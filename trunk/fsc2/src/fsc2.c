@@ -117,7 +117,7 @@ int main( int argc, char *argv[ ] )
 	while ( fl_do_forms( ) != main_form->quit )
 		;
 
-	/* Do everything necessary to end program */
+	/* Do everything necessary to end the program */
 
 	clean_up( );
 	xforms_close( );
@@ -331,12 +331,7 @@ void edit_file( FL_OBJECT *a, long b )
 
 	if ( ed == NULL || *ed == '\0' )
 	{
-		if ( ( argv = T_malloc( 5 * sizeof ( char * ) ) ) == NULL )
-		{
-			fl_show_alert( "Error", "Sorry, unable to start the editor.",
-						   NULL, 1 );
-			return;
-		}
+		argv = T_malloc( 5 * sizeof ( char * ) );
 
 		argv[ 0 ] = ( char * ) "xterm";
 		argv[ 1 ] = ( char * ) "-e";
@@ -355,12 +350,7 @@ void edit_file( FL_OBJECT *a, long b )
 
 		if ( ! *ep )   /* no command line arguments */
 		{
-			if ( ( argv = T_malloc( 5 * sizeof ( char * ) ) ) == NULL )
-			{
-				fl_show_alert( "Error", "Sorry, unable to start the editor.",
-							   NULL, 1 );
-				return;
-			}
+			argv = T_malloc( 5 * sizeof ( char * ) );
 
 			argv[ 0 ] = ( char * ) "xterm";
 			argv[ 1 ] = ( char * ) "-e";
@@ -380,13 +370,7 @@ void edit_file( FL_OBJECT *a, long b )
 				++argc;
 			}
 		
-			if ( ( argv = T_malloc( ( argc + 5 ) * sizeof ( char * ) ) )
-				 == NULL )
-			{
-				fl_show_alert( "Error", "Sorry, unable to start the editor.",
-							   NULL, 1 );
-				return;
-			}
+			argv = T_malloc( ( argc + 5 ) * sizeof ( char * ) );
 
 			argv[ 0 ] = ( char * ) "xterm";
 			argv[ 1 ] = ( char * ) "-e";
@@ -426,8 +410,8 @@ void edit_file( FL_OBJECT *a, long b )
 		else
 			execvp( "xterm", argv );                /* all other editors */
 
-		/* If this point is reached the invocation of the editor failed -
-		   tell the parent by setting a special return value */
+		/* If this point is reached at all the invocation of the editor failed
+		   - tell the parent by setting a special return value */
 
 		_exit( EDITOR_FAILED );
 	}
@@ -594,7 +578,7 @@ void run_file( FL_OBJECT *a, long b )
 		}
 	}
 
-	if ( ! state )               /* quit if program failed the test */
+	if ( ! state )               /* return if program failed the test */
 	{
 		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
 		return;
@@ -651,7 +635,7 @@ void run_file( FL_OBJECT *a, long b )
 /* browser, numbering the lines and expanding tab chars.              */
 /* ->                                                                 */
 /*   * name of the file to be displayed                               */
-/*   * FILE pointer for the file                                      */
+/*   * FILE pointer of the file                                       */
 /*--------------------------------------------------------------------*/
 
 static bool display_file( char *name, FILE *fp )
@@ -665,26 +649,26 @@ static bool display_file( char *name, FILE *fp )
 	/* Determine number of lines (and maximum number of digits) in order to
 	   find out about proper formating of line numbers */
 
-	if ( ( lc = get_file_length( name, &len ) ) <= 0 )
+	if ( ( lc = get_file_length( name, &len ) ) <= 0 )  /* error ? */
 	{
 		switch ( ( int ) lc )
 		{
-			case 0 :
+			case 0 :                  /* file length is zero */
 				fl_show_alert( "Error", "File is empty.", NULL, 1 );
 				return( FAIL );
 
-			case -1 :
+			case -1 :                 /* not enough memory left */
 				return( FAIL );
 
-			case -2 :
+			case -2 :                 /* popen() failure */
 				fl_show_alert( "Error", "Can't determine length of file:",
 							   name, 1 );
 				return( FAIL );
 		}
 	}
 
-	/* Freeze browser, read consecutive lines, append to line number
-	   (after expanding tab chars) and send lines to browser */
+	/* Freeze browser, read consecutive lines, prepend line numbers (after
+	   expanding tab chars) and send lines to browser */
 
 	fl_clear_browser( main_form->browser );
 	fl_clear_browser( main_form->error_browser );
@@ -721,10 +705,10 @@ static bool display_file( char *name, FILE *fp )
 }
 
 
-/*----------------------------------------------------------*/
-/* sigchld_handler() is the default SIGCHLD handler used in */
-/* order to avoid having to many zombies hanging around.    */
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* sigchld_handler() is the default SIGCHLD handler used */
+/* to avoid having to many zombies hanging around.       */
+/*-------------------------------------------------------*/
 
 void sigchld_handler( int sig_type, void *data )
 {
@@ -743,6 +727,12 @@ void sigchld_handler( int sig_type, void *data )
 					   NULL, 1 );
 }
 
+
+/*--------------------------------------------------------------------*/  
+/* Does everything that needs to be done (i.e. deallocating memory,   */
+/* unloading the device drivers, reinitializing all kinds of internal */
+/* structures etc.) before a new file can be loaded.                  */
+/*--------------------------------------------------------------------*/  
 
 void clean_up( void )
 {
