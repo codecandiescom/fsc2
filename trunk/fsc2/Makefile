@@ -123,7 +123,9 @@ SERIAL_LOCK_DIR   := /var/lock
 # The next two lines must be uncommented if you want support for the National
 # Instruments 6601 GPCT card. If the library for the card isn't in a place
 # where the linker will find it automatically you need to specify the full
-# absolut path for the library (e.g. '/usr/xxx/yyy/libni6601.so').
+# absolut path for the library (e.g. '/usr/xxx/yyy/libni6601.so'). You must
+# make sure that the library for the card is already installed if you want
+# to build fsc2 with support for the card.
 
 # WITH_NI6601     := yes
 # ni6601_libs     := libni6601.so
@@ -133,6 +135,8 @@ SERIAL_LOCK_DIR   := /var/lock
 # Electronics 6000 or 6100 DAC card. If the library for the card isn't in a
 # place where the linker will find it automatically you need to specify the
 # full absolut path for the library  (e.g. '/opt/zzz/ttt/libme6x00.so').
+# You must make sure that the library for the card is already installed if
+# you want to build fsc2 with support for the card.
 
 # WITH_ME6000     := yes
 # me6000_libs     := libme6x00.so
@@ -145,7 +149,9 @@ SERIAL_LOCK_DIR   := /var/lock
 # of the installation directory. The third variable, 'rs_spec10_libs', must
 # be changed if the library isn't in a place where the linker will find it
 # automatically, in this case it must be the full absolute path to of the
-# library (e.g. '/usr/lib/pvcam/libpvcam.so').
+# library (e.g. '/usr/lib/pvcam/libpvcam.so'). You must make sure that the
+# library for the camera is already installed if you want to build fsc2 with
+# support for the camera.
 
 # WITH_SPEC10     := yes
 # rs_spec10_incl  := /usr/local/include/pvcam

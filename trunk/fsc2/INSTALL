@@ -211,6 +211,14 @@ paths and the exact locations for the required libraries may have to be
 chenged. Please see the comments in the Makefile for details.
 
 
+Moreover, support for the National Instruments 6601 GPCT or the Meilhaus
+ME6000 and ME6100 DAC card requires that the drivers and libraries for the
+cards are already successfully install, otherwise the corresponding modules
+can't be built. For support for the Roper Scientific CCD Spec-10 camera the
+PVCAM library supplied by Roper Scientific is required and also must be
+installed together with the header files before you try to compile fsc2.
+
+
 The WITH_HTTP_SERVER variable tells if support for the web server should
 be built into fsc2. Just comment out the line and the web server won't be
 available. If the web server gets included into fsc2 the next variable,
@@ -245,27 +253,6 @@ access the device the first time.
 
 D) Compiling and Installing
 ===========================
-
-If you want support for the National Instruments 6601 GPCT or the Meilhaus
-ME6000 and ME6100 DAC card you must make sure that you already compiled and
-installed the driver for the cards, otherwise the corresponding modules are
-not built. Should you install the libraries for these cards in non-standard
-location you must set the variables "ni6601_libs" or "me6000_libs" in the
-Makefile in the 'modules' subdirectory to the full absolute path of the
-library.
-
-
-For support for the Roper Scientific CCD Spec-10 camera the PVCAM library
-supplied by Roper Scientific is required and must be installed correctly,
-together with the header files. In a standard install (at least for the
-latest version, 2.6.4.2) the library gets installed in '/usr/lib'. If you
-should install it instead in a directory the linker does not search for
-libraries per default, you have to change the "rs_spec10_libs" variable
-in the Makefile in the 'modules' subdirectory to the full, absolute path
-of the library. The required header files get installed per default in
-'/usr/local/pvcam/examples'. Should you chose a more reasonable place you
-must change the "rs_spec10_incl" variable in the same Makefile to the path
-of the header files.
 
 
 Now go into the main directory of the package and type 'make'. This may
