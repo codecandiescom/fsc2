@@ -216,6 +216,7 @@ extern bool just_testing;
 extern FD_fsc2 *main_form;
 extern FD_run *run_form;
 extern FD_input_form *input_form;
+extern FD_run *cut_form;
 
 
 extern int I_am;
