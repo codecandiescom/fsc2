@@ -115,6 +115,7 @@ void usage( void );
 #define FILESELFONTSIZE 11
 #define HELPFONTSIZE    12
 #define STOPMOUSEBUTTON 13
+#define NOCRASHMAIL     14
 
 
 /* Global variables */
