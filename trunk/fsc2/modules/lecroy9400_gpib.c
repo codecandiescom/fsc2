@@ -106,13 +106,12 @@ bool lecroy9400_init( const char *name )
 	{
 		/* If the record length hasn't been set use one that is as least as
 		   long as the number of points we can fetch for an averaged curve
-		   (i.e. the number of points displayed on the screen which in turn
-		   is 10 times the number of points per division) */
+		   (which is just the number of points displayed on the screen) */
 
 		if ( lecroy9400.rec_len[ i ] == UNDEFINED_REC_LEN )
 		{
 			for ( j = 0; j < CL_ENTRIES; j++ )
-				if ( cl[ j ] >= 10 * ppd[ lecroy9400.tb_index ] )
+				if ( cl[ j ] >= ml[ lecroy9400.tb_index ] )
 					break;
 			lecroy9400.rec_len[ i ] = cl[ j ];
 		}
