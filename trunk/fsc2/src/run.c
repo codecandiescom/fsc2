@@ -865,8 +865,27 @@ void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 		stop_graphics( );
 		graphics_have_been_started = UNSET;
 	}
+
 	set_buttons_for_run( 0 );
 	Internals.state = STATE_IDLE;
+
+	if ( Internals.cmdline_flags & ICONIFIED_RUN )
+		switch( is_iconic( fl_get_display( ), GUI.main_form->fsc2->window ) )
+		{
+			case 1 :
+				fl_trigger_object( GUI.main_form->quit );
+				break;
+
+			case 0 :
+				Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+				break;
+
+			case -1 :
+				Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+				fl_raise_form( GUI.main_form->fsc2 );
+				XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
+				break;
+		}
 }
 
 

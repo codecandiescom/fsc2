@@ -707,6 +707,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				usage( EXIT_FAILURE );
 			}
 
+			if ( flags & NO_GUI_RUN )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-t' and "
+						"'-ng' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
 			/* no file name with "-t" option ? */
 
 			if ( argv[ ++cur_arg ] == NULL )
@@ -743,6 +750,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
 						"'-B' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & ICONIFIED_RUN )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
+						"'-I' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -846,6 +860,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-S' and "
 						"'-B' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-S' and "
+						"'-ng' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -972,6 +993,63 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
+		if ( strlen( argv[ cur_arg ] ) == 2 &&
+			 ! strcmp( argv[ cur_arg ], "-I" ) )
+		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-I' and "
+						"'-t' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_START )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-I' and "
+						"'-S' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & DO_TEST )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-I' and "
+						"'-T' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & NO_GUI_RUN )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-I' and "
+						"'-ng' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
+			{
+				fprintf( stderr, "fsc2 -I: No input files.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( argv[ cur_arg ][ 2 ] != '\0' )
+			{
+				*fname = argv[ cur_arg ] + 2;
+				for ( i = cur_arg; i < *argc; i++ )
+					argv[ i ] = argv[ i + 1 ];
+				*argc -= 1;
+			}
+			else
+			{
+				*fname = argv[ cur_arg + 1 ];
+				for ( i = cur_arg; i < *argc - 1; i++ )
+					argv[ i ] = argv[ i + 2 ];
+				*argc -= 2;
+			}
+
+			flags |= DO_LOAD | ICONIFIED_RUN | DO_START;
+
+			break;
+		}
+
 		if ( ! strncmp( argv[ cur_arg ], "-X", 2 ) )
 		{
 			if ( flags & DO_CHECK )
@@ -999,6 +1077,13 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			{
 				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
 						"'-B' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & NO_GUI_RUN )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-X' and "
+						"'-ng' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
@@ -2021,7 +2106,8 @@ void usage( int return_status )
 			 "  -t FILE    run syntax check on FILE and exit (no graphics)\n"
 			 "  -T FILE    run syntax check on FILE\n"
 			 "  -S FILE    start experiment interpreting FILE\n"
-			 "  -B FILE... run in batch mode\n"
+			 "  -B FILEs   run in batch mode\n"
+			 "  -I FILE    start with main window iconified\n"
 			 "  -ng FILE   run experiment without any graphics\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
 			 "  -non-exclusive\n"
