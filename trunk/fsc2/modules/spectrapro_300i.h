@@ -92,7 +92,7 @@ extern struct SPECTRAPRO_300I spectrapro_300i;
 int spectrapro_300i_init_hook( void );
 int spectrapro_300i_exp_hook( void );
 int spectrapro_300i_end_of_exp_hook( void );
-void spectrapro_300i_exit_hook( void );
+
 Var *monochromator_name( Var *v );
 Var *monochromator_turret( Var *v );
 Var *monochromator_grating( Var *v );

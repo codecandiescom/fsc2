@@ -55,7 +55,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 int lakeshore330_init_hook( void );
 int lakeshore330_exp_hook( void );
 int lakeshore330_end_of_exp_hook( void );
-void lakeshore330_exit_hook( void );
 
 
 Var *temp_contr_name( Var *v );

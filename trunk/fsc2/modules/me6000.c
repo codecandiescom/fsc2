@@ -229,11 +229,6 @@ void me6000_exit_hook( void )
 	int i;
 
 
-	/* This shouldn't be necessary, I just want to make 100% sure that
-	   the device file for the board is really closed */
-
-	me6x00_close( BOARD_NUMBER );
-
 	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
 	{
 		if ( me6000.dac[ i ].reserved_by )

@@ -39,7 +39,6 @@ int s_band_magnet_tmpl_init_hook( void );
 int s_band_magnet_tmpl_test_hook( void );
 int s_band_magnet_tmpl_exp_hook( void );
 int s_band_magnet_tmpl_end_of_exp_hook( void );
-void s_band_magnet_tmpl_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -196,16 +195,6 @@ int s_band_magnet_tmpl_end_of_exp_hook( void )
 	magnet.is_opened = UNSET;
 
 	return 1;
-}
-
-
-/*--------------------------------------------------------------------*/
-/* Just make sure the connection to the power supply is really closed */
-/*--------------------------------------------------------------------*/
-
-void s_band_magnet_tmpl_exit_hook( void )
-{
-	s_band_magnet_tmpl_end_of_exp_hook( );
 }
 
 

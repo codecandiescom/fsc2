@@ -38,7 +38,6 @@ int aeg_x_band_init_hook( void );
 int aeg_x_band_test_hook( void );
 int aeg_x_band_exp_hook( void );
 int aeg_x_band_end_of_exp_hook( void );
-void aeg_x_band_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -249,16 +248,6 @@ int aeg_x_band_end_of_exp_hook( void )
 	magnet.is_opened = UNSET;
 
 	return 1;
-}
-
-
-/*--------------------------------------------------------------------*/
-/* Just make sure the connection to the power supply is really closed */
-/*--------------------------------------------------------------------*/
-
-void aeg_x_band_exit_hook( void )
-{
-	aeg_x_band_end_of_exp_hook( );
 }
 
 

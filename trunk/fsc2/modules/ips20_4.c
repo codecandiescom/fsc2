@@ -48,7 +48,6 @@ int ips20_4_init_hook( void );
 int ips20_4_test_hook( void );
 int ips20_4_exp_hook( void );
 int ips20_4_end_of_exp_hook( void );
-void ips20_4_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -242,17 +241,6 @@ int ips20_4_end_of_exp_hook( void )
 	ips20_4.device = -1;
 
 	return 1;
-}
-
-
-/*-----------------------------------------*/
-/* Called before device driver is unloaded */
-/*-----------------------------------------*/
-
-void ips20_4_exit_hook( void )
-{
-	if ( ips20_4.device >= 0 )
-		ips20_4_end_of_exp_hook( );
 }
 
 

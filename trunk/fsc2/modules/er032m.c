@@ -105,7 +105,6 @@ int er032m_test_hook( void );
 int er032m_end_of_test_hook( void );
 int er032m_exp_hook( void );
 int er032m_end_of_exp_hook( void );
-void er032m_exit_hook( void );
 
 
 Var *magnet_name( Var *v );
@@ -292,15 +291,6 @@ int er032m_end_of_exp_hook( void )
 	if ( magnet.device >= 0 )
 		gpib_local( magnet.device );
 	return 1;
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void er032m_exit_hook( void )
-{
-	magnet.device = -1;
 }
 
 

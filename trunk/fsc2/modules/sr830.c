@@ -90,7 +90,6 @@ int sr830_init_hook( void );
 int sr830_test_hook( void );
 int sr830_exp_hook( void );
 int sr830_end_of_exp_hook( void );
-void sr830_exit_hook( void );
 
 Var *lockin_name( Var *v );
 Var *lockin_get_data( Var *v );
@@ -357,17 +356,6 @@ int sr830_end_of_exp_hook( void )
 	sr830.device = -1;
 
 	return 1;
-}
-
-
-/*-----------------------------------------*/
-/* Called before device driver is unloaded */
-/*-----------------------------------------*/
-
-void sr830_exit_hook( void )
-{
-	if ( sr830.device >= 0 )
-		sr830_end_of_exp_hook( );
 }
 
 

@@ -50,7 +50,6 @@ int ips120_10_init_hook( void );
 int ips120_10_test_hook( void );
 int ips120_10_exp_hook( void );
 int ips120_10_end_of_exp_hook( void );
-void ips120_10_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -244,17 +243,6 @@ int ips120_10_end_of_exp_hook( void )
 	ips120_10.device = -1;
 
 	return 1;
-}
-
-
-/*-----------------------------------------*/
-/* Called before device driver is unloaded */
-/*-----------------------------------------*/
-
-void ips120_10_exit_hook( void )
-{
-	if ( ips120_10.device >= 0 )
-		ips120_10_end_of_exp_hook( );
 }
 
 

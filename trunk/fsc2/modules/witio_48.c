@@ -190,15 +190,6 @@ void witio_48_exit_hook( void )
 		if ( witio_48_saved.reserved_by[ i ] )
 			T_free( witio_48_saved.reserved_by[ i ] );
 	}
-
-	/* This shouldn't be necessary, I just want to make 100% sure that
-	   the device file for the board is really closed */
-
-	if ( witio_48.is_open )
-	{
-		witio_48_close( );
-		witio_48.is_open = UNSET;
-	}
 }
 
 

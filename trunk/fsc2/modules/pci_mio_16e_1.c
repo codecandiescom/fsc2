@@ -256,12 +256,6 @@ void pci_mio_16e_1_exit_hook( void )
 	int i;
 
 
-	/* This shouldn't be necessary, I just want to make 100% sure that
-	   the device file for the board is really closed */
-
-	if ( pci_mio_16e_1.board >= 0 )
-		ni_daq_close( pci_mio_16e_1.board );
-
 	for ( i = 0; i < 2; i++ )
 	{
 		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )

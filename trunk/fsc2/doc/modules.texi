@@ -1154,10 +1154,15 @@ functions.
 
 The fifth function, @code{sr510_end_of_exp_hook()} is run after the
 experiment has been stopped. This hook function should be used to get
-the device back into a usable state with local control.
+the device back into a usable state with local control and must close
+any existing connections to the device.
 
 Finally, the sixth and final function, @code{sr510_exit_hook()}, is run
-just before the module is unloaded.
+just before the module is unloaded. Please take care: you can't talk to
+the device anymore when this hook is called. It should only be used to
+e.g.@: get rid of memory allocated withing the module before the it
+becomes unloaded (and thus any memory not deallocated properly would
+result in a memory leak).
 
 Please note that the first three functions, i.e.@:
 @code{sr510_init_hook}, @code{sr510_test_hook} and

@@ -138,17 +138,6 @@ int spectrapro_300i_end_of_exp_hook( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-void spectrapro_300i_exit_hook( void )
-{
-	spectrapro_300i.is_needed = UNSET;
-	if ( spectrapro_300i.is_open )
-		spectrapro_300i_close( );
-}
-
-
 /*----------------------------------------------*/
 /* Returns a string with the name of the device */
 /*----------------------------------------------*/

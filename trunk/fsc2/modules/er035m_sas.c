@@ -48,7 +48,6 @@ int er035m_sas_init_hook( void );
 int er035m_sas_test_hook( void );
 int er035m_sas_exp_hook( void );
 int er035m_sas_end_of_exp_hook( void );
-void er035m_sas_end_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *gaussmeter_field( Var *v );
@@ -363,15 +362,6 @@ int er035m_sas_end_of_exp_hook( void )
 	er035m_sas_close( );
 
 	return 1;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-void er035m_sas_end_hook( void )
-{
-	nmr.is_needed = UNSET;
 }
 
 

@@ -159,8 +159,6 @@ void hp8672a_exit_hook( void )
 
 	if ( hp8672a.use_table && hp8672a.att_table != NULL )
 		hp8672a.att_table = ATT_TABLE_ENTRY_P T_free( hp8672a.att_table );
-
-	hp8672a.device = -1;
 }
 
 

@@ -53,7 +53,6 @@ int er035m_init_hook( void );
 int er035m_test_hook( void );
 int er035m_exp_hook( void );
 int er035m_end_of_exp_hook( void );
-void er035m_exit_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *gaussmeter_field( Var *v );
@@ -387,14 +386,6 @@ int er035m_end_of_exp_hook( void )
 	nmr.device = -1;
 
 	return 1;
-}
-
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
-
-void er035m_exit_hook( void )
-{
-	er035m_end_of_exp_hook( );
 }
 
 

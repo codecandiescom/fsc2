@@ -50,7 +50,6 @@ int sr510_init_hook( void );
 int sr510_test_hook( void );
 int sr510_exp_hook( void );
 int sr510_end_of_exp_hook( void );
-void sr510_exit_hook( void );
 
 Var *lockin_name( Var *v );
 Var *lockin_get_data( Var *v );
@@ -211,17 +210,6 @@ int sr510_end_of_exp_hook( void )
 	sr510.device = -1;
 
 	return 1;
-}
-
-
-/*-----------------------------------------*/
-/* Called before device driver is unloaded */
-/*-----------------------------------------*/
-
-void sr510_exit_hook( void )
-{
-	if ( sr510.device >= 0 )
-		sr510_end_of_exp_hook( );
 }
 
 

@@ -165,8 +165,6 @@ void hp864_tmpl_exit_hook( void )
 	if ( hp864_tmpl.use_table && hp864_tmpl.att_table != NULL )
 		hp864_tmpl.att_table =
 							  ATT_TABLE_ENTRY_P T_free( hp864_tmpl.att_table );
-
-	hp864_tmpl.device = -1;
 }
 
 

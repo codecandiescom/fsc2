@@ -129,13 +129,6 @@ void hjs_attenuator_exit_hook( void )
 	if ( hjs_attenuator.att_table )
 		hjs_attenuator.att_table =
 					  HJS_ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
-
-	/* This shouldn't be necessary, but to make 100% sure the device file
-	   is closed we do it anyway */
-
-	if ( hjs_attenuator.is_open )
-		fsc2_serial_close( SERIAL_PORT );
-	hjs_attenuator.is_open = UNSET;
 }
 
 

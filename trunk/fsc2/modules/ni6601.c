@@ -45,7 +45,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 int ni6601_init_hook( void );
 int ni6601_exp_hook( void );
 int ni6601_end_of_exp_hook( void );
-void ni6601_exit_hook( void );
 
 
 Var *counter_name( Var *v );
@@ -149,18 +148,6 @@ int ni6601_end_of_exp_hook( void )
 {
 	ni6601_close( BOARD_NUMBER );
 	return 1;
-}
-
-
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
-
-void ni6601_exit_hook( void )
-{
-	/* This shouldn't be necessary, I just want to make 100% sure that
-	   the device file for the board is really closed */
-
-	ni6601_close( BOARD_NUMBER );
 }
 
 

@@ -58,7 +58,6 @@ enum {
 int itc503_init_hook( void );
 int itc503_exp_hook( void );
 int itc503_end_of_exp_hook( void );
-void itc503_exit_hook( void );
 
 
 Var *temp_contr_name( Var *v );
