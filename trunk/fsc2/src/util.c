@@ -255,7 +255,11 @@ inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 
 inline short shrt( double a )
 {
-	return ( a > SHRT_MAX ? SHRT_MAX : a ) < SHRT_MIN ? SHRT_MIN : ( short ) a;
+	if ( a > SHRT_MAX )
+		return SHRT_MAX;
+	if ( a < SHRT_MIN )
+		return SHRT_MIN;
+	return ( short ) rnd( a );
 }
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
