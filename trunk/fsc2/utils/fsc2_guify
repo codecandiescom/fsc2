@@ -50,8 +50,6 @@ my $label_width = 20;
 my $entry_width = 10;
 my $unit_width  = 5;
 
-# Read in the complete input and open the output file (and make it STDOUT)
-
 my $if = *STDIN;
 my $of = *STDOUT;
 
@@ -60,6 +58,8 @@ if ( $ARGV[ 0 ] ) {
     open( $if, "<" . $ARGV[ 0 ] )
         or die "Can't open input file " . $ARGV[ 0 ] . ": $!\n";
 }
+
+# Read in the complete input and do some parsing
 
 while ( <$if> ) {
 
@@ -176,7 +176,7 @@ for ( @vars ) {
 
 cond_check( );
 
-# Write out the script
+# Open the output file and write out the script
 
 if ( $ARGV[ 1 ] ) {
     open( $of, ">" . $ARGV[ 1 ] )
