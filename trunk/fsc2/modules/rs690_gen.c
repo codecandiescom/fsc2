@@ -29,8 +29,8 @@ static int Cur_PHS = -1;                 /* used for internal sanity checks */
 
 /*------------------------------------------------------------------*/
 /* Function is called via the TIMEBASE command to set the timebase  */
-/* used with the pulser - got to be called first because all nearly */
-/* all other functions depend on the timebase setting !             */
+/* used with the pulser - got to be called first because nearly all */
+/* other functions depend on the timebase setting !                 */
 /*------------------------------------------------------------------*/
 
 bool rs690_store_timebase( double timebase )
