@@ -117,11 +117,12 @@ lockin_mf, -1, ALL;             // (ER023M)
 
 
 // Functions exported by the digitizer
-// (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A)
+// (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A, LeCroy 9400 )
 
 digitizer_name, 0, ALL;                 // returns the device name
 digitizer_define_window, -1, PREP;      // defines a cursor window
 digitizer_timebase, -1, ALL;            // set or get the time base
+digitizer_time_per_point, 0, EXP;       // returns time per point
 digitizer_sensitivity, -1, ALL;         // set or get the sensitivity
 digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, -1, ALL;     // set or get trigger channel
