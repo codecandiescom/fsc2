@@ -296,10 +296,24 @@ Var *magnet_setup( Var *v )
 
 	/* check that both variables are reasonable */
 
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
+				"`magnet_setup'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
 				Fname, Lc, DEVICE_NAME );
+
+	if ( v->next == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing field step size in call of "
+				"`magnet_setup'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 	if ( v->next->type == INT_VAR )
