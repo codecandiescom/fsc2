@@ -58,6 +58,7 @@
 @item @code{cosh}             @tab Built-in function (@pxref{cosh})
 @item                         @tab
 @item @code{date}             @tab Built-in function (@pxref{date})
+@item @code{dB}               @tab Unit, Decibel
 @item @code{db}               @tab Unit, Decibel
 @item @code{DEL}              @tab @code{DELAY} keyword
 @item @code{DELAY}            @tab @code{DELAY} keyword
@@ -139,7 +140,8 @@
 @item @code{is_file}          @tab Built-in function (@pxref{is_file})
 @item                         @tab
 @item @code{kA}               @tab Unit, Kilo-Ampere
-@item @code{kA}               @tab Unit, Kilo-Ampere
+@item @code{kdB}              @tab Unit, Kilo-Dezibel
+@item @code{kdb}              @tab Unit, Kilo-Dezibel
 @item @code{kG}               @tab Unit, Kilo-Gauss
 @item @code{kHz}              @tab Unit, Kilo-Hertz
 @item @code{ks}               @tab Unit, Kilo-Seconds
@@ -155,6 +157,8 @@
 @item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
 @item @code{MA}               @tab Unit, Mega-Ampere
+@item @code{MdB}              @tab Unit, Mega-Dezibel
+@item @code{Mdb}              @tab Unit, Mega-Dezibel
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
@@ -168,6 +172,8 @@
 @item @code{Ms}               @tab Unit, Mega-Seconds
 @item @code{MV}               @tab Unit, Mega-Volt
 @item @code{mA}               @tab Unit, Milli-Ampere
+@item @code{mdB}              @tab Unit, Milli-Dezibel
+@item @code{mdb}              @tab Unit, Milli-Dezibel
 @item @code{mG}               @tab Unit, Milli-Gauss
 @item @code{mHz}              @tab Unit, Milli-Hertz
 @item @code{MODE}             @tab
@@ -176,6 +182,8 @@
 @item @code{mV}               @tab Unit, Milli-Volt
 @item                         @tab
 @item @code{nA}               @tab Unit, Nano-Ampere
+@item @code{ndB}              @tab Unit, Nano-Dezibel
+@item @code{ndb}              @tab Unit, Nano-Dezibel
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
 @item @code{NEXT}             @tab Loop control statement (@pxref{NEXT statement})
@@ -265,6 +273,8 @@
 @item @code{TIME_BASE}        @tab Pulser @code{TIME_BASE} keyword
 @item                         @tab
 @item @code{uA}               @tab Unit, Micro-Ampere
+@item @code{udB}              @tab Unit, Micro-Dezibel
+@item @code{udb}              @tab Unit, Micro-Dezibel
 @item @code{uG}               @tab Unit, Micro-Gauss
 @item @code{uHz}              @tab Unit, Micro-Hertz
 @item @code{us}               @tab Unit, Micro-Seconds
