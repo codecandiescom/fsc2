@@ -18,12 +18,12 @@
    messages, which in turn is returned by this program via its return value
    (see list below).
 
-   If, on the other hand, the program finds that fsc2 isn't running at all
-   (because it can't connect to fsc2) it will try to start fsc2 with the '-d'
-   flag (to tell fsc2 to delete its input file when done with it) and,
-   depending on the name this program was invocated with, with the '-S' or 'T'
-   flag or no flag and the name of the temporary file. If fsc2 couldn't be
-   started properly this program will return a return value to indicate it.
+   If, on the other hand, the program finds that fsc2 isn't running (because
+   it can't connect to fsc2) it will try to start fsc2 with the '-d' flag (to
+   make fsc2 delete its input file when done with it) and, depending on the
+   name this program was invocated with, with the '-S' or '-T' flag or no flag
+   and the name of the temporary file. If fsc2 can't be started properly this
+   program will return a return value to indicate it.
 
    The best way to use this program is to create the EDL program to send to
    fsc2 and send it to this program using a popen() call. The success can be
@@ -82,8 +82,7 @@ int main( int argc, char *argv[ ] )
 	int sock_fd;
 
 
-	argc = argc;
-
+	argc = argc;                      /* keeps the compiler happy ;-) */
 
 	make_tmp_file( fname );
 	if ( ( sock_fd = open_socket( fname ) ) == -1 )
@@ -112,7 +111,7 @@ void make_tmp_file( char *fname )
 
 	fchmod( tmp, S_IRUSR | S_IWUSR );
 
-	/* Now read in from stdin and write into the emp file */
+	/* Now read in from stdin and write into the temporary file */
 
 	while ( ( bytes_read = read( 0, line, MAXLINE ) ) != 0 )
 	{
@@ -149,7 +148,7 @@ int open_socket( const char *fname )
 	struct sockaddr_un serv_addr;
 
 
-	/* Create a socket */
+	/* Try to get a socket */
 
 	if ( ( sock_fd = socket( AF_LOCAL, SOCK_STREAM, 0 ) ) == -1 )
 	{
@@ -283,7 +282,7 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	char *prog_name;
 
 
-	/* Send UID to fsc2 as credential */
+	/* Send UID to fsc2 as credentials */
 
 	sprintf( line, "%d\n", getuid( ) );
 	if ( writen( sock_fd, line, strlen( line ) )
@@ -299,7 +298,7 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( ! strcmp( line, "BUSY\n" ) )
 		clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )
+	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	/* Assemble second string to send, the first character is the method ('s'
@@ -338,10 +337,10 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( ! strcmp( line, "BUSY\n" ) )
 		clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )
+	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
-	/* Finally we tell fsc2 the name of the temporary file */
+	/* Finally tell fsc2 the name of the temporary file */
 
 	strcpy( line, fname );
 	strcat( line, "\n" );
@@ -358,7 +357,7 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( ! strcmp( line, "BUSY\n" ) )
 		clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )
+	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
 		clean_up( fname, sock_fd, -1 );
 
 	close( sock_fd );

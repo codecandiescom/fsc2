@@ -69,8 +69,8 @@ pid_t spawn_conn( bool start_state )
 	if ( new_pid >= 0 )
 	{
 		close( conn_pd[ WRITE ] );
-		if ( ! conn_child_replied )
-			sleep( INT_MAX );
+		while ( ! conn_child_replied )
+			pause( );
 		conn_child_replied = UNSET;
 	}
 
