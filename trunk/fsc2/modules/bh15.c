@@ -94,15 +94,15 @@ int bh15_init_hook( void )
 
 	if ( exists_device( "er035m" ) )
 	{
-		eprint( FATAL, UNSET, "BH15: Driver for Bruker ER035M gaussmeter is "
-				"already loaded - there can only be one gaussmeter.\n" );
+		print( FATAL, "Driver for Bruker ER035M gaussmeter is already loaded "
+			   "- there can only be one gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
 	{
-		eprint( WARN, UNSET, "BH15: Driver for Bruker BH15 field controller "
-				"is loaded but no appropriate magnet power supply driver.\n" );
+		print( WARN, "Driver for Bruker BH15 field controller is loaded but "
+			   "no appropriate magnet power supply driver.\n" );
 		bh15.is_needed = UNSET;
 	}
 	else
@@ -146,8 +146,7 @@ int bh15_exp_hook( void )
 	if ( gpib_init_device( bh15.name, &bh15.device ) == FAILURE )
 	{
 		bh15.device = -1;
-		eprint( FATAL, UNSET, "BH15: Can't initialize device: %s\n",
-				gpib_error_msg );
+		print( FATAL, " Can't initialize device: %s\n", gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -160,8 +159,7 @@ int bh15_exp_hook( void )
 
 	if ( gpib_write( bh15.device, "MO 5\r", 5 ) == FAILURE )
 	{
-		eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-				"controller.\n" );
+		print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -169,8 +167,7 @@ int bh15_exp_hook( void )
 
 	if ( gpib_write( bh15.device, "RU\r", 3 ) == FAILURE )
 	{
-		eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-				"controller.\n" );
+		eprint( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -185,16 +182,14 @@ int bh15_exp_hook( void )
 
 		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
@@ -322,16 +317,14 @@ static double bh15_get_field( void )
 
 		if ( gpib_write( bh15.device, "LE\r", 3 ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
@@ -349,16 +342,14 @@ static double bh15_get_field( void )
 
 		if ( gpib_write( bh15.device, "FV\r", 3 ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 
 		len = 20;
 		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
 		{
-			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
-					"controller.\n" );
+			print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -370,8 +361,8 @@ static double bh15_get_field( void )
 
 		if ( *val == '\0' )    /* no qualifier found ? */
 		{
-			eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
-					"field controller.\n" );
+			print( FATAL, "Invalid data returned by Bruker BH15 field "
+				   "controller.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -394,14 +385,14 @@ static double bh15_get_field( void )
 				break;
 
 			case '3' :                             /* BH15 not in RUN mode */
-				eprint( FATAL, UNSET, "BH15: Bruker BH15 field controller "
-						"dropped out of run mode.\n" );
+				print( FATAL, "Bruker BH15 field controller dropped out of "
+					   "run mode.\n" );
 				THROW( EXCEPTION );
 				break;
 
 			default :
-				eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker "
-						"BH15 field controller.\n" );
+				print( FATAL, "Invalid data returned by Bruker BH15 field "
+					   "controller.\n" );
 				THROW( EXCEPTION );
 		}
 
@@ -409,8 +400,7 @@ static double bh15_get_field( void )
 
 	if ( bh15.state != BH15_LOCKED )
 	{
-		eprint( FATAL, UNSET, "BH15: Bruker BH15 field controller can't find "
-				"the field.\n" );
+		print( FATAL, "Bruker BH15 field controller can't find the field.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -422,8 +412,8 @@ static double bh15_get_field( void )
 
 	if ( *val == '\0' )    /* no field value found ? */
 	{
-		eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
-				"field controller.\n" );
+		print( FATAL, "Invalid data returned by Bruker BH15 field "
+			   "controller.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -432,8 +422,8 @@ static double bh15_get_field( void )
 	bh15.field = strtod( val, &endptr );
 	if ( endptr == val || errno == ERANGE )
 	{
-		eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
-				"field controller.\n" );
+		print( FATAL, "Invalid data returned by Bruker BH15 field "
+			   "controller.\n" );
 		THROW( EXCEPTION );
 	}
 
