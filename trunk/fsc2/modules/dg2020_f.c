@@ -556,9 +556,6 @@ Var *pulser_next_phase( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
-		dg2020_update_data( );
-
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -624,9 +621,6 @@ Var *pulser_phase_reset( Var *v )
 
 		f->next_phase = 2;
 	}
-
-	if ( ! TEST_RUN )
-		dg2020_update_data( );
 
 	return vars_push( INT_VAR, 1 );;
 }
