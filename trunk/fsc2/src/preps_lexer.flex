@@ -74,7 +74,7 @@ INT         [+-]?[0-9]+
 EXPO        [EDed]{INT}
 FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
 
-P           P(ULSE)?_?{INT}
+P           P(ULSE)?_?[0-9]+
 
 F           F(UNC(TION)?)?
 S           S(TART)?

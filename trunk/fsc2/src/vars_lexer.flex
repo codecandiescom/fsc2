@@ -68,7 +68,7 @@ FLOAT       ([+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?))|({INT}{EXPO})
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
-P           P(ULSE)?_?{INT}
+P           P(ULSE)?_?[0-9]+
 
 F           F(UNC(TION)?)?
 S           S(TART)?

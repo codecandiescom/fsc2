@@ -52,7 +52,7 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
-P           P(ULSE)?_?{INT}
+P           P(ULSE)?_?[0-9]+
 
 F           F(UNC(TION)?)?
 S           S(TART)?
