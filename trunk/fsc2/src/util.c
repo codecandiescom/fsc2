@@ -259,7 +259,7 @@ bool fsc2_locking( void )
 
 	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
-		fl_show_alert( "Error", "Sorry, can't create a lock file.",
+		fl_show_alert( "Error", "Sorry, can't create lock file:",
 					   LOCKFILE, 1 );
 		return FAIL;
 	}
@@ -334,7 +334,6 @@ bool fsc2_locking( void )
 		return FAIL;
 	}
 
-	unlink( LOCKFILE );
 	return OK;
 }
 
