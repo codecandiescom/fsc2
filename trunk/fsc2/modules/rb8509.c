@@ -159,7 +159,7 @@ int rb8509_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* If necessary se the trigger mode (card switches to internal trigger
+	/* If necessary set the trigger mode (card switches to internal trigger
 	   mode on initialization) */
 
 	if ( rb8509.trig_mode_is_set &&
