@@ -236,6 +236,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	double new_rwc_delta_y;
 	Curve_1d *cv;
 	long i, j;
+	Scaled_Point *sp;
 
 
 	/* Test if the curve number is OK */
@@ -295,8 +296,8 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			cv->xpoints = T_realloc( cv->xpoints,
 										( x_index + len ) * sizeof( XPoint ) );
 
-			for ( j = G.nx; j < x_index + len; j++ )
-				cv->points[ j ].exist = UNSET;
+			for ( j = G.nx, sp = cv->points + j; j < x_index + len; sp++, j++ )
+				sp->exist = UNSET;
 
 			if ( G.is_fs )
 				cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
@@ -341,11 +342,10 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			{
 				cv = G.curve[ i ];
 
-				for ( j = 0; j < G.nx; j++ )
-					if ( cv->points[ j ].exist )
-						cv->points[ j ].v = ( G.rwc_delta[ Y ]
-									* cv->points[ j ].v + G.rw_min - rw_min ) /
-							                                   new_rwc_delta_y;
+				for ( j = 0, sp = cv->points; j < G.nx; sp++, j++ )
+					if ( sp->exist )
+						sp->v = ( G.rwc_delta[ Y ] * sp->v
+								  + G.rw_min - rw_min ) / new_rwc_delta_y;
 
 				if ( ! G.is_fs )
 				{
@@ -366,10 +366,9 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
-				for ( j = 0; j < G.nx; j++ )
-					if ( cv->points[ j ].exist )
-						  cv->points[ j ].v = ( cv->points[ j ].v - rw_min ) /
-						                                       new_rwc_delta_y;
+				for ( j = 0, sp = cv->points; j < G.nx; sp++, j++ )
+					if ( sp->exist )
+						  sp->v = ( sp->v - rw_min ) / new_rwc_delta_y;
 			}
 
 			G.rwc_delta[ Y ] = new_rwc_delta_y;
