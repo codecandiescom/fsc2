@@ -115,7 +115,7 @@ the structure for variables:
 @example
 typedef struct Var
 @{
-    int type;                /* type of the variable */
+    Var_Type_T type;         /* type of the variable */
     union
     @{
         long    lval;        /* value of integer values */
@@ -128,7 +128,7 @@ typedef struct Var
     int dim;                 /* dimension of array */
     ssize_t len;             /* length of array */
     struct Var *next;        /* next variable on stack */
-@} Var;
+@} Var_T;
 @end example
 
 There are only six types of variables you have to know about:
@@ -142,7 +142,10 @@ There are only six types of variables you have to know about:
 point values
 @end multitable
 @noindent
-(There are a few others, but they are only used by @code{fsc2} internally.)
+(There are a few others, but they are only used by @code{fsc2} internally.
+If you test for variable types in an @code{switch} you may get compiler
+warnings because @code{Var_Type_T} is an @code{enum}. To avoid the warning
+simply add a @code{default} for all the other types.)
 
 To give you a better idea what these variables are good for let's assume
 that you want to write a function that returns the curve between the two
@@ -156,7 +159,7 @@ get_curve_between_cursors( cursor_1, cursor_2 )
 @noindent
 A typical C declaration for this function is
 @example
-Var *get_curve_between_cursors( Var *var );
+Var_T *get_curve_between_cursors( Var_T *var );
 @end example
 @noindent
 Surprisingly, there seems to be only one input variable! And how to return an
@@ -253,9 +256,9 @@ the variable actually exists and has been assigned a value.
 A function that expects just integer arguments could start like the
 following example, just running through the linked list of parameters:
 @example
-Var *my_function( Var *var )
+Var_T *my_function( Var_T *var )
 @{
-    Var *current;
+    Var_T *current;
 
     for ( current = var; current != NULL; current = current->next )
         vars_check( current, INT_VAR );
@@ -293,7 +296,7 @@ that you expect an integer variable but would also be prepared to deal
 with a floating point number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
-long get_long( Var *var, const char *snippet )
+long get_long( Var_T *var, const char *snippet )
 @end example
 @noindent
 The first argument is a pointer to the variable you want to
@@ -320,7 +323,7 @@ foo.edl:17: LECRONIX: abc(): Floating point number used as channel number.
 If, on the other hand, you expect a floating point number but are also
 prepared to accept an integer, you can use the function
 @example
-long get_double( Var *var, const char *snippet )
+long get_double( Var_T *var, const char *snippet )
 @end example
 @noindent
 The arguments of this function are the same you would pass to the
@@ -331,7 +334,7 @@ integer variable instead of the expected floating point variable.
 If your function can accept an integer variable only there's a third
 function:
 @example
-long get_strict_long( Var *var, const char *snippet )
+long get_strict_long( Var_T *var, const char *snippet )
 @end example
 @noindent
 This function has the same arguments as the two other functions but it
@@ -348,7 +351,7 @@ Finally, there is a function for the case where you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
 function is declared as
 @example
-bool get_boolean( Var *var )
+bool get_boolean( Var_T *var )
 @end example
 This function will return true (i.e.@: a value of @code{1}) when the
 variable passed to it is either an integer variable with a non-zero
@@ -443,7 +446,7 @@ But there's also a function that does all the required checks
 automatically and returns an element. It is called @code{get_element()}
 and is declared as
 @example
-   Var *get_element( Var *v, int len, ... );
+   Var_T *get_element( Var_T *v, int len, ... );
 @end example
 @noindent
 It takes an unspecified number of arguments, but at least three. The
@@ -517,11 +520,11 @@ assuming that @code{data} is an array of @code{long int}s.
 As a complete example here is a rather simple but working function named
 @code{square()} that returns the square of the value it got passed:
 @example
-Var *square( Var *var )
+Var_T *square( Var_T *var )
 @{
     long int_square;
     double float_square;
-    Var *ret_val;
+    Var_T *ret_val;
 
     vars_check( var, INT_VAR | FLOAT_VAR );   /* is it a number ? */ 
 
@@ -552,7 +555,7 @@ floating point variable. Finally, we return the variable pointer
 
 Of course, we could also have written the function in a more compact way:
 @example
-Var *square( Var *var )
+Var_T *square( Var_T *var )
 @{
     vars_check( var, INT_VAR | FLOAT_VAR );
 
@@ -575,7 +578,7 @@ digitizer are stored in an array of integers called @code{data} which
 has @code{len} elements (where @code{len} is a @code{long}). Now all
 you've got to do is call the function @code{vars_push()} as
 @example
-Var *ret_var;
+Var_T *ret_var;
 
 ...
 ret = vars_push( INT_ARR, data, len );
@@ -609,7 +612,7 @@ V2 = Dummy[ 2 ];
 @noindent
 and the C code for function @code{my_function()} would look like
 @example
-Var *my_function( Var *var )
+Var_T *my_function( Var_T *var )
 @{
     long v[ 2 ];
 
@@ -636,7 +639,7 @@ while the C code would define both functions as
 @example
 static double v2;   /* global variable used by my_function_1() 
                        and my_function_2() */
-Var *my_function_1( Var *v )
+Var_T *my_function_1( Var_T *v )
 @{
     long V1;
 
@@ -646,7 +649,7 @@ Var *my_function_1( Var *v )
     return vars_push( INT_VAR, V1 );
 @}
 
-Var *my_function_2( Var *v )
+Var_T *my_function_2( Var_T *v )
 @{
     return vars_push( FLOAT_VAR, v2 );
 @}
@@ -662,7 +665,7 @@ v2 = my_function( );
 @noindent
 with the corresponding C code
 @example
-Var *my_function( Var *v )
+Var_T *my_function( Var_T *v )
 @{
     long V1;
     static double v2;
@@ -867,18 +870,20 @@ switch ( FSC2_MODE )
 @end example
 
 
-The second important global variable, @code{need_GPIB}, is of type
+The second important global variable, @code{Need_GPIB}, is of type
 @code{bool} and has to be set in the init hook function if the device is
 controlled via the GPIB bus. Thus, if the GPIB bus is needed, include a
 line in the init hook function similar to
 @example
-need_GPIB = SET;
+Need_GPIB = SET;
 @end example
 @noindent
 If you forget to set this variable chances are high that the program
 will stop with an error message, complaining that it can't access the
 GPIB bus.
 
+For devices that use the Rulbus another global variable, @code{Need_RULBUS}
+and also of type @code{bool}, has to be set in the init hook function.
 
 @subsection Handling GPIB devices
 
@@ -1528,10 +1533,10 @@ As an example let's assume there is an @code{EDL} function named
 arguments, an integer and a floating point value. Then a typical piece
 of C code to call the function would be
 @example
-Var *my_function( Var *var )
+Var_T *my_function( Var_T *var )
 @{
-    Var *func_ptr;
-    Var *ret_value;
+    Var_T *func_ptr;
+    Var_T *ret_value;
     int access;
 
     if ( ! func_exists( "foo" ) )              /* test if function exists */
@@ -2075,7 +2080,7 @@ To make it possible to integrate handling of pulsers in this way
 directly into @code{EDL} the module for a pulser must obviously
 define quite a lot of non-@code{EDL} functions and some additional
 variables. Pointers to all of these needed functions are collected in one
-structure, @code{pulser_struct}:
+structure, @code{Pulser_Struct}:
 @example
 struct @{
     const char *name;
@@ -2127,7 +2132,7 @@ struct @{
     bool ( *keep_all_pulses )( void );
     bool ( *set_phase_switch_delay )( int function, double del_time );
     bool ( *set_grace_period )( double gp_time );
-@} pulser_struct;
+@} Pulser_Struct;
 @end example
 @noindent
 At the start all the pointers in this structure are set to @code{NULL}
