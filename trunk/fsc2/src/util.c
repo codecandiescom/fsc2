@@ -725,14 +725,14 @@ int fsc2_usleep( unsigned long us_dur, bool quit_on_signal )
 	int ret;
 
 
-	req.tv_sec = ( time_t ) us_dur / 1000000;
-	req.tv_nsec = ( us_dur % 1000000 ) * 1000;
+	req.tv_sec = ( time_t ) us_dur / 1000000L;
+	req.tv_nsec = ( us_dur % 1000000L ) * 1000;
 
 	do
 	{
 		ret = nanosleep( &req, &rem );
 		req = rem;
-	} ( ! quit_on_signal && ret == -1 && errno == EINTR );
+	} while ( ! quit_on_signal && ret == -1 && errno == EINTR );
 
 	return ret;
 }

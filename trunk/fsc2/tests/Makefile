@@ -25,4 +25,5 @@ all:
 	for f in *.edl; do              \
 		echo "Running $$f";         \
 		$(fdir)/src/fsc2 -X2 $$f;   \
-	done
+	done; \
+	echo "Tests completed succesfully."
