@@ -415,8 +415,8 @@ Var *find_field( Var *v )
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
-					eprint( FATAL, "er0935m: NMR gaussmeter has an "
-							"unidentifiable problem." );
+					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
+							"problem.", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'B' :      /* SU active -> OK */
