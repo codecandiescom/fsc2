@@ -160,13 +160,11 @@ else
 	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
 endif
 
-
 ifdef GPIB_LOG_FILE
 	CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 else
 	CFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
-
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
 	CFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
@@ -292,14 +290,13 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install clean distclean pack \
-		all-docs info-docs html-docs ps-docs pdf-docs  \
-        install-pion.anorg.chemie.uni-frankfurt.de     \
-		install-crowley.physik.fu-berlin.de            \
-		install-moebi.physik.fu-berlin.de              \
-		install-door.physik.fu-berlin.de               \
-		install-isaak.physik.fu-berlin.de              \
-		install-crowley.none                           \
+.PHONY: all install-strip install clean distclean pack  \
+        install-pion.anorg.chemie.uni-frankfurt.de      \
+		install-crowley.physik.fu-berlin.de             \
+		install-moebi.physik.fu-berlin.de               \
+		install-door.physik.fu-berlin.de                \
+		install-isaak.physik.fu-berlin.de               \
+		install-crowley.none                            \
 		ZIP
 
 
@@ -347,32 +344,6 @@ install:
 	fi
 
 
-# make all types of documentation
-
-all-docs:
-	$(MAKE) -C doc all
-
-# make info documentation
-
-info-docs:
-	$(MAKE) -C doc info
-
-# make html documentation
-
-html-docs:
-	$(MAKE) -C doc html
-
-# make Postscript documentation
-
-ps-docs:
-	$(MAKE) -C doc ps
-
-# make PDF documentation
-
-pdf-docs:
-	$(MAKE) -C doc pdf
-
-
 # `clean' deletes all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
 
@@ -395,69 +366,76 @@ pack:
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
 
-# Here links of module libraries for often used devices for the different
+# Here links to module libraries for often used devices for the different
 # spectrometers are created. If, for example, the spectrometer always uses
-# the aeg_x_band.so as the driver for the magnet power supply, by creating
-# a link with the name magnet.so allows to use 'magnet' as an alternative name
-# for the power supply in EDL programs. Don't forget to delete already
+# aeg_x_band.so as the driver for the magnet power supply, by creating a
+# link with the name magnet.so allows to use 'magnet' as an alternative
+# name for the power supply in EDL programs. Don't forget to delete already
 # existing links before creating new ones!
 
 install-pion.anorg.chemie.uni-frankfurt.de:
-	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so $(libdir)/s_band.so     \
-					  $(libdir)/lockin.so $(libdir)/gaussmeter.so \
-					  $(libdir)/magnet.so $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so
 	$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
 	$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
 	chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/s_band.so
 	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
 	chown $(OWNER).$(GROUP) $(libdir)/s_band.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
 	chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 	$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
 	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/lockin.so
 	$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
 	chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-crowley.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
-					  $(libdir)/boxcar.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 	$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
 	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
 	$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
 	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
+	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
 	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
 	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
-					  $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
 	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so \
-					  $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so
 	$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	chown fsc2.fsc2 $(libdir)/hfs9003.so
+	-$(RM) $(RMFLAGS) $(libdir)/w_band.so
 	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
 	chown fsc2.fsc2 $(libdir)/w_band.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-isaak.physik.fu-berlin.de:
-	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
-					  $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
 	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
 	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
 	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 

@@ -64,7 +64,7 @@ this directory.
 
 Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
-and /usr/local/share/doc). To change this location edit the first lines
+and /usr/local/share/doc). To change these locations edit the first lines
 of the Makefile.
 
 The next make file variable, RESOLUTION, tells fsc2 if it's is going to
