@@ -44,24 +44,16 @@ Var *vars_div( Var *v1, Var *v2 )
 
 	switch ( v1->type )
 	{
-		case INT_VAR :
-			new_var = vars_int_var_mult( v1, v2 );
+		case REF_PTR :
+			v1 = v1->from;
 			break;
 
-		case FLOAT_VAR :
-			new_var = vars_float_var_mult( v1, v2 );
-			break;
-	
-		case INT_ARR :
-			new_var = vars_int_arr_mult( v1, v2 );
+		case INT_PTR :
+			v1 = vars_push( INT_VAR, *v1->val.lpnt );
 			break;
 
-		case FLOAT_ARR :
-			new_var = vars_float_arr_mult( v1, v2 );
-			break;
-
-		case INT_REF : case FLOAT_REF :
-			new_var = vars_ref_mult( v1, v2 );
+		case FLOAT_PTR :
+			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
 			break;
 	}
 
