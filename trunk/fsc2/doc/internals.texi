@@ -1744,8 +1744,8 @@ closed.
 
 
 If the user now closes the window(s) for displaying the data the program
-is in a state so that a new experiment can be started. This can be done
-by repeating the same experiment, in which case the already stored
+is in a state that allows a new experiment to be started. This can be
+done by repeating the same experiment, in which case the already stored
 tokens would be interpreted again, i.e.@: the @code{EDL} script would't
 have to be read in and tested again but the program would immediately go
 to the start of the @code{EXPERIMENT} section. But, of course a
