@@ -876,7 +876,7 @@ Var *pulser_command( Var *v )
 		}
 	}
 
-	return vars_push( 1 );
+	return vars_push( INT_VAR, 1 );
 }
 
 

@@ -1188,6 +1188,17 @@ void tds_tmpl_lock_state( bool lock )
 }
 
 
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+bool tds_tmpl_command( const char *cmd )
+{
+	if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds_tmpl_gpib_failure( );
+	return OK;
+}
+
+
 /* The next functions are useless when the device (i.e. TDS520) can't do
    gated measurements or has no tracking cursors */
 
