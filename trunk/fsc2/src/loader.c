@@ -109,11 +109,14 @@ void load_functions( Device *dev )
 	strcat( lib_name, dev->name );
 	strcat( lib_name, ".so" );
 
-	/* Increase memory allocated for library handles and try to open
-	   the dynamically loaded library */
+	/* Try to open the library - if it can't be found in the usual place give
+       it another chance in the places defined by  LD_LIBRARAY_PATH */
 
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
+	if ( dev->driver.handle == NULL )
+		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_LAZY );
 	T_free( lib_name );
+
 	if ( dev->driver.handle == NULL )
 	{
 		if ( ! strcmp( dev->name, "User_Functions" ) )
