@@ -41,7 +41,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 
-#include "config.h"
+#include "fsc2_config.h"
 #include "fsc2_types.h"
 
 
