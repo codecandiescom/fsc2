@@ -57,14 +57,12 @@
    quite simple - the child sends the request and waits for the answer by the
    parent, knowing exactly what kind of data to expect.
 
-   The exchange of data for REQUESTs isn't done via shared memory segments
-   but using a pair of pipes. To avoid having the child write more than
-   one message to the pipe there's a second semaphore initialized to one.
-   For a request the child has first to put a REQUEST message into the mesage
-   queue and then to wait also for the second semaphore before the writing
-   to the pipe. The parent, in turn, will post this second semaphore when it
-   receives a REQUEST message and will then read the pipe (and if necessary
-   return data to the child via a second pipe).
+   The exchange of data for REQUESTs isn't done via shared memory segments but
+   using a pair of pipes. For a request the child has first to put a REQUEST
+   message into the mesage queue. The parent, in turn, will execute some
+   action of behalf of the child and return some kind of answer (either data
+   or just an acknowledgment) which the child must read from the pipe before
+   it continues.
 
    This scheme will work as long as the parent doesn't get to much behind with
    handling DATA messages. But if the parent is very busy and the child very
@@ -86,8 +84,7 @@
    orphaned shared memory segments, i.e. segments that no process is
    interested in anymore, each memory segment allocated by fsc2 is labelled by
    the four byte magic number 'fsc2' at its very start. Using this label at
-   the next start of fsc2 all orphaned segments can be identified and released.
-*/
+   the next start of fsc2 all orphaned segments can be identified and released.  */
 
 
 #include "fsc2.h"

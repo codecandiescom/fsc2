@@ -261,8 +261,7 @@ struct COMMUNICATION {
 	int conn_pd[ 2 ];            /* pipe for communication child */
 	int http_pd[ 4 ];            /* pipes for HTTP server */
 
-	int data_semaphore;          /* Semaphore for DATA messages */
-	int request_semaphore;       /* Semaphore for REQUEST mesages */
+	int mq_semaphore;            /* Semaphore for message queue */
 
 	MESSAGE_QUEUE *MQ;           /* The message queue for data send from the
 									child to the parent process */
