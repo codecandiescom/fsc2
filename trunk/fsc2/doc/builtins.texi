@@ -702,7 +702,6 @@ elements of an array).
 @findex time()
 Returns a string with the current time in the form @code{hh:mm:ss}.
 
-@table @samp
 @item delta_time()
 @anchor{delta_time}
 @findex delta_time()
