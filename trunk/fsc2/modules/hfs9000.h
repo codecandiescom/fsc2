@@ -54,16 +54,16 @@ Var *pulser_stop_on_update( Var *v );
 
 /* Definitions needed for the pulser */
 
-#define Ticks long              // for times in units of the pulsers time base
+#define Ticks long              /* times in units of the pulsers time base */
 #define Ticks_max l_max
 #define Ticks_min l_min
 
 
-#define MIN_TIMEBASE           1.6e-9      // minimum pulser time base: 1.6 ns
-#define MAX_TIMEBASE           2.0e-5      // maximum pulser time base: 20 us
+#define MIN_TIMEBASE           1.6e-9   /* minimum pulser time base: 1.6 ns */
+#define MAX_TIMEBASE           2.0e-5   /* maximum pulser time base: 20 us */
 
 #define MIN_CHANNEL            1
-#define MAX_CHANNEL            4           // number of channels
+#define MAX_CHANNEL            4        /* number of channels */
 
 
 # define MIN_POD_HIGH_VOLTAGE  -1.5
@@ -80,7 +80,7 @@ Var *pulser_stop_on_update( Var *v );
 #define MAX_TRIG_IN_LEVEL       4.7
 #define MIN_TRIG_IN_LEVEL      -4.7
 
-#define MAX_PULSER_BITS       65536        // maximum number of bits in channel
+#define MAX_PULSER_BITS       65536     /* maximum number of bits in channel */
 
 
 /* Trigger Out is treated as a kind of channel with the following
@@ -89,7 +89,7 @@ Var *pulser_stop_on_update( Var *v );
    fixed to HFS9000_TRIG_OUT_PULSE_LEN. */
 
 #define HFS9000_TRIG_OUT            0
-#define HFS9000_TRIG_OUT_PULSE_LEN  2.0e-8  // roughly 20 ns
+#define HFS9000_TRIG_OUT_PULSE_LEN  2.0e-8  /* roughly 20 ns */
 
 
 #define START ( ( bool ) 1 )
@@ -114,26 +114,26 @@ Var *pulser_stop_on_update( Var *v );
 /* typedefs of structures needed in the module */
 
 typedef struct _F_ {
-	int self;                    // the functions number
-	bool is_used;                // set if the function has been declared in
-	                             // the ASSIGNMENTS section
-	bool is_needed;              // set if the function has been assigned
-                                 // pulses
-	struct _C_ *channel;         // channel assigned to function
+	int self;                  /* the functions number
+	bool is_used;              /* set if the function has been declared in
+								  the ASSIGNMENTS section */
+	bool is_needed;            /* set if the function has been assigned
+								  pulses */
+	struct _C_ *channel;       /* channel assigned to function */
 
-	int num_pulses;              // number of pulses assigned to the function
-	int num_active_pulses;       // number of pulses currenty in use
-	struct _p_ **pulses;         // list of pulse pointers
+	int num_pulses;            /* number of pulses assigned to the function */
+	int num_active_pulses;     /* number of pulses currenty in use */
+	struct _p_ **pulses;       /* list of pulse pointers */
 
-	long max_seq_len;            // maximum length of the pulse sequence
+	long max_seq_len;          /* maximum length of the pulse sequence */
 
-	bool is_inverted;            // if set polarity is inverted
+	bool is_inverted;          /* if set polarity is inverted */
 
-	Ticks delay;                 // delay for the function/channel combination
+	Ticks delay;               /* delay for the function/channel combination */
 	bool is_delay;
 
-	double high_level;           // high and low voltage levels for the pod(s)
-	double low_level;            // associated with the fucntion
+	double high_level;         /* high and low voltage levels for the pod(s) */
+	double low_level;          /* associated with the fucntion */
 
 	bool is_high_level;
 	bool is_low_level;
@@ -152,90 +152,90 @@ typedef struct _C_ {
 
 
 typedef struct {
-	int device;              // GPIB number of the device
+	int device;              /* GPIB number of the device */
 
-	double timebase;         // time base of the digitizer
+	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
 
-	int trig_in_mode;        //	EXTERNAL or INTERNAL
-	int trig_in_slope;       //	only in EXTERNAL mode
-	double trig_in_level;    //	only in EXTERNAL mode
+	int trig_in_mode;        /* EXTERNAL or INTERNAL */
+	int trig_in_slope;       /* only in EXTERNAL mode */
+	double trig_in_level;    /* only in EXTERNAL mode */
 
-	bool keep_all;           // keep even unused pulses ?
+	bool keep_all;           /* keep even unused pulses ? */
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
 
 	Ticks neg_delay;
-	bool is_neg_delay;       // if any of the functions has a negative delay
+	bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	long max_seq_len;        // maximum length of all pulse sequences
+	long max_seq_len;        /* maximum length of all pulse sequences */
 	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	CHANNEL channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
 
-	int needed_channels;     // number of channels that are going to be needed
-	                         // in the experiment
+	int needed_channels;     /* number of channels that are going to be needed
+								in the experiment */
 
-	bool needs_update;       // set if pulse properties have been changed in
-                             // test run or experiment
-	bool is_running;         // set if the pulser is in run mode
+	bool needs_update;       /* set if pulse properties have been changed in
+							    test run or experiment */
+	bool is_running;         /* set if the pulser is in run mode */
 	bool has_been_running;
 
-	Ticks mem_size;          // size of the complete sequence, i.e. including
-	                         // the memory needed for padding
+	Ticks mem_size;          /* size of the complete sequence, i.e. including
+								the memory needed for padding */
 
-	bool stop_on_update;     // if not set the pulser does not get stopped
-	                         // while doing an update
+	bool stop_on_update;     /* if not set the pulser does not get stopped
+								while doing an update */
 } HFS9000;
 
 
 typedef struct _p_ {
 
-	long num;                // (positive) number of the pulse
+	long num;                /* (positive) number of the pulse */
 
-	bool is_active;          // set if the pulse is really used
+	bool is_active;          /* set if the pulse is really used */
 	bool was_active;
-	bool has_been_active;    // used to find useless pulses
+	bool has_been_active;    /* used to find useless pulses */
 
 	struct _p_ *next;
 	struct _p_ *prev;
 
-	FUNCTION *function;      // function the pulse is associated with
+	FUNCTION *function;      /* function the pulse is associated with */
 
-	Ticks pos;               // current position, length, position change and
-	Ticks len;               // length change of pulse (in units of the pulsers
-	Ticks dpos;              // time base)
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
 	Ticks dlen;
 
-	bool is_function;        // flags that are set when the corresponding
-	bool is_pos;             // property has been set
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
 	bool is_len;
 	bool is_dpos;
 	bool is_dlen;
 
-	Ticks initial_pos;       // position, length, position change and length
-	Ticks initial_len;       // change at the start of the experiment
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
 	Ticks initial_dpos;
 	Ticks initial_dlen;
 
-	bool initial_is_pos;     // property has initially been set
+	bool initial_is_pos;     /* property has initially been set */
 	bool initial_is_len;
 	bool initial_is_dpos;
 	bool initial_is_dlen;
 
-	Ticks old_pos;           // position and length of pulse before a change
-	Ticks old_len;           // is applied
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
 
 	bool is_old_pos;
 	bool is_old_len;
 
 	CHANNEL *channel;
 
-	bool needs_update;       // set if the pulses properties have been changed
-                             // in test run or experiment
+	bool needs_update;       /* set if the pulses properties have been changed
+								in test run or experiment */
 } PULSE;
 
 

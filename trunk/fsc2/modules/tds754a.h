@@ -100,10 +100,10 @@ typedef struct
 	long num_avg;
 	bool is_num_avg;
 
-	WINDOW *w;                // start element of list of windows
-	bool is_equal_width;      // all windows have equal width -> tracking
-	                          // cursors can be used without further checking
-	bool gated_state;         // Gated measurements ?
+	WINDOW *w;                /* start element of list of windows */
+	bool is_equal_width;      /* all windows have equal width -> tracking
+								 cursors can be used without further checks */
+	bool gated_state;         /* Gated measurements ? */
 	bool snap_state;
 
 	int trigger_channel;
@@ -115,15 +115,15 @@ typedef struct
 	double trig_pos;
 	bool is_trig_pos;
 
-	double cursor_pos;        // current position of cursor 1
+	double cursor_pos;        /* current position of cursor 1 */
 
-	int meas_source;          // channel selected as measurement source
-	int data_source;          // channel selected as data source
+	int meas_source;          /* channel selected as measurement source */
+	int data_source;          /* channel selected as data source */
 
 	bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
 	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
-	bool lock_state;          // set if keyboard is locked
+	bool lock_state;          /* set if keyboard is locked */
 } TDS754A;
 
 

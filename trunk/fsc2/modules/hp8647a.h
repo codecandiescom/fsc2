@@ -110,8 +110,8 @@ typedef struct
 	double min_attenuation;
 	double att_ref_freq;
 	double att_at_ref_freq;
-	double real_attenuation;        // might differ from attenuation due to use
-									// of table
+	double real_attenuation;        /* might differ from attenuation due to
+									   use of table
 	int mod_type;
 	bool mod_type_is_set;
 	int mod_source[ NUM_MOD_TYPES ];
