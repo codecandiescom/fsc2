@@ -172,9 +172,6 @@ uninstall:
 	for f in *.so; do                    \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;  \
 	done
-	if [ -z "`ls -a $(bindir)`" ]; then  \
-		rmdir $(bindir);                 \
-	fi
 
 # How to get rid of stuff not needed anymore
 
