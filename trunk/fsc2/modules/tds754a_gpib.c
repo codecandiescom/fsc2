@@ -487,7 +487,7 @@ bool tds754a_set_snap( bool flag )
 	}
 	else
 	{
-		stprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds754a.rec_len );
+		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds754a.rec_len );
 		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
 			tds754a_gpib_failure( );
 	}		
@@ -579,7 +579,7 @@ bool tds754a_start_aquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds754a_get_area( int channel, WINDOW *w )
+double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 {
 	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
 	char reply[ 40 ];
@@ -694,7 +694,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Set the cursors or set start and end point of interval */
 
-	if ( use_cursors )
+	if ( use_cursor )
 		tds754a_set_curve_window( w );
 	else
 	{

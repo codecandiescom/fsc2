@@ -694,7 +694,7 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Set the cursors or start and end point of interval */
 
-	if ( use_cursors )
+	if ( use_cursor )
 		tds744a_set_curve_window( w );
 	else
 	{
