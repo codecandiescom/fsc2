@@ -519,9 +519,9 @@ the manual for more details.
 
 For the @strong{ER023M} only certain modulation frequencies can be set,
 these are @code{100 kHz}, @code{50 kHz}, @code{25 kHz}, @code{12.5 kHz},
-@code{6.25 kHz} and @code{3.125 kHz}. If a modulation
-frequency is specified that does not fit one of the valid ones the next
-usable frequency is used.
+@code{6.25 kHz} and @code{3.125 kHz}. If a modulation frequency is
+specified that does not fit one of these values the next usable
+frequency is used.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
