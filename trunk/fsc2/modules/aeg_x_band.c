@@ -41,7 +41,7 @@ Var *reset_field( Var *v );
 
 static double aeg_x_band_field_check( double field, bool *err_flag );
 static bool magnet_init( void );
-static bool magnet_goto_field( double field );
+static bool magnet_goto_field( double field, double error );
 static bool magnet_goto_field_rec( double field, int rec );
 static void magnet_sweep( int dir );
 static bool magnet_do( int command );
@@ -363,6 +363,7 @@ Var *set_field( Var *v )
 {
 	double field;
 	bool err_flag = UNSET;
+	double error = 0.0;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -376,6 +377,19 @@ Var *set_field( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+		if ( v->type == INT_VAR )
+			eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field "
+					"precision.\n", Fname, Lc, DEVICE_NAME );
+		error = fabs( VALUE( v ) );
+
+		if ( error > 0.1 * field )
+			eprint( SEVERE, "%s:%ld: %s: Field precision larger than 10% of "
+					"field value.\n", Fname, Lc, DEVICE_NAME );
+	}
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
 		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
 				"function `set_field'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
@@ -385,7 +399,7 @@ Var *set_field( Var *v )
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, field );
 
-	if ( ! magnet_goto_field( field ) )
+	if ( ! magnet_goto_field( field, error ) )
 	{
 		eprint( FATAL, "%s: Can't reach requested field of %lf G.\n",
 				DEVICE_NAME, field );
