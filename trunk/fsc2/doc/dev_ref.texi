@@ -46,6 +46,8 @@
 * lakeshore330::  Lake Shore 330 Temperature Controller
 * lecroy9400::    LeCroy Digitizing Oscilloscope 9400
 * pt2025::        Metrolab NMR Teslameter PT2025
+* s_band_magnet_broad:   S-Band magnet controlled via a DAC
+* s_band_magnet_narrow:  S-Band magnet controlled via a DAC
 * sr510::         Stanford Research Lock-In Amplifier SR510
 * sr530::         Stanford Research Lock-In Amplifier SR530
 * sr810::         Stanford Research Lock-In Amplifier SR810
@@ -588,7 +590,7 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate}
 @item @code{magnet_sweep()}             @tab @ref{magnet_sweep}
 @item @code{reset_field()}              @tab @ref{reset_field}
-@item @code{magnet_goto_current_on_end} @tab @ref{magnet_goto_current_on_end}
+@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end}
 @end multitable
 
 
@@ -730,7 +732,7 @@ channels, 2 function channels (needed for averaging).
 @end multitable
 
 
-@node pt2025, sr510, lecroy9400,  Device Reference
+@node pt2025, s_band_magnet_broad, lecroy9400,  Device Reference
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
 @end iftex
@@ -758,7 +760,76 @@ T. Measured fields are returned in Gauss, not Tesla!
 @item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
 @end multitable
 
-@node sr510, sr530, pt2025, Device Reference
+
+
+@node s_band_magnet_broad, s_band_magnet_narrow, pt2025, Device Reference
+@iftex
+@subheading S-band Magnet Power Supply (broad range)
+@end iftex
+@ifnottex
+@section S-band Magnet Power Supply (broad range)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{s_band_magnet_broad}
+
+@paragraphindent 0
+@strong{Description}: Power supply for magnet with home-built
+computer control to be used with an S-band spectrometer. Field range
+is 0 G to 2047.5 G with a resolution of 0.5 G.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{get_field()}              @tab @ref{get_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end}
+@end multitable
+
+
+@node s_band_magnet_narrow, sr510, s_band_magnet_broad, Device Reference
+@iftex
+@subheading S-band Magnet Power Supply (narrow range)
+@end iftex
+@ifnottex
+@section S-band Magnet Power Supply (narrow range)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{s_band_magnet_narrow}
+
+@paragraphindent 0
+@strong{Description}: Power supply for magnet with home-built
+computer control to be used with an S-band spectrometer. Field range
+is 1070 G to 1479.5 G with a resolution of 0.1 G.
+
+@paragraphindent 0
+@strong{Controlled via}: Serial port (@file{/dev/ttyS1} or @code{COM2}).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{magnet_name()}            @tab @ref{magnet_name}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup}
+@item @code{set_field()}              @tab @ref{set_field}
+@item @code{get_field()}              @tab @ref{get_field}
+@item @code{sweep_up()}               @tab @ref{sweep_up}
+@item @code{sweep_down()}             @tab @ref{sweep_down}
+@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end}
+@end multitable
+
+
+
+@node sr510, sr530, s_band_magnet_narrow, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR510
 @end iftex
