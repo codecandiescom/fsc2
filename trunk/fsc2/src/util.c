@@ -363,33 +363,6 @@ bool fsc2_locking( void )
 
 
 /*---------------------------------------------------------------------*/
-/* The program starts with the EUID and EGID set to the ones of fsc2,  */
-/* but these privileges get dropped immediately. Only for some special */
-/* actions (like dealing with shared memory and lock and log files)    */
-/* this function is called to change the EUID and EGID to the one of   */
-/* fsc2.                                                               */
-/*---------------------------------------------------------------------*/
-
-inline void raise_permissions( void )
-{
-	seteuid( EUID );
-	setegid( EGID );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* This function sets the EUID and EGID to the one of the user running */
-/* the program.                                                        */
-/*---------------------------------------------------------------------*/
-
-inline void lower_permissions( void )
-{
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
-}
-
-
-/*---------------------------------------------------------------------*/
 /* Functions checks if a supplied input string is identical to one of  */
 /* `max' alternatives, pointed to by `altern', but neglecting the case */
 /* of the characters. Leading and trailing white space is removed from */
@@ -514,6 +487,33 @@ void create_colors( void )
 /***********************************************************************/
 
 
+/*---------------------------------------------------------------------*/
+/* The program starts with the EUID and EGID set to the ones of fsc2,  */
+/* but these privileges get dropped immediately. Only for some special */
+/* actions (like dealing with shared memory and lock and log files)    */
+/* this function is called to change the EUID and EGID to the one of   */
+/* fsc2.                                                               */
+/*---------------------------------------------------------------------*/
+
+inline void raise_permissions( void )
+{
+	seteuid( EUID );
+	setegid( EGID );
+}
+
+
+/*---------------------------------------------------------------------*/
+/* This function sets the EUID and EGID to the one of the user running */
+/* the program.                                                        */
+/*---------------------------------------------------------------------*/
+
+inline void lower_permissions( void )
+{
+	seteuid( getuid( ) );
+	setegid( getgid( ) );
+}
+
+
 /*--------------------------------------------------------------------------*/
 /* Returns the pixel value of an entry in XFORMs internal colour map from   */
 /* the colours set in create_colors(). For values slightly above 1 as well  */
@@ -571,15 +571,6 @@ inline short i2shrt( int a )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* This function is needed for glib versions below 2.0 (or 2.1 ?) only */
-/*---------------------------------------------------------------------*/
-
-#if ! defined ( lround )
-inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
-#endif
-
-
 inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
 inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
@@ -588,3 +579,12 @@ inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
 inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
 inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
+
+
+/*-----------------------------------------------------*/
+/* This function is needed for glib versions below 2.0 */
+/*-----------------------------------------------------*/
+
+#if defined IS_STILL_LIBC1
+inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
+#endif

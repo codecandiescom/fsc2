@@ -33,13 +33,14 @@ const char *strip_path( const char *path );
 long get_file_length( char *name, int *len );
 void eprint( int severity, bool print_fl, const char *fmt, ... );
 bool fsc2_locking( void );
-inline void raise_permissions( void );
-inline void lower_permissions( void );
 int is_in( const char *supplied_in, const char **altern, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
-inline unsigned long d2color( double a );
 
+inline void raise_permissions( void );
+inline void lower_permissions( void );
+
+inline unsigned long d2color( double a );
 
 inline short  d2shrt( double a );
 inline short  i2shrt( int a );
