@@ -29,7 +29,7 @@
 
 static void spawn_server( void );
 static void http_send_error_browser( int pd );
-static void http_send_picture( int pd, int type, const char *ext );
+static void http_send_picture( int pd, int type );
 
 
 enum {
@@ -74,7 +74,7 @@ void server_callback( FL_OBJECT *obj, long a )
 	else
 	{
 		/* This might get called twice: First when the button gets switched
-		   off and the again (with the pid set to -1) when the signal handler
+		   off and then again (with the pid set to -1) when the signal handler
 		   for SIGCHLD gets triggered. */
 
 		if ( ! fl_get_button( obj ) && Internals.http_pid > 0 &&
@@ -82,9 +82,11 @@ void server_callback( FL_OBJECT *obj, long a )
 			kill( Internals.http_pid, SIGTERM );
 		else
 		{
-			fl_set_button( obj, 0 );
 			Internals.http_pid = 0;
+			close( Comm.http_pd[ HTTP_PARENT_READ ] );
+			close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
+			fl_set_button( obj, 0 );
 			www_help = get_string( "Run a HTTP server (on port %d)\n"
 								   "that allows to view fsc2's current\n"
 								   "state via the internet.",
@@ -95,6 +97,15 @@ void server_callback( FL_OBJECT *obj, long a )
 	}
 }
 
+
+/*--------------------------------------------------*/
+/* Function execs the web server as a child process */
+/* with its standard input and output redirected to */
+/* two pipes. We're going to check out read end of  */
+/* one of the pipes regularly to see if the server  */
+/* needs some data and send these back on the other */
+/* pipe.                                            */
+/*--------------------------------------------------*/
 
 static void spawn_server( void )
 {
@@ -157,25 +168,30 @@ static void spawn_server( void )
 }
 
 
+/*------------------------------------------------*/
+/* This function gets called from an idle handler */
+/* to check if the web server has asked for data. */
+/*------------------------------------------------*/
+
 void http_check( void )
 {
 	struct timeval tv;
 	fd_set rfds;
+	char reply[ 2 ];
+	char query;
 
-
-	if ( Internals.http_pid <= 0 )
-		return;
 
 	tv.tv_sec = tv.tv_usec = 0;
 	FD_ZERO( &rfds );
 	FD_SET( Comm.http_pd[ HTTP_PARENT_READ ], &rfds );
 
-	while ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
-					NULL, NULL, &tv ) > 0 )
-	{
-		char reply[ 2 ];
-		char query;
+	/* Answer only one reqest at a time, we don't want the experiment getting
+	   bogged down just because somone has been fallen asleep on the reload
+	   button of his browser... */
 
+	if ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
+				 NULL, NULL, &tv ) > 0 )
+	{
 		read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 );
 
 		reply[ 1 ] = '\n';
@@ -183,13 +199,11 @@ void http_check( void )
 		switch ( query )
 		{
 			case 'S' :
-				printf( "fsc2: Got S\n" );
 				reply[ 0 ]  = ( char ) Internals.state + '0';
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
 			case 'W' :
-				printf( "fsc2: Got W\n" );
 				if ( ! G.is_init )
 					reply[ 0 ] = '0';
 				else
@@ -199,44 +213,39 @@ void http_check( void )
 					else
 						reply[ 0 ] = ( G.is_cut ? '3' : '2' );
 				}
+
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
 			case 'E' :
-				printf( "fsc2: Got E\n" );
 				http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 				break;
 
-			case 'A' :
-				printf( "fsc2: Got A\n" );
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
-								   1, "png" );
-				break;
-
 			case 'a' :
-				printf( "fsc2: Got a\n" );
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
-								   1, "gif" );
-				break;
-
-			case 'B' :
-				printf( "fsc2: Got B\n" );
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
-								   2, "png" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 1 );
 				break;
 
 			case 'b' :
-				printf( "fsc2: Got b\n" );
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ],
-								   2, "gif" );
+				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 2 );
 				break;
 
+#if ! defined NDEBUG
 			default :
-				return;
+				fprintf( stderr, "Got stray request ('%c', %d) from http "
+						 "server.\n", query, query );
+#endif
 		}
 	}
 }
 
+
+/*----------------------------------------------------------------*/
+/* Sends the contents of the error browser (or at least the last  */
+/* MAX_LINES_TO_SEND) to the server. The server expects each line */
+/* to end with a newline character and treats a line consisting   */
+/* of a newline only as the end of the message. Thus we have to   */
+/* look out for empty lines and send a space char for these.      */
+/*----------------------------------------------------------------*/
 
 static void http_send_error_browser( int pd )
 {
@@ -244,6 +253,7 @@ static void http_send_error_browser( int pd )
 	const char *l;
 	int i = 0;
 	char newline = '\n';
+	char space = ' ';
 
 
 	if ( ( i = fl_get_browser_maxline( b ) - MAX_LINES_TO_SEND  ) < 0 )
@@ -251,7 +261,10 @@ static void http_send_error_browser( int pd )
 
 	while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
 	{
-		write( pd, l, strlen( l ) );
+		if ( *l != '\0' )
+			write( pd, l, strlen( l ) );
+		else
+			write( pd, &space, 1 );
 		write( pd, &newline, 1 );
 	}
 
@@ -259,14 +272,58 @@ static void http_send_error_browser( int pd )
 }
 
 
-static void http_send_picture( int pd, int type, const char *ext )
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static void http_send_picture( int pd, int type )
 {
+	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
 	char reply[ 2 ];
+	static int tmp_fd = -1;
 
 
-	reply[ 0 ] = '0';
 	reply[ 1 ] = '\n';
-	write( pd, reply, 2 );
+
+	/* If the server asks for a window that isn't shown anymore we send a '0'
+	   to indicate that it has to send the "Not available" picture instead of
+	   the one the client is looking for. */
+
+	if ( ! G.is_init || ( type == 2 && ! G.is_cut ) )
+	{
+		reply[ 0 ] = '0';
+		write( pd, reply, 2 );
+		return;
+	}
+
+	/* Try to create a file with a unique name, dump the window into it and
+	   send the server the filename */
+
+	TRY
+	{
+		if ( ( tmp_fd = mkstemp( filename ) ) < 0 )
+			THROW( EXCEPTION );
+
+		dump_window( type, tmp_fd );
+
+		reply[ 0 ] = '1';
+		write( pd, reply, 2 );
+
+		write( pd, filename, strlen( filename ) );
+		write( pd, reply + 1, 1 );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( tmp_fd >= 0 )
+		{
+			unlink( filename );
+			close( tmp_fd );
+		}
+
+		reply[ 0 ] = '0';
+		write( pd, reply, 2 );
+	}
 }
 
 

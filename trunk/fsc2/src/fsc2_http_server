@@ -21,6 +21,10 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 
+# TODO: 1. Also send number of curently displayed curve for 2D display
+#       2. Evaluate If-fields in meta data the browser sends
+#       3. Support JPEG?
+
 
 use strict;
 use IO::Socket::INET;
@@ -31,6 +35,7 @@ my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
+my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
 
 
 # Check if we got a port number as the first command line argument...
@@ -73,6 +78,8 @@ $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 my @a = `echo -n "P6 1 1 255\n000" | pnmtopng 2>/dev/null`;
 $has_pnmtopng = defined $a[ 0 ];
 
+@a = `echo -n "P6 1 1 255\n000" | ppmtojpeg 2>/dev/null`;
+$has_ppmtojpeg = defined $a[ 0 ];
 
 # Ok, fire up the server - isn't OOP plus helpful modules a nice thing? ;-)
 
@@ -118,7 +125,7 @@ while ( $client = $server->accept( ) ) {
 sub serve {
 
 	my $txt;
-	my ( $has_png, $has_gif ) = ( 0, 0 );
+	my %f = ( png => 0, gif => 0, jpeg => 0 );
 
 
 	# Make the client connection the default I/O channel
@@ -144,8 +151,9 @@ sub serve {
 	# we're done listening when we get an empty line
 
 	while ( defined( $txt = <$client> ) and $txt !~ /^\r*\n$/o ) {
-		$has_png = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
-		$has_gif = 1 if $txt =~ m|^\s*Accept:.*\s*image/gif[^a-zA-Z0-9]|io;
+		$f{ png }  = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
+		$f{ gif } = 1 if $txt =~ m|^\s*Accept:.*\s*image/gif[^a-zA-Z0-9]|io;
+		$f{ jpeg } = 1 if $txt =~ m|^\s*Accept:.*\s*image/jpeg[^a-zA-Z0-9]|io;
 	}
 
 	# Give up if the client bailed out in between...
@@ -155,11 +163,11 @@ sub serve {
 	# Ok, now it's finally our turn to send something back...
 
 	if ( $file =~ m|^/(index.html*)*$|o ) {
-		serve_main( $has_png, $has_gif );
-	} elsif ( $file =~ m{^/(fsc2\.(png|gif))$}o ) {
+		serve_main( \%f );
+	} elsif ( $file =~ m{^/(fsc2\.(png|gif|jpeg))$}o ) {
 		serve_logo( $1, $2 );
-	} elsif ( $file =~ m{^/fsc2_(a|b)\.png$}o ) {
-		serve_pics( $1 );
+	} elsif ( $file =~ m{^/fsc2_(a|b)\.(png|jpeg)$}o ) {
+		serve_pics( $1, $2 );
 	} else {
 		not_found( $file );
 	}
@@ -175,7 +183,7 @@ sub serve {
 
 sub serve_main {
 
-	my ( $has_png, $has_gif ) = @_;
+	my $f = shift;
 
 	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "DONE" );
 	my @st2 = ( "Idle",
@@ -185,9 +193,16 @@ sub serve_main {
 	my $state;
 	my $pic;
 	my $txt;
+	my $ext;
 	my $date = rfc_1123_date( );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
+	my $logo_file;
 
+
+	if ( $f->{ gif } or $f->{ png } or $f->{ jpeg } ) {
+		$logo_file = "fsc2." . 
+				 ( $f->{ gif } ? "gif" : ( $f->{ png } ? "png" : "jpeg" ) );
+	}
 
 	# Ask the parent for its current state - and don't forget to set a lock
 	# on STDOUT while doing it or other processes might interfere
@@ -202,21 +217,19 @@ sub serve_main {
 	# First send some meta-information for the browser plus the first lines
 	# of the page
 
-	print &uq( <<'HTTP' );
-:		HTTP/1.0 200 OK
-:		Date: $date
-:		Server: fsc2/0.1
-:		Allow: GET
-:		Content-Type: text/html; charset=iso-8859-1
-:		Connection: close
-:		Expires: $date
-:
-:		<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
-:		<HTML><HEAD>
-:		<META content="iso-8859-1" http-equiv="charset">
-:		<META name="author" content="fsc2">
-:		<META name="robots" content="noindex">
-HTTP
+	print "HTTP/1.0 200 OK$crlf" .
+		  "Date: $date$crlf" .
+		  "Server: fsc2/0.1$crlf" .
+		  "Allow: GET$crlf" .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "Connection: close$crlf" .
+		  "Expires: $date$crlf" .
+		  "$crlf" .
+		  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
+		  "<HTML><HEAD>$crlf" .
+		  "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
+		  "<META name=\"author\" content=\"fsc2\">$crlf" .
+		  "<META name=\"robots\" content=\"noindex\">$crlf";
 
 	# Send the logo (per default the GIF version because some browser don't
 	# seem to deal correctly with transparency in PNG files even when they
@@ -225,8 +238,8 @@ HTTP
 	if ( $state =~ /^[0-3]$/o ) {
 		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
 
-		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\" ALT=\"fsc2\"></CENTER></P>$crlf" if $has_png or $has_gif;
+		print "<P><CENTER><IMG SRC=\"$logo_file\"" .
+			  "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
 
 		print "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>$crlf" .
 			  "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
@@ -234,41 +247,43 @@ HTTP
 	} else {
 		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>$crlf";
 
-		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\"ALT=\"fsc2\"></CENTER></P>$crlf" if $has_png or $has_gif;
+		print "<P><CENTER><IMG SRC=\"$logo_file\"" .
+			  "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
 
-		print &uq( <<'HTTP' );
-:			<P><CENTER><H1>Status:  Something weird is happening here...
-:			</H1></CENTER>
-:			<P>Ok, you seem to have found a bug. Please tell nobody ;-)
-:			</P>$crlf</BODY></HTML>
-HTTP
+		print "<P><CENTER><H1>Status:  Something weird is " .
+			  "happening here...$crlf" .
+			  "</H1></CENTER>$crlf" .
+			  "<P>Ok, you seem to have found a bug. " .
+			  "Please tell nobody ;-)$crlf" .
+			  "</P></BODY></HTML>$crlf";
 		return;
 	}
 
 	# Now tell the client where to look for the graphics fsc2 currently
-	# displays - only PNG format is supported for legal reasons that I
-	# am not inclined to try to even understand
+	# displays - only PNG amd JPEG format is supported (but not GIF, for
+	# legal reasons that I am not inclined to even try to understand)
 
-	if ( $state =~ /^[1-3]$/o and $has_pnmtopng and $has_png ) {
+	if ( $f->{ png } and $has_pnmtopng ) {
+		$ext = "png";
+	} elsif ( $f->{ jpeg } and $has_ppmtojpeg ) {
+		$ext = "jpeg";
+	}
+
+	if ( $state =~ /^[1-3]$/o and defined $ext ) {
 		stdout_lock( 1 ) or exit 1;
 		print STDOUT 'W';
 		1 while defined ( $pic = <STDIN> ) and $state =~ /^$/o;
 		stdout_lock( 0 );
 
-		return unless defined $state;
+		return unless defined $pic;
 
-		print &uq( <<'HTTP' ) if $pic =~ /^[1-3]$/o;
-:			<H2>Display window:</H2>
-:			<P><CENTER><IMG SRC="fsc2_a.png"
-:			ALT="Display window"></CENTER></P>
-HTTP
+		print "<H2>Display window:</H2>" .
+			  "<P><CENTER><IMG SRC=\"fsc2_a.$ext\"" .
+			  "ALT=\"Display window\"></CENTER></P>$crlf";
 
-		print &uq( <<'HTTP' ) if $pic =~ /^3$/o;
-:			<H2>Cross section window:</H2>
-:			<P><CENTER><IMG SRC="fsc2_b.png"
-:			ALT="Cross section window"></CENTER>
-HTTP
+		print "<H2>Cross section window:</H2>" .
+			  "<P><CENTER><IMG SRC=\"fsc2_b.$ext\"" .
+			  "ALT=\"Cross section window\"></CENTER>$crlf" if $pic =~ /^3$/;
 	}
 
 	# Finally, ask fsc2 for the contents of the error browser and, when we
@@ -303,7 +318,7 @@ HTTP
 
 sub serve_logo {
 
-	my ( $file, $type ) = @_;
+	my ( $file, $ext ) = @_;
 	my $date = rfc_1123_date( );
 	my $edate = rfc_1123_date( 'next_year' );
 	my $fh;
@@ -311,18 +326,16 @@ sub serve_logo {
 
 	open( $fh, $auxdir . $file ) or return not_found( $file );
 
-	print &uq( <<'HTTP' );
-:		HTTP/1.0 200 OK
-:		Date: $date .
-:		Server: fsc2/0.1
-:		Allow: GET
-:		Accept-Ranges: none
-:		Connection: close" .
-:		Expires: $edate
-:		Content-Type: image/$type
-HTTP
-
-	print "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
+	print "HTTP/1.0 200 OK$crlf" .
+		  "Date: $date$crlf" .
+		  "Server: fsc2/0.1$crlf" .
+		  "Allow: GET$crlf" .
+		  "Accept-Ranges: none$crlf" .
+		  "Connection: close$crlf" .
+		  "Expires: $edate$crlf" .
+		  "Content-Type: image/$ext$crlf" .
+		  "Content-Type: image/$ext$crlf" .
+		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
 
 	print <$fh>;
 	close $fh;
@@ -336,7 +349,7 @@ HTTP
 # instead in which case we have to send the "Not available" picture.
 
 sub serve_pics {
-	my $which = shift;
+	my ( $which, $ext ) = @_;
 	my $state;
 	my $date = rfc_1123_date( );
 	my $fh;
@@ -363,28 +376,34 @@ sub serve_pics {
 	# requested graphic in ppm format, which we then have to convert to png
 	# before passing it on to the browser
 
-	if ( $state !~ /^0$/o and $has_pnmtopng ) {
+	if ( $state !~ /^0$/o and
+		 ( ( $ext eq "png" and $has_pnmtopng ) or
+		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
 		$file = <STDIN>;
 		chomp $file;
-		@data = `pnmtopng -compression 9 $file`;
+		if ( $ext eq "png" ) {
+			@data = `pnmtopng -compression 9 $file`;
+		} else {
+			@data = `ppmtojpeg $file`;
+		}
 	} elsif ( $state =~ /^0$/o ) {
-		$file = $auxdir . "na.png";
-		open( $fh, $file ) or return not_found( "fsc2_" . $which . ".png" );
+		$file = $auxdir . "na.$ext";
+		open( $fh, $file ) or return not_found( "fsc2_" . $which . $ext );
 	}
 	stdout_lock( 0 );
 
-	print &uq( <<'HTTP' );
-:		HTTP/1.0 200 OK
-:		Date: $date
-:		Server: fsc2/0.1
-:		Allow: GET
-:		Accept-Ranges: none
-:		Connection: close
-:		Expires: $date
-:		Content-Type: image/png
-HTTP
+	print "HTTP/1.0 200 OK$crlf" .
+		  "Date: $date$crlf" .
+		  "Server: fsc2/0.1$crlf" .
+		  "Allow: GET$crlf" .
+		  "Accept-Ranges: none$crlf" .
+		  "Connection: close$crlf" .
+		  "Expires: $date$crlf" .
+		  "Content-Type: image/$ext$crlf";
 
-	if ( $state !~ /^0$/o and $has_pnmtopng ) {
+	if ( $state !~ /^0$/o and
+		 ( ( $ext eq "png" and $has_pnmtopng ) or
+		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
 		print "Content-Length: " . len( @data ) . "$crlf$crlf";
 		print @data;
 		unlink $file;
@@ -403,23 +422,21 @@ sub not_found {
 	my $file = shift;
 	my $date = rfc_1123_date( );
 
-	print &uq( <<'HTTP' );
-:		HTTP/1.0 404 Not Found
-:		Date: $date
-:		Server: fsc2/0.1
-:		Connection: close
-:		Content-Type: text/html; charset=iso-8859-1
-:
-:		<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
-:		<HTML><HEAD>
-:		<TITLE>404 Not Found</TITLE>
-:		</HEAD><BODY>
-:		<HR>
-:		<H1>Not Found</H1>
-:		<P>The requested URL ($file) was not found.</P>
-:		<HR>
-:		</BODY></HTML>
-HTTP
+	print "HTTP/1.0 404 Not Found$crlf" .
+		  "Date: $date$crlf" .
+		  "Server: fsc2/0.1$crlf" .
+		  "Connection: close$crlf" .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "$crlf" .
+		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		  "<HTML><HEAD>$crlf" .
+		  "<TITLE>404 Not Found</TITLE>$crlf" .
+		  "</HEAD><BODY>$crlf" .
+		  "<HR>$crlf" .
+		  "<H1>Not Found</H1>$crlf" .
+		  "<P>The requested URL ($file) was not found.</P>$crlf" .
+		  "<HR>$crlf" .
+		  "</BODY></HTML>$crlf";
 }
 
 
@@ -431,20 +448,18 @@ sub illegal_request {
 	my $date = rfc_1123_date( );
 
 
-	print &uq( <<'HTTP' );
-:		HTTP/1.0 400 Bad Request
-:		Date: $date
-:		Server: fsc2/0.1
-:		Connection: close
-:		Content-Type: text/html; charset=iso-8859-1
-:
-:		<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 4.0//EN">
-:		<HTML><HEAD>
-:		<TITLE>400 Bad Request</TITLE>
-:		</HEAD><BODY>
-:		<HR>
-:		<H1>Bad Request</H1>
-HTTP
+	print "HTTP/1.0 400 Bad Request$crlf" .
+		  "Date: $date$crlf" .
+		  "Server: fsc2/0.1$crlf" .
+		  "Connection: close$crlf" .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "$crlf" .
+		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
+		  "<HTML><HEAD>$crlf" .
+		  "<TITLE>400 Bad Request</TITLE>$crlf" .
+		  "</HEAD><BODY>$crlf" .
+		  "<HR>$crlf" .
+		  "<H1>Bad Request</H1>$crlf";
 
 	if ( $type !~ /^GET$/o ) {
 		print "<P>This simple server only supports GET requests.</P>$crlf";
@@ -482,18 +497,6 @@ sub stdout_lock {
 
 
 #########################################################
-# Strips leading colon and tabs from the lines of string passed to it (the
-# string may contain newlines) and replaces all newlines by "\r\n" (as RFC
-# 2616 requires for strings send to a browser).
-
-sub uq {
-	my $s = shift;
-	$s =~ s/^:\t*(.*)\n/$1$crlf/gm;
-	$s;
-}
-
-
-#########################################################
 # Returns the total length (in bytes) of an array
 
 sub len {
@@ -501,4 +504,5 @@ sub len {
 
 	my $l = 0;
 	$l += length for @_;
+	return $l;
 }
