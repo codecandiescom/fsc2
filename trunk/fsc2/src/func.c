@@ -1134,6 +1134,9 @@ Var *f_wait( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
+	if ( TEST_RUN )
+		return;
+
 	if ( v->type == INT_VAR )
 		how_long = v->val.lval;
 	else

@@ -743,7 +743,7 @@ void magnet_sweep( int dir )
 
 	/* <PARANOIA> check for unreasonable input </PARANOIA> */
 
-	assert( dir != 1 && dir != -1 );
+	assert( dir == 1 || dir == -1 );
 
 	/* Problem: while there can be arbitrary sweep steps requested by the
 	   user, the real sweep steps are discreet. This might sum up to a
