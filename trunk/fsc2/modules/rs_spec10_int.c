@@ -105,6 +105,7 @@ static void rs_spec10_ccd_init( void )
 	uns16 acc;
 	uns16 num_pix;
 	uns32 clear_mode;
+	uns32 shutter_open_mode;
 	uns32 exp_res_count;
 	uns32 exp_res_index;
 	uns32 *exp_res_array;
@@ -146,9 +147,9 @@ static void rs_spec10_ccd_init( void )
 		THROW( EXCEPTION );
 	}
 
-	/* If the clear mode can be set use CLEAR_PRE_EXPOSURE mode if (since we
-	   don't have a shutter and time between exposures is probably rather long
-	   this seems to be the most reasonable mode) */
+	/* If the clear mode can be set use CLEAR_PRE_EXPOSURE mode if, this looks
+	   like the most reasonable mode for both cameras with and without a
+	   shutter */
 
 	if ( rs_spec10_param_access( PARAM_CLEAR_MODE, &acc ) &&
 		 ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
@@ -156,6 +157,18 @@ static void rs_spec10_ccd_init( void )
 		clear_mode = CLEAR_PRE_EXPOSURE;
 		if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE, 
 							 ( void_ptr ) &clear_mode ) )
+			rs_spec10_error_handling( );
+	}
+
+	/* If the camera has a shutter set open mode to OPEN_PRE_EXPOSURE, i.e.
+	   the normal default mode */
+
+	if ( rs_spec10_param_access( PARAM_SHTR_OPEN_MODE, &acc ) &&
+		 ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
+	{
+		shutter_open_mode = OPEN_PRE_EXPOSURE;
+		if ( ! pl_set_param( rs_spec10->handle, PARAM_SHTR_OPEN_MODE, 
+							 ( void_ptr ) &shutter_open_mode ) )
 			rs_spec10_error_handling( );
 	}
 
