@@ -1141,14 +1141,14 @@ void run_help( FL_OBJECT *a, long b )
 static void start_help_browser( void )
 {
 	char *browser;
-	char *av[ 4 ] = { NULL, NULL, NULL, NULL };
+	char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 
 
 	/* Try to figure out which browser to use... */
 
 	browser = getenv( "BROWSER" );
 
-	if ( browser && ! strcasecmp( browser, "Opera" ) )
+	if ( browser && ! strcasecmp( browser, "opera" ) )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
@@ -1156,6 +1156,32 @@ static void start_help_browser( void )
 		strcpy( av[ 2 ], "file:/" );
 		strcat( av[ 2 ], docdir );
 		strcat( av[ 2 ], "fsc2.html" );
+	}
+	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
+	{
+		av[ 0 ] = T_strdup( "konqueror" );
+		av[ 1 ] = get_string( 15 + strlen( docdir ) );
+		strcpy( av[ 1 ], "file:/" );
+		strcat( av[ 1 ], docdir );
+		strcat( av[ 1 ], "fsc2.html" );
+	}
+	else if ( browser && ( ! strcasecmp( browser, "lynx" ) ||
+						   ! strcasecmp( browser, "w3m" ) ) )
+	{
+		av[ 0 ] = T_strdup( "xterm" );
+		av[ 1 ] = T_strdup( "-e" );
+		av[ 2 ] = T_strdup( browser );
+		av[ 3 ] = get_string( 9 + strlen( docdir ) );
+		strcpy( av[ 3 ], docdir );
+		strcat( av[ 3 ], "fsc2.html" );
+	}
+	else if ( browser && strcasecmp( browser, "netscape" ) )
+	{
+		av[ 0 ] = T_strdup( browser );
+		av[ 1 ] = get_string( 15 + strlen( docdir ) );
+		strcpy( av[ 1 ], "file:/" );
+		strcat( av[ 1 ], docdir );
+		strcat( av[ 1 ], "fsc2.html" );
 	}
 	else
 	{
