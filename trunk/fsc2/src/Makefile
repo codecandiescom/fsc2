@@ -41,7 +41,7 @@ SLFLAGS        = -shared -fpic
 .PHONY:    all modules res gpib clean distclean
 
 
-# Default target - make only GPIB_LIBRARY is set correctly
+# Default target - make only if GPIB_LIBRARY is set correctly
 
 all:
 	@if [ -n "$(GPIB_LIBRARY)"                                  \
@@ -133,14 +133,12 @@ gpib:
 	fi;                                                         \
 	if [ "$(GPIB_LIBRARY)" = "ni" ]; then                       \
 		if [ ! -e gpib_lexer.l                                  \
-	          -o gpib_lexer.ll -nt gpib_lexer.l                 \
-	          -o gpib_lexer.ll -ed gpib_lexer.l ]; then         \
+	          -o gpib_lexer.ll -nt gpib_lexer.l ]; then         \
 			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
 			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
 		fi;                                                     \
 		if [ ! -e gpib_lexer.l                                  \
-	    	  -o gpib_lexer.ll -nt gpib_lexer.l                 \
-	      	  -o gpib_lexer.ll -ed gpib_lexer.l ]; then         \
+	    	  -o gpib_lexer.ll -nt gpib_lexer.l ]; then         \
 			$(RM) $(RMFLAGS) gpib_lexer.l;                      \
 			$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;        \
 		fi;                                                     \
