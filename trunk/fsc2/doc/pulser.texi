@@ -536,10 +536,10 @@ Microwave pulse           |                 |
 
 
 When the program does its tests it will always check if the distances
-between the pulses is large enough to allow setting the phase pulses. If
-the pulse distances get very small it may drop the grace period but the
-phase switch delay will always be there (or the program will abort with
-an error message).
+between the pulses are large enough to allow setting the phase
+pulses. If the pulse distances get very small it may drop the grace
+period but the phase switch delay will always be there (or the program
+will abort with an error message).
 
 
 @c ########################################################
