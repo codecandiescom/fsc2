@@ -22,7 +22,7 @@ typedef  unsigned char  bool;
 
 /* Define the default time base (in ns) to be used in the program */
 
-#define DEFAULT_TIME_BASE 1
+#define DEFAULT_TIME_UNIT 1
 
 
 

@@ -56,7 +56,8 @@ char *Fname = NULL;
 Compilation compilation;
 
 
-long Default_Time_Base = DEFAULT_TIME_BASE;
+long Time_Unit = DEFAULT_TIME_UNIT;
+long Time_Base = DEFAULT_TIME_UNIT;
 
 Var *var_list = NULL;
 Var *Var_Stack = NULL;
@@ -76,7 +77,8 @@ extern long Lc;
 extern char *Fname;
 extern Compilation compilation;
 
-extern long Default_Time_Base;
+extern long Time_Unit;
+extern long Time_Base;
 
 extern Var *var_list;
 extern Var *Var_Stack;
