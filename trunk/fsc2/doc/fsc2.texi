@@ -6,7 +6,7 @@
 @c %**start of header
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate June 17, 2000
+@set lastupdate August 3, 2000
 @iftex
 @afourpaper
 @end iftex
