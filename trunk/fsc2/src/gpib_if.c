@@ -21,7 +21,7 @@
 
 
 #define SRQ      0x40    /* SRQ bit in device status register */
-#define TIMEOUT  T10s    /* GPIB timeout period set at initialisation */
+#define TIMEOUT  T1s     /* GPIB timeout period set at initialisation */
 
 
 #define ON  1
