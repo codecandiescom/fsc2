@@ -597,12 +597,15 @@ bool tds754a_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Get the channels sensitivity */
 
-	tds754a_get_sens( channel );
-	tds754a.is_sens[ channel ] = SET;
+	if ( channel >= 0 && channel <= TDS754A_CH4 )
+	{
+		tds754a_get_sens( channel );
+		tds754a.is_sens[ channel ] = SET;
+	}
 
 	/* check if channel is already displayed */
 
@@ -634,7 +637,7 @@ double tds754a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -733,7 +736,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -833,12 +836,13 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= 0 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	if ( ! tds754a.is_sens[ channel ] || ! tds754a.lock_state )
+	if ( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 &&
+		 ( ! tds754a.is_sens[ channel ] || ! tds754a.lock_state ) )
 	{
 		tds754a_get_sens( channel );
 		tds754a.is_sens[ channel ] = SET;
@@ -940,7 +944,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS754A_AUX );
+	assert( channel >= TDS754A_CH1 && channel < TDS754A_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -1044,6 +1048,18 @@ void tds754a_free_running( void )
 bool tds754a_lock_state( bool lock )
 {
 	char cmd[ 100 ];
+	int channel;
+
+
+	/* If we switch from unlocked to locked state we need to find out the
+	   current sensitiviy settings */
+
+	if ( ! tds754a.lock_state && lock )
+		for ( channel = TDS754A_CH1; channel <= TDS754A_CH4; channel++ )
+		{
+			tds754a_get_sens( channel );
+			tds754a.is_sens[ channel ] = SET;
+		}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )

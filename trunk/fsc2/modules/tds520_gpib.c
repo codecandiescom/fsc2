@@ -554,12 +554,15 @@ bool tds520_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS520_AUX1 );
+	assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
 
 	/* Get the channels sensitivity */
 
-	tds520_get_sens( channel );
-	tds520.is_sens[ channel ] = SET;
+	if ( channel >= TDS520_CH1 && channel <= TDS520_CH2 )
+	{
+		tds520_get_sens( channel );
+		tds520.is_sens[ channel ] = SET;
+	}
 
 	/* Check if channel is already displayed */
 
@@ -591,7 +594,7 @@ double tds520_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
+	assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -717,7 +720,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= 0 && channel < TDS520_AUX1 );
+	assert( channel >= TDS520_CH1 && channel < TDS520_AUX1 );
 
 	/* If asked to simulate using the cursors (as may be used with the newer
 	   oszilloscopes) by setting the cursors to the start and end position
@@ -736,7 +739,8 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	if ( ! tds520.is_sens[ channel ] || ! tds520.lock_state )
+	if ( channel >= TDS520_CH1 && channel <= TDS520_CH2 &&
+		 ( ! tds520.is_sens[ channel ] || ! tds520.lock_state ) )
 	{
 		tds520_get_sens( channel );
 		tds520.is_sens[ channel ] = SET;
@@ -884,6 +888,18 @@ void tds520_free_running( void )
 bool tds520_lock_state( bool lock )
 {
 	char cmd[ 100 ];
+	int channel;
+
+
+	/* If we switch from unlocked to locked state we need to find out the
+	   current sensitiviy settings */
+
+	if ( ! tds520.lock_state && lock )
+		for ( channel = TDS520_CH1; channel <= TDS520_CH2; channel++ )
+		{
+			tds520_get_sens( channel );
+			tds520.is_sens[ channel ] = SET;
+		}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )

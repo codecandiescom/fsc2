@@ -592,12 +592,15 @@ bool tds520a_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
 
 	/* Get the channels sensitivity */
 
-	tds520a_get_sens( channel );
-	tds520a.sens[ channel ] = SET;
+	if ( channel >= TDS520A_CH1 && channel <= TDS520A_CH2 )
+	{
+		tds520a_get_sens( channel );
+		tds520a.sens[ channel ] = SET;
+	}
 
 	/* Check if channel is already displayed */
 
@@ -629,7 +632,7 @@ double tds520a_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520A_CH1 && channel < TDS520A_CH2 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -701,7 +704,7 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds520a.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
 		tds520a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -802,12 +805,13 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	if ( ! tds520a.is_sens[ channel ] || ! tds520a.lock_state )
+	if ( channel >= TDS520A_CH1 && channel <= TDS520A_CH2 &&
+		 ( ! tds520a.is_sens[ channel ] || ! tds520a.lock_state ) )
 	{
 		tds520a_get_sens( channel );
 		tds520a.is_sens[ channel ] = SET;
@@ -909,7 +913,7 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds520a.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
 		tds520a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS520A_AUX1 );
+	assert( channel >= TDS520A_CH1 && channel < TDS520A_AUX1 );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -1000,6 +1004,18 @@ void tds520a_free_running( void )
 bool tds520a_lock_state( bool lock )
 {
 	char cmd[ 100 ];
+	int channel;
+
+
+	/* If we switch from unlocked to locked state we need to find out the
+	   current sensitiviy settings */
+
+	if ( ! tds520a.lock_state && lock )
+		for ( channel = TDS520A_CH1; channel <= TDS520A_CH2; channel++ )
+		{
+			tds520a_get_sens( channel );
+			tds520a.is_sens[ channel ] = SET;
+		}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )

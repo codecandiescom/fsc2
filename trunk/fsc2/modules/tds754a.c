@@ -87,8 +87,13 @@ int tds754a_init_hook( void )
 	tds754a.meas_source = TDS754A_UNDEF;
 	tds754a.lock_state  = SET;
 
-	for ( i = TDS754A_CH1; i < MAX_CHANNELS; i++ )
+	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
 		tds754a.is_sens[ i ] = UNSET;
+	for ( i = TDS754A_MATH1; i <= TDS754A_REF4; i++ )
+	{
+		tds754a.is_sens[ i ] = SET;
+		tds754a.sens[ i ] = 1.0;
+	}
 
 	return 1;
 }

@@ -88,8 +88,13 @@ int tds744a_init_hook( void )
 	tds744a.meas_source = TDS744A_UNDEF;
 	tds744a.lock_state  = SET;
 
-	for ( i = TDS744A_CH1; i < MAX_CHANNELS; i++ )
+	for ( i = TDS744A_CH1; i <= TDS744A_CH4; i++ )
 		tds744a.is_sens[ i ] = UNSET;
+	for ( i = TDS744A_MATH1; i <= TDS744A_REF4; i++ )
+	{
+		tds744a.is_sens[ i ] = SET;
+		tds744a.sens[ i ] = 1.0;
+	}
 
 	return 1;
 }

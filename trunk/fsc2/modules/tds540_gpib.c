@@ -595,12 +595,15 @@ bool tds540_display_channel( int channel )
     long length = 10;
 
 
-	assert( channel >= 0 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
 
 	/* Get the channels sensitivity */
 
-	tds540_get_sens( channel );
-	tds540.is_sens[ channel ] = SET;
+	if ( channel >= TDS540_CH1 && channel <= TDS540_CH4 )
+	{
+		tds540_get_sens( channel );
+		tds540.is_sens[ channel ] = SET;
+	}
 
 	/* check if channel is already displayed */
 
@@ -632,7 +635,7 @@ double tds540_get_sens( int channel )
     long length = 30;
 
 
-	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel <= TDS540_CH4 );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
 	if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -706,7 +709,7 @@ double tds540_get_area( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds540.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
 		tds540_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -806,12 +809,13 @@ bool tds540_get_curve( int channel, WINDOW *w, double **data, long *length,
 	long len1, len2;
 
 
-	assert( channel >= 0 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	if ( ! tds540.is_sens[ channel ] || ! tds540.lock_state )
+	if ( channel >= TDS540_CH1 && channel <= TDS540_CH4 &&
+		 ( ! tds540.is_sens[ channel ] || ! tds540.lock_state ) )
 	{
 		tds540_get_sens( channel );
 		tds540.is_sens[ channel ] = SET;
@@ -913,7 +917,7 @@ double tds540_get_amplitude( int channel, WINDOW *w, bool use_cursor )
     if ( gpib_write( tds540.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
 		tds540_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS540_AUX );
+	assert( channel >= TDS540_CH1 && channel < TDS540_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
@@ -1004,7 +1008,18 @@ void tds540_free_running( void )
 bool tds540_lock_state( bool lock )
 {
 	char cmd[ 100 ];
+	int channel;
 
+
+	/* If we switch from unlocked to locked state we need to find out the
+	   current sensitiviy settings */
+
+	if ( ! tds540.lock_state && lock )
+		for ( channel = TDS540_CH1; channel <= TDS540_CH4; channel++ )
+		{
+			tds540_get_sens( channel );
+			tds540.is_sens[ channel ] = SET;
+		}
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
 	if ( gpib_write( tds540.device, cmd, strlen( cmd ) ) == FAILURE )

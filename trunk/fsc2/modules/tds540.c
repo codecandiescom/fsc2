@@ -82,8 +82,13 @@ int tds540_init_hook( void )
 	tds540.meas_source = TDS540_UNDEF;
 	tds540.lock_state  = SET;
 
-	for ( i = TDS540_CH1; i < MAX_CHANNELS; i++ )
+	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
 		tds540.is_sens[ i ] = UNSET;
+	for ( i = TDS540_MATH1; i <= TDS540_REF4; i++ )
+	{
+		tds540.is_sens[ i ] = SET;
+		tds540.sens[ i ] = 1.0;
+	}
 
 	return 1;
 }
