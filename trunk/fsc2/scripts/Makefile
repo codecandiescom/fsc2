@@ -16,7 +16,7 @@ install: $(scripts)
 
 
 install_them:
-	for file in $list; do \
+	for file in $(scripts); do \
 		install -m 755 -o fsc2 -g fsc2 \
 			$$file $(bindir)/$${file%.$(shell hostname -f)}; \
 	done
