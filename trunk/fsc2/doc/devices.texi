@@ -3312,7 +3312,6 @@ daq_ai_acq_setup( Num_Scans, "TRIGGER_START_CONV", S_start,
 
 daq_ai_acq_setup( Num_Scans, "TRIGGER_OUT", t_delay,
                   t_scan [ , t_conv ] );
-                  
 @end example
 The symbol @code{Num_Scans} stands for the number of scans to be done,
 @code{S_start} for the source of the trigger starting the acquisition,
