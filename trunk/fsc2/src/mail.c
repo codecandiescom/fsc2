@@ -76,9 +76,10 @@ static unsigned short get_ushort( const unsigned char *p );
 /* that relies on the availability of a working MTA being available   */
 /* on the machine. The other version tries to do everything required  */
 /* with as little external help as possible. The function is also     */
-/* written in a way *not* to use malloc() etc. because it may be      */
-/* called in situations where we got a segmentation fault due to      */
-/* memory problems and still want to be able to send out a mail.      */
+/* written in a way *not* to use dynamically allocated memory etc.    */
+/* because it may be called in situations where we got a segmentation */
+/* fault due to memory problems and still want to be able to send out */
+/* mails without provoking another segmentation fault.                */
 /*--------------------------------------------------------------------*/
 
 #if defined MAIL_PROGRAM
@@ -381,9 +382,10 @@ static int open_mail_socket( const char *remote, const char *local )
 
 	/* We can't simply connect to the remote host but must first figure
 	   out which is the machine that takes care of mail for the domain
-	   and then send the mail to this machine (there can be sseveral). */
+	   and then send the mail to this machine (there can be several). */
 
-	while ( ( host = get_mail_server( remote, local ) ) != NULL )
+	for ( host = get_mail_server( remote, local ); host != NULL;
+		  host = get_mail_server( NULL, local ) )
 	{
 		memset( &serv_addr, 0, sizeof( serv_addr ) );
 		serv_addr.sin_family = AF_INET;
@@ -398,10 +400,7 @@ static int open_mail_socket( const char *remote, const char *local )
 		
 		if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
 					  sizeof( serv_addr ) ) == 0 )
-		{
-			get_mail_server( NULL, NULL );
 			return sock_fd;
-		}
 	}
 
 	close( sock_fd );
@@ -414,21 +413,21 @@ static int open_mail_socket( const char *remote, const char *local )
 /* the domain passed to the function in 'remote'. To find out we have to  */
 /* query a DNS server and interpret the reply according to RFC 1035 and   */
 /* RFC 974 (and take into account that RFC 1123 tells that, in contrast   */
-/* to what's written in RFC 974, we're not supposed top check for the WKS */
+/* to what's written in RFC 974, we're not supposed to check for the WKS  */
 /* record for the machine anymore but instead simply try to connect to it */
-/* and test what happens.                                                 */
+/* and test what happens).                                                */
 /* The function might be called several times in a row to get another     */
-/* mail-receiving machine if no connection could be made to the machine   */
-/* it was told about. If it returns NULL there's no machine that would    */
-/* accept mail and the calling function is supposed to stop calling it.   */
-/* If the calling function succeeded in connecting to the machines it is  */
-/* supposed to call this function for last time with a NULL pointer in    */   
-/* 'remote' so that the function can set itself up for new queries.       */
+/* mail-receiving machine each time round if no connection could be made  */
+/* to the machine that was returned the last time round. The first time   */
+/* it must be called with the remote machine name as the first argument,  */
+/* while on further invocations for the same remote host the 'remote'     */
+/* argument must be NULL. The function returns NULL if there's no machine */
+/* left that would accept mail, otherwise a pointer to the name of the    */
+/* next machine that should be tried.                                     */
 /*------------------------------------------------------------------------*/
 
 static const char *get_mail_server( const char *remote, const char *local )
 {
-	static bool is_init = UNSET;
 	static char host[ NS_MAXDNAME ];
 	static unsigned char buf[ DNS_MAX_ANSWER_LEN ];
 	static unsigned char *ans_sec;
@@ -438,24 +437,21 @@ static const char *get_mail_server( const char *remote, const char *local )
 	const char *phost;
 
 
-	/* A NULL pointer for remote indicates that the calling function has
-	   successfully connected to one of the machines we were telling it
-	   about and will not call us again for more mail-exchangers. */
+	/* If 'remote' isn't NULL this is a query for a new machine and we have
+	   to ask the DNS server and initialize some internal variables. Otherwise
+	   it's a query for the next machine prepared to accept mail for the
+	   domain that has been passed to the function already in a previous
+	   invocation. */
 
-	if ( remote == NULL )
+	if ( remote != NULL )
 	{
 		rrs_left = 0;
-		is_init = UNSET;
-		return NULL;
-	}
 
-	/* If the DNS server hasn't been queried for the MX records yet do it
-	   now and check the headers and the qestion section of the reply.
-	   If necessary also find the canoncial name of the host we're looking
-	   for. */
+		/* The DNS server hasn't been queried for the MX records yet. So we
+		   do so now and check the headers and the qestion section of the
+		   reply. If necessary also find the canoncial name of the host
+		   we're looking for. */
 
-	if ( ! is_init )
-	{
 		strcpy( host, remote );
 
 	reget_mx_rr:
@@ -476,8 +472,8 @@ static const char *get_mail_server( const char *remote, const char *local )
 												   host, ns_t_mx ) ) == NULL )
 			return NULL;
 
-		/* Check that the answer didn't contain a CNAME RR for our host.
-		   Otherwise repeat the query with the canonical name of the host. */
+		/* Check that the answer didn't contain a CNAME RR for the remote
+		   host. Otherwise repeat the query with the canonical name. */
 
 		switch ( check_cname_rr( buf, len, ans_sec, host, sec_entries ) )
 		{
@@ -488,35 +484,26 @@ static const char *get_mail_server( const char *remote, const char *local )
 				goto reget_mx_rr;
 		}
 
-		is_init = SET;
-		rrs_left = sec_entries[ ANCOUNT ];
-
 		/* If there aren't any MX RRs in the answer section all we can try
 		   is to talk with the host directly. */
 
-		if ( rrs_left == 0 )
+		if ( sec_entries[ ANCOUNT ] == 0 )
 			return host;
 
-		/* We still have to check if the host itseld is in the list and
+		/* We still have to check if the host itself is in the list and
 		   weed out all hosts that have the same or lower priority than
-		   it to avoid mail loops. If we end up with no hosts left we
-		   can't send mail. */
+		   it in this case to avoid loops. If we end up with no hosts left
+		   we can't send mail. */
 
-		if ( ( rrs_left = weed_out( buf, len, ans_sec, rrs_left, local ) )
-			 <= 0 )
-		{
-			is_init = UNSET;
+		if ( ( rrs_left = weed_out( buf, len, ans_sec,
+									sec_entries[ ANCOUNT ], local ) ) <= 0 )
 			return NULL;
-		}
 	}
 
-	/* If there aren't any MX RRs left do a reset */
+	/* If there aren't any MX RRs left return NULL */
 
-	if ( rrs_left == 0 )
-	{
-		is_init = UNSET;
+	if ( rrs_left <= 0 )
 		return NULL;
-	}
 
 	/* Otherwise return the name of the next host with the highest
 	   priority */
@@ -525,9 +512,11 @@ static const char *get_mail_server( const char *remote, const char *local )
 		 == NULL )
 	{
 		rrs_left = 0;
-		is_init = UNSET;
 		return NULL;
 	}
+
+	/* Ok, got a new mail exchanger, decrement the number of exchangers
+	   left and return a pointer to its name */
 
 	rrs_left--;
 	return phost;
@@ -555,11 +544,11 @@ static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
 	int i;
 
 
-	/* Skip the ID field */
+	/* Skip the ID field of the reply */
 
 	cur_pos += 2;
 
-	/* Get the field with information about the result of the query */
+	/* Get the field with information about the success of the query */
 
 	rpq = get_ushort( cur_pos );
 	cur_pos += 2;
@@ -609,14 +598,14 @@ static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
 
 		/* Find the end of the host name, in the question section it's
 		   always a sequence of labels, consisting of a length byte
-		   followed that number of bytes. It's terminated by a zero byte. */
+		   followed that number of bytes and terminated by a zero byte. */
 
 		while ( *cur_pos != '\0' )
 			cur_pos += *cur_pos + 1;
 
 		cur_pos++;
 
-		/* Get the QTYPE field and check it */
+		/* Get the QTYPE field and check its type */
 
 		rpq = get_ushort( cur_pos );
 		cur_pos += 2;
@@ -633,7 +622,7 @@ static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
 			return NULL;
 	}
 
-	return cur_pos;
+	return cur_pos;           /* return pointer to start of answer section */
 }
 
 
@@ -660,7 +649,7 @@ static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
 			 return -1;
 
 		/* If the RR isn't a CNAME entry or is not of class Internet or if
-		   it's for differenrt host skip the RR and ceck the next one */
+		   it's for different host skip it and check the next one */
 
 		if ( get_ushort( ans_sec ) != ns_t_cname ||
 			 get_ushort( ans_sec + 2 ) != ns_c_in ||
@@ -687,7 +676,7 @@ static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
 /*--------------------------------------------------------------------*/
 /* Loops over all entries in the answer section, checking if the host */
 /* itself is listed as being prepared to accept mail, and if it does  */
-/* sets the priority of all hosts with equal or lower priority to     */
+/* sets the priority of all hosts with equal or lower priority to the */
 /* lowest possible priority. All RRs with that low a priority will    */
 /* never be used.                                                     */
 /*--------------------------------------------------------------------*/
@@ -827,8 +816,8 @@ static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
 	while ( 1 )
 	{
 		/* Check if we got to the end of the name, this is the case when
-		   we either hit a NUL-character or a pointer (than the top-most
-		   two bits are both set) */
+		   we either hit a NUL-character or a pointer (indicated by the
+		   two top-most bits being both set) */
 
 		if ( **rr == '\0' )
 		{
@@ -842,7 +831,7 @@ static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
 			break;
 		}
 
-		/* Otherwise go to the length byte before the next label */
+		/* Otherwise jump to the length byte of the next label */
 
 		*rr += **rr + 1;
 	}
