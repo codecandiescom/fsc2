@@ -192,9 +192,9 @@ synthesizer_use_table, -1, PREP;      // set attenuation-table to use in sweeps
 synthesizer_att_ref_freq, -1, ALL;    // set frequency the attention setting
                                       // refers to
 synthesizer_modulation, -1, ALL;
-synthesizer_mod_type, -1, EXP;
-synthesizer_mod_source, -1, EXP;
-synthesizer_mod_ampl, -1, EXP;
+synthesizer_mod_type, -1, ALL;
+synthesizer_mod_source, -1, ALL;
+synthesizer_mod_ampl, -1, ALL;
 
 
 /* Functions exported by the boxcar (EGG4402) */

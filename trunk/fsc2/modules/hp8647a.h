@@ -126,14 +126,12 @@ typedef struct
 #if defined( HP8647A_MAIN )
 
 HP8647A hp8647a;
-bool HP8647A_INIT = UNSET;
 const char *mod_types[ ] =   { "FM", "AM", "PHASE", "OFF" };
 const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 
 #else
 
 extern HP8647A hp8647a;
-extern bool HP8647A_INIT;
 extern const char *mod_types[ ];
 extern const char *mod_sources[ ];
 

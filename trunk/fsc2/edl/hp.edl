@@ -1,28 +1,29 @@
 DEVICES:
 
+hp8672a;
 hp8647a;
-
 
 VARIABLES:
 
 I = 1;
-freq = 5 MHz;
+freq = 2000 MHz;
 dfreq = 0.1 MHz;
 dt;
 
 
 PREPARATIONS:
 
-synthesizer_modulation( "PHASE", "AC", 9.0 );
+synthesizer_modulation#2( "PHASE", "AC", 9.0 );
+synthesizer_modulation( "FM", 1 MHz );
 init_1d( );
 
 
 EXPERIMENT:
 
-print( "# # #\n", synthesizer_mod_type( ), synthesizer_mod_source( ),
-	   synthesizer_mod_ampl( ) );
-
-synthesizer_modulation( "FM", "EXT DC", 900.9 Hz );
+//print( "# # #\n", synthesizer_mod_type( ), synthesizer_mod_source( ),
+//	   synthesizer_mod_ampl( ) );
+print( "# #\n", synthesizer_mod_type( ), synthesizer_mod_ampl( ) );
+//synthesizer_modulation( "FM", "EXT DC", 900.9 Hz );
 
 synthesizer_frequency( freq );
 

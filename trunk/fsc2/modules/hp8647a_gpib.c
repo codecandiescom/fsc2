@@ -57,8 +57,6 @@ bool hp8647a_init( const char *name )
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
-	HP8647A_INIT = SET;
-
 	/* If frequency and attenuation need to be set do it now, otherwise get
 	   frequency and attenuation set at the synthesizer and store it */
 
@@ -119,8 +117,6 @@ bool hp8647a_init( const char *name )
 		if ( hp8647a.mod_ampl_is_set[ i ] )
 			hp8647a_set_mod_ampl( i, hp8647a.mod_ampl[ i ] );
 	}
-
-	HP8647A_INIT = UNSET;
 
 	return OK;
 }
@@ -255,10 +251,7 @@ int hp8647a_set_mod_type( int type )
 	/* The manual is not really clear about this but it looks as if we
 	   have to make sure that only one modulation type is switched on... */
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return type;
-
-	for ( i = 0; i < NUM_MOD_TYPES -  1; i++ )
+	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
 		if ( i == type )
 			continue;
@@ -293,14 +286,6 @@ int hp8647a_get_mod_type( void )
 	long length;
 	int i;
 
-
-	if ( FSC2_MODE == TEST )
-	{
-		if ( hp8647a.mod_type_is_set )
-			return hp8647a.mod_type;
-		else
-			return MOD_TYPE_FM;
-	}
 
 	for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
 	{
@@ -340,9 +325,6 @@ int hp8647a_set_mod_source( int type, int source )
 			   mod_sources[ source ], mod_types[ type ] );
 		source = MOD_SOURCE_AC;
 	}
-
-	if ( ! HP8647A_INIT )
-		return source;
 
 	sprintf( cmd1, "%s:SOUR ", types[ type ] );
 	switch( source )
@@ -396,14 +378,6 @@ int hp8647a_get_mod_source( int type )
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	if ( FSC2_MODE == TEST )
-	{
-		if ( hp8647a.mod_source_is_set[ type ] )
-			return hp8647a.mod_source[ type ];
-		else
-			return MOD_SOURCE_AC;
-	}
-
 	sprintf( cmd, "%s:SOUR?\n", types[ type ] );
 	length = 100;
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -440,62 +414,28 @@ int hp8647a_get_mod_source( int type )
 
 double hp8647a_set_mod_ampl( int type, double ampl )
 {
-	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
 
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
-	if ( ampl < 0.0 )
-	{
-		print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
-			   type != MOD_TYPE_PHASE ? types[ type ] : "phase",
-			   type == MOD_TYPE_FM ? "kHz" :
-			   ( type == MOD_TYPE_AM ? "%%" : "rad" ) );
-		THROW( EXCEPTION );
-	}
-
-	switch ( type )
+	switch ( hp8647a.mod_type )
 	{
 		case MOD_TYPE_FM :
-			if ( ampl > MAX_FM_AMPL )
-			{
-				print( FATAL, "FM modulation amplitude of %.1f kHz is too "
-					   "large, valid range is 0 - %.1f kHz.\n",
-					   ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
-				THROW( EXCEPTION );
-			}
 			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );
 			break;
 
 		case MOD_TYPE_AM :
-			if ( ampl > MAX_AM_AMPL )
-			{
-				print( FATAL, "AM modulation amplitude of %.1f %% is too "
-					   "large, valid range is 0 - %.1f %%.\n",
-					   ampl, ( double ) MAX_AM_AMPL );
-				THROW( EXCEPTION );
-			}
 			sprintf( cmd, "AM:DEPT %.1f PCT\n", ampl );
 			break;
 
 		case MOD_TYPE_PHASE :
-			if ( ampl > MAX_PHASE_AMPL )
-			{
-				print( FATAL, "Phase modulation amplitude of %.1f rad is too "
-					   "large, valid range is 0 - %.1f rad.\n",
-					   ampl, ( double ) MAX_PHASE_AMPL );
-				THROW( EXCEPTION );
-			}
 			sprintf( cmd, "PM:DEV %.*f RAD\n", ampl < 9.95 ? 2 : 1, ampl );
 			break;
 
 		default :                         /* this can never happen... */
 			fsc2_assert( 1 == 0 );
 	}
-
-	if ( FSC2_MODE != EXPERIMENT && ! HP8647A_INIT )
-		return ampl;
 
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
@@ -513,18 +453,9 @@ double hp8647a_get_mod_ampl( int type )
 	const char *cmds[ ] = { "FM:DEV?\n", "AM:DEPT?\n", "PM:DEV?\n" };
 	char buffer[ 100 ];
 	long length = 100;
-	double defaults[ ] = { 1.0e5, 100.0, 10.0 };
 
 
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
-
-	if ( FSC2_MODE == TEST )
-	{
-		if ( hp8647a.mod_ampl_is_set[ type ] )
-			return hp8647a.mod_ampl[ type ];
-		else
-			return defaults[ type ];
-	}
 
 	if ( gpib_write( hp8647a.device, cmds[ type ], strlen( cmds[ type] ) )
 		 == FAILURE ||

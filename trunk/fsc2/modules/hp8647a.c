@@ -138,7 +138,6 @@ int hp8647a_exp_hook( void )
 
 int hp8647a_end_of_exp_hook( void )
 {
-	HP8647A_INIT = UNSET;
 	hp8647a_finished( );
 
 	hp8647a = hp8647a_backup;
@@ -154,8 +153,6 @@ int hp8647a_end_of_exp_hook( void )
 
 void hp8647a_exit_hook( void )
 {
-	HP8647A_INIT = UNSET;
-
 	if ( hp8647a.table_file != NULL )
 		hp8647a.table_file = T_free( hp8647a.table_file );
 
@@ -718,6 +715,8 @@ Var *synthesizer_modulation( Var *v )
 	int what;
 	int type = UNDEFINED,
 		source = UNDEFINED;
+	Var *func_ptr;
+	int acc;
 
 
 	if ( v == NULL )
@@ -756,46 +755,25 @@ Var *synthesizer_modulation( Var *v )
 		v = vars_pop( v );
 	}
 
-	if ( type != UNDEFINED || hp8647a.mod_type_is_set == SET )
+	if ( type != UNDEFINED )
 	{
-		if ( type != UNDEFINED )
-		{
-			hp8647a.mod_type = hp8647a_set_mod_type( type );
-			hp8647a.mod_type_is_set = SET;
-		}
-
-		if ( source != UNDEFINED )
-		{
-			hp8647a.mod_source[ hp8647a.mod_type ] =
-							hp8647a_set_mod_source( hp8647a.mod_type, source );
-			hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
-
-		}
-
-		if ( ampl >= 0.0 )
-		{
-			hp8647a.mod_ampl[ hp8647a.mod_type ] = ampl;
-			hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
-
-			if ( FSC2_MODE == EXPERIMENT )
-				hp8647a_set_mod_ampl( hp8647a.mod_type, ampl );
-		}
+		func_ptr = func_get( "synthesizer_mod_type", &acc );
+		vars_push( INT_VAR, type );
+		func_call( func_ptr );
 	}
-	else
-	{
-		if ( source != UNDEFINED )
-		{
-			print( FATAL, "Can't set modulation source as long as modulation "
-				   "type hasn't been set.\n" );
-			THROW( EXCEPTION );
-		}
 
-		if ( ampl >= 0.0 )
-		{
-			print( FATAL, "Can't set modulation amplitude as long as "
-				   "modulation type hasn't been set.\n" );
-			THROW( EXCEPTION );
-		}
+	if ( ampl >= 0.0 )
+	{
+		func_ptr = func_get( "synthesizer_mod_ampl", &acc );
+		vars_push( FLOAT_VAR, ampl );
+		func_call( func_ptr );
+	}
+
+	if ( source != UNDEFINED )
+	{
+		func_ptr = func_get( "synthesizer_mod_source", &acc );
+		vars_push( INT_VAR, source );
+		func_call( func_ptr );
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -812,22 +790,30 @@ Var *synthesizer_mod_type( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( ! hp8647a.mod_type_is_set )
-			return vars_push( INT_VAR, -1 );
-
-		if ( FSC2_MODE == EXPERIMENT )
-			hp8647a.mod_type = hp8647a_get_mod_type( );
-
-		if ( hp8647a.mod_type != UNDEFINED )
+		switch ( FSC2_MODE )
 		{
-			hp8647a.mod_type_is_set = SET;
-			return vars_push( INT_VAR, hp8647a.mod_type );
+			case PREPARATION :
+				if ( ! hp8647a.mod_type_is_set )
+				{
+					print( FATAL, "Modulation type hasn't been set yet.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case TEST :
+				if ( ! hp8647a.mod_type_is_set )
+				{
+					hp8647a.mod_type = MOD_TYPE_FM;
+					hp8647a.mod_type_is_set = SET;
+				}
+				break;
+
+			case EXPERIMENT :
+				hp8647a.mod_type = hp8647a_get_mod_type( );
 		}
-		else
-		{
-			hp8647a.mod_type_is_set = UNSET;
-			return vars_push( INT_VAR, -1 );
-		}
+
+		return vars_push( INT_VAR, hp8647a.mod_type != UNDEFINED ?
+						  							  hp8647a.mod_type : - 1 );
 	}
 
 	vars_check( v, STR_VAR | INT_VAR );
@@ -891,11 +877,32 @@ Var *synthesizer_mod_source( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( FSC2_MODE == EXPERIMENT )
-			hp8647a.mod_source[ hp8647a.mod_type ] =
-			                        hp8647a_get_mod_source( hp8647a.mod_type );
+		switch ( FSC2_MODE )
+		{
+			case PREPARATION :
+				if ( ! hp8647a.mod_source_is_set[ hp8647a.mod_type ] )
+				{
+					print( FATAL, "Modulation source for %s modulation "
+						   "hasn't been set yet.\n",
+						   mod_types[ hp8647a.mod_type ] );
+					THROW( EXCEPTION );
+				}
+				break;
 
-		hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
+			case TEST :
+				if ( ! hp8647a.mod_source_is_set[ hp8647a.mod_type ] )
+				{
+					hp8647a.mod_source[ hp8647a.mod_type ] = MOD_SOURCE_AC;
+					hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
+				}
+				break;
+
+			case EXPERIMENT :
+				hp8647a.mod_source[ hp8647a.mod_type ] =
+			                        hp8647a_get_mod_source( hp8647a.mod_type );
+				break;
+		}
+
 		return vars_push( INT_VAR, hp8647a.mod_source[ hp8647a.mod_type ] );
 	}
 
@@ -955,7 +962,10 @@ Var *synthesizer_mod_source( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hp8647a.mod_source[ hp8647a.mod_type ] =
+	if ( FSC2_MODE != EXPERIMENT )
+		hp8647a.mod_source[ hp8647a.mod_type ] = source;
+	else
+		hp8647a.mod_source[ hp8647a.mod_type ] =
 							hp8647a_set_mod_source( hp8647a.mod_type, source );
 	hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
 
@@ -969,6 +979,7 @@ Var *synthesizer_mod_source( Var *v )
 Var *synthesizer_mod_ampl( Var *v )
 {
 	double ampl;
+	double defaults[ ] = { 1.0e5, 100.0, 10.0 };
 
 
 	if ( v == NULL )
@@ -987,10 +998,32 @@ Var *synthesizer_mod_ampl( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		hp8647a.mod_ampl[ hp8647a.mod_type ] =
-			                          hp8647a_get_mod_ampl( hp8647a.mod_type );
+		switch ( FSC2_MODE == EXPERIMENT )
+		{
+			case PREPARATION :
+				if ( ! hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] )
+				{
+					print( FATAL, "Modulation amplitude for %s modulation "
+						   "hasn't been set yet.\n",
+						   mod_types[ hp8647a.mod_type ] );
+					THROW( EXCEPTION );
+				}
+				break;
 
-		hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
+			case TEST :
+				if ( ! hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] )
+				{
+					hp8647a.mod_ampl[ hp8647a.mod_type ] =
+												  defaults[ hp8647a.mod_type ];
+					hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
+				}
+				break;
+
+			case EXPERIMENT :
+				hp8647a.mod_ampl[ hp8647a.mod_type ] =
+			                          hp8647a_get_mod_ampl( hp8647a.mod_type );
+				break;
+		}
 
 		return vars_push( FLOAT_VAR, hp8647a.mod_ampl[ hp8647a.mod_type ] );
 	}
@@ -1002,10 +1035,6 @@ Var *synthesizer_mod_ampl( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	ampl = get_double( v, "modulation amplitude" );
-
-	too_many_arguments( v );
-
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{
 		print( FATAL, "Can't set modulation amplitude while modulation is "
@@ -1013,7 +1042,59 @@ Var *synthesizer_mod_ampl( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	hp8647a.mod_ampl[ hp8647a.mod_type ] =
+	ampl = get_double( v, "modulation amplitude" );
+
+	too_many_arguments( v );
+
+	if ( ampl < 0.0 )
+	{
+		print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
+			   mod_types[ hp8647a.mod_type ],
+			   hp8647a.mod_type == MOD_TYPE_FM ? "kHz" :
+						  ( hp8647a.mod_type == MOD_TYPE_AM ? "%%" : "rad" ) );
+		THROW( EXCEPTION );
+	}
+
+	switch ( hp8647a.mod_type )
+	{
+		case MOD_TYPE_FM :
+			if ( ampl > MAX_FM_AMPL )
+			{
+				print( FATAL, "FM modulation amplitude of %.1f kHz is too "
+					   "large, valid range is 0 - %.1f kHz.\n",
+					   ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		case MOD_TYPE_AM :
+			if ( ampl > MAX_AM_AMPL )
+			{
+				print( FATAL, "AM modulation amplitude of %.1f %% is too "
+					   "large, valid range is 0 - %.1f %%.\n",
+					   ampl, ( double ) MAX_AM_AMPL );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		case MOD_TYPE_PHASE :
+			if ( ampl > MAX_PHASE_AMPL )
+			{
+				print( FATAL, "Phase modulation amplitude of %.1f rad is too "
+					   "large, valid range is 0 - %.1f rad.\n",
+					   ampl, ( double ) MAX_PHASE_AMPL );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		default :                         /* this can never happen... */
+			fsc2_assert( 1 == 0 );
+	}
+
+	if ( FSC2_MODE != EXPERIMENT )
+		hp8647a.mod_ampl[ hp8647a.mod_type ] = ampl;
+	else
+		hp8647a.mod_ampl[ hp8647a.mod_type ] =
 		                              hp8647a_get_mod_ampl( hp8647a.mod_type );
 	hp8647a.mod_ampl_is_set[ hp8647a.mod_type ] = SET;
 
