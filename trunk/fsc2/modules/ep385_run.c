@@ -280,8 +280,7 @@ static bool ep385_update_pulses( bool flag )
 				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
 		PULSE_PARAMS *shape_p, *defense_p;
 
-
-		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
+		if ( cd->num_active_pulses > 0 && cs->num_active_pulses > 0 )
 		{
 			shape_p = cs->pulse_params;
 			defense_p = cd->pulse_params + cd->num_active_pulses - 1;
