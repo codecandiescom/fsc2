@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Device Functions, Functions, Modules, EDL, Top
+@node Device Functions, Modules, Built-in Functions, Top
 @chapter Device Functions
 
 @ifinfo
@@ -311,11 +311,8 @@ returned when the @code{EXPAND} button is switched on.
 
 When called with a second argument the corresponding sensitivity is
 set. This value has to be positive. If there is no sensitivity fitting
-the argument the lowest sensitivity is set when the argument is larger
-than the lowest sensitivity. When the argument is smaller than the
-highest sensitivity the highest sensitivity is set. When the argument is
-in between two possible sensitivity settings the nearest sensitivity
-setting is set and a warning is printed. The function will return the
+the argument the sensitivity is set to the nearest available sensitivity
+setting and a warning is printed. The function will return the
 sensitivity that has been set.
 
 For the models SR510 and SR530 a sensitivity 10 times higher than the
@@ -330,18 +327,16 @@ without an argument, i.e. as a query.
 The function queries or sets the time constant of the lock-in
 amplifier. If no argument is passed to the function the current time
 constant is returned. If there's an argument the time constant is set
-accordingly.  The argument has to be positive. If the argument is larger
-than the highest time constant the maximum time constant is set and if
-its smaller than the lowest time constant the smallest possible time
-constant is set. If the value of the argument is in between two possible
-time constant settings the nearest setting is used and a warning is
-printed. The function will return the time constant setting that has
-been set.
+accordingly.  The argument has to be positive. If the there is no time
+constant setting fitting the argument the available nearest setting is
+used and a warning is printed. The function will return the time
+constant setting that has been set.
 
-For models SR510 and SR530 also the POST time constant is set.
+For models SR510 and SR530 also the POST time constant is set to lower
+or equal the time constant.
 
 Before the @code{EXPERIMENT} section this function can't be called
-without an argument, i.e. as a query.
+as a query, i.e without an argument.
 
 @item lockin_phase()
 @findex lockin_phase()
@@ -401,9 +396,12 @@ tds754a
 The function queries (if called with no argument) or sets (if called
 with an argument) the time base setting of the oscilloscope. The time
 base of the oscilloscope can be only set once before the start of the
-@code{EXPERIMENT} section. The admissible range of the time base
-depends on the model, please check the manual. The function can be
-called in query mode only in the @code{EXPERIMENT} section.
+@code{EXPERIMENT} section. The admissible range of the time base depends
+on the model, please check the manual.
+
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has been already called with an argument or in the
+@code{EXPERIMENT} section.
 
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
@@ -415,32 +413,239 @@ section. The argument for the number of averages must be at least 1
 argument is larger than the maximum number of averages the maximum
 number is used instead.
 
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has been already called with an argument or in the
+@code{EXPERIMENT} section.
+
 @item digitizer_trigger_channel()
 @findex digitizer_trigger_channel()
+The function queries or sets the channel of the digitizing oscilloscope
+to be used as trigger input. Possible arguments or return values are,
+depending on the type of the oscilloscope:
+@table @samp
+@item TDS520
+@item TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@item @code{AUX1}, @code{AUX2} or @code{LIN} or, alternatively @code{9},
+@code{10} or @code{11}
+@end itemize
+@item TDS744A
+@item TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@code{0}, @code{1}, @code{2} or @code{3}
+@item @code{AUX} or @code{LIN} or, alternatively, @code{11} or @code{12}
+@end itemize
+@end table
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has been already called with an argument or in the
+@code{EXPERIMENT} section.
 
 @item digitizer_define_window()
 @findex digitizer_define_window()
+The function can be used to define a time window to be used in later
+calls of the functions to measure an area, an amplituide or to fetch a
+curve from the oscilloscope. It needs up to two arguments, the starting
+point of the interval (in seconds) and, optionally, the width of the
+window (also in sconds). If no width argument is passed to the function
+the distance between the cursor pair shown on the oscilloscopes screen
+is going to be used.
+
+The allowed arguments of the function depend on the time base setting of
+the oscilloscope as well as on the pre-trigger setting and the current
+record length. The point in time defined by trigger event corresponds to
+an argument of zero for the starting point of the window. Times before
+the trigger are negative, times after the trigger are positive. If a
+window width is given it has to be positive and the window must fit into
+the time interval measured by the oscilloscope. The easiest way to find
+valid parameters is to position the two vertical cursors at the borders
+of the interval to be measured and directly use the values for the
+starting point and width displayed in the upper right hand corner of the
+oscilloscope.
+
+Because the data measured by the oscilloscope are discreet it is not
+possible to specify arbitrary values for the starting point and the
+window width (they must be dividable by 1/50 of the oscilloscopes time
+base). If the specified values don't fit the requirement a warning is
+printed and the position an width are adjusted to the nearest allowed
+value.
+
+The function returns an integer window ID to be used to reference this
+window in later funtions calls.
+
+This function can only be used in the @code{PREPARATIONS} section of the
+@acronym{EDL} file.
 
 @item digitizer_start_acquisition()
 @findex digitizer_start_acquisition()
+This function starts an acqusistion sequence of the
+oscilloscope. Previously measured curves are discarded and a new data
+are sampled until the requested number of averages has been sampled.
+The function can only be used in the @code{EXPERIMENT} section of the
+@acronym{EDL} file.
 
 @item digitizer_get_area()
 @findex digitizer_get_area()
+The function returns the area under one of the measured curves. It
+expects up to two arguments, the oscilloscopes channel the data are to
+be taken from and, optionally, a window ID as returned by
+@code{digitizer_define_window()} to specify the time interval the area
+is computed from. The channel that can be used depend on the model of
+the digitizer:
+@table @samp
+@item TDS520
+@item TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{2}, @code{3} or @code{4}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item
+@end itemize
+@item TDS744A
+@item TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@code{0}, @code{1}, @code{2} or @code{3}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{4}, @code{5} or @code{6} 
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{7}, @code{8}, @code{9}, or @code{10} 
+@end itemize
+@end table
+Except for the model @code{TDS520}, this function positions the cursors
+at the start and end point of the specified window (or the first and
+last point if no window as been specified) and uses the function
+built into the digitizer to compute the area. For the model @code{TDS520}
+that misses this built-in function the curve in the interval is fetched
+which is than used to compute the area. To give some visual feedback
+also for this model the cursors are moved to the borders of the
+interval.
+
+The function will automatically wait until a still running acquistition
+sequence is finished before measuring the area. 
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} file.
+
 
 @item digitizer_get_area_fast()
 @findex digitizer_get_area_fast()
+This function takes exactly the same arguments as the function
+@code{digitizer_get_area()} and also basically does the same. The only
+difference is that instead of using the function built into the
+digitizer to compute the area the curve in the specified interval is
+fetched and the area is computed from these data. This function can be a
+bit faster because it doesn't set the cursors (which also means that
+there is no visual feedback).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} file.
 
 @item digitizer_get_curve()
 @findex digitizer_get_curve()
+The function fetches a curve from the digitizer. It expects up to two
+arguments, the channel the data are to be fetched from and, optionally,
+a window ID as returned by @code{digitizer_define_window()} to specify
+the time interval. Valid choices of the data channel depend on the model
+of the digitizer:
+@table @samp
+@item TDS520
+@item TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{2}, @code{3} or @code{4}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item
+@end itemize
+@item TDS744A
+@item TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or, alternatively @code{0},
+@code{1}, @code{2} or @code{3}
+or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{4}, @code{5} or @code{6} 
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{7}, @code{8}, @code{9}, or @code{10}
+@end itemize
+@end table
+
+The function positions the cursors at the start and end point of the
+specified window (or the first and last point if no window as been
+specified) to give a visual feedback.
+
+The function will automatically wait until a still running acquistition
+sequence is finished before returning a curve. The data will be returned
+as an array of floating point numbers and it's the users responsibility
+to supply an array for storing the data. Usually, this will we an array
+with an unspecified number of elements.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} file.
 
 @item digitizer_get_curve_fast()
 @findex digitizer_get_curve_fast()
+This function is nearly identical to the function
+@code{digitizer_get_curve()} with the only difference that the cursors
+are not positioned at the start and end point of the curve to be fetched.
 
 @item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
+The function returns the amplitude, i.e.@: the difference between the
+maximum and minimum voltage, from the digitizer. The function takes up
+to two parameters, the channel the data are to be fetched from and, optionally,
+a window ID as returned by @code{digitizer_define_window()} to specify
+the time interval. Valid choices of the data channel depend on the model
+of the digitizer:
+@table @samp
+@item TDS520
+@item TDS520A
+@itemize @bullet
+@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{2}, @code{3} or @code{4}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item
+@end itemize
+@item TDS744A
+@item TDS754A
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or, alternatively @code{0},
+@code{1}, @code{2} or @code{3}
+or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
+@code{4}, @code{5} or @code{6} 
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
+alternatively, @code{7}, @code{8}, @code{9}, or @code{10}
+@end itemize
+@end table
+Except for the model @code{TDS520}, this function positions the cursors
+at the start and end point of the specified window (or the first and
+last point if no window as been specified) and uses the function built
+into the digitizer to compute the amplitude. For the model @code{TDS520}
+that misses this built-in function the curve in the interval is fetched
+which is than used to compute the amplitude. To give some visual
+feedback also for this model the cursors are moved to the borders of the
+interval.
+
+The function will automatically wait until a still running acquistition
+sequence is finished before measuring the amplitude.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@acronym{EDL} file.
 
 @item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()
+This function is nearly identivcal to @code{digitizer_get_amplitude()}
+except that the function to compute amplitudes built into the digitizer
+isn't used and the cursors aren't positioned at the start and end of the
+time interval.
 
 @end table
 
@@ -518,3 +723,5 @@ number is used instead.
 
 @item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
+
+@end table

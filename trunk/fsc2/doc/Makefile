@@ -28,4 +28,4 @@ clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
 
 distclean:
-	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps fsc2.pdf *~
+	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps fsc2.pdf *.info* *~
