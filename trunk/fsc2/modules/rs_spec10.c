@@ -185,7 +185,6 @@ Var *ccd_camera_roi( Var *v )
 {
 	int i;
 	long vroi[ 4 ];
-	long temp;
 
 
 	for ( i = 0; i < 4; i++ )
@@ -705,7 +704,7 @@ Var *ccd_camera_get_image( UNUSED_ARG Var *v )
 Var *ccd_camera_get_spectrum( UNUSED_ARG Var *v )
 {
 	uns16 *frame = NULL;
-	long width;
+	long width, height;
 	unsigned long max_val;
 	Var *nv = NULL;
 	long i, j, k;
@@ -736,6 +735,7 @@ Var *ccd_camera_get_spectrum( UNUSED_ARG Var *v )
 	/* Calculate how many points the image will have after binning */
 
 	width  = ( urc[ X ] - rs_spec10->ccd.roi[ X ] + 1 ) / bin[ X ];
+	height = ( urc[ Y ] - rs_spec10->ccd.roi[ Y ] + 1 );
 
 	/* If the binning area is larger than the ROI reduce the binning sizes
 	   to fit the the ROI sizes (the binning sizes are reset to their original
@@ -802,14 +802,32 @@ Var *ccd_camera_get_spectrum( UNUSED_ARG Var *v )
 
 		if ( FSC2_MODE == TEST ||
 			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
-			for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
-				*dest++ = ( long ) *cf++;
+		{
+			if ( RS_SPEC10_MIRROR == 1 )
+			{
+				cf += width - 1;
+				for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
+					*dest++ = ( long ) *cf--;
+			}
+			else
+				for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
+					*dest++ = ( long ) *cf++;
+		}
 		else
 		{
-			for ( i = 0; i < rs_spec10->ccd.bin[ Y ]; i++ )
-				for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
-					for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
-						*dest += ( long ) *cf++;
+			if ( RS_SPEC10_MIRROR == 1 )
+			{
+				cf += size / sizeof *frame - 1;
+				for ( i = 0; i < height; i++ )
+					for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
+						for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
+							*dest += ( long ) *cf--;
+			}
+			else
+				for ( i = 0; i < height; i++ )
+					for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
+						for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
+							*dest += ( long ) *cf++;
 		}
 
 		TRY_SUCCESS;
