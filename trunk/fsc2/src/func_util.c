@@ -2100,9 +2100,7 @@ Var *f_save( Var *v )
 				fsc2_assert( 1 == 0 );
 				break;
 		}
-
-		v = v->next;
-	} while ( v );
+	} while ( ( v = vars_pop( v ) ) );
 
 	return vars_push( INT_VAR, 1 );
 }

@@ -1141,7 +1141,7 @@ automatic variables may differ from the values they were set to after an
 exception got thrown. This could become a problem in cases where you do
 error handling in a @code{CATCH()} or @code{OTHERWISE} block as in the
 above example and rely on the values of such variables. You can avoid
-this problem if you declare these variables as @code{volatile}. If you
+this problem if you declare these variables as @code{static}. If you
 need to find out more about this problem, have a look at the code in
 @file{exceptions.h} and @file{exceptions.c} and read the documentation
 for the standard C functions @code{setjmp()}
