@@ -10,9 +10,6 @@
 #define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
 #define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
-/*!%!%!%!%*/
-void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type );
-/*!%!%!%!%*/
 
 
 /*---------------------------------------------------------------------------
@@ -26,14 +23,14 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-/*!%!%!%!%*/
+#ifdef MAX_DEBUG
 	if ( ! TEST_RUN )
 		printf( "\nChanges to the channels:\n\n" );
-/*!%!%!%!%*/
+#endif
 
 	dg2020_reorganize_pulses( TEST_RUN );
 
-/*!%!%!%!%*/
+#ifdef MAX_DEBUG
 	{
 		PULSE *p = dg2020_Pulses;
 
@@ -53,16 +50,15 @@ void dg2020_do_update( void )
 		}
 		printf( "\n" );
 	}
-/*!%!%!%!%*/
+#endif
 
 	/* Finally commit all changes */
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 	if ( ! TEST_RUN )
 		dg2020_update_data( );
-*/
-/*!%!%!%!%*/
+#endif
+
 	dg2020.needs_update = UNSET;
 }
 
@@ -848,11 +844,11 @@ void dg2020_clear_padding_block( FUNCTION *f )
 }
 
 
-/*!%!%!%!%*/
+#ifdef MAX_DEBUG
 void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type )
 {
 	printf( "->  %2d: %8ld %8ld   %s\n", ch, start, len,
 			type == 1 ? "HIGH" : "LOW" );
 	fflush( stdout );
 }
-/*!%!%!%!%*/
+#endif

@@ -203,15 +203,13 @@ int dg2020_exp_hook( void )
 
 	/* Initialize the device */
 
-/*!%!%!%!%*/
-/*
+#idndef MAX_DEBU
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "DG2020: Failure to initialize the pulser.\n" );
 		THROW( EXCEPTION );
 	}
-*/
-/*!%!%!%!%*/
+#endif
 
 	/* Now we have to tell the pulser about all the pulses */
 
@@ -225,8 +223,8 @@ int dg2020_exp_hook( void )
 
 	/* Finally tell the pulser to update we're always running in manual
 	   update mode) and than switch the pulser into run mode */
-/*!%!%!%!%*/
-/*
+
+ifndef MAX_DEBUG
 	dg2020_update_data( );
 	if ( ! dg2020_run( START ) )
 	{
@@ -234,8 +232,7 @@ int dg2020_exp_hook( void )
 				"failed.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
-*/
-/*!%!%!%!%*/
+#endif
 
 	return 1;
 }
@@ -249,11 +246,9 @@ int dg2020_end_of_exp_hook( void )
 	if ( ! dg2020_is_needed )
 		return 1;
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
   gpib_local( dg2020.device );
-*/
-/*!%!%!%!%*/
+#endif
 
 	return 1;
 }
@@ -300,16 +295,14 @@ Var *pulser_start( Var *v )
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 	if ( ! TEST_RUN && ! dg2020_run( START ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 				"failed.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
-*/
-/*!%!%!%!%*/
+#endif
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -378,16 +371,14 @@ Var *pulser_shift( Var *v )
 
 			/* stop the pulser */
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 			{
 				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 						"failed.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
-*/
-/*!%!%!%!%*/
+#endif
 		}
 	}
 
@@ -459,16 +450,14 @@ Var *pulser_increment( Var *v )
 			dg2020.needs_update = SET;
 
 			/* stop the pulser */
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 			{
 				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 						"failed.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
-*/
-/*!%!%!%!%*/
+#endif
 		}
 	}
 
@@ -524,14 +513,14 @@ Var *pulser_next_phase( Var *v )
 
 		if ( f->next_phase >= f->num_channels )
 			f->next_phase = 0;
-/*!%!%!%!%*/
-/*
+
+#ifndef MAX_DEBUG
 		if ( ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
 									  f->pod->self ) ||
 			 ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
 									  f->pod2->self ) )
-*/
-/*!%!%!%!%*/
+#endif
+
 			return vars_push( INT_VAR, 0 );
 	}
 
@@ -585,13 +574,11 @@ Var *pulser_phase_reset( Var *v )
 			return vars_push( INT_VAR, 0 );
 		}
 
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 		if ( ! dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self ) ||
 			 ! dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self ) )
 			return vars_push( INT_VAR, 0 );
-*/
-/*!%!%!%!%*/
+#endif
 
 		f->next_phase = 2;
 	}
@@ -655,16 +642,14 @@ Var *pulser_pulse_reset( Var *v )
 			dg2020.needs_update = SET;
 
 			/* stop the pulser */
-/*!%!%!%!%*/
-/*
+#ifndef MAX_DEBUG
 			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 			{
 				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 						"failed.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
-*/
-/*!%!%!%!%*/
+#endif
 		}
 	}
 
