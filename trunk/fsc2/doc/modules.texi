@@ -253,8 +253,8 @@ All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
 e.g.@:
 @example
-    vars_check( var, INT_VAR );
-    vars_check( var->next, FLOAT_VAR );
+  vars_check( var, INT_VAR );
+  vars_check( var->next, FLOAT_VAR );
 @end example
 @noindent
 If @code{vars_check()} finds that everything is ok it simply returns,
@@ -263,7 +263,7 @@ you don't have to take care of error handling. If you're prepared to accept
 integers as well as floating point data, call @code{vars_check()} instead
 with
 @example
-    vars_check( var, INT_VAR | FLOAT_VAR );
+vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
 @noindent
 As you probably already guessed from this the different types of
@@ -319,12 +319,12 @@ very easy: just call the function @code{vars_push()} with the type of
 the return value as the first and the value itself as the second
 argument, e.g.@:
 @example
-    return vars_push( INT_VAR, i_value );
+return vars_push( INT_VAR, i_value );
 @end example
 @noindent
 or
 @example
-    return vars_push( FLOAT_VAR, f_value );
+return vars_push( FLOAT_VAR, f_value );
 @end example
 @noindent
 where @code{i_value} is a @code{long int} and @code{f_value} is supposed
@@ -339,9 +339,9 @@ variable alsoa third argument is needed, the length of the array (a
 @code{long} integer). If you want to return an array with two integer
 arguments you would use for example
 @example
-    data[ 0 ] = 1;
-    data[ 1 ] = 2;
-    return vars_push( INT_ARRAY, data, 2 );
+data[ 0 ] = 1;
+data[ 1 ] = 2;
+return vars_push( INT_ARRAY, data, 2 );
 @end example
 @noindent
 assuming that @code{data} is an array of @code{long int}s.
@@ -399,12 +399,12 @@ If your function does not has to return a value at all there are two ways to
 handle this situation. Either return a pointer to a variable with an arbitrary
 value. e.g.@: write
 @example
-    return vars_push( INT_VAR, 0 );
+return vars_push( INT_VAR, 0 );
 @end example
 @noindent
 or simply return a @code{NULL} pointer, i.e.@:
 @example
-    return NULL;
+return NULL;
 @end example
 
 
@@ -415,12 +415,12 @@ are stored in an array of integers called @code{data} which has
 @code{len} elements (where @code{len} is a @code{long}). Now all you've
 got to do is call the function @code{vars_push()} as
 @example
-    Var *ret_var;
+Var *ret_var;
 
-    ...
-    ret = vars_push( INT_ARR, data, len );
-    ...
-    return ret_var;
+...
+ret = vars_push( INT_ARR, data, len );
+...
+return ret_var;
 @end example
 @noindent
 Actually, at some point of your function you may have allocated memory
@@ -554,12 +554,12 @@ words @code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
 if the new device is named `ABC123' and thus the module is `abc123'
 these functions are (together with the parameters):
 @example
-    int abc123_init_hook( void )
-    int abc123_test_hook( void )
-    int abc123_end_of_test_hook( void )
-    int abc123_exp_hook( void )
-    int abc123_end_of_exp_hook( void )
-    void abc123_exit_hook( void )
+int abc123_init_hook( void )
+int abc123_test_hook( void )
+int abc123_end_of_test_hook( void )
+int abc123_exp_hook( void )
+int abc123_end_of_exp_hook( void )
+void abc123_exit_hook( void )
 @end example
 @noindent
 The loader will test if these functions exist and if they do they will
@@ -625,14 +625,14 @@ init hook function if the hardware interface for the device controlled
 by the module is the GPIB bus. Thus, if the GPIB bus is needed, include
 a line in the init hook function similar to
 @example
-    need_GPIB = SET;
+need_GPIB = SET;
 @end example
 
 For serial ports things handled a bit differently. In the init_hook you
 should try to request the serial port you need by calling the function
 @code{fsc2_request_serial_port()}
 @example
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
 @noindent
 with the number of the serial port (0 stands for what is called
@@ -813,16 +813,16 @@ with the error condition you can catch the exception using either
 to pass it on to higher level routines that are supposed to take care of
 the problem. Here's some example code
 @example
-  TRY
-  @{
-      do_something_error_prone();
-      TRY_SUCCESS;
-  @}
-  OTHERWISE
-  @{
-      do_cleanup();       /* e.g. deallocate memory */
-      PASSTHROU();
-  @}
+TRY
+@{
+    do_something_error_prone();
+    TRY_SUCCESS;
+@}
+OTHERWISE
+@{
+    do_cleanup();       /* e.g. deallocate memory */
+    PASSTHROU();
+@}
 @end example
 
 
@@ -845,9 +845,9 @@ which are used to implement exceptions.
 There are three types of exceptions that may be relevant when writing
 a module:
 @example
-  EXCEPTION
-  OUT_OF_MEMORY_EXCEPTION
-  USER_BREAK_EXCEPTION
+EXCEPTION
+OUT_OF_MEMORY_EXCEPTION
+USER_BREAK_EXCEPTION
 @end example
 @noindent
 @code{EXCEPTION} stands for all kinds of exceptions not covered by one
@@ -864,17 +864,17 @@ digitizer. It waits indefinitely in a loop for the digitizer to become
 ready. To allow the user to break from it within the loop @code{DO_STOP}
 is tested, and if set, an @code{USER_BREAK_EXCEPTION} is thrown:
 @example
-  do
-  @{
-      if ( DO_STOP )
-          THROW( USER_BREAK_EXCEPTION );
+do
+@{
+    if ( DO_STOP )
+        THROW( USER_BREAK_EXCEPTION );
 
-      length = 40;
-      usleep( 100000 );
-      if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
-           gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
-          THROW( EXCEPTION );
-  @} while ( reply[ 0 ] == '1' ); 
+    length = 40;
+    usleep( 100000 );
+    if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
+         gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
+        THROW( EXCEPTION );
+@} while ( reply[ 0 ] == '1' ); 
 @end example
 
 
@@ -906,11 +906,11 @@ strings you should use @code{T_strdup()} instead of the normal
 @code{free()} is called @code{T_free()}. All five functions accept the
 same input and return values as their normal counterparts, i.e.@:
 @example
-  void *T_malloc( size_t size )
-  void *T_calloc( size_t nmemb, size_t size )
-  void *T_realloc( void *ptr, size_t size )
-  char *T_strdup( const char *string )
-  void *T_free( void *ptr )
+void *T_malloc( size_t size )
+void *T_calloc( size_t nmemb, size_t size )
+void *T_realloc( void *ptr, size_t size )
+char *T_strdup( const char *string )
+void *T_free( void *ptr )
 @end example
 @noindent
 For @code{T_free()} there's is small deviation from the behaviour of
@@ -924,15 +924,15 @@ exception that gets thrown when the memory allocation fails. The
 exception that will be thrown is an @code{OUT_OF_MEMORY_EXCEPTION}.
 Here's some example code:
 @example
-  TRY
-  @{
-      array = T_malloc( length );
-      TRY_SUCCESS;
-  @}
-  CATCH( OUT_OF_MEMORY_EXCEPTION )
-  @{
-      ...                  /* your error handling code goes here */
-  @}
+TRY
+@{
+    array = T_malloc( length );
+    TRY_SUCCESS;
+@}
+CATCH( OUT_OF_MEMORY_EXCEPTION )
+@{
+    ...                  /* your error handling code goes here */
+@}
 @end example
 
 I would strongly recommend using this functions since they got built in
