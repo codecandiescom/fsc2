@@ -60,71 +60,71 @@ static Var *CV;
 
 input:   /* empty */
        | input ';'
-       | input line ';'           { assert( Var_Stack == NULL ); }
-       | input line SECTION_LABEL { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL      { YYACCEPT; }
+       | input line ';'            { assert( Var_Stack == NULL ); }
+       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input SECTION_LABEL       { YYACCEPT; }
 ;								  
 								  
 line:    linet					  
        | line ',' linet			  
-       | line linet               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | line linet                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
 ;								  
 								  
-linet:   VAR_TOKEN                { } /* no assignment to be done */
-       | VAR_TOKEN '=' expr       { vars_assign( $3, $1 ); }
-       | VAR_TOKEN '['            { vars_arr_start( $1 ); }
-         list1 ']'                { vars_arr_lhs( $4 ); }
+linet:   VAR_TOKEN                 { } /* no assignment to be done */
+       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs					  
-       | FUNC_TOKEN '(' list4 ')' { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
+       | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 								  			 "function and not an array.\n",
 								  			 Fname, Lc, $1->name );
-	                                THROW( EXCEPTION ); }
-       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' is an "
+	                                 THROW( EXCEPTION ); }
+       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' is an "
 								  			 "array and not a function.\n",
 								  			 Fname, Lc, $1->name );
-	                                THROW( EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
 ;
 
-expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
-													 $2 ); }
-       | FLOAT_TOKEN unit         { $$ = apply_unit(
+expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													  $2 ); }
+       | FLOAT_TOKEN unit          { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
-       | VAR_TOKEN '['            { vars_arr_start( $1 ); }
-         list3 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( CV, $7 ); }
-       | FUNC_TOKEN '(' list4 ')' { CV = func_call( $1 ); }
-         unit                     { $$ = apply_unit( CV, $6 ); }
-       | VAR_REF                  { $$ = $1; }
-       | VAR_TOKEN '('            { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											"function.\n", Fname, Lc,
-											$1->name );
+       | VAR_TOKEN unit            { $$ = apply_unit( $1, $2 ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list3 ']'                 { CV = vars_arr_rhs( $4 ); }
+         unit                      { $$ = apply_unit( CV, $7 ); }
+       | FUNC_TOKEN '(' list4 ')'  { CV = func_call( $1 ); }
+         unit                      { $$ = apply_unit( CV, $6 ); }
+       | VAR_REF                   { $$ = $1; }
+       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
+											 "function.\n", Fname, Lc,
+											 $1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['           { eprint( FATAL, "%s:%ld: `%s' is a "
-											"predefined function.\n",
-											Fname, Lc, $1->name );
-	                                THROW( EXCEPTION ); }
-       | expr AND expr       	  { $$ = vars_comp( COMP_AND, $1, $3 ); }
-       | expr OR expr        	  { $$ = vars_comp( COMP_OR, $1, $3 ); }
-       | expr XOR expr       	  { $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | NOT expr            	  { $$ = vars_lnegate( $2 ); }
-       | expr EQ expr             { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr LT expr             { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr GT expr             { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr LE expr             { $$ = vars_comp( COMP_LESS_EQUAL,
-													$1, $3 ); }
-       | expr GE expr             { $$ = vars_comp( COMP_LESS_EQUAL, 
-													$3, $1 ); }
-       | expr '+' expr            { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr            { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr            { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr            { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
-       | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
+       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
+											 "predefined function.\n",
+											 Fname, Lc, $1->name );
+	                                 THROW( EXCEPTION ); }
+       | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
+       | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
+       | expr XOR expr       	   { $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | NOT expr            	   { $$ = vars_lnegate( $2 ); }
+       | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
+													 $1, $3 ); }
+       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL, 
+													 $3, $1 ); }
+       | expr '+' expr             { $$ = vars_add( $1, $3 ); }
+       | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr             { $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr             { $$ = vars_div( $1, $3 ); }
+       | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
+       | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
+       | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
 ;
 
 

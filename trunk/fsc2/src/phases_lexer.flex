@@ -228,7 +228,7 @@ int phases_parser( FILE *in )
 	TRY
 	{
 		phasesparse( );
-		phases_end( );
+		phases_end( );             /* do some preliminary consistency checks */
 		TRY_SUCCESS;
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
