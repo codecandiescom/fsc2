@@ -428,7 +428,7 @@ Var *func_call( Var *f )
 
 	TRY
 	{
-		ret = ( *f->val.fnct->fnct )( f->next );
+		ret = f->val.fnct->fnct( f->next );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

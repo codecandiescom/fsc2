@@ -210,7 +210,7 @@ void p_assign_pod( long func, Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.assign_function )( func, pod );
+		pulser_struct.assign_function( func, pod );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -262,13 +262,13 @@ void p_assign_channel( long func, Var *v )
 		{
 			is_pulser_func( pulser_struct.assign_function,
 							"assigning function to pod" );
-			( *pulser_struct.assign_function )( func, channel );
+			pulser_struct.assign_function( func, channel );
 		}
 		else
 		{
 			is_pulser_func( pulser_struct.assign_channel_to_function,
 							"assigning function to channel" );
-			( *pulser_struct.assign_channel_to_function )( func, channel );
+			pulser_struct.assign_channel_to_function( func, channel );
 		}
 		TRY_SUCCESS;
 	}
@@ -309,7 +309,7 @@ void p_set_delay( long func, Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_function_delay )( func, delay );
+		pulser_struct.set_function_delay( func, delay );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -336,7 +336,7 @@ void p_inv( long func )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.invert_function )( func );
+		pulser_struct.invert_function( func );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -376,7 +376,7 @@ void p_set_v_high( long func, Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_function_high_level )( func, voltage );
+		pulser_struct.set_function_high_level( func, voltage );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -416,7 +416,7 @@ void p_set_v_low( long func, Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_function_low_level )( func, voltage );
+		pulser_struct.set_function_low_level( func, voltage );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -453,7 +453,7 @@ void p_set_timebase( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_timebase )( timebase );
+		pulser_struct.set_timebase( timebase );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -503,7 +503,7 @@ void p_set_trigger_mode( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_trigger_mode )( mode );
+		pulser_struct.set_trigger_mode( mode );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -552,7 +552,7 @@ void p_set_trigger_slope( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_trig_in_slope )( slope );
+		pulser_struct.set_trig_in_slope( slope );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -588,7 +588,7 @@ void p_set_trigger_level( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_trig_in_level )( level );
+		pulser_struct.set_trig_in_level( level );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -624,7 +624,7 @@ void p_set_trigger_impedance( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_trig_in_impedance )( state );
+		pulser_struct.set_trig_in_impedance( state );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -668,7 +668,7 @@ void p_set_rep_time( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_repeat_time )( rep_time );
+		pulser_struct.set_repeat_time( rep_time );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -715,7 +715,7 @@ void p_set_rep_freq( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_repeat_time )( rep_time );
+		pulser_struct.set_repeat_time( rep_time );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -756,7 +756,7 @@ void p_set_max_seq_len( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_max_seq_len )( seq_len );
+		pulser_struct.set_max_seq_len( seq_len );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -828,7 +828,7 @@ void p_phase_ref( int func, int ref )
 			}
 		}
 
-		( *pulser_struct.set_phase_reference )( func, ref );
+		pulser_struct.set_phase_reference( func, ref );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -852,7 +852,7 @@ long p_new( long pnum )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.new_pulse )( pnum );
+		pulser_struct.new_pulse( pnum );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -890,7 +890,7 @@ void p_set( long pnum, int type, Var *v )
 				}
 				is_pulser_func( pulser_struct.set_pulse_function,
 								"setting a pulse function" );
-				( *pulser_struct.set_pulse_function )( pnum,
+				pulser_struct.set_pulse_function( pnum,
 													   ( int ) v->val.lval );
 				vars_pop( v );
 				break;
@@ -899,7 +899,7 @@ void p_set( long pnum, int type, Var *v )
 				vars_check( v, INT_VAR | FLOAT_VAR );
 				is_pulser_func( pulser_struct.set_pulse_position,
 								"setting a pulse position" );
-				( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+				pulser_struct.set_pulse_position( pnum, VALUE( v ) );
 				vars_pop( v );
 				break;
 
@@ -907,7 +907,7 @@ void p_set( long pnum, int type, Var *v )
 				vars_check( v, INT_VAR | FLOAT_VAR );
 				is_pulser_func( pulser_struct.set_pulse_length,
 								"setting a pulse length" );
-				( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
+				pulser_struct.set_pulse_length( pnum, VALUE( v ) );
 				vars_pop( v );
 				break;
 
@@ -915,8 +915,7 @@ void p_set( long pnum, int type, Var *v )
 				vars_check( v, INT_VAR | FLOAT_VAR );
 				is_pulser_func( pulser_struct.set_pulse_position_change,
 								"setting a pulse position change" );
-				( *pulser_struct.set_pulse_position_change )( pnum,
-															  VALUE( v ) );
+				pulser_struct.set_pulse_position_change( pnum, VALUE( v ) );
 				vars_pop( v );
 				break;
 
@@ -924,7 +923,7 @@ void p_set( long pnum, int type, Var *v )
 				vars_check( v, INT_VAR | FLOAT_VAR );
 				is_pulser_func( pulser_struct.set_pulse_length_change,
 								"setting a pulse length change" );
-				( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
+				pulser_struct.set_pulse_length_change( pnum, VALUE( v ) );
 				vars_pop( v );
 				break;
 
@@ -932,7 +931,7 @@ void p_set( long pnum, int type, Var *v )
 				vars_check( v, INT_VAR );
 				is_pulser_func( pulser_struct.set_pulse_phase_cycle,
 								"setting a pulse phase cycle" );
-				( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
+				pulser_struct.set_pulse_phase_cycle( pnum, v->val.lval );
 				vars_pop( v );
 				break;
 
@@ -984,42 +983,42 @@ Var *p_get_by_num( long pnum, int type )
 			case P_FUNC :
 				is_pulser_func( pulser_struct.get_pulse_function,
 								"returning a pulses function" );
-				( *pulser_struct.get_pulse_function )( pnum, &function );
+				pulser_struct.get_pulse_function( pnum, &function );
 				v = vars_push( INT_VAR, ( long ) function );
 				break;
 
 			case P_POS :
 				is_pulser_func( pulser_struct.get_pulse_position,
 								"returning a pulses position" );
-				( *pulser_struct.get_pulse_position )( pnum, &ptime );
+				pulser_struct.get_pulse_position( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_LEN :
 				is_pulser_func( pulser_struct.get_pulse_length,
 								"returning a pulses length" );
-				( *pulser_struct.get_pulse_length )( pnum, &ptime );
+				pulser_struct.get_pulse_length( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DPOS :
 				is_pulser_func( pulser_struct.get_pulse_position_change,
 								"returning a pulses position change" );
-				( *pulser_struct.get_pulse_position_change )( pnum, &ptime );
+				pulser_struct.get_pulse_position_change( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DLEN :
 				is_pulser_func( pulser_struct.get_pulse_length_change,
 								"returning a pulses length change" );
-				( *pulser_struct.get_pulse_length_change )( pnum, &ptime );
+				pulser_struct.get_pulse_length_change( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_PHASE :
 				is_pulser_func( pulser_struct.get_pulse_phase_cycle,
 								"returning a pulses phase cycle" );
-				( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
+				pulser_struct.get_pulse_phase_cycle( pnum, &cycle );
 				v = vars_push( INT_VAR, cycle );
 				break;
 
@@ -1068,7 +1067,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.phase_setup_prep )( func, type, pod, val );	
+		pulser_struct.phase_setup_prep( func, type, pod, val );	
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1092,7 +1091,7 @@ void p_phs_end( int func )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.phase_setup )( func );
+		pulser_struct.phase_setup( func );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1123,10 +1122,10 @@ void p_set_psd( int func, Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_phase_switch_delay )( func == 0 ?
-												   PULSER_CHANNEL_PHASE_1 :
-												   PULSER_CHANNEL_PHASE_2,
-												   VALUE( v ) );
+		pulser_struct.set_phase_switch_delay( func == 0 ?
+											  PULSER_CHANNEL_PHASE_1 :
+											  PULSER_CHANNEL_PHASE_2,
+											  VALUE( v ) );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1153,7 +1152,7 @@ void p_set_gp( Var *v )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.set_grace_period )( VALUE( v ) );
+		pulser_struct.set_grace_period( VALUE( v ) );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1180,7 +1179,7 @@ void keep_all_pulses( void )
 	call_push( NULL, pulser_struct.name );
 	TRY
 	{
-		( *pulser_struct.keep_all_pulses )( );
+		pulser_struct.keep_all_pulses( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
