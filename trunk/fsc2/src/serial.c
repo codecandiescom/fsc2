@@ -23,6 +23,7 @@
 
 
 #include "fsc2.h"
+#include "serial.h"
 
 
 /*----------------------------------------------------------------------*/
@@ -113,13 +114,30 @@ int fsc2_tcgetattr( int fd, struct termios *termios_p )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
+int fsc2_tcsetattr( int fd, int optional_actions, struct termios *termios_p )
+{
+	int ret;
+	bool must_reset = UNSET;
+
+
+	must_reset = raise_permissions( );
+	ret = tcsetattr( fd, optional_actions, termios_p );
+	lower_permissions( must_reset );
+
+	return ret;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
 int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed )
 {
 	int ret;
 	bool must_reset = UNSET;
 
 	must_reset = raise_permissions( );
-	ret = cfsetospeed( termios_p, spped );
+	ret = cfsetospeed( termios_p, speed );
 	lower_permissions( must_reset );
 
 	return ret;
@@ -136,40 +154,6 @@ int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed )
 
 	must_reset = raise_permissions( );
 	ret = cfsetispeed( termios_p, speed );
-	lower_permissions( must_reset );
-
-	return ret;
-}
-
-
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-int fsc2_tcflush( int fd, int queue_selector )
-{
-	int ret;
-	bool must_reset = UNSET;
-
-
-	must_reset = raise_permissions( );
-	ret = tcflush( fd, queue_selector );
-	lower_permissions( must_reset );
-
-	return ret;
-}
-
-
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-int fsc2_tcsetattr( int fd, int optional_actions, struct termios *termios_p )
-{
-	int ret;
-	bool must_reset = UNSET;
-
-
-	must_reset = raise_permissions( );
-	ret = tcsetattr( fd, optional_actions, termios_p );
 	lower_permissions( must_reset );
 
 	return ret;
