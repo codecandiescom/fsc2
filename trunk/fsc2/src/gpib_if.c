@@ -184,9 +184,11 @@ int gpib_shutdown( void )
     if ( ll > LL_NONE )
     {
         gpib_log_date( );
+		seteuid( EUID );
         fprintf( gpib_log, "GPIB bus is being shut down.\n\n" );
         if ( gpib_log != stderr )
             fclose( gpib_log );                 /* close log file */
+		seteuid( getuid( ) );
     }
 
     gpib_is_active = 0;
@@ -236,8 +238,10 @@ static void gpib_init_log( char **log_file_name )
     }
 
     gpib_log_date( );
+	seteuid( EUID );
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
 
@@ -343,9 +347,11 @@ int gpib_timeout( int device, int period )
     if ( ll > LL_ERR )
     {
         gpib_log_date( );
+		seteuid( EUID );
         fprintf( gpib_log, "CALL of gpib_timeout for device %s, ", dev_name );
         fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
         fflush( gpib_log );
+		seteuid( getuid( ) );
     }
 
     ibtmo( device, period );
@@ -360,8 +366,10 @@ int gpib_timeout( int device, int period )
     if ( ll > LL_ERR )
     {
         gpib_log_date( );
+		seteuid( EUID );
         fprintf( gpib_log, "EXIT of gpib_timeout\n" );
         fflush( gpib_log );
+		seteuid( getuid( ) );
     }
 
     timeout = period;          /* store actual value of timeout period */
@@ -534,11 +542,13 @@ int gpib_wait( int device, int mask, int *status )
     if ( ll > LL_ERR )
     {
         gpib_log_function_start( "gpib_wait", dev_name );
+		seteuid( EUID );
         fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
         if ( mask & ~( TIMO | END | RQS | CMPL ) )
             fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
                      mask & ( TIMO | END | RQS | CMPL ) );
         fflush( gpib_log );
+		seteuid( getuid( ) );
     }
 
     mask &= TIMO | END | RQS | CMPL;    /* remove invalid bits */
@@ -552,7 +562,11 @@ int gpib_wait( int device, int mask, int *status )
         *status = ibsta;
 
 	if ( ll > LL_ERR )
+	{
+		seteuid( EUID );
         fprintf( gpib_log, "wait return status = 0x0%X\n", ibsta );
+		seteuid( getuid( ) );
+	}
 
     if ( ! ( mask & TIMO ) && old_timeout != TNONE )
         gpib_timeout( device, old_timeout );
@@ -600,9 +614,11 @@ int gpib_write( int device, const char *buffer, long length )
         if ( ll != LL_NONE )
         {
             gpib_log_date( );
+			seteuid( EUID );
             fprintf( gpib_log, "ERROR in in call of gpib_write: "
                                "Invalid parameter: %ld bytes.\n", length );
             fflush( gpib_log );
+			seteuid( getuid( ) );
         }
         sprintf( gpib_error_msg, "Can't write %ld bytes.", length );
         return FAILURE;
@@ -642,6 +658,7 @@ static void gpib_write_start( const char *dev_name, const char *buffer,
 
 
     gpib_log_function_start( "gpib_write", dev_name );
+	seteuid( EUID );
     fprintf( gpib_log, "-> There are %ld bytes to be sent\n", length );
 
     if ( ll == LL_ALL )
@@ -651,6 +668,7 @@ static void gpib_write_start( const char *dev_name, const char *buffer,
         fputc( ( int) '\n', gpib_log );
     }
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
 
@@ -686,9 +704,11 @@ int gpib_read( int device, char *buffer, long *length )
         if ( ll != LL_NONE )
         {
             gpib_log_date( );
+			seteuid( EUID );
             fprintf( gpib_log, "ERROR in call of gpib_read: "
                                "Invalid parameter: %ld bytes\n", *length );
             fflush( gpib_log );
+			seteuid( getuid( ) );
         }
         sprintf( gpib_error_msg, "Can't read %ld bytes.", *length );
         return FAILURE;
@@ -697,8 +717,10 @@ int gpib_read( int device, char *buffer, long *length )
     if ( ll > LL_ERR )
     {
         gpib_log_function_start( "gpib_read", dev_name );
+		seteuid( EUID );
         fprintf( gpib_log, "-> Expecting up to %ld bytes\n", *length );
         fflush( gpib_log );
+		seteuid( getuid( ) );
     }
 
     ibrd( device, buffer, expected );
@@ -739,6 +761,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
     if ( ll < LL_CE )
         return;
 
+	seteuid( EUID );
     fprintf( gpib_log, "-> Received %ld of up to %ld bytes\n",
              received, expected );
 
@@ -750,6 +773,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
     }
 
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
 
@@ -766,7 +790,9 @@ static void gpib_log_date( void )
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
     tc[ 24 ] = '\0';
+	seteuid( EUID );
     fprintf( gpib_log, "[%s] ", tc );
+	seteuid( getuid( ) );
 }
 
 
@@ -797,6 +823,7 @@ static void gpib_log_error( const char *type )
 
 
     gpib_log_date( );
+	seteuid( EUID );
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
     {
@@ -805,6 +832,7 @@ static void gpib_log_error( const char *type )
     }
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
 
@@ -820,8 +848,10 @@ static void gpib_log_function_start( const char *function,
 									 const char *dev_name )
 {
     gpib_log_date( );
+	seteuid( EUID );
     fprintf( gpib_log, "CALL of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
 
@@ -843,13 +873,20 @@ static void gpib_log_function_end( const char *function,
         if ( ll > LL_ERR )
         {
             gpib_log_date( );
+			seteuid( EUID );
             fprintf( gpib_log, "EXIT of %s, dev = %s\n", function, dev_name );
+			seteuid( getuid( ) );
         }
     }
 
+	seteuid( EUID );
     fflush( gpib_log );
+	seteuid( getuid( ) );
 }
 
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
 
 static char *gpib_get_dev_name( int device )
 {
