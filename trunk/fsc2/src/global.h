@@ -17,12 +17,6 @@
 #define NUM_SERIAL_PORTS 2
 
 
-/* Define the maximum number of pulses (thus pulse numbers have to be in
-   the range between 0 and MAX_PULSE_NUM - 1) */
-
-#define MAX_PULSE_NUM  400
-
-
 /* Define the maximum length of phase sequences */
 
 #define MAX_PHASE_SEQ_LEN  12    
