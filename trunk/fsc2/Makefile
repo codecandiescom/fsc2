@@ -2,7 +2,7 @@ bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 			     fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
-				 phases.c ppcheck.c
+				 phases.c ppcheck.c pulse.c
 objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -DDEBUG
