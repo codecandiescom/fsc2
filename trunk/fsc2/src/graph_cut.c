@@ -82,8 +82,6 @@ static struct {
 
 
 static bool is_mapped = UNSET;  /* set while form is mapped */
-static int cut_x, cut_y;
-static unsigned int cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
 
 
@@ -119,8 +117,9 @@ void cut_init( void )
 
 void cut_show( int dir, long u_index )
 {
-	bool needs_pos = UNSET;
 	int flags;
+	int x, y;
+	unsigned int h, w;
 
 
 	/* Don't do anything if no curve is currently displayed or if mouse didn't
@@ -142,39 +141,43 @@ void cut_show( int dir, long u_index )
 			 * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ CUTGEOMETRY ].var,
-									&cut_x, &cut_y, &cut_w, &cut_h );
+									&x, &y, &w, &h );
 			if ( WidthValue & flags && HeightValue & flags )
 			{
-				if ( cut_w < GC_sizes.WIN_MIN_WIDTH )
-					cut_w = GC_sizes.WIN_MIN_WIDTH;
-
-				if ( cut_h < GC_sizes.WIN_MIN_HEIGHT )
-					cut_h = GC_sizes.WIN_MIN_HEIGHT;
-
-				fl_set_form_size( GUI.cut_form->cut, cut_w, cut_h );
+				GUI.cut_win_width = w;
+				GUI.cut_win_height = h;
+				GUI.cut_win_has_size = SET;
 			}
 
 			if ( XValue & flags && YValue & flags )
 			{
-				cut_x += GUI.border_offset_x - 1;
-				cut_y += GUI.border_offset_y - 1;
-
-				fl_set_form_position( GUI.cut_form->cut, cut_x, cut_y );
-				needs_pos = SET;
+				GUI.cut_win_x = x + GUI.border_offset_x - 1;
+				GUI.cut_win_y = y + GUI.border_offset_y - 1;
+				GUI.cut_win_has_pos = SET;
 			}
 		}
 
-		if ( cut_has_been_shown )
+		if ( ! cut_has_been_shown && GUI.cut_win_has_size )
 		{
-			fl_set_form_geometry( GUI.cut_form->cut, cut_x, cut_y,
-                                  cut_w, cut_h );
-			needs_pos = SET;
+			if ( GUI.cut_win_width < GC_sizes.WIN_MIN_WIDTH )
+				GUI.cut_win_width = GC_sizes.WIN_MIN_WIDTH;
+
+			if ( GUI.cut_win_height < GC_sizes.WIN_MIN_HEIGHT )
+					GUI.cut_win_height = GC_sizes.WIN_MIN_HEIGHT;
+
+			fl_set_form_size( GUI.cut_form->cut,
+							  GUI.cut_win_width, GUI.cut_win_height );
 		}
 
-		fl_show_form( GUI.cut_form->cut, needs_pos ?
+
+		if ( ! cut_has_been_shown && GUI.cut_win_has_pos )
+			fl_set_form_geometry( GUI.cut_form->cut, GUI.cut_win_x,
+								  GUI.cut_win_y, GUI.cut_win_width,
+								  GUI.cut_win_height );
+
+		fl_show_form( GUI.cut_form->cut, GUI.cut_win_has_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Cross section" );
-		cut_has_been_shown = SET;
 
 		fl_winminsize( GUI.cut_form->cut->window,
 					   GC_sizes.WIN_MIN_WIDTH, GC_sizes.WIN_MIN_HEIGHT );
@@ -191,7 +194,8 @@ void cut_show( int dir, long u_index )
 	else if ( ! is_mapped )
 	{
 		XMapWindow( G.d, GUI.cut_form->cut->window );
-		XMoveWindow( G.d, GUI.cut_form->cut->window, cut_x + 1, cut_y + 1 );
+		XMoveWindow( G.d, GUI.cut_form->cut->window,
+					 GUI.cut_win_x, GUI.cut_win_y );
 	}
 
 	fl_raise_form( GUI.cut_form->cut );
@@ -541,13 +545,20 @@ void cut_form_close( void )
 	cv->points  = SCALED_POINT_P T_free( cv->points );
 	cv->xpoints = XPOINT_P T_free( cv->xpoints );
 
-	cut_x = GUI.cut_form->cut->x;
-	cut_y = GUI.cut_form->cut->y;
-	cut_w = GUI.cut_form->cut->w;
-	cut_h = GUI.cut_form->cut->h;
+	if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
+	{
+		get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
+
+		GUI.cut_win_x += GUI.border_offset_x - 1;
+		GUI.cut_win_y += GUI.border_offset_y - 1;
+		GUI.cut_win_has_pos = SET;
+
+		GUI.cut_win_width = GUI.cut_form->cut->w;
+		GUI.cut_win_height = GUI.cut_form->cut->h;
+		GUI.cut_win_has_size = SET;
+	}
 
 	fl_hide_form( GUI.cut_form->cut );
-
 	fl_free_form( GUI.cut_form->cut );
 
 	CG.is_shown = is_mapped = UNSET;
@@ -573,10 +584,18 @@ void cut_close_callback( FL_OBJECT *a, long b )
 	delete_all_cut_markers( UNSET );
 	G2.is_cut = is_mapped = UNSET;
 
-	cut_x = GUI.cut_form->cut->x - 1;
-	cut_y = GUI.cut_form->cut->y - 1;
-	cut_w = GUI.cut_form->cut->w;
-	cut_h = GUI.cut_form->cut->h;
+	if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
+	{
+		get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
+
+		GUI.cut_win_x += GUI.border_offset_x - 1;
+		GUI.cut_win_y += GUI.border_offset_y - 1;
+		GUI.cut_win_has_pos = SET;
+
+		GUI.cut_win_width = GUI.cut_form->cut->w;
+		GUI.cut_win_height = GUI.cut_form->cut->h;
+		GUI.cut_win_has_size = SET;
+	}
 
 	XUnmapWindow( G.d, GUI.cut_form->cut->window );
 

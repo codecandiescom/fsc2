@@ -302,6 +302,17 @@ static void globals_init( const char *pname )
 	Internals.is_linux_i386 = UNSET;
 	Internals.conn_child_replied = UNSET;
 	Internals.title = NULL;
+
+	GUI.win_has_pos = UNSET;
+	GUI.win_has_size = UNSET;
+	GUI.display_1d_has_pos = UNSET;
+	GUI.display_1d_has_size = UNSET;
+	GUI.display_2d_has_pos = UNSET;
+	GUI.display_2d_has_size = UNSET;
+	GUI.cut_win_has_pos = UNSET;
+	GUI.cut_win_has_size = UNSET;
+	GUI.toolbox_has_pos = UNSET;
+
 	fsc2_get_conf( );
 
 	/* Figure out if the machine has an INTEL i386 type processor and we're
@@ -429,18 +440,14 @@ static void fsc2_save_conf( void )
 	FILE *fp;
 
 
-	if ( Internals.def_directory != NULL )
-		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
-
-	/* The file selector has never been called, so the configuration file
-	   does not have to be rewritten */
-
-	if ( Internals.use_def_directory )
-		return;
-
 	if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
 		 ue->pw_dir == NULL || *ue->pw_dir == '\0' )
+	{
+		 if ( Internals.def_directory != NULL )
+			 Internals.def_directory =
+				 					  CHAR_P T_free( Internals.def_directory );
 		 return;
+	}
 
 	TRY
 	{
@@ -453,12 +460,54 @@ static void fsc2_save_conf( void )
 	if ( ( fp = fopen( fname, "w" ) ) == NULL )
 	{
 		T_free( fname );
-		Internals.def_directory = CHAR_P T_free( Internals.def_directory );
+		 if ( Internals.def_directory != NULL )
+			 Internals.def_directory =
+				 					  CHAR_P T_free( Internals.def_directory );
 		return;
 	}
 
 	T_free( fname );
-	fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
+
+	if ( Internals.use_def_directory && Internals.def_directory != NULL )
+		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Internals.def_directory );
+	else
+		fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
+	if ( Internals.def_directory != NULL )
+			 Internals.def_directory =
+				 					  CHAR_P T_free( Internals.def_directory );
+
+	fprintf( fp, "MAIN_WINDOW_POSITION: %d%+d\n", GUI.win_x, GUI.win_y );
+
+	fprintf( fp, "MAIN_WINDOW_SIZE: %ux%u\n", GUI.win_width, GUI.win_height );
+
+	if ( GUI.display_1d_has_pos )
+		fprintf( fp, "DISPLAY_1D_WINDOW_POSITION: %d%+d\n", GUI.display_1d_x,
+				 GUI.display_1d_y );
+
+	if ( GUI.display_1d_has_size )
+		fprintf( fp, "DISPLAY_1D_WINDOW_SIZE: %ux%u\n", GUI.display_1d_width,
+				 GUI.display_1d_height );
+
+	if ( GUI.display_2d_has_pos )
+		fprintf( fp, "DISPLAY_2D_WINDOW_POSITION: %d%+d\n", GUI.display_2d_x,
+				 GUI.display_2d_y );
+
+	if ( GUI.display_2d_has_size )
+		fprintf( fp, "DISPLAY_2D_WINDOW_SIZE: %ux%u\n", GUI.display_2d_width,
+				 GUI.display_2d_height );
+
+	if ( GUI.cut_win_has_pos )
+		fprintf( fp, "CUT_WINDOW_POSITION: %d%+d\n", GUI.cut_win_x,
+				 GUI.cut_win_y );
+
+	if ( GUI.cut_win_has_size )
+		fprintf( fp,"CUT_WINDOW_SIZE: %ux%u\n", GUI.cut_win_width,
+				 GUI.cut_win_height );
+
+	if ( GUI.toolbox_has_pos )
+		fprintf( fp, "TOOLBOX_POSITION: %d%+d\n", GUI.toolbox_x,
+				 GUI.toolbox_y );
+
 	fclose( fp );
 }
 

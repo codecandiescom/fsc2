@@ -46,14 +46,31 @@ FILE *fsc2_confin;
 		/*---------------*/
 
 
-"#".*                /* Skip comments */
-[\n\t ]+             /* Skip white-space */
-"DEFAULT_DIRECTORY"  return DEF_DIR;
-":"|"="              return SEPARATOR;
-[^#\t\n:= ]+         {
-						 fsc2_conflval.sval = fsc2_conftext;
-						 return TEXT;
-					 }
-<<EOF>>              return 0;
+"#".*                         /* Skip comments */
+[\n\t ]+                      /* Skip white-space */
+"DEFAULT_DIRECTORY"           return DEF_DIR;
+"MAIN_WINDOW_POSITION"        return MW_POS;
+"MAIN_WINDOW_SIZE"            return MW_SZ;
+"DISPLAY_1D_WINDOW_POSITION"  return DW1_POS;
+"DISPLAY_1D_WINDOW_SIZE"      return DW1_SZ;
+"DISPLAY_2D_WINDOW_POSITION"  return DW2_POS;
+"DISPLAY_2D_WINDOW_SIZE"      return DW2_SZ;
+"CUT_WINDOW_POSITION"         return CW_POS;
+"CUT_WINDOW_SIZE"             return CW_SZ;
+"TOOLBOX_POSITION"            return TB_POS;
+":"|"="                       return SEPARATOR;
+[+-]*[0-9]+[+-][0-9]+         {
+						          fsc2_conflval.sval = fsc2_conftext;
+						          return POS;
+                              }
+[0-9]+"x"[0-9]+               {
+						          fsc2_conflval.sval = fsc2_conftext;
+						          return SZ;
+                              }
+[^#\t\n:= ]+                  {
+						          fsc2_conflval.sval = fsc2_conftext;
+						          return TEXT;
+					          }
+<<EOF>>                       return 0;
 
 %%

@@ -1393,6 +1393,28 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 }
 
 
+/*------------------------------------------------------------------*/
+/* Determine the exact position of the top window containing a form */
+/*------------------------------------------------------------------*/
+
+void get_form_position( FL_FORM *form, int *x, int *y )
+{
+	XWindowAttributes attr;
+	Window root, parent, *children;
+	unsigned int nchilds;
+
+
+	XQueryTree( fl_get_display( ), form->window, &root, &parent, &children,
+				&nchilds );
+	XQueryTree( fl_get_display( ), parent, &root, &parent, &children,
+				&nchilds );
+	XGetWindowAttributes( fl_get_display( ), parent, &attr );
+
+	*x = attr.x;
+	*y = attr.y;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

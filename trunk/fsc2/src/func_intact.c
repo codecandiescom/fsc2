@@ -55,10 +55,8 @@ struct {
 
 extern FL_resource xresources[ ];
 extern FL_IOPT xcntl;
-static int tool_x, tool_y;
-static bool has_pos = UNSET,
-			is_frozen = UNSET;
-
+static bool is_frozen = UNSET;
+static bool has_been_shown = UNSET;
 
 static Var *f_layout_child( long layout );
 static void f_objdel_child( Var *v );
@@ -96,7 +94,6 @@ void toolbox_create( long layout )
 	Toolbox->layout         = layout;
 	Toolbox->Tools          = NULL;                 /* no form created yet */
 	Toolbox->objs           = NULL;                 /* and also no objects */
-	Toolbox->has_been_shown = UNSET;
 	Toolbox->next_ID        = ID_OFFSET;
 
 	if ( GUI.G_Funcs.size == LOW )
@@ -210,9 +207,10 @@ void parent_freeze( int freeze )
 
 	if ( is_frozen && ! freeze )       /* unfreeze the toolbox */
 	{
-		if ( has_pos )
+		if ( GUI.toolbox_has_pos )
 		{
-			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
+			fl_set_form_position( Toolbox->Tools, GUI.toolbox_x,
+								  GUI.toolbox_y );
 			fl_show_form( Toolbox->Tools, FL_PLACE_GEOMETRY, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
@@ -220,9 +218,7 @@ void parent_freeze( int freeze )
 		{
 			fl_show_form( Toolbox->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
 						  "fsc2: Tools" );
-			tool_x = Toolbox->Tools->x;
-			tool_y = Toolbox->Tools->y;
-			has_pos = SET;
+			store_toolbox_position( );
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
@@ -230,7 +226,7 @@ void parent_freeze( int freeze )
 
 		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-		Toolbox->has_been_shown = SET;
+		has_been_shown = SET;
 
 		/* The following shouldn't be necessary, but there seems to be
 		   some bug that keeps some of the objects from getting disabled
@@ -808,7 +804,6 @@ void tools_clear( void )
 
 
 	is_frozen = UNSET;
-	has_pos = UNSET;
 
 	if ( Toolbox == NULL )
 		return;
@@ -861,6 +856,7 @@ void recreate_Toolbox( void )
 	IOBJECT *io, *last_io = NULL;
 	int flags;
 	int unsigned dummy;
+	int tool_x, tool_y;
 
 
 	if ( Internals.mode == TEST )        /* no drawing in test mode */
@@ -896,7 +892,7 @@ void recreate_Toolbox( void )
 	{
 		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
-		if ( ! Toolbox->has_been_shown &&
+		if ( ! has_been_shown &&
 			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
@@ -904,9 +900,9 @@ void recreate_Toolbox( void )
 
 			if ( XValue & flags && YValue & flags )
 			{
-				tool_x += GUI.border_offset_x;
-				tool_y += GUI.border_offset_y;
-				has_pos = SET;
+				GUI.toolbox_x = tool_x;
+				GUI.toolbox_y = tool_y;
+				GUI.toolbox_has_pos = SET;
 			}
 		}
 	}
@@ -924,11 +920,15 @@ void recreate_Toolbox( void )
 
 	fl_set_form_size( Toolbox->Tools, Toolbox->w, Toolbox->h );
 
+	if ( GUI.toolbox_has_pos )
+		fl_set_form_position( Toolbox->Tools, GUI.toolbox_x, GUI.toolbox_y );
+
 	if ( ! is_frozen )
 	{
-		if ( has_pos )
+		if ( GUI.toolbox_has_pos )
 		{
-			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
+			fl_set_form_position( Toolbox->Tools, GUI.toolbox_x,
+								  GUI.toolbox_y );
 			fl_show_form( Toolbox->Tools, FL_PLACE_GEOMETRY, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
@@ -936,9 +936,7 @@ void recreate_Toolbox( void )
 		{
 			fl_show_form( Toolbox->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
 						  "fsc2: Tools" );
-			tool_x = Toolbox->Tools->x;
-			tool_y = Toolbox->Tools->y;
-			has_pos = SET;
+			store_toolbox_position( );
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
@@ -946,7 +944,7 @@ void recreate_Toolbox( void )
 
 		fl_set_form_atclose( Toolbox->Tools, toolbox_close_handler, NULL );
 
-		Toolbox->has_been_shown = SET;
+		has_been_shown = SET;
 	}
 }
 
@@ -1956,19 +1954,11 @@ void check_label( char *str )
 
 static void store_toolbox_position( void )
 {
-	if ( tool_x != Toolbox->Tools->x - 1 ||
-		 tool_y != Toolbox->Tools->y - 1 )
-	{
-		tool_x = Toolbox->Tools->x;
-		tool_y = Toolbox->Tools->y;
-	}
-	else
-	{
-		tool_x = Toolbox->Tools->x - 1;
-		tool_y = Toolbox->Tools->y - 1;
-	}
+	get_form_position( Toolbox->Tools, &GUI.toolbox_x, &GUI.toolbox_y );
 
-	has_pos = SET;
+	GUI.toolbox_x += GUI.border_offset_x - 1;
+	GUI.toolbox_y += GUI.border_offset_y - 1;
+	GUI.toolbox_has_pos = SET;
 }
 
 

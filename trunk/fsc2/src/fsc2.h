@@ -164,7 +164,7 @@ typedef struct INTERNALS INTERNALS;
 typedef struct EDL_Stuff EDL_Stuff;
 typedef struct COMMUNICATION COMMUNICATION;
 typedef struct GUI_Stuff GUI_Stuff;
-
+typedef struct XI_SIZES XI_SIZES;
 
 struct INTERNALS {
 	uid_t EUID;                  /* user and group ID the program got */
@@ -304,6 +304,38 @@ struct GUI_Stuff {
 
 	int stop_button_mask;        /* which mouse buttons to use for STOP
 									button */
+
+	int win_x;
+	int win_y;
+	bool win_has_pos;
+	unsigned int win_width;
+	unsigned int win_height;
+	bool win_has_size;
+
+	int display_1d_x;
+	int display_1d_y;
+	bool display_1d_has_pos;
+	unsigned int display_1d_width;
+	unsigned int display_1d_height;
+	bool display_1d_has_size;
+
+	int display_2d_x;
+	int display_2d_y;
+	bool display_2d_has_pos;
+	unsigned int display_2d_width;
+	unsigned int display_2d_height;
+	bool display_2d_has_size;
+
+	int cut_win_x;
+	int cut_win_y;
+	bool cut_win_has_pos;
+	unsigned int cut_win_width;
+	unsigned int cut_win_height;
+	bool cut_win_has_size;
+
+	int toolbox_x;
+	int toolbox_y;
+	bool toolbox_has_pos;
 };
 
 
