@@ -390,8 +390,10 @@ data as there were arguments (in the sequence corresponding to the one
 of the arguments).
 
 @item ER023M
-No argument is allowed -- the function returns a floating point value
-in the interval between +1 and -1.
+No argument is allowed -- the function returns a floating point value.
+The range of the returned values and also the value representing a @i{zero
+signal} depends in a strange way on the conversion time and isn't
+explained in the manuals at all.
 @end table
 The function can only be called in the @code{EXPERIMENT} section.
 
@@ -455,7 +457,10 @@ higher than the maximum sensitivity can be specified, in which case the
 For the @strong{ER023M Signal Channel} the function does not set the
 sensitivity in units of the output voltage but sets the receiver
 gain. Valid receiver gains are in the range between @code{2.0E+1} and
-@code{1.0E+7} and in increments of @code{2 dB}.
+@code{1.0E+7} and in increments of @code{2 dB}. Therefor in this range
+the following multiplier steps can be used: @code{1.0}, @code{1.25},
+@code{1.5}, @code{2.0}, @code{2.5}, @code{3.0}, @code{4.0}, @code{5.0},
+@code{6.0} and @code{8.0}.
 
 
 Before the @code{EXPERIMENT} section this function can't be called
@@ -475,6 +480,11 @@ constant setting that has been set.
 For models @strong{SR510} and @strong{SR530} also the POST time constant
 is set to a value equal or lower than the time constant.
 
+For the @strong{ER023M} the follwoing (approximate) time constant
+settings can be used: @code{2.5 ms}, @code{5 ms}, @code{10 ms}, @code{20
+ms}, @code{40 ms}, @code{65 ms}, @code{130 ms}, @code{330 ms}, @code{650
+ms}, @code{1.3 s}, @code{2.6 s} and @code{5.2 s}.
+
 Before the @code{EXPERIMENT} section this function can't be called
 as a query, i.e.@: without an argument.
 
@@ -485,8 +495,7 @@ This function only exists for the @strong{ER023M Signal Channel} and
 queries or sets the internal integration time of the lock-in
 amplifier. Valid values are times that are multiples of @code{320 us},
 with a lowest multiplicator of 10 and a maximum multiplicator of 9999,
-thus allowing conversion times between @code{3.2 ms} and @code{3.19968
-s}.
+thus allowing conversion times between @code{3.2 ms} and @code{3.2 s}.
 
 Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e.@: as a query.
@@ -520,11 +529,12 @@ the manual for more details.
 For the @strong{ER023M} only certain modulation frequencies can be set,
 these are @code{100 kHz}, @code{50 kHz}, @code{25 kHz}, @code{12.5 kHz},
 @code{6.25 kHz} and @code{3.125 kHz}. If a modulation frequency is
-specified that does not fit one of these values the next usable
+specified that does not fit one of these values the next valid
 frequency is used.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
+
 
 @item lockin_ref_level()
 @findex lockin_ref_level()
