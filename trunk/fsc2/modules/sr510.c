@@ -301,7 +301,7 @@ Var *lockin_sensitivity( Var *v )
 					"using %.0lf V instead.\n", Fname, Lc, DEVICE_NAME,
 					sens * 1.0e3, slist[ Sens - 1 ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf V, "
+			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", Fname, Lc, DEVICE_NAME,
 					sens * 1.0e6, slist[ Sens - 1 ] * 1.0e6 );
 		else
