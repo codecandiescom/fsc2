@@ -118,7 +118,7 @@ void device_add( char *dev_name )
 	T_free( lib_name );
 
 	/* Now test if the device is in the list of device names, either with the
-	   rteal name or the alternate name - because `real_name' might start with
+	   real name or the alternate name - because `real_name' might start with
 	   a path but the names in `Devices' should be just names without a path
 	   compare only after stripping off the path */
 
