@@ -350,7 +350,7 @@ FOREVER {
 		clear_marker( );
 		rescale( 64 );
 		I = 0;
-		IF Sweep_State != STOPPED & ! Pause_State {
+		IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
 			lockin_auto_acquisition( "OFF" );
 			lockin_auto_acquisition( "ON" );
 			dt = delta_time( );
