@@ -73,11 +73,11 @@ FD_run *create_form_run(void)
 
   fdui->run = fl_bgn_form(FL_NO_BOX, 1030, 800);
   obj = fl_add_box(FL_UP_BOX,0,0,1030,800,"");
-  fdui->stop = obj = fl_add_button(FL_NORMAL_BUTTON,30,700,130,50,"Stop");
+  fdui->stop = obj = fl_add_button(FL_NORMAL_BUTTON,25,700,130,50,"Stop");
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,stop_measurement,0);
-  fdui->save = obj = fl_add_button(FL_NORMAL_BUTTON,30,590,130,50,"Save");
+  fdui->save = obj = fl_add_button(FL_NORMAL_BUTTON,25,590,130,50,"Save");
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,save_data,0);
@@ -87,7 +87,10 @@ FD_run *create_form_run(void)
   fdui->sigchld = obj = fl_add_button(FL_NORMAL_BUTTON,260,270,10,10,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,run_sigchld_callback,0);
-  fdui->canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,200,10,820,780,"");
+  obj = fl_add_frame(FL_UP_FRAME,180,10,840,780,"");
+  fdui->yaxis = obj = fl_add_canvas(FL_NORMAL_CANVAS,185,15,90,690,"");
+  fdui->xaxis = obj = fl_add_canvas(FL_NORMAL_CANVAS,275,705,740,80,"");
+  fdui->canvas = obj = fl_add_canvas(FL_NORMAL_CANVAS,275,15,740,690,"");
   fl_end_form();
 
   fdui->run->fdui = fdui;

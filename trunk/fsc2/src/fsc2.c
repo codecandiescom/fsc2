@@ -147,6 +147,13 @@ void xforms_init( int *argc, char *argv[] )
 	/* Create the form for running experiments */
 
 	run_form = create_form_run( );
+
+	/* fdesign is unable to set the box type attributes for canvases... */
+
+	fl_set_object_boxtype( run_form->xaxis, FL_NO_BOX );
+	fl_set_object_boxtype( run_form->yaxis, FL_NO_BOX );
+	fl_set_object_boxtype( run_form->canvas, FL_FRAME_BOX );
+
 	fl_deactivate_object( run_form->save );
 	fl_set_object_lcol( run_form->save, FL_INACTIVE_COL );
 
