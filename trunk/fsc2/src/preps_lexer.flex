@@ -189,7 +189,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {P}"."{F}   {
 				prepslval.vptr = p_get( prepstext, P_FUNC );
-				return VAR_REF;
+				return PFUNC;
             }
 
 {P}"."{S}   {
@@ -218,7 +218,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
             }
 
 {P}":"      {
-			    Cur_Pulse = p_num( prepstext );
+			    Cur_Pulse = p_new( p_num( prepstext ) );
 				return P_TOK;
 			}
 
