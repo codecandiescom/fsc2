@@ -145,7 +145,7 @@ typedef struct {
 
 #if defined __KERNEL__
 
-#include <linux/autoconf.h>
+#include <linux/config.h>
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
