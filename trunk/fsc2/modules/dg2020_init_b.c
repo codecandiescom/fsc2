@@ -25,6 +25,7 @@
 #include "dg2020_b.h"
 
 
+static void dg2020_init_print( FILE *fp );
 static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
 static int dg2020_calc_channels_needed( FUNCTION *f );
@@ -34,6 +35,8 @@ static void dg2020_setup_phase_matrix( FUNCTION *f );
 static void dg2020_pulse_start_setup( void );
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
 static void dg2020_cw_init( void );
+static void dg2020_create_shape_pulses( void );
+static void dg2020_create_twt_pulses( void );
 
 
 /*-------------------------------------------------------------------*/
@@ -48,11 +51,46 @@ void dg2020_init_setup( void )
 	{
 		dg2020_basic_pulse_check( );
 		dg2020_basic_functions_check( );
+		dg2020_create_shape_pulses( );
+		dg2020_create_twt_pulses( );
 		dg2020_distribute_channels( );
+
+		dg2020_init_print( dg2020.dump_file );
+		dg2020_init_print( dg2020.show_file );
+
 		dg2020_pulse_start_setup( );
 	}
 	else
 		dg2020_cw_init( );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+
+static void dg2020_init_print( FILE *fp )
+{
+	FUNCTION *f;
+	int i, j;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( fp, "TB: %g\nD: %ld\n===\n", dg2020.timebase,
+			 dg2020.neg_delay );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+
+		if ( ! f->is_needed && f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+			fprintf( fp, "%s:%d %ld\n",
+					 f->name, f->channel[ j ]->self, f->delay );
+	}
 }
 
 
@@ -696,6 +734,227 @@ static void dg2020_cw_init( void )
 
 	f->num_needed_channels = 2;
 	dg2020_distribute_channels( );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void dg2020_create_shape_pulses( void )
+{
+	FUNCTION *spf = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE;
+	FUNCTION *f;
+	PULSE *np, *cp, *rp, *p1, *p2, *old_end;
+
+
+	if ( ! dg2020.auto_shape_pulses )
+		return;
+
+	/* Find the end of the pulse list (to be able to add further shape
+	   pulses) */
+
+	for ( cp = np = dg2020_Pulses; np != NULL; np = np->next )
+		cp = np;
+	old_end = cp;
+
+	/* Loop over all pulses */
+
+	for ( rp = dg2020_Pulses; rp != NULL; rp = rp->next )
+	{
+		f = rp->function;
+
+		/* No shape pulses can be set for the PULSE_SHAPE function itself
+		   and functions that don't need shape pulses */
+
+		if ( f == spf || ! f->uses_auto_shape_pulses )
+			continue;
+
+		np = PULSE_P T_malloc( sizeof *np );
+
+		np->prev = cp;
+		cp = cp->next = np;
+
+		np->next = NULL;
+		np->pc = NULL;
+
+		np->function = spf;
+		np->is_function = SET;
+
+		/* These 'artifical' pulses get negative numbers */
+
+		np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+
+		np->pc = NULL;
+
+		rp->sp = np;
+		np->sp = rp;
+
+		/* The remaining properties are just exact copies of the
+		   pulse the shape pulse has to be used with */
+
+		np->is_active = rp->is_active;
+		np->was_active = rp->was_active;
+		np->has_been_active = rp->has_been_active;
+
+		np->pos = rp->pos;
+		np->len = rp->len;
+		np->dpos = rp->dpos;
+		np->dlen = rp->dlen;
+
+		np->is_pos = rp->is_pos;
+		np->is_len = rp->is_len;
+		np->is_dpos = rp->is_dpos;
+		np->is_dlen = rp->is_dlen;
+
+		np->initial_pos = rp->initial_pos;
+		np->initial_len = rp->initial_len;
+		np->initial_dpos = rp->initial_dpos;
+		np->initial_dlen = rp->initial_dlen;
+
+		np->initial_is_pos = rp->initial_is_pos;
+		np->initial_is_len = rp->initial_is_len;
+		np->initial_is_dpos = rp->initial_is_dpos;
+		np->initial_is_dlen = rp->initial_is_dlen;
+
+		np->old_pos = rp->old_pos;
+		np->old_len = rp->old_len;
+
+		np->is_old_pos = rp->is_old_pos;
+		np->is_old_len = rp->is_old_len;
+
+		np->needs_update = rp->needs_update;
+	}
+
+	if ( np != old_end )
+		spf->is_needed = SET;
+
+	/* Now after we got all the necessary shape pulses we've got to check
+	   that they don't overlap when they are for pulses of different
+	   functions (overlaps for pulses of the same function will be detected
+	   later and reported as overlaps for the pulses they belong to) */
+
+	for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
+	{
+		if ( ! p1->is_active )
+			continue;
+
+		for ( p2 = p1->next; p2 != NULL; p2 = p2->next )
+		{
+			if ( ! p2->is_active )
+				continue;
+
+			if ( p1->sp->function == p2->sp->function )
+				continue;
+
+			if ( p1->pos == p2->pos ||
+				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+			{
+				print( FATAL, "Automatically created shape pulses for pulse "
+					   "#%ld of function '%s' and #%ld of function '%s' would "
+					   "overlap.\n",
+					   p1->sp->num, p1->sp->function->name,
+					   p2->sp->num, p2->sp->function->name );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void dg2020_create_twt_pulses( void )
+{
+	FUNCTION *tpf = dg2020.function + PULSER_CHANNEL_TWT;
+	FUNCTION *f;
+	PULSE *np, *cp, *rp, *old_end;
+
+
+	if ( ! dg2020.auto_twt_pulses )
+		return;
+
+	/* Find the end of the pulse list (to be able to add further TWT
+	   pulses) */
+
+	for ( cp = np = dg2020_Pulses; np != NULL; np = np->next )
+		cp = np;
+	old_end = cp;
+
+	/* Loop over all pulses */
+
+	for ( rp = dg2020_Pulses; rp != NULL; rp = rp->next )
+	{
+		f = rp->function;
+
+		/* No TWT pulses can be set for the TWT or TWT_GATE function and
+		   functions that don't need TWT pulses */
+
+		if ( f == tpf || f->self == PULSER_CHANNEL_TWT_GATE ||
+			 ! f->uses_auto_twt_pulses )
+			continue;
+
+		tpf->has_auto_twt_pulses = SET;
+
+		np = PULSE_P T_malloc( sizeof *np );
+
+		np->prev = cp;
+		cp = cp->next = np;
+
+		np->next = NULL;
+		np->pc = NULL;
+
+		np->function = tpf;
+		np->is_function = SET;
+
+		/* These 'artifical' pulses get negative numbers */
+
+		np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+
+		np->pc = NULL;
+
+		rp->tp = np;
+		np->tp = rp;
+
+		/* The remaining properties are just exact copies of the
+		   pulse the shape pulse has to be used with */
+
+		np->is_active = rp->is_active;
+		np->was_active = rp->was_active;
+		np->has_been_active = rp->has_been_active;
+
+		np->pos = rp->pos;
+		np->len = rp->len;
+		np->dpos = rp->dpos;
+		np->dlen = rp->dlen;
+
+		np->is_pos = rp->is_pos;
+		np->is_len = rp->is_len;
+		np->is_dpos = rp->is_dpos;
+		np->is_dlen = rp->is_dlen;
+
+		np->initial_pos = rp->initial_pos;
+		np->initial_len = rp->initial_len;
+		np->initial_dpos = rp->initial_dpos;
+		np->initial_dlen = rp->initial_dlen;
+
+		np->initial_is_pos = rp->initial_is_pos;
+		np->initial_is_len = rp->initial_is_len;
+		np->initial_is_dpos = rp->initial_is_dpos;
+		np->initial_is_dlen = rp->initial_is_dlen;
+
+		np->old_pos = rp->old_pos;
+		np->old_len = rp->old_len;
+
+		np->is_old_pos = rp->is_old_pos;
+		np->is_old_len = rp->is_old_len;
+
+		np->needs_update = rp->needs_update;
+	}
+
+	if ( np != old_end )
+		tpf->is_needed = SET;
 }
 
 

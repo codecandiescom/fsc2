@@ -25,6 +25,7 @@
 #include "ep385.h"
 
 
+static void ep385_init_print( FILE *fp );
 static void ep385_basic_pulse_check( void );
 static void ep385_create_shape_pulses( void );
 static void ep385_create_twt_pulses( void );
@@ -56,39 +57,8 @@ void ep385_init_setup( void )
 		ep385_create_twt_pulses( );
 		ep385_basic_functions_check( );
 
-		if ( ep385.dump_file != NULL )
-		{
-			fprintf( ep385.dump_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
-					 ep385.neg_delay );
-			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				f = ep385.function + i;
-
-				if ( ! f->is_needed && f->num_channels == 0 )
-					continue;
-
-				for ( j = 0; j < f->num_channels; j++ )
-					fprintf( ep385.dump_file, "%s:%d %ld\n",
-							 f->name, f->channel[ j ]->self, f->delay );
-			}
-		}
-
-		if ( ep385.show_file != NULL )
-		{
-			fprintf( ep385.show_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
-					 ep385.neg_delay );
-			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				f = ep385.function + i;
-
-				if ( ! f->is_needed && f->num_channels == 0 )
-					continue;
-
-				for ( j = 0; j < f->num_channels; j++ )
-					fprintf( ep385.show_file, "%s:%d %ld\n",
-							 f->name, f->channel[ j ]->self, f->delay );
-			}
-		}
+		ep385_init_print( ep385.dump_file );
+		ep385_init_print( ep385.show_file );
 
 		ep385_setup_channels( );
 		ep385_pulse_start_setup( );
@@ -100,7 +70,7 @@ void ep385_init_setup( void )
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
-			f = &ep385.function[ i ];
+			f = ep385.function + i;
 
 			if ( f->pulses != NULL )
 				f->pulses = PULSE_PP T_free( f->pulses );
@@ -130,6 +100,34 @@ void ep385_init_setup( void )
 
 	if ( ep385.show_file != NULL )
 		ep385_dump_channels( ep385.show_file );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static void ep385_init_print( FILE *fp )
+{
+	FUNCTION *f;
+	int i, j;
+
+
+	if ( fp == NULL )
+		return;
+
+	fprintf( ep385.dump_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
+			 ep385.neg_delay );
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = ep385.function + i;
+
+		if ( ! f->is_needed && f->num_channels == 0 )
+			continue;
+
+		for ( j = 0; j < f->num_channels; j++ )
+			fprintf( ep385.dump_file, "%s:%d %ld\n",
+					 f->name, f->channel[ j ]->self, f->delay );
+	}
 }
 
 
