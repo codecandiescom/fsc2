@@ -217,20 +217,31 @@ static void load_functions( Device *dev )
 		T_free( ld );
 	}
 
+	/* If this didn't work out now try it the normal way (unless in DO_CHECK
+	   mode), where we look into the compile in library path or, if the device
+	   name starts with an absolute path, we use this path (this happens when
+	   the device is specified using an alternative name and we thus had to
+	   follow a symbolic link). */
+
 	if ( dev->driver.handle == NULL &&
 		 ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
-		lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ),
-							   dev->name );
-		dev->driver.handle = dlopen( lib_name, RTLD_NOW );
+		if ( dev->name[ 0 ] != '/' )
+		{
+			lib_name = get_string( "%s%s%s.so", libdir, slash( libdir ),
+								   dev->name );
+			dev->driver.handle = dlopen( lib_name, RTLD_NOW );
+			T_free( lib_name );
+		}
+		else
+			dev->driver.handle = dlopen( dev->name, RTLD_NOW );
 	}
-
-	T_free( lib_name );
 
 	if ( dev->driver.handle == NULL )
 	{
 		eprint( FATAL, UNSET, "Can't open module for device '%s'.\n",
-				dev->name );
+				dev->name[ 0 ] != '/' ?
+				dev->name : strrchr( dev->name, '/' ) + 1 );
 		THROW( EXCEPTION );
 	}
 
