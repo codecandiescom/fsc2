@@ -418,8 +418,7 @@ int rs690_exp_hook( void )
 					 "***** Is this really what you want? *****",
 					 rs690_pticks( rs690.defense_2_shape ) );
 
-		if ( ! FSC2_IS_BATCH_MODE ||
-			 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
+		if ( 2 != show_choices( str, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 
 		rs690.is_confirmation = SET;
@@ -772,7 +771,7 @@ Var *pulser_show_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! FSC2_IS_CHECK_RUN )
+	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_show_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );
@@ -786,7 +785,7 @@ Var *pulser_dump_pulses( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 
-	if ( ! FSC2_IS_CHECK_RUN )
+	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_dump_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );

@@ -117,14 +117,14 @@ void show_alert( const char *str )
 /*------------------------------------------------------------------------*/
 
 int show_choices( const char *text, int numb, const char *b1, const char *b2,
-				  const char *b3, int def )
+				  const char *b3, int def, bool is_batch )
 {
 	int ret;
 
 	if ( Internals.I_am == PARENT )
 	{
 		if ( Internals.cmdline_flags & DO_CHECK ||
-			 Internals.cmdline_flags & BATCH_MODE )
+			 ( Internals.cmdline_flags & BATCH_MODE && is_batch ) )
 		{
 			fprintf( stdout, "%s\n%s %s %s\n", text, b1, b2, b3 );
 			return def != 0 ? def : 1;
