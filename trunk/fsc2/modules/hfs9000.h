@@ -114,7 +114,7 @@ Var *pulser_stop_on_update( Var *v );
 /* typedefs of structures needed in the module */
 
 typedef struct _F_ {
-	int self;                  /* the functions number
+	int self;                  /* the functions number */
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */
 	bool is_needed;            /* set if the function has been assigned

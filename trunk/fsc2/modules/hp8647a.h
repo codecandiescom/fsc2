@@ -101,7 +101,7 @@ typedef struct
 
 	bool state;
 
-	char *table_file;      /* name of attenuation table file */
+	char *table_file;               /* name of attenuation table file */
 	bool use_table;
 	ATT_TABLE_ENTRY *att_table;
 	long att_table_len;
@@ -111,7 +111,7 @@ typedef struct
 	double att_ref_freq;
 	double att_at_ref_freq;
 	double real_attenuation;        /* might differ from attenuation due to
-									   use of table
+									   use of table */
 	int mod_type;
 	bool mod_type_is_set;
 	int mod_source[ NUM_MOD_TYPES ];

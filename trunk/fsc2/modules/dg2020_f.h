@@ -228,7 +228,7 @@ typedef struct
 	BLOCK block[ 2 ];        /* blocks needed for padding */
 
 	Ticks mem_size;          /* size of the complete sequence, i.e. including
-								the memory needed for padding
+								the memory needed for padding */
 	bool is_grace_period;
 	Ticks grace_period;
 } DG2020;
@@ -236,7 +236,7 @@ typedef struct
 
 typedef struct _p_ {
 
-	long num;                /* number of the pulse (pulses used fro realize
+	long num;                /* number of the pulse (pulses used for realize
 								phase cycling have negative, normal pulses
 								positive numbers */
 
