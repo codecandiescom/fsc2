@@ -7,7 +7,7 @@
 
 
 #include "dg2020_f.h"
-#include "../gpib.h"
+#include "gpib.h"
 
 
 

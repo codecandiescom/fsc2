@@ -5,16 +5,16 @@
 
 #include "fsc2.h"
 
-#include "c1.xbm"             /* bitmaps for cursors */
-#include "c2.xbm"
-#include "c3.xbm"
-#include "c4.xbm"
-#include "c5.xbm"
+#include auxdir"c1.xbm"             /* bitmaps for cursors */
+#include auxdir"c2.xbm"
+#include auxdir"c3.xbm"
+#include auxdir"c4.xbm"
+#include auxdir"c5.xbm"
 
-#include "ua.xbm"             /* arrow bitmaps */
-#include "da.xbm"
-#include "la.xbm"
-#include "ra.xbm"
+#include auxdir"ua.xbm"             /* arrow bitmaps */
+#include auxdir"da.xbm"
+#include auxdir"la.xbm"
+#include auxdir"ra.xbm"
 
 
 static void G_struct_init( void );
@@ -45,17 +45,17 @@ void start_graphics( void )
 
 	/* It still need some modifications... */
 
-	pixmap_file = get_string( strlen( libdir ) + strlen( "/undo.xpm" ) );
-	strcpy( pixmap_file, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
+	strcpy( pixmap_file, auxdir );
+	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "undo.xpm" );
     fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 	T_free( pixmap_file );
 
-	pixmap_file = get_string( strlen( libdir ) + strlen( "/printer.xpm" ) );
-	strcpy( pixmap_file, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+	pixmap_file = get_string( strlen( auxdir ) + strlen( "/printer.xpm" ) );
+	strcpy( pixmap_file, auxdir );
+	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "printer.xpm" );
     fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
