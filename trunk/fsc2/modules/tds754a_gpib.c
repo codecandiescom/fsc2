@@ -163,7 +163,7 @@ bool tds754a_get_record_length( long *ret )
 	char *r = reply;
 
 
-    if ( gpib_write( tds754a.device, "HOR:RECO?\n", 16 ) == FAILURE ||
+    if ( gpib_write( tds754a.device, "HOR:RECO?\n", 10 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         return FAIL;
 

@@ -450,12 +450,11 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	   for DEF we need the block name without quotes while in ADD
 	   we need quotes...*/
 
-	sprintf( dummy, "%ld,%s\n", block[ 0 ].start, block[ 0 ].blk_name );
+	sprintf( dummy, "%ld,%s", block[ 0 ].start, block[ 0 ].blk_name );
 	l = strlen( dummy );
 	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
-	sprintf( cmd, "DATA:BLOC:DEF #%ld%s", l, dummy );
-	sprintf( cmd + strlen( cmd ), "%ld,%s\n",
+	sprintf( cmd, "DATA:BLOC:DEF #%ld%s%ld,%s\n", l, dummy,
 			 block[ 0 ].start, block[ 0 ].blk_name );
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -493,22 +492,23 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	int i;
 
 
-	for ( i = 0; i < num_blocks; ++i )
-		sprintf( cmd + strlen( cmd ), "%s,%ld,0,0,0,0\n",
-				 block[ i ].blk_name, block[ i ].repeat );
-
-	l = strlen( cmd );
-	sprintf( dummy, "%ld", l - 1 );
+	l = 10 + strlen( block[ 0 ].blk_name );
+	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
-	sprintf( cmd, "DATA:SEQ:DEF #%ld%s", l, dummy );
-
-	for ( i = 0; i < num_blocks; ++i )
-		sprintf( cmd + strlen( cmd ), "%s,%ld,0,0,0,0\n",
-				 block[ i ].blk_name, block[ i ].repeat );
-	cmd[ strlen( cmd ) - 1 ] = '\0';
+	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s%s,1,0,0,0,0\n",
+			 l, dummy, block[ 0 ].blk_name );
 
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );
+
+	for ( i = 1; i < num_blocks; i++ )
+	{
+		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
+				 i, block[ i ].blk_name, block[ i ].repeat );
+
+		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+			dg2020_gpib_failure( );
+	}
 
 	/* For external trigger mode set trigger wait for first (and only) block */
 

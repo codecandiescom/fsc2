@@ -22,8 +22,6 @@ bool tds520_init( const char *name )
 	if ( gpib_init_device( name, &tds520.device ) == FAILURE )
         return FAIL;
 
-	gpib_clr( tds520.device );
-
     /* Set digitizer to short form of replies */
 
     if ( gpib_write( tds520.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE )
