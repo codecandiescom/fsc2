@@ -10,9 +10,11 @@
 
 #define PRG_CHUNK_SIZE 128
 
-/* Number of tokens to be parsed befor forms are checked for user input - too
-   low a number slows down the program quite a lot and even relatively short
-   EDL files with loops may produce an appreciable number of tokens ! */
+/* Number of tokens to be parsed before forms are rechecked for user input -
+   too low a number slows down the program quite a lot and even relatively
+   short EDL files with loops may produce an appreciable number of tokens,
+   while setting it to too large a value will make it difficult for the user
+   to stop the interpreter! */
 
 #define CHECK_FORMS_AFTER   65536
 
@@ -47,20 +49,20 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr );
 
 
 /*-----------------------------------------------------------------------------
-
    This routine stores the experiment section of an EDL file in the form of
-   tokens (together with their semantic values if there is one) as returned by
-   the lexer. Thus it serves as a kind of intermediate between the lexer and
-   the parser. This is necessary for two reasons: First, the experiment
+   tokens (together with their semantic values if there are any) as returned
+   by the lexer. Thus it serves as a kind of intermediate between the lexer
+   and the parser. This is necessary for two reasons: First, the experiment
    section may contain loops. Without an intermediate it would be rather
    difficult to run through the loops since we would have to re-read and
-   re-tokenise the input file again and again, which not only would be slow
-   but also difficult since what we read is not the real EDL file(s) but via a
-   pipe after filtering by the program `fsc2_clean'. Second, we will have to
-   run through the experiment section at least two times, first for syntax and
-   sanity checks and then again for really doing the experiment. Again,
-   without an intermediate for storing the tokenised form of the experiment
-   section this would necessitate reading the input files at least two times.
+   re-tokenise the input file again and again, which not only would be
+   painfully slow but also difficult since what we read is not the real EDL
+   file(s) but a pipe that contains what remains after filtering through the
+   program `fsc2_clean'. Second, we will have to run through the experiment
+   section at least two times, first for syntax and sanity checks and then
+   again for really doing the experiment. Again, without an intermediate for
+   storing the tokenised form of the experiment section this would necessitate
+   reading the input files at least two times.
 
    By having an intermediate between the lexer and the parser we avoid several
    problems. We don't have to re-read and re-tokenise the input file. We also
@@ -169,10 +171,10 @@ void store_exp( FILE *in )
 	loop_setup( );
 }
 
-/*------------------------------------------------------------------------*/
-/* Deallocates all memory used for storing the tokens (and their semantic */
-/* values) of a program.                                                  */
-/*------------------------------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Deallocates all memory used for storing the tokens */
+/* (and their semantic values) of a program.          */
+/*----------------------------------------------------*/
 
 void forget_prg( void )
 {
@@ -182,7 +184,7 @@ void forget_prg( void )
 
 	On_Stop_Pos = -1;
 
-	/* check if anything has to be done at all */
+	/* Check if anything has to be done at all */
 
 	if ( prg_token == NULL )
 	{
@@ -190,7 +192,7 @@ void forget_prg( void )
 		return;
 	}
 
-	/* get the address in the first token where the file names is stored and
+	/* Get the address in the first token where the file names is stored and
 	   free the string */
 
 	cur_Fname = prg_token[ 0 ].Fname;
@@ -212,14 +214,14 @@ void forget_prg( void )
 				break;
 		}
 
-		/* if the file name changed we store the pointer to the new name and
+		/* If the file name changed we store the pointer to the new name and
            free the string */
 
 		if ( prg_token[ i ].Fname != cur_Fname )
 			T_free( cur_Fname = prg_token[ i ].Fname );
 	}
 
-	/* get rid of the memory used for storing the tokens */
+	/* Get rid of the memory used for storing the tokens */
 
 	T_free( prg_token );
 	prg_token = NULL;
@@ -378,7 +380,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
-	bool dont_need_close_paran = UNSET;      /* set for ELSE IF constructs */
+	bool dont_need_close_parans = UNSET;      /* set for ELSE IF constructs */
 
 
 	/* Start with some sanity checks */
@@ -395,6 +397,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 		eprint( FATAL, "%s:%ld: Missing condition after IF.",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
 	}
+
+	/* Now let's get things done... */
 
 	for ( ; i < prg_length; i++ )
 	{
@@ -429,7 +433,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case IF_TOK :
 				setup_if_else( &i, cur_wr );
 
-				if ( dont_need_close_paran )
+				if ( dont_need_close_parans )
 				{
 					if ( cur->end != NULL )
 						( cur->end - 1 )->end = &prg_token[ i + 1 ];
@@ -470,7 +474,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				if(  prg_token[ i + 1 ].token == IF_TOK )
 				{
 					cur->end = &prg_token[ i ];
-					dont_need_close_paran = SET;
+					dont_need_close_parans = SET;
 				}
 
 				break;
@@ -1227,7 +1231,7 @@ void save_restore_variables( bool flag )
 
 	if ( flag )
 	{
-		assert( var_list_copy == NULL );          /* don't save twice ! */
+		assert( var_list_copy == NULL );           /* don't save twice ! */
 
 		/* Count the number of variables and get memory for storing them */
 
