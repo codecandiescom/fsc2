@@ -1445,11 +1445,11 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st *arg, int minor )
 	reg |= 0x4;
 	me6x00_outl( reg, port );
 
-	if ( fifo.endis == ME6X00_DISABLE ) {
-		reg &= 0xFFFFFFF7;
+	if ( fifo.endis == ME6X00_ENABLE ) {
+		reg |= 0x00000008;
 		me6x00_outl( reg, port );
 	} else {
-		reg |= 0x00000008;
+		reg &= 0xFFFFFFF7;
 		me6x00_outl( reg, port );
 	}
 
@@ -1513,11 +1513,11 @@ static int me6x00_endis_extrig( me6x00_endis_st *arg, int minor )
 	reg |= 0x4;
 	me6x00_outl( reg, port );
 
-	if ( trig.endis == ME6X00_DISABLE ) {
-		reg &= 0xFFFFFFEF;
+	if ( trig.endis == ME6X00_ENABLE ) {
+		reg |= 0x00000010;
 		me6x00_outl( reg, port );
 	} else {
-		reg |= 0x00000010;
+		reg &= 0xFFFFFFEF;
 		me6x00_outl( reg, port );
 	}
 

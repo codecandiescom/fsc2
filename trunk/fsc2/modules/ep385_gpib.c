@@ -44,6 +44,7 @@ static void ep385_gpib_failure( void );
 bool ep385_init( const char *name )
 {
 	char cmd[ 100 ];
+	int i;
 
 
 #ifdef EP385_GPIB_DEBUG
@@ -91,6 +92,16 @@ bool ep385_init( const char *name )
 	   tiggering */
 
 	ep385_command( "TIM;SET;TRY\r" );
+
+	/* According to a request by Robert and Stefan all channels get reset
+	   (so they can be sure there are no left-over pulses lurking anywhere)
+	   before the new pulse patterns are set. */
+
+	for ( i = 0; i < MAX_CHANNELS; i++ )
+	{
+		sprintf( cmd, "DIG;SLT%d;PSD2,1,0,0,0,0\r", i + CHANNEL_OFFSET );
+		ep385_command( cmd );
+	}
 
 	ep385_do_update( );
 
