@@ -26,7 +26,11 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "TDS520A"    /* compare entry in /etc/gpib.conf ! */
+/* Include configuration information for the device */
+
+#include "tds520.conf"
+
+
 
 #define TDS_POINTS_PER_DIV 50
 
