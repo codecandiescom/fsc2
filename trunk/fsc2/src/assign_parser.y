@@ -354,10 +354,10 @@ expr:    INT_TOKEN unit            { if ( ! dont_exec )
 		                                 $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list2 ')'  { if ( ! dont_exec )
 		                                 $$ = func_call( $1 ); }
-       | VAR_REF
-       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
-                                             "function.\n", $1->name );
+       | FUNC_TOKEN                { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
+       | VAR_REF
 	   | expr AND                  { if ( ! dont_exec )
 	                                 {
 										 if ( ! check_result( $1 ) )
@@ -651,6 +651,8 @@ static void assignerror ( const char *s )
 
 	if ( *assigntext == '\0' )
 		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
+	else if ( assigntext[ 0 ] == '\x4' )
+		print( FATAL, "Units can only applied to numbers.\n" );
 	else
 		print( FATAL, "Syntax error near '%s'.\n", assigntext );
 	THROW( EXCEPTION );

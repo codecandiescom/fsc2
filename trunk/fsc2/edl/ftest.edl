@@ -1,6 +1,6 @@
 DEVICES:
 
-dg2020;
+dg2020_f;
 
 
 VARIABLES:
@@ -13,7 +13,7 @@ ASSIGNMENTS:
 TIMEBASE: 5 ns;
 MW: POD = 0;
 PHASE_1: MW, POD = 1, 2;
-PHASE_1_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP_1:	X: POD_1 = OFF, POD2 = OFF,
 			   +Y: 1, 0,
 			   -X: 0, 1,
 			   -Y: 1, 1;

@@ -61,7 +61,6 @@ static void conditionerror( const char *s );
 
 static int dont_exec = 0;
 
-
 %}
 
 
@@ -158,11 +157,14 @@ expr:    E_INT_TOKEN unit         { if ( ! dont_exec )
                                         $$ = vars_push( UNDEF_VAR ); }
 		 ']'                      { if ( ! dont_exec )
                                         $$ = vars_arr_rhs( $4 ); }
-       | E_FUNC_TOKEN '(' list2
-         ')'                      { if ( ! dont_exec )
+       | E_FUNC_TOKEN '('
+	     list2 ')'                { if ( ! dont_exec )
 			                            $$ = func_call( $1 );
 	                                else
 										vars_pop( $1 ); }
+       | E_FUNC_TOKEN             { print( FATAL, "'%s' is a predefined "
+										   "function.\n", $1->name );
+	                                THROW( EXCEPTION ); }
        | E_VAR_REF                { if ( dont_exec )
 		                                 vars_pop( $1 ); }
        | E_VAR_TOKEN '('          { print( FATAL, "'%s' isn't a function.\n",
@@ -343,9 +345,13 @@ static void conditionerror( const char *s )
 {
 	UNUSED_ARGUMENT( s );
 
-	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
+	if ( conditionchar >= E_NT_TOKEN && conditionchar <= E_MEG_TOKEN )
+		print( FATAL, "Units can only applied to numbers.\n" );
+	else
+		print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
 }
+
 
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/

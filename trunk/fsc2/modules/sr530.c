@@ -368,7 +368,7 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 1; i++ )
 		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
 			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
@@ -477,7 +477,7 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < TC_ENTRIES - 2; i++ )
+	for ( i = 0; i < TC_ENTRIES - 1; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )

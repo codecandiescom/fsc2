@@ -303,7 +303,7 @@ static void other_data_request( int dim, int type, char *ptr )
 			if ( dim == DATA_1D )
 				rescale_1d( * ( long * ) ptr );
 			else
-				rescale_2d( ( void * ) ptr );
+				rescale_2d( ( long * ) ptr );
 			break;
 
 		case D_SET_MARKER :

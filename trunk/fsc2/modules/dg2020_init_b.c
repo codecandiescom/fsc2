@@ -607,7 +607,7 @@ static void dg2020_pulse_start_setup( void )
 				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
 		PULSE_PARAMS *shape_p, *defense_p;
 
-		if ( fd->num_params != 0 && fs->num_params != 0 )
+		if ( fd->num_params > 0 && fs->num_params > 0 )
 		{
 			shape_p = fs->pulse_params;
 			defense_p = fd->pulse_params + fd->num_params - 1;

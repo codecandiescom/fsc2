@@ -62,8 +62,7 @@ PHASE_SETUP:    MW,
                  X: POD = 1,
                 +Y: POD = 2,
                 -X: POD = 3,
-                -Y: POD = 4,
-                CW: POD = 5;
+                -Y: POD = 4;
 
 
 PREPARATIONS:

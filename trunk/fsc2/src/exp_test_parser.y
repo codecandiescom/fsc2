@@ -180,9 +180,9 @@ et:      ls
 line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
-       | E_FUNC_TOKEN '['
-          { print( FATAL, "'%s' is a predefined function.\n", $1->name );
-		    THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
+	                                 THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('
           { print( FATAL, "'%s' is a variable, not a funnction.\n", $1->name );
 		    THROW( EXCEPTION ); }
@@ -209,21 +209,22 @@ ass:     '=' expr
 expr:    E_INT_TOKEN unit             { }
        | E_FLOAT_TOKEN unit           { }
        | E_VAR_TOKEN                  { }
-       | E_VAR_TOKEN '[' list1 ']'    { }
-       | E_FUNC_TOKEN '(' list2 ')'   { }
        | E_VAR_REF                    { }
-       | E_FUNC_TOKEN '['             { print( FATAL, "%s' is a predefined "
-											   "function.\n", $1->name );
-	                                    THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '[' list1 ']'    { }
        | E_VAR_TOKEN '('              { print( FATAL, "'%s' is a variable, "
 											   "not a function.\n", $1->name );
 	                                    THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN '(' list2 ')'   { }
+       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
+	                                 THROW( EXCEPTION ); }
        | pt
        | bin
        | '+' expr %prec E_NEG
        | '-' expr %prec E_NEG
        | '(' expr ')'
        | E_NOT expr
+       | expr '?' expr ':' expr
 ;
 
 bin:     expr E_AND expr
@@ -241,7 +242,6 @@ bin:     expr E_AND expr
        | expr '/' expr
        | expr '%' expr
        | expr '^' expr
-       | expr '?' expr ':' expr
 ;
 
 unit:    /* empty */
@@ -279,11 +279,10 @@ l2e:     exprs
 ;
 
 exprs:   expr
-       | E_STR_TOKEN
-         strs
+       | strs
 ;
 
-strs:    /* empty */
+strs:    E_STR_TOKEN
        | strs E_STR_TOKEN
 ;
 
@@ -309,13 +308,18 @@ static void exp_testerror( const char *s )
 
 	if ( ! dont_print_error && ! in_cond )
 	{
-		print( FATAL, "Syntax error in EXPERIMENT section.\n" );
+		if ( exp_testchar >= E_NT_TOKEN && exp_testchar <= E_MEG_TOKEN )
+			print( FATAL, "Units can only applied to numbers.\n" );
+		else
+			print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( in_cond )
 	{
-		if ( ( EDL.cur_prg_token - 1 )->token == '=' )
+		if ( exp_testchar >= E_NT_TOKEN && exp_testchar <= E_MEG_TOKEN )
+			print( FATAL, "Units can only applied to numbers.\n" );
+		else if ( ( EDL.cur_prg_token - 1 )->token == '=' )
 			print( FATAL, "Assignment '=' used in loop or IF/UNLESS condition "
 				   "instead of comparison '=='.\n" );
 		else

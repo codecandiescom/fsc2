@@ -48,6 +48,7 @@ EXPERIMENT:
 Rec_len = digitizer_record_length( );
 trig_pos = digitizer_trigger_position( );
 time_base = digitizer_timebase( );
+base_curve[ Rec_len ] = 0.0;
 
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( - trig_pos * Rec_len / 50.0 * time_base * 1.e6,

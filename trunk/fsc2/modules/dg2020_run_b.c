@@ -148,7 +148,7 @@ bool dg2020_reorganize_pulses( bool flag )
 				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
 		PULSE_PARAMS *shape_p, *defense_p;
 
-		if ( fd->num_params != 0 && fs->num_params != 0 )
+		if ( fd->num_params > 0 && fs->num_params > 0 )
 		{
 			shape_p = fs->pulse_params;
 			defense_p = fd->pulse_params + fd->num_params - 1;
@@ -209,27 +209,25 @@ void dg2020_do_checks( FUNCTION *f )
 {
 	PULSE *p;
 	PULSE_PARAMS *pp, *ppn;
-	int i, j;
+	int i;
 
 
 	if ( f->num_active_pulses == 0 )
 		return;
 
-    f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
-    f->old_pulse_params = f->pulse_params;
-
+    f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
 	f->num_params = f->num_active_pulses;
-	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses
+	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_params
 											   * sizeof *f->pulse_params );
 	
-	for ( j = 0, i = 0; i < f->num_pulses; i++ )
+	for ( i = 0; i < f->num_active_pulses; i++ )
 	{
 		p = f->pulses[ i ];
 
 		if ( ! p->is_active )
 			continue;
 
-		pp = f->pulse_params + j++;
+		pp = f->pulse_params + i;
 
 		pp->pulse = p;
 		p->old_pp = p->pp;
@@ -237,7 +235,7 @@ void dg2020_do_checks( FUNCTION *f )
 		pp->pos = p->pos + f->delay;
 		pp->len = p->len;
 
-		if ( f->uses_auto_shape_pulses && pp->len > 0)
+		if ( f->uses_auto_shape_pulses && pp->len > 0 )
 		{
 			pp->pos -= f->left_shape_padding;
 			pp->len += f->left_shape_padding + f->right_shape_padding;

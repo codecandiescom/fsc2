@@ -52,5 +52,4 @@ WHILE field <= end_field {
 	display( 1, I, data );
 	field = sweep_up( );
 	I +=1;
-
 }

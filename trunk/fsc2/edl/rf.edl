@@ -4,8 +4,8 @@ hp8647a;
 
 PREPARATIONS:
 
-synthesizer_set_frequency( 150.0 MHz );
-synthesizer_set_step_frequency( 10.0 MHz );
+synthesizer_frequency( 150.0 MHz );
+synthesizer_step_frequency( 10.0 MHz );
 synthesizer_use_table( );
 
 EXPERIMENT:

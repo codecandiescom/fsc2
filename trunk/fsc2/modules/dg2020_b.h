@@ -182,7 +182,6 @@ typedef struct _F_ {
 	struct CHANNEL **pcm;       /* phase matrix */
 
 	PULSE_PARAMS *pulse_params;
-	PULSE_PARAMS *old_pulse_params;
 	int num_params;
 
 	bool uses_auto_shape_pulses;     /* set when shape pulses are to be set */

@@ -817,7 +817,7 @@ int exp_testlex( void )
 		EDL.Fname = EDL.cur_prg_token->Fname;
 		EDL.Lc = EDL.cur_prg_token->Lc;
 		memcpy( &exp_testlval, &EDL.cur_prg_token->tv,
-				sizeof( Token_Val ) );
+				sizeof exp_testlval );
 		return EDL.cur_prg_token++->token;
 	}
 

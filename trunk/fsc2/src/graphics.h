@@ -380,7 +380,7 @@ void change_scale_2d( int is_set, void *ptr );
 void change_label_1d( char **label );
 void change_label_2d( char **label );
 void rescale_1d( long new_nx );
-void rescale_2d( void *new_dims );
+void rescale_2d( long *new_dims );
 void redraw_canvas_2d( Canvas *c );
 void change_mode( long mode, long width );
 

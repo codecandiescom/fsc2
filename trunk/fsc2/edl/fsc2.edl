@@ -1,6 +1,6 @@
 DEVICES:
 
-dg2020;
+dg2020_f;
 TDS754A;
 
 
@@ -33,12 +33,12 @@ PHASE_1:          POD = 7, 9  CHANNEL = 11, 12, 13, 14, 15, 16, 17, 18,
 				  RF, INV;
 //PHASE_2:          POD = 8, 10 CHANNEL = 15, 16, 17, 18, TWT;
 
-PHASE_1_SETUP:	X: POD_1 = ON, POD2 = OFF,
+PHASE_SETUP_1:	X: POD_1 = ON, POD2 = OFF,
 			   +Y: 0, 0,
 			   -X: 0, 1,
 			   -Y: 1, 1;
 
-PHASE_2_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP_2:	X: POD_1 = OFF, POD2 = OFF,
 			   +Y: ON, OFF,
 			   -X: 0, 1,
 			   -Y: POD1 = 1, 1;
@@ -164,7 +164,7 @@ FOR I = 1:10 {
  		P33.LEN = 0;
  	}
 	pulser_update( );
-	digitizer_start_aquisition( ); 
+	digitizer_start_acquisition( ); 
 	d[ ] = digitizer_get_curve( CH1, Window );
 }
 

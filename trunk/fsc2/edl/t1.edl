@@ -1,6 +1,6 @@
 DEVICES:
 
-dg2020;
+dg2020_f;
 tds754a;
 
 VARIABLES:
@@ -9,6 +9,7 @@ tb = 5 ns;
 I;
 Win;
 c[ * ];
+
 
 ASSIGNMENTS:
 
@@ -20,7 +21,7 @@ TRIGGER_MODE: EXT, SLOPE = POSITIVE, LEVEL = 0.5 V, IMP = HIGH;
 MW:      POD = 0, CHANNEL = 35, V_HIGH = 3V, V_LOW = -1V;
 PHASE_1: POD = 3,4,  MW;
 
-PHASE_1_SETUP:	X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP_1:	X: POD_1 = OFF, POD2 = OFF,
 			   +Y: 0, 1,
 			   -X: 1, 0,
 			   -Y: 1, 1;

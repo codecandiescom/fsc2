@@ -144,7 +144,7 @@ line:    lhs '=' expr              { vars_assign( $3, $1 ); }
        | lhs E_MODA expr           { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | lhs E_EXPA expr           { vars_assign( vars_pow( $1, $3 ), $1 ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
-       | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined "
+       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | plhs '=' expr             { p_set( $1, wpp, $3 ); }
@@ -190,13 +190,13 @@ expr:    E_INT_TOKEN unit          { if ( ! dont_exec )
                                          $$ = func_call( $1 );
 	                                 else
 										 vars_pop( $1 ); }
+       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
+	                                 THROW( EXCEPTION ); }
        | E_VAR_REF                 { if ( dont_exec )
 										 vars_pop( $1 ); }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
-	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined"
-											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS                    { if ( ! dont_exec )
 		                                  $$ = p_get_by_num( $1, P_POS ); }
@@ -368,7 +368,11 @@ static void exp_runerror ( const char *s )
 {
 	UNUSED_ARGUMENT( s );
 
-	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
+
+	if ( exp_runchar >= E_NT_TOKEN && exp_runchar <= E_MEG_TOKEN )
+		print( FATAL, "Units can only applied to numbers.\n" );
+	else
+		print( FATAL, "AASyntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -41,6 +41,7 @@ extern char *prepstext;
 static void prepserror( const char *s );
 
 static int dont_exec = 0;
+static char *f_error = NULL;
 
 %}
 
@@ -96,12 +97,18 @@ input:   /* empty */
        | input ';'                  { EDL.Cur_Pulse = -1; }
        | input line ';'             { EDL.Cur_Pulse = -1;
 	                                  fsc2_assert( EDL.Var_Stack == NULL ); }
-       | input error ';'            { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line P_TOK           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL        { EDL.Cur_Pulse = -1;
 	                                  fsc2_assert( EDL.Var_Stack == NULL );
 	                                  YYACCEPT; }
+       | input error ';'            { if ( f_error != NULL )
+	                                  {
+										  print( FATAL, "'%s' is a predefined "
+												 "function.\n", f_error );
+										  THROW( EXCEPTION );
+									  }
+		   							  THROW( SYNTAX_ERROR_EXCEPTION ); }
 ;
 
 line:    P_TOK prop
@@ -113,7 +120,7 @@ line:    P_TOK prop
        | lhs MODA expr              { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | lhs EXPA expr              { vars_assign( vars_pow( $1, $3 ), $1 ); }
        | FUNC_TOKEN '(' list2 ')'   { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['             { print( FATAL, "'%s' is a predefined "
+       | FUNC_TOKEN                 { print( FATAL, "'%s' is a predefined "
 											 "function.\n", $1->name );
 	                                  THROW( EXCEPTION ); }
 ;
@@ -158,14 +165,16 @@ expr:    INT_TOKEN unit           { if ( ! dont_exec )
 		                                vars_arr_start( $1 ); }
          list1 ']'                { if ( ! dont_exec )
 		                                $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list2 ')' { if ( ! dont_exec )
+       | FUNC_TOKEN               { f_error = $1->name; }
+	     '('                      { f_error = NULL; }
+	     list2 ')'                { if ( ! dont_exec )
 		                                $$ = func_call( $1 ); }
+       | FUNC_TOKEN               { print( FATAL, "'%s' is a predefined "
+										   "function.\n", $1->name );
+	                                THROW( EXCEPTION ); }
        | VAR_REF
        | VAR_TOKEN '('            { print( FATAL, "'%s' isn't a function.\n",
 										   $1->name );
-	                                THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['           { print( FATAL, "'%s' is a predefined "
-										   "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
 	   | expr AND                 { if ( ! dont_exec )
 	                                {
@@ -333,9 +342,10 @@ static void prepserror ( const char *s )
 
 	if ( *prepstext == '\0' )
 		print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );
+	else if ( prepstext[ 0 ] == '\x4' )
+		print( FATAL, "Units can only applied to numbers.\n" );
 	else
-		print( FATAL, "Syntax error near '%s'.\n",
-			   isprint( *prepstext ) ? prepstext : prepstext + 1 );
+		print( FATAL, "Syntax error near '%s'.\n", prepstext );
 	THROW( EXCEPTION );
 }
 
@@ -346,6 +356,7 @@ static void prepserror ( const char *s )
 void prepsparser_init( void )
 {
 	dont_exec = 0;
+	f_error = NULL;
 }
 
 

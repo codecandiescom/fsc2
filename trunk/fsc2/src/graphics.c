@@ -2470,7 +2470,7 @@ void rescale_1d( long new_nx )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void rescale_2d( void *new_dims )
+void rescale_2d( long *new_dims )
 {
 	long i, j, k, l, count;
 	long max_x = 0,
@@ -2480,8 +2480,8 @@ void rescale_2d( void *new_dims )
 	long new_nx, new_ny;
 
 
-	memcpy( &new_nx, new_dims, sizeof new_nx );
-	memcpy( &new_ny, ( char * ) new_dims + sizeof new_nx, sizeof new_ny );
+	new_nx = new_dims[ X ];
+	new_ny = new_dims[ Y ];
 
 	if ( new_nx < 0 && new_ny < 0 )
 		return;

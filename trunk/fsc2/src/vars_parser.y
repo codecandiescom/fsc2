@@ -103,8 +103,8 @@ linet:   VAR_TOKEN                 { }        /* no assignment to be done */
 											"be used in variable "
 											"initialisations.\n" );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { print( FATAL, "'%s()' is a function and "
-											"not an array.\n", $1->name );
+       | FUNC_TOKEN                { print( FATAL, "'%s()' is a predefind "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | VAR_TOKEN '('             { print( FATAL, "'%s' is an array and not "
 											 "a function.\n", $1->name );
@@ -143,14 +143,13 @@ expr:    INT_TOKEN unit            { if ( ! dont_exec )
 	                                     $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list4 ')'  { if ( ! dont_exec )
 	                                     $$ = func_call( $1 ); }
+       | FUNC_TOKEN                { print( FATAL, "'%s()' is a predefind "
+											"function.\n", $1->name );
+	                                 THROW( EXCEPTION ); }
        | VAR_REF
        | VAR_TOKEN '('             { dont_exec = 0;
 	                                 print( FATAL, "'%s' isn't a function.\n",
 											$1->name );
-	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { dont_exec = 0;
-	                                 print( FATAL, "'%s()' is a predefined "
-											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
 	   | expr AND                  { if ( ! dont_exec )
 	                                 {
@@ -351,14 +350,10 @@ static void varserror ( const char *s )
 
 	if ( *varstext == '\0' )
 		print( FATAL, "Unexpected end of file in VARIABLES section.\n");
+	else if ( varstext[ 0 ] == '\x4' )
+		print( FATAL, "Units can only applied to numbers.\n" );
 	else
-	{
-		if ( isprint( *varstext ) )
-			print( FATAL, "Syntax error near token '%s'.\n", varstext );
-		else
-			print( FATAL, "Syntax error near token '\"%s\"'.\n",
-				   varstext + 1 );
-	}
+		print( FATAL, "Syntax error near '%s'.\n", varstext );
 	THROW( EXCEPTION );
 }
 

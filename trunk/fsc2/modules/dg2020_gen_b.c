@@ -670,8 +670,8 @@ bool dg2020_phase_setup( int phs )
 				 dg2020_phs[ phs ].pod[ i ] == dg2020_phs[ phs ].pod[ j ] )
 			{
 				print( FATAL, "The same pod %d is used for phases '%s' and "
-					   "'%s'.\n", dg2020_phs[ phs ].pod[ i ], Phase_Types[ j ],
-					   Phase_Types[ i ] );
+					   "'%s'.\n", dg2020_phs[ phs ].pod[ i ]->self,
+					   Phase_Types[ j ], Phase_Types[ i ] );
 				THROW( EXCEPTION );
 			}
 	}

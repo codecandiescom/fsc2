@@ -1012,7 +1012,7 @@ Var *f_cscale_2d( Var *v )
 			is_set |= 2;
 	}
 
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		y_0 = VALUE( v );
 		is_set |= 4;
@@ -1571,8 +1571,7 @@ Var *f_rescale_2d( Var *v )
 	memcpy( ptr, &new_nx, sizeof new_nx );             /* new # of x points */
 	ptr += sizeof new_nx;
 
-	memcpy( ptr, &new_ny, sizeof new_ny );            /* new # of y points */
-	ptr += sizeof new_ny;
+	memcpy( ptr, &new_ny, sizeof new_ny );             /* new # of y points */
 
 	/* Detach from the segment with the data segment */
 

@@ -13,13 +13,14 @@ fs = 24.9999 kHz;
 
 PREPARATIONS:
 
-print( "\T#, #, #\n", ( ef - sf ) / fs, int( ( ef - sf ) / fs ),
+print( "#, #, #\n", ( ef - sf ) / fs, int( ( ef - sf ) / fs ),
 		ceil( ( ef - sf ) / fs ) );
 
-Z = X + exp( Y ms );
+Z = X + exp( Y );
 
-print( "\TZ = #\n", Z );
-print( "\Ta = #\n", exp( - 1000000 ) );
+print( "Z = #\n", Z );
+print( "a = #\n", exp( - 1000000 ) );
 
 EXPERIMENT:
+Z = X + exp( Y );
 save( R );

@@ -16,9 +16,9 @@ I, J;
 
 EXPERIMENT:
 
-FOR I = 1:size( sl, 1 ) {
+FOR I = 1 : size( sl ) {
 	lockin_sensitivity( sl[ I ] );
-	FOR J = 1:size( tc, 1 ) {
+	FOR J = 1 : size( tc ) {
 		lockin_time_constant( tc[ J ] );
 		wait( 100 ms );
 	}

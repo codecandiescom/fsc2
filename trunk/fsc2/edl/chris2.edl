@@ -73,6 +73,7 @@ FOREVER {
 	I += 1;
 	digitizer_start_acquisition( );
 	curve = 1000.0 * digitizer_get_curve_fast( CH1 );
+	base_curve[ size( curve ) ] = 0.0;
 
 	IF Pretrigger != 0 {
 	    ground = mean( curve, 1, Pretrigger );

@@ -54,10 +54,10 @@ ASSIGNMENTS:
 TIMEBASE:      5 ns;
 TRIGGER_MODE:  INTERNAL, REP_FREQ = 200 Hz;
 
-MW:            POD = 1, 2, 3, 4, 5, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
-PULSE_SHAPE:   POD = 6,             INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
-DEFENSE:       POD = 7,             INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
-TWT_GATE:      POD = 11,                      V_HIGH = 5 V, V_LOW = 0 V;
+MW:            POD = 1, 2, 3, 4, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+PULSE_SHAPE:   POD = 6,          INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+DEFENSE:       POD = 7,          INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+TWT_GATE:      POD = 11,                   V_HIGH = 5 V, V_LOW = 0 V;
 DETECTION:     POD = 0;
       
        
@@ -65,8 +65,7 @@ PHASE_SETUP:   MW,
                 X: POD = 1,
                -X: POD = 2,
                 Y: POD = 3,
-               -Y: POD = 4,
-               CW: POD = 5;
+               -Y: POD = 4;
 
 
 PHASES:
@@ -175,7 +174,7 @@ FOR K = 1 : N_runs {
             
 			/* Now get the data from the digiizer */
 
-			data = get_phase_cycled_area_1d( CH1, WinID1, WinID2 );
+			data = get_phase_cycled_area( CH1, WinID1, WinID2 );
 
             display( I, data[ 1 ] - data[ 2 ] );
             

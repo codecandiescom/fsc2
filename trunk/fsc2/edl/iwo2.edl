@@ -52,8 +52,8 @@ FOR K = 1 : 3 {
 	WHILE field <= end_field[ K ] {
 		  digitizer_start_acquisition( );
 		  data = digitizer_get_curve( FUNC_E );
-		  FOR J = 1 : size( data, 1 ) {
-		  fsave( F1, "# ", data[ J ] );
+		  FOR J = 1 : size( data ) {
+			  fsave( F1, "# ", data[ J ] );
 		  }
 		  fsave( F1, "\n" );
 		  display( 1, round( ( field - start_field[ 1 ] ) / field_step ) + 1,

@@ -14,14 +14,14 @@ a4 = 2 s;
 
 b = 40 mV;
 d[* ];
-c[ 2, 3 ] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+c[ 2, 3 ] = { { 1.0, 2.0, 3.0 }, { 4.0, 5.0, 6.0 } };
 D[ * ];
 
 N = 100;
 
-X[ 3, 3, 3 ] = {  9,  8,  7,  6,  5,  4,  3,  2,  1,
-				 19, 18, 17, 16, 15, 14, 13, 12, 11,
-				 29, 28, 27, 26, 25, 24, 23, 22, 21 };
+X[ 3, 3, 3 ] = { { {  9,  8,  7 }, {  6,  5,  4 }, {  3,  2,  1 } },
+				 { { 19, 18, 17 }, { 16, 15, 14 }, { 13, 12, 11 } },
+				 { { 29, 28, 27 }, { 26, 25, 24 }, { 23, 22, 21 } } };
 
 dt1, dt2;
 
@@ -36,15 +36,16 @@ print( "I = #\n", I );
 I += square( 3 );
 print( "I = #\n", I );
 
-print ( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
-X[1,1,2] += 3;
-print( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
+print ( "X[ 1, 1, 2 ] = #\n", X[ 1, 1, 2 ] );
+X[ 1, 1, 2 ] += 3;
+print( "X[ 1, 1, 2 ] = #\n", X[ 1, 1, 2 ] );
 
 print( "This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line. This a very long line.\n" );
 print( "b = #\n", b );
 print( "dim = #\n", dim( c ) );
-print( "size[1] = #, size[2] = #\n", size( c, 1 ), size( c, 2 ) );
-D[ ] = sizes( c );
+print( "size[1] = #, size[2] = #\n", size( c ), size( c[ 1 ] ) );
+D[ 1 ] = size( c );
+D[ 2 ] = size( c[ 1 ] );
 print( "D[ 1 ] = #, D[ 2 ] = #\n", D[ 1 ], D[ 2 ] );
 d[] = c[2];
 print( "# # #\n", d[ 1 ], d[ 2 ], d[ 3 ]);
@@ -107,8 +108,8 @@ save_program( F1, "# ");
 save_output( F1, "% " );
 fsave( F1, "# # #, \n#\n\n\n", 1, 2, 3, X[ 2, 2, 2 ] );
 
-FOR I = 1 : size( c, 1 ) {
-	FOR J = 1 : size( c, 2 ) {
+FOR I = 1 : size( c ) {
+	FOR J = 1 : size( c[ 1 ] ) {
 		fsave( F1, "c[ #, # ] = #\n", I, J, c[ I, J ] );
 	}
 }
