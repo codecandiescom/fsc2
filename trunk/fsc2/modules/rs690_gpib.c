@@ -414,7 +414,7 @@ static void rs690_calc_tables( void )
 	{
 		rs690.new_table.table_loops_1 = count % MAX_LOOP_REPETITIONS;
 		rs690.new_table.table_loops_2 = MAX_LOOP_REPETITIONS;
-		rs690.new_table.middle_loops = count / MAX_LOOP_REPETITIONS;
+		rs690.new_table.middle_loops  = count / MAX_LOOP_REPETITIONS;
 	}
 }
 
@@ -459,6 +459,9 @@ static void rs690_table_set( int i, int k, FS *n )
 						 ( n->fields[ i ] >> 4 ) & 0xF,
 						 n->fields[ i ] & 0xF );
 			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
 	}
 
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
