@@ -250,8 +250,9 @@ bool fsc2_locking( void )
 {
 	int fd, flags;
 	struct flock lock;
-	char message[ 128 ] = "If not, delete the lockfile ";
+	char message[ 128 ] = "running. ";
 	char buf[ 10 ];
+	int i;
 
 
 	/* Open a lock file */
@@ -270,12 +271,24 @@ bool fsc2_locking( void )
 	lock.l_whence = SEEK_SET;
 	lock.l_len = 0;
 
-	if ( fcntl( fd, F_SETLK, &lock ) == -1 )
+	if ( fcntl( fd, F_SETLK, &lock ) == -1 )           /* if lock failed */
 	{
-		strcat( message, LOCKFILE );
-		strcat( message, " and restart." );
-		fl_show_alert( "Error",
-					   "Another instance of is fsc2 is already running.",
+		/* Try to read from the lock file the PID of the process holding
+		   the lock and add it to the error message */
+
+		i = 0;
+		do
+			read( fd, ( void * ) ( buf + i ), sizeof( char ) );
+		while ( buf[ i ] != '\n' && i++ < 10 );
+		if ( i != 10 )
+		{
+			buf[ i ] = '\0';
+			strcat( message, " Its PID is " );
+			strcat( message, buf );
+			strcat( message, "." );
+		}
+		
+		fl_show_alert( "Error", "Another instance of fsc2 is already",
 					   message, 1 );
 		return FAIL;
 	}
