@@ -125,8 +125,8 @@ IV. Documentation
 =================
 
 In the 'driver' subdirectory you will find a file named 'ni_daq_drv.txt'.
-It's supposed to become a complete description of the ioctl() calls that
-can used to deal with the card, unfortuately I am noit finished with it
+It's supposed to become a complete description of the system calls that
+can used to deal with the card. Unfortuately I am not finished with it
 yet.
 
 In the 'lib' subdirectory a file named 'ni_daq_lib.txt' describes the
