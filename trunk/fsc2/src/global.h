@@ -369,6 +369,15 @@ enum {
 #define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
 
 
+/* In case of a crash we want to send out a mail including the program counter
+   where the crash happened. Within the signal handler this program counter
+   is stored at the following offset from the content of the ebp register
+   (of course, this only will work with a i386 type processor and only with
+   gcc of the versions where I tested it...) */
+
+#define CRASH_ADDRESS_OFFSET 0x11
+
+
 #endif /* ! FSC2_GLOBAL */
 
 

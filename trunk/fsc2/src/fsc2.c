@@ -1624,6 +1624,9 @@ void main_sig_handler( int signo )
 {
 	int errno_saved;
 	pid_t pid;
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
 
 
 	switch ( signo )
@@ -1666,7 +1669,17 @@ void main_sig_handler( int signo )
 			fsc2_death = signo;
 
 			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
+			{
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+				if ( Internals.is_i386 )
+				{
+					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+					Internals.crash_address =
+								   ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET );
+				}
+#endif
 				DumpStack( );
+			}
 
 			exit( EXIT_FAILURE );
 	}

@@ -919,6 +919,11 @@ static void setup_child_signals( void )
 
 static void child_sig_handler( int signo )
 {
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+#endif
+
+
 	switch ( signo )
 	{
 		case DO_QUIT :                             /* aka SIGUSR2 */
@@ -953,6 +958,14 @@ static void child_sig_handler( int signo )
 			if ( ! ( Internals.cmdline_flags & NO_MAIL ) &&
 				 signo != SIGTERM )
 			{
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+				if ( Internals.is_i386 )
+				{
+					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+					Internals.crash_address =
+								   ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET );
+				}
+#endif
 				DumpStack( );
 				death_mail( signo );
 			}
