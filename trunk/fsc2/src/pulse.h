@@ -4,10 +4,6 @@
 #include "fsc2.h"
 
 
-#define MAX_PULSE_NUM  400
-
-
-
 typedef struct Pulse_ {
 
 	int num;                  /* number of pulse */

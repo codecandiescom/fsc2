@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.13  1999/07/19 07:40:08  jens
+   *** empty log message ***
+
    Revision 1.12  1999/07/17 15:58:23  jens
    Bug fix.
 
@@ -771,7 +774,7 @@ Var *vars_negate( Var *v )
 /* than the second variable (tests for greater or greater or equal can be   */
 /* done simply by switching the arguments).                                 */
 /* ->                                                                       */
-/*    * type of comparision (EQUAL, LESS or LESS_EQUAL)                     */
+/*    * type of comparision (COMP_EQUAL, COMP_LESS or COMP_LESS_EQUAL)      */
 /*    * pointers to the two variables                                       */
 /* <-                                                                       */
 /*    * 1 (TRUE) or 0 (FALSE) depending on result of comparision            */
@@ -791,21 +794,21 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 	switch ( comp_type )
 	{
-		case EQUAL :
+		case COMP_EQUAL :
 			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    == ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;
 			new_var = vars_push( INT_VAR, ( void * ) &res );
 			break;
 
-		case LESS :
+		case COMP_LESS :
 			res = (   ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    < ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;
 			new_var = vars_push( INT_VAR, ( void * ) &res );
 			break;
 
-		case LESS_EQUAL :
+		case COMP_LESS_EQUAL :
 			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    <= ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;

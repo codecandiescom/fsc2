@@ -100,11 +100,13 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );
 	                                 THROW( VARIABLES_EXCEPTION ); }
-       | expr EQ expr              { $$ = vars_comp( EQUAL, $1, $3 ); }
-       | expr LT expr              { $$ = vars_comp( LESS, $1, $3 ); }
-       | expr GT expr              { $$ = vars_comp( LESS, $3, $1 ); }
-       | expr LE expr              { $$ = vars_comp( LESS_EQUAL, $1, $3 ); }
-       | expr GE expr              { $$ = vars_comp( LESS_EQUAL, $3, $1 ); }
+       | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr GT expr              { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr LE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
+													 $1, $3 ); }
+       | expr GE expr              { $$ = vars_comp( COMP_LESS_EQUAL,
+													 $3, $1 ); }
        | expr '+' expr             { $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
        | expr '*' expr             { $$ = vars_mult( $1, $3 ); }

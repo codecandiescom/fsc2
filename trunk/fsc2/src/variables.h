@@ -58,22 +58,10 @@ typedef struct AStack_
 } AStack;
 
 
-/* the different types of variables */
-
 enum {
-	UNDEF_VAR = -1,
-	INT_VAR,
-	FLOAT_VAR,
-	INT_ARR,
-	FLOAT_ARR,
-	FUNC,
-};
-
-
-enum {
-	EQUAL,
-	LESS,
-	LESS_EQUAL
+	COMP_EQUAL,
+	COMP_LESS,
+	COMP_LESS_EQUAL
 };
 
 
