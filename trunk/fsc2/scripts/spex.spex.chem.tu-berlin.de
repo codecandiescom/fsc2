@@ -92,9 +92,9 @@ sub calib {
 /* 2. If necessary change the range for the scan over the    */
 /*    laser line (also in absolute wavenumber units) and the */
 /*    step width.                                            */
-/* 3. If necessary change the sampling time (i.e. the time   */
-/*    for which at every spectral position photons are       */
-/*    counted).                                              */
+/* 3. Adjust the sampling time (i.e. the time for which at   */
+/*    every spectral position photons are counted) as        */
+/*    required.                                              */
 /* 4. Make sure the slit of the monochromator isn't too wide */
 /*    open, otherwise you could destroy the PMT!             */
 /* 5. Press the "Start scan" button and wait for the end of  */
@@ -102,12 +102,12 @@ sub calib {
 /* 6. Either enter the position where the laser line did     */
 /*    appear during the scan (you can determine the position */
 /*    by pressing both the left and the right mouse button   */
-/*    while moving the mouse to the top of the peak, it's    */
+/*    while moving the mouse to the top of the peak, its     */
 /*    coordinates will be shown in the upper left hand       */
 /*    corner of the window with the spectrum) or by pressing */
 /*    the "Find line" button (please note: this will only    */
 /*    lead to reasonable results when the spectrum has been  */
-/*    measured with a good S/N ratio, e.g. above 200).       */
+/*    measured with a good S/N ratio, e.g. above ca. 200).   */
 /* 7. After determining the observed line position press the */
 /*    "Accept" button to make the program automatically      */
 /*    correct for the deviation between the exact and the    */
@@ -398,24 +398,26 @@ sub monit {
 
 	print F <<EOF;
 /*-----------------------------------------------------------*/
-/* EDL script for mitor mode:                                */
-/* 1. "Scan start" allows to set a new spectral position for */
-/*    the start of a scan.                                   */
+/* EDL script for monitor mode:                              */
+/* 1. "Scan start" input field allows to set a new spectral  */
+/*    position for the start of a scan.                      */
 /* 2. Press the button "Go to scan start position" to set    */
-/*    monochromator to the scan start position (instead of   */
-/*    defering the action until a scan is started). Can be   */
-/*    used while sampling but not while scan is in progress. */
+/*    the monochromator to the scan start position (instead  */
+/*    of deferring this until the moment a scan is started). */
+/*    Can be used while sampling but not while scan is in    */
+/*    progress.                                              */
 /* 3. Use the "Scan step size" and "Sampling time" fields    */
 /*    to set up the wavenumber decrement used in a scan and  */
 /*    the time photons are counted at spectral positions.    */
 /* 4. Use the "Start scan" button to start a scan and the    */
 /*    "Start sampling" button to start sampling (but without */
 /*    changing the spectral position).                       */
-/* 5. Use the "Stop scan/sampling" to abort a scan or stop   */
-/*    sampling mode.                                         */
-/* 6. The "Relative units" and "Absolute units" allow you    */
-/*    to switch between display of wavenumber units relative */
-/*    to the laser line position and absolute wavenumbers.   */
+/* 5. The "Stop scan/sampling" button is for aborting a scan */
+/*    or for stopping in sampling mode.                      */
+/* 6. The "Relative units" and "Absolute units" buttons      */
+/*    allow you to switch between display of wavenumbers     */
+/*    either relative to the laser line position or in       */
+/*    absolute units.                                        */
 /* 7. Use the "Clear screen" button to remove all displayed  */
 /*    data.                                                  */
 /*-----------------------------------------------------------*/
@@ -1006,11 +1008,11 @@ step_size =  $sz cm^-1;
 mtime     =  $mt s;
 N_scans   =  $Ns;
 
-N_points = int( ceil( ( end_wn - start_wn ) / step_size ) );
+N_points = int( ceil( ( end_wn - start_wn ) / step_size ) ) + 1;
 data[ N_points ];
 mean_data[ N_points ];
 new_mean;
-cwn = start_wn;
+cwn[ N_points ] = { start_wn };
 laser_line;
 
 I, J;
@@ -1039,7 +1041,7 @@ B_abs  = button_create( "RADIO_BUTTON", B_rel, "Absolute units" );
 button_state( B_rel, "ON" );
 B_cr   = output_create( "INT_OUTPUT", 1,
 						 sprint( "Current scan (of #)", N_scans ) );
-B_cwn  = output_create( "FLOAT_OUTPUT", cwn,
+B_cwn  = output_create( "FLOAT_OUTPUT", cwn[ 1 ],
 						"Current position [cm^-1 rel.]", "", "%.4f" );
 B_stop = button_create( "PUSH_BUTTON", "Stop on end of scan" );
 hide_toolbox( "OFF" );
@@ -1061,7 +1063,7 @@ FOR I = 1 : N_scans {
 			change_scale( laser_line - start_wn, -step_size );
 			change_label( "Wavenumber [cm^-1 abs.]" );
 			object_change_label( B_cwn, "Current position [cm^-1 abs.]" );
-			output_value( B_cwn, laser_line - cwn );
+			output_value( B_cwn, laser_line - cwn[ J ] );
 			Display_Mode = 1;
 		}
 
@@ -1069,7 +1071,7 @@ FOR I = 1 : N_scans {
 			change_scale( start_wn, step_size );
 			change_label( "Wavenumber [cm^-1 rel.]" );
 			object_change_label( B_cwn, "Current position [cm^-1 rel.]" );
-			output_value( B_cwn, cwn );
+			output_value( B_cwn, cwn[ J ] );
 			Display_Mode = 0;
 		}
 
@@ -1077,12 +1079,12 @@ FOR I = 1 : N_scans {
 		new_mean = ( ( I - 1 ) * mean_data[ J ] + data[ J ] ) / I;
 		display( J, new_mean, 2, J, data[ J ], 1 );
 
-		save( F_cur, data[ J ] );
+		fsave( F_cur, "# #\\n", cwn[ J ], data[ J ] );
 
 		IF J < N_points {
-			cwn = monochromator_scan_step( );
-			output_value( B_cwn,
-				 Display_Mode == 0 ? cwn : laser_line - cwn );
+			cwn[ J + 1 ] = monochromator_scan_step( );
+			output_value( B_cwn, Display_Mode == 0 ?
+						  cwn[ J + 1 ] : laser_line - cwn[ J + 1 ] );
 		}
 	}
 
@@ -1098,12 +1100,14 @@ FOR I = 1 : N_scans {
 
 ON_STOP:
 
-IF Scan_is_done == 0 {
+IF ! Scan_is_done  {
 	I -= 1;
 }
 
 IF I > 0 {
-	save( F_all, mean_data );
+	FOR J = 1 : N_points {
+		fsave( F_all, "# #\\n", cwn[ J ], mean_data[ J ] );
+	}
 }
 EOF
 
