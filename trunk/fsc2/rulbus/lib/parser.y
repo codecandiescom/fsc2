@@ -270,7 +270,7 @@ static int set_nchan( unsigned int nchan )
 
 	/* Check that it's not too large */
 
-	if ( nchan < 1 || nchan > ADC12_MAX_CHANNELS )
+	if ( nchan < 1 || nchan > RULBUS_ADC12_MAX_CHANNELS )
 		return RULBUS_CHN_INV;
 
 	rulbus_card[ rulbus_num_cards - 1 ].nchan = nchan;

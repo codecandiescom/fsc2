@@ -272,8 +272,9 @@ freq_counter_measure, 0, EXP;
 freq_counter_command, 1, EXP;
 
 
-/* Functions exported by DAQ cards and devices (PCI-MIO-16E-1, ME-6000 and
-   ME-6100, home build DA and ADC from Heinz-Juergen Steinhoffs group) */
+/* Functions exported by DAQ cards and devices (PCI-MIO-16E-1, ME-6000,
+   ME-6100, home build DA and ADC from Heinz-Juergen Steinhoffs group
+   and Rulbus RB8509  12-bit ADC */
 
 daq_name, 0, ALL;
 daq_reserve_dac, -1, ALL;
@@ -305,6 +306,8 @@ daq_reserve_freq_out, -1, ALL;
 daq_freq_out, -1, EXP;
 daq_trigger_setup, -1, EXP;
 
+daq_trigger_mode, -1, ALL;              // RB8905 only
+daq_gain, -1, ALL;                      // RB8905 only
 
 /* Functions exported by event counters (NatInst 6601) */
 

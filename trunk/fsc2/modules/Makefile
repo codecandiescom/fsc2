@@ -107,7 +107,7 @@ comp_modules    += pci_mio_16e_1
 endif
 
 ifdef WITH_RULBUS
-#simp_modules    += rulbus_adc12
+simp_modules    += rb8509
 #comp_modules    += rulbus_pulser
 endif
 

@@ -84,6 +84,9 @@ typedef enum
 #define RB8515_WIDTH 1
 
 
+#define RULBUS_ADC12_MAX_CHANNELS   16    /* there are also some with only 8 */
+
+
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
 
 struct RULBUS_CARD_LIST {
