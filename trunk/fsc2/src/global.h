@@ -31,22 +31,6 @@
 #define LOCKFILE "/tmp/fsc2.lock"
 
 
-/* Define the default delay for phase pulses needed for phase switching 
-   (used in for the Frankfurt pulser) */
-
-#define DEFAULT_PHASE_SWITCH_DELAY 2e-8    /* 20 ns */
-
-/* This defines the amount of time that we try to prolong all pulse sequences
-   to allow for a jitter due to different cable lengths with the resulting
-   problems for phase pulses (they may end a bit to early and thus lead to
-   strange artefacts at the end of an experiment) etc. If the pulser time base
-   is larger we try to allow for at least one time base at the end of the
-   pulse sequence. Define GRACE_PERIOD as 0 to switch off setting of a grace
-   period. (used in for the Frankfurt pulser) */
-
-#define GRACE_PERIOD 1e-8                  /* 10 ns */
-
-
 /* Define number of colors to be used in 2D graphics - must be less than
    FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005. On
    the other hand, the sum of all colors shouldn't exceed the number of

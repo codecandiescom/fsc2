@@ -25,6 +25,11 @@
 #include "fsc2.h"
 
 
+/* Include configuration information for the device */
+
+#include "dg2020_b.conf"
+
+
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
@@ -56,10 +61,6 @@ Var *pulser_lock_keyboard( Var *v );
 #define Ticks_max l_max
 #define Ticks_min l_min
 
-
-/* name of device as given in GPIB configuration file /etc/gpib.conf */
-
-#define DEVICE_NAME "DG2020_B"
 
 
 #define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
@@ -94,10 +95,6 @@ Var *pulser_lock_keyboard( Var *v );
 #define STOP  ( ( bool ) 0 )
 
 #define MAX_PODS_PER_FUNC       5
-
-
-#define TWT_2_DEFENSE_MIN_DISTANCE 4.3e-7   // 430 ns
-#define DEFENSE_2_TWT_MIN_DISTANCE 1.0e-7
 
 
 /* A pulse is acive if it has a position and a length set and if the length

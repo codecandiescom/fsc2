@@ -26,6 +26,11 @@
 #include "fsc2.h"
 
 
+/* Include configuration information for the device */
+
+#include "dg2020_f.conf"
+
+
 /* Here are all the directy exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
@@ -55,11 +60,6 @@ Var *pulser_lock_keyboard( Var *v );
 #define Ticks long              // for times in units of the pulsers time base
 #define Ticks_max l_max
 #define Ticks_min l_min
-
-
-/* name of device as given in GPIB configuration file /etc/gpib.conf */
-
-#define DEVICE_NAME "DG2020_F"
 
 
 #define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
