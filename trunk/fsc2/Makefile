@@ -8,7 +8,7 @@ objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -W -DDEBUG
 modules        = User_Functions.c
-
+header         = ${c_sources:.c=.h} global.h
 
 
 .PHONY: all
@@ -16,52 +16,52 @@ all: tags fsc2 mods
 
 
 
-fsc2: $(objects) fsc_clean fsc2.h
+fsc2: $(objects) fsc_clean $(header)
 	libtool gcc -export-dynamic -o $@ $(objects) -lm -ldl
 
-split_lexer.c: split_lexer.flex fsc2.h
+split_lexer.c: split_lexer.flex $(header)
 	flex -B -Psplit -osplit_lexer.c split_lexer.flex
 
 devices_parser.c devices_parser.h: devices_parser.y
 	bison -d -v -t -p devices -o devices_parser.c devices_parser.y
 
-devices_lexer.c: devices_lexer.flex fsc2.h
+devices_lexer.c: devices_lexer.flex $(header)
 	flex -B -Pdevices -odevices_lexer.c devices_lexer.flex
 
 assign_parser.c assign_parser.h: assign_parser.y
 	bison -d -v -t -p assign -o assign_parser.c assign_parser.y
 
-assign_lexer.c: assign_lexer.flex fsc2.h
+assign_lexer.c: assign_lexer.flex $(header)
 	flex -B -Passign -oassign_lexer.c assign_lexer.flex
 
-vars_parser.c vars_parser.h: vars_parser.y fsc2.h
+vars_parser.c vars_parser.h: vars_parser.y $(header)
 	bison -d -v -t -p variables -o vars_parser.c vars_parser.y
 
-vars_lexer.c: vars_lexer.flex fsc2.h
+vars_lexer.c: vars_lexer.flex $(header)
 	flex -B -Pvariables -ovars_lexer.c vars_lexer.flex
 
-phases_parser.c phases_parser.h: phases_parser.y fsc2.h
+phases_parser.c phases_parser.h: phases_parser.y $(header)
 	bison -d -v -t -p phases -o phases_parser.c phases_parser.y
 
-phases_lexer.c: phases_lexer.flex fsc2.h
+phases_lexer.c: phases_lexer.flex $(header)
 	flex -B -Pphases -ophases_lexer.c phases_lexer.flex
 
-preps_parser.c preps_parser.h: preps_parser.y fsc2.h
+preps_parser.c preps_parser.h: preps_parser.y $(header)
 	bison -d -v -t -p preps -o preps_parser.c preps_parser.y
 
-preps_lexer.c: preps_lexer.flex fsc2.h
+preps_lexer.c: preps_lexer.flex $(header)
 	flex -B -Ppreps -opreps_lexer.c preps_lexer.flex
 
-prim_exp_run_parser.c: prim_exp_run_parser.y fsc2.h
+prim_exp_run_parser.c: prim_exp_run_parser.y $(header)
 	bison -v -t -p prim_exp_run -o prim_exp_run_parser.c prim_exp_run_parser.y
 
-prim_exp_lexer.c: prim_exp_lexer.flex fsc2.h
+prim_exp_lexer.c: prim_exp_lexer.flex $(header)
 	flex -B -Pprim_exp -oprim_exp_lexer.c prim_exp_lexer.flex
 
-condition_parser.c: condition_parser.y fsc2.h
+condition_parser.c: condition_parser.y $(header)
 	bison -v -t -p condition -o condition_parser.c condition_parser.y
 
-func_list_lexer.c: func_list_lexer.flex fsc2.h
+func_list_lexer.c: func_list_lexer.flex $(header)
 	flex -B -Pfunc_list -ofunc_list_lexer.c func_list_lexer.flex
 
 %.o: %.c
@@ -70,7 +70,7 @@ func_list_lexer.c: func_list_lexer.flex fsc2.h
 fsc_clean: fsc_clean.o exceptions.o util.o T.o util.o variables.o
 	gcc $(CFLAGS) -O2 -lm -o $@ fsc_clean.o exceptions.o util.o T.o variables.o
 
-fsc_clean.c: fsc_clean.flex fsc2.h
+fsc_clean.c: fsc_clean.flex $(header)
 	flex -B -ofsc_clean.c fsc_clean.flex
 
 
@@ -79,7 +79,7 @@ fsc_clean.c: fsc_clean.flex fsc2.h
 mods: lib_fsc2_$(modules:.c=.la)
 	export LD_LIBRARY_PATH=`pwd`/.libs
 
-lib_fsc2_%.la: %.c fsc2.h
+lib_fsc2_%.la: %.c $(header)
 	libtool gcc $(CFLAGS) -c $<
 	libtool gcc -module -o $@ $*.lo -rpath /usr/local/lib -lm
 
@@ -92,4 +92,4 @@ clean:
 
 
 tags:
-	etags -T ${c_sources} *.flex *.y *.h
+	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)
