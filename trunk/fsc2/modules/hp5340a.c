@@ -117,7 +117,7 @@ Var *freq_counter_measure( Var *v )
 	v = v;
 
 	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, HP5430A_DEFAULT_FREQUENCY );
+		return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
 
 	return vars_push( FLOAT_VAR, h95340a_get_freq( ) );
 }
