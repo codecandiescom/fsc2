@@ -114,7 +114,7 @@ void *T_free( void *ptr )
 #if defined MDEBUG
 	fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
 	fflush( stderr );
-	assert( mprobe( ptr ) == MCHECK_OK );
+	fsc2_assert( mprobe( ptr ) == MCHECK_OK );
 #endif
 
 	free( ptr );
