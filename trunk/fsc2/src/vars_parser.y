@@ -92,7 +92,7 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
 	                                  $$ = vars_mult(
 										    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit           { if ( $2 == NULL )
-                                      $$ = vars_push( $1 );
+                                      $$ = vars_push( $1->type, $1 );
                                     else
 	                                  $$ = vars_mult( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
