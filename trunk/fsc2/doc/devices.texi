@@ -542,11 +542,11 @@ second the field at the maximum DAC output voltage. The file may contain
 character ('@code{#}') are taken to be comments.
 
 The module @code{hfs_fc} per default tries to determine the data
-described above by doing a measurement of the maximum and minimum
-field position at the start of an experiment. But if in the
+described above by doing a measurement of the minimum and maximum field
+position at the start of each experiment. But if in the
 @code{PREPARATIONS} section @code{magnet_calibration_file()} is invoked
-data from the configuration file are used instead, thus avoiding a length
-measurement.
+the data from the configuration file are used instead, thus avoiding the
+lengthy measurement.
 
 The function can only be used in the @code{PREPARATIONS} section.
 
