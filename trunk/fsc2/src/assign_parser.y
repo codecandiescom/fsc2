@@ -169,9 +169,14 @@ pcd:    /* empty */
 
 
 pod:    POD_TOKEN sep1
-        INT_TOKEN sep2             { p_assign_pod( Channel_Type,
+        INT_TOKEN pm               { p_assign_pod( Channel_Type,
 												  vars_push( INT_VAR, $3 ) ); }
-;								  
+;
+
+pm:     sep2 INT_TOKEN sep2       { p_assign_pod( Channel_Type,
+												  vars_push( INT_VAR, $2 ) ); }
+      | sep2
+;
 								  
 chd:    CH_TOKEN sep1 ch1
 ;
