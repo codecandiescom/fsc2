@@ -69,7 +69,7 @@ Features
   are already part of the package and can be used as a starting point
   for developing drivers for new devices.
 
-* fsc2 is well-documented, an 150+ page documentation in HTML, info,
+* fsc2 is well-documented, an 180 page documentation in HTML, info,
   PostScript and PDF format, covering all aspects of fsc2, i.e the
   graphical interface, the EDL language, device functions and writing of
   new device modules, is part of the package.
@@ -88,15 +88,17 @@ Currently suported devices
 * LeCroy Digitizing Oscilloscope 9400
 * Sony/Tektronix Data Generator DG2020
 * Tektronix Stimulus System HFS9003
+* Bruker EP 385 Pulse Programmer
 * Stanford Research Lock-In Amplifier SR510, SR530, SR810, SR830
 * AEG Magnet Power Supply (home-build computer control, S-, X-Band)
 * Bruker Field controller ER 032 M
 * Keithley 228A (used as superconducting magnet power supply)
 * Oxford Magnet Sweep Power Supply IPS20-4
 * Bruker Hall Effect Field Controller BH 15
-* Bruker NMR Gaussmeter ER 035 M (F0, F1 probe, serial port and GPIB versions)
+* Bruker NMR Gaussmeter ER 035 M (F0, F1 probe, serial port and GPIB version)
 * Metrolab NMR Teslameter PT2025
-* HP RF Synthesizer HP8647A
+* Hewlett-Packard RF Synthesizer HP8647A
+* Hewlett-Packard Frequency Counter HP5340A
 * Bruker Signal Channel ER 023 M
 * Lake Shore 330 Temperature Controller
 * Kontron 4060 Voltmeter
