@@ -1015,13 +1015,13 @@ descriptor. If the function gets passed an invalid serial port number
 
 As you will already know the interpretation of an @acronym{EDL} file
 consists of several steps. When the file is tested and a @code{DEVICES}
-section is found all modules for the devices listed here are loaded.
-When in the test the @code{EXPERIMENT} section is found the test run is
-started in which the program is tested as far as possible. When the test
-was successful, the experiment may be run repeatedly. To allow
-initialization of the modules internal parameters, initialization of the
-devices etc. for each of these stages hook functions can be defined in
-the modules that will be executed automatically at appropriate times (if
+section is found all modules for the devices listed are loaded. When in
+the test the @code{EXPERIMENT} section is found the test run is started
+in which the program is tested as far as possible. When the test was
+successful the experiment may be run repeatedly. To allow initialization
+of the modules internal parameters, initialization of the devices
+etc.@: for each of these stages hook functions can be defined in the
+modules that will be executed automatically at appropriate times (if
 they exist).
 
 Thus, each module may contain up to six pre-defined hook functions that
