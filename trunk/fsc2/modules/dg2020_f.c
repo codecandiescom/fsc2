@@ -3,10 +3,10 @@
 */
 
 
-#define DG2020_MAIN
+#define DG2020_F_MAIN
 
 
-#include "dg2020.h"
+#include "dg2020_f.h"
 #include "gpib.h"
 
 
@@ -22,13 +22,18 @@ int dg2020_init_hook( void )
 	int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+	/* Check that the Berlin version of the driver isn't already loaded */
 
-	need_GPIB = SET;
+ 	if ( exist_device( "dg2020_b" ) )
+	{
+		eprint( FATAL, "%s:%ld: Found that driver for device DG2020_B is "
+				"already installed while loading driver for DG2020_F.",
+				F_name, Lc );
+		THROW( EXCEPTION );
+	}
 
-	/* First we test that the name entry in the pulser structure is NULL,
-	   otherwise we've got to assume, that another pulser driver has already
-	   been installed. */
+	/* Now test that the name entry in the pulser structure is NULL, otherwise
+	   assume, that another pulser driver has already been installed. */
 
 	if ( pulser_struct.name != NULL )
 	{
@@ -39,6 +44,10 @@ int dg2020_init_hook( void )
 	}
 
 	pulser_struct.name = get_string_copy( "DG2020" );
+
+	/* Set global variable to indicate that GPIB bus is needed */
+
+	need_GPIB = SET;
 
 	/* Than we have to set up the global structure for the pulser, especially
 	   we have to set the pointers for the functions that will get called from

@@ -265,7 +265,7 @@ typedef struct _p_ {
 /* Here the global variables of the module are declared */
 
 
-#if defined (DG2020_MAIN )
+#if defined (DG2020_F_MAIN )
 
 bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
