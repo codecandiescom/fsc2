@@ -20,6 +20,10 @@
 # Boston, MA 02111-1307, USA.
 
 
+# Please note: When there is some talk about "commenting out a variable"
+# in the following this simply means that you have to put a hash character
+# ('#') at the start of the line where the variable is set.
+
 # The following variables determine where the program, auxiliary files and
 # the documentation will be copied to by 'make install'.
 
@@ -63,7 +67,7 @@ GROUP             := uucp
 # are stored. When set to 'MEDIUM' only GPIB function calls are logged. When
 # set to 'LOW' only errors will be wriiten to the file. If not set it defaults
 # to 'LOW'.
-# Finally, if the header files for the GPIB library aren't either in
+# Finally, if the header files for the GPIB library aren't in either
 # /usr/include or /usr/local/include (i.e. if they are, for example, in
 # /usr/include/gpib) set the last variable GPIB_HEADER_DIR to the absolute
 # path of the directory where the header file(s) for the library reside.
@@ -83,15 +87,16 @@ GPIB_LOG_LEVEL    := HIGH
 # lock files for the serial ports are created. This should be '/var/lock'
 # according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
 # itself or all its users must have read and write permissions for this
-# directory. Also see the longer discussion in section B of the INSTALL file.
+# directory. Also see the longer discussion in section C of the INSTALL file.
 
 NUM_SERIAL_PORTS  := 2
 SERIAL_LOCK_DIR   := /var/lock
 
 
-# Comment out the next two lines if you don't want a HTTP server that allows
-# to monitor fsc2's current state via the Internet. The default port number,
-# set by the sec ond variable, must be between 1024 and 65535.
+# Comment out the next two lines if you don't want the ability to run a HTTP
+# server that allows to monitor fsc2's current state via the Internet. The
+# default port number the HTTP server will listen on can be set by the second
+# variable, DEFAULT_HTTP_PORT, which must be a  number between 1024 and 65535.
 
 WITH_HTTP_SERVER  := yes
 DEFAULT_HTTP_PORT := 8080
@@ -101,8 +106,8 @@ DEFAULT_HTTP_PORT := 8080
 # will be send - if not set no "Bug report" button will be shown. Please
 # change this only if you change the program yourself (in which case sending
 # bug reports or mails about crashes to me wouldn't make too much sense).
-# If you want to keep fsc2 from sending out crash reports at all to me
-# commenting out this variable is one way to do it.
+# If you want to keep fsc2 from sending out crash reports at all commenting
+# out this variable is one way to do it.
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
@@ -445,7 +450,8 @@ export            # export all variables to sub-makes
 
 
 # Default rule: make the main program, the primary lexer and the modules
-# (the Makefile for modules is called via the Makefile in src)
+# (the Makefile for modules is called via the Makefile in src), and the
+# documentation and some other, more or less useful stuff
 
 all:
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
@@ -464,7 +470,7 @@ all:
 	$(MAKE) -C doc all
 
 
-# Install the program and all the other stuff.
+# Install the program and everything else
 
 install-strip:
 	$(MAKE) EXEC_INSTALL='$(INSTALL) -s' install
@@ -492,8 +498,8 @@ install:
 	$(MAKE) -C doc install
 
 
-# How to get rid of everything that got installed - requires that the Makefile
-# hasn't been changed significantly since the installation!
+# How to get rid of everything that got installed - requires that the
+# Makefile hasn't been changed significantly since the installation!
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
@@ -530,7 +536,7 @@ version:
 # `clean' deletes all the files remaining from the compilation and not needed
 # for an installation while `distclean' also removes all executables, shared
 # libraries and documentation. `mostly_clean' is nearly identical to
-# `distclean' but does not remove the documentation files.
+# `distclean' but does not remove the documentation.
 
 clean:
 	$(MAKE) -C src clean
