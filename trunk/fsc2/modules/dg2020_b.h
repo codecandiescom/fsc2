@@ -62,7 +62,6 @@ Var *pulser_lock_keyboard( Var *v );
 #define Ticks_min l_min
 
 
-
 #define MIN_TIMEBASE            5.0e-9     // minimum pulser time base: 5 ns
 #define MAX_TIMEBASE            0.1        // maximum pulser time base: 0.1 s
 
@@ -83,7 +82,6 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_TRIG_IN_LEVEL       5.0
 #define MIN_TRIG_IN_LEVEL      -5.0
-
 
 
 #define MIN_BLOCK_SIZE     64     // minimum length of a block

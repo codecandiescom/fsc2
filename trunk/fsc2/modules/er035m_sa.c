@@ -33,7 +33,10 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "ER035M"     /* name, compare /etc/gpib.conf */
+/* Include configuration information for the device */
+
+#include "er035m_sa.conf"
+
 
 #define TEST_FIELD 2000.0        /* returned as current fireld in test run */
 

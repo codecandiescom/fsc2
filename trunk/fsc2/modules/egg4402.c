@@ -27,12 +27,12 @@
 #include "gpib_if.h"
 
 
-/* name of device as given in GPIB configuration file /etc/gpib.conf */
+/* Include configuration information for the device */
 
-#define DEVICE_NAME "EGG4402"
+#include "egg4402.conf"
 
 
-/* declaration of exported functions */
+/* Declaration of exported functions */
 
 int egg4402_init_hook( void );
 int egg4402_exp_hook( void );

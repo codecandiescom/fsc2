@@ -26,9 +26,12 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "ER035M"     /* name, compare /etc/gpib.conf */
+/* Include configuration information for the device */
 
-#define TEST_FIELD 2000.0        /* returned as current fireld in test run */
+#include "er035m.conf"
+
+
+#define TEST_FIELD 2000.0        /* returned as current field in test run */
 
 
 /* exported functions and symbols */
