@@ -97,6 +97,7 @@ CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
+FUNC        {IDENT}"#"[0-9]+
 
 
 		/*---------------*/
@@ -312,6 +313,35 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 			/* handling of function, variable and array identifiers */
+{FUNC}      {
+				int acc;
+
+                if ( ! strcmp( strchr( prepstext, '#' ), "#1" ) )
+                    *strchr( prepstext, '#' ) = '\0';
+
+				prepslval.vptr = func_get( prepstext, &acc );
+				if ( prepslval.vptr != NULL )
+				{
+					/* If it's a function check that the function can be used
+					   in the current context */
+
+					if ( acc == ACCESS_EXP )
+					{
+						eprint( FATAL, "%s:%ld: Function `%s' can only be "
+								"used in the EXPERIMENT section.\n",
+								 Fname, Lc, prepstext );
+						THROW( EXCEPTION );
+					}
+					return FUNC_TOKEN;
+				}
+                else
+                {
+                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
+							Fname, Lc, prepstext );
+					THROW( EXCEPTION );
+                }
+            }
+
 {IDENT}     {
 				int acc;
 

@@ -78,7 +78,7 @@ CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
-
+FUNC        {IDENT}"#"[0-9]+
 
 
 
@@ -214,6 +214,32 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {CHT}       {
                 exp_val.vptr = exp_get_channel_name( );
 				return E_VAR_REF;
+            }
+
+{FUNC}      {
+				int acc;
+
+                if ( ! strcmp( strchr( exptext, '#' ), "#1" ) )
+                    *strchr( exptext, '#' ) = '\0';
+
+				exp_val.vptr = func_get( exptext, &acc );
+				if ( exp_val.vptr != NULL )
+				{
+					if ( acc == ACCESS_PREP )
+					{
+						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
+								"in the EXPERIMENT section.\n",
+								Fname, Lc, exptext );
+						THROW( EXCEPTION );
+					}
+					return E_FUNC_TOKEN;
+				}
+                else
+                {
+                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
+							Fname, Lc, exptext );
+					THROW( EXCEPTION );
+                }
             }
 
 {IDENT}     {
