@@ -10,7 +10,7 @@ Prof.@: K.@: M@"obius (Free University Berlin). Both where so kind to
 allow me to spend quite large amounts of time on getting it to the state
 it is in now.
 
-All the people using the program sofar have from time to time been
+All the people using the program so far have from time to time been
 mis-used as alpha-testers. The first one accepting this unpleasant role
 has been Axel Weber in Frankfurt, who already dealt with the bugs and
 shortcomings of the very first version. Then, in Berlin, Stefan Weber,
