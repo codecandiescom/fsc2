@@ -23,7 +23,10 @@
 
 
 #include "rs_spec10.h"
+
+#if defined RUNNING_WITH_ROOT_PRIVILEGES
 #include <sys/mman.h>
+#endif
 
 
 static void rs_spec10_ccd_init( void );
@@ -266,7 +269,6 @@ static void rs_spec10_ccd_init( void )
 
 	/* Find out if we can read and write the number of clear cycles */
 
-
 	if ( ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc ) ||
 		 acc != ACC_READ_WRITE )
 	{
@@ -377,7 +379,7 @@ static void rs_spec10_temperature_init( void )
 	else
 		rs_spec10_set_temperature( rs_spec10_c2k( CCD_MIN_TEMPERATURE ) );
 
-	/* Check if we can read the current temperature and if yes get it */
+	/* Check if we can read the temperature and, in case we can, get it */
 
 	if ( ! rs_spec10_param_access( PARAM_TEMP, &acc ) ||
 		 ! ( acc == ACC_READ_ONLY || acc == ACC_READ_WRITE ) )
@@ -444,13 +446,13 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		region.pbin = 1;
 	}
 
-	/* The PVCAM library needs some additional data files to get loaded.
+	/* The PVCAM library needs to load some additional data files.
 	   Unfortunately, these are looked for only in a single directory,
 	   the current working directory and, moreover, the library crashes
-	   the program when data files are not found. Thus we must make sure
-	   they can get loaded by temporarily switching to the directory where
-	   the files reside. Hopefully, this problem will go away in the near
-	   future... */
+	   the program when these data files are not found. Thus we must make
+	   sure they can get loaded by temporarily switching to the directory
+	   where the files reside. Hopefully, this problem will go away in
+	   the near future... */
 
 	getcwd( cur_dir, PATH_MAX );
 	chdir( PVCAM_DATA_DIR );
@@ -482,18 +484,22 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 #endif
 
 	/* Now we need memory for storing the new picture. The manual requires
-	   this memory to be protected against swapping, thus we must mlock()
-	   it. */
+	   this memory to be protected against swapping, thus we should mlock()
+	   it - but since we would need root permissions to do so it's commented
+	   out for the time being. */
 
 	TRY
 	{
 		frame = UNS16_P T_malloc( ( size_t ) *size );
-//		  if ( mlock( frame, *size ) != 0 )
-//		  {
-//            T_free( frame );
-//			  print( FATAL, "Failure to obtain properly protected memory.\n" );
-//			  THROW( EXCEPTION );
-//		  }
+
+#if defined RUNNING_WITH_ROOT_PRIVILEGES
+		if ( mlock( frame, *size ) != 0 )
+		{
+			T_free( frame );
+			print( FATAL, "Failure to obtain properly protected memory.\n" );
+			THROW( EXCEPTION );
+		}
+#endif
 
 		TRY_SUCCESS;
 	}
@@ -510,7 +516,11 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 		chdir( cur_dir );
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-//		munlock( frame, *size );
+
+#if defined RUNNING_WITH_ROOT_PRIVILEGES
+		munlock( frame, *size );
+#endif 
+
 		T_free( frame );
 		rs_spec10_error_handling( );
 	}
@@ -534,7 +544,11 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	{
 		pl_exp_abort( rs_spec10->handle, CCS_HALT );
 		pl_exp_uninit_seq( );
-//		munlock( frame, *size );
+
+#if defined RUNNING_WITH_ROOT_PRIVILEGES
+		munlock( frame, *size );
+#endif
+
 		T_free( frame );
 		chdir( cur_dir );
 		RETHROW( );
@@ -543,7 +557,9 @@ uns16 *rs_spec10_get_pic( uns32 *size )
     pl_exp_finish_seq( rs_spec10->handle, frame, 0 );
 	pl_exp_uninit_seq();
 
-//	munlock( frame, *size );
+#if defined RUNNING_WITH_ROOT_PRIVILEGES
+	munlock( frame, *size );
+#endif
 
 	chdir( cur_dir );
 	return frame;
