@@ -191,6 +191,9 @@ static void set_cur_clock( int clock_no )
 
 static void set_name( char *name )
 {
+	/* Make sure either a delay or a clock card has been selected for the
+	   name */
+
 	if ( cur_delay == INVALID_DELAY_NUMBER &&
 		 cur_clock == INVALID_CLOCK_NUMBER )
 	{
@@ -198,6 +201,8 @@ static void set_name( char *name )
 			   "line %ld.\n", rb_pulser.config_file, rb_pulser_Lc );
 		THROW( EXCEPTION );
 	}
+
+	/* Don't accept names with an embedded line break */
 
 	if ( strrchr( rb_pulser_text, '\n' ) != NULL )
 	{
@@ -282,6 +287,8 @@ void rb_pulser_read_configuration( void )
 	    rb_pulser_restart( rb_pulser_in );
 	else
 		is_restart = SET;
+
+	/* Read and interpret the configuration file */
 
 	cur_delay = INVALID_DELAY_NUMBER;
 	cur_clock = INVALID_CLOCK_NUMBER;
