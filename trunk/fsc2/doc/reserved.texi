@@ -1,0 +1,124 @@
+@c $Id$
+
+@node Reserved Words, , Modules, Top
+@appendix Reserved words
+@cindex Reserved words
+
+
+
+@multitable { @code{PREPARATIONS:} } { Starts the @code{PREPARATIONS} section }
+@item @code{A}             @tab Unit, Ampere
+@item @code{abs}           @tab Built-in function
+@item @code{acos}          @tab Built-in function
+@item @code{asin}          @tab Built-in function
+@item @code{atan}          @tab Built-in function
+@item @code{ASS:}          @tab Starts the @code{ASSIGNMENTS} section
+@item @code{ASSIGNMENT:}   @tab Starts the @code{ASSIGNMENTS} section
+@item @code{ASSIGNMENTS:}  @tab Starts the @code{ASSIGNMENTS} section
+@item                      @tab
+@item @code{ceil}          @tab Built-in function
+@item @code{clear_curve}   @tab Built-in function
+@item @code{cos}           @tab Built-in function
+@item @code{cosh}          @tab Built-in function
+@item                      @tab
+@item @code{date}          @tab Built-in function
+@item @code{dB}            @tab Unit, Decibel
+@item @code{DEV:}          @tab Starts the @code{DEVICES} section
+@item @code{DEVS:}         @tab Starts the @code{DEVICES} section
+@item @code{DEVICE:}       @tab Starts the @code{DEVICES} section
+@item @code{DEVICES:}      @tab Starts the @code{DEVICES} section
+@item @code{dim}           @tab Built-in function
+@item @code{display}       @tab Built-in function
+@item                      @tab
+@item @code{EXP:}          @tab Starts the @code{EXPERIMENT} section
+@item @code{EXPERIMENT:}   @tab Starts the @code{EXPERIMENT} section
+@item                      @tab
+@item @code{float}         @tab Built-in function
+@item @code{floor}         @tab Built-in function
+@item @code{FOR}           @tab Keyword for @code{FOR} loops
+@item @code{fsave}         @tab Built-in function
+@item                      @tab
+@item @code{G}             @tab Unit, Gauss
+@item @code{get_file}      @tab Built-in function
+@item                      @tab
+@item @code{Hz}            @tab Unit, Hertz
+@item                      @tab
+@item @code{init_1d}       @tab Built-in function
+@item @code{init_2d}       @tab Built-in function
+@item @code{int}           @tab Built-in function
+@item                      @tab
+@item @code{kA}            @tab Unit, Kilo-Ampere
+@item @code{kA}            @tab Unit, Kilo-Ampere
+@item @code{kG}            @tab Unit, Kilo-Gauss
+@item @code{kHz}           @tab Unit, Kilo-Hertz
+@item @code{ks}            @tab Unit, Kilo-Seconds
+@item @code{kV}            @tab Unit, Kilo-Volt
+@item                      @tab
+@item @code{MA}            @tab Unit, Mega-Ampere
+@item @code{MG}            @tab Unit, Mega-Gauss
+@item @code{MHz}           @tab Unit, Mega-Hertz
+@item @code{Ms}            @tab Unit, Mega-Seconds
+@item @code{MV}            @tab Unit, Mega-Volt
+@item @code{mA}            @tab Unit, Milli-Ampere
+@item @code{mG}            @tab Unit, Milli-Gauss
+@item @code{mHz}           @tab Unit, Milli-Hertz
+@item @code{ms}            @tab Unit, Milli-Seconds
+@item @code{mT}            @tab Unit, Milli-Tesla
+@item @code{mV}            @tab Unit, Milli-Volt
+@item                      @tab
+@item @code{nA}            @tab Unit, Nano-Ampere
+@item @code{nG}            @tab Unit, Nano-Gauss
+@item @code{nHz}           @tab Unit, Nano-Hertz
+@item @code{ns}            @tab Unit, Nano-Seconds
+@item @code{nT}            @tab Unit, Nano-Tesla
+@item @code{nV}            @tab Unit, Nano-Volt
+@item                      @tab
+@item @code{ON_STOP:}      @tab Label in @code{EXPERIMENT} section
+@item                      @tab
+@item @code{PHA:}          @tab Starts the @code{PHASES} section
+@item @code{PHAS:}         @tab Starts the @code{PHASES} section
+@item @code{PHASE:}        @tab Starts the @code{PHASES} section
+@item @code{PHASES:}       @tab Starts the @code{PHASES} section
+@item @code{PREP:}         @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPS:}        @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPARATION:}  @tab Starts the @code{PREPARATIONS} section
+@item @code{PREPARATIONS:} @tab Starts the @code{PREPARATIONS} section
+@item @code{print}         @tab Built-in function
+@item                      @tab
+@item @code{REPEAT}        @tab Keyword for @code{REPEAT} loops
+@item @code{random}        @tab Built-in function
+@item @code{round}         @tab Built-in function
+@item                      @tab
+@item @code{s}             @tab Unit, Seconds
+@item @code{save}          @tab Built-in function
+@item @code{save_comment}  @tab Built-in function
+@item @code{save_output}   @tab Built-in function
+@item @code{save_program}  @tab Built-in function
+@item @code{set_seed}      @tab Built-in function
+@item @code{sin}           @tab Built-in function
+@item @code{sinh}          @tab Built-in function
+@item @code{size}          @tab Built-in function
+@item @code{sizes}         @tab Built-in function
+@item @code{sqrt}          @tab Built-in function
+@item                      @tab
+@item @code{T}             @tab Unit, Tesla
+@item @code{tan}           @tab Built-in function
+@item @code{tanh}          @tab Built-in function
+@item @code{time}          @tab Built-in function
+@item                      @tab
+@item @code{uA}            @tab Unit, Micro-Ampere
+@item @code{uG}            @tab Unit, Micro-Gauss
+@item @code{uHz}           @tab Unit, Micro-Hertz
+@item @code{us}            @tab Unit, Micro-Seconds
+@item @code{uT}            @tab Unit, Micro-Tesla
+@item @code{uV}            @tab Unit, Micro-Volt
+@item                      @tab
+@item @code{V}             @tab Unit, Volt
+@item @code{VAR:}          @tab Starts the @code{VARIABLES} section
+@item @code{VARS:}         @tab Starts the @code{VARIABLES} section
+@item @code{VARIABLE:}     @tab Starts the @code{VARIABLES} section
+@item @code{VARIABLES:}    @tab Starts the @code{VARIABLES} section
+@item                      @tab
+@item @code{wait}          @tab Built-in function
+@item @code{WHILE}         @tab Keyword for @code{WHILE} loops
+@end multitable
