@@ -80,7 +80,7 @@ modules:
 	mv -f $@.x $@
 
 
-# Make the primary lexer that's utilized by the main program
+# Make the primary lexer (which does a cleanup of the input file)
 
 fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lm
@@ -96,8 +96,8 @@ fsc2_connect: fsc2_connect.o
 
 
 # Create files and links needed for for graphical interface - they need making
-# if either fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist, the file they
-# are made from is newer or the existing files are for the wrong resolution
+# if either fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist or the file they
+# are made from is newer
 
 %.so: %.o
 	$(LD) $(SLFLAGS) $^ -o $@
@@ -122,7 +122,7 @@ fsc2_rsc_hr.c: fsc2_rsc_hr.fd
 # configuration file are needed.
 
 gpib:
-	@if [ ! -e gpib_if.c -o ! -e gpib_if.h                      \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h                      \
 		  -o gpib_if_$(GPIB_LIBRARY).c -nt gpib_if.c            \
 		  -o gpib_if_$(GPIB_LIBRARY).h -nt gpib_if.h            \
 		  -o ! gpib_if_$(GPIB_LIBRARY).c -ef gpib_if.c          \
