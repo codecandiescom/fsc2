@@ -40,7 +40,6 @@
 static bool is_loaded = UNSET;       /* set when EDL file is loaded */
 static bool is_tested = UNSET;       /* set when EDL file has been tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
-static char *in_file = NULL;         /* name of input file */
 static FILE *in_file_fp = NULL;
 static time_t in_file_mod = 0;
 static char *title = NULL;
@@ -111,6 +110,7 @@ int main( int argc, char *argv[ ] )
 	prog_name = argv[ 0 ];
 
 	EDL.Lc = 0;
+	EDL.in_file = NULL;
 	EDL.Fname = NULL;
 	EDL.Call_Stack = NULL;
 	EDL.prg_token = NULL;
@@ -187,7 +187,25 @@ int main( int argc, char *argv[ ] )
 	{
 		TRY
 		{
-			in_file = T_strdup( fname );
+			/* We need the name of the file with the full path name (which
+			   needs to be passed on to fsc2_clean to allow include files
+			   in scripts be specified relative to the path of the script
+			   instead of relative to the current working directory fsc2
+			   was started from. */
+
+			if ( fname[ 0 ] == '/' )
+				EDL.in_file = T_strdup( fname );
+			else
+			{
+				size_t size;
+				char *buf;
+
+				size = pathconf( ".", _PC_PATH_MAX );
+				buf = CHAR_P T_malloc( size );
+				EDL.in_file = get_string( "%s/%s",
+										  getcwd( buf, size ), fname );
+				T_free( buf );
+			}
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -267,13 +285,13 @@ static void check_run( void )
 	fl_deactivate_object( GUI.main_form->test_file );
 	fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
 
-	if ( ( in_file_fp = fopen( in_file, "r" ) ) == NULL )
+	if ( ( in_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
 		exit( EXIT_FAILURE );
 
 	user_break = UNSET;
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
-	if ( ! scan_main( in_file, in_file_fp ) || user_break ||
+	if ( ! scan_main( EDL.in_file, in_file_fp ) || user_break ||
 		 EDL.compilation.error[ FATAL ]  != 0 ||
 		 EDL.compilation.error[ SEVERE ] != 0 ||
 		 EDL.compilation.error[ WARN ]   != 0 )
@@ -596,11 +614,11 @@ static void final_exit_handler( void )
 	if ( in_file_fp != NULL )
 		fclose( in_file_fp );
 
-	if ( delete_old_file && in_file != NULL )
-		unlink( in_file );
+	if ( delete_old_file && EDL.in_file != NULL )
+		unlink( EDL.in_file );
 	unlink( FSC2_SOCKET );
 
-	T_free( in_file );
+	T_free( EDL.in_file );
 
 	T_free( G.color_hash );
 
@@ -664,7 +682,7 @@ void load_file( FL_OBJECT *a, long reload )
 	UNUSED_ARGUMENT( a );
 
 	notify_conn( BUSY_SIGNAL );
-	old_in_file= NULL;
+	old_in_file = NULL;
 
 	/* If new file is to be loaded get its name and store it, otherwise use
 	   previous name */
@@ -682,25 +700,25 @@ void load_file( FL_OBJECT *a, long reload )
 				return;
 			}
 
-			old_in_file = in_file;
+			old_in_file = EDL.in_file;
 
 			TRY
 			{
-				in_file = T_strdup( fn );
+				EDL.in_file = T_strdup( fn );
 				TRY_SUCCESS;
 			}
 			OTHERWISE
 			{
-				in_file = old_in_file;
+				EDL.in_file = old_in_file;
 				notify_conn( UNBUSY_SIGNAL );
 				return;
 			}
 		}
 		else
 		{
-			old_in_file = in_file;
+			old_in_file = EDL.in_file;
 
-			in_file = GUI.main_form->Load->u_cdata;
+			EDL.in_file = GUI.main_form->Load->u_cdata;
 			GUI.main_form->Load->u_cdata = NULL;
 		}
 	}
@@ -708,7 +726,7 @@ void load_file( FL_OBJECT *a, long reload )
 	{
 		/* Quit if name of previous file is empty */
 
-		if ( in_file == '\0' )
+		if ( EDL.in_file == '\0' )
 		{
 			fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
 			old_in_file = CHAR_P T_free( old_in_file );
@@ -725,16 +743,16 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Test if the file is readable and can be opened */
 
-	if ( access( in_file, R_OK ) == -1 )
+	if ( access( EDL.in_file, R_OK ) == -1 )
 	{
 		if ( Internals.cmdline_flags & DO_CHECK )
 			exit ( EXIT_FAILURE );
 
 		if ( errno == ENOENT )
-			fl_show_alert( "Error", "Sorry, file not found:", in_file, 1 );
+			fl_show_alert( "Error", "Sorry, file not found:", EDL.in_file, 1 );
 		else
 			fl_show_alert( "Error", "Sorry, no permission to read file:",
-						   in_file, 1 );
+						   EDL.in_file, 1 );
 		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
@@ -744,7 +762,7 @@ void load_file( FL_OBJECT *a, long reload )
 	   file in the currently loaded form at later times even when the user
 	   changes the file in between. In all the following we work on the
 	   file pointer 'fp' of this temporary file even though the file name
-	   'in_file' shown to the user still refers to the original file... */
+	   'EDL.in_file' shown to the user still refers to the original file... */
 
 	if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
 	{
@@ -772,13 +790,13 @@ void load_file( FL_OBJECT *a, long reload )
 		return;
 	}
 
-	if ( ( fp = fopen( in_file, "r" ) ) == NULL )
+	if ( ( fp = fopen( EDL.in_file, "r" ) ) == NULL )
 	{
 		fclose( tmp_fp );
 		if ( Internals.cmdline_flags & DO_CHECK )
 			exit ( EXIT_FAILURE );
 
-		fl_show_alert( "Error", "Sorry, can't open file:", in_file, 1 );
+		fl_show_alert( "Error", "Sorry, can't open file:", EDL.in_file, 1 );
 		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
@@ -786,7 +804,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Get modification time of file */
 
-	stat( in_file, &file_stat );
+	stat( EDL.in_file, &file_stat );
 	in_file_mod = file_stat.st_mtime;
 
 	/* Copy the contents of the EDL file into our temporary file */
@@ -805,7 +823,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 	if ( old_in_file != NULL )
 	{
-		if ( strcmp( old_in_file, in_file ) )
+		if ( strcmp( old_in_file, EDL.in_file ) )
 		{
 			if ( delete_old_file )
 				unlink( old_in_file );
@@ -826,12 +844,12 @@ void load_file( FL_OBJECT *a, long reload )
 	/* Set a new window title */
 
 	T_free( title );
-	title = get_string( "fsc2: %s", in_file );
+	title = get_string( "fsc2: %s", EDL.in_file );
 	fl_set_form_title( GUI.main_form->fsc2, title );
 
 	/* Read in and display the new file */
 
-	is_loaded = display_file( in_file, in_file_fp );
+	is_loaded = display_file( EDL.in_file, in_file_fp );
 	state = FAIL;
 	is_tested = UNSET;
 
@@ -912,7 +930,7 @@ static void start_editor( void )
 		argv[ 0 ] = ( char * ) "xterm";
 		argv[ 1 ] = ( char * ) "-e";
 		argv[ 2 ] = ( char * ) "vi";
-		argv[ 3 ] = in_file;
+		argv[ 3 ] = EDL.in_file;
 		argv[ 4 ] = NULL;
 	}
 	else              /* otherwise use the one given by EDITOR */
@@ -931,7 +949,7 @@ static void start_editor( void )
 			argv[ 0 ] = ( char * ) "xterm";
 			argv[ 1 ] = ( char * ) "-e";
 			argv[ 2 ] = ed;
-			argv[ 3 ] = in_file;
+			argv[ 3 ] = EDL.in_file;
 			argv[ 4 ] = NULL;
 		}
 		else
@@ -957,7 +975,7 @@ static void start_editor( void )
 					/* empty */ ;
 			}
 
-			argv[ i ] = in_file;
+			argv[ i ]   = EDL.in_file;
 			argv[ ++i ] = NULL;
 		}
 	}
@@ -1051,7 +1069,7 @@ void test_file( FL_OBJECT *a, long b )
 	   between and the user wants the new version - quit if file can't be read
 	   again. */
 
-	stat( in_file, &file_stat );
+	stat( EDL.in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime &&
 		 2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
 							  "file. Reload file from disk?",
@@ -1093,7 +1111,7 @@ void test_file( FL_OBJECT *a, long b )
 	   relevant is now stored in memory (unless the parsing was interrupted
 	   by the user) */
 
-	state = scan_main( in_file, in_file_fp );
+	state = scan_main( EDL.in_file, in_file_fp );
 	if ( ! user_break )
 	{
 		fclose( in_file_fp );
@@ -1169,7 +1187,7 @@ void run_file( FL_OBJECT *a, long b )
 	}
 	else
 	{
-		stat( in_file, &file_stat );
+		stat( EDL.in_file, &file_stat );
 		if ( in_file_mod != file_stat.st_mtime &&
 			 2 == fl_show_choice( "EDL file on disk is newer than loaded",
 								  "file. Reload the file from disk?",

@@ -204,6 +204,7 @@ typedef struct {
 typedef struct {
 
 	long Lc;                     /* Line number in currently parsed EDL file */
+	char *in_file;               /* name of input file */
 	char *Fname;                 /* Name of currently parsed EDL file */
 
 	CALL_STACK *Call_Stack;      /* Stack for storing some kind of frame
