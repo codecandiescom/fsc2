@@ -100,10 +100,15 @@ endif
 export            # export all variables to sub-makes
 
 
-# Switch off all implicit rules and set suffices of file to be made by make
+# Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install clean distclean pack
+.PHONY: all install-strip install clean distclean pack \
+        install-pion.anorg.chemie.uni-frankfurt.de     \
+		install-crowley.physik.fu-berlin.de            \
+		install-moebi.physik.fu-berlin.de              \
+		install-door.physik.fu-berlin.de               \
+		install-crowley.none
 
 
 # default rule: make the main program, the primary lexer and the modules
@@ -200,6 +205,9 @@ install-door.physik.fu-berlin.de:
 	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
+
+install-crowley.none:
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 
 
 # make all types of documentation

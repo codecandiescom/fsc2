@@ -31,7 +31,7 @@
 
 
 int explex( void );
-static int exp_get_channel_name( void );
+static Var *exp_get_channel_name( void );
 
 extern Token_Val exp_val;
 
@@ -211,8 +211,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
             }
 
 
-{CHT}       return exp_get_channel_name( );
-
+{CHT}       {
+                exp_val.vptr = exp_get_channel_name( );
+				return E_VAR_REF;
+            }
 
 {IDENT}     {
 				int acc;
@@ -332,7 +334,7 @@ int experiment_parser( FILE *in )
 }
 
 
-static int exp_get_channel_name( void )
+static Var *exp_get_channel_name( void )
 {
 	Var *func, *v;
 	int access;
@@ -344,7 +346,7 @@ static int exp_get_channel_name( void )
 		vars_push( STR_VAR, exptext );
 		v = func_call( func );
 		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return E_VAR_REF;
+			 return v;
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
