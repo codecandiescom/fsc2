@@ -440,7 +440,7 @@ void test_file( FL_OBJECT *a, long b )
 	if ( in_file_mod != file_stat.st_mtime )
 	{
 		if ( 1 == fl_show_choice( "EDL file on disk has changed.",
-								  "Re-read file ?",
+								  "Reload the file ?",
 								  "",
 								  2, "Abort", "Ok", "", 1 ) )
 			return;
