@@ -1224,17 +1224,16 @@ static void eps_draw_contour( FILE *fp, int cn )
    to lpr (or whatever the appropriate print command is) and then write the
    data to be printed to lpr's standard input. Unfortunately, there's a
    problem with this approach: Even though the main program gets the SIGCHLD
-   signal the exit status is already reaped by pclose(). Thus, if we're
-   running an handler for SIGCHLD signals it will be triggered but the handler
-   will wait for the death of another child instead of the process that exited
-   due to the pclose(). While this might be OK as long as there are no other
-   child processes, at least while the measurement is running there is at
-   least one other child, the child we forked to do the measurement. Now,
-   after the the pclose() call the parent process will hang in the SIGCHLD
-   signal handler, waiting indefinitely for another child to exit, while the
-   child process doing the measurement also hangs, waiting for the parent
-   process to send signals allowing the measurement child process to send
-   further data...
+   signal the exit status has already been reaped by pclose(). Thus, if we're
+   running an handler for SIGCHLD signals it will wait for the death of
+   another child instead of the process that exited due to the pclose()
+   While this might be OK as long as there are no other child processes,
+   at least while the measurement is running there is at least one other
+   child, the child that got forked to do the measurement. Now, after the
+   pclose() call the parent process will hang in the SIGCHLD signal handler,
+   waiting indefinitely for another child to exit, while the child process
+   doing the measurement also hangs, waiting for the parent process to send
+   signals allowing the measurement process to send further data...
 
    So, instead we write all data to a temporary file and then fork another
    process. This process forks again and then execs lpr (or whatever printing
