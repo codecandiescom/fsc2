@@ -53,6 +53,7 @@ Var *set_sweep_rate( Var *v );
 Var *magnet_sweep( Var *v );
 Var *magnet_sweep_rate( Var *v );
 Var *reset_field( Var *v );
+Var *magnet_goto_current_on_end( Var *v );
 
 
 static void magnet_sweep_up( void );
@@ -107,6 +108,9 @@ typedef struct {
 	double min_current;
 
 	double time_estimate;
+
+	bool goto_field_on_end;
+	double final_target_current;
 
 } IPS20_4;
 
@@ -168,6 +172,7 @@ int ips20_4_init_hook( void )
 	ips20_4.max_current = MAX_CURRENT;
 	ips20_4.min_current = MIN_CURRENT;
 
+	ips20_4.goto_field_on_end = UNSET;
 	return 1;
 }
 
@@ -229,10 +234,7 @@ int ips20_4_exp_hook( void )
 int ips20_4_end_of_exp_hook( void )
 {
 	ips20_4_to_local( );
-
 	ips20_4 = ips20_4_stored;
-
-	ips20_4.sweep_state = STOPPED;
 	ips20_4.device = -1;
 
 	return 1;
@@ -606,6 +608,25 @@ Var *reset_field( Var *v )
 }
 
 
+/*-----------------------------------------------------------*/
+/* This function was added on Martin Fuchs' request to allow */
+/* to keep sweeping the magnet to a predefined current even  */
+/* after the experiment has ended.                           */
+/*-----------------------------------------------------------*/
+
+Var *magnet_goto_current_on_end( Var *v )
+{
+	double cur;
+
+
+	cur = get_double( v, "final target current" );
+	ips20_4.final_target_current = ips20_4_current_check( cur );
+	ips20_4.goto_field_on_end = SET;
+
+	return vars_push( FLOAT_VAR, ips20_4.final_target_current );
+}
+
+
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -756,7 +777,19 @@ static void ips20_4_to_local( void )
 	char reply[ 100 ];
 
 
-	ips20_4_set_activity( HOLD );
+	if ( ips20_4.goto_field_on_end )
+	{
+		ips20_4_set_target_current( ips20_4.final_target_current );
+		ips20_4_set_sweep_rate( ips20_4.fast_sweep_rate );
+
+		if ( ips20_4.activity != TO_SET_POINT )
+			ips20_4.activity = ips20_4_set_activity( TO_SET_POINT );
+	}
+	else
+	{	
+		ips20_4_set_activity( HOLD );
+		ips20_4.sweep_state = STOPPED;
+	}
 
 	sprintf( cmd, "@%1dC0\r", IPS20_4_ISOBUS_ADDRESS );
 	ips20_4_talk( cmd, reply, 100 );

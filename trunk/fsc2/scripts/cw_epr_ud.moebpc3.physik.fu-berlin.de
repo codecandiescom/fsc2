@@ -672,6 +672,7 @@ init_1d( 3, Num_Points, start_current, step_size,
 		 \"Current [A]\", \"Signal [mV]\" );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
+magnet_goto_current_on_end( start_current );
 
 
 EXPERIMENT:
@@ -815,8 +816,6 @@ IF is_file( File ) {
 		   J, Num_Points );
 	save_comment( File, \"% \", \"Sample:  \\nTemperature:  \\n\" );
 }
-
-set_field( start_current );
 ";
 
 	close F;
