@@ -1819,7 +1819,12 @@ sub run {
 	$f[ 18 ] = $f[ 17 ]->Button( -text => "Start measurement",
 								 -command => \&realtime_run );
 	$f[ 19 ] = $f[ 17 ]->Button( -text => "Quit",
-								 -command => sub { $top->deiconify;
+								 -command => sub { if ( $laser_line != 0.0 and
+														$units[ 0 ] == 1 ) {
+													    $$cwn = $laser_line
+															    - $$cwn;
+												   }
+											   	   $top->deiconify;
 												   $f[ 0 ]->destroy; } );
 
 	$f[ 1 ]->pack( %fp );
