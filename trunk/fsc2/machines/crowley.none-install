@@ -1,0 +1,8 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+install-crowley.none:
+	$(MAKE) $(UNINSTALL_MACHINE)
+
+uninstall-crowley.none:

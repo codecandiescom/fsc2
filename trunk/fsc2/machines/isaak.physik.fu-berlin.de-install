@@ -1,0 +1,17 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+install-isaak.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+
+uninstall-isaak.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so

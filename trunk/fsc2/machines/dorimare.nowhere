@@ -1,0 +1,18 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+OWNER              := fsc2
+GROUP              := uucp
+GPIB_LIBRARY       := JTT
+NUM_SERIAL_PORTS   := 2
+SERIAL_LOCK_DIR    := /var/lock
+WITH_NI6601        := yes
+ni6601_libs        := libni6601.so
+WITH_ME6000        := yes
+me6000_libs        := libme6x00.so
+WITH_SPEC10        := yes
+rs_spec10_incl     := /usr/local/include/pvcam
+rs_spec10_libs     := libpvcam.so
+WITH_WITIO_48      := yes
+witio_48_libs      := libwitio_48.so

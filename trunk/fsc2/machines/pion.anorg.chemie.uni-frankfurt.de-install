@@ -1,0 +1,28 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+install-pion.anorg.chemie.uni-frankfurt.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	-chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
+	-$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
+	-chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	-$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	-chown $(OWNER).$(GROUP) $(libdir)/s_band.so
+	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_broad.so $(libdir)/magnet_b.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet_b.so
+	-$(LN) $(LNFLAGS) $(libdir)/s_band_magnet_narrow.so $(libdir)/magnet_n.so
+	-chown $(OWNER).$(GROUP) $(libdir)/magnet_n.so
+	-$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/sr530.so $(libdir)/lockin.so
+	-chown $(OWNER).$(GROUP) $(libdir)/lockin.so
+
+uninstall-pion.anorg.chemie.uni-frankfurt.de:
+	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/s_band.so
+	-$(RM) $(RMFLAGS) $(libdir)/magnet.so
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/lockin.so

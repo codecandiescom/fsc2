@@ -1,0 +1,17 @@
+# -*-Makefile-*-
+#
+# $Id$
+
+install-crowley.physik.fu-berlin.de:
+	$(MAKE) $(UNINSTALL_MACHINE)
+	-$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
+	-chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	-$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
+	-chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
+	-$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
+	-chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
+
+uninstall-crowley.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so
+	-$(RM) $(RMFLAGS) $(libdir)/synthesizer.so
+	-$(RM) $(RMFLAGS) $(libdir)/boxcar.so
