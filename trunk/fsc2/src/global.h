@@ -25,15 +25,38 @@
 #if ! defined FSC2_GLOBAL
 #define FSC2_GLOBAL
 
-
-/* Define the name of fsc2's lock file */
-
-#define FSC2_LOCKFILE "/tmp/fsc2.lock"
+#include <sys/socket.h>
 
 
-/* Define the name of fsc2's (Unix domain) socket file */
+/* Define the maximum number of instances of fsc2 that can run at the
+   same time (this number must be lower than SOMAXCONN, i.e. the
+   maximum backlog value in calls of listen(2). */
+
+#define FSC2_MAX_INSTANCES 16
+
+#if FSC2_MAX_INSTANCES > SOMAXCONN
+#error ***********************************************
+#error *   Maximum number of instances of fsc2 is    *
+#error *   larger than SOMAXCONN, see src/global.h   *
+#error ***********************************************
+#endif
+
+
+/* Define the name of fsc2's (Unix domain) socket file via which other
+   programs can send EDL scripts */
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
+
+
+/* Define the name of fsc2d's (Unix domain) socket file that is used to
+   control the different instances of fsc2 */
+
+#define FSC2D_SOCKET  "/tmp/fsc2d.uds"
+
+
+/* The maximum length send via sockets by fsc2 */
+
+#define MAX_LINE_LENGTH    4096
 
 
 /* Define number of colors to be used in 2D graphics - must be less than
@@ -357,14 +380,15 @@ enum {
 /* Flags set according to the command line arguments */
 
 enum {
-	DO_LOAD    =   ( 1 << 0 ),
-	DO_TEST    =   ( 1 << 1 ),
-	DO_START   =   ( 1 << 2 ),
-	DO_SIGNAL  =   ( 1 << 3 ),
-	DO_DELETE  =   ( 1 << 4 ),
-	NO_MAIL    =   ( 1 << 5 ),
-	NO_BALLOON =   ( 1 << 6 ),
-	DO_CHECK   =   ( 1 << 7 )                 /* used for check runs only */
+	DO_LOAD        =  ( 1 << 0 ),
+	DO_TEST        =  ( 1 << 1 ),
+	DO_START       =  ( 1 << 2 ),
+	DO_SIGNAL      =  ( 1 << 3 ),
+	DO_DELETE      =  ( 1 << 4 ),
+	NO_MAIL        =  ( 1 << 5 ),
+	NO_BALLOON     =  ( 1 << 6 ),
+	NON_EXCLUSIVE  =  ( 1 << 7 ),
+	DO_CHECK       =  ( 1 << 8 )               /* used for check runs only */
 };
 
 

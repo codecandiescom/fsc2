@@ -322,7 +322,7 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 	char *prog_name;
 
 
-	/* Send UID to fsc2 as credentials */
+	/* Send UID to fsc2 as credential */
 
 	sprintf( line, "%d\n", getuid( ) );
 	if ( writen( sock_fd, line, strlen( line ) )

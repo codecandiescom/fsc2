@@ -26,6 +26,7 @@
 
 
 static int fsc2_simplex_is_minimum( int n, double *y, double epsilon );
+static ssize_t do_read( int fd, char *ptr );
 
 
 /*------------------------------------------------------------------*/
@@ -774,120 +775,13 @@ FILE *filter_edl( const char *name, FILE *fp )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* There can be only one instance of fsc2 running (except simple test     */
-/* runs that only do a syntax check of an EDL program). To check if there */
-/* is another instance already running a lock file is used - the file is  */
-/* created at the start of the program, a write lock is set on the whole  */
-/* length of the file and then the PID and user name are written into the */
-/* lock file. Thus fsc2 can find out who is currently holding the lock    */
-/* and tell the user about it. The lock automatically expires when fsc2   */
-/* exits (on normal termination it will also delete the lock file).       */
-/* To make this work correctly for more then one user the lock file must  */
-/* belong to a special user (e.g. a user named 'fsc2') as well as the     */
-/* program belong to this user and have the setuid bit set.               */
-/* Another purpose of this scheme is to get rid of shared memory segments */
-/* that remain after fsc2 crashed or was killed. Therefore, all shared    */
-/* memory segment have to be created with the EUID of fsc2 so that even   */
-/* another user may delete them when he starts fsc2.                      */
-/* This routine is mostly taken from R. Stevens' "Advanced Programming in */
-/* the UNIX Environment" (Addison-Wesley 1997)                            */
-/*------------------------------------------------------------------------*/
-
-bool fsc2_locking( void )
-{
-	int fd, flags;
-	struct flock lock;
-	char buf[ 128 ];
-	char *name, *name_end;
-
-
-	/* Try to open a lock file */
-
-	raise_permissions( );
-
-	if ( ( fd = open( FSC2_LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) )
-		 < 0 )
-	{
-		lower_permissions( );
-		fprintf( stderr, "Error: Can't access lock file '%s'.\n",
-				 FSC2_LOCKFILE );
-		return FAIL;
-	}
-
-	/* Set a write lock */
-
-	lock.l_type = F_WRLCK;
-	lock.l_start = 0;
-	lock.l_whence = SEEK_SET;
-	lock.l_len = 0;
-
-	if ( fcntl( fd, F_SETLK, &lock ) == -1 )           /* if lock failed */
-	{
-		fprintf( stderr, "Error: fsc2 is already running." );
-
-		/* Try to read the PID of the process holding the lock as well as the
-		   user name from the lock file and append it to the error message */
-
-		if ( read( fd, ( void * ) buf, 127 ) != -1 &&
-			 ( name = strchr( buf, '\n' ) + 1 ) != NULL )
-		{
-			*( name - 1 ) = '\0';
-			fprintf( stderr, " Its PID is %s", buf );
-			if ( ( name_end = strchr( name, '\n' ) ) != NULL )
-			{
-				*name_end = '\0';
-				fprintf( stderr, " and the user is '%s'.\n", name );
-			}
-			else
-				fprintf( stderr, ".\n" );
-		}
-		else
-			fprintf( stderr, "\n" );
-
-		lower_permissions( );
-		return FAIL;
-	}
-
-	/* Truncate to zero length, write process ID and user name into the lock
-	   file and get the close-on-exec flag */
-
-	snprintf( buf, sizeof( buf ), "%ld\n%s\n", ( long ) getpid( ),
-			  getpwuid( getuid( ) )->pw_name );
-	if ( ftruncate( fd, 0 ) < 0 ||
-		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
-		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
-	{
-		unlink( FSC2_LOCKFILE );
-		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file '%s'.\n",
-				 FSC2_LOCKFILE );
-		return FAIL;
-	}
-
-	/* Finally set the close-on-exec flag */
-
-	if ( fcntl( fd, F_SETFD, flags | FD_CLOEXEC ) < 0 )
-	{
-		unlink( FSC2_LOCKFILE );
-		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file '%s'.\n",
-				 FSC2_LOCKFILE );
-		return FAIL;
-	}
-
-	lower_permissions( );
-	return OK;
-}
-
-
 /*---------------------------------------------------------------------*/
 /* Replacement for usleep(), but you can decide by setting the second  */
 /* argument if the function should continue to sleep on receipt of a   */
 /* signal or if it should return immediately (in which case the return */
 /* value is -1 instead of 0). The first argument is the time to sleep  */
 /* in microseconds, times longer then a second are allowed.            */
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
 
 int fsc2_usleep( unsigned long us_dur, bool quit_on_signal )
 {
@@ -1314,6 +1208,106 @@ static int fsc2_simplex_is_minimum( int n, double *y, double epsilon )
     dev = sqrt( ( yq_2 - yq * yq / n ) /  ( n - 1 ) );
 
 	return dev * n / fabs( yq ) < epsilon;
+}
+
+
+/*----------------------------------------------------------------*/
+/* Reads a line of text of max_len characters ending in '\n' from */
+/* a socket. This is directly copied from W. R. Stevens, UNP1.2  */
+/*----------------------------------------------------------------*/
+
+ssize_t read_line( int fd, void *vptr, size_t max_len )
+{
+	ssize_t n, rc;
+	char c, *ptr;
+
+
+	ptr = CHAR_P vptr;
+	for ( n = 1; n < ( ssize_t ) max_len; n++ )
+	{
+		if ( ( rc = do_read( fd, &c ) ) == 1 )
+		{
+			*ptr++ = c;
+			if ( c == '\n' )
+				break;
+		}
+		else if ( rc == 0 )
+		{
+			if ( n == 1 )
+				return 0;
+			else
+				break;
+		}
+		else
+			return -1;
+	}
+
+	*ptr = '\0';
+	return n;
+}
+
+
+/*----------------------------------------------------*/
+/* This is directly copied from W. R. Stevens, UNP1.2 */
+/*----------------------------------------------------*/
+
+static ssize_t do_read( int fd, char *ptr )
+{
+	static int read_cnt;
+	static char *read_ptr;
+	static char read_buf[ MAX_LINE_LENGTH ];
+
+
+	if ( read_cnt <= 0 )
+	{
+	  again:
+		if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
+		{
+			if ( errno == EINTR )
+				goto again;
+			return -1;
+		}
+		else if ( read_cnt == 0 )
+			return 0;
+
+		read_ptr = read_buf;
+	}
+
+	read_cnt--;
+	*ptr = *read_ptr++;
+	return 1;
+}
+
+
+/*-----------------------------------------------------*/
+/* Write a line of a n characters of text to a socket. */
+/* This is directly copied from W. R. Stevens, UNP1.2  */
+/*-----------------------------------------------------*/
+
+ssize_t writen( int fd, const void *vptr, size_t n )
+{
+	size_t nleft;
+	ssize_t nwritten;
+	const char *ptr;
+
+
+	ptr = CHAR_P vptr;
+	nleft = n;
+	while ( nleft > 0 )
+	{
+		if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
+		{
+			if ( errno == EINTR )
+				nwritten = 0;
+			else
+				return -1;
+		}
+
+		nleft -= nwritten;
+		ptr += nwritten;
+	}
+
+	return n;
 }
 
 

@@ -62,6 +62,7 @@
 #include "fsc2_rsc_hr.h"          /* must be the first to be included ! */
 #include "global.h"               /* must be the second to be included ! */
 #include "fsc2_assert.h"
+#include "fsc2d.h"
 #include "inline.h"
 #include "dump.h"
 #include "bugs.h"

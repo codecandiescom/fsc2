@@ -54,6 +54,8 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 
 const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y" };
 
+volatile sig_atomic_t conn_child_replied;
+
 
 /* Locally used global variables */
 
@@ -68,7 +70,6 @@ static bool delete_old_file = UNSET;
 static volatile sig_atomic_t fsc2_death = 0;
 
 extern FL_resource xresources[ ];    /* from xinit.c */
-volatile sig_atomic_t conn_child_replied;
 
 
 /* Locally used functions */
@@ -91,6 +92,7 @@ static void conn_request_handler( void );
 int main( int argc, char *argv[ ] )
 {
 	char *fname = NULL;
+	int conn_pid;
 
 
 #if defined( FSC2_MDEBUG ) || defined( LIBC_MDEBUG )
@@ -165,18 +167,16 @@ int main( int argc, char *argv[ ] )
 
 	Internals.cmdline_flags = scan_args( &argc, argv, &fname );
 
-	/* Check via the lock file if there is already a process holding a lock,
-	   otherwise create one. This has to done after parsing the command line
-	   arguments because it should still be possible to test an EDL program
-	   via the '-t' flag although someone else is running fsc2. */
+	/* Check if other instances of fsc2 are already running. If there are
+	   and the current instance of fsc2 wasn't started with the non-exclusive
+	   option we've got to quit. If there's no other instance we've got to
+	   spawn a process that deals with further instances of fsc2 and takes
+	   care of state shared memory segments (if there are any) */
 
-	if ( ! fsc2_locking( ) )
+	if ( ( Internals.conn_pid =
+		 	  check_spawn_fsc2d( ! ( Internals.cmdline_flags & NON_EXCLUSIVE ),
+								 in_file_fp ) ) == -1 )
 		return EXIT_FAILURE;
-
-	/* Remove orphaned shared memory segments resulting from previous
-	   crashes */
-
-	delete_stale_shms( );
 
 	/* Setup a structure used when dealing with serial ports */
 
@@ -187,7 +187,6 @@ int main( int argc, char *argv[ ] )
 	if ( ! xforms_init( &argc, argv ) )
 	{
 		raise_permissions( );
-		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
 		return EXIT_FAILURE;
 	}
@@ -234,7 +233,10 @@ int main( int argc, char *argv[ ] )
 		OTHERWISE
 			return EXIT_FAILURE;
 
+		conn_pid = Internals.conn_pid;
+		Internals.conn_pid = 0;
 		load_file( GUI.main_form->browser, 1 );
+		Internals.conn_pid = conn_pid;
 	}
 
 	/* Set handler for signal that's going to be send by the process that
@@ -251,10 +253,10 @@ int main( int argc, char *argv[ ] )
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( ( Internals.conn_pid = spawn_conn( Internals.cmdline_flags &
-											( DO_TEST | DO_START )
-											&& is_loaded, in_file_fp ) )
-		 != -1 )
+	if ( Internals.conn_pid == 0 ||
+		 ( Internals.conn_pid =
+			   spawn_conn( Internals.cmdline_flags &
+			   	   ( DO_TEST | DO_START ) && is_loaded, in_file_fp ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
@@ -264,7 +266,7 @@ int main( int argc, char *argv[ ] )
 		if ( Internals.cmdline_flags & DO_START && is_loaded )
 			fl_trigger_object( GUI.main_form->run );
 
-		/* If required send signal to invoking process */
+		/* If required send signal to the invoking process */
 
 		if ( Internals.cmdline_flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
@@ -449,6 +451,15 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 		if ( ! strcmp( argv[ cur_arg ], "-noBalloons" ) )
 		{
 			flags |= NO_BALLOON;
+			for ( i = cur_arg; i < *argc; i++ )
+				argv[ i ] = argv[ i + 1 ];
+			*argc -= 1;
+			continue;
+		}
+
+		if ( ! strcmp( argv[ cur_arg ], "-non-exclusive" ) )
+		{
+			flags |= NON_EXCLUSIVE;
 			for ( i = cur_arg; i < *argc; i++ )
 				argv[ i ] = argv[ i + 1 ];
 			*argc -= 1;
@@ -652,11 +663,6 @@ static void final_exit_handler( void )
 		sema_destroy( Comm.data_semaphore );
 	if ( Comm.request_semaphore >= 0 )
 		sema_destroy( Comm.request_semaphore );
-
-	/* Delete the lock file */
-
-	setuid( Internals.EUID );
-	unlink( FSC2_LOCKFILE );
 
 	/* If the program was killed by a signal indicating an unrecoverable
 	   error print out a message and (if this feature isn't switched off) 
@@ -1789,8 +1795,11 @@ void usage( int return_status )
 			 "  -S FILE    start interpreting FILE (i.e. start the "
 			 "experiment)\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
+			 "  -non-exclusive\n"
+			 "             run in non-exclusive mode, allowing more than\n"
+			 "             one instance of fsc2 to be run at a time\n"
              "  -stopMouseButton Number/Word\n"
-			 "             Mouse button to be used to stop an experiment\n"
+			 "             mouse button to be used to stop an experiment\n"
 			 "             1 = \"left\", 2 = \"middle\", 3 = \"right\" "
 			 "button\n"
 			 "  -size size\n"

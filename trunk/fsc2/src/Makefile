@@ -28,7 +28,7 @@ c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c    \
 				phases.c devices.c exp.c run.c comm.c accept.c gpib_if.c   \
 				loader.c conn.c mail.c ipc.c print.c serial.c graphics.c   \
 				graph_handler_1d.c graph_handler_2d.c graph_cut.c bugs.c   \
-				fsc2_assert.c dump.c module_util.c
+				fsc2_assert.c dump.c module_util.c fsc2d.c
 ifdef WITH_HTTP_SERVER
 c_sources    += http.c dump_graphic.c
 endif

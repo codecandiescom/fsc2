@@ -23,15 +23,10 @@
 
 
 #include "fsc2.h"
-#include <sys/socket.h>
 #include <sys/un.h>
 
 
-
 static void connect_handler( int listen_fd );
-static ssize_t read_line( int fd, char *ptr, ssize_t max_len );
-static ssize_t do_read( int fd, char *ptr );
-static ssize_t writen( int fd, const char *ptr, ssize_t n );
 static void set_conn_signals( void );
 static void conn_sig_handler( int signo );
 
@@ -135,7 +130,7 @@ static void connect_handler( int listen_fd )
 	int conn_fd;
 	socklen_t cli_len;
 	struct sockaddr_un cli_addr;
-	char line[ MAXLINE ];
+	char line[ MAX_LINE_LENGTH ];
 	ssize_t count;
 	int extern_UID;
 	ssize_t i;
@@ -159,7 +154,7 @@ static void connect_handler( int listen_fd )
 
 		/* Read first line with UID of connecting program */
 
-		if ( ( count = read_line( conn_fd, line, MAXLINE ) ) <= 0 )
+		if ( ( count = read_line( conn_fd, line, MAX_LINE_LENGTH ) ) <= 0 )
 		{
 			close( conn_fd );
 			continue;
@@ -218,7 +213,7 @@ static void connect_handler( int listen_fd )
 		   to tell fsc2 to delete the file after it has been used. If there
 		   is no 'd' replace the newline with a space */
 
-		if ( ( count = read_line( conn_fd, line, MAXLINE ) ) <= 0 ||
+		if ( ( count = read_line( conn_fd, line, MAX_LINE_LENGTH ) ) <= 0 ||
 			 ( line[ 0 ] != 'S' && line[ 0 ] != 'T' && line[ 0 ] != 'L' ) ||
 			 ( line[ 1 ] != '\n' && line[ 1 ] != 'd' ) )
 		{
@@ -241,7 +236,8 @@ static void connect_handler( int listen_fd )
 
 		/* Now read the file name */
 
-		if ( ( count = read_line( conn_fd, line + 2, MAXLINE - 2 ) ) <= 0 )
+		if ( ( count = read_line( conn_fd, line + 2, MAX_LINE_LENGTH - 2 ) )
+			 <= 0 )
 		{
 			close( conn_fd );
 			continue;
@@ -280,103 +276,6 @@ static void connect_handler( int listen_fd )
 	}
 
 	_exit( 0 );                     /* we never can end up here... */
-}
-
-
-/*----------------------------------------------------------------*/
-/* Reads a line of text of max_len characters ending in '\n' from */
-/* the socket. This is directly copied from W. R. Stevens, UNP1.2 */
-/*----------------------------------------------------------------*/
-
-static ssize_t read_line( int fd, char *ptr, ssize_t max_len )
-{
-    ssize_t n, rc;
-    char c;
-
-
-    for ( n = 1; n < max_len; n++ )
-    {
-        if ( ( rc = do_read( fd, &c ) ) == 1 )
-        {
-            *ptr++ = c;
-            if ( c == '\n' )
-                break;
-        }
-        else if ( rc == 0 )
-        {
-            if ( n == 1 )
-                return 0;
-            else
-                break;
-        }
-        else
-            return -1;
-    }
-
-    *ptr = '\0';
-    return n;
-}
-
-
-/*----------------------------------------------------*/
-/* This is directly copied from W. R. Stevens, UNP1.2 */
-/*----------------------------------------------------*/
-
-static ssize_t do_read( int fd, char *ptr )
-{
-    static int read_cnt = 0;
-    static char *read_ptr;
-    static char read_buf[ MAXLINE ];
-
-
-    if ( read_cnt <= 0 )
-    {
-      again:
-        if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
-        {
-            if ( errno == EINTR )
-                goto again;
-            return -1;
-        }
-        else if ( read_cnt == 0 )
-            return 0;
-
-        read_ptr = read_buf;
-    }
-
-    read_cnt--;
-    *ptr = *read_ptr++;
-    return 1;
-}
-
-
-/*----------------------------------------------------*/
-/* Write a line of a n characters of text to socket   */
-/* This is directly copied from W. R. Stevens, UNP1.2 */
-/*----------------------------------------------------*/
-
-static ssize_t writen( int fd, const char *ptr, ssize_t n )
-{
-    size_t nleft;
-    ssize_t nwritten;
-
-
-    nleft = n;
-    while ( nleft > 0 )
-    {
-        if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
-        {
-            if ( errno == EINTR )
-                nwritten = 0;
-            else
-                return -1;
-        }
-
-        nleft -= nwritten;
-        ptr += nwritten;
-    }
-
-    return n;
 }
 
 

@@ -994,18 +994,17 @@ static void child_sig_handler( int signo )
 
 			/* Test if parent still exists - if not (i.e. the parent died
 			   without sending a SIGTERM signal) destroy the semaphore and
-			   shared memory (as far as the child knows about it), kill also
-			   the child for connections and remove the lock file. */
+			   shared memory (as far as the child knows about it) and also
+			   kill the child for connections (if it exists). */
 
 			if ( getppid( ) == 1 ||
 				 ( kill( getppid( ), 0 ) == -1 && errno == ESRCH ) )
 			{
-				kill( Internals.conn_pid, SIGTERM );
+				if ( Internals.conn_pid > 0 )
+					kill( Internals.conn_pid, SIGTERM );
 				delete_all_shm( );
 				sema_destroy( Comm.data_semaphore );
 				sema_destroy( Comm.request_semaphore );
-				setuid( Internals.EUID );
-				unlink( FSC2_LOCKFILE );
 			}
 
 			EDL.do_quit = SET;

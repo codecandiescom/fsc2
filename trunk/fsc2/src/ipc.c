@@ -223,8 +223,6 @@ void delete_stale_shms( void )
 	void *buf;
 
 
-	raise_permissions( );
-
 	/* Get the current maximum shared memory segment id */
 
     max_id = shmctl( 0, SHM_INFO, &shm_seg );
@@ -267,8 +265,6 @@ void delete_stale_shms( void )
 				shmdt( buf );
 		}
 	}
-
-	lower_permissions( );
 }
 
 

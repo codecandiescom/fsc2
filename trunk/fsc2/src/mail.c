@@ -27,7 +27,6 @@
 #include <netdb.h>
 #include <sys/un.h>
 #include <sys/param.h>
-#include <sys/socket.h>
 
 
 #define MAIL_PORT 25
@@ -39,16 +38,10 @@
 #endif
 
 
-#define MAX_MAIL_LINE      4096
-
-
 static int do_send( const char *rec_host, const char *to,
 					const char *from, const char *local_host,
 					const char *subject, FILE *fp );
 static int open_mail_socket( const char *host );
-static ssize_t writen( int fd, const void *vptr, size_t n );
-static ssize_t read_line( int fd, void *vptr, size_t max_len );
-static ssize_t do_read( int fd, char *ptr );
 
 
 /*---------------------------------------------------------------*/
@@ -95,7 +88,7 @@ static int do_send( const char *rec_host, const char *to,
 					const char *subject, FILE *fp )
 {
 	int mfd;
-	char line[ MAX_MAIL_LINE ];
+	char line[ MAX_LINE_LENGTH ];
 	ssize_t len;
 	
 
@@ -107,7 +100,7 @@ static int do_send( const char *rec_host, const char *to,
 
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "220", 3 ) )
 		{
 			close( mfd );
@@ -117,8 +110,8 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Send the line telling the other side about ourself */
 
-	if ( ( len = snprintf( line, MAX_MAIL_LINE, "HELO %s\r\n", local_host ) )
-		 > MAX_MAIL_LINE ||
+	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "HELO %s\r\n", local_host ) )
+		 > MAX_LINE_LENGTH ||
 		 writen( mfd, line, len ) < len )
 	{
 		close( mfd );
@@ -129,7 +122,7 @@ static int do_send( const char *rec_host, const char *to,
 	
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "250", 3 ) )
 		{
 			close( mfd );
@@ -139,9 +132,9 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Send the line about the sender of the mail */
 
-	if ( ( len = snprintf( line, MAX_MAIL_LINE, "MAIL FROM:<%s@%s>\r\n",
+	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "MAIL FROM:<%s@%s>\r\n",
 						   from, local_host ) )
-		 > MAX_MAIL_LINE ||
+		 > MAX_LINE_LENGTH ||
 		 writen( mfd, line, len ) < len )
 	{
 		close( mfd );
@@ -152,7 +145,7 @@ static int do_send( const char *rec_host, const char *to,
 	
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "250", 3 ) )
 		{
 			close( mfd );
@@ -162,8 +155,8 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Send the line telling the other side about the receiver of the mail */
 
-	if ( ( len = snprintf( line, MAX_MAIL_LINE, "RCPT TO:<%s>\r\n", to ) )
-		 > MAX_MAIL_LINE ||
+	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "RCPT TO:<%s>\r\n", to ) )
+		 > MAX_LINE_LENGTH ||
 		 writen( mfd, line, len ) < len )
 	{
 		close( mfd );
@@ -174,7 +167,7 @@ static int do_send( const char *rec_host, const char *to,
 	
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "250", 3 ) )
 		{
 			close( mfd );
@@ -194,7 +187,7 @@ static int do_send( const char *rec_host, const char *to,
 	
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "354", 3 ) )
 		{
 			close( mfd );
@@ -204,14 +197,14 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Now send the message, starting with the header */
 
-	if ( ( len = snprintf( line, MAX_MAIL_LINE, "Subject: %s\n", subject ) )
-		 > MAX_MAIL_LINE  ||
+	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "Subject: %s\n", subject ) )
+		 > MAX_LINE_LENGTH  ||
 		 writen( mfd, line, len ) < len ||
-		 ( len = snprintf( line, MAX_MAIL_LINE, "From: fsc2 <fsc2@%s>\n",
-						   local_host ) ) > MAX_MAIL_LINE  ||
+		 ( len = snprintf( line, MAX_LINE_LENGTH, "From: fsc2 <fsc2@%s>\n",
+						   local_host ) ) > MAX_LINE_LENGTH  ||
 		 writen( mfd, line, len ) < len ||
-		 ( len = snprintf( line, MAX_MAIL_LINE, "To: %s\n", to ) )
-		 > MAX_MAIL_LINE ||
+		 ( len = snprintf( line, MAX_LINE_LENGTH, "To: %s\n", to ) )
+		 > MAX_LINE_LENGTH ||
 		 writen( mfd, line, len ) < len )
 	{
 		close( mfd );
@@ -220,7 +213,7 @@ static int do_send( const char *rec_host, const char *to,
 
 	/* Copy the whole input file to the socket */
 
-	while ( fgets( line, MAX_MAIL_LINE, fp ) != NULL )
+	while ( fgets( line, MAX_LINE_LENGTH, fp ) != NULL )
 	{
 		/* Send an additional dot before the line if the line consists of
 		   nothing more than a dot */
@@ -254,7 +247,7 @@ static int do_send( const char *rec_host, const char *to,
 	
 	do
 	{
-		if ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) <= 4 ||
+		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
 			 strncmp( line, "250", 3 ) )
 		{
 			close( mfd );
@@ -268,7 +261,7 @@ static int do_send( const char *rec_host, const char *to,
 		return -1;
 	}
 
-	while ( ( len = read_line( mfd, line, MAX_MAIL_LINE ) ) >= 4 &&
+	while ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) >= 4 &&
 			! strncmp( line, "221", 3 ) && line[ 3 ] == '-' )
 		/* empty */ ;
 
@@ -308,101 +301,6 @@ static int open_mail_socket( const char *host )
 		return -1;
 
 	return sock_fd;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-static ssize_t read_line( int fd, void *vptr, size_t max_len )
-{
-	ssize_t n, rc;
-	char c, *ptr;
-
-
-	ptr = CHAR_P vptr;
-	for ( n = 1; n < ( ssize_t ) max_len; n++ )
-	{
-		if ( ( rc = do_read( fd, &c ) ) == 1 )
-		{
-			*ptr++ = c;
-			if ( c == '\n' )
-				break;
-		}
-		else if ( rc == 0 )
-		{
-			if ( n == 1 )
-				return 0;
-			else
-				break;
-		}
-		else
-			return -1;
-	}
-
-	*ptr = '\0';
-	return n;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-static ssize_t do_read( int fd, char *ptr )
-{
-	static int read_cnt;
-	static char *read_ptr;
-	static char read_buf[ MAX_MAIL_LINE ];
-
-
-	if ( read_cnt <= 0 )
-	{
-	  again:
-		if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
-		{
-			if ( errno == EINTR )
-				goto again;
-			return -1;
-		}
-		else if ( read_cnt == 0 )
-			return 0;
-
-		read_ptr = read_buf;
-	}
-
-	read_cnt--;
-	*ptr = *read_ptr++;
-	return 1;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-static ssize_t writen( int fd, const void *vptr, size_t n )
-{
-	size_t nleft;
-	ssize_t nwritten;
-	const char *ptr;
-
-
-	ptr = CHAR_P vptr;
-	nleft = n;
-	while ( nleft > 0 )
-	{
-		if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
-		{
-			if ( errno == EINTR )
-				nwritten = 0;
-			else
-				return -1;
-		}
-
-		nleft -= nwritten;
-		ptr += nwritten;
-	}
-
-	return n;
 }
 
 
