@@ -41,9 +41,11 @@ int spectrapro_300i_exp_hook( void );
 int spectrapro_300i_end_of_exp_hook( void );
 void spectrapro_300i_exit_hook( void );
 Var *monochromator_name( Var *v );
+Var *monochromator_turret( Var *v );
 Var *monochromator_grating( Var *v );
 Var *monochromator_wavelength( Var *v );
 Var *monochromator_install_grating( Var *v );
+Var *monochromator_groove_density( Var *v );
 static bool spectrapro_300i_open( void );
 static bool spectrapro_300i_close( void );
 static long spectrapro_300i_get_turret( void );
@@ -70,7 +72,7 @@ struct SPECTRAPRO_300I {
 	long current_grating;
 	struct {
 		bool is_installed;
-		long grooves;       /* number of grooes per m */
+		long grooves;       /* number of grooves per m */
 		double blaze;       /* blaze wavelength (negative if not appicable) */
 	} grating[ MAX_GRATINGS ];
 };
@@ -102,7 +104,12 @@ int spectrapro_300i_init_hook( void )
 	spectrapro_300i.is_needed = SET;
 
 	for ( i = 0; i < MAX_GRATINGS; i++ )
-		spectrapro_300i.grating[ i ].is_installed = UNSET;
+	{
+		spectrapro_300i.grating[ i ].is_installed = SET;
+		spectrapro_300i.grating[ i ].grooves = 1.2e6;
+		spectrapro_300i.grating[ i ].blaze = 7.5e-7;
+	}
+
 	spectrapro_300i.turret = 0;
 	spectrapro_300i.current_grating = 0;
 
@@ -221,14 +228,19 @@ Var *monochromator_grating( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for setting or quering the current turret */
-/*----------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Function for setting or quering the current turret. If the turret is */
+/* changed also the grating is set to the one at the same position on   */
+/* the new turret (if this is installed) or to one of the gratings      */
+/* installed on the new turret. If there is no grating installed for    */
+/* the new turret the function will return an error.                    */
+/*----------------------------------------------------------------------*/
 
-#if 0
 Var *monochromator_turret( Var *v )
 {
 	long turret;
+	long new_grat;
+	long i;
 
 
 	if ( v == 0 )
@@ -236,7 +248,7 @@ Var *monochromator_turret( Var *v )
 
 	turret = get_strict_long( v, "turret number" );
 
-	if ( turret < 1 || grating > MAX_TURRETS )
+	if ( turret < 1 || turret > MAX_TURRETS )
 	{
 		if ( FSC2_MODE == TEST )
 		{
@@ -250,15 +262,51 @@ Var *monochromator_turret( Var *v )
 		return vars_push( INT_VAR, spectrapro_300i.turret + 1 );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		if ( ! sectrapro_300i.grating[ 3 * turret + i ].is_installed )
+	/* During the test run we don't have to do anything */
 
-		for ( i = 0; i < 3; i++ )
-			if ( sectrapro_300i.grating[ 3 * turret + i ].is_installed )
+	if ( FSC2_MODE != EXPERIMENT )
+	{
+		spectrapro_300i.turret = turret - 1;		
+		return vars_push( INT_VAR, turret );
+	}
+
+	/* Same if the new turret is identical to the current turret */
+
+	if ( turret - 1 == spectrapro_300i.turret )
+		return vars_push( INT_VAR, turret );
+
+	/* Figure out the new grating to use */
+
+	new_grat = spectrapro_300i.current_grating +
+			   3 * ( turret - 1 - spectrapro_300i.turret );
+
+	if ( ! spectrapro_300i.grating[ new_grat ].is_installed )
+	{
+		for ( i = 3 * ( turret - 1 ); i < 3 * turret; i++ )
+			if ( spectrapro_300i.grating[ i ].is_installed )
 				break;
+
+		if ( i == 3 * turret )
+		{
+			print( FATAL, "Can't switch to turret #%ld, no grating installed "
+				   "for this turret.\n" );
+			THROW( EXCEPTION );
+		}
+
+		new_grat = i;
+	}
+
+	print( NO_ERROR, "Switching to grating #%ld.\n", new_grat + 1 );
+
+	spectrapro_300i_set_turret( turret );
+	spectrapro_300i.turret = turret - 1;
+
+	spectrapro_300i_set_turret( new_grat + 1 );
+	spectrapro_300i.current_grating = new_grat;	
+
+	return vars_push( INT_VAR, turret );
 }
-#endif
+
 
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
@@ -352,14 +400,15 @@ Var *monochromator_install_grating( Var *v )
 
 	if ( v->type != STR_VAR )
 	{
-		print( FATAL, "First varianbe must be a string with the part "
+		print( FATAL, "First variable must be a string with the part "
 			   "number, e.g. 1-120-500.\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* Do some minimal checks on the part number */
 
-	if ( strncmp( v->val.sptr, "1-", 2 ) ||
+	if ( ! isdigit( v->val.sptr[ 0 ] ) ||
+		 v->val.sptr[ 0 ] != '-'       ||
 		 ! isdigit( v->val.sptr[ 2 ] ) ||
 		 ! isdigit( v->val.sptr[ 3 ] ) ||
 		 ! isdigit( v->val.sptr[ 4 ] ) ||
@@ -384,6 +433,34 @@ Var *monochromator_install_grating( Var *v )
 		spectrapro_300i_install_grating( v->val.sptr, grating );
 
 	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+Var *monochromator_groove_density( Var *v )
+{
+	long grating;
+
+
+	grating = get_strict_long( v->next, "grating number" );
+
+	if ( grating < 1 && grating > MAX_GRATINGS )
+	{
+		print( FATAL, "Invalid grating number, must be in range between "
+			   "1 and %d.\n", MAX_GRATINGS );
+		THROW( EXCEPTION );
+	}
+	
+	if ( ! spectrapro_300i.grating[ grating - 1 ].is_installed )
+	{
+		print( FATAL, "Grating #%ld isn't installed.\n", grating );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( FLOAT_VAR,
+					  spectrapro_300i.grating[ grating - 1 ].grooves );
 }
 
 

@@ -821,6 +821,14 @@ Var *ccd_camera_temperature( Var *v )
 }
 
 
+/*------------------------------------------------------*/
+/*------------------------------------------------------*/
+
+Var *ccd_camera_pixel_size( Var *v )
+{
+	return vars_push( FLOAT_VAR, RS_SPEC10_PIXEL_SIZE );
+}
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

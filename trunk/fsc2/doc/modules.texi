@@ -1357,7 +1357,7 @@ Var *my_function( Var *var )
     Var *ret_value;
     int access;
 
-    if ( func_exists( "foo" )                  /* test if function exists */
+    if ( ! func_exists( "foo" ) )              /* test if function exists */
     @{
         /* do your error handling here */ 
     @}
