@@ -64,6 +64,9 @@
 #define NO_CHECKSUM    0
 #define WITH_CHECKSUM  1
 
+#define NO_LINEFEED    0
+#define WITH_LINEFEED  1
+
 
 #define WN        1
 #define WND       2
@@ -130,7 +133,9 @@ typedef struct {
 	struct termios *tio;             /* serial port terminal interface
 										structure */
 
+	bool data_format;                /* either STANDARD or DATALOGGER */
 	bool use_checksum;               /* do we need a checksum in transfers ? */
+	bool sends_lf;
 
 } SPEX_CD2A;
 
@@ -140,6 +145,7 @@ extern SPEX_CD2A spex_cd2a;
 int spex_cd2a_init_hook( void );
 int spex_cd2a_test_hook( void );
 int spex_cd2a_exp_hook( void );
+void spex_cd2a_child_exit_hook( void );
 int spex_cd2a_end_of_exp_hook( void );
 
 Var *monochromator_name( Var *v );
@@ -147,7 +153,7 @@ Var *monochromator_init( Var *v );
 Var *monochromator_wavelength( Var *v );
 Var *monochromator_wavenumber( Var *v );
 Var *monochromator_start_scan( Var *v );
-Var *monochromator_scan_up( Var *v );
+Var *monochromator_scan( Var *v );
 Var *monochromator_laser_line( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_shutter_limits( Var *v );

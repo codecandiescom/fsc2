@@ -216,9 +216,24 @@ int spex_cd2a_init_hook( void )
 		}
 	}
 
+	/* Determine the format data are send by the device */
+
+	spex_cd2a.data_format = DATA_FORMAT;
+	if ( spex_cd2a.data_format != STANDARD &&
+		 spex_cd2a.data_format != DATALOGGER )
+	{
+		print( FATAL, "Invalid setting for data format in configuration file "
+			   "for the device.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* Determine if we need to send a checksum with commands */
 
 	spex_cd2a.use_checksum = USE_CHECKSUM != NO_CHECKSUM;
+
+	/* Determine if device sends a linefeed at the end of data */
+
+	spex_cd2a.sends_lf = SENDS_LINEFEED != NO_LINEFEED;
 
 	spex_cd2a.is_wavelength = UNSET;
 	spex_cd2a.laser_wavenumber = 0.0;
@@ -260,6 +275,16 @@ int spex_cd2a_exp_hook( void )
 	spex_cd2a_init( );
 
 	return 1;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+void spex_cd2a_child_exit_hook( void )
+{
+	if ( spex_cd2a.in_scan )
+		spex_cd2a_halt( );
 }
 
 
@@ -418,6 +443,8 @@ Var *monochromator_init( Var *v )
 
 	spex_cd2a.start = start;
 	spex_cd2a.step = num_steps * spex_cd2a.mini_step;
+	if ( spex_cd2a.mode && WND )
+		spex_cd2a.step *= -1.0;
 	spex_cd2a.is_init = SET;
 
 	return vars_push( INT_VAR, 1L );
@@ -573,7 +600,7 @@ Var *monochromator_start_scan( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *monochromator_scan_up( Var *v )
+Var *monochromator_scan( Var *v )
 {
 	UNUSED_ARGUMENT( v );
 

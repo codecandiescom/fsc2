@@ -43,8 +43,14 @@ static void spex_cd2a_sweep_end( void );
 static void spex_cd2a_sweep_step( void );
 static void spex_cd2a_print( char *mess, int digits, double val );
 static size_t spex_cd2a_write( int type, const char *mess );
-static void spex_cd2a_read( void );
+static void spex_cd2a_read_param_ack( void );
+static void spex_cd2a_read_cmd_ack( const char *cmd );
+static void spex_cd2a_read_set_pos_ack( void );
+static void spex_cd2a_read_start_sweep_ack( void );
+static void spex_cd2a_read_sweep_ack( void );
+static void spex_cd2a_read_halt_ack( void );
 static void spex_cd2a_comm_fail( void );
+static void spex_cd2a_wrong_data( void );
 
 
 static bool do_print_message = UNSET;
@@ -66,7 +72,6 @@ void spex_cd2a_init( void )
 			fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
 
 			spex_cd2a_write( PARAMETER, "BI1.0" );
-			spex_cd2a_read( );
 			TRY_SUCCESS;
 		}
 		CATCH( EXCEPTION )
@@ -97,7 +102,6 @@ void spex_cd2a_init( void )
 		spex_cd2a_sweep_end( );
 		spex_cd2a_sweep_step( );
 		spex_cd2a_write( PARAMETER, "NS1" );
-		spex_cd2a_read( );
 
 		spex_cd2a.is_wavelength = SET;
 		spex_cd2a.wavelength = spex_cd2a.start;
@@ -136,12 +140,10 @@ void spex_cd2a_set_wavelength( void )
 	}
 
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 
 	/* ...and ask the monochromator to move to it */
 
 	spex_cd2a_write( COMMAND, "P" );
-	spex_cd2a_read( );
 }
 
 
@@ -151,10 +153,7 @@ void spex_cd2a_set_wavelength( void )
 void spex_cd2a_halt( void )
 {
 	if ( FSC2_MODE == EXPERIMENT )
-	{
 		spex_cd2a_write( COMMAND, "H" );
-		spex_cd2a_read( );
-	}
 
 	spex_cd2a.in_scan = UNSET;
 }
@@ -174,10 +173,7 @@ void spex_cd2a_start_scan( void )
 		spex_cd2a_halt( );
 
 	if ( FSC2_MODE == EXPERIMENT )
-	{
-		spex_cd2a_write( COMMAND, "E" );
-		spex_cd2a_read( );
-	}
+		spex_cd2a_write( COMMAND, "T" );
 
 	spex_cd2a.in_scan = SET;
 	spex_cd2a.wavelength = spex_cd2a.start;
@@ -193,10 +189,7 @@ void spex_cd2a_trigger( void )
 	fsc2_assert( spex_cd2a.in_scan );
 
 	if ( FSC2_MODE == EXPERIMENT )
-	{
-		spex_cd2a_write( COMMAND, "T" );
-		spex_cd2a_read( );
-	}
+		spex_cd2a_write( COMMAND, "E" );
 }
 
 
@@ -212,13 +205,11 @@ void spex_cd2a_set_laser_line( void )
 		return;
 
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 
 	if ( spex_cd2a.mode == WND )
 	{
 		spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_wavenumber );
 		spex_cd2a_write( PARAMETER, mess );
-		spex_cd2a_read( );
 	}
 }
 
@@ -240,7 +231,6 @@ void spex_cd2a_set_shutter_limits( void )
 					 spex_cd2a_wl2mwn( spex_cd2a.lower_limit ) :
 					 spex_cd2a.lower_limit );
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 
 	/* Set the upper shutter limit */
 
@@ -249,7 +239,6 @@ void spex_cd2a_set_shutter_limits( void )
 					 spex_cd2a_wl2mwn( spex_cd2a.upper_limit ) :
 					 spex_cd2a.lower_limit );
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 }
 
 
@@ -258,8 +247,7 @@ void spex_cd2a_set_shutter_limits( void )
 
 static void spex_cd2a_scan_type( void )
 {
-	spex_cd2a_write( PARAMETER, "TYC" );
-	spex_cd2a_read( );
+	spex_cd2a_write( PARAMETER, "TYB" );
 }
 
 
@@ -283,7 +271,6 @@ static void spex_cd2a_sweep_start( void )
 	}
 
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 }
 
 
@@ -306,7 +293,6 @@ static void spex_cd2a_sweep_end( void )
 	}
 
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 }
 
 
@@ -318,9 +304,8 @@ static void spex_cd2a_sweep_step( void )
 	char mess[ 9 ] = "BI";
 
 
-	spex_cd2a_print( mess + 2, 6, spex_cd2a.step );
+	spex_cd2a_print( mess + 2, 6, fabs( spex_cd2a.step ) );
 	spex_cd2a_write( PARAMETER, mess );
-	spex_cd2a_read( );
 }	
 
 
@@ -477,14 +462,11 @@ static size_t spex_cd2a_write( int type, const char *mess )
 	ssize_t written;
 
 
-	printf( "%s\n", mess );
-
 	len = strlen( mess );
 	tm = T_malloc( len + 6 );
 
 	tm[ 0 ] = type == PARAMETER ? STX : CAN;
 	len++;
-
 	strcpy( tm + 1, mess );
 	tm[ len++ ] = ETX;
 
@@ -497,7 +479,9 @@ static size_t spex_cd2a_write( int type, const char *mess )
 	}
 
 	tm[ len++ ] = '\r';
-	tm[ len++ ] = '\0';
+
+	if ( type == COMMAND )
+		fsc2_usleep( 10000, UNSET );
 
 	if ( ( written = fsc2_serial_write( SERIAL_PORT, tm, len, 0, UNSET ) )
 		 <= 0 )
@@ -508,6 +492,11 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 	T_free( tm );
 
+	if ( type == PARAMETER )
+		spex_cd2a_read_param_ack( );
+	else
+		spex_cd2a_read_cmd_ack( mess );
+
 	return ( size_t ) written;
 }
 
@@ -515,22 +504,16 @@ static size_t spex_cd2a_write( int type, const char *mess )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static void spex_cd2a_read( void )
+static void spex_cd2a_read_param_ack( void )
 {
 	char buf[ 7 ];
 	ssize_t r = 0;
-	ssize_t i;
 
 
 	while ( r < 2 )
 		if ( ( r += fsc2_serial_read( SERIAL_PORT, buf + r,
 									  7 - r, 500000, SET ) ) <= 0 )
 			spex_cd2a_comm_fail( );
-
-	printf( "%ld: ", ( long ) r );
-	for ( i = 0; i < r; i++ )
-		printf( " 0x%x", buf[ i ] );
-	printf( "\n" );
 
 	if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
 		return;
@@ -541,19 +524,381 @@ static void spex_cd2a_read( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( buf[ 0 ] == '\a' || buf[ 1 ] == '\a' )
+	if ( buf[ 0 ] == ACK || buf[ 1 ] == '\a' )
 	{
-		if ( buf[ 0 ] == '\a' )
-			buf[ 3 ] = '\0';
-		else
-			buf[ 4 ] = '\0';
+		buf[ 4 ] = '\0';
 		print( FATAL, "Failure to execute command, error code: %s.\n",
-			   buf[ 0 ] == '\a' ? buf + 1 : buf + 2 );
+			   buf + 2 );
 		THROW( EXCEPTION );
 	}
 
-	print( FATAL, "Device send unexpected data.\n" );
-	THROW( EXCEPTION );
+	spex_cd2a_wrong_data( );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_read_cmd_ack( const char *cmd )
+{
+	switch ( *cmd )
+	{
+		case 'P' :
+			spex_cd2a_read_set_pos_ack( );
+			break;
+
+		case 'T' :
+			spex_cd2a_read_start_sweep_ack( );
+			break;
+
+		case 'E' :
+			spex_cd2a_read_sweep_ack( );
+			break;
+
+		case 'H' :
+			spex_cd2a_read_halt_ack( );
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+}
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_read_set_pos_ack( void )
+{
+	char buf[ 20 ];
+	ssize_t to_be_read = 5;
+	ssize_t already_read = 0;
+	char *bp, *ep;
+	bool done = UNSET;
+
+	
+	while ( already_read < to_be_read )
+	{
+		if ( ( already_read +=
+			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+								 to_be_read - already_read, 1000000,
+								 SET ) ) < 0 )
+			spex_cd2a_comm_fail( );
+		stop_on_user_request( );
+	}
+
+	if ( buf[ 0 ] != CAN || buf[ 1 ] != ACK || buf[ 2 ] != CAN ||
+		 buf[ 3 ] != CAN || buf[ 4 ] != CAN )
+		spex_cd2a_wrong_data( );
+
+	to_be_read = 11;
+	if ( spex_cd2a.data_format == STANDARD )
+		to_be_read += 2;
+	if ( spex_cd2a.use_checksum )
+		to_be_read += 2;
+	if ( spex_cd2a.sends_lf )
+		to_be_read++;
+
+	do
+	{
+		already_read = 0;
+
+		while ( already_read < to_be_read )
+		{
+			if ( ( already_read +=
+				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+									 to_be_read - already_read, 1000000,
+									 SET ) ) < 0 )
+				spex_cd2a_comm_fail( );
+			stop_on_user_request( );
+		}
+
+		bp = buf;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported status is reasonable */
+
+		switch ( *bp++ )
+		{
+			case '*' :          /* final position reached ? */
+				done = SET;
+				break;
+
+			case 'P' :          /* still moving to final position ? */
+				break;
+
+			default :
+				spex_cd2a_wrong_data( );
+		}
+
+		/* Check that the reported unit is reasonable */
+
+		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
+			 ( spex_cd2a.mode == WL &&
+			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
+				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+			bp++;
+		else
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported wave-length or -number is reasonable */
+
+		errno = 0;
+		strtod( bp, &ep );
+		if ( errno || ep != bp + 8 )
+			spex_cd2a_wrong_data( );
+
+		bp += 8;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
+			spex_cd2a_wrong_data( );
+
+		/* Skip the checksum if there's one */
+
+		if ( spex_cd2a.use_checksum )
+			bp += 2;
+
+		if ( *bp++ != '\r' )
+			spex_cd2a_wrong_data( );
+
+		if ( spex_cd2a.sends_lf && *bp != '\n' )
+			spex_cd2a_wrong_data( );
+
+	} while ( ! done );
+}
+		
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_read_start_sweep_ack( void )
+{
+	char buf[ 20 ];
+	ssize_t to_be_read = 2;
+	ssize_t already_read = 0;
+	char *bp, *ep;
+	bool done = UNSET;
+
+	
+	while ( already_read < to_be_read )
+	{
+		if ( ( already_read +=
+			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+								 to_be_read - already_read, 1000000,
+								 SET ) ) < 0 )
+			spex_cd2a_comm_fail( );
+		stop_on_user_request( );
+	}
+
+	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
+		spex_cd2a_wrong_data( );
+
+	to_be_read = 11;
+	if ( spex_cd2a.data_format == STANDARD )
+		to_be_read += 2;
+	if ( spex_cd2a.use_checksum )
+		to_be_read += 2;
+	if ( spex_cd2a.sends_lf )
+		to_be_read++;
+
+	do
+	{
+		already_read = 0;
+
+		while ( already_read < to_be_read )
+		{
+			if ( ( already_read +=
+				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+									 to_be_read - already_read, 1000000,
+									 SET ) ) < 0 )
+				spex_cd2a_comm_fail( );
+			stop_on_user_request( );
+		}
+
+		bp = buf;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported status is reasonable */
+
+		switch ( *bp++ )
+		{
+			case 'S' :          /* final position reached ? */
+				done = SET;
+				break;
+
+			case 'P' :          /* still moving to final position ? */
+				break;
+
+			default :
+				spex_cd2a_wrong_data( );
+		}
+
+		/* Check that the reported unit is reasonable */
+
+		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
+			 ( spex_cd2a.mode == WL &&
+			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
+				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+			bp++;
+		else
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported wave-length or -number is reasonable */
+
+		errno = 0;
+		strtod( bp, &ep );
+		if ( errno || ep != bp + 8 )
+			spex_cd2a_wrong_data( );
+
+		bp += 8;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
+			spex_cd2a_wrong_data( );
+
+		/* Skip the checksum if there's one */
+
+		if ( spex_cd2a.use_checksum )
+			bp += 2;
+
+		if ( *bp++ != '\r' )
+			spex_cd2a_wrong_data( );
+
+		if ( spex_cd2a.sends_lf && *bp != '\n' )
+			spex_cd2a_wrong_data( );
+
+	} while ( ! done );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_read_sweep_ack( void )
+{
+	char buf[ 20 ];
+	ssize_t to_be_read = 2;
+	ssize_t already_read = 0;
+	char *bp, *ep;
+	bool done = UNSET;
+
+	
+	while ( already_read < to_be_read )
+	{
+		if ( ( already_read +=
+			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+								 to_be_read - already_read, 1000000,
+								 SET ) ) < 0 )
+			spex_cd2a_comm_fail( );
+		stop_on_user_request( );
+	}
+
+	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
+		spex_cd2a_wrong_data( );
+
+	to_be_read = 11;
+	if ( spex_cd2a.data_format == STANDARD )
+		to_be_read += 2;
+	if ( spex_cd2a.use_checksum )
+		to_be_read += 2;
+	if ( spex_cd2a.sends_lf )
+		to_be_read++;
+
+	do
+	{
+		already_read = 0;
+
+		while ( already_read < to_be_read )
+		{
+			if ( ( already_read +=
+				   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+									 to_be_read - already_read, 1000000,
+									 SET ) ) < 0 )
+				spex_cd2a_comm_fail( );
+			stop_on_user_request( );
+		}
+
+		bp = buf;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != STX )
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported status is reasonable */
+
+		switch ( *bp++ )
+		{
+			case 'B' :          /* final position reached ? */
+				done = SET;
+				break;
+
+			case 'P' :          /* still moving to final position ? */
+				break;
+
+			default :
+				spex_cd2a_wrong_data( );
+		}
+
+		/* Check that the reported unit is reasonable */
+
+		if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
+			 ( spex_cd2a.mode == WL &&
+			   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
+				 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+			bp++;
+		else
+			spex_cd2a_wrong_data( );
+
+		/* Check that the reported wave-length or -number is reasonable */
+
+		errno = 0;
+		strtod( bp, &ep );
+		if ( errno || ep != bp + 8 )
+			spex_cd2a_wrong_data( );
+
+		bp += 8;
+
+		if ( spex_cd2a.data_format == STANDARD && *bp++ != ETX )
+			spex_cd2a_wrong_data( );
+
+		/* Skip the checksum if there's one */
+
+		if ( spex_cd2a.use_checksum )
+			bp += 2;
+
+		if ( *bp++ != '\r' )
+			spex_cd2a_wrong_data( );
+
+		if ( spex_cd2a.sends_lf && *bp != '\n' )
+			spex_cd2a_wrong_data( );
+
+	} while ( ! done );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_read_halt_ack( void )
+{
+	char buf[ 2 ];
+	ssize_t to_be_read = 2;
+	ssize_t already_read = 0;
+
+	
+	while ( already_read < to_be_read )
+	{
+		if ( ( already_read +=
+			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
+								 to_be_read - already_read, 1000000,
+								 SET ) ) < 0 )
+			spex_cd2a_comm_fail( );
+		stop_on_user_request( );
+	}
+
+	if ( buf[ 0 ] != ACK || buf[ 1 ] != CAN )
+		spex_cd2a_wrong_data( );
 }
 
 
@@ -575,6 +920,16 @@ static void spex_cd2a_comm_fail( void )
 {
 	if ( do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
+	THROW( EXCEPTION );
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void spex_cd2a_wrong_data( void )
+{
+	print( FATAL, "Device send unexpected data.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -323,6 +323,8 @@ monochromator_grating_adjust, -1, EXP;
 monochromator_calibrate, -1, EXP;
 monochromator_init, 2, PREP;
 monochromator_wavenumber, -1, ALL;
+monochromator_start_scan, 0, EXP;
+monochromator_scan, 0, EXP;
 monochromator_laser_line, -1, ALL;
 monochromator_shutter_limits, -1, ALL;
 
