@@ -59,7 +59,7 @@ typedef struct
 	const char *name;                 /* name of the function */
     Var * ( * fnct )( Var * );        /* pointer to the function */
 	int nargs;                        /* number of arguments */
-    int access_flag;                  /* asscessibility flag */
+    int access_flag;                  /* accessibility flag */
 	Device *device;                   /* handle of defining device module */
 	bool to_be_loaded;                /* set if function has to be loaded */
 } Func;

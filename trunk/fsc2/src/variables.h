@@ -65,7 +65,7 @@ typedef struct Var_
 		long   *lpnt;                               /* for integer arrays */
 		double *dpnt;                               /* for double arrays */
 		char   *sptr;                               /* for strings */
-		struct Var_ * ( * fnct )( struct Var_ * );  /* for functions */
+		Func   *fnct;                               /* for functions */
 		struct Var_ *vptr;                          /* for array references */
 		void   *gptr;                               /* generic pointer */
 	} val;

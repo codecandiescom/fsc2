@@ -25,14 +25,6 @@
 #include "fsc2.h"
 
 
-/* Some typedefs needed due to the limitations of va_arg() (also have a look
-   at the C-FAQ 15.11 about this): FnctPtr is a pointer to a Var pointer
-   returning function with a Var pointer as argument. */
-
-typedef Var *Var_pointer_returning_Function( Var * );
-typedef Var_pointer_returning_Function *FnctPtr;
-
-
 /* local variables */
 
 static bool is_sorted = UNSET;
@@ -1179,7 +1171,7 @@ Var *vars_push( int type, ... )
 			/* Understanding a function pointer is too complicated for
 			   va_arg() thus `FnctPtr' is a typedef (see start of file) */
 
-			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
+			new_stack_var->val.fnct = va_arg( ap, FUNC * );
 			break;
 
 		case ARR_PTR :
