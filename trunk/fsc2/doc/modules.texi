@@ -137,12 +137,12 @@ lockin_ref_level,     -1, EXP;  // Get/set mod. level (SR8x0 only)
 lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
 @end example
 @noindent
-For example, @code{lockin_get_adc_data} (a function that alows you to
+For example, @code{lockin_get_adc_data} (a function that allows you to
 read the voltage at one of the lock-ins ADCs) expects 1 argument (the
 number of the ADC) and can only be used in the @code{EXPERIMENT}
 section. In contrast, @code{lockin_sensitivity} can be called with a
 variable number of arguments with an upper limit of 1 argument (if
-called without an argument it returns the sensitivity seting of the
+called without an argument it returns the sensitivity setting of the
 lock-in, if called with an argument the function treats this as the new
 sensitivity to be set). This function can be used in all parts of the
 @acronym{EDL} program - but because querying the lock-in for its
@@ -241,15 +241,15 @@ them, i.e.@: the input variables are organized as a linked list:
               |                           |
               V                           |
              ---------------              V
-            |        | next |       second input paramter
+            |        | next |       second input parameter
              ---------------                  |
                          |                    |
                          V                    V
                         NULL        no more parameters...
 @end example
 @noindent
-If you declared your function in the functon data base file
-@file{Functions} to acept exactly two input parameters the function will
+If you declared your function in the function data base file
+@file{Functions} to accept exactly two input parameters the function will
 always get exactly two. The @code{next}-pointer of the very last
 parameter will always be @code{NULL}. If the function gets called in the
 @acronym{EDL} file with more variables than you declared it to have a
@@ -262,7 +262,7 @@ Having the parameters organized as a linked list also makes it easy to a
 handle variable numbers of arguments: as long as the @code{next}-pointer
 of an argument isn't @code{NULL} there is at least another one. You
 probably should check in your function if there aren't too many
-arguments and if neccessary print out a warning.
+arguments and if necessary print out a warning.
 
 
 One word of warning: @strong{Never ever try to change the variables you
@@ -327,7 +327,7 @@ Var *my_function( Var *var )
 
 
 The next question is how to access the value of the variable. As you can
-seein the typedef for variables above the value is stored in the union
+see the typedef for variables above the value is stored in the union
 @code{val}.  If the variable has integer type, you can access it as
 
 @quotation
@@ -368,7 +368,7 @@ pointer to the new variable holding the value.
 For arrays @code{vars_push()} the first argument is either
 @code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a pointer
 to the array (i.e.@: its first argument). For creation of an array
-variable alsoa third argument is needed, the length of the array (a
+variable also third argument is needed, the length of the array (a
 @code{long} integer). If you want to return an array with two integer
 arguments you would use for example
 @example
@@ -474,7 +474,7 @@ Dummy[ * ];     // variable sized array for values returned by my_function()
 
 ...             // lots of stuff left out
 
-Dummy[ ] = my_function( );   // automagically sets dimension 
+Dummy[ ] = my_function( );   // auto-magically sets dimension 
                              // of Dummy to 2
 V1 = Dummy[ 1 ];
 V2 = Dummy[ 2 ];
@@ -579,7 +579,7 @@ used.
 
 Third, each module should but its basic configuration information into a
 special file which should be well enough commented to allow even people
-without much programming experience to adapt the behaviour of the module
+without much programming experience to adapt the behavior of the module
 to his/her needs. A good example are modules for devices that are
 accessed via the serial port. Because you probably won't know which
 serial port the user is going to use you shouldn't hide this information
@@ -633,7 +633,7 @@ into the configuration file for the device, no memory has been allocated
 for this string yet. This should be done as one of the first things after
 the include files having been included. Each and every device module
 should define a constant character array called @code{generic_type},
-that contaings the device type string, i.e.@: one of the first lines
+that contains the device type string, i.e.@: one of the first lines
 should always be
 @example
 const char generic_type[ ] = DEVICE_TYPE;
@@ -712,7 +712,7 @@ section is found all modules for the devices listed here are loaded.
 When in the test the @code{EXPERIMENT} section is found the test run is
 started in which the program is tested as far as possible. When the test
 was successful, the experiment may be run repeatedly. To allow
-intialization of the modules internal parameters, initialization of the
+initialization of the modules internal parameters, initialization of the
 devices etc. for each of these stages hook functions can be defined in
 the modules that will be executed automatically at appropriate times (if
 they exist).
@@ -840,7 +840,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
                  kontron4060.c lakeshore330.c pt2025.c
 @end example
 (The @code{\} characters at the ends of the lines tell make that the
-line countinues on the next line.) All you've got to do to include your
+line continues on the next line.) All you've got to do to include your
 new module is to append the name of the single @code{C} file you have
 written to this list, i.e.@: if it is called @file{abc.c} just change
 the last line to
@@ -854,8 +854,8 @@ If you now re-compile it will also be compiled, a shareable library will
 be created from it and when you do @code{make install} it will be copied
 to the appropriate place where @acronym{fsc2} will find it (but don't
 forget that you also have to declare it in the devices data base file
-@file{conf/Devices} and the functions it exports in the functions data
-base file @file{conf/Functions}).
+@file{config/Devices} and the functions it exports in the functions data
+base file @file{config/Functions}).
 
 If you wrote a larger module that consists of more than just one source
 file you will have to apply two changes to the @file{Makefile}. Directly
@@ -986,7 +986,7 @@ When writing a module some of the following information might be useful.
 First a special function for printing out messages to the user is
 discussed.
 
-The second topic, execeptions, is a well-known concept implemented for
+The second topic, exceptions, is a well-known concept implemented for
 example in @code{C++}. Unfortunately, @code{C} does not have this kind
 of mechanism, but when being a bit careful one can implement something
 very similar also in @code{C} using a few macros. 
@@ -1059,8 +1059,8 @@ handling code.  This is especially tedious within deeply nested function
 calls where it is often not clear on which level the error handling is
 done best.
 
-In order to alleviate ths problem in @acronym{fsc2} there is a mechanism
-called exceptions. An exception can be seens as a kind of flag that can
+In order to alleviate this problem in @acronym{fsc2} there is a mechanism
+called exceptions. An exception can be seen as a kind of flag that can
 be raised at any instance in the program and leads to the flow of
 control being changed to a place were the error can be handled.
 
@@ -1079,7 +1079,7 @@ know about exceptions for nearly all cases that have to be handled within
 modules.
 
 
-@subsubsection More on programing with exceptions
+@subsubsection More on programming with exceptions
 
 Of course, to allow the `throwing' of exceptions there must be a place that
 will `catch' the exception, otherwise the exception will simply kill the
@@ -1117,7 +1117,7 @@ all types of exceptions in one go you can use @code{OTHERWISE}
 instead.
 Finally, if you need to do some cleaning up but can not really deal
 with the error condition you can catch the exception using either
-@code{CATCH} or @code{OTHERWISE} and then rethrow the exception by calling
+@code{CATCH} or @code{OTHERWISE} and then re-throw the exception by calling
 @code{PASSTHROU()}
 @findex PASSTHROU()
 to pass it on to higher level routines that are supposed to take care of
@@ -1161,12 +1161,12 @@ USER_BREAK_EXCEPTION
 @end example
 @noindent
 @code{EXCEPTION} stands for all kinds of exceptions not covered by one
-of the fowlloing two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
+of the following two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
 thrown by @acronym{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
 the module is doing something rather time consuming (e.g.@: waiting for a
-device to become ready or doing some calbration) and the module detects
+device to become ready or doing some calibration) and the module detects
 that the user has pressed the stop button. To find about the this you
 can use a macro, @code{DO_STOP} - if it returns @code{TRUE} the user has
 pressed the stop button. Here's some code taken from the module for a
@@ -1223,7 +1223,7 @@ char *T_strdup( const char *string )
 void *T_free( void *ptr )
 @end example
 @noindent
-For @code{T_free()} there's is small deviation from the behaviour of
+For @code{T_free()} there's is small deviation from the behavior of
 the normal @code{free()} function. @code{T_free()} returns a @code{void}
 pointer, which is always @code{NULL}.
 
