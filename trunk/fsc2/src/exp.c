@@ -131,20 +131,20 @@ void store_exp( FILE *in )
 			{
 				eprint( FATAL, SET, "Unbalanced parentheses before ON_STOP "
 						"label.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			if ( square_brace_count > 0 )
 			{
 				eprint( FATAL, SET, "Unbalanced square braces before ON_STOP "
 						"label.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			if ( cb_stack != NULL )
 			{
 				eprint( FATAL, SET, "ON_STOP label found within a block.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			On_Stop_Pos = prg_length;
@@ -203,7 +203,7 @@ void store_exp( FILE *in )
 				if ( --parenthesis_count < 0 )
 				{
 					eprint( FATAL, SET, "Found ')' without matching '('.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				break;
 
@@ -212,14 +212,14 @@ void store_exp( FILE *in )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found before a "
 							"'{'.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( square_brace_count != 0 )
 				{
 					eprint( FATAL, SET, "More '[' than ']` found before a "
 							"'{'.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				push_curly_brace( cur_Fname, Lc );
@@ -232,20 +232,20 @@ void store_exp( FILE *in )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found before a "
 							"'}'.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( square_brace_count != 0 )
 				{
 					eprint( FATAL, SET, "More '[' than ']` found before a "
 							"'}'.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( ! pop_curly_brace( ) )
 				{
 					eprint( FATAL, SET, "Found '}' without matching '{'.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( in_loop && --curly_brace_in_loop_count == 0 )
@@ -261,7 +261,7 @@ void store_exp( FILE *in )
 				if ( --square_brace_count < 0 )
 				{
 					eprint( FATAL, SET, "Found ']' without matching '['.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				break;
 
@@ -296,14 +296,14 @@ void store_exp( FILE *in )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found at end of"
 							"statement.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( square_brace_count != 0 )
 				{
 					eprint( FATAL, SET, "More '[' than ']` found at end of "
 							"of statement.\n" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				break;
 
@@ -312,7 +312,7 @@ void store_exp( FILE *in )
 				{
 					eprint( FATAL, SET, "%s statement not within a loop.\n",
 							ret == BREAK_TOK ? "BREAK" : "NEXT" );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				break;
 
@@ -330,21 +330,21 @@ void store_exp( FILE *in )
 	{
 		eprint( FATAL, UNSET, "'(' without closing ')' detected at end of "
 				"program.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( cb_stack != NULL  )
 	{
 		eprint( FATAL, UNSET, "Block starting with '{' at %s:%ld has no "
 				"closing '}'.\n", cb_stack->Fname, cb_stack->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( square_brace_count > 0 )
 	{
 		eprint( FATAL, UNSET, "'[' without closing ']' detected at end of "
 				"program.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check and initialise if's and loops */
@@ -530,21 +530,21 @@ static void setup_while_or_repeat( int type, long *pos )
 		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
 				"section.\n", prg_token[ i - 1 ].Fname,
 				prg_token[ i - 1 ].Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( type != FOREVER_TOK && prg_token[ i ].token == '{' )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: Missing loop condition.\n",
 				prg_token[ i ].Fname, prg_token[ i ].Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( type == FOREVER_TOK && prg_token[ i ].token != '{' )
 	{
 		eprint( FATAL, UNSET, "%s:%ld: No condition can be used for a FOREVER "
 				"loop.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Look for the start and end of the WHILE, UNTIL, REPEAT, FOR or FOREVER
@@ -580,7 +580,7 @@ static void setup_while_or_repeat( int type, long *pos )
 				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF/UNLESS in "
 						"current block.\n", prg_token[ i ].Fname,
 						prg_token[ i ].Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			case '{' :
 				if ( i + 1 == prg_length )
@@ -588,7 +588,7 @@ static void setup_while_or_repeat( int type, long *pos )
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
 							"EXPERIMENT section.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				cur->start = &prg_token[ i + 1 ];
 				break;
@@ -618,7 +618,7 @@ static void setup_while_or_repeat( int type, long *pos )
 	else
 		eprint( FATAL, UNSET, "Missing `}' for %s loop starting at %s:%ld.\n",
 				t, cur->Fname, cur->Lc );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 
@@ -647,7 +647,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 		eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in EXPERIMENT "
 				"section.\n", prg_token[ i - 1 ].Fname,
 				prg_token[ i - 1 ].Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( prg_token[ i ].token == '{' )
@@ -675,7 +675,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 							"a loop.\n", prg_token[ i ].token == NEXT_TOK ?
 							"NEXT" : "BREAK",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				prg_token[ i ].start = cur_wr;
 				break;
@@ -702,7 +702,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
 							"EXPERIMENT section.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				if ( prg_token[ i + 1 ].token != '{' &&
 					 prg_token[ i + 1 ].token != IF_TOK &&
@@ -710,7 +710,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				{
 					eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if ( in_if )
@@ -718,7 +718,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, UNSET, "Missing `}' for ELSE block "
 							"belonging to IF-ELSE construct starting at "
 							"%s:%ld.\n", cur->Fname, cur->Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				if (  prg_token[ i + 1 ].token == IF_TOK ||
@@ -736,7 +736,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					eprint( FATAL, UNSET, "%s:%ld: Unexpected end of file in "
 							"EXPERIMENT section.\n",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 				if ( in_if )
 					cur->start = &prg_token[ i + 1 ];
@@ -765,7 +765,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	eprint( FATAL, UNSET, "Missing `}' for %s starting at %s:%ld.\n",
 			in_if ? "IF/UNLESS" : "ELSE", cur->Fname, cur->Lc );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 
@@ -1110,7 +1110,7 @@ int conditionlex( void )
 					return 0;
 				eprint( FATAL, SET, "Syntax error in condition at token "
 						"`:'.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			case E_STR_TOKEN :
 				conditionlval.sptr = cur_prg_token->tv.sptr;
@@ -1147,7 +1147,7 @@ int conditionlex( void )
 			case '=' :
 				eprint( FATAL, SET, "For comparisons `==' must be used "
 						"(`=' is for assignments only).\n", Fname, Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			default :
 				memcpy( &conditionlval, &cur_prg_token->tv,
@@ -1206,7 +1206,7 @@ bool test_condition( Prg_Token *cur )
 		else
 			eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
 					cur->Fname, cur->Lc, t );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Test the result - everything nonzero returns OK */
@@ -1241,7 +1241,7 @@ void get_max_repeat_count( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid counter for REPEAT loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Set the repeat count - warn if value is float an convert to integer */
@@ -1284,7 +1284,7 @@ void get_for_cond( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: Syntax error in condition of FOR "
 				"loop.\n", cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If loop variable is new set its type */
@@ -1303,7 +1303,7 @@ void get_for_cond( Prg_Token *cur )
 		cur++;
 		eprint( FATAL, UNSET, "%s:%ld: FOR loop variable must be integer or "
 				"float variable.\n", cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Store pointer to loop variable */
@@ -1325,7 +1325,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Missing end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Make sure the returned value is either integer or float */
@@ -1336,7 +1336,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid start value in FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Set start value of loop variable */
@@ -1378,7 +1378,7 @@ void get_for_cond( Prg_Token *cur )
 		in_for_lex = UNSET;
 		eprint( FATAL, UNSET, "%s:%ld: Invalid end value in FOR loop.\n",
 				cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If loop variable is integer `end' must also be integer */
@@ -1390,7 +1390,7 @@ void get_for_cond( Prg_Token *cur )
 		eprint( FATAL, UNSET, "%s:%ld: End value in FOR loop is floating "
 				"point value while loop variable is an integer.\n",
 				cur->Fname, cur->Lc );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Set end value of loop */
@@ -1433,7 +1433,7 @@ void get_for_cond( Prg_Token *cur )
 			cur++;
 			eprint( FATAL, UNSET, "%s:%ld: Invalid increment for FOR loop.\n",
 					cur->Fname, cur->Lc );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* If loop variable is an integer, `incr' must also be integer */
@@ -1446,7 +1446,7 @@ void get_for_cond( Prg_Token *cur )
 			eprint( FATAL, UNSET, "%s:%ld: FOR loop increment is floating "
 					"point value while loop variable is an integer.\n",
 					cur->Fname, cur->Lc );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		cur->count.forl.incr.type = Var_Stack->type;
@@ -1460,7 +1460,7 @@ void get_for_cond( Prg_Token *cur )
 				cur++;
 				eprint( FATAL, UNSET, "%s:%ld: Zero increment in FOR loop.\n",
 						cur->Fname, cur->Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			cur->count.forl.incr.lval = Var_Stack->val.lval;
 		}
@@ -1471,7 +1471,7 @@ void get_for_cond( Prg_Token *cur )
 				cur++;
 				eprint( FATAL, UNSET, "%s:%ld: Zero increment for FOR loop.\n",
 						cur->Fname, cur->Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			cur->count.forl.incr.dval = Var_Stack->val.dval;
 		}
@@ -1561,7 +1561,7 @@ bool test_for_cond( Prg_Token *cur )
 	/* We better never end here... */
 
 	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 
 	return FAIL;
 }

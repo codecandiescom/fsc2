@@ -152,13 +152,13 @@ Var *f_layout( Var *v )
 	{
 		eprint( FATAL, SET,"Layout of tool box must be set before any "
 				"buttons or sliders are created.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -181,7 +181,7 @@ Var *f_layout( Var *v )
 			default :
 				eprint( FATAL, SET, "Unknown layout keyword `%s' in %s().\n",
 						v->val.sptr, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 		}
 
 	/* The child has no control over the graphical stuff, it has to pass all
@@ -217,7 +217,7 @@ Var *f_layout( Var *v )
 		/* Bomb out if parent failed to set layout type */
 
 		if ( ! exp_layout( buffer, ( long ) ( pos - buffer ) ) )
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 
 		return vars_push( INT_VAR, ( long ) layout );
 	}
@@ -256,7 +256,7 @@ Var *f_bcreate( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* First argument must be type of button ("NORMAL_BUTTON", "PUSH_BUTTON"
@@ -281,7 +281,7 @@ Var *f_bcreate( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid button type (%ld) in %s().\n",
 					type, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -296,7 +296,7 @@ Var *f_bcreate( Var *v )
 		{
 			eprint( FATAL, SET, "Unknown button type (`%s') in function "
 					"%s().\n", v->val.sptr, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -331,7 +331,7 @@ Var *f_bcreate( Var *v )
 				{
 					eprint( FATAL, SET, "Button with ID %ld doesn't exist "
 							"in %s().\n", coll, Cur_Func );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 
 				/* The other group members must also be radio buttons */
@@ -340,7 +340,7 @@ Var *f_bcreate( Var *v )
 				{
 					eprint( FATAL, SET, "Button with ID %ld isn't a "
 							"RADIO_BUTTON in %s().\n", coll, Cur_Func );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 			}
 
@@ -454,7 +454,7 @@ Var *f_bcreate( Var *v )
 		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
 			T_free( result );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		new_ID = result[ 1 ];
@@ -529,7 +529,7 @@ Var *f_bdelete( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Loop over all button numbers */
@@ -553,7 +553,7 @@ Var *f_bdelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid button identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* Get a long enough buffer and write data */
@@ -583,7 +583,7 @@ Var *f_bdelete( Var *v )
 			/* Ask parent to delete the buton, bomb out on failure */
 
 			if ( ! exp_bdelete( buffer, ( long ) ( pos - buffer ) ) )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			continue;
 		}
@@ -593,7 +593,7 @@ Var *f_bdelete( Var *v )
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
 			eprint( FATAL, SET, "No buttons have been defined yet.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Check the parameters */
@@ -606,7 +606,7 @@ Var *f_bdelete( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid button identifier in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Remove button from the linked list */
@@ -673,7 +673,7 @@ Var *f_bdelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid button identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			return vars_push( INT_VAR, 1 );
@@ -715,7 +715,7 @@ Var *f_bstate( Var *v )
 	{
 		eprint( FATAL, SET, "Missing parameters in call of %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Again, the child doesn't know about the button, so it got to ask the
@@ -735,7 +735,7 @@ Var *f_bstate( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid button identifier in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		ID = v->val.lval;
 		
@@ -766,7 +766,7 @@ Var *f_bstate( Var *v )
 					default :
 						eprint( FATAL, SET, "Invalid string `%s' in %s().\n",
 								v->val.sptr, Cur_Func );
-						THROW( EXCEPTION );
+						THROW( EXCEPTION )
 				}
 		}
 
@@ -813,7 +813,7 @@ Var *f_bstate( Var *v )
 		state = exp_bstate( buffer, ( long ) ( pos - buffer ) );
 
 		if ( state < 0 )
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 
 		return vars_push( INT_VAR, state );
 	}
@@ -823,7 +823,7 @@ Var *f_bstate( Var *v )
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
 		eprint( FATAL, SET, "No buttons have been defined yet.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check the button ID parameter */
@@ -835,7 +835,7 @@ Var *f_bstate( Var *v )
 		   io->type != RADIO_BUTTON ) )
 	{
 		eprint( FATAL, SET, "Invalid button identifier in %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If there's no second parameter just return the button state - for
@@ -860,7 +860,7 @@ Var *f_bstate( Var *v )
 	if ( io->type == NORMAL_BUTTON )
 	{
 		eprint( FATAL, SET, "Can't set state of a NORMAL_BUTTON.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -886,7 +886,7 @@ Var *f_bstate( Var *v )
 			default :
 				eprint( FATAL, SET, "Invalid string `%s' in %s().\n",
 						v->val.sptr, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 		}
 
 	/* If this isn't a test run set the button state */
@@ -948,7 +948,7 @@ Var *f_screate( Var *v )
 	{
 		eprint( FATAL, SET, "Missing parameters in call of %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check the type parameter */
@@ -970,7 +970,7 @@ Var *f_screate( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid slider type (%ld) in %s().\n",
 					type, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -983,7 +983,7 @@ Var *f_screate( Var *v )
 		{
 			eprint( FATAL, SET, "Unknown slider type (`%s') in function "
 					"%s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -993,7 +993,7 @@ Var *f_screate( Var *v )
 	{
 		eprint( FATAL, SET, "Missing minimum value in call of %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -1003,7 +1003,7 @@ Var *f_screate( Var *v )
 	{
 		eprint( FATAL, SET, "Missing maximum value in call of %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Get the maximum value and make sure it's larger than the minimum */
@@ -1015,7 +1015,7 @@ Var *f_screate( Var *v )
 	{
 		eprint( FATAL, SET, "Maxinmum not larger than minimum value in "
 				"call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( v->next != NULL && v->next->type & ( INT_VAR | FLOAT_VAR ) )
@@ -1027,7 +1027,7 @@ Var *f_screate( Var *v )
 		{
 			eprint( FATAL, SET, "Negative slider step width in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( step > end_val - start_val )
@@ -1035,7 +1035,7 @@ Var *f_screate( Var *v )
 			eprint( FATAL, SET, "Slider step size larger than difference "
 					"between minimum and maximum value in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -1144,7 +1144,7 @@ Var *f_screate( Var *v )
 		if ( result[ 0 ] == 0 )
 		{
 			T_free( result );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		new_ID = result[ 1 ];
@@ -1217,7 +1217,7 @@ Var *f_sdelete( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Loop over all slider IDs */
@@ -1239,7 +1239,7 @@ Var *f_sdelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid slider identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			len = 2 * sizeof( long );
@@ -1269,7 +1269,7 @@ Var *f_sdelete( Var *v )
 			/* Bomb out on failure */
 
 			if ( ! exp_sdelete( buffer, ( long ) ( pos - buffer ) ) )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			continue;                   /* delete next slider */
 		}
@@ -1279,7 +1279,7 @@ Var *f_sdelete( Var *v )
 		if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 		{
 			eprint( FATAL, SET, "No sliders have been defined yet.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Check that slider with the ID exists */
@@ -1291,7 +1291,7 @@ Var *f_sdelete( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid slider identifier in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Remove slider from the linked list */
@@ -1339,7 +1339,7 @@ Var *f_sdelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid slider identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			return vars_push( INT_VAR, 1 );
@@ -1378,7 +1378,7 @@ Var *f_svalue( Var *v )
 	{
 		eprint( FATAL, SET, "Missing parameters in call of %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Again, the child has to pass the arguments to the parent and ask it
@@ -1400,7 +1400,7 @@ Var *f_svalue( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid slider identifier in %s().\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		ID = v->val.lval;
 		
@@ -1460,7 +1460,7 @@ Var *f_svalue( Var *v )
 		if ( res[ 0 ] < 0 )
 		{
 			T_free( res );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		val = res[ 1 ];
@@ -1473,7 +1473,7 @@ Var *f_svalue( Var *v )
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
 		eprint( FATAL, SET, "No slider have been defined yet.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that ID is ID of a slider */
@@ -1484,7 +1484,7 @@ Var *f_svalue( Var *v )
 		   io->type != VALUE_SLIDER ) )
 	{
 		eprint( FATAL, SET, "Invalid slider identifier in %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If there are no more arguments just return the sliders value */
@@ -1558,7 +1558,7 @@ Var *f_icreate( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* First argument must be type of "INT_INPUT", "FLOAT_INPUT",
@@ -1582,7 +1582,7 @@ Var *f_icreate( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid in- or output object type (%ld) "
 					"in function %s().\n", type, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -1599,7 +1599,7 @@ Var *f_icreate( Var *v )
 		{
 			eprint( FATAL, SET, "Unknown in- or output object type (`%s')"
 					" in function %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -1663,7 +1663,7 @@ Var *f_icreate( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid format string \"%s\" in "
 						"%s().\n", v->val.sptr, Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			form_str = T_strdup( v->val.sptr );
 		}
@@ -1787,7 +1787,7 @@ Var *f_icreate( Var *v )
 		if ( result[ 0 ] == 0 )      /* failure -> bomb out */
 		{
 			T_free( result );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		new_ID = result[ 1 ];
@@ -1872,7 +1872,7 @@ Var *f_idelete( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Loop over all object numbers */
@@ -1895,7 +1895,7 @@ Var *f_idelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid in- or output object "
 						"identifier in %s().\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* Get a bufer long enough and write data */
@@ -1925,7 +1925,7 @@ Var *f_idelete( Var *v )
 			/* Ask parent to delete the object, bomb out on failure */
 
 			if ( ! exp_idelete( buffer, ( long ) ( pos - buffer ) ) )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			continue;
 		}
@@ -1936,7 +1936,7 @@ Var *f_idelete( Var *v )
 		{
 			eprint( FATAL, SET, "No in- or output objects have been "
 					"defined yet.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Do checks on parameters */
@@ -1948,7 +1948,7 @@ Var *f_idelete( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid in- or output object identifier "
 					"in %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Remove object from the linked list */
@@ -1995,7 +1995,7 @@ Var *f_idelete( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid in- or output object "
 						"identifier in %s().\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			return vars_push( INT_VAR, 1 );
@@ -2036,7 +2036,7 @@ Var *f_ivalue( Var *v )
 	{
 		eprint( FATAL, SET, "Missing parameters in call of "
 				"%s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Again, the child has to pass the arguments to the parent and ask it
@@ -2059,7 +2059,7 @@ Var *f_ivalue( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid in- or output object identifier "
 					"in %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		ID = v->val.lval;
 		
@@ -2139,7 +2139,7 @@ Var *f_ivalue( Var *v )
 		if ( input_res->res < 0 )
 		{
 			T_free( input_res );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		state = input_res->res;
@@ -2161,7 +2161,7 @@ Var *f_ivalue( Var *v )
 	{
 		eprint( FATAL, SET, "No in- or output objects have been defined "
 				"yet.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that ID is ID of an input or output object */
@@ -2173,7 +2173,7 @@ Var *f_ivalue( Var *v )
 	{
 		eprint( FATAL, SET, "Invalid in- or output object identifier in "
 				"%s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If there are no more arguments just return the objects value */
@@ -2806,7 +2806,7 @@ Var *f_objdel( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Loop over all object numbers */
@@ -2829,7 +2829,7 @@ Var *f_objdel( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid object identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* Get a bufer long enough and write data */
@@ -2859,7 +2859,7 @@ Var *f_objdel( Var *v )
 			/* Ask parent to delete the object, bomb out on failure */
 
 			if ( ! exp_objdel( buffer, len ) )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 
 			continue;
 		}
@@ -2873,7 +2873,7 @@ Var *f_objdel( Var *v )
 			if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 			{
 				eprint( FATAL, SET, "No objects have been defined yet.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* Do checks on parameters */
@@ -2883,7 +2883,7 @@ Var *f_objdel( Var *v )
 			{
 				eprint( FATAL, SET, "Invalid object identifier in %s().\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			switch ( io->type )
@@ -2909,7 +2909,7 @@ Var *f_objdel( Var *v )
 				default :
 					eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
 							__FILE__, __LINE__ );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 			}
 
 			v = vars_pop( v );

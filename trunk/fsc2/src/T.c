@@ -44,7 +44,7 @@ void *T_malloc( size_t size )
 	if ( mem == NULL )
 	{
 		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
 #if defined MDEBUG
@@ -80,7 +80,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	if ( mem == NULL )
 	{
 		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
 #if defined MDEBUG
@@ -116,7 +116,7 @@ void *T_realloc( void *ptr, size_t size )
 	if ( new_ptr == NULL )
 	{
 		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
 #if defined MDEBUG
@@ -185,7 +185,7 @@ char *T_strdup( const char *str )
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
 		eprint( FATAL, Fname != NULL, "Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+		THROW( OUT_OF_MEMORY_EXCEPTION )
 	}
 
 #if defined MDEBUG
@@ -219,7 +219,7 @@ long T_atol( const char *txt )
 	if ( errno == ERANGE )
 	{
 		eprint( FATAL, SET, "Integer number out of range: %s.\n", txt );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return ret;
@@ -238,7 +238,7 @@ double T_atof( const char *txt )
 	if ( errno == ERANGE )
 	{
 		eprint( FATAL, SET, "Floating point number out of range: %s.\n", txt );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return ret;

@@ -356,7 +356,7 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 
 		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
 								  2, "No", "Yes", "", 1 ) )
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 	}
 }
 
@@ -1004,9 +1004,9 @@ static void do_measurement( void )
 			TRY_SUCCESS;
 			vars_del_stack( );     /* variable stack is probably messed up */
 			if ( ! react_to_do_quit )
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 		}
 		OTHERWISE
-			PASSTHROU( );
+			PASSTHROU( )
 	}
 }

@@ -46,7 +46,7 @@ bool dg2020_store_timebase( double timebase )
 				dg2020_ptime( timebase ), min, max );
 		T_free( min );
 		T_free( max );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020.is_timebase = SET;
@@ -71,7 +71,7 @@ bool dg2020_assign_function( int function, long pod )
 	{
 		eprint( FATAL, SET, "%s: Invalid pod number: %ld, valid pod number "
 				"are %d-%d.\n", pulser_struct.name, pod, 0, MAX_PODS - 1 );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check pod isn't already in use */
@@ -81,7 +81,7 @@ bool dg2020_assign_function( int function, long pod )
 		eprint( FATAL, SET, "%s: Pod number %ld has already been assigned "
 				"to function `%s'.\n", pulser_struct.name, pod,
 				Function_Names[ p->function->self ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* In this driver we don't have any use for phase functions */
@@ -91,7 +91,7 @@ bool dg2020_assign_function( int function, long pod )
 	{
 		eprint( FATAL, SET, "%s: Phase functions can't be used with this "
 				"driver.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that function doesn't get assigned too many pods */
@@ -101,7 +101,7 @@ bool dg2020_assign_function( int function, long pod )
 		eprint( FATAL, SET, "%s: Function %s has already been assigned the "
 				"maximum number of %d pods.\n", pulser_struct.name,
 				Function_Names[ f->self ], ( int ) MAX_PODS_PER_FUNC );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	
 	f->is_used = SET;
@@ -126,7 +126,7 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 		eprint( FATAL, SET, "%s: Invalid channel number: %ld, valid range is "
 				"0-%d.\n",
 				pulser_struct.name, channel, ( int ) MAX_CHANNELS - 1 );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( c->function != NULL )
@@ -142,7 +142,7 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 		eprint( FATAL, SET, "%s: Channel %ld is already used for function "
 				"`%s'.\n", pulser_struct.name, channel,
 				Function_Names[ c->function->self ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	f->is_used = SET;
@@ -178,7 +178,7 @@ bool dg2020_set_function_delay( int function, double delay )
 	{
 		eprint( FATAL, SET, "%s: Delay for function `%s' has already been "
 				"set.\n", pulser_struct.name, Function_Names[ function ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that the delay value is reasonable */
@@ -191,7 +191,7 @@ bool dg2020_set_function_delay( int function, double delay )
 		{
 			eprint( FATAL, SET, "Negative delays are invalid in EXTERNAL "
 					"trigger mode.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( Delay < dg2020.neg_delay )
@@ -231,7 +231,7 @@ bool dg2020_set_function_high_level( int function, double voltage )
 				"`%s', valid range is %g V to %g V.\n",
 				pulser_struct.name, voltage, Function_Names[ function ],
 				MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 				
 	if ( dg2020.function[ function ].is_low_level )
@@ -259,7 +259,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 				"`%s', valid range is %g V to %g V.\n",
 				pulser_struct.name, voltage, Function_Names[ function ],
 				MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 				
 	if ( dg2020.function[ function ].is_high_level )
@@ -286,7 +286,7 @@ bool dg2020_set_trigger_mode( int mode )
 		eprint( FATAL, SET, "%s: Trigger mode has already been set to "
 				"%s.\n", pulser_struct.name,
 				mode == EXTERNAL ? "INTERNAL" : "EXTERNAL" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( mode == INTERNAL )
@@ -295,14 +295,14 @@ bool dg2020_set_trigger_mode( int mode )
 		{
 			eprint( FATAL, SET, "%s: INTERNAL trigger mode and setting a "
 					"trigger slope isn't possible.\n", pulser_struct.name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( dg2020.is_trig_in_level )
 		{
 			eprint( FATAL, SET, "%s: INTERNAL trigger mode and setting a "
 					"trigger level isn't possible.\n", pulser_struct.name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( dg2020.is_trig_in_impedance )
@@ -310,7 +310,7 @@ bool dg2020_set_trigger_mode( int mode )
 			eprint( FATAL, SET, "%s: INTERNAL trigger mode and setting a "
 					"trigger impedance is isn't possible.\n",
 					pulser_struct.name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -320,7 +320,7 @@ bool dg2020_set_trigger_mode( int mode )
 			eprint( FATAL, SET, "%s: EXTERNAL trigger mode and setting a "
 					"repeat time or frequency isn't possible.\n",
 					pulser_struct.name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( dg2020.is_neg_delay )
@@ -328,7 +328,7 @@ bool dg2020_set_trigger_mode( int mode )
 			eprint( FATAL, SET, "%s: EXTERNAL trigger mode and using "
 					"negative delays for functions isn't possible.\n",
 					pulser_struct.name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -351,7 +351,7 @@ bool dg2020_set_trig_in_level( double voltage )
 		eprint( FATAL, SET, "%s: A different level of %g V for the trigger "
 				"has already been set.\n", pulser_struct.name,
 				dg2020.trig_in_level );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
@@ -369,7 +369,7 @@ bool dg2020_set_trig_in_level( double voltage )
 		eprint( FATAL, SET, "%s: Setting a trigger level (thus implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
 				"for functions is incompatible.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
@@ -377,7 +377,7 @@ bool dg2020_set_trig_in_level( double voltage )
 		eprint( FATAL, SET, "%s: Invalid level for trigger of %g V, valid "
 				"range is %g V to %g V.\n", pulser_struct.name,
 				MIN_TRIG_IN_LEVEL, MAX_TRIG_IN_LEVEL );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020.trig_in_level = voltage;
@@ -399,7 +399,7 @@ bool dg2020_set_trig_in_slope( int slope )
 		eprint( FATAL, SET, "%s: A different trigger slope (%s) has "
 				"already been set.\n", pulser_struct.name,
 				slope == POSITIVE ? "NEGATIVE" : "POSITIVE" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
@@ -417,7 +417,7 @@ bool dg2020_set_trig_in_slope( int slope )
 		eprint( FATAL, SET, "s: Setting a trigger slope (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
 				"for functions is incompatible.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020.trig_in_slope = slope;
@@ -439,7 +439,7 @@ bool dg2020_set_trig_in_impedance( int state )
 		eprint( FATAL, SET, "%s: A trigger impedance (%s) has already been "
 				"set.\n", pulser_struct.name,
 				state == LOW ? "LOW = 50 Ohm" : "HIGH = 1 kOhm" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) ||
@@ -457,7 +457,7 @@ bool dg2020_set_trig_in_impedance( int state )
 		eprint( FATAL, SET, "%s: Setting a trigger impedance (implicitly "
 				"selecting EXTERNAL trigger mode) while using negative delays "
 				"for functions is incompatible.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020.trig_in_impedance = state;
@@ -479,7 +479,7 @@ bool dg2020_set_repeat_time( double time )
 				"%g Hz has already been set.\n", pulser_struct.name,
 				dg2020_pticks( dg2020.repeat_time ),
 				1.0 / dg2020_ticks2double( dg2020.repeat_time ) );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
@@ -487,7 +487,7 @@ bool dg2020_set_repeat_time( double time )
 		eprint( FATAL, SET, "%s: Setting a repeat time/frequency and "
 				"trigger mode to EXTERNAL isn't possible.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( dg2020.is_trig_in_slope || dg2020.is_trig_in_level )
@@ -495,14 +495,14 @@ bool dg2020_set_repeat_time( double time )
 		eprint( FATAL, SET, "%s: Setting a repeat time/frequency and a "
 				"trigger slope or level isn't possible.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( time <= 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid zero or negative repeat time: "
 				"%s.\n", pulser_struct.name, dg2020_ptime( time ) );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 
@@ -524,7 +524,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 		eprint( FATAL, SET, "%s: A differrent minimum pattern length of %s "
 				"has already been set.\n", pulser_struct.name,
 				dg2020_pticks( dg2020.max_seq_len ) );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that the value is reasonable */
@@ -533,7 +533,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 	{
 		eprint( FATAL, SET, "%s: Zero or negative minimum pattern "
 				"length.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020.max_seq_len = dg2020_double2ticks( seq_len );
@@ -562,7 +562,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	{
 		eprint( FATAL, SET, "%s: PHASE function can't be used with this "
 				"driver.\n", pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check if a function has already been assigned to the phase setup */
@@ -572,7 +572,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 		eprint( FATAL, SET, "%s: PHASE_%1d_SETUP has already been "
 				"assoiated with function %s.\n", pulser_struct.name,
 				phs, Function_Names[ dg2020_phs[ phs ].function->self ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	f = &dg2020.function[ function ];
@@ -614,7 +614,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 	{
 		eprint( FATAL, SET, "%s: Invalid syntax for this driver.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Make sure the phase type is supported */
@@ -624,7 +624,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 		eprint( FATAL, SET, "%s: Phase type `%s' not supported by this "
 				"driver.\n", pulser_struct.name,
 				Phase_Types[ type ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	type -= PHASE_PLUS_X;
@@ -647,7 +647,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 	{
 		eprint( FATAL, SET, "%s: Invalid pod number %d.\n",
 				pulser_struct.name, val );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	dg2020_phs[ phs ].is_set[ type ] = SET;

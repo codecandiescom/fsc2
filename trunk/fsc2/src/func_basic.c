@@ -49,7 +49,7 @@ Var *f_abort( Var *v )
 						  "%s at line %ld.", Fname, Lc );
 		show_message( str );
 		T_free( str );
-		THROW( ABORT_EXCEPTION );
+		THROW( ABORT_EXCEPTION )
 	}
 
 	return NULL;
@@ -71,7 +71,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			{
 				eprint( FATAL, SET, "Argument of function %s() is neither a "
 						"number nor an 1-dimensional array.\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			*len = v->len;
 			*ilp = v->val.lpnt;
@@ -82,7 +82,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			{
 				eprint( FATAL, SET, "Argument of function %s() is neither a "
 						"number nor an 1-dimensional array.\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			*len = v->len;
 			*idp = v->val.dpnt;
@@ -101,7 +101,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 			{
 				eprint( FATAL, SET, "Argument of function %s() is neither a "
 						"number nor an 1-dimensional array.\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			if ( v->from->flags & NEED_ALLOC )
@@ -109,7 +109,7 @@ static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 				eprint( FATAL, SET, "Argument of function %s() is a "
 						"dynamically sized array of still unknown size.\n",
 						Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			*len = v->from->sizes[ 0 ];
@@ -618,7 +618,7 @@ Var *f_asin( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is out "
 					"of range.\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		return vars_push( FLOAT_VAR, asin( arg ) );
 	}
@@ -634,7 +634,7 @@ Var *f_asin( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		rdp[ i ] = asin( arg );
@@ -675,7 +675,7 @@ Var *f_acos( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		return vars_push( FLOAT_VAR, acos( arg ) );
 	}
@@ -691,7 +691,7 @@ Var *f_acos( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		rdp[ i ] = acos( arg );
@@ -964,7 +964,7 @@ Var *f_ln( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		res = log( arg );
@@ -986,7 +986,7 @@ Var *f_ln( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		res = log( arg );
@@ -1031,7 +1031,7 @@ Var *f_log( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		res = log10( arg );
@@ -1053,7 +1053,7 @@ Var *f_log( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of %s() is out of range.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		res = log10( arg );
@@ -1098,7 +1098,7 @@ Var *f_sqrt( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is negative.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		return vars_push( FLOAT_VAR, sqrt( arg ) );
 	}
@@ -1115,7 +1115,7 @@ Var *f_sqrt( Var *v )
 		{
 			eprint( FATAL, SET, "Argument of function %s() is negative.\n",
 					Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		rdp[ i ] = sqrt( arg );
@@ -1346,7 +1346,7 @@ Var *f_size( Var *v )
 		eprint( FATAL, SET, "Array `%s' has only %d dimensions, can't return "
 				"size of %d. dimension.\n",
 				v->from->name, v->from->dim, size );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
@@ -1389,7 +1389,7 @@ Var *f_mean( Var *v )
 	{
 		eprint( FATAL, SET, "Missing parameter in call of function %s().\n",
 				Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
@@ -1418,7 +1418,7 @@ Var *f_mean( Var *v )
 		{
 			eprint( FATAL, SET, "Invalid array index (%ld) in function "
 					"%s().\n", index + ARRAY_OFFSET, Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ilp != NULL )
@@ -1443,7 +1443,7 @@ Var *f_mean( Var *v )
 			{
 				eprint( FATAL, SET, "Zero or negative slice length used in "
 						"function %s().\n", Cur_Func );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* Test that the slice is within the arrays range */
@@ -1456,7 +1456,7 @@ Var *f_mean( Var *v )
 					eprint( FATAL, SET, "Sum of index and slice length "
 							"parameter exceeds length of array in function "
 							"%s().\n", Cur_Func );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 			}
 		}
@@ -1523,7 +1523,7 @@ Var *f_slice( Var *v )
 	{
 		eprint( FATAL, SET, "Not enough parameter in call of function "
 				"%s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
@@ -1546,7 +1546,7 @@ Var *f_slice( Var *v )
 	{
 		eprint( FATAL, SET, "Negative array index used in function "
 				"%s().\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( v->next->next != NULL )
@@ -1566,7 +1566,7 @@ Var *f_slice( Var *v )
 		{
 			eprint( FATAL, SET, "Zero or negative slice length used in "
 					"function %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 	else
@@ -1582,7 +1582,7 @@ Var *f_slice( Var *v )
 		{
 			eprint( FATAL, SET, "Sum of index and slice length parameter "
 					"exceeds length of array in function %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 

@@ -680,7 +680,7 @@ static void dg2020_gpib_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			pulser_struct.name );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 

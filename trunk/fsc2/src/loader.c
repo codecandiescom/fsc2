@@ -180,7 +180,7 @@ static void load_functions( Device *dev )
 		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n", 
 				strip_path( dev->name ), dlerror( ) );
 		T_free( lib_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	T_free( lib_name );
@@ -503,7 +503,7 @@ void run_exp_hooks( void )
 
 		fl_check_only_forms( );
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION )
 	}
 }
 

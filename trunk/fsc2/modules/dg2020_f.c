@@ -50,7 +50,7 @@ int dg2020_f_init_hook( void )
 		eprint( FATAL, SET, "While loading driver for DG2020_F found that "
 				"driver for pulser %s is already installed.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	pulser_struct.name = DEVICE_NAME;
@@ -242,7 +242,7 @@ int dg2020_f_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Failure to initialize the pulser: %s\n",
 				pulser_struct.name, gpib_error_msg );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Now we have to tell the pulser about all the pulses */
@@ -251,7 +251,7 @@ int dg2020_f_exp_hook( void )
 	if ( ! dg2020_reorganize_pulses( UNSET ) )
 	{
 		dg2020_IN_SETUP = UNSET;
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 	dg2020_IN_SETUP = UNSET;
 
@@ -352,7 +352,7 @@ Var *pulser_state( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid argument in call of "
 					"`pulser_state'.\n", DEVICE_NAME );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -401,7 +401,7 @@ Var *pulser_update( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Communication with pulser failed.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	return vars_push( INT_VAR, state ? 1 : 0 );
@@ -439,7 +439,7 @@ Var *pulser_shift( Var *v )
 			eprint( FATAL, SET, "%s: Pulse %ld has no position set, so "
 					"shifting it is impossible.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! p->is_dpos )
@@ -447,7 +447,7 @@ Var *pulser_shift( Var *v )
 			eprint( FATAL, SET, "%s: Time for position change hasn't "
 					"been defined for pulse %ld.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! p->is_old_pos )
@@ -461,7 +461,7 @@ Var *pulser_shift( Var *v )
 			eprint( FATAL, SET, "%s: Shifting the position of pulse "
 					"%ld leads to an invalid  negative position of %s.\n",
 					pulser_struct.name, p->num, dg2020_pticks( p->pos ) );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( p->pos == p->old_pos )       // nothing really changed ?
@@ -509,7 +509,7 @@ Var *pulser_increment( Var *v )
 			eprint( FATAL, SET, "%s: Pulse %ld has no length set, so "
 					"imcrementing it is impossibe.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! p->is_dlen )
@@ -517,7 +517,7 @@ Var *pulser_increment( Var *v )
 			eprint( FATAL, SET, "%s: Length change time hasn't been "
 					"defined for pulse %ld.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 	
 		if ( ! p->is_old_len )
@@ -531,7 +531,7 @@ Var *pulser_increment( Var *v )
 			eprint( FATAL, SET, "%s: Incrementing the length of pulse "
 					"%ld leads to an invalid negative pulse length of %s.\n",
 					pulser_struct.name, p->num, dg2020_pticks( p->len ) );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( p->old_len == p->len )
@@ -585,7 +585,7 @@ Var *pulser_next_phase( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
 					pulser_struct.name, v->val.lval );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
@@ -652,7 +652,7 @@ Var *pulser_phase_reset( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
 					pulser_struct.name, v->val.lval );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
@@ -777,7 +777,7 @@ Var *pulser_lock_keyboard( Var *v )
 				eprint( FATAL, SET, "%s: Invalid argument in call of "
 						"`pulser_lock_keyboard'.\n",
 						DEVICE_NAME );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 		}
 	}

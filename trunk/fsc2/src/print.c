@@ -1289,7 +1289,7 @@ static void do_print( char *name, const char *command )
 			if ( cptr < cmd_line + 2 )
 			{
 				fl_show_alert( "Error", "Sorry, bad print command.", NULL, 1 );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			*cptr = '\0';
@@ -1315,7 +1315,7 @@ static void do_print( char *name, const char *command )
 		{
 			fl_show_alert( "Error", "Sorry, can't print results.",
 						   "Running out of resources.", 1 );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		TRY_SUCCESS;

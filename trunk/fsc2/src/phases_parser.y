@@ -69,12 +69,12 @@ input:   /* empty */
 ;
 
 line:    acq ';'
-       | acq phase                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | acq SECTION_LABEL            { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | acq error                    { THROW( SYNTAX_ERROR_EXCEPTION ); }
+       | acq phase                    { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | acq SECTION_LABEL            { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | acq error                    { THROW( SYNTAX_ERROR_EXCEPTION ) }
        | phase ';'
-	   | phase acq                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phase SECTION_LABEL          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+	   | phase acq                    { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | phase SECTION_LABEL          { THROW( MISSING_SEMICOLON_EXCEPTION ) }
 ;
 
 acq:     AS_TOKEN A_TOKEN             { acq_seq_start( $1, $2 ); }
@@ -108,5 +108,5 @@ static void phaseserror ( const char *s )
 		eprint( FATAL, SET, "Unexpected end of file in PHASES section.\n" );
 	else
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", phasestext );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }

@@ -61,7 +61,7 @@ void accept_new_data( void )
 		{
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		/* Unpack and accept the data sets (skip the length field) - if an
@@ -206,7 +206,7 @@ static void unpack_and_accept( void *ptr )
 			default :
 				eprint( UNSET, FATAL, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 		}
 
 		if ( G.dim == 1 )
@@ -272,7 +272,7 @@ static void other_data_request( int type, void *ptr )
 		default :                             /* unknown command */
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 	}
 }
 
@@ -302,7 +302,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	if ( curve >= G.nc )
 	{
 		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Get the amount of new data and a pointer to the start of the data */
@@ -334,7 +334,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		default :
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 	}
 
 	/* If the number of points exceeds the size of the arrays for the curves
@@ -516,7 +516,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	if ( curve >= G.nc )
 	{
 		eprint( FATAL, SET, "There is no curve %ld.\n", curve + 1 );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	cv = G.curve_2d[ curve ];
@@ -550,7 +550,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		default :
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 	}
 
 	/* Now test if the new data fit into the already allocated memory,

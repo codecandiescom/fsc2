@@ -72,7 +72,7 @@ void device_add( const char *name )
 				dev_name );
 		T_free( lib_name );
 		T_free( dev_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If the module is a symbolic link try to figure out the name of the file
@@ -95,7 +95,7 @@ void device_add( const char *name )
 							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
-					THROW( EXCEPTION );
+					THROW( EXCEPTION )
 				}
 			}
 		}
@@ -108,7 +108,7 @@ void device_add( const char *name )
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		real_name[ length ] = '\0';
@@ -122,7 +122,7 @@ void device_add( const char *name )
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		*( real_name + length - 3 ) = '\0';
@@ -148,7 +148,7 @@ void device_add( const char *name )
 				"base.\n", dev_name );
 		T_free( real_name );
 		T_free( dev_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Now append the device to the end of the device list */
@@ -192,7 +192,7 @@ void device_append_to_list( const char *dev_name )
 				eprint( FATAL, SET, "Device `%s' is already listed in the "
 						"DEVICES section (possibly using an alternate "
 						"name).\n", dev_name );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 		cd->next = T_malloc( sizeof( Device ) );

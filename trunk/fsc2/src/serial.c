@@ -61,7 +61,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		else
 			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
 					"range (0 is allowed only).\n", sn, devname );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that serial port isn't already in use by another device */
@@ -71,7 +71,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		eprint( FATAL, UNSET, "%s: Requested serial port %d (i.e. /dev/ttyS%d "
 				"or COM%d) is already used by device %s.\n", devname, sn, sn,
 				sn + 1, Serial_Port[ sn ].devname );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	Serial_Port[ sn ].in_use = SET;
@@ -93,14 +93,14 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		else
 			eprint( FATAL, UNSET, "%s: No permission to access serial "
 					"port %d.\n", devname, sn );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 #else
 	sn = sn;
 
 	eprintf( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
 			 "not compiled with support for serial port access.\n", devname );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 #endif
 }
 

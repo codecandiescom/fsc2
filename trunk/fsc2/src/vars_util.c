@@ -61,14 +61,14 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 			{
 				eprint( FATAL, SET, "Arithmetic can be only done "
 						"on numbers or array slices.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			if ( v->from->flags & NEED_ALLOC )
 			{
 				eprint( FATAL, SET, "Array `%s' is a dynamically sized "
 						"array of still unknown size.\n", v->from->name );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			vars_check( v->from, INT_CONT_ARR | FLOAT_CONT_ARR );
@@ -206,7 +206,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -251,7 +251,7 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 		{
 			 eprint( FATAL, SET, "Sizes of array slices to be added "
 					 "differ.\n" );
-			 THROW( EXCEPTION );
+			 THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( elems, v1_len );
@@ -302,7 +302,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -338,7 +338,7 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be added "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -458,7 +458,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -504,7 +504,7 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -554,7 +554,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -590,7 +590,7 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -709,7 +709,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -754,7 +754,7 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -804,7 +804,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -840,7 +840,7 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -992,7 +992,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1039,7 +1039,7 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be divided "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1095,7 +1095,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1131,7 +1131,7 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices to be divided "
 					"differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1161,7 +1161,7 @@ static void vars_div_check( double val )
 	if ( val != 0.0 )
 		return;
 	eprint( FATAL, SET, "Division by zero.\n" );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 
@@ -1300,7 +1300,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1347,7 +1347,7 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
 					"calculated from differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1403,7 +1403,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1439,7 +1439,7 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
 					"calculated from differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1469,7 +1469,7 @@ static void vars_mod_check( double val )
 	if ( val != 0.0 )
 		return;
 	eprint( FATAL, SET, "Modulo by zero.\n" );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }
 
 
@@ -1644,7 +1644,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1722,7 +1722,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices used in "
 					"exponentiation differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1807,7 +1807,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	{
 		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
 				"array slices.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
@@ -1846,7 +1846,7 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Sizes of array slices used in "
 					"exponentiation differ.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 		else
 			elems = l_min( v1_len, elems );
@@ -1878,7 +1878,7 @@ static void vars_pow_check( double v1, double v2 )
 	{
 		eprint( FATAL, SET, "Negative base while exponent is not an "
 				"integer value.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 }
 
@@ -1905,7 +1905,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 		{
 			eprint( FATAL, SET, "Arithmetic can be only done "
 					"on array slices.\n" );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( ! ( v1->from->flags & NEED_ALLOC ) )
@@ -1927,7 +1927,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 			  v2->from->flags & NEED_ALLOC ) )
 	{
 		eprint( FATAL, SET, "Size of array can't be determined.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Find out the size of the right hand side array */
@@ -1939,7 +1939,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 			{
 				eprint( FATAL, SET, "Arithmetic can be only done "
 						"on numbers or array slices.\n" );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 			vars_check( v2->from, INT_CONT_ARR | FLOAT_CONT_ARR );
 			length = v2->from->len;

@@ -101,13 +101,13 @@ WS          [\n\t ]+
 			/* handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, UNSET, "%s\n", devicestext + 2 );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 {ESTR}		{
 				devicestext = strchr( devicestext, '\x03' );
 				eprint( FATAL, UNSET, "%s\n", devicestext + 2 );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* handling of DEVICES: labels */
@@ -159,7 +159,7 @@ WS          [\n\t ]+
 .           {
 				eprint( FATAL, SET, "Invalid input in DEVICES section: "
 						"`%s'.\n", devicestext );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 <<EOF>>	    {
@@ -184,7 +184,7 @@ int devices_parser( FILE *in )
 	if ( compilation.sections[ DEVICES_SECTION ] )
 	{
 		eprint( FATAL, SET, "Multiple instances of DEVICES section label.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; i++ )
@@ -194,7 +194,7 @@ int devices_parser( FILE *in )
 
 		eprint( FATAL, SET, "Sorry, the DEVICES section has to be the very "
 				"first section.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	compilation.sections[ DEVICES_SECTION ] = SET;

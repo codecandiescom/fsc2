@@ -159,7 +159,7 @@ void setup_comm( void )
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* We will need a message queue where the parent stores the keys and
@@ -198,7 +198,7 @@ void setup_comm( void )
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Finally we need a shared memory segment to pass the key to further
@@ -217,7 +217,7 @@ void setup_comm( void )
 
 		eprint( FATAL, UNSET, "Can't set up internal communication "
 				"channels.\n" );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	message_queue_low = message_queue_high = 0;

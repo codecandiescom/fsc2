@@ -115,7 +115,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	if ( V == NULL )
 	{
 		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Find out how many channels the first acquisition sequence needs - if
@@ -133,7 +133,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	{
 		eprint( FATAL, SET, "%s(): Invalid digitizer "
 				"channel number: %ld.\n", Cur_Func, channel[ 0 ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If we need two channels (acquisition sequence uses A and B) also the
@@ -148,7 +148,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 		{
 			eprint( FATAL, SET, "%s(): Two digitizer channel nunmbers are "
 					"needed but second argument isn't one.\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( channels_needed == 1 && is_channel )
@@ -337,7 +337,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	{
 		eprint( FATAL, SET, "%s(): Second acquisition sequence (B) hasn't "
 				"been defined.\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Next step: check the parameter */
@@ -345,7 +345,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	if ( V == NULL )
 	{
 		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Find out how many channels both the acquisition sequences need - if
@@ -372,7 +372,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 	{
 		eprint( FATAL, SET, "%s(): Invalid digitizer channel number: %ld.\n",
 				Cur_Func, channel[ 0 ] );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* If we need two channels (acquisition sequences use A and B) also the
@@ -387,7 +387,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 		{
 			eprint( FATAL, SET, "%s(): Two digitizer channel nunmbers are "
 					"needed but second argument isn't one.\n", Cur_Func );
-			THROW( EXCEPTION );
+			THROW( EXCEPTION )
 		}
 
 		if ( channels_needed == 1 && is_channel )
@@ -614,7 +614,7 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel )
 	{
 		eprint( FATAL, SET, "%s(): Digitizer module does not supply needed "
 				"functions.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	vars_push( INT_VAR, *channel );
@@ -640,21 +640,21 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ! func_exists( "pulser_phase_reset" ) )
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ! func_exists( "pulser_update" ) )
 	{
 		eprint( FATAL, SET, "%s(): No pulser module loaded supplying a "
 				"function to do phase cycling.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that there's a function for starting the acquisition */
@@ -663,7 +663,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	{
 		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
 				"function to do an acquisition.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* Check that both the supplied functions are supported and sets flags
@@ -676,7 +676,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	{
 		eprint( FATAL, SET, "%s(): No digitizer module loaded supplying a "
 				"function to obtain %s.\n", func_name, str );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	/* We also need to check that a phase sequence and at least one
@@ -686,13 +686,13 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	{
 		eprint( FATAL, SET, "%s(): No phase sequence has been defined.\n",
 				func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 
 	if ( ! ASeq->defined )
 	{
 		eprint( FATAL, SET, "%s(): First acquisition sequence (A) hasn't "
 				"been defined.\n", func_name );
-		THROW( EXCEPTION );
+		THROW( EXCEPTION )
 	}
 }

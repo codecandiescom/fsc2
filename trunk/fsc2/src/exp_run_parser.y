@@ -144,7 +144,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
 											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+	                                 THROW( EXCEPTION ) }
        | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
        | E_PPOS E_PLSA expr        { p_set( $1, P_POS, vars_add(
 		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
@@ -234,10 +234,10 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | E_VAR_REF
        | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+	                                 THROW( EXCEPTION ) }
        | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
 											 " function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+	                                 THROW( EXCEPTION ) }
        | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }
        | E_PLEN                    { $$ = p_get_by_num( $1, P_LEN ); }
        | E_PDPOS                   { $$ = p_get_by_num( $1, P_DPOS ); }
@@ -314,5 +314,5 @@ static void exp_runerror ( const char *s )
 
 
 	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
-	THROW( EXCEPTION );
+	THROW( EXCEPTION )
 }

@@ -93,7 +93,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 				eprint( FATAL, UNSET, "%s: End of device data base `%s' in "
 							   "comment starting at line %ld.\n",
 							   Fname, Comm_Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* end of comment but not end of line */
@@ -110,7 +110,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {EREM1}     {  /* End of comment without start */
 				eprint( FATAL, UNSET, "End of comment found at line %ld in "
 							   "device data base `%s'.\n", Lc, Fname );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
@@ -140,7 +140,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 .           {
 				eprint( FATAL, UNSET, "Syntax error in devices data base `%s' "
 							   "at line %ld.\n", Fname, Lc );
-				THROW( EXCEPTION );
+				THROW( EXCEPTION )
 			}
 
 <<EOF>>		return 0;
