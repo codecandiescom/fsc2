@@ -75,10 +75,10 @@ install:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) *~ include/*~ misc_doc/*~
+	$(RM) $(RMFLAGS) *~ include/*~ util/*~
 
 
 distclean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib distclean
-	$(RM) $(RMFLAGS) makelog *~ include/autoconf.h include/*~ misc_doc/*~
+	$(RM) $(RMFLAGS) makelog *~ include/autoconf.h include/*~ util/*~

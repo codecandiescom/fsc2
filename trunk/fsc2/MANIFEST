@@ -1,7 +1,6 @@
 # List of all (necessary) files of the package
 #
 # $Id$
-#
 
 Changes
 COPYING
@@ -60,9 +59,13 @@ config/er032m.conf
 config/er035m.conf
 config/er035m_sa.conf
 config/er035m_sas.conf
+<<<<<<< MANIFEST
+config/gg_chopper.conf
+=======
 config/er035m_s.conf
 config/Functions
 config/gg_chopper.conf
+>>>>>>> 1.48
 config/gpib.conf
 config/hfs9000.conf
 config/hjs_attenuator.calib
@@ -198,8 +201,12 @@ modules/er032m.c
 modules/er035m.c
 modules/er035m_sa.c
 modules/er035m_sas.c
+<<<<<<< MANIFEST
+modules/gg_chopper.c
+=======
 modules/er035m_s.c
 modules/gg_chopper.c
+>>>>>>> 1.48
 modules/hfs9000.c
 modules/hfs9000_gen.c
 modules/hfs9000_gpib.c
@@ -246,6 +253,16 @@ modules/Makefile
 modules/Makefile.tmpl
 modules/me6000.c
 modules/ni6601.c
+<<<<<<< MANIFEST
+modules/pci_mio_16e_1.c
+modules/pci_mio_16e_1.h
+modules/pci_mio_16e_1_ai.c
+modules/pci_mio_16e_1_ao.c
+modules/pci_mio_16e_1_dio.c
+modules/pci_mio_16e_1_gpct.c
+modules/pci_mio_16e_1_msc.c
+modules/pci_mio_16e_1_util.c
+=======
 modules/pci_mio_16e_1_ai.c
 modules/pci_mio_16e_1_ao.c
 modules/pci_mio_16e_1.c
@@ -254,6 +271,7 @@ modules/pci_mio_16e_1_gpct.c
 modules/pci_mio_16e_1.h
 modules/pci_mio_16e_1_msc.c
 modules/pci_mio_16e_1_util.c
+>>>>>>> 1.48
 modules/pt2025.c
 modules/rs690.c
 modules/rs690_gen.c
@@ -263,11 +281,19 @@ modules/rs690_init.c
 modules/rs690_pulse.c
 modules/rs690_run.c
 modules/rs690_util.c
+<<<<<<< MANIFEST
+modules/rs_sml01.c
+modules/rs_sml01.h
+modules/rs_sml01_gpib.c
+modules/rs_sml01_lexer.l
+modules/rs_sml01_util.c
+=======
 modules/rs_sml01.c
 modules/rs_sml01_gpib.c
 modules/rs_sml01.h
 modules/rs_sml01_lexer.l
 modules/rs_sml01_util.c
+>>>>>>> 1.48
 modules/rs_spec10.c
 modules/rs_spec10.h
 modules/rs_spec10_int.c
@@ -468,6 +494,7 @@ utils/ipcc
 utils/Makefile
 utils/memcheck
 
+me6x00/COPYING
 me6x00/INSTALL
 me6x00/Makefile
 me6x00/README
@@ -490,6 +517,7 @@ me6x00/lib/me_test.c
 
 me6x00/utils/me6x00
 
+ni6601/COPYING
 ni6601/INSTALL
 ni6601/Makefile
 ni6601/README
@@ -510,6 +538,7 @@ ni6601/lib/ni6601_lib.txt
 ni6601/utils/ni6601
 ni6601/utils/ni_test.c
 
+witio_48/COPYING
 witio_48/INSTALL
 witio_48/Makefile
 witio_48/README
@@ -526,6 +555,86 @@ witio_48/lib/witio_48_lib.c
 witio_48/lib/witio_48_lib.txt
 
 witio_48/utils/witio_48
+<<<<<<< MANIFEST
+
+ni_daq/COPYING
+ni_daq/INSTALL
+ni_daq/Makefile
+ni_daq/README
+
+ni_daq/driver/Makefile
+ni_daq/driver/ni_daq_drv.txt
+
+ni_daq/driver/daq_stc/AI.c
+ni_daq/driver/daq_stc/AO.c
+ni_daq/driver/daq_stc/DIO.c
+ni_daq/driver/daq_stc/GPCT.c
+ni_daq/driver/daq_stc/MSC.c
+ni_daq/driver/daq_stc/Makefile
+ni_daq/driver/daq_stc/fops.c
+
+ni_daq/driver/include/AI.h
+ni_daq/driver/include/AO.h
+ni_daq/driver/include/DIO.h
+ni_daq/driver/include/GPCT.h
+ni_daq/driver/include/MSC.h
+ni_daq/driver/include/daq_stc.h
+ni_daq/driver/include/ni_daq_board.h
+
+ni_daq/driver/pci_e_series/Makefile
+ni_daq/driver/pci_e_series/board.c
+ni_daq/driver/pci_e_series/board.h
+ni_daq/driver/pci_e_series/board_props.h
+ni_daq/driver/pci_e_series/caldac.c
+ni_daq/driver/pci_e_series/init.c
+ni_daq/driver/pci_e_series/io.c
+ni_daq/driver/pci_e_series/io.h
+ni_daq/driver/pci_e_series/mite.c
+ni_daq/driver/pci_e_series/mite.h
+
+ni_daq/include/ni_daq.h
+ni_daq/include/ni_daq_drv.h
+
+ni_daq/lib/Makefile
+ni_daq/lib/ai.c
+ni_daq/lib/ao.c
+ni_daq/lib/dio.c
+ni_daq/lib/gpct.c
+ni_daq/lib/msc.c
+ni_daq/lib/ni_daq_lib.c
+ni_daq/lib/ni_daq_lib.h
+ni_daq/lib/ni_daq_lib.txt
+
+ni_daq/misc_doc/clocks
+ni_daq/misc_doc/fout.txt
+ni_daq/misc_doc/registers.txt
+
+ni_daq/utils/ni_daq
+
+rulbus/COPYING
+rulbus/INSTALL
+rulbus/Makefile
+rulbus/README
+rulbus/rulbus.conf
+
+rulbus/driver/Makefile
+rulbus/driver/rulbus_epp.c
+rulbus/driver/rulbus_epp.txt
+
+rulbus/lib/Makefile
+rulbus/lib/lexer.l
+rulbus/lib/parser.y
+rulbus/lib/rb8509.c
+rulbus/lib/rb8510.c
+rulbus/lib/rb8514.c
+rulbus/lib/rb8515.c
+rulbus/lib/rt
+rulbus/lib/rt.c
+rulbus/lib/rulbus_lib.c
+rulbus/lib/rulbus_lib.txt
+
+rulbus/util/rulbus_epp
+=======
 
 ni_daq/INSTALL
 ni_daq/Makefile
@@ -579,3 +688,4 @@ ni_daq/misc_doc/fout.txt
 ni_daq/misc_doc/registers.txt
 
 ni_daq/utils/ni_daq
+

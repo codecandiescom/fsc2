@@ -817,8 +817,8 @@ MANIFEST:
 		witio_48/lib witio_48/utils ni_daq ni_daq/driver                  \
 		ni_daq/driver/daq_stc ni_daq/driver/include                       \
 		ni_daq/driver/pci_e_series ni_daq/include ni_daq/lib              \
-		ni_daq/misc_doc ni_daq/utils rulbus rulbus/driber rulbus/lib      \
-		rulbus/util; do                                  \
+		ni_daq/misc_doc ni_daq/utils rulbus rulbus/driver rulbus/lib      \
+		rulbus/util; do                                                   \
 		echo "" >> MANIFEST; \
 		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" | \
 		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST; \
