@@ -6,7 +6,7 @@
 
 
 
-@multitable { @code{REPEAT_FREQUENCY} and a bit } { Starts the @code{PREPARATIONS} section and lots more of tex... }
+@multitable { @code{REPEAT_FREQUENCY} and a bit } { Starts the @code{PREPARATIONS} section and lots more of text... }
 @item @code{A}                @tab Unit, Ampere
 @item @code{abs}              @tab Built-in function (@pxref{abs})
 @item @code{acos}             @tab Built-in function (@pxref{acos})
@@ -19,6 +19,8 @@
 @item @code{AUX1}             @tab Digitizer channel name
 @item @code{AUX2}             @tab Digitizer channel name
 @item                         @tab
+@item @code{BREAK}            @tab Loop control statement
+@item                         @tab
 @item @code{ceil}             @tab Built-in function (@pxref{ceil})
 @item @code{CH}               @tab
 @item @code{CH1}              @tab Digitizer channel name
@@ -27,7 +29,6 @@
 @item @code{CH4}              @tab Digitizer channel name
 @item @code{CHANNEL}          @tab
 @item @code{clear_curve}      @tab Built-in function (@pxref{clear_curve})
-@item @code{CONTINUE}         @tab Loop control statement
 @item @code{cos}              @tab Built-in function (@pxref{cos})
 @item @code{cosh}             @tab Built-in function (@pxref{cosh})
 @item                         @tab

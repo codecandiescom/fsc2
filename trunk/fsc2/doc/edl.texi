@@ -602,9 +602,9 @@ array when arithmetic with arrays is used.
 
 
 Within the @code{EXPERIMENT} section flow control structures can be
-used. These are @code{REPEAT}, @code{WHILE} and @code{FOR} loops and
-@code{IF}-@code{ELSE} constructs. (Please note: all of these keywords
-have to be spelt in capital letters!).
+used. These are @code{REPEAT}, @code{WHILE}, @code{FOR} and
+@code{FOREVER} loops and @code{IF}-@code{ELSE} constructs. (Please note:
+all of these keywords have to be spelt in capital letters!).
 
 
 Most flow control construct keywords are followed by a condition and all
@@ -749,7 +749,6 @@ operators. Here is a list of these operators and their meaning:
 @subsection FOR loops
 @cindex FOR loops
 
-
 Before the @code{WHILE} loop on often has to initialise the loop
 variables and within the statement block the loop variable has to been
 updated. In many cases (for example in both the preceeding examples) it
@@ -792,6 +791,49 @@ decremented until it is smaller than 1 (the second value in the
 not only be incremented by 1 but by any value (integer or floating point
 ones). And, of course, the loop variable don't have to be an integer
 variable!
+
+
+@subsection FOREVER loops
+@cindex FOREVER loops
+
+There can be situations where one wants to have the program running as
+long as the STOP button is hasn't been pressed. While something like
+this can be realized by using i.e.@: a @code{REPEAT} loop with a huge
+number of repeats, this could take extremely long to test the program
+before the @code{EXPERIMENT} is started.  In these cases a
+@code{FOREVER} loop is more convenient because the content of the loop
+is only tested once so the experiment can start much faster. For obvious
+resons, a @code{FOREVER} loop doesn't expect a loop condition but the
+statements of loop immediately following the @code{FOREVER} keyword.
+
+But there's also a disadvantage: Because the @code{EXPERIMENT} section
+isn't thoroughly tested it can't be guaranteed that the experiment will
+run without errors. Thus the use of @code{FOREVER} loops should be
+restricted to test runs where one wants to figure out the optimum
+parameter for an experiment.
+
+
+@subsection NEXT statement
+@cindex NEXT
+
+Under certain conditions one doesn't want to execute all statements of a
+loop but to go back to the test of the loop condition
+immediately. Whenever the keyword @code{NEXT} appears as the next
+statement to be executed in a loop the remaining statements are skipped
+and the program jumps back to the test of the loop condition (with the
+loop counter in @code{REPEAT} and @code{FOR} loops being set to the next
+value).
+
+
+@subsection BREAK statement
+@cindex BREAK
+
+There may be situations where one doesn't want to continue with a loop
+until the loop condition becomes untrue but where one has to leave the
+loop immediately. For this purpose the keyword @code{BREAK} can be used.
+If it is found as the next statement in a loop to be executed the
+program jumps to the first statement following the loop body.
+
 
 
 @subsection IF-ELSE constructs
