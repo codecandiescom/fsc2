@@ -17,31 +17,33 @@ EXPERIMENT:
 
 hide_toolbox( "ON" );
 layout( "VERTICAL" );
+//layout( "HORIZONTAL" );
 M = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz", "4 Hz",
 				 "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz", "1/8 Hz", "1/16 Hz" );
-BID1 = button_create( "NORMAL_BUTTON", "Clear curve",
+BID1 = button_create( "NORMAL_BUTTON", "Clear curve\nund noch viel mehr\nund noch viel, viel, viiiiel mehr....",
 					  "Removes the currently\ndisplayed curve" );
-BID2 = button_create( "PUSH_BUTTON", "RF On / Off" );
-BID3 = button_create( "RADIO_BUTTON", "Bla3", "Help3" );
+//BID1 = button_create( "NORMAL_BUTTON", "@#>>",
+//					  "Removes the currently\ndisplayed curve" );
+BID2 = button_create( "PUSH_BUTTON", "@#>>", "Help3" );//"RF On / Off" );
+BID3 = button_create( "RADIO_BUTTON", "@#>>", "Help3" );
 button_state( BID3, 1 );
 BID4 = button_create( "RADIO_BUTTON", BID3, "Bla4", "Help4" );
-SID1 = slider_create( "SLOW_NORMAL_SLIDER", 0, 1, 0.2, "Blub1", "Hilfe1" );
+SID1 = slider_create( "SLOW_NORMAL_SLIDER", 0, 1, 0.2, "@#>>", "Help3" );//"Blub1", "Hilfe1" );
 BID5 = button_create( "RADIO_BUTTON", "Sweep RF up" );
-BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF\nsweep" );
+BID6 = button_create( "RADIO_BUTTON", BID5, "Stop RF\nsweep\nasdads\ndasa\ndas\nsdasda" );
 button_state( BID6, 1 );
 BID7 = button_create( "RADIO_BUTTON", BID5, "Sweep RF down" );
 SID2 = slider_create( "VALUE_SLIDER", -100.0, -3.0, "Attenuation",
 					  "Adjusts RF attenuation" );
 I1   = input_create( "INT_INPUT", 17, "Na, was wohl", "Weiss auch nicht..." );
 I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%15.2f" );
-I3   = output_create( "INT_OUTPUT", 17, "", "Weiss auch nicht..." );
-I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "", "%.5f" );
-I5   = input_create( "INT_INPUT", NX, "Points in x direction" );
-/*
-FILE1 = get_file( "", "*.dat", "", "", "dat" );
-FILE2 = clone_file( FILE1, "dat", "dxx" );
-*/
+I3   = output_create( "INT_OUTPUT", 17, "Dies ist ein extrem langes und dabei auch hohes Label.\nMal sehen was xforms damit anstellt.\nWahrscheinlich geht es schief, oder?\nAber man muss es ja mal ausprobieren...", "Weiss auch nicht..." );
+I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins\nakjdhasjkdhdkasjhdhasjkdkashjkahdakdhkajhdjahdkhakdhakjdhak\nahjsdaksdhasjkdhajhdjkadhajkdhjadjjdhjakdhjahdjkadhajkdhajkdhajkdhjasjkdhaksjdhdjkadhaksdhakjdhka", "", "%.5f" );
+I5   = input_create( "INT_INPUT", NX, "Points in x direction\njkshdjkadhjakdja\nksdjaldjajdajdsjaldjaldjklajdladkladj\nasjdsklajasjdkljskajdadjaskjdkldjadjalalsdkajdkjaljadjadsjadjasdjalsdjlsdjasjdla"  );
 hide_toolbox( "OFF" );
+//FILE1 = get_file( "", "*.dat", "", "", "dat" );
+//FILE2 = clone_file( FILE1, "dat", "dxx" );
+
 
 FOREVER {
 
