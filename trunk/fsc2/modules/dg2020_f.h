@@ -24,6 +24,7 @@ Var *pulser_increment( Var *v );
 Var *pulser_next_phase( Var *v );
 Var *pulser_phase_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
+Var *pulser_lock_keyboard( Var *v );
 
 
 
@@ -401,3 +402,4 @@ bool dg2020_set_trigger_in_level( double voltage );
 bool dg2020_set_trigger_in_slope( int slope );
 bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );
+bool dg2020_lock_state( bool lock );

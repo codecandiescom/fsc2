@@ -676,3 +676,30 @@ Var *pulser_pulse_reset( Var *v )
 
 	return vars_push( INT_VAR, 1 );
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_lock_keyboard( Var *v )
+{
+	bool lock;
+
+
+	if ( v == NULL )
+		lock = SET;
+	else
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			lock = v->val.lval == 0 ? UNSET : UNSET;
+		else
+			lock = v->val.dval == 0.0 ? UNSET : UNSET;
+	}
+
+	if ( ! TEST_RUN )
+		dg2020_lock_state( lock );
+
+	return vars_push( INT_VAR, lock ? 1 : 0);
+}
