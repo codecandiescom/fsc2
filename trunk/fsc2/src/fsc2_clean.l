@@ -381,23 +381,24 @@ int main( int argc, char *argv[ ] )
 
 	if ( argc < 2 )
 	{
-		printf( "\x03\nMissing file name.\n" );
-		return EXIT_FAILURE;
+		yyin = stdin;
+		printf( "\x01\n" );
+		Fname = T_strdup( "" );
 	}
-
-	/* Try to open the input file */
-
-	yyin = fopen( argv[ 1 ], "r" );
-	if ( yyin == NULL )
+	else
 	{
-		printf( "\x03\nCan't open input file %s.\n", argv[ 1 ] );
-		return EXIT_FAILURE;
+		yyin = fopen( argv[ 1 ], "r" );
+		if ( yyin == NULL )
+		{
+			printf( "\x03\nCan't open input file %s.\n", argv[ 1 ] );
+			return EXIT_FAILURE;
+		}
+
+		/* Set the global variables and output name of input file */
+
+		printf( "\x01\n%s\n", argv[ 1 ] );
+		Fname = T_strdup( argv[ 1 ] );
 	}
-
-	/* Set the global variables and output name of input file */
-
-	printf( "\x01\n%s\n", argv[ 1 ] );
-	Fname = T_strdup( argv[ 1 ] );
 	Lc = 1;
 	Eol = SET;
 
