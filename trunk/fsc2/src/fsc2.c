@@ -808,7 +808,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	if ( mkstemp( filename ) < 0 || ( tmp = fopen( filename, "w" ) ) == NULL )
 	{
-		eprint( NO_ERROR, "Sorry can't send a bug report.\n" );
+		fl_show_messages( "Sorry can't send a bug report." );
 		return;
 	}
 
