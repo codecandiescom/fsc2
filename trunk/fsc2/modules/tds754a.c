@@ -9,37 +9,40 @@
 #include "tds754a.h"
 
 
-static Var *get_area( Var *v, bool use_cursor );
-static Var *get_curve( Var *v, bool use_cursor );
-static Var *get_amplitude( Var *v, bool use_cursor );
-
-/* This array must be set to the possible record lengths of the digitizer
+/* This array must be set to the available record lengths of the digitizer
    and must always end with a 0 */
 
 static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
-/* List of all allowed time base values (in seconds) */
+/* List of all possible time base values (in seconds) */
 /* Still needs checking!!! */
 
-static double tb[ 32 ] = { 5.0e-10,
-						   1.0e-9,   2.0e-9,   5.0e-9,
-						   12.5e-9,  25.0e-9,  50.0e-9,
+static double tb[ 32 ] = {                     500.0e-12,
+						     1.0e-9,   2.0e-9,   5.0e-9,
+						    12.5e-9,  25.0e-9,  50.0e-9,
 						   100.0e-9, 200.0e-9, 400.0e-9,
-						   1.0e-6,   2.0e-6,   5.0e-6,
-						   10.0e-6,  20.0e-6,  50.0e-6,
+						     1.0e-6,   2.0e-6,   5.0e-6,
+						    10.0e-6,  20.0e-6,  50.0e-6,
 						   100.0e-6, 200.0e-6, 500.0e-6,
-						   1.0e-3,   2.0e-3,   5.0e-3,
-						   10.0e-3,  20.0e-3,  50.0e-3,
+						     1.0e-3,   2.0e-3,   5.0e-3,
+						    10.0e-3,  20.0e-3,  50.0e-3,
 						   100.0e-3, 200.0e-3, 500.0e-3,
-						   1.0,      2.0,      5.0,
-						   10.0 };
+						     1.0,      2.0,      5.0,
+						    10.0 };
 
-/* Maximum and minimum sensitivity (in V) */
-/* Still needs checking !!! Might have the same dependence as on the TDS754A
+/* Maximum and minimum sensitivity settings (in V) for the measurement
+   channels */
+/* !!! Still needs checking - might have the same dependence as on the TDS754A
    where the minimum sensitivity is 1V for 1 M ohm and 10 V for 50 ohm */
 
 static double max_sens = 1e-3,
               min_sens = 10.0;
+
+
+static Var *get_area( Var *v, bool use_cursor );
+static Var *get_curve( Var *v, bool use_cursor );
+static Var *get_amplitude( Var *v, bool use_cursor );
+
 
 
 /*******************************************/
