@@ -580,7 +580,9 @@ distclean:
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 ifdef WITH_HTTP_SERVER
-	-$(MAKE) -C Fcntl_Lock distclean
+	if [ -e Fcntl_$(ldir)/Makefile ]; then  \
+		$(MAKE) -C Fcntl_Lock distclean;    \
+	fi
 endif
 	$(MAKE) -C utils distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
