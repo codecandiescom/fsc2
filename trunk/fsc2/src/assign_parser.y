@@ -21,10 +21,7 @@ int assignerror( const char *s );
 /* locally used global variables */
 
 int Channel_Type;
-
 static Var *CV;
-
-/* externally (in assign_lexer.flex) defined global variables */ 
 
 %}
 

@@ -80,7 +80,7 @@ input:   /* empty */
        | input line ';'            { Cur_Pulse = -1;
 	                                 assert( Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
-       | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { Cur_Pulse = -1;
 	                                 assert( Var_Stack == NULL );

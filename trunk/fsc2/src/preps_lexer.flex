@@ -224,19 +224,13 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return VAR_REF;
             }
 
-{P}":"      {
+{P}(":")    {
 			    Cur_Pulse = p_new( p_num( prepstext ) );
 				return P_TOK;
 			}
 
 
 {P}/[\t \n,;] {
-				if ( Cur_Pulse < 0 )
-				{
-					Cur_Pulse = p_new( p_num( prepstext ) );
-					return P_TOK;
-				}
-
 				prepslval.vptr = vars_push( INT_VAR, p_num( prepstext ) );
 				return( RPP_TOK );
 			}
