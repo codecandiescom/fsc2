@@ -210,7 +210,7 @@ Var *field_meter_wait( Var *v )
 /*****************************************************************************/
 
 
-double bh15_get_field( void )
+static double bh15_get_field( void )
 {
 	char buffer[ 20 ];
 	long len;

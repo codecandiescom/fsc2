@@ -78,7 +78,7 @@ enum {
 
 int er035m_init_hook( void )
 {
-	/* Set global flag to tell magnet poswer supply driver that the
+	/* Set global flag to tell magnet power supply driver that the
 	   gaussmeter has already been loaded */
 
 	is_gaussmeter = SET;
@@ -86,7 +86,7 @@ int er035m_init_hook( void )
 	if ( exist_device( "bh15" ) )
 	{
 		eprint( FATAL, "er035m: Driver for Bruker BH15 field controller is "
-				"already loaded - there can only be one gaussmter.\n" );
+				"already loaded - there can only be one gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -161,7 +161,7 @@ try_again:
 		THROW( EXCEPTION );
 	}
 
-	/* Now look if the status byte says that device is ok where ok means that
+	/* Now look if the status byte says that device is OK where OK means that
 	   for the X-Band magnet the F0-probe is connected, modulation is on and
 	   the gaussmeter is either in locked state or is actively searching to
 	   achieve the lock (if it's just in TRANS L-H or H-L state check again) */
@@ -172,7 +172,7 @@ try_again:
 	{
 		switch ( *bp )
 		{
-			case '0' :      /* Probe F0 is connected -> ok for S-band */
+			case '0' :      /* Probe F0 is connected -> OK for S-band */
 				if ( exist_device( "s_band" ) )
 					break;
 				eprint( FATAL, "er035m: Wrong field probe (F0) connected to "
@@ -180,7 +180,7 @@ try_again:
 				THROW( EXCEPTION );
 				
 
-			case '1' :      /* Probe F1 is connected -> ok for X-band*/
+			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exist_device( "x_band" ) )
 					break;
 				eprint( FATAL, "er035m: Wrong field probe (F1) connected to "
@@ -216,11 +216,11 @@ try_again:
 						"is switched off.\n" );
 				THROW( EXCEPTION );
 
-			case '7' :      /* MOD POS -> ok (default state) */
+			case '7' :      /* MOD POS -> OK (default state) */
 				break;
 
-			case '8' :      /* MOD NEG -> ok (should never happen */
-				break;      /* because of intialization) */ 
+			case '8' :      /* MOD NEG -> OK (should never happen */
+				break;      /* because of initialisation) */ 
 
 			case '9' :      /* System in lock -> very good... */
 				nmr.state = ER035M_LOCKED;
@@ -231,23 +231,23 @@ try_again:
 						"unidentifiable problem.\n" );
 				THROW( EXCEPTION );
 
-			case 'B' :      /* SU active -> ok */
+			case 'B' :      /* SU active -> OK */
 				nmr.state = ER035M_SU_ACTIVE;
 				break;
 
-			case 'C' :      /* SD active -> ok */
+			case 'C' :      /* SD active -> OK */
 				nmr.state = ER035M_SD_ACTIVE;
 				break;
 
-			case 'D' :      /* OU active -> ok */
+			case 'D' :      /* OU active -> OK */
 				nmr.state = ER035M_OU_ACTIVE;
 				break;
 
-			case 'E' :      /* OD active -> ok */
+			case 'E' :      /* OD active -> OK */
 				nmr.state = ER035M_OD_ACTIVE;
 				break;
 
-			case 'F' :      /* Search active but just at search limit -> ok */
+			case 'F' :      /* Search active but just at search limit -> OK */
 				nmr.state = ER035M_SEARCH_AT_LIMIT;
 				break;
 		}
@@ -357,7 +357,7 @@ Var *find_field( Var *v )
 		return vars_push( FLOAT_VAR, 0.0 );
 
 
-	/* If gaussmeter is in oszillator up/down state or the state is unknown
+	/* If gaussmeter is in oscillator up/down state or the state is unknown
 	   (i.e. it's standing somewhere but not searching) search for field.
 	   Starting with searching down is just as probable the wrong decision
 	   as searching up... */
@@ -412,7 +412,7 @@ Var *find_field( Var *v )
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
-				case 'B' :      /* SU active -> ok */
+				case 'B' :      /* SU active -> OK */
 					nmr.state = ER035M_SU_ACTIVE;
 					break;
 
@@ -432,7 +432,7 @@ Var *find_field( Var *v )
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
-				case 'F' :      /* Search active but at a search limit -> ok*/
+				case 'F' :      /* Search active but at a search limit -> OK*/
 					nmr.state = ER035M_SEARCH_AT_LIMIT;
 					break;
 			}
@@ -498,7 +498,7 @@ double er035m_get_field( void )
 
 	do
 	{
-		/* ask gaussmeter to send the current field and read result */
+		/* Ask gaussmeter to send the current field and read result */
 
 		if ( gpib_write( nmr.device, "PF", 2 ) == FAILURE )
 		{
@@ -514,11 +514,11 @@ double er035m_get_field( void )
 			THROW( EXCEPTION );
 		}
 
-		/* dissasemble field value and flag showing the state */
+		/* Disassemble field value and flag showing the state */
 
 		state_flag = strrchr( buffer, ',' ) + 1;
 
-		/* report error if gaussmeter isn't in lock state */
+		/* Report error if gaussmeter isn't in lock state */
 
 		if ( *state_flag >= '3' )
 		{

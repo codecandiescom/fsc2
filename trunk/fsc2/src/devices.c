@@ -54,10 +54,10 @@ void device_add( char *dev_name )
 }
 
 
-/*---------------------------------------------------------------*/
-/*  Function createa a new Device structure and append it to the */ 
-/* list of devices.                                              */
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function creates a new Device structure and appends */
+/* it to the list of devices.                          */
+/*-----------------------------------------------------*/
 
 void device_append_to_list( const char *dev_name )
 {
