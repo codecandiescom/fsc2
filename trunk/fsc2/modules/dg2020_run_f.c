@@ -444,7 +444,6 @@ set_length:
 					Fname, Lc, pulser_struct.name, p->num, pn->num );
 			for_pulse = p;
 		}
-
 	}
 
 done_setting:
@@ -458,12 +457,6 @@ done_setting:
 		phase_p->is_old_len = UNSET;
 
 	phase_p->needs_update = NEEDS_UPDATE( phase_p );
-
-/*
-	if ( phase_p->len < -1 )
-		printf( "!O!O!O! pulse %ld has a lenght of %ld\n",
-				phase_p->num, phase_p->len );
-*/
 }
 
 
@@ -838,9 +831,9 @@ void dg2020_commit( FUNCTION * f, bool flag )
 }
 
 
-/*----------------------------------------------------------------------------
-  Changes the pulse pattern in the channel belonging to the phase function 'f'
-  so that the data in the pulser get in sync with the its internal
+/*--------------------------------------------------------------------------
+  Changes the pulse pattern in the channel belonging to the phase function
+  'f' so that the data in the pulser get in sync with the its internal
   representation. Actually, the real work is done in dg2020_commit( ).
 ----------------------------------------------------------------------------*/
 
