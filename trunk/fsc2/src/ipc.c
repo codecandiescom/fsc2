@@ -354,7 +354,8 @@ int sema_wait( int sema_id )
 
 /*--------------------------------------------------------------------*/
 /* Function increments the semaphore with ID number 'sema_id' by one. */
-/* It returns 0 on success and -1 on errors.                          */
+/* It returns 0 on success and -1 on errors. The function will not    */
+/* return but continue to wait when signals are received.             */
 /*--------------------------------------------------------------------*/
 
 int sema_post( int sema_id )
