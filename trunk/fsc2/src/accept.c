@@ -285,7 +285,6 @@ static void other_data_request( int type, char *ptr )
 static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 {
 	long len = 0;
-	long *l_data;
 	double *f_data;
 	double rw_max,
 		   rw_min;
@@ -310,8 +309,9 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	switch ( type )
 	{
 		case INT_VAR :
-			len = 1;
-			l_data = ( long * ) ptr;
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION )
 			break;
 
 		case FLOAT_VAR :
@@ -320,9 +320,9 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 			break;
 
 		case INT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			l_data = ( long * ) ptr;
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION )
 			break;
 
 		case FLOAT_CONT_ARR :
@@ -497,7 +497,6 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							char *ptr )
 {
 	long len = 0, count;
-	long *l_data;
 	double *f_data;
 	double rw_max,
 		   rw_min;
@@ -526,8 +525,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	switch ( type )
 	{
 		case INT_VAR :
-			len = 1;
-			l_data = ( long * ) ptr;
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION )
 			break;
 
 		case FLOAT_VAR :
@@ -536,9 +536,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			break;
 
 		case INT_CONT_ARR :
-			len = * ( long * ) ptr;
-			ptr += sizeof( long );
-			l_data = ( long * ) ptr;
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION )
 			break;
 
 		case FLOAT_CONT_ARR :
