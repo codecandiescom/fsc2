@@ -101,8 +101,16 @@
 			   only.
 			   monochromator_laser_line() accepts and returns data in
 			   absolute wavenumber units only.
+			   monochromator_wavelength_axis() returns data always in
+			   wavelength units
+			   monochromator_wavenumber_axis() returns data always in
+			   wavenumber units
 */
 
+
+/* All wavelengths and -numbers stored in the following structure are (as
+   far as applicable) in monochromator units, i.e. without correction
+   according to the offset value also stored in the structure */
 
 typedef struct {
 	bool is_needed;
@@ -126,11 +134,12 @@ typedef struct {
 
 	double offset;                   /* in m or cm^-1, depending on mode */
 
-	double pixel_diff;               /* in m or cm^-1, depending on mode */
+	double pixel_diff;               /* in m */
 
 	double laser_wavenumber;         /* in cm^-1 (wavenumber mode only) */
 
-	double scan_start;               /* in m */
+	double scan_start;               /* absolute scan start position in m
+									    or cm^-1, depending on mode */
 	double scan_step;                /* in m or cm^-1, depending on mode */
 	bool scan_is_init;
 	bool in_scan;                    /* set while scanning */
@@ -151,6 +160,8 @@ typedef struct {
 extern SPEX_CD2A spex_cd2a;
 
 
+/* Functions from spex_cd2a.c */
+
 int spex_cd2a_init_hook( void );
 int spex_cd2a_test_hook( void );
 int spex_cd2a_exp_hook( void );
@@ -167,7 +178,11 @@ Var *monochromator_scan_step( Var *v );
 Var *monochromator_laser_line( Var *v );
 Var *monochromator_groove_density( Var *v );
 Var *monochromator_shutter_limits( Var *v );
+Var *monochromator_wavelength_axis( Var * v );
+Var *monochromator_wavenumber_axis( Var * v );
 
+
+/* Functions from spex_cd2a_ll.c */
 
 void spex_cd2a_init( void );
 void spex_cd2a_set_wavelength( void );
@@ -181,14 +196,31 @@ void spex_cd2a_set_shutter_limits( void );
 void spex_cd2a_sweep_up( void );
 void spex_cd2a_open( void );
 void spex_cd2a_close( void );
-double spex_cd2a_wn2wl( double wn );
-double spex_cd2a_wl2wn( double wl );
-double spex_cd2a_wl2mwn( double wl );
+
+
+/* Functions from spex_cd2a_util.c */
+
 bool spex_cd2a_read_state( void );
 bool spex_cd2a_store_state( void );
-double spex_cd2a_cwl( double wl );
-double spex_cd2a_cwn( double wn );
-double spex_cd2a_cwnm( double wn );
+double spex_cd2a_wl2Awn( double wl );
+double spex_cd2a_Awn2wl( double wn );
+double spex_cd2a_wl2Mwn( double wl );
+double spex_cd2a_Awn2Mwn( double wn );
+double spex_cd2a_Mwn2Awn( double wn );
+double spex_cd2a_Mwn2wl( double wn );
+double spex_cd2a_Swl2Uwl( double wl );
+double spex_cd2a_Uwl2Swl( double wl );
+double spex_cd2a_SAwn2UAwn( double wn );
+double spex_cd2a_UAwn2SAwn( double wn );
+double spex_cd2a_SAwn2UMwn( double wn );
+double spex_cd2a_SMwn2UMwn( double wn );
+double spex_cd2a_UMwn2SMwn( double wn );
+double spex_cd2a_Swl2UMwn( double wl );
+double spex_cd2a_UMwn2SAwn( double wn );
+double spex_cd2a_UMwn2S2wl( double wn );
+double spex_cd2a_Swl2UAwn( double wl );
+double spex_cd2a_UAwn2Swl( double wn );
+double spex_cd2a_UMwn2Swl( double wn );
 
 
 #endif /* ! SPEX_CD2A_HEADER */

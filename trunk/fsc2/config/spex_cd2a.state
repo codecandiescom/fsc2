@@ -4,8 +4,11 @@
 # 1. An offset of the monochromator, i.e. a number that always has to be
 #    added to wavenumbers -or lengths reported by the monochromator and
 #    subtracted from wavenumbers or -lengths send to the device.
-# 2. For wavenumber driven monochromators only: the current setting of
+# 2. The wavelength or wavenumber difference between two pixels of the
+#    connected CCD camera\n"
+# 3. For wavenumber driven monochromators only: the current setting of
 #    the position of the laser line (as set at the SPEX CD2A).
 
 0.0000 cm^-1
+0.0050 cm^-1
 24000.0000 cm^-1

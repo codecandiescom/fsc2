@@ -24,6 +24,8 @@
 
 #include "spex_cd2a.h"
 
+#define SPEX_CD2A_TEST
+
 
 #define PARAMETER  0
 #define COMMAND    1
@@ -46,12 +48,12 @@ static void spex_cd2a_read_start_scan_ack( void );
 static void spex_cd2a_read_scan_ack( void );
 static void spex_cd2a_comm_fail( void );
 static void spex_cd2a_wrong_data( void );
-static ssize_t spex_cd2a_pos_mess_len( void );
+static ssize_t spex_cd2a_calc_pos_mess_len( void );
 static void spex_cd2a_pos_mess_check( const char *bp );
 
 
-static ssize_t pos_mess_len;
-static bool do_print_message = UNSET;
+static ssize_t spex_cd2a_pos_mess_len;
+static bool spex_cd2a_do_print_message = UNSET;
 
 
 /*--------------------------------------------------------------*/
@@ -64,15 +66,15 @@ void spex_cd2a_init( void )
 	/* First calculate the length of position messages, so we don't have to
 	   recalculate it all of the time. */
 
-	pos_mess_len = spex_cd2a_pos_mess_len( );
+	spex_cd2a_pos_mess_len = spex_cd2a_calc_pos_mess_len( );
 
 	/* Now check if the device is prepared to talk with us by sending it the
 	   command to use burst scans - that's the only type of scans supported
 	   anyway (with bursts induced by software triggers). */
 
-	do_print_message = UNSET;
+	spex_cd2a_do_print_message = UNSET;
 
-#ifndef SPEX_CD2A_TEST 
+#ifndef SPEX_CD2A_TEST
 	while ( 1 )
 	{
 		TRY
@@ -98,7 +100,7 @@ void spex_cd2a_init( void )
 	}
 #endif
 
-	do_print_message = SET;
+	spex_cd2a_do_print_message = SET;
 
 	/* Set the laser line position if the monochromator is wavenumber driven
 	   (if not set the laser line gets switched off automatically to make
@@ -129,7 +131,11 @@ void spex_cd2a_init( void )
 
 		if ( spex_cd2a.is_wavelength )
 		{
-			spex_cd2a.wavelength = spex_cd2a.scan_start;
+			if ( spex_cd2a.mode & WN_MODES )
+				spex_cd2a.wavelength =
+									  spex_cd2a_Awn2wl( spex_cd2a.scan_start );
+			else
+				spex_cd2a.wavelength = spex_cd2a.scan_start;
 			spex_cd2a_set_wavelength( );
 			spex_cd2a.is_wavelength = SET;
 		}
@@ -155,18 +161,11 @@ void spex_cd2a_set_wavelength( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* When the wavelength or wavenumber is in absolute units we have to
-	   send the already offset-corrected wavelength or or wavenumber, but
-	   when in delta-wavenumber mode we have to remove the offset because
-	   it's already included in the laser line position */
+	/* Set the wavenumber or -length, depending on monochromator type */
 
-	if ( spex_cd2a.mode == WN )
+	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.wavelength ) );
-	else if ( spex_cd2a.mode == WND )
-		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.wavelength )
-						 - spex_cd2a.offset );
+						 spex_cd2a_wl2Mwn( spex_cd2a.wavelength ) );
 	else
 	{
 		if ( UNITS == NANOMETER )
@@ -212,7 +211,10 @@ void spex_cd2a_start_scan( void )
 		spex_cd2a_write( COMMAND, "T" );
 
 	spex_cd2a.in_scan = SET;
-	spex_cd2a.wavelength = spex_cd2a.scan_start;
+	if ( spex_cd2a.mode & WN_MODES )
+		spex_cd2a.wavelength = spex_cd2a_Awn2wl( spex_cd2a.scan_start );
+	else
+		spex_cd2a.wavelength = spex_cd2a.scan_start;
 }
 
 
@@ -288,7 +290,7 @@ void spex_cd2a_set_shutter_limits( void )
 	/* Set the lower shutter limit */
 
 	spex_cd2a_print( mess + 2, 8, spex_cd2a.mode & WN_MODES ?
-					 spex_cd2a_wl2mwn( spex_cd2a.lower_limit ) :
+					 spex_cd2a_wl2Mwn( spex_cd2a.lower_limit ) :
 					 spex_cd2a.lower_limit );
 	spex_cd2a_write( PARAMETER, mess );
 
@@ -296,7 +298,7 @@ void spex_cd2a_set_shutter_limits( void )
 
 	strcpy( mess, "SH" );
 	spex_cd2a_print( mess + 2, 8, spex_cd2a.mode & WN_MODES ?
-					 spex_cd2a_wl2mwn( spex_cd2a.upper_limit ) :
+					 spex_cd2a_wl2Mwn( spex_cd2a.upper_limit ) :
 					 spex_cd2a.lower_limit );
 	spex_cd2a_write( PARAMETER, mess );
 }
@@ -319,18 +321,11 @@ void spex_cd2a_scan_start( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* When the wavelength or wavenumber is in absolute units we have to
-	   send the already offset-corrected wavelength or or wavenumber, but
-	   when in delta-wavenumber mode we have to remove the offset because
-	   it's already included in the laser line position */
+	/* Set start wavenumber or -length, depending on monochromator type */
 
-	if ( spex_cd2a.mode == WN )
+	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.scan_start ) );
-	else if ( spex_cd2a.mode == WND )
-		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.scan_start )
-						 - spex_cd2a.offset );
+						 spex_cd2a_Awn2Mwn( spex_cd2a.scan_start ) );
 	else
 	{
 		if ( UNITS == NANOMETER )
@@ -356,7 +351,7 @@ static void spex_cd2a_scan_end( void )
 
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2mwn( spex_cd2a.upper_limit ) );
+						 spex_cd2a_wl2Mwn( spex_cd2a.upper_limit ) );
 	else
 	{
 		if ( UNITS == NANOMETER )
@@ -554,6 +549,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 
 #ifdef SPEX_CD2A_TEST
+	fprintf( stderr, "%s\n", mess );
 	return 0;
 #endif
 
@@ -637,7 +633,7 @@ static void spex_cd2a_read_ack( void )
 	if ( buf[ 0 ] == ACK || buf[ 1 ] == '\a' )
 	{
 		buf[ 4 ] = '\0';
-		if ( do_print_message )
+		if ( spex_cd2a_do_print_message )
 			print( FATAL, "Failure to execute command, error code: %s.\n",
 			   buf + 2 );
 		THROW( EXCEPTION );
@@ -720,7 +716,7 @@ static void spex_cd2a_read_set_pos_ack( void )
 	/* Keep reading until the final position is reached, each time carefully
 	   testing what the device is sending. */
 
-	to_be_read = pos_mess_len;
+	to_be_read = spex_cd2a_pos_mess_len;
 
 	while ( 1 )
 	{
@@ -770,7 +766,7 @@ static void spex_cd2a_read_set_pos_ack( void )
 static void spex_cd2a_read_start_scan_ack( void )
 {
 	char buf[ 20 ];
-	ssize_t to_be_read = pos_mess_len;
+	ssize_t to_be_read = spex_cd2a_pos_mess_len;
 	ssize_t already_read = 0;
 	char *bp;
 
@@ -828,7 +824,7 @@ static void spex_cd2a_read_start_scan_ack( void )
 static void spex_cd2a_read_scan_ack( void )
 {
 	char buf[ 20 ];
-	ssize_t to_be_read = pos_mess_len;
+	ssize_t to_be_read = spex_cd2a_pos_mess_len;
 	ssize_t already_read = 0;
 	char *bp;
 
@@ -897,7 +893,7 @@ void spex_cd2a_close( void )
 
 static void spex_cd2a_comm_fail( void )
 {
-	if ( do_print_message )
+	if ( spex_cd2a_do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
 	THROW( EXCEPTION );
 }
@@ -926,7 +922,7 @@ static void spex_cd2a_wrong_data( void )
 /* send at the end of the string.                                          */
 /*-------------------------------------------------------------------------*/
 
-static ssize_t spex_cd2a_pos_mess_len( void )
+static ssize_t spex_cd2a_calc_pos_mess_len( void )
 {
 	ssize_t len = 11;
 
@@ -1000,260 +996,6 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 
 	if ( spex_cd2a.sends_lf && *bp != '\n' )
 		spex_cd2a_wrong_data( );
-}
-
-
-/*-----------------------------------------*/
-/* Converts a wavenumber into a wavelength */
-/*-----------------------------------------*/
-
-double spex_cd2a_wn2wl( double wn )
-{
-	fsc2_assert( wn > 0 );
-	return 0.01 / wn;
-}
-
-
-/*-----------------------------------------*/
-/* Converts a wavelength into a wavenumber */
-/*-----------------------------------------*/
-
-double spex_cd2a_wl2wn( double wl )
-{
-	fsc2_assert( wl > 0 );
-	return 0.01 / wl;
-}
-
-
-/*-----------------------------------------------------------*/
-/* Converts a wavelength into either an absolute or relative */
-/* wavenumber, depending on a laser line having been set.    */
-/*-----------------------------------------------------------*/
-
-double spex_cd2a_wl2mwn( double wl )
-{
-	double wn;
-
-
-	fsc2_assert( wl > 0 );
-	wn = 0.01 / wl;
-	if ( spex_cd2a.mode == WND )
-		wn = spex_cd2a.laser_wavenumber - wn;
-	return wn;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-bool spex_cd2a_read_state( void )
-{
-	char *fn;
-	const char *dn;
-	FILE *fp;
-	int c;
-	double val[ 3 ];
-	int i = 0;
-	bool in_comment = UNSET;
-	bool found_end = UNSET;
-
-
-	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
-
-	if ( ( fp = fsc2_fopen( fn, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open state file '%s'.\n", fn );
-		T_free( fn );
-		THROW( EXCEPTION );
-	}
-
-	do
-	{
-		c = fsc2_fgetc( fp );
-
-		switch ( c )
-		{
-			case EOF :
-				found_end = SET;
-				break;
-
-			case '#' :
-				in_comment = SET;
-				break;
-
-			case '\n' :
-				in_comment = UNSET;
-				break;
-
-			default :
-				if ( in_comment )
-					break;
-
-				fsc2_fseek( fp, -1, SEEK_CUR );
-
-				if ( ( i > 1 && spex_cd2a.mode & WL ) || i > 2 ||
-					 fsc2_fscanf( fp, "%lf", val + i++ ) != 1 )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					THROW( EXCEPTION );
-				}
-
-				while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
-					/* empty */ ;
-
-				if ( c == EOF || ( spex_cd2a.mode & WN_MODES && c != 'c' ) ||
-					 ( spex_cd2a.mode & WL && c != 'n' ) )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					THROW( EXCEPTION );
-				}
-				
-				if ( fsc2_fgetc( fp ) != 'm' ||
-					 ( spex_cd2a.mode & WN_MODES && 
-					   ( fsc2_fgetc( fp ) != '^' ||
-						 fsc2_fgetc( fp ) != '-' ||
-						 fsc2_fgetc( fp ) != '1' ) ) )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					THROW( EXCEPTION );
-				}
-
-				break;
-		}
-
-	} while ( ! found_end );
-
-	fsc2_fclose( fp );
-
-	if ( val[ 1 ] <= 0.0 )
-	{
-		print( FATAL, "Invalid state file '%s'.\n", fn );
-		T_free( fn );
-		THROW( EXCEPTION );
-	}	
-
-	if ( spex_cd2a.mode & WN_MODES )
-	{
-		spex_cd2a.offset = val[ 0 ];
-		spex_cd2a.pixel_diff = val[ 1 ];
-
-		if ( val[ 2 ] <= 0.0 )
-		{
-			print( FATAL, "Invalid state file '%s'.\n", fn );
-			T_free( fn );
-			THROW( EXCEPTION );
-		}
-		spex_cd2a.laser_wavenumber = val[ 2 ];
-	}
-	else
-	{
-		spex_cd2a.offset     = 1.0e-9 * val[ 0 ];
-		spex_cd2a.pixel_diff = 1.0e-9 * val[ 1 ];
-	}
-
-	T_free( fn );
-	return OK;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-bool spex_cd2a_store_state( void )
-{
-	char *fn;
-	const char *dn;
-	FILE *fp;
-
-
-	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
-
-	if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
-	{
-		print( SEVERE, "Can't store state data in '%s'.\n", fn );
-		return FAIL;
-	}
-
-	fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
-				  "automatically ---\n\n"
-				  "# In this file state information for the spex_cd2a "
-				  "driver is stored:\n"
-				  "# 1. An offset of the monochromator, i.e. a number that "
-				  "always has to be\n"
-				  "#    added to wavenumbers or -lengths reported by the "
-				  "monochromator and\n"
-				  "#    subtracted from wavenumbers or -lengths send to the "
-				  "device.\n"
-				  "# 2. The wavelength or wavenumber difference between two "
-				  "pixels of the\n#    connected CCD camera\n"
-				  "# 3. For wavenumber driven monochromators only: the "
-				  "current setting of\n"
-				  "#    the position of the laser line (as set at the "
-				  "SPEX CD2A).\n\n" );
-
-	if ( spex_cd2a.mode & WN_MODES )
-		fsc2_fprintf( fp, "%.4f cm^-1\n%.8f cm^-1\n%.4f cm^-1\n",
-					  spex_cd2a.offset, spex_cd2a.pixel_diff,
-					  spex_cd2a.laser_wavenumber );
-	else
-		fsc2_fprintf( fp, "%.5f nm\n%.9f nm\n", 1.0e9 * spex_cd2a.offset,
-					  1.0e9 * spex_cd2a.pixel_diff );
-
-	fsc2_fclose( fp );
-
-	return OK;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-double spex_cd2a_cwl( double wl )
-{
-	if ( spex_cd2a.mode & WN_MODES )
-		wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) + spex_cd2a.offset );
-	else
-		wl += spex_cd2a.offset;
-
-	return wl;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-double spex_cd2a_cwn( double wn )
-{
-	if ( spex_cd2a.mode & WN_MODES )
-		wn += spex_cd2a.offset;
-	else
-		wn = spex_cd2a_wl2wn( spex_cd2a_wn2wl( wn ) + spex_cd2a.offset );
-	return wn;
-}
-
-
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
-
-double spex_cd2a_cwnm( double wn )
-{
-	if ( spex_cd2a.mode & WN_MODES )
-		wn += spex_cd2a.offset;
-	else
-		wn = spex_cd2a_wl2wn( spex_cd2a_wn2wl( wn ) + spex_cd2a.offset );
-
-	if ( spex_cd2a.mode == WND )
-		wn = spex_cd2a.laser_wavenumber - wn;
-
-	return wn;
 }
 
 
