@@ -29,14 +29,14 @@ This chapter tries to describe how to write new modules for use with
 
 @ifinfo
 @menu
-* Module overview::       What modules are good for.
-* fsc2s variables::       How to use fsc2's variables.
-* New modules::           How to write new modules.
-* Programming utils::     Functions that help in programming modules
+* Module Overview::       What modules are good for.
+* fsc2s Variables::       How to use fsc2's variables.
+* New Modules::           How to write new modules.
+* Programming Utils::     Functions that help in programming modules
 @end menu
 @end ifinfo
 
-@node Module overview, fsc2s variables, Modules, Modules
+@node Module Overview, fsc2s Variables, Modules, Modules
 @section What modules are good for
 
 
@@ -133,16 +133,17 @@ lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
 @end example
 
 
-Writing the C file with the functions, compiling it to create a
+Writing the C file(s) with these functions, compiling it to create a
 shareable library file from it and extending the device and function
 data base is all there is to be done. If in the devices sections of the
-@acronym{EDL} file the new device is found (and it's also listed in
-@file{Devices}) the new module will be loaded by @acronym{fsc2} and the
-functions defined in the module can be used in the @acronym{EDL} file.
+@acronym{EDL} file the new device is found (and it's also listed in the
+devices data base file @file{Devices}) the new module will be loaded by
+@acronym{fsc2} and the functions defined in the module can be used in
+the @acronym{EDL} file.
 
 
 
-@node fsc2s variables, New modules, Module overview, Modules
+@node fsc2s Variables, New Modules, Module Overview, Modules
 @section How @acronym{fsc2}'s variables work and how to use them
 
 
@@ -527,7 +528,7 @@ correct sequence, so it's not completely foolproof.
 
 
 
-@node New modules, Programming utils, fsc2s variables, Modules
+@node New Modules, Programming Utils, fsc2s Variables, Modules
 @section How to write a new module
 
 @subsection Files to be included
@@ -868,9 +869,31 @@ pointer, anyway.
 
 
 
-@node Programming utils, , New modules, Modules
+@node Programming Utils, , New Modules, Modules
+@section Additional utilities provided by fsc2
 
-@section Exceptions
+When writing a module some of the following information might be useful.
+The first topic, execeptions, is a well-known concept implemented for
+example in @code{C++}. Unfortunately, @code{C} does not have this kind
+of mechanism, but when being a bit careful one can implement something
+very similar also in @code{C} using a few macros. 
+
+When writing the program I had to deal a lot with memory leaks,
+segmentation faults etc.@: and hacked together a few routines for
+allocation and deallocation of memory, that have some build in code that
+helps me with debugging (and throws an exception when an allocation
+fails). You might find it useful also to use these routines for your
+modules.
+
+Finally, a boolean type is something that was missing until the new C99
+standard (which only a few compilersd already support, if any at all),
+so there's already a @code{typedef} for this type included in
+@acronym{fsc2} that you can use. It's also documented here in order to
+avoid confusion should you accidentally redefine it.
+
+
+
+@subsection Exceptions
 @cindex exceptions
 
 One of the most annoying things in programming is error handling. In
@@ -900,7 +923,7 @@ know about exceptions for nearly all cases that have to be handled within
 modules.
 
 
-@subsection Programing with exceptions
+@subsubsection Programing with exceptions
 
 Of course, to allow the `throwing' of exceptions there must be a place that
 will `catch' the exception, otherwise the exception will simply kill the
@@ -1014,7 +1037,7 @@ from an article by Peter Simons in the the iX magazine
 (@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
 
 
-@section Functions for memory allocation
+@subsection Functions for memory allocation
 @cindex memory allocation
 @findex T_malloc()
 @findex T_calloc()
@@ -1066,5 +1089,26 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 @}
 @end example
 
-I strongly recommend using this functions since they got built in some
-code to help detecting memory leaks etc. which helps in debugging.
+
+@subsection @code{bool} type
+
+@acronym{fsc2} already has a @code{typedef} for the @code{bool} type,
+i.e.@: for variables that can have only two values, either @code{1} or
+@code{0}. You can use either the macros @code{SET}, @code{OK} or
+@code{TRUE} instead of @code{1} and @code{UNSET}, @code{FAIL} or
+@code{FALSE} instead of @code{1}. You can use this type to do things
+like this
+@example
+bool is_flag;
+
+flag = SET;
+...
+if ( ! flag )
+@{
+    do_something( );
+    flag = UNSET;
+@}
+...
+if ( flag )
+    do_something_else( );
+@end example
