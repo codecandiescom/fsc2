@@ -59,50 +59,50 @@
 @item                         @tab
 @item @code{date}             @tab Built-in function (@pxref{date})
 @item @code{db}               @tab Unit, Decibel
-@item @code{DEL}              @tab
-@item @code{DELAY}            @tab
-@item @code{DELL}             @tab
-@item @code{DEL_L}            @tab
-@item @code{DELLEN}           @tab
-@item @code{DEL_LEN}          @tab
-@item @code{DELLENGTH}        @tab
-@item @code{DEL_LENGTH}       @tab
-@item @code{DELS}             @tab
-@item @code{DEL_S}            @tab
-@item @code{DELSTART}         @tab
-@item @code{DEL_START}        @tab
-@item @code{DELTAL}           @tab
-@item @code{DELTA_L}          @tab
-@item @code{DELTALEN}         @tab
-@item @code{DELTA_LEN}        @tab
-@item @code{DELTALENGTH}      @tab
-@item @code{DELTA_LENGTH}     @tab
-@item @code{DELTASTART}       @tab
-@item @code{DELTA_START}      @tab
+@item @code{DEL}              @tab @code{DELAY} keyword
+@item @code{DELAY}            @tab @code{DELAY} keyword
+@item @code{DELL}             @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DEL_L}            @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELLEN}           @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DEL_LEN}          @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELLENGTH}        @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DEL_LENGTH}       @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELS}             @tab Pulse @code{DELTA_START} keyword
+@item @code{DEL_S}            @tab Pulse @code{DELTA_START} keyword
+@item @code{DELSTART}         @tab Pulse @code{DELTA_START} keyword
+@item @code{DEL_START}        @tab Pulse @code{DELTA_START} keyword
+@item @code{DELTAL}           @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTA_L}          @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTALEN}         @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTA_LEN}        @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTALENGTH}      @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTA_LENGTH}     @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DELTASTART}       @tab Pulse @code{DELTA_START} keyword
+@item @code{DELTA_START}      @tab Pulse @code{DELTA_START} keyword
 @item @code{DEV:}             @tab Starts the @code{DEVICES} section
 @item @code{DEVS:}            @tab Starts the @code{DEVICES} section
 @item @code{DEVICE:}          @tab Starts the @code{DEVICES} section
 @item @code{DEVICES:}         @tab Starts the @code{DEVICES} section
 @item @code{dim}              @tab Built-in function (@pxref{dim})
 @item @code{display}          @tab Built-in function (@pxref{display})
-@item @code{DL}               @tab
-@item @code{D_L}              @tab
-@item @code{DLEN}             @tab
-@item @code{D_LEN}            @tab
-@item @code{DLENGTH}          @tab
-@item @code{D_LENGTH}         @tab
-@item @code{DS}               @tab
-@item @code{D_S}              @tab
-@item @code{DSTART}           @tab
-@item @code{D_START}          @tab
+@item @code{DL}               @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{D_L}              @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DLEN}             @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{D_LEN}            @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DLENGTH}          @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{D_LENGTH}         @tab Pulse @code{DELTA_LENGTH} keyword
+@item @code{DS}               @tab Pulse @code{DELTA_START} keyword
+@item @code{D_S}              @tab Pulse @code{DELTA_START} keyword
+@item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
+@item @code{D_START}          @tab Pulse @code{DELTA_START} keyword
 @item                         @tab
 @item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
-@item @code{EXT}              @tab EXTERNAL keyword / Digitizer channel name
-@item @code{EXT10}            @tab Digitizer channel name
-@item @code{EXTERN}           @tab
-@item @code{EXTERNAL}         @tab
+@item @code{EXT}              @tab @code{EXTERNAL} keyword / Digitizer trigger channel name
+@item @code{EXT10}            @tab Digitizer trigger channel name
+@item @code{EXTERN}           @tab @code{EXTERNAL} keyword
+@item @code{EXTERNAL}         @tab @code{EXTERNAL} keyword
 @item                         @tab
 @item @code{F}                @tab
 @item @code{float}            @tab Built-in function (@pxref{float})
@@ -120,22 +120,22 @@
 @item @code{G}                @tab Unit, Gauss
 @item @code{get_file}         @tab Built-in function (@pxref{get_file})
 @item                         @tab
-@item @code{H}                @tab
-@item @code{HIGH}             @tab
+@item @code{H}                @tab @code{HIGH} keyword
+@item @code{HIGH}             @tab @code{HIGH} keyword
 @item @code{Hz}               @tab Unit, Hertz
 @item                         @tab
 @item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{init_1d}          @tab Built-in function (@pxref{init_1d})
 @item @code{init_2d}          @tab Built-in function (@pxref{init_2d})
 @item @code{int}              @tab Built-in function (@pxref{int})
-@item @code{INT}              @tab
-@item @code{INTERN}           @tab
-@item @code{INTERNAL}         @tab
-@item @code{INV}              @tab
-@item @code{INVERT}           @tab
-@item @code{INVERTED}         @tab
-@item @code{IMP}              @tab
-@item @code{IMPEDANCE}        @tab
+@item @code{INT}              @tab @code{INTERNAL} keyword
+@item @code{INTERN}           @tab @code{INTERNAL} keyword
+@item @code{INTERNAL}         @tab @code{INTERNAL} keyword
+@item @code{INV}              @tab @code{INVERTED} keyword
+@item @code{INVERT}           @tab @code{INVERTED} keyword
+@item @code{INVERTED}         @tab @code{INVERTED} keyword
+@item @code{IMP}              @tab @code{IMPEDANCE} keyword
+@item @code{IMPEDANCE}        @tab @code{IMPEDANCE} keyword
 @item @code{is_file}          @tab Built-in function (@pxref{is_file})
 @item                         @tab
 @item @code{kA}               @tab Unit, Kilo-Ampere
@@ -145,14 +145,14 @@
 @item @code{ks}               @tab Unit, Kilo-Seconds
 @item @code{kV}               @tab Unit, Kilo-Volt
 @item                         @tab
-@item @code{L}                @tab
-@item @code{LEN}              @tab
-@item @code{LENGTH}           @tab
-@item @code{LEV}              @tab
-@item @code{LEVEL}            @tab
-@item @code{LIN}              @tab Digitizer channel name
-@item @code{LINE}             @tab Digitizer channel name
-@item @code{LOW}              @tab
+@item @code{L}                @tab @code{LOW} keyword / Pulse @code{LENGTH} keyword
+@item @code{LEN}              @tab Pulse @code{LENGTH} keyword
+@item @code{LENGTH}           @tab Pulse @code{LENGTH} keyword
+@item @code{LEV}              @tab Pulser channel @code{LEVEL} keyword
+@item @code{LEVEL}            @tab Pulser channel @code{LEVEL} keyword
+@item @code{LIN}              @tab Digitizer trigger channel name
+@item @code{LINE}             @tab Digitizer trigger channel name
+@item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
 @item @code{MA}               @tab Unit, Mega-Ampere
 @item @code{MATH1}            @tab Digitizer channel name
@@ -206,26 +206,26 @@
 @item @code{PULSE_@i{[0-9]+}} @tab
 @item                         @tab
 @item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@pxref{REPEAT loops})
-@item @code{REPF}             @tab
-@item @code{REP_F}            @tab
-@item @code{REPEATF}          @tab
-@item @code{REPEAT_F}         @tab
-@item @code{REPEATFREQ}       @tab
-@item @code{REPEAT_FREQ}      @tab
-@item @code{REPEATFREQUENCY}  @tab
-@item @code{REPEAT_FREQUENCY} @tab
-@item @code{REPEATT}          @tab
-@item @code{REPEAT_T}         @tab
-@item @code{REPEATTIME}       @tab
-@item @code{REPEAT_TIME}      @tab
-@item @code{REPFREQ}          @tab
-@item @code{REP_FREQ}         @tab
-@item @code{REPFREQUENCY}     @tab
-@item @code{REP_FREQUENCY}    @tab
-@item @code{REPT}             @tab
-@item @code{REP_T}            @tab
-@item @code{REPTIME}          @tab
-@item @code{REP_TIME}         @tab
+@item @code{REPF}             @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REP_F}            @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEATF}          @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEAT_F}         @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEATFREQ}       @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEAT_FREQ}      @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEATFREQUENCY}  @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEAT_FREQUENCY} @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPEATT}          @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REPEAT_T}         @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REPEATTIME}       @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REPEAT_TIME}      @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REPFREQ}          @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REP_FREQ}         @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPFREQUENCY}     @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REP_FREQUENCY}    @tab Pulser @code{REPETITION_FREQUENCY} keyword
+@item @code{REPT}             @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REP_T}            @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REPTIME}          @tab Pulser @code{REPETITION_TIME} keyword
+@item @code{REP_TIME}         @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{random}           @tab Built-in function (@pxref{random})
 @item @code{REF1}             @tab Digitizer channel name
 @item @code{REF2}             @tab Digitizer channel name
@@ -247,22 +247,22 @@
 @item @code{sizes}            @tab Built-in function (@pxref{sizes})
 @item @code{SL}               @tab
 @item @code{slice}            @tab Built-in function (@pxref{slice})
-@item @code{SLOPE}            @tab
+@item @code{SLOPE}            @tab Pulser @code{SLOPE} keyword
 @item @code{sqrt}             @tab Built-in function (@pxref{sqrt})
 @item @code{START}            @tab
 @item                         @tab
 @item @code{T}                @tab Unit, Tesla
 @item @code{tan}              @tab Built-in function (@pxref{tan})
 @item @code{tanh}             @tab Built-in function (@pxref{tanh})
-@item @code{TB}               @tab
-@item @code{T_B}              @tab
-@item @code{TBASE}            @tab
-@item @code{T_BASE}           @tab
+@item @code{TB}               @tab Pulser @code{TIME_BASE} keyword
+@item @code{T_B}              @tab Pulser @code{TIME_BASE} keyword
+@item @code{TBASE}            @tab Pulser @code{TIME_BASE} keyword
+@item @code{T_BASE}           @tab Pulser @code{TIME_BASE} keyword
 @item @code{time}             @tab Built-in function (@pxref{time})
-@item @code{TIMEB}            @tab
-@item @code{TIME_B}           @tab
-@item @code{TIMEBASE}         @tab
-@item @code{TIME_BASE}        @tab
+@item @code{TIMEB}            @tab Pulser @code{TIME_BASE} keyword
+@item @code{TIME_B}           @tab Pulser @code{TIME_BASE} keyword
+@item @code{TIMEBASE}         @tab Pulser @code{TIME_BASE} keyword
+@item @code{TIME_BASE}        @tab Pulser @code{TIME_BASE} keyword
 @item                         @tab
 @item @code{uA}               @tab Unit, Micro-Ampere
 @item @code{uG}               @tab Unit, Micro-Gauss

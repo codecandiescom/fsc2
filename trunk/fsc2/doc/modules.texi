@@ -1435,22 +1435,47 @@ if ( flag )
 @node Pulser Modules, , Programming Utils, Modules
 @section Writing modules for pulsers
 
-Modules for pulsers are abit more difficult to write than drivers for
-other devices. The reason is that pulsers play, at least for meaurements
-with pulsed irradiation, an extremely important role and thus setting up
-the pulses should be made as easy as possible for the user. Of course,
-it would be possible to deal with pulsers in exactly the same way as
-normal devices, i.e.@: to define just a set of functions for setting
-different pulse properties etc.@: but this would make the programs much
-harder to write and understand. Instead many aspects of dealing with
-pulsers were integrated directly into the @acronym{EDL} language. While
-this makes it easier fot the user writing programs it requires more work
-by the writer of modules for pulsers.
+Modules for pulsers are a bit more difficult to write than drivers for
+other devices. The reason is that pulsers play a rather important role
+in modern spectrometers and thus setting the pulses should be made as
+easy as possible for the user. Of course, it would be possible to deal
+with pulsers in exactly the same way as normal devices, i.e.@: to define
+just a set of functions for setting different pulse properties etc.@:
+but this would make the programs much harder to write and understand.
+Instead many aspects of dealing with pulses and pulsers are integrated
+directly into the @acronym{EDL} language. While this makes it easier for
+the user writing @acronym{EDL} programs it requires more work by the
+writer of the module for a pulsers.
 
-To make it possible to integrate handling of pulsers directly into
-@acronym{EDL} modules for pulsers must define quite a lot of
-non-@acronym{EDL} functions and some variables. All of them are 
-collected in on structure, @code{pulser_struct}:
+If, for example, the user defines a new pulse in the @code{PREPARATIONS}
+section the relevant part of the @acronym{EDL} file will similar look to
+this:
+@example
+P3: FUNCTION = MW,
+    START    = P1.START + 200 ns,
+    LENGTH   = 140 ns;
+@end example
+When @code{fsc2} finds these lines it will have to call several
+functions that must be defined within the module. First it needs to call
+a function that allows it to inform the module that there is a new pulse
+numbered 3. Next it will inform the module that the pulse function the
+new pulse 3 is associated with is the function for microwave pulses.
+Next it detects that the start position of the new pulse is defined in
+terms of the values that (hopefully) have been already set for the pulse
+1 and must ask the module for the stat position of pulse 1. Using the
+returned value @acronym{fsc2} now can calculate the start position of
+the new pulse 3 and must then call another function in the module to
+tell the module about this position. Finally, another function in the
+module must exist so that @acronym{fsc2} can inform it about the length
+of the new pulse. Using these (and a lot more) functions the module will
+be able to set up an internal representation of the pulser state and to
+bring the pulser into this state at the start of the experiment.
+
+To make it possible to integrate handling of pulsers in this way
+directly into @acronym{EDL} the module for a pulser must obviously
+define quite a lot of non-@acronym{EDL} functions and some additional
+variables. Pointers to all of these needed functions are collected in one
+structure, @code{pulser_struct}:
 @example
 struct @{
     const char *name;
@@ -1496,33 +1521,36 @@ struct @{
     bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
     bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
+
 @} pulser_struct;
 @end example
-When a new @acronym{EDL} program is read, all the pointers in this
-structure get set to @code{NULL} and the boolean variable
-@code{needs_phase_pulses} is set to false. When the @code{init_hook} of
-a module gets run it has to fill in values for the function pointers it
-supplies functions for. When the module does not define a function that
-would be called via one of the function pointer it must leave the
+At the start all the pointers in this structure are set to @code{NULL}
+(@acronym{fsc2} has still no idea which functions it actually has to
+call), @code{name} is also a @code{NULL} pointer and the boolean
+variable @code{needs_phase_pulses} is set to false. Now, when the
+@code{init_hook} of the pulser module gets run it has to fill in values
+for all the function pointers it supplies functions for - only this will
+allow @acronym{fsc2} to figure out where the relevant functions to call
+are. When the module does not define a function it must leave the
 corresponding entry in the structure unchanged, i.e.@: leave it a
 @code{NULL} pointer. Most of the following text will try to explain in
-detail the meaning of the arguments of the functions and what these
-functions are supposed to do.
+detail what the different functions are supposed to do and the meaning
+of the arguments of the functions.
 
 But first the two variables to be set will be discussed. The first
 variable, @code{name}, is simply the name of the pulser that will be
 used in error messages etc. When setting this variable within the
-@code{init_hook} function it should be checked if it is still a
-@code{NULL} pointer. If not the module should print an error message an
+@code{init_hook} function it should first be checked if it is still a
+@code{NULL} pointer. If not the module should print an error message and
 quit immediately - when @code{name} is not @code{NULL} a different
 pulser module has already been loaded and currently it is not possible
 to deal with more than one pulser.
 
 The second variable, @code{needs_phase_pulses} must be set to a true
 value only if the experiment the pulser is connected to has phase
-switches that need their own pulses and that the module is prepared to
-create automatically. Currently, this is only the case for the Frankfurt
-S-band spectrometer.
+switches that need their own pulses and if the module is prepared to
+create these phase pulses automatically. Currently, this is only the
+case for the Frankfurt S-band spectrometer.
 
 
 @subsection Pulse functions
@@ -1592,6 +1620,11 @@ extern const char *Function_Names[ ];
 @end example
 Beside the definition of pulse function numbers there is also an array
 with the full names for the functions (to be used in error messages).
+
+The functions @w{@code{PULSER_CHANNEL_PHASE_1}} and
+@w{@code{PULSER_CHANNEL_PHASE_2}} are a bit different from the rest because
+these functions are reserved for automatically created pulses pulses, so
+the user shouldn't be able to create pulses with both these functions.
 
 The second argument obviously is either the number of channel (for
 pulsers of the first type) or the output connector (for pulsers of the
@@ -1675,8 +1708,8 @@ values should ever get changed you should use these predefined values.
 @item bool set_repeat_time( double rep_time )
 The function gets called to set a repetition time or a repetition
 frequency to do an pulsed experiment, i.e.@: when either the
-@code{REPETITION_TIME} or @code{REPETITION_FREQUENCY} keyword is found
-in the trigger mode description in the @code{ASSIGNMENTS} section.
+@w{@code{REPETITION_TIME}} or @w{@code{REPETITION_FREQUENCY}} keyword is
+found in the trigger mode description in the @code{ASSIGNMENTS} section.
 Obviously, to be able to set a repetition time or frequency the trigger
 mode must be internal and the module has to check that this is the case.
 
@@ -1735,18 +1768,18 @@ length of the pulse pattern and not use instead the maximum pattern
 length all the time? The reason is that clearing the whole pattern at
 the start of the experiment for some pulsers can take a rather long
 time. E.g.@: for the @strong{Sony/Tektronix DG2020} for each of the
-internal channels, that are going to be used, more than @w{64 kB} would
+internal channels that are going to be used more than @w{64 kB} would
 have to be send to the pulser while in most experiments only a small
 fraction of the maximum pattern length is really needed.
 
 @item bool bool keep_all_pulses( void )
-This function is called when the @code{KEEP_ALL_PULSES} keyword is found
-in the @code{ASSIGNMENTS} section. If this function is called your
+This function is called when the @w{@code{KEEP_ALL_PULSES}} keyword is
+found in the @code{ASSIGNMENTS} section. If this function is called your
 module may not delete pulses that it found during the test run never to
 be used.
 
 The question, of course, is why delete pulses at all that are never used
-and not keep them? The reason is that, when doing phase cycling, it can
+and not keep them? The reason is that when doing phase cycling it can
 happen that for each additional pulse lots of channels in the digitzer
 are needed, even to the point that the number of channels gets exceeded.
 Therefor, as a default, pulses that are found to be never used during
@@ -1770,7 +1803,7 @@ by the first argument (which currently can be only either @code{1} or
 @code{2}) start before the 'real' pulses of the pulse function the phase
 function is associated with. Of course, if the module is not prepared to
 create phase pulses at all, this function does not need to exist and the
-corresponding entry in the pulsers structure should be left a NULL
+corresponding entry in the pulsers structure should be left a @code{NULL}
 pointer. If no phase switch delay is set for a phase-cycled function it
 should (but that's not a necessity but just a recommendation) use a
 default value of @w{20 ns}.
@@ -1789,8 +1822,8 @@ these 'real' pulses get to near to each other to allow having both a
 phase switch delay as well as the 'grace period' the later may be
 reduced below the value set by the user. If the module is not prepared
 to create phase pulses at all, this function does not need to exist and
-the corresponding entry in the pulsers structure should be left a NULL
-pointer.
+the corresponding function pointer entry in the pulsers structure should
+remain a @code{NULL} pointer.
 
 
 @item bool phase_setup_prep( int func, int type, int pod, long val )
@@ -1828,7 +1861,11 @@ The first argument is the pulse number (you can be sure that the
 function @code{new_pulse()} will have been called before with this pulse
 number as argument) and the pulse function number as the second argument
 (see the discussion of pulse function number aboe in the description of
-the function @code{assign_channel_to_function()}).
+the function @w{@code{assign_channel_to_function()}}). If you don't have
+a god reason to do othrwise I would recommend to allow neither
+@w{@code{PULSER_CHANNEL_PHASE_1}} nor @w{@code{PULSER_CHANNEL_PHASE_2}}
+as pulse functions because these functions are usually reserved for
+internally generated phase pulses.
 
 
 @item bool set_pulse_position( long pulse_number, double ptime )
@@ -1838,7 +1875,7 @@ start position of a pulse, i.e.@: for lines like
 PULSE_13: START = 100 ns, ...
 @end example
 within the experiment section or when during the experiment the position
-of a pulse is chenged directly by assigneing a new start position i.e.@:
+of a pulse is changed directly by assigning a new start position i.e.@:
 for lines like
 @example
 P13.START = 260 ns;
@@ -1901,29 +1938,29 @@ to test this value within the function.
 This function is called by @acronym{fsc2} to find out about the function
 of a pulse from the module. If a pulse with the number passed to the
 function exists (otherwise the module should print out an error message
-and throw an exception), it should set the second argument to the number
-of the pulses function and return a true value. If no function has been
-set for the pulse an error message should be printed out and an
-exception has to be thrown.
+and throw an exception), it should set the variable pointed to by the
+second argument to the number of the pulses function and return a true
+value. If no function has been set for the pulse an error message should
+be printed out and an exception has to be thrown.
 
 
 @item bool get_pulse_position( long pulse_number, double *ptime )
 This function is called by @acronym{fsc2} to find out about the current
 position of a pulse from the module. If a pulse with the number passed
 to the function exists (otherwise the module should print out an error
-message and throw an exception), it should set the second argument to
-the start position (in seconds) of the pulse. If no start position has
-been set for the pulse an error message should be printed out and an
-exception has to be thrown.
+message and throw an exception), it should set the variable pointed to
+by the second argument to the start position (in seconds) of the
+pulse. If no start position has been set for the pulse an error message
+should be printed out and an exception has to be thrown.
 
 
 
 @item bool get_pulse_length( long pulse_number, double *ptime )
 This function in the module is called to determine the current length of
 a pulse. If a pulse with the number passed as the first argument exists
-the second argument has to be set to the length of the pulse (in seconds).
-If no length has been set for the pulse an error message should be
-printed out and an exception has to be thrown.
+the variable the second argument points to has to be set to the length
+of the pulse (in seconds).  If no length has been set for the pulse an
+error message should be printed out and an exception has to be thrown.
 
 @item bool get_pulse_position_change( long pulse_number, double *ptime )
 This function should return the current setting of the position change
