@@ -346,7 +346,14 @@ Var *func_call( Var *f )
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
 	   all parameters - just keep the return value (which is alway the last
-	   variable on the stack) */
+	   variable on the stack). Before this do a sanity check. */
+
+	if ( ! vars_exist( f ) )
+	{
+		eprint( FATAL, "%s:%ld: Function `%s' messed up the variable stack.",
+				Fname, Lc, Fncts[ i ].name );
+		THROW( EXCEPTION );
+	}
 
 	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
 		;

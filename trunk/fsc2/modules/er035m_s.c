@@ -15,8 +15,9 @@
 
 /* definitions for serial port access */
 
-#define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
+#define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
+#define SERIAL_FLAGS    CS8
 
 
 #define DEVICE_NAME "ER035M_S"       /* name of device */
@@ -42,7 +43,7 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 static double er035m_s_get_field( void );
 static bool er035m_s_open( void );
 static bool er035m_s_close( void );
-static bool er035m_s_write( const char *buf, long len );
+static bool er035m_s_write( const char *buf );
 static bool er035m_s_read( char *buf, long *len );
 static bool er035m_s_comm( int type, ... );
 static void er035_s_comm_fail( void );
@@ -51,16 +52,14 @@ static void er035_s_comm_fail( void );
 
 typedef struct
 {
-	int state;
-	bool is_needed;
-	const char *name;
-	double field;
-	int resolution;
-
+	bool is_needed;         /* is the gaussmter needed at all? */
+	int state;              /* current state of the gaussmeter */
+	double field;           /* last measured field */
+	int resolution;         /* LOW = 0.01 G, HIGH = 0.001 G */
     int fd;                 /* file descriptor for serial port */
     struct termios old_tio, /* serial port terminal interface structures */
-                   new_tio;
-	char prompt;
+		           new_tio; /* (stored old and current one) */
+	char prompt;            /* prompt character send on each reply */
 } NMR;
 
 
@@ -170,7 +169,6 @@ int er035m_s_init_hook( void )
 	*strrchr( serial_port, '*' ) = ( char ) ( SERIAL_PORT + '0' );
 
 	nmr.is_needed = SET;
-	nmr.name = DEVICE_NAME;
 	nmr.state = ER035M_S_UNKNOWN;
 	nmr.prompt = '\0';
 
@@ -205,13 +203,13 @@ int er035m_s_exp_hook( void )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
-	if ( ! er035m_s_write( "REM", 3 ) )
+	if ( ! er035m_s_write( "REM" ) )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
 	/* Switch the display on */
 
-	if ( er035m_s_write( "ED", 2 ) == FAIL )
+	if ( er035m_s_write( "ED" ) == FAIL )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
@@ -221,7 +219,7 @@ int er035m_s_exp_hook( void )
 
 try_again:
 
-	if ( er035m_s_write( "PS", 2 ) == FAIL )
+	if ( er035m_s_write( "PS" ) == FAIL )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
@@ -245,7 +243,7 @@ try_again:
 				if ( exist_device( "s_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
-						"NMR gaussmeter.", nmr.name );
+						"NMR gaussmeter.", DEVICE_NAME );
 				THROW( EXCEPTION );
 				
 
@@ -253,36 +251,36 @@ try_again:
 				if ( exist_device( "aeg_x_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
-						"NMR gaussmeter.", nmr.name );
+						"NMR gaussmeter.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
 				eprint( FATAL, "%s: No field probe connected to the NMR "
-						"gaussmeter.", nmr.name );
+						"gaussmeter.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
 				eprint( FATAL, "%s: Temperature error from NMR gaussmeter.",
-						nmr.name );
+						DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
 				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
-						"field.", nmr.name );
+						"field.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
 				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
-						"field.", nmr.name );
+						"field.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen) */
 				eprint( FATAL, "%s: Modulation of NMR gaussmeter is switched "
-						"off.", nmr.name );
+						"off.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case '7' :      /* MOD POS -> OK (default state) */
@@ -297,7 +295,7 @@ try_again:
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
 				eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-						"problem.", nmr.name );
+						"problem.", DEVICE_NAME );
 				THROW( EXCEPTION );
 
 			case 'B' :      /* SU active -> OK */
@@ -322,14 +320,14 @@ try_again:
 
 			default :
 				eprint( FATAL, "%s: Undocumented data received from the NMR "
-						"gaussmeter.", nmr.name );
+						"gaussmeter.", DEVICE_NAME );
 				THROW( EXCEPTION );
 		}
 	} while ( *++bp ); 
 
 	/* Find out the resolution and set it to at least 2 digits */
 
-	if ( er035m_s_write( "RS", 2 ) == FAIL )
+	if ( er035m_s_write( "RS" ) == FAIL )
 		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
@@ -340,7 +338,7 @@ try_again:
 	switch ( buffer[ 0 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
-			if ( er035m_s_write( "RS2", 3 ) == FAIL )
+			if ( er035m_s_write( "RS2" ) == FAIL )
 				er035_s_comm_fail( );
 			usleep( ER035M_S_WAIT );
 			/* drop through */
@@ -356,7 +354,7 @@ try_again:
 		default :                     /* should never happen... */
 		{
 			eprint( FATAL, "%s: Undocumented data received from the NMR "
-					"gaussmeter.", nmr.name );
+					"gaussmeter.", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -433,9 +431,9 @@ Var *find_field( Var *v )
 	if ( ( nmr.state == ER035M_S_OU_ACTIVE ||
 		   nmr.state == ER035M_S_OD_ACTIVE ||
 		   nmr.state == ER035M_S_UNKNOWN ) &&
-		 er035m_s_write( "SD", 2 ) == FAIL )
+		 er035m_s_write( "SD" ) == FAIL )
 	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_S_WAIT );
@@ -446,7 +444,7 @@ Var *find_field( Var *v )
 	{
 		/* Get status byte and check if lock was achieved */
 
-		if ( er035m_s_write( "PS", 2 ) == FAIL )
+		if ( er035m_s_write( "PS" ) == FAIL )
 			er035_s_comm_fail( );
 		usleep( ER035M_S_WAIT );
 
@@ -465,7 +463,7 @@ Var *find_field( Var *v )
 
 				case '2' :             /* no probe -> error */
 					eprint( FATAL, "%s: No field probe connected to the NMR "
-							"gaussmeter.", nmr.name );
+							"gaussmeter.", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case '4' : case '5' :  /* TRANS L-H or H-L -> test again */
@@ -480,7 +478,7 @@ Var *find_field( Var *v )
 
 				case 'A' :      /* FIELD ? -> error */
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.", nmr.name );
+							"problem.", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case 'B' :      /* SU active -> OK */
@@ -494,13 +492,13 @@ Var *find_field( Var *v )
 				case 'D' :      /* OU active -> error (should never happen) */
 					nmr.state = ER035M_S_OU_ACTIVE;
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.", nmr.name );
+							"problem.", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
 					nmr.state = ER035M_S_OD_ACTIVE;
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
-							"problem.", nmr.name );
+							"problem.", DEVICE_NAME );
 					THROW( EXCEPTION );
 
 				case 'F' :      /* Search active but at a search limit -> OK */
@@ -509,7 +507,7 @@ Var *find_field( Var *v )
 
 				default :
 					eprint( FATAL, "%s: Undocumented data received from the "
-							"NMR gaussmeter.", nmr.name );
+							"NMR gaussmeter.", DEVICE_NAME );
 					THROW( EXCEPTION );
 			}
 		} while ( *++bp );
@@ -582,7 +580,7 @@ static double er035m_s_get_field( void )
 	{
 		/* Ask gaussmeter to send the current field and read result */
 
-		if ( er035m_s_write( "PF", 2 ) == FAIL )
+		if ( er035m_s_write( "PF" ) == FAIL )
 			er035_s_comm_fail( );
 		usleep( ER035M_S_WAIT );
 
@@ -599,7 +597,7 @@ static double er035m_s_get_field( void )
 		if ( *state_flag >= '3' )
 		{
 			eprint( FATAL, "%s: NMR gaussmeter can't get lock onto the "
-					"current field.", nmr.name );
+					"current field.", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -610,7 +608,7 @@ static double er035m_s_get_field( void )
 	if ( tries < 0 )
 	{
 		eprint( FATAL, "%s: Field is too unstable to be measured with the "
-				"requested resolution of %s G.", nmr.name,
+				"requested resolution of %s G.", DEVICE_NAME,
 				nmr.resolution == LOW ? "0.01" : "0.001" );
 		THROW( EXCEPTION );
 	}
@@ -650,28 +648,29 @@ static bool er035m_s_close( void )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static bool er035m_s_write( const char *buf, long len )
+static bool er035m_s_write( const char *buf )
 {
 	char *wbuf;
 	long wlen;
 	bool res;
 
 
-	if ( buf == NULL || len == 0 )
+	if ( buf == NULL || *buf == '\0' )
 		return OK;
+	wlen = strlen( buf );
 
 	if ( er035m_s_eol != NULL && strlen( er035m_s_eol ) > 0 )
 	{
-		wlen = len + strlen( er035m_s_eol );
-		wbuf = T_malloc( ( wlen + 1 ) * sizeof( char ) );
-		strncpy( wbuf, buf, len );
-		strcpy( wbuf + len, er035m_s_eol );
+		wlen += strlen( er035m_s_eol );
+		wbuf = get_string( wlen );
+		strcpy( wbuf, buf );
+		strcat( wbuf, er035m_s_eol );
 
-		res = er035m_s_comm( SERIAL_WRITE, wbuf, wlen );
+		res = er035m_s_comm( SERIAL_WRITE, wbuf );
 		T_free( wbuf );
 	}
 	else
-		res = er035m_s_comm( SERIAL_WRITE, buf, len );
+		res = er035m_s_comm( SERIAL_WRITE, buf );
 
 	return res;
 }
@@ -735,46 +734,49 @@ static bool er035m_s_comm( int type, ... )
 	long len;
 	long *lptr;
 	long read_retries = 10;            /* number of times we try to read */
-	bool res = OK;
 
-
-	va_start( ap, type );
 
 	switch ( type )
 	{
 		case SERIAL_INIT :
 			if ( ( nmr.fd =
 				   open( serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK ) ) < 0 )
-			{
-				res = FAIL;
-				break;
-			}
+				return FAIL;
 
 			tcgetattr( nmr.fd, &nmr.old_tio );
 			memcpy( &nmr.new_tio, &nmr.old_tio,
 					sizeof( struct termios ) );
-			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | CS8;
+			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | SERIAL_FLAGS;
 			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
 
 		case SERIAL_EXIT :
-			er035m_s_write( "LOC", 3 );
+			er035m_s_write( "LOC" );
 			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
 			close( nmr.fd );
 			break;
 
 		case SERIAL_WRITE :
+			va_start( ap, type );
 			buf = va_arg( ap, char * );
-			len = va_arg( ap, long );
+			va_end( ap );
+
+			len = strlen( buf );
 			if ( write( nmr.fd, buf, len ) != len )
-				res = FAIL;
+				return FAIL;
 			break;
 
 		case SERIAL_READ :
+			va_start( ap, type );
 			buf = va_arg( ap, char * );
 			lptr = va_arg( ap, long * );
+			va_end( ap );
+
+			/* The gaussmeter might not be ready yet to send data, in this
+			   case we retry it a few times before giving up */
+
 			len = 1;
 			do
 			{
@@ -787,8 +789,7 @@ static bool er035m_s_comm( int type, ... )
 			if ( len < 0 )
 			{
 				*lptr = 0;
-				res = FAIL;
-				break;
+				return FAIL;
 			}
 
 			/* The two most significant bits of each byte the gaussmeter
@@ -800,14 +801,12 @@ static bool er035m_s_comm( int type, ... )
 			break;
 
 		default :
-			va_end( ap );
-			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.", nmr.name,
-					__FILE__, __LINE__ );
+			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.",
+					DEVICE_NAME, __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
 
-	va_end( ap );
-	return res;
+	return OK;
 }
 
 
@@ -816,6 +815,6 @@ static bool er035m_s_comm( int type, ... )
 
 void er035_s_comm_fail( void )
 {
-	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
+	eprint( FATAL, "%s: Can't access the NMR gaussmeter.", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
