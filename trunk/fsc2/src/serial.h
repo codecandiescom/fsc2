@@ -21,6 +21,16 @@
   Boston, MA 02111-1307, USA.
 */
 
+/*
+  PLEASE NOTE: This file should only be included when access to a serial
+               port is needed. Unfortunately, some of the definitions in
+               <termios.h> conflict with definitions in the files created
+               by flex (actually just one definition, ECHO), so including
+			   this file everywhere results in several compiler warnings.
+			   While these do not indicate a serious problem it's simply
+			   ugly and might lead to confusion.
+*/
+
 
 #if ! defined SERIAL_HEADER
 #define SERIAL_HEADER
@@ -34,9 +44,17 @@ ssize_t fsc2_serial_read( int fd, void *buf, size_t count );
 int fsc2_serial_close( int fd );
 int fsc2_tcgetattr( int fd, struct termios *termios_p );
 int fsc2_tcsetattr( int fd, int optional_actions, struct termios *termios_p );
-int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed );
-int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed );
+int fsc2_tcsendbreak ( int fd, int duration );
+int fsc2_tcdrain( int fd );
 int fsc2_tcflush( int fd, int queue_selector );
+int fsc2_tcflow( int fd, int action );
+int fsc2_cfmakeraw( struct termios *termios_p );
+speed_t fsc2_cfgetospeed( struct termios *termios_p );
+int fsc2_cfsetospeed( struct termios *termios_p, speed_t speed );
+speed_t fsc2_cfgetispeed( struct termios *termios_p );
+int fsc2_cfsetispeed( struct termios *termios_p, speed_t speed );
+pid_t fsc2_tcgetpgrp( int fd );
+int fsc2_tcsetpgrp( int fd, pid_t pgrpid );
 
 
 #endif   /* ! SERIAL_HEADER */
