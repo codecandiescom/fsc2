@@ -666,10 +666,10 @@ Here is a complete list of the comparison operators between two
 expressions (e.g.@: numbers):
 
 @quotation
-@cindex == (equal)
-@cindex equal `=='
-@cindex != (unequal)
-@cindex unequal `!='
+@cindex == (equal to)
+@cindex equal to `=='
+@cindex != (unequal to)
+@cindex unequal to `!='
 @cindex < (less than)
 @cindex less than `<'
 @cindex <= (less or equal)
