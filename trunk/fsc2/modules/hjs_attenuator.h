@@ -30,11 +30,15 @@
 #include "hjs_attenuator.conf"
 
 
+/* Define the time to wait for a single step when changing the
+   attenuation (in units of micro-seconds) */
+
+#define HJS_ATTENTUATOR_WAIT_PER_STEP   2000   /* 2 ms */
+
+
 typedef struct HJS_ATTENUATOR HJS_ATTENUATOR;
 typedef struct HJS_ATT_TABLE_ENTRY HJS_ATT_TABLE_ENTRY;
 
-
-#define HJS_ATTENTUATOR_WAIT_PER_STEP   2000   /* 2 ms */
 
 struct HJS_ATT_TABLE_ENTRY {
 	double att;
@@ -42,22 +46,22 @@ struct HJS_ATT_TABLE_ENTRY {
 };
 
 struct HJS_ATTENUATOR {
-	bool is_open;
-    struct termios *tio;    /* serial port terminal interface structure */
-	double att;
-	long step;
-	bool is_step;
-
+	bool is_open;                   /* set when serial port has been opened */
+    struct termios *tio;            /* serial port interface structure */
+	double att;                     /* current attenuation */
+	long step;                      /* current stepper motor position */
+	bool is_step;                   /* set when initial position of stepper
+									   motor has been set */
 	char *table_file;               /* name of attenuation table file */
-	HJS_ATT_TABLE_ENTRY *att_table;
-	size_t att_table_len;
-	double min_table_att;
-	double max_table_att;
+	HJS_ATT_TABLE_ENTRY *att_table; /* (sorted) array of attenuation/position
+									   of motor settings */
+	size_t att_table_len;           /* length of this array */
+	double min_table_att;           /* lowest attenuation in array */
+	double max_table_att;           /* largest attenuation in array */
 };
 
 
 extern HJS_ATTENUATOR hjs_attenuator;
-
 
 
 /* Exported functions */
@@ -74,4 +78,14 @@ Var *mw_attenuator_use_table( Var *v );
 Var *mw_attenuator_initial_attenuation( Var *v );
 Var *mw_attenuator_attenuation( Var *v );
 
+
+/* Functions from hjs_attenuator_lexer.l */
+
 void hjs_attenuator_read_table( FILE *fp );
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
