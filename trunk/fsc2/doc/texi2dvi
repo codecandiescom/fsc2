@@ -429,9 +429,11 @@ for command_line_filename in ${1+"$@"}; do
   # If clean mode was specified, then move to the temporary directory.
   if test "$clean" = t; then
     $verbose "cd $tmpdir_src"
-	for f in `ls *.png`; do           # hack to get the figures correctly, JTT
-		cp ${f%.png}.pdf $tmpdir_src;
-	done
+	if [ $oformat = "pdf" ]; then
+		for f in `ls *.png`; do        # hack to get the figures correctly, JTT
+			cp ${f%.png}.pdf $tmpdir_src;
+		done
+	fi
     cd "$tmpdir_src" || exit 1
   fi
 

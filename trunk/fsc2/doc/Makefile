@@ -2,7 +2,7 @@
 
 
 docs    = $(wildcard *.texi)
-figures = $(wildcard fsc2fig*.png)
+figures = $(wildcard *.png)
 
 
 all:

@@ -320,7 +320,6 @@ Var *set_current( Var *v )
 			;
 	}
 
-
 	return vars_push( FLOAT_VAR, keithley228a_goto_current( new_current ) );
 }
 
@@ -609,22 +608,24 @@ static double keithley228a_goto_current( double new_current )
 	int max_tries = 100;
 
 	
-	assert( fabs( new_current <= KEITHLEY228A_MAXMAX_CURRENT ) );
+	assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
 
 	/* Nothing really to be done in a test run */
 
 	if ( TEST_RUN )
 		return keithley228a.current = new_current;
 
+	jmp_size = fabs( keithley228a.current > new_current );
+
 	/* Calculate the size of the current steps */
 
 	del_amps = 0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
-		       * keithley228a.current > new_current ? -1.0 : 1.0;
+		       * ( keithley228a.current > new_current ) ? -1.0 : 1.0;
 
 	/* Use as many current steps as necessary to get near to the final current
 	   and wait 100 ms after each step */
 
-	while ( fabs( new_current - keithley228a.current) > fabs( del_amps ) )
+	while ( fabs( new_current - keithley228a.current ) > fabs( del_amps ) )
 	{
 		keithley228a.current += del_amps;
 		keithley228a_set_current( keithley228a.current );
@@ -650,7 +651,7 @@ static double keithley228a_goto_current( double new_current )
 		sscanf( reply, "%lf,%lf", &dummy, &act_amps );
 	} while ( fabs( act_amps - keithley228a.current ) > 0.05 &&
 			  max_tries-- > 0 );
-	
+
 	if ( max_tries < 0 )
 	{
 		eprint( FATAL, "%s: Can't set requested current.\n", DEVICE_NAME );
@@ -687,7 +688,7 @@ static double keithley228a_set_current( double new_current )
 	int access;
 
 
-	assert( fabs( new_current <= KEITHLEY228A_MAXMAX_CURRENT ) );
+	assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
 
 	if ( ! keithley228a.use_correction )
 	{

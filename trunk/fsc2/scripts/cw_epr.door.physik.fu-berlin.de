@@ -305,11 +305,11 @@ print F
 "VARIABLES:\n\nI";
 print F ", J" if $num_runs != 1;
 print F ";
-start_cur = $start_cur G;
-end_cur = $end_cur G;
+start_cur = $start_cur A;
+end_cur = $end_cur A;
 cur_step = ";
 print F $end_cur > $start_cur ? $cur_step : - $cur_step;
-print F " G;\n";
+print F " A;\n";
 print F
 "N_points = ceil( abs( end_cur - start_cur ) / abs( cur_step ) ) + 1;
 data[ N_points ];
@@ -348,9 +348,9 @@ fsave( \"% Field:\\n\"
 	   start_cur, start_cur + ( N_points - 1 ) * cur_step, cur_step,
 	   lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
 	   N_runs );
-save_comment( \"% \" );
-save_program( \"% \", \"Sample:  \\nMicrowave frequency:  \\n\"
-              \"Microwave power:  \\nTemperature:  \\n\" );\n\n";
+save_comment( \"% \"  \"Sample:  \\nMicrowave frequency:  \\n\"
+              \"Microwave power:  \\nTemperature:  \\n\" );
+save_program( \"% \" );\n\n";
 
 print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
