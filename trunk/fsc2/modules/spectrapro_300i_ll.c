@@ -36,6 +36,9 @@ enum {
 };
 
 
+static void spectrapro_300i_send( const char *buf );
+static bool spectrapro_300i_read( char *buf, size_t *len );
+static char *spectrapro_300i_talk( const char *buf, size_t len );
 static bool spectrapro_300i_comm( int type, ... );
 static void spectrapro_300i_comm_fail( void );
 
@@ -295,13 +298,53 @@ void spectrapro_300i_close( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
+double spectrapro_300i_get_wavelength( void )
+{
+	char *reply;
+
+
+	reply = spectrapro_300i_talk( "?NM", 100 );
+	return T_atod( reply ) * 1.0e-9;
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+void spectrapro_300i_set_wavelength( double wavelength )
+{
+	char *buf;
+
+
+	fsc2_assert( wavelength < 0.0 || wavelength <= MAX_WAVELENGTH );
+
+
+	buf = get_string( "%.3f GOTO", 1.0e9 * wavelength );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
 long spectrapro_300i_get_turret( void )
 {
 	const char *reply;
 	long turret;
 
 
-	reply = spectrapro_300i_talk( "?TURRET", 20, 1 );
+	reply = spectrapro_300i_talk( "?TURRET", 20 );
 	turret = T_atol( reply );
 	T_free( ( void * ) reply );
 	return turret;
@@ -346,7 +389,7 @@ long spectrapro_300i_get_grating( void )
 	long grating;
 
 
-	reply = spectrapro_300i_talk( "?GRATING", 20, 1 );
+	reply = spectrapro_300i_talk( "?GRATING", 20 );
 	grating = T_atol( reply );
 	T_free( ( void * ) reply );
 	return grating;
@@ -395,7 +438,7 @@ void spectrapro_300i_get_gratings( void )
 	int i;
 
 
-	reply = spectrapro_300i_talk( "?GRATINGS", 80 * MAX_GRATINGS, 5 );
+	reply = spectrapro_300i_talk( "?GRATINGS", 80 * MAX_GRATINGS );
 
 	for ( sp = reply, i = 0; i < MAX_GRATINGS; i++ )
 	{
@@ -546,7 +589,7 @@ long spectrapro_300i_get_offset( long grating )
 
 	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
 
-	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096, 1 );
+	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
 	if ( ( sp = strstr( reply, "offset" ) ) == NULL )
 	{
@@ -582,6 +625,9 @@ void spectrapro_300i_set_offset( long grating, long offset )
 	char *buf;
 
 
+	CLOBBER_PROTECT( buf );
+	CLOBBER_PROTECT( grating );
+
 	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
 
 	grating--;
@@ -605,9 +651,24 @@ void spectrapro_300i_set_offset( long grating, long offset )
 		RETHROW( );
 	}
 
+	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
-	spectrapro_300i_send( "MONO-RESET" );
+	spectrapro_300i_set_grating( grating + 1 );
+
+	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
 }
 
 
@@ -624,7 +685,7 @@ long spectrapro_300i_get_adjust( long grating )
 
 	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
 
-	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096, 1 );
+	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
 	if ( ( sp = strstr( reply, "adjust" ) ) == NULL )
 	{
@@ -660,11 +721,16 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 	char *buf;
 
 
+	CLOBBER_PROTECT( buf );
+	CLOBBER_PROTECT( grating );
+
 	fsc2_assert( grating >= 1 && grating <= MAX_GRATINGS );
 	fsc2_assert( spectrapro_300i.grating[ grating - 1 ].is_installed );
 	fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
 
-	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, grating - 1 );
+	grating--;
+
+	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, grating );
 
 	TRY
 	{
@@ -678,9 +744,24 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 		RETHROW( );
 	}
 
+	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
-	spectrapro_300i_send( "MONO-RESET" );
+	spectrapro_300i_set_grating( grating + 1 );
+
+	buf = get_string( "%.3f GOTO", 1.0e9 * spectrapro_300i.wavelength );
+
+	TRY
+	{
+		spectrapro_300i_send( buf );
+		T_free( buf );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( buf );
+		RETHROW( );
+	}
 }
 
 
@@ -746,10 +827,7 @@ void spectrapro_300i_send( const char *buf )
 	char *lbuf;
 	size_t len;
 	char reply[ 5 ];
-	int repeats = 100;
 
-
-	CLOBBER_PROTECT( repeats );
 
 	fsc2_assert( buf != NULL && *buf != '\0' );
 
@@ -766,7 +844,7 @@ void spectrapro_300i_send( const char *buf )
 
 	TRY
 	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
+		if ( ! spectrapro_300i_read( lbuf, &len ) )
 			spectrapro_300i_comm_fail( );
 		TRY_SUCCESS;
 	}
@@ -778,31 +856,151 @@ void spectrapro_300i_send( const char *buf )
 
 	T_free( lbuf );
 
-	/* When the command just send has been executed " ok\r\n" gets returned */
+	/* Read the string returned by the device indicating success */
 
-	while ( repeats-- >= 0 )
-	{
-		len = 5;
-		if ( spectrapro_300i_comm( SERIAL_READ, reply, &len ) )
-			break;
-		fsc2_usleep( SPECTRAPRO_300I_WAIT, UNSET );
-		stop_on_user_request( );
-	}
-
-	if ( repeats < 0 || len != 5 || strncmp( reply, " ok\r\n", 5 ) )
+	len = 5;
+	if ( ! spectrapro_300i_read( reply, &len ) )
 		spectrapro_300i_comm_fail( );
 }
 
 
+/*----------------------------------------------------------------------*/
+/* Function tries to read up to '*len' bytes of data into 'buf' fom the */
+/* monochromator. It recognizes the end of the data (if there are less  */
+/* than '*len' going to be send by the device) by the string " ok\r\n"  */
+/* (or, in one case "ok\r\n") when the command initializing the read    */
+/* was successful, or "?\r\n" when the command failed (probably due to  */
+/* an invalid command.                                                  */
+/* There are four cases to be considered:                               */
+/* 1. The returned string ended in "ok\r\n" or " ok\r\n". In this case  */
+/*    this part is cut of (i.e. replaced by a '\0') and the length of   */
+/*    the string ready in is returned in len (could actually be 0 when  */
+/*    the "ok\r\n" part was everything we got) and the function returns */
+/*    a status indicating success.                                      */
+/* 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or */
+/*    "?\r\n", indicating that there are more data coming. In 'len' the */
+/*    length of what we got is returned and the function returns a      */
+/*    status indicating failure. No '\0' is appended to the returned    */
+/*    string.                                                           */
+/* 3. The string we got ended in "?\r\n", in which case the function    */
+/*    throws an exception.                                              */
+/* 4. Reading from the device failed, in which case an exception is     */
+/*    thrown.                                                           */
+/* Some care has to be taken: when the input buffer 'buf' isn't large   */
+/* enough to hold the complete string the device is trying to send it   */
+/* may happen that the transmission ends within the marker indicating   */
+/* success or failure, in which case this function won't be able to     */
+/* determine if the end of a transmission has been reached. In this     */
+/* case the calling function must do the checking!                      */
+/*                                                                      */
+/* There's also another way this function can be ended: if the user hit */
+/* the "Stop" button a USER_BREAK_EXCEPTION is thrown.                  */
+/*----------------------------------------------------------------------*/
+
+static bool spectrapro_300i_read( char *buf, size_t *len )
+{
+	size_t to_fetch = *len;
+	size_t already_read = 0;
+	char *lbuf;
+	long llen = *len;
+
+
+	CLOBBER_PROTECT( to_fetch );
+	CLOBBER_PROTECT( already_read );
+
+	lbuf = CHAR_P T_malloc( llen );
+
+	do
+	{
+		llen = to_fetch;
+		if ( ! spectrapro_300i_comm( SERIAL_READ, buf + already_read, &llen ) )
+		{
+			T_free( lbuf );
+			spectrapro_300i_comm_fail( );
+		}
+
+		/* Device didn't send anything yet then try again. */
+
+		if ( llen == 0 )
+			goto read_retry;
+
+		already_read += llen;
+		to_fetch -= llen;
+
+		/* No end marker can have been read yet */
+
+		if ( already_read < 3 )
+		{
+			if ( to_fetch == 0 )
+				break;
+			goto read_retry;
+		}
+
+		/* Throw exception if device did signal an invalid command */
+
+		if ( ! strncmp( buf + already_read - 3, "?\r\n", 3 ) )
+		{
+			T_free( lbuf );
+			spectrapro_300i_comm_fail( );
+		}
+
+		/* No end marker indicating succes can have been read yet */
+
+		if ( already_read < 4 )
+		{
+			if ( to_fetch == 0 )
+				break;
+			goto read_retry;
+		}
+
+		/* Check if we got an indicator saying that everything the device is
+		   going to write has already been sent successfully - if yes replace
+		   the indicator by a '\0' character and break from the loop */
+
+		if ( ! strncmp( buf + already_read - 4, "ok\r\n", 4 ) )
+		{
+			already_read -= 4;
+			if ( already_read > 0 && buf[ already_read - 1 ] == ' ' )
+				already_read--;
+			buf[ already_read ] = '\0';
+			break;
+		}
+
+		/* When we get here we have to try again reading (more) data. Before
+		   we do we wait a bit and also check if the "Stop" button has been
+		   hit by the user. */
+
+	read_retry:
+		fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
+		TRY
+		{		
+			stop_on_user_request( );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( lbuf );
+			RETHROW( );
+		}
+	} while ( to_fetch > 0 );
+
+	*len = already_read;
+	return to_fetch == 0;
+}
+
+
 /*---------------------------------------------------------------*/
-/* Function sends a command and returns a buffer (with a maximum */
-/* length of *len bytes) with the reply of the device.           */
+/* Function sends a command and returns a buffer (with a default */
+/* size of *len bytes) with the reply of the device. If the      */
+/* reply by the device is longer that *len bytes, a larger       */
+/* buffer gets returned. The buffer always ends in a '\0'.       */  
 /*---------------------------------------------------------------*/
 
-char *spectrapro_300i_talk( const char *buf, size_t len, long wait_cycles )
+char *spectrapro_300i_talk( const char *buf, size_t len )
 {
 	char *lbuf;
 	size_t comm_len;
+	size_t already_read;
 
 
 	CLOBBER_PROTECT( lbuf );
@@ -818,11 +1016,14 @@ char *spectrapro_300i_talk( const char *buf, size_t len, long wait_cycles )
 		spectrapro_300i_comm_fail( );
 	}
 
-	/* The device always echos the command, we got to get rid of the echo */
+	/* The device always echos the command, we got to get rid of this echo.
+	   Here we don't expect the "ok\r\n" end indicator, so getting it would
+	   actually be an error, thus we have to expect spectrapro_300i_read()
+	   to return a status indicating failure.... */
 
 	TRY
 	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &comm_len ) )
+		if ( spectrapro_300i_read( lbuf, &comm_len ) )
 			spectrapro_300i_comm_fail( );
 		TRY_SUCCESS;
 	}
@@ -832,19 +1033,21 @@ char *spectrapro_300i_talk( const char *buf, size_t len, long wait_cycles )
 		RETHROW( );
 	}
 
-	T_free( lbuf );
-
-	/* Now we read the reply by the device, which is followed by " ok\r\n". */
-
-	fsc2_usleep( wait_cycles * SPECTRAPRO_300I_WAIT, SET );
-
-	lbuf = T_malloc( len + 6 );
-	len += 5;
+	/* Now we read the reply by the device, if necessary extending the
+	   buffer. */
 
 	TRY
 	{
-		if ( ! spectrapro_300i_comm( SERIAL_READ, lbuf, &len ) )
-			spectrapro_300i_comm_fail( );
+		already_read = 0;
+		len += 5;
+		lbuf = CHAR_P T_realloc( lbuf, len );
+
+		while ( ! spectrapro_300i_read( lbuf + already_read, &len ) )
+		{
+			lbuf = CHAR_P realloc( lbuf, 2 * len + 5 );
+			already_read += len;
+		}
+		already_read += len;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -853,29 +1056,7 @@ char *spectrapro_300i_talk( const char *buf, size_t len, long wait_cycles )
 		RETHROW( );
 	}
 
-	/* Cut off the " ok\r\n" stuff and return the buffer with the reply */
-
-	lbuf[ len ] = '\0';
-	if ( strncmp( lbuf + len - 5, " ok\r\n", 5 ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
-
-	len -= 5;
-	lbuf[ len ] = '\0';
-
-	TRY
-	{
-		T_realloc( lbuf, len + 1 );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
-
+	T_realloc( lbuf, already_read + 1 );
 	return lbuf;
 }
 
@@ -889,7 +1070,6 @@ static bool spectrapro_300i_comm( int type, ... )
 	char *buf;
 	ssize_t len;
 	size_t *lptr;
-	long read_retries = 20;            /* number of times we try to read */
 
 
 	switch ( type )
@@ -901,9 +1081,9 @@ static bool spectrapro_300i_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as CTRL-C might kill the program. */
 
-			if ( ( spectrapro_300i.tio = fsc2_serial_open( SERIAL_PORT,
-					    DEVICE_NAME,
-						O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+			if ( ( spectrapro_300i.tio =
+						fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
 
 			/* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
@@ -933,7 +1113,6 @@ static bool spectrapro_300i_comm( int type, ... )
 			len = strlen( buf );
 			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
 				return FAIL;
-
 			break;
 
 		case SERIAL_READ :
@@ -942,29 +1121,15 @@ static bool spectrapro_300i_comm( int type, ... )
 			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
-			/* The monochromator might not be ready yet to send data, in
-			   this case we retry it a few times before giving up */
-
-			len = 1;
-			do
-			{
-				if ( len < 0 )
-				{
-					fsc2_usleep( SPECTRAPRO_300I_WAIT, SET );
-					stop_on_user_request( );
-				}
-
-				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
-			} while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
-
+			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
 			if ( len < 0 )
 			{
+				if ( errno != EAGAIN && errno != EINTR )
+					return FAIL;
 				*lptr = 0;
-				return FAIL;
 			}
 			else
 				*lptr = len;
-
 			break;
 
 		default :
