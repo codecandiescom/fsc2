@@ -14,6 +14,7 @@
 
 dg2020_f      // Sony/Tektronix data generator (Frankfurt version)
 dg2020_b      // Sony/Tektronix data generator (Berlin version)
+hfs9000;      // Tektronix stimulus system     (Berlin W-band)
 
 tds520        // Tektronix digitizing oscilloscope, model 520
 tds520a       // Tektronix digitizing oscilloscope, model 520a
