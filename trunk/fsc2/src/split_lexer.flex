@@ -139,7 +139,7 @@ bool split( char *file )
 	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; ++i )
 		compilation.sections[ i ] = UNSET;
 
-	if ( ! functions_init_hook( ) )
+	if ( ! functions_init( ) )
 		return FAIL;
 
 	/* check that the file name is reasonable */
@@ -169,7 +169,7 @@ bool split( char *file )
 	if ( Fname != NULL )
 		free( Fname );
 
-	functions_exit_hook( );
+	functions_exit( );
 
 	return split_error;
 }
