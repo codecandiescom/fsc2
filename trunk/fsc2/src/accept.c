@@ -364,12 +364,9 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		if ( ! G.is_scale_set && rw_max != rw_min )
 		{
 			for ( i = 0; i < G.nc; i++ )
-			{
-				cv = G.curve[ i ];
-				for ( j = 0, sp = cv->points; j < G.nx; sp++, j++ )
+				for ( j = 0, sp = G.curve[ i ]->points; j < G.nx; sp++, j++ )
 					if ( sp->exist )
 						  sp->v = ( sp->v - rw_min ) / new_rwc_delta_y;
-			}
 
 			G.rwc_delta[ Y ] = new_rwc_delta_y;
 			G.is_scale_set = SET;
