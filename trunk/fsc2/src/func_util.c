@@ -3577,7 +3577,9 @@ Var *f_mean_part_array( Var *v )
 	if ( size == v->len )
 		return f_float( v );
 
-	m = DOUBLE_P T_calloc( size, sizeof *m );
+	m = DOUBLE_P T_malloc( size * sizeof *m );
+	for ( i = 0; i < size; i++ )
+		m[ i ] = 0.0;
 	par = v->len / size;
 
 	if ( v->type == INT_ARR )

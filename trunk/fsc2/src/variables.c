@@ -398,7 +398,11 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	{
 		a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
 		if ( a->type == INT_ARR )
-			a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
+		{
+			a->val.lpnt = LONG_P T_malloc( len * sizeof *a->val.lpnt );
+			for ( i = 0; i < len; i++ )
+				a->val.lpnt[ i ] = 0;
+		}
 		else
 		{
 			a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
@@ -660,8 +664,8 @@ static void vars_do_init( Var *src, Var *dest )
 			if ( dest->flags & IS_DYNAMIC )
 			{
 				dest->len = src->len;
-				dest->val.lpnt = LONG_P T_calloc( dest->len,
-												  sizeof *dest->val.lpnt );
+				dest->val.lpnt = LONG_P T_malloc( dest->len
+												  * sizeof *dest->val.lpnt );
 			}
 			else if ( src->len > dest->len )
 				print( WARN, "Superfluous intitialization data.\n" );
@@ -678,14 +682,17 @@ static void vars_do_init( Var *src, Var *dest )
 								   dest->len : src->len ); i++ )
 					dest->val.lpnt[ i ] = ( long ) src->val.dpnt[ i ];
 			}
+
+			for ( i = src->len; i < dest->len; i++ )
+				dest->val.lpnt[ i ] = 0;
 			return;
 
 		case FLOAT_ARR :
 			if ( dest->flags & IS_DYNAMIC )
 			{
 				dest->len = src->len;
-				dest->val.dpnt = DOUBLE_P T_calloc( dest->len,
-													sizeof *dest->val.dpnt );
+				dest->val.dpnt = DOUBLE_P T_malloc( dest->len
+													* sizeof *dest->val.dpnt );
 			}
 			else if ( src->len > dest->len )
 				print( WARN, "Superfluous intitialization data.\n" );
@@ -698,6 +705,10 @@ static void vars_do_init( Var *src, Var *dest )
 				for ( i = 0; i < ( dest->len < src->len ?
 								   dest->len : src->len ); i++ )
 					dest->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
+
+			for ( i = src->len; i < dest->len; i++ )
+				dest->val.dpnt[ i ] = 0.0;
+
 			return;
 
 		case INT_REF :
@@ -976,8 +987,11 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 
 			case INT_REF :
 				cv->type = INT_ARR;
-				cv->val.lpnt = LONG_P T_calloc( ind + 1,
-												sizeof *cv->val.lpnt );
+				cv->val.lpnt = LONG_P T_malloc( ( ind + 1 )
+												* sizeof *cv->val.lpnt );
+				for ( i = 0; i <= ind; i++ )
+					cv->val.lpnt[ i ] = 0;
+				break;
 
 			case FLOAT_REF :
 				cv->type = FLOAT_ARR;
@@ -1778,13 +1792,15 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 		if ( type == INT_REF )
 		{
 			nv->type = type = INT_ARR;
-			nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
+			nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
+			for ( i = 0; i < nv->len; i++ )
+				nv->val.lpnt[ i ] = 0;
 		}
 		else
 		{
 			nv->type = FLOAT_ARR;
 			nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
-			for ( i = 0; i < sizes[ 0 ]; i++ )
+			for ( i = 0; i < nv->len; i++ )
 				nv->val.dpnt[ i ] = 0.0;
 		}
 
@@ -1870,8 +1886,12 @@ Var *vars_push( int type, ... )
 					nsv->val.lpnt = LONG_P get_memcpy( nsv->val.lpnt,
 											nsv->len * sizeof *nsv->val.lpnt );
 				else
-					nsv->val.lpnt = LONG_P T_calloc( nsv->len,
-													 sizeof *nsv->val.lpnt );
+				{
+					nsv->val.lpnt = LONG_P T_malloc( nsv->len
+													 * sizeof *nsv->val.lpnt );
+					for ( i = 0; i < nsv->len; i++ )
+						nsv->val.lpnt[ i ] = 0;
+				}
 			}
 			break;
 
@@ -1999,8 +2019,12 @@ Var *vars_make( int type, Var *src )
 			nv->len = src->len;
 			nv->dim = 1;
 			if ( nv->len != 0 )
-				nv->val.lpnt = LONG_P T_calloc( nv->len,
-												sizeof *nv->val.lpnt );
+			{
+				nv->val.lpnt = LONG_P T_malloc( nv->len
+												* sizeof *nv->val.lpnt );
+				for ( i = 0; i < nv->len; i++ )
+					nv->val.lpnt[ i ] = 0;
+			}
 			else
 				nv->val.lpnt = NULL;
 			return nv;
@@ -2373,6 +2397,7 @@ void *vars_iter( Var *v )
 {
 	static ssize_t *iter = NULL;
 	void *ret;
+	ssize_t i;
 
 
 	/* If called with a NULL argument just reset the iter array */
@@ -2388,7 +2413,9 @@ void *vars_iter( Var *v )
 
 	if ( iter == NULL )
 	{
-		iter = SSIZE_T_P T_calloc( v->dim, sizeof *iter );
+		iter = SSIZE_T_P T_malloc( v->dim * sizeof *iter );
+		for ( i = 0; i < v->dim - 1; i++ )
+			iter[ i ] = 0;
 		iter[ v->dim - 1 ] = -1;
 	}
 
