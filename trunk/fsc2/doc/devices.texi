@@ -851,10 +851,9 @@ in the upper right hand corner of the oscilloscope.
 
 Because the data measured by the oscilloscope are discreet it is not
 possible to specify arbitrary values for the starting point and the
-window width (they must be dividable by 1/50 of the oscilloscopes time
-base). If the specified values don't fit the requirement a warning is
-printed and the position an width are adjusted to the nearest allowed
-value.
+window width but must fit with the current minimum time resolution. If
+the specified values don't fit the requirement a warning is printed and
+the position and width are adjusted to the nearest allowed value.
 
 This function can only be used in the @code{PREPARATIONS} section of the
 @acronym{EDL} file.

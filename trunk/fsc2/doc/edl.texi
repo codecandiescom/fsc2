@@ -63,13 +63,11 @@ To give you an impression how an @acronym{EDL} program may look like
 here's the program for a cw-EPR experiment:
 @example
 DEVICES:
-
   er035m_s;              // gaussmeter module
   aeg_x_band;            // magnet module
   sr530;                 // lock-in amplifier module
 
 VARIABLES:
-
   start_field = 3360.0 G;
   end_field   = 3450.0 G;
   field_step  =    0.5 G;
@@ -79,12 +77,10 @@ VARIABLES:
   data;
 
 PREPARATIONS:
-
   magnet_setup( start_field, field_step );
   init_1d( );
 
 EXPERIMENT:
-
   WHILE field <= end_field
   @{
       data = lockin_get_data( );
