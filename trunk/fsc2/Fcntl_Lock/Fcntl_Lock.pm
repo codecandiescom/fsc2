@@ -149,7 +149,8 @@ sub l_whence {
 
 
 ###########################################################
-#
+# l_start can be both positive and negative (it only may not point to
+# something before the start of the file but which we can't check here).
 
 sub l_start {
     my $flock_struct = shift;
@@ -174,16 +175,12 @@ sub l_len {
 
 
 ###########################################################
-#
+# We don't care which PID the user sets, it's useless anyway...
 
 sub l_pid {
     my $flock_struct = shift;
 
-	if ( @_ ) {
-		my $l_pid = shift;
-		croak "Invalid value for l_pid member" unless $l_pid >= 0;
-		$flock_struct->{ l_pid } = $l_pid;
-	}
+	if ( @_ ) { $flock_struct->{ l_pid } = shift }
     return $flock_struct->{ l_pid };
 }
 
