@@ -29,7 +29,8 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
 				 $(addsuffix .c,$(s_band_list))
 
-comp_modules  := dg2020_f dg2020_b hfs9000 ep385 er023m lecroy9400 $(tds_list)
+comp_modules  := dg2020_f dg2020_b hfs9000 ep385 er023m lecroy9400 \
+				 hp8647a hp8672a $(tds_list)
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -46,6 +47,7 @@ tds520c       := tds520c.c tds520c_gpib.c tds520c_util.c
 tds520a       := tds520a.c tds520a_gpib.c tds520a_util.c
 tds520        := tds520.c  tds520_gpib.c  tds520_util.c
 hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
+hp8672a       := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
 
