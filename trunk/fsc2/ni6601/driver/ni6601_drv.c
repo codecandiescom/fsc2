@@ -96,10 +96,15 @@ static int __init ni6601_init( void )
 	struct pci_dev *dev = NULL;
 
 
-	while ( board_count < NI6601_MAX_BOARDS &&
-		NULL != ( dev = pci_find_device( PCI_VENDOR_NATINST,
-						 PCI_DEVICE_NATINST_6601,
-						 dev ) ) ) {
+	/* Try to find all boards */
+
+	while ( board_count < NI6601_MAX_BOARDS ) {
+		dev = pci_find_device( PCI_VENDOR_NATINST,
+				       PCI_DEVICE_NATINST_6601, dev );
+
+		if ( dev == NULL )
+			break;
+
 		if ( ni6601_init_board( dev, boards + board_count ) ) {
 			printk( KERN_ERR NI6601_NAME ": Failed to initialize "
 				"board %d\n", board_count );
@@ -126,8 +131,8 @@ static int __init ni6601_init( void )
 	if ( ( major = register_chrdev( major, NI6601_NAME,
 					&ni6601_file_ops ) ) < 0 ) {
 #endif
-		printk( KERN_ERR NI6601_NAME ": Can't get assigned major "
-			"device\n" );
+		printk( KERN_ERR NI6601_NAME ": Can't get assigned a major "
+			"device number\n" );
 		ni6601_release_resources( boards, board_count );
 		return major;
 	}

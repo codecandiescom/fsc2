@@ -345,10 +345,15 @@ int init_module( void )
 
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
+#ifdef CONFIG_DEVFS_FS
+	if ( ( major = devfs_register_chrdev( major, ME6X00_NAME,
+					    &me6x00_file_operations ) ) < 0 ) {
+#else
 	if ( ( major = register_chrdev( major, ME6X00_NAME,
 					&me6x00_file_operations ) ) < 0 ) {
+#endif
 		printk( KERN_ERR "ME6X00: init_module(): "
-			"Can't get major no\n" );
+			"Can't get assigned a major number\n" );
 		return -ENODEV;
 	}
 
@@ -2287,7 +2292,11 @@ void cleanup_module( void )
 		pci_release_regions( info_vec[ i ].dev );
 	}
 
-	if ( major && unregister_chrdev( major, ME6X00_NAME ) )
+#ifdef CONFIG_DEVFS_FS
+	if ( devfs_unregister_chrdev( major, ME6x00_NAME ) < 0 )
+#else
+	if ( unregister_chrdev( major, ME6X00_NAME ) )
+#endif
 		printk( KERN_ERR "ME6X00: cleanup_module(): "
 			"cannot unregister major %d\n", major );
 	else
