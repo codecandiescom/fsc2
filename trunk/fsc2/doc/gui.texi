@@ -6,7 +6,7 @@
 @ifinfo
 
 @menu
-* Main Window::        What you see first
+* Main Window::        The program's main window
 @end menu
 
 @end ifinfo
@@ -93,10 +93,11 @@ pressing the key for this letter each button can be triggered via the
 keyboard - but note that, if the underlined letter is an uppercase
 character, you have to enter the uppercase character from the keyboard!
 
-When you start testing the program most of the buttons can not be used
-anymore (as indicated by the text becoming grayed). And the label of the
-@code{Test} button will become @code{Stop Test} - so if you want to stop
-the test press the @code{Test} button again.
+While the test of the the @acronym{EDL} program is runnin most of the
+buttons can not be used anymore (as indicated by their labels becoming
+grayed out). The label of the @code{Test} button will become @code{Stop
+Test} - so if you want to stop the test press the @code{Test} button
+again.
 
 During the test @acronym{fsc2} may detect problems with @acronym{EDL}
 program or even errors. It then will print messages in the lower
@@ -104,3 +105,4 @@ browser. There are three categories of messages: Warnings, messages for
 severe problems and fatal error messages. Warnings are printed in green,
 messages for severe problems in blue and messages for fatal errors in
 red (in the latter case the test is also aborted immediately).
+
