@@ -233,7 +233,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 	{
 		print( FATAL, "Probe orientation can only be set during the "
 			   "PREPARATIONS section.\n" );
-		THROW( EXPERIMENT );
+		THROW( EXCEPTION );
 	}
 
 	if ( v->type != STR_VAR )
@@ -287,12 +287,12 @@ static bool pt2025_init( const char *name )
 	{
 		len = 50;
 		if ( gpib_write( pt2025.device, "S3\r\n", 4 ) == FAILURE ||
-			 gpib_read( pt2025.device, buf, &len ) == FAILURE )
+			 gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
 			return FAIL;
 	} while ( buf[ 0 ] != 'S' || len != 3 );
 
 	buf[ 3 ] = '\0';
-	status = strtol( buf + 1, NULL, 16 );
+	status = strtol( ( char * ) buf + 1, NULL, 16 );
 
 	/* If necessary switch to field display mode (i.e. send data in Tesla) */
 
@@ -346,7 +346,7 @@ static bool pt2025_init( const char *name )
 	/* Get first field value */
 
 	len = 50;
-	if ( gpib_read( pt2025.device, buf, &len ) == FAILURE )
+	if ( gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
 		return FAIL;
 
 	return OK;
