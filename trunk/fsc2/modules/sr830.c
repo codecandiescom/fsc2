@@ -134,6 +134,10 @@ static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
 
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
+#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
+
+
 /* Declaration of all functions used only within this file */
 
 static bool sr830_init( const char *name );
@@ -500,7 +504,7 @@ Var *lockin_sensitivity( Var *v )
 	   depending on the size of the argument. If the value does not fit within
 	   1 percent, utter a warning message (but only once). */
 
-	for ( i = 0; i < 25; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
 			sens_index = i +
@@ -509,8 +513,8 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( sens_index < 0 && sens < sens_list[ 26 ] * 1.01 )
-		sens_index = 26;
+	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index >= 0 &&                                 /* value found ? */
 		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
@@ -537,7 +541,7 @@ Var *lockin_sensitivity( Var *v )
 		if ( sens < sens_list[ 0 ] )
 			sens_index = 0;
 		else
-		    sens_index = 26;
+		    sens_index = SENS_ENTRIES - 1;
 
 		if ( ! sr830.sens_warn )                      /* no warn message yet */
 		{
@@ -623,7 +627,7 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 	
-	for ( i = 0; i < 18; i++ )
+	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			tc_index = i + ( ( tc / tc_list[ i ] <
@@ -653,13 +657,13 @@ Var *lockin_time_constant( Var *v )
 					tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 		sr830.tc_warn = SET;
 	}
-	
+
 	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
 		else
-			tc_index = 19;
+			tc_index = TC_ENTRIES - 1;
 
 		if ( ! sr830.tc_warn )                      /* no warn message yet ? */
 		{

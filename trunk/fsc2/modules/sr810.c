@@ -134,6 +134,8 @@ static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
+#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
 
 /* Declaration of all functions used only within this file */
 
@@ -501,7 +503,7 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < 25; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
 			Sens = i + ( ( sens_list[ i ] / sens > sens /
@@ -509,8 +511,8 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( Sens < 0 && sens < sens_list[ 26 ] * 1.01 )
-		Sens = 26;
+	if ( Sens < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		Sens = SENS_ENTRIES - 1;
 
 	if ( Sens >= 0 &&                                    /* value found ? */
 		 fabs( sens - sens_list[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
@@ -536,7 +538,7 @@ Var *lockin_sensitivity( Var *v )
 		if ( sens < sens_list[ 0 ] )
 			Sens = 0;
 		else
-		    Sens = 26;
+		    Sens = SENS_ENTRIES - 1;
 
 		if ( ! sr810.Sens_warn )                      /* no warn message yet */
 		{
@@ -622,7 +624,7 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 	
-	for ( i = 0; i < 18; i++ )
+	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			tc_index = i + ( ( tc / tc_list[ i ] <
@@ -658,7 +660,7 @@ Var *lockin_time_constant( Var *v )
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
 		else
-			tc_index = 19;
+			tc_index = TC_ENTRIES - 1;
 
 		if ( ! sr810.TC_warn )                      /* no warn message yet ? */
 		{

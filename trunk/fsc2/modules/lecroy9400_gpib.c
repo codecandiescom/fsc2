@@ -475,7 +475,7 @@ long lecroy9400_get_num_avg( int channel )
 	/* Check that the channel is in averaging mode (in which case the byte
 	   at offset 34 of the waveform description is 0), if not return -1 */
 
-	if ( ( int ) lecroy9400.wv_desc[ 34 ] != 99 )
+	if ( ( int ) lecroy9400.wv_desc[ channel ][ 34 ] != 99 )
 		return -1;
 
 	/* 32 bit word (MSB first) at offset 70 of the waveform description is

@@ -957,7 +957,7 @@ void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = i2shrt G.canvas.h - 1 - 
+		xp->y = i2shrt( G.canvas.h ) - 1 - 
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
 		cv->left  |= ( xp->x < 0 );

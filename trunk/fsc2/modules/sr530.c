@@ -106,6 +106,9 @@ static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 							 1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
+#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
+
 /* Declaration of all functions used only in this file */
 
 static double get_single_channel_data( Var *v );
@@ -237,13 +240,13 @@ Var *lockin_get_data( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, get_single_channel_data( v ) );
 
-	val[ 1 ] = get_single_channel_data( v );
+	val[ 0 ] = get_single_channel_data( v );
 	v = vars_pop( v );
 
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, val[ 1 ] );
 
-	val[ 2 ] = get_single_channel_data( v );
+	val[ 1 ] = get_single_channel_data( v );
 	v = vars_pop( v );
 
 	if ( v != NULL )
@@ -391,56 +394,56 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < 23; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
 			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
-				sens_index = i + 1;
+				sens_index = i;
 			else
-				sens_index = i + 2;
+				sens_index = i + 1;
 			break;
 		}
 
-	if ( sens_index < 0 && sens < sens_list[ 24 ] * 1.01 )
-		sens_index = 24;
+	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index > 0 &&                             /* value found ? */
-		 fabs( sens - sens_list[ sens_index - 1 ] ) > sens * 1.0e-2 &&
+		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
                                                        /* error > 1% ? */
 		 ! sr530.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf V instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, sens_list[ sens_index - 1 ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 		sr530.sens_warn = SET;
 	}
 
 	if ( sens_index < 0 )                                /* not found yet ? */
 	{
 		if ( sens > sens_list[ 0 ] )
-			sens_index = 1;
+			sens_index = 0;
 		else
-		    sens_index = 24;
+		    sens_index = SENS_ENTRIES - 1;
 
 		if ( ! sr530.sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too low, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too high,"
 					" using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 			sr530.sens_warn = SET;
 		}
 	}
@@ -453,7 +456,7 @@ Var *lockin_sensitivity( Var *v )
 			sr530.sens_index = sens_index;
 	}
 	
-	return vars_push( FLOAT_VAR, sens_list[ sens_index - 1 ] );
+	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
 
@@ -516,44 +519,44 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 	
-	for ( i = 0; i < 10; i++ )
+	for ( i = 0; i < TC_ENTRIES - 2; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
-				tc_index = i + 1;
+				tc_index = i;
 			else
-				tc_index = i + 2;
+				tc_index = i + 1;
 			break;
 		}
 
 	if ( tc_index > 0 &&                                    /* value found ? */
-		 fabs( tc - tc_list[ tc_index - 1 ] ) > tc * 1.0e-2 )/* error > 1% ? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ? */
 	{
 		if ( tc >= 1.0 )
 			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index - 1 ] );
+					tc_list[ tc_index ] );
 		else
 			eprint( WARN, SET, "%s: Can't set time constant to %g s, "
 					"using %.0lf ms instead.\n", DEVICE_NAME,
-					tc, tc_list[ tc_index - 1 ] * 1.0e3 );
+					tc, tc_list[ tc_index ] * 1.0e3 );
 	}
 	
 	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
-			tc_index = 1;
+			tc_index = 0;
 		else
-			tc_index = 11;
+			tc_index = TC_ENTRIES - 1;
 
 		if ( tc >= 1.0 )
 			eprint( WARN, SET, "%s: Time constant of %g s is too large, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index - 1 ] );
+					tc_list[ tc_index ] );
 		else
 			eprint( WARN, SET, "%s: Time constant of %g s is too short, "
 					"using %.0lf ms instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index - 1 ] * 1.0e3 );
+					tc_list[ tc_index ] * 1.0e3 );
 	}
 
 	if ( ! TEST_RUN )
@@ -564,7 +567,7 @@ Var *lockin_time_constant( Var *v )
 			sr530.tc_index = tc_index;
 	}
 	
-	return vars_push( FLOAT_VAR, tc_list[ tc_index - 1 ] );
+	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
 
@@ -918,7 +921,7 @@ double sr530_get_sens( void )
 		sr530_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	sens = sens_list[ 24 - T_atol( buffer ) ];
+	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity 
 	   by a factor of 10 */
@@ -937,8 +940,8 @@ double sr530_get_sens( void )
 
 /*----------------------------------------------------------------------*/
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
-/* valid values. The parameter can be in the range from 1 to 27,  where */
-/* 1 is 0.5 V and 27 is 10 nV - these and the other values in between   */
+/* valid values. The parameter can be in the range from 0 to 23,  where */
+/* 0 is 0.5 V and 23 is 10 nV - these and the other values in between   */
 /* are listed in the global array 'sens_list' at the start of the file. */
 /* To achieve sensitivities below 100 nV EXPAND has to switched on.     */
 /*----------------------------------------------------------------------*/
@@ -952,7 +955,7 @@ void sr530_set_sens( int sens_index )
 	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
 	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	sens_index = 25 - sens_index;
+	sens_index = SENS_ENTRIES - sens_index;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   (for both channels) otherwise it got to be switched off */
@@ -1003,8 +1006,8 @@ double sr530_get_tc( void )
 
 /*-------------------------------------------------------------------------*/
 /* Function sets the time constant (plus the post time constant) to one    */
-/* of the valid values. The parameter can be in the range from 1 to 11,    */
-/* where 1 is 1 ms and 11 is 100 s - these and the other values in between */
+/* of the valid values. The parameter can be in the range from 0 to 10,    */
+/* where 0 is 1 ms and 10 is 100 s - these and the other values in between */
 /* are listed in the global array 'tc_list' (cf. start of file)            */
 /*-------------------------------------------------------------------------*/
 
@@ -1013,21 +1016,21 @@ void sr530_set_tc( int tc_index )
 	char buffer[ 10 ];
 
 
-	sprintf( buffer, "T1,%d\n", tc_index );
+	sprintf( buffer, "T1,%d\n", tc_index + 1 );
 	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr530_failure( );
 
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
-	if ( tc_index <= 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
+	if ( tc_index < 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
 		sr530_failure( );
 
-	if ( tc_index > 4 && tc_index <= 6 &&
+	if ( tc_index >= 4 && tc_index < 6 &&
 		 gpib_write( sr530.device, "T2,1\n", 5 ) == FAILURE )
 		sr530_failure( );
 
-	if ( tc_index > 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
+	if ( tc_index >= 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
 		sr530_failure( );
 }
 

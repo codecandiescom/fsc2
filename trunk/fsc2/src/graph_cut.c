@@ -729,7 +729,7 @@ static void cut_recalc_XPoints( void )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = i2short( G.cut_canvas.h ) - 1 -
+		xp->y = i2shrt( G.cut_canvas.h ) - 1 -
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 		sp->xp_ref = k;
 

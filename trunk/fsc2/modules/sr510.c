@@ -883,8 +883,8 @@ double sr510_get_sens( void )
 
 /*----------------------------------------------------------------------*/
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
-/* valid values. The parameter can be in the range from 1 to 27,  where */
-/* 1 is 0.5 V and 27 is 10 nV - these and the other values in between   */
+/* valid values. The parameter can be in the range from 0 to 23,  where */
+/* 0 is 0.5 V and 23 is 10 nV - these and the other values in between   */
 /* are listed in the global array 'sens_list' at the start of the file. */
 /* To achieve sensitivities below 100 nV EXPAND has to switched on.     */
 /*----------------------------------------------------------------------*/
@@ -903,7 +903,7 @@ void sr510_set_sens( int sens_index )
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   otherwise it got to be switched off */
 
-	if ( sens_index < 3 )
+	if ( sens_index <= 3 )
 	{
 		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
 			sr510_failure( );
@@ -917,7 +917,7 @@ void sr510_set_sens( int sens_index )
 
 	/* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", sens_index + 1 );
+	sprintf( buffer, "G%d\n", sens_index );
 
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr510_failure( );
