@@ -537,7 +537,7 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	num_avg = get_long( v, "numberof averages", DEVICE_NAME );
+	num_avg = get_long( v, "number of averages", DEVICE_NAME );
 
 	if ( num_avg <= 0 )
 	{
