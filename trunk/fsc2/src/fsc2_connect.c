@@ -73,10 +73,10 @@
 #include "fsc2_config.h"
 #include "fsc2_types.h"
 
-/* pion specific stuff */
+
+/* Stuff needed if we're still running an old libc */
 
 #if defined IS_STILL_LIBC1
-#define AF_LOCAL AF_UNIX
 typedef unsigned int socklen_t;
 #endif
 
@@ -99,7 +99,7 @@ extern int snprintf( char *str, size_t size, const  char *format, ... );
 
 
 void make_tmp_file( char *fname );
-int open_socket( const char *fname );
+int open_fsc2_socket( const char *fname );
 void start_fsc2( char *pname, char *fname );
 void sig_handler( int signo );
 void contact_fsc2( int sock_fd, char *pname, char *fname );
@@ -125,7 +125,7 @@ int main( int argc, char *argv[ ] )
 	UNUSED_ARGUMENT( argc );
 
 	make_tmp_file( fname );
-	if ( ( sock_fd = open_socket( fname ) ) == -1 )
+	if ( ( sock_fd = open_fsc2_socket( fname ) ) == -1 )
 		start_fsc2( argv[ 0 ], fname );
 	else
 		contact_fsc2( sock_fd, argv[ 0 ], fname );
@@ -182,7 +182,7 @@ void make_tmp_file( char *fname )
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 
-int open_socket( const char *fname )
+int open_fsc2_socket( const char *fname )
 {
 	int sock_fd;
 	struct sockaddr_un serv_addr;
@@ -190,14 +190,14 @@ int open_socket( const char *fname )
 
 	/* Try to get a socket */
 
-	if ( ( sock_fd = socket( AF_LOCAL, SOCK_STREAM, 0 ) ) == -1 )
+	if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
 	{
 		unlink( fname );
 		exit( -1 );
 	}
 
 	memset( &serv_addr, 0, sizeof( serv_addr ) );
-	serv_addr.sun_family = AF_LOCAL;
+	serv_addr.sun_family = AF_UNIX;
 	strcpy( serv_addr.sun_path, FSC2_SOCKET );
 
 	/* If connect fails due to connection refused or because there's no socket
