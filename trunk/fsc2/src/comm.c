@@ -74,7 +74,7 @@ long reader( void *ret )
 	int i;
 	int n1, n2;
 	long retval;
-	char *retstr;
+	char *retstr = NULL;
 
 
 	pipe_read( pd[ READ ], &header, sizeof( CS ) );
@@ -175,7 +175,7 @@ long reader( void *ret )
 					str[ i ] = NULL;
 			}
 
-			/* call fl_show_fselector() and send the result back to th child
+			/* call fl_show_fselector() and send the result back to the child
 			   process (which does a read in the mean time) */
 
 			writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
@@ -229,7 +229,8 @@ long reader( void *ret )
 			retstr = get_string( header.data.len );
 			pipe_read( pd[ READ ], retstr, header.data.len );
 			retstr[ header.data.len ] = '\0';
-			ret = ( void * ) retstr;
+			if ( ret != NULL )
+				*( ( char ** ) ret ) = retstr;
 			break;
 
 		case C_INT :
@@ -400,7 +401,7 @@ void writer( int type, ... )
 
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL && strlen( str[ i ] ) != 0 )
-					write( pd[ WRITE ], str[ i ], strlen( str[ i ] ) );
+					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
 		case C_INIT_GRAPHICS :            /* only to be written by child */
@@ -419,12 +420,14 @@ void writer( int type, ... )
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], &dim, sizeof( long ) );
 			if ( str[ 0 ] != NULL )
-				write( pd[ WRITE ], str[ 0 ], strlen( str[ 0 ] ) );
+				write( pd[ WRITE ], str[ 0 ], header.data.str_len[ 0 ] );
 			if ( str[ 1 ] != NULL )
-				write( pd[ WRITE ], str[ 1 ], strlen( str[ 1 ] ) );
+				write( pd[ WRITE ], str[ 1 ], header.data.str_len[ 0 ] );
 			break;
 
 		case C_SHOW_FSELECTOR :             /* only to be written by child */
+			/* set up header and write it */
+
 			for ( i = 0; i < 4; i++ )
 			{
 				str[ i ] = va_arg( ap, char * );
@@ -434,9 +437,12 @@ void writer( int type, ... )
 					header.data.str_len[ i ] = 0;
 			}
 			write( pd[ WRITE ], &header, sizeof( CS ) );
+
+			/* write out all four strings */
+
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL )
-					write( pd[ WRITE ], str[ i ], strlen( str[ i ] ) );
+					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
 		case C_STR :
