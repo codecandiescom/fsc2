@@ -271,7 +271,7 @@ inline u32 pci_stc_readl( Board *board, u16 offset )
 
 /*------------------------------------------------------------*
  * Initialization of the data structure used in protection of
- * parts of code that may not become interrupted.
+ * parts of code that must not be interrupted.
  *------------------------------------------------------------*/
 
 void pci_init_critical_section_handling( Board *board )

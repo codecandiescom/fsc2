@@ -1,28 +1,28 @@
 /*
-  $Id$
- 
-  Driver for National Instruments PCI E Series DAQ boards
-
-  Copyright (C) 2003-2004 Jens Thoms Toerring
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
-*/
+ *  $Id$
+ * 
+ *  Driver for National Instruments PCI E Series DAQ boards
+ * 
+ *  Copyright (C) 2003-2004 Jens Thoms Toerring
+ * 
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ * 
+ *  To contact the author send email to
+ *  Jens.Toerring@physik.fu-berlin.de
+ */
 
 
 #include "ni_daq_board.h"
@@ -42,11 +42,11 @@ static Subsystem_Data sys_data[ 4 ];
 static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys );
 
 
-/*---------------------------------------------------------------------*/
-/* Function for initializing the MITE, bringing it into a well-defined */
-/* quiet state and the assigning the different MITE DMA channels to    */
-/* different subsystems of the board.                                  */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for initializing the MITE, bringing it into a well-defined
+ * quiet state and the assigning the different MITE DMA channels to
+ * different subsystems of the board.
+ *---------------------------------------------------------------------*/
 
 void pci_mite_init( Board *board )
 {
@@ -78,10 +78,10 @@ void pci_mite_init( Board *board )
 }
 
 
-/*----------------------------------------------------------*/
-/* Function gets called when the module is unloaded to stop */
-/* all MITE activities and freeing DMA kernel buffers.      */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function gets called when the module is unloaded to stop
+ * all MITE activities and freeing DMA kernel buffers.
+ *----------------------------------------------------------*/
 
 void pci_mite_close( Board *board )
 {
@@ -96,16 +96,16 @@ void pci_mite_close( Board *board )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function allocates kernel buffers for DMA transfer to and from the   */
-/* board. The MITE chip allows hardware scatter-gather, i.e. it accepts */
-/* a linked list of buffers and switches between buffers if necessary.  */
-/* The default size of the buffers can be set by the DMA_BUFFER_SIZE    */
-/* macro, but this value is increased to a power of the PAGE size if    */
-/* necessary. Setting this to too large a value may lead to allocation  */
-/* failures because a continuous buffer may not be available, while too */
-/* small a buffer size may require too many buffers.                    */
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function allocates kernel buffers for DMA transfer to and from the
+ * board. The MITE chip allows hardware scatter-gather, i.e. it accepts
+ * a linked list of buffers and switches between buffers if necessary.
+ * The default size of the buffers can be set by the DMA_BUFFER_SIZE
+ * macro, but this value is increased to a power of the PAGE size if
+ * necessary. Setting this to too large a value may lead to allocation
+ * failures because a continuous buffer may not be available, while too
+ * small a buffer size may require too many buffers.
+ *----------------------------------------------------------------------*/
 
 #define DMA_BUFFER_SIZE  16384   /* 16 kByte */
 
@@ -273,28 +273,28 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 }
 
 
-/*-------------------------------------------------------------*/
-/* Gets newly acquired data from a subsystem. The function not */
-/* necessarily returns as many bytes as requested by what the  */
-/* 'size' argument points to but only as many as are currently */
-/* available, writing them to the 'dest' buffer. If it's clear */
-/* that all data from the acquisition have already been read   */
-/* DMA is disabled and the DMA kernel buffers are released.    */
-/* When the function returns 'size' points to the number of    */
-/* transfered bytes. A negative return value indicates an      */
-/* error, a return value of 0 means that everything went well  */
-/* and there are still more data to be expected, while a value */
-/* of 1 also means success but that all data to be expected    */
-/* now have been fetched and the DMA system has been shut down */
-/* (and a further call would fail unless a new acquisition has */
-/* been started in the mean time).                             */
-/* Please note: The data returned may belong to different AI   */
-/*              channels. This depends on the channel setup:   */
-/*              a scan returns a value for each channels in    */
-/*              the channel setup (unless the type is GHOST).  */
-/*              Furthermore, the data are "raw" data, i.e.     */
-/*              2-byte, little-endian numbers.                 */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Gets newly acquired data from a subsystem. The function not
+ * necessarily returns as many bytes as requested by what the
+ * 'size' argument points to but only as many as are currently
+ * available, writing them to the 'dest' buffer. If it's clear
+ * that all data from the acquisition have already been read
+ * DMA is disabled and the DMA kernel buffers are released.
+ * When the function returns 'size' points to the number of
+ * transfered bytes. A negative return value indicates an
+ * error, a return value of 0 means that everything went well
+ * and there are still more data to be expected, while a value
+ * of 1 also means success but that all data to be expected
+ * now have been fetched and the DMA system has been shut down
+ * (and a further call would fail unless a new acquisition has
+ * been started in the mean time).
+ * Please note: The data returned may belong to different AI
+ *              channels. This depends on the channel setup:
+ *              a scan returns a value for each channels in
+ *              the channel setup (unless the type is GHOST).
+ *              Furthermore, the data are "raw" data, i.e.
+ *              2-byte, little-endian numbers.
+ *-------------------------------------------------------------*/
 
 int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 		     size_t *size, int still_used )
@@ -391,13 +391,13 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* For the AI subsystem the function returns the number of scans for which */
-/* data have been written to memory. For all other subsystems (where the   */
-/* function is not used yet) it returns the number of bytes that have been */
-/* written to memory or read by the board since the function was called    */
-/* the last time.                                                          */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * For the AI subsystem the function returns the number of scans for which
+ * data have been written to memory. For all other subsystems (where the
+ * function is not used yet) it returns the number of bytes that have been
+ * written to memory or read by the board since the function was called
+ * the last time.
+ *-------------------------------------------------------------------------
 
 size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -423,10 +423,10 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*------------------------------------------------------*/
-/* Function for unmapping and releasing all DMA buffers */
-/* allocated for a subsystem of the board               */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function for unmapping and releasing all DMA buffers
+ * allocated for a subsystem of the board
+ *------------------------------------------------------*/
 
 void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -456,10 +456,10 @@ void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function enables DMA for a subsystem. Requires that DMA memory */
-/* has already been allocated.                                    */
-/*----------------------------------------------------------------*/
+/*------------------------------------------------*
+ * Function enables DMA for a subsystem. Requires
+ * that DMA memory has already been allocated.
+ *------------------------------------------------*/
 
 int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -545,9 +545,9 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*-----------------------------------------------------*/
-/* Disables DMA ad releases DMA memory for a subsystem */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Disables DMA ad releases DMA memory for a subsystem
+ *-----------------------------------------------------*/
 
 int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -567,9 +567,9 @@ int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*-------------------------*/
-/* Stops DMA for subsystem */
-/*-------------------------*/
+/*-------------------------*
+ * Stops DMA for subsystem
+ *-------------------------*/
 
 static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -585,10 +585,10 @@ static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 
 
-/*--------------------------------------------------------------------*/
-/* Function for printing out all accessible registers of a channel of */
-/* the MITE - only available when compiling with debugging support.   */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for printing out all accessible registers of a channel of
+ * the MITE - only available when compiling with debugging support.
+ *--------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
 void pci_mite_dump( Board *board, int channel )
