@@ -1225,10 +1225,6 @@ Var *f_init_display( Var *v )
 	else
 		l1 = l2 = NULL;
 
-	if ( I_am ==  PARENT )
-		graphics_init( dim, l1, l2 );
-	else
-		writer( C_INIT_GRAPHICS, dim, l1, l2 );
-
+	graphics_init( dim, l1, l2 );
 	return vars_push( INT_VAR, 1 );
 }
