@@ -36,9 +36,8 @@ my $has_pnmtopng;      # does the pnmtopng utility exist?
 # Check if we got a port number as the first command line argument...
 
 my $port = 8080;
-$port = $ARGV[ 0 ] if
-	defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o and
-	$ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
+$port = $ARGV[ 0 ] if defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o and
+		$ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
 
 
 # The second argument is supposed to be the place where to look for the

@@ -24,6 +24,9 @@
 
 #include "fsc2.h"
 #include <sys/timeb.h>
+#include <X11/X.h>
+#include <X11/Xmd.h>
+#include <X11/Intrinsic.h>
 
 #include "cursor1.xbm"             /* bitmaps for cursors */
 #include "cursor2.xbm"
@@ -54,9 +57,13 @@ static void rescale_2d( long new_nx, long new_ny );
 static Pixmap get_1d_window( unsigned int *width, unsigned int *height );
 static Pixmap get_2d_window( unsigned int *width, unsigned int *height );
 static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
-static void dump_1d( int fd, XImage *im, unsigned int w, unsigned int h );
-static void dump_2d( int fd, XImage *im, unsigned int w, unsigned int h );
+static void dump_1d( int fd, XImage *image, unsigned int w, unsigned int h );
+static void dump_2d( int fd, XImage *image, unsigned int w, unsigned int h );
 static void create_1d_colormap( void );
+
+void dump_image_to_file( int fd, XImage *image, XWindowAttributes *xwa );
+static int lowbitnum( unsigned long ul );
+static unsigned int get_colors( XWindowAttributes *xwa, XColor **xc );
 
 
 static Graphics *G_stored = NULL;
@@ -2052,10 +2059,11 @@ static void rescale_2d( long new_nx, long new_ny )
 
 void dump_window( int type, int fd )
 {
-	XImage *im;
+	XImage *image;
 	unsigned int w, h;
 	char buf[ 100 ];
 	Pixmap pm;
+	XWindowAttributes xwa;
 
 
 	if ( ! G.is_init || ! G.is_fully_drawn )
@@ -2066,7 +2074,17 @@ void dump_window( int type, int fd )
 		if ( G.dim == 1 )
 			pm = get_1d_window( &w, &h );
 		else
+		{
 			pm = get_2d_window( &w, &h );
+
+			if ( ! XGetWindowAttributes( G.d,
+										 FL_ObjWin( GUI.run_form->canvas ),
+										 &xwa ) )
+			{
+				XFreePixmap( G.d, pm );
+				THROW( EXCEPTION );
+			}
+		}
 	}
 	else
 	{
@@ -2075,12 +2093,12 @@ void dump_window( int type, int fd )
 		pm = get_cut_window( &w, &h );
 	}
 
-	im = XGetImage( G.d, pm, 0, 0, w, h, AllPlanes, ZPixmap );
+	image = XGetImage( G.d, pm, 0, 0, w, h, AllPlanes, ZPixmap );
 	XFreePixmap( G.d, pm );
 
-	if ( im == NULL )
+	if ( image == NULL )
 	{
-		XDestroyImage( im );
+		XDestroyImage( image );
 		THROW( EXCEPTION );
 	}
 
@@ -2090,18 +2108,18 @@ void dump_window( int type, int fd )
 	TRY
 	{
 		if ( ( type == 1 && G.dim == 1 ) || type == 2 )
-			dump_1d( fd, im, w, h );
+			dump_1d( fd, image, w, h );
 		else
-			dump_2d( fd, im, w, h );
+			dump_image_to_file( fd, image, &xwa );
 	}
 	OTHERWISE
 	{
-		XDestroyImage( im );
+		XDestroyImage( image );
 		RETHROW( );
 	}
 
 	close( fd );
-	XDestroyImage( im );
+	XDestroyImage( image );
 }
 
 
@@ -2224,6 +2242,9 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static void log_date( void )
 {
     static char tc[ 26 ];
@@ -2240,22 +2261,34 @@ static void log_date( void )
     fprintf( stderr, "\n%s.%03d", tc + 11, mt.millitm );
 }
 
+
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static void dump_1d( int fd, XImage *im, unsigned int w, unsigned int h )
+static void dump_1d( int fd, XImage *image, unsigned int w, unsigned int h )
 {
 	unsigned int i, j, k;
 	unsigned long pixel;
+	unsigned long black_pixel;
+	char *black;
 
+
+	black_pixel = G.cm_1[ 0 ].pixel;
+	black = G.cm_1[ 0 ].rgb;
 
 	for ( j = 0; j < h; j++ )
 		for ( i = 0; i < w; i++ )
 		{
-			pixel = XGetPixel( im, i, j );
-			for ( k = 0; k < NUM_1D_COLS && pixel != G.cm_1[ k ].pixel;  k++ )
-				/* empty */ ;
-			write( fd, G.cm_1[ k ].rgb, 3 );
+			pixel = XGetPixel( image, i, j );
+			if ( pixel == black_pixel )
+				write( fd, black, 3 );
+			else
+			{
+				for ( k = 1; k < NUM_1D_COLS && pixel != G.cm_1[ k ].pixel;
+					  k++ )
+					/* empty */ ;
+				write( fd, G.cm_1[ k ].rgb, 3 );
+			}
 		}
 }
 
@@ -2263,7 +2296,7 @@ static void dump_1d( int fd, XImage *im, unsigned int w, unsigned int h )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static void dump_2d( int fd, XImage *im, unsigned int w, unsigned int h )
+static void dump_2d( int fd, XImage *image, unsigned int w, unsigned int h )
 {
 	unsigned int i, j;
 	ColorIndex l;
@@ -2273,7 +2306,7 @@ static void dump_2d( int fd, XImage *im, unsigned int w, unsigned int h )
 	for ( j = 0; j < h; j++ )
 		for ( i = 0; i < w; i++ )
 		{
-			l.pixel = XGetPixel( im, i, j );
+			l.pixel = XGetPixel( image, i, j );
 			cm_2 = bsearch( &l.pixel, G.cm_2, NUM_COLORS + FL_FREE_COL1 + 3,
 							sizeof( ColorIndex ), color_comp );
 			if ( cm_2 != NULL )
@@ -2313,6 +2346,273 @@ static void create_1d_colormap( void )
 	   paranoia... */
 
 	memcpy( G.cm_1 + NUM_1D_COLS, G.cm_1, sizeof( ColorIndex ) );
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void dump_image_to_file( int fd, XImage *image, XWindowAttributes *xwa )
+{
+	int i, j, l;
+	CARD8  *bptr;
+	CARD16 *sptr;
+	CARD32 *lptr;
+	char  *lineptr;
+	int bits_used, bits_per_item, bit_shift = 0, bit_order;
+	int bits_per_pixel;
+	CARD32 pixvalue = 0, pixmask, mask[ 3 ];
+	int shift[ 3 ] = { 0, 0, 0 }, tshift[ 3 ] = { 0, 0, 0 };
+	CARD32 rgb_val[ 3 ] = { 0, 0, 0 };
+	unsigned int num_colors;
+	XColor *xc = NULL;
+	unsigned char rgb[ 3 ];
+	Visual *v;
+
+
+	/* Determine the number of colors and get the colormap */
+
+	num_colors = get_colors( xwa, &xc );
+
+	/* Bail out if something seems to be fishy */
+
+	if ( xwa == NULL || ( v = xwa->visual ) == NULL ||
+		 ( image->bitmap_unit != 8 && image->bitmap_unit != 16 &&
+		   image->bitmap_unit != 32 ) ||
+		 ( num_colors == 0 && v->class != TrueColor ) )
+	{
+		T_free( xc );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->class == TrueColor || v->class == DirectColor )
+	{
+		unsigned int tmp;
+
+
+		mask[ RED   ] = v->red_mask;
+		mask[ GREEN ] = v->green_mask;
+		mask[ BLUE  ] = v->blue_mask;
+
+		for ( l = RED; l <= BLUE; l++ )
+		{
+			tshift[ l ] = shift[ l ] =
+									  lowbitnum( ( unsigned long ) mask[ l ] );
+			tmp = mask[ l ] >> shift[ l ];
+
+			while ( tmp >= 256 )
+			{
+				tmp >>= 1;
+				tshift[ l ] += 1;
+			}
+
+			while ( tmp < 128 )
+			{
+				tmp <<= 1;
+				tshift[ l ] -= 1;
+			}
+		}
+	}
+
+	bits_used = bits_per_item  = image->bitmap_unit;
+	bits_per_pixel = image->bits_per_pixel;
+
+	if ( bits_per_pixel == 32 )
+		pixmask = ~ ( ( CARD32 ) 0 );
+	else 
+		pixmask = ( ( ( CARD32 ) 1 ) << bits_per_pixel ) - 1;
+
+	bit_order  = image->bitmap_bit_order;
+
+	for ( lineptr = image->data, i = 0; i < image->height;
+		  lineptr += image->bytes_per_line, i++ )
+	{
+		bptr = ( ( CARD8  * ) lineptr ) - 1;
+		sptr = ( ( CARD16 * ) lineptr ) - 1;
+		lptr = ( ( CARD32 * ) lineptr ) - 1;
+
+		bits_used = bits_per_item;
+
+		for ( j = 0; j < image->width; j++ )
+		{
+			/* get the next pixel value from the image data */
+
+			if ( bits_used == bits_per_item )
+			{  
+				switch ( bits_per_item )
+				{
+					case 8 :
+						bptr++;
+						break;
+
+					case 16 :
+						sptr++;
+						break;
+
+					case 32 :
+						lptr++;
+						break;
+				}
+		   
+				bits_used = 0;
+
+				if ( bit_order == MSBFirst )
+					bit_shift = bits_per_item - bits_per_pixel;
+				else
+					bit_shift = 0;
+			}
+
+			switch ( bits_per_item )
+			{
+				case 8 :
+					pixvalue = ( *bptr >> bit_shift ) & pixmask;
+					break;
+
+				case 16 :
+					pixvalue = ( *sptr >> bit_shift ) & pixmask;
+					break;
+
+				case 32 :
+					pixvalue = ( *lptr >> bit_shift ) & pixmask;
+					break;
+			}
+
+			if ( bit_order == MSBFirst )
+				bit_shift -= bits_per_pixel;
+			else
+				bit_shift += bits_per_pixel;
+
+			bits_used += bits_per_pixel;
+  
+			/* okay, we've got the next pixel value in 'pixvalue' */
+      
+			if ( v->class == TrueColor || v->class == DirectColor )
+			{
+				/* in either case, we have to take the pixvalue and 
+				   break it out into individual r,g,b components */
+
+				if ( v->class == DirectColor )
+				{
+					for ( l = RED; l <= BLUE; l++ )
+						rgb_val[ l ] = ( pixvalue & mask[ l ] ) >> shift[ l ];
+
+					/* use rgb_val[] as indicies into colors array */
+
+					rgb[ RED ]   = ( rgb_val[ RED ] < num_colors ) ?
+									( xc[ rgb_val[ RED ] ].red >> 8 ) : 0;
+					rgb[ GREEN ] = ( rgb_val[ GREEN ] < num_colors ) ?
+									( xc[ rgb_val[ GREEN ] ].green >> 8 ) : 0;
+					rgb[ BLUE ]  = ( rgb_val[ BLUE ] < num_colors ) ?
+									( xc[ rgb_val[ BLUE ] ].blue >> 8 ) : 0;
+				}
+				else  /* TrueColor: map rgb_val[ ] into 0-255 range */ 
+					for ( l = RED; l <= BLUE; l++ )
+						if ( tshift[ l ] >= 0 )
+							rgb[ l ] = ( pixvalue & mask[ l ] ) >> tshift[ l ];
+						else
+							rgb[ l ] =
+								( pixvalue & mask[ l ] ) << ( - tshift[ l ] );
+			}
+
+			else
+			{
+				/* StaticGray, StaticColor, GrayScale, PseudoColor
+				   use pixel value as an index into colors array */
+
+				if ( pixvalue >= num_colors )
+				{
+					T_free( xc );
+					THROW( EXCEPTION );
+				}
+
+				if ( num_colors > 256 )
+				{
+					rgb[ RED ]   = xc[ pixvalue ].red   >> 8;
+					rgb[ GREEN ] = xc[ pixvalue ].green >> 8;
+					rgb[ BLUE ]  = xc[ pixvalue ].blue  >> 8;
+				}
+				else
+					rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = pixvalue & 0xff;
+			}
+
+			write( fd, rgb, 3 );
+		}
+	}
+
+	T_free( xc );
+}
+
+
+static int lowbitnum( unsigned long ul )
+{
+	/* returns position of lowest set bit in 'ul' as an integer (0-31),
+	   or -1 if none */
+
+	int i;
+	for ( i = 0; ( ul & 1 ) == 0 && i < 32; i++, ul >>= 1 )
+		/* empty */ ;
+	if ( i == 32 )
+		i = -1;
+	return i;
+}
+
+
+
+#define lowbit( x ) ( ( x ) & ( ~ ( x ) + 1 ) )
+
+static unsigned int get_colors( XWindowAttributes *xwa, XColor **xc )
+{
+	unsigned int i;
+	unsigned int num_colors;
+	Visual *v;
+
+
+	v = xwa->visual;
+	if ( v->class == TrueColor || ! xwa->colormap )
+		return 0;
+
+	num_colors = v->map_entries;
+
+	*xc = T_malloc( num_colors * sizeof( XColor ) );
+
+	if ( v->class == DirectColor )
+	{
+		Pixel red, green, blue, red1, green1, blue1;
+
+		red = green = blue = 0;
+
+		red1   = lowbit( v->red_mask   );
+		green1 = lowbit( v->green_mask );
+		blue1  = lowbit( v->blue_mask  );
+
+		for ( i = 0; i < num_colors; i++ )
+		{
+			( *xc )[ i ].pixel = red | green | blue;
+			( *xc )[ i ].pad = 0;
+
+			red += red1;
+			if ( red > v->red_mask )
+				red = 0;
+
+			green += green1;
+			if ( green > v->green_mask )
+				green = 0;
+
+			blue += blue1;
+			if ( blue > v->blue_mask )
+				blue = 0;
+		}
+	}
+	else
+		for ( i = 0; i < num_colors; i++ )
+		{
+			( *xc )[ i ].pixel = i;
+			( *xc )[ i ].pad = 0;
+		}
+
+	XQueryColors( G.d, xwa->colormap, *xc, num_colors );
+
+	return num_colors;
 }
 
 
