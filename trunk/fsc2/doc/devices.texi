@@ -2499,7 +2499,7 @@ does not accept any parameters and can only by used in the
 @node DAC Functions, Event Counter Functions, Frequency Counter Functions, Device Functions
 @section DAC Functions
 @cindex DAC Functions
-Currently, there's support for one type of digital-to-analog convert
+Currently, there's support for one type of digital-to-analog converter
 cards, the @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100.
 These cards have, depending on the model, either 4, 8 or 16 output
 ports. The module for these cards is loaded by specifying
@@ -2508,6 +2508,9 @@ me6000
 @end example
 @noindent
 in the @code{DEVICES} section. 
+
+Use of these cards requires that a kernel module and an additional
+library (both coming with @code{fsc2}) have been successfully installed.
 
 @table @samp
 
@@ -2519,22 +2522,22 @@ Returns a string with the name of the DAC being used.
 @anchor{dac_voltage}
 @item dac_voltage()
 @findex dac_voltage()
-This function has to be used to output a voltage on one of the output
+This function has to be used to output a voltage at one of the output
 ports. The first argument has to be the output port, specified by one of
-the symbolic value between @code{CH0} and @code{CH15} (please
+the symbolic values between @code{CH0} and @code{CH15} (please
 @strong{don't} use numbers directly, the mapping between the symbolic
 values and channel numbers is non-trivial). The second argument is the
 voltage (in the range between @w{-10 V} and @w{+10 V}) to be output.
 
-If an output voltage has already been set for and output port the last
+If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
 argument.
 
-Please note that last set output voltage will still appear on the ouput
-port after the program is finished. If it is required that the output
-voltage reverts to a default value at the end of the experiment please
-put a command for setting this voltage into the @code{ON_STOP} section of
-the @code{EDL} script.
+Please note that the latest set output voltage will still appear on the
+ouput port after the program is finished. If it is required that the
+output voltage reverts to a default value at the end of the experiment
+please put a command for setting this voltage into the @code{ON_STOP}
+section of the @code{EDL} script.
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -2554,6 +2557,9 @@ ni6601
 @noindent
 in the @code{DEVICES} section. 
 
+Use of this card requires that a kernel module and an additional
+library (both coming with @code{fsc2}) have been successfully installed.
+
 @table @samp
 
 @anchor{counter_name}
@@ -2565,19 +2571,19 @@ Returns a string with the name of the event counter being used.
 @item counter_start_continuous_counter()
 @findex counter_start_continuous_counter()
 This functions starts one of the counters of the card. The counter will
-count until it is stopped by calling the @code{EDL} function
+count until it is stopped by a call of the @code{EDL} function
 @code{counter_stop_counter()}. It requires at least one argument, the
 counter to be used, which needs to be specified by one of the symbolic
-values between @code{CH0} and @code{CH3} (please @strong{don't} use
+names between @code{CH0} and @code{CH3} (please @strong{don't} use
 numbers directly, the mapping between the symbolic values and channel
-numbers is non-trivial). If the requested counter is already runnng the
+numbers is non-trivial). If the requested counter is already running the
 function will fail.
 
 If called without a further argument the counter will count events on
-its default input. Alternatively, as a second argument, the source of
+its default input. Alternatively, as a second argument the source of
 events to be counted can be specified by one of the following symbolic
 names: @code{DEFAULT_SOURCE} (which is what would be used if no second
-argument is specified), @code{SOURCE_1} to @code{SOURCE_3} (the default
+argument is specified), @code{SOURCE_0} to @code{SOURCE_3} (the default
 input sources for channel @code{0} to @code{3}), @code{NEXT_GATE} (the
 gate input for the adjacent counter, where the adjacent counter for
 channel @code{0} is channel @code{1} and vice versa, and channels
@@ -2593,10 +2599,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function starts on of the counters of the card. The counter will
 count for a specified time and then stops automatically. It requires at
 least two arguments, the counter to be used, specified by a symbolic
-value between @code{CH0} and @code{3}. If the requested counter is
-already runnng the function will fail. The second requires argument is
+name between @code{CH0} and @code{3}. If the requested counter is
+already running the function will fail. The second required argument is
 the length of time the counter is supposed to count. This time must be
-between @w{100 ns} and about @w{214,748 s} and must be a integer
+between @w{100 ns} and about @w{214.748 s} and must be an integer
 multiple of @w{50 ns}.
 
 Please note: This function requires not only one counter channel, i.e.@:
@@ -2641,7 +2647,7 @@ still be running, in which case repeated calls of the function will
 return an updated value according to the new number of events that
 happened between invocations of the function. The function requires on
 argument, the counter for which the current value is to be returned. It
-must be specified by one of the symbolic values between @code{CH0} and
+must be specified by one of the symbolic names between @code{CH0} and
 @code{CH3} (please @strong{don't} use numbers directly, the mapping
 between the symbolic values and channel numbers is non-trivial).
 
@@ -2660,9 +2666,9 @@ that has been started by the function
 @code{counter_start_continuous_counter()} and hasn't already been
 stopped will fail, because such a counter will never stop by itself.
 
-The function requires on argument, the counter for which the current
+The function requires one argument, the counter for which the current
 value is to be returned. It must be specified by one of the symbolic
-values between @code{CH0} and @code{CH3} (please @strong{don't} use
+names between @code{CH0} and @code{CH3} (please @strong{don't} use
 numbers directly, the mapping between the symbolic values and channel
 numbers is non-trivial).
 
@@ -2694,9 +2700,9 @@ create pulses on its default output port. This function can be used to
 create a single pulse on the output port. It requires two arguments, the
 first being the counter to be used, specified by a symbolic value
 between @code{CH0} and @code{3}. If the requested counter is already
-runnng the function will fail. The second argument is the length of the
-pulse, which must be between @w{100 ns} and about @w{214,748 s} and must
-be a integer multiple of @w{50 ns}.
+running the function will fail. The second argument is the length of the
+pulse, which must be between @w{100 ns} and about @w{214.748 s} and must
+be an integer multiple of @w{50 ns}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2707,17 +2713,17 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function allows to create a continuous train of pulses. It requires
 at least two arguments, the first being the counter to be used,
 specified by a symbolic value between @code{CH0} and @code{3}. If the
-requested counter is already runnng the function will fail. The second
+requested counter is already running the function will fail. The second
 argument is the length of the pulse, which must be between @w{100 ns}
-and about @w{214,748 s} and must be a integer multiple of @w{50 ns}.
+and about @w{214.748 s} and must be an integer multiple of @w{50 ns}.
 
-If no third argument is specified the distance between the pulses will
-be identical to the pulse length. By specifying a third argument (with
-to the same restrictions as for the second argument) the distance
-between pulses can be set.
+If no third argument is specified the distance between pulses will be
+identical to the pulse length. By specifying a third argument (with the
+same restrictions as for the second argument) the distance between
+pulses can be set.
 
-To stop creation of pulses (and to free the counter used for other uses)
-the function @code{counter_stop_counter()} must be called.
+To stop creation of pulses (and to free the counter for other uses) the
+function @code{counter_stop_counter()} must be called.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
