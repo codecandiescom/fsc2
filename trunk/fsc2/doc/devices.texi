@@ -2814,8 +2814,10 @@ The DIO isn't split up at all but used as a 24-bit wide DIO.
 The DIO is split up into two independent DIOs, one with a width of 16
 bit and one 8-bit wide. These can be addressed as channels in calls of
 the function @code{dio_value()}.
-
 @end table
+
+If no mode is set for a DIO the mode for 24-bit input and output is used
+per default.
 
 
 @anchor{dio_value}
@@ -2888,6 +2890,9 @@ immediately as will trying to output too large a value during the test
 run. During the experiment a too large value will be truncated to the
 allowed range by stripping off the higher bits and an warning message is
 printed out.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
 @end table

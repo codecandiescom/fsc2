@@ -166,7 +166,7 @@ Suported devices
   * EG&G PARC Box-Car Integrator 4402 (download of data and starting and
     stopping measurements only)
 
- DAC cards:
+ DAQ cards:
 
   * Meilhaus Electronic GmbH ME-6000 and ME-6100 (Linux device driver
     comes with the package)
@@ -182,13 +182,18 @@ Suported devices
     and the PVCAM library, both of which can be downloaded from Roper
 	Scientifics FTP server)
 
- Mocochromators:
+ Monochromators:
 
   * Acton Research SpectraPro-300i Monochromator
 
  Power supplies:
 
   * Thurlby & Thandar PL330DP
+
+  DIO Devices:
+
+  * Wasco WITIO-48 DIO card (Linux device driver comes with the
+    package)
 
 
 fsc2 works with three different GPIB driver/library combinations, the
