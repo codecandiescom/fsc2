@@ -1444,6 +1444,16 @@ The function allows to change the label of a button. It takes two
 arguments, the ID of the button and a string with the new label.
 
 
+@anchor{button_enable}
+@item button_enable()
+@findex button_enable()
+The function allows to temporarily enable or disable the use of a
+button. It takes two arguments, the ID of the button and either the
+value @code{1} or the string @code{"ON"} to enable the button (which is
+the default state) or the value @code{0} or the string @code{"OFF"} to
+disable the button.
+
+
 @anchor{slider_create}
 @item slider_create()
 @findex slider_create()
@@ -1522,6 +1532,16 @@ The function allows to change the label of a slider. It takes two
 arguments, the ID of the slider and a string with the new label.
 
 
+@anchor{slider_enable}
+@item slider_enable()
+@findex slider_enable()
+The function allows to temporarily enable or disable the use of a
+slider. It takes two arguments, the ID of the slider and either the
+value @code{1} or the string @code{"ON"} to enable the slider (which is
+the default state) or the value @code{0} or the string @code{"OFF"} to
+disable the slider.
+
+
 @anchor{input_create}
 @item input_create()
 @findex input_create()
@@ -1588,6 +1608,16 @@ new value by calling @code{input_value()}.
 @findex input_change_label()
 The function allows to change the label of an input field. It takes two
 arguments, the ID of the input field and a string with the new label.
+
+
+@anchor{input_enable}
+@item input_enable()
+@findex input_enable()
+The function allows to temporarily enable or disable the use of an
+input field. It takes two arguments, the ID of the input field and either the
+value @code{1} or the string @code{"ON"} to enable the input field (which is
+the default state) or the value @code{0} or the string @code{"OFF"} to
+disable the input field.
 
 
 @anchor{output_create}
@@ -1705,6 +1735,16 @@ The function allows to change the label of a menu. It takes two
 arguments, the ID of the menu and a string with the new label.
 
 
+@anchor{menu_enable}
+@item menu_enable()
+@findex menu_enable()
+The function allows to temporarily enable or disable the use of a
+menu. It takes two arguments, the ID of the menu and either the
+value @code{1} or the string @code{"ON"} to enable the menu (which is
+the default state) or the value @code{0} or the string @code{"OFF"} to
+disable the menu.
+
+
 @anchor{object_delete}
 @item object_delete()
 @findex object_delete()
@@ -1719,6 +1759,16 @@ functions @code{button_create()}, @code{slider_create()} and
 @findex object_change_label()
 The function allows to change the label of an object. It takes two
 arguments, the ID of the object and a string with the new label.
+
+
+@anchor{object_enable}
+@item object_enable()
+@findex object_enable()
+The function allows to temporarily enable or disable the use of an
+object. It takes two arguments, the ID of the object and either the
+value @code{1} or the string @code{"ON"} to enable the object (which is
+the default state) or the value @code{0} or the string @code{"OFF"} to
+disable the object.
 
 
 @anchor{hide_toolbox}
