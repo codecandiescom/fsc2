@@ -808,7 +808,7 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-int gpib_serial_poll( int device, unsigend char *stb )
+int gpib_serial_poll( int device, unsigned char *stb )
 {
 	char *dev_name;
 

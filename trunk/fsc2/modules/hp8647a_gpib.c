@@ -159,6 +159,14 @@ double hp8647a_set_frequency( double freq )
 
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
+	{
+		unsigned char c;
+		gpib_serial_poll( hp8647a.device, &c );
+		printf( "Status byte is 0x%x\n", c );
+		if ( gpib_status & GPIB_ERR )
+			hp8647a_comm_failure( );
+	}
+
 	sprintf( cmd, "FREQ:CW %.0f\n", freq );
 	if ( gpib_write( hp8647a.device, cmd ) == FAILURE )
 		hp8647a_comm_failure( );
