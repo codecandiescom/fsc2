@@ -769,9 +769,17 @@ try_again:
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This just a wrapper to hide the recursiveness of magnet_goto_field_rec() */
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* On the one hand this function is a wrapper to hide the recursiveness of */
+/* magnet_goto_field_rec(), on the other hand there's something more: The  */
+/* function stores the size of the last field step as well as the number   */
+/* mini_steps that were needed to achieve the field step. When the next    */
+/* field step has the same size (within the error specified by the user)   */
+/* this number of mini_steps is used instead of the one that would result  */
+/* when using the factor determined in the initialization. This way the    */
+/* errors for large field steps (where the factor doesn't work well) can   */
+/* be compensated and the sweep can be done faster.                        */
+/*-------------------------------------------------------------------------*/
 
 bool magnet_goto_field( double field, double error )
 {
@@ -816,13 +824,13 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	int acc;
 
 
-	/* determine the field between the target field and the current field */
+	/* Determine the field between the target field and the current field */
 
 	v = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
-	/* calculate the number of steps we need using the smallest possible
+	/* Calculate the number of steps we need using the smallest possible
 	   field increment (i.e. 1 bit) */
 
 	if ( rec == 0 && *hint != 0.0 )
@@ -835,7 +843,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 
 	*hint += mini_steps;
 
-	/* how many steps do we need using the maximum step size and how many
+	/* How many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );

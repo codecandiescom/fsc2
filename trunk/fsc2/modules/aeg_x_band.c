@@ -784,9 +784,17 @@ try_again:
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This just a wrapper to hide the recursiveness of magnet_goto_field_rec() */
-/*--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* On the one hand this function is a wrapper to hide the recursiveness of */
+/* magnet_goto_field_rec(), on the other hand there's something more: The  */
+/* function stores the size of the last field step as well as the number   */
+/* mini_steps that were needed to achieve the field step. When the next    */
+/* field step has the same size (within the error specified by the user)   */
+/* this number of mini_steps is used instead of the one that would result  */
+/* when using the factor determined in the initialization. This way the    */
+/* errors for large field steps (where the factor doesn't work well) can   */
+/* be compensated and the sweep can be done faster.                        */
+/*-------------------------------------------------------------------------*/
 
 static bool magnet_goto_field( double field, double error )
 {
