@@ -134,8 +134,8 @@ bool dg2020_set_pulse_length( long pnum, double time )
 
 	if ( p->is_len )
 	{
-		eprint( FATAL, "%s:%ld: %s: The length of pulse %ld has already been "
-				"set to %s.\n", Fname, Lc, pulser_struct.name, pnum,
+		eprint( FATAL, "%s:%ld: %s: Length of pulse %ld has already been set "
+				"to %s.\n", Fname, Lc, pulser_struct.name, pnum,
 				dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
@@ -201,8 +201,8 @@ bool dg2020_set_pulse_length_change( long pnum, double time )
 
 	if ( p->is_dlen )
 	{
-		eprint( FATAL, "%s:%ld: %s: The length change of pulse %ld has "
-				"already been set to %s.\n", Fname, Lc, pulser_struct.name,
+		eprint( FATAL, "%s:%ld: %s: Length change of pulse %ld has already "
+				"been set to %s.\n", Fname, Lc, pulser_struct.name,
 				pnum, dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
@@ -305,8 +305,8 @@ bool dg2020_get_pulse_length( long pnum, double *time )
 
 	if ( ! p->is_len )
 	{
-		eprint( FATAL, "%s:%ld: %s: The length of pulse %ld hasn't "
-				"been set.\n", Fname, Lc, pulser_struct.name, pnum );
+		eprint( FATAL, "%s:%ld: %s: Length of pulse %ld hasn't been set.\n",
+				Fname, Lc, pulser_struct.name, pnum );
 		THROW(EXCEPTION );
 	}
 
@@ -345,8 +345,8 @@ bool dg2020_get_pulse_length_change( long pnum, double *time )
 
 	if ( ! p->is_dlen )
 	{
-		eprint( FATAL, "%s:%ld: %s: The length change of pulse %ld hasn't "
-				"been set.\n", Fname, Lc, pulser_struct.name, pnum );
+		eprint( FATAL, "%s:%ld: %s: Length change of pulse %ld hasn't been "
+				"set.\n", Fname, Lc, pulser_struct.name, pnum );
 		THROW(EXCEPTION );
 	}
 
