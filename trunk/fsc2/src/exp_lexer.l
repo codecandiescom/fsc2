@@ -345,8 +345,7 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input in EXPERIMENT section near "
-					   "'%s'.\n", exptext );
+				print( FATAL, "Invalid input near '%s'.\n", exptext );
 				THROW( EXCEPTION );
 			}
 
