@@ -1248,7 +1248,7 @@ void repaint_canvas_2d( Canvas *c )
 {
 	char buf[ 256 ];
 	int x, y, x2, y2;
-	long index, index_1, index_2;
+	long a_index, index_1, index_2;
 	unsigned int w, h;
 	Curve_2d *cv;
 	Pixmap pm;
@@ -1345,17 +1345,17 @@ void repaint_canvas_2d( Canvas *c )
 			if ( x_pos < 0 || floor( x_pos ) >= G.nx ||
 				 y_pos < 0 || floor( y_pos ) >= G.ny ||
 				 ! cv->is_scale_set )
-				index = -1;
+				a_index = -1;
 			else
 			{
-				index = G.nx * ( long ) floor( y_pos )
-					    + ( long ) floor( x_pos );
+				a_index = G.nx * lround( floor( y_pos ) )
+					     + lround( floor( x_pos ) );
 
-				if ( cv->points[ index ].exist )
+				if ( cv->points[ a_index ].exist )
 					z_pos = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
-						    * cv->points[ index ].v;
+						    * cv->points[ a_index ].v;
 				else
-					index = -1;
+					a_index = -1;
 			}
 
 			x_pos = cv->rwc_start[ X ] + cv->rwc_delta[ X ]
@@ -1371,12 +1371,12 @@ void repaint_canvas_2d( Canvas *c )
 			make_label_string( buf + strlen( buf ), y_pos,
 							   ( int ) floor( log10( fabs( cv->rwc_delta[ Y ] )
 													 / cv->s2d[ Y ] ) ) - 2 );
-			if ( index != -1 )
+			if ( a_index != -1 )
 			{
 				strcat( buf, "   " ); 
 				make_label_string( buf + strlen( buf ), z_pos,
-						       ( int ) floor( log10( fabs( cv->rwc_delta[ Z ] )
-													 / cv->s2d[ Z ] ) ) - 2 );
+					  ( int ) lround( floor( log10( fabs( cv->rwc_delta[ Z ] )
+													/ cv->s2d[ Z ] ) ) - 2 ) );
 			}
 			strcat( buf, " " );
 
@@ -1403,8 +1403,8 @@ void repaint_canvas_2d( Canvas *c )
 					index_1 = -1;
 				else
 				{
-					index_1 = G.nx * ( long ) floor( y_pos )
-						      + ( long ) floor( x_pos );
+					index_1 = G.nx * lround( floor( y_pos ) )
+						      + lrund( floor( x_pos ) );
 
 					if ( cv->points[ index_1 ].exist )
 						z_pos_1 = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]
@@ -1424,8 +1424,8 @@ void repaint_canvas_2d( Canvas *c )
 					index_2 = -1;
 				else
 				{
-					index_2 = G.nx * ( long ) floor( y_pos )
-						      + ( long ) floor( x_pos );
+					index_2 = G.nx * lround( floor( y_pos ) )
+						      + lround( floor( x_pos ) );
 
 					if ( cv->points[ index_2 ].exist )
 						z_pos_2 = cv->rwc_start[ Z ] + cv->rwc_delta[ Z ]

@@ -312,12 +312,12 @@ int sema_destroy( int sema_id )
 
 int sema_wait( int sema_id )
 {
-	struct sembuf wait = { 0, -1, 0 };
+	struct sembuf wait_flags = { 0, -1, 0 };
 
 
 	raise_permissions( );
 
-	while ( semop( sema_id, &wait, 1 ) < 0 )
+	while ( semop( sema_id, &wait_flags, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
 			lower_permissions( );

@@ -190,7 +190,7 @@ static const char *handle_input( const char *content, const char *label )
 /* the return value of the layout() function.                   */
 /*--------------------------------------------------------------*/
 
-bool exp_layout( void *buffer, long len )
+bool exp_layout( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -245,7 +245,7 @@ bool exp_layout( void *buffer, long len )
 /* the return values of the button_create() function.           */
 /*--------------------------------------------------------------*/
 
-long *exp_bcreate( void *buffer, long len )
+long *exp_bcreate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -324,7 +324,7 @@ long *exp_bcreate( void *buffer, long len )
 /* the return value of the button_delete() function.            */
 /*--------------------------------------------------------------*/
 
-bool exp_bdelete( void *buffer, long len )
+bool exp_bdelete( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -379,7 +379,7 @@ bool exp_bdelete( void *buffer, long len )
 /* the return values of the button_state() function .           */
 /*--------------------------------------------------------------*/
 
-long exp_bstate( void *buffer, long len )
+long exp_bstate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -441,7 +441,7 @@ long exp_bstate( void *buffer, long len )
 /* the return values of the slider_create() function .          */
 /*--------------------------------------------------------------*/
 
-long *exp_screate( void *buffer, long len )
+long *exp_screate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -523,7 +523,7 @@ long *exp_screate( void *buffer, long len )
 /* the return value of the slider_delete() function.            */
 /*--------------------------------------------------------------*/
 
-bool exp_sdelete( void *buffer, long len )
+bool exp_sdelete( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -581,7 +581,7 @@ bool exp_sdelete( void *buffer, long len )
 /* arguments and results of the slider_value() function         */
 /*--------------------------------------------------------------*/
 
-double *exp_sstate( void *buffer, long len )
+double *exp_sstate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -653,7 +653,7 @@ double *exp_sstate( void *buffer, long len )
 /* the return values of the input_create() function.            */
 /*--------------------------------------------------------------*/
 
-long *exp_icreate( void *buffer, long len )
+long *exp_icreate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -755,7 +755,7 @@ long *exp_icreate( void *buffer, long len )
 /* the return value of the input_delete() function.             */
 /*--------------------------------------------------------------*/
 
-bool exp_idelete( void *buffer, long len )
+bool exp_idelete( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -810,7 +810,7 @@ bool exp_idelete( void *buffer, long len )
 /* arguments and results of the input_value() function          */
 /*--------------------------------------------------------------*/
 
-INPUT_RES *exp_istate( void *buffer, long len )
+INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{
@@ -898,7 +898,7 @@ INPUT_RES *exp_istate( void *buffer, long len )
 /* the return value of the object_delete() function.            */
 /*--------------------------------------------------------------*/
 
-bool exp_objdel( void *buffer, long len )
+bool exp_objdel( char *buffer, ptrdiff_t len )
 {
 	if ( I_am == CHILD )
 	{

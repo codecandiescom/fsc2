@@ -96,7 +96,7 @@ enum {
 typedef struct {
 	int type;
 	union {
-		long len;           /* length of following string (without '\0') */
+		ptrdiff_t len;
 		int int_data;
 		long long_data;
 		float float_data;

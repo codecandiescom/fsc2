@@ -1142,11 +1142,12 @@ void repaint_canvas_1d( Canvas *c )
 									           cv->s2d[ Y ] - cv->shift[ Y ] );
 
 				strcpy( buf, " " );
-				make_label_string( buf + 1, x_pos, ( int ) floor( log10( fabs(
-					G.rwc_delta[ X ] ) / cv->s2d[ X ] ) ) - 2 );
+				make_label_string( buf + 1, x_pos,
+					  ( int ) lround( floor( log10( fabs( G.rwc_delta[ X ] )
+												    / cv->s2d[ X ] ) ) - 2 ) );
 				strcat( buf, "   " ); 
 				make_label_string( buf + strlen( buf ), y_pos,
-								   ( int ) floor( log10( fabs(
+								   ( int ) lround( floor( log10( fabs(
 								   G.rwc_delta[ Y ] ) / cv->s2d[ Y ] ) ) - 2 );
 				strcat( buf, " " );
 

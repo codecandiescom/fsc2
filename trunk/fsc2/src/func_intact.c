@@ -189,7 +189,7 @@ Var *f_layout( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		void *buffer, *pos;
+		char *buffer, *pos;
 		long len;
 
 		len = 2 * sizeof( long );
@@ -208,15 +208,15 @@ Var *f_layout( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );      /* current file name */
+			strcpy( pos, Fname );                 /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			*pos++ = '\0';
 
 		/* Bomb out if parent failed to set layout type */
 
-		if ( ! exp_layout( buffer, ( long ) ( pos - buffer ) ) )
+		if ( ! exp_layout( buffer, pos - buffer ) )
 			THROW( EXCEPTION )
 
 		return vars_push( INT_VAR, ( long ) layout );
@@ -384,7 +384,7 @@ Var *f_bcreate( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		void *buffer, *pos;
+		char *buffer, *pos;
 		long new_ID;
 		long *result;
 		size_t len;
@@ -419,34 +419,34 @@ Var *f_bcreate( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( pos, Fname );               /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			*pos++ = '\0';
 
 		if ( label )                            /* label string */
 		{
-			strcpy( ( char * ) pos, label );
+			strcpy( pos, label );
 			pos += strlen( label ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			*pos++ = '\0';
 
 		if ( help_text )                        /* help text string */
 		{
-			strcpy( ( char * ) pos, help_text );
+			strcpy( pos, help_text );
 			pos += strlen( help_text ) + 1;
 		}
 		else
-			*( ( char * ) pos++ ) = '\0';
+			*pos++ = '\0';
 
 
 		/* Pass buffer to parent and ask it to create the button. It returns a
 		   buffer with two longs, the first one indicating success or failure
 		   (value is 1 or 0), the second being the buttons ID */
 
-		result = exp_bcreate( buffer, ( long ) ( pos - buffer ) );
+		result = exp_bcreate( buffer, pos - buffer );
 
 		T_free( label );
 		T_free( help_text );
@@ -543,7 +543,7 @@ Var *f_bdelete( Var *v )
 
 		if ( I_am == CHILD )
 		{
-			void *buffer, *pos;
+			char *buffer, *pos;
 			size_t len;
 
 
@@ -572,17 +572,17 @@ Var *f_bdelete( Var *v )
 			pos += sizeof( long );
 			if ( Fname )
 			{
-				strcpy( ( char * ) pos, Fname );    /* current file name */
+				strcpy( pos, Fname );                 /* current file name */
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				*( ( char * ) pos++ ) = '\0';
+				*pos++ = '\0';
 
 			v = vars_pop( v );
 
 			/* Ask parent to delete the buton, bomb out on failure */
 
-			if ( ! exp_bdelete( buffer, ( long ) ( pos - buffer ) ) )
+			if ( ! exp_bdelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION )
 
 			continue;
@@ -724,8 +724,8 @@ Var *f_bstate( Var *v )
 	if ( I_am == CHILD )
 	{
 		long ID;
-		long state = -1;
-		void *buffer, *pos;
+		long chld_state = -1;
+		char *buffer, *pos;
 		long len;
 
 
@@ -748,19 +748,19 @@ Var *f_bstate( Var *v )
 			if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 			{
 				if ( v->type == INT_VAR )
-					state = v->val.lval != 0 ? 1 : 0;
+					chld_state = v->val.lval != 0 ? 1 : 0;
 				else
-					state = v->val.dval != 0.0 ? 1 : 0;
+					chld_state = v->val.dval != 0.0 ? 1 : 0;
 			}
 			else
 				switch ( is_in( v->val.sptr, on_off_str, 2 ) )
 				{
 					case 0 :
-						state = 0;
+						chld_state = 0;
 						break;
 
 					case 1 :
-						state = 1;
+						chld_state = 1;
 						break;
 
 					default :
@@ -796,26 +796,27 @@ Var *f_bstate( Var *v )
 		memcpy( pos, &ID, sizeof( long ) );     /* buttons ID */
 		pos += sizeof( long );
 
-		memcpy( pos, &state, sizeof( long ) );  /* state to be set (negative */
+		memcpy( pos, &chld_state, sizeof( long ) );
+		                                        /* state to be set (negative */
 		pos += sizeof( long );                  /* if not to be set)         */
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( pos, Fname );               /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 		
 		/* Ask parent process to return or set the state - bomb out if it
 		   returns a negative value, indicating a severe error */
 
-		state = exp_bstate( buffer, ( long ) ( pos - buffer ) );
+		chld_state = exp_bstate( buffer, pos - buffer );
 
-		if ( state < 0 )
+		if ( chld_state < 0 )
 			THROW( EXCEPTION )
 
-		return vars_push( INT_VAR, state );
+		return vars_push( INT_VAR, chld_state );
 	}
 
 	/* No tool box -> no buttons -> no button state to set or get... */
@@ -1069,7 +1070,7 @@ Var *f_screate( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		void *buffer, *pos;
+		char *buffer, *pos;
 		long new_ID;
 		long *result;
 		size_t len;
@@ -1108,33 +1109,33 @@ Var *f_screate( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* store current file name */
+			strcpy( pos, Fname );               /* store current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		if ( label )                            /* store label string */
 		{
-			strcpy( ( char * ) pos, label );
+			strcpy( pos, label );
 			pos += strlen( label ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		if ( help_text )                        /* store help text string */
 		{
-			strcpy( ( char * ) pos, help_text );
+			strcpy( pos, help_text );
 			pos += strlen( help_text ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		/* Ask parent to create the slider - it returns an array width two
 		   elements, the first indicating if it was successful, the second
 		   being the sliders ID */
 
-		result = exp_screate( buffer, ( long ) ( pos - buffer ) );
+		result = exp_screate( buffer, pos - buffer );
 
 		T_free( label );
 		T_free( help_text );
@@ -1229,7 +1230,7 @@ Var *f_sdelete( Var *v )
 
 		if ( I_am == CHILD )
 		{
-			void *buffer, *pos;
+			char *buffer, *pos;
 			long len;
 
 
@@ -1258,17 +1259,17 @@ Var *f_sdelete( Var *v )
 
 			if ( Fname )
 			{
-				strcpy( ( char * ) pos, Fname );    /* current file name */
+				strcpy( pos, Fname );            /* current file name */
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				* ( char * ) pos++ = '\0';
+				*pos++ = '\0';
 
 			v = vars_pop( v );
 
 			/* Bomb out on failure */
 
-			if ( ! exp_sdelete( buffer, ( long ) ( pos - buffer ) ) )
+			if ( ! exp_sdelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION )
 
 			continue;                   /* delete next slider */
@@ -1389,7 +1390,7 @@ Var *f_svalue( Var *v )
 		long ID;
 		long state = 0;
 		double val = 0.0;
-		void *buffer, *pos;
+		char *buffer, *pos;
 		double *res;
 		long len;
 
@@ -1443,17 +1444,17 @@ Var *f_svalue( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( pos, Fname );               /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 		
 		/* Ask parent to set or get the slider value - it will return an array
 		   with two doubles, the first indicating if it was successful (when
 		   the value is positive) the second is the slider value */
 
-		res = exp_sstate( buffer, ( long ) ( pos - buffer ) );
+		res = exp_sstate( buffer, pos - buffer );
 
 		/* Bomb out on failure */
 
@@ -1686,7 +1687,7 @@ Var *f_icreate( Var *v )
 
 	if ( I_am == CHILD )
 	{
-		void *buffer, *pos;
+		char *buffer, *pos;
 		long new_ID;
 		long *result;
 		size_t len;
@@ -1735,19 +1736,19 @@ Var *f_icreate( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( pos, Fname );               /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		if ( label )                            /* label string */
 		{
-			strcpy( ( char * ) pos, label );
+			strcpy( pos, label );
 			pos += strlen( label ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		if ( help_text )                        /* help text string */
 		{
@@ -1758,27 +1759,27 @@ Var *f_icreate( Var *v )
 			}
 			else
 			{
-				strcpy( ( char * ) pos, help_text );
+				strcpy( pos, help_text );
 				pos += strlen( help_text ) + 1;
 			}
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		if ( form_str )
 		{
-			strcpy( ( char * ) pos, form_str );
+			strcpy( pos, form_str );
 			pos += strlen( form_str ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 
 		/* Pass buffer to parent and ask it to create the input or input
 		   object. It returns a buffer with two longs, the first one
 		   indicating success or failure (1 or 0), the second being the
 		   objects ID */
 
-		result = exp_icreate( buffer, ( long ) ( pos - buffer ) );
+		result = exp_icreate( buffer, pos - buffer );
 
 		T_free( label );
 		T_free( help_text );
@@ -1886,7 +1887,7 @@ Var *f_idelete( Var *v )
 
 		if ( I_am == CHILD )
 		{
-			void *buffer, *pos;
+			char *buffer, *pos;
 			size_t len;
 
 			/* Do all possible checking of the parameter */
@@ -1914,17 +1915,17 @@ Var *f_idelete( Var *v )
 			pos += sizeof( long );
 			if ( Fname )
 			{
-				strcpy( ( char * ) pos, Fname );    /* current file name */
+				strcpy( pos, Fname );                 /* current file name */
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				* ( char * ) pos++ = '\0';
+				*pos++ = '\0';
 
 			v = vars_pop( v );
 
 			/* Ask parent to delete the object, bomb out on failure */
 
-			if ( ! exp_idelete( buffer, ( long ) ( pos - buffer ) ) )
+			if ( ! exp_idelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION )
 
 			continue;
@@ -2048,7 +2049,7 @@ Var *f_ivalue( Var *v )
 		long state = 0;
 		long lval = 0;
 		double dval = 0.0;
-		void *buffer, *pos;
+		char *buffer, *pos;
 		INPUT_RES *input_res;
 		long len;
 
@@ -2120,11 +2121,11 @@ Var *f_ivalue( Var *v )
 
 		if ( Fname )
 		{
-			strcpy( ( char * ) pos, Fname );    /* current file name */
+			strcpy( pos, Fname );               /* current file name */
 			pos += strlen( Fname ) + 1;
 		}
 		else
-			* ( char * ) pos++ = '\0';
+			*pos++ = '\0';
 		
 		/* Ask parent to set or get the value - it will return a pointer
 		   to an INPUT_RES structure, where the res entry indicates failure
@@ -2132,7 +2133,7 @@ Var *f_ivalue( Var *v )
 		   positive non-zero is float), and the second entry is a union for
 		   the return value, i.e. the objects value. */
 
-		input_res = exp_istate( buffer, ( long ) ( pos - buffer ) );
+		input_res = exp_istate( buffer, pos - buffer );
 
 		/* Bomb out on failure */
 
@@ -2820,7 +2821,7 @@ Var *f_objdel( Var *v )
 
 		if ( I_am == CHILD )
 		{
-			void *buffer, *pos;
+			char *buffer, *pos;
 			size_t len;
 
 			/* Do all possible checking of the parameter */
@@ -2848,17 +2849,17 @@ Var *f_objdel( Var *v )
 			pos += sizeof( long );
 			if ( Fname )
 			{
-				strcpy( ( char * ) pos, Fname );      /* current file name */
+				strcpy( pos, Fname );                 /* current file name */
 				pos += strlen( Fname ) + 1;
 			}
 			else
-				* ( char * ) pos++ = '\0';
+				*pos++ = '\0';
 
 			v = vars_pop( v );
 
 			/* Ask parent to delete the object, bomb out on failure */
 
-			if ( ! exp_objdel( buffer, len ) )
+			if ( ! exp_objdel( buffer, pos - buffer ) )
 				THROW( EXCEPTION )
 
 			continue;

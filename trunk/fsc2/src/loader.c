@@ -37,7 +37,7 @@ extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 static void resolve_hook_functions( Device *dev, const char *dev_name );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
-static void add_function( int index, void *new_func, Device *new_dev,
+static void add_function( int f_index, void *new_func, Device *new_dev,
 						  int num_new );
 static int func_cmp( const void *a, const void *b );
 static void resolve_generic_type( Device *dev );
@@ -99,7 +99,8 @@ void load_all_drivers( void )
 
 static int func_cmp( const void *a, const void *b )
 {
-	return strcmp( ( ( Func * ) a )->name, ( ( Func * ) b )->name );
+	return strcmp( ( ( const Func * ) a )->name,
+				   ( ( const Func * ) b )->name );
 }
 
 
@@ -363,7 +364,7 @@ static void resolve_functions( Device *dev )
 /* current device.                                                      */
 /*----------------------------------------------------------------------*/
 
-static void add_function( int index, void *new_func, Device *new_dev,
+static void add_function( int f_index, void *new_func, Device *new_dev,
 						  int num_new )
 {
 	int i;
@@ -384,7 +385,7 @@ static void add_function( int index, void *new_func, Device *new_dev,
 
 	if ( new_dev->count == 1 )
 	{
-		if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) != NULL )
+		if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) != NULL )
 			new_dev->count = atoi( temp + 1 ) + 1;
 		else
 			new_dev->count = 2;
@@ -399,7 +400,7 @@ static void add_function( int index, void *new_func, Device *new_dev,
 	}
 	else
 	{
-		if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) != NULL 
+		if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) != NULL 
 			 && atoi( temp + 1 ) >= new_dev->count )
 		{
 			new_dev->count++;
@@ -419,15 +420,15 @@ static void add_function( int index, void *new_func, Device *new_dev,
 
 	Fncts = T_realloc( Fncts, ( Num_Func + num_new + 1 ) * sizeof( Func ) );
 	f = Fncts + Num_Func + num_new;
-	memcpy( f, Fncts + index, sizeof( Func ) );
+	memcpy( f, Fncts + f_index, sizeof( Func ) );
 	
 	f->fnct   = new_func;
 	f->device = new_dev;
-	if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) == NULL )
-		f->name = get_string( "%s#%d", Fncts[ index ].name, new_dev->count );
+	if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) == NULL )
+		f->name = get_string( "%s#%d", Fncts[ f_index ].name, new_dev->count );
 	else
-		f->name = get_string( "%*s%d", temp - Fncts[ index ].name + 1,
-							  Fncts[ index ].name, new_dev->count );
+		f->name = get_string( "%*s%d", temp - Fncts[ f_index ].name + 1,
+							  Fncts[ f_index ].name, new_dev->count );
 }
 
 

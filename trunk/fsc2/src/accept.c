@@ -28,10 +28,10 @@
 extern bool need_post;                    /* defined in run.c */
 
 static void	unpack_and_accept( void *ptr );
-static void	other_data_request( int type, void *ptr );
-static void accept_1d_data( long x_index, long curve, int type, void *ptr );
+static void	other_data_request( int type, char *ptr );
+static void accept_1d_data( long x_index, long curve, int type, char *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
-							void *ptr );
+							char *ptr );
 static bool	incr_x( long x_index, long len );
 static bool	incr_y( long y_index );
 static bool	incr_x_and_y( long x_index, long len, long y_index );
@@ -46,7 +46,7 @@ static bool	incr_x_and_y( long x_index, long len, long y_index );
 
 void accept_new_data( void )
 {
-	void *buf;
+	char *buf;
 	int mq_next;
 	int shm_id;
 
@@ -145,7 +145,7 @@ static void unpack_and_accept( void *ptr )
 {
 	int i;
 	int nsets;
-	void *ptr_next;
+	char *ptr_next;
 	long x_index,
 		 y_index,
 		 curve;
@@ -223,7 +223,7 @@ static void unpack_and_accept( void *ptr )
 /* command is determined and the appropriate functions are called.          */
 /*--------------------------------------------------------------------------*/
 
-static void other_data_request( int type, void *ptr )
+static void other_data_request( int type, char *ptr )
 {
 	long i;
 	long count;
@@ -282,7 +282,7 @@ static void other_data_request( int type, void *ptr )
 /* when 1D graphics is used.                                           */
 /*---------------------------------------------------------------------*/
 
-static void accept_1d_data( long x_index, long curve, int type, void *ptr )
+static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 {
 	long len = 0;
 	long *l_data;
@@ -494,7 +494,7 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 /*---------------------------------------------------------------------*/
 
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
-							void *ptr )
+							char *ptr )
 {
 	long len = 0, count;
 	long *l_data;

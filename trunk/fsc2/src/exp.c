@@ -53,6 +53,9 @@ extern FILE *expin;                       /* from exp_lexer.flex */
 
 extern void exprestart( FILE *expin );
 
+extern Token_Val exp_runlval;             /* from exp_run_parser.y */
+extern Token_Val exp_testlval;            /* from exp_test_parser.y */
+extern Token_Val conditionlval;           /* from condition_parser.y */
 
 /* local functions */
 
@@ -809,9 +812,6 @@ static void exp_syntax_check( void )
 
 int exp_testlex( void )
 {
-	extern Token_Val exp_testlval;            /* from exp_test_parser.y */
-
-
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
 		Fname = cur_prg_token->Fname;
@@ -1036,7 +1036,6 @@ void exp_test_run( void )
 
 int exp_runlex( void )
 {
-	extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 	Var *ret, *from, *next, *prev;
 
 
@@ -1106,7 +1105,6 @@ int exp_runlex( void )
 
 int conditionlex( void )
 {
-	extern Token_Val conditionlval;           /* from condition_parser.y */
 	int token;
 	Var *ret, *from, *next, *prev;
 
