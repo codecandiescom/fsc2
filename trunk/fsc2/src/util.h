@@ -14,14 +14,14 @@ long get_file_length( char *name, int *len );
 void eprint( int severity, const char *fmt, ... );
 
 inline long   rnd( double x );
-inline int    imax( int    a, int    b );
-inline int    imin( int    a, int    b );
-inline long   lmax( long   a, long   b );
-inline long   lmin( long   a, long   b );
-inline float  fmax( float  a, float  b );
-inline float  fmin( float  a, float  b );
-inline double dmax( double a, double b );
-inline double dmin( double a, double b );
+inline int    i_max( int    a, int    b );
+inline int    i_min( int    a, int    b );
+inline long   l_max( long   a, long   b );
+inline long   l_min( long   a, long   b );
+inline float  f_max( float  a, float  b );
+inline float  f_min( float  a, float  b );
+inline double d_max( double a, double b );
+inline double d_min( double a, double b );
 
 
 #endif  /* ! UTIL_HEADER */
