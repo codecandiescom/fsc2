@@ -109,7 +109,7 @@ int pci_mio_16e_1_end_of_test_hook( void )
 
 	if ( pci_mio_16e_1.ai_state.polarities != NULL )
 		pci_mio_16e_1.ai_state.polarities =
-				 NI_DAQ_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
+			  NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
 
 	return 1;
 }

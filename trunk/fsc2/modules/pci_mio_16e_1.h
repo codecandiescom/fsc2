@@ -34,9 +34,13 @@
 
 
 #ifdef __cplusplus
-#define NI_DAQ_POLARITY_P              ( NI_DAQ_POLARITY * )
+#define NI_DAQ_BU_POLARITY_P           ( NI_DAQ_BU_POLARITY * )
+#define NI_DAQ_AI_TYPE_P               ( NI_DAQ_AI_TYPE  * )
+#define NI_DAQ_STATE_P                 ( NI_DAQ_STATE    * )
 #else
-#define NI_DAQ_POLARITY_P
+#define NI_DAQ_BU_POLARITY_P
+#define NI_DAQ_AI_TYPE_P
+#define NI_DAQ_STATE_P
 #endif
 
 
@@ -70,7 +74,7 @@ struct PCI_MIO_16E_1 {
 		int num_channels;
 		ssize_t data_per_channel;
 		double *ranges;
-		NI_DAQ_POLARITY *polarities;
+		NI_DAQ_BU_POLARITY *polarities;
 	} ai_state;
 
 	struct {

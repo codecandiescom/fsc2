@@ -318,8 +318,8 @@ Var *daq_ao_channel_setup( Var *v )
 		}
 	}
 
-	pci_mio_16e_1.ao_state.external_reference[ dac ] = er;
-	pci_mio_16e_1.ao_state.polarity[ dac ] = pol;
+	pci_mio_16e_1.ao_state.external_reference[ dac ] = ( NI_DAQ_STATE ) er;
+	pci_mio_16e_1.ao_state.polarity[ dac ] = ( NI_DAQ_BU_POLARITY ) pol;
 
 	return vars_push( INT_VAR, 1L );	
 }
