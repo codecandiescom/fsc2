@@ -6,7 +6,7 @@
 
 
 
-@multitable { @code{REPEAT_FREQUENCY} and a bit } { Starts the @code{PREPARATIONS} section and lots more of text... }
+@multitable { @code{MAXIMUM_PATTERN_LENGTH}} { Starts the @code{PREPARATIONS} section and lots more of text... }
 @item @code{#exit}            @tab Miscellaneous (@pxref{#exit statement})
 @item @code{#include}         @tab Miscellaneous (@pxref{#include statement})
 @item @code{#quit}            @tab Miscellaneous (@pxref{#quit statement})
