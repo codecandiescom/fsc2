@@ -1117,19 +1117,19 @@ void sr510_exit_hook( void )
 
 If it exists, the first function, i.e.@: @code{sr510_init_hook()} is
 called immediately after the functions defined in all modules are
-loaded. That means, the internal loader loads the module libraries and
+loaded. That means that the internal loader loads the module libraries and
 when done runs the init hook functions of the modules in the order the
 modules did appear in the devices section. The main purpose of the init
 hook functions is to allow the modules to get all kinds of initialization
 done. Since all other modules are already loaded, they also may be used to
 test for the existence of other modules by calling a function called
 @code{exist_device()}. But you should not call functions from other
-modules at this stage, because the other modules may still be
+modules at this stage because the other modules may still be
 uninitialized. If the initialization completes successfully, the
 function must return a non-zero value. If there are problems that don't
 make the module unusable it may return a zero value -- in this case a
 warning message will be printed. If the initialization fails in a
-non-recoverable way, the function should throw an exception.
+non-recoverable way the function should throw an exception.
 
 The second function, @code{sr510_test_hook()}, is called at the start
 of the test run of the @code{EXPERIMENT} section of the @code{EDL}
@@ -1158,12 +1158,14 @@ the device back into a usable state with local control and must close
 any existing connections to the device.
 
 Finally, the sixth and final function, @code{sr510_exit_hook()}, is run
-just before the module is unloaded. Please take care: you can't talk to
-the device anymore when this hook is called. It should only be used to
-e.g.@: get rid of memory allocated withing the module before the it
-becomes unloaded (and thus any memory not deallocated properly would
-result in a memory leak). The exit hook can be run immediately after the
-init hook, so write your module in a way that it can handle this case!
+just before the module is unloaded except for the case that an exception
+had been thrown while the @code{init_hook()} was run. Please take care:
+you can't talk to the device anymore when this hook is called. It should
+only be used to e.g.@: get rid of memory allocated withing the module
+before the it becomes unloaded (and thus any memory not deallocated
+properly would result in a memory leak). The exit hook can be run
+immediately after the init hook, so write your module in a way that it
+can handle this case!
 
 Please note that the first three functions, i.e.@:
 @code{sr510_init_hook}, @code{sr510_test_hook} and
