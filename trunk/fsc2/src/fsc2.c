@@ -13,20 +13,34 @@
 
 int main( int argc, char *argv[ ] )
 {
+#if defined DEBUG
+	if ( mcheck( NULL ) != 0 )
+	{
+		printf( "Can't start mcheck() !\n" );
+		return EXIT_FAILURE;
+	}
+#endif
+
 	if ( argc < 2 )
 	{
 		printf( "Missing input file.\n" );
 		return EXIT_FAILURE;
 	}
 
-	clear_up( );
-
+	clean_up( );
+/*
 	while ( 1 )
 	{
+*/
 		split( argv[ 1 ] );
 		clean_up( );
-	}
 
+#if defined DEBUG
+		fprintf( stderr, "\n\n" );
+#endif
+/*
+	}
+*/
 	return EXIT_SUCCESS;
 }
 

@@ -20,6 +20,10 @@ void *T_malloc( size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
+#if defined DEBUG
+	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
+#endif
+
 	return mem;
 }
 
@@ -36,6 +40,9 @@ void *T_calloc( size_t nmemb, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
+#if defined DEBUG
+	fprintf( stderr, "calloc:  %p (%u)\n", mem, nmemb * size );
+#endif
 	return mem;
 }
 
@@ -52,6 +59,10 @@ void *T_realloc( void *ptr, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
+#if defined DEBUG
+	fprintf( stderr, "realloc: %p -> %p (%u)\n", ptr, new_ptr, size );
+#endif
+
 	return new_ptr;
 }
 
@@ -59,7 +70,7 @@ void *T_realloc( void *ptr, size_t size )
 void T_free( void *ptr )
 {
 #if defined DEBUG
-	assert( mprobe( ptr ) == MCHECK_OK );
+	fprintf( stderr, "free:    %p (check : %d)\n", ptr, mprobe( ptr ) );
 #endif
 
 	free( ptr );
