@@ -893,8 +893,7 @@ double tds520_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 void tds520_gpib_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			DEVICE_NAME );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -123,8 +123,8 @@ void tds520_do_pre_exp_checks( void )
 
 		if ( width == 0.0 )
 		{
-			eprint( FATAL, UNSET, "%s: Can't determine a reasonable value for "
-					"still undefined window widths.\n", DEVICE_NAME );
+			print( FATAL, "Can't determine a reasonable value for still "
+				   "undefined window widths.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -224,9 +224,8 @@ static void tds520_window_check_2( void )
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS520_POINTS_PER_DIV;
 			buffer = T_strdup( tds520_ptime( dcs ) );
-			eprint( WARN, UNSET, "%s: Start point of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num, 
-					tds520_ptime( w->start ), buffer );
+			print( WARN, "Start point of window %ld had to be readjusted from "
+				   "%s to %s.\n", w->num, tds520_ptime( w->start ), buffer );
 			T_free( buffer );
 			w->start = dcs;
 		}
@@ -248,9 +247,8 @@ static void tds520_window_check_2( void )
 		{
 			dcd = tds520.timebase / TDS520_POINTS_PER_DIV;
 			buffer = T_strdup( tds520_ptime( dcd ) );
-			eprint( SEVERE, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520_ptime( w->width ), buffer );
+			print( SEVERE, "Width of window %ld had to be readjusted from %s "
+				   "to %s.\n", w->num, tds520_ptime( w->width ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -259,9 +257,8 @@ static void tds520_window_check_2( void )
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS520_POINTS_PER_DIV;
 			buffer = T_strdup( tds520_ptime( dcd ) );
-			eprint( WARN, UNSET, "%s: Width of window %ld had to be "
-					"readjusted from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520_ptime( w->width ), buffer );
+			print( WARN, "Width of window %ld had to be readjusted from %s to "
+				   "%s.\n", w->num, tds520_ptime( w->width ), buffer );
 			T_free( buffer );
 			w->width = dcd;
 		}
@@ -290,8 +287,8 @@ static void tds520_window_check_3( void )
              w->start < - tds520.trig_pos * window ||
              w->start + w->width < - tds520.trig_pos * window )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld doesn't fit into current "
-					"digitizer time range.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld doesn't fit into current digitizer time "
+				   "range.\n", w->num );
 			THROW( EXCEPTION );
 		}
 
@@ -304,8 +301,8 @@ static void tds520_window_check_3( void )
 
 		if ( w->end_num - w->start_num <= 0 )
         {
-			eprint( FATAL, UNSET, "%s: Window %ld has width of less than 1 "
-					"point.\n", DEVICE_NAME, w->num );
+			print( FATAL, "Window %ld has width of less than 1 point.\n",
+				   w->num );
 			THROW( EXCEPTION );
 		}
     }
@@ -416,8 +413,8 @@ long tds520_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_LINE;
 
 			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
+				print( FATAL, "Internal error detected at %s:%d.\n",
+					   __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
