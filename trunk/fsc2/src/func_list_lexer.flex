@@ -175,9 +175,9 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		 is_restart = SET;
 
 	/* count the number of functions defined in the file */
-
+/*
 	eprint( NO_ERROR, "Parsing function data base `%s'.\n", Fname );
-
+*/
 	TRY
 	{
 		num = fll_count_functions( );
