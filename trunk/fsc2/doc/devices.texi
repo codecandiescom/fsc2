@@ -27,11 +27,12 @@ individual device, i.e.@: to have a different function for e.g.@:
 fetching data from each of a series of different digitizing
 oscilloscopes.  But this would be a nuisance for someone writing
 @acronym{EDL} programs because whenever for example the oscilloscope has
-to be changed also all the programs have to be adjusted to the special
-capabilities of the digitizer that's just using.
+to be changed also all the programs would have to be adjusted to reflect
+the names of the functions for the new digitizer.
 
-Thus it's reasonable to have generic functions for a similar devices
-that usually have a lot in common. So one may write
+Thus it's reasonable to have generic functions for similar devices
+that usually have a lot in common. It's not only much more convenient
+to write
 @example
 new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
 @end example
@@ -39,28 +40,57 @@ instead of
 @example
 new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
-and does not have to change anything whenever someone else needs the
-TDS754A oscilloscope for a few days and one has to do with the TDS520
-oscilloscope in the mean time.
+but one doesn't has to change dozens of references to the TDS754A
+oscilloscope in each and every @acronym{EDL} program when someone else
+needs just this oscilloscope for a few days and one has to do with the
+TDS520 oscilloscope in between.
 
-Of course, using generic functions has its limitations - when e.g.@: the
-lock-in amplifier has only one channel no abstraction can make it have
-two channels - but wait, actually, it can: whenever the program is asked
-for data from channel 2 it may rotate the phase lock-in phase by 90
-degrees, waits for another time constant, gets the value and you
-basically have two channels, at least realized in software (of course,
-there's a penalty - measurements take at least twice the time needed
-with a two-channel lock-in amplifier). But there can be real hard
-limitations - if you've got a device with only 2 DACs no software
-trickery will ever magically convert it into a device with 4 DACs
-(additional hardware may, but that's a different topic...)
-
-The gist is, that, while a lot of abstraction is possible, not all device
-functions can be completely identical for all devices. Thus, while the
+Of course, using generic functions has its limitations - if e.g.@: the
+new lock-in amplifier has only one channel while the previous one had
+two no abstraction can make it have two channels. This means that,
+while a lot of abstraction is possible, not all device functions can be
+completely identical for all devices of the same type. Thus, while the
 names of the functions remain identical, the arguments the functions are
-called with may differ for different devices. But while this can be as
-annoying as having different functions for each device, it at least
-reduces the amount of differences to be taken into account considerably.
+called with may differ sometimes for different devices. But while this
+can be annoyingly enough it at least reduces the amount of changes
+to be done to the @acronym{EDL} program considerably.
+
+But what if you need to use for example two lock-in amplifiers
+simultaneously? When the names of the functions for accessing both the
+lock-ins are identical how does one specify which one to use for a
+command? It's actually quite simple. In the @code{DEVICES} section the
+two lock-in amplifiers will be listed:
+@example
+sr510;         // first lock-in amplifier
+sr830;         // second lock-in amplifier
+@end example
+If now data from the first lock-in amplifier are needed one simply uses
+the normal way to get data, i.e.@: the usual function name:
+@example
+data_from_1st_lockin = lockin_get_data( );
+@end example
+But to get data from the second only the string @code{"#2"} needs to
+be appended to the function name:
+@example
+data_from_2nd_lockin = lockin_get_data#2( );
+@end example
+and @code{fsc2} will automatically know that now the second of the
+lock-in amplifiers from the list of devices is meant.
+
+Of course, if there are three lock-ins, for the third one would have to
+append @code{"#3"} to the function name (assuming there's a third
+lock-in in the @code{DEVICES} section) etc. (Actually, one could also
+append the string @code{"#1"} to the name of the function for the first
+lock-in amplifier, but that's optional.)
+
+What remains problematical is when two identical devices are to be used.
+Due to limitations not only of @acronym{fsc2} but also the libraries
+used for accessing the GPIB bus there's not such simple method. I.e. you
+can't simply list the device twice in the @code{DEVICES} section and
+then use them as outlines above. Instead, two device modules with
+different names have to be created for these devices and mad known to
+the program. [Further information on how this is done still needs to be
+written...]
 
 
 
