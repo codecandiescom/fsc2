@@ -778,6 +778,8 @@ Var *monochromator_calc_wavelength( Var *v )
 			print( FATAL, "Invalid negative center wavelength.\n" );
 			THROW( EXCEPTION );
 		}
+
+		too_many_arguments( v );
 	}
 	else
 		cwl = spectrapro_300i.wavelength;
