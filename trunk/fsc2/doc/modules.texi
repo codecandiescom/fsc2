@@ -58,20 +58,19 @@ I want to start with a short summary what a module usually contains and
 how to make @code{fsc2} aware of its existence. The most important
 things are, of course, the functions that are going to be invoked from
 @code{EDL} script. Their names (in the C code) are identical to the ones
-that are used as @code{EDL} function names. Thus, while your in
+that are used as @code{EDL} function names. Thus, while you are in
 principle free to chose whatever names you fancy, it is probably
-reasonable to use names that fit the common convention to pick names
-that start with the type of the device (but not its name) followed by an
-underscore and a descriptive name. If there are already devices similar
-to the one you're writing the module for it's best to use names
-identical to the ones in these other modules and also to try to use the
-same arguments if possible. This reduces the problems for users when
-they have to switch devices, they simply can exchange the device name in
-the @code{DEVICES} section and don't have check each and every function
-call for the device. So, if you're writing a driver for a lock-in
-amplifier stick for example with the name @code{lockin_get_data()} and
-don't make up new ones like @code{lockin_fetch_data()} when the
-functionality is the same.
+reasonable to use names that fit the convention to pick names that start
+with the type of the device (not its name), followed by an underscore
+and a descriptive name. If there are already devices similar to the one
+you're writing the module for it's best to use names identical to the
+ones in these other modules and also to try to use the same arguments if
+possible. This reduces the problems for users when they have to switch
+devices, they simply can exchange the device name in the @code{DEVICES}
+section and don't have to check each and every function call for the
+device. So, if you're writing a driver for a lock-in amplifier stick for
+example with the name @code{lockin_get_data()} and don't make up new
+ones like @code{lockin_fetch_data()} when the functionality is the same.
 
 Of course, a module will usually also contain other utility functions.
 Here you're free to use whatever name you like. To avoid trouble I
@@ -84,7 +83,7 @@ going to be invoked from @code{EDL} scripts that get called from
 @code{fsc2}. These are the so-called hook functions that (if they exist)
 get invoked at certain stages of the execution of an @code{EDL} script,
 i.e.@: after loading the module, before and after the test run, at the
-start and the end of the experiment and, finally, just before the module
+start and the end of an experiment and, finally, just before the module
 is unloaded. From within these functions you can initialize the internal
 data of the module, initialize the device you're controlling and finally
 bring it back into a well defined state when the experiment is done.
