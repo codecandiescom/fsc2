@@ -370,7 +370,7 @@ bool dg2020_set_memory_size( long mem_size );
 bool dg2020_channel_assign(  int channel, int pod );
 bool dg2020_update_data( void );
 bool dg2020_make_blocks( int num_blocks, BLOCK *block );
-bool dg2020_make_seq( int num_blocks, BLOCK *block );
+bool dg2020_make_seq( BLOCK *block );
 bool pulser_set_channel( int channel, Ticks address,
 						 Ticks length, char *pattern );
 bool dg2020_set_constant( int channel, Ticks address,
