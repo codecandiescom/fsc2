@@ -39,7 +39,7 @@
 #endif
 
 #if ! defined RULBUS_DEFAULT_DEVICE_FILE
-#define RULBUS_DEFAULT_DEVICE_FILE  "/dev/rulbus"
+#define RULBUS_DEFAULT_DEVICE_FILE  "/dev/rulbus_epp"
 #endif
 
 
