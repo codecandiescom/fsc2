@@ -283,7 +283,7 @@ example let's further improve the @code{EDL} program to include
 setting the lock-in's time constant. To do so, you normally would
 include a line for defining the time constant in the @code{VARIABLES}
 section and a line, somewhere at the start of the @code{EXPERIMENT}
-section to set the lock-in's time constant. The "enhamced" @code{EDL}
+section to set the lock-in's time constant. The "enhanced" @code{EDL}
 program now would look like this:
 @example
 DEVICES:
@@ -446,9 +446,9 @@ in which case the program would output a sentence grumbling about the
 time the experiment will take when the user selected a time constant of
 three seconds. Please note that it's important not to omit any spaces
 from the string when comparing it against a menu entry - for a human
-it's obvious that @code{" 3s"} and @code{"3s"} is supposed to mean the
-same, but a computer isn't that good at getting the meaning but rather
-cares about formalities...
+it's obvious that @w{@code{" 3s"}} and @code{"3s"} is supposed to mean
+the same, but a computer isn't that good at getting the meaning but
+rather cares about formalities...
 
 Of course, you can also compare numbers in if-elsif-else-endif
 constructs (or whatever you care to call them). The reason that we were

@@ -135,8 +135,6 @@ translation approved by the Free Software Foundation.
 
 @end ifinfo
 
-@kbdinputstyle distinct
-
 @contents
 
 @include overview.texi
