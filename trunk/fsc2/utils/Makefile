@@ -30,7 +30,7 @@ utils: edl-mod.elc
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el
 
-install:
+install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
 	$(INSTALL) -m 755 fsc2_pulses $(bindir)
 	$(INSTALL) -d $(emacs_dir)
