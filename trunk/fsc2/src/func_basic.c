@@ -1377,13 +1377,16 @@ Var *f_mean( Var *v )
 
 			/* Test that the slice is within the arrays range */
 
-			if ( slice_len != 1 && index + slice_len > len &&
-				 ! ( TEST_RUN && ( v->flags & IS_DYNAMIC ) ) )
-			{
-				eprint( FATAL, "%s:%ld: Sum of index and slice length "
-						"parameter exceeds length of array in function "
-						"mean().\n", Fname, Lc );
-				THROW( EXCEPTION );
+			if ( slice_len != 1 && index + slice_len > len ) {
+				if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
+					slice_len = len - index;
+				else
+				{
+					eprint( FATAL, "%s:%ld: Sum of index and slice length "
+							"parameter exceeds length of array in function "
+							"mean().\n", Fname, Lc );
+					THROW( EXCEPTION );
+				}
 			}
 		}
 		else
@@ -1503,32 +1506,17 @@ Var *f_slice( Var *v )
 
 	/* Test that the slice is within the arrays range */
 
-	if ( index + slice_len > len &&
-		 ! ( TEST_RUN && ( v->flags & IS_DYNAMIC ) ) )
-	{
-		eprint( FATAL, "%s:%ld: Sum of index and slice length parameter "
-				"exceeds length of array in function slice.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
 	if ( index + slice_len >= len )
 	{
-		if ( ilp != NULL )
-		{
-			nlp = T_calloc( slice_len, sizeof( long ) );
-			memcpy( nlp, ilp + index, ( len - index ) * sizeof( long ) );
-			new_var = vars_push( INT_TRANS_ARR, nlp, slice_len );
-			T_free( nlp );
-		}
+		if ( TEST_RUN && ( v->flags & IS_DYNAMIC ) )
+			slice_len = len - index - 1;
 		else
 		{
-			ndp = T_calloc( slice_len, sizeof( double ) );
-			memcpy( nlp, idp + index, ( len - index ) * sizeof( double ) );
-			new_var = vars_push( FLOAT_TRANS_ARR, ndp, slice_len );
-			T_free( ndp );
+			eprint( FATAL, "%s:%ld: Sum of index and slice length parameter "
+					"exceeds length of array in function slice.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
 		}
-
-		return new_var;
 	}
 
 	if ( ilp != NULL )
