@@ -85,6 +85,7 @@ Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
+Var *magnet_command( Var *v );
 
 
 
@@ -106,6 +107,8 @@ static int er032m_set_swa( int sweep_address );
 static int er032m_get_swa( void );        /* currently not needed */
 #endif
 static void er032m_test_leds( void );
+static bool er032m_command( const char *cmd );
+static bool er032m_talk( const char *cmd, char *reply, long *length );
 static void er032m_failure( void );
 
 
@@ -425,6 +428,37 @@ Var *set_field( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *magnet_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			er032m_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*------------------------------*/
 /* Initialization of the device */
 /*------------------------------*/
@@ -441,29 +475,24 @@ static void er032m_init( void )
 
 	/* Switch to computer mode */
 
-	if ( gpib_write( magnet.device, "CO\r", 3 ) == FAILURE )
-		er032m_failure( );
+	er032m_command( "CO\r" );
 
 	/* Enable Hall controller */
 
-	if ( gpib_write( magnet.device, "EC\r", 3 ) == FAILURE )
-		er032m_failure( );
+	er032m_command( "EC\r" );
 
 	/* Switch to mode 0 */
 
-	if ( gpib_write( magnet.device, "MO0\r", 4 ) == FAILURE )
-		er032m_failure( );
+	er032m_command( "MO0\r" );
 
 	/* Switch off service requests */
 
-	if ( gpib_write( magnet.device, "SR0\r", 4 ) == FAILURE )
-		er032m_failure( );
+	er032m_command( "SR0\r" );
 
 	/* Set IM0 sweep mode (we don't use it, just to make sure we don't
 	   trigger a sweep start inadvertently) */
 
-	if ( gpib_write( magnet.device, "IM0\r", 4 ) == FAILURE )
-		er032m_failure( );
+	er032m_command( "IM0\r" );
 
 	/* Check the status of the LEDs */
 
@@ -936,10 +965,7 @@ static void er032m_test_leds( void )
 		is_overload = is_remote = UNSET;
 
 		length = 20;
-
-		if ( gpib_write( magnet.device, "LE\r", 3 ) == FAILURE ||
-			 gpib_read( magnet.device, buf, &length ) == FAILURE )
-			er032m_failure( );
+		er032m_talk( "LE\r", buf, &length );
 
 		bp = buf;
 		while ( *bp && *bp != '\r' )
@@ -1001,10 +1027,7 @@ static double er032m_get_field( void )
 	long length = 30;
 
 
-	if ( gpib_write( magnet.device, "FC\r", 3 ) == FAILURE ||
-		 gpib_read( magnet.device, buf, &length ) == FAILURE )
-		er032m_failure( );
-
+	er032m_talk( "FC\r", buf, &length );
 	buf[ length ] = '\0';
 	return T_atod( buf + 2 );
 }
@@ -1026,9 +1049,7 @@ static double er032m_set_cf( double center_field )
 
 	for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
 	{
-		if ( gpib_write( magnet.device, buf, strlen( buf ) ) == FAILURE )
-			er032m_failure( );
-
+		er032m_command( buf );
 		if ( fabs( center_field - er032m_get_cf( ) ) <= 1.0e-3 )
 			break;
 	}
@@ -1052,10 +1073,7 @@ static double er032m_get_cf( void )
 	long len = 30;
 
 
-	if ( gpib_write( magnet.device, "CF\r", 3 ) == FAILURE ||
-		 gpib_read( magnet.device, buf, &len ) == FAILURE )
-		er032m_failure( );
-
+	er032m_talk( "CF\r", buf, &len );
 	buf[ len ] = '\0';
 	return T_atod( buf + 2 );
 }
@@ -1076,9 +1094,7 @@ static double er032m_set_sw( double sweep_width )
 
 	for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
 	{
-		if ( gpib_write( magnet.device, buf, strlen( buf ) ) == FAILURE )
-			er032m_failure( );
-
+		er032m_command( buf );
 		if ( fabs( sweep_width - er032m_get_sw( ) ) <= 1.0e-3 )
 			break;
 	}
@@ -1102,10 +1118,7 @@ static double er032m_get_sw( void )
 	long len = 30;
 
 
-	if ( gpib_write( magnet.device, "SW\r", 3 ) == FAILURE ||
-		 gpib_read( magnet.device, buf, &len ) == FAILURE )
-		er032m_failure( );
-
+	er032m_talk( "SW\r", buf, &len );
 	buf[ len ] = '\0';
 	return T_atod( buf + 2 );
 }
@@ -1122,9 +1135,7 @@ static int er032m_set_swa( int sweep_address )
 	fsc2_assert( sweep_address >= MIN_SWA && sweep_address <= MAX_SWA );
 
 	sprintf( buf, "SS%d\r", sweep_address );
-	if ( gpib_write( magnet.device, buf, strlen( buf ) ) == FAILURE )
-		er032m_failure( );
-
+	er032m_command( buf );
 	return sweep_address;
 }
 
@@ -1139,14 +1150,34 @@ static int er032m_get_swa( void )
 	long len = 30;
 
 
-	if ( gpib_write( magnet.device, "SA\r", 3 ) == FAILURE ||
-		 gpib_read( magnet.device, buf, &len ) == FAILURE )
-		er032m_failure( );
-
+	er032m_talk( "SA\r", buf, &len );
 	buf[ len ] = '\0';
 	return T_atoi( buf + 2 );
 }
 #endif
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool er032m_command( const char *cmd )
+{
+	if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE )
+		er032m_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool er032m_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( magnet.device, reply, length ) == FAILURE )
+		er032m_failure( );
+	return OK;
+}
 
 
 /*-------------------------------------------------------*/
