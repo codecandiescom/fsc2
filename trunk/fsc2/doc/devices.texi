@@ -457,8 +457,8 @@ higher than the maximum sensitivity can be specified, in which case the
 For the @strong{ER023M Signal Channel} the function does not set the
 sensitivity in units of the output voltage but sets the receiver
 gain. Valid receiver gains are in the range between @code{2.0E+1} and
-@code{1.0E+7} and in increments of @code{2 dB}. Therefor in this range
-the following multiplier steps can be used: @code{1.0}, @code{1.25},
+@code{1.0E+7} and in increments of @code{2 dB}. Thus in this range the
+following multiplier steps can be used: @code{1.0}, @code{1.25},
 @code{1.5}, @code{2.0}, @code{2.5}, @code{3.0}, @code{4.0}, @code{5.0},
 @code{6.0} and @code{8.0}.
 

@@ -508,7 +508,7 @@ other direction is drawn.
 
 Sometimes it is necessary to adjust certain values while a measurement
 is running, especially if one is trying to determine the optimum
-parameters for an experiment. Therefor it is possible to write an
+parameters for an experiment. Therefore, it is possible to write an
 @code{EDL} program that creates several different kinds of objects
 allowing user input during the experiment. All these elements appear in
 a separate window, the tool box.
