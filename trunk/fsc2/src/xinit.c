@@ -94,7 +94,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 		 == NULL )
 		return FAIL;
 
-	if ( *argc != 1 )
+	if ( *argc > 1 )
 	{
 		fprintf( stderr, "Unknown option \"%s\".\n", argv[ 1 ] );
 		usage( );

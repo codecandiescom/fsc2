@@ -19,11 +19,11 @@
    (see list below).
 
    If, on the other hand, the program finds that fsc2 isn't running (because
-   it can't connect to fsc2) it will try to start fsc2 with the '-d' flag (to
-   make fsc2 delete its input file when done with it) and, depending on the
-   name this program was invocated with, with the '-S' or '-T' flag or no flag
-   and the name of the temporary file. If fsc2 can't be started properly this
-   program will return a return value to indicate it.
+   it can't connect to fsc2) it will try to start fsc2 with the '--delete'
+   flag (to make fsc2 delete its input file when done with it) and, depending
+   on the name this program was invocated with, with the '-S' or '-T' flag or
+   no flag and the name of the temporary file. If fsc2 can't be started
+   properly this program will return a return value to indicate it.
 
    The best way to use this program is to create the EDL program to send to
    fsc2 and send it to this program using a popen() call. The success can be
