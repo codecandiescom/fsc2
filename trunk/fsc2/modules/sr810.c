@@ -885,10 +885,11 @@ static bool sr810_init( const char *name )
 	int i;
 
 
-	fsc2_assert( sr810.device < 0 );
-
 	if ( gpib_init_device( name, &sr810.device ) == FAILURE )
+	{
+		sr810.device = -1;
         return FAIL;
+	}
 
 	/* Tell the lock-in to use the GPIB bus for communication, clear all
 	   the relevant registers  and make sure the keyboard is locked */

@@ -753,10 +753,11 @@ bool sr530_init( const char *name )
 	int i;
 
 
-	fsc2_assert( sr530.device < 0 );
-
 	if ( gpib_init_device( name, &sr530.device ) == FAILURE )
+	{
+		sr530.device = -1;
         return FAIL;
+	}
 
 	/* Ask lock-in to send status byte and test if it does */
 

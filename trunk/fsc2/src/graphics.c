@@ -800,16 +800,31 @@ void stop_graphics( void )
 
 		if ( run_form )
 		{
-			canvas_off( &G.x_axis, run_form->x_axis );
-			canvas_off( &G.y_axis, run_form->y_axis );
-			canvas_off( &G.canvas, run_form->canvas );
+			if ( G.x_axis.obj )
+			{
+				canvas_off( &G.x_axis, run_form->x_axis );
+				G.x_axis.obj = NULL;
+			}
+			if ( G.y_axis.obj )
+			{
+				canvas_off( &G.y_axis, run_form->y_axis );
+				G.y_axis.obj = NULL;
+			}
+			if ( G.canvas.obj )
+			{
+				canvas_off( &G.canvas, run_form->canvas );
+				G.canvas.obj = NULL;
+			}
 		}
 
 		if ( G.dim == 2 )
 		{
 			cut_form_close( );
-			if ( run_form )
+			if ( run_form && G.z_axis.obj )
+			{
 				canvas_off( &G.z_axis, run_form->z_axis );
+				G.z_axis.obj = NULL;
+			}
 		}
 	}
 
@@ -835,6 +850,8 @@ void stop_graphics( void )
 	{
 		memcpy( &G, G_stored, sizeof( Graphics ) );
 		T_free( G_stored );
+		for ( i = X; i <= Z; i++ )
+			G.label[ i ] = NULL;
 	}
 }
 
