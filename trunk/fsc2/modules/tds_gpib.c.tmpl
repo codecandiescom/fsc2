@@ -353,8 +353,8 @@ void tds_tmpl_set_num_avg( long num_avg )
 	if ( num_avg == 0 )
 		tds_tmpl_command( "ACQ:STATE STOP\n" );
 
-	/* With number of acquisitions switch to sample mode, for all other numbers
-	   set the number of acquisitions and switch to average mode */
+	/* With 1 as the number of acquisitions switch to sample mode, for all
+	   others set the number of acquisitions and switch to average mode */
 
 	if ( num_avg == 1 )
 		tds_tmpl_command( "ACQ:MOD SAM\n" );

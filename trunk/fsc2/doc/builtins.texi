@@ -1172,7 +1172,7 @@ report e.g.@: a new slider value until you have called
 This function is very similar to the previous function,
 @code{toolbox_change()}. The main difference is that it will wait for a
 certain time and only returns when either this time has expired or an
-objects state has changed. Thus it needs on additional argument: the
+objects state has changed. Thus it needs one additional argument: the
 first argument must be the maximum time the function will block if none
 of the objects were changed. This first argument may be followed of a
 list of objects to check. The function also returns the ID of the first
@@ -1204,7 +1204,7 @@ that become yellow when pressed, and radio buttons as round buttons,
 that become red when activated.
 
 The first argument the function expects is the type of the button,
-i.e.@: on of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
+i.e.@: one of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
 @code{"RADIO_BUTTON"} (the case of the letters doesn't matter).
 
 For a radio button it must be specified which group it belongs to. Each
@@ -1256,7 +1256,7 @@ argument is the identifier of the button as it was returned by the
 function @code{button_create()}. If there are no more arguments the
 state of the button is returned. There is a difference between the
 values returned for normal buttons on the one side and push and radio
-buttons on he other. For normal buttons a counter is maintained that
+buttons on the other. For normal buttons a counter is maintained that
 counts the number of times the button was pressed and its value is
 returned and the counter is set back to zero at the same time. In
 contrast, for push and radio buttons the state of the button, i.e.@:
@@ -1330,7 +1330,7 @@ used as the sliders initial value.
 @anchor{slider_delete}
 @item slider_delete()
 @findex slider_delete()
-The function deletes on or more sliders. It expects one or a list of
+The function deletes one or more sliders. It expects one or a list of
 slider identifiers as returned by the function @code{slider_create()}.
 
 
@@ -1394,7 +1394,7 @@ please read the manual page for @code{C}'s @code{printf(3)}.
 @anchor{input_delete}
 @item input_delete()
 @findex input_delete()
-The function deletes on or more input field. It expects one or a list of
+The function deletes one or more input field. It expects one or a list of
 input field identifiers as returned by the function @code{input_create()}.
 
 
@@ -1413,12 +1413,11 @@ will also be accepted) for @code{FLOAT_INPUT} objects.
 @anchor{input_changed}
 @item input_changed()
 @findex input_changed()
-The function takes one argument, the ID of a input. It will return
-@code{1} if the value of the input field has been edited by the user
-(and thereby changed) and @code{0} if not. Please note that the function
-will repeatedly report a change of the input fields value until you have
-determined the new value by calling @code{input_value()} for the input
-field.
+The function takes one argument, the ID of an input field. It returns
+@code{1} if the value of the input field has been changed by the user
+and @code{0} if not. Please note that the function will repeatedly
+report a change of the input fields value until you have determined the
+new value by calling @code{input_value()}.
 
 
 @anchor{output_create}
@@ -1458,7 +1457,7 @@ please read the manual page for @code{C}'s @code{printf(3)}.
 @anchor{output_delete}
 @item output_delete()
 @findex output_delete()
-The function deletes on or more output field. It expects one or a list of
+The function deletes one or more output field. It expects one or a list of
 output field identifiers as returned by the function @code{input_create()}.
 
 
@@ -1525,7 +1524,7 @@ the selected menu item until you have determined the new item by calling
 @anchor{object_delete}
 @item object_delete()
 @findex object_delete()
-The function deletes on or more objects from the toolbox. It expects one
+The function deletes one or more objects from the toolbox. It expects one
 or a comma separated list of object identifiers as returned by the
 functions @code{button_create()}, @code{slider_create()} and
 @code{input_create()}.

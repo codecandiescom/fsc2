@@ -1094,8 +1094,8 @@ measured by the digitizer.
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
-called with two arguments) the sensitivity setting of on of the channels
-of the oscilloscope. It needs at least on argument, the channel, either
+called with two arguments) the sensitivity setting of one of the channels
+of the oscilloscope. It needs at least one argument, the channel, either
 symbolically or numerically. The channels that can be used as arguments
 depend on the model of the oscilloscope:
 @table @samp
@@ -1290,7 +1290,7 @@ cursors on the screen is used for the window width.
 @item digitizer_window_position()
 @findex digitizer_window_position()
 This function can be used to query the position or to set a new position
-for an already defined window. It expects at least on argument, a window
+for an already defined window. It expects at least one argument, a window
 number as returned by @code{digitizer_define_window()}. If there is no
 further argument the position of the window is returned. Otherwise the
 second parameter is taken to be the new window position.
@@ -1300,7 +1300,7 @@ second parameter is taken to be the new window position.
 @item digitizer_window_width()
 @findex digitizer_window_width()
 This function can be used to query the width or to set a new width for
-an already existing window. It expects at least on argument, a window
+an already existing window. It expects at least one argument, a window
 number as returned by @code{digitizer_define_window()}. If there is no
 further argument the width of the window is returned. Otherwise the
 second parameter is taken to be the new window width.
@@ -2256,7 +2256,7 @@ external AC coupled source and @w{50%} amplitude.
 @findex synthesizer_mod_type()
 As an alternative the function @code{synthesizer_modulation()} the
 modulation type can be also set via the function
-@code{synthesizer_mod_type()}. It accepts on of three (for the
+@code{synthesizer_mod_type()}. It accepts one of three (for the
 @code{HP8672A}) or four ( for the @code{HP8647} string arguments
 @code{"FM"}, @code{"AM"}, @code{"PHASE"} (@code{HP8647A} only) or,
 finally, @code{"OFF"}. (or the numbers @code{0} for FM, @code{1} for AM,
