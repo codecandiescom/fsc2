@@ -2283,13 +2283,12 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 		/* Finally copy the array slice element by element */
 
-		for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
-		{
-			if ( d->type == INT_CONT_ARR )
+		if ( d->type == INT_CONT_ARR )
+			for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 				*dest->val.lpnt++ = ( long ) *src->val.dpnt++;
-			else
+		else
+			for ( i = 0; i < d->sizes[ d->dim - 1 ]; i++ )
 				*dest->val.dpnt++ = ( double ) *src->val.lpnt++;
-		}
 	}
 
 	/* The size of the destination array is now fixed if the source array has
