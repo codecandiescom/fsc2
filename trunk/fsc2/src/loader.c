@@ -882,6 +882,8 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 void unload_device( Device *dev )
 {
+	fsc2_assert( EDL.Call_Stack == NULL );
+
 	if ( dev->driver.handle &&
 		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
 	{

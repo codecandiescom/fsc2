@@ -243,6 +243,7 @@ struct EDL_Stuff {
 									ON_STOP label has been processed) */
 	FILE_LIST *File_List;        /* List of all files the user opened */
 	int File_List_Len;           /* Length of this file list */
+	int old_FLL;                 /* For saving file list length during test */
 
     Device *Device_List;
     Device_Name *Device_Name_List;

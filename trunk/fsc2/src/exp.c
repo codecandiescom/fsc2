@@ -846,7 +846,9 @@ int exp_testlex( void )
 
 void exp_test_run( void )
 {
-	EDL.old_FLL = EDL.File_List_Len;
+	int old_FLL = EDL.File_List_Len;
+
+
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
 	in_for_lex = UNSET;
 	in_cond = 0;
@@ -923,7 +925,7 @@ void exp_test_run( void )
 		delete_devices( );                       /* run the exit hooks ! */
 		vars_save_restore( UNSET );
 
-		EDL.File_List_Len = EDL.old_FLL;
+		EDL.File_List_Len = old_FLL;
 		close_all_files( );
 
 		Internals.mode = PREPARATION;
@@ -933,7 +935,7 @@ void exp_test_run( void )
 	Internals.mode = PREPARATION;
 	EDL.Fname = NULL;
 	vars_save_restore( UNSET );
-	EDL.File_List_Len = EDL.old_FLL;
+	EDL.File_List_Len = old_FLL;
 }
 
 
