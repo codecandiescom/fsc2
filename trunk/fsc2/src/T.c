@@ -28,6 +28,7 @@ void *T_malloc( size_t size )
 #if defined MDEBUG
 	fprintf( stderr, "(%d) malloc:  %p (%u)\n",
 			 I_am == CHILD, mem, size );
+	fflush( stderr );
 #endif
 
 	return mem;
@@ -52,6 +53,7 @@ void *T_calloc( size_t nmemb, size_t size )
 #if defined MDEBUG
 	fprintf( stderr, "(%d) calloc:  %p (%u)\n",
 			 I_am == CHILD, mem, nmemb * size );
+	fflush( stderr );
 #endif
 	return mem;
 }
@@ -78,6 +80,7 @@ void *T_realloc( void *ptr, size_t size )
 #if defined MDEBUG
 	fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
 			 I_am == CHILD, ptr, new_ptr, size );
+	fflush( stderr );
 #endif
 
 	return new_ptr;
