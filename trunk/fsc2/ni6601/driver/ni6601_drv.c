@@ -555,7 +555,7 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 	u16 source_bits;
 	u16 mode_bits = 0;
 	int use_gate;
-	u16 cmd_bits = ALWAYS_DOWN | ARM;
+	u16 cmd_bits = ALWAYS_DOWN;
 
 
 	if ( copy_from_user( &p, arg, sizeof *arg ) ) {
@@ -631,6 +631,7 @@ static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 	/* Finally start outputting the pulses */
 
 	writew( cmd_bits, board->regs.command[ p.counter ] );
+	writew( cmd_bits | ARM, board->regs.command[ p.counter ] );
 
 	return 0;
 }
@@ -647,7 +648,7 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 	u16 source_bits;
 	u16 mode_bits = OUTPUT_MODE_TC;
 	int use_gate;
-	u16 cmd_bits = ALWAYS_UP | LOAD;// | ARM;
+	u16 cmd_bits = ALWAYS_UP | LOAD;
 
 
 	if ( copy_from_user( &c, arg, sizeof *arg ) ) {
