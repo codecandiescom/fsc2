@@ -181,7 +181,7 @@ $T2H_OPTIONS -> {invisible} =
 {
  type => '=s',
  linkage => \$T2H_INVISIBLE_MARK,
- verbose => 'use text in invisble anchot',
+ verbose => 'use text in invisible anchor',
  noHelp  => 1,
 };
 
