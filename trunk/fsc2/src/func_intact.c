@@ -579,7 +579,7 @@ Var *f_bdelete( Var *v )
 
 			v = vars_pop( v );
 
-			/* Ask parent to delete the buton, bomb out on failure */
+			/* Ask parent to delete the button, bomb out on failure */
 
 			if ( ! exp_bdelete( buffer, pos - buffer ) )
 				THROW( EXCEPTION )
@@ -888,6 +888,16 @@ Var *f_bstate( Var *v )
 						v->val.sptr, Cur_Func );
 				THROW( EXCEPTION )
 		}
+
+	/* Can't switch off a radio button that is switched on */
+
+	if ( io->type == RADIO_BUTTON && io->state == 0 &&
+		 fl_get_button( io->self ) )
+	{
+		eprint( FATAL, SET, "Can't switch off an active RADIO_BUTTON, switch "
+				"on another one instead.\n" );
+		THROW( EXCEPTION )
+	}
 
 	/* If this isn't a test run set the button state */
 

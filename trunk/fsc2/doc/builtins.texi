@@ -141,44 +141,7 @@ string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run (the @code{T} is never
 printed).
 @end table
-@end table
 
-Before delving into the explanation of the functions for displaying data
-in the display window, here are a few remarks that may make things a bit
-clearer: Please start with imaging the display window as a grid, with
-each point of the grid being addressed by an integer number.
-
-For 1D-displays (i.e.@: if just simple curves are going to be displayed)
-you will have to tell the program at which of the points in
-@i{x}-direction a new measured value has to be displayed, i.e.@: that
-the new data value from the lock-in amplifier has to be shown at the
-@code{123}th point of the grid.
-
-Of course, when doing the measurement, you can't care less for the
-number of the point where the data point is displayed, but you would
-like to know e.g.@: the field at this point (assuming a cw-EPR
-experiment). To make this possible you will have to tell @acronym{fsc2}
-the field value at the very first point (i.e.@: the field at point
-@code{1}) as well as the field difference between two points of the
-grid. This you will have to do before the experiment is
-started. Afterwards you just have to instruct @acronym{fsc2} at which
-point number a new data point is to be drawn and the program will be
-able to figure out what has to be drawn as the @i{x}-axis. Here's an
-example (which assumes that you had already a peek at the following
-text): If you initialize the graphics by
-@example
-  init_1d( 1, 0, 3400 G, 0.5 G );
-@end example
-thus telling @acronym{fsc2} that there is just one curve to be
-displayed, that you don't know how many measured data are going to be
-displayed, and, finally, that the lowest field to b dealt with is going
-to be @w{3500 G} and the field difference between two data points will
-be halve a Gauss.
-
-Now, during the measurement, you will have to instruct 
-
-
-@tables samp
 @anchor{init_1d}
 @item init_1d()
 @findex init_1d()
