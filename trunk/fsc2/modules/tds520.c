@@ -221,8 +221,8 @@ Var *digitizer_define_window( Var *v )
 
 			/* Allow window width to be zero in test run... */
 
-			if ( ( TEST_RUN && win_width < 0.0 ) ||
-				 ( ! TEST_RUN && win_width <= 0.0 ) )
+			if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
+				 ( FSC2_MODE =! TEST && win_width <= 0.0 ) )
 			{
 				eprint( FATAL, SET, "%s: Zero or negative width for "
 						"window in %s.\n", DEVICE_NAME, Cur_Func );
