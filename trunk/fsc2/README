@@ -98,6 +98,7 @@ Currently suported devices
 * Bruker NMR Gaussmeter ER 035 M (F0, F1 probe, serial port and GPIB version)
 * Metrolab NMR Teslameter PT2025
 * Hewlett-Packard RF Synthesizer HP8647A
+* Hewlett-Packard RF Synthesizer HP8672A
 * Hewlett-Packard Frequency Counter HP5340A
 * Bruker Signal Channel ER 023 M
 * Lake Shore 330 Temperature Controller
