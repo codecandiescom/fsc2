@@ -64,7 +64,7 @@ endif
 .SUFFIXES: .c .o .h
 .PHONY: all clean
 
-all: tags fsc2 mods fsc_clean
+all: tags fsc2 mods fsc2_clean
 
 fsc2: $(objects) $(header)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
