@@ -2918,7 +2918,75 @@ Returns a string with the name of the DAC being used.
 @findex daq_ai_channel_setup()
 This function is only available for the PCI-MIO-16E-1 card. It is
 required that this function is called before analog input (AI) can be
-done using the card to setup the properties of the input channels.
+done to setup the properties of the input channels.
+
+In order to understand what this function (as well as the next few do)
+a short explanation of the way analog input (AI) is done with the card
+is required. The most basic element of an acquisition is a single
+conversion of an input voltage into a digital value. Since there's
+only a single ADC on the card, converting a the voltages of a set of
+channels needs to be serially, which is called a scan, consisting
+of as many comversions as there are channels to be sampled. So a single
+scan consists of one or more conversions, depending on the number of
+channels involved. To acquire a a curve several scans have to be done.
+
+But before even a single scan can be done, the card must be told about
+all the channels are to be sampled. The first The first argument the
+function expects is a channel number, specified by one of the symbolic
+names between @code{CH0} and @code{CH15}.
+
+The second, required argument is the range to use for the channel. For
+channels set up for bipolar input the allowed ranges are @w{10 V},
+@w{5 V}, @w{2.5 V}, @w{1 V}, @w{500 mV}, @w{250 mV}, @w{100 mV} and
+@w{50 mV}, while for channels to be used in uniploar mode the possible
+range settings are @w{10 V}, @w{5 V}, @w{2 V}, @w{1 V}, @w{500 mV},
+@w{200 mV} and @w{100 mV}.
+
+Then follwo three optional settings .The first one is the coupling of
+the channel, which must be given by one of the strings @code{"Ground"},
+@code{"Floating"} or @code{"Differential"}. The first one,
+@code{"Ground"}, means that a ground-referenced signal source is
+connected to the channel and is, therefore, already connected to a
+common ground. @code{"Floating"} means that the signal source is in no
+way connected to the ground system and is therefore free
+floating. Examples are e.g.@: batteries, thermocouples, transformers
+etc. Finally, @code{"Differential"} is for cases where the signals
+source has its own reference signal or signal return path. In these
+cases two inputs channels are required, one from the range @code{CH0} to
+@code{CH7} and the second being having the number of the first
+incremented by 8 - thus if one of the channels involved is @code{CH0}
+the other channel to be used for differential input is @code{CH8}
+etc. This second channel must not be setup, its clear from the first
+channel (which must be between @code{CH0} and @code{CH7}) setup which
+one is going to be used. When it is not given the coupling will be
+set per default to @code{"Ground"}.
+
+The next optional argument is the polarity of the channel, specified
+by the strings @code{"BIPLOAR"} or @code{"UNIPLOAR"}. Per default
+@code{"BIPLOAR"} will be used, but if the specified range can only be
+used with uniploar coupling @code{"UNIPLOAR"} must be specified.
+
+Finally, the card allows to add approximately 0.5 LSBrms of white
+Gaussian noise to the signal to be converted by the ADC, which is called
+dithering. This addition is useful when averaging rather small samples
+to increase the resolution. To enable dithering use the string
+@code{"DITHER_ON"} as another argument. Per default dithering is
+switched off, but you can make sure by passing the function the string
+@code{"DITHER_OFF"} as another argument.
+
+The above listed set of arguments have to be repeated for each channel.
+Thus a typical invocation, setting up an acquisition using two channels
+may look like this:
+@example
+daq_ai_channel_setup( CH3, 5 V, "Differential", "BIPLOAR",
+                      CH1, 500 mV, "UNIPOLAR", "DITHER_ON" );
+@end example
+In this case @code{CH3} and @code{CH11} will be used together for a
+signal in the range between @w{-5 V} and @w{+5V} (i.e. in bipolar mode),
+where the sampled volatge is the difference between both channels, and
+@code{CH1} is going to be used in unipolar mode for a voltage between
+@w{0 V} and @w{500 mV} in @code{"Ground"} coupling mode and with
+dithering switched on.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
