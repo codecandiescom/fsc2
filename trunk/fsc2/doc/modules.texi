@@ -54,129 +54,65 @@ other useful functionalities. But the following discussion will
 concentrate on modules for new devices, writing other kinds of modules
 is even simpler.
 
-Let's start with a short summary of the things a module for a device has
-to do. Usually, a module contains a few functions that talk to the
-device via an hardware interface, e.g.@: the GPIB bus or a serial port
-(or whatever else there might be). As an example for the following a
-lock-in amplifier will be used. Probably the most basic operation is to
-fetch data from it. So one needs to create a function, called for
-example @code{lockin_get_data()}. This name will be used in the module
-written in C as well as in the @code{EDL} scripts using the function.
+I want to start with a short summary what a module usually contains and
+how to make @code{fsc2} aware of its existence. The most important
+things are, of course, the functions that are going to be invoked from
+@code{EDL} script. Their names (in the C code) are identical to the ones
+that are used as @code{EDL} function names. Thus, while your in
+principle free to chose whatever names you fancy, it is probably
+reasonable to use names that fit the common convention to pick names
+that start with the type of the device (but not its name) followed by an
+underscore and a descriptive name. If there are already devices similar
+to the one you're writing the module for it's best to use names
+identical to the ones in these other modules and also to try to use the
+same arguments if possible. This reduces the problems for users when
+they have to switch devices, they simply can exchange the device name in
+the @code{DEVICES} section and don't have check each and every function
+call for the device. So, if you're writing a driver for a lock-in
+amplifier stick for example with the name @code{lockin_get_data()} and
+don't make up new ones like @code{lockin_fetch_data()} when the
+functionality is the same.
 
-But before starting to write a new module one has to decide about the
-name for the device, which will also be the name of the module. E.g.@:
-for the @i{Stanford Research 510} lock-in amplifier I picked the name
-SR510 because that's what's written on the front panel.
+Of course, a module will usually also contain other utility functions.
+Here you're free to use whatever name you like. To avoid trouble I
+always prepend the names of all function not exported by the module with
+the name of the device and define them, as far as possible, as
+@code{static}.
 
-A new device has to be included into the device name data base called
-@file{Devices}
-@cindex @code{Devices} file
-, which is a simple ASCII file consisting of the names of all the
-supported devices. It can be found in the @file{config} subdirectory of
-the source tree and usually gets installed in the directory
-@file{/usr/local/lib/fsc2}. The entries in this file are
-case-insensitive, so you might add `SR510', `sr510' or `Sr510'
-etc. Within the file C and C++ style comments can be used. By adding the
-device name to this file you tell @code{fsc2} that there is now a module
-called `sr510' (take care - all modules are spelled with @strong{lower}
-case characters!). Actually, the file compiled from the C file defining
-the functions has to be @file{sr510.so} - that means it is a shared
-library (how to create one from the C file is described later). Here is
-a short snippet from the @file{Devices} file with the entries for the
-lock-in amplifiers:
-@example
-sr510         // Stanford Research lock-in amplifier, model 510
-sr530         // Stanford Research lock-in amplifier, model 530
-sr810         // Stanford Research lock-in amplifier, model 810
-sr830         // Stanford Research lock-in amplifier, model 830
-er023m        // Bruker Signal Channel, model ER 023 M
-@end example
+There usually are a few functions in a module beside the ones that are
+going to be invoked from @code{EDL} scripts that get called from
+@code{fsc2}. These are the so-called hook functions that (if they exist)
+get invoked at certain stages of the execution of an @code{EDL} script,
+i.e. after loading the module, before and after the test run, at the
+start and the end of the experiment and, finally, just before the module
+is unloaded. From within these functions you can initialize the internal
+data of the module, initialize the device you're controlling and finally
+bring it back into a well defined state when the experiment is done.
 
-The next thing is to append the function(s) exported by the module (in
-the sense that they can be used from @code{EDL} scripts) to the function
-data base file called @file{Functions}
-@cindex @code{Functions} file
-. Also this file is located in the @file{config} subdirectory of the
-source tree and also will usually be installed under
-@file{/usr/local/lib/fsc2}. Here one adds lines consisting of two
-or three entries, separated by commas and ending with a
-semicolon. Please note that you can't use function names that contain a
-@code{#} character.
-@enumerate
-@item Each line must start with the names of the exported function, i.e.@:
-      @code{lockin_get_data}.
-@item This has to be followed by the number of arguments the function takes 
-      - if the function accepts a variable number of arguments specify an
-      arbitrary negative number or just a minus sign (@code{-}).
-@item Optionally, you can add the keywords @code{ALL},
-@cindex @code{ALL} (in @code{Functions} file)
-      @code{EXP}
-@cindex @code{EXP} (in @code{Functions} file)
-      or @code{PREP},
-@cindex @code{PREP} (in @code{Functions} file)
-      where @code{ALL} means that the function can be used in all parts of the
-      @code{EDL} file, while @code{EXP} tells @code{fsc2} to use this
-      functions only during an experiment and, finally, @code{PREP} restricts
-      the use of the function to the @code{PREPARATION} section of the
-      @code{EDL} file.
-@end enumerate
-As in the file with the device list, C and C++ style comments can be
-used. Here are a few lines from a valid @file{Functions} file with the
-entries for lock-in amplifier functions:
-@example
-/* Functions exported by the lock-in amplifier modules
-   (SR510, SR530, SR810, SR830) */
+Once you have written the module you must make @code{fsc2} aware of the
+new device it's supposed to control and give it a list of the @code{EDL}
+functions that can be used with the device. For this purpose there are
+to files in the @file{config} directory, called @file{Devices} and
+@file{Functions} where you have to enter the name of the device and add
+the list of the new functions.
 
-lockin_name,           0, ALL;  // return the device name
-lockin_get_data,      -1, EXP;  // return the lock-in voltage 
-lockin_get_adc_data,   1, EXP;  // return a ADC voltage
-lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
-lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
-lockin_time_constant, -1, ALL;  // get/set the time constant
-lockin_phase,         -1, ALL;  // get/set the phase
-lockin_ref_freq,      -1, ALL;  // Get/set mod. frequency (SR8x0 only)
-lockin_ref_mode,       0, EXP;  // Get mod. mode (SR8x0 only)
-lockin_ref_level,     -1, EXP;  // Get/set mod. level (SR8x0 only)
-lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
-@end example
-@noindent
-For example, @code{lockin_get_adc_data} (a function that allows you to
-read the voltage at one of the lock-ins ADCs) expects 1 argument (the
-number of the ADC) and can only be used in the @code{EXPERIMENT}
-section. In contrast, @code{lockin_sensitivity} can be called with a
-variable number of arguments (if called without an argument it returns
-the sensitivity setting of the lock-in, if called with an argument the
-function treats this as the new sensitivity to be set). This function
-can be used in all parts of the @code{EDL} program - but because
-querying the lock-in for its sensitivity won't work as long as the
-program can't talk with the lock-in, i.e.@: while not in the
-@code{EXPERIMENT} section the function must test for this case and emit
-an appropriate error message all by itself.
-
-
-Writing the C file(s) with these functions, compiling it to create a
-shared library file from it and extending the device and function data
-base is all there is to be done. If in the devices sections of the
-@code{EDL} file the new device is found (and it's also listed in the
-devices data base file @file{Devices}) the new module will be loaded by
-@code{fsc2} and the functions defined in the module can be used in the
-@code{EDL} file.
+All these subjects are discussed in detail in the following. But before 
+I do so I want to start with an exlpanation of the special type of
+variables used within @code{fsc2}.
 
 
 
 @node fsc2s Variables, New Modules, Module Overview, Modules
 @section How fsc2's variables work and how to use them
 
+All functions in a module that are going to be invoked from @code{EDL}
+scripts get their input parameters in the form of a special type of
+variable and @code{fsc2} also expects that each function returns a
+value in the this form.
 
-Of course, the first question is: Why do I have to know about this at
-all?  The answer is that all functions to be used in an @code{EDL}
-file get their input parameters in form of this kind of variables and
-@code{fsc2} expects that you return values also in the form of
-@code{fsc2}'s variables.
-
-Now let's have a look at the way @code{fsc2} internally stores
-variables. Here is the (actually somewhat simplified) @code{typedef} of the
-structure for variables:
+Let's start with a look at the way @code{fsc2} internally stores
+variables. Here is the (actually somewhat simplified) @code{typedef} of
+the structure for variables:
 @example
 typedef struct Var
 @{
@@ -188,18 +124,22 @@ typedef struct Var
         long   *lpnt;        /* pointer to integer arrays */
         double *dpnt;        /* pointer to floating point arrays */
         char   *sptr;        /* for string constants */
+		struct Var **vptr;   /* for array references */
     @} val;
-    size_t len;              /* length of array */
+    int dim;                 /* dimension of array */
+    ssize_t len;             /* length of array */
     struct Var *next;        /* next variable on stack */
 @} Var;
 @end example
 
-There are only four types of variables you have to know about:
+There are only six types of variables you have to know about:
 @multitable {FLOAT_ARR} {a one-dimensional array of floating point values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
 @item @code{INT_ARR} @tab a one-dimensional array of integer values
-@item @code{FLOAT_ARR} @tab a one-dimensional array of floating
+@item @code{FLOAT_ARR} @tab a one-dimensional array of floating point values
+@item @code{INT_REF} @tab a more-dimensional array of integer values
+@item @code{FLOAT_REF} @tab a more-dimensional array of floating point values
 point values
 @end multitable
 @noindent
@@ -226,10 +166,11 @@ array of data?
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
 you look back at the typedef for @code{fsc2}'s variables, there is a
-@code{next} pointer. This is the key to accessing the next parameter --
-@code{var->next} points to next of the input parameters. If the function
-expects even more arguments, @code{var->next->next} etc.@: let's you get
-them, i.e.@: the input variables are organized as a linked list:
+@code{next} pointer. This is the key to accessing the next function
+argument -- @code{var->next} points to next of the input parameters. If
+the function expects even more arguments, @code{var->next->next} etc.@:
+let's you get them, i.e.@: the input variables are organized as a linked
+list:
 @example
   var                               pointer passed to function
    |                                  |
@@ -247,33 +188,36 @@ them, i.e.@: the input variables are organized as a linked list:
                         NULL        no more parameters...
 @end example
 @noindent
-If you declared your function in the function data base file
-@file{Functions} to accept exactly two input parameters the function will
-always get exactly two arguments. The @code{next}-pointer of the very last
-parameter will always be @code{NULL}. If the function gets called in the
-@code{EDL} file with more variables than you declared it to have a
-warning will be printed, the superfluous variables discarded
-automatically and not passed to the function. If, on the other hand,
-there are not enough parameters the program will just print an error
-message and then stop (and not call your function).
+This method allows to pass the function a variable number of arguments
+and you can check how many you got by simply counting while following
+the pointers until the @code{next} pointer of a parameter is @code{NULL}.
 
-Having the parameters organized as a linked list also makes it easy to a
-handle variable numbers of arguments: as long as the @code{next}-pointer
-of an argument isn't @code{NULL} there is at least another one. You
-probably should check in your function if there aren't too many
-arguments and if necessary print out a warning.
+When you later tell @code{fsc2} about the function (by adding it to the
+@file{Functions} file, see below) you can explicitely state if the
+functions allows a variable number of arguments or only a certain fixed
+number of arguments. A function that only accepts e.g.@: 3 arguments
+will always get 3 -- when the @code{EDL} function is called with less
+arguments an error message is printed and executing the @code{EDL}
+script is stopped, if it is called with too many arguments, the
+superfluous ones are discarded and an error message is printed before
+your function gets invoked with the correct number of arguments.
 
+In case you defined the function to accept a variable number of
+arguments you probably better check in your function that there aren't
+too many and if necessary print out a warning.
 
-One word of warning: @strong{Never ever try to change the variables you
-get passed to your functions in any way, especially the
-@code{next}-pointer!}
+One word of warning: @strong{Never ever change the variables you get
+passed to your functions in any way, especially the
+@code{next}-pointer!}. Even though the variables get thrown away
+automatically when you return from the function changing something
+within the variable may break the mechanism for clearing up the
+variables and lead to all kinds of weird errors.
 
-
-What @code{fsc2} won't do is check if the arguments it passes to your
+What @code{fsc2} can't check is if the arguments it passes to your
 function have the type you expect. Let's assume that you expect two
 integer values. What you should do first is to check if the parameters
-you got are really integers. There is a function that can do this for you,
-@code{vars_check()}.
+you got are really integers. There is a function that can do this for
+you, @code{vars_check()}.
 @findex vars_check()
 All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
@@ -297,21 +241,18 @@ variables are coded into the bits of the the integer @code{type} in the
 variable's structure, so you have to use the bitwise inclusive OR
 operator @code{|} to test alternatives.
 
-
 You can also check if the argument is a string by testing a type
 of @code{STR_VAR}, i.e.@:
 @example
 vars_check( var, STR_VAR );
 @end example
 
-
 @code{vars_check()} not only checks that the variables has the correct
-type but also some internal consistency checks to make sure that the
-variable actually exists and has been assigned a value.
+type but also does some internal consistency checks to make sure that
+the variable actually exists and has been assigned a value.
 
-A function that expects just integer arguments would probably start
-like the following example, just running through the linked list of
-parameters:
+A function that expects just integer arguments could start like the
+following example, just running through the linked list of parameters:
 @example
 Var *my_function( Var *var )
 @{
@@ -324,11 +265,9 @@ Var *my_function( Var *var )
 @}
 @end example
 
-
 The next question is how to access the value of the variable. As you can
 see the typedef for variables above the value is stored in the union
 @code{val}.  If the variable has integer type, you can access it as
-
 @quotation
     @code{var->INT}@ @ @ @ (which is a macro standing for @code{var->val.lval})
 @end quotation
@@ -340,8 +279,7 @@ variable is @code{FLOAT_VAR} you get at the data with
     @code{var->FLOAT}@ @ @ @ (i.e.@: a macro for @code{var->val.dval})
 @end quotation
 @noindent
-in which case you get a value of type @code{double}. Of course, you may
-also access the contents of the union directly. Finally you may use
+in which case you get a value of type @code{double}. Finally you may use
 @quotation
     @code{var->STRING}@ @ @ @ (a macro standing for @code{var->val.sptr})
 @end quotation
@@ -350,10 +288,10 @@ to get the address of the start of a string variable.
 
 @subsection Utility functions to determine variables values
 
-There are some utility functions that make it even easier for you to
-evaluate the parameters your function receives. The first one is for the
-case that you expect an integer variable but would also be prepared to
-deal with a floating number after it has been rounded to the nearest
+There are some utility functions that make it even easier to evaluate
+the parameters your function receives. The first one is for the case
+that you expect an integer variable but would also be prepared to deal
+with a floating number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet )
@@ -363,20 +301,21 @@ The first argument is a pointer to the variable you want to
 evaluate. The second parameter is used to create a warning message when
 the variable isn't an integer variable but a float value. This message
 always starts with the name of the currently interpreted @code{EDL}
-file, followed by the line number and the device name. The second
-parameter is a string that gets embedded into the message. For example
-if the currently interpreted @code{EDL} file is @file{foo.edl}, the line
-where your function is called is line 17 and the device name is
-@code{LECRONIX}, your function (that expects an integer but got a floating
-point number) is named @code{abc()} and the string you pass to the function
+file, followed by the line number in the @code{EDL} script your function
+was invoked from and the device name. The second parameter is a string
+that gets embedded into the message. For example, if the currently
+interpreted @code{EDL} file is @file{foo.edl}, the line where your
+function is called is line 17 and the device name is @code{LECRONIX},
+your function (that expects an integer but got a floating point number)
+is named @code{abc()} and the string you pass to the function
 @code{get_long()} as the second argument is @code{"bar"}, i.e.
 @example
-get_long( var, "baz" );
+get_long( var, "channel number" );
 @end example
 @noindent
 the following warning message will be printed:
 @example
-foo.edl:17: LECRONIX: abc(): Floating point number used as baz.
+foo.edl:17: LECRONIX: abc(): Floating point number used as channel number.
 @end example
 
 If, on the other hand, you expect a floating point number but would also
@@ -388,13 +327,7 @@ long get_double( Var *var, const char *snippet )
 The arguments of this function are the same you would pass to the
 previous function and the only difference is that it will return a
 @code{double} and print a warning message if the variable is an
-integer variable instead of the expected floating point variable. The
-warning message is
-@example
-foo.edl:17: LECRONIX: abc(): Integer number used as baz.
-@end example
-@noindent
-assuming that everything else is identical to the above example.
+integer variable instead of the expected floating point variable.
 
 If your function can accept integer variables only there's a third
 function:
@@ -403,14 +336,14 @@ long get_strict_long( Var *var, const char *snippet )
 @end example
 @noindent
 This function has the same arguments as the two other functions but it
-will throw an exception when getting passed a floating point number,
-stopping the interpretation of the @code{EDL} program (see below)
-except while doing the experiment, in which case only a warning message
-is printed and the floating point number is converted to the nearest
-integer, which is then returned (thus avoiding the termination of the
-running experiment). But usually the wrong parameter should already have
-been found during the test run, thus forcing the user to correct her/his
-program.
+will throw an exception (see below what this means) when getting passed
+a floating point number, stopping the interpretation of the @code{EDL}
+program except while doing the experiment, in which case only a warning
+message is printed and the floating point number is converted to the
+nearest integer, which is then returned (thus avoiding the termination
+of a running experiment). But usually the wrong parameter should already
+have been found during the test run, thus forcing the user to correct
+her program.
 
 Finally, there is a function for the case that you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
@@ -433,21 +366,76 @@ foo.edl:17: LECRONIX: abc(): Floating point number found where
                              boolean value was expected.
 @end example
 @noindent
-is printed and an exception is thrown. Only when @code{fsc2} is
-running the experiment only a similar warning message is printed but
-instead the floating point value is converted to the nearest integer
+is printed and an exception is thrown. Should @code{fsc2} be running an
+experiment the warning message is printed but instead of terminating the
+experiment the floating point value is converted to the nearest integer
 value and the truth value of this number is returned to avoid stopping
 the experiment.
 
-Finally, if the function receives a string variable that is neither
-@code{"ON"} nor @code{"OFF"} (including variations of the case of the
-characters) an error message is printed:
+Finally, if the @code{get_boolean()} function receives a string variable
+that is neither @code{"ON"} nor @code{"OFF"} (including variations of
+the case of the characters) an error message is printed:
 @example
 foo.edl:17: LECRONIX: abc(): Invalid boolean argument ("bla").
 @end example
 @noindent
 (assuming that the string was @code{"bla"}) and an exception is thrown
 in all cases, even during the experiment.
+
+
+@subsection Getting at the data of an one-dimensional array
+
+When a complete one-dimensional array gets passed to your function the
+type of the variable is either @code{INT_ARR} or @code{FLOAT_ARR}. As
+for single value variables you can check these variables by calling
+@code{vars_check()}.
+
+You can find the length of the array by checking the @code{len} part of
+the variable structure. Dynamically sized arrays can have a still
+undefined length, in which case the @code{len} field has a value of
+@code{0}, make sure you check for this possibility in your code.
+
+The actual data of the array can be accessed via the @code{lpnt} or the
+@code{dpnt} elements of the @code{val} union in the variables structure.
+When you have to deal with an array of integer values (i.e.@: a variable
+named @code{var} of type @code{INT_ARR}) the values (of type
+@w{@code{long int}}) are in @w{@code{var->val.lpnt[0]}} to
+@w{@code{var->val.lpnt[var->len-1]}}. For an array of floating point
+numbers the values (of type @code{double}) are stored in
+@w{@code{val->var.dpnt[0]}} to @w{@code{var->val.dpnt[var->len-1]}}.
+
+
+@subsection More-dimensional arrays
+
+For arrays of 2 or more dimensions (i.e.@: variables of type
+@code{INT_REF} and @code{FLOAT_REF}) the dimension of the array is
+stored in the @code{dim} field of the variables structure. For the data
+of such arrays the @code{vptr} field in the @code{val} union of the
+variable structure is relevent, @code{vptr} is an array of variable
+pointers, pointing to the next lower-dimension sub-arrays. How many of
+such subarrays exist can be determined from the @code{len} field of the
+variable structure. As already for the one-dimensional arrays care has
+to be taken to check that @code{len} isn't @code{0} in case none of the
+subarrays have been defined yet for variable sized arrays.
+
+If the dimension of a variable is 2 all the subarrays are
+one-dimensional arrays (i.e.@: have a type of @code{INT_ARR} or
+@code{FLOAT_ARR} and one can the values of these subarrays as described
+in the previous section.
+
+For arrays of higher dimensions the pointers in the @code{val.vptr}
+array point to variables that also have a type of @code{INT_REF} or
+@code{FLOAT_REF}.
+
+Thus to find out the element @code{[3,2,5]} of variable @code{var}
+pointing a three-dimensional floating point array one would have to use
+@example
+  var->val.vptr[ 3 ]->val.vptr[ 2 ]->val.dpnt[ 5 ]
+@end example
+Of course, before one tries to access the element oe always should check
+that @code{var->len} is at least @code{4}, @code{var->val.vptr[3]->len}
+is at least @code{3} and @code{var->val.vptr[3]->val.vptr[2]->len} is
+at least @code{6}.
 
 
 @subsection Returning data from EDL functions
@@ -660,6 +648,30 @@ correct sequence, so it's not completely foolproof.
 @node New Modules, Programming Utils, fsc2s Variables, Modules
 @section How to write a new module
 
+@subsection EDL Functions
+
+Each module has its own unique name, usually you will pick name of the
+device. Beside, a device usually belongs to a certain group, i.e.@:
+lock-in-amplifiers, digitizers, gaussmeters etc. As you will already
+have understood, the names of the @code{EDL} functions should be chosen
+to start with the type of the device, followed by an underscore and a
+name, describing what the function is supposed to do. Typical examples
+are @code{lockin_get_data()} or @code{digitzer_time_constant()}.
+
+Please note that there aren't two separate function, one for setting the
+digitizers time constant and one for asking the digitizer for the
+currently set time constant. Instead there is a single function that can
+be used for both purposes. What it is supposed to do it can recognize by
+the number of arguments, if there's no argument it will return the
+currently set time constant, otherwise it sets the time constant to the
+value passed to the function (at least if the value is reasonable). You
+should try to follow this convention if possible.
+
+All functions to be invoked via an @code{EDL} script take their arguments
+in the form of the variables as described above and return a pointer to
+such a variable.
+
+
 @subsection Files to be included
 
 First of all, each module has to include the header file
@@ -742,7 +754,6 @@ warnings and error messages. The second string is needed to find out
 about the type of the device. If this variable does not exist
 @code{fsc2} won't have any information about the device type and
 having another device of the same type recognized automatically will fail.
-
 
 Another important point is that if in two modules with different
 @code{generic_type} settings the same function name is used only one of
@@ -1199,6 +1210,95 @@ or need to set the environment variable @code{LD_LIBRARY_PATH} to
 point to the place where the library can be found.
 
 
+@subsection Making @code{fsc2} aware of the module
+
+@code{fsc2} must be made aware of the existence of a new module and of
+the @code{EDL} functions supplied by the module. Thus a new device
+driver has to be included into the device name data base called
+@file{Devices}
+@cindex @code{Devices} file
+, which is a simple ASCII file consisting of the names of all the
+supported devices. It can be found in the @file{config} subdirectory of
+the source tree and usually gets installed in the directory
+@file{/usr/local/lib/fsc2}. The entries in this file are
+case-insensitive, so you might add `SR510', `sr510' or `Sr510'
+etc. Within the file C and C++ style comments can be used. By adding the
+device name to this file you tell @code{fsc2} that there is now a module
+called `sr510' (take care - all modules are spelled with @strong{lower}
+case characters!). Actually, the file compiled from the C file defining
+the functions has to be @file{sr510.so} - that means it is a shared
+library (how to create one from the C file is described later). Here is
+a short snippet from the @file{Devices} file with the entries for the
+lock-in amplifiers:
+@example
+sr510         // Stanford Research lock-in amplifier, model 510
+sr530         // Stanford Research lock-in amplifier, model 530
+sr810         // Stanford Research lock-in amplifier, model 810
+sr830         // Stanford Research lock-in amplifier, model 830
+er023m        // Bruker Signal Channel, model ER 023 M
+@end example
+
+The next thing is to append the function(s) exported by the module (in
+the sense that they can be used from @code{EDL} scripts) to the function
+data base file called @file{Functions}
+@cindex @code{Functions} file
+. Also this file is located in the @file{config} subdirectory of the
+source tree and also will usually be installed under
+@file{/usr/local/lib/fsc2}. Here one adds lines consisting of two
+or three entries, separated by commas and ending with a
+semicolon. Please note that you can't use function names that contain a
+@code{#} character.
+@enumerate
+@item Each line must start with the names of the exported function, i.e.@:
+      @code{lockin_get_data}.
+@item This has to be followed by the number of arguments the function takes 
+      - if the function accepts a variable number of arguments specify an
+      arbitrary negative number or just a minus sign (@code{-}).
+@item Optionally, you can add the keywords @code{ALL},
+@cindex @code{ALL} (in @code{Functions} file)
+      @code{EXP}
+@cindex @code{EXP} (in @code{Functions} file)
+      or @code{PREP},
+@cindex @code{PREP} (in @code{Functions} file)
+      where @code{ALL} means that the function can be used in all parts of the
+      @code{EDL} file, while @code{EXP} tells @code{fsc2} to use this
+      functions only during an experiment and, finally, @code{PREP} restricts
+      the use of the function to the @code{PREPARATION} section of the
+      @code{EDL} file.
+@end enumerate
+As in the file with the device list, C and C++ style comments can be
+used. Here are a few lines from a valid @file{Functions} file with the
+entries for lock-in amplifier functions:
+@example
+/* Functions exported by the lock-in amplifier modules
+   (SR510, SR530, SR810, SR830) */
+
+lockin_name,           0, ALL;  // return the device name
+lockin_get_data,      -1, EXP;  // return the lock-in voltage 
+lockin_get_adc_data,   1, EXP;  // return a ADC voltage
+lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
+lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
+lockin_time_constant, -1, ALL;  // get/set the time constant
+lockin_phase,         -1, ALL;  // get/set the phase
+lockin_ref_freq,      -1, ALL;  // Get/set mod. frequency (SR8x0 only)
+lockin_ref_mode,       0, EXP;  // Get mod. mode (SR8x0 only)
+lockin_ref_level,     -1, EXP;  // Get/set mod. level (SR8x0 only)
+lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
+@end example
+@noindent
+For example, @code{lockin_get_adc_data} (a function that allows you to
+read the voltage at one of the lock-ins ADCs) expects 1 argument (the
+number of the ADC) and can only be used in the @code{EXPERIMENT}
+section. In contrast, @code{lockin_sensitivity} can be called with a
+variable number of arguments (if called without an argument it returns
+the sensitivity setting of the lock-in, if called with an argument the
+function treats this as the new sensitivity to be set). This function
+can be used in all parts of the @code{EDL} program - but because
+querying the lock-in for its sensitivity won't work as long as the
+program can't talk with the lock-in, i.e.@: while not in the
+@code{EXPERIMENT} section the function must test for this case and emit
+an appropriate error message all by itself.
+
 @subsection Calling EDL functions from a modules
 
 Calling an @code{EDL} function (built-in as well as @code{EDL}
@@ -1307,10 +1407,10 @@ very similar also in @code{C} using a few macros.
 
 When writing the program I had to deal a lot with memory leaks,
 segmentation faults etc.@: and hacked together a few routines for
-allocation and deallocation of memory that have some build in code and
-which help me with debugging (and that throw an exception when an
-allocation fails). You might find it useful to also use these routines
-for your modules.
+allocation and deallocation of memory that have some build in code to
+help me with debugging (and which throw exceptions when an allocation
+fails). You might find it useful to also use these routines for your
+modules.
 
 Finally, a boolean type is something that was missing until the new C99
 standard (and which only a few compilers already support), so there's
@@ -1405,7 +1505,7 @@ on signals.  The function is actually nothing else than a wrapper around
 @code{nanosleep()}, so you can @code{nanosleep()} yourself if you prefer.
 
 
-@subsection Exceptions
+@subsection Error handling with exceptions
 @cindex exceptions
 
 One of the most annoying things in programming is error handling. In
