@@ -461,8 +461,18 @@ Var *pulser_next_phase( Var *v )
 
 	if ( v == NULL )
 	{
-		pulser_next_phase( vars_push( INT_VAR, 1 ) );
-		pulser_next_phase( vars_push( INT_VAR, 2 ) );
+		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
+			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: No phase functions are in use.\n",
+					Fname, Lc );
+			return vars_push( INT_VAR, 0 );
+		}
+					
+		if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used )
+			pulser_next_phase( vars_push( INT_VAR, 1 ) );
+		if ( dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+			pulser_next_phase( vars_push( INT_VAR, 2 ) );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -478,6 +488,13 @@ Var *pulser_next_phase( Var *v )
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
 		vars_pop( v );
+
+		if ( ! f->is_used )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: Phase function `%s' is not "
+					"used.\n", Fname, Lc, Function_names[ f->self ] );
+			return vars_push( INT_VAR, 0 );
+		}
 
 		if ( f->next_phase >= f->num_channels )
 			f->next_phase = 0;
@@ -503,8 +520,18 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		pulser_phase_reset( vars_push( INT_VAR, 1 ) );
-		pulser_phase_reset( vars_push( INT_VAR, 2 ) );
+		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
+			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: No phase functions are in use.\n",
+					Fname, Lc );
+			return vars_push( INT_VAR, 0 );
+		}
+					
+		if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used )
+			pulser_phase_reset( vars_push( INT_VAR, 1 ) );
+		if ( dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+			pulser_phase_reset( vars_push( INT_VAR, 2 ) );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -520,6 +547,13 @@ Var *pulser_phase_reset( Var *v )
 		f = &dg2020.function[ v->val.lval == 1 ? PULSER_CHANNEL_PHASE_1 :
 							  PULSER_CHANNEL_PHASE_2 ];
 		vars_pop( v );
+
+		if ( ! f->is_used )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: Phase function `%s' is not "
+					"used.\n", Fname, Lc, Function_names[ f->self ] );
+			return vars_push( INT_VAR, 0 );
+		}
 
 		if ( ! dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self ) ||
 			 ! dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self ) )
