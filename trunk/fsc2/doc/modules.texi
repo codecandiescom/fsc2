@@ -189,7 +189,7 @@ write a function that has the two positions of the cursor bars as input
 parameters and returns the data of the curve between the cursor
 bars. Let's call this function
 @example
-    get_curve_between_cursors( cursor_1, cursor_2 )
+get_curve_between_cursors( cursor_1, cursor_2 )
 @end example
 @noindent
 This hypothetical function expects two values, the positions of two
@@ -198,7 +198,7 @@ fetched from the digitizer. Now, a typical C declaration for this
 function is
 
 @example
-    Var *get_curve_between_cursors( Var *var );
+Var *get_curve_between_cursors( Var *var );
 @end example
 @noindent
 Surprisingly, there seems to be only one input variable! And how to return an
@@ -212,20 +212,20 @@ you look back at the typedef for @acronym{fsc2}'s variables, there is a
 expects even more arguments, @code{var->next->next} etc. let's you get
 them, i.e.@: the input variables are organized as a linked list:
 @example
-    var                               pointer passed to function
-     |                                  |
-     V                                  |
-    ---------------                     V
-   |        | next |                  first input parameter
-    ---------------                         |
-                |                           |
-                V                           |
-               ---------------              V
-              |        | next |       second input paramter
-               ---------------                  |
-                           |                    |
-                           V                    V
-                          NULL        no more parameters...
+  var                               pointer passed to function
+   |                                  |
+   V                                  |
+  ---------------                     V
+ |        | next |                  first input parameter
+  ---------------                         |
+              |                           |
+              V                           |
+             ---------------              V
+            |        | next |       second input paramter
+             ---------------                  |
+                         |                    |
+                         V                    V
+                        NULL        no more parameters...
 @end example
 @noindent
 If you declared your function to expect two input parameters the
@@ -253,8 +253,8 @@ All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
 e.g.@:
 @example
-  vars_check( var, INT_VAR );
-  vars_check( var->next, FLOAT_VAR );
+vars_check( var, INT_VAR );
+vars_check( var->next, FLOAT_VAR );
 @end example
 @noindent
 If @code{vars_check()} finds that everything is ok it simply returns,
