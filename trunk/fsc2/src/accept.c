@@ -39,6 +39,10 @@ static bool	incr_y( long y_index );
 static bool	incr_x_and_y( long x_index, long len, long y_index );
 
 
+/* These variables are used to determine which parts of the display(s) need
+   redrawing after the data have been unpacked in order to minimize the
+   number of graphical operations */
+
 static bool scale_1d_changed[ 2 ];
 static bool scale_2d_changed[ 3 ];
 static bool need_2d_redraw;
@@ -162,8 +166,8 @@ void accept_new_data( void )
   		Comm.MQ->slot[ mq_next ].type = REQUEST;
   	}
 
-	/* Finally display the new data by redrawing the canvases that need
-	   redrawing */
+	/* Finally display the new data by redrawing the canvases that really
+	   have been changed due to the new data */
 
 	if ( dim & 1 )
 	{
@@ -759,8 +763,8 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 
 	G1.rwc_start[ Y ] = G1.rw_min;
 
-	/* If the scale did not change redraw only the current curve, otherwise all
-	   curves */
+	/* If the scale did not change recalculate the points of the current curve
+	   only, otherwise the points of all curves */
 
 	if ( ! ( scale_1d_changed[ X ] || scale_1d_changed[ Y ] ) )
 		recalc_XPoints_of_curve_1d( G1.curve[ curve ] );
@@ -816,7 +820,8 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	cv = G2.curve_2d[ curve ];
 
 	/* Check if the new data fit into the already allocated memory, otherwise
-	   extend the memory area. */
+	   extend the memory area and figure out if this requires redrawing of the
+	   areas for the axes and the cut window. */
 
 	if ( x_index + x_len > G2.nx )
 	{
@@ -893,6 +898,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 				}
 
 			cv->is_scale_set = SET;
+
 			if ( cv->active )
 				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
 		}
