@@ -198,7 +198,8 @@ void tds744a_do_pre_exp_checks( void )
 			tds744a.is_equal_width = UNSET;
 	}
 
-	/* Next check: Test if the windows fit into the measurement window */
+	/* Test if the windows fit into the measurement window and calculate start
+	   and end point of window */
 
     window = tds744a.timebase * tds744a.rec_len / TDS_POINTS_PER_DIV;
 
@@ -213,6 +214,14 @@ void tds744a_do_pre_exp_checks( void )
 					"time range.\n", DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
+
+		/* Take care: Numbers start from 1 ! */
+
+		w->start_num = lround( ( w->start + tds744a.trig_pos * window )
+							   * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
+		w->end_num = lround( ( w->start
+							   + w->width + tds744a.trig_pos * window )
+							 * TDS_POINTS_PER_DIV / tds744a.timebase ) + 1;
     }
 
 	/* Now that al windows are properly set we switch on gated measurements */
