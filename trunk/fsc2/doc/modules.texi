@@ -1301,9 +1301,10 @@ result if you try to use it.
 
 When writing a module some of the following information might be useful.
 First a special function for printing out messages to the user is
-discussed.
+discussed. Second a function that simulates @code{usleep()} but does
+not share some of its shortcomings.
 
-The second topic, exceptions, is a well-known concept implemented for
+The third topic, exceptions, is a well-known concept implemented for
 example in @code{C++}. Unfortunately, @code{C} does not have this kind
 of mechanism, but when being a bit careful one can implement something
 very similar also in @code{C} using a few macros. 
@@ -1378,6 +1379,33 @@ The full @code{C} declaration of this function is:
 double experiment_time( void )
 @end example
 @noindent
+
+
+@subsection Wainting for short times
+@cindex fsc2_usleep()
+@findex fsc2_usleep()
+
+When writing code that deals with real devices on often needs to wait
+for times with a resolution of less than a second. The usual way to do
+this is to call either @code{usleep()} or @code{nansleep()}. The second
+function, @code{nanosleep()}, may look like a bit of overkill since both
+functions real time resolution is usually in the @w{10 ms} range, at
+least on Intel machines. On the other hand, @code{usleep()} is marked as
+obsolescent in the the IEEE Standard 1003.1-2001 (SUV3) for several
+reasons and thus should not be used anymore.
+
+As a replacement for @code{usleep()} (which you shouldn't use in a
+module) there is a function
+@example
+int fsc2_usleep( unsigned long us_duration, bool quit_on_signal )
+@end example
+@noindent
+It takes two parameters, an @code{unsigned long}, which is the duration
+(in milliseconds) to wait (just like @code{usleep()}), and a boolean
+value that indicates if the function is supposed to return immediately
+if a signal gets caught or if it should wait for the specified time even
+on signals.  The function is actually nothing else than a wrapper around
+@code{nanosleep()}, so you can @code{nanosleep()} yourself if you prefer.
 
 
 @subsection Exceptions
