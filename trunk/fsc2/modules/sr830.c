@@ -135,7 +135,7 @@ typedef struct
 	double dac_voltage[ NUM_DAC_PORTS ];
 	bool is_dac_voltage[ NUM_DAC_PORTS ];
 
-	bool is_auto;
+	bool is_auto_running;
 	bool is_auto_setup;
 	long st_index;
 	bool set_sample_time_to_tc;
@@ -182,14 +182,14 @@ static long dsp_ch_list[ ][ DISPLAY_CHANNELS ] =
 							  { DSP_CH_R, DSP_CH_theta },
 							  { DSP_CH_AUX1, DSP_CH_AUX2 },
 							  { DSP_CH_AUX3, DSP_CH_AUX4 },
-							  { DSP_CH_Ynoise, DSP_CH_Xnoise },
+							  { DSP_CH_Xnoise, DSP_CH_Ynoise },
 							  { DSP_CH_UNDEF, DSP_CH_UNDEF }
 							};
 static int symbol_to_dsp[ ] = { 0, 0, 0, 1, 1, 3, 4, 3, 4, 2, 2 };
 static long dsp_to_symbol[ ][ DISPLAY_CHANNELS ] =
 							{ { DSP_CH_X, DSP_CH_Y },
 							  { DSP_CH_R, DSP_CH_theta },
-							  { DSP_CH_Ynoise, DSP_CH_Xnoise },
+							  { DSP_CH_Xnoise, DSP_CH_Ynoise },
 							  { DSP_CH_AUX1, DSP_CH_AUX2 },
 							  { DSP_CH_AUX3, DSP_CH_AUX4 } };
 
@@ -255,7 +255,7 @@ int sr830_init_hook( void )
 	sr830.is_mod_freq           = UNSET;
 	sr830.is_mod_level          = UNSET;
 	sr830.is_harmonic           = UNSET;
-	sr830.is_auto               = UNSET;
+	sr830.is_auto_running       = UNSET;
 	sr830.is_auto_setup         = UNSET;
 	sr830.st_index              = UNDEF_ST_INDEX;
 	sr830.set_sample_time_to_tc = UNSET;
@@ -386,8 +386,6 @@ Var *lockin_get_data( Var *v )
 			return vars_push( FLOAT_VAR, sr830_get_data( ) );
 	}
 
-	
-
 	for ( num_channels = i = 0; i < MAX_DATA_AT_ONCE && v != NULL;
 		  i++, v = vars_pop( v ) )
 	{
@@ -396,10 +394,10 @@ Var *lockin_get_data( Var *v )
 		if ( channels[ i ] ==  DSP_CH_Xnoise ||
 			 channels[ i ] == DSP_CH_Ynoise )
 		{
-			if ( ! sr830.is_auto )
+			if ( ! sr830.is_auto_running )
 			{
-				print( FATAL, "%c Noise can only be measured in "
-					   "auto-acquisition mode.\n",
+				print( FATAL, "%c noise can only be measured while "
+					   "auto-acquisition is running.\n",
 					   channels[ i ] == DSP_CH_Xnoise ? 'X' : 'Y' );
 				THROW( EXCEPTION );
 			}
@@ -410,8 +408,8 @@ Var *lockin_get_data( Var *v )
 
 			if ( j == DISPLAY_CHANNELS )
 			{
-				print( FATAL, "%c Noise can only be measured when displayed "
-					   "in CH%d display.\n",
+				print( FATAL, "%c noise can only be measured when it's "
+					   "displayed in CH%d display.\n",
 					   channels[ i ] == DSP_CH_Xnoise ? 'X' : 'Y',
 					   channels[ i ] == DSP_CH_Xnoise ? 1 : 2 );
 				THROW( EXCEPTION );
@@ -569,7 +567,11 @@ Var *lockin_sensitivity( Var *v )
 		switch( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( sr830.sens_index == UNDEF_SENS_INDEX )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR,
+									  sens_list[ sr830.sens_index ] );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -677,7 +679,10 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( sr830.tc_index == UNDEF_TC_INDEX )
+					no_query_possible( );
+				else
+					vars_push( FLOAT_VAR, tc_list[ sr830.tc_index ] );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.tc_index == UNDEF_TC_INDEX ?
@@ -780,7 +785,10 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr830.is_phase )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr830.phase );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_phase ?
@@ -902,7 +910,10 @@ Var *lockin_ref_freq( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr830.is_mod_freq )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr830.mod_freq );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_freq ?
@@ -964,7 +975,10 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! sr830.is_mod_level )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, sr830.mod_level );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_level ?
@@ -1120,7 +1134,7 @@ Var *lockin_auto_setup( Var *v )
 
 		dsp_ch[ i ] = get_long( v, "channel to display" );
 
-		/* Accept 'o' to mean don't change */
+		/* Accept '0' to mean don't change channel display setting */
 
 		if ( dsp_ch[ i ] == 0 )
 		{
@@ -1128,7 +1142,7 @@ Var *lockin_auto_setup( Var *v )
 			continue;
 		}
 
-		for ( j = 0; ; )
+		for ( j = 0; ; j++ )
 		{
 			if ( dsp_ch_list[ j ][ i ] == DSP_CH_UNDEF )
 			{
@@ -1137,7 +1151,7 @@ Var *lockin_auto_setup( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			if ( dsp_ch[ i ] == dsp_ch_list[ j++ ][ i ] )
+			if ( dsp_ch[ i ] == dsp_ch_list[ j ][ i ] )
 				break;
 		}
 	}
@@ -1156,7 +1170,7 @@ Var *lockin_auto_setup( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( sr830.is_auto )
+		if ( sr830.is_auto_running )
 			sr830_auto( 0 );
 
 		sr830_set_sample_time( st_index );
@@ -1165,7 +1179,7 @@ Var *lockin_auto_setup( Var *v )
 					 sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
 			sr830_set_display_channel( i, sr830.dsp_ch[ i ] );
 
-		if ( sr830.is_auto )
+		if ( sr830.is_auto_running )
 			sr830_auto( 1 );
 	}
 
@@ -1226,7 +1240,7 @@ Var *lockin_auto_acquisition( Var *v )
 	}
 
 	if ( v == 0 )
-		return vars_push( INT_VAR, ( long ) sr830.is_auto );
+		return vars_push( INT_VAR, ( long ) sr830.is_auto_running );
 
 	state = get_boolean( v );
 	too_many_arguments( v );
@@ -1234,7 +1248,7 @@ Var *lockin_auto_acquisition( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_auto( state );
 
-	sr830.is_auto = state;
+	sr830.is_auto_running = state;
 
 	return vars_push( INT_VAR, ( long ) state );
 }
@@ -1369,7 +1383,7 @@ static double sr830_get_data( void )
 	/* If in auto mode and the X channel is displayed in CH1 return the
 	   data from the lock-in's internal bufer */
 
-	if ( sr830.is_auto && sr830.dsp_ch[ 0 ] == DSP_CH_X )
+	if ( sr830.is_auto_running && sr830.dsp_ch[ 0 ] == DSP_CH_X )
 		return sr830_get_auto_data( DSP_CH_X );
 
 	/* Otherwise return fetch the directly measured data */
@@ -1404,7 +1418,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 
 	for ( i = 0; i < num_channels; i++ )
 	{
-		if ( sr830.is_auto )
+		if ( sr830.is_auto_running )
 			for ( j = 0; j < DISPLAY_CHANNELS; j++ )
 				if ( channels[ i ] == sr830.dsp_ch[ j ] )
 				{
