@@ -213,7 +213,7 @@ Var *vars_get( char *name )
 
 	/* try to find the variable with the name passed to the function */
 
-	for ( ptr = var_list; ptr != ( Var * ) NULL; ptr = ptr->next )
+	for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
 		if ( ! strcmp( ptr->name, name ) )
 			return ptr;
 
@@ -628,7 +628,6 @@ Var *vars_negate( Var *v )
 Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long res;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values
@@ -640,24 +639,15 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 	switch ( comp_type )
 	{
 		case COMP_EQUAL :
-			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
-				    == ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
-				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, res );
+			new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
 			break;
 
 		case COMP_LESS :
-			res = (   ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
-				    < ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
-				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, res );
+			new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
 			break;
 
 		case COMP_LESS_EQUAL :
-			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
-				    <= ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
-				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, res );
+			new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
 			break;
 
 		default:               /* this should never happen... */
@@ -974,6 +964,9 @@ void vars_warn_new( Var *v )
 }
 
 
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
 bool vars_exist( Var *v )
 {
 	Var *lp;
@@ -1095,7 +1088,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
        complete slice in order to determine the missing size of the last
        dimension */
 
-	if ( need_alloc( a ) && dim != a->dim - 1 )
+	if ( a->flags & NEED_ALLOC && dim != a->dim - 1 )
 	{
 		if ( a->dim != 1 )
 			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
@@ -1120,7 +1113,7 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 	 the variables structure `len' element. Otherwise we push a variable onto
 	 the stack with a pointer to the indexed element or slice.*/
 
-	if ( need_alloc( a ) )
+	if ( a->flags & NEED_ALLOC )
 	{
 		ret = vars_push( ARR_PTR, NULL, a );
 		ret->len = index;
@@ -1496,10 +1489,11 @@ void vars_ass_from_var( Var *src, Var *dest )
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
-	/* Now do the assignment - take are: the left hand side variable can be
+	/* Now do the assignment - take care: the left hand side variable can be
 	   either a real variable or an array pointer with the void pointer
-	   `val.gptr' in the variable structure pointing to the data to be set
-	   in an array. */
+	   `val.gptr' in the variable structure pointing to the data to be set in
+	   an array.
+	*/
 
 	switch ( dest->type )
 	{
@@ -1791,7 +1785,7 @@ void vars_arr_init( Var *v )
 	   an array slice to determine the still unknown size of their very last
 	   dimension */
 
-	if ( need_alloc( a ) )
+	if ( a->flags & NEED_ALLOC )
 	{
 		eprint( FATAL, "%s:%ld: Variable sized array `%s' can not be "
 				"initialized.\n", Fname, Lc, a->name );
