@@ -52,7 +52,7 @@ Ticks dg2020_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2 ||
+	if ( fabs( Ticksrnd( ticks ) - p_time / dg2020.timebase ) > 1.0e-2 ||
 		 ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
 	{
 		char *t = T_strdup( dg2020_ptime( p_time ) );

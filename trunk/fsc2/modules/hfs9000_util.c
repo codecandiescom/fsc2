@@ -52,7 +52,7 @@ Ticks hfs9000_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2 ||
+	if ( fabs( Ticksrnd( ticks ) - p_time / hfs9000.timebase ) > 1.0e-2 ||
 		 ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
 	{
 		char *t = T_strdup( hfs9000_ptime( p_time ) );
