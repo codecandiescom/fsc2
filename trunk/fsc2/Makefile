@@ -82,7 +82,7 @@ objects        = $(sources:.c=.o)
 headers        = ${c_sources:.c=.h} global.h
 modules        = User_Functions.c \
 				 sr510.c sr530.c sr810.c \
-				 s_band.c aeg_x_band.c \
+				 aeg_s_band.c aeg_x_band.c \
 				 er035m.c er035m_s.c bh15.c \
 				 hp8647a.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
@@ -202,6 +202,10 @@ install:
 	install -d $(auxdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
+	if [ `hostname` = "pion" ]; then \
+		ls -s $libdir/dg2020_f.so $libdir/dg2020.so; \
+		ls -s $libdir/aeg_s_band.so $libdir/s_band.so; \
+	fi
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
