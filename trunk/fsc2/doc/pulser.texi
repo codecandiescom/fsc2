@@ -7,7 +7,8 @@
 @menu
 * Pulser Overview::        Introduction
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
-* Creating Pulses::        How to create pulses
+* Defining Pulses::        How to define pulses
+* Using Pulses::           How to use pulses in the experiment
 @end menu
 @end ifinfo
 
@@ -48,7 +49,7 @@ identical for all pulsers.
 
 @c ########################################################
 
-@node Setting up the Pulser, Creating Pulses, Pulser Overview, Using Pulsers
+@node Setting up the Pulser, Defining Pulses, Pulser Overview, Using Pulsers
 @section Setting up the Pulser
 
 The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
@@ -521,15 +522,15 @@ length has to be identical to the lengths of the phase sequences.
 @c ########################################################
 
 
-@node Creating Pulses, , Setting up the Pulser, Using Pulsers
-@section Creating Pulses
+@node Defining Pulses, Using Pulses, Setting up the Pulser, Using Pulsers
+@section Defining Pulses
 
 
 Every pulse has at least three properties: a unique number, a function
-and a start position. Actually, real pulses also need a length, but as
-long as the length is not defined (or is 0) the pulse stays switched
-off.  All pulses are created in the @code{PREPARATIONS} section of the
-@acronym{EDL} program. Here's an example of how to create a pulser
+and a start position. Actually, pulses also need a length, but as
+long as the length is not set (or is 0) the pulse stays switched
+off.  All pulses are defined in the @code{PREPARATIONS} section of the
+@acronym{EDL} program. Here an example of how to create a pulser
 numbered @code{1}, that is a microwave pulse, starts at @w{100 ns}
 (i.e.@: @w{100 ns} after the trigger) and has a length of @w{250 ns}:
 @example
@@ -588,3 +589,267 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
             LENGTH       = 2 * PULSE_1.LENGTH;
 @end example
 
+
+@node Using Pulses, , Defining Pulses, Using Pulsers
+@section Using Pulses
+
+When pulses have been defined and the experiment is started with the
+begin of the @code{EXPERIMENT} section, all pulses get set and all
+channels or PODs, that have been assigned pulses (that are used in the
+experiment), are switched on.
+
+Now there are several methods to change the properties of pulses. To
+change the start position of pulse 1 by the start position change time
+as defined in the properties of the pulse the function
+@code{pulser_shift()} can be used:
+@example
+pulser_shift( P1 );      // or  pulser_shift( 1 );
+@end example
+If the start position of several pulses has to be changed, this function
+also accepts a (comman separated) list of pulses. If the function is
+called with no argument the start position of all pulses that have a
+@code{DELTA_START} defined are changed.
+
+There is also a similar function for changing the length of a pulse by
+it's @code{DELTA_LENGTH}, @code{pulser_increment()}:
+@example
+pulser_increment( P3 );  // or  pulser_increment( 3 );
+@end example
+As for the other function, also here a list of pulses can be passed to
+the function and no argument automatically lengthens all pulses that
+have a @code{DELTA_LENGTH} defined.
+
+But it is also possibleto change the start position or length of a pulse
+directly and in other increments as @code{DELTA_START} and
+@code{DELTA_LENGTH}. If, for example, the position of pulse 4 should be
+changed to @w{500 ns} and its length to @w{120 ns}, one could write
+@example
+P4.START  = 500 ns;
+P4.LENGTH = 120 ns;
+@end example
+
+Of course, as in the definition of the pulses in the @code{PREPARTATION}
+section the properties of the pulse itself and other pulses can be used
+in setting the new values, e.g.:
+@example
+P4.START  = P3.START + 200 ns;
+P4.LENGTH = 2 * P4.LENGTH + 20 ns;
+@end example
+Actually, the properties of pulses can be treated as a normal variable.
+
+Even the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
+changed in this way anytime during the experiment:
+@example
+P4.DELTA_START  = 20 ns;
+P4.DELTA_LENGTH = 10 ns;
+@end example
+even if they haven't been defined in the @code{PREPARATION} section.
+
+The only pulse properties that may not be changed during the experiment
+are its function and the phase sequence associated with the pulse.
+
+There is only one point that needs to be taken care of: Just calling any
+of these functions does not change the real pulses immediately. Instead,
+all these changes are stored internally in the program and the changes
+will get only send to the pulser when the function
+@code{pulser_update()} gets called. Therfor, the normal way to change
+the pulse pattern is to change all pulse properties and when everything
+is done @code{pulser_update()} is called to makethe real
+changes. Because the new pulse settings only are checked this also
+avoids getting spurious error messages when, e.g. due to a change
+of a pulse length the pulse becomes to near to the next pulse, but the
+following pulse is moved away with the next command.
+
+There's also a further function that resets all pulses to their intial
+state, @code{pulser_pulse_reset()}. This function can, for example, be
+used for repeating the same experiment several times without having to
+reset each pulse individually. As in the other functions the argument
+can be either one pulse, a list of pulses, or no argument, in which case
+all pulses are reset to their initial positions and lengths.
+
+Here is now a somewhat shortened example of a 2 pulse Hahn-echo
+experiment. Two microwave pulses are needed, a pi/half and a pi-pulse,
+and a pulse to trigger the digitizer. The trigger pulse has to have
+about the same distance from the second microwave pulse as the distance
+between the two microwave pulses, i.e.@: it has to move twice as fast as
+the second microwave pulse:
+@example
+DEVICES:
+
+dg2020_b;    // Berlin X-band spectrometer pulser
+tds520c;     // digitzer
+
+VARIABLES:
+
+tau_0     = 200 ns;
+delta_tau = 50 ns;
+
+I, J;
+data[ 20, 1024];
+
+ASSIGNMENTS:
+
+TIMEBASE:     5 ns;
+TRIGGER_MODE: INTERNAL, REPEAT_TIME = 20 ms;
+MICROWAVE:    POD = 8,  V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:    POD = 5,  V_HIGH = 3 V, V_LOW = 0 V;
+
+PREPARATIONS:
+
+P0:   FUNCTION    = MICROWAVE,       // 1st microwave pulse
+      START       = 0 ns,
+      LENGTH      = 50 ns;
+
+P1:   FUNCTION    = MICROWAVE,       // 2nd microwave pulse
+      LENGTH      = 100 ns,
+      START       = P0.START + P0.LENGTH / 2 + tau_0 - P1.LENGTH / 2,
+      DELTA_START = delta_tau;
+
+P2:   FUNCTION    = DETECTION,       // trigger pulse
+      LENGTH      = 5 ns,
+      START       = P1.START + P1.LENGTH / 2 + tau_0,
+      DELTA_START = 2 * delta_tau;
+
+EXPERIMENT:
+
+FOR J = 1 : 20 @{          // repeat experiment 20 times
+    FOR I = 1 : 1024 @{
+        digitizer_start_acquisition( );
+        data[ J, I ] = digitizer_get_area( CH1 );
+        pulser_shift( );             // move pulse 1 and 2
+        pulser_update( );            // tell pulser about it
+    @}
+    pulser_pulse_reset( );           // reset all pulses
+@}
+@end example
+
+
+Beside the functions for changing the positions and lengths of pulses there
+are also functions needed to set the phase of the pulses, at least for
+phase cycled experiments. When the experiment starts the pulse phases
+are set to the first phase of the associated phase sequence (as defined
+in the @code{PHASES} section). To switch to the next phase the function
+@code{pulser_next_phase()} has to be used. Again, the necessary changes
+are only send to the pulser when the function @code{pulser_update()} is
+called afterwards. By repeatedly invoking @code{pulser_next_phase()} one
+can run through the complete phase sequence. To reset all pulses to their
+start phases (i.e.@: the first of the associated phase sequence) the
+function @code{pulser_phase_reset()} can be used.
+
+The next (rather simplified) example is a phase cycled (1dimensional)
+stimulated echo experiment. We need three microwave pulses and a
+detection trigger pulse. During the experiment the first and second
+microwave pulse have to be phase cycled.
+@example
+DEVICES:
+
+dg2020_b;    // Berlin X-band spectrometer pulser
+tds520c;     // digitzer
+
+VARIABLES:
+
+tau_0     = 250 ns;   // start distance between 1st & 2nd pulse
+delta_tau =  25 ns;   // and the change of this distance
+t_0       = 400 ns;   // start distance between 2nd & 3rd pulse
+delta_t   =  50 ns;   // and the change of this distance
+
+area, data;
+I, J;
+
+ASSIGNMENTS:
+
+TIMEBASE:      5 ns;
+TRIGGER_MODE:  INTERNAL, REP_FREQ = 200 Hz;
+
+MW:            POD = 1, 2, 3, 4, 5, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:     POD = 0,                       V_HIGH = 5 V, V_LOW = 0 V;;
+      
+       
+PHASE_SETUP:   MW,           // cycle microwave channel
+               +X: POD = 1,  // POD 1 on for +X
+               -X: POD = 2,  // POD 2 on for -X
+               +Y: POD = 3,  // POD 3 on for +Y
+               -Y: POD = 4,  // POD 4 on for -Y
+               CW: POD = 5;  // POD 5 on for CW
+
+PHASES:
+
+PHASE_SEQUENCE_0 = +x, -x, +x, -x;  // for 1st pulse
+PHASE_SEQUENCE_1 = +x, +x, -x, -x;  // for 2nd pulse
+
+PREPARATIONS:
+
+P0:  FUNCTION    = MW,
+     START       = 0 ns,
+     LENGTH      = pi_half_pulse_length,
+     PHASE_CYCLE = PHASE_SEQUENCE_0;
+     
+P1:  FUNCTION    = MW,
+     START       = P0.START + P0.LENGTH  + tau0,
+     LENGTH      = pi_half_pulse_length,
+     PHASE_CYCLE = PHASE_SEQUENCE_1;
+
+P2:  FUNCTION    = MW,
+     START       = P1.START + P1.LENGTH + t0,
+     LENGTH      = pi_half_pulse_length,
+     DELTA_START = delta_t;
+
+P3:  FUNCTION    = DETECTION,
+     START       = P2.START + P2.LENGTH,
+     LENGTH      = 10 ns,
+     DELTA_START = delta_t;
+
+init_1d( );
+
+EXPERIMENT:
+
+FOR I = 1: 128 @{
+    data = 0.0;
+    FOR J = 1 : 4 @{
+        digitizer_start_acquisition( );
+        area = digitizer_get_area( CH1 );
+
+        IF J == 1 | J == 4 @{
+            data += area;     // add 1st & 4th area
+        @} ELSE @{
+            data -= area;     // subtract 2nd & 3rd area
+        @}
+
+        display( I, data );
+        pulser_next_phase( );
+        pulser_update( );
+    @}
+
+    pulser_shift( );
+    pulser_update( );
+@}
+@end example
+
+The inner loop in this example runs through the 4 different phase
+settings and adds up the areas with the correct sign. Instead of writing
+this loop one could also define an acquisition sequence and use the
+function @code{get_phase_cycled()}. This function does everything done
+in the loop automatically and thus makes the program much more
+legible. The only changes needed are in the @code{PHASES} section
+@example
+PHASES:
+
+PHASE_SEQUENCE_0     = +x, -x, +x, -x;  // for 1st pulse
+PHASE_SEQUENCE_1     = +x, +x, -x, -x;  // for 2nd pulse
+ACQUISITION_SEQUENCE =  +,  -,  -,  +;
+@end example
+and in the @code{EXPRIMENT} section, which becomes
+@example
+EXPERIMENT:
+
+FOR I = 1: 128 @{
+    data = get_phase_cycled_area( CH1 );
+    display( I, data );
+    pulser_shift( );
+    pulser_update( );
+@}
+@end example
+As can be seen from this example @code{get_phase_cycled_area()} not only
+sets the pulse phases but also starts the digitizer acquisition, fetches
+the measured areas from the digitizer and adds up the areas according to
+to the acquisition sequence.
