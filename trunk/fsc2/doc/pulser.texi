@@ -35,14 +35,22 @@
 Using the pulsers has its own chapter covering the special methods to
 handle the pulser setup, create pulses and do phase cycling. It also
 describes how the way the pulsers are to be used depends on the hardware
-used in the spectrometer. Currently, there are three
-pulsers/spectrometer combinations of implemented:
+used in the spectrometer. The following pulsers/spectrometer
+combinations
+of implemented:
 @itemize @bullet
 @item Sony/Tektronix DG2020 (S-band spectrometer, Frankfurt/Main)
 @item Sony/Tektronix DG2020 (X-band spectrometer, Berlin)
 @item Tektronix HFS9003 (W-band spectrometer, Berlin)
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
+@item Interface Technology RS690 Word Generator (360 GHz spectrometer, Berlin)
 @end itemize
+The @strong{Interface Technology RS690} can also be used for the Berlin
+X-band spectrometer without any changes, and, of course, all pulsers can
+be used everywhere when no special requirements for phase-cycling exist,
+see the discussion below about the differences between the Frankfurt
+S-band and the Berlin X-band spectrometer.
+
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}
 program in order to set up the pulser. These
