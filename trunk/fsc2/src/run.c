@@ -492,11 +492,14 @@ static void do_measurement( void )
 		{
 			if ( do_quit && react_to_do_quit )
 			{
+				/* Don't react to 'do_quit' flag while we're handling the
+				   ON_STOP part of he program */
+
 				react_to_do_quit = UNSET;
 
-				if ( On_Stop_Pos < 0 )
-					cur_prg_token = NULL;
-				else
+				if ( On_Stop_Pos < 0 )                /* no ON_STOP part ? */
+					cur_prg_token = NULL;             /* -> stop immediately */
+				else                                  /* goto ON_STOP part */
 					cur_prg_token = prg_token + On_Stop_Pos;
 
 				continue;
