@@ -32,6 +32,7 @@ This chapter tries to describe how to write new modules for use with
 * Module overview::       What modules are good for.
 * fsc2s variables::       How to use fsc2's variables.
 * New modules::           How to write new modules.
+* Programming utils::     Functions that help in programming modules
 @end menu
 @end ifinfo
 
@@ -526,7 +527,7 @@ correct sequence, so it's not completely foolproof.
 
 
 
-@node New modules, , fsc2s variables, Modules
+@node New modules, Programming utils, fsc2s variables, Modules
 @section How to write a new module
 
 @subsection Files to be included
@@ -735,6 +736,154 @@ bad is going to happen if you call @code{vars_pop()}on the @code{NULL}
 pointer, anyway.
 
 
+
+@node Programming utils, , New modules, Modules
+
+@section Exceptions
+@cindex exceptions
+
+One of the most annoying things in programming is error handling. In
+order to make a program failsafe in every place where there is even the
+remotest chance that something may go wrong one has to include error
+handling code.  This is especially tedious within deeply nested function
+calls where it is often not clear on which level the error handling is
+done best.
+
+In order to alleviate ths problem in @acronym{fsc2} there is a mechanism
+called exceptions. An exception can be seens as a kind of flag that can
+be raised at any instance in the program and leads to the flow of
+control being changed to a place were the error can be handled.
+
+As far as raising exceptions in a module is concerned it's very
+simple. If you run into an error that can't be handled by the module
+just use something like
+@example
+if ( non_recoverable_error )
+    THROW( EXCEPTION );
+@end example
+@findex THROW()
+@findex EXCEPTION
+@noindent
+and @acronym{fsc2} will take care of all error handling. That's all you need to
+know about exceptions for nearly all cases that have to be handled within
+modules.
+
+
+@subsection Programing with exceptions
+
+Of course, to allow the `throwing' of exceptions there must be a place that
+will `catch' the exception, otherwise the exception will simply kill the
+program. Lets assume that you have a function @code{foo()}, that in turn
+calls a lot of other functions, each of which might lead to non-recoverable
+errors and that can't be handled by the functions themselves. The way to
+handle this problem with exceptions is demonstrated by the following example:
+@example
+TRY
+@{
+    foo( );
+    TRY_SUCCESS;         /* never forget this ! */
+@}
+CATCH( EXCEPTION )
+@{
+    ...                  /* the error handling code goes here */
+@}
+@end example
+@findex TRY
+@findex TRY_SUCCESS
+@findex CATCH()
+@noindent
+With @code{TRY} the program is told that the following code might throw
+an exception. If everything works out well and no exception is thrown
+the @code{CATCH()} block is never executed and in which case
+@code{TRY_SUCCESS} must be called. But if an error happens and an
+exception is thrown the flow of control is changed immediately from the
+function the exception is thrown in to the first statements in the
+@code{CATCH()} block.
+
+@code{CATCH} can be used to catch a specific exception and you can have
+several of them for different types of exceptions. If you want to catch
+all types of exceptions in one go you can use @code{OTHERWISE}
+@findex OTHERWISE
+instead.
+Finally, if you need to do some cleaning up but can not really deal
+with the error condition you can catch the exception using either
+@code{CATCH} or @code{OTHERWISE} and then rethrow the exception by calling
+@code{PASSTHROU()}
+@findex PASSTHROU()
+to pass it on to higher level routines that are supposed to take care of
+the problem. Here's some example code
+@example
+  TRY
+  @{
+      do_something_error_prone();
+      TRY_SUCCESS;
+  @}
+  OTHERWISE
+  @{
+      do_cleanup();       /* e.g. deallocate memory */
+      PASSTHROU();
+  @}
+@end example
+
+
+There is a caveat when using exceptions: The values of non-volatile
+automatic variables may differ from the values they were set to after an
+exception got thrown. This could become a problem in cases where you do
+error handling in a @code{CATCH()} or @code{OTHERWISE} block as in the
+above example and rely on the values of such variables. You can avoid
+this problem if you declare these variables as @code{volatile}. If you
+need to find out more about this problem, have a look at the code in
+@file{exceptions.h} and @file{exceptions.c} and read the documentation
+for the standard C functions @code{setjmp()}
+@findex setjmp()
+and
+@code{longjmp()}
+@findex longjmp()
+which are used to implement exceptions.
+
+
+There are three types of exceptions that may be relevant when writing
+a module:
+@example
+  EXCEPTION
+  OUT_OF_MEMORY_EXCEPTION
+  USER_BREAK_EXCEPTION
+@end example
+@noindent
+@code{EXCEPTION} stands for all kinds of exceptions not covered by one
+of the fowlloing two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
+thrown by @acronym{fsc2}s special functions for memory allocation (see
+next section), so don't throw it yourself without a very good reason. A
+@code{USER_BREAK_EXCEPTION} should be thrown from within a module when
+the module is doing something rather time consuming (e.g. waiting for a
+device to become ready or doing a calbration if this takes a long time)
+and the module detects that the user has pressed the stop button. To
+find about the this you can use a macro, @code{DO_STOP} - if it returns
+@code{TRUE} the user has pressed the stop button. Here's some code taken
+from the module for a digitizer. It waits indefinitely in a loop for the
+digitizer to become ready. To allow the user to break from it within the
+loop @code{DO_STOP} is tested, and if set, an
+@code{USER_BREAK_EXCEPTION} is thrown:
+@example
+  do
+  @{
+      if ( DO_STOP )
+          THROW( USER_BREAK_EXCEPTION );
+
+      length = 40;
+      usleep( 100000 );
+      if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
+           gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
+          THROW( EXCEPTION );
+  @} while ( reply[ 0 ] == '1' ); 
+@end example
+
+
+The idea and most of the code used for exceptions in @acronym{fsc2} is taken
+from an article by Peter Simons in the the iX magazine
+(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
+
+
 @section Functions for memory allocation
 @cindex memory allocation
 @findex T_malloc()
@@ -762,87 +911,30 @@ same input and return values as their normal counterparts, i.e.@:
   void *T_calloc( size_t nmemb, size_t size )
   void *T_realloc( void *ptr, size_t size )
   char *T_strdup( const char *string )
-  void  T_free( void *ptr )
+  void *T_free( void *ptr )
 @end example
 @noindent
+For @code{T_free()} there's is small deviation from the behaviour of
+the normal @code{free()} function. @code{T_free()} returns a @code{void}
+pointer, which is always @code{NULL}.
+
+There might be cases where you want a call of one of the functions
+allocating memory to return even if it fails. In this case you have
+to do the call within a @code{TRY} block and be prepared to catch an
+exception that gets thrown when the memory allocation fails. The
+exception that will be thrown is an @code{OUT_OF_MEMORY_EXCEPTION}.
+Here's some example code:
+@example
+  TRY
+  @{
+      array = T_malloc( length );
+      TRY_SUCCESS;
+  @}
+  CATCH( OUT_OF_MEMORY_EXCEPTION )
+  @{
+      ...                  /* your error handling code goes here */
+  @}
+@end example
+
 I would strongly recommend using this functions since they got built in
 some code to help detecting memory leaks etc. which helps in debugging.
-
-
-@section Exceptions
-@cindex exceptions
-
-One of the most annoying things in programming is error handling. In
-order to make a program failsafe in every place where there is even the
-remotest chance that something may go wrong one has to include error
-handling code.  This is especially tedious within deeply nested function
-calls where it is often not clear on which level the error handling is
-done best.
-
-In order to alleviate ths problem in @acronym{fsc2} there is a mechanism
-called exceptions. An exception can be seens as a kind of flag that can
-be raised at any instance in the program and leads to the flow of
-control being changed to a place were the error can be handled.
-
-As far as raising exceptions in a module is
-concerned it's very simple. If you run into an error that can't be handled by
-the module just use something like
-@example
-if ( non_recoverable_error )
-    THROW( EXCEPTION );
-@end example
-@findex THROW()
-@findex EXCEPTION
-@noindent
-and @acronym{fsc2} will ake care of all error handling. That's all you need to
-know about exceptions for nearly all cases that have to be handled within
-modules.
-
-
-@subsection Programing with exceptions
-
-Of course, to allow the `throwing' of exceptions there must be a place that
-will `catch' the exception, otherwise the exception will simply end the
-program. Lets assume that you have a function @code{foo()}, that in turn
-calls a lot of other functions, each of which might lead to non-recoverable
-errors and that can't be handled by the functions themselves. The way to
-handle this problem with exceptions is demonstrated by the following example:
-@example
-TRY
-@{
-    foo( );
-    TRY_SUCCESS;         /* never forget this ! */
-@}
-CATCH( EXCEPTION )
-@{
-    ...                  /* the error handling code goes here */
-@}
-@end example
-@findex TRY
-@findex TRY_SUCCESS
-@findex CATCH()
-@noindent
-With @code{TRY} the program is told that the following code might throw
-an exception. If everything works out well and no exception is thrown
-the @code{CATCH} block is never executed. But if an error happens and an
-exception is thrown the flow of control is changed immediately from the
-function the exception is thrown in to the statements in the
-@code{CATCH} block.
-
-There is a caveat when using exceptions: The value of non-volatile automatic
-variables may become undefined after an exception if they were changed in the
-@code{TRY} block. If you need to find out more about this problem, have
-a look at the code in @file{exceptions.c} and @file{exceptions.h}
-and read the documentation for the standard C function @code{setjmp()}
-@findex setjmp()
-and
-@code{longjmp()}
-@findex longjmp()
-which are used to implement exceptions.
-
-
-The idea and most of the code used for exceptions in @acronym{fsc2} is taken
-from an article by Peter Simons in the the iX magazine
-(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
-
-
