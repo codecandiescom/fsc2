@@ -1613,7 +1613,7 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
 @item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
 @item @code{monochromator_laser_line()}       @tab @ref{monochromator_laser_line}
-@item @codemonochromator_scan_setup()}        @tab @ref{monochromator_scan_setup}
+@item @code{monochromator_scan_setup()}       @tab @ref{monochromator_scan_setup}
 @item @code{monochromator_start_scan()}       @tab @ref{monochromator_start_scan}
 @item @code{monochromator_scan_step()}        @tab @ref{monochromator_scan_step}
 @item @code{monochromator_shutter_limits()}   @tab @ref{monochromator_shutter_limits}

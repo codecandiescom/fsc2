@@ -364,8 +364,8 @@ Var *monochromator_wavelength( Var *v )
 		spectrapro_300i_set_wavelength( wl );
 
 	spectrapro_300i.wavelength = wl;
-	if ( FSC2_MODE == PREPARATIONS )
-		spectrapro_300i.is_wavelength = UNSET;
+	if ( FSC2_MODE == PREPARATION )
+		spectrapro_300i.is_wavelength = SET;
 
 	return vars_push( FLOAT_VAR, spectrapro_300i.wavelength );
 }
@@ -415,8 +415,8 @@ Var *monochromator_wavenumber( Var *v )
 		spectrapro_300i_set_wavelength( wl );
 
 	spectrapro_300i.wavelength = wl;
-	if ( FSC2_MODE == PREPARATIONS )
-		spectrapro_300i.is_wavelength = UNSET;
+	if ( FSC2_MODE == PREPARATION )
+		spectrapro_300i.is_wavelength = SET;
 
 	return vars_push( FLOAT_VAR, spectrapro_300i.wavelength );
 }
