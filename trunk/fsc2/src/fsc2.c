@@ -128,10 +128,10 @@ void xforms_init( int *argc, char *argv[] )
 
 	main_form = create_form_fsc2( );
 
-	fl_set_browser_fontsize( main_form->browser, FL_NORMAL_SIZE );
+	fl_set_browser_fontsize( main_form->browser, FL_MEDIUM_SIZE );
 	fl_set_browser_fontstyle( main_form->browser, FL_FIXED_STYLE );
 
-	fl_set_browser_fontsize( main_form->error_browser, FL_NORMAL_SIZE );
+	fl_set_browser_fontsize( main_form->error_browser, FL_MEDIUM_SIZE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
@@ -159,8 +159,8 @@ void xforms_init( int *argc, char *argv[] )
 	/* Set some properties of goodies */
 
 	fl_set_fselector_fontsize( FL_MEDIUM_SIZE );
-	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
 }
 
 
