@@ -52,8 +52,8 @@
             return FAILURE;                                          \
         }
 
-
 #define GPIB_ERROR_BUFFER_LENGTH 1024
+
 
 /*------------------------------------------------------------------------*/
 /* functions used only locally                                            */
