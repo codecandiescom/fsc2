@@ -102,9 +102,10 @@ static struct rulbus_device {
 	struct pardevice *dev;
 	unsigned char rack;
 	int in_use;                 /* set when device is opened */
+	int is_claimed;
 	uid_t owner;                /* current owner of the device */
 	spinlock_t spinlock;
-} rulbus = { NULL, NULL, 0xf0, 0 };
+} rulbus = { NULL, NULL, 0xf0, 0, 0 };
 
 
 struct file_operations rulbus_file_ops = {
@@ -128,102 +129,12 @@ static int __init rulbus_init( void )
 	int res_major;
 
 
+	/* All we do at the moment is registering a driver and a char device,
+	   everything else is deferred until we get notified about the
+	   parports of the system and when the device file gets opened. */
+
 	if ( parport_register_driver( &rulbus_drv ) != 0 )
 		return -EIO;
-
-	return 0;
-#if 0
-
-	/* First thing to do is trying to get a structure for the port we
-	   were told the RULBUS device is connected to. */
-
-	while ( rulbus.port = parport_enumerate( ) )
-	{
-		printk( KERN_NOTICE "0x%8lx\n", rulbus.port->base );
-	printk( KERN_NOTICE "calling parport_find_base\n" );
-
-	if ( ( rulbus.port = parport_find_base( base ) ) == NULL ) {
-		PDEBUG( "No parallel port found at base 0x%x\n", base );
-		return -EIO;
-	}
-
-	printk( KERN_NOTICE "done calling parport_find_base\n" );
-
-	if ( ( rulbus.dev = parport_register_device( rulbus.port,
-						     RULBUS_EPP_NAME,
-						     NULL, NULL, NULL,
-						     0, NULL ) ) == NULL )
-	{
-		PDEBUG( "Failed to register device\n" );
-		return -EIO;
-	}
-	if ( ( rulbus.dev = parport_open( 0,
-						     RULBUS_EPP_NAME,
-						     NULL, NULL, NULL,
-						     0, NULL ) ) == NULL )
-	{
-		printk( KERN_NOTICE "Failed to register device\n" );
-		return -EIO;
-	}
-
-	printk( KERN_NOTICE "done calling parport_register_device\n" );
-
-
-	printk( KERN_NOTICE "%d\n", parport_daisy_init( rulbus.port ) );
-	if ( parport_device_id( 1, buf, 1000 ) < 0 )
-		return -EIO;
-	}
-	printk( KERN_NOTICE "info = 0x%8lx\n0x%8lx\n0x%8lx\n0x%8lx\n",
-		( unsigned long ) rulbus.port->probe_info,
-		( unsigned long ) rulbus.port->probe_info[ 0 ].class_name,
-		( unsigned long ) rulbus.port->probe_info[ 0 ].mfr,
-		( unsigned long ) rulbus.port->probe_info[ 0 ].model
-		);
-
-	printk( KERN_NOTICE "done calling register_device\n" );
-#endif
-
-	/* Make sure the device is present and understands EPP */
-
-	printk( KERN_NOTICE "port = 0x%8lx\nphysport = 0x%8lx\ncad = 0x%8lx\n",
-		( unsigned long ) rulbus.port,
-		( unsigned long )  rulbus.port->physport,
-		( unsigned long )  rulbus.port->cad );
-
-	if ( parport_claim( rulbus.dev ) < 0 ) {
-		printk( KERN_NOTICE "failed calling claim_or_block\n" );
-		PDEBUG( "Failed to clain the parallel port\n" );
-		return -EIO;
-	}
-
-	printk( KERN_NOTICE "done calling claim_or_block\n" );
-
-	printk( KERN_NOTICE "port = 0x%8lx\nphysport = 0x%8lx\ncad = 0x%8lx\n",
-		( unsigned long ) rulbus.port,
-		( unsigned long )  rulbus.port->physport,
-		( unsigned long )  rulbus.port->physport->cad );
-
-	printk( KERN_NOTICE "calling parport_negotiate\n" );
-
-	switch ( parport_negotiate( rulbus.port, PARPORT_MODE_EPP ) )
-	{
-		case -1 :
-			parport_unregister_device( rulbus.dev  );
-			PDEBUG( "Device not connected or non-compliant\n" );
-			return -EIO;
-
-		case 1 :
-			parport_unregister_device( rulbus.dev  );
-			PDEBUG( "Device is connected but can't use EPP "
-				"mode\n" );
-			return -EIO;
-	}
-
-	parport_release( rulbus.dev );
-
- 	printk( KERN_NOTICE "done calling parport_negotiate\n" );
-
-	/* Now we also try to register a char device */
 
 #ifdef CONFIG_DEVFS_FS
 	if ( ( res_major = devfs_register_chrdev( major, RULBUS_EPP_NAME,
@@ -256,7 +167,6 @@ static int __init rulbus_init( void )
 
 static void __exit rulbus_cleanup( void )
 {
-#if 0
 #ifdef CONFIG_DEVFS_FS
 	if ( major && devfs_unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
 #else
@@ -264,91 +174,137 @@ static void __exit rulbus_cleanup( void )
 #endif
 		printk( KERN_ERR RULBUS_EPP_NAME
 			": Device busy or other module error.\n" );
-#endif
+
+	/* Unregister the device (but only if it's registered) */
+
+	if ( rulbus.dev )
+		rulbus_epp_detach( rulbus.port );
+
 	parport_unregister_driver( &rulbus_drv );
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function that gets called automatically for each detected parport -
+ * we pick the one with the right base address and try to register a
+ * driver for it.
+ *---------------------------------------------------------------------*/
 
 static void rulbus_epp_attach( struct parport *port )
 {
-	printk( KERN_NOTICE "attach with 0x%x\n", port );
+	/* Check that the port has the base address we're looking for and
+	   that we don't already have a device registered for this port */
 
-	if ( port->base != base )
+	if ( port->base != base || rulbus.dev )
 		return;
+
+	/* Register a device for this parport */
 
 	if ( ( rulbus.dev = parport_register_device( port,
 						     RULBUS_EPP_NAME,
 						     NULL, NULL, NULL,
-						     0, NULL ) ) == NULL )
-	{
+						     0, NULL ) ) == NULL ) {
 		printk( KERN_NOTICE "Failed to register device\n" );
 		return;
 	}
 
-	if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
-		printk( KERN_NOTICE "Failed to claim parallel port\n" );
-		return;
-	}
-
-	switch ( parport_negotiate( port, PARPORT_MODE_EPP ) )
-	{
-		case -1 :
-			parport_release( rulbus.dev );
-			parport_unregister_device( rulbus.dev );
-			printk( KERN_NOTICE
-				"Device not connected or non-compliant\n" );
-			return;
-
-		case 1 :
-			parport_release( rulbus.dev );
-			parport_unregister_device( rulbus.dev );
-			printk( KERN_NOTICE "Device is connected but can't "
-				"use EPP mode\n" );
-			return;
-	}
+	rulbus.port = port;
 }
+
+
+/*---------------------------------------------------------------------*
+ * Function that gets called either automatically in case of a parport
+ * suddenly vanishing or from the cleanup function of the module. It
+ * unregisters the device we might have registered for the port.
+ *---------------------------------------------------------------------*/
 
 static void rulbus_epp_detach( struct parport *port )
 {
-	printk( KERN_NOTICE "detach with 0x%x\n", port );
+	if ( rulbus.dev == NULL || rulbus.port != port )
+		return;
+
+	if ( rulbus.is_claimed )
+		parport_release( rulbus.dev );
+	parport_unregister_device( rulbus.dev );
+	rulbus.dev = NULL;
 }
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*
+ * Function that gets called when the device file for the RULBUS interface
+ * gets opened. First, we must make sure there's only a single user of the
+ * device (except that root can still fiddle with it). Then, after checking
+ * that a device has been registered we must claim the port - and we only
+ * will unclaim it when the device file is closed, there's no daisy chaining
+ * possible with this device. Next we must check that the device is present
+ * and talks EPP. Only then we can be rather sure we got it.
+ *---------------------------------------------------------------------------*/
 
 static int rulbus_open( struct inode *inode_p, struct file *file_p )
 {
 	spin_lock( &rulbus.spinlock );
 
-	if ( rulbus.in_use > 0 &&
-	     rulbus.owner != current->uid &&
-	     rulbus.owner != current->euid &&
-	     ! capable( CAP_DAC_OVERRIDE ) ) {
-		PDEBUG( "Device already in use by another user\n" );
-		spin_unlock( &rulbus.spinlock );
-		return -EBUSY;
-	}
-
-	/* Try to register the device with exclusive access to the parallel
-	   port. */
-
-	if ( rulbus.in_use == 0 ) {
-		if ( ( rulbus.dev = parport_register_device( rulbus.port,
-							     RULBUS_EPP_NAME,
-							     NULL, NULL, NULL,
-							     PARPORT_FLAG_EXCL,
-							     NULL ) ) == NULL )
-		{
+	if ( rulbus.in_use > 0 ) {
+		if ( rulbus.owner != current->uid &&
+		     rulbus.owner != current->euid &&
+		     ! capable( CAP_DAC_OVERRIDE ) ) {
+			PDEBUG( "Device already in use by another user\n" );
 			spin_unlock( &rulbus.spinlock );
-			PDEBUG( "Failed to register device\n" );
-			return -EIO;
+			return -EBUSY;
 		}
 
-		rulbus.owner = current->uid;
+		if ( rulbus.dev != NULL )
+		{
+			rulbus.in_use++;
+			MOD_INC_USE_COUNT;
+			spin_unlock( &rulbus.spinlock );
+			return 0;
+		}
 	}
+
+	/* Check that a device is registered for the port we need */
+
+	if ( rulbus.dev == NULL )
+	{
+		spin_unlock( &rulbus.spinlock );
+		PDEBUG( "No device registered for port\n" );
+		return -EIO;
+	}
+
+	/* We need exclusive access to the port as long as the device file
+	   is open - the device does not allow daisy chaining since its
+	   using all addresses on the bus. */
+
+	if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
+		spin_unlock( &rulbus.spinlock );
+		PDEBUG( "Failed to claim parallel port\n" );
+		return -EIO;
+	}
+
+	rulbus.is_claimed = 1;
+
+	/* Now lets check if the peripherial speeks EPP */
+
+	switch ( parport_negotiate( rulbus.port, PARPORT_MODE_EPP ) )
+	{
+		case -1 :
+			parport_release( rulbus.dev );
+			rulbus.is_claimed = 0;
+			spin_unlock( &rulbus.spinlock );
+			printk( KERN_NOTICE
+				"Device not connected or non-compliant\n" );
+			return -EIO;
+
+		case 1 :
+			parport_release( rulbus.dev );
+			rulbus.is_claimed = 0;
+			spin_unlock( &rulbus.spinlock );
+			printk( KERN_NOTICE "Device is connected but can't "
+				"use EPP mode\n" );
+			return -EIO;
+	}
+
+	rulbus.owner = current->uid;
 
 	rulbus.in_use++;
 
@@ -360,8 +316,10 @@ static int rulbus_open( struct inode *inode_p, struct file *file_p )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function that gets called when the device file for the interface is
+ * closed. We must unclaim the port and unregister the device for it.
+ *---------------------------------------------------------------------*/
 
 static int rulbus_release( struct inode *inode_p, struct file *file_p )
 {
@@ -379,10 +337,13 @@ static int rulbus_release( struct inode *inode_p, struct file *file_p )
 
 	/* Unclaim and unregister the parallel port */
 
-	if ( --rulbus.in_use == 0 ) {
-
-		if ( rulbus.dev != NULL )
-			parport_unregister_device( rulbus.dev  );
+	if ( --rulbus.in_use == 0 && rulbus.dev != NULL ) {
+		if ( rulbus.is_claimed ) {
+			parport_release( rulbus.dev );
+			rulbus.is_claimed = 0;
+		}
+		parport_unregister_device( rulbus.dev );
+		rulbus.dev = NULL;
 	}
 
 	MOD_DEC_USE_COUNT;
@@ -400,6 +361,11 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
 	RULBUS_EPP_IOCTL_ARGS rulbus_arg;
 	int ret;
 
+
+	if ( rulbus.dev == NULL || ! rulbus.is_claimed ) {
+		PDEBUG( "Device has been closed\n" );
+		return -EIO;
+	}
 
 	if ( copy_from_user( &rulbus_arg, ( RULBUS_EPP_IOCTL_ARGS * ) arg,
 			     sizeof rulbus_arg ) ) {
@@ -441,6 +407,7 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 {
 	unsigned char null = 0;
+	unsigned char *data;
 
 
 	if ( rulbus_arg->rack & 0xF0 ) {
@@ -448,11 +415,37 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 		return -EINVAL;
 	}
 
-	/* Claim exclusive access to the parallel port */
+	if ( rulbus_arg->len < 1 ) {
+		PDEBUG( "Invalid number of bytes to be read.\n" );
+		return -EINVAL;
+	}
 
-	if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
-		PDEBUG( "Failed to clain the parallel port\n" );
-		return -EIO;
+	/* If there's just a single byte to be read use the 'byte' field of the
+	   RULBUS_EPP_IOCTL_ARGS structure as the buffer, otherwise we need to
+	   allocate a buffer and copy everything there from user-space */
+
+	if ( rulbus_arg->len == 1 )
+		data = &rulbus_arg->byte;
+	else {
+		if ( rulbus_arg->data == NULL ) {
+			PDEBUG( "Invalid write data pointer.\n" );
+			return -EINVAL;
+		}
+
+		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+		if ( data == NULL )
+		{
+			PDEBUG( "Not enough memory for reading.\n" );
+			return -ENOMEM;
+		}
+
+		if ( copy_from_user( data, rulbus_arg->data,
+				     rulbus_arg->len ) ) {
+			kfree( data );
+			PDEBUG( "Can't read from user space\n" );
+			return -EACCES;
+		}
 	}
 
 	/* Select the rack (if necessary) and then write the data */
@@ -463,8 +456,9 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 						       1, 0 ) != 1 ||
 		     rulbus.port->ops->epp_write_data( rulbus.port, &null,
 						       1, 0  ) != 1 ) {
-			parport_release( rulbus.dev );
-			PDEBUG( "Setting rack failed\n" );
+			if ( rulbus_arg->len > 1 )
+				kfree( data );
+			PDEBUG( "Selecting rack failed\n" );
 			return -EIO;
 		}
 
@@ -474,14 +468,29 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 	if ( rulbus.port->ops->epp_write_addr( rulbus.port,
 					       &rulbus_arg->offset,
 					       1, 0 ) != 1 ||
-	     rulbus.port->ops->epp_read_data( rulbus.port, &rulbus_arg->data,
-					      1, 0  ) != 1 ) {
-		parport_release( rulbus.dev );
+	     rulbus.port->ops->epp_read_data( rulbus.port, data,
+					      rulbus_arg->len, 0  )
+	     						 != rulbus_arg->len ) {
+			if ( rulbus_arg->len > 1 )
+				kfree( data );
 		PDEBUG( "Reading data failed\n" );
 		return -EIO;
 	}
 
-	parport_release( rulbus.dev );
+	/* If more than a single byte was read copy what we just read to the
+	   user-space buffer and deallocate the kernel buffer */
+
+	if ( rulbus_arg->len > 1 )
+	{
+		if ( copy_to_user( rulbus_arg->data, data,
+				   rulbus_arg->len ) ) {
+			kfree( data );
+			PDEBUG( "Can't write to user space\n" );
+			return -EACCES;
+		}
+
+		kfree( data );
+	}
 
 	return 0;
 }
@@ -493,6 +502,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 {
 	unsigned char null = 0;
+	unsigned char *data;
 
 
 	if ( rulbus_arg->rack & 0xF0 ) {
@@ -500,11 +510,37 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 		return -EINVAL;
 	}
 
-	/* Claim exclusive access to the parallel port */
+	if ( rulbus_arg->len < 1 ) {
+		PDEBUG( "Invalid number of bytes to be written.\n" );
+		return -EINVAL;
+	}
 
-	if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
-		PDEBUG( "Failed to clain the parallel port\n" );
-		return -EIO;
+	/* If there's just a single byte to be written use the 'byte' field of
+	   the RULBUS_EPP_IOCTL_ARGS structure, otherwise we need to allocate
+	   a buffer and copy everything there from user-space */
+
+	if ( rulbus_arg->len == 1 )
+		data = &rulbus_arg->byte;
+	else {
+		if ( rulbus_arg->data == NULL ) {
+			PDEBUG( "Invalid write data pointer.\n" );
+			return -EINVAL;
+		}
+
+		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+		if ( data == NULL )
+		{
+			PDEBUG( "Not enough memory for reading.\n" );
+			return -ENOMEM;
+		}
+
+		if ( copy_from_user( data, rulbus_arg->data,
+				     rulbus_arg->len ) ) {
+			kfree( data );
+			PDEBUG( "Can't read from user space\n" );
+			return -EACCES;
+		}
 	}
 
 	/* Select the rack (if necessary) and then read the data */
@@ -515,8 +551,9 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 						       1, 0 ) != 1 ||
 		     rulbus.port->ops->epp_write_data( rulbus.port, &null,
 						       1, 0  ) != 1 ) {
-			parport_release( rulbus.dev );
-			PDEBUG( "Setting rack failed\n" );
+			if ( rulbus_arg->len > 1 )
+				kfree( data );
+			PDEBUG( "Selecting rack failed\n" );
 			return -EIO;
 		}
 
@@ -526,14 +563,17 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 	if ( rulbus.port->ops->epp_write_addr( rulbus.port,
 					       &rulbus_arg->offset,
 					       1, 0 ) != 1 ||
-	     rulbus.port->ops->epp_write_data( rulbus.port, &rulbus_arg->data,
-					       1, 0  ) != 1 ) {
-		parport_release( rulbus.dev );
+	     rulbus.port->ops->epp_write_data( rulbus.port, data,
+					       rulbus_arg->len, 0  )
+	     						 != rulbus_arg->len ) {
+		if ( rulbus_arg->len > 1 )
+			kfree( data );
 		PDEBUG( "Writing data failed\n" );
 		return -EIO;
 	}
 
-	parport_release( rulbus.dev );
+	if ( rulbus_arg->len > 1 )
+		kfree( data );
 
 	return 0;
 }
