@@ -474,7 +474,7 @@ static void prune_stage_2( Var_T *nv )
 
 	if ( nv->val.vptr[ 0 ]->type == INT_ARR )
 	{
-		nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
+		nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
 		nv->type = INT_ARR;
 
 		for ( i = 0; i < nv->len; i++ )
@@ -485,7 +485,7 @@ static void prune_stage_2( Var_T *nv )
 	}
 	else
 	{
-		nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
+		nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
 		nv->type = FLOAT_ARR;
 
 		for ( i = 0; i < nv->len; i++ )

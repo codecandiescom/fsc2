@@ -323,11 +323,7 @@ void vars_arr_create( Var_T *a, Var_T *v, int dim, bool is_temp )
 	{
 		a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
 		if ( a->type == INT_ARR )
-		{
-			a->val.lpnt = LONG_P T_malloc( len * sizeof *a->val.lpnt );
-			for ( i = 0; i < len; i++ )
-				a->val.lpnt[ i ] = 0;
-		}
+			a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
 		else
 		{
 			a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
