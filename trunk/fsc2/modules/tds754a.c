@@ -7,6 +7,7 @@
 #define TDS754A_MAIN
 
 #include "tds754a.h"
+#include "gpib_if.h"
 
 
 /* This array must be set to the available record lengths of the digitizer
