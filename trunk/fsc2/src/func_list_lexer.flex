@@ -327,7 +327,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 				state = 2;
 				break;
 
-			case ALL_TOKEN : case EXP_TOKEN :
+			case ALL_TOKEN : case EXP_TOKEN : case PREP_TOKEN :
 				if ( state != 2 )
 				{
 					eprint( FATAL, "Syntax error at line %ld of function data "

@@ -49,6 +49,6 @@ pulser_set_timebase, 1, PREP;   // sets timebase for pulser
 
 lockin_get_data, -1, EXP;       // returns either the voltage or the
 				                // voltage measured at one of the ADCs
-lockin_sensitivity, -1, EXP;    // getss or sets the sensitivity
-lockin_time_constant, -1, EXP;  // gets or sets the time constant
-lockin_phase, -1, EXP;          // gets or sets the phase
+lockin_sensitivity, -1, ALL;    // getss or sets the sensitivity
+lockin_time_constant, -1, ALL;  // gets or sets the time constant
+lockin_phase, -1, ALL;          // gets or sets the phase
