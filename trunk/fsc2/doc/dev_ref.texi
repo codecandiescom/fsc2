@@ -852,11 +852,10 @@ to @code{no}.
 @strong{Module name}: @code{hp8647a}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard RF synthesizer HP8647A (but also
-works with HP8648B) with support for output level normalization via
-frequency/amplitude table files. For safety reasons only output
-attenuations below @w{-5 dB} are allowed -- change the configuration
-file to allow higher output levels.
+@strong{Description}: Hewlett-Packard RF synthesizer HP8647A with support for
+output level normalization via frequency/amplitude table files. For safety
+reasons only output attenuations below @w{-5 dB} are allowed -- change the
+configuration file to allow higher output levels.
 
 Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 dB}
 to @w{3 dB} in @w{0.1 dB} steps.
