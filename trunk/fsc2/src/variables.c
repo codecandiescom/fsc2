@@ -1073,11 +1073,10 @@ bool vars_exist( Var *v )
 		if ( lp == v )
 			return OK;
 
-	/* This should never happen and this function might finally vanish... */
+	/* If variable can't be found do the in both lists we're really fucked */
 
-	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
-			"variable detected at %s:%d.", __FILE__, __LINE__ );
-	exit( EXIT_FAILURE );
+	assert( 1 == 0 );
+	return FAIL;
 }
 
 
