@@ -12,20 +12,20 @@
 /***********************************************************************/
 
 
-DG2020_F      // Sony/Tektronix data generator (Frankfurt version)
-DG2020_B      // Sony/Tektronix data generator (Berlin version)
+dg2020_f      // Sony/Tektronix data generator (Frankfurt version)
+dg2020_b      // Sony/Tektronix data generator (Berlin version)
 
-TDS754A       // Tektronix digitizing oscilloscope
-TDS520A       // Tektronix digitizing oscilloscope
+tds754a       // Tektronix digitizing oscilloscope
+tds520a       // Tektronix digitizing oscilloscope
 
-SR510         // Stanford Research lock-in amplifier
-SR810         // Stanford Research lock-in amplifier
+sr510         // Stanford Research lock-in amplifier
+sr810         // Stanford Research lock-in amplifier
 
-S_BAND        // S-band AEG magnet power supply (Frankfurt)
-AEG_X_BAND    // X-band AEG magnet power supply (Berlin)
+s_band        // S-band AEG magnet power supply (Frankfurt)
+aeg_x_band    // X-band AEG magnet power supply (Berlin)
 
-ER035M        // Bruker NMR gaussmeter
+er035m        // Bruker NMR gaussmeter
 
-BH15          // Bruker field controller
+bh15          // Bruker field controller
 
-HP8647A       // HP RF synthesizer
+hp8647a       // HP RF synthesizer
