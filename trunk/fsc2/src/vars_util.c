@@ -45,6 +45,13 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 				THROW( EXCEPTION );
 			}
 
+			if ( v->from->flags & NEED_ALLOC )
+			{
+				eprint( FATAL, "%s:%ld: `%s' is a dynamically sized array of "
+						"still unknown size.\n", Fname, Lc, v->from->name );
+				THROW( EXCEPTION );
+			}
+
 			vars_check( v->from, INT_ARR | FLOAT_ARR );
 			*elems = v->from->len;
 			if ( v->from->type == INT_ARR )
