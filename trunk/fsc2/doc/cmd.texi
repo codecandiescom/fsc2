@@ -28,7 +28,7 @@ Starts @acronym{fsc2} in graphics mode and immediately does a syntax
 check on FILE.  If the syntax check does not fail the experiment is
 started without needing further user input.
 
-@item @option{-d}
+@item @option{--delete}
 Starts @acronym{fsc2} in graphics mode and loads FILE (or also tests
 and/or starts the program when used in conjunction with the @code{-T} or
 @code{-S} flags). The input file will be @strong{automatically deleted}
@@ -36,6 +36,12 @@ when @acronym{fsc2} is done with it, i.e.@ when either @acronym{fsc2}
 exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{real careful}.
+
+@item @option{-sb button_number}
+Specifies which mouse button has to be used to activate the stop button
+while the experiment is running. Use @code{1} for the left mouse button,
+@code{2} for the middle and @code{3} for the right mosue button. Per
+default each of the three mouse buttons can be used.
 
 @item @option{-h, --help}
 Displays a very short help text and exits.

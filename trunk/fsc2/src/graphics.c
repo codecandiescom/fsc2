@@ -159,7 +159,17 @@ void start_graphics( void )
 	}
 	T_free( pixmap_file );
 
-	fl_set_object_helper( run_form->stop, "Stop the experiment" );
+	if ( stop_button_mask == 0 )
+		fl_set_object_helper( run_form->stop, "Stop the experiment" );
+	else if ( stop_button_mask == FL_LEFT_MOUSE )
+		fl_set_object_helper( run_form->stop, " Stop the experiment\n"
+			                                  "Use left mouse button" );
+	else if ( stop_button_mask == FL_MIDDLE_MOUSE )
+		fl_set_object_helper( run_form->stop, "  Stop the experiment\n"
+			                                  "Use middle mouse button" );
+	else if ( stop_button_mask == FL_RIGHT_MOUSE )
+		fl_set_object_helper( run_form->stop, " Stop the experiment\n"
+			                                  "Use right mouse button" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
 	if ( G.dim == 2 )
