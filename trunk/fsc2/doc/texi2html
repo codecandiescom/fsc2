@@ -875,6 +875,7 @@ $T2H_DOCTYPE
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
 <META NAME="Generator" CONTENT="$THISPROG">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 $T2H_EXTRA_HEAD
 <LINK REL=STYLESHEET TYPE="text/css" HREF="fsc2.css">
 </HEAD>
