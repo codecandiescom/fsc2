@@ -2,6 +2,9 @@
 #define FSC2_HEADER
 
 
+#define _GNU_SOURCE
+
+
 /* inclusion system header files */
 
 #include <stdio.h>
