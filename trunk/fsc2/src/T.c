@@ -86,6 +86,9 @@ void *T_realloc( void *ptr, size_t size )
 
 void *T_free( void *ptr )
 {
+	if ( ptr == NULL )
+		return NULL;
+
 #if defined MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
 	fflush( stderr );
