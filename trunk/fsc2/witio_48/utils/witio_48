@@ -69,15 +69,18 @@ case "$1" in
 			log_failure_msg "Loading WITIO-48 module failed."
 			exit 1
 		fi
-		major=`grep witio_48 /proc/devices | awk '{print $1}'`
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
 		if [ $? != 0 ]; then
-			log_failure_msg "Can't determine major device number for WITIO-48 cards."
-			exit 1
-		fi
-		mknod -m 666 /dev/witio_48 c $major 0
-		if [ $? != 0 ]; then
-			log_failure_msg "Creating device file for WITIO-48 cards failed."
-			exit 1
+			major=`grep witio_48 /proc/devices | awk '{print $1}'`
+			if [ $? != 0 ]; then
+				log_failure_msg "Can't determine major device number for WITIO-48 cards."
+				exit 1
+			fi
+			mknod -m 666 /dev/witio_48 c $major 0
+			if [ $? != 0 ]; then
+				log_failure_msg "Creating device file for WITIO-48 cards failed."
+				exit 1
+			fi
 		fi
 		test "$2" = "restart" || log_success_msg "Starting WITIO-48 support."
 		;;
@@ -88,10 +91,13 @@ case "$1" in
 			log_failure_msg "Unloading WITIO-48 module failed."
 			exit 1
 		fi
-		rm -f /dev/witio
-			if [ $? != 0 ]; then
-			log_failure_msg "Deleting device files for WITIO-48 cards failed."
-			exit 1
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			rm -f /dev/witio
+				if [ $? != 0 ]; then
+					log_failure_msg "Deleting device files for WITIO-48 cards failed."
+				exit 1
+			fi
 		fi
 		test "$2" = "restart" || log_success_msg "Stopping WITIO-48 support."
 		;;

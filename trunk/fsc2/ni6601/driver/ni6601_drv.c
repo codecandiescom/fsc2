@@ -101,8 +101,8 @@ static int __init ni6601_init( void )
 	if ( ( res_major = register_chrdev( major, NI6601_NAME,
 					    &ni6601_file_ops ) ) < 0 ) {
 #endif
-		printk( KERN_ERR NI6601_NAME ": Can't get assigned a major "
-			"device number\n" );
+		printk( KERN_ERR NI6601_NAME ": Can't register as char "
+			"device.\n" );
 		ni6601_release_resources( boards, board_count );
 		return major;
 	}

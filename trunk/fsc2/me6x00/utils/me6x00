@@ -69,33 +69,39 @@ case "$1" in
 			log_failure_msg "Loading ME6X00 module failed."
 			exit 1
 		fi
-		major=`grep me6x00 /proc/devices | awk '{print $1}'`
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
 		if [ $? != 0 ]; then
-			log_failure_msg "Can't determine major device number for ME6X00 cards."
-			exit 1
-		fi
-		nboards=`grep '1402:6[01][013][48f]' /proc/pci | wc -l`
-		i=0;
-		while [ $i -lt $nboards ]; do
-			mknod /dev/me6x00_$i c $major $i
+			major=`grep me6x00 /proc/devices | awk '{print $1}'`
 			if [ $? != 0 ]; then
-				log_failure_msg "Creating device files for ME6X00 cards failed."
+				log_failure_msg "Can't determine major device number for ME6X00 cards."
 				exit 1
 			fi
-			chmod 666 /dev/me6x00_$i
-			i=$(($i+1))
-		done
+			nboards=`grep '1402:6[01][013][48f]' /proc/pci | wc -l`
+			i=0;
+			while [ $i -lt $nboards ]; do
+				mknod /dev/me6x00_$i c $major $i
+				if [ $? != 0 ]; then
+					log_failure_msg "Creating device files for ME6X00 cards failed."
+					exit 1
+				fi
+				chmod 666 /dev/me6x00_$i
+				i=$(($i+1))
+			done
+		fi
 		test "$2" = "restart" || log_success_msg "Starting ME6X00 support."
 		;;
 
 	 stop)
-		for f in /dev/me6x00_*; do
-			rm -f $f
-			if [ $? != 0 ]; then
-				log_failure_msg "Deleting device files for ME6X00 cards failed."
-				exit 1
-			fi
-		done
+		grep 'devfs=only' /proc/cmdline > /dev/null 2>&1
+		if [ $? != 0 ]; then
+			for f in /dev/me6x00_*; do
+				rm -f $f
+				if [ $? != 0 ]; then
+					log_failure_msg "Deleting device files for ME6X00 cards failed."
+					exit 1
+				fi
+			done
+		fi
 		rmmod me6x00 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Unloading ME6X00 module failed."

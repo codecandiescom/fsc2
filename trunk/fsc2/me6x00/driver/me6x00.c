@@ -321,6 +321,7 @@ int init_module( void )
 #endif
 {
 #ifdef CONFIG_PCI
+	int res_major;
 	int i;
 
 
@@ -346,18 +347,21 @@ int init_module( void )
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( major = devfs_register_chrdev( major, ME6X00_NAME,
+	if ( ( res_major = devfs_register_chrdev( major, ME6X00_NAME,
 					    &me6x00_file_operations ) ) < 0 ) {
 #else
-	if ( ( major = register_chrdev( major, ME6X00_NAME,
-					&me6x00_file_operations ) ) < 0 ) {
+	if ( ( res_major = register_chrdev( major, ME6X00_NAME,
+					    &me6x00_file_operations ) ) < 0 ) {
 #endif
 		printk( KERN_ERR "ME6X00: init_module(): "
 			"Can't get assigned a major number\n" );
 		return -ENODEV;
 	}
 
-	printk( KERN_INFO "ME6X00: driver installed, major = %d\n", major );
+	if ( major == 0 )
+		major = res_major;
+
+	printk( KERN_INFO "ME6X00: driver succesfully installed.\n" );
 
 	for ( i = 0; i < me6x00_board_count; i++ )
 		printk( KERN_INFO "ME6X00: Board %d: type is %s\n",
@@ -370,6 +374,50 @@ int init_module( void )
 		"Missing PCI support in kernel.\n" );
 	return -ENODEV
 #endif
+}
+
+
+/*
+ * Routine:
+ *   me6x00_exit / cleanup_module
+ *
+ * Description:
+ *   This routine is called when the module is removed from the kernel.
+ *   It unregisters the module from the system.
+ *
+ * Parameter list:
+ *   Name       Type              Access    Description
+ *--------------------------------------------------------------------------
+ *
+ * Result:
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification: JTT
+ */
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+static void __exit me6x00_exit( vod )
+#else
+void cleanup_module( void )
+#endif
+{
+	int i;
+
+
+	for ( i = 0; i < me6x00_board_count; i++ ) {
+		me6x00_reset_board( i, FROM_CLEANUP );
+		pci_release_regions( info_vec[ i ].dev );
+	}
+
+#ifdef CONFIG_DEVFS_FS
+	if ( major && devfs_unregister_chrdev( major, ME6x00_NAME ) < 0 )
+#else
+	if ( unregister_chrdev( major, ME6X00_NAME ) )
+#endif
+		printk( KERN_ERR "ME6X00: cleanup_module(): "
+			"can't unregister module.\n" );
+	else
+		printk( KERN_INFO "ME6X00: driver de-installed.\n" );
 }
 
 
@@ -2257,50 +2305,6 @@ static void me6x00_isr( int irq, void *dev_id, struct pt_regs *dummy )
 
 	ISR_PDEBUG( "me6x00_isr(): FIFO %d: reset interrupt\n", dac );
 	reg2 = me6x00_inl( info->me6x00_regbase + regs[ dac ].irqr );
-}
-
-
-/*
- * Routine:
- *   me6x00_exit / cleanup_module
- *
- * Description:
- *   This routine is called when the module is removed from the kernel.
- *   It unregisters the module from the system.
- *
- * Parameter list:
- *   Name       Type              Access    Description
- *--------------------------------------------------------------------------
- *
- * Result:
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification: JTT
- */
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
-static void __exit me6x00_exit( vod )
-#else
-void cleanup_module( void )
-#endif
-{
-	int i;
-
-
-	for ( i = 0; i < me6x00_board_count; i++ ) {
-		me6x00_reset_board( i, FROM_CLEANUP );
-		pci_release_regions( info_vec[ i ].dev );
-	}
-
-#ifdef CONFIG_DEVFS_FS
-	if ( devfs_unregister_chrdev( major, ME6x00_NAME ) < 0 )
-#else
-	if ( unregister_chrdev( major, ME6X00_NAME ) )
-#endif
-		printk( KERN_ERR "ME6X00: cleanup_module(): "
-			"cannot unregister major %d\n", major );
-	else
-		printk( KERN_INFO "ME6X00: driver de-installed.\n" );
 }
 
 
