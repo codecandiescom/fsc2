@@ -8,8 +8,8 @@
 #include "gpib_if.h"
 
 
-static double tds720a_get_area_wo_cursor( int channel, WINDOW *w );
-static double tds720a_get_amplitude_wo_cursor( int channel, WINDOW *w );
+static double tds520a_get_area_wo_cursor( int channel, WINDOW *w );
+static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w );
 
 
 /*-----------------------------------------------------------------*/
@@ -585,7 +585,7 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 
 	if ( ! use_cursor )
-		return tds720a_get_area_wo_cursor( channel, w );
+		return tds520a_get_area_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
@@ -642,13 +642,13 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 /* by fetching the curve in the window and integrating it 'by hand'. */
 /*-------------------------------------------------------------------*/
 
-static double tds720a_get_area_wo_cursor( int channel, WINDOW *w )
+static double tds520a_get_area_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, area;
 	long length, i;
 
 
-	tds720a_get_curve( channel, w, &data, &length, UNSET );
+	tds520a_get_curve( channel, w, &data, &length, UNSET );
 
 	for ( area = 0.0, i = 0; i < length; i++ )
 		area += data[ i ];
@@ -657,7 +657,7 @@ static double tds720a_get_area_wo_cursor( int channel, WINDOW *w )
 
 	/* Return the integrated area, multiplied by the the time per point */
 
-	return area * tds720a.timebase / TDS_POINTS_PER_DIV;
+	return area * tds520a.timebase / TDS_POINTS_PER_DIV;
 }
 
 
@@ -694,15 +694,15 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Set the cursors or start and end point of interval */
 
-	if ( use_cursors )
-		tds720a_set_curve_window( w );
+	if ( use_cursor )
+		tds520a_set_curve_window( w );
 	else
 	{
 		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
-				 w != NULL ? w->end_num : tds720a.rec_len );
-		if ( gpib_write( tds720a.device, cmd ) == FAILURE )
-			tds720a_gpib_failure( );
+				 w != NULL ? w->end_num : tds520a.rec_len );
+		if ( gpib_write( tds520a.device, cmd ) == FAILURE )
+			tds520a_gpib_failure( );
 	}
 
 	/* Wait for measurement to finish (use polling) */
@@ -787,7 +787,7 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 
 	if ( ! use_cursor )
-		return tds720a_get_amplitude_wo_cursor( channel, w );
+		return tds520a_get_amplitude_wo_cursor( channel, w );
 
 	/* Set measurement type to area */
 
@@ -844,13 +844,13 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 /* fetching the curve in the window and integrating it 'by hand'.    */
 /*-------------------------------------------------------------------*/
 
-static double tds720a_get_amplitude_wo_cursor( int channel, WINDOW *w )
+static double tds520a_get_amplitude_wo_cursor( int channel, WINDOW *w )
 {
 	double *data, min, max;
 	long length, i;
 
 
-	tds720a_get_curve( channel, w, &data, &length, UNSET );
+	tds520a_get_curve( channel, w, &data, &length, UNSET );
 
 	min = HUGE_VAL;
 	max = - HUGE_VAL;

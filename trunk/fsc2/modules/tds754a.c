@@ -524,7 +524,7 @@ Var *digitizer_get_curve( Var *v )
 	return get_curve( v, SET );
 }
 
-Var *digitizer_get_curve_fast( Var *v, UNSET )
+Var *digitizer_get_curve_fast( Var *v )
 {
 	return get_curve( v, UNSET );
 }

@@ -609,8 +609,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( I_am == CHILD )
 	{
-		tds744a_get_curve( ch, w, &array, &length );
-		nv = vars_push( FLOAT_TRANS_ARR, array, length, use_cursor );
+		tds744a_get_curve( ch, w, &array, &length, use_cursor );
+		nv = vars_push( FLOAT_TRANS_ARR, array, length );
 		T_free( array );
 		return nv;
 	}

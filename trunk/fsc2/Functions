@@ -76,8 +76,11 @@ digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, 1, PREP;     // set or get trigger channel
 digitizer_start_acquisition, 0, EXP;
 digitizer_get_area, -1, EXP;
+digitizer_get_area_fast, -1, EXP;
 digitizer_get_curve, -1, EXP;
+digitizer_get_curve_fast, -1, EXP;
 digitizer_get_amplitude, -1, EXP;
+digitizer_get_amplitude_fast, -1, EXP;
 
 digitizer_get_channel_number, 1, ALL;   // only for internal use !
 
