@@ -328,7 +328,6 @@ bool xforms_init( int *argc, char *argv[ ] )
 	else
 		fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2" );
-
 	
 	fl_deactivate_object( main_form->reload );
 	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
