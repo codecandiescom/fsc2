@@ -40,13 +40,13 @@ written to the controlling terminal.
 
 @item @option{-T}
 Starts @acronym{fsc2} in graphics mode and immediately does a syntax
-check on FILE.  When done with the check @acronym{fsc2} waits for further
-commands.
+check on FILE.  When @acronym{fsc2} is done with the check it waits for
+further commands.
 
 @item @option{-S}
 Starts @acronym{fsc2} in graphics mode and immediately does a syntax
-check on FILE.  If the syntax check does not fail the experiment is
-started without needing further user input.
+check on FILE. If the syntax check does not fail the experiment is
+started without the need for further user input.
 
 @item @option{--delete}
 Starts @acronym{fsc2} in graphics mode and loads FILE (or also tests
