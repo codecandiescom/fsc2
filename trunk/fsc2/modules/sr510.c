@@ -100,6 +100,10 @@ static double sens_list[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
 static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 							 1.0, 3.0, 10.0, 30.0, 100.0 };
 
+#define SENS_ENTRIES ( sizeof sens_list / sizeof sens_list[ 0 ] )
+#define TC_ENTRIES ( sizeof tc_list / sizeof tc_list[ 0 ] )
+
+
 
 /* Declaration of all functions used only in this file */
 
@@ -329,7 +333,7 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < 23; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
 			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
@@ -339,9 +343,8 @@ Var *lockin_sensitivity( Var *v )
 			break;
 		}
 
-	if ( sens_index < 0 && sens < sens_list[ 24 ] * 1.01 )
-		sens_index = 24;
-
+	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		sens_index = SENS_ENTRIES;
 
 	if ( sens_index > 0 &&                                  /* value found ? */
 		 fabs( sens - sens_list[ sens_index - 1 ] ) > sens * 1.0e-2 &&
@@ -368,7 +371,7 @@ Var *lockin_sensitivity( Var *v )
 		if ( sens > sens_list[ 0 ] )
 			sens_index = 1;
 		else
-		    sens_index = 24;
+		    sens_index = SENS_ENTRIES;
 
 		if ( ! sr510.sens_warn )                      /* no warn message yet */
 		{
@@ -454,7 +457,7 @@ Var *lockin_time_constant( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 	
-	for ( i = 0; i < 10; i++ )
+	for ( i = 0; i < TC_ENTRIES - 1; i++ )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
@@ -484,7 +487,7 @@ Var *lockin_time_constant( Var *v )
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 1;
 		else
-			tc_index = 11;
+			tc_index = TC_ENTRIES;
 
 		if ( ! sr510.tc_warn )                      /* no warn message yet ? */
 		{
@@ -861,7 +864,7 @@ double sr510_get_sens( void )
 		sr510_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	sens = sens_list[ 24 - T_atol( buffer ) ];
+	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity 
 	   by a factor of 10 */
@@ -895,7 +898,7 @@ void sr510_set_sens( int sens_index )
 	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
 	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	sens_index = 25 - sens_index;
+	sens_index = SENS_ENTRIES + 1 - sens_index;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   otherwise it got to be switched off */
