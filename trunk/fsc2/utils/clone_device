@@ -93,7 +93,7 @@ die "Sorry, a module with the name $new_dev already seems to exist.\n"
 
 
 print "\nAlso a device name (to be used in error messages and\n" .
-	  "possibly also in the GPIB configuration file) is needed.\n\n" .
+	  "possibly in the GPIB configuration file) is needed.\n\n" .
 	  "Please enter a new device name (the old name is $dev_name) :  ";
 $new_dev_name = <>;
 chomp $new_dev_name;

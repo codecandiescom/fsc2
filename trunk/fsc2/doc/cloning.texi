@@ -70,14 +70,14 @@ Do you want to continue [y/n]? y
 
 Name of the device module you want to clone :  sr510
 
-Please now enter the name for the new module :  sr510_b
+Please enter the name for the new module    :  sr510_b
 
 Also a device name (to be used in error messages and
 possibly also in the GPIB configuration file) is needed.
 
 Please enter a new device name (the old name is SR510) :  SR510_B
 
-Thanks, that's all the needed information...
+Thanks, that's all the information needed...
 
 Everything worked out well. Now you simply have to re-make fsc2
 (just cd to the main directory and type 'make' and, when this
@@ -86,7 +86,7 @@ succeeds, become root and type 'make install').
 If the device is controlled via the GPIB bus you still have to
 update the GPIB configuration file manually (usually, it's
 /etc/gpib.conf). Just copy the section for the old device,
-replace the device name by `sr510_b'_name and change the GPIB
+replace the device name by `SR510_B' and change the GPIB
 address to the one of the new device.
 @end example
 
