@@ -20,9 +20,14 @@
 # Boston, MA 02111-1307, USA.
 
 
+# Lists of modules that get created from the same template files
+
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
 hp864_list      := hp8647a hp8648b
+
+
+# List of modules that are to be made from a single source file only
 
 simp_modules    := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				   aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
@@ -30,29 +35,9 @@ simp_modules    := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
 				   pt2025 er032m ips20_4 $(s_band_list) thurlby330          \
 				   hjs_daadc
 
-ifdef WITH_ME6000
-simp_modules    += me6000
-endif
 
-ifdef WITH_NI6601
-simp_modules    += ni6601
-endif
-
-ifdef WITH_WITIO_48
-simp_modules    += witio_48 bnm12
-endif
-
-comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
-				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a
-
-ifdef WITH_SPEC10
-comp_modules    += rs_spec10
-endif
-
-ifdef WITH_WITIO_48
-comp_modules    += hjs_fc
-endif
+# For each of the "complicated" modules a list of all source files they are
+# to be created from is needed
 
 dg2020_f        := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 			       dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -83,6 +68,35 @@ hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
 hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 hjs_fc          := hjs_fc.c hjs_fc_lexer.c
 spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c
+
+
+# List of all "complicated" modules that are to be made from more than a
+# single source file (plus a header file)
+
+comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
+				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
+				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a
+
+
+# Additional modules that only get created on demand (they require some
+# additional libraries that not installed on all systems)
+
+ifdef WITH_ME6000
+simp_modules    += me6000
+endif
+
+ifdef WITH_NI6601
+simp_modules    += ni6601
+endif
+
+ifdef WITH_WITIO_48
+simp_modules    += witio_48 bnm12
+comp_modules    += hjs_fc
+endif
+
+ifdef WITH_SPEC10
+comp_modules    += rs_spec10
+endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
