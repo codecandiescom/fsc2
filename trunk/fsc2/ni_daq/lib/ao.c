@@ -90,7 +90,7 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 			   										 external_reference[ i ] ||
 			   ni_daq_dev[ board ].ao_state.polarity[ ch ] != polarity[ i ] )
 			 &&
-			 ( ret = ni_daq_ao( board, &ch, 1, &null_volts ) ) < 0 )
+			 ( ret = ni_daq_ao( board, 1, &ch, &null_volts ) ) < 0 )
 			return ret;
 
 		if ( ( ret = ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_AO, &ao ) )
@@ -143,7 +143,7 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 			return ni_daq_errno = NI_DAQ_ERR_IVA;
 
 		if ( ! ni_daq_dev[ board ].ao_state.is_channel_setup[ i ] )
-			return ni_daq_error = NI_DAQ_ERR_NSS;
+			return ni_daq_errno = NI_DAQ_ERR_NCS;
 
 
 		if ( ni_daq_dev[ board ].ao_state.ext_ref[ ch ] == NI_DAQ_DISABLED )
@@ -196,6 +196,9 @@ int ni_daq_ao( int board, int num_channels, int *channels, double *values )
 
 int ni_daq_ao_init( int board )
 {
+	int ch;
+
+
 	for ( ch = 0; ch < 2; ch++ )
 		ni_daq_dev[ board ].ao_state.is_channel_setup[ ch ] = 0;
 	return 0;
