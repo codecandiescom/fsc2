@@ -13,11 +13,15 @@ static int num_func;        /* number of built-in  and listed functions */
 static Func *fncts;         /* structure for list of functions */
 
 
-static void **Lib_Handle;   /* array of dynamically loaded library handles */
-static int Num_Libs;        /* number of dynamically loaded libaries */
+typedef struct {
+	void *handle;
+	void ( * lib_exit ) ( void );
+	bool is_exit_hook;
+} Lib_Struct;
 
-void load_functions( const char *name, Func *fncts,
-					 int num_def_func, int num_func );
+static Lib_Struct *Libs = NULL;
+static int Num_Libs;              /* number of dynamically loaded libaries */
+
 
 
 
@@ -107,15 +111,13 @@ static Func def_fncts[ ] =              /* List of built-in functions */
 
 
 
-bool functions_init_hook( void )
+bool functions_init( void )
 {
 	/* count number of built-in functions */
 
 	for ( num_def_func = 0; def_fncts[ num_def_func ].fnct != NULL;
 		  num_def_func++ )
 		;
-
-	Lib_Handle = NULL;
 
 	num_func = num_def_func;
 
@@ -131,18 +133,18 @@ bool functions_init_hook( void )
 		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
-		load_functions( "User_Functions", fncts, num_def_func, num_func );
+		load_functions( "User_Functions" );
 	}
 	if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
    		TRY_SUCCESS;
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		functions_exit_hook( );
+		functions_exit( );
 		return FAIL;
 	}
 	CATCH( FUNCTION_EXCEPTION )
 	{
-		functions_exit_hook( );
+		functions_exit( );
 		return FAIL;
 	}
 
@@ -150,24 +152,128 @@ bool functions_init_hook( void )
 }
 
 
-void functions_exit_hook( void )
+void functions_exit( void )
 {
 	int i;
 
+
+	/* Get rid of the structures for the functions */
 
 	for ( i = num_def_func; i < num_func; i++ )
 		if ( fncts[ i ].name != NULL )
 			free( ( char * ) fncts[ i ].name );
 	free( fncts );
 
-	if ( Lib_Handle == NULL )
+	/* If there are loaded libraries run the exit hooks and unload them */
+
+	if ( Libs == NULL )
 		return;
 
 	for ( i = 0; i < Num_Libs; ++i )
-		dlclose( Lib_Handle[ Num_Libs ] );
+	{
+		if ( Libs[ i ].is_exit_hook )
+			Libs[ i ].lib_exit( );
+		dlclose( Libs[ i ].handle );
+	}
 
-	free( Lib_Handle );
+	free( Libs );
+	Libs = NULL;
 	Num_Libs = 0;
+}
+
+
+
+void load_functions( const char *name )
+{
+	int num;
+	char *library;
+	char *init_func;
+	char *exit_func;
+	void *cur;
+	int ( * lib_init ) ( void );
+
+
+	/* Put together name of library to be loaded */
+
+	library = get_string( strlen( name ) + 14 );
+	strcpy( library, "lib_fsc2_" );
+	strcat( library, name );
+	strcat( library, ".so.0" );
+
+	/* Increase memory allocated for library handles and try to open
+	   dynamically loaded library */
+
+	Libs = T_realloc( Libs, ( Num_Libs + 1 ) * sizeof( void ) );
+	Libs[ Num_Libs ].handle = dlopen( library, RTLD_LAZY );
+	free( library );
+	if ( Libs[ Num_Libs ].handle == NULL )
+	{
+		eprint( FATAL, "Can't open library for `%s', %s.\n",
+				name, dlerror( ) );
+		THROW( FUNCTION_EXCEPTION );
+	}
+
+	/* If there is a function with the name of the library file and the
+       appended string "_init_hook" run this init hook function and test if
+	   it returns TRUE */
+
+	init_func = T_malloc( strlen( name ) + 11 );
+	strcpy( init_func, name );
+	strcat( init_func, "_init_hook" );	
+
+	lib_init = dlsym( Libs[ Num_Libs ].handle, init_func );
+	free( init_func );
+	if ( dlerror( ) == NULL && lib_init( ) == 0 )
+	{
+		eprint( NO_ERROR, "Initialization of library for `%s' failed.\n",
+				name );
+		return;
+	}
+	
+	/* Now check if there's also an exit hook function */
+
+	exit_func = T_malloc( strlen( name ) + 11 );
+	strcpy( exit_func, name );
+	strcat( exit_func, "_exit_hook" );	
+
+	Libs[ Num_Libs ].lib_exit = dlsym( Libs[ Num_Libs ].handle, init_func );
+	if ( dlerror( ) == NULL )
+		Libs[ Num_Libs ].is_exit_hook = SET;
+	else
+		Libs[ Num_Libs ].is_exit_hook = UNSET;
+	free( exit_func );
+
+	eprint( NO_ERROR, "Loading functions from file `%s'.\n", name );
+
+	/* Run trough all the functions in the function list and if they need
+	   loading  store the address of the function - check that the function
+	   has not already been loaded (but overloading built-in functions is
+	   acceptable). */
+
+	for ( num = 0; num < num_func; num++ )
+	{
+		/* Don't try to load if function isn't listed in `Functions' */
+
+		if ( ! fncts[ num ].to_be_loaded )
+			continue;
+
+		cur = dlsym( Libs[ Num_Libs ].handle, fncts[ num ].name );
+
+		if ( dlerror( ) != NULL )     /* function not found in library ? */
+			continue;
+
+		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
+		{
+			eprint( FATAL, " Redefinition of function `%s()'.\n",
+					fncts[ num ].name );
+			THROW( FUNCTION_EXCEPTION );
+		}
+
+		eprint( NO_ERROR, "  Loading function `%s()'.\n", fncts[ num ].name );
+		fncts[ num ].fnct = cur;
+	}
+
+	Num_Libs++;
 }
 
 
@@ -258,20 +364,14 @@ Var *func_call( Var *f )
 	else
 		ret = ( *f->val.fnct )( NULL );
 
-	/* Finally do clean up, i.e. for function with a known number of arguments
-	   remove all variables from the stack. Finally remove the function
-	   variable und return the result */
+	/* Finally do clean up, remove the variable with the function and all
+	   parameters - just keep the return value */
 
-	if ( f->dim > 0 )
+	for ( ap = f; ap != ret; ap = apn )
 	{
-		for ( ac = 0, ap = f->next; ac < f->dim; ++ac )
-		{
-			apn = ap->next;
-			vars_pop( ap );
-			ap = apn;
-		}
+		apn = ap->next;
+		vars_pop( ap );
 	}
-	vars_pop( f );
 
 	return ret;
 }
@@ -696,7 +796,6 @@ Var *f_print( Var *v )
 					break;
 			}
 
-			vars_pop( cv );
 			cv = v->next;
 		}
 
@@ -706,78 +805,9 @@ Var *f_print( Var *v )
 	if ( *cp != '\0' )
 		eprint( NO_ERROR, cp );
 
-	/* remove superfluous arguments (if there are any) */
-
-	while ( ( cv = v->next ) != NULL )
-		vars_pop( cv );
-
-	/* finally free the copy of the format string as well as the variable with
-	   the format string */
+	/* finally free the copy of the format string and return number of
+	   printed varaibles */
 
 	free( fmt );
-	vars_pop( v );
-
 	return vars_push( INT_VAR, in_format );
 }
-
-
-void load_functions( const char *name, Func *fncts,
-					 int num_def_func, int num_func )
-{
-	int num;
-	char *library;
-	void *cur;
-
-
-	/* Put together name of library to be loaded */
-
-	library = get_string( strlen( name ) + 14 );
-	strcpy( library, "lib_fsc2_" );
-	strcat( library, name );
-	strcat( library, ".so.0" );
-
-	/* Increase memory allocated for library handles and try to open
-	   dynamically loaded library */
-
-	Lib_Handle = T_realloc( Lib_Handle, ( Num_Libs + 1 ) * sizeof( void ) );
-	Lib_Handle[ Num_Libs ] = dlopen( library, RTLD_LAZY );
-	if ( Lib_Handle[ Num_Libs ] == NULL )
-	{
-		eprint( FATAL, "Can't open library for `%s', %s.\n",
-				name, dlerror( ) );
-		THROW( FUNCTION_EXCEPTION );
-	}
-
-	eprint( NO_ERROR, "Loading functions from file `%s'.\n", name );
-
-	/* Run trough all the functions in the function list and if they need
-	   loading  store the address of the function - check that the function
-	   has not already been loaded (but overloading built-in functions is
-	   acceptable). */
-
-	for ( num = 0; num < num_func; num++ )
-	{
-		/* Don't try to load if function isn't listed in `Functions' */
-
-		if ( ! fncts[ num ].to_be_loaded )
-			continue;
-
-		cur = dlsym( Lib_Handle[ Num_Libs ], fncts[ num ].name );
-
-		if ( dlerror( ) != NULL )     /* function not found in library ? */
-			continue;
-
-		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
-		{
-			eprint( FATAL, " Redefinition of function `%s()'.\n",
-					fncts[ num ].name );
-			THROW( FUNCTION_EXCEPTION );
-		}
-
-		eprint( NO_ERROR, "  Loading function `%s()'.\n", fncts[ num ].name );
-		fncts[ num ].fnct = cur;
-	}
-
-	Num_Libs++;
-}
-
