@@ -1000,7 +1000,7 @@ dB}, i.e.@: you can use @w{10 uV}, @w{20 uV}, @w{50 uV}, @w{100 uV} etc.
 To achieve the two highest sensitivity settings the @code{EXPAND} button
 is automatically switched on.
 
-For the @strong{SR810} and the @strong{SR810} vaid sensitivity setings
+For the @strong{SR810} and the @strong{SR810} vaid sensitivity settings
 range from @w{2 nV} up to @w{1 V}, using the same system of steps as
 the @strong{SR510} and @strong{SR530}.
 
