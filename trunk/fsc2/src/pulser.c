@@ -717,6 +717,7 @@ void p_set( long pnum, int type, Var *v )
 			vars_check( v, INT_VAR );
 			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
 							"setting a pulse phase cycle" );
+			fprintf( stderr, "cycle = %ld\n", v->val.lval );
 			( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
 			vars_pop( v );
 			break;
@@ -810,7 +811,7 @@ Var *p_get_by_num( long pnum, int type )
 /* (0: first pod channel, 1: second pod channel, -1: pick the one not   */
 /* set yet)                                                             */
 /* 'val' means high or low to be set on the pod channel to set the      */
-/* requested phase(0: low, !0: high)                                    */
+/* requested phase (0: low, !0: high)                                   */
 /*----------------------------------------------------------------------*/
 
 void p_phs_setup( int func, int type, int pod, long val )
