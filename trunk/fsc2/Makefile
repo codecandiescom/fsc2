@@ -58,7 +58,7 @@ GROUP             := uucp
 GPIB_LIBRARY      := JTT
 
 
-# Then the location of the GPIB configuration file is set (this usually is
+# Here the location of the GPIB configuration file is set (this usually is
 # needed for the National Instruments GPIB library only, if not set
 # GPIB_CONF_FILE defaults to /etc/gpib.conf).
 
@@ -69,27 +69,27 @@ GPIB_CONF_FILE    := /etc/gpib.conf
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments you
-# do the file can become rather long. But the file will not grow indefintely,
-# if you start a new experiment the previous contents get overwritten. If no
-# file is specified logs will be written to stderr.
+# will do the file can become rather long. But the file will not grow
+# indefintely, if you start a new experiment its previous contents get
+# overwritten. If no file is specified logs will be written to stderr.
 
 GPIB_LOG_FILE     := /tmp/gpib.log
 
 
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
 # logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to 'HIGH' all
-# GPIB function calls together wih all data send to or recoved from devices
+# GPIB function calls together with all data send to or received from devices
 # are stored. When set to 'MEDIUM' only GPIB function calls are logged. When
-# set to 'LOW' only errors will be wriiten to the file. If not set it defaults
-# to 'LOW'.
+# set to 'LOW' only errors messages will be written to the log file. If not
+# set it defaults to 'LOW'.
 
 GPIB_LOG_LEVEL    := HIGH
 
 
 # Finally, if the header files for the GPIB library aren't in either
-# /usr/include or /usr/local/include (for example if they are in
-# /usr/include/gpib) set the variable GPIB_HEADER_DIR to the absolute
-# path of the directory where the header file(s) for the library reside.
+# /usr/include or /usr/local/include (e.g. if they are in /usr/include/gpib)
+# set the variable GPIB_HEADER_DIR to the absolute path of the directory
+# where the header file(s) for the library reside.
 
 # GPIB_HEADER_DIR  := /usr/include/gpib
 
@@ -119,16 +119,16 @@ WITH_HTTP_SERVER  := yes
 DEFAULT_HTTP_PORT := 8080
 
 
-# Uncomment the following line if you don't want the program to send an
-# email with a bug report when it crashes.
+# Uncomment the following line if you don't want the program to send me an
+# email with a report when it crashes.
 
 # NO_MAIL = yes
 
 
-# This last variable controls to whom mail with bug reports and about crashes
+# This last variable controls to whom emails with bug reports and about crashes
 # will be send - if it's commented out no "Bug report" button will be shown.
 # Please change this if you change the program yourself (in which case
-# sending bug reports or mails about crashes to me wouldn't make too much
+# sending bug reports or emails about crashes to me wouldn't make too much
 # sense).
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
@@ -202,7 +202,7 @@ ifeq ($(MPATROL),YES)
 	LIBS         := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
 					-lX11 -lm -ldl
 else
-	LIBS         := -L/usr/X11R6/lib  -lforms -lX11 -lm -ldl
+	LIBS         := -L/usr/X11R6/lib -lforms -lX11 -lm -ldl
 				    # -lmcheck   # for malloc debugging
 				    # -lefence   # to run with efence
 endif
@@ -220,7 +220,7 @@ EXEC_INSTALL     := install
 
 
 ############################################################################
-###########     Don't change anything below this line      #################
+###########   Don't change anything below this line        #################
 ###########  unless you really know what you're doing ...  #################
 ############################################################################
 
@@ -341,7 +341,7 @@ endif
 
 
 # Pass lots of variables to the source files...
-# For directories make sure they end with a `/'.
+# For directories make sure they end with a '/'.
 
 CONFFLAGS += -Dsrcdir=\"$(sdir:/=)/\"
 CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
@@ -412,10 +412,10 @@ ifdef SERIAL_LOCK_DIR
 endif
 
 
-# Define variables with full paths for the 'mail' and 'addr2line' programs
+# Define variables with the full paths of the 'mail' and 'addr2line' programs
 # and make sure the mail program and addr2line got found by 'which',
 # otherwise don't set the variables, If NO_MAIL has been defined never
-# send crash mails (which require ADDR2LINE being set).
+# send crash mails (which require ADDR2LINE to be set).
 
 MAIL_PROGRAM  := $(shell which mail)
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
@@ -431,7 +431,7 @@ ifndef NO_MAIL
 endif
 
 
-# Finally take care the variables for GPIB support are set correctly
+# Finally take care that the variables for GPIB support are set correctly
 
 ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_CONF_FILE
@@ -604,10 +604,10 @@ version:
 	fi
 
 
-# `clean' deletes all the files remaining from the compilation and not needed
-# for an installation while `distclean' also removes all executables, shared
-# libraries and documentation. `mostly_clean' is nearly identical to
-# `distclean' but does not remove the documentation.
+# 'clean' deletes all the files remaining from the compilation and not needed
+# for an installation while 'distclean' also removes all executables, shared
+# libraries and documentation. 'mostly_clean' is nearly identical to
+# 'distclean' but does not remove the documentation.
 
 clean:
 	$(MAKE) -C src clean
