@@ -22,7 +22,8 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations -W \
 				 -DDEBUG \
 				 # -DMDEBUG   # for malloc debugging
-LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl
+LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
+				 # -lmcheck   # for malloc debugging
 LDFLAGS        = -Wl,-E
 BISON          = bison
 BISONFLAGS     = -d -v -t -p

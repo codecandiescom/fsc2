@@ -1,7 +1,5 @@
 #include "fsc2.h"
 #include "gpib.h"
-#include <sys/types.h>
-#include <sys/socket.h>
 
 
 extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */

@@ -16,7 +16,7 @@ FD_fsc2 *create_form_fsc2(void)
   fdui->browser = obj = fl_add_browser(FL_NORMAL_BROWSER,230,10,790,580,"");
     fl_set_object_color(obj,FL_WHITE,FL_YELLOW);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
-  fdui->Load = obj = fl_add_button(FL_NORMAL_BUTTON,50,70,130,50,"Load");
+  fdui->Load = obj = fl_add_button(FL_NORMAL_BUTTON,50,60,130,50,"Load");
     fl_set_button_shortcut(obj,"L",1);
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
@@ -79,11 +79,14 @@ FD_run *create_form_run(void)
   fdui->redraw_dummy = obj = fl_add_button(FL_NORMAL_BUTTON,510,330,30,30,"");
     fl_set_object_boxtype(obj,FL_NO_BOX);
     fl_set_object_callback(obj,new_data_callback,0);
-  fdui->xy_plot = obj = fl_add_xyplot(FL_NORMAL_XYPLOT,230,30,780,750,"");
+  fdui->xy_plot = obj = fl_add_xyplot(FL_NORMAL_XYPLOT,220,20,790,760,"");
     fl_set_object_color(obj,FL_WHITE,FL_BLACK);
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
     fl_set_xyplot_xtics(obj, 10, 2);
     fl_set_xyplot_ytics(obj, 10, 2);
+  fdui->sigchld = obj = fl_add_button(FL_NORMAL_BUTTON,260,270,10,10,"");
+    fl_set_object_boxtype(obj,FL_NO_BOX);
+    fl_set_object_callback(obj,run_sigchld_callback,0);
   fl_end_form();
 
   fdui->run->fdui = fdui;
