@@ -152,6 +152,7 @@ typedef struct _p_ {
 int dg2020_init_hook( void );
 int dg2020_test_hook( void );
 int dg2020_exp_hook( void );
+int dg2020_end_of_exp_hook( void );
 void dg2020_exit_hook( void );
 
 

@@ -133,7 +133,7 @@ void load_functions( Device *dev )
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag */
 
-	hook_func_name = get_string( strlen( dev->name ) + 10 );
+	hook_func_name = get_string( strlen( dev->name ) + 17 );
 	strcpy( hook_func_name, dev->name );
 	strcat( hook_func_name, "_init_hook" );	
 

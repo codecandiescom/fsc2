@@ -8,7 +8,7 @@
 int User_Functions_init_hook( void );
 int User_Functions_test_hook( void );
 int User_Functions_exp_hook( void );
-void User_Functions_end_of_exp_hook( void );
+int User_Functions_end_of_exp_hook( void );
 void User_Functions_exit_hook( void );
 
 
