@@ -101,7 +101,18 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
        | E_VAR_TOKEN unit         { if ( $2 == NULL )
                                       $$ = vars_push( $1->type, $1 );
                                     else
-	                                  $$ = vars_mult( $1, $2 ); }
+									{
+									  if ( $1->type & ( INT_VAR | FLOAT_VAR ) )
+			                            $$ = vars_mult( $1, $2 );
+									  else
+									  {
+										eprint( FATAL, "%s:%ld: Can't apply "
+												 "a unit to a non-number.\n",
+												Fname, Lc );
+										THROW( EXCEPTION );
+									  }
+									}
+                                  }
        | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
          unit                     { if ( $7 == NULL )

@@ -229,3 +229,22 @@ inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
 inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
 inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
+
+
+
+Var * apply_unit( Var *var, Var *unit ) 
+{
+	if ( unit == NULL )
+		return var;
+	else
+	{
+		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
+		    return vars_mult( var, unit );
+		else
+		{
+			eprint( FATAL, "%s:%ld: Can't apply a unit to a non-number.\n",
+					Fname, Lc );
+			THROW( EXCEPTION );
+		}
+	}
+}

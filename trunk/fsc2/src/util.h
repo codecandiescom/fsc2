@@ -23,5 +23,6 @@ inline float  f_min( float  a, float  b );
 inline double d_max( double a, double b );
 inline double d_min( double a, double b );
 
+Var * apply_unit( Var *var, Var *unit );
 
 #endif  /* ! UTIL_HEADER */
