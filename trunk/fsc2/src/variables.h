@@ -82,7 +82,7 @@ Var *vars_negate( Var *v );
 Var *vars_comp( int comp_type, Var *v1, Var *v2 );
 Var *vars_lnegate( Var *v );
 Var *vars_push( int type, ... );
-void vars_pop( Var *v );
+Var *vars_pop( Var *v );
 void vars_del_stack( void );
 void vars_clean_up( void );
 void free_vars( void );

@@ -839,10 +839,11 @@ Var *vars_push( int type, ... )
 /* if it does removes it from the linked list making up the stack */
 /*----------------------------------------------------------------*/
 
-void vars_pop( Var *v )
+Var *vars_pop( Var *v )
 {
 	Var *stack = Var_Stack,
-		*prev = NULL;
+		*prev = NULL,
+		*ret = NULL;
 
 
 	if ( v == NULL )
@@ -863,6 +864,8 @@ void vars_pop( Var *v )
 
 	if ( stack != NULL )
 	{
+		ret = v->next;
+
 		if ( prev != NULL )
 		{
 			prev->next = stack->next;
@@ -897,6 +900,8 @@ void vars_pop( Var *v )
 
 		T_free( stack );
 	}
+
+	return ret;
 }
 
 
