@@ -880,6 +880,7 @@ $T2H_DOCTYPE
 $T2H_EXTRA_HEAD
 <LINK REL=STYLESHEET TYPE="text/css" HREF="fsc2.css">
 <LINK REL="icon" HREF="fsc2.ico" TYPE="image/x-icon">
+<LINK REL="shortcut icon" HREF="fsc2.ico" TYPE="image/x-icon">
 </HEAD>
 
 <BODY>
