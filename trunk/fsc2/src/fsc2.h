@@ -11,8 +11,7 @@
 
 /* define my email address for bug and crash reports */
 
-//#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
-#define MAIL_ADDRESS "jens"
+#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
 
