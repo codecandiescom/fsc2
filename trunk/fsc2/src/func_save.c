@@ -36,9 +36,9 @@ static int print_array( Var *v, long cur_dim, long *start, int fid );
 static int print_slice( Var *v, int fid );
 static void f_format_check( Var *v );
 static void ff_format_check( Var *v );
-static long do_printf( int file_num, Var *v );
+static long do_printf( long file_num, Var *v );
 static int print_browser( int browser, int fid, const char* comment );
-static int T_fprintf( int file_num, const char *fmt, ... );
+static int T_fprintf( long fn, const char *fmt, ... );
 static char *handle_escape( char *fmt_end );
 
 
@@ -120,7 +120,7 @@ Var *f_openf( Var *var )
 	{
 		for ( i = 0, cur = var; i < 6 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
-		return vars_push( INT_VAR, EDL.File_List_Len++ );
+		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 	}
 
 	/* Check the arguments and supply default values if necessary */
@@ -217,7 +217,7 @@ Var *f_openf( Var *var )
 
 	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, EDL.File_List_Len++ );
+	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -280,7 +280,8 @@ Var *f_getf( Var *var )
 	{
 		for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
-		if ( i > 0 && *var->val.sptr == '\\' )
+		if ( i > 0 && *var->val.sptr == '\\' &&
+			 EDL.Call_Stack->f->fnct != f_clonef )
 			print( WARN, "Use of hard-coded file names is deprecated, please "
 				   "use open_file() instead.\n" );
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -299,7 +300,8 @@ Var *f_getf( Var *var )
 
 	/* First string is the message */
 
-	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
+	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' &&
+		 EDL.Call_Stack->f->fnct != f_clonef )
 	{
 		print( WARN, "Use of hard-coded file names is deprecated, please use "
 			   "open_file() instead.\n" );
@@ -492,6 +494,7 @@ Var *f_clonef( Var *v )
 	char *n;
 	Var *new_v, *arg[ 5 ];
 	int i;
+	long file_num;
 
 
 	/* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
@@ -504,11 +507,14 @@ Var *f_clonef( Var *v )
 	/* Check all the parameter */
 
 	if ( v->type != INT_VAR ||
-		 v->val.lval < 0 || v->val.lval >= EDL.File_List_Len )
+		 v->val.lval < FILE_NUMBER_OFFSET ||
+		 v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
 	{
 		 print( FATAL, "First argument isn't a vaild file handle.\n" );
 		 THROW( EXCEPTION );
 	}
+
+	file_num = v->val.lval - FILE_NUMBER_OFFSET;
 
 	if ( v->next->type != STR_VAR || v->next->next->type != STR_VAR ||
 		 *v->next->next->val.sptr == '\0' )
@@ -520,10 +526,10 @@ Var *f_clonef( Var *v )
 	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
-	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ v->val.lval ].name )
+	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
 						  + strlen( v->next->next->val.sptr ) + 3 );
 	strcpy( fn, "\\" );
-	strcat( fn, EDL.File_List[ v->val.lval ].name );
+	strcat( fn, EDL.File_List[ file_num ].name );
 
 	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
 	if ( n > fn + 1 && *( n - 1 ) == '.' &&
@@ -566,7 +572,7 @@ static int get_save_file( Var **v )
 {
 	Var *get_file_ptr;
 	Var *file;
-	int file_num;
+	long file_num;
 	int acc;
 
 
@@ -681,7 +687,7 @@ Var *f_save( Var *v )
 {
 	size_t i;
 	long start;
-	int file_num;
+	long file_num;
 	int count = 0;
 	int sub_count;
 
@@ -827,7 +833,7 @@ static int print_slice( Var *v, int fid )
 
 Var *f_fsave( Var *v )
 {
-	int file_num;
+	long file_num;
 
 
 	/* Determine the file identifier */
@@ -978,7 +984,7 @@ static void f_format_check( Var *v )
 
 Var *f_ffsave( Var *v )
 {
-	int file_num;
+	long file_num;
 
 
 	/* Determine the file identifier */
@@ -1215,7 +1221,7 @@ static void ff_format_check( Var *v )
 /* the number of character written.                                      */
 /*-----------------------------------------------------------------------*/
 
-static long do_printf( int file_num, Var *v )
+static long do_printf( long file_num, Var *v )
 {
 	static char *fmt_start,
 		        *fmt_end,
@@ -1520,7 +1526,7 @@ static long do_printf( int file_num, Var *v )
 
 Var *f_save_p( Var *v )
 {
-	int file_num;
+	long file_num;
 
 
 	/* Determine the file identifier */
@@ -1552,7 +1558,7 @@ Var *f_save_p( Var *v )
 
 Var *f_save_o( Var *v )
 {
-	int file_num;
+	long file_num;
 
 
 	/* Determine the file identifier */
@@ -1632,7 +1638,7 @@ static int print_browser( int browser, int fid, const char* comment )
 
 Var *f_save_c( Var *v )
 {
-	int file_num;
+	long file_num;
 	const char *cc = NULL;
 	char *c = NULL,
 		 *l = NULL,
@@ -1723,12 +1729,12 @@ Var *f_save_c( Var *v )
 /* had to be used).                                                   */
 /*--------------------------------------------------------------------*/
 
-static int T_fprintf( int fn, const char *fmt, ... )
+static int T_fprintf( long fn, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static size_t size;         /* guess for number of characters needed */
 	static char *p;
-	static int file_num;
+	static long file_num;
 	va_list ap;
 	char *new_name;
 	FILE *new_fp;
