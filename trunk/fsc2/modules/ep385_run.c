@@ -814,9 +814,9 @@ void ep385_twt_padding_check( CHANNEL *ch )
 	   created pulses lengthen them if necessary, for user created pulses
 	   print a warning */
 
-	pp = f->pulse_params;
+	pp = ch->pulse_params;
 
-	for ( i = 1; i < f->num_active_pulses; i++ )
+	for ( i = 1; i < ch->num_active_pulses; i++ )
 	{
 		ppp = pp;
 		pp = pp + 1;

@@ -785,9 +785,9 @@ void rs690_twt_padding_check( CHANNEL *ch )
 	   created pulses lengthen them if necessary, for user created pulses
 	   print a warning */
 
-	pp = f->pulse_params;
+	pp = ch->pulse_params;
 
-	for ( i = 1; i < f->num_active_pulses; i++ )
+	for ( i = 1; i < ch->num_active_pulses; i++ )
 	{
 		ppp = pp;
 		pp = pp + 1;
@@ -1306,6 +1306,10 @@ void rs690_check_fs( void )
 			n->len = MAX_TICKS_PER_ENTRY;
 			memcpy( nn->fields, n->fields, sizeof n->fields );
 		}
+
+	/* Finally, if the pulse sequence is that complicated that more than the
+	   maximum number of words we have for table entries would be needed we
+	   have to bail out. */
 
 	if ( rs690.new_fs_count > TS_MAX_WORDS - 2 )
 	{
