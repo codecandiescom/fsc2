@@ -39,7 +39,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, int dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
-static int start_printing( char **argv );
+static int start_printing( char **argv, char *name );
 
 
 
@@ -1212,7 +1212,7 @@ static void do_print( char *name, const char *command )
 		/* Fork another process to do the printing */
 
 		if ( ( new_pid = fork( ) ) == 0 )
-			start_printing( argv );
+			start_printing( argv, name );
 
 		if ( new_pid < 0 )
 		{
@@ -1235,16 +1235,33 @@ static void do_print( char *name, const char *command )
 /* Starts a `grand-child' process to do the actual printing. */
 /*-----------------------------------------------------------*/
 
-static int start_printing( char **argv )
+static int start_printing( char **argv, char *name )
 {
 	int i;
+	pid_t new_pid;
+	int status;
+	struct sigaction sact;
 
 
-	execvp( argv[ 0 ], argv );
+	sact.sa_handler = SIG_IGN;
+	sigaction( SIGCHLD, &sact, NULL );
 
-	fprintf( stderr, "fsc2: print command failed:" );
-	for ( i = 0; argv[ i ] != NULL; i++ )
-		fprintf( stderr, " %s", argv[ i ] );
-	fprintf( stderr, "\n" );
-	_exit( EXIT_FAILURE );
+	if ( ( new_pid = fork( ) ) == 0 )
+		execvp( argv[ 0 ], argv );
+
+	if ( new_pid > 0 )
+		waitpid( new_pid, &status, 0 );
+
+	if ( new_pid < 0 || status != 0 )
+	{
+		fprintf( stderr, "fsc2: print command failed:" );
+		for ( i = 0; argv[ i ] != NULL; i++ )
+			fprintf( stderr, " %s", argv[ i ] );
+		fprintf( stderr, "\n" );
+		unlink( name );
+		_exit( EXIT_FAILURE );
+	}
+
+	unlink( name );
+	_exit( EXIT_SUCCESS );
 }
