@@ -1,5 +1,7 @@
 @c $Id$
 @c
+@c Copyright (c) 2001 Jens Thoms Toerring
+@c
 @c This file is part of fsc2.
 @c
 @c Fsc2 is free software; you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /*
-   $Id$
+  $Id$
 
   Copyright (c) 2001 Jens Thoms Toerring
 
