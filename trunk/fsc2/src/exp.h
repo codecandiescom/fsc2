@@ -42,6 +42,10 @@ typedef union {
 #define	E_OR            280
 #define	E_XOR           281
 #define	E_NOT           282
+#define	E_PPOS          283
+#define	E_PLEN          284
+#define	E_PDPOS         285
+#define	E_PDLEN         286
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050

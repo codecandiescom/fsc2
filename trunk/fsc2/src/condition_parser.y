@@ -57,6 +57,10 @@ static Var *CV;
 %token E_OR           280
 %token E_XOR          281
 %token E_NOT          282
+%token E_PPOS         283
+%token E_PLEN         284
+%token E_PDPOS        285
+%token E_PDLEN        286
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -66,6 +70,7 @@ static Var *CV;
 %token <dval> E_FLOAT_TOKEN
 %token <sptr> E_STR_TOKEN
 %token E_EQ E_LT E_LE E_GT E_GE
+%token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
@@ -108,6 +113,10 @@ expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 											"predefined function.\n",
 											Fname, Lc, $1->name );
 	                                THROW( EXCEPTION ); }
+       | E_PPOS                   { p_get( $1, P_POS ); }
+       | E_PLEN                   { p_get( $1, P_LEN ); }
+       | E_PDPOS                  { p_get( $1, P_DPOS ); }
+       | E_PDLEN                  { p_get( $1, P_DLEN ); }
        | expr E_AND expr          { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr E_OR expr           { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }
