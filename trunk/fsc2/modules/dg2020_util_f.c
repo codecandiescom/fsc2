@@ -146,13 +146,13 @@ const char *dg2020_pticks( Ticks ticks )
 }
 
 
-/*-----------------------------------------------------------------------------
-   Functions returns a pointer to a free channel - the channels with the
-   lowest numbers are used first since most users probably tend to use the
-   high number channels for storing test pulse sequences that they don't like
-   too much being overwritten just because they didn't set a channel-to-
-   function-assignment in their EDL program.
------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Functions returns a pointer to a free channel - the channels with the   */
+/* lowest numbers are used first since most users probably tend to use the */
+/* high number channels for storing test pulse sequences that they don't   */
+/* like too much being overwritten just because they didn't set a channel- */
+/* to-function-assignment in their EDL program.                            */
+/*-------------------------------------------------------------------------*/
 
 CHANNEL *dg2020_get_next_free_channel( void )
 {

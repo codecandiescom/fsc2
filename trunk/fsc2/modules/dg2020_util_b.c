@@ -174,7 +174,7 @@ CHANNEL *dg2020_get_next_free_channel( void )
 /* inactive, -1 if only the second pulse is inactive or starts at a */
 /* later time and 1 if only the first pulse is inactive pulse or    */
 /* the second pulse starts earlier.                                 */
---------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
 
 int dg2020_start_compare( const void *A, const void *B )
 {

@@ -149,7 +149,7 @@ Var *f_bcreate( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, ST, "Missing parameter in call of %s().\n", Cur_Func );
+		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
 		THROW( EXCEPTION );
 	}
 
