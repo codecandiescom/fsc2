@@ -375,6 +375,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	/* reset all the devices and finally the GPIB bus */
 
+	tools_clear( );
 	run_end_of_exp_hooks( );
 	if ( need_GPIB )
 		gpib_shutdown( );
