@@ -606,7 +606,7 @@ FOR J = 1 : N_runs {
         wt = ";
 print F "$tc_fact * " if $tc_fact != 1;
 print F "tc - delta_time( );
-        IF ( wt > 0 ) {
+        IF ( wt > 1 ms ) {
             wait( wt );
         }
         new_data[ I ] = lockin_get_data( );
