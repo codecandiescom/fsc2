@@ -242,59 +242,47 @@ void eprint( int severity, const char *fmt, ... )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Function converts an intensity into rgb values. For values below 0 black */
-/* wil be retrned, for values above 1 white. In the interval [ 0, 1 ] rgb   */
-/* colors from blue (0.0) via cyan (0.3), green (0.5), and yellow (0.7) to  */
-/* red (1.0) are returned.                                                  */
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function converts intensities into rgb values (between 0 and 255). For */
+/* values below 0 a dark kind of violet is returned, for values above 1 a */
+/* creamy shade of white. The interval [ 0, 1 ] itself is subdivided into */
+/* 6 subintervals at the points defined by the array `p' and rgb colors   */
+/* ranging from blue via cyan, green and yellow to red are calculated     */
+/* with `v' defining the intensities of the three primary colors at the   */
+/* endpoints of the intervals and using linear interpolation in between.  */
+/*------------------------------------------------------------------------*/
 
 void i2rgb( double h, int *rgb )
 {
-	if ( h < 0.0 )
+	int i, j;
+	double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
+	int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },     /* RED   */
+						{   0,  32, 233, 255, 233,  32,   0 },     /* GREEN */
+						{ 128, 255, 233,  32,   0,   0,   0 } };   /* BLUE  */
+
+
+	if ( h < p[ 0 ] )
 	{
-		rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 0;
+		rgb[ RED ]   = 72;
+		rgb[ GREEN ] = 0;
+		rgb[ BLUE ]  = 72;
 		return;
 	}
 
-	if ( h <= 0.3 )
-	{
-		rgb[ RED ] = 0;
-/*		rgb[ GREEN ] = ( int ) ( 255.0 * 3.333333333333 * h ); */
-		rgb[ GREEN ] = ( int ) ( 850.0 * h );
-		rgb[ BLUE ] = 255;
-		return;
-	}
+	for ( i = 0; i < 6; i++ )
+		if ( p[ i ] != p[ i + 1 ] && h <= p[ i + 1 ] )
+		{
+			for ( j = RED; j <= BLUE; j++ )
+				rgb[ j ]   = ( int ) ( v[ j ][ i ] +
+									   ( v[ j ][ i + 1 ] - v[ j ][ i ] ) 
+									   * ( h - p[ i ] )
+									   / ( p[ i + 1 ] - p[ i ] ) );
+			return;
+		}
 
-	if ( h <= 0.5 )
-	{
-		rgb[ RED ] = 0;
-		rgb[ GREEN ] = 255;
-/*		rgb[ BLUE ] = ( int ) ( 255.0 * ( 1.0 - 5.0 * ( h - 0.3 ) ) ); */
-		rgb[ BLUE ] = ( int ) ( 637.5 - 1275.0 * h );
-		return;
-	}
-
-	if ( h <= 0.7 )
-	{
-/*		rgb[ RED ] = ( int ) ( 255.0 * 5.0 * ( h - 0.5 ) ); */
-		rgb[ RED ] = ( int ) ( 1275.0 * h - 637.5 );
-		rgb[ GREEN ] = 255;
-		rgb[ BLUE ] = 0;
-		return;
-	}
-
-	if ( h <= 1.0 )
-	{
-		rgb[ RED ] = 255;
-/*		rgb[ GREEN ] = ( int ) ( 255.0
-                             * ( 1.0 - 3.3333333333333333 * ( h - 0.7 ) ) ); */
-		rgb[ GREEN ] = ( int ) ( 850.0 * ( 1.0 - h ) );
-		rgb[ BLUE ] = 0;
-		return;
-	}
-
-	rgb[ RED ] = rgb[ GREEN ] = rgb[ BLUE ] = 255;
+	rgb[ RED ] = 255;
+	rgb[ GREEN ] = 248;
+	rgb[ BLUE ] = 220;
 }
 
 
