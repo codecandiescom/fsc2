@@ -373,7 +373,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			if ( ! defense_p->is_active )
 				continue;
 
-			if ( shape_p->pos < defense_p->pos &&
+			if ( shape_p->pos <= defense_p->pos &&
 				 shape_p->pos + shape_p->len + ep385.shape_2_defense >
 				 defense_p->pos )
 			{

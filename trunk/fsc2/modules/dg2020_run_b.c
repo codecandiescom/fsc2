@@ -343,9 +343,9 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 				ppp->len -= ppp->pos + ppp->len - pp->pos;
 			else
 			{
-				print( FATAL, "Distance between pulses #%ld and #%ld %stoo "
+				print( FATAL, "Distance between pulses #%ld and #%ld %s too "
 					   "small to set shape padding.\n", ppp->pulse->num,
-					   pp->pulse->num, dg2020_IN_SETUP ? "" : "becomes " );
+					   pp->pulse->num, dg2020_IN_SETUP ? "is" : "becomes" );
 				THROW( EXCEPTION );
 			}
 		}
@@ -715,7 +715,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 			if ( ! defense_p->is_active )
 				continue;
 
-			if ( shape_p->pos < defense_p->pos &&
+			if ( shape_p->pos <= defense_p->pos &&
 				 shape_p->pos + shape_p->len + dg2020.shape_2_defense >
 				 defense_p->pos )
 			{
