@@ -114,10 +114,10 @@ input:   /* empty */
 	                                 THROW( EXCEPTION ); }
 ;
 
-eol:     ';'                       { assert( Var_Stack == NULL );
+eol:     ';'                       { fsc2_assert( Var_Stack == NULL );
                                      if ( do_quit ) 
                                          YYACCEPT; }
-       | '}'                       { assert( Var_Stack == NULL );
+       | '}'                       { fsc2_assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
 
 /* currently only the variables related stuff */
@@ -132,7 +132,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
-         ass                       { assert( Var_Stack == NULL ); }
+         ass                       { fsc2_assert( Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",

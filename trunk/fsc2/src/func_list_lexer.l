@@ -181,7 +181,7 @@ int func_list_parse( Func **fncts, int num_func )
 	TRY
 	{
 		num = fll_count_functions( *fncts, num_predef_func );
-		assert( num >= 0 );
+		fsc2_assert( num >= 0 );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -416,7 +416,7 @@ static void fll_get_functions( Func *fncts, int num_predef_func )
 				break;
 
 			default:                             /* this can never happen... */
-				assert( 1 == 0 );
+				fsc2_assert( 1 == 0 );
 		}
 	}
 }

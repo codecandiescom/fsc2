@@ -15,7 +15,7 @@ long cur_aseq;
 
 void acq_seq_start( long acq_num, long acq_type )
 {
-	assert( acq_num == 0 || acq_num == 1 );
+	fsc2_assert( acq_num == 0 || acq_num == 1 );
 
 	/* Check that this acquisition sequence isn't already defined */
 
@@ -60,7 +60,7 @@ void acq_seq_cont( long acq_type )
 
 	/* Make real sure the acquisition type is reasonable */
 
-	assert( acq_type >= ACQ_PLUS_U && acq_type <= ACQ_MINUS_B );
+	fsc2_assert( acq_type >= ACQ_PLUS_U && acq_type <= ACQ_MINUS_B );
 
 	/* Add the new acquisition type */
 
@@ -91,7 +91,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 	Phase_Sequence *cp = PSeq, *pn;
 
 
-	assert( phase_seq_num >= 0 );       /* again, let's be paranoid */
+	fsc2_assert( phase_seq_num >= 0 );        /* again, let's be paranoid */
 
 	/* Check that a phase sequence with this number isn't already defined */
 
@@ -139,7 +139,8 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 
 void phases_add_phase( Phase_Sequence *p, int phase_type )
 {
-	assert ( phase_type >= PHASE_TYPES_MIN && phase_type <= PHASE_TYPES_MAX );
+	fsc2_assert ( phase_type >= PHASE_TYPES_MIN &&
+				  phase_type <= PHASE_TYPES_MAX );
 
 	/* Append the new phase to the sequence */
 

@@ -1924,7 +1924,7 @@ void redraw_cut_axis( int coord )
 	int r_coord;
 
 
-	assert( coord >= X && coord <= Z );
+	fsc2_assert( coord >= X && coord <= Z );
 
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the

@@ -61,7 +61,7 @@ static Var *CV;
 
 input:   /* empty */
        | input ';'
-       | input line ';'            { assert( Var_Stack == NULL ); }
+       | input line ';'            { fsc2_assert( Var_Stack == NULL ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
 ;								  

@@ -2469,7 +2469,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	fl_set_object_resize( io->self, FL_RESIZE_X );
@@ -2506,7 +2506,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 		if ( io->self == obj )
 			break;
 
-	assert( io != NULL );            /* this can never happen :) */
+	fsc2_assert( io != NULL );            /* this can never happen :) */
 
 	switch ( io->type )
 	{
@@ -2596,7 +2596,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			break;
 
 		default :                 /* this can never happen :) */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 }
 

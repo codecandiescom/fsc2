@@ -337,7 +337,7 @@ int is_in( const char *supplied_in, const char **altern, int max )
 	int count;
 
 
-	assert( supplied_in != NULL && altern != NULL );
+	fsc2_assert( supplied_in != NULL && altern != NULL );
 
 	/* Get copy of input string and get rid of leading and trailing white
 	   space */

@@ -292,7 +292,12 @@ void death_mail( int signo )
 
 	fprintf( tmp, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
 			 I_am == CHILD ? "CHILD" : "PARENT", strsignal( signo ) );
-
+#ifndef NDEBUG
+	if ( signo == SIGABRT )
+		fprintf( tmp, "%s:%u: failed assertion: %s\n\n",
+				 Assert_struct.filename, Assert_struct.line,
+				 Assert_struct.expression );
+#endif
 	fprintf( tmp, "Fname = %s, Lc = %ld\n\n", Fname, Lc );
 
 	fprintf( tmp, "Content of program browser:\n\n" );

@@ -66,7 +66,7 @@ long p_num( char *txt )
 	while ( txt != NULL && ! isdigit( *txt ) )
 		txt++;
 
-	assert( txt != NULL );          /* Paranoia ? */
+	fsc2_assert( txt != NULL );          /* Paranoia ? */
 
 	return T_atol( txt );
 }
@@ -145,8 +145,8 @@ void p_assign_pod( long func, Var *v )
 
 	is_pulser_driver( );
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	/* Test if there's a function for assigning channels to pods - otherwise
 	   the pulser doesn't have pods and we have to quit */
@@ -194,8 +194,8 @@ void p_assign_channel( long func, Var *v )
 	long channel;
 
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	/* Check the variable and get its value */
 
@@ -238,8 +238,8 @@ void p_set_delay( long func, Var *v )
 	double delay;
 
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	/* Check the variable and get its value */
 
@@ -262,8 +262,8 @@ void p_set_delay( long func, Var *v )
 
 void p_inv( long func )
 {
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	is_pulser_func( pulser_struct.invert_function, "inverting a channel" );
 	( *pulser_struct.invert_function )( func );
@@ -280,8 +280,8 @@ void p_set_v_high( long func, Var *v )
 	double voltage;
 
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	/* Check the variable and get its value */
 
@@ -307,8 +307,8 @@ void p_set_v_low( long func, Var *v )
 	double voltage;
 
 
-	assert( func >= PULSER_CHANNEL_FUNC_MIN &&
-			func <= PULSER_CHANNEL_FUNC_MAX );
+	fsc2_assert( func >= PULSER_CHANNEL_FUNC_MIN &&
+				 func <= PULSER_CHANNEL_FUNC_MAX );
 
 	/* Check the variable and get its value */
 
@@ -720,7 +720,7 @@ void p_set( long pnum, int type, Var *v )
 			break;
 
 		default:
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 }
 
@@ -791,7 +791,7 @@ Var *p_get_by_num( long pnum, int type )
 			break;
 
 		default :
-			assert ( 1 == 0 );
+			fsc2_assert ( 1 == 0 );
 	}
 
 	return v;
@@ -815,8 +815,8 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 {
 	/* A few sanity checks before we call the pulsers handler function */
 
-	assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
-	assert( func == 0 || func == 1 );        /* phase function correct ? */
+	fsc2_assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
+	fsc2_assert( func == 0 || func == 1 );       /* phase function correct ? */
 
 	/* Let's check if the pulser supports the function needed */
 
@@ -834,7 +834,7 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 
 void p_phs_end( int func )
 {
-	assert( func == 0 || func == 1 );        /* phase function correct ? */
+	fsc2_assert( func == 0 || func == 1 );      /* phase function correct ? */
 
 	( *pulser_struct.phase_setup )( func );
 }
@@ -848,7 +848,7 @@ void p_phs_end( int func )
 
 void p_set_psd( int func, Var *v )
 {
-	assert( func == 0 || func == 1 );
+	fsc2_assert( func == 0 || func == 1 );
 
 	if ( ! exists_device( "dg2020_f" ) )
 	{

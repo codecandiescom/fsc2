@@ -74,12 +74,12 @@ static Var *CV;
 input:   /* empty */
        | input ';'                 { Cur_Pulse = -1; }
        | input line ';'            { Cur_Pulse = -1;
-	                                 assert( Var_Stack == NULL ); }
+	                                 fsc2_assert( Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { Cur_Pulse = -1;
-	                                 assert( Var_Stack == NULL );
+	                                 fsc2_assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
 
@@ -92,7 +92,7 @@ line:    P_TOK prop
        | VAR_TOKEN MODA expr       { vars_assign( vars_mod( $1, $3 ), $1 ); }
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
-         ass                       { assert( Var_Stack == NULL ); }
+         ass                       { fsc2_assert( Var_Stack == NULL ); }
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",

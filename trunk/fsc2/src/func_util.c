@@ -213,7 +213,7 @@ Var *f_print( Var *v )
 						break;
 
 					default :
-						assert( 1 == 0 );
+						fsc2_assert( 1 == 0 );
 				}
 
 			cv = cv->next;
@@ -738,7 +738,7 @@ Var *f_cscale( Var *v )
 
 	/* Function can only be used in experiment section */
 
-	assert( I_am == CHILD );
+	fsc2_assert( I_am == CHILD );
 
 	len =   sizeof( long )                /* length field itself */
 		  + 2 * sizeof( int )             /* type field and flags */
@@ -863,7 +863,7 @@ Var *f_clabel( Var *v )
 
 	/* Function can only be used in experiment section */
 
-	assert( I_am == CHILD );
+	fsc2_assert( I_am == CHILD );
 
 	len =   4 * sizeof( long )            /* length field and label lengths */
 		  + sizeof( int );                /* type field */
@@ -1011,7 +1011,7 @@ Var *f_rescale( Var *v )
 
 	/* Function can only be used in experiment section */
 
-	assert( I_am == CHILD );
+	fsc2_assert( I_am == CHILD );
 
 	len =   3 * sizeof( long )          /* length field and number of points */
 		  + sizeof( int );              /* type field */
@@ -1096,7 +1096,7 @@ Var *f_display( Var *v )
 		return vars_push( INT_VAR, 1 );
 	}
 
-	assert( I_am == CHILD );
+	fsc2_assert( I_am == CHILD );
 
 	/* Determine the needed amount of shared memory */
 
@@ -1211,8 +1211,8 @@ Var *f_display( Var *v )
 				break;
 
 			case ARR_PTR :
-				assert( dp[ i ].v->from->type == INT_ARR ||
-						dp[ i ].v->from->type == FLOAT_ARR );
+				fsc2_assert( dp[ i ].v->from->type == INT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_ARR );
 				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
 				ptr += sizeof( int );
 
@@ -1235,8 +1235,8 @@ Var *f_display( Var *v )
 				break;
 
 			case ARR_REF :
-				assert( dp[ i ].v->from->type == INT_ARR ||
-						dp[ i ].v->from->type == FLOAT_ARR );
+				fsc2_assert( dp[ i ].v->from->type == INT_ARR ||
+							 dp[ i ].v->from->type == FLOAT_ARR );
 				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
 				ptr += sizeof( int );
 					
@@ -1530,7 +1530,7 @@ Var *f_clearcv( Var *v )
 	/* Now starts the code only to be executed by the child, i.e. while the
 	   measurement is running. */
 
-	assert( I_am == CHILD );
+	fsc2_assert( I_am == CHILD );
 
 	/* Now try to get a shared memory segment */
 
@@ -2086,7 +2086,7 @@ Var *f_save( Var *v )
 				break;
 
 			default :
-				assert( 1 == 0 );
+				fsc2_assert( 1 == 0 );
 		}
 
 		v = v->next;
@@ -2319,7 +2319,7 @@ Var *f_fsave( Var *v )
 					break;
 
 				default :
-					assert( 1 == 0 );
+					fsc2_assert( 1 == 0 );
 			}
 
 			cv = cv->next;

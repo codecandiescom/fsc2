@@ -735,8 +735,8 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 	
 	/* Make sure we don't do something stupid... */
 
-	assert( ( coord == Y && c == &G.y_axis ) ||
-			( coord == Z && ( c == &G.z_axis || c == &G.cut_z_axis ) ) );
+	fsc2_assert( ( coord == Y && c == &G.y_axis ) ||
+				 ( coord == Z && ( c == &G.z_axis || c == &G.cut_z_axis ) ) );
 
 	/* Distinguish between labels for the primary window and the cut window
 	   (this function is never called for the cut windows y-axis) */

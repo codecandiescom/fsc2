@@ -219,8 +219,8 @@ void store_exp( FILE *in )
 		THROW( EXCEPTION );
 	}
 
-	assert( paranthesis_count == 0 );
-	assert( square_brace_count == 0 );
+	fsc2_assert( paranthesis_count == 0 );
+	fsc2_assert( square_brace_count == 0 );
 
 	/* Check and initialise if's and loops */
 
@@ -936,10 +936,10 @@ bool test_condition( Prg_Token *cur )
 	bool condition;
 
 
-	cur_prg_token++;                     /* skip the WHILE or IF etc. */
-	conditionparse( );                   /* get the value */
-	assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
-	assert( cur_prg_token->token == '{' );
+	cur_prg_token++;                          /* skip the WHILE or IF etc. */
+	conditionparse( );                        /* get the value */
+	fsc2_assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
+	fsc2_assert( cur_prg_token->token == '{' );
 
 	/* Make sure returned value is either integer or float */
 
@@ -985,9 +985,9 @@ bool test_condition( Prg_Token *cur )
 
 void get_max_repeat_count( Prg_Token *cur )
 {
-	cur_prg_token++;                    /* skip the REPEAT token */
-	conditionparse( );                  /* get the value */
-	assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
+	cur_prg_token++;                         /* skip the REPEAT token */
+	conditionparse( );                       /* get the value */
+	fsc2_assert( Var_Stack->next == NULL );  /* Paranoia as usual... */
 
 	/* Make sure the repeat count is either int or float */
 
@@ -1067,10 +1067,10 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Now get start value to be assigned to loop variable */
 
-	cur_prg_token +=2;                    /* skip variable and `=' token */
-	in_for_lex = SET;                     /* allow `:' as separator */
-	conditionparse( );                    /* get start value */
-	assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+	cur_prg_token +=2;                        /* skip variable and `=' token */
+	in_for_lex = SET;                         /* allow `:' as separator */
+	conditionparse( );                        /* get start value */
+	fsc2_assert( Var_Stack->next == NULL );   /* Paranoia as usual... */
 
 	/* Make sure there is at least one more token, i.e. the loops end value */
 
@@ -1120,9 +1120,9 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Get for loop end value */
 
-	cur_prg_token++;                      /* skip the `:' */
-	conditionparse( );                    /* get end value */
-	assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
+	cur_prg_token++;                           /* skip the `:' */
+	conditionparse( );                         /* get end value */
+	fsc2_assert( Var_Stack->next == NULL );    /* Paranoia as usual... */
 
 	/* Make sure end value is either integer or float */
 
@@ -1178,7 +1178,7 @@ void get_for_cond( Prg_Token *cur )
 		cur_prg_token++;                        /* skip the `:' */
 		conditionparse( );                      /* get end value */
 		in_for_lex = UNSET;
-		assert( Var_Stack->next == NULL );      /* Paranoia as usual... */
+		fsc2_assert( Var_Stack->next == NULL ); /* Paranoia as usual... */
 
 		/* Make sure the increment is either an integer or a float */
 
@@ -1312,7 +1312,7 @@ bool test_for_cond( Prg_Token *cur )
 		}
 	}
 
-	assert( 1 == 0 );
+	fsc2_assert( 1 == 0 );
 	return FAIL;
 }
 
@@ -1332,14 +1332,14 @@ void save_restore_variables( bool flag )
 {
 	Var *src;
 	Var *cpy;
-	static Var *var_list_copy = NULL;      /* area for storing variables */
+	static Var *var_list_copy = NULL;      /* area for storing variables    */
 	static Var *old_var_list;              /* needed to satisfy my paranoia */
-	long var_count;                        /* number of variables to save */
+	long var_count;                        /* number of variables to save   */
 
 
 	if ( flag )
 	{
-		assert( var_list_copy == NULL );           /* don't save twice ! */
+		fsc2_assert( var_list_copy == NULL );      /* don't save twice ! */
 
 		/* Count the number of variables and get memory for storing them */
 
@@ -1380,8 +1380,8 @@ void save_restore_variables( bool flag )
 	}
 	else
 	{
-		assert( var_list_copy != NULL );     /* don't restore without save ! */
-		assert( var_list == old_var_list );  /* just being a bit paranoid... */
+		fsc2_assert( var_list_copy != NULL );   /* no restore without save ! */
+		fsc2_assert( var_list == old_var_list );   /* just a bit paranoid... */
 
 		/* Get rid of memory for arrays that might have been changed during
 		   the test */

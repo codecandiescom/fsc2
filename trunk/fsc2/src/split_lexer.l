@@ -235,7 +235,7 @@ bool section_parser( int section )
 					break;
 	
 				default :              /* this should never happen, but ... */
-					assert( 1 == 0 );
+					fsc2_assert( 1 == 0 );
 			}
 	
 		} while ( section != NO_SECTION );

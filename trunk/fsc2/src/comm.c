@@ -330,7 +330,7 @@ long reader( void *ret )
 	switch ( header.type )
 	{
 		case C_EPRINT :          
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			/* Get the string to be printed... */
 
@@ -360,7 +360,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_MESSAGE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
@@ -390,7 +390,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_ALERT :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
@@ -418,7 +418,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_CHOICES :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			/* Get number of buttons and number of default button */
 
@@ -457,7 +457,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			/* Get the 4 parameter strings */
 
@@ -492,7 +492,7 @@ long reader( void *ret )
 			break;
 
 		case C_PROG : case C_OUTPUT :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			sema_post( semaphore );
 
@@ -502,7 +502,7 @@ long reader( void *ret )
 			break;
 
 		case C_INPUT :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			/* Get length of predefined content and label from header and 
 			   read them */
@@ -529,7 +529,7 @@ long reader( void *ret )
 			break;
 
 		case C_LAYOUT :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -540,7 +540,7 @@ long reader( void *ret )
 			break;
 
 		case C_BCREATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -553,14 +553,14 @@ long reader( void *ret )
 		case C_BCREATE_REPLY :
 		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
 		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 
 			pipe_read( pd[ READ ], ret, header.data.len );
 			retval = 0;
 			break;
 
 		case C_BDELETE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -571,7 +571,7 @@ long reader( void *ret )
 			break;
 
 		case C_BSTATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -585,12 +585,12 @@ long reader( void *ret )
 		case C_SDELETE_REPLY :
 		case C_IDELETE_REPLY :
 		case C_ODELETE_REPLY :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 			retval = header.data.long_data;
 			break;
 
 		case C_SCREATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -601,7 +601,7 @@ long reader( void *ret )
 			break;
 
 		case C_SDELETE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -612,7 +612,7 @@ long reader( void *ret )
 			break;
 
 		case C_SSTATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -623,7 +623,7 @@ long reader( void *ret )
 			break;
 
 		case C_ICREATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -634,7 +634,7 @@ long reader( void *ret )
 			break;
 
 		case C_IDELETE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -645,7 +645,7 @@ long reader( void *ret )
 			break;
 
 		case C_ISTATE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -656,7 +656,7 @@ long reader( void *ret )
 			break;
 
 		case C_ODELETE :
-			assert( I_am == PARENT );       /* only to be read by the parent */
+			fsc2_assert( I_am == PARENT );  /* only to be read by the parent */
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
@@ -667,7 +667,7 @@ long reader( void *ret )
 			break;
 
 		case C_STR :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 
 			if ( header.data.len == -1 )
 			{
@@ -695,7 +695,7 @@ long reader( void *ret )
 			break;
 
 		case C_INT :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 
 			if ( ret != NULL )
 				*( ( int * ) ret ) = header.data.int_data;
@@ -704,7 +704,7 @@ long reader( void *ret )
 			break;
 
 		case C_LONG :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 
 			if ( ret != NULL )
 				*( ( long * ) ret ) = header.data.long_data;
@@ -712,7 +712,7 @@ long reader( void *ret )
 			break;
 
 		case C_FLOAT :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 
 			if ( ret != NULL )
 				*( ( float * ) ret ) = header.data.float_data;
@@ -720,14 +720,14 @@ long reader( void *ret )
 			break;
 
 		case C_DOUBLE :
-			assert( I_am == CHILD );         /* only to be read by the child */
+			fsc2_assert( I_am == CHILD );    /* only to be read by the child */
 			if ( ret != NULL )
 				*( ( double * ) ret ) = header.data.double_data;
 			retval = 1;
 			break;
 
 		default :                     /* this should never be reached... */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	return retval;
@@ -844,7 +844,7 @@ void writer( int type, ... )
 	switch ( type )
 	{
 		case C_EPRINT :          
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -860,7 +860,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_MESSAGE :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -880,7 +880,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_ALERT :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -900,7 +900,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_CHOICES :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -935,7 +935,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			/* Set up header and write it */
 
@@ -963,12 +963,12 @@ void writer( int type, ... )
 			break;
 
 		case C_PROG : case C_OUTPUT :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_INPUT :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			/* Set up the two argument strings */
 
@@ -996,7 +996,7 @@ void writer( int type, ... )
 		case C_SCREATE : case C_SDELETE : case C_SSTATE :
 		case C_ICREATE : case C_IDELETE : case C_ISTATE :
 		case C_ODELETE :
-			assert( I_am == CHILD );      /* only to be written by the child */
+			fsc2_assert( I_am == CHILD );      /* only to be written by the child */
 
 			header.data.len = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
@@ -1007,7 +1007,7 @@ void writer( int type, ... )
 		case C_BCREATE_REPLY :
 		case C_SCREATE_REPLY : case C_SSTATE_REPLY :
 		case C_ICREATE_REPLY : case C_ISTATE_REPLY :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.len = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
@@ -1019,13 +1019,13 @@ void writer( int type, ... )
 		case C_BSTATE_REPLY : case C_SDELETE_REPLY :
 		case C_IDELETE_REPLY :
 		case C_ODELETE_REPLY :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 			header.data.long_data = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_STR :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			str[ 0 ] = va_arg( ap, char * );
 			if ( str[ 0 ] == NULL )
@@ -1042,35 +1042,35 @@ void writer( int type, ... )
 			break;
 
 		case C_INT :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.int_data = va_arg( ap, int );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_LONG :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.long_data = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_FLOAT :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.float_data = va_arg( ap, float );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		case C_DOUBLE :
-			assert( I_am == PARENT );    /* only to be written by the parent */
+			fsc2_assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.double_data = va_arg( ap, double );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			break;
 
 		default :                     /* this should never be reached... */
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	va_end( ap );

@@ -81,7 +81,7 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 }
 
@@ -180,8 +180,8 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -276,8 +276,8 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -432,8 +432,8 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -528,8 +528,8 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -683,8 +683,8 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -778,8 +778,8 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -966,8 +966,8 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -1069,8 +1069,8 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -1274,8 +1274,8 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -1377,8 +1377,8 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -1618,8 +1618,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
+	fsc2_assert( v1->type & ( INT_ARR | INT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == INT_ARR ) );
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
@@ -1781,8 +1781,8 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	long v1_len;
 
 
-	assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
-		    ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
+	fsc2_assert( v1->type & ( FLOAT_ARR | FLOAT_TRANS_ARR ) ||
+				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_ARR ) );
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
@@ -1937,7 +1937,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	switch ( v1->type )
@@ -1958,7 +1958,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 			break;
 
 		default :
-			assert( 1 == 0 );
+			fsc2_assert( 1 == 0 );
 	}
 
 	v->flags |= v1->flags & v2->flags & IS_DYNAMIC;
