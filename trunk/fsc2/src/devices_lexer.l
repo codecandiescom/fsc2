@@ -37,7 +37,7 @@
 
 /* We declare our own input routine to make the lexer read the input byte
    by byte instead of larger chunks - since the lexer might be called by
-   another lexer we thus avoid reading stuff which is to be handled here. */
+   another lexer we thus avoid reading stuff which isn't to be handled here. */
 
 #define YY_INPUT( buf, result, max_size )                  \
 {                                                          \
