@@ -79,6 +79,7 @@ config/hp8648b.table
 config/hp8672a.conf
 config/ips120_10.conf
 config/ips20_4.conf
+config/itc503.conf
 config/keithley228a.conf
 config/kontron4060.conf
 config/lakeshore330.conf
@@ -100,8 +101,8 @@ config/s_band_magnet_broad.conf
 config/s_band_magnet_narrow.conf
 config/spectrapro_300i.calib
 config/spectrapro_300i.conf
-config/spex_cd2a.calib
 config/spex_cd2a.conf
+config/spex_cd2a.state
 config/sr510.conf
 config/sr530.conf
 config/sr810.conf
@@ -245,6 +246,7 @@ modules/hp8672a.map
 modules/hp8672a_util.c
 modules/ips120_10.c
 modules/ips20_4.c
+modules/itc503.c
 modules/keithley228a.c
 modules/kontron4060.c
 modules/lakeshore330.c
@@ -351,6 +353,8 @@ scripts/cw_epr_saturation.pake.physik.uni-osnabrueck.de
 scripts/cw_epr.tresr.physik.fu-berlin.de
 scripts/endor_monitor.crowley.physik.fu-berlin.de
 scripts/Makefile
+scripts/pulse_monitor.rulhmpc66.leidenuniv.nl
+scripts/spectrapro_300i_calibration.single.physik.fu-berlin.de
 scripts/spex.spex.chem.tu-berlin.de
 scripts/trepr.isaak.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch
@@ -390,6 +394,8 @@ src/fsc2_assert.c
 src/fsc2_assert.h
 src/fsc2.c
 src/fsc2_clean.l
+src/fsc2_conf_lexer.l
+src/fsc2_conf_parser.y
 src/fsc2_connect.c
 src/fsc2d.c
 src/fsc2d.h
@@ -451,6 +457,7 @@ src/loader.h
 src/mail.c
 src/mail.h
 src/Makefile
+src/makelog
 src/module_util.c
 src/module_util.h
 src/phases.c

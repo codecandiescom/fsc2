@@ -30,16 +30,16 @@
 # If a version script exists we try to use it.
 
 
-##.so: $(##:.c=.o)
+##.fsc2_so: $(##:.c=.o)
 	@if [ -a ##.map ]; then                                           \
 		map="-Wl,--version-script=##.map";                            \
 	fi;                                                               \
-	if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then                   \
+	if [ -z "$($(patsubst %.fsc2_so,%_libs,$@))" ]; then              \
 		echo "$(CC) $(LFLAGS) $^ -o $@ $$map";                        \
 		$(CC) $(LFLAGS) $^ -o $@ $$map;                               \
 		chmod 644 $@;                                                 \
 	else                                                              \
-		for l in "$($(patsubst %.so,%_libs,$@))"; do                  \
+		for l in "$($(patsubst %.fsc2_so,%_libs,$@))"; do             \
 			if [ "$(notdir $$l)" == "$$l" ]; then                     \
 				l=$${l%.so};                                          \
 				libs="$$libs -l$${l#lib}";                            \

@@ -643,7 +643,7 @@ Var *monochromator_load_calibration( Var * v )
 /* function (if the camera uses binning the second element may have  */
 /* to be multiplied by the x-binning width). Please note: since the  */
 /* axis is not really completely linear, the axis that gets displyed */
-/* when using these values is not 1000% correct!                     */
+/* when using these values is not 100% correct!                      */
 /*-------------------------------------------------------------------*/
 
 Var *monochromator_wavelength_axis( Var * v )

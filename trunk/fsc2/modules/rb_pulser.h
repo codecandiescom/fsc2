@@ -258,6 +258,7 @@ Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
 Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
+Var *pulser_pulse_minimum_specs( Var *v );
 
 
 /* Functions defined in rb_pulser_gen.c */
