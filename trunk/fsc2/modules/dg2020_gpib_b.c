@@ -555,7 +555,7 @@ bool pulser_set_channel( int channel, Ticks address,
 /* in one of the channels either to high or low.       */
 /* ->                                                  */
 /*  * channel number                                   */
-/*  * start address (0 to 0xFFFF)                      */
+/*  * start address (-1 to 0xFFFE)                      */
 /*  * length of pattern (1 to 0xFFFF)                  */
 /*    (address + length must be less or equal 0xFFFF)  */
 /*  * either 1 or 0 to set the bits to high or low     */
