@@ -82,8 +82,8 @@ void dump_window( int type, int fd )
 		THROW( EXCEPTION );
 	}
 
-	/* Write the ppm header and the picture - the webserver is going to take
-	   care of converting it to the appropriate format. */
+	/* Write out the image in PPM format - the webserver will have to take
+	   care of converting it to a more appropriate format. */
 
 	dump_as_ppm( fp, image );
 
@@ -362,7 +362,7 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 
 void create_color_hash( void )
 {
-	int i;
+	FL_COLOR i;
 	FL_COLOR pixel;
 	int key;
 	int r = 0, g = 0, b = 0;
@@ -386,7 +386,7 @@ void create_color_hash( void )
 
 	for ( i = 0; i < NUM_COLORS + FL_FREE_COL1 + 2; i++ )
 	{
-		pixel = fl_get_pixel( ( FL_COLOR )  i );
+		pixel = fl_get_pixel( i );
 
 		key = pixel % hash_size;
 		while ( hash[ key ].is_used )
