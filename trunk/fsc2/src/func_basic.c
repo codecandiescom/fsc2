@@ -333,7 +333,7 @@ Var *f_floor( Var *v )
 			if ( v->val.dval < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
+			return vars_push( INT_VAR, lround( floor( v->val.dval )  ) );
 
 		default :
 			get_array_params( v, &len, &ilp, &idp );
@@ -349,7 +349,7 @@ Var *f_floor( Var *v )
 			if ( *idp < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			rlp[ i ] = ( long ) floor( *idp );
+			rlp[ i ] = lround( floor( *idp ) );
 		}
 
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -387,7 +387,7 @@ Var *f_ceil( Var *v )
 			if ( v->val.dval > LONG_MAX )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
+			return vars_push( INT_VAR, lround( ceil( v->val.dval ) ) );
 
 		default :
 			get_array_params( v, &len, &ilp, &idp );
@@ -403,7 +403,7 @@ Var *f_ceil( Var *v )
 			if ( *idp < LONG_MIN )
 				eprint( SEVERE, SET, "Integer overflow in function %s().\n",
 						Cur_Func );
-			rlp[ i ] = ( long ) ceil( *idp );
+			rlp[ i ] = lround( ceil( *idp ) );
 		}
 
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -1172,8 +1172,8 @@ Var *f_grand( Var *v )
 	if ( ! grand_is_old )
 	{
 		do {
-			val_1 = 2.0 * ( double ) random( ) / ( double ) RAND_MAX - 1.0;
-			val_2 = 2.0 * ( double ) random( ) / ( double ) RAND_MAX - 1.0;
+			val_1 = 2.0 * random( ) / ( double ) RAND_MAX - 1.0;
+			val_2 = 2.0 * random( ) / ( double ) RAND_MAX - 1.0;
 			radius = val_1 * val_1 + val_2 * val_2;
 		} while ( radius < 0.0 || radius >= 1.0 );
 

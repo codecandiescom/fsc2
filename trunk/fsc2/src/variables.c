@@ -1589,7 +1589,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 {
 	Var *ret;
 	Var *a = v->from;
-	long index;
+	long a_index;
 
 
 	/* Check that there are enough indices on the stack (since variable sized
@@ -1631,7 +1631,7 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 	/* Calculate the pointer to the indexed array element (or slice) and,
        while doing so, pop all the indices from the stack */
 
-	index = vars_calc_index( a, v->next );
+	a_index = vars_calc_index( a, v->next );
 
 	/* Pop the variable with the array pointer */
 
@@ -1645,14 +1645,14 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 	if ( a->flags & NEED_ALLOC )
 	{
 		ret = vars_push( ARR_PTR, NULL, a );
-		ret->len = index;
+		ret->len = a_index;
 	}
 	else
 	{
 		if ( a->type == INT_CONT_ARR )
-			ret = vars_push( ARR_PTR, a->val.lpnt + index, a );
+			ret = vars_push( ARR_PTR, a->val.lpnt + a_index, a );
 		else
-			ret = vars_push( ARR_PTR, a->val.dpnt + index, a );
+			ret = vars_push( ARR_PTR, a->val.dpnt + a_index, a );
 	}
 
 	/* Set necessary flags if a slice is indexed */
@@ -1672,12 +1672,12 @@ static Var *vars_get_lhs_pointer( Var *v, int n )
 static long vars_calc_index( Var *a, Var *v )
 {
 	int  i, cur;
-	long index;
+	long a_index;
 
 
 	/* Run through all the indices on the variable stack */
 
-	for ( i = 0, index = 0; v != NULL; i++, v = vars_pop( v ) )
+	for ( i = 0, a_index = 0; v != NULL; i++, v = vars_pop( v ) )
 	{
 		/* We may use an undefined variable as the very last index...*/
 
@@ -1743,7 +1743,7 @@ static long vars_calc_index( Var *a, Var *v )
 
 		/* Update the index */
 
-		index = index * a->sizes[ i ] + cur;
+		a_index = a_index * a->sizes[ i ] + cur;
 	}
 
 	if ( v != NULL )
@@ -1761,9 +1761,9 @@ static long vars_calc_index( Var *a, Var *v )
 	/* For slices we need another update of the index */
 
 	if ( i != a->dim && ! ( a->flags & NEED_ALLOC ) )
-		index = index * a->sizes[ i ];
+		a_index = index * a->sizes[ i ];
 
-	return index;
+	return a_index;
 }
 
 
@@ -1879,7 +1879,7 @@ Var *vars_arr_rhs( Var *v )
 {
 	int  dim;
 	Var  *a;
-	long index;
+	long a_index;
 
 
 	/* The variable pointer this function gets passed is a pointer to the very
@@ -1934,7 +1934,7 @@ Var *vars_arr_rhs( Var *v )
 
 	/* Calculate the position of the indexed array element (or slice) */
 
-	index = vars_calc_index( a, v->next );
+	a_index = vars_calc_index( a, v->next );
 
 	/* Pop the array pointer variable */
 
@@ -1947,15 +1947,15 @@ Var *vars_arr_rhs( Var *v )
 	if ( dim == a->dim )
 	{
 		if ( a->type == INT_CONT_ARR )
-			return vars_push( INT_VAR, *( a->val.lpnt + index ) );
+			return vars_push( INT_VAR, *( a->val.lpnt + a_index ) );
 		else
-			return vars_push( FLOAT_VAR, *( a->val.dpnt + index ) );
+			return vars_push( FLOAT_VAR, *( a->val.dpnt + a_index ) );
 	}
 
 	if ( a->type == INT_CONT_ARR )
-		return vars_push( ARR_PTR, a->val.lpnt + index, a );
+		return vars_push( ARR_PTR, a->val.lpnt + a_index, a );
 	else
-		return vars_push( ARR_PTR, a->val.dpnt + index, a );
+		return vars_push( ARR_PTR, a->val.dpnt + a_index, a );
 }
 
 

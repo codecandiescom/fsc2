@@ -602,15 +602,15 @@ inline void lower_permissions( void )
 
 inline unsigned long d2color( double a )
 {
-	long index;
+	long c_index;
 
 
-	index = lround( a * ( NUM_COLORS - 1 ) );
+	c_index = lround( a * ( NUM_COLORS - 1 ) );
 
-	if ( index < 0 )
+	if ( c_index < 0 )
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
-	else if ( index < NUM_COLORS )
-		return fl_get_pixel( FL_FREE_COL1 + 1 + index );
+	else if ( c_index < NUM_COLORS )
+		return fl_get_pixel( FL_FREE_COL1 + 1 + c_index );
 	else
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 }
@@ -667,16 +667,6 @@ inline unsigned short i2ushrt( int a )
 	return ( unsigned short ) a;
 }
 
-inline long d2long( double a )
-{
-	if ( a > LONG_MAX )
-		return LONG_MAX;
-	if ( a < LONG_MIN )
-		return LONG_MIN;
-	return lround( a );
-}
-
-
 inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
 inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
 inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
@@ -687,4 +677,11 @@ inline double d_max( double a, double b ) { return a > b ? a : b; }
 inline double d_min( double a, double b ) { return a < b ? a : b; }
 
 
-inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
+inline long lround( double x )
+{
+	if ( x > LONG_MAX )
+		return LONG_MAX;
+	if ( x < LONG_MIN )
+		return LONG_MIN;
+	return ( long ) ( 2 * x ) - ( long ) x;
+}
