@@ -42,8 +42,8 @@ void acq_seq_start( long acq_num, long acq_type )
 
 	if ( ASeq[ acq_num ].defined )
 	{
-		eprint( FATAL, SET, "Acquisition sequence %c has already been "
-				"defined.\n", ( char ) ( acq_num + 'X' ) );
+		eprint( FATAL, SET, "Acquisition sequence numbered %ld has already "
+				"been defined.\n", acq_num );
 		THROW( EXCEPTION );
 	}
 

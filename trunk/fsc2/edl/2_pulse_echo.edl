@@ -16,7 +16,10 @@ I;
 ASSIGNMENTS:
 
 TIME_BASE#1: timebase;
+TIME_BASE#2: 2 * timebase;
 TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
+
+MICROWAVE#2:       POD = 1;
 
 MICROWAVE:         POD =  1, 2, 3, 4, 5,
 				   CH = 35, 34, 33,
@@ -62,6 +65,10 @@ P0:   FUNCTION = MICROWAVE,
 	  LENGTH   = 400 ns,
 	  PHC      = PHS1;
 
+P17#2: FUNCTION = MW,
+	   S = 30 ns,
+	   L = 30 ns,
+	   DL = 10 ns;
 
 P1:   FUNCTION = P0.FUNC,
 	  S        = P0.START + 8 us,
@@ -107,7 +114,9 @@ REPEAT 1000 {
 	FOR I = 1:4 {
 //		wait( 1s );
 		pulser_next_phase( );
+		pulser_increment#2( );
 		pulser_update( );
+		pulser_update#2( );
 	}
 }
 
