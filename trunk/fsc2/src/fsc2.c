@@ -29,9 +29,12 @@ enum {
 	DO_START  =  4,
 	DO_SIGNAL =  8,
 	DO_DELETE = 16,
+	NO_MAIL   = 32,
 };
 
 static volatile int fsc2_death = 0;
+
+extern FL_resource xresources[ ];
 
 
 /* Locally used functions */
@@ -43,6 +46,8 @@ static void start_editor( void );
 static void start_help_browser( void );
 static void set_main_signals( void );
 
+static int flags;
+
 
 
 /**************************/
@@ -52,7 +57,6 @@ static void set_main_signals( void );
 int main( int argc, char *argv[ ] )
 {
 	char *fname;
-	int flags;
 
 
 #if defined MDEBUG
@@ -96,6 +100,12 @@ int main( int argc, char *argv[ ] )
 	{
 		unlink( LOCKFILE );
 		return EXIT_FAILURE;
+	}
+
+	if ( argc > 1 )
+	{
+		flags |= DO_LOAD;
+		fname = argv[ 1 ];
 	}
 
 	/* If '--delete' was given on the command line store flags that the input
@@ -215,6 +225,15 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			continue;
 		}
 
+		if ( ! strcmp( argv[ cur_arg ], "-noCrashMail" ) )
+		{
+			flags |= NO_MAIL;
+			for ( i = cur_arg; i < *argc; i++ )
+				argv[ i ] = argv[ i + 1 ];
+			*argc -= 1;
+			continue;
+		}
+
 		if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
 		{
 			if ( flags & DO_TEST )
@@ -283,15 +302,6 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
-		if ( argv[ cur_arg ][ 0 ] != '-' && *argc == cur_arg + 1 )
-		{
-			flags |= DO_LOAD;
-			*fname = argv[ cur_arg ];
-			argv[ cur_arg ] = NULL;
-			*argc -= 1;
-			break;
-		}
-
 		cur_arg++;
 	}
 
@@ -331,11 +341,14 @@ static void final_exit_handler( void )
 	unlink( LOCKFILE );
 
 	/* If program was killed by a signal indicating an unrecoverable error
-	   print out a message */
+	   print out a message and (if this feature isn't switched off) send me
+	   an email */
 
 	if ( fsc2_death != 0 && fsc2_death != SIGTERM )
 	{
-		death_mail( fsc2_death );
+		if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
+			 !( flags & NO_MAIL ) )
+			death_mail( fsc2_death );
 		fprintf( stderr, "fsc2 (%d, %s) killed by %s signal.\n", getpid( ),
 				 I_am == CHILD ? "CHILD" : "PARENT", strsignal( fsc2_death ) );
 	}
@@ -629,6 +642,8 @@ void test_file( FL_OBJECT *a, long b )
 	struct stat file_stat;
 	static bool in_test = UNSET;
 
+
+	fsc2_assert( 1 == 0 );
 
 	a->u_ldata = 0;
 	b = b;
@@ -1266,8 +1281,10 @@ void usage( void )
 			 "  -S FILE    start interpreting FILE (i.e. start the "
 			 "experiment)\n"
 			 "  --delete   delete input file when fsc2 is done with it\n"
-             "  -m NUMBER  Mouse button to be used to stop an experiment\n"
-			 "             1 = left, 2 = middle, 3 = right button\n"
+             "  -stopMouseButton Number/Word\n"
+			 "             Mouse button to be used to stop an experiment\n"
+			 "             1 = \"left\", 2 = \"middle\", 3 = \"right\" "
+			 "button\n"
 			 "  -geometry geometry\n"
 			 "             specify preferred size and position of main "
 			 "window\n"
@@ -1295,6 +1312,8 @@ void usage( void )
 			 "  -axisFont font\n"
 			 "             set the font to be used in the axis in the "
 			 "display window\n"
+			 "  -noCrashMail boolean value\n"
+			 "             don't send mail when fsc2 crashes\n"
 			 "  -h, --help\n"
 			 "             display this help text and exit\n\n"
 			 "For a complete documentation see either %s/fsc2.ps,\n"
@@ -1303,5 +1322,3 @@ void usage( void )
 	T_free( dd );
 	exit( EXIT_SUCCESS );
 }
-
-

@@ -20,6 +20,9 @@ GPIB_LOG       = /tmp/gpib.log
 # if you don't have a really good reason...
 ##############################################################################
 
+MAIL_ADDRESS   = jens
+MAIL_PROGRAM   = /usr/bin/mail
+
 SHELL          = /bin/sh
 CC             = gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
@@ -97,6 +100,13 @@ else
 	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
 endif
 
+ifdef MAIL_ADDRESS
+	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
+endif
+
+ifdef MAIL_PROGRAM
+	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+endif
 
 export            # export all variables to sub-makes
 

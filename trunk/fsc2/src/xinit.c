@@ -8,7 +8,7 @@
 
 
 static int main_form_close_handler( FL_FORM *a, void *b );
-static void set_up_app_options( FL_CMD_OPT app_opt[ ] );
+static void setup_app_options( FL_CMD_OPT app_opt[ ] );
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
 static int fsc2_xio_error_handler( Display *d );
 
@@ -32,7 +32,7 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 14
+#define N_APP_OPT 15
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
@@ -40,31 +40,32 @@ char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xaxisFont[ 256 ], xsmb[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
-	xfileselectorfs, xhelpfs;
+	xfileselectorfs, xhelpfs, xnocm;
 
 FL_resource xresources[ N_APP_OPT ] = {
 	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },
-    { "browserFontSize", "*.browserFontSize", FL_INT, &xbrowserfs,
+	{ "browserFontSize", "*.browserFontSize", FL_INT, &xbrowserfs,
 	  "0", sizeof( int ) },
-    { "buttonFontSize", "*.buttonFontSize", FL_INT, &xbuttonfs,
+	{ "buttonFontSize", "*.buttonFontSize", FL_INT, &xbuttonfs,
 	  "0", sizeof( int ) },
-    { "inputFontSize", "*.inputFontSize", FL_INT, &xinputfs,
+	{ "inputFontSize", "*.inputFontSize", FL_INT, &xinputfs,
 	  "0", sizeof( int ) },
-    { "labelFontSize", "*.labelFontSize", FL_INT, &xlabelfs,
+	{ "labelFontSize", "*.labelFontSize", FL_INT, &xlabelfs,
 	  "0", sizeof( int ) },
-    { "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
+	{ "displayGeometry", "*.displayGeometry", FL_STRING, xdisplayGeoStr,
 	  "", 64 },
-    { "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
-    { "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
+	{ "cutGeometry", "*.cutGeometry", FL_STRING, xcutGeoStr, "", 64 },
+	{ "toolGeometry", "*.toolGeometry", FL_STRING, xtoolGeoStr, "", 64 },
 	{ "axisFont", "*.axisFont", FL_STRING, xaxisFont, "", 256 },
-    { "choiceFontSize", "*.choiceFontSize", FL_INT, &xchoicefs,
+	{ "choiceFontSize", "*.choiceFontSize", FL_INT, &xchoicefs,
 	  "0", sizeof( int ) },
-    { "sliderFontSize", "*.sliderFontSize", FL_INT, &xsliderfs,
+	{ "sliderFontSize", "*.sliderFontSize", FL_INT, &xsliderfs,
 	  "0", sizeof( int ) },
-    { "filselectorFontSize", "*.fileselectorFontSize", FL_INT,
+	{ "filselectorFontSize", "*.fileselectorFontSize", FL_INT,
 	  &xfileselectorfs, "0", sizeof( int ) },
-    { "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
-    { "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
+	{ "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
+	{ "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
+	{ "noCrashMail", "*.noCrashMail", FL_BOOL, &xnocm, "0", sizeof( int ) },
 };
 
 
@@ -89,13 +90,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 	int nchilds;
 
 
-	set_up_app_options( app_opt );
+	setup_app_options( app_opt );
 
 	if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt, N_APP_OPT ) )
 		 == NULL )
 		return FAIL;
 
-	if ( *argc > 1 )
+	if ( *argc > 1 && argv[ 1 ][ 0 ] == '-' )
 	{
 		fprintf( stderr, "Unknown option \"%s\".\n", argv[ 1 ] );
 		usage( );
@@ -299,7 +300,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-static void set_up_app_options( FL_CMD_OPT app_opt[ ] )
+static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
 	app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
 	app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
@@ -372,6 +373,11 @@ static void set_up_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ STOPMOUSEBUTTON ].specifier  = T_strdup( "*.stopMouseButton" );
 	app_opt[ STOPMOUSEBUTTON ].argKind    = XrmoptionSepArg;
 	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) "";
+
+	app_opt[ NOCRASHMAIL ].option         = T_strdup( "-noCrashMail" );
+	app_opt[ NOCRASHMAIL ].specifier      = T_strdup( "*.noCrashMail" );
+	app_opt[ NOCRASHMAIL ].argKind        = XrmoptionNoArg;
+	app_opt[ NOCRASHMAIL ].value          = ( caddr_t ) "0";
 }
 
 
