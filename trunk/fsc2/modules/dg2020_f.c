@@ -273,6 +273,7 @@ void dg2020_exit_hook( void )
 
 	for ( p = dg2020_Pulses; p != NULL; np = p->next, T_free( p ), p = np )
 		;
+	dg2020_Pulses = NULL;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( dg2020.function[ i ].pulses != NULL )

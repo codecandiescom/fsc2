@@ -23,6 +23,8 @@ static int Cur_PHS = -1;
 
 void pulser_struct_init( void )
 {
+	int i, j, k;
+
 	if ( pulser_struct.name != NULL )
 	{
 		T_free( pulser_struct.name );
@@ -58,6 +60,11 @@ void pulser_struct_init( void )
 
 	pulser_struct.setup_phase = NULL;
 	pulser_struct.set_phase_switch_delay = NULL;
+
+	for ( i = 0; i < 3; i++ )
+		for ( j = 0; j < 4; j++ )
+			for ( k = 0; k < 2; k++ )
+				phs[ i ].is_var[ j ][ k ] = UNSET;
 }
 
 

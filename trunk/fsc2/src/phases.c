@@ -176,6 +176,8 @@ void phases_clear( void )
 			T_free( p->sequence );
 		T_free( p );
 	}
+
+	PSeq = NULL;
 }
 
 

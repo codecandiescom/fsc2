@@ -154,9 +154,9 @@ void dg2020_do_checks( FUNCTION *f )
 			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
 			if ( f->delay + f->max_seq_len >= MAX_PULSER_BITS )
 			{
-				eprint( FATAL, "%s:%ld: Pulse sequence for function `%s' does "
-						"not fit into the pulsers memory. Maybe, you could "
-						"try a longer pulser time base.", Fname, Lc,
+				eprint( FATAL, "%s:%ld: DG2020: Pulse sequence for function "
+						"`%s' does not fit into the pulsers memory. Maybe, "
+						"you could try a longer pulser time base.", Fname, Lc,
 						Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
