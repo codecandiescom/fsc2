@@ -25,17 +25,17 @@
 
 @c ########################################################
 
-Usually, there are some standard experiments for which only a few
-parameter ever change. In this case it can become rather bothersome
-always to have to edit the corresponding @acronym{EDL} file just to
-change these parameters. Beside, for someone not used to @acronym{fsc2}
-and its syntax doing who just wants to do a few of such a simple
-measurements it may be too complicated to learn the @acronym{EDL}
-syntax. But it is possible to write some rather simple programs that
-interface to @acronym{fsc2} and handle this automatically.
+Usually there are some standard experiments for which only require afew
+parameters to be changed reguarely. In this case it can become rather
+tedious to always have to edit the corresponding @acronym{EDL} file just
+to change these parameters. Beside, for someone not used to
+@acronym{fsc2} and its syntax and who just wants to do a few of such a
+simple measurements it may seem to be too complicated to learn the
+@acronym{EDL} syntax. Fortunately, it's possible to write some rather
+simple scripts interfacing to @acronym{fsc2} and handle all these
+problems automatically.
 
-
-What such a program has to do is to create a @acronym{EDL} file and send
+What such a script has to do is to create a @acronym{EDL} file and send
 it to @acronym{fsc2}. Usually, the program will have a graphical
 front-end that allows the user to set the parameter and will then create
 the @acronym{EDL} file using these parameter. To write such a program an
@@ -43,12 +43,12 @@ interpreted language like Tcl/Tk or Perl/Tk (or even a simple shell
 script using e.g.@ the @code{dialog} utility) will be sufficient.
 
 @ifnotinfo
-Here's an example for a typical ENDOR-experiment:
+Here's an example of a GUI for editing the parameters of a typical
+ENDOR-experiment:
 
 @image{interfacing,7cm,}
 
-As you see all the relevant parameters can be set in the form. After
-clicking onto the @code{Apply} button all the script
+After clicking onto the @code{Apply} button all the script
 @end ifnotinfo
 @ifinfo
 @ifnothtml
