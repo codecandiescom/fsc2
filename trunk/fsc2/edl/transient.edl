@@ -25,13 +25,9 @@ W2 = digitizer_define_window( 92.5 ns, 20 ns );
 digitizer_num_averages( 50 );
 digitizer_timebase( timebase );
 
-
-init_2d( 1, 0, N, -1e9 * timebase, 1e9 * timebase / 50,
-		 start_field, field_step,
-		 "tau [ns]", "Magnetic field [G]", "Intensity (arbitrary units)" );
-
+init_2d( 1, 0, N, -1e9 * timebase, 1e9 * timebase / 50, start_field,
+		 field_step, "tau [ns]", "Magnetic field [G]", "Intensity [a.u.]" );
 init_1d( 3, N, 10, 0.05, "Frequency / MHz", "RF Amplitude / V" );
-
 
 EXPERIMENT:
 
