@@ -67,6 +67,7 @@
 /* locally used routines */
 
 static void pipe_read( int fd, void *buf, size_t bytes_to_read );
+static void comm_error( int rw, int type );
 static Data_Buffer *get_new_data_buffer( void );
 
 
@@ -88,7 +89,10 @@ long reader( void *ret )
 
 	switch ( header.type )
 	{
-		case C_EPRINT :                     /* only to be read by the parent */
+		case C_EPRINT :          
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			/* get the string to be printed... */
 
 			str[ 0 ] = get_string( header.data.len );
@@ -105,7 +109,10 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_SHOW_MESSAGE :               /* only to be read by the parent */
+		case C_SHOW_MESSAGE :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			str[ 0 ] = get_string( header.data.len );
 			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
 			str[ 0 ] [ header.data.len ] = '\0';
@@ -119,7 +126,10 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_SHOW_ALERT :                 /* only to be read by the parent */
+		case C_SHOW_ALERT :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			str[ 0 ] = get_string( header.data.len );
 			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
 			show_alert( str[ 0 ] );
@@ -133,7 +143,10 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_SHOW_CHOICES :               /* only to be read by the parent */
+		case C_SHOW_CHOICES :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			/* get number of buttons and number of default button */
 
 			pipe_read( pd[ READ ], &n1, sizeof( int ) );
@@ -166,7 +179,10 @@ long reader( void *ret )
 				T_free( str[ i ] );
 			break;
 
-		case C_SHOW_FSELECTOR :             /* only to be read by the parent */
+		case C_SHOW_FSELECTOR :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			/* get the 4 parameter strings */
 
 			for ( i = 0; i < 4; i++ )
@@ -195,7 +211,10 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_INIT_GRAPHICS :              /* only to be read by the parent */
+		case C_INIT_GRAPHICS :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			/* read the dimension and the numbers of points */
 
 			pipe_read( pd[ READ ], &dim, sizeof( long ) );
@@ -226,7 +245,10 @@ long reader( void *ret )
 					T_free( str[ i ] );
 			break;
 
-		case C_DATA :                       /* only to be read by the parent */
+		case C_DATA :
+			if ( I_am == CHILD )            /* only to be read by the parent */
+				comm_error( READ, header.type );
+
 			dbuf = get_new_data_buffer( );
 
 			/* get x- an y-indices and the data type */
@@ -304,9 +326,7 @@ long reader( void *ret )
 			break;
 
 		default :                     /* this should never be reached... */
-			eprint( FATAL, "INTERNAL COMMUNICATION ERROR (in reader(), "
-					"type %d).\n", header.type );
-			THROW( EXCEPTION );
+			comm_error( READ, header.type );
 	}
 
 	/* The parent process now tells the child process that it's again ready
@@ -411,14 +431,20 @@ void writer( int type, ... )
 
 	switch ( type )
 	{
-		case C_EPRINT :                 /* only to be written by the child */
+		case C_EPRINT :          
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
 			write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
-		case C_SHOW_MESSAGE :           /* only to be written by the child */
+		case C_SHOW_MESSAGE :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
@@ -429,7 +455,10 @@ void writer( int type, ... )
 			read( pd[ READ ], &ack, sizeof( char ) );
 			break;
 
-		case C_SHOW_ALERT :             /* only to be written by the child */
+		case C_SHOW_ALERT :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
 			write( pd[ WRITE ], &header, sizeof( CS ) );
@@ -440,7 +469,10 @@ void writer( int type, ... )
 			pipe_read( pd[ READ ], &ack, sizeof( char ) );
 			break;
 
-		case C_SHOW_CHOICES :           /* only to be written by the child */
+		case C_SHOW_CHOICES :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			str[ 0 ] = va_arg( ap, char * );
 			n1 = va_arg( ap, int );
 			for ( i = 1; i < 4; i++ )
@@ -462,7 +494,10 @@ void writer( int type, ... )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
-		case C_INIT_GRAPHICS :          /* only to be written by the child */
+		case C_INIT_GRAPHICS :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			dim = va_arg( ap, long );
 			nx = va_arg( ap, long );
 			ny = va_arg( ap, long );
@@ -488,7 +523,10 @@ void writer( int type, ... )
 				write( pd[ WRITE ], str[ 1 ], header.data.str_len[ 0 ] );
 			break;
 
-		case C_SHOW_FSELECTOR :         /* only to be written by the child */
+		case C_SHOW_FSELECTOR :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			/* set up header and write it */
 
 			for ( i = 0; i < 4; i++ )
@@ -508,7 +546,10 @@ void writer( int type, ... )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
-		case C_DATA :                   /* only to be written by the child */
+		case C_DATA :
+			if ( I_am == PARENT )       /* only to be written by the child */
+				comm_error( WRITE, type );
+
 			/* Get x- and y-indices */
 
 			nx = va_arg( ap, long );
@@ -591,13 +632,22 @@ void writer( int type, ... )
 			break;
 
 		default :                     /* this should never be reached... */
-			eprint( FATAL, "INTERNAL COMMUNICATION ERROR (in writer(), "
-					"type %d)\n", type );
-			THROW( EXCEPTION );
+			comm_error( WRITE, type );
 	}
 
 
 	va_end( ap );
+}
+
+
+
+void comm_error( int rw, int type )
+{
+	eprint( FATAL, "INTERNAL ERROR (%s:%d): %s process isn't allowed to %s "
+			"messages of type %d.\n", __FILE__, __LINE__, 
+			I_am == PARENT ? "Parent" : "child",
+			rw == READ ? "read" : "write", type );
+	THROW( EXCEPTION );
 }
 
 
