@@ -120,11 +120,7 @@ void load_functions( Device *dev )
 
 	if ( dev->driver.handle == NULL )
 	{
-		if ( ! strcmp( dev->name, "User_Functions" ) )
-			eprint( FATAL, "Can't open module `User_Functions.so'.\n" );
-		else
-			eprint( FATAL, "Can't open module for device `%s'.\n",
-					dev->name );
+		eprint( FATAL, "Can't open module `%s'.\n", lib_name );
 		THROW( EXCEPTION );
 	}
 
