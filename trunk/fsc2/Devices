@@ -17,9 +17,11 @@ dg2020_b      // Sony/Tektronix data generator (Berlin version)
 hfs9000       // Tektronix stimulus system     (Berlin W-band)
 
 tds520        // Tektronix digitizing oscilloscope, model 520
-tds520a       // Tektronix digitizing oscilloscope, model 520a
-tds744a       // Tektronix digitizing oscilloscope, model 744a
-tds754a       // Tektronix digitizing oscilloscope, model 754a
+tds520a       // Tektronix digitizing oscilloscope, model 520A
+tds520c       // Tektronix digitizing oscilloscope, model 520C
+tds540        // Tektronix digitizing oscilloscope, model 540
+tds744a       // Tektronix digitizing oscilloscope, model 744A
+tds754a       // Tektronix digitizing oscilloscope, model 754A
 
 sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530

@@ -87,7 +87,7 @@ lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 
 
 // Functions exported by the digitizer
-// (TDS520, TDS520A, TDS540, TDS744A, TDS754A)
+// (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A)
 
 digitizer_define_window, -1, PREP;      // defines a cursor window
 digitizer_timebase, -1, ALL;            // set or get the time base

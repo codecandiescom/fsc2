@@ -656,7 +656,7 @@ bool tds520c_set_sens( int channel, double sens )
 	{
 		sprintf( cmd, "CH%1d:IMP?\n", channel );
 		if ( gpib_write( tds520c.device, cmd, strlen( cmd ) ) == FAILURE ||
-			 gpib_read_w( tds520c.device, reply, &length ) == FAILURE )
+			 gpib_read( tds520c.device, reply, &length ) == FAILURE )
 			tds520c_gpib_failure( );
 
 		if ( strncmp( reply, "MEG", 3 ) )
