@@ -50,7 +50,7 @@ static void gpib_log_error( const char *type );
 static void gpib_write_start( const char *dev_name, const char *buffer,
 							  long length );
 static void gpib_log_function_start( const char *function,
-									  const char *dev_name );
+									 const char *dev_name );
 static void gpib_log_function_end( const char *function,
 									char const *dev_name );
 static GPIB_Device *gpib_get_dev( int device );
@@ -510,7 +510,7 @@ int gpib_trigger( int device )
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+	if ( ( devp = gpib_get_dev( device ) ) == NULL )
 	{
 		sprintf( gpib_error_msg, "CALL of gpib_trigger for unknown device "
 				 "(device number %d)\n", device );
@@ -751,7 +751,7 @@ int gpib_read( int device, char *buffer, long *length )
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+	if ( ( devp = gpib_get_dev( device ) ) == NULL )
 	{
 		sprintf( gpib_error_msg, "CALL of gpib_read for unknown device "
 				 "(device number %d)\n", device );
