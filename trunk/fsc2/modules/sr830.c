@@ -890,7 +890,6 @@ Var *lockin_harmonic( Var *v )
 
 	if ( freq > MAX_MOD_FREQ / ( double ) harm )
 	{
-		vars_pop( mod );
 		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
 				"harmonic set to %ld is not within valid range "
 				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
