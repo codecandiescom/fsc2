@@ -462,6 +462,7 @@ ifdef WITH_RULBUS
 		LFLAGS += -L$(rulbus_lib_path)
 	endif
 	LFLAGS += -lrulbus
+	CFLAGS += -DWITH_RULBUS
 endif
 
 

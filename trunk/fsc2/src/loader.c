@@ -131,6 +131,7 @@ void load_all_drivers( void )
 				eprint( FATAL, UNSET, "Module '%s' requires RULBUS but fsc2 "
 						"hasn't been built with RULBUS support.\n", cd->name );
 				THROW( EXCEPTION );
+			}
 #endif
 		}
 
