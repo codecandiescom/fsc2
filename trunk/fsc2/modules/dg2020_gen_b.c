@@ -670,3 +670,15 @@ bool dg2020_phase_setup( int phs )
 
 	return OK;
 }
+
+
+/*----------------------------------------------*/
+/* Function that gets called to tell the pulser */
+/* driver to keep all pulses, even unused ones. */
+/*----------------------------------------------*/
+
+bool dg2020_keep_all( void )
+{
+	dg2020.keep_all = SET;
+	return OK;
+}

@@ -52,7 +52,7 @@ void pulser_struct_init( void )
 	pulser_struct.phase_setup_prep           = NULL;
 	pulser_struct.phase_setup                = NULL;
 	pulser_struct.set_phase_switch_delay     = NULL;
-
+	pulser_struct.keep_all_pulses            = NULL;
 }
 
 
@@ -882,4 +882,17 @@ void p_set_gp( Var *v )
 	( *pulser_struct.set_grace_period )( VALUE( v ) );
 
 	vars_pop( v );
+}
+
+
+/*---------------------------------------------------------*/
+/* Function gets called when the keyword 'KEEP_ALL_PULSES' */
+/* is found in the ASSIGNMENTS section                     */
+/*---------------------------------------------------------*/
+
+void keep_all_pulses( void )
+{
+	is_pulser_func( pulser_struct.keep_all_pulses,
+					"enforcing of keeping all pulses" );
+	( *pulser_struct.keep_all_pulses )( );
 }

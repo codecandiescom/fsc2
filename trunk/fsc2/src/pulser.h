@@ -53,6 +53,7 @@ typedef struct {
 	bool ( *phase_setup )( int function );
 	bool ( *set_phase_switch_delay )( int function, double time );
 	bool ( *set_grace_period )( double time );
+	bool ( *keep_all_pulses )( void );
 
 } Pulser_Struct;
 
@@ -100,6 +101,8 @@ void p_phs_end( int func );
 
 void p_set_psd( int func, Var *v );
 void p_set_gp( Var *v );
+
+void keep_all_pulses( void );
 
 
 #endif  /* ! PULSER_HEADER */

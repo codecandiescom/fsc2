@@ -108,6 +108,7 @@ VL          V_?L(OW)?
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
 MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)?
+KAP         KEEP_?ALL_?PULSES:?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
@@ -289,6 +290,7 @@ WS          [\n=: ]+
 {POS}       return POS_TOKEN;
 {THRESH}    return THRESH_TOKEN;
 {IMP}       return IMP_TOKEN;
+{KAP}       return KAP_TOKEN;
 {LOW}       {
 				assignlval.lval = LOW;
 				return HL_TOKEN;

@@ -183,6 +183,8 @@ typedef struct
 	int trig_in_impedance;   //	only in EXTERNAL mode
 	Ticks repeat_time;       //	only in INTERNAL mode
 
+	bool keep_all;           // keep even unused pulses ?
+
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
 	bool is_trig_in_level;
@@ -319,6 +321,7 @@ bool dg2020_phase_setup( int func );
 bool dg2020_phase_setup_finalize( int func, PHS phs );
 bool dg2020_set_phase_switch_delay( int func, double time );
 bool dg2020_set_grace_period( double time );
+bool dg2020_keep_all( void );
 
 
 /* These are the functions from dg2020_pulse.c */

@@ -827,3 +827,15 @@ bool dg2020_set_grace_period( double time )
 
 	return OK;
 }
+
+
+/*----------------------------------------------*/
+/* Function that gets called to tell the pulser */
+/* driver to keep all pulses, even unused ones. */
+/*----------------------------------------------*/
+
+bool dg2020_keep_all( void )
+{
+	dg2020.keep_all = SET;
+	return OK;
+}

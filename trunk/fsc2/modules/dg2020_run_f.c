@@ -514,10 +514,11 @@ void dg2020_full_reset( void )
 	PULSE *p = dg2020_Pulses;
 
 
-	while ( p != NULL )
+	while ( p != NULL && ! dg2020.keep_all )
 	{
 		/* First we check if the pulse has been used at all, send a warning
-           and delete it if it hasn't */
+           and delete it if it hasn't (unless we haven't ben told to keep
+		   all pulses, even unused ones) */
 
 		if ( ! p->has_been_active )
 		{

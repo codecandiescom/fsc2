@@ -68,6 +68,7 @@ static bool Func_is_set = UNSET;
 %token TB_TOKEN              /* TIMEBASE */
 %token TM_TOKEN              /* TRIGGERMODE */
 %token MPL_TOKEN             /* MAXIMUM_PATTERN_LENGTH */
+%token KAP_TOKEN             /* KEEP_ALL_PULSES */
 
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
@@ -153,6 +154,7 @@ line:    func                      { Func_is_set = SET; }
        | phs aphs                  { p_phs_end( Cur_PHS ); }
        | psd apsd
        | gp agp
+	   | KAP_TOKEN                 { keep_all_pulses( ); }
 ;								   
 
 

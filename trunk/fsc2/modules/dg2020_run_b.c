@@ -122,14 +122,12 @@ void dg2020_do_checks( FUNCTION *f )
 			{
 				if ( TEST_RUN )
 					eprint( FATAL, SET, "%s: Pulse sequence for function "
-							"`%s' does not fit into the pulsers memory. "
-							"Maybe, you could try a longer pulser time "
-							"base.\n", pulser_struct.name, 
-							Function_Names[ f->self ] );
+							"`%s' does not fit into the pulsers memory.\n",
+							pulser_struct.name, Function_Names[ f->self ] );
 				else
 					eprint( FATAL, ! dg2020_IN_SETUP, "%s: Pulse sequence for "
-							"function `%s' is too long. You could try to set "
-							"a higher MAXIMUM_PATTERN_LENGTH.\n",
+							"function `%s' is too long. Possibly "
+							"MAXIMUM_PATTERN_LENGTH needs to be higher.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
@@ -272,10 +270,11 @@ void dg2020_full_reset( void )
 	PULSE *p = dg2020_Pulses;
 
 
-	while ( p != NULL )
+	while ( p != NULL && ! dg2020.keep_all )
 	{
 		/* First we check if the pulse has been used at all, send a warning
-           and delete it if it hasn't */
+           and delete it if it hasn't (unless we haven't ben told to keep
+		   all pulses, even unused ones) */
 
 		if ( ! p->has_been_active )
 		{
@@ -344,7 +343,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->function->num_pulses == 0 )
 	{
 		eprint( SEVERE, UNSET, "%s: Function `%s' isn't used at all because "
-				"all its pulses are never used.\n", pulser_struct.name,
+				"all its pulses are unused.\n", pulser_struct.name,
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}

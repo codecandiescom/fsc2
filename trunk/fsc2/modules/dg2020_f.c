@@ -44,13 +44,14 @@ int dg2020_f_init_hook( void )
 	   pulser.c */
 
 	dg2020.needs_update = UNSET;
-	dg2020.is_running = SET;
+	dg2020.is_running   = SET;
+	dg2020.keep_all     = UNSET;
 
 	pulser_struct.set_timebase = dg2020_store_timebase;
 
 	pulser_struct.assign_function = dg2020_assign_function;
 	pulser_struct.assign_channel_to_function =
-		dg2020_assign_channel_to_function;
+											 dg2020_assign_channel_to_function;
 	pulser_struct.invert_function = dg2020_invert_function;
 	pulser_struct.set_function_delay = dg2020_set_function_delay;
 	pulser_struct.set_function_high_level = dg2020_set_function_high_level;
@@ -85,6 +86,8 @@ int dg2020_f_init_hook( void )
 	pulser_struct.phase_setup = dg2020_phase_setup;
 
 	pulser_struct.set_phase_switch_delay = dg2020_set_phase_switch_delay;
+
+	pulser_struct.keep_all_pulses = dg2020_keep_all;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
