@@ -145,15 +145,17 @@ all:
 
 # The following rule looks a bit complicated because we have to check if
 # additional libraries are required by each module. These libraries have
-# to defined by a variables consisting of the name of the module and the
+# to be defined by a variables consisting of the name of the module and the
 # the string "_libs". If no additional libraries are requires we compile
 # the module immediately. Otherwise we've got to distinguish between
 # libraries given with an absolute path (which are passed to gcc just as
-# they are) and libraries without a path, that are supposed to be in the
+# they are) and libraries without a path, which are supposed to be in the
 # directories searched by the linker. For these we must remove the leading
 # "lib" and the trailing".so" extension and prepend the "-l" option. Before
 # we actually use the library we check if they really exist by an extra
-# call of gcc - if it fails the module can't be created.
+# call of gcc - if it fails the module can't be created (which takes care
+# of people who obviously don't need the module because they didn't care
+# to install the required libraries).
 
 $(addsuffix .so,$(simp_modules)): %.so: %.o	
 	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
@@ -181,10 +183,10 @@ $(addsuffix .so,$(simp_modules)): %.so: %.o
 	fi
 
 
-# Since some modules may require header files for additional libraries.
-# We prepend each value in variables with a name starting with the module
-# name and followed by the string "_incl" with "-I" and pass this to the
-# compiler.
+# Compile each simple module to an object file (take care to pass the
+# include directories for possibly required additional header files to
+# the compiler, they must be set by a variable starting with the name
+# of the module and followed by "_incl")
 
 $(addsuffix .o,$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
 	@incl="$(foreach i,$($(patsubst %.o,%_incl,$@)),-I$(i))";      \
