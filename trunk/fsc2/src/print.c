@@ -57,8 +57,9 @@ static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
 static char *pc_string = NULL;
 
+static int print_form_close_handler( FL_FORM *a, void *b );
 static bool get_print_file( FILE **fp, char **name, long data );
-static void get_print_comm( void );
+static void get_print_comm( long data );
 static void start_printing( FILE *fp, char *name, long what );
 static void print_header( FILE *fp, char *name );
 static void do_1d_printing( FILE *fp, long what );
@@ -94,7 +95,17 @@ void print_it( FL_OBJECT *obj, long data )
 	char *name = NULL;
 
 
-	fl_deactivate_object( obj );
+	/* There's a race condition here, if the user is extremely fast she
+	   might already press another print button before it gets deactivated,
+	   but chances are very low and I'm too busy at the moment to implement
+	   a 100% safe method... */
+
+	if ( GUI.run_form_1d )
+		fl_deactivate_object( GUI.run_form_1d->print_button_1d );
+	if ( GUI.run_form_2d )
+		fl_deactivate_object( GUI.run_form_2d->print_button_2d );
+	if ( GUI.cut_form )
+		fl_deactivate_object( GUI.cut_form->cut_print_button );
 
 	if ( data == 2 && G2.active_curve == -1 )
 	{
@@ -109,13 +120,18 @@ void print_it( FL_OBJECT *obj, long data )
 
 	if ( get_print_file( &fp, &name, data ) )
 	{
-		get_print_comm( );
+		get_print_comm( data );
 
 		if ( data == 2 && G2.active_curve == -1 )
 		{
 			fl_show_alert( "Error", "Can't print - no curve is shown.",
 						   NULL, 1 );
-			fl_activate_object( obj );
+			if ( GUI.run_form_1d )
+				fl_activate_object( GUI.run_form_1d->print_button_1d );
+			if ( GUI.run_form_2d )
+				fl_activate_object( GUI.run_form_2d->print_button_2d );
+			if ( GUI.cut_form )
+				fl_activate_object( GUI.cut_form->cut_print_button );
 			return;
 		}
 
@@ -129,7 +145,12 @@ void print_it( FL_OBJECT *obj, long data )
 		name = CHAR_P T_free( name );
 	}
 
-	fl_activate_object( obj );
+	if ( GUI.run_form_1d )
+		fl_activate_object( GUI.run_form_1d->print_button_1d );
+	if ( GUI.run_form_2d )
+		fl_activate_object( GUI.run_form_2d->print_button_2d );
+	if ( GUI.cut_form )
+		fl_activate_object( GUI.cut_form->cut_print_button );
 }
 
 
@@ -144,9 +165,9 @@ static bool get_print_file( FILE **fp, char **name, long data )
 	struct stat stat_buf;
 
 
-	/* Create the form for print setup */
-
 	print_form = GUI.G_Funcs.create_form_print( );
+
+	fl_set_form_atclose( print_form->print, print_form_close_handler, NULL );
 
 	/* There's no good way to draw 2D in black and white so make the b&w
 	   button invisible and activate the color button */
@@ -241,8 +262,28 @@ static bool get_print_file( FILE **fp, char **name, long data )
 		fl_set_button( print_form->col_button, 0 );
 	}
 
-	fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
-				  "fsc2: Print" );
+	switch ( data )
+	{
+		case 1 :
+			fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
+						  "fsc2: Print 1D data" );
+			break;
+
+		case 2 :
+			fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
+						  "fsc2: Print 2D data" );
+			break;
+
+		case 0 : case -1 :
+			fl_show_form( print_form->print, FL_PLACE_MOUSE, FL_TRANSIENT,
+						  "fsc2: Print cross section" );
+			break;
+
+		default :
+			fl_free_form( print_form->print );
+			print_form = NULL;
+			return FAIL;
+	}
 
 	/* Let the user fill in the form */
 
@@ -284,15 +325,17 @@ static bool get_print_file( FILE **fp, char **name, long data )
 		 paper_type = Legal_PAPER;
 
 	fl_hide_form( print_form->print );
-	fl_free_form( print_form->print );
 
 	/* If cancel button was pressed (or an error happened) return now */
 
 	if ( obj == print_form->cancel_button )
 	{
 		*name = CHAR_P T_free( *name );
+		fl_free_form( print_form->print );
 		return FAIL;
 	}
+
+	fl_free_form( print_form->print );
 
 	/* In send-to-printer mode we're already done */
 
@@ -319,6 +362,18 @@ static bool get_print_file( FILE **fp, char **name, long data )
 	}
 
 	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static int print_form_close_handler( FL_FORM *a, void *b )
+{
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
+
+	return FL_IGNORE;
 }
 
 
@@ -407,10 +462,11 @@ void print_callback( FL_OBJECT *obj, long data )
 /* resulting string is stored in the global variable 'pc_string' */
 /*---------------------------------------------------------------*/
 
-static void get_print_comm( void )
+static void get_print_comm( long data )
 {
 	FL_OBJECT *obj;
 	const char *res;
+	static bool locked = UNSET;
 
 
 	if ( ! print_with_comment )
@@ -421,8 +477,27 @@ static void get_print_comm( void )
 
 	pc_string = CHAR_P T_free( pc_string );
 
-	fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
-                  FL_TRANSIENT, "fsc2: Print Text" );
+	switch ( data )
+	{
+		case 1 :
+			fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
+						  FL_TRANSIENT, "fsc2: Print text (1D)" );
+			break;
+
+		case 2 :
+			fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
+						  FL_TRANSIENT, "fsc2: Print text (2D)" );
+			break;
+
+		case 0 : case -1 :
+			fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
+						  FL_TRANSIENT, "fsc2: Print text (cross section)" );
+			break;
+
+		default :
+			locked = UNSET;
+			return;
+	}
 
 	while ( ( obj = fl_do_forms( ) ) != GUI.print_comment->pc_done )
 	{
@@ -436,6 +511,8 @@ static void get_print_comm( void )
 
 	if ( fl_form_is_visible( GUI.print_comment->print_comment ) )
 		fl_hide_form( GUI.print_comment->print_comment );
+
+	locked = UNSET;
 }
 
 
