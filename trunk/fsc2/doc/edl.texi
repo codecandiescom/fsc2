@@ -308,6 +308,11 @@ start_field       =               3360.0G;
                   start_field=
         3360.0 G;
 @end example
+@noindent
+The only thing you have to take care of is that you don't have a line
+break between a number and its unit (e.g.@: between the @code{3360.0}
+and the @code{G}), only space and tabulator characters are allowed as
+separators.
 
 @code{EDL} programs use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
@@ -361,11 +366,16 @@ There are some combinations of characters that can't be used as variable
 names. First of all, variable names may not be identical to function
 names, neither built-in nor device function names.
 
-Some combinations of characters are also treated not as a variable name
-when they follow a number directly (i.e.@: only with spaces or tabulator
-characters in between). These are physical units with or without the
-characters @code{n} (nano), @code{u} (micro), @code{m} (milli), @code{k}
-(kilo) and @code{M} (mega).  Here's the complete list:
+Further, the keywords used by @code{EDL} also may not be used as
+variable names (to make it easier to avoid these, they are all spelled
+with capitals only). In the appendix you'll find a list of (hopefully)
+all reserved words.
+
+Finally, some combinations of characters take on a special meaning when
+they follow a number directly (i.e.@: with only spaces or tabulator
+characters in between). These are some physical units with or without
+the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
+@code{k} (kilo) and @code{M} (mega).  Here's the complete list:
 @quotation
 @multitable {Hz} {Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
@@ -380,14 +390,6 @@ characters @code{n} (nano), @code{u} (micro), @code{m} (milli), @code{k}
 @end multitable
 @end quotation
 @noindent
-You still can use these units as variable names but you have to take
-care that there's no line break between a number and the unit associated
-with the number.
-
-Finally, the keywords used by @code{EDL} also may not be used as
-variable names (to make it easier to avoid these, they are all spelled
-with capitals only). In the appendix you'll find a list of (hopefully) all
-reserved words.
 
 
 @anchor{Variable types}
