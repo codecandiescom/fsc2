@@ -88,7 +88,8 @@ static Var *f_tb_wait_child( Var *v );
 
 void toolbox_create( long layout )
 {
-	int h, dummy;
+	int h = 10;
+	int dummy;
 
 	if ( Toolbox != NULL )
 		return;
@@ -101,8 +102,9 @@ void toolbox_create( long layout )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
-								 "1", 1, &dummy, &h );
+		if ( ! Internals.just_testing )
+			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
+									 "1", 1, &dummy, &h );
 		h += 8;
 
 		FI_sizes.VERT_OFFSET         = 10;
@@ -131,8 +133,9 @@ void toolbox_create( long layout )
 	}
 	else
 	{
-		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
-								 "1", 1, &dummy, &h );
+		if ( ! Internals.just_testing )
+			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
+									 "1", 1, &dummy, &h );
 		h += 8;
 
 		FI_sizes.VERT_OFFSET         = 30;

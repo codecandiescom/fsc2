@@ -184,9 +184,7 @@ static bool start_gpib_and_rulbus( void )
 
 	/* Disable some buttons and show a watch cursor */
 
-	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	set_buttons_for_run( 1 );
-	XFlush( fl_get_display( ) );
 
 	/* If there are devices that need the GPIB bus initialize it now */
 
@@ -195,9 +193,9 @@ static bool start_gpib_and_rulbus( void )
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
 		set_buttons_for_run( 0 );
-		Internals.state = STATE_IDLE;
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		XFlush( fl_get_display( ) );
+		Internals.state = STATE_IDLE;
 		return FAIL;
 	}
 
@@ -213,9 +211,9 @@ static bool start_gpib_and_rulbus( void )
 			gpib_shutdown( );
 
 		set_buttons_for_run( 0 );
-		Internals.state = STATE_IDLE;
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		XFlush( fl_get_display( ) );
+		Internals.state = STATE_IDLE;
 		return FAIL;
 	}
 #endif
@@ -280,6 +278,7 @@ static bool no_prog_to_run( void )
 	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+	XFlush( fl_get_display( ) );
 	Internals.state = STATE_IDLE;
 
 	return ret;
@@ -841,6 +840,8 @@ static void set_buttons_for_run( int run_state )
 
 	if ( run_state == 1 )
 	{
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+
 		fl_deactivate_object( GUI.main_form->Load );
 		fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
 
@@ -852,6 +853,8 @@ static void set_buttons_for_run( int run_state )
 
 		fl_deactivate_object( GUI.main_form->bug_report );
 		fl_set_object_lcol( GUI.main_form->bug_report, FL_INACTIVE_COL );
+
+		XFlush( fl_get_display( ) );
 	}
 	else
 	{
