@@ -251,7 +251,7 @@ Var *lockin_sensitivity( Var *v )
 	int i;
 
 
-	if ( v == 0 )
+	if ( v == NULL )
 	{
 		if ( TEST_RUN )                  /* return dummy value in test run */
 			return vars_push( FLOAT_VAR, 0.5 );
