@@ -32,16 +32,16 @@ following called an @acronym{EDL}
 @cindex @acronym{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage) program. This approach is
 quite different from the usual programs for remote spectrometer control
-that have a some graphical user interface to set some parameters to be
-used and then the experiment is started.
+that usally have some graphical user interface to set the experimental
+parameters and then the experiment is started.
 
-The problem with the traditional approach is that there is always only a
-fixed set of experiments that can be done using the program. The
-problems start when one needss to do a new experiment for which the
+The drawback with the traditional approach is that there is always only
+a fixed set of experiments that can be done using the program. The
+problems start when one needs to do a new experiment for which the
 program was not written for. One eiter has to find some ways to trick
 the program into doing something which it isn't intended for or, if this
 fails, to change the program. This tends to take a lot of time
-especially when the person who wrote the program isn't around
+especially when the person that wrote the program isn't around
 anymore. Often this also leads to the introduction of new bugs or even
 the realization that the program has not written in a way that allows it
 to be adapted to the new requirements, in which case the old program
@@ -69,8 +69,8 @@ large field range with nothing of interest in between, so it would be
 nice to just skip these regions. Most normal programs won't allow this
 and one has to either record also the uninteresting field regions (thus
 loosing lots of time) or to restart the experiments for each of the
-regions of interest. In contrast, with @acronym{fsc2} it souldn't take
-more than a few minutes to write a @code{EDL} program consisting of a
+regions of interest. In contrast, with @acronym{fsc2} it shouldn't take
+more than a few minutes to write an @code{EDL} program consisting of a
 few lines of code that can not only skip these regions but also repeat
 the experiment as often as needed, and if necessary do different numbers
 of accumulations of the different parts (if, for example, some of the
@@ -93,9 +93,9 @@ write an @acronym{EDL} program.
 
 
 Another problem with the traditional type of programs is the use of
-different devices or the integration of new ones. Usually the devices
+different devices or the integration of new ones. Usually, the devices
 are hard-coded into the program and just changing one device requires a
-major rewrite. In contrast, in @code{fsc2} has a strictly modular
+major rewrite. In contrast, in @acronym{fsc2} has a strictly modular
 approach to the handling of devices. For each device a seperate module
 exists that only gets loaded if it is stated explicitely in the
 @acronym{EDL} program that this device is needed. Thus changing the
@@ -110,29 +110,29 @@ require a thorough understanding of the way @acronym{fsc2} works but
 only some knowledge about a few conventions which are explained in
 detail in a later parts of this manual. Thus the module can be tested
 independently of the main program and there is no danger of introducing
-new bugs into @code{fsc2} itself.
+new bugs into @acronym{fsc2} itself.
 
 This manual is organized along the following lines: the next chapter
 (@pxref{GUI}) explains in detail the graphical user interface for
 starting an @acronym{EDL} program and displaying measured data. The
-following chapter (@pxref{EDL}) explains all about the @code{EDL}
-language. To give you an expression how easy writing an @code{EDL}
+following chapter (@pxref{EDL}) explains all about the @acronym{EDL}
+language. To give you an expression how easy writing an @acronym{EDL}
 program is you may have a look at the first example (@pxref{Basics})
 which discusses a program for doing a simple cw-detected EPR-experiment.
 
 The next chapter (@pxref{Built-in Functions}) lists all functions that
-are already built into @code{fsc2}. These include functions for
+are already built into @acronym{fsc2}. These include functions for
 displaying data, storing the measured data in one or more files,
 functions to extend the graphical user interface to be used during the
 experiment, mathematical and other useful utility functions. The
 following chapter (@pxref{Device Functions}) discusses the functions
 that can be used to deal with the devices for which modules are already
-exist (at the time of writing this there were 29 different modules to
-choose from).
+exist (at the time of writing there are 29 different modules to choose
+from).
 
 Experiments with pulsed microwave or RF excitation play an ever
-encreasing r@^ole in modern EPR and @code{fsc2} has an extensive set of
-commands and functions for dealing with pulses and pulse generators.
+encreasing r@^ole in modern EPR and @acronym{fsc2} has an extensive set
+of commands and functions for dealing with pulses and pulse generators.
 These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).
 
@@ -140,6 +140,6 @@ The next chapter (@pxref{Command Line Options}) lists all the command
 line options that can be passed to @acronym{fsc2}, the following
 (@pxref{Modules}) explains in detail everything there is to know about
 writing new modules, and the final chapter (@pxref{Interfacing}) is
-about writing programs that interface with @code{fsc2}, i.e.@: that can
-send @acronym{EDL} programs to @code{fsc2} that in turn will execute
-them.
+about writing programs that interface with @acronym{fsc2}, i.e.@: that
+can send @acronym{EDL} programs to @acronym{fsc2} that in turn will
+execute them.
