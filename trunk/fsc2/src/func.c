@@ -765,6 +765,7 @@ Var *f_sqrt( Var *v )
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
 	return vars_push( FLOAT_VAR, sqrt( arg ) );
 }
 
