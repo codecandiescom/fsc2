@@ -186,7 +186,9 @@ sub new {
 	# Calculate width of window to display *all* data
 
 	my $h = $Channels->num_channels * $self->{ 'hstep' } + 80;
-	my $w = $self->{ 'mag' } * ( $Channels->longest_sequence + $Delay );
+	my @wx = $Channels->longest_sequence;
+	my $w = $self->{ 'mag' } * ( $wx[ 0 ] > $wx[ 1 ] + $self->{ 'offset' } ?
+								 $wx[ 0 ] : $wx[ 1 ] + $self->{ 'offset' } );
 
 	# Blow up magnification if the pulse sequence is very short, if it's
 	# very long we have to reduce the magnification factor (maximum width
@@ -907,15 +909,16 @@ sub add_pulse_list {
 sub longest_sequence {
 
 	my $self = shift;
-	my $duration = 0;
+	my @duration = ( 0, 0 );
 
 	for ( @{ $self->{ channels } } ) {
-		my $l = $_->longest_sequence;
-		next unless defined $l;
-		$duration = $l if $duration < $l;
+		my @l = $_->longest_sequence;
+		next unless @l;
+		$duration[ 0 ] = $l[ 0 ] if $duration[ 0 ] < $l[ 0 ];
+		$duration[ 1 ] = $l[ 1 ] if $duration[ 1 ] < $l[ 1 ];
 	}
 
-	return $duration - $Delay;
+	return @duration;
 }
 
 #---------------------------------------------------------
@@ -997,14 +1000,18 @@ sub get_pulse_list {
 sub longest_sequence {
 
 	my $self = shift;
-	my $duration = 0;
+	my @duration = ( 0, 0 );
 
 	for ( keys %{ $self->{ 'plist' } } ) {
 		my $len = $self->{ 'plist' }{ $_ }->len;
-		$duration = $len if $duration < $len;
+		$duration[ 0 ] = $len if $duration[ 0 ] < $len;
+		$duration[ 1 ] = $len - $self->{ 'delay' }
+			if $duration[ 1 ] < $len - $self->{ 'delay' };
 	}
 
-	return $duration;
+	print STDOUT $self->{ 'name' } . ": " . $duration[ 0 ] . ", " . $duration[ 1 ] . "\n";
+
+	return @duration;
 }
 
 #---------------------------------------------------------
