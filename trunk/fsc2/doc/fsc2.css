@@ -24,35 +24,21 @@
 
 body       { margin :           0%;
            	 padding :          0%;
-           }
-
-#level0    { position :         relative;
-		   	 margin :           0%;
-           	 padding:           0%;
-           	 width :            100%;
-		   	 background :       white url(background.gif) repeat-y;
-		   	 z-level :          0;
-           }
-
-#level1    { position :         relative;
-           	 padding:           0%;
-		   	 margin-left :      180px;
-		   	 z-level :          2;
-           }
-
-#main      { position :         relative;
-		   	 margin :           0%;
-		   	 padding :          0% 0% 0% 10px;
-		   	 background :       white;
-		   	 z-level :          3;
+			 background :       white;
            }
 
 #links     { position :         fixed;
-		   	 margin :           0%;
-           	 width :            180px;
-           	 padding :          15px 0px 0px 15px;
-           	 background :       transparent;
-		   	 z-level :          1;
+           	 width :            195px;
+			 height :           100%;
+			 padding :          10px 10px;
+		   	 background :       white url(background.gif) repeat-y;
+           }
+
+#main      { position :         absolute;
+			 left :             195px;
+			 right :            10px;
+			 padding :          0 10px;
+			 background :       white;
            }
 
 code       { font-family :      monospace;
@@ -72,5 +58,5 @@ table.navi { background-color : #e6e6e6;
              cellpadding :      4em;
              cellspacing :      0px;
              border :           none;
-             width :            100%;
+			 width :            100%;
            }

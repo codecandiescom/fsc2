@@ -160,10 +160,10 @@ Frankfurt S-band magnet via homebuilt DAC, broad field range
 @item s_band_magnet_narrow
 Frankfurt S-band magnet via homebuilt DAC, narrow field range
 @item hjs_sfc
-Pseudo-decive for magnet control in the Osnabrueck group (without field
+Pseudo-device for magnet control in the Osnabrueck group (without field
 measurement)
 @item hjs_fc
-Pseudo-decive for magnet control in the Osnabrueck group
+Pseudo-device for magnet control in the Osnabrueck group
 @end table
 @noindent
 Because magnets hardly ever get changed (and if @code{fsc2} is set up
