@@ -794,17 +794,16 @@ static bool er035m_s_comm( int type, ... )
 	{
 		case SERIAL_INIT :
 			if ( ( nmr.fd = open( serial_port,
-								  O_RDWR | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( nmr.fd, &nmr.old_tio );
-			memcpy( &nmr.new_tio, &nmr.old_tio,
-					sizeof( struct termios ) );
+			memcpy( &nmr.new_tio, &nmr.old_tio, sizeof( struct termios ) );
 
 			/* Switch off parity checking and use of 2 stop bits and clear
 			   character size mask, then set character size mask to CS8,
-			   set flag for ignorinmg modem lines, enable reading and finally
-			   set the baud rate (input and output baud rate are identical) */
+			   set flag for ignoring modem lines, enable reading and, finally
+			   set the baud rate */
 
 			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
 
@@ -865,7 +864,7 @@ static bool er035m_s_comm( int type, ... )
 			}
 
 			/* The two most significant bits of each byte the gaussmeter
-			   sends seem to be invalid, so let's get rid of them... */
+			   sends are cmpletely useless, so get rid of them... */
 
 			*lptr = len;
 			for ( len = 0; len < *lptr; len++ )
