@@ -241,10 +241,11 @@ int hp8647a_set_mod_type( int type )
 	if ( I_am == PARENT && ! HP8647A_INIT )
 		return type;
 
-	for ( i = 1; i < NUM_MOD_TYPES; i++ )
+	for ( i = 0; i < NUM_MOD_TYPES -  1; i++ )
 	{
-		sprintf( cmd, "%s:STAT OFF\n", 
-				 types[ ( type + i ) % NUM_MOD_TYPES ] );
+		if ( i == type )
+			continue;
+		sprintf( cmd, "%s:STAT OFF\n", types[ i ] );
 		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 			hp8647a_comm_failure( );
 	}

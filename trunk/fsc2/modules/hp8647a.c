@@ -783,14 +783,14 @@ Var *synthesizer_modulation( Var *v )
 		{
 			switch ( res )
 			{
-				case 1 :
+				case 1 :                /* setting modulatopn amplitude */
 					break;
 
-				case 2 :
+				case 2 :                /* setting modulation type */
 					type = what;
 					break;
 
-				case 3 :
+				case 3 :                /* setting modulation source */
 					source = what;
 					break;
 
