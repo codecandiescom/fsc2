@@ -2399,7 +2399,7 @@ Var *f_islice( Var *v )
 	}
 
 	array = LONG_P T_calloc( ( size_t ) size, sizeof *array );
-	ret = vars_push( INT_ARR, array, ( size_t ) size );
+	ret = vars_push( INT_ARR, array, ( ssize_t ) size );
 	T_free( array );
 
 	return ret;
@@ -2429,7 +2429,7 @@ Var *f_fslice( Var *v )
 	array = DOUBLE_P T_malloc( size * sizeof *array );
 	for( i = 0; i < size; i++ )
 		*( array + i ) = 0.0;
-	ret = vars_push( FLOAT_ARR, array, ( size_t ) size );
+	ret = vars_push( FLOAT_ARR, array, ( ssize_t ) size );
 	T_free( array );
 
 	return ret;
