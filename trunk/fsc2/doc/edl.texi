@@ -44,38 +44,37 @@ experiment:
 @example
 DEVICES:
 
-er035m_s;              // gaussmeter module
-aeg_x_band;            // magnet module
-sr530;                 // lock-in amplifier module
+  er035m_s;              // gaussmeter module
+  aeg_x_band;            // magnet module
+  sr530;                 // lock-in amplifier module
 
 VARIABLES:
 
-start_field = 3360.0 G;
-end_field   = 3450.0 G;
-field_step  =    0.5 G;
+  start_field = 3360.0 G;
+  end_field   = 3450.0 G;
+  field_step  =    0.5 G;
 
-field = start_field;
-I = 1;
-data;
+  field = start_field;
+  I = 1;
+  data;
 
 PREPARATIONS:
 
-magnet_setup( start_field, field_step );
-lockin_sensitivity( 5 uV );
-lockin_time_constant( 300 ms );
-init_1d( );
+  magnet_setup( start_field, field_step );
+  lockin_sensitivity( 5 uV );
+  lockin_time_constant( 300 ms );
+  init_1d( );
 
 EXPERIMENT:
 
-WHILE field <= end_field
-@{
-    data = lockin_get_data( );
-    display( I, data );
-    save( data );
-    I = I + 1;
-    field = sweep_up( );
-    wait( 300 ms );
-@}
+  WHILE field <= end_field @{
+      data = lockin_get_data( );
+      display( I, data );
+      save( data );
+      I = I + 1;
+      field = sweep_up( );
+      wait( 300 ms );
+  @}
 @end example
 
 Obviously, the very first section of the program, starting with the
