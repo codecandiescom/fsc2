@@ -569,9 +569,10 @@ static void check_run( void )
 /*------------------------------------------------------------------*/
 /* Figure out the machine type from the value returned by uname(),  */
 /* currently i[3-6]86 will be treated as having an Intel compatible */
-/* processor. Only for these types of processors and when running   */
-/* under Linux some stuff needing assembler and used to help with   */
-/* debugging can be used.                                           */
+/* processor. Only for these types of processors (which also must   */
+/* have the same size for ints and pointers) and when running Linux */
+/* some stuff needing assembler and used to help with debugging can */
+/* be used              .                                           */
 /*------------------------------------------------------------------*/
 
 static void test_machine_type( void )
