@@ -657,8 +657,8 @@ inline unsigned long d2color( double a )
 /* to half the size of a short int.                                        */
 /*-------------------------------------------------------------------------*/
 
-#define SHRT_MAX_HALF ( SHRT_MAX >> 1 )
-#define SHRT_MIN_HALF ( SHRT_MIN >> 1 )
+#define SHRT_MAX_HALF ( SHRT_MAX / 2 )
+#define SHRT_MIN_HALF ( SHRT_MIN / 2 )
 
 
 inline short d2shrt( double a )
@@ -667,7 +667,7 @@ inline short d2shrt( double a )
 		return SHRT_MAX_HALF;
 	if ( a < SHRT_MIN_HALF )
 		return SHRT_MIN_HALF;
-	return ( short ) a;
+	return ( short ) floor( a + 0.5 );
 }
 
 
@@ -687,7 +687,7 @@ inline unsigned short d2ushrt( double a )
 		return USHRT_MAX;
 	if ( a < 0 )
 		return 0;
-	return ( unsigned short ) a;
+	return ( unsigned short ) floor( a + 0.5 );
 }
 
 
@@ -717,7 +717,7 @@ inline long lrnd( double x )
 		return LONG_MAX;
 	if ( x < LONG_MIN )
 		return LONG_MIN;
-	return ( long ) rint( x );                  /* Leads to compiler warning */
+	return ( long ) floor( x + 0.5 );
 }
 
 
@@ -727,7 +727,7 @@ inline int irnd( double x )
 		return INT_MAX;
 	if ( x < INT_MIN )
 		return INT_MIN;
-	return ( int ) rint( x );                   /* Leads to compiler warning */
+	return ( int ) floor( x + 0.5 );
 }
 
 
