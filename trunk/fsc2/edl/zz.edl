@@ -7,7 +7,7 @@ K;
 
 PREP:
 
-init_2d( 1, 0, 0 );
+init_2d( 1, 0, 0, "Time [ns]", "Field [mT]" );
 
 EXP:
 
