@@ -118,7 +118,7 @@ $(resources:.fd=.o): %.o: %.c %.h
 # Create files and links needed for the GPIB interface - they need making if
 # either gpib_if.[ch] doesn't exit or the files they're made from are newer.
 # When using the NI library also the parser and lexer for the GPIB
-# configuration file are needed.
+# configuration file are needed, otherwise they must be deleted.
 
 gpib_setup:
 	@if [ -n "$(GPIB_LIBRARY)"                                       \
