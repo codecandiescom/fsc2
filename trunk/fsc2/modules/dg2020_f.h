@@ -6,6 +6,22 @@
 #include "fsc2.h"
 
 
+/* Here are all the directy exported functions (i.e. exported either implicit
+   as a hook functions or via the Functions data base) */
+
+int dg2020_init_hook( void );
+int dg2020_test_hook( void );
+int dg2020_exp_hook( void );
+int dg2020_end_of_exp_hook( void );
+void dg2020_exit_hook( void );
+
+
+Var *pulser_start( Var *v );
+
+
+
+/* Definitions needed for the pulser*/
+
 #define Ticks long
 
 
@@ -37,6 +53,8 @@
 #define MAX_PULSER_BITS    65536  /* maximum number of bits in channel */
 
 
+
+/* typedefs of structures needed in the module */
 
 typedef struct _F_ {
 
@@ -93,6 +111,8 @@ typedef struct _C_ {
 
 typedef struct
 {
+	int device;              /* GPIB number of the device */
+
 	double timebase;
 	bool is_timebase;
 
@@ -111,6 +131,9 @@ typedef struct
 	CHANNEL channel[ MAX_CHANNELS ];
 
 	int needed_channels;
+
+	bool need_update;
+	bool is_running;
 } DG2020;
 
 
@@ -145,16 +168,21 @@ typedef struct _p_ {
 	Ticks initial_dpos;
 	Ticks initial_dlen;
 
+	Ticks old_pos;
+	Ticks old_len;
+
+	CHANNEL **channel;           // list of channels the pulse belongs to
+
+	struct _p_ *for_pulse;
+
+	bool need_update;
 } PULSE;
 
 
+/* All the remaining declarations are internal to the module */
 
-int dg2020_init_hook( void );
-int dg2020_test_hook( void );
-int dg2020_exp_hook( void );
-int dg2020_end_of_exp_hook( void );
-void dg2020_exit_hook( void );
-
+/* The following functions are indirectly exported via the pulser structure
+   as defined in pulser.h */
 
 static bool set_timebase( double timebase );
 static bool assign_function( int function, long pod );
@@ -191,6 +219,9 @@ static bool get_pulse_maxlen( long pnum, double *time );
 
 static bool setup_phase( int func, PHS phs );
 
+
+/* All the remaining functions are exclusively used internally */
+
 static Ticks double2ticks( double time );
 static double ticks2double( Ticks ticks );
 static void check_pod_level_diff( double high, double low );
@@ -206,3 +237,23 @@ static void distribute_channels( void );
 static CHANNEL *get_next_free_channel( void );
 static void pulse_start_setup( void );
 static int start_compare( const void *A, const void *B );
+void create_phase_pulses( int func );
+PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
+
+static bool change_pulse_position( long pnum, double time );
+static bool change_pulse_length( long pnum, double time );
+static bool change_pulse_position_change( long pnum, double time );
+static bool change_pulse_length_change( long pnum, double time );
+
+static void do_checks( void );
+static void do_update( void );
+
+
+/* All the functions starting with dg2020 are functions that really access the
+   pulser, i.e. they can only be used after the GPIB bus has been initialized
+*/
+
+static bool dg2020_init( const char *name );
+static bool dg2020_run( bool flag );
+static bool dg2020_set_timebase( void );
+static bool dg2020_update_data( void );
