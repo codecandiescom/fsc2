@@ -47,12 +47,12 @@ But sometimes it might be advantageous to pass a whole set of @code{EDL}
 scripts to @code{fsc2}, which then get executed one after another
 without the need for further user interaction and supervision.  This is
 called @strong{batch mode} and gets invoked by starting @code{fsc2} with
-the '@code{-B}' option, directly followed by the list of @code{EDL}
-scripts to be executed. @code{fsc2} will then try to execute the
+the '@code{-B}' option, directly followed by a list of @code{EDL}
+scripts to be executed. @code{fsc2} will then try to execute these
 @code{EDL} scripts in the order they were specified on the command line
 and quit when done.
 
-To make @code{fsc2} run ndependent of user input it must behave
+To make @code{fsc2} run independently of user input it must behave
 differently from normal mode in several situations. Here's a hopefully
 complete list of all differences that might be expected:
 @itemize @bullet
@@ -68,10 +68,10 @@ complete list of all differences that might be expected:
   was started from and execution of this script is skipped.
 
 @item
-  If the test of an @code{EDL} script results in warnings or severe
-  warnings it is executed anyway without asking for permission by the
-  user. Thus scripts to be run in batch mode should be carefully tested
-  before used in this way.
+  If the test of an @code{EDL} script results in warnings or severe warnings
+  it is executed anyway without asking for further confirmation by the
+  user. Thus scripts to be run in batch mode should be carefully tested before
+  used in this way.
 
 @item
   If the experiment gets stopped due to a fatal error an error message is
@@ -92,12 +92,12 @@ complete list of all differences that might be expected:
   @code{open_file()} and @code{clone_file()} for the details.
 
 @item
-  Device modules that under normal circumstances ask the user for
-  confirmation before starting potentially dangerous operations will use a
+  Device modules, that under normal circumstances ask the user for
+  confirmation before starting potentially dangerous operations, will use a
   default answer. This may result in the execution of the script ending
   prematurely, depending on the what the device module takes to be the
   default answer. Take care that this this might deactivate some security
-  features!
+  checks!
 @end itemize
 
 @quotation
@@ -114,7 +114,7 @@ the scripts to be used carefully before running them in batch mode.
 @cindex non-exlusive mode
 
 Normally it is not possible to start @code{fsc2} more than once, if you
-try a short error message is printed out and the program aborts. It was
+try to a short error message is printed out and the program aborts. It was
 written this way to avoid the problem that only one program should be
 able to control the devices at a time. Otherwise it can't be guaranteed
 that the devices react as expected (just imagine how happy you would be
@@ -151,9 +151,9 @@ consider some possible problems:
   instance exits, none of the others will take over -- you need to start a
   new instance which then is going to deal with external programs.
 @item
-  You also won't be able to run the built-in web server for more that
+  You also won't be able to run the built-in web server for more than
   one of the instances of @code{fsc2}, at least on the port 8080 the web
-  server per default is listening on. If you want the web server to be
+  server is listening on per default. If you want the web server to be
   able to run for each (or at least for more than one) instance of
   @code{fsc2} you need to specify different HTTP ports for the different
   instances via the @code{-httpPort} option.
@@ -177,7 +177,7 @@ available options are:
 @table @samp
 @item @option{-t}
 Runs a syntax check on FILE and quits. No graphic is used and all output is
-written to the controlling terminal.
+written to the controlling terminal. No interaction with any device happens.
 
 @item @option{-T}
 Starts @code{fsc2} in graphics mode and immediately does a syntax
@@ -193,9 +193,8 @@ started without the need for further user input.
 Starts @code{fsc2} in batch mode, see discussion above.
 
 @item @option{-I}
-
 Starts @code{fsc2} in graphics mode but with the main window being
-iconified. After a syntax check the experiment is started imediately.
+iconified. After a syntax check the experiment is started immediately.
 If the main window is still iconified when the experiment display
 window gets closed @code{fsc2} is also quit. On syntax or other
 errors in the @code{EDL} script the main window gets automatically
@@ -206,14 +205,15 @@ Does both the test run as well as the experiment for the input
 @code{EDL} file without using any graphics. Afterwards @code{fsc2}
 quits immediately, returning @code{0} on success and @code{1} on
 failure. Error messages and warnings get written to the standard
-error channel, output of the program to its standard output channel.
+error channel, output of the program to the standard output channel.
 
 In the @code{EDL} script no @code{EDL} functions can be used that
-wold require graphics or user interaction - the script must stop
-all by itself since there's no @code{STOP} button.
+wold require graphics or user interaction - and the script must stop
+all by itself since there's no @code{STOP} button (so infinite loops
+can't be used).
 
-This mode is useful when for example just a few settings for a device
-are to be done that don't require user interaction and also don't need
+This mode is mostly useful when for example just a few settings for a device
+are to be changed that don't require user interaction and also don't need
 graphical output.
 
 @item @option{--delete}
@@ -228,7 +228,8 @@ isn't needed anymore, so better be @strong{really careful}.
 @item @option{-non-exclusive}
 When started with this option you are able to run several instances
 of @code{fsc2} at the same time (at least if all the other instances
-were also started with this option).
+were also started with this option). Please see also the discussion
+above.
 
 @item @option{-h, --help}
 Displays a very short help text and exits.
@@ -236,7 +237,7 @@ Displays a very short help text and exits.
 @item @option{-size size}
 This option specifies the sizes of the window to be used etc. Use either
 @code{Small} for low resolution displays or @code{Large} for high resolution
-displays. If not specified size will default to @code{Small} for
+displays. If not specified the size will default to @code{Small} for
 displays with a resolution of less than 1152x870, for all other to
 @code{Large}. @code{Small} and @code{Large} can be abbreviated to
 @code{S} or @code{s} and @code{L} and @code{l}.
@@ -267,7 +268,8 @@ cross-section through a 2D data set.
 @item @option{-toolGeometry geometry_string}
 Sets the preferred position for the window with the user defined objects
 like buttons, sliders and in- and output fields.  Please note that for
-this window only the position part of the geometry string is used.
+this window only the position part of the geometry string is used, its
+size is determined by the elements that the @code{EDL} script requires.
 
 @item @option{-browserFontSize number}
 Sets the size (in pixels) of the font to be used in both browsers in the
@@ -319,3 +321,10 @@ option a different port (in the range between 1024 and 65535) can be
 set.
 
 @end table
+
+All of the above options can also be set from within the @file{.Xdefaults}
+or @file{.Xresources} files. To e.g. set the size and position of the main
+window from within one of these files you would need a line like
+@example
+fsc2.geometry:         800x600+200+200
+@end example
