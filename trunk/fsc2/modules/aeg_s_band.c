@@ -22,8 +22,7 @@
 */
 
 
-#include "fsc2.h"
-#include "serial.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -387,13 +386,7 @@ Var *set_field( Var *v )
 					"field value in %s().\n", DEVICE_NAME, Cur_Func );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous parameter in call of "
-				"function %s().\n", DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );

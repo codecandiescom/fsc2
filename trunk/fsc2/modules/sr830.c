@@ -22,8 +22,7 @@
 */
 
 
-#include "fsc2.h"
-#include "gpib_if.h"
+#include "fsc2_module.h"
 
 
 /* Include configuration information for the device */
@@ -418,7 +417,6 @@ Var *lockin_dac_voltage( Var *v )
 				"number.\n", DEVICE_NAME );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
-	v = vars_pop( v );
 
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
@@ -428,7 +426,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( v == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == PREPARATION )
 		{
@@ -454,14 +452,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous arguments in call of function "
-				"`lockin_dac_voltage'.\n", DEVICE_NAME );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 	
 	sr830.dac_voltage[ port - 1 ] = voltage;
 
@@ -510,14 +501,7 @@ Var *lockin_sensitivity( Var *v )
 				DEVICE_NAME );
 	sens = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( sens < 0.0 )
 	{
@@ -632,14 +616,7 @@ Var *lockin_time_constant( Var *v )
 				DEVICE_NAME );
 	tc = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( tc < 0.0 )
 	{
@@ -754,14 +731,7 @@ Var *lockin_phase( Var *v )
 		eprint( WARN, SET, "%s: Integer value used as phase.\n", DEVICE_NAME );
 	phase = VALUE( v );
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -815,14 +785,7 @@ Var *lockin_harmonic( Var *v )
 	else
 		harm = v->val.lval;
 	
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
@@ -904,14 +867,7 @@ Var *lockin_ref_freq( Var *v )
 				"frequency.\n", DEVICE_NAME );
 	freq = VALUE( v );
 	
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
@@ -980,14 +936,7 @@ Var *lockin_ref_level( Var *v )
 				DEVICE_NAME );
 	level = VALUE( v );
 	
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
@@ -1040,14 +989,7 @@ Var *lockin_lock_keyboard( Var *v )
 		}
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
+	too_many_arguments( v; DEVICE_NAME );
 
 	if ( FSC2_MODE == EXPERIMENT )
 		sr830_lock_state( lock );

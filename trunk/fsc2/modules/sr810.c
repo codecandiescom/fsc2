@@ -319,9 +319,13 @@ Var *lockin_get_data( Var *v )
 	}
 
 	if ( v != NULL )
+	{
 		eprint( SEVERE, SET, "%s: More than 6 parameters in call of "
 				"%s(), discarding superfluous ones.\n",
 				DEVICE_NAME, Cur_Func );
+		while ( ( v = vars_pop( v ) )!= NULL )
+			;
+	}
 
 	if ( FSC2_MODE == TEST )
 	{
