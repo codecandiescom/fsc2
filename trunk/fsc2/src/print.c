@@ -77,19 +77,17 @@ static void print_markers_1d( FILE *fp );
 static void print_markers_2d( FILE *fp );
 
 
-/*-------------------------------------------------------------------------*/
-/* This function gets called as the callback routine for the print button  */
-/* It shows a form that lets the user select if (s)he wants to "print" the */
-/* resulting PostScript file (using whatever command the user specifies in */
-/* the form) or to save it in as a file. Other things the user can choose  */
-/* in this form is the paper size, either A4, A3, Legal, Letter or A5 or   */
-/* A6 (the later two as size reduced version created for an A4 printer),   */
-/* and b/w or color output.                                                */
-/* For drawing the curves from the main 1D display window the parameter    */
-/* 'data' is expected to be 1, for 2D display to be 2 and for cross        */
-/* section curves 'data' must be 0 for cross sections through the x-axis   */
-/* and -1 for the y-axis!                                                  */
-/*-------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* This function gets called as the callback routine for the print button */
+/* It shows a form that lets the user choose where to print the resulting */
+/* Postscript file to (sending it to a printer with a command like "lpr"  */
+/* or saving to a file), the paper size (either A4, A3, Legal, Letter or  */
+/* A5 or A6) and to switch between b&w and color.                         */
+/* For drawing the curves from the main 1D display window the parameter   */
+/* 'data' is expected to be 1, for 2D display to be 2 and for cross       */
+/* section curves 'data' must be 0 for cross sections through the x-axis  */
+/* and -1 for the y-axis!                                                 */
+/*------------------------------------------------------------------------*/
 
 void print_it( FL_OBJECT *obj, long data )
 {
