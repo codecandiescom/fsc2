@@ -70,7 +70,9 @@ int main( int argc, char *argv[ ] )
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This, as well as the following check for stale
 	   shared memory segments has to be done with the effective user ID, i.e.
-	   the UID of fsc2. */
+	   the UID of fsc2. This has to done after parsing the command line
+	   arguments because it should still be possible to test an EDL program
+	   via the '-t' flag although someone else is running fsc. */
 
 	if ( ! fsc2_locking( ) )
 		return EXIT_FAILURE;
@@ -80,8 +82,8 @@ int main( int argc, char *argv[ ] )
 
 	delete_stale_shms( );
 
-	/* Now we set the effective user ID to the real user ID, we only switch
-	   back when creating or attaching shared memory segments */
+	/* Now set the effective user ID to the real user ID, only switch back
+	   when creating or attaching to shared memory segments etc. */
 
 	EUID = geteuid( );
 	EGID = getegid( );
@@ -96,13 +98,13 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	/* If '-d' was given on the command line store flags that are tested to
-	   find out if the files needs to be deleted */
+	/* If '--delete' was given on the command line store flags that the input
+	   files needs to be deleted */
 
 	if ( fname != NULL && flags & DO_DELETE )
 		delete_file = delete_old_file = SET;
 
-	/* If there is a file as argument try to load it */
+	/* If there is a file argument try to load it */
 
 	if ( flags & DO_LOAD )
 	{
@@ -123,12 +125,11 @@ int main( int argc, char *argv[ ] )
 	set_main_signals( );
 	atexit( final_exit_handler );
 
-	/* If starting the server for external connections succeeds we can
-	   really start the main loop */
+	/* If starting the server for external connections succeeds really start
+	   the main loop */
 
-	if ( ( conn_pid =
-		            spawn_conn( flags & ( DO_TEST | DO_START ) && is_loaded ) )
-		 != -1 )
+	if ( -1 != ( conn_pid =
+				 spawn_conn( flags & ( DO_TEST | DO_START ) && is_loaded ) ) )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
@@ -138,13 +139,12 @@ int main( int argc, char *argv[ ] )
 		if ( flags & DO_START && is_loaded )
 			fl_trigger_object( main_form->run );
 
-		/* If required send signal to parent process, then loop until quit
-		   button is pressed */
+		/* If required send signal to invoking process */
 
 		if ( flags & DO_SIGNAL )
 			kill( getppid( ), SIGUSR1 );
 
-		/* And here's the main loop of the program... */
+		/* And, finally,  here's the main loop of the program... */
 
 		while ( fl_do_forms( ) != main_form->quit )
 			;
