@@ -920,6 +920,50 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 }
 
 
+/*-------------------------------------------------------------------*/
+/* Function allows to query or change the minimum allowed distance   */
+/* between automatically created TWT pulses (if the distance between */
+/* the pulses gets to short the pulses get lengthened automatically  */
+/* to avoid having to short distances between the pulses).           */
+/* In the EXPERIMENT section the new setting only gets used at the   */
+/* next call of pulser_update().                                     */
+/*-------------------------------------------------------------------*/
+
+Var *pulser_minimum_twt_pulse_distance( Var *v )
+{
+	double mtpd;
+
+
+	if ( v == NULL )
+	{
+		if ( dg2020.is_minimum_twt_pulse_distance )
+			return vars_push( FLOAT_VAR,
+					dg2020_ticks2double( dg2020.minimum_twt_pulse_distance ) );
+		return vars_push( FLOAT_VAR, MINIMUM_TWT_PULSE_DISTANCE );
+	}
+
+	mtpd = get_double( v, "minimum TWT pulse distance" );
+
+	if ( mtpd < 0.0 )
+	{
+		print( FATAL, "Negative minimum TWT pulse distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( mtpd < MINIMUM_TWT_PULSE_DISTANCE )
+		print( SEVERE, "New minimum TWT pulse distance is shorter than the "
+			   "default value of %s, the TWT might not work correctly.\n",
+			   dg2020_ptime( MINIMUM_TWT_PULSE_DISTANCE ) );
+
+	dg2020.minimum_twt_pulse_distance = dg2020_double2ticks( mtpd );
+	dg2020.is_minimum_twt_pulse_distance = SET;
+
+	return vars_push( FLOAT_VAR, mtpd );
+}
+
+
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 

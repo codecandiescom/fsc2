@@ -837,7 +837,7 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v )
 
 	s2d = get_double( v, "SHAPE to DEFENSE pulse minimum distance" );
 
-	if ( s2d < 0 )
+	if ( s2d < 0.0 )
 	{
 		print( FATAL, "Negative SHAPE to DEFENSE pulse minimum distance.\n" );
 		THROW( EXCEPTION );
@@ -867,7 +867,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 
 	d2s = get_double( v, "DEFENSE to SHAPE pulse minimum distance" );
 
-	if ( d2s < 0 )
+	if ( d2s < 0.0 )
 	{
 		print( FATAL, "Negative DEFENSE to SHAPE pulse minimum distance.\n" );
 		THROW( EXCEPTION );
@@ -877,6 +877,50 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 	ep385.is_defense_2_shape = SET;
 
 	return vars_push( FLOAT_VAR, d2s );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Function allows to query or change the minimum allowed distance   */
+/* between automatically created TWT pulses (if the distance between */
+/* the pulses gets to short the pulses get lengthened automatically  */
+/* to avoid having to short distances between the pulses).           */
+/* In the EXPERIMENT section the new setting only gets used at the   */
+/* next call of pulser_update().                                     */
+/*-------------------------------------------------------------------*/
+
+Var *pulser_minimum_twt_pulse_distance( Var *v )
+{
+	double mtpd;
+
+
+	if ( v == NULL )
+	{
+		if ( ep385.is_minimum_twt_pulse_distance )
+			return vars_push( FLOAT_VAR,
+					  ep385_ticks2double( ep385.minimum_twt_pulse_distance ) );
+		return vars_push( FLOAT_VAR, MINIMUM_TWT_PULSE_DISTANCE );
+	}
+
+	mtpd = get_double( v, "minimum TWT pulse distance" );
+
+	if ( mtpd < 0.0 )
+	{
+		print( FATAL, "Negative minimum TWT pulse distance.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( mtpd < MINIMUM_TWT_PULSE_DISTANCE )
+		print( SEVERE, "New minimum TWT pulse distance is shorter than the "
+			   "default value of %s, the TWT might not work correctly.\n",
+			   ep385_ptime( MINIMUM_TWT_PULSE_DISTANCE ) );
+
+	ep385.minimum_twt_pulse_distance = ep385_double2ticks( mtpd );
+	ep385.is_minimum_twt_pulse_distance = SET;
+
+	return vars_push( FLOAT_VAR, mtpd );
 }
 
 

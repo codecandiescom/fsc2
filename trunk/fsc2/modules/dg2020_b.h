@@ -57,6 +57,7 @@ Var *pulser_show_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
+Var *pulser_minimum_twt_pulse_distance( Var *v );
 Var *pulser_keep_all_pulses( Var *v );
 Var *pulser_maximum_pattern_length( Var *v );
 Var *pulser_state( Var *v );
@@ -301,6 +302,7 @@ typedef struct {
 	long right_twt_warning;
 
 	Ticks minimum_twt_pulse_distance;
+	bool is_minimum_twt_pulse_distance;
 	long twt_distance_warning;
 
 	PHASE_SETUP *dummy_phase_setup;
