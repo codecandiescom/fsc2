@@ -397,7 +397,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
  * function is not used yet) it returns the number of bytes that have been
  * written to memory or read by the board since the function was called
  * the last time.
- *-------------------------------------------------------------------------
+ *-------------------------------------------------------------------------*/
 
 size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
