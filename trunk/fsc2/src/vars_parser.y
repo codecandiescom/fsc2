@@ -58,7 +58,7 @@ input:   /* empty */
        | input SECTION_LABEL       { YYACCEPT; }
 ;
 
-line:    VAR_TOKEN                 { vars_new_assign( NULL, $1 ); }
+line:    VAR_TOKEN                 /* no assignment to be done */
        | VAR_TOKEN '=' expr        { vars_new_assign( $3, $1 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }

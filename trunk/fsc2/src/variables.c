@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.16  1999/07/20 12:01:39  jens
+   *** empty log message ***
+
    Revision 1.15  1999/07/20 11:23:33  jens
    ars
 
@@ -836,7 +839,14 @@ Var *vars_push_simple( Var *v )
 {
 	/* Make sure it's really a simple variable */
 
-	if ( v->type == INT_ARR || v->type == FLOAT_ARR )
+	if ( v->type == INT_VAR && v->type == FLOAT_VAR )
+	{
+		eprint( FATAL, "%s:%ld: `%s' is an array and can't be used in this "
+				"context.\n", Fname, Lc, v->name );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	if ( v->type == INT_VAR && v->type == FLOAT_VAR )
 	{
 		eprint( FATAL, "%s:%ld: `%s' is an array and can't be used in this "
 				"context.\n", Fname, Lc, v->name );
