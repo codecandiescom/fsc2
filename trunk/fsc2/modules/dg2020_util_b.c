@@ -193,38 +193,6 @@ int dg2020_start_compare( const void *A, const void *B )
 }
 
 
-/*---------------------------------------------------------------------------
-  Functions searches for the phase pulses associated with the pulse passed as
-  the first argument and belonging to the channels passed as the second and
-  third argument. If pulses are found they are returned in the last to
-  arguments. If at least one was found a postive result is returned.
----------------------------------------------------------------------------*/
-
-bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
-{
-	PULSE *pp = dg2020_Pulses;
-
-
-	assert( p->num >= 0 );    // is it really a normal pulse ?
-
-	*pl = NULL;
-	*num = 0;
-
-	while ( pp != NULL )
-	{
-		if ( pp->num < 0 && pp->for_pulse == p )
-		{
-			*pl = T_realloc( *pl, ++( *num ) * sizeof( PULSE * ) );
-			( *pl )[ *num - 1 ] = pp;
-		}
-
-		pp = pp->next;
-	}
-
-	return *num != 0;
-}
-
-
 Ticks dg2020_get_max_seq_len( void )
 {
 	int i;
