@@ -32,7 +32,7 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
-
+my $version = 0.1;
 
 # Check if we got a port number as the first command line argument...
 
@@ -188,7 +188,6 @@ sub serve_main {
 	my @st2 = ( "Idle", "Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
 				"Experiment finished" );
-	my $date = rfc_1123_date( );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
 	my ( $state, $pic, $txt, $ext, $curve, $logo_file );
 
@@ -206,23 +205,18 @@ sub serve_main {
 	# First send some meta-information for the browser plus the first lines
 	# of the page
 
-	print "HTTP/1.0 200 OK$crlf" .
-		  "Date: $date$crlf" .
-		  "Server: fsc2/0.1$crlf" .
-		  "Allow: GET$crlf" .
+	print "HTTP/1.0 200 OK$crlf" . def_txt( ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "Connection: close$crlf" .
-		  "Expires: $date$crlf" .
 		  "$crlf" .
 		  "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
-		  "<HTML><HEAD>$crlf" .
+		  "<HTML>$crlf<HEAD>$crlf" .
 		  "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
 		  "<META name=\"author\" content=\"fsc2\">$crlf" .
 		  "<META name=\"robots\" content=\"noindex\">$crlf";
 
 	# Send the logo (per default the GIF version because some browsers don't
 	# seem to deal correctly with transparency in PNG files even though they
-	# clain to understand PNG) and the status information
+	# claim to understand PNG) and the status information
 
 	$logo_file = "fsc2." .
 		( $f->{ 'gif' } ? "gif" : ( $f->{ 'png' } ? "png" : "jpeg" ) )
@@ -248,7 +242,7 @@ sub serve_main {
 			  "</H1></CENTER>$crlf" .
 			  "<P>Ok, you seem to have found a bug. " .
 			  "Please tell nobody ;-)$crlf" .
-			  "</P></BODY></HTML>$crlf";
+			  "</P>$crlf</BODY></HTML>$crlf";
 		return;
 	}
 
@@ -312,7 +306,7 @@ sub serve_main {
 
 	print "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
 		if defined $txt;
-	print "</BODY></HTML>$crlf";
+	print "</BODY>$crlf</HTML>$crlf";
 }
 
 
@@ -324,20 +318,13 @@ sub serve_main {
 sub serve_logo {
 
 	my ( $file, $ext ) = @_;
-	my $date = rfc_1123_date( );
-	my $edate = rfc_1123_date( 'next_year' );
 	my $fh;
 
 
 	open( $fh, $auxdir . $file ) or return not_found( $file );
 
-	print "HTTP/1.0 200 OK$crlf" .
-		  "Date: $date$crlf" .
-		  "Server: fsc2/0.1$crlf" .
-		  "Allow: GET$crlf" .
+	print "HTTP/1.0 200 OK$crlf" . def_txt( 1 ) .
 		  "Accept-Ranges: none$crlf" .
-		  "Connection: close$crlf" .
-		  "Expires: $edate$crlf" .
 		  "Content-Type: image/$ext$crlf" .
 		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
 	print <$fh>;
@@ -348,15 +335,14 @@ sub serve_logo {
 
 #########################################################
 # Sends a graphic to the client. fsc2 has to create it for us as a temporary
-# file (in ppm format) and then sends us the file name. We still have to
+# file (in ppm format) and then will send us the file name. We still have to
 # convert it into a format the browser understands and afterwards have to get
 # rid of the temporary file. If the window to be shown does not exist anymore
-# (or the file can't be created) we get send a '0' character instead in which
-# case we have to send the "Not available" picture.
+# (or the file can't be created) we get send a '0' character by fsc2 instead
+# in which case we send the "Not available" picture.
 
 sub serve_pics {
 	my ( $which, $ext ) = @_;
-	my $date = rfc_1123_date( );
 	my ( $state, $fh, $file, @data );
 
 
@@ -368,6 +354,8 @@ sub serve_pics {
 						 close $client;
 						 exit 0
 					   };
+
+	# Ask fsc2 for the file with the graphic
 
 	stdout_lock( 1 ) or exit 1;
 	print STDOUT $which;
@@ -395,13 +383,8 @@ sub serve_pics {
 	}
 	stdout_lock( 0 );
 
-	print "HTTP/1.0 200 OK$crlf" .
-		  "Date: $date$crlf" .
-		  "Server: fsc2/0.1$crlf" .
-		  "Allow: GET$crlf" .
+	print "HTTP/1.0 200 OK$crlf" . def_txt( ) .
 		  "Accept-Ranges: none$crlf" .
-		  "Connection: close$crlf" .
-		  "Expires: $date$crlf" .
 		  "Content-Type: image/$ext$crlf";
 
 	if ( $state !~ /^0$/o and
@@ -423,23 +406,18 @@ sub serve_pics {
 
 sub not_found {
 	my $file = shift;
-	my $date = rfc_1123_date( );
 
-	print "HTTP/1.0 404 Not Found$crlf" .
-		  "Date: $date$crlf" .
-		  "Server: fsc2/0.1$crlf" .
-		  "Connection: close$crlf" .
+	print "HTTP/1.0 404 Not Found$crlf" . def_txt( ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "$crlf" .
 		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-		  "<HTML><HEAD>$crlf" .
+		  "<HTML>$crlf<HEAD>$crlf" .
 		  "<TITLE>404 Not Found</TITLE>$crlf" .
 		  "</HEAD><BODY>$crlf" .
 		  "<HR>$crlf" .
 		  "<H1>Not Found</H1>$crlf" .
 		  "<P>The requested URL ($file) was not found.</P>$crlf" .
-		  "<HR>$crlf" .
-		  "</BODY></HTML>$crlf";
+		  "<HR>$crlf</BODY>$crlf</HTML>$crlf";
 }
 
 
@@ -448,17 +426,13 @@ sub not_found {
 
 sub illegal_request {
 	my ( $type, $string ) = @_;
-	my $date = rfc_1123_date( );
 
 
-	print "HTTP/1.0 400 Bad Request$crlf" .
-		  "Date: $date$crlf" .
-		  "Server: fsc2/0.1$crlf" .
-		  "Connection: close$crlf" .
+	print "HTTP/1.0 400 Bad Request$crlf" . def_txt( ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
 		  "$crlf" .
 		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
-		  "<HTML><HEAD>$crlf" .
+		  "<HTML>$crlf<HEAD>$crlf" .
 		  "<TITLE>400 Bad Request</TITLE>$crlf" .
 		  "</HEAD><BODY>$crlf" .
 		  "<HR>$crlf" .
@@ -471,8 +445,24 @@ sub illegal_request {
 		print "<P>Malformed request: <SAMP>$string</SAMP>.</P>$crlf";
 	}
 
-	print "<HR>$crlf</BODY></HTML>$crlf";
+	print "<HR>$crlf</BODY>$crlf</HTML>$crlf";
 	close $client;
+}
+
+
+#########################################################
+# Returns some text we always have to send to the client in the meta data
+
+sub def_txt {
+	my $date = rfc_1123_date( );
+	my $exp_date = ( @ == 0 ) ? $date : rfc_1123_date( 'next_year' );
+
+
+	return "Date: $date$crlf" .
+		   "Server: fsc2/$version$crlf" .
+		   "Connection: close$crlf" .
+		   "Allow: GET$crlf" .
+		   "Expires: $exp_date$crlf";
 }
 
 
