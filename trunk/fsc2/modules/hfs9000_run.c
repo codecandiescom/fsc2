@@ -147,14 +147,14 @@ void hfs9000_do_checks( FUNCTION *f )
 				( FSC2_MODE == TEST ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
 			{
 				if ( FSC2_MODE == TEST )
-					eprint( FATAL, SET, "%s: Pulse sequence for function "
-							"`%s' does not fit into the pulsers memory.\n",
-							pulser_struct.name, Function_Names[ f->self ] );
+					print( FATAL, "Pulse sequence for function `%s' does not "
+						   "fit into the pulsers memory.\n",
+						   Function_Names[ f->self ] );
 				else
-					eprint( FATAL, ! hfs9000_IN_SETUP, "%s: Pulse sequence "
-							"for function `%s' is too long. Perhaps you "
-							"should try the MAXIMUM_PATTERN_LENGTH command.\n",
-							pulser_struct.name, Function_Names[ f->self ] );
+					print( FATAL, "Pulse sequence for function `%s' is too "
+						   "long. Perhaps you should try the "
+						   "MAXIMUM_PATTERN_LENGTH command.\n",
+						   Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -169,25 +169,22 @@ void hfs9000_do_checks( FUNCTION *f )
 			if ( p->pos + p->len > f->pulses[ i + 1 ]->pos )
 			{
 				if ( hfs9000_IN_SETUP )
-					eprint( FATAL, UNSET, "%s: Pulses %ld and %ld overlap.\n",
-							pulser_struct.name, p->num,
-							f->pulses[ i + 1 ]->num );
+					print( FATAL, "Pulses %ld and %ld overlap.\n", p->num,
+						   f->pulses[ i + 1 ]->num );
 				else
-					eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
-							"overlap.\n", pulser_struct.name,
-							p->num, f->pulses[ i + 1 ]->num );
+					print( FATAL, "Pulses %ld and %ld begin to overlap.\n",
+						   p->num, f->pulses[ i + 1 ]->num );
 				THROW( EXCEPTION );
 			}
 			else if ( p->pos + p->len == f->pulses[ i + 1 ]->pos )
 			{
 				if ( hfs9000_IN_SETUP )
-					eprint( SEVERE, UNSET, "%s: Distance between pulses %ld "
-							"and %ld is zero.\n", pulser_struct.name,
-							p->num, f->pulses[ i + 1 ]->num );
+					print( SEVERE, "Distance between pulses %ld and %ld is "
+						   "zero.\n", p->num, f->pulses[ i + 1 ]->num );
 				else
-					eprint( SEVERE, SET, "%s: Distance between pulses %ld "
-							"and %ld becomes zero.\n", pulser_struct.name,
-							p->num, f->pulses[ i + 1 ]->num );
+					print( SEVERE, "Distance between pulses %ld and %ld "
+						   "becomes zero.\n",
+						   p->num, f->pulses[ i + 1 ]->num );
 			}
 		}
 	}
@@ -261,8 +258,7 @@ void hfs9000_full_reset( void )
 
 		if ( ! p->has_been_active && ! hfs9000.keep_all )
 		{
-			eprint( WARN, UNSET, "%s: Pulse %ld is never used.\n",
-					pulser_struct.name, p->num );
+			print( WARN, "Pulse %ld is never used.\n", p->num );
 			p = hfs9000_delete_pulse( p );
 			continue;
 		}
@@ -328,9 +324,9 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = T_free( p->function->pulses );
 
-		eprint( SEVERE, UNSET, "%s: Function `%s' isn't used at all because "
-				"all its pulses are never used.\n", pulser_struct.name,
-				Function_Names[ p->function->self ] );
+		print( SEVERE, "Function `%s' isn't used at all because all its "
+			   "pulses are never used.\n",
+			   Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}
 

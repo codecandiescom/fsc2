@@ -38,8 +38,8 @@ Ticks hfs9000_double2ticks( double p_time )
 
 	if ( ! hfs9000.is_timebase )
 	{
-		eprint( FATAL, SET, "%s: Can't set a time because no pulser time "
-				"base has been set.\n", pulser_struct.name );
+		print( FATAL, "Can't set a time because no pulser time base has been "
+			   "set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -48,9 +48,9 @@ Ticks hfs9000_double2ticks( double p_time )
 	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
 	{
 		char *t = T_strdup( hfs9000_ptime( p_time ) );
-		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
-				"multiple of the pulser time base of %s.\n",
-				pulser_struct.name, t, hfs9000_ptime( hfs9000.timebase ) );
+		print( FATAL, "Specified time of %s is not an integer multiple of the "
+			   "pulser time base of %s.\n",
+			   t, hfs9000_ptime( hfs9000.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
@@ -79,25 +79,23 @@ void hfs9000_check_pod_level_diff( double high, double low )
 {
 	if ( low > high )
 	{
-		eprint( FATAL, SET, "%s: Low voltage level is above high level, "
-				"use keyword INVERT to invert the polarity.\n",
-				pulser_struct.name );
+		print( FATAL, "Low voltage level is above high level, use keyword "
+			   "INVERT to invert the polarity.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, SET, "%s: Difference between high and low "
-				"voltage of %g V is too big, maximum is %g V.\n",
-				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
+		print( FATAL, "Difference between high and low voltage of %g V is too "
+			   "big, maximum is %g V.\n", high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, SET, " %s: Difference between high and low "
-				"voltage of %g V is too small, minimum is %g V.\n",
-				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
+		print( FATAL, "Difference between high and low voltage of %g V is too "
+			   "small, minimum is %g V.\n",
+			   high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 }
@@ -114,8 +112,7 @@ PULSE *hfs9000_get_pulse( long pnum )
 
 	if ( pnum < 0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid pulse number: %ld.\n",
-				pulser_struct.name, pnum );
+		print( FATAL, "Invalid pulse number: %ld.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -128,8 +125,7 @@ PULSE *hfs9000_get_pulse( long pnum )
 
 	if ( cp == NULL )
 	{
-		eprint( FATAL, SET, "%s: Referenced pulse %ld does not exist.\n",
-				pulser_struct.name, pnum );
+		print( FATAL, "Referenced pulse %ld does not exist.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
