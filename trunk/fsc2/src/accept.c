@@ -385,7 +385,8 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	/* Include the new data into the scaled data */
 
-	for ( cur_ptr = ptr, i = x_index; i < x_index + len; i++ )
+	for ( cur_ptr = ptr, sp = G.curve[ curve ]->points, i = x_index;
+		  i < x_index + len; sp++, i++ )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
@@ -394,22 +395,21 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		}
 		else
 		{
-			data = *( ( double * ) cur_ptr );
+			data = * ( ( double * ) cur_ptr );
 			cur_ptr += sizeof( double );
 		}
 
 		if ( G.is_scale_set )
-			G.curve[ curve ]->points[ i ].v = ( data - G.rw_min ) /
-				                                              G.rwc_delta[ Y ];
+			sp->v = ( data - G.rw_min ) / G.rwc_delta[ Y ];
 		else
-			G.curve[ curve ]->points[ i ].v = data;
+			sp->v = data;
 
 		/* Increase the point count if the point is new and mark it as set */
 
-		if ( ! G.curve[ curve ]->points[ i ].exist )
+		if ( ! sp->exist )
 		{
 			G.curve[ curve ]->count++;
-			G.curve[ curve ]->points[ i ].exist = SET;
+			sp->exist = SET;
 		}
 	}
 
@@ -556,8 +556,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 		if ( ! cv->is_scale_set && rw_max != rw_min )
 		{
-			for ( sp = cv->points, j = 0;
-				  j < G.nx * G.ny; sp++, j++ )
+			for ( sp = cv->points, j = 0; j < G.nx * G.ny; sp++, j++ )
 				if ( sp->exist )
 					sp->v = ( sp->v - rw_min ) / new_rwc_delta_z;
 
