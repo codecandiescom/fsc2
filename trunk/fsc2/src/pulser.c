@@ -32,7 +32,7 @@ void pulser_struct_init( void )
 	pulser_struct.assign_function = NULL;
 	pulser_struct.assign_channel_to_function = NULL;
 	pulser_struct.invert_function = NULL;
-	pulser_struct.set__function_delay = NULL;
+	pulser_struct.set_function_delay = NULL;
 	pulser_struct.set_function_high_level = NULL;
 	pulser_struct.set_function_low_level = NULL;
 	pulser_struct.set_timebase = NULL;
