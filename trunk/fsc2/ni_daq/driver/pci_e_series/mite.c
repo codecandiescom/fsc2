@@ -39,6 +39,7 @@ struct Subsystem_Data {
 
 static Subsystem_Data sys_data[ 4 ];
 
+static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys );
 
 
 /*-------------------------------------------------------------------*/
@@ -212,7 +213,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	   DMA memory buffers streaming mapping must be set up (except for
 	   the AO buffers because data still need to be written to them before
 	   they can be passed to the MITE). Take care, the link chain pointers
-	   (LKAR) must be a bus addresses. */
+	   (LKAR) must be bus addresses. */
 
 	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
 
@@ -237,7 +238,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	/* If the streaming mapping failed all mapped buffers must be unmapped
 	   and then all memory realeased */
 
-	if ( mdc != board->mite_chain[ sys ] + num_links)
+	if ( mdc != board->mite_chain[ sys ] + num_links )
 	{
 		for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL;
 		      mdc++ ) {
@@ -394,9 +395,19 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 
 size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
-	return le32_to_cpu( readl( mite_DAR( sys ) )
-			    - ( readl( mite_FCR( sys ) ) & 0x000000FF ) )
-	       - sys_data[ sys ].transfered;
+	u32 avail;
+
+	avail = le32_to_cpu( readl( mite_DAR( sys ) )
+			     - ( readl( mite_FCR( sys ) ) & 0x000000FF ) )
+	        - sys_data[ sys ].transfered;
+
+	/* Only tell about AI data for completed scans */
+
+	if ( sys == NI_DAQ_AI_SUBSYSTEM )
+		avail = ( avail / ( 2 * board->AI.num_data_per_scan) )
+			* 2 * board->AI.num_data_per_scan;
+
+	return avail;
 }
 
 
@@ -453,7 +464,7 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 	/* Make sure the MITE isn't already DMA-enabled */
 
-	pci_dma_shutdown( board, sys );
+	pci_dma_stop( board, sys );
 
 	/* Run MITE DMA channel in short link mode and set the transfer
 	   direction */
@@ -491,6 +502,7 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 	   make sure all buffers are streaming mapped */
 
 	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
+
 		if ( mdc->is_mapped )
 			continue;
 
@@ -521,9 +533,9 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
 }
 
 
-/*------------------------------*/
-/* Disables DMA for a subsystem */
-/*------------------------------*/
+/*-----------------------------------------------------*/
+/* Disables DMA ad releases DMA momory for a subsystem */
+/*-----------------------------------------------------*/
 
 int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
@@ -532,9 +544,7 @@ int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 	/* Stop the MITE */
 
-	writel( CHOR_DMARESET | CHOR_CLRDONE | CHOR_FRESET | CHOR_ABORT,
-		mite_CHOR( sys ) );
-	board->mite_irq_enabled[ sys ] = 0;
+	pci_dma_stop( board, sys );
 
 	/* Release DMA memory and clear the ADC FIFO */
 
@@ -543,6 +553,24 @@ int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
 
 	return 0;
 }
+
+
+/*-------------------------*/
+/* Stops DMA for subsystem */
+/*-------------------------*/
+
+static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
+{
+	if ( board->mite_irq_enabled[ sys ] == 0 )
+		return;
+
+	/* Stop the MITE */
+
+	writel( CHOR_DMARESET | CHOR_CLRDONE | CHOR_FRESET | CHOR_ABORT,
+		mite_CHOR( sys ) );
+	board->mite_irq_enabled[ sys ] = 0;
+}
+
 
 
 /*--------------------------------------------------------------------*/

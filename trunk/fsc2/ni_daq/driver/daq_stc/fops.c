@@ -291,7 +291,7 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 
 	*offp += count;
 
-	printk( KERN_INFO "Returning count = %ld\n", ( long ) count );
+	PDEBUG( "Returning count = %ld\n", ( long ) count );
 
 	return count;
 }
