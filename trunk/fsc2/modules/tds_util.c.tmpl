@@ -331,7 +331,7 @@ static void tds_tmpl_window_check_3( WINDOW *w )
 		start = - tds_tmpl.trig_pos * window;
 
 		/* If the end point is still within the record length nothing more
-		   got to be done, otheriwse the window width has to be reduced */
+		   got to be done, otherwise the window width has to be reduced */
 
 		if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
 		{
