@@ -101,12 +101,6 @@ struct P_List {
 };
 
 
-/* Variables defined in pulser.c and accessible by all files including
-   pulser.h */
-
-extern Pulser_Struct *pulser_struct;
-extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
-
 
 void pulser_struct_init( void );
 void pulser_cleanup( void );

@@ -409,10 +409,10 @@ are named @code{A1} to @code{A4} for the first, @code{B1} to @code{B4}
 for the second and @code{C1} to @code{C4} for the thrid channel
 board. Additionally, the @strong{Tektronix HFS9003} has a trigger output
 channel that can produce a single pulse of @w{5 ns} duration. This
-special channel can also be associated with a function (e.g.@: or
-generating a @code{DETECTION{ trigger pulse) and is named
+special channel can also be associated with a function (e.g.@: for
+generating a @code{DETECTION} trigger pulse) and is named
 @code{TRIG_OUT} (or @code{TRIGOUT}, @code{TRIGGER_OUT} or
-@code{TRIGGEROUT} ).
+@code{TRIGGEROUT}).
 
 The @strong{Interface Technology RS690} has 4 sets of output connectors
 (or even 8, if a second HSM card is installed), each with 16 output
