@@ -348,7 +348,7 @@ Variables can be divided into two classes, variables to hold integer
 values and variables for storing floating point values.
 
 Integer variables can hold data from the interval @w{[-2^31, 2^31 - 1]},
-i.e. they run from -2147483648 all the way up to +2147483647. In
+i.e. they run from @w{-2147483648} all the way up to @w{+2147483647}. In
 contrast, floating point variables can have much larger values (up to
 ca.@: 10^300), the exact limits depending on the machine @acronym{fsc2}
 is running on.

@@ -590,9 +590,9 @@ alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @item TDS744A
 @item TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or, alternatively @code{0},
-@code{1}, @code{2} or @code{3}
-or @code{CH4}
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@code{0}, @code{1}, @code{2} or @code{3}
+
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
 @code{4}, @code{5} or @code{6} 
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
@@ -640,9 +640,8 @@ alternatively, @code{5}, @code{6}, @code{7} or @code{8}
 @item TDS744A
 @item TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or, alternatively @code{0},
-@code{1}, @code{2} or @code{3}
-or @code{CH4}
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
+@code{0}, @code{1}, @code{2} or @code{3}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
 @code{4}, @code{5} or @code{6} 
 @item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,

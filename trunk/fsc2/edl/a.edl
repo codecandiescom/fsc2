@@ -3,11 +3,11 @@ DEVICES:
 VARS:
 I = 3; J = 1; K = 10;
 
-a = 3MHz;
+a  = 3 MHz;
 a1 = 2 ns;
-a2 = 2us;
-a3 = 3ms;
-a4 = 2s;
+a2 = 2 us;
+a3 = 3 ms;
+a4 = 2 s;
 
 b = 40 mV;
 d[* ];
@@ -16,9 +16,9 @@ D[ * ];
 
 N = 100;
 
-X[ 3, 3, 3 ] = { 9,8,7,6,5,4,3,2,1,
-				 19,18,17,16,15,14,13,12,11,
-				 29,28,27,26,25,24,23,22,21 };
+X[ 3, 3, 3 ] = {  9,  8,  7,  6,  5,  4,  3,  2,  1,
+				 19, 18, 17, 16, 15, 14, 13, 12, 11,
+				 29, 28, 27, 26, 25, 24, 23, 22, 21 };
 
 dt1, dt2;
 
@@ -33,9 +33,9 @@ print( "I = #\n", I );
 I += square( 3 );
 print( "I = #\n", I );
 
-print ( "X[1,1,2] = #\n", X[1,1,2] );
+print ( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
 X[1,1,2] += 3;
-print( "X[1,1,2] = #\n", X[1,1,2] );
+print( "X[1,1,2] = #\n", X[ 1, 1, 2 ] );
 
 print( "b = #\n", b );
 print( "dim = #\n", dim( c ) );
@@ -43,23 +43,16 @@ print( "size[1] = #, size[2] = #\n", size( c, 1 ), size( c, 2 ) );
 D[ ] = sizes( c );
 print( "D[ 1 ] = #, D[ 2 ] = #\n", D[ 1 ], D[ 2 ] );
 d[] = c[2];
-print( "# # #\n", d[1],d[2],d[3]);
+print( "# # #\n", d[ 1 ], d[ 2 ], d[ 3 ]);
 
 print( "The # of # is: #\n", "sine", x, sin( x ) );
 
 
-//init_1d( 4, N, 890, 0.1, "Magnetic field [G]",
-//		 "EPR signal (1st derivative)" );
-
 init_1d( 4, 0, 890, 0.1, "Magnetic field [G]",
 		 "EPR signal (1st derivative)" );
 
-//init_1d( 4, N, 20000, 10, "Magnetic field [ G ]" );
 
 EXP:
-
-
-// save( 3,2,1 );
 
 
 
@@ -82,21 +75,6 @@ FOR K = 1 : 5 {
 }
 
 
-/*
-FOR I = 2 : N : 3 {
-	J = I * I;
-//	print( "#! = #", I, J);
-	display( I, J, 1, I, 10 * I, 2, I, 0.5 * N^2 * sin( 0.06 * I ), 3,
-			 N + 1 - I, 20 * I, 4 );
-}
-
-FOR I = 3 : N : 3 {
-	J = I * I;
-//	print( "#! = #", I, J);
-	display( I, J, 1, I, 10 * I, 2, I, 0.5 * N^2 * sin( 0.06 * I ), 3,
-			 N + 1 - I, 20 * I, 4 );
-}
-*/
 
 ON_STOP:
 
