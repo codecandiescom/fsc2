@@ -1609,17 +1609,10 @@ static void change_label_2d( char **label )
 			{
 				if ( G.label[ X ] != NULL && G.font != NULL )
 					create_label_pixmap( &G.cut_z_axis, Z, G.label[ X ] );
-
-				printf( "Redrawing Z axis: %s\n", G.label[ X ] );
-				fflush( stdout );
 				redraw_cut_axis( Z );
 			}
 			else
-			{
-				printf( "Redrawing X axis: %s\n", G.label[ X ] );
-				fflush( stdout );
 				redraw_cut_axis( X );
-			}
 		}
 	}
 
@@ -1651,16 +1644,10 @@ static void change_label_2d( char **label )
 							G.label_w[ Z + 3 ] = G.label_w[ Y ];
 							G.label_h[ Z + 3 ] = G.label_h[ Y ];
 						}
-						printf( "Redrawing Z axis: %s\n", G.label[ Y ] );
-						fflush( stdout );
 						redraw_cut_axis( Z );
 					}
 					else
-					{
-						printf( "Redrawing X axis: %s\n", G.label[ X ] );
-						fflush( stdout );
 						redraw_cut_axis( X );
-					}
 				}
 
 				if ( coord == Z )
@@ -1671,8 +1658,6 @@ static void change_label_2d( char **label )
 						G.label_w[ Y + 3 ]  = G.label_w[ Z ];
 						G.label_h[ Y + 3 ]  = G.label_h[ Z ];
 					}
-					printf( "Redrawing Y axis: %s\n", G.label[ Z ] );
-					fflush( stdout );
 					redraw_cut_axis( Y );
 				}
 			}
@@ -1800,7 +1785,6 @@ static void rescale_2d( long new_nx, long new_ny )
 					count--;
 				}
 	}
-
 
 	if ( max_x != 0 )
 		max_x++;

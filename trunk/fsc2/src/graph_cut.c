@@ -1925,9 +1925,6 @@ void redraw_cut_axis( int coord )
 
 	assert( coord >= X && coord <= Z );
 
-	printf( "Drawing %c cut axis\n", ( char ) ( coord + 'X' ) );
-	fflush( stdout );
-
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the
 	   label is a string rotated by 90 degree that has been drawn in advance */
