@@ -69,7 +69,7 @@ GPIB_LOG_LEVEL   := HIGH
 # lock files for the serial ports are created. This should be '/var/lock'
 # according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
 # itself or all its users must have read and write permissions for this
-# directory. See the longer discussion in the INSTALL file.
+# directory. See the longer discussion in section B of the INSTALL file.
 
 NUM_SERIAL_PORTS := 2
 SERIAL_LOCK_DIR  := "/var/lock"
