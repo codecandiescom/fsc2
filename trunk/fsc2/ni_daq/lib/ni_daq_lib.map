@@ -3,7 +3,7 @@
 #  
 #  Copyright (C) 2003 Jens Thoms Toerring
 #  
-#  Library for Rulbus (Rijksuniversiteit Leiden BUS)
+#  Library for National Instruments DAQ boards based on a DAQ-STC
 #  
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -24,33 +24,40 @@
 #  Jens.Toerring@physik.fu-berlin.de  
 
 
-RULBUS_LIB_1.0 {
+NI_DAQ_LIB_1.0 {
 
 	global:
-			rulbus_open;
-			rulbus_close;
-			rulbus_perror;
-			rulbus_strerror;
-			rulbus_card_open;
-			rulbus_card_close;
-			rulbus_adc12_num_channels;
-			rulbus_adc12_set_channel;
-			rulbus_adc12_set_gain;
-			rulbus_adc12_has_external_trigger;
-			rulbus_adc12_set_trigger_mode;
-			rulbus_adc12_properties;
-			rulbus_adc12_check_convert;
-			rulbus_adc12_convert;
-			rulbus_dac12_set_voltage;
-			rulbus_dac12_properties;
-			rulbus_delay_set_delay;
-			rulbus_delay_set_trigger;
-			rulbus_delay_set_output_pulse;
-			rulbus_delay_set_output_pulse_polarity;
-			rulbus_delay_busy;
-			rulbus_delay_software_start;
-			rulbus_clock_set_frequency;
-			rulbus_errno;
+			ni_daq_errlist;
+			ni_daq_nerr;
+			ni_daq_open;
+			ni_daq_close;
+			ni_daq_perror;
+			ni_daq_strerror;
+			ni_daq_msc_set_clock_speed;
+			ni_daq_msc_set_clock_output;
+			ni_daq_msc_get_clock_state;
+			ni_daq_msc_set_trigger;
+			ni_daq_ai_set_speed;
+			ni_daq_ai_get_speed;
+			ni_daq_ai_channel_configuration;
+			ni_daq_ai_acq_setup;
+			ni_daq_ai_start_acq;
+			ni_daq_ai_stop_acq;
+			ni_daq_ai_get_acq_data;
+			ni_daq_ao_channel_configuration;
+			ni_daq_ao;
+			ni_daq_gpct_set_speed;
+			ni_daq_gpct_get_speed;
+			ni_daq_gpct_start_counter;
+			ni_daq_gpct_start_gated_counter;
+			ni_daq_gpct_stop_counter;
+			ni_daq_gpct_get_count;
+			ni_daq_gpct_single_pulse;
+			ni_daq_gpct_continuous_pulses;
+			ni_daq_gpct_start_pulses;
+			ni_daq_gpct_stop_pulses;
+			ni_daq_dio_write;
+			ni_daq_dio_read;
 
 	local:  *;
 };
