@@ -1,0 +1,28 @@
+@c $Id$
+
+@node Using Pulsers, Modules, Device Functions, Top
+@chapter Using Pulsers
+
+@ifinfo
+@menu
+* Introductio::            
+@end menu
+@end ifinfo
+
+
+@node Introductio, , Using Pulsers, Using Pulsers
+@section Introductio
+
+Using the pulsers has its own chapter because several special methods
+to handle the pulser setup, create pulses und how to do phase cycling
+have to be introduced. Beside, the way the pulser is to be used depends
+rather strongly on the other hardware used in the spectrometer. For this
+reasons, there can even to additional types of sections in the
+@acronym{EDL} in order to setup the pulser. These are
+@example
+ASSIGNMENTS
+PHASES
+@end example
+
+While the first one deals with the basic setup of the pulser the second
+one is only necessary when phase cycling is used.
