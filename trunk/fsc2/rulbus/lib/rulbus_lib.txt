@@ -93,7 +93,7 @@ everything from the character sequence '/*' until the first encounter of
 nested).
 
 Further entries for a rack are for the cards in the rack (as many as there
-are cards). Each card description starts with the type of the rack, either
+are cards). Each card description starts with the type of the card, either
 'rb8509_adc12' (for the 12-bit ADC card RB8509), 'rb8510_dac12', (for the
 12-bit DAC card RB8510), 'rb8514_delay' (for the RB8514 delay card),
 'rb8515_clock' (for the RB8515 clock card) or 'rb_generic' (a card type
@@ -112,7 +112,7 @@ rack. Valid card addresses are in the range between 1 and 254.
 For 12-bit ADC (RB8509) cards the default address is 0xC0, for 12-bit DAC
 (RB8510) cards it is 0xD0, for delay (RB8514) cards it's 0xC4 and for
 clock (RB8515) cards 0xC8. No address (or only the address 0, which is
-invalid for all other crads) can be specified for "generic" (rb_generic)
+invalid for all other cards) can be specified for "generic" (rb_generic)
 cards.
 
 For 12-bit ADC (RB8509) cards additional informations to be specified are
@@ -183,8 +183,9 @@ be set in the configuration file except its address, which defaults to
 Finally, the generic card, 'rb_generic', does not allow to specify any
 properties at all, not even an address. This card type isn't meant to
 stand for a "real" card but allows to read from and write to each
-address in the rack in belongs to. Thus in all calls of the functions
-for dealing with this card, the absolute Rulbus address has to be given.
+address in the rack it belongs to. Thus in all calls of the functions
+for dealing with this type of card, the absolute Rulbus address has to
+be given.
 
 Numerical (floating point) values used in the configuration file can be
 written as a number, followed by a suffix, indicating a unit:
@@ -343,12 +344,13 @@ int rulbus_perror( const char *s )
 The function prints out a string to stderr, consisting of a string
 pased to it as the argument, a colon, a blank and a short descriptive
 text of the error encountered in the last invocation of one of the
-functions for the board, followed by a new-line. If the argument is
-NULL or an empty string the error message is printed.
+Rulbus functions (or "Success" if the last call was successful),
+followed by a new-line. If the argument is NULL or an empty string
+only the error message is printed.
 
 The function returns the number of characters printed to stderr or
-the negative value RULBUS_NO_INIT if the RULBUS isn't open (i.e.
-rulbus_open() has never been called or rulbus_close() hase been
+the negative value RULBUS_NO_INITIALIZATION if the RULBUS isn't open
+(i.e. rulbus_open() has never been called or rulbus_close() has been
 called before this function).
 
 
@@ -356,10 +358,12 @@ called before this function).
 
 const char *rulbus_strerror( void )
 
-The function returns a string with a short descriptive text of the
-error encountered in the last invocation of one of the functions for
-the board (or "Success" if the last function call was successful).
-Each new invocation overwrites the content of the string.
+The function returns a pointer to a (read-only) string with a short
+descriptive text of the error encountered in the last invocation of
+one of the Rulbus functions (or "Success" if the last function call
+was successful). A NULL pointer gets returned if the RULBUS isn't
+open (i.e. rulbus_open() has never been called or rulbus_close() has
+been called before this function).
 
 
 ----------------------------------------------------------------------
