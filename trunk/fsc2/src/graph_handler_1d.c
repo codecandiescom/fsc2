@@ -823,10 +823,10 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 
 			if ( cv->can_undo )
 			{
-				cv->old_s2d[ X ] *=
-					           ( double ) ( w - 1 ) / ( double ) ( old_w - 1 );
-				cv->old_s2d[ Y ] *=
-					           ( double ) ( h - 1 ) / ( double ) ( old_h - 1 );
+				cv->old_s2d[ X ] *= ( double ) ( w - 1 )
+									/ ( double ) ( old_w - 1 );
+				cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
+									/ ( double ) ( old_h - 1 );
 			}
 		}
 
@@ -836,7 +836,7 @@ static void reconfigure_window_1d( Canvas *c, int w, int h )
 		recalc_XPoints_1d( );
 	}
 
-	/* We can't know the sequence the different canvases are reconfigured in
+	/* We can't know the sequence the different canvases are reconfigured
 	   but, on the other hand, redrawing an axis canvases is useless before
 	   the new scaling factors are set. Thus we need in the call for the
 	   canvas window to redraw also axis windows which got reconfigured
