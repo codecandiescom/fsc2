@@ -189,7 +189,6 @@ pack:
 	cd ..; tar -c fsc2a | gzip -c -9 > fsc2a.tgz
 
 ZIP:
-	$(MAKE) pack
 	if ! `grep ZIP /etc/mtab > /dev/null`; then \
 	    sleep 1; \
 		mount /ZIP; \
