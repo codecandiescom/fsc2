@@ -46,6 +46,7 @@ tds520c       // Tektronix digitizing oscilloscope, model 520C
 tds540        // Tektronix digitizing oscilloscope, model 540
 tds744a       // Tektronix digitizing oscilloscope, model 744A
 tds754a       // Tektronix digitizing oscilloscope, model 754A
+lecroy9400    // LeCroy digitizing oscilloscope, model 9400
 
 
 // Lock-In amplifiers
