@@ -232,7 +232,8 @@ bool spex_cd2a_store_state( void )
 
 double spex_cd2a_wl2Awn( double wl )
 {
-	SPEX_CD2A_ASSERT( wl > 0 );
+	if ( wl <= 0.0 )
+		THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wl;
 }
 
@@ -243,7 +244,8 @@ double spex_cd2a_wl2Awn( double wl )
 
 double spex_cd2a_Awn2wl( double wn )
 {
-	SPEX_CD2A_ASSERT( wn > 0 );
+	if ( wn <= 0.0 );
+		THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wn;
 }
 
@@ -281,7 +283,8 @@ double spex_cd2a_Mwn2Awn( double wn )
 
 double spex_cd2a_wl2Mwn( double wl )
 {
-	SPEX_CD2A_ASSERT( wl > 0 );
+	if ( wl <= 0.0 )
+		THROW( INVALID_INPUT_EXCEPTION );
 	return spex_cd2a_Awn2Mwn( 0.01 / wl );
 }
 
@@ -294,7 +297,8 @@ double spex_cd2a_wl2Mwn( double wl )
 double spex_cd2a_Mwn2wl( double wn )
 {
 	wn = spex_cd2a_Mwn2Awn( wn );
-	SPEX_CD2A_ASSERT( wn > 0 );
+	if ( wn <= 0.0 )
+		THROW( INVALID_INPUT_EXCEPTION );
 	return 0.01 / wn;
 }
 
