@@ -104,7 +104,7 @@ static struct {
 	bool is_current_step;     /* flag, set if current step size is defined */
 	bool use_correction;      /* flag, set if corrections are to be applied */
 	bool use_corr_orig;
-	char *lockin_append;      /* string to append to lockin function names */
+	char *dac_func;           /* name of function to set DAC voltage */
 } keithley228a;
 
 
@@ -123,6 +123,7 @@ int keithley228a_init_hook( void )
 	int *last_DAC_port;
 	int seq;
 	char *fn;
+	int dev_num;
 
 
 	/* Set global variable to indicate that GPIB bus is needed */
@@ -136,10 +137,11 @@ int keithley228a_init_hook( void )
 	   that's not as simple as it might look...
 	   If LOCKIN_NAME has not been defined the first available lockin (i.e.
 	   the first defined in the devices section) is going to be used,
-	   otherwise the one defined by the name (if the name is valid).
-	   Then the DAC port number is set, if LOCKIN_DAC isn't set the default
-	   value from the array dac_ports is used, otherwise the number defined
-	   by LOCKIN_DAC (if the number is valid) */
+	   otherwise the one defined by LOCKIN_NAME (if the name is one of the
+	   ones listed in lockins[]). Then the DAC port number is set, if
+	   LOCKIN_DAC isn't set the default value from the array dac_ports is
+	   used, otherwise the number defined by LOCKIN_DAC (if the number is
+	   valid) */
 
 
 #if defined( LOCKIN_NAME )
@@ -156,7 +158,7 @@ int keithley228a_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exists_device( keithley228a.lockin_name ) )
+	if ( ( dev_num = exists_device( keithley228a.lockin_name ) ) < 1 )
 	{
 		print( FATAL, "Module for lock-in amplifier '%s' needed by the magnet "
 			   "power supply isn't loaded.\n", keithley228a.lockin_name );
@@ -165,7 +167,7 @@ int keithley228a_init_hook( void )
 #else
 	keithley228a.lockin_name = NULL;
 	for ( i = 0; lockins[ i ] != NULL; i++ )
-		if ( exists_device( lockins[ i ] ) )
+		if ( ( dev_num = exists_device( lockins[ i ] ) ) > 0 )
 		{
 			keithley228a.lockin_name = lockins[ i ];
 			break;
@@ -178,16 +180,6 @@ int keithley228a_init_hook( void )
 		THROW( EXCEPTION );
 	}
 #endif
-
-	/* Now we've got to figure out what kind of string we need to append to
-	   lock-in functions, i.e. if the lock-in to be used is the first, second
-	   etc. lock-in module loaded. Only if it is the first lock-in nothing
-	   got to be appended, otherwise a string of the form "#n", were n is the
-	   lock-in number. */
-
-	if ( ( seq = get_lib_number( keithley228a.lockin_name ) ) > 1 )
-		keithley228a.lockin_append = get_string( "#%d", seq );
-		keithley228a.lockin_append = T_strdup( "" );
 
 	/* Set the DAC port to be used and check that it is a valid number */
 
@@ -218,17 +210,21 @@ int keithley228a_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	/* Check if a function for setting the DAC port exists */
+	/* Assemble the name of the function for setting the DAC port and test
+	   if it exists */
 
-	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
-	if ( ( func_ptr = func_get( fn, &acc ) ) == NULL )
+	if ( dev_num == 1 )
+		keithley228a.dac_func = T_strdup( "lockin_dac_voltage" );
+	else
+		keithley228a.dac_func = get_string( "lockin_dac_voltage#%d", dev_num );
+	
+	if ( ( func_ptr = func_get( keithley228a.dac_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "No lock-in amplifier module loaded supplying a "
 			   "function for setting a DAC.\n" );
-		T_free( fn );
+		T_free( keithley228a.dac_func );
 		THROW( EXCEPTION );
 	}
-	T_free( fn );
 	vars_pop( func_ptr );
 
 	/* Unset some flags in the power supplies structure */
@@ -277,7 +273,7 @@ int keithley228a_end_of_exp_hook( void )
 
 void keithley228a_exit_hook( void )
 {
-	keithley228a.lockin_append = CHAR_P T_free( keithley228a.lockin_append );
+	T_free( keithley228a.dac_func );
 }
 
 
@@ -858,9 +854,7 @@ static double keithley228a_set_current( double new_current )
 	/* Set the voltage on the lock-ins DAC - the function needs two arguments,
 	   the port number and the voltage */
 
-	fn = get_string( "lockin_dac_voltage%s", keithley228a.lockin_append );
-	func_ptr = func_get( fn, &acc );
-	T_free( fn );
+	func_ptr = func_get( keithley228a.dac_func, &acc );
 	vars_push( INT_VAR, ( long ) keithley228a.lockin_dac_port );
 	vars_push( FLOAT_VAR, dac_volts );
 	vars_pop( func_call( func_ptr ) );

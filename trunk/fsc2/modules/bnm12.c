@@ -146,13 +146,7 @@ int bnm12_init_hook( void )
 	T_free( func );
 	vars_push( INT_VAR, DIO_NUMBER );     /* push the DIO number */
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
-
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+	v = func_call( Func_ptr );
 
 	if ( v->val.lval != 1 )
 	{
@@ -180,15 +174,7 @@ int bnm12_init_hook( void )
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( INT_VAR, DIO_NUMBER );          /* push the DIO number */
 	vars_push( STR_VAR, "1x24" );              /* push the mode type string */
-
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
-
-	vars_pop( v );
+	vars_pop( func_call( Func_ptr ) );         /* call the function */
 
 	/* Get the name for the function for reading from the DIO and check if
 	   it exists */
@@ -377,13 +363,7 @@ static double bnm12_get_field( void )
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( INT_VAR, DIO_NUMBER );          /* push the DIO number */
 	vars_push( INT_VAR, WITIO_48_CHANNEL_0 );  /* push the channel number */
-
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+	v = func_call( Func_ptr );                 /* call the function */
 
 	res = ( unsigned long ) v->val.lval;
 	vars_pop( v );
@@ -443,13 +423,7 @@ static void bnm12_check_field( void )
 		vars_push( STR_VAR, DEVICE_NAME );        /* push the pass-phrase */
 		vars_push( INT_VAR, DIO_NUMBER );         /* push the DIO number */
 		vars_push( INT_VAR, WITIO_48_CHANNEL_0 ); /* push the channel number */
-
-		if ( ( v = func_call( Func_ptr ) ) == NULL )
-		{
-			print( FATAL, "Internal error detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
+		v = func_call( Func_ptr );                /* call the function */
 
 		res = ( unsigned long ) v->val.lval;
 		vars_pop( v );

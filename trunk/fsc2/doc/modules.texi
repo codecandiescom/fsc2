@@ -1367,8 +1367,7 @@ see the description of @code{vars_push()} in the section about
 Finally, call @code{func_call()} with the pointer returned by the call
 to @code{func_get()}
 @findex func_get()
-as the argument. This will return a pointer to the
-variable with the result.
+as the argument. This will return a pointer to the variable with the result.
 @end enumerate
 
 As an example let's assume there is an @code{EDL} function named

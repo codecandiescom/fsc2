@@ -99,12 +99,7 @@ int hjs_sfc_init_hook( void )
 	T_free( func );
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+	v = func_call( Func_ptr );
 
 	if ( v->val.lval != 1 )
 	{
@@ -617,15 +612,7 @@ static double hjs_sfc_set_field( double field )
 
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( FLOAT_VAR, v_step );
-
-	if ( ( v = func_call( Func_ptr ) ) == NULL )
-	{
-		print( FATAL, "Internal error detected at %s:%d.\n",
-			   __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
-
-	vars_pop( v );
+	vars_pop( func_call( Func_ptr );
 
 	/* We probably will have to wait here a bit for the new field to
 	   be reached */

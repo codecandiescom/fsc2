@@ -874,52 +874,6 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* This routine expects the name of a device and returns the position in   */
-/* the list of devices with the same function, as indicated by the         */
-/* generic type string. I.e. if you have loaded modules for three lock-in  */
-/* amplifiers and you pass this function the name of one of them it loops  */
-/* over the devices listed in the DEVICES section and returns the sequence */
-/* number of the device, in this example either 1, 2 or 3. In case of      */
-/* errors (or if the devices generic_type string isn't set) the funtion    */
-/* returns 0.                                                              */
-/*-------------------------------------------------------------------------*/
-
-int get_lib_number( const char *name )
-{
-	Device *cd;
-	Device *sd = NULL;                   /* the device we're looking for */
-	int num;
-
-
-	for ( cd = EDL.Device_List; cd != 0; cd = cd->next )
-		if ( cd->is_loaded && cd->generic_type != NULL &&
-			 ! strcasecmp( strip_path( cd->name ), name ) )
-		{
-			sd = cd;
-			break;
-		}
-
-	if ( cd == NULL || sd == NULL )
-		return 0;
-
-	for ( num = 1, cd = EDL.Device_List; cd != 0; cd = cd->next )
-	{
-		if ( ! cd->is_loaded )
-			continue;
-
-		if ( cd == sd )             /* device found -> we're done */
-			return num;
-
-		if ( cd->generic_type != NULL && sd->generic_type != NULL &&
-			 ! strcasecmp( cd->generic_type, sd->generic_type ) )
-			num++;
-	}
-
-	return 0;
-}
-
-
 /*-------------------------------------------------------------*/
 /* The function runs the exit hook functions for a modules (if */
 /* this hasn't already been done and if there exists one) and  */
