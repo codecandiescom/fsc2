@@ -265,11 +265,6 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {WS}        /* skip white space */
 
-"\x4nsec"   return E_NS_TOKEN;
-"\x4usec"   return E_US_TOKEN;
-"\x4msec"   return E_MS_TOKEN;
-"\x4sec"    return E_S_TOKEN;
-
 "\x4ntesla" return E_NT_TOKEN;
 "\x4utesla" return E_UT_TOKEN;
 "\x4mtesla" return E_MT_TOKEN;

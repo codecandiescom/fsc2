@@ -130,14 +130,11 @@ expr:    INT_TOKEN unit           { if ( $2 == NULL )
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { if ( $4 == NULL )
-			                          $$ = $2;
-		                            else
-									  $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
 ;
 
 
-unit:    /* empty */               { $$ = NULL; }
+unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | NT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | UT_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | MT_TOKEN                  { $$ = vars_push( INT_VAR, 10 ); }

@@ -44,24 +44,20 @@ static Var *CV;
 %token E_LE	          266
 %token E_GT	          267
 %token E_GE	          268
-%token E_NS_TOKEN	  269
-%token E_US_TOKEN	  270
-%token E_MS_TOKEN	  271
-%token E_S_TOKEN	  272
-%token E_NT_TOKEN	  273
-%token E_UT_TOKEN	  274
-%token E_MT_TOKEN	  275
-%token E_T_TOKEN	  276
-%token E_NU_TOKEN	  277
-%token E_UU_TOKEN	  278
-%token E_MU_TOKEN	  279
-%token E_KU_TOKEN	  280
-%token E_MEG_TOKEN	  281
-%token E_NEG	      282
-%token E_AND          283
-%token E_OR           284
-%token E_XOR          285
-%token E_NOT          286
+%token E_NT_TOKEN	  269
+%token E_UT_TOKEN	  270
+%token E_MT_TOKEN	  271
+%token E_T_TOKEN	  272
+%token E_NU_TOKEN	  273
+%token E_UU_TOKEN	  274
+%token E_MU_TOKEN	  275
+%token E_KU_TOKEN	  276
+%token E_MEG_TOKEN	  277
+%token E_NEG	      278
+%token E_AND          279
+%token E_OR           280
+%token E_XOR          281
+%token E_NOT          282
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -72,7 +68,6 @@ static Var *CV;
 %token <sptr> E_STR_TOKEN
 %token E_EQ E_LT E_LE E_GT E_GE
 
-%token E_NS_TOKEN E_US_TOKEN E_MS_TOKEN E_S_TOKEN
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
 %type <vptr> expr unit line list1
@@ -159,26 +154,19 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
        | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { if ( $4 == NULL )
-	                                  $$ = $2;
-                                    else
-                                      $$ = vars_mult( $2, $4 ); }
+       | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = NULL; }
-       | E_NS_TOKEN                { $$ = vars_push( INT_VAR, 1L ); }
-       | E_US_TOKEN                { $$ = vars_push( INT_VAR, 1000L ); }
-       | E_MS_TOKEN                { $$ = vars_push( INT_VAR, 1000000L ); }
-       | E_S_TOKEN                 { $$ = vars_push( INT_VAR, 1000000000L ); }
+unit:    /* empty */               { $$ = vars_push( INT_VAR, 1 ); }
        | E_NT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN                { $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | E_T_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e4 ); }
+       | E_MT_TOKEN                { $$ = vars_push( INT_VAR, 10 ); }
+       | E_T_TOKEN                 { $$ = vars_push( INT_VAR, 10000 ); }
        | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN                { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | E_UU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_MEG_TOKEN               { $$ = vars_push( INT_VAR, 1.0e6 ); }
+       | E_KU_TOKEN                { $$ = vars_push( INT_VAR, 1000 ); }
+       | E_MEG_TOKEN               { $$ = vars_push( INT_VAR, 1000000 ); }
 ;
 
 
