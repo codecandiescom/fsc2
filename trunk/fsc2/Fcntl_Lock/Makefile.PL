@@ -1,8 +1,7 @@
 use ExtUtils::MakeMaker;
 
 # Compile and run the program that creates the include file (first try the
-# version that also can deal with 'long long, then the one that only tests
-# for 'long').
+# version that also tries 'long long', then the one that only uses for 'long').
 
 if ( ( system( "make sizes1 >/dev/null 2>&1" ) or
 	   system( "./sizes1 >/dev/null 2>&1" ) ) and
