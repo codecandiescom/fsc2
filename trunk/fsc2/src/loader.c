@@ -210,7 +210,7 @@ static void load_functions( Device *dev )
 			if ( ( dev->driver.handle = dlopen( lib_name, RTLD_LAZY ) )
 				 != NULL )
 				break;
-			lib_name = T_free( lib_name );
+			lib_name = CHAR_P T_free( lib_name );
 		}
 		T_free( ld );
 	}
@@ -273,7 +273,7 @@ static void resolve_hook_functions( Device *dev )
 	   path before the device name - it may be set via a symbolic link to
 	   some other directory than the normal module directory. */
 
-	hook_func_name = T_malloc( strlen( strip_path( dev->name ) ) + 18 );
+	hook_func_name = CHAR_P T_malloc( strlen( strip_path( dev->name ) ) + 18 );
 	strcpy( hook_func_name, strip_path( dev->name ) );
 	app = hook_func_name + strlen( strip_path( dev->name ) );
 	strcpy( app, "_init_hook" );
@@ -412,7 +412,7 @@ static void add_function( int num, void *new_func, Device *new_dev )
 
 	/* Add an entry for the new function to the list of functions */
 
-	Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+	Fncts = FUNC_P T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
 	f = Fncts + Num_Func++;
 	memcpy( f, Fncts + num, sizeof( Func ) );
 

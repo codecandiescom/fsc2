@@ -173,8 +173,10 @@ void fsc2_final_serial_cleanup( void )
 
 		if ( Serial_Port[ i ].in_use )
 		{
-			Serial_Port[ i ].dev_file = T_free( Serial_Port[ i ].dev_file );
-			Serial_Port[ i ].lock_file = T_free( Serial_Port[ i ].lock_file );
+			Serial_Port[ i ].dev_file = CHAR_P 
+				                         T_free( Serial_Port[ i ].dev_file );
+			Serial_Port[ i ].lock_file = CHAR_P
+                                         T_free( Serial_Port[ i ].lock_file );
 		}
 
 		Serial_Port[ i ].devname   = NULL;

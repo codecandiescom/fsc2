@@ -700,7 +700,7 @@ void load_file( FL_OBJECT *a, long reload )
 		if ( in_file == '\0' )
 		{
 			fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
-			old_in_file = T_free( old_in_file );
+			old_in_file = CHAR_P T_free( old_in_file );
 			notify_conn( UNBUSY_SIGNAL );
 			return;
 		}
@@ -724,7 +724,7 @@ void load_file( FL_OBJECT *a, long reload )
 		else
 			fl_show_alert( "Error", "Sorry, no permission to read file:",
 						   in_file, 1 );
-		old_in_file = T_free( old_in_file );
+		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
@@ -741,7 +741,7 @@ void load_file( FL_OBJECT *a, long reload )
 			exit ( EXIT_FAILURE );
 		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 					   NULL, 1 );
-		old_in_file = T_free( old_in_file );
+		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
@@ -756,7 +756,7 @@ void load_file( FL_OBJECT *a, long reload )
 
 		fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 					   NULL, 1 );
-		old_in_file = T_free( old_in_file );
+		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
@@ -768,7 +768,7 @@ void load_file( FL_OBJECT *a, long reload )
 			exit ( EXIT_FAILURE );
 
 		fl_show_alert( "Error", "Sorry, can't open file:", in_file, 1 );
-		old_in_file = T_free( old_in_file );
+		old_in_file = CHAR_P T_free( old_in_file );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
@@ -810,7 +810,7 @@ void load_file( FL_OBJECT *a, long reload )
 	in_file_fp = fp;
 
 	delete_file = UNSET;
-	old_in_file = T_free( old_in_file );
+	old_in_file = CHAR_P T_free( old_in_file );
 
 	/* Set a new window title */
 
@@ -897,7 +897,7 @@ static void start_editor( void )
 
 	if ( ed == NULL || *ed == '\0' )
 	{
-		argv = T_malloc( 5 * sizeof *argv );
+		argv = CHAR_PP T_malloc( 5 * sizeof *argv );
 
 		argv[ 0 ] = ( char * ) "xterm";
 		argv[ 1 ] = ( char * ) "-e";
@@ -916,7 +916,7 @@ static void start_editor( void )
 
 		if ( ! *ep )   /* no command line arguments */
 		{
-			argv = T_malloc( 5 * sizeof *argv );
+			argv = CHAR_PP T_malloc( 5 * sizeof *argv );
 
 			argv[ 0 ] = ( char * ) "xterm";
 			argv[ 1 ] = ( char * ) "-e";
@@ -936,7 +936,7 @@ static void start_editor( void )
 				++argc;
 			}
 
-			argv = T_malloc( ( argc + 5 ) * sizeof *argv );
+			argv = CHAR_PP T_malloc( ( argc + 5 ) * sizeof *argv );
 
 			argv[ 0 ] = ( char * ) "xterm";
 			argv[ 1 ] = ( char * ) "-e";
@@ -1368,7 +1368,7 @@ void clean_up( void )
 	/* Get rid of the last remains of graphics */
 
 	for ( i = X; i <= Z; i++ )
-		G.label_orig[ i ] = T_free( G.label_orig[ i ] );
+		G.label_orig[ i ] = CHAR_P T_free( G.label_orig[ i ] );
 
 	G.is_init = UNSET;
 
@@ -1381,7 +1381,7 @@ void clean_up( void )
 
 	/* Deallocate memory used for file names */
 
-	EDL.Fname = T_free( EDL.Fname );
+	EDL.Fname = CHAR_P T_free( EDL.Fname );
 
 	/* Run exit hook functions and unlink modules */
 

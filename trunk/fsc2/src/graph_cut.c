@@ -528,8 +528,8 @@ void cut_form_close( void )
 	/* Get rid of GCs and memory allocated for the curve */
 
 	XFreeGC( G.d, cv->font_gc );
-	cv->points  = T_free( cv->points );
-	cv->xpoints = T_free( cv->xpoints );
+	cv->points  = SCALED_POINT_P T_free( cv->points );
+	cv->xpoints = XPOINT_P T_free( cv->xpoints );
 
 	cut_x = GUI.cut_form->cut->x;
 	cut_y = GUI.cut_form->cut->y;
@@ -666,8 +666,10 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 
 	/* Allocate memory for storing of scaled data and points for display */
 
-	cv->points = T_realloc( cv->points, CG.nx * sizeof *cv->points );
-	cv->xpoints = T_realloc( cv->xpoints, CG.nx * sizeof *cv->xpoints );
+	cv->points = SCALED_POINT_P T_realloc( cv->points,
+										   CG.nx * sizeof *cv->points );
+	cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+									  CG.nx * sizeof *cv->xpoints );
 
 	/* Extract the existing scaled data of the cut from the 2d curve */
 
@@ -766,8 +768,8 @@ void cut_new_curve_handler( void )
 		/* Remove the current curve */
 
 		CG.curve = -1;
-		cv->points = T_free( cv->points );
-		cv->xpoints = T_free( cv->xpoints );
+		cv->points = SCALED_POINT_P T_free( cv->points );
+		cv->xpoints = XPOINT_P T_free( cv->xpoints );
 		cv->count = 0;
 	}
 	else
@@ -939,8 +941,10 @@ bool cut_num_points_changed( int dir, long num_points )
 
 	/* Extend the arrays for the (scaled) data and the array of XPoints */
 
-	cv->points = T_realloc( cv->points, num_points * sizeof *cv->points );
-	cv->xpoints = T_realloc( cv->xpoints, num_points * sizeof *cv->xpoints );
+	cv->points = SCALED_POINT_P T_realloc( cv->points,
+										   num_points * sizeof *cv->points );
+	cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+									  num_points * sizeof *cv->xpoints );
 
 	/* The new entries are not set yet */
 

@@ -126,7 +126,7 @@ FUNC        {IDENT}"#"[0-9]+
 			/* Handling of file name lines */
 {FILE}      {
 				*( prepstext + prepsleng - 1 ) = '\0';
-				EDL.Fname = T_free( EDL.Fname );
+				EDL.Fname = CHAR_P T_free( EDL.Fname );
 				EDL.Fname = T_strdup( prepstext + 2 );
 			}
 

@@ -163,7 +163,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 
 
 	nf = num_func;
-	EDL.Fname = T_free( EDL.Fname );
+	EDL.Fname = CHAR_P T_free( EDL.Fname );
 	EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
 
 	if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
@@ -208,7 +208,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 	nf = num + num_predef_func;
 
 	if ( num != 0 )
-		*fncts = T_realloc( *fncts, nf * sizeof( Func ) );
+		*fncts = FUNC_P T_realloc( *fncts, nf * sizeof( Func ) );
 
 	for ( cur = num_predef_func; cur < nf; cur++ )
 	{
@@ -261,8 +261,9 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 
 		if ( ret_token == IDENT_TOKEN )
 		{
-			if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
-								sizeof( Func ), ffl_func_cmp2 ) ) != NULL )
+			if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
+									   sizeof( Func ), ffl_func_cmp2 ) )
+				 != NULL )
 			{
 				eprint( WARN, UNSET, "Loadable function '%s()' hides "
 						"built-in function (line %ld in function data "

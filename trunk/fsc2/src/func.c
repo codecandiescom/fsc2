@@ -192,7 +192,7 @@ bool functions_init( void )
 
 	TRY
 	{
-		Fncts = T_malloc( Num_Func * sizeof *Fncts );
+		Fncts = FUNC_P T_malloc( Num_Func * sizeof *Fncts );
 		memcpy( Fncts, Def_Fncts, Num_Func * sizeof *Fncts );
 		qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
 		Num_Func = func_list_parse( &Fncts, Num_Func );
@@ -239,7 +239,7 @@ void functions_exit( void )
 		if ( Fncts[ i ].to_be_loaded )
 			T_free( ( char * ) Fncts[ i ].name );
 
-	Fncts = T_free( Fncts );
+	Fncts = FUNC_P T_free( Fncts );
 
 	/* Clean up the call stack */
 
@@ -309,7 +309,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 	   the variable stack with a pointer to the function and the number of
 	   arguments. Also copy the functions name and access flag. */
 
-	f = bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+	f = FUNC_P bsearch( name, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 
 	if ( f == NULL )             /* function not found */
 		return NULL;
@@ -513,7 +513,7 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 
 	TRY
 	{
-		cs = T_malloc( sizeof *cs );
+		cs = CALL_STACK_P T_malloc( sizeof *cs );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )

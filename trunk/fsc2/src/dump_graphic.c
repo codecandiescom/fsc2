@@ -375,7 +375,7 @@ void create_color_hash( void )
 
 	TRY
 	{
-		hash = T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+		hash = G_HASH_ENTRY_P T_malloc( hash_size * sizeof( G_Hash_Entry ) );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

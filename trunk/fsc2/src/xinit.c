@@ -588,7 +588,7 @@ bool dl_fsc2_rsc( void )
 								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
 			if ( ( handle = dlopen( lib_name, RTLD_LAZY ) ) != NULL )
 				break;
-			lib_name = T_free( lib_name );
+			lib_name = CHAR_P T_free( lib_name );
 		}
 		T_free( ld );
 	}

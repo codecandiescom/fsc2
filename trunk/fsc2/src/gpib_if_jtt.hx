@@ -74,6 +74,13 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define FAILURE  -1
 
 
+#ifdef __cplusplus
+#define GPIB_DEV_P ( GPIB_DEV * )
+#else
+#define GPIB_DEV_P
+#endif
+
+
 /*----------------------------------------------------------*/
 /* definition of log levels allowed in calls of gpib_init() */
 /*----------------------------------------------------------*/

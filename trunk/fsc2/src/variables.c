@@ -250,8 +250,8 @@ Var *vars_get( char *name )
 	/* Try to find the variable with the name passed to the function */
 
 	if ( is_sorted )
-		return bsearch( name, EDL.Var_List, num_vars, sizeof *EDL.Var_List,
-						comp_vars_2 );
+		return VAR_P bsearch( name, EDL.Var_List, num_vars,
+							  sizeof *EDL.Var_List, comp_vars_2 );
 	else
 		for ( ptr = EDL.Var_List; ptr != NULL; ptr = ptr->next )
 			if ( ! strcmp( ptr->name, name ) )
@@ -294,7 +294,7 @@ void vars_sort( void )
 	/* Get the variables into a continous block, then sort them according
 	   to the variable names */
 
-	new_var_list = T_malloc( num_vars * sizeof *new_var_list );
+	new_var_list = VAR_P T_malloc( num_vars * sizeof *new_var_list );
 	for ( i = 0, ptr = EDL.Var_List; i < num_vars; i++, ptr = next_ptr )
 	{
 		memcpy( new_var_list + i, ptr, sizeof *new_var_list );
@@ -360,7 +360,7 @@ Var *vars_new( char *name )
 
 	/* Get memory for a new structure and for storing the name */
 
-	vp = T_malloc( sizeof *vp );
+	vp = VAR_P T_malloc( sizeof *vp );
 	vp->name        = NULL;
 	vp->is_on_stack = UNSET;
 	vp->sizes       = NULL;
@@ -421,8 +421,8 @@ Var *vars_add( Var *v1, Var *v2 )
 				THROW( EXCEPTION );
 			}
 
-			new_str = T_malloc( strlen( v1->val.sptr )
-								+ strlen( v2->val.sptr ) + 1 );
+			new_str = CHAR_P T_malloc( strlen( v1->val.sptr )
+									   + strlen( v2->val.sptr ) + 1 );
 			strcpy( new_str, v1->val.sptr );
 			strcat( new_str, v2->val.sptr );
 			new_var = vars_push( STR_VAR, new_str );
@@ -854,7 +854,7 @@ Var *vars_negate( Var *v )
 	size_t i;
 	size_t len = 0;
 	long *rlp;
-	double *rdp;
+	double *rdp = NULL;
 	long *ilp = NULL;
 	double *idp = NULL;
 
@@ -937,7 +937,7 @@ Var *vars_negate( Var *v )
 
 	if ( ilp != NULL )
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; ilp++, i++ )
 			rlp[ i ] = - *ilp;
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -946,7 +946,7 @@ Var *vars_negate( Var *v )
 	}
 	else
 	{
-		rdp = T_malloc( len * sizeof *rdp );
+		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = - *idp;
 		new_var = vars_push( FLOAT_ARR, rdp, len );
@@ -1199,7 +1199,7 @@ Var *vars_push( int type, ... )
 	/* Get memory for the new variable to be appended to the stack, set its
 	   type and initialize some fields */
 
-	new_stack_var              = T_malloc( sizeof *new_stack_var );
+	new_stack_var              = VAR_P T_malloc( sizeof *new_stack_var );
 	new_stack_var->is_on_stack = SET;
 	new_stack_var->type        = type;
 	new_stack_var->name        = NULL;
@@ -1242,12 +1242,12 @@ Var *vars_push( int type, ... )
 			new_stack_var->len = va_arg( ap, size_t );
 			if ( new_stack_var->val.lpnt != NULL )
 				new_stack_var->val.lpnt =
-					         get_memcpy( new_stack_var->val.lpnt,
+					  LONG_P get_memcpy( new_stack_var->val.lpnt,
 										 new_stack_var->len
 										 * sizeof *new_stack_var->val.lpnt );
 			else
 				new_stack_var->val.lpnt =
-								   T_calloc( new_stack_var->len,
+						    LONG_P T_calloc( new_stack_var->len,
 											 sizeof *new_stack_var->val.lpnt );
 			break;
 
@@ -1256,12 +1256,12 @@ Var *vars_push( int type, ... )
 			new_stack_var->len = va_arg( ap, size_t );
 			if ( new_stack_var->val.dpnt != NULL )
 				new_stack_var->val.dpnt =
-							get_memcpy( new_stack_var->val.dpnt,
+				   DOUBLE_P get_memcpy( new_stack_var->val.dpnt,
 										new_stack_var->len
 										*sizeof *new_stack_var->val.dpnt );
 			else
 				new_stack_var->val.dpnt =
-								   T_calloc( new_stack_var->len,
+						  DOUBLE_P T_calloc( new_stack_var->len,
 											 sizeof *new_stack_var->val.dpnt );
 			break;
 
@@ -1438,7 +1438,7 @@ static void free_vars( void )
 		}
 	}
 
-	EDL.Var_List = T_free( EDL.Var_List );
+	EDL.Var_List = VAR_P T_free( EDL.Var_List );
 }
 
 
@@ -1540,8 +1540,8 @@ bool vars_exist( Var *v )
 	else
 	{
 		if ( is_sorted )
-			lp = bsearch( v->name, EDL.Var_List, num_vars,
-						  sizeof *EDL.Var_List, comp_vars_2 );
+			lp = VAR_P bsearch( v->name, EDL.Var_List, num_vars,
+								sizeof *EDL.Var_List, comp_vars_2 );
 		else
 			for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
 				/* empty */ ;
@@ -1847,7 +1847,7 @@ static Var *vars_setup_new_array( Var *v, int dim )
 
 	a->dim = dim;
 	a->sizes = NULL;
-	a->sizes = T_malloc( dim * sizeof *a->sizes );
+	a->sizes = UINT_P T_malloc( dim * sizeof *a->sizes );
 	a->len = 1;
 
 	a->flags &= ~NEW_VARIABLE;
@@ -1912,9 +1912,9 @@ static Var *vars_setup_new_array( Var *v, int dim )
 	/* Allocate memory */
 
 	if ( a->type == INT_CONT_ARR )
-		a->val.lpnt = T_calloc( a->len, sizeof *a->val.lpnt );
+		a->val.lpnt = LONG_P T_calloc( a->len, sizeof *a->val.lpnt );
 	else
-		a->val.dpnt = T_calloc( a->len, sizeof *a->val.dpnt );
+		a->val.dpnt = DOUBLE_P T_calloc( a->len, sizeof *a->val.dpnt );
 
 	return vars_push( ARR_PTR, a->type == INT_CONT_ARR ?
 					  ( void * ) a->val.lpnt : ( void * ) a->val.dpnt, a );
@@ -2250,13 +2250,13 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 
 			if ( d->type == INT_CONT_ARR )
 			{
-				d->val.lpnt = T_calloc( d->len, sizeof *d->val.lpnt );
+				d->val.lpnt = LONG_P T_calloc( d->len, sizeof *d->val.lpnt );
 				dest->val.lpnt = d->val.lpnt
 					             + dest->len * d->sizes[ d->dim - 1 ];
 			}
 			else
 			{
-				d->val.dpnt = T_calloc( d->len, sizeof *d->val.dpnt );
+				d->val.dpnt = DOUBLE_P T_calloc( d->len, sizeof *d->val.dpnt );
 				dest->val.dpnt = d->val.dpnt
 					             + dest->len * d->sizes[ d->dim - 1 ];
 			}
@@ -2291,9 +2291,9 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		{
 			d->len = d->sizes[ 0 ] = s->sizes[ s->dim - 1 ];
 			if ( d->type == INT_CONT_ARR )
-				d->val.lpnt = T_calloc( d->len, sizeof *d->val.lpnt );
+				d->val.lpnt = LONG_P T_calloc( d->len, sizeof *d->val.lpnt );
 			else
-				d->val.dpnt = T_calloc( d->len, sizeof *d->val.dpnt );
+				d->val.dpnt = DOUBLE_P T_calloc( d->len, sizeof *d->val.dpnt );
 
 			d->flags &= ~ NEED_ALLOC;
 		}
@@ -2418,12 +2418,12 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 		if ( d->type == INT_CONT_ARR )
 		{
-			d->val.lpnt = T_calloc( d->len, sizeof *d->val.lpnt );
+			d->val.lpnt = LONG_P T_calloc( d->len, sizeof *d->val.lpnt );
 			dest->val.lpnt = d->val.lpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 		else
 		{
-			d->val.dpnt = T_calloc( d->len, sizeof *d->val.dpnt );
+			d->val.dpnt = DOUBLE_P T_calloc( d->len, sizeof *d->val.dpnt );
 			dest->val.dpnt = d->val.dpnt + dest->len * d->sizes[ d->dim - 1 ];
 		}
 
@@ -2561,9 +2561,9 @@ void vars_arr_init( Var *v )
 		a->len = a->sizes[ 0 ] = num_init;
 
 		if ( a->type == INT_CONT_ARR )
-			a->val.lpnt = T_malloc( a->len * sizeof *a->val.lpnt );
+			a->val.lpnt = LONG_P T_malloc( a->len * sizeof *a->val.lpnt );
 		else
-			a->val.dpnt = T_malloc( a->len * sizeof *a->val.dpnt );
+			a->val.dpnt = DOUBLE_P T_malloc( a->len * sizeof *a->val.dpnt );
 
 		a->flags &= ~NEED_ALLOC;
 	}

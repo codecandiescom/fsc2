@@ -74,7 +74,7 @@ void device_add( const char *name )
 			lib_name = get_string( "%s%s%s.so", ldc, slash( ldc ), dev_name );
 			if ( lstat( lib_name, &buf ) == 0 )
 				break;
-			lib_name = T_free( lib_name );
+			lib_name = CHAR_P T_free( lib_name );
 		}
 		T_free( ld );
 	}
@@ -84,7 +84,7 @@ void device_add( const char *name )
 		lib_name = get_string( "%s%s%s.so",
 							   libdir, slash( libdir ), dev_name );
 		if ( lstat( lib_name, &buf ) < 0 )
-			lib_name = T_free( lib_name );
+			lib_name = CHAR_P T_free( lib_name );
 	}
 
 	if ( lib_name == NULL )
@@ -120,7 +120,7 @@ void device_add( const char *name )
 			}
 		}
 
-		real_name = T_malloc( pathmax + 1 );
+		real_name = CHAR_P T_malloc( pathmax + 1 );
 		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
 		{
 			eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
@@ -220,13 +220,13 @@ void device_append_to_list( const char *dev_name )
 		for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
 			/* empty */ ;
 
-		cd->next = T_malloc( sizeof( Device ) );
+		cd->next = DEVICE_P T_malloc( sizeof *cd->next );
 		cd->next->prev = cd;
 		cd = cd->next;
 	}
 	else
 	{
-		EDL.Device_List = cd = T_malloc( sizeof *cd );
+		EDL.Device_List = cd = DEVICE_P T_malloc( sizeof *cd );
 		cd->prev = NULL;
 	}
 

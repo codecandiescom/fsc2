@@ -123,7 +123,7 @@ Var *f_print( Var *v )
 	/* Get string long enough to replace each '#' by a 3 char sequence
 	   plus a '\0' character */
 
-	fmt = T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
+	fmt = CHAR_P T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; cp++ )
@@ -775,7 +775,7 @@ Var *f_cscale( Var *v )
 
 	/* Copy the data to the segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );                   /* total length */
 	ptr += sizeof len;
@@ -898,7 +898,7 @@ Var *f_clabel( Var *v )
 
 	/* Copy the data to the segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );                   /* total length */
 	ptr += sizeof len;
@@ -1018,7 +1018,7 @@ Var *f_rescale( Var *v )
 
 	/* Copy the data to the segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );                   /* total length */
 	ptr += sizeof len;
@@ -1163,7 +1163,7 @@ Var *f_display( Var *v )
 
 	/* Copy the data to the segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );                   /* total length */
 	ptr += sizeof len;
@@ -1322,7 +1322,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	{
 		/* Get (more) memory for the sets */
 
-		dp = T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
+		dp = DPOINT_P T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
 
 		/* Check and store the x-index */
 
@@ -1444,7 +1444,7 @@ Var *f_clearcv( Var *v )
 		if ( Internals.mode == TEST )
 			return vars_push( INT_VAR, 1 );
 
-		ca = T_malloc( sizeof *ca );
+		ca = LONG_P T_malloc( sizeof *ca );
 		*ca = 0;
 		count = 1;
 	}
@@ -1469,7 +1469,7 @@ Var *f_clearcv( Var *v )
 
 			/* Store curve number */
 
-			ca = T_realloc( ca, ( count + 1 ) * sizeof *ca );
+			ca = LONG_P T_realloc( ca, ( count + 1 ) * sizeof *ca );
 			ca[ count++ ] = curve - 1;
 
 		} while ( ( v = v->next ) != NULL );
@@ -1509,7 +1509,7 @@ Var *f_clearcv( Var *v )
 
 	/* Copy all data into the shared memory segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );               /* total length */
 	ptr += sizeof len;
@@ -1639,7 +1639,7 @@ Var *f_setmark( Var *v )
 
 	/* Copy all data into the shared memory segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );               /* total length */
 	ptr += sizeof len;
@@ -1722,7 +1722,7 @@ Var *f_clearmark( Var *v )
 
 	/* Copy all data into the shared memory segment */
 
-	ptr = buf;
+	ptr = CHAR_P buf;
 
 	memcpy( ptr, &len, sizeof len );               /* total length */
 	ptr += sizeof len;

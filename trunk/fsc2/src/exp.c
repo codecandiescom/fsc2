@@ -162,9 +162,9 @@ void store_exp( FILE *in )
 		/* Get or extend memory for storing the tokens if necessary */
 
 		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
-			EDL.prg_token = T_realloc( EDL.prg_token,
-									   ( EDL.prg_length + PRG_CHUNK_SIZE )
-									   * sizeof( Prg_Token ) );
+			EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
+											( EDL.prg_length + PRG_CHUNK_SIZE )
+									        * sizeof( Prg_Token ) );
 
 		EDL.prg_token[ EDL.prg_length ].token = ret;   /* store token */
 
@@ -280,7 +280,7 @@ void store_exp( FILE *in )
 			case E_FUNC_TOKEN :
 				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
 				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-													 T_malloc( sizeof( Var ) );
+											   VAR_P T_malloc( sizeof( Var ) );
 				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
 						sizeof( Var ) );
 				EDL.prg_token[ EDL.prg_length ].tv.vptr->name = NULL;
@@ -292,7 +292,7 @@ void store_exp( FILE *in )
 			case E_VAR_REF :
 				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
 				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-													 T_malloc( sizeof( Var ) );
+											   VAR_P T_malloc( sizeof( Var ) );
 				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
 						sizeof( Var ) );
 				vars_pop( EDL.Var_Stack );
@@ -385,7 +385,7 @@ static void push_curly_brace( const char *fname, long lc )
 	CB_Stack *new_cb;
 
 
-	new_cb = T_malloc( sizeof( CB_Stack ) );
+	new_cb = CB_STACK_P T_malloc( sizeof( CB_Stack ) );
 	new_cb->next = cb_stack;
 	new_cb->Fname = T_strdup( fname );
 	new_cb->Lc = lc;
@@ -473,7 +473,7 @@ void forget_prg( void )
 
 	/* Get rid of the memory used for storing the tokens */
 
-	EDL.prg_token = T_free( EDL.prg_token );
+	EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
 	EDL.prg_length = 0;
 
 	/* Get rid of structures for curly braces that may have survived when an
@@ -781,7 +781,7 @@ static void exp_syntax_check( void )
 	if ( EDL.prg_token == NULL )
 		return;
 
-	EDL.Fname = T_free( EDL.Fname );
+	EDL.Fname = CHAR_P T_free( EDL.Fname );
 
 	TRY
 	{
@@ -837,7 +837,7 @@ void exp_test_run( void )
 	long old_FLL = EDL.File_List_Len;
 
 
-	EDL.Fname = T_free( EDL.Fname );
+	EDL.Fname = CHAR_P T_free( EDL.Fname );
 
 	TRY
 	{
@@ -1594,7 +1594,7 @@ static void save_restore_variables( bool flag )
 			  var_count++, src = src->next )
 			/* empty */ ;
 
-		var_list_copy = T_malloc( var_count * sizeof( Var ) );
+		var_list_copy = VAR_P T_malloc( var_count * sizeof( Var ) );
 
 		/* Copy all of them into the backup region */
 
@@ -1606,13 +1606,13 @@ static void save_restore_variables( bool flag )
 			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
 			{
 				src->val.lpnt = NULL;
-				src->val.lpnt =
+				src->val.lpnt = LONG_P
 					  get_memcpy( cpy->val.lpnt, cpy->len * sizeof( long ) );
 			}
 			if ( cpy->type == FLOAT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
 			{
 				src->val.dpnt = NULL;
-				src->val.dpnt =
+				src->val.dpnt = DOUBLE_P
 					  get_memcpy( cpy->val.dpnt, cpy->len * sizeof( double ) );
 			}
 
@@ -1620,8 +1620,8 @@ static void save_restore_variables( bool flag )
 				 cpy->sizes != NULL )
 			{
 				src->sizes = NULL;
-				src->sizes
-					      = get_memcpy( cpy->sizes, cpy->dim * sizeof( int ) );
+				src->sizes = UINT_P
+					        get_memcpy( cpy->sizes, cpy->dim * sizeof( int ) );
 			}
 		}
 
@@ -1662,7 +1662,7 @@ static void save_restore_variables( bool flag )
 
 		/* Deallocate memory used in arrays */
 
-		var_list_copy = T_free( var_list_copy );
+		var_list_copy = VAR_P T_free( var_list_copy );
 		exists_copy = UNSET;
 	}
 }

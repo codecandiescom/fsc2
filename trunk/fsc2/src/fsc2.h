@@ -28,7 +28,7 @@
 #define FSC2_HEADER
 
 
-/* This allows also to compiler with a C++ compiler to get better
+/* The allows to also compile with a C++ compiler to get better
    type checking... */
 
 #ifdef __cplusplus

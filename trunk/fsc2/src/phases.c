@@ -50,7 +50,8 @@ void acq_seq_start( long acq_num, long acq_type )
 	/* Initialize the acquisition sequence */
 
 	ASeq[ acq_num ].defined = SET;
-	ASeq[ acq_num ].sequence = T_malloc( sizeof( int ) );
+	ASeq[ acq_num ].sequence = INT_P
+		                          T_malloc( sizeof *ASeq[ acq_num ].sequence );
 
 	if ( acq_type == ACQ_PLUS_U && cur_aseq == 0 )
 		acq_type = ACQ_PLUS_A;
@@ -93,8 +94,8 @@ void acq_seq_cont( long acq_type )
 		acq_type = ACQ_MINUS_B;
 
 	len = ++ASeq[ cur_aseq ].len;
-	ASeq[ cur_aseq ].sequence = T_realloc( ASeq[ cur_aseq ].sequence,
-										   len * sizeof( int ) );
+	ASeq[ cur_aseq ].sequence = INT_P T_realloc( ASeq[ cur_aseq ].sequence,
+									  len * sizeof ASeq[ cur_aseq ].sequence );
 	ASeq[ cur_aseq ].sequence[ len - 1 ] = ( int ) acq_type;
 }
 
@@ -127,7 +128,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 
 	/* Create new sequence, append it to end of list and initialize it */
 
-	cp = T_malloc( sizeof( Phase_Sequence ) );
+	cp = PHASE_SEQUENCE_P T_malloc( sizeof *cp );
 
 	if ( PSeq == NULL )
 		PSeq = cp;
@@ -163,7 +164,8 @@ void phases_add_phase( Phase_Sequence *p, int phase_type )
 	/* Append the new phase to the sequence */
 
 	p->len++;
-	p->sequence = T_realloc ( p->sequence, p->len * sizeof( int ) );
+	p->sequence = INT_P T_realloc ( p->sequence,
+									p->len * sizeof *p->sequence );
 	p->sequence[ p->len - 1 ] = phase_type;
 }
 
@@ -204,7 +206,7 @@ void phases_clear( void )
 	for ( i = 0; i < 2; i++ )
 	{
 		ASeq[ i ].defined = UNSET;
-		ASeq[ i ].sequence = T_free( ASeq[ i ].sequence );
+		ASeq[ i ].sequence = INT_P T_free( ASeq[ i ].sequence );
 	}
 
 	for ( p = PSeq; p != NULL; p = pn )

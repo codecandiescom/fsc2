@@ -59,8 +59,9 @@ void accept_new_data( void )
 		   fail it sometimes does (2.0 kernels only?) so we better have
 		   a bit more of error output until this is sorted out. */
 
-		if ( ( buf = attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
-			 == ( void * ) - 1 )
+		if ( ( buf =
+			    ( char * ) attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
+			 == ( char * ) - 1 )
 		{
 #ifndef NDEBUG
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
@@ -335,9 +336,9 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	{
 		for ( i = 0, cv = G.curve[ i ]; i < G.nc; i++, cv = G.curve[ i ] )
 		{
-			cv->points = T_realloc( cv->points,
-								  ( x_index + len ) * sizeof *cv->points );
-			cv->xpoints = T_realloc( cv->xpoints,
+			cv->points = SCALED_POINT_P T_realloc( cv->points,
+								      ( x_index + len ) * sizeof *cv->points );
+			cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
 									 ( x_index + len ) * sizeof *cv->xpoints );
 
 			for ( j = G.nx, sp = cv->points + j; j < x_index + len; sp++, j++ )
@@ -743,7 +744,7 @@ static bool incr_x( long x_index, long len )
 		cv = G.curve_2d[ i ];
 
 		old_points = cv->points;
-		sp = cv->points = T_malloc( new_num * sizeof *sp );
+		sp = cv->points = SCALED_POINT_P T_malloc( new_num * sizeof *sp );
 
 		for ( j = 0; j < G.ny; j++ )
 		{
@@ -754,9 +755,10 @@ static bool incr_x( long x_index, long len )
 
 		T_free( old_points );
 
-		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = T_realloc( cv->xpoints_s,
-								   new_num * sizeof *cv->xpoints_s );
+		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+										  new_num * sizeof *cv->xpoints );
+		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
+											new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
 			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
@@ -792,10 +794,12 @@ static bool incr_y( long y_index )
 	{
 		cv = G.curve_2d[ i ];
 
-		cv->points = T_realloc( cv->points, new_num * sizeof *cv->points );
-		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = T_realloc( cv->xpoints_s,
-								   new_num * sizeof *cv->xpoints_s );
+		cv->points = SCALED_POINT_P T_realloc( cv->points,
+											   new_num * sizeof *cv->points );
+		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+										  new_num * sizeof *cv->xpoints );
+		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
+											new_num * sizeof *cv->xpoints_s );
 
 		for ( k = G.ny * G.nx, sp = cv->points + k; k < new_num; sp++, k++ )
 			sp->exist = UNSET;
@@ -839,7 +843,7 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 		cv = G.curve_2d[ i ];
 
 		old_points = cv->points;
-		sp = cv->points = T_malloc( new_num * sizeof *sp );
+		sp = cv->points = SCALED_POINT_P T_malloc( new_num * sizeof *sp );
 
 		/* Reorganise the old elements to fit into the new array and clear
 		   the new elements in the already existing rows */
@@ -858,9 +862,10 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 
 		T_free( old_points );
 
-		cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = T_realloc( cv->xpoints_s,
-								   new_num * sizeof *cv->xpoints_s );
+		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
+										  new_num * sizeof *cv->xpoints );
+		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
+											new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
 		{

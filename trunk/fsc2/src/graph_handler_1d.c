@@ -1686,7 +1686,7 @@ void set_marker( long position, long color )
 	XGCValues gcv;
 
 
-	m = T_malloc( sizeof *m );
+	m = MARKER_P T_malloc( sizeof *m );
 	m->next = 0;
 
 	if ( G.marker == NULL )
@@ -1731,7 +1731,7 @@ void remove_marker( void )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
-		m = T_free( m );
+		m = MARKER_P T_free( m );
 	}
 	G.marker = NULL;
 

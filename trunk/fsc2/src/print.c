@@ -126,7 +126,7 @@ void print_it( FL_OBJECT *obj, long data )
 
 		if ( fp != NULL )
 			fclose( fp );
-		name = T_free( name );
+		name = CHAR_P T_free( name );
 	}
 
 	fl_activate_object( obj );
@@ -163,7 +163,7 @@ static bool get_print_file( FILE **fp, char **name, long data )
 	if ( cmd != NULL )
 	{
 		fl_set_input( print_form->s2p_input, cmd );
-		cmd = T_free( cmd );
+		cmd = CHAR_P T_free( cmd );
 	}
 	else
 		fl_set_input( print_form->s2p_input, "lpr -h" );
@@ -290,7 +290,7 @@ static bool get_print_file( FILE **fp, char **name, long data )
 
 	if ( obj == print_form->cancel_button )
 	{
-		*name = T_free( *name );
+		*name = CHAR_P T_free( *name );
 		return FAIL;
 	}
 
@@ -307,14 +307,14 @@ static bool get_print_file( FILE **fp, char **name, long data )
 							 "Are you sure you want to overwrite it?",
 							 2, "Yes", "No", NULL, 2 ) )
 	{
-		*name = T_free( *name );
+		*name = CHAR_P T_free( *name );
 		return FAIL;
 	}
 
 	if ( ( *fp = fopen( *name, "w" ) ) == NULL )
 	{
 		fl_show_alert( "Error", "Sorry, can't open file:", *name, 1 );
-		*name = T_free( *name );
+		*name = CHAR_P T_free( *name );
 		return FAIL;
 	}
 
@@ -419,7 +419,7 @@ static void get_print_comm( void )
 	if ( pc_string != NULL )
 		fl_set_input( GUI.print_comment->pc_input, pc_string );
 
-	pc_string = T_free( pc_string );
+	pc_string = CHAR_P T_free( pc_string );
 
 	fl_show_form( GUI.print_comment->print_comment, FL_PLACE_MOUSE,
                   FL_TRANSIENT, "fsc2: Print Text" );
@@ -1447,7 +1447,7 @@ static char **split_into_lines( int *num_lines )
 
 	TRY
 	{
-		lines = T_malloc( cur_size * sizeof *lines );
+		lines = CHAR_PP T_malloc( cur_size * sizeof *lines );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1464,7 +1464,8 @@ static char **split_into_lines( int *num_lines )
 				if ( nl++ == cur_size )
 				{
 					cur_size += GUESS_NUM_LINES;
-					lines = T_realloc( lines, cur_size * sizeof *lines );
+					lines = CHAR_PP T_realloc( lines,
+											   cur_size * sizeof *lines );
 				}
 
 				lines[ nl ] = cp + 1;
@@ -1478,13 +1479,12 @@ static char **split_into_lines( int *num_lines )
 			if ( nl == 0 )
 				THROW( EXCEPTION );
 
-			lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
+			lines = CHAR_PP T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 		}
 		else
 		{
 			if ( nl++ >= cur_size )
-				lines = T_realloc( lines, ( nl + 1 ) * sizeof *lines );
-
+				lines = CHAR_PP T_realloc( lines, ( nl + 1 ) * sizeof *lines );
 			lines[ nl ] = cp + 2;
 		}
 
@@ -1505,7 +1505,7 @@ static char **split_into_lines( int *num_lines )
 		{
 			cp = lines[ i ];
 			count = lines[ i + 1 ] - cp;
-			lines[ i ] = T_malloc( count );
+			lines[ i ] = CHAR_P T_malloc( count );
 			memcpy( lines[ i ], cp, count );
 			lines[ i ][ count - 1 ] = '\0';
 
@@ -1574,7 +1574,7 @@ static char *paren_replace( const char *str )
 	if ( p_count == 0 )
 		return T_strdup( str );
 
-	cp = sp = T_malloc( len + p_count );
+	cp = sp = CHAR_P T_malloc( len + p_count );
 	strcpy( sp, str );
 
 	for ( i = len; *cp != '\0'; i--, cp++ )

@@ -339,7 +339,7 @@ static bool parent_reader( CommStruct *header )
 	char *str[ 4 ] = { NULL, NULL, NULL, NULL };
 	int i;
 	int n1, n2;
-	static void *data;
+	static char *data;
 
 
 	data = NULL;
@@ -353,8 +353,8 @@ static bool parent_reader( CommStruct *header )
 			{
 				if ( header->data.str_len[ 0 ] > 0 )
 				{
-					str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
-										 + 1 );
+					str[ 0 ] = CHAR_P T_malloc(
+						            ( size_t ) header->data.str_len[ 0 ] + 1 );
 					if ( ! pipe_read( str[ 0 ],
 									  ( size_t ) header->data.str_len[ 0 ] ) )
 						THROW( EXCEPTION );
@@ -374,7 +374,7 @@ static bool parent_reader( CommStruct *header )
 
 			/* Get rid of the string and return */
 
-			str[ 0 ] = T_free( str[ 0 ] );
+			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
 
 			break;
 
@@ -385,8 +385,8 @@ static bool parent_reader( CommStruct *header )
 			{
 				if ( header->data.str_len[ 0 ] > 0 )
 				{
-					str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
-										 + 1 );
+					str[ 0 ] = CHAR_P T_malloc(
+						            ( size_t ) header->data.str_len[ 0 ] + 1 );
 					if ( ! pipe_read( str[ 0 ],
 									  ( size_t ) header->data.str_len[ 0 ] ) )
 						THROW( EXCEPTION );
@@ -404,7 +404,7 @@ static bool parent_reader( CommStruct *header )
 				return FAIL;
 			}
 
-			str[ 0 ] = T_free( str[ 0 ] );
+			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
 
 			/* Send back an acknowledgement that the message has been read
 			   by the user */
@@ -416,8 +416,8 @@ static bool parent_reader( CommStruct *header )
 			{
 				if ( header->data.str_len[ 0 ] > 0 )
 				{
-					str[ 0 ] = T_malloc( ( size_t ) header->data.str_len[ 0 ]
-										 + 1 );
+					str[ 0 ] = CHAR_P T_malloc(
+						            ( size_t ) header->data.str_len[ 0 ] + 1 );
 					if ( ! pipe_read( str[ 0 ],
 									  ( size_t ) header->data.str_len[ 0 ] ) )
 						THROW( EXCEPTION );
@@ -435,7 +435,7 @@ static bool parent_reader( CommStruct *header )
 				return FAIL;
 			}
 
-			str[ 0 ] = T_free( str[ 0 ] );
+			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
 
 			/* Send back an acknowledgement that alert has been read by the
 			   user */
@@ -457,7 +457,7 @@ static bool parent_reader( CommStruct *header )
 				{
 					if ( header->data.str_len[ i ] > 0 )
 					{
-						str[ i ] =
+						str[ i ] = CHAR_P
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 						if ( ! pipe_read( str[ i ],
 									   ( size_t ) header->data.str_len[ i ] ) )
@@ -486,7 +486,7 @@ static bool parent_reader( CommStruct *header )
 			/* Get rid of the strings and return */
 
 			for ( i = 0; i < 4; i++ )
-				str[ i ] = T_free( str[ i ] );
+				str[ i ] = CHAR_P T_free( str[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -496,7 +496,7 @@ static bool parent_reader( CommStruct *header )
 				{
 					if ( header->data.str_len[ i ] > 0 )
 					{
-						str[ i ] =
+						str[ i ] = CHAR_P
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 						if ( ! pipe_read( str[ i ],
 									   ( size_t ) header->data.str_len[ i ] ) )
@@ -525,7 +525,7 @@ static bool parent_reader( CommStruct *header )
 			}
 
 			for ( i = 0; i < 4; i++ )
-				str[ i ] = T_free( str[ i ] );
+				str[ i ] = CHAR_P T_free( str[ i ] );
 			Internals.state = STATE_RUNNING;
 			break;
 
@@ -540,7 +540,7 @@ static bool parent_reader( CommStruct *header )
 				for ( i = 0; i < 2 ; i++ )
 					if ( header->data.str_len[ i ] > 0 )
 					{
-						str[ i ] =
+						str[ i ] = CHAR_P
 						  T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
 						if ( ! pipe_read( str[ i ],
 									   ( size_t ) header->data.str_len[ i ] ) )
@@ -565,7 +565,7 @@ static bool parent_reader( CommStruct *header )
 		case C_LAYOUT :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_layout( data, header->data.len );
@@ -582,7 +582,7 @@ static bool parent_reader( CommStruct *header )
 		case C_BCREATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_bcreate( data, header->data.len );
@@ -599,7 +599,7 @@ static bool parent_reader( CommStruct *header )
 		case C_BDELETE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_bdelete( data, header->data.len );
@@ -616,7 +616,7 @@ static bool parent_reader( CommStruct *header )
 		case C_BSTATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_bstate( data, header->data.len );
@@ -633,7 +633,7 @@ static bool parent_reader( CommStruct *header )
 		case C_SCREATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_screate( data, header->data.len );
@@ -650,7 +650,7 @@ static bool parent_reader( CommStruct *header )
 		case C_SDELETE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_sdelete( data, header->data.len );
@@ -667,7 +667,7 @@ static bool parent_reader( CommStruct *header )
 		case C_SSTATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_sstate( data, header->data.len );
@@ -684,7 +684,7 @@ static bool parent_reader( CommStruct *header )
 		case C_ICREATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_icreate( data, header->data.len );
@@ -701,7 +701,7 @@ static bool parent_reader( CommStruct *header )
 		case C_IDELETE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_idelete( data, header->data.len );
@@ -718,7 +718,7 @@ static bool parent_reader( CommStruct *header )
 		case C_ISTATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_istate( data, header->data.len );
@@ -735,7 +735,7 @@ static bool parent_reader( CommStruct *header )
 		case C_MCREATE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_mcreate( data, header->data.len );
@@ -752,7 +752,7 @@ static bool parent_reader( CommStruct *header )
 		case C_MDELETE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_mdelete( data, header->data.len );
@@ -769,7 +769,7 @@ static bool parent_reader( CommStruct *header )
 		case C_MCHOICE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_mchoice( data, header->data.len );
@@ -786,7 +786,7 @@ static bool parent_reader( CommStruct *header )
 		case C_ODELETE :
 			TRY
 			{
-				data = T_malloc( ( size_t ) header->data.len );
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
 				if ( ! pipe_read( data, ( size_t ) header->data.len ) )
 					THROW( EXCEPTION );
 				exp_objdel( data, header->data.len );
@@ -837,7 +837,7 @@ static bool child_reader( void *ret, CommStruct *header )
 
 			TRY
 			{
-				retstr = T_malloc( ( size_t ) header->data.len + 1 );
+				retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
 				if ( header->data.len > 0 )
 				{
 					if ( ! pipe_read( retstr, ( size_t ) header->data.len ) )
@@ -883,7 +883,8 @@ static bool child_reader( void *ret, CommStruct *header )
 		case C_ICREATE_REPLY : case C_ISTATE_REPLY  :
 		case C_MCREATE_REPLY : case C_MCHOICE_REPLY :
 			if ( ret != NULL )
-				return pipe_read( ret, ( size_t ) header->data.len );
+				return pipe_read( ( char * ) ret,
+								  ( size_t ) header->data.len );
 			return OK;
 
 		case C_LAYOUT_REPLY  :
@@ -1108,7 +1109,7 @@ bool writer( int type, ... )
 			}
 			data = va_arg( ap, void * );
 			va_end( ap );
-			return pipe_write( data, ( size_t ) header.data.len );
+			return pipe_write( ( char * ) data, ( size_t ) header.data.len );
 
 		case C_FREEZE :
 			fsc2_assert( Internals.I_am == CHILD );
@@ -1140,7 +1141,7 @@ bool writer( int type, ... )
 
 			data = va_arg( ap, void * );
 			va_end( ap );
-			return pipe_write( data, ( size_t ) header.data.len );
+			return pipe_write( ( char * ) data, ( size_t ) header.data.len );
 
 		case C_LAYOUT_REPLY  :
 		case C_BDELETE_REPLY :

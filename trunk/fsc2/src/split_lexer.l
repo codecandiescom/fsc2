@@ -73,7 +73,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 			/* handling of file name lines */
 {FILE}      {
 				*( splittext + splitleng - 1 ) = '\0';
-				EDL.Fname = T_free( EDL.Fname );
+				EDL.Fname = CHAR_P T_free( EDL.Fname );
 				EDL.Fname = T_strdup( splittext + 2 );
 			}
 

@@ -47,7 +47,8 @@ void pulser_struct_init( void )
 	if ( EDL.Num_Pulsers == 0 )
 		return;
 
-	pulser_struct = T_malloc( EDL.Num_Pulsers * sizeof( Pulser_Struct ) );
+	pulser_struct = PULSER_STRUCT_P T_malloc( EDL.Num_Pulsers
+											  * sizeof( Pulser_Struct ) );
 
 	for ( i = 0; i < EDL.Num_Pulsers; i++ )
 	{
@@ -109,7 +110,7 @@ void pulser_cleanup( void )
 
 	plist = NULL;
 
-	pulser_struct = T_free( pulser_struct );
+	pulser_struct = PULSER_STRUCT_P T_free( pulser_struct );
 }
 
 
@@ -962,7 +963,7 @@ long p_new( long pnum )
 			THROW( EXCEPTION );
 		}
 
-	new_plist = T_malloc( sizeof( P_List ) );
+	new_plist = P_LIST_P T_malloc( sizeof( P_List ) );
 	new_plist->next    = plist;
 	new_plist->num     = pnum;
 	new_plist->dev_num = Cur_Pulser;

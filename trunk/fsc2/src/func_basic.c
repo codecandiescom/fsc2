@@ -187,7 +187,7 @@ Var *f_int( Var *v )
 		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp > LONG_MAX || *idp < LONG_MIN )
@@ -238,7 +238,7 @@ Var *f_float( Var *v )
 		new_var = vars_push( FLOAT_ARR, idp, len );
 	else
 	{
-		rdp = T_malloc( len * sizeof *rdp );
+		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = ( double ) *ilp++;
 		new_var = vars_push( FLOAT_ARR, rdp, len );
@@ -287,7 +287,7 @@ Var *f_round( Var *v )
 		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
@@ -339,7 +339,7 @@ Var *f_floor( Var *v )
 		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
@@ -391,7 +391,7 @@ Var *f_ceil( Var *v )
 		new_var = vars_push( INT_ARR, ilp, len );
 	else
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
@@ -443,7 +443,7 @@ Var *f_abs( Var *v )
 
 	if ( ilp != NULL )
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; ilp++, i++ )
 		{
 			if ( *ilp == LONG_MIN )
@@ -455,7 +455,7 @@ Var *f_abs( Var *v )
 	}
 	else
 	{
-		rdp = T_malloc( len * sizeof *rdp );
+		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = fabs( *idp );
 		new_var = vars_push( FLOAT_ARR, rdp, len );
@@ -489,7 +489,7 @@ Var *f_sin( Var *v )
 
 	get_array_params( v, &len, &ilp, &idp );
 
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	if ( ilp != NULL )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = sin( ( double ) *ilp++ );
@@ -528,7 +528,7 @@ Var *f_cos( Var *v )
 
 	get_array_params( v, &len, &ilp, &idp );
 
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	if ( ilp != NULL )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = cos( ( double ) *ilp++ );
@@ -575,7 +575,7 @@ Var *f_tan( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		rdp[ i ] = tan( is_int ? ( double ) *ilp++ : *idp++ );
@@ -625,7 +625,7 @@ Var *f_asin( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -680,7 +680,7 @@ Var *f_acos( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -724,7 +724,7 @@ Var *f_atan( Var *v )
 
 	get_array_params( v, &len, &ilp, &idp );
 
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	if ( ilp != NULL )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = atan( ( double ) *ilp++ );
@@ -771,7 +771,7 @@ Var *f_sinh( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		res = sinh( is_int ? ( double ) *ilp++ : *idp++ );
@@ -820,7 +820,7 @@ Var *f_cosh( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		res = cosh( is_int ? ( double ) *ilp++ : *idp++ );
@@ -861,7 +861,7 @@ Var *f_tanh( Var *v )
 
 	get_array_params( v, &len, &ilp, &idp );
 
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	if ( ilp != NULL )
 		for ( i = 0; i < len; i++ )
 			rdp[ i ] = tanh( ( double ) *ilp++ );
@@ -916,7 +916,7 @@ Var *f_asinh( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -977,7 +977,7 @@ Var *f_acosh( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -1034,7 +1034,7 @@ Var *f_atanh( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -1108,7 +1108,7 @@ Var *f_exp( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		res = tanh( is_int ? ( double ) *ilp++ : *idp++ );
@@ -1168,7 +1168,7 @@ Var *f_ln( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -1233,7 +1233,7 @@ Var *f_log( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -1293,7 +1293,7 @@ Var *f_sqrt( Var *v )
 	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
-	rdp = T_malloc( len * sizeof *rdp );
+	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 	for ( i = 0; i < len; i++ )
 	{
 		arg = is_int ? ( double ) *ilp++ : *idp++;
@@ -1341,7 +1341,7 @@ Var *f_random( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	arr = T_malloc( len * sizeof *arr );
+	arr = DOUBLE_P T_malloc( len * sizeof *arr );
 	for ( i = 0; i < len; i++ )
 		*( arr + i ) = random( ) / ( double ) RAND_MAX;
 
@@ -1375,7 +1375,7 @@ Var *f_grand( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	arr = T_malloc( len * sizeof *arr );
+	arr = DOUBLE_P T_malloc( len * sizeof *arr );
 	for ( i = 0; i < len; i++ )
 		*( arr + i ) = gauss_random( );
 
@@ -1899,7 +1899,7 @@ Var *f_square( Var *v )
 
 	if ( ilp != NULL )
 	{
-		rlp = T_malloc( len * sizeof *rlp );
+		rlp = LONG_P T_malloc( len * sizeof *rlp );
 		for ( i = 0; i < len; ilp++, i++ )
 		{
 			if ( ( double ) *ilp >= sqrt( ( double ) LONG_MAX ) )
@@ -1911,7 +1911,7 @@ Var *f_square( Var *v )
 	}
 	else
 	{
-		rdp = T_malloc( len * sizeof *rdp );
+		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
 		for ( i = 0; i < len; idp++, i++ )
 			rdp[ i ] = *idp * *idp;
 		new_var = vars_push( FLOAT_ARR, rdp, len );
@@ -1946,7 +1946,7 @@ Var *f_islice( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	array = T_calloc( ( size_t ) size, sizeof *array );
+	array = LONG_P T_calloc( ( size_t ) size, sizeof *array );
 	ret = vars_push( INT_ARR, array, ( size_t ) size );
 	T_free( array );
 
@@ -1974,7 +1974,7 @@ Var *f_fslice( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	array = T_malloc( size * sizeof *array );
+	array = DOUBLE_P T_malloc( size * sizeof *array );
 	for( i = 0; i < size; i++ )
 		*( array + i ) = 0.0;
 	ret = vars_push( FLOAT_ARR, array, ( size_t ) size );

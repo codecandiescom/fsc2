@@ -184,14 +184,15 @@ Var *f_openf( Var *var )
 
 	if ( EDL.File_List )
 	{
-		old_File_List = T_malloc( EDL.File_List_Len * sizeof( FILE_LIST ) );
+		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
+											  * sizeof( FILE_LIST ) );
 		memcpy( old_File_List, EDL.File_List,
 				EDL.File_List_Len * sizeof( FILE_LIST ) );
 	}
 
 	TRY
 	{
-		EDL.File_List = T_realloc( EDL.File_List,
+		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
 							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
@@ -329,7 +330,7 @@ Var *f_getf( Var *var )
 			do
 			{
 				len += PATH_MAX;
-				s[ 2 ] = T_realloc( s[ 2 ], len );
+				s[ 2 ] = CHAR_P T_realloc( s[ 2 ], len );
 				getcwd( s[ 2 ], len );
 			} while ( s[ 2 ] == NULL && errno == ERANGE );
 
@@ -365,7 +366,7 @@ getfile_retry:
 					   "        The data will be lost!",
 					   2, "Yes", "No", NULL, 2 ) != 1 )
 	{
-		r = T_free( r );
+		r = CHAR_P T_free( r );
 		goto getfile_retry;
 	}
 
@@ -400,7 +401,7 @@ getfile_retry:
 		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
 		{
 			T_free( m );
-			r = T_free( r );
+			r = CHAR_P T_free( r );
 			goto getfile_retry;
 		}
 		T_free( m );
@@ -430,7 +431,7 @@ getfile_retry:
 							  "       Please select a different file." );
 		}
 
-		r = T_free( r );
+		r = CHAR_P T_free( r );
 		goto getfile_retry;
 	}
 
@@ -445,14 +446,15 @@ getfile_retry:
 
 	if ( EDL.File_List )
 	{
-		old_File_List = T_malloc( EDL.File_List_Len * sizeof( FILE_LIST ) );
+		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len *
+											  sizeof( FILE_LIST ) );
 		memcpy( old_File_List, EDL.File_List,
 				EDL.File_List_Len * sizeof( FILE_LIST ) );
 	}
 
 	TRY
 	{
-		EDL.File_List = T_realloc( EDL.File_List,
+		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
 							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
@@ -515,8 +517,8 @@ Var *f_clonef( Var *v )
 	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, EDL.File_List_Len++ );
 
-	fn = T_malloc(   strlen( EDL.File_List[ v->val.lval ].name )
-				   + strlen( v->next->next->val.sptr ) + 3 );
+	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ v->val.lval ].name )
+						  + strlen( v->next->next->val.sptr ) + 3 );
 	strcpy( fn, "\\" );
 	strcat( fn, EDL.File_List[ v->val.lval ].name );
 
@@ -655,7 +657,7 @@ void close_all_files( void )
 			fclose( EDL.File_List[ i ].fp );
 	}
 
-	EDL.File_List = T_free( EDL.File_List );
+	EDL.File_List = FILE_LIST_P T_free( EDL.File_List );
 	EDL.File_List_Len = 0;
 }
 
@@ -869,7 +871,8 @@ static void f_format_check( Var *v )
 		if ( *cp == '%' )
 		{
 			s2c = cp - v->val.sptr;
-			v->val.sptr = T_realloc( v->val.sptr, strlen( v->val.sptr ) + 2 );
+			v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+											strlen( v->val.sptr ) + 2 );
 			cp = v->val.sptr + s2c;
 			memmove( cp + 1, cp, strlen( cp ) + 1 );
 			cp++;
@@ -904,8 +907,8 @@ static void f_format_check( Var *v )
 		{
 			case INT_VAR :
 				s2c = cp - v->val.sptr;
-				v->val.sptr = T_realloc( v->val.sptr,
-										 strlen( v->val.sptr ) + 2 );
+				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+												strlen( v->val.sptr ) + 2 );
 				cp = v->val.sptr + s2c;
 			    memmove( cp + 2, cp + 1, strlen( cp ) );
 				memcpy( cp, "%d", 2 );
@@ -914,8 +917,8 @@ static void f_format_check( Var *v )
 
 			case FLOAT_VAR :
 				s2c = cp - v->val.sptr;
-				v->val.sptr = T_realloc( v->val.sptr,
-										 strlen( v->val.sptr ) + 5 );
+				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+												strlen( v->val.sptr ) + 5 );
 				cp = v->val.sptr + s2c;
 			    memmove( cp + 5, cp + 1, strlen( cp ) );
 				memcpy( cp, "%#.9g", 5 );
@@ -924,8 +927,8 @@ static void f_format_check( Var *v )
 
 			case STR_VAR :
 				s2c = cp - v->val.sptr;
-				v->val.sptr = T_realloc( v->val.sptr,
-										 strlen( v->val.sptr ) + 2 );
+				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+												strlen( v->val.sptr ) + 2 );
 				cp = v->val.sptr + s2c;
 			    memmove( cp + 2, cp + 1, strlen( cp ) );
 				memcpy( cp, "%s", 2 );
@@ -1220,7 +1223,7 @@ static long do_printf( int file_num, Var *v )
 
 
 	sptr = v->val.sptr;
-	fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
+	fmt_start = fmt_end = CHAR_P T_malloc( strlen( sptr ) + 2 );
 	strcpy( fmt_start, sptr );
 	cv = v->next;
 	count = 0;
@@ -1749,7 +1752,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 
 	/* First we've got to find out how many characters we need to write out */
 
-	p = T_malloc( size );
+	p = CHAR_P T_malloc( size );
 
 	while ( 1 ) {
 
@@ -1782,7 +1785,7 @@ static int T_fprintf( int file_num, const char *fmt, ... )
 
 		TRY
 		{
-			p = T_realloc( p, size );
+			p = CHAR_P T_realloc( p, size );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -1830,7 +1833,7 @@ get_repl_retry:
 							2, "Yes", "No", NULL, 2 ) )
 	{
 		if ( new_name != NULL )
-			new_name = T_free( new_name );
+			new_name = CHAR_P T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -1853,7 +1856,7 @@ get_repl_retry:
 							 " Do you really want to overwrite it?",
 							 2, "Yes", "No", NULL, 2 ) )
 	{
-		new_name = T_free( new_name );
+		new_name = CHAR_P T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -1886,7 +1889,7 @@ get_repl_retry:
 							  "       Please select a different file." );
 		}
 
-		new_name = T_free( new_name );
+		new_name = CHAR_P T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -1924,7 +1927,7 @@ get_repl_retry:
 				T_free( mess );
 				fclose( new_fp );
 				unlink( new_name );
-				new_name = T_free( new_name );
+				new_name = CHAR_P T_free( new_name );
 				goto get_repl_retry;
 			}
 

@@ -78,7 +78,7 @@ void tool_box_create( long layout )
 	if ( Tool_Box != NULL )
 		return;
 
-	Tool_Box                 = T_malloc( sizeof *Tool_Box );
+	Tool_Box                 = TOOL_BOX_P T_malloc( sizeof *Tool_Box );
 	Tool_Box->layout         = layout;
 	Tool_Box->Tools          = NULL;                 /* no form created yet */
 	Tool_Box->objs           = NULL;                 /* and also no objects */
@@ -153,7 +153,7 @@ void tool_box_delete( void )
 		fl_free_form( Tool_Box->Tools );
 	}
 
-	Tool_Box = T_free( Tool_Box );
+	Tool_Box = TOOL_BOX_P T_free( Tool_Box );
 }
 
 
@@ -314,7 +314,7 @@ static Var *f_layout_child( long layout )
 	else
 		len++;
 
-	pos = buffer = T_malloc( len );
+	pos = buffer = CHAR_P T_malloc( len );
 
 	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
 	pos += sizeof EDL.Lc;
@@ -399,7 +399,7 @@ static void f_objdel_child( Var *v )
 	else
 		len++;
 
-	pos = buffer = T_malloc( len );
+	pos = buffer = CHAR_P T_malloc( len );
 
 	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    	/* current line number */
 	pos += sizeof EDL.Lc;
@@ -559,7 +559,7 @@ void tools_clear( void )
 	if ( Tool_Box->Tools )
 		fl_free_form( Tool_Box->Tools );
 
-	Tool_Box = T_free( Tool_Box );
+	Tool_Box = TOOL_BOX_P T_free( Tool_Box );
 }
 
 

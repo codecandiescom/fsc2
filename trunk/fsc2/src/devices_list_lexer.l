@@ -144,7 +144,7 @@ bool device_list_parse( void )
 	Device_Name *new_device_name;
 
 
-	EDL.Fname = T_free( EDL.Fname );
+	EDL.Fname = CHAR_P T_free( EDL.Fname );
 	EDL.Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
 
 	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
@@ -167,7 +167,7 @@ bool device_list_parse( void )
 	{
 		while ( devices_listlex( ) )
 		{
-			new_device_name = T_malloc( sizeof( Device_Name ) );
+			new_device_name = DEVICE_NAME_P T_malloc( sizeof( Device_Name ) );
 			new_device_name->name = T_strdup( devices_listtext );
 			string_to_lower( new_device_name->name );
 			new_device_name->next = EDL.Device_Name_List;
