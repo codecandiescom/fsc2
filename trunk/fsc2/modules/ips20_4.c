@@ -777,6 +777,11 @@ static void ips20_4_to_local( void )
 	char reply[ 100 ];
 
 
+	/* On Martin Fuchs' request there are now two alternatives: Normally
+	   the magnet simply gets stopped when the experiment finishes, but if
+	   the function magnet_current_field_on_end() has been called the magnet
+	   instead sweeps to the current value passed to the function. */
+
 	if ( ips20_4.goto_field_on_end )
 	{
 		ips20_4_set_target_current( ips20_4.final_target_current );
