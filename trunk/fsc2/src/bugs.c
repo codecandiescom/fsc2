@@ -131,7 +131,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	T_free( cmd );
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
-					  + strlen( "/Devices" ) + strlen( filename ) );
+					  + strlen( "/Devices " ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
@@ -142,7 +142,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	T_free( cmd );
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
-					  + strlen( "/Functions" ) + strlen( filename ) );
+					  + strlen( "/Functions " ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
@@ -153,7 +153,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	T_free( cmd );
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
-					  strlen( "/*.so" ) + strlen( filename ) );
+					  strlen( "/*.so " ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
@@ -180,13 +180,13 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	cmd = get_string( strlen( "echo \"\nDevices:\n\" >> " )
 					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\nDevices:\n\" >>" );
+	strcpy( cmd, "echo \"\nDevices:\n\" >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );
 
 	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/Devices" ) + strlen( filename ) );
+					  + strlen( "/Devices " ) + strlen( filename ) );
 	strcpy( cmd, "cat " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
@@ -201,18 +201,40 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 	cmd = get_string( strlen( "echo \"\n\nFunctions:\n\" >> " )
 					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\n\nFunctions:\n\" >>" );
+	strcpy( cmd, "echo \"\n\nFunctions:\n\" >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );
 
 	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/Functions" ) + strlen( filename ) );
+					  + strlen( "/Functions " ) + strlen( filename ) );
 	strcpy( cmd, "cat " );
 	strcat( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( cmd, "/" );
 	strcat( cmd, "Functions" );
+	strcat( cmd, " >> " );
+	strcat( cmd, filename );
+	system( cmd );
+	T_free( cmd );
+
+	/* Finally append the file with the version informations so that I'll know
+	   what the sender is really using */
+
+	cmd = get_string( strlen( "echo \"\n\nVersion:\n\" >> " )
+					  + strlen( filename ) );
+	strcpy( cmd, "echo \"\n\nVersion:\n\" >> " );
+	strcat( cmd, filename );
+	system( cmd );
+	T_free( cmd );
+
+	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
+					  + strlen( "/version " ) + strlen( filename ) );
+	strcpy( cmd, "cat " );
+	strcat( cmd, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
+	strcat( cmd, "version" );
 	strcat( cmd, " >> " );
 	strcat( cmd, filename );
 	system( cmd );
@@ -274,7 +296,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 						  + ( user != NULL ? strlen( user ) : 0 ) );
 		strcpy( cmd, MAIL_PROGRAM " -s \"fsc2 bug report\" " );
 
-		if ( user != NULL )             /* append option for the carbon copy */
+		if ( user != NULL )            /* append option for the carbon copy */
 		{
 			strcat( cmd, "-c " );
 			strcat( cmd, user );
