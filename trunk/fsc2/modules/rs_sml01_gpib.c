@@ -463,7 +463,7 @@ double rs_sml01_set_mod_ampl( int type, double ampl )
 			break;
 
 		case MOD_TYPE_AM :
-			sprintf( cmd, "AM %.1fPCT\n", ampl );
+			sprintf( cmd, "AM %fPCT\n", ampl );
 			break;
 
 		case MOD_TYPE_PM :

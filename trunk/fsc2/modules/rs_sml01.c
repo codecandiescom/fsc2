@@ -68,8 +68,6 @@ int rs_sml01_init_hook( void )
 
 	need_GPIB = SET;
 
-	rs_sml01.device = -1;
-
 	rs_sml01.state = UNSET;
 
 	rs_sml01.freq_is_set = UNSET;
@@ -213,8 +211,6 @@ void rs_sml01_exit_hook( void )
 	if ( rs_sml01.use_table && rs_sml01.att_table != NULL )
 		rs_sml01.att_table =
 							  ATT_TABLE_ENTRY_P T_free( rs_sml01.att_table );
-
-	rs_sml01.device = -1;
 }
 
 
@@ -228,8 +224,10 @@ Var *synthesizer_name( Var *v )
 }
 
 
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Switches RF output on or off, or, if called with no argument, */
+/* returns 0 or 1, indicating that RF output is off or on.       */
+/*---------------------------------------------------------------*/
 
 Var *synthesizer_state( Var *v )
 {
@@ -1280,7 +1278,7 @@ Var *synthesizer_mod_ampl( Var *v )
 			if ( ampl > MAX_AM_AMPL )
 			{
 				print( FATAL, "AM modulation amplitude of %.1f %% is too "
-					   "large, valid range is 0 - %.1f %%.\n",
+					   "large, valid range is 0 - %.2f %%.\n",
 					   ampl, ( double ) MAX_AM_AMPL );
 				THROW( EXCEPTION );
 			}
@@ -1295,10 +1293,10 @@ Var *synthesizer_mod_ampl( Var *v )
 
 			if ( ampl > pm_mod_ranges[ i ].upper_limit )
 			{
-				print( FATAL, "PM modulation amplitude of %.1f kHz is too "
-					   "large, valid range is 0 - %.1f kHz for the current "
+				print( FATAL, "PM modulation amplitude of %.2f rad is too "
+					   "large, valid range is 0 - %.2f rad for the current "
 					   "RF frequency of %.4f MHz.\n",
-					   ampl * 1.0e-3, pm_mod_ranges[ i ].upper_limit * 1.0e-3,
+					   ampl, pm_mod_ranges[ i ].upper_limit,
 					   rs_sml01.freq * 1.0e-6 );
 				THROW( EXCEPTION );
 			}

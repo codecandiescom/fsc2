@@ -109,8 +109,6 @@ struct ATT_TABLE_ENTRY {
 
 
 struct RS_SML01 {
-	int device;
-
 	double freq;
 	bool freq_is_set;
 	double step_freq;

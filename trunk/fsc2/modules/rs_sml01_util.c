@@ -363,11 +363,11 @@ void rs_sml01_check_mod_ampl( double freq )
 		if ( rs_sml01.mod_ampl[ rs_sml01.mod_type ] >
 			 								   pm_mod_ranges[ i ].upper_limit )
 		{
-			print( SEVERE, "Current phase modulation amplitude of %.1f kHz is "
+			print( SEVERE, "Current phase modulation amplitude of %.2f rad is "
 				   "is too high for new RF frequency of %.4f MHz, reducing "
-				   "it to %.1f kHz.\n",
-				   rs_sml01.mod_ampl[ rs_sml01.mod_type ] * 1.0e-3,
-				   freq * 1.0e-6,  pm_mod_ranges[ i ].upper_limit * 1.0e-3 );
+				   "it to %.2f rad.\n",
+				   rs_sml01.mod_ampl[ rs_sml01.mod_type ],
+				   freq * 1.0e-6,  pm_mod_ranges[ i ].upper_limit );
 
 			if ( FSC2_MODE == EXPERIMENT )
 				rs_sml01_set_mod_ampl( rs_sml01.mod_type,

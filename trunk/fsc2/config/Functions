@@ -227,7 +227,7 @@ synthesizer_modulation, -1, ALL;
 synthesizer_mod_type, -1, ALL;
 synthesizer_mod_source, -1, ALL;
 synthesizer_mod_ampl, -1, ALL;
-synthesizer_mod_freq, -1, ALL;
+synthesizer_mod_freq, -1, ALL;         // R&S SML01 only
 synthesizer_command, 1, EXP;
 
 
