@@ -34,7 +34,7 @@
 
 
 int prepslex( void );
-static int preps_get_channel_name( void );
+static Var *preps_get_channel_name( void );
 
 extern void prepsparse( void );
 
@@ -300,7 +300,10 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 
-{CHT}       return preps_get_channel_name( );
+{CHT}       {
+                prepslval.vptr = preps_get_channel_name( );
+                return VAR_REF;
+            }
 
 {CTRL}      {
 				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
@@ -439,7 +442,7 @@ int preparations_parser( FILE *in )
 }
 
 
-static int preps_get_channel_name( void )
+static Var *preps_get_channel_name( void )
 {
 	Var *func, *v;
 	int access;
@@ -451,7 +454,7 @@ static int preps_get_channel_name( void )
 		vars_push( STR_VAR, prepstext );
 		v = func_call( func );
 		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return VAR_REF;
+			 return v;
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "

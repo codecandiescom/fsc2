@@ -52,7 +52,7 @@ ESTR        \x5.*\x3\n.*\n
 STR         \x5[^\x6]*\x6
 
 DEV         ^[ \t]*DEV(ICE)?S?:
-ASS         ^[ \t]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
+ASS         ^[ \t]*ASS(IGNMENTS?)?:
 VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:

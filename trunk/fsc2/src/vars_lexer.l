@@ -34,7 +34,7 @@
 
 
 int varslex( void );
-static int vars_get_channel_name( void );
+static Var *vars_get_channel_name( void );
 
 extern void varsparse( void );
 
@@ -175,7 +175,10 @@ WS          [\n \t]+
 				return VAR_REF;
             }
 
-{CHT}       return vars_get_channel_name( );
+{CHT}       {
+                varslval.vptr = vars_get_channel_name( );
+				return VAR_REF;
+            }
 
 			/* handling of integer numbers */
 {INT}       {
@@ -339,7 +342,7 @@ int variables_parser( FILE *in )
 }
 
 
-static int vars_get_channel_name( void )
+static Var *vars_get_channel_name( void )
 {
 	Var *func, *v;
 	int access;
@@ -351,7 +354,7 @@ static int vars_get_channel_name( void )
 		vars_push( STR_VAR, varstext );
 		v = func_call( func );
 		if ( v != NULL && v->val.lval != UNDEFINED )
-			 return VAR_REF;
+			 return v;
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
