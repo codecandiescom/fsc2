@@ -373,7 +373,11 @@ Var *counter_timed_count( Var *v )
 		if ( ( interval -= 0.01 ) > 0.0 )
 		{
 			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
-			stop_on_user_request( );
+			if ( check_user_request( ) )
+			{
+				counter_stop_counter( counter );
+				THROW( USER_BREAK_EXCEPTION );
+			}
 		}
 
 	try_counter_again:
@@ -394,7 +398,11 @@ Var *counter_timed_count( Var *v )
 				THROW( EXCEPTION );
 
 			case NI6601_ERR_ITR :
-				stop_on_user_request( );
+				if ( check_user_request( ) )
+				{
+					counter_stop_counter( counter );
+					THROW( USER_BREAK_EXCEPTION );
+				}
 				goto try_counter_again;
 
 			default :
@@ -409,9 +417,9 @@ Var *counter_timed_count( Var *v )
 }
 
 
-/*----------------------------------------------------*/
-/* Gest a count, even if the counter is still running */
-/*----------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Gest a count even if the counter is still running */
+/*---------------------------------------------------*/
 
 Var *counter_intermediate_count( Var *v )
 {
@@ -444,9 +452,9 @@ Var *counter_intermediate_count( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Get a count, waiting until the counter is finished counting */
-/*-------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Get a count after waiting until the counter is finished counting */
+/*------------------------------------------------------------------*/
 
 Var *counter_final_count( Var *v )
 {
@@ -479,7 +487,11 @@ Var *counter_final_count( Var *v )
 				THROW( EXCEPTION );
 
 			case NI6601_ERR_ITR :
-				stop_on_user_request( );
+				if ( check_user_request( ) )
+				{
+					counter_stop_counter( counter );
+					THROW( USER_BREAK_EXCEPTION );
+				}
 				goto try_counter_again;
 
 			default :

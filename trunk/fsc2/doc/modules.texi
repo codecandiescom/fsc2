@@ -1624,8 +1624,8 @@ section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} can be thrown from within a module when the
 module is doing something rather time consuming (e.g.@: waiting for a
 device to become ready or doing some calibration) and the user has
-pressed the @code{STOP} button. Actually, you probably shouldn't throw
-it directly but use the function
+pressed the @code{STOP} button. In many cases it's probably simpler not
+to throw the @code{USER_BREAK_EXCEPTION} directly but use the function
 @example
 void stop_on_user_request( void )
 @end example
@@ -1636,6 +1636,19 @@ all parts of the module except when running the @code{end_of_exp_hook}
 and @code{exit_hook} functions because these need to run without the
 user intervening.  Thus you must make sure that these clean-up functions
 don't call other functions that may rely on user intervention.
+
+
+But when you need to do some cleanup within the module when the
+@code{STOP} button has been pressed you can check if the button has been
+pressed by calling the function
+@example
+void check_user_request( void )
+@end example
+@noindent
+It will return @code{true} if the @code{STOP} button has been pressed.
+You then should do your cleanup actions and immediately afterwards throw
+a @code{USER_BREAK_EXCEPTION} yourself.
+
 
 Here's some code taken from the module for a digitizer. It waits
 indefinitely in a loop for the digitizer to become finished with a

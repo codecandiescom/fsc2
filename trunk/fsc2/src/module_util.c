@@ -48,6 +48,21 @@ int get_check_state( void )
 }
 
 
+/*--------------------------------------------------------------*/
+/* Function returns true if the user has hit the "Stop" button. */
+/* It's the users resonsibility to throw a USER_BREAK_EXCEPTION */
+/* in this case.                                                */
+/*--------------------------------------------------------------*/
+
+bool check_user_request( void )
+{
+	if ( Internals.I_am == PARENT )
+		fl_check_only_forms( );
+	if ( EDL.do_quit && EDL.react_to_do_quit )
+		return 1;
+}
+
+
 /*------------------------------------------------------*/
 /* Function tests if the user has hit the "Stop" button */
 /* and throws an USER_BREAK_EXCEPTION in this case.     */
@@ -219,7 +234,14 @@ double is_mult_ns( double val, const char *text )
 {
 	double ip, fp;
 
-	val *= 1.e9;
+
+	if ( val * 1.0e9 > LONG_MAX )
+	{
+		print( FATAL, "%s of %.0f is too large.\n", text, val );
+		THROW( EXCEPTION );
+	}
+
+	val *= 1.0e9;
 	fp = modf( val , &ip );
 
 	if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
