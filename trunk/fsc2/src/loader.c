@@ -542,7 +542,7 @@ void run_end_of_exp_hooks( void )
 	/* Each of the end-of-experiment hooks must be run to get all instruments
 	   back into a usable state, even if the function fails for one of them.
 	   The only exception are devices for which the exp-hook has not been
-	   run, probably because the exp-hook for a provious device in the list
+	   run, probably because the exp-hook for a previous device in the list
 	   failed. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
