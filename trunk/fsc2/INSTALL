@@ -217,9 +217,8 @@ typing
     make install
 
 Normally, you will need root privileges to do this. If making the
-documentation failed with an error also the installon may fail when trying
-to install the documentation, but this is not something to worry about
-too much...
+documentation failed with an error also its installion may fail,
+but that's not something to worry about too much...
 
 If you want to you can also try to test your built of fsc2 before
 installation by running

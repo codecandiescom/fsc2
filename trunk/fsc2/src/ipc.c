@@ -27,6 +27,20 @@
 #include <sys/shm.h>
 
 
+#if ! defined ( SEM_R )
+#define SEM_R 0400
+#endif
+#if ! defined ( SEM_A )
+#define SEM_A 0200
+#endif
+#if ! defined ( SHM_R )
+#define SHM_R 0400
+#endif
+#if ! defined ( SHM_A )
+#define SHM_A 0200
+#endif
+
+
 #if defined ( _SEM_SEMUN_UNDEFINED ) && ( _SEM_SEMUN_UNDEFINED == 1 )
 union semun {
 	  int val;                    /* value for SETVAL */
