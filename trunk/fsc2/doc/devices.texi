@@ -2710,9 +2710,9 @@ does not accept any parameters and can only by used in the
 @node DAQ Functions, DIO Functions, Frequency Counter Functions, Device Functions
 @section DAQ Functions
 @cindex DAQ Functions
-Currently, there's support for digital-to-analog converter cards,
-the @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100,
-and a home-built DA and AD converter from the group of H.-J.@: Steinhoff.
+Currently, there's support for digital-to-analog converter cards, the
+@strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100, and a
+home-built DA and AD converter from the group of H.-J.@: Steinhoff.
 
 The ME-6000 and ME-6100 cards have, depending on the model, either 4, 8
 or 16 output ports.Use of these cards requires that a kernel module and
@@ -2741,11 +2741,21 @@ Returns a string with the name of the DAC being used.
 @anchor{daq_set_voltage}
 @item daq_set_voltage()
 @findex daq_set_voltage()
-This function has to be used to output a voltage at one of the output
-ports. The first argument has to be the output port, specified by one of
-the symbolic values between @code{CH0} and @code{CH15} (don't try to use
-simple numbers instead!). The second argument is the voltage (in the
-range between @w{-10 V} and @w{+10 V}) to be output.
+This function has to be used to output a voltage at (one of) the output
+ports. For the ME-6000 and ME-6100 cards the first argument has to be
+the output port, specified by one of the symbolic values between
+@code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
+For the home-built AD and DA converter this argument can't be specified
+since it has only a single output.
+
+For the ME-6000 and ME-6100 the second argument is the output voltage in
+the range between @w{-10 V} and @w{+10 V}) to be output.
+
+In contrast, for the home-built AD and DA converter card, the only
+argument is the output voltage. It must be between @w{0 V} and the
+maximum voltage that has been spcified in the call of the function
+@code{daq_maximum_output_voltage()}. If this function hasn't been called
+the default maximum output voltage is @w{+10 V}.
 
 If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
@@ -2757,8 +2767,54 @@ output voltage reverts to a default value at the end of the experiment
 please put a command for setting this voltage into the @code{ON_STOP}
 section of the @code{EDL} script.
 
+For the home-built DA and AD card the output voltage will automatically
+drop to @w{0 V} if the function @code{daq_get_voltage()} (see below)
+is called without a previous call of the function for setting an output
+voltage.
+
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
+
+
+@anchor{daq_maximum_output_voltage}
+@item daq_maximum_output_voltage()
+@findex daq_maximum_output_voltage()
+This function is only available for the home-built AD and DA converter.
+This device has a potentiometer at the front side that can be used to
+reduce the output voltage level from the maximum level of @w{+10 V}. By
+calling this function you can tell the program about the new value of
+the maximum outout voltage, so that you afterwards may use the real
+required output voltages instead of values that have to be too large by
+the reduction factor of the potentiometer. So, if the potentiometer is
+set to 5 (of its maximum range of 10) and you call this function with an
+argument of @w{5 V} you then can specify the real voltage you want to
+output in calls of @code{daq_set_voltage()} instead of having to pass it
+values that are too large by a factor of 2.
+
+If this function hasn't been called the program will assume that the
+potentiometer is set to its maximum of 10 and output voltages of the
+DA converter are between @w{0 V} and @w{+10 V}.
+
+The function can be used in the @code{EXPERIMENT} as well as in the
+@code{PREPARATIONS} section.
+
+
+@anchor{daq_get_voltage}
+@item daq_get_voltage()
+@findex daq_get_voltage()
+This function is only available for the home-built AD and DA converter.
+It accepts no arguments and returns the current voltage at the input of
+the AD converter, a value between @w{-10 V} and @w{+10 V}.
+
+Please note: If this function is called without a previous call of the
+function @code{daq_set_voltage()} (see above) the voltage at the output
+of the DA converter will switch to @w{0 V} automatically. So you should
+call @code{daq_set_voltage()} always before
+@code{@code{daq_get_voltage()} if something is connected to the DA
+output!
+
+The function can be used in the @code{EXPERIMENT} section only.
+
 
 @end table
 
@@ -2766,9 +2822,9 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @node DIO Functions, Event Counter Functions, DAQ Functions, Device Functions
 @section DIO Functions
 @cindex DIO Functions
-Currently, there's only one DIO device, the @strong{Wasco WITIO-48}
-ISA card. It can be used for digital input and output. The module for the
-card gets loaded by specifying
+Currently, there's only one DIO device, the @strong{Wasco WITIO-48} ISA
+DIO card by Messcomp Datentechnik GmbH. It can be used for digital input
+and output. The module for the card gets loaded by specifying
 @example
 witio_48
 @end example
