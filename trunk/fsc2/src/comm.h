@@ -6,6 +6,7 @@
 #define COMM_HEADER
 
 #include "fsc2.h"
+#include <asm/shmparam.h>    /* here we find SHMMNI, at least under linux... */
 
 
 enum {
@@ -49,8 +50,8 @@ enum {
 };
 
 
-# define QUEUE_SIZE 129     /* max number of shared memory segments + 1 */
-                            /* (as determined by 'ipcs -ul') */
+# define QUEUE_SIZE ( SHMMNI + 1 )   /* maximum number of shared memory
+										segments + 1 */
 
 bool setup_comm( void );
 void end_comm( void );
