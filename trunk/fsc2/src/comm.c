@@ -363,9 +363,9 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   header.data.str_len[ 0 ] );
+						   ( size_t ) header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
@@ -391,9 +391,9 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   header.data.str_len[ 0 ] );
+						   ( size_t ) header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
@@ -421,9 +421,9 @@ long reader( void *ret )
 
 			if ( header.data.str_len[ 0 ] > 0 )
 			{
-				str[ 0 ] = T_malloc( header.data.str_len[ 0 ] + 1 );
+				str[ 0 ] = T_malloc( ( size_t ) header.data.str_len[ 0 ] + 1 );
 				pipe_read( pd[ READ ], str[ 0 ],
-						   header.data.str_len[ 0 ] );
+						   ( size_t ) header.data.str_len[ 0 ] );
 				str[ 0 ][ header.data.str_len[ 0 ] ] = '\0';
 			}
 			else if ( header.data.str_len[ 0 ] == 0 )
@@ -458,9 +458,10 @@ long reader( void *ret )
 			{
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
+					str[ i ] =
+						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   header.data.str_len[ i ] );
+							   ( size_t ) header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
@@ -492,9 +493,10 @@ long reader( void *ret )
 			{
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
+					str[ i ] =
+						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   header.data.str_len[ i ] );
+							   ( size_t ) header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
@@ -537,9 +539,10 @@ long reader( void *ret )
 			for ( i = 0; i < 2 ; i++ )
 				if ( header.data.str_len[ i ] > 0 )
 				{
-					str[ i ] = T_malloc( header.data.str_len[ i ] + 1 );
+					str[ i ] =
+						   T_malloc( ( size_t ) header.data.str_len[ i ] + 1 );
 					pipe_read( pd[ READ ], str[ i ],
-							   header.data.str_len[ i ] );
+							   ( size_t ) header.data.str_len[ i ] );
 					str[ i ][ header.data.str_len[ i ] ] = '\0';
 				}
 				else if ( header.data.str_len[ i ] == 0 )
@@ -966,7 +969,8 @@ void writer( int type, ... )
 
 			for ( i = 0; i < 4; i++ )
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+					write( pd[ WRITE ], str[ i ],
+						   ( size_t ) header.data.str_len[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -992,7 +996,8 @@ void writer( int type, ... )
 			for ( i = 0; i < 4; i++ )
 			{
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+					write( pd[ WRITE ], str[ i ],
+						   ( size_t ) header.data.str_len[ i ] );
 			}
 
 			break;
@@ -1023,7 +1028,8 @@ void writer( int type, ... )
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
 			for ( i = 0; i < 2; i++ )
 				if ( header.data.str_len[ i ] > 0 )
-					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
+					write( pd[ WRITE ], str[ i ],
+						   ( size_t ) header.data.str_len[ i ] );
 			break;
 
 		case C_LAYOUT : case C_BCREATE :

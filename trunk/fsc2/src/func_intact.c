@@ -190,7 +190,7 @@ Var *f_layout( Var *v )
 	if ( I_am == CHILD )
 	{
 		char *buffer, *pos;
-		long len;
+		size_t len;
 
 		len = 2 * sizeof( long );
 		if ( Fname )
@@ -726,7 +726,7 @@ Var *f_bstate( Var *v )
 		long ID;
 		long chld_state = -1;
 		char *buffer, *pos;
-		long len;
+		size_t len;
 
 
 		/* Basic check of button identifier - always the first parameter */
@@ -1231,7 +1231,7 @@ Var *f_sdelete( Var *v )
 		if ( I_am == CHILD )
 		{
 			char *buffer, *pos;
-			long len;
+			size_t len;
 
 
 			/* Very basic sanity check */
@@ -1392,7 +1392,7 @@ Var *f_svalue( Var *v )
 		double val = 0.0;
 		char *buffer, *pos;
 		double *res;
-		long len;
+		size_t len;
 
 
 		/* Very basic sanity check... */
@@ -2051,7 +2051,7 @@ Var *f_ivalue( Var *v )
 		double dval = 0.0;
 		char *buffer, *pos;
 		INPUT_RES *input_res;
-		long len;
+		size_t len;
 
 
 		/* Very basic sanity check... */

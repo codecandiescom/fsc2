@@ -108,12 +108,14 @@ CFLAGS           := -ggdb -O2 -I/usr/X11R6/include/X11 \
 					-Wpointer-arith \
 					-Waggregate-return \
 					-Wnested-externs \
-					-Wcast-align
+					-Wcast-align \
+					-Wconversion
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
 				    # -Wcast-qual         # too many false positives
 				    # -Wundef             # fails in bison/flex created files
 				    # -ansi               # fails due to inline/asm
+				    # -pedantic
 				    # -DNDEBUG            # switch off build-in debugging code 
 				    # -DMDEBUG            # for malloc debugging
 LD				 := ld
