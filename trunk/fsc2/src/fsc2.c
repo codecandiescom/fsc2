@@ -977,11 +977,7 @@ static bool display_file( char *name, FILE *fp )
 				return FAIL;
 
 			case -1 :                 /* not enough memory left */
-				return FAIL;
-
-			case -2 :                 /* popen() failure */
-				fl_show_alert( "Error", "Can't determine length of file:",
-							   name, 1 );
+				fl_show_alert( "Error", "Cannot read file:", name, 1 );
 				return FAIL;
 
 			default:
