@@ -60,7 +60,7 @@ static void magnet_sweep( int dir );
 static bool magnet_do( int command );
 
 
-typedef struct
+static struct
 {
 	double field;			/* the start field given by the user */
 	double field_step;		/* the field steps to be used */
@@ -80,13 +80,11 @@ typedef struct
 	int int_step;			/* used internally */
 
 	bool is_opened;
-	struct termios *tio,    /* serial port terminal interface structure */
+	struct termios *tio;    /* serial port terminal interface structure */
 
 	bool fast_init;			/* if set do a fast initialization */
-} Magnet;
+} magnet;
 
-
-static Magnet magnet;
 
 enum {
 	   SERIAL_INIT,
