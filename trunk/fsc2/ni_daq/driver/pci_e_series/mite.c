@@ -327,7 +327,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 	if ( avail < *size )
 		*size = avail;
 
-	/* Copy as many of the newly acquired bytes as possible or requested
+	/* Copy as many of the newly acquired bytes as requested or possible
 	   to the user supplied buffer */
 
 	for ( mdc = board->mite_chain[ sys ]; *size > 0 && mdc->buf != NULL;
@@ -361,7 +361,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 			}
 		}
 
-		/* Copy it's (yet unused) content to the user buffer */
+		/* Copy its (yet unused) content to the user buffer */
 
 		if ( copy_to_user( dest + total, mdc->buf + mdc->transfered,
 				   transf ) ) {
@@ -403,10 +403,10 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 {
 	/* It seems to be important to read from the MITE DAR register first
 	   and only then from the FCR register - otherwise sometimes the very
-	   last data point read later on was garbage when during the reading
+	   last data point read later on was garbage if during the read of
 	   the data there was heavy disk I/O (also using DMA) going on. That's
 	   also why the the next two lines aren't written as a single line,
-	   when doing so the compiler rearranged the code to read the FCR
+	   when doing that the compiler rearranged the code to read the FCR
 	   first and the DAR only afterwards. */
 
 	u32 avail = le32_to_cpu( readl( mite_DAR( sys ) ) );
