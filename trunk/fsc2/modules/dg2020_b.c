@@ -1001,7 +1001,7 @@ Var *pulser_cw_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.function[ PULSER_CHANNEL_MW ]->phase_setup == NULL )
+	if ( dg2020.function[ PULSER_CHANNEL_MW ].phase_setup == NULL )
 	{
 		print( FATAL, "Missing PHASE_SETUP for function 'MICROWAVE'.\n" );
 		THROW( EXCEPTION );

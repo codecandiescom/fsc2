@@ -462,6 +462,14 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 							 pp->pulse->function->left_twt_padding + pp->pos );
 		pp->len += pp->pos;
 		pp->pos = 0;
+
+		if ( ! pp->pulse->needs_update )
+		{
+			pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
+			pp->pulse->was_active = pp->pulse->is_active;
+		}
+
+		pp->pulse->needs_update = SET;
 	}
 
 	/* Shorten intermediate pulses so they don't overlap - if necessary even
@@ -496,6 +504,14 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 							 pp->pulse->function->left_twt_padding + pp->pos );
 			pp->len += pp->pos;
 			pp->pos = 0;
+
+			if ( ! pp->pulse->needs_update )
+			{
+				pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
+				pp->pulse->was_active = pp->pulse->is_active;
+			}
+
+			pp->pulse->needs_update = SET;
 		}
 
 		if ( ppp->pos == pp->pos )
@@ -506,6 +522,22 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 			else
 				memmove( pp, pp + 1,
 						 ( f->num_active_pulses-- - --i ) * sizeof *pp );
+
+			if ( ! pp->pulse->needs_update )
+			{
+				pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
+				pp->pulse->was_active = pp->pulse->is_active;
+			}
+
+			pp->pulse->needs_update = SET;
+
+			if ( ! ppp->pulse->needs_update )
+			{
+				ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
+				ppp->pulse->was_active = ppp->pulse->is_active;
+			}
+
+			ppp->pulse->needs_update = SET;
 			continue;
 		}
 
@@ -515,9 +547,36 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 			{
 				memmove( pp, pp + 1,
 					  ( --f->num_active_pulses - --i ) * sizeof *pp );
+
+				if ( ! pp->pulse->needs_update )
+				{
+					pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
+					pp->pulse->was_active = pp->pulse->is_active;
+				}
+
+				pp->pulse->needs_update = SET;
+
+				if ( ! ppp->pulse->needs_update )
+				{
+					ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
+					ppp->pulse->was_active = ppp->pulse->is_active;
+				}
+
+				ppp->pulse->needs_update = SET;
 			}
+
 			else
+			{
 				ppp->len -= ppp->pos + ppp->len - pp->pos;
+
+				if ( ! ppp->pulse->needs_update )
+				{
+					ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
+					ppp->pulse->was_active = ppp->pulse->is_active;
+				}
+
+				ppp->pulse->needs_update = SET;
+			}
 		}
 	}
 
@@ -553,6 +612,14 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 			l_min( pp->pulse->function->min_right_twt_padding,
 				   pp->pulse->function->right_twt_padding + pp->pos );
 		pp->len = MAX_PULSER_BITS - pp->pos;
+
+		if ( ! pp->pulse->needs_update )
+		{
+			pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
+			pp->pulse->was_active = pp->pulse->is_active;
+		}
+
+		pp->pulse->needs_update = SET;
 	}
 }
 
@@ -753,6 +820,11 @@ void dg2020_full_reset( void )
 
 		p = p->next;
 	}
+
+	if ( dg2020_phs[ 0 ].function != NULL )
+		dg2020_phs[ 0 ].function->next_phase = 0;
+	if ( dg2020_phs[ 1 ].function != NULL )
+		dg2020_phs[ 1 ].function->next_phase = 0;
 }
 
 
@@ -975,17 +1047,22 @@ void dg2020_cw_setup( void )
 	f = dg2020.function + PULSER_CHANNEL_MW;
 	p = f->phase_setup;
 
-	/* First, all non-cw channels get associated with the first pulser channel
-	   and the cw channel with the second */
+	if ( f->num_channels == 0 )
+	{
+		f->channel[ 0 ] = dg2020.channel + MAX_CHANNELS - 1;
+		f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 2;
+	}
 
-	for ( i = 0; i < f->num_pods; i++ )
-		if ( f->pod[ i ] != p->pod[ PHASE_CW ] )
-			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ i ]->self );
+	if ( f->num_channels == 1 )
+	{
+		if ( f->channel[ 0 ]->self != MAX_CHANNELS - 1 )
+			f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 1;
 		else
-			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod[ i ]->self );
+			f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 2;
+	}
 
-	/* Now the the first channel is set to be always logical low, the second
-	   (i.e. the cw channel) to be always logical high */
+	/* The first channel is set to be always logical low, the second (i.e.
+	   the cw channel) to be always logical high */
 
 	if ( ! dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, 0 ) ||
 		 ! dg2020_set_constant( f->channel[ 0 ]->self, 0, 127,
@@ -1022,6 +1099,15 @@ void dg2020_cw_setup( void )
 	   channels */
 
 	dg2020_update_data( );
+
+	/* Finally, all non-cw channels get associated with the first pulser
+	   channel and the cw channel with the second */
+
+	for ( i = 0; i < f->num_pods; i++ )
+		if ( f->pod[ i ] != p->pod[ PHASE_CW ] )
+			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ i ]->self );
+		else
+			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod[ i ]->self );
 }
 
 
