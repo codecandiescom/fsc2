@@ -637,14 +637,13 @@ Var *monochromator_wavelength_axis( Var * v )
 	pixel_width = cv->val.dval;
 	vars_pop( cv );
 
-	cv = vars_push( FLOAT_ARR, NULL, 2 );
-
 	/* If no calibration file has been read or there is no (complete)
 	   calibration for the current grating we just return values for
 	   a pixel count scale */
 
 	if ( ! spectrapro_300i.use_calib )
 	{
+		cv = vars_push( FLOAT_ARR, NULL, 2 );
 		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
 		cv->val.dpnt[ 1 ] = 1;
 		return cv;
@@ -666,6 +665,7 @@ Var *monochromator_wavelength_axis( Var * v )
 	{
 		print( SEVERE, "No (complete) calibration for current grating #%ld "
 			   "found.\n", g + 1 );
+		cv = vars_push( FLOAT_ARR, NULL, 2 );
 		cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
 		cv->val.dpnt[ 1 ] = 1;
 		return cv;
@@ -676,7 +676,7 @@ Var *monochromator_wavelength_axis( Var * v )
 		wl = get_double( v, "wavelength" );
 		if ( wl < 0.0 )
 		{
-			print( FATAL, "Invalid negative wavelength.\n" );
+			print( FATAL, "Invalid negative center wavelength.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -688,7 +688,8 @@ Var *monochromator_wavelength_axis( Var * v )
 	wl_low = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, 1 );
 	wl_hi = spectrapro_300i_conv( g, wl, num_pixels, pixel_width, num_pixels );
 
-	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / num_pixels;
+	cv = vars_push( FLOAT_ARR, NULL, 2 );
+	cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / ( num_pixels - 1 );
 	cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
 
 	return cv;
@@ -839,12 +840,16 @@ Var *monochromator_calc_wavelength( Var *v )
 
 	spectrapro_300i_arr_conv( g, cwl, num_pixels, pixel_width, v, cv );
 
-	return v;
+	return cv;
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function converts the indices (relative to the left hand edge */
+/* of the CCD chip, where the index starts of with 1)  stored in */
+/* array 'src' to the wavelength at that positions, writing them */
+/* into array 'dest'.                                            */
+/*---------------------------------------------------------------*/
 
 static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
 									  double pixel_width, Var *src, Var *dest )
@@ -879,8 +884,10 @@ static void spectrapro_300i_arr_conv( long g, double cwl, long num_pixels,
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function takes an index (relative to the left edge of the CCD chip */
+/* and starting there with 1) into the wavelength at that position.   */
+/*--------------------------------------------------------------------*/
 
 static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 									double pixel_width, double px )
@@ -893,6 +900,19 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 	double x;
 
 
+	if ( px < 1.0 )
+	{
+		print( SEVERE, "Pixel position too small, replacing by 1.\n" );
+		px = 1.0;
+	}
+
+	if ( px > num_pixels )
+	{
+		print( SEVERE, "Pixel position too large, replacing by %ld.\n",
+			   num_pixels );
+		px = ( double ) num_pixels;
+	}
+
 	inclusion_angle_2 = 0.5 * spectrapro_300i.grating[ g ].inclusion_angle;
 	focal_length = spectrapro_300i.grating[ g ].focal_length;
 	detector_angle = spectrapro_300i.grating[ g ].detector_angle;
@@ -904,7 +924,7 @@ static double spectrapro_300i_conv( long g, double cwl, long num_pixels,
 	theta = atan(   x * cos( detector_angle )
 				  / ( focal_length + x * sin( detector_angle ) ) );
 	return (   sin( grating_angle - inclusion_angle_2 )
-			   + sin( grating_angle + inclusion_angle_2 + theta ) )
+			 + sin( grating_angle + inclusion_angle_2 + theta ) )
 		   / spectrapro_300i.grating[ g ].grooves;
 }
 

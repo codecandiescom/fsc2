@@ -3208,7 +3208,7 @@ Returns a string with the name of the monochromator being used.
 @c monochromator_wavelength, -1, EXP;        // set/query wavelength
 @c monochromator_install_grating, 2, EXP;    // install new grating
 @c monochromator_groove_density, 1, EXP;     // get groove density of grating
-@c monochromator_wavelength_axis, 0, EXP;    // caclulate wavelength axis
+@c monochromator_wavelength_axis, -1, EXP;   // caclulate wavelength axis
 @c monochromator_set_calibration, -1, EXP;   // manually set calibration
 @c monochromator_load_calibration, -1, EXP;  // read in calibration file
 @c monochromator_init_offset, -1, EXP;
