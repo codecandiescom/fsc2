@@ -130,50 +130,50 @@ statements belonging to the loop are enclosed in curly braces,
 The first thing to do in the experiment loop is to fetch a new data
 point from the lock-in amplifier and to store it in the variable
 @code{data}.  Next we have to display the data point, which is done via
-the call of the @code{display} function. Here two arguments are used,
+the call of the @code{display()} function. Here two arguments are used,
 the number of the point, stored in the variable @code{I}, and the value
 of the corresponding data point.
 
 Of course, we also need to save the data point in a file. This is done
-by the call of the function @code{save} that automatically writes its
+by the call of the function @code{save()} that automatically writes its
 argument to a file. When the function is called for the first time it
 prompts for the name of the file to use.
 
 What remains to be done is to increment the counter variable @code{I}
-and to sweep up the field. The function @code{sweep_up} returns the new
+and to sweep up the field. The function @code{sweep_up()} returns the new
 value of the field, which is then used in the test of the loop condition
 to decide if the experiment is finished, i.e.@: the end field is
 reached.
 
-The last function call of @code{wait} with the call of
-@code{lockin_time_constant} as the argument in the loop makes the
-program waits for the time constant of the lock-in amplifiers to give it
-enough time to measure a new data point.
+The last function call of @code{wait()} with result of a call of the
+function @code{lockin_time_constant()} as the argument in the loop makes
+the program waits for the time constant of the lock-in amplifiers to
+give it enough time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
 editor) you load it into @acronym{fsc2} and press the test or the start
 button.  @acronym{fsc2} will now analyze the program very thoroughly. It
-will not only check for misspelt keywords, undefined variables, syntax
-errors etc.@: but will also repeat the loop in the experiment section as
-often as in the real experiment to find out if no errors will happen
-during the experiment. This includes, for example, checking that the
-field will not be sweeped into regions the magnet or the gaussmeter can
-not handle (e.g.@: by incidentally setting an end field value of
-@w{34500.0 G} the magnet can't produce instead of @w{3450.00 G}). So you
-can be reasonable sure that the experiment will not abort due to a
-faulty @acronym{EDL} program after it has run for 2 hours and you have
-to start all over again.
+will not only check for misspelt keywords, undefined variables,
+non-existent functions, syntax errors etc.@: but will also repeat the
+loop in the experiment section as often as in the real experiment to
+find out if no errors will happen during the experiment. This includes,
+for example, checking that the field will not be sweeped into regions
+the magnet or the gaussmeter can not handle (e.g.@: by incidentally
+setting an end field value of @w{34500.0 G} the magnet can't produce
+instead of @w{3450.00 G}). So you can be reasonable sure that the
+experiment will not abort due to a faulty @acronym{EDL} program after it
+has run for 2 hours and you have to start all over again.
 
 As you can already see form the example most of an @acronym{EDL} program
 consists of function calls. Functions can be devided into two
 categories, built-in functions and device functions. Built-in functions
-(like @code{init_1d}, @code{display}, @code{save} and @code{wait}) are
-always available, even when there is no @code{DEVICES} section. In
-contrast, device functions are bound to certain devices and can only be
-called when the device they are defined for is listed in the
-@code{DEVICES} section. For example, the functions
-@w{@code{lockin_sensitivity}}, @w{@code{lockin_time_constant}} and
-@w{@code{lockin_get_data}} are obviously targeted at the lock-in
+(like @code{init_1d()}, @code{display()}, @code{save()} and
+@code{wait()}) are always available, even when there is no
+@code{DEVICES} section. In contrast, device functions are bound to
+certain devices and can only be called when the device they are defined
+for is listed in the @code{DEVICES} section. For example, the functions
+@w{@code{lockin_sensitivity()}}, @w{@code{lockin_time_constant()}} and
+@w{@code{lockin_get_data()}} are obviously targeted at the lock-in
 amplifier and are only available when a lock-in amplifier module is
 specified. Most of these functions are available for all types of
 lock-in amplifiers (possibly with minor variations) so that using a
@@ -693,7 +693,7 @@ use parenthesis -- this won't slow down the program significantly.
 
 Beside the usual arithmetic with numbers it is also possible to use
 arithmetic with (one-dimensional) arrays. Also all built-in functions
-can (as far as this makes any sense) can be applied to these kinds of
+(as far as this makes any sense) can be applied to one-dimensional
 arrays.
 
 As long as the sizes of two arrays are identical they can be added or
