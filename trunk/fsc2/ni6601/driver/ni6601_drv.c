@@ -63,9 +63,8 @@ struct file_operations ni6601_file_ops = {
 static int __init ni6601_init( void )
 {
 	struct pci_dev *dev = NULL;
-#ifndef CONFIG_DEVFS_FS
 	int res_major;
-#endif
+
 
 	/* Try to find all boards */
 
@@ -96,8 +95,8 @@ static int __init ni6601_init( void )
 			"the %d supported boards!\n", NI6601_MAX_BOARDS );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( major = devfs_register_chrdev( major, NI6601_NAME,
-					      &ni6601_file_ops ) ) < 0 ) {
+	if ( ( res_major = devfs_register_chrdev( major, NI6601_NAME,
+						  &ni6601_file_ops ) ) < 0 ) {
 #else
 	if ( ( res_major = register_chrdev( major, NI6601_NAME,
 					    &ni6601_file_ops ) ) < 0 ) {
@@ -108,10 +107,8 @@ static int __init ni6601_init( void )
 		return major;
 	}
 
-#ifndef CONFIG_DEVFS_FS
 	if ( major == 0 )
 		major = res_major;
-#endif
 
 	printk( KERN_INFO NI6601_NAME ": Module successfully installed\n"
 		NI6601_NAME ": Initialized %d board%s\n",
@@ -206,14 +203,13 @@ static void __exit ni6601_cleanup( void )
 {
 	ni6601_release_resources( boards, board_count );
 
-	/* Unregister the character device only when we aren't using devfs
-	   exclussively, as indicated by major being 0 */
+	/* Unregister the character device (but only when we aren't using
+	   devfs exclussively as indicated by major being 0 */
 
-	if ( major > 0 &&
 #ifdef CONFIG_DEVFS_FS
-	     devfs_unregister_chrdev( major, NI6601_NAME ) < 0 )
+	if ( major != 0 && devfs_unregister_chrdev( major, NI6601_NAME ) < 0 )
 #else
-	     unregister_chrdev( major, NI6601_NAME ) < 0 )
+	if ( unregister_chrdev( major, NI6601_NAME ) < 0 )
 #endif
 		printk( KERN_ERR NI6601_NAME ": Unable to unregister "
 			"module.\n" );
