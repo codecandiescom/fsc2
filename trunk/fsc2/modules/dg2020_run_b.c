@@ -140,7 +140,7 @@ void dg2020_set_pulses( FUNCTION *f )
 	for ( i = 0; i < f->num_needed_channels; i++ )
 	{
 		dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
-		dg2020_set_constant( f->channel[ i ]->self, 0, dg2020.max_seq_len,
+		dg2020_set_constant( f->channel[ i ]->self, 0, dg2020.max_size - 1,
 							 OFF( f ) );
 	}
 
