@@ -82,7 +82,6 @@ VARIABLES:
 PREPARATIONS:
 
   magnet_setup( start_field, field_step );
-  lockin_time_constant( 300 ms );
   init_1d( );
 
 EXPERIMENT:
@@ -93,7 +92,7 @@ EXPERIMENT:
       save( data );
       I = I + 1;
       field = sweep_up( );
-      wait( 300 ms );
+      wait( lockin_time_constant( ) );
   @}
 @end example
 
@@ -113,11 +112,10 @@ start field.  Finally, a counter variable @code{I}, initialized to 1,
 and another variable, @code{data}, later to be used for storing the data
 received from the lock-in amplifier, are declared.
 
-In the next section, after the @code{PREPARATIONS:} keyword, the
-devices are set up. The function @code{magnet_setup} tells the magnet to
-start with the field stored in the variable @w{@code{start_field}} and
-to use a step size of @w{@code{field_step}}. Next, the lock-in time
-constant is set to @w{300 ms}. The last function call in this section,
+In the next section, after the @code{PREPARATIONS:} keyword, devices can
+be set up. The function @code{magnet_setup} tells the magnet to start
+with the field stored in the variable @w{@code{start_field}} and to use
+a step size of @w{@code{field_step}}. The next function call,
 @code{init_1d()}, tells the program that this is a 1-dimensional
 experiment and to use the appropriate kind of display for the data.
 
@@ -147,9 +145,10 @@ value of the field, which is then used in the test of the loop condition
 to decide if the experiment is finished, i.e.@: the end field is
 reached.
 
-The last function call of @code{wait} in the loop makes the program
-waits for @w{300 ms} (the lock-in amplifiers time constant) to give the
-lock-in amplifier time to measure a new data point.
+The last function call of @code{wait} with the call of
+@code{lockin_time_constant} as the argument in the loop makes the
+program waits for the time constant of the lock-in amplifiers to give it
+enough time to measure a new data point.
 
 When you have written such a program (using, for example, a simple ASCII
 editor) you load it into @acronym{fsc2} and press the test or the start
