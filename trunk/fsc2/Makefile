@@ -53,6 +53,7 @@ objects        = $(sources:.c=.o)
 modules        = User_Functions.c tds754a.c sr510.c s_band.c er035m.c bh15.c
 dg2020         = dg2020.c dg2020_gen.c dg2020_pulse.c dg2020_init.c \
 				 dg2020_run.c dg2020_util.c dg2020_gpib.c
+tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 header         = ${c_sources:.c=.h} global.h
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files (don't
@@ -101,13 +102,18 @@ fsc2: $(objects) $(header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
 
 
-# make the modules - the pulser module has to handles specially since it has
-# its own header file and is divided into several source files
+# make the modules - the pulser and digitizer modules have to be handled
+# specially since each has its own header file and is divided into several
+# source files
 
-mods: dg2020.so $(modules:.c=.so)
+mods: dg2020.so tds754a.so $(modules:.c=.so)
 
 dg2020.so: ${dg2020:.c=.lo} dg2020.h
 	$(CC) -shared -o $@ ${dg2020:.c=.lo} -lm $(LDFLAGS)
+	chmod 644 $@
+
+tds754a.so: ${tds754a:.c=.lo} tds754a.h
+	$(CC) -shared -o $@ ${tds754a:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
 %.so: %.lo
@@ -115,6 +121,7 @@ dg2020.so: ${dg2020:.c=.lo} dg2020.h
 	chmod 644 $@
 
 ${dg2020:.c=.lo}: dg2020.h
+${tds754a:.c=.lo}: tds754a.h
 
 %.lo: %.c $(header)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
