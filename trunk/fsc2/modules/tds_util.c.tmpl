@@ -888,10 +888,10 @@ void tds_tmpl_set_tracking( WINDOW *w )
 
 void tds_tmpl_set_meas_window( WINDOW *w )
 {
-	tds_tmpl_set_window( w );
-
 	if ( w != NULL )
 	{
+		tds_tmpl_set_window( w );
+
 		/* If not already in gated measurement state set it now */
 
 		if ( ! tds_tmpl.gated_state )
