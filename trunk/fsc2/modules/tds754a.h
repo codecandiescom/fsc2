@@ -145,7 +145,7 @@ TDS754A tds754a;
 const char *Channel_Names[ ] = { "CH1", "CH2", "CH3", "CH4",
 								 "MATH1", "MATH2", "MATH3", "REF1",
 								 "REF2", "REF3", "REF4",
-								 "AUX", "LIN" };
+								 "AUX", "LINE" };
 
 #else
 

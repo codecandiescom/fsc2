@@ -141,7 +141,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length );
 TDS520A tds520a;
 const char *Channel_Names[ ] = { "CH1", "CH2", "MATH1", "MATH2", "MATH3",
 								 "REF1", "REF2", "REF3", "REF4",
-								 "AUX1", "AUX2", "LIN" };
+								 "AUX1", "AUX2", "LINE" };
 
 #else
 
