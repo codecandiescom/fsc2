@@ -31,6 +31,7 @@ PREPARATIONS:
 digitizer_num_averages( 20 );
 digitizer_timebase( timebase );
 
+synthesizer_minimum_attenuation( -4 db );
 synthesizer_attenuation( atten );
 synthesizer_frequency( freq );
 
@@ -60,7 +61,7 @@ FOR I = 1 : N_points {
 
 nu_low = ( start_freq + ( N_low - 1 ) * step_freq );
 
-print( "Lowest voltage of # V at # MHz (at point \# #)\n", v_low, 
+print( "Lowest voltage of # V at # MHz (at point \##)\n", v_low, 
 		nu_low * 1e-6, N_low );
 
 /* Now run a second time through the complete frequency range, figure out the
