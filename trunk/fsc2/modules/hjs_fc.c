@@ -707,6 +707,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 	mini_step = 0.1 * MAX_SWEEP_SPEED * ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE )
 				/ ( hjs_fc.B_max - hjs_fc.B_min );
 */
+
 	mini_step = ( DAC_MAX_VOLTAGE - DAC_MIN_VOLTAGE ) / 4095.0;
 
 	/* If the constants for the field at a DAC voltage of 0 V and for
@@ -735,6 +736,21 @@ static double hjs_fc_set_field( double field, double error_margin )
 			if ( ( mini_step > 0.0 && cur_volts > v_step ) ||
 				 ( mini_step < 0.0 && cur_volts < v_step ) )
 				cur_volts = v_step;
+
+			if ( ( cur_volts < 0.0 && hjs_fc.slope > 0.0 ) ||
+				 ( cur_volts > 10.0 && hjs_fc.slope < 0.0 ) )
+			{
+				print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
+					   new_field );
+				THROW( EXCEPTION );
+			}
+			else if ( ( cur_volts < 0.0 && hjs_fc.slope < 0.0 ) ||
+					  ( cur_volts > 10.0 && hjs_fc.slope > 0.0 ) )
+			{
+				print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
+					   new_field );
+				THROW( EXCEPTION );
+			}
 
 			hjs_fc_set_dac( cur_volts );
 			hjs_fc.cur_volts = cur_volts;
@@ -788,6 +804,21 @@ static double hjs_fc_sweep_to( double new_field )
 
 	cur_volts = hjs_fc.cur_volts;
 	v_step = cur_volts + ( new_field - hjs_fc.act_field ) / hjs_fc.slope;
+
+	if ( ( v_step < 0.0 && hjs_fc.slope > 0.0 ) ||
+		 ( v_step > 10.0 && hjs_fc.slope < 0.0 ) )
+	{
+		print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
+			   new_field );
+		THROW( EXCEPTION );
+	}
+	else if ( ( v_step < 0.0 && hjs_fc.slope < 0.0 ) ||
+			  ( v_step > 10.0 && hjs_fc.slope > 0.0 ) )
+	{
+		print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
+			   new_field );
+		THROW( EXCEPTION );
+	}
 
 	if ( v_step > cur_volts )
 		mini_step = fabs( mini_step );
