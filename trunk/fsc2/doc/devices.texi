@@ -5121,8 +5121,8 @@ gg_chopper
 @end example
 @noindent
 in the @code{DEVICES} section. Please note that the name of the module
-for the DAQ device (usually @code{pci_mio_16e_1}= must be listed before
-this module.
+for the DAQ device (@code{pci_mio_16e_1}) must be listed before this
+module.
 
 Unless a rotation frequency has set already during the
 @code{PREPARATIONS} section the chopper will only start to rotate
