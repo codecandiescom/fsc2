@@ -34,7 +34,6 @@ static void dg2020_distribute_channels( void );
 static void dg2020_setup_phase_matrix( FUNCTION *f );
 static void dg2020_pulse_start_setup( void );
 static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
-static void dg2020_cw_init( void );
 static void dg2020_create_shape_pulses( void );
 static void dg2020_create_twt_pulses( void );
 
@@ -47,18 +46,12 @@ static void dg2020_create_twt_pulses( void );
 
 void dg2020_init_setup( void )
 {
-	if ( ! dg2020.is_cw_mode )
-	{
-		dg2020_create_shape_pulses( );
-		dg2020_create_twt_pulses( );
-		dg2020_basic_pulse_check( );
-		dg2020_basic_functions_check( );
-		dg2020_distribute_channels( );
-
-		dg2020_pulse_start_setup( );
-	}
-	else
-		dg2020_cw_init( );
+	dg2020_create_shape_pulses( );
+	dg2020_create_twt_pulses( );
+	dg2020_basic_pulse_check( );
+	dg2020_basic_functions_check( );
+	dg2020_distribute_channels( );
+	dg2020_pulse_start_setup( );
 
 	if ( dg2020.dump_file != NULL )
 	{
@@ -171,7 +164,7 @@ void dg2020_basic_pulse_check( void )
 				cur_type = p->pc->sequence[ i ];
 
 				fsc2_assert( cur_type >= PHASE_PLUS_X ||
-							 cur_type <= PHASE_CW );     /* Paranoia... */
+							 cur_type <= PHASE_MINUS_Y );     /* Paranoia... */
 
 				cur_type -= PHASE_PLUS_X;
 				p->function->phase_setup->is_needed[ cur_type ] = SET;
@@ -201,9 +194,9 @@ void dg2020_basic_pulse_check( void )
 			{
 				p->function->pm =
 					BOOL_P T_malloc( p->pc->len * sizeof( *p->function->pm )
-									 * ( PHASE_CW - PHASE_PLUS_X + 1 ) );
+									 * ( PHASE_MINUS_Y - PHASE_PLUS_X + 1 ) );
 
-				for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+				for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 					for ( j = 0; j < p->pc->len; j++ )
 						p->function->pm[ i * p->pc->len + j ] = UNSET;
 				p->function->pc_len = p->pc->len;
@@ -340,7 +333,7 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 	num_channels = 0;
 	f->need_constant = UNSET;
 	for ( i = 0; i < f->pc_len; i++ )
-		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 		{
 			if ( f->pm[ j * f->pc_len + i ] )
 				num_channels++;
@@ -368,7 +361,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	/* First let's see if the pods mentioned in the phase setup are really
 	   assigned to the function */
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 	{
 		if ( ! f->phase_setup->is_set[ i ] )
 			continue;
@@ -390,7 +383,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	   for the current function. Now we can check if these phase types are
 	   also defined in the phase setup. */
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 	{
 		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
 		{
@@ -409,15 +402,15 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	free_pods = 0;
 	for ( i = 0; i < f->num_pods; i++ )
 	{
-		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 			if ( f->pod[ i ] == f->phase_setup->pod[ j ] )
 				break;
-		if ( j == PHASE_CW - PHASE_PLUS_X + 1 )
+		if ( j == PHASE_MINUS_Y - PHASE_PLUS_X + 1 )
 			free_pod_list[ free_pods++ ] = f->pod[ i ];
 	}
 
 	if ( free_pods != 0 )
-		for ( i = j = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+		for ( i = j = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 			if ( ! f->phase_setup->is_set[ i ] )
 			{
 				f->phase_setup->is_set[ i ]= SET;
@@ -429,8 +422,8 @@ static void dg2020_phase_setup_check( FUNCTION *f )
        the same pod (exception: the different phase types are never actually
        used for a pulse - that's ok). */
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
-		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
+		for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 		{
 			if ( i == j )
 				continue;
@@ -512,7 +505,7 @@ static void dg2020_distribute_channels( void )
 			f->channel[ f->num_channels++ ]->function = f;
 		}
 
-		if ( f->num_pods > 1 && ! dg2020.is_cw_mode )
+		if ( f->num_pods > 1 )
 			dg2020_setup_phase_matrix( f );
 	}
 }
@@ -540,10 +533,11 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	cur_channel = f->need_constant ? 1 : 0;
 
-	f->pcm = CHANNEL_PP T_malloc( f->pc_len * ( PHASE_CW - PHASE_PLUS_X + 1 )
+	f->pcm = CHANNEL_PP T_malloc( f->pc_len
+								  * ( PHASE_MINUS_Y - PHASE_PLUS_X + 1 )
 								  * sizeof *f->pcm );
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 		for ( j = 0; j < f->pc_len; j++ )
 			if ( f->pm && f->pm[ i * f->pc_len + j ] )
 				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
@@ -579,7 +573,7 @@ static void dg2020_pulse_start_setup( void )
 
 		/* Sort the pulses of current the function */
 
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+		qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
 			   dg2020_start_compare );
 
 		/* Check that they don't overlap and fit into the pulsers memory */
@@ -590,8 +584,8 @@ static void dg2020_pulse_start_setup( void )
 
 		for ( j = 0; j < f->num_pulses; j++ )
 		{
-			f->pulses[ j ]->channel =
-						CHANNEL_PP T_malloc( f->pc_len * sizeof( CHANNEL * ) );
+			f->pulses[ j ]->channel = CHANNEL_PP T_malloc( f->pc_len
+										   * sizeof *f->pulses[ j ]->channel );
 			for ( k = 0; k < f->pc_len; k++ )
 				f->pulses[ j ]->channel[ k ] = NULL;
 
@@ -660,66 +654,6 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 
 	np->next = NULL;
 	return np;
-}
-
-
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
-
-static void dg2020_cw_init( void )
-{
-	int i;
-	FUNCTION *f;
-
-
-	/* Only the MICROWAVE function can be used in cw mode */
-
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		if ( i == PULSER_CHANNEL_MW )
-			continue;
-
-		if ( dg2020.function[ i ].is_used )
-		{
-			print( WARN, "Function '%s' can't be used in CW mode.\n",
-				   Function_Names[ i ] );
-			dg2020.function[ i ].is_used = UNSET;
-		}
-	}
-
-	f = dg2020.function + PULSER_CHANNEL_MW;
-
-	/* For cw mode we need to know which pods are assigned to x, y, -x, -y
-	   and cw, i.e. a phase setup */
-
-	if ( f->phase_setup == NULL )
-	{
-		print( FATAL, "CW mode needs a phase setup for the function '%s'.\n",
-			   f->name );
-		THROW( EXCEPTION );
-	}
-
-	/* At least a pod for the cw channel must be set */
-
-	if ( ! f->phase_setup[ PHASE_CW ].is_set )
-	{
-		print( FATAL, "Pod for CW channel hasn't been set in phase setup.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* We need at least two pods, one for x, -x, y and -y and one for cw */
-
-	if ( f->num_pods <= 1 )
-	{
-		print( FATAL, "Not enough pods (i.e. not at least 2) have been "
-			   "assigned to function '%s'.\n", f->name );
-		THROW( EXCEPTION );
-	}
-
-	/* Now get the two channels needed for the MICROWAVE function */
-
-	f->num_needed_channels = 2;
-	dg2020_distribute_channels( );
 }
 
 

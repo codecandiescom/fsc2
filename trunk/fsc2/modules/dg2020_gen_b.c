@@ -547,7 +547,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 	if ( dg2020_phs[ phs ].function != NULL )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
-			   "function %s.\n", phs, dg2020_phs[ phs ].function->name );
+			   "function %s.\n", phs + 1, dg2020_phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -585,7 +585,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int dummy, long pod )
 
 	/* Make sure the phase type is supported */
 
-	if  ( type < PHASE_PLUS_X || type > PHASE_CW )
+	if  ( type < PHASE_PLUS_X || type > PHASE_MINUS_Y )
 	{
 		print( FATAL, "Unknown phase type.\n" );
 		THROW( EXCEPTION );
@@ -642,7 +642,7 @@ bool dg2020_phase_setup( int phs )
 		return FAIL;
 	}
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 	{
 		if ( ! dg2020_phs[ phs ].is_set[ i ] )
 			 continue;

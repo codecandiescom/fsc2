@@ -54,14 +54,15 @@ int ep385_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
+#ifndef EP385_GPIB_DEBUG
 	need_GPIB = SET;
+#endif
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
 
 	ep385.needs_update = SET;
 	ep385.keep_all     = UNSET;
-	ep385.is_cw_mode   = UNSET;
 
 	pulser_struct.set_timebase = ep385_store_timebase;
 	pulser_struct.assign_function = NULL;
@@ -160,10 +161,9 @@ int ep385_init_hook( void )
 		f->next_phase = 0;
 		f->uses_auto_shape_pulses = UNSET;
 		f->uses_auto_twt_pulses = UNSET;
-		f->has_auto_twt_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
 			f->channel[ j ] = NULL;
-		f->max_len = 0;
+		f->max_duty_warning = 0;
 	}
 
 	ep385_is_needed = SET;
@@ -177,8 +177,8 @@ int ep385_init_hook( void )
 
 int ep385_test_hook( void )
 {
-	if ( ep385.is_cw_mode )
-		return 1;
+	double tmp;
+
 
 	/* Make sure that a timebase is set (shouldn't really be needed) */
 
@@ -188,12 +188,17 @@ int ep385_test_hook( void )
 		ep385.timebase_mode = INTERNAL;
 		ep385.timebase = FIXED_TIMEBASE;
 
-		ep385.shape_2_defense = Ticksrnd( ceil (
-					 SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.defense_2_shape = Ticksrnd( ceil (
-					 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
-		ep385.minimum_twt_pulse_distance =
-			   Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE ) );
+		tmp = SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.shape_2_defense = Ticksrnd( tmp );
+
+		tmp = DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.defense_2_shape = Ticksrnd( tmp );
+
+		tmp = MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.minimum_twt_pulse_distance = Ticksrnd( tmp );
 	}
 
 	if ( ep385_Pulses == NULL )
@@ -251,9 +256,9 @@ int ep385_test_hook( void )
 
 int ep385_end_of_test_hook( void )
 {
-	int i;
-	FUNCTION *f;
-	char *min;
+	static int i;
+	static FUNCTION *f;
+	static char *min = NULL;
 
 
 	if ( ep385.dump_file != NULL )
@@ -268,29 +273,25 @@ int ep385_end_of_test_hook( void )
 		ep385.show_file = NULL;
 	}
 
-	if ( ! ep385_is_needed || ep385.is_cw_mode )
+	if ( ! ep385_is_needed )
 		return 1;
 
 	/* Check that TWT duty cycle isn't exceeded due to excessive length of
 	   TWT and TWT_GATE pulses */
 
-	if ( ep385.trig_in_mode == INTERNAL && ep385.is_repeat_time )
+	if ( ep385.is_repeat_time )
 	{
 		f = ep385.function + PULSER_CHANNEL_TWT;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE
-						  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
-							  REPEAT_TICKS * ep385.repeat_time ) )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT %ld time%s exceeded due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
 
 		f = ep385.function + PULSER_CHANNEL_TWT_GATE;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE
-						  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
-							  REPEAT_TICKS * ep385.repeat_time ) )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT %ld time%s exceeded due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
 	}
 
 	/* If in the test it was found that shape and defense pulses got too
@@ -312,11 +313,14 @@ int ep385_end_of_test_hook( void )
 		 ep385.defense_2_shape_too_near != 0 )
 		THROW( EXCEPTION );
 
+	/* Tell the users about problems when setting shape pulses */
+
 	if ( ep385.left_shape_warning != 0 )
 	{
-		print( SEVERE, "For %ld times left padding for a pulse with "
+		print( SEVERE, "For %ld time%s left padding for a pulse with "
 			   "automatic shape pulse couldn't be set.\n",
-			   ep385.left_shape_warning );
+			   ep385.left_shape_warning,
+			   ep385.left_shape_warning == 1 ? "" : "s" );
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
@@ -326,19 +330,30 @@ int ep385_end_of_test_hook( void )
 				 f->left_shape_padding <= f->min_left_shape_padding )
 				continue;
 
-			min = T_strdup( ep385_pticks( f->min_left_shape_padding ) );
-			print( SEVERE, "Minimum left padding for function '%s' was %s "
-				   "instead of requested %s.\n", f->name,
-				   min, ep385_pticks( f->left_shape_padding ) );
-			T_free( min );
+			TRY
+			{
+				min = T_strdup( ep385_pticks( f->min_left_shape_padding ) );
+				print( SEVERE, "Minimum left shape padding for function '%s' "
+					   "was %s instead of the requested %s.\n", f->name,
+					   min, ep385_pticks( f->left_shape_padding ) );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				min = CHAR_P T_free( min );
+				RETHROW( );
+			}
+
+			min = CHAR_P T_free( min );
 		}
 	}
 
 	if ( ep385.right_shape_warning != 0 )
 	{
-		print( SEVERE, "For %ld times right padding for a pulse with "
+		print( SEVERE, "For %ld time%s right padding for a pulse with "
 			   "automatic shape pulse couldn't be set.\n",
-			   ep385.left_shape_warning );
+			   ep385.right_shape_warning,
+			   ep385.right_shape_warning == 1 ? "" : "s" );
 
 		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		{
@@ -348,23 +363,45 @@ int ep385_end_of_test_hook( void )
 				 f->right_shape_padding <= f->min_right_shape_padding )
 				continue;
 
-			min = T_strdup( ep385_pticks( f->min_right_shape_padding ) );
-			print( SEVERE, "Minimum right padding for function '%s' was %s "
-				   "instead of requested %s.\n",  f->name,
+			TRY
+			{
+				min = T_strdup( ep385_pticks( f->min_right_shape_padding ) );
+				print( SEVERE, "Minimum right shape padding for function '%s' "
+					   "was %s instead of the requested %s.\n",  f->name,
 				   min, ep385_pticks( f->right_shape_padding ) );
-			T_free( min );
+			}
+			OTHERWISE
+			{
+				min = CHAR_P T_free( min );
+				RETHROW( );
+			}
+
+			min = CHAR_P T_free( min );
 		}
 	}
 
+	/* Tell the users about problems when setting TWT pulses */
+
+	if ( ep385.left_twt_warning != 0 )
+		print( SEVERE, "For %ld time%s a pulse was too early to allow correct "
+			   "setting of its TWT pulse.\n", ep385.left_twt_warning,
+			   ep385.left_twt_warning == 1 ? "" : "s" );
+
+	if ( ep385.right_twt_warning != 0 )
+		print( SEVERE, "For %ld time%s a pulse was too late or too long to "
+			   "allow correct setting of its TWT pulse.\n",
+			   ep385.right_twt_warning,
+			   ep385.right_twt_warning == 1 ? "" : "s" );
+
 	if ( ep385.twt_distance_warning != 0 )
-		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+		print( SEVERE, "Distance between TWT pulses was %ld time%s shorter "
 			   "than %s.\n", ep385.twt_distance_warning,
+			   ep385.twt_distance_warning == 1 ? "" : "s",
 			   ep385_pticks( ep385.minimum_twt_pulse_distance ) );
 
 	/* Reset the internal representation back to its initial state */
 
-	if ( ! ep385.is_cw_mode )
-		ep385_full_reset( );
+	ep385_full_reset( );
 
 	return 1;
 }
@@ -375,10 +412,6 @@ int ep385_end_of_test_hook( void )
 
 int ep385_exp_hook( void )
 {
-	int i, j;
-	FUNCTION *f;
-
-
 	if ( ! ep385_is_needed )
 		return 1;
 
@@ -430,30 +463,6 @@ int ep385_exp_hook( void )
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
-
-	/* Channels associated with unused functions have been set to output no
-	   pulses, now we can remove the association between the function and
-	   the channel */
-
-	if ( ! ep385.is_cw_mode )
-		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		{
-			f = ep385.function + i;
-
-			if ( f->is_used || f->num_channels == 0 )
-				continue;
-
-			for ( j = 0; j < f->num_channels; j++ )
-			{
-				f->channel[ j ]->function = NULL;
-				f->channel[ j ] = NULL;
-			}
-
-			f->num_channels = 0;
-		}
-
-
-	ep385_run( SET );
 
 	return 1;
 }
@@ -549,7 +558,7 @@ Var *pulser_name( Var *v )
 Var *pulser_automatic_shape_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function shape pulse are to be
@@ -634,15 +643,21 @@ Var *pulser_automatic_shape_pulses( Var *v )
 													  ep385_double2ticks( dr );
 		}
 		else
-			ep385.function[ func ].right_shape_padding =
-				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+		{
+			tmp = AUTO_SHAPE_RIGHT_PADDING / ep385.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			ep385.function[ func ].right_shape_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		ep385.function[ func ].left_shape_padding =
-				 Ticksrnd( ceil( AUTO_SHAPE_LEFT_PADDING / ep385.timebase ) );
-		ep385.function[ func ].right_shape_padding =
-				 Ticksrnd( ceil( AUTO_SHAPE_RIGHT_PADDING / ep385.timebase ) );
+		tmp = AUTO_SHAPE_LEFT_PADDING / ep385.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.function[ func ].left_shape_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_SHAPE_RIGHT_PADDING / ep385.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.function[ func ].right_shape_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );
@@ -662,7 +677,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 Var *pulser_automatic_twt_pulses( Var *v )
 {
 	long func;
-	double dl, dr;
+	double dl, dr, tmp;
 
 
 	/* We need at least one argument, the function TWT pulse are to be
@@ -747,15 +762,21 @@ Var *pulser_automatic_twt_pulses( Var *v )
 													  ep385_double2ticks( dr );
 		}
 		else
-			ep385.function[ func ].right_twt_padding =
-				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+		{
+			tmp = AUTO_TWT_RIGHT_PADDING / ep385.timebase;
+			tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+			ep385.function[ func ].right_twt_padding = Ticksrnd( tmp );
+		}
 	}
 	else
 	{
-		ep385.function[ func ].left_twt_padding =
-					Ticksrnd( ceil( AUTO_TWT_LEFT_PADDING / ep385.timebase ) );
-		ep385.function[ func ].right_twt_padding =
-				   Ticksrnd( ceil( AUTO_TWT_RIGHT_PADDING / ep385.timebase ) );
+		tmp = AUTO_TWT_LEFT_PADDING / ep385.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.function[ func ].left_twt_padding = Ticksrnd( tmp );
+
+		tmp = AUTO_TWT_RIGHT_PADDING / ep385.timebase;
+		tmp = tmp - floor( tmp ) > 0.01 ? ceil( tmp ) : floor( tmp );
+		ep385.function[ func ].right_twt_padding = Ticksrnd( tmp );
 	}
 
 	too_many_arguments( v );
@@ -1027,12 +1048,6 @@ Var *pulser_update( Var *v )
 	v = v;
 
 
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1040,51 +1055,6 @@ Var *pulser_update( Var *v )
 
 	if ( ep385.needs_update )
 		return vars_push( INT_VAR, ep385_do_update( ) ? 1 : 0 );
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-Var *pulser_cw_mode( Var *v )
-{
-	v = v;
-
-
-	/* We can't have any pulses in cw mode */
-
-	if ( ep385_Pulses != NULL )
-	{
-		print( FATAL, "CW mode and use of pulses is mutually exclusive.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* We need the function MICROWAVE defined for cw mode */
-
-	if ( ! ep385.function[ PULSER_CHANNEL_MW ].is_used )
-	{
-		print( FATAL, "Function 'MICROWAVE' has not been defined as needed "
-			   "for CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "External trigger mode can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ep385.is_repeat_time )
-	{
-		print( FATAL, "Repeat time/frequency can't be set in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	ep385.is_cw_mode = SET;
-	ep385.trig_in_mode = INTERNAL;
-	ep385.is_trig_in_mode = SET;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1102,12 +1072,6 @@ Var *pulser_shift( Var *v )
 {
 	PULSE *p;
 
-
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Pulses can't be shifted in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1203,12 +1167,6 @@ Var *pulser_increment( Var *v )
 	PULSE *p;
 
 
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Pulses can't be changed in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1299,12 +1257,6 @@ Var *pulser_reset( Var *v )
 {
 	v = v;
 
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1328,12 +1280,6 @@ Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 
-
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1434,12 +1380,6 @@ Var *pulser_next_phase( Var *v )
 	long phase_number;
 
 
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1505,12 +1445,6 @@ Var *pulser_phase_reset( Var *v )
 	FUNCTION *f;
 	long phase_number;
 
-
-	if ( ep385.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! ep385_is_needed )
 		return vars_push( INT_VAR, 1 );

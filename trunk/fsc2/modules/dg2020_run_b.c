@@ -32,6 +32,7 @@
 static void dg2020_shape_padding_check_1( FUNCTION *f );
 static void dg2020_shape_padding_check_2( void );
 static void dg2020_twt_padding_check( FUNCTION *f );
+static int dg2020_pulse_params_compare( const void *A, const void *B );
 static void dg2020_defense_shape_check( FUNCTION *shape );
 
 
@@ -160,11 +161,12 @@ void dg2020_do_checks( FUNCTION *f )
 	if ( f->num_active_pulses == 0 )
 		return;
 
-	f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
-	f->old_pulse_params = f->pulse_params;
+    f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
+    f->old_pulse_params = f->pulse_params;
 
-	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses *
-											   sizeof *f->pulse_params );
+	f->num_params = f->num_active_pulses;
+	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses
+											   * sizeof *f->pulse_params );
 	
 	for ( j = 0, i = 0; i < f->num_pulses; i++ )
 	{
@@ -181,13 +183,13 @@ void dg2020_do_checks( FUNCTION *f )
 		pp->pos = p->pos + f->delay;
 		pp->len = p->len;
 
-		if ( f->uses_auto_shape_pulses )
+		if ( f->uses_auto_shape_pulses && pp->len > 0)
 		{
 			pp->pos -= f->left_shape_padding;
 			pp->len += f->left_shape_padding + f->right_shape_padding;
 		}
 
-		if ( f->self == PULSER_CHANNEL_TWT && p->tp != NULL )
+		if ( f->self == PULSER_CHANNEL_TWT && p->tp != NULL && pp->len > 0 )
 		{
 			pp->pos -= p->tp->function->left_twt_padding;
 			pp->len +=   p->tp->function->left_twt_padding
@@ -196,9 +198,10 @@ void dg2020_do_checks( FUNCTION *f )
 	}
 
 	dg2020_shape_padding_check_1( f );
-	dg2020_twt_padding_check( f );
+	if ( f->self == PULSER_CHANNEL_TWT )
+		dg2020_twt_padding_check( f );
 
-	for ( i = 0; i < f->num_active_pulses; i++ )
+	for ( i = 0; i < f->num_params; i++ )
 	{
 		pp = f->pulse_params + i;
 
@@ -221,13 +224,17 @@ void dg2020_do_checks( FUNCTION *f )
 
 		/* Check for overlap of pulses */
 
-		if ( i + 1 < f->num_active_pulses )
+		if ( i + 1 < f->num_params )
 			ppn = f->pulse_params + i + 1;
 		else
 			ppn = NULL;
 
 		if ( ppn != NULL && pp->pulse->pos + pp->pulse->len > ppn->pulse->pos )
 		{
+			if ( f->self == PULSER_CHANNEL_TWT &&
+				 ( pp->pulse->tp != NULL || ppn->pulse->tp != NULL ) )
+				 continue;
+
 			if ( dg2020.auto_shape_pulses &&
 				 f->self == PULSER_CHANNEL_PULSE_SHAPE )
 			{
@@ -280,7 +287,7 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 
 	if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
 		 ! f->uses_auto_shape_pulses ||
-		 f->num_active_pulses == 0 )
+		 f->num_params == 0 )
 		return;
 
 	/* Check that first pulse don't starts to early */
@@ -306,7 +313,7 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 
 	/* Shorten intermediate pulses if they would overlap */
 
-	for ( i = 1; i < f->num_active_pulses; i++ )
+	for ( i = 1; i < f->num_params; i++ )
 	{
 		POD *pod_pp, *pod_ppp;
 
@@ -348,7 +355,7 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 
 	/* Check that last pulse isn't too long */
 
-	pp = f->pulse_params + f->num_active_pulses - 1;
+	pp = f->pulse_params + f->num_params - 1;
 
 	if ( pp->pos + pp->len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
@@ -405,11 +412,11 @@ static void dg2020_shape_padding_check_2( void )
 			if ( ! f2->uses_auto_shape_pulses )
 				continue;
 
-			for ( k = 0; k < f1->num_active_pulses; k++ )
+			for ( k = 0; k < f1->num_params; k++ )
 			{
 				pp1 = f1->pulse_params + k;
 
-				for ( l = 0; l < f2->num_active_pulses; l++ )
+				for ( l = 0; l < f2->num_params; l++ )
 				{
 					pp2 = f2->pulse_params + l;
 
@@ -435,12 +442,17 @@ static void dg2020_shape_padding_check_2( void )
 
 static void dg2020_twt_padding_check( FUNCTION *f )
 {
-	PULSE_PARAMS *pp, *ppp;
-	int i;
+	PULSE_PARAMS *pp, *ppp, tmp_pp;
+	int i, j;
 
 
-	if ( f->self != PULSER_CHANNEL_TWT || f->num_active_pulses == 0 )
+	fsc2_assert( f->self == PULSER_CHANNEL_TWT );
+
+	if ( f->num_params == 0 )
 		return;
+
+	qsort( f->pulse_params, f->num_params, sizeof *f->pulse_params,
+		   dg2020_pulse_params_compare );
 
 	/* Check that first TWT pulse doesn't start too early (this only can
 	   happen for automatically created pulses) */
@@ -465,12 +477,6 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 		pp->len += pp->pos;
 		pp->pos = 0;
 
-		if ( ! pp->pulse->needs_update )
-		{
-			pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
-			pp->pulse->was_active = pp->pulse->is_active;
-		}
-
 		pp->pulse->needs_update = SET;
 	}
 
@@ -478,7 +484,7 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 	   remove pulses if a pulse is completely within the area of its
 	   predecessor */
 
-	for ( i = 1; i < f->num_active_pulses; i++ )
+	for ( i = 1; i < f->num_params; i++ )
 	{
 		ppp = pp;
 		pp = pp + 1;
@@ -507,76 +513,82 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 			pp->len += pp->pos;
 			pp->pos = 0;
 
-			if ( ! pp->pulse->needs_update )
-			{
-				pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
-				pp->pulse->was_active = pp->pulse->is_active;
-			}
-
 			pp->pulse->needs_update = SET;
 		}
 
 		if ( ppp->pos == pp->pos )
 		{
 			if ( ppp->len <= pp->len )
+			{
+				for ( j = i; j < f->num_active_pulses; j++ )
+					f->pulses[ j ]->pp--;
+
+				tmp_pp = *ppp;
+
 				memmove( ppp, pp,
-						 ( f->num_active_pulses-- - i-- ) * sizeof *pp );
+						 ( f->num_active_pulses - i-- ) * sizeof *pp );
+
+				pp = ppp;
+
+				ppp = f->pulse_params + f->num_active_pulses - 1;
+				*ppp = tmp_pp;
+				ppp->pulse->pp = ppp;
+
+				f->num_params--;
+				ppp->pulse->needs_update = SET;
+			}
 			else
+			{
+				if ( i == --f->num_params )
+				{
+					pp->pulse->needs_update = SET;
+					break;
+				}
+
+				for ( j = i + 1; j < f->num_active_pulses; j++ )
+					f->pulses[ j ]->pp--;
+
+				tmp_pp = *pp;
 				memmove( pp, pp + 1,
-						 ( f->num_active_pulses-- - --i ) * sizeof *pp );
+						 ( f->num_active_pulses - i-- - 1 ) * sizeof *pp );
 
-			if ( ! pp->pulse->needs_update )
-			{
-				pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
-				pp->pulse->was_active = pp->pulse->is_active;
+				pp = f->pulse_params + f->num_active_pulses - 1;
+				*pp = tmp_pp;
+				pp->pulse->pp = pp;
+				pp->pulse->needs_update = SET;
+
+				f->num_params--;
+				pp = ppp;
 			}
 
-			pp->pulse->needs_update = SET;
-
-			if ( ! ppp->pulse->needs_update )
-			{
-				ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
-				ppp->pulse->was_active = ppp->pulse->is_active;
-			}
-
-			ppp->pulse->needs_update = SET;
-			continue;
 		}
-
-		if ( ppp->pos + ppp->len > pp->pos )
+		else if ( ppp->pos + ppp->len > pp->pos )
 		{
 			if ( ppp->pos + ppp->len >= pp->pos + pp->len )
 			{
+				if ( i == --f->num_params )
+				{
+					pp->pulse->needs_update = SET;
+					break;
+				}
+
+				for ( j = i + 1; j < f->num_active_pulses; j++ )
+					f->pulses[ j ]->pp--;
+
+				tmp_pp = *pp;
 				memmove( pp, pp + 1,
-					  ( --f->num_active_pulses - --i ) * sizeof *pp );
+						 ( f->num_active_pulses - i-- - 1 ) * sizeof *pp );
 
-				if ( ! pp->pulse->needs_update )
-				{
-					pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
-					pp->pulse->was_active = pp->pulse->is_active;
-				}
-
+				pp = f->pulse_params + f->num_active_pulses - 1;
+				*pp = tmp_pp;
+				pp->pulse->pp = pp;
+				
 				pp->pulse->needs_update = SET;
-
-				if ( ! ppp->pulse->needs_update )
-				{
-					ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
-					ppp->pulse->was_active = ppp->pulse->is_active;
-				}
-
-				ppp->pulse->needs_update = SET;
+				pp = ppp;
 			}
-
 			else
 			{
-				ppp->len -= ppp->pos + ppp->len - pp->pos;
-
-				if ( ! ppp->pulse->needs_update )
-				{
-					ppp->pulse->is_old_len = ppp->pulse->is_old_pos = UNSET;
-					ppp->pulse->was_active = ppp->pulse->is_active;
-				}
-
+				ppp->len = pp->pos - ppp->pos;
 				ppp->pulse->needs_update = SET;
 			}
 		}
@@ -585,7 +597,7 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 	/* Check that the last TWT pulse isn't too long (can only happen for
 	   automatically created pulses) */
 
-	pp = f->pulse_params + f->num_active_pulses - 1;
+	pp = f->pulse_params + f->num_params - 1;
 	if ( pp->pos + pp->len >
 				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
 	{
@@ -615,12 +627,6 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 				   pp->pulse->function->right_twt_padding + pp->pos );
 		pp->len = MAX_PULSER_BITS - pp->pos;
 
-		if ( ! pp->pulse->needs_update )
-		{
-			pp->pulse->is_old_len = pp->pulse->is_old_pos = UNSET;
-			pp->pulse->was_active = pp->pulse->is_active;
-		}
-
 		pp->pulse->needs_update = SET;
 	}
 
@@ -630,17 +636,15 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 
 	pp = f->pulse_params;
 
-	for ( i = 1; i < f->num_active_pulses; i++ )
+	for ( i = 1; i < f->num_params; i++ )
 	{
 		ppp = pp;
 		pp = pp + 1;
 
 		if ( pp->pos - ( ppp->pos + ppp->len )
-			 < dg2020.minimum_twt_pulse_distance )
+										  < dg2020.minimum_twt_pulse_distance )
 		{
-			if ( pp->pulse->tp != NULL || ppp->pulse->tp != NULL )
-				ppp->len = pp->pos - ppp->pos;
-			else
+			if ( pp->pulse->tp == NULL && ppp->pulse->tp == NULL )
 			{
 				if ( dg2020.twt_distance_warning++ != 0 )
 					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
@@ -648,10 +652,33 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 						   pp->pulse->num, dg2020_pticks(
 										 dg2020.minimum_twt_pulse_distance ) );
 			}
+			else
+			{
+				ppp->len = pp->pos - ppp->pos;
+				ppp->pulse->needs_update = SET;
+			}
 		}
 	}
 }
 
+
+/*------------------------------------------------------------------*/
+/* Comparison function for two pulses: returns 0 if both pulses are */
+/* inactive, -1 if only the second pulse is inactive or starts at a */
+/* later time and 1 if only the first pulse is inactive pulse or    */
+/* the second pulse starts earlier.                                 */
+/*------------------------------------------------------------------*/
+
+static int dg2020_pulse_params_compare( const void *A, const void *B )
+{
+	PULSE_PARAMS *a = ( PULSE_PARAMS * ) A,
+				 *b = ( PULSE_PARAMS * ) B;
+
+	if ( a->pos <= b->pos )
+		return -1;
+
+	return 1;
+}
 
 /*------------------------------------------------------------------------*/
 /* Function checks if the distance between pulse shape pulses and defense */
@@ -712,8 +739,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 				else if ( ! dg2020.shape_2_defense_too_near )
 					print( SEVERE, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld got shorter than "
-						   "%s.\n",
-						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   "%s.\n", shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   defense_p->num,
 						   dg2020_pticks( dg2020.shape_2_defense ) );
@@ -728,8 +754,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 				{
 					print( FATAL, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
-						   defense_p->num,
-						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+						   defense_p->num, shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   dg2020_pticks( dg2020.defense_2_shape ) );
 					THROW( EXCEPTION );
@@ -737,18 +762,16 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 
 				if ( dg2020_IN_SETUP )
 				{
-					print( SEVERE, "Distance between DEFENSE pulse #%ld "
-						   "and PULSE_SHAPE pulse #%ld is shorter than "
-						   "%s.\n", defense_p->num,
-						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
+						   defense_p->num, shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   dg2020_pticks( dg2020.defense_2_shape ) );
 				}
 				else if ( ! dg2020.defense_2_shape_too_near )
-					print( SEVERE, "Distance between DEFENSE pulse #%ld "
-						   "and PULSE_SHAPE pulse #%ld got shorter than "
-						   "%s.\n", defense_p->num,
-						   shape_p->sp ? shape_p->sp->num : shape_p->num,
+					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
+						   "PULSE_SHAPE pulse %s#%ld got shorter than %s.\n",
+						   defense_p->num, shape_p->sp ? "for pulse " : "",
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   dg2020_pticks( dg2020.defense_2_shape ) );
 				dg2020.defense_2_shape_too_near++;
@@ -757,7 +780,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 	}
 }
 
-
+#if 0
 /*-----------------------------------------------------------*/
 /* Function creates all active pulses in the channels of the */
 /* pulser assigned to the function passed as argument.       */
@@ -766,6 +789,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 void dg2020_set_pulses( FUNCTION *f )
 {
 	PULSE *p;
+	PULSE_PARAMS *pp;
 	Ticks start, end;
 	int i, j;
 
@@ -789,27 +813,107 @@ void dg2020_set_pulses( FUNCTION *f )
 	if ( f->num_pulses == 0 )
 		return;
 
-	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses && p->is_active;
-		  p = f->pulses[ ++i ] )
+	for ( pp = f->pulse_params, i = 0; i < f->num_params; pp++, i++ )
 	{
+		if ( ! pp->pulse->is_active )
+			continue;
+
 		/* Set the area of the pulse itself */
 
-		start = p->pp->pos;
-		end = p->pp->pos + p->pp->len;
+		start = pp->pos;
+		end = pp->pos + pp->len;
 
 		for ( j = 0; j < f->pc_len; j++ )
 		{
-			if ( p->channel[ j ] == NULL )        /* skip unused channels */
+			if ( pp->pulse->channel[ j ] == NULL )   /* skip unused channels */
 				continue;
 
 			if ( start != end )
-				dg2020_set_constant( p->channel[ j ]->self, start, end - start,
-									 type_ON( f ) );
+				dg2020_set_constant( pp->pulse->channel[ j ]->self, start,
+									 end - start, type_ON( f ) );
+			pp->pulse->is_old_pos = pp->pulse->is_old_pos = SET;
 		}
 	}
 
 	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
 		p->was_active = p->is_active;
+}
+#endif
+
+
+/*-----------------------------------------------------------*/
+/* Function creates all active pulses in the channels of the */
+/* pulser assigned to the function passed as argument.       */
+/*-----------------------------------------------------------*/
+
+void dg2020_set_pulses( FUNCTION *f )
+{
+	PULSE_PARAMS *pp;
+	int i, j;
+	Ticks start, len;
+	int what;
+
+
+	fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
+				 f->self != PULSER_CHANNEL_PHASE_2 );
+
+	/* Always set the very first bit to LOW state, see the rant about the bugs
+	   in the pulser firmware at the start of dg2020_gpib_b.c. Then set the
+	   rest of the channels to off state. */
+
+	for ( i = 0; i < f->num_needed_channels; i++ )
+	{
+		dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
+
+		f->channel[ i ]->old_d = CHAR_P T_calloc( 2 * dg2020.max_seq_len, 1 );
+		f->channel[ i ]->new_d = f->channel[ i ]->old_d + dg2020.max_seq_len;
+		dg2020_set( f->channel[ i ]->old_d, 0, dg2020.max_seq_len - 1 );
+	}
+
+	if ( f->num_pulses != 0 )
+		for ( pp = f->pulse_params, i = 0; i < f->num_params; pp++, i++ )
+		{
+			if ( ! pp->pulse->is_active )
+				continue;
+
+			/* For the channels used by the pulse enter the old and new
+			   position in the corresponding memory representations of the
+			   channels and mark the channel as needing update */
+
+			for ( j = 0; j < f->pc_len; j++ )
+			{
+				if ( pp->pulse->channel[ j ] == NULL )
+					continue;
+
+				if ( pp->pulse->is_pos && pp->pulse->is_len && pp->len > 0 )
+				{
+					dg2020_set( pp->pulse->channel[ j ]->new_d,
+								pp->pos, pp->len );
+					dg2020_clear( pp->pulse->channel[ j ]->old_d,
+								  pp->pos, pp->len );
+				}
+
+				pp->pulse->channel[ j ]->needs_update = SET;
+			}
+
+			pp->pulse->is_old_len = pp->pulse->is_old_pos = SET;
+		}
+
+	for ( i = 0; i < f->num_needed_channels; i++ )
+	{
+		while ( ( what = dg2020_diff( f->channel[ i ]->old_d,
+									  f->channel[ i ]->new_d,
+									  &start, &len ) ) != 0 )
+			dg2020_set_constant( f->channel[ i ]->self, start, len,
+								 what == -1 ? type_OFF( f ) : type_ON( f ) );
+
+		if ( start + len < dg2020.mem_size - 1 )
+			dg2020_set_constant( f->channel[ i ]->self, len,
+								 dg2020.mem_size - 1 - len, type_OFF( f ) );
+
+		f->channel[ i ]->needs_update = UNSET;
+		T_free( f->channel[ i ]->old_d );
+	}
 }
 
 
@@ -1031,17 +1135,18 @@ void dg2020_commit( FUNCTION *f, bool flag )
 			if ( p->channel[ j ] == NULL )        /* skip unused channels */
 				continue;
 
-			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
+			if ( p->is_old_pos || ( p->is_old_len && p->old_pp->len > 0 ) )
 				dg2020_set( p->channel[ j ]->old_d,
 							p->is_old_pos ? p->old_pp->pos : p->pp->pos,
 							p->is_old_len ? p->old_pp->len : p->pp->len );
-			if ( p->is_pos && p->is_len && p->pp->len != 0 )
+			if ( p->is_pos && p->is_len && p->pp->len > 0 )
 				dg2020_set( p->channel[ j ]->new_d, p->pp->pos, p->pp->len );
 
 			p->channel[ j ]->needs_update = SET;
 		}
 
-		p->is_old_len = p->is_old_pos = UNSET;
+		if ( p->is_pos && p->is_len && p->pp->len != 0 )
+			p->is_old_len = p->is_old_pos = SET;
 		if ( p->is_active )
 			p->was_active = SET;
 		p->needs_update = UNSET;
@@ -1068,83 +1173,6 @@ void dg2020_commit( FUNCTION *f, bool flag )
 		f->channel[ i ]->needs_update = UNSET;
 		T_free( f->channel[ i ]->old_d );
 	}
-}
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-void dg2020_cw_setup( void )
-{
-	int i;
-	PHASE_SETUP *p;
-	FUNCTION *f;
-
-
-	f = dg2020.function + PULSER_CHANNEL_MW;
-	p = f->phase_setup;
-
-	if ( f->num_channels == 0 )
-	{
-		f->channel[ 0 ] = dg2020.channel + MAX_CHANNELS - 1;
-		f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 2;
-	}
-
-	if ( f->num_channels == 1 )
-	{
-		if ( f->channel[ 0 ]->self != MAX_CHANNELS - 1 )
-			f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 1;
-		else
-			f->channel[ 1 ] = dg2020.channel + MAX_CHANNELS - 2;
-	}
-
-	/* The first channel is set to be always logical low, the second (i.e.
-	   the cw channel) to be always logical high */
-
-	if ( ! dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, 0 ) ||
-		 ! dg2020_set_constant( f->channel[ 0 ]->self, 0, 127,
-								type_OFF( f ) ) ||
-		 ! dg2020_set_constant( f->channel[ 1 ]->self, -1, 1, 0 ) ||
-		 ! dg2020_set_constant( f->channel[ 1 ]->self, 0, 127, type_ON( f ) ) )
-	{
-		print( FATAL, "Failed to setup pulser.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Finally, we've got to setup the blocks. The first one has not much
-	   meaning (except allowing to start with a low voltage level, while
-	   the second block is repeated infinitely. */
-
-	strcpy( dg2020.block[ 0 ].blk_name, "B0" );
-	dg2020.block[ 0 ].start = 0;
-	dg2020.block[ 0 ].repeat = 1;
-	dg2020.block[ 0 ].is_used = SET;
-
-	strcpy( dg2020.block[ 1 ].blk_name, "B1" );
-	dg2020.block[ 1 ].start = 64;
-	dg2020.block[ 1 ].repeat = 1;
-	dg2020.block[ 1 ].is_used = SET;
-
-	if ( ! dg2020_make_blocks( 2, dg2020.block ) ||
-		 ! dg2020_make_seq( 2, dg2020.block ) )
-	{
-		print( FATAL, "Failed to setup pulser.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Now that everything is done the pulser is told to really set the
-	   channels */
-
-	dg2020_update_data( );
-
-	/* Finally, all non-cw channels get associated with the first pulser
-	   channel and the cw channel with the second */
-
-	for ( i = 0; i < f->num_pods; i++ )
-		if ( f->pod[ i ] != p->pod[ PHASE_CW ] )
-			dg2020_channel_assign( f->channel[ 0 ]->self, f->pod[ i ]->self );
-		else
-			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod[ i ]->self );
 }
 
 

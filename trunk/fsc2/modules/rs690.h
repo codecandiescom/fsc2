@@ -55,7 +55,6 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
-Var *pulser_cw_mode( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
@@ -179,9 +178,9 @@ typedef struct _C_ {
 
 typedef struct _PHS_ {
 	bool is_defined;
-	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
-	bool is_needed[ PHASE_CW - PHASE_PLUS_X + 1 ];
-	CHANNEL *channels[ PHASE_CW - PHASE_PLUS_X + 1 ];
+	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
+	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
+	CHANNEL *channels[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	FUNCTION *function;
 } PHASE_SETUP;
 
@@ -223,8 +222,6 @@ typedef struct {
 
 	Ticks repeat_time;       /* only in INTERNAL mode */
 	bool is_repeat_time;
-
-	bool is_cw_mode;
 
 	bool keep_all;           /* keep even unused pulses ? */
 

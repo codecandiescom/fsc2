@@ -95,7 +95,7 @@ bool ep385_init( const char *name )
 	if ( gpib_write( ep385.device, "TIM;SET;TRY\r", 12 ) == FAILURE )
 		ep385_gpib_failure( );
 
-	ep385_set_channels( );
+	ep385_do_update( );
 
 	return OK;
 }
@@ -135,7 +135,7 @@ bool ep385_set_channels( void )
 	{
 		f = ep385.function + i;
 
-		if ( ! f->is_needed && f->num_channels == 0 )
+		if ( f->num_channels == 0 )
 			continue;
 
 		for ( j = 0; j < f->num_channels; j++ )

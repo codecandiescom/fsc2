@@ -103,7 +103,6 @@ int dg2020_b_init_hook( void )
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	dg2020.is_timebase = UNSET;
-	dg2020.is_cw_mode = UNSET;
 	dg2020.is_trig_in_mode = UNSET;
 	dg2020.is_trig_in_slope = UNSET;
 	dg2020.is_trig_in_level = UNSET;
@@ -164,13 +163,11 @@ int dg2020_b_init_hook( void )
 		f->pcm = NULL;
 		f->pc_len = 1;
 		f->num_active_pulses = 0;
-		f->old_num_active_pulses = 0;
 		f->pulse_params = NULL;
 		f->old_pulse_params = NULL;
 		f->uses_auto_shape_pulses = UNSET;
 		f->uses_auto_twt_pulses = UNSET;
-		f->has_auto_twt_pulses = UNSET;
-		f->max_len = 0;
+		f->max_duty_warning = 0;
 	}
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
@@ -185,7 +182,7 @@ int dg2020_b_init_hook( void )
 	{
 		dg2020_phs[ i ].is_defined = UNSET;
 		dg2020_phs[ i ].function = NULL;
-		for ( j = 0; j < PHASE_CW - PHASE_PLUS_X; j++ )
+		for ( j = 0; j < PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 		{
 			dg2020_phs[ i ].is_set[ j ] = UNSET;
 			dg2020_phs[ i ].is_needed[ j ] = UNSET;
@@ -204,7 +201,7 @@ int dg2020_b_init_hook( void )
 
 int dg2020_b_test_hook( void )
 {
-	if ( dg2020_Pulses == NULL && ! dg2020.is_cw_mode )
+	if ( dg2020_Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
 		print( WARN, "Driver loaded but no pulses defined.\n" );
@@ -264,7 +261,7 @@ int dg2020_b_end_of_test_hook( void )
 	static FUNCTION *f;
 
 
-	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
+	if ( ! dg2020_is_needed )
 		return 1;
 
 	if ( dg2020.dump_file != NULL )
@@ -277,6 +274,24 @@ int dg2020_b_end_of_test_hook( void )
 	{
 		fclose( dg2020.show_file );
 		dg2020.show_file = NULL;
+	}
+
+	/* Check that TWT duty cycle isn't exceeded due to an excessive length of
+	   TWT or TWT_GATE pulses */
+
+	if ( dg2020.is_repeat_time )
+	{
+		f = dg2020.function + PULSER_CHANNEL_TWT;
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT %ld time%s exceeded due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
+
+		f = dg2020.function + PULSER_CHANNEL_TWT_GATE;
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT %ld time%s exceeded due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
 	}
 
 	/* If in the test it was found that shape and defense pulses got too
@@ -421,7 +436,7 @@ int dg2020_b_exp_hook( void )
 	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-	if ( ! dg2020.is_cw_mode && ! dg2020.is_confirmation && 
+	if ( ! dg2020.is_confirmation && 
 		 ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ) )
 	{
 		char str[ 500 ];
@@ -466,29 +481,24 @@ int dg2020_b_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! dg2020.is_cw_mode )
+	/* Now we have to tell the pulser about all the pulses */
+
+	dg2020_IN_SETUP = SET;
+	if ( ! dg2020_reorganize_pulses( SET ) )
 	{
-		/* Now we have to tell the pulser about all the pulses */
-
-		dg2020_IN_SETUP = SET;
-		if ( ! dg2020_reorganize_pulses( UNSET ) )
-		{
-			dg2020_IN_SETUP = UNSET;
-			THROW( EXCEPTION );
-		}
 		dg2020_IN_SETUP = UNSET;
-
-		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			if ( dg2020.function[ i ].is_used )
-				dg2020_set_pulses( dg2020.function + i );
-
-		/* Finally tell the pulser to update (we're always running in manual
-		   update mode) and than switch the pulser into run mode */
-
-		dg2020_update_data( );
+		THROW( EXCEPTION );
 	}
-	else
-		dg2020_cw_setup( );
+	dg2020_IN_SETUP = UNSET;
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		if ( dg2020.function[ i ].is_used )
+			dg2020_set_pulses( dg2020.function + i );
+
+	/* Finally tell the pulser to update (we're always running in manual
+	   update mode) and than switch the pulser into run mode */
+
+	dg2020_update_data( );
 
 	dg2020_run( dg2020.is_running );
 
@@ -501,11 +511,22 @@ int dg2020_b_exp_hook( void )
 
 int dg2020_b_end_of_exp_hook( void )
 {
+	FUNCTION *f;
+	int i;
+
+
 	if ( ! dg2020_is_needed )
 		return 1;
 
 	dg2020_run( STOP );
 	gpib_local( dg2020.device );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+		f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
+	}
 
 	return 1;
 }
@@ -533,10 +554,6 @@ void dg2020_b_exit_hook( void )
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = dg2020.function + i;
-
-		f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
-		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
-
 		f->pcm = CHANNEL_PP T_free( f->pcm );
 		f->pm = BOOL_P T_free( f->pm );
 		f->pulses = PULSE_PP T_free( f->pulses );
@@ -1066,13 +1083,6 @@ Var *pulser_update( Var *v )
 
 	v = v;
 
-
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1091,58 +1101,6 @@ Var *pulser_update( Var *v )
 
 
 /*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-Var *pulser_cw_mode( Var *v )
-{
-	v = v;
-
-
-	/* We can't have any pulses in cw mode */
-
-	if ( dg2020_Pulses != NULL )
-	{
-		print( FATAL, "CW mode and use of pulses is mutually exclusive.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* We need the function MICROWAVE defined for cw mode */
-
-	if ( ! dg2020.function[ PULSER_CHANNEL_MW ].is_used )
-	{
-		print( FATAL, "Function 'MICROWAVE' has not been defined as needed "
-			   "for CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.function[ PULSER_CHANNEL_MW ].phase_setup == NULL )
-	{
-		print( FATAL, "Missing PHASE_SETUP for function 'MICROWAVE'.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "External trigger mode can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( dg2020.is_repeat_time )
-	{
-		print( FATAL, "Repeat time/frequency can't be set in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	dg2020.mem_size = 128;
-	dg2020.is_cw_mode = SET;
-	dg2020.trig_in_mode = INTERNAL;
-	dg2020.is_trig_in_mode = SET;
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/*----------------------------------------------------------------------*/
 /* Public function to change the position of pulses. If called with no  */
 /* argument all active pulses that have a position change time set will */
 /* be moved, otherwise all pulses passed as arguments to the function.  */
@@ -1154,12 +1112,6 @@ Var *pulser_shift( Var *v )
 {
 	PULSE *p;
 
-
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1260,12 +1212,6 @@ Var *pulser_increment( Var *v )
 	PULSE *p;
 
 
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1365,12 +1311,6 @@ Var *pulser_next_phase( Var *v )
 	long phase_number;
 
 
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1425,7 +1365,7 @@ Var *pulser_next_phase( Var *v )
 			f->next_phase = 0;
 
 		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
 						 f->pcm[ j * f->pc_len + f->next_phase ]->self,
@@ -1447,12 +1387,6 @@ Var *pulser_reset( Var *v )
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( dg2020_phs[ 0 ].function != NULL ||
 		 dg2020_phs[ 1 ].function != NULL )
@@ -1471,12 +1405,6 @@ Var *pulser_phase_reset( Var *v )
 	FUNCTION *f;
 	long phase_number;
 
-
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1521,7 +1449,7 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 0;
 
 		if ( FSC2_MODE == EXPERIMENT )
-			for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
 				if ( f->phase_setup->is_set[ j ] &&
 					 ! dg2020_channel_assign(
 						 					f->pcm[ j * f->pc_len + 0 ]->self,
@@ -1540,12 +1468,6 @@ Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 
-
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );

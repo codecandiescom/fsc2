@@ -242,7 +242,6 @@ Ticks dg2020_get_max_seq_len( void )
 			continue;
 
 		max = Ticks_max( max, f->max_seq_len ); 
-//+ f->delay );
 	}
 
 	if ( dg2020.is_max_seq_len )
@@ -420,6 +419,17 @@ void dg2020_set( char *arena, Ticks start, Ticks len )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
+void dg2020_clear( char *arena, Ticks start, Ticks len )
+{
+	fsc2_assert( start + len <= dg2020.max_seq_len );
+
+	memset( arena + start, UNSET, len );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 {
 	static Ticks where = 0;
@@ -518,10 +528,10 @@ Ticks dg2020_calc_max_length( FUNCTION *f )
 	Ticks max_len = 0;
 
 
-	if ( ! f->is_needed || f->num_channels == 0 || f->num_active_pulses == 0 )
+	if ( ! f->is_needed || f->num_channels == 0 || f->num_params == 0 )
 		return 0;
 
-	for ( i = 0; i < f->num_active_pulses; i++ )
+	for ( i = 0; i < f->num_params; i++ )
 		max_len += f->pulse_params[ i ].len;
 
 	return max_len;
@@ -556,7 +566,7 @@ void dg2020_dump_channels( FILE *fp )
 			pod = f->pod[ j ];
 
 			fprintf( fp, "%s:%d", f->name, pod->self );
-			for ( k = 0; k < f->num_active_pulses; k++ )
+			for ( k = 0; k < f->num_params; k++ )
 			{
 				pp = f->pulse_params + k;
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&

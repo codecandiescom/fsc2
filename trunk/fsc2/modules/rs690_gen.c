@@ -194,9 +194,10 @@ bool rs690_assign_channel_to_function( int function, long channel )
 		case TIMEBASE_4_NS :
 			if ( channel % 16 >= 4 )
 			{
-				print( FATAL, "For time bases below 8 ns only channels "
-					   "[A-%c][0-3] can be used\n",
-					   NUM_HSM_CARDS == 1 ? 'D' : 'H' );
+				print( FATAL, "For %s only channels [A-%c][0-3] can be used\n",
+					   rs690.timebase_mode == INTERNAL ?
+					   "time bases below 8 ns" : "external time bases",
+					   'A' + 4 * NUM_HSM_CARDS - 1 );
 				THROW( EXCEPTION );
 			}
 			break;
@@ -206,7 +207,7 @@ bool rs690_assign_channel_to_function( int function, long channel )
 			{
 				print( FATAL, "For time bases below 16 ns only channels "
 					   "[A-%c][0-7] can be used\n",
-					   NUM_HSM_CARDS == 1 ? 'D' : 'H' );
+					   'A' + 4 * NUM_HSM_CARDS - 1 );
 				THROW( EXCEPTION );
 			}
 			break;
@@ -288,11 +289,9 @@ bool rs690_set_function_delay( int function, double delay )
 		if ( Delay < rs690.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				if ( i == function )
-					continue;
-				rs690.function[ i ].delay -= rs690.neg_delay + Delay;
-			}
+				if ( i != function )
+					rs690.function[ i ].delay -= rs690.neg_delay + Delay;
+
 			rs690.neg_delay = - Delay;
 			rs690.function[ function ].delay = 0;
 		}
@@ -554,7 +553,7 @@ bool rs690_set_phase_reference( int phs, int function )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
 			   "function %s.\n",
-			   phs, rs690_phs[ phs ].function->name );
+			   phs + 1, rs690_phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -592,7 +591,7 @@ bool rs690_phase_setup_prep( int phs, int type, int dummy, long channel )
 
 	/* Make sure the phase type is supported */
 
-	if  ( type < PHASE_PLUS_X || type > PHASE_CW )
+	if  ( type < PHASE_PLUS_X || type > PHASE_MINUS_Y )
 	{
 		print( FATAL, "Unknown phase type.\n" );
 		THROW( EXCEPTION );
@@ -694,7 +693,7 @@ bool rs690_phase_setup( int phs )
 		return FAIL;
 	}
 
-	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+	for ( i = 0; i <= PHASE_MINUS_Y - PHASE_PLUS_X; i++ )
 	{
 		if ( ! rs690_phs[ phs ].is_set[ i ] )
 			 continue;

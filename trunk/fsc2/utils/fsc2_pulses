@@ -246,7 +246,10 @@ sub new {
 						   $self->{ 'canvas' }->xviewScroll( -1, 'unit' ); } );
 		$self->{ 'top' }->bind( '<Right>' => sub {
 						   $self->{ 'canvas' }->xviewScroll( 1, 'unit' ); } );
-
+		$self->{ 'top' }->bind( '<Up>' => sub {
+						   $self->{ 'canvas' }->yviewScroll( -1, 'unit' ); } );
+		$self->{ 'top' }->bind( '<Down>' => sub {
+						   $self->{ 'canvas' }->yviewScroll( 1, 'unit' ); } );
 	}
 
 	$f1->pack( '-fill' => 'x' );
@@ -320,30 +323,16 @@ sub new {
 										 $self->pshift( 1 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-4>' => sub {
 										 $self->pshift( 1 ); } );
-    $self->{ 'top' }->bind( '<Up>' => sub {
-										 $self->pshift( 1 ); } );
-    $self->{ 'top' }->bind( '<Shift-Up>' => sub {
-										 $self->pshift( 10 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-3>' => sub {
 										 $self->pshift( -1 ); } );
     $self->{ 'canvas' }->CanvasBind( '<Button-5>' => sub {
 										 $self->pshift( -1 ); } );
-    $self->{ 'top' }->bind( '<Down>' => sub {
-										 $self->pshift( -1 ); } );
-    $self->{ 'top' }->bind( '<Shift-Down>' => sub {
-										 $self->pshift( -10 ); } );
 	$self->{ 'top' }->bind( '<End>' => sub {
 										 $self->pshift( -1, 1 ); } );
 	$self->{ 'top' }->bind( '<Home>' => sub {
 										 $self->pshift( 1, 1 ); } );
-	$self->{ 'top' }->bind( '<Prior>' => sub {
-										 $self->pshift(
-									       int( 0.1 * $Channels->num_steps ) );
-									     } );
-	$self->{ 'top' }->bind( '<Next>' => sub {
-										 $self->pshift(
-									     - int( 0.1 * $Channels->num_steps ) );
-									     } );
+	$self->{ 'top' }->bind( '<Prior>' => sub { $self->pshift( 1 ); } );
+	$self->{ 'top' }->bind( '<Next>' => sub { $self->pshift( -1 ); } );
 	$self->{ 'top' }->bind( '<Control-d>' => sub {
 								              $self->{ 'delay' } ^= 1;
 											  $self->draw_scale;
@@ -408,6 +397,7 @@ sub primary_draw {
 		$y -= 0.5 * $ch->{ 'inv' } * $self->{ 'hstep' };
 		$c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
 	}
+
 	$self->redraw( );
 }
 

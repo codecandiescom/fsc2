@@ -90,9 +90,6 @@ void ep385_init_setup( void )
 		RETHROW( );
 	}
 
-	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT );
-	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT_GATE );
-
 	if ( ep385.dump_file != NULL )
 		ep385_dump_channels( ep385.dump_file );
 
@@ -434,8 +431,6 @@ static void ep385_basic_functions_check( void )
 		{
 			print( WARN, "No pulses have been assigned to function '%s'.\n",
 				   Function_Names[ i ] );
-			f->is_used = UNSET;
-
 			continue;
 		}
 
@@ -854,8 +849,7 @@ static void ep385_pulse_init_check( FUNCTION *f )
 		{
 			p2 = f->pulses[ j ];
 
-			/* Skip checks for inactive pulses and automatically generated
-			   TWT pulses */
+			/* Skip checks for inactive pulses */
 
 			if ( ! p2->is_active ||
 				 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
@@ -870,7 +864,7 @@ static void ep385_pulse_init_check( FUNCTION *f )
 				{
 					if ( p1->sp != NULL && p2->sp != NULL &&
 						 p1->sp->function != p2->sp->function )
-						print( FATAL, "Shape pulses for pulses #%ld function "
+						print( FATAL, "Shape pulses for pulses #%ld (function "
 							   "'%s') and #%ld (function '%s') overlap.\n",
 							   p1->sp->num, p1->sp->function->name,
 							   p2->sp->num, p2->sp->function->name );

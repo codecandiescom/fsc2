@@ -154,7 +154,8 @@ static bool ep385_update_pulses( bool flag )
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
 			ep385_shape_padding_check_1( ch );
-			ep385_twt_padding_check( ch );
+			if ( ch->function->self == PULSER_CHANNEL_TWT )
+				ep385_twt_padding_check( ch );
 
 			/* Compare old and new state, if nothing changed, i.e. the number
 			   of active pulses is the same and all positions and lengths are
@@ -186,7 +187,7 @@ static bool ep385_update_pulses( bool flag )
 
 			TRY
 			{
-				/* Check that there aren't to many pulses for the chanel */
+				/* Check that there aren't too many pulses for the chanel */
 
 				if ( ch->num_active_pulses > MAX_PULSES_PER_CHANNEL )
 				{
@@ -294,11 +295,10 @@ static void ep385_pulse_check( FUNCTION *f )
 		{
 			p2 = f->pulses[ j ];
 
-			/* Skip checks for inactive pulses and automatically generated
-			   TWT pulses */
+			/* Skip checks for inactive pulses */
 
 			if ( ! p2->is_active ||
-				( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
+				 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
 				continue;
 
 			if ( p1->pos == p2->pos ||
@@ -310,7 +310,7 @@ static void ep385_pulse_check( FUNCTION *f )
 				{
 					if ( p1->sp != NULL && p2->sp != NULL &&
 						 p1->sp->function != p2->sp->function )
-						print( FATAL, "Shape pulses for pulses #%ld function "
+						print( FATAL, "Shape pulses for pulses #%ld (function "
 							   "'%s') and #%ld (function '%s') start to "
 							   "overlap.\n", p1->sp->num,
 							   p1->sp->function->name, p2->sp->num,
@@ -553,7 +553,8 @@ void ep385_full_reset( void )
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
 			ep385_shape_padding_check_1( ch );
-			ep385_twt_padding_check( ch );
+			if ( ch->function->self == PULSER_CHANNEL_TWT )
+				ep385_twt_padding_check( ch );
 		}
 	}
 
@@ -702,24 +703,29 @@ void ep385_shape_padding_check_2( void )
 }
 
 
-/*------------------------------------------------*/
-/*------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Here we check that TWT pulses don't overlap (if at least one of */
+/* them has been created automatically), if necessary shortening   */
+/* or even eliminating TWT pulses, Then we again lengthen pulses   */
+/* if the time between two TWT gets too short.                     */
+/*-----------------------------------------------------------------*/
 
 void ep385_twt_padding_check( CHANNEL *ch )
 {
 	PULSE_PARAMS *pp, *ppp;
 	int i;
 
-	if ( ch->function->self != PULSER_CHANNEL_TWT ||
-		 ! ch->function->has_auto_twt_pulses ||
-		 ch->num_active_pulses == 0 )
+
+	fsc2_assert( ch->function->self == PULSER_CHANNEL_TWT );
+
+	if ( ch->num_active_pulses == 0 )
 		return;
 
 	/* Check that first TWT pulse doesn't start too early (this only can
 	   happen for automatically created pulses) */
 
 	pp = ch->pulse_params;
-	if ( pp->pulse->tp != NULL && pp->pos < 0 )
+	if ( pp->pos < 0 )
 	{
 		if ( ! pp->pulse->left_twt_warning )
 		{
@@ -739,13 +745,16 @@ void ep385_twt_padding_check( CHANNEL *ch )
 	}
 
 	/* Shorten intermediate pulses so they don't overlap - if necessary even
-	   remove pulses if a pulse is completely within the area of its
+	   remove a pulse if it's is completely within the area of its
 	   predecessor */
 
 	for ( i = 1; i < ch->num_active_pulses; i++ )
 	{
 		ppp = pp;
 		pp = pp + 1;
+
+		/* Check for negative start times (can only happen for automatically
+		   created pulses) */
 
 		if ( pp->pos < 0 )
 		{
@@ -774,18 +783,18 @@ void ep385_twt_padding_check( CHANNEL *ch )
 			else
 				memmove( pp, pp + 1,
 						 ( ch->num_active_pulses-- - --i ) * sizeof *pp );
-			continue;
+			pp = ppp;
 		}
-
-		if ( ppp->pos + ppp->len > pp->pos )
+		else if ( ppp->pos + ppp->len > pp->pos )
 		{
 			if ( ppp->pos + ppp->len >= pp->pos + pp->len )
 			{
 				memmove( pp, pp + 1,
-					  ( --ch->num_active_pulses - --i ) * sizeof *pp );
+						 ( --ch->num_active_pulses - --i ) * sizeof *pp );
+				pp = ppp;
 			}
 			else
-				ppp->len -= ppp->pos + ppp->len - pp->pos;
+				ppp->len = pp->pos - ppp->len;
 		}
 	}
 
@@ -795,7 +804,7 @@ void ep385_twt_padding_check( CHANNEL *ch )
 	pp = ch->pulse_params + ch->num_active_pulses - 1;
 	if ( pp->pos + pp->len > MAX_PULSER_BITS )
 	{
-		if ( ! pp->pulse->right_twt_warning )
+		if ( pp->pulse->tp != NULL && ! pp->pulse->right_twt_warning )
 		{
 			print( SEVERE, "Pulse #%ld too long to set right padding of %s "
 				   "for its TWT pulse.\n", pp->pulse->tp->num, ep385_pticks(
@@ -822,11 +831,9 @@ void ep385_twt_padding_check( CHANNEL *ch )
 		pp = pp + 1;
 
 		if ( pp->pos - ( ppp->pos + ppp->len )
-			 < ep385.minimum_twt_pulse_distance )
+			 							   < ep385.minimum_twt_pulse_distance )
 		{
-			if ( pp->pulse->tp != NULL || ppp->pulse->tp != NULL )
-				ppp->len = pp->pos - ppp->pos;
-			else
+			if ( pp->pulse->tp == NULL && ppp->pulse->tp == NULL )
 			{
 				if ( ep385.twt_distance_warning++ != 0 )
 					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
@@ -834,6 +841,8 @@ void ep385_twt_padding_check( CHANNEL *ch )
 						   pp->pulse->num, ep385_pticks(
 										  ep385.minimum_twt_pulse_distance ) );
 			}
+			else
+				ppp->len = pp->pos - ppp->pos;
 		}
 	}
 }
@@ -941,43 +950,15 @@ static void ep385_commit( bool flag )
 	/* Only really set the pulses while doing an experiment */
 
 	if ( ! flag )
-	{
-		ep385.function[ PULSER_CHANNEL_TWT ].max_len =
-			ep385.function[ PULSER_CHANNEL_TWT_GATE ].max_len = 0;
-	}
-
-	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT );
-	ep385_calc_max_length( ep385.function + PULSER_CHANNEL_TWT_GATE );
-
-	if ( ! flag )
-	{
 		ep385_set_channels( );
-
-		if ( ep385.trig_in_mode == INTERNAL && ep385.is_repeat_time )
-		{
-			f = ep385.function + PULSER_CHANNEL_TWT;
-			if ( f->is_used && f->num_channels > 0 &&
-				 f->max_len > MAX_TWT_DUTY_CYCLE
-							  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
-								  REPEAT_TICKS * ep385.repeat_time ) )
-				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
-					   "%s pulses.\n", f->name );
-
-			f = ep385.function + PULSER_CHANNEL_TWT_GATE;
-			if ( f->is_used && f->num_channels > 0 &&
-				 f->max_len > MAX_TWT_DUTY_CYCLE
-							  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
-								  REPEAT_TICKS * ep385.repeat_time ) )
-				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
-					   "%s pulses.\n", f->name );
-		}
-	}
 	else
 	{
 		if ( ep385.dump_file != NULL )
 			ep385_dump_channels( ep385.dump_file );
 		if ( ep385.show_file != NULL )
 			ep385_dump_channels( ep385.show_file );
+
+		ep385_duty_check( );
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )

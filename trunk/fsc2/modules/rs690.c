@@ -63,7 +63,6 @@ int rs690_init_hook( void )
 
 	rs690.needs_update = SET;
 	rs690.keep_all     = UNSET;
-	rs690.is_cw_mode   = UNSET;
 
 	pulser_struct.set_timebase = rs690_store_timebase;
 	pulser_struct.set_timebase_level = rs690_store_timebase_level;
@@ -185,9 +184,6 @@ int rs690_init_hook( void )
 
 int rs690_test_hook( void )
 {
-	if ( rs690.is_cw_mode )
-		return 1;
-
 	if ( rs690_Pulses == NULL )
 	{
 		rs690_is_needed = UNSET;
@@ -257,13 +253,12 @@ int rs690_end_of_test_hook( void )
 		rs690.show_file = NULL;
 	}
 
-	if ( ! rs690_is_needed || rs690.is_cw_mode )
+	if ( ! rs690_is_needed )
 		return 1;
 
 	/* Reset the internal representation back to its initial state */
 
-	if ( ! rs690.is_cw_mode )
-		rs690_full_reset( );
+	rs690_full_reset( );
 
 	/* Check that TWT duty cycle isn't exceeded due to an excessive length of
 	   TWT or TWT_GATE pulses */
@@ -360,10 +355,6 @@ int rs690_end_of_test_hook( void )
 
 int rs690_exp_hook( void )
 {
-	int i, j;
-	FUNCTION *f;
-
-
 	if ( ! rs690_is_needed )
 		return 1;
 
@@ -415,28 +406,6 @@ int rs690_exp_hook( void )
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
-
-	/* Channels associated with unused functions have been set to output no
-	   pulses, now we can remove the association between the function and
-	   the channel */
-
-	if ( ! rs690.is_cw_mode )
-		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		{
-			f = rs690.function + i;
-
-			if ( f->is_used || f->num_channels == 0 )
-				continue;
-
-			for ( j = 0; j < f->num_channels; j++ )
-			{
-				f->channel[ j ]->function = NULL;
-				f->channel[ j ] = NULL;
-			}
-
-			f->num_channels = 0;
-		}
-
 
 	rs690_run( SET );
 
@@ -1027,12 +996,6 @@ Var *pulser_update( Var *v )
 	v = v;
 
 
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1040,51 +1003,6 @@ Var *pulser_update( Var *v )
 
 	if ( rs690.needs_update )
 		return vars_push( INT_VAR, rs690_do_update( ) ? 1 : 0 );
-
-	return vars_push( INT_VAR, 1 );
-}
-
-
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
-
-Var *pulser_cw_mode( Var *v )
-{
-	v = v;
-
-
-	/* We can't have any pulses in cw mode */
-
-	if ( rs690_Pulses != NULL )
-	{
-		print( FATAL, "CW mode and use of pulses is mutually exclusive.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* We need the function MICROWAVE defined for cw mode */
-
-	if ( ! rs690.function[ PULSER_CHANNEL_MW ].is_used )
-	{
-		print( FATAL, "Function 'MICROWAVE' has not been defined as needed "
-			   "for CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( rs690.is_trig_in_mode && rs690.trig_in_mode == EXTERNAL )
-	{
-		print( FATAL, "External trigger mode can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( rs690.is_repeat_time )
-	{
-		print( FATAL, "Repeat time/frequency can't be set in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
-	rs690.is_cw_mode = SET;
-	rs690.trig_in_mode = INTERNAL;
-	rs690.is_trig_in_mode = SET;
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1102,12 +1020,6 @@ Var *pulser_shift( Var *v )
 {
 	PULSE *p;
 
-
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Pulses can't be shifted in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1203,12 +1115,6 @@ Var *pulser_increment( Var *v )
 	PULSE *p;
 
 
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Pulses can't be changed in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1299,12 +1205,6 @@ Var *pulser_reset( Var *v )
 {
 	v = v;
 
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1328,12 +1228,6 @@ Var *pulser_pulse_reset( Var *v )
 {
 	PULSE *p;
 
-
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1434,12 +1328,6 @@ Var *pulser_next_phase( Var *v )
 	long phase_number;
 
 
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -1505,12 +1393,6 @@ Var *pulser_phase_reset( Var *v )
 	FUNCTION *f;
 	long phase_number;
 
-
-	if ( rs690.is_cw_mode )
-	{
-		print( FATAL, "Function can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
 
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );

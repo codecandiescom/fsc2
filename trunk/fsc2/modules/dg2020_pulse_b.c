@@ -35,14 +35,6 @@ bool dg2020_new_pulse( long pnum )
 	PULSE *lp = NULL;
 
 
-	/* If cw mode has been set no pulses can be defined */
-
-	if ( dg2020.is_cw_mode )
-	{
-		print( FATAL, "Pulses can't be used in CW mode.\n" );
-		THROW( EXCEPTION );
-	}
-
 	while ( cp != NULL )
 	{
 		if ( cp->num == pnum )
