@@ -125,21 +125,25 @@ void notify_conn( int signo );
 
 #if defined ( FSC2_MAIN )
 
-uid_t EUID;
-gid_t EGID;
+uid_t EUID;                  /* user and group ID the program was called */
+gid_t EGID;                  /* with (should both translate to fsc2) */
 
-/* used in compiling the user supplied program */
+/* used in compiling and executing the user supplied program */
 
-long Lc = 0;
-char *Fname = NULL;
-Compilation compilation;
-Prg_Token *prg_token = NULL;
-long prg_length = 0;
-Prg_Token *cur_prg_token;
-long On_Stop_Pos = -1;
+long Lc = 0;                 /* line number in currently parsed file */
+char *Fname = NULL;          /* name of currently paresed file */
+Compilation compilation;     /* structure with infos about compilation state */
+Prg_Token *prg_token = NULL; /* array with predigested program */
+long prg_length = 0;         /* number of array elements in predigested
+								program */
+Prg_Token *cur_prg_token;    /* index of currently handled element in
+								predigested program */
+long On_Stop_Pos = -1;       /* index of the ON_STOP command in the array with
+								the predigested program */
 
-Var *var_list = NULL;
-Var *Var_Stack = NULL;
+Var *var_list = NULL;        /* list of all variables used in the program */
+Var *Var_Stack = NULL;       /* list for stack of variables used in evaluation
+								of expressions and function calls */
 
 Device *Device_List = NULL;
 Device_Name *Device_Name_List = NULL;
