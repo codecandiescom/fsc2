@@ -496,9 +496,6 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->f = f;
 	cs->dev_name = device_name;
 
-	if ( f && f->to_be_loaded )
-		printf( "%s\n", cs->f->device->name );
-
 	return Call_Stack = cs;
 }
 
