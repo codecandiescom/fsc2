@@ -11,6 +11,7 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
+void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void new_data_handler( int sig_type );
 static void quitting_handler( int sig_type, void *data );
 static void run_sigchld_handler( int sig_type );
@@ -46,6 +47,8 @@ static volatile bool child_is_quitting;
 bool run( void )
 {
     char *gpib_log = ( char * ) GPIB_LOG_FILE;
+	Compilation compile_test;
+
 
 
 	/* If there are no commands we're already done */
@@ -73,11 +76,16 @@ bool run( void )
 		return FAIL;
 	}
 
+	/* Make a copy of the errors found while compiling the program */
+
+	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
+
 	/* Run all the experiment hooks - on failure reset GPIB bus */
 
 	TRY
 	{
 		run_exp_hooks( );
+		check_for_further_errors( &compile_test, &compilation );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -166,6 +174,55 @@ bool run( void )
 		gpib_shutdown( );
 	stop_measurement( NULL, 1 );
 	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Checks if new errors etc. were found while running the exp_hooks. */
+/* If so ask the user if she wants to continue - if no an exception  */
+/* is thrown.                                                        */
+/*-------------------------------------------------------------------*/
+
+void check_for_further_errors( Compilation *c_old, Compilation *c_all )
+{
+	Compilation diff;
+	char str1[ 128 ],
+		 str2[ 128 ];
+	int i;
+
+
+	for ( i = FATAL; i < NO_ERROR; i++ )
+		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
+
+
+	if ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 )
+	{
+		if ( diff.error[ SEVERE ] != 0 )
+		{
+			if ( diff.error[ WARN ] != 0 )
+			{
+				sprintf( str1, "Starting the experiment there where %d "
+						 "severe", diff.error[ SEVERE ] );
+				sprintf( str2, "and %d warnings.", diff.error[ WARN ] );
+			}
+			else
+			{
+				sprintf( str1, "Starting the experiment there  where %d "
+						 "severe warnings.", diff.error[ SEVERE ] );
+				str2[ 0 ] = '\0';
+			}
+		}
+		else
+		{
+			sprintf( str1, "Starting the experiment there where %d warnings.",
+					 diff.error[ WARN ] );
+			str2[ 0 ] = '\0';
+		}
+
+		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+								  2, "No", "Yes", "", 1 ) )
+			THROW( EXCEPTION );
+	}
 }
 
 

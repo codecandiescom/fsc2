@@ -524,21 +524,6 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 	T_free( f->pm );
 	f->pm = NULL;
-
-/*!!!*/
-	if ( f->pcm )
-	{
-		int i1, j1;
-		printf( "pcm for function `%s'\n", Function_Names[ f->self ] );
-		for ( i1 = 0; i1 < 5; i1++ )
-		{
-			printf( "%s ", Phase_Types[ i1 ] );
-			for ( j1 = 0; j1 < f->pc_len; j1++ )
-				printf( " %2d", f->pcm[ i1 * f->pc_len + j1 ]->self );
-			printf( "\n" );
-		}
-	}
-/*!!!*/
 }
 
 
