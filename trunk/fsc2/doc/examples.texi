@@ -876,9 +876,9 @@ digitizer instead of a lock-in amplifier to do the detection:
 @example
  1 DEVICES:
  2
- 3 er032m;       // field controller
- 4 dg2020_b;     // pulser
- 5 tds754a;      // digitzer
+ 3 dg2020_b;     // pulser
+ 4 tds754a;      // digitzer
+ 5 er032m;       // field controller
  6
  7
  8 VARIABLES:
@@ -892,7 +892,7 @@ digitizer instead of a lock-in amplifier to do the detection:
 16 
 17 field = start_field;
 18 area[ 2 ];
-19 W1, W2;
+19 W[ 2 ];
 20 I = 1;
 31 
 32 
@@ -923,30 +923,38 @@ digitizer instead of a lock-in amplifier to do the detection:
 57 init_1d( 1, 0, start_field, field_step,
 58          "Field [G]", "Echo area [mV * ns]" );
 59 
-60 
-61 EXPERIMENT:
-62 
-63 digitizer_num_averages( 100 );
-64 digitizer_trigger_channel( AUX );
-65 digitizer_trigger_position( 0.5 );
+60 digitizer_num_averages( 100 );
+61 digitizer_trigger_channel( AUX );
+62 digitizer_trigger_position( 0.2 );
+63 
+64 W[ 1 ] = digitizer_define_window( -5 ns, 10 ns );
+65 W[ 2 ] = digitizer_define_window( 200 ns, 10 ns );
 66 
-67 W1 = digitizer_define_window( -5 ns, 10 ns );
-68 W2 = digitizer_define_window( 100 ns, 10 ns );
+67 
+68 EXPERIMENT:
 69 
 70 WHILE field <= end_field @{
-81 
-82     digitizer_start_acquisition( );
-83     area[ 1 ] = digitizer_get_area( CH1, W1 );
-84     area[ 2 ] = digitizer_get_area( CH1, W2 );
-85     display( I, ( area[ 1 ] - area[ 2 ] ) * 1.0e12 );
-86     I += 1;
-87     fsave( "# # # #\n", field, area[ 1 ], area[ 2 ],
-88                         area[ 1 ] - area[ 2 ] );
-89     field = sweep_up( )
-90 @}
+71     digitizer_start_acquisition( );
+72     area[ 1 ] = digitizer_get_area( CH1, W[ 1 ] );
+73     area[ 2 ] = digitizer_get_area( CH1, W[ 2 ] );
+74     display( I, ( area[ 1 ] - area[ 2 ] ) * 1.0e12 );
+75     I += 1;
+76     fsave( "# # # #\n", field, area[ 1 ], area[ 2 ],
+77                         area[ 1 ] - area[ 2 ] );
+78     field = sweep_up( )
+79 @}
 @end example
 
+As usual, the script starts with the @code{DEVICES} section, telling
+@code{fsc2} that the Berlin version of the driver for the
+@code{Sny/Tektronix DG2020} pulser, the @code{Tektronix TDS754A}
+digitizer and the @code{Bruker ER032M} field controller are going to be
+used in the experiment.
 
+In the @code{VARIABLES} section we need variables for the field sweep,
+i.e.@: the start and end field and the field sweep with. Then we declare
+a variable with the length of a pi-half pulse and the edge-to-edge
+distance of the two pulses we're going to use. 
 
 
 
