@@ -783,8 +783,7 @@ void stop_graphics( void )
 		graphics_free( );
 
 		for ( i = X; i <= Z; i++ )
-			if ( G.label[ i ] != NULL )
-				G.label[ i ] = T_free( G.label[ i ] );
+			G.label[ i ] = T_free( G.label[ i ] );
 
 		if ( G.font )
 			XFreeFont( G.d, G.font );
@@ -1584,9 +1583,7 @@ static void change_label_1d( char **label )
 {
 	if ( *label[ X ] != '\0' )
 	{
-		if ( G.label[ X ] != NULL )
-			G.label[ X ] = T_free( G.label[ X ] );
-
+		G.label[ X ] = T_free( G.label[ X ] );
 		G.label[ X ] = T_strdup( label[ X ] );
 		redraw_canvas_1d( &G.x_axis );
 	}

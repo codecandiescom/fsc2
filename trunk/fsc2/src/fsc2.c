@@ -962,8 +962,7 @@ void clean_up( void )
 	/* Get rid of the last remains of graphics */
 
 	for ( i = X; i <= Z; i++ )
-		if ( G.label_orig[ i ] != NULL )
-			G.label_orig[ i ] = T_free( G.label_orig[ i ] );
+		G.label_orig[ i ] = T_free( G.label_orig[ i ] );
 
 	G.is_init = UNSET;
 
