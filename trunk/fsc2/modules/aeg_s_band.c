@@ -699,10 +699,10 @@ bool magnet_goto_field_rec( double field, int rec )
 	/* Finally we check if the field value is reached. If it isn't we do
 	   further corrections by calling the routine itself. To avoid running
 	   in an endless recursion with the difference between the actual field
-	   and the target field becoming larger and larger we allow the
-	   difference becoming larger only MAGNET_MAX_TRIES times - after that
-	   we have to assume that something has gone wrong (maybe some luser
-	   switched the magnet from remote control state? ) */
+	   and the target field becoming larger and larger we allow it to become
+	   larger only MAGNET_MAX_TRIES times - after that we have to assume
+	   that something has gone wrong (maybe some luser switched the magnet
+	   from remote to local? ) */
 
 	vars_pop( func_call( func_get( "field_meter_wait", &acc ) ) );
 
