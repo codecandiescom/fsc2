@@ -81,6 +81,7 @@
 #include "func.h"                 /* load before "devices.h" */
 #include "devices.h"              /* load before "loader.h"  */
 #include "func_basic.h"
+#include "func_util.h"
 #include "loader.h"
 #include "phases.h"
 #include "pulser.h"

@@ -35,12 +35,6 @@ typedef struct {
 } Lib_Struct;
 
 
-typedef struct {
-	FILE *fp;
-	char *name;
-} FILE_LIST;
-
-
 bool functions_init( void );
 void functions_exit( void );
 Var *func_get( const char *name, int *access );
