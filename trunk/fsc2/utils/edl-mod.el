@@ -1,4 +1,4 @@
-;;; edl-mod.el --- editing EDL files under Emacs
+;;; edl-mod.el --- editing EDL files with Emacs
 
 ;; Copyright (C) 2000 Jens Thoms Törring
 
@@ -59,17 +59,16 @@
   :type 'hook
   :group 'edl)
 
+;(setq edl-mode-syntax-table (make-syntax-table))
+;(modify-syntax-entry ?_ "w" edl-mode-syntax-table)
+
 
 (defvar edl-comments
   '( "\\/\\/.*"                                              ; C++ style
-     "\\/\\*\\(\\([^\\*]*\\)\\|\\(\\*[^\\/]\\)*\\)\\*\\/"    ; C style
-     )
-  )
+     "\\/\\*\\(\\([^\\*]*\\)\\|\\(\\*[^\\/]\\)*\\)\\*\\/" )) ; C style
 
 (defvar edl-strings
-  '( "\\\"[^\"]*\\\""
-     )
-  )
+  '( "\\\"[^\"]*\\\"" ))
 
 (defvar edl-reserved-words
   '( "P\\(ULSE\\)?_?[0-9]+\\(\\.\\|\\b\\)"
@@ -130,9 +129,7 @@
      "OFF\\>"
      "[+-]?[xX]\\>"
      "[+-]?[yY]\\>"
-	 "[cC][wW]\\>"
-     )
-  )
+	 "[cC][wW]\\>" ))
 
 
 (defvar edl-section-keywords
@@ -142,9 +139,7 @@
 	 "PHA\\(SE\\)?S?:"
 	 "PREP\\(ARATION\\)?S?:"
 	 "EXP\\(ERIMENT\\)?:"
-	 "ON_STOP:"
-	 )
-  )
+	 "ON_STOP:" ))
 
 
 (defvar edl-unit-keywords
@@ -153,27 +148,21 @@
 
 (defvar edl-font-lock-keywords
   (list
-   (cons (concat "\\("
-				 (mapconcat 'identity edl-comments "\\|")
-				 "\\)")
+   (cons (concat "\\(" (mapconcat 'identity edl-comments "\\|") "\\)")
 		 'font-lock-comment-face )
    (cons (mapconcat 'identity edl-strings "\\|")
 		 'font-lock-string-face )
    (cons (concat "\\<\\("
-				 (mapconcat 'identity edl-section-keywords "\\|")
-				 "\\)")
+				 (mapconcat 'identity edl-section-keywords "\\|") "\\)")
 		 'font-lock-function-name-face )
    (cons (concat "\\<\\("
-				 (mapconcat 'identity edl-reserved-words "\\|")
-				 "\\)\\|{\\|}")
+				 (mapconcat 'identity edl-reserved-words "\\|") "\\)\\|{\\|}")
 		 'font-lock-keyword-face)
-   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\)"
-		 'font-lock-builtin-face)
-   (cons edl-unit-keywords 'font-lock-type-face)
-   )
+   (cons "\\(<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\|!\\|~\\)" 'font-lock-builtin-face)
+   (cons edl-unit-keywords 'font-lock-type-face))
+  "EDL expressions to highlight." )
 
-  "EDL expressions to highlight."
-  )
+
 
 
 ;;;###autoload
@@ -193,9 +182,7 @@
 
   (setq comment-start "//" )
 
-  (run-hooks 'edl-mode-hook)
-
-  )
+  (run-hooks 'edl-mode-hook))
 
 
 ;;; provide ourself
