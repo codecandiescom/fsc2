@@ -1240,6 +1240,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 {
 	int keymask;
 	bool scale_changed = UNSET;
+	double v;
 
 
 	obj = obj;
@@ -1288,12 +1289,20 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				case 4 :                       /* in z-axis window */
 					if ( G.cut_select == CUT_SELECT_X )
+					{
 						cut_show( CG.cut_dir, ( int ) lround(
 							( double ) ( CG.cut_dir == X ?
 										 ( ( c->h - 1 - c->ppos[ Y ] )
 										   * G.x_axis.w ) :
 										 ( c->ppos[ Y ] * G.y_axis.h ) )
 							/ ( double ) c->h ) );
+/*
+	if ( dir == X )
+		index = lround( ( double ) pos / scv->s2d[ X ] - scv->shift[ X ] );
+	else
+		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
+						- scv->shift[ Y ] );
+*/
 					break;
 
 				case 7 :                       /* in canvas window */
@@ -2035,7 +2044,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	rwc_start_fine *= rwc_delta;
 
 	d_start_fine = r_scale * ( rwc_start_fine - rwc_start )
-		                   / cv2->rwc_delta[ r_coord ];
+		           / cv2->rwc_delta[ r_coord ];
 	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
