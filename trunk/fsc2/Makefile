@@ -833,7 +833,16 @@ test:
 
 pack:
 	@$(MAKE) distclean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tar.gz
+	tar -c fsc2 | gzip -c -9 > ../fsc2.tar.gz
+
+
+# Make distributions of the device modules etc.
+
+packages:
+	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
+		$(MAKE) -C $$dir distclean;                                 \
+		tar -c $$dir | gzip -c -9 > ../$$dir.tar.gz;                 \
+	done
 
 
 # Creates the MANIFEST file with the list of relevant files
