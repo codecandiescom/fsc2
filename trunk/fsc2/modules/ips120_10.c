@@ -1415,7 +1415,8 @@ static long ips120_20_talk( const char *message, char *reply, long length )
 	if ( gpib_read( ips120_20.device, reply, &len ) == FAILURE )
 		ips120_20_comm_failure( );
 
-	/* If device mis-understood the command send it again */
+	/* If device misunderstood the command send it again, repeat up to
+	   MAX_RETRIES times */
 
 	if ( reply[ 0 ] == '?' )
 	{
