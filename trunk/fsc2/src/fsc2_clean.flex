@@ -46,7 +46,7 @@ int yylex( void );
 void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
-void unit_spec( char *text, int type, int power );
+void unit_spec( char *text, int power );
 char *get_string_copy( const char *string );
 char *get_string( size_t len );
 void *T_malloc( size_t size );
@@ -283,30 +283,31 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <incl> */
 
-            /* here some special handling of numbers with units */
+            /* here some special handling of numbers with units
+			   take care they will be converted to double automatically */
 
-{INANO}/[^a-zA-z_]   unit_spec( yytext, 0, -9 );
-{IMICRO}/[^a-zA-z_]  unit_spec( yytext, 0, -6 );
-{IMILLI}/[^a-zA-z_]  unit_spec( yytext, 0, -3 );
-{INONE}/[^a-zA-z_]   unit_spec( yytext, 0,  0 );
-{IKILO}/[^a-zA-z_]   unit_spec( yytext, 0,  3 );
-{IMEGA}/[^a-zA-z_]   unit_spec( yytext, 0,  6 );
-
-{FNANO}/[^a-zA-z_]   unit_spec( yytext, 1, -9 );
-{FMICRO}/[^a-zA-z_]  unit_spec( yytext, 1, -6 );
-{FMILLI}/[^a-zA-z_]  unit_spec( yytext, 1, -3 );
-{FNONE}/[^a-zA-z_]   unit_spec( yytext, 1,  0 );
-{FKILO}/[^a-zA-z_]   unit_spec( yytext, 1,  3 );
-{FMEGA}/[^a-zA-z_]   unit_spec( yytext, 1,  6 );
-
-{INTs}/[^a-zA-z_]    unit_spec( yytext, 0, -5 );
-{IUT}/[^a-zA-z_]     unit_spec( yytext, 0, -2 );
-{IMT}/[^a-zA-z_]     unit_spec( yytext, 0,  1 );
-{IT}/[^a-zA-z_]      unit_spec( yytext, 0,  4 );
-{FNT}/[^a-zA-z_]     unit_spec( yytext, 1, -5 );
-{FUT}/[^a-zA-z_]     unit_spec( yytext, 1, -2 );
-{FMT}/[^a-zA-z_]     unit_spec( yytext, 1,  1 );
-{FT}/[^a-zA-z_]      unit_spec( yytext, 1,  4 );
+{INANO}/[^a-zA-z_]   unit_spec( yytext, -9 );
+{IMICRO}/[^a-zA-z_]  unit_spec( yytext, -6 );
+{IMILLI}/[^a-zA-z_]  unit_spec( yytext, -3 );
+{INONE}/[^a-zA-z_]   unit_spec( yytext,  0 );
+{IKILO}/[^a-zA-z_]   unit_spec( yytext,  3 );
+{IMEGA}/[^a-zA-z_]   unit_spec( yytext,  6 );
+										
+{FNANO}/[^a-zA-z_]   unit_spec( yytext, -9 );
+{FMICRO}/[^a-zA-z_]  unit_spec( yytext, -6 );
+{FMILLI}/[^a-zA-z_]  unit_spec( yytext, -3 );
+{FNONE}/[^a-zA-z_]   unit_spec( yytext,  0 );
+{FKILO}/[^a-zA-z_]   unit_spec( yytext,  3 );
+{FMEGA}/[^a-zA-z_]   unit_spec( yytext,  6 );
+										
+{INTs}/[^a-zA-z_]    unit_spec( yytext, -5 );
+{IUT}/[^a-zA-z_]     unit_spec( yytext, -2 );
+{IMT}/[^a-zA-z_]     unit_spec( yytext,  1 );
+{IT}/[^a-zA-z_]      unit_spec( yytext,  4 );
+{FNT}/[^a-zA-z_]     unit_spec( yytext, -5 );
+{FUT}/[^a-zA-z_]     unit_spec( yytext, -2 );
+{FMT}/[^a-zA-z_]     unit_spec( yytext,  1 );
+{FT}/[^a-zA-z_]      unit_spec( yytext,  4 );
 
 "nT"/[^a-zA-z_]      printf( "\x4ntesla" );
 "uT"/[^a-zA-z_]      printf( "\x4utesla" );
@@ -550,101 +551,10 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 
 /* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
 
-void unit_spec( char *text, int type, int power )
+void unit_spec( char *text, int power )
 {
 	double dval;
-	long lval;
 
-
-	if ( type == 0 )
-	{
-		lval = strtol( text, NULL, 10 );
-		if ( ( lval == LONG_MAX || lval == LONG_MIN ) && errno == ERANGE )
-		    goto try_double;
-
-		switch ( power )
-		{
-			case -9 :
-				if ( lval % 1000000000L )
-				    printf( "%.9f", ( double ) lval * 1.0e-9 );
-				else
-				 	printf( "%ld", lval / 1000000000L );
-				return;
-
-			case -6 :
-				if ( lval % 1000000 )
-					printf( "%.6f", ( double ) lval * 1.0e-6 );
-				else
-				 	printf( "%ld", lval / 100000 );
-				return;
-
-			case -5 :
-				if ( lval % 100000 )
-					printf( "%.6f", ( double ) lval * 1.0e-5 );
-				else
-				 	printf( "%ld", lval / 10000 );
-				return;
-
-			case -3 :
-				if ( lval % 1000 )
-					printf( "%.3f", ( double ) lval * 1.0e-3 );
-				else
-				 	printf( "%ld", lval / 1000 );
-				return;
-
-			case -2 :
-				if ( lval % 100 )
-					printf( "%.3f", ( double ) lval * 1.0e-2 );
-				else
-				 	printf( "%ld", lval / 100 );
-				return;
-
-			case 0 :
-				printf( "%ld", lval );
-				return;
-
-			case 1 :
-				if ( labs( lval ) > LONG_MAX / 10 )
-				    printf( "%f", ( double ) lval * 10.0 );
-				else
-					printf( "%ld", lval * 10 );
-				return;
-
-			case 3 :
-				if ( labs( lval ) > LONG_MAX / 1000 )
-				    printf( "%f", ( double ) lval * 1000.0 );
-				else
-					printf( "%ld", lval * 1000 );
-				return;
-
-			case 4 :
-				if ( labs( lval ) > LONG_MAX / 10000 )
-				    printf( "%f", ( double ) lval * 10000.0 );
-				else
-					printf( "%ld", lval * 10000 );
-				return;
-
-			case 6 :
-				if ( labs( lval ) > LONG_MAX / 1000000L )
-				    printf( "%f", ( double ) lval * 1.0e6 );
-				else
-					printf( "%ld", lval * 1000000L );
-				return;
-
-			case 9 :
-				if ( labs( lval ) > LONG_MAX / 1000000000L )
-				    printf( "%f", ( double ) lval * 1.0e9 );
-				else
-					printf( "%ld", lval * 1000000000L );
-				return;
-
-			default :
-				 printf( "\x03\n%s:%ld: INTERNAL ERROR.\n", Fname, Lc );
-				 exit( EXIT_FAILURE );
-		}
-	}
-
-try_double:
 
 	dval = strtod( text, NULL );
 	if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
