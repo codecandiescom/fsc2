@@ -4,9 +4,10 @@
 
 /***********************************************************************/
 /* This is the device name data base used by fsc2. To add a new device */
-/* just append its name to this file - the names are case-insensitive. */
-/* If it's controlled via the GPIB bus there also has to be an entry   */
-/* in `/etc/gpib.conf'!                                                */
+/* just append its name to this file - the names are case-insensitive  */
+/* (i.e. they will be automatically cnverted to all lower case).       */
+/* If the dvice is controlled via the GPIB bus it also has to have to  */
+/* be listed in `/etc/gpib.conf'!                                      */
 /* C and C++ style comments can be used within this file.              */
 /***********************************************************************/
 
