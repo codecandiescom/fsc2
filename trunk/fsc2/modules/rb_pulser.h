@@ -116,13 +116,13 @@ struct Rulbus_Delay_Card {
 	char *name;
 	int handle;
 	Ticks delay;
+	Ticks old_delay;
 	double intr_delay;
 	Rulbus_Delay_Card_T *prev;
 	Rulbus_Delay_Card_T *next;
 	int num_next;
 	bool is_active;
 	bool was_active;
-	bool needs_update;
 };
 
 
@@ -178,9 +178,6 @@ struct Pulse {
 	bool initial_is_len;
 	bool initial_is_dpos;
 	bool initial_is_dlen;
-
-	bool needs_update;       /* set if the pulses properties have been
-								changed in test run or experiment */
 };
 
 
@@ -216,8 +213,6 @@ struct RB_Pulser {
 
 	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
 
-	bool needs_update;       /* set if pulse properties have been changed in
-								test run or experiment */
 	bool is_running;         /* set if the pulser is in run mode */
 
 	char *synth_state;
