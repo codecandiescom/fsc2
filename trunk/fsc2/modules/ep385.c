@@ -30,6 +30,8 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+static bool in_reset = UNSET;
+
 
 /*-------------------------------------------------------------------------*/
 /* This function is called directly after all modules are loaded. Its main */
@@ -998,10 +1000,10 @@ Var *pulser_state( Var *v )
 	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( INT_VAR, 1 );
+		return vars_push( INT_VAR, ( long ) ( ep385.is_running = state ) );
 
 	ep385_run( state );
-	return vars_push( INT_VAR, state  );
+	return vars_push( INT_VAR, ( long ) ep385.is_running );
 }
 
 
@@ -1303,12 +1305,19 @@ Var *pulser_reset( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( ! ep385_is_needed )
+		return vars_push( INT_VAR, 1 );
+
+	in_reset = SET;
+
 	if ( ep385_phs[ 0 ].function != NULL ||
 		 ep385_phs[ 1 ].function != NULL )
 		vars_pop( pulser_pulse_reset( NULL ) );
 	vars_pop( pulser_pulse_reset( NULL ) );
 
-	return vars_push( INT_VAR, 1 );
+	in_reset = UNSET;
+
+	return pulser_update( NULL );
 }
 
 
@@ -1412,7 +1421,6 @@ Var *pulser_pulse_reset( Var *v )
 			ep385.needs_update = SET;
 	}
 
-	pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1484,6 +1492,7 @@ Var *pulser_next_phase( Var *v )
 	}
 
 	ep385.needs_update = SET;
+	pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1547,6 +1556,8 @@ Var *pulser_phase_reset( Var *v )
 	}
 
 	ep385.needs_update = SET;
+	if ( ! in_reset )
+		pulser_update( NULL );
 	return vars_push( INT_VAR, 1 );
 }
 

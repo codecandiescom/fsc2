@@ -30,6 +30,8 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
+static bool in_reset = UNSET;
+
 
 /*-------------------------------------------------------------------------*/
 /* This function is called directly after all modules are loaded. Its main */
@@ -1273,10 +1275,14 @@ Var *pulser_reset( Var *v )
 	if ( ! rs690_is_needed )
 		return vars_push( INT_VAR, 1 );
 
+	in_reset = SET;
+
 	vars_pop( pulser_pulse_reset( NULL ) );
 	if ( rs690_phs[ 0 ].function != NULL ||
 		 rs690_phs[ 1 ].function != NULL )
 		vars_pop( pulser_pulse_reset( NULL ) );
+
+	in_reset = UNSET;
 
 	return pulser_update( NULL );
 }
@@ -1453,6 +1459,7 @@ Var *pulser_next_phase( Var *v )
 	}
 
 	rs690.needs_update = SET;
+	pulser_update( );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1516,6 +1523,8 @@ Var *pulser_phase_reset( Var *v )
 	}
 
 	rs690.needs_update = SET;
+	if ( ! in_reset )
+		pulser_update( );
 	return vars_push( INT_VAR, 1 );
 }
 

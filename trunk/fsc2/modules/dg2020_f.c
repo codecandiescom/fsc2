@@ -568,7 +568,7 @@ Var *pulser_update( Var *v )
 	/* If we're doing a real experiment also tell the pulser to start */
 
 	if ( FSC2_MODE == EXPERIMENT )
-		dg2020_run( dg2020.is_running )
+		dg2020_run( dg2020.is_running );
 
 	return vars_push( INT_VAR, state ? 1 : 0 );
 }
