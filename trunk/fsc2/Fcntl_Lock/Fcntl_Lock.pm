@@ -44,13 +44,13 @@ Fcntl_Lock - Perl extension for file locking with fcntl(2)
   use Fcntl_Lock;
 
   my $fs = Fcntl_Lock->new;
-  $fs->l_type( F_WRLCK );
+  $fs->l_type( F_RDLCK );
   $fs->l_whence( SEEK_CUR );
   $fs->l_start( 100 );
   $fs->l_len( 123 );
 
   my $fh;
-  open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
+  open( $fh, "<file_name" ) or die "Can't open file: $!\n";
   $fs->fcntl_lock( $fh, F_SETLK ) ) or
       print "Locking failed: " . $fs->fcntl_error . "\n";
 
