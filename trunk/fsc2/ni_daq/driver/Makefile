@@ -58,7 +58,27 @@ $(MODULE): $(SOURCES:.c=.o)
 	ld -r -o $@ $(SOURCES:.c=.o)
 
 
+install:
+ifeq ($(NI_DAQ_KERNEL_SOURCE),)
+	if [ -d /lib/modules/`uname -r` ]; then                        \
+		if [ ! -d /lib/modules/`uname -r`/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/`uname -r`/misc;     \
+		fi;                                                        \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
+	else                                                           \
+		if [ ! -d /lib/modules/misc ]; then                        \
+			$(INSTALL) -m 755 -d /lib/modules/misc;                \
+		fi;                                                        \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;             \
+	fi
+endif
+
+
 clean:
 	$(MAKE) -C pci_e_series clean
 	$(MAKE) -C daq_stc clean
 	$(RM) $(RMFLAGS) ni_daq.o *~ include/*~
+
+distclean:
+	$(MAKE) clean
+	$(RM) $(RMFLAGS) include/autoconf.h

@@ -44,6 +44,7 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      unsigned long low_ticks,
 			      unsigned long high_ticks,
 			      NI_DAQ_POLARITY output_polarity,
+			      NI_DAQ_POLARITY source_polarity,
 			      NI_DAQ_POLARITY gate_polarity, int continuous );
 static int GPCT_start_counting( Board *board, unsigned counter,
 				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
@@ -199,6 +200,7 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 						  a.source, a.gate,
 						  a.low_ticks, a.high_ticks,
 						  a.output_polarity,
+						  a.source_polarity,
 						  a.gate_polarity,
 						  a.continuous );
 
@@ -337,7 +339,7 @@ static int GPCT_get_count( Board *board, unsigned int counter,
 
 		if ( signal_pending( current ) ) {
 			PDEBUG( "Aborted by signal\n" );
-			return -EINTR;
+			return -EAGAIN;
 		}
 
 		*count = board->func->stc_readl( board,
@@ -404,6 +406,7 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 			      unsigned long low_ticks,
 			      unsigned long high_ticks,
 			      NI_DAQ_POLARITY output_polarity,
+			      NI_DAQ_POLARITY source_polarity,
 			      NI_DAQ_POLARITY gate_polarity, int continuous )
 {
 	int use_gate;
@@ -452,6 +455,9 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 	}
 
 	/* Set the polarity of the output */
+
+	if ( source_polarity == NI_DAQ_INVERTED )
+		input |= Gi_Source_Polarity;
 
 	if ( output_polarity != NI_DAQ_NORMAL )
 		input |= Gi_Output_Polarity;

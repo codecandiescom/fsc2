@@ -215,7 +215,7 @@ typedef struct {
 
 	int num_ao_channels;
 	int num_ao_bits;
-	int has_unipolar_ao;
+	int ao_does_unipolar;
 	int ao_has_ext_ref;
 
 	int has_analog_trig;

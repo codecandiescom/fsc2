@@ -253,13 +253,6 @@ int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
 	}
 
 	switch ( a.cmd ) {
-		case NI_DAQ_AI_CHANNEL_SETUP :
-			ret = AI_channel_setup( board, a.num_channels,
-						a.channel_args );
-			if ( ret == 0 )
-				ret = board->AI.num_data_per_scan;
-			break;
-
 		case NI_DAQ_AI_SET_CLOCK_SPEED :
 			ret = AI_clock_setup( board, a.speed );
 			break;
@@ -268,6 +261,13 @@ int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
 			a.speed = ( board->stc.Clock_and_FOUT &
 				    AI_Source_Divide_By_2 ) ?
 				   NI_DAQ_HALF_SPEED : NI_DAQ_FULL_SPEED;
+			break;
+
+		case NI_DAQ_AI_CHANNEL_SETUP :
+			ret = AI_channel_setup( board, a.num_channels,
+						a.channel_args );
+			if ( ret == 0 )
+				ret = board->AI.num_data_per_scan;
 			break;
 
 		case NI_DAQ_AI_ACQ_SETUP :
@@ -299,6 +299,33 @@ int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
 	}
 
 	return ret;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Function for setting the AI_IN_TIMEBASE1 - it can be switched */
+/* between 20 MHz and 10 MHz (Please note that the timebase for  */
+/* IN_TIMEBASE2 is controlled by the general setting of the MSC  */
+/* subsystem!).                                                  */
+/*---------------------------------------------------------------*/
+
+static int AI_clock_setup( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+{
+	if ( board->AI.is_running )
+		return -EBUSY;
+
+	if ( speed == NI_DAQ_FULL_SPEED ) {
+		board->AI.timebase1 = 50;
+		board->stc.Clock_and_FOUT &= ~ AI_Source_Divide_By_2;
+	} else {
+		board->AI.timebase1 = 100;
+		board->stc.Clock_and_FOUT |= AI_Source_Divide_By_2;
+	}
+
+	board->func->stc_writew( board, STC_Clock_and_FOUT,
+				 board->stc.Clock_and_FOUT );
+
+	return 0;
 }
 
 
@@ -415,33 +442,6 @@ static int AI_channel_setup( Board *board, unsigned int num_channels,
 
 	board->AI.num_channels = num_channels;
 	board->AI.num_data_per_scan = num_data;
-
-	return 0;
-}
-
-
-/*---------------------------------------------------------------*/
-/* Function for setting the AI_IN_TIMEBASE1 - it can be switched */
-/* between 20 MHz and 10 MHz (Please note that the timebase for  */
-/* IN_TIMEBASE2 is controlled by the general setting of the MSC  */
-/* subsystem!).                                                  */
-/*---------------------------------------------------------------*/
-
-static int AI_clock_setup( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
-{
-	if ( board->AI.is_running )
-		return -EBUSY;
-
-	if ( speed == NI_DAQ_FULL_SPEED ) {
-		board->AI.timebase1 = 50;
-		board->stc.Clock_and_FOUT &= ~ AI_Source_Divide_By_2;
-	} else {
-		board->AI.timebase1 = 100;
-		board->stc.Clock_and_FOUT |= AI_Source_Divide_By_2;
-	}
-
-	board->func->stc_writew( board, STC_Clock_and_FOUT,
-				 board->stc.Clock_and_FOUT );
 
 	return 0;
 }
@@ -1056,7 +1056,7 @@ static int AI_acq_wait( Board *board )
 	     wait_event_interruptible( board->AI.waitqueue,
 				   board->irq_hand[ IRQ_AI_SC_TC ].raised ) ) {
 		PDEBUG( "Aborted by signal\n" );
-		return -EINTR;
+		return -EAGAIN;
 	}
 
 	/* Disable the interrupt and release possibly used trigger input
