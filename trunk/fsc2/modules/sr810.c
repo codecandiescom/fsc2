@@ -1245,6 +1245,7 @@ static double sr810_set_ref_freq( double freq )
 
 
 /*---------------------------------------------------------------*/
+/* ??????????? What does this really return ?????????            */
 /*---------------------------------------------------------------*/
 
 static long sr810_get_ref_mode( void )
