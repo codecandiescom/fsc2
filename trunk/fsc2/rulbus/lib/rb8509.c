@@ -393,7 +393,8 @@ int rulbus_adc12_convert( int handle, double *volts )
 				  ! card->is_data ) );
 
 	/* If the EOC bit is set get the new data from the card, even though if
-	   this means throwing away data we already fetched */
+	   this means throwing away data we already fetched in external trigger
+	   mode. */
 
 	if ( hi & STATUS_EOC )
 	{
