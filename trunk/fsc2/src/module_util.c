@@ -277,7 +277,7 @@ double experiment_time( void )
 	t_old.tv_sec = t_new.tv_sec;
 	t_old.tv_usec = t_new.tv_usec;
 
-	return EDL.experiment_time += ( double ) dsec + 1.e-6 * ( double ) dusec;
+	return EDL.experiment_time += dsec + 1.e-6 * dusec;
 }
 
 
