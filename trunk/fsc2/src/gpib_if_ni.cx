@@ -287,7 +287,7 @@ static void gpib_init_log( const char *log_file_name )
  *  * pointer for returning assigned device number
  * <-
  *  * SUCCESS: OK, assigned device number is returned in 'dev'
- *  * FAILURE: error, no valid data is returned in 'dev'                 */
+ *  * FAILURE: error, no valid data is returned in 'dev'
  *-----------------------------------------------------------------------*/
 
 int gpib_init_device( const char *device_name, int *dev )
