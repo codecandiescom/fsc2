@@ -27,6 +27,45 @@
 static int Cur_PHS = -1;
 
 
+/*------------------------------------------------------------------*/
+/* Function is called via the TIMEBASE command to set the timebase  */
+/* used with the pulser - got to be called first because all nearly */
+/* all other functions depend on the timebase setting !             */
+/*------------------------------------------------------------------*/
+
+bool ep385_store_timebase( double timebase )
+{
+	if ( ep385.is_timebase )
+	{
+		if ( ep385.timebase_mode = EXTERNAL )
+			print( FATAL, "Time base (external) has already been set to %s.\n",
+				   ep385_ptime( ep385.timebase ) );
+		else
+			print( FATAL, "Time base has already automatically set to 8 ns. "
+				   "Make sure the TIMEBASE command comes first in the "
+				   "ASSIGNMENTS section.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( timebase < FIXED_TIMEBASE )
+	{
+		char *min =
+			T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
+
+		print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
+			   ep385_ptime( timebase ), min, max );
+		T_free( min );
+		THROW( EXCEPTION );
+	}
+
+	ep385.is_timebase = SET;
+	ep385.timebase = timebase;
+	ep385.timebase_mode = EXTERNAL;
+
+	return OK;
+}
+
+
 /*------------------------------------------------*/
 /* Function for assigning a channel to a function */
 /*------------------------------------------------*/

@@ -36,6 +36,17 @@ Ticks ep385_double2ticks( double p_time )
 	double ticks;
 
 
+	/* If the time base hasn't been set yet this indicates that we should
+	   use the built-in time base (by having *no* TIMEBASE command in the
+	   PREPARATIONS section) */
+
+	if ( ! ep385.is_timebase )
+	{
+		ep385.is_timebase = SET;
+		ep385.timebase_mode = INTERNAL;
+		ep385.timebase = FIXED_TIMEBASE;
+	}
+
 	ticks = p_time / ep385.timebase;
 
 	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
