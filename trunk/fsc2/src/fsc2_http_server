@@ -25,6 +25,7 @@
 use strict;
 use IO::Socket::INET;
 use POSIX;
+use bytes;
 
 
 my $client;            # The Most Important Entity ;-)
@@ -150,8 +151,8 @@ sub serve {
 		serve_main( $has_png, $has_gif );
 	} elsif ( $file =~ m{^/(fsc2\.(png|gif))$}o ) {
 		serve_logo( $1, $2 );
-	} elsif ( $file =~ m{^/fsc2_(a|b)\.(png|gif)$}o ) {
-		serve_pics( $1, $2 );
+	} elsif ( $file =~ m{^/fsc2_(a|b)\.png$}o ) {
+		serve_pics( $1 );
 	} else {
 		not_found( $file );
 	}
@@ -175,6 +176,7 @@ sub serve_main {
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
 				"Experiment finished" );
 	my $state;
+	my $pic;
 	my $txt;
 	my $date = rfc_1123_date( );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
@@ -190,25 +192,28 @@ sub serve_main {
 
 	return unless defined $state;
 
-	# First send some meta-information for the browser
+	# First send some meta-information for the browser plus the first lines
+	# of the page
 
-	print "HTTP/1.0 200 OK\r\n" .
-		  "Date: $date\r\n" .
-		  "Server: fsc2/0.1\r\n" .
-		  "Allow: GET\r\n" .
-		  "Content-Type: text/html; charset=iso-8859-1\r\n" .
-		  "Connection: close\r\n" .
-		  "Expires: $date\r\n\r\n";
-
-	# And here starts the HTTP page
-
-	print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">\r\n" .
-		  "<HTML><HEAD>\r\n" .
-		  "<meta name=\"robots\" content=\"noindex\">\r\n";
+	print &uq( <<'HTTP' );
+:		HTTP/1.0 200 OK
+:		Date: $date
+:		Server: fsc2/0.1
+:		Allow: GET
+:		Content-Type: text/html; charset=iso-8859-1
+:		Connection: close
+:		Expires: $date
+:
+:		<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+:		<HTML><HEAD>
+:		<META content="iso-8859-1" http-equiv="charset">
+:		<META name="author" content="fsc2">
+:		<META name="robots" content="noindex">
+HTTP
 
 	# Send the logo (per default the GIF version because some browser don't
-	# seem to deal correctly with transparency in PNG files) and the status
-	# information
+	# seem to deal correctly with transparency in PNG files even when they
+	# clain to understand png) and the status information
 
 	if ( $state =~ /^[0-3]$/o ) {
 		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
@@ -223,36 +228,40 @@ sub serve_main {
 		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
 
 		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			  "\" ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
+			  "\"ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
 
-		print "<P><CENTER><H1>Status:  Something weird is happening here..." .
-			  "</H1></CENTER>\r\n" .
-			  "<P>Ok, you seem to have found a bug. Please tell nobody ;-)" .
-			  "</P>\r\n</BODY></HTML>\r\n";
+		print &uq( <<'HTTP' );
+:			<P><CENTER><H1>Status:  Something weird is happening here...
+:			</H1></CENTER>
+:			<P>Ok, you seem to have found a bug. Please tell nobody ;-)
+:			</P>\r\n</BODY></HTML>
+HTTP
 		return;
 	}
 
 	# Now tell the client where to look for the graphics fsc2 currently
-	# displays (if the browser understands PNG files we tell it to get
-	# this version, it usually seems to be compressed better than GIF files
-	# and the problem with transparency isn't an issue here).
+	# displays - only PNG format is supported for legal reasons that I
+	# am not inclined to try to even understand
 
-	if ( $state =~ /^[1-3]$/o and ( $has_png or $has_gif ) ) {
+	if ( $state =~ /^[1-3]$/o and $has_png ) {
 		stdout_lock( 1 ) or exit 1;
 		print STDOUT 'W';
-		1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
+		1 while defined ( $pic = <STDIN> ) and $state =~ /^$/o;
 		stdout_lock( 0 );
 
 		return unless defined $state;
 
-		print "<H2>Display window:</H2>\r\n" .
-			  "<P><CENTER><IMG SRC=\"fsc2_a." . ( $has_png ? "png" : "gif" ) .
-			  "\" ALT=\"Display window\"></CENTER></P>\r\n"
-				  if $state =~ /^[1-3]$/o;
-		print "<H2>Cross section window:</H2>\r\n" .
-			  "<P><CENTER><IMG SRC=\"fsc2_b." . ( $has_png ? "png" : "gif" ) .
-			  "\" ALT=\"Cross section window\"></CENTER></P>\r\n"
-				  if $state =~ /^3$/o;
+		print &uq( <<'HTTP' ) if $pic =~ /^[1-3]$/o;
+:			<H2>Display window:</H2>
+:			<P><CENTER><IMG SRC="fsc2_a.png"
+:			ALT="Display window"></CENTER></P>
+HTTP
+
+		print &uq( <<'HTTP' ) if $pic =~ /^3$/o;
+:			<H2>Cross section window:</H2>
+:			<P><CENTER><IMG SRC="fsc2_b.png"
+:			ALT="Cross section window"></CENTER>
+HTTP
 	}
 
 	# Finally, ask fsc2 for the contents of the error browser and, when we
@@ -296,15 +305,18 @@ sub serve_logo {
 
 	open( $fh, $auxdir . $file ) or return not_found( $file );
 
-	print "HTTP/1.0 200 OK\r\n" .
-		  "Date: $date\r\n" .
-		  "Server: fsc2/0.1\r\n" .
-		  "Allow: GET\r\n" .
-		  "Accept-Ranges: none\r\n" .
-		  "Connection: close\r\n" .
-		  "Expires: $edate\r\n" .
-		  "Content-Type: image/$type\r\n" .
-		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
+	print &uq( <<'HTTP' );
+:		HTTP/1.0 200 OK
+:		Date: $date .
+:		Server: fsc2/0.1
+:		Allow: GET
+:		Accept-Ranges: none
+:		Connection: close\r\n" .
+:		Expires: $edate
+:		Content-Type: image/$type
+HTTP
+
+	print "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
 
 	print <$fh>;
 	close $fh;
@@ -318,51 +330,60 @@ sub serve_logo {
 # instead in which case we have to send the "Not available" picture.
 
 sub serve_pics {
-	my ( $which, $ext ) = @_;
+	my $which = shift;
 	my $state;
 	my $date = rfc_1123_date( );
 	my $fh;
 	my $file;
+	my @data;
+	my $len = 0;
 
 
 	# We need a special SIGPIPE handler here because we must remove the
 	# temporary file fsc2 created for us...
 
-	$SIG{ PIPE } = sub {  if ( defined $file and $file !~ /na\.$ext$/ ) {
-							  close $fh;
-							  unlink( $file );
-						  }
+	$SIG{ PIPE } = sub {  close $fh if defined $fh;
+						  unlink $file if defined $file and $file !~ /na\.png/;
 						  close $client;
 						  exit 0
 					   };
 
 	stdout_lock( 1 ) or exit 1;
-	print STDOUT ( $ext eq 'png' ? uc( $which ) : $which );
+	print STDOUT $which;
 	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
 	return stdout_lock( 0 ) unless defined $state;
 
 	if ( $state !~ /^0$/o ) {
 		$file = <STDIN>;
 		chomp $file;
-	} else {
-		$file = $auxdir . "na.$ext";
+		@data = `pnmtopng -compression 9 $file`;
+	} elsif ( $state =~ /^0$/o ) {
+		$file = $auxdir . "na.png";
+		open( $fh, $file ) or return not_found( "fsc2_" . $which . ".png" );
 	}
 	stdout_lock( 0 );
 
-	open( $fh, $file ) or return not_found( "$which.$ext" );
-	print "HTTP/1.0 200 OK\r\n" .
-		  "Date: $date\r\n" .
-		  "Server: fsc2/0.1\r\n" .
-		  "Allow: GET\r\n" .
-		  "Accept-Ranges: none\r\n" .
-		  "Connection: close\r\n" .
-		  "Expires: $date\r\n" .
-		  "Content-Type: image/$ext\r\n" .
-		  "Content-Length: " . ( stat( $file ) )[ 7 ] . "\r\n\r\n";
+	print &uq( <<'HTTP' );
+:		HTTP/1.0 200 OK
+:		Date: $date
+:		Server: fsc2/0.1
+:		Allow: GET
+:		Accept-Ranges: none
+:		Connection: close
+:		Expires: $date
+:		Content-Type: image/png
+HTTP
 
-	print <$fh>;
-	unlink $file unless $file =~ /na\.$ext$/;
-	close $fh;
+	if ( $state !~ /^0$/o ) {
+		$len += length for @data;
+		print "Content-Length: $len\r\n\r\n";
+		print @data;
+		unlink $file;
+	} else {
+		print "Content-Length: " . ( stat( $file ) )[ 7 ] . "\r\n\r\n";
+		print <$fh>;
+		close $fh;
+	}
 }
 
 
@@ -371,21 +392,25 @@ sub serve_pics {
 
 sub not_found {
 	my $file = shift;
+	my $date = rfc_1123_date( );
 
-	print "HTTP/1.0 404 Not Found\r\n" .
-		  "Date: ". rfc_1123_date( ) . "\r\n" .
-		  "Server: fsc2/0.1\r\n" .
-		  "Connection: close\r\n" .
-		  "Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
-	      "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
-		  "<HTML><HEAD>\r\n" .
-		  "<TITLE>404 Not Found</TITLE>\r\n" .
-		  "</HEAD><BODY>\r\n" .
-		  "<HR>\r\n" .
-		  "<H1>Not Found</H1>\r\n" .
-		  "<P>The requested URL ($file) was not found.</P>\r\n" .
-		  "<HR>\r\n" .
-		  "</BODY></HTML>\r\n";
+	print &uq( <<'HTTP' );
+:		HTTP/1.0 404 Not Found
+:		Date: $date
+:		Server: fsc2/0.1
+:		Connection: close
+:		Content-Type: text/html; charset=iso-8859-1
+:
+:		<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+:		<HTML><HEAD>
+:		<TITLE>404 Not Found</TITLE>
+:		</HEAD><BODY>
+:		<HR>
+:		<H1>Not Found</H1>
+:		<P>The requested URL ($file) was not found.</P>
+:		<HR>
+:		</BODY></HTML>
+HTTP
 }
 
 
@@ -397,17 +422,20 @@ sub illegal_request {
 	my $date = rfc_1123_date( );
 
 
-	print "HTTP/1.0 400 Bad Request\r\n" .
-		  "Date: " . rfc_1123_date( ) . "\r\n" .
-		  "Server: fsc2/0.1\r\n" .
-		  "Connection: close\r\n" .
-		  "Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
-		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">\r\n" .
-		  "<HTML><HEAD>\r\n" .
-		  "<TITLE>400 Bad Request</TITLE>\r\n" .
-		  "</HEAD><BODY>\r\n" .
-		  "<HR>\r\n" .
-		  "<H1>Bad Request</H1>\r\n";
+	print &uq( <<'HTTP' );
+:		HTTP/1.0 400 Bad Request
+:		Date: $date
+:		Server: fsc2/0.1
+:		Connection: close
+:		Content-Type: text/html; charset=iso-8859-1
+:
+:		<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 4.0//EN">
+:		<HTML><HEAD>
+:		<TITLE>400 Bad Request</TITLE>
+:		</HEAD><BODY>
+:		<HR>
+:		<H1>Bad Request</H1>
+HTTP
 
 	if ( $type !~ /^GET$/o ) {
 		print "<P>This simple server only supports GET requests.</P>\r\n";
@@ -417,13 +445,12 @@ sub illegal_request {
 	}
 
 	print "<HR>\r\n</BODY></HTML>\r\n";
-	return 0;
 }
 
 
 #########################################################
-# If called without an argument the fucntion returns the current (GMT) date
-# in RFC 1123 format, otherwise the date in ca. one years time (to be used
+# If called without an argument the function returns the current (GMT) date
+# in RFC 1123 format, otherwise the date in about one years time (to be used
 # as the 'infinite' expiry date, according to RFC 2616)
 
 sub rfc_1123_date {
@@ -437,9 +464,21 @@ sub rfc_1123_date {
 #########################################################
 # Creates (or releases) an advisory lock on STDOUT. Uses fcntl() instead of
 # flock() in a rather cryptic way (about which I am not too happy) because
-# flock() does not seem to work at all...
+# flock() does not seem to work for locking STDOUT.
 
 sub stdout_lock {
 	return defined fcntl STDOUT, F_SETLKW,
 		pack( "sslll", shift( ) ? F_WRLCK : F_UNLCK, SEEK_SET, 0, 0, 0 );
+}
+
+
+#########################################################
+# Strips leading colon and tabs from the lines of string passed to it (the
+# string may contain newlines) and replaces all newlines by "\r\n" (as RFC
+# 2616 requires for strings send to a browser).
+
+sub uq {
+	my $s = shift;
+	$s =~ s/^:\t*(.*)\n/$1\r\n/gm;
+	$s;
 }
