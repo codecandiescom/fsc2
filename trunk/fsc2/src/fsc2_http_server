@@ -97,7 +97,7 @@ $SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
 # Now wait for the users to hammer on our little server - at least $max_reqs
 # requests can get served simultaneously. This requires the child processes
 # to look out for locks on STDOUT, i.e. the write-connection to fsc2. To be
-# more precise, each single server has to get an lock on STDOUT by calling
+# more precise, each single server has to get a lock on STDOUT by calling
 # stdout_lock() before writing to it and must release the lock only after
 # reading the complete reply from fsc2.
 
