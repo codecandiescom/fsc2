@@ -39,13 +39,13 @@
 #include "right_arrow.xbm"
 
 
-static void cut_calc_curve( int dir, long index, bool has_been_shown );
+static void cut_calc_curve( int dir, long p_index, bool has_been_shown );
 static void G_init_cut_curve( void );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void cut_canvas_off( Canvas *c, FL_OBJECT *obj );
 static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_recalc_XPoints( void );
-static void cut_integrate_point( long index, double val );
+static void cut_integrate_point( long p_index, double val );
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata );
 static void cut_reconfigure_window( Canvas *c, int w, int h );
@@ -589,7 +589,7 @@ void cut_close_callback( FL_OBJECT *a, long b )
 /* this curve.                                              */
 /*----------------------------------------------------------*/
 
-static void cut_calc_curve( int dir, long index, bool has_been_shown )
+static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 {
 	long i;
 	Curve_1d *cv = &G.cut_curve;
@@ -672,8 +672,8 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 	/* If the index is reasonable store it (if called with index smaller than
 	   zero keep the old index) */
 
-	if ( index >= 0 )
-		CG.index = index;
+	if ( p_index >= 0 )
+		CG.index = p_index;
 
 	/* Allocate memory for storing of scaled data and points for display */
 
@@ -990,7 +990,7 @@ bool cut_num_points_changed( int dir, long num_points )
 bool cut_new_points( long curve, long x_index, long y_index, long len )
 {
 	Scaled_Point *sp;
-	long index;
+	long p_index;
 
 
 	/* Nothing to be done if either the cross section isn't drawn or the new
@@ -1034,8 +1034,8 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 		/* All new points are on the cut */
 
 		sp = G.curve_2d[ curve ]->points + y_index * G.nx + x_index;
-		for ( index = x_index; index < x_index + len; sp++, index++ )
-			cut_integrate_point( index, sp->v );
+		for ( p_index = x_index; p_index < x_index + len; sp++, p_index++ )
+			cut_integrate_point( p_index, sp->v );
 	}
 
 	/* Signal calling routine that a  redraw of the cut curve is needed */
@@ -1047,7 +1047,7 @@ bool cut_new_points( long curve, long x_index, long y_index, long len )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-static void cut_integrate_point( long index, double val )
+static void cut_integrate_point( long p_index, double val )
 {
 	Curve_1d *cv = &G.cut_curve;
 	Scaled_Point *cvp;
@@ -1059,17 +1059,17 @@ static void cut_integrate_point( long index, double val )
 	   array of XPoints (which have to be sorted in ascending order of the
 	   x-coordinate), otherwise the XPoint just needs to be updated */
 
-	if ( ! cv->points[ index ].exist )
+	if ( ! cv->points[ p_index ].exist )
 	{
 		/* Find next existing point to the left */
 
-		for ( i = index - 1, cvp = cv->points + i;
+		for ( i = p_index - 1, cvp = cv->points + i;
 			  i >= 0 && ! cvp->exist; cvp--, i-- )
 			;
 
 		if ( i == -1 )                     /* new points to be drawn is first*/
 		{
-			xp_index = cv->points[ index ].xp_ref = 0;
+			xp_index = cv->points[ p_index ].xp_ref = 0;
 			memmove( cv->xpoints + 1, cv->xpoints,
 					 cv->count * sizeof( XPoint ) );
 			for ( cvp = cv->points + 1, j = 1; j < CG.nx; cvp++, j++ )
@@ -1077,13 +1077,15 @@ static void cut_integrate_point( long index, double val )
 					cvp->xp_ref++;
 		}
 		else if ( cv->points[ i ].xp_ref == cv->count - 1 )    /* ...is last */
-			xp_index = cv->points[ index ].xp_ref = cv->count;
+			xp_index = cv->points[ p_index ].xp_ref = cv->count;
 		else                                             /* ...is in between */
 		{
-			xp_index = cv->points[ index ].xp_ref = cv->points[ i ].xp_ref + 1;
+			xp_index = cv->points[ p_index ].xp_ref =
+				                                    cv->points[ i ].xp_ref + 1;
 			memmove( cv->xpoints + xp_index + 1, cv->xpoints + xp_index,
 					 ( cv->count - xp_index ) * sizeof( XPoint ) );
-			for ( j = index + 1, cvp = cv->points + j; j < CG.nx; cvp++, j++ )
+			for ( j = p_index + 1, cvp = cv->points + j; j < CG.nx;
+				  cvp++, j++ )
 				if ( cvp->exist )
 					cvp->xp_ref++;
 		}
@@ -1092,7 +1094,7 @@ static void cut_integrate_point( long index, double val )
 		   exceeds the borders of the canvas */
 
 		cv->xpoints[ xp_index ].x = d2shrt( cv->s2d[ X ]
-											* ( index + cv->shift[ X ] ) );
+											* ( p_index + cv->shift[ X ] ) );
 		if ( cv->xpoints[ xp_index ].x < 0 )
 			cv->left = SET;
 		if ( cv->xpoints[ xp_index ].x >= ( int ) G.cut_canvas.w )
@@ -1101,21 +1103,21 @@ static void cut_integrate_point( long index, double val )
 		/* Increment the number of points belonging to the cut */
 
 		cv->count++;
-		cv->points[ index ].exist = SET;
+		cv->points[ p_index ].exist = SET;
 	}
 	else
-		xp_index = cv->points[ index ].xp_ref;
+		xp_index = cv->points[ p_index ].xp_ref;
 
 	/* Store the (new) points value */
 
-	cv->points[ index ].v = val;
+	cv->points[ p_index ].v = val;
 
 	/* Calculate the y-coordinate of the (new) point and figure out if it
 	   exceeds the borders of the canvas */
 
-	cv->xpoints[ xp_index ].y = ( short ) G.cut_canvas.h - 1 - 
-		                d2shrt( cv->s2d[ Y ]
-								* ( cv->points[ index ].v + cv->shift[ Y ] ) );
+	cv->xpoints[ xp_index ].y = ( short ) G.cut_canvas.h - 1
+		            - d2shrt( cv->s2d[ Y ]
+							  * ( cv->points[ p_index ].v + cv->shift[ Y ] ) );
 
 	if ( cv->xpoints[ xp_index ].y < 0 )
 		cv->up = SET;
@@ -1589,7 +1591,7 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	XEvent new_ev;
 	bool scale_changed = UNSET;
 	int keymask;
-	long index;
+	long p_index;
 
 	
 	obj = obj;
@@ -1648,12 +1650,12 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 				if ( c->box_y + c->box_h < 0 )
 					c->box_h = - c->box_y;
-				index = lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
-								* ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
-								/ c->h );
-				if ( index != CG.index )
+				p_index = lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+								  * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
+								  / c->h );
+				if ( p_index != CG.index )
 				{
-					cut_show( CG.cut_dir, index );
+					cut_show( CG.cut_dir, p_index );
 					break;
 				}
 			}
@@ -2718,7 +2720,7 @@ void cut_change_dir( FL_OBJECT *a, long b )
 {
 	Curve_1d *cv = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
-	long index;
+	long p_index;
 	int keymask;
 	int px, py;
 
@@ -2736,21 +2738,21 @@ void cut_change_dir( FL_OBJECT *a, long b )
 	if ( px < 0 || px > cut_form->cut_canvas->w )
 		return;
 
-	index = lround( px / cv->s2d[ X ] - cv->shift[ X ] );
+	p_index = lround( px / cv->s2d[ X ] - cv->shift[ X ] );
 
 	if ( CG.cut_dir == X )
 	{
-		if ( index >= G.ny )
-			index = G.ny - 1;
-		if ( index < 0 )
-			index = 0;
+		if ( p_index >= G.ny )
+			p_index = G.ny - 1;
+		if ( p_index < 0 )
+			p_index = 0;
 	}
 	else
 	{
-		if ( index >= G.nx )
-			index = G.nx - 1;
-		if ( index < 0 )
-			index = 0;
+		if ( p_index >= G.nx )
+			p_index = G.nx - 1;
+		if ( p_index < 0 )
+			p_index = 0;
 	}
 
 	if ( ! CG.is_fs[ G.active_curve ] )
@@ -2771,5 +2773,5 @@ void cut_change_dir( FL_OBJECT *a, long b )
 		}
 	}
 
-	cut_show( CG.cut_dir == X ? Y : X, index );
+	cut_show( CG.cut_dir == X ? Y : X, p_index );
 }

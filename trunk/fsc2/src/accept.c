@@ -27,7 +27,7 @@
 
 extern bool need_post;                    /* defined in run.c */
 
-static void	unpack_and_accept( void *ptr );
+static void	unpack_and_accept( char *ptr );
 static void	other_data_request( int type, char *ptr );
 static void accept_1d_data( long x_index, long curve, int type, char *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
@@ -141,7 +141,7 @@ void accept_new_data( void )
 /* and calls the appropriate functions for dealing with the data.   */
 /*------------------------------------------------------------------*/
 
-static void unpack_and_accept( void *ptr )
+static void unpack_and_accept( char *ptr )
 {
 	int i;
 	int nsets;
@@ -289,7 +289,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	double *f_data;
 	double rw_max,
 		   rw_min;
-	void *cur_ptr;
+	char *cur_ptr;
 	double data;
 	double new_rwc_delta_y;
 	Curve_1d *cv;
@@ -501,7 +501,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	double *f_data;
 	double rw_max,
 		   rw_min;
-	void *cur_ptr;
+	char *cur_ptr;
 	double data;
 	double new_rwc_delta_z;
 	Curve_2d *cv;
