@@ -23,7 +23,7 @@
 
 #define YY_INPUT( buf, result, max_size )                          \
         {                                                          \
-	        int c = fgetc( variablesin );                          \
+	        int c = fgetc( varsin );                               \
 	        result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
         }
 
@@ -33,8 +33,8 @@
 #include "vars_parser.h"
 
 
-int variableslex( void );
-extern void variablesparse( void );
+int varslex( void );
+extern void varsparse( void );
 
 #ifdef DEBUG
 void print_all_vars( void );
@@ -87,27 +87,27 @@ WS          [\n \t]+
 
 			/* handling of file name lines */
 {FILE}      {
-				*( variablestext + variablesleng - 1 ) = '\0';
+				*( varstext + varsleng - 1 ) = '\0';
 				if ( Fname != NULL )
 					T_free( Fname );
-				Fname = get_string_copy( variablestext + 2 );
+				Fname = get_string_copy( varstext + 2 );
 			}
 
 			/* handling of line number lines */
 {LNUM}		{
-				*( variablestext + variablesleng - 1 ) = '\0';
-				Lc = atol( variablestext + 2 );
+				*( varstext + varsleng - 1 ) = '\0';
+				Lc = atol( varstext + 2 );
 			}
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s", variablestext + 2 );
+				eprint( FATAL, "%s", varstext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
-				variablestext = strchr( variablestext, '\x03' );
-				eprint( FATAL, "%s", variablestext + 2 );
+				varstext = strchr( varstext, '\x03' );
+				eprint( FATAL, "%s", varstext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -150,58 +150,52 @@ WS          [\n \t]+
 			/* all needed pulse related keywords... */
 
 {P}?"."{F}  {
-				variableslval.vptr
-				           = pulse_get_by_addr( n2p( variablestext ), P_FUNC );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				variableslval.vptr
-				            = pulse_get_by_addr( n2p( variablestext ), P_POS );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				variableslval.vptr
-				            = pulse_get_by_addr( n2p( variablestext ), P_LEN );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				variableslval.vptr
-				           = pulse_get_by_addr( n2p( variablestext ), P_DPOS );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				variableslval.vptr
-				           = pulse_get_by_addr( n2p( variablestext ), P_DLEN );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				variableslval.vptr
-				         = pulse_get_by_addr( n2p( variablestext ), P_MAXLEN );
+				varslval.vptr = pulse_get_by_addr( n2p( varstext ), P_MAXLEN );
 				return VAR_REF;
             }
 
 			/* handling of integer numbers */
 {INT}       {
-				variableslval.lval = atol( variablestext );
+				varslval.lval = atol( varstext );
                 return INT_TOKEN;
             }
 
 			/* handling of floating point numbers */
 {FLOAT}     {
-                variableslval.dval = atof( variablestext );
+                varslval.dval = atof( varstext );
                 return FLOAT_TOKEN;
             }
 
             /* handling of string constants (to be used as format strings in
 			   the print() function only */
 {STR}       {
-				variablestext[ strlen( variablestext ) - 1 ] = '\0';
-				variableslval.sptr = variablestext + 1;
+				varstext[ strlen( varstext ) - 1 ] = '\0';
+				varslval.sptr = varstext + 1;
 				return STR_TOKEN;
 			}
 
@@ -211,8 +205,8 @@ WS          [\n \t]+
 
 				/* first check if the identifier is a function name */
 
-				variableslval.vptr = func_get( variablestext, &acc );
-				if ( variableslval.vptr != NULL )
+				varslval.vptr = func_get( varstext, &acc );
+				if ( varslval.vptr != NULL )
 				{
 					/* if it's a function check that the function can be used
 					   in the current context */
@@ -221,7 +215,7 @@ WS          [\n \t]+
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								 "in VARIABLES section.\n",
-								 Fname, Lc, variablestext );
+								 Fname, Lc, varstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -229,9 +223,9 @@ WS          [\n \t]+
 
 				/* if it's not a function it's got to be a variable */
 
-				if ( ( variableslval.vptr = vars_get( variablestext ) )
+				if ( ( varslval.vptr = vars_get( varstext ) )
 				     == NULL )
-			         variableslval.vptr = vars_new( variablestext );
+			         varslval.vptr = vars_new( varstext );
 				return VAR_TOKEN;
 			}
 
@@ -270,7 +264,7 @@ WS          [\n \t]+
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: "
-						"`%s'\n", Fname, Lc, variablestext );
+						"`%s'\n", Fname, Lc, varstext );
 				THROW( EXCEPTION );
 			}
 
@@ -313,16 +307,16 @@ int variables_parser( FILE *in )
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
 
-	variablesin = in;
+	varsin = in;
 
 	/* Keep the lexer happy... */
 
 	if ( is_restart )
-	    variablesrestart( variablesin );
+	    varsrestart( varsin );
 	else
 		 is_restart = SET;
 
-	variablesparse( );
+	varsparse( );
 
 #ifdef DEBUG
 	print_all_vars( );

@@ -7,15 +7,15 @@
 #include "fsc2.h"
 
 
-extern int variableslex( void );
+extern int varslex( void );
 
 
 /* locally used functions */
 
-int variablesparse( void );
-void variableserror( const char *s );
+int varsparse( void );
+void varserror( const char *s );
 
-extern char *variablestext;
+extern char *varstext;
 
 
 static Var *CV;
@@ -180,15 +180,15 @@ exprs:   expr                      { }
 %%
 
 
-void variableserror ( const char *s )
+void varserror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	if ( *variablestext == '\0' )
+	if ( *varstext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in VARIABLES "
 				"section.\n", Fname, Lc );
 	else
 		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, variablestext );
+				Fname, Lc, varstext );
 	THROW( EXCEPTION );
 }
