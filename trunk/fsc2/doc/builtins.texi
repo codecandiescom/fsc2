@@ -765,6 +765,25 @@ will produce output already in the test run (the @code{T} is never
 printed).
 @end table
 
+
+@anchor{show_message}
+@item show_message()
+@findex show_message()
+The function allows to display a message in a new window. The user has
+to click onto the "Ok" button in this window before the function
+returns, i.e.@: the experiment is paused while the message is shown.
+
+The function accepts a single argument, a string with the message to be
+displayed. To display a multi-line message embed '@code{\n}' characters
+in the string. Other escape sequences recognized by the function are:
+'@code{\t}' for a tabulator character, '@code{\\}' or the backslash
+character (a single backslash is always supposed to start an escape
+sequence) and '@code{\"}' to embed double quotes in the message.
+
+Avoid messages with more than 6 lines, they won't fit into the message
+box.
+
+
 @end table
 
 
@@ -1452,23 +1471,6 @@ off, i.e.@: only for the button that has become active from a group of
 radio buttons.
 
 
-@anchor{button_change_label}
-@item button_change_label()
-@findex button_change_label()
-The function allows to change the label of a button. It takes two
-arguments, the ID of the button and a string with the new label.
-
-
-@anchor{button_enable}
-@item button_enable()
-@findex button_enable()
-The function allows to temporarily enable or disable the use of a
-button. It takes two arguments, the ID of the button and either the
-value @code{1} or the string @code{"ON"} to enable the button (which is
-the default state) or the value @code{0} or the string @code{"OFF"} to
-disable the button.
-
-
 @anchor{slider_create}
 @item slider_create()
 @findex slider_create()
@@ -1540,23 +1542,6 @@ change of the sliders value until you have determined the new value by
 calling @code{slider_value()} for the slider.
 
 
-@anchor{slider_change_label}
-@item slider_change_label()
-@findex slider_change_label()
-The function allows to change the label of a slider. It takes two
-arguments, the ID of the slider and a string with the new label.
-
-
-@anchor{slider_enable}
-@item slider_enable()
-@findex slider_enable()
-The function allows to temporarily enable or disable the use of a
-slider. It takes two arguments, the ID of the slider and either the
-value @code{1} or the string @code{"ON"} to enable the slider (which is
-the default state) or the value @code{0} or the string @code{"OFF"} to
-disable the slider.
-
-
 @anchor{input_create}
 @item input_create()
 @findex input_create()
@@ -1616,23 +1601,6 @@ The function takes one argument, the ID of an input field. It returns
 and @code{0} if not. Please note that the function will repeatedly
 report a change of the input fields value until you have determined the
 new value by calling @code{input_value()}.
-
-
-@anchor{input_change_label}
-@item input_change_label()
-@findex input_change_label()
-The function allows to change the label of an input field. It takes two
-arguments, the ID of the input field and a string with the new label.
-
-
-@anchor{input_enable}
-@item input_enable()
-@findex input_enable()
-The function allows to temporarily enable or disable the use of an
-input field. It takes two arguments, the ID of the input field and either the
-value @code{1} or the string @code{"ON"} to enable the input field (which is
-the default state) or the value @code{0} or the string @code{"OFF"} to
-disable the input field.
 
 
 @anchor{output_create}
@@ -1743,47 +1711,31 @@ the selected menu item until you have determined the new item by calling
 @code{menu_choice()} for the menu object.
 
 
-@anchor{menu_change_label}
-@item menu_change_label()
-@findex menu_change_label()
-The function allows to change the label of a menu. It takes two
-arguments, the ID of the menu and a string with the new label.
-
-
-@anchor{menu_enable}
-@item menu_enable()
-@findex menu_enable()
-The function allows to temporarily enable or disable the use of a
-menu. It takes two arguments, the ID of the menu and either the
-value @code{1} or the string @code{"ON"} to enable the menu (which is
-the default state) or the value @code{0} or the string @code{"OFF"} to
-disable the menu.
-
-
 @anchor{object_delete}
 @item object_delete()
 @findex object_delete()
-The function deletes one or more objects from the toolbox. It expects one
-or a comma separated list of object identifiers as returned by the
-functions @code{button_create()}, @code{slider_create()} and
-@code{input_create()}.
+The function deletes one or more objects from the toolbox. It expects
+one or a comma separated list of object identifiers as returned by the
+functions @code{button_create()}, @code{slider_create()},
+@code{input_create()}, @code{output_create()} or @code{menu_create()}.
 
 
 @anchor{object_change_label}
 @item object_change_label()
 @findex object_change_label()
 The function allows to change the label of an object. It takes two
-arguments, the ID of the object and a string with the new label.
+arguments, the ID of the object that was returned when the object was
+created and a string with the new label.
 
 
 @anchor{object_enable}
 @item object_enable()
 @findex object_enable()
 The function allows to temporarily enable or disable the use of an
-object. It takes two arguments, the ID of the object and either the
-value @code{1} or the string @code{"ON"} to enable the object (which is
-the default state) or the value @code{0} or the string @code{"OFF"} to
-disable the object.
+object. It takes two arguments, the ID of the object that was returned
+when the object was created and either the value @code{1} or the string
+@code{"ON"} to enable the object (which is the default state) or the
+value @code{0} or the string @code{"OFF"} to disable the object.
 
 
 @anchor{hide_toolbox}
@@ -2247,6 +2199,17 @@ FOR I = 1 : 10 @{
                             sprint( "Button \##", I ) );
 @}
 @end example
+
+
+@anchor{lin_space}
+@item lin_space()
+@findex lin_space()
+The function returns an array of equally spaced (floating point)
+numbers. It expects three arguments, the start value, then end value and
+the number of points. It then returns an array with as many points as
+specified by the third argument, starting with the value of the first
+argument and ending with the value of the second and with the difference
+between adjacent points being identical.
 
 
 @end table
