@@ -58,6 +58,7 @@ reloading the @code{EDL} file) only this third step is repeated.
 * First stage of interpretation::
 * Second stage of interpretation::
 * Third stage of interpretation::
+* Reading the sources::
 @end menu
 @end ifinfo
 
