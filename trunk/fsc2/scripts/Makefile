@@ -20,8 +20,8 @@
 # Boston, MA 02111-1307, USA.
 #
 
-# List of all scripts for the current machine (i.e. all scripts whose
-# extension is equal to the machines FQDN)
+# List of all scripts for the current machine (i.e. all scripts with
+# an extension equal to the machines FQDN)
 
 scripts = $(wildcard *.$(machine_name))
 
