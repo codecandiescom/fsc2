@@ -41,7 +41,8 @@ typedef struct Var_
 		double dval;                        /* for float values */
 		long *lpnt;                         /* for integer arrays */
 		double *dpnt;                       /* for double arrays */
-		struct Var_ * ( * fnct )( long, double * ); /* for functions */
+		char *sptr;                         /* for strings */
+		struct Var_ * ( * fnct )( struct Var_ * );  /* for functions */
 	} val;
 	long dim;             /* dimension of array / number of args of function */
 	long *sizes;
@@ -92,6 +93,7 @@ void vars_del_astack( void );
 void vars_update_astack( Var *v );
 void vars_clean_up( void );
 void free_vars( void );
+void vars_check2( Var *v, int type );
 void vars_check( Var *v );
 void vars_warn_new( Var *v );
 Var *vars_assign( Var *src, Var *dest );
