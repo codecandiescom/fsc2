@@ -509,3 +509,39 @@ i.e.@: by pressing both the left and the middle mouse button. Move the
 mouse to the new position where you want the cross section in the other
 direction. Now hit the @code{Space} bar and the cross section in the
 other direction is drawn.
+
+
+@subsection Creating additional tools
+
+Sometimes it is necessary to adjust certain values during an experiment
+is running, especially if one is trying to determine the optimum
+parameters for an experiment. To facilitate this it is possible to create
+several different kinds of objects that allow user input during the
+experiment. All of the user created elements appear in a seperate window.
+@ifnotinfo
+The next figure shows all types of objects that can be created.
+
+@image{fsc2fig7,4cm,}
+
+@end ifnotinfo
+
+First there are the normal buttons. A normal button can be depressed and
+from the @acronym{EDL} program it is possible to determine how often the
+button has been pressed since the last time the function was called.
+
+The second type of objects are push buttons, i.e.@: buttons, that can be
+in two states, either pressed or released.
+
+The third type of objects, radio buttons always come in groups and only
+exactly one of a group can be in the activated state at any moment.
+
+The next objects are sliders to adjust numerical values. There are two
+types of sliders, normal sliders and value sliders. The only difference
+between these is that value sliders have an additional field displaying
+a number that indicates the value the slider is currently set to.
+
+Finally there are in- and output objects. Input objects are boxes into
+which the user can enter numbers, while output objects are used to
+display numerical values. Both object types come in two variants, one
+that allows the input or display of integer values only and one for
+floating point numbers.
