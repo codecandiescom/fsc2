@@ -17,7 +17,7 @@
 
 #define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
 #define SERIAL_BAUDRATE B9600        /* baud rate of field controller */
-#define SERIAL_FLAGS    CS8
+#define SERIAL_FLAGS    CS8 | CLOCAL | CREAD
 
 
 #define DEVICE_NAME "ER035M_S"       /* name of device */
@@ -777,6 +777,9 @@ static bool er035m_s_comm( int type, ... )
 			memcpy( &nmr.new_tio, &nmr.old_tio,
 					sizeof( struct termios ) );
 			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | SERIAL_FLAGS;
+			nmr.new_tio.c_iflag = IGNBRK;
+			nmr.new_tio.c_oflag = 0;
+			nmr.new_tio.c_lflag = 0;
 			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
 			break;
