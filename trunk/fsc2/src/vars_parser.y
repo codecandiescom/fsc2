@@ -93,14 +93,14 @@ linet:   VAR_TOKEN                 { } /* no assignment to be done */
        | VAR_TOKEN '['             { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
-	   | FUNC_TOKEN '('            { eprint( FATAL, SET, "Not a variable "
-											   "definition.\n" );
+	   | FUNC_TOKEN '('            { print( FATAL, "Not a variable "
+											"definition.\n" );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a function "
-											 "and not an array.\n", $1->name );
+       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a function and "
+											"not an array.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' is an array and"
-											 " not a function.\n", $1->name );
+       | VAR_TOKEN '('             { print( FATAL, "'%s' is an array and not "
+											 "a function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
 ;
 
@@ -115,11 +115,11 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
          unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
-       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
-											 "function.\n", $1->name );
+       | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
+											$1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
-											 " function.\n",$1->name );
+       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
+											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
@@ -212,14 +212,14 @@ static void varserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *varstext == '\0' )
-		eprint( FATAL, SET, "Unexpected end of file in VARIABLES section.\n");
+		print( FATAL, "Unexpected end of file in VARIABLES section.\n");
 	else
 	{
 		if ( isprint( *varstext ) )
-			eprint( FATAL, SET, "Syntax error near token '%s'.\n", varstext );
+			print( FATAL, "Syntax error near token '%s'.\n", varstext );
 		else
-			eprint( FATAL, SET, "Syntax error near token '\"%s\"'.\n",
-					varstext + 1 );
+			print( FATAL, "Syntax error near token '\"%s\"'.\n",
+				   varstext + 1 );
 	}
 	THROW( EXCEPTION );
 }

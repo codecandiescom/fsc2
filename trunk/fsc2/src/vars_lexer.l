@@ -218,8 +218,8 @@ WS          [\n \t]+
 			}
 
 {CTRL}      {
-				eprint( FATAL, SET, "Flow control structures can't be used "
-						"in the VARIABLES section.\n" );
+				print( FATAL, "Flow control structures can't be used "
+					   "in the VARIABLES section.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -240,16 +240,15 @@ WS          [\n \t]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, SET, "Function `%s' can only be used "
-								"in the EXPERIMENT section.\n", varstext );
+						print( FATAL, "Function '%s' can only be used "
+							   "in the EXPERIMENT section.\n", varstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
                 else
                 {
-                    eprint( FATAL, SET, "Function `%s' is not loaded.\n",
-							varstext );
+                    print( FATAL, "Function '%s' is not loaded.\n", varstext );
 					THROW( EXCEPTION );
                 }
             }
@@ -267,8 +266,8 @@ WS          [\n \t]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, SET, "Function `%s' can only be used "
-								"in the EXPERIMENT section.\n", varstext );
+						print( FATAL, "Function '%s' can only be used "
+							   "in the EXPERIMENT section.\n", varstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -329,8 +328,8 @@ WS          [\n \t]+
 
 			/* Handling of invalid input */
 .           {
-				eprint( FATAL, SET, "Invalid input in VARIABLES section: "
-						"`%s'.\n", varstext );
+				print( FATAL, "Invalid input in VARIABLES section: '%s'.\n",
+					   varstext );
 				THROW( EXCEPTION );
 			}
 
@@ -351,7 +350,7 @@ WS          [\n \t]+
 /* initializes a few variables and then starts the lexer/parser  */
 /* combination. If this works out ok, either the number of the   */
 /* next section or, on end of file, NO_SECTION is stored in the  */
-/* global variable `Vars_Next_Section', which is returned to the */
+/* global variable 'Vars_Next_Section', which is returned to the */
 /* calling section_parser(). Otherwise, some special exceptions  */
 /* are caught here (resulting in FAIL return state) or, for the  */
 /* more comman exceptions, are caught in section_parser() (in    */
@@ -367,8 +366,7 @@ int variables_parser( FILE *in )
 
 	if ( EDL.compilation.sections[ VARIABLES_SECTION ] )
 	{
-		eprint( FATAL, SET, "Multiple instances of VARIABLES section "
-				"label.\n" );
+		print( FATAL, "Multiple instances of VARIABLES section label.\n" );
 		THROW( EXCEPTION );
 	}
 	EDL.compilation.sections[ VARIABLES_SECTION ] = SET;
