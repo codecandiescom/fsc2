@@ -511,7 +511,7 @@ static void loop_setup( void )
 
 
 /*----------------------------------------------------------------*/
-/* Does the real work for setting up while, repeat and for loops. */
+/* Does the real work for setting up WHILE, REPEAT and FOR loops. */
 /* Can be called recursively to allow nested loops.               */
 /* ->                                                             */
 /*  1. Type of loop (WHILE_TOK, UNTIL_TOK, REPEAT_TOK or FOR_TOK) */
@@ -609,7 +609,7 @@ static void setup_while_or_repeat( int type, long *pos )
 
 
 /*----------------------------------------------------------------------*/
-/* Does the real work for setting up IF-ELSE or UNLESS_ELSE constructs. */
+/* Does the real work for setting up IF-ELSE or UNLESS-ELSE constructs. */
 /* Can be called recursively to allow nested IF and UNLESS tokens.      */
 /* ->                                                                   */
 /*    1. pointer to number of token                                     */
@@ -1084,7 +1084,7 @@ int exp_runlex( void )
 
 /*-----------------------------------------------------------------------*/
 /* This routines returns the tokens to the parser while the condition of */
-/* a while, repeat or for or if is parsed.                               */
+/* a WHILE, REPEAT, FOR, IF OR UNLESS is parsed.                         */
 /*-----------------------------------------------------------------------*/
 
 int conditionlex( void )
@@ -1201,7 +1201,7 @@ bool test_condition( Prg_Token *cur )
 
 
 /*---------------------------------------------------------*/
-/* Functions determines the repeat count for a repeat loop */
+/* Functions determines the repeat count for a REPEAT loop */
 /*---------------------------------------------------------*/
 
 void get_max_repeat_count( Prg_Token *cur )
@@ -1241,9 +1241,9 @@ void get_max_repeat_count( Prg_Token *cur )
 
 /*--------------------------------------------------------------------------*/
 /* Function gets all parts of a for loop condition, i.e. the loop variable, */
-/* the start value assigned to the loop variable, the end value and and op- */
-/* tional increment value. If the loop variable is an integer also the end  */
-/* and increment variable have to be integers.                              */
+/* the start value assigned to the loop variable, the end value and and the */
+/* optional increment value. If the loop variable is an integer also the    */
+/* end and increment variable must be integers.                             */
 /*--------------------------------------------------------------------------*/
 
 void get_for_cond( Prg_Token *cur )
@@ -1340,7 +1340,7 @@ void get_for_cond( Prg_Token *cur )
 
 	vars_pop( Var_Stack );
 
-	/* Get for loop end value */
+	/* Get FOR loop end value */
 
 	cur_prg_token++;                           /* skip the `:' */
 	conditionparse( );                         /* get end value */
