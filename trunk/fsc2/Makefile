@@ -217,5 +217,5 @@ ZIP:
 	    sleep 1; \
 		mount /ZIP; \
 	fi
-	cp ../fsc2a.tgz /ZIP
+	cp ../fsc2.tgz /ZIP
 	umount /ZIP
