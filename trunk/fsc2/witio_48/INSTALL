@@ -261,16 +261,6 @@ fi
 
 function do_install() {
 
-# Check that user has root privileges
-
-if [ `id -u` != "0" ]; then
-	dialog --msgbox \
-"Sorry, you need root privileges to install\n\
- the driver and the library etc. Please\n\
-    become root and then try again.\n" 7 48
-	exit 1;
-fi
-
 # Ask user if he wants to install the library, driver and include files etc.
 
 PREFIX=`grep WITIO_48_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
@@ -288,6 +278,16 @@ directories that don't exist:\n\n\
 		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
+
+# Check that user has root privileges
+
+if [ `id -u` != "0" ]; then
+	dialog --msgbox \
+"Sorry, you need root privileges to install\n\
+ the driver and the library etc. Please\n\
+    become root and then try again.\n" 7 48
+	exit 1;
+fi
 
 # Do the basic installation (covered by the makefile) and
 # find out if user wants to update the modules dependency file

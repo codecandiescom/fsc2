@@ -187,7 +187,7 @@ Alternatively, you could set the environment variable\n\
 ME6X00_KERNEL_SOURCE to the location of the directory with\n\
 the kernel sources.
 
-   Unfortunately, the installation can't proceed.\n" 16 62;
+   Unfortunately, the compilation can't proceed.\n" 16 62;
 	 exit 1;
 fi
 
@@ -210,18 +210,28 @@ If the environment variable ME6X00_KERNEL_SOURCE points\n\
 to the kernel sources and there exists a file version.h\n\
 in \$ME6X00_KERNEL_SOURCE/include/linux this will also do.\n\
 
-   Unfortunately, the installation can't proceed.\n" 17 62;
+   Unfortunately, the compilation can't proceed.\n" 17 62;
 	 exit 1;
 fi
 
 # Compile the driver and the library
 
-echo "Compiling driver and library, please wait..."
-make all > makelog 2>&1
+echo "Compiling the driver, please wait..."
+make driver > makelog 2>&1
 
 if [ $? -ne 0 ]; then
     dialog --msgbox \
-"  Sorry, compilation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
+"Sorry, compiling the driver failed.\nSee \"makelog\" for the reasons.\n" 7 42;
+    exit 1;
+fi
+
+echo "Compiling the library, please wait..."
+make lib >> makelog 2>&1
+
+if [ $? -ne 0 ]; then
+    dialog --msgbox \
+"Sorry, compiling the library failed.\n\
+See \"makelog\" for the reasons.\n" 7 45;
     exit 1;
 fi
 

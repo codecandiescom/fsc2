@@ -427,6 +427,7 @@ me6x00/INSTALL
 me6x00/Makefile
 me6x00/README
 
+me6x00/driver/autoconf.h.example
 me6x00/driver/Makefile
 me6x00/driver/me6x00.c
 me6x00/driver/me6x00_drv.h
@@ -448,6 +449,7 @@ ni6601/INSTALL
 ni6601/Makefile
 ni6601/README
 
+ni6601/driver/autoconf.h.example
 ni6601/driver/Makefile
 ni6601/driver/ni6601_drv.c
 ni6601/driver/ni6601_drv.h
@@ -467,6 +469,7 @@ witio_48/INSTALL
 witio_48/Makefile
 witio_48/README
 
+witio_48/driver/autoconf.h.example
 witio_48/driver/Makefile
 witio_48/driver/witio_48_drv.c
 witio_48/driver/witio_48_drv.h
