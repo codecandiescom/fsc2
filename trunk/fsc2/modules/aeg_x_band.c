@@ -13,7 +13,7 @@
 /* definitions for serial port access */
 
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_PORT     1            /* serial port device file */
+#define SERIAL_PORT     0            /* serial port device file */
 #define SERIAL_TIME     50000        /* time in us set at magnet front panel */
                                      /* set to 50 ms and not to be changed ! */
 

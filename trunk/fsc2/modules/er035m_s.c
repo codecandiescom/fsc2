@@ -183,12 +183,12 @@ int er035m_s_exp_hook( void )
 	}
 	usleep( ER035M_S_WAIT );
 
-	/* Send a "Selected Device Clear" - otherwise the gaussmeter does not
-	   work ... */
-/*
-	gpib_clear_device( nmr.device );
-	usleep( ER035M_S_WAIT );
-*/
+	if ( ! er035m_s_write( "REM", 3 ) )
+	{
+		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
+		THROW( EXCEPTION );
+	}
+
 	/* Ask gaussmeter to send status byte and test if it does */
 
 	nmr.state = ER035M_S_UNKNOWN;
@@ -223,6 +223,7 @@ try_again:
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
 				if ( exist_device( "s_band" ) )
 					break;
+				er035m_s_close( );
 				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
 						"NMR gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
@@ -231,16 +232,19 @@ try_again:
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
 				if ( exist_device( "aeg_x_band" ) )
 					break;
+				er035m_s_close( );
 				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
 						"NMR gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
+				er035m_s_close( );
 				eprint( FATAL, "%s: No field probe connected to the NMR "
 						"gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
+				er035m_s_close( );
 				eprint( FATAL, "%s: Temperature error from NMR "
 						"gaussmeter.", nmr.name );
 				THROW( EXCEPTION );
@@ -248,6 +252,7 @@ try_again:
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
+				er035m_s_close( );
 				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
 						"field.", nmr.name );
 				THROW( EXCEPTION );
@@ -255,11 +260,13 @@ try_again:
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
+				er035m_s_close( );
 				eprint( FATAL, "%s: NMR gaussmeter can't find the actual "
 						"field.", nmr.name );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen) */
+				er035m_s_close( );
 				eprint( FATAL, "%s: Modulation of NMR gaussmeter is switched "
 						"off.", nmr.name );
 				THROW( EXCEPTION );
@@ -275,6 +282,7 @@ try_again:
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
+				er035m_s_close( );
 				eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
 						"problem.", nmr.name );
 				THROW( EXCEPTION );
@@ -350,6 +358,7 @@ try_again:
 
 		default :                     /* should never happen... */
 		{
+			er035m_s_close( );
 			eprint( FATAL, "%s: Undocumented data received from the NMR "
 					"gaussmeter.", nmr.name );
 			THROW( EXCEPTION );
@@ -465,6 +474,7 @@ Var *find_field( Var *v )
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
+					er035m_s_close( );
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
 							"problem.", nmr.name );
 					THROW( EXCEPTION );
@@ -479,12 +489,14 @@ Var *find_field( Var *v )
 
 				case 'D' :      /* OU active -> error (should never happen) */
 					nmr.state = ER035M_S_OU_ACTIVE;
+					er035m_s_close( );
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
 							"problem.", nmr.name );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
 					nmr.state = ER035M_S_OD_ACTIVE;
+					er035m_s_close( );
 					eprint( FATAL, "%s: NMR gaussmeter has an unidentifiable "
 							"problem.", nmr.name );
 					THROW( EXCEPTION );
@@ -579,6 +591,7 @@ static double er035m_s_get_field( void )
 
 		if ( *state_flag >= '3' )
 		{
+			er035m_s_close( );
 			eprint( FATAL, "%s: NMR gaussmeter can't get lock onto the "
 					"current field.", nmr.name );
 			THROW( EXCEPTION );
@@ -630,6 +643,8 @@ static bool er035m_s_write( const char *buf, long len )
 	else
 		res = er035m_s_comm( SERIAL_WRITE, buf, len );
 
+	if ( ! res )
+		er035m_s_close( );
 	return res;
 }
 
@@ -639,7 +654,13 @@ static bool er035m_s_read( char *buf, long *len )
 	if ( buf == NULL || *len == 0 )
 		return OK;
 
-	return er035m_s_comm( SERIAL_READ, buf, len );
+	if ( ! er035m_s_comm( SERIAL_READ, buf, len ) )
+	{
+		er035m_s_close( );
+		return FAIL;
+	}
+
+	return OK;
 }
 
 
@@ -669,6 +690,7 @@ static bool er035m_s_comm( int type, ... )
 			break;
 
 		case SERIAL_EXIT :
+			er035m_s_write( "LOC", 3 );
 			tcflush( nmr.fd, TCIFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
 			close( nmr.fd );
