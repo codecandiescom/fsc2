@@ -11,6 +11,7 @@ Makefile
 README
 README.mail
 TODO
+xxx
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -357,6 +358,7 @@ src/func_save.c
 src/func_save.h
 src/func_util.c
 src/func_util.h
+src/global.c
 src/global.h
 src/gpib_if_jtt.cx
 src/gpib_if_jtt.hx
@@ -385,7 +387,6 @@ src/loader.c
 src/loader.h
 src/mail.c
 src/mail.h
-src/makelog
 src/module_util.c
 src/module_util.h
 src/phases.c

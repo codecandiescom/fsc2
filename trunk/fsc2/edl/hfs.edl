@@ -18,8 +18,8 @@ TRIGGER_MODE: INTERNAL;
 
 MICROWAVE:    CHANNEL = A1, V_H = 2 V, V_L = 0 V, DELAY = 0 ns;
 RF:           CH = A2;
-RF_GATE:      CH = A3;
-DETECTION:    CH = TRIGGER_OUT;
+RF_GATE:      CH = A4;
+DETECTION:    CH = TRIG_OUT;
 
 
 PREPARATIONS:
@@ -44,6 +44,13 @@ P2: FUNC   = MW,
 P21: FUNC  = MW;
 P22: FUNC  = MW;
 
+P17: FUNC = RF,
+	 START = 400 ns,
+	 LEN   = 20 ns;
+
+P18: FUNC = RF_GATE,
+	 START = 400 ns,
+	 LEN   = 20 ns;
 
 P4: FUNC   = DETECTION,
 	START  = 0 ns;
