@@ -70,7 +70,7 @@ export        # export all symbols to the sub-makefiles
 
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
-# template and then invoke them in turn
+# template and then invoke them
 
 all: $(simp_modules:.c=.so)
 	for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do \
