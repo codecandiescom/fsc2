@@ -1212,8 +1212,6 @@ static bool incr_x( long x_index, long len )
 
 		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
 										  new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
-											new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
 			cv->s2d[ X ] = ( double ) ( G2.canvas.w - 1 ) /
@@ -1252,8 +1250,6 @@ static bool incr_y( long y_index )
 											   new_num * sizeof *cv->points );
 		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
 										  new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
-											new_num * sizeof *cv->xpoints_s );
 
 		for ( k = G2.ny * G2.nx, sp = cv->points + k; k < new_num; sp++, k++ )
 			sp->exist = UNSET;
@@ -1317,8 +1313,6 @@ static bool incr_x_and_y( long x_index, long len, long y_index )
 
 		cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
 										  new_num * sizeof *cv->xpoints );
-		cv->xpoints_s = XPOINT_P T_realloc( cv->xpoints_s,
-											new_num * sizeof *cv->xpoints_s );
 
 		if ( cv->is_fs )
 		{

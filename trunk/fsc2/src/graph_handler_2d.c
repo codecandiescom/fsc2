@@ -1026,8 +1026,7 @@ static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 		dz;
 	int factor;
 	Scaled_Point *sp = cv->points;
-	XPoint *xp = cv->xpoints,
-		   *xps = cv->xpoints_s;
+	XPoint *xp = cv->xpoints;
 
 
 	/* Additionally pressing the right mouse button increases the amount the
@@ -1064,20 +1063,18 @@ static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 	cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
 	for ( i = 0, count = cv->count;
-		  i < G2.nx * G2.ny && count != 0; sp++, xp++, xps++, i++ )
+		  i < G2.nx * G2.ny && count != 0; sp++, xp++, i++ )
 		if ( sp->exist )
 		{
 			count--;
 
 			xp->x = i2shrt( xp->x + dx );
 			xp->y = i2shrt( xp->y + dy );
-			xps->x = i2shrt( xp->x - ( cv->w >> 1 ) );
-			xps->y = i2shrt( xp->y - ( cv->h >> 1 ) );
 
-			cv->left &= ( xps->x + cv->w <= 0 );
-			cv->right &= ( xps->x >= ( int ) G2.canvas.w );
-			cv->up &= ( xps->y + cv->h <= 0 );
-			cv->down &= ( xps->y >= ( int ) G2.canvas.h );
+			cv->left  &= ( xp->x + cv->w <= 0 );
+			cv->right &= ( xp->x >= ( int ) G2.canvas.w );
+			cv->up    &= ( xp->y + cv->h <= 0 );
+			cv->down  &= ( xp->y >= ( int ) G2.canvas.h );
 	}
 
 	return SET;
@@ -1241,8 +1238,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 {
 	long i, j, count;
 	Scaled_Point *sp;
-	XPoint *xp  = cv->xpoints,
-		   *xps = cv->xpoints_s;
+	XPoint *xp = cv->xpoints;
+	XPoint p;
 	short dw, dh;
 
 
@@ -1255,21 +1252,21 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 
 	for ( sp = cv->points, i = 0, count = cv->count;
 		  i < G2.ny && count != 0; i++ )
-		for ( j = 0; j < G2.nx && count != 0; sp++, xp++, xps++, j++ )
+		for ( j = 0; j < G2.nx && count != 0; sp++, xp++, j++ )
 			if ( sp->exist )
 			{
 				count--;
 
-				xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-				xp->y = i2shrt( G2.canvas.h ) - 1
+				p.x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+				p.y = i2shrt( G2.canvas.h ) - 1
 				        - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
-				xps->x = i2shrt( xp->x - dw );
-				xps->y = i2shrt( xp->y - dh );
+				xp->x = i2shrt( p.x - dw );
+				xp->y = i2shrt( p.y - dh );
 
-				cv->left  &= ( xps->x + cv->w <= 0 );
-				cv->right &= ( xps->x >= ( int ) G2.canvas.w );
-				cv->up    &= ( xps->y + cv->h <= 0 );
-				cv->down  &= ( xps->y >= ( int ) G2.canvas.h );
+				cv->left  &= ( xp->x + cv->w <= 0 );
+				cv->right &= ( xp->x >= ( int ) G2.canvas.w );
+				cv->up    &= ( xp->y + cv->h <= 0 );
+				cv->down  &= ( xp->y >= ( int ) G2.canvas.h );
 			}
 
 	cv->needs_recalc = UNSET;
@@ -1428,7 +1425,7 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 {
 	long i, count;
 	Scaled_Point *sp;
-	XPoint *xps;
+	XPoint *xp;
 	XPoint p[ 2 ];
 
 
@@ -1436,69 +1433,66 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 		recalc_XPoints_of_curve_2d( cv );
 
 	if ( cv->w == 1 && cv->h == 1 )
-		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
-				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		for ( sp = cv->points, xp = cv->xpoints, count = cv->count,
+				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xp++, i++ )
 		{
 			if ( ! sp->exist )
 				continue;
 
 			count--;
 
-			if ( xps->x > ( short int ) c->w ||
-				 xps->y > ( short int ) c->h ||
-				 - xps->x - 1 > 1 || - xps->y - 1 > 1 )
+			if ( xp->x > ( short int ) c->w || xp->y > ( short int ) c->h ||
+				 - xp->x - 1 > 1 || - xp->y - 1 > 1 )
 				continue;
 
 			XDrawPoint( G.d, c->pm,
 						G2.gcs[ d2ci( cv->z_factor
 									  * ( sp->v + cv->shift[ Z ] ) ) ],
-						xps->x, xps->y );
+						xp->x, xp->y );
 		}
 	else if ( cv->w == 1 || cv->h == 1 )
 	{
 		p[ 1 ].x = cv->w - 1;
 		p[ 1 ].y = cv->h - 1;
 
-		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
-				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		for ( sp = cv->points, xp = cv->xpoints, count = cv->count,
+				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xp++, i++ )
 		{
 			if ( ! sp->exist )
 				continue;
 
 			count--;
 
-			if ( xps->x > ( short int ) c->w ||
-				 xps->y > ( short int ) c->h ||
-				 - xps->x - 1 > 1 || - xps->y - 1 > 1 )
+			if ( xp->x > ( short int ) c->w || xp->y > ( short int ) c->h ||
+				 - xp->x - 1 > 1 || - xp->y - 1 > 1 )
 				continue;
 
-			p[ 0 ].x = xps->x;
-			p[ 0 ].y = xps->y;
+			p[ 0 ].x = xp->x;
+			p[ 0 ].y = xp->y;
 
 			XDrawLines( G.d, c->pm,
 						G2.gcs[ d2ci( cv->z_factor
 									  * ( sp->v + cv->shift[ Z ] ) ) ],
-						p, 2,  CoordModePrevious);
+						p, 2,  CoordModePrevious );
 		}
 	}
 	else
-		for ( sp = cv->points, xps = cv->xpoints_s, count = cv->count,
-				  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xps++, i++ )
+		for ( sp = cv->points, xp = cv->xpoints, count = cv->count,
+			  i = 0; i < G2.nx * G2.ny && count != 0; sp++, xp++, i++ )
 		{
 			if ( ! sp->exist )
 				continue;
 
 			count--;
 
-			if ( xps->x > ( short int ) c->w ||
-				 xps->y > ( short int ) c->h ||
-				 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
+			if ( xp->x > ( short int ) c->w || xp->y > ( short int ) c->h ||
+				 - xp->x - 1 > cv->w || - xp->y - 1 > cv->h )
 				continue;
 
 			XFillRectangle( G.d, c->pm,
 							G2.gcs[ d2ci( cv->z_factor
 										  * ( sp->v + cv->shift[ Z ] ) ) ],
-							xps->x, xps->y, cv->w, cv->h );
+							xp->x, xp->y, cv->w, cv->h );
 		}
 }
 
