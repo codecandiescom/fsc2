@@ -234,7 +234,6 @@ try_again:
 		if ( er035m_s_read( buffer, &length ) == OK )
 			break;
 
-		printf( "%s didn't answer correctly!\n", DEVICE_NAME );
 		if ( retries <= 0 )
 			er035_s_comm_fail( );
 	}
@@ -469,7 +468,6 @@ Var *find_field( Var *v )
 			if ( er035m_s_read( buffer, &length ) == FAIL )
 				break;
 
-			printf( "%s didn't answer correctly!\n", DEVICE_NAME );
 			if ( retries <= 0 )
 				er035_s_comm_fail( );
 		}
@@ -616,7 +614,6 @@ static double er035m_s_get_field( void )
 			if ( er035m_s_read( buffer, &length ) == OK )
 				break;
 
-			printf( "%s didn't answer correctly!\n", DEVICE_NAME );
 			if ( retries <= 0 )
 				er035_s_comm_fail( );
 		}
@@ -692,8 +689,6 @@ static bool er035m_s_write( const char *buf )
 		return OK;
 	wlen = strlen( buf );
 
-printf( "WRITE: `%s'\n", buf );
-
 	if ( er035m_s_eol != NULL && strlen( er035m_s_eol ) > 0 )
 	{
 		wlen += strlen( er035m_s_eol );
@@ -736,8 +731,6 @@ static bool er035m_s_read( char *buf, long *len )
 	   sometimes may send complete BS) */
 
 	buf[ *len ] = '\0';         /* make sure there's an end of string marker */
-
-printf( "READ: `%s'\n", buf );
 
 	if ( ( ptr = strchr( buf, '\r' ) ) ||
 		 ( ptr = strchr( buf, '\n' ) )    )
