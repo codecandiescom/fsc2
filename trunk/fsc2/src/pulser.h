@@ -43,14 +43,14 @@ typedef struct {
 	bool ( *set_pulse_length )( long pulse_number, double time );
 	bool ( *set_pulse_position_change )( long pulse_number, double time );
 	bool ( *set_pulse_length_change )( long pulse_number, double time );
-	bool ( *set_pulse_phase_cycle )( long pulse_number, int cycle );
+	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
 
 	bool ( *get_pulse_function )( long pulse_number, int *function );
 	bool ( *get_pulse_position )( long pulse_number, double *time );
 	bool ( *get_pulse_length )( long pulse_number, double *time );
 	bool ( *get_pulse_position_change )( long pulse_number, double *time );
 	bool ( *get_pulse_length_change )( long pulse_number, double *time );
-	bool ( *get_pulse_phase_cycle )( long pulse_number, int *cycle );
+	bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
 
 	bool ( *setup_phase )( int function, PHS phs );
 	bool ( *set_phase_switch_delay )( int function, double time );
