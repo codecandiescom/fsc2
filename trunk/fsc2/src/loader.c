@@ -195,9 +195,7 @@ void load_functions( Device *dev )
 	   to be resolved try to find them in the device driver functions - check
 	   that the function has not already been loaded (but overloading built-in
 	   functions is acceptable). */
-/*
-	eprint( NO_ERROR, "Loading functions from module `%s.so'.", dev->name );
-*/
+
 	for ( num = 0; num < Num_Func; num++ )
 	{
 		/* Don't try to load functions that are not listed in `Functions' */
@@ -236,11 +234,7 @@ void load_functions( Device *dev )
 			eprint( NO_ERROR, "  Overloading built-in function `%s()' from "
 					"module `%s.so'.", Fncts[ num ].name, dev->name );
 		}
-/*
-		else
-			eprint( NO_ERROR, "  Loading function `%s()'.",
-					Fncts[ num ].name );
-*/
+
 		Fncts[ num ].fnct = cur;
 	}
 }
