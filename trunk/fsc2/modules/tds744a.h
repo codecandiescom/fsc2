@@ -276,7 +276,7 @@ void tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 double tds744a_get_amplitude( int channel, WINDOW *w, bool use_cursors );
 void tds744a_free_running( void );
 void tds744a_lock_state( bool lock );
-bool tds520_command( const char *cmd );
+bool tds744a_command( const char *cmd );
 
 
 
