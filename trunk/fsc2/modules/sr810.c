@@ -305,8 +305,8 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the voltage */
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-	voltage = VALUE( v->next );
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	voltage = VALUE( v );
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC voltage (%f V) in call of "
@@ -324,7 +324,7 @@ Var *lockin_dac_voltage( Var *v )
 			;
 	}
 	
-	sr810.dac_voltage = voltage;
+	sr810.dac_voltage[ port - 1 ] = voltage;
 
 	if ( TEST_RUN || I_am == PARENT )
 		return vars_push( FLOAT_VAR, voltage );
@@ -766,6 +766,7 @@ static bool sr810_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
+	int i;
 
 
 	assert( sr810.device < 0 );
@@ -917,14 +918,14 @@ static double sr810_get_adc_data( long channel )
 /* -> Voltage to be set (-10.5 V - +10.5 V)                     */
 /*-------------------------- -----------------------------------*/
 
-static void sr810_set_dac_data( long channel, double voltage )
+static void sr810_set_dac_data( long port, double voltage )
 {
 	char buffer [ 40 ] = "AUXV ";
 
-	assert( channel >= 1 && channel <= 4 );
+	assert( port >= 1 && port <= 4 );
 	assert( voltage >= DAC_MIN_VOLTAGE && voltage <= DAC_MAX_VOLTAGE );
 
-	sprintf( buffer + 5, "%ld,%f", channel, voltage );
+	sprintf( buffer + 5, "%ld,%f", port, voltage );
 
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{

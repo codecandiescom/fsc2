@@ -552,7 +552,7 @@ Var *lockin_dac_voltage( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used as DAC voltage.",
 				Fname, Lc, DEVICE_NAME );
 
-	voltage = FLOAT( v );
+	voltage = VALUE( v );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
