@@ -199,6 +199,9 @@ Var *boxcar_get_curve( Var *v )
 	long i;
 	unsigned char *cc, *cn;
 	Var *cl;
+	double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
+	int new_timo, old_timo = -1;
+	double max_time;
 
 
 	if ( ! TEST_RUN && I_am == PARENT )
@@ -416,11 +419,26 @@ Var *boxcar_get_curve( Var *v )
 
 	TRY
 	{
+		/* Set a timeout value that we have at least 20 ms per point - this
+		   seems to be the upper limit needed. Don't set timout to less than
+		   1s. Reset timeout when finished. */
+
+		max_time = 0.02 * num_points;
+		new_timo = 0;
+		while ( tmos[ new_timo ] < max_time )
+			new_timo++;
+		new_timo += 11;
+		gpib_timeout( egg4402.device, new_timo );
+		old_timo = ( int ) gpib_count;
+
 		egg4402_query( buffer, &length );
+		gpib_timeout( egg4402.device, old_timo );
 		TRY_SUCCESS;
 	}
 	CATCH( EXCEPTION )
 	{
+		if ( old_timo > 0 )
+			gpib_timeout( egg4402.device, old_timo );
 		T_free( buffer );
 		THROW( EXCEPTION );
 	}
