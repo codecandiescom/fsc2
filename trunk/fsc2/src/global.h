@@ -120,10 +120,8 @@ enum {
 	PULSER_CHANNEL_DET_GATE,
 	PULSER_CHANNEL_RF,
 	PULSER_CHANNEL_RF_GATE,
-	PULSER_CHANNEL_PHASE_X1,
-	PULSER_CHANNEL_PHASE_X2,
-	PULSER_CHANNEL_PHASE_Y1,
-	PULSER_CHANNEL_PHASE_Y2,
+	PULSER_CHANNEL_PHASE_1,
+	PULSER_CHANNEL_PHASE_2,
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
@@ -133,9 +131,8 @@ enum {
 
 #if defined ( FSC2_MAIN )
 const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DET", "DET_GATE",
-								  "RF", "RF_GATE", "PHASE_X1", "PHASE_X2",
-								  "PHASE_Y1", "PHASE_Y2", "OTHER_1", "OTHER_2",
-								  "OTHER_3", "OTHER_4" };
+								  "RF", "RF_GATE", "PHASE_1", "PHASE_2",
+								  "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" };
 #else
 extern const char *Function_Names[ ];
 #endif

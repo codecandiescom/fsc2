@@ -35,6 +35,7 @@ void pulser_struct_init( void )
 	pulser_struct.set_pulse_length = NULL;
 	pulser_struct.set_pulse_position_change = NULL;
 	pulser_struct.set_pulse_length_change = NULL;
+	pulser_struct.set_pulse_phase_cycle = NULL;
 	pulser_struct.set_pulse_maxlen = NULL;
 	pulser_struct.set_pulse_replacements = NULL;
 	pulser_struct.get_pulse_function = NULL;
@@ -42,6 +43,7 @@ void pulser_struct_init( void )
 	pulser_struct.get_pulse_length = NULL;
 	pulser_struct.get_pulse_position_change = NULL;
 	pulser_struct.get_pulse_length_change = NULL;
+	pulser_struct.get_pulse_phase_cycle = NULL;
 	pulser_struct.get_pulse_maxlen = NULL;
 }
 
@@ -590,6 +592,14 @@ void p_set( long pnum, int type, Var *v )
 			vars_pop( v );
 			break;
 
+		case P_PHASE :
+			vars_check( v, INT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_phase_cycle,
+							"setting a pulse phase cycle" );
+			( *pulser_struct.set_pulse_phase_cycle )( pnum, v->val.lval );
+			vars_pop( v );
+			break;
+
 		case P_MAXLEN :
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			is_pulser_func( pulser_struct.set_pulse_maxlen,
@@ -638,6 +648,7 @@ Var *p_get( char *txt, int type )
 	long pnum = p_num( txt );               /* determine pulse number */
 	int function;
 	double time;
+	long cycle;
 	Var *v;
 
 
@@ -676,6 +687,13 @@ Var *p_get( char *txt, int type )
 							"returning a pulses length change" );
 			( *pulser_struct.get_pulse_length_change )( pnum, &time );
 			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		case P_PHASE :
+			is_pulser_func( pulser_struct.get_pulse_phase_cycle,
+							"returning a pulses phase cycle" );
+			( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
+			v = vars_push( FLOAT_VAR, cycle );
 			break;
 
 		case P_MAXLEN :

@@ -46,10 +46,8 @@ static Var *CV;
 %token DET_GATE_TOKEN        /* DETECTION_GATE */
 %token RF_TOKEN              /* RADIO_FREQUENCY */
 %token RF_GATE_TOKEN         /* RADIO_FREQUENCY_GATE */
-%token PHX1_TOKEN            /* PHASE_X1 */
-%token PHX2_TOKEN            /* PHASE_X2 */
-%token PHY1_TOKEN            /* PHASE_Y1 */
-%token PHY2_TOKEN            /* PHASE_Y2 */
+%token PH1_TOKEN             /* PHASE_1 */
+%token PH2_TOKEN             /* PHASE_2 */
 %token OI_TOKEN              /* OTHER_1 */
 %token OII_TOKEN             /* OTHER_2 */
 %token OIII_TOKEN            /* OTHER_3 */
@@ -141,10 +139,8 @@ func:    MW_TOKEN                  { Channel_Type = PULSER_CHANNEL_MW; }
 	   | DET_GATE_TOKEN            { Channel_Type = PULSER_CHANNEL_DET_GATE; }
        | RF_TOKEN                  { Channel_Type = PULSER_CHANNEL_RF; }
 	   | RF_GATE_TOKEN             { Channel_Type = PULSER_CHANNEL_RF_GATE; }
-       | PHX1_TOKEN                { Channel_Type = PULSER_CHANNEL_PHASE_X1; }
-       | PHX2_TOKEN                { Channel_Type = PULSER_CHANNEL_PHASE_X2; }
-       | PHY1_TOKEN                { Channel_Type = PULSER_CHANNEL_PHASE_Y1; }
-       | PHY2_TOKEN                { Channel_Type = PULSER_CHANNEL_PHASE_Y2; }
+       | PH1_TOKEN                 { Channel_Type = PULSER_CHANNEL_PHASE_1; }
+       | PH2_TOKEN                 { Channel_Type = PULSER_CHANNEL_PHASE_2; }
        | OI_TOKEN                  { Channel_Type = PULSER_CHANNEL_OTHER_1; }
        | OII_TOKEN                 { Channel_Type = PULSER_CHANNEL_OTHER_2; }
        | OIII_TOKEN                { Channel_Type = PULSER_CHANNEL_OTHER_3; }
@@ -169,13 +165,13 @@ pcd:    /* empty */
 
 
 pod:    POD_TOKEN sep1
-        INT_TOKEN pm               { p_assign_pod( Channel_Type,
-												  vars_push( INT_VAR, $3 ) ); }
+        pm
 ;
 
-pm:     sep2 INT_TOKEN sep2       { p_assign_pod( Channel_Type,
+pm:     INT_TOKEN sep2             { p_assign_pod( Channel_Type,
+												  vars_push( INT_VAR, $1 ) ); }
+      | pm INT_TOKEN sep2          { p_assign_pod( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
-      | sep2
 ;
 								  
 chd:    CH_TOKEN sep1 ch1

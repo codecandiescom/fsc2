@@ -81,9 +81,11 @@ S           S(TART)?
 L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
-PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9]+)?
+PC          P(HA(SE)?)?_?C(YC(LE)?)?
 ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
 RP          REPL(ACEMENT)?_?(P((ULSE)?S?)?)?
+
+PS          P(HASE)?_?S(EQ(UENCE)?)?(_?[0-9]{1,2})?
 
 WS          [\n \t]+
 
@@ -176,7 +178,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {L}			return L_TOK;
 {DS}        return DS_TOK;
 {DL}        return DL_TOK;
-{PH}        return PH_TOK;
+{PC}        return PC_TOK;
 {ML}        return ML_TOK;
 {RP}        {
 				/* push a marker variable */
@@ -212,6 +214,11 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				return VAR_REF;
             }
 
+{P}"."{PC}  {
+				prepslval.vptr = p_get( prepstext, P_PHASE );
+				return VAR_REF;
+            }
+
 {P}"."{ML}  {
 				prepslval.vptr = p_get( prepstext, P_MAXLEN );
 				return VAR_REF;
@@ -232,6 +239,23 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 				prepslval.vptr = vars_push( INT_VAR, p_num( prepstext ) );
 				return( RPP_TOK );
+			}
+
+{PS}		{   /* Phase sequence */
+				long val = 0;
+				char *cp = prepstext + prepsleng - 1;
+
+				/* determine number of phase sequence (0 to ...)*/
+
+				if ( isdigit( *cp ) )
+				{
+					while ( isdigit( *cp ) )
+						cp--;
+					val = atol( ++cp ) - 1;
+				}
+
+				prepslval.vptr = vars_push( INT_VAR, val );
+				return VAR_REF;
 			}
 
 {MW}        {

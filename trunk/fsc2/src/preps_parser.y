@@ -42,7 +42,7 @@ static Var *CV;
 %token L_TOK                    /* pulse length */
 %token DS_TOK                   /* pulse position change */
 %token DL_TOK                   /* pulse length change */
-%token PH_TOK                   /* phase sequence */
+%token PC_TOK                   /* pulse phase cycle sequence */
 %token ML_TOK                   /* maximum pulse length */
 %token <vptr> RP_TOK            /* replacement pulse list */
 %token RPP_TOK
@@ -106,6 +106,7 @@ prop:   /* empty */
        | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
        | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }
        | prop DL_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DLEN, $4 ); }
+       | prop PC_TOK sep1 VAR_REF sep2 { p_set( Cur_Pulse, P_PHASE, $4 ); }
        | prop ML_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_MAXLEN, $4 ); }
        | prop RP_TOK sep1 rps sep2  { p_set( Cur_Pulse, P_REPL, $2->next );
 	   	                              vars_pop( $2 ); }
