@@ -615,8 +615,6 @@ static double keithley228a_goto_current( double new_current )
 	if ( TEST_RUN )
 		return keithley228a.current = new_current;
 
-	jmp_size = fabs( keithley228a.current > new_current );
-
 	/* Calculate the size of the current steps */
 
 	del_amps = 0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
