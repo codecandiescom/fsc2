@@ -48,6 +48,7 @@
 #ifndef EXCEPTIONS_HEADER
 #define EXCEPTIONS_HEADER
 
+#include <unistd.h>
 #include <setjmp.h>
 #include <syslog.h>
 
