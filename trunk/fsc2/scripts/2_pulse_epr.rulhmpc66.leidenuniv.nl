@@ -413,6 +413,7 @@ save_comment( File, \"%\" );
 
 fsave( File,
 	   \"% Date:                   # #\\n\"
+	   \"% Script:                 2_pulse_epr\\n\"
 	   \"% Start field:            # G\\n\"
 	   \"% End field:              # G\\n\"
 	   \"% Field step:             # G\\n\"

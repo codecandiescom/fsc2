@@ -626,6 +626,7 @@ save_comment( File, \"%\" );
 
 fsave( File,
 	   \"% Date:                   # #\\n\"
+	   \"% Script:                 3_pulse_endor\\n\"
 	   \"% Field:                  # G\\n\"
 	   \"% Start frequency:        # MHz\\n\"
 	   \"% End frequency:          # MHz\\n\"

@@ -933,7 +933,7 @@ IF J == 1 {
 	FOR I = 1 : Num_Points - 1 {
 		fsave( File, \"#\", field + ( I - 1 ) * step_size );
 		FOR K = 1 : J {
-			fsave( File, \",#\", data[ J, I ] );
+			fsave( File, \",#\", data[ K, I ] );
 		}
 		fsave( File, \"\\n\" );
 	}
@@ -944,9 +944,9 @@ IF J == 1 {
 	}
 }
 
-
 fsave( File, \"\\n\"
        \"% Date:                    # #\\n\"
+	   \"% Script:                  cw_epr\\n\"
        \"% Magnet (measuring during both sweep up and down):\\n\"
        \"%   Start field:           # G\\n\"
        \"%   End field:             # G\\n\"
