@@ -675,23 +675,24 @@ void close_all_files( void )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* Saves data to a file. If 'get_file()' hasn't been called yet it will be  */
-/* called now - in this case the file opened this way is the only file to   */
-/* be used and no file identifier is allowed as first argument to 'save()'. */
-/* This version of save writes the data in an unformatted way, i.e. each    */
-/* on its own line with the only exception of arrays of more than one       */
-/* dimension where an empty line is put between the slices.                 */
-/* It returns the number of characters written.                             */
-/*--------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Saves data to a file. If 'get_file()' hasn't been called yet it will */
+/* be called now - in this case the file opened this way is the only    */
+/* file to be used and no file identifier is allowed as first argument  */
+/* to 'save()'. This version of save writes the data in an unformatted  */
+/* way, i.e. each on its own line with the only exception of arrays of  */
+/* more than one dimension where an empty line is put between the       */
+/* slices. It returns the number of characters written.                 */
+/*----------------------------------------------------------------------*/
 
 Var *f_save( Var *v )
 {
-	ssize_t i;
+	static ssize_t i;
 	long file_num;
-	long count = 0;
-	Var *tmp = NULL;
-	Var *nv1, *nv2 = NULL;
+	static long count;
+	static Var *tmp;
+	Var *nv1;
+	static Var *nv2;
 
 
 	/* Determine the file identifier */
@@ -704,6 +705,10 @@ Var *f_save( Var *v )
 		print( WARN, "Missing arguments.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
+
+	count = 0;
+	tmp = NULL;
+	nv2 = NULL;
 
 	do
 	{

@@ -153,7 +153,7 @@ static void unpack_and_accept( int dim, char *ptr )
 {
 	int i;
 	int nsets;
-	char *ptr_next;
+	char *ptr_next = NULL;
 	long x_index,
 		 y_index,
 		 curve;
