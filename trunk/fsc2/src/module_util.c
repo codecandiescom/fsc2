@@ -60,6 +60,6 @@ inline void too_many_arguments( Var *v, const char *device_name )
 inline void no_query_possible( const char device_name )
 {
 	eprint( FATAL, SET, "%s: Function %s() with no argument can only be used "
-			"in the EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
+			"in the EXPERIMENT section.\n", device_name, Cur_Func );
 	THROW( EXCEPTION )
 }
