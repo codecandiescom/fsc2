@@ -582,16 +582,16 @@ actual pattern length becomes larger than the one specified.
 @cindex Keeping unused pulses
 @cindex @code{KEEP_ALL_PULSES}
 
-Usually, pulses that in the test run are found to be unused in the
-experiment are deleted and a warning message is printed. Any further
-reference to or use of these deleted pulses would lead to the immediate
-termination of the experiment. But there are a few situations where it
-can't be detected in the test run that a pulse is actually needed
-(e.g.@: if it is only used in an untestable @code{IF} construct) and it
-gets deleted even though it is needed. In this case it is possible to force
-the program to keep all pulses, even if they seem to be unused. This is
-done by specifying the keyword @code{KEEP_ALL_PULSES} in the
-@code{ASSIGNMENTS} section, i.e.@: just write
+Usually, pulses that in the test run are found to be unused are deleted
+and a warning message is printed. Any further reference to or use of
+these deleted pulses leads to the immediate termination of the
+experiment. But there are a few situations where it can't be detected in
+the test run that a pulse is actually needed (e.g.@: if it is only used
+in an untestable @code{IF} construct) and thus the pulse gets deleted
+even though it is needed. In this case you have to force the program to
+keep all pulses even if they seem to be unused. This is done by
+specifying the keyword @code{KEEP_ALL_PULSES} in the @code{ASSIGNMENTS}
+section, i.e.@: just write
 @example
 KEEP_ALL_PULSES;
 @end example
