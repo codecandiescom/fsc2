@@ -36,8 +36,7 @@ to be controlled.
   sacrificing flexibility.
 
 * fsc2 has a built-in simple web server (only running on user demand)
-  that allows the experimentator to remotely monitor the state of an
-  experiment.
+  that allows the user to remotely monitor the state of an experiment.
 
 * Currently fsc2 controls devices that are either connected via the
   serial ports or the GPIB bus. Functions for simplifying access of
@@ -63,7 +62,7 @@ to be controlled.
 
 Devices for which functional drivers already exist are:
 
-* Tektronix Digitizing Oszilloscopes TDS 520, 520A, 520C, 540, 744A, 754A
+* Tektronix Digitizing Oscilloscopes TDS 520, 520A, 520C, 540, 744A, 754A
 * LeCroy Digitizing Oscilloscope 9400
 * Sony/Tektronix Data Generator DG2020
 * Tektronix Stimulus System HFS9003
