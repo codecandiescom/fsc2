@@ -22,9 +22,9 @@
 # Boston, MA 02111-1307, USA.
 
 
-use Tk::Balloon;
 use strict;
 use Tk;
+use Tk::Balloon;
 
 my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
@@ -208,19 +208,23 @@ my $f9_m = $mw->Optionmenu( '-options' => [ ( 'Start experiment',
 											  'Test program',
 											  'Load into fsc2' ) ],
 							'-variable' => \$how,
-							'-command' => \&write_out
 						  )->pack( '-padx' => '3m',
 								   '-pady' => '3m' );
 $ballon->attach( $f9_m,
-				 '-balloonmsg' => "Make fsc2 run, test or just load " .
-				 "the program" );
+				 '-balloonmsg' => "Run fsc2 immediately, test\n" .
+				                  "or just load the program" );
 
-my $f10_b =$mw->Button( '-text' => 'Quit',
-						'-command' => sub { &store_defs; $mw->destroy }
-					  )->pack( '-padx' => '3m',
-							   '-pady' => '3m' );
-$ballon->attach( $f10_b,
-				 '-balloonmsg' => "Press this when you're done" );
+my $f10 = $mw->Frame( );
+my $f10_a = $mw->Button( '-text' => 'Apply',
+						 '-command' => \&write_out );
+my $f10_q = $mw->Button( '-text' => 'Quit',
+						 '-command' => sub { &store_defs; $mw->destroy } );
+$f10->pack( '-side' => 'top',
+			'-fill' => 'x',
+			'-padx' => '4m' );
+$f10_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f10_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+
 
 MainLoop;
 
@@ -317,7 +321,7 @@ return if &do_checks( ) != 0;
 local *F;
 my $text;
 
-open( F, "|fsc2_" . lc $how2 )
+open( F, "|fsc2_" . lc $how )
 	or die "Can't find utility fsc2_" . lc $how . ".\n";
 
 print F
