@@ -3,6 +3,9 @@
 
   Copyright (C) 1999-2003 Jens Thoms Toerring
 
+  Thanks to Anton Savitsky for re-measuring the data for the corrections
+  and including them into the code.
+
   This file is part of fsc2.
 
   Fsc2 is free software; you can redistribute it and/or modify
@@ -822,13 +825,13 @@ static double keithley228a_set_current( double new_current )
 			if ( new_current >= 0.0)
 			{
 				power_supply_current = 1.0e-2 * floor( 1.0e2 * new_current );
-				if ( fabs( power_supply_current - new_current ) > 0.01 )
+				if ( fabs( power_supply_current - new_current ) > 9.99999e-3 )
 					power_supply_current += 1.0e-2;
 			}
 			else
 			{
 				power_supply_current = 1.0e-2 * ceil( 1.0e2 * new_current );
-				if ( fabs( power_supply_current - new_current ) > 0.01 )
+				if ( fabs( power_supply_current - new_current ) > 9.99999e-3 )
 					power_supply_current -= 1.0e-2;
 			}
 
@@ -969,6 +972,17 @@ static double keithley228a_current_check( double current )
 /* 5.91, 6.04, 6.18, 6.31, 6.44, 6.57, 6.70, 6.83, 6.96, 7.09, 7.23,	    */
 /* 7.36, 7.49, 7.62, 7.75, 7.88, 8.01, 8.14, 8.28, 8.41, 8.54, 8.67,	    */
 /* 8.80, 8.93, 9.06, 9.19, 9.33, 9.46, 9.59, 9.72, 9.85, 9.98			    */
+/****************************************************************************/
+/* New positions of 3 mA jumps measured 11.3.2003 with Metrolab Teslameter  */
+/* (only in region from 0 to 10A)                                           */
+/* 0.14, 0.27, 0.40, 0.53, 0.67, 0.80, 0.93, 1.06, 1.20, 1.33, 1.46, 1.59,  */
+/* 1.73, 1.86, 1.99, 2.12, 2.25, 2.39, 2.52, 2.65, 2.78, 2.92, 3.05, 3.18,  */
+/* 3.31, 3.45, 3.58, 3.71, 3.84, 3.98, 4.11, 4.24, 4.37, 4.50, 4.64, 4.77,  */
+/* 4.90, 5.03, 5.17, 5.30, 5.43, 5.56, 5.70, 5.83, 5.96, 6.09, 6.23, 6.36,  */
+/* 6.49, 6.62, 6.75, 6.89, 7.02, 7.15, 7.28, 7.42, 7.55, 7.68, 7.81, 7.95,  */
+/* 8.08, 8.21, 8.34, 8.47, 8.61, 8.74, 8.87, 9.00, 9.14, 9.27, 9.40, 9.53,  */
+/* 9.67, 9.8, 9.93                                                          */ 
+/****************************************************************************/
 /* In den beiden Listen 'neg_jumps' und 'pos_jumps' sind jeweils die	    */
 /* Punkte gespeichert, bei denen sich die Abstaende zwischen den Spruengen  */
 /* aendern. Hieraus wird dann die notwendige Korrektur berechnet. Im Be-	*/
@@ -990,9 +1004,19 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 						 0.0, -0.001027, 0.001396, 0.00429, 0.005472 },
 		offsets[ ] =   { 0.00793, 0.007257, 0.004831, 0.000866, -0.000962,
 						 0.0, 0.000252, -0.012237, -0.033361, -0.043436 },
-	    pos_jumps[ ] = { 0.00, 0.14, 0.92, 1.06, 1.97, 2.11, 3.02, 3.16,
-					     4.07, 4.21, 5.12, 5.26, 6.04, 6.18, 7.09, 7.23,
-					     8.14, 8.28, 9.19, 9.33, 10.0, 100.0 },
+	    pos_jumps[ ]=  { 0.0, 0.14, 0.53, 0.67, 1.06, 1.20, 1.59, 1.73, 
+						 2.25, 2.39, 2.78, 2.92, 3.31, 3.45, 3.84, 3.98, 
+						 4.5, 4.64, 5.03, 5.17, 5.56, 5.70, 6.09, 6.23,
+						 6.75, 6.89, 7.28, 7.42, 7.81, 7.95, 8.47, 8.61, 
+						 9.00, 9.14, 9.53, 9.67},
+
+		/* here the old jumps, new positions (above) measured 11.3.2003
+
+		   pos_jumps[ ] = { 0.00, 0.16, 0.94, 1.08, 1.99, 2.13, 3.04, 3.18,
+					        4.09, 4.23, 5.14, 5.28, 6.06, 6.20, 7.11, 7.25,
+					        8.16, 8.30, 9.21, 9.35, 10.0, 100.0 },
+		*/
+
 	    neg_jumps[ ] = {  0.00, -0.13, -0.26, -0.38, -0.64, -0.76, -0.89,
 						 -1.01, -1.27, -1.39, -1.65, -1.77, -1.90, -2.02,
 						 -2.28, -2.40, -2.66, -2.78, -2.91, -3.03, -3.29,
@@ -1009,13 +1033,13 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		 if ( c >= 0.0)
 		 {
 			 *psc = 1.0e-2 * floor( 1.0e2 * c );
-			 if ( fabs( *psc - c ) > 9.9999999999e-3)
+			 if ( fabs( *psc - c ) > 9.99999e-3)
 				 *psc += 1.0e-2;
 		 }
 		 else
 		 {
 			 *psc = 1.0e-2 * ceil( 1.0e2 * c );
-			 if ( fabs( *psc - c ) > 9.9999999999e-3 )
+			 if ( fabs( *psc - c ) > 9.99999e-3 )
 				 *psc -= 1.0e-2;
 		 }
 
