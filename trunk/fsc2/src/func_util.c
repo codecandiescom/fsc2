@@ -1781,6 +1781,11 @@ Var *f_fsave( Var *v )
 
 			cv = cv->next;
 		}
+		else
+		{
+			strcpy( ep, "#" );
+			T_fprintf( file_num, cp );
+		}
 
 		cp = ep + 6;
 	}
