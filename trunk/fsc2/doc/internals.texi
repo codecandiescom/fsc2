@@ -1764,17 +1764,17 @@ of variables. And while I try to be consistent unfortunately I don't always
 follow my own rules all of the time and thus later have to try to to correct
 these mistakes. I can't promise that I am always successful in this endeavor.
 
-Local variables with function scope should always be in all lower case
-characters, i.e.@: @code{num_points}. For local variables with file scope
+Local variables with function scope should always be spelled in all lower
+case, i.e.@: @code{num_points}. For local variables with file scope
 (i.e. variables that are global for a whole C file but not further) I tend
 to use an upper case for the very first character of the name and all others
 in lower case, i.e.@: @code{Child_return_status}. Truely global variables
-(there are more than I like but it's basically impossible to throw out all
-of them) mostly consist of more than a single word, where I use an underscore
-character between the words, and have each of the words start with an upper
-case letter, i.e.@: @code{Function_Names}. Sometimes that rule gets a bit
-loosened up when one of the words is an acronym, where I then use all upper
-case characters for the word.
+(there are more than I am happy with but it's basically impossible to throw
+out all of them) mostly consist of more than a single word, where I use an
+underscore character between the words, and have each of the words start
+with an upper case letter, i.e.@: @code{Function_Names}. Sometimes that
+rule gets a bit loosened up when one of the words is an acronym, where I
+then use all upper case characters for the word.
 
 When I use @code{typedef}'ed types I use a similar convention like for global
 variables but append the suffix @code{_T} to the end of the name to make them
