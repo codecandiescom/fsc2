@@ -69,8 +69,8 @@ td.example { background-color : #FFFF44;
            }
 
 table.navi { background-color : #e6e6e6;
-             cellpadding :      4;
-             cellspacing :      0;
+             cellpadding :      4em;
+             cellspacing :      0px;
              border :           none;
              width :            100%;
            }
