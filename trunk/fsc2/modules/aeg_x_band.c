@@ -12,6 +12,7 @@
 
 /* definitions for serial port access */
 
+#define DEVICE_NAME "AEG_X_BAND"     /* name of device */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
 #define SERIAL_PORT     0            /* serial port device file */
 #define SERIAL_TIME     50000        /* time in us set at magnet front panel */
@@ -47,7 +48,7 @@ static bool magnet_do( int command );
 
 /* maximum and minimum field settings (also depending on field meter) */
 
-#define AEG_X_BAND_MIN_FIELD_STEP              1.5e-3
+#define AEG_X_BAND_MIN_FIELD_STEP              1.1e-3
 #define AEG_X_BAND_WITH_ER035M_MIN_FIELD       1460
 #define AEG_X_BAND_WITH_ER035M_MAX_FIELD       19900
 #define AEG_X_BAND_WITH_BH15_MIN_FIELD         -50
@@ -78,7 +79,7 @@ typedef struct
     struct termios old_tio, /* serial port terminal interface structures */
                    new_tio;
 
-	bool fast_init;         /* if set do a fast initialisation */
+	bool fast_init;         /* if set do a fast initialization */
 } Magnet;
 
 
@@ -118,12 +119,12 @@ int aeg_x_band_init_hook( void )
 		 ! exist_device( "er035m_s" ) &&
 		 ! exist_device( "bh15" ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Can't find a field meter." );
+		eprint( FATAL, "%s: Can't find a field meter.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	/* We need the field meter driver called *before* the X-band driver since
-	   the field meter is needed in the initialisation of the magnet.
+	   the field meter is needed in the initialization of the magnet.
 	   Probably we should implement a solution that brings the devices into
 	   the correct sequence instead of this hack, but that's not as simple as
 	   it might look... */
@@ -149,8 +150,8 @@ int aeg_x_band_init_hook( void )
 
 	if ( ! *is_gaussmeter )
 	{
-		eprint( FATAL, "AEG_X_BAND: Problem in DEVICES section - driver for "
-				"field meter must be listed before X-band driver." );
+		eprint( FATAL, "%s: Problem in DEVICES section: driver for gaussmeter "
+				"must be listed before magnet driver.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -159,22 +160,22 @@ int aeg_x_band_init_hook( void )
 
 	if ( ! exist_function( "find_field" ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: No function available to do field "
-				"measurements." );
+		eprint( FATAL, "%s: No function available to do field measurements.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_meter_wait" ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Function needed for field measurements not"
-				" available." );
+		eprint( FATAL, "%s: Function needed for field measurements not "
+				"available.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_resolution" ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Function to determine field measurement "
-				"resolution is missing." );
+		eprint( FATAL, "%s: Function to determine field measurement "
+				"resolution is missing.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -182,15 +183,15 @@ int aeg_x_band_init_hook( void )
 
 	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
 	{
-		eprint( FATAL, "AEG_X_BAND: Serial port number %d out of valid range "
-				"(0-%d).", SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
+		eprint( FATAL, "%s: Serial port number %d out of valid range (0-%d).",
+				DEVICE_NAME, SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
-		eprint( FATAL, "AEG_X_BAND: Serial port %d (i.e. /dev/ttyS%d or "
-				"COM%d) is already in use by another device.", SERIAL_PORT,
+		eprint( FATAL, "%s: Serial port %d (i.e. /dev/ttyS%d or COM%d) is "
+				"already in use by another device.", DEVICE_NAME, SERIAL_PORT,
 				SERIAL_PORT, SERIAL_PORT + 1 );
 		THROW( EXCEPTION );
 	}
@@ -230,18 +231,19 @@ int aeg_x_band_exp_hook( void )
 	magnet.max_deviation = VALUE( v );
 	vars_pop( v );
 
-	/* Try to initialise the magnet power supply controller */
+	/* Try to initialize the magnet power supply controller */
 
 	if ( ! magnet_init( ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Can't access the X-band magnet power "
-				"supply." );
+		eprint( FATAL, "%s: Can't access the X-band magnet power supply.",
+				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	magnet.is_opened = SET;
 
 	/* When same EDL file is run again always use fast initialization mode */
+	/* Is this really a good idea ????*/
 
 	magnet.fast_init = SET;
 
@@ -298,17 +300,19 @@ Var *magnet_setup( Var *v )
 	{
 		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Start field (%lf G) too low "
-					"for Bruker ER035M gaussmeter, minimum is %d G.", Fname,
-					Lc, VALUE( v ), ( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
+					"Bruker ER035M gaussmeter, minimum is %d G.",
+					Fname, Lc, DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( VALUE( v ) > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Start field (%lf G) too high "
-					"for Bruker ER035M gaussmeter, maximum is %d G.", Fname,
-					Lc, VALUE( v ), ( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
+					"Bruker ER035M gaussmeter, maximum is %d G.",
+					Fname, Lc, DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -317,18 +321,18 @@ Var *magnet_setup( Var *v )
 	{
 		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Start field (%lf G) too low "
-					"for Bruker BH15 field controller, minimum is %d G.",
-					Fname, Lc, VALUE( v ),
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
+					"Bruker BH15 field controller, minimum is %d G.",
+					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( VALUE( v ) > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Start field (%lf G) too high "
-					"for Bruker BH15 field controller, maximum is %d G.",
-					Fname, Lc, VALUE( v ),
+			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
+					"Bruker BH15 field controller, maximum is %d G.",
+					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
@@ -336,8 +340,8 @@ Var *magnet_setup( Var *v )
 
 	if ( VALUE( v->next ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
-		eprint( FATAL, "%s:%ld: AEG_X_BAND: Field sweep step size (%lf G) too "
-				"small, minimum is %f G.", Fname, Lc, VALUE( v->next ),
+		eprint( FATAL, "%s:%ld: %s: Field sweep step size (%lf G) too small, "
+				"minimum is %f G.", Fname, Lc, DEVICE_NAME, VALUE( v->next ),
 				( double ) AEG_X_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
@@ -374,17 +378,19 @@ Var *set_field( Var *v )
 	{
 		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Field (%lf G) too low for "
-					"Bruker ER035M gaussmeter, minimum is %d G.", Fname, Lc,
-					VALUE( v ), ( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
+					"ER035M gaussmeter, minimum is %d G.", Fname, Lc,
+					DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( magnet.field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Field (%lf G) too high for "
-					"Bruker ER035M gaussmeter, maximum is %d G.", Fname, Lc,
-					VALUE( v ), ( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
+					"ER035M gaussmeter, maximum is %d G.", Fname, Lc,
+					DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -393,17 +399,19 @@ Var *set_field( Var *v )
 	{
 		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Field (%lf G) too low for "
-					"Bruker BH15 field controller, minimum is %d G.", Fname,
-					Lc, VALUE( v ), ( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
+					"BH15 field controller, minimum is %d G.", Fname, Lc,
+					DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
 		}
         
 		if ( magnet.field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
-			eprint( FATAL, "%s:%ld: AEG_X_BAND: Field (%lf G) too high for "
-					"Bruker BH15 field controller, maximum is %d G.", Fname,
-					Lc, VALUE( v ), ( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
+			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
+					"BH15 field controller, maximum is %d G.", Fname, Lc,
+					DEVICE_NAME, VALUE( v ),
+					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
 		}
 	}
@@ -413,10 +421,11 @@ Var *set_field( Var *v )
 
 	if ( ! magnet_goto_field( VALUE( v ) ) )
 	{
-		eprint( FATAL, "AEG_X_BAND: Can't reach requested field of %lf G.",
-				VALUE( v ) );
+		eprint( FATAL, "%s: Can't reach requested field of %lf G.",
+				DEVICE_NAME, VALUE( v ) );
 		THROW( EXCEPTION );
 	}
+
 	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -430,21 +439,19 @@ Var *sweep_up( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: AEG_X_BAND: Sweep step size has not been "
-				"defined.", Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! TEST_RUN )
-	{
-		magnet_sweep( 1 );
-		return vars_push( FLOAT_VAR, magnet.act_field );
-	}
-	else
+	if ( TEST_RUN )
 	{
 		magnet.target_field += magnet.field_step;
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
+
+	magnet_sweep( 1 );
+	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -458,21 +465,19 @@ Var *sweep_down( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: AEG_X_BAND: Sweep step size has not been "
-				"defined.",	Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! TEST_RUN )
-	{
-		magnet_sweep( -1 );
-		return vars_push( FLOAT_VAR, magnet.act_field );
-	}
-	else
+	if ( TEST_RUN )
 	{
 		magnet.target_field -= magnet.field_step;
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
+
+	magnet_sweep( -1 );
+	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -485,22 +490,19 @@ Var *reset_field( Var *v )
 
 	if ( ! magnet.is_field )
 	{
-		eprint( FATAL, "%s:%ld: AEG_X_BAND: Start field has not been defined.",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: %s: Start field has not been defined.",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! TEST_RUN )
-	{
-		magnet_goto_field( magnet.field );
-		return vars_push( FLOAT_VAR, magnet.act_field );
-	}
-	else
+	if ( TEST_RUN )
 	{
 		magnet.target_field = magnet.field;
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
 
+	magnet_goto_field( magnet.field );
+	return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -574,12 +576,12 @@ Var *reset_field( Var *v )
 
 
 /*--------------------------------------------------------------------------*/
-/* magnet_init() first initialises the serial interface and then tries to   */
+/* magnet_init() first initializes the serial interface and then tries to   */
 /* figure out what's the current minimal step size is for the magnet - this */
 /* is necessary for every new sweep since the user can adjust the step size */
 /* by setting the sweep rate on the magnets front panel (s/he also might    */
 /* change the time steps but lets hope he doesn't since there's no way to   */
-/* find out about it...). We also have to make sure that the setting at the */
+/* find out about it...). So, we have to make sure that the setting at the  */
 /* front panel is the maximum setting of 5000 Oe/min. Finally we try to go  */
 /* to the start field.                                                      */
 /*--------------------------------------------------------------------------*/
@@ -600,7 +602,7 @@ bool magnet_init( void )
 
 	/* Next step: We do MAGNET_FAST_TEST_STEPS or MAGNET_TEST_STEPS steps
 	   with a step width of MAGNET_TEST_WIDTH. Then we measure the field to
-	   determine the current/field ratio */
+	   determine the field change per bit ratio `nmr.mini_step'. */
 
 	if ( magnet.fast_init )
 		test_steps = MAGNET_FAST_TEST_STEPS;
@@ -631,13 +633,13 @@ try_again:
 	magnet.meas_field = v->val.dval;
 	vars_pop( v );
 
-	/* calculate the smallest possible step width (in field units) */
+	/* Calculate the smallest possible step width (in field units) */
 
-	magnet.mini_step = fabs( magnet.meas_field - start_field ) /
+	magnet.mini_step = ( magnet.meas_field - start_field ) /
 		                         ( double ) ( MAGNET_TEST_WIDTH * test_steps );
 
-	/* Now lets do the same, just in the opposite direction to increase
-	   accuracy */
+	/* Now lets do the same, just in the opposite direction to (hopefully)
+	   increase accuracy */
 
 	start_field = magnet.meas_field;
 	magnet.step = - MAGNET_TEST_WIDTH;
@@ -663,7 +665,7 @@ try_again:
 	   to the maximum, i.e. 5000 Oe/min - otherwise ask user to change the
 	   setting and try again */
 
-	if ( magnet.mini_step < 0.00060 )
+	if ( fabs( magnet.mini_step ) < 0.00060 )
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
 								"panel to maximum value of 5000 Oe/min\n."
@@ -674,7 +676,6 @@ try_again:
 	}
 
 	/* Finally using this ratio we go to the start field */
-
 
 	if ( magnet.is_field )
 		return magnet_goto_field( magnet.field );
@@ -813,8 +814,7 @@ void magnet_sweep( int dir )
 	   never be larger than one bit). */
 
 	over_shot = magnet.act_field - magnet.target_field;
-   	mini_steps = ( ( double ) dir * magnet.field_step - over_shot ) /
-		                                                     magnet.mini_step;
+   	mini_steps = ( dir * magnet.field_step - over_shot ) / magnet.mini_step;
 
 	/* If the target field can be achieved by a single step... */
 
@@ -827,16 +827,16 @@ void magnet_sweep( int dir )
 		}
 		magnet_do( SERIAL_TRIGGER );
 
-		magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
-			                                               * magnet.mini_step;
-		magnet.target_field += ( double ) dir * magnet.field_step;
+		magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
+			                * magnet.mini_step;
+		magnet.target_field += dir * magnet.field_step;
 		return;
 	}
 
-	/* ...otherwise we need several steps with in MAGNET_MAX_STEP chunks
-	   plus a last step for the remainder */
-	/* how many steps need we using the maximum step size and how many
-	   steps with the minimum step size remain ? */
+	/* ...otherwise we need several steps with MAGNET_MAX_STEP chunks plus a
+	   last step for the remainder.
+	   First calculate how many steps we need we using the maximum step size
+	   and how large a step for the rest. */
 
 	steps = ( int ) floor( fabs( mini_steps ) / MAGNET_MAX_STEP );
 	remainder = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
@@ -851,8 +851,8 @@ void magnet_sweep( int dir )
 		for ( i = 0; i < steps; ++i )
 		{
 			magnet_do( SERIAL_TRIGGER );
-			magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
-			                                               * magnet.mini_step;
+			magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
+				                * magnet.mini_step;
 		}
 	}
 
@@ -862,16 +862,15 @@ void magnet_sweep( int dir )
 		magnet_do( SERIAL_TRIGGER );
 	}
 
-	magnet.act_field += ( MAGNET_ZERO_STEP - magnet.int_step )
-			                                               * magnet.mini_step;
-	magnet.target_field += ( double ) dir * magnet.field_step;
+	magnet.act_field +=   ( MAGNET_ZERO_STEP - magnet.int_step )
+		                * magnet.mini_step;
+	magnet.target_field += dir * magnet.field_step;
 }
-
 
 
 /*---------------------------------------------------------------------------*/
 /* This is the most basic routine for controlling the field - there are four */
-/* basic commands, i.e. initialising the serial interface, setting a sweep   */
+/* basic commands, i.e. initializing the serial interface, setting a sweep   */
 /* voltage, triggering a field sweep and finally resetting the serial inter- */
 /* face.                                                                     */
 /*---------------------------------------------------------------------------*/
@@ -884,13 +883,13 @@ bool magnet_do( int command )
 
 	switch ( command )
 	{
-		case SERIAL_INIT :               /* open and initialise serial port */
+		case SERIAL_INIT :               /* open and initialize serial port */
 			if ( ( magnet.fd =
 				  open( serial_port, O_WRONLY | O_NOCTTY | O_NONBLOCK ) ) < 0 )
 				return FAIL;
 
 			tcgetattr( magnet.fd, &magnet.old_tio );
-			memcpy( ( void * ) &magnet.new_tio, ( void * ) &magnet.old_tio,
+			memcpy( &magnet.new_tio, &magnet.old_tio,
 					sizeof( struct termios ) );
 			magnet.new_tio.c_cflag = SERIAL_BAUDRATE | CS8 | CRTSCTS;
 			tcflush( magnet.fd, TCIFLUSH );
@@ -908,7 +907,7 @@ bool magnet_do( int command )
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-			write( magnet.fd, ( void * ) &data, 2 );
+			write( magnet.fd, &data, 2 );
 			break;
 
 		case SERIAL_EXIT :                    /* reset and close serial port */
@@ -918,8 +917,8 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			eprint( FATAL, "AEG_X_BAND: INTERNAL ERROR detected at %s:%d.",
-					__FILE__, __LINE__ );
+			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.",
+					DEVICE_NAME, __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
 

@@ -150,8 +150,8 @@ int s_band_init_hook( void )
 
 	if ( ! *is_gaussmeter )
 	{
-		eprint( FATAL, "%s: Problem in DEVICES section - driver for field "
-				"meter must be listed before magnet driver.", DEVICE_NAME );
+		eprint( FATAL, "%s: Problem in DEVICES section: driver for gaussmeter "
+				"must be listed before magnet driver.", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -926,8 +926,8 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.",
-					__FILE__, __LINE__ );
+			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.",
+					DEVICE_NAME, __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
 
