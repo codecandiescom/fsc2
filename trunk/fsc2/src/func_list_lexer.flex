@@ -7,26 +7,16 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-insensitive stack
+%option noyywrap case-insensitive stack nounput
 
 %{
 
 /* if not defined set default directory for include files */
 
 
-#define INT_TOKEN    256
-#define ALL_TOKEN    257
-#define EXP_TOKEN    258
-#define IDENT_TOKEN  259
-
-
-#if ! defined DEF_INCL_DIR
-#define DEF_INCL_DIR "/usr/local/lib/fsc"
-#endif
 
 
 #include "fsc2.h"
-
 
 int func_listlex( void );
 
@@ -35,6 +25,11 @@ static char *Fname;
 
 static long Comm_Lc;
 static bool Eol;
+
+#define INT_TOKEN    256
+#define ALL_TOKEN    257
+#define EXP_TOKEN    258
+#define IDENT_TOKEN  259
 
 
 %}
@@ -62,9 +57,6 @@ IDENT    [A-ZA-Z_0-9]+
 		/*---------------*/
 %%		/*     RULES     */
 		/*---------------*/
-
-
-
 
 
             /* handling of C++ style comment spanning a whole line */
@@ -153,13 +145,15 @@ EXP         return EXP_TOKEN;
 
 void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 {
-	int ret_token, last_token;
+	int ret_token;
+	int last_token;
 	int num = 0;
 	int cur;
 	int state;
+	int i;
 
 
-	Fname = get_string_copy( ( char * ) "Functions" );
+	Fname = get_string_copy( "Functions" );
 	Lc = 1;
 	Eol = SET;
 
@@ -172,7 +166,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 	{
 		while ( ( ret_token = func_listlex( ) ) != 0 )
 		{
-			if ( ret_token == ';' )
+			if ( ret_token == ';' && last_token != ';' )
 			   num++;
 			last_token = ret_token;
 		}
@@ -242,6 +236,17 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 					free( Fname );
 					THROW( FUNCTION_EXCEPTION );
 				}
+
+				for ( i = 0; i < cur; i++ )
+					if ( ! strcmp( ( *fncts )[ i ].name, func_listtext ) )
+					{
+						fclose( func_listin );
+						eprint( FATAL, "%s:%ld: Function `%s' is declared "
+								"more than once.\n",
+								Fname, Lc, func_listtext );
+						free( Fname );
+						THROW( FUNCTION_EXCEPTION );
+					}
 
 				( *fncts )[ cur ].name = get_string_copy( func_listtext );
 				state = 1;

@@ -1,22 +1,22 @@
 /********************************************************************/
-/* List of all non-default functions that can be used in EDL files  */
+/* List of all non-builtin functions that can be used in EDL files  */
 /*                                                                  */
 /* Syntax:                                                          */
 /*                                                                  */
-/*     EDL_name, # args [ , access  [ , C_name ] ] ;                */
+/*               name, # args [ , access ] ;                        */
 /*                                                                  */
-/* where `EDL_name' is the name of the function to be used in the   */
-/* EDL file and `#args' is the number of arguments - use `-1' for   */
-/* functions with a variable number of arguments. The first         */
+/* where `name' is the name of the function to be used in the EDL   */
+/* file and `#args' is the number of arguments - use a negative     */
+/* number for functions with a variable number of arguments. The    */
 /* optional parameter `access' is the access flag, where ALL means  */
 /* that it can be used in all sections of an EDL file while EXP     */
 /* says that the function can  be used only in the EXPERIMENTS      */
 /* section, i.e. it's probably a function that accesses a device.   */
-/* Finally, the optional parameter `C_name' is the name of the      */
-/* function written in C that is called when the function name is   */
-/* found in the EDL file.                                           */
+/*                                                                  */
 /********************************************************************/
 
 
-incr, 1, ALL;
-square, 1, ALL;
+square, 1, ALL;               /* returns the square of a value */
+int_slice, 1, ALL;            /* creates an integer array slice */
+float_slice, 1, ALL;          /* creates an float array slice */
+blub, 0, ALL;

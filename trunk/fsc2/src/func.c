@@ -66,8 +66,6 @@ static Var *f_ln( Var *v  );
 static Var *f_log( Var *v  );
 static Var *f_sqrt( Var *v  );
 static Var *f_print( Var *v  );
-static Var *f_islice( Var *v );
-static Var *f_fslice( Var *v );
 
 
 
@@ -98,8 +96,6 @@ static Func def_fncts[ ] =
 	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS	},
 	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS	},
 	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS	},
-	{ "islice", f_islice,  1, ACCESS_ALL_SECTIONS	},
-	{ "fslice", f_fslice,  1, ACCESS_ALL_SECTIONS	},
 	{ NULL,     NULL,      0, 0 }        /* marks last entry, don't remove ! */
 };
 
@@ -121,6 +117,7 @@ bool functions_init_hook( void )
 		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
+		load_user_functions( fncts, num_def_func, num_func );
 	}
 	if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
    		TRY_SUCCESS;
@@ -134,10 +131,6 @@ bool functions_init_hook( void )
 		functions_exit_hook( );
 		return FAIL;
 	}
-
-	/* load diverse user defined functions */
-
-	load_user_functions( fncts, num_def_func, num_func );
 
 	return OK;
 }
@@ -194,11 +187,9 @@ Var *func_call( Var *f )
 	int ac;
 	
 
-	/* <PARANOID> check that's really a function variable */
+	/* <PARANOID> check that's really a function variable </PARANOID> */
 
 	assert( f->type == FUNC );
-
-	/* </PARANOID> */
 
 	/* if the number of function arguments isn't negative (indicating a
 	   variable number of arguments) count number of variables on the stack */
@@ -237,11 +228,14 @@ Var *func_call( Var *f )
 		}
 	}
 
-	/* now call the function */
+	/* Now call the function */
 
-	ret = ( *f->val.fnct )( f->next );
+	if ( ac != 0 )
+		ret = ( *f->val.fnct )( f->next );
+	else
+		ret = ( *f->val.fnct )( NULL );
 
-	/* finally do clean up, i.e. for function with a known number of arguments
+	/* Finally do clean up, i.e. for function with a known number of arguments
 	   remove all variables from the stack. Finally remove the function
 	   variable und return the result */
 
@@ -564,11 +558,8 @@ Var *f_print( Var *v )
 	   as there specifiers in the format string */
 
 	if ( on_stack < in_format )
-	{
-		eprint( FATAL, "%s:%ld: Less data than format descriptors in print() "
+		eprint( SEVERE, "%s:%ld: Less data than format descriptors in print() "
 				"format string.\n", Fname, Lc );
-		THROW( PRINT_SYNTAX_EXCEPTION );
-	}
 
 	/* utter a warning if there are more data than format descriptors */
 
@@ -662,27 +653,31 @@ Var *f_print( Var *v )
 	cv = v->next;
 	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
 	{
-		switch ( cv->type )
+		if ( cv )          /* skip printing if there are not enough data */
 		{
-			case INT_VAR :
-				strcpy( ep, "%d" );
-				eprint( NO_ERROR, cp, cv->val.lval );
-				break;
+			switch ( cv->type )
+			{
+				case INT_VAR :
+					strcpy( ep, "%d" );
+					eprint( NO_ERROR, cp, cv->val.lval );
+					break;
 
-			case FLOAT_VAR :
-				strcpy( ep, "%#g" );
-				eprint( NO_ERROR, cp, cv->val.dval );
-				break;
+				case FLOAT_VAR :
+					strcpy( ep, "%#g" );
+					eprint( NO_ERROR, cp, cv->val.dval );
+					break;
 
-			case STR_VAR :
-				strcpy( ep, "%s" );
-				eprint( NO_ERROR, cp, cv->val.sptr );
-				break;
+				case STR_VAR :
+					strcpy( ep, "%s" );
+					eprint( NO_ERROR, cp, cv->val.sptr );
+					break;
+			}
+
+			vars_pop( cv );
+			cv = v->next;
 		}
 
 		cp = ep + 4;
-		vars_pop( cv );
-		cv = v->next;
 	}
 
 	if ( *cp != '\0' )
@@ -700,40 +695,4 @@ Var *f_print( Var *v )
 	vars_pop( v );
 
 	return vars_push( INT_VAR, in_format );
-}
-
-
-Var *f_islice( Var *v )
-{
-	long *x;
-	long size;
-
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
-	else
-		size = ( long ) v->val.dval;
-
-	x = T_calloc( size, sizeof( long ) );
-	return vars_push( INT_TRANS_ARR, x, size );
-}
-
-
-Var *f_fslice( Var *v )
-{
-	long *x;
-	long size;
-
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
-	else
-		size = ( long ) v->val.dval;
-
-	x = T_calloc( size, sizeof( double ) );
-	return vars_push( FLOAT_TRANS_ARR, x, size );
 }
