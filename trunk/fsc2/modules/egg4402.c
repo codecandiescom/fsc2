@@ -46,6 +46,7 @@ Var *boxcar_curve_length( Var *v );
 Var *boxcar_get_curve( Var *v );
 Var *boxcar_start_acquisition( Var *v );
 Var *boxcar_stop_acquisition( Var *v );
+Var *boxcar_single_shot( Var *v );
 Var *boxcar_command( Var *v);
 
 /* Locally used functions */
@@ -450,6 +451,129 @@ Var *boxcar_stop_acquisition( Var *v )
 }
 	
 
+/*----------------------------------------------------------------*/
+/* This function starts an acquisition but pauses the acquisition */
+/* when the first data point has been measured. It then returns   */
+/* of the first point from either one or both live curves. The    */
+/* function expects either 1 or 2 arguments, the livecurve        */
+/* the data point(s) are to be fetched from.                      */
+/*----------------------------------------------------------------*/
+
+Var *boxcar_single_shot( Var *v );
+{
+	long channel_1 = 1, channel_2 = -1;
+	double data[ 2 ];
+	unsigned char stb = 0;
+	char cmd[ 100 ];
+	char reply[ 16 ];
+	char *cn;
+	length = 16;
+
+
+	if ( v == NULL )
+		print( SEVERE, "Missing channel argument, using channel 1.\n" );
+	else
+	{
+		channel_1 = get_long( v, "first channel number" );
+		if ( channel_1 < 1 || channel_1 > 2 )
+		{
+			print( FATAL, "Invalid curve number %d.\n", channel_1 );
+			THROW( EXCEPTION );
+		}
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			channel_2 = get_long( v, "second channel number" );
+			if ( channel_2 < 1 || channel_2 > 2 )
+			{
+				print( FATAL, "Invalid curve number %d.\n", channel_2 );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+
+	if ( FSC2_MODE == TEST )
+	{
+		data[ 0 ] = random( ) / ( double ) RAND_MAX;
+		if ( channel_2 == -1 )
+			return vars_push( FLOAT_VAR, data[ 0 ] );
+		data[ 1 ] = random( ) / ( double ) RAND_MAX;
+		return vars_push( FLOAT_ARR, data, 2 );
+	}
+
+	/* Start the acquisition and already set the transfer type to ASCII floats
+	   and the curve to the first channel */
+
+	egg4402_command( "START\n" );
+	egg4402_command( "NT 1\n" );
+	sprintf( cmd, "CRV %ld %ld\n", 0, channel_1 );
+	egg4402_command( cmd );
+	
+	/* Wait for the BUFFER DATA bit to become set, indicating that there
+	   is at least one point of a LIVECURVE to be read */
+
+	while ( 1 )
+	{
+		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
+			egg4402_failure( );
+		if ( stb & 0x8 )
+			break;
+		stop_on_user_request( );
+		fsc2_usleep( 100000, UNSET );
+	}
+
+	/* When at least one point is available pause the acquisition and fetch
+	   a single point */
+
+	egg4402_command( "PAUSE\n" );
+	egg4402_command( "DC 0 1\n" );
+
+	if ( gpib_read( egg4402.device, reply, &length ) == FAILURE )
+		egg4402_failure( );
+
+	cn = strchr( ( char * ) reply, '\r' );
+	if ( cn == NULL )
+	{
+		T_free( buffer );
+		print( FATAL, "Received unexpected data.\n" );
+		THROW( EXCEPTION );
+	}
+	*cn = '\0';
+
+	data[ 0 ] = T_atod( reply );
+
+	/* If no data point from the other channel was requested return the
+	   value of the data point */
+
+	if ( channel_2 == -1 )
+		return vars_push( FLOAT_VAR, data[ 0 ] );
+
+	/* Otherwise switch to getting data from the second curve and also
+	   get one point */
+
+	sprintf( cmd, "CRV %ld %ld\n", 0, channel_2 );
+	egg4402_command( cmd );
+	egg4402_command( "DC 0 1\n" );
+
+	length = 16;
+	if ( gpib_read( egg4402.device, reply, &length ) == FAILURE )
+		egg4402_failure( );
+
+	cn = strchr( ( char * ) reply, '\r' );
+	if ( cn == NULL )
+	{
+		T_free( buffer );
+		print( FATAL, "Received unexpected data.\n" );
+		THROW( EXCEPTION );
+	}
+	*cn = '\0';
+
+	data[ 1 ] = T_atod( reply );
+
+	return vars_push( FLOAT_ARR, data, 2 );
+} 
+
+
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -512,21 +636,23 @@ static void egg4402_failure( void )
 
 static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
 {
-	unsigned char stb;
+	unsigned char stb = 0;
 
 
-	/* Before trying to read anything from the device check that both the
-	   COMMAND DONE and the OUTPUT READY bits are reset. If 'wait_for_stop'
-	   is set wait also for the CURVE NOT RUNNING bit to become set. */
+	/* Before trying to read anything from the device check that the OUTPUT
+	   READY bits is set. If 'wait_for_stop' is set wait also for the CURVE
+	   NOT RUNNING bit to become set. */
 
-	do
+	while ( 1 )
 	{
-		stop_on_user_request( );
-		fsc2_usleep( 100000, UNSET );
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );
-	} while ( ( ! ( stb & 0x80 ) && ! ( stb & 1 ) ) ||
-			  ( wait_for_stop && ! ( stb & 4 ) ) );
+		if ( ( ! wait_for_stop stb & 0x80 ) ||
+			 ( wait_for_stop && stb & 4 & stb & 0x80 ) )
+			break;
+		stop_on_user_request( );
+		fsc2_usleep( 100000, UNSET );
+	}
 
 	if ( gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );

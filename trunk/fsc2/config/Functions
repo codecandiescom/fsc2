@@ -230,8 +230,8 @@ boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
 boxcar_start_acquisition, 0, EXP;
 boxcar_stop_acquisition, 0, EXP;
+boxcar_single_shot, -1, EXP;
 boxcar_command, 1, EXP;
-
 
 /* Functions exported by the voltmeter (Kontron 4060) */
 
