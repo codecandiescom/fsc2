@@ -407,10 +407,11 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
 	   register first and only then from the FCR register - otherwise
 	   sometimes the very last data point read later on was garbage when
 	   during the reading the data there was heavy disk I/O (also using
-	   DMA going on. That's also why the the next two lines aren't written
-	   as a single line, I found by looking at disassembled module that
-	   the compiler rearranged the reads to read the FCR first and the
-	   DAR only afterwards when it was written as a single line. */
+	   DMA) going on. That's also why the the next two lines aren't
+	   written as a single line, I found by looking at disassembled
+	   module that the compiler rearranged the reads to read the FCR
+	   first and the DAR only afterwards when it was written as a
+	   single line. */
 
 	avail = le32_to_cpu( readl( mite_DAR( sys ) ) );
 	avail -= ( le32_to_cpu( readl( mite_FCR( sys ) ) ) & 0x000000FF )
