@@ -98,7 +98,7 @@ from @acronym{fsc2}s main directory, start @w{@code{make install}}.
 
 If the device isn't controlled via the GPIB bus everything is already
 done. Otherwise you will have also to edit (still as @code{root} the
-GPIB configuration file (which usually is @file{/etc/gpib.conf} and
+GPIB configuration file (which usually is @file{/etc/gpib.conf}) and
 first copy the entry of the cloned device. Then you only have to
 change the name of the device given there (i.e.@: in or example
 @code{SR510}) to the new device name (@code{SR510_B} in the example) and
