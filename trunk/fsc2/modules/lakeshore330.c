@@ -96,15 +96,12 @@ static LAKESHORE330 lakeshore330;
 
 int lakeshore330_init_hook( void )
 {
-	Cur_Func = "lakeshore330_init_hook";
-
 	need_GPIB = SET;
 	lakeshore330.device = -1;
 	lakeshore330.lock_state = LOCK_STATE_REMOTE_LLO;
 	lakeshore330.sample_channel = DEFAULT_SAMPLE_CHANNEL;
 	lakeshore330.unit = DEFAULT_UNIT;
 
-	Cur_Func = NULL;
 	return 1;
 }
 
@@ -114,13 +111,11 @@ int lakeshore330_init_hook( void )
 
 int lakeshore330_exp_hook( void )
 {
-	Cur_Func = "lakeshore330_exp_hook";
 	if ( ! lakeshore330_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed.\n" );
 		THROW( EXCEPTION );
 	}
-	Cur_Func = NULL;
 	return 1;
 }
 
@@ -130,9 +125,7 @@ int lakeshore330_exp_hook( void )
 
 int lakeshore330_end_of_exp_hook( void )
 {
-	Cur_Func = "lakeshore330_end_of_exp_hook";
 	lakeshore330_lock( 0 );
-	Cur_Func = NULL;
 	return 1;
 }
 

@@ -60,7 +60,7 @@ static int dac_ports[ ] = { 6,       6,       4,       4      };
 int keithley228a_init_hook( void );
 int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
-void keithley228a__exit_hook( void );
+void keithley228a_exit_hook( void );
 
 Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
@@ -264,7 +264,7 @@ int keithley228a_end_of_exp_hook( void )
 /*------------------------------------------*/
 
 
-void keithley228a__exit_hook( void )
+void keithley228a_exit_hook( void )
 {
 	keithley228a.lockin_append = T_free( keithley228a.lockin_append );
 }

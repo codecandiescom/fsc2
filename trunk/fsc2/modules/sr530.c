@@ -355,7 +355,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		print( FATAL, "Invalid negative sensitivity.\n", Cur_Func );
+		print( FATAL, "Invalid negative sensitivity.\n" );
 		THROW( EXCEPTION );
 	}
 
