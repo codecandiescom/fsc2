@@ -206,6 +206,36 @@ bool get_boolean( Var *v )
 }
 
 
+/*---------------------------------------------------------------------------*/
+/* Function tests if the time (in seconds) it gets passed is a reasonable    */
+/* integer multiple of 1 ns and tries to reduce rounding errors. If the time */
+/* is more than 10 ps off from a multiple of a nanosecond an error message   */
+/* is output, using the piece of text passed to the function as the second   */
+/* argument.                                                                 */
+/*---------------------------------------------------------------------------*/
+
+double is_mult_ns( double val, const char *text )
+{
+	double ip, fp;
+
+	val *= 1.e9;
+	fp = modf( val , &ip );
+
+	if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
+	{
+		print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
+		THROW( EXCEPTION );
+	}
+
+	if ( ip < 0.0 && fp < -0.5 )
+		return ( ip - 1.0 ) * 1.0e-9;
+	if ( ip >= 0.0 && fp > 0.5 )
+		return ( ip + 1.0 ) * 1.0e-9;;
+
+	return ip * 1.0e-9;
+}
+
+
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
