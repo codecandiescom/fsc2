@@ -53,7 +53,7 @@ Var *f_abort( Var *v )
 		THROW( ABORT_EXCEPTION );
 	}
 	else
-		print( NO_ERROR, "During test run encountered call of abort().\n" );
+		print( NO_ERROR, "Call of abort() in test run encountered .\n" );
 
 	return NULL;
 }
