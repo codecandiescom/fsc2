@@ -166,7 +166,7 @@ bool scan_main( char *file )
 
 	splitin = popen( cmd, "r" );
 
-	/* now try to parse the cleaned up contents */
+	/* Now try to parse the cleaned up contents */
 
 	split_error = splitlex( );
 
@@ -186,8 +186,7 @@ bool scan_main( char *file )
 /* label is used to call the next lexer. On failure, several common   */
 /* errors are caught (if the lexer didn't do it by itself) and the    */
 /* failure is signaled back to splitlex(). On success we only return  */
-/* to splitlex() on end of the input file(s). The last thing to be    */
-/* done is to check the program just parsed for plausibility.         */
+/* to splitlex() on end of the input file(s).                         */
 /* ->                                                                 */
 /*    * number (label) of first section found by splitlex()           */
 /* <-                                                                 */
@@ -248,8 +247,8 @@ bool section_parser( int section )
 	}
 	CATCH( MISSING_SEMICOLON_EXCEPTION )
 	{		
-		eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this "
-				"line.", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing semicolon before (or on) this line.",
+		Fname, Lc );
 		return FAIL;
 	}
 	OTHERWISE

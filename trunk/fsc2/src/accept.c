@@ -116,6 +116,7 @@ void accept_new_data( void )
 
 
 /*---------------------------------------------------------------------------*/
+/* This function should *not* throw exceptions but return 'FAIL' instead !   */
 /*---------------------------------------------------------------------------*/
 
 static bool unpack_and_accept( void *ptr )
@@ -175,7 +176,7 @@ static bool unpack_and_accept( void *ptr )
 			default :
 				eprint( FATAL, "Internal communication error at %s:%d.",
 						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
+				return FAIL;
 		}
 
 		TRY

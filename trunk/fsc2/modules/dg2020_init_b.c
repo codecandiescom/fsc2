@@ -257,21 +257,6 @@ static void dg2020_basic_functions_check( void )
 			dg2020_phase_setup_check( f );
 		
 		f->num_needed_channels = dg2020_calc_channels_needed( f );
-
-/*!!!*/
-		if ( f->pm )
-		{
-			int i1, j1;
-			printf( "pm for function `%s'\n", Function_Names[ i ] );
-			for ( i1 = 0; i1 < 5; i1++ )
-			{
-				printf( "%s ", Phase_Types[ i1 ] );
-				for ( j1 = 0; j1 < f->pc_len; j1++ )
-					printf( " %1c", '0' + f->pm[ i1 * f->pc_len + j1 ] );
-				printf( "\n" );
-			}
-		}
-/*!!!*/
 	}
 }
 
