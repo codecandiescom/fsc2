@@ -18,7 +18,7 @@ Var *filename( Var *var );
 
 
 
-/* Here examples for init and exit hok functions - the init hook function
+/* Here examples for init and exit hook functions - the init hook function
    will be called directly after all libraries are loaded while the exit
    hook function is called immediately before the library is unloaded.
 */
