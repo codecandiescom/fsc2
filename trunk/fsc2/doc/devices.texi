@@ -4445,11 +4445,11 @@ to setting both binning values to 1.
 
 If the number of pixels region of interest (ROI) in one of the
 directions isn't a integer multiple of the binning size for this
-direction the ROI is automatically reduced to an multiple integer of the
-binning size (only if the ROI size in a direction is smaller than the
-binning size for this direction the ROI size is expanded to the binning
-size, resulting in a width of one of the returned image or spectrum for
-this direction).
+direction the ROI is automatically reduced to an multiple of the binning
+size (only if the ROI size in a direction is smaller than the binning
+size for this direction the ROI size is expanded to the binning size,
+resulting in a width of one of the returned image or spectrum for this
+direction).
 
 The function also accepts a second parameter, the binning method to be
 used. You can use either hardware binning, i.e.@: binning is done by the
