@@ -647,7 +647,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 	int ppp_num;                  /* and the length of this list */
 	PULSE *pp, *pn;
 	int i;
-	static PULSE *for_pulse;
+	PULSE *for_pulse = NULL;
 
 
 	if ( nth == 0 )                           /* for first pulse ? */

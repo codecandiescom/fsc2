@@ -563,9 +563,11 @@ Var *synthesizer_reset_frequency( Var *v )
 
 Var *synthesizer_use_table( Var *v )
 {
-	static FILE *tfp = NULL;
+	FILE *tfp = NULL;
 	char *tfname;
 
+
+	CLOBBER_PROTECT( tfp );
 
 	/* Try to figure out the name of the table file - if no argument is given
 	   use the default table file, otherwise use the user supplied file name */
@@ -872,10 +874,11 @@ Var *synthesizer_mod_ampl( Var *v )
 
 Var *synthesizer_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

@@ -510,10 +510,11 @@ Var *reset_field( Var *v )
 
 Var *magnet_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

@@ -49,7 +49,9 @@ bool rs690_store_timebase( double timebase )
 
 	if ( timebase < rs690_fixed_timebases[ 0 ] * 0.999 )
 	{
-		static char *min = NULL;
+		char *min = NULL;
+
+		CLOBBER_PROTECT( min );
 
 		TRY
 		{
@@ -467,7 +469,9 @@ bool rs690_set_repeat_time( double rep_time )
 
 	if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 4 )
 	{
-		static char *o;
+		char *o = NULL;
+
+		CLOBBER_PROTECT( o );
 
 		TRY
 		{
@@ -489,7 +493,9 @@ bool rs690_set_repeat_time( double rep_time )
 	}
 	else if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 2 )
 	{
-		static char *o;
+		char *o = NULL;
+
+		CLOBBER_PROTECT( o );
 
 		TRY
 		{
@@ -509,7 +515,7 @@ bool rs690_set_repeat_time( double rep_time )
 
 		o = CHAR_P T_free( o );
 	}
-			   
+
 	rs690.is_repeat_time = SET;
 
 	return OK;

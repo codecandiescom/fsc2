@@ -565,8 +565,10 @@ void dg2020_show_pulses( void )
 
 	if ( pid == 0 )
 	{
-		static char *cmd = NULL;
+		char *cmd = NULL;
 
+
+		CLOBBER_PROTECT( cmd );
 
 		close( pd[ 1 ] );
 

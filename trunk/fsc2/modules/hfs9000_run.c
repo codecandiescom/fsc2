@@ -79,10 +79,12 @@ bool hfs9000_do_update( void )
 
 static bool hfs9000_update_pulses( bool flag )
 {
-	static int i;
+	int i;
 	FUNCTION *f;
 	PULSE *p;
 
+
+	CLOBBER_PROTECT( i );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{

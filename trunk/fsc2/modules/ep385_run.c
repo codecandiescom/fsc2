@@ -69,14 +69,19 @@ bool ep385_do_update( void )
 
 static bool ep385_update_pulses( bool flag )
 {
-	static int i, j;
+	int i, j;
 	int l, m;
-	static FUNCTION *f;
+	FUNCTION *f;
 	PULSE *p;
-	static CHANNEL *ch;
+	CHANNEL *ch;
 	PULSE **pm_elem;
 	PULSE_PARAMS *pp;
 
+
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( j );
+	CLOBBER_PROTECT( f );
+	CLOBBER_PROTECT( ch );
 
 	ep385.needs_update = UNSET;
 

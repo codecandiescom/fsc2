@@ -80,11 +80,14 @@ bool dg2020_do_update( void )
 
 bool dg2020_reorganize_pulses( bool flag )
 {
-	static int i;
+	int i;
 	int j;
-	static FUNCTION *f;
+	FUNCTION *f;
 	PULSE *p;
 
+
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( f );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{

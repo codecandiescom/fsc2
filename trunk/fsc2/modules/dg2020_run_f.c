@@ -82,10 +82,12 @@ bool dg2020_do_update( void )
 
 bool dg2020_reorganize_pulses( bool flag )
 {
-	static int i;
+	int i;
 	FUNCTION *f;
 	PULSE *p;
 
+
+	CLOBBER_PROTECT( i );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -262,7 +264,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 	int ppp_num;                  /* and the length of this list */
 	PULSE *pp, *pn;
 	int i;
-	static PULSE *for_pulse = NULL;
+	PULSE *for_pulse = NULL;
 
 
 	/* If the pulse the phase pulse is associated with has become inactive

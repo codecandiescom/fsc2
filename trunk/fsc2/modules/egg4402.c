@@ -191,26 +191,29 @@ Var *boxcar_curve_length( Var *v )
 
 Var *boxcar_get_curve( Var *v )
 {
-	static unsigned char *buffer;
+	unsigned char *buffer;
 	double *ret_buffer;
 	char cmd[ 100 ];
 	long length;
 	long curve_type;
 	long curve_number = 0;
 	long max_points;
-	static long first, last;
+	long first, last;
 	long num_points;
 	long i;
 	unsigned char *cc, *cn;
 	Var *cl;
 	double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
 	int new_timo;
-	static int old_timo;
+	int old_timo = -1;
 	double max_time;
 	bool size_dynamic = UNSET;
 
 
-	old_timo = -1;
+	CLOBBER_PROTECT( buffer );
+	CLOBBER_PROTECT( first );
+	CLOBBER_PROTECT( last );
+	CLOBBER_PROTECT( old_timo );
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -444,10 +447,11 @@ Var *boxcar_get_curve( Var *v )
 
 Var *boxcar_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

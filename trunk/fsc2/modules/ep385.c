@@ -263,10 +263,14 @@ int ep385_test_hook( void )
 
 int ep385_end_of_test_hook( void )
 {
-	static int i;
-	static FUNCTION *f;
-	static char *min = NULL;
+	int i;
+	FUNCTION *f;
+	char *min = NULL;
 
+
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( f );
+	CLOBBER_PROTECT( min );
 
 	if ( ep385.dump_file != NULL )
 	{
@@ -1431,10 +1435,11 @@ Var *pulser_lock_keyboard( Var *v )
 
 Var *pulser_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

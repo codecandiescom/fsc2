@@ -426,8 +426,10 @@ bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 bool dg2020_change_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
-	static Ticks new_pos = 0;
+	Ticks new_pos = 0;
 
+
+	CLOBBER_PROTECT( new_pos );
 
 	if ( p_time < 0 )
 	{
@@ -484,8 +486,10 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 bool dg2020_change_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
-	static Ticks new_len = 0;
+	Ticks new_len = 0;
 
+
+	CLOBBER_PROTECT( new_len );
 
 	if ( p_time < 0 )
 	{
@@ -542,8 +546,10 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 bool dg2020_change_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
-	static Ticks new_dpos = 0;
+	Ticks new_dpos = 0;
 
+
+	CLOBBER_PROTECT( new_dpos );
 
 	TRY
 	{
@@ -577,8 +583,10 @@ bool dg2020_change_pulse_position_change( long pnum, double p_time )
 bool dg2020_change_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
-	static Ticks new_dlen = 0;
+	Ticks new_dlen = 0;
 
+
+	CLOBBER_PROTECT( new_dlen );
 
 	TRY
 	{

@@ -489,8 +489,10 @@ bool ep385_get_pulse_phase_cycle( long pnum, long *cycle )
 bool ep385_change_pulse_position( long pnum, double p_time )
 {
 	PULSE *p = ep385_get_pulse( pnum );
-	static Ticks new_pos = 0;
+	Ticks new_pos = 0;
 
+
+	CLOBBER_PROTECT( new_pos );
 
 	if ( p_time + p->function->delay < 0 )
 	{
@@ -571,8 +573,10 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 bool ep385_change_pulse_length( long pnum, double p_time )
 {
 	PULSE *p = ep385_get_pulse( pnum );
-	static Ticks new_len = 0;
+	Ticks new_len = 0;
 
+
+	CLOBBER_PROTECT( new:len );
 
 	if ( p_time < 0 )
 	{
@@ -655,8 +659,10 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 bool ep385_change_pulse_position_change( long pnum, double p_time )
 {
 	PULSE *p = ep385_get_pulse( pnum );
-	static Ticks new_dpos = 0;
+	Ticks new_dpos = 0;
 
+
+	CLOBBER_PROTECT( new_dpos );
 
 	TRY
 	{
@@ -698,8 +704,10 @@ bool ep385_change_pulse_position_change( long pnum, double p_time )
 bool ep385_change_pulse_length_change( long pnum, double p_time )
 {
 	PULSE *p = ep385_get_pulse( pnum );
-	static Ticks new_dlen = 0;
+	Ticks new_dlen = 0;
 
+
+	CLOBBER_PROTECT( new_dlen );
 
 	TRY
 	{

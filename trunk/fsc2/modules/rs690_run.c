@@ -78,14 +78,19 @@ bool rs690_do_update( void )
 
 static bool rs690_update_pulses( bool flag )
 {
-	static int i, j;
+	int i, j;
 	int l, m;
-	static FUNCTION *f;
+	FUNCTION *f;
 	PULSE *p;
-	static CHANNEL *ch;
+	CHANNEL *ch;
 	PULSE **pm_elem;
 	PULSE_PARAMS *pp;
 
+
+	CLOBBER_PROTECT( i );
+	CLOBBER_PROTECT( j );
+	CLOBBER_PROTECT( f );
+	CLOBBER_PROTECT( ch );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -1246,9 +1251,12 @@ static void rs690_populate_fs( FS *start_fs )
 void rs690_check_fs( void )
 {
 	FS *nn;
-	static FS *n = NULL;
-	static char *s;
+	FS *n;
+	char *s = NULL;
 
+
+	CLOBBER_PROTECT( n );
+	CLOBBER_PROTECT( s );
 
 	/* The very last FS, standing for the time following the pulses hasn't
 	   got a length yet. If a repetition time has been given we try to set

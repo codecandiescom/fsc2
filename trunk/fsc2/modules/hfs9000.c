@@ -375,8 +375,9 @@ Var *pulser_show_pulses( Var *v )
 
 	if ( pid == 0 )
 	{
-		static char *cmd = NULL;
+		char *cmd = NULL;
 
+		CLOBBER_PROTECT( cmd );
 
 		close( pd[ 1 ] );
 
@@ -875,10 +876,11 @@ Var *pulser_stop_on_update( Var *v )
 
 Var *pulser_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )

@@ -305,10 +305,11 @@ Var *temp_contr_lock_keyboard( Var *v )
 
 Var *temp_contr_command( Var *v )
 {
-	static char *cmd;
+	char *cmd = NULL;
 
 
-	cmd = NULL;
+	CLOBBER_PROTECT( cmd );
+
 	vars_check( v, STR_VAR );
 	
 	if ( FSC2_MODE == EXPERIMENT )
@@ -344,7 +345,7 @@ static bool lakeshore330_init( const char *name )
 {
 	char buf[ 20 ];
 	long len = 20;
-	const char *in_units  = "KCS";
+	char *in_units  = "KCS";
 
 
 	/* Initialize GPIB communication with the temperature controller */
@@ -410,7 +411,7 @@ static double lakeshore330_sens_data( void )
 
 static void lakeshore330_set_unit( long unit )
 {
-	const char *in_units  = "KCS";
+	char *in_units  = "KCS";
 	char buf[ 30 ];
 
 
