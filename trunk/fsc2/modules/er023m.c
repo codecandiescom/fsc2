@@ -195,14 +195,13 @@ Var *lockin_sensitivity( Var *v )
 									ER023M_TEST_RG_INDEX : er023m.rg_index ] );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, rg_list[ er023m_get_rg( ) ] );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, rg_list[ er023m_get_rg( ) ] );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -293,18 +292,17 @@ Var *lockin_time_constant( Var *v )
 	{
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR,
-						   tc_list[ er023m.tc_index == UNDEF_TC_INDEX ?
+							  tc_list[ er023m.tc_index == UNDEF_TC_INDEX ?
 									ER023M_TEST_TC_INDEX : er023m.tc_index ] );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, tc_list[ er023m_get_tc( ) ] );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, tc_list[ er023m_get_tc( ) ] );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -425,14 +423,13 @@ Var *lockin_phase( Var *v )
 								ER023M_TEST_PHASE : er023m.phase ) );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, ( double ) er023m_get_ph( ) );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, ( double ) er023m_get_ph( ) );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -486,14 +483,13 @@ Var *lockin_offset( Var *v )
 								ER023M_TEST_OF : er023m.of ) );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) er023m_get_of( ) );
+			if ( I_am == CHILD )
+				return vars_push( INT_VAR, ( long ) er023m_get_of( ) );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -555,14 +551,13 @@ Var *lockin_conversion_time( Var *v )
 								ER023M_TEST_CT_MULT : er023m.ct_mult ) );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, BASE_CT * er023m_get_ct( ) );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, BASE_CT * er023m_get_ct( ) );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -638,14 +633,13 @@ Var *lockin_ref_freq( Var *v )
 								    ER023M_TEST_MF_INDEX : er023m.mf_index ] );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, mf_list[ er023m_get_mf( ) ] );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, mf_list[ er023m_get_mf( ) ] );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -751,14 +745,13 @@ Var *lockin_ref_level( Var *v )
 								    ER023M_TEST_MA_INDEX : er023m.ma_index ] );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, ma_list[ er023m_get_ma( ) ] );
+			if ( I_am == CHILD )
+				return vars_push( FLOAT_VAR, ma_list[ er023m_get_ma( ) ] );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -843,14 +836,13 @@ Var *lockin_harmonic( Var *v )
 								ER023M_TEST_HARMONIC : er023m.ha ) );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) ( er023m_get_ph( ) + 1 ) );
+			if ( I_am == CHILD )
+				return vars_push( INT_VAR, ( long ) ( er023m_get_ph( ) + 1 ) );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
@@ -911,14 +903,13 @@ Var *lockin_resonator( Var *v )
 								ER023M_TEST_RESONATOR : er023m.re ) );
 		else
 		{
-			if ( I_am == PARENT )
-			{
-				eprint( FATAL, SET, "%s: Function %s() with no argument can "
-						"only be used in the EXPERIMENT section.\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-			return vars_push( INT_VAR, ( long ) ( er023m_get_re( ) + 1 ) );
+			if ( I_am == CHILD )
+				return vars_push( INT_VAR, ( long ) ( er023m_get_re( ) + 1 ) );
+
+			eprint( FATAL, SET, "%s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
 		}
 	}
 
