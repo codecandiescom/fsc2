@@ -42,7 +42,7 @@ int rulbus_errno = RULBUS_OK;
 
 static const char *rulbus_errlist[ ] = {
 	"Success",                                         /* RULBUS_OK      */
-	"Not permission to open configurarion file",       /* RULBUS_CFG_ACC */
+	"No permission to open configurarion file",        /* RULBUS_CFG_ACC */
 	"Invalid name for configuration file",             /* RULBUS_INV_CFG */
     "Can't open configuration file",                   /* RULBUS_OPN_CFG */
 	"Not permission to open device file",              /* RULBUS_DVF_ACC */
@@ -61,6 +61,15 @@ static const char *rulbus_errlist[ ] = {
 	"More than one name for a card",                   /* RULBUS_DUP_NAM */
 	"More than one address for a card",                /* RULBUS_ADD_DUP */
 	"More than one type for a card",                   /* RULBUS_TYP_DUP */
+	"More than one number of channel setting",         /* RULBUS_CHN_DUP */
+	"Invalid number of channels for ADC12 card",       /* RULBUS_CHN_INV */
+    "Missing number of channels for ADC12 card",       /* RULBUS_MIS_CHN */
+	"More than one range for card",                    /* RULBUS_RNG_DUP */
+	"More than one polarity for card",                 /* RULBUS_POL_DUP */
+	"Invalid polarity setting",                        /* RULBUS_INV_POL */
+	"Missing range setting for DAC12 card",            /* RULBUS_NO_RNG  */
+    "Invalid range setting for DAC12 card",            /* RULBUS_INV_RNG */
+	"Missing polarity setting for DAC12 card",         /* RULBUS_NO_POL  */
 	"Too many cards for single rack",                  /* RULBUS_CRD_CNT */
 	"No cards found in configuration file",            /* RULBUS_NO_CRD  */
 	"Missing card name in configuration file",         /* RULBUS_CRD_NAM */
@@ -76,12 +85,6 @@ static const char *rulbus_errlist[ ] = {
 	"Write error"                                      /* RULBUS_WRT_ERR */
 	"Read error"                                       /* RULBUS_RD_ERR  */
 	"Card is busy",                                    /* RULBUS_CRD_BSY */
-	"More than one range for card",                    /* RULBUS_RNG_DUP */
-	"More than one polarity for card",                 /* RULBUS_POL_DUP */
-	"Invalid polarity setting",                        /* RULBUS_INV_POL */
-	"Missing range setting for DAC12 card",            /* RULBUS_NO_RNG  */
-    "Invalid range setting for DAC12 card",            /* RULBUS_INV_RNG */
-	"Missing polarity setting for DAC12 card",         /* RULBUS_NO_POL  */
 	"Voltage out of range",                            /* RULBUS_INV_VLT */
 };
 
@@ -171,6 +174,7 @@ int rulbus_open( void )
 {
 	const char *config_name;
 	extern FILE *rulbus_in;         /* fron the parser */
+	int fd_flags;
 	int retval;
 	int i;
 
@@ -225,7 +229,7 @@ int rulbus_open( void )
 
 	/* Try to open the device file */
 
-	if ( ( fd = open( rulbus_dev_file, O_RDWR ) ) < 0 )
+	if ( ( fd = open( rulbus_dev_file, O_RDWR | O_EXCL | O_NONBLOCK) ) < 0 )
 	{
 		int stored_errno = errno;
 
@@ -246,6 +250,13 @@ int rulbus_open( void )
 				return rulbus_errno = RULBUS_DVF_OPN;
 		}
 	}
+
+    /* Set the close-on-exec flag for the device file descriptor */
+
+    if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
+        fd_flags = 0;
+
+    fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
 	rulbus_in_use = SET;
 
@@ -428,7 +439,7 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 		return rulbus_errno = RULBUS_INV_OFF;
 
 	if ( data == NULL || len == 0 )
-		return rulbus_errno RULBUS_INV_ARG;
+		return rulbus_errno = RULBUS_INV_ARG;
 
 	retval = rulbus_write_rack( rulbus_card[ handle ].rack,
 								rulbus_card[ handle ].addr + offset,
@@ -470,7 +481,7 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 		return rulbus_errno = RULBUS_INV_OFF;
 
 	if ( data == NULL || len == 0 )
-		return rulbus_errno RULBUS_INV_ARG;
+		return rulbus_errno = RULBUS_INV_ARG;
 
 	retval = rulbus_read_rack( rulbus_card[ handle ].rack,
 							   rulbus_card[ handle ].addr + offset,
@@ -520,6 +531,8 @@ static int rulbus_check_config( void )
 		{
 			case RB8509 :
 				rulbus_card[ i ].width = RB8509_WIDTH;
+				if ( rulbus_card[ i ].nchan < 0 )
+					return RULBUS_MIS_CHN;
 				break;
 
 			case RB8510 :
