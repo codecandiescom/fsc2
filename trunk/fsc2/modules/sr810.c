@@ -610,8 +610,8 @@ Var *lockin_sensitivity( Var *v )
 		}
 
 	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens > sens_list[ SENS_ENTRIES - 1 ] sens &&
-		 sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		 sens > sens_list[ SENS_ENTRIES - 1 ] &&
+		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
 		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index >= 0 &&                                 /* value found ? */
@@ -644,8 +644,8 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr810.sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
-				print( WARN, "Sensitivity of %.0lf V is too low, using "
-					   "%.0lf V instead.\n",
+				print( WARN, "Sensitivity of %.0lf mV is too low, using "
+					   "%.0lf mV instead.\n",
 					   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 			else
 				print( WARN, "Sensitivity of %.0lf nV is too high, using "

@@ -376,7 +376,8 @@ Var *lockin_sensitivity( Var *v )
 		}
 
 	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		 sens >= sens_list[ SENS_ENTRIES - 1 ] / 1.01 &&
+		 sens < sens_list[ SENS_ENTRIES - 1 ] )
 		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index >= 0 &&                         /* value found ? */
@@ -385,7 +386,7 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr530.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf V "
+			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 )
