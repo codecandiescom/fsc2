@@ -119,7 +119,7 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS *~
+	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS cscope.out *~
 
 distclean:
 	$(MAKE) clean

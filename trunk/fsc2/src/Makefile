@@ -151,11 +151,11 @@ gpib:
 
 clean:
 	-$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
-					  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem *~
+					  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
 
 distclean:
 	$(MAKE) clean
-	 -$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] *.so
+	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] *.so
 
 
 # don't automatically delete intermediate files created by bison and flex
