@@ -718,20 +718,20 @@ must be number.
 @anchor{int}
 @item int()
 @findex int()
-Converts a number (or the elements of an array) to integer type by
+Converts a number (or all the elements of an array) to integer type by
 truncating all digits following the decimal point.
 
 
 @anchor{float}
 @item float()
 @findex float()
-Converts a number (or the elements of an array) to floating point type.
+Converts a number (or all the elements of an array) to floating point type.
 
 
 @anchor{round}
 @item round()
 @findex round()
-Converts a floating point number (or the elements of an array) to the
+Converts a floating point number (or all the elements of an array) to the
 nearest integer, i.e.@:
 
 @example
@@ -742,7 +742,7 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 @anchor{floor}
 @item floor()
 @findex floor()
-Converts a floating point number (or the elements of an array) to the
+Converts a floating point number (or all the elements of an array) to the
 largest integer that is not larger than the argument, i.e.@:
 
 @example
@@ -753,7 +753,7 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 @anchor{ceil}
 @item ceil()
 @findex ceil()
-Converts a floating point number (or the elements of an array) to the
+Converts a floating point number (or all the elements of an array) to the
 smallest integer that is not less than the argument, i.e.@:
 
 @example
@@ -765,7 +765,7 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @item abs()
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
-the elements of an array) .
+all the elements of an array) .
 
 
 @anchor{mean}
@@ -789,8 +789,8 @@ the sum of the squared array elements, divided by the number of elements.
 @anchor{sqrt}
 @item sqrt()
 @findex sqrt()
-Returns the square root of an integer or floating point number (or the
-elements of an array). The argument must be a positive number.
+Returns the square root of an integer or floating point number (or all
+the elements of an array). The argument must be a positive number.
 
 
 @anchor{random}
@@ -811,21 +811,21 @@ Alternatively, when no argument is given, the time in seconds since
 @anchor{sin}
 @item sin()
 @findex sin()
-Returns the sine of the argument (simple number or elements of an
+Returns the sine of the argument (simple number or all elements of an
 array), with the argument interpreted as the angle in radian.
 
 
 @anchor{cos}
 @item cos()
 @findex cos()
-Returns the cosine of the argument (simple number or elements of an
+Returns the cosine of the argument (simple number or all elements of an
 array), with the argument interpreted as the angle in radian.
 
 
 @anchor{tan}
 @item tan()
 @findex tan()
-Returns the tangent of the argument (simple number or elements of an
+Returns the tangent of the argument (simple number or all elements of an
 array), with the argument interpreted as the angle in radian.
 
 
@@ -833,7 +833,7 @@ array), with the argument interpreted as the angle in radian.
 @item asin()
 @findex asin()
 Returns the inverse of the sine function of the argument (simple number
-or elements of an array) as an angle in radian. The argument must be in
+or all elements of an array) as an angle in radian. The argument must be in
 the interval @w{[-1, 1]}, the result an element of the interval
 @w{[-pi/2, pi/2]}.
 
@@ -842,37 +842,37 @@ the interval @w{[-1, 1]}, the result an element of the interval
 @item acos()
 @findex acos()
 Returns the inverse of the cosine function of the argument (simple
-number or elements of an array) as an angle in radian. The argument must
-be in the interval @w{[-1, 1]}, the result an element of the interval
-@w{[0, pi]}.
+number or all elements of an array) as an angle in radian. The argument
+must be in the interval @w{[-1, 1]}, the result an element of the
+interval @w{[0, pi]}.
 
 
 @anchor{atan}
 @item atan()
 @findex atan()
 Returns the inverse of the tangent function of the argument (simple
-number or elements of an array) as an angle in radian, the result an
+number or all elements of an array) as an angle in radian, the result an
 element of the interval @w{[-pi, pi]}.
 
 
 @anchor{sinh}
 @item sinh()
 @findex sinh()
-Returns the hyperbolic sine of the argument (simple number or elements
+Returns the hyperbolic sine of the argument (simple number or all elements
 of an array).
 
 
 @anchor{cosh}
 @item cosh()
 @findex cosh()
-Returns the hyperbolic cosine of the argument (simple number or elements
+Returns the hyperbolic cosine of the argument (simple number or all elements
 of an array).
 
 
 @anchor{tanh}
 @item tanh()
 @findex tanh()
-Returns the hyperbolic tangent of the argument (simple number or
+Returns the hyperbolic tangent of the argument (simple number or all
 elements of an array).
 
 @end table
@@ -888,7 +888,7 @@ elements of an array).
 @anchor{abort}
 @item abort()
 @findex abort()
-Teh function will abort the currently running program immediately, so
+The function will abort the currently running program immediately, so
 it's kind of an emergency exit when nothing else will do. When called
 it displays a message box on the screen to inform the user.
 
