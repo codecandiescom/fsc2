@@ -65,8 +65,8 @@ bool Eol;
 
 %}
 
-REM1     ^[\t ]*"//".*\n
-REM2     "//".*\n
+REM1     ^[\t ]*"//".*
+REM2     "//".*
 REM3     "/*"
 REM4     [^*\n]*
 REM5     "*"+[^*/\n]*
@@ -157,14 +157,10 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 } /* end of <str> */
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		Lc++;
+{REM1}		
 
 			/* handling of C++ style comment not spanning a whole line */
-{REM2}		{
-		 		printf( "\n" );
-				Lc++;
-				Eol = SET;
-			}
+{REM2}		
 
 			/* handling of C style comment */
 {REM3}		{
@@ -243,7 +239,7 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
 <incl>{
 			/* handling of C++ style comments */
-{REM2}      Lc++;
+{REM2}      
 
 {WS}       /* dumps white space */
 
