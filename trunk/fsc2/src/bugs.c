@@ -139,9 +139,11 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	/* Finally append the file with the version informations so that I'll know
 	   what the sender is really using */
 
-	cmd = get_string( strlen( "echo \"\n\nVersion:\n\" >> " )
+	cmd = get_string( strlen( "echo \"\n\nVersion (use 'uudecode file "
+							  "| bunzip2 -c to unpack):\n\" >> " )
 					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\n\nVersion:\n\" >> " );
+	strcpy( cmd, "echo \"\n\nVersion (use 'uudecode file "
+			     "| bunzip2 -c to unpack):\n\" >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );

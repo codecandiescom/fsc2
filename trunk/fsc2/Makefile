@@ -294,7 +294,7 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules
 
 .SUFFIXES:
-.PHONY: all install-strip install uninstall clean distclean pack ZIP
+.PHONY: all install-strip install uninstall version clean distclean pack ZIP
 
 
 # Default rule: make the main program, the primary lexer and the modules
@@ -358,6 +358,13 @@ uninstall:
 		rmdir $(libdir);                  \
 	fi
 
+
+# Unpacks the (local) version file and writes its content to stdout
+
+version:
+	-@if [ -e version.ubz ]; then              \
+		uudecode version.ubz | bunzip2 -c -q;  \
+	fi
 
 # `clean' deletes all the files remaining from the compilation and needed for
 # an installation while `distclean' also removes all executables, shared
