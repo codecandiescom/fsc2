@@ -1,3 +1,4 @@
+
 @c $Id$
 @c
 @c Copyright (C) 1999-2003 Jens Thoms Toerring
@@ -43,6 +44,7 @@
 * rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
+* hp8648b::       HP RF Synthesizer HP8648b
 * hp8672a::       HP RF Synthesizer HP8672A
 * ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
@@ -710,7 +712,7 @@ to return the measured frequency can be used.
 @end multitable
 
 
-@node hp8647a, hp8672a, hp5340a, Device Reference
+@node hp8647a, hp8648b, hp5340a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -727,6 +729,9 @@ works with HP8648B) with support for output level normalization via
 frequency/amplitude table files. For safety reasons only output
 attenuations below @w{-5 db} are allowed -- change the configuration
 file to allow higher output levels.
+
+Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 db}
+to @w{3 db}
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -753,7 +758,51 @@ file to allow higher output levels.
 @end multitable
 
 
-@node hp8672a, ips20_4, hp8647a, Device Reference
+@node hp8648b, hp8672a, hp8647a, Device Reference
+@iftex
+@subheading HP RF Synthesizer HP8648B
+@end iftex
+@ifnottex
+@section HP RF Synthesizer HP8648B
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp8648b}
+
+@paragraphindent 0
+@strong{Description}: Hewlett-Packard RF synthesizer HP8648B with
+support for output level normalization via frequency/amplitude table
+files.
+
+Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 db}
+to @w{14.5 db}.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
+@end multitable
+
+
+@node hp8672a, ips20_4, hp8648b, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8672A
 @end iftex
