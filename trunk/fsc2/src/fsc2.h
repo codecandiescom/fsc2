@@ -24,7 +24,7 @@
 
 /* inclusion of programs own header files */
 
-#include "global.h"                    /* must be the very first one ! */
+#include "global.h"               /* must be the very first to be included ! */
 #include "exceptions.h"
 #include "T.h"
 #include "util.h"
@@ -35,6 +35,19 @@
 #include "phases.h"
 #include "pulse.h"
 #include "ppcheck.h"
+
+
+
+typedef struct PT_ {
+	int token;
+	union {
+		long   lval;
+		double dval;
+		char   *sptr;
+		Var    *vptr;
+	} type;
+	struct PT_ *gto;
+} Prg_Token;
 
 
 
@@ -59,7 +72,8 @@ int primary_experiment_parser( FILE *in );
 long Lc = 0;
 char *Fname = NULL;
 Compilation compilation;
-
+Prg_Token *prg_token;
+long prg_length = 0;
 
 long Time_Unit = DEFAULT_TIME_UNIT;
 long Time_Base = DEFAULT_TIME_UNIT;
@@ -81,6 +95,8 @@ Pulse *Cur_Pulse = NULL;
 extern long Lc;
 extern char *Fname;
 extern Compilation compilation;
+extern Prg_Token prg_token;
+extern long prg_length;
 
 extern long Time_Unit;
 extern long Time_Base;
