@@ -395,8 +395,8 @@ Var *pulser_reset( Var *v )
 	bool was_active;
 
 
-	/* An empty pulse list means that we have to reset all pulses (in this
-	   case even the inactive ones) */
+	/* An empty pulse list means that we have to reset all pulses (even the
+       inactive ones) */
 
 	if ( v == NULL )
 		for( p = Pulses; p != NULL; p = p->next )
