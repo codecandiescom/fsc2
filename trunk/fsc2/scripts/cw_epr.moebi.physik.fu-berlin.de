@@ -33,6 +33,7 @@ my %wp = ( '-side' => 'left',
 # Create all the graphic stuff
 
 my $mw = MainWindow->new( );
+$mw->title( "cw_epr" );
 
 my $f0 = $mw->Frame( );
 my $f0_l1 = $f0->Label( '-text' => 'Bridge:',
@@ -228,16 +229,13 @@ goto done_reading unless defined( $ne = <F> )
 	and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
 chomp $ne;
 $tc = $ne;
-print "tc = $tc\n";
 
 goto done_reading unless defined( $ne = <F> )
 	and $ne =~ /(^Don't set)|([125]0{0,2} [mun]V)$/;
 chomp $ne;
 $sens = $ne;
-print "sens = $sens\n";
 
 done_reading:
-print "Done in $ne\n";
 close F;
 }
 
