@@ -27,9 +27,13 @@
 #include <sys/un.h>
 
 
-/* Maximum length of a user name */
+/* Try to figure out the maximum length of a user name */
 
-#define MAX_LOGIN_NAME    32
+#if defined _SC_LOGIN_NAME_MAX 
+#define MAX_LOGIN_NAME    _SC_LOGIN_NAME_MAX
+#else
+#define MAX_LOGIN_NAME    64
+#endif
 
 
 /* Number of seconds after which the "daemon" checks if some or all
