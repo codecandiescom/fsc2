@@ -5,17 +5,29 @@
 #include "fsc2.h"
 
 
+/*-----------------------------------------------------------------------*/
+/* This function is called from the signal handler for 'deadly' signals, */
+/* i.e. SIGSEGV etc. It tries to figure out where this signal happend by */
+/* running through the stackframes and determining from the return       */
+/* addresses and by the help of the GNU utility 'addr2line' the function */
+/* name and the source file and line number. The result is written to    */
+/* write end of a pipe that, under the name of 'fail_mess_fd', can be    */
+/* read and, for example, written into a mail.                           */
+/* This function is highly hardware depended, i.e. it will probably only */
+/* work with i386 type processors.                                       */
+/*-----------------------------------------------------------------------*/
+
 void DumpStack( void )
 {
 #ifdef ADDR2LINE
 
-	int *EBP;
-	int f[ 2 ];
-	int p[ 4 ];
+	int *EBP;          /* assumes that sizeof( int ) equals size of pointers */
+	int answer_fd[ 2 ];
+	int pipe_fd[ 4 ];
 	pid_t pid;
-	int i, k = 0;
+	int i, k = 1;
 	struct sigaction sact;
-	char buf[ 100 ];
+	char buf[ 32 ];
 	char c;
 
 
@@ -25,42 +37,43 @@ void DumpStack( void )
 	sact.sa_flags = 0;
 	sigaction( SIGCHLD, &sact, NULL );
 
-	/* Don't crash with SIGPIPE if child process fails to exec ADDR2LINE */
+	/* Don't crash with SIGPIPE if child process fails to exec (in this case
+	   the output will only contain the addresses) */
 
 	sact.sa_handler = SIG_IGN;
 	sact.sa_flags = 0;
 	sigaction( SIGPIPE, &sact, NULL );
 
-	if ( pipe( p ) < 0 )
+	if ( pipe( pipe_fd ) < 0 )
 		return;
-	if ( pipe( p + 2 ) < 0 )
+	if ( pipe( pipe_fd + 2 ) < 0 )
 	{
 		for ( i = 0; i < 2; i++ )
-			close( p[ i ] );
+			close( pipe_fd[ i ] );
 		return;
 	}
 
-	if ( pipe( f ) < 0 )
+	if ( pipe( answer_fd ) < 0 )
 	{
 		for ( i = 0; i < 4; i++ )
-			close( p[ i ] );
+			close( pipe_fd[ i ] );
 		return;
 	}
 
-	/* Create child running addr2line with input and output redirected */
+	/* Create child running ADDR2LINE with input and output redirected */
 
 	if ( ( pid = fork( ) ) == 0 )
 	{
-		close( p[ 0 ] );
-		close( p[ 3 ] );
+		close( pipe_fd[ 0 ] );
+		close( pipe_fd[ 3 ] );
 
 		close( STDOUT_FILENO );
 		close( STDERR_FILENO );
 		close( STDIN_FILENO );
 
-		dup2( p[ 1 ], STDOUT_FILENO );
-		dup2( p[ 1 ], STDERR_FILENO );
-		dup2( p[ 2 ], STDIN_FILENO );
+		dup2( pipe_fd[ 1 ], STDOUT_FILENO );
+		dup2( pipe_fd[ 1 ], STDERR_FILENO );
+		dup2( pipe_fd[ 2 ], STDIN_FILENO );
 
 		execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2", NULL );
 		_exit( EXIT_FAILURE );
@@ -68,14 +81,14 @@ void DumpStack( void )
 	else if ( pid < 0 )               /* fork failed */
 	{
 		for ( i = 0; i < 4; i++ )
-			close( p[ i ] );
+			close( pipe_fd[ i ] );
 		for ( i = 0; i < 2; i++ )
-			close( f[ i ] );
+			close( answer_fd[ i ] );
 		return;
 	}
 
-	close( p[ 1 ] );
-	close( p[ 2 ] );
+	close( pipe_fd[ 1 ] );
+	close( pipe_fd[ 2 ] );
 
 	/* Load content of ebp register into EBP - ebp always points to the stack
 	   address before the return address of the current subroutine, and the
@@ -92,40 +105,39 @@ void DumpStack( void )
 	{
 		/* Get return address of current subroutine and ask the process
 		   running ADDR2LINE to convert this into a function name and the
-		   source file and line number (this fails for programs competely
-		   striiped of all debugging information as well as for library
+		   source file and line number. (This fails for programs competely
+		   stripped of all debugging information as well as for library
 		   functions - in this case question marks get returned, but using
 		   the address it's still possible to find out via the debugger
-		   where the shit hit the fan). */
+		   where the shit hit the fan.) */
 
 		sprintf( buf, "%p\n", ( int * ) * ( EBP + 1 ) );
-		write( p[ 3 ], buf, strlen( buf ) );
+		write( pipe_fd[ 3 ], buf, strlen( buf ) );
 
-		sprintf( buf, "#%-3d %-10p ", k++, ( int * ) * ( EBP + 1 ) );
-		write( f[ 1 ], buf, strlen( buf ) );
+		sprintf( buf, "#%-3d %-10p  ", k++, ( int * ) * ( EBP + 1 ) );
+		write( answer_fd[ 1 ], buf, strlen( buf ) );
 
-		while ( read( p[ 0 ], &c, 1 ) == 1 && c != '\n' )
-			write( f[ 1 ], &c, 1 );
+		/* Copy answer to answer pipe */
 
-		write( f[ 1 ], "() in ", 6 );
+		while ( read( pipe_fd[ 0 ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ 1 ], &c, 1 );
 
-		while ( read( p[ 0 ], &c, 1 ) == 1 )
-		{
-			write( f[ 1 ], &c, 1 );
-			if ( c == '\n' )
-				break;
-		}
+		write( answer_fd[ 1 ], "() in ", 6 );
 
-		/* Get content of ebp for the next higher stackframe */
+		while ( read( pipe_fd[ 0 ], &c, 1 ) == 1 && c != '\n' )
+			write( answer_fd[ 1 ], &c, 1 );
+		write( answer_fd[ 1 ], &c, 1 );
+
+		/* Get value of ebp register of the next higher level stackframe */
 
 		EBP = ( int * ) * EBP;
 	}
 
 	kill( pid, SIGTERM );
-	close( p[ 0 ] );
-	close( p[ 3 ] );
-	close( f[ 1 ] );
-	fail_mess_fd = f[ 0 ];
+	close( pipe_fd[ 0 ] );
+	close( pipe_fd[ 3 ] );
+	close( answer_fd[ 1 ] );
+	fail_mess_fd = answer_fd[ 0 ];
 
 #endif  /* ! ADDR2LINE */
 }
