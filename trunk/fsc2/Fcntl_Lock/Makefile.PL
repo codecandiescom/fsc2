@@ -3,8 +3,8 @@ use ExtUtils::MakeMaker;
 use Config;
 
 
-# Check if we can run the C compiler and if including fcntl.h works - if the
-# later fails the system may not have a fcntl() system call.
+# Check if we can run the C compiler and if using fcntl() works - if the
+# later fails the system may not have a fcntl() system call at all.
 
 open( $fh, ">cc_test.c" ) or die "Can't open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
@@ -18,13 +18,23 @@ unlink "cc_test";
 unlink "cc_test.c";
 
 open( $fh, ">fcntl_test.c" ) or die "Can't open a file for writing: $!\n";
-print $fh "#include <fcntl.h>\nint main(void)\n{\nreturn 0;\n}\n";
+print $fh "#include <fcntl.h>\n" .
+	      "#include <stdio.h>\n" .
+	      "int main(void)\n" .
+          "{\n" .
+	      "    struct flock f;\n" .
+	      "    f.l_type = F_RDLCK;\n" .
+	      "    f.l_whence = SEEK_SET;\n" .
+          "    f.l_start = 0;\n" .
+	      "    f.l_len = 0;\n" .
+          "    return fcntl( 0, F_SETLK, &f ) == -1;\n" .
+          "}\n";
 close $fh;
 
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
 	unlink "fcntl_test.c";
-	die "Can't include <fcntl.h>. Does your system really have a fcntl() " .
-		"system call?\n";
+	die "Can't compile a program that uses fcntl(). Does your system " .
+		"really has a fcntl() system call?\n";
 }
 unlink "fcntl_test";
 unlink "fcntl_test.c";
