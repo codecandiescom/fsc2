@@ -512,7 +512,9 @@ if [ ! -e driver/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [ ! -e driver/me6x00.o -o ! -e lib/libme6x00.a -o ! -e lib/libme6x00.so ]; then
+    if [ ! -e driver/me6x00.o -o \
+		 ! -e lib/libme6x00.a -o \
+		 ! -e lib/libme6x00.so ]; then
         pref_comp
         do_compile 0
         do_install
