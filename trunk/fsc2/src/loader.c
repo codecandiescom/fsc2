@@ -127,8 +127,8 @@ void load_functions( Device *dev )
 
 	dev->is_loaded = SET;
 	dev->driver.is_init_hook = dev->driver.is_test_hook =
-		dev->driver.is_exp_hook = dev->driver.is_exit_hook = 
-		dev->driver.is_end_of_exp_hook = UNSET;
+		dev->driver.is_endof_test_hook = dev->driver.is_exp_hook =
+		dev->driver.is_end_of_exp_hook = dev->driver.is_exit_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
 	   appended string "_init_hook" store it and set corresponding flag
