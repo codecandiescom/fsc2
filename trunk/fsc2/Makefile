@@ -83,14 +83,15 @@ headers        = ${c_sources:.c=.h} global.h
 modules        = User_Functions.c \
 				 sr510.c sr530.c sr810.c \
 				 aeg_s_band.c aeg_x_band.c \
-				 er035m.c er035m_s.c bh15.c \
-				 hp8647a.c
+				 er035m.c er035m_s.c bh15.c
 dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
+hp8647a        = hp8647a.c hp8647a_lexer.c
+
 
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
@@ -162,7 +163,8 @@ fsc2_clean.c: fsc2_clean.flex $(headers)
 # specially since each has its own header file and is divided into several
 # source files
 
-mods: dg2020_f.so dg2020_b.so tds754a.so tds520a.so $(modules:.c=.so)
+mods: dg2020_f.so dg2020_b.so tds754a.so tds520a.so hp8647a.so \
+	  $(modules:.c=.so)
 
 dg2020_f.so: ${dg2020_f:.c=.lo}
 	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
@@ -180,14 +182,20 @@ tds520a.so: ${tds520a:.c=.lo}
 	$(CC) -shared -o $@ ${tds520a:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
+hp8647a.so: ${hp8647a:.c=.lo}
+	$(CC) -shared -o $@ ${hp8647a:.c=.lo} -lm $(LDFLAGS)
+	chmod 644 $@
+
 %.so: %.lo
 	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
 	chmod 644 $@
+
 
 ${dg2020_f:.c=.lo}: dg2020_f.h $(headers)
 ${dg2020_b:.c=.lo}: dg2020_b.h $(headers)
 ${tds754a:.c=.lo}: tds754a.h $(headers)
 ${tds520a:.c=.lo}: tds520a.h $(headers)
+${hp8647a:.c=.lo}: $(headers)
 
 %.lo: %.c $(headers)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
