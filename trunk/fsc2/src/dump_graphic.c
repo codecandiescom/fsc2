@@ -273,13 +273,13 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 	CARD32 *lptr;
 	char *lineptr;
 	G_Hash hash;
-	int hash_size;
+	unsigned int hash_size;
 
 
 	hash = G.color_hash;
 	hash_size = G.color_hash_size;
 
-	fprintf( fp, "P6\n%d %d\n255\n", w, h );
+	fprintf( fp, "P6\n%d %d\n255\n", image->width, image->height );
 
 	/* Get some information about the image */
 
@@ -366,7 +366,7 @@ void create_color_hash( void )
 	FL_COLOR pixel;
 	int key;
 	int r = 0, g = 0, b = 0;
-	int hash_size = COLOR_HASH_SIZE;
+	unsigned int hash_size = COLOR_HASH_SIZE;
 	G_Hash hash;
 
 

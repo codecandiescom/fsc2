@@ -223,7 +223,7 @@ typedef struct {
 	FL_COLOR colors[ MAX_CURVES ];
 
 	G_Hash color_hash;
-	int color_hash_size;
+	unsigned int color_hash_size;
 
 	int cursor[ 7 ];              /* the different cursors */
 
