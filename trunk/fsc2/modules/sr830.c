@@ -28,7 +28,8 @@
 #define MAX_HARMONIC          19999
 #define MIN_HARMONIC          1
 
-#define NUM_CHANNELS          11
+#define NUM_CHANNELS          4        /* 11 would be possible but this doesn't
+										  make too much sense... */
 
 
 /* declaration of exported functions */
