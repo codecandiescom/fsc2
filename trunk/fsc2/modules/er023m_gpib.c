@@ -198,7 +198,7 @@ unsigned int er023m_get_data( void )
 	/* Bring lock-in into talker mode, this should make it send one ADC data
 	   point automatically (when in SINGLE mode) */
 
-	er023m_talk( "SM\r",buf, &len );
+	er023m_talk( "SM\r", ( char * ) buf, &len );
 
 	/* The device should send as many bytes for a data point as it told us
 	   it would, plus an EOS character */

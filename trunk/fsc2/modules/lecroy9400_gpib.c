@@ -464,7 +464,8 @@ bool lecroy9400_get_desc( int channel )
 
 	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
 
-	lecroy9400_talk( cmds[ channel ], lecroy9400.wv_desc[ channel ], &len );
+	lecroy9400_talk( cmds[ channel ],
+					 ( char * ) lecroy9400.wv_desc[ channel ], &len );
 	return OK;
 }
 
@@ -636,7 +637,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 	snprintf( cmd, 100, "RD,%s.DA,1,%ld,0,0",
 			  ch == LECROY9400_FUNC_E ? "FE" : "FF", *length );
-	lecroy9400_talk( cmd, data, &len );
+	lecroy9400_talk( cmd, ( char * ) data, &len );
 
 	*length = ( ( long ) data[ 2 ] * 256 + ( long ) data[ 3 ] ) / 2;
 

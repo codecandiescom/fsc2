@@ -919,7 +919,7 @@ static void setup_child_signals( void )
 
 static void child_sig_handler( int signo )
 {
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && defined __STRICT_ANSI__
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
@@ -958,7 +958,7 @@ static void child_sig_handler( int signo )
 			if ( ! ( Internals.cmdline_flags & NO_MAIL ) &&
 				 signo != SIGTERM )
 			{
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 				if ( Internals.is_i386 )
 				{
 					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
