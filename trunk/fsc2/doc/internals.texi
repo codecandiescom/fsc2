@@ -1691,12 +1691,13 @@ whole concept of the graphics in @code{fsc2}, which I am not going to do
 here. If you want to know more about it you will find the source code
 associated with graphics in the already mentioned files
 @file{graphics.c}, @file{graph_handler_1d.c}, @file{graph_handler_2d.c}
-and @file{graph_cut.c}.
+and @file{graph_cut.c}. Keep in mind that this code will never be
+executed by the child process but only by the parent.
 
 
-Now to the handling of requests: when in @code{accept_new_data()} a
-message with this type gets found contol is passed back to its calling
-function, @code{new_data_handler()} in @file{comm.c}, which teh invokes
+Now about the handling of requests: when in @code{accept_new_data()} a
+message with this type is found contol is passed back to the calling
+function, @code{new_data_handler()} in @file{comm.c}, which then invokes
 @code{reader()}. Within this function the parent process reads on its
 side of the pipe to the child process. The child process will write a
 structure of type @code{CommStruct} (see @file{comm.h}) to the pipe.
@@ -1718,3 +1719,23 @@ back either just an acknowledgment or a set of data to the child process
 waiting in @code{reader()} for the reply.
 
 
+When the child exits the parent has again to do a bit of work. It
+deletes the channels of communication with the child process, i.e.@:
+closes its remaining ends of the pipes and removes the shared memory
+segments and the semaphore used to protect the message queue (after
+having worked its way through all remaining messages). Then it deletes
+the tool box (if it was used at all) end runs the end-of-experiment hook
+functions in the modules. If the GPIB bus or serial ports were used the
+appropriate function in the GPIB library is called to close the
+connection to the bus and also the device files for the serial ports are
+closed.
+
+
+If the user now closes the window(s) for displaying the data the program
+is in a state so that a new experiment can be started. This can be done
+by repeating the same experiment, in which case the already stored
+tokens would be interpreted again, i.e.@: the @code{EDL} script would't
+have to be read in and tested again but the program would immediately go
+to the start of the @code{EXPERIMENT} section. But, of course a
+completely new experiment can be done by loading a new @code{EDL}
+script.
