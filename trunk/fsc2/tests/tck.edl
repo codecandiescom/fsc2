@@ -1,0 +1,46 @@
+/*-----------------------------------------------------------------------
+    This script is for testing some aspects of 1D-graphics of fsc2.
+    No warnings or errors should occur or something is seriously broken.
+
+    $Id$
+-------------------------------------------------------------------------*/ 
+
+VARIABLES:
+
+I = 1;
+J = 0;
+K;
+j[ 10 ];
+
+PREPARATIONS:
+
+init_1d( 2 );
+display_mode( "SLIDING", 50 );
+
+EXPERIMENT:
+
+FOR K = 1 : 836 {
+	display( I, sin( 4 * 0.031415 * I ), 1 );
+	wait( 0.05 s );
+	I += 1;
+	IF I % 10 == 0 {
+		j = 0.3 * grandom( 10 );
+		display( I - 9, j, 2 );
+		draw_marker( I, "WHITE" );
+	}
+
+	IF I % 30 == 0 {
+		rescale_1d( 80 );
+	}
+
+	IF I % 210 == 0 {
+		IF J == 0 {
+			display_mode( "NORMAL", 100 );
+			I = 1;
+			J = 1;
+		} ELSE {
+			display_mode( "SLIDING", 50 );
+			J = 0;
+		}
+	}
+}
