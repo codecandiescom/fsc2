@@ -1441,18 +1441,20 @@ static void rs690_correct_fs_for_4ns( void )
 		}
 
 		/* If the Ticks of the current FS have been moved completely into
-		   the previous FS it's now empty, so delete it. */
+		   the previous FS it's now empty, so delete it and continue with
+		   the next FS in the list. */
 
 		if ( n->len == 0 )
 		{
 			rs690_delete_fs_successor( p );
 			rs690.new_fs_count--;
 			n = p;
+			continue;
 		}
 
 		/* If the current FS is now shorter then 4 Ticks we have to prepare
-		   it to be the next successor into which we're going to shift Ticks
-		   from the next FS. */
+		   it to become the next successor into which we're going to shift
+		   Ticks from the next FS. */
 
 		if ( n->len < 4 )
 		{
