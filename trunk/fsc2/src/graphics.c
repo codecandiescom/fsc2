@@ -69,8 +69,8 @@ void start_graphics( void )
 						  "Switch off automatic rescaling" );
 
 
-	/* Store the state of the current state of the Graphics structure - to
-	   be restored after the experiment */
+	/* Store the current state of the Graphics structure - to be restored
+	   after the experiment */
 
 	G_stored = get_memcpy( &G, sizeof( Graphics ) );
 
@@ -224,24 +224,23 @@ static void G_struct_init( void )
 	if ( keymask & Button3Mask )
 		G.raw_button_state |= 4;
 
-	/* On the first call create the different cursors and the colours needed
-	   for 2D displays */
+	/* Create the  different cursors */
+
+	G.cur_1 = fl_create_bitmap_cursor( c1_bits, c1_bits, c1_width,
+									   c1_height, c1_x_hot, c1_y_hot );
+	G.cur_2 = fl_create_bitmap_cursor( c2_bits, c2_bits, c2_width,
+									   c2_height, c2_x_hot, c2_y_hot );
+	G.cur_3 = fl_create_bitmap_cursor( c3_bits, c3_bits, c3_width,
+									   c3_height, c3_x_hot, c3_y_hot );
+	G.cur_4 = fl_create_bitmap_cursor( c4_bits, c4_bits, c4_width,
+									   c4_height, c4_x_hot, c4_y_hot );
+	G.cur_5 = fl_create_bitmap_cursor( c5_bits, c5_bits, c5_width,
+									   c5_height, c5_x_hot, c5_y_hot );
+
+	/* On the first call also create the colours needed for 2D displays */
 
 	if ( first_time )
-	{
-		G.cur_1 = fl_create_bitmap_cursor( c1_bits, c1_bits, c1_width,
-										   c1_height, c1_x_hot, c1_y_hot );
-		G.cur_2 = fl_create_bitmap_cursor( c2_bits, c2_bits, c2_width,
-										   c2_height, c2_x_hot, c2_y_hot );
-		G.cur_3 = fl_create_bitmap_cursor( c3_bits, c3_bits, c3_width,
-										   c3_height, c3_x_hot, c3_y_hot );
-		G.cur_4 = fl_create_bitmap_cursor( c4_bits, c4_bits, c4_width,
-										   c4_height, c4_x_hot, c4_y_hot );
-		G.cur_5 = fl_create_bitmap_cursor( c5_bits, c5_bits, c5_width,
-										   c5_height, c5_x_hot, c5_y_hot );
-
 		create_colors( );
-	}
 
 	/* Define colours for the curves (in principal this should be made
        configurable by the user) */
@@ -281,7 +280,6 @@ static void G_init_curves_1d( void )
 	int i, j;
 	Curve_1d *cv;
 	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
-
 
 
 	fl_set_cursor_color( G.cur_1, FL_RED, FL_WHITE );
