@@ -93,7 +93,7 @@ Var *daq_ai_channel_setup( Var *v )
 	int type;
 	NI_DAQ_AI_TYPE *types = NULL;
 	int pol;
-	NI_DAQ_POLARITY *polarities = NULL;
+	NI_DAQ_BU_POLARITY *polarities = NULL;
 	int dither_enable;
 	NI_DAQ_STATE *dither_enables = NULL;
 	int num_channels = 0;
@@ -134,10 +134,10 @@ Var *daq_ai_channel_setup( Var *v )
 	{
 		if ( pci_mio_16e_1.ai_state.ranges != NULL )
 			pci_mio_16e_1.ai_state.ranges =
-									   T_free( pci_mio_16e_1.ai_state.ranges );
+							  DOUBLE_P T_free( pci_mio_16e_1.ai_state.ranges );
 		if ( pci_mio_16e_1.ai_state.polarities != NULL )
 			pci_mio_16e_1.ai_state.polarities =
-								   T_free( pci_mio_16e_1.ai_state.polarities );
+			  NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
 	}
 
 	pci_mio_16e_1.ai_state.ampl_switch_needed = UNSET;
@@ -166,12 +166,15 @@ Var *daq_ai_channel_setup( Var *v )
 			range = get_double( v, "voltage range" );
 
 			num_channels++;
-			channels = T_realloc( channels, num_channels * sizeof *channels );
-			ranges = T_realloc( ranges, num_channels * sizeof *ranges );
-			types = T_realloc( types, num_channels * sizeof *types );
-			polarities = T_realloc( polarities,
-									num_channels * sizeof *polarities );
-			dither_enables = T_realloc( dither_enables,
+			channels = INT_P T_realloc( channels,
+										num_channels * sizeof *channels );
+			ranges = DOUBLE_P T_realloc( ranges,
+										 num_channels * sizeof *ranges );
+			types = NI_DAQ_AI_TYPE_P T_realloc( types,
+												num_channels * sizeof *types );
+			polarities = NI_DAQ_BU_POLARITY_P T_realloc( polarities,
+										   num_channels * sizeof *polarities );
+			dither_enables = NI_DAQ_STATE_P T_realloc( dither_enables,
 									   num_channels * sizeof *dither_enables );
 
 			TRY_SUCCESS;
@@ -633,8 +636,8 @@ Var *daq_ai_get_curve( Var * v )
 
 	TRY
 	{
-		volts = T_malloc( pci_mio_16e_1.ai_state.num_channels
-						  * sizeof *volts );
+		volts = DOUBLE_PP T_malloc( pci_mio_16e_1.ai_state.num_channels
+									* sizeof *volts );
 
 		if ( pci_mio_16e_1.ai_state.num_channels == 1 )
 		{
@@ -1030,7 +1033,7 @@ static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
 
 	for ( i = 0; i < 10; i++ )
 		if ( ! strncasecmp( "PFI", tname, 3 ) && tname[ 3 ] == '0' + i  )
-			return pfi + i;
+			return ( NI_DAQ_INPUT ) ( pfi + i );
 
 	if ( ! strcasecmp( "TRIG1", tname ) )
 		return NI_DAQ_PFI0;
@@ -1041,7 +1044,7 @@ static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
 	print( FATAL, "Invalid source for %s.\n", snippet );
 	THROW( EXCEPTION );
 
-	return -1;
+	return ( NI_DAQ_INPUT ) -1;
 }
 
 

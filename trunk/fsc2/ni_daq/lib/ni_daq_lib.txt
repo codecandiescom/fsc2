@@ -391,7 +391,7 @@ On failure the function returns one of the following error codes
 
 int ni_daq_ai_channel_configuration( int board, int num_channels,
                                      int *channels, NI_DAQ_AI_TYPE *types,
-                                     NI_DAQ_POLARITY *polarities,
+                                     NI_DAQ_BU_POLARITY *polarities,
                                      double *ranges,
                                      NI_DAQ_STATE *dither_enables )
 
@@ -442,13 +442,13 @@ channel, the setting can be useful when different channels are to be
 sampled at different rates.
 
 The fifth argument, '*polarities', is an array of 'num_channels' values
-of type 'NI_DAQ_POLARITY'. These can have the values
+of type 'NI_DAQ_BU_POLARITY'. These can have the values
 
    NI_DAQ_BIPOLAR   or   NI_DAQ_UNIPOLAR
 
-When set to NI_DAQ_BIPOLAR and bipolar experiment is done (i.e. the
+When set to NI_DAQ_BIPOLAR an bipolar acquisitionis done (i.e. the
 input voltages are expected in a range symmetric with respect to 0V),
-otherwise the have to be unipolar, i.e. all input voltages must be
+otherwise they have to be unipolar, i.e. all input voltages must be
 between 0V and the upper limit of the measurement range (to be set by
 the next argument.
 

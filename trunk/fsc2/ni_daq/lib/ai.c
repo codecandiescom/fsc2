@@ -98,7 +98,7 @@ int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 
 int ni_daq_ai_channel_configuration( int board, int num_channels,
 									 int *channels, NI_DAQ_AI_TYPE *types,
-									 NI_DAQ_POLARITY *polarities,
+									 NI_DAQ_BU_POLARITY *polarities,
 									 double *ranges,
 									 NI_DAQ_STATE *dither_enables )
 {

@@ -35,6 +35,7 @@
 #define inline
 
 #define DOUBLE_P              ( double * )
+#define DOUBLE_PP             ( double ** )
 #define LONG_P                ( long * )
 #define INT_P                 ( int * )
 #define UINT_P                ( unsigned int * )
@@ -86,6 +87,7 @@
 #else
 
 #define DOUBLE_P
+#define DOUBLE_PP
 #define LONG_P
 #define INT_P
 #define UINT_P
