@@ -148,20 +148,20 @@ const char *dg2020_pticks( Ticks ticks )
 
 /*-----------------------------------------------------------------------------
    Functions returns a pointer to a free channel - the channels with the
-   highest numbers are used first since most users probably tend to use the
-   low number channels for storing test pulse sequences that they don't like
+   lowest numbers are used first since most users probably tend to use the
+   high number channels for storing test pulse sequences that they don't like
    too much being overwritten just because they forgot to set a channel-to-
    function-assignment in their EDL program.
 -----------------------------------------------------------------------------*/
 
 CHANNEL *dg2020_get_next_free_channel( void )
 {
-	int i = MAX_CHANNELS - 1;
+	int i = 0;
 
 	while ( dg2020.channel[ i ].function != NULL )
-		i--;
+		i++;
 
-	assert( i >= 0 );                 /* this can't happen ;-) */
+	assert( i < MAX_CHANNELS );                 /* this can't happen ;-) */
 
 	return &dg2020.channel[ i ];
 }
