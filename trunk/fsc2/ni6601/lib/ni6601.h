@@ -62,6 +62,7 @@ int ni6601_generate_single_pulse( int board, int counter, double duration );
 int ni6601_dio_write( int board, unsigned char bits, unsigned char mask );
 int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask );
 int ni6601_is_counter_armed( int board, int counter, int *state );
+const char *ni6601_error_message( void );
 
 
 #define NI6601_OK        0

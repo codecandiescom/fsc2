@@ -36,6 +36,7 @@ The library supplies the following functions:
     ni6601_dio_read()
     ni6601_is_counter_armed()
     ni6601_close()
+	ni6601_error_message()
 
 
 All functions return an integer, indicating success or failure. On success,
@@ -338,3 +339,10 @@ Beside the error codes mentioned above the function may return:
 
 
 ======================================================================
+
+const char *ni6601_error_message( void )
+
+The function returns a short error message about the reason the last
+call of one of the functions in the library failed. If there was no
+error during the last functuin call an empty string is returned.
+

@@ -49,6 +49,7 @@ static int check_source( int source );
 static int ni6601_time_to_ticks( double time, unsigned long *ticks );
 
 static NI6601_Device_Info dev_info[ NI6601_MAX_BOARDS ];
+static const char *error_message = "";
 
 
 /*-----------------------------------------------------------------*/
@@ -56,11 +57,19 @@ static NI6601_Device_Info dev_info[ NI6601_MAX_BOARDS ];
 
 int ni6601_close( int board )
 {
+	error_message = "";
+
 	if ( board < 0 || board >= NI6601_MAX_BOARDS )
+	{
+		error_message = NI6601_ERR_NSB_MESS;
 		return NI6601_ERR_NSB;
+	}
 
 	if ( ! dev_info[ board ].is_init )
+	{
+		error_message = NI6601_ERR_BNO_MESS;
 		return NI6601_ERR_BNO;
+	}
 
     if ( dev_info[ board ].fd >= 0 )
         close( dev_info[ board ].fd );
@@ -83,8 +92,13 @@ int ni6601_start_counter( int board, int counter, int source )
 	NI6601_COUNTER c;
 
 
+	error_message = "";
+
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
@@ -96,7 +110,10 @@ int ni6601_start_counter( int board, int counter, int source )
 		return ret;
 
 	if ( state == NI6601_BUSY )
+	{
+		error_message = NI6601_ERR_CBS_MESS;
 		return NI6601_ERR_CBS;
+	}
 
 	c.counter = counter;
 	c.source_polarity = NI6601_NORMAL;
@@ -104,7 +121,10 @@ int ni6601_start_counter( int board, int counter, int source )
 	c.source = source;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_COUNTER, &c ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	dev_info[ board ].state[ counter ] = NI6601_CONT_COUNTER_RUNNING;
 
@@ -128,18 +148,26 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 	NI6601_COUNTER c;
 
 
+	error_message = "";
+
 	/* Check if the counter number is reasonable and determine number of
 	   adjacent counter to be used for gating */
 
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	pulser = counter & 1 ? counter - 1 : counter + 1;
 
 	/* Check that the gate length is reasonable and convert it to ticks */
 
 	if ( ni6601_time_to_ticks( gate_length, &len ) < 0 )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	/* Open the board if necessary */
 
@@ -157,13 +185,19 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 		return ret;
 
 	if ( state == NI6601_BUSY )
+	{
+		error_message = NI6601_ERR_CBS_MESS;
 		return NI6601_ERR_CBS;
+	}
 
 	if ( ( ret = ni6601_state( board, pulser, &state ) ) < 0 )
 		return ret;
 
 	if ( state == NI6601_BUSY )
+	{
+		error_message = NI6601_ERR_NCB_MESS;
 		return NI6601_ERR_NCB;
+	}
 
 	/* Start the counter */
 
@@ -173,7 +207,10 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 	c.source = source;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_COUNTER, &c ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	/* Start the adjacent counter producing the gate */
 
@@ -189,6 +226,7 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_PULSER, &p ) < 0 )
 	{
 		ni6601_stop_counter( board, counter );
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
 	}
 
@@ -209,8 +247,13 @@ int ni6601_stop_counter( int board, int counter )
 	NI6601_DISARM d;
 
 
+	error_message = "";
+
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
@@ -224,7 +267,10 @@ int ni6601_stop_counter( int board, int counter )
 	d.counter = counter;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_DISARM, &d ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	if ( dev_info[ board ].state[ counter ] == NI6601_COUNTER_RUNNING )
 		ni6601_stop_counter( board, counter & 1 ? counter - 1 : counter + 1 );
@@ -245,20 +291,31 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 	NI6601_COUNTER_VAL v;
 
 
+	error_message = "";
+
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
 	if ( count == NULL )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( wait_for_end &&
 		 ( dev_info[ board ].state[ counter ] == NI6601_CONT_PULSER_RUNNING ||
 		   dev_info[ board ].state[ counter ] == NI6601_CONT_COUNTER_RUNNING )
 		)
+	{
+		error_message = NI6601_ERR_WFC_MESS;
 		return NI6601_ERR_WFC;
+	}
 
 	if ( state != NULL &&
 		 ( ret = ni6601_state( board, counter, state ) ) < 0 )
@@ -270,8 +327,12 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_COUNT, &v ) < 0 )
 	{
 		if ( errno == EINTR )
+		{
+			error_message = NI6601_ERR_ITR_MESS;
 			return NI6601_ERR_ITR;
+		}
 			
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
 	}
 
@@ -299,14 +360,25 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 	int state;
 
 
+	error_message = "";
+
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( dev_info[ board ].state[ counter ] != NI6601_IDLE )
+	{
+		error_message = NI6601_ERR_CBS_MESS;
 		return NI6601_ERR_CBS;
+	}
 
 	if ( ni6601_time_to_ticks( duration, &len ) < 0 )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;	
@@ -315,7 +387,10 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 		return ret;
 
 	if ( state == NI6601_BUSY )
+	{
+		error_message = NI6601_ERR_CBS_MESS;
 		return NI6601_ERR_CBS;
+	}
 
 	p.counter = counter;
 	p.continuous = 1;
@@ -327,7 +402,10 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 	p.output_polarity = NI6601_NORMAL;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_PULSER, &p ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	dev_info[ board ].state[ counter ] = NI6601_PULSER_RUNNING;
 
@@ -347,12 +425,20 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 	unsigned long ht, lt;
 
 
+	error_message = "";
+
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( ni6601_time_to_ticks( high_phase, &ht ) < 0 ||
 		 ni6601_time_to_ticks( low_phase, &lt ) < 0 )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;	
@@ -361,7 +447,10 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 		return ret;
 
 	if ( state == NI6601_BUSY )
+	{
+		error_message = NI6601_ERR_CBS_MESS;
 		return NI6601_ERR_CBS;
+	}
 
 	p.counter = counter;
 	p.continuous = 1;
@@ -373,7 +462,10 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 	p.output_polarity = NI6601_NORMAL;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_PULSER, &p ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	dev_info[ board ].state[ counter ] = NI6601_CONT_PULSER_RUNNING;
 
@@ -399,6 +491,8 @@ int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 	NI6601_DIO_VALUE dio;
 
 
+	error_message = "";
+
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
@@ -406,7 +500,10 @@ int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 	dio.mask = mask;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_DIO_OUT, &dio ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	return NI6601_OK;
 }
@@ -421,15 +518,23 @@ int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
 	NI6601_DIO_VALUE dio;
 
 
+	error_message = "";
+
 	if ( bits == NULL )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;	
 
 	dio.mask = mask;
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_DIO_IN, &dio ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	*bits = dio.value;
 	return NI6601_OK;
@@ -444,11 +549,19 @@ int ni6601_is_counter_armed( int board, int counter, int *state )
 	int ret;
 
 
+	error_message = "";
+
 	if ( state == NULL )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
+	{
+		error_message = NI6601_ERR_NSC_MESS;
 		return NI6601_ERR_NSC;
+	}
 
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;	
@@ -468,7 +581,10 @@ static int ni6601_is_armed( int board, int counter, int *state )
 	a.counter = counter;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_IS_BUSY, &a ) < 0 )
+	{
+		error_message = NI6601_ERR_INT_MESS;
 		return NI6601_ERR_INT;
+	}
 
 	*state = a.state ? NI6601_BUSY : NI6601_IDLE;
 
@@ -518,17 +634,13 @@ static int check_board( int board )
 
 
 	if ( board < 0 || board >= NI6601_MAX_BOARDS )
+	{
+		error_message = NI6601_ERR_NSB_MESS;
 		return NI6601_ERR_NSB;
+	}
 
 	if ( ! dev_info[ board ].is_init )
 	{
-		/* If the file descriptor associated with the board is negative we
-		   already found out that there's no such board (or we got an
-		   internal error when trying to access it) */
-
-		if ( dev_info[ board ].fd < 0 )
-			return NI6601_ERR_NSB;
-
 		/* Cobble together the device file name */
 
 		snprintf( name + strlen( name ), 20 - strlen( name ), "%d", board );
@@ -539,12 +651,15 @@ static int check_board( int board )
 			switch ( errno )
 			{
 				case ENOENT :
+					error_message = NI6601_ERR_DFM_MESS;
 					return NI6601_ERR_DFM;
 
 				case EACCES :
+					error_message = NI6601_ERR_ACS_MESS;
 					return NI6601_ERR_ACS;
 
 				default :
+					error_message = NI6601_ERR_DFP_MESS;
 					return NI6601_ERR_DFP;
 			}
 
@@ -554,15 +669,19 @@ static int check_board( int board )
 			switch ( errno )
 			{
 				case ENODEV : case ENXIO :
+					error_message = NI6601_ERR_NDV_MESS;
 					return NI6601_ERR_NDV;
 			
 				case EACCES :
+					error_message = NI6601_ERR_ACS_MESS;
 					return NI6601_ERR_ACS;
 
 				case EBUSY :
+					error_message = NI6601_ERR_BBS_MESS;
 					return NI6601_ERR_BBS;
 
 				default :
+					error_message = NI6601_ERR_DFP_MESS;
 					return NI6601_ERR_DFP;
 			}
 
@@ -600,6 +719,7 @@ static int check_source( int source )
 		 source == NI6601_TIMEBASE_3 )
 		return NI6601_OK;
 
+	error_message = NI6601_ERR_IVS_MESS;
 	return NI6601_ERR_IVS;
 }
 
@@ -612,17 +732,41 @@ static int ni6601_time_to_ticks( double time, unsigned long *ticks )
 	unsigned long t;
 
 
+	error_message = "";
+
 	if ( time <= 0.0 )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( time / NI6601_TIME_RESOLUTION - 1 > ULONG_MAX )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 
 	if ( ( t = ( unsigned long )
 						  floor( time / NI6601_TIME_RESOLUTION - 0.5 ) ) == 0 )
+	{
+		error_message = NI6601_ERR_IVA_MESS;
 		return NI6601_ERR_IVA;
+	}
 	
 	*ticks = t;
 
 	return NI6601_OK;
+}
+
+
+/*---------------------------------------------------------------*/
+/* Returns a string with a short descriptive text of the error   */
+/* encountered in the last invocation of one of the ni6601_xxx() */
+/* functions. If there were no error, i.e. the function returned */
+/* successfully, an empty string is returned.                    */
+/*---------------------------------------------------------------*/
+
+const char *ni6601_error_message( void )
+{
+	return error_message;
 }
