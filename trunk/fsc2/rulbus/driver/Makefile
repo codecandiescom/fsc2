@@ -46,7 +46,7 @@ incl_dir = $(prefix)/include
 
 
 .SUFFIXES:
-.PHONY: all install clean pack
+.PHONY: all install cleanup clean pack
 
 all:
 	$(MAKE) $(MODULE)
@@ -68,6 +68,9 @@ ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
 		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;             \
 	fi
 endif
+
+clean:
+	$(RM) $(RMFLAGS) *~
 
 clean:
 	$(RM) $(RMFLAGS) *.o *~

@@ -45,7 +45,7 @@ export CC CFLAGS INCLUDES
 
 
 .SUFFIXES:
-.PHONY: all install clean pack
+.PHONY: all install cleanup clean pack
 
 
 all:
@@ -74,11 +74,11 @@ ifeq ($(NI_DAQ_KERNEL_SOURCE),)
 endif
 
 
-clean:
-	$(MAKE) -C pci_e_series clean
-	$(MAKE) -C daq_stc clean
-	$(RM) $(RMFLAGS) ni_daq.o *~ include/*~
+cleanup:
+	$(MAKE) -C pci_e_series cleanup
+	$(MAKE) -C daq_stc cleanup
+	$(RM) $(RMFLAGS) *~ include/*~
 
-distclean:
-	$(MAKE) clean
-	$(RM) $(RMFLAGS) include/autoconf.h
+clean:
+	$(MAKE) cleanup
+	$(RM) $(RMFLAGS) ni_daq.o include/autoconf.h

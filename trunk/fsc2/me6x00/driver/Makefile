@@ -45,7 +45,7 @@ incl_dir = $(prefix)/include
 
 
 .SUFFIXES:
-.PHONY: all install clean
+.PHONY: all install cleanup clean
 
 all:
 	$(MAKE) $(SOURCES:.c=.o)
@@ -70,5 +70,8 @@ endif
 	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 me6x00_drv.h $(incl_dir)
 
+cleanup:
+	$(RM) $(RMFLAGS) *~
+
 clean:
-	$(RM) $(RMFLAGS) me6x00.o *~
+	$(RM) $(RMFLAGS) *.o autoconf.h *~

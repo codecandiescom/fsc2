@@ -30,11 +30,12 @@ HEADERS  = $(shell ls *.h) $(shell ls ../include/*.h) \
 		   ../../include/ni_daq_drv.h
 INCLUDES += -I../../include -I../include
 
+PHONY: cleanup
 
 all: $(SOURCES:.c=.o)
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
-clean:
+cleanup:
 	$(RM) $(RMFLAGS) *.o *~

@@ -45,7 +45,7 @@ incl_dir = $(prefix)/include
 
 
 .SUFFIXES:
-.PHONY: all install clean distclean
+.PHONY: all install cleanup clean
 
 all:
 	$(MAKE) $(MODULE)
@@ -70,5 +70,8 @@ endif
 	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 witio_48_drv.h $(incl_dir)
 
+cleanup:
+	$(RM) $(RMFLAGS) *~
+
 clean:
-	$(RM) $(RMFLAGS) -f *.o *~
+	$(RM) $(RMFLAGS) *.o autoconf.h *~

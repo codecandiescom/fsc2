@@ -37,7 +37,7 @@ headers   = ../include/ni_daq.h ../include/ni_daq_drv.h
 
 
 .SUFFIXES:                    # don't use implicit rules
-.PHONY: all clean install
+.PHONY: all cleanup clean install
 
 
 all: libni_daq.so libni_daq.a
@@ -56,8 +56,8 @@ install:
 	$(INSTALL) -m 755 libni_daq.so $(lib_dir)
 	$(INSTALL) -m 644 libni_daq.a  $(lib_dir)
 
+cleanup:
+	$(RM) $(RMFLAGS) *.o
+
 clean:
 	$(RM) $(RMFLAGS) *.o *.so *.a *~
-
-distclean:
-	$(MAKE) clean

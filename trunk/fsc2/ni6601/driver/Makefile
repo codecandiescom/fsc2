@@ -46,7 +46,7 @@ incl_dir = $(prefix)/include
 
 
 .SUFFIXES:
-.PHONY: all install clean pack
+.PHONY: all install cleanup clean pack
 
 all:
 	$(MAKE) $(MODULE)
@@ -74,5 +74,8 @@ endif
 	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 ni6601_drv.h $(incl_dir)
 
+cleanup:
+	$(RM) $(RMFLAGS) ni6601_drv.o util.o *~
+
 clean:
-	$(RM) $(RMFLAGS) *.o *~
+	$(RM) $(RMFLAGS) autoconf.h *.o *~

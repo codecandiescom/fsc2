@@ -37,7 +37,7 @@ lib_headers   = $(INCLUDES)/rulbus.h $(INCLUDES)/rulbus_lib.h
 
 
 .SUFFIXES:                    # don't use implicit rules
-.PHONY: all clean distclean install
+.PHONY: all cleanup clean install
 
 
 all: librulbus.so librulbus.a
@@ -68,13 +68,13 @@ install:
 	install -m 644 ../include/rulbus.h $(incl_dir)
 
 
+cleanup:
+	$(RM) $(RMFLAGS) *.o lexer.c parser.c parser.h  parser.output *~
+
+
 clean:
-	$(RM) $(RMFLAGS) *.o lexer.c parser.c parser.h *~
-
-
-distclean:
-	$(MAKE) clean
-	$(RM) $(RMFLAGS) *.a *.so parser.output
+	$(MAKE) cleanup
+	$(RM) $(RMFLAGS) *.a *.so
 
 
 .PRECIOUS: %.c %.h

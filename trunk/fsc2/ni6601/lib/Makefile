@@ -37,7 +37,7 @@ sources   = ni6601_lib.c
 headers   = ni6601.h ../driver/ni6601_drv.h
 
 .SUFFIXES:                    # don't use implicit rules
-.PHONY: all clean install
+.PHONY: all cleanup clean install
 
 all: libni6601.so libni6601.a
 
@@ -61,5 +61,10 @@ install:
 	$(INSTALL) -m 644 libni6601.a  $(lib_dir)
 	$(INSTALL) -m 644 ni6601.h $(incl_dir)
 
+
+cleanup:
+	$(RM) $(RMFLAGS) *.o ni_test
+
 clean:
-	$(RM) $(RMFLAGS) *.o ni_test *.so *.a *~
+	$(MAKE) cleanup
+	$(RM) $(RMFLAGS) *.so *.a *~

@@ -38,7 +38,7 @@ sources   = witio_48_lib.c
 headers   = witio_48.h ../driver/witio_48_drv.h
 
 .SUFFIXES:                    # don't use implicit rules
-.PHONY: all clean install
+.PHONY: all cleanup clean install
 
 all: libwitio_48.so libwitio_48.a
 
@@ -58,6 +58,9 @@ install:
 	$(INSTALL) -m 755 libwitio_48.so $(lib_dir)
 	$(INSTALL) -m 644 libwitio_48.a  $(lib_dir)
 	$(INSTALL) -m 644 witio_48.h $(incl_dir)
+
+cleanup:
+	$(RM) $(RMFLAGS) *.o *~
 
 clean:
 	$(RM) $(RMFLAGS) *.o *.so *.a *~

@@ -38,7 +38,7 @@ sources   = me6x00_lib.c
 headers   = me6x00.h ../driver/me6x00_drv.h
 
 .SUFFIXES:                    # don't use implicit rules
-.PHONY: all clean install
+.PHONY: all cleanup clean install
 
 all: libme6x00.so libme6x00.a
 
@@ -62,5 +62,9 @@ install:
 	$(INSTALL) -m 644 libme6x00.a  $(lib_dir)
 	$(INSTALL) -m 644 me6x00.h $(incl_dir)
 
+cleanup:
+	$(RM) $(RMFLAGS) *.o me_test
+
 clean:
-	$(RM) $(RMFLAGS) *.o me_test *.so *.a *~
+	$(MAKE) cleanup
+	$(RM) $(RMFLAGS) *.so *.a *~

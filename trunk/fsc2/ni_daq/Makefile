@@ -22,6 +22,7 @@
 #  To contact the author send email to
 #  Jens.Toerring@physik.fu-berlin.de
 
+
 SHELL   = /bin/sh
 CC      = gcc
 INSTALL = install
