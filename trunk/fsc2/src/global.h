@@ -105,15 +105,14 @@ enum {
 /* Define the different types of variables */
 
 enum {
-	UNDEF_VAR = -1,
-	INT_VAR,
-	FLOAT_VAR,
-	INT_ARR,
-	FLOAT_ARR,
-	FUNC,
+	UNDEF_VAR   = 0,
+	INT_VAR     = ( 1 << 0 ),
+	FLOAT_VAR   = ( 1 << 1 ),
+	STR_VAR     = ( 1 << 2 ),
+	INT_ARR     = ( 1 << 3 ),
+	FLOAT_ARR   = ( 1 << 4 ),
+	FUNC        = ( 1 << 5 ),
 };
-
-
 
 
 /* Define a structure used in analyzing the input program */
