@@ -130,13 +130,13 @@ bool functions_init( void )
 	   2. Parse the function name data base `Functions' where all additional
 	      functions have to be listed.
 	   3. Sort the functions by name so that they can be found using bsearch()
-	      (but only after the function data base has been analysed)
 	*/
 
 	TRY
 	{
 		Fncts = T_malloc( ( Num_Func + 1 ) * sizeof( Func ) );
 		memcpy( Fncts, Def_Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
 		Num_Func = func_list_parse( &Fncts, Num_Func );
 		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
    		TRY_SUCCESS;

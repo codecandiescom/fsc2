@@ -14,8 +14,9 @@
 #include "fsc2.h"
 
 int func_listlex( void );
-int fll_count_functions( Func *fncts, int num_def_func );
-void fll_get_functions( Func *fncts, int num_def_func );
+static int fll_count_functions( Func *fncts, int num_def_func );
+static int ffl_func_cmp2( const void *a, const void *b );
+static void fll_get_functions( Func *fncts, int num_def_func );
 
 static long Comm_Lc;
 static bool Eol;
@@ -232,12 +233,12 @@ int func_list_parse( Func **fncts, int num_func )
 /* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
-int fll_count_functions( Func *fncts, int num_def_func )
+static int fll_count_functions( Func *fncts, int num_def_func )
 {
 	int ret_token;
 	int last_token = 0;
 	int num = 0;
-	int i = -1;
+	Func *f;
 
 
 	Lc = 1;
@@ -251,27 +252,26 @@ int fll_count_functions( Func *fncts, int num_def_func )
 
 		if ( ret_token == IDENT_TOKEN )
 		{
-			for ( i = 0; i < num_def_func; i++ )
-				if ( ! strcmp( fncts[ i ].name, func_listtext ) )
-				{
-					eprint( WARN, "Loadable function `%s()' hides "
-							"built-in function (line %ld in function data "
-							"base `%s').\n", func_listtext, Lc, Fname );
+			if ( ( f = bsearch( func_listtext, fncts, num_def_func,
+								sizeof( Func ), ffl_func_cmp2 ) ) != NULL )
+			{
+				eprint( WARN, "Loadable function `%s()' hides "
+						"built-in function (line %ld in function data "
+						"base `%s').\n", f->name, Lc, Fname );
 
-					fncts[ i ].name = get_string_copy( func_listtext );
-					fncts[ i ].fnct = NULL;
-					fncts[ i ].nargs = 0;
-					fncts[ i ].access_flag = ACCESS_EXP;
-					fncts[ i ].to_be_loaded = SET;
-					break;
-				}
+				f->name = get_string_copy( f->name );
+				f->fnct = NULL;
+				f->nargs = 0;
+				f->access_flag = ACCESS_EXP;
+				f->to_be_loaded = SET;
+			}
 		}
 
 		/* Increment number of functions only after a semicolon (but not if
 		   the previous token was also a semicolon) and if the new function
 		   didn't overload a built-in function */
 
-		if ( ret_token == ';' && last_token != ';' && i == num_def_func )
+		if ( ret_token == ';' && last_token != ';' && f == NULL )
 		   num++;
 		last_token = ret_token;
 	}
@@ -287,12 +287,20 @@ int fll_count_functions( Func *fncts, int num_def_func )
 }
 
 
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static int ffl_func_cmp2( const void *a, const void *b )
+{
+	return strcmp( ( char * ) a, ( ( Func * ) b )->name );
+}
+
 /*------------------------------------------------------------*/
 /* Function runs a second time through the function data base */
 /* and tries to make sense from the entries                   */
 /*------------------------------------------------------------*/
 
-void fll_get_functions( Func *fncts, int num_def_func )
+static void fll_get_functions( Func *fncts, int num_def_func )
 {
 	int ret_token;
 	int state;
