@@ -537,16 +537,13 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
 			     "%%%%Creator: fsc2, Nov 2001\n"
-			     "%%%%CreationDate: %s", ctime( &d ) );
-
-	/* Continue with rest of header */
-
-	fprintf( fp, "%%%%Title: %s\n"
+			     "%%%%CreationDate: %s"
+			 	 "%%%%Title: %s\n"
 			     "%%%%For: %s (%s)\n"
 			     "%%%%BoundingBox: 0 0 %d %d\n"
 			     "%%%%Orientation: Landscape\n"
 			     "%%%%End Comments\n",
-			     name,
+			     ctime( &d ), name,
 			     getpwuid( getuid( ) )->pw_name,
 				 getpwuid( getuid( ) )->pw_gecos,
 			     ( int ) ( 72.0 * paper_width / INCH ),
