@@ -371,6 +371,7 @@ to be used -- for the SR510 and SR530 this can be @code{5} or @code{6},
 while for the SR810 and SR830 all values in the range between @code{1}
 and @code{4} may be used.
 
+The function can only be used in the @code{PREPARATIONS} section.
 
 @anchor{magnet_sweep}
 @item magnet_sweep()
@@ -383,7 +384,7 @@ or, finally, an argument of @code{0} to stop a running sweep.
 
 To be able to do a sweep a sweep rate must have been set. This can be
 either done by a call of the function @code{magnet_setup()} (see above)
-during the @code{PREPARATIONS} section or by calling
+within the @code{PREPARATIONS} section or by calling
 @code{magnet_sweep_rate()} (see below).
 
 The function can also be called without an argument, in which case
@@ -393,6 +394,8 @@ sweeping up or down or the sweep is stopped.
 Sweeps will be automatically stopped when a current limit is reached. By
 calling this function without an argument you may check if this has
 happened.
+
+The function can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{magnet_sweep_rate}
@@ -410,14 +413,15 @@ passed to the function.
 @findex magnet_goto_field_on_end()
 This function is only available for the Oxford magnet sweep power supply
 (@code{ips20_4}) and the S-band field drivers
-(@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}) to set a
-target current that the magnet will be swept to @b{after} the experiment
-has ended (per default the magnet would stay at the last field position
-for the Oxford magnet supply or move to the middle of the allowed field
-range for both the other drivers). This function can be called in the
-@code{PREPARATION} as well the @code{EXPERIMENT} section and returns the
-target current the magnet will sweep to after the end of the experiment.
-If called more than once the current of the last call will be used.
+@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to
+set a target current that the magnet will be swept to @b{after} the
+experiment has ended (per default the magnet would stay at the last
+field position for the Oxford magnet supply or move to the middle of the
+allowed field range for both the other drivers). This function can be
+called in the @code{PREPARATION} as well the @code{EXPERIMENT} section
+and returns the target current the magnet will sweep to after the end of
+the experiment.  If called more than once the current of the last call
+will be used.
 
 
 @end table
@@ -453,7 +457,7 @@ pt2025
 The modules with names starting with @code{er035m} are for the Bruker
 ER035M NMR gaussmeter. @code{er035m} and @code{er035m_sa} are to be used
 when the device is controlled via the GPIB bus while @code{er035m_s} and
-@code{er035m_sas} expect the device to b connected to a serial port of
+@code{er035m_sas} expect the device to be connected to a serial port of
 the computer. The @code{bh15} module is for the Hall controller used in
 some setups. The last module, @code{pt2025}, is for the Metrolab NMR
 gaussmeter from the Berlin W-Band spectrometer.
@@ -461,7 +465,7 @@ gaussmeter from the Berlin W-Band spectrometer.
 The first three gaussmeter modules, @code{er035m}, @code{er035m_s} and
 @code{bh15}, are only to be used for controlling the sweep of a magnet
 power supply. Thus only one of these gaussmeter drivers can be loaded,
-if other gaussmeters are also used, it must be the first in the
+and if other gaussmeters are also used it must be the first in the
 @code{DEVICES} section and must be specified @b{before} the magnet
 module (see above) which relies on its existence,
 
@@ -514,6 +518,7 @@ This function is defined in the device drivers @code{er035m_sa},
 @code{er035m_sas} and @code{pt2025}. It measures the current field and
 returns the value in Gauss. The function can only be called in the
 @code{EXPERIMENT} section.
+
 
 @anchor{gaussmeter_probe_orientation}
 @item gaussmeter_probe_orientation()
