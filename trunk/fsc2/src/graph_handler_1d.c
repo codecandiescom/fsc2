@@ -1371,8 +1371,8 @@ void repaint_canvas_1d( Canvas *c )
 
 				if ( G.font != NULL )
 					XDrawImageString( G.d, pm, cv->font_gc, 5,
-									  ( G.font_asc + 3 ) * ( i + 1 ) +
-									  G.font_desc * i + 2,
+									  ( G.font_asc + 3 ) * ( i + 1 )
+									  + G.font_desc * i + 2,
 									  buf, strlen( buf ) );
 			}
 
@@ -1389,8 +1389,8 @@ void repaint_canvas_1d( Canvas *c )
 				sprintf( buf, " dx = %#g   dy = %#g ", x_pos, y_pos );
 				if ( G.font != NULL )
 					XDrawImageString( G.d, pm, cv->font_gc, 5,
-									  ( G.font_asc + 3 ) * ( i + 1 ) +
-									  G.font_desc * i + 2,
+									  ( G.font_asc + 3 ) * ( i + 1 )
+									  + G.font_desc * i + 2,
 									  buf, strlen( buf ) );
 			}
 

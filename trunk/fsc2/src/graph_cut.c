@@ -611,8 +611,8 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 		if ( scv->is_fs )
 		{
 			CG.s2d[ G2.active_curve ][ X ] = cv->s2d[ X ] =
-				                    ( double ) ( G2.cut_canvas.w - 1 ) /
-				                    ( double ) ( CG.nx - 1 );
+											 ( double ) ( G2.cut_canvas.w - 1 )
+											 / ( double ) ( CG.nx - 1 );
 			CG.s2d[ G2.active_curve ][ Y ] = cv->s2d[ Y ] =
 				                    ( double ) ( G2.cut_canvas.h - 1 );
 			CG.shift[ G2.active_curve ][ X ] = CG.shift[ G2.active_curve ][ Y ]

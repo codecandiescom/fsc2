@@ -1119,10 +1119,10 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 
 			if ( cv->can_undo )
 			{
-				cv->old_s2d[ X ] *= ( double ) ( w - 1 ) /
-					                                  ( double ) ( old_w - 1 );
-				cv->old_s2d[ Y ] *= ( double ) ( h - 1 ) /
-					                                  ( double ) ( old_h - 1 );
+				cv->old_s2d[ X ] *= ( double ) ( w - 1 )
+									/ ( double ) ( old_w - 1 );
+				cv->old_s2d[ Y ] *= ( double ) ( h - 1 )
+									/ ( double ) ( old_h - 1 );
 			}
 		}
 
@@ -1675,8 +1675,8 @@ void fs_rescale_2d( Curve_2d *cv )
 
 	for ( sp = cv->points, i = 0; i < G2.nx * G2.ny; sp++, i++ )
 		if ( sp->exist )
-			sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min - rw_min ) /
-						                                       new_rwc_delta_z;
+			sp->v = ( cv->rwc_delta[ Z ] * sp->v + cv->rw_min - rw_min )
+					/ new_rwc_delta_z;
 
 	recalc_XPoints_of_curve_2d( cv );
 
@@ -1762,8 +1762,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 
 	/* Calculate the final distance between the small ticks in points */
 
-	d_delta_fine = cv->s2d[ coord ] * rwc_delta /
-		                                        fabs( cv->rwc_delta[ coord ] );
+	d_delta_fine = cv->s2d[ coord ] * rwc_delta
+				   / fabs( cv->rwc_delta[ coord ] );
 
 	/* 'rwc_start' is the first value in the display (i.e. the smallest x or y
 	   value still shown in the canvas), 'rwc_start_fine' the position of the
@@ -1778,8 +1778,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
-		                                                cv->rwc_delta[ coord ];
+	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start )
+				   / cv->rwc_delta[ coord ];
 	if ( lrnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
@@ -1788,8 +1788,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
 
-	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
-			                                            cv->rwc_delta[ coord ];
+	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start )
+					 / cv->rwc_delta[ coord ];
 	if ( lrnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
@@ -1800,8 +1800,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
 
-	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
-			                                            cv->rwc_delta[ coord ];
+	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start )
+					 / cv->rwc_delta[ coord ];
 	if ( lrnd( d_start_coarse ) < 0 )
 	{
 		d_start_coarse += coarse_factor * d_delta_fine;
