@@ -321,10 +321,10 @@ install:
 	$(INSTALL) -d $(docdir)
 
 	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) src/fsc2 $(bindir)
-	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) src/fsc2_clean $(libdir)
-	$(EXEC_INSTALL) -m 644  -o $(OWNER) -g $(GROUP) src/*.so $(libdir)
-	$(EXEC_INSTALL) -m 644  -o $(OWNER) -g $(GROUP) modules/*.so $(libdir)
-	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) src/fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) src/fsc2_clean $(bindir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) src/fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) src/*.so $(libdir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) modules/*.so $(libdir)
 
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					  $(bindir)/fsc2_load
