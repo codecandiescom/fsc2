@@ -60,6 +60,7 @@
 #include "loader.h"
 #include "assign.h"
 #include "phases.h"
+#include "pulser.h"
 #include "pulse.h"
 #include "ppcheck.h"
 #include "exp.h"
@@ -114,6 +115,7 @@ Var *Var_Stack = NULL;
 Device *Device_List = NULL;
 Device_Name *Device_Name_List = NULL;
 
+Pulser_Struct pulser_struct;
 
 ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
 
@@ -127,8 +129,8 @@ bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
 bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
-
 bool just_testing;
+
 FD_fsc2 *main_form;
 FD_run *run_form;
 FD_input_form *input_form;
@@ -166,6 +168,8 @@ extern Device_Name *Device_Name_List;
 
 extern Var *var_list;
 extern Var *Var_Stack;
+
+extern Pulser_Struct pulser_struct;
 
 extern ASSIGNMENTS assignment[ ];
 
