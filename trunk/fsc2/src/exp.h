@@ -99,11 +99,11 @@ typedef struct
 } Simp_Var;
 
 
-typedef struct PT_ {
+typedef struct PT {
 	int       token;          /* type of current token */
 	Token_Val tv;             /* tokens value as needed by the parser */
-	struct    PT_ *start;     /* used in IF, WHILE etc. [1] */
-	struct    PT_ *end;       /* used in WHILE, IF etc. [2] */
+	struct PT *start;         /* used in IF, WHILE etc. [1] */
+	struct PT *end;           /* used in WHILE, IF etc. [2] */
 	union {
 		struct {
 			long max;         /* maximum counter value for REPEAT loops */
@@ -121,10 +121,10 @@ typedef struct PT_ {
 } Prg_Token;
 
 
-typedef struct CBS_ {
+typedef struct CBS {
 	char *Fname;
 	long Lc;
-	struct CBS_ *next;
+	struct CBS *next;
 } CB_Stack;
 
 

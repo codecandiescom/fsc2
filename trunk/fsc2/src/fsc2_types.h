@@ -42,12 +42,14 @@
 #define UCHAR_P           ( unsigned char * )
 #define CHAR_PP           ( char ** )
 #define UCHAR_PP          ( unsigned char ** )
+#define SSIZE_T_P         ( ssize_t * )
 #define BOOL_P            ( bool * )
 #define DEVICE_NAME_P     ( Device_Name * )
 #define FUNC_P            ( Func * )
 #define PULSER_STRUCT_P   ( Pulser_Struct * )
 #define P_LIST_P          ( P_List * )
 #define VAR_P             ( Var * )
+#define VAR_PP            ( Var ** )
 #define CALL_STACK_P      ( CALL_STACK * )
 #define DPOINT_P          ( DPoint * )
 #define FILE_LIST_P       ( FILE_LIST * )
@@ -89,12 +91,14 @@
 #define UCHAR_P
 #define CHAR_PP
 #define UCHAR_PP
+#define SSIZE_T_P
 #define BOOL_P
 #define DEVICE_NAME_P
 #define FUNC_P
 #define PULSER_STRUCT_P
 #define P_LIST_P
 #define VAR_P
+#define VAR_PP
 #define CALL_STACK_P
 #define DPOINT_P
 #define FILE_LIST_P

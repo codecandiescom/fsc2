@@ -130,7 +130,6 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
     { "display_mode",    f_dmode,           -2, ACCESS_ALL,  NULL, UNSET },
 	{ "dim",             f_dim,      	     1, ACCESS_ALL,  NULL, UNSET },
 	{ "size",            f_size,     	    -2, ACCESS_ALL,  NULL, UNSET },
-	{ "sizes",           f_sizes,    	     1, ACCESS_ALL,  NULL, UNSET },
 	{ "mean",            f_mean,     	    -3, ACCESS_ALL,  NULL, UNSET },
 	{ "rms",             f_rms,      	    -3, ACCESS_ALL,  NULL, UNSET },
 	{ "slice",           f_slice,    	    -3, ACCESS_ALL,  NULL, UNSET },

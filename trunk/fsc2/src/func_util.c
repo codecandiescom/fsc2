@@ -1633,7 +1633,6 @@ Var *f_display_1d( Var *v )
 	char *ptr;
 	int nsets;
 	int i;
-	int type;
 
 
 	/* We can't display data without a previous initialization */
@@ -1690,41 +1689,12 @@ Var *f_display_1d( Var *v )
 				len += sizeof( double );
 				break;
 
-			case ARR_PTR :
-				len += sizeof( long );
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
-						   * sizeof( long );
-				else
-					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
-						   * sizeof( double );
-				break;
-
-			case ARR_REF :
-				if ( dp[ i ].v->from->dim != 1 )
-				{
-					print( FATAL,"Only one-dimensional arrays or slices of "
-						   "more-dimensional arrays can be displayed.\n" );
-					T_free( dp );
-					THROW( EXCEPTION );
-				}
-
-				len += sizeof( long );
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( long );
-				else
-					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
-				break;
-
 			case INT_ARR :
-				len += sizeof( long );
-				len += dp[ i ].v->len * sizeof( long );
+				len += sizeof( long ) + dp[ i ].v->len * sizeof( long );
 				break;
 
 			case FLOAT_ARR :
-				len += sizeof( long );
-				len += dp[ i ].v->len * sizeof( double );
+				len += sizeof( long ) + dp[ i ].v->len * sizeof( double );
 				break;
 
 			default :                   /* this better never happens... */
@@ -1781,82 +1751,36 @@ Var *f_display_1d( Var *v )
 				ptr += sizeof dp[ i ].v->val.dval;
 				break;
 
-			case ARR_PTR :
-				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-
-				memcpy( ptr, &dp[ i ].v->from->type,
-						sizeof dp[ i ].v->from->type );
-				ptr += sizeof dp[ i ].v->from->type;
-
-				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-				{
-					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( long ) );
-					ptr += len * sizeof( long );
-				}
-				else
-				{
-					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( double ) );
-					ptr += len * sizeof( double );
-				}
-				break;
-
-			case ARR_REF :
-				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-
-				memcpy( ptr, &dp[ i ].v->from->type,
-						sizeof dp[ i ].v->from->type );
-				ptr += sizeof dp[ i ].v->from->type;
-
-				len = dp[ i ].v->from->sizes[ 0 ];
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-				{
-					memcpy( ptr, dp[ i ].v->from->val.lpnt,
-							len * sizeof *dp[ i ].v->from->val.lpnt );
-					ptr += len * sizeof *dp[ i ].v->from->val.lpnt;
-				}
-				else
-				{
-					memcpy( ptr, dp[ i ].v->from->val.dpnt,
-							len * sizeof *dp[ i ].v->from->val.dpnt );
-					ptr += len * sizeof *dp[ i ].v->from->val.dpnt;
-				}
-				break;
-
 			case INT_ARR :
-				type = INT_CONT_ARR;
-				memcpy( ptr, &type, sizeof type );
-				ptr += sizeof type;
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
 
 				len = dp[ i ].v->len;
 				memcpy( ptr, &len, sizeof len );
 				ptr += sizeof len;
 
-				memcpy( ptr, dp[ i ].v->val.lpnt,
-						len * sizeof *dp[ i ].v->val.lpnt );
-				ptr += len * sizeof *dp[ i ].v->val.lpnt;
+				if ( len > 0 )
+				{
+					memcpy( ptr, dp[ i ].v->val.lpnt,
+							len * sizeof *dp[ i ].v->val.lpnt );
+					ptr += len * sizeof *dp[ i ].v->val.lpnt;
+				}
 				break;
 
 			case FLOAT_ARR :
-				type = FLOAT_CONT_ARR;
-				memcpy( ptr, &type, sizeof type );
-				ptr += sizeof type;
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
 
 				len = dp[ i ].v->len;
 				memcpy( ptr, &len, sizeof len );
 				ptr += sizeof len;
 
-				memcpy( ptr, dp[ i ].v->val.dpnt,
-						len * sizeof *dp[ i ].v->val.dpnt );
-				ptr += len * sizeof *dp[ i ].v->val.dpnt;
+				if ( len > 0 )
+				{
+					memcpy( ptr, dp[ i ].v->val.dpnt,
+							len * sizeof *dp[ i ].v->val.dpnt );
+					ptr += len * sizeof *dp[ i ].v->val.dpnt;
+				}
 				break;
 
 			default :                   /* this better never happens... */
@@ -1897,7 +1821,6 @@ Var *f_display_2d( Var *v )
 	char *ptr;
 	int nsets;
 	int i;
-	int type;
 
 
 	/* We can't display data without a previous initialization */
@@ -1954,42 +1877,21 @@ Var *f_display_2d( Var *v )
 				len += sizeof( double );
 				break;
 
-			case ARR_PTR :
-				len += sizeof( long );
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
-						   * sizeof( long );
-				else
-					len += dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ]
-						   * sizeof( double );
-				break;
-
-			case ARR_REF :
-				if ( dp[ i ].v->from->dim != 1 )
-				{
-					print( FATAL,"Only one-dimensional arrays or slices of "
-						   "more-dimensional arrays can be displayed.\n" );
-					T_free( dp );
-					THROW( EXCEPTION );
-				}
-
-				len += sizeof( long );
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( long );
-				else
-					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
-				break;
-
 			case INT_ARR :
-				len += sizeof( long );
-				len += dp[ i ].v->len * sizeof( long );
+				len += sizeof( long )
+					   + dp[ i ].v->len * sizeof *dp[ i ].v->val.lpnt;
 				break;
 
 			case FLOAT_ARR :
-				len += sizeof( long );
-				len += dp[ i ].v->len * sizeof( double );
+				len += sizeof( long )
+					   + dp[ i ].v->len * sizeof *dp[ i ].v->val.dpnt;
 				break;
+
+			case INT_REF : case FLOAT_REF :
+				print( FATAL,"Only one-dimensional arrays or slices of "
+					   "more-dimensional arrays can be displayed.\n" );
+				T_free( dp );
+				THROW( EXCEPTION );
 
 			default :                   /* this better never happens... */
 				T_free( dp );
@@ -2048,82 +1950,34 @@ Var *f_display_2d( Var *v )
 				ptr += sizeof dp[ i ].v->val.dval;
 				break;
 
-			case ARR_PTR :
-				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-
-				memcpy( ptr, &dp[ i ].v->from->type,
-						sizeof dp[ i ].v->from->type );
-				ptr += sizeof dp[ i ].v->from->type;
-
-				len = dp[ i ].v->from->sizes[ dp[ i ].v->from->dim - 1 ];
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-				{
-					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( long ) );
-					ptr += len * sizeof( long );
-				}
-				else
-				{
-					memcpy( ptr, dp[ i ].v->val.gptr, len * sizeof( double ) );
-					ptr += len * sizeof( double );
-				}
-				break;
-
-			case ARR_REF :
-				fsc2_assert( dp[ i ].v->from->type == INT_CONT_ARR ||
-							 dp[ i ].v->from->type == FLOAT_CONT_ARR );
-
-				memcpy( ptr, &dp[ i ].v->from->type,
-						sizeof dp[ i ].v->from->type );
-				ptr += sizeof dp[ i ].v->from->type;
-
-				len = dp[ i ].v->from->sizes[ 0 ];
-				memcpy( ptr, &len, sizeof len );
-				ptr += sizeof len;
-
-				if ( dp[ i ].v->from->type == INT_CONT_ARR )
-				{
-					memcpy( ptr, dp[ i ].v->from->val.lpnt,
-							len * sizeof *dp[ i ].v->from->val.lpnt );
-					ptr += len * sizeof *dp[ i ].v->from->val.lpnt;
-				}
-				else
-				{
-					memcpy( ptr, dp[ i ].v->from->val.dpnt,
-							len * sizeof *dp[ i ].v->from->val.dpnt );
-					ptr += len * sizeof *dp[ i ].v->from->val.dpnt;
-				}
-				break;
-
 			case INT_ARR :
-				type = INT_CONT_ARR;
-				memcpy( ptr, &type, sizeof type );
-				ptr += sizeof type;
-
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
 				len = dp[ i ].v->len;
 				memcpy( ptr, &len, sizeof len );
 				ptr += sizeof len;
 
-				memcpy( ptr, dp[ i ].v->val.lpnt,
-						len * sizeof *dp[ i ].v->val.lpnt );
-				ptr += len * sizeof *dp[ i ].v->val.lpnt;
+				if ( len > 0 )
+				{
+					memcpy( ptr, dp[ i ].v->val.lpnt,
+							len * sizeof *dp[ i ].v->val.lpnt );
+					ptr += len * sizeof *dp[ i ].v->val.lpnt;
+				}
 				break;
 
 			case FLOAT_ARR :
-				type = FLOAT_CONT_ARR;
-				memcpy( ptr, &type, sizeof type );
-				ptr += sizeof type;
-
+				memcpy( ptr, &dp[ i ].v->type, sizeof dp[ i ].v->type );
+				ptr += sizeof dp[ i ].v->type;
 				len = dp[ i ].v->len;
 				memcpy( ptr, &len, sizeof len );
 				ptr += sizeof len;
 
-				memcpy( ptr, dp[ i ].v->val.dpnt,
-						len * sizeof *dp[ i ].v->val.dpnt );
-				ptr += len * sizeof *dp[ i ].v->val.dpnt;
+				if ( len > 0 )
+				{
+					memcpy( ptr, dp[ i ].v->val.dpnt,
+							len * sizeof *dp[ i ].v->val.dpnt );
+					ptr += len * sizeof *dp[ i ].v->val.dpnt;
+				}
 				break;
 
 			default :                   /* this better never happens... */
@@ -2216,8 +2070,8 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF |
-					   INT_ARR | FLOAT_ARR );
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+					   FLOAT_REF | INT_REF );
 
 		dp[ *nsets ].v = v;
 

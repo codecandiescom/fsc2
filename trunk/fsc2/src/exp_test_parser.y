@@ -205,23 +205,23 @@ ass:     '=' expr
        | E_EXPA expr
 ;
 
-expr:    E_INT_TOKEN unit                { }
-       | E_FLOAT_TOKEN unit              { }
-       | E_VAR_TOKEN unit                { }
-       | E_VAR_TOKEN '[' list1 ']' unit  { }
-       | E_FUNC_TOKEN '(' list3 ')' unit { }
-       | E_VAR_REF                       { }
-       | E_FUNC_TOKEN '['         { print( FATAL, "%s' is a predefined "
-									        "function.\n", $1->name );
-	                                THROW( EXCEPTION ); }
-       | E_VAR_TOKEN '('          { print( FATAL, "'%s' is a variable, "
-											"not a function.\n", $1->name );
-	                                THROW( EXCEPTION ); }
+expr:    E_INT_TOKEN unit             { }
+       | E_FLOAT_TOKEN unit           { }
+       | E_VAR_TOKEN                  { }
+       | E_VAR_TOKEN '[' list1 ']'    { }
+       | E_FUNC_TOKEN '(' list3 ')'   { }
+       | E_VAR_REF                    { }
+       | E_FUNC_TOKEN '['             { print( FATAL, "%s' is a predefined "
+											   "function.\n", $1->name );
+	                                    THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '('              { print( FATAL, "'%s' is a variable, "
+											   "not a function.\n", $1->name );
+	                                    THROW( EXCEPTION ); }
        | pt
        | bin
        | '+' expr %prec E_NEG
        | '-' expr %prec E_NEG
-       | '(' expr ')' unit
+       | '(' expr ')'
        | E_NOT expr
 ;
 

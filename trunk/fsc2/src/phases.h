@@ -28,11 +28,11 @@
 #include "fsc2.h"
 
 
-typedef struct _PhS_ {
+typedef struct Phase_Sequence {
 	long num;
 	int *sequence;                   /* array of phase types */
 	int len;                         /* length of array of phase types */
-	struct _PhS_ *next;
+	struct Phase_Sequence *next;
 } Phase_Sequence;
 
 

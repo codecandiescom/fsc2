@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -32,13 +32,11 @@ extern bool Dont_Save;
 
 
 static int get_save_file( Var **v );
-static int print_array( Var *v, long cur_dim, long *start, int fid );
-static int print_slice( Var *v, int fid );
 static void f_format_check( Var *v );
 static void ff_format_check( Var *v );
 static long do_printf( long file_num, Var *v );
-static int print_browser( int browser, int fid, const char* comment );
-static int T_fprintf( long fn, const char *fmt, ... );
+static long print_browser( int browser, int fid, const char* comment );
+static long T_fprintf( long fn, const char *fmt, ... );
 
 
 /*--------------------------------------------------------------------*/
@@ -689,11 +687,11 @@ void close_all_files( void )
 
 Var *f_save( Var *v )
 {
-	size_t i;
-	long start;
+	ssize_t i;
 	long file_num;
-	int count = 0;
-	int sub_count;
+	long count = 0;
+	Var *tmp = NULL;
+	Var *nv1, *nv2 = NULL;
 
 
 	/* Determine the file identifier */
@@ -709,6 +707,17 @@ Var *f_save( Var *v )
 
 	do
 	{
+		/* This is a bit of a dirty hack for being able to call the function
+		   recursively when printing whole matrices, in principle variables
+		   of type REF_PTR should only appear on the left hand side of an
+		   assignment... */
+
+		if ( v->type == REF_PTR )
+		{
+			tmp = v;
+			v = v->from;
+		}
+
 		switch( v->type )
 		{
 			case INT_VAR :
@@ -735,94 +744,49 @@ Var *f_save( Var *v )
 										v->val.dpnt[ i ] );
 				break;
 
-			case ARR_PTR :
-				if ( ( sub_count = print_slice( v, file_num ) ) >= 0 )
-					count += sub_count;
-				else
-					THROW( EXCEPTION );
-				break;
-
-			case ARR_REF :
-				if ( v->from->flags & NEED_ALLOC )
+			case INT_REF : case FLOAT_REF :
+				nv1 = vars_push( INT_VAR, file_num );
+				for ( i = 0; i < v->len; i++ )
 				{
-					print( WARN, "Variable sized array '%s' is still "
-						   "undefined - skipping'.\n", v->from->name );
-					break;
+					if ( v->val.vptr[ i ] == NULL )
+						continue;
+
+					TRY
+					{
+						vars_push( REF_PTR, v->val.vptr[ i ] );
+						nv2 = f_save( nv1 );
+						TRY_SUCCESS;
+					}
+					OTHERWISE
+					{
+						if ( tmp != NULL )
+							 vars_pop( tmp );
+						vars_pop( nv2 );
+						vars_pop( nv1 );
+						RETHROW( );
+					}
+					count += nv2->val.lval;
+					vars_pop( nv2 );
 				}
-				start = 0;
-				if ( ( sub_count =  print_array( v->from, 0, &start,
-												 file_num ) ) >= 0 )
-					count += sub_count;
-				else
-					THROW( EXCEPTION );
+
+				vars_pop( nv1 );
 				break;
 
 			default :
 				fsc2_assert( 1 == 0 );
-				break;
 		}
+
+		/* Switch back to the REF_PTR, don't pop what it's pointing to */
+
+		if ( tmp != NULL )
+		{
+			v = tmp;
+			tmp = NULL;
+		}
+
 	} while ( ( v = vars_pop( v ) ) );
 
-	return vars_push( INT_VAR, ( long ) count );
-}
-
-
-/*---------------------------------------------------------------------*/
-/* Writes a complete array to a file, returns number of chars it wrote */
-/*---------------------------------------------------------------------*/
-
-static int print_array( Var *v, long cur_dim, long *start, int fid )
-{
-	unsigned int i;
-	int total_count = 0;
-	int count = 0;
-
-
-	if ( cur_dim < v->dim - 1 )
-	{
-		for ( i = 0; i < v->sizes[ cur_dim ]; i++ )
-			if ( ( count = print_array( v, cur_dim + 1, start, fid ) ) < 0 )
-				return -1;
-			else
-				total_count += count;
-	}
-	else
-	{
-		for ( i = 0; i < v->sizes[ cur_dim ]; ( *start )++, i++ )
-		{
-			if ( v->type == INT_CONT_ARR )
-				total_count += T_fprintf( fid, "%ld\n",
-										  v->val.lpnt[ *start ] );
-			else
-				total_count += T_fprintf( fid, "%#.9g\n",
-										  v->val.dpnt[ *start ] );
-		}
-
-		total_count += T_fprintf( fid, "\n" );
-	}
-
-	return total_count;
-}
-
-
-/*-------------------------------------------------------------------*/
-/* Writes an array slice to a file, returns number of chars it wrote */
-/*-------------------------------------------------------------------*/
-
-static int print_slice( Var *v, int fid )
-{
-	unsigned int i;
-	int count = 0;
-
-
-	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
-		if ( v->from->type == INT_CONT_ARR )
-			count += T_fprintf( fid, "%ld\n",
-								* ( ( long * ) v->val.gptr + i ) );
-		else
-			count += T_fprintf( fid, "%#.9g\n",
-								* ( ( double * ) v->val.gptr + i ) );
-	return count;
+	return vars_push( INT_VAR, count );
 }
 
 
@@ -1231,7 +1195,7 @@ static long do_printf( long file_num, Var *v )
 		        *fmt_end,
 		        *sptr;
 	static Var *cv;
-	static int count;
+	static long count;
 	char store;
 	int need_vars;
 	int need_type;
@@ -1273,7 +1237,7 @@ static long do_printf( long file_num, Var *v )
 		{
 			TRY_SUCCESS;
 			T_free( fmt_start );
-			return ( long ) count;
+			return count;
 		}
 
 		sptr += fmt_end - fmt_start;
@@ -1514,7 +1478,7 @@ static long do_printf( long file_num, Var *v )
 	}
 
 	T_free( fmt_start );
-	return ( long ) count;
+	return count;
 }
 
 
@@ -1591,11 +1555,11 @@ Var *f_save_o( Var *v )
 /* 3. Comment string to prepend to each line                           */
 /*---------------------------------------------------------------------*/
 
-static int print_browser( int browser, int fid, const char* comment )
+static long print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
 	char *lp;
-	int count;
+	long count;
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
@@ -1733,9 +1697,9 @@ Var *f_save_c( Var *v )
 /* had to be used).                                                   */
 /*--------------------------------------------------------------------*/
 
-static int T_fprintf( long fn, const char *fmt, ... )
+static long T_fprintf( long fn, const char *fmt, ... )
 {
-	int n;                      /* number of bytes we need to write */
+	long n;                     /* number of bytes we need to write */
 	static size_t size;         /* guess for number of characters needed */
 	static char *p;
 	static long file_num;
@@ -1746,7 +1710,7 @@ static int T_fprintf( long fn, const char *fmt, ... )
 	char *buffer[ 1024 ];
 	size_t rw;
 	char *mess;
-	int count;
+	long count;
 
 
 	file_num = fn;

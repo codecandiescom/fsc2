@@ -55,7 +55,7 @@ typedef struct {
    must be used, while for functions with no upper limit 'LONG_MIN' has to
    be specified. */
 
-typedef struct Func_
+typedef struct Func
 {
 	const char *name;                 /* name of the function */
     Var * ( * fnct )( Var * );        /* pointer to the function */
@@ -66,14 +66,14 @@ typedef struct Func_
 } Func;
 
 
-typedef struct CALL_STACK_
+typedef struct CALL_STACK
 {
 	Func *f;
 	Device *device;
 	const char *dev_name;
 	int dev_count;
 	long Cur_Pulser;
-	struct CALL_STACK_ *next;
+	struct CALL_STACK *next;
 } CALL_STACK;
 
 

@@ -27,6 +27,7 @@
 
 #include "fsc2.h"
 
+
 /* The following defines the function that decides if a variable is an integer
    or a float variable. The function gets passed the first character of the
    variable name. If it returns TRUE, the variable will be an integer variable
@@ -47,63 +48,66 @@
                             /* or something else for really weird results :) */
 
 
-/* Dynamically sized arrays have (as long as their dimension is still
-   undetermined) a size of 0 for the very last dimension */
-
-#define need_alloc( a )  ( ( a )->sizes[ ( a )->dim - 1 ] == 0 )
-
-
-typedef struct Var_
-{
-	char *name;                         /* name of the variable */
-	int  type;                          /* type of the variable */
-	union
-	{
-		long   lval;                                /* for integer values */
-		double dval;                                /* for float values */
-		long   *lpnt;                               /* for integer arrays */
-		double *dpnt;                               /* for double arrays */
-		char   *sptr;                               /* for strings */
-		struct Func_ *fnct;                         /* for functions */
-		struct Var_ *vptr;                          /* for array references */
-		void   *gptr;                               /* generic pointer */
-	} val;
-	int dim;                       /* dimension of array */
-	unsigned int *sizes;           /* array of sizes of dimensions */
-	size_t len;                    /* total len of array */
-	unsigned long flags;
-
-	struct Var_ *from;
-	struct Var_ *next;       /* next variable in list or stack */
-	struct Var_ *prev;       /* previous variable in list or stack */
-	bool is_on_stack;        /* indicates where to look for the variable */
-} Var;
-
-
-/* Define the different types of variables */
+/* Different types of variables */
 
 enum {
-	UNDEF_VAR       = 0,               /*    0 */
-	INT_VAR         = ( 1 << 0 ),      /*    1 */
-	FLOAT_VAR       = ( 1 << 1 ),      /*    2 */
-	STR_VAR         = ( 1 << 2 ),      /*    4 */
-	INT_CONT_ARR    = ( 1 << 3 ),      /*    8 */
-	FLOAT_CONT_ARR  = ( 1 << 4 ),      /*   16 */
-	FUNC            = ( 1 << 5 ),      /*   32 */
-	ARR_PTR         = ( 1 << 6 ),      /*   64 */
-	INT_ARR         = ( 1 << 7 ),      /*  128 */
-	FLOAT_ARR       = ( 1 << 8 ),      /*  256 */
-	ARR_REF         = ( 1 << 9 )       /*  512 */
+	UNDEF_VAR       = 0,                /*     0 */
+	STR_VAR         = ( 1 <<  0 ),      /*     1 */
+	INT_VAR         = ( 1 <<  1 ),      /*     2 */
+	FLOAT_VAR       = ( 1 <<  2 ),      /*     4 */
+	INT_ARR         = ( 1 <<  3 ),      /*     8 */
+	FLOAT_ARR       = ( 1 <<  4 ),      /*    16 */
+	INT_REF         = ( 1 <<  5 ),      /*    32 */
+    FLOAT_REF       = ( 1 <<  6 ),      /*    64 */
+	INT_PTR         = ( 1 <<  7 ),      /*   128 */
+	FLOAT_PTR       = ( 1 <<  8 ),      /*   256 */
+	REF_PTR         = ( 1 <<  9 ),      /*   512 */
+	FUNC            = ( 1 << 10 ),      /*  1024 */
 };
 
 
+typedef struct Var
+{
+	char *name;                    /* name of the variable */
+	int  type;                     /* type of the variable */
+
+	union
+	{
+		long   lval;               /* for integer values */
+		double dval;               /* for float values */
+		long   *lpnt;              /* for integer arrays */
+		double *dpnt;              /* for double arrays */
+		char   *sptr;              /* for strings */
+		struct Var **vptr;         /* for array references */
+		struct Func *fnct;         /* for functions */
+	} val;
+
+	int dim;                       /* dimension of array */
+	ssize_t len;                   /* total len of array */
+	unsigned long flags;
+
+	struct Var *from;              /* used in pointer variables */
+	struct Var *next;              /* next variable in list or stack */
+	struct Var *prev;              /* previous variable in list or stack */
+
+} Var;
+
+
+
+#define INT_TYPE( a ) \
+	( ( a )->type & ( INT_VAR | INT_ARR | INT_REF | INT_PTR ) )
+
+
+#define RHS_TYPES \
+	( INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF )
+
+
 enum {
-	NEW_VARIABLE    = ( 1 << 0 ),      /*    1 */
-	VARIABLE_SIZED  = ( 1 << 1 ),      /*    2 */
-	NEED_SLICE      = ( 1 << 2 ),      /*    4 */
-	NEED_INIT       = ( 1 << 3 ),      /*    8 */
-	NEED_ALLOC      = ( 1 << 4 ),      /*   16 */
-	IS_DYNAMIC      = ( 1 << 5 )       /*   32 */
+	NEW_VARIABLE       = ( 1 << 0 ),       /*    1 */
+	IS_DYNAMIC         = ( 1 << 1 ),       /*    2 */
+	ON_STACK           = ( 1 << 2 ),       /*    4 */
+	IS_TEMP            = ( 1 << 3 ),       /*    8 */
+	EXISTS_BEFORE_TEST = ( 1 << 4 )        /*   16 */
 };
 
 
@@ -119,19 +123,11 @@ enum {
 
 
 Var *vars_get( char *name );
-void vars_sort( void );
 Var *vars_new( char *name );
-Var *vars_add( Var *v1, Var *v2 );
-Var *vars_sub( Var *v1, Var *v2 );
-Var *vars_mult( Var *v1, Var *v2 );
-Var *vars_div( Var *v1, Var *v2 );
-Var *vars_mod( Var *v1, Var *v2 );
-Var *vars_pow( Var *v1, Var *v2 );
-Var *vars_negate( Var *v );
-Var *vars_comp( int comp_type, Var *v1, Var *v2 );
-Var *vars_lnegate( Var *v );
+Var *vars_push_copy( Var *v );
 Var *vars_push( int type, ... );
 Var *vars_pop( Var *v );
+Var *vars_make( int type, Var *src );
 void vars_del_stack( void );
 void vars_clean_up( void );
 void vars_check( Var *v, int type );
@@ -142,7 +138,9 @@ Var *vars_arr_rhs( Var *v );
 void vars_assign( Var *src, Var *dest );
 void vars_arr_init( Var *dest );
 Var *apply_unit( Var *var, Var *unit );
-Var *vars_val( Var *v );
+void *vars_iter( Var *v );
+void vars_save_restore( bool flag );
+Var *vars_free( Var *v, bool also_nameless );
 
 
 #endif  /* ! VARIABLES_HEADER */

@@ -72,6 +72,12 @@
 #include "T.h"
 #include "variables.h"
 #include "util.h"
+#include "vars_add.h"
+#include "vars_sub.h"
+#include "vars_mult.h"
+#include "vars_div.h"
+#include "vars_mod.h"
+#include "vars_pow.h"
 #include "vars_util.h"
 #include "func.h"                 /* load before "devices.h" */
 #include "devices.h"              /* load before "loader.h"  */

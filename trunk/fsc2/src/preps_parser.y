@@ -72,7 +72,7 @@ static void prepserror( const char *s );
 
 %token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
 %token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr unit list1 list2
+%type <vptr> expr unit list1 list2 lhs
 
 
 %left EQ NE LT LE GT GE
@@ -88,52 +88,34 @@ static void prepserror( const char *s );
 
 
 input:   /* empty */
-       | input ';'                 { EDL.Cur_Pulse = -1; }
-       | input line ';'            { EDL.Cur_Pulse = -1;
-	                                 fsc2_assert( EDL.Var_Stack == NULL ); }
-       | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
-       | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { EDL.Cur_Pulse = -1;
-	                                 fsc2_assert( EDL.Var_Stack == NULL );
-	                                 YYACCEPT; }
+       | input ';'                  { EDL.Cur_Pulse = -1; }
+       | input line ';'             { EDL.Cur_Pulse = -1;
+	                                  fsc2_assert( EDL.Var_Stack == NULL ); }
+       | input error ';'            { THROW( SYNTAX_ERROR_EXCEPTION ); }
+       | input line P_TOK           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input line SECTION_LABEL   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input SECTION_LABEL        { EDL.Cur_Pulse = -1;
+	                                  fsc2_assert( EDL.Var_Stack == NULL );
+	                                  YYACCEPT; }
 ;
 
 line:    P_TOK prop
-       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
-       | VAR_TOKEN PLSA expr       { vars_assign( vars_add( $1, $3 ), $1 ); }
-       | VAR_TOKEN MINA expr       { vars_assign( vars_sub( $1, $3 ), $1 ); }
-       | VAR_TOKEN MULA expr       { vars_assign( vars_mult( $1, $3 ), $1 ); }
-       | VAR_TOKEN DIVA expr       { vars_assign( vars_div( $1, $3 ), $1 ); }
-       | VAR_TOKEN MODA expr       { vars_assign( vars_mod( $1, $3 ), $1 ); }
-       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
-         list1 ']'                 { vars_arr_lhs( $4 ); }
-         ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
-       | FUNC_TOKEN '(' list3 ')'  { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['            { print( FATAL, "'%s' is a predefined "
-											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+       | lhs '=' expr               { vars_assign( $3, $1 ); }
+       | lhs PLSA expr              { vars_assign( vars_add( $1, $3 ), $1 ); }
+       | lhs MINA expr              { vars_assign( vars_sub( $1, $3 ), $1 ); }
+       | lhs MULA expr              { vars_assign( vars_mult( $1, $3 ), $1 ); }
+       | lhs DIVA expr              { vars_assign( vars_div( $1, $3 ), $1 ); }
+       | lhs MODA expr              { vars_assign( vars_mod( $1, $3 ), $1 ); }
+       | lhs EXPA expr              { vars_assign( vars_pow( $1, $3 ), $1 ); }
+       | FUNC_TOKEN '(' list3 ')'   { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '['             { print( FATAL, "'%s' is a predefined "
+											 "function.\n", $1->name );
+	                                  THROW( EXCEPTION ); }
 ;
 
-ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
-       | PLSA expr                 { vars_assign( vars_add(
-		                                                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | MINA expr                 { vars_assign( vars_sub(
-										                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | MULA expr                 { vars_assign( vars_mult(
-										                  vars_val( $2->prev ),
-														    $2 ), $2->prev ); }
-       | DIVA expr                 { vars_assign( vars_div(
-										                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | MODA expr                 { vars_assign( vars_div(
-										                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | EXPA expr                 { vars_assign( vars_pow(
-										                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
+lhs:     VAR_TOKEN                  { $$ = $1; }
+       | VAR_TOKEN '['              { vars_arr_start( $1 ); }
+         list1 ']'                  { $$ = vars_arr_lhs( $4 ); }
 ;
 
 prop:   /* empty */
@@ -159,17 +141,14 @@ sep2:    /* empty */
        | ','
 ;
 
-
 expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													 $2 ); }
        | FLOAT_TOKEN unit         { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
+       | VAR_TOKEN                { $$ = vars_push_copy( $1 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { $$ = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list3 ')' { $$ = func_call( $1 ); }
-         unit                     { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
        | VAR_TOKEN '('            { print( FATAL, "'%s' isn't a function.\n",
 										   $1->name );
@@ -197,7 +176,7 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
        | '+' expr %prec NEG       { $$ = $2; }
        | '-' expr %prec NEG       { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
+       | '(' expr ')'             { $$ = $2; }
 ;
 
 unit:    /* empty */              { $$ = NULL; }

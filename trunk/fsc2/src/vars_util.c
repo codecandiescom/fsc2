@@ -1,7 +1,7 @@
 /*
-  $Id$
+   $Id$
 
-  Copyright (C) 1999-2002 Jens Thoms Toerring
+  Copyright (C) 1999-2003 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -25,1991 +25,298 @@
 #include "fsc2.h"
 
 
-static void vars_params( Var *v, size_t *elems, long **lpnt, double **dpnt );
-static void vars_div_check( double val );
-static void vars_mod_check( double val );
-static Var *vars_int_pow( long v1, long v2 );
-static void vars_pow_check( double v1, double v2 );
+static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 );
 
 
-/*--------------------------------------------------------------------*/
-/* If passed an integer or floating point variable or array slice the */
-/* function returns the number of elements and a pointer to the data  */
-/* (in lpnt or dpnt depending on the type of the data, the other      */
-/* pointer is always set to NULL).                                    */
-/*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* vars_negate() negates the value of a variable, an 1D array or */
+/* a complete matrix.                                            */
+/*---------------------------------------------------------------*/
 
-static void vars_params( Var *v, size_t *elems, long **lpnt, double **dpnt )
+Var *vars_negate( Var *v )
 {
-	*lpnt = NULL;
-	*dpnt = NULL;
+	Var *new_var;
+	ssize_t i;
 
-	switch ( v->type )
+
+	/* Make sure that 'v' exists and has RHS type */
+
+	vars_check( v, RHS_TYPES );
+
+	switch( v->type )
 	{
 		case INT_VAR :
-			*elems = 1;
-			*lpnt = &v->val.lval;
-			break;
+			v->val.lval = - v->val.lval;
+			return v;
 
 		case FLOAT_VAR :
-			*elems = 1;
-			*dpnt = &v->val.dval;
-			break;
-
-		case ARR_REF :
-			if ( v->from->dim != 1 )
-			{
-				print( FATAL, "Arithmetic can be only done on numbers or "
-					   "array slices.\n" );
-				THROW( EXCEPTION );
-			}
-
-			if ( v->from->flags & NEED_ALLOC )
-			{
-				print( FATAL, "Array '%s' is a dynamically sized array and "
-					   "its size is still unknown.\n", v->from->name );
-				THROW( EXCEPTION );
-			}
-
-			vars_check( v->from, INT_CONT_ARR | FLOAT_CONT_ARR );
-			*elems = v->from->len;
-			if ( v->from->type == INT_CONT_ARR )
-				*lpnt = v->from->val.lpnt;
-			else
-				*dpnt = v->from->val.dpnt;
-			break;
-
-		case ARR_PTR :
-			vars_check( v->from, INT_CONT_ARR | FLOAT_CONT_ARR );
-			*elems = v->from->sizes[ v->from->dim - 1 ];
-			if ( v->from->type == INT_CONT_ARR )
-				*lpnt = ( long * ) v->val.gptr;
-			else
-				*dpnt = ( double * ) v->val.gptr;
-			break;
+			v->val.dval = - v->val.dval;
+			return v;
 
 		case INT_ARR :
-			*elems = v->len;
-			*lpnt = v->val.lpnt;
+			if ( v->flags & IS_TEMP )
+				 new_var = v;
+			else
+				new_var = vars_push( v->type, v->val.lpnt, v->len );
+
+			for ( i = 0; i < new_var->len; i++ )
+				new_var->val.lpnt[ i ] = - new_var->val.lpnt[ i ];
+
 			break;
 
 		case FLOAT_ARR :
-			*elems = v->len;
-			*dpnt = v->val.dpnt;
-			break;
-
-		default :
-			fsc2_assert( 1 == 0 );
-			break;
-	}
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_add_to_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt != NULL )
-			return vars_push( INT_VAR, v1->val.lval + *v2_lpnt );
-		else
-			return vars_push( FLOAT_VAR, ( double ) v1->val.lval + *v2_dpnt );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lval + *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lval + *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_add_to_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-		return vars_push( FLOAT_VAR, v1->val.dval
-						  + ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dval
-			      + ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_add_to_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-				lp[ i ] = *v1_lpnt++ + *v2_lpnt;
-			new_var = vars_push( INT_ARR, lp, v1_len );
-			T_free( lp );
-		}
-		else
-		{
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-				dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt;
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			 print( FATAL, "Sizes of array slices to be added differ.\n" );
-			 THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( elems, v1_len );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = *v1_lpnt++ + *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) *v1_lpnt++ + *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_add_to_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-			dp[ i ] = *v1_dpnt++
-				      + ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		T_free( dp );
-
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be added differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = *v1_dpnt++
-			      + ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_sub_from_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-			return vars_push( INT_VAR, v1->val.lval - *v2_lpnt );
-		else
-			return vars_push( FLOAT_VAR, ( double ) v1->val.lval - *v2_dpnt );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lval - *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lval - *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_sub_from_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-		return vars_push( FLOAT_VAR, v1->val.dval
-						  - ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dval
-			      - ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-				lp[ i ] = *v1_lpnt++ - *v2_lpnt;
-			new_var = vars_push( INT_ARR, lp, v1_len );
-			T_free( lp );
-		}
-		else
-		{
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-				dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt;
-
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be subtracted differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = *v1_lpnt++ - *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) *v1_lpnt++ - *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-			dp[ i ] = *v1_dpnt++
-				      - ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		T_free( dp );
-
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be subtracted differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = *v1_dpnt++
-			      - ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mult_by_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-			return vars_push( INT_VAR, v1->val.lval * *v2_lpnt );
-		else
-			return vars_push( FLOAT_VAR, ( double ) v1->val.lval * *v2_dpnt );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = v1->val.lval * *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) v1->val.lval * *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mult_by_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-		return vars_push( FLOAT_VAR, v1->val.dval
-						  * ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = v1->val.dval
-			      * ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-				lp[ i ] = *v1_lpnt * *v2_lpnt;
-			new_var = vars_push( INT_ARR, lp, v1_len );
-			T_free( lp );
-		}
-		else
-		{
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-				dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt;
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be multiplied differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-			lp[ i ] = *v1_lpnt++ * *v2_lpnt++;
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-			dp[ i ] = ( double ) *v1_lpnt++ * *v2_dpnt++;
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-			dp[ i ] = *v1_dpnt++
-				      * ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		T_free( dp );
-
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be multiplied differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-		dp[ i ] = *v1_dpnt++
-			      * ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_div_of_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			return vars_push( INT_VAR, v1->val.lval / *v2_lpnt );
-		}
-		else
-		{
-			vars_div_check( *v2_dpnt );
-			return vars_push( FLOAT_VAR, ( double ) v1->val.lval / *v2_dpnt );
-		}
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			lp[ i ] = v1->val.lval / *v2_lpnt++;
-		}
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_div_check( *v2_dpnt );
-			dp[ i ] = ( double ) v1->val.lval / *v2_dpnt++;
-		}
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_div_of_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			return vars_push( FLOAT_VAR, v1->val.dval / ( double ) *v2_lpnt );
-		}
-		else
-		{
-			vars_div_check( *v2_dpnt );
-			return vars_push( FLOAT_VAR, v1->val.dval / *v2_dpnt );
-		}
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-	{
-		if ( v2_lpnt )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			dp[ i ] = v1->val.dval / ( double ) *v2_lpnt++;
-		}
-		else
-		{
-			vars_div_check( *v2_dpnt );
-			dp[ i ] = v1->val.dval / *v2_dpnt++;
-		}
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return NULL;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_div_of_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-				lp[ i ] = *v1_lpnt++ / *v2_lpnt;
-			new_var = vars_push( INT_ARR, lp, v1_len );
-			T_free( lp );
-		}
-		else
-		{
-			vars_div_check( *v2_dpnt );
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-				dp[ i ] = ( double ) *v1_lpnt++ / *v2_dpnt;
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be divided differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_div_check( ( double ) *v2_lpnt );
-			lp[ i ] = *v1_lpnt++ / *v2_lpnt++;
-		}
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_div_check( *v2_dpnt );
-			dp[ i ] = ( double ) *v1_lpnt++ / *v2_dpnt++;
-		}
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_div_of_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-			dp[ i ] = *v1_dpnt++
-				      / ( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		T_free( dp );
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices to be divided differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-	{
-		vars_div_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp[ i ] = *v1_dpnt++
-			      / ( v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_div_check( double val )
-{
-	if ( val != 0.0 )
-		return;
-	print( FATAL, "Division by zero.\n" );
-	THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mod_of_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			return vars_push( INT_VAR, v1->val.lval % *v2_lpnt );
-		}
-		else
-		{
-			vars_mod_check( *v2_dpnt );
-			return vars_push( FLOAT_VAR, fmod( ( double ) v1->val.lval,
-											   *v2_dpnt ) );
-		}
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			lp[ i ] = v1->val.lval % *v2_lpnt++;
-		}
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_mod_check( *v2_dpnt );
-			dp[ i ] = fmod( ( double ) v1->val.lval, *v2_dpnt++ );
-		}
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mod_of_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			return vars_push( FLOAT_VAR, fmod( v1->val.dval,
-											   ( double ) *v2_lpnt ) );
-		}
-		else
-		{
-			vars_mod_check( *v2_dpnt );
-			return vars_push( FLOAT_VAR, fmod( v1->val.dval, *v2_dpnt ) );
-		}
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-	{
-		if ( v2_lpnt )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			dp[ i ] = fmod( v1->val.dval, ( double ) *v2_lpnt++ );
-		}
-		else
-		{
-			vars_mod_check( *v2_dpnt );
-			dp[ i ] = fmod( v1->val.dval, *v2_dpnt++ );
-		}
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return NULL;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *lp;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-				lp[ i ] = *v1_lpnt++ % *v2_lpnt;
-			new_var = vars_push( INT_ARR, lp, v1_len );
-			T_free( lp );
-		}
-		else
-		{
-			vars_mod_check( *v2_dpnt );
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-				dp[ i ] = fmod( ( double ) *v1_lpnt++, *v2_dpnt );
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices modulo is to be calculated "
-				   "on differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_mod_check( ( double ) *v2_lpnt );
-			lp[ i ] = *v1_lpnt++ % *v2_lpnt++;
-		}
-		new_var = vars_push( INT_ARR, lp, elems );
-		T_free( lp );
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_mod_check( *v2_dpnt );
-			dp[ i ] = fmod( ( double ) *v1_lpnt++, *v2_dpnt++ );
-		}
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-			dp[ i ] = fmod( *v1_dpnt,
-							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		T_free( dp );
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices modulo is to be calculated "
-				   "on differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-	{
-		vars_mod_check( v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt);
-		dp[ i ] = fmod( *v1_dpnt++,
-						v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_mod_check( double val )
-{
-	if ( val != 0.0 )
-		return;
-	print( FATAL, "Modulo by zero.\n" );
-	THROW( EXCEPTION );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static Var *vars_int_pow( long v1, long v2 )
-{
-	long ires,
-		 i;
-	double v = 0.0;
-
-
-	if ( v2 == 0 )
-		return vars_push( INT_VAR, 1L );
-	if ( v2 > 0 && ( v = pow( ( double ) v1, ( double ) v2 ) ) <= LONG_MAX )
-	{
-		for ( ires = v1, i = 1; i < v2; i++ )
-			ires *= v1;
-		return vars_push( INT_VAR, ires );
-	}
-
-	return vars_push( FLOAT_VAR, v );
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_pow_of_int_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i, j;
-	size_t elems;
-	long *lp = NULL;
-	long *v2_lpnt;
-	double *dp = NULL;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-			return vars_int_pow( v1->val.lval, *v2_lpnt );
-		else
-		{
-			vars_pow_check( ( double ) v1->val.lval, *v2_dpnt );
-			return vars_push( FLOAT_VAR,
-							  pow( ( double ) v1->val.lval, *v2_dpnt ) );
-		}
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			if ( lp != NULL )
-			{
-				new_var = vars_int_pow( v1->val.lval, *v2_lpnt++ );
-				if ( new_var->type == INT_VAR )
-					lp[ i ] = new_var->val.lval;
-				else
-				{
-					dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-					for ( j = 0; j < i; j++ )
-						dp[ j ] = lp[ j ];
-					dp[ i ] = new_var->val.dval;
-					lp = LONG_P T_free( lp );
-				}
-
-				vars_pop( new_var );
-				continue;
-			}
-
-			vars_pow_check( ( double ) v1->val.lval, ( double ) *v2_lpnt );
-			dp[ i ] = pow( ( double ) v1->val.lval, ( double ) *v2_lpnt++ );
-		}
-
-		if ( lp != NULL )
-		{
-			new_var = vars_push( INT_ARR, lp, elems );
-			T_free( lp );
-		}
-		else
-		{
-			new_var = vars_push( FLOAT_ARR, dp, elems );
-			T_free( dp );
-		}
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_pow_check( ( double ) v1->val.lval, *v2_dpnt );
-			dp[ i ] = pow( ( double ) v1->val.lval, *v2_dpnt++ );
-		}
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_pow_of_float_var( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( elems == 1 )
-	{
-		vars_pow_check( v1->val.dval,
-						v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		return vars_push( FLOAT_VAR,
-						  pow( v1->val.dval,
-							   v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt ) );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-	for ( i = 0; i < elems; i++ )
-	{
-		vars_pow_check( v1->val.dval,
-						v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-		dp[ i ] = pow( v1->val.dval,
-					   v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v2->flags & IS_DYNAMIC;
-
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i, j;
-	size_t elems;
-	long *lp = NULL;
-	long *v2_lpnt;
-	double *dp = NULL;
-	double *v2_dpnt;
-	long *v1_lpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( INT_CONT_ARR | INT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == INT_CONT_ARR ) );
-
-	if ( v1->type == INT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_lpnt = ( long * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_lpnt = v1->val.lpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		if ( v2_lpnt )
-		{
-			lp = LONG_P T_malloc( v1_len * sizeof *lp );
-			for ( i = 0; i < v1_len; i++ )
-			{
-				if ( lp != NULL )
-				{
-					new_var = vars_int_pow( *v1_lpnt++, *v2_lpnt );
-					if ( new_var->type == INT_VAR )
-						lp[ i ] = new_var->val.lval;
-					else
-					{
-						dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-						for ( j = 0; j < i; j++ )
-							dp[ j ] = lp[ j ];
-						dp[ i ] = new_var->val.dval;
-						lp = LONG_P T_free( lp );
-					}
-
-					vars_pop( new_var );
-					continue;
-				}
-
-				vars_pow_check( ( double ) *v1_lpnt, ( double ) *v2_lpnt );
-				dp[ i ] = pow( ( double ) *v1_lpnt++, ( double ) *v2_lpnt );
-			}
-
-			if ( lp != NULL )
-			{
-				new_var = vars_push( INT_ARR, lp, v1_len );
-				T_free( lp );
-			}
+			if ( v->flags & IS_TEMP )
+				 new_var = v;
 			else
-			{
-				new_var = vars_push( FLOAT_ARR, dp, v1_len );
-				T_free( dp );
-			}
-		}
-		else
-		{
-			dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-			for ( i = 0; i < v1_len; i++ )
-			{
-				vars_pow_check( ( double ) *v1_lpnt, *v2_dpnt );
-				dp[ i ] = pow( ( double ) *v1_lpnt++, *v2_dpnt );
-			}
-			new_var = vars_push( FLOAT_ARR, dp, v1_len );
-			T_free( dp );
-		}
+				new_var = vars_push( v->type, v->val.dpnt, v->len );
 
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
+			for ( i = 0; i < new_var->len; i++ )
+				new_var->val.dpnt[ i ] = - new_var->val.dpnt[ i ];
 
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices used in exponentiation "
-				   "differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	if ( v2_lpnt )
-	{
-		lp = LONG_P T_malloc( elems * sizeof *lp );
-		for ( i = 0; i < elems; i++ )
-		{
-			if ( lp != NULL )
-			{
-				new_var = vars_int_pow( *v1_lpnt, *v2_lpnt++ );
-				if ( new_var->type == INT_VAR )
-					lp[ i ] = new_var->val.lval;
-				else
-				{
-					dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-					for ( j = 0; j < i; j++ )
-						dp[ j ] = lp[ j ];
-					dp[ i ] = new_var->val.dval;
-					lp = LONG_P T_free( lp );
-				}
-
-				vars_pop( new_var );
-				continue;
-			}
-
-			vars_pow_check( ( double ) *v1_lpnt, ( double ) *v2_lpnt );
-			dp[ i ] = pow( ( double ) *v1_lpnt++, ( double ) *v2_lpnt++ );
-		}
-
-		if ( lp != NULL )
-		{
-			new_var = vars_push( INT_ARR, lp, elems );
-			T_free( lp );
-		}
-		else
-		{
-			new_var = vars_push( FLOAT_ARR, dp, elems );
-			T_free( dp );
-		}
-	}
-	else
-	{
-		dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-
-		for ( i = 0; i < elems; i++ )
-		{
-			vars_pow_check( ( double ) *v1_lpnt, *v2_dpnt );
-			dp[ i ] = pow( ( double ) *v1_lpnt++, *v2_dpnt++ );
-		}
-
-		new_var = vars_push( FLOAT_ARR, dp, elems );
-		T_free( dp );
-	}
-
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
-{
-	Var *new_var;
-	size_t i;
-	size_t elems;
-	long *v2_lpnt;
-	double *dp;
-	double *v2_dpnt;
-	double *v1_dpnt;
-	size_t v1_len;
-
-
-	fsc2_assert( v1->type & ( FLOAT_CONT_ARR | FLOAT_ARR ) ||
-				 ( v1->type == ARR_PTR && v1->from->type == FLOAT_CONT_ARR ) );
-
-	if ( v1->type == FLOAT_CONT_ARR && v1->dim != 1 )
-	{
-		print( FATAL, "Arithmetic can be only done on numbers and array "
-			   "slices.\n" );
-		THROW( EXCEPTION );
-	}
-
-	vars_params( v2, &elems, &v2_lpnt, &v2_dpnt );
-
-	if ( v1->type == ARR_PTR )
-	{
-		v1_dpnt = ( double * ) v1->val.gptr;
-		v1_len = v1->from->sizes[ v1->from->dim -1 ];
-	}
-	else
-	{
-		v1_dpnt = v1->val.dpnt;
-		v1_len = v1->len;
-	}
-
-	if ( elems == 1 )
-	{
-		dp = DOUBLE_P T_malloc( v1_len * sizeof *dp );
-		for ( i = 0; i < v1_len; i++ )
-		{
-			vars_pow_check( *v1_dpnt,
-							v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-			dp[ i ] = pow( *v1_dpnt++,
-						   v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		}
-		new_var = vars_push( FLOAT_ARR, dp, v1_len );
-		T_free( dp );
-
-		new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-		return new_var;
-	}
-
-	if ( v1_len != elems )
-	{
-		if ( ! ( Internals.mode == TEST &&
-				 ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
-		{
-			print( FATAL, "Sizes of array slices used in exponentiation "
-				   "differ.\n" );
-			THROW( EXCEPTION );
-		}
-		else
-			elems = s_min( v1_len, elems );
-	}
-
-	dp = DOUBLE_P T_malloc( elems * sizeof *dp );
-
-	for ( i = 0; i < elems; i++ )
-	{
-		vars_pow_check( *v1_dpnt, v2_lpnt ? ( double ) *v2_lpnt : *v2_dpnt );
-		dp[ i ] = pow( *v1_dpnt++,
-					   v2_lpnt ? ( double ) *v2_lpnt++ : *v2_dpnt++ );
-	}
-
-	new_var = vars_push( FLOAT_ARR, dp, elems );
-	new_var->flags |= v1->flags & v2->flags & IS_DYNAMIC;
-	T_free( dp );
-
-	return new_var;
-}
-
-
-/*---------------------------------------------------------------------*/
-/*---------------------------------------------------------------------*/
-
-static void vars_pow_check( double v1, double v2 )
-{
-	if ( v1 < 0.0 && fmod( fabs( v2 ), 1.0 ) != 0.0 )
-	{
-		print( FATAL, "Negative base while exponent is not an integer "
-			   "value.\n" );
-		THROW( EXCEPTION );
-	}
-}
-
-
-/*----------------------------------------------------------------------*/
-/* When doing arithmetic with an array it can happen that the left hand */
-/* side array has a still undefined size. In this case the size has to  */
-/* be adjusted automatically to the size of the right hand side array   */
-/* (or an exception must be thrown if the right hand side array also    */
-/* has an undefined size).                                              */
-/*----------------------------------------------------------------------*/
-
-Var *vars_array_check( Var *v1, Var *v2 )
-{
-	Var *v = NULL;
-	size_t length = 0;
-
-
-	/* If the left hand side has a defined size nothing needs to be done */
-
-	if ( v1->type == ARR_REF || v1->type == ARR_PTR )
-	{
-		if ( v1->type == ARR_REF && v1->from->dim != 1 )
-		{
-			print( FATAL, "Arithmetic can be only done on array slices, "
-				   "not on multi-dimensional arrays.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( ! ( v1->from->flags & NEED_ALLOC ) )
-			return v1;
-	}
-	else
-	{
-		if ( v1->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) && v1->dim != 1 )
-		{
-			print( FATAL, "Arithmetic can be only done on array slices, "
-				   "not on multi-dimensional arrays.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( ! ( v1->flags & NEED_ALLOC ) )
-			return v1;
-	}
-
-	/* Make sure the right hand side is an array with a defined size */
-
-	if ( ! ( v2->type & ( ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR ) ) )
-	{
-		print( FATAL, "Size of variable sized array '%s' hasn't been "
-			   "set yet.\n", v1->type == ARR_REF || v1->type == ARR_PTR ?
-			   v1->from->name : v1->name );
-		THROW( EXCEPTION );
-	}
-
-	if ( v2->type & ( INT_ARR | FLOAT_ARR ) && v2->flags & NEED_ALLOC )
-	{
-		print( FATAL, "Size of array '%s' has not been set yet.\n", v->name );
-		THROW( EXCEPTION );
-	}
-
-	if ( v2->type & ( ARR_REF | ARR_PTR ) && v2->from->flags & NEED_ALLOC )
-	{
-		print( FATAL, "Size of array '%s' has not been set yet.\n",
-			   v->from->name );
-		THROW( EXCEPTION );
-	}
-
-	/* Find out the size of the right hand side array */
-
-	switch ( v2->type )
-	{
-		case ARR_REF :
-			if ( v2->from->dim != 1 )
-			{
-				print( FATAL, "Arithmetic can be only done on numbers or "
-					   "array slices.\n" );
-				THROW( EXCEPTION );
-			}
-			vars_check( v2->from, INT_CONT_ARR | FLOAT_CONT_ARR );
-			length = v2->from->len;
 			break;
 
-		case ARR_PTR :
-			vars_check( v2->from, INT_CONT_ARR | FLOAT_CONT_ARR );
-			length = v2->from->sizes[ v2->from->dim - 1 ];
-			break;
-
-		case INT_ARR : case FLOAT_ARR :
-			length = v2->len;
-			break;
-
-		default :
-			fsc2_assert( 1 == 0 );
-			break;
-	}
-
-	switch ( v1->type )
-	{
-		case INT_CONT_ARR : case INT_ARR :
-			v = vars_push( INT_ARR, NULL, length );
-			break;
-
-		case FLOAT_CONT_ARR : case FLOAT_ARR :
-			v = vars_push( FLOAT_ARR, NULL, length );
-			break;
-
-		case ARR_REF : case ARR_PTR :
-			if ( v1->from->type == INT_CONT_ARR )
-				v = vars_push( INT_ARR, NULL, length );
+		case INT_REF : case FLOAT_REF :
+			if ( v->flags & IS_TEMP )
+				new_var = v;
 			else
-				v = vars_push( FLOAT_ARR, NULL, length );
+				new_var = vars_push( v->type, v );
+
+			for ( i = 0; i < new_var->len; i++ )
+				vars_pop( vars_negate( new_var->val.vptr[ i ] ) );	
+
 			break;
 
+#ifndef NDEBUG
 		default :
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+#endif
+	}
+
+	if ( new_var != v )
+		vars_pop( v );
+
+	return new_var;
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* vars_comp() is used for comparing the values of two variables. There are */
+/* three types of comparison - it can be tested if two variables are equal, */
+/* if the first one is less than the second or if the first is less or      */
+/* equal than the second variable (tests for greater or greater or equal    */
+/* can be done simply by switching the arguments).                          */
+/* In comparisons between floating point numbers not only the numbers are   */
+/* compared but, in order to reduce problems due to rounding errors, also   */
+/* the numbers when the last significant bit is changed (if there's a       */
+/* function in libc that allow us to do this...).                           */
+/* ->                                                                       */
+/*    * type of comparison (COMP_EQUAL, COMP_UNEQUAL, COMP_LESS,            */
+/*      COMP_LESS_EQUAL, COMP_AND, COMP_OR or COMP_XOR)                     */
+/*    * pointers to the two variables                                       */
+/* <-                                                                       */
+/*    * integer variable with value of 1 (true) or 0 (false) depending on   */
+/*      the result of the comparison                                        */
+/*--------------------------------------------------------------------------*/
+
+Var *vars_comp( int comp_type, Var *v1, Var *v2 )
+{
+	Var *new_var = NULL;
+
+
+	/* If both variables are strings we can also do some kind of comparisons */
+
+	if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
+		return vars_str_comp( comp_type, v1, v2 );
+
+	/* Make sure that 'v1' and 'v2' exist, are integers or float values
+	   and have an value assigned to it */
+
+	vars_check( v1, INT_VAR | FLOAT_VAR );
+	vars_check( v2, INT_VAR | FLOAT_VAR );
+
+	switch ( comp_type )
+	{
+#if ! defined IS_STILL_LIBC1     /* libc2 *has* nextafter() */
+		case COMP_EQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 == VALUE( v2 ) );
+			break;
+
+		case COMP_UNEQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) &&
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 != VALUE( v2 ) );
+			break;
+
+		case COMP_LESS :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT < v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 < VALUE( v2 ) );
+			break;
+
+		case COMP_LESS_EQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
+									 nextafter( VALUE( v1 ), VALUE( v2 ) )
+									 <= VALUE( v2 ) );
+			break;
+#else
+		case COMP_EQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
+			break;
+
+		case COMP_UNEQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
+
+			break;
+
+		case COMP_LESS :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT < v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
+			break;
+
+		case COMP_LESS_EQUAL :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
+			break;
+#endif
+
+		case COMP_AND :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT != 0 && v2->INT != 0 );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 &&
+									          VALUE( v2 ) != 0.0 );
+			break;
+
+		case COMP_OR :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR, v1->INT != 0 || v2->INT != 0 );
+			else
+				new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 ||
+									          VALUE( v2 ) != 0.0 );
+			break;
+
+		case COMP_XOR :
+			if ( v1->type == INT_VAR && v2->type == INT_VAR )
+				new_var = vars_push( INT_VAR,
+									 ( v1->INT != 0 && v2->INT == 0 ) ||
+									 ( v1->INT == 0 && v2->INT != 0 ) );
+			else
+				new_var = vars_push( INT_VAR,
+								( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
+								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
+			break;
+
+		default:               /* this should never happen... */
 			fsc2_assert( 1 == 0 );
 			break;
 	}
 
-	v->flags |= v1->flags & v2->flags & IS_DYNAMIC;
+	/* Pop the variables from the stack */
+
 	vars_pop( v1 );
-	return v;
+	vars_pop( v2 );
+
+	return new_var;
 }
 
 
-/*
- * Local variables:
- * tags-file-name: "../TAGS"
- * End:
- */
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 )
+{
+	Var *new_var = NULL;
+
+
+	switch ( comp_type )
+	{
+		case COMP_EQUAL :
+			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 0 : 1 );
+			break;
+			
+		case COMP_UNEQUAL :
+			vars_push( INT_VAR, strcmp( v1->val.sptr, v2->val.sptr ) ? 1 : 0 );
+			break;
+
+		case COMP_LESS :
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1 : 0 );
+			break;
+
+		case COMP_LESS_EQUAL :
+			vars_push( INT_VAR,
+					   strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1 : 0 );
+			break;
+
+		case COMP_AND :
+		case COMP_OR  :
+		case COMP_XOR :
+			print( FATAL, "Logical and, or and xor operators can't be used "
+				   "with string variables.\n" );
+			THROW( EXCEPTION );
+
+		default:               /* this should never happen... */
+			fsc2_assert( 1 == 0 );
+			break;
+	}
+
+	/* Pop the variables from the stack */
+
+	vars_pop( v1 );
+	vars_pop( v2 );
+
+	return new_var;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* vars_lnegate() does a logical negate of an integer or float variable, */
+/* i.e. if the variables value is zero a value of 1 is returned in a new */
+/* variable, otherwise 0.                                                */
+/*-----------------------------------------------------------------------*/
+
+Var *vars_lnegate( Var *v )
+{
+	Var *new_var;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( ( v->type == INT_VAR && v->INT == 0 ) ||
+		 ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
+		new_var = vars_push( INT_VAR, 1 );
+	else
+		new_var = vars_push( INT_VAR, 0 );
+
+	vars_pop( v );
+
+	return new_var;
+}
+
+

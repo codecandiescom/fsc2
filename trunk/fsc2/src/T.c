@@ -254,12 +254,14 @@ long T_atol( const char *txt )
 	char *end_p;
 
 
+#ifndef NDEBUG
 	if ( txt == NULL || *txt == '\0' )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	ret = strtol( txt, &end_p, 10 );
 
@@ -288,6 +290,7 @@ long T_htol( const char *txt )
 	char *end_p;
 
 
+#ifndef NDEBUG
 	if ( txt == NULL || *txt == '\0' ||
 		 ( *txt != '0' && tolower( txt[ 1 ] ) != 'x' ) )
 	{
@@ -295,6 +298,7 @@ long T_htol( const char *txt )
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	ret = strtol( txt + 2, &end_p, 16 );
 
@@ -323,12 +327,14 @@ int T_atoi( const char *txt )
 	char *end_p;
 
 
+#ifndef NDEBUG
 	if ( txt == NULL || *txt == '\0' )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	ret = strtol( txt, &end_p, 10 );
 
@@ -357,12 +363,14 @@ double T_atod( const char *txt )
 	char *end_p;
 
 
+#ifndef NDEBUG
 	if ( txt == NULL || *txt == '\0' )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+#endif
 
 	ret = strtod( txt, &end_p );
 

@@ -74,7 +74,7 @@ void *get_shm( int *shm_id, long len )
 			fsc2_usleep( 10000, SET );
 		else                                      /* non-recoverable failure */
 		{
-#if defined  ( DEBUG )
+#ifndef NDEBUG
 			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
 					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
 					"CITING THESE LINES *** Thank you.\n",
@@ -119,7 +119,7 @@ void *attach_shm( int key )
 
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
-#if defined ( DEBUG )
+#ifndef NDEBUG
 		eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
 				"SHM_RDONLY failed for key %d with error number %d.\n"
 				"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "

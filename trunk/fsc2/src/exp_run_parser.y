@@ -33,6 +33,8 @@
 extern int exp_runlex( void );
 extern char *exptext;
 
+static int wpp;        /* which pulse property */
+
 /* locally used functions */
 
 int exp_runparse( void );
@@ -102,7 +104,8 @@ static void exp_runerror( const char *s );
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit line list1 list2
+%type <vptr> expr unit line list1 list2 lhs
+%type <lval> plhs
 
 
 
@@ -130,107 +133,52 @@ eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
 	                                 YYACCEPT; }
 ;
 
-line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
-       | E_VAR_TOKEN E_PLSA expr   { vars_assign( vars_add( $1, $3 ), $1 ); }
-       | E_VAR_TOKEN E_MINA expr   { vars_assign( vars_sub( $1, $3 ), $1 ); }
-       | E_VAR_TOKEN E_MULA expr   { vars_assign( vars_mult( $1, $3 ), $1 ); }
-       | E_VAR_TOKEN E_DIVA expr   { vars_assign( vars_div( $1, $3 ), $1 ); }
-       | E_VAR_TOKEN E_MODA expr   { vars_assign( vars_mod( $1, $3 ), $1 ); }
-       | E_VAR_TOKEN E_EXPA expr   { vars_assign( vars_pow( $1, $3 ), $1 ); }
-
-       | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
-         list1 ']'                 { vars_arr_lhs( $4 ) }
-         ass                       { fsc2_assert( EDL.Var_Stack == NULL ); }
+line:    lhs '=' expr              { vars_assign( $3, $1 ); }
+       | lhs E_PLSA expr           { vars_assign( vars_add( $1, $3 ), $1 ); }
+       | lhs E_MINA expr           { vars_assign( vars_sub( $1, $3 ), $1 ); }
+       | lhs E_MULA expr           { vars_assign( vars_mult( $1, $3 ), $1 ); }
+       | lhs E_DIVA expr           { vars_assign( vars_div( $1, $3 ), $1 ); }
+       | lhs E_MODA expr           { vars_assign( vars_mod( $1, $3 ), $1 ); }
+       | lhs E_EXPA expr           { vars_assign( vars_pow( $1, $3 ), $1 ); }
        | E_FUNC_TOKEN '(' list3 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
-       | E_PPOS E_PLSA expr        { p_set( $1, P_POS, vars_add(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PPOS E_MINA expr        { p_set( $1, P_POS, vars_sub(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PPOS E_MULA expr        { p_set( $1, P_POS, vars_mult(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PPOS E_DIVA expr        { p_set( $1, P_POS, vars_div(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PPOS E_MODA expr        { p_set( $1, P_POS, vars_mod(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PPOS E_EXPA expr        { p_set( $1, P_POS, vars_pow(
-		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
-       | E_PLEN '=' expr           { p_set( $1, P_LEN, $3 ); }
-       | E_PLEN E_PLSA expr        { p_set( $1, P_LEN, vars_add(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PLEN E_MINA expr        { p_set( $1, P_LEN, vars_sub(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PLEN E_MULA expr        { p_set( $1, P_LEN, vars_mult(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PLEN E_DIVA expr        { p_set( $1, P_LEN, vars_div(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PLEN E_MODA expr        { p_set( $1, P_LEN, vars_mod(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PLEN E_EXPA expr        { p_set( $1, P_LEN, vars_pow(
-		                                   p_get_by_num( $1, P_LEN ), $3 ) ); }
-       | E_PDPOS '=' expr          { p_set( $1, P_DPOS, $3 ); }
-       | E_PDPOS E_PLSA expr       { p_set( $1, P_DPOS, vars_add(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDPOS E_MINA expr       { p_set( $1, P_DPOS, vars_sub(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDPOS E_MULA expr       { p_set( $1, P_DPOS, vars_mult(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDPOS E_DIVA expr       { p_set( $1, P_DPOS, vars_div(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDPOS E_MODA expr       { p_set( $1, P_DPOS, vars_mod(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDPOS E_EXPA expr       { p_set( $1, P_DPOS, vars_pow(
-		                                  p_get_by_num( $1, P_DPOS ), $3 ) ); }
-       | E_PDLEN '=' expr          { p_set( $1, P_DLEN, $3 ); }
-       | E_PDLEN E_PLSA expr       { p_set( $1, P_DLEN, vars_add(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
-       | E_PDLEN E_MINA expr       { p_set( $1, P_DLEN, vars_sub(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
-       | E_PDLEN E_MULA expr       { p_set( $1, P_DLEN, vars_mult(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
-       | E_PDLEN E_DIVA expr       { p_set( $1, P_DLEN, vars_div(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
-       | E_PDLEN E_MODA expr       { p_set( $1, P_DLEN, vars_mod(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
-       | E_PDLEN E_EXPA expr       { p_set( $1, P_DLEN, vars_pow(
-		                                  p_get_by_num( $1, P_DLEN ), $3 ) ); }
+       | plhs '=' expr             { p_set( $1, wpp, $3 ); }
+       | plhs E_PLSA expr          { p_set( $1, wpp, vars_add(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs E_MINA expr          { p_set( $1, wpp, vars_sub(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs E_MULA expr          { p_set( $1, wpp, vars_mult(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs E_DIVA expr          { p_set( $1, wpp, vars_div(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs E_MODA expr          { p_set( $1, wpp, vars_mod(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs E_EXPA expr          { p_set( $1, wpp, vars_pow(
+		                                    p_get_by_num( $1, wpp ), $3 ) ); }
 ;
 
-ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
-       | E_PLSA expr               { vars_assign( vars_add(
-		                                                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | E_MINA expr               { vars_assign( vars_sub(
-										                  vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | E_MULA expr               { vars_assign( vars_mult(
-										                  vars_val( $2->prev ),
-														  $2 ), $2->prev ); }
-       | E_DIVA expr               { vars_assign( vars_div(
-                                                          vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | E_MODA expr               { vars_assign( vars_div(
-                                                          vars_val( $2->prev ),
-															$2 ), $2->prev ); }
-       | E_EXPA expr               { vars_assign( vars_pow(
-                                                          vars_val( $2->prev ),
-															$2 ), $2->prev ); }
+lhs:     E_VAR_TOKEN               { $$ = $1; }
+       | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
+         list1 ']'                 { $$ = vars_arr_lhs( $4 ); }
+;
+
+plhs:    E_PPOS                    { wpp = P_POS; $$ = $1; }
+       | E_PLEN                    { wpp = P_LEN; $$ = $1; }
+       | E_PDPOS                   { wpp = P_DPOS; $$ = $1; }
+       | E_PDLEN                   { wpp = P_DLEN; $$ = $1; }
 ;
 
 expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													  $2 ); }
        | E_FLOAT_TOKEN unit        { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN unit          { $$ = apply_unit( $1, $2 ); }
+       | E_VAR_TOKEN               { $$ = vars_push_copy( $1 ); }
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { $$ = vars_arr_rhs( $4 ); }
-         unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | E_FUNC_TOKEN '(' list3
          ')'                       { $$ = func_call( $1 ); }
-         unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF                 { $$ = $1; }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
@@ -262,7 +210,7 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
        | '+' expr %prec E_NEG      { $$ = $2; }
        | '-' expr %prec E_NEG      { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
+       | '(' expr ')'              { $$ = $2; }
 ;
 
 unit:    /* empty */               { $$ = NULL; }

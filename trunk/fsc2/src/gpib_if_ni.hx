@@ -29,11 +29,22 @@
 /*------------------------------------------------------------------------*/
 
 
+#if ! defined GPIB_IF_NI_HEADER
+#define GPIB_IF_NI_HEADER
+
 #include <sys/ugpib.h>
 
 #include <dirent.h>
 
 #define GPIB_NI
+
+
+#if defined ( GPIB_IF_NI_MAIN_SRC )
+	#define GPIB_VARIABLE
+#else
+	#define GPIB_VARIABLE extern
+#endif
+
 
 #define GPIB_MAX_DEV      30
 #define GPIB_NAME_MAX     14
@@ -125,6 +136,9 @@ GPIB_VARIABLE int gpiblineno;
 /*-------------------------------*/
 
 #define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
+
+
+#endif /* ! GPIB_IF_NI_HEADER */
 
 /*
  * Local variables:

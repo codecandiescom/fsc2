@@ -25,12 +25,8 @@
 #include "fsc2.h"
 
 
-static void get_array_params( Var *v, size_t *len, long **ilp, double **idp );
 static double gauss_random( void );
 static double datanh( double arg );
-
-static bool grand_is_old = UNSET;
-
 
 
 /*----------------------------------------------------------------*/
@@ -71,87 +67,6 @@ Var *f_stopsim( Var *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
-
-static void get_array_params( Var *v, size_t *len, long **ilp, double **idp )
-{
-	*ilp = NULL;
-	*idp = NULL;
-
-	switch ( v->type )
-	{
-		case INT_CONT_ARR :
-			if ( v->dim != 1 )
-			{
-				print( FATAL, "Argument is neither a number nor an "
-					   "1-dimensional array.\n" );
-				THROW( EXCEPTION );
-			}
-			*len = v->len;
-			*ilp = v->val.lpnt;
-			break;
-
-		case FLOAT_CONT_ARR :
-			if ( v->dim != 1 )
-			{
-				print( FATAL, "Argument is neither a number nor an "
-					   "1-dimensional array.\n" );
-				THROW( EXCEPTION );
-			}
-			*len = v->len;
-			*idp = v->val.dpnt;
-			break;
-
-		case ARR_PTR :
-			*len = v->from->sizes[ v->from->dim - 1 ];
-			if ( v->from->type == INT_CONT_ARR )
-				*ilp = ( long * ) v->val.gptr;
-			else
-				*idp = ( double * ) v->val.gptr;
-			break;
-
-		case ARR_REF :
-			if ( v->from->dim != 1 )
-			{
-				print( FATAL, "Argument is neither a number nor an "
-					   "1-dimensional array.\n" );
-				THROW( EXCEPTION );
-			}
-
-			if ( v->from->flags & NEED_ALLOC )
-			{
-				print( FATAL, "Argument is a dynamically sized array of "
-					   "still unknown size.\n" );
-				THROW( EXCEPTION );
-			}
-
-			*len = v->from->sizes[ 0 ];
-			if ( v->from->type == INT_CONT_ARR )
-				*ilp = v->from->val.lpnt;
-			else
-				*idp = v->from->val.dpnt;
-			break;
-
-		case INT_ARR :
-			*len = v->len;
-			*ilp = v->val.lpnt;
-			break;
-
-		case FLOAT_ARR :
-			*len = v->len;
-			*idp = v->val.dpnt;
-			break;
-
-		default :
-			fsc2_assert( 1 == 0 );
-			break;
-	}
-
-	fsc2_assert( ( *ilp != NULL ) ^ ( *idp != NULL ) );
-}
-
-
 /*-------------------------------------------------*/
 /* Conversion float to integer (result is integer) */
 /*-------------------------------------------------*/
@@ -159,15 +74,13 @@ static void get_array_params( Var *v, size_t *len, long **ilp, double **idp )
 Var *f_int( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp = NULL;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *dest;
+	double *src;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -176,32 +89,37 @@ Var *f_int( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, ( long ) v->val.dval );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var->flags = v->flags;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, src++, dest++ )
+			{
+				if ( *src > LONG_MAX || *src < LONG_MIN )
+					print( SEVERE, "Integer argument overflow.\n" );
+				*dest = ( long ) *src;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_int( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-		new_var = vars_push( INT_ARR, ilp, len );
-	else
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; idp++, i++ )
-		{
-			if ( *idp > LONG_MAX || *idp < LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
-			rlp[ i ] = ( long ) *idp;
-		}
-
-		new_var = vars_push( INT_ARR, rlp, len );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	T_free( rlp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -212,15 +130,13 @@ Var *f_int( Var *v )
 Var *f_float( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp = NULL;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	double *dest;
+	long *src;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -230,23 +146,30 @@ Var *f_float( Var *v )
 		case FLOAT_VAR :
 			return vars_push( FLOAT_VAR, v->val.dval );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( src = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, src++, dest++ )
+				*dest = ( double ) *src;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_push( FLOAT_ARR, v->len, v->val.dpnt );
+			new_var->flags = v->flags;
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_float( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( idp != NULL )
-		new_var = vars_push( FLOAT_ARR, idp, len );
-	else
-	{
-		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = ( double ) *ilp++;
-		new_var = vars_push( FLOAT_ARR, rdp, len );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	T_free( rdp );
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -257,15 +180,13 @@ Var *f_float( Var *v )
 Var *f_round( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp = NULL;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *dest;
+	double *src;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -278,28 +199,34 @@ Var *f_round( Var *v )
 				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, lrnd( v->val.dval ) );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var->flags = v->flags;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, src++, dest++ )
+			{
+				if ( *src >= LONG_MAX - 0.5 || *src <= LONG_MIN + 0.5 )
+					print( SEVERE, "Integer argument overflow.\n" );
+				*dest = lrnd( *src );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_round( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-		new_var = vars_push( INT_ARR, ilp, len );
-	else
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; idp++, i++ )
-		{
-			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
-				print( SEVERE, "Integer argument overflow.\n" );
-			rlp[ i ] = lrnd( *idp );
-		}
-
-		new_var = vars_push( INT_ARR, rlp, len );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	T_free( rlp );
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -310,15 +237,13 @@ Var *f_round( Var *v )
 Var *f_floor( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp = NULL;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *dest;
+	double *src;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -330,28 +255,34 @@ Var *f_floor( Var *v )
 				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, lrnd( floor( v->val.dval )  ) );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var->flags = v->flags;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, src++, dest++ )
+			{
+				if ( *src < LONG_MIN )
+					print( SEVERE, "Integer argument overflow.\n" );
+				*dest = lrnd( floor( *src ) );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_floor( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-		new_var = vars_push( INT_ARR, ilp, len );
-	else
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; idp++, i++ )
-		{
-			if ( *idp < LONG_MIN )
-				print( SEVERE, "Integer argument overflow.\n" );
-			rlp[ i ] = lrnd( floor( *idp ) );
-		}
-
-		new_var = vars_push( INT_ARR, rlp, len );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	T_free( rlp );
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -362,15 +293,13 @@ Var *f_floor( Var *v )
 Var *f_ceil( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp = NULL;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *dest;
+	double *src;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -382,29 +311,34 @@ Var *f_ceil( Var *v )
 				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, lrnd( ceil( v->val.dval ) ) );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_push( INT_ARR, v->len, v->val.lpnt );
+			new_var->flags = v->flags;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( src = v->val.dpnt, dest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, src++, dest++ )
+			{
+				if ( *src > LONG_MAX )
+					print( SEVERE, "Integer argument overflow.\n" );
+				*dest = lrnd( ceil( *src ) );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-		new_var = vars_push( INT_ARR, ilp, len );
-	else
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; idp++, i++ )
-		{
-			if ( *idp < LONG_MIN )
-				print( SEVERE, "Integer argument overflow.\n" );
-			rlp[ i ] = lrnd( ceil( *idp ) );
-		}
-
-		new_var = vars_push( INT_ARR, rlp, len );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	T_free( rlp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -415,16 +349,13 @@ Var *f_ceil( Var *v )
 Var *f_abs( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -436,33 +367,45 @@ Var *f_abs( Var *v )
 		case FLOAT_VAR :
 			return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+			{
+				if ( *lsrc == LONG_MIN )
+					print( SEVERE, "Integer argument overflow.\n" );
+				*ldest = labs( *lsrc );
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = fabs( *dsrc );
+			return new_var;
+
+		case INT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+			return new_var;
+
+		case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; ilp++, i++ )
-		{
-			if ( *ilp == LONG_MIN )
-				print( SEVERE, "Integer argument overflow.\n" );
-			rlp[ i ] = labs( *ilp );
-		}
-		new_var = vars_push( INT_ARR, rlp, len );
-		T_free( rlp );
-	}
-	else
-	{
-		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-		for ( i = 0; i < len; idp++, i++ )
-			rdp[ i ] = fabs( *idp );
-		new_var = vars_push( FLOAT_ARR, rdp, len );
-		T_free( rdp );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -489,38 +432,47 @@ Var *f_lmax( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-					ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+					   INT_REF | FLOAT_REF );
 
-		if ( v->type == INT_VAR )
+		switch ( v->type )
 		{
-			if ( v->val.lval > m )
-				m = v->val.lval;
-			continue;
-		}
+			case INT_VAR :
+				if ( v->val.lval > m )
+					m = v->val.lval;
+				break;
 
-		if ( v->type == FLOAT_VAR )
-		{
-			if ( v->val.dval > m )
-				m = v->val.dval;
-			all_int = UNSET;
-			continue;
-		}
+			case FLOAT_VAR :
+				if ( v->val.dval > m )
+					m = v->val.dval;
+				all_int = UNSET;
+				break;
 
-		get_array_params( v, &len, &ilp, &idp );
+			case INT_ARR :
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.lpnt[ i ] > m )
+						m = v->val.lpnt[ i ];
+				break;
+					
+			case FLOAT_ARR :
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.dpnt[ i ] > m )
+						m = v->val.dpnt[ i ];
+				all_int = UNSET;
+				break;
 
-		if ( ilp != NULL )
-		{
-			for ( i = 0; i < len; ilp++, i++ )
-				if ( *ilp > m )
-					m = *ilp;
-		}
-		else
-		{
-			for ( i = 0; i < len; idp++, i++ )
-				if ( *idp > m )
-					m = *idp;
-			all_int = UNSET;
+			case INT_REF :
+				while ( ( gp = vars_iter( v ) ) != NULL )
+					if ( * ( long * ) gp > m )
+						m = * ( long * ) *gp;
+				break;
+
+			case FLOAT_REF :
+				while ( ( gp = vars_iter( v ) ) != NULL )
+					if ( * ( double * ) gp > m )
+						m = * ( double * ) *gp;
+				all_int = UNSET;
+				break;
 		}
 	}
 
@@ -539,10 +491,8 @@ Var *f_lmin( Var *v )
 {
 	double m = HUGE_VAL;
 	bool all_int = SET;
-	size_t i;
-	size_t len;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	void *gp;
 
 
 	if ( v == NULL )
@@ -553,38 +503,47 @@ Var *f_lmin( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-					ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+		vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+					   INT_REF | FLOAT_REF );
 
-		if ( v->type == INT_VAR )
+		switch ( v->type )
 		{
-			if ( v->val.lval < m )
-				m = v->val.lval;
-			continue;
-		}
+			case INT_VAR :
+				if ( v->val.lval < m )
+					m = v->val.lval;
+				break;
 
-		if ( v->type == FLOAT_VAR )
-		{
-			if ( v->val.dval < m )
-				m = v->val.dval;
-			all_int = UNSET;
-			continue;
-		}
+			case FLOAT_VAR :
+				if ( v->val.dval < m )
+					m = v->val.dval;
+				all_int = UNSET;
+				break;
 
-		get_array_params( v, &len, &ilp, &idp );
+			case INT_ARR :
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.lpnt[ i ] < m )
+						m = v->val.lpnt[ i ];
+				break;
+					
+			case FLOAT_ARR :
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.dpnt[ i ] < m )
+						m = v->val.dpnt[ i ];
+				all_int = UNSET;
+				break;
 
-		if ( ilp != NULL )
-		{
-			for ( i = 0; i < len; ilp++, i++ )
-				if ( *ilp < m )
-					m = *ilp;
-		}
-		else
-		{
-			for ( i = 0; i < len; idp++, i++ )
-				if ( *idp < m )
-					m = *idp;
-			all_int = UNSET;
+			case INT_REF :
+				while ( ( gp = vars_iter( v ) ) != NULL )
+					if ( * ( long * ) gp < m )
+						m = * ( long * ) *gp;
+				break;
+
+			case FLOAT_REF :
+				while ( ( gp = vars_iter( v ) ) != NULL )
+					if ( * ( double * ) gp < m )
+						m = * ( double * ) *gp;
+				all_int = UNSET;
+				break;
 		}
 	}
 
@@ -601,35 +560,48 @@ Var *f_lmin( Var *v )
 Var *f_sin( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dest, *dsrc;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) );
 
-	get_array_params( v, &len, &ilp, &idp );
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, sin( v->val.dval ) );
 
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	if ( ilp != NULL )
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = sin( ( double ) *ilp++ );
-	else
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = sin( *idp++ );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+				*dest = sin( ( double ) *lsrc );
+			return new_var;
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+				*dest = sin( *dsrc );
+			return new_var;
 
-	T_free( rdp );
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_sin( v->val.vptr[ i ] );
+			return new_var;
+	}
 
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -640,35 +612,48 @@ Var *f_sin( Var *v )
 Var *f_cos( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dest, *dsrc;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-		return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) );
 
-	get_array_params( v, &len, &ilp, &idp );
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, cos( v->val.dval ) );
 
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	if ( ilp != NULL )
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = cos( ( double ) *ilp++ );
-	else
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = cos( *idp++ );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+				*dest = cos( ( double ) *lsrc );
+			return new_var;
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+				*dest = cos( *dsrc );
+			return new_var;
 
-	T_free( rdp );
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_cos( v->val.vptr[ i ] );
+			return new_var;
+	}
 
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -680,16 +665,13 @@ Var *f_tan( Var *v )
 {
 	double res;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -699,23 +681,44 @@ Var *f_tan( Var *v )
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		rdp[ i ] = tan( is_int ? ( double ) *ilp++ : *idp++ );
-		if ( fabs( rdp[ i ] ) == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				res = tan( ( double ) *lsrc );
+				if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+				*dest = res;
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				res = tan( *dsrc );
+				if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+				*dest = res;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_tan( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -727,16 +730,13 @@ Var *f_asin( Var *v )
 {
 	double arg;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -749,28 +749,48 @@ Var *f_asin( Var *v )
 		return vars_push( FLOAT_VAR, asin( arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
-		if ( fabs( arg ) > 1.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				if ( labs( *lsrc ) > 1 )
+				{
+					print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = asin( ( double ) *lsrc );
+			}
+			return new_var;
 
-		rdp[ i ] = asin( arg );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				if ( fabs( *dsrc ) > 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = asin( *dsrc );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_asin( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -782,16 +802,13 @@ Var *f_acos( Var *v )
 {
 	double arg;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -804,28 +821,48 @@ Var *f_acos( Var *v )
 		return vars_push( FLOAT_VAR, acos( arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
-		if ( fabs( arg ) > 1.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				if ( labs( *lsrc ) > 1 )
+				{
+					print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = acos( ( double ) *lsrc );
+			}
+			return new_var;
 
-		rdp[ i ] = acos( arg );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				if ( fabs( *dsrc ) > 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = acos( *dsrc );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_acos( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -836,35 +873,45 @@ Var *f_acos( Var *v )
 Var *f_atan( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
 
-	get_array_params( v, &len, &ilp, &idp );
+	switch ( v->type )
+	{
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+				*dest = atan( ( double ) *lsrc );
+			return new_var;
 
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	if ( ilp != NULL )
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = atan( ( double ) *ilp++ );
-	else
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = atan( *idp++ );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+				*dest = atan( *dsrc );
+			return new_var;
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_atan( v->val.vptr[ i ] );
+			return new_var;
+	}
 
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -876,16 +923,13 @@ Var *f_sinh( Var *v )
 {
 	double res;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -895,25 +939,42 @@ Var *f_sinh( Var *v )
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		res = sinh( is_int ? ( double ) *ilp++ : *idp++ );
-		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				*dest = sinh( ( double ) *lsrc );
+				if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		rdp[ i ] = res;
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				*dest = sinh( *dsrc );
+				if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_sinh( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -925,44 +986,58 @@ Var *f_cosh( Var *v )
 {
 	double res;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		res = cosh( VALUE( v ) );
-		if ( res == HUGE_VAL && errno == ERANGE )
+		res = cosh( VALUE ( v ) );
+		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
 			print( SEVERE, "Result overflow.\n" );
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		res = cosh( is_int ? ( double ) *ilp++ : *idp++ );
-		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				*dest = cosh( ( double ) *lsrc );
+				if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		rdp[ i ] = res;
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				*dest = cosh( *dsrc );
+				if ( fabs( *dest ) == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_cosh( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -973,35 +1048,45 @@ Var *f_cosh( Var *v )
 Var *f_tanh( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, tanh( VALUE( v ) ) );
 
-	get_array_params( v, &len, &ilp, &idp );
+	switch ( v->type )
+	{
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+				*dest = tanh( ( double ) *lsrc );
+			return new_var;
 
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	if ( ilp != NULL )
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = tanh( ( double ) *ilp++ );
-	else
-		for ( i = 0; i < len; i++ )
-			rdp[ i ] = tanh( *idp++ );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+				*dest = tanh( *dsrc );
+			return new_var;
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_tanh( v->val.vptr[ i ] );
+			return new_var;
+	}
 
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1012,18 +1097,15 @@ Var *f_tanh( Var *v )
 Var *f_asinh( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 	double arg, new_arg;
 	int sgn;
-	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1040,32 +1122,58 @@ Var *f_asinh( Var *v )
 		return vars_push( FLOAT_VAR, sgn * datanh( new_arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
-		sgn = arg >= 0.0 ? 1 : -1;
-		new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				arg = ( double ) *lsrc;
+				sgn = arg >= 0.0 ? 1 : -1;
+				new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
 
-		if ( new_arg >= 1.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n",
-				   i + 1, arg );
-			THROW( EXCEPTION );
-		}
+				if ( new_arg >= 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
 
-		rdp[ i ] = sgn * datanh( new_arg );
+				*dest = sgn * datanh( new_arg );
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				arg = *dsrc;
+				sgn = arg >= 0.0 ? 1 : -1;
+				new_arg = sqrt( 1.0 / ( 1.0 + 1.0 / ( arg * arg ) ) );
+
+				if ( new_arg >= 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
+
+				*dest = sgn * datanh( new_arg );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_asinh( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1076,17 +1184,14 @@ Var *f_asinh( Var *v )
 Var *f_acosh( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 	double arg, new_arg;
-	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1101,29 +1206,52 @@ Var *f_acosh( Var *v )
 		return vars_push( FLOAT_VAR, datanh( new_arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
-		if ( arg < 1.0 ||
-			 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				arg = ( double ) *lsrc;
+				if ( arg < 1.0 ||
+					 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
+				*dest = datanh( new_arg );
+			}
+			return new_var;
 
-		rdp[ i ] = datanh( new_arg );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				arg = *dsrc;
+				if ( arg < 1.0 ||
+					 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
+				*dest = datanh( new_arg );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_acosh( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1134,17 +1262,14 @@ Var *f_acosh( Var *v )
 Var *f_atanh( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 	double arg;
-	bool is_int;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1158,48 +1283,51 @@ Var *f_atanh( Var *v )
 		return vars_push( FLOAT_VAR, datanh( arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
-		if ( arg >= 1.0 || arg <= -1.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				arg = ( double ) *lsrc;
+				if ( arg >= 1.0 || arg <= -1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
 
-		rdp[ i ] = datanh( arg );
+				*dest = datanh( arg );
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				arg = *dsrc;
+				if ( arg >= 1.0 || arg <= -1.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", arg );
+					THROW( EXCEPTION );
+				}
+				*dest = datanh( arg );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_atanh( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
-}
-
-
-/*-----------------------------------*/
-/*-----------------------------------*/
-
-static double datanh( double arg )
-{
-	int sgn;
-
-	sgn = arg >= 0 ? 1 : -1;
-	arg = fabs( arg );
-
-	if ( 1.0 - arg < DBL_EPSILON )
-	{
-		print( SEVERE, "Argument overflow.\n" );
-		arg = 1.0 - DBL_EPSILON;
-	}
-
-	return sgn * 0.5 * log( ( 1.0 + arg ) / ( 1.0 - arg ) );
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1211,16 +1339,13 @@ Var *f_exp( Var *v )
 {
 	Var *new_var;
 	double res;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1232,28 +1357,46 @@ Var *f_exp( Var *v )
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		res = exp( is_int ? ( double ) *ilp++ : *idp++ );
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				*dest = exp( ( double ) *lsrc );
+				if ( *dest == 0.0 && errno == ERANGE )
+					print( WARN, "Result underflow - result is set to 0.\n" );
+				if ( *dest == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		if ( res == 0.0 && errno == ERANGE )
-			print( WARN, "Result underflow - result is set to 0.\n" );
-		if ( res == HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				*dest = exp( *dsrc );
+				if ( *dest == 0.0 && errno == ERANGE )
+					print( WARN, "Result underflow - result is set to 0.\n" );
+				if ( *dest == HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		rdp[ i ] = res;
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_exp( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1265,23 +1408,20 @@ Var *f_ln( Var *v )
 {
 	double arg, res;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
 		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", arg );
+			print( FATAL, "Argument (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 
@@ -1292,33 +1432,54 @@ Var *f_ln( Var *v )
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				if ( *lsrc <= 0 )
+				{
+					print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+					THROW( EXCEPTION );
+				}
 
-		if ( arg <= 0.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+				*dest = log( ( double ) *lsrc );
+				if ( *dest == - HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		res = log( arg );
-		if ( res == - HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				if ( *dsrc <= 0.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+					THROW( EXCEPTION );
+				}
 
-		rdp[ i ] = res;
+				*dest = log( *dsrc );
+				if ( *dest == - HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_ln( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1330,18 +1491,15 @@ Var *f_log( Var *v )
 {
 	double arg, res;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
-    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
@@ -1357,33 +1515,54 @@ Var *f_log( Var *v )
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				if ( *lsrc <= 0 )
+				{
+					print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+					THROW( EXCEPTION );
+				}
 
-		if ( arg <= 0.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
+				*dest = log10( ( double ) *lsrc );
+				if ( *dest == - HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
 
-		res = log10( arg );
-		if ( res == - HUGE_VAL && errno == ERANGE )
-			print( SEVERE, "Result overflow.\n" );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				if ( *dsrc <= 0.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+					THROW( EXCEPTION );
+				}
 
-		rdp[ i ] = res;
+				*dest = log10( *dsrc );
+				if ( *dest == - HUGE_VAL && errno == ERANGE )
+					print( SEVERE, "Result overflow.\n" );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_log( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1395,16 +1574,13 @@ Var *f_sqrt( Var *v )
 {
 	double arg;
 	Var *new_var;
-	size_t i;
-	size_t len;
-	double *rdp;
-	long *ilp;
-	double *idp;
-	bool is_int;
+	ssize_t i;
+	long *lsrc;
+	double *dsrc, *dest;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
@@ -1417,36 +1593,55 @@ Var *f_sqrt( Var *v )
 		return vars_push( FLOAT_VAR, sqrt( arg ) );
 	}
 
-	get_array_params( v, &len, &ilp, &idp );
-
-	is_int = ilp != NULL ? SET : UNSET;
-	rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-	for ( i = 0; i < len; i++ )
+	switch ( v->type )
 	{
-		arg = is_int ? ( double ) *ilp++ : *idp++;
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, lsrc++, dest++ )
+			{
+				if ( *lsrc < 0 )
+				{
+					print( FATAL, "Argument (%ld) out of range.\n", *lsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = sqrt( ( double ) *lsrc );
+			}
+			return new_var;
 
-		if ( arg < 0.0 )
-		{
-			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
-			THROW( EXCEPTION );
-		}
 
-		rdp[ i ] = sqrt( arg );
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( dsrc = v->val.dpnt, dest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, dest++ )
+			{
+				if ( *dsrc < 0.0 )
+				{
+					print( FATAL, "Argument (%f) out of range.\n", *dsrc );
+					THROW( EXCEPTION );
+				}
+				*dest = sqrt( *dsrc );
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_sqrt( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	new_var = vars_push( FLOAT_ARR, rdp, len );
-	new_var->flags |= v->flags & IS_DYNAMIC;
-
-	T_free( rdp );
-
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
 /*----------------------------------------------------------------*/
 /* Returns a random number between 0 and 1 (i.e. result is float) */
 /*----------------------------------------------------------------*/
-
 
 Var *f_random( Var *v )
 {
@@ -1481,6 +1676,8 @@ Var *f_random( Var *v )
 
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
+
+static bool grand_is_old = UNSET;
 
 Var *f_grand( Var *v )
 {
@@ -1669,82 +1866,35 @@ Var *f_date( Var *v )
 
 Var *f_dim( Var *v )
 {
-	vars_check( v, ARR_REF );
-	return vars_push( INT_VAR, ( long ) v->from->dim );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+	return vars_push( INT_VAR, ( long ) v->dim );
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function returns the size of the dimension passed to the function,  */
-/* i.e. the function takes two arguments, first the array and then the */
-/* the dimension the size is needed for.                               */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function returns the length of an array or the number of rows */
+/* of a matrix (for simple variables 1 is returned). For arrays  */
+/* or matrices 0 gets returned when no elements exist yet.       */
+/*---------------------------------------------------------------*/
 
 Var *f_size( Var *v )
 {
-	int size;
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
-
-	vars_check( v, ARR_REF );
-
-	/* Only for 1-dimensional arrays a missing second argument is allowed */
-
-	if ( v->next == NULL )
+	switch ( v->type )
 	{
-		if ( v->from->dim == 1 )
-			return vars_push( INT_VAR, ( long ) v->from->len );
+		case INT_VAR : case FLOAT_VAR :
+			print( WARN, "Argument is a number.\n" );
+			return vars_push( INT_VAR, 1L );
 
-		print( FATAL, "Missing dimension argument (array '%s' is "
-			   "%d-dimensional).\n", v->from->name, v->from->dim );
-		THROW( EXCEPTION );
+		case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
+			return vars_push( INT_VAR, ( long ) v->len );
 	}
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-
-	if ( v->next->type == FLOAT_VAR )
-	{
-		print( WARN, "Floating point value used as index for array '%s'.\n",
-			   v->from->name );
-		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
-	}
-	else
-		size = ( int ) v->next->val.lval - ARRAY_OFFSET;
-
-	if ( size >= v->from->dim )
-	{
-		print( FATAL, "Array '%s' has only %d dimensions, can't return size "
-			   "of %d. dimension.\n", v->from->name, v->from->dim, size );
-		THROW( EXCEPTION );
-	}
-
-	if ( size == v->from->dim - 1 && v->from->flags & NEED_ALLOC )
-	{
-		print( FATAL, "Array '%s' is variable sized and size of %d. dimension "
-			   "is still unknown.\n", v->from->name, v->from->dim );
-		THROW( EXCEPTION );
-	}
-
-	return vars_push( INT_VAR, ( long ) v->from->sizes[ size ] );
-}
-
-
-/*--------------------------------------------------------*/
-/* Function returns the sizes of the different dimension  */
-/* of an array as an 1-dimensional array.                 */
-/*--------------------------------------------------------*/
-
-Var *f_sizes( Var *v )
-{
-	vars_check( v, ARR_REF );
-
-	if ( v->from->flags & NEED_ALLOC )
-	{
-		print( FATAL, "Array '%s' is variable sized and size of last "
-			   "dimension is still unknown.\n", v->from->name );
-		THROW( EXCEPTION );
-	}
-
-	return vars_push( INT_ARR, v->from->sizes, ( long ) v->from->dim );
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1753,19 +1903,18 @@ Var *f_sizes( Var *v )
 /* If only an array (or a pointer to an array is passed to the function */
 /* the mean of all array elements is calculated. If there's a second    */
 /* argument it's taken to be an index into the array at which the       */
-/* calculation of the maen starts. If there's a third argument it has   */
+/* calculation of the mean starts. If there's a third argument it has   */
 /* be the number of elements to be included into the mean.              */
 /*----------------------------------------------------------------------*/
 
 Var *f_mean( Var *v )
 {
-	size_t i;
-	size_t len;
-	long *ilp = NULL;
-	double *idp = NULL;
-	double val;
-	long a_index;
-	size_t slice_len;
+	ssize_t i;
+	long start;
+	ssize_t len;
+	double sum = 0.0;
+	long count;
+	void *gp;
 
 
 	if ( v == NULL )
@@ -1774,66 +1923,138 @@ Var *f_mean( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
-				   INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_PTR );
 
-	get_array_params( v, &len, &ilp, &idp );
-	slice_len = len;
+	start = 0;
+	len = v->len;
 
-	/* The following optional parameter are the start index into to the array
-	   and the length of the subarray to be used for the calculation */
-
-	if ( v->next != NULL )
+	if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) && v->next != NULL )
 	{
-		a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
+		start = get_strict_long( v->next, "start index in array" )
+				- ARRAY_OFFSET;
 
-		if ( a_index < 0 )
+		if ( start < 0 || start >= v->len )
 		{
-			print( FATAL, "Invalid array index (%ld).\n",
-				   a_index + ARRAY_OFFSET );
+			print( FATAL, "Invalid start index (%ld).\n", start );
 			THROW( EXCEPTION );
 		}
 
-		if ( ilp != NULL )
-			ilp += a_index;
-		else
-			idp += a_index;
-
 		if ( v->next->next != NULL )
 		{
-			slice_len = get_long( v->next->next, "length of slice" );
+			len = get_strict_long( v->next->next, "array slice length" );
 
-			if ( slice_len < 1 )
+			if ( len < 1 )
 			{
-				print( FATAL, "Zero or negative slice length (%ld).\n",
-					   slice_len );
+				print( FATAL, "Invalid array slice length (%ld).\n",
+					   ( long ) len );
 				THROW( EXCEPTION );
 			}
 
-			/* Test that the slice is within the arrays range */
-
-			if ( slice_len != 1 && a_index + slice_len > len ) {
-				if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
-					slice_len = len - a_index;
-				else
-				{
-					print( FATAL, "Sum of index and slice length parameter "
-						   "exceeds length of array.\n" );
-					THROW( EXCEPTION );
-				}
+			if ( start + len > v->len )
+			{
+				print( FATAL, "Sum of index and slice length parameter "
+					   "exceeds length of array.\n" );
+				THROW( EXCEPTION );
 			}
 		}
 		else
-			slice_len = len - a_index;
+			len = v->len - start;
 	}
 
-	for ( val = 0.0, i = 0; i < slice_len; i++ )
-		if ( ilp != NULL )
-			val += ( double ) *ilp++;
-		else
-			val += *idp++;
+	switch ( v->type )
+	{
+		case INT_VAR :
+			print( WARN, "Argument is a number.\n" );
+			return vars_push( INT_VAR, v->val.lval );
 
-	return vars_push( FLOAT_VAR, val / ( double ) slice_len );
+		case FLOAT_VAR :
+			print( WARN, "Argument is a number.\n" );
+			return vars_push( FLOAT_VAR, v->val.dval );
+
+		case INT_ARR :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			for ( count = 0, i = start; i < start + len; count++, i++ )
+				sum += ( double ) v->val.lpnt[ i ];
+			break;
+
+		case FLOAT_ARR :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			for ( count = 0, i = start; i < start + len; count++, i++ )
+				sum += v->val.dpnt[ i ];
+			break;
+
+		case INT_REF :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			if ( start == 0 && len == v->len )
+			{
+				count = 0;
+				while ( ( gp = vars_iter( v ) ) != NULL )
+				{
+					sum += * ( long * ) gp;
+					count++;
+				}
+			}
+			else
+				for ( count = 0, i = start; i < start + len; i++ )
+					while ( ( gp = vars_iter( v->val.vptr[ i ] ) ) != NULL )
+					{
+						sum += * ( long * ) gp;
+						count++;
+					}
+			break;
+			
+		case FLOAT_REF :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			if ( start == 0 && len == v->len )
+			{
+				count = 0;
+				while ( ( gp = vars_iter( v ) ) != NULL )
+				{
+					sum += * ( double * ) gp;
+					count++;
+				}
+			}
+			else
+				for ( count = 0, i = start; i < start + len; i++ )
+					while ( ( gp = vars_iter( v->val.vptr[ i ] ) ) != NULL )
+					{
+						sum += * ( double * ) gp;
+						count++;
+					}
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+	if ( count == 0 )
+	{
+		print( FATAL, "Number of array or matrix elements is 0.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( FLOAT_VAR, sum / ( double ) count );
 }
 
 
@@ -1842,13 +2063,12 @@ Var *f_mean( Var *v )
 
 Var *f_rms( Var *v )
 {
-	size_t i;
-	size_t len;
-	size_t slice_len;
-	long *ilp;
-	double *idp;
-	double val;
-	long a_index;
+	ssize_t i;
+	long start;
+	ssize_t len;
+	double sum = 0.0;
+	long count;
+	void *gp;
 
 
 	if ( v == NULL )
@@ -1857,138 +2077,228 @@ Var *f_rms( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
-				   INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_PTR );
 
-	get_array_params( v, &len, &ilp, &idp );
-	slice_len = len;
+	start = 0;
+	len = v->len;
 
-	/* The following optional parameter are the start index into to the array
-	   and the length of the subarray to be used for the calculation */
-
-	if ( v->next != NULL )
+	if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) && v->next != NULL )
 	{
-		a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
+		start = get_strict_long( v->next, "start index in array" )
+				- ARRAY_OFFSET;
 
-		if ( a_index < 0 )
+		if ( start < 0 || start >= v->len )
 		{
-			print( FATAL, "Invalid array index (%ld).\n",
-				   a_index + ARRAY_OFFSET );
+			print( FATAL, "Invalid start index (%ld).\n", start );
 			THROW( EXCEPTION );
 		}
-
-		if ( ilp != NULL )
-			ilp += a_index;
-		else
-			idp += a_index;
 
 		if ( v->next->next != NULL )
 		{
-			slice_len = get_long( v->next->next, "length of slice" );
+			len = get_strict_long( v->next->next, "array slice length" );
 
-			if ( slice_len < 1 )
+			if ( len < 1 )
 			{
-				print( FATAL, "Zero or negative slice length (%ld).\n",
-					   slice_len );
+				print( FATAL, "Invalid array slice length (%ld).\n",
+					   ( long ) len );
 				THROW( EXCEPTION );
 			}
 
-			/* Test that the slice is within the arrays range */
-
-			if ( slice_len != 1 && a_index + slice_len > len ) {
-				if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
-					slice_len = len - a_index;
-				else
-				{
-					print( FATAL, "Sum of index and slice length parameter "
-						   "exceeds length of array.\n" );
-					THROW( EXCEPTION );
-				}
+			if ( start + len > v->len )
+			{
+				print( FATAL, "Sum of index and slice length parameter "
+					   "exceeds length of array.\n" );
+				THROW( EXCEPTION );
 			}
 		}
 		else
-			slice_len = len - a_index;
+			len = v->len - start;
 	}
 
-	for ( val = 0.0, i = 0; i < slice_len; i++ )
-		if ( ilp != NULL )
-		{
-			val += ( double ) *ilp * ( double ) *ilp;
-			ilp++;
-		}
-		else
-		{
-			val += *idp * *idp;
-			idp++;
-		}
+	switch ( v->type )
+	{
+		case INT_VAR :
+			print( WARN, "Argument is a number.\n" );
+			return vars_push( INT_VAR, labs( v->val.lval ) );
 
-	return vars_push( FLOAT_VAR, sqrt( val ) / ( double ) len );
+		case FLOAT_VAR :
+			print( WARN, "Argument is a number.\n" );
+			return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
+
+		case INT_ARR :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			for ( count = 0, i = start; i < start + len; count++, i++ )
+				sum +=
+					 ( double ) v->val.lpnt[ i ] * ( double ) v->val.lpnt[ i ];
+			break;
+
+		case FLOAT_ARR :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			for ( count = 0, i = start; i < start + len; count++, i++ )
+				sum += v->val.dpnt[ i ] * v->val.dpnt[ i ];
+			break;
+
+		case INT_REF :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			if ( start == 0 && len == v->len )
+			{
+				count = 0;
+				while ( ( gp = vars_iter( v ) ) != NULL )
+				{
+					sum += * ( long * ) gp * * ( long * ) gp;
+					count++;
+				}
+			}
+			else
+				for ( count = 0, i = start; i < start + len; i++ )
+					while ( ( gp = vars_iter( v->val.vptr[ i ] ) ) != NULL )
+					{
+						sum += * ( long * ) gp * * ( long * ) gp;
+						count++;
+					}
+			break;
+			
+		case FLOAT_REF :
+			if ( v->len == 0 )
+			{
+				count = 0;
+				break;
+			}
+
+			if ( start == 0 && len == v->len )
+			{
+				count = 0;
+				while ( ( gp = vars_iter( v ) ) != NULL )
+				{
+					sum += * ( double * ) gp * * ( double * ) gp;
+					count++;
+				}
+			}
+			else
+				for ( count = 0, i = start; i < start + len; i++ )
+					while ( ( gp = vars_iter( v->val.vptr[ i ] ) ) != NULL )
+					{
+						sum += * ( double * ) gp * * ( double * ) gp;
+						count++;
+					}
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+	if ( count == 0 )
+	{
+		print( FATAL, "Number of array or matrix elements is 0.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( FLOAT_VAR, sqrt( sum ) / ( double ) count );
 }
 
 
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
+/*----------------------------------------------*/
+/* Function for creating a slice of an 1D array */
+/* or a submatrix of a more-dimensional matrix  */
+/*----------------------------------------------*/
 
 Var *f_slice( Var *v )
 {
-	size_t len;
-	long *ilp;
-	double *idp;
-	long a_index;
-	size_t slice_len;
+	long start;
+	ssize_t len;
+	Var *nv;
+	ssize_t old_len;
+	Var **old_vptr;
 
 
-	if ( v == NULL || v->next == NULL )
+	vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+
+	start = 0;
+	len = v->len;
+
+	if ( v->next != NULL )
 	{
-		print( FATAL, "Not enough parameter.\n" );
-		THROW( EXCEPTION );
-	}
+		start = get_long( v->next, "array index" ) - ARRAY_OFFSET;
 
-	vars_check( v, INT_CONT_ARR | FLOAT_CONT_ARR | ARR_REF | ARR_PTR |
-				   INT_ARR | FLOAT_ARR );
-
-	get_array_params( v, &len, &ilp, &idp );
-
-	a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
-
-	if ( a_index < 0 )
-	{
-		print( FATAL, "Invalid array index (%ld).\n", a_index + ARRAY_OFFSET );
-		THROW( EXCEPTION );
-	}
-
-	if ( v->next->next != NULL )
-	{
-		slice_len = get_long( v->next->next, "length of slice" );
-
-		if ( slice_len < 1 )
+		if ( start < 0 || start >= v->len )
 		{
-			print( FATAL, "Zero or negative slice length (%ld).\n",
-				   slice_len );
+			print( FATAL, "Invalid array index (%ld).\n",
+				   start + ARRAY_OFFSET );
 			THROW( EXCEPTION );
 		}
-	}
-	else
-		slice_len = len - a_index;
 
-	/* Test that the slice is within the arrays range */
+		if ( v->next->next != NULL )
+		{
+			len = get_long( v->next->next, "length of slice" );
 
-	if ( a_index + slice_len > len )
-	{
-		if ( Internals.mode == TEST && ( v->flags & IS_DYNAMIC ) )
-			slice_len = len - a_index;
+			if ( len < 1 )
+			{
+				print( FATAL, "Invalid array slice length (%ld).\n",
+					   ( long ) len );
+				THROW( EXCEPTION );
+			}
+
+			if ( start + len > v->len )
+			{
+				print( FATAL, "Sum of index and slice length parameter "
+					   "exceeds length of array.\n" );
+				THROW( EXCEPTION );
+			}
+		}
 		else
-		{
-			print( FATAL, "Sum of index and slice length parameter "
-				   "exceeds length of array.\n" );
-			THROW( EXCEPTION );
-		}
+			len = v->len - start;
 	}
 
-	if ( ilp != NULL )
-		return vars_push( INT_ARR, ilp + a_index, slice_len );
-	else
-		return vars_push( FLOAT_ARR, idp + a_index, slice_len );
+	switch ( v->type )
+	{
+		case INT_ARR :
+			return vars_push( INT_ARR, v->val.lpnt + start, len );
+
+		case FLOAT_ARR :
+			return vars_push( FLOAT_ARR, v->val.dpnt + start, len );
+
+		case INT_REF : case FLOAT_REF :
+			old_len  = v->len;
+			old_vptr = v->val.vptr;
+
+			v->val.vptr = v->val.vptr + start;
+			v->len      = len;
+
+			TRY
+			{
+				nv = vars_push( v->type, v );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				v->val.vptr = old_vptr;
+				v->len      = old_len;
+				RETHROW( );
+			}
+
+			v->val.vptr = old_vptr;
+			v->len      = old_len;
+			return nv;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -1998,54 +2308,72 @@ Var *f_slice( Var *v )
 Var *f_square( Var *v )
 {
 	Var *new_var;
-	size_t i;
-	size_t len;
-	long *rlp;
-	double *rdp;
-	long *ilp;
-	double *idp;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_CONT_ARR | FLOAT_CONT_ARR |
-				   ARR_REF | ARR_PTR | INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
 		case INT_VAR :
-			if ( ( double ) v->val.lval >= sqrt( ( double ) LONG_MAX ) )
+			if ( labs( v->val.lval ) >= sqrt( ( double ) LONG_MAX ) )
 				print( SEVERE, "Result overflow.\n" );
 			return vars_push( INT_VAR, v->val.lval * v->val.lval );
 
 		case FLOAT_VAR :
+			if ( fabs( v->val.dval ) > sqrt( HUGE_VAL ) )
+				print( SEVERE, "Result overflow.\n" );
 			return vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
 
-		default :
-			get_array_params( v, &len, &ilp, &idp );
+		case INT_ARR :
+			new_var = vars_make( INT_ARR, v );
+			lmax = sqrt( ( double ) LONG_MAX );
+			for ( lsrc = v->val.lpnt, ldest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+			{
+				if ( labs( *lsrc ) > lmax )
+					print( SEVERE, "Result overflow.\n" );
+				*ldest = *lsrc * *lsrc;
+			}
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+			{
+				if ( fabs( *dsrc ) > dmax )
+					print( SEVERE, "Result overflow.\n" );
+				*ddest = *dsrc * *dsrc;
+			}
+			return new_var;
+
+		case INT_REF :
+			new_var = vars_make( INT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_square( v->val.vptr[ i ] );
+			return new_var;
+
+		case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+			return new_var;
 	}
 
-	if ( ilp != NULL )
-	{
-		rlp = LONG_P T_malloc( len * sizeof *rlp );
-		for ( i = 0; i < len; ilp++, i++ )
-		{
-			if ( ( double ) *ilp >= sqrt( ( double ) LONG_MAX ) )
-				print( SEVERE, "Result overflow.\n" );
-			rlp[ i ] = *ilp * *ilp;
-		}
-		new_var = vars_push( INT_ARR, rlp, len );
-		T_free( rlp );
-	}
-	else
-	{
-		rdp = DOUBLE_P T_malloc( len * sizeof *rdp );
-		for ( i = 0; i < len; idp++, i++ )
-			rdp[ i ] = *idp * *idp;
-		new_var = vars_push( FLOAT_ARR, rdp, len );
-		T_free( rdp );
-	}
-
-	new_var->flags |= v->flags & IS_DYNAMIC;
-	return new_var;
+	fsc2_assert( 1 == 0 );
+	return NULL;
 }
 
 
@@ -2107,6 +2435,28 @@ Var *f_fslice( Var *v )
 	T_free( array );
 
 	return ret;
+}
+
+
+/*--------------------------------------------*/
+/* Function is used in the calculation of the */
+/* asinh(), acosh() and atanh() functions.    */
+/*--------------------------------------------*/
+
+static double datanh( double arg )
+{
+	int sgn;
+
+	sgn = arg >= 0 ? 1 : -1;
+	arg = fabs( arg );
+
+	if ( 1.0 - arg < DBL_EPSILON )
+	{
+		print( SEVERE, "Argument overflow.\n" );
+		arg = 1.0 - DBL_EPSILON;
+	}
+
+	return sgn * 0.5 * log( ( 1.0 + arg ) / ( 1.0 - arg ) );
 }
 
 

@@ -204,20 +204,26 @@ static void unpack_and_accept( int dim, char *ptr )
 				ptr_next = ptr + sizeof( double );
 				break;
 
-			case INT_CONT_ARR :
+			case INT_ARR :
 				memcpy( &len, ptr, sizeof len );
+				if ( len == 0 )
+					continue;
 				ptr_next = ptr + sizeof len + len * sizeof( long );
 				break;
 
-			case FLOAT_CONT_ARR :
+			case FLOAT_ARR :
 				memcpy( &len, ptr, sizeof len );
+				if ( len == 0 )
+					continue;
 				ptr_next = ptr + sizeof len + len * sizeof( double );
 				break;
 
+#ifndef NDEBUG
 			default :
 				eprint( FATAL, UNSET, "Internal communication error at "
 						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
+#endif
 		}
 
 		if ( dim == DATA_1D )
@@ -338,10 +344,12 @@ static void other_data_request( int dim, int type, char *ptr )
 			change_mode( mode, width );
 			break;
 
+#ifndef NDEBUG
 		default :                             /* unknown command */
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
+#endif
 	}
 }
 
@@ -482,7 +490,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	for ( cur_ptr = ptr, i = x_index, sp = G1.curve[ curve ]->points + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			memcpy( &ldata, cur_ptr, sizeof ldata );
 			data = ( double ) ldata;
@@ -609,9 +617,9 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 
 	if ( len > G1.nx )
 	{
-		fsc2_assert( type ==  INT_CONT_ARR || type == FLOAT_CONT_ARR );
+		fsc2_assert( type ==  INT_ARR || type == FLOAT_ARR );
 		ptr += ( len - G1.nx )
-			   * ( type == INT_CONT_ARR ? sizeof( long ) : sizeof( double ) );
+			   * ( type == INT_ARR ? sizeof( long ) : sizeof( double ) );
 		len = G1.nx;
 	}
 
@@ -675,7 +683,7 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 	for ( cur_ptr = ptr, i = 0, sp = cv->points + cv->count;
 		  i < len; sp++, i++ )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			memcpy( &ldata, cur_ptr, sizeof ldata );
 			data = ( double ) ldata;
@@ -841,7 +849,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		  sp = cv->points + y_index * G2.nx + x_index;
 		  i < x_index + len; sp++, i++ )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			memcpy( &ldata, cur_ptr, sizeof ldata );
 			data = ( double ) ldata;
@@ -915,15 +923,17 @@ static long get_number_of_new_points( char **ptr, int type )
 			len = 1;
 			break;
 
-		case INT_CONT_ARR : case FLOAT_CONT_ARR :
+		case INT_ARR : case FLOAT_ARR :
 			memcpy( &len, *ptr, sizeof len );
 			*ptr += sizeof len;
 			break;
 
+#ifndef NDEBUG
 		default :
 			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
+#endif
 	}
 
 #ifndef NDEBUG
@@ -957,7 +967,7 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 
 	for ( i = 0; i < len; i++ )
 	{
-		if ( type & ( INT_VAR | INT_CONT_ARR ) )
+		if ( type & ( INT_VAR | INT_ARR ) )
 		{
 			memcpy( &ldata, ptr, sizeof ldata );
 			data = ( double ) ldata;

@@ -79,20 +79,20 @@ typedef	struct {
 } Scaled_Point;
 
 
-typedef struct MRKR1_ {
+typedef struct Marker_1D {
 	long x_pos;
 	long color;
 	GC gc;
-	struct MRKR1_ *next;
+	struct Marker_1D *next;
 } Marker_1D;
 
 
-typedef struct MRKR2_ {
+typedef struct Marker_2D {
 	long x_pos;
 	long y_pos;
 	long color;
 	GC gc;
-	struct MRKR2_ *next;
+	struct Marker_2D *next;
 } Marker_2D;
 
 

@@ -22,19 +22,17 @@
 */
 
 
-#if ! defined VARS_UTIL_HEADER
-#define VARS_UTIL_HEADER
+#if ! defined VARS_MOD_HEADER
+#define VARS_MOD_HEADER
 
 
 #include "fsc2.h"
 
 
-Var *vars_negate( Var *v );
-Var *vars_comp( int comp_type, Var *v1, Var *v2 );
-Var *vars_lnegate( Var *v );
+Var *vars_mod( Var *v1, Var *v2 );
 
 
-#endif  /* ! VARS_UTIL_HEADER */
+#endif  /* ! VARS_MOD_HEADER */
 
 
 /*

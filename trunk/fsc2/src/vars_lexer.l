@@ -284,9 +284,8 @@ WS          [\n \t]+
 
 				/* If it's not a function it's got to be a variable */
 
-				if ( ( varslval.vptr = vars_get( varstext ) )
-				     == NULL )
-			         varslval.vptr = vars_new( varstext );
+				if ( ( varslval.vptr = vars_get( varstext ) ) == NULL )
+					varslval.vptr = vars_new( varstext );
 				return VAR_TOKEN;
 			}
 
@@ -387,11 +386,9 @@ int variables_parser( FILE *in )
 	if ( is_restart )
 	    varsrestart( varsin );
 	else
-		 is_restart = SET;
+		is_restart = SET;
 
 	varsparse( );
-
-	vars_sort( );
 
 	return Vars_Next_Section;
 }

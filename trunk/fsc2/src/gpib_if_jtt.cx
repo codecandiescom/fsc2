@@ -22,7 +22,7 @@
 */
 
 
-#define __GPIB_IF__
+#define GPIB_IF_JTT_MAIN_SRC
 
 
 #include "fsc2.h"

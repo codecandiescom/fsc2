@@ -29,6 +29,10 @@
 /*------------------------------------------------------------------------*/
 
 
+#define ! GPIB_IF_LPP_HEADER
+#define GPIB_IF_LPP_HEADER
+
+
 /* If ib.h can't be found set the variable GPIB_HEADER_FILE in the top level
    Makefile to the full path of the directory where this header file resides */
 
@@ -49,7 +53,7 @@
 #endif
 
 
-#if defined ( __GPIB__ )
+#if defined ( GPIB_IF_LLP_MAIN_SRC )
 	#define GPIB_VARIABLE
 #else
 	#define GPIB_VARIABLE extern
@@ -59,12 +63,11 @@
 #define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 
-typedef struct _gd_
-{
-	int number;           /* device number */
-    char *name;           /* symbolic name of device */
-	struct _gd_ *next;    /* pointer to next GPIB_DEV structure */
-	struct _gd_ *prev;    /* pointer to previous GPIB_DEV structure */
+typedef struct GPIB_DEV {
+	int number;               /* device number */
+    char *name;               /* symbolic name of device */
+	struct GPIB_DEV *next;    /* pointer to next GPIB_DEV structure */
+	struct GPIB_DEV *prev;    /* pointer to previous GPIB_DEV structure */
 } GPIB_DEV;
 
 
@@ -111,6 +114,9 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 /*-------------------------------*/
 
 #define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
+
+
+#endif /* ! GPIB_IF_LPP_HEADER */
 
 
 /*

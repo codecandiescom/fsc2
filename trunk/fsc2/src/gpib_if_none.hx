@@ -29,6 +29,10 @@
 /*------------------------------------------------------------------------*/
 
 
+#if ! defined GPIB_IF_NONE_HEADER
+#define GPIB_IF_NONE_HEADER
+
+
 #define GPIB_NONE
 
 
@@ -62,7 +66,7 @@
 #define GPIB_EOT  0x08    /* Send END with last byte    */
 
 
-#if defined ( __GPIB_IF__ )
+#if defined ( GPIB_IF_NONE_MAIN_SRC )
 	#define GPIB_VARIABLE
 #else
 	#define GPIB_VARIABLE extern
@@ -108,6 +112,9 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 /*-------------------------------*/
 
 #define GPIB_IS_TIMEOUT     0
+
+
+#endif /* ! GPIB_IF_NONE_HEADER */
 
 
 /*

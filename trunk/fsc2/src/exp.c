@@ -69,7 +69,6 @@ static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
-static void save_restore_variables( bool flag );
 static const char *get_construct_name( int type );
 
 
@@ -850,7 +849,7 @@ void exp_test_run( void )
 		*/
 
 		Internals.mode = TEST;
-		save_restore_variables( SET );
+		vars_save_restore( SET );
 
 		experiment_time( );
 		EDL.experiment_time = 0.0;
@@ -905,7 +904,7 @@ void exp_test_run( void )
 		tools_clear( );
 
 		EDL.Fname = NULL;
-		save_restore_variables( UNSET );
+		vars_save_restore( UNSET );
 
 		EDL.File_List_Len = old_FLL;
 		close_all_files( );
@@ -915,7 +914,7 @@ void exp_test_run( void )
 	}
 
 	EDL.Fname = NULL;
-	save_restore_variables( UNSET );
+	vars_save_restore( UNSET );
 	EDL.File_List_Len = old_FLL;
 	Internals.mode = PREPARATION;
 }
@@ -1549,122 +1548,12 @@ bool test_for_cond( Prg_Token *cur )
 
 	/* We can't end up here... */
 
+#ifndef NDEBUG
 	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
 	THROW( EXCEPTION );
+#endif
 
 	return FAIL;
-}
-
-
-/*------------------------------------------------------------------------*/
-/* This functions saves or restores all variables depending on 'flag'. If */
-/* 'flag' is set the variables are saved, otherwise they are copied back  */
-/* from the backup into the normal variables space. Don't use the saved   */
-/* variables - the internal pointers are not adjusted. Currently, for     */
-/* string variables the string is not saved but just the pointer to the   */
-/* string but since they should never change this shouldn't be a problem. */
-/* Never ever change the memory locations of the variables between saving */
-/* and restoring !!!                                                      */
-/*------------------------------------------------------------------------*/
-
-static void save_restore_variables( bool flag )
-{
-	Var *src;
-	Var *cpy;
-	static Var *var_list_copy = NULL;      /* area for storing variables    */
-	static Var *old_var_list;              /* needed to satisfy my paranoia */
-	long var_count;                        /* number of variables to save   */
-	static bool exists_copy = UNSET;
-
-
-	if ( flag )
-	{
-		fsc2_assert( ! exists_copy );      /* don't save twice ! */
-
-		if ( EDL.Var_List == NULL )
-		{
-			old_var_list = var_list_copy = NULL;
-			exists_copy = SET;
-			return;
-		}
-
-		/* Count the number of variables and get memory for storing them */
-
-		for ( var_count = 0, src = EDL.Var_List; src != NULL;
-			  var_count++, src = src->next )
-			/* empty */ ;
-
-		var_list_copy = VAR_P T_malloc( var_count * sizeof( Var ) );
-
-		/* Copy all of them into the backup region */
-
-		for ( src = EDL.Var_List, cpy = var_list_copy; src != NULL;
-			  cpy++, src = src->next )
-		{
-			memcpy( cpy, src, sizeof( Var ) );
-
-			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
-			{
-				src->val.lpnt = NULL;
-				src->val.lpnt = LONG_P
-					  get_memcpy( cpy->val.lpnt, cpy->len * sizeof( long ) );
-			}
-			if ( cpy->type == FLOAT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) )
-			{
-				src->val.dpnt = NULL;
-				src->val.dpnt = DOUBLE_P
-					  get_memcpy( cpy->val.dpnt, cpy->len * sizeof( double ) );
-			}
-
-			if ( cpy->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) &&
-				 cpy->sizes != NULL )
-			{
-				src->sizes = NULL;
-				src->sizes = UINT_P
-					        get_memcpy( cpy->sizes, cpy->dim * sizeof( int ) );
-			}
-		}
-
-		old_var_list = EDL.Var_List;
-		exists_copy = SET;
-	}
-	else
-	{
-		fsc2_assert( exists_copy );             /* no restore without save ! */
-		fsc2_assert( EDL.Var_List == old_var_list );   /* a bit paranoid... */
-
-		if ( var_list_copy == NULL )
-		{
-			exists_copy = UNSET;
-			return;
-		}
-
-		/* Get rid of memory for arrays that might have been changed during
-		   the test */
-
-		for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
-		{
-			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
-				 cpy->val.lpnt != NULL )
-				T_free( cpy->val.lpnt );
-			if ( cpy->type == FLOAT_CONT_ARR &&
-				 ! ( cpy->flags & NEED_ALLOC ) &&
-				 cpy->val.dpnt != NULL )
-				T_free( cpy->val.dpnt );
-			if ( cpy->type & ( INT_CONT_ARR | FLOAT_CONT_ARR ) &&
-				 cpy->sizes != NULL )
-				T_free( cpy->sizes );
-		}
-
-		for ( src = var_list_copy, cpy = EDL.Var_List; cpy != NULL;
-			  cpy = src->next, src++  )
-			memcpy( cpy, src, sizeof( Var ) );
-
-		/* Deallocate memory used in arrays */
-
-		var_list_copy = VAR_P T_free( var_list_copy );
-		exists_copy = UNSET;
-	}
 }
 
 
@@ -1695,12 +1584,13 @@ static const char *get_construct_name( int type )
 
 		case UNLESS_TOK :
 			return "UNLESS construct";
-
-		default :
-			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
 	}
+
+#ifndef NDEBUG
+	eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+			__FILE__, __LINE__ );
+	THROW( EXCEPTION );
+#endif
 
 	return NULL;                  /* we'll never get here... */
 }

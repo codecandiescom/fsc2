@@ -27,21 +27,21 @@
 #include "fsc2.h"
 
 
-typedef struct Dev_ {
+typedef struct Device {
 	char *name;
 	Lib_Struct driver;
 	bool is_loaded;
 	const char *generic_type;
 	const char *device_name;
-	struct Dev_ *next;
-	struct Dev_ *prev;
+	struct Device *next;
+	struct Device *prev;
 	int count;
 } Device;
 
 
-typedef struct DN_ {
+typedef struct Device_Name {
 	char *name;
-	struct DN_ *next;
+	struct Device_Name *next;
 } Device_Name;
 
 

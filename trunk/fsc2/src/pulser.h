@@ -90,10 +90,10 @@ enum {
 };
 
 
-typedef struct P_List_ {
+typedef struct P_List {
 	long num;
 	long dev_num;
-	struct P_List_ *next;
+	struct P_List *next;
 } P_List;
 
 

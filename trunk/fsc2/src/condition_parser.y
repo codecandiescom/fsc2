@@ -149,8 +149,9 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
        | E_FLOAT_TOKEN unit       { if ( ! condition_gobble )
 		                                $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN unit         { if ( ! condition_gobble )
-		                                $$ = apply_unit( $1, $2 );
+       | E_VAR_TOKEN              { if ( ! condition_gobble )
+		                                $$ = vars_add( vars_push( INT_VAR, 0 ),
+													   $1 );
 	                                else
 										vars_pop( $1 ); }
        | E_VAR_TOKEN '['          { if ( ! condition_gobble )
@@ -161,16 +162,11 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
                                         $$ = vars_push( UNDEF_VAR ); }
 		 ']'                      { if ( ! condition_gobble )
                                         $$ = vars_arr_rhs( $4 ); }
-         unit                     { if ( $<vptr>7 != NULL &&
-										 ! condition_gobble )
-                                        $$ = apply_unit( $<vptr>7, $8 ); }
        | E_FUNC_TOKEN '(' list
          ')'                      { if ( ! condition_gobble )
 			                            $$ = func_call( $1 );
 	                                else
 										vars_pop( $1 ); }
-         unit                     { if ( ! condition_gobble )
-                                        $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF                { if ( condition_gobble )
 		                                 vars_pop( $1 ); }
        | E_STR_TOKEN              { if ( ! condition_gobble )
@@ -258,8 +254,8 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
                                         $$ = $2; }
        | '-' expr %prec E_NEG     { if ( ! condition_gobble )
                                         $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { if ( ! condition_gobble )
-                                        $$ = apply_unit( $2, $4 ); }
+       | '(' expr ')'             { if ( ! condition_gobble )
+                                        $$ = $2; }
 ;
 
 unit:    /* empty */              { $$ = NULL; }

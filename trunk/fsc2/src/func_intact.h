@@ -28,12 +28,12 @@
 #include "fsc2.h"
 
 
-typedef struct _IOBJ_ {
+typedef struct IOBJECT {
 
 	long ID;                  /* ID of object */
 	FL_OBJECT *self;
-	struct _IOBJ_ *prev;      /* pointer to previous object */
-	struct _IOBJ_ *next;      /* pointer to next object */
+	struct IOBJECT *prev;     /* pointer to previous object */
+	struct IOBJECT *next;     /* pointer to next object */
 
 	int type;                 /* object type (BUTTON, SLIDER, etc.) */
 

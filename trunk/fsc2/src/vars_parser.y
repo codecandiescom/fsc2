@@ -109,12 +109,22 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													  $2 ); }
        | FLOAT_TOKEN unit          { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | VAR_TOKEN unit            { $$ = apply_unit( $1, $2 ); }
-       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+       | VAR_TOKEN                 { if ( $1->flags & NEW_VARIABLE )
+	                                 {
+										 print( FATAL, "Variable '%s' does not"
+												" exist.\n", $1->name );
+										 THROW( EXCEPTION );
+									 }
+	                                 $$ = vars_push_copy( $1 ); }
+       | VAR_TOKEN '['             { if ( $1->flags & NEW_VARIABLE )
+	                                 {
+										 print( FATAL, "Variable '%s' does not"
+												" exist.\n", $1->name );
+										 THROW( EXCEPTION );
+									 }
+	                                 vars_arr_start( $1 ); }
          list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
-         unit                      { $$ = apply_unit( $<vptr>6, $7 ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
-         unit                      { $$ = apply_unit( $<vptr>5, $6 ); }
        | VAR_REF
        | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
 											$1->name );
@@ -142,7 +152,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
        | '+' expr %prec NEG        { $$ = $2; }
        | '-' expr %prec NEG        { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
+       | '(' expr ')'              { $$ = $2; }
 ;
 
 
@@ -174,7 +184,7 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 
 list1a:   expr                     { $$ = $1; }
         | '*'                      { ( $$ = vars_push( INT_VAR, 0 ) )->flags
-										                   |= VARIABLE_SIZED; }
+										                       |= IS_DYNAMIC; }
 ;
 
 list1b:   /* empty */

@@ -880,12 +880,14 @@ void p_phase_ref( int func, int ref )
 	{
 		if ( pulser_struct[ Cur_Pulser ].needs_phase_pulses )
 		{
+#ifndef NDEBUG
 			if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
 			{
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 			}
+#endif
 
 			if ( func != PULSER_CHANNEL_PHASE_1 &&
 				 func != PULSER_CHANNEL_PHASE_2 )
@@ -904,6 +906,7 @@ void p_phase_ref( int func, int ref )
 		}
 		else
 		{
+#ifndef NDEBUG
 			if ( ( func != 0 && func != 1 )    ||
 				 ref < 0 || ref >= PULSER_CHANNEL_NUM_FUNC )
 			{
@@ -911,6 +914,7 @@ void p_phase_ref( int func, int ref )
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 			}
+#endif
 
 			if ( ref == PULSER_CHANNEL_PHASE_1 ||
 				 ref == PULSER_CHANNEL_PHASE_2 )
