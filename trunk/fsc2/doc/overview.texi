@@ -59,17 +59,17 @@ be done by writing a (usually rather short) script. @code{fsc2} will
 interpret this script and do the experiment accordingly. Writing a
 script may sound difficult, but the @code{EDL} language that is used to
 define an experiment isn't very hard to learn. And when this hurdle has
-been taken you will have complete control over the way the experiment is
-done. Just to give a few trivial examples: sometimes signals are
+been taken you will have complete control over the way your experiment
+are done. Just to give a few trivial examples: sometimes signals are
 distributed over a large field range with nothing of interest in
 between, so it would be rather useful to skip these regions. Most normal
 programs won't allow this and one has to either record also the
 uninteresting field regions (thus losing lots of time) or to manually
-restart the experiments for each of the regions of interest. In
-contrast, with @code{fsc2} it shouldn't take more than a few minutes to
-write an @code{EDL} script consisting of just a few lines of code that
-can not only skip these regions but also repeat the experiment as often
-as needed, and if necessary do different numbers of accumulations of the
+restart the experiment for each of the regions of interest. In contrast,
+with @code{fsc2} it shouldn't take more than a few minutes to write an
+@code{EDL} script consisting of just a few lines of code that can not
+only skip these regions but also repeat the experiment as often as
+needed, and if necessary do different numbers of accumulations of the
 different parts (if, for example, the signals are huge in some of the
 regions while in others they are hardly detectable above the noise
 floor) or with automatically changing the lock-in amplifiers sensitivity
