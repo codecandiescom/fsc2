@@ -780,6 +780,33 @@ void rs690_twt_padding_check( CHANNEL *ch )
 				ppp->len -= ppp->pos + ppp->len - pp->pos;
 		}
 	}
+
+	/* Finally check if the pulses are far enough apart - for automatically
+	   created pulses lengthen them if necessary, for user created pulses
+	   print a warning */
+
+	pp = f->pulse_params;
+
+	for ( i = 1; i < f->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( pp->pos - ( ppp->pos + ppp->len )
+			 < rs690.minimum_twt_pulse_distance )
+		{
+			if ( pp->pulse->tp != NULL || ppp->pulse->tp != NULL )
+				ppp->len = pp->pos - ppp->pos;
+			else
+			{
+				if ( rs690.twt_distance_warning++ != 0 )
+					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
+						   "is smaller than %s.\n", ppp->pulse->num,
+						   pp->pulse->num, rs690_pticks(
+										  rs690.minimum_twt_pulse_distance ) );
+			}
+		}
+	}
 }
 
 
@@ -997,6 +1024,11 @@ void rs690_channel_setup( bool flag )
 	TRY
 	{
 		rs690.new_fs = rs690_append_fs( 0 );
+		memset( rs690.new_fs->fields, 0, sizeof rs690.new_fs->fields );
+		rs690.new_fs->len = 1;
+
+		rs690_append_fs( 1 );
+
 		rs690_make_fs( );
 		rs690_populate_fs( );
 		rs690_check_fs( );
@@ -1041,56 +1073,54 @@ static void rs690_make_fs( void )
 			if ( ch->num_active_pulses == 0 )
 				continue;
 
-			for ( n = rs690.new_fs, pp = ch->pulse_params, k = 0;
-				  k < ch->num_active_pulses;
-				  pp++, k++ )
+			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
+				  k < ch->num_active_pulses; pp++, k++ )
 			{
 				for ( ; n != NULL; n = n->next )
-					if ( pp->pos > n->pos )
+					if ( pp->pos > n->pos - 1 )
 					{
 						if ( n->next == NULL )
 						{
-							n = rs690_append_fs( pp->pos );
+							n = rs690_append_fs( pp->pos + 1 );
 							break;
 						}
 
-						if ( n->next != NULL && n->next->pos <= pp->pos )
+						if ( n->next != NULL && n->next->pos - 1 <= pp->pos )
 							continue;
 
-						n = rs690_insert_fs( n, pp->pos );
+						n = rs690_insert_fs( n, pp->pos + 1 );
 						break;
 					}
-					else if ( pp->pos == n->pos )
+					else if ( pp->pos == n->pos - 1 )
 						break;
 			}
-				
-			for ( n = rs690.new_fs, pp = ch->pulse_params, k = 0;
-				  k < ch->num_active_pulses;
-				  pp++, k++ )
+
+			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
+				  k < ch->num_active_pulses; pp++, k++ )
 			{
 				for ( ; n != NULL; n = n->next )
-					if ( pp->pos + pp->len > n->pos )
+					if ( pp->pos + pp->len > n->pos - 1 )
 					{
 						if ( n->next == NULL )
 						{
-							n = rs690_append_fs( pp->pos + pp->len );
+							n = rs690_append_fs( pp->pos + pp->len + 1 );
 							break;
 						}
 
 						if ( n->next != NULL &&
-							 n->next->pos <= pp->pos + pp->len )
+							 n->next->pos - 1 <= pp->pos + pp->len )
 							continue;
 
-						n = rs690_insert_fs( n, pp->pos + pp->len );
+						n = rs690_insert_fs( n, pp->pos + pp->len + 1 );
 						break;
 					}
-					else if ( pp->pos + pp->len == n->pos )
+					else if ( pp->pos + pp->len == n->pos - 1 )
 						break;
 			}
 		}
 	}
 
-	for ( n = rs690.new_fs; n->next != NULL; n = n->next )
+	for ( n = rs690.new_fs->next; n->next != NULL; n = n->next )
 		n->len = n->next->pos - n->pos;
 }
 
@@ -1123,14 +1153,14 @@ static void rs690_populate_fs( void )
 			if ( ch->num_active_pulses == 0 )
 				continue;
 
-			for ( n = rs690.new_fs, pp = ch->pulse_params, k = 0;
+			for ( n = rs690.new_fs->next, pp = ch->pulse_params, k = 0;
 				  k < ch->num_active_pulses; pp++, k++ )
 				for ( ; n != NULL; n = n->next )
 				{
-					if ( pp->pos > n->pos )
+					if ( pp->pos > n->pos - 1 )
 						continue;
 
-					if ( pp->pos + pp->len <= n->pos )
+					if ( pp->pos + pp->len <= n->pos - 1 )
 						break;
 
 					if ( ! f->is_inverted )
@@ -1227,6 +1257,15 @@ void rs690_check_fs( void )
 
 	/* If two adjacent FS structures have the same bit pattern combine them
 	   (this can happen if e.g. the distance between two pulses is zero). */
+
+	for ( n = rs690.new_fs; n != NULL; n = n->next )
+		while ( n->next != NULL &&
+				! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
+		{
+			n->len += n->next->len;
+			rs690_delete_fs_successor( n );
+			rs690.new_fs_count--;
+		}
 
 	for ( n = rs690.new_fs; n != NULL; n = n->next )
 		while ( n->next != NULL &&
@@ -1355,20 +1394,6 @@ static void rs690_correct_fs_for_8ns( void )
 			continue;
 		}
 
-		/* If the current FS has now an odd number of Ticks we've got to
-		   create a new FS for holding the last Tick of the current one, so
-		   the current ones length becomes even */
-
-		if ( n->len & 1 )
-		{
-			nn = rs690_insert_fs( n, n->pos + ( n->len & ~ 1 ) );
-			memcpy( nn->fields, n->fields, sizeof n->fields );
-
-			n->len--;     /* the current FS structure is now 1 Tick shorter */
-			nn->len = 2;  /* set the length of the additional FS structure */
-			fr = 1;       /* remember that we got a semi-filled FS structure */
-		}
-		
 		/* Correct the values in the fields of the current FS (the upper byte
 		   gets set to the same bit pattern as the lower byte) */
 
@@ -1469,25 +1494,6 @@ static void rs690_correct_fs_for_4ns( void )
 			continue;
 		}
 
-		/* If the current FS (now) has a number of Ticks that can't be devided
-		   by 4 we've got to create a new FS for holding the last Tick(s)
-		   of the current one, so its length becomes divisible by 4 */
-
-		if ( n->len & 3 )
-		{
-			nn = rs690_insert_fs( n, n->pos + ( n->len & ~ 3 ) );
-			memcpy( nn->fields, n->fields, sizeof n->fields );
-
-			nn->len = 4;
-			fr = 4 - ( n->len % 4 );
-			n->len &= ~ 3;
-
-			for ( i = 0; i <= rs690.last_used_field; i++ )
-				for ( j = 0; j < 3 - fr; j++ )
-					nn->fields[ i ] = ( nn->fields[ i ] << 4 ) |
-									  ( nn->fields[ i ] & 0xF );
-		}
-		
 		/* Correct the values in the fields of the current FS (all the upper
 		   3 nibbles get set the to the bit pattern of the lowest nibble) */
 
@@ -1559,7 +1565,6 @@ static FS *rs690_append_fs( Ticks pos )
 	{
 		n = rs690.new_fs = FS_P T_malloc( sizeof *n );
 		rs690.new_fs_count = 1;
-
 	}
 	else
 	{

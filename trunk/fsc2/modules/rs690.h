@@ -83,7 +83,7 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_LOOP_REPETITIONS   4095
 
-#define MAX_TICKS_PER_ENTRY    491520
+#define MAX_TICKS_PER_ENTRY    491520L
 
 #define START ( ( bool ) 1 )
 #define STOP  ( ( bool ) 0 )
@@ -257,6 +257,9 @@ typedef struct {
 
 	bool auto_twt_pulses;
 	long left_twt_warning;
+
+	Ticks minimum_twt_pulse_distance;
+	long twt_distance_warning;
 
 	int last_used_field;
 
