@@ -266,8 +266,8 @@ Var *vars_arr_lhs( Var *v )
 	Var *cv;
 
 
-	/* Move up the stack to the variable indicating the array or matrix
-	   itself */
+	/* Move up the stack unitl we find the variable indicating the array or
+	   matrix itself */
 
 	while ( v->type != REF_PTR )
 		v = v->prev;
@@ -902,8 +902,8 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 		}
 
 		/* If the index is larger than the length of the array this is a
-		   fatal error for fixed length arrays, but for dynamically sized
-		   arrays it simply means we have to extend them */
+		   fatal error for a fixed length array, but for a dynamically sized
+		   array it simply means we have to extend it */
 
 		if ( cv->len <= ind )
 		{
@@ -1013,18 +1013,17 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 
 	vars_pop( v );
 
-	if ( cv->type == INT_ARR )
-		return vars_push( INT_PTR, cv->val.lpnt + ind );
-	return vars_push( FLOAT_PTR, cv->val.dpnt + ind );
+	return cv->type == INT_ARR ? vars_push( INT_PTR,   cv->val.lpnt + ind ) : 
+								 vars_push( FLOAT_PTR, cv->val.dpnt + ind );
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function is called if an element an array or a sub-array is accessed. */
-/* Prior to the call of this function vars_arr_start() has been called   */
-/* and a REF_PTR type variable, pointing to the array variable, had been */
-/* pushed onto the stack.                                                */
-/*-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* Function is called if an element of an array or a sub-array is accessed. */
+/* Prior to the call of this function vars_arr_start() has been called and  */
+/* a REF_PTR type variable, pointing to the array variable, had been pushed */
+/* onto the stack.                                                          */
+/*--------------------------------------------------------------------------*/
 
 Var *vars_arr_rhs( Var *v )
 {
@@ -1035,7 +1034,7 @@ Var *vars_arr_rhs( Var *v )
 
 	/* The variable pointer this function gets passed is a pointer to the very
 	   last index on the variable stack. Now we've got to work our way up in
-	   the stack until we find the first non-index variable a reference. */
+	   the stack until we find the first non-index variable, a reference. */
 
 	while ( v->type != REF_PTR )
 	{
@@ -1047,9 +1046,9 @@ Var *vars_arr_rhs( Var *v )
 	v = vars_pop( v );
 
 	/* When a complete array is passed this can be either written with empty
-	   square braces, in which case we get a single variable of UNDEF_VAR, or
-	   by no square braces at all, in which case we get no index variables
-	   at all. */
+	   square braces, in which case we get a single variable of type UNDEF_VAR,
+	   or by no square braces at all, in which case we'll find no index
+	   variables */
 
 	if ( v->type == UNDEF_VAR )
 	{
@@ -1065,6 +1064,9 @@ Var *vars_arr_rhs( Var *v )
 		print( FATAL, "Too many indices for array '%s'.\n", a->name );
 		THROW( EXCEPTION );
 	}
+
+	/* Otherwise we have to iterate over all indices to find the referenced
+	   element or subarray */
 
 	for ( cv = a; cv->type & ( INT_REF | FLOAT_REF ) && v != NULL;
 		  v = vars_pop( v ) )
@@ -1094,7 +1096,7 @@ Var *vars_arr_rhs( Var *v )
 	if ( v == NULL )
 	{
 		if ( cv->type == INT_ARR )
-			return vars_push( cv->type,cv->val.lpnt, cv->len );
+			return vars_push( cv->type, cv->val.lpnt, cv->len );
 		else if ( cv->type == FLOAT_ARR )
 			return vars_push( cv->type, cv->val.dpnt, cv->len );
 		else
@@ -1122,10 +1124,8 @@ Var *vars_arr_rhs( Var *v )
 
 	vars_pop( v );
 
-	if ( cv->type & INT_ARR )
-		return vars_push( INT_VAR, cv->val.lpnt[ ind ] );
-
-	return vars_push( FLOAT_VAR, cv->val.dpnt[ ind ] );
+	return cv->type == INT_ARR ? vars_push( INT_VAR, cv->val.lpnt[ ind ] ) :
+								 vars_push( FLOAT_VAR, cv->val.dpnt[ ind ] );
 }
 		
 
