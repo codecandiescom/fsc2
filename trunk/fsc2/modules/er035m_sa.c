@@ -63,6 +63,8 @@ Var *measure_field( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
 Var *gaussmeter_command( Var *v );
+Var *gaussmeter_upper_search_limit( Var *v );
+Var *gaussmeter_lower_search_limit( Var *v );
 
 
 /* internally used functions */
@@ -70,6 +72,10 @@ Var *gaussmeter_command( Var *v );
 static double er035m_sa_get_field( void );
 static int er035m_sa_get_resolution( void );
 static void er035m_sa_set_resolution( int res_index );
+static double er035m_sa_get_upper_search_limit( void );
+static double er035m_sa_get_lower_search_limit( void );
+static void er035m_sa_set_upper_search_limit( double ul );
+static void er035m_sa_set_lower_search_limit( double ll );
 static bool er035m_sa_command( const char *cmd );
 static bool er035m_sa_talk( const char *cmd, char *reply, long *length );
 static void er035m_sa_failure( void );
@@ -84,6 +90,9 @@ typedef struct
 	double field;
 	int resolution;
 	int probe_orientation;
+	int probe_type;
+	double upper_search_limit;
+	double lower_search_limit;
 } NMR;
 
 
@@ -115,6 +124,14 @@ enum {
    lock is already achieved but the field value is too unstable! */
 
 #define ER035M_SA_MAX_RETRIES 100
+
+
+#define PROBE_TYPE_F0 0
+#define PROBE_TYPE_F1 1
+
+
+double upper_search_limits[ 2 ] = { 3000.0, 18000.0 };
+double lower_search_limits[ 2 ] = { 200.0, 2000.0 };
 
 
 enum {
@@ -159,6 +176,8 @@ int er035m_sa_init_hook( void )
 int er035m_sa_test_hook( void )
 {
 	nmr_stored = nmr;
+	nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F1 ];
+	nmr.lower_search_limit = lower_search_limits[ PROBE_TYPE_F0 ];
 	return 1;
 }
 
@@ -227,7 +246,11 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
+				nmr.probe_type = PROBE_TYPE_F0;
+				break;
+
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
+				nmr.probe_type = PROBE_TYPE_F1;
 				break;
 
 			case '2' :      /* No probe connected -> error */
@@ -307,6 +330,11 @@ try_again:
 	}
 	else
 		nmr.field = er035m_sa_get_field( );
+
+	/* Find out the current settings of the search limits */
+
+	nmr.upper_search_limit = er035m_sa_get_upper_search_limit( );
+	nmr.lower_search_limit = er035m_sa_get_lower_search_limit( );
 
 	return 1;
 }
@@ -552,6 +580,88 @@ Var *gaussmeter_command( Var *v )
 }
 
 
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+Var *gaussmeter_upper_search_limit( Var *v )
+{
+	double ul;
+
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, nmr.upper_search_limit );
+
+	ul = get_double( v, "upper search limit" );
+
+	if ( ul > upper_search_limits[ FSC2_MODE == TEST ?
+								   PROBE_TYPE_F1 : nmr.probe_type ] )
+	{
+		print( SEVERE, "Requested upper search limit too high, changing to "
+			   "%.1f G\n",
+			   upper_search_limits[ FSC2_MODE == TEST ?
+								    PROBE_TYPE_F1 : nmr.probe_type ] );
+		ul = upper_search_limits[ FSC2_MODE == TEST ?
+								  PROBE_TYPE_F1 : nmr.probe_type ];
+	}
+
+	if ( ul <= nmr.lower_search_limit )
+	{
+		print( FATAL, "Requested upper search limit isn't higher than the "
+			   "currently active lower search limit.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		er035m_sa_set_upper_search_limit( ul );
+	nmr.upper_search_limit = ul;
+
+	return vars_push( FLOAT_VAR, ul );
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+Var *gaussmeter_lower_search_limit( Var *v )
+{
+	double ll;
+
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, nmr.lower_search_limit );
+
+	ll = get_double( v, "lower search limit" );
+
+	if ( ll < lower_search_limits[ FSC2_MODE == TEST ?
+								   PROBE_TYPE_F0 : nmr.probe_type ] )
+	{
+		print( SEVERE, "Requested lower search limit too low, changing to "
+			   "%.1f G\n",
+			   lower_search_limits[ FSC2_MODE == TEST ?
+								    PROBE_TYPE_F0 : nmr.probe_type ] );
+		ll = lower_search_limits[ FSC2_MODE == TEST ?
+								  PROBE_TYPE_F0 : nmr.probe_type ];
+	}
+
+	if ( ll >= nmr.upper_search_limit )
+	{
+		print( FATAL, "Requested lower search limit isn't lower than the "
+			   "currently active upper search limit.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		er035m_sa_set_lower_search_limit( ll );
+	nmr.lower_search_limit = ll;
+
+	return vars_push( FLOAT_VAR, ll );
+}
+
+
 /*****************************************************************************/
 /*                                                                           */
 /*            internally used functions                                      */
@@ -664,6 +774,66 @@ static void er035m_sa_set_resolution( int res_index )
 
 	sprintf( buf, "RS%1d\r", res_index + 1 );
 	er035m_sa_command( buf );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double er035m_sa_get_upper_search_limit( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	er035m_sa_talk( "UL\r", buffer, &length );
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer + 2 );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static double er035m_sa_get_lower_search_limit( void )
+{
+	char buffer[ 20 ];
+	long length = 20;
+
+
+	er035m_sa_talk( "LL\r", buffer, &length );
+	buffer[ length - 1 ] = '\0';
+	return T_atod( buffer + 2 );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static void er035m_sa_set_upper_search_limit( double ul )
+{
+	char cmd[ 40 ];
+
+
+	snprintf( cmd, 40, "UL%f\r", ul );
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_sa_failure( );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static void er035m_sa_set_lower_search_limit( double ll )
+{
+	char cmd[ 40 ];
+
+
+	snprintf( cmd, 40, "LL%f\r", ll );
+	if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
+		er035m_sa_failure( );
+	fsc2_usleep( ER035M_SA_WAIT, UNSET );
 }
 
 
