@@ -345,7 +345,7 @@ void pulse_set_pos( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : round( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
 
 	if ( val < 0 )
 	{
@@ -381,7 +381,7 @@ void pulse_set_len( Pulse *p, Var *v )
 		return;
 	}
 
-	val = ( v->type == INT_VAR ) ? v->val.lval : round( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
 
 	if ( val < 0 )
 	{
@@ -418,7 +418,7 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : round( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{
@@ -448,7 +448,7 @@ void pulse_set_dlen( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : round( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{
@@ -478,7 +478,7 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : round( v->val.dval );
+	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
 	{

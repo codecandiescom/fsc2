@@ -879,7 +879,7 @@ bool magnet_do( int command )
 			break;
 
 		case SERIAL_VOLTAGE :                 /* send voltage data pattern */
-			magnet.int_step = volt = round( MAGNET_ZERO_STEP - magnet.step );
+			magnet.int_step = volt = lround( MAGNET_ZERO_STEP - magnet.step );
 		    data[ 0 ] = ( unsigned char ) 
 				( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
 			data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
