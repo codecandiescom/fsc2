@@ -15,7 +15,7 @@
 /* Finally, the optional parameter `C_name' is the name of the      */
 /* function written in C that is called when the function name is   */
 /* found in the EDL file.                                           */
-/*******************************************************************/
+/********************************************************************/
 
 
 incr, 1, ALL;
