@@ -676,7 +676,7 @@ Var *lockin_lock_keyboard( Var *v )
 
 
 /*------------------------------------------------------------------*/
-/* Function initialises the Stanford lock-in amplifier and tests if */
+/* Function initializes the Stanford lock-in amplifier and tests if */
 /* it can be accessed by asking it to send its status byte.         */
 /*------------------------------------------------------------------*/
 
