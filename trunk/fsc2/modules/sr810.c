@@ -43,7 +43,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR810_TEST_PHASE         0.0
 #define SR810_TEST_REF_FREQUENCY 5.0e3
 #define SR810_TEST_REF_LEVEL     1.0
-#define SR830_TEST_REF_MODE      1         // this must be INTERNAL
+#define SR810_TEST_REF_MODE      1         // this must be INTERNAL
 
 
 #define NUM_ADC_PORTS         4

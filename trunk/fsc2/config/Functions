@@ -102,7 +102,7 @@ lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
 lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR8x0 only)
 lockin_ref_mode, 0, EXP;        // Get reference mode (SR8x0 only)
-lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
+lockin_ref_level, -1, EXP;      // Get or set reference level (SR8x0 only)
 lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 
 

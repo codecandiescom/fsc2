@@ -126,9 +126,9 @@ lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
 lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
 lockin_time_constant, -1, ALL;  // get/set the time constant
 lockin_phase,         -1, ALL;  // get/set the phase
-lockin_ref_freq,      -1, EXP;  // Get/set mod frequency (SR8x0 only)
+lockin_ref_freq,      -1, ALL;  // Get/set mod frequency (SR8x0 only)
 lockin_ref_mode,       0, EXP;  // Get mod. mode (SR8x0 only)
-lockin_ref_level,     -1, ALL;  // Get/set mod. level (SR8x0 only)
+lockin_ref_level,     -1, EXP;  // Get/set mod. level (SR8x0 only)
 lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
 @end example
 
@@ -568,6 +568,10 @@ print out error messages or warnings. For devices connected via the GPIB
 bus this device name should be identical to the one it is advertised as
 in the GPIB configuration file (usually @file{/etc/gpib.conf}).
 
+It is probably a good idea to select a name for a device that is
+identical to the name of the module in order to avoid confusion for the
+users.
+
 For each module also a second string needs to be defined which describes
 the device type, e.g.
 @example
@@ -607,89 +611,6 @@ exist it won't have any information about the device type and having
 another device of the same type recognized automatically will not work.
 
 
-
-@subsection Hook functions
-@cindex hook functions
-@findex init_hook()
-@findex test_hook()
-@findex end_of_test_hook
-@findex exp_hook()
-@findex end_of_exp_hook
-@findex exit_hook()
-
-
-
-Each module may contain up to six pre-defined functions that don't have
-to be declared in the function data base file, *Functions'. They all
-start with the name of the module followed by 
-@code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
-@code{_exp_hook}, @code{_end_of_exp_hook} and @code{_exit_hook}. Thus,
-if the new device is named `ABC123' and thus the module is `abc123'
-these functions are (together with the parameters):
-@example
-int abc123_init_hook( void )
-int abc123_test_hook( void )
-int abc123_end_of_test_hook( void )
-int abc123_exp_hook( void )
-int abc123_end_of_exp_hook( void )
-void abc123_exit_hook( void )
-@end example
-@noindent
-The loader will test if these functions exist and if they do they will
-be called automatically at certain points in the interpretation of the
-@acronym{EDL} file.
-
-If it exists, the first function, i.e.@: @code{abc123_init_hook()} is
-called immediately after the functions defined in all modules are
-loaded. Its main purpose is to allow the module to get all kinds of
-initialization done. Since all other modules are already loaded, it also
-may be used to test for the existence of other modules by calling a
-function called @code{exist_device()}. But you should not call functions
-from other modules at this stage, because the other module may still be
-uninitialized. If the initialization completes successfully, the
-function must return a non-zero value. If there are problems that don't
-make the module unusable it may return a zero value --- in this case a
-warning message will be printed. If the initialization fails in a
-non-recoverable way, the function should throw an exception.
-
-The second function, @code{abc123_test_hook()}, is called at the start
-of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
-input file. Again, it can be used for initializations. But it should be
-noted that changes to the variables defined in the @acronym{EDL} file
-will remain only visible for the test run, after the test is completed
-they will revert to their former values, i.e.@: the ones they had before
-the test run started! The return code of the function is the same as for
-the init hook function (i.e.@: always return a non-zero value on success).
-
-The third function, @code{abc123_end_of_test_hook()} is called when the
-test hook functions of the modules have been run. This hook function
-might be used to reset variables internal to the module that have been
-changed during the test run. The return code of the function is the same
-as for the init hook and test hook function (i.e.@: always return a
-non-zero value on success).
-
-
-The fourth function, @code{abc123_exp_hook()}, is run when the actual
-experiment is started. Initialization of devices should be done
-here. Return codes are again identical to the ones of the former
-functions.
-
-The fifth function, @code{abc123_end_of_exp_hook()} is run after the
-experiment has been stopped. This hook function should be used to get
-the device back into a usable state wth local control.
-
-Finally, the sixth and final function, @code{abc123_exit_hook()}, is run
-just before the module is unloaded.
-
-Please note that the first three functions, i.e.@:
-@code{abc123__init_hook}, @code{abc123_test_hook} and
-@code{abc123_end_of_test_hook} as well as the last function,
-@code{abc123_exit_hook()}, will be run only once, while both the
-remaining functions, @code{abc123_exp_hook()} and
-@code{abc123_end_of_exp_hook()} will be run each time the experiment is
-started.
-
-
 @subsection Global variables
 
 There are a few important global variables for modules. The first on is
@@ -710,20 +631,147 @@ a line in the init hook function similar to
 @example
 need_GPIB = SET;
 @end example
+Don't try to assign anything else to this variable.
 
-For serial ports things handled a bit differently. In the init hook
-function you should try to request the serial port you need by calling
+
+@subsection Requesting hardware
+
+If a device is controlled via the GPIB bus it has to set the global
+variable @code{need_GPIB}, as already explained in the previous section.
+Of course, the device needs also a valid entry in the GPIB configuration
+file but this is nothing @acronym{fsc2} can handle.
+
+For serial ports things are handled a bit differently. In the init hook
+function you must try to request the serial port you need by calling
 the function @code{fsc2_request_serial_port()}
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
 @noindent
-with the number of the serial port (0 stands for what is called
-@code{COM1} in DOS-speak, 1 for @code{COM2} et.@.) as the first and the
+with the number of the serial port (0 stands for the device file
+@file{/dev/ttyS0}, which is what is called @code{COM1} in DOS-speak, 1
+for @file{/dev/ttyS1} or for @code{COM2} etc.@.) as the first and the
 device name as the second argument. If the requested serial port has
 already been claimed by a different device the function will print an
 error message and stop the @acronym{EDL} program, so you don't have to
 deal with error handling.
+
+All further dealings with the serial port are your own responsibility,
+i.e.@: you have to open the device file, set the communication
+parameters, write and read data and, when done with the serial port,
+reset the communication parameters back to reasonable values and close
+the device file.
+
+
+@subsection Hook functions
+@cindex hook functions
+@findex init_hook()
+@findex test_hook()
+@findex end_of_test_hook
+@findex exp_hook()
+@findex end_of_exp_hook
+@findex exit_hook()
+
+
+As you will already know the interpretation of an @acronym{EDL} file
+consists of several steps. When the file is tested and a @code{DEVICES}
+section is found all modules for the devices listed here are loaded.
+When in the test the @code{EXPERIMENT} section is found the test run is
+started in which the program is tested as far as possible. When the test
+was successful, the experiment may be run repeatedly. To allow
+intialization of the modules internal parameters, initialization of the
+devices etc. for each of these stages hook functions can be defined in
+the modules that will be executed automatically at appropriate times (if
+they exist).
+
+Thus, each module may contain up to six pre-defined hook functions that
+don't have to be declared in the function data base file,
+@file{Functions}. They all start with the name of the module followed by
+@code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
+@code{_exp_hook}, @code{_end_of_exp_hook} and @code{_exit_hook}. Thus,
+if the new device is named `SR510' (as the lock-in amplifier mentioned
+at the start) and thus the module is `sr510' these functions are
+(together with the parameters):
+@example
+int sr510_init_hook( void )
+int sr510_test_hook( void )
+int sr510_end_of_test_hook( void )
+int sr510_exp_hook( void )
+int sr510_end_of_exp_hook( void )
+void sr510_exit_hook( void )
+@end example
+@noindent
+
+If it exists, the first function, i.e.@: @code{sr510_init_hook()} is
+called immediately after the functions defined in all modules are
+loaded. That means, the internal loader loads the module libraries and
+when done runs the init hook functions of the modules in the order the
+modules did appear in the devices section. The main purpose of the init
+hook functions is to allow the modules to get all kinds of initialization
+done. Since all other modules are already loaded, they also may be used to
+test for the existence of other modules by calling a function called
+@code{exist_device()}. But you should not call functions from other
+modules at this stage, because the other modules may still be
+uninitialized. If the initialization completes successfully, the
+function must return a non-zero value. If there are problems that don't
+make the module unusable it may return a zero value --- in this case a
+warning message will be printed. If the initialization fails in a
+non-recoverable way, the function should throw an exception.
+
+The second function, @code{sr510_test_hook()}, is called at the start
+of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
+input file. Again, it can be used for initializations. But it should be
+noted that changes to the variables defined in the @acronym{EDL} file
+will remain only visible for the test run, after the test is completed
+they will revert to their former values, i.e.@: the ones they had before
+the test run started! The return code of the function is the same as for
+the init hook function (i.e.@: always return a non-zero value on success).
+
+The third function, @code{sr510_end_of_test_hook()} is called when the
+test hook functions of the modules have been run. This hook function
+might be used to reset internal variables of the module that got changed
+during the test run. The return code of the function is the same as for
+the init hook and test hook function (i.e.@: always return a non-zero
+value on success).
+
+The fourth function, @code{sr510_exp_hook()}, is run when the actual
+experiment is started. Initialization of devices should be done
+here. Return codes are again identical to the ones of the former
+functions.
+
+The fifth function, @code{sr510_end_of_exp_hook()} is run after the
+experiment has been stopped. This hook function should be used to get
+the device back into a usable state with local control.
+
+Finally, the sixth and final function, @code{sr510_exit_hook()}, is run
+just before the module is unloaded.
+
+Please note that the first three functions, i.e.@:
+@code{sr510__init_hook}, @code{sr510_test_hook} and
+@code{sr510_end_of_test_hook} as well as the last function,
+@code{sr510_exit_hook()}, will be run only once, while both the
+remaining functions, @code{sr510_exp_hook()} and
+@code{sr510_end_of_exp_hook()} will be run each time the experiment is
+started.
+
+
+@subsection Caveats for the test run
+
+There is one rather nasty problem with the test run. In the test run the
+program is checked extensively and as far as possible everything is done
+as it will be done later in the real experiment. But this leads the
+problem that the functions in the module must return data even though
+they can't talk to the devices yet. If the program asks for the measured
+value from a device reasonable, valid value most be returned.  This can
+be quite tricky, because, while writing the module it is less than clear
+what will be reasonable, valid value in all imaginable situations.
+
+I didn't found a fail safe method to select values to return during the
+test run and I also fear that there isn't one. But after some
+experimenting the values now used in the modules didn't lead to too many
+problems. If necessary the users must be made aware of possible problems,
+i.e. if they test the return values from the @acronym{EDL} file they
+must be prepared to accept unexpected values.
 
 
 @subsection How to call an @acronym{EDL} function from a module
