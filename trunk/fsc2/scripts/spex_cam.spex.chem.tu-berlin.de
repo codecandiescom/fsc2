@@ -1719,7 +1719,8 @@ our ( $laser_line,             # position of laser line (abs. cm^-1)
 	  $cwn,                    # center wavenumber (abs. or rel. cm^-1)
 	  $cwn_offset,             # offset to center wavenumber required due to
 	                           # asymmetric ROI (abs. cm^-1)
-	  $exp_time );             # exposure time
+	  $exp_time,               # exposure time
+	  @units );
 
 sub run {
 	my ( $top, $geom, $ccd_w );
@@ -1740,6 +1741,8 @@ sub run {
 		main::show_message( "Please set ROI and binning parameters first." );
 		return;
 	}
+
+	@units = $laser_line != 0.0 ? ( 0, 1 ) : ( 1, 0 );
 
 	$wn_width = ( ( $ROI[ 2 ] - $ROI[ 0 ] ) + 1 ) * $pixel_diff;
 	$cwn_offset = 0.5 * $pixel_diff
@@ -1777,6 +1780,19 @@ sub run {
 							  -width => 10 );
 	$f[ 8 ] = $f[ 5 ]->Label( -text => " s",
 							  -width => 9 );
+
+	if ( $laser_line != 0.0 ) {
+		$f[ 20 ] = $f[ 0 ]->Frame( );
+		$f[ 21 ] = $f[ 20 ]->Label( -text => "Units:",
+									-width => 10,
+									-anchor => 'w' );
+		$f[ 22 ] = $f[ 20 ]->Checkbutton( -variable => \$units[ 0 ],
+										  -width => 9,
+										  -text => "abs. cm^-1" );
+		$f[ 23 ] = $f[ 20 ]->Checkbutton( -variable => \$units[ 1 ],
+										  -width => 9,
+										  -text => "rel. cm^-1" );
+	}
 
 	$f[  9 ] = $f[ 0 ]->Frame( );
 	$f[ 10 ] = $f[ 9 ]->Label( -text => "Spectral width:",
@@ -1816,6 +1832,13 @@ sub run {
 	$f[ 7 ]->pack( %wp );
 	$f[ 8 ]->pack( %up );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 20 ]->pack( %fp );
+		$f[ 21 ]->pack( %wp );
+		$f[ 22 ]->pack( %wp );
+		$f[ 23 ]->pack( %up );
+	}
+
 	$f[ 9 ]->pack( %fp );
 	$f[ 10 ]->pack( %wp );
 	$f[ 11 ]->pack( %wp );
@@ -1841,6 +1864,13 @@ sub run {
 						-vcmd => sub { exp_time_check( shift,
 														$f[ 18 ] ); } );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 22 ]->configure( -command =>
+							 sub { set_units( 0, $f[ 4 ] ); } );
+		$f[ 23 ]->configure( -command => 
+							 sub { set_units( 1, $f[ 4 ] ); } );
+	}
+
 	check_all_parms( $f[ 18 ], $$cwn, $$exp_time );
 
 	# Focus should be in the entry field and cursor after the last character
@@ -1865,6 +1895,24 @@ sub run {
 	 }
 
 	MainLoop;
+}
+
+
+#############################################
+#
+
+sub set_units {
+	my ( $which, $cl ) = @_;
+
+	if ( $which == 0 ) {
+		$units[ 1 ] = 0;
+		$cl->configure( -text => " cm^-1 abs." );
+	} else {
+		$units[ 0 ] = 0;
+		$cl->configure( -text => " cm^-1 rel." );
+	}
+
+	$$cwn = $laser_line - $$cwn;
 }
 
 
@@ -1906,7 +1954,7 @@ sub check_all_parms {
     my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
 	if ( $wn =~ /^[+-]?$float_rep$/ ) {
-		$wn = $laser_line != 0.0 ? $laser_line - $wn : $wn;
+		$wn = $laser_line - $wn if $units[ 1 ] == 1;
 		$wn -= $offset + $cwn_offset;
 	}
 
@@ -1925,12 +1973,18 @@ sub check_all_parms {
 # Runs the actual experiment
 
 sub realtime_run {
-    my $fh;
+    my ( $fh, $lcwn );
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_iconic_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
+	}
+
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		$lcwn = $laser_line - $$cwn;
+	} else {
+		$lcwn = $cwn;
 	}
 
     print $fh <<EOF;
@@ -1941,7 +1995,7 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $$cwn cm^-1;
+cwn = $lcwn cm^-1;
 exposure_time = $$exp_time s;
 start_wn;
 step_wn;
@@ -1949,7 +2003,6 @@ N_Points;
 laser_line;
 cwn_offset;
 spec[ * ];
-wn[ * ];
 B_rel,B_abs, B_wl;
 I, J;
 ROI[ 4 ];
@@ -1983,26 +2036,34 @@ cwn_offset = 0.5 * calib[ 2 ]
 
 hide_toolbox( 1 );
 IF laser_line != 0.0 {
-	monochromator_wavenumber( cwn + cwn_offset );
-	start_wn = cwn - 0.5 * ( N_Points - 1 ) * step_wn;
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
-	change_scale( start_wn, step_wn );
-	wn = lin_space( start_wn, start_wn + ( N_Points + 1 ) * step_wn,
-                    N_Points );
-
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
+
+	monochromator_wavenumber( cwn + cwn_offset );
+	start_wn = cwn - 0.5 * ( N_Points - 1 ) * step_wn;
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+	button_state( B_abs, 1 );
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
+	change_scale( laser_line - start_wn, - step_wn );
+EOF
+	} else {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
+	change_scale( start_wn, step_wn );
+EOF
+	}
+	print $fh <<EOF;
 } ELSE {
+	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
+	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
+
 	monochromator_wavenumber( cwn - cwn_offset );
 	start_wn = cwn + 0.5 * ( N_Points - 1 ) * step_wn;
 	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
-	wn = lin_space( start_wn, start_wn - ( N_Points + 1 ) * step_wn,
-                    N_Points );
-
-	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
 }
 
 hide_toolbox( 0 );
@@ -2096,7 +2157,8 @@ our ( $laser_line,             # position of laser line (abs. cm^-1)
 	  $cwn_offset,             # offset to center wavenumber required due to
 	                           # asymmetric ROI (abs. cm^-1)
 	  $exp_time,               # exposure time
-	  $N_scans );              # number of repetitions of experiment
+	  $N_scans,                # number of repetitions of experiment
+	  @units );
 
 sub run {
 	my ( $top, $geom, $ccd_w );
@@ -2104,6 +2166,8 @@ sub run {
 	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
+
+	@units = $laser_line != 0.0 ? ( 0, 1 ) : ( 1, 0 );
 
 	if ( $pixel_diff <= 0.0 ) {
 		main::show_message( "Please do a CCD camera calibration first." );
@@ -2164,6 +2228,19 @@ sub run {
 	$f[ 12 ] = $f[ 9 ]->Label( -text => "",
 								-width => 9 );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 25 ] = $f[ 0 ]->Frame( );
+		$f[ 26 ] = $f[ 25 ]->Label( -text => "Units:",
+									-width => 10,
+									-anchor => 'w' );
+		$f[ 27 ] = $f[ 25 ]->Checkbutton( -variable => \$units[ 0 ],
+										  -width => 9,
+										  -text => "abs. cm^-1" );
+		$f[ 28 ] = $f[ 25 ]->Checkbutton( -variable => \$units[ 1 ],
+										  -width => 9,
+										  -text => "rel. cm^-1" );
+	}
+
 	$f[ 13 ] = $f[ 0 ]->Frame( );
 	$f[ 14 ] = $f[ 13 ]->Label( -text => "Spectral width:",
 								-width => 20,
@@ -2189,7 +2266,12 @@ sub run {
 	$f[ 22 ] = $f[ 21 ]->Button( -text => "Start measurement",
 								 -command => \&single_run );
 	$f[ 23 ] = $f[ 21 ]->Button( -text => "Quit",
-								 -command => sub { $top->deiconify;
+								 -command => sub { if ( $laser_line != 0.0 and
+														$units[ 0 ] == 1 ) {
+													    $$cwn = $laser_line
+															    - $$cwn;
+												   }
+											   	   $top->deiconify;
 												   $f[ 0 ]->destroy; } );
 
 	$f[ 1 ]->pack( %fp );
@@ -2206,6 +2288,13 @@ sub run {
 	$f[ 10 ]->pack( %wp );
 	$f[ 11 ]->pack( %wp );
 	$f[ 12 ]->pack( %up );
+
+	if ( $laser_line != 0.0 ) {
+		$f[ 25 ]->pack( %fp );
+		$f[ 26 ]->pack( %wp );
+		$f[ 27 ]->pack( %wp );
+		$f[ 28 ]->pack( %up );
+	}
 
 	$f[ 13 ]->pack( %fp );
 	$f[ 14 ]->pack( %wp );
@@ -2238,6 +2327,13 @@ sub run {
 														 $$exp_time, $N );
 										return 1; } );
 
+	if ( $laser_line != 0.0 ) {
+		$f[ 27 ]->configure( -command =>
+							 sub { set_units( 0, $f[ 4 ] ); } );
+		$f[ 28 ]->configure( -command => 
+							 sub { set_units( 1, $f[ 4 ] ); } );
+	}
+
 	check_all_parms( $f[ 22 ], $$cwn, $$exp_time, $$N_scans );
 
 	# Focus should be in the entry field and cursor after the last character
@@ -2262,6 +2358,24 @@ sub run {
 	 }
 
 	MainLoop;
+}
+
+
+#############################################
+#
+
+sub set_units {
+	my ( $which, $cl ) = @_;
+
+	if ( $which == 0 ) {
+		$units[ 1 ] = 0;
+		$cl->configure( -text => " cm^-1 abs." );
+	} else {
+		$units[ 0 ] = 0;
+		$cl->configure( -text => " cm^-1 rel." );
+	}
+
+	$$cwn = $laser_line - $$cwn;
 }
 
 
@@ -2303,7 +2417,7 @@ sub check_all_parms {
     my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
 
 	if ( $wn =~ /^[+-]?$float_rep$/ ) {
-		$wn = $laser_line != 0.0 ? $laser_line - $wn : $wn;
+		$wn = $laser_line - $wn if $units[ 1 ] == 1;
 		$wn -= $offset + $cwn_offset;
 	}
 
@@ -2323,12 +2437,18 @@ sub check_all_parms {
 # Runs the actual experiment
 
 sub single_run {
-    my $fh;
+    my ( $fh, $lcwn );
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_iconic_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
+	}
+
+	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
+		$lcwn = $laser_line - $$cwn;
+	} else {
+		$lcwn = $cwn;
 	}
 
     print $fh <<EOF;
@@ -2339,7 +2459,7 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $$cwn cm^-1;
+cwn = $lcwn cm^-1;
 exposure_time = $$exp_time s;
 start_wn;
 step_wn;
@@ -2388,24 +2508,41 @@ I_scan = output_create( "INT_OUTPUT", 0,
 IF laser_line != 0.0 {
 	monochromator_wavenumber( cwn + cwn_offset );
 	start_wn = cwn - 0.5 * ( N_Points - 1 ) * step_wn;
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
-	change_scale( start_wn, step_wn );
-	wn = lin_space( start_wn, start_wn + ( N_Points + 1 ) * step_wn,
-                    N_Points );
 
 	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
 	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
+
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+	button_state( B_abs, 1 );
+	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
+	change_scale( laser_line - start_wn, - step_wn );
+	wn = lin_space( laser_line - start_wn,
+					laser_line - start_wn - ( N_Points + 1 ) * step_wn,
+                    N_Points );
+EOF
+	} else {
+		print $fh <<EOF;
+	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
+	change_scale( start_wn, step_wn );
+	wn = lin_space( start_wn, start_wn + ( N_Points + 1 ) * step_wn,
+                    N_Points );
+EOF
+	}
+	print $fh <<EOF;
 } ELSE {
 	monochromator_wavenumber( cwn - cwn_offset );
 	start_wn = cwn + 0.5 * ( N_Points - 1 ) * step_wn;
+
+	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
+	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
+
 	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
 	change_scale( start_wn, - step_wn );
 	wn = lin_space( start_wn, start_wn - ( N_Points + 1 ) * step_wn,
                     N_Points );
-
-	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
 }
 
 
@@ -2471,8 +2608,21 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Resolution        = # cm^-1\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
+EOF
+	if ( $units[ 0 ] == 1 ) {
+		print $fh <<EOF;
+              date( ), time( ), laser_line - cwn,
+			  ( N_Points - 1 ) * Bin[ 1 ] * calib[ 2 ],
+              calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+EOF
+	} else {
+		print $fh <<EOF;
               date( ), time( ), cwn, ( N_Points - 1 ) * Bin[ 1 ] * calib[ 2 ],
               calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+EOF
+	}
+	print $fh <<EOF;
+
 IF laser_line != 0.0 {
     fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
 } ELSE {
@@ -2765,6 +2915,7 @@ sub run {
 
 
 #############################################
+#
 
 sub set_units {
 	my ( $which, $sl, $el ) = @_;
@@ -2773,15 +2924,14 @@ sub set_units {
 		$units[ 1 ] = 0;
 		$sl->configure( -text => " cm^-1 abs." );
 		$el->configure( -text => " cm^-1 abs." );
-		$$start_wn = $laser_line - $$start_wn;
-		$$end_wn = $laser_line - $$end_wn;
 	} else {
 		$units[ 0 ] = 0;
 		$sl->configure( -text => " cm^-1 rel." );
 		$el->configure( -text => " cm^-1 rel." );
-		$$start_wn = $laser_line - $$start_wn;
-		$$end_wn = $laser_line - $$end_wn;
 	}
+
+	$$start_wn = $laser_line - $$start_wn;
+	$$end_wn = $laser_line - $$end_wn;
 }
 
 
