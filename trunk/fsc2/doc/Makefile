@@ -150,7 +150,8 @@ install:
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)/html
-	ln -s $(docdir)/html/fsc2.html index.html
+	-$(RM) $(RMFLAGS) $(docdir)/html/index.html
+	ln -s $(docdir)/html/fsc2.html $(docdir)/html/index.html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.png) $(docdir)/html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) $(wildcard *.gif) $(docdir)/html
