@@ -714,10 +714,10 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 	/* Check that both the supplied functions are supported and sets flags
        accordingly */
 
-	*is_1 = ( ( func_ptr = func_get( func_1, &access ) ) == NULL );
+	*is_1 = ( ( func_ptr = func_get( func_1, &access ) ) != NULL );
 	vars_pop( func_ptr );
 
-	*is_2 = ( ( func_ptr = func_get( func_2, &access) ) == NULL );
+	*is_2 = ( ( func_ptr = func_get( func_2, &access) ) != NULL );
 	vars_pop( func_ptr );
 
 	if ( ! is_1 && ! *is_2 )
