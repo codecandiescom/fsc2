@@ -90,7 +90,7 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments
 # you will do the file can become rather long. But the file will not grow
-# indefinitely, if you start a new experiment its previous contents get
+# indefinitely, if you start a new experiment its previous contents gets
 # overwritten. If no file is specified logs will be written to stderr.
 
 GPIB_LOG_FILE      := /tmp/gpib.log
@@ -114,19 +114,6 @@ GPIB_LOG_LEVEL     := HIGH
 # GPIB_HEADER_DIR    := /usr/include/gpib
 
 
-# Define the default editor to use for editing when the "Edit" button gets
-# pressed or for writing a bug report
-
-EDITOR             := vi
-
-
-# Define the default browser to use when the "Help" button gets pressed and
-# the manual is to be shown, currently supported are netscape, mozilla,
-# opera, konqueror, galeon, lnyx and w3m.
-
-BROWSER            := netscape
-
-
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer (or how many you want to allow fsc2 to use) and defaults to 0
 # if not set (in which case no serial ports can be used).
@@ -141,6 +128,40 @@ NUM_SERIAL_PORTS   := 2
 # directory. Also see the longer discussion in section C of the INSTALL file.
 
 SERIAL_LOCK_DIR    := /var/lock
+
+
+# Next set the file for writing logs about the activity on the serial port.
+# Make sure that fsc2 or its users have write access to the directory the
+# log file will be created in. Don't use a partition on which you don't have
+# at least a few megabytes to spare, depending on the type of experiments
+# you will do the file can become rather long. But the file will not grow
+# indefinitely, if you start a new experiment its previous contents gets
+# overwritten. If no file is specified logs will be written to stderr.
+
+SERIAL_LOG_FILE    := /tmp/serial.log
+
+
+# The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the logs
+# for the serial port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
+# to 'HIGH' all serial port function calls together with all data send to or
+# received from devices are stored. When set to 'MEDIUM' only serial port
+# function calls are logged. When set to 'LOW' only errors messages will be
+# written to the log file. If not set it defaults to 'LOW'.
+
+SERIAL_LOG_LEVEL   := HIGH
+
+
+# Define the default editor to use for editing when the "Edit" button gets
+# pressed or for writing a bug report
+
+EDITOR             := vi
+
+
+# Define the default browser to use when the "Help" button gets pressed and
+# the manual is to be shown, currently supported are netscape, mozilla,
+# opera, konqueror, galeon, lnyx and w3m.
+
+BROWSER            := netscape
 
 
 # The next two lines must be uncommented if you want support for the National
@@ -438,65 +459,62 @@ CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 CONFFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 
 
+# Make sure settings for GPIB bus are reasonable
+
+ifneq ($(GPIB_LIBRARY),NONE)
+	ifdef GPIB_HEADER_DIR
+		INCLUDES         += -I$(GPIB_HEADER_DIR)
+	endif
+
+	ifdef GPIB_CONF_FILE
+		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+	else
+		CONFFLAGS        += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
+	endif
+endif
+
 ifdef GPIB_LOG_FILE
-	CONFFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+	CONFFLAGS            += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 else
-	CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+	CONFFLAGS            += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
-
-
-ifdef WITH_HTTP_SERVER
-ifdef DEFAULT_HTTP_PORT
-	CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
-else
-	CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
-endif
-endif
-
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
-	CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
+	CONFFLAGS            += -DGPIB_LOG_LEVEL=LL_ALL
 else
 	ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-		CONFFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+		CONFFLAGS        += -DGPIB_LOG_LEVEL=LL_CE
 	else
 		ifeq ($(GPIB_LOG_LEVEL),OFF)
-			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+			CONFFLAGS    += -DGPIB_LOG_LEVEL=LL_NONE
 		else
-			CONFFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+			CONFFLAGS    += -DGPIB_LOG_LEVEL=LL_ERR
 		endif
 	endif
 endif
 
-
-ifdef GPIB_HEADER_DIR
-	INCLUDES += -I$(GPIB_HEADER_DIR)
+ifeq ($(GPIB_LIBRARY),LLP)
+	GPIB_LIBRARY         := llp
+	ifndef GPIB_HEADER_DIR
+		INCLUDES         += -I/usr/local/include/gpib
+	endif
+	LIBS                 += -lfl
+else
+	ifeq ($(GPIB_LIBRARY),NI)
+		GPIB_LIBRARY     := ni
+	else
+		ifeq ($(GPIB_LIBRARY),JTT)
+			GPIB_LIBRARY := jtt
+		else
+			GPIB_LIBRARY := none
+		endif
+	endif
 endif
 
-ifndef OWNER
-	OWNER = fsc2
-endif
+LIBS                     += -lgpib
 
 
-ifdef EDITOR
-	INCLUDES += -DEDITOR=\"$(EDITOR)\"
-endif
-
-
-ifdef BROWSER
-	INCLUDES += -DBROWSER=\"$(BROWSER)\"
-endif
-
-
-ifdef DEF_INCL_DIR
-	CONFFLAGS += -DDEF_INCL_DIR=\"$(DEF_INCL_DIR)\"
-endif
-
-
-ifndef GROUP
-	GROUP = uucp
-endif
-
+# Make sure settings for serial port are reasonable
 
 ifdef NUM_SERIAL_PORTS
 	CONFFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
@@ -504,11 +522,32 @@ else
 	CONFFLAGS += -DNUM_SERIAL_PORTS=0
 endif
 
-
 ifdef SERIAL_LOCK_DIR
 	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
 endif
 
+ifdef SERIAL_LOG_FILE
+	CONFFLAGS += -DSERIAL_LOG_FILE=\"$(SERIAL_LOG_FILE)\"
+else
+	CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/serial.log\"
+endif
+
+ifeq ($(SERIAL_LOG_LEVEL),HIGH)
+	CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ALL
+else
+	ifeq ($(SERIAL_LOG_LEVEL),MEDIUM)
+		CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_CE
+	else
+		ifeq ($(SERIAL_LOG_LEVEL),OFF)
+			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_NONE
+		else
+			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ERR
+		endif
+	endif
+endif
+
+
+# Make sure RULBUS settings are reasonable
 
 ifdef WITH_RULBUS
 	ifdef rulbus_incl_path
@@ -518,7 +557,43 @@ ifdef WITH_RULBUS
 		LIBS += -L$(rulbus_lib_path)
 	endif
 	LIBS   += -lrulbus
-	CFLAGS += -DWITH_RULBUS
+	CONFFLAGS += -DWITH_RULBUS
+endif
+
+
+ifdef WITH_HTTP_SERVER
+	ifdef DEFAULT_HTTP_PORT
+		CONFFLAGS += -DWITH_HTTP_SERVER \
+					 -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+	else
+		CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
+	endif
+endif
+
+
+ifdef EDITOR
+	CONFFLAGS += -DEDITOR=\"$(EDITOR)\"
+endif
+
+
+ifdef BROWSER
+	CONFFLAGS += -DBROWSER=\"$(BROWSER)\"
+endif
+
+
+ifdef DEF_INCL_DIR
+	CONFFLAGS += -DDEF_INCL_DIR=\"$(DEF_INCL_DIR)\"
+endif
+
+
+# Make sure some owner and group for the program are set
+
+ifndef OWNER
+	OWNER = fsc2
+endif
+
+ifndef GROUP
+	GROUP = uucp
 endif
 
 
@@ -549,35 +624,6 @@ ifdef MAIL_ADDRESS
 	else
 		LIBS          += -lresolv
 		CONFFLAGS     += -DUSE_FSC2_MTA
-	endif
-endif
-
-
-# Finally take care that the variables for GPIB support are set correctly
-
-ifneq ($(GPIB_LIBRARY),NONE)
-	ifdef GPIB_CONF_FILE
-		CONFFLAGS        += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
-	else
-		INCLUDES         += -I/usr/local/include/gpib
-	endif
-	LIBS                 += -lgpib
-endif
-
-
-ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY         := llp
-	INCLUDES             += -I/usr/local/include/gpib
-	LIBS                 += -lfl
-else
-	ifeq ($(GPIB_LIBRARY),NI)
-		GPIB_LIBRARY     := ni
-	else
-		ifeq ($(GPIB_LIBRARY),JTT)
-			GPIB_LIBRARY := jtt
-		else
-			GPIB_LIBRARY := none
-		endif
 	endif
 endif
 
