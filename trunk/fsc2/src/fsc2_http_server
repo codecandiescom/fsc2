@@ -34,6 +34,9 @@ my $crlf = "\r\n";     # RFC 2616 requires this as the newline
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_ppmtojpeg;     # does the ppmtojpeg utility exist?
 my $version = 0.2;
+my $hostname = `hostname -f`;
+
+chomp $hostname;
 
 # Check if we got a port number as the first command line argument...
 
@@ -127,6 +130,7 @@ sub serve {
 
 	my $txt;
 	my %f = ( 'png' => 0, 'gif' => 0, 'jpeg' => 0 );
+	my $is_host_field = 0;
 
 
 	# Make the client connection the default I/O channel
@@ -142,19 +146,31 @@ sub serve {
 
 	# The "server" only handles well-formed GET requests...
 
-	exit illegal_request( $1, $txt )
-		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*\r*$|io;
+	illegal_request( $1 )
+		if $txt !~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/(\d+)\.(\d+)\s*\r*$|io;
 
-	my ( $req, $file ) = ( $1, $2 );
-	exit unsuppoted_request( $req, $txt ) unless $req =~ /^(GET)|(HEAD)$/io;
+	my ( $req, $file, $maj, $min ) = ( $1, $2, $3, $4 );
+
+	# RFC2616 requires that we accept an absolute URI, i.e. an URI starting
+	# with http://machine_name
+
+	$file =~ s|^(http://$hostname)?/||io;
+
+	# Stop on unsupported types of requests (anything except GET and HEAD)
+
+	unsupported_request( $req ) unless $req =~ /^(GET)|(HEAD)$/io;
 
 	# Check if client accepts PNG, GIF or JPEG files and skip the rest of
 	# the noise, we're done listening when we get an empty line
 
 	while ( defined( $txt = <$client> ) and $txt !~ /^$crlf$/o ) {
-		next unless $txt =~ /^\s*Accept:/;
-		for ( keys %f ) {
-			$f{ $_ } = 1 if $txt =~ m(\s+image/$_[^a-zA-Z0-9])i;
+		next unless $txt =~ /^\s*(Accept)|(Host):/io;
+		if ( $txt =~ /^\s*Accept:/io ) {
+			for ( keys %f ) {
+				$f{ $_ } = 1 if $txt =~ m(\s+image/$_[^a-zA-Z0-9])io;
+			}
+		} else {
+			$is_host_field = 1;
 		}
 	}
 
@@ -162,20 +178,26 @@ sub serve {
 
 	exit 0 unless defined $txt;
 
+	# Send a not too rude reply if the client didn't send a Host field but
+	# claims to be HTTP/1.1 compliant
+
+	missing_host_field( $req )
+		if $maj >= 1 and $min >= 1 and ! $is_host_field;
+
 	# Ok, now it's finally our turn to send something back to the client...
 
-	if ( $file =~ m|^/(index.html*)*$|o ) {
+	if ( $file =~ /^(index.html*)*$/io ) {
 		serve_main( \%f, $req );
-	} elsif ( $file =~ m{^/(fsc2\.(png|gif|jpeg))$}o ) {
+	} elsif ( $file =~ m{^(fsc2\.(png|gif|jpeg))$}o ) {
 		serve_logo( $1, $2, $req );
-	} elsif ( $file =~ m{^/fsc2_(a|b)\.(png|jpeg)$}o ) {
+	} elsif ( $file =~ m{^fsc2_(a|b)\.(png|jpeg)$}o ) {
 		serve_pics( $1, $2, $req );
 	} else {
 		not_found( $file, $req );
 	}
 
 	close $client;
-	exit 0;
+	exit;
 }
 
 
@@ -191,7 +213,7 @@ sub serve_main {
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
 				"Experiment finished" );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
-	my ( $state, $pic, $txt, $ext, $curve, $logo_file );
+	my ( $body, $state, $pic, $txt, $ext, $curve, $logo_file );
 
 
 	# Ask the parent for its current state - and don't forget to set a lock
@@ -204,21 +226,22 @@ sub serve_main {
 
 	return unless defined $state;
 
-	# First send some meta-information for the browser plus the first lines
-	# of the page
+	# First send some meta-information for the browser
 
-	print "HTTP/1.1 200 OK$crlf" . def_txt( ) .
-		  "Content-Type: text/html; charset=ISO-8859-1$crlf$crlf";
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 0 ) .
+		  "Content-Type: text/html; charset=ISO-8859-1$crlf";
 
 	return unless $req =~ /^GET$/io;
 
-	print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
-		  "<HTML>$crlf<HEAD>$crlf" .
-		  "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
-		  "<META name=\"author\" content=\"fsc2\">$crlf" .
-		  "<META name=\"robots\" content=\"noindex\">$crlf";
+	# Start to cobble together the page
 
-	# Send the logo (per default the GIF version because some browsers don't
+	$body = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">$crlf" .
+		    "<HTML>$crlf<HEAD>$crlf" .
+		    "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
+		    "<META name=\"author\" content=\"fsc2\">$crlf" .
+		    "<META name=\"robots\" content=\"noindex\">$crlf";
+
+	# Add the logo (per default the GIF version because some browsers don't
 	# seem to deal correctly with transparency in PNG files even though they
 	# claim to understand PNG) and the status information
 
@@ -227,32 +250,36 @@ sub serve_main {
 			if $f->{ 'gif' } or $f->{ 'png' } or $f->{ 'jpeg' };
 
 	if ( $state =~ /^[0-3]$/o ) {
-		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
+		$body .= "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
 
-		print "<P><CENTER><IMG SRC=\"$logo_file\"" .
-			  "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
+		$body .= "<P><CENTER><IMG SRC=\"$logo_file\"" .
+			     "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
 
-		print "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>$crlf" .
-			  "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
-			  strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>$crlf";
+		$body .=  "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>$crlf" .
+			      "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
+			      strftime( "%d %b %G %T %Z", localtime ) .
+				  ")</CENTER></P>$crlf";
 	} else {
-		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>$crlf";
+		$body .= "<TITLE>fsc2: WEIRD</TITLE></HEAD>$crlf";
 
-		print "<P><CENTER><IMG SRC=\"$logo_file\"" .
-			  "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
+		$body .= "<P><CENTER><IMG SRC=\"$logo_file\"" .
+			     "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
 
-		print "<P><CENTER><H1>Status:  Something weird is " .
-			  "happening here...$crlf" .
-			  "</H1></CENTER>$crlf" .
-			  "<P>Ok, you seem to have found a bug. " .
-			  "Please tell nobody ;-)$crlf" .
-			  "</P>$crlf</BODY></HTML>$crlf";
+		$body .= "<P><CENTER><H1>Status:  Something weird is " .
+			     "happening here...$crlf" .
+			     "</H1></CENTER>$crlf" .
+			     "<P>Ok, you seem to have found a bug. " .
+			     "Please tell nobody ;-)$crlf" .
+			     "</P>$crlf</BODY></HTML>$crlf";
+
+		print "Content-Length: " . length( $body ) . "$crlf$crlf";
+		print $body;
 		return;
 	}
 
-	# Now tell the client where to look for the graphics fsc2 currently
-	# displays - only PNG amd JPEG format is supported (but not GIF, for
-	# some szupid legal reasons)
+	# Now add where to look for the graphics fsc2 currently displays - only
+	# PNG amd JPEG format is supported (but not GIF, for some stupid legal
+	# reasons)
 
 	if ( $f->{ 'png' } and $has_pnmtopng ) {
 		$ext = "png";
@@ -266,11 +293,15 @@ sub serve_main {
 		1 while defined ( $pic = <STDIN> ) and $pic =~ /^$/o;
 		stdout_lock( 0 );
 
-		return unless defined $pic;
+		unless ( defined $pic ) {
+			print "Content-Length: " . length( $body ) . "$crlf$crlf";
+			print $body;
+			return;
+		}
 
-		print "<H2>Display window:</H2>" .
-			  "<P><CENTER><IMG SRC=\"fsc2_a.$ext\"" .
-			  "ALT=\"Display window\"></CENTER></P>$crlf";
+		$body .= "<H2>Display window:</H2>" .
+			     "<P><CENTER><IMG SRC=\"fsc2_a.$ext\"" .
+			     "ALT=\"Display window\"></CENTER></P>$crlf";
 
 		if ( $pic =~ /^[23]$/ ) {
 			stdout_lock( 1 ) or exit 1;
@@ -278,15 +309,20 @@ sub serve_main {
 			1 while defined ( $curve = <STDIN> ) and $curve =~ /^$/o;
 			stdout_lock( 0 );
 
-			return unless defined $curve;
+			unless ( defined $curve ) {
+				print "Content-Length: " . length( $body ) . "$crlf$crlf";
+				print $body;
+				return;
+			}
 
-			print "<P><CENTER>Curve $curve</CENTER></P>$crlf"
+			$body .= "<P><CENTER>Curve $curve</CENTER></P>$crlf"
 				if $curve =~ /^[1-4]$/;
 		}
 
-		print "<H2>Cross section window:</H2>" .
-			  "<P><CENTER><IMG SRC=\"fsc2_b.$ext\"" .
-			  "ALT=\"Cross section window\"></CENTER>$crlf" if $pic =~ /^3$/;
+		$body .= "<H2>Cross section window:</H2>" .
+			     "<P><CENTER><IMG SRC=\"fsc2_b.$ext\"" .
+			     "ALT=\"Cross section window\"></CENTER>$crlf"
+					 if $pic =~ /^3$/;
 	}
 
 	# Finally, ask fsc2 for the contents of the error browser and, when we
@@ -308,9 +344,14 @@ sub serve_main {
 	}
 	stdout_lock( 0 );
 
-	print "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
+	$body .= "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
 		if defined $txt;
-	print "</BODY>$crlf</HTML>$crlf";
+	$body .= "<HR><ADDRESS>fsc2/$version at $hostname Port " .
+		     "$port</ADDRESS>$crlf" .
+			 "</BODY></HTML>$crlf";
+
+	print "Content-Length: " . length( $body ) . "$crlf$crlf";
+	print $body;
 }
 
 
@@ -325,12 +366,13 @@ sub serve_logo {
 	my $fh;
 
 
-	open( $fh, $auxdir . $file ) or return not_found( $file, $req );
+	open( $fh, "$auxdir/$file" ) or
+		return not_found( $file, $req );
 
 	print "HTTP/1.1 200 OK$crlf" . def_txt( 1 ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf" .
-		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "$crlf$crlf";
+		  "Content-Length: " . ( -s "$auxdir/$file" ) . "$crlf$crlf";
 	print <$fh> unless $req =~ /^HEAD$/io;
 
 	close $fh;
@@ -381,13 +423,15 @@ sub serve_pics {
 		} else {
 			@data = `ppmtojpeg $file`;
 		}
+		unlink $file;
 	} elsif ( $state =~ /^0$/o ) {
-		$file = $auxdir . "na.$ext";
-		open( $fh, $file ) or return not_found( "fsc2_$which$ext", $req );
+		$file = "$auxdir/na.$ext";
+		open( $fh, $file ) or
+			return not_found( "fsc2_$which$ext", $req );
 	}
 	stdout_lock( 0 );
 
-	print "HTTP/1.1 200 OK$crlf" . def_txt( ) .
+	print "HTTP/1.1 200 OK$crlf" . def_txt( 0 ) .
 		  "Accept-Ranges: none$crlf" .
 		  "Content-Type: image/$ext$crlf";
 
@@ -396,9 +440,8 @@ sub serve_pics {
 		   ( $ext eq "jpeg" and $has_ppmtojpeg ) ) ) {
 		print "Content-Length: " . len( @data ) . "$crlf$crlf";
 		print @data if $req =~ /^GET$/io;
-		unlink $file;
 	} else {
-		print "Content-Length: " . ( stat( $file ) )[ 7 ] . "$crlf$crlf";
+		print "Content-Length: " . ( -s $file ) . "$crlf$crlf";
 		print <$fh> if $req =~ /^GET$/io;
 		close $fh;
 	}
@@ -409,20 +452,26 @@ sub serve_pics {
 # Deals with requests for pages we don't know about...
 
 sub not_found {
-	my ( $file, $req ) = shift;
+	my ( $file, $req ) = @_;
 
-	print "HTTP/1.1 404 Not Found$crlf" . def_txt( ) .
+	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		       "<HTML><HEAD>$crlf" .
+			   "<TITLE>404 Not Found</TITLE>$crlf" .
+			   "</HEAD><BODY>$crlf" .
+			   "<H1>Not Found</H1>$crlf" .
+			   "<P>The requested URL ($file) was not found.</P><HR>$crlf" .
+			   "<ADDRESS>fsc2/$version at $hostname Port " .
+			   "$port</ADDRESS>$crlf" .
+			   "</BODY></HTML>$crlf";
+
+	print "HTTP/1.1 404 Not Found$crlf" . def_txt( 0 ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "$crlf";
-	print "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-		  "<HTML>$crlf<HEAD>$crlf" .
-		  "<TITLE>404 Not Found</TITLE>$crlf" .
-		  "</HEAD><BODY>$crlf" .
-		  "<HR>$crlf" .
-		  "<H1>Not Found</H1>$crlf" .
-		  "<P>The requested URL ($file) was not found.</P>$crlf" .
-		  "<HR>$crlf</BODY>$crlf</HTML>$crlf"
-			  if $req =~ /^GET$/io;
+		  "Content-Length: " . length( $body ) . "$crlf$crlf";
+
+	print $body if $req =~ /^GET$/io;
+
+	close $client;
+	exit;
 }
 
 
@@ -430,23 +479,28 @@ sub not_found {
 # Deals with requests that are neither GET nor HEAD
 
 sub unsupported_request {
-	my ( $type, $string ) = @_;
 
+	my $req = shift;
 
-	print "HTTP/1.1 405 Method not allowed" . def_txt( ) .
-		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "$crlf" .
-		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
-		  "<HTML>$crlf<HEAD>$crlf" .
-		  "<TITLE>405 Method not allowed</TITLE>$crlf" .
-		  "</HEAD><BODY>$crlf" .
-		  "<HR>$crlf" .
-		  "<H1>Method not allowed</H1>$crlf";
+    my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		       "<HTML><HEAD>$crlf" .
+		       "<TITLE>405 Method not allowed</TITLE>$crlf" .
+		       "</HEAD><BODY>$crlf" .
+		       "<H1>Method not allowed</H1>$crlf" .
+		       "<P>Server understands GET and HEAD requests only.</P>" .
+			   "</HR>$crlf" .
+		       "<ADDRESS>fsc2/$version at $hostname " . 
+			   "Port $port</ADDRESS>$crlf" .
+		       "</BODY></HTML>$crlf";
 
-	print "<P>Server supports GET and HEAD requests only.</P>$crlf";
+	print "HTTP/1.1 405 Method not allowed$crlf" . def_txt( 0 ) .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" . 
+		  "Content-Length: "  . length( $body ) . "$crlf$crlf";
 
-	print "<HR>$crlf</BODY>$crlf</HTML>$crlf";
+	print $body if $req =~ /^GET$/io;
+
 	close $client;
+	exit;
 }
 
 
@@ -454,24 +508,59 @@ sub unsupported_request {
 # Deals with malformed requests
 
 sub illegal_request {
-	my ( $type, $string ) = @_;
 
+	my $req = shift;
 
-	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( ) .
+	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
+		       "<HTML><HEAD>$crlf" .
+		       "<TITLE>400 Bad Request</TITLE>$crlf" .
+		       "</HEAD><BODY>$crlf" .
+		       "<H1>Bad Request</H1>$crlf" .
+		       "<P>Your browser send a request that this server could not " .
+		       "understand</P></HR>$crlf" .
+		       "<ADDRESS>fsc2/$version at $hostname " . 
+			   "Port $port</ADDRESS>$crlf" .
+		       "</BODY></HTML>$crlf";
+
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0 ) .
 		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
-		  "$crlf" .
-		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
-		  "<HTML>$crlf<HEAD>$crlf" .
-		  "<TITLE>400 Bad Request</TITLE>$crlf" .
-		  "</HEAD><BODY>$crlf" .
-		  "<HR>$crlf" .
-		  "<H1>Bad Request</H1>$crlf";
+          "Content-Lenght: " . length( $body ) . "$crlf$crlf";
 
-	$string =~ s/\r*\n$//o;
-	print "<P>Malformed request: <SAMP>$string</SAMP>.</P>$crlf";
+	print $body if $req =~ /^GET$/io;
 
-	print "<HR>$crlf</BODY>$crlf</HTML>$crlf";
 	close $client;
+	exit;
+}
+
+
+#########################################################
+# Deals with requests claiming to be HTTP/1.1 compliant but don't send
+# a Host field as required by RFC2616, section 14.23.
+
+sub missing_host_field {
+
+	my $req = shift;
+
+	my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">$crlf" .
+		   	   "<HTML>$crlf<HEAD>$crlf" .
+		   	   "<TITLE>400 Bad Request</TITLE>$crlf" .
+		   	   "</HEAD><BODY>$crlf" .
+		   	   "<H1>Bad Request</H1>$crlf" .
+		   	   "<P>Your browser send a request that this server could not " .
+		   	   "understand:$crlf" .
+		   	   "Client sent HTTP/1.1 request without hostname (see RFC2616 " .
+		   	   "section 14.23)</P></HR>$crlf" .
+		   	   "<ADDRESS>fsc2/$version at $hostname Port $port</ADDRESS>" .
+		   	   "</BODY></HTML>$crlf";
+
+	print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0 ) .
+		  "Content-Type: text/html; charset=iso-8859-1$crlf" .
+		  "Content-Lenght: " . length( $body ) . "$crlf$crlf";
+
+	print $body if $req =~ /^GET$/io;
+
+	close $client;
+	exit;
 }
 
 
@@ -479,17 +568,18 @@ sub illegal_request {
 # Returns some text we always have to send to the client in the meta data
 
 sub def_txt {
+	my ( $no_expire ) = @_;
+
 	my $date = rfc_1123_date( );
-	my $exp_date = ( @_ == 0 ) ? $date : rfc_1123_date( 'next_year' );
+	my $exp_date = $no_expire ? rfc_1123_date( 'next_year' ) : $date;
 
 	my $reply = "Date: $date$crlf" .
 				"Server: fsc2/$version$crlf" .
-				"Connection: close$crlf" .
 				"Allow: GET, HEAD$crlf" .
 				"Accept-Ranges: none$crlf" .
+				"Connection: close$crlf" .
 				"Expires: $exp_date$crlf";
-
-	$reply .= "Cache-Control: no-cache$crlf" if @_ == 0;
+	$reply .= "Cache-Control: no-cache$crlf" unless $no_expire;
 	return $reply
 }
 
