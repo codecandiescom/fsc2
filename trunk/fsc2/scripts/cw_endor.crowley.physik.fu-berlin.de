@@ -552,9 +552,11 @@ fsave( File_2, \"% Start frequency = # MHz\\n\"
 save_comment( File_2, \"% \" );
 save_program( File_2, \"% \" );
 
+hide_toolbox( 1 );
 B1 = button_create( \"PUSH_BUTTON\", \"Pause before\\nnext run\" );
 OO1 = output_create( \"INT_OUTPUT\", \"Current run\" );
-OO2 = output_create( \"FLOAT_OUTPUT\", \"RF Frequency [MHz]\" );\n\n";
+OO2 = output_create( \"FLOAT_OUTPUT\", \"RF Frequency [MHz]\" );
+hide_toolbox( 0 );\n\n";
 
 print F "
 
