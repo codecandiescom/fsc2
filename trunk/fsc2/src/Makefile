@@ -45,7 +45,7 @@ export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all src res gpib_setup clean distclean
+.PHONY:    all src res gpib_setup cleanup clean
 
 
 # Default target which is used when make is called from within this directory
@@ -202,12 +202,12 @@ endif
 
 # How to get rid of stuff not needed anymore
 
-clean:
+cleanup:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
 		  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
 
-distclean:
-	$(MAKE) clean
+clean:
+	$(MAKE) cleanup
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
 		  *.fsc2_so *.bak
 

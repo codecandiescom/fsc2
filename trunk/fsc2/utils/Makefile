@@ -46,5 +46,9 @@ uninstall:
 		rmdir $(emacs_dir);                  \
 	fi
 
-distclean:
-	-$(RM) $(RMFLAGS) edl-mod.elc *~
+cleanup:
+	-$(RM) $(RMFLAGS) *~
+
+clean:
+	$(MAKE) cleanup
+	-$(RM) $(RMFLAGS) edl-mod.elc
