@@ -2,7 +2,7 @@
 # $Id$
 #
 #
-#  Makefile for Wasco WITIO-48 ISA DIO card module and library
+# Makefile for Wasco WITIO-48 ISA DIO card module and library
 #
 # Copyright (C) 2003 Jens Thoms Toerring
 #
@@ -26,7 +26,7 @@
 
 prefix  = $(shell if [ -e driver/autoconf.h ]; then \
                       grep WITIO_48_PREFIX driver/autoconf.h | \
-                      sed 's/[^\"]*//' | tr -d \"; \
+                      sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/'; \
                   else \
                       echo "/usr/local"; \
                   fi)

@@ -24,7 +24,12 @@
 # Jens.Toerring@physik.fu-berlin.de
 
 
-prefix  = $(shell if [ -e driver/autoconf.h ]; then grep NI6601_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"; else echo "/usr/local"; fi)
+prefix  = $(shell if [ -e driver/autoconf.h ]; then \
+                      grep NI6601_PREFIX driver/autoconf.h | \
+                      sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/'; \
+                  else \
+                      echo "/usr/local"; \
+                  fi)
 
 export prefix
 
@@ -34,10 +39,10 @@ export prefix
 
 all:
 	@if [ ! -e driver/autoconf.h ]; then \
-		echo "**********************************************";\
+		echo "**********************************************"; \
 		echo "*   The file driver/autoconf.h is missing.   *"; \
 		echo "*    Please run './INSTALL' to create it.    *"; \
-		echo "**********************************************";\
+		echo "**********************************************"; \
 		exit 2; \
 	fi
 	$(MAKE) -C driver
