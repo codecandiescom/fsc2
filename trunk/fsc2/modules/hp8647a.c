@@ -517,12 +517,10 @@ Var *synthesizer_sweep_up( Var *v )
 			att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
 				  + hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
-			{
 				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
 						"insufficient, using %f dB instead of %f dB.\n",
 						Fname, Lc, DEVICE_NAME, MAX_ATTEN, att );
 			if ( att > MIN_ATTEN )
-			{
 				eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is  "
 						"insufficient, using %f dB instead of %f dB.\n",
 						Fname, Lc, DEVICE_NAME, MIN_ATTEN, att );
@@ -605,7 +603,7 @@ Var *synthesizer_reset_frequency( Var *v )
 
 Var *synthesizer_use_table( Var *v )
 {
-	FILE *tfp = NULL;
+	static FILE *tfp = NULL;
 	char *tfname;
 
 
@@ -774,7 +772,8 @@ static bool hp8647a_init( const char *name )
 	{
 		if ( hp8647a.use_table )
 		{
-			att = hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+			att =   hp8647a.attenuation
+				  - hp8647a_get_att_from_table( hp8647a.freq )
 				  + hp8647a.att_at_ref_freq;
 			if ( att < MAX_ATTEN )
 			{
@@ -794,7 +793,7 @@ static bool hp8647a_init( const char *name )
 		else
 			att = hp8647a.attenuation;
 
-		hp8647a_set_attenuation( hp8647a.att );
+		hp8647a_set_attenuation( att );
 	}
 	else
 		hp8647a.attenuation = hp8647a_get_attenuation( );
