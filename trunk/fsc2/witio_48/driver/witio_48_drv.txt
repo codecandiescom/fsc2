@@ -21,7 +21,7 @@ WITIO_48_MODE_1x24:  The DIO isn't split up but used as a 24-bit wide DIO
 WITIO_48_MODE_16_8:  The DIO is split into a 16-bit and an 8-bit wide DIO
 
 When the module gets loaded the board gets initialized to mode
-'WITIO_48_MODE_3x8' with all set up as inputs.
+'WITIO_48_MODE_1x24' with all set up as inputs.
 
 Depending on the mode, one, two or three channels can be used to out-
 or input values in different ranges:

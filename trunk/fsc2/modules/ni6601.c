@@ -368,16 +368,17 @@ Var *counter_timed_count( Var *v )
 	{
 		/* For longer intervals (i.e. longer than the typical time resolution
 		   of the machine) sleep instead of waiting in the kernel for the
-		   count interval to finish */
+		   count interval to finish (as we would do when calling
+		   ni6601_get_count() immediately with the third argument being set
+		   to 1). If the user pressed the "Stop" button while we were
+		   sleeping stop the counter and return the current count without
+		   further waiting. */
 
 		if ( ( interval -= 0.01 ) > 0.0 )
 		{
 			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
 			if ( check_user_request( ) )
-			{
 				counter_stop_counter( vars_push( INT_VAR, counter ) );
-				THROW( USER_BREAK_EXCEPTION );
-			}
 		}
 
 	try_counter_again:
@@ -398,11 +399,6 @@ Var *counter_timed_count( Var *v )
 				THROW( EXCEPTION );
 
 			case NI6601_ERR_ITR :
-				if ( check_user_request( ) )
-				{
-					counter_stop_counter( vars_push( INT_VAR, counter ) );
-					THROW( USER_BREAK_EXCEPTION );
-				}
 				goto try_counter_again;
 
 			default :
@@ -417,9 +413,9 @@ Var *counter_timed_count( Var *v )
 }
 
 
-/*---------------------------------------------------*/
-/* Gest a count even if the counter is still running */
-/*---------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Gets a count even while the counter is still running */
+/*------------------------------------------------------*/
 
 Var *counter_intermediate_count( Var *v )
 {
@@ -487,11 +483,6 @@ Var *counter_final_count( Var *v )
 				THROW( EXCEPTION );
 
 			case NI6601_ERR_ITR :
-				if ( check_user_request( ) )
-				{
-					counter_stop_counter( vars_push( INT_VAR, counter ) );
-					THROW( USER_BREAK_EXCEPTION );
-				}
 				goto try_counter_again;
 
 			default :
@@ -889,3 +880,10 @@ static double ni6601_time_check( double duration, const char *text )
 
 	return ticks * NI6601_TIME_RESOLUTION;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
