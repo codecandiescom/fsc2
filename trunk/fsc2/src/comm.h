@@ -38,9 +38,28 @@ typedef struct {
 } CS;
 
 
+typedef struct Data_Buffer_ {
+	int type;
+	long nx;
+	long ny;
+	union {
+		long lval;
+		double dval;
+		long *lpnt;
+		double *dpnt;
+	} data;
+	size_t len;
+	int overdraw_flag;
+
+	struct Data_Buffer_ *next;
+} Data_Buffer;
+
+
 
 long reader( void *ret );
 void writer( int type, ... );
+void delete_data_buffer( Data_Buffer *buf );
+void delete_all_data_buffers( void );
 
 
 
