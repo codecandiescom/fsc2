@@ -49,6 +49,8 @@
 * kontron4060::   Kontron 4060 Voltmeter
 * lakeshore330::  Lake Shore 330 Temperature Controller
 * lecroy9400::    LeCroy Digitizing Oscilloscope 9400
+* me6000::        Meilhaus ME-6000 and ME-6100 DAC card
+* ni6601::        National Instruments 6601 GPCT card
 * pt2025::        Metrolab NMR Teslameter PT2025
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
@@ -916,7 +918,7 @@ the temperature.
 @end multitable
 
 
-@node lecroy9400, pt2025, lakeshore330, Device Reference
+@node lecroy9400, me6000, lakeshore330, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9400
 @end iftex
@@ -955,7 +957,75 @@ channels, 2 function channels (needed for averaging).
 @end multitable
 
 
-@node pt2025, s_band_magnet_broad, lecroy9400,  Device Reference
+@node  me6000, ni6601, lecroy9400, Device Reference
+@iftex
+@subheading Meilhaus Electronic GmbH ME-6000 and ME.6100 DAC card
+@end iftex
+@ifnottex
+@section Meilhaus Electronic GmbH ME-6000 and ME.6100 DAC card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{me6000}
+
+@paragraphindent 0
+@strong{Description}: Digital-to-analog converter card with 4, 8 or 16
+output ports, depending on model of card.
+
+@paragraphindent 0
+@strong{Controlled via}: PCI card (requires module and library coming
+with @code{fsc2} being installed)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{dac_name()}                    @tab @ref{dac_name}
+@item @code{dac_voltage()}                 @tab @ref{dac_voltage}
+@end multitable
+
+
+@node  ni6601, pt2025, me6000, Device Reference
+@iftex
+@subheading National Instruments 6601 GPCT card
+@end iftex
+@ifnottex
+@section National Instruments 6601 GPCT card
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{ni6601}
+
+@paragraphindent 0
+@strong{Description}: General purpose counter and timer card with 4
+channels, used for event counting and pulse creation
+
+@paragraphindent 0
+@strong{Controlled via}: PCI card (requires module and library coming
+with @code{fsc2} being installed)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{counter_name()}                   @tab @ref{counter_name}
+@item @code{counter_start_continuous_counter} @tab @ref{counter_start_continuous_counter}
+@item @code{counter_start_timed_counter}      @tab
+@ref{counter_start_timed_counter}
+@item @code{counter_timed_count}              @tab @ref{counter_timed_count}
+@item @code{counter_intermediate_count}       @tab @ref{counter_intermediate_count}
+@item @code{counter_final_count}              @tab @ref{counter_final_count}
+@item @code{counter_stop_counter}             @tab
+@ref{counter_stop_counter}
+@item @code{counter_single_pulse}             @tab
+@ref{counter_single_pulse}
+@item @code{counter_continuous_pulses}        @tab
+@ref{counter_continuous_pulses}
+@item @code{counter_dio_read}                 @tab
+@ref{counter_dio_read}
+@item @code{counter_dio_write}                @tab @ref{counter_dio_write}
+@end multitable
+
+
+@node pt2025, s_band_magnet_broad, ni6601, Device Reference
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
 @end iftex

@@ -84,7 +84,7 @@
 @item @code{date}             @tab Built-in function (@ref{date})
 @item @code{dB}               @tab Unit, Decibel
 @item @code{db}               @tab Unit, Decibel
-@item @code{DEFAULT_SOURCE}   @code Channel Name
+@item @code{DEFAULT_SOURCE}   @tab Channel Name
 @item @code{DEL}              @tab @code{DELAY} keyword
 @item @code{DELAY}            @tab @code{DELAY} keyword
 @item @code{DELL}             @tab Pulse @code{DELTA_LENGTH} keyword
@@ -225,7 +225,7 @@
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
 @item @code{NEXT}             @tab Loop control statement (@ref{NEXT statement})
-@item @code{NEXT_GATE}        @code Channel Name
+@item @code{NEXT_GATE}        @tab Channel Name
 @item @code{nG}               @tab Unit, Nano-Gauss
 @item @code{nHz}              @tab Unit, Nano-Hertz
 @item @code{ns}               @tab Unit, Nano-Seconds
@@ -306,10 +306,10 @@
 @item @code{slider_delete}    @tab Built-in function (@ref{slider_delete})
 @item @code{slider_value}     @tab Built-in function (@ref{slider_value})
 @item @code{SLOPE}            @tab Pulser @code{SLOPE} keyword
-@item @code{SOURCE_0}         @code Channel Name
-@item @code{SOURCE_1}         @code Channel Name
-@item @code{SOURCE_2}         @code Channel Name
-@item @code{SOURCE_3}         @code Channel Name
+@item @code{SOURCE_0}         @tab Channel Name
+@item @code{SOURCE_1}         @tab Channel Name
+@item @code{SOURCE_2}         @tab Channel Name
+@item @code{SOURCE_3}         @tab Channel Name
 @item @code{sqrt}             @tab Built-in function (@ref{sqrt})
 @item @code{START}            @tab
 @item                         @tab
@@ -325,8 +325,8 @@
 @item @code{TIME_B}           @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIMEBASE}         @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIME_BASE}        @tab Pulser @code{TIME_BASE} keyword
-@item @code{TIMEBASE_1}       @code Channel Name
-@item @code{TIMEBASE_2}       @code Channel Name
+@item @code{TIMEBASE_1}       @tab Channel Name
+@item @code{TIMEBASE_2}       @tab Channel Name
 @item @code{TTL}              @tab Input level keyword
 @item                         @tab
 @item @code{uA}               @tab Unit, Micro-Ampere

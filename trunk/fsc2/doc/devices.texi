@@ -36,6 +36,8 @@
 * Voltmeter Functions::
 * Boxcar Integrator Functions::
 * Frequency Counter Functions::
+* DAC Functions::
+* Event Counter Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -2464,7 +2466,7 @@ between @code{1} and @code{3} for memory curves.
 @end table
 
 
-@node Frequency Counter Functions, Multi-Device Functions, Boxcar Integrator Functions, Device Functions
+@node Frequency Counter Functions, DAC Functions, Boxcar Integrator Functions, Device Functions
 @section Frequency Counter Functions
 @cindex Frequency Counter Functions
 Currently only one frequency counter is supported, the HP5340A. Because
@@ -2491,11 +2493,294 @@ Returns a floating point value with the measured frequency. The function
 does not accept any parameters and can only by used in the
 @code{EXPERIMENT} section.
 
+@end table
+
+
+@node DAC Functions, Event Counter Functions, Frequency Counter Functions, Device Functions
+@section DAC Functions
+@cindex DAC Functions
+Currently, there's support for one type of digital-to-analog convert
+cards, the @strong{Meilhaus Electronic GmbH} cards ME-6000 and ME-6100.
+These cards have, depending on the model, either 4, 8 or 16 output
+ports. The module for these cards is loaded by specifying
+@example
+me6000
+@end example
+@noindent
+in the @code{DEVICES} section. 
+
+@table @samp
+
+@anchor{dac_name}
+@item dac_name()
+@findex dac_name()
+Returns a string with the name of the DAC being used.
+
+@anchor{dac_voltage}
+@item dac_voltage()
+@findex dac_voltage()
+This function has to be used to output a voltage on one of the output
+ports. The first argument has to be the output port, specified by one of
+the symbolic value between @code{CH0} and @code{CH15} (please
+@strong{don't} use numbers directly, the mapping between the symbolic
+values and channel numbers is non-trivial). The second argument is the
+voltage (in the range between @w{-10 V} and @w{+10 V}) to be output.
+
+If an output voltage has already been set for and output port the last
+set voltage is returned when the function is called without a second
+argument.
+
+Please note that last set output voltage will still appear on the ouput
+port after the program is finished. If it is required that the output
+voltage reverts to a default value at the end of the experiment please
+put a command for setting this voltage into the @code{ON_STOP} section of
+the @code{EDL} script.
+
+The function can be used in the @code{EXPERIMENT} as well as in the
+@code{PREPARATIONS} section.
 
 @end table
 
 
-@node Multi-Device Functions, , Frequency Counter Functions, Device Functions
+@node Event Counter Functions, Multi-Device Functions, DAC Functions, Device Functions
+@section Event Counter Functions
+@cindex Event Counter Functions
+The only currently supported event counter is the @code{National
+Instruments} GPCT 6601 card. It can be used for counting as well as for
+creating pulses. The module for this card is loaded by specifying
+@example
+ni6601
+@end example
+@noindent
+in the @code{DEVICES} section. 
+
+@table @samp
+
+@anchor{counter_name}
+@item counter_name()
+@findex counter_name()
+Returns a string with the name of the event counter being used.
+
+@anchor{counter_start_continuous_counter}
+@item counter_start_continuous_counter()
+@findex counter_start_continuous_counter()
+This functions starts one of the counters of the card. The counter will
+count until it is stopped by calling the @code{EDL} function
+@code{counter_stop_counter()}. It requires at least one argument, the
+counter to be used, which needs to be specified by one of the symbolic
+values between @code{CH0} and @code{CH3} (please @strong{don't} use
+numbers directly, the mapping between the symbolic values and channel
+numbers is non-trivial). If the requested counter is already runnng the
+function will fail.
+
+If called without a further argument the counter will count events on
+its default input. Alternatively, as a second argument, the source of
+events to be counted can be specified by one of the following symbolic
+names: @code{DEFAULT_SOURCE} (which is what would be used if no second
+argument is specified), @code{SOURCE_1} to @code{SOURCE_3} (the default
+input sources for channel @code{0} to @code{3}), @code{NEXT_GATE} (the
+gate input for the adjacent counter, where the adjacent counter for
+channel @code{0} is channel @code{1} and vice versa, and channels
+@code{2} and @code{3} also make up a pair) and @code{TIMEBASE_1} and
+@code{TIMEBASE_2} (the internal timebases of @w{20 MHz} and @w{100 kHz}).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_start_timed_counter}
+@item counter_start_timed_counter()
+@findex counter_start_timed_counter()
+This function starts on of the counters of the card. The counter will
+count for a specified time and then stops automatically. It requires at
+least two arguments, the counter to be used, specified by a symbolic
+value between @code{CH0} and @code{3}. If the requested counter is
+already runnng the function will fail. The second requires argument is
+the length of time the counter is supposed to count. This time must be
+between @w{100 ns} and about @w{214,748 s} and must be a integer
+multiple of @w{50 ns}.
+
+Please note: This function requires not only one counter channel, i.e.@:
+the one passed to the function as the first argument, but also a second,
+adjacent counter. If @code{CH0} is specified as the counter channel also
+@code{CH1} will be needed and vice versa, and if @code{CH2} is specified
+also @code{CH3} is required and vice versa. If the adjacent counter is
+already in use for some other purpose the function fails.
+
+If called without a further argument the counter will count events on
+its default input. Alternatively, as a second argument, the source of
+events to be counted can be specified by one of the following symbolic
+names: @code{DEFAULT_SOURCE} (which is what would be used if no second
+argument is specified), @code{SOURCE_1} to @code{SOURCE_3} (the default
+input sources for channel @code{0} to @code{3}), @code{NEXT_GATE} (the
+gate input for the adjacent counter, where the adjacent counter for
+channel @code{0} is channel @code{1} and vice versa, and channels
+@code{2} and @code{3} also make up a pair) and @code{TIMEBASE_1} and
+@code{TIMEBASE_2} (the internal timebases of @w{20 MHz} and @w{100 kHz}).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_timed_count}
+@item counter_timed_count()
+@findex counter_timed_count()
+This function is very similar to the previous function,
+@code{counter_start_timed_counter()}, i.e.@: it runs a counter for a
+specified of time, but it only returns when the requested duration of
+time is over and then returns the masured count. In every other respect,
+i.e.@: the required arguments etc.@: it is identical to the previous
+function.
+
+@anchor{counter_intermediate_count}
+@item counter_intermediate_count()
+@findex counter_intermediate_count()
+The function returns the current value of a counter. The counter may
+still be running, in which case repeated calls of the function will
+return an updated value according to the new number of events that
+happened between invocations of the function. The function requires on
+argument, the counter for which the current value is to be returned. It
+must be specified by one of the symbolic values between @code{CH0} and
+@code{CH3} (please @strong{don't} use numbers directly, the mapping
+between the symbolic values and channel numbers is non-trivial).
+
+The largest value that can be returned for a counter is @w{2147483647},
+i.e. @w{2^31 - 1}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_final_count}
+@item counter_final_count()
+@findex counter_final_count()
+This function waits for an counter to stop and only then returns the
+final value of the counter. Trying to call this function on a counter
+that has been started by the function
+@code{counter_start_continuous_counter()} and hasn't already been
+stopped will fail, because such a counter will never stop by itself.
+
+The function requires on argument, the counter for which the current
+value is to be returned. It must be specified by one of the symbolic
+values between @code{CH0} and @code{CH3} (please @strong{don't} use
+numbers directly, the mapping between the symbolic values and channel
+numbers is non-trivial).
+
+The largest value that can be returned for a counter is @w{2147483647},
+i.e. @w{2^31 - 1}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_stop_counter}
+@item counter_stop_counter()
+@findex counter_stop_counter()
+This function can be used to stop a counter independent of the way it
+was started. It requires on argument, the counter for which the current
+value is to be returned. It must be specified by one of the symbolic
+values between @code{CH0} and @code{CH3} (please @strong{don't} use
+numbers directly, the mapping between the symbolic values and channel
+numbers is non-trivial).
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_single_pulse}
+@item counter_single_pulse()
+@findex counter_single_pulse()
+Beside being used as event counters the counters can also be used to
+create pulses on its default output port. This function can be used to
+create a single pulse on the output port. It requires two arguments, the
+first being the counter to be used, specified by a symbolic value
+between @code{CH0} and @code{3}. If the requested counter is already
+runnng the function will fail. The second argument is the length of the
+pulse, which must be between @w{100 ns} and about @w{214,748 s} and must
+be a integer multiple of @w{50 ns}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_continuous_pulses}
+@item counter_continuous_pulses()
+@findex counter_continuous_pulses()
+This function allows to create a continuous train of pulses. It requires
+at least two arguments, the first being the counter to be used,
+specified by a symbolic value between @code{CH0} and @code{3}. If the
+requested counter is already runnng the function will fail. The second
+argument is the length of the pulse, which must be between @w{100 ns}
+and about @w{214,748 s} and must be a integer multiple of @w{50 ns}.
+
+If no thrid argument is specified the distance between the pulses will
+be identical to the pulse length. By specifying a third argument (with
+to the same restrictions as for the second argument) the distance
+between pulses can be set.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_dio_read}
+@item counter_dio_read()
+@findex counter_dio_read()
+Beside counters the card also can do digital input and output. There are
+8 lines that can be monitored or set. Using this function the current
+state of any subset of these 8 lines can be determined. If the function
+is called without an argument the state of all lines is returned, with
+the lowest bit of the number returned being the state of the
+lowest numbered DIO line, the seond-lowest bit of the number standing
+for the second-lowest numbered DIO line etc. If all lines are set the
+returned value is thus @code{255}.
+
+If an integer argument gets passed to the function it is taken as a
+mask, determining which of the DIO lines are to be treated as input
+lines. The lowest bit of the mask stands for the lowest numbered DIO
+line, the second-lowest bit of the mask for the second-lowest DIO line
+etc. Thus, by specifying a mask of value of @code{1} the state of only
+the DIO line numbered @code{0} would be returned, for a mask of value of
+@code{2} the state of DIO line @code{1}, for @code{4} DIO line @code{2}
+etc. By adding values for different DIO lines a subset of the DIO lines
+can be specified. Simple arithmetics show that the value of the mask
+must be between @code{0} (no DIO lines selected) and @code{255} (all DIO
+lines selected, which is the default). All bits in the resulting return
+value for which bits in the mask ae not set will be returned as being
+set to @code{0}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@anchor{counter_dio_write}
+@item counter_dio_write()
+@findex counter_dio_write()
+The 8 DIO lines of the card can not only be monitored (see the previous
+function, @code{counter_dio_read()}) but also set, which this function
+is to be used for. The function requires at least one integer argument,
+defining the states of the DIO lines to be set to. To output a high
+voltage at one of the DIO lines the corresponding bit of the value must
+be set.  The lowest bit of the value corresponds to the lowest numbered
+DIO line, the second-lowest bit to the second-lowest numbered DIO line
+etc. To only set the lowest numbered DIO line the value passed to the
+function would have to be @code{1}, to set only the second-lowest
+numbered DIO line the value would be @code{2}, to set only the
+third-lowest numbered DIO line a value of @code{4} would be used. By
+combining these values for the different DIO lines a certain output
+pattern can be set for all DIO lines. Obviously, the allowed values are
+restricted to the range between @code{0} (all DIO lines in low state) to
+@code{255} (all DIO lines in high state).
+
+Without a second argument all 8 DIO lines are switched to output mode
+and the states of the lines set according to the value of the first
+argument.  But by passing the function a mask value as the second
+argument only a certain subset of the DIO lines will be set to output
+mode, thus allowing to have some of the DIO lines for output, while the
+can be used as input lines. Each set bit in the mask will switch the
+corresponding lines to output state while not changing mode for the
+lines for which no bit is set in the mask. Bits in the first argument
+for which no bit is set in the second argument will be not used, i.e.@:
+don't influence the state of the DIO lines.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+@end table
+
+
+@node Multi-Device Functions, , Event Counter Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 
@@ -2505,7 +2790,6 @@ the modules for the required devices aren't loaded or if the modules
 don't support the needed functions). The module they are defined in is
 automatically loaded, so it needs no special entry in the @code{DEVICES}
 section.
-
 
 @table @samp
 
