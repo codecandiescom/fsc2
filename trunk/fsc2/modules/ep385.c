@@ -264,11 +264,6 @@ int ep385_end_of_test_hook( void )
 	if ( ! ep385_is_needed || ep385.is_cw_mode )
 		return 1;
 
-	/* Reset the internal representation back to its initial state */
-
-	if ( ! ep385.is_cw_mode )
-		ep385_full_reset( );
-
 	/* Check that TWT duty cycle isn't exceeded due to excessive length of
 	   TWT and TWT_GATE pulses */
 
@@ -353,6 +348,11 @@ int ep385_end_of_test_hook( void )
 			T_free( min );
 		}
 	}
+
+	/* Reset the internal representation back to its initial state */
+
+	if ( ! ep385.is_cw_mode )
+		ep385_full_reset( );
 
 	return 1;
 }

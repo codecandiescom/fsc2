@@ -118,8 +118,8 @@ int dg2020_b_init_hook( void )
 
 	dg2020.is_shape_2_defense = UNSET;
 	dg2020.is_defense_2_shape = UNSET;
-	dg2020.shape_2_defense_too_near = UNSET;
-	dg2020.defense_2_shape_too_near = UNSET;
+	dg2020.shape_2_defense_too_near = 0;
+	dg2020.defense_2_shape_too_near = 0;
 	dg2020.is_confirmation = UNSET;
 
 	dg2020.auto_shape_pulses = UNSET;
@@ -269,7 +269,26 @@ int dg2020_b_end_of_test_hook( void )
 		dg2020.show_file = NULL;
 	}
 
-	/* First we have to reset the internal representation back to its initial
+	/* If in the test it was found that shape and defense pulses got too
+	   near to each other bail out */
+
+	if ( dg2020.shape_2_defense_too_near != 0 )
+		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
+			   "%ld times shorter than %s during the test run.\n",
+			   dg2020.shape_2_defense_too_near,
+			   dg2020_pticks( dg2020.shape_2_defense ) );
+
+	if ( dg2020.defense_2_shape_too_near != 0 )
+		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
+			   "%ld times shorter than %s during the test run.\n",
+			   dg2020.defense_2_shape_too_near,
+			   dg2020_pticks( dg2020.defense_2_shape ) );
+
+	if ( dg2020.shape_2_defense_too_near != 0 ||
+		 dg2020.defense_2_shape_too_near != 0 )
+		THROW( EXCEPTION );
+
+	/* Now we have to reset the internal representation back to its initial
 	   state */
 
 	dg2020_full_reset( );
@@ -279,22 +298,6 @@ int dg2020_b_end_of_test_hook( void )
 
 	dg2020.max_seq_len = dg2020_get_max_seq_len( );
 	dg2020_calc_padding( );
-
-	/* If in the test it was found that shape and defense pulses got too
-	   near to each other bail out */
-
-	if ( dg2020.shape_2_defense_too_near )
-		print( FATAL, "Distance between PULSE_SHAPE and DEFENSE pulses was "
-			   "shorter than %s during the test run.\n",
-			   dg2020_ptime( dg2020_ticks2double( dg2020.shape_2_defense ) ) );
-
-	if ( dg2020.defense_2_shape_too_near )
-		print( FATAL, "Distance between DEFENSE and PULSE_SHAPE pulses was "
-			   "shorter than %s during the test run.\n",
-			   dg2020_ptime( dg2020_ticks2double( dg2020.defense_2_shape ) ) );
-
-	if ( dg2020.shape_2_defense_too_near || dg2020.defense_2_shape_too_near )
-		THROW( EXCEPTION );
 
 	return 1;
 }

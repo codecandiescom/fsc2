@@ -688,7 +688,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   defense_p->num,
 						   dg2020_pticks( dg2020.shape_2_defense ) );
-				dg2020.shape_2_defense_too_near = SET;
+				dg2020.shape_2_defense_too_near++;
 			}
 
 			if ( defense_p->pos < shape_p->pos &&
@@ -722,7 +722,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   shape_p->sp ? shape_p->sp->num : shape_p->num,
 						   dg2020_pticks( dg2020.defense_2_shape ) );
-				dg2020.defense_2_shape_too_near = SET;
+				dg2020.defense_2_shape_too_near++;
 			}
 		}
 	}
