@@ -48,6 +48,12 @@ typedef struct {
 #include "devices.h"
 
 
+/* Concerning the number of argumuments: If the number of arguments is fixed
+   this number has to be used, if the function accepts a variable number of
+   arguments but only with an upper limit, the negative of the upper limit
+   must be used, while for functions with no upper limit 'LONG_MIN' has to
+   be specified. */
+
 typedef struct
 {
 	const char *name;                 /* name of the function */

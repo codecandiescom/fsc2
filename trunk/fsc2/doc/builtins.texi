@@ -301,7 +301,7 @@ In the 2D-case the function accepts two arguments, one for the number of
 points to be displayed in @i{x}-direction and the second for the number
 of points in @i{y}-direction. As in the 1D-case a @code{-1} means not to
 do any changes to the axis and @code{0} sets the number of points to the
-number of points currently displayed alog this axis.
+number of points currently displayed along this axis.
 
 
 @anchor{clear_curve}
@@ -670,7 +670,7 @@ The second argument must be the minimum value the slider can be adjusted
 to and the third argument is the maximum value. The minimum value must
 always be smaller than the maximum value.
 
-A third, optional paramter is the step size to be used, i.e.@: the
+A fourth, optional paramter is the step size to be used, i.e.@: the
 minimum increment the slider value can be changed. Of course, this value
 has to be larger than zero and smaller than the differenece between the
 minimum and maximum value of the slider.
@@ -883,9 +883,9 @@ all the elements of an array) .
 @findex mean()
 Expects an one-dimensional array as input and returns the mean value of
 the array elements. Optionally, it accepts up to two more integer
-arguments, the start index of the first element of the array top be
+arguments, the start index of the first element of the array to be
 included into the calculation and the number of elements to use. If the
-length parameter is missingall elements up to the end of the array are
+length parameter is missing all elements up to the end of the array are
 used.
 
 
