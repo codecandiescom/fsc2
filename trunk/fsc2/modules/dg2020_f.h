@@ -10,12 +10,12 @@
 /* Here are all the directy exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
-int dg2020_init_hook( void );
-int dg2020_test_hook( void );
-int dg2020_end_of_test_hook( void );
-int dg2020_exp_hook( void );
-int dg2020_end_of_exp_hook( void );
-void dg2020_exit_hook( void );
+int dg2020_f_init_hook( void );
+int dg2020_f_test_hook( void );
+int dg2020_f_end_of_test_hook( void );
+int dg2020_f_exp_hook( void );
+int dg2020_f_end_of_exp_hook( void );
+void dg2020_f_exit_hook( void );
 
 
 Var *pulser_update( Var *v );
@@ -265,7 +265,7 @@ typedef struct _p_ {
 /* Here the global variables of the module are declared */
 
 
-#if defined (DG2020_F_MAIN )
+#if defined( DG2020_F_MAIN )
 
 bool dg2020_is_needed = UNSET;
 DG2020 dg2020;

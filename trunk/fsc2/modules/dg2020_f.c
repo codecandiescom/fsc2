@@ -17,7 +17,7 @@
   module.
 ---------------------------------------------------------------------------*/
 
-int dg2020_init_hook( void )
+int dg2020_f_init_hook( void )
 {
 	int i;
 
@@ -149,7 +149,7 @@ int dg2020_init_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-int dg2020_test_hook( void )
+int dg2020_f_test_hook( void )
 {
 	if ( dg2020_Pulses == NULL )
 	{
@@ -167,28 +167,6 @@ int dg2020_test_hook( void )
 
 	dg2020_IN_SETUP = UNSET;
 
-/*
-	{
-		PULSE *p = dg2020_Pulses;
-
-		printf( "\n!!!Setting pulse positions:\n\n" );
-
-		while ( p != NULL )
-		{
-			if ( p->is_active )
-			{
-				printf( "%4ld (on %2d): %6ld %6ld", p->num, p->channel->self,
-						p->pos, p->len );
-				if ( p->num < 0 )
-					printf( " -> %4ld", p->for_pulse->num );
-				printf( "\n" );
-			}
-			p = p->next;
-		}
-		printf( "\n" );
-	}
-*/
-
 	/* We need some somewhat different functions for setting some of the
 	   pulser properties */
 
@@ -205,7 +183,7 @@ int dg2020_test_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-int dg2020_end_of_test_hook( void )
+int dg2020_f_end_of_test_hook( void )
 {
 	if ( ! dg2020_is_needed )
 		return 1;
@@ -231,7 +209,7 @@ int dg2020_end_of_test_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-int dg2020_exp_hook( void )
+int dg2020_f_exp_hook( void )
 {
 	int i;
 
@@ -250,28 +228,6 @@ int dg2020_exp_hook( void )
 	/* Now we have to tell the pulser about all the pulses */
 
 	dg2020_reorganize_pulses( UNSET );
-
-/*
-	{
-		PULSE *p = dg2020_Pulses;
-
-		printf( "\nSetting pulse positions:\n\n" );
-
-		while ( p != NULL )
-		{
-			if ( p->is_active )
-			{
-				printf( "%4ld (on %2d): %6ld %6ld", p->num, p->channel->self,
-						p->pos, p->len );
-				if ( p->num < 0 )
-					printf( " -> %4ld", p->for_pulse->num );
-				printf( "\n" );
-			}
-			p = p->next;
-		}
-		printf( "\n" );
-	}
-*/
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -299,7 +255,7 @@ int dg2020_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-int dg2020_end_of_exp_hook( void )
+int dg2020_f_end_of_exp_hook( void )
 {
 	if ( ! dg2020_is_needed )
 		return 1;
@@ -313,7 +269,7 @@ int dg2020_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-void dg2020_exit_hook( void )
+void dg2020_f_exit_hook( void )
 {
 	PULSE *p, *np;
 	int i;
