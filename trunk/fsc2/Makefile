@@ -111,8 +111,8 @@ all:
 	$(MAKE) -C doc all
 
 
-# Install the program in $bindir and all the other stuff in $libdir and $auxdir
-# Finally, for certain sites create aliases for some devices.
+# Install the program in $bindir and all the other stuff in $libdir, $auxdir
+# and $docdir. Finally (for some sites) create aliases for devices.
 
 install:
 	install -d $(bindir)
