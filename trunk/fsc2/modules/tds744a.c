@@ -429,22 +429,21 @@ Var *digitizer_timebase( Var *v )
 
 		if ( timebase < tb[ 0 ] )
 		{
-			timebase = tb[ 0 ];
+			TB = 0;
 			eprint( WARN, SET, "%s: Timebase of %s is too low, using %s "
-					"instead.\n", Lc, DEVICE_NAME, t,
-					tds744a_ptime( timebase ) );
+					"instead.\n", DEVICE_NAME, t, tds744a_ptime( tb[ TB ] ) );
 		}
 		else
 		{
-		    timebase = tb[ TB_ENTRIES - 1 ];
+		    TB = TB_ENTRIES - 1;
 			eprint( WARN, SET, "%s: Timebase of %s is too large, using %s "
-					"instead.\n", DEVICE_NAME, t, tds744a_ptime( timebase ) );
+					"instead.\n", DEVICE_NAME, t, tds744a_ptime( tb[ TB ] ) );
 		}
 
 		T_free( t );
 	}
 
-	tds744a.timebase = timebase;
+	tds744a.timebase = tb[ TB ];
 	tds744a.is_timebase = SET;
 
 	return vars_push( FLOAT_VAR, tds744a.timebase );
