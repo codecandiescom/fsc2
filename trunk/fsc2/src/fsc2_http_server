@@ -102,13 +102,14 @@ $SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
 # reading the complete reply from fsc2.
 
 while ( $client = $server->accept( ) ) {
+  FORK:
 	if ( my $pid = fork ) {         # parent on success
 		close $client;
 	} elsif ( defined $pid ) {      # child
 		serve( );
 	} elsif ( $! == EAGAIN ) {      # (hopefully) recoverable fork problem
 		sleep 1;
-		redo;
+		redo FORK;
 	} else {                        # fork failed badly
 		shutdown( $server, 2 );
 		exit 1;
@@ -123,7 +124,7 @@ while ( $client = $server->accept( ) ) {
 sub serve {
 
 	my $txt;
-	my %f = ( png => 0, gif => 0, jpeg => 0 );
+	my %f = ( 'png' => 0, 'gif' => 0, 'jpeg' => 0 );
 
 
 	# Make the client connection the default I/O channel
@@ -145,13 +146,14 @@ sub serve {
 	my ( $req, $file ) = ( $1, $2 );
 	exit illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
 
-	# Check if client accepts PNG or GIF files and skip the rest of the noise,
-	# we're done listening when we get an empty line
+	# Check if client accepts PNG, GIF or JPEG files and skip the rest of
+	# the noise, we're done listening when we get an empty line
 
-	while ( defined( $txt = <$client> ) and $txt !~ /^\r*\n$/o ) {
-		$f{ png }  = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
-		$f{ gif } = 1 if $txt =~ m|^\s*Accept:.*\s*image/gif[^a-zA-Z0-9]|io;
-		$f{ jpeg } = 1 if $txt =~ m|^\s*Accept:.*\s*image/jpeg[^a-zA-Z0-9]|io;
+	while ( defined( $txt = <$client> ) and $txt !~ /^$crlf$/o ) {
+		next unless $txt =~ /^\s*Accept:/;
+		for ( keys %f ) {
+			$f{ $_ } = 1 if $txt =~ m(\s+image/$_[^a-zA-Z0-9])i;
+		}
 	}
 
 	# Give up if the client bailed out in between...
@@ -182,29 +184,17 @@ sub serve {
 sub serve_main {
 
 	my $f = shift;
-
 	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
-	my @st2 = ( "Idle",
-				"Experiment running",
+	my @st2 = ( "Idle", "Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
 				"Experiment finished" );
-	my $state;
-	my $pic;
-	my $txt;
-	my $ext;
-	my $curve;
 	my $date = rfc_1123_date( );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
-	my $logo_file;
+	my ( $state, $pic, $txt, $ext, $curve, $logo_file );
 
-
-	if ( $f->{ gif } or $f->{ png } or $f->{ jpeg } ) {
-		$logo_file = "fsc2." . 
-				 ( $f->{ gif } ? "gif" : ( $f->{ png } ? "png" : "jpeg" ) );
-	}
 
 	# Ask the parent for its current state - and don't forget to set a lock
-	# on STDOUT while doing it or other processes might interfere
+	# on STDOUT while doing so or other processes might interfere
 
 	stdout_lock( 1 ) or exit 1;
 	print STDOUT 'S';
@@ -230,9 +220,13 @@ sub serve_main {
 		  "<META name=\"author\" content=\"fsc2\">$crlf" .
 		  "<META name=\"robots\" content=\"noindex\">$crlf";
 
-	# Send the logo (per default the GIF version because some browser don't
-	# seem to deal correctly with transparency in PNG files even when they
-	# clain to understand png) and the status information
+	# Send the logo (per default the GIF version because some browsers don't
+	# seem to deal correctly with transparency in PNG files even though they
+	# clain to understand PNG) and the status information
+
+	$logo_file = "fsc2." .
+		( $f->{ 'gif' } ? "gif" : ( $f->{ 'png' } ? "png" : "jpeg" ) )
+			if $f->{ 'gif' } or $f->{ 'png' } or $f->{ 'jpeg' };
 
 	if ( $state =~ /^[0-3]$/o ) {
 		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
@@ -259,12 +253,12 @@ sub serve_main {
 	}
 
 	# Now tell the client where to look for the graphics fsc2 currently
-	# displays - only PNG amd JPEG format is supported (but not GIF, for
-	# legal reasons that I am not inclined to even try to understand)
+	# displays - only PNG amd JPEG format is supported (but, for legal
+	# reasons, not GIF)
 
-	if ( $f->{ png } and $has_pnmtopng ) {
+	if ( $f->{ 'png' } and $has_pnmtopng ) {
 		$ext = "png";
-	} elsif ( $f->{ jpeg } and $has_ppmtojpeg ) {
+	} elsif ( $f->{ 'jpeg' } and $has_ppmtojpeg ) {
 		$ext = "jpeg";
 	}
 
@@ -354,17 +348,16 @@ sub serve_logo {
 
 #########################################################
 # Sends a graphic to the client. fsc2 has to create it for us as a temporary
-# file and then send us the file name. If the window to be shown does not
-# exist anymore (or the file can't be created) we get send a '0' character
-# instead in which case we have to send the "Not available" picture.
+# file (in ppm format) and then sends us the file name. We still have to
+# convert it into a format the browser understands and afterwards have to get
+# rid of the temporary file. If the window to be shown does not exist anymore
+# (or the file can't be created) we get send a '0' character instead in which
+# case we have to send the "Not available" picture.
 
 sub serve_pics {
 	my ( $which, $ext ) = @_;
-	my $state;
 	my $date = rfc_1123_date( );
-	my $fh;
-	my $file;
-	my @data;
+	my ( $state, $fh, $file, @data );
 
 
 	# We need a special SIGPIPE handler here because we must remove the
@@ -479,6 +472,7 @@ sub illegal_request {
 	}
 
 	print "<HR>$crlf</BODY></HTML>$crlf";
+	close $client;
 }
 
 
