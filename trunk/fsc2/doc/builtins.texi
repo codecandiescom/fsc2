@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Functions, Modules, EDL, Top
+@node Functions, Device Functions, EDL, Top
 @chapter Built-in Functions
 
 @ifinfo
