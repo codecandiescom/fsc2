@@ -141,6 +141,7 @@ install:
 	install -m 644 -o fsc2 -g fsc2 *.so $(libdir)
 #	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
 	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	$(MAKE) install-$(shell hostname -f)

@@ -8,17 +8,17 @@
 
 /* Exported functions */
 
-int w_band_init_hook( void );
-int w_band_exp_hook( void );
-int w_band_end_of_exp_hook( void );
-void w_band_exit_hook( void );
+int keithley228a_init_hook( void );
+int keithley228a_exp_hook( void );
+int keithley228a_end_of_exp_hook( void );
+void keithley228a_exit_hook( void );
 
 
 
-#define DEVICE_NAME "W_BAND"         /* name of device */
+#define DEVICE_NAME "KEITHLEY228A"         /* name of device */
 
-#define W_BAND_MAX_CUURENT    10.0
-#define V_TO_A_FACTOR	     -97.5	/* Conversion factor of voltage at DAC
+#define KEITHLEY228A_MAX_CUURENT   10.0
+#define V_TO_A_FACTOR	          -97.5  /* Conversion factor of voltage at DAC
 
 
 
@@ -37,7 +37,7 @@ typedef struct {
 /* test if this driver will be loaded before the magnet driver.   */
 /*----------------------------------------------------------------*/
 
-int w_band_init_hook( void )
+int keithley228a_init_hook( void )
 {
 	int ret;
 	Var *func_ptr;
@@ -123,7 +123,7 @@ Var *magnet_setup( Var *v )
 
 	/* Check that new field value is still within bounds */
 
-	w_band_current_check( VALUE( v ), NULL );
+	keithley228a_current_check( VALUE( v ), NULL );
 
 	if ( VALUE( v->next ) < 1.0 )
 	{
@@ -142,10 +142,10 @@ Var *magnet_setup( Var *v )
 
 
 
-static double w_band_current_check( double current, bool *err_flag )
+static double keithley228a_current_check( double current, bool *err_flag )
 {
 
-	if ( fabs( current ) > W_BAND_MAX_CURRENT )
+	if ( fabs( current ) > KEITHLEY228A_MAX_CURRENT )
 	{
 		if ( ! TEST_RUN )
 		{
