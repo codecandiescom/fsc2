@@ -31,6 +31,7 @@
 
 
 /* Uncomment the next line for debugging of data sent via GPIB bus */
+
 /*
 #define RS690_GPIB_DEBUG 1
 */

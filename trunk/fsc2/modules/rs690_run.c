@@ -449,19 +449,17 @@ static void rs690_defense_shape_check( FUNCTION *shape )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function is called after the test run to reset all the variables */
-/* describing the state of the pulser to their initial values.      */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function is called after the test run and experiments to reset all the */
+/* variables describing the state of the pulser to their initial values.  */
+/*------------------------------------------------------------------------*/
 
 void rs690_full_reset( void )
 {
-	int i, j, m;
+	int i, j;
 	PULSE *p = rs690_Pulses;
 	FUNCTION *f;
 	CHANNEL *ch;
-	PULSE **pm_entry;
-	PULSE_PARAMS *pp;
 
 
 	rs690_cleanup_fs( );
@@ -516,60 +514,9 @@ void rs690_full_reset( void )
 			if ( ch->num_pulses == 0 )
 				continue;
 
-			/* Copy the old pulse list for the channel so the new state can
-			   be compared to the old state and an update is done only when
-			   needed. */
-
-			memcpy( ch->old_pulse_params, ch->pulse_params,
-					ch->num_active_pulses * sizeof *ch->pulse_params );
-			ch->old_num_active_pulses = ch->num_active_pulses;
-
-			pm_entry = f->pm[ f->next_phase * f->num_channels + j ];
-
-			ch->num_active_pulses = 0;
-			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
-			{
-				if ( p->is_active )
-					continue;
-
-				pp = ch->pulse_params + ch->num_active_pulses++;
-
-				pp->pos = p->pos + f->delay;
-				pp->len = p->len;
-				pp->pulse = p;
-
-				/* Extend pulses for which a shape pulse has been created
-				   automatically a bit */
-
-				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-					 p->sp != NULL )
-				{
-					pp->pos -= p->function->left_shape_padding;
-					pp->len +=   p->function->left_shape_padding
-							   + p->function->right_shape_padding;
-				}
-
-				/* Extend TWT pulses that were automatically created */
-
-				if ( p->function->self == PULSER_CHANNEL_TWT &&
-					 p->tp != NULL )
-				{
-					pp->pos -= p->tp->function->left_twt_padding;
-					pp->len +=   p->tp->function->left_twt_padding
-							   + p->tp->function->right_twt_padding;
-				}
-			}
-
-			qsort( ch->pulse_params, ch->num_active_pulses,
-				   sizeof *ch->pulse_params, rs690_pulse_compare );
-
-			rs690_shape_padding_check_1( ch );
-			if ( ch->function->self == PULSER_CHANNEL_TWT )
-				rs690_twt_padding_check( ch );
+			ch->num_active_pulses = ! ch->num_active_pulses;
 		}
 	}
-
-	rs690_shape_padding_check_2( );
 }
 
 

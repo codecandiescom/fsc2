@@ -428,7 +428,9 @@ int rs690_end_of_exp_hook( void )
 	rs690_lock_state( UNSET );
 	gpib_local( rs690.device );
 
-	rs690_cleanup_fs( );
+	/* Reset the internal representation back to its initial state */
+
+	rs690_full_reset( );
 
 	return 1;
 }
