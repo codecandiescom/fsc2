@@ -723,9 +723,6 @@ void make_scale( Curve_1d *cv, Canvas *c, int coord )
 	rwc_start = G.rwc_start[ coord ]
 		        - cv->shift[ coord ] * G.rwc_delta[ coord ];
 
-	printf( "%s: rwc_start = %f\n", coord == X ? "X" : "Y", rwc_start );
-	printf( "%s: shift = %f\n", coord == X ? "X" : "Y", cv->shift[ coord ] );
-
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
