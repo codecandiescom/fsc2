@@ -699,13 +699,13 @@ static void rb_pulser_card_setup( void )
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		rb_pulser.clock_card[ i ].handle = -1;
 
-	rb_pulser.delay_card[ ERT_DELAY ]. name = ERT_DELAY_CARD;
-	rb_pulser.delay_card[ ERT_DELAY ]. prev = NULL;
-	rb_pulser.delay_card[ ERT_DELAY ]. next = NULL;
+	rb_pulser.delay_card[ ERT_DELAY ].name = ERT_DELAY_CARD;
+	rb_pulser.delay_card[ ERT_DELAY ].prev = NULL;
+	rb_pulser.delay_card[ ERT_DELAY ].next = NULL;
 
 	rb_pulser.delay_card[ INIT_DELAY ].name = INIT_DELAY_CARD;
-	rb_pulser.delay_card[ INIT_DELAY ]. prev = NULL;
-	rb_pulser.delay_card[ INIT_DELAY ]. next = NULL;
+	rb_pulser.delay_card[ INIT_DELAY ].prev = NULL;
+	rb_pulser.delay_card[ INIT_DELAY ].next = NULL;
 
 	rb_pulser.delay_card[ MW_DELAY_0 ].name = MW_DELAY_CARD_0;
 	rb_pulser.delay_card[ MW_DELAY_0 ].prev =
