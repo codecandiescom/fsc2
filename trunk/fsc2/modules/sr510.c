@@ -31,6 +31,7 @@ Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
 Var *lockin_dac_voltage( Var *v );
+Var *lockin_lock_keyboard( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -619,6 +620,34 @@ Var *lockin_dac_voltage( Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_lock_keyboard( Var *v )
+{
+	bool lock;
+
+
+	if ( v == NULL )
+		lock = SET;
+	else
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			lock = v->val.lval == 0 ? UNSET : UNSET;
+		else
+			lock = v->val.dval == 0.0 ? UNSET : UNSET;
+	}
+
+	if ( ! TEST_RUN )
+		sr510_lock_state( lock );
+
+	return vars_push( INT_VAR, lock ? 1 : 0);
+}
+
+
+
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
@@ -998,4 +1027,22 @@ static double sr510_set_dac_voltage( long channel, double voltage )
 	}
 	
 	return voltage;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void sr510_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
+	if ( gpib_write( sr510.device, cmd ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 }

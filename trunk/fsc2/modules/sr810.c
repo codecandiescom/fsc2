@@ -834,10 +834,6 @@ Var *lockin_lock_keyboard( Var *v )
 	bool lock;
 
 
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, 1 );
-
-
 	if ( v == NULL )
 		lock = SET;
 	else
@@ -850,8 +846,10 @@ Var *lockin_lock_keyboard( Var *v )
 			lock = v->val.dval == 0.0 ? UNSET : UNSET;
 	}
 
-	sr810_lock_state( lock );
-	return vars_push( INT_VAR, 1 );
+	if ( ! TEST_RUN )
+		sr810_lock_state( lock );
+
+	return vars_push( INT_VAR, lock ? 1 : 0);
 }
 
 

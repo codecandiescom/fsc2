@@ -48,6 +48,7 @@ Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
+Var *lockin_lock_keyboard( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -824,6 +825,33 @@ Var *lockin_ref_level( Var *v )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+Var *lockin_lock_keyboard( Var *v )
+{
+	bool lock;
+
+
+	if ( v == NULL )
+		lock = SET;
+	else
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == INT_VAR )
+			lock = v->val.lval == 0 ? UNSET : UNSET;
+		else
+			lock = v->val.dval == 0.0 ? UNSET : UNSET;
+	}
+
+	if ( ! TEST_RUN )
+		sr830_lock_state( lock );
+
+	return vars_push( INT_VAR, lock ? 1 : 0);
+}
+
+
 
 /******************************************************/
 /* The following functions are only used internally ! */
@@ -1363,4 +1391,22 @@ static double sr830_set_ref_level( double level )
 	}
 
 	return level;
+}
+
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
+void sr830_lock_state( bool lock )
+{
+	char cmd[ 100 ];
+
+
+	sprintf( cmd, "OVRM %c\n", lock ? '0' : '1' );
+	if ( gpib_write( sr830.device, cmd ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 }
