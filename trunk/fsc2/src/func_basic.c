@@ -1788,7 +1788,6 @@ Var *f_grand( Var *v )
 /* University Press 1992, pp. 288-290, for all the gory details.        */
 /*----------------------------------------------------------------------*/
 
-
 static double gauss_random( void )
 {
 	static double next_val;
