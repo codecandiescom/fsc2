@@ -229,7 +229,7 @@ double hp8647a_get_attenuation( void )
 int hp8647a_set_mod_type( int type )
 {
 	char cmd[ 100 ];
-	const char *types[ ] = { "FM", "AM", "PM" };
+	const char *types[ ] = { "FM", "AM", "PM", "OFF" };
 	int i;
 
 
@@ -249,10 +249,13 @@ int hp8647a_set_mod_type( int type )
 			hp8647a_comm_failure( );
 	}
 
-	sprintf( cmd, "%s:STAT ON\n", types[ type ] );
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-		hp8647a_comm_failure( );
-	hp8647a_check_complete( );
+	if ( type != MOD_TYPE_OFF )
+	{
+		sprintf( cmd, "%s:STAT ON\n", types[ type ] );
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
+			hp8647a_comm_failure( );
+		hp8647a_check_complete( );
+	}
 
 	return type;
 }

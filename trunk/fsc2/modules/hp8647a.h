@@ -23,6 +23,7 @@
 #define MOD_TYPE_FM     0
 #define MOD_TYPE_AM     1
 #define MOD_TYPE_PHASE  2
+#define MOD_TYPE_OFF    3
 
 #define NUM_MOD_SOURCES 4
 #define MOD_SOURCE_AC   0

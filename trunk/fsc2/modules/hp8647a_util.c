@@ -241,7 +241,7 @@ double hp8647a_get_att( double freq )
 
 int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 {
-	const char *type[ ] =   { "FM", "AM", "PHASE" },
+	const char *type[ ] =   { "OFF", "FM", "AM", "PHASE" },
 		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
 							  "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
 							  "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
@@ -264,7 +264,7 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 
 	vars_check( v, STR_VAR );
 
-	switch ( is_in( v->val.sptr, type, 3 ) )
+	switch ( is_in( v->val.sptr, type, 4 ) )
 	{
 		case 0 :
 			*ires = MOD_TYPE_FM;
@@ -276,6 +276,10 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 
 		case 2 :
 			*ires = MOD_TYPE_PHASE;
+			return 2;
+
+		case 3 :
+			*ires = MOD_TYPE_OFF;
 			return 2;
 	}
 

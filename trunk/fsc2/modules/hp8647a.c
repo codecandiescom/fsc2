@@ -890,7 +890,7 @@ Var *synthesizer_mod_type( Var *v )
 	}
 	else
 	{
-		if ( ( res = is_in( v->val.sptr, mod_types, 3 ) ) == UNDEFINED )
+		if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
 		{
 			eprint( FATAL, "%s:%ld: %s: Invalid modulation type `%s'.\n",
 					Fname, Lc, DEVICE_NAME, v->val.sptr );
@@ -932,6 +932,13 @@ Var *synthesizer_mod_source( Var *v )
 			eprint( FATAL, "%s:%ld: %s: Can't determine modulation source as "
 					"long as modulation type isn't set.\n",  Fname, Lc,
 					DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( hp8647a.mod_type == MOD_TYPE_OFF )
+		{
+			eprint( FATAL, "%s:%ld: %s: Can't determine modulation source "
+					"when modulation is off.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -997,6 +1004,13 @@ Var *synthesizer_mod_source( Var *v )
 		}
 	}
 
+	if ( hp8647a.mod_type == MOD_TYPE_OFF )
+	{
+		eprint( FATAL, "%s:%ld: %s: Can't set modulation source while "
+				"modulation is off.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
 	hp8647a.mod_source[ hp8647a.mod_type ] =
 		                    hp8647a_set_mod_source( hp8647a.mod_type, source );
 	hp8647a.mod_source_is_set[ hp8647a.mod_type ] = SET;
@@ -1020,6 +1034,13 @@ Var *synthesizer_mod_ampl( Var *v )
 			eprint( FATAL, "%s:%ld: %s: Can't determine modulation amplitude "
 					"as long as modulation type isn't set.\n",  Fname, Lc,
 					DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		if ( hp8647a.mod_type == MOD_TYPE_OFF )
+		{
+			eprint( FATAL, "%s:%ld: %s: Can't determine modulation amplitude "
+					"when modulation is off.\n",  Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -1052,6 +1073,13 @@ Var *synthesizer_mod_ampl( Var *v )
 				"function `synthesizer_mod_ampl'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
+	}
+
+	if ( hp8647a.mod_type == MOD_TYPE_OFF )
+	{
+		eprint( FATAL, "%s:%ld: %s: Can't set modulation amplitude while "
+				"modulation is off.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
 	}
 
 	hp8647a.mod_ampl[ hp8647a.mod_type ] =

@@ -1,3 +1,5 @@
+#!/usr/local/bin/fsc2
+
 DEVICES:
 
 er035m_s;
@@ -8,10 +10,10 @@ tds520;
 VARIABLES:
 
 
-start_field = 3510 G; 
-end_field   = 3410 G;
+start_field = 4250 G; 
+end_field   = 2750 G;
 
-field_step  = -0.5 G;
+field_step  = -5 G;
 
 field       = start_field;
 
@@ -26,7 +28,7 @@ ground;
 
 Rec_len;
 trig_pos;
-time_base,
+time_base;
 
 
 I, J, K;
@@ -43,9 +45,6 @@ init_2d( 3, 0, N_steps, 0, 0, start_field, field_step, "Time / us",
 
 EXPERIMENT:
 
-set_field( start_field);
-save_program( "% " );
-
 Rec_len = digitizer_record_length( );
 trig_pos = digitizer_trigger_position( );
 time_base = digitizer_timebase( );
@@ -53,6 +52,21 @@ time_base = digitizer_timebase( );
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( - trig_pos * Rec_len / 50.0 * time_base * 1.e6,
 	      time_base / 50.0 * 1e6 );
+
+set_field( start_field );
+save_program( "% " );
+fsave( "% Number of runs     = #\n", N_runs );
+fsave( "% Start field        = # G\n", start_field );
+fsave( "% End field          = # G\n", end_field );
+fsave( "% Field step width   = # G\n", field_step );
+fsave( "% Sensitivity        = # mV/div\n",
+	   digitizer_sensitivity( CH1 ) * 1.0e3 );
+fsave( "% Number of averages = #\n", N_averages );
+fsave( "% Time base          = # us/div\n", time_base * 1.0e6 );
+fsave( "% Number of points   = #\n", Rec_len );
+fsave( "% Trigger position   = #\n", int( Rec_len * trig_pos ) );
+fsave( "% Slice length       = # us\n", Rec_len * time_base / 50 * 1.0e6 );
+save_comment( "% " );
 
 FOR J = 1 : N_runs {
 
@@ -66,7 +80,7 @@ FOR J = 1 : N_runs {
 	IF Pretrigger != 0 {
 	    ground = mean( slice( curve, 1, Pretrigger ) );
 	} ELSE {
-		ground = 0;
+	    ground = 0;
 	}
 
 	IF I <= NUM_BASE_CURVES {

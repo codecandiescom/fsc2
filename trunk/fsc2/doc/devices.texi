@@ -947,7 +947,12 @@ modulation. It can set all of these parameters at once or only parts.
 
 There are three possible types of modulation FM, AM and phase
 modulation. The modulation type is specified by a string, either
-@code{"FM"}, @code{"AM"} or @code{"PHASE"}.
+@code{"FM"}, @code{"AM"}, @code{"PHASE"} or, finally, @code{"OFF"}.
+
+Please note that setting a modulation source or amplitude while the
+modulation is off (i.e.@: when @code{"OFF"} has been specified as the
+modulation type) is not possible and trying to do so will make the
+program abort.
 
 The possible modulation sources are either external AC coupled, external
 DC coupled, internal @w{1 kHz} or internal @w{400 Hz}. For external AC
@@ -988,8 +993,9 @@ source and @w{50 %} amplitude.
 As an alternative the function @code{synthesizer_modulation()} the
 modulation type can be also set via the function
 @code{synthesizer_mod_type()}. It accepts on of the three string
-arguments @code{"FM"}, @code{"AM"} or @code{"PHASE"} (or the numbers
-@code{0} for FM, @code{1} for AM or @code{2} for phase modulation).
+arguments @code{"FM"}, @code{"AM"}, @code{"PHASE"} or, finally,
+@code{"OFF"} (or the numbers @code{0} for FM, @code{1} for AM, @code{2}
+for phase modulation or @code{3} for switching modulation off).
 
 If called with no argument it will return the currently active modulation
 type as an integer number.
@@ -1009,6 +1015,9 @@ and @code{3} for the internal @w{400 Hz} source.
 
 If the function is called with no argument it will return the modulation
 source setting for the currently active modulation type as an integer number.
+You can neither set nor obtain the modulation source as long as the
+modulation is switched off, trying to do so will result in aborting the
+program.
 
 
 @item synthesizer_mod_ampl()
@@ -1021,7 +1030,9 @@ are acceptable and for phase modulation values between @w{0 degree} and
 @w{10 degree} are valid.
 
 If called with no argument, the function will return the amplitude
-setting for the currently active modulation type.
+setting for the currently active modulation type. You can neither set
+nor obtain the modulation amplitude as long as the modulation is
+switched off, trying to do so will result in aborting the program.
 
 
 

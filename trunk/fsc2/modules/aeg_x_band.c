@@ -1065,9 +1065,9 @@ bool magnet_do( int command )
 			   character size mask, then set character size mask to CS8,
 			   allow flow control and finally set the baud rate */
 
-			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			nmr.new_tio.c_cflag |= CS8 | CRTSCTS;
-			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
+			magnet.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			magnet.new_tio.c_cflag |= CS8 | CRTSCTS;
+			cfsetospeed( &magnet.new_tio, SERIAL_BAUDRATE );
 
 			tcflush( magnet.fd, TCIFLUSH );
 			tcsetattr( magnet.fd, TCSANOW, &magnet.new_tio );

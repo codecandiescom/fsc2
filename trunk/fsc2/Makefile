@@ -196,6 +196,7 @@ install-moebi.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so

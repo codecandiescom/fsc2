@@ -1,0 +1,231 @@
+DEVICES:
+
+//hp8647a;
+//tds520;
+
+
+VARIABLES:
+
+start_freq  =  8 MHz;
+end_freq    = 22 MHz;
+step_freq   = 333 kHz;
+//step_freq   = 25 kHz;          
+
+attenuation = -5 db;
+
+N_runs      = 2;            // how many times to repeat the whole experiment
+N_averages  = 16;            // number of averages per frequency
+
+N_max_base_curves = 10;      // how many curve to use for baseline
+
+
+/***********************************************/
+/* Nothing needs to be changed below this line */
+/***********************************************/
+
+freq = start_freq;
+
+N_steps = round( ( end_freq - start_freq ) / step_freq ) + 1;
+
+//curve[ * ];
+curve[ 250 ];
+mean_curve[ N_steps, * ];
+base_curve[ * ];
+Pretrigger;
+ground = 0;
+
+Rec_len;                         // number of points of trace
+trig_pos;                        // position od trigger in data set (range 0-1)
+time_base;                       // time base of digitizer (in s)
+time_res;                        // digitizer time resolution (in us)
+
+min_time, max_time;              // first / last point (in us)
+start_time, end_time;            // intergation window start / end pos. (in us)
+new_start_time, new_end_time;    // new values od sliders (in us)
+Start_pos, Width;
+N_base_curves;
+integ, base_int;
+integral[ 3 ];
+
+
+I, J, K;
+S1, S2;
+
+End_index;
+M;
+
+PREPARATIONS:
+
+//synthesizer_use_table( );
+//synthesizer_attenuation( attenuation );
+//synthesizer_frequency( start_freq );
+//synthesizer_att_ref_freq( 14 MHz );
+//synthesizer_modulation( "OFF" );
+
+//digitizer_num_averages( N_averages );
+
+init_2d( 3, 0, N_steps, 0, 0, start_freq, step_freq, "Time / us",
+		 "Radio frequency / MHz", "Signal / mV" );
+
+
+EXPERIMENT:
+
+//synthesizer_state( "ON" );
+
+
+/* Get the digitizers record length, the trigger position and the time base
+   to be able to readjust the RF scale and to find out how many points we
+   have before the laser starts - these points are used to get rid of changing
+   'zero levels' */
+
+//Rec_len   = digitizer_record_length( );
+//trig_pos  = digitizer_trigger_position( );
+//time_base = digitizer_timebase( );
+
+Rec_len = 250;
+trig_pos = 0.1;
+time_base = 100 ns;
+
+time_res  = time_base * 1.0e6 / 50.0;
+
+min_time = - trig_pos * Rec_len * time_res;
+max_time   = min_time + Rec_len * time_res;
+
+Pretrigger = int( 0.9 * trig_pos * Rec_len );
+change_scale( min_time, time_res );
+
+mean_curve[ 1 ] = float_slice( Rec_len );
+base_curve = float_slice( Rec_len );
+
+/* Create the sliders for setting the integration window limits */
+
+start_time = 0.0;
+S1 = slider_create( "VALUE_SLIDER", min_time, max_time,
+	                "Start position (us) " );
+slider_value( S1, start_time );
+Start_pos = int( Rec_len * trig_pos );
+
+S2 = slider_create( "VALUE_SLIDER", min_time, max_time,
+		            "End position (us) " );
+end_time = 50.0 * time_res;
+slider_value( S2, end_time );
+Width = 51;
+
+
+FOR J = 1 : N_runs
+{
+    print( "Starting #. run of #\n", J, N_runs );
+
+	/* Set the synthesizer to the start frequency and start an acquisition */
+
+	freq = start_freq;
+//	synthesizer_frequency( freq );
+
+//	digitizer_start_acquisition( );
+
+    FOR I = 1 : N_steps
+	{
+		/* Get next curve from the digitizer */
+
+//		curve = digitizer_get_curve_fast( CH1 );
+		wait( 0.5 s );
+		FOR M = 1 : Rec_len
+		{
+			IF M < Rec_len / 10
+			{
+				curve[ M ] = 1.0e-9 * random();
+			}
+			ELSE
+			{
+				curve[ M ] =
+					  5.0e-9 * exp( - ( 0.1 * ( I - N_steps / 2 ) )^2 )
+						     * exp( - ( 0.005 * ( M - Rec_len / 10 ) )^2 )
+                    + 1.0e-9 * random();
+			}
+		}
+
+		/* Save the new date to file */
+
+		save( curve );
+
+		/* If this wasn't the very last curve of the run set the new frequency
+		   and already start the next masurement, so we're not loosing time 
+		   doing all the graphics */
+
+		IF I != N_steps
+		{
+	        freq += step_freq;
+//			synthesizer_frequency( freq );
+//			digitizer_start_acquisition( );
+		}
+
+		/* Add the new curve to the results from previous runs */
+
+		mean_curve[ I ] = ( ( J - 1 ) * mean_curve[ I ] + curve ) / J;
+
+		/* Calculate the mean of the data before the trigger used to get rid
+		   of changes of the 'zero level' */
+
+		IF Pretrigger != 0
+		{
+	    	ground = mean( mean_curve[ I ], 1, Pretrigger );
+		}
+
+		/* At the start of a run add up curves to be used as baseline */
+
+		IF I <= N_max_base_curves
+		{
+			N_base_curves = ( J - 1 ) * N_max_base_curves + I;
+	    	base_curve = ( 1.0 - 1.0 / N_base_curves ) * base_curve
+	    	             + ( curve - ground ) / N_base_curves;
+		}
+
+		/* Calculate the values of the integration window (now use 'curve' as
+		   temporary storage for the baseline corrected curve) */
+
+		curve = 1.0e3 * ( mean_curve[ I ] - base_curve - ground );
+		integral[ 1 ] = 1.0e3 * mean( mean_curve[ I ], Start_pos, Width );
+		integral[ 2 ] = mean( curve, Start_pos, Width );
+
+		/* Display the new data */
+
+		display( 1, I, 1.0e3 * mean_curve[ I ], 1,
+				 1, I, curve, 2,
+				 1, I, integral[ 1 ], 3,
+				 2, I, integral[ 2 ], 3 );
+
+		/* Finally check for new positions of the integration window sliders */
+
+		new_start_time = slider_value( S1 );
+		new_end_time   = slider_value( S2 );
+		IF start_time != new_start_time | end_time != new_end_time
+		{
+			Start_pos = round( ( new_start_time - min_time ) / time_res );
+			Width = floor( abs( ( new_end_time - new_start_time )
+						   / time_res ) ) + 1;
+			print( "start = #, width = #\n", Start_pos, Width );
+			start_time = new_start_time;
+			end_time = new_end_time;
+
+			IF ( J == 1 ) {
+				End_index  = I;
+			} ELSE {
+				End_index = N_steps;
+			}
+
+			base_int = 1.0e3 * mean( base_curve, Start_pos, Width );
+			FOR K = 1 : End_index
+			{
+				integral[ 1 ] = 1.0e3 * mean( mean_curve[ K ],
+											  Start_pos, Width );
+				integral[ 2 ] = integral[ 1 ] - base_int - 1.0e3 * ground;
+				display( 1, K, integral[ 1 ], 3,
+				 		 2, K, integral[ 2 ], 3 );
+			}
+		}
+	}
+}
+
+ON_STOP:
+
+//synthesizer_state( "OFF" );

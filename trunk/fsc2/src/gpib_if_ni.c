@@ -321,7 +321,7 @@ int gpib_init_device( const char *device_name, int *dev )
         return FAILURE;
 	}
 
-	if ( num_init_devices >= GPIB_MAX_INIT_DEVICES )
+	if ( num_init_devices >= GPIB_MAX_INIT_DEV )
 	{
 		sprintf( gpib_error_msg, "Can't open device %s, too many open "
 				 "devices.\n", device_name );
