@@ -2821,18 +2821,31 @@ static bool T_fprintf( int file_num, const char *fmt, ... )
 			return FAIL;
 	}
 
-	/* Now we try to write the string to a file */
+	/* Now we try to write the string to the file and fprintf wrote out
+	   everything also we flush the buffer. Flushing the buffer can fail for
+	   two reasons (assuming that the file is really open for writing etc.),
+	   it was either interrupted by a signal (in which case we retry) or the
+	   disk is full. If either fprintf or fflush fails, we have to assume that
+	   the disk is full. */
 
 	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
 	{
-		fflush( File_List[ file_num ].fp );
-		T_free( p );
-		return OK;
+reflush:
+		if ( fflush( File_List[ file_num ].fp ) == 0 )
+		{
+			T_free( p );
+			return OK;
+		}
+		else
+		{
+			if ( errno == EINTR )    /* fflush() got interrupted by a signal */
+				goto reflush;
+		}
 	}
 
 	/* Couldn't write as many bytes as needed - disk seems to be full */
 
-	fl_show_alert( "Disk is full while writing to file", 
+	fl_show_alert( "Disk full while writing to file", 
 				   File_List[ file_num ].name, "Please choose a new file.",
 				   1 );
 
