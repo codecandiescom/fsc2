@@ -123,7 +123,7 @@ EREM1    "*"+"/"
 EREM2    "*"+"/"[\t ]*\n?
 
 INT      [0-9]+
-EXPO     [EDed][+-]?{INT}
+EXPO     [Ee][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 UNIT     ("m"|"s"|"G"|"V"|"A"|"Hz"|"dB"|"db")
@@ -357,8 +357,8 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <incl> */
 
-            /* Here some special handling of numbers with units
-			   take care they will be converted to double automatically */
+            /* Here's handling of numbers with units - they are converted
+			   to double automatically */
 
 {INANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
 {IMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
@@ -662,9 +662,9 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 }
 
 
-/*----------------------------------------------------*/
-/* Rewrites combinations like "100ns" as "0.0000001". */
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Rewrites combinations like "100ns" or "100 ns" as "0.000000100000". */
+/*---------------------------------------------------------------------*/
 
 static void unit_spec( char *text, int power )
 {

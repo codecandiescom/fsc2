@@ -99,7 +99,7 @@ PH2         PH(ASE)?_?2
 
 INT         [0-9]+
 HEX         0[xX][0-9A-Fa-f]+
-EXPO        [EDed][+-]?{INT}
+EXPO        [Ee][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 P           P(ULSE)?_?{INT}(#{INT})?

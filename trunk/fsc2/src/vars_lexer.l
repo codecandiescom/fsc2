@@ -84,7 +84,7 @@ ESTR        \x5.*\x3\n.*\n
 
 INT         [0-9]+
 HEX         0[xX][0-9A-Fa-f]+
-EXPO        [EDed][+-]?{INT}
+EXPO        [Ee][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
