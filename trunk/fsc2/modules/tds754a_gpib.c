@@ -490,12 +490,13 @@ bool tds754a_clear_SESR( void )
 
 void tds754a_finished( void )
 {
-	const char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
 
 	if ( ! tds754a.is_reacting )
 		return;
 
+    gpib_write( tds754a.device, "ACQ:STATE STOP\n", 15 );
     tds754a_clear_SESR( );
     gpib_write( tds754a.device, cmd, strlen( cmd ) );
 	gpib_local( tds754a.device );

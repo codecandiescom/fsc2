@@ -490,6 +490,7 @@ void tds520c_finished( void )
 {
 	const char *cmd = "*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
 
+
 	if ( ! tds520c.is_reacting )
 		return;
 
