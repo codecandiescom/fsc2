@@ -14,7 +14,7 @@
 
 #define DEVICE_NAME "S_BAND"         /* name of device */
 #define SERIAL_BAUDRATE B1200        /* baud rate of field controller */
-#define SERIAL_PORT     1            /* serial port device file */
+#define SERIAL_PORT     1            /* serial port number (i.e. COM2) */
 #define SERIAL_TIME     50000        /* time in us set at magnet front panel */
                                      /* set to 50 ms and not to be changed ! */
 
