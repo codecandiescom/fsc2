@@ -132,3 +132,149 @@ int dg2020_b_init_hook( void )
 
 	return 1;
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int dg2020_b_test_hook( void )
+{
+	if ( dg2020_Pulses == NULL )
+	{
+		dg2020_is_needed = UNSET;
+		eprint( WARN, "%s loaded but no pulses are defined.",
+				pulser_struct.name );
+		return 1;
+	}
+
+	/* Check consistency of pulser settings and do everything to setup the
+	   pulser for the test run */
+
+	dg2020_IN_SETUP = SET;
+
+//	dg2020_init_setup( );
+
+	dg2020_IN_SETUP = UNSET;
+
+	/* We need some somewhat different functions for setting some of the
+	   pulser properties */
+
+//	pulser_struct.set_pulse_position = dg2020_change_pulse_position;
+//	pulser_struct.set_pulse_length = dg2020_change_pulse_length;
+//	pulser_struct.set_pulse_position_change =
+//		dg2020_change_pulse_position_change;
+//	pulser_struct.set_pulse_length_change = dg2020_change_pulse_length_change;
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int dg2020_b_end_of_test_hook( void )
+{
+	if ( ! dg2020_is_needed )
+		return 1;
+
+	/* First we have to reset the internal representation back to its initial
+	   state */
+
+//	dg2020_full_reset( );
+
+	/* Now we've got to find out about the maximum sequence length, set up
+	   padding to achieve the repeat time and set the lengths of the last
+	   phase pulses in the channels needing phase cycling */
+
+//	  dg2020.max_seq_len = dg2020_get_max_seq_len( );
+//	  dg2020_calc_padding( );
+//	  dg2020_finalize_phase_pulses( PULSER_CHANNEL_PHASE_1 );
+//	  dg2020_finalize_phase_pulses( PULSER_CHANNEL_PHASE_2 );
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int dg2020_b_exp_hook( void )
+{
+	int i;
+
+
+	if ( ! dg2020_is_needed )
+		return 1;
+
+	/* Initialize the device */
+
+//  if ( ! dg2020_init( DEVICE_NAME ) )
+//	{
+//		eprint( FATAL, "%s: Failure to initialize the pulser.",
+//				pulser_struct.name );
+//		THROW( EXCEPTION );
+//	}
+
+	/* Now we have to tell the pulser about all the pulses */
+
+//	dg2020_reorganize_pulses( UNSET );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		if ( ! dg2020.function[ i ].is_used )
+			continue;
+//		dg2020_set_pulses( &dg2020.function[ i ] );
+//		dg2020_clear_padding_block( &dg2020.function[ i ] );
+	}
+
+	/* Finally tell the pulser to update (we're always running in manual
+	   update mode) and than switch the pulser into run mode */
+
+//	dg2020_update_data( );
+//	if ( ! dg2020_run( START ) )
+//	{
+//		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.",
+//				Fname, Lc, pulser_struct.name );
+//		THROW( EXCEPTION );
+//	}
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+int dg2020_b_end_of_exp_hook( void )
+{
+	if ( ! dg2020_is_needed )
+		return 1;
+
+//	gpib_local( dg2020.device );
+
+	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void dg2020_b_exit_hook( void )
+{
+	PULSE *p, *np;
+	int i;
+
+
+	if ( ! dg2020_is_needed )
+		return;
+
+	/* free all the memory allocated within the module */
+
+	for ( p = dg2020_Pulses; p != NULL; np = p->next, T_free( p ), p = np )
+		;
+	dg2020_Pulses = NULL;
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		if ( dg2020.function[ i ].pulses != NULL )
+			T_free( dg2020.function[ i ].pulses );
+}
