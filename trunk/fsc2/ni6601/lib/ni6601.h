@@ -66,7 +66,6 @@ const char *ni6601_error_message( void );
 
 
 #define NI6601_OK        0
-
 #define NI6601_ERR_NSB  -1
 #define NI6601_ERR_NSC  -2
 #define NI6601_ERR_CBS  -3
@@ -81,7 +80,6 @@ const char *ni6601_error_message( void );
 #define NI6601_ERR_ACS -12
 #define NI6601_ERR_DFM -13
 #define NI6601_ERR_DFP -14
-
 #define NI6601_ERR_INT -15
 
 #define NI6601_ERR_NSB_MESS  "No such board"
@@ -98,5 +96,4 @@ const char *ni6601_error_message( void );
 #define NI6601_ERR_ACS_MESS  "No permissions to open file"
 #define NI6601_ERR_DFM_MESS  "Device file does not exist"
 #define NI6601_ERR_DFP_MESS  "Unspecified error when opening device file"
-
 #define NI6601_ERR_INT_MESS  "Internal driver or library error"

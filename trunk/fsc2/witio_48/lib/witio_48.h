@@ -36,7 +36,6 @@ const char *witio_48_error_message( void );
 
 
 #define WITIO_48_OK        0
-
 #define WITIO_48_ERR_ICA  -1
 #define WITIO_48_ERR_ICM  -2
 #define WITIO_48_ERR_IVD  -3
