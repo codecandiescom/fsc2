@@ -354,10 +354,12 @@ also access the contents of the union directly. Finally you may use
 to get the address of the start of a string variable.
 
 
-But there are some functions that make it even easier for you to
-evaluate the parameters your function receives. The first one is for the
-case that you expect an integer variable but would be prepared also to
-deal with a floating number (after it has been rounded to the nearest
+@subsection Utility functions to determine variables values
+
+There are some functions that make it even easier for you to evaluate
+the parameters your function receives. The first one is for the case
+that you expect an integer variable but would be prepared also to deal
+with a floating number after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
 long get_long( Var *var, const char *snippet )
@@ -749,7 +751,7 @@ const char *generic_type = DEVICE_TYPE;
 @end example
 @acronym{fsc2} will use the first variable with the name for printing of
 @noindent
-warnings and error messages. Tes second string is needed to find out
+warnings and error messages. The second string is needed to find out
 about the type of the device. If this variable does not exist it won't
 have any information about the device type and having another device of
 the same type recognized automatically will not work.
