@@ -99,12 +99,12 @@ enum {
 
 
 enum {
-	NEW_VARIABLE       = ( 1 << 0 ),   /*    1 */
-	VARIABLE_SIZED     = ( 1 << 1 ),   /*    2 */
-	NEED_SLICE         = ( 1 << 2 ),   /*    4 */
-	NEED_INIT          = ( 1 << 3 ),   /*    8 */
-	NEED_ALLOC         = ( 1 << 4 ),   /*   16 */
-	IS_DYNAMIC         = ( 1 << 5 )    /*   32 */
+	NEW_VARIABLE    = ( 1 << 0 ),      /*    1 */
+	VARIABLE_SIZED  = ( 1 << 1 ),      /*    2 */
+	NEED_SLICE      = ( 1 << 2 ),      /*    4 */
+	NEED_INIT       = ( 1 << 3 ),      /*    8 */
+	NEED_ALLOC      = ( 1 << 4 ),      /*   16 */
+	IS_DYNAMIC      = ( 1 << 5 )       /*   32 */
 };
 
 

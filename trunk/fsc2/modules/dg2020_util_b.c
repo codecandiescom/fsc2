@@ -457,7 +457,7 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 	   or to set (1) */
 
 	*start = where;
-	ret = *a == SET ? -1 : 1;
+	ret = *a ? -1 : 1;
 	cur_state = *a;
 
 	/* Now figure out the length of the area we have to set or reset */

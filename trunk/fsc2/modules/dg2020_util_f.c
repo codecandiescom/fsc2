@@ -507,12 +507,12 @@ int dg2020_diff( bool *old, bool *new, Ticks *start, Ticks *length )
 		return 0;
 	}
 
-	/* store the start position (including the offset and the necessary one
+	/* Store the start position (including the offset and the necessary one
 	   due to the pulsers firmware bug) and store if we wave to reset (-1)
 	   or to set (1) */
 
 	*start = where;
-	ret = *a == SET ? -1 : 1;
+	ret = *a ? -1 : 1;
 	cur_state = *a;
 
 	/* Now figure out the length of the area we have to set or reset */

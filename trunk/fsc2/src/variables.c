@@ -1724,7 +1724,7 @@ static long vars_calc_index( Var *a, Var *v )
 		   we're still in the test phase, the array slice size might be a
 		   dummy value that get's corrected in the real measurement. In this
 		   case (i.e. test phase and array is dynamically sized and its the
-		   last index into the array) we accept even an index that's to large
+		   last index into the array) we accept even an index that's too large
 		   and readjust it to the currenty possible maximum value hoping that
 		   everthing will work out well in the experiment. */
 
