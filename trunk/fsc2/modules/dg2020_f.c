@@ -86,7 +86,7 @@ int dg2020_init_hook( void )
 	dg2020.is_trig_in_slope = UNSET;
 	dg2020.is_trig_in_level = UNSET;
 	dg2020.is_repeat_time = UNSET;
-	
+
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
 	for ( i = 0; i < MAX_PODS; i++ )
@@ -472,8 +472,8 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		pulser_next_phase( vars_push( INT_VAR, 1 ) );
-		pulser_next_phase( vars_push( INT_VAR, 2 ) );
+		pulser_phase_reset( vars_push( INT_VAR, 1 ) );
+		pulser_phase_reset( vars_push( INT_VAR, 2 ) );
 	}
 
 	for ( ; v != NULL; v = vars_pop( v ) )
@@ -497,7 +497,7 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 2;
 	}
 
-	return OK;
+	return vars_push( INT_VAR, 1 );;
 }
 
 
@@ -516,7 +516,7 @@ Var *pulser_pulse_reset( Var *v )
 	if ( v == NULL )
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
-				pulser_reset( vars_push( INT_VAR, p->num ) );
+				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
 
 	/* Otherwise run through the supplied pulse list */
 
