@@ -546,7 +546,7 @@ static void ass_func( int function )
 
 	if ( Channel_Type != PULSER_CHANNEL_NO_TYPE )
 	{
-		if ( pulser_struct.needs_phase_pulse )
+		if ( pulser_struct.needs_phase_pulses )
 			p_phase_ref( Channel_Type, function );
 		else
 		{
