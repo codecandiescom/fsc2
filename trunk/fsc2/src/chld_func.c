@@ -1199,7 +1199,7 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
 			THROW( EXCEPTION );
 		}
 		T_free( buffer );
-		res = LONG_P T_malloc( sizeof *res );
+		res = LONG_P T_malloc( 2 * sizeof *res );
 		if ( ! reader( ( void * ) res ) )
 			res[ 0 ] = -1;
 		return res;
