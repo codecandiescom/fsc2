@@ -44,8 +44,8 @@ static HJS_ATTENUATOR hjs_attenuator_stored;
 static bool hjs_attenuator_serial_init( void );
 static void hjs_attenuator_set_attenuation( long new_step );
 static void hjs_attenuator_comm_failure( void );
-static FILE *hjs_attenuator_find_table( char **name );
-static FILE *hjs_attenuator_open_table( char *name );
+static FILE *hjs_attenuator_find_calibration( char **name );
+static FILE *hjs_attenuator_open_calibration( char *name );
 static long hjs_attenuator_att_to_step( double att );
 
 
@@ -59,11 +59,11 @@ int hjs_attenuator_init_hook( void )
 
 	hjs_attenuator.is_open       = UNSET;
 	hjs_attenuator.is_step       = UNSET;
-	hjs_attenuator.table_file    = NULL;
+	hjs_attenuator.calib_file    = NULL;
 	hjs_attenuator.att_table     = NULL;
 	hjs_attenuator.att_table_len = 0;
 
-	vars_pop( mw_attenuator_use_table( NULL ) );
+	vars_pop( mw_attenuator_load_calibration( NULL ) );
 
 	return 1;
 }
@@ -118,7 +118,7 @@ int hjs_attenuator_end_of_exp_hook( void )
 
 void hjs_attenuator_exit_hook( void )
 {
-	/* Get rid of the data from the table file */
+	/* Get rid of the data from the calibration file */
 
 	if ( hjs_attenuator.att_table )
 		hjs_attenuator.att_table =
@@ -155,13 +155,20 @@ Var *mw_attenuator_name( Var *v )
 /* used.                                                     */
 /*-----------------------------------------------------------*/
 
-Var *mw_attenuator_use_table( Var *v )
+Var *mw_attenuator_load_calibration( Var *v )
 {
 	FILE *tfp = NULL;
 	char *tfname;
 
 
 	CLOBBER_PROTECT( tfp );
+
+	if ( hjs_attenuator.is_step )
+	{
+		print( FATAL, "calibration file can only be loaded before an "
+			   "attenuation has been set.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* If a table had already been read in get rid of it */
 
@@ -172,25 +179,27 @@ Var *mw_attenuator_use_table( Var *v )
 		hjs_attenuator.att_table_len = 0;
 	}
 
-	/* Try to figure out the name of the table file - if no argument is given
-	   use the default table file, otherwise use the user supplied file name */
+	/* Try to figure out the name of the calibration file - if no argument is
+	   given use the default calibration file, otherwise use the user supplied
+	   file name */
 
 	if ( v == NULL )
 	{
-		if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
-			hjs_attenuator.table_file = T_strdup( DEFAULT_TABLE_FILE );
+		if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
+			hjs_attenuator.calib_file = T_strdup( DEFAULT_CALIB_FILE );
 		else
-			hjs_attenuator.table_file = get_string( "%s%s%s", libdir,
+			hjs_attenuator.calib_file = get_string( "%s%s%s", libdir,
 													slash( libdir ),
-													DEFAULT_TABLE_FILE );
+													DEFAULT_CALIB_FILE );
 
-		if ( ( tfp = hjs_attenuator_open_table( hjs_attenuator.table_file ) )
+		if ( ( tfp = 
+			   hjs_attenuator_open_calibration( hjs_attenuator.calib_file ) )
 			 == NULL )
 		{
-			print( FATAL, "Table file '%s' not found.\n",
-				   hjs_attenuator.table_file );
-			hjs_attenuator.table_file =
-									CHAR_P T_free( hjs_attenuator.table_file );
+			print( FATAL, "Calibration file '%s' not found.\n",
+				   hjs_attenuator.calib_file );
+			hjs_attenuator.calib_file =
+									CHAR_P T_free( hjs_attenuator.calib_file );
 			THROW( EXCEPTION );
 		}
 	}
@@ -204,8 +213,8 @@ Var *mw_attenuator_use_table( Var *v )
 
 		TRY
 		{
-			tfp = hjs_attenuator_find_table( &tfname );
-			hjs_attenuator.table_file = tfname;
+			tfp = hjs_attenuator_find_calibration( &tfname );
+			hjs_attenuator.calib_file = tfname;
 			TRY_SUCCESS;
 		}
 		CATCH( EXCEPTION )
@@ -219,18 +228,18 @@ Var *mw_attenuator_use_table( Var *v )
 
 	TRY
 	{
-		hjs_attenuator_read_table( tfp );
+		hjs_attenuator_read_calibration( tfp );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
 		fclose( tfp );
-		hjs_attenuator.table_file = CHAR_P T_free( hjs_attenuator.table_file );
+		hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
 		RETHROW( );
 	}
 
 	fclose( tfp );
-	hjs_attenuator.table_file = CHAR_P T_free( hjs_attenuator.table_file );
+	hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -399,14 +408,14 @@ static void hjs_attenuator_comm_failure( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* If the function succeeds it returns a file pointer to the table file */
-/* and sets the table_file entry in the device structure to the name of */
-/* the table file. Otherwise an exception is thrown. In any case the    */
-/* memory used for the file name passed to the function is deallocated. */
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+/* If the function succeeds it returns a file pointer to the calibration    */
+/* file and sets the calib_file entry in the device structure to the name   */
+/* of the calibration file. Otherwise an exception is thrown. In any case   */
+/* the memory used for the file name passed to the function is deallocated. */
+/*--------------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_find_table( char **name )
+static FILE *hjs_attenuator_find_calibration( char **name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -422,12 +431,12 @@ static FILE *hjs_attenuator_find_table( char **name )
 		*name = new_name;
 	}
 
-	/* Now try to open the file - set table_file entry in the device structure
+	/* Now try to open the file - set calib_file entry in the device structure
 	   to the name and return the file pointer */
 
-	if ( ( tfp = hjs_attenuator_open_table( *name ) ) != NULL )
+	if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) != NULL )
 	{
-		hjs_attenuator.table_file = T_strdup( *name );
+		hjs_attenuator.calib_file = T_strdup( *name );
 		return tfp;
 	}
 
@@ -435,19 +444,19 @@ static FILE *hjs_attenuator_find_table( char **name )
 
 	if ( strchr( *name, '/' ) != NULL )
 	{
-		print( FATAL, "Table file '%s' not found.\n", *name );
+		print( FATAL, "Calibration file '%s' not found.\n", *name );
 		THROW( EXCEPTION );
 	}
 
-	/* Last chance: The table file is in the library directory... */
+	/* Last chance: The calibration file is in the library directory... */
 
 	new_name = get_string( "%s%s%s", libdir, slash( libdir ), *name );
 	T_free( *name );
 	*name = new_name;
 
-	if ( ( tfp = hjs_attenuator_open_table( *name ) ) == NULL )
+	if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) == NULL )
 	{
-		print( FATAL, "Table file '%s' not found in either the current "
+		print( FATAL, "Calibration file '%s' not found in either the current "
 			   "directory or in '%s'.\n", strip_path( *name ), libdir );
 		THROW( EXCEPTION );
 	}
@@ -465,7 +474,7 @@ static FILE *hjs_attenuator_find_table( char **name )
 /* deallocated.                                                     */
 /*------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_open_table( char *name )
+static FILE *hjs_attenuator_open_calibration( char *name )
 {
 	FILE *tfp;
 
@@ -475,14 +484,15 @@ static FILE *hjs_attenuator_open_table( char *name )
 		if ( errno == ENOENT )       /* file not found */
 			return NULL;
 
-		print( FATAL, "No read permission for table file '%s'.\n", name );
+		print( FATAL, "No read permission for calibration file '%s'.\n",
+			   name );
 		T_free( name );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( tfp = fopen( name, "r" ) ) == NULL )
 	{
-		print( FATAL, "Can't open table file '%s'.\n", name );
+		print( FATAL, "Can't open calibration file '%s'.\n", name );
 		T_free( name );
 		THROW( EXCEPTION );
 	}

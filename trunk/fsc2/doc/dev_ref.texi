@@ -883,7 +883,7 @@ setting.
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
 @item @code{mw_attenuator_name()}                @tab @ref{mw_attenuator_name}
-@item @code{mw_attenuator_use_table()}           @tab @ref{mw_attenuator_use_table}
+@item @code{mw_attenuator_load_calibration()}    @tab @ref{mw_attenuator_load_calibration}
 @item @code{mw_attenuator_initial_attenuation()} @tab @ref{mw_attenuator_initial_attenuation}
 @item @code{mw_attenuator_attenuation()}         @tab @ref{mw_attenuator_attenuation}
 @end multitable

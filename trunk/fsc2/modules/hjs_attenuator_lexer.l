@@ -143,14 +143,14 @@ UNIT     "db"|"dB"
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-void hjs_attenuator_read_table( FILE *fp )
+void hjs_attenuator_read_calibration( FILE *fp )
 {
 	static bool is_restart = UNSET;
 
 
 	if ( ( hjs_attenuator_in = fp ) == NULL )
 	{
-		print( FATAL, "Internal error while reading attenuation table.\n" );
+		print( FATAL, "Internal error while reading calibration file.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -174,21 +174,21 @@ void hjs_attenuator_read_table( FILE *fp )
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		print( FATAL, "Unexpected end of table file '%s' in comment starting "
-			   "at line %ld.\n", hjs_attenuator.table_file,
+		print( FATAL, "Unexpected end of calibration file '%s' in comment "
+			   "starting at line %ld.\n", hjs_attenuator.calib_file,
 			   hjs_attenuator_Comm_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
-		print( FATAL, "End of comment found in table file '%s' at line %ld.\n",
-			   hjs_attenuator.table_file, hjs_attenuator_Lc );
+		print( FATAL, "End of comment found in calibration file '%s' at "
+			   "line %ld.\n", hjs_attenuator.calib_file, hjs_attenuator_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
-			   hjs_attenuator.table_file, hjs_attenuator_Lc );
+		print( FATAL, "Invalid entry in calibration file '%s' at line %ld.\n",
+			   hjs_attenuator.calib_file, hjs_attenuator_Lc );
 		THROW( EXCEPTION );
 	}
 	OTHERWISE
@@ -227,8 +227,8 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 
 		if ( last_type != TABLE_TYPE_STEP )
 		{
-			print( FATAL, "More attenuations than steps in table file '%s'.\n",
-				   hjs_attenuator.table_file );
+			print( FATAL, "More attenuations than steps in calibration "
+				   "file '%s'.\n", hjs_attenuator.calib_file );
 			THROW( EXCEPTION );
 		}
 
@@ -236,8 +236,8 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 
 		if ( hjs_attenuator.att_table_len < 2 )
 		{
-			print( FATAL, "Table file '%s' contains less than 2 entries.\n",
-				   hjs_attenuator.table_file );
+			print( FATAL, "Calibration file '%s' contains less than 2 "
+				   "entries.\n", hjs_attenuator.calib_file );
 			THROW( EXCEPTION );
 		}
 
@@ -262,8 +262,8 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 				 hjs_attenuator.att_table[ i + 1 ].step )
 			{
 				print( FATAL, "Stepper motor position aren't dropping "
-					   "monotonously in attenuation table '%s'.\n",
-					   hjs_attenuator.table_file );
+					   "monotonously in calibration file '%s'.\n",
+					   hjs_attenuator.calib_file );
 				THROW( EXCEPTION );
 			}
 
@@ -310,8 +310,8 @@ static int hjs_attenuator_comp( const void *a, const void *b )
 
 	if ( A->att == B->att )
 	{
-		print( FATAL, "Attenuation of %s dB appears twice in table file "
-					  "'%s'\n", A->att, hjs_attenuator.table_file );
+		print( FATAL, "Attenuation of %s dB appears twice in calibration file "
+					  "'%s'\n", A->att, hjs_attenuator.calib_file );
 		THROW( EXCEPTION );
 	}
 

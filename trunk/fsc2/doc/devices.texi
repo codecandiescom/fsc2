@@ -3915,22 +3915,27 @@ module.
 Returns a string with the name of the power supply being used.
 
 
-@anchor{mw_attenuator_use_table}
-@item mw_attenuator_use_table()
-@findex mw_attenuator_use_table()
+@anchor{mw_attenuator_load_calibration}
+@item mw_attenuator_load_calibration()
+@findex mw_attenuator_load_calibration()
 This function can be used to load a calibration table file different
-from the one loaded when the module is loaded. It expects a single
+from the one read in when the module is loaded. It expects a single
 argument, a (string) variable with the name of the table file. If no
 argument is given a default table file is reloaded (typically this is
 @file{/usr/local/lib/fsc2/hjs_attenuator.calib}, but this may depend on
 the installation of @code{fsc2}).
 
-The table file must consist of pairs of entries, an attenuation (in dB)
-and a stepper motor position. Attenuations values may be followed by an
-unit of @code{dB} or @code{db}. The entries in the file don't have to be
-sorted in any way and don't have to spaced equally. The only requirement
-is that the stepper motor settings are a monotonuously decreasing
-function of the attenuation.
+If this function is used it @strong{must} be called before the functions
+@code{mw_attenuator_initial_attenuation()} or
+@code{mw_attenuator_attenuation()} are invoked. Once an attenuation has
+been set calibrations can't be loaded in anymore.
+
+The calibration file must consist of pairs of entries, an attenuation
+(in dB) and a stepper motor position. Attenuations values may be
+followed by an unit of @code{dB} or @code{db}. The attenuation entries
+in the file don't have to be sorted in any way and don't have to be
+equidistant. The only requirement is that the stepper motor settings are
+a monotonuously decreasing function of the attenuation.
 
 The items in the table file can be separated by spaces, commas,
 semicolons, colons, tabs or any combination of these characters (a unit
@@ -3945,10 +3950,10 @@ valid:
 Blank lines don't matter. Finally, all lines starting with a hash
 character, `@code{#}', are treated as comments.
 
-If an attenuation is used that isn't in the table the stepper motor
-setting to be used is linearly interpolated from the next neighboring
-values. as long as the attenuation isn't smaller or larger than the
-minimum or maximum attenuation in the table.
+If an attenuation is used that isn't in the table read in from the file
+the stepper motor setting to be used is linearly interpolated from the
+next neighboring values. as long as the attenuation isn't smaller or
+larger than the minimum or maximum attenuation in the table.
 
 The function can only be used in the @code{PREPARATIONS} section of an
 @code{EDL} script.

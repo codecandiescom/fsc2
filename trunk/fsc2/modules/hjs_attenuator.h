@@ -52,7 +52,7 @@ struct HJS_ATTENUATOR {
 	long step;                      /* current stepper motor position */
 	bool is_step;                   /* set when initial position of stepper
 									   motor has been set */
-	char *table_file;               /* name of attenuation table file */
+	char *calib_file;               /* name of attenuation calibration file */
 	HJS_ATT_TABLE_ENTRY *att_table; /* (sorted) array of attenuation/position
 									   of motor settings */
 	size_t att_table_len;           /* length of this array */
@@ -74,14 +74,14 @@ void hjs_attenuator_exit_hook( void );
 
 
 Var *mw_attenuator_name( Var *v );
-Var *mw_attenuator_use_table( Var *v );
+Var *mw_attenuator_load_calibration( Var *v );
 Var *mw_attenuator_initial_attenuation( Var *v );
 Var *mw_attenuator_attenuation( Var *v );
 
 
 /* Functions from hjs_attenuator_lexer.l */
 
-void hjs_attenuator_read_table( FILE *fp );
+void hjs_attenuator_read_calibration( FILE *fp );
 
 
 /*
