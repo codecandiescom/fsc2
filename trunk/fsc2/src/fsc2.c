@@ -993,7 +993,7 @@ static bool display_file( char *name, FILE *fp )
 		lp = line + len + 2;
 		cc = 0;
 		while ( ( key = fgetc( fp ) ) != '\n' &&
-			    key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 3 )
+			    key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 9 )
 		{
 			if ( ( char ) key != '\t' )
 				*lp++ = ( char ) key;
@@ -1036,6 +1036,16 @@ static bool display_file( char *name, FILE *fp )
 			line[ 3 ] = '4';
 			line[ 4 ] = '@';
 			line[ 5 ] = 'f';
+		}
+
+		if ( *lp == '#' )
+		{
+			memmove( line + 5, line, strlen( line ) + 1 );
+			line[ 0 ] = '@';
+			line[ 1 ] = 'C';
+			line[ 2 ] = '2';
+			line[ 3 ] = '@';
+			line[ 4 ] = 'f';
 		}
 
 		fl_add_browser_line( main_form->browser, line );
