@@ -2160,4 +2160,28 @@ For variable sized arrays for which the length is still unknown the
 function returns @code{0}.
 
 
+@anchor{sprint}
+@item sprint()
+@findex sprint()
+The function can be used to create strings with a text that only gets
+determined while the experiment is running, e.g.@: to create label
+strings on demand etc. The function expects at least one argument, a
+format string, having exactly the same form as the format string passed
+to the @code{print()} function, i.e.@: with embedded @code{#} characters
+as placeholders for the values of other variables to be inserted into
+the string. For each unescaped @code{#} in the string there must be
+an additional argument, a number, a variable or a string. The function
+returns a variable that can be used in all places where otherwise a
+string would be required. Here's a simpleminded example on how to create
+a set of 10 buttons, where the label contains the button number (note
+that the first @code{#} character is escaped by a backslash, so it goes
+directly into the string to be created without any conversions):
+@example
+FOR I = 1 : 10 @{
+    B[ I ] = button_create( "NORMAL_BUTTON",
+                            sprint( "Button \##", I ) );
+@}
+@end example
+
+
 @end table
