@@ -465,10 +465,10 @@ or
 return vars_push( FLOAT_VAR, f_value );
 @end example
 @noindent
-where @code{i_value} is a @code{long int} and @code{f_value} is supposed
-to be a @code{double} value. Of course, you don't have to use
-@code{vars_push()} in return statements only, it simply returns a
-pointer to the new variable holding the value.
+where @code{i_value} is a @code{long int} and @code{f_value} must be a
+value of type @code{double} (take care not to get this wrong). Of
+course, you don't have to use @code{vars_push()} in return statements
+only, it simply returns a pointer to the new variable holding the value.
 
 For arrays @code{vars_push()} the first argument is either
 @code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a pointer
@@ -510,13 +510,13 @@ Var *square( Var *var )
 @}
 @end example
 @noindent
-As you see it is checked first that the variable passed to the function
+As you see it's checked first that the variable passed to the function
 has the correct type - both integer and floating point values are ok
-(otherwise the interpretation of the @code{EDL} program woul be stopped).
-Next we distinguish between the possibilities that the value is
-an integer or a floating point number by testing the @code{type}
-field of the variable. Then we create either a new integer variable by
-calling @code{vars_push()} with the square of the integer value or a new
+(otherwise the interpretation of the @code{EDL} program would stop).
+Next we distinguish between the possibilities that the value is an
+integer or a floating point number by testing the @code{type} field of
+the variable. Then we create either a new integer variable by calling
+@code{vars_push()} with the square of the integer value or a new
 floating point variable. Finally, we return the variable pointer
 @code{vars_push()} had delivered.
 
@@ -534,17 +534,8 @@ Var *square( Var *var )
 @end example
 
 
-If your function does not has to return a value at all there are two ways to
-handle this situation. Either return a pointer to a variable with an arbitrary
-value. e.g.@: write
-@example
-return vars_push( INT_VAR, 0 );
-@end example
-@noindent
-or simply return a @code{NULL} pointer, i.e.@:
-@example
-return NULL;
-@end example
+If your function does not have to return a value at all just return
+the integer value @code{1}, which can be interpreted as success.
 
 
 What if you want to write to function that returns more than one value?
@@ -580,7 +571,7 @@ Dummy[ * ];     // variable sized array for values returned by my_function()
 
 ...             // lots of stuff left out
 
-Dummy[ ] = my_function( );   // automagically sets the dimension 
+Dummy = my_function( );      // automagically sets the dimension 
                              // of array Dummy to 2
 V1 = Dummy[ 1 ];
 V2 = Dummy[ 2 ];
