@@ -215,7 +215,7 @@ print F "field_step  = " . abs( $field_step ) . " G;
 field";
 print F " = start_field" if $no_ranges == 1;
 print F ";\n";
-print F "min_field = $min_field G;\n" if $no_ranges > 1;
+print F "min_field = $min_field G;\n";
 print F "data[ * ];\n";
 print F "I = 1;\n" if $no_ranges == 1;
 print F "J, K, F1, F2;
@@ -223,21 +223,9 @@ print F "J, K, F1, F2;
 
 PREPARATIONS:
 
-init_2d( 1, 0, 0, 0, 0, ";
-if ( $no_ranges > 1 ) {
-	print F "min_field" ;
-} else {
-	print F "start_field";
-}
-print F ", field_step, \"Time [us]\", \"Field [G]\" );
+init_2d( 1, 0, 0, 0, 0, min_field, field_step, \"Time [us]\", \"Field [G]\" );
 
-magnet_setup( ";
-if ( $no_ranges > 1 ) {
-	print F "min_field";
-} else {
-	print F "start_field";
-}
-print F ", field_step );
+magnet_setup( " .$rsf[ 0 ] . "G, field_step );
 digitizer_averaging( FUNC_E, CH1, $num_averages );
 
 
@@ -269,12 +257,17 @@ if ( $no_ranges > 1 ) {
     print F "FOR K = 1 : $no_ranges {
 	set_field( start_field[ K ] );
 	field = start_field[ K ];
-	WHILE field <= end_field[ K ] {
+	WHILE ( start_field[ K ] <= end_field[ K ] & field <= end_field[ K ] ) |
+          ( start_field[ K ] >  end_field[ K ] & field >= start_field[ K ] ) {
 		digitizer_start_acquisition( );
 		data = digitizer_get_curve( FUNC_E );
 		display( 1, round( ( field - min_field ) / field_step ) + 1,
 			     data );
-	    field = sweep_up( );
+		IF start_field[ K ] <= end_field[ K ] {
+	    	field = sweep_up( );
+		} ELSE {
+	    	field = sweep_down( );
+		}
 		FOR J = 1 : size( data ) {
 		    fsave( F1, \"# \", data[ J ] );
 		}
@@ -282,15 +275,23 @@ if ( $no_ranges > 1 ) {
 	}
 }\n";
 } else {
-    print F "WHILE field <= end_field {
-	digitizer_start_acquisition( );
+	if ( $rsf[ 0 ] <= $ref[ 0 ] ) {
+	    print F "WHILE field <= end_field {\n";
+	} else {
+	    print F "WHILE field >= end_field {\n";
+	}
+	print F "    digitizer_start_acquisition( );
 	data = digitizer_get_curve( FUNC_E );
-	field = sweep_up( );
-	FOR J = 1 : size( data ) {
+	display( 1, round( ( field - min_field ) / field_step ) + 1, data );\n";
+	if ( $rsf[ 0 ] <= $ref[ 0 ] ) {
+		print F "	field = sweep_up( );\n";
+	} else {
+		print F "	field = sweep_down( );\n";
+	}
+	print F "    FOR J = 1 : size( data ) {
 		fsave( F1, \"# \", data[ J ] );
 	}
 	fsave( F1, \"\\n\" );
-	display( 1, I, data );
 	I +=1;
 }\n";
 }
@@ -364,15 +365,10 @@ sub do_checks {
             return -1;
         }
 
-		if ( $start_field[ $i ] <= $end_field[ $i ] ) {
-			$rsf[ $i ] = $start_field[ $i ];
-			$ref[ $i ] = $end_field[ $i ];
-		} else {
-			$ref[ $i ] = $start_field[ $i ];
-			$rsf[ $i ] = $end_field[ $i ];
-		}
+		$rsf[ $i ] = $start_field[ $i ];
+		$ref[ $i ] = $end_field[ $i ];
 
-		if ( abs( $field_step ) > $ref[ $i ] - $rsf[ $i ] ) {
+		if ( $field_step > abs( $end_field[ $i ] - $start_field[ $i ] ) ) {
 			if ( $no_ranges == 1 ) {
 				&show_message( "Field step size larger than\n" .
 							   "difference between start and\n" .
@@ -386,6 +382,7 @@ sub do_checks {
 		}
 
 		$min_field = $rsf[ $i ] if $rsf[ $i ] < $min_field;
+		$min_field = $ref[ $i ] if $ref[ $i ] < $min_field;
 	}
 
     for ( my $i = 0; $i < $no_ranges; $i++ ) {
