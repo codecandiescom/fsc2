@@ -197,7 +197,7 @@ The next item, a single number in square braces, is the default value
 for the variable, i.e.@: the value to be shown when the script is
 invoked for the first time. The second from last item is a string with
 the text to be shown to the left of the field for editing the start
-field. And, finally, the last item is string with e.g.@: a unit to be
+field. And, finally, the last item is a string with e.g.@: a unit to be
 shown on the right hand side of the editable field.
 
 Please note: when the user exits the created script the current values
@@ -266,7 +266,7 @@ Finally, there are @code{file} variables. These are for cases where you
 want to put a file name into an @code{EDL} program. The syntax is even
 easier, you just need a line like this:
 @example
-=== FILENAME file "Data file"
+=== FILENAME file "Data file:"
 File = open_file( FILENAME );
 @end example
 @noindent
@@ -312,7 +312,7 @@ PREPARATIONS:
 
 EXPERIMENT:
 
-=== FILENAME file "Data file"
+=== FILENAME file "Data file:"
   File = open_file( FILENAME );
 
   lockin_time_constant( tc );
@@ -407,7 +407,7 @@ Instead of the comparison for equality, @code{eq}, we could also have
 used the opposite operator, @code{ne}, which evaluates to true if the
 strings differ.
 
-Of course, there is a second place, where we have to apply a
+Of course, there is a second place where we have to apply a
 change. That's in the line where we really set the lock-in's time
 constant at the start of the @code{EXPERIMENT} section. Here we have to
 replace
