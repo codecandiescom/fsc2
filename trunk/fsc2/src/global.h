@@ -35,6 +35,11 @@ typedef  unsigned char  bool;
 #define DEFAULT_TIME_UNIT 1
 
 
+/* Define number of colors to be used in 2D graphics */
+
+#define NUM_COLORS 128
+
+
 /* Define some useful abbreviations - never ever change these ! */
 
 #define	FAIL  ( ( bool ) 0 )      
