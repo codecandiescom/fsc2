@@ -24,8 +24,7 @@ static void create_pixmap( Canvas *c );
 static void delete_pixmap( Canvas *c );
 static void fs_rescale_1d( void );
 static void fs_rescale_2d( void );
-static void redraw_x_axis( void );
-static void redraw_y_axis( void );
+static void redraw_axis( int coord );
 static void make_scale( Curve_1d *cv, Canvas *c, int coord );
 
 
@@ -565,10 +564,10 @@ void redraw_canvas( Canvas *c )
 			}
 
 		if ( c == &G.x_axis )
-			redraw_x_axis( );
+			redraw_axis( X );
 
 		if ( c == &G.y_axis )
-			redraw_y_axis( );
+			redraw_axis( Y );
 	}
 
 	repaint_canvas( c );
@@ -578,59 +577,40 @@ void redraw_canvas( Canvas *c )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-void redraw_x_axis( void )
+void redraw_axis( int coord )
 {
-	Canvas *c = &G.x_axis;
+	Canvas *c;
 	Curve_1d *cv;
 	int width;
 	int i;
 
 
-	if ( G.label[ X ] != NULL && G.font != NULL )
+	if ( coord == X )
 	{
-		width = XTextWidth( G.font, G.label[ X ], strlen( G.label[ X ] ) );
-		XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-					 c->h - 5 - G.font_desc,
-					 G.label[ X ], strlen( G.label[ X ] ) );
+		c = &G.x_axis;
+		if ( G.label[ X ] != NULL && G.font != NULL )
+		{
+			width = XTextWidth( G.font, G.label[ X ], strlen( G.label[ X ] ) );
+			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
+						 c->h - 5 - G.font_desc, 
+						 G.label[ X ], strlen( G.label[ X ] ) );
+		}
 	}
-
-	if ( ! G.is_scale_set )
-		return;
-
-	for ( i = 0; i < G.nc; i++ )
+	else
 	{
-		cv = G.curve[ i ];
-		if ( cv->active )
-			break;
-	}
-
-	if ( i == G.nc )                          /* no active curve -> no scale */
-		return;
-
-	make_scale( cv, c, X );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-void redraw_y_axis( void )
-{
-	Canvas *c = &G.y_axis;
-	Curve_1d *cv;
-	int width;
-	int i;
-
+		c = &G.y_axis;
 /*
-	if ( G.label[ X ] != NULL && G.font != NULL )
-	{
-		width = XTextWidth( G.font, G.label[ X ], strlen( G.label[ X ] ) );
-		XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
-					 c->h - 5 - G.font_desc,
-					 G.label[ X ], strlen( G.label[ X ] ) );
-	}
+		if ( G.label[ Y ] != NULL && G.font != NULL )
+		{
+			width = XTextWidth( G.font, G.label[ Y ], strlen( G.label[ Y ] ) );
+			XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
+						 c->h - 5 - G.font_desc,
+						 G.label[ Y ], strlen( G.label[ Y ] ) );
+		}
 */
-	if ( ! G.is_scale_set )
+	}
+
+	if ( ! G.is_scale_set )                   /* no scaling -> no scale */
 		return;
 
 	for ( i = 0; i < G.nc; i++ )
@@ -643,7 +623,7 @@ void redraw_y_axis( void )
 	if ( i == G.nc )                          /* no active curve -> no scale */
 		return;
 
-	make_scale( cv, c, Y );
+	make_scale( cv, c, coord );
 }
 
 
