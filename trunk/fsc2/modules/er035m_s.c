@@ -28,6 +28,7 @@ int er035m_s_init_hook( void );
 int er035m_s_test_hook( void );
 int er035m_s_exp_hook( void );
 int er035m_s_end_of_exp_hook( void );
+void er035m_s_end_hook( void );
 
 Var *find_field( Var *v );
 Var *field_resolution( Var *v );
@@ -41,7 +42,7 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 static double er035m_s_get_field( void );
 static bool er035m_s_open( void );
 static bool er035m_s_close( void );
-static bool er035m_s_write( char *buf, long len );
+static bool er035m_s_write( const char *buf, long len );
 static bool er035m_s_read( char *buf, long *len );
 static bool er035m_s_comm( int type, ... );
 
@@ -63,7 +64,7 @@ typedef struct
 
 static NMR nmr;
 static char serial_port[ ] = "/dev/ttyS*";
-static char er035m_seol[ ] = "\n";       /* end of command string (compare
+static char er035m_s_eol[ ] = "\n";      /* end of command string (compare
 											settings at back side of device) */
 
 
@@ -100,7 +101,7 @@ enum {
 /*****************************************************************************/
 
 
-int er035m_init_hook( void )
+int er035m_s_init_hook( void )
 {
 	/* Set global flag to tell magnet power supply driver that the
 	   gaussmeter has already been loaded */
@@ -152,8 +153,6 @@ int er035m_init_hook( void )
 
 	nmr.is_needed = SET;
 	nmr.name = DEVICE_NAME;
-
-	nmr.is_opened = UNSET;
 	nmr.state = ER035M_S_UNKNOWN;
 
 	return 1;
@@ -179,7 +178,6 @@ int er035m_s_exp_hook( void )
 
 	if ( ! er035m_s_open( ) )
 	{
-		nmr.device = -1;
 		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
 		THROW( EXCEPTION );
 	}
@@ -380,9 +378,14 @@ int er035m_s_end_of_exp_hook( void )
 		return 1;
 
 	er035m_s_close( );
-	nmr.device = -1;
 
 	return 1;
+}
+
+
+void er035m_s_end_hook( void )
+{
+	nmr.is_needed = 0;
 }
 
 
@@ -604,11 +607,12 @@ static bool er035m_s_close( void )
 }
 
 
-static bool er035m_s_write( char *buf, long len )
+static bool er035m_s_write( const char *buf, long len )
 {
 	char *wbuf;
 	long wlen;
 	bool res;
+
 
 	if ( buf == NULL || len == 0 )
 		return OK;
@@ -635,7 +639,7 @@ static bool er035m_s_read( char *buf, long *len )
 	if ( buf == NULL || *len == 0 )
 		return OK;
 
-	return er035m_s_read( SERIAL_READ, buf, len );
+	return er035m_s_comm( SERIAL_READ, buf, len );
 }
 
 
