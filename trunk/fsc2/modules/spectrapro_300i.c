@@ -661,7 +661,7 @@ Var *monochromator_wavelength_axis( Var *v )
 
 	/* Check if there's a CCD camera module loaded */
 
-	if ( ! exists_device_type( "ccd_camera" ) )
+	if ( ! exists_device_type( "ccd camera" ) )
 	{
 		print( FATAL, "Function can only be used when the module for a "
 			   "CCD camera is loaded.\n" );
@@ -1373,7 +1373,7 @@ Var *monochromator_calibrate( Var *v )
 
 	/* Check if there's a CCD camera module loaded */
 
-	if ( ! exists_device_type( "ccd_camera" ) )
+	if ( ! exists_device_type( "ccd camera" ) )
 	{
 		print( FATAL, "Function can only be used when the module for a "
 			   "CCD camera is loaded.\n" );
