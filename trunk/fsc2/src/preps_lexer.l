@@ -139,13 +139,13 @@ FUNC        {IDENT}"#"[0-9]+
 			/* Handling of error messages from the cleaner */
 {ERR}		{
 				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				prepstext = strchr( prepstext, '\x03' );
 				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* Handling of DEVICES: labels */
@@ -328,7 +328,7 @@ FUNC        {IDENT}"#"[0-9]+
 {CTRL}      {
 				eprint( FATAL, SET, "Flow control structures can't be used "
 						"in the PREPARATIONS section.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* Handling of function, variable and array identifiers */
@@ -345,7 +345,7 @@ FUNC        {IDENT}"#"[0-9]+
 					{
 						eprint( FATAL, SET, "Function `%s' can only be used "
 								"in the EXPERIMENT section.\n", prepstext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -353,7 +353,7 @@ FUNC        {IDENT}"#"[0-9]+
                 {
                     eprint( FATAL, SET, "Function `%s' is not loaded.\n",
 							prepstext );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
                 }
             }
 
@@ -369,7 +369,7 @@ FUNC        {IDENT}"#"[0-9]+
 					{
 						eprint( FATAL, SET, "Function `%s' can only be used "
 								"in the EXPERIMENT section.\n", prepstext );
-						THROW( EXCEPTION )
+						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
@@ -380,7 +380,7 @@ FUNC        {IDENT}"#"[0-9]+
 				{
 					eprint( FATAL, SET, "Variable or function `%s' has not "
 						    "been declared or loaded.\n", prepstext );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				return VAR_TOKEN;
@@ -443,7 +443,7 @@ FUNC        {IDENT}"#"[0-9]+
 .           {
 				eprint( FATAL, SET, "Invalid input in PREPARATIONS "
 						"section: `%s'.\n", prepstext );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 <<EOF>>	    {
@@ -469,7 +469,7 @@ int preparations_parser( FILE *in )
 	{
 		eprint( FATAL, SET, "Multiple instances of PREPARATIONS section "
 		        "label.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
 

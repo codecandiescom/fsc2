@@ -78,13 +78,13 @@ extern char *varstext;
 input:   /* empty */
        | input ';'
        | input line ';'            { fsc2_assert( Var_Stack == NULL ); }
-       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
 ;								  
 								  
 line:    linet					  
        | line ',' linet			  
-       | line linet                { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | line linet                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 
 ;								  
 								  
@@ -96,10 +96,10 @@ linet:   VAR_TOKEN                 { } /* no assignment to be done */
        | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a function "
 											 "and not an array.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' is an array and"
 											 " not a function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
 ;
 
 expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
@@ -115,10 +115,10 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_REF
        | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
 											 "function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
 											 " function.\n",$1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr XOR expr       	   { $$ = vars_comp( COMP_XOR, $1, $3 ); }
@@ -213,7 +213,7 @@ static void varserror ( const char *s )
 		eprint( FATAL, SET, "Unexpected end of file in VARIABLES section.\n");
 	else
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

@@ -91,9 +91,9 @@ input:   /* empty */
        | input ';'                 { Cur_Pulse = -1; }
        | input line ';'            { Cur_Pulse = -1;
 	                                 fsc2_assert( Var_Stack == NULL ); }
-       | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ) }
-       | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ) }
-       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ) }
+       | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
+       | input line P_TOK          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { Cur_Pulse = -1;
 	                                 fsc2_assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
@@ -112,7 +112,7 @@ line:    P_TOK prop
        | FUNC_TOKEN '(' list2 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
                                              " function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
 ;
 
 ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
@@ -173,10 +173,10 @@ expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_REF
        | VAR_TOKEN '('            { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ) }
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['           { eprint( FATAL, SET, "`%s' is a predefined "
 											"function.\n", $1->name );
-	                                THROW( EXCEPTION ) }
+	                                THROW( EXCEPTION ); }
        | expr AND expr       	  { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	  { $$ = vars_comp( COMP_OR, $1, $3 ); }
        | expr XOR expr       	  { $$ = vars_comp( COMP_XOR, $1, $3 ); }
@@ -252,7 +252,7 @@ static void prepserror ( const char *s )
 	else
 		eprint( FATAL, SET, "Syntax error near `%s'.\n",
 				isprint( *prepstext ) ? prepstext : prepstext + 1 );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

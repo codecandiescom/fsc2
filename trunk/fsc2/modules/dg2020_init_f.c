@@ -76,7 +76,7 @@ static void dg2020_basic_pulse_check( void )
 		{
 			eprint( FATAL, UNSET, "%s: Pulse %ld is not associated with a "
 					"function.\n", pulser_struct.name, p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
@@ -85,7 +85,7 @@ static void dg2020_basic_pulse_check( void )
 					"been declared in the ASSIGNMENTS section.\n",
 					pulser_struct.name, Function_Names[ p->function->self ],
 					p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Check the start position */
@@ -128,7 +128,7 @@ static void dg2020_basic_pulse_check( void )
 			eprint( FATAL, UNSET, "%s: Pulse %ld does not fit into the "
 					"pulsers memory. You could try a longer pulser time "
 					"base.\n", pulser_struct.name, p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Check phase cycling of pulse */
@@ -139,7 +139,7 @@ static void dg2020_basic_pulse_check( void )
 					"function (%s) isn't associated with a phase function.\n",
 					pulser_struct.name, p->num,
 					Function_Names[ p->function->self ] );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( p->is_active )
@@ -261,7 +261,7 @@ static void dg2020_basic_functions_check( void )
 				eprint( FATAL, UNSET, "%s: Function `%s' needs two pods "
 						"assigned to it.\n", pulser_struct.name,
 						Function_Names[ i ] );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			/* No phase setup has been done for this phase function */
@@ -273,7 +273,7 @@ static void dg2020_basic_functions_check( void )
 						"a %s_SETUP command in the ASSIGNMENTS section.\n",
 						pulser_struct.name, Function_Names[ i ],
 						Function_Names[ i ] );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 		}
 
@@ -283,7 +283,7 @@ static void dg2020_basic_functions_check( void )
 		{
 			eprint( FATAL, UNSET, "%s: No pod has been assigned to function "
 					"`%s'.\n", pulser_struct.name, Function_Names[ i ] );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Assemble a list of all pulses assigned to the function and, while
@@ -429,7 +429,7 @@ static void dg2020_distribute_channels( void )
 		eprint( FATAL, UNSET, "%s: The experiment would require %d pulser "
 				"channels but only %d are available.\n", pulser_struct.name, 
 				dg2020.needed_channels, ( int ) MAX_CHANNELS );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -630,7 +630,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			eprint( FATAL, UNSET, "%s: Pulse %ld starts too early to allow "
 					"setting of a phase pulse.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		np->pos = np->initial_pos = - f->delay;
@@ -648,7 +648,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			eprint( FATAL, UNSET, "%s: Distance between pulses %ld and %ld "
 					"is too small to allow setting of phase pulses.\n",
 					pulser_struct.name, pp->num, p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Try to start the phase pulse as late as possible, i.e. just the
@@ -695,7 +695,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 							"and %ld is too small to allow setting of phase "
 							"pulses.\n", pulser_struct.name, p->num,
 							pppl[ i ]->for_pulse->num );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				if ( pppl[ i ]->pos + pppl[ i ]->len <
@@ -737,7 +737,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			eprint( FATAL, UNSET, "%s: Distance between pulses %ld and %ld is "
 					"too small to allow setting of phase pulses.\n",
 					pulser_struct.name, p->num, pn->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&

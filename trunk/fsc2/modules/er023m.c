@@ -124,7 +124,7 @@ int er023m_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return 1;
@@ -223,7 +223,7 @@ Var *lockin_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Negative or zero receiver gain in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Try to match the receiver gain passed to the function by checking if it
@@ -307,7 +307,7 @@ Var *lockin_time_constant( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Negative or zero time constant in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* We try to match the time constant passed to the function by checking if
@@ -464,7 +464,7 @@ Var *lockin_offset( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid offset value %d in %s(), must be in "
 				"range %d-%d.\n", DEVICE_NAME, of, Cur_Func, MIN_OF, MAX_OF );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er023m.of = of;
@@ -511,7 +511,7 @@ Var *lockin_conversion_time( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Negative or zero conversion time in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	ct_mult = irnd( ct / BASE_CT );
@@ -599,7 +599,7 @@ Var *lockin_ref_freq( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Negative or zero modulation frequency in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Find a valid modulation frequency nearest to the one we got */
@@ -693,7 +693,7 @@ Var *lockin_ref_level( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Negative modulation amplitude in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Find a valid amplitude nearest to the one we got */
@@ -765,7 +765,7 @@ Var *lockin_harmonic( Var *v )
 		eprint( FATAL, SET, "%s: Invalid value %d used for harmonic, valid "
 				"values are %d and %d.\n", DEVICE_NAME, ha + 1,
 				MIN_HARMONIC + 1, MAX_HARMONIC + 1 );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er023m.ha = ha;
@@ -811,7 +811,7 @@ Var *lockin_resonator( Var *v )
 		eprint( FATAL, SET, "%s: Invalid value %d used as resonator number, "
 				"valid values are %d and %d.\n", DEVICE_NAME, re + 1,
 				MIN_RESONATOR + 1, MAX_RESONATOR + 1 );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er023m.re = re;

@@ -648,7 +648,7 @@ void er023m_failure( void )
 	if ( ! dont_print_on_error )
 		eprint( FATAL, UNSET, "%s: Can't access the signal channel.\n",
 				DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

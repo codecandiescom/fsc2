@@ -57,7 +57,7 @@ Var *lockin_rg( Var *v )
 		eprint( FATAL, SET, "%s: Invalid receiver gain index %ld in %s(), "
 				"valid range is 0-%d.\n",
 				DEVICE_NAME, rg_index, RG_MAX_INDEX );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er023m.rg_index = ( int ) rg_index;
@@ -105,7 +105,7 @@ Var *lockin_tc( Var *v )
 		eprint( FATAL, SET, "%s: Invalid time constant index %ld in %s(), "
 				"valid range is %d-%d.\n",
 				DEVICE_NAME, tc_index, TC_MIN_INDEX, TC_MAX_INDEX );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -159,7 +159,7 @@ Var *lockin_ma( Var *v )
 				"%s, must be in range %d-%d.\n",
 				DEVICE_NAME, ma, ma > MAX_MA_INDEX ? "large" : "low",
 				MIN_MA_INDEX, MAX_MA_INDEX );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -200,7 +200,7 @@ Var *lockin_ct( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
 				"in %s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ct_mult < MIN_CT_MULT )
@@ -283,7 +283,7 @@ Var *lockin_mf( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative modulation frequency index "
 				"%ld in %s().\n", DEVICE_NAME, mf_index, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( mf_index > MAX_MF_INDEX )
@@ -291,7 +291,7 @@ Var *lockin_mf( Var *v )
 		eprint( FATAL, SET, "%s: Invalid modulation frequency index %ld in "
 				"%s(), valid range is 0-%ld.\n", DEVICE_NAME, mf_index,
 				Cur_Func, MAX_MF_INDEX );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );

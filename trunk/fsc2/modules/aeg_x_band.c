@@ -121,7 +121,7 @@ int aeg_x_band_init_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Can't find a gaussmeter - must be listed "
 				"before the magnet driver.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* We need the field meter driver called *before* the magnet driver since
@@ -146,7 +146,7 @@ int aeg_x_band_init_hook( void )
 	{
 		eprint( FATAL, UNSET, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ! *is_gaussmeter )
@@ -154,7 +154,7 @@ int aeg_x_band_init_hook( void )
 		eprint( FATAL, UNSET, "%s: Problem in DEVICES section: driver for "
 				"gaussmeter must be listed before magnet driver.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check that the functions exported by the field meter driver(s) can be
@@ -164,21 +164,21 @@ int aeg_x_band_init_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: No function available to do field "
 				"measurements.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_function( "gaussmeter_wait" ) )
 	{
 		eprint( FATAL, UNSET, "%s: Function needed for field measurements not "
 				"available.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_function( "gaussmeter_resolution" ) )
 	{
 		eprint( FATAL, UNSET, "%s: Function to determine field measurement "
 				"resolution is missing.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Claim the serial port (throws exception on failure) */
@@ -217,7 +217,7 @@ int aeg_x_band_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Can't access the X-band magnet power "
 				"supply.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	magnet.is_opened = SET;
@@ -292,7 +292,7 @@ Var *magnet_setup( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing parameter in call of function "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	start_field = get_double( v, "magnetic field", DEVICE_NAME );
@@ -301,7 +301,7 @@ Var *magnet_setup( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing field step size in call of "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	field_step = get_double( v, "field step width", DEVICE_NAME );
@@ -312,7 +312,7 @@ Var *magnet_setup( Var *v )
 
 	aeg_x_band_field_check( start_field, &err_flag );
 	if ( err_flag )
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 
 	if ( fabs( field_step ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
@@ -320,7 +320,7 @@ Var *magnet_setup( Var *v )
 				"%s(), minimum is %f G.\n",
 				DEVICE_NAME, field_step, Cur_Func,
 				( double ) AEG_X_BAND_MIN_FIELD_STEP );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	magnet.field = start_field;
@@ -359,7 +359,7 @@ Var *set_field( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing parameter in function %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	field = get_double( v, "magnetic field", DEVICE_NAME );
@@ -388,7 +388,7 @@ Var *set_field( Var *v )
 	{
 		eprint( FATAL, UNSET, "%s: Can't reach requested field of %lf G in "
 				"%s().\n", DEVICE_NAME, field, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return vars_push( FLOAT_VAR, magnet.act_field );
@@ -427,7 +427,7 @@ Var *sweep_up( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Sweep step size has not been defined in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check that new field value is still within bounds */
@@ -461,7 +461,7 @@ Var *sweep_down( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Sweep step size has not been defined in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check that new field value is still within bounds */
@@ -492,7 +492,7 @@ Var *reset_field( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Start field has not been defined in "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
@@ -529,7 +529,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 				return AEG_X_BAND_WITH_ER035M_MIN_FIELD;
 			}
 			else
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 		
 		if ( field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
@@ -544,7 +544,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 				return AEG_X_BAND_WITH_ER035M_MAX_FIELD;
 			}
 			else
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 	}
 
@@ -562,7 +562,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 				return AEG_X_BAND_WITH_BH15_MIN_FIELD;
 			}
 			else
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 		
 		if ( field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
@@ -577,7 +577,7 @@ static double aeg_x_band_field_check( double field, bool *err_flag )
 				return AEG_X_BAND_WITH_BH15_MAX_FIELD;
 			}
 			else
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 	}
 
@@ -695,7 +695,7 @@ try_again:
 	{
 		fl_check_only_forms( );
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -723,7 +723,7 @@ try_again:
 	{
 		fl_check_only_forms( );
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		magnet_do( SERIAL_TRIGGER );
 		vars_pop( func_call( func_get( "gaussmeter_wait", &acc ) ) );
@@ -856,14 +856,14 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 		for ( i = 0; i < steps; ++i )
 		{
 			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION )
+				THROW( USER_BREAK_EXCEPTION );
 
 			magnet_do( SERIAL_TRIGGER );
 		}
 	}
 
 	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{
@@ -980,7 +980,7 @@ static void magnet_sweep( int dir )
 		for ( i = 0; i < steps; ++i )
 		{
 			if ( DO_STOP )
-				THROW( USER_BREAK_EXCEPTION )
+				THROW( USER_BREAK_EXCEPTION );
 
 			magnet_do( SERIAL_TRIGGER );
 			magnet.act_field +=	  ( MAGNET_ZERO_STEP - magnet.int_step )
@@ -989,7 +989,7 @@ static void magnet_sweep( int dir )
 	}
 
 	if ( DO_STOP )
-		THROW( USER_BREAK_EXCEPTION )
+		THROW( USER_BREAK_EXCEPTION );
 
 	if ( ( magnet.step = remain ) != 0.0 )
 	{
@@ -1063,7 +1063,7 @@ bool magnet_do( int command )
 		default :
 			eprint( FATAL, UNSET, "%s: INTERNAL ERROR detected at %s:%d.\n",
 					DEVICE_NAME, __FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	return OK;

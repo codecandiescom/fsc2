@@ -184,7 +184,7 @@ int sr510_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return 1;
@@ -269,7 +269,7 @@ Var *lockin_get_adc_data( Var *v )
 		eprint( FATAL, SET, "%s: Invalid ADC channel number (%ld) "
 				"in call of 'lockin_get_adc_data', valid channel are in "
 				"the range 1-4.\n", DEVICE_NAME, port );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
@@ -315,7 +315,7 @@ Var *lockin_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative sensitivity in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* We try to match the sensitivity passed to the function by checking if
@@ -423,7 +423,7 @@ Var *lockin_time_constant( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid time constant in %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* We try to match the time constant passed to the function by checking if
@@ -556,7 +556,7 @@ Var *lockin_ref_freq( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Reference frequency cannot be set for "
 				"this model.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	switch ( FSC2_MODE )
@@ -564,7 +564,7 @@ Var *lockin_ref_freq( Var *v )
 		case PREPARATION :
 			eprint( FATAL, SET, "%s: Function %s() can only be used in the "
 					"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 
 		case TEST :
 			return vars_push( FLOAT_VAR, SR510_TEST_REF_FREQUENCY );
@@ -593,7 +593,7 @@ Var *lockin_dac_voltage( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing argument in call of function %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* First argument must be the channel number (5 or 6) */
@@ -605,7 +605,7 @@ Var *lockin_dac_voltage( Var *v )
 		eprint( FATAL, SET, "%s: Invalid lock-in DAC channel number %ld, "
 				"valid channels are in the range from %d to %d.\n",
 				DEVICE_NAME, channel, first_DAC_port, last_DAC_port );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* If no second argument is specified return the current DAC setting */
@@ -617,7 +617,7 @@ Var *lockin_dac_voltage( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		return vars_push( FLOAT_VAR,
@@ -632,7 +632,7 @@ Var *lockin_dac_voltage( Var *v )
 	{
 		eprint( FATAL, SET, "%s: DAC voltage of %f V is out of valid "
 				"range (+/-10.24 V).\n", DEVICE_NAME, voltage );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -1010,7 +1010,7 @@ static void sr510_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Can't access the lock-in amplifier.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

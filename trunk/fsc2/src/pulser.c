@@ -106,7 +106,7 @@ void is_pulser_driver( void )
 	{
 		eprint( FATAL, SET, "No pulser driver has been loaded - can't use "
 				"pulser-specific functions.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 }
 
@@ -136,7 +136,7 @@ void is_pulser_func( void *func, const char *text )
 		else
 			eprint( FATAL, SET, "%s: Function for %s not found in module.\n",
 					pulser_struct.name, text );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 }
 
@@ -156,7 +156,7 @@ double is_mult_ns( double val, const char *text )
 	{
 		eprint( FATAL, SET, "%s has to be an integer multiple of 1 ns.\n",
 				text );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return lrnd( val ) * 1.e-9;
@@ -185,7 +185,7 @@ void p_assign_pod( long func, Var *v )
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
 		eprint( FATAL, SET, "%s: Pulser has no pods.\n", pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Check the variable and get its value */
@@ -400,7 +400,7 @@ void p_set_trigger_mode( Var *v )
 	if ( mode != INTERNAL && mode != EXTERNAL )
 	{
 		eprint( FATAL, SET, "Invalid trigger mode specification.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Finally call the function (if it exists...) */
@@ -435,7 +435,7 @@ void p_set_trigger_slope( Var *v )
 	if ( slope != POSITIVE && slope != NEGATIVE )
 	{
 		eprint( FATAL, SET, "Invalid trigger slope specification.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Finally call the function (if it exists...) */
@@ -510,7 +510,7 @@ void p_set_rep_time( Var *v )
 	if ( rep_time < 9.9e-10 )
 	{
 		eprint( FATAL, SET, "Invalid repeat time: %g s.\n", rep_time );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	rep_time = is_mult_ns( rep_time, "Repeat time" );
@@ -540,7 +540,7 @@ void p_set_rep_freq( Var *v )
 	if ( freq > 1.01e9 || freq <= 0.0 )
 	{
 		eprint( FATAL, SET, "Invalid repeat frequency: %g s.\n", freq );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Make sure we get a repeat time that's a multiple of 1 ns */
@@ -600,7 +600,7 @@ void p_phase_ref( int func, int ref )
 		{
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( func != PULSER_CHANNEL_PHASE_1 &&
@@ -609,7 +609,7 @@ void p_phase_ref( int func, int ref )
 			eprint( FATAL, SET, "%s: Function `%s' can't be used as PHASE "
 					"functions.\n",
 					pulser_struct.name, Function_Names[ func ] );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( ref == PULSER_CHANNEL_PHASE_1 ||
@@ -617,7 +617,7 @@ void p_phase_ref( int func, int ref )
 		{
 			eprint( FATAL, SET, "%s: A PHASE function can't be phase "
 					"cycled.\n", pulser_struct.name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 	else
@@ -628,7 +628,7 @@ void p_phase_ref( int func, int ref )
 		{
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( ref == PULSER_CHANNEL_PHASE_1 ||
@@ -636,7 +636,7 @@ void p_phase_ref( int func, int ref )
 		{
 			eprint( FATAL, SET, "%s: Phase functions can't be used with this "
 					"driver.\n", pulser_struct.name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 
@@ -673,7 +673,7 @@ void p_set( long pnum, int type, Var *v )
 				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
 			{
 				eprint( FATAL, SET, "Invalid function.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 			is_pulser_func( pulser_struct.set_pulse_function,
 							"setting a pulse function" );

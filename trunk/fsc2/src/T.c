@@ -46,7 +46,7 @@ void *T_malloc( size_t size )
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (malloc with size 0).\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -56,7 +56,7 @@ void *T_malloc( size_t size )
 	{
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
@@ -93,7 +93,7 @@ void *T_calloc( size_t nmemb, size_t size )
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (calloc with size 0).\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -103,7 +103,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	{
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
@@ -141,7 +141,7 @@ void *T_realloc( void *ptr, size_t size )
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Internal error detected at %s:%d (realloc with size 0).\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 
@@ -151,7 +151,7 @@ void *T_realloc( void *ptr, size_t size )
 	{
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
@@ -221,7 +221,7 @@ char *T_strdup( const char *str )
 	{
 		eprint( FATAL, Fname != NULL ? SET : UNSET,
 				"Running out of memory.\n" );
-		THROW( OUT_OF_MEMORY_EXCEPTION )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
 #if defined MDEBUG
@@ -255,7 +255,7 @@ long T_atol( const char *txt )
 	if ( errno == ERANGE )
 	{
 		eprint( FATAL, SET, "Long integer number out of range: %s.\n", txt );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return ret;
@@ -274,7 +274,7 @@ long T_atoi( const char *txt )
 	if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
 	{
 		eprint( FATAL, SET, "Integer number out of range: %s.\n", txt );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return ret;
@@ -293,7 +293,7 @@ double T_atof( const char *txt )
 	if ( errno == ERANGE )
 	{
 		eprint( FATAL, SET, "Floating point number out of range: %s.\n", txt );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return ret;

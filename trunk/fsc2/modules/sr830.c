@@ -225,7 +225,7 @@ int sr830_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return 1;
@@ -303,7 +303,7 @@ Var *lockin_get_data( Var *v )
 		{
 			eprint( FATAL, SET, "%s: Invalid channel number %ld in call of "
 					"`lockin_get_data'.\n", DEVICE_NAME, channels[ i ] );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		num_channels++;
@@ -363,7 +363,7 @@ Var *lockin_get_adc_data( Var *v )
 		eprint( FATAL, SET, "%s: Invalid ADC channel number (%ld) in "
 				"call of 'lockin_get_adc_data', valid channel are in the "
 				"range 1-%d.\n", DEVICE_NAME, port, NUM_ADC_PORTS );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
@@ -392,7 +392,7 @@ Var *lockin_dac_voltage( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing arguments in call of function "
 				"`lockin_dac_voltage`.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Get and check the port number */
@@ -404,7 +404,7 @@ Var *lockin_dac_voltage( Var *v )
 		eprint( FATAL, SET, "%s: Invalid DAC channel number (%ld) in "
 				"call of 'lockin_dac_voltage', valid channel are in the "
 				"range 1-%d.\n", DEVICE_NAME, port, NUM_DAC_PORTS );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -414,7 +414,7 @@ Var *lockin_dac_voltage( Var *v )
 			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
 					"only be used in the EXPERIMENT section.\n",
 					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		return vars_push( FLOAT_VAR, sr830.dac_voltage[ port - 1 ] );
@@ -430,7 +430,7 @@ Var *lockin_dac_voltage( Var *v )
 				"'lockin_dac_voltage', valid range is between %f V and "
 				"%f V.\n", DEVICE_NAME, DAC_MIN_VOLTAGE,
 				DAC_MAX_VOLTAGE );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -479,7 +479,7 @@ Var *lockin_sensitivity( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative sensitivity.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Try to match the sensitivity passed to the function by checking if it
@@ -587,7 +587,7 @@ Var *lockin_time_constant( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative time constant.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* We try to match the time constant passed to the function by checking if
@@ -681,7 +681,7 @@ Var *lockin_phase( Var *v )
 				eprint( FATAL, SET, "%s: Function `lockin_phase' with "
 						"no argument can only be used in the EXPERIMENT "
 						"section.\n", DEVICE_NAME );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_phase ?
@@ -750,7 +750,7 @@ Var *lockin_harmonic( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
 				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( freq > MAX_MOD_FREQ / ( double ) harm )
@@ -759,7 +759,7 @@ Var *lockin_harmonic( Var *v )
 				"harmonic set to %ld is not within valid range "
 				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
 				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -820,7 +820,7 @@ Var *lockin_ref_freq( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
 				"modulation source isn't internal.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == TEST )
@@ -839,7 +839,7 @@ Var *lockin_ref_freq( Var *v )
 					"harmonic set to %ld is not within valid range "
 					"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
 					MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -883,7 +883,7 @@ Var *lockin_ref_level( Var *v )
 		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
 				"valid range (%f V - %f V).\n", DEVICE_NAME,
 				MIN_MOD_LEVEL, MAX_MOD_LEVEL );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	too_many_arguments( v, DEVICE_NAME );
@@ -1066,7 +1066,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 		{
 			eprint( FATAL, UNSET, "%s: Lock-in amplifier does not react "
 					"properly.\n", DEVICE_NAME );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 		else
 			*( bp_next - 1 ) = '\0';
@@ -1292,7 +1292,7 @@ static double sr830_set_mod_freq( double freq )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to set modulation frequency to %f "
 				"Hz.\n", DEVICE_NAME, freq );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return real_freq;
@@ -1358,7 +1358,7 @@ static long sr830_set_harmonic( long harmonic )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to set harmonic to %ld.\n",
 				DEVICE_NAME, harmonic );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return harmonic;
@@ -1422,7 +1422,7 @@ static void sr830_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Can't access the lock-in amplifier.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

@@ -617,7 +617,7 @@ Var *get_digitizer_channel_number( const char *channel_name )
 	{
 		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 #endif
 

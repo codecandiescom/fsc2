@@ -420,7 +420,7 @@ bool lecroy9400_display( int channel, int on_off )
 	{
 		eprint( FATAL, UNSET, "%s: More than %d channels are needed to run "
 				"the experiment.\n", DEVICE_NAME, MAX_USED_CHANNELS );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	strcat( cmds[ channel - LECROY9400_CH1 ], on_off ? "ON" : "OFF" );
@@ -611,7 +611,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	{
 		eprint( FATAL, SET, "%s: Getting normal channels is not implemented "
 				"yet.\n", DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	fsc2_assert( ch == LECROY9400_FUNC_E || ch == LECROY9400_FUNC_F );
@@ -620,14 +620,14 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	{
 		eprint( FATAL, SET, "%s: Averaging has not been initialized for "
 				"channel %s.\n", DEVICE_NAME, Channel_Names[ ch ] );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ! is_acquiring )
 	{
 		eprint( FATAL, SET, "%s: No acquisition has been started.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Poll the device until the averaging is finished, i.e. get the channel
@@ -639,7 +639,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 		long j;
 
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		usleep( 20000 );
 
@@ -712,7 +712,7 @@ void lecroy9400_gpib_failure( void )
 
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

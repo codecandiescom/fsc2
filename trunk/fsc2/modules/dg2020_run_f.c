@@ -60,7 +60,7 @@ bool dg2020_do_update( void )
 	{
 		eprint( FATAL, UNSET, "%s: Setting the pulser failed badly.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	dg2020.needs_update = UNSET;
@@ -114,7 +114,7 @@ bool dg2020_reorganize_pulses( bool flag )
 		CATCH( EXCEPTION )
 		{
 			if ( flag )
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 
 			for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			{
@@ -173,7 +173,7 @@ void dg2020_do_checks( FUNCTION *f )
 							"`%s' is too long. Perhaps you should try the "
 							"MAXIMUM_PATTERN_LENGTH command.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			f->num_active_pulses = i + 1;
@@ -191,7 +191,7 @@ void dg2020_do_checks( FUNCTION *f )
 				eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
 						"overlap.\n", pulser_struct.name, p->num,
 						f->pulses[ i + 1 ]->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 }
@@ -311,7 +311,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			eprint( FATAL, SET, "%s: Pulse %ld now starts too early to allow "
 					"setting of a phase pulse.\n",
 					pulser_struct.name, p->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Store the old position if there's one and hasn't been set yet */
@@ -352,7 +352,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			eprint( FATAL, SET, "%s: Distance between pulses %ld and %ld "
 					"becomes too small to allow setting of phase pulses.\n",
 					pulser_struct.name, p->num, pp->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* If the phase pulse has a position and it hasn't been stored yet
@@ -423,7 +423,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 							"%ld and %ld becomes too small to allow setting "
 							"of phase pulses.\n", pulser_struct.name, p->num,
 							pppl[ i ]->for_pulse->num );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 				}
 
 				if ( pppl[ i ]->pos + pppl[ i ]->len <
@@ -496,7 +496,7 @@ set_length:
 			eprint( FATAL, SET, "%s: Distance between pulses %ld and %ld "
 					"becomes too small to allow setting of phase pulses.\n",
 					pulser_struct.name, p->num, pn->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		if ( phase_p->pos + phase_p->len <

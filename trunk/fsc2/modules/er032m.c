@@ -226,7 +226,7 @@ Var *magnet_setup( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing parameter in call of function "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	start_field = get_double( v, "start field", DEVICE_NAME );
@@ -237,7 +237,7 @@ Var *magnet_setup( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing field step size in call of "
 				"%s().\n", DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	field_step = get_double( v, "field step width", DEVICE_NAME );
@@ -247,7 +247,7 @@ Var *magnet_setup( Var *v )
 		eprint( FATAL, SET, "%s: Field sweep step size (%lf G) too small in "
 				"%s(), minimum is %f G.\n", DEVICE_NAME, VALUE( v ), Cur_Func,
 				ER032M_MIN_FIELD_STEP );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 		
 	too_many_arguments( v, DEVICE_NAME );
@@ -275,7 +275,7 @@ Var *sweep_up( Var *v )
 		eprint( FATAL, SET, "%s: No sweep step size has been set - you must "
 				"call function magnet_setup() to be able to do sweeps.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er032m_field_check( magnet.act_field + magnet.field_step );
@@ -326,7 +326,7 @@ Var *sweep_down( Var *v )
 		eprint( FATAL, SET, "%s: No sweep step size has been set - you must "
 				"call function magnet_setup() to be able to do sweeps.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	er032m_field_check( magnet.act_field + magnet.field_step );
@@ -374,7 +374,7 @@ Var *reset_field( Var *v )
 		eprint( FATAL, SET, "%s: Start field has not been defined  - you must "
 				"call function magnet_setup() to be able to use %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -411,7 +411,7 @@ Var *set_field( Var *v )
 	{
 		eprint( FATAL, SET, "%s: Missing parameter in function %s().\n",
 				DEVICE_NAME, Cur_Func );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	field = get_double( v, "magnetic field", DEVICE_NAME );
@@ -445,7 +445,7 @@ static void er032m_init( void )
 		magnet.device = -1;
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Switch to computer mode */
@@ -913,14 +913,14 @@ static void er032m_field_check( double field )
 	{
 		eprint( FATAL, SET, "%s: Field of %f G is too high, maximum field is "
 				"%f G.\n", DEVICE_NAME, field, ER032M_MAX_FIELD );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( field < ER032M_MIN_FIELD )
 	{
 		eprint( FATAL, SET, "%s: Field of %f G is too low, minimum field is "
 				"%f G.\n", DEVICE_NAME, field, ER032M_MIN_FIELD );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 }
 
@@ -941,7 +941,7 @@ static void er032m_test_leds( void )
 	while ( 1 )
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		is_overload = is_remote = UNSET;
 
@@ -963,7 +963,7 @@ static void er032m_test_leds( void )
 				case '2' :
 					eprint( FATAL, UNSET, "%s: Probehead thermostat not in "
 							"equilibrilum.\n", DEVICE_NAME );
-					THROW( EXCEPTION )
+					THROW( EXCEPTION );
 					break;
 
 				case '4' :
@@ -983,7 +983,7 @@ static void er032m_test_leds( void )
 		{
 			eprint( FATAL, UNSET, "%s: Device isn't in remote state.\n",
 					DEVICE_NAME );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* If there's no overload we're done, otherwise we retry several
@@ -998,7 +998,7 @@ static void er032m_test_leds( void )
 		{
 			eprint( FATAL, UNSET, "%s: Field regulation loop not balanced.\n",
 					DEVICE_NAME );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 }
@@ -1049,7 +1049,7 @@ static double er032m_set_cf( double center_field )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to set center field.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return center_field;
@@ -1100,7 +1100,7 @@ static double er032m_set_sw( double sweep_width )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to set sweep width.\n",
 				DEVICE_NAME );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return sweep_width;
@@ -1170,7 +1170,7 @@ static void er032m_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Can't access the field controller.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

@@ -95,7 +95,7 @@ int bh15_init_hook( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Driver for Bruker ER035M gaussmeter is "
 				"already loaded - there can only be one gaussmeter.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
@@ -147,7 +147,7 @@ int bh15_exp_hook( void )
 		bh15.device = -1;
 		eprint( FATAL, UNSET, "BH15: Can't initialize device: %s\n",
 				gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Send a "Selected Device Clear" - I don't know yet if this is really
@@ -161,7 +161,7 @@ int bh15_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 				"controller.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Set it into run mode */
@@ -170,7 +170,7 @@ int bh15_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 				"controller.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	sleep( 5 );                /* unfortunately, it seems to need this... */
@@ -178,7 +178,7 @@ int bh15_exp_hook( void )
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		usleep( 100000 );
 
@@ -186,7 +186,7 @@ int bh15_exp_hook( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		len = 20;
@@ -194,7 +194,7 @@ int bh15_exp_hook( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
 
@@ -315,7 +315,7 @@ static double bh15_get_field( void )
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		usleep( 100000 );
 
@@ -323,7 +323,7 @@ static double bh15_get_field( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		len = 20;
@@ -331,7 +331,7 @@ static double bh15_get_field( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
 
@@ -342,7 +342,7 @@ static double bh15_get_field( void )
 	do
 	{
 		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION )
+			THROW( USER_BREAK_EXCEPTION );
 
 		usleep( 100000 );
 
@@ -350,7 +350,7 @@ static double bh15_get_field( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		len = 20;
@@ -358,7 +358,7 @@ static double bh15_get_field( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Can't access the Bruker BH15 field "
 					"controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		/* Try to find the qualifier */
@@ -371,7 +371,7 @@ static double bh15_get_field( void )
 		{
 			eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
 					"field controller.\n" );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 
 		switch ( *val )
@@ -395,13 +395,13 @@ static double bh15_get_field( void )
 			case '3' :                             /* BH15 not in RUN mode */
 				eprint( FATAL, UNSET, "BH15: Bruker BH15 field controller "
 						"dropped out of run mode.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 				break;
 
 			default :
 				eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker "
 						"BH15 field controller.\n" );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 
 	} while ( bh15.state != BH15_LOCKED && ++tries < BH15_MAX_TRIES );
@@ -410,7 +410,7 @@ static double bh15_get_field( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Bruker BH15 field controller can't find "
 				"the field.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Try to locate the start of the field value */
@@ -423,7 +423,7 @@ static double bh15_get_field( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
 				"field controller.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Convert the string and check for errors */
@@ -433,7 +433,7 @@ static double bh15_get_field( void )
 	{
 		eprint( FATAL, UNSET, "BH15: Invalid data returned by Bruker BH15 "
 				"field controller.\n" );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return bh15.field;

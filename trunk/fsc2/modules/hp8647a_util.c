@@ -64,7 +64,7 @@ FILE *hp8647a_find_table( char **name )
 	{
 		eprint( FATAL, UNSET, "%s: Table file `%s' not found.\n",
 				DEVICE_NAME, *name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Last chance: The table file is in the library directory... */
@@ -78,7 +78,7 @@ FILE *hp8647a_find_table( char **name )
 		eprint( FATAL, UNSET, "%s: Table file `%s' not found, neither in the "
 				"current dirctory nor in `%s'.\n", DEVICE_NAME,
 				strip_path( *name ), libdir );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return tfp;
@@ -107,7 +107,7 @@ FILE *hp8647a_open_table( char *name )
 		eprint( FATAL, UNSET, "%s: No read permission for table file `%s'.\n",
 				DEVICE_NAME, name );
 		T_free( name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( ( tfp = fopen( name, "r" ) ) == NULL )
@@ -115,7 +115,7 @@ FILE *hp8647a_open_table( char *name )
 		eprint( FATAL, UNSET, "%s: Can't open table file `%s'.\n",
 				DEVICE_NAME, name );
 		T_free( name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return tfp;
@@ -304,7 +304,7 @@ int hp8647a_set_mod_param( Var *v, double *dres, int *ires )
 
 	eprint( FATAL, SET, "%s: Invalid parameter \"%s\" in call of "
 			"function `synthesizer_modulation'.\n", DEVICE_NAME, v->val.sptr );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 
 	return -1;               /* we're never going to get here... */
 }

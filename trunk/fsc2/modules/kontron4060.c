@@ -98,7 +98,7 @@ int kontron4060_exp_hook( void )
 	{
 		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
 				DEVICE_NAME, gpib_error_msg );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	return 1;
@@ -238,7 +238,7 @@ static void kontron4060_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with voltmeter failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

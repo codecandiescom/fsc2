@@ -40,7 +40,7 @@ bool hfs9000_new_pulse( long pnum )
 		{
 			eprint( FATAL, SET, "%s: Pulse %ld already exists.\n",
 					pulser_struct.name, pnum );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 		lp = cp;
 		cp = cp->next;
@@ -92,7 +92,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 	{
 		eprint( FATAL, SET, "%s: Phase functions can't be used with this "
 				"driver.\n", pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( p->is_function )
@@ -100,7 +100,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		eprint( FATAL, SET, "%s: Function of pulse %ld has already been "
 				"set to `%s'.\n", pulser_struct.name, pnum,
 				Function_Names[ p->function->self ] );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( f->channel == NULL )
@@ -108,7 +108,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		eprint( FATAL, SET, "%s: No channel has been assigned to function "
 				"`%s'.\n", pulser_struct.name,
 				Function_Names[ hfs9000.function[ function ].self ] );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* There can be only one pulse for the function associated with Trigger
@@ -125,7 +125,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 			{
 				eprint( FATAL, SET, "%s: There can be only one pulse for "
 						"the Trigger Out channel.\n", pulser_struct.name );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 		}
 
@@ -149,7 +149,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 		{
 			eprint( FATAL, SET, "%s: Trigger Out pulses are not allowed to "
 					"have a pulse length change set.\n", pulser_struct.name );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 
@@ -175,7 +175,7 @@ bool hfs9000_set_pulse_position( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: The start position of pulse %ld has "
 				"already been set to %s.\n", pulser_struct.name,
 				pnum, hfs9000_pticks( p->pos ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0 )
@@ -183,7 +183,7 @@ bool hfs9000_set_pulse_position( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Invalid (negative) start position for "
 				"pulse %ld: %s.\n", pulser_struct.name, pnum,
 				hfs9000_ptime( p_time ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	p->pos = hfs9000_double2ticks( p_time );
@@ -217,14 +217,14 @@ bool hfs9000_set_pulse_length( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Length of pulse %ld has already been set "
 				"to %s.\n", pulser_struct.name, pnum,
 				hfs9000_pticks( p->len ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative length set for pulse %ld: "
 				"%s.\n", pulser_struct.name, pnum, hfs9000_ptime( p_time ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( p->is_function && p->function->channel &&
@@ -266,7 +266,7 @@ bool hfs9000_set_pulse_position_change( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: The position change of pulse %ld has "
 				"already been set to %s.\n", pulser_struct.name,
 				pnum, hfs9000_pticks( p->dpos ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000_double2ticks( p_time ) == 0 )
@@ -302,7 +302,7 @@ bool hfs9000_set_pulse_length_change( long pnum, double p_time )
 		eprint( FATAL, SET, "%s: Length change of pulse %ld has already "
 				"been set to %s.\n", pulser_struct.name,
 				pnum, hfs9000_pticks( p->len ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000_double2ticks( p_time ) == 0 )
@@ -317,7 +317,7 @@ bool hfs9000_set_pulse_length_change( long pnum, double p_time )
 	{
 		eprint( FATAL, SET, "%s: Length of Trigger Out pulse %ld can't be "
 				"changed.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	p->dlen = hfs9000_double2ticks( p_time );
@@ -345,7 +345,7 @@ bool hfs9000_get_pulse_function( long pnum, int *function )
 	{
 		eprint( FATAL, SET, "%s: The function of pulse %ld hasn't been "
 				"set.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	*function = p->function->self;
@@ -365,7 +365,7 @@ bool hfs9000_get_pulse_position( long pnum, double *p_time )
 	{
 		eprint( FATAL, SET, "%s: The start position of pulse %ld hasn't "
 				"been set.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	*p_time = hfs9000_ticks2double( p->pos );
@@ -385,7 +385,7 @@ bool hfs9000_get_pulse_length( long pnum, double *p_time )
 	{
 		eprint( FATAL, SET, "%s: Length of pulse %ld hasn't been set.\n",
 				pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	if ( p->is_function && p->function->channel &&
@@ -393,7 +393,7 @@ bool hfs9000_get_pulse_length( long pnum, double *p_time )
 	{
 		eprint( FATAL, SET, "%s: Length of Trigger Out pulse %ld can't "
 				"be referenced.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	*p_time = hfs9000_ticks2double( p->len );
@@ -413,7 +413,7 @@ bool hfs9000_get_pulse_position_change( long pnum, double *p_time )
 	{
 		eprint( FATAL, SET, "%s: The position change of pulse %ld hasn't "
 				"been set.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	*p_time = hfs9000_ticks2double( p->dpos );
@@ -433,7 +433,7 @@ bool hfs9000_get_pulse_length_change( long pnum, double *p_time )
 	{
 		eprint( FATAL, SET, "%s: Length change of pulse %ld hasn't been "
 				"set.\n", pulser_struct.name, pnum );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	*p_time = hfs9000_ticks2double( p->dlen );
@@ -459,7 +459,7 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	TRY
@@ -472,7 +472,7 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	if ( p->is_pos && new_pos == p->pos )
@@ -518,7 +518,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	TRY
@@ -531,7 +531,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	if ( p->is_len && p->is_function && p->function->channel )
@@ -543,7 +543,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 			if ( FSC2_MODE == EXPERIMENT )
 				return FAIL;
 			else
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 		}
 
 		if ( p->len == new_len )
@@ -592,7 +592,7 @@ bool hfs9000_change_pulse_position_change( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	if ( new_dpos == 0 && FSC2_MODE == TEST )
@@ -626,7 +626,7 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	TRY
@@ -639,7 +639,7 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 	}
 
 	if ( new_dlen == 0 && FSC2_MODE == TEST )

@@ -460,7 +460,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 				type != MOD_TYPE_PHASE ? types[ type ] : "phase",
 				type == MOD_TYPE_FM ? "kHz" :
 				( type == MOD_TYPE_AM ? "%%" : "rad" ) );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	switch ( type )
@@ -472,7 +472,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 						"of %.1f kHz is too large, valid range is 0 - %.1f "
 						"kHz.\n", DEVICE_NAME, ampl * 1.0e-3,
 						MAX_FM_AMPL * 1.0e-3 );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "FM:DEV %ld HZ\n", 10 * lrnd( 0.1 * ampl ) );
 			break;
@@ -483,7 +483,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 				eprint( FATAL, ! HP8647A_INIT, "%s: AM modulation amplitude "
 						"of %.1f %% is too large, valid range is 0 - %.1f "
 						"%%.\n", DEVICE_NAME, ampl, ( double ) MAX_AM_AMPL );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "AM:DEPT %.1f PCT\n", ampl );
 			break;
@@ -495,7 +495,7 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 						"amplitude of %.1f rad is too large, valid range is "
 						"0 - %.1f rad.\n", DEVICE_NAME, ampl,
 						( double ) MAX_PHASE_AMPL );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 			sprintf( cmd, "PM:DEV %.*f RAD\n", ampl < 9.95 ? 2 : 1, ampl );
 			break;
@@ -552,7 +552,7 @@ static void hp8647a_comm_failure( void )
 {
 	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
 			DEVICE_NAME );
-	THROW( EXCEPTION )
+	THROW( EXCEPTION );
 }
 
 

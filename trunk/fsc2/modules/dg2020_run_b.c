@@ -96,7 +96,7 @@ bool dg2020_reorganize_pulses( bool flag )
 		CATCH( EXCEPTION )
 		{
 			if ( flag )
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 
 			for ( p = dg2020_Pulses; p != NULL; p = p->next )
 			{
@@ -154,7 +154,7 @@ void dg2020_do_checks( FUNCTION *f )
 							"function `%s' is too long. Perhaps you should "
 							"try the MAXIMUM_PATTERN_LENGTH command.\n",
 							pulser_struct.name, Function_Names[ f->self ] );
-				THROW( EXCEPTION )
+				THROW( EXCEPTION );
 			}
 
 			f->num_active_pulses = i + 1;
@@ -173,7 +173,7 @@ void dg2020_do_checks( FUNCTION *f )
 				eprint( FATAL, SET, "%s: Pulses %ld and %ld begin to "
 						"overlap.\n", pulser_struct.name,
 						p->num, f->pulses[ i + 1 ]->num );
-			THROW( EXCEPTION )
+			THROW( EXCEPTION );
 		}
 	}
 
@@ -540,7 +540,7 @@ void dg2020_cw_setup( void )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to setup pulser.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Finally, we've got to setup the blocks. The first one has not much
@@ -562,7 +562,7 @@ void dg2020_cw_setup( void )
 	{
 		eprint( FATAL, UNSET, "%s: Failed to setup pulser.\n",
 				pulser_struct.name );
-		THROW( EXCEPTION )
+		THROW( EXCEPTION );
 	}
 
 	/* Now that everything is done the pulser is told to really set the
