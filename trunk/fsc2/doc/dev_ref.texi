@@ -312,7 +312,7 @@ Timebases: Internal: @w{8 ns}, External: @w{8 ns} and slower
 @item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
 @item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
 @item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
-@item @code{pulser_defense_to_shapeminimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
 @item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
 @item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
 @item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}

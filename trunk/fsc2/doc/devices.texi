@@ -1636,7 +1636,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_shape_to_defense_minimum_distance}
 @item pulser_shape_to_defense_minimum_distance()
-@findex{pulser_shape_to_defense_minimum_distance}
+@findex pulser_shape_to_defense_minimum_distance()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It sets the minimum allowed
 distance between the end of a pulse shaper pulse and the start of a
@@ -1653,7 +1653,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_defense_to_shape_minimum_distance}
 @item pulser_defense_to_shape_minimum_distance()
-@findex{pulser_defense_to_shape_minimum_distance}
+@findex pulser_defense_to_shape_minimum_distance()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It sets the minimum allowed
 distance between the end of a defense pulse and the start of a pulse
@@ -1670,7 +1670,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_automatic_shape_pulses}
 @item pulser_automatic_shape_pulses()
-@findex{pulser_automatic_shape_pulses}
+@findex pulser_automatic_shape_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It tells @code{fsc2} to
 automatically create pulse shaper pulses in the @code{PULSE_SHAPE}
@@ -1723,7 +1723,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_automatic_twt_pulses}
 @item pulser_automatic_twt_pulses()
-@findex{pulser_automatic_twt_pulses}
+@findex pulser_automatic_twt_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It tells @code{fsc2} to
 automatically create in the @code{TWT} function. Obviously, this
@@ -1752,7 +1752,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_show_pulses}
 @item pulser_show_pulses()
-@findex{pulser_show_pulses}
+@findex pulser_show_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It allows to view the pulses as
 they become set during the test run. If this function is called an
@@ -1774,7 +1774,7 @@ of an @code{EDL} program.
 
 @anchor{pulser_dump_pulses}
 @item pulser_dump_pulses()
-@findex{pulser_dump_pulses}
+@findex pulser_dump_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b} and @code{ep385} only. It requests the user to select a
 file name and then writes all pulse settings during the test run into
