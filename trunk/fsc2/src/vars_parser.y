@@ -25,6 +25,7 @@
 
 #include "fsc2.h"
 
+#define YYMAXDEPTH 0                  /* avoids compiler warning */
 
 extern int varslex( void );
 
