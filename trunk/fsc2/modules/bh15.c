@@ -212,8 +212,11 @@ Var *field_resolution( Var *v )
 Var *field_meter_wait( Var *v )
 {
 	v = v;
+
 	/* do this thing needs a time out ? */
+
 	usleep( 100000 );
+
 	return vars_push( INT_VAR, 1 );
 }
 
