@@ -2916,7 +2916,7 @@ Var *f_WN2WL( Var *v )
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 			{
-				if ( *dscr == 0.0 )
+				if ( *dsrc == 0.0 )
 				{
 					print( FATAL, "Can't convert 0 cm^-1 to a wavelength.\n" );
 					THROW( EXCEPTION );
@@ -2978,7 +2978,6 @@ Var *f_F2WN( Var *v )
 			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
 				  i < v->len; i++, dsrc++, ddest++ )
 				*ddest = *dsrc / WN2F_FACTOR;
-			}
 			return new_var;
 
 		case INT_REF : case FLOAT_REF :
