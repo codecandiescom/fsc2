@@ -173,7 +173,7 @@ MainLoop;
 sub is_numeric {
 
 	my $new_val = shift;
-	return $new_val =~ /^[+-]?([0-9]+(\.[0-9]*)?)?$/;
+	return $new_val =~ /^([0-9]+(\.[0-9]*)?)?$/;
 }
 
 
@@ -200,23 +200,19 @@ print F
 dg2020_b;
 er035m_s;
 aeg_x_band;\n";
-
-print F lc( $lockin ), ";\n\n";
+print F lc( $lockin ), ";\n\n\n";
 
 print F
-"VARIABLES:
-
-I";
-
+"VARIABLES:\n\nI";
 print F ", J" if $num_runs != 1;
-
 print F ";
 start_field = $start_field G;
 end_field = $end_field G;
-field_step = $field_step G;
+field_step = ";
+print F ( $end_field > $start_field ) ? $field_step : - $field_step;
+print F " G;
 N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
 data[ N_points ];\n";
-
 
 if ( $num_runs != 1 ) {
 	print F "N_runs = $num_runs;\nnew_data[ N_points ];\n";
@@ -228,27 +224,17 @@ if ( $tc eq "Don't set" ) {
 	print F "tc = $tc;\n";
 }
 
-
 print F 
-"\n\nASSIGNMENTS:
-
+"\n\nASSIGNMENTS:\n
 TIMEBASE:	  5 ns;
-MICROWAVE:	  POD = 1, 2, 3, 4, 5, V_HIGH = 5 V, V_LOW = 0 V, INV;
+MICROWAVE:	  POD = 1, 2, 3, 4, 5, V_HIGH = 5 V, V_LOW = 0 V, INVERTED;
 PHASE_SETUP:  MICROWAVE, CW: 5;
 
 
 PREPARATIONS:
 
 pulser_cw_mode( );
-magnet_setup( start_field, field_step );
-init_1d( ";
-
-print F $num_runs == 1 ? "1" : "3";
-
-print F ", N_points, start_field, field_step, \"Magnetic field / G\",
-		 \"Signal / V\" );
-";
-
+magnet_setup( start_field, field_step );\n";
 if ( $tc ne "Don't set" ) {
 	print F "lockin_time_constant( $tc );\n";
 }
@@ -257,9 +243,13 @@ if ( $sens ne "Don't set" ) {
 	print F "lockin_sensitivity( $sens );\n";
 }
 
-print F
-"\nEXPERIMENT:
+print F "init_1d( ";
+print F $num_runs == 1 ? "1" : "3";
+print F ", N_points, start_field, field_step, \"Magnetic field / G\",
+		 \"Signal / V\" );\n\n\n";
 
+print F
+"EXPERIMENT:\n
 fsave( \"% Field:\\n\"
 	   \"%	 Start:			# G\\n\"
 	   \"%	 End:			# G\\n\"
@@ -291,7 +281,7 @@ if ( $num_runs != 1 ) {
 
 		new_data[ I ] = lockin_get_data( );
 
-		fsave( \"# #\\n\", start_field + ( I -	1 ) * field_step, new_data[ I ] );
+		fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, new_data[ I ] );
 
 		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
 		display( I, new_data[ I ], 3 );
@@ -302,9 +292,8 @@ if ( $num_runs != 1 ) {
 		\}
 	\}
 
-	clear_curve( 1, 3 );
-
 	data += new_data;
+	clear_curve( 1, 3 );
 	display( 1, data / float( J ), 2 );
 
 	fsave( \"\\n\" );
@@ -317,14 +306,14 @@ if ( $num_runs != 1 ) {
 ON_STOP:
 
 FOR I = 1 : N_points \{
-	fsave( \"\\n# #\\n\", start_field + ( I -	1 ) * field_step, data[ I ] );
+	fsave( \"\\n# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
 \}
 ";
 } else {
 	print F
 "FOR I = 1 : N_points \{
 	data[ I ] = lockin_get_data( );
-	fsave( \"# #\\n\", start_field + ( I -	1 ) * field_step, data[ I ] );
+	fsave( \"# #\\n\", start_field + ( I - 1 ) * field_step, data[ I ] );
 	display( I, data[ I ] );
 	IF ( I < N_points ) \{
 		sweep_up( );
@@ -365,6 +354,7 @@ sub do_checks {
 
 	if ( $end_field > 19900 ) {
 		&show_message( "End field is too high." );
+		return -1;
 	}
 
 	if ( $field_step =~ /^$/ ) {
@@ -379,23 +369,10 @@ sub do_checks {
 		return -1;
     }
 
-	if ( $end_field < $start_field && $field_step > 0 ) {
-		&show_message( "End field lower than start field " .
-					   "while field step size isn't negative." );
-		return -1;
-	}
-
-	if ( $end_field > $start_field && $field_step < 0 ) {
-		&show_message( "End field higher than start field " .
-					   "but field step size is negative." );
-		return -1;
-	}
-
 	if ( $num_runs =~ /^$/ ) {
 		&show_message( "Number of runs hasn't been\n" .
 					   "set, defaulting to 1." );
 		$num_runs = 1;
-		return 0;
 	}
 
 	if ( $num_runs < 1 ) {
