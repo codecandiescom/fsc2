@@ -144,7 +144,7 @@ void load_functions( Device *dev )
 	if ( dev->driver.handle == NULL )
 		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_LAZY );
 
-	if ( dev->driver.handle == NULL && strchr( dev->name, '/' ) == NULL )
+	if ( dev->driver.handle == NULL )
 	{
 		strcpy( lib_name, dev->name );
 		strcat( lib_name, ".so" );
@@ -183,6 +183,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_init_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_init_hook = SET;
@@ -192,6 +193,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_test_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
@@ -201,6 +203,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_end_of_test_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_test_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_test_hook = SET;
@@ -210,6 +213,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_exp_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exp_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exp_hook = SET;
@@ -219,6 +223,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_end_of_exp_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.end_of_exp_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_end_of_exp_hook = SET;
@@ -228,6 +233,7 @@ void load_functions( Device *dev )
 	strcpy( hook_func_name, dev_name );
 	strcat( hook_func_name, "_exit_hook" );	
 
+	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.exit_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_exit_hook = SET;
