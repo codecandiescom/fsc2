@@ -173,7 +173,7 @@ typedef struct
 {
 	/* global compilation error states (FATAL, SEVERE and WARN) */
 
-	bool error[ 3 ];
+	int error[ 3 ];
 
 	/* indicates which sections have already been handled to detect
 	   multiple instances of the same section */

@@ -169,7 +169,8 @@ void eprint( int severity, const char *fmt, ... )
 	int written;
 	va_list ap;
 
-	compilation.error[ severity ] = SET;
+	if ( severity != NO_ERROR )
+		compilation.error[ severity ] += 1;
 
 	if ( ! just_testing )
 	{
