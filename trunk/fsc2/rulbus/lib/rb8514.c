@@ -464,7 +464,8 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
 
 /*-----------------------------------------------------------------*
  * Function to start a delay via software (by toggling the trigger
- * slope bit).
+ * slope bit). Afterwards triger slope is set back to the original
+ * setting.
  *-----------------------------------------------------------------*/
 
 int rulbus_rb8514_software_start( int handle )
