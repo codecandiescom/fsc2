@@ -353,12 +353,12 @@ static void hp8647a_new_table_entry( int type, double val )
 	}
 	else                // IS_ATT
 	{
-		if ( val > MIN_ATTEN - MAX_ATTEN )
+		if ( val > hp8647a.min_attenuation - MAX_ATTEN )
 		{
 			eprint( FATAL, "%s: Attenuation of %.1f dB in table file `%s', "
 					"line %ld, can't be achieved, maximum dynamic range is "
 					"%.1f dB.\n", DEVICE_NAME, val, hp8647a.table_file,
-					hp8647a_Lc, MIN_ATTEN - MAX_ATTEN );
+					hp8647a_Lc, hp8647a.min_attenuation - MAX_ATTEN );
 			THROW( EXCEPTION );
 		}
 	    hp8647a.att_table[ hp8647a.att_table_len ].att = val;

@@ -7,15 +7,11 @@
 
 #define DEVICE_NAME "HP8647A"      /* compare entry in /etc/gpib.conf ! */
 
-/* On Chris request the minimum attenuation was set to -3 db. In principle,
-   minimum attenuations of up to +10 db are possible, but at attenuations of
-   less than -3 db the maximum input voltage of both amplifiers  of 1 V is
-   reached and at higher input levels they go into saturation */
-
 
 #define MIN_FREQ        2.5e5            /* 250 kHz  */
 #define MAX_FREQ        1.0e9            /* 1000 MHz */
-#define MIN_ATTEN        -3.0
+#define MIN_MIN_ATTEN   3.0
+#define MIN_ATTEN      -5.0
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
@@ -54,6 +50,7 @@ Var *synthesizer_state( Var *v );
 Var *synthesizer_frequency( Var *v );
 Var *synthesizer_step_frequency( Var *v );
 Var *synthesizer_attenuation( Var *v );
+Var *synthesizer_minimum_attenuation( Var *v );
 Var *synthesizer_sweep_up( Var *v );
 Var *synthesizer_sweep_down( Var *v );
 Var *synthesizer_reset_frequency( Var *v );
@@ -93,6 +90,7 @@ typedef struct
 	long att_table_len;
 	double min_table_freq;
 	double max_table_freq;
+	double min_attenuation;
 	double att_ref_freq;
 	double att_at_ref_freq;
 	double real_attenuation;        // might differ from attenuation due to use

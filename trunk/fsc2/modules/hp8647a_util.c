@@ -218,18 +218,18 @@ double hp8647a_get_att( double freq )
 					MAX_ATTEN, att );
 		att = MAX_ATTEN;
 	}
-	if ( att > MIN_ATTEN )
+	if ( att > hp8647a.min_attenuation )
 	{
 		if ( ! TEST_RUN && I_am == PARENT )
 			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
 					"(f = %g MHz), using %f db instead of %f db.\n",
-					DEVICE_NAME, freq * 1.0e-6, MIN_ATTEN, att );
+					DEVICE_NAME, freq * 1.0e-6, hp8647a.min_attenuation, att );
 		else
 			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
 					"insufficient (f = %g MHz) , using %f db instead of "
 					"%f db.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
-					MIN_ATTEN, att );
-		att = MIN_ATTEN;
+					hp8647a.min_attenuation, att );
+		att = hp8647a.min_attenuation;
 	}
 
 	return att;

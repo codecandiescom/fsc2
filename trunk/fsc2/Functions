@@ -113,6 +113,7 @@ digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
 synthesizer_frequency, -1, ALL;       // set/get frequency
 synthesizer_attenuation, -1, ALL;     // set/get attenuation
+synthesizer_minimum_attenuation, -1, ALL;     // set/get minimum attenuation
 synthesizer_step_frequency, -1, ALL;  // set/get sweep step frequency
 synthesizer_sweep_up, 0, EXP;         // sweep up
 synthesizer_sweep_down, 0, EXP;       // sweep down

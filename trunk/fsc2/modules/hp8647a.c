@@ -37,6 +37,7 @@ int hp8647a_init_hook( void )
 	hp8647a.step_freq_is_set = UNSET;
 	hp8647a.start_freq_is_set = UNSET;
 	hp8647a.attenuation_is_set = UNSET;
+	hp8647a.min_attenuation = MIN_ATTEN;
 
 	hp8647a.table_file = NULL;
 	hp8647a.use_table = UNSET;
@@ -403,11 +404,11 @@ Var *synthesizer_attenuation( Var *v )
 	/* Check that attenuation is within valid range, if not throw exception
 	   in test run, but in real run just don't change the attenuation */
 
-	if ( att > MIN_ATTEN || att < MAX_ATTEN )
+	if ( att > hp8647a.min_attenuation || att < MAX_ATTEN )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
 				"range (%g db to %g db).\n", Fname, Lc, DEVICE_NAME, att,
-				MAX_ATTEN, MIN_ATTEN );
+				MAX_ATTEN, hp8647a.min_attenuation );
 		if ( ! TEST_RUN && I_am == CHILD )
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		else
@@ -439,6 +440,56 @@ Var *synthesizer_attenuation( Var *v )
 	return vars_push( FLOAT_VAR, att );
 }
 
+
+/*-------------------------------------------------------------*/
+/* Sets (or returns) the minimum attentuation that can be set. */
+/*-------------------------------------------------------------*/
+
+Var *synthesizer_minimum_attenuation( Var *v )
+{
+	double min_atten;
+
+
+	if ( v == NULL )          /* i.e. return the current minimum attenuation */
+		return vars_push( FLOAT_VAR, hp8647a.min_attenuation );
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer variable used as minumum RF "
+				"attenuation.\n", Fname, Lc, DEVICE_NAME );
+
+	min_atten = VALUE( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `synthesizer_minimum_attenuation'.\n",
+				Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+
+	if ( min_atten > MIN_MIN_ATTEN )
+	{
+		eprint( FATAL, "%s:%ld: %s: Minimum attenuation must be below "
+				"%g dB.\n", Fname, Lc, DEVICE_NAME, MIN_MIN_ATTEN );
+		THROW( EXCEPTION );
+	}
+
+	if ( min_atten < MAX_ATTEN )
+	{
+		eprint( FATAL, "%s:%ld: %s: Minimum attenuation must be more than "
+				"%g dB.\n", Fname, Lc, DEVICE_NAME, MAX_ATTEN );
+		THROW( EXCEPTION );
+	}
+
+	hp8647a.min_attenuation = min_atten;
+
+	return vars_push( FLOAT_VAR, hp8647a.min_attenuation );
+}
 
 /*-----------------------------------------------------------*/
 /* Function sets or returns (if called with no argument) the */
