@@ -42,6 +42,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MAX_SWA            4095
 #define SWA_RANGE          4096
 
+
 /* Defines the time before we test again if it is found that the overload
    LED is still on. */
 
@@ -70,8 +71,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define ER032M_RESOLUTION   5.0e-3
 
 
-/* According to a Bruker technician the center field can only be set with a
-   resolution of 50 mG. */
+/* As Mr. Antoine Wolff from Bruker pointed out to  me the center field
+   can only be set with a resolution of 50 mG. */
 
 #define ER032M_CF_RESOLUTION 5.0e-2
 
