@@ -216,6 +216,12 @@ Var *daq_get_voltage( Var *v )
 	int retval = 0;
 
 
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing channel argument\n" );
+		THROW( EXCEPTION );
+	}
+
 	channel = rb8509_translate_channel(
 								  get_strict_long( v, "ADC channel number" ) );
 

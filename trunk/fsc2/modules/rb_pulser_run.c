@@ -402,13 +402,15 @@ static void rb_pulser_commit( bool flag )
 static void rb_pulser_rf_pulse( void )
 {
 	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_RF;
-	PULSE *p = f->pulses[ 0 ];
+	PULSE *p;
 	Var *Func_ptr;
 	int acc;
 
 
 	if ( ! f->is_used )
 		return;
+
+	p = f->pulses[ 0 ];
 
 	if ( p->is_active )
 	{
