@@ -3,6 +3,7 @@
 # $Id$
 #
 
+0.000000
 Changes
 COPYING
 INSTALL
@@ -377,6 +378,8 @@ src/dump.c
 src/dump_graphic.c
 src/dump_graphic.h
 src/dump.h
+src/edit.c
+src/edit.h
 src/exceptions.c
 src/exceptions.h
 src/exp.c
@@ -437,6 +440,8 @@ src/graph_handler_2d.c
 src/graph_handler_2d.h
 src/graphics.c
 src/graphics.h
+src/help.c
+src/help.h
 src/http.c
 src/http.h
 src/inline.h
