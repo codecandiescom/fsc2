@@ -57,7 +57,7 @@ static RULBUS_RB8510_DAC12_CARD *rulbus_rb8510_dac12_card_find( int handle );
 /*------------------------------------------------------------------*
  * Function for initializing the dac12 card subsystem (gets invoked
  * automatically by the rulbus_open() function, so it's not to be
- * called by the user directly)
+ * called by the user directly).
  *------------------------------------------------------------------*/
 
 int rulbus_rb8510_dac12_init( void )
@@ -90,7 +90,7 @@ void rulbus_rb8510_dac12_exit( void )
 /*---------------------------------------------------------------------*
  * Function for initializing a single card (gets invoked automatically
  * by the rulbus_card_open() function, so it's not to be called by the
- * user directly)
+ * user directly).
  *---------------------------------------------------------------------*/
 
 int rulbus_rb8510_dac12_card_init( int handle )
@@ -130,7 +130,7 @@ int rulbus_rb8510_dac12_card_init( int handle )
 /*---------------------------------------------------------------*
  * Function for deactivating a card (gets invoked automatically
  * by the rulbus_card_close() function, so it's not to be called
- * by the user directly)
+ * by the user directly).
  *---------------------------------------------------------------*/
 
 int rulbus_rb8510_dac12_card_exit( int handle )
@@ -185,13 +185,13 @@ int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
 	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
 		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( Vmax )
+	if ( Vmax != NULL )
 		*Vmax = card->Vmax;
 
-	if ( Vmin )
+	if ( Vmin != NULL )
 		*Vmin = card->Vmin;
 
-	if ( dV )
+	if ( dV != NULL )
 		*dV = card->dV;
 
 	return rulbus_errno = RULBUS_OK;
