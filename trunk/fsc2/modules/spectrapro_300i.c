@@ -444,7 +444,7 @@ Var *monochromator_groove_density( Var *v )
 	long grating;
 
 
-	grating = get_strict_long( v->next, "grating number" );
+	grating = get_strict_long( v, "grating number" );
 
 	if ( grating < 1 && grating > MAX_GRATINGS )
 	{
