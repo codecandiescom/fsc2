@@ -752,7 +752,7 @@ array when arithmetic with arrays is used.
 
 
 Within the @code{EXPERIMENT} section flow control structures can be
-used. These are @code{REPEAT}, @code{WHILE}, @code{FOR} and
+used. These are @code{REPEAT}, @code{WHILE}, @code{UNTIL}, @code{FOR} and
 @code{FOREVER} loops and @code{IF}-@code{ELSE} constructs. (Please note:
 all of these keywords have to be spelt in capital letters!).
 
@@ -895,17 +895,27 @@ operators. Here is a list of these operators and their meaning:
 @end quotation
 
 
+@subsection UNTIL loops
+@cindex UNTIL loops
+
+Directly related to the @code{WHILE} loop is the @code{UNTIL} loop. The
+only difference is that, instead of repeating until the loop condition
+becomes false, the @code{UNTIL} loop is repeated until the loop
+condition becomes true.
+
+
 
 @subsection FOR loops
 @cindex FOR loops
 
-Before the @code{WHILE} loop on often has to initialise the loop
-variables and within the statement block the loop variable has to been
-updated. In many cases (for example in both the preceeding examples) it
-is simpler to use a @code{FOR} loop instead, because setting the loop
-variable as well as updating it is aromatically done in the condition
-part. Here's an example that does exactly the same as the first of the
-two preceeding examples:
+Before the @code{WHILE} loop one often has to initialize the loop
+variables and within the statement block the loop variable has to be
+updated. In many cases (for example in both the examples fro the
+@code{WHILE} loop) it is simpler to use a @code{FOR} loop instead,
+because setting the loop variable as well as updating the loop is
+automatically done in the condition part. Here's an example that does
+exactly the same as the first of the two examples for @code{WHILE}
+loops:
 @cindex FOR
 
 @example
@@ -923,7 +933,7 @@ value of `@code{I}'. Take care: You can change `@code{I}' also within
 the loop, but you only should do this if you really mean it and know
 what you're doing!
 
-But we also can reproduce the second version of the factorial
+But you can also reproduce the second version of the factorial
 calculation using a @code{FOR} loop. Here it is:
 
 @example
