@@ -441,16 +441,16 @@ at least @code{6}.
 
 But there's also a function that does all the required checks
 automatically and returns an element. It is called @code{get_element()}
-and declared as
+and is declared as
 @example
    Var *get_element( Var *v, int len, ... );
 @end example
 @noindent
 It takes an unspecified number of arguments, but at least three. The
 first one is a pointer to the array or matrix from which you want an
-element and then the number of remaining arguments. This number may not
-be larger than the dimension of the array or matrix. All the remaining
-arguments are the indices into the array.
+element and the second is the number of remaining arguments. This number
+may not be larger than the dimension of the array or matrix. All the
+remaining arguments are the indices into the array.
 
 The function returns on success a variable that is either an integer or
 float value or a pointer to an array or matrix. On failure (e.g.@:
