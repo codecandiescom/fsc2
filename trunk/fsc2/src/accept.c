@@ -297,11 +297,13 @@ static void accept_1d_data( long x_index, long curve, int type, void *ptr )
 			for ( j = G.nx; j < x_index + len; j++ )
 				cv->points[ j ].exist = UNSET;
 
-			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+			if ( G.is_fs )
+				cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 				                              ( double ) ( x_index + len - 1 );
 		}
 
-		G.scale_changed = SET;
+		if ( G.is_fs )
+			G.scale_changed = SET;
 	}
 
 	/* Find maximum and minimum of old and new data */
@@ -502,13 +504,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			incr_x_and_y( x_index, len, y_index );
 		else
 			incr_x( x_index, len );
-		G.scale_changed = SET;
 	}
 	else if ( y_index >= G.ny )
-	{
 		incr_y( y_index );
-		G.scale_changed = SET;
-	}
 
 	/* Find maximum and minimum of old and new data */
 
@@ -666,11 +664,13 @@ static void incr_x( long x_index, long len )
 		cv->xpoints_s = T_realloc( cv->xpoints_s,
 								   new_Gnx * G.ny * sizeof( XPoint ) );
 
-		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		if ( G.is_fs )
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
 	}
 
-	G.scale_changed = SET;
+	if ( G.is_fs )
+		G.scale_changed = SET;
 }
 
 
@@ -700,10 +700,12 @@ static void incr_y( long y_index )
 			for ( k = 0; k < G.nx; sp++, k++ )
 				sp->exist = UNSET;
 
-		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+		if ( G.is_fs )
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
 	}
 
-	G.scale_changed = SET;
+	if ( G.is_fs )
+		G.scale_changed = SET;
 }
 
 
@@ -751,10 +753,14 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 		   the the new elements in the already existing rows */
 
 
-		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
+		if ( G.is_fs )
+		{
+			cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) /
 			                                        ( double ) ( new_Gnx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
+		}
 	}
 
-	G.scale_changed = SET;
+	if ( G.is_fs )
+		G.scale_changed = SET;
 }
