@@ -1427,7 +1427,7 @@ static void vars_arr_assign( Var *src, Var *dest )
 
 			if ( src->len == 0 && dest->len > 0 )
 			{
-				print( WARN, "Assignment from array that has no "
+				print( WARN, "Assignment from 1D-array that has no "
 					   "elements.\n" );
 				dest->len = 0;
 				return;
@@ -1476,8 +1476,16 @@ static void vars_arr_assign( Var *src, Var *dest )
 			{
 				for ( i = src->len; i < dest->len; i++ )
 					vars_free( dest->val.vptr[ i ], SET );
-				dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
+
+				if ( src->len > 0 )
+					dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
 										   src->len * sizeof *dest->val.vptr );
+				else
+				{
+					dest->val.vptr = VAR_PP T_free( dest->val.vptr );
+					print( WARN, "Assignment from %dD-array that has no "
+						   "sub-arrays.\n", src->dim );
+				}
 			}
 			else if ( dest->len < src->len )
 			{

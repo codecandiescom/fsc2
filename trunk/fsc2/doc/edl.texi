@@ -167,7 +167,7 @@ swept into regions the magnet or the gauss-meter can not handle (e.g.@:
 by incidentally setting an end field value of @w{34500.0 G} which the
 magnet can't produce). So you can be reasonable sure that the experiment
 will not be aborted due to a faulty @code{EDL} script after it has
-alredy run for 2 hours and you have to start all over again.
+already run for 2 hours and you have to start all over again.
 
 As you can already see from the example most of an @code{EDL} script
 consists of function calls. Functions can be divided into two
@@ -271,7 +271,7 @@ section label, the
 @end itemize
 @cindex @code{ON_STOP} label
 @noindent
-label (which also must be foolowed by a colon, @code{:}). It can only be
+label (which also must be followed by a colon, @code{:}). It can only be
 used within the @code{EXPERIMENT} section. The @code{ON_STOP} label can
 be used to guarantee that a certain part of the @code{EXPERIMENT}
 section is going to be executed even after the user hit the @code{Stop}
@@ -479,7 +479,7 @@ G[ 4, 3, 4 ] = @{ @{ @},
                @};
 @end example
 @noindent
-In the last statment of the example sub-arrays of the matrix @code{E}
+In the last statement of the example sub-arrays of the matrix @code{E}
 are used, e.g.@: @code{E[3]} is the whole third sub-array of @code{E}.
 You also need not to specify as many initializer elements as there are
 elements in the matrix to be initialized, for missing elements the
@@ -527,7 +527,7 @@ h[ *, 2 ];  /* WRONG! */
 @end example
 
 The length of the 1-dimensional array @code{M} from the above example
-remains indetermined until a value is assigned to at least one of the
+remains undetermined until a value is assigned to at least one of the
 array element. If you now assign a value to the 25th element like this
 @example
 M[ 25 ] = 42;
@@ -561,7 +561,7 @@ M = H;
 elements of @code{H}.
 
 Some care has to be taken: it is also possible to shrink the length of a
-variable sized array by assigning a another arrray to it. If @code{M}
+variable sized array by assigning a another array to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
 element then assigning it the shorter array @code{H} will automatically
 shorten it to 10 elements and the values stored in the 11th to the 25th
@@ -625,7 +625,6 @@ Since @code{l} is a matrix of rank 3x2 after the assignment @code{j}
 will have the same rank (and the elements of @code{j} and @code{l}
 will, of course, be identical).
 
-
 The same, of course, can be done with "matrices" of higher dimensions.
 If you have a 3-dimensional matrix you can assign numbers to its
 elements, 1-dimensional arrays to its sub-sub-arrays, 2-dimensional
@@ -643,7 +642,7 @@ the left and the right side must be identical or an error will be
 flagged.
 
 But @code{fsc2} tries to be even more clever: when the dimensions of a
-quantitiy the left side of an equation is larger than the dimension of
+quantity the left side of an equation is larger than the dimension of
 the quantity on the right hand side it tries to assign the quantity on
 the right hand side to as many elements or sub-arrays on the left hand
 side as possible. You already have seen this in the discussion of the
@@ -660,7 +659,7 @@ sets all elements of the array @code{B} to 9 and all 18 elements of the
 evaluates to a quarter of pi).
 
 The same assignment can also be done for variable sized arrays and
-matrixes, but only the already existibg elements can be set (if i.e.@:
+matrixes, but only the already existing elements can be set (if i.e.@:
 only a single sub-array of a 2-dimensional "matrix" has been created yet
 only the elements of this sub-array can be set).
 
@@ -702,12 +701,22 @@ Of course, the same also works with arrays of higher dimensions. If you
 have e.g.@: a 3-dimensional matrix, assigning it a number will set all
 of its elements (i.e.@: the elements of the sub-sub-arrays its made up
 from), assigning it an 1-dimensional arrays will set all sub-sub-arrays
-to be identical to the 1-dimenensional array on the right hand side,
+to be identical to the 1-dimensional array on the right hand side,
 assigning it a 2-dimensional matrix will set all its sub-matrices and
 assigning it another 3-dimensional matrix will make the matrix on the
 left hand side identical to the one on the right hand side. Of course,
-if the matrix on the left hand side isn't variable sized, itssizes must
+if the matrix on the left hand side isn't variable sized, its sizes must
 fit the sizes of the quantity on the right hand side.
+
+With dynamically sized arrays some care has to be taken when doing
+assignments. That's because the size of the array on the left hand side
+automatically gets adjusted to the one on the right hand side. This
+includes even cases where the size of array on the right hand side is
+still unknown. In this case all information about the size of the left
+hand side array and its elements are discarded and it will now be
+treated as if its size never had been set. Since in most cases this may
+be not what you want a warning is printed to inform you about this
+potential problem.
 
 
 @node Arithmetic, Conditional operator, Assignment operations, EDL
@@ -1026,7 +1035,7 @@ arrays and simple numbers, also resulting in arrays:
 
 All these kinds of arithmetics also work with more-dimensional arrays.
 If the size of two matrices are identical they can be added together
-or suvbstracted from each other, then elements can be mutiplicated or
+or subtracted from each other, then elements can be multiplicated or
 divided in an element by element fashion (take care, multiplication
 of two 2-dimensional matrices does @strong{don't} work in the usual
 mathematical way, but the first elements of the first rows of both
@@ -1233,7 +1242,7 @@ is checked if @code{val} plus @code{1.0} is smaller than @code{0} and
 @code{x1} is set accordingly to either @code{5} or @code{9}, while in
 the second line it is checked if @code{val} is less than @code{0} and,
 depending on the result, either @code{5} or @code{9} is added to
-@code{1.0}, resulting in @code{6} or @code{10}. Also the follwing two
+@code{1.0}, resulting in @code{6} or @code{10}. Also the following two
 assignments may result in different values, at least if @code{val} is
 negative:
 @example
@@ -1243,7 +1252,7 @@ x2 = ( val < 0 ? 5 : 9 ) + 1;
 The value of @code{x1} will be either set to @code{5} or @code{10} (the
 sum of @code{9} and @code{1}, while @code{x2} will be set to @code{6} or
 @code{10}. Thus it is to be recommended to use parentheses to make sure
-that the evaluation happens as expected except in trival cases.
+that the evaluation happens as expected except in trivial cases.
 
 Beside comparison operators also logical operators can be used in the
 test part of the condition operator. They are discussed in detail in the
@@ -1445,17 +1454,15 @@ IF A != 0 @{
 @end example
 
 
-@c This still leads to 2 reduce/reduce conflicts in the parsers...
-
-@c All comparison operators may also be used with strings. The test
-@c for equality has its usual meaning (but take care, in the comparison
-@c lower and upper case characters are treated as different). The
-@c comparison for larger or smaller is based on the ASCII values of the
-@c characters of the string, not the lengths of the strings. For example,
-@c the comparison of the strings @code{"ON"} and @code{"OFF"} will result
-@c in @code{"ON"} being larger than @code{"OFF"} because for the first
-@c characters where the strings differ, @code{'N'} and @code{'F'},
-@c @code{'N'} has a higher ASCII value than @code{'F'}.
+All comparison operators may also be used with strings. The test
+for equality has its usual meaning (but take care, in the comparison
+lower and upper case characters are treated as different). The
+comparison for larger or smaller than is based on the ASCII values of the
+characters of the string, not the lengths of the strings. For example,
+the comparison of the strings @code{"ON"} and @code{"OFF"} will result
+in @code{"ON"} being larger than @code{"OFF"} because for the first
+characters where the strings differ, @code{'N'} and @code{'F'},
+@code{'N'} has a higher ASCII value than @code{'F'}.
 
 
 @anchor{UNTIL loops}
@@ -1701,7 +1708,7 @@ characters in between). It also must be included either in double quotes
 '@code{<}' and '@code{>}' (i.e.@: be in the form @code{<...>}).
 
 When the file name is enclosed in double quotes @code{fsc2} tries to
-figure out the location where it is stored by the follwoing algorithm:
+figure out the location where it is stored by the following algorithm:
 @itemize
 @item If the name starts with a slash, '@code{/}', it is assumed that the
       file is given with a complete, absolute path.
