@@ -46,8 +46,9 @@ pulser_start, 0, EXP;           // switches the pulser into run mode
 pulser_shift, -1, EXP;          // shift pulse positions
 pulser_increment, -1, EXP;      // change pulse lengths
 pulser_pulse_reset, -1, EXP;    // set back pulses to initial state
-pulser_next_phase, -1, EXP;
-pulser_phase_reset, -1, EXP;
+pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
+pulser_phase_reset, -1, EXP;    // switch back to first phase
+
 
 // Functions exported by the lock-in amplifier drivers (SR510)
 
@@ -60,11 +61,11 @@ lockin_phase, -1, ALL;          // gets or sets the phase
 
 // functions exported by the digitizer (TDS754A)
 
-digitizer_define_window, -1, ALL; // defines a cursor window
-digitizer_timebase, -1, ALL;      // set or get the time base
-digitizer_num_averages, -1, ALL;  // set or get number of averages
-digitizer_get_channel_number, 1, ALL;
-digitizer_trigger_channel, 1, ALL;
+digitizer_define_window, -1, PREP;      // defines a cursor window
+digitizer_timebase, -1, PREP;           // set or get the time base
+digitizer_num_averages, -1, ALL;        // set or get number of averages
+digitizer_trigger_channel, 1, PREP;     // set or get trigger channel
 digitizer_start_acquisition, 0, EXP;
 digitizer_get_area, -1, EXP;
 digitizer_get_curve, -1, EXP;
+digitizer_get_channel_number, 1, ALL;   // only for internal use !
