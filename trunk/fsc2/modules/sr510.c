@@ -604,7 +604,7 @@ double sr510_get_sens( void )
 	}
 
 	buffer[ length - 2 ] = '\0';
-	sens = slist[ 24 - atoi( buffer ) ];
+	sens = slist[ 24 - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity 
 	   by a factor of 10 */
