@@ -2,6 +2,7 @@
   $Id$
 */
 
+
 #if ! defined GRAPHICS_HEADER
 #define GRAPHICS_HEADER
 
@@ -56,7 +57,6 @@ typedef struct {
 typedef struct {
 	FL_OBJECT *obj;
 	Pixmap pm;
-	Pixmap pm_sec;
 	GC gc;                  /* gc for pixmap */
 
 	bool is_box;
@@ -96,11 +96,14 @@ typedef struct {
 	char *x_label;          /* label for x-axis */
 	char *y_label;          /* label for y-axis */
 
-	double rw_y_min;       /* minimum of real world y coordinates */
-	double rw_y_max;       /* maximum of real world y coordinates */
-	double rw2s;           /* real world to scaled data (y) scale factor */
+	double rw_y_min;        /* minimum of real world y coordinates */
+	double rw_y_max;        /* maximum of real world y coordinates */
+	double rw2s;            /* real world to scaled data (y) scale factor */
 
 	Display *d;             /* pointer to display structure */
+
+	Pixmap pm;
+
 	Canvas x_axis;
 	Canvas y_axis;
 	Canvas canvas;
@@ -108,6 +111,22 @@ typedef struct {
 	int drag_canvas;
 
 	Curve_1d *curve[ MAX_CURVES ];
+
+	FL_COLOR colors[ MAX_CURVES ];
+
+	int cur_1,              /* the different cursors */
+	    cur_2,
+	    cur_3,
+	    cur_4,
+	    cur_5;
+
+	XFontStruct *font;
+
+	int button_state,       /* usuable button states */
+		real_button_state;  /* the real button state */
+
+	int x_start,
+		y_start;
 
 } Graphics;
 
@@ -123,6 +142,12 @@ void graphics_free( void );
 void free_graphics( void );
 void start_graphics( void );
 void stop_graphics( void );
+void reconfigure_window( Canvas *c, int w, int h );
+void recalc_XPoints( void );
+void recalc_XPoints_of_curve( Curve_1d *cv );
+void redraw_canvas( Canvas *c );
+void repaint_canvas( Canvas *c );
+void switch_off_special_cursors( void );
 void accept_new_data( void );
 
 #endif   /* ! GRAPHICS_HEADER */
