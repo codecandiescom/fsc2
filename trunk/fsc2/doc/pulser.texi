@@ -406,7 +406,7 @@ MICROWAVE: CHANNEL = A3;
 RF:        CHANNEL = B7;
 RF_GATE:   CH = C5;
 DETECTION: CHANNEL = D15;
-@example
+@end example
 @noindent
 The output channels usually are numbered as printed on the device, one
 exception is the trigger-out channel of the @strong{Tektronix HFS9003},
