@@ -1126,8 +1126,8 @@ static void reconfigure_window_2d( Canvas *c, int w, int h )
 			}
 		}
 
-		/* Recalculate data for drawing (has to be done after setting of canvas
-		   sizes since they are needed in the recalculation) */
+		/* Recalculate data for drawing (has to be done after setting of
+		   canvas sizes since they are needed in the recalculation) */
 
 		recalc_XPoints_2d( );
 	}
@@ -1329,7 +1329,7 @@ void redraw_canvas_2d( Canvas *c )
 
 					/* Don't draw if the rectangle isn't at least partially
 					   within the canvas (this seems to be faster than X
-					   setting the color and only then check the boundary) */
+					   setting the color and only then doing the clipping). */
 
 					if ( xps->x > ( short int ) c->w ||
 						 xps->y > ( short int ) c->h ||
@@ -1412,7 +1412,7 @@ void repaint_canvas_2d( Canvas *c )
 	}
 
 	/* Otherwise use another level of buffering and copy the pixmap with
-	   the curves into another pixmap */
+	   the surface into another pixmap */
 
 	pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), c->w, c->h,
 						fl_get_canvas_depth( c->obj ) );
