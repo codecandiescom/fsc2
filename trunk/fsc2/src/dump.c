@@ -279,6 +279,39 @@ static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
 #endif  /* ! NDEBUG && ADDR2LINE && !  __STRICT_ANSI__ */
 
 
+
+#if 0
+
+/* An alternative method to obtain a backtrace - unfortunately this won't
+   show us crashes in modules... */
+
+#include <execinfo.h>
+
+void DumpStack( void )
+{
+	int size;
+	void *buf[ 100 ];
+	int p[ 2 ];
+
+	if ( pipe( p ) < 0 )
+		return;
+	size = backtrace( buf, 100 );
+	if ( size != 0 )
+	{
+		fail_mess_fd = p[ 0 ];
+		backtrace_symbols_fd( buf, size, p[ 1 ] );
+		close( p[ 1 ] );
+	}
+	else
+	{
+		close( p[ 0 ] );
+		close( p[ 1 ] );
+	}
+}
+
+#endif
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
