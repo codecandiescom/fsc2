@@ -688,7 +688,7 @@ inline long lrnd( double x )
 }
 
 
-inline long irnd( double x )
+inline int irnd( double x )
 {
 	if ( x > LONG_MAX )
 		return LONG_MAX;

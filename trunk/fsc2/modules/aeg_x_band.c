@@ -854,7 +854,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	/* How many steps do we need using the maximum step size and how many
 	   steps with the minimum step size remain ? */
 
-	steps = ilrnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
+	steps = irnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
 	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
@@ -978,7 +978,7 @@ static void magnet_sweep( int dir )
 	   First calculate how many steps we need we using the maximum step size
 	   and how large a step for the rest. */
 
-	steps = ilrnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
+	steps = irnd( floor( fabs( mini_steps ) / MAGNET_MAX_STEP ) );
 	remain = mini_steps - sign( mini_steps ) * steps * MAGNET_MAX_STEP;
 
 	/* Now do all the steps to reach the target field */
