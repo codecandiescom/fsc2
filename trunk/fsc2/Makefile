@@ -732,22 +732,3 @@ MANIFEST:
 		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" | \
 		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST; \
 	done;
-
-
-# Create zipped tarball and write it to the ZIP drive (at home or on isaak
-# also mount and unmount the ZIP drive, otherwise assume that it's already
-# mounted at isaak, may fail quite often...)
-
-ZIP:
-	$(MAKE) pack
-	if [    "$(machine_name)" = "crowley.none"                       \
-		 -o "$(machine_name)" = "isaak.physik.fu-berlin.de" ]; then  \
-		if [ ! `grep ZIP /etc/mtab > /dev/null` ]; then              \
-			sleep 1;                                                 \
-			mount /ZIP;                                              \
-		fi;                                                          \
-		cp ../fsc2.tar.gz /ZIP;                                      \
-		umount /ZIP;                                                 \
-	else                                                             \
-		scp ../fsc2.tar.gz isaak.physik.fu-berlin.de:/ZIP;           \
-	fi
