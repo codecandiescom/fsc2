@@ -41,7 +41,7 @@ my @lines;
 my @vars;
 my $guify_entry = '^\s*===\s+';
 my $var_entry = $guify_entry .
-    '([A-Za-z0-9_]+)\s+(int|float|menu|file)(\s+(.*))?';
+    '([A-Za-z0-9_]+)\s+(int|float|menu|file|button)(\s+(.*))?';
 my $if_entry = $guify_entry . 'if\s*';
 my $elsif_entry = $guify_entry . 'elsif\s*';
 my $else_entry = $guify_entry . 'else\s*$';
@@ -169,6 +169,8 @@ for ( @vars ) {
         $$_{ def_value } = $$_{ value };
     } elsif ( $$_{ type } =~ /^menu$/ ) {
         $$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
+	} elsif ( $$_{ type } =~ /^button$/ ) {
+        $$_{ value } = $$_{ def_value } = 0;
     } else {
         $$_{ value } = $$_{ def_value } = "";
         $entry_width = 15;
@@ -394,7 +396,11 @@ sub get_default_value {
             die "Default value ($val) isn't a floating point number at " .
                 "line $lino\n";
         }
-    } else {
+    } elsif ( $hr->{ type } =~ /^button$/ ) {
+		return ( $val =~ /^on|1$/io, $str ) if $val =~ /^on|off|1|0$/io;
+		die "Default value ($val) isn't a valid initializer for a button at " .
+			"line $lino\n";
+	} else {
         if ( $val =~ /^\d+/o ) {
             die "Default value ($val) for $hr->{ name } is larger than the " .
                 "number of menu entries at line $lino\n"
@@ -546,6 +552,10 @@ EOT
 -balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
 \" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
 ";
+		} elsif ( $$_{ type } =~ /^button$/o ) {
+            print "\$$$_{ name }\{ value \} = $$_{ value };
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Checkbutton( -variable => \\\$$$_{ name }\{ value \},
+-width => $entry_width );\n";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
             print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
 my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
@@ -566,7 +576,7 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 ";
         }
 
-        if ( $$_{ type } =~ /^int|float|menu$/o ) {
+        if ( $$_{ type } =~ /^int|float|menu|button$/o ) {
             print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
 -width => $unit_width );
@@ -819,6 +829,10 @@ EOT
         print \$fh \"$$_{ def_value }\\n\";
     }
 ";
+        } elsif ( $$_{ type } =~ /^button$/o ) {
+			print "
+    print \$fh \"\$$$_{ name }\{ value \}\\n\";
+";
         } elsif ( $$_{ type } =~ /^menu$|file/o ) {
             print "
     print \$fh \"\$$$_{ name }\{ value \}\\n\";
@@ -884,6 +898,12 @@ EOT
         }
     }
     goto done_reading unless \$found;
+    \$$$_{ name }\{ value \} = \$ne;
+";
+        } elsif ( $$_{ type } =~ /^button$/o ) {
+            print "
+    goto done_reading unless defined( \$ne = <\$fh> ) and \$ne =~ /^1|0\$/o;
+    chomp \$ne;
     \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^file$/o ) {
