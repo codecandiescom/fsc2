@@ -202,6 +202,12 @@ static bool xforms_init( int *argc, char *argv[] )
 	h = y2 - y1 - h1;
 	H = h1 + h2 + h;
 
+#if ( SIZE == HI_RES )
+	slider_size = 0.075;
+#else
+	slider_size = 0.10;
+#endif
+
 	fl_set_slider_size( main_form->win_slider, slider_size );
 	fl_set_slider_value( main_form->win_slider,
 						 ( double ) ( h1 + h / 2 - 0.5 * H * slider_size )
