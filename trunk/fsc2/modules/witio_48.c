@@ -237,6 +237,8 @@ Var *dio_reserve_dio( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Get and check the DIO number */
+
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
 	if ( dio < 0 || dio > 1 )
@@ -246,8 +248,13 @@ Var *dio_reserve_dio( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* If there's no further argument return a value indicating if the
+	   DIO is locked */
+
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( INT_VAR, witio_48.reserved_by[ dio ] ? 1L : 0L );
+
+	/* Get the pass-phrase */
 
 	if ( v->type != STR_VAR )
 	{
@@ -255,11 +262,16 @@ Var *dio_reserve_dio( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* The next, optional argument tells if the DIO is to be locked or
+	   unlocked (if it's missing it defaults to locking the DIO) */
+
 	if ( v->next != NULL )
 	{
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
+
+	/* Lock or unlock (after checking the pass-phrase) the DIO */
 
 	if ( witio_48.reserved_by[ dio ] )
 	{
@@ -311,6 +323,8 @@ Var *dio_mode( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* If the first argument is a string we assume it's a pass-phrase */
+
 	if ( v->type == STR_VAR )
 	{
 		pass = v->val.sptr;
@@ -322,6 +336,8 @@ Var *dio_mode( Var *v )
 		v = v->next;
 	}
 
+	/* Get and check the DIO number */
+
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
 	if ( dio < 0 || dio > 1 )
@@ -330,6 +346,8 @@ Var *dio_mode( Var *v )
 			   "(or DIO or DIO2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
+
+	/* If the DIO is locked check the pass-phrase */
 
 	if ( witio_48.reserved_by[ dio ] )
 	{
@@ -347,6 +365,8 @@ Var *dio_mode( Var *v )
 		}
 	}
 
+	/* If there's no mode argument return the currently set mode */
+
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
@@ -354,6 +374,8 @@ Var *dio_mode( Var *v )
 										  &witio_48.mode[ dio ] ) );
 		return vars_push( INT_VAR, ( long ) witio_48.mode[ dio ] );
 	}
+
+	/* Get and check the mode argument */
 
 	if ( v->type == STR_VAR )
 	{
@@ -366,24 +388,21 @@ Var *dio_mode( Var *v )
 		else if ( ! strcmp( v->val.sptr, "16_8" ) )
 			 mode = ( long ) WITIO_48_MODE_16_8;
 		else
-		{
-			print( FATAL, "Invalid mode type '%s', valid are \"3x8\", "
-				   "\"2x12\", \"1x24\" or \"16_8\" (or numbers between 0 "
-				   "and 3).\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
+			mode = -1;
 	else
 		mode = get_strict_long( v, "DIO mode" );
 
-	too_many_arguments( v );
-
 	if ( mode < WITIO_48_MODE_3x8 || mode > WITIO_48_MODE_16_8 )
 	{
-		print( FATAL, "Invalid mode type %ld, valid values are between 0 and "
-			   "3 (or \"3x8\", \"2x12\", \"1x24\" or \"16_8\").\n" );
+		print( FATAL, "Invalid mode type '%s', valid are \"3x8\", "
+			   "\"2x12\", \"1x24\" or \"16_8\" (or numbers between 0 "
+			   "and 3).\n", v->val.sptr );
 		THROW( EXCEPTION );
 	}
+
+	too_many_arguments( v );
+
+	/* Set the new mode */
 
 	witio_48.mode[ dio ] = ( WITIO_48_MODE ) mode;
 
@@ -416,6 +435,8 @@ Var *dio_value( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* If the first argument is a string we assume it's a pass-phrase */
+
 	if ( v->type == STR_VAR )
 	{
 		pass = v->val.sptr;
@@ -427,6 +448,8 @@ Var *dio_value( Var *v )
 		v = v->next;
 	}
 
+	/* Get and check the DIO number */
+
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
 	if ( dio < 0 || dio > 1 )
@@ -435,6 +458,8 @@ Var *dio_value( Var *v )
 			   "(or 1 or 2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
+
+	/* If the DIO is locked check the pass-phrase */
 
 	if ( witio_48.reserved_by[ dio ] )
 	{
@@ -451,6 +476,8 @@ Var *dio_value( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
+
+	/* Get and check the channel number */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -471,6 +498,9 @@ Var *dio_value( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* If there's no value to output read the input from the DIO and return
+	   it to the user */
+
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
@@ -478,6 +508,8 @@ Var *dio_value( Var *v )
 										( WITIO_48_CHANNEL ) ch, &uval ) );
 		return vars_push( INT_VAR, ( long ) uval );
 	}
+
+	/* Otherwise get the value and check if it's reasonable */
 
 	val = get_strict_long( v, "value to output" );
 
@@ -524,6 +556,8 @@ Var *dio_value( Var *v )
 				   val, uval );
 		}
 	}
+
+	/* Output the value */
 
 	if ( FSC2_MODE == EXPERIMENT )
 		check_ret( witio_48_dio_out( ( WITIO_48_DIO ) dio,

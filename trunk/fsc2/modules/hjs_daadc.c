@@ -220,17 +220,24 @@ Var *daq_reserve_dac( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, hjs_daadc.dac_reserved_by ? 1L : 0L );
 
+	/* Get the pass-phrase */
+
 	if ( v->type != STR_VAR )
 	{
 		print( FATAL, "First argument isn't a string.\n" );
 		THROW( EXCEPTION );
 	}
 
+	/* The next, optional argument tells if the DAC is to be locked or
+	   unlocked (if it's missing it defaults to locking the DAC) */
+
 	if ( v->next != NULL )
 	{
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
+
+	/* Lock or unlock (after checking the pass-phrase) the DAC */
 
 	if ( hjs_daadc.dac_reserved_by )
 	{
@@ -276,19 +283,24 @@ Var *daq_reserve_adc( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_VAR, hjs_daadc.adc_reserved_by ? 1L : 0L );
 
+	/* Get the pass-phrase */
+
 	if ( v->type != STR_VAR )
 	{
 		print( FATAL, "First argument isn't a string.\n" );
 		THROW( EXCEPTION );
 	}
 
+	/* The next, optional argument tells if the ADC is to be locked or
+	   unlocked (if it's missing it defaults to locking the ADC) */
+
 	if ( v->next != NULL )
 	{
 		lock_state = get_boolean( v->next );
 		too_many_arguments( v->next );
 	}
-	else
-		too_many_arguments( v );
+
+	/* Lock or unlock (after checking the pass-phrase) the ADC */
 
 	if ( hjs_daadc.adc_reserved_by )
 	{
@@ -340,16 +352,26 @@ Var *daq_maximum_output_voltage( Var *v )
 	char *pass = NULL;
 
 
+	/* If the first argument is a string we assume it's a pass-phrase */
+
 	if ( v != NULL && v->type == STR_VAR )
 	{
 		pass = v->val.sptr;
 		v = v->next;
 	}
 
+	/* If there's no other argument return the current settting of the
+	   maximum output voltage */
+
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, hjs_daadc.max_volts );
 
+	/* Get the new maximum output voltage */
+
 	volts = get_double( v, "DAC output voltage" );
+
+	/* Allow changes only when the DAC is either not locked or the
+	   pass-phrase is correct */
 
 	if ( hjs_daadc.dac_reserved_by )
 	{
@@ -366,6 +388,8 @@ Var *daq_maximum_output_voltage( Var *v )
 	}		
 
 	too_many_arguments( v );
+
+	/* Check the new maximum output voltage */
 
 	if ( volts < MIN_OUT_VOLTS || volts > MAX_OUT_VOLTS )
 	{
@@ -408,11 +432,16 @@ Var *daq_set_voltage( Var *v )
 	char *pass = NULL;
 
 
+	/* If the first argument is a string we assume it's a pass-phrase */
+
 	if ( v != NULL && v->type == STR_VAR )
 	{
 		pass = v->val.sptr;
 		v = v->next;
 	}
+
+	/* If there's no other argument return the currently set output voltage
+	   (if it's possible) */
 
 	if ( v == NULL )
 	{
@@ -426,7 +455,12 @@ Var *daq_set_voltage( Var *v )
 		return vars_push( FLOAT_VAR, hjs_daadc.volts_out );
 	}
 
+	/* Get the new output voltage */
+
 	volts = get_double( v, "DAC output voltage" );
+
+	/* Allow changes only if either the DAC isn't locked or the pass-phrase
+	   is correct */
 
 	if ( hjs_daadc.dac_reserved_by )
 	{
@@ -443,6 +477,8 @@ Var *daq_set_voltage( Var *v )
 	}		
 
 	too_many_arguments( v );
+
+	/* Check the new output voltage */
 
 	if ( volts < MIN_OUT_VOLTS || volts >= hjs_daadc.max_volts * 1.001 )
 	{
@@ -462,6 +498,8 @@ Var *daq_set_voltage( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
+
+	/* Set the new output voltage */
 
 	if ( FSC2_MODE == EXPERIMENT )
 		hjs_daadc_out( hjs_daadc_da_volts_to_val( volts ) );
@@ -487,6 +525,8 @@ Var *daq_get_voltage( Var *v )
 	char *pass = NULL;
 
 
+	/* If the first argument is a string we assume it's a pass-phrase */
+
 	if ( v != NULL )
 	{
 		if ( v->type == STR_VAR )
@@ -497,6 +537,9 @@ Var *daq_get_voltage( Var *v )
 			THROW( EXCEPTION );
 		}
 	}
+
+	/* Allow reading the ADC only if either the ADC isn't locked or if
+	   the pas-phrase is correct */
 
 	if ( hjs_daadc.adc_reserved_by )
 	{
@@ -511,6 +554,11 @@ Var *daq_get_voltage( Var *v )
 			THROW( EXCEPTION );
 		}
 	}		
+
+	/* The AD conversion only happens when there's a simultaneous DA
+	   conversion. If none has been done before reading the ADC involves
+	   setting the DAC to a default output voltage and we better tell
+	   the user about it */
 
 	if ( ! hjs_daadc.has_dac_been_set )
 		print( SEVERE, "AD conversion requires DA conversion, setting "
