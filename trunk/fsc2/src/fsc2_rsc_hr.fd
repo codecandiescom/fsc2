@@ -11,7 +11,7 @@ SnapGrid: 5
 Name: fsc2
 Width: 1050
 Height: 800
-Number of Objects: 14
+Number of Objects: 15
 
 --------------------
 class: FL_BOX
