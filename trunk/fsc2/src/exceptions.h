@@ -73,7 +73,7 @@ enum {
 
 #ifndef EXCEPTIONS_SOURCE_COMPILE
 
-extern jmp_buf      exception_env_stack[ ];
+extern jmp_buf exception_env_stack[ ];
 extern unsigned int exception_env_stack_pos;
 extern unsigned int exception_id;
 extern void longjmperror( void );
