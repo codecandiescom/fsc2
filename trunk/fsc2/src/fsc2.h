@@ -115,7 +115,7 @@ Device_Name *Device_Name_List = NULL;
 
 Pulser_Struct pulser_struct;
 
-ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
+ASSIGNMENTS assignment[ PULSER_CHANNEL_NUM_FUNC ];
 
 Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
 Acquisition_Sequence ASeq[ 2 ];

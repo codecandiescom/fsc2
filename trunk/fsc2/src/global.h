@@ -107,27 +107,38 @@ enum {
 
 
 /* Define the different functions pulses may have (it's not too dangerous here
-   to add further ones as long as the immediately following defined remain
+   to add further ones as long as the immediately following defined remains
    intact)
 */
 
 enum {
 	PULSER_CHANNEL_NO_TYPE = -1,
-	PULSER_CHANNEL_MW,
+	PULSER_CHANNEL_MW = 0,
     PULSER_CHANNEL_TWT,
 	PULSER_CHANNEL_TWT_GATE,
 	PULSER_CHANNEL_DET,
 	PULSER_CHANNEL_DET_GATE,
 	PULSER_CHANNEL_RF,
 	PULSER_CHANNEL_RF_GATE,
-	PULSER_CHANNEL_PHASE_X,
-	PULSER_CHANNEL_PHASE_Y,
+	PULSER_CHANNEL_PHASE_X1,
+	PULSER_CHANNEL_PHASE_X2,
+	PULSER_CHANNEL_PHASE_Y1,
+	PULSER_CHANNEL_PHASE_Y2,
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
 	PULSER_CHANNEL_OTHER_4,
 };
 
+
+#if defined ( FSC2_MAIN )
+const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DET", "DET_GATE",
+								  "RF", "RF_GATE", "PHASE_X1", "PHASE_X2",
+								  "PHASE_Y1", "PHASE_Y2", "OTHER_1", "OTHER_2",
+								  "OTHER_3", "OTHER_4" };
+#else
+extern char**Function_Names;
+#endif
 
 #define PULSER_CHANNEL_FUNC_MIN PULSER_CHANNEL_MW
 #define PULSER_CHANNEL_FUNC_MAX PULSER_CHANNEL_OTHER_4
