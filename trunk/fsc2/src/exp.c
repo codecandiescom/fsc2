@@ -530,11 +530,13 @@ void exp_test_run( void )
 		run_test_hooks( );
 
 		cur_prg_token = prg_token;
+		token_count = 0;
 
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
-			if ( ! just_testing && prg_length % 8 == 0 )
+			token_count++;
+			if ( ! just_testing && token_count % 256 == 0 )
 				fl_check_only_forms( );
 
 			switch ( cur_prg_token->token )
@@ -657,8 +659,8 @@ int exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		if ( TEST_RUN && ! just_testing && 
-			 ( cur_prg_token - prg_token ) % 8 == 0 )
+		token_count++;
+		if ( TEST_RUN && ! just_testing && token_count % 512 == 0 )
 			fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;

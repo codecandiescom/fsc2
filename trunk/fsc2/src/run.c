@@ -33,7 +33,7 @@ static void do_measurement( void );
 /* Locally used global variables used in parent, child and signal handlers */
 
 static bool child_is_ready;
-static volatile int quitting;
+static volatile int child_is_quitting;
 
 
 
@@ -114,19 +114,20 @@ bool run( void )
 
 	/* Here the experiment really starts - process for doing it is forked. */
 
-	child_is_ready = quitting = UNSET;
+	child_is_ready = child_is_quitting = UNSET;
 
 	fl_add_signal_callback( NEW_DATA, new_data_handler, NULL );
 	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
 
-	if ( ( child_pid = fork( ) ) == 0 )     /* start child */
+	if ( ( child_pid = fork( ) ) == 0 )     /* fork the child */
 		run_child( );
 
 	close_all_files( );              /* only child is going to write to them */
 
 	if ( child_pid != -1 )           /* if fork() succeeded */
 	{
+		usleep( 100000 );
 		close( pd[ 0 ] );
 		close( pd[ 3 ] );
 		pd[ 0 ] = pd[ 2 ];
@@ -214,7 +215,7 @@ void quitting_handler( int sig_type, void *data )
 	if ( sig_type != QUITTING )
 		return;
 
-	quitting = SET;
+	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 }
 
@@ -224,8 +225,8 @@ void quitting_handler( int sig_type, void *data )
 /* while a measurement is running. Only the most basic things (i.e   */
 /* waiting for the return status and resetting of signal handlers)   */
 /* are done here since it's a signal handler. To get the remaining   */
-/* stuff done an invisible button is triggered whioch leads to a     */
-/* call of its callback function run_sigchld_callback().             */
+/* stuff done an invisible button is triggered which leads to a call */
+/* of its callback function run_sigchld_callback().                  */
 /*-------------------------------------------------------------------*/
 
 void run_sigchld_handler( int sig_type, void *data )
@@ -248,7 +249,7 @@ void run_sigchld_handler( int sig_type, void *data )
 				 WTERMSIG( return_status ) );
 #endif
 
-	child_pid = 0;                    /* child is dead... */
+	child_pid = 0;                          /* the child is dead... */
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
@@ -270,7 +271,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 {
 	b = b;
 
-	if ( ! quitting )            /* missing notification by the child ? */
+	if ( ! child_is_quitting )   /* missing notification by the child ? */
 		fl_show_alert( "FATAL Error", "Experiment stopped prematurely.",
 					   NULL, 1 );
 
@@ -475,6 +476,7 @@ void do_measurement( void )
 	Prg_Token *cur;
 	bool react_to_do_quit = SET;
 
+	TEST_RUN = UNSET;
 
 	TRY
 	{
