@@ -59,6 +59,7 @@ Var *magnet_sweep( Var *v );
 Var *magnet_sweep_rate( Var *v );
 Var *reset_field( Var *v );
 Var *magnet_goto_field_on_end( Var *v );
+Var *magnet_command( Var *v );
 
 
 static void magnet_sweep_up( void );
@@ -629,6 +630,38 @@ Var *magnet_goto_field_on_end( Var *v )
 	ips20_4.goto_field_on_end = SET;
 
 	return vars_push( FLOAT_VAR, ips20_4.final_target_current );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *magnet_command( Var *v )
+{
+	static char *cmd;
+	char reply[ 100 ];
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			ips20_4_talk( cmd, reply, 100 );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
 }
 
 
@@ -1402,7 +1435,7 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 		if ( retries-- )
 			goto start;
 		else
-			THROW( EXCEPTION );
+			ips20_4_comm_failure( );
 	}
 
 	/* If the first character of the reply isn't equal to the third character
@@ -1414,7 +1447,7 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 		if ( retries-- )
 			goto reread;
 		else
-			THROW( EXCEPTION );
+			ips20_4_comm_failure( );
 	}
 
 	return len;

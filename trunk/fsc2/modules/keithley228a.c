@@ -71,6 +71,7 @@ Var *get_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_field( Var *v );
+Var *magnet_command( Var *v );
 
 
 /* internally used functions */
@@ -84,6 +85,7 @@ static void keithley228a_gpib_failure( void );
 static double keithley228a_current_check( double current );
 static void keithley228a_get_corrected_current( double c, double *psc,
 												double *dacv );
+static bool keithley228a_command( const char *cmd );
 
 
 typedef struct {
@@ -488,6 +490,37 @@ Var *reset_field( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *magnet_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			keithley228a_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*****************************************************/
 /*                                                   */
 /*            Internally used functions              */
@@ -825,6 +858,18 @@ static double keithley228a_set_current( double new_current )
 
 	return new_current;
 }
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool keithley228a_command( const char *cmd )
+{
+	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
+		keithley228a_gpib_failure( );
+
+	return OK;
+}
+
 
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
