@@ -435,11 +435,11 @@ board and shouldn't be needed for normal programms.
 
 'NI_DAQ_AI_TYPE_Aux' is for measuring the output voltage of a onboard
 temperature sensor (+100 mV = -40 degree Celsius and +1.25 V = 125 degree
-Celsius). Not all boards have an onboard temerature sensor.
+Celsius). Not all boards have an onboard temperature sensor.
 
-'NI_DAQ_AI_TYPE_Ghost' is a seeting where *no* data is returned, the
-setting can be useful when different channels are to be sampled at
-different rates.
+'NI_DAQ_AI_TYPE_Ghost' is a setting where *no* data is returned for the
+channel, the setting can be useful when different channels are to be
+sampled at different rates.
 
 The fifth argument, '*polarities', is an array of 'num_channels' values
 of type 'NI_DAQ_POLARITY'. These can have the values
@@ -470,7 +470,6 @@ converted by the ADC. This addition is useful for applications
 involving averaging to increase the resolution. In such applications,
 noise modulation is decreased and differential linearity is improved
 by the addition of the dither.
-
 
 On success the function returns the number of data points that will
 be returned for each conversion of all channels. Unless you specified
