@@ -30,7 +30,7 @@ int main( int argc, char *argv[ ] )
 }
 
 
-void clear_up( void )
+void clean_up( void )
 {
 	int i;
 
