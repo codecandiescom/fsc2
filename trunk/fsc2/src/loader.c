@@ -212,9 +212,11 @@ void load_functions( Device *dev )
 			eprint( NO_ERROR, "  Overloading built-in function `%s()' from "
 					"module `%s.so'.\n", Fncts[ num ].name, dev->name );
 		}
+/*
 		else
 			eprint( NO_ERROR, "  Loading function `%s()'.\n",
 					Fncts[ num ].name );
+*/
 		Fncts[ num ].fnct = cur;
 	}
 }

@@ -94,20 +94,20 @@ typedef VarretFnct *FnctPtr;
   information, i.e. its type and value. It then finds the `+' and branches
   recursively to evaluate the expression to the right of the `+'. Here, the
   parser sees just the numerical value `3.25' and pushes it onto the variables
-  stack, thus creating another transient variable on the stack with the value
-  3.25 (and type FLOAT_VAL). Now the (transient) copy of `B' and the transient
-  variable with the value of 3.25 are on the variables stack and the parser
-  can continue by adding the values of both these variables. It does so by
-  calling vars_add(), creating another transient variable on the stack for the
-  result and removing both the variables used as arguments. It finally returns
-  to the state it started from, the place where it found the `A =' bit, with a
-  the transient variable with the result of the evaluation of the right hand
-  side. All left to be done now is to call vars_assign() which assigns the
-  value of the transient variable to the variable `A'. The transient variable
-  is than removed from the variables stack. If we're a bit paranoid we can
-  make sure everything worked out fine by checking that the variabe stack is
-  now empty. Quite simple, isn't it?
-  
+  stack, thus creating another transient stack variable with the value 3.25
+  (and type FLOAT_VAL). Now the copy of `B' and the variable with the value of
+  3.25 are on the variables stack and the parser can continue by adding the
+  values of both these variables. It does so by calling vars_add(), creating
+  another transient stack variable for the result and removing both the
+  variables used as arguments. It finally returns to the state it started
+  from, the place where it found the `A =' bit, with a stack variable holding
+  the result of the evaluation of the right hand side. All left to be done now
+  is to call vars_assign() which assigns the value of the stack variable to
+  `A'. The stack variable with the right hand side result is than removed from
+  the stack. If we're a bit paranoid we can make sure everything worked out
+  fine by checking that the variabe stack is now empty. Quite simple, isn't
+  it?
+
   What looks like a lot of complicated work to do something rather simple
   has the advantage that, due to its recursive nature, it can be used
   without any changes for much more complicated situations. Instead of the
@@ -126,36 +126,35 @@ typedef VarretFnct *FnctPtr;
 
             variable_identifier [ 
 
-  where `variable_identifier' is a variable or array name. It calls
-  vars_arr_start() where, if the variable is still completetly new, the type
-  of the array is set to INT_ARR or FLOAT_ARR (depending on the result of the
-  macro IF_FUNC(), see above). Finally, it pushes a transient variable onto
-  the stack of type ARR_PTR with the `from' element in the variable structure
-  pointing to the original array. This transient variable serves as a kind of
-  marker since next the parser is going to read all the indices and also push
-  them onto the stack.
+  where `variable_identifier' is a array name. It calls vars_arr_start()
+  where, if the array is still completetly new, the type of the array is set
+  to INT_ARR or FLOAT_ARR (depending on the result of the macro IF_FUNC(), see
+  above). Finally, it pushes a transient variable onto the stack of type
+  ARR_PTR with the `from' element in the variable structure pointing to the
+  original array. This transient variable serves as a kind of marker since
+  next the parser is going to read all indices and push them onto the stack.
 
-  The next tokens have to be expressions - either simple numbers or computed
-  numbers (i.e. either results of function calls or elements of arrays). They
-  are the indices of the array. We've reached the end of the list of indices
-  when the the closing bracket `]' is found in the input. Now the stack may
-  look like this:
+  The next tokens have to be numbers - either simple numbers or computed
+  numbers (i.e. results of function calls or elements of arrays). These are
+  the indices of the array. We've reached the end of the list of indices when
+  the the closing bracket `]' is found in the input. Now the stack looks like
+  this:
 
-               last index ->    number
+               last index ->    number      <- top of stack
                                 number
                                 number
                first index ->   number
-                                ARR_PTR
+                                ARR_PTR     <- bottom of stack
 
-  i.e. on the top we've the indices followed by the pointer to the array.  The
-  next step depends if this is an access to an array element (i.e. it's found
-  on the right hand side of an assignment) or if an array element is to be set
-  (i.e. its on thre left hand side). In the first case the function
-  vars_arr_rhs() is called.
+  i.e. on the top we've the indices (in reverse order) followed by the pointer
+  to the array.  The next step depends if this is an access to an array
+  element (i.e. it's found on the right hand side of an assignment) or if an
+  array element is to be set (i.e. its on thre left hand side). In the first
+  case the function vars_arr_rhs() is called.
 
   Basically, what vars_arr_rhs() does is to take the indices and the pointer
   to the array from the stake, determine the value of the accessed array
-  element and push this value as a transient variable onto the stack.
+  element and push its value as a variable onto the stack.
 
   If, on the other hand, the array is found on the left hand side of an
   assignment, vars_arr_lhs() is called. Again, from the indices the element of
@@ -192,6 +191,7 @@ typedef VarretFnct *FnctPtr;
   must be an array slice, i.e. an one-dimensional array. This is done by
   either assigning an existing array or by assigning the data from an
   array-returning function.
+
 */
 
 
@@ -939,11 +939,11 @@ void vars_check( Var *v, int type )
 
 	if ( ! ( v->type & type ) )
 	{
-		i = 0;
+		i = 1;
 		t = v->type;
-		while ( ! ( t >>= 1 & 1 ) )
+		while ( ! ( ( t >>= 1 ) & 1 ) )
 			i++;
-		eprint( FATAL, "%s:%ld: A variable of type %s cannot be used in this "
+		eprint( FATAL, "%s:%ld: Variable of type %s cannot be used in this "
 				"context.\n", Fname, Lc, types[ i ] );
 		THROW( EXCEPTION );
 	}
@@ -1901,7 +1901,7 @@ Var *apply_unit( Var *var, Var *unit )
 	{
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 			return var;
-		eprint( FATAL, "%s:%ld: Some shit is happening here...\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: The shit hits the fan...\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	else
@@ -1910,7 +1910,7 @@ Var *apply_unit( Var *var, Var *unit )
 		    return vars_mult( var, unit );
 		else
 		{
-			eprint( FATAL, "%s:%ld: Syntax error: Unit is applied to a "
+			eprint( FATAL, "%s:%ld: Syntax error: A unit is applied to a "
 					"non-number.\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
