@@ -39,6 +39,7 @@ Var *P_Var;
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
 %token EQ LT LE GT GE
+%token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 
 
 %type <vptr> expr line arrass list1 list2 list3
