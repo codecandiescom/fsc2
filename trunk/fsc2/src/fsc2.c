@@ -34,6 +34,7 @@ float *y;
 static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
+static void start_editor( void );
 static void start_browser( void );
 
 
@@ -345,14 +346,34 @@ void load_file( FL_OBJECT *a, long reload )
 
 void edit_file( FL_OBJECT *a, long b )
 {
-	char *ed, *ep;
-	char **argv;
-	int argc = 1, i;
 	int res;
 
 
 	a = a;
 	b = b;
+
+
+	/* Fork and execute editor in child process */
+
+	if ( ( res = fork( ) ) == 0 )
+		start_editor( );
+
+	if ( res == -1 )                                /* fork failed ? */
+		fl_show_alert( "Error", "Sorry, unable to start the editor.",
+					   NULL, 1 );
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+static void start_editor( void )
+{
+	char *ed, *ep;
+	char **argv, **final_argv;
+	int argc = 1, i;
+	int res, status;
+
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
 	   exist use vi as standard editor */
@@ -416,41 +437,37 @@ void edit_file( FL_OBJECT *a, long b )
 		}
 	}
 
-	/* Fork and execute editor in child process */
+	/* Special treatment for emacs and xemacs: if emacs is called without
+	   the '-nw' option it will create its own window - so we don't embed
+	   it into a xterm - the same holds for xemacs which always creates
+	   its own window. */
 
-	if ( ( res = fork( ) ) == 0 )
+	final_argv = argv;
+
+	if ( ! strcmp( strip_path( argv[ 2 ] ), "xemacs" ) )
+		final_argv = argv + 2;
+
+	if ( ! strcmp( strip_path( argv[ 2 ] ), "emacs" ) )
 	{
-		/* Special treatment for emacs and xemacs: if emacs is called without
-		   the '-nw' option it will create its own window - so we don't embed
-		   it into a xterm - the same holds for xemacs which always creates
-		   its own window. */
-
-		if ( ! strcmp( strip_path( argv[ 2 ] ), "xemacs" ) )
-			execvp( argv[ 2 ], argv + 2 );
-
-		if ( ! strcmp( strip_path( argv[ 2 ] ), "emacs" ) )
-		{
-			for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )
-				;
-			if ( argv[ i ] == NULL )                    /* no '-nw' flag */
-				execvp( argv[ 2 ], argv + 2 );
-			else
-				execvp( "xterm", argv );
-		}
-		else
-			execvp( "xterm", argv );                /* all other editors */
-
-		/* If this point is reached at all the invocation of the editor failed
-		   - tell the parent by setting a special return value */
-
-		_exit( EDITOR_FAILED );
+		for ( i = 3; argv[ i ] && strcmp( argv[ i ], "-nw" ); ++i )
+			;
+		if ( argv[ i ] == NULL )                    /* no '-nw' flag */
+			final_argv = argv + 2;
 	}
 
-	if ( res == -1 )                                /* fork failed ? */
-		fl_show_alert( "Error", "Sorry, unable to start the editor.",
-					   NULL, 1 );
+	if ( ( res = fork( ) ) == 0 )
+		execvp( final_argv[ 0 ], final_argv );
+
 	T_free( argv );
+
+	if ( res == -1 )
+		_exit( EDITOR_FAILED );
+
+	waitpid( res, &status, 1 );
+
+	_exit( status );
 }
+
 
 
 /*-----------------------------------------------------*/
