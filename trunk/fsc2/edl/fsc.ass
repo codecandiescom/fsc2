@@ -102,8 +102,8 @@ P1:  FUNC  = MW,
 print( "Now: pi = #\n", pi + 3 );
 print( "X = #\n", X );
 
-P2: FUNC=P1.FUNC,
-	START=P1.LEN,
+P2: FUNC = P1.FUNC,
+	START = P1.START + P1.LEN + 10 ns,
 	LEN=1us+ floor(pi) us;
 
 pi=pi-3;
