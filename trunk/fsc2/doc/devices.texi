@@ -682,10 +682,10 @@ when the lock-in-amplifier is running in auto-acquisition mode and the
 CH2 display is set to display Y noise.
 @end table
 
-A maximum 6 different channels can be passed to the function which must
-all be different. If there is more than one argument a 1-dimensional
-array is returned with as many data as there were arguments (in the
-sequence corresponding to the one of the arguments).
+A maximum of 6 different channels can be passed to the function which
+must all be different. If there is more than one argument an
+1-dimensional array is returned with as many data as there were
+arguments (in the sequence corresponding to the one of the arguments).
 
 @item ER023M
 No argument is allowed -- the function returns a floating point value.
