@@ -557,7 +557,6 @@ Var *pulser_update( Var *v )
 
 	v = v;
 
-
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
 
@@ -798,6 +797,7 @@ Var *pulser_reset( Var *v )
 		 dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
 		vars_pop( pulser_pulse_reset( NULL ) );
 	vars_pop( pulser_pulse_reset( NULL ) );
+	dg2020_update_data( );
 
 	return vars_push( INT_VAR, 1 );
 }
