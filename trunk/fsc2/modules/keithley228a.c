@@ -23,7 +23,7 @@ static       int dac_ports[ ] = { 6,       6,       4,       4      };
 
 
 //#define V_TO_A_FACTOR	      -97.5   /* Conversion factor of voltage at DAC */
-#define V_TO_A_FACTOR	      -95.2   /* Conversion factor of voltage at DAC */
+#define V_TO_A_FACTOR	      -96.35  /* Conversion factor of voltage at DAC */
 
 
 
@@ -698,15 +698,13 @@ static double keithley228a_set_current( double new_current )
 			if ( new_current >= 0.0)
 			{
 				power_supply_current = 1.0e-2 * floor( 1.0e2 * new_current );
-				if ( fabs( power_supply_current - new_current ) >
-					                                          9.9999999999e-3 )
+				if ( fabs( power_supply_current - new_current ) > 0.01 )
 					power_supply_current += 1.0e-2;
 			}
 			else
 			{
 				power_supply_current = 1.0e-2 * ceil( 1.0e2 * new_current );
-				if (fabs( power_supply_current - new_current ) >
-					                                          9.9999999999E-3 )
+				if ( fabs( power_supply_current - new_current ) > 0.01 )
 					power_supply_current -= 1.0e-2;
 			}
 

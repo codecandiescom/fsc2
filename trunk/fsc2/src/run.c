@@ -788,6 +788,7 @@ static void do_measurement( void )
 					break;
 
 				case BREAK_TOK :
+					cur_prg_token->start->counter = 0;
 					cur_prg_token = cur_prg_token->start->end;
 					break;
 
