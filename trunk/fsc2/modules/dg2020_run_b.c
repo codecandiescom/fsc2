@@ -25,8 +25,6 @@
 #include "dg2020_b.h"
 
 
-static void dg2020_defense_shape_check( FUNCTION *shape );
-
 
 #define type_ON( f )   ( ( f )->is_inverted ? LOW : HIGH )
 #define type_OFF( f )  ( ( f )->is_inverted ? HIGH : LOW )
@@ -140,16 +138,13 @@ void dg2020_do_checks( FUNCTION *f )
 	int i, j;
 
 
-	f->num_active_pulses = 0;
-
-	for ( i = 0; i < f->num_pulses; i++ )
-		if ( f->pulses[ i ]->is_active )
-			f->num_active_pulses++;
-
 	if ( f->num_active_pulses == 0 )
 		return;
 
-	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses++ *
+	f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
+	f->old_pulse_params = f->pulse_params;
+
+	f->pulse_params = PULSE_PARAMS_P T_malloc( f->num_active_pulses *
 											   sizeof *f->pulse_params );
 	
 	for ( j = 0, i = 0; i < f->num_pulses; i++ )
@@ -159,7 +154,7 @@ void dg2020_do_checks( FUNCTION *f )
 		if ( ! p->is_active )
 			continue;
 
-		pp = f->pulse_params + j;
+		pp = f->pulse_params + j++;
 
 		pp->pulse= p;
 		pp->pos = p->pos + f->delay;
@@ -269,6 +264,12 @@ void dg2020_shape_padding_check( FUNCTION *f )
 		ppp = pp;
 		pp = pp + 1;
 
+		/* Don't complain about manually generated pulses - the user has to
+		   take care of this */
+
+		if ( ppp->pulse->sp == NULL && pp->pulse->sp == NULL )
+			continue;
+
 		if ( ppp->pos + ppp->len > pp->pos )
 			ppp->len -= ppp->pos + ppp->len - pp->pos;
 	}
@@ -316,8 +317,8 @@ void dg2020_twt_padding_check( FUNCTION *f )
 	PULSE_PARAMS *pp, *ppp;
 	int i;
 
-	if ( f->self != PULSER_CHANNEL_TWT || ! f->has_auto_twt_pulses ||
-		 f->num_active_pulses == 0 )
+
+	if ( f->self != PULSER_CHANNEL_TWT || f->num_active_pulses == 0 )
 		return;
 
 	/* Check that first TWT pulse doesn't start too early (this only can
@@ -352,6 +353,12 @@ void dg2020_twt_padding_check( FUNCTION *f )
 	{
 		ppp = pp;
 		pp = pp + 1;
+
+		/* Don't complain about manually generated pulses - the user has to
+		   take care of this */
+
+		if ( ppp->pulse->tp == NULL && pp->pulse->tp == NULL )
+			continue;
 
 		if ( pp->pos < 0 )
 		{
@@ -444,7 +451,7 @@ void dg2020_twt_padding_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-static void dg2020_defense_shape_check( FUNCTION *shape )
+void dg2020_defense_shape_check( FUNCTION *shape )
 {
 	FUNCTION *defense = dg2020.function + PULSER_CHANNEL_DEFENSE;
 	PULSE *shape_p, *defense_p;
@@ -643,13 +650,25 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 
 	/* If the pulse has an associated shape pulse delete it */
 
-	if ( p->sp && p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
-		dg2020_delete_pulse( p->sp );
+	if ( p->sp )
+	{
+		if ( p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+			dg2020_delete_pulse( p->sp );
+		else
+			p->sp->sp = NULL;
+	}
 
 	/* If the pulse has an associated TWT pulse also delete it */
 
-	if ( p->tp && p->sp->function->self == PULSER_CHANNEL_TWT )
-		dg2020_delete_pulse( p->tp );
+	if ( p->tp )
+	{
+		if ( p->sp->function->self == PULSER_CHANNEL_TWT )
+		{
+			dg2020_delete_pulse( p->tp );
+		}
+		else
+			p->tp->tp = NULL;
+	}
 
 	/* First we've got to remove the pulse from its functions pulse list */
 

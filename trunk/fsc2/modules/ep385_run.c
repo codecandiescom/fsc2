@@ -760,13 +760,23 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 
 	/* If the pulse has an associated shape pulse delete it */
 
-	if ( p->sp && p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
-		ep385_delete_pulse( p->sp );
+	if ( p->sp )
+	{
+		if ( p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+			ep385_delete_pulse( p->sp );
+		else
+			p->sp->sp = NULL;
+	}
 
 	/* If the pulse has an associated TWT pulse also delete it */
 
-	if ( p->tp && p->sp->function->self == PULSER_CHANNEL_TWT )
-		ep385_delete_pulse( p->tp );
+	if ( p->tp )
+	{
+		if ( p->sp->function->self == PULSER_CHANNEL_TWT )
+			ep385_delete_pulse( p->tp );
+		else
+			p->tp->tp = NULL;
+	}
 
 	/* First we've got to remove the pulse from its functions pulse list */
 
