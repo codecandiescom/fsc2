@@ -79,7 +79,13 @@ endif
 .SUFFIXES: .c .o .h
 .PHONY: all clean
 
+
+# default rule: make the main program, the modules and the primary lexer
+
 all: fsc2 mods fsc2_clean
+
+
+# make the main program from the c, flex and bison source files
 
 fsc2: $(objects) $(header)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
@@ -93,6 +99,10 @@ fsc2: $(objects) $(header)
 %.c: %.flex $(header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.flex,%,$<) -o$@ $<
 
+
+# make the modules - the pulser module has to handles specially since it has
+# its own header file and is divided into several source files
+
 mods: dg2020.so $(modules:.c=.so)
 
 dg2020.so: ${dg2020:.c=.lo} dg2020.h
@@ -103,13 +113,13 @@ dg2020.so: ${dg2020:.c=.lo} dg2020.h
 	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
 	chmod 644 $@
 
-$(dg2020:.c=.lo): dg2020.h
+${dg2020:.c=.lo}: dg2020.h
 
 %.lo: %.c $(header)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
 
 
-
+# make the primary lexer that's utilized by the main program
 
 fsc2_clean: fsc2_clean.o exceptions.o
 	$(CC) -o $@ $^ -lfl -lm
@@ -117,6 +127,7 @@ fsc2_clean: fsc2_clean.o exceptions.o
 fsc2_clean.c: fsc2_clean.flex $(header)
 	$(FLEX) -B -o$@ $<
 
+# install the main program and the modules
 
 install:
 	cp fsc2 $(bindir)/fsc2
@@ -129,6 +140,7 @@ install:
 	chown fsc2.fsc2 $(libdir)/*.so $(libdir)/*.xpm $(libdir)/fsc2_clean
 	chmod 644 $(libdir)/*.so $(libdir)/*.xpm
 	chmod 755 $(libdir)/fsc2_clean
+
 
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header)
