@@ -9,7 +9,7 @@ static const char *handle_input( const char *content, const char *label );
 
 
 /*-------------------------------------------------------*/
-/* Shows a messge box with an "OK" button - use embedded */
+/* Shows a message box with an "OK" button - use embedded */
 /* newline characters to get multi-line messages.        */
 /*-------------------------------------------------------*/
 
@@ -62,7 +62,7 @@ void show_alert( const char *str )
 
 /*------------------------------------------------------------------------*/
 /* Shows a choice box with up to three buttons, returns the number of the */
-/* pressed button (int he range from 1 - 3).                              */
+/* pressed button (in the range from 1 - 3).                              */
 /* ->                                                                     */
 /*    1. message text, use embedded newlines for multi-line messages      */
 /*    2. number of buttons to show                                        */
@@ -148,7 +148,7 @@ static const char *handle_input( const char *content, const char *label )
 
 	fl_show_form( input_form->input_form,
 				  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
-				  "fsc: Comment editor" );
+				  "fsc2: Comment editor" );
 
 	while ( fl_do_forms( ) != input_form->comm_done )
 		;
