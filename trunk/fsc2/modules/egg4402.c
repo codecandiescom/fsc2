@@ -196,7 +196,7 @@ Var *boxcar_get_curve( Var *v )
 	double *ret_buffer;
 	char cmd[ 100 ];
 	long length;
-	long curve_type;
+	long curve_type = -1;
 	long curve_number = 0;
 	long max_points;
 	long first, last;
@@ -216,6 +216,12 @@ Var *boxcar_get_curve( Var *v )
 	CLOBBER_PROTECT( last );
 	CLOBBER_PROTECT( old_timo );
 
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	/* If the first variable is a number, the second also must be a number.
@@ -223,68 +229,35 @@ Var *boxcar_get_curve( Var *v )
 	   second must be the curve number */
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-	{
  		curve_type = get_long( v, "curve type" );
-
-		if ( ( v = vars_pop( v ) ) == NULL )
-		{
-			print( FATAL, "Missing curve number.\n" );
-			THROW( EXCEPTION );
-		}
-
-		curve_number = get_long( v, "curve number" );
-
-		v = vars_pop( v );
-	}
 	else                             /* first argument is a string */
 	{
-		curve_type = -1;
-
-		if ( ! strncmp( v->val.sptr, "LC", 2 ) )
-		{
+		if ( ! strcmp( v->val.sptr, "LC" ) ||
+			 ! strcmp( v->val.sptr, "LIVECURVE" ) ||
+			 ! strcmp( v->val.sptr, "LIVE_CURVE" ) )
 			curve_type = 0;
-			curve_number = T_atol( v->val.sptr + 2 );
-		}
-
-		if ( ! strncmp( v->val.sptr, "LIVECURVE", 9 ) )
-		{
-			curve_type = 0;
-			curve_number = T_atol( v->val.sptr + 9 );
-		}
-
-		if ( ! strncmp( v->val.sptr, "LIVE_CURVE", 10 ) )
-		{
-			curve_type = 0;
-			curve_number = T_atol( v->val.sptr + 10 );
-		}
-
-		if ( ! strncmp( v->val.sptr, "MC", 2 ) )
-		{
+		else if ( ! strcmp( v->val.sptr, "MC" ) ||
+				  ! strcmp( v->val.sptr, "MEMORYCURVE" ) ||
+				  ! strcmp( v->val.sptr, "MEMORY_CURVE" ) )
 			curve_type = 1;
-			curve_number = T_atol( v->val.sptr + 2 );
-		}
-
-		if ( ! strncmp( v->val.sptr, "MEMORYCURVE", 11 ) )
-		{
-			curve_type = 1;
-			curve_number = T_atol( v->val.sptr + 11 );
-		}
-
-		if ( ! strncmp( v->val.sptr, "MEMORY_CURVE", 12 ) )
-		{
-			curve_type = 1;
-			curve_number = T_atol( v->val.sptr + 12 );
-		}
-
-		if ( curve_type == -1 )
-		{
-			print( FATAL, "First argument ('%s') isn't a invalid curve.\n",
-				   v->val.sptr );
-			THROW( EXCEPTION );
-		}
-
-		v = vars_pop( v );
 	}
+
+	if ( curve_type == -1 )
+	{
+		print( FATAL, "First argument ('%s') isn't a valid curve.\n",
+			   v->val.sptr );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing curve number.\n" );
+		THROW( EXCEPTION );
+	}
+
+	curve_number = get_long( v, "curve number" );
+
+	v = vars_pop( v );
 
 	/* Check validity of curve type and number argument */
 
@@ -522,8 +495,7 @@ static void egg4402_query( char *buffer, long *length )
 			egg4402_failure( );
 	} while ( ! ( stb & 0x80 ) && ! ( stb & 1 ) );
 
-	if ( gpib_read( egg4402.device, ( char * ) &stb, &dummy ) == FAILURE ||
-		 gpib_read( egg4402.device, buffer, length ) == FAILURE )
+	if ( gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );
 }
 
