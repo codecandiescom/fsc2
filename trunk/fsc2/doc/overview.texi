@@ -20,7 +20,7 @@
 @c Boston, MA 02111-1307, USA.
 
 
-@node Overview, EDL, Top, Top
+@node Overview, GUI, Top, Top
 @chapter Overview
 @cindex overview
 
@@ -32,8 +32,8 @@ following called an @acronym{EDL}
 @cindex @acronym{EDL}
 file (@b{E}xperiment @b{D}escription @b{L}anguage)).
 
-This approach is a bit different from the one usually used for remote
-control programs with a graphical user interface where you set the
+This approach is different from the one usually used for remote
+control programs with a graphical user interface where one sets the
 parameters to be used in the experiment and then start the experiment.
 
 The problem with the traditional approach is that usually there is a
@@ -47,7 +47,7 @@ leads to the introduction of new bugs or the realization that the program
 was not written in a way that allows it to be changed to accommodate the
 new requirements.
 
-@acronym{fsc2} is very different because it wasn't written with a
+@acronym{fsc2} is rather different because it wasn't written with a
 certain set of experiments in mind but was developed to make it as easy
 as possible to do all kinds of experiments. Of course, this comes with a
 price: one has to specify clearly how the experiment is to be done. This
