@@ -27,7 +27,7 @@ int dg2020_b_init_hook( void )
 	if ( pulser_struct.name != NULL )
 	{
 		eprint( FATAL, "%s:%ld: While loading driver DG2020_B found that "
-				"driver %s is already installed.\n",
+				"driver for pulser %s is already installed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
