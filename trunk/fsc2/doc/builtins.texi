@@ -18,8 +18,8 @@
 @cindex output functions
 
 @table @samp
-@item print()
 @anchor{print}
+@item print()
 @findex print()
 This function prints text into the output browser in the main form of
 @acronym{fsc2}.  It needs a @i{format string}
@@ -89,8 +89,8 @@ will produce output already in the test run.
 @end table
 
 
-@item init_1d()
 @anchor{init_1d}
+@item init_1d()
 @findex init_1d()
 Initializes the display for one-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to six
@@ -147,8 +147,8 @@ displayed at the @i{x}-axis are (in contrast to the point numbers)
 referred to as `real world coordinates'.
 
 
-@item init_2d()
 @anchor{init_2d}
+@item init_2d()
 @findex init_2d()
 Initializes the display for two-dimensional experiments - without a call to
 this function no data will be displayed. The function takes up to nine
@@ -196,8 +196,8 @@ init_2d( [ n_data_sets [ , n_x_points [ , n_y_points,
 @end example
 
 
-@item display( )
 @anchor{display}
+@item display( )
 @findex display()
 This function has to be called to display data in 1-dimensional as well as
 2-dimensional experiments. It takes the following arguments:
@@ -232,8 +232,8 @@ display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @end example
 
 
-@item change_scale()
 @anchor{change_scale}
+@item change_scale()
 @findex change_scale()
 This function allows it to change the scale settings (originally set in
 the call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) after an
@@ -246,16 +246,16 @@ instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
 argument.
 
 
-@item clear_curve()
 @anchor{clear_curve}
+@item clear_curve()
 @findex clear_curve()
 Removes one or more curves from the display. As many arguments as there
 are curves can be used. No arguments at all implies the first
 curve. Invalid arguments are discarded and an error message is printed.
 
 
-@item get_file( )
 @anchor{get_file}
+@item get_file( )
 @findex get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
@@ -293,8 +293,8 @@ I.e.@: either @code{get_file()} is called before any save-operation or
 never at all!
 
 
-@item save()
 @anchor{save}
+@item save()
 @findex save()
 Writes one or more data or complete arrays to a file. But some care has
 to be used: If @w{@code{get_file()}} has been called before the first
@@ -345,8 +345,8 @@ will be printed as
 @end example
 
 
-@item fsave()
 @anchor{fsave}
+@item fsave()
 @findex fsave()
 This function may be used to write data in a formated way into a
 file. As in the case of the @code{save()} function the first argument
@@ -388,8 +388,8 @@ X[ 3, 2 ] = 6
 @end example
 
 
-@item save_program()
 @anchor{save_program}
+@item save_program()
 @findex save_program()
 This functions writes the currently run @acronym{EDL} program into a
 file. As usual, the first argument may be a file identifier - the same
@@ -399,16 +399,16 @@ comment character to make other programs like @acronym{MATHLAB} or
 @acronym{octave} skip these lines.
 
 
-@item save_output()
 @anchor{save_output}
+@item save_output()
 @findex save_output()
 This function has the same arguments as @code{save_program()} but prints
 the content of the output window (i.e.@: the bottom browser window in
 the main form) into the file.
 
 
-@item save_comment()
 @anchor{save_comment}
+@item save_comment()
 @findex save_comment()
 This function is used to print comments into the file. When it is called a
 small editor is shown and the user may enter comments. These will be then
@@ -423,8 +423,8 @@ last argument is the label string to be shown on top of the editor - it
 defaults to "Please enter a comment:".
 
 
-@item is_file()
 @anchor{is_file}
+@item is_file()
 @findex is_file()
 This function expects a file handle as returned by @code{get_file()} and
 checks if it is valid and if the associated file is open for writing.
@@ -458,8 +458,8 @@ set via the function @code{slider_value()}.
 
 
 @table @samp
-@item layout()
 @anchor{layout}
+@item layout()
 @findex layout()
 The functions tells the program how to layout the buttons and sliders in
 the window, either vertically or horizontally. The function must be
@@ -469,8 +469,8 @@ matter). The numbers @code{0} and @code{1} can be used alternatively for
 vertical or horizontal layout.
 
 
-@item button_create()
 @anchor{button_create}
+@item button_create()
 @findex button_create()
 The function creates a new button and returns a unique integer number
 that has to be used in later calls to identify this button. There are
@@ -513,8 +513,8 @@ allow a backslash in front of an `n'.
 All buttons start as unpressed and in the unset state.
 
 
-@item button_delete()
 @anchor{button_delete}
+@item button_delete()
 @findex button_delete()
 Using this function one or more buttons can be deleted. It expects one
 or more button identifiers as returned by the function
@@ -525,8 +525,8 @@ buttons is deleted, the next button of the group becomes the new group
 leader automatically.
 
 
-@item button_state()
 @anchor{button_state}
+@item button_state()
 @findex button_state()
 The function returns or sets the state of a button, depending on the
 number of argument. The first argument is the identifier of the button
@@ -543,8 +543,8 @@ or a number with @code{0} standing for off and a non-zero number for
 on. The state of normal buttons cannot be set.
 
 
-@item slider_create()
 @anchor{slider_create}
+@item slider_create()
 @findex slider_create()
 Sliders are for setting values in a predefined range. There are two
 types of sliders, normal sliders and value sliders. The only difference
@@ -565,15 +565,15 @@ sequences as for button labels and help texts can be used for sliders.
 
 All labels start of as set to the middle of the defined range.
 
-@item slider_delete()
 @anchor{slider_delete}
+@item slider_delete()
 @findex slider_delete()
 The function deletes on or more sliders. It expects one or more slider
 identifiers as returned by the function @code{slider_create()}.
 
 
-@item slider_value()
 @anchor{slider_value}
+@item slider_value()
 @findex slider_value()
 This function returns or sets the value of a slider. The first argument
 must be a slider identifier as returned by the function
@@ -593,21 +593,21 @@ slider value is set to the next value still within the allowed range.
 @cindex mathematical functions
 
 @table @samp
-@item int()
 @anchor{int}
+@item int()
 @findex int()
 Converts a number (or the elements of an array) to integer type by
 truncating all digits following the decimal point.
 
 
-@item float()
 @anchor{float}
+@item float()
 @findex float()
 Converts a number (or the elements of an array) to floating point type.
 
 
-@item round()
 @anchor{round}
+@item round()
 @findex round()
 Converts a floating point number (or the elements of an array) to the
 nearest integer, i.e.@:
@@ -617,8 +617,8 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 @end example
 
 
-@item floor()
 @anchor{floor}
+@item floor()
 @findex floor()
 Converts a floating point number (or the elements of an array) to the
 largest integer that is not larger than the argument, i.e.@:
@@ -628,8 +628,8 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 @end example
 
 
-@item ceil()
 @anchor{ceil}
+@item ceil()
 @findex ceil()
 Converts a floating point number (or the elements of an array) to the
 smallest integer that is not less than the argument, i.e.@:
@@ -639,15 +639,15 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 @end example
 
 
-@item abs()
 @anchor{abs}
+@item abs()
 @findex abs()
 Returns the absolute value of an integer or floating point number (or
 the elements of an array) .
 
 
-@item mean()
 @anchor{mean}
+@item mean()
 @findex mean()
 Expects an one-dimensional array as input and returns the mean value of
 the array elements. Optionally, it accepts up to two more integer
@@ -657,28 +657,28 @@ length parameter is missingall elements up to the end of the array are
 used.
 
 
-@item rms()
 @anchor{rms}
+@item rms()
 @findex rms()
 Expects an one-dimensional array as input and returns the square root of
 the sum of the squared array elements, divided by the number of elements.
 
 
-@item sqrt()
 @anchor{sqrt}
+@item sqrt()
 @findex sqrt()
 Returns the square root of an integer or floating point number (or the
 elements of an array). The argument must be a positive number.
 
 
-@item random()
 @anchor{random}
+@item random()
 @findex random()
 Returns a pseudo-random number in the interval @w{[0, 1]}.
 
 
-@item set_seed()
 @anchor{set_seed}
+@item set_seed()
 @findex set_seed()
 Sets a seed for the random number generator used in the function
 @code{random()} function. The argument has to be a positive integer.
@@ -686,29 +686,29 @@ Alternatively, when no argument is given, the time in seconds since
 00:00:00 UTC, January 1, 1970 is used as the seed.
 
 
-@item sin()
 @anchor{sin}
+@item sin()
 @findex sin()
 Returns the sine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 
-@item cos()
 @anchor{cos}
+@item cos()
 @findex cos()
 Returns the cosine of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 
-@item tan()
 @anchor{tan}
+@item tan()
 @findex tan()
 Returns the tangent of the argument (simple number or elements of an
 array), with the argument interpreted as the angle in radian.
 
 
-@item asin()
 @anchor{asin}
+@item asin()
 @findex asin()
 Returns the inverse of the sine function of the argument (simple number
 or elements of an array) as an angle in radian. The argument must be in
@@ -716,8 +716,8 @@ the interval @w{[-1, 1]}, the result an element of the interval
 @w{[-pi/2, pi/2]}.
 
 
-@item acos()
 @anchor{acos}
+@item acos()
 @findex acos()
 Returns the inverse of the cosine function of the argument (simple
 number or elements of an array) as an angle in radian. The argument must
@@ -725,30 +725,30 @@ be in the interval @w{[-1, 1]}, the result an element of the interval
 @w{[0, pi]}.
 
 
-@item atan()
 @anchor{atan}
+@item atan()
 @findex atan()
 Returns the inverse of the tangent function of the argument (simple
 number or elements of an array) as an angle in radian, the result an
 element of the interval @w{[-pi, pi]}.
 
 
-@item sinh()
 @anchor{sinh}
+@item sinh()
 @findex sinh()
 Returns the hyperbolic sine of the argument (simple number or elements
 of an array).
 
 
-@item cosh()
 @anchor{cosh}
+@item cosh()
 @findex cosh()
 Returns the hyperbolic cosine of the argument (simple number or elements
 of an array).
 
 
-@item tanh()
 @anchor{tanh}
+@item tanh()
 @findex tanh()
 Returns the hyperbolic tangent of the argument (simple number or
 elements of an array).
@@ -763,28 +763,28 @@ elements of an array).
 
 
 @table @samp
-@item abort()
 @anchor{abort}
+@item abort()
 @findex abort()
 Teh function will abort the currently running program immediately, so
 it's kind of an emergency exit when nothing else will do. When called
 it displays a message box on the screen to inform the user.
 
 
-@item date()
 @anchor{date}
+@item date()
 @findex date()
 Returns a string with the current date in a form like @code{Sun Jun 17, 2000}.
 
 
-@item time()
 @anchor{time}
+@item time()
 @findex time()
 Returns a string with the current time in the form @code{hh:mm:ss}.
 
 
-@item delta_time()
 @anchor{delta_time}
+@item delta_time()
 @findex delta_time()
 This function (that can only be used in the @code{EXPERIMENT} section of
 the program) returns the time (in seconds) since the last call of the
@@ -793,8 +793,8 @@ it returns the time since the start of the experiment. The time
 returned by the function has micro-second resolution.
 
 
-@item wait()
 @anchor{wait}
+@item wait()
 @findex wait()
 Waits for the specified time. Times are always to be given in seconds or
 alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
@@ -804,8 +804,8 @@ error message and return immediately. The maximum time the function
 accepts is more than 2.1 billion seconds (or about 68 years).
 
 
-@item slice()
 @anchor{slice}
+@item slice()
 @findex slice()
 The function returns a part (slice) of an one-dimensional array. It
 expects at least two arguments, the array the values are to be taken
@@ -830,8 +830,8 @@ will return an array with 4 elements containing the data
 @end example
 
 
-@item dim()
 @anchor{dim}
+@item dim()
 @findex dim()
 The function returns the dimension of the array passed to it as
 argument. I.e.@: for the array
@@ -843,8 +843,8 @@ X[ 4, 2, 5 ]
 it will return 3.
 
 
-@item size()
 @anchor{size}
+@item size()
 @findex size()
 The function takes two arguments, an array and one of the dimensions of the
 array, and returns the size of this dimension. I.e.@: for an array defined as
@@ -855,8 +855,8 @@ array, and returns the size of this dimension. I.e.@: for an array defined as
 @code{size( X, 3 )} will return 5.
 
 
-@item sizes()
 @anchor{sizes}
+@item sizes()
 @findex sizes()
 This function is similar to @code{size()} but only takes an array as
 argument an returns a new one-dimensional array with the sizes of the

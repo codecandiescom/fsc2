@@ -764,8 +764,8 @@ has to be enclosed in curly braces and may contain as many statements as
 needed (or still fit into the memory).
 
 
-@subsection REPEAT loops
 @anchor{REPEAT loops}
+@subsection REPEAT loops
 @cindex REPEAT loops
 
 The most simple construct is the @code{REPEAT} loop. What is needed
@@ -794,8 +794,8 @@ repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
 
 
-@subsection WHILE loops
 @anchor{WHILE loops}
+@subsection WHILE loops
 @cindex WHILE loops
 
 
@@ -898,8 +898,8 @@ operators. Here is a list of these operators and their meaning:
 @end quotation
 
 
-@subsection UNTIL loops
 @anchor{UNTIL loops}
+@subsection UNTIL loops
 @cindex UNTIL loops
 
 Directly related to the @code{WHILE} loop is the @code{UNTIL} loop. The
@@ -909,8 +909,8 @@ condition becomes true.
 
 
 
-@subsection FOR loops
 @anchor{FOR loops}
+@subsection FOR loops
 @cindex FOR loops
 
 Before the @code{WHILE} loop one often has to initialize the loop
@@ -958,8 +958,8 @@ ones). And, of course, the loop variable don't have to be an integer
 variable!
 
 
-@subsection FOREVER loops
 @anchor{FOREVER loops}
+@subsection FOREVER loops
 @cindex FOREVER loops
 
 There can be situations where one wants to have the program running as
@@ -979,8 +979,8 @@ restricted to test runs where one wants to figure out the optimum
 parameter for an experiment.
 
 
-@subsection NEXT statement
 @anchor{NEXT statement}
+@subsection NEXT statement
 @cindex NEXT
 
 Under certain conditions one doesn't want to execute all statements of a
@@ -992,8 +992,8 @@ loop counter in @code{REPEAT} and @code{FOR} loops being set to the next
 value).
 
 
-@subsection BREAK statement
 @anchor{BREAK statement}
+@subsection BREAK statement
 @cindex BREAK
 
 There may be situations where one doesn't want to continue with a loop
@@ -1004,8 +1004,8 @@ program jumps to the first statement following the loop body.
 
 
 
-@subsection IF-ELSE constructs
 @anchor{IF-ELSE constructs}
+@subsection IF-ELSE constructs
 @cindex IF
 @cindex ELSE 
 @cindex IF-ELSE
@@ -1065,8 +1065,8 @@ IF x > 1.0 @{
 The following covers a few additional syntactic elements that didn't fit
 into any of the previous sections.
 
-@subsection @code{#include} statement
 @anchor{#include statement}
+@subsection @code{#include} statement
 @cindex #include statement
 
 Everywhere within an @acronym{EDL} program one can include another
@@ -1077,8 +1077,8 @@ program. Included files may also contain @code{#include} statements, up
 to 16 levels deep.
 
 
-@subsection @code{#exit} statement
 @anchor{#exit statement}
+@subsection @code{#exit} statement
 @cindex #exit statement
 
 When the @code{#exit} statement is found in an @acronym{EDL} program
@@ -1090,8 +1090,8 @@ current file is an included file (see the @code{#include} statement)
 the current file was included.
 
 
-@subsection @code{#quit} statement
 @anchor{#quit statement}
+@subsection @code{#quit} statement
 @cindex #quit statement
 
 When the @code{#quit} statement is encountered in a file @acronym{fsc2}

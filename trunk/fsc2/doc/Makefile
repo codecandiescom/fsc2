@@ -30,6 +30,10 @@ fsc2.html: $(docs)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
 	sed -e 's/fsc2_[0-9]\+/fsc2/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
+	for f in `ls *.html`; do \
+		sed -e 's/<\/HEAD>/<link rel=stylesheet type="text\/css" href="fsc2.css"><\/HEAD>/' $$f > $$f.x; \
+		mv $$f.x $$f; \
+	done
 
 
 ps: fsc2.ps
