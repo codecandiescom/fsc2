@@ -19,7 +19,7 @@ int hfs9000_init_hook( void )
 	int i;
 
 
-	/* Now test that the name entry in the pulser structure is NULL, otherwise
+	/* Test that the name entry in the pulser structure is NULL, otherwise
 	   assume, that another pulser driver has already been installed. */
 
 	if ( pulser_struct.name != NULL )
@@ -84,6 +84,8 @@ int hfs9000_init_hook( void )
 	pulser_struct.set_phase_switch_delay = NULL;
 
 	/* Finally, we initialize variables that store the state of the pulser */
+
+	hfs9000.trig_in_mode = EXTERNAL;
 
 	hfs9000.is_timebase = UNSET;
 
@@ -276,3 +278,234 @@ Var *pulser_update( Var *v )
 }
 
 
+/*----------------------------------------------------------------------*/
+/* Public function to change the position of pulses. If called with no  */
+/* argument all active pulses that have a position change time set will */
+/* be moved, otherwise all pulses passed as arguments to the function.  */
+/* Take care: The changes will only commited on the next call of the    */
+/*            function pulser_update() !                                */
+/*----------------------------------------------------------------------*/
+
+Var *pulser_shift( Var *v )
+{
+	PULSE *p;
+
+
+	if ( ! hfs9000_is_needed )
+		return vars_push( INT_VAR, 1 );
+
+	/* An empty pulse list means that we have to shift all active pulses that
+	   have a position change time value set */
+
+	if ( v == NULL )
+		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+			if ( p->num >= 0 && p->is_active && p->is_dpos )
+				pulser_shift( vars_push( INT_VAR, p->num ) );
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = hfs9000_get_pulse( v->val.lval );
+
+		if ( ! p->is_pos )
+		{
+			eprint( FATAL, "%s:ld: %s: Pulse %ld has no position set, so "
+					"shifting it is impossible.\n",
+					Fname, Lc, pulser_struct.name, p->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! p->is_dpos )
+		{
+			eprint( FATAL, "%s:%ld: %s: Amount of position change hasn't "
+					"been defined for pulse %ld.\n",
+					Fname, Lc, pulser_struct.name, p->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! p->is_old_pos )
+		{
+			p->old_pos = p->pos;
+			p->is_old_pos = SET;
+		}
+
+		if ( ( p->pos += p->dpos ) < 0 )
+		{
+			eprint( FATAL, "%s:%ld: %s: Shifting the position of pulse "
+					"%ld leads to an invalid  negative position of %s.\n",
+					Fname, Lc, pulser_struct.name,
+					p->num, hfs9000_pticks( p->pos ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( p->pos == p->old_pos )       // nothing really changed ?
+			p->is_old_pos = UNSET;
+
+		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+		p->needs_update = NEEDS_UPDATE( p );
+
+		if ( p->needs_update )
+			hfs9000.needs_update = SET;
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Public function for incrementing the length of pulses. If called with   */
+/* no argument all active pulses that have a length change defined are     */
+/* incremented, oltherwise all pulses passed as arguments to the function. */
+/* Take care: The changes will only commited on the next call of the       */
+/*            function pulser_update() !                                   */
+/*-------------------------------------------------------------------------*/
+
+Var *pulser_increment( Var *v )
+{
+	PULSE *p;
+
+
+	if ( ! hfs9000_is_needed )
+		return vars_push( INT_VAR, 1 );
+
+	/* An empty pulse list means that we have to increment all active pulses
+	   that have a length change time value set */
+
+	if ( v == NULL )
+		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+			if ( p->num >= 0 && p->is_active && p->is_dlen )
+				pulser_increment( vars_push( INT_VAR, p->num ) );
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = hfs9000_get_pulse( v->val.lval );
+
+		if ( ! p->is_len )
+		{
+			eprint( FATAL, "%s:%ld: %s: Pulse %ld has no length set, so "
+					"incrementing it length is impossibe.\n",
+					Fname, Lc, pulser_struct.name, p->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( p->channel->self == HFS9000_TRIG_OUT )
+		{
+			eprint( FATAL, "%s:%ld: %s: Length of Trigger Out pulse %ld "
+					"can't be changed.\n", Fname, Lc, pulser_struct.name,
+					p->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! p->is_dlen )
+		{
+			eprint( FATAL, "%s:%ld: %s: Length change time hasn't been "
+					"defined for pulse %ld.\n",
+					Fname, Lc, pulser_struct.name, p->num );
+			THROW( EXCEPTION );
+		}
+	
+		if ( ! p->is_old_len )
+		{
+			p->old_len = p->len;
+			p->is_old_len = SET;
+		}
+
+		if ( ( p->len += p->dlen ) < 0 )
+		{
+			eprint( FATAL, "%s:%ld: %s: Incrementing the length of pulse "
+					"%ld leads to an invalid negative pulse length of %s.\n",
+					Fname, Lc, pulser_struct.name,
+					p->num, hfs9000_pticks( p->len ) );
+			THROW( EXCEPTION );
+		}
+
+		if ( p->old_len == p->len )
+			p->is_old_len = UNSET;
+
+		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+		p->needs_update = NEEDS_UPDATE( p );
+
+		/* If the pulse was or is active we've got to update the pulser */
+
+		if ( p->needs_update )
+			hfs9000.needs_update = SET;
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_pulse_reset( Var *v )
+{
+	PULSE *p;
+
+
+	if ( ! hfs9000_is_needed )
+		return vars_push( INT_VAR, 1 );
+
+	/* An empty pulse list means that we have to reset all pulses (even the
+       inactive ones) */
+
+	if ( v == NULL )
+	{
+		if ( hfs9000_phs[ 0 ].function != NULL ||
+			 hfs9000_phs[ 1 ].function != NULL )
+			pulser_phase_reset( NULL );
+
+		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+			if ( p->num >= 0 )
+				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
+	}
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = hfs9000_get_pulse( v->val.lval );
+
+		/* Reset all changeable properties back to their initial values */
+
+		if ( p->is_pos && ! p->is_old_pos )
+		{
+			p->old_pos = p->pos;
+			p->is_old_pos = SET;
+		}
+
+		p->pos = p->initial_pos;
+		p->is_pos = p->initial_is_pos;
+
+		if ( p->is_len && ! p->is_old_len )
+		{
+			p->old_len = p->len;
+			p->is_old_len = SET;
+		}
+
+		p->len = p->initial_len;
+		p->is_len = p->initial_is_len;
+
+		if ( p->initial_is_dpos )
+			p->dpos = p->initial_dpos;
+		p->is_dpos = p->initial_is_dpos;
+
+		if ( p->initial_is_dlen )
+			p->dlen = p->initial_dlen;
+		p->is_dlen = p->initial_is_dlen;
+
+		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+		p->needs_update = NEEDS_UPDATE( p );
+
+		if ( p->needs_update )
+			hfs9000.needs_update = SET;
+	}
+
+	return vars_push( INT_VAR, 1 );
+}

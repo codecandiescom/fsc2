@@ -509,7 +509,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_len )
 		{
 			eprint( FATAL, "%s:%ld: %s: Pulse %ld has no length set, so "
-					"imcrementing it is impossibe.\n",
+					"incrementing it is impossibe.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}

@@ -36,10 +36,11 @@ Var *pulser_lock_keyboard( Var *v );
 #define DEVICE_NAME "HFS9000"
 
 
-#define MIN_TIMEBASE            1.6e-9     // minimum pulser time base: 1.6 ns
-#define MAX_TIMEBASE            2.0e-5     // maximum pulser time base: 20 us
+#define MIN_TIMEBASE           1.6e-9      // minimum pulser time base: 1.6 ns
+#define MAX_TIMEBASE           2.0e-5      // maximum pulser time base: 20 us
 
-#define MAX_CHANNELS            4          // number of channels
+#define MIN_CHANNEL            1
+#define MAX_CHANNEL            4           // number of channels
 
 
 # define MIN_POD_HIGH_VOLTAGE  -1.5
@@ -58,7 +59,14 @@ Var *pulser_lock_keyboard( Var *v );
 
 #define MAX_PULSER_BITS       65536        // maximum number of bits in channel
 
-#define HFS9000_TRIG_OUT          0
+
+/* Trigger Out is treated as a kind of channel with the following
+   restrictions: The levels of this channel are fixed and it can't be
+   inverted, there can be only one pulse and the length of the pulse is
+   fixed to HFS9000_TRIG_OUT_PULSE_LEN. */
+
+#define HFS9000_TRIG_OUT            0
+#define HFS9000_TRIG_OUT_PULSE_LEN  2.0e-8  // roughly 20 ns
 
 
 #define START ( ( bool ) 1 )
@@ -114,6 +122,8 @@ typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
+	char *old;
+	char *new;
 } CHANNEL;
 
 
@@ -137,7 +147,7 @@ typedef struct {
 	long max_seq_len;        // maximum length of all pulse sequences
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	CHANNEL channel[ MAX_CHANNELS + 1 ];  /* zero is for TRIGGER_OUT ! */
+	CHANNEL channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
 
 	int needed_channels;     // number of channels that are going to be needed
 	                         // in the experiment
@@ -204,6 +214,9 @@ bool hfs9000_is_needed = UNSET;
 HFS9000 hfs9000;
 PULSE *hfs9000_Pulses = NULL;
 bool hfs9000_IN_SETUP = UNSET;
+const char *hfs9000_fnames[ ] = { "MW", "TWT", "TWTG", "DET", "DETG", "DFNS",
+								  "RF", "RFG", "PSHP", "PHS1", "PHS2",
+								  "O1", "O2", "O3", "O4" };
 
 #else
 
@@ -211,6 +224,7 @@ extern bool hfs9000_is_needed;
 extern HFS9000 hfs9000;
 extern PULSE *hfs9000_Pulses;
 extern bool hfs9000_IN_SETUP;
+extern const char **hfs9000_fnames;
 
 #endif
 
@@ -266,16 +280,21 @@ const char *hfs9000_ptime( double time );
 const char *hfs9000_pticks( Ticks ticks );
 int hfs9000_start_compare( const void *A, const void *B );
 Ticks hfs9000_get_max_seq_len( void );
-void hfs9000_calc_padding( void );
-void hfs9000_set( bool *arena, Ticks start, Ticks len, Ticks offset );
-int hfs9000_diff( bool *old, bool *new, Ticks *start, Ticks *length );
+void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset );
+int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length );
 
 
 /* Functions fron hfs9000_run.c */
 
+void hfs9000_do_update( void );
 void hfs9000_do_checks( FUNCTION *f );
+void hfs9000_set_pulses( FUNCTION *f );
+void hfs9000_full_reset( void );
 
 
 /* Functions from hfs9000_gpib.c */
 
 bool hfs9000_init( const char *name );
+bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state );
+bool hfs9000_set_trig_out_pulse( void );
+bool hfs9000_run( bool flag );
