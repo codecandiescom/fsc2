@@ -80,8 +80,10 @@ static int exception_stack_pos = -1;
 
 jmp_buf *push_exception_frame( const char *file, int line )
 {
-	if ( exception_stack_pos >= MAX_NESTED_EXCEPTION )
+	if ( exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
 	{
+		fprintf( stderr, "%s: Too many nested exceptions at %s:%d.\n",
+				 prog_name, file, line );
 	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
@@ -107,6 +109,8 @@ void pop_exception_frame( const char *file, int line )
 {
 	if ( exception_stack_pos < 0 )
 	{
+		fprintf( stderr, "%s: Exception stack empty at %s:%d.\n",
+				 prog_name, file, line );
 		syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
@@ -160,6 +164,8 @@ Exception_Types get_exception_type( const char *file, int line )
 	if ( exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
 		 ! exception_stack[ exception_stack_pos + 1 ].is_thrown )
 	{
+	    fprintf( stderr, "%s: Request for type of exception that never got "
+				 "thrown at %s:%d.\n", prog_name, file, line );
 	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
 				"thrown at %s:%d.\n", prog_name, file, line );
 #ifdef FSC2_HEADER
@@ -171,6 +177,8 @@ Exception_Types get_exception_type( const char *file, int line )
 
 	if ( exception_stack_pos < -1 )
 	{
+	    fprintf( stderr, "%s: Exception stack is empty at %s:%d.\n",
+				 prog_name, file, line );
 	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
 				prog_name, file, line );
 #ifdef FSC2_HEADER
