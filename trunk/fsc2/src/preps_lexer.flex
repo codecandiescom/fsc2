@@ -62,7 +62,7 @@ WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
-UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
+UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^]+
 
 
 		/*---------------*/
@@ -131,23 +131,28 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
                 return( FLOAT_TOKEN );
             }
 
+            /* handling of string constants (to be used as format strings in
+			   the print() function only */
 {STR}       {
 				prepstext[ strlen( prepstext ) - 1 ] = '\0';
 				prepslval.sptr = prepstext + 1;
 				return( STR_TOKEN );
 			}
 
+			/* handling of function, variable and array identifiers */
 {IDENT}     {
-				int acc;
-
 				/* special treatent for calls of print() function */
 
 				if ( ! strcmp( prepstext, "print" ) )
 				    return( PRINT_TOK );
 
+				/* first check if the identifier is a function name */
+
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )
 				{
+					int acc;
+
 					if ( acc != ACCESS_ALL_SECTIONS )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
@@ -158,33 +163,33 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 					return( FUNC_TOKEN );
 				}
 
-				if ( ( prepslval.vptr = vars_get( prepstext ) )
-				     == NULL )
+				/* if it's not a function it should be a variable */
+
+				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
 				return( VAR_TOKEN );
 			}
 
-"=="        return( EQ );
-"<"         return( LT );
-"<="        return( LE );
-">"         return( GT );
-">="        return( GE );
-"="         return( '=' );
-"["         return( '[' );
-"]"         return( ']' );
-","         return( ',' );
-"{"         return( '{' );
-"}"         return( '}' );
+			/* stuff used with functions, arrays and math */
 
-"("         return( '(' );
-")"         return( ')' );
-"+"         return( '+' );
-"-"         return( '-' );
-"*"         return( '*' );
-"/"         return( '/' );
-"%"         return( '%' );
-"^"         return( '^' );
+"=="        return( EQ );        /* equal */                  
+"<"         return( LT );        /* less than */              
+"<="        return( LE );        /* less than or equal */     
+">"         return( GT );        /* greater than */           
+">="        return( GE );        /* greater than or equal */  
+"="         return( '=' );       /* assignment operator */    
+"["         return( '[' );       /* start of array indices */ 
+"]"         return( ']' );       /* end of array indices */   
+","         return( ',' );       /* list separator */         
+"("         return( '(' );       /* start of function argument list */
+")"         return( ')' );       /* end of function argument list */
+"+"         return( '+' );       /* addition operator */      
+"-"         return( '-' );       /* subtraction operator or unary minus */
+"*"         return( '*' );       /* multiplication operator */
+"/"         return( '/' );       /* division operator */      
+"%"         return( '%' );       /* modulo operator */        
+"^"         return( '^' );       /* exponentiation operator */
 
 			/* handling of end of statement character */
 ";"			return( ';' );
@@ -242,6 +247,8 @@ int preparations_parser( FILE *in )
 				Fname, Lc, prepstext );
 		return( FAIL );
 	}
+	CATCH( PREPARATIONS_EXCEPTION )
+		return( FAIL );
 
 	return( Preps_Next_Section );
 }
