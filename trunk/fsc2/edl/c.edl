@@ -14,4 +14,4 @@ print( "% round(8.6) = #, %round(-8.6) = #\n", round(8.6), round(-8.6));
 print( "floor(8.%6) = #, floor(-8.6) = #\n", floor(8.6), floor(-8.6));
 print( "ceil(8.6) = #, ceil(-8.6) = #\n", ceil(8.6), ceil(-8.6));
 print( "tan( pi / 2 ) = #\n", tan( 2.0 * atan( 1.0 ) ) );
-print( "# #\n", random());
+print( "#\n", random());
