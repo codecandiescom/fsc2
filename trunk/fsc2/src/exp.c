@@ -640,6 +640,7 @@ void exp_test_run( void )
 			}
 		}
 
+		clear_tools_after_test( );
 		run_end_of_test_hooks( );
 		TRY_SUCCESS;
 	}
@@ -654,8 +655,6 @@ void exp_test_run( void )
 		TEST_RUN = UNSET;
 		PASSTHROU( );
 	}
-
-	clear_tools_after_test( );
 
 	Fname = NULL;
 	save_restore_variables( UNSET );
