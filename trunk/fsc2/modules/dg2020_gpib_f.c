@@ -202,11 +202,10 @@ bool dg2020_init( const char *name )
 		if ( dg2020.is_trig_in_level )
 			dg2020_set_trigger_in_level( dg2020.trig_in_level );
 		if ( dg2020.is_trig_in_slope )
-			dg2020_set_trigger_in_level( dg2020.trig_in_slope );
+			dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
 		if ( dg2020.is_trig_in_impedance )
 			dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
 	}
-		
 
 	/* If additional padding is needed or trigger mode is EXTERNAL create
 	   sequence and blocks */
@@ -502,7 +501,9 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 	/* For external trigger mode set trigger wait for first (and only) block */
 
 	if ( dg2020.trig_in_mode == EXTERNAL &&
-		 gpib_write( dg2020.device, "DATA:SEQ:TWAIT: 0,ON", 20 ) == FAILURE )
+		 ( gpib_write( dg2020.device, "DATA:SEQ:REP 0,1", 16 ) == FAILURE ||
+		   gpib_write( dg2020.device, "DATA:SEQ:TWAIT 0,1", 18 ) == FAILURE )
+		)
 		dg2020_gpib_failure( );
 
 	return OK;

@@ -8,20 +8,6 @@
 
 
 
-#ifdef MAX_DEBUG
-void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type );
-void x_dg2020_set_constant( int ch, Ticks start, Ticks len, int type )
-{
-	printf( "->  %2d: %8ld %8ld   %s\n", ch, start + 1, len,
-			type == 1 ? "HIGH" : "LOW" );
-	fflush( stdout );
-}
-
-#define dg2020_set_constant x_dg2020_set_constant
-
-#endif
-
-
 #define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
 #define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
@@ -41,18 +27,21 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-#ifdef MAX_DEBUG
+/*
 	if ( ! TEST_RUN )
 		printf( "\nChanges to the channels:\n\n" );
-#endif
+*/
 
 	dg2020_reorganize_pulses( TEST_RUN );
 
-#ifdef MAX_DEBUG
+/*
 	{
 		PULSE *p = dg2020_Pulses;
 
-		printf( "\nNew pulse positions:\n\n" );
+		if ( TEST_RUN )
+			printf( "\nTEST New pulse positions:\n\n" );
+		else
+			printf( "\nNew pulse positions:\n\n" );
 
 		while ( p != NULL )
 		{
@@ -68,14 +57,12 @@ void dg2020_do_update( void )
 		}
 		printf( "\n" );
 	}
-#endif
+*/
 
 	/* Finally commit all changes */
 
-#ifndef MAX_DEBUG
 	if ( ! TEST_RUN )
 		dg2020_update_data( );
-#endif
 
 	dg2020.needs_update = UNSET;
 }
@@ -119,18 +106,6 @@ void dg2020_reorganize_pulses( bool flag )
 
 		dg2020_commit( f, flag );
 	}
-/*
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = &dg2020.function[ i ];
-		if ( ! f->is_used ||
-			 f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-			continue;
-
-		dg2020_commit( f, flag );
-	}
-*/
 }
 
 
@@ -199,7 +174,7 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 			  f->self == PULSER_CHANNEL_PHASE_2 ) &&
 			f->is_used );
 
-	/* First check if any of the phase pulses will need to be updated */
+	/* First check if any of the phase pulses needs to be updated */
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
@@ -242,7 +217,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 	int ppp_num;                  // and the length of this list
 	PULSE *pp, *pn;
 	int i;
-	static PULSE *for_pulse;
+	static PULSE *for_pulse = NULL;
 
 
 	/* If the pulse the phase pulse is associated with has become inactive
@@ -264,6 +239,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		phase_p->len = 0;
 		phase_p->is_active = UNSET;
 		phase_p->needs_update = SET;
+
 		return;
 	}
 			
@@ -352,7 +328,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		   probablity is high that the preceeding pulse is going to be shifted
 		   to later times or is lenghtened */
 
-		phase_p->pos = p->pos - f->psd - dg2020.grace_period;
+		phase_p->pos = p->pos - f->psd;
 
 		/* If this is too near to the preceeding pulse leave out the grace
 		   period, and if this still is too near to the previous pulse
@@ -379,8 +355,35 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
 		{
 			for ( i = 0; i < ppp_num; i++ )
+			{
 				if ( pppl[ i ]->is_len )
 					pppl[ i ]->len = phase_p->pos - pppl[ i ]->pos;
+
+				if ( pppl[ i ]->pos + pppl[ i ]->len <
+					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
+					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+				{
+					eprint( FATAL, "%s:%ld: DG2020: Distance between pulses "
+							"%ld and %ld becomes too small to allow setting "
+							"of phase pulses.", Fname, Lc, p->num,
+							pppl[ i ]->for_pulse->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( pppl[ i ]->pos + pppl[ i ]->len <
+					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
+					 + dg2020.grace_period  &&
+					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
+					 p != for_pulse )
+				{
+					eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld "
+							"become so close that problems with phase "
+							"switching may result.", Fname, Lc, p->num,
+							pppl[ i ]->for_pulse->num );
+					for_pulse = p;
+				}
+			}
+
 			T_free( pppl );
 		}
 
@@ -391,22 +394,10 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		phase_p->needs_update = SET;
 	}
 
-	if ( phase_p->is_old_pos && phase_p->old_pos == phase_p->pos )
-		phase_p->is_old_pos = UNSET;
-
 set_length:
 
-	/* Now that we're done with setting the position we can continue with
-	   setting the phase pulses length. We don't have to do anything if the
-	   phase pulse has a length set and the lenght exceeds the pulse it
-	   belongs to by the grace period but not the maximum length */
-
-	if ( phase_p->is_len &&
-		 phase_p->pos + phase_p->len >= p->pos + p->len + dg2020.grace_period 
-		 &&
-		 ( ! flag &&
-		   phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay ) )
-		return;
+	if ( phase_p->is_old_pos && phase_p->old_pos == phase_p->pos )
+		phase_p->is_old_pos = UNSET;
 
 	/* Store the old length of the phase pulse (if there's one) */
 
@@ -429,15 +420,42 @@ set_length:
 	}
 	else
 	{
-		/* This length is only tentatively and will possibly change when the
+		pn = p->function->pulses[ nth + 1 ];
+
+		/* This length is only tentatively and may become shorter when the
 		   following phase pulse is set */
 
-		pn = p->function->pulses[ nth + 1 ];
-		phase_p->len = pn->pos - f->psd - dg2020.grace_period - phase_p->pos;
+		if ( phase_p->is_len &&
+			 phase_p->pos + phase_p->len >=
+			 p->pos + p->len + dg2020.grace_period &&
+			 phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
+			 phase_p->pos + phase_p->len <= pn->pos - f->psd )
+			return;
+
+		phase_p->len = pn->pos - f->psd - phase_p->pos;
+
+		if ( phase_p->pos + phase_p->len < p->pos + p->len && p->pc != pn->pc )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Distance between pulses %ld and "
+					"%ld becomes too small to allow setting of phase pulses.",
+					Fname, Lc, p->num, pn->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( phase_p->pos + phase_p->len <
+			 p->pos + p->len + dg2020.grace_period &&
+			 p->pc != pn->pc && p != for_pulse )
+		{
+			eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld become so "
+					"close that problems with phase switching may result.",
+					Fname, Lc, p->num, pn->num );
+			for_pulse = p;
+		}
+
 	}
 
 	phase_p->is_len = SET;
-	phase_p->needs_update = SET;
+	phase_p->needs_update = NEEDS_UPDATE( phase_p );
 
 	/* Make sure the flags for an old position or length are only set if the
 	   old and the new value really differ */
@@ -446,7 +464,8 @@ set_length:
 		phase_p->is_old_len = UNSET;
 
 	if ( phase_p->len < -1 )
-		printf( "!Q!Q!Q! pulse %ld has len of %ld\n", phase_p->num, phase_p->len );
+		printf( "!Q!Q!Q! pulse %ld has len of %ld\n",
+				phase_p->num, phase_p->len );
 }
 
 
@@ -645,6 +664,8 @@ void dg2020_set_pulses( FUNCTION *f )
 		if ( start != end )
 			dg2020_set_constant( p->channel->self, start, end - start,
 								   ON( f ) );
+
+
 	}
 
 	/* Finally set the area following the last active pulse to the end

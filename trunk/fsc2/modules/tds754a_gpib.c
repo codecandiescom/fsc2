@@ -115,24 +115,6 @@ bool tds754a_init( const char *name )
         return( FAIL );
     }
 
-    /* Now we still have to prepare the digitzer for the measurement:
-       1. set OPC (operation complete) bit in Device Event Status Enable
-          Register (DESER) -> corresponding bit in Standard Event Status
-          Register (SESR) can be set
-       2. set OPC bit also in Event Status Enable Register (ESER) ->
-          ESB bit in status byte register can be set
-       3. set ESB bit in Service Request Enable Register (SRER)-> SRQ can
-          be flagged due to a set ESB-bit in Status Byte Register (SBR)
-    */
-
-    if ( gpib_write( tds754a.device, "DESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*ESE 1", 6 )         == FAILURE ||
-         gpib_write( tds754a.device, "*SRE 0", 7 )        == FAILURE )
-    {
-        gpib_local( tds754a.device );
-        return FAIL;
-    }
-
 	return OK;
 }
 
@@ -186,7 +168,7 @@ bool tds754a_get_record_length( long *ret )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
-    *ret = strtol( reply, NULL, 10 );
+    *ret = T_atol( reply );
     return OK;
 }
 
@@ -304,6 +286,9 @@ int tds754a_get_acq_mode(void)
 	return SAMPLE;
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 bool tds754a_get_cursor_position( int cur_no, double *cp )
 {
@@ -587,28 +572,19 @@ double tds754a_get_sens( int channel )
 
 bool tds754a_start_aquisition( void )
 {
-	int status;
+//	int status;
 
 
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
        2. set state to run
-	   3. set stop after sequence
-       3. tell digitizer to set the operation complete bit in the SESR when
-	      the measurement is finished, this, in turn will set the ESB-bit in
-          the status byte register which leads to a SRQ */
+	   3. set stop after sequence */
 
-    if ( // ! tds754a_clear_SESR( ) ||
+    if ( ! tds754a_clear_SESR( ) ||
          gpib_write( tds754a.device, "ACQ:STATE RUN", 13 ) == FAILURE ||
-		 gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE ||
-         gpib_write( tds754a.device, "*OPC", 4 ) == FAILURE )
+		 gpib_write( tds754a.device, "ACQ:STOPA SEQ", 13 ) == FAILURE )
 		tds754a_gpib_failure( );
 
-    /* Now all left to do is to wait for a SRQ (don't test return status
-       for RQS bit - it's obviously never set (?)) */
-
-    if ( gpib_wait( tds754a.device, RQS, &status ) == FAILURE )
-		tds754a_gpib_failure( );
 
 	return OK;
 }
@@ -647,7 +623,8 @@ double tds754a_get_area( int channel, WINDOW *w )
 
 	/* get the the area */
 
-	if ( gpib_write( tds754a.device, "MEASU:IMM:VAL?", 14 ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "*WAI", 4 ) == FAILURE ||
+		 gpib_write( tds754a.device, "MEASU:IMM:VAL?", 14 ) == FAILURE ||
 		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -693,7 +670,8 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	/* Ask digitizer to send the curve */
 
-	if ( gpib_write( tds754a.device, "CURV?", 5 ) == FAILURE )
+	if ( gpib_write( tds754a.device, "*WAI", 4 ) == FAILURE ||
+		 gpib_write( tds754a.device, "CURV?", 5 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	/* Read just the first two bytes, these are a '#' character plus the

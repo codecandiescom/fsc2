@@ -67,8 +67,8 @@ Var *pulser_pulse_reset( Var *v );
 #define MAX_PULSER_BITS    65536  // maximum number of bits in channel
 
 
-#define START ( ( bool ) 0 )
-#define STOP  ( ( bool ) 1 )
+#define START ( ( bool ) 1 )
+#define STOP  ( ( bool ) 0 )
 
 /* A pulse is acive if it has a position and a length set and if the length
    is non-zero */

@@ -87,36 +87,34 @@ void tds754a_do_pre_exp_checks( void )
 	/* Remove all unused windows and test if for all other windows the width
 	   is set */
 
-	while ( tds754a.w != NULL && ! tds754a.w->is_used )
+	for ( w = tds754a.w; w != NULL; )
 	{
-		w = tds754a.w;
-		tds754a.w = tds754a.w->next;
-		T_free( w );
-		tds754a.num_windows--;
-	}
+		if ( ! w->is_used )
+		{
+			if ( w == tds754a.w )
+				wn = tds754a.w = w->next;
+			else
+				wn = w->prev->next = w->next;
 
-	for ( w = tds754a.w; w->next != NULL; w = w->next )
-	{
+			T_free( w );
+			tds754a.num_windows--;
+			w = wn;
+			continue;
+		}
+
 		if ( ! w->is_width )
 			is_width = UNSET;
-		if ( ! w->next->is_used )
-		{
-			wn = w->next;
-			w->next = w->next->next;
-			T_free( wn );
-			tds754a.num_windows--;
-		}
+		w = w->next;
 	}
-
-	if ( ! w->is_width )
-		is_width = UNSET;
 
 	/* If not get the distance of the cursors on the digitizers screen and
 	   use it as the default width. */
 
-	if ( w != NULL )
+	if ( tds754a.w != NULL && ! is_width )
 	{
 		tds754a_get_cursor_distance( &width );
+
+		width = fabs( width );
 
 		if ( width == 0.0 )
 		{
@@ -126,13 +124,8 @@ void tds754a_do_pre_exp_checks( void )
 		}
 
 		for ( w = tds754a.w; w != NULL; w = w->next )
-		{
 			if ( ! w->is_width )
-			{
 				w->width = width;
-				w->is_width = SET;
-			}
-		}
 	}
 
 	/* It's not possible to set arbitrary cursor distances - they've got to be
@@ -149,7 +142,8 @@ void tds754a_do_pre_exp_checks( void )
 		dcd = w->width;
 		dtb = tds754a.timebase;
 		fac = 1.0;
-		while ( fabs( dcd ) < 1.0 )
+
+		while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
 		{
 			dcd *= 1000.0;
 			dtb *= 1000.0;

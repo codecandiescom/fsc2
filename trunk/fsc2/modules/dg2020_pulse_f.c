@@ -408,14 +408,13 @@ bool dg2020_change_pulse_position( long pnum, double time )
 		dg2020.needs_update = SET;
 
 		/* stop the pulser */
-#ifndef MAX_DEBUG
+
 		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 					"failed.", Fname, Lc );
 			THROW( EXCEPTION );
 		}
-#endif
 	}
 
 	return OK;
@@ -462,14 +461,13 @@ bool dg2020_change_pulse_length( long pnum, double time )
 		dg2020.needs_update = SET;
 
 		/* stop the pulser */
-#ifndef MAX_DEBUG
+
 		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
 		{
 			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
 					"failed.", Fname, Lc );
 			THROW( EXCEPTION );
 		}
-#endif
 	}
 
 	return OK;

@@ -610,7 +610,7 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		   associated with and its predecessor we have to complain (except
 		   when both pulses use the same phase sequence or none at all) */
 
-		if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
+		if ( p->pos - pp->pos - pp->len < f->psd && p->pc != pp->pc )
 		{
 			eprint( FATAL, "DG2020: Distance between pulses %ld and %ld "
 					"is too small to allow setting of phase pulses.",
@@ -619,11 +619,11 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		}
 
 		/* Try to start the phase pulse as late as possible, i.e. just the
-		   phase switch delay plus the grace period before the associated
-		   pulse, because the probablity is high that the preceeding pulse is
-		   going to be shifted to later times or is lenghtened */
+		   phase switch delay before the associated pulse, because the
+		   probablity is high that the preceeding pulse is going to be
+		   shifted to later times or is lenghtened */
 
-		np->pos = np->initial_pos = p->pos - f->psd - dg2020.grace_period;
+		np->pos = np->initial_pos = p->pos - f->psd;
 
 		/* If this is too near to the preceeding pulse leave out the grace
 		   period, and if this still is too near to the previous pulse
@@ -634,24 +634,49 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		{
 			np->pos += dg2020.grace_period;
 
-			if ( np->pos < pp->pos + pp->len + dg2020.grace_period  &&
+			if ( np->pos < pp->pos + pp->len + dg2020.grace_period &&
 				 p->pc != pp->pc && for_pulse != p )
 			{
-				eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld are so "
+				eprint( SEVERE, "DG2020: Pulses %ld and %ld are so "
 						"close that problems with phase switching may "
-						"result.", Fname, Lc, pp->num, p->num );
+						"result.", pp->num, p->num );
 				for_pulse = p;
 			}
 		}
 
 		/* Adjust the length of all phase pulses associated with the
-		   precceding pulse */
+		   preceeding pulse */
 
 		if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
 		{
 			for ( i = 0; i < ppp_num; i++ )
+			{
 				if ( pppl[ i ]->is_len )
 					pppl[ i ]->len = np->pos - pppl[ i ]->pos;
+
+				if ( pppl[ i ]->pos + pppl[ i ]->len <
+					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
+					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+				{
+					eprint( FATAL, "DG2020: Distance between pulses %ld and "
+							"%ld is too small to allow setting of phase "
+							"pulses.", p->num, pppl[ i ]->for_pulse->num );
+					THROW( EXCEPTION );
+				}
+
+				if ( pppl[ i ]->pos + pppl[ i ]->len <
+					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
+					 + dg2020.grace_period  &&
+					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
+					 p != for_pulse )
+				{
+					eprint( SEVERE, "DG2020: Pulses %ld and %ld are so close "
+							"that problems with phase switching may result.",
+							p->num, pppl[ i ]->for_pulse->num );
+					for_pulse = p;
+				}
+			}
+
 			T_free( pppl );
 		}
 	}
@@ -666,12 +691,28 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		np->len = np->initial_len = -1;
 	else
 	{
-		/* This length is only tentatively and will possibly change when the
+		/* This length is only tentatively and may become shorter when the
 		   following phase pulse is set */
 
 		pn = p->function->pulses[ nth + 1 ];
-		np->len = np->initial_len =
-			pn->pos - f->psd - dg2020.grace_period - np->pos;
+		np->len = np->initial_len =	pn->pos - f->psd - np->pos;
+
+		if ( np->pos + np->len < p->pos + p->len && p->pc != pn->pc )
+		{
+			eprint( FATAL, "DG2020: Distance between pulses %ld and %ld is "
+					"too small to allow setting of phase pulses.",
+					p->num, pn->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&
+			 p->pc != pn->pc && p != for_pulse )
+		{
+			eprint( SEVERE, "DG2020: Pulses %ld and %ld are so close "
+					"that problems with phase switching may result.",
+					p->num, pn->num );
+			for_pulse = p;
+		}
 	}
 	np->is_len = p->is_len == SET;
 }

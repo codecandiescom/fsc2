@@ -411,12 +411,12 @@ static void run_child( void )
 	signal( DO_SEND, do_send_handler );
 	signal( DO_QUIT, do_quit_handler );
 
-///*
+/*
 {
 	bool h = SET;
 	while ( h );
 }
-//*/
+*/
 
 	/* Send parent process a NEW_DATA signal thus indicating that the child
 	   process is done with preparations and ready to start the experiment.

@@ -64,10 +64,6 @@ int tds754a_end_of_test_hook( void )
 
 int tds754a_exp_hook( void )
 {
-   	WINDOW *w;
-	double width;
-
-
 	if ( ! tds754a_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "TDS754A: Initialization of device failed." );
@@ -75,27 +71,6 @@ int tds754a_exp_hook( void )
 	}
 
 	tds754a_do_pre_exp_checks( );
-
-	/* Test if for all window the width is set */
-
-	for ( w = tds754a.w; w != NULL; w = w->next )
-		if ( ! w->is_width )
-			break;
-
-	/* If not get the distance of the cursors on the digitizers screen
-	   and use it as the default width */
-
-	if ( w != NULL )
-	{
-		tds754a_get_cursor_distance( &width );
-
-			for ( w = tds754a.w; w != NULL; w = w->next )
-				if ( ! w->is_width )
-				{
-					w->width = width;
-					w->is_width = SET;
-				}
-	}
 
 	return 1;
 }
@@ -208,13 +183,17 @@ Var *digitizer_define_window( Var *v )
 	/* Create a new window structure and append it to the list of windows */
 
 	if ( tds754a.w == NULL )
+	{
 		tds754a.w = w = T_malloc( sizeof( WINDOW ) );
+		w->prev = NULL;
+	}
 	else
 	{
 		w = tds754a.w;
 		while ( w->next != NULL )
 			w = w->next;
 		w->next = T_malloc( sizeof( WINDOW ) );
+		w->next->prev = w;
 		w = w->next;
 	}
 
@@ -340,7 +319,14 @@ Var *digitizer_num_averages( Var *v )
 	}
 	vars_pop( v );
 
-	if ( num_avg < 0 )
+	if ( num_avg == 0 )
+	{
+		eprint( FATAL, "%s:%ld: TDS754A: Can't do zero averages. If you want "
+				"to set sample mode specify 1 as number of averages.",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+	else if ( num_avg < 0 )
 	{
 		eprint( FATAL, "%s:%ld: TDS754A: Invalid negative number of averages: "
 				"%ld.", Fname, Lc, num_avg );
@@ -442,7 +428,9 @@ Var *digitizer_trigger_channel( Var *v )
 Var *digitizer_start_acquisition( Var *v )
 {
 	v = v;
-	tds754a_start_aquisition( );
+
+	if ( ! TEST_RUN )
+		tds754a_start_aquisition( );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -622,7 +610,7 @@ Var *digitizer_get_curve( Var *v )
 	}
 
 	length = 123;
-	array = T_malloc( length * sizeof( long ) );
+	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 	nv = vars_push( FLOAT_TRANS_ARR, array, length );

@@ -171,6 +171,11 @@ static bool unpack_and_accept( void *ptr )
 				len = *( ( long * ) ptr );
 				ptr_next = ptr + sizeof( long ) + len * sizeof( double );
 				break;
+
+			default :
+				eprint( FATAL, "Internal communication error at %s:%d.",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
 		}
 
 		TRY

@@ -1338,7 +1338,7 @@ long vars_calc_index( Var *a, Var *v )
 
 
 /*-------------------------------------------------------------------------*/
-/* The function sets up a new array, pointed to by the 'from'-filed in 'v' */
+/* The function sets up a new array, pointed to by the 'from'-field in 'v' */
 /* dimension 'dim' with the sizes of the dimensions specified by a list of */
 /* indices on the stack, starting directly after 'v'. If the list contains */
 /* only one index less than the dimension, a variable sized array is       */
@@ -1797,7 +1797,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Again being paranoid... */
 
-	assert( dest->flags & NEED_SLICE || dest->flags & NEED_ALLOC );
+	assert( dest->flags & NEED_SLICE || dest->from->flags & NEED_ALLOC );
 
 	d = dest->from;
 

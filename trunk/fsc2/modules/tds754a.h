@@ -41,7 +41,8 @@ typedef struct _W {
 	double width;               // width of window (in time units)
 	bool is_width;              // flag, set if width of window has been set
 	long num_points;            // number of data points between the cursors
-	struct _W * next;           // pointer to next window structure
+	struct _W *next;            // pointer to next window structure
+	struct _W *prev;            // pointer to previous window structure
 } WINDOW;
 
 
@@ -117,6 +118,7 @@ bool tds754a_get_trigger_pos( double *ret );
 long tds754a_get_num_avg( void );
 bool tds754a_set_num_avg( long num_avg );
 int tds754a_get_acq_mode(void);
+bool tds754a_get_cursor_position( int cur_no, double *cp );
 bool tds754a_get_cursor_distance( double *cd );
 bool tds754a_set_trigger_channel( const char *name );
 int tds754a_get_trigger_channel( void );
