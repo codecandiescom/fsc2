@@ -644,7 +644,7 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
 						   "is smaller than %s.\n", ppp->pulse->num,
 						   pp->pulse->num, dg2020_pticks(
-							   dg2020.minimum_twt_pulse_distance ) );
+										 dg2020.minimum_twt_pulse_distance ) );
 			}
 		}
 	}

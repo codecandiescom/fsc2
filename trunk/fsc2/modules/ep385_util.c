@@ -45,10 +45,12 @@ Ticks ep385_double2ticks( double p_time )
 		ep385.timebase_mode = INTERNAL;
 		ep385.timebase = FIXED_TIMEBASE;
 
-		ep385.shape_2_defense =
-			 Ticksrnd( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
-		ep385.defense_2_shape =
-			 Ticksrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
+		ep385.shape_2_defense = Ticksrnd( ceil (
+					 SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
+		ep385.defense_2_shape = Ticksrnd( ceil (
+					 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE ) );
+		ep385.minimum_twt_pulse_distance =
+			   Ticksrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / FIXED_TIMEBASE ) );
 	}
 
 	ticks = p_time / ep385.timebase;

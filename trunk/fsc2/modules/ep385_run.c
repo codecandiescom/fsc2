@@ -832,7 +832,7 @@ void ep385_twt_padding_check( CHANNEL *ch )
 					print( SEVERE, "Distance between TWT pulses #%ld and #%ld "
 						   "is smaller than %s.\n", ppp->pulse->num,
 						   pp->pulse->num, ep385_pticks(
-							   ep385.minimum_twt_pulse_distance ) );
+										  ep385.minimum_twt_pulse_distance ) );
 			}
 		}
 	}

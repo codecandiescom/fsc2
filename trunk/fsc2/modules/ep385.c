@@ -352,6 +352,11 @@ int ep385_end_of_test_hook( void )
 		}
 	}
 
+	if ( ep385.twt_distance_warning != 0 )
+		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+			   "than %s.\n", ep385.twt_distance_warning,
+			   ep385_pticks( ep385.minimum_twt_pulse_distance ) );
+
 	/* Reset the internal representation back to its initial state */
 
 	if ( ! ep385.is_cw_mode )

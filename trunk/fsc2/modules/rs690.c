@@ -52,7 +52,7 @@ int rs690_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+//	need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
@@ -320,6 +320,11 @@ int rs690_end_of_test_hook( void )
 			T_free( min );
 		}
 	}
+
+	if ( rs690.twt_distance_warning )
+		print( SEVERE, "Distance between TWT pulses was %ld times shorter "
+			   "than %s.\n", rs690.twt_distance_warning,
+			   rs690_pticks( rs690.minimum_twt_pulse_distance ) );
 
 	rs690_cleanup_fs( );
 

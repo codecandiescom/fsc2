@@ -104,6 +104,9 @@ bool rs690_store_timebase( double timebase )
 		rs690.is_timebase = SET;
 	}
 
+	rs690.minimum_twt_pulse_distance =
+						 lrnd( ceil( MINIMUM_TWT_PULSE_DISTANCE / timebase ) );
+
 	/* Remind the user that with the choosen time base an external clock
 	   might be needed */
 
