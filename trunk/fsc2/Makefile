@@ -207,8 +207,8 @@ install:
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-		ln -s $libdir/dg2020_f.so $libdir/dg2020.so; \
-		ln -s $libdir/aeg_s_band.so $libdir/s_band.so; \
+		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
+		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
 	fi
 
 
