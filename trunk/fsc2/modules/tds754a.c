@@ -29,7 +29,6 @@ void tds754a_exit_hook( void );
 
 
 
-
 /*******************************************/
 /*   We start with the hook functions...   */
 /*******************************************/
@@ -43,6 +42,18 @@ int tds754a_init_hook( void )
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
+
+	return 1;
+}
+
+
+/*------------------------------------*/
+/* Test hook function for the module. */
+/*------------------------------------*/
+
+int tds754a_test_hook( void )
+{
+	return 1;
 }
 
 
@@ -52,6 +63,7 @@ int tds754a_init_hook( void )
 
 int tds754a_exp_hook( void )
 {
+	return 1;
 }
 
 
