@@ -241,6 +241,7 @@ void tds540_set_window( WINDOW *w );
 long tds540_translate_channel( int dir, long channel, bool flag );
 void tds540_store_state( TDS540 *dest, TDS540 *src );
 void tds540_state_check( double timebase, long rec_len, double trig_pos );
+WINDOW *tds540_get_window_by_number( long win_number );
 
 bool tds540_init( const char *name );
 double tds540_get_timebase( void );

@@ -242,6 +242,7 @@ void tds520a_set_window( WINDOW *w );
 long tds520a_translate_channel( int dir, long channel, bool flag );
 void tds520a_store_state( TDS520A *dest, TDS520A *src );
 void tds520a_state_check( double timebase, long rec_len, double trig_pos );
+WINDOW *tds520a_get_window_by_number( long win_number );
 
 bool tds520a_init( const char *name );
 double tds520a_get_timebase( void );

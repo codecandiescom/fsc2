@@ -244,6 +244,7 @@ void tds520_window_checks( WINDOW *w );
 long tds520_translate_channel( int dir, long channel, bool flag );
 void tds520_store_state( TDS520 *dest, TDS520 *src );
 void tds520_state_check( double timebase, long rec_len, double trig_pos );
+WINDOW *tds520_get_window_by_number( long win_number );
 
 
 bool tds520_init( const char *name );

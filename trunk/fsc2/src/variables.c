@@ -867,6 +867,7 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 				cv->val.vptr[ i ]->dim = cur_dim;
 				cv->val.vptr[ i ]->len = 0;
 				cv->val.vptr[ i ]->flags |= IS_DYNAMIC;
+				cv->val.vptr[ i ]->flags &= ~ NEW_VARIABLE;
 			}
 
 			cv->len = ind + 1;
@@ -1265,6 +1266,12 @@ static void vars_assign_to_nd_from_1d( Var *src, Var *dest )
 
 	/* Set all elements of the destination array */
 
+	if ( dest->len == 0 )
+	{
+		print( FATAL, "Assignment of value to an array of unknown length.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( vars_set_all( dest, lval, dval ) == 0 )
 		print( WARN, "No elements were set in assignment because size of "
 			   "destination isn't known yet.\n" );
@@ -1356,10 +1363,11 @@ static void vars_size_check( Var *src, Var *dest )
 	/* If there are sub-arrays and unless these are dynamically sized do
 	   size comparision also for the sub-arrays */
 
-	if ( dest->type == REF_PTR &&
-		 ! ( dest->val.vptr[ 0 ]->flags & IS_DYNAMIC ) )
+	if ( dest->type & ( INT_REF | FLOAT_REF ) )
 		for( i = 0; i < dest->len; i++ )
-			vars_size_check( src->val.vptr[ i ], dest->val.vptr[ i ] );
+			if ( ! ( dest->val.vptr[ i ] != NULL &&
+					 dest->val.vptr[ i ]->flags & IS_DYNAMIC ) )
+				vars_size_check( src->val.vptr[ i ], dest->val.vptr[ i ] );
 }
 
 
@@ -1761,6 +1769,7 @@ Var *vars_push( int type, ... )
 Var *vars_make( int type, Var *src )
 {
 	Var *nv, *stack;
+	ssize_t i;
 
 
 	if ( src->flags & ON_STACK )
@@ -1797,8 +1806,8 @@ Var *vars_make( int type, Var *src )
 			nv->len = src->len;
 			nv->dim = 1;
 			if ( nv->len != 0 )
-				nv->val.lpnt = LONG_P T_malloc(   nv->len
-												* sizeof *nv->val.lpnt );
+				nv->val.lpnt = LONG_P T_calloc( nv->len,
+												sizeof *nv->val.lpnt );
 			else
 				nv->val.lpnt = NULL;
 			return nv;
@@ -1807,28 +1816,26 @@ Var *vars_make( int type, Var *src )
 			nv->len = src->len;
 			nv->dim = 1;
 			if ( nv->len != 0 )
+			{
 				nv->val.dpnt = DOUBLE_P T_malloc(   nv->len
 												  * sizeof *nv->val.dpnt );
+				for ( i = 0; i < nv->len; i++ )
+					nv->val.dpnt[ i ] = 0.0;
+			}
 			else
 				nv->val.dpnt = NULL;
 			return nv;
 
-		case INT_REF :
+		case INT_REF : case FLOAT_REF :
 			nv->len = src->len;
 			nv->dim = src->dim;
 			if ( nv->len != 0 )
+			{
 				nv->val.vptr = VAR_PP T_malloc(   nv->len
 												* sizeof *nv->val.vptr );
-			else
-				nv->val.vptr = NULL;
-			return nv;
-
-		case FLOAT_REF :
-			nv->len = src->len;
-			nv->dim = src->dim;
-			if ( nv->len != 0 )
-				nv->val.vptr = VAR_PP T_malloc(   nv->len
-												* sizeof *nv->val.vptr );
+				for ( i = 0; i < nv->len; i++ )
+					nv->val.vptr[ i ] = NULL;
+			}
 			else
 				nv->val.vptr = NULL;
 			return nv;
@@ -1841,31 +1848,27 @@ Var *vars_make( int type, Var *src )
 
 /*------------------------------------------------------------------------*/
 /* Function for making a copy of an INT_REF or FLOAT_REF via vars_push(). */
-/* This also works with making a FLOAT type copy of an INT type array or  */
-/* matrix. Note that sub-matrices do not go onto the stack but into the   */
-/* variables list (but without a name attached to them and the IS_TEMP    */
-/* flag set) - this is needed to keep the convention working that an EDL  */
+/* This also works with making a FLOAT type copy of an INT type matrix.   */
+/* Note that sub-matrices do not go onto the stack but into the variables */
+/* list (but without a name attached to them and the with IS_TEMP flag    */
+/* being set) - this is needed to keep the convention working that an EDL */
 /* functions gets one variable one the stack for each of its arguments.   */
 /*------------------------------------------------------------------------*/
 
 static void vars_ref_copy( Var *nsv, Var *src, bool exact_copy )
 {
-	if ( src->len == 0 )
-	{
-		print( FATAL, "Size(s) of array '%s' have not been set yet.\n",
-			   src->name );
-		THROW( EXCEPTION );
-	}
-
 	if ( ! exact_copy )
 		nsv->flags |= IS_DYNAMIC | IS_TEMP;
-	if ( INT_TYPE( nsv ) && ! INT_TYPE( src ) )
+	if ( nsv->type == INT_REF && src->type == FLOAT_REF )
 		nsv->type = FLOAT_REF;
 	nsv->from = src;
 	nsv->dim = src->dim;
 	nsv->len = src->len;
 
-	vars_ref_copy_create( nsv, src, exact_copy );
+	if ( nsv->len != 0 )
+		vars_ref_copy_create( nsv, src, exact_copy );
+	else
+		nsv->val.vptr = NULL;
 }
 
 
@@ -1943,13 +1946,16 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 	}
 
 	nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
+	for ( i = 0; i < nsv->len; i++ )
+		nsv->val.vptr[ i ] = NULL;
 
 	for ( i = 0; i < src->len; i++ )
 	{
 		/* If some of the sub-matrices of the source matrix do not exist
-		   (yet) we also can't create them... */
+		   (i.e. are still completely non-existent or have zero length )
+		   we don't create a copy... */
 
-		if ( src->val.vptr[ i ] == NULL )
+		if ( src->val.vptr[ i ] == NULL || src->val.vptr[ i ]->len == 0 )
 		{
 			nsv->val.vptr[ i ] = NULL;
 			continue;

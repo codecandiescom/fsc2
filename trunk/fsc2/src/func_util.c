@@ -2177,6 +2177,8 @@ static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
 	if ( ( *v )->len == 0 )
 	{
 		print( WARN, "Request to draw zero-length 2D-array.\n" );
+		if ( ( *v = ( *v )->next ) != NULL )
+			*v = ( *v )->next;
 		return;
 	}
 
@@ -2186,12 +2188,16 @@ static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
 		if ( ( *v )->val.vptr[ i ] != NULL && ( *v )->val.vptr[ i ]->len != 0 )
 			count++;
 
-	/* If all sub-arrays have zero length nothing further has to be done */
+	/* If all sub-arrays have zero length nothing further has to be done
+	   except removing the variable (and possibly the curve number) from
+	   the stack. */
 
 	if ( count == 0 )
 	{
 		print( WARN, "All sub-arrays of 2D-array to be drawn have zero "
 			   "length.\n" );
+		if ( ( *v = ( *v )->next ) != NULL )
+			*v = ( *v )->next;
 		return;
 	}
 
@@ -2212,26 +2218,26 @@ static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
 		}
 	}
 
-	/* The x- and y-coordinate of the first array have already been set,
-	   we need them also for the other arrays */
+	/* The x- and y-coordinate of the first array to be drawn have already
+	   been set but we need them also for the other arrays */
 
-	nx_offset = ( *dp )[ *nsets ].nx;
-	ny_offset = ( *dp )[ *nsets ].ny;
+	nx_offset = ( *dp + *nsets )->nx;
+	ny_offset = ( *dp + *nsets )->ny;
 
 	/* Now set up all the structures for the different array */
 
-	for ( j = i = 0; i < ( *v )->len; i++ )
+	for ( j = *nsets, i = 0; i < ( *v )->len; i++ )
 	{
 		if ( ( *v )->val.vptr[ i ] == NULL || ( *v )->val.vptr[ i ]->len == 0 )
 			continue;
 
-		( *dp )[ *nsets + j ].nx   = nx_offset;
-		( *dp )[ *nsets + j ].ny   = ny_offset + i;
-		( *dp )[ *nsets + j ].type = ( *v )->val.vptr[ i ]->type;
-		( *dp )[ *nsets + j ].len  = ( *v )->val.vptr[ i ]->len;
-		( *dp )[ *nsets + j ].ptr = ( *dp )[ *nsets + j ].type == INT_ARR ?
-								   ( void * ) ( *v )->val.vptr[ i ]->val.lpnt :
-								   ( void * ) ( *v )->val.vptr[ i ]->val.dpnt;
+		( *dp + j )->nx   = nx_offset;
+		( *dp + j )->ny   = ny_offset + i;
+		( *dp + j )->type = ( *v )->val.vptr[ i ]->type;
+		( *dp + j )->len  = ( *v )->val.vptr[ i ]->len;
+		( *dp + j )->ptr  = ( *dp + j )->type == INT_ARR ?
+								( void * ) ( *v )->val.vptr[ i ]->val.lpnt :
+								( void * ) ( *v )->val.vptr[ i ]->val.dpnt;
 		j++;
 	}
 
@@ -2249,13 +2255,20 @@ static void eval_disp_array( Var **v, int dim, DPoint **dp, int *nsets )
 		cn = 0;
 	}
 	else
+	{
 		cn = get_long( *v, "curve number" ) - 1;
+		*v = ( *v )->next;
+
+		if ( cn < 0 || cn >= G2.nc )
+		{
+			print( FATAL, "Invalid curve number (%ld).\n", cn );
+			T_free( *dp );
+			THROW( EXCEPTION );
+		}
+	}
 
 	for ( j = 0; j < count; j++ )
-		( *dp )[ *nsets + j ].nc = cn;
-
-	*nsets += count;		
-	return;
+		( *dp + ( *nsets )++ )->nc = cn;
 }
 
 

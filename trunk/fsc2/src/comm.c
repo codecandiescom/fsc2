@@ -296,8 +296,8 @@ int new_data_callback( XEvent *a, void *b )
 			Comm.MQ->low = Comm.MQ->high;
 		}
 
-		/* Finally check for requests from the HTTP server and handle death
-		   of the HTTP server. */
+	/* Finally check for requests from the HTTP server and handle death
+	   of the HTTP server. */
 
 #if defined WITH_HTTP_SERVER
 	if ( Internals.http_pid > 0 )

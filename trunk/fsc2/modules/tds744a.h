@@ -247,6 +247,7 @@ void tds744a_set_window( WINDOW *w );
 long tds744a_translate_channel( int dir, long channel, bool flag );
 void tds744a_store_state( TDS744A *dest, TDS744A *src );
 void tds744a_state_check( double timebase, long rec_len, double trig_pos );
+WINDOW *tds744a_get_window_by_number( long win_number );
 
 bool tds744a_init( const char *name );
 double tds744a_get_timebase( void );

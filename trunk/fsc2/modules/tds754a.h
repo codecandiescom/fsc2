@@ -245,6 +245,7 @@ void tds754a_set_window( WINDOW *w );
 long tds754a_translate_channel( int dir, long channel, bool flag );
 void tds754a_store_state( TDS754A *dest, TDS754A *src );
 void tds754a_state_check( double timebase, long rec_len, double trig_pos );
+WINDOW *tds754a_get_window_by_number( long win_number );
 
 bool tds754a_init( const char *name );
 double tds754a_get_timebase( void );
