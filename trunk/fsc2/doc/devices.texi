@@ -183,7 +183,7 @@ that the parameters didn't change significantly since the last run.
 @findex set_field()
 This function expects one floating point argument for the field value
 and will set the magnetic field to this value. For the @strong{AEG}
-magnets it also accepts a second optional paramter, the maximum
+magnets it also accepts a second optional parameter, the maximum
 acceptable deviation of the field from the value to be set. For example
 by the call
 @example
@@ -192,9 +192,9 @@ set_field( 3421.5 G, 0.2 G );
 @noindent
 the field will be set to a value between @w{3421.3 G} and @w{3421.7 G}.
 
-If in the case of @strong{AEG} magnets this second paramter is missing
+If in the case of @strong{AEG} magnets this second parameter is missing
 the precision of the gaussmeter used for measuring the field is used. If
-the maximum deviation paramter is smaller than the precision of the
+the maximum deviation parameter is smaller than the precision of the
 gaussmeter the precision of the gaussmeter is used instead. The function
 can only be called in the @code{EXPERIMENT} section.
 
@@ -435,7 +435,7 @@ lock-in amplifiers.
 
 In the @code{EXPERIMENT} section this function can only be called
 with two argument, i.e@: to set the output voltage of one of the DACs
-already in the initialisation of the device.
+already in the initialization of the device.
 
 
 @item lockin_sensitivity()
@@ -482,7 +482,7 @@ constant setting that has been set.
 For models @strong{SR510} and @strong{SR530} also the POST time constant
 is set to a value equal or lower than the time constant.
 
-For the @strong{ER023M} the follwoing (approximate) time constant
+For the @strong{ER023M} the following (approximate) time constant
 settings can be used: @code{2.5 ms}, @code{5 ms}, @code{10 ms}, @code{20
 ms}, @code{40 ms}, @code{65 ms}, @code{130 ms}, @code{330 ms}, @code{650
 ms}, @code{1.3 s}, @code{2.6 s} and @code{5.2 s}.
@@ -496,7 +496,7 @@ as a query, i.e.@: without an argument.
 This function only exists for the @strong{ER023M Signal Channel} and
 queries or sets the internal integration time of the lock-in
 amplifier. Valid values are times that are multiples of @code{320 us},
-with a lowest multiplicator of 10 and a maximum multiplicator of 9999,
+with a lowest factor of 10 and a maximum factor of 9999,
 thus allowing conversion times between @code{3.2 ms} and @code{3.2 s}.
 
 Before the @code{EXPERIMENT} section this function can't be called
@@ -608,11 +608,11 @@ be replaced by integer numbers:
 @item REF4
 @code{10} - Fourth reference channel (all Tektronix digitizers)
 @item AUX
-@code{11} - Auxillary channel (Tektronix TDS540, TDS744A, TDS754A)
+@code{11} - Auxiliary channel (Tektronix TDS540, TDS744A, TDS754A)
 @item AUX1
-@code{12} - First auxillary channel (Tektronix TDS520, TDS520A, TDS520C)
+@code{12} - First auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item AUX2
-@code{13} - Second auxillary channel (Tektronix TDS520, TDS520A, TDS520C)
+@code{13} - Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
 @code{14} - Line In for trigger (all models)
 @item MEM_C
@@ -678,7 +678,7 @@ setting in Volts. If the sensitivity value passed to the function is not
 one of the available settings the nearest allowed value is used
 instead. Please note that for some of the oscilloscopes the range of
 admissible sensitivity settings depends on the input impedance --
-unfortunmately this can only be checked for when the experiment has
+unfortunately this can only be checked for when the experiment has
 already been started!
 
 If no second argument is given the current sensitivity setting for the
@@ -730,7 +730,7 @@ rejected automatically). The final optional argument is the number of
 points that get included into the average. Usually it doesn't make too
 much sense to set this value because the program will make sure
 automatically that at least as many points of curve as can be read from
-the digitizer are included into the averging. If the value is set only
+the digitizer are included into the averaging. If the value is set only
 as many points as have been set will be returned by a
 @code{digitizer_get_curve()} command.
 
@@ -1042,7 +1042,7 @@ Pulsers are rather special and even the @acronym{EDL} syntax for dealing
 with the pulsers differs slightly. Thus there is a whole chapter dealing
 with pulsers and how to define and use pulses, see @ref{Using
 Pulsers}. Several of the aspects of the following short descriptions of
-the pulser funtions will probably only become understandable after
+the pulser functions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
 @table @samp
@@ -1066,7 +1066,7 @@ of @code{0} stops the pulser, a non-zero argument starts it).
 For the @strong{Tektronix HFS9003} this function can be used to
 determine or set the state of individual channels of the pulser. If
 called with a single integer argument between @code{1} and @code{4} the
-state of the corresponing channel is returned. If called with an
+state of the corresponding channel is returned. If called with an
 additional numeric argument or a string of @code{"ON"} or @code{"OFF"}
 the channel can be switched on or off.
 
@@ -1088,7 +1088,7 @@ This function has to be called after changes have been applied to pulses
 either via any of the following pulser functions or by changing a pulse
 property directly. Before this function is called, all changes are only
 done to the internal representation of the pulser, but not yet send to
-the pulser. Only by calling the function these changes are commited and
+the pulser. Only by calling the function these changes are committed and
 the real pulses will change.
 
 @item pulser_shift()
@@ -1141,8 +1141,8 @@ are passed to the function the phases of only these pulses are reset.
 This function exists for the HFS9003 only. While doing updates of the
 pulser to set new pulse positions and length etc.@: it usually gets
 switched off. By calling this function with an argument of @code{0} you
-can tell to pulser to continue even while doing updates. If callled with
-an argumnt of @code{1} you may switch back to the default behaviour.
+can tell to pulser to continue even while doing updates. If called with
+an argument of @code{1} you may switch back to the default behavior.
 
 @end table
 
@@ -1361,7 +1361,7 @@ type as an integer number.
 
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
-If the modulation type has been set bedore the modulation source can be
+If the modulation type has been set before the modulation source can be
 set directly via this function. It accepts one of the following strings:
 @code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"}, @code{"1kHz"},
 @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"}, @code{"INT 400 Hz"},
@@ -1484,7 +1484,7 @@ This function is for cases where there's only one
 @code{get_phase_cycled_area()} instead.
 
 The first argument the function expects is a digitizer channel to be
-used for meauring the area of the signal, see above which channels can
+used for measuring the area of the signal, see above which channels can
 be used for the different digitizers. If the @code{ACQUISITION_SEQUENCE}
 is written in way that it is clear that two digitizer channels are
 needed, i.e.@: you have a line in the @code{PHASES} section like
@@ -1492,18 +1492,18 @@ needed, i.e.@: you have a line in the @code{PHASES} section like
 ACQUISITION_SEQUENCE = +A, -B, -A, +B;
 @end example
 also the second argument to the function must be a digitizer
-channel. The first channel is used for feteching the @code{A} data, the
+channel. The first channel is used for fetching the @code{A} data, the
 second for the @code{B} data. This is, of course, only relevant when you
 have two different signals, e.g.@: the two outputs of a quadrature mixer
 and the measured data consist of adding up signals from both channels.
 
-The following arguments are as many window indentifiers (as returned by
+The following arguments are as many window identifiers (as returned by
 @code{digitizer_define_window()} as there are needed. If no window
 argument is given always the area of the complete curve is returned!
 
 The type of the return value depends on the number of window identifiers
 passed to the function. If there is only one window identifier (or none)
-a floating point value with the resultof the meaurement is returned. If,
+a floating point value with the result of the measurement is returned. If,
 on the other hand, there is more than one window identifier an array
 will be returned with as many elements as there are window identifiers,
 the first element of the returned array containing the result for the
