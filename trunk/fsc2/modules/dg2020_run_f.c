@@ -484,9 +484,11 @@ done_setting:
 
 	phase_p->needs_update = NEEDS_UPDATE( phase_p );
 
+/*
 	if ( phase_p->len < -1 )
 		printf( "!O!O!O! pulse %ld has a lenght of %ld\n",
 				phase_p->num, phase_p->len );
+*/
 }
 
 

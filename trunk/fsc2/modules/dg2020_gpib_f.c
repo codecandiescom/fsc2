@@ -571,10 +571,10 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	Ticks m, n;
 	char s = ( state ? '1' : '0' );
 
-
+/*
 	printf( "SET: ch = %2d to %1d, at: %8ld, len = %8ld\n", channel, state,
 			address, length );
-
+*/
 
 	address++;        /* because of the first unset bit */
 

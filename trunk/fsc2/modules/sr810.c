@@ -742,10 +742,11 @@ static bool sr810_init( const char *name )
 	if ( gpib_init_device( name, &sr810.device ) == FAILURE )
         return FAIL;
 
-	/* Tell the loc-in to use the GPIB bus for its outputs and make sure
-	   the keyboard is locked */
+	/* Tell the lock-in to use the GPIB bus for communication, clear all
+	   the relevant registers  and make sure the keyboard is locked */
 
 	if ( gpib_write( sr810.device, "OUTX 1", 6 ) == FAILURE ||
+		 gpib_write( sr810.device, "*CLS", 4 )   == FAILURE ||
 		 gpib_write( sr810.device, "OVRM 0", 6 ) == FAILURE )
 		return FAIL;
 	   
