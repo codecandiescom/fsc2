@@ -226,7 +226,7 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 
 		if ( i != 1 )
 		{
-			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
+			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d\n",
 					__FILE__, __LINE__ );
 			exit( EXIT_FAILURE );
 		}
