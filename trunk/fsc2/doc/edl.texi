@@ -378,7 +378,7 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @code{k} (kilo) and @code{M} (mega) (only wave numbers can't be
 preceeded by such a character).  Here's the complete list:
 @quotation
-@multitable {Hz} {Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
+@multitable { @code{cm^-1} } {Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
 @item @code{m}  @tab Meter (and @code{nm, um, mm, km} and @code{Mm})
 @item @code{G}  @tab Gauss (and @code{nG, uG, mG, kG} and @code{MG})

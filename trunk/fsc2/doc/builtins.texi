@@ -284,7 +284,7 @@ display( n_x_point, data [ , n_curve [ , ... ] ] )
 When the display mode (@ref{display_mode}) is set to @code{SLIDING
 DISPLAY} the @i{x}-coordinate has no function at all (but must be given
 and must be larger than @code{0}), new data points are always appended
-to the right of already drawn data points.
+to the right of the already drawn data points.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
