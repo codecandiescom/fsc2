@@ -126,16 +126,17 @@ void rulbus_rb8515_clock_card_exit( int handle )
 	/* Remove the entry for the card */
 
 	if ( card != rulbus_rb8515_clock_card + rulbus_num_clock_cards - 1 )
-		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_clock_cards -
-				( card - rulbus_rb8515_clock_card ) - 1 );
+		memmove( card, card + 1, sizeof *card *
+				 ( rulbus_num_clock_cards -
+				   ( card - rulbus_rb8515_clock_card ) - 1 ) );
 
 	card = realloc( rulbus_rb8515_clock_card,
 					( rulbus_num_clock_cards - 1 ) * sizeof *card );
 
-	if ( card != NULL )
-		rulbus_rb8515_clock_card = card;
+	if ( card == NULL )
+		return rulbus_errno = RULBUS_NO_MEMORY;
 
+	rulbus_rb8515_clock_card = card;
 	rulbus_num_clock_cards--;
 }
 
