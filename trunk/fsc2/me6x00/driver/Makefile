@@ -59,7 +59,7 @@ install:
 ifeq ($(ME6X00_KERNEL_SOURCE),)
 	if [ -d /lib/modules/`uname -r` ]; then                     \
 		if [ ! -d /lib/modules/`uname -r`/misc ]; then          \
-			install -d 755 -d /lib/modules/`uname -r`/misc;     \
+			install -m 755 -d /lib/modules/`uname -r`/misc;     \
 		fi;                                                     \
 		install -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
 	else                                                        \
