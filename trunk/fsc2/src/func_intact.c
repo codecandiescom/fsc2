@@ -11,6 +11,7 @@ static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
+static void convert_escapes( char *str );
 
 
 
@@ -185,6 +186,7 @@ Var *f_bcreate( Var *v )
 	{
 		vars_check( v, STR_VAR );
 		label = get_string_copy( v->val.sptr );
+		convert_escapes( label );
 		v = vars_pop( v );
 	}
 
@@ -194,6 +196,7 @@ Var *f_bcreate( Var *v )
 	{
 		vars_check( v, STR_VAR );
 		help_text = get_string_copy( v->val.sptr );
+		convert_escapes( help_text );
 		v = vars_pop( v );
 	}
 
@@ -788,12 +791,14 @@ Var *f_screate( Var *v )
 	{
 		vars_check( v, STR_VAR );
 		label = get_string_copy( v->val.sptr );
+		convert_escapes( label );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, STR_VAR );
 		help_text = get_string_copy( v->val.sptr );
+		convert_escapes( help_text );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -1336,10 +1341,10 @@ static void recreate_Tool_Box( void )
 	{
 		fl_freeze_form( Tool_Box->Tools );
 		fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
-		Tool_Box->Tools->w = Tool_Box->w;
-		Tool_Box->Tools->h = Tool_Box->h;
-		Tool_Box->Tools->first->w = Tool_Box->w;
-		Tool_Box->Tools->first->h = Tool_Box->h;
+	Tool_Box->Tools->w = Tool_Box->w;
+	Tool_Box->Tools->h = Tool_Box->h;
+	Tool_Box->Tools->first->w = Tool_Box->w;
+	Tool_Box->Tools->first->h = Tool_Box->h;
 		fl_addto_form( Tool_Box->Tools );
 	}
 	else
@@ -1353,7 +1358,6 @@ static void recreate_Tool_Box( void )
 	fl_end_form( );
 
 	fl_unfreeze_form( Tool_Box->Tools );
-
 }
 
 
@@ -1520,5 +1524,28 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 		default :
 			assert( 1 == 0 );
+	}
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static void convert_escapes( char *str )
+{
+	char *ptr = str;
+
+	while ( ( ptr = strchr( ptr, '\\' ) ) != NULL )
+	{
+		if ( *( ptr + 1 ) == '\\' )
+			memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+			
+		if ( *( ptr + 1 ) == 'n' )
+		{
+			memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+			*ptr = '\n';
+		}
+
+		ptr++;
 	}
 }
