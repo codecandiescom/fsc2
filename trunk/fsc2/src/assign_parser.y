@@ -120,7 +120,7 @@ input:   /* empty */
 
 line:    func pcd                  { }
        | func pcd SECTION_LABEL    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | func pcd func error       { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | func pcd error            { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd TB_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | func pcd TM_TOKEN         { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tb                        { }
@@ -132,19 +132,86 @@ line:    func pcd                  { }
 ;								   
 								   
 								   
-func:    MW_TOKEN                  { Channel_Type = PULSER_CHANNEL_MW; }
-	   | TWT_TOKEN                 { Channel_Type = PULSER_CHANNEL_TWT; }
-       | TWT_GATE_TOKEN            { Channel_Type = PULSER_CHANNEL_TWT_GATE; }
-       | DET_TOKEN                 { Channel_Type = PULSER_CHANNEL_DET; }
-	   | DET_GATE_TOKEN            { Channel_Type = PULSER_CHANNEL_DET_GATE; }
-       | RF_TOKEN                  { Channel_Type = PULSER_CHANNEL_RF; }
-	   | RF_GATE_TOKEN             { Channel_Type = PULSER_CHANNEL_RF_GATE; }
-       | PH1_TOKEN                 { Channel_Type = PULSER_CHANNEL_PHASE_1; }
-       | PH2_TOKEN                 { Channel_Type = PULSER_CHANNEL_PHASE_2; }
-       | OI_TOKEN                  { Channel_Type = PULSER_CHANNEL_OTHER_1; }
-       | OII_TOKEN                 { Channel_Type = PULSER_CHANNEL_OTHER_2; }
-       | OIII_TOKEN                { Channel_Type = PULSER_CHANNEL_OTHER_3; }
-       | OIV_TOKEN                 { Channel_Type = PULSER_CHANNEL_OTHER_4; }
+func:    MW_TOKEN                  { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_MW;
+                                     else
+										 p_phase_ref( Channel_Type,
+													  PULSER_CHANNEL_MW ); }
+	   | TWT_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_TWT;
+                                     else
+										 p_phase_ref( Channel_Type,
+													  PULSER_CHANNEL_TWT ); }
+       | TWT_GATE_TOKEN            { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type =
+											 PULSER_CHANNEL_TWT_GATE;
+                                     else
+										 p_phase_ref( Channel_Type,
+												   PULSER_CHANNEL_TWT_GATE ); }
+       | DET_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_DET;
+                                     else
+										 p_phase_ref( Channel_Type,
+													  PULSER_CHANNEL_DET ); }
+	   | DET_GATE_TOKEN            { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type =
+											 PULSER_CHANNEL_DET_GATE;
+                                     else
+										 p_phase_ref( Channel_Type,
+												   PULSER_CHANNEL_DET_GATE ); }
+       | RF_TOKEN                  { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_RF;
+                                     else
+										 p_phase_ref( Channel_Type,
+													  PULSER_CHANNEL_RF ); }
+	   | RF_GATE_TOKEN             { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_RF_GATE;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_RF_GATE ); }
+       | PH1_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_PHASE_1;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_PHASE_1 ); }
+       | PH2_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_PHASE_2;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_PHASE_2 ); }
+       | OI_TOKEN                  { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_OTHER_1;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_OTHER_1 ); }
+       | OII_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_OTHER_2;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_OTHER_2 ); }
+       | OIII_TOKEN                { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_OTHER_3;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_OTHER_3 ); }
+       | OIV_TOKEN                 { if ( Channel_Type ==
+										  PULSER_CHANNEL_NO_TYPE )
+	                                     Channel_Type = PULSER_CHANNEL_OTHER_4;
+                                     else
+										 p_phase_ref( Channel_Type,
+													PULSER_CHANNEL_OTHER_4 ); }
 ;
 
 
@@ -161,6 +228,7 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
+	  | pcd func sep2
 ;
 
 

@@ -518,14 +518,10 @@ void p_set_rep_freq( Var *v )
 /* Function for setting the trigger in level voltage */
 /*---------------------------------------------------*/
 
-void p_phase_ref( long function, int ref )
+void p_phase_ref( long func, int ref )
 {
-	double level;
-
-
 	is_pulser_func( pulser_struct.set_phase_reference,
 					"setting a function for phase cycling" );
-
 
 	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
 	{
@@ -534,14 +530,14 @@ void p_phase_ref( long function, int ref )
 		THROW( EXCEPTION );
 	}
 
-	if ( ref == PULSER_CHANNEL_PHASE_1 || ref = PULSER_CHANNEL_PHASE_2 )
+	if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
 	{
 		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
-	( *pulser_struct.set_phase_reference )( ( int ) function, ref );
+	( *pulser_struct.set_phase_reference )( ( int ) func, ref );
 }
 
 
@@ -681,7 +677,7 @@ Var *p_get( char *txt, int type )
 	long pnum = p_num( txt );               /* determine pulse number */
 	int function;
 	double time;
-	long cycle;
+	int cycle;
 	Var *v;
 
 
@@ -726,7 +722,7 @@ Var *p_get( char *txt, int type )
 			is_pulser_func( pulser_struct.get_pulse_phase_cycle,
 							"returning a pulses phase cycle" );
 			( *pulser_struct.get_pulse_phase_cycle )( pnum, &cycle );
-			v = vars_push( FLOAT_VAR, cycle );
+			v = vars_push( INT_VAR, cycle );
 			break;
 
 		case P_MAXLEN :
