@@ -175,15 +175,13 @@ letters only.
 @subsection Variable types
 
 
-Variables cam be divided into two classes, variables to hold integer
+Variables can be divided into two classes, variables to hold integer
 values and variables for storing floating point values.
-
 
 Integer variables can hold data from the interval @w{[-2^31, 2^31 - 1]},
 i.e. they run from -2147483648 all the way up to +2147483647. In
 contrast, floating point variables can have much larger values (up to ca.@:
 10^300), the exact limits depending on the machine @b{fsc2} is running on.
-
 
 To distinguish between integer and floating point variables the
 following convention is used: The names of all integer variables start
@@ -194,7 +192,7 @@ variables start with a lower case character, i.e.@: a-z.
 
 @node Arithmetic, Control structures, Variables, EDL
 @section Arithmetic
-@cindex arithmetic
+@cindex Arithmetic
 
 There are the usual arithmetic operations built into @b{fsc2}, i.e.@:
 addition, subtraction, multiplication and division. They can be applied
@@ -283,7 +281,7 @@ As usual, non-integer exponents can only be used with non-negative bases!
 
 @node Arithmetic with arrays, Arithmetic, Control structures,EDL
 @section Arithmetic with arrays
-@cindex arithmetic with arrays
+@cindex Arithmetic with arrays
 
 
 Beside the usual artithmetic with numbers it is also possible to use
@@ -361,8 +359,8 @@ function results in:
 
 @node Control structures, , Arithmetic with arrays, EDL
 @section Control structures
-@cindex control structures
-@cindex flow control
+@cindex Control structures
+@cindex Flow control
 
 
 Within the @code{EXPERIMENT} section flow control structures can be
