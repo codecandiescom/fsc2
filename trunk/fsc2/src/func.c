@@ -305,7 +305,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 			return NULL;
 	}
 	
-	ret = vars_push( FUNC, f->fnct );
+	ret = vars_push( FUNC, f );
 	ret->name = T_strdup( name );
 	ret->dim = f->nargs;
 	if ( acc != NULL )
@@ -354,7 +354,7 @@ Var *func_call( Var *f )
 	}
 
 	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].fnct == f->val.fnct )
+		if ( Fncts[ i ].fnct == f->val.fnct->fnct )
 			break;
 	
 	if ( i >= Num_Func )
@@ -423,7 +423,7 @@ Var *func_call( Var *f )
 
 	TRY
 	{
-		ret = ( *f->val.fnct )( f->next );
+		ret = ( *f->val.fnct->fnct )( f->next );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
