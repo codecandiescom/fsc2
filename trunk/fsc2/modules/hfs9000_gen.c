@@ -176,11 +176,8 @@ bool hfs9000_set_function_delay( int function, double delay )
 		if ( Delay < - hfs9000.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				if ( i == function )
-					continue;
 				hfs9000.function[ i ].delay -= hfs9000.neg_delay - Delay;
-			}
+
 			hfs9000.neg_delay = - Delay;
 			hfs9000.function[ function ].delay = 0;
 		}

@@ -204,11 +204,8 @@ bool dg2020_set_function_delay( int function, double delay )
 		if ( Delay < - dg2020.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				if ( i == function )
-					continue;
 				dg2020.function[ i ].delay -= dg2020.neg_delay + Delay;
-			}
+
 			dg2020.neg_delay = - Delay;
 			dg2020.function[ function ].delay = 0;
 		}

@@ -174,11 +174,8 @@ bool ep385_set_function_delay( int function, double delay )
 		if ( Delay < - ep385.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				if ( i == function )
-					continue;
 				ep385.function[ i ].delay -= ep385.neg_delay + Delay;
-			}
+
 			ep385.neg_delay = - Delay;
 			ep385.function[ function ].delay = 0;
 		}
