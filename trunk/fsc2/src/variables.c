@@ -2269,11 +2269,11 @@ void vars_check( Var *v, int type )
 {
 	int i;
 	int t;
-	const char *types[ ] = { "STRING", "INTEGER", "FLOAT", "1D INTEGER ARRAY",
-							 "1D FLOAT ARRAY", "INTEGER MATRIX",
-							 "FLOAT MATRIX", "INTEGER REFERENCE",
-							 "FLOAT REFERENCE", "ARRAY REFERENCE",
-							 "FUNCTION" };
+	const char *types[ ] = { "STRING", "INTEGER", "FLOAT",
+							 "1D INTEGER ARRAY", "1D FLOAT ARRAY",
+							 "INTEGER MATRIX", "FLOAT MATRIX",
+							 "INTEGER REFERENCE", "FLOAT REFERENCE",
+							 "ARRAY REFERENCE", "FUNCTION" };
 
 
 	/* Someone might call the function with a NULL pointer - handle this
@@ -2309,10 +2309,8 @@ void vars_check( Var *v, int type )
 
 	if ( ! ( v->type & type ) )
 	{
-		i = 1;
-		t = v->type;
-		while ( ! ( ( t >>= 1 ) & 1 ) )
-			i++;
+		for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
+			/* empty */ ;
 		print( FATAL, "Variable of type %s can't be used in this context.\n",
 			   types[ i ] );
 		THROW( EXCEPTION );
