@@ -29,7 +29,7 @@
 	$(LD) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
-$(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf
+$(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 %_lexer.c: %_lexer.l $(src_header)
