@@ -112,7 +112,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "display",       f_display,  	  -16, ACCESS_EXP,  NULL, UNSET },
 	{ "clear_curve",   f_clearcv,  	   -4, ACCESS_EXP,  NULL, UNSET },
 	{ "dim",           f_dim,      	    1, ACCESS_ALL,  NULL, UNSET },
-	{ "size",          f_size,     	    2, ACCESS_ALL,  NULL, UNSET },
+	{ "size",          f_size,     	   -2, ACCESS_ALL,  NULL, UNSET },
 	{ "sizes",         f_sizes,    	    1, ACCESS_ALL,  NULL, UNSET },
 	{ "mean",          f_mean,     	   -3, ACCESS_ALL,  NULL, UNSET },
 	{ "rms",           f_rms,      	    1, ACCESS_ALL,  NULL, UNSET },

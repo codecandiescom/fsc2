@@ -1344,6 +1344,9 @@ Var *f_size( Var *v )
 	vars_check( v, ARR_REF );
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 
+	if ( v->next->type == NULL && v->from->dim == 1 )
+		return( INT_VAR, ( long ) v->from->len );
+
 	if ( v->next->type == FLOAT_VAR )
 	{
 		eprint( WARN, SET, "WARNING: Float value used as index for array "
