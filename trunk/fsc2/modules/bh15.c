@@ -197,7 +197,7 @@ void bh15_exit_hook( void )
 
 Var *gaussmeter_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -207,7 +207,7 @@ Var *gaussmeter_name( Var *v )
 
 Var *find_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
 
@@ -217,7 +217,7 @@ Var *find_field( Var *v )
 
 Var *gaussmeter_resolution( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( FLOAT_VAR, bh15.resolution );
 }
 
@@ -258,12 +258,8 @@ Var *gaussmeter_command( Var *v )
 
 Var *gaussmeter_wait( Var *v )
 {
-	v = v;
-
-	/* do this thing needs a time out ? */
-
+	UNUSED_ARGUMENT( v );
 	fsc2_usleep( 100000, UNSET );
-
 	return vars_push( INT_VAR, 1 );
 }
 

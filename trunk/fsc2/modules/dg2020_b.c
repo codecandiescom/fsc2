@@ -557,7 +557,7 @@ void dg2020_b_exit_hook( void )
 
 Var *pulser_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -809,7 +809,7 @@ Var *pulser_show_pulses( Var *v )
 	pid_t pid;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN )
 		return vars_push( INT_VAR, 1 );
@@ -883,7 +883,7 @@ Var *pulser_dump_pulses( Var *v )
 	struct stat stat_buf;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_IS_CHECK_RUN )
 		return vars_push( INT_VAR, 1 );
@@ -1036,7 +1036,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 
 Var *pulser_keep_all_pulses( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	dg2020_keep_all( );
 	return vars_push( INT_VAR, 1 );
 }
@@ -1082,7 +1082,7 @@ Var *pulser_state( Var *v )
 
 Var *pulser_channel_state( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	print( SEVERE, "Individual pod channels can't be switched on or off with "
 		   "this device.\n" );
 	return vars_push( INT_VAR, 0 );
@@ -1097,7 +1097,7 @@ Var *pulser_update( Var *v )
 	bool state = OK;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );
@@ -1398,7 +1398,7 @@ Var *pulser_next_phase( Var *v )
 
 Var *pulser_reset( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! dg2020_is_needed )
 		return vars_push( INT_VAR, 1 );

@@ -279,7 +279,7 @@ void aeg_x_band_exit_hook( void )
 
 Var *magnet_name( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -343,8 +343,7 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_fast_init( Var *v )
 {
-	v = v;
-
+	UNUSED_ARGUMENT( v );
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1 );
 }
@@ -408,7 +407,7 @@ Var *get_field( Var *v )
 	int acc;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	new_var = func_call( func_get( "find_field", &acc ) );
 	magnet.meas_field = new_var->val.dval;
@@ -424,7 +423,7 @@ Var *sweep_up( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -457,7 +456,7 @@ Var *sweep_down( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field_step )
 	{
@@ -487,7 +486,7 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
-	v = v;
+	UNUSED_ARGUMENT( v );
 
 	if ( ! magnet.is_field )
 	{

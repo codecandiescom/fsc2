@@ -577,7 +577,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 
 bool dg2020_phase_setup_prep( int phs, int type, int dummy, long pod )
 {
-	dummy = dummy;
+	UNUSED_ARGUMENT( dummy );
 	fsc2_assert( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 	fsc2_assert( phs == 0 || phs == 1 );
 

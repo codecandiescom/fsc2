@@ -392,8 +392,8 @@ bool ep385_phase_setup_prep( int phs, int type, int dummy, long channel )
 {
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 	fsc2_assert ( phs == 0 || phs == 1 );
+	UNUSED_ARGUMENT( dummy );
 
-	dummy = dummy;
 	Cur_PHS = phs;
 
 	/* Make sure the phase type is supported */
