@@ -1346,6 +1346,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 								  "and switch on automatic rescaling" );
 		}
 
+		cut_recalc_XPoints( );
 		redraw_all_cut_canvases( );
 	}
 
@@ -2278,8 +2279,6 @@ static bool cut_change_x_range( Canvas *c )
 	cv->shift[ X ] = - d_min( x1, x2 );
 	cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) / fabs( x1 - x2 );
 
-	cut_recalc_XPoints( );
-
 	return SET;
 }
 
@@ -2304,8 +2303,6 @@ static bool cut_change_y_range( Canvas *c )
 
 	cv->shift[ Y ] = - d_min( y1, y2 );
 	cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 ) / fabs( y1 - y2 );
-
-	cut_recalc_XPoints( );
 
 	return SET;
 }
@@ -2352,9 +2349,6 @@ static bool cut_change_xy_range( Canvas *c )
 		scale_changed = SET;
 	}
 
-	if ( scale_changed )
-		cut_recalc_XPoints( );
-
 	return scale_changed;
 }
 
@@ -2391,8 +2385,6 @@ static bool cut_zoom_x( Canvas *c )
 						/ ( double ) G.cut_x_axis.w );
 
 	cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
-
-	cut_recalc_XPoints( );
 
 	return SET;
 }
@@ -2434,8 +2426,6 @@ static bool cut_zoom_y( Canvas *c )
 
 	cv->shift[ Y ] = ( ( double ) G.cut_canvas.h - 1.0 - G.start[ Y ] )
 		             / cv->s2d[ Y ] - py;
-
-	cut_recalc_XPoints( );
 
 	return SET;
 }
@@ -2496,9 +2486,6 @@ static bool cut_zoom_xy( Canvas *c )
 		scale_changed = SET;
 	}
 		
-	if ( scale_changed )
-		cut_recalc_XPoints( );
-
 	return scale_changed;
 }
 
