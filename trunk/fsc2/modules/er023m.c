@@ -156,8 +156,7 @@ Var *lockin_get_data( Var *v )
 	if ( TEST_RUN )                  /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, ER023M_TEST_DATA );
 	else
-		return vars_push( FLOAT_VAR, 
-						  er023m.scale_factor * er023m_get_data( ) - 1.0 );
+		return vars_push( FLOAT_VAR, ( double ) er023m_get_data( ) );
 }
 
 
@@ -604,7 +603,7 @@ Var *lockin_conversion_time( Var *v )
 
 
 /*--------------------------------------------------------------------------*/
-/* Returns or sets the modulation frquency. If called without an argument   */
+/* Returns or sets the modulation frequency. If called without an argument  */
 /* the modulation frequency is returned (in Hz). If called with an argument */
 /* the modulation frequency is set to this value.                           */
 /*--------------------------------------------------------------------------*/
@@ -660,38 +659,31 @@ Var *lockin_ref_freq( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	/* Find the allowed modulation frequency nearest to the one we got */
+	/* Find a valid modulation frequency nearest to the one we got */
 
-	for ( i = MAX_MF_INDEX; i > 0; i++ )
-		if ( mf >= mf_list[ i ] && mf <= mf_list[ i + 1 ] )
+	for ( i = 0; i < MAX_MF_INDEX; i++ )
+		if ( mf <= mf_list[ i ] && mf > mf_list[ i + 1 ] )
 		{
 			mf_index = i
-				   + ( ( mf_list[ i ] / mf > mf / mf_list[ i + 1 ] ) ? 0 : 1 );
+				   + ( ( mf / mf_list[ i ] > mf_list[ i + 1 ] / mf ) ? 0 : 1 );
 			break;
 		}
 
 	if ( mf_index == UNDEF_MF_INDEX )
 	{
-		if ( mf_list[ MAX_MF_INDEX ] / mf < 1.06 )
-			mf_index = MAX_MF_INDEX;
-		else if ( mf / mf_list[ 0 ] < 1.06 )
+		if ( mf > mf_list[ 0 ] )
 			mf_index = 0;
 		else
-		{
-			if ( mf > mf_list[ 0 ] )
-				mf_index = 0;
-			else
-				mf_index = MAX_MF_INDEX;
+			mf_index = MAX_MF_INDEX;
 
-			eprint( WARN, SET, "%s: Modulation frequency of %.2 kHz is too "
-					"%s, using %.2 kHz instead.\n",
-					DEVICE_NAME, mf * 1.0e-3, mf_index == 0 ? "high" : "low",
-					mf_list[ mf_index ] * 1.0e-3 );
-		}
+		eprint( WARN, SET, "%s: Modulation frequency of %.2f kHz is too "
+				"%s, using %.2f kHz instead.\n",
+				DEVICE_NAME, mf * 1.0e-3, mf_index == 0 ? "high" : "low",
+				mf_list[ mf_index ] * 1.0e-3 );
 	}
 	else if ( fabs( mf - mf_list[ mf_index ] ) > mf * 6.0e-2 )
-		eprint( WARN, SET, "%s: Can't modulation frequency to %.2 kHz, using "
-				"%.2 kHz instead.\n", DEVICE_NAME, mf * 1.0e-3,
+		eprint( WARN, SET, "%s: Can't set modulation frequency to %.2f kHz, "
+				"using %.2f kHz instead.\n", DEVICE_NAME, mf * 1.0e-3,
 				mf_list[ mf_index ] * 1.0e-3 );
 
 	if ( ! TEST_RUN )

@@ -566,7 +566,8 @@ int er023m_nb( void )
 	for ( fac = 255, i = 1; i < nb; i++ )
 		fac = fac * 256 + 255;
 
-	er023m.scale_factor = 2.0 / ( double ) fac;
+	er023m.scale_factor = 0.5 / ( double ) fac;
+	er023m.scale_offset = 1 << ( 4 * nb );
 
 	return nb;
 }
