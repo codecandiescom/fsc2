@@ -1878,6 +1878,8 @@ Bin = ccd_camera_binning( );
 N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
+// Calculate offset for center wavenumber due to asymmetric ROI
+
 cwn_offset = 0.5 * calib[ 2 ]
              * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
 
@@ -2405,6 +2407,8 @@ Bin = ccd_camera_binning( );
 CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
+// Calculate offset for center wavenumber due to asymmetric ROI
+
 cwn_offset = 0.5 * calib[ 2 ]
              * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
 
@@ -2623,6 +2627,8 @@ Bin = ccd_camera_binning( );
 
 CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
+
+// Calculate offset for center wavenumber due to asymmetric ROI
 
 cwn_offset = 0.5 * calib[ 2 ]
              * ( CCD_size[ 1 ] - ( ROI[ 3 ] + ROI[ 1 ] - 1 ) );
