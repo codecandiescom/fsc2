@@ -72,16 +72,10 @@ static int cur_1,
 /* window with the cross section is already shown the cut at the mouse   */
 /* position is shown.                                                    */
 /* dir: axis canvas the mouse button was pressed in (X or Y)             */
-/* pos: x- or y- position the mouse was pressed at (in screen units)     */
-/*      respectively)                                                    */
 /*-----------------------------------------------------------------------*/
 
-void cut_show( int dir, int pos )
+void cut_show( int dir, long index )
 {
-	long index;
-	Curve_2d *scv = G.curve_2d[ G.active_curve ];
-
-
 	/* Don't do anything if no curve is currently displayed */
 
 	if ( G.active_curve == -1 )
@@ -89,9 +83,8 @@ void cut_show( int dir, int pos )
 
 	/* Don't do anything if we didn't end in one of the axis canvases */
 
-	if ( pos < 0 ||
-		 ( dir == X && ( unsigned int ) pos >= G.x_axis.w ) ||
-		 ( dir == Y && ( unsigned int ) pos >= G.y_axis.h ) )
+	if ( index < 0 ||
+		 ( dir == X && index >= G.nx ) || ( dir == Y && index >= G.ny ) )
 		return;
 
 	/* If the cross section window hasn't been shown before create and
@@ -121,14 +114,6 @@ void cut_show( int dir, int pos )
 	}
 
 	fl_raise_form( cut_form->cut );
-
-	/* Calculate index into curve where cut is to be shown */
-
-	if ( dir == X )
-		index = lround( ( double ) pos / scv->s2d[ X ] - scv->shift[ X ] );
-	else
-		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
-						- scv->shift[ Y ] );
 
 	/* Set up the labels if the cut window does't not exist yet or the cut
 	   direction changed */
@@ -1288,19 +1273,10 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				case 4 :                       /* in z-axis window */
 					if ( G.cut_select == CUT_SELECT_X )
-						cut_show( CG.cut_dir, ( int ) lround(
-							( double ) ( CG.cut_dir == X ?
-										 ( ( c->h - 1 - c->ppos[ Y ] )
-										   * G.x_axis.w ) :
-										 ( c->ppos[ Y ] * G.y_axis.h ) )
-							/ ( double ) c->h ) );
-/*
-	if ( dir == X )
-		index = lround( ( double ) pos / scv->s2d[ X ] - scv->shift[ X ] );
-	else
-		index = lround( ( double ) ( G.canvas.h - 1 - pos ) / scv->s2d[ Y ]
-						- scv->shift[ Y ] );
-*/
+						cut_show( CG.cut_dir,
+							    lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+							    * ( ( CG.cut_dir == X ? G.ny : G.nx ) - 1 )
+								/ c->h ) );
 					break;
 
 				case 7 :                       /* in canvas window */

@@ -284,7 +284,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 						scale_changed = change_x_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_X &&
 							  keymask & ShiftMask )
-						cut_show( X, c->box_x + c->box_w );
+						cut_show( X, lround(
+							( double ) ( c->box_x + c->box_w )
+							/ G.curve_2d[ G.active_curve]->s2d[ X ]
+							- G.curve_2d[ G.active_curve]->shift[ X ] ) );
 					break;
 
 				case 2 :                       /* in y-axis window */
@@ -292,7 +295,10 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 						scale_changed = change_y_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
-						cut_show( Y, c->box_y + c->box_h );
+						cut_show( Y, lround( ( double )
+							     ( G.y_axis.h - 1 - ( c->box_y + c->box_h ) )
+							     / G.curve_2d[ G.active_curve]->s2d[ Y ]
+						         - G.curve_2d[ G.active_curve]->shift[ Y ] ) );
 					break;
 
 				case 4 :
