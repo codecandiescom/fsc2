@@ -5,6 +5,7 @@ DEVICES:
 hp8647a;
 tds520a;
 dg2020_b;
+dg2020_f;
 
 
 VARIABLES:
@@ -14,7 +15,7 @@ I;
 
 ASSIGNMENTS:
 
-TIME_BASE: timebase;
+TIME_BASE#1: timebase;
 TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
 
 MICROWAVE:         POD =  1, 2, 3, 4, 5,
@@ -36,15 +37,14 @@ DETECTION_GATE:    POD = 7,
 //					 INVERTED;
 
 DETECTION:         POD = 0
-					 V_HIGH = 5 V, V_LOW = 0 V;
+				   V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_SETUP_1:  MW,
-                 X: POD = 1,
-                +Y: POD = 2,
-                -X: POD = 3,
-                -Y: POD = 4,
-                CW: POD = 5;
-
+PHASE_SETUP_1:     MW,
+                   	X: POD = 1,
+                   +Y: POD = 2,
+                   -X: POD = 3,
+                   -Y: POD = 4,
+                   CW: POD = 5;
 
 PHASES:
 
