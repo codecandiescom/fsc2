@@ -54,15 +54,14 @@ static bool Need_cut_redraw;
 
 
 /*--------------------------------------------------------------------------*
- * This is the function that takes the new data from the message queue and
- * displays them. The function is invoked as a idle callback, i.e. whenever
- * the program has some unused time. For a limited time (currently set to
- * 200 ms) and schedules them to be displayed. Data sets for REQUEST type
- * data are moved to the end of the message queue (there can only be one at
- * a time because REQUESTS need a reply to the child process). When all
- * sets have been removed from the message queue (or the maximum time in
- * the accept loop is over) all parts of the display windows that changed
- * due to the new data get udated.
+ * This is the function that takes new data from the message queue and
+ * displays them. The function is invoked as an idle callback, i.e. whenever
+ * the program has nothing else to do for a limited time (currently set to
+ * 200 ms), and schedules them to be displayed. When all sets have been
+ * removed from the message queue (or the maximum time in the accept loop is
+ * over or only a REQUEST type date item is left, which is always the last
+ * if one exists) all parts of the display windows that changed due to the
+ * new data get updated.
  *--------------------------------------------------------------------------*/
 
 void accept_new_data( bool empty_queue )
@@ -96,8 +95,8 @@ void accept_new_data( bool empty_queue )
 	{
 		/* Attach to the shared memory segment pointed to by the oldest entry
 		   in the message queue - even though this should never fail it
-		   sometimes does (seems to be 2.0 kernels only) so we better have a
-		   bit more of error output until this is finally sorted out. */
+		   sometimes does (seems to happen with 2.0 kernels only) so we better
+		   have a bit more of error output until this is finally sorted out. */
 
 		if ( ( buf = attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
 			 == NULL )
@@ -133,7 +132,7 @@ void accept_new_data( bool empty_queue )
 			RETHROW( );
 		}
 
-		/* Detach from shared memory segment and remove it */
+		/* Detach from the shared memory segment and remove it */
 
 		detach_shm( buf, &Comm.MQ->slot[ Comm.MQ->low ].shm_id );
 		Comm.MQ->slot[ Comm.MQ->low ].shm_id = -1;
@@ -144,16 +143,17 @@ void accept_new_data( bool empty_queue )
 		Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
 		sema_post( Comm.mq_semaphore );
 
-		/* Return if all entries in the message queue are used up or there's
-		   a REQUEST (which is always the last entry because the child has to
-		   wait for a reply and which gets handled by the calling routine) */
+		/* Leave the loop if all entries in the message queue are used up or
+		   there's only a REQUEST left (which is always the last entry because
+		   the child has to wait for a reply and which gets handled by the
+		   calling routine) */
 
 		if ( Comm.MQ->low == Comm.MQ->high ||
 			 Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
 			break;
 
-		/* Also quit from the loop at least about every fifth of a second 
-		   unless 'empty_queue' is set, in which case the child is dead and
+		/* Also break from the loop after about MAX_ACCEPT_TIME seconds unless
+		   'empty_queue' is set, in which case the child is already dead and
 		   we have to fetch everything it send during its live time. */
 
 		if ( ! empty_queue )
@@ -448,7 +448,7 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 	double old_rw_min;
 	double fac, off;
 	Curve_1d_T *cv;
-	long i, j;
+	long i, j, end_index;
 	Scaled_Point_T *sp;
 	long count;
 
@@ -476,24 +476,24 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 	/* Get the amount of new data and a pointer to the start of the data */
 
 	len = get_number_of_new_points( &ptr, type );
+	end_index = x_index + len;
 
 	/* If the number of points exceeds the size of the arrays for the curves
 	   we have to increase the sizes for all curves. But take care: While
 	   x_index + len may be greater than G_1d.nx, x_index can still be smaller
 	   than G_1d.nx ! */
 
-	if ( x_index + len > G_1d.nx )
+	if ( end_index > G_1d.nx )
 	{
 		for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 			  cv = G_1d.curve[ ++i ] )
 		{
 			cv->points = SCALED_POINT_P T_realloc( cv->points,
-								      ( x_index + len ) * sizeof *cv->points );
+								              end_index * sizeof *cv->points );
 			cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-									 ( x_index + len ) * sizeof *cv->xpoints );
+									         end_index * sizeof *cv->xpoints );
 
-			for ( j = G_1d.nx, sp = cv->points + j;
-				  j < x_index + len; sp++, j++ )
+			for ( j = G_1d.nx, sp = cv->points + j; j < end_index; sp++, j++ )
 				sp->exist = UNSET;
 
 			if ( G_1d.is_fs )
@@ -521,8 +521,7 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 			for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 				  cv = G_1d.curve[ ++i ] )
 			{
-				for ( sp = cv->points, count = cv->count;
-					  count > 0; sp++ )
+				for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 					if ( sp->exist )
 					{
 						sp->v = fac * sp->v + off;
@@ -565,14 +564,14 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 	/* Now we're finished with rescaling and can set the new number of points
 	   if necessary */
 
-	if ( x_index + len > G_1d.nx )
-		G_1d.nx = x_index + len;
+	if ( end_index > G_1d.nx )
+		G_1d.nx = end_index;
 
 	/* Include the new data into the scaled data */
 
 	for ( cur_ptr = ptr, i = x_index,
 		  sp = G_1d.curve[ curve ]->points + x_index;
-		  i < x_index + len; sp++, i++ )
+		  i < end_index; sp++, i++ )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
@@ -765,8 +764,8 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 	/* Now append the new data */
 
 	cv = G_1d.curve[ curve ];
-	for ( cur_ptr = ptr, i = 0, sp = cv->points + cv->count;
-		  i < len; sp++, i++ )
+	for ( cur_ptr = ptr, i = 0, sp = cv->points + cv->count; i < len;
+		  sp++, i++ )
 	{
 		if ( type & ( INT_VAR | INT_ARR ) )
 		{
@@ -826,7 +825,7 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	long ldata;
 	double new_rwc_delta_z, fac, off, old_rw_min;
 	Curve_2d_T *cv;
-	long i, j;
+	long i, j, end_index;
 	Scaled_Point_T *sp;
 	bool size_changed = UNSET;
 
@@ -956,9 +955,10 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 
 	if ( type & ( INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR ) )
 	{
-		for ( cur_ptr = ptr, i = x_index,
-			  sp = cv->points + y_index * G_2d.nx + x_index;
-			  i < x_index + x_len; sp++, i++ )
+		cur_ptr = ptr;
+		end_index = x_index + x_len;
+		sp = cv->points + y_index * G_2d.nx + x_index;
+		for ( i = x_index; i < end_index; sp++, i++ )
 		{
 			if ( type & ( INT_VAR | INT_ARR ) )
 			{
@@ -994,8 +994,9 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	}
 	else        /* 2-dimensional data field is to be included */
 	{
-		ptr += sizeof y_len;
-		for ( cur_ptr = ptr, i = y_index; i <= y_index + y_len; i++ )
+		cur_ptr = ptr += sizeof y_len;
+		end_index = y_index + y_len;
+		for ( i = y_index; i <= end_index; i++ )
 		{
 			sp = cv->points + i * G_2d.nx + x_index;
 			memcpy( &x_len, cur_ptr, sizeof x_len );
