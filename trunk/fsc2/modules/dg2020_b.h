@@ -96,12 +96,6 @@ typedef struct _F_ {
                                  // pulses
 
 	struct _P_ *pod;             // points to the pod assigned to the function
-	struct _P_ *pod2;            // points to the second pod assigned to the 
-	                             // function (phase functions only)
-
-	PHS phs;                     // phase functions only: how to translate
-	                             // phases to pod outputs
-	bool is_phs;
 
 	int num_channels;            // number of channels assigned to function
 	int num_needed_channels;     // number of channels really needed
@@ -114,10 +108,6 @@ typedef struct _F_ {
 	bool needs_phases;           // set if phase cycling is needed
 
 	int next_phase;
-	struct _F_ *phase_func;      // for phase functions here's stored which
-	                             // function it's going to take care of while
-	                             // for normal functions it's a pointer to the
-	                             // phase function responsible for it.
 
 	Ticks psd;                   // delay due to phase switches (only needed
 	bool is_psd;                 // for the phase functions)
@@ -139,8 +129,10 @@ typedef struct _F_ {
 
 
 typedef struct _P_ {
-	int self;
-	FUNCTION *function;
+	int self;                    // pod number
+	FUNCTION *function;          // the function the po is assigned to
+	struct _P_ *next;            // ...for linking into a list
+	struct _P_ *prev;
 } POD;
 
 

@@ -72,7 +72,7 @@ int dg2020_b_init_hook( void )
 	pulser_struct.set_pulse_position_change = dg2020_set_pulse_position_change;
 	pulser_struct.set_pulse_length_change = dg2020_set_pulse_length_change;
 	pulser_struct.set_pulse_phase_cycle = dg2020_set_pulse_phase_cycle;
-	pulser_struct.set_grace_period = dg2020_set_grace_period;
+	pulser_struct.set_grace_period = NULL;
 
 	pulser_struct.get_pulse_function = dg2020_get_pulse_function;
 	pulser_struct.get_pulse_position = dg2020_get_pulse_position;
@@ -83,7 +83,7 @@ int dg2020_b_init_hook( void )
 
 	pulser_struct.setup_phase = dg2020_setup_phase;
 
-	pulser_struct.set_phase_switch_delay = dg2020_set_phase_switch_delay;
+	pulser_struct.set_phase_switch_delay = NULL;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
@@ -111,13 +111,11 @@ int dg2020_b_init_hook( void )
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
-		dg2020.function[ i ].is_phs = UNSET;
 		dg2020.function[ i ].is_psd = UNSET;
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;
 		dg2020.function[ i ].pulses = NULL;
 		dg2020.function[ i ].next_phase = 0;
-		dg2020.function[ i ].phase_func = NULL;
 		dg2020.function[ i ].is_inverted = UNSET;
 		dg2020.function[ i ].delay = 0;
 		dg2020.function[ i ].is_delay = UNSET;
@@ -135,5 +133,3 @@ int dg2020_b_init_hook( void )
 
 	return 1;
 }
-
-
