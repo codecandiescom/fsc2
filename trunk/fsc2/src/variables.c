@@ -1779,7 +1779,7 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( dim < a->dim - 1 )
 	{
-		eprint( FATAL, "%s:%ld: Not enough indices found for array `%s'.\n",
+		eprint( FATAL, "%s:%ld: Not enough indices supplied for array `%s'.\n",
 				Fname, Lc, a->name );
 		THROW( EXCEPTION );
 	}
@@ -1788,7 +1788,7 @@ Var *vars_arr_rhs( Var *v )
 
 	if ( dim > a->dim )
 	{
-		eprint( FATAL, "%s:%ld: Too many indices found for %d-dimensional "
+		eprint( FATAL, "%s:%ld: Too many indices supplied for %d-dimensional "
 				"array `%s'.\n", Fname, Lc, a->dim, a->name );
 		THROW( EXCEPTION );
 	}
