@@ -546,8 +546,8 @@ and you now assign @code{H} to @code{M}
 M = H;
 @end example
 @noindent
-@code{M} will also have 10 elements afterwards, with the same values as
-the elements of @code{H}.
+@code{M} will also have 10 elements with the same values as the
+elements of @code{H}.
 
 Some care has to be taken: it is also possible to shrink the length of a
 variable sized array by assigning a another arrray to it. If @code{M}
