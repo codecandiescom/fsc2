@@ -27,12 +27,12 @@
 Since it is often much easier to understand a new language from examples
 then by just learning the vocabulary and the syntax here are a few
 example @code{EDL} scripts, together with an explanation of how they
-work. If the explanations may look a bit verbose, please bear with me, I
+work. If the explanations looks overly verbose please bear with me, I
 tried to make it as comprehensive and easy to understand as possible.
-Please note that the discussion of the functions used in the example
-scripts isn't complete in all cases, sometimes a function may accept
-more parameters than mentioned here etc.@:, please always look up the
-full documentation in the previous chapters when in doubt.
+Please note that the discussion of @code{EDL} functions used in the
+example scripts isn't complete in all cases, sometimes a function may
+accept more parameters than mentioned here etc.@:, please always look up
+the full documentation in the previous chapters when in doubt.
 
 
 @ifinfo
@@ -1062,12 +1062,27 @@ channel 1, @code{CH1}), and the handle for the window previously
 defined. After storing the result in the first element of array
 @code{area} we call the function again to also get the off-signal area.
 
-All now to be done is to display the area, or to be precise, the
+The next thing to be done is to display the area, or to be precise, the
 difference between the on-signal and the off-signal areas, multiplied by
 1.0e12 because in the call of @code{init_1d()} we promised to display
 the signal in units of mV times ns, but the digitizer returns the areas
-always in Vs units.
+always in Vs units. Afterwards we have to increment the counter @code{I}
+to be prepared for displaying the next data point.
 
+We also need to write the data to a file, which is done by the next call
+of @code{fsave()} (@pxref{fsave}). Here we write first the current
+field, both areas and the difference between the areas to a file. Since
+we didn't open a file explicitely by a call of e.g.@: @code{get_file()}
+(@pxref{get_file}) we don't have a file handle to pass to the function
+as the first argument as we did in the first script. Instead we simply
+leave out the file handle. In this case the first time the script needs
+to write to the file a file selector box pops up.
+
+All left to be done in the loop of the experiemnt is to sweep up the
+field. The new field value as returned by @code{sweep_up()}
+(@pxref{sweep_up}) is stored in the @code{field} variable. which then is
+used at the begin of the loop to figure out if the experiment has to
+continue or if the end field has already been reached.
 
 
 @node ESEEM script, Time-resolved EPR script, Hahn-echo detected EPR script, Example EDL Scripts
