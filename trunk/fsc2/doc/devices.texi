@@ -5150,6 +5150,19 @@ the frequency with an accuracy of at least @w{1%} a warning is output,
 informing the user about the real rotation frequency). If the function
 is called with a zero or negative argument the chopper is stopped.
 
+When called during the @code{PREPARATIONS} section of thr @code{EDL}
+script the choppers rotation frequency is set to this value when the
+experiment is started.
+
+@anchor{chopper_rotation_frequency}
+@item chopper_rotation_frequency()
+@findex chopper_rotation_frequency()
+This function makes the choppers control electronics create a TTL
+trigger pulse at the next time the light path gets opened.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
 @end table
 
 

@@ -713,6 +713,7 @@ card.
 @multitable @columnfractions .45 .45
 @item @code{chopper_name()}               @tab @ref{chopper_name}
 @item @code{chopper_rotation_frequency()} @tab @ref{chopper_rotation_frequency}
+@item @code{chopper_create_trigger()}     @tab @ref{chopper_create_trigger}
 @end multitable
 
 

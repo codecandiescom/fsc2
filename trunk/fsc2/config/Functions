@@ -385,3 +385,4 @@ mw_attenuator_attenuation, -1, EXP;
 
 chopper_name, 0. ALL;
 chopper_rotation_frequency, -1, ALL;
+chopper_create_trigger, 0, EXP;
