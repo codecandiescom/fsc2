@@ -37,7 +37,7 @@ static bool change_xy_range_1d( Canvas *c );
 static bool zoom_x_1d( Canvas *c );
 static bool zoom_y_1d( Canvas *c );
 static bool zoom_xy_1d( Canvas *c );
-static void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
+static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
 static void reconfigure_window_1d( Canvas *c, int w, int h );
 static void recalc_XPoints_1d( void );
 
@@ -368,8 +368,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					shift_XPoints_of_curve_1d( &G.x_axis, cv );
-					scale_changed = SET;
+					scale_changed = shift_XPoints_of_curve_1d( &G.x_axis, cv );
 				}
 
 				/* Switch off full scale button if necessary */
@@ -401,8 +400,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					shift_XPoints_of_curve_1d( &G.y_axis, cv );
-					scale_changed = SET;
+					scale_changed = shift_XPoints_of_curve_1d( &G.y_axis, cv );
 				}
 
 				/* Switch off full scale button if necessary */
@@ -439,8 +437,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					shift_XPoints_of_curve_1d( &G.x_axis, cv );
-					scale_changed = SET;
+					scale_changed = shift_XPoints_of_curve_1d( &G.x_axis, cv );
 				}
 
 				redraw_canvas_1d( &G.canvas );
@@ -460,8 +457,7 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 					/* Recalculate the offsets and shift curves in the
 					   canvas */
 
-					shift_XPoints_of_curve_1d( &G.y_axis, cv );
-					scale_changed = SET;
+					scale_changed = shift_XPoints_of_curve_1d( &G.y_axis, cv );
 				}
 
 				redraw_canvas_1d( &G.canvas );
@@ -578,8 +574,7 @@ static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 				/* Recalculate the offsets and shift curves in the canvas */
 
-				shift_XPoints_of_curve_1d( c, cv );
-				scale_changed = SET;
+				scale_changed = shift_XPoints_of_curve_1d( c, cv );
 			}
 
 			G.start[ X ] = c->ppos[ X ];
@@ -940,7 +935,7 @@ static bool zoom_xy_1d( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-static void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
+static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 {
 	long j, k;
 	int dx = 0,
@@ -990,6 +985,8 @@ static void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 			k++;
 		}
 	}
+
+	return SET;
 }
 
 

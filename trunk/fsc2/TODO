@@ -12,8 +12,9 @@
    delivered (again, Martin Fuchs found this problem).
 
 3. When increasing the magnification of the display of the measured data
-   more and more there is a point above which rubish will get displayed
-   (but the program does not crash). Since it is probably a lot of work
-   to get this cleaned up and, on the other hand, it only shows up under
-   unreasonable situations (i.e. when doing stress testing) solving the
-   problem has a rather low position on my priority list...
+   further and further there is a point after which rubish will get
+   displayed (but the program does not crash). Since it will probably
+   take a lot of work to get this resolved and, on the other hand, it
+   only shows up under unreasonable situations (i.e. when doing stress
+   testing) solving the problem has a rather low position on my priority
+   list...
