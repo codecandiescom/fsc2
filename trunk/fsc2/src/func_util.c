@@ -2422,17 +2422,17 @@ static void format_check( Var *v )
 		if ( *sptr == '%' )
 			continue;
 
-		if ( *sptr == '-' || *sptr == '+' || *sptr == ' ' )
-			sptr++;
 
-		if ( *sptr == 'o' && *( sptr + 1 ) != '\0' && *( sptr + 1 ) == 'o' )
+		while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
+				*sptr == '0' || *sptr == '#' )
+		{		
 			sptr++;
-
-		if ( *sptr == '\0' )
-		{
-			eprint( FATAL, SET, "End of format string within conversion "
-					"specifier in call of %s().\n", Cur_Func );
-			THROW( EXCEPTION );
+			if ( *sptr == '\0' )
+			{
+				eprint( FATAL, SET, "End of format string within conversion "
+						"specifier in call of %s().\n", Cur_Func );
+				THROW( EXCEPTION );
+			}
 		}
 
 		if ( *sptr == '*' )
@@ -2484,52 +2484,13 @@ static void format_check( Var *v )
 			else if ( isdigit( *sptr ) )
 				while ( isdigit( *++sptr ) )
 					;
+
 			if ( *sptr == '\0' )
 			{
 				eprint( FATAL, SET, "End of format string within conversion "
 						"specifier in call of %s().\n", Cur_Func );
 				THROW( EXCEPTION );
 			}
-		}
-
-		if ( *sptr == 'h' || *sptr == 'l' || *sptr == 'L' )
-		{
-			if ( *sptr != 'l' )
-				eprint( SEVERE, SET, "To use length modifiers 'h' and 'L' is "
-						"dangerous in a format string in %s().\n", Cur_Func );
-
-			sptr++;
-			if ( *sptr == '\0' )
-			{
-				eprint( FATAL, SET, "End of format string within conversion "
-						"specifier in call of %s().\n", Cur_Func );
-				THROW( EXCEPTION );
-			}
-		}
-
-		if ( *sptr == 'c' )
-		{
-			eprint( SEVERE, SET, "To use char specifier 'c' is completele"
-					"useless in a format string in %s().\n", Cur_Func );
-
-			if ( vptr == NULL )
-			{
-				eprint( FATAL, SET, "Not enough arguments for format "
-						"string in %s().\n", Cur_Func );
-				THROW( EXCEPTION );
-			}
-
-			if ( vptr->type != STR_VAR )
-			{
-				eprint( FATAL, SET, "Non-string variable found for character "
-						"type conversion specifier in format string in "
-						"%s().\n", Cur_Func );
-				THROW( EXCEPTION );
-			}
-				
-			sptr++;
-			vptr = vptr->next;
-			continue;
 		}
 
 		if ( *sptr == 's' )
@@ -2554,19 +2515,8 @@ static void format_check( Var *v )
 			continue;
 		}
 
-		if ( *sptr == 'd' || *sptr == 'i' || *sptr == 'o' ||
-			 *sptr == 'x' || *sptr == 'X' || *sptr == 'u' )
+		if ( *sptr == 'd' || *sptr == 'i' )
 		{
-			if ( *( sptr - 1 ) != 'l' )
-				eprint( SEVERE, SET, "All integers are longs, but no 'l' "
-						"modifier in format string in %s().\n", Cur_Func );
-
-			if ( *sptr == 'o' || *sptr == 'x' ||
-				 *sptr == 'X' || *sptr == 'u' )
-				eprint( SEVERE, SET, "All integers are signed, but format "
-						"specifier for unsigned quantity in format string "
-						"in %s().\n", Cur_Func );
-
 			if ( vptr == NULL )
 			{
 				eprint( FATAL, SET, "Not enough arguments for format "
@@ -2610,23 +2560,6 @@ static void format_check( Var *v )
 			continue;
 		}
 
-		if ( *sptr == 'p' )
-		{
-			if ( vptr == NULL )
-			{
-				eprint( FATAL, SET, "Not enough arguments for format "
-						"string in %s().\n", Cur_Func );
-				THROW( EXCEPTION );
-			}
-
-			eprint( SEVERE, SET, "Using 'p' format specifier is rather "
-					"useless in format string in %s().\n", Cur_Func );
-
-			sptr++;
-			vptr = vptr->next;
-			continue;
-		}
-
 		if ( *sptr == 'n' )
 		{
 			sptr++;
@@ -2664,7 +2597,9 @@ static long do_printf( int file_num, Var *v )
 	int esc_len;
 
 	
-	sptr = fmt_start = fmt_end = T_strdup( v->val.sptr );
+	sptr = v->val.sptr;
+	fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
+	strcpy( fmt_start, sptr );
 	cv = v->next;
 	count = 0;
 
@@ -2760,9 +2695,9 @@ static long do_printf( int file_num, Var *v )
 							 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
 							   toupper( *( fmt_end + 2 ) ) > 'F' ) )
 						{
-							eprint( FATAL, SET, "'\\x' escape sequence "
-									"without hex number in format string in "
-									"%s().\n", Cur_Func );
+							eprint( FATAL, SET, "'\\x' used with no following "
+									"hex digits in format string in %s().\n",
+									Cur_Func );
 							THROW( EXCEPTION );
 						}
 						esc_len = 1;
@@ -2779,25 +2714,16 @@ static long do_printf( int file_num, Var *v )
 							             *fmt_end - '0' : *fmt_end - 'A' + 10;
 						}
 
-						if ( isdigit( *( fmt_end + 4 ) ) ||
-							 ( toupper( *( fmt_end + 4 ) ) >= 'A' &&
-							   toupper( *( fmt_end + 4 ) ) <= 'F' ) )
-						{
-							eprint( FATAL, SET, "'\\x' escape sequence out of "
-									"range in format string in %s().\n",
-									Cur_Func );
-							THROW( EXCEPTION );
-						}
-
 						memmove( fmt_end + 1, fmt_end + 2 + esc_len,
 								 strlen( fmt_end + 1 + esc_len ) );
 						break;
 
 					default :
-						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '3' )
+						if ( *( fmt_end + 1 ) < '0' || *( fmt_end + 1 ) > '7' )
 						{
-							eprint( FATAL, SET, "Invalid escape sequence in "
-									"format string in %s().\n", Cur_Func );
+							eprint( FATAL, SET, "Unknown escape sequence "
+									"'\\%c' in format string in %s().\n",
+									Cur_Func, *( fmt_end + 1 ) );
 							THROW( EXCEPTION );
 						}
 
@@ -2811,15 +2737,9 @@ static long do_printf( int file_num, Var *v )
 							esc_len = 2;
 
 							if ( *( fmt_end + 3 ) >= '0' &&
-								 *( fmt_end + 3 ) <= '3' )
+								 *( fmt_end + 3 ) <= '7' &&
+								 *fmt_end < 0x1F )
 							{
-								{
-									eprint( FATAL, SET, "'Escape sequence out "
-											"of range in format string in "
-											"%s().\n", Cur_Func );
-									THROW( EXCEPTION );
-								}
-
 								*fmt_end = *fmt_end * 8
 									       + *( fmt_end + 3 ) - '0';
 								esc_len = 3;
@@ -2841,25 +2761,24 @@ static long do_printf( int file_num, Var *v )
 		if ( fmt_start != fmt_end )
 			count += T_fprintf( file_num, fmt_start );
 
-		if ( ( *fmt_end = store ) == '\0' )              /* already at end ? */
+		if ( store == '\0' )              /* already at end ? */
 		{
 			TRY_SUCCESS;
-			T_free( sptr );
+			T_free( fmt_start );
 			return ( long ) count;
 		}
 
-		fmt_start = fmt_end++;
+		sptr += fmt_end - fmt_start;
+		strcpy( fmt_start, sptr );
+		fmt_end = fmt_start + 1;
 
 		while ( 1 )
 		{
 			need_vars = 0;
 			need_type = -1;
 
-			if ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' )
-				fmt_end++;
-
-			if ( *fmt_end == 'o' && *( fmt_end + 1 ) != '\0' &&
-				 *( fmt_end + 1 ) == 'o' )
+			while ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' ||
+					*fmt_end == '0' || *fmt_end == '#' )
 				fmt_end++;
 
 			if ( *fmt_end == '*' )
@@ -2883,51 +2802,35 @@ static long do_printf( int file_num, Var *v )
 						;
 			}
 
-			if ( *fmt_end == 'h' || *fmt_end == 'l' || *fmt_end == 'L' )
-				fmt_end++;
-
 			if ( *fmt_end == 's' )
 			{
 				need_type = 0;       /* string */
 				need_vars++;
 			}
 
-			if ( *fmt_end == 'c' )
+			if ( *fmt_end == 'd' || *fmt_end == 'i' )
 			{
-				need_type = 1;       /* char */
-				need_vars++;
-			}
-
-			if ( *fmt_end == 'd' || *fmt_end == 'i' || *fmt_end == 'o' ||
-				 *fmt_end == 'x' || *fmt_end == 'X' || *fmt_end == 'u' )
-			{
-				need_type = 2;       /* integer */
+				memmove( fmt_end + 1, fmt_end, strlen( fmt_end ) + 1 );
+				*fmt_end++ = 'l';
+				need_type = 1;       /* integer */
 				need_vars++;
 			}
 
 			if ( *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g' ||
 				 *fmt_end == 'E' || *fmt_end == 'G' )
 			{
-				need_type = 3;       /* float */
-				need_vars++;
-			}
-
-			if ( *fmt_end == 'p' )
-			{
-				need_type = 4;       /* pointer */
+				need_type = 2;       /* float */
 				need_vars++;
 			}
 
 			if ( *fmt_end == 'n' )
 			{
 				*fmt_end = 'd';
-				need_type = 5;       /* count */
+				need_type = 3;       /* count */
 			}
 
 			while ( *fmt_end != '\0' )
 			{
-				fprintf( stderr, "*->%s\n", fmt_end );
-
 				if ( *fmt_end == '%' )
 				{
 					if ( *( fmt_end + 1 ) == '%' )
@@ -3015,9 +2918,9 @@ static long do_printf( int file_num, Var *v )
 								 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
 								   toupper( *( fmt_end + 2 ) ) > 'F' ) )
 							{
-								eprint( FATAL, SET, "'\\x' escape sequence "
-										"without hex number in format string "
-										"in %s().\n", Cur_Func );
+								eprint( FATAL, SET, "'\\x' used with no "
+										"following hex digits in format "
+										"string in %s().\n", Cur_Func );
 								THROW( EXCEPTION );
 							}
 							esc_len = 1;
@@ -3030,18 +2933,8 @@ static long do_printf( int file_num, Var *v )
 							{
 								esc_len++;
 								*fmt_end = *fmt_end * 16 + 
-									      + isdigit( *fmt_end + 3 ) ?
+                                         + isdigit( *fmt_end + 3 ) ?
 							              *fmt_end - '0' : *fmt_end - 'A' + 10;
-							}
-
-							if ( isdigit( *( fmt_end + 4 ) ) ||
-								 ( toupper( *( fmt_end + 4 ) ) >= 'A' &&
-								   toupper( *( fmt_end + 4 ) ) <= 'F' ) )
-							{
-								eprint( FATAL, SET, "'\\x' escape sequence "
-										"out of range in format string in "
-										"%s().\n", Cur_Func );
-								THROW( EXCEPTION );
 							}
 
 							memmove( fmt_end + 1, fmt_end + 2 + esc_len,
@@ -3052,9 +2945,9 @@ static long do_printf( int file_num, Var *v )
 							if ( *( fmt_end + 1 ) < '0' ||
 								 *( fmt_end + 1 ) > '7' )
 							{
-								eprint( FATAL, SET, "Invalid escape sequence "
-										"in format string in %s().\n",
-										Cur_Func );
+								eprint( FATAL, SET, "Unknown escape sequence "
+										"'\\%c' in format string in %s().\n",
+										Cur_Func, *( fmt_end + 1 ) );
 								THROW( EXCEPTION );
 							}
 
@@ -3062,28 +2955,20 @@ static long do_printf( int file_num, Var *v )
 							esc_len = 1;
 
 							if ( *( fmt_end + 2 ) >= '0' &&
-								 *( fmt_end + 2 ) <= '0' )
+								 *( fmt_end + 2 ) <= '7' )
 							{
 								*fmt_end = *fmt_end * 8
 									       + *( fmt_end + 2 ) - '0';
 								esc_len = 2;
 
 								if ( *( fmt_end + 3 ) >= '0' &&
-									 *( fmt_end + 3 ) <= '7' )
+									 *( fmt_end + 3 ) <= '7' &&
+									 *fmt_end < 0x1F )
 								{
-									if ( *( fmt_end + 3 ) > '3' )
-									{
-										eprint( FATAL, SET, "'Escape sequence "
-												"out of range in format "
-												"string in %s().\n",
-												Cur_Func );
-										THROW( EXCEPTION );
-									}
+									*fmt_end = *fmt_end * 8
+										       + *( fmt_end + 3 ) - '0';
+									esc_len = 3;
 								}
-
-								*fmt_end = *fmt_end * 8
-                                           + *( fmt_end + 3 ) - '0';
-								esc_len = 3;
 							}
 
 							memmove( fmt_end + 1, fmt_end + 1 + esc_len,
@@ -3098,12 +2983,14 @@ static long do_printf( int file_num, Var *v )
 			store = *fmt_end;
 			*fmt_end = '\0';
 
-			fprintf( stderr, "%s\n", fmt_start );
+			fprintf( stderr, "->%s<- %d %d\n", fmt_start, need_vars,
+					 need_type  );
+			fflush( stderr );
 
 			switch ( need_vars )
 			{
 				case 0 :
-					fsc2_assert( need_type == 5 );        /* must be a count */
+					fsc2_assert( need_type == 3 );        /* must be a count */
 					fprintf( stderr, "count\n" );
 					count += T_fprintf( file_num, fmt_start, count );
 					break;
@@ -3118,30 +3005,18 @@ static long do_printf( int file_num, Var *v )
 							break;
 
 						case 1 :
-							fprintf( stderr, "char\n" );
-							count += T_fprintf( file_num, fmt_start,
-												cv->val.sptr[ 0 ] );
-							break;
-
-						case 2 :
 							fprintf( stderr, "int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.lval );
 							break;
 
-						case 3 :
+						case 2 :
 							fprintf( stderr, "double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												cv->val.dval );
 							break;
 
-						case 4 :
-							fprintf( stderr, "pointer\n" );
-							count += T_fprintf( file_num, fmt_start,
-												( void * ) cv );
-							break;
-
-						case 5 :
+						case 3 :
 							fprintf( stderr, "num count\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval, count );
@@ -3165,34 +3040,20 @@ static long do_printf( int file_num, Var *v )
 							break;
 
 						case 1 :
-							fprintf( stderr, "num char\n" );
-							count += T_fprintf( file_num, fmt_start,
-												( int ) cv->val.lval,
-												cv->next->val.sptr[ 0 ] );
-							break;
-
-						case 2 :
 							fprintf( stderr, "num int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.lval );
 							break;
 
-						case 3 :
+						case 2 :
 							fprintf( stderr, "num double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												cv->next->val.dval );
 							break;
 
-						case 4 :
-							fprintf( stderr, "num pointer\n" );
-							count += T_fprintf( file_num, fmt_start,
-												( int ) cv->val.lval,
-												( void * ) cv->next );
-							break;
-
-						case 5 :
+						case 3 :
 							fprintf( stderr, "num num count\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
@@ -3219,14 +3080,6 @@ static long do_printf( int file_num, Var *v )
 							break;
 
 						case 1 :
-							fprintf( stderr, "num num char\n" );
-							count += T_fprintf( file_num, fmt_start,
-											   ( int ) cv->val.lval,
-											   ( int ) cv->next->val.lval,
-											   cv->next->next->val.sptr[ 0 ] );
-							break;
-
-						case 2 :
 							fprintf( stderr, "num num int\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
@@ -3234,20 +3087,12 @@ static long do_printf( int file_num, Var *v )
 												cv->next->next->val.lval );
 							break;
 
-						case 3 :
+						case 2 :
 							fprintf( stderr, "num num double\n" );
 							count += T_fprintf( file_num, fmt_start,
 												( int ) cv->val.lval,
 												( int ) cv->next->val.lval,
 												cv->next->next->val.dval );
-							break;
-
-						case 4 :
-							fprintf( stderr, "num num pointer\n" );
-							count += T_fprintf( file_num, fmt_start,
-												( int ) cv->val.lval,
-												( int ) cv->next->val.lval,
-												( void * ) cv->next->next );
 							break;
 
 						default :
@@ -3261,20 +3106,23 @@ static long do_printf( int file_num, Var *v )
 					fsc2_assert( 1 == 0 );
 			}
 
-			if ( ( *fmt_end = store ) == '\0' )             /* end reached ? */
+			if ( store == '\0' )             /* end reached ? */
 				break;
-			fmt_start = fmt_end++;
+
+			sptr += fmt_end - fmt_start - ( need_type == 1 ? 1 : 0 );
+			strcpy( fmt_start, sptr );
+			fmt_end = fmt_start + 1;
 		}
 
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		T_free( sptr );
+		T_free( fmt_start );
 		PASSTHROU( );
 	}
 
-	T_free( sptr );
+	T_free( fmt_start );
 	return ( long ) count;
 }
 
