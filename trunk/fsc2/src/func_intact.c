@@ -2544,7 +2544,9 @@ static bool check_format_string( const char *buf )
 		return FAIL;
 
 	lcp = bp + strlen( bp ) - 1;      /* last char must be g, f or e */
-	if ( *lcp != 'g' && *lcp != 'f' && *lcp != 'e' )
+	if ( *lcp != 'g' && *lcp != 'G' &&
+		 *lcp != 'f' && *lcp != 'F' &&
+		 *lcp != 'e' && *lcp != 'E' )
 		return FAIL;
 
 

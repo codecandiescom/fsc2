@@ -617,11 +617,13 @@ arguments, the label to be shown below the input field and a help
 text. The same escape sequences as for button and lider labels and help
 texts can be used for buttons and sliders.
 
-The final optional field for an input object is a format string that is
-used when printing the value. As in C the format string must start with
-a @code{%}, optionally followed by the minimum field width, a dot, the
-precission and then either @code{f}, @code{e} or @code{g}. For more
-information see the manual page for C's printf(3).
+The final, optional field for an input object is a format string that is
+used when printing the value. The format string is a simplified version
+of a C format string. It must start with @code{%}, optionally followed
+by the minimum field width, a dot, the precision and finally
+(non-optionally) either @code{f}, @code{e} or @code{g} (or @code{F},
+@code{E} or @code{G}). For more information please read the manual page
+for C's printf(3).
 
 
 @anchor{input_delete}
@@ -667,11 +669,13 @@ arguments, the label to be shown below the input field and a help
 text. The same escape sequences as for button and lider labels and help
 texts can be used for buttons and sliders.
 
-The final optional field for an output object is a format string that is
-used when printing the value. As in C the format string must start with
-a @code{%}, optionally followed by the minimum field width, a dot, the
-precission and then either @code{f}, @code{e} or @code{g}. For more
-information see the manual page for C's printf(3).
+The final, optional field for an output object is a format string that is
+used when printing the value. The format string is a simplified version
+of a C format string. It must start with @code{%}, optionally followed
+by the minimum field width, a dot, the precision and finally
+(non-optionally) either @code{f}, @code{e} or @code{g} (or @code{F},
+@code{E} or @code{G}). For more information please read the manual page
+for C's printf(3).
 
 
 @anchor{output_delete}
