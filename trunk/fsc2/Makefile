@@ -96,9 +96,9 @@ export            # export all variables to sub-makes
 
 all:
 	$(MAKE) -C src all
-	mv src/fsc2 .
-	mv src/fsc2_clean .
-	mv modules/*.so .
+	cp src/fsc2 .
+	cp src/fsc2_clean .
+	cp modules/*.so .
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 

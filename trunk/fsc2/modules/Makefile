@@ -25,52 +25,51 @@ CFLAGS        += -I../src
 
 all: $(comp_modules:=.so) $(simp_modules:.c=.so)
 
-#$(comp_modules:=.so): $(subst .c,.lo,$($(subst .so,,$@)))
-#	 $(CC) -shared -o $@ $(subst .c,.lo,$($(subst .so,,$@))) -lm $(LDFLAGS)
-#	 chmod 644 $@
+#$(comp_modules:=.so): $($($(subst .so,,$@)):.c=.o)
+#	$(CC) -shared -o $@ $(subst .c,.o,$($(subst .so,,$@))) -lm $(LDFLAGS)
+#	chmod 644 $@
 
-dg2020_f.so: ${dg2020_f:.c=.lo}
-	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
+#$(comp_modules:.o): $(subst .o,.c,$@) $(src_headers)
+
+dg2020_f.so: ${dg2020_f:.c=.o}
+	$(CC) -shared -o $@ ${dg2020_f:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-dg2020_b.so: ${dg2020_b:.c=.lo}
-	$(CC) -shared -o $@ ${dg2020_b:.c=.lo} -lm $(LDFLAGS)
+dg2020_b.so: ${dg2020_b:.c=.o}
+	$(CC) -shared -o $@ ${dg2020_b:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds754a.so: ${tds754a:.c=.lo}
-	$(CC) -shared -o $@ ${tds754a:.c=.lo} -lm $(LDFLAGS)
+tds754a.so: ${tds754a:.c=.o}
+	$(CC) -shared -o $@ ${tds754a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds744a.so: ${tds744a:.c=.lo}
-	$(CC) -shared -o $@ ${tds744a:.c=.lo} -lm $(LDFLAGS)
+tds744a.so: ${tds744a:.c=.o}
+	$(CC) -shared -o $@ ${tds744a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds520a.so: ${tds520a:.c=.lo}
-	$(CC) -shared -o $@ ${tds520a:.c=.lo} -lm $(LDFLAGS)
+tds520a.so: ${tds520a:.c=.o}
+	$(CC) -shared -o $@ ${tds520a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-tds520.so: ${tds520:.c=.lo}
-	$(CC) -shared -o $@ ${tds520:.c=.lo} -lm $(LDFLAGS)
+tds520.so: ${tds520:.c=.o}
+	$(CC) -shared -o $@ ${tds520:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-hp8647a.so: ${hp8647a:.c=.lo}
-	$(CC) -shared -o $@ ${hp8647a:.c=.lo} -lm $(LDFLAGS)
+hp8647a.so: ${hp8647a:.c=.o}
+	$(CC) -shared -o $@ ${hp8647a:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
-%.so: %.lo
-	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
+%.so: %.o
+	$(CC) -shared -o $@ $*.o -lm $(LDFLAGS)
 	chmod 644 $@
 
-%.o: %.c $(src_headers)
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-${dg2020_f:.c=.lo}: dg2020_f.h $(src_headers)
-${dg2020_b:.c=.lo}: dg2020_b.h $(src_headers)
-${tds754a:.c=.lo}:  tds754a.h  $(src_headers)
-${tds744a:.c=.lo}:  tds744a.h  $(src_headers)
-${tds520a:.c=.lo}:  tds520a.h  $(src_headers)
-${tds520:.c=.lo}:   tds520.h   $(src_headers)
-${hp8647a:.c=.lo}:  hp8647a.h  $(src_headers)
+${dg2020_f:.c=.o}: dg2020_f.h
+${dg2020_b:.c=.o}: dg2020_b.h
+${tds754a:.c=.o}:  tds754a.h
+${tds744a:.c=.o}:  tds744a.h
+${tds520a:.c=.o}:  tds520a.h
+${tds520:.c=.o}:   tds520.h
+${hp8647a:.c=.o}:  hp8647a.h
 
 hp8647a_lexer.c: hp8647a_lexer.flex $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.flex,%,$<) -o$@ $<
@@ -78,15 +77,15 @@ hp8647a_lexer.c: hp8647a_lexer.flex $(src_header)
 			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
-%.lo: %.c $(src_headers)
-	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
+%.o: %.c $(src_headers)
+	$(CC) $(CFLAGS) -c -fpic -o $@ $<
 
 
 # `clean' deletes just all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
 
 clean:
-	$(RM) $(RMFLAGS) *.o *_lexer.c *.lo *.so TAGS *~
+	$(RM) $(RMFLAGS) *.o *_lexer.c *.so TAGS *~
 
 
 # don't automatically delete intermediate files created by flex
