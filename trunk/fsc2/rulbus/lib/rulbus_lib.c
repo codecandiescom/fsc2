@@ -53,7 +53,7 @@ static const char *rulbus_errlist[ ] = {
 	"Too many cards in configuration file",            /* RULBUS_MAX_CRD */
 	"Invalid card address in configuration file",      /* RULBUS_CRD_ADD */
 	"Duplicate card name in configuration file",       /* RULBUS_NAM_DUP */
-	"More than one name for a card",                   /* RULBUS_CRD_NAM */
+	"More than one name for a card",                   /* RULBUS_DUP_NAM */
 	"More than one address for a card",                /* RULBUS_ADD_DUP */
 	"More than one type for a card",                   /* RULBUS_TYP_DUP */
 	"Too many cards for single rack",                  /* RULBUS_CRD_CNT */
@@ -566,7 +566,7 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 		return retval;
 
 	if ( len == 1 )
-		*data = byte;
+		*data = args.byte;
 
 	return retval;
 }

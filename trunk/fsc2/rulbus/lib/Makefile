@@ -31,7 +31,7 @@ YACC      = bison
 YFLAGS    = -d -t
 INCLUDES  = ../include
 
-lib_sources   = rulbus_lib.c parser.c lexer.c
+lib_sources   = rulbus_lib.c parser.c lexer.c rb8514.c rb8515.c
 lib_headers   = $(INCLUDES)/rulbus.h
 
 

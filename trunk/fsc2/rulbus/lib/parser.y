@@ -96,26 +96,26 @@ rdata:    /* empty */
 
 cdata:    /* empty */
 		| cdata NAME_TOKEN sep1 STR_TOKEN sep2
-										  { if ( ( ret =  set_name( $4) )  )
+										  { if ( ( ret =  set_name( $4 ) )  )
 												return ret; }
 		| cdata ADDR_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret =  set_addr( $4) ) )
+										  { if ( ( ret =  set_addr( $4 ) ) )
 												return ret; }
 		| cdata CARD_TYPE_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret =  set_type( $4) ) )
+										  { if ( ( ret =  set_type( $4 ) ) )
 												return ret; }
 ;
 
 
-sep1:   /* empty */
-      | '='
-      | ':'
+sep1:     /* empty */
+        | '='
+        | ':'
 ;
 
 
-sep2:   /* empty */
-      | ','
-      | ';'
+sep2:     /* empty */
+        | ','
+        | ';'
 ;
 
 
@@ -178,14 +178,22 @@ static int new_card( void )
 
 static int set_name( const char *name )
 {
+	int i;
+
+
+	/* Check that the name hasn't been used before */
+
 	for ( i = 0; i < rulbus_num_cards - 1; i++ )
 		if ( rulbus_card[ i ].name &&
 			 ! strcpy( rulbus_card[ i ].name, name ) )
 			return RULBUS_NAM_DUP;
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].name != NULL ||
-		 ( rulbus_card[ rulbus_num_cards - 1 ].name =
-									   malloc( strlen( name ) + 1 ) ) == NULL )
+	/* Check that the card hasn't already been assigned a name */
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].name != NULL )
+		return RULBUS_DUP_NAM;
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].name = strdup( name ) == NULL )
 		return RULBUS_NO_MEM;
 
 	strcpy( rulbus_card[ rulbus_num_cards - 1 ].name, name );
@@ -199,8 +207,12 @@ static int set_name( const char *name )
 
 static int set_addr( unsigned int addr )
 {
+	/* Check that the address is reasonable */
+
 	if ( addr < RULBUS_MIN_CARD_ADDR || addr > RULBUS_MAX_CARD_ADDR )
 		return RULBUS_CRD_ADD;
+
+	/* Check that the card hasn't already been assigned an address */
 
 	if ( rulbus_card[ rulbus_num_cards - 1 ].addr != RULBUS_INVALID_ADDR )
 		return RULBUS_ADD_DUP;
@@ -216,6 +228,8 @@ static int set_addr( unsigned int addr )
 
 static int set_type( unsigned int type )
 {
+	/* Check that the card hasn't already been assigned a type */
+
 	if ( rulbus_card[ rulbus_num_cards - 1 ].type != -1 )
 		return RULBUS_TYP_DUP;
 
