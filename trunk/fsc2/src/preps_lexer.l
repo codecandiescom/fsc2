@@ -108,7 +108,7 @@ PC          PH(ASE)?_?C(YCLE)?
 
 PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 
-CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(AUX1)|(AUX2)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN))
+CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(AUX1)|(AUX2)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LINE))
 
 
 CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)

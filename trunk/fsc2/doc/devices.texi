@@ -566,7 +566,7 @@ numeric!):
 @item TDS520A
 @itemize @bullet
 @item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@item @code{AUX1}, @code{AUX2} or @code{LIN} or, alternatively @code{9},
+@item @code{AUX1}, @code{AUX2} or @code{LINE} or, alternatively @code{9},
 @code{10} or @code{11}
 @end itemize
 @item TDS540
@@ -575,7 +575,7 @@ numeric!):
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
 @code{0}, @code{1}, @code{2} or @code{3}
-@item @code{AUX} or @code{LIN} or, alternatively, @code{11} or @code{12}
+@item @code{AUX} or @code{LINE} or, alternatively, @code{11} or @code{12}
 @end itemize
 @end table
 The function can be called in query mode (i.e.@: without an argument)
