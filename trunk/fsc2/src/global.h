@@ -185,7 +185,7 @@ enum {
 #define PHASE_TYPES_MAX  PHASE_CW
 
 #if defined ( FSC2_MAIN )
-const char *Phase_Types[ ] = { "X", "-X", "Y", "-Y", "CW" };
+const char *Phase_Types[ ] = { "+X", "-X", "+Y", "-Y", "CW" };
 #else
 extern const char *Phase_Types[ ];
 #endif
