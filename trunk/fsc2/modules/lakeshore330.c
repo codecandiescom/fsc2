@@ -466,7 +466,7 @@ static void lakeshore330_lock( int state )
 	char cmd[ 20 ];
 
 
-	assert ( state >= LOCK_STATE_LOCAL && state <= LOCK_STATE_REMOTE_LLO );
+	fsc2_assert( state >= LOCK_STATE_LOCAL && state <= LOCK_STATE_REMOTE_LLO );
 
 	sprintf( cmd, "MODE %d\n", state );
 	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )

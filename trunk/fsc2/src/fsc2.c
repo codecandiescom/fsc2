@@ -643,8 +643,6 @@ void test_file( FL_OBJECT *a, long b )
 	static bool in_test = UNSET;
 
 
-	fsc2_assert( 1 == 0 );
-
 	a->u_ldata = 0;
 	b = b;
 

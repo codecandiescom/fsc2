@@ -6,6 +6,18 @@
 #include "fsc2.h"
 
 
+extern Fsc2_Assert Assert_struct;      /* defined fsc2_assert.c */
+
+
+#if ! defined MAIL_ADDRESS
+#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
+#endif
+
+#if ! defined MAIL_PROGRAM
+#define MAIL_PROGRAM "/usr/bin/mail"
+#endif
+
+
 /*------------------------------------------------------------------------*/
 /* Callback function for the bug report button. Creates a bug report with */
 /* some information about the input and output of the program etc and     */
@@ -244,10 +256,11 @@ void bug_report_callback( FL_OBJECT *a, long b )
 
 		/* Assemble the command for sending the mail */
 
-		cmd = get_string( strlen( "mail -s \"fsc2 bug report\" -c    < " ) +
-						  + strlen( MAIL_ADDRESS ) + strlen( filename ) +
-						  ( user != NULL ? strlen( user ) : 0 ) );
-		strcpy( cmd, "mail -s \"fsc2 bug report\" " );
+		cmd = get_string( strlen( MAIL_PROGRAM MAIL_ADDRESS
+								  " -s \"fsc2 bug report\" -c    < " ) +
+						  + strlen( filename )
+						  + ( user != NULL ? strlen( user ) : 0 ) );
+		strcpy( cmd, MAIL_PROGRAM " -s \"fsc2 bug report\" " );
 
 		if ( user != NULL )             /* append option for the carbon copy */
 		{
@@ -270,9 +283,9 @@ void bug_report_callback( FL_OBJECT *a, long b )
 }
 
 
-/*-----------------------------------------------------*/
-/* This function sends a mail to me when fsc2 crashes. */
-/*-----------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* This function sends an email to me when fsc2 crashes. */
+/*-------------------------------------------------------*/
 
 void death_mail( int signo )
 {

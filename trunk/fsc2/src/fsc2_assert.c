@@ -6,6 +6,9 @@
 #include "fsc2.h"
 
 
+Fsc2_Assert Assert_struct;
+
+
 void fsc2_assert_print( const char *expression, const char *filename,
 						unsigned int line )
 {
