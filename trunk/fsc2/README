@@ -62,8 +62,10 @@ Features
 * fsc2 has a built-in simple web server (only running on user demand)
   that allows the user to remotely monitor the state of an experiment.
 
-* Currently fsc2 controls devices that are either connected via the
-  serial ports or the GPIB bus and two devices on PCI cards.
+* Currently fsc2 can control more than types of 30 devices that are
+  either connected via the serial ports or the GPIB bus or are
+  realized as PCI cards (Linux drivers for these devices are supplied
+  with the package).
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
