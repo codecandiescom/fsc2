@@ -41,7 +41,7 @@ extern int rulbus_num_cards;
 static int rack;                 /* address of current rack */
 static RULBUS_CARD_LIST *card;   /* pointer to current card */
 static int ret;                  
-static bool rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR + 1 ];
+static int rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR + 1 ];
 static char **rulbus_rack_names = NULL;
 static int rulbus_num_racks = 0;
 

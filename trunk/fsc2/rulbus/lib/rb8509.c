@@ -31,15 +31,15 @@
 typedef struct RULBUS_RB8509_ADC12_CARD RULBUS_RB8509_ADC12_CARD;
 
 struct RULBUS_RB8509_ADC12_CARD {
-	int handle;
-	int num_channels;
-	double gain;
-	double Vmax;
-	double Vmin;
-	double dV;
-	bool has_ext_trigger;
-	int trig_mode;
-	int data;
+	int           handle;
+	int           num_channels;
+	double        gain;
+	double        Vmax;
+	double        Vmin;
+	double        dV;
+	int           has_ext_trigger;
+	int           trig_mode;
+	int           data;
 	unsigned char ctrl;
 };
 

@@ -137,7 +137,7 @@ static char rulbus_err_str[ 256 ];
 static const int rulbus_nerr =
                 ( int ) ( sizeof rulbus_errlist / sizeof rulbus_errlist[ 0 ] );
 
-static bool rulbus_in_use = UNSET;
+static int rulbus_in_use = UNSET;
 static int fd;
 
 
@@ -161,7 +161,7 @@ struct RULBUS_CARD_HANDLER {
 	void ( *exit ) ( void );      /* module cleanup function */
 	int ( *card_init ) ( int );   /* card initialization function */
 	void ( *card_exit ) ( int );  /* card cleanup function */
-	bool is_init;                 /* module initialization flag */
+	int is_init;                  /* module initialization flag */
 };
 
 static RULBUS_CARD_HANDLER rulbus_card_handler[ ] =

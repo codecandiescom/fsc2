@@ -51,16 +51,6 @@ extern "C" {
 #endif
 
 
-#ifndef __cplusplus
-
-typedef enum
-{
-      false = 0,
-      true  = 1
-} bool;
-
-#endif
-
 #define FAIL    false
 #define UNSET   false
 #if ! defined FALSE
@@ -114,19 +104,19 @@ typedef enum
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
 
 struct RULBUS_CARD_LIST {
-	char *name;
-	char *rack_name;
-	int type;
-	unsigned char rack;
-	unsigned char addr;
-	unsigned char width;
+	char                       *name;
+	char                       *rack_name;
+	int                         type;
+	unsigned char               rack;
+	unsigned char               addr;
+	unsigned char               width;
 	struct RULBUS_CARD_HANDLER *handler;
-	bool in_use;
-	int num_channels;
-	double vpb;
-	int bipolar;
-	int has_ext_trigger;
-	double intr_delay;
+	int                         in_use;
+	int                         num_channels;
+	double                      vpb;              /* volts per bit */
+	int                         bipolar;
+	int                         has_ext_trigger;
+	double                      intr_delay;
 };
 
 extern RULBUS_CARD_LIST *rulbus_card;
