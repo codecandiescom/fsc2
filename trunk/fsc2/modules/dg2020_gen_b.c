@@ -10,7 +10,7 @@ static int Cur_PHS = -1;
 
 
 /*------------------------------------------------------------------*/
-/* Function is called via the TIMEBASE commandf to set the timebase */
+/* Function is called via the TIMEBASE command to set the timebase  */
 /* used with the pulser - got to be called first because all nearly */
 /* all other functions depend on the timebase setting !             */
 /*------------------------------------------------------------------*/
@@ -510,7 +510,9 @@ bool dg2020_set_phase_reference( int phs, int function )
 	FUNCTION *f;
 
 
-	assert( Cur_PHS != -1 && Cur_PHS == phs );
+	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+
+	Cur_PHS = phs;
 
 	/* Phase function can't be used with this driver... */
 
@@ -559,10 +561,12 @@ bool dg2020_set_phase_reference( int phs, int function )
 bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 							  long protocol )
 {
-	assert( Cur_PHS != -1 && Cur_PHS == phs );
+	assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
 
 
-	pod = pod;        /* keep te compiler happy... */
+	Cur_PHS = phs;
+
+	pod = pod;        /* keep the compiler happy... */
 
 	/* Ceck that we don't get stuf only to be used with the Frankfurt driver */
 
@@ -611,10 +615,10 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val,
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Just does a primary sanity check after a PHASE_SETUP command has been */
-/* parsed.                                                               */
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Function just does a primary sanity check after */
+/* a PHASE_SETUP command has been parsed.          */
+/*-------------------------------------------------*/
 
 bool dg2020_phase_setup( int phs )
 {

@@ -164,7 +164,7 @@ int dg2020_b_test_hook( void )
 
 	dg2020_IN_SETUP = SET;
 
-//	dg2020_init_setup( );
+	dg2020_init_setup( );
 
 	dg2020_IN_SETUP = UNSET;
 
