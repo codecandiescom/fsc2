@@ -109,7 +109,10 @@ static Func def_fncts[ ] =              /* List of built-in functions */
 };
 
 
-
+/*--------------------------------------------------------------------*/
+/* Function parses the function data base in `Functions' and makes up */
+/* a complete list of all built-in and user-supplied functions.       */
+/*--------------------------------------------------------------------*/
 
 bool functions_init( void )
 {
@@ -151,6 +154,11 @@ bool functions_init( void )
 }
 
 
+/*-----------------------------------------------------------*/
+/* Function gets rid of all loaded loaded functions and also */
+/* unlinks the library files.                                */
+/*-----------------------------------------------------------*/
+
 void functions_exit( void )
 {
 	int i;
@@ -184,6 +192,11 @@ void functions_exit( void )
 }
 
 
+/*------------------------------------------------------------------------*/
+/* Function to be called after the DEVICES section is read in: It links   */
+/* the library files and tries to resolve the references to the functions */
+/* listed in `Files' and stores pointers to the functions in `Fncts'.     */
+/*------------------------------------------------------------------------*/
 
 void load_all_functions( void )
 {
@@ -198,6 +211,12 @@ void load_all_functions( void )
 	}
 }
 
+
+/*----------------------------------------------------------------------*/
+/* Function links a library file  with the name passed to it (after     */
+/* adding the  extension `so') and then tries to find still unresolved  */
+/* references to functions listed in the function data base `Function'. */
+/*----------------------------------------------------------------------*/
 
 void load_functions( const char *name )
 {
@@ -287,9 +306,21 @@ void load_functions( const char *name )
 			continue;
 		}
 
+		/* Allow overloading of built-in functions - but only once, next time
+		   just print strong warning and do nothing */
+
 		if ( num < num_def_func && fncts[ num ].fnct != NULL )
+		{
+			if ( fncts[ num ].fnct != def_fncts[ num ].fnct )
+			{
+				eprint( SEVERE, "  Built-in function `%s()' has already been "
+						"overloaded.\n", fncts[ num ].name );
+				continue;
+			}
+
 			eprint( NO_ERROR, "  Overloading built-in function `%s()'.\n",
 					fncts[ num ].name );
+		}
 		else
 			eprint( NO_ERROR, "  Loading function `%s()'.\n",
 					fncts[ num ].name );
@@ -297,6 +328,13 @@ void load_functions( const char *name )
 	}
 }
 
+
+/*------------------------------------------------------------------------*/
+/* Function tries to find a function in the list of built-in and loaded   */
+/* functions. If it does it creates a new variable on the variables stack */
+/* with a pointer to the function and returns a pointer to the variable.  */
+/* If the function can't be found it returns a NULL pointer.              */
+/*------------------------------------------------------------------------*/
 
 Var *func_get( char *name, int *access )
 {
@@ -398,6 +436,16 @@ Var *func_call( Var *f )
 }
 
 
+/****************************************************************/
+/*                                                              */
+/*     Here follow the definitions of all built-in functions    */
+/*                                                              */
+/****************************************************************/
+
+
+
+/* Conversion float to integer (result is integer) */
+
 Var *f_int( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -409,6 +457,8 @@ Var *f_int( Var *v )
 }
 
 
+/* Conversion int to floating point (result is float) */
+
 Var *f_float( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -419,6 +469,8 @@ Var *f_float( Var *v )
 		return vars_push( FLOAT_VAR, v->val.dval );
 }
 
+
+/* Rounding of floating point numbers (result is integer) */
 
 Var *f_round( Var *v )
 {
@@ -432,6 +484,8 @@ Var *f_round( Var *v )
 }
 
 
+/* Floor value (result is integer) */
+
 Var *f_floor( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -442,6 +496,8 @@ Var *f_floor( Var *v )
 		return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
 }
 
+
+/* Ceiling value (result is integer) */
 
 Var *f_ceil( Var *v )
 {
@@ -454,6 +510,8 @@ Var *f_ceil( Var *v )
 }
 
 
+/* abs of value (result has same as type argument) */
+
 Var *f_abs( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -464,6 +522,8 @@ Var *f_abs( Var *v )
 		return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
 }
 
+
+/* sin of argument (in radian) (result is float) */
 
 Var *f_sin( Var *v )
 {
@@ -476,6 +536,8 @@ Var *f_sin( Var *v )
 }
 
 
+/* cos of argument (in radian) (result is float) */
+
 Var *f_cos( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -487,6 +549,8 @@ Var *f_cos( Var *v )
 }
 
 
+/* tan of argument (in radian) (result is float) */
+
 Var *f_tan( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -497,6 +561,8 @@ Var *f_tan( Var *v )
 		return vars_push( FLOAT_VAR, tan( v->val.dval ) );
 }
 
+
+/* asin (in radian) of argument (with -1 <= x <= 1) (result is float) */
 
 Var *f_asin( Var *v )
 {
@@ -520,6 +586,8 @@ Var *f_asin( Var *v )
 }
 
 
+/* acos (in radian) of argument (with -1 <= x <= 1) (result is float) */
+
 Var *f_acos( Var *v )
 {
 	double arg;
@@ -542,6 +610,8 @@ Var *f_acos( Var *v )
 }
 
 
+/* atan (in radian) of argument (result is float) */
+
 Var *f_atan( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -552,6 +622,8 @@ Var *f_atan( Var *v )
 		return vars_push( FLOAT_VAR, atan( v->val.dval ) );
 }
 
+
+/* sinh of argument (result is float) */
 
 Var *f_sinh( Var *v )
 {
@@ -564,6 +636,8 @@ Var *f_sinh( Var *v )
 }
 
 
+/* cosh of argument (result is float) */
+
 Var *f_cosh( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -574,6 +648,8 @@ Var *f_cosh( Var *v )
 		return vars_push( FLOAT_VAR, cosh( v->val.dval ) );
 }
 
+
+/* tanh of argument (result is float) */
 
 Var *f_tanh( Var *v )
 {
@@ -586,6 +662,8 @@ Var *f_tanh( Var *v )
 }
 
 
+/* exp of argument (result is float) */
+
 Var *f_exp( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -596,6 +674,8 @@ Var *f_exp( Var *v )
 		return vars_push( FLOAT_VAR, exp( v->val.dval ) );
 }
 
+
+/* ln of argument (with x > 0) (result is float) */
 
 Var *f_ln( Var *v )
 {
@@ -618,6 +698,8 @@ Var *f_ln( Var *v )
 }
 
 
+/* log of argument (with x > 0) (result is float) */
+
 Var *f_log( Var *v )
 {
 	double arg;
@@ -638,6 +720,8 @@ Var *f_log( Var *v )
 	return vars_push( FLOAT_VAR, log10( arg ) );
 }
 
+
+/* sqrt of argument (with x >= 0) (result is float) */
 
 Var *f_sqrt( Var *v )
 {
@@ -661,10 +745,16 @@ Var *f_sqrt( Var *v )
 
 
 
-/*------------------------------------------------------------------*/
-/* The print() function returns the number of variables it printed, */
-/* not counting the format string.                                  */
-/*------------------------------------------------------------------*/
+/* Prints variable number of arguments using a format string supplied as
+   the first argument. Types of arguments to be printed are integer and
+   float data and strings. To get a value printed the format string has
+   to contain the character `#'. The escape character is the backslash,
+   with a double backslash for printing one backslash. Beside the `\#'
+   combination to print a `#' most of the escape sequences from printf()
+   ('\a', '\b', '\f', '\n', '\r', '\t', '\v' and '\"') do function.
+
+   The unction returns the number of variables it printed, not counting
+   the format string. */
 
 Var *f_print( Var *v )
 {
