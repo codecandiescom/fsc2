@@ -6,6 +6,7 @@
 #include "hp8647a.h"
 
 
+
 /*----------------------------------------------------------------------*/
 /* If the function succeeds it returns a file pointer to the table file */
 /* and sets the table_file entry in the device structure to the name of */
@@ -13,7 +14,7 @@
 /* memory used for the file name passed to the function is deallocated. */
 /*----------------------------------------------------------------------*/
 
-FILE *hp8647a_find_table( char *name )
+FILE *hp8647a_find_table( char **name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -21,56 +22,54 @@ FILE *hp8647a_find_table( char *name )
 
 	/* Expand a leading tilde to the users home directory */
 
-	if ( name[ 0 ] == '~' )
+	if ( ( *name )[ 0 ] == '~' )
 	{
-		new_name = get_string( strlen( getenv( "HOME" ) ) + strlen( name ) );
+		new_name = get_string(   strlen( getenv( "HOME" ) )
+							   + strlen( *name ) + 1 );
 		strcpy( new_name, getenv( "HOME" ) );
-		if ( name[ 1 ] != '/' )
+		if ( ( *name )[ 1 ] != '/' )
 			strcat( new_name, "/" );
-		strcat( new_name, name + 1 );
-		T_free( name );
-		name = new_name;
+		strcat( new_name, *name + 1 );
+		T_free( *name );
+		*name = new_name;
 	}
 
 	/* Now try to open the file - set table_file entry in the device structure
 	   to the name and return the file pointer */
 
-	if ( ( tfp = hp8647a_open_table( name ) ) != NULL )
+	if ( ( tfp = hp8647a_open_table( *name ) ) != NULL )
 	{
-		hp8647a.table_file = name;
+		hp8647a.table_file = get_string_copy( *name );
 		return tfp;
 	}
 
 	/* If the file name contains a slash we give up after freeing memory */
 
-	if ( strchr( name, '/' ) != NULL )
+	if ( strchr( *name, '/' ) != NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
-				Fname, Lc, name );
-		T_free( name );
+				Fname, Lc, *name );
 		THROW( EXCEPTION );
 	}
 
 	/* Last chance: The table file is in the library directory... */
 
-	new_name = get_string( strlen( libdir ) + strlen( name ) );
+	new_name = get_string( strlen( libdir ) + strlen( *name ) );
 	strcpy( new_name, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
 		strcat( new_name, "/" );
-	strcat( new_name, name );
-	T_free( name );
-	name = new_name;
+	strcat( new_name, *name );
+	T_free( *name );
+	*name = new_name;
 
-	if ( ( tfp = hp8647a_open_table( name ) ) == NULL )
+	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found, neither in the "
 				"current dirctory nor in `%s'.\n", Fname, Lc,
-				strrchr( name, '/' ) + 1, libdir );
-		T_free( name );
+				strrchr( *name, '/' ) + 1, libdir );
 		THROW( EXCEPTION );
 	}
 
-	hp8647a.table_file = name;
 	return tfp;
 }
 
@@ -142,32 +141,35 @@ double hp8647a_get_att_from_table( double freq )
 	}
 
 	/* Find the indices of the two entries in the table (that has been sorted
-	   in ascending order of frequencies) bracketing the frequency. In most
-	   cases the frequencies in the table are equally spaced, so we use
-	   bisecting employing the mean slope of the current interval for our
-	   guesses. This is probably the fasted method for the most common case
-	   (value is found after first run through loop) but may be slow in other
-	   cases. */
+	   in ascending order of frequencies) bracketing the frequency. Since in
+	   most cases the frequencies in the table are equally spaced, we first
+	   try to find the entry by interpolating. If this doesn't succeeds the
+	   frequencies can't be uniformly spaced and we used simple bisecting.*/
 
 	i_low = 0;
 	i_high = hp8647a.att_table_len - 1;
 
+	i_cur = floor( ( i_high - i_low ) *
+				   ( freq - hp8647a.att_table[ i_low ].freq ) /
+				   (   hp8647a.att_table[ i_high ].freq 
+					 - hp8647a.att_table[ i_low ].freq ) ) + i_low;
+
+	if ( freq > hp8647a.att_table[ i_cur ].freq )
+	{
+		i_low = i_cur;
+		if ( freq < hp8647a.att_table[ i_cur + 1 ].freq )
+			i_high = i_cur + 1;
+	}
+	else
+		i_high = i_cur;
+
 	while ( i_high - i_low > 1 )
 	{
-		i_cur = floor( ( i_high - i_low ) *
-					   ( freq - hp8647a.att_table[ i_low ].freq ) /
-					   (   hp8647a.att_table[ i_high ].freq 
-						 - hp8647a.att_table[ i_low ].freq ) ) + i_low;
 		if ( freq > hp8647a.att_table[ i_cur ].freq )
 			i_low = i_cur;
 		else
-		{
 			i_high = i_cur;
-			continue;
-		}
-
-		if ( freq < hp8647a.att_table[ i_cur + 1 ].freq )
-			i_high = i_cur + 1;
+		i_cur = ( i_high + i_low ) >> 1;
 	}
 
 	/* Now do a linear interpolation for the attenuation between the bracketing
@@ -182,4 +184,48 @@ double hp8647a_get_att_from_table( double freq )
 	/* Reduce value to the resolution the attenuation can be set with */
 
 	return ATT_RESOLUTION * lround( att / ATT_RESOLUTION );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+double hp8647a_get_att( double freq )
+{
+	double att;
+
+	if ( ! hp8647a.use_table )
+		return hp8647a.attenuation;
+
+	att =   hp8647a.attenuation - hp8647a_get_att_from_table( freq )
+		  + hp8647a.att_at_ref_freq;
+
+	if ( att < MAX_ATTEN )
+	{
+		if ( ! TEST_RUN && I_am == PARENT )
+			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
+					"(f = %g MHz), using %f dB instead of %f dB.\n",
+					DEVICE_NAME, freq * 1.0e-6, MAX_ATTEN, att );
+		else
+			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
+					"insufficient (f = %g MHz) , using %f dB instead of "
+					"%f dB.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
+					MAX_ATTEN, att );
+		att = MAX_ATTEN;
+	}
+	if ( att > MIN_ATTEN )
+	{
+		if ( ! TEST_RUN && I_am == PARENT )
+			eprint( SEVERE, "%s: Attenuation dynamic range is insufficient "
+					"(f = %g MHz), using %f dB instead of %f dB.\n",
+					DEVICE_NAME, freq * 1.0e-6, MIN_ATTEN, att );
+		else
+			eprint( SEVERE, "%s:%ld: %s: Attenuation dynamic range is "
+					"insufficient (f = %g MHz) , using %f dB instead of "
+					"%f dB.\n", Fname, Lc, DEVICE_NAME, freq * 1.0e-6,
+					MIN_ATTEN, att );
+		att = MIN_ATTEN;
+	}
+
+	return att;
 }

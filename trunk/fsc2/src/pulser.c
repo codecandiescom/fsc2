@@ -599,6 +599,14 @@ void p_phase_ref( long prot, long func, int ref )
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 			}
+
+			if ( ref == PULSER_CHANNEL_PHASE_1 ||
+				 ref == PULSER_CHANNEL_PHASE_2 )
+			{
+				eprint( FATAL, "%s:%ld: Phase functions can't be used with "
+						"this driver.", Fname, Lc );
+				THROW( EXCEPTION );
+			}
 			break;
 
 		default :

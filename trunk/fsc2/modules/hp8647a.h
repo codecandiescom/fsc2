@@ -68,6 +68,8 @@ typedef struct
 	double max_table_freq;
 	double att_ref_freq;
 	double att_at_ref_freq;
+	double real_attenuation;        // might differ from attenuation due to use
+									// of table
 
 } HP8647A;
 
@@ -88,9 +90,10 @@ extern HP8647A hp8647a;
 /* functions defined in "hp8647a_util.c" */
 
 void hp8647a_read_table( FILE *fp );
-FILE *hp8647a_find_table( char *name );
+FILE *hp8647a_find_table( char **name );
 FILE *hp8647a_open_table( char *name );
 double hp8647a_get_att_from_table( double freq );
+double hp8647a_get_att( double freq );
 
 
 /* functions defined in "hp8647a_lexer.flex" */
