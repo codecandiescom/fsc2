@@ -30,8 +30,6 @@
 
 #include "fsc2.h"
 
-#define YYMAXDEPTH 0                  /* avoids compiler warning */
-
 /* locally used functions */
 
 int conditionparse( void );
