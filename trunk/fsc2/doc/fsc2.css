@@ -22,54 +22,56 @@
 --!>
 
 
-body { margin :      0px 0px 0px 0px;
-       padding:      0px;
-       background :  white;
-     }
+body       { margin :           0%;
+           	 padding :          0%;
+           }
 
-#level0 { background :         white;
-          background-image :   url(background.gif); 
-          background-repeat :  repeat-y;
-          width :              100%;
-        }
+#level0    { position :         relative;
+		   	 margin :           0%;
+           	 padding:           0%;
+           	 width :            100%;
+		   	 background :       white url(background.gif) repeat-y;
+		   	 z-level :          0;
+           }
 
-#level1 { margin-left :    195px;
-          background :     white;
-        }
+#level1    { position :         relative;
+           	 padding:           0%;
+		   	 margin-left :      180px;
+           }
 
-#main { background :  white;
-      }
+#main      { position :         relative;
+		   	 margin :           0%;
+		   	 padding :          0% 0% 0% 10px;
+		   	 background :       white;
+		   	 z-level :          1;
+           }
 
-#links { position :     fixed;
-         width :        180px;
-         top :          15px;
-         left :         15px;
-         background :   transparent;
-       }
+#links     { position :         fixed;
+		   	 margin :           0%;
+           	 width :            180px;
+           	 padding :          15px 0px 0px 15px;
+           	 background :       transparent;
+           }
 
-code { font-family : monospace;
-       font-weight : bold;
-     }
+code       { font-family :      monospace;
+           	 font-weight :      bold;
+           }
 
-samp { font-family : monospace;
-       font-weight : bold;
-     }
-
-pre { font:0.9em monospace;
-    }
+samp       { font-family :      monospace;
+         	 font-weight :      bold;
+           }
 
 td.example { background-color : #FFFF44;
-             padding-top      : 1.5mm;
-             padding-bottom   : 1.5mm;
-             padding-left     : 4mm;
-             padding-right    : 4mm;
-             border-width     : thin;
-             border-style     : solid;
+             padding-top :      1.5mm;
+             padding-bottom :   1.5mm;
+             padding-left :     4mm;
+             padding-right :    4mm;
+             border :           thin solid;
            }
 
 table.navi { background-color : #e6e6e6;
-             cellpadding      : 4;
-             cellspacing      : 0;
-             border           : 0;
-             width            : 100%;
+             cellpadding :      4;
+             cellspacing :      0;
+             border :           none;
+             width :            100%;
            }
