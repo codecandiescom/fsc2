@@ -1024,7 +1024,7 @@ FOR I = 1: 128 @{
 @cindex Simplified pulse cycling
 
 
-The inner loop in the privious example runs through the 4 different
+The inner loop in the previous example runs through the 4 different
 phase settings, adding up the areas with the correct sign. Instead of
 writing out this loop one could also define an acquisition sequence and
 use the @acronym{EDL} function @code{get_phase_cycled_area()}. This
