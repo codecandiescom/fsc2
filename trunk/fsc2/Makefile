@@ -122,7 +122,7 @@ else
 endif
 
 ifdef GPIB_LOG_FILE
-    CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+	CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
 end
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
