@@ -809,7 +809,8 @@ corresponding attenuation in dB. The attenuation is being added to the
 output power a negative attenuation has to be specified.  If no unit are
 given in the table file (i.e.@: @code{MHz} and @code{dB}) the first
 member of an entry must be the frequency, the second the attenuation.
-The entries in the file don't have to be sorted in any way:
+The entries in the file don't have to be sorted in any way, and
+the frequencies don't have to spaced equally.
 
 The items in the table file can be separated by spaces, commata,
 semicolons, colons, tabs or newlines or any combination of these
@@ -822,14 +823,27 @@ be valid:
 8.1E6 -2.2 8.20000000 MHz : -2.30000000 dB 8300 kHz
 
    -2.4 dB
-8.40000000MHz-2.40000000dB
+8.70000000MHz-2.40000000dB
 @end example
 @noindent
 As you see also blank lines don't matter. Finally, all lines starting
 with a hash character, `@code{#}', are treated as comments.
 
+If a frequency is used that isn't in the table the atenuation to be used
+is extrapolated from the next neighbouring frequencies. If the frequency
+isn't within the rane of frequencies covered by the table a warning is
+printed and the attenuation for the nearest frequency is used.
+
+
 @item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
+When a tabe file is used there remains the question for which frequency
+to use the attenuation has been set e.g.@: by
+@code{synthesizer_attenuation()}. To set this reference frequency the
+function @code{synthesizer_att_ref_freq()} can be used. If the function
+isn't called a frequency of @{14 MHz} is used.
+
+
 
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
