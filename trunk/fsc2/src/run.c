@@ -1053,39 +1053,37 @@ static void child_sig_handler( int signo )
 		case SIGTTOU :
 		case SIGVTALRM :
 			return;
-
-		/* All remaining signals are deadly... */
-
-		default :
-			if ( ! ( Internals.cmdline_flags & NO_MAIL ) &&
-				 signo != SIGTERM )
-			{
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-				if ( Internals.is_linux_i386 )
-				{
-					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-					DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
-				}
-#endif
-				death_mail( signo );
-			}
-
-			/* Test if parent still exists - if not (i.e. the parent died
-			   without sending a SIGTERM signal) destroy the semaphore and
-			   shared memory (as far as the child knows about it) and also
-			   kill the child for connections (if it exists). */
-
-			if ( getppid( ) == 1 )
-			{
-				if ( Internals.conn_pid > 0 )
-					kill( Internals.conn_pid, SIGTERM );
-				delete_all_shm( );
-				sema_destroy( Comm.mq_semaphore );
-			}
-
-			EDL.do_quit = SET;
-			_exit( EXIT_FAILURE );
 	}
+
+	/* All remaining signals are deadly... */
+
+	if ( signo != SIGTERM && ! ( Internals.cmdline_flags & NO_MAIL ) )
+	{
+#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
+		if ( Internals.is_linux_i386 )
+		{
+			asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+			DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
+		}
+#endif
+		death_mail( signo );
+	}
+
+	/* Test if parent still exists - if not (i.e. the parent died without
+	   sending a SIGTERM signal) destroy the semaphore and shared memory (as
+	   far as the child knows about it) and also kill the child for
+	   connections (if it exists). */
+
+	if ( getppid( ) == 1 )
+	{
+		if ( Internals.conn_pid > 0 )
+			kill( Internals.conn_pid, SIGTERM );
+		delete_all_shm( );
+		sema_destroy( Comm.mq_semaphore );
+	}
+
+	EDL.do_quit = SET;
+	_exit( EXIT_FAILURE );
 }
 
 

@@ -579,7 +579,8 @@ static void test_machine_type( void )
 	struct utsname utsbuf;
 
 
-	if ( uname( &utsbuf ) == 0 &&
+	if ( sizeof( int ) == sizeof( void * ) && 
+		 uname( &utsbuf ) == 0 &&
 		 utsbuf.machine[ 0 ] == 'i' &&
 		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
 		 ! strncmp( utsbuf.machine + 2, "86", 2 ) &&
