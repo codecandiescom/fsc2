@@ -60,8 +60,8 @@ EXP:
 
 F1 = get_file();
 
-FOR K = 1 : 5 {
-	print( "Run \##\n", K );
+FOR K = 1 : 5
+	print( "\TRun \##\n", K );
 	clear_curve( 4 );
 	dt1 = 700 us;
 	dt2 = 150 ms;

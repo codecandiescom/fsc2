@@ -250,7 +250,7 @@ Var *magnet_setup( Var *v )
 		
 	too_many_arguments( v );
 
-	start_field = start_field;
+	magnet.start_field = start_field;
 	magnet.field_step = field_step;
 	magnet.is_init = SET;
 
@@ -532,7 +532,7 @@ static void er032m_start_field( void )
 	   any real field precision problems */
 
 	magnet.sw = SWEEP_RANGE_RESOLUTION *
-		lrnd( magnet.sw / SWEEP_RANGE_RESOLUTION );
+									lrnd( magnet.sw / SWEEP_RANGE_RESOLUTION );
 	magnet.swa_step = magnet.sw / SWA_RANGE;
 	magnet.field_step = magnet.step_incr * magnet.swa_step;
 

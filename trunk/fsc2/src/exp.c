@@ -1179,12 +1179,11 @@ bool test_condition( Prg_Token *cur )
 
 	/* Make sure returned value is either integer or float */
 
-	if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
-	{
-		cur++;
+    if ( ! ( Var_Stack->type & ( INT_VAR | FLOAT_VAR ) ) )
+    {
 		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
 				cur->Fname, cur->Lc,
-				get_construct_name( ( cur - 1 )->token ) );
+				get_construct_name( cur->token ) );
 		THROW( EXCEPTION );
 	}
 
@@ -1196,7 +1195,7 @@ bool test_condition( Prg_Token *cur )
 		condition = Var_Stack->val.dval ? OK : FAIL;
 
 	vars_pop( Var_Stack );
-	return cur->token == UNLESS_TOK ? condition : ! condition;
+	return ( cur->token != UNLESS_TOK ) ? condition : ! condition;
 }
 
 
