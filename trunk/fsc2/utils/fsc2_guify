@@ -36,7 +36,7 @@ my @lines;
 my @vars;
 my $guify_entry = '^\s*===\s+';
 my $var_entry = $guify_entry .
-	'([A-Za-z0-9_]+)\s+(int|float|menu)(\s+(.*))?';
+	'([A-Za-z0-9_]+)\s+(int|float|menu|file)(\s+(.*))?';
 my $if_entry = $guify_entry . 'if\\s+';
 my $elsif_entry = $guify_entry . "elsif\\s+";
 my $else_entry = $guify_entry . "else\\s*\$";
@@ -155,8 +155,12 @@ for ( @vars ) {
 			$$_{ value } = 0;
 		}
 		$$_{ def_value } = $$_{ value };
+	} elsif ( $$_{ type } =~ /^menu$/ ) {
+		$$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
 	} else {
-		$$_{ value } = $$_{ menu_entries }->[ 0 ];
+		$$_{ value } = $$_{ def_value } = "";
+		$entry_width = 15;
+		$unit_width  = 10;
 	}
 }
 
@@ -199,18 +203,22 @@ sub analyze_var_options {
 		$str = get_float_limits( $hr, $str );
 	} elsif ( $hr->{ type } =~ /^int$/o ) {
 		$str = get_int_limits( $hr, $str );
-	} else {
+	} elsif ( $hr->{ type } =~ /^menu$/o ) {
 		$str = get_menu_entries( $hr, $str );
 	}
 
-	( $res, $str ) = get_default_value( $str, $hr );
-	$hr->{ value } = $res if defined $res;
+	unless ( $hr->{ type } =~ /^file$/o ) {
+		( $res, $str ) = get_default_value( $str, $hr );
+		$hr->{ value } = $res if defined $res;
+	}
 
 	( $res, $str ) = get_string( $str, $hr );
 	$hr->{ label } = defined $res ? $res : '""';
 
-	( $res, $str ) = get_string( $str );
-	$hr->{ unit } = defined $res ? $res : '""';
+	unless ( $hr->{ type } =~ /^file$/o ) {
+		( $res, $str ) = get_string( $str );
+		$hr->{ unit } = defined $res ? $res : '""';
+	}
 
 	die "Syntax error at line $lino\n" if defined $str and $str !~ /^\s*$/;
 }
@@ -485,7 +493,7 @@ my \%$$_{ name };
 -anchor => 'w' );
 EOT
 
-		if ( $$_{ type } =~ /^int|float$/ ) {
+		if ( $$_{ type } =~ /^int|float$/o ) {
 			print "my \$$$_{ name } = $$_{ value };
 \$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : "undef" ) . ";
 \$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : "undef" ) . ";
@@ -500,7 +508,7 @@ EOT
 -balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
 \" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
 ";
-		} else {
+		} elsif ( $$_{ type } =~ /^menu$/o ) {
 			print "my \$$$_{ name } = \"$$_{ value }\";
 my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 			for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
@@ -512,11 +520,30 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 -width => $entry_width,
 -textvariable => \\\$$$_{ name } );
 ";
+		} else {
+			print "my \$$$_{ name } = \"$$_{ value }\";
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
+-width => $entry_width,
+-relief => 'sunken' );
+";
+		}
+
+		if ( $$_{ type } =~ /^int|float|menu$/o ) {
+			print <<"EOT";
+\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
+-width => $unit_width );
+EOT
+		} else {
+			print <<"EOT";
+\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"Browse\",
+-command => sub { my \$fn = \&fsc2_filesel::show( \$fsc2_main_window, \$$$_{ name } );
+				  \$$$_{ name } = \$fn if defined \$fn;
+ 				  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
+);
+EOT
 		}
 
 		print <<"EOT";
-\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ unit },
--width => $unit_width );
 \$$$_{ name }\{ tk_frame \}->pack( \%fp );
 \$$$_{ name }\{ tk_label \}->pack( \%wp );
 \$$$_{ name }\{ tk_entry \}->pack( \%wp );
@@ -647,7 +674,13 @@ print \$fh \"";
 		$line =~ s/\\/\\\\/g;
 		$line =~ s/\"/\\\"/g;
 		$line =~ s{\$}{\\\$}g;
-		$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+		for ( @vars ) {
+			if ( $$_{ type } =~ /^int|float|menu$/o ) {
+				$line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
+			} else {
+				$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+			}
+		}
 		print $line;
 	}
 
@@ -722,7 +755,7 @@ EOT
 		print \$fh \"$$_{ def_value }\\n\";
 	}
 ";
-		} else {
+		} elsif ( $$_{ type } =~ /^menu$|file/o ) {
 			print "
 	print \$fh \"\$$$_{ name }\\n\";
 ";
@@ -775,7 +808,7 @@ EOT
 						 ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
 	\$$$_{ name } = \$ne;
 ";
-		} else {
+		} elsif ( $$_{ type } =~ /^menu$/o ) {
 			print"
 	goto done_reading unless defined( \$ne = <\$fh> );
 	chomp \$ne;
@@ -787,6 +820,12 @@ EOT
 		}
 	}
 	goto done_reading unless \$found;
+	\$$$_{ name } = \$ne;
+";
+		} elsif ( $$_{ type } =~ /^file$/o ) {
+			print "
+	goto done_reading unless defined( \$ne = <\$fh> );
+	chomp \$ne;
 	\$$$_{ name } = \$ne;
 ";
 		}
@@ -809,5 +848,153 @@ EOT
   done_reading:
 	close $fh;
 };
+
+
+package fsc2_filesel;
+
+use Tk;
+use strict;
+use warnings;
+
+my $cur_dir;
+my $cur_file;
+
+BEGIN {
+	$cur_dir = `pwd`;
+	chomp $cur_dir;
+}
+
+sub show {
+
+	my $top = shift;
+
+	my $selected = undef;
+
+	$cur_file = "";
+	my %fs;
+	$fs{ top } = $top->Toplevel( '-title' => 'File Select' );
+	$fs{ top }->grab;
+	$fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
+									-width => 35
+								  )->pack( -side => 'top',
+										   -fill => 'x',
+										   -padx => '2m',
+										   -pady => '1m',
+										 );
+	$fs{ list } = $fs{ top }->Scrolled( 'Listbox',
+										-selectmode => 'single',
+										-scrollbars => 'osoe',
+									  )->pack( -side => 'top',
+											   -fill => 'both',
+											   -anchor => 's',
+											   -padx => '2m',
+											   -pady => '1m',
+											   -expand => 1 );
+	populate_fs( $fs{ list }, $cur_dir );
+	$fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
+								   )->pack( -side => 'top',
+											-fill => 'x',
+											-padx => '2m',
+											-pady => '1m'
+										  );
+	$fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
+	$fs{ frame }->Button( -text => 'Cancel',
+						  -command => sub { $selected = "" }
+						)->pack( -side => 'left',
+								 -padx => '2m',
+								 -pady => '1m'
+							   );
+	$fs{ frame }->Button( -text => 'Rescan',
+						  -command => [ \&populate_fs, $fs{ list }, 
+										$cur_dir ]
+						)->pack( -side => 'left',
+								 -padx => '2m',
+								 -pady => '1m'
+											 );
+	$fs{ frame }-> Button( -text => '  Ok  ',
+						   -command => sub { $selected = $cur_file }
+						 )->pack( -side => 'right',
+								  -padx => '2m',
+								  -pady => '1m'
+								);
+	$fs{ list }->bind( '<ButtonPress-1>' =>
+					   [ \&new_selection, $fs{ list }, Ev( 'y' ) ] );
+	$fs{ top }->bind( '<ButtonPress-4>' =>
+					   sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+	$fs{ top }->bind( '<Up>' =>
+					   sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+	$fs{ top }->bind( '<Prior>' =>
+					   sub { $fs{ list }->yview( scroll => -1, 'page' ) } );
+	$fs{ top }->bind( '<ButtonPress-5>' =>
+					   sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+	$fs{ top }->bind( '<Down>' =>
+					   sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+	$fs{ top }->bind( '<Next>' =>
+					   sub { $fs{ list }->yview( scroll => 1, 'page' ) } );
+	$fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
+	$fs{ top }->bind( '<End>' =>
+					  sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
+	$fs{ top }->bind( '<Delete>' => sub { $selected = "" } );
+	$fs{ top }->bind( '<BackSpace>' => sub { $selected = "" } );
+	$fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
+	$fs{ top }->bind( '<Tab>' =>
+					  sub { populate_fs( $fs{ list }, $cur_dir ) } );
+
+	$fs{ top }->waitVariable( \$selected );
+	$fs{ top }->destroy;
+	return undef if $selected =~ /^$/o;
+	if ( $cur_dir =~ m|^/$|o ) {
+ 		return "/$selected";
+	} else {
+ 		return "$cur_dir/$selected";
+	}
+}
+
+
+sub new_selection {
+	my ( $d, $l, $y ) = @_;
+	my $sel = $l->get( $l->nearest( $y ) );
+	if ( $sel =~ /^d (.*)$/o ) {
+		my $dir = $1;
+		$cur_file = "";
+		return if $dir =~ /^\.$/o;
+		if ( $dir =~ /^\.\.$/o ) {
+			$cur_dir =~ s|^(.*?)/[^/]+$|$1|;
+			$cur_dir = "/" if $cur_dir =~ /^$/o;
+			populate_fs( $l, $cur_dir );
+		}
+		else {
+			if ( $cur_dir =~ m|^/$|o ) {
+				$cur_dir .= "$dir";
+			} else {
+				$cur_dir .= "/$dir";
+			}
+			populate_fs( $l, $cur_dir );
+		}
+	} else {
+		$cur_file = $sel;
+		$cur_file =~ s/^[l ] (.*)$/$1/o;
+	}
+}
+
+
+sub populate_fs {
+	my ( $list, $dir ) = @_;
+
+	$list->delete( 0, 'end' );
+	my @ls = `ls -a $dir`;
+	for ( @ls ) {
+		chomp;
+		next unless -d "$dir/$_";
+		$list->insert( 'end', "d $_" );
+		undef $_;
+	}
+
+	for ( @ls ) {
+		$list->insert( 'end', "  $_" ) if defined;
+	}
+}
+
+1;
 EOT
 }
