@@ -137,7 +137,7 @@ Var *f_print( Var *v )
 	/* Get string long enough to replace each `#' by a 3 char sequence
 	   plus a '\0' character */
 
-	fmt = get_string( strlen( sptr ) + 3 * in_format + percs + 2 );
+	fmt = T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; cp++ )
@@ -1745,10 +1745,7 @@ getfile_retry:
 		 ( strrchr( r, '.' ) == NULL ||
 		   strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
 	{
-		new_r = get_string( strlen( r ) + strlen( s[ 4 ] ) + 1 );
-		strcpy( new_r, r );
-		strcat( new_r, "." );
-		strcat( new_r, s[ 4 ] );
+		new_r = get_init_string( "%s.%s", r, s[ 4 ] );
 		T_free( r );
 		r = new_r;
 	}
@@ -1758,12 +1755,8 @@ getfile_retry:
 
 	if  ( 0 == stat( r, &stat_buf ) )
 	{
-		m = get_string(   strlen( "The selected file does already exist:\n" )
-					    + strlen( r )
-					    + strlen( "\nDo you really want to overwrite it?" ) );
-		strcpy( m, "The selected file does already exist:\n" );
-		strcat( m, r );
-		strcat( m, "\nDo you really want to overwrite it?" );
+		m = get_init_string( "The selected file does already exist:\n%s\n"
+							 "\nDo you really want to overwrite it?", r );
 		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
 		{
 			T_free( m );
@@ -1879,8 +1872,8 @@ Var *f_clonef( Var *v )
 	if ( TEST_RUN )
 		return vars_push( INT_VAR, File_List_Len++ );
 
-	fn = get_string(   strlen( File_List[ v->val.lval ].name )
-					 + strlen( v->next->next->val.sptr ) + 2 );
+	fn = T_malloc(   strlen( File_List[ v->val.lval ].name )
+				   + strlen( v->next->next->val.sptr ) + 3 );
 	strcpy( fn, "\\" );
 	strcat( fn, File_List[ v->val.lval ].name );
 
@@ -1897,9 +1890,7 @@ Var *f_clonef( Var *v )
 	arg[ 0 ] = vars_push( STR_VAR, fn );
 	T_free( fn );
 
-	n = get_string( strlen( v->next->next->val.sptr ) + 2 );
-	strcpy( n, "*." );
-	strcat( n, v->next->next->val.sptr );
+	n = get_init_string( "*.%s", v->next->next->val.sptr );
 	arg[ 1 ] = vars_push( STR_VAR, n );
 	T_free( n );
 
@@ -2245,7 +2236,7 @@ Var *f_fsave( Var *v )
 	/* Get string long enough to replace each `#' by a 5-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 5 * in_format + percs + 2 );
+	fmt = T_malloc( strlen( sptr ) + 5 * in_format + percs + 3 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
@@ -2642,14 +2633,9 @@ static void T_fprintf( int file_num, const char *fmt, ... )
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
 
-	mess = get_string( strlen( "Disk full while writing to file" )
-					   + strlen( File_List[ file_num ].name )
-					   + strlen( "Please choose a new file." ) );
-	strcpy( mess, "Disk full while writing to file" );
-	strcat( mess, "\n" );
-	strcat( mess, File_List[ file_num ].name );
-	strcat( mess, "\n" );
-	strcat( mess, "Please choose a new file." );
+	mess = get_init_string( "Disk full while writing to file\n%s\n"
+							"Please choose a new file.",
+							File_List[ file_num ].name );
     show_message( mess );
 	T_free( mess );
 
@@ -2756,17 +2742,9 @@ get_repl_retry:
 
 			if ( ferror( new_fp ) )
 			{
-				mess = get_string( strlen( "Can't write to replacement file" )
-								   + strlen( new_name )
-								   + strlen( "Please choose a different "
-											 "file." )
-								   + 2 );
-				strcpy( mess, "Can't write to replacement file" );
-				strcat( mess, "\n" );
-				strcat( mess, new_name );
-				strcat( mess, "\n" );
-				strcat( mess, "Please choose a different file." );
-
+				mess = get_init_string( "Can't write to replacement file\n%s\n"
+										"Please choose a different file.",
+										new_name );
 				show_message( mess );
 				T_free( mess );
 				fclose( new_fp );
@@ -2796,14 +2774,9 @@ get_repl_retry:
 
 	/* Ooops, also failed to write to new file */
 
-	mess = get_string( strlen( "Can't write to (replacement) file" )
-					   + strlen( File_List[ file_num ].name )
-					   + strlen( "Please choose a different file." ) + 2 );
-	strcpy( mess, "Can't write to (replacement) file" );
-	strcat( mess, "\n" );
-	strcat( mess, File_List[ file_num ].name );
-	strcat( mess, "\n" );
-	strcat( mess, "Please choose a different file." );
+	mess = get_init_string( "Can't write to (replacement) file\n%s\n"
+							"Please choose a different file.",
+							File_List[ file_num ].name );
 	show_message( mess );
 	T_free( mess );
 	goto get_repl_retry;

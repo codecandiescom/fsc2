@@ -169,10 +169,8 @@ bool scan_main( char *file )
 
 	/* Filter input through "fsc2_clean" (expected to be in `bindir') */
 
-	cmd = get_string( strlen( bindir ) + strlen( "/fsc2_clean " )
-	                  + strlen( file ) );
-	sprintf( cmd, "%s%sfsc2_clean %s", bindir,
-			 bindir[ strlen( bindir ) - 1 ] != '/' ? "/" : "", file );
+	cmd = get_initstring( "%s%sfsc2_clean %s", bindir,
+					  bindir[ strlen( bindir ) - 1 ] != '/' ? "/" : "", file );
 
 	/* Setting the program length to -1 means that no EXPERIMENT section has
 	   been found yet. */

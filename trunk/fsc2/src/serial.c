@@ -50,8 +50,6 @@ static struct {
 void fsc2_request_serial_port( int sn, const char *devname )
 {
 #if defined( NUM_SERIAL_PORTS ) && NUM_SERIAL_PORTS > 0
-	int l, snc;
-
 
 	/* Do some sanity checks on the serial port number */
 
@@ -82,10 +80,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 
 	/* Assemble name of the device file */
 
-	for ( l = 1, snc = sn; snc /= 10; l++ )
-		;
-	Serial_Port[ sn ].dev_file = get_string( strlen( "/dev/ttyS" ) + l );
-	sprintf( Serial_Port[ sn ].dev_file, "/dev/ttyS%d", sn );
+	Serial_Port[ sn ].dev_file = get_init_string( "/dev/ttyS%d", sn );
 
 	/* Finally test if device file exists and we have read and write
 	   permissions */
