@@ -147,7 +147,7 @@
 
 
 (defvar edl-unit-keywords
-  "\\(\\B\\|\\db\\|\\<\\)\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|T\\|V\\|A\\|Hz\\)\\>" )
+  "\\(\\B\\|\\<\\)\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|T\\|V\\|A\\|\\db\\|Hz\\)\\>" )
 
 
 (defvar edl-font-lock-keywords
