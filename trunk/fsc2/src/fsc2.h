@@ -197,8 +197,6 @@ struct INTERNALS {
 									either PREPARATION, TEST or EXPERIMENT */
 	bool in_hook;                /* set while module hook functions are run */
 
-	bool just_testing;           /* set if only syntax check is to be done */
-
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
 

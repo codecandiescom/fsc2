@@ -91,6 +91,12 @@ void toolbox_create( long layout )
 	int h = 10;
 	int dummy;
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Toolbox can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( Toolbox != NULL )
 		return;
 
@@ -102,7 +108,7 @@ void toolbox_create( long layout )
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		if ( ! Internals.just_testing )
+		if ( ! ( Internals.cmdline_flags & TEST_ONLY ) )
 			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 									 "1", 1, &dummy, &h );
 		h += 8;
@@ -133,7 +139,7 @@ void toolbox_create( long layout )
 	}
 	else
 	{
-		if ( ! Internals.just_testing )
+		if ( ! ( Internals.cmdline_flags & TEST_ONLY ) )
 			fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
 									 "1", 1, &dummy, &h );
 		h += 8;
@@ -171,7 +177,7 @@ void toolbox_create( long layout )
 
 void toolbox_delete( void )
 {
-	if ( Internals.mode != TEST && Toolbox->Tools )
+	if ( Internals.mode != TEST && Toolbox && Toolbox->Tools )
 	{
 		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
@@ -286,6 +292,12 @@ Var *f_layout( Var *v )
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( Internals.I_am == PARENT && Toolbox != NULL )
 	{
 		print( FATAL, "Layout of tool box must be set before any buttons or "
@@ -354,9 +366,8 @@ Var *f_layout( Var *v )
 static Var *f_layout_child( long layout )
 {
 	char *buffer, *pos;
-	size_t len;
+	size_t len = sizeof EDL.Lc + sizeof layout;
 
-	len = sizeof EDL.Lc + sizeof layout;
 
 	if ( EDL.Fname )
 		len += strlen( EDL.Fname ) + 1;
@@ -394,6 +405,12 @@ static Var *f_layout_child( long layout )
 
 Var *f_objdel( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* We need the ID of the object to delete */
 
 	if ( v == NULL )
@@ -483,6 +500,12 @@ static void f_objdel_parent( Var *v )
 	IOBJECT *io = NULL;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No tool box -> no objects -> no objects to delete... */
 
 	if ( Toolbox == NULL || Toolbox->objs == NULL )
@@ -544,6 +567,12 @@ Var *f_obj_clabel( Var *v )
 
 	CLOBBER_PROTECT( v );
 	CLOBBER_PROTECT( label );
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* We first need the ID of the button */
 
@@ -674,6 +703,12 @@ Var *f_obj_xable( Var *v )
 	long ID;
 	bool state;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, get_boolean( v->next ) ? 1L : 0L );

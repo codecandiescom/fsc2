@@ -125,7 +125,9 @@ bool run( void )
 	   new data. */
 
 	setup_signal_handlers( );
-	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
 	/* We have to be careful: When the child process gets forked it may
 	   already be finished running *before* the fork() call returns in the
@@ -192,9 +194,14 @@ static bool start_gpib_and_rulbus( void )
 	{
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
-		set_buttons_for_run( 0 );
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-		XFlush( fl_get_display( ) );
+
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			set_buttons_for_run( 0 );
+			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+			XFlush( fl_get_display( ) );
+		}
+
 		Internals.state = STATE_IDLE;
 		return FAIL;
 	}
@@ -210,9 +217,13 @@ static bool start_gpib_and_rulbus( void )
 		if ( need_GPIB )
 			gpib_shutdown( );
 
-		set_buttons_for_run( 0 );
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-		XFlush( fl_get_display( ) );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			set_buttons_for_run( 0 );
+			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+			XFlush( fl_get_display( ) );
+		}
+
 		Internals.state = STATE_IDLE;
 		return FAIL;
 	}
@@ -238,9 +249,13 @@ static bool no_prog_to_run( void )
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
 
-		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
-		fl_set_object_label( GUI.main_form->run, "Stop" );
-		XFlush( fl_get_display( ) );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			fl_set_object_callback( GUI.main_form->run,
+									stop_while_exp_hook, 0 );
+			fl_set_object_label( GUI.main_form->run, "Stop" );
+			XFlush( fl_get_display( ) );
+		}
 
 		Internals.mode = EXPERIMENT;
 
@@ -274,11 +289,15 @@ static bool no_prog_to_run( void )
 
 	Internals.mode = PREPARATION;
 
-	fl_set_object_label( GUI.main_form->run, "Start" );
-	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-	set_buttons_for_run( 0 );
-	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-	XFlush( fl_get_display( ) );
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	{
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		set_buttons_for_run( 0 );
+		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		XFlush( fl_get_display( ) );
+	}
+
 	Internals.state = STATE_IDLE;
 
 	return ret;
@@ -307,9 +326,13 @@ static bool init_devs_and_graphics( void )
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
 
-		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
-		fl_set_object_label( GUI.main_form->run, "Stop" );
-		XFlush( fl_get_display( ) );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			fl_set_object_callback( GUI.main_form->run,
+									stop_while_exp_hook, 0 );
+			fl_set_object_label( GUI.main_form->run, "Stop" );
+			XFlush( fl_get_display( ) );
+		}
 
 		Internals.mode = EXPERIMENT;
 
@@ -321,23 +344,29 @@ static bool init_devs_and_graphics( void )
 
 		EDL.react_to_do_quit = UNSET;
 
-		fl_deactivate_object( GUI.main_form->run );
-		fl_set_object_label( GUI.main_form->run, "Start" );
-		fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-		XFlush( fl_get_display( ) );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			fl_deactivate_object( GUI.main_form->run );
+			fl_set_object_label( GUI.main_form->run, "Start" );
+			fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+			fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+			XFlush( fl_get_display( ) );
+		}
 
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
-		start_graphics( );
-		graphics_have_been_started = SET;
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			start_graphics( );
+			graphics_have_been_started = SET;
 
-		if ( G.dim & 1 || ! G.is_init )
-			fl_set_object_callback( GUI.run_form_1d->stop_1d,
-									run_stop_button_callback, 0 );
-		if ( G.dim & 2 )
-			fl_set_object_callback( GUI.run_form_2d->stop_2d,
-									run_stop_button_callback, 0 );
+			if ( G.dim & 1 || ! G.is_init )
+				fl_set_object_callback( GUI.run_form_1d->stop_1d,
+										run_stop_button_callback, 0 );
+			if ( G.dim & 2 )
+				fl_set_object_callback( GUI.run_form_2d->stop_2d,
+										run_stop_button_callback, 0 );
+		}
 
 		setup_comm( );
 
@@ -364,19 +393,24 @@ static bool init_devs_and_graphics( void )
 
 		Internals.mode = PREPARATION;
 
-		run_close_button_callback( NULL, 0 );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			run_close_button_callback( NULL, 0 );
 
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-		fl_set_object_label( GUI.main_form->run, "Start" );
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
-		fl_activate_object( GUI.main_form->run );
-		XFlush( fl_get_display( ) );
+			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+			fl_set_object_label( GUI.main_form->run, "Start" );
+			fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+			fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+			fl_activate_object( GUI.main_form->run );
+			XFlush( fl_get_display( ) );
+		}
 
 		return FAIL;
 	}
 
-	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+
 	Internals.child_is_quitting = QUITTING_UNSET;
 
 	return OK;
@@ -435,6 +469,8 @@ static void fork_failure( int stored_errno )
 		case EAGAIN :
 			eprint( FATAL, UNSET, "Not enough system resources left to run "
 					"the experiment.\n" );
+			if ( Internals.cmdline_flags & NO_GUI_RUN )
+				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "Not enough system resources",
 						   "left to run the experiment.", 1 );
 			break;
@@ -442,6 +478,8 @@ static void fork_failure( int stored_errno )
 		case ENOMEM :
 			eprint( FATAL, UNSET, "Not enough memory left to run the "
 					"experiment.\n" );
+			if ( Internals.cmdline_flags & NO_GUI_RUN )
+				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "Not enough memory left",
 						   "to run the experiment.", 1 );
 			break;
@@ -453,6 +491,8 @@ static void fork_failure( int stored_errno )
 			else
 				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
 						"when trying to start experiment.\n", stored_errno );
+			if ( Internals.cmdline_flags & NO_GUI_RUN )
+				exit( EXIT_FAILURE );
 			fl_show_alert( "FATAL Error", "System error on start of "
 						   "experiment.", NULL, 1 );
 			break;
@@ -477,9 +517,12 @@ static void fork_failure( int stored_errno )
 
 	Internals.mode = PREPARATION;
 
-	run_close_button_callback( NULL, 0 );
-	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
-	fl_activate_object( GUI.main_form->run );
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	{
+		run_close_button_callback( NULL, 0 );
+		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+		fl_activate_object( GUI.main_form->run );
+	}
 }
 
 
@@ -501,7 +544,11 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 	for ( i = FATAL; i < NO_ERROR; i++ )
 		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
-	if ( ! Internals.cmdline_flags & BATCH_MODE &&
+	if ( Internals.cmdline_flags & NO_GUI_RUN &&
+		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
+		THROW( EXCEPTION );
+
+	if ( ! ( Internals.cmdline_flags & BATCH_MODE ) &&
 		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
 	{
 		if ( diff.error[ SEVERE ] != 0 )
@@ -648,8 +695,13 @@ static void run_sigchld_handler( int signo )
 
 		EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-		GUI.main_form->sigchld->u_ldata = ( long ) return_status;
-		fl_trigger_object( GUI.main_form->sigchld );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			GUI.main_form->sigchld->u_ldata = ( long ) return_status;
+			fl_trigger_object( GUI.main_form->sigchld );
+		}
+		else
+			run_sigchld_callback( NULL, 0 );
 	}
 
 	errno = errno_saved;
@@ -682,14 +734,15 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 									/* missing notification by the child ? */
 	{
 		if ( ! ( Internals.cmdline_flags & DO_CHECK ) && 
-			 ! ( Internals.cmdline_flags & BATCH_MODE ) )
+			 ! ( Internals.cmdline_flags & BATCH_MODE ) &&
+			 ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
 						   NULL, 1 );
 		}
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
 			fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
 					 "'%s'.\n", EDL.in_file );
 
@@ -699,14 +752,15 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	else if ( ! a->u_ldata )          /* return status indicates error ? */
 	{
 		if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
-			 ! ( Internals.cmdline_flags & BATCH_MODE ) )
+			 ! ( Internals.cmdline_flags & BATCH_MODE ) &&
+			 ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
 			Internals.state = STATE_WAITING;
 			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
 						   NULL, 1 );
 		}
 
-		if ( Internals.cmdline_flags & BATCH_MODE )
+		if ( Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
 			fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
 					 "'%s'.\n", EDL.in_file );
 
@@ -769,32 +823,35 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	   handler that's responsible for closing the window. Also change the
 	   buttons label to 'Close'. */
 
-	if ( G.dim & 1 || ! G.is_init )
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 	{
-		fl_freeze_form( GUI.run_form_1d->run_1d );
-		fl_set_object_label( GUI.run_form_1d->stop_1d,
-							 G.dim == 1 ? "Close" : "Close all" );
-		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( GUI.run_form_1d->stop_1d,
-								  "Removes all display windows" );
-		fl_set_object_callback( GUI.run_form_1d->stop_1d,
-								run_close_button_callback, 0 );
-		fl_unfreeze_form( GUI.run_form_1d->run_1d );
-	}
+		if ( G.dim & 1 || ! G.is_init )
+		{
+			fl_freeze_form( GUI.run_form_1d->run_1d );
+			fl_set_object_label( GUI.run_form_1d->stop_1d,
+								 G.dim == 1 ? "Close" : "Close all" );
+			fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form_1d->stop_1d,
+									  "Removes all display windows" );
+			fl_set_object_callback( GUI.run_form_1d->stop_1d,
+									run_close_button_callback, 0 );
+			fl_unfreeze_form( GUI.run_form_1d->run_1d );
+		}
 
-	if ( G.dim & 2 )
-	{
-		fl_freeze_form( GUI.run_form_2d->run_2d );
-		fl_set_object_label( GUI.run_form_2d->stop_2d,
-							 G.dim == 2 ? "Close" : "Close all" );
-		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
-		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( GUI.run_form_2d->stop_2d,
-								  "Removes all display windows" );
-		fl_set_object_callback( GUI.run_form_2d->stop_2d,
-								run_close_button_callback, 0 );
-		fl_unfreeze_form( GUI.run_form_2d->run_2d );
+		if ( G.dim & 2 )
+		{
+			fl_freeze_form( GUI.run_form_2d->run_2d );
+			fl_set_object_label( GUI.run_form_2d->stop_2d,
+								 G.dim == 2 ? "Close" : "Close all" );
+			fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
+			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+				fl_set_object_helper( GUI.run_form_2d->stop_2d,
+									  "Removes all display windows" );
+			fl_set_object_callback( GUI.run_form_2d->stop_2d,
+									run_close_button_callback, 0 );
+			fl_unfreeze_form( GUI.run_form_2d->run_2d );
+		}
 	}
 
 	if ( Internals.cmdline_flags & DO_CHECK ||
@@ -804,6 +861,9 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		Internals.check_return = state;
 		fl_trigger_object( GUI.main_form->quit );
 	}
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+		Internals.check_return = state;
 }
 
 
@@ -836,6 +896,9 @@ void run_close_button_callback( FL_OBJECT *a, long b )
 
 static void set_buttons_for_run( int run_state )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+		return;
+
 	fl_freeze_form( GUI.main_form->fsc2 );
 
 	if ( run_state == 1 )
@@ -921,7 +984,8 @@ static void run_child( void )
 	EDL.cur_prg_token = EDL.prg_token;
 	EDL.do_quit = UNSET;
 	setup_child_signals( );
-	dlclose( Internals.rsc_handle );
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		dlclose( Internals.rsc_handle );
 
 #ifndef NDEBUG
 	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty

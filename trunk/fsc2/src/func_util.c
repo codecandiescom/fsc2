@@ -458,6 +458,12 @@ Var *f_showm( Var *v )
 	char *mp;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	vars_check( v, STR_VAR );
 	mess = T_strdup( v->val.sptr );
 
@@ -631,6 +637,12 @@ Var *f_init_1d( Var *v )
 	int i;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* Set some default values */
 
 	G.dim |= 1;
@@ -742,6 +754,12 @@ Var *f_init_2d( Var *v )
 {
 	int i;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* Set some default values */
 
@@ -906,6 +924,12 @@ Var *f_dmode( Var *v )
 	int type = D_CHANGE_MODE;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No rescaling without graphics... */
 
 	if ( ! G.is_init )
@@ -1041,6 +1065,12 @@ Var *f_dmode( Var *v )
 
 Var *f_cscale( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No rescaling without graphics... */
 
 	if ( ! G.is_init )
@@ -1083,6 +1113,12 @@ Var *f_cscale_1d( Var *v )
 	char *ptr;
 	int type = D_CHANGE_SCALE;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* No rescaling without graphics... */
 
@@ -1197,6 +1233,12 @@ Var *f_cscale_2d( Var *v )
 	char *ptr;
 	int type = D_CHANGE_SCALE;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* No rescaling without graphics... */
 
@@ -1322,6 +1364,12 @@ Var *f_cscale_2d( Var *v )
 
 Var *f_clabel( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No changing of labels without graphics... */
 
 	if ( ! G.is_init )
@@ -1366,6 +1414,12 @@ Var *f_clabel_1d( Var *v )
 	int i;
 	int type = D_CHANGE_LABEL;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* No changing of labels without graphics... */
 
@@ -1488,6 +1542,12 @@ Var *f_clabel_2d( Var *v )
 	int type = D_CHANGE_LABEL;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No changing of labels without graphics... */
 
 	if ( ! G.is_init )
@@ -1607,6 +1667,12 @@ Var *f_clabel_2d( Var *v )
 
 Var *f_rescale( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No rescaling without graphics... */
 
 	if ( ! G.is_init )
@@ -1649,6 +1715,12 @@ Var *f_rescale_1d( Var *v )
 	char *ptr;
 	int type = D_CHANGE_POINTS;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* No rescaling without graphics... */
 
@@ -1747,6 +1819,12 @@ Var *f_rescale_2d( Var *v )
 	int type = D_CHANGE_POINTS;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* No rescaling without graphics... */
 
 	if ( ! G.is_init )
@@ -1844,6 +1922,12 @@ Var *f_rescale_2d( Var *v )
 
 Var *f_display( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* We can't display data without a previous initialization */
 
 	if ( ! G.is_init )
@@ -1885,6 +1969,12 @@ Var *f_display_1d( Var *v )
 	int nsets;
 	int i;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* We can't display data without a previous initialization */
 
@@ -2059,6 +2149,12 @@ Var *f_display_2d( Var *v )
 	int i, j;
 	long x_len, y_len;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* We can't display data without a previous initialization */
 
@@ -2519,6 +2615,12 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 
 Var *f_clearcv( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
 
@@ -2563,6 +2665,12 @@ Var *f_clearcv_1d( Var *v )
 	char *ptr;
 	int type = D_CLEAR_CURVE;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
@@ -2706,6 +2814,12 @@ Var *f_clearcv_2d( Var *v )
 	int type = D_CLEAR_CURVE;
 
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
 
@@ -2838,6 +2952,12 @@ Var *f_clearcv_2d( Var *v )
 
 Var *f_setmark( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! G.is_init )
 	{
 		if ( ! G.is_warn )
@@ -2881,6 +3001,12 @@ Var *f_setmark_1d( Var *v )
 							  "BLUE", "BLACK", "DELETE" };
 	long num_colors = sizeof colors / sizeof *colors;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
@@ -3013,6 +3139,12 @@ Var *f_setmark_2d( Var *v )
 							  "BLUE", "BLACK", "DELETE" };
 	long num_colors = sizeof colors / sizeof *colors;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
@@ -3165,6 +3297,12 @@ Var *f_setmark_2d( Var *v )
 
 Var *f_clearmark( Var *v )
 {
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
 	if ( ! G.is_init )
 	{
 		if ( ! G.is_warn )
@@ -3203,6 +3341,12 @@ Var *f_clearmark_1d( Var *v )
 	int type = D_CLEAR_MARKERS;
 	int shm_id;
 
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
@@ -3291,6 +3435,12 @@ Var *f_clearmark_2d( Var *v )
 
 
 	UNUSED_ARGUMENT( v );
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialization */
@@ -3390,6 +3540,12 @@ Var *f_get_pos( Var *v )
 
 
 	UNUSED_ARGUMENT( v );
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
 
 	nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 2 );
 

@@ -271,7 +271,7 @@ void eprint( int severity, bool print_fl, const char *fmt, ... )
 	if ( severity != NO_ERROR )
 		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! Internals.just_testing )
+	if ( ! ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
 	{
 		if ( severity == FATAL )
 		{
@@ -360,7 +360,7 @@ void print( int severity, const char *fmt, ... )
 	if ( severity != NO_ERROR )
 		EDL.compilation.error[ severity ] += 1;
 
-	if ( ! Internals.just_testing )
+	if ( ! ( Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
 	{
 		if ( severity == FATAL )
 		{

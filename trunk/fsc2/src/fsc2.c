@@ -60,6 +60,7 @@ static void fsc2_get_conf( void );
 static void fsc2_save_conf( void );
 static bool get_edl_file( char *fname );
 static void check_run( void );
+static void no_gui_run( void );
 static void test_machine_type( void );
 static int scan_args( int *argc, char *argv[ ], char **fname );
 static void final_exit_handler( void );
@@ -111,13 +112,14 @@ int main( int argc, char *argv[ ] )
 
 	/* Initialize xforms stuff, quit on error */
 
-	if ( ! xforms_init( &argc, argv ) )
+	else if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) &&
+			  ! xforms_init( &argc, argv ) )
 	{
 		raise_permissions( );
 		lower_permissions( );
 		return EXIT_FAILURE;
 	}
-
+	
 	/* If we don't know yet about an input file and there are command
 	   line arguments left take it to be the input file */
 
@@ -186,6 +188,9 @@ int main( int argc, char *argv[ ] )
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 		check_run( );
+
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+		no_gui_run( );
 
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
@@ -291,9 +296,9 @@ static void globals_init( const char *pname )
 
 	Internals.state = STATE_IDLE;
 	Internals.mode = PREPARATION;
+	Internals.cmdline_flags = UNSET;
 	Internals.in_hook = UNSET;
 	Internals.I_am = PARENT;
-	Internals.just_testing = UNSET;
 	Internals.exit_hooks_are_run = UNSET;
 	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
 	Internals.rsc_handle = NULL;
@@ -554,6 +559,30 @@ static bool get_edl_file( char *fname )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
+static void no_gui_run( void )
+{
+	if ( ! scan_main( EDL.in_file, in_file_fp ) ||
+		 EDL.compilation.error[ FATAL ]  != 0 ||
+		 EDL.compilation.error[ SEVERE ] != 0 ||
+		 EDL.compilation.error[ WARN ]   != 0 )
+		exit( EXIT_FAILURE );
+
+	if ( ! run( ) )
+		exit( EXIT_FAILURE );
+
+	while ( Internals.child_pid != 0 )
+	{
+		pause( );
+		new_data_handler( );
+	}
+
+	exit( Internals.check_return );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
 static void check_run( void )
 {
 	static bool user_break = UNSET;
@@ -578,6 +607,7 @@ static void check_run( void )
 		exit( EXIT_FAILURE );
 
 	user_break = UNSET;
+
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
 	if ( ! scan_main( EDL.in_file, in_file_fp ) || user_break ||
@@ -686,7 +716,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				exit( EXIT_FAILURE );
 			}
 
-			Internals.just_testing = SET;    /* set "just_testing"-mode flag */
+			Internals.cmdline_flags |= TEST_ONLY;
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
@@ -698,6 +728,50 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			exit( scan_main( argv[ cur_arg ], in_file_fp ) ?
 				  EXIT_SUCCESS : EXIT_FAILURE );
+		}
+
+		if ( strlen( argv[ cur_arg ] ) == 4 &&
+			 ! strcmp( argv[ cur_arg ], "-NGR" ) )
+		{
+			if ( flags & DO_CHECK )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-NGR' and "
+						"'-X' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			if ( flags & BATCH_MODE )
+			{
+				fprintf( stderr, "fsc2: Can't have both flags '-NGR' and "
+						"'-B' at once.\n" );
+				usage( EXIT_FAILURE );
+			}
+
+			/* no file name with "-NGR" option ? */
+
+			if ( argv[ ++cur_arg ] == NULL )
+			{
+				fprintf( stderr, "fsc2 -NGR: No input file.\n" );
+				exit( EXIT_FAILURE );
+			}
+
+			if ( ( in_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
+			{
+				fprintf( stderr, "Can't open file '%s'.\n", argv[ cur_arg ] );
+				exit( EXIT_FAILURE );
+			}
+
+			EDL.in_file = T_strdup( argv[ cur_arg ] );
+			flags |= NO_GUI_RUN;
+
+			*argc -= 2;
+			if ( *argc > 1 )
+			{
+				fprintf( stderr, "Superfluous arguments\n" );
+				exit( EXIT_FAILURE );
+			}
+
+			break;
 		}
 
 		if ( ( strlen( argv[ cur_arg ] ) == 2 &&
@@ -958,8 +1032,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			if ( Internals.num_test_runs == 0 )
 			{
-				Internals.just_testing = SET;
-				Internals.cmdline_flags |= NO_MAIL;
+				Internals.cmdline_flags |= TEST_ONLY | NO_MAIL;
 
 				seteuid( getuid( ) );
 				setegid( getgid( ) );
@@ -1259,15 +1332,14 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Set a new window title */
 
-	T_free( Internals.title );
+	if ( Internals.title )
+		Internals.title = CHAR_P T_free( Internals.title );
 	Internals.title = get_string( "fsc2: %s", EDL.in_file );
 	fl_set_form_title( GUI.main_form->fsc2, Internals.title );
 
 	/* Read in and display the new file */
 
 	is_loaded = display_file( EDL.in_file, in_file_fp );
-	parse_result = FAIL;
-	is_tested = UNSET;
 
 	fl_activate_object( GUI.main_form->reload );
 	fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
@@ -1289,6 +1361,9 @@ void load_file( FL_OBJECT *a, long reload )
 
 	fl_activate_object( GUI.main_form->test_file );
 	fl_set_object_lcol( GUI.main_form->test_file, FL_BLACK );
+
+	parse_result = FAIL;
+	is_tested = UNSET;
 
 	notify_conn( UNBUSY_SIGNAL );
 }

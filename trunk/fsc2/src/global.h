@@ -530,16 +530,18 @@ enum {
 /* Flags set according to the command line arguments */
 
 enum {
-	DO_LOAD       = ( 1 << 0 ),
-	DO_TEST       = ( 1 << 1 ),
-	DO_START      = ( 1 << 2 ),
-	DO_SIGNAL     = ( 1 << 3 ),
-	DO_DELETE     = ( 1 << 4 ),
-	NO_MAIL       = ( 1 << 5 ),
-	NO_BALLOON    = ( 1 << 6 ),
-	NON_EXCLUSIVE = ( 1 << 7 ),
-	BATCH_MODE    = ( 1 << 8 ),
-	DO_CHECK      = ( 1 << 9 )                /* used for check runs only */
+	DO_LOAD       = ( 1 <<  0 ),
+	DO_TEST       = ( 1 <<  1 ),
+	DO_START      = ( 1 <<  2 ),
+	DO_SIGNAL     = ( 1 <<  3 ),
+	DO_DELETE     = ( 1 <<  4 ),
+	NO_MAIL       = ( 1 <<  5 ),
+	NO_BALLOON    = ( 1 <<  6 ),
+	NON_EXCLUSIVE = ( 1 <<  7 ),
+	BATCH_MODE    = ( 1 <<  8 ),
+	DO_CHECK      = ( 1 <<  9 ),                /* used for check runs only */
+	TEST_ONLY     = ( 1 << 10 ),
+	NO_GUI_RUN    = ( 1 << 11 )
 };
 
 

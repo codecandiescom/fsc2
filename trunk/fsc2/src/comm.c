@@ -231,10 +231,13 @@ int new_data_handler( void )
 			kill( Internals.child_pid, DO_QUIT );
 		Internals.child_is_quitting = QUITTING_ACCEPTED;
 
-		if ( G.dim & 1 || ! G.is_init )
-			fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
-		if ( G.dim & 2 )
-			fl_set_object_callback( GUI.run_form_2d->stop_2d, NULL, 0 );
+		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+		{
+			if ( G.dim & 1 || ! G.is_init )
+				fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
+			if ( G.dim & 2 )
+				fl_set_object_callback( GUI.run_form_2d->stop_2d, NULL, 0 );
+		}
 	}
 
 	/* Check if the child is waiting for an answer in a call of the
@@ -288,7 +291,8 @@ int new_data_handler( void )
 	   to slow down the experiment by serving pages when the process is
 	   already struggling to keep up with data the child sends). */
 
-	if ( Comm.MQ->low == Comm.MQ->high )
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) &&
+		 Comm.MQ->low == Comm.MQ->high )
 	{
 		if ( Internals.http_pid > 0 )
 			http_check( );
@@ -302,7 +306,7 @@ int new_data_handler( void )
 
 	/* Check if a request from the child for external conections came in */
 
-	if ( Internals.conn_request )
+	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) && Internals.conn_request )
 	{
 		Internals.conn_request = UNSET;
 		conn_request_handler( );
