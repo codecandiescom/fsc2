@@ -79,7 +79,7 @@ struct Var {
 		long   *lpnt;              /* for integer arrays */
 		double *dpnt;              /* for double arrays */
 		char   *sptr;              /* for strings */
-		Var **vptr;                /* for array references */
+		Var    **vptr;             /* for array references */
 		struct Func *fnct;         /* for functions */
 	} val;
 
