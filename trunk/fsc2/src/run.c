@@ -713,11 +713,12 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_1d->stop_1d,
-								  "Removes this window" );
+								  "Removes all display windows" );
 		fl_set_object_callback( GUI.run_form_1d->stop_1d,
 								run_close_button_callback, 0 );
 		fl_unfreeze_form( GUI.run_form_1d->run_1d );
 	}
+
 	if ( G.dim & 2 )
 	{
 		fl_freeze_form( GUI.run_form_2d->run_2d );
@@ -726,7 +727,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
 		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			fl_set_object_helper( GUI.run_form_2d->stop_2d,
-								  "Removes this window" );
+								  "Removes all display windows" );
 		fl_set_object_callback( GUI.run_form_2d->stop_2d,
 								run_close_button_callback, 0 );
 		fl_unfreeze_form( GUI.run_form_2d->run_2d );

@@ -92,9 +92,15 @@ static bool cut_has_been_shown = UNSET;
 void cut_init( void )
 {
 	if ( GUI.G_Funcs.size == LOW )
-		GC_sizes.WIN_MIN_WIDTH   = 350;
+	{
+		GC_sizes.WIN_MIN_WIDTH  = 350;
+		GC_sizes.WIN_MIN_HEIGHT = 250;
+	}
 	else
-		GC_sizes.WIN_MIN_WIDTH   = 500;
+	{
+		GC_sizes.WIN_MIN_WIDTH  = 500;
+		GC_sizes.WIN_MIN_HEIGHT = 350;
+	}
 }
 
 
@@ -650,6 +656,10 @@ static void cut_calc_curve( int dir, long p_index, bool has_been_shown )
 									  "Rescale curves to fit into the window\n"
 									  "and switch on automatic rescaling" );
 		}
+
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.cut_form->cut_close_button,
+								  "Removes this window" );
 	}
 	else if ( CG.is_fs[ G2.active_curve ] )
 	{
