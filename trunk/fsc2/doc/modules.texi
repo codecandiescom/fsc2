@@ -161,10 +161,10 @@ typedef struct Var_
     int  type;               /* type of the variable */
     union
     @{
-        long    lval;        /* for integer values */
-        double  dval;        /* for float values */
-        long   *lpnt;        /* for integer arrays */
-        double *dpnt;        /* for floating point arrays */
+        long    lval;        /* value of integer values */
+        double  dval;        /* value of float values */
+        long   *lpnt;        /* pointer to integer arrays */
+        double *dpnt;        /* pointer to floating point arrays */
     @} val;
     long len;                /* length of array */
     struct Var_ *next;       /* next variable on stack */
@@ -205,12 +205,11 @@ array of data?
 
 Actually, it's not too complicated. The pointer to the variable
 structure @code{var} points to the first of the two parameters. And if
-you look back at the typedef for @acronym{fsc2}'s variables,
-there is a @code{next} pointer. That is the key to access the next
-parameter -- @code{var->next} points to next of the input parameters. If
-the function expects even more arguments, @code{var->next->next}
-etc. would get you to them - that means the input variables are
-organized as a linked list:
+you look back at the typedef for @acronym{fsc2}'s variables, there is a
+@code{next} pointer. This is the key to access the next parameter --
+@code{var->next} points to next of the input parameters. If the function
+expects even more arguments, @code{var->next->next} etc. let's you get
+them, i.e.@: the input variables are organized as a linked list:
 @example
     var                               pointer passed to function
      |                                  |
@@ -238,7 +237,7 @@ hand, there are not enough parameters the program will just print an
 error message and then stop (and not call your function). Having the
 parameters organized as a linked list also makes it easy to handle
 variable numbers of variables: as long as the @code{next}-pointer of a
-function argument isn't @code{NULL} there is still another one.
+functions argument isn't @code{NULL} there is at least another one.
 
 One word of warning: @strong{Never ever try to change the variables you
 get passed to your functions in any way!}
@@ -266,12 +265,20 @@ with
     vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
 @noindent
-(i.e.@: the different types of variables are coded into the bits of the
-the integer @code{type} in the variable's structure, so you have to use
-the bitwise inclusive OR operator @code{|} to test alternatives).
+As you probably already guessed from this the different types of
+variables are coded into the bits of the the integer @code{type} in the
+variable's structure, so you have to use the bitwise inclusive OR
+operator @code{|} to test alternatives.
 
-Thus, a function that expects just integer arguments would probably start
-like this, just running through the linked list of parameters:
+
+@code{vars_check()} not only checks that the variables has the correct
+type but will also do some internal consistency checks to make sure
+that the variable actually exists and has been assigned a value etc.
+
+
+A function that expects just integer arguments would probably start
+like te following example, just running through the linked list of
+parameters:
 @example
 Var *my_function( Var *var )
 @{
@@ -286,7 +293,7 @@ Var *my_function( Var *var )
 
 
 The next question is how to access the value of the variable. As you can
-see above in the typedef for variables the value is stored in the union
+seein the typedef for variables above the value is stored in the union
 @code{val}.  If the variable has integer type, you can access it as
 
 @quotation
@@ -304,48 +311,12 @@ in which case you get a value of type @code{double}. Of course, you may
 also access the contents of the union directly.
 
 
-@subsection Functions for memory allocation
-@cindex memory allocation
-@findex T_malloc()
-@findex T_calloc()
-@findex T_realloc()
-@findex T_free()
-@findex T_strdup()
-
-By the way, there's a special function made for @acronym{fsc2} for
-allocating memory.  This functions does not only allocates memory but
-also checks that the allocation really returns as much memory as you
-asked for (i.e.@: if it fails it will stop the program and print an
-appropriate error message). That means that you don't have to care for
-error handling - if the function returns everything is ok, otherwise it
-won't return at all. This function is called @code{T_malloc()} (think
-about it as @i{tested malloc}). And, of course, there is also a
-replacement for @code{realloc()} and @code{calloc()}, called
-@code{T_realloc()} and @code{T_calloc()}. Also for duplication of
-strings you should use @code{T_strdup()} instead of the normal
-@code{strdup()}.And, to make things complete, the replacement for
-@code{free()} is called @code{T_free()}. All five functions accept 
-the same input and return values as their normal counterparts, i.e.@:
-@example
-  void *T_malloc( size_t size )
-  void *T_calloc( size_t nmemb, size_t size )
-  void *T_realloc( void *ptr, size_t size )
-  char *T_strdup( const char *string )
-  void  T_free( void *ptr )
-@end example
-@noindent
-I would strongly recommend using this functions since they got built in
-some code to help detecting memory leaks etc. --- but that's a completely
-different topic...
-
-
 @subsection Returning data from an @acronym{EDL} function
 
-So, let's get back to our main theme and talk about returning values
-from your module functions. If your function just wants to return an
-integer or a float, things are very easy: just call the function
-@code{vars_push()} with the type of the return value as the first and
-the value itself as the second argument, e.g.@:
+If your function just wants to return an integer or a float, things are
+very easy: just call the function @code{vars_push()} with the type of
+the return value as the first and the value itself as the second
+argument, e.g.@:
 @example
     return vars_push( INT_VAR, i_value );
 @end example
@@ -355,17 +326,17 @@ or
     return vars_push( FLOAT_VAR, f_value );
 @end example
 @noindent
-where @code{i_value} is a @code{long int} and @code{f_value} is
-supposed to be a @code{double} value. Of course, you don't have to use
-@code{vars_push()} in returns only, it simply returns a pointer to the
-new variable holding the value.
+where @code{i_value} is a @code{long int} and @code{f_value} is supposed
+to be a @code{double} value. Of course, you don't have to use
+@code{vars_push()} in return statements only, it simply returns a
+pointer to the new variable holding the value.
 
 For arrays @code{vars_push()} the first argument is either
-@code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument
-is a pointer to the array (i.e.@: its first argument). For creating an
-array variable it also needs a third argument, the length of the array
-(as a @code{long} integer). If you want to return an array with two
-integer arguments you would use something like
+@code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a pointer
+to the array (i.e.@: its first argument). For creation of an array
+variable alsoa third argument is needed, the length of the array (a
+@code{long} integer). If you want to return an array with two integer
+arguments you would use for example
 @example
     data[ 0 ] = 1;
     data[ 1 ] = 2;
@@ -374,9 +345,8 @@ integer arguments you would use something like
 @noindent
 assuming that @code{data} is an array of @code{long int}s.
 
-As a further example here the rather simple but complete (and tested)
-function @code{square()} that returns the square of the value passed to
-it:
+As a complete example here is a rather simple but working function named
+@code{square()} that returns the square of the value it got passed:
 @example
 Var *square( Var *var )
 @{
@@ -401,14 +371,14 @@ Var *square( Var *var )
 @}
 @end example
 @noindent
-As you see, we first check that the variable passed to the function has
-the correct type - both integer and floating point values are ok
-here. Next we distinguish between both the possibilities that the value
-is either an integer or a floating point number by testing the
-@code{type} field of the variable. Then we create either a new integer
-variable by calling @code{vars_push()} with the square of the integer
-value or a new floating point variable. Finally, we return the variable
-pointer @code{vars_push()} had delivered.
+As you see, first it is checked that the variable passed to the function
+has the correct type - both integer and floating point values are ok.
+Next we distinguish between the possibilities that the value is
+either an integer or a floating point number by testing the @code{type}
+field of the variable. Then we create either a new integer variable by
+calling @code{vars_push()} with the square of the integer value or a new
+floating point variable. Finally, we return the variable pointer
+@code{vars_push()} had delivered.
 
 Of course, we could also have written the function in a more compact way:
 @example
@@ -437,20 +407,19 @@ or simply return a @code{NULL} pointer, i.e.@:
 @end example
 
 
-Now, what if you want to write to function that returns more than one
-value? Again we take a function for a digitizer that has to return a
-curve as an array as an example. Let's assume the data you got from the
-digitizer are stored in an array of integers called @code{data} which
-has @code{len} elements (where @code{len} is a @code{long}). Now all
-you've got to do is call the function @code{vars_push()} as
+What if you want to write to function that returns more than one value?
+Again we use a function for a digitizer that has to return a curve as
+an array as an example. Let's assume the data you got from the digitizer
+are stored in an array of integers called @code{data} which has
+@code{len} elements (where @code{len} is a @code{long}). Now all you've
+got to do is call the function @code{vars_push()} as
 @example
-    Var *ret;
+    Var *ret_var;
 
     ...
-
-    return vars_push( INT_ARR, data, len );
-    T_free( data );
-    return ret;
+    ret = vars_push( INT_ARR, data, len );
+    ...
+    return ret_var;
 @end example
 @noindent
 Actually, at some point of your function you may have allocated memory
@@ -764,6 +733,40 @@ call @code{vars_pop()} on the returned value only if it wasn't the
 @code{NULL} pointer (i.e.@: if the function was not found) --- but nothing
 bad is going to happen if you call @code{vars_pop()}on the @code{NULL}
 pointer, anyway.
+
+
+@section Functions for memory allocation
+@cindex memory allocation
+@findex T_malloc()
+@findex T_calloc()
+@findex T_realloc()
+@findex T_free()
+@findex T_strdup()
+
+There are special function for @acronym{fsc2} for allocating memory.
+These functions does not only allocates memory but also checks that the
+allocation really returns as much memory as you asked for (i.e.@: on
+failure the program gets stopped and an appropriate error message is
+printed). That means that you don't have to care for error handling - if
+the functions return everything is ok, otherwise they won't return at
+all. The first of these functions is called @code{T_malloc()} (think
+about it as @i{tested malloc}). And, of course, there is also a
+replacement for @code{realloc()} and @code{calloc()}, called
+@code{T_realloc()} and @code{T_calloc()}. Also for duplication of
+strings you should use @code{T_strdup()} instead of the normal
+@code{strdup()}. And, to make things complete, the replacement for
+@code{free()} is called @code{T_free()}. All five functions accept the
+same input and return values as their normal counterparts, i.e.@:
+@example
+  void *T_malloc( size_t size )
+  void *T_calloc( size_t nmemb, size_t size )
+  void *T_realloc( void *ptr, size_t size )
+  char *T_strdup( const char *string )
+  void  T_free( void *ptr )
+@end example
+@noindent
+I would strongly recommend using this functions since they got built in
+some code to help detecting memory leaks etc. which helps in debugging.
 
 
 @section Exceptions
