@@ -179,9 +179,9 @@ int sr530_test_hook( void )
 
 int sr530_exp_hook( void )
 {
-	/* Store the current state */
+	/* Reset the device structure to the state it had before the test run */
 
-	memcpy( &sr530_stored, &sr530, sizeof( SR530 ) );
+	memcpy( &sr530, &sr530_stored, sizeof( SR530 ) );
 
 	/* Initialize the lock-in */
 

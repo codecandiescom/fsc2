@@ -218,9 +218,9 @@ int sr830_test_hook( void )
 
 int sr830_exp_hook( void )
 {
-	/* Store current state and initialize the lock-in */
+	/* Reset the device structure to the state it had before the test run */
 
-	memcpy( &sr830_stored, &sr830, sizeof( SR830 ) );
+	memcpy( &sr830, &sr830_stored, sizeof( SR830 ) );
 
 	if ( ! sr830_init( DEVICE_NAME ) )
 	{
