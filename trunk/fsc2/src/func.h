@@ -24,6 +24,8 @@ typedef struct {
 	bool is_init_hook;
 	int ( * test_hook ) ( void );
 	bool is_test_hook;
+	int ( * end_of_test_hook ) ( void );
+	bool is_end_of_test_hook;
 	int ( * exp_hook ) ( void );
 	bool is_exp_hook;
 	int ( * end_of_exp_hook ) ( void );

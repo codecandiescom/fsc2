@@ -629,6 +629,7 @@ void exp_test_run( void )
 			}
 		}
 
+		run_end_of_test_hooks( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

@@ -135,7 +135,7 @@ void load_functions( Device *dev )
 	   (the string will be reused for the other hook functions, so make
 	   it long enough that the longest name will fit into it) */
 
-	hook_func_name = get_string( strlen( dev->name ) + 17 );
+	hook_func_name = get_string( strlen( dev->name ) + 18 );
 	strcpy( hook_func_name, dev->name );
 	strcat( hook_func_name, "_init_hook" );	
 
@@ -151,6 +151,15 @@ void load_functions( Device *dev )
 	dev->driver.test_hook = dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
 		dev->driver.is_test_hook = SET;
+
+	/* Get end-of-test hook function if available */
+	
+	strcpy( hook_func_name, dev->name );
+	strcat( hook_func_name, "_end_of_test_hook" );	
+
+	dev->driver.end_of_test_hook = dlsym( dev->driver.handle, hook_func_name );
+	if ( dlerror( ) == NULL )
+		dev->driver.is_end_of_test_hook = SET;
 
 	/* Get pre-experiment hook function if available */
 	
