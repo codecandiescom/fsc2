@@ -82,10 +82,7 @@ int tds520a_exp_hook( void )
 
 int tds520a_end_of_exp_hook( void )
 {
-#ifndef MAX_DEBUG
 	tds520a_finished( );
-#endif
-
 	return 1;
 }
 

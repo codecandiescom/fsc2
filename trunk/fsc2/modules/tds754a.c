@@ -82,10 +82,7 @@ int tds754a_exp_hook( void )
 
 int tds754a_end_of_exp_hook( void )
 {
-#ifndef MAX_DEBUG
 	tds754a_finished( );
-#endif
-
 	return 1;
 }
 
