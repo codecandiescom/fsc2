@@ -38,6 +38,7 @@ dg2020_b      // Sony/Tektronix data generator (Berlin X-band)
 hfs9000       // Tektronix stimulus system     (Berlin W-band)
 ep385         // Bruker Pulse Programmer       (Berlin X-band)
 rs690         // Interface Technology RS-690 Word Generator (Berlin 360 GHz)
+rb_pulser     // Leiden pulser made up from Rulbus cards
 
 
 // Digital oszilloscopes
