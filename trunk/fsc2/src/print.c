@@ -37,8 +37,10 @@
 #define Legal_PAPER  5
 
 
+#define GUESS_NUM_LINES 10
+
+
 static FD_print *print_form;
-static FD_print_comment *print_comment;
 
 static char *cmd = NULL;             /* for storing the last print command */
 static int print_type = S2P;         /* the way to print: S2P or P2F */
@@ -53,9 +55,10 @@ static bool print_with_comment = UNSET;
 static double x_0, y_0, w, h;        /* position and size of print area */
 static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 
+static const char *pc_string = NULL;
 
 static int get_print_file( FILE **fp, char **name );
-static void get_print_comment( void );
+static void get_print_comm( void );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
@@ -63,6 +66,8 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void do_print( char *name, const char *command );
+static void print_comm( FILE *fp );
+static char **split_into_lines( int *num_lines );
 static void start_printing( char **argv, char *name );
 
 
@@ -97,7 +102,7 @@ void print_1d( FL_OBJECT *obj, long data )
 		return;
 	}
 
-	get_print_comment( );
+	get_print_comm( );
 
 	print_header( fp, name );
 
@@ -109,10 +114,14 @@ void print_1d( FL_OBJECT *obj, long data )
 	w = paper_height - margin - x_0;
 	h = paper_width - margin - y_0;
 
+	fprintf( fp, "0.05 slw 0 sgr\n" );
+
+	if ( print_with_comment )
+		print_comm( fp );
+
 	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
        graph) */
 
-	fprintf( fp, "0.05 slw\n" );
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
@@ -188,6 +197,8 @@ void print_2d( FL_OBJECT *obj, long data )
 		return;
 	}
 
+	get_print_comm( );
+
 	print_header( fp, name );
 
 	/* Set the area for the graph, leave a margin on all sides and,
@@ -203,9 +214,13 @@ void print_2d( FL_OBJECT *obj, long data )
 
 	h = paper_width - margin - y_0;
 
+	fprintf( fp, "0.05 slw 0 0 0 srgb\n" );
+
+	if ( print_with_comment )
+		print_comm( fp );
+
 	/* Draw the frame and the scales */
 
-	fprintf( fp, "0.05 slw\n" );
 	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
@@ -225,7 +240,8 @@ void print_2d( FL_OBJECT *obj, long data )
 	else
 		eps_draw_contour( fp, G.active_curve );
 
-	fprintf( fp, "showpage\n" );
+	fprintf( fp, "showpage\n"
+				 "%%%%EOF" );
 	fclose( fp );
 
 	if ( print_type == S2P )
@@ -262,6 +278,8 @@ static int get_print_file( FILE **fp, char **name )
 	}
 	else
 		fl_set_input( print_form->s2p_input, "lpr -h" );
+
+	fl_set_button( print_form->add_comment, ( int ) print_with_comment );
 
 	/* Set the paper type to the last one used (or A4 at the start) */
 
@@ -531,19 +549,38 @@ void print_callback( FL_OBJECT *obj, long data )
 }
 
 
-static void get_print_comment( void )
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+
+static void get_print_comm( void )
 {
 	FL_OBJECT *obj;
+	const char *res;
 
 
 	if ( ! print_with_comment )
 		return;
 	
+	if ( pc_string != NULL )
+		fl_set_input( print_comment->pc_input, pc_string );
+
+	pc_string = T_free( ( char * ) pc_string );
+
+	fl_show_form( print_comment->print_comment, FL_PLACE_MOUSE, FL_TRANSIENT,
+				  "fsc2: Print Text" );
+
 	while ( ( obj = fl_do_forms( ) ) != print_comment->pc_done )
 	{
 		if ( obj == print_comment->pc_clear )
 			fl_set_input( print_comment->pc_input, NULL );
 	}
+
+	res = fl_get_input( print_comment->pc_input );
+	if ( res != NULL && *res != '\0' )
+		pc_string = T_strdup( res );
+
+	if ( fl_form_is_visible( print_comment->print_comment ) )
+		fl_hide_form( print_comment->print_comment );
 }
 
 
@@ -561,18 +598,19 @@ static void print_header( FILE *fp, char *name )
 	d = time( NULL );
 
 	fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
+			     "%%%%BoundingBox: 0 0 %d %d\n"
 			     "%%%%Creator: fsc2, Nov 2001\n"
 			     "%%%%CreationDate: %s"
 			 	 "%%%%Title: %s\n"
 			     "%%%%For: %s (%s)\n"
-			     "%%%%BoundingBox: 0 0 %d %d\n"
 			     "%%%%Orientation: Landscape\n"
+				 "%%%%DocumentNeededResources: font Times-Roman\n"
 			     "%%%%End Comments\n",
-			     ctime( &d ), name,
-			     getpwuid( getuid( ) )->pw_name,
-				 getpwuid( getuid( ) )->pw_gecos,
-			     ( int ) ( 72.0 * paper_width / INCH ),
-			     ( int ) ( 72.0 * paper_height / INCH ) );
+			 irnd( 72.0 * paper_width / INCH ),
+			 irnd( 72.0 * paper_height / INCH ),
+			 ctime( &d ), name,
+			 getpwuid( getuid( ) )->pw_name,
+			 getpwuid( getuid( ) )->pw_gecos );
 
 	/* Some (hopefully) helpful definitions */
 
@@ -582,7 +620,6 @@ static void print_header( FILE *fp, char *name )
 			     "/f { fill } b\n"
                  "/t { translate } b\n"
 			     "/r { rotate} b\n"
-			     "/cp { closepath } b\n"
 				 "/m { moveto } b\n"
 			     "/l { lineto } b\n"
 			     "/rm { rmoveto } b\n"
@@ -626,10 +663,22 @@ static void print_header( FILE *fp, char *name )
 
 	/* Done with the header, tell the Postscript interpreter */
 
-	fprintf( fp, "%%%%EndProlog\n" );
+	fprintf( fp, "%%%%EndProlog\n\n" );
 
-	/* Rotate and shift for landscape format, scale to mm units, set font
-	   and draw logo, date and user name */
+	/* Try to set up a font that also supports umlauts etc., thanks to
+	   Adobe Systems Inc, PostScript Language Reference 3rd edition */
+
+	fprintf( fp, "/Times-Roman findfont\n"
+				 "dup length dict begin\n"
+				 "{ 1 index /FID ne\n"
+				 "    { def } { pop pop } ifelse\n"
+				 "} forall\n"
+				 "/Encoding ISOLatin1Encoding def\n"
+				 "currentdict end\n"
+				 "/Times-RomanISOLatin1 exch definefont pop\n\n" );
+
+	/* Rotate and shift for landscape format, scale to mm units, draw logo,
+	   set font and draw date and user name */
 
 	fprintf( fp, "%f dup scale 90 r 0 %f t\n", 72.0 / INCH, - paper_width );
 
@@ -640,7 +689,7 @@ static void print_header( FILE *fp, char *name )
 		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
 
 	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
-	fprintf( fp, "/Times-Roman 4 sf\n" );
+	fprintf( fp, "/Times-RomanISOLatin1 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
 			 getpwuid( getuid( ) )->pw_name );
 }
@@ -1246,6 +1295,151 @@ static void eps_draw_contour( FILE *fp, int cn )
 			}
 
 	fprintf( fp, "gr\n" );
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static void print_comm( FILE *fp )
+{
+	char **lines = NULL;
+	int num_lines;
+	int i;
+
+
+	if ( pc_string == NULL )
+		return;
+
+	if ( ( lines = split_into_lines( &num_lines ) ) == NULL )
+		return;
+
+	/* Calculate the length of the longest lines and push it on the stack */
+
+	fprintf( fp, "(%s) dup sw dup\n", lines[ 0 ] );
+
+	if ( num_lines > 1 )
+		for ( i = 1; i < num_lines; i++ )
+			  fprintf( fp, "(%s) dup sw exch 4 1 roll dup 4 1 roll lt\n"
+						   "{ pop }{ exch pop } ifelse dup\n",
+					   lines[ i ] );
+
+	fprintf( fp, "pop dup %f exch sub 0.5 mul %f add\n", w, margin );
+	fprintf( fp, "5 (X) ch 1.5 mul add gs translate dup 0 0 m newpath\n"
+				 "(m) cw neg (X) ch -1.5 mul m\n"
+				 "(m) cw 2 mul add 0 rl\n"
+				 "0 (X) ch %d 2 mul 1 add mul rl\n"
+				 "(m) cw 2 mul add neg 0 rl cp\n"
+				 "gs 0.95 sgr fill gr s\n",
+			 num_lines );
+
+	fprintf( fp, "0 0 m\n"
+			     "count { dup show sw neg (X) ch 1.65 mul rm } repeat\n"
+			     "gr\n" );
+
+
+	for ( i = 0; i < num_lines; i++ )
+		T_free( lines[ i ] );
+
+	T_free( lines );
+
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static char **split_into_lines( int *num_lines )
+{
+	static char **lines;
+	char *cp;
+	static int nl;
+	static int cur_size;
+	static int i = 0;
+	int j;
+	ptrdiff_t count;
+
+
+	lines = NULL;
+	cur_size = GUESS_NUM_LINES;
+
+	TRY
+	{
+		lines = T_malloc( cur_size * sizeof( char * ) );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+		return NULL;
+
+	/* Count the number of lines by detecting the '\n' characters and set up
+	   an array of pointers to the starts of the lines */
+
+	TRY
+	{
+		for ( lines[ nl = 0 ] = cp = ( char * ) pc_string; *cp != '\0'; cp++ )
+			if ( *cp == '\n' )
+			{
+				if ( nl++ == cur_size )
+				{
+					cur_size += GUESS_NUM_LINES;
+					lines = T_realloc( lines, cur_size * sizeof( char * ) );
+				}
+
+				lines[ nl ] = cp + 1;
+			}
+
+		if ( *--cp == '\n' )
+		{
+			while ( nl != 0 && *--cp == '\n')
+				nl--;
+			
+			if ( nl == 0 )
+				THROW( EXCEPTION );
+
+			lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+		}
+		else
+		{
+			if ( nl++ >= cur_size )
+				lines = T_realloc( lines, ( nl + 1 ) * sizeof( char * ) );
+
+			lines[ nl ] = cp + 2;
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		T_free( lines );
+		return NULL;
+	}
+
+	/* Now split the string into single lines and copy them into the array
+	   of lines */
+
+	TRY
+	{
+		for ( i = 0; i < nl; i++ )
+		{
+			cp = lines[ i ];
+			count = lines[ i + 1 ] - cp;
+			lines[ i ] = T_malloc( count );
+			memcpy( lines[ i ], cp, count );
+			lines[ i ][ count - 1 ] = '\0';
+		}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		for ( j = 0; j < i; j++ )
+			T_free( lines[ i ] );
+		T_free( lines );
+		return NULL;
+	}
+
+	*num_lines = nl;
+	return lines;
 }
 
 
