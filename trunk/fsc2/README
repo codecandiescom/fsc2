@@ -1,29 +1,25 @@
-fsc2 is a program written to remotely control spectrometers.
+fsc2 is a program for controlling spectrometers.
 
-Programs for controlling spectrometers are usually home-written,
-restricted to doing a certain set of experiments and often bound to
-a fixed hardware base. One of the few counter-examples is e.g. LabVIEW,
-but which is a commercial, closed-source application and requires the
-experimentator to become comfortable with the rather unusual graphical
-approach to programming if even simple changes are needed in either the
-way the experiment is to be done or the hardware configuration.
+Programs for controlling spectrometers are usually home-written and
+are often restricted to doing a certain set of experiments with a
+fixed hardware base. In contrast, fsc2 interprets a rather simple
+but powerful scripting language (in the following called EDL for
+Experiment Description Language) and has a strictly modular approach
+to the handling of devices.
 
-In contrast, fsc2 basically interprets a rather simple but powerful
-scripting language (in the following called EDL for Experiment Description
-Language) and has a strictly modular approach to handling of devices.
-This allows you to easily set up a completely new experiment (or to change
-an already existing experiment description) in a short time without
-any detailed knowledge of the internals of fsc2 nor on how exactly the
-devices have to be controlled.
+This allows setting up a completely new experiment (or to change
+an already existing experiment description) fast and easily without
+any detailed knowledge of the internals of fsc2 nor on how exactly
+the devices have to be controlled.
 
-Some key features:
+Some key features of fsc2:
 
 * The EDL language is similar to other medium to high level languages,
-  borrowing from e.g. MathLab, C, Fortran and Perl etc. Moreover, it
+  borrowing from e.g. MathLab, Fortran, C and Perl etc. Moreover, it
   comes with a lot of functions for displaying and saving measured
   data in completely user defined ways. Thus writing a description
   for a new experiment (or adapting an already existing EDL script)
-  won't be difficult for anyone remotely acqainted with one of the
+  won't be difficult for anyone remotely acquainted with one of the
   above mentioned programming languages.
 
 * Device are not hard-coded into fsc2. Instead, devices are dealt with
@@ -32,34 +28,34 @@ Some key features:
   functionality by usually changing not more than a single line in an
   EDL script.
 
-* Currently fsc2 controls devices that are either connected via the serial
-  ports or the GPIB bus. Functions for simplifying access of devices using
-  these interfaces are built into fsc2.
+* Currently fsc2 controls devices that are either connected via the
+  serial ports or the GPIB bus. Functions for simplifying access of
+  devices using these interfaces are built into fsc2.
 
-* fsc2 allows other programs to send it EDL scripts to execute. This
-  allows to write a set of scripts for standard experiments that
-  automatically create EDL scripts from user input (e.g. via a graphical
-  interface). The package comes with a tool that automatically can generate
-  such scripts from (slightly modified) EDL programs. Once such a script
-  has been created, "normal" user don't even have to know how to write EDL
-  programs, thus having all the convenience of the traditional type of
-  programs without sacrificing the flexibility of fsc2. Several examples
-  of such scripts, written in Perl/Tk, are included in the distribution.
+* fsc2 allows other programs to send it EDL scripts for execution.
+  So one may write a set of scripts for standard experiments that
+  in turn automatically create EDL scripts from user input e.g. from
+  a graphical user interface). The package even comes with a tool that
+  will automatically generate such scripts from (slightly modified)
+  EDL programs. Once such a script has been created, "normal" users
+  don't have to know how to write or change EDL programs, thus retaining
+  all the convenience of the traditional type of programs but without
+  sacrificing the flexibility of fsc2.
 
-* fsc2 comes with a simple web server (only running on user demand) that
-  allows the experimentator to remotely monitor the current state of the
-  experiment.
+* fsc2 has a built-in simple web server (only running on user demand)
+  that allows the experimentator to remotely monitor the current state
+  of the experiment.
 
 * Writing new device modules (or adapting existing ones for a new device)
-  shouldn't be too difficult for anyone having some experience with writing
-  programs in C. About 30 modules for quite a range of devices are already
-  part of the package and can be used as a starting point for the
-  development of new ones.
+  shouldn't be too difficult for anyone having some experience with
+  writing programs in C. About 30 modules for quite a range of devices
+  are already part of the package and can be used as a starting point
+  for the development of new ones.
 
-* An extensive 150+ page documentation (in HTML, info, PostScript and PDF
-  format), covering all aspects of fsc2 from the graphical interface, the
-  EDL language, device functions to writing of new device modules, is part
-  of the fsc2 package.
+* fsc2 is well-documented, an 150+ page documentation (in HTML, info,
+  PostScript and PDF format), covering all aspects of fsc2, i.e the
+  graphical interface, the EDL language, device functions and writing of
+  new device modules, is part of the package.
 
 * fsc2 has been extensively tested and is currently used to control seven
   EPR spectrometers, using a broad range of different devices and   
