@@ -1,3 +1,5 @@
+# -*- cperl -*-
+#
 # $Id$
 #
 # Before `make install' is performed this script should be runnable with
@@ -5,12 +7,10 @@
 
 #########################
 
-# change 'tests => 1' to 'tests => last_test_to_print';
-
 use Test;
 BEGIN { plan tests => 16 };
-use Fcntl_Lock;
 use POSIX;
+use Fcntl_Lock;
 ok(1); # If we made it this far, we're ok.
 
 #########################
@@ -81,7 +81,7 @@ $fs->l_pid( 1234 );
 ok( $fs->l_pid, 1234 );
 
 ##############################################
-# 12. Test if we get an write lock on STDOUT
+# 12. Test if we can get an write lock on STDOUT
 
 ok( defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
 
@@ -92,14 +92,14 @@ $fs->l_type( F_UNLCK );
 ok( defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
 
 ##############################################
-# 14. Test if we can a read lock on the script we're just running
+# 14. Test if we can get a read lock on the script we're just running
 
 $fs->l_type( F_RDLCK );
 open( $fh, "test.pl" );
 ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
 
 ##############################################
-# 15. Test if we can release the lock
+# 15. Test if we can release this lock
 
 $fs->l_type( F_UNLCK );
 ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
@@ -107,10 +107,10 @@ close $fh;
 
 ##############################################
 # 16. Now a real test: the child process grabs a write lock on a test file
-#     for 2 secs while the parent repeatedly tries to get the lock. After
-#     the child finally releases the lock the parent should be able to
-#     obtain the lock (this test isn't real clean because under extremely
-#     high system load it might not work as expected...)
+#     for 2 secs while the parent repeatedly checks if it could get the
+#     lock. After the child finally releases the lock the parent should be
+#     able to obtain the lock (this test isn't real clean because under
+#     extremely high system load it might not work as expected...)
 
 $fs = $fs->new( 'l_type'   => F_WRLCK,
 				'l_whence' => SEEK_SET,

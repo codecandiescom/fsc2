@@ -28,7 +28,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 				  SEEK_SET SEEK_CUR SEEK_END
 );
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 bootstrap Fcntl_Lock $VERSION;
 
@@ -39,7 +39,6 @@ bootstrap Fcntl_Lock $VERSION;
 
 sub new {
 	my $inv = shift;
-	croak "Missing value in key-value initializer list" if @_ % 2;
     my $pkg = ref( $inv ) || $inv;
     my $self = { 'l_type'   => F_RDLCK,
 				 'l_whence' => SEEK_SET,
@@ -48,6 +47,7 @@ sub new {
 				 'l_pid'    => 0,
 			   };
 
+	croak "Missing value in key-value initializer list" if @_ % 2;
 	while ( @_ ) {
 		no strict 'refs';
 		my $key = shift;
