@@ -320,7 +320,7 @@ FOREVER {
 		display( I, data[ I ] * 1.0e3 );
 
 		IF ( Sweep_State != STOPPED & magnet_sweep( ) == STOPPED ) |
-			I >= MAX_POINTS {
+			 I >= MAX_POINTS {
 			lockin_auto_acquisition( \"OFF\" );
 			magnet_sweep( STOPPED );
 			Sweep_State = STOPPED;
