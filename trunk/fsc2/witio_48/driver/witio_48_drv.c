@@ -237,8 +237,8 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p )
 	if ( board.in_use &&
 	     board.owner != current->uid &&
 	     board.owner != current->euid ) {
-		PDEBUG( "Board already in use by another user.\n" );
 		spin_unlock( &board.spinlock );
+		PDEBUG( "Board already in use by another user.\n" );
 		return -EBUSY;
 	}
 
@@ -292,7 +292,7 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 	if ( _IOC_TYPE( cmd ) != WITIO_48_MAGIC_IOC || 
 	     _IOC_NR( cmd ) < WITIO_48_MIN_NR ||
 	     _IOC_NR( cmd ) > WITIO_48_MAX_NR ) {
-		PDEBUG( "Invalid ioctl() call.\n", cmd );
+		PDEBUG( "Invalid ioctl() call.\n" );
 		return -EINVAL;
 	}
 
@@ -300,7 +300,7 @@ static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
 		case WITIO_48_IOC_SET_MODE :
 			if ( witio_48_get_from_user( arg,
 						     ( void * ) &state_struct,
-						     sizeof state_struct ) ) 
+						     sizeof state_struct ) )
 				return -EACCES;
 			ret_val = witio_48_set_mode( &state_struct );
 			break;
@@ -355,8 +355,10 @@ static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
 {
 	if ( access_ok( VERIFY_READ, ( void * ) arg, len ) )
 		__copy_from_user( to, ( void * ) arg, len );
-	else
+	else {
+		PDEBUG( "Failure to access user space data.\n" );
 		return -EACCES;
+	}
 
 	return 0;
 }
@@ -370,14 +372,18 @@ static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
 {
 	/* Check if the DIO number is valid */
 
-	if ( state->dio < WITIO_48_DIO_1 || state->dio > WITIO_48_DIO_2 )
+	if ( state->dio < WITIO_48_DIO_1 || state->dio > WITIO_48_DIO_2 ) {
+		PDEBUG( "Invalid DIO number.\n" );
 		return -EINVAL;
+	}
 
 	/* Check if the mode is valid */
 
 	if ( state->mode < WITIO_48_MODE_3x8 ||
-	     state->mode > WITIO_48_MODE_16_8 )
+	     state->mode > WITIO_48_MODE_16_8 ) {
+		PDEBUG( "Invalid channel number.\n" );
 		return -EINVAL;
+	}
 
 	board.states[ state->dio ].mode = state->mode;
 
@@ -393,8 +399,10 @@ static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
 {
 	/* Check if the DIO number is valid */
 
-	if ( state->dio < WITIO_48_DIO_1 || state->dio > WITIO_48_DIO_2 )
+	if ( state->dio < WITIO_48_DIO_1 || state->dio > WITIO_48_DIO_2 ) {
+		PDEBUG( "Invalid DIO number.\n" );
 		return -EINVAL;
+	}
 
 	state->mode = board.states[ state->dio ].mode;
 
@@ -414,23 +422,29 @@ static int witio_48_dio_out( WITIO_48_DATA *data )
 
 	/* Check if the DIO number is valid */
 
-	if ( dio < WITIO_48_DIO_1 || dio > WITIO_48_DIO_2 )
+	if ( dio < WITIO_48_DIO_1 || dio > WITIO_48_DIO_2 ) {
+		PDEBUG( "Invalid DIO number.\n" );
 		return -EINVAL;
+	}
 
 	/* Check if the channel number is valid */
 
-	if ( ch < WITIO_48_CHANNEL_0 || ch > WITIO_48_CHANNEL_2 )
+	if ( ch < WITIO_48_CHANNEL_0 || ch > WITIO_48_CHANNEL_2 ) {
+		PDEBUG( "Invalid channel number.\n" );
 		return -EINVAL;
+	}
 
 	/* Check if the channel number isn't too large for the mode of
 	   the selected DIO */
 
-	if ( ( board.states[ dio ].mode == WITIO_48_MODE_3x8 &&
+	if ( ( board.states[ dio ].mode == WITIO_48_MODE_1x24 &&
 	       ch > WITIO_48_CHANNEL_0 ) ||
 	     ( ( board.states[ dio ].mode == WITIO_48_MODE_2x12 ||
 		 board.states[ dio ].mode == WITIO_48_MODE_16_8 ) &&
-	       ch > WITIO_48_CHANNEL_1 ) )
+	       ch > WITIO_48_CHANNEL_1 ) ) {
+		PDEBUG( "Invalid channel number for current mode.\n" );
 		return -EINVAL;
+	}
 
 	/* Now write to the relevant write buffer registers and, if necessary,
 	   to the control registers if the direction changed (i.e. the port
@@ -625,23 +639,29 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
 
 	/* Check if the DIO number is valid */
 
-	if ( dio < WITIO_48_DIO_1 || dio > WITIO_48_DIO_2 )
+	if ( dio < WITIO_48_DIO_1 || dio > WITIO_48_DIO_2 ) {
+		PDEBUG( "Invalid DIO number.\n" );
 		return -EINVAL;
+	}
 
 	/* Check if the channel number is valid */
 
-	if ( ch < WITIO_48_CHANNEL_0 || ch > WITIO_48_CHANNEL_2 )
+	if ( ch < WITIO_48_CHANNEL_0 || ch > WITIO_48_CHANNEL_2 ) {
+		PDEBUG( "Invalid channel number.\n" );
 		return -EINVAL;
+	}
 
 	/* Check if the channel number isn't too large for the mode of
 	   the selected DIO */
 
-	if ( ( board.states[ dio ].mode == WITIO_48_MODE_3x8 &&
+	if ( ( board.states[ dio ].mode == WITIO_48_MODE_1x24 &&
 	       ch > WITIO_48_CHANNEL_0 ) ||
 	     ( ( board.states[ dio ].mode == WITIO_48_MODE_2x12 ||
 		 board.states[ dio ].mode == WITIO_48_MODE_16_8 ) &&
-	       ch > WITIO_48_CHANNEL_1 ) )
+	       ch > WITIO_48_CHANNEL_1 ) ) {
+		PDEBUG( "Invalid channel number for current mode.\n" );
 		return -EINVAL;
+	}
 
 	/* Now write to the relevant write buffer registers and, if necessary,
 	   to the control registers if the direction changed (i.e. the port
