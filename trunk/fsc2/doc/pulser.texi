@@ -582,7 +582,7 @@ and pulses will not be deleted even if they seem to be unused.
 @c ########################################################
 
 @anchor{PHASES section}
-@subsubsection @code{PHASES} section
+@subsection @code{PHASES} section
 @cindex Phases section
 @cindex @code{PHASE_SEQUENCE}
 @cindex @code{ACQUSISTION_SEQUENCE}
