@@ -316,14 +316,6 @@ double f_sqrt( long n, double *args )
 }
 
 
-Var *print_call( char *fmt )
-{
-	Var *print_statement = vars_push( UNDEF_VAR, NULL );
-	print_statement->name = get_string_copy( fmt );
-	return( print_statement );
-}
-
-
 Var *print_args( Var *print_statement )
 {
 	char *fmt = print_statement->name;
