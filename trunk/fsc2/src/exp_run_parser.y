@@ -64,6 +64,11 @@ static Var *CV;
 %token E_PLEN         285
 %token E_PDPOS        286
 %token E_PDLEN        287
+%token E_PLSA         288
+%token E_MINA         289
+%token E_MULA         290
+%token E_DIVA         291
+%token E_MODA         291
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -114,20 +119,52 @@ eol:     ';'                       { assert( Var_Stack == NULL );
 /* currently only the variables related stuff */
 
 line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
+       | E_VAR_TOKEN E_PLSA expr   { vars_assign( vars_add( $1, $3 ), $1 ); }
+       | E_VAR_TOKEN E_MINA expr   { vars_assign( vars_sub( $1, $3 ), $1 ); }
+       | E_VAR_TOKEN E_MULA expr   { vars_assign( vars_mult( $1, $3 ), $1 ); }
+       | E_VAR_TOKEN E_DIVA expr   { vars_assign( vars_div( $1, $3 ), $1 ); }
+       | E_VAR_TOKEN E_MODA expr   { vars_assign( vars_mod( $1, $3 ), $1 ); }
+
        | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
-         '=' expr                  { vars_assign( $8, $8->prev );
-                                     assert( Var_Stack == NULL ); }
+         ass                       { assert( Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
        | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.",
 											 Fname, Lc, $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
+       | E_PPOS E_PLSA expr        { p_set( $1, P_POS, vars_add(
+		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
+       | E_PPOS E_MINA expr        { p_set( $1, P_POS, vars_sub(
+		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
+       | E_PPOS E_MULA expr        { p_set( $1, P_POS, vars_mult(
+		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
+       | E_PPOS E_DIVA expr        { p_set( $1, P_POS, vars_div(
+		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
+       | E_PPOS E_MODA expr        { p_set( $1, P_POS, vars_mod(
+		                                   p_get_by_num( $1, P_POS ), $3 ) ); }
        | E_PLEN '=' expr           { p_set( $1, P_LEN, $3 ); }
        | E_PDPOS '=' expr          { p_set( $1, P_DPOS, $3 ); }
        | E_PDLEN '=' expr          { p_set( $1, P_DLEN, $3 ); }
 ;
+
+ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
+       | E_PLSA expr               { Var **C = &( $2->prev );
+	                                 vars_assign( vars_add( vars_val( *C ),
+															$2 ), *C ); }
+       | E_MINA expr               { Var **C = &( $2->prev );
+	                                 vars_assign( vars_sub( vars_val( *C ),
+															$2 ), *C ); }
+       | E_MULA expr               { vars_assign( vars_mult( $2->prev, $2 ),
+												  $2->prev ); }
+       | E_DIVA expr               { Var **C = &( $2->prev );
+	                                 vars_assign( vars_div( vars_val( *C ),
+															$2 ), *C ); }
+       | E_MODA expr               { Var **C = &( $2->prev );
+	                                 vars_assign( vars_div( vars_val( *C ),
+															$2 ), *C ); }
+;                                     
 
 expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													  $2 ); }
