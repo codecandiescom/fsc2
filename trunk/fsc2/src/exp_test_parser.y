@@ -141,6 +141,8 @@ eol:     ';'
        | '}'
 ;
 
+/* Flow control statements */
+
 fc :     FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi '{'
        | FOREVER_TOK '{'
        | REPEAT_TOK expr '{'
@@ -161,7 +163,7 @@ et:      '{'
        | IF_TOK expr '{'
 ;
 
-/* Valid syntax of normal line: either assignment or function call */
+/* Normal lines are either assignments or function calls */
 
 line:    lhs ass_op expr	                          { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
