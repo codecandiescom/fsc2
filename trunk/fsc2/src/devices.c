@@ -6,9 +6,9 @@
 #include "fsc2.h"
 
 #if defined PATH_MAX
-static int pathmax = PATH_MAX;
+static long pathmax = PATH_MAX;
 #else
-static int pathmax = 0;
+static long pathmax = 0;
 #endif
 
 #define PATH_MAX_GUESS 4095      /* guess for maximum file name length... */
@@ -19,13 +19,12 @@ static int pathmax = 0;
 /* the EDL file. It first checks if the device is listed in the device data */
 /* base file "Devices". Then it appends a new structure for the device to   */
 /* the end of the linked list.                                              */
-/* ATTENTION: The string passed to the function is already allocated to the */
-/* program and has to be deallocated here to avoid a memory leak!           */
 /*--------------------------------------------------------------------------*/
 
-void device_add( char *dev_name )
+void device_add( const char *name )
 {
 	Device_Name *dl;
+	static char *dev_name;
 	static char *real_name;         /* static because otherwise possibly
 									   clobbered by TRY (longjmp) */
 	char *search_name = NULL;
@@ -34,6 +33,7 @@ void device_add( char *dev_name )
 	int length;
 
 
+	dev_name = T_strdup( name );
 	string_to_lower( dev_name );
 	real_name = NULL;
 
@@ -102,7 +102,7 @@ void device_add( char *dev_name )
 
 		/* Now check that module has the extension ".so" and strip it off */
 
-		if ( strstr( real_name, ".so" ) == NULL )
+		if ( strcmp( real_name + length - 3, ".so" ) == NULL )
 		{
 			eprint( FATAL, "Module `%s' used for device `%s' hasn't extension "
 					"\".so\".\n", real_name, dev_name );
@@ -112,14 +112,14 @@ void device_add( char *dev_name )
 			THROW( EXCEPTION );
 		}
 
-		*strstr( real_name, ".so" ) = '\0';
+		*( real_name + length - 3 ) = '\0';
 	}
 
 	T_free( lib_name );
 
 	/* Now test if the device is in the list of device names, either with the
 	   real name or the alternate name - because `real_name' might start with
-	   a path but the names in `Devices' should be just names without a path
+	   a path but the names in `Devices' are just names without a path
 	   compare only after stripping off the path */
 
 	if ( real_name != NULL && strchr( real_name, '/' ) != NULL )
@@ -156,7 +156,7 @@ void device_add( char *dev_name )
 	}
 
 	T_free( real_name );
-	T_free( dev_name );		
+	T_free( dev_name );
 }
 
 
@@ -171,9 +171,11 @@ void device_append_to_list( const char *dev_name )
 
 
 	/* Let's first run through the device list and check that the device isn't
-	   already in it */
+	   already in it and (if this turns out ok) append a new new Device
+	   structure to the list of devices */
 
 	if ( Device_List != NULL )
+	{
 		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
 			if ( ! strcmp( cd->name, dev_name ) )
 			{
@@ -183,21 +185,14 @@ void device_append_to_list( const char *dev_name )
 				THROW( EXCEPTION );
 			}
 
-	/* Now create a new Device structure and append it to the list of
-	   devices */
-
-	if ( Device_List == NULL )
-	{
-		Device_List = cd = T_malloc( sizeof( Device ) );
-		cd->prev = NULL;
-	}
-	else
-	{
-		for ( cd = Device_List; cd->next != NULL; cd = cd->next )
-			;
 		cd->next = T_malloc( sizeof( Device ) );
 		cd->next->prev = cd;
 		cd = cd->next;
+	}
+	else
+	{
+		Device_List = cd = T_malloc( sizeof( Device ) );
+		cd->prev = NULL;
 	}
 
 	cd->name = T_strdup( dev_name );
