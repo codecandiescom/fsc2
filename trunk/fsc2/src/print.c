@@ -30,6 +30,7 @@ bool print_with_color = UNSET;
 double x_0, y_0, w, h;            /* position and size of print area */
 double margin = 25.0;             /* margin (in mm) to leave on all sides */
 
+
 static int get_print_file( FILE **fp, char **name );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord );
@@ -134,6 +135,7 @@ void print_2d( FL_OBJECT *obj, long data )
 	if ( G.active_curve == -1 )
 	{
 		fl_show_alert( "Error", "Can't print - no curve is shown.", NULL, 1 );
+		fl_activate_object( obj );
 		return;
 	}
 
@@ -330,7 +332,7 @@ int get_print_file( FILE **fp, char **name )
 		if ( mkstemp( filename ) < 0 ||
 			 ( *fp = fopen( filename, "w" ) ) == NULL )
 		{
-			fl_show_alert( "Error", "Sorry, can't open temporary file.",
+			fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 						   NULL, 1 );
 			return 0;
 		}
@@ -507,8 +509,7 @@ void print_header( FILE *fp, char *name )
 	/* Rotate and shift for landscape format, scale to mm units, set font
 	   and draw logo, date and user name */
 
-	fprintf( fp, "90 r\n0 %d t\n", ( int ) ( -72.0 * paper_width / INCH ) );
-	fprintf( fp, "%f %f scale\n", 72.0 / INCH, 72.0 / INCH );
+	fprintf( fp, "%f dup scale 90 r 0 %f t\n", 72.0 / INCH, - paper_width );
 	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-Roman 4 sf\n" );
 	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
