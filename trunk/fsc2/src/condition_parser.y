@@ -206,7 +206,7 @@ strs:    /* empty */
 %%
 
 
-int conditionerror ( const char *s )
+int conditionerror( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
