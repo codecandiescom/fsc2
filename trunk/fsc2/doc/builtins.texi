@@ -250,11 +250,11 @@ first one is usually the string to be printed in the file selector. If
 it is missing or is the empty string (use `@code{""}' to create an empty
 string) it defaults to `@i{Please enter a file name:}'. The second
 argument is a pattern for the file name, defaulting to `@i{*.dat}'. You
-may use all the usal wildcard characters you're used from the shell. The
-third argument is the directory the search for the file name should
-start from. Finally, as the fourth and last argument you may pass a file
-name to the function as the default file, that will appear in the entry
-for the selected file.
+may use all the usal wildcard characters you're used to from the
+shell. The third argument is the directory the search for the file name
+should start from. Finally, as the fourth and last argument you may pass
+a file name to the function as the default file that appears in the
+entry for the selected file.
 
 But there's also an alternative. If the very first string (that is
 usually used for the prompt string) starts with a backslash `@code{\}'
