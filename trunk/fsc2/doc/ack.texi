@@ -12,6 +12,10 @@ time on getting it to the state it is in now. Prof.@: R.@: Bittl (Freie
 Universit@"at Berlin) supported the development by emplyoing me
 part-time to extend the program and write further device drivers.
 
+Special thanks to Anton Savitsky for writing the module for the
+@w{Thurlby 330} programable power supply and allowing me to include
+it into the distribution.
+
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant role
 has been Axel Weber in Frankfurt/Main, who already dealt with the bugs
