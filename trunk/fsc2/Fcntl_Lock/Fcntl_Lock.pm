@@ -40,6 +40,7 @@ bootstrap Fcntl_Lock $VERSION;
 sub new {
 	my $inv = shift;
     my $pkg = ref( $inv ) || $inv;
+
     my $self = { 'l_type'   => F_RDLCK,
 				 'l_whence' => SEEK_SET,
                  'l_start'  => 0,
@@ -64,10 +65,13 @@ sub new {
 
 sub l_type {
     my $flock_struct = shift;
+
     return $flock_struct->{ l_type } unless @_;
+
     my $l_type = shift;
     croak "Invalid value for l_type member"
         unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
+
     $flock_struct->{ 'l_type' } = $l_type;
 }
 
@@ -77,11 +81,14 @@ sub l_type {
 
 sub l_whence {
     my $flock_struct = shift;
+
     return $flock_struct->{ l_whence } unless @_;
+
     my $l_whence = shift;
     croak "Invalid value for l_whence member" unless $l_whence == SEEK_SET or
 											         $l_whence == SEEK_CUR or
 											         $l_whence == SEEK_END;
+
     $flock_struct->{ l_whence } = $l_whence;
 }
 
@@ -91,7 +98,9 @@ sub l_whence {
 
 sub l_start {
     my $flock_struct = shift;
+
     return $flock_struct->{ l_start } unless @_;
+
     $flock_struct->{ l_start } = shift;
 }
 
@@ -101,9 +110,12 @@ sub l_start {
 
 sub l_len {
     my $flock_struct = shift;
+
     return $flock_struct->{ l_len } unless @_;
+
     my $l_len = shift;
     croak "Invalid value for l_end member" if $l_len < 0;
+
     $flock_struct->{ l_len } = $l_len;
 }
 
@@ -113,9 +125,12 @@ sub l_len {
 
 sub l_pid {
     my $flock_struct = shift;
+
     return $flock_struct->{ l_pid } unless @_;
+
     my $l_pid = shift;
     croak "Invalid value for l_pid member" unless $l_pid >= 0;
+
     $flock_struct->{ l_pid } = $l_pid;
 }
 
@@ -125,11 +140,13 @@ sub l_pid {
 
 sub fcntl_lock {
 	my ( $flock_struct, $fh, $function ) = @_;
+
 	croak "Missing arguments to fcntl_lock()"
 		unless defined $flock_struct and defined $fh and defined $function;
 	croak "Invalid action argument" unless $function == F_GETLK or
 										   $function == F_SETLK or
 										   $function == F_SETLKW;
+
 	$fh = fileno( $fh ) if ref( $fh );
 	C_fcntl_lock( $fh, $function, $flock_struct );
 }
