@@ -90,7 +90,6 @@ fsc2_connect.o: fsc2_connect.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 
-
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h *_lexer.c \
 					 fsc2_clean.c fsc2 fsc2_clean fsc2_connect mem *~
