@@ -700,7 +700,9 @@ Var *pulser_pulse_reset( Var *v )
 
 Var *pulser_next_phase( Var *v )
 {
+/*
 	int j;
+*/
 	FUNCTION *f;
 	long phase_number;
 
@@ -784,7 +786,9 @@ Var *pulser_next_phase( Var *v )
 
 Var *pulser_phase_reset( Var *v )
 {
+/*
 	int j;
+*/
 	FUNCTION *f;
 	long phase_number;
 
