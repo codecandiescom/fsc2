@@ -1076,8 +1076,8 @@ fails). You might find it useful to also use these routines for your
 modules.
 
 Finally, a boolean type is something that was missing until the new C99
-standard (which only a few compilers already support, if any at all),
-so there's already a @code{typedef} for this type included in
+standard (and which only a few compilers already support, if any at
+all), so there's already a @code{typedef} for this type included in
 @acronym{fsc2} that you can use. It's also documented here in order to
 avoid confusion should you accidentally try to redefine it.
 
