@@ -157,11 +157,8 @@ static void load_functions( Device *dev )
 	   where the device name contains a relative path */
 
 	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
-	strcpy( lib_name, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( lib_name, "/" );
-	strcat( lib_name, dev->name );
-	strcat( lib_name, ".so" );
+	sprintf( lib_name, "%s%s%s.so", libdir,
+			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev->name );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by checking the paths defined
@@ -396,8 +393,8 @@ static void add_function( int index, void *new_func, Device *new_dev,
 	   also exporting a1() and b1() can be accessed as a1#2() and a2#2().
 	   This device number is, following a '#', appended to the function name
 	   (and the names of all functions from the current module).
-	   While not being bulletproof this method hopefully will work correctly
-	   with all modules written in a reasonable way... */
+	   While not being completely bulletproof this method hopefully will work
+	   correctly with all modules written in a reasonable way... */
 
 	if ( new_dev->count == 1 )
 	{
@@ -543,19 +540,19 @@ void run_end_of_exp_hooks( void )
 
 
 	/* Each of the end-of-experiment hooks must be run to get all instruments
-	   back in a usable state, even if the function fails for one of them.
+	   back into a usable state, even if the function fails for one of them.
 	   The only exception are devices for which the exp-hook has not been
 	   run, probably because the exp-hook for a provious device in the list
 	   failed. */
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
+		if ( ! cd->driver.exp_hook_is_run )
+			continue;
+
 		TRY
 		{
-			if ( ! cd->driver.exp_hook_is_run )
-				continue;
-			else
-				cd->driver.exp_hook_is_run = UNSET;
+			cd->driver.exp_hook_is_run = UNSET;
 
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
@@ -587,14 +584,12 @@ void run_exit_hooks( void )
 		;
 
 	for ( ; cd != NULL; cd = cd->prev )
-	{
 		TRY
 		{
 			if ( cd->is_loaded && cd->driver.is_exit_hook )
 				cd->driver.exit_hook( );
 			TRY_SUCCESS;
 		}
-	}
 
 	/* Set global variable to show that exit hooks already have been run */
 
@@ -686,7 +681,7 @@ int get_lib_number( const char *name )
 		if ( ! cd->is_loaded )
 			continue;
 
-		if ( cd == sd )             /* searched for device found -> finished */
+		if ( cd == sd )             /* device found -> we're done */
 			return num;
 
 		if ( cd->generic_type != NULL &&
