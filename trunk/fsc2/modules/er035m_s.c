@@ -125,14 +125,14 @@ int er035m_s_init_hook( void )
 
 	is_gaussmeter = SET;
 
-	if ( exist_device( "bh15" ) )
+	if ( exists_device( "bh15" ) )
 	{
 		eprint( FATAL, "ER035M_S: Driver for Bruker BH15 field controller is "
 				"already loaded - there can only be one gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( exist_device( "er035m" ) )
+	if ( exists_device( "er035m" ) )
 	{
 		eprint( FATAL, "ER035M_S: Driver for ER035 gaussmeter (connected to "
 				"IEEE bus) is already loaded - there can only be one "
@@ -140,7 +140,7 @@ int er035m_s_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exist_device( "aeg_s_band" ) && ! exist_device( "aeg_x_band" ) )
+	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
 	{	
 		eprint( WARN, "ER035M_S: Driver for NMR gaussmeter is loaded "
 				"but no appropriate magnet power supply driver.\n" );
@@ -253,14 +253,14 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
-				if ( exist_device( "aeg_s_band" ) )
+				if ( exists_device( "aeg_s_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
 						"NMR gaussmeter.\n", DEVICE_NAME );
 				THROW( EXCEPTION );
 				
 			case '1' :      /* Probe F1 is connected -> OK for X-band */
-				if ( exist_device( "aeg_x_band" ) )
+				if ( exists_device( "aeg_x_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
 						"NMR gaussmeter.\n", DEVICE_NAME );

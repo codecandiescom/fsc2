@@ -62,14 +62,14 @@ int bh15_init_hook( void )
 
 	is_gaussmeter = SET;
 
-	if ( exist_device( "er035m" ) )
+	if ( exists_device( "er035m" ) )
 	{
 		eprint( FATAL, "BH15: Driver for Bruker ER035M gaussmeter is already "
 				"loaded - there can only be one gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( ! exist_device( "aeg_s_band" ) && ! exist_device( "aeg_x_band" ) )
+	if ( ! exists_device( "aeg_s_band" ) && ! exists_device( "aeg_x_band" ) )
 	{
 		eprint( WARN, "BH15: Driver for Bruker BH15 field controller is "
 				"loaded but no appropriate magnet power supply driver.\n" );

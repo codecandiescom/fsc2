@@ -329,8 +329,10 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 					THROW( EXCEPTION );
 				}
 
-				/* Allow overloading of buit-in functions but don't allow
-				   multiple overloading */
+				/* Allow overloading of built-in functions but don't allow
+				   multiple overloading (please note that this got nothing to
+				   do with several modules defining the same function, here
+				   we only care about the declarations in 'Functions') */
 
 				for ( i = 0; i < cur; i++ )
 					if ( ! strcmp( fncts[ i ].name, func_listtext ) )

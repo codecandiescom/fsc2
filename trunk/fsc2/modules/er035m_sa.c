@@ -97,8 +97,8 @@ enum {
 
 int er035m_sa_init_hook( void )
 {
-	if ( exist_device( "er035m_s" ) || exist_device( "er035m" ) ||
-		 exist_device( "er035m_sas" ) )
+	if ( exists_device( "er035m_s" ) || exists_device( "er035m" ) ||
+		 exists_device( "er035m_sas" ) )
 	{
 		eprint( FATAL, "ER035M: A driver for the ER035 gaussmeter is already "
 				"loaded.\n" );
@@ -183,7 +183,7 @@ try_again:
 		switch ( *bp )
 		{
 			case '0' :      /* Probe F0 is connected -> OK for S-band */
-				if ( exist_device( "aeg_s_band" ) )
+				if ( exists_device( "aeg_s_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F0) connected to the "
 						"NMR gaussmeter.\n", nmr.name );
@@ -191,7 +191,7 @@ try_again:
 				
 
 			case '1' :      /* Probe F1 is connected -> OK for X-band*/
-				if ( exist_device( "aeg_x_band" ) )
+				if ( exists_device( "aeg_x_band" ) )
 					break;
 				eprint( FATAL, "%s: Wrong field probe (F1) connected to the "
 						"NMR gaussmeter.\n", nmr.name );

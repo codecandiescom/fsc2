@@ -121,8 +121,8 @@ enum {
 
 int er035m_sas_init_hook( void )
 {
-	if ( exist_device( "er035m_s" ) || exist_device( "er035m" ) ||
-		 exist_device( "er035m_sa" ) )
+	if ( exists_device( "er035m_s" ) || exists_device( "er035m" ) ||
+		 exists_device( "er035m_sa" ) )
 	{
 		eprint( FATAL, "%s: A driver for the ER035 gaussmeter is already "
 				"loaded.\n", DEVICE_NAME );

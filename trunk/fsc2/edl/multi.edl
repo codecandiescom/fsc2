@@ -1,0 +1,22 @@
+DEVICES:
+
+sr510;
+sr530;
+sr810;
+sr830;
+
+VARIABLES:
+
+init_1d( 2 );
+
+PREPARATIONS:
+
+lockin_sensitivity( 4e-3 );
+lockin_sensitivity#2( 4e-6 );
+lockin_sensitivity#3( 4e-6 );
+lockin_sensitivity#4( 4e-6 );
+
+EXPERIMENT:
+
+lockin_ref_freq#3( 87 kHz )
+lockin_ref_freq#4( 120 kHz )
