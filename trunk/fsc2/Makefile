@@ -115,9 +115,9 @@ install:
 	strip $(bindir)/fsc2
 	cp *.so $(libdir)
 	cp fsc2_clean $(libdir)
-	cp undo.xbm $(libdir)
-	chown fsc2.fsc2 $(libdir)/*.so $(libdir)/undo.xbm $(libdir)/fsc2_clean
-	chmod 644 $(libdir)/*.so $(libdir)/undo.xbm
+	cp *.xpm $(libdir)
+	chown fsc2.fsc2 $(libdir)/*.so $(libdir)/*.xpm $(libdir)/fsc2_clean
+	chmod 644 $(libdir)/*.so $(libdir)/*.xpm
 	chmod 755 $(libdir)/fsc2_clean
 
 tags:
