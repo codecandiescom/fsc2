@@ -1343,6 +1343,7 @@ void test_file( FL_OBJECT *a, long b )
 
 	running_test = SET;
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+	XFlush( fl_get_display( ) );
 	user_break = UNSET;
 
 	/* Parse the input file and, when we're done with it, close it, everything
