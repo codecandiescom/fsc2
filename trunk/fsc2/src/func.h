@@ -29,6 +29,7 @@
 
 typedef struct {
 	void *handle;
+	char *lib_name;
 	int ( * init_hook ) ( void );
 	bool is_init_hook;
 	int ( * test_hook ) ( void );
