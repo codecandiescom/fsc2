@@ -788,7 +788,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 Var *vars_push_simple( Var *v )
 {
-	/* Make sure it's really a simple variable
+	/* Make sure it's really a simple variable */
 
 	if ( v->type == INT_ARR || v->type == FLOAT_ARR )
 	{
@@ -951,7 +951,7 @@ void vars_arr_extend( Var *a, Var *s )
 
 	/* Get array dimension and make sure its larger than zero, but there's
 	   also a special case: when the pointer to the variable `s' is NULL this
-	   means we need an array of variable size. Variabler sizes are only
+	   means we need an array of variable size. Variable sizes are only
 	   allowed for the very last dimension of the array. */
 
 	if ( a->dim >= 1 && is_variable_array( a ) )
@@ -965,10 +965,8 @@ void vars_arr_extend( Var *a, Var *s )
 		size = 0;
 	else
 	{
-		/* make sure that `s' exists, has integer or float type and has
-		   an value assigned to it */
-		
-
+		/* make sure that the variable with the size exists, has integer or
+		   float type and has a value assigned to it */
 
 		vars_check( s );
 
@@ -1431,21 +1429,34 @@ void free_vars( void )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/* vars_check() checks that a variable exists, and, in DEBUG mode tests that */
-/* it has integer or float type and warns if it hasn't been assigned a value */
-/*---------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* vars_check() checks that a variable exists, has integer or float type */
+/* and warns if it hasn't been assigned a value                          */
+/*-----------------------------------------------------------------------*/
 
 void vars_check( Var *v )
 {
 	if ( v->type == UNDEF_VAR )
 	{
-		eprint( FATAL, "%s:%ld: There is no variable named `%s'.\n",
-				Fname, Lc, v->name );
+		if ( v->name != NULL )
+			eprint( FATAL, "%s:%ld: There is no variable named `%s'.\n",
+					Fname, Lc, v->name );
+		else
+			eprint( FATAL, "%s:%ld: INTERNAL ERROR: Transient variable does "
+					"not exist.\n", Fname, Lc );
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-	assert( v->type == INT_VAR || v->type == FLOAT_VAR );
+	if ( v->type != INT_VAR && v->type != FLOAT_VAR )
+	{
+		if ( v->name != NULL )
+			eprint( FATAL, "%s:%ld: `%s' is neither an integer nor a float "
+					"variable.\n", Fname, Lc, v->name );
+		else
+			eprint( FATAL, "%s:%ld: Transient variable is neither an integer "
+					"nor a float variable.\n", Fname, Lc );
+		THROW( VARIABLES_EXCEPTION );
+	}
 
 	vars_warn_new( v );
 }
@@ -1459,8 +1470,14 @@ void vars_check( Var *v )
 void vars_warn_new( Var *v )
 {
  	if ( v->new_flag )
-		eprint( WARN, "%s:%ld: WARNING: Variable `%s' has never been "
-				"assigned a value.\n", Fname, Lc, v->name );
+	{
+		if ( v->name != NULL )
+			eprint( WARN, "%s:%ld: WARNING: Variable `%s' has never been "
+					"assigned a value.\n", Fname, Lc, v->name );
+		else
+			eprint( WARN, "%s:%ld: INTERNAL WARNING: Transient variable has "
+					"`new_flag' set.\n", Fname, Lc );
+	}
 }
 
 
