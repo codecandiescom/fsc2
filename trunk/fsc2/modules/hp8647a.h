@@ -143,6 +143,7 @@ double hp8647a_get_frequency( void );
 double hp8647a_set_attenuation( double att );
 double hp8647a_get_attenuation( void );
 bool hp8647a_set_mod_state( int type, bool state );
-int hp8647a_get_mod_state( void );
+bool hp8647a_get_mod_state( int type );
+int hp8647a_get_mod_states( void );
 int hp8647a_set_mod_source( int type, int source );
 double hp8647a_set_mod_ampl( int type, double ampl );
