@@ -307,8 +307,9 @@ Var *func_call( Var *f )
 
 		if ( ac < f->dim )
 		{
-			eprint( FATAL, "%s:%ld: Function `%s' needs %d arguments but "
-					"found only %d.\n", Fname, Lc, f->name, f->dim, ac );
+			eprint( FATAL, "%s:%ld: Function `%s' needs %d argument%s but "
+					"found only %d.\n", Fname, Lc, f->name, f->dim,
+					f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION );
 		}
 	}

@@ -548,6 +548,17 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
+		case C_LAYOUT :
+			assert( I_am == PARENT );       /* only to be read by the parent */
+
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
+			kill( child_pid, DO_SEND );
+			exp_layout( data, header.data.len );
+			T_free( data );
+			retval = 0;
+			break;
+
 		case C_BCREATE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
@@ -588,8 +599,8 @@ long reader( void *ret )
 			retval = 0;
 			break;
 
-		case C_BDELETE_REPLY : case C_BSTATE_REPLY :
-		case C_SDELETE_REPLY :
+		case C_LAYOUT_REPLY : case C_BDELETE_REPLY :
+		case C_BSTATE_REPLY : case C_SDELETE_REPLY :
 			assert( I_am == CHILD );         /* only to be read by the child */
 
 			retval = header.data.long_data;
@@ -960,8 +971,10 @@ void writer( int type, ... )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
 			break;
 
-		case C_BCREATE : case C_BDELETE : case C_BSTATE :
-		case C_SCREATE : case C_SDELETE : case C_SSTATE :
+		case C_LAYOUT : case C_BCREATE :
+		case C_BDELETE : case C_BSTATE :
+		case C_SCREATE : case C_SDELETE :
+		case C_SSTATE :
 			assert( I_am == CHILD );      /* only to be written by the child */
 
 			header.data.len = va_arg( ap, long );
@@ -979,7 +992,8 @@ void writer( int type, ... )
 			write( pd[ WRITE ], data, header.data.len );
 			break;
 
-		case C_BDELETE_REPLY : case C_BSTATE_REPLY : case C_SDELETE_REPLY :
+		case C_LAYOUT_REPLY : case C_BDELETE_REPLY :
+		case C_BSTATE_REPLY : case C_SDELETE_REPLY :
 			assert( I_am == PARENT );    /* only to be written by the parent */
 
 			header.data.long_data = va_arg( ap, long );

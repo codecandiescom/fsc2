@@ -13,6 +13,69 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 
 
+
+Var *f_layout( Var *v )
+{
+	int layout;
+
+
+	if ( I_am == PARENT && Tool_Box != NULL )
+	{
+		eprint( FATAL, "%s:%ld Layout of tool box must be set before any "
+				"buttons or sliders are created.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		layout = v->val.lval != 0 ? HORI : VERT;
+	else
+		layout = v->val.dval != 0.0 ? HORI : VERT;
+
+	if ( I_am == CHILD )
+	{
+		void *buffer, *pos;
+		long len;
+
+		len = 2 * sizeof( long );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
+
+		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
+		pos += sizeof( long );
+
+		* ( ( long * ) pos ) = ( long ) layout;   /* type of layout */
+		pos += sizeof( long );
+
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
+
+		if ( ! exp_layout( buffer, ( long ) ( pos - buffer ) ) )
+			THROW( EXCEPTION );
+
+		return vars_push( INT_VAR, ( long ) layout );
+	}
+
+	Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
+	Tool_Box->layout = layout;
+	Tool_Box->x = Tool_Box->y = 0;
+	Tool_Box->Tools = NULL;
+	Tool_Box->objs = NULL;
+
+	return vars_push( INT_VAR, ( long ) layout );
+}
+	
+
 /*----------------------*/
 /* Creates a new button */
 /*----------------------*/
@@ -86,6 +149,9 @@ Var *f_bcreate( Var *v )
 			}
 			else
 				coll = v->val.lval;
+
+			/* Checking that the referenced group leader button exists
+			   and is also a RADIO_BUTTON can only be done by the parent */
 
 			if ( I_am == PARENT )
 			{
@@ -177,7 +243,7 @@ Var *f_bcreate( Var *v )
 		memcpy( pos, &type, sizeof( long ) );   /* button type */
 		pos += sizeof( long );
 
-		memcpy( pos, &coll, sizeof( long ) );   /* colleague button */
+		memcpy( pos, &coll, sizeof( long ) );   /* group leaders ID */
 		pos += sizeof( long );
 
 		if ( Fname )
@@ -254,8 +320,6 @@ Var *f_bcreate( Var *v )
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->partner = coll;
-	new_io->is_created = UNSET;
-	new_io->delete_after_test = TEST_RUN ? SET : UNSET;
 
 	/* If this isn't just a test run really draw the new button */
 
@@ -308,6 +372,7 @@ Var *f_bdelete( Var *v )
 		if ( I_am == CHILD )
 		{
 			void *buffer, *pos;
+			size_t len;
 
 
 			/* Do all possible checking of the parameter */
@@ -321,15 +386,25 @@ Var *f_bdelete( Var *v )
 
 			/* Get a bufer long enough and write data */
 
-			pos = buffer =
-				T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+			len = 2 * sizeof( long );
+			if ( Fname )
+				len += strlen( Fname ) + 1;
+			else
+				len++;
+
+			pos = buffer = T_malloc( len );
 
 			memcpy( pos, &Lc, sizeof( long ) );       /* current line number */
 			pos += sizeof( long );
 			memcpy( pos, &v->val.lval, sizeof( long ) );  /* button ID */
 			pos += sizeof( long );
-			strcpy( pos, Fname );
-			pos += strlen( ( char * ) pos ) + 1;      /* current file name */
+			if ( Fname )
+			{
+				strcpy( ( char * ) pos, Fname );    /* current file name */
+				pos += strlen( Fname ) + 1;
+			}
+			else
+				*( ( char * ) pos++ ) = '\0';
 
 			v = vars_pop( v );
 
@@ -450,6 +525,7 @@ Var *f_bdelete( Var *v )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2: Tools" );
 	}
+
 	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
@@ -481,6 +557,7 @@ Var *f_bstate( Var *v )
 		long ID;
 		long state = -1;
 		void *buffer, *pos;
+		long len;
 
 
 		/* Basid check of button identifier - always the first parameter */
@@ -516,7 +593,13 @@ Var *f_bstate( Var *v )
 
 		/* Make up buffer to send to parent process */
 
-		pos = buffer = T_malloc( 3 * sizeof( long ) + strlen( Fname ) + 1 );
+		len = 3 * sizeof( long );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
 
 		memcpy( pos, &Lc, sizeof( long ) );     /* current line number */
 		pos += sizeof( long );
@@ -527,8 +610,13 @@ Var *f_bstate( Var *v )
 		memcpy( pos, &state, sizeof( long ) );  /* state to be set (negative */
 		pos += sizeof( long );                  /* if not to be set)         */
 
-		strcpy( pos, Fname );                   /* current file name */
-		pos += strlen( ( char * ) pos ) + 1;
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
 		
 		/* Ask parent process to return or set the state - bomb out if it
 		   returns a negative value, indicating a severe error */
@@ -598,7 +686,10 @@ Var *f_bstate( Var *v )
 	}
 
 	if ( ! TEST_RUN )
+	{
 		fl_set_button( io->self, io->state );
+		XFlush( fl_get_display( ) );
+	}
 
 	if ( io->type == RADIO_BUTTON )
 	{
@@ -823,8 +914,6 @@ Var *f_screate( Var *v )
 	new_io->value = 0.5 * ( end_val + start_val );
 	new_io->label = label;
 	new_io->help_text = help_text;
-	new_io->is_created = UNSET;
-	new_io->delete_after_test = TEST_RUN ? 1 : 0;
 	
 	if ( ! TEST_RUN )
 	{
@@ -839,6 +928,7 @@ Var *f_screate( Var *v )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
 						  FL_FULLBORDER, "fsc2: Tools" );
 		}
+
 		XFlush( fl_get_display( ) );
 	}
 
@@ -867,6 +957,7 @@ Var *f_sdelete( Var *v )
 		if ( I_am == CHILD )
 		{
 			void *buffer, *pos;
+			long len;
 
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
@@ -876,15 +967,27 @@ Var *f_sdelete( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			buffer = T_malloc( 2 * sizeof( long ) + strlen( Fname ) + 1 );
+			len = 2 * sizeof( long );
+			if ( Fname )
+				len += strlen( Fname ) + 1;
+			else
+				len++;
 
-			pos = buffer;
+			pos = buffer = T_malloc( len );
+
 			memcpy( pos, &Lc, sizeof( long ) );
 			pos += sizeof( long );
+
 			memcpy( pos, &v->val.lval, sizeof( long ) );
 			pos += sizeof( long );
-			strcpy( pos, Fname );
-			pos += strlen( ( char * ) pos ) + 1;
+
+			if ( Fname )
+			{
+				strcpy( ( char * ) pos, Fname );    /* current file name */
+				pos += strlen( Fname ) + 1;
+			}
+			else
+				*( ( char * ) pos++ ) = '\0';
 
 			v = vars_pop( v );
 
@@ -911,17 +1014,14 @@ Var *f_sdelete( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		/* Remove button from the linked list */
+		/* Remove slider from the linked list */
 
-		if ( ! TEST_RUN || io->delete_after_test )
-		{
-			if ( io->next != NULL )
-				io->next->prev = io->prev;
-			if ( io->prev != NULL )
-				io->prev->next = io->next;
-			else
-				Tool_Box->objs = io->next;
-		}
+		if ( io->next != NULL )
+			io->next->prev = io->prev;
+		if ( io->prev != NULL )
+			io->prev->next = io->next;
+		else
+			Tool_Box->objs = io->next;
 
 		/* Delete the button */
 
@@ -931,12 +1031,9 @@ Var *f_sdelete( Var *v )
 			fl_free_object( io->self );
 		}
 
-		if ( ! TEST_RUN || io->delete_after_test )
-		{
-			T_free( io->label );
-			T_free( io->help_text );
-			T_free( io );
-		}
+		T_free( io->label );
+		T_free( io->help_text );
+		T_free( io );
 
 		if ( Tool_Box->objs == NULL )
 		{
@@ -966,24 +1063,22 @@ Var *f_sdelete( Var *v )
 		v = vars_pop( v );
 	}
 
-	if ( I_am == CHILD )
+	if ( I_am == CHILD || TEST_RUN )
 		return vars_push( INT_VAR, 1 );
 
-	if ( ! TEST_RUN )
-	{
-		recreate_Tool_Box( );
+	recreate_Tool_Box( );
 
-		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		else
-		{
-			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		}
-		XFlush( fl_get_display( ) );
+	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
+					  FL_FULLBORDER, "fsc2: Tools" );
+	else
+	{
+		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
+		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
+					  FL_FULLBORDER, "fsc2: Tools" );
 	}
+
+	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1013,6 +1108,7 @@ Var *f_svalue( Var *v )
 		double val = 0.0;
 		void *buffer, *pos;
 		double *res;
+		long len;
 
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
@@ -1038,8 +1134,13 @@ Var *f_svalue( Var *v )
 				;
 		}
 
-		pos = buffer = T_malloc( 3 * sizeof( long ) + sizeof( double )
-								 + strlen( Fname ) + 1 );
+		len = 3 * sizeof( long ) + sizeof( double );
+		if ( Fname )
+			len += strlen( Fname ) + 1;
+		else
+			len++;
+
+		pos = buffer = T_malloc( len );
 
 		memcpy( pos, &Lc, sizeof( long ) );
 		pos += sizeof( long );
@@ -1053,8 +1154,13 @@ Var *f_svalue( Var *v )
 		memcpy( pos, &val, sizeof( double ) );
 		pos += sizeof( double );
 
-		strcpy( pos, Fname );
-		pos += strlen( ( char * ) pos ) + 1;
+		if ( Fname )
+		{
+			strcpy( ( char * ) pos, Fname );    /* current file name */
+			pos += strlen( Fname ) + 1;
+		}
+		else
+			*( ( char * ) pos++ ) = '\0';
 		
 		res = exp_sstate( buffer, ( long ) ( pos - buffer ) );
 
@@ -1109,7 +1215,10 @@ Var *f_svalue( Var *v )
 	}
 	
 	if ( ! TEST_RUN )
+	{
 		fl_set_slider_value( io->self, io->value );
+		XFlush( fl_get_display( ) );
+	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -1132,12 +1241,15 @@ static IOBJECT *find_object_from_ID( long ID )
 	IOBJECT *io;
 
 
-	if ( Tool_Box == NULL )
+	if ( Tool_Box == NULL )            /* no objects defined yet ? */
 		return NULL;
+
+	/* Loop through linked list to find the object */
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		if ( io->ID == ID )
 			return io;
+
 	return NULL;
 }
 
@@ -1161,15 +1273,14 @@ void tools_clear( void )
 	{
 		next = io->next;
 
-		T_free( io->label );
-		T_free( io->help_text );
-
-		if ( io->self )
+		if ( Tool_Box->Tools )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
 		}
 
+		T_free( io->label );
+		T_free( io->help_text );
 		T_free( io );
 	}
 
@@ -1177,64 +1288,10 @@ void tools_clear( void )
 	{
 		fl_delete_object( Tool_Box->background_box );
 		fl_free_object( Tool_Box->background_box );
-
 		fl_free_form( Tool_Box->Tools );
 	}
 
 	Tool_Box = T_free( Tool_Box );
-}
-
-
-/*-----------------------------------------------------*/
-/* Removes all objects that were created in a test run */
-/*-----------------------------------------------------*/
-
-void clear_tools_after_test( void )
-{
-	IOBJECT *io, *nio, *next;
-	long new_anchor;
-
-
-	if ( Tool_Box == NULL )
-		return;
-
-	for ( io = Tool_Box->objs; io != NULL; io = next )
-	{
-		next = io->next;
-
-		if ( ! io->delete_after_test )
-			continue;
-
-		if ( io->next != NULL )
-			io->next->prev = io->prev;
-		if ( io->prev != NULL )
-			io->prev->next = io->next;
-		else
-			Tool_Box->objs = io->next;
-
-		if ( io->type == RADIO_BUTTON && io->partner == -1 )
-		{
-			for ( nio = next; nio != NULL; nio = nio->next )
-				if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
-				{
-					new_anchor = nio->ID;
-					nio->partner = -1;
-					break;
-				}
-
-			if ( nio != NULL )
-				for ( nio = nio->next; nio != NULL; nio = nio->next )
-					if ( nio->type == RADIO_BUTTON && nio->partner == io->ID )
-						nio->partner = new_anchor;
-		}
-
-		T_free( io->label );
-		T_free( io->help_text );
-		T_free( io );
-	}		
-
-	if ( Tool_Box->objs == NULL )
-		Tool_Box = T_free( Tool_Box );
 }
 
 
@@ -1249,8 +1306,11 @@ static void recreate_Tool_Box( void )
     int temp;
 
 
+	if ( TEST_RUN )        /* just to make sure... */
+		return;
+
 	/* If the tool box already exists we've got to find out its position
-	   and then delete the form */
+	   and then delete the form amnd all objects */
 
 	if ( Tool_Box->Tools != NULL )
 	{
@@ -1266,13 +1326,8 @@ static void recreate_Tool_Box( void )
 
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
-			if ( io->is_created )
-			{
-				fl_delete_object( io->self );
-				fl_free_object( io->self );
-				io->is_created = UNSET;
-			}
-
+			fl_delete_object( io->self );
+			fl_free_object( io->self );
 			io->group = NULL;
 		}
 		
@@ -1282,7 +1337,7 @@ static void recreate_Tool_Box( void )
 		fl_free_form( Tool_Box->Tools );
 	}
 
-	/* Now we've got to calculate its new size and create it */
+	/* Now calculate the new size of the tool box and create it */
 
 	Tool_Box->w = 2 * OFFSET_X0;
 	Tool_Box->h = 2 * OFFSET_Y0;
@@ -1306,11 +1361,12 @@ static void recreate_Tool_Box( void )
 		Tool_Box->h += OBJ_HEIGHT;
 	}
 
-	/* Now recreate the tool box and re-populate it */
-
 	Tool_Box->Tools = fl_bgn_form( FL_NO_BOX, Tool_Box->w, Tool_Box->h );
 	Tool_Box->background_box = fl_add_box( FL_UP_BOX, 0, 0,
 										   Tool_Box->w, Tool_Box->h, "" );
+
+	/* Finally re-populate the tool box */
+
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		append_object_to_form( io );
 	fl_end_form( );
@@ -1426,8 +1482,6 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	fl_set_object_callback( io->self, tools_callback, 0 );
 	if ( io->help_text != NULL && *io->help_text != '\0' )
 		fl_set_object_helper( io->self, io->help_text );
-
-	io->is_created = SET;
 
 	return io->self;
 }

@@ -41,6 +41,8 @@ enum {
 	C_LONG,
 	C_FLOAT,
 	C_DOUBLE,
+	C_LAYOUT,
+	C_LAYOUT_REPLY,
 	C_BCREATE,
 	C_BCREATE_REPLY,
 	C_BDELETE,
@@ -94,6 +96,7 @@ void *get_shm( int *shm_id, long len );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
+bool exp_layout( void *buffer, long len );
 long *exp_bcreate( void *buffer, long len );
 bool exp_bdelete( void *buffer, long len );
 long exp_bstate( void *buffer, long len );
