@@ -31,10 +31,8 @@
 typedef struct {
 
 	const char *name;
-	bool is_trigger_out;
-	long trigger_out_channel_number;
-	bool has_phase_switch;
 
+	bool has_phase_switch;
 
 	bool ( *assign_function )( int function, long connector );
 	bool ( *assign_channel_to_function )( int function, long channel );
