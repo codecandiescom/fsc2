@@ -1129,7 +1129,6 @@ static void G_init_curves_2d( void )
 										   * sizeof *cv->xpoints_s );
 
 		cv->marker_2d = NULL;
-
 	}
 }
 

@@ -1766,7 +1766,7 @@ static void delete_marker_1d( long x_pos )
 /* Gets called to delete all markers */
 /*-----------------------------------*/
 
-void remove_marker_1d( void )
+void remove_markers_1d( void )
 {
 	Marker_1D *m, *mn;
 

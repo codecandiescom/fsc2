@@ -1704,7 +1704,7 @@ static void print_markers( FILE *fp )
 {
 	long i;
 	Curve_1d *cv = NULL;
-	Marker *m;
+	Marker_1D *m;
 	double s2d;
 
 
@@ -1725,7 +1725,7 @@ static void print_markers( FILE *fp )
 
 	s2d = w * cv->s2d[ X ] / G1.canvas.w;
 
-	for ( m = G1.marker; m != NULL; m = m->next )
+	for ( m = G1.marker_1d; m != NULL; m = m->next )
 	{
 		if ( print_with_color )
 			switch ( m->color )

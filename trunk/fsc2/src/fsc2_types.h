@@ -63,7 +63,8 @@
 #define XPOINT_P          ( XPoint * )
 #define CURVE_1D_P        ( Curve_1d * )
 #define CURVE_2D_P        ( Curve_2d * )
-#define MARKER_P          ( Marker * )
+#define MARKER_1D_P       ( Marker_1D * )
+#define MARKER_2D_P       ( Marker_2D * )
 #define GRAPHICS_P        ( Graphics * )
 #define GRAPHICS_1D_P     ( Graphics_1d * )
 #define GRAPHICS_2D_P     ( Graphics_2d * )
@@ -109,7 +110,8 @@
 #define XPOINT_P
 #define CURVE_1D_P
 #define CURVE_2D_P
-#define MARKER_P
+#define MARKER_1D_P
+#define MARKER_2D_P
 #define GRAPHICS_P
 #define GRAPHICS_1D_P
 #define GRAPHICS_2D_P
