@@ -74,7 +74,7 @@ line:    VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
          list3 ']' '=' expr        { vars_arr_assign( $1, $7 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = print_call( $3 ); }
+       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
          list5 ')'                 { vars_pop( print_args( P_Var ) ); }
        | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
 											 "predefined function.\n",
@@ -93,7 +93,7 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, &$1 ); }
 											 "function.\n", Fname, Lc,
 											 $1->name );
 	                                 THROW( UNKNOWN_FUNCTION_EXCEPTION ); }
-       | PRINT_TOK '(' STR_TOKEN   { P_Var = print_call( $3 ); }
+       | PRINT_TOK '(' STR_TOKEN   { P_Var = vars_push( UNDEF_VAR, $3 ); }
          ',' list5 ')'             { $$ = print_args( P_Var ); }
        | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
 											 "predefined function.\n",
