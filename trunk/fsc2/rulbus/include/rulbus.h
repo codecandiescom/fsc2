@@ -36,14 +36,26 @@ extern "C" {
 
 /* Functions and variables for the whole library */
 
+typedef struct RULBUS_CARD_INFO RULBUS_CARD_INFO;
+
 int rulbus_open( void );
 void rulbus_close( void );
 int rulbus_perror( const char *s );
 const char *rulbus_strerror( void );
 int rulbus_card_open( const char *name );
 int rulbus_card_close( int handle );
+int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info );
 
 extern int rulbus_errno;
+
+struct RULBUS_CARD_INFO {
+	int type;
+	int num_channels;
+	int ext_trigger;
+	int bipolar;
+	double volt_per_bit;
+	double intr_delay;
+};
 
 
 /* Functions and definitions for the 12-bit ADC card module (RB8509) */
@@ -76,12 +88,16 @@ int rulbus_dac12_properties( int handle, double *Vmax, double *Vmin,
 
 /* Functions and definitions for the delay card module (RB8514) */
 
-int rulbus_delay_set_delay( int handle, unsigned long delay, int force );
+int rulbus_delay_set_clock_frequency( int handle, double freq );
+int rulbus_delay_set_delay( int handle, double delay, int force );
+int rulbus_delay_set_raw_delay( int handle, unsigned long delay, int force );
 int rulbus_delay_set_trigger( int handle, int edge );
 int rulbus_delay_set_output_pulse( int handle, int output, int type );
 int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol );
 int rulbus_delay_busy( int handle );
 int rulbus_delay_software_start( int handle );
+double rulbus_delay_get_intrinsic_delay( int handle );
+
 
 #define RULBUS_DELAY_FALLING_EDGE      1
 #define RULBUS_DELAY_RAISING_EDGE      0
@@ -115,58 +131,62 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_100MHz    7
 
 
+/* Functions for the generic card module (RB_GENERIC) */
+
+int rulbus_generic_write( int handle, unsigned char address,
+						  unsigned char *data, size_t len );
+int rulbus_generic_read( int handle, unsigned char address,
+						 unsigned char *data, size_t len );
+
+
 /* Error codes of the library */
 
-#define RULBUS_OK         0
-#define RULBUS_CFG_ACC   -1
-#define RULBUS_INV_CFG   -2
-#define RULBUS_OPN_CFG   -3
-#define RULBUS_DVF_ACC   -4
-#define RULBUS_DVF_CFG   -5
-#define RULBUS_DVF_OPN   -6
-#define RULBUS_STX_ERR   -7
-#define RULBUS_NO_MEM    -8
-#define RULBUS_RCK_CNT   -9
-#define RULBUS_RCK_DUP  -10
-#define RULBUS_NO_RCK   -11
-#define RULBUS_INV_RCK  -12
-#define RULBUS_DVF_CNT  -13
-#define RULBUS_MAX_CRD  -14
-#define RULBUS_CRD_ADD  -15
-#define RULBUS_NAM_DUP  -16
-#define RULBUS_DUP_NAM  -17
-#define RULBUS_ADD_DUP  -18
-#define RULBUS_TYP_DUP  -19
-#define RULBUS_CHN_DUP  -20
-#define RULBUS_CHN_INV  -21
-#define RULBUS_MIS_CHN  -22
-#define RULBUS_RNG_DUP  -23
-#define RULBUS_POL_DUP  -24
-#define RULBUS_INV_POL  -25
-#define RULBUS_EXT_DUP  -26
-#define RULBUS_EXT_INV  -27
-#define RULBUS_EXT_NO   -28
-#define RULBUS_NO_RNG 	-29
-#define RULBUS_INV_RNG  -30
-#define RULBUS_NO_POL   -31
-#define RULBUS_CRD_CNT  -32
-#define RULBUS_NO_CRD   -33
-#define RULBUS_CRD_NAM  -34
-#define RULBUS_INV_TYP  -35
-#define RULBUS_ADD_CFL  -36
-#define RULBUS_TYP_HND  -37
-#define RULBUS_NO_INIT  -38
-#define RULBUS_INV_ARG  -39
-#define RULBUS_INV_CRD  -40
-#define RULBUS_INV_HND  -41
-#define RULBUS_CRD_NOP  -42
-#define RULBUS_INV_OFF  -43
-#define RULBUS_WRT_ERR  -44
-#define RULBUS_RD_ERR   -45
-#define RULBUS_CRD_BSY  -46
-#define RULBUS_INV_VLT  -47
-#define RULBUS_NO_EXT   -48
-#define RULBUS_TIM_OUT  -49
+#define RULBUS_OK                             0
+#define RULBUS_NO_MEMORY 					 -1
+#define RULBUS_CONF_FILE_ACCESS 			 -2
+#define RULBUS_CONF_FILE_NAME_INVALID 		 -3
+#define RULBUS_CONF_FILE_OPEN_FAIL 			 -4
+#define RULBUS_CF_SYNTAX_ERROR 				 -5
+#define RULBUS_CF_EOF_IN_COMMENT 			 -6
+#define RULBUS_CF_DEV_FILE_DUPLICATE 		 -7
+#define RULBUS_CF_RACK_ADDR_DUPLICATE 		 -8
+#define RULBUS_CF_RACK_ADDR_INVALID 		 -9
+#define RULBUS_CF_RACK_ADDR_CONFLICT 		-10
+#define RULBUS_CF_RACK_ADDR_DEF_DUPLICATE 	-11
+#define RULBUS_CF_UNSUPPORTED_CARD_TYPE 	-12
+#define RULBUS_CF_CARD_NAME_CONFLICT 		-13
+#define RULBUS_CF_CARD_ADDR_INVALID 		-14
+#define RULBUS_CF_CARD_ADDR_CONFLICT  	    -15
+#define RULBUS_CF_CARD_ADDR_DUPLICATE       -16
+#define RULBUS_CF_CARD_ADDR_DEF_CONFLICT    -17
+#define RULBUS_CF_CARD_ADDR_OVERLAP 		-18
+#define RULBUS_CF_CARD_ADDR_GENERIC 		-19
+#define RULBUS_CF_CARD_PROPERTY_INVALID 	-20
+#define RULBUS_CF_DUPLICATE_NUM_CHANNELS 	-21
+#define RULBUS_CF_INVALID_NUM_CHANNELS 		-22
+#define RULBUS_CF_VPB_DUPLICATE 			-23
+#define RULBUS_CF_INVALID_VPB 				-24
+#define RULBUS_CF_BIPLOAR_DUPLICATE 		-25
+#define RULBUS_CF_EXT_TRIGGER_DUPLICATE     -26
+#define RULBUS_CF_INTR_DELAY_DUPLICATE 		-27
+#define RULBUS_CF_INTR_DELAY_INVALID 		-28
+#define RULBUS_DEV_FILE_ACCESS 				-29
+#define RULBUS_DEV_FILE_NAME_INVALID 		-30
+#define RULBUS_DEV_FILE_OPEN_FAIL 			-31
+#define RULBUS_DEV_NO_DEVICE                -32
+#define RULBUS_NO_INITIALIZATION 			-33
+#define RULBUS_INVALID_ARGUMENT 			-34
+#define RULBUS_INVALID_CARD_NAME 			-35
+#define RULBUS_INVALID_CARD_HANDLE 			-36
+#define RULBUS_CARD_NOT_OPEN 				-37
+#define RULBUS_INVALID_CARD_OFFSET 			-38
+#define RULBUS_WRITE_ERROR 					-39
+#define RULBUS_READ_ERROR  					-40
+#define RULBUS_CARD_IS_BUSY 				-41
+#define RULBUS_INVALID_VOLTAGE 				-42
+#define RULBUS_TIME_OUT                     -43
+#define RULBUS_NO_CLOCK_FREQ                -44
+#define RULBUS_NO_EXT_TRIGGER               -45
 
 
 #ifdef __cplusplus

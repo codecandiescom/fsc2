@@ -62,10 +62,6 @@ static const char *rulbus_errlist[ ] = {
 	"column %d",                        /* RULBUS_CF_RACK_ADDR_CONFLICT */
 	"Missing rack addresses in configuration file before line %d, column %d",
 										/* RULBUS_CF_RACK_ADDR_DEF_DUPLICATE */
-	"More than maximum number of cards in configuration file before line %d, "
-	"column %d",                        /* RULBUS_CF_TOO_MANY_CARDS */
-	"Too many cards for single rack in configuration file before line %d, "
-	"column %d",                        /* RULBUS_CF_TOO_MANY_CARDS_IN_RACK */
 	"Unsupported card type in configuration file before line %d, column %d",
 										/* RULBUS_CF_UNSUPPORTED_CARD_TYPE */
 	"Identical names used for two cards in configuration file before line %d, "
@@ -95,17 +91,22 @@ static const char *rulbus_errlist[ ] = {
 										/* RULBUS_CF_VPB_DUPLICATE */
 	"Invalid 'volt_per_bit' value specified in configuration file before line "
 	"%d, column %d",               		/* RULBUS_CF_INVALID_VPB */
-	"Different settings for 'bipolar' property already specified for card in "
+	"Different settings for 'bipolar' property specified for card in "
 	"configuration file before line %d, column %d",
 										/* RULBUS_CF_BIPLOAR_DUPLICATE */
+	"Different settings for 'ext_trigger' proper specified for card in "
+	"configuration file before line %d, column %d",
+										/* RULBUS_CF_EXT_TRIGGER_DUPLICATE */
 	"Different 'intr_delay' value already pecified for card in configuration "
 	"file before line %d, column %d",   /* RULBUS_CF_INTR_DELAY_DUPLICATE */
 	"Invalid 'intr_delay' value specified in configuration file before line "
 	"%d, column %d",               		/* RULBUS_CF_INTR_DELAY_INVALID */
 	"Not permission to open device file",
 										/* RULBUS_DEV_FILE_ACCESS */
-	"Invalid name for device file",     /* RULBUS_DEV_FILE_NAME_INVALID */
+	"Invalid device file name",         /* RULBUS_DEV_FILE_NAME_INVALID */
 	"Can't open device file",           /* RULBUS_DEV_FILE_OPEN_FAIL */
+	"Device doesn't exit or driver not loaded",
+										/* RULBUS_DEV_NO_DEVICE */
 	"Missing intialization of Rulbus library",
 										/* RULBUS_NO_INITIALIZATION */
 	"Invalid function argument",        /* RULBUS_INVALID_ARGUMENT */
@@ -118,8 +119,10 @@ static const char *rulbus_errlist[ ] = {
 	"Card is busy",                     /* RULBUS_CARD_IS_BUSY */
 	"Voltage out of range",             /* RULBUS_INVALID_VOLTAGE */
 	"Rulbus timeout",                   /* RULBUS_TIME_OUT */
-	"No clock frequency has been set for delay card"
+	"No clock frequency has been set for delay card",
 										/* RULBUS_NO_CLOCK_FREQ */
+	"Card does not have external trigger capabilities"
+										/* RULBUS_NO_EXT_TRIGGER */
 };
 
 
@@ -284,6 +287,9 @@ int rulbus_open( void )
 
 			case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
 				return rulbus_errno = RULBUS_DEV_FILE_NAME_INVALID;
+
+			case ENODEV : case ENXIO :
+				return rulbus_errno = RULBUS_DEV_NO_DEVICE;
 
 			default :
 				return rulbus_errno = RULBUS_DEV_FILE_OPEN_FAIL;
@@ -678,7 +684,7 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
  * specified by the configuration file
  *--------------------------------------------------------------*/
 
-int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info )
+int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 {
 	const char *config_name;
 	extern FILE *rulbus_in;             /* defined in parser.y */
@@ -686,7 +692,7 @@ int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info )
 	int i;
 
 
-	if ( name == NULL || card_info == NULL )
+	if ( card_name == NULL || card_info == NULL )
 		return RULBUS_INVALID_ARGUMENT;
 
 	if ( ! rulbus_in_use )
@@ -734,7 +740,7 @@ int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info )
 	}
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
-		if ( ! strcmp( name, rulbus_card[ i ].name ) )
+		if ( ! strcmp( card_name, rulbus_card[ i ].name ) )
 			break;
 
 	if ( i == rulbus_num_cards )
@@ -747,6 +753,7 @@ int rulbus_get_card_info( const char *name, RULBUS_CARD_INFO *card_info )
 	card_info->num_channels = rulbus_card[ i ].num_channels;
 	card_info->volt_per_bit = rulbus_card[ i ].vpb;
 	card_info->bipolar = rulbus_card[ i ].bipolar;
+	card_info->ext_trigger = rulbus_card[ i ].ext_trigger;
 	card_info->intr_delay = rulbus_card[ i ].intr_delay;
 
 	rulbus_cleanup( );

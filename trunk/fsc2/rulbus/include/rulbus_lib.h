@@ -77,11 +77,8 @@ typedef enum
 #define RULBUS_BIPOLAR        1
 
 
-#define RULBUS_MAX_CARDS           154    /* maximum total number of cards */
-#define RULBUS_MAX_RACK_ADDR      0x0E    /* maximum number of racks */
 #define RULBUS_DEF_RACK_ADDR      0x0F
 #define RULBUS_INV_RACK_ADDR      0xFF
-#define RULBUS_MAX_CARDS_IN_RACK    11    /* maximum number of cards in rack */
 #define RULBUS_MIN_CARD_ADDR      0x01
 #define RULBUS_MAX_CARD_ADDR      0xfe
 #define RULBUS_INV_CARD_ADDR      0xff
@@ -105,6 +102,7 @@ typedef enum
 #define RULBUS_RB8509_DEF_BIPOLAR        1
 #define RULBUS_RB8509_DEF_VPB            5.0e-3
 #define RULBUS_RB8509_DEF_NUM_CHANNELS   8
+#define RULBUS_RB8509_DEF_EXT_TRIGGER    1
 #define RULBUS_RB8509_MAX_CHANNELS       8
 
 #define RULBUS_RB8510_DEF_ADDR           0xD0
@@ -112,12 +110,12 @@ typedef enum
 #define RULBUS_RB8510_DEF_BIPOLAR        1
 #define RULBUS_RB8510_DEF_VPB            5.0e-3
 
-#define RULBUS_RB8514_DEF_ADDR          0xC4
-#define RULBUS_RB8514_WIDTH             4
-#define RULBUS_RB8514_DEF_INTR_DELAY    6.0e-8
+#define RULBUS_RB8514_DEF_ADDR           0xC4
+#define RULBUS_RB8514_WIDTH              4
+#define RULBUS_RB8514_DEF_INTR_DELAY     6.0e-8
 
-#define RULBUS_RB8515_DEF_ADDR          0xC4
-#define RULBUS_RB8515_WIDTH             1
+#define RULBUS_RB8515_DEF_ADDR           0xC8
+#define RULBUS_RB8515_WIDTH              1
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
@@ -133,6 +131,7 @@ struct RULBUS_CARD_LIST {
 	int num_channels;
 	double vpb;
 	int bipolar;
+	int ext_trigger;
 	double intr_delay;
 };
 

@@ -37,6 +37,7 @@ struct RULBUS_ADC12_CARD {
 	double Vmax;
 	double Vmin;
 	double dV;
+	bool ext_trigger;
 	int trig_mode;
 	int data;
 	unsigned char ctrl;
@@ -148,6 +149,7 @@ int rulbus_adc12_card_init( int handle )
 		tmp->Vmin = 0.0;
 	}
 
+	tmp->ext_trigger = rulbus_card[ handle ].ext_trigger;
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
 	tmp->ctrl = 0;
@@ -337,6 +339,9 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 
 	/* Some cards can't be triggered externally */
 
+	if ( mode != RULBUS_ADC12_INT_TRIG && ! card->ext_trigger )
+		return RULBUS_NO_EXT_TRIGGER;
+
 	if ( mode == RULBUS_ADC12_INT_TRIG )
 		ctrl = card->ctrl & ~ CTRL_EXT_TRIGGER_ENABLE;
 	else
@@ -386,6 +391,22 @@ int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
 		*dV = card->dV;
 
 	return RULBUS_OK;
+}
+
+
+/*-----------------------------------------------------*
+ * Function returns the number of channels of the card
+ *-----------------------------------------------------*/
+
+int rulbus_adc12_has_external_trigger( int handle )
+{
+	RULBUS_ADC12_CARD *card;
+
+
+	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
+
+	return card->ext_trigger;
 }
 
 

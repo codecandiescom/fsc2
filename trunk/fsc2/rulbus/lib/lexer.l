@@ -29,15 +29,17 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap nocase-sensitive nounput never-interactive yylineno nounput
+%option noyywrap case-sensitive nounput never-interactive yylineno stack
 
 %{
+
+#define YY_NO_TOP_STATE
 
 #include "parser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-unsigned int rulbus_column = 0;
+int rulbus_column = 0;
 int rulbus_lex( void );
 static void count( void );
 
@@ -48,86 +50,160 @@ static void count( void );
 STRING   [\"\'][^\"\']*[\"\']
 INT      [0-9]+
 EXPO     [Ee][+-]?{INT}
-FLOAT    ((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
+FLOAT    [+-]*((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
+CARD     "rb"("8506_pia"|"8506_sifu"|"8506_via"|"8509_adc12"|"8510_dac12"|"8513_timebase"|"8514_delay"|"8515_clock"|"8905_adc12"|"9005_amplifier"|"9603_monochromator")
+BOOL_T   "true"|"yes"
+BOOL_F   "false"|"no"
+UNIT     ("f"|"p"|"n"|"u"|"m"|"k"|"M"|"G"|"T")
+OCT      "0"[0-9]*
+HEX      "0"[xX][0-9a-fA-F]*
+DEC      [+-]*[1-9][0-9]*
+
+
+%x       comm
 
 		/*---------------*/
 %%		/*     RULES     */
 		/*---------------*/
 
-#.*        { count( ); } /* Skip comments */
+"#".*          { count( ); } /* Skip UNIX configuration file style comments */
+"//".*         { count( ); } /* Skip C++ style comments */
+"/*"           {  /* C style comment */
+	                count( );
+					yy_push_state( comm );
+               }
 
-"file"     { count(); return FILE_TOKEN; }
-"rack"     { count(); return RACK_TOKEN; }
-"card"     { count(); return CARD_TOKEN; }
-"name"     { count(); return NAME_TOKEN; }
-"type"     { count(); return TYPE_TOKEN; }
-"addr"     { count(); return ADDR_TOKEN; }
-"nchan"    { count(); return NCHAN_TOKEN; }
-"range"    { count(); return RANGE_TOKEN; }
-"polar"    { count(); return POLAR_TOKEN; }
-"ext_trg"  { count(); return EXTTRG_TOKEN; }
+<comm>{        /* Handling of C style comments */
+"*"+"/"        { /* End of comment found */
+	               count( );
+				   yy_pop_state( );
+			   }
 
-{FLOAT}    {
-	           count( );
-			   rulbus_lval.dval = atof( rulbus_text );
-			   return FLOAT_TOKEN;
-		   }
+.              { count( ); } /* Skip everything else in a comment */
 
-0[0-3][0-7]{0,2} {   /* octal number between 0 and 0377 */
-			   count( );
-               sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
-               if ( rulbus_lval.ival > 255 )
-                   return ERR_TOKEN;
-               return NUM_TOKEN;
-           }
+<<EOF>>        { return EOFC_TOKEN; }  /* End of file in comment */
 
-[0-9]|([1-9][0-9])|([1-2][0-9]{2}) {  /* decimal number between 0 and 255 */
-			   count( );
-               sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
-               if ( rulbus_lval.ival > 255 )
-                   return ERR_TOKEN;
-               return NUM_TOKEN;
-           }
+}              /* End of C style comment handling */
 
-0x[0-9A-F]{1,2} {  /* hexadecimal number between 0x0 and 0xff */
-			   count( );
-               sscanf( rulbus_text, "0x%x", &rulbus_lval.ival );
-               if ( rulbus_lval.ival > 255 )
-                   return ERR_TOKEN;
-               return NUM_TOKEN;
-           }
+"file"         { count(); return FILE_TOKEN; }
+"rack"         { count(); return RACK_TOKEN; }
+"address"      { count(); return ADDR_TOKEN; }
+"num_channels" { count(); return NCHAN_TOKEN; }
+"volt_per_bit" { count(); return VPB_TOKEN; }
+"bipolar"      { count(); return POL_TOKEN; }
+"intr_delay"   { count(); return IDEL_TOKEN; }
+"ext_trigger"  { count(); return EXTTRIG_TOKEN; }
 
-[ \t\n]+   {   count( ); } /* Skip white space */
+"rb_generic"   {
+			       count( );
+			       rulbus_lval.ival = 0;
+			       return CARD_TOKEN;
+			   }
 
-{STRING}   {
-               char *p;
+{CARD}         {
+			       count( );
+			       rulbus_lval.ival = atoi( rulbus_text + 2 );
+			       return CARD_TOKEN;
+               }
 
-			   count( );
-               rulbus_lval.sval = p = rulbus_text + 1;
-			   while ( *p && *p != *rulbus_text )
-                   p++;
-			   if ( ! *p )
-				   return ERR_TOKEN;
-               *p = '\0';
-               return STR_TOKEN;
-           }
+{UNIT}         {
+	               count( );
+	               switch ( *rulbus_text )
+				   {
+					   case 'f' :
+						   rulbus_lval.dval = 1.0e-15;
+						   break;
+	
+					   case 'p' :
+						   rulbus_lval.dval = 1.0e-12;
+						   break;
 
+					   case 'n' :
+						   rulbus_lval.dval = 1.0e-9;
+						   break;
 
-"RB"[0-9]{1,4} {
-			   count( );
-			   rulbus_lval.ival = atoi( rulbus_text + 2 );
-			   return CARD_TYPE_TOKEN;
-           }
+					   case 'u' :
+						   rulbus_lval.dval = 1.0e-6;
+						   break;
 
-.          {
-			   count( );
-			   return *rulbus_text;
-           }
+					   case 'm' :
+						   rulbus_lval.dval = 1.0e-3;
+						   break;
 
-<<EOF>>    {
-			   rulbus_column = 0;
-			   return 0;
-           }
+					   case 'k' :
+						   rulbus_lval.dval = 1.0e3;
+						   break;
+
+					   case 'M' :
+						   rulbus_lval.dval = 1.0e6;
+						   break;
+
+					   case 'G' :
+						   rulbus_lval.dval = 1.0e9;
+						   break;
+
+					   case 'T' :
+						   rulbus_lval.dval = 1.0e12;
+						   break;
+				   }
+
+				   return UNIT_TOKEN;
+			   }
+
+{FLOAT}        {
+	               count( );
+			       rulbus_lval.dval = atof( rulbus_text );
+			       return FLOAT_TOKEN;
+		       }
+
+{BOOL_T}       { /* true boolean value */
+	               count( );
+                   rulbus_lval.ival = 1;
+                   return NUM_TOKEN;
+               }
+
+{BOOL_F}       { /* false boolean value */
+	               count( );
+                   rulbus_lval.ival = 0;
+                   return NUM_TOKEN;
+               }
+
+{OCT}          { /* octal number */
+			       count( );
+                   sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
+                   return NUM_TOKEN;
+               }
+
+{DEC}          { /* decimal number */
+			       count( );
+                   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
+                   return NUM_TOKEN;
+               }
+
+{HEX}          { /* hexadecimal number */
+			       count( );
+                   sscanf( rulbus_text, "0x%x", &rulbus_lval.ival );
+                   return NUM_TOKEN;
+               }
+
+[ \t\n]+       { count( ); } /* Skip white space */
+
+{STRING}       {
+                   char *p;
+
+			       count( );
+                   rulbus_lval.sval = p = rulbus_text + 1;
+			       while ( *p && *p != *rulbus_text )
+                 	   p++;
+			       if ( ! *p )
+			     	   return ERR_TOKEN;
+                   *p = '\0';
+                   return STR_TOKEN;
+               }
+
+.              { count( ); return *rulbus_text; }
+
+<<EOF>>        { rulbus_column = 0; return 0; }
 
 
 		/*----------------------*/

@@ -320,6 +320,7 @@ static int new_card( int type, char *name )
 	card->num_channels = -1;
 	card->vpb = -1.0;
 	card->bipolar = -1;
+	card->ext_trigger = -1;
 	card->intr_delay = -1.0;
 
 	return RULBUS_OK;
