@@ -175,7 +175,7 @@ const me6x00_dev_info *me6x00_board_info( int board )
 
 const char *me6x00_error_message( void )
 {
-	return ( const char * ) error_message;
+	return error_message;
 }
 
 
