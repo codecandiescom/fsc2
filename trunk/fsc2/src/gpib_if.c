@@ -324,6 +324,8 @@ int gpib_init_device( const char *device_name, int *dev )
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
 			cur_dev->prev->next = NULL;
+		else
+			gpib_dev_list = NULL;
 		T_free( cur_dev );
         sprintf( gpib_error_msg, "Can't initialise device %s, ibsta = 0x%x",
 				 device_name, ibsta );
