@@ -368,9 +368,7 @@ static void set_buttons_for_run( int active )
 /**************************************************************/
 
 
-volatile bool do_send;        /* globals used with the signal handlers */
-volatile bool do_quit;
-int return_status;
+static int return_status;
 
 
 /*------------------------------------------------------------------*/
