@@ -18,9 +18,10 @@ dg2020_b      // Sony/Tektronix data generator (Berlin version)
 tds754a       // Tektronix digitizing oscilloscope
 tds520a       // Tektronix digitizing oscilloscope
 
-sr510         // Stanford Research lock-in amplifier
-sr530         // Stanford Research lock-in amplifier
-sr810         // Stanford Research lock-in amplifier
+sr510         // Stanford Research lock-in amplifier, model 510
+sr530         // Stanford Research lock-in amplifier, model 530
+sr810         // Stanford Research lock-in amplifier, model 810
+sr830         // Stanford Research lock-in amplifier, model 830
 
 aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)

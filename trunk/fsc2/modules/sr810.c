@@ -28,6 +28,8 @@
 #define MAX_HARMONIC          19999
 #define MIN_HARMONIC          1
 
+#define NUM_CHANNELS          11
+
 
 /* declaration of exported functions */
 
@@ -89,7 +91,8 @@ static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 
 static bool sr810_init( const char *name );
 static double sr810_get_data( void );
-static void sr810_get_xy_data( double data[ 2 ] );
+static void sr810_get_xy_data( double *data, long *channels,
+							   int num_channels );
 static double sr810_get_adc_data( long channel );
 static double sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
@@ -206,8 +209,11 @@ void sr810_exit_hook( void )
 
 Var *lockin_get_data( Var *v )
 {
-	Var *nv;
-	double data[ 2 ] = { 0.0, 0.0 };
+	double data[ 6 ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+	long channels[ 6 ];
+	int num_channels;
+	bool using_dummy_channels = UNSET;
+	int i;
 
 
 	if ( v == NULL )
@@ -218,11 +224,61 @@ Var *lockin_get_data( Var *v )
 			return vars_push( FLOAT_VAR, sr810_get_data( ) );
 	}
 
-	if ( ! TEST_RUN )                  /* return dummy value in test run */
-		sr810_get_xy_data( data );
+	for ( num_channels = i = 0; i < 6; i++ )
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+		if ( v->type == INT_VAR )
+			channels[ i ] = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: %s: Integer value (parameter #%d) used as "
+					"channel number in call of `lockin_get_data'.\n",
+					Fname, Lc, DEVICE_NAME, i + 1 );
+			channels[ i ] = lround( v->val.dval );
+		}
 
-	nv = vars_push( FLOAT_TRANS_ARR, data, 2 );
-	return nv;
+		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
+		{
+			eprint( FATAL, "%s:%ld: %s: Invalid channel number %ld in call of "
+					"`lockin_get_data'.\n",
+					Fname, Lc, DEVICE_NAME, channels[ i ] );
+			THROW( EXCEPTION );
+		}
+
+		num_channels++;
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+			break;
+	}
+
+	if ( v != NULL )
+	{
+		eprint( SEVERE, "%s:%ld: %s: More than 6 parameters in call of "
+				"`lockin_get_data', discarding superfluous ones.\n",
+				Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( TEST_RUN )
+		return vars_push( FLOAT_TRANS_ARR, data, num_channels );
+
+	/* If we need less than two channels we've got to pass the function an
+	   extra value, it expects at least 2 - just take the next channel */
+
+	if ( num_channels == 1 )
+	{
+		using_dummy_channels = SET;
+		channels[ num_channels++ ] = channels[ 0 ] % NUM_CHANNELS + 1;
+	}
+
+	sr810_get_xy_data( data, channels, num_channels );
+
+	if ( using_dummy_channels )
+		return vars_push( FLOAT_VAR, data[ 0 ] );
+
+	return vars_push( FLOAT_TRANS_ARR, data, num_channels );
 }
 
 
@@ -867,37 +923,60 @@ static double sr810_get_data( void )
 /* lockin_data() returns the measured voltage of the lock-in. */
 /*------------------------------------------------------------*/
 
-static void sr810_get_xy_data( double data[ 2 ] )
+static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 {
-	char buffer[ 100 ];
-	long length = 100;
-	char *d2;
-	int x1, x2;
+	char cmd[ 100 ] = "SNAP?";
+	char buffer[ 200 ];
+	long length = 200;
+	char *bp_cur, *bp_next;
+	int i;
 
 
-	if ( ( x1 = gpib_write( sr810.device, "SNAP?1,2", 8 ) ) == FAILURE ||
-		 ( x2 = gpib_read( sr810.device, buffer, &length ) ) == FAILURE )
+	assert( num_channels >= 2 && num_channels <= 6 );
+
+	/* Assembe te command to be send to the lock-in */
+
+	for ( i = 0; i < num_channels; i++ )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier, 0x%s 0x%x.\n",
+		assert( channels[ i ] > 0 && channels[ i ] <= NUM_CHANNELS );
+
+		if ( i == 0 )
+			sprintf( cmd + strlen( cmd ), "%ld", channels[ i ] );
+		else
+			sprintf( cmd + strlen( cmd ), ",%ld", channels[ i ] );
+	}
+
+	/* Get the data from the lock-in */
+
+	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	/* Disassemble the reply */
 
 	buffer[ length - 1 ] = '\0';
-	d2 = strchr( buffer, ',' );
-	if ( d2 == NULL )
+	bp_cur = buffer;
+
+	for ( i = 0; i < num_channels; bp_cur = bp_next, i++ )
 	{
-		eprint( FATAL, "%s: Lock-in amplifier does not react properly.\n",
-				DEVICE_NAME );
-		THROW( EXCEPTION );
+		bp_next = strchr( bp_cur, ',' ) + 1;
+
+		if ( bp_next == NULL )
+		{
+			eprint( FATAL, "%s: Lock-in amplifier does not react properly.\n",
+					DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+		else
+			*( bp_next - 1 ) = '\0';
+
+		data[ i ] = T_atof( bp_cur );
 	}
-
-	*d2 = '\0';
-	data[ 0 ] = T_atof( buffer );
-	data[ 1 ] = T_atof( d2 + 1 );
 }
-
-
 
 
 /*----------------------------------------------------------*/
@@ -908,12 +987,12 @@ static void sr810_get_xy_data( double data[ 2 ] )
 
 static double sr810_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "OAUX? *";
+	char buffer[ 16 ] = "OAUX?*";
 	long length = 16;
 
 
 	assert( channel >= 1 && channel <= 4 );
-	buffer[ 6 ] = ( char ) channel + '0';
+	buffer[ 5 ] = ( char ) channel + '0';
 
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
