@@ -2,7 +2,7 @@
 ;;
 ;; $Id$
 ;;
-;; Copyright (C) 2000 Jens Thoms Törring
+;; Copyright (c) 2000 Jens Thoms Törring
 ;;
 ;; Author: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
 ;; Maintainer: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
