@@ -1042,9 +1042,9 @@ static void do_print( char *name, const char *command )
 }
 
 
-/*------------------------------------------------------------*/
-/* Starts a `grand-parent' process to do the actual printing. */
-/*------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Starts a `grand-child' process to do the actual printing. */
+/*-----------------------------------------------------------*/
 
 static int start_printing( char **argv, char *name )
 {
