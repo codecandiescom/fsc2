@@ -1906,15 +1906,16 @@ function that automatically updates the pulser, i.e.@: either
 @anchor{pulser_keep_all_pulses}
 @item pulser_keep_all_pulses()
 @findex pulser_keep_all_pulses()
-Usually pulses that in the test run were found to be unused are deleted
-and a warning message is printed indicating this. Any further reference
-to or use of these deleted pulses leads to the immediate termination of
-the experiment. But there are a few situations where it can't be
-detected reliable in the test run that a pulse is actually needed
-(e.g.@: if it is only used in an untestable @code{IF} construct) and
-thus the pulse gets deleted even though it is needed. In this case you
-have to force the program to keep all pulses even if it assumes them to
-be useless by calling this function (without any arguments).
+Usually pulses that in the test run were found to be unused (i.e.@:
+always had a length of @code{0}) are deleted and a warning message is
+printed indicating this. Any further references to or use of these
+deleted pulses leads to the immediate termination of the experiment. But
+there are a few situations where it can't be detected reliable in the
+test run that a pulse is actually needed (e.g.@: if it is only used in
+an untestable @code{IF} construct) and thus the pulse gets deleted even
+though it is needed. In this case you have to force the program to keep
+all pulses even if it assumes them to be useless by calling this
+function (without any arguments).
 
 
 @anchor{pulser_maximum_pattern_length}
