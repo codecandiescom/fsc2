@@ -12,7 +12,7 @@
 
 typedef struct {
 
-	char *name;
+	const char *name;
 	bool is_trigger_out;
 	long trigger_out_channel_number;
 

@@ -75,6 +75,7 @@ hp8647a.so: ${hp8647a:.c=.o}
 
 ${dg2020_f:.c=.o}: dg2020_f.h
 ${dg2020_b:.c=.o}: dg2020_b.h
+${hfs9000:.c=.o}:  hfs9000.h
 ${tds754a:.c=.o}:  tds754a.h
 ${tds744a:.c=.o}:  tds744a.h
 ${tds520a:.c=.o}:  tds520a.h
