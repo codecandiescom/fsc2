@@ -303,7 +303,14 @@ Var *magnet_setup( Var *v )
 	/* check that both variables are reasonable */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
+				Fname, Lc, DEVICE_NAME );
+
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
+	if ( v->next->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used for field step width.\n",
+				Fname, Lc, DEVICE_NAME );
 
 	if ( exist_device( "er035m" ) )
 	{

@@ -2028,15 +2028,21 @@ void vars_arr_init( Var *v )
 /* This function is called from the parsers for variable or function tokens */
 /* possibly followed by a unit. If there was no unit the second argument is */
 /* NULL and nothing has to be done. If it isn't NULL we've got to check     */
-/* that the token is really a simple number and multiply it then with the   */
-/* unit. If the variable or function token is an array we have to drop out  */
-/* of parsing and print an error message instead.                           */
+/* that the token is really a simple number and multiply it with the unit.  */
+/* If the variable or function token is an array we have to drop out of     */
+/* parsing and print an error message instead.                              */
 /*--------------------------------------------------------------------------*/
 
 Var *apply_unit( Var *var, Var *unit ) 
 {
 	if ( unit == NULL )
+	{
+		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
+			return vars_mult( var, vars_push( INT_VAR, 1 ) );
+		if ( var->type & ( INT_ARR | FLOAT_ARR ) )
+			return vars_push( ARR_REF, var );
 		return var;
+	}
 
 	if ( var->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_mult( var, unit );

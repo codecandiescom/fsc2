@@ -365,6 +365,9 @@ Var *lockin_sensitivity( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as sensitivity.\n",
+				Fname, Lc, DEVICE_NAME );
 	sens = VALUE( v );
 	vars_pop( v );
 
@@ -472,6 +475,9 @@ Var *lockin_time_constant( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as time constant.\n",
+				Fname, Lc, DEVICE_NAME );
 	tc = VALUE( v );
 	vars_pop( v );
 
@@ -586,6 +592,9 @@ Var *lockin_phase( Var *v )
 	/* Otherwise set phase to value passed to the function */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as phase.\n",
+				Fname, Lc, DEVICE_NAME );
 	phase = VALUE( v );
 	vars_pop( v );
 
@@ -616,9 +625,9 @@ Var *lockin_phase( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Sets or returns the lock-in reference frequency                 */
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------*/
+/* Sets or returns the lock-in reference frequency */
+/*-------------------------------------------------*/
 
 Var *lockin_ref_freq( Var *v )
 {
@@ -647,6 +656,9 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as reference "
+				"frequency.\n", Fname, Lc, DEVICE_NAME );
 	freq = VALUE( v );
 	vars_pop( v );
 	
@@ -727,6 +739,9 @@ Var *lockin_ref_level( Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as reference level.\n",
+				Fname, Lc, DEVICE_NAME );
 	level = VALUE( v );
 	vars_pop( v );
 	
