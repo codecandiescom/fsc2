@@ -44,26 +44,26 @@ static bool	incr_x_and_y( long x_index, long len, long y_index );
    redrawing after the data have been unpacked in order to minimize the
    number of graphical operations */
 
-static bool scale_1d_changed[ 2 ];
-static bool scale_2d_changed[ 3 ];
-static bool need_2d_redraw;
-static bool need_cut_redraw;
+static bool Scale_1d_changed[ 2 ];
+static bool Scale_2d_changed[ 3 ];
+static bool Need_2d_redraw;
+static bool Need_cut_redraw;
 
 
 #define MAX_ACCEPT_TIME  0.2    /* 200 ms */
 
 
-/*--------------------------------------------------------------------------*/
-/* This is the function that takes the new data from the message queue and  */
-/* displays them. The function is invoked as a idle callback, i.e. whenever */
-/* the program has some unused time. For a limited time (currently set to   */
-/* 200 ms) and schedules them to be displayed. Data sets for REQUEST type   */
-/* data are moved to the end of the message queue (there can only be one at */
-/* a time because REQUESTS need a reply to the child process). When all     */
-/* sets have been removed from the message queue (or the maximum time in    */
-/* the accept loop is over) all parts of the display windows that changed   */
-/* due to the new data get udated.                                          */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
+ * This is the function that takes the new data from the message queue and
+ * displays them. The function is invoked as a idle callback, i.e. whenever
+ * the program has some unused time. For a limited time (currently set to
+ * 200 ms) and schedules them to be displayed. Data sets for REQUEST type
+ * data are moved to the end of the message queue (there can only be one at
+ * a time because REQUESTS need a reply to the child process). When all
+ * sets have been removed from the message queue (or the maximum time in
+ * the accept loop is over) all parts of the display windows that changed
+ * due to the new data get udated.
+ *--------------------------------------------------------------------------*/
 
 void accept_new_data( bool empty_queue )
 {
@@ -88,9 +88,9 @@ void accept_new_data( bool empty_queue )
 
 	/* Clear the flags that later tell us what really needs to be redrawn */
 
-	memset( scale_1d_changed, 0, sizeof scale_1d_changed );
-	memset( scale_2d_changed, 0, sizeof scale_2d_changed );
-	need_2d_redraw = need_cut_redraw = UNSET;
+	memset( Scale_1d_changed, 0, sizeof Scale_1d_changed );
+	memset( Scale_2d_changed, 0, sizeof Scale_2d_changed );
+	Need_2d_redraw = Need_cut_redraw = UNSET;
 
 	while ( 1 )
 	{
@@ -171,32 +171,32 @@ void accept_new_data( bool empty_queue )
 	if ( dim & 1 )
 	{
 		redraw_canvas_1d( &G_1d.canvas );
-		if ( scale_1d_changed[ X ] )
+		if ( Scale_1d_changed[ X ] )
 			redraw_canvas_1d( &G_1d.x_axis );
-		if ( scale_1d_changed[ Y ] )
+		if ( Scale_1d_changed[ Y ] )
 			redraw_canvas_1d( &G_1d.y_axis );
 	}
 
 	if ( dim & 2 )
 	{
-		if ( need_2d_redraw )
+		if ( Need_2d_redraw )
 			redraw_canvas_2d( &G_2d.canvas );
-		if ( scale_2d_changed[ X ] )
+		if ( Scale_2d_changed[ X ] )
 			redraw_canvas_2d( &G_2d.x_axis );
-		if ( scale_2d_changed[ Y ] )
+		if ( Scale_2d_changed[ Y ] )
 			redraw_canvas_2d( &G_2d.y_axis );
-		if ( scale_2d_changed[ Z ] )
+		if ( Scale_2d_changed[ Z ] )
 			redraw_canvas_2d( &G_2d.z_axis );
-		if ( need_cut_redraw )
+		if ( Need_cut_redraw )
 			redraw_all_cut_canvases( );
 	}
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function examines the new data by looking at the first item    */
-/* and calls the appropriate functions for dealing with the data. */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function examines the new data by looking at the first item
+ * and calls the appropriate functions for dealing with the data.
+ *----------------------------------------------------------------*/
 
 static void unpack_and_accept( int dim, char *ptr )
 {
@@ -286,11 +286,11 @@ static void unpack_and_accept( int dim, char *ptr )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for handling special commands that come disguised as data  */
-/* (commands for clearing curves, changing scales etc). The type of    */
-/* the command is determined and the appropriate functions are called. */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for handling special commands that come disguised as data
+ * (commands for clearing curves, changing scales etc). The type of
+ * the command is determined and the appropriate functions are called.
+ *---------------------------------------------------------------------*/
 
 static void other_data_request( int dim, int type, char *ptr )
 {
@@ -322,9 +322,9 @@ static void other_data_request( int dim, int type, char *ptr )
 				else
 				{
 					clear_curve_2d( ca );
-					need_2d_redraw = SET;
+					Need_2d_redraw = SET;
 					cut_clear_curve( ca );
-					need_cut_redraw = SET;
+					Need_cut_redraw = SET;
 				}
 			}
 
@@ -336,14 +336,14 @@ static void other_data_request( int dim, int type, char *ptr )
 			if ( dim == DATA_1D )
 			{
 				change_scale_1d( is_set, ( void * ) ptr );
-				scale_1d_changed[ X ] = scale_1d_changed[ Y ] = SET;
+				Scale_1d_changed[ X ] = Scale_1d_changed[ Y ] = SET;
 			}
 			else
 			{
 				change_scale_2d( is_set, ( void * ) ptr );
-				scale_2d_changed[ X ] =
-					scale_2d_changed[ Y ] = 
-						scale_2d_changed[ Z ] = SET;
+				Scale_2d_changed[ X ] =
+					Scale_2d_changed[ Y ] = 
+						Scale_2d_changed[ Z ] = SET;
 			}
 			break;
 
@@ -358,14 +358,14 @@ static void other_data_request( int dim, int type, char *ptr )
 			if ( dim == DATA_1D )
 			{
 				change_label_1d( label );
-				scale_1d_changed[ X ] = scale_1d_changed[ Y ] = SET;
+				Scale_1d_changed[ X ] = Scale_1d_changed[ Y ] = SET;
 			}
 			else
 			{
 				change_label_2d( label );
-				scale_2d_changed[ X ] =
-					scale_2d_changed[ Y ] = 
-						scale_2d_changed[ Z ] = SET;
+				Scale_2d_changed[ X ] =
+					Scale_2d_changed[ Y ] = 
+						Scale_2d_changed[ Z ] = SET;
 			}
 			break;
 
@@ -375,8 +375,8 @@ static void other_data_request( int dim, int type, char *ptr )
 			else
 			{
 				rescale_2d( ( long * ) ptr );
-				need_2d_redraw = scale_2d_changed[ X ] =
-					scale_2d_changed[ Y ] = SET;
+				Need_2d_redraw = Scale_2d_changed[ X ] =
+					Scale_2d_changed[ Y ] = SET;
 			}
 			break;
 
@@ -400,7 +400,7 @@ static void other_data_request( int dim, int type, char *ptr )
 				ptr += sizeof color;
 				memcpy( &count, ptr, sizeof count );
 				set_marker_2d( x_pos, y_pos, color, count );
-				need_2d_redraw = SET;
+				Need_2d_redraw = SET;
 			}
 			break;
 
@@ -410,7 +410,7 @@ static void other_data_request( int dim, int type, char *ptr )
 			else
 			{
 				remove_markers_2d( ( long * ) ptr );
-				need_2d_redraw = SET;
+				Need_2d_redraw = SET;
 			}
 			break;
 
@@ -432,10 +432,10 @@ static void other_data_request( int dim, int type, char *ptr )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function for storing and displaying of new data points */
-/* for 1D graphics (when normal display mode is used).    */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for storing and displaying of new data points
+ * for 1D graphics (when normal display mode is used).
+ *--------------------------------------------------------*/
 
 static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 							char *ptr )
@@ -501,7 +501,7 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 							   ( double ) ( x_index + len - 1 );
 		}
 
-		scale_1d_changed[ X ] |= G_1d.is_fs;
+		Scale_1d_changed[ X ] |= G_1d.is_fs;
 	}
 
 	/* Find maximum and minimum of old and new data and, if the minimum or
@@ -555,10 +555,10 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 					}
 
 			G_1d.is_scale_set = SET;
-			scale_1d_changed[ X ] = SET;
+			Scale_1d_changed[ X ] = SET;
 		}
 
-		scale_1d_changed[ Y ] = SET;
+		Scale_1d_changed[ Y ] = SET;
 		G_1d.rwc_delta[ Y ] = new_rwc_delta_y;
 	}
 
@@ -610,7 +610,7 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 	/* If the scale did not change redraw only the current curve, otherwise all
 	   curves */
 
-	if ( ! ( scale_1d_changed[ X ] || scale_1d_changed[ Y ] ) )
+	if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
 		recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
 	else
 		for ( i = 0; i < G_1d.nc; i++ )
@@ -618,10 +618,10 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 }
 
 
-/*--------------------------------------------------------*/
-/* Function for handling new data for the 1D display when */
-/* "sliding window" mode is used.                         */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for handling new data for the 1D display when
+ * "sliding window" mode is used.
+ *--------------------------------------------------------*/
 
 static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 {
@@ -689,12 +689,12 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 					  sp++, count-- )
 					sp->v = fac * sp->v + off;
 
-			scale_1d_changed[ X ] = SET;
+			Scale_1d_changed[ X ] = SET;
 			G_1d.is_scale_set = SET;
 		}
 
 
-		scale_1d_changed[ Y ] = SET;
+		Scale_1d_changed[ Y ] = SET;
 		G_1d.rwc_delta[ Y ] = new_rwc_delta_y;
 	}
 
@@ -800,7 +800,7 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 	/* If the scale did not change recalculate the points of the current curve
 	   only, otherwise the points of all curves */
 
-	if ( ! ( scale_1d_changed[ X ] || scale_1d_changed[ Y ] ) )
+	if ( ! ( Scale_1d_changed[ X ] || Scale_1d_changed[ Y ] ) )
 		recalc_XPoints_of_curve_1d( G_1d.curve[ curve ] );
 	else
 		for ( i = 0; i < G_1d.nc; i++ )
@@ -809,12 +809,11 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 
 
 
-/*----------------------------------------------------------------*/
-/* Function for storing and displaying of new data points for the */
-/* 2D display (sorry if it's a bit hard to understand, but quite  */
-/* a bit of work has gone into getting the function to make it as */
-/* fast as possible...)                                           */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for storing and displaying of new data points for the
+ * 2D display (sorry if it's a bit hard to understand, but quite
+ * a bit of work has gone into getting it as fast as possible...)
+ *----------------------------------------------------------------*/
 
 static void accept_2d_data( long x_index, long y_index, long curve,
 							Var_Type_T type, char *ptr )
@@ -863,16 +862,16 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	{
 		if ( y_index + y_len >= G_2d.ny )
 		{
-			need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
+			Need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
 			if ( ( cv->active && cv->is_fs ) ||
 				 ( G_2d.active_curve != -1 &&
 				   G_2d.curve_2d[ G_2d.active_curve ]->is_fs ) )
-				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
+				Scale_2d_changed[ X ] = Scale_2d_changed[ Y ] = SET;
 		}
 		else
 		{
-			need_cut_redraw |= incr_x( x_index, x_len );
-			scale_2d_changed[ X ] |= 
+			Need_cut_redraw |= incr_x( x_index, x_len );
+			Scale_2d_changed[ X ] |= 
 								 ( cv->active && cv->is_fs ) ||
 								 ( G_2d.active_curve != -1 &&
 								   G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
@@ -882,8 +881,8 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	}
 	else if ( y_index + y_len >= G_2d.ny )
 	{
-		need_cut_redraw |= incr_y( y_index + y_len );
-		scale_2d_changed[ Y ] |= ( cv->active && cv->is_fs  ) ||
+		Need_cut_redraw |= incr_y( y_index + y_len );
+		Scale_2d_changed[ Y ] |= ( cv->active && cv->is_fs  ) ||
 								 ( G_2d.active_curve != -1 &&
 								   G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
 		size_changed = SET;
@@ -937,11 +936,11 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 			cv->is_scale_set = SET;
 
 			if ( cv->active )
-				scale_2d_changed[ X ] = scale_2d_changed[ Y ] = SET;
+				Scale_2d_changed[ X ] = Scale_2d_changed[ Y ] = SET;
 		}
 
-		scale_2d_changed[ Z ] |= cv->active && cv->is_fs;
-		need_cut_redraw |= cut_data_rescaled( curve, cv->rw_min, cv->rw_max );
+		Scale_2d_changed[ Z ] |= cv->active && cv->is_fs;
+		Need_cut_redraw |= cut_data_rescaled( curve, cv->rw_min, cv->rw_max );
 		cv->rwc_delta[ Z ] = new_rwc_delta_z;
 	}
 
@@ -991,7 +990,7 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 		/* Tell the cross section handler about the new data, its return value
 		   indicates if the cut graphics needs to be redrawn */
 
-		need_cut_redraw |= cut_new_points( curve, x_index, y_index, x_len );
+		Need_cut_redraw |= cut_new_points( curve, x_index, y_index, x_len );
 	}
 	else        /* 2-dimensional data field is to be included */
 	{
@@ -1034,7 +1033,7 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 			/* Tell the cross section handler about the new data, its return
 			   value indicates if the cut graphics needs to be redrawn */
 
-			need_cut_redraw |= cut_new_points( curve, x_index, i, x_len );
+			Need_cut_redraw |= cut_new_points( curve, x_index, i, x_len );
 		}
 	}
 
@@ -1066,21 +1065,21 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	   in full scale mode or because new data points got added to the curve. */
 
 	if ( G_2d.active_curve != -1 )
-		need_2d_redraw |= G_2d.curve_2d[ G_2d.active_curve ]->needs_recalc &&
+		Need_2d_redraw |= G_2d.curve_2d[ G_2d.active_curve ]->needs_recalc &&
 						  ( G_2d.curve_2d[ G_2d.active_curve ]->is_fs ||
 							G_2d.curve_2d[ G_2d.active_curve ] == cv );
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function used by all functions that unpack new data to be displayed */
-/* to figure out how many new data there really are. When invoked *ptr */
-/* points to the start of the new data set, and 'type' indicates the   */
-/* type of the new data (integer or floating point numbers, 1D or      */
-/* multi-dimensional array). It returns the number of of new data      */
-/* points and '*ptr' is pointing to the start of the new data when the */
-/* function returns.                                                   */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function used by all functions that unpack new data to be displayed
+ * to figure out how many new data there really are. When invoked *ptr
+ * points to the start of the new data set, and 'type' indicates the
+ * type of the new data (integer or floating point numbers, 1D or
+ * multi-dimensional array). It returns the number of of new data
+ * points and '*ptr' is pointing to the start of the new data when the
+ * function returns.
+ *---------------------------------------------------------------------*/
 
 static long get_number_of_new_points( char **ptr, Var_Type_T type )
 {
@@ -1145,10 +1144,10 @@ static long get_number_of_new_points( char **ptr, Var_Type_T type )
 }
 
 
-/*----------------------------------------------------------*/
-/* Determines the new maximum and minimum value of the data */
-/* set and returns if the maximum or minimum changed.       */
-/*----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Determines the new maximum and minimum value of the data
+ * set and returns if the maximum or minimum changed.
+ *----------------------------------------------------------*/
 
 static bool get_new_extrema( double *max, double *min, char *ptr,
 							 long len, Var_Type_T type )
@@ -1221,9 +1220,9 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 }
 
 
-/*-------------------------------------------------*/
-/* Increments the number of 2D data in x-direction */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Increments the number of 2D data in x-direction
+ *-------------------------------------------------*/
 
 static bool incr_x( long x_index, long len )
 {
@@ -1270,9 +1269,9 @@ static bool incr_x( long x_index, long len )
 }
 
 
-/*-------------------------------------------------*/
-/* Increments the number of 2D data in y-direction */
-/*-------------------------------------------------*/
+/*-------------------------------------------------*
+ * Increments the number of 2D data in y-direction
+ *-------------------------------------------------*/
 
 static bool incr_y( long y_index )
 {
@@ -1312,9 +1311,9 @@ static bool incr_y( long y_index )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Increments the number of 2D data in both x- and y-direction */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Increments the number of 2D data in both x- and y-direction
+ *-------------------------------------------------------------*/
 
 static bool incr_x_and_y( long x_index, long len, long y_index )
 {

@@ -25,15 +25,15 @@
 #include "fsc2.h"
 
 
-extern Fsc2_Assert_T Assert_struct;    /* defined fsc2_assert.c */
-extern int fail_mess_fd;               /* defined in dump.c     */
+extern Fsc2_Assert_T Assert_Struct;    /* defined in fsc2_assert.c */
+extern int Fail_Mess_Fd;               /* defined in dump.c */
 
 
-/*------------------------------------------------------------------------*/
-/* Callback function for the bug report button. Creates a bug report with */
-/* some information about the input and output of the program etc and     */
-/* additional input by the user. Finally it mails me the report.          */
-/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Callback function for the bug report button. Creates a bug report with
+ * some information about the input and output of the program etc and
+ * additional input by the user. Finally it mails me the report.
+ *------------------------------------------------------------------------*/
 
 #if defined ( MAIL_ADDRESS )
 void bug_report_callback( FL_OBJECT *a, UNUSED_ARG long b )
@@ -222,9 +222,9 @@ void bug_report_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 #endif
 
 
-/*-------------------------------------------------------*/
-/* This function sends an email to me when fsc2 crashes. */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * This function sends an email to me when fsc2 crashes.
+ *-------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
 void death_mail( int signo )
@@ -257,16 +257,16 @@ void death_mail( int signo )
 #ifndef NDEBUG
 	if ( signo == SIGABRT )
 		fprintf( mail, "%s:%d: failed assertion: %s\n\n",
-				 Assert_struct.filename, Assert_struct.line,
-				 Assert_struct.expression );
+				 Assert_Struct.filename, Assert_Struct.line,
+				 Assert_Struct.expression );
 #endif
 
-	if ( fail_mess_fd >= 0 )
+	if ( Fail_Mess_Fd >= 0 )
 	{
-		while ( ( count = read( fail_mess_fd, buffer, DM_BUF_SIZE ) ) > 0 )
+		while ( ( count = read( Fail_Mess_Fd, buffer, DM_BUF_SIZE ) ) > 0 )
 			fwrite( buffer, count, 1, mail );
 		fprintf( mail, "\n" );
-		close( fail_mess_fd );
+		close( Fail_Mess_Fd );
 	}
 
 	if ( EDL.Fname != NULL )
