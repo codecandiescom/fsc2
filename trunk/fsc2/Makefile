@@ -17,6 +17,11 @@ auxdir         = $(libdir)/aux
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
 
+# here you set if you want the program for a high or a low resolution screen
+# (set SIZE to either `HI_RES' or `LOW_RES')
+
+SIZE           = LOW_RES       # HI_RES
+
 
 # The name of the awk tool is passed to the programs via a macro
 
@@ -56,10 +61,17 @@ RMFLAGS        = -f
 
 VPATH          = .:src:modules
 
-c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
+c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c \
 				 func.c T.c phases.c exp.c devices.c gpib.c run.c comm.c \
 				 chld_func.c graphics.c accept.c graph_handler_1d.c \
 				 graph_handler_2d.c loader.c bugs.c print.c
+
+ifeq ($(SIZE),HI_RES)
+	c_sources += fsc2_rsc_hr.c
+else
+	c_sources += fsc2_rsc_lr.c
+endif
+
 bison_sources  = $(notdir $(wildcard src/*_parser.y))
 flex_sources   = $(notdir $(wildcard src/*_lexer.flex))
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
@@ -101,6 +113,8 @@ endif
 ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
 endif
+
+CFLAGS     += -DSIZE=$(SIZE)
 
 
 # Switch off all implicit rules and set suffices of file to be made by make

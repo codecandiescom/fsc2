@@ -33,6 +33,11 @@
 #endif
 
 
+#if ! defined SIZE
+#define SIZE HI_RES
+#endif
+
+
 /* inclusion system header files */
 
 #include <stdio.h>
@@ -58,7 +63,12 @@
 
 /* inclusion of programs own header files */
 
-#include "fsc2_rsc.h"
+#if ( SIZE == HI_RES )
+#include "fsc2_rsc_hr.h"
+#else
+#include "fsc2_rsc_lr.h"
+#endif
+
 #include "global.h"               /* must be the very first to be included ! */
 #include "comm.h"
 #include "exceptions.h"
