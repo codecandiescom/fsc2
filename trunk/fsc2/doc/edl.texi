@@ -127,11 +127,11 @@ statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
 The first thing to do in the experiment loop is to fetch a new data
-point from the lock-in amplifier and to store it in the variable
-@code{data}.  Next we have to display the data point, which is done via
-the call of the @code{display()} function. Here two arguments are used,
-the number of the point, stored in the variable @code{I}, and the value
-of the corresponding data point.
+point from the lock-in amplifier, storing it in the variable @code{data}.
+Next, we have to display the data point, which is done via the call of
+the @code{display()} function. Here two arguments are used, the number
+of the point, stored in the variable @code{I}, and the value of the
+new data point.
 
 Of course, we also need to write the data point to a file. This is done
 by the call of the function @code{save()} that automatically writes its
