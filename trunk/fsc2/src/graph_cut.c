@@ -2535,7 +2535,8 @@ void cut_next_index( FL_OBJECT *a, long b )
 {
 	a = a;
 
-	switch( data )
+
+	switch( b )
 	{
 		case 0 :
 			cut_show( CG.cut_dir, CG.index + 1 );
