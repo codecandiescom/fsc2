@@ -44,10 +44,10 @@ infodir        = $(prefix)/info
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
 # or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
 
-GPIB_LIBRARY   = JTT
-GPIB_CONF_FILE = /etc/gpib.conf
-GPIB_LOG_FILE  = /tmp/gpib.log
-GPIB_LOG_LEVEL = HIGH
+GPIB_LIBRARY     = JTT
+GPIB_CONF_FILE   = /etc/gpib.conf
+GPIB_LOG_FILE    = /tmp/gpib.log
+GPIB_LOG_LEVEL   = HIGH
 
 
 # Here the owner of the program of all files that will be installed as well
@@ -57,8 +57,14 @@ GPIB_LOG_LEVEL = HIGH
 # if the program will be used by one person only and everything is installed
 # in his/her home directory this persons account and group can be used.
 
-OWNER          = fsc2
-GROUP          = fsc2
+OWNER            = fsc2
+GROUP            = fsc2
+
+
+# The next variable defines the number of serial ports that are available on
+# the computer.
+
+NUM_SERIAL_PORTS = 2
 
 
 # Only leave the next line in if your machine does have a i386 type processor,
@@ -69,7 +75,7 @@ GROUP          = fsc2
 # following line doesn't influence the basic functionality, it just makes it a
 # little bit harder to trace bugs...)
 
-IS_I386        = 1
+IS_I386          = 1
 
 
 ##############################################################################
@@ -184,6 +190,12 @@ endif
 ifndef GROUP
 	GROUP = fsc2
 endif 
+
+ifdef NUM_SERIAL_PORTS
+	CFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
+else
+	CFLAGS += -DNUM_SERIAL_PORTS=0
+endif
 
 ifdef IS_I386
 	CFLAGS += -DIS_I386
