@@ -67,7 +67,7 @@ static bool Func_is_set = UNSET;
 
 %token TB_TOKEN              /* TIMEBASE */
 %token TM_TOKEN              /* TRIGGERMODE */
-%token MPL_TOKEN             /* MINIMUM_PATTERN_LENGTH */
+%token MPL_TOKEN             /* MAXIMUM_PATTERN_LENGTH */
 
 %token INTERN_TOKEN          /* INTERNAL */
 %token EXTERN_TOKEN          /* EXTERNAL */
@@ -433,9 +433,9 @@ sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
 ;
 
 
-/* handling of TIME_BASE commands */
+/* handling of MAXIMUM_PATTERN_LENGTH commands */
 
-mpl:      MPL_TOKEN expr           { p_set_min_seq_len( $2 ); }
+mpl:      MPL_TOKEN expr           { p_set_max_seq_len( $2 ); }
 ;
 
 /* Handling of PHASE_SETUP commands */

@@ -107,7 +107,7 @@ VL          V_?L(OW)?
 
 TB          T(IME)?_?B(ASE)?:?
 TM          T(RIG(GER)?)?_?M(ODE)?:?
-MPL         MIN(IMUM)?_?PATT(ERN)?_LEN(GTH)?
+MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
