@@ -18,14 +18,14 @@ start_freq  = 12 MHz;
 end_freq    =  14 MHz;
 step_freq   = 40 kHz;          
 
-attenuation =  -4 dB;
+attenuation =  -5 dB;
 
 N_runs      = 2;            // how many times to repeat the whole experiment
-N_averages  = 50;            // number of averages per frequency point
+N_averages  = 50;           // number of averages per frequency point
 
-N_max_base_curves =4;      // how many curve to use for baseline correction
+N_max_base_curves = 4;      // how many curves to use for baseline correction
 
-Channel = CH1;               // input channel of the digitizer
+Channel = CH1;              // input channel of the digitizer
 
 
 /***********************************************/
@@ -49,8 +49,8 @@ time_base;                       // time base of digitizer (in s)
 time_res;                        // digitizer time resolution (in ns)
 
 min_time, max_time;              // first / last point (in ns)
-start_time, end_time;            // intergation window start / end pos. (in ns)
-new_start_time, new_end_time;    // new values od sliders (in ns)
+start_time, end_time;            // integration window start / end pos. (in ns)
+new_start_time, new_end_time;    // new values of sliders (in ns)
 Start_pos, End_pos, Width;
 N_base_curves;
 integ, base_int;
@@ -68,10 +68,10 @@ Is_stored = 0;
 
 PREPARATIONS:
 
-synthesizer_use_table( "table_big.dat" );
 synthesizer_attenuation( attenuation );
 synthesizer_frequency( start_freq );
 synthesizer_att_ref_freq( 14 MHz );
+synthesizer_use_table( "table_big.dat" );
 synthesizer_modulation( "OFF" );
 
 digitizer_num_averages( N_averages );

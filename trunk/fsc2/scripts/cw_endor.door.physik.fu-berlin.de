@@ -210,7 +210,7 @@ my $f11_l1 = $f11->Label( '-text' => 'Field current:',
 my $f11_v = $f11->Entry( '-textvariable' => \$current,
 					   '-width' => '6',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => \&is_signed_numeric,
 					   '-relief' => 'sunken' );
 my $f11_l2 = $f11->Label( '-text' => 'A',
 						  '-width' => 1 );
@@ -288,7 +288,7 @@ goto done_reading unless defined( $ne = <F> )
 chomp $ne;
 $sens = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $current = $ne;
 
@@ -322,6 +322,15 @@ sub store_defs {
 #############################################
 
 sub is_numeric {
+
+	my $new_val = shift;
+	return $new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+}
+
+
+#############################################
+
+sub is_signed_numeric {
 
 	my $new_val = shift;
 	return $new_val =~ /^[+-]?((\d+\.?(\d+)?)|(\.(\d+)?))?$/;

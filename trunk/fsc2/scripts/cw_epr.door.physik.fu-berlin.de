@@ -2,6 +2,7 @@
 
 # $Id$
 
+use Tk::Balloon;
 use strict;
 use Tk;
 
@@ -34,6 +35,7 @@ my %wp = ( '-side' => 'left',
 
 my $mw = MainWindow->new( );
 $mw->title( "cw_epr" );
+my $ballon = $mw->Balloon( );
 
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text' => 'Start current:',
@@ -42,8 +44,10 @@ my $f1_l1 = $f1->Label( '-text' => 'Start current:',
 my $f1_v = $f1->Entry( '-textvariable' => \$start_cur,
 					   '-width' => '8',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => \&is_signed_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f1_v,
+				 '-balloonmsg' => "Enter the start current (in Ampere)" );
 my $f1_l2 = $f1->Label( '-text' => 'A',
 						'-width' => 1 );
 
@@ -60,8 +64,10 @@ my $f2_l1 = $f2->Label( '-text' => 'End current:',
 my $f2_v = $f2->Entry( '-textvariable' => \$end_cur,
 					   '-width' => '8',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => \&is_signed_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f2_v,
+				 '-balloonmsg' => "Enter the end current (in Ampere)" );
 my $f2_l2 = $f2->Label( '-text' => 'A',
 						'-width' => 1 );
 
@@ -78,8 +84,11 @@ my $f3_l1 = $f3->Label( '-text' => 'Current step size:',
 my $f3_v = $f3->Entry( '-textvariable' => \$cur_step,
 					   '-width' => '8',
 					   '-validate' => 'key',
-					   '-validatecommand' => \&is_numeric,
+					   '-validatecommand' => \&is_signed_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f3_v,
+				 '-balloonmsg' => "Enter the size of the current steps " .
+				 "(in Ampere)" );
 my $f3_l2 = $f3->Label( '-text' => 'A',
 						'-width' => 1 );
 
@@ -98,6 +107,8 @@ my $f4_v = $f4->Entry( '-textvariable' => \$num_runs,
 					   '-validate' => 'key',
 					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
 					   '-relief' => 'sunken' );
+$ballon->attach( $f4_v,
+				 '-balloonmsg' => "Enter the number of runs" );
 my $f4_l2 = $f4->Label( '-text' => ' ',
 						'-width' => 1 );
 
@@ -116,6 +127,9 @@ my $f5_v = $f5->Entry( '-textvariable' => \$tc_fact,
 					   '-validate' => 'key',
 					   '-validatecommand' => \&is_numeric,
 					   '-relief' => 'sunken' );
+$ballon->attach( $f5_v,
+				 '-balloonmsg' => "Enter the number of lock-in time " .
+				 "constants\nwaited before a new data point is recorded" );
 my $f5_l2 = $f5->Label( '-text' => '* tc',
 						'-width' => 2 );
 
@@ -136,6 +150,9 @@ my $f6_m = $f6->Optionmenu( '-options' =>
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
 							'-width' => 9,
 							'-variable' => \$tc );
+$ballon->attach( $f6_m,
+				 '-balloonmsg' => "Select the lock-in amplifiers time " .
+				 "constant" );
 $f6->pack( %fp );
 $f6_l->pack( %wp );
 $f6_m->pack( %wp );
@@ -155,22 +172,31 @@ my $f7_m = $f7->Optionmenu( '-options' =>
 								' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
 							'-width' => 9,
 							'-variable' => \$sens );
+$ballon->attach( $f7_m,
+				 '-balloonmsg' => "Select the lock-in amplifiers " .
+				 "sensitivity" );
 $f7->pack( %fp );
 $f7_l->pack( %wp );
 $f7_m->pack( %wp );
 
 
-$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
-								   'Load into fsc2' ) ],
-				 '-variable' => \$how,
-				 '-command' => \&write_out
-			   )->pack( '-padx' => '3m',
-						'-pady' => '3m' );
+my $f9_m = $mw->Optionmenu( '-options' => [ ( 'Start experiment',
+											  'Test program',
+											  'Load into fsc2' ) ],
+							'-variable' => \$how,
+							'-command' => \&write_out
+						  )->pack( '-padx' => '3m',
+								   '-pady' => '3m' );
+$ballon->attach( $f9_m,
+				 '-balloonmsg' => "Make fsc2 run, test or just load " .
+				 "the program" );
 
-$mw->Button( '-text' => 'Quit',
-			 '-command' => sub { &store_defs; $mw->destroy }
-		   )->pack( '-padx' => '3m',
-					'-pady' => '3m' );
+my $f10_b =$mw->Button( '-text' => 'Quit',
+						'-command' => sub { &store_defs; $mw->destroy }
+					  )->pack( '-padx' => '3m',
+							   '-pady' => '3m' );
+$ballon->attach( $f10_b,
+				 '-balloonmsg' => "Press this when you're done" );
 
 MainLoop;
 
@@ -188,15 +214,15 @@ if ( $ARGV[ 0 ] ) {
 	open( F, "<$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
 }
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $start_cur = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $end_cur = $ne;
 
-goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
 chomp $ne;
 $cur_step = $ne;
 
@@ -243,6 +269,15 @@ sub is_numeric {
 
 	my $new_val = shift;
 	$new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+}
+
+
+#############################################
+
+sub is_signed_numeric {
+
+	my $new_val = shift;
+	$new_val =~ /^[+-]?((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
 }
 
 
