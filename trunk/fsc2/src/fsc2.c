@@ -45,6 +45,14 @@ static void start_browser( void );
 
 int main( int argc, char *argv[ ] )
 {
+	bool do_load = UNSET;
+	bool do_test = UNSET;
+	bool do_start = UNSET;
+	bool do_signal = UNSET;
+	char *fname;
+	int cur_arg;
+
+
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
@@ -55,26 +63,97 @@ int main( int argc, char *argv[ ] )
 
 	/* With the option "-t" just test the file and output results to stderr
 	   - this can be used to test a file e.g. with emacs' "M-x compile"
-	   feature or from the shell without any graphics stuff involved */
+	   feature or from the shell without any graphics stuff involved.
+	   With the option -S the program is started immediately, while with
+	   -T it is tested. If the option -s is found fsc2 will send its parent
+	   process a SIGUSR1 signal when it got started correctly . */
 
-	if ( argc > 1 && ! strcmp( argv[ 1 ], "-t" ) )
+	if ( argc > 1 )
 	{
-		if ( argv[ 2 ] == NULL )          /* no file name with "-t" option ? */
+		if ( ! strncmp( argv[ 1 ], "-t", 2 ) )
 		{
-			fprintf( stderr, "fsc2 -t: No input file\n" );
-			return EXIT_FAILURE;
+			/* no file name with "-t" option ? */
+
+			if ( argv[ 1 ][ 2 ] == '\0' && argc == 2 )
+			{
+				fprintf( stderr, "fsc2 -t: No input file.\n" );
+				return EXIT_FAILURE;
+			}
+
+			fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
+
+			just_testing = SET;    /* signal "just_testing"-mode to eprint() */
+			return scan_main( fname ) ? EXIT_SUCCESS : EXIT_FAILURE;
 		}
 
-		just_testing = SET;        /* signal "just_testing"-mode to eprint() */
-		return scan_main( argv[ 2 ] ) ? EXIT_SUCCESS : EXIT_FAILURE;
+		cur_arg = 1;
+		while ( cur_arg < argc )
+		{
+			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
+			{
+				do_signal = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
+			{
+				if ( do_test )
+				{
+					fprintf( stderr, "fsc2: Can't have both flags `-S' and "
+							 "`-T'.\n" );
+					return EXIT_FAILURE;
+				}
+
+				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
+				{
+					fprintf( stderr, "fsc2 -S: No input file.\n" );
+					return EXIT_FAILURE;
+				}
+
+				fname = argv[ cur_arg ][ 2 ] != '\0' ?
+					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
+
+				do_load = SET;
+				do_start = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
+			{
+				if ( do_start )
+				{
+					fprintf( stderr, "fsc2: Can't have both flags `-S' and "
+							 "`-T'.\n" );
+					return EXIT_FAILURE;
+				}
+
+				if ( argv[ cur_arg ][ 2 ] == '\0' && cur_arg + 1 >= argc )
+				{
+					fprintf( stderr, "fsc2 -T: No input file\n" );
+					return EXIT_FAILURE;
+				}
+
+				fname = argv[ cur_arg ][ 2 ] != '\0' ?
+					    &argv[ cur_arg ][ 2 ] : argv[ ++cur_arg ];
+
+				do_load = SET;
+				do_test = SET;
+				cur_arg++;
+				continue;
+			}
+
+			do_load = SET;
+			fname = argv[ cur_arg ];
+			break;
+		}
 	}
-	else
-		just_testing = UNSET;
 
 	/* Check via the lock file if there is already a process holding a lock,
 	   otherwise create one. This, as well as the following check for stale
 	   shared memory segments has to be done with the effective user ID, i.e.
-	   the UID of fsc2.*/
+	   the UID of fsc2. */
 
 	if ( ! fsc2_locking( ) )
 		return EXIT_FAILURE;
@@ -103,11 +182,11 @@ int main( int argc, char *argv[ ] )
 
 	/* If there is a file as argument try to load it */
 
-	if ( argc > 1 )
+	if ( do_load )
 	{
 		TRY
 		{
-			in_file = get_string_copy( argv[ 1 ] );
+			in_file = get_string_copy( fname );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -116,10 +195,28 @@ int main( int argc, char *argv[ ] )
 		load_file( main_form->browser, 1 );
 	}
 
-	/* Loop until quit button is pressed and there is no experiment running */
+	/* Test or start current EDL program if the appropriate flags were passed
+	   to to the program */
 
-	while ( fl_do_forms( ) != main_form->quit )
-		;
+	if ( do_test && is_loaded )
+		fl_trigger_object( main_form->test_file );
+	if ( do_start && is_loaded )
+		fl_trigger_object( main_form->run );
+
+	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
+		 != -1 )
+	{
+		/* Loop until quit button is pressed and there is no experiment
+		   running */
+
+		if ( do_signal )
+			kill( getppid( ), SIGUSR1 );
+		while ( fl_do_forms( ) != main_form->quit )
+			;
+		kill( conn_pid, SIGTERM );
+	}
+	else
+		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
 	/* Do everything necessary to end the program */
 
@@ -256,13 +353,20 @@ void load_file( FL_OBJECT *a, long reload )
 
 	a = a;
 
+	if ( conn_pid >= 0 )
+		kill( BUSY_SIGNAL, conn_pid );
+
 	/* If new file is to be loaded get its name, otherwise use previous name */
 
 	if ( ! reload )
 	{
 		fn = fl_show_fselector( "Select input file:", NULL, "*.edl", NULL );
 		if ( fn == NULL )
+		{
+			if ( conn_pid )
+				kill( UNBUSY_SIGNAL, conn_pid );
 			return;
+		}
 	}
 	else
 		fn = in_file;
@@ -281,6 +385,8 @@ void load_file( FL_OBJECT *a, long reload )
 		OTHERWISE
 		{
 			in_file = old_in_file;
+			if ( conn_pid >= 0 )
+				kill( UNBUSY_SIGNAL, conn_pid );
 			return;
 		}
 
@@ -292,6 +398,8 @@ void load_file( FL_OBJECT *a, long reload )
 	if ( reload && fn == '\0' )
 	{
 		fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
+		if ( conn_pid >= 0 )
+			kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
@@ -304,12 +412,16 @@ void load_file( FL_OBJECT *a, long reload )
 		else
 			fl_show_alert( "Error", "Sorry, no permission to read file:",
 						   fn, 1 );
+		if ( conn_pid >= 0 )
+			kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
 	if ( ( fp = fopen( fn, "r" ) ) == NULL )
 	{
 		fl_show_alert( "Error", "Sorry, can't open file:", fn, 1 );
+		if ( conn_pid >= 0 )
+			kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
@@ -334,6 +446,8 @@ void load_file( FL_OBJECT *a, long reload )
 		    compilation.error[ WARN ] = 0;
 
 	fclose( fp );
+	if ( conn_pid >= 0 )
+		kill( UNBUSY_SIGNAL, conn_pid );
 }
 
 
@@ -483,6 +597,8 @@ void test_file( FL_OBJECT *a, long b )
 	a->u_ldata = 0;
 	b = b;
 
+	kill( BUSY_SIGNAL, conn_pid );
+
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
 
@@ -500,12 +616,14 @@ void test_file( FL_OBJECT *a, long b )
 	if ( ! is_loaded )
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
+		kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 		
     if ( is_tested )
 	{
 		fl_show_alert( "Warning", "File has already been tested.", NULL, 1 );
+		kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
@@ -519,10 +637,15 @@ void test_file( FL_OBJECT *a, long b )
 								  "file. Reload the file from disk?",
 								  "",
 								  2, "No", "Yes", "", 1 ) )
+		{
+			kill( UNBUSY_SIGNAL, conn_pid );
 			return;
+		}
+
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
 			return;
+		kill( BUSY_SIGNAL, conn_pid );
 	}
 
 	/* While the test is run the only accessible button is the test button
@@ -572,6 +695,8 @@ void test_file( FL_OBJECT *a, long b )
 	fl_set_object_lcol( main_form->run, FL_BLACK );
 	fl_activate_object( main_form->quit );
 	fl_set_object_lcol( main_form->quit, FL_BLACK );
+
+	kill( UNBUSY_SIGNAL, conn_pid );
 }
 
 
@@ -590,9 +715,12 @@ void run_file( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
+	kill( BUSY_SIGNAL, conn_pid );
+
 	if ( ! is_loaded )              /* check that there is a file loaded */
 	{
 		fl_show_alert( "Error", "Sorry, but no file is loaded.", NULL, 1 );
+		kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
@@ -601,6 +729,7 @@ void run_file( FL_OBJECT *a, long b )
 		test_file( main_form->test_file, 1 );
 		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 			return;
+		kill( BUSY_SIGNAL, conn_pid );
 	}
 	else
 	{
@@ -619,6 +748,7 @@ void run_file( FL_OBJECT *a, long b )
 				test_file( main_form->test_file, 1 );
 				if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 					return;
+				kill( BUSY_SIGNAL, conn_pid );
 			}
 		}
 	}
@@ -626,6 +756,7 @@ void run_file( FL_OBJECT *a, long b )
 	if ( ! state )               /* return if program failed the test */
 	{
 		fl_show_alert( "Error", "Sorry, but test of file failed.", NULL, 1 );
+		kill( UNBUSY_SIGNAL, conn_pid );
 		return;
 	}
 
@@ -657,7 +788,10 @@ void run_file( FL_OBJECT *a, long b )
 
 		if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
 								  2, "No", "Yes", "", 1 ) )
+		{
+			kill( UNBUSY_SIGNAL, conn_pid );
 			return;
+		}
 	}		
 
 	/* Finally start the experiment */
@@ -672,6 +806,8 @@ void run_file( FL_OBJECT *a, long b )
 		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
 	}
+
+	kill( UNBUSY_SIGNAL, conn_pid );
 }
 
 

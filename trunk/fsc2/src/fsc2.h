@@ -13,6 +13,7 @@
 
 #define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
 
+#define FSC2_SOCKET  "/tmp/fsc2.uds"
 
 /* AWK might be defined via compiler flags - otherwise define it here */
 
@@ -94,9 +95,10 @@
 #include "graph_handler_2d.h"
 #include "print.h"
 #include "func_intact.h"
+#include "conn.h"
 
 
-/* The diverse lexers */
+/* Some global functions */
 
 void clean_up( void );
 bool scan_main( char *file );
@@ -156,7 +158,8 @@ FD_input_form *input_form;
 
 int I_am = PARENT;
 int pd[ 4 ];                    /* pipe descriptors */
-int child_pid = 0;              /* pid of child */
+pid_t child_pid = 0;            /* pid of child */
+pid_t conn_pid = -1;            /* pid of communication child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
 bool react_to_do_quit = SET;
@@ -210,7 +213,8 @@ extern FD_input_form *input_form;
 
 extern int I_am;
 extern int pd[ ];                  /* pipe descriptors */
-extern int child_pid;              /* pid of child */
+extern pid_t child_pid;            /* pid of child */
+extern pid_t conn_pid;
 extern volatile bool do_send;      /* globals used with the signal handlers */
 extern volatile bool do_quit;
 extern bool react_to_do_quit;
