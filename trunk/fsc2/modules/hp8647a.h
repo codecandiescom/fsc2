@@ -34,7 +34,7 @@ Var *synthesizer_sweep_down( Var *v );
 Var *synthesizer_reset_frequency( Var *v );
 Var *synthesizer_use_table( Var *v );
 Var *synthesizer_attenuation( Var *v );
-
+Var *synthesizer_att_ref_freq( Var *v );
 
 
 typedef struct {
