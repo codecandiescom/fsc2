@@ -75,15 +75,15 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		if ( f->is_inverted )
 		{
 			print( FATAL, "Function '%s' has been set to use inverted logic. "
-				   "This can't be done with TRIGER_OUT channel.\n",
+				   "This can't be done with TRIGGER_OUT channel.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
 
 		if ( f->is_high_level || f->is_low_level )
 		{
-			print( FATAL, "For function '%s', associated with Trigger Out, no "
-				   "voltage levels can be set.\n",
+			print( FATAL, "For function '%s', associated with a TRIGGER_OUT "
+				   "channel, no voltage levels can be set.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
@@ -130,7 +130,7 @@ bool hfs9000_invert_function( int function )
 	if ( hfs9000.function[ function ].channel != NULL &&
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Polarity of function '%s' associated with Trigger Out "
+		print( FATAL, "Polarity of function '%s' associated with TRIGGER_OUT "
 			   "can't be inverted.\n", Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -211,7 +211,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Function '%s' is associated with Trigger Out that "
+		print( FATAL, "Function '%s' is associated with TRIGGER_OUT that "
 			   "doesn't allow setting of levels.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
