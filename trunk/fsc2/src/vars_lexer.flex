@@ -1,6 +1,10 @@
 /*
   $Id$
+
   $Log$
+  Revision 1.5  1999/07/16 22:39:52  jens
+  *** empty log message ***
+
   Revision 1.4  1999/07/16 22:39:41  jens
   *** empty log message ***
 
