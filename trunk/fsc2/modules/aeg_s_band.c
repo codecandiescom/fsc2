@@ -325,7 +325,7 @@ Var *magnet_setup( Var *v )
 	if ( err_flag )
 		THROW( EXCEPTION );
 
-	if ( VALUE( v->next ) < AEG_S_BAND_MIN_FIELD_STEP )
+	if ( fabs( VALUE( v->next ) ) < AEG_S_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, "%s:%ld: %s: Field sweep step size (%lf G) too "
 				"small, minimum is %f G.\n", Fname, Lc, DEVICE_NAME,
