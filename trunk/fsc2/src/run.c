@@ -1054,7 +1054,7 @@ static void wait_for_confirmation( void )
 	/* Tell parent that we're done and just wait for its DO_QUIT signal - if
 	   we can't send the signal to the parent stop the child. */
 
-    if ( kill( getppid( ), QUITTING ) == -1 )
+    if ( getppid( ) == 1 || kill( getppid( ), QUITTING ) == -1 )
 		_exit( child_return_status );           /* commit controlled suicide */
 
 	/* This seemingly infinite loop looks worse than it is, the child really
