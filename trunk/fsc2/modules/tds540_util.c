@@ -31,6 +31,7 @@ const char *tds540_ptime( double time )
 
 
 /*-----------------------------------------------------------------*/
+/* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
 void tds540_delete_windows( void )
@@ -374,9 +375,9 @@ void tds540_set_window( WINDOW *w )
 	if ( w == NULL )
 		return;
 
-		/* If all windows have the same width we only have to set the first
-		   cursor (and only if its not already at the correct position),
-		   otherwise we have to set both cursors */
+	/* If all windows have the same width we only have to set the first
+	   cursor (and only if its not already at the correct position),
+	   otherwise we have to set both cursors */
 
 	if ( tds540.is_equal_width )
 	{

@@ -31,6 +31,7 @@ const char *tds754a_ptime( double time )
 
 
 /*-----------------------------------------------------------------*/
+/* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
 void tds754a_delete_windows( void )
@@ -373,9 +374,9 @@ void tds754a_set_window( WINDOW *w )
 	if ( w == NULL )
 		return;
 
-		/* If all windows have the same width we only have to set the first
-		   cursor (and only if its not already at the correct position),
-		   otherwise we have to set both cursors */
+	/* If all windows have the same width we only have to set the first
+	   cursor (and only if its not already at the correct position),
+	   otherwise we have to set both cursors */
 
 	if ( tds754a.is_equal_width )
 	{

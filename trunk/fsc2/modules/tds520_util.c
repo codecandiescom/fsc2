@@ -31,6 +31,7 @@ const char *tds520_ptime( double time )
 
 
 /*-----------------------------------------------------------------*/
+/* Deletes a window by removing it from the linked list of windows */
 /*-----------------------------------------------------------------*/
 
 void tds520_delete_windows( void )
