@@ -891,7 +891,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			else
 				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
 									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 == VALUE( v2 ) );
+									 == VALUE( v2 ) ||);
 			break;
 
 		case COMP_UNEQUAL :
@@ -1031,14 +1031,11 @@ Var *vars_push( int type, ... )
 	va_list ap;
 
 
-	/* Get memory for the new variable to be appended to the stack
-	   and set its type */
+	/* Get memory for the new variable to be appended to the stack, set its
+	   type and initialize some fields */
 
 	new_stack_var = T_malloc( sizeof( Var ) );
 	new_stack_var->type = type;
-
-	/* Clear its `flag' and set the `name' and `next' entry to NULL... */
-
 	new_stack_var->name = NULL;
 	new_stack_var->next = NULL;
 	new_stack_var->flags = 0;
@@ -1066,9 +1063,8 @@ Var *vars_push( int type, ... )
 
 		case FUNC :
 
-			/* Understanding the function pointer seems to be too complicated
-			   for va_arg() when written directly thus `FnctPtr' is a typedef
-			   (see start of file) */
+			/* Understanding a function pointer is too complicated for
+			   va_arg() thus `FnctPtr' is a typedef (see start of file) */
 
 			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
 			break;
