@@ -180,7 +180,7 @@ cond_check( );
 
 if ( $ARGV[ 1 ] ) {
     open( $of, ">" . $ARGV[ 1 ] )
-        or die "Can't open ouput file " . $ARGV[ 0 ] . ": $!\n";
+        or die "Can't open output file " . $ARGV[ 0 ] . ": $!\n";
 }
 
 select $of;
