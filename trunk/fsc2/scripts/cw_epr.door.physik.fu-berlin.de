@@ -211,7 +211,7 @@ my $ne;
 if ( $ARGV[ 0 ] ) {
 	open( F, "<$ARGV[ 0 ]" ) or return;
 } else {
-	open( F, "<$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
+	open( F, "<$ENV{ HOME }/.fsc2/cw_epr" ) or return;
 }
 
 goto done_reading unless defined( $ne = <F> ) and is_signed_numeric( $ne );
@@ -251,7 +251,7 @@ sub store_defs {
 	local *F;
 
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	open( F, ">$ENV{ HOME }/.fsc2/.cw_epr" ) or return;
+	open( F, ">$ENV{ HOME }/.fsc2/cw_epr" ) or return;
 
 	$start_cur = 0 if $start_cur eq ".";
 	$end_cur = 0 if $end_cur eq ".";
