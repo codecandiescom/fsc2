@@ -199,7 +199,7 @@ int er035m_sa_exp_hook( void )
 	if ( nmr.resolution == UNDEF_RES )
 		nmr.resolution = cur_res;
 	else if ( nmr.resolution != cur_res )
-		er035m_sa_set_resolution( res_list[ nmr.resolution ] );
+		er035m_sa_set_resolution( nmr.resolution );
 
 	/* Ask gaussmeter to send status byte and test if it does */
 

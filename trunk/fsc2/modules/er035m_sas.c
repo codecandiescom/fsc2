@@ -209,7 +209,7 @@ int er035m_sas_exp_hook( void )
 	if ( nmr.resolution == UNDEF_RES )
 		nmr.resolution = cur_res;
 	else if ( nmr.resolution != cur_res )
-		er035m_sas_set_resolution( res_list[ nmr.resolution ] );
+		er035m_sas_set_resolution( nmr.resolution );
 
 	/* Ask gaussmeter to send status byte and test if it does - sometimes the
 	   fucking thing does not answer (i.e. it just seems to send the prompt
@@ -584,7 +584,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 	}
 
 	print( FATAL, "Device does not allow setting of probe orientation.\n" );
-	THROW( EXPERIMENT );
+	THROW( EXCEPTION );
 
 	return NULL;
 }
@@ -785,7 +785,7 @@ static bool er035m_sas_write( const char *buf )
 
 		TRY
 		{
-			wrbuf = T_malloc( wrlen + 1 );
+			wrbuf = CHAR_P T_malloc( wrlen + 1 );
 			TRY_SUCCESS;
 		}
 

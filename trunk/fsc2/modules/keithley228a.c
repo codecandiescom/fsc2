@@ -271,7 +271,7 @@ int keithley228a_end_of_exp_hook( void )
 
 void keithley228a_exit_hook( void )
 {
-	keithley228a.lockin_append = T_free( keithley228a.lockin_append );
+	keithley228a.lockin_append = CHAR_P T_free( keithley228a.lockin_append );
 }
 
 
