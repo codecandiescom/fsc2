@@ -360,7 +360,7 @@ typedef struct {
    commands need write access to the structure passed to ioctl() because
    status and error states are returned via this structure. */
 
-#define NI_DAQ_MAGIC_IOC    'j'
+#define NI_DAQ_MAGIC_IOC  'j'
 
 #define NI_DAQ_IOC_DIO    _IOWR( NI_DAQ_MAGIC_IOC, 0x90, NI_DAQ_DIO_ARG  )
 #define NI_DAQ_IOC_GPCT   _IOWR( NI_DAQ_MAGIC_IOC, 0x91, NI_DAQ_GPCT_ARG )
