@@ -26,6 +26,10 @@ use Tk::Balloon;
 use strict;
 use Tk;
 
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
 my $lockin		       = 'SR810';
 my $start_field        = 3350;
 my $end_field	       = 3500;
