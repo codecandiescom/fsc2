@@ -7,17 +7,16 @@
 
 DEVICES:
 
-//hp8647a;                     // RF synthesizer
-//tds520;                      // digitizer
-//er035m_sas;                  // gauss meter
+hp8647a;                     // RF synthesizer
+tds520;                      // digitizer
+er035m_sas;                  // gauss meter
 
 
 VARIABLES:
 
 start_freq  =  8 MHz;
 end_freq    = 22 MHz;
-step_freq   = 150 kHz;
-//step_freq   = 25 kHz;          
+step_freq   = 25 kHz;          
 
 attenuation = -5 db;
 
@@ -26,8 +25,8 @@ N_averages  = 16;            // number of averages per frequency
 
 N_max_base_curves = 10;      // how many curve to use for baseline correction
 
-channel = 0;                 // i.e. CH1 is input channel of the digitizer
-                             // (use 1, 2 or 3 for CH2, Ch3 or CH4)
+channel = CH1;               // input channel of the digitizer
+
 
 /***********************************************/
 /* Nothing needs to be changed below this line */
@@ -37,10 +36,9 @@ freq = start_freq;
 
 N_steps = round( ( end_freq - start_freq ) / step_freq ) + 1;
 
-//curve[ * ];
-curve[ 500 ];
-mean_curve[ N_steps, * ];
-base_curve[ * ];
+curve[ * ];                      // for new raw data
+mean_curve[ N_steps, * ];        // complete field of averaged data
+base_curve[ * ];                 // averaged baseline curve
 Pretrigger;
 ground = 0.0;
 mean_ground[ N_steps ];
@@ -58,25 +56,25 @@ N_base_curves;
 integ, base_int;
 integral[ 2 ];
 
-F1, F2, F3;
-I, J, K;
-S1, S2;
-B1, B2;
+I, J, K;                         // counters
+
+F1, F2, F3;                      // file handlers
+S1, S2;                          // slider handlers
+B1, B2;                          // button handlers
 
 End_index;
-M;
 Is_stored = 0;
 
 
 PREPARATIONS:
 
-//synthesizer_use_table( );
-//synthesizer_attenuation( attenuation );
-//synthesizer_frequency( start_freq );
-//synthesizer_att_ref_freq( 14 MHz );
-//synthesizer_modulation( "OFF" );
+synthesizer_use_table( );
+synthesizer_attenuation( attenuation );
+synthesizer_frequency( start_freq );
+synthesizer_att_ref_freq( 14 MHz );
+synthesizer_modulation( "OFF" );
 
-//digitizer_num_averages( N_averages );
+digitizer_num_averages( N_averages );
 
 init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
 		 "Time / us", "Radio frequency / MHz", "Signal / mV" );
@@ -84,21 +82,16 @@ init_2d( 3, 0, N_steps, 0, 0, start_freq * 1.0e-6, step_freq * 1.0e-6,
 
 EXPERIMENT:
 
-//synthesizer_state( "ON" );
+synthesizer_state( "ON" );
 
 
-/* Get the digitizers record length, the trigger position and the time base
-   to be able to readjust the RF scale and to find out how many points we
-   have before the laser starts - these points are used to get rid of changing
-   'zero levels' */
+/* Get the digitizers record length, trigger position and time base to be able
+   to readjust the RF scale and to find out how many points we have before the
+   laser starts - these points are used to get rid of changing 'zero levels' */
 
-//Rec_len   = digitizer_record_length( );
-//trig_pos  = digitizer_trigger_position( );
-//time_base = digitizer_timebase( );
-
-Rec_len = 500;
-trig_pos = 0.1;
-time_base = 100 ns;
+Rec_len   = digitizer_record_length( );
+trig_pos  = digitizer_trigger_position( );
+time_base = digitizer_timebase( );
 
 time_res  = time_base * 1.0e9 / 50.0;
 
@@ -122,9 +115,9 @@ fsave( F2, "% Attenuation      = # dB\n", attenuation );
 fsave( F2, "% Record length    = #\n", Rec_len );
 fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
 fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
-//fsave( F2, "%Sensitivity       = # mV\n",
-//	   1.0e3 * digitizer_sensitivity( CH1 ) );
-//fsave( F2, "% Field            = # G\n", measure_field( ) );
+fsave( F2, "%Sensitivity       = # mV\n",
+	   1.0e3 * digitizer_sensitivity( channel ) );
+fsave( F2, "% Field            = # G\n", measure_field( ) );
 save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
 			  "Microwave power: \nTemperature: \n" );
 
@@ -150,9 +143,9 @@ FOR J = 1 : N_runs
 	/* Set the synthesizer to the start frequency and start an acquisition */
 
 	freq = start_freq;
-//	synthesizer_frequency( freq );
+	synthesizer_frequency( freq );
 
-//	digitizer_start_acquisition( );
+	digitizer_start_acquisition( );
 
     FOR I = 1 : N_steps
 	{
@@ -160,23 +153,7 @@ FOR J = 1 : N_runs
 
 		/* Get next curve from the digitizer */
 
-//		curve = digitizer_get_curve_fast( channel );
-		wait( 0.5 s );
-		FOR M = 1 : Rec_len
-		{
-			IF M < Rec_len / 10
-			{
-				curve[ M ] = 2.5e-9 * random();
-			}
-			ELSE
-			{
-				curve[ M ] =
-					  1.0e-9 * exp( - ( 0.1 * ( I - N_steps / 2 ) )^2
-						            - 0.005 * ( M - Rec_len / 10 ) )
-                    + 2.5e-9 * random( ) + 5.0e-9;
-			}
-		}
-		curve += 2.0e-9 * random( );
+		curve = digitizer_get_curve_fast( channel );
 
 		/* If this wasn't the very last curve of the run set the new frequency
 		   and already start the next masurement, so we're not loosing time 
@@ -185,8 +162,8 @@ FOR J = 1 : N_runs
 		IF I != N_steps
 		{
 	        freq += step_freq;
-//			synthesizer_frequency( freq );
-//			digitizer_start_acquisition( );
+			synthesizer_frequency( freq );
+			digitizer_start_acquisition( );
 		}
 
 		/* Save the new date to file */
@@ -277,7 +254,7 @@ FOR J = 1 : N_runs
 
 ON_STOP:
 
-//synthesizer_state( "OFF" );
+synthesizer_state( "OFF" );
 
 /* Save the averaged data if a file has been selected */
 
