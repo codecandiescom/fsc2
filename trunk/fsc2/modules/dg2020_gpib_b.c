@@ -180,7 +180,10 @@ bool dg2020_init( const char *name )
 #ifndef DG2020_B_GPIB_DEBUG
 	char reply[ 100 ];
 	long len = 100;
+#else
+	name = name;
 #endif
+
 
 
 	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
