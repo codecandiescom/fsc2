@@ -15,11 +15,6 @@
 
 /*
   <RANT>
-  The guys that wrote the firmware of this digitizer as well as the
-  documentation are not only a fucking bunch of morons but should be
-  quartered, hanged and burned. Not only did they introduce some very annoying
-  bugs but also made live a hell for the programmers that have no choice but
-  to try to use their piece of crap.
 
   Here a few of the bugs as far as I found them yet (text taken from an email
   I sent to Tektronix/Sony):
@@ -92,7 +87,7 @@
 
   Why do they have to have a minimum block size of 64 bits? Without this
   limitation you could do a lot of things in a real nice way, but so all you
-  can do is to write a lot of bloody hacks and really cool things are simply
+  can do is to write a lot of bloody hacks but really useful things are simply
   impossible to do.
 
   Just another problem with the documentation: Why is there no comprehensible
@@ -109,7 +104,7 @@
   the impression that Tektronix's devices are quite good and especially the
   programming interface was real good but since they have been bought up by
   Sony much seems to have gone down the drain. Obviously, people at Sony have
-  aproblem understanding the difference between a walkman and a pulse data
+  a problem understanding the difference between a walkman and a pulse data
   generator...
 
   </RANT>
@@ -121,6 +116,19 @@
 #include "dg2020_f.h"
 #include "gpib.h"
 
+typedef struct _dg2020_store_ {
+	int channel;
+	Ticks address;
+	Ticks length;
+	int state;
+	struct _dg2020_store_ *next;
+	struct _dg2020_store_ *prev;
+} DG2020_STORE;
+
+static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
+							   int state );
+static bool dg2020_gpib_check( void );
+static bool dg2020_gpib_do_check( DG2020_STORE *params );
 
 
 /*------------------------------------------------------*/
@@ -377,7 +385,7 @@ bool dg2020_update_data( void )
 	if ( gpib_write( dg2020.device, "DATA:UPD", 8 ) == FAILURE )
 		dg2020_gpib_failure( );
 
-	return OK;
+	return dg2020_gpib_check( );
 }
 
 
@@ -530,13 +538,6 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 	Ticks m, n;
 	char s = ( state ? '1' : '0' );
 
-/*
-	printf( "SET: ch = %2d to %1d, at: %8ld, len = %8ld\n", channel, state,
-			address, length );
-*/
-
-	address++;        /* because of the first unset bit */
-
 	/* The following is a dirty hack to get around the 63K write limit by
 	   splitting transfers that would be too long into several shorter ones.
 	   This should go away when the problem is finally solved !!!!!!! */
@@ -553,9 +554,17 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 		return OK;
 	}
 
-	/* Check parameters, allocate memory and set up start of command string */
+	/* In order to check that the command really arrived at the pulser and has
+	   been executed we have to store each change and compare it with the
+	   actual state after an update comand */
 
-	if ( ! dg2020_prep_cmd( &cmd, channel, address, length ) )
+	dg2020_gpib_store( channel, address, length, state );
+
+	/* Check parameters, allocate memory and set up start of command string.
+	   Because the very first bit in a channel alway has to stay unset we
+	   have not to use address but the increment of address! */ 
+
+	if ( ! dg2020_prep_cmd( &cmd, channel, address + 1, length ) )
 		return FAIL;
 
 	/* Assemble rest of command string */
@@ -672,4 +681,281 @@ void dg2020_gpib_failure( void )
 	eprint( FATAL, "%s: Communication with device failed.\n",
 			pulser_struct.name );
 	THROW( EXCEPTION );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Unfortunately, the Frankfurt pulser sometimes doesn't execute a command */
+/* to set or clear some bits in a channel. Since I don't have any idea why */
+/* but this can completely destroy a measurement the following is a hack   */
+/* to avoid this kind of errors:                                           */
+/* Each time bits are set this is stored by a call of dg2020_gpib_store(). */
+/* Now, after each update of the pulser by a call of dg2020_update_data()  */
+/* dg2020_gpib_check() is called. Here the patterns changed by previous    */
+/* commands are read in from the pulser and compared with the state they   */
+/* should be in (this can't be done immediately after the setting because  */
+/* we get a valid reply only after the update command). If we detect a     */
+/* difference the corresponding command is repeated and the result again   */
+/* is checked. In order to avoid getting into an infinite loop of failed   */
+/* commands this cycle is only repeated 'MAX_CHECK_RETRIES' times (see     */
+/* definition below).                                                      */
+/* Unfortunately, this checking will increase the time to setup the pulser */
+/* quite a lot. To get rid of the checking just comment out the line       */
+/*                                                                         */
+/* 	   dg2020_gpib_store( channel, address, length, state );               */
+/*                                                                         */
+/* in the function dg2020_set_constant().                                  */
+/*-------------------------------------------------------------------------*/
+
+#define MAX_CHECK_RETRIES 3
+
+static DG2020_STORE *dst = NULL;
+static int check_retries = 0;
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
+							   int state )
+{
+	DG2020_STORE *cur = dst;
+
+
+	/* Setup a linked list of all pulse changing commands */
+
+	if ( dst == NULL )
+	{
+		dst = cur = T_malloc( sizeof( DG2020_STORE ) );
+		cur->prev = cur->next = NULL;
+	}
+	else
+	{
+		while ( cur->next != NULL )
+			cur = cur->next;
+
+		cur->next = T_malloc( sizeof( DG2020_STORE ) );
+		cur->next->prev = cur;
+		cur = cur->next;
+		cur->next = NULL;
+	}
+
+	cur->channel = channel;
+	cur->address = address;
+	cur->length = length;
+	cur->state = state;
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static bool dg2020_gpib_check( void )
+{
+	DG2020_STORE *cur = dst,
+		         *tmp,
+		         *old_dst;
+	bool result = OK;
+
+
+	/* Return immediately if there's nothing to check */
+
+	if ( dst == NULL )
+		return OK;
+
+	/* Do a check on each of the commands - if everything is ok remove the
+	   entry from the list. So we end up with a list of just the commands
+	   that failed.*/
+
+	while ( cur != NULL )
+	{
+		if ( dg2020_gpib_do_check( cur ) )           /* everything ok ? */
+		{
+			if ( cur->prev != NULL )
+				cur->prev->next = cur->next;
+			if ( cur->next != NULL )
+				cur->next->prev = cur->prev;
+			if ( cur == dst )
+				dst = cur->next;
+			tmp = cur->next;
+			T_free( cur );
+			cur = tmp;
+		}
+		else
+		{
+			gpib_log_message( "dg2020_set_constant( %d, %ld, %ld, %d ) "
+							  "failed.\n", cur->channel, cur->address,
+							  cur->length, cur->state );
+			result = FAIL;
+			cur = cur->next;
+		}
+	}
+
+	/* If everything is ok the command list is removed and we just return */
+
+	if ( result )
+	{
+		check_retries = 0;
+		return OK;
+	}
+
+	/* We give up if there were already enough retries - this is necessary to
+       avoid getting into an infinite loop of failed commands */
+
+	if ( check_retries++ >= MAX_CHECK_RETRIES )
+	{
+		/* Throw away the list of failed commands */
+
+		while ( dst != NULL )
+		{
+			tmp = dst->next;
+			T_free( dst );
+			dst = tmp;
+		}
+
+		check_retries = 0;
+		return FAIL;
+	}
+
+	/* Redo all the failed commands - we still need the list of the old
+       commands to deallocate it while the retries create a new list */
+
+	cur = old_dst = dst;
+	dst = NULL;
+	result = OK;
+
+	while ( cur != NULL )
+	{
+		if ( ! dg2020_set_constant( cur->channel, cur->address, cur->length,
+									cur->state ) )
+		{
+			result = FAIL;
+			break;
+		}
+
+		cur = cur->next;
+	}
+
+	/* Get rid of the old list */
+
+	while ( old_dst != NULL )
+	{
+		tmp = old_dst->next;
+		T_free( old_dst );
+		old_dst = tmp;
+	}
+
+	/* If redoing the commands failed we're out of options - we just delete
+	   the newly created command list and return the failure status */
+
+	if ( result != OK )
+	{
+		while ( dst != NULL )
+		{
+			tmp = dst->next;
+			T_free( dst );
+			dst = tmp;
+		}
+
+		check_retries = 0;
+		return FAIL;
+	}
+
+	/* Now, to commit the changes, we call the update function - this, in
+	   turn, leads to the checks done here being called again */
+
+	return dg2020_update_data( );
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+static bool dg2020_gpib_do_check( DG2020_STORE *params )
+{
+	char cmd[ 100 ] = "DATA:PATT:BIT? ";
+	char *reply;
+	char *ptr;
+	long length;
+	long got_count;
+	int got_count_digits;
+	char state_char = ( params->state ? '1' : '0' );
+	int i;
+	
+
+	/* Let's be paranoid */
+
+	if ( params->length < 1 )
+		return OK;
+
+	/* Allocate enough space for the pulsers reply */
+
+	length = params->length + 30;
+	reply = T_malloc( length * sizeof( char ) );
+
+	/* Assemble the command string - because of the first bit problem we have
+	   to use the increment of address, see also dg2020_set_constant() */
+
+	sprintf( cmd + strlen( cmd ), "%d,%ld,%ld", params->channel,
+			 params->address + 1, params->length );
+
+	/* Send command and receive reply */
+
+	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( dg2020.device, reply, &length ) == FAILURE )
+	{
+		T_free( reply );
+		dg2020_gpib_failure( );
+	}
+
+	/* The interesting part of the reply starts with a '#' character */
+
+	ptr = reply;
+	while ( *ptr != '#' && ptr < reply + length )
+		ptr++;
+
+	/* If no '#' could be found we're in deep trouble... */
+
+	if ( *ptr != '#' )
+	{
+		T_free( reply );
+		return FAIL;
+	}
+
+	/* The first byte is the number of digits of the next number... */
+
+	ptr++;
+	got_count_digits = ( int ) ( *ptr++ - '0' );
+
+	if ( got_count_digits < 1 )         /* paranoia */
+	{
+		T_free( reply );
+		return FAIL;
+	}
+		
+	/* The next number is the number of relevant bytes */
+
+	for ( got_count = 0, i = 0; i < got_count_digits; i++ )
+		got_count = got_count * 10 + ( long ) ( *ptr++ - '0' );
+
+	/* The number of bytes we got as the reply must be as long as we asked for
+       - another symptom of paranoia ;-) */
+
+	if ( got_count != params->length )
+	{
+		T_free( reply );
+		return FAIL;
+	}
+
+	/* Now check that the bytes received show the correct state */
+
+	for ( i = 0; i < got_count; i++ )
+		if ( *ptr++ != state_char )
+			break;                     /* whoops, an error ! */
+
+	T_free( reply );
+
+	/* If we got to the end of the list of bytes everything is ok */
+
+	return ( i == got_count ? OK : FAIL );
 }
