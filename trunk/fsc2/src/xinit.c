@@ -839,7 +839,43 @@ void win_slider_callback( FL_OBJECT *a, UNUSED_ARG long b )
 	fl_unfreeze_form( GUI.main_form->fsc2 );
 }
 
+
+/*-----------------------------------------------------*/
+/* Function for figuring out if a window is iconified. */
+/* Returns 1 if it is, 0 if it in't and -1 on errors.  */
+/*-----------------------------------------------------*/
+
+int is_iconic( Window w )
+{
+	Atom a, act_type;
+	int act_format;
+	unsigned long nitems, left_over;
+	unsigned long *prop = NULL;
+	int ret;
+
+	if ( ( a = XInternAtom( fl_get_display( ), "WM_STATE", True ) ) == 0 )
+		return -1;
+
+	ret = XGetWindowProperty( fl_get_display( ), w, a, 0,
+							  ( CHAR_BIT * sizeof prop ) / 32,
+							  False, AnyPropertyType, &act_type, &act_format,
+							  &nitems, &left_over, ( char ** ) &prop );
+
+	if ( ret != Success || prop == NULL || act_type != a || nitems != 1L )
+	{
+		if ( prop != NULL )
+			XFree( ( char * ) prop );
+		return -1;
+	}
+
+	ret = *prop == IconicState;           /* defined in <X11/Xutil.h> */
+	XFree( ( char * ) prop );
+	return ret;
+}
+
+
 #if 0
+
 
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
