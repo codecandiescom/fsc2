@@ -3,7 +3,7 @@ samp { font-family:monospace;
 	   color:#AA0000;
 	 }
 
-td.example { background-color:#FFFFE0;
+td.example { background-color:#FFFF44;
              padding-top:1.5mm;
              padding-bottom:1.5mm;
              padding-left:4mm;
@@ -12,7 +12,7 @@ td.example { background-color:#FFFFE0;
 			 border-style:solid;
 		   }
 
-table.navi { background-color:#EEEEEE;
+table.navi { background-color:#CCCCCC;
 	         cellpadding:4;
 		     cellspacing:0;
 		     border:0;

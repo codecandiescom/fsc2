@@ -1196,28 +1196,45 @@ void run_help( FL_OBJECT *a, long b )
 
 static void start_help_browser( void )
 {
+	char *browser;
 	char *av[ 4 ] = { NULL, NULL, NULL, NULL };
 
 
-	/* If netscape isn't running start it, otherwise ask it to just open a
-	   new window */
+	/* Try to figure out which browser to use... */
 
-	av[ 0 ] = T_strdup( "netscape" );
+	browser = getenv( "BROWSER" );
 
-	if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
+	if ( browser && ! strcasecmp( browser, "Opera" ) )
 	{
-		av[ 1 ] = get_string( 20 + strlen( docdir ) );
-		strcpy( av[ 1 ], "file:" );
-		strcat( av[ 1 ], docdir );
-		strcat( av[ 1 ], "fsc2_frame.html" );
+		av[ 0 ] = T_strdup( "opera" );
+		av[ 1 ] = T_strdup( "-newbrowser" );
+		av[ 2 ] = get_string( 21 + strlen( docdir ) );
+		strcpy( av[ 2 ], "file:/" );
+		strcat( av[ 2 ], docdir );
+		strcat( av[ 2 ], "fsc2_frame.html" );
 	}
 	else
 	{
-		av[ 1 ] = T_strdup( "-remote" );
-		av[ 2 ] = get_string( 40 + strlen( docdir ) );
-		strcpy( av[ 2 ], "openURL(file:" );
-		strcat( av[ 2 ], docdir );
-		strcat( av[ 2 ], "fsc2_frame.html,new-window)" );
+		/* If netscape isn't running start it, otherwise ask it to just open
+		   a new window */
+
+		av[ 0 ] = T_strdup( "netscape" );
+
+		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
+		{
+			av[ 1 ] = get_string( 20 + strlen( docdir ) );
+			strcpy( av[ 1 ], "file:" );
+			strcat( av[ 1 ], docdir );
+			strcat( av[ 1 ], "fsc2_frame.html" );
+		}
+		else
+		{
+			av[ 1 ] = T_strdup( "-remote" );
+			av[ 2 ] = get_string( 40 + strlen( docdir ) );
+			strcpy( av[ 2 ], "openURL(file:" );
+			strcat( av[ 2 ], docdir );
+			strcat( av[ 2 ], "fsc2_frame.html,new-window)" );
+		}
 	}
 
 	execvp( av[ 0 ], av );

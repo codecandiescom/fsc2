@@ -7,9 +7,12 @@
 @menu
 * Pulser Overview::        Introduction
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
+* Creating Pulses::        How to create pulses
 @end menu
 @end ifinfo
 
+
+@c ########################################################
 
 @node Pulser Overview, Setting up the Pulser, Using Pulsers, Using Pulsers
 @section Pulser Overview
@@ -44,16 +47,23 @@ creation of pulses and their subsequent manipulation. These are
 identical for all pulsers.
 
 
-@node Setting up the Pulser, , Pulser Overview, Using Pulsers
+@c ########################################################
+
+@node Setting up the Pulser, Creating Pulses, Pulser Overview, Using Pulsers
 @section Setting up the Pulser
 
 The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
 cycling is planned for the experinment.
 
-@anchor{ASSIGNMENTS}
+
+@c ########################################################
+
+@anchor{ASSIGNMENTS section}
 @subsection @code{ASSIGNMENTS} section
 @cindex ASSIGNMENTS section
+
+@c ########################################################
 
 @anchor{Setting the TIMEBASE}
 @subsubsection Setting the @code{TIMEBASE}
@@ -86,6 +96,9 @@ pulsers:
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
 @end itemize
+
+
+@c ########################################################
 
 @anchor{Setting the trigger mode}
 @subsubsection Setting the trigger mode
@@ -152,6 +165,9 @@ TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
 Please note: The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020}.
+
+
+@c ########################################################
 
 @anchor{Channel setup}
 @subsubsection Channel setup
@@ -308,6 +324,8 @@ difficult:-). By the way, the keyword @code{DELAY} can be abbreviated to
 @code{DEL}.}.
 
 
+@c ########################################################
+
 @anchor{Phase channel setup}
 @subsubsection Phase channel setup
 @cindex Phase channel setup
@@ -419,14 +437,14 @@ Here's a diagram that shows the phase switch delay and the grace period:
                    ____________________________
                   |                            |
 Phase pulse       |                            |
-             _____|                            |____________
+             _____|                            |_________
                            _________________
                           |                 |
 Microwave pulse           |                 |
-             _____________|                 |_______________
-
+             _____________|                 |____________
+         
                 ->|       |<-             ->|  |<-
-              phase switch delay        grace period
+               phase switch delay        grace period
 @end example
 
 
@@ -435,4 +453,84 @@ between the pulses is large enough to allow setting the phase pulses. If
 the pulse distances get very small it may drop the grace period but the
 phase switch delay will always be there (or the program will abort with
 an error message).
+
+
+@c ########################################################
+
+@anchor{PHASES section}
+@subsubsection @code{PHASES} section
+@cindex Phases section
+
+@strong{Still to be written...}
+
+
+@c ########################################################
+
+
+@node Creating Pulses, , Setting up the Pulser, Using Pulsers
+@section Creating Pulses
+
+
+Every pulse has at least three properties: It has a unique number, a
+function, a start position. Actually, real pulses also need a length.
+All pulses are created in the @code{EXPERIMENT} section of the
+@acronym{EDL} program. Here's an example of how to create a pulser
+numbered one, that is a microwave pulse, starts at @w{100 ns} and
+has a length of @w{250 ns}:
+@example
+PULSE_1:    FUNCTION = MICROWAVE,
+            START    = 100 ns,
+            LENGTH   = 250 ns;
+@end example
+As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
+@code{PULSE1:}, @code{P_1:} or @code{P1:}, @code{FUNCTION} to either
+@code{FUNC} or @code{F}, @code{START} to @code{S}, and finally,
+@code{LENGTH} to @code{LEN} or @code{L}.
+
+Pulse numbers can be choosen at random, the only requirements are that
+the numbers are positive and not larger than 2147483647.
+
+
+There are three additional properties a pulse can have. The first one is
+the amount of time the start position of the pulse will change during
+the experiment, keyword is
+@code{DELTA_START}@footnote{@code{DELTA_START} can be abbreviated to
+@code{DELTASTART}, @code{DELTA_S}, @code{DELTAS}, @code{DEL_START},
+@code{DELSTART}, @code{DEL_S}, @code{DELS}, @code{D_START},
+@code{DSTART}, @code{D_S} or @code{DS}.)}. Second, there's the length
+change of the pulse, @code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH}
+can be shortened to @code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL},
+@code{DEL_LENGTH}, @code{DELLENGTH}., @code{DEL_L}. @code{DELL},
+@code{D_LENGTH}, @code{DLENGTH}, @code{DEL_L}, @code{DELL},
+@code{D_LENGTH}, @code{DLENGTH}, @code{D_L} or @code{DL}}. And finally,
+there is the phase sequence to be used for phase cycling of the by the
+pulse - here the keyword is
+@code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can also be written as
+@code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC}, @code{PH_CYCLE},
+@code{PHCYCLE}, @code{PH_C} or @code{PHC}}.
+
+With these additional properties (using for phase cycling of the pulse
+the first phase sequence defined in the @code{PHASES} section, see
+above) the definition of the pulse would look like this:
+@example
+PULSE_1:    FUNCTION     = MICROWAVE,
+            START        = 100 ns,
+            LENGTH       = 250 ns,
+            DELTA_START  = 20 ns,
+            DELTA_LENGTH = 35 ns,
+            PHASE_CYCLE  = PHASE_SEQUENCE_1;
+@end example
+
+In setting the properties of further pulses you can always use the
+properties of pulses already defined. You do this by giving the name of
+the pulse (e.g.@ @code{P} and the pulse number), followed by a dot and
+the property you want to use. If, for example, you want to create a
+second pulse, that is also a microwave pulse, starts @w{300 ns} after
+the end of the first pulse as defined above and is twice as long, you
+would write:
+@example
+PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
+            START        = PULSE_1.START + PULSE_1.LENGTH + 300 ns,
+            LENGTH       = 2 * PULSE_1.LENGTH;
+@end example
 
