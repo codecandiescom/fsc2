@@ -131,7 +131,9 @@ void load_functions( Device *dev )
 		dev->driver.is_end_of_exp_hook = UNSET;
 
 	/* If there is function with the name of the library file and the
-	   appended string "_init_hook" store it and set corresponding flag */
+	   appended string "_init_hook" store it and set corresponding flag
+	   (the string will be reused for the other hook functions, so make
+	   it long enough that the longest name will fit into it) */
 
 	hook_func_name = get_string( strlen( dev->name ) + 17 );
 	strcpy( hook_func_name, dev->name );
