@@ -755,6 +755,9 @@ void clean_up( void )
 	/* run exit hook functions and unlink modules */
 
 	delete_devices( );
+	need_GPIB = UNSET;
+	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+		need_Serial_Port[ i ] = UNSET;
 
 	/* delete function list */
 

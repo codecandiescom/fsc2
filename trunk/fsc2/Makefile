@@ -4,15 +4,15 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-#prefix         = /usr/local
-#bindir         = $(prefix)/bin
-#libdir         = $(prefix)/lib/fsc2
-#auxdir         = $(libdir)/aux
-
-prefix         = .
-bindir         = $(prefix)
-libdir         = $(prefix)
+prefix         = /usr/local
+bindir         = $(prefix)/bin
+libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
+
+#prefix         = .
+#bindir         = $(prefix)
+#libdir         = $(prefix)
+#auxdir         = $(libdir)/aux
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -180,8 +180,10 @@ install:
 	install -d $(libdir)
 	install -d $(auxdir)
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
+	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
+	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s *.xpm $(auxdir)
+	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 
 
 tags:
