@@ -1154,8 +1154,8 @@ void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 			continue;
 
 		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-		xp->y = i2shrt( G1.canvas.h ) - 1 -
-			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
+		xp->y = d2shrt( G1.canvas.h - 1 - cv->s2d[ Y ]
+						* ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
 		cv->left  |= ( xp->x < 0 );
 		cv->right |= ( xp->x >= ( int ) G1.canvas.w );
@@ -1229,7 +1229,7 @@ void redraw_canvas_1d( Canvas *c )
 							CoordModeOrigin );
 			}
 
-			/* Now draw the out of range arrows */
+			/* Finally draw the out of range arrows */
 
 			for ( i = 0 ; i < G1.nc; i++ )
 			{

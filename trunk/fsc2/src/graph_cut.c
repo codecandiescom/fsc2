@@ -1670,9 +1670,9 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 	UNUSED_ARGUMENT( obj );
 
-	/* We do event compression to avoid being flooded with motion events -
-	   instead of handling them all individually we only react to the latest
-	   in the series of motion events for the current window */
+	/* Do event compression to avoid being flooded with motion events -
+	   instead of handling them all individually only react to the latest
+	   in a series of motion events for the current window */
 
 	while ( fl_XEventsQueued( QueuedAfterReading ) > 0 )
 	{

@@ -517,9 +517,9 @@ static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 	if ( G2.active_curve == -1 )
 		return;
 
-	/* We need to do event compression to avoid being flooded with motion
-	   events - instead of handling them all individually we only react to
-	   the latest in the series of motion events for the current window */
+	/* Do event compression to avoid being flooded with motion events -
+	   instead of handling them all individually only react to the latest
+	   in a series of motion events for the current window */
 
 	while ( fl_XEventsQueued( QueuedAfterReading ) > 0 )
 	{
@@ -1310,11 +1310,14 @@ void redraw_canvas_2d( Canvas *c )
 
 	if ( c == &G2.canvas )
 	{
-		/* First draw the active curve */
+		/* First draw the active curve (unless the magnification isn't too
+		   large) */
 
 		if ( G2.active_curve != -1 &&
 			 G2.curve_2d[ G2.active_curve ]->count > 1 &&
-			 G2.curve_2d[ G2.active_curve ]->is_scale_set )
+			 G2.curve_2d[ G2.active_curve ]->is_scale_set && 
+			 G2.curve_2d[ G2.active_curve ]->w <= 2 * c->w &&
+			 G2.curve_2d[ G2.active_curve ]->h <= 2 * c->h )
 		{
 			cv = G2.curve_2d[ G2.active_curve ];
 
@@ -1323,6 +1326,15 @@ void redraw_canvas_2d( Canvas *c )
 				if ( sp->exist )
 				{
 					count--;
+
+					/* Don't draw if the rectangle isn't at least partially
+					   within the canvas (this seems to be faster than X
+					   setting the color and only then check the boundary) */
+
+					if ( xps->x > ( short int ) c->w ||
+						 xps->y > ( short int ) c->h ||
+						 - xps->x - 1 > cv->w || - xps->y - 1 > cv->h )
+						continue;
 
 					XSetForeground( G.d, cv->gc,
 									d2color( cv->z_factor
@@ -1970,11 +1982,11 @@ static inline unsigned long d2color( double a )
 	c_index = lrnd( a * ( NUM_COLORS - 1 ) );
 
 	if ( c_index < 0 )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 );
+		return G2.color_list[ NUM_COLORS ];
 	else if ( c_index < NUM_COLORS )
-		return fl_get_pixel( FL_FREE_COL1 + ( unsigned int ) c_index );
+		return G2.color_list[ c_index ];
 	else
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
+		return G2.color_list[ NUM_COLORS + 1 ];
 }
 
 
