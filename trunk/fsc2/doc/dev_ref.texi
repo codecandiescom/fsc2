@@ -44,7 +44,7 @@
 * rs690::         Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * hp5340a::       HP Frequency Counter HP5340A
 * hp8647a::       HP RF Synthesizer HP8647A
-* hp8648b::       HP RF Synthesizer HP8648b
+* hp8648b::       HP RF Synthesizer HP8648B
 * hp8672a::       HP RF Synthesizer HP8672A
 * ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
