@@ -246,7 +246,6 @@ try_again:
 						"NMR gaussmeter.", DEVICE_NAME );
 				THROW( EXCEPTION );
 				
-
 			case '1' :      /* Probe F1 is connected -> OK for X-band */
 				if ( exist_device( "aeg_x_band" ) )
 					break;
