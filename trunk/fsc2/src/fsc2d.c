@@ -27,6 +27,13 @@
 #include <sys/un.h>
 
 
+/* Stuff needed if we're still running an old libc */
+
+#if defined IS_STILL_LIBC1
+typedef unsigned int socklen_t;
+#endif
+
+
 /* Try to figure out the maximum length of a user name */
 
 #if defined _SC_LOGIN_NAME_MAX 

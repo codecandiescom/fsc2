@@ -442,11 +442,13 @@ Doing_Scan = 0;
 Doing_Sampling = 0;
 I = 1;
 I_start = 1;
-Mode = 0;
 
 B_swn, B_goto, B_stsz, B_mt, B_scan, B_samp,
 B_cwn, B_stop, B_rel, B_abs, B_clr;
 
+RELATIVE = 0,
+ABSOLUTE = 1;
+Mode = RELATIVE;
 
 PREPARATIONS:
 
@@ -485,10 +487,12 @@ FOREVER {
 			object_change_label( B_swn, "Scan start [cm^-1 rel.]" );
 			output_value( B_cwn, cwn );
 			object_change_label( B_cwn, "Current position [cm^-1 rel.]" );
-			change_label( "Wavenumber [cm^-1 rel.]" );
-			change_scale( old_start_wn - ( I_start - 1 ) * old_step_size,
-						  old_step_size );
-			Mode = 0;
+			IF ! Doing_Sampling {
+				change_label( "Wavenumber [cm^-1 rel.]" );
+				change_scale( old_start_wn - ( I_start - 1 ) * old_step_size,
+							  old_step_size );
+			}
+			Mode = RELATIVE;
 		}
 
 		IF button_changed( B_abs ) {
@@ -497,28 +501,32 @@ FOREVER {
 			object_change_label( B_swn, "Scan start [cm^-1 abs.]" );
 			output_value( B_cwn, ll - cwn );
 			object_change_label( B_cwn, "Current position [cm^-1 abs.]" );
-			change_label( "Wavenumber [cm^-1 abs.]" );
-			change_scale( ll - old_start_wn + ( I_start - 1 ) * old_step_size,
-						  - old_step_size );
-			Mode = 1;
+			IF ! Doing_Sampling {
+				change_label( "Wavenumber [cm^-1 abs.]" );
+				change_scale( ll - old_start_wn
+							  + ( I_start - 1 ) * old_step_size,
+							  - old_step_size );
+			}
+			Mode = ABSOLUTE;
 		}
 
 		IF input_changed( B_swn ) {
 			new = input_value( B_swn );
 
-			IF ( Mode == 0 &
+			IF ( Mode == RELATIVE &
 				 ( ll - new > 44000.0 | ll - new < 46000.0 / 3.0 ) ) |
-			   ( Mode == 1 &
+			   ( Mode == ABSOLUTE &
 				 ( new > 44000.0 | new < 46000.0 / 3.0 ) ) {
-				input_value( B_swn, Mode == 0 ? start_wn : ll - start_wn);
+				input_value( B_swn,
+							 Mode == RELATIVE ? start_wn : ll - start_wn);
 				NEXT;
 			}
 
-			start_wn = Mode == 0 ? new : ll - new;
-			IF ! Doing_Scan {
+			start_wn = Mode == RELATIVE ? new : ll - new;
+			IF ! ( Doing_Scan | Doing_Sampling ) {
 				object_enable( B_scan, "ON" );
 			}
-			IF Mode == 0 {
+			IF Mode == RELATIVE {
 				change_scale( start_wn + ( I - 1 ) * step_size, - step_size );
 			} ELSE {
 				change_scale( ll - start_wn - ( I - 1 ) * step_size,
@@ -528,11 +536,11 @@ FOREVER {
 
 		IF button_changed( B_goto ) {
 			button_state( B_goto );
-			IF cwn != start_wn {
-				cwn = start_wn;
-				output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
-				monochromator_wavenumber( Mode == 0 ? start_wn :
-										  ll - start_wn );
+			IF ( Mode == RELATIVE & cwn != start_wn ) |
+			   ( Mode == ABSOLUTE & cwn != ll - start_wn ) {
+				cwn = Mode == RELATIVE ? start_wn : ll - start_wn ;
+				output_value( B_cwn, cwn );
+				monochromator_wavenumber( start_wn );
 			}
 		}
 
@@ -564,7 +572,7 @@ FOREVER {
 			rescale( 32 );
 			I = 1;
 			old_start_wn = cwn;
-			IF Mode == 0 {
+			IF Mode == RELATIVE {
 				change_scale( cwn - ( I - 1 ) * step_size, step_size );
 			} ELSE {
 				change_scale( ll - cwn + ( I - 1 ) * step_size, - step_size );
@@ -572,15 +580,27 @@ FOREVER {
 		}
 
 		IF button_state( B_scan ) {
+			IF Mode == ABSOLUTE {
+				change_label( "Wavenumber [cm^-1 abs.]" );
+				change_scale( ll - old_start_wn
+							  + ( I_start - 1 ) * old_step_size,
+						  		- old_step_size );
+			} ELSE {
+				change_label( "Wavenumber [cm^-1 rel.]" );
+				change_scale( old_start_wn - ( I_start - 1 ) * old_step_size,
+						  	  old_step_size );
+			}
+
 			object_enable( B_goto, "OFF" );
 			object_enable( B_scan, "OFF" );
 			object_enable( B_samp, "OFF" );
 			object_enable( B_stop, "ON" );
+			object_enable( B_mt, "OFF" );
 
 			cwn = start_wn;
-			output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
+			output_value( B_cwn, Mode == RELATIVE ? cwn : ll - cwn );
 
-			IF Mode == 0 {
+			IF Mode == RELATIVE {
 				change_scale( start_wn - ( I - 1 ) * step_size, step_size );
 			} ELSE {
 				change_scale( ll - start_wn + ( I - 1 ) * step_size,
@@ -596,6 +616,10 @@ FOREVER {
 		}
 
 		IF button_state( B_samp ) {
+			change_label( "Time [s]" );
+			change_scale( 0, mtime );
+			object_enable( B_goto, "OFF" );
+			object_enable( B_mt, "OFF" );
 			object_enable( B_scan, "OFF" );
 			object_enable( B_samp, "OFF" );
 			object_enable( B_stop, "ON" );
@@ -605,6 +629,7 @@ FOREVER {
 
 		IF button_state( B_stop ) {
 			draw_marker( I );
+			object_enable( B_mt, "ON" );
 			object_enable( B_scan, "ON" );
 			object_enable( B_samp, "ON" );
 			object_enable( B_stop, "OFF" );
@@ -620,7 +645,7 @@ FOREVER {
 
 		IF ll - cwn > 46000.0 / 3.0 + step_size {
 	        cwn = monochromator_scan_step( );
-			output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
+			output_value( B_cwn, Mode == RELATIVE ? cwn : ll - cwn );
 
 		} ELSE {
 			draw_marker( I - 1 );
