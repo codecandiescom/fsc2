@@ -32,6 +32,7 @@ static void rs690_calc_tables_16ns( void );
 static bool rs690_set_channels_16ns( void );
 static bool rs690_init_channels_16ns( void );
 static void rs690_gpib_failure( void );
+static void rs690_check( void );
 
 
 #if 0
@@ -71,6 +72,8 @@ bool rs690_init( const char *name )
 	if ( gpib_write( rs690.device, "RST!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
+	rs690_check( );
+
 	/* Load the operating paramters, i.e clean previous settings, switch
 	   to timing simulator mode and set number of channels per connector
 	   (the maximum number depends on the timebase) */
@@ -80,12 +83,24 @@ bool rs690_init( const char *name )
 	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
 
+	{
+		char b[ 1000 ];
+		long l = 1000;
+		if ( gpib_write( rs690.device, "ROM!", 4 ) == FAILURE ||
+			 gpib_read( rs690.device, b, &l ) == FAILURE )
+			rs690_gpib_failure( );
+	}
+
+	rs690_check( );
+
 	/* Set the clock source mode - currently we only support either internal
 	   or external TTL oscillator */
 
 	sprintf( cmd, "LCK,%c!", rs690.timebase_mode == INTERNAL ? '0' : '2' );
 	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );
+
+	rs690_check( );
 
 	/* Set the trigger mode and slope */
 
@@ -108,16 +123,22 @@ bool rs690_init( const char *name )
 			rs690_gpib_failure( );
 	}
 
+	rs690_check( );
+
 	/* Switch off use of an external gate */
 
 	if ( gpib_write( rs690.device, "LEG,0!", 6 ) == FAILURE )
 		rs690_gpib_failure( );
+
+	rs690_check( );
 
 	/* Make the association between the fields bits and the output connector
 	   channels */
 
 	rs690_field_channel_setup( );
 	rs690_do_update( );
+
+	rs690_check( );
 
 	return OK;
 }
@@ -176,6 +197,8 @@ static bool rs690_field_channel_setup( void )
 
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
+
+		rs690_check( );
 	}
 
 	for ( ; i < 4 * NUM_HSM_CARDS; i++ )
@@ -183,6 +206,8 @@ static bool rs690_field_channel_setup( void )
 		sprintf( buf, "LFD,FL%d,OFF!", i );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
+
+		rs690_check( );
 	}
 
 	return OK;
@@ -194,12 +219,16 @@ static bool rs690_field_channel_setup( void )
 
 bool rs690_run( bool state )
 {
-	if ( gpib_write( rs690.device, state ? "RUN!" : "STP!" , 4 ) == FAILURE )
+	if ( gpib_write( rs690.device, state ? "RUN!" : "RST!" , 4 ) == FAILURE )
 		rs690_gpib_failure( );
 
-	if ( state && rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL &&
+	rs690_check( );
+
+	if ( state && rs690.trig_in_mode == INTERNAL &&
 		 gpib_write( rs690.device, "TRG!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
+
+	rs690_check( );
 
 	return OK;
 }
@@ -316,9 +345,11 @@ static bool rs690_set_channels_16ns( void )
 
 	if ( rs690.new_table.len != rs690.old_table.len )
 	{
-		sprintf( buf, "LTD0,T0,%d,T1,1,T2,1", rs690.new_table.len );
+		sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_table.len );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
+
+		rs690_check( );
 	}
 
 	if ( rs690.new_table.repeat_1 != rs690.old_table.repeat_1 ||
@@ -329,11 +360,13 @@ static bool rs690_set_channels_16ns( void )
 				 rs690.new_table.repeat_1, rs690.new_table.repeat_2 );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
+
+		rs690_check( );
 	}
 
 	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
-		for ( k = 0, n = rs690.new_fs, o = rs690.old_fs;
+		for ( k = 1, n = rs690.new_fs, o = rs690.old_fs;
 			  n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0 &&
 			  o != NULL && o->len % MAX_TICKS_PER_ENTRY != 0 ;
 			  n = n->next, o = o->next, k++ )
@@ -347,6 +380,8 @@ static bool rs690_set_channels_16ns( void )
 				if ( gpib_write( rs690.device, buf, strlen( buf ) )
 					 == FAILURE )
 					rs690_gpib_failure( );
+
+				rs690_check( );
 			}
 		}
 	}
@@ -367,7 +402,7 @@ static bool rs690_init_channels_16ns( void )
 
 	rs690_calc_tables_16ns( );
 
-	sprintf( buf, "LTD0,T0,%d,T1,1,T2,1", rs690.new_table.len );
+	sprintf( buf, "LTD,T0,%d,T1,1,T2,1!", rs690.new_table.len );
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
@@ -377,9 +412,11 @@ static bool rs690_init_channels_16ns( void )
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
+	rs690_check( );
+
 	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
-		sprintf( buf, "LDT0,T0,FL%d,0,%d", i, rs690.new_table.len );
+		sprintf( buf, "LDT,T0,FL%d,1,%d", i, rs690.new_table.len );
 		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
 			  n = n->next )
 			sprintf( buf + strlen( buf ), ",%X,%ldns", n->fields[ i ],
@@ -388,13 +425,17 @@ static bool rs690_init_channels_16ns( void )
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
 
+		rs690_check( );
+
 		for ( j = 1; j <= 2; j++ )
 		{
-			sprintf( buf, "LDT,T%d,FL%d,0,1,%X,%ldns!", j, i,
+			sprintf( buf, "LDT,T%d,FL%d,1,1,%X,%ldns!", j, i,
 					 rs690_default_fields[ i ],
 					 MAX_TICKS_PER_ENTRY * 16L );
 			if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 				rs690_gpib_failure( );
+
+			rs690_check( );
 		}
 	}
 
@@ -407,8 +448,10 @@ static bool rs690_init_channels_16ns( void )
 
 bool rs690_lock_state( bool lock )
 {
-	if ( gpib_write( dg2020.device, lock ? "LOC!" : "LCL", 4 ) == FAILURE )
+	if ( gpib_write( rs690.device, lock ? "LOC!" : "LCL!", 4 ) == FAILURE )
 		rs690_gpib_failure( );
+
+	rs690_check( );
 
 	return OK;
 }
@@ -421,6 +464,21 @@ static void rs690_gpib_failure( void )
 {
 	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static void rs690_check( void )
+{
+/*
+	char b[ 1000 ];
+	long l = 1000;
+	if ( gpib_write( rs690.device, "RCS!", 4 ) == FAILURE ||
+		 gpib_read( rs690.device, b, &l ) == FAILURE )
+		rs690_gpib_failure( );
+*/
 }
 
 

@@ -428,6 +428,7 @@ int rs690_end_of_exp_hook( void )
 		return 1;
 
 	rs690_run( UNSET );
+	rs690_lock_state( UNSET );
 	gpib_local( rs690.device );
 
 	rs690_cleanup_fs( );

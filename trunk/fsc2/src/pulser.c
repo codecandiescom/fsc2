@@ -213,12 +213,12 @@ double is_mult_ns( double val, const char *text )
 		THROW( EXCEPTION );
 	}
 
-	if ( val < 0.0 && fp < 0.5 )
-		return ( val - 1.0 ) * 1.0e-9;
-	if ( val >= 0.0 && fp > 0.5 )
-		return ( val + 1.0 ) * 1.0e-9;;
+	if ( ip < 0.0 && fp < -0.5 )
+		return ( ip - 1.0 ) * 1.0e-9;
+	if ( ip >= 0.0 && fp > 0.5 )
+		return ( ip + 1.0 ) * 1.0e-9;;
 
-	return val * 1.0e-9;
+	return ip * 1.0e-9;
 }
 
 

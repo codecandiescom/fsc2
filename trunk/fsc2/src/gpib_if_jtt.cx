@@ -53,6 +53,8 @@
         }
 
 
+#define GPIB_ERROR_BUFFER_LENGTH 1024
+
 /*------------------------------------------------------------------------*/
 /* functions used only locally                                            */
 /*------------------------------------------------------------------------*/
@@ -85,7 +87,7 @@ static int timeout;                 /* stores actual timeout period          */
 static FILE *gpib_log;              /* file pointer of GPIB log file         */
 static GPIB_DEV *gpib_dev_list = NULL;
                                    /* list of symbolic names of devices etc. */
-static char *gpib_error_buffer = NULL;
+static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
 
 
 /*-------------------------------------------------------------------------*/
@@ -123,7 +125,7 @@ int gpib_init( const char *log_file_name, int log_level )
 		ll = LL_ALL;
 
     gpib_init_log( log_file_name );             /* initialise logging */
-	gpib_error_setup( gpib_error_buffer, 1024 );
+	gpib_error_setup( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH );
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
