@@ -36,9 +36,6 @@
 #define MAX_BLOCK_REPEATS  65536  /* maximum of repeats of block in sequence */
 #define MAX_PULSER_BITS    65536  /* maximum number of bits in channel */
 
-#define NO_PULSE           -1     /* marks unused pulse numbers */
-#define NO_CHANNEL         -1     /* marks unused channels */
-
 
 
 typedef struct {
