@@ -451,13 +451,13 @@ Before the @code{EXPERIMENT} section this function can't be called
 without an argument, i.e.@: as a query.
 
 
-@item lockin_ref_freq()
-@findex lockin_ref_freq()
-The function can be used to query the reference frequency and, for the
-models SR810 and SR830, to set the reference frequency (both the other
-models need an external reference frequency). If called with no argument
-the current reference frequency is returned. If called with an argument
-(models SR810 and SR830 only) the reference frequency is set. If the
+@item lockin_mod_freq()
+@findex lockin_mod_freq()
+The function can be used to query the modulation frequency and, for the
+models SR810 and SR830, to set the modulation frequency (both the other
+models need an external modulation frequency). If called with no argument
+the current modulation frequency is returned. If called with an argument
+(models SR810 and SR830 only) the modulation frequency is set. If the
 frequency is not within the admissible range an error message is
 printed and the experiment is stopped) - the admissible range depends on
 the harmonics setting, see the manual for more details.
@@ -465,11 +465,11 @@ the harmonics setting, see the manual for more details.
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument.
 
-@item lockin_ref_level()
-@findex lockin_ref_level()
+@item lockin_mod_level()
+@findex lockin_mod_level()
 This function can be only used with the models SR810 and SR830. It
 queries (if called with no argument) or sets (if called with an
-argument) the level of the reference frequency. The allowed levels are
+argument) the level of the modulation frequency. The allowed levels are
 between @w{4 mV} and @w{5 V}, if the argument is not within this range
 an error message is printed and the experiment is stopped.
 

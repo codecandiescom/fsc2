@@ -41,9 +41,9 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR810_TEST_SENSITIVITY   0.5
 #define SR810_TEST_TIME_CONSTANT 0.1
 #define SR810_TEST_PHASE         0.0
-#define SR810_TEST_REF_FREQUENCY 5.0e3
-#define SR810_TEST_REF_LEVEL     1.0
-#define SR810_TEST_REF_MODE      1         // this must be INTERNAL
+#define SR810_TEST_MOD_FREQUENCY 5.0e3
+#define SR810_TEST_MOD_LEVEL     1.0
+#define SR810_TEST_MOD_MODE      1         // this must be INTERNAL
 
 
 #define NUM_ADC_PORTS         4
@@ -51,14 +51,14 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define DAC_MAX_VOLTAGE       10.5
 #define DAC_MIN_VOLTAGE      -10.5
 
-#define MAX_REF_FREQ          102000.0
-#define MIN_REF_FREQ          0.001
+#define MAX_MOD_FREQ          102000.0
+#define MIN_MOD_FREQ          0.001
 
-#define REF_MODE_INTERNAL     1
-#define REF_MODE_EXTERNAL     0
+#define MOD_MODE_INTERNAL     1
+#define MOD_MODE_EXTERNAL     0
 
-#define MAX_REF_LEVEL         5.0
-#define MIN_REF_LEVEL         4.0e-3
+#define MAX_MOD_LEVEL         5.0
+#define MIN_MOD_LEVEL         4.0e-3
 
 #define MAX_HARMONIC          19999
 #define MIN_HARMONIC          1
@@ -81,9 +81,9 @@ Var *lockin_dac_voltage( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
-Var *lockin_ref_freq( Var *v );
-Var *lockin_ref_mode( Var *v );
-Var *lockin_ref_level( Var *v );
+Var *lockin_mod_freq( Var *v );
+Var *lockin_mod_mode( Var *v );
+Var *lockin_mod_level( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
@@ -104,10 +104,10 @@ typedef struct
 	bool is_phase;
 	int tc_index;
 	bool TC_warn;
-	double ref_freq;
-	bool is_ref_freq;
-	double ref_level;
-	bool is_ref_level;
+	double mod_freq;
+	bool is_mod_freq;
+	double mod_level;
+	bool is_mod_level;
 	long harmonic;
 	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
@@ -147,13 +147,13 @@ static double sr810_get_tc( void );
 static void sr810_set_tc( int tc_index );
 static double sr810_get_phase( void );
 static double sr810_set_phase( double phase );
-static double sr810_get_ref_freq( void );
-static double sr810_set_ref_freq( double freq );
-static long sr810_get_ref_mode( void );
+static double sr810_get_mod_freq( void );
+static double sr810_set_mod_freq( double freq );
+static long sr810_get_mod_mode( void );
 static long sr810_get_harmonic( void );
 static long sr810_set_harmonic( long harmonic );
-static double sr810_get_ref_level( void );
-static double sr810_set_ref_level( double level );
+static double sr810_get_mod_level( void );
+static double sr810_set_mod_level( double level );
 static void sr810_lock_state( bool lock );
 static void sr810_failure( void );
 
@@ -184,9 +184,9 @@ int sr810_init_hook( void )
 	sr810.tc_index = -1;         /* no time constant has to be set at the */
 	sr810.TC_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
-	sr810.is_ref_freq = UNSET;   /* no reference frequency has to be set */
+	sr810.is_mod_freq = UNSET;   /* no modulation frequency has to be set */
 	sr810.is_harmonic = UNSET;   /* no harmonics has to be set */
-	sr810.is_ref_level = UNSET;  /* no rference level has to b set */
+	sr810.is_mod_level = UNSET;  /* no modulation level has to b set */
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 		sr810.dac_voltage[ i ] = 0.0;
@@ -745,11 +745,11 @@ Var *lockin_phase( Var *v )
 }
 
 
-/*-------------------------------------------------*/
-/* Sets or returns the lock-in reference frequency */
-/*-------------------------------------------------*/
+/*--------------------------------------------------*/
+/* Sets or returns the lock-in modulation frequency */
+/*--------------------------------------------------*/
 
-Var *lockin_ref_freq( Var *v )
+Var *lockin_mod_freq( Var *v )
 {
 	long harm;
 	double freq;
@@ -760,22 +760,22 @@ Var *lockin_ref_freq( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_REF_FREQUENCY );
+			return vars_push( FLOAT_VAR, SR810_TEST_MOD_FREQUENCY );
 		else
-			return vars_push( FLOAT_VAR, sr810_get_ref_freq( ) );
+			return vars_push( FLOAT_VAR, sr810_get_mod_freq( ) );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as reference "
+		eprint( WARN, SET, "%s: Integer value used as modulation "
 				"frequency.\n", DEVICE_NAME );
 	freq = VALUE( v );
 	vars_pop( v );
 	
-	if ( ! TEST_RUN && sr810_get_ref_mode( ) != REF_MODE_INTERNAL )
+	if ( ! TEST_RUN && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
-		eprint( FATAL, SET, "%s: Can't set reference frequency while "
-				"reference source isn't internal.\n", DEVICE_NAME );
+		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
+				"modulation source isn't internal.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -784,45 +784,45 @@ Var *lockin_ref_freq( Var *v )
 	else
 		harm = sr810_get_harmonic( );
 
-	if ( freq < MIN_REF_FREQ || freq > MAX_REF_FREQ / ( double ) harm )
+	if ( freq < MIN_MOD_FREQ || freq > MAX_MOD_FREQ / ( double ) harm )
 	{
 		if ( harm == 1 )
-			eprint( FATAL, SET, "%s: Reference frequency of %f Hz is "
+			eprint( FATAL, SET, "%s: Modulation frequency of %f Hz is "
 					"not within valid range (%f Hz - %f kHz).\n", DEVICE_NAME,
-					freq, MIN_REF_FREQ, MAX_REF_FREQ * 1.0e-3 );
+					freq, MIN_MOD_FREQ, MAX_MOD_FREQ * 1.0e-3 );
 		else
-			eprint( FATAL, SET, "%s: Reference frequency of %f Hz with "
+			eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
 					"harmonic set to %ld is not within valid range "
 					"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
-					MIN_REF_FREQ, 1.0e-3 * MAX_REF_FREQ / ( double ) harm );
+					MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
 
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, freq );
 
-	return vars_push( FLOAT_VAR, sr810_set_ref_freq( freq ) );
+	return vars_push( FLOAT_VAR, sr810_set_mod_freq( freq ) );
 }
 
 
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_mode( Var *v )
+Var *lockin_mod_mode( Var *v )
 {
 	v = v;
 
 
 	if ( TEST_RUN )
-		return vars_push( INT_VAR, SR810_TEST_REF_MODE );
-	return vars_push( INT_VAR, sr810_get_ref_mode( ) );
+		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
+	return vars_push( INT_VAR, sr810_get_mod_mode( ) );
 }
 
 
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_level( Var *v )
+Var *lockin_mod_level( Var *v )
 {
 	double level;
 
@@ -830,33 +830,33 @@ Var *lockin_ref_level( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_REF_LEVEL );
+			return vars_push( FLOAT_VAR, SR810_TEST_MOD_LEVEL );
 		else
 		{
 			if ( I_am == PARENT )
 			{
-				eprint( FATAL, SET, "%s: Function `lockin_ref_level' "
+				eprint( FATAL, SET, "%s: Function `lockin_mod_level' "
 						"with no argument can only be used in the EXPERIMENT "
 						"section.\n", DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 
-			return vars_push( FLOAT_VAR, sr810_get_ref_level( ) );
+			return vars_push( FLOAT_VAR, sr810_get_mod_level( ) );
 		}
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as reference level.\n",
+		eprint( WARN, SET, "%s: Integer value used as modulation level.\n",
 				DEVICE_NAME );
 	level = VALUE( v );
 	vars_pop( v );
 	
-	if ( level < MIN_REF_LEVEL || level > MAX_REF_LEVEL )
+	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
-		eprint( FATAL, SET, "%s: Reference level of %f V is not within "
+		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
 				"valid range (%f V - %f V).\n", DEVICE_NAME,
-				MIN_REF_LEVEL, MAX_REF_LEVEL );
+				MIN_MOD_LEVEL, MAX_MOD_LEVEL );
 		THROW( EXCEPTION );
 	}
 
@@ -864,11 +864,11 @@ Var *lockin_ref_level( Var *v )
 		return vars_push( FLOAT_VAR, level );
 
 	if ( I_am == CHILD )                /* if called in EXPERIMENT section */
-		return vars_push( FLOAT_VAR, sr810_set_ref_level( level ) );
+		return vars_push( FLOAT_VAR, sr810_set_mod_level( level ) );
 	else                                /* if called in preparation sections */
 	{
-		sr810.ref_level = level;
-		sr810.is_ref_level = SET;
+		sr810.mod_level = level;
+		sr810.is_mod_level = SET;
 		return vars_push( FLOAT_VAR, level );
 	}
 }
@@ -975,10 +975,10 @@ static bool sr810_init( const char *name )
 		sr810_set_tc( sr810.tc_index );
 	if ( sr810.is_harmonic )
 		sr810_set_harmonic( sr810.harmonic );
-	if ( sr810.is_ref_freq )
-		sr810_set_ref_freq( sr810.ref_freq );
-	if ( sr810.is_ref_level )
-		sr810_set_ref_level( sr810.ref_level );
+	if ( sr810.is_mod_freq )
+		sr810_set_mod_freq( sr810.mod_freq );
+	if ( sr810.is_mod_level )
+		sr810_set_mod_level( sr810.mod_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 		sr810_set_dac_data( i + 1, sr810.dac_voltage[ i ] );
@@ -1240,7 +1240,7 @@ static double sr810_set_phase( double phase )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static double sr810_get_ref_freq( void )
+static double sr810_get_mod_freq( void )
 {
 	char buffer[ 40 ];
 	long length = 40;
@@ -1256,10 +1256,9 @@ static double sr810_get_ref_freq( void )
 
 
 /*---------------------------------------------------------------*/
-/* Functions sets the phase to a value between 0 and 360 degree. */
 /*---------------------------------------------------------------*/
 
-static double sr810_set_ref_freq( double freq )
+static double sr810_set_mod_freq( double freq )
 {
 	char buffer[ 40 ];
 	double real_freq;
@@ -1269,15 +1268,15 @@ static double sr810_set_ref_freq( double freq )
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr810_failure( );
 
-	/* Take care: The product of the harmonic and the reference frequency
-	   can't be larger than 102 kHz, otherwise the reference frequency is
+	/* Take care: The product of the harmonic and the modulation frequency
+	   can't be larger than 102 kHz, otherwise the modulation frequency is
 	   reduced to a value that fits this restriction. Thus we better check
 	   which value has been really set... */
 
-	real_freq = sr810_get_ref_freq( );
+	real_freq = sr810_get_mod_freq( );
 	if ( ( real_freq - freq ) / freq > 1.0e-4 && real_freq - freq > 1.0e-4 )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to set reference frequency to %f "
+		eprint( FATAL, UNSET, "%s: Failed to set modulation frequency to %f "
 				"Hz.\n", DEVICE_NAME, freq );
 		THROW( EXCEPTION );
 	}
@@ -1290,7 +1289,7 @@ static double sr810_set_ref_freq( double freq )
 /* ??????????? What does this really return ?????????            */
 /*---------------------------------------------------------------*/
 
-static long sr810_get_ref_mode( void )
+static long sr810_get_mod_mode( void )
 {
 	char buffer[ 10 ];
 	long length = 10;
@@ -1337,7 +1336,7 @@ static long sr810_set_harmonic( long harmonic )
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr810_failure( );
 
-	/* Take care: The product of the harmonic and the reference frequency
+	/* Take care: The product of the harmonic and the modulation frequency
 	   can't be larger than 102 kHz, otherwise the harmonic is reduced to a
 	   value that fits this restriction. So we better check on the value
 	   that has been really set... */
@@ -1356,7 +1355,7 @@ static long sr810_set_harmonic( long harmonic )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static double sr810_get_ref_level( void )
+static double sr810_get_mod_level( void )
 {
 	char buffer[ 20 ];
 	long length = 20;
@@ -1374,12 +1373,12 @@ static double sr810_get_ref_level( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-static double sr810_set_ref_level( double level )
+static double sr810_set_mod_level( double level )
 {
 	char buffer[ 50 ];
 
 
-	fsc2_assert( level >= MIN_REF_LEVEL && level <= MAX_REF_LEVEL );
+	fsc2_assert( level >= MIN_MOD_LEVEL && level <= MAX_MOD_LEVEL );
 
 	sprintf( buffer, "SLVL %f\n", level );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
