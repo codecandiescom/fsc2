@@ -353,7 +353,7 @@ bool fsc2_locking( void )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-bool raise_permissions( void )
+inline bool raise_permissions( void )
 {
 	if ( geteuid( ) != EUID )
 	{
@@ -369,7 +369,7 @@ bool raise_permissions( void )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-void lower_permissions( bool must_change )
+inline void lower_permissions( bool must_change )
 {
 	if ( must_change )
 	{
