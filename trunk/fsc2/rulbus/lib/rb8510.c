@@ -223,6 +223,9 @@ static RULBUS_DAC12_CARD *rulbus_dac12_card_find( int handle )
 	int i;
 
 
+	if ( handle < 0 )
+		return NULL;
+
 	for ( i = 0; i < rulbus_num_dac12_cards; i++ )
 		if ( handle == rulbus_dac12_card[ i ].handle )
 			return rulbus_dac12_card + i;

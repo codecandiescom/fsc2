@@ -168,6 +168,9 @@ static RULBUS_CLOCK_CARD *rulbus_clock_card_find( int handle )
 	int i;
 
 
+	if ( handle < 0 )
+		return NULL;
+
 	for ( i = 0; i < rulbus_num_clock_cards; i++ )
 		if ( handle == rulbus_clock_card[ i ].handle )
 			return rulbus_clock_card + i;
