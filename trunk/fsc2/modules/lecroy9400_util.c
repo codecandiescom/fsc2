@@ -28,6 +28,23 @@ static void lecroy9400_window_check_2( void );
 static void lecroy9400_window_check_3( void );
 
 
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+int lecroy9400_get_tb_index( double timebase )
+{
+	int i;
+
+	for ( i = 0; i < TB_ENTRIES - 1; i++ )
+		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
+			return i + ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ?
+						 0 : 1 );
+
+	return i;
+}
+
+
 /*-----------------------------------------------------------*/
 /* Returns a string with a time value with a resonable unit. */
 /*-----------------------------------------------------------*/

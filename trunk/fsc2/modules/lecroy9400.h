@@ -193,6 +193,7 @@ Var *digitizer_lock_keyboard( Var *v );
 
 /* declaration of internally used functions */
 
+int lecroy9400_get_tb_index( double timebase );
 const char *lecroy9400_ptime( double p_time );
 void lecroy9400_delete_windows( void );
 void lecroy9400_do_pre_exp_checks( void );

@@ -729,7 +729,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 {
 	vars_check( v, INT_VAR );
 
-	if ( v->val.lval < LECROY9400_CH1 || v->val.lval > LECROY9400_REF4 )
+	if ( v->val.lval < LECROY9400_CH1 || v->val.lval > LECROY9400_FUNC_F )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -777,8 +777,8 @@ Var *digitizer_trigger_channel( Var *v )
 
     switch ( v->val.lval )
     {
-        case LECROY9400_CH1 : case LECROY9400_CH2 : case LECROY9400_AUX1 :
-		case LECROY9400_AUX2 : case LECROY9400_LIN :
+        case LECROY9400_CH1 : case LECROY9400_CH2 : case LECROY9400_LIN :
+		case LECROY9400_EXT : case LECROY9400_EXT10 :
 			lecroy9400.trigger_channel = v->val.lval;
 			if ( I_am == CHILD )
 				lecroy9400_set_trigger_channel( Channel_Names[ v->val.lval ] );
@@ -1136,7 +1136,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( I_am == CHILD )
 	{
-		nv = vars_push( FLOAT_VAR, lecroy9400_get_amplitude( ch, w, use_cursor ) );
+		nv = vars_push( FLOAT_VAR, lecroy9400_get_amplitude( ch, w,
+															 use_cursor ) );
 		return nv;
 	}
 
