@@ -93,7 +93,7 @@ address to the one of the new device.
 @end example
 
 When you have run the script you will have to @code{cd} back from the
-@file{utils} subdirectory to @code{fsc2}s main directory (just type
+@file{utils} subdirectory to @code{fsc2}'s main directory (just type
 @code{cd ..}) and recompile, using the @code{make} command. After a
 successful run of make to compile the new device module you also have to
 install it. To do so you must become @code{root} and, still from
@@ -102,8 +102,8 @@ install it. To do so you must become @code{root} and, still from
 If the device isn't controlled via the GPIB bus you're already
 done. Otherwise you will have also to edit (still with @code{root}
 privileges) the GPIB configuration file (which usually is
-@file{/etc/gpib.conf}) and copy the entry for the cloned device. Then
-you only have to change in the copy the device name to the one you have
-entered while running the script (i.e.@: in the example @code{SR510}) to
-the new device name @code{SR510_B} and finally correct the entry for the
-new devices GPIB address.
+@file{/etc/gpib.conf}) and copy the entry for the cloned device. In this
+copy jsut change the device name to the one you had entered while
+running the script (i.e.@: in the example @code{SR510}) to the new
+device name @code{SR510_B} and finally correct the entry for the new
+devices GPIB address.
