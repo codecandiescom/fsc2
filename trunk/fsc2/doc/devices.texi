@@ -566,7 +566,7 @@ queries.
 This function can be called to set of query the upper search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
-@code{EXPERIMENT} section for queries.
+@code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_lower_search_limit}
@@ -575,7 +575,7 @@ and @code{er035m_sas}. The function can only be called in the
 This function can be called to set of query the lower search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
-@code{EXPERIMENT} section for queries.
+@code{EXPERIMENT} section.
 
 
 @end table
