@@ -184,7 +184,7 @@ sub serve {
 
 	# Stop on unsupported requests (i.e. everything except GET and HEAD)
 
-	unsupported_request( $req, $maj, $min ) unless $req =~ /^(GET)|(HEAD)$/io;
+	unsupported_request( $req, $maj, $min ) unless $req =~ /^(GET)|(HEAD)$/o;
 
 	# Send a not too rude reply if the client didn't send a Host field but
 	# claims to be HTTP/1.1 compliant.
