@@ -742,7 +742,7 @@ static int dg2020_twt_pulse_compare( const void *A, const void *B )
 	return 1;
 }
 
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
  * Function checks if the distances between pulse shape pulses and defense
  * pulses are large enough. The minimum lengths the shape_2_defense and
  * defense_2_shape members of the dg2020 structure. Both are set to

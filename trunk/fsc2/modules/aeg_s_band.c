@@ -621,7 +621,7 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 
 
 
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*
  * magnet_init() first initializes the serial interface and then tries to
  * figure out what's the current minimal step size is for the magnet - this
  * is necessary for every new sweep since the user can adjust the step size

@@ -518,7 +518,7 @@ Var_T *lockin_get_adc_data( Var_T *v )
  * the voltage in the range between -10.5 V and +10.5 V. If
  * there isn't a second argument the set DAC voltage is
  * returned (which is initially set to 0 V).
- *-----------------------------------------------------------*
+ *-----------------------------------------------------------*/
 
 Var_T *lockin_dac_voltage( Var_T *v )
 {
@@ -921,7 +921,7 @@ Var_T *lockin_ref_mode( UNUSED_ARG Var_T *v )
 }
 
 
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
  * Sets or returns the lock-in modulation frequency
  *--------------------------------------------------*/
 
