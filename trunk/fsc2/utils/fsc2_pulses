@@ -662,7 +662,7 @@ sub redraw {
 
 			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt,
 						'-text' => $cp->num,
-						'-tags' => $ch->key,
+						'-tags' => [ $ch->key, $tag ],
 						'-fill' => 'green' );
 		}
 	}
@@ -980,7 +980,7 @@ sub pstart {
 }
 
 #---------------------------------------------------------
-# Returns a string with a pulse position or length with in resonable units
+# Returns a string with a pulse position or length with in reasonable units
 
 sub ptime {
 
