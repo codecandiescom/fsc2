@@ -4457,10 +4457,9 @@ camera itself, or binning can be done by the software, i.e.@: the whole
 image or spectrum is fetched from the camera and the binning is only
 applied afterwards on the received data). Wile hardware binning is
 faster (mainly due to the reduced time required for the transfer) in
-some cases it might lead to artifacts when the sum of the values of all
-pixels combined in binning would be larger than 65535. In this case the
-value after binning is always 65535, leading to an effect that looks
-like saturation of the region of the chip.
+some cases it might lead to saturation effects when the sum of the
+values of all pixels combined during binning would be larger than
+65536. In this case the value after binning would never exceed 65536.
 
 The binning method argument must be either @code{0} or one of the
 strings @code{"HARDWARE"} or @code{"HARD"} for use of hardware binning
