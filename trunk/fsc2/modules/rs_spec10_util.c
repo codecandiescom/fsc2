@@ -113,7 +113,7 @@ const char *rs_spec10_ptime( double p_time )
 /* the current process. Then the function for initialisation of the   */
 /* board gets called, opening the device file. Afterwards, the second */
 /* function is invoked that compares the fd's in the list with the    */
-/* entries int the /proc/self/fd directory and sets the close-on-exec */
+/* entries in the /proc/self/fd directory and sets the close-on-exec  */
 /* flag for the new fd (i.e. the fd that wasn't already in the old    */
 /* list). Of course this will only work on Linux but fails (hopefully */
 /* benignly) on other systems.                                        */
@@ -126,6 +126,8 @@ int *rs_spec10_get_fd_list( void )
 	int *fd_list = NULL;
 	int num_fds = 0;
 	char *dn;
+	int fd;
+	struct stat buf;
 
 
 	CLOBBER_PROTECT( fd_list );
@@ -144,8 +146,15 @@ int *rs_spec10_get_fd_list( void )
 
 		TRY
 		{
+			fd = T_atoi( de->d_name );
+			if ( fstat( fd, &buf ) == -1 )
+				THROW( EXCEPTION );
+
+			if ( S_ISDIR( buf.st_mode ) )
+				continue;
+
 			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
-			fd_list[ num_fds++ ] = T_atoi( de->d_name );
+			fd_list[ num_fds++ ] = fd;
 			TRY_SUCCESS;
 		}
 		OTHERWISE
