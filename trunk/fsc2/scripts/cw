@@ -406,6 +406,7 @@ sub do_checks {
 	return 0;
 }
 
+
 #############################################
 
 sub show_message {
