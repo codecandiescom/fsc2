@@ -870,9 +870,8 @@ Var *f_print( Var *v )
 	/* count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
 
-	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL;
-		  ++cp )
-		if ( cp == fmt || *( cp - 1 ) != '\\' )
+	for ( in_format = 0, sptr; ( cp = strchr( cp, '#' ) ) != NULL; ++cp )
+		if ( *( cp - 1 ) != '\\' )
 			in_format++;
 
 	/* check and count number of variables on the stack following the format
