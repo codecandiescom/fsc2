@@ -45,8 +45,6 @@ static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int active );
 
 
-
-
 /* Routines of the child process doing the measurement */
 
 static void run_child( void );
@@ -61,13 +59,10 @@ static void deal_with_program_tokens( void );
 /* Locally used global variables used in parent, child and signal handlers */
 
 static volatile bool child_is_quitting;
-
 sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
-
 static struct sigaction sigchld_old_act,
 	                    quitting_old_act;
-
 static int child_return_status;
 
 
@@ -602,7 +597,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 	end_comm( );
 
-	/* Remove the signal handlers */
+	/* Remove the handler for DO_QUIT signals */
 
 	sigaction( QUITTING, &quitting_old_act, NULL );
 
