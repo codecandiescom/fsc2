@@ -149,7 +149,7 @@ failure a negative value gets returned. Here is the complete list
 of error codes with a short explanation:
 
     RULBUS_CFG_ACC   Not permission to open configurarion file
-    RULBUS_INV_CFG   Invalid name for configuration file
+    RULBUS_INV_CFG   Invalid name for configuration file (or not found)
     RULBUS_OPN_CFG   Can't open configuration file
     RULBUS_DVF_ACC   No permission to open device file
     RULBUS_DVF_CFG   Invalid name for device file

@@ -43,7 +43,7 @@ int rulbus_errno = RULBUS_OK;
 static const char *rulbus_errlist[ ] = {
 	"Success",                                         /* RULBUS_OK      */
 	"No permission to open configurarion file",        /* RULBUS_CFG_ACC */
-	"Invalid name for configuration file",             /* RULBUS_INV_CFG */
+	"Invalid name of configuration file (or missing)", /* RULBUS_INV_CFG */
     "Can't open configuration file",                   /* RULBUS_OPN_CFG */
 	"Not permission to open device file",              /* RULBUS_DVF_ACC */
 	"Invalid name for device file",                    /* RULBUS_DVF_CFG */
