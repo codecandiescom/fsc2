@@ -98,8 +98,10 @@ void store_exp( FILE *in )
 	int ret;
 	char *cur_Fname = NULL;
 	long curly_brace_count = 0;
+	long curly_brace_in_loop_count = 0;
 	long paranthesis_count = 0;
 	long square_brace_count = 0;
+	bool in_loop = UNSET;
 
 
 	/* Set input file */
@@ -142,6 +144,11 @@ void store_exp( FILE *in )
 
 		switch( ret )
 		{
+			case FOR_TOK : case WHILE_TOK : case UNLESS_TOK :
+			case REPEAT_TOK : case FOREVER_TOK :
+				in_loop = SET;
+				break;
+
 			case '(' :
 				paranthesis_count++;
 				break;
@@ -170,6 +177,8 @@ void store_exp( FILE *in )
 				}
 
 				curly_brace_count++;
+				if ( in_loop )
+					curly_brace_in_loop_count++;
 				break;
 
 			case '}' :
@@ -192,6 +201,10 @@ void store_exp( FILE *in )
 					eprint( FATAL, SET, "Found '}' without matching '{'.\n" );
 					THROW( EXCEPTION );
 				}
+
+				if ( in_loop && --curly_brace_in_loop_count == 0 )
+					in_loop = UNSET;
+					
 				break;
 
 			case '[' :
@@ -204,6 +217,8 @@ void store_exp( FILE *in )
 					eprint( FATAL, SET, "Found ']' without matching '['.\n" );
 					THROW( EXCEPTION );
 				}
+				break;
+
 				break;
 
 			case E_STR_TOKEN :
@@ -240,6 +255,16 @@ void store_exp( FILE *in )
 				{
 					eprint( FATAL, SET, "More '[' than ']` found at end of "
 							"of statement.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			case BREAK_TOK : case CONT_TOK :
+				if ( ! in_loop )
+				{
+					eprint( FATAL, SET, "Found a %s statement not located "
+							"within a loop.\n",
+							ret == BREAK_TOK ? "BREAK" : "NEXT" );
 					THROW( EXCEPTION );
 				}
 				break;
@@ -386,7 +411,7 @@ static void loop_setup( void )
 				}
 				break;
 
-			case IF_TOK : case UNLESS :
+			case IF_TOK : case UNLESS_TOK :
 				cur_pos = i;
 				setup_if_else( &i, NULL );
 				if ( cur_pos < On_Stop_Pos && i > On_Stop_Pos )

@@ -127,6 +127,7 @@
      "NEXT\\>"
      "IF\\>"
      "ELSE\\>"
+     "UNLESS\\>"
      "REPEAT\\>"
      "FOR\\>"
      "FOREVER\\>"

@@ -49,7 +49,7 @@ keywords in Keyword are
 end keywords
 
 keywords in Keyword_strong are
-   IF, ELSE, FOR, WHILE, UNTIL, REPEAT, FOREVER, NEXT, LAST, BREAK,
+   IF, ELSE, UNLESS, FOR, WHILE, UNTIL, REPEAT, FOREVER, NEXT, LAST, BREAK,
    #exit, #quit, #include,
    DEVICES:, DEV:, DEVS:, DEVICE:,
    ASSIGNMENTS:, ASS:, ASSIGNMENT:,
