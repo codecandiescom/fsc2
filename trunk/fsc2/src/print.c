@@ -58,6 +58,7 @@ static double margin = 25.0;         /* margin (in mm) to leave on all sides */
 static char *pc_string = NULL;
 
 static int print_form_close_handler( FL_FORM *a, void *b );
+static int print_comment_close_handler( FL_FORM *a, void *b );
 static bool get_print_file( FILE **fp, char **name, long data );
 static void get_print_comm( long data );
 static void start_printing( FILE *fp, char *name, long what );
@@ -477,6 +478,9 @@ static void get_print_comm( long data )
 
 	pc_string = CHAR_P T_free( pc_string );
 
+	fl_set_form_atclose( GUI.print_comment->print_comment,
+						 print_comment_close_handler, NULL );
+
 	switch ( data )
 	{
 		case 1 :
@@ -500,10 +504,8 @@ static void get_print_comm( long data )
 	}
 
 	while ( ( obj = fl_do_forms( ) ) != GUI.print_comment->pc_done )
-	{
 		if ( obj == GUI.print_comment->pc_clear )
 			fl_set_input( GUI.print_comment->pc_input, NULL );
-	}
 
 	res = fl_get_input( GUI.print_comment->pc_input );
 	if ( res != NULL && *res != '\0' )
@@ -513,6 +515,22 @@ static void get_print_comm( long data )
 		fl_hide_form( GUI.print_comment->print_comment );
 
 	locked = UNSET;
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Closing the form via the window buttons simulates clearing all text */
+/* and then pressing the "Done" button.                                */
+/*---------------------------------------------------------------------*/
+
+static int print_comment_close_handler( FL_FORM *a, void *b )
+{
+	UNUSED_ARGUMENT( a );
+	UNUSED_ARGUMENT( b );
+
+	fl_set_input( GUI.print_comment->pc_input, NULL );
+	fl_trigger_object( GUI.print_comment->pc_done );
+	return FL_IGNORE;
 }
 
 

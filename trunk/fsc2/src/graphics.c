@@ -54,20 +54,6 @@ static Graphics *G_stored = NULL;
 static Graphics_1d *G_1d_stored = NULL;
 static Graphics_2d *G_2d_stored = NULL;
 
-static bool display_has_been_shown = UNSET;
-
-static int display_x, display_y;
-static int display_1d_x, display_1d_y;
-static int display_2d_x, display_2d_y;
-static unsigned display_w, display_h,
-				display_1d_w, display_1d_h,
-				display_2d_w, display_2d_h;
-static bool is_pos = UNSET,
-			is_size = UNSET,
-			is_1d_pos = UNSET,
-			is_1d_size = UNSET,
-			is_2d_pos = UNSET,
-			is_2d_size = UNSET;
 
 extern FL_resource xresources[ ];
 
@@ -76,11 +62,38 @@ static struct {
 	unsigned int WIN_MIN_1D_WIDTH;
 	unsigned int WIN_MIN_2D_WIDTH;
 	unsigned int WIN_MIN_HEIGHT;
-	int	SMALL_FONT_SIZE;
+
+	int SMALL_FONT_SIZE;
+
 	const char *DEFAULT_AXISFONT_1;
 	const char *DEFAULT_AXISFONT_2;
 	const char *DEFAULT_AXISFONT_3;
-} GI_sizes;
+
+	bool display_has_been_shown;
+
+	int display_x,
+		display_y;
+
+	int display_1d_x,
+		display_1d_y;
+
+	int display_2d_x,
+		display_2d_y;
+
+	unsigned int display_w,
+				 display_h,
+				 display_1d_w,
+				 display_1d_h,
+				 display_2d_w,
+				 display_2d_h;
+
+	bool is_pos,
+		 is_size,
+		 is_1d_pos,
+		 is_1d_size,
+		 is_2d_pos,
+		 is_2d_size;
+} GI;
 
 
 /*----------------------------------------------------------------------*/
@@ -152,7 +165,7 @@ void start_graphics( void )
 
 	if ( ! G.is_init || G.dim & 1 )
 	{
-		fl_show_form( GUI.run_form_1d->run_1d, is_pos || is_1d_pos ?
+		fl_show_form( GUI.run_form_1d->run_1d, GI.is_pos || GI.is_1d_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: 1D-Display" );
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
@@ -160,22 +173,22 @@ void start_graphics( void )
 
 	if ( G.dim & 2 )
 	{
-		fl_show_form( GUI.run_form_2d->run_2d, is_pos || is_2d_pos ?
+		fl_show_form( GUI.run_form_2d->run_2d, GI.is_pos || GI.is_2d_pos ?
 					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: 2D-Display" );
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
 	}
 
-	display_has_been_shown = SET;
+	GI.display_has_been_shown = SET;
 
 	/* Set minimum size for display window and switch on full scale button */
 
 	if ( G.dim & 1 || ! G.is_init )
 		fl_winminsize( GUI.run_form_1d->run_1d->window,
-					   GI_sizes.WIN_MIN_1D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
+					   GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT );
 	if ( G.dim & 2 )
 		fl_winminsize( GUI.run_form_2d->run_2d->window,
-					   GI_sizes.WIN_MIN_2D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
+					   GI.WIN_MIN_2D_WIDTH, GI.WIN_MIN_HEIGHT );
 
 	if ( G.dim & 1 )
 		fl_set_button( GUI.run_form_1d->full_scale_button_1d, 1 );
@@ -192,13 +205,13 @@ void start_graphics( void )
 									 ( char * ) xresources[ AXISFONT ].var );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_1 );
+			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_2 );
+			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_3 );
+			G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
 
 		if ( G.font )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
@@ -257,23 +270,23 @@ static void set_default_sizes( void )
 	int flags;
 
 
-	if ( ! display_has_been_shown )
+	if ( ! GI.display_has_been_shown )
 	{
 		if ( * ( ( char * ) xresources[ DISPLAYGEOMETRY ].var ) != '\0' )
 		{
 			flags = XParseGeometry(
 								( char * ) xresources[ DISPLAYGEOMETRY ].var,
-								&display_x, &display_y,
-								&display_w, &display_h );
+								&GI.display_x, &GI.display_y,
+								&GI.display_w, &GI.display_h );
 
 			if ( WidthValue & flags && HeightValue & flags )
-				is_pos = SET;
+				GI.is_pos = SET;
 
 			if ( XValue & flags && YValue & flags )
 			{
-				display_x += GUI.border_offset_x - 1;
-				display_y += GUI.border_offset_y - 1;
-				is_size = SET;
+				GI.display_x += GUI.border_offset_x - 1;
+				GI.display_y += GUI.border_offset_y - 1;
+				GI.is_size = SET;
 			}
 		}
 
@@ -281,23 +294,23 @@ static void set_default_sizes( void )
 		{
 			flags = XParseGeometry(
 								( char * ) xresources[ DISPLAY1DGEOMETRY ].var,
-								&display_1d_x, &display_1d_y,
-								&display_1d_w, &display_1d_h );
+								&GI.display_1d_x, &GI.display_1d_y,
+								&GI.display_1d_w, &GI.display_1d_h );
 
 			if ( WidthValue & flags && HeightValue & flags )
 			{
-				if ( display_1d_w < GI_sizes.WIN_MIN_1D_WIDTH )
-					display_1d_w = GI_sizes.WIN_MIN_1D_WIDTH;
-				if ( display_1d_h < GI_sizes.WIN_MIN_HEIGHT )
-					display_1d_h = GI_sizes.WIN_MIN_HEIGHT;
-				is_1d_size = SET;
+				if ( GI.display_1d_w < GI.WIN_MIN_1D_WIDTH )
+					GI.display_1d_w = GI.WIN_MIN_1D_WIDTH;
+				if ( GI.display_1d_h < GI.WIN_MIN_HEIGHT )
+					GI.display_1d_h = GI.WIN_MIN_HEIGHT;
+				GI.is_1d_size = SET;
 			}
 
 			if ( XValue & flags && YValue & flags )
 			{
-				display_1d_x += GUI.border_offset_x - 1;
-				display_1d_y += GUI.border_offset_y - 1;
-				is_1d_pos = SET;
+				GI.display_1d_x += GUI.border_offset_x - 1;
+				GI.display_1d_y += GUI.border_offset_y - 1;
+				GI.is_1d_pos = SET;
 			}
 		}
 
@@ -305,85 +318,85 @@ static void set_default_sizes( void )
 		{
 			flags = XParseGeometry(
 								( char * ) xresources[ DISPLAY2DGEOMETRY ].var,
-								&display_2d_x, &display_2d_y,
-								&display_2d_w, &display_2d_h );
+								&GI.display_2d_x, &GI.display_2d_y,
+								&GI.display_2d_w, &GI.display_2d_h );
 
 			if ( WidthValue & flags && HeightValue & flags )
 			{
-				if ( display_2d_w < GI_sizes.WIN_MIN_2D_WIDTH )
-					display_2d_w = GI_sizes.WIN_MIN_2D_WIDTH;
-				if ( display_2d_h < GI_sizes.WIN_MIN_HEIGHT )
-					display_2d_h = GI_sizes.WIN_MIN_HEIGHT;
-				is_2d_size = SET;
+				if ( GI.display_2d_w < GI.WIN_MIN_2D_WIDTH )
+					GI.display_2d_w = GI.WIN_MIN_2D_WIDTH;
+				if ( GI.display_2d_h < GI.WIN_MIN_HEIGHT )
+					GI.display_2d_h = GI.WIN_MIN_HEIGHT;
+				GI.is_2d_size = SET;
 			}
 
 			if ( XValue & flags && YValue & flags )
 			{
-				display_2d_x += GUI.border_offset_x - 1;
-				display_2d_y += GUI.border_offset_y - 1;
-				is_2d_pos = SET;
+				GI.display_2d_x += GUI.border_offset_x - 1;
+				GI.display_2d_y += GUI.border_offset_y - 1;
+				GI.is_2d_pos = SET;
 			}
 		}
 	}
 
-	if ( is_pos )
+	if ( GI.is_pos )
 	{
-		if ( ! is_1d_pos )
+		if ( ! GI.is_1d_pos )
 		{
-			display_1d_x = display_x;
-			display_1d_y = display_y;
+			GI.display_1d_x = GI.display_x;
+			GI.display_1d_y = GI.display_y;
 		}
 				
-		if ( ! is_2d_pos )
+		if ( ! GI.is_2d_pos )
 		{
-			display_2d_x = display_x;
-			display_2d_y = display_y;
+			GI.display_2d_x = GI.display_x;
+			GI.display_2d_y = GI.display_y;
 		}
 	}
 
-	if ( is_size )
+	if ( GI.is_size )
 	{
-		if ( ! is_1d_size )
+		if ( ! GI.is_1d_size )
 		{
-			display_1d_w = display_w;
-			if ( display_1d_w < GI_sizes.WIN_MIN_1D_WIDTH )
-				display_1d_w = GI_sizes.WIN_MIN_1D_WIDTH;
+			GI.display_1d_w = GI.display_w;
+			if ( GI.display_1d_w < GI.WIN_MIN_1D_WIDTH )
+				GI.display_1d_w = GI.WIN_MIN_1D_WIDTH;
 
-			display_1d_h = display_h;
-			if ( display_1d_h < GI_sizes.WIN_MIN_HEIGHT )
-				display_1d_w = GI_sizes.WIN_MIN_HEIGHT;
+			GI.display_1d_h = GI.display_h;
+			if ( GI.display_1d_h < GI.WIN_MIN_HEIGHT )
+				GI.display_1d_w = GI.WIN_MIN_HEIGHT;
 		}
 
-		if ( ! is_2d_size )
+		if ( ! GI.is_2d_size )
 		{
-			display_2d_w = display_w;
-			if ( display_2d_w < GI_sizes.WIN_MIN_2D_WIDTH )
-				display_2d_w = GI_sizes.WIN_MIN_2D_WIDTH;
+			GI.display_2d_w = GI.display_w;
+			if ( GI.display_2d_w < GI.WIN_MIN_2D_WIDTH )
+				GI.display_2d_w = GI.WIN_MIN_2D_WIDTH;
 
-			display_2d_h = display_h;
-			if ( display_2d_h < GI_sizes.WIN_MIN_HEIGHT )
-				display_2d_w = GI_sizes.WIN_MIN_HEIGHT;
+			GI.display_2d_h = GI.display_h;
+			if ( GI.display_2d_h < GI.WIN_MIN_HEIGHT )
+				GI.display_2d_w = GI.WIN_MIN_HEIGHT;
 		}
 	}
 
 	if ( G.dim & 1 || ! G.is_init )
 	{
-		if ( is_size || is_1d_size )
+		if ( GI.is_size || GI.is_1d_size )
 			fl_set_form_size( GUI.run_form_1d->run_1d,
-							  display_1d_w, display_1d_h );
-		if ( is_pos || is_1d_pos )
+							  GI.display_1d_w, GI.display_1d_h );
+		if ( GI.is_pos || GI.is_1d_pos )
 			fl_set_form_position( GUI.run_form_1d->run_1d,
-								  display_1d_x, display_1d_y );
+								  GI.display_1d_x, GI.display_1d_y );
 	}
 
 	if ( G.dim & 2 )
 	{
-		if ( is_size || is_2d_size )
+		if ( GI.is_size || GI.is_2d_size )
 			fl_set_form_size( GUI.run_form_2d->run_2d,
-							  display_2d_w, display_2d_h );
-		if ( is_pos || is_2d_pos )
+							  GI.display_2d_w, GI.display_2d_h );
+		if ( GI.is_pos || GI.is_2d_pos )
 			fl_set_form_position( GUI.run_form_2d->run_2d,
-								  display_2d_x, display_2d_y );
+								  GI.display_2d_x, GI.display_2d_y );
 	}
 }
 
@@ -395,13 +408,13 @@ static void set_defaults( void )
 {
 	if ( GUI.G_Funcs.size == LOW )
 	{
-		GI_sizes.WIN_MIN_1D_WIDTH   = 300;
-		GI_sizes.WIN_MIN_2D_WIDTH   = 350;
-		GI_sizes.WIN_MIN_HEIGHT     = 380;
-		GI_sizes.SMALL_FONT_SIZE    = FL_TINY_SIZE;
-		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
-		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
-		GI_sizes.DEFAULT_AXISFONT_3 = "fixed";
+		GI.WIN_MIN_1D_WIDTH   = 300;
+		GI.WIN_MIN_2D_WIDTH   = 350;
+		GI.WIN_MIN_HEIGHT     = 380;
+		GI.SMALL_FONT_SIZE    = FL_TINY_SIZE;
+		GI.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
+		GI.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
+		GI.DEFAULT_AXISFONT_3 = "fixed";
 
 		G.scale_tick_dist   =  4;
 		G.short_tick_len    =  3;
@@ -417,13 +430,13 @@ static void set_defaults( void )
 	}
 	else
 	{
-		GI_sizes.WIN_MIN_1D_WIDTH   = 400;
-		GI_sizes.WIN_MIN_2D_WIDTH   = 500;
-		GI_sizes.WIN_MIN_HEIGHT     = 435;
-		GI_sizes.SMALL_FONT_SIZE    = FL_SMALL_SIZE;
-		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
-		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
-		GI_sizes.DEFAULT_AXISFONT_3 = "fixed";
+		GI.WIN_MIN_1D_WIDTH   = 400;
+		GI.WIN_MIN_2D_WIDTH   = 500;
+		GI.WIN_MIN_HEIGHT     = 435;
+		GI.SMALL_FONT_SIZE    = FL_SMALL_SIZE;
+		GI.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
+		GI.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
+		GI.DEFAULT_AXISFONT_3 = "fixed";
 
 		G.scale_tick_dist   =   6;
 		G.short_tick_len    =   5;
@@ -437,6 +450,14 @@ static void set_defaults( void )
 		G.z_line_width      =  14;
 		G.enlarge_box_width =   5;
 	}
+
+	GI.display_has_been_shown = UNSET;
+	GI.is_pos = UNSET;
+	GI.is_size = UNSET;
+	GI.is_1d_pos = UNSET;
+	GI.is_1d_size = UNSET;
+	GI.is_2d_pos = UNSET;
+	GI.is_2d_size = UNSET;
 
 	G.font = NULL;
 
@@ -480,10 +501,10 @@ static void forms_adapt( void )
 
 			if ( G.dim & 1 )
 				fl_set_object_lsize( GUI.run_form_1d->undo_button_1d,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 			if ( G.dim & 2 )
 				fl_set_object_lsize( GUI.run_form_2d->undo_button_2d,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 
 			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			{
@@ -500,7 +521,7 @@ static void forms_adapt( void )
 				fl_set_pixmapbutton_file( GUI.cut_form->cut_undo_button,
 										  pixmap_file );
 				fl_set_object_lsize( GUI.cut_form->cut_undo_button,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.cut_form->cut_undo_button,
 										  "Undo last rescaling operation" );
@@ -521,10 +542,10 @@ static void forms_adapt( void )
 
 			if ( G.dim & 1 )
 				fl_set_object_lsize( GUI.run_form_1d->print_button_1d,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 			if ( G.dim & 2 )
 				fl_set_object_lsize( GUI.run_form_2d->print_button_2d,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 
 			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 			{
@@ -541,7 +562,7 @@ static void forms_adapt( void )
 				fl_set_pixmapbutton_file( GUI.cut_form->cut_print_button,
 										  pixmap_file );
 				fl_set_object_lsize( GUI.cut_form->cut_print_button,
-									 GI_sizes.SMALL_FONT_SIZE );
+									 GI.SMALL_FONT_SIZE );
 				if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
 					fl_set_object_helper( GUI.cut_form->cut_print_button,
 										  "Print window" );
@@ -1250,19 +1271,20 @@ void stop_graphics( void )
 
 	if ( GUI.run_form_1d && fl_form_is_visible( GUI.run_form_1d->run_1d ) )
 	{
-		if ( ! is_1d_pos )
+		if ( ! GI.is_1d_pos )
 		{
-			display_1d_x = GUI.run_form_1d->run_1d->x;
-			display_1d_y = GUI.run_form_1d->run_1d->y;
+			GI.display_1d_x = GUI.run_form_1d->run_1d->x;
+			GI.display_1d_y = GUI.run_form_1d->run_1d->y;
 		}
 
-		if ( ! is_1d_size )
+		if ( ! GI.is_1d_size )
 		{
-			display_1d_w = GUI.run_form_1d->run_1d->w;
-			display_1d_h = GUI.run_form_1d->run_1d->h;
+			GI.display_1d_w = GUI.run_form_1d->run_1d->w;
+			GI.display_1d_h = GUI.run_form_1d->run_1d->h;
 		}
 
-		is_1d_pos = is_1d_size = SET;
+		GI.is_1d_pos = GI.is_1d_size = SET;
+
 		fl_hide_form( GUI.run_form_1d->run_1d );
 		fl_free_form( GUI.run_form_1d->run_1d );
 		GUI.run_form_1d = NULL;
@@ -1270,19 +1292,20 @@ void stop_graphics( void )
 
 	if ( GUI.run_form_2d && fl_form_is_visible( GUI.run_form_2d->run_2d ) )
 	{
-		if ( ! is_2d_pos )
+		if ( ! GI.is_2d_pos )
 		{
-			display_2d_x = GUI.run_form_2d->run_2d->x;
-			display_2d_y = GUI.run_form_2d->run_2d->y;
+			GI.display_2d_x = GUI.run_form_2d->run_2d->x;
+			GI.display_2d_y = GUI.run_form_2d->run_2d->y;
 		}
 
-		if ( ! is_2d_size )
+		if ( ! GI.is_2d_size )
 		{
-			display_2d_w = GUI.run_form_2d->run_2d->w;
-			display_2d_h = GUI.run_form_2d->run_2d->h;
+			GI.display_2d_w = GUI.run_form_2d->run_2d->w;
+			GI.display_2d_h = GUI.run_form_2d->run_2d->h;
 		}
 
-		is_2d_pos = is_2d_size = SET;
+		GI.is_2d_pos = GI.is_2d_size = SET;
+
 		fl_hide_form( GUI.run_form_2d->run_2d );
 
 		fl_free_form( GUI.run_form_2d->run_2d );
