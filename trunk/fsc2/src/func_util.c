@@ -919,7 +919,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid x-index (%ld) in `display()'.\n",
+			eprint( FATAL, "%s:%ld: Invalid x-index (= %ld) in `display()'.\n",
 					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET );
 			T_free( dp );
 			THROW( EXCEPTION );
@@ -946,9 +946,9 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			else
 				dp[ *nsets ].ny = lround( v->val.dval - ARRAY_OFFSET );
 
-			if ( dp[ *nsets ].nx < 0 )
+			if ( dp[ *nsets ].ny < 0 )
 			{
-				eprint( FATAL, "%s:%ld: Invalid y-index (%ld) in "
+				eprint( FATAL, "%s:%ld: Invalid y-index (= %ld) in "
 						"`display()'.\n",
 						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET );
 				T_free( dp );
