@@ -16,7 +16,7 @@ pdf: $(docs)
 	texi2dvi --pdf -c fsc2.texi
 
 clean:
-	$(RM) $(RMFLAGS) fsc2.dvi
+	$(RM) $(RMFLAGS) fsc2.dvi *.log
 
 distclean:
 	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps fsc2.pdf *~

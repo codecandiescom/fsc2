@@ -181,10 +181,10 @@ pdf-docs:
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C modules clean
-	$(MAKE) -C docs clean
+	$(MAKE) -C doc clean
 
 distclean:
-	$(MAKE) -C docs distclean
+	$(MAKE) -C doc distclean
 	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so *~
 
