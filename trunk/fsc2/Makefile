@@ -134,8 +134,23 @@ all: fsc2 fsc2_clean mods
 
 # make the main program from the c, flex and bison source files
 
-fsc2: $(objects)
+fsc2: test $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+		mv gpib.c gpib_old.c; \
+		mv gpib.h gpib_old.h; \
+		mv gpib_new.c gpib.c; \
+		mv gpib_new.h gpib.h; \
+	fi;
+
+test:
+	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
+		mv gpib.c gpib_new.c; \
+		mv gpib.h gpib_new.h; \
+		mv gpib_old.c gpib.c; \
+		mv gpib_old.h gpib.h; \
+	fi;
+
 
 %.o: %.c $(headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
