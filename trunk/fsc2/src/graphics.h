@@ -35,10 +35,10 @@ typedef struct {
 		 left,
 		 right;
 
-	Pixmap up_arr,
-		   down_arr,
-		   left_arr,
-		   right_arr;
+	Pixmap up_arrow,
+		   down_arrow,
+		   left_arrow,
+		   right_arrow;
 
 	bool can_undo;
 
@@ -81,10 +81,10 @@ typedef struct {
 		 left,
 		 right;
 
-	Pixmap up_arr,
-		   down_arr,
-		   left_arr,
-		   right_arr;
+	Pixmap up_arrow,
+		   down_arrow,
+		   left_arrow,
+		   right_arrow;
 
 	bool can_undo;
 	double old_s2d[ 3 ];

@@ -316,7 +316,7 @@ static void G_init_curves_1d( void )
 
 		/* Create pixmaps for the out-of-display arrows */
 
-		cv->up_arr =
+		cv->up_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, up_arrow_bits,
 										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -324,7 +324,7 @@ static void G_init_curves_1d( void )
 		G.up_arrow_w = up_arrow_width;
 		G.up_arrow_h = up_arrow_width;
 
-		cv->down_arr =
+		cv->down_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, down_arrow_bits,
 										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -333,7 +333,7 @@ static void G_init_curves_1d( void )
 		G.down_arrow_w = down_arrow_width;
 		G.down_arrow_h = down_arrow_width;
 
-		cv->left_arr =
+		cv->left_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, left_arrow_bits,
 										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -342,7 +342,7 @@ static void G_init_curves_1d( void )
 		G.left_arrow_w = left_arrow_width;
 		G.left_arrow_h = left_arrow_width;
 
-		cv->right_arr = 
+		cv->right_arrow = 
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -414,7 +414,7 @@ static void G_init_curves_2d( void )
 
 		/* Create pixmaps for the out-of-display arrows */
 
-		cv->up_arr =
+		cv->up_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, up_arrow_bits,
 										 up_arrow_width, up_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -422,7 +422,7 @@ static void G_init_curves_2d( void )
 		G.up_arrow_w = up_arrow_width;
 		G.up_arrow_h = up_arrow_width;
 
-		cv->down_arr =
+		cv->down_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, down_arrow_bits,
 										 down_arrow_width, down_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -431,7 +431,7 @@ static void G_init_curves_2d( void )
 		G.down_arrow_w = down_arrow_width;
 		G.down_arrow_h = down_arrow_width;
 
-		cv->left_arr =
+		cv->left_arrow =
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, left_arrow_bits,
 										 left_arrow_width, left_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -440,7 +440,7 @@ static void G_init_curves_2d( void )
 		G.left_arrow_w = left_arrow_width;
 		G.left_arrow_h = left_arrow_width;
 
-		cv->right_arr = 
+		cv->right_arrow = 
 			XCreatePixmapFromBitmapData( G.d, G.canvas.pm, right_arrow_bits,
 										 right_arrow_width, right_arrow_height,
 										 fl_get_pixel( G.colors[ i ] ),
@@ -593,10 +593,10 @@ void graphics_free( void )
 
 			XFreeGC( G.d, cv->gc );
 
-			XFreePixmap( G.d, cv->up_arr );
-			XFreePixmap( G.d, cv->down_arr );
-			XFreePixmap( G.d, cv->left_arr );
-			XFreePixmap( G.d, cv->right_arr );
+			XFreePixmap( G.d, cv->up_arrow );
+			XFreePixmap( G.d, cv->down_arrow );
+			XFreePixmap( G.d, cv->left_arrow );
+			XFreePixmap( G.d, cv->right_arrow );
 
 			XFreeGC( G.d, cv->font_gc );
 
@@ -621,10 +621,10 @@ void graphics_free( void )
 
 			XFreeGC( G.d, cv2->gc );
 
-			XFreePixmap( G.d, cv2->up_arr );
-			XFreePixmap( G.d, cv2->down_arr );
-			XFreePixmap( G.d, cv2->left_arr );
-			XFreePixmap( G.d, cv2->right_arr );
+			XFreePixmap( G.d, cv2->up_arrow );
+			XFreePixmap( G.d, cv2->down_arrow );
+			XFreePixmap( G.d, cv2->left_arrow );
+			XFreePixmap( G.d, cv2->right_arrow );
 
 			XFreeGC( G.d, cv2->font_gc );
 
