@@ -55,7 +55,7 @@ EXP         ^[ \t]*EXP(ERIMENT)?:
 STR         \x5[^\x6]*\x6
 ESTR        \x5.*\x3\n.*\n
 
-IDENT       [A-Za-z0-9]+[A-Za-z_0-9]?
+IDENT       [A-Za-z0-9][A-Za-z_0-9]*
 
 WS          [\n\t ]+
 
