@@ -67,7 +67,7 @@ fsc_clean.c: fsc_clean.flex exceptions.h fsc2.h
 .PHONY:
 clean: 
 	   rm $(objects) fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
-	   fsc_clean.c fsc_clean.o
+	   fsc_clean.c fsc_clean.o TAGS
 
 tags:
 	etags -T $(cstuff) $(header) *.y *.h
