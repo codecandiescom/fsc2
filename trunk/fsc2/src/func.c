@@ -143,7 +143,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "output_delete", f_idelete, LONG_MIN, ACCESS_EXP,  NULL, UNSET },
 	{ "output_value",  f_ivalue,   		-2, ACCESS_EXP,  NULL, UNSET },
 	{ "object_delete", f_objdel,  LONG_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "abort",         f_abort,    		 0, ACCESS_ALL,  NULL, UNSET },
+	{ "end",           f_end,    		 0, ACCESS_EXP,  NULL, UNSET },
+	{ "abort",         f_abort,    		 0, ACCESS_EXP,  NULL, UNSET },
 	{ NULL,            NULL,       		 0, 0,           NULL, UNSET }
 	                   /* last set marks the very last entry, don't remove ! */
 };
@@ -262,9 +263,9 @@ int func_exists( const char *name )
 /*    exists but has not been loaded an exception is thrown.            */
 /*----------------------------------------------------------------------*/
 
-Var *func_get( const char *name, int *access )
+Var *func_get( const char *name, int *acc )
 {
-	return func_get_long( name, access, SET );
+	return func_get_long( name, acc, SET );
 }
 
 
@@ -275,7 +276,7 @@ Var *func_get( const char *name, int *access )
 /* printed and an exception is thrown or simply NULL is returned. */
 /*----------------------------------------------------------------*/
 
-Var *func_get_long( const char *name, int *access, bool flag )
+Var *func_get_long( const char *name, int *acc, bool flag )
 {
 	Func *f;
 	Var *ret;
@@ -306,8 +307,8 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	ret = vars_push( FUNC, f->fnct );
 	ret->name = T_strdup( name );
 	ret->len = f->nargs;
-	if ( access != NULL )
-		*access = f->access_flag;
+	if ( acc != NULL )
+		*acc = f->access_flag;
 
 	return ret;
 }

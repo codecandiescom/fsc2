@@ -201,9 +201,9 @@ extern const char *Function_Names[ ];
 /* Define access types for functions in certain sections */
 
 enum {
-	ACCESS_PREP = 1,         // only in preparation phase
-	ACCESS_EXP  = 2,         // only in experiment phase
-	ACCESS_ALL  = 3          // everywhere
+	ACCESS_PREP = 1,         /* only in preparation phase */
+	ACCESS_EXP  = 2,         /*	only in experiment phase */
+	ACCESS_ALL  = 3          /*	everywhere */
 };
 
 
@@ -308,9 +308,9 @@ enum {
 /* Return codes from function get_lib_symbol() (in func.c) */
 
 enum {
-	LIB_OK          =  0,        // everything fine
-	LIB_ERR_NO_LIB  = -1,        // library not found
-	LIB_ERR_NO_SYM  = -2         // symbol not found in library
+	LIB_OK          =  0,        /*	everything fine */
+	LIB_ERR_NO_LIB  = -1,        /*	library not found */
+	LIB_ERR_NO_SYM  = -2         /*	symbol not found in library */
 };
 
 
