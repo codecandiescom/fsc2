@@ -963,9 +963,9 @@ void recalc_XPoints_of_curve( Curve_1d *c )
 	for ( k = 0, j = 0; j < G.nx; j++ )
 		if ( c->points[ j ].exist )
 		{
-			c->xpoints[ k ].x = ( short ) rnd( c->s2d_x * ( j + c->x_shift ) );
-			c->xpoints[ k++ ].y = ( short )
-				rnd( c->s2d_y * ( 1.0 - ( c->points[ j ].y + c->y_shift ) ) );
+			c->xpoints[ k ].x = shrt( c->s2d_x * ( j + c->x_shift ) );
+			c->xpoints[ k++ ].y =
+				shrt( c->s2d_y * ( 1.0 - ( c->points[ j ].y + c->y_shift ) ) );
 		}
 }
 
@@ -1066,11 +1066,9 @@ void fs_rescale_1d( void )
 					  + G.rw_y_min - rw_y_min );
 
 				G.curve[ i ]->xpoints[ k ].x =
-					( short ) rnd( G.curve[ i ]->s2d_x * ( double ) j );
-				G.curve[ i ]->xpoints[ k ].y = ( short )
-					rnd( G.curve[ i ]->s2d_y
-						 * ( 1.0 - G.curve[ i ]->points[ j ].y ) );
-				k++;
+					                shrt( G.curve[ i ]->s2d_x * ( double ) j );
+				G.curve[ i ]->xpoints[ k++ ].y = shrt( G.curve[ i ]->s2d_y
+						             * ( 1.0 - G.curve[ i ]->points[ j ].y ) );
 			}
 	}
 
@@ -1424,13 +1422,11 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		{
 			if ( G.curve[ i ]->points[ j ].exist )
 			{
-				G.curve[ i ]->xpoints[ k ].x =
-					( short ) rnd ( G.curve[ i ]->s2d_x
-									* ( j + G.curve[ i ]->x_shift ) );
-				G.curve[ i ]->xpoints[ k++ ].y = ( short )
-					rnd( G.curve[ i ]->s2d_y *
-						 ( 1.0 - ( G.curve[ i ]->points[ j ].y
-								   + G.curve[ i ]->y_shift ) ) );
+				G.curve[ i ]->xpoints[ k ].x = shrt( G.curve[ i ]->s2d_x
+									         * ( j + G.curve[ i ]->x_shift ) );
+				G.curve[ i ]->xpoints[ k++ ].y = shrt( G.curve[ i ]->s2d_y *
+										  ( 1.0 - ( G.curve[ i ]->points[ j ].y
+											     + G.curve[ i ]->y_shift ) ) );
 			}
 		}
 	}
@@ -1447,5 +1443,6 @@ void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 void curve_button_callback( FL_OBJECT *obj, long data )
 {
+	obj = obj;
 	G.curve[ data - 1 ]->active ^= SET;
 }
