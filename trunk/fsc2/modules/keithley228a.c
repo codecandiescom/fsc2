@@ -342,6 +342,8 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_use_correction( Var *v )
 {
+	v = v;
+
 	keithley228a.use_correction = SET;
 	return vars_push( INT_VAR, 1 );
 }
@@ -492,6 +494,8 @@ Var *sweep_down( Var *v )
 
 Var *reset_field( Var *v )
 {
+	v = v;
+
 	if ( ! keithley228a.is_req_current )
 	{
 		eprint( FATAL, SET, "Start current has not been defined in "

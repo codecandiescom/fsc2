@@ -44,7 +44,7 @@ inline int get_mode( void )
 
 inline void too_many_arguments( Var *v, const char *device_name )
 {
-	if ( ( v = vars_pop( v ) ) == NULL )
+	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
 
 	eprint( WARN, SET, "%s: Superfluous argument%s in call of function "

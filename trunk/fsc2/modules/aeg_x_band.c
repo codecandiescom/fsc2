@@ -346,6 +346,8 @@ Var *magnet_setup( Var *v )
 
 Var *magnet_fast_init( Var *v )
 {
+	v = v;
+
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1 );
 }
