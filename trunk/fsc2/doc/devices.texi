@@ -847,7 +847,9 @@ isn't called a frequency of @w{14 MHz} is used.
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
 This function is used to set the type, source and amplitude of the
-modulation. There are three types of modulation FM, AM and phase
+modulation. It can set all of these parameters at once or only parts.
+
+There are three possible types of modulation FM, AM and phase
 modulation. The modulation type is specified by a string, either
 @code{"FM"}, @code{"AM"} or @code{"PHASE"}.
 
@@ -859,7 +861,8 @@ modulation with @w{1 kHz} or @w{400 Hz} use a string argument from the
 following list: @code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"},
 @code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"},
 @code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"}
-or @code{"400"}.
+or @code{"400"}. But please note: external DC coupled modulation source
+does not work with amplitude and phase modulation@!
 
 Finally you may specify the modulation amplitude, which has to be a
 number (preferably a floating point number). FM modulation amplitudes
