@@ -20,13 +20,16 @@
 # Boston, MA 02111-1307, USA.
 
 
+s_band_list   := s_band_magnet_narrow s_band_magnet_broad
+tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
+
 simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
 				 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
-				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c
+				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
+				 $(addsuffix .c,$(s_band_list))
 
-comp_modules  := dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
-                 tds520a tds520 hp8647a er023m lecroy9400
+comp_modules  := dg2020_f dg2020_b hfs9000 er023m lecroy9400 $(tds_list)
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -45,8 +48,6 @@ er023m        := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400    := lecroy9400.c  lecroy9400_gpib.c  lecroy9400_util.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
-
-tds_list      := tds754a tds744a tds540 tds520c tds520a tds520
 
 CFLAGS        += -I$(sdir) -I$(cdir)
 
@@ -104,6 +105,14 @@ $(simp_modules:.c=.so): %.so: %.o
 
 $(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
+
+# Also the modules for controlling the Frankfurt S-band magnet are made
+# from a template file
+
+$(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
+	n=$(subst .c,,$(subst s_band_magnet_,,$@)); \
+	o=`echo $$n | tr "a-z" "A-Z"`; \
+	sed "s/s_band_magnet_tmpl/s_band_magnet_$$n/g;s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
 
 # How to install the modules
@@ -250,6 +259,9 @@ distclean:
 		for m in "" _util _gpib; do \
 			$(RM) $(RMFLAGS) $$n$$m.c; \
 		done; \
+	done;
+	-for n in $(s_band_list); do \
+		$(RM) $(RMFLAGS) $$n.c; \
 	done;
 	-$(RM) $(RMFLAGS) *.so
 
