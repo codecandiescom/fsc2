@@ -65,13 +65,13 @@ bool Eol;
 
 %}
 
-REM1     ^[\t ]*"//".*\n
-REM2     [\t ]*"//".*\n
+REM1     ^[\t ]*"//".*\n?
+REM2     [\t ]*"//".*\n?
 REM3     "/*"
 REM4     [^*\n]*
 REM5     "*"+[^*/\n]*
 EREM1    "*"+"/"
-EREM2    "*"+"/"[\t ]*\n
+EREM2    "*"+"/"[\t ]*\n?
 
 INT      [0-9]+
 EXPO     [EDed][+-]?{INT}
