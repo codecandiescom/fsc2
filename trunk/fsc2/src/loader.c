@@ -262,13 +262,10 @@ void load_functions( Device *dev )
 		   an already loaded (i.e. non-built-in) function */
 
 		if ( Fncts[ num ].fnct != NULL )
-		{
 			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
 					"already been loaded'.\n", Fncts[ num ].name, dev->name );
-			continue;
-		}
-
-		Fncts[ num ].fnct = cur;
+		else
+			Fncts[ num ].fnct = cur;
 	}
 }
 
