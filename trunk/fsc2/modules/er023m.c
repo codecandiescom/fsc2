@@ -215,11 +215,7 @@ Var *lockin_sensitivity( Var *v )
 		}
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as receiver gain.\n",
-				DEVICE_NAME );
-	rg = VALUE( v );
+	rg = get_double( v, "receiver gain", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -303,11 +299,7 @@ Var *lockin_time_constant( Var *v )
 				return vars_push( FLOAT_VAR, tc_list[ er023m_get_tc( ) ] );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as time constant.\n",
-				DEVICE_NAME );
-	tc = VALUE( v );
+	tc = get_double( v, "time constant", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -464,15 +456,7 @@ Var *lockin_offset( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_of( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Floating point value used as offset in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-		of = irnd( v->val.dval );
-	}
-	else
-		of = ( int ) v->val.lval;
+	of = get_long( v, "offset", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -519,11 +503,7 @@ Var *lockin_conversion_time( Var *v )
 				return vars_push( FLOAT_VAR, BASE_CT * er023m_get_ct( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as conversion time.\n",
-				DEVICE_NAME );
-	ct = VALUE( v );
+	ct = get_double( v, "conversion time", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -589,11 +569,7 @@ Var *lockin_ref_freq( Var *v )
 
 	old_mf_index = er023m.mf_index;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as modulation frequency.\n",
-				DEVICE_NAME );
-	mf = VALUE( v );
+	mf = get_double( v, "modulation frequency", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -687,11 +663,7 @@ Var *lockin_ref_level( Var *v )
 
 	old_ma_index = er023m.ma_index;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used as modulation amplitude.\n",
-				DEVICE_NAME );
-	ma = VALUE( v );
+	ma = get_double( v, "modulation amplitude", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -762,15 +734,7 @@ Var *lockin_harmonic( Var *v )
 				return vars_push( INT_VAR, ( long ) ( er023m_get_ph( ) + 1 ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
-				DEVICE_NAME );
-		ha = irnd( v->val.dval ) - 1;
-	}
-	else
-		ha = ( int ) v->val.lval - 1;
+	ha = ( int ) get_long( v, "harmonic", DEVICE_NAME ) - 1;
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -816,15 +780,7 @@ Var *lockin_resonator( Var *v )
 				return vars_push( INT_VAR, ( long ) ( er023m_get_re( ) + 1 ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as resonator number.\n",
-				DEVICE_NAME );
-		re = irnd( v->val.dval ) - 1;
-	}
-	else
-		re = ( int ) v->val.lval - 1;
+	re = ( int ) get_long( v, "resonator number", DEVICE_NAME ) - 1;
 
 	too_many_arguments( v, DEVICE_NAME );
 

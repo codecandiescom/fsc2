@@ -155,15 +155,7 @@ Var *boxcar_curve_length( Var *v )
 		return vars_push( INT_VAR, T_atol( buffer ) );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		num_points = v->val.lval;
-	else
-	{
-		eprint( WARN, SET, "%s: Floating point number used as number of "
-				"points in function %s().\n", DEVICE_NAME, Cur_Func );
-		num_points = lrnd( v->val.dval );
-	}
+	num_points = get_int( v, "number of points", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -231,14 +223,7 @@ Var *boxcar_get_curve( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( v->type == INT_VAR )
-			curve_type = v->val.lval;
-		else
-		{
-			eprint( WARN, SET, "%s: Floating point number used as curve "
-					"type in function %s().\n", DEVICE_NAME, Cur_Func );
-			curve_type = lrnd( v->val.dval );
-		}
+		curve_type = get_long( v, "curve type", DEVICE_NAME );
 
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
@@ -327,15 +312,7 @@ Var *boxcar_get_curve( Var *v )
 	}
 	else
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		if ( v->type == INT_VAR )
-			first = v->val.lval - 1;
-		else
-		{
-			eprint( WARN, SET, "%s: Floating point number used as first "
-				"point in function %s().\n", DEVICE_NAME, Cur_Func );
-			first = lrnd( v->val.dval ) - 1;
-		}
+		first = get_long( v, "first point", DEVICE_NAME );
 
 		if ( first < 0 || first >= max_points )
 		{

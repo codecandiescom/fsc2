@@ -29,7 +29,7 @@
 inline int get_mode( void );
 inline void too_many_arguments( Var *v, const char *device_name );
 inline void no_query_possible( const char *device_name );
-inline long get_int( Var *v, const char *snippet, const char *device_name );
+inline long get_long( Var *v, const char *snippet, const char *device_name );
 inline double get_double( Var *v, const char *snippet,
 						  const char *device_name );
 

@@ -262,7 +262,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	port = get_int( v, "ADC port number", DEVICE_NAME );
+	port = get_long( v, "ADC port number", DEVICE_NAME );
 
 	if ( port < 1 || port > 4 )
 	{
@@ -598,7 +598,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* First argument must be the channel number (5 or 6) */
 
-	channel = get_int( v, "DAC channel number", DEVICE_NAME );
+	channel = get_long( v, "DAC channel number", DEVICE_NAME );
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{

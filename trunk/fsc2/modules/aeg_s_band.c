@@ -282,6 +282,8 @@ Var *magnet_name( Var *v )
 Var *magnet_setup( Var *v )
 {
 	bool err_flag = UNSET;
+	double start_field;
+	double field_step;
 
 
 	/* check that both variables are reasonable */
@@ -293,39 +295,35 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnetic field.\n",
-				DEVICE_NAME );
+	start_field = get_double( v, "magnetic field", DEVICE_NAME );
 
-	if ( v->next == NULL )
+	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		eprint( FATAL, SET, "%s: Missing field step size in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-	if ( v->next->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for field step width "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
+	field_step = get_double( v, "field step width", DEVICE_NAME );
 
 	/* Check that new field value is still within bounds */
 
-	aeg_s_band_field_check( VALUE( v ), &err_flag );
+	aeg_s_band_field_check( start_field, &err_flag );
 	if ( err_flag )
 		THROW( EXCEPTION )
 
-	if ( fabs( VALUE( v->next ) ) < AEG_S_BAND_MIN_FIELD_STEP )
+	if ( fabs( field_step ) < AEG_S_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, SET, "%s: Field sweep step size (%lf G) too small in "
-				"%s(), minimum is %f G.\n", DEVICE_NAME, VALUE( v->next ),
+				"%s(), minimum is %f G.\n", DEVICE_NAME, field_step,
 				Cur_Func, ( double ) AEG_S_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION )
 	}
-		
-	magnet.field = VALUE( v );
-	magnet.field_step = VALUE( v->next );
+
+	too_many_arguments( v, DEVICE_NAME );
+
+	magnet.field = start_field;
+	magnet.field_step = field_step;
 	magnet.is_field = magnet.is_field_step = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -351,6 +349,7 @@ Var *magnet_fast_init( Var *v )
 Var *set_field( Var *v )
 {
 	double field;
+	
 	bool err_flag = UNSET;
 	double error = 0.0;
 
@@ -362,25 +361,17 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+	field = get_double( v, "magnetic field", DEVICE_NAME );
 
 	/* Check the new field value and reduce value if necessary */
 
-	field = aeg_s_band_field_check( VALUE( v ), &err_flag );
+	field = aeg_s_band_field_check( field, &err_flag );
 
 	/* The second argument be the maximum error */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		if ( v->type == INT_VAR )
-			eprint( WARN, SET, "%s: Integer value used for magnetic field "
-					"precision in %s().\n", DEVICE_NAME, Cur_Func );
-		error = fabs( VALUE( v ) );
-
+		error = get_double( v, "magnetic field precision", DEVICE_NAME );
 		if ( error > 0.1 * field )
 			eprint( SEVERE, SET, "%s: Field precision larger than 10% of "
 					"field value in %s().\n", DEVICE_NAME, Cur_Func );

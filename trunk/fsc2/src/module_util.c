@@ -68,7 +68,7 @@ inline void no_query_possible( const char *device_name )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-inline long get_int( Var *v, const char *snippet, const char *device_name )
+inline long get_long( Var *v, const char *snippet, const char *device_name )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 

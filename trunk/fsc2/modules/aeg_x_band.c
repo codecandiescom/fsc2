@@ -286,7 +286,7 @@ Var *magnet_setup( Var *v )
 	double field_step;
 
 
-	/* check that both variables are reasonable */
+	/* Check that both variables are reasonable */
 
 	if ( v == NULL )
 	{
@@ -295,11 +295,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
-	start_field = VALUE( v );
+	start_field = get_double( v, "magnetic field", DEVICE_NAME );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -308,11 +304,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for field step width "
-				"in %s().\n", DEVICE_NAME, Cur_Func );
-	field_step = VALUE( v );
+	field_step = get_double( v, "field step width", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -370,26 +362,18 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		eprint( WARN, SET, "%s: Integer value used for magnetic field in "
-				"%s().\n", DEVICE_NAME, Cur_Func );
+	field = get_double( v, "magnetic field", DEVICE_NAME );
 
 	/* Check the new field value and reduce value if necessary */
 
-	field = aeg_x_band_field_check( VALUE( v ), &err_flag );
+	field = aeg_x_band_field_check( field, &err_flag );
 
 	/* The second argument can be the maximum error which should be less than 
 	   10% of the absolut requested field value */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		if ( v->type == INT_VAR )
-			eprint( WARN, SET, "%s: Integer value used for magnetic field "
-					"precision in %s().\n", DEVICE_NAME, Cur_Func );
-		error = fabs( VALUE( v ) );
-
+		error = get_double( v, "magnetic field precision", DEVICE_NAME );
 		if ( error > 0.1 * fabs( field ) )
 			eprint( SEVERE, SET, "%s: Field precision is larger than 10% "
 					"of field value in %s().\n", DEVICE_NAME, Cur_Func );

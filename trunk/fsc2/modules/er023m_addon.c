@@ -48,15 +48,7 @@ Var *lockin_rg( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_rg( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as receiver gain index.\n",
-				DEVICE_NAME );
-		rg_index = irnd( v->val.dval );
-	}
-	else
-		rg_index = ( int ) v->val.lval;
+	rg_index = ( int ) get_long( v, "receiver gain index", DEVICE_NAME );
 
 	too_many_arguments( v, DEVICE_NAME );
 
@@ -98,16 +90,7 @@ Var *lockin_tc( Var *v )
 				return vars_push( INT_VAR, er023m_get_tc( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-
-	{
-		eprint( WARN, SET, "%s: Float value used as time constant index.\n",
-				DEVICE_NAME );
-		tc_index =  irnd( v->val.dval );
-	}
-	else
-		tc_index = ( int ) v->val.lval;
+	tc_index = ( int ) get_long( v, "time constant index", DEVICE_NAME );
 
 	if ( tc_index > 0 && tc_index < TC_MIN_INDEX )
 	{
@@ -168,15 +151,7 @@ Var *lockin_ma( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as modulation attenuation "
-				"index in %s().\n", DEVICE_NAME, Cur_Func );
-		ma = irnd( v->val.dval );
-	}
-	else
-		ma = ( int ) v->val.lval;
+	ma = ( int ) get_long( v, "modulation attenuation index", DEVICE_NAME );
 
 	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
@@ -220,17 +195,8 @@ Var *lockin_ct( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ct( ) );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-
-	{
-		eprint( WARN, SET, "%s: Float value used as conversion time "
-				"multiplicator.\n", DEVICE_NAME );
-		ct_mult = irnd( v->val.dval );
-	}
-	else
-		ct_mult = ( int ) v->val.lval;
-
+	ct_mult = ( int ) get_long( v, "conversion time multiplicator",
+								DEVICE_NAME );
 	if ( ct_mult < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
@@ -290,16 +256,8 @@ Var *lockin_mf( Var *v )
 
 	old_mf_index = er023m.mf_index;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-
-	{
-		eprint( WARN, SET, "%s: Float value used as modulation frequency "
-				"index.\n", DEVICE_NAME );
-		mf_index = irnd( v->val.dval );
-	}
-	else
-		mf_index = ( int ) v->val.lval;
+	mf_index = ( int ) get_long( v, "modulation frequency index",
+								 DEVICE_NAME );
 
 	if ( mf_index < 0 )
 	{
