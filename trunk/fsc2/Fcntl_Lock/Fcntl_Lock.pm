@@ -29,7 +29,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
 				  SEEK_SET SEEK_CUR SEEK_END
 );
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # Set up an hash with the error messages, but only for errno's that Errno
 # knows about. The texts represent what's written in the man pages for

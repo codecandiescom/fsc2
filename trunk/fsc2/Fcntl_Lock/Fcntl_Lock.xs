@@ -28,7 +28,7 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 
 	INIT:
 		unsigned char flock_struct[ STRUCT_SIZE ];
-		HV *fh;
+		HV *fs;
 		SV **sv_type, **sv_whence, **sv_start, **sv_len, **sv_pid;
 
 		sv_setiv( int_err, 0 );
@@ -39,7 +39,7 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 				XSRETURN_UNDEF;
 		}
 
-		fh = ( HV * ) SvRV( flock_hash );
+		fs = ( HV * ) SvRV( flock_hash );
 
 	CODE:
 		/* Unfortunately, we can't even be sure that the constants aren't
@@ -67,11 +67,11 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 		/* Let's be careful and not assume that anything at all will work as
 	   	   expected (otherwise we could merge this with the following) */
 
-		if ( ( sv_type   = hv_fetch( fh, "l_type",   6, 0 ) ) == NULL ||
-			 ( sv_whence = hv_fetch( fh, "l_whence", 8, 0 ) ) == NULL ||
-			 ( sv_start  = hv_fetch( fh, "l_start",  7, 0 ) ) == NULL ||
-			 ( sv_len	 = hv_fetch( fh, "l_len",    5, 0 ) ) == NULL ||
-			 ( sv_pid	 = hv_fetch( fh, "l_pid",    5, 0 ) ) == NULL )
+		if ( ( sv_type   = hv_fetch( fs, "l_type",   6, 0 ) ) == NULL ||
+			 ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL ||
+			 ( sv_start  = hv_fetch( fs, "l_start",  7, 0 ) ) == NULL ||
+			 ( sv_len	 = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL ||
+			 ( sv_pid	 = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL )
 		{
 			sv_setiv( int_err, 1 );
 			XSRETURN_UNDEF;
@@ -105,15 +105,15 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 
 		if ( function == REAL_F_GETLK )
 		{
-			hv_store( fh, "l_type",   6, newSViv( * ( LTYPE_TYPE * ) 
+			hv_store( fs, "l_type",   6, newSViv( * ( LTYPE_TYPE * ) 
 									  ( flock_struct + LTYPE_OFFSET ) ), 0 );
-			hv_store( fh, "l_whence", 8, newSViv( * ( LWHENCE_TYPE * ) 
+			hv_store( fs, "l_whence", 8, newSViv( * ( LWHENCE_TYPE * ) 
 									  ( flock_struct + LWHENCE_OFFSET ) ), 0 );
-			hv_store( fh, "l_start",  7, newSViv( * ( LSTART_TYPE * ) 
+			hv_store( fs, "l_start",  7, newSViv( * ( LSTART_TYPE * ) 
 									  ( flock_struct + LSTART_OFFSET ) ), 0 );
-			hv_store( fh, "l_len",    5, newSViv( * ( LLEN_TYPE * ) 
+			hv_store( fs, "l_len",    5, newSViv( * ( LLEN_TYPE * ) 
 									  ( flock_struct + LLEN_OFFSET ) ), 0 );
-			hv_store( fh, "l_pid",    5, newSViv( * ( LPID_TYPE * ) 
+			hv_store( fs, "l_pid",    5, newSViv( * ( LPID_TYPE * ) 
 									  ( flock_struct + LPID_OFFSET ) ), 0 );
 		}
 
