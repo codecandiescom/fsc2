@@ -2590,7 +2590,7 @@ Var *f_setmark_1d( Var *v )
 	int type = D_SET_MARKER;
 	int shm_id;
 	const char *colors[ ] = { "WHITE", "RED", "GREEN", "YELLOW",
-							  "BLUE", "BLACK" };
+							  "BLUE", "BLACK", "DELETE" };
 	long num_colors = sizeof colors / sizeof *colors;
 
 

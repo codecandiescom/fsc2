@@ -40,6 +40,7 @@ static bool zoom_xy_1d( Canvas *c );
 static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
 static void reconfigure_window_1d( Canvas *c, int w, int h );
 static void recalc_XPoints_1d( void );
+static void delete_marker_1d( long x_pos );
 
 
 /*--------------------------------------------------------*/
@@ -1182,7 +1183,7 @@ void redraw_canvas_1d( Canvas *c )
 {
 	long i;
 	Curve_1d *cv = NULL;
-	Marker *m;
+	Marker_1D *m;
 	short x;
 
 
@@ -1204,7 +1205,7 @@ void redraw_canvas_1d( Canvas *c )
 				}
 
 			if ( cv != NULL )
-				for ( m = G1.marker; m != NULL; m = m->next )
+				for ( m = G1.marker_1d; m != NULL; m = m->next )
 				{
 					x = d2shrt( cv->s2d[ X ]
 								* ( m->x_pos + cv->shift[ X ] ) );
@@ -1693,20 +1694,26 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 /* Gets called to create a marker at 'x_pos' */
 /*-------------------------------------------*/
 
-void set_marker( long x_pos, long color )
+void set_marker_1d( long x_pos, long color )
 {
-	Marker *m, *cm;
+	Marker_1D *m, *cm;
 	XGCValues gcv;
 
 
-	m = MARKER_P T_malloc( sizeof *m );
+	if ( color > MAX_CURVES + 1 )
+	{
+		delete_marker_1d( x_pos );
+		return;
+	}
+
+	m = MARKER_1D_P T_malloc( sizeof *m );
 	m->next = 0;
 
-	if ( G1.marker == NULL )
-		G1.marker = m;
+	if ( G1.marker_1d == NULL )
+		G1.marker_1d = m;
 	else
 	{
-		cm = G1.marker;
+		cm = G1.marker_1d;
 		while ( cm->next != NULL )
 			cm = cm->next;
 		cm->next = m;
@@ -1717,10 +1724,10 @@ void set_marker( long x_pos, long color )
 	m->color = color;
 	m->gc = XCreateGC( G.d, G1.canvas.pm, GCLineStyle, &gcv );
 
-	if ( color > 0 && color <= MAX_CURVES )
-		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
-	else if ( color == 0 )
+	if ( color == 0 )
 		XSetForeground( G.d, m->gc, fl_get_pixel( FL_WHITE ) );
+	else if ( color <= MAX_CURVES )
+		XSetForeground( G.d, m->gc, fl_get_pixel( G.colors[ color - 1 ] ) );
 	else
 		XSetForeground( G.d, m->gc, fl_get_pixel( FL_BLACK ) );
 
@@ -1731,25 +1738,49 @@ void set_marker( long x_pos, long color )
 }
 
 
+/*------------------------------------------*/
+/*------------------------------------------*/
+
+static void delete_marker_1d( long x_pos )
+{
+	Marker_1D *m, *mp;
+
+
+	for ( mp = NULL, m = G1.marker_1d; m != NULL; mp = m, m = m->next )
+	{
+		if ( m->x_pos != x_pos )
+			continue;
+
+		XFreeGC( G.d, m->gc );
+		if ( mp != NULL )
+			mp->next = m->next;
+		if ( m == G1.marker_1d )
+			G1.marker_1d = m->next;
+		T_free( m );
+		return;
+	}
+}
+
+
 /*-----------------------------------*/
 /* Gets called to delete all markers */
 /*-----------------------------------*/
 
-void remove_marker( void )
+void remove_marker_1d( void )
 {
-	Marker *m, *mn;
+	Marker_1D *m, *mn;
 
 
-	if ( G1.marker == NULL )
+	if ( G1.marker_1d == NULL )
 		return;
 
-	for ( m = G1.marker; m != NULL; m = mn )
+	for ( m = G1.marker_1d; m != NULL; m = mn )
 	{
 		XFreeGC( G.d, m->gc );
 		mn = m->next;
-		m = MARKER_P T_free( m );
+		m = MARKER_1D_P T_free( m );
 	}
-	G1.marker = NULL;
+	G1.marker_1d = NULL;
 
 	repaint_canvas_1d( &G1.canvas );
 }
