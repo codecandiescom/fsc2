@@ -101,7 +101,6 @@ bool test_condition( Prg_Token *cur );
 void get_max_repeat_count( Prg_Token *cur );
 void get_for_cond( Prg_Token *cur );
 bool test_for_cond( Prg_Token *cur );
-void delete_var_list_copy( void );
 
 
 #endif   /* ! PRIM_EXP_HEADER */
