@@ -85,14 +85,14 @@ static void save_restore_variables( bool flag );
   exp_testlex() and exp_runlex().
 
   The function does the following:
-  1. It stores each token (with its semantic values which it receives from
-     the lexer) in the array of program tokens, prg_token.
+  1. It stores each token (with the semantic values it receives from the
+     lexer) in the array of program tokens, prg_token.
   2. While doing so it also does a few preliminay tests - it checks that
      opening and closing parentheses and braces match, BREAK and NEXT
 	 statements only appear in loops and that THE ON_STOP statement isn't
-	 in a block or within parantheses or braces.
-  3. When done when storing the program it does everything needed to set up
-     running of loops and if-else and unless-else constructs.
+	 in a block or within parentheses or braces.
+  3. When done with storing the program it does everything needed to set up
+     loops, if-else and unless-else constructs.
   4. Finally, a syntax check of the program is run. In this check the whole
      program is feed to a parser to test if any syntactic errors are found.
 -----------------------------------------------------------------------------*/
