@@ -51,15 +51,15 @@ extern "C" {
 #endif
 
 
-#define FAIL    false
-#define UNSET   false
+#define FAIL    0
+#define UNSET   0
 #if ! defined FALSE
-#define FALSE   false
+#define FALSE   0
 #endif
-#define OK      true
-#define SET     true
+#define OK      1
+#define SET     1
 #if ! defined TRUE
-#define TRUE    true
+#define TRUE    1
 #endif
 
 
