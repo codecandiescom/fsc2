@@ -73,9 +73,12 @@ FOR K = 1 : 5 {
 		dt2 = delta_time();
 
 		IF I == N / 2 {
-			print( "Yeah!!!\n" );
-			change_scale( -17.3, 2.13 );
+			change_scale( -10.0, 2.5 );
 		}
+	}
+
+	IF K != 5 {
+		change_scale( 890, 0.1 );
 	}
 }
 

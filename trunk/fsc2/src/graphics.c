@@ -1392,28 +1392,43 @@ void clear_curve( long curve )
 
 void change_scale( int is_set, double *vals )
 {
-	if ( is_set & 8 )
+	int i;
+
+
+	if ( is_set & 1 )
+	{
 		G.rwc_start[ X ] = vals[ 0 ];
 
-	if ( is_set & 4 )
+		if ( G.dim == 2 )
+			for ( i = 0; i < G.nc; i++ )
+				G.curve_2d[ i ]->rwc_start[ X ] = vals[ 0 ];
+	}
+
+	if ( is_set & 2 )
+	{
 		G.rwc_delta[ X ] = vals[ 1 ];
 
-	if ( is_set & 0xC )
-	{
-		printf( "Changing x scaling, %f %f\n", G.rwc_start[ X ], G.rwc_delta[ X ] );
+		if ( G.dim == 2 )
+			for ( i = 0; i < G.nc; i++ )
+				G.curve_2d[ i ]->rwc_delta[ X ] = vals[ 1 ];
 	}
 
 	if ( G.dim == 1 )
 		return;
 
-	if ( is_set & 2 )
+	if ( is_set & 4 )
+	{
 		G.rwc_start[ Y ] = vals[ 2 ];
 
-	if ( is_set & 1 )
+		for ( i = 0; i < G.nc; i++ )
+			G.curve_2d[ i ]->rwc_start[ Y ] = vals[ 2 ];
+	}
+
+	if ( is_set & 8 )
+	{
 		G.rwc_delta[ Y ] = vals[ 3 ];
 
-	if ( is_set & 3 )
-	{
-		printf( "Changing y scaling, %f %f\n", G.rwc_start[ Y ], G.rwc_delta[ Y ] );
+		for ( i = 0; i < G.nc; i++ )
+			G.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
 	}
 }
