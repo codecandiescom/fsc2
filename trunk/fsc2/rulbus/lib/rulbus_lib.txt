@@ -406,28 +406,28 @@ defined structure of type RULBUS_CARD_INFO which is typedef'ed to
       	  double intr_delay;
       } RULBUS_CARD_INFO;
 
-'type' is the type of the card, one of the (numerical) values 'rb8509_adc12',
-'rb8510_dac12', 'rb8514_delay', 'rb8515_clock' or 'rb_generic'.
+'type' is the type of the card, one of the (numerical) values RB8509_ADC12,
+RB8510_DAC12, RB8514_DELAY, RB8515_CLOCK or RB_GENERIC.
 
-'num_channels' is only set for cards of type 'rb8509_adc12' and specifies
+'num_channels' is only set for cards of type RB8509_ADC12 and specifies
 the number if input channels of the ADC card.
 
-'has_ext_trigger' also is only set for 'rb8509_adc12' cards and is set
+'has_ext_trigger' also is only set for RB8509_ADC12 cards and is set
 to 0 if the card does not have an input connector for external triggers,
 otherwise to a non-zero value.
 
-'bipolar' is only set for cards of type 'rb8509_adc12' and 'rb8510_dac12'
+'bipolar' is only set for cards of type RB8509_ADC12 and RB8510_DAC12'
 and tells if the card is working in bipolar (in which case it has a non-
 zero value' or in unipolar mode (if it has a value of 0).
 
-Also 'volt_per_bit' is only set for cards of type 'rb8509_adc12' and
-'rb8510_dac12'. It specifies the sensitivity of the card, in the voltage
+Also 'volt_per_bit' is only set for cards of type RB8509_ADC12 and
+RB8510_DAC12'. It specifies the sensitivity of the card, in the voltage
 for a single bit. To find out the total range of the card multiply this
 value by 4095. For bipolar card the most negative input or output voltage
 is 2048 times this value, and to get the most positive voltage multiply
 it by 2047.
 
-'intr_delay' is only set for 'rb8514_delay' cards and represents the
+'intr_delay' is only set for RB8514_DELAY cards and represents the
 shortest possible delay (in seconds) that can be created by the card.
 
 
@@ -663,8 +663,8 @@ int rulbus_rb8514_delay_set_trigger( int handle, int edge )
 
 This function lets youu select if the delay is started on the raising
 or the falling edge of an external trigger. To make the card start
-on the raising edge pass it the constant RULBUS_RB8510_DELAY_RAISING_EDGE
-as the second argument, otherwise RULBUS_RB8510_DELAY_FALLING_EDGE.
+on the raising edge pass it the constant RULBUS_RB8514_DELAY_RAISING_EDGE
+as the second argument, otherwise RULBUS_RB8514_DELAY_FALLING_EDGE.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
@@ -675,18 +675,18 @@ indicating the reason for the failure.
 int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
 
 This function allows to set if a start and/or end pulse is to be created
-at output 1 and/or 2. If the 'output' argument is RULBUS_RB8510_DELAY_OUTPUT_1
+at output 1 and/or 2. If the 'output' argument is RULBUS_RB8514_DELAY_OUTPUT_1
 the type argument will only be applied to the setting for output 1, if
-it is RULBUS_RB8510_DELAY_OUTPUT_2 'type' only applies to output 2 and
-if it is RULBUS_RB8510_DELAY_OUTPUT_BOTH the 'type' argument applies to
+it is RULBUS_RB8514_DELAY_OUTPUT_2 'type' only applies to output 2 and
+if it is RULBUS_RB8514_DELAY_OUTPUT_BOTH the 'type' argument applies to
 both outputs.
 
-The 'type' argument can be either RULBUS_RB8510_DELAY_START_PULSE,
-RULBUS_RB8510_DELAY_END_PULSE or RULBUS_RB8510_DELAY_PULSE_BOTH. In the
+The 'type' argument can be either RULBUS_RB8514_DELAY_START_PULSE,
+RULBUS_RB8514_DELAY_END_PULSE or RULBUS_RB8514_DELAY_PULSE_BOTH. In the
 first case only a start pulse, but no end pulse gets output, in the
 second case only an end pulse and in the third case both a start and an
 end pulse will be created on the selected output(s). A 'type' argument
-of RULBUS_RB8510_DELAY_PULSE_NONE keeps the the delay card from out-
+of RULBUS_RB8514_DELAY_PULSE_NONE keeps the the delay card from out-
 putting start and/or pulses on the addressed output(s).
 
 On success the function returns RULBUS_OK, otherwise a negative value
@@ -702,15 +702,15 @@ This function lets you select the polarity of the start and/or end pulses.
 The 'type' argument are the same as for the previous function, i.e. it
 can be either 
 
-    RULBUS_RB8510_DELAY_START_PULSE
-    RULBUS_RB8510_DELAY_END_PULSE
-    RULBUS_RB8510_DELAY_PULSE_BOTH
+    RULBUS_RB8514_DELAY_START_PULSE
+    RULBUS_RB8514_DELAY_END_PULSE
+    RULBUS_RB8514_DELAY_PULSE_BOTH
 
 obviously indicating for which of the pulses the 'pol' argument is to be
 applied to. The 'pol' argument determines the polarity of the selected
-pulses and can be either RULBUS_RB8510_DELAY_POLARITY_POSITIVE to output
+pulses and can be either RULBUS_RB8514_DELAY_POLARITY_POSITIVE to output
 a positive voltage for the start or end pulse, or, to create pulses with
-negative polarity, RULBUS_RB8510_DELAY_POLARITY_NEGATIVE.
+negative polarity, RULBUS_RB8514_DELAY_POLARITY_NEGATIVE.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
