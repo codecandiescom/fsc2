@@ -50,6 +50,7 @@ int hp8672a_init_hook( void )
 	hp8672a.device = -1;
 
 	hp8672a.state = UNSET;
+	hp8672a.is_10db = UNSET;
 
 	hp8672a.freq_is_set = UNSET;
 	hp8672a.step_freq_is_set = UNSET;

@@ -65,12 +65,6 @@ bool hp8672a_init( const char *name )
 		THROW( EXCEPTION );
 	}
 
-	if ( buffer[ 0 ] & HP8672A_NOT_PHASE_LOCKED )
-	{
-		print( FATAL, "Synthesizers isn't phase locked.\n" );
-		THROW( EXCEPTION );
-	}
-
 	/* Make sure RF output is switched off */
 
 	hp8672a_set_output_state( UNSET );
@@ -142,9 +136,17 @@ bool hp8672a_set_output_state( bool state )
 	char cmd[ 100 ];
 
 
-	sprintf( cmd, "O%c\n", state ? '1' : '0' );
-	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( ! hp8672a.is_10db )
+		sprintf( cmd, "O%c\n", state ? '1' : '0' );
+	else
+		sprintf( cmd, "O%c\n", state ? '3' : '0' );
+
+	if ( gpib_write( hp8672a.device, cmd, 3 ) == FAILURE )
 		hp8672a_comm_failure( );
+
+	/* Switching RF ON/OFF takes about 30 ms or 5 ms, respectively */
+
+	fsc2_usleep( state ? 30000 : 5000, UNSET );
 
 	return state;
 }
@@ -194,13 +196,20 @@ double hp8672a_set_frequency( double freq )
 
 	tfreq = ifreq;
 
-	cmd[ 0 ] = 'G';
-	while ( ( tfreq /= 10 ) >= 10 )
+	cmd[ 0 ] = 'W';
+	while ( tfreq >= 10 )
+	{
 		cmd[ 0 ]--;
+		tfreq /= 10;
+	}
 
-	sprintf( cmd + 1, "%ldJ8\n", ifreq );
+	sprintf( cmd + 1, "%ldZ8\n", ifreq );
 	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8672a_comm_failure( );
+
+	/* Frequency needs about 10 ms to settle */
+
+	fsc2_usleep( 10000, UNSET );
 
 	return ifreq * 1.0e3;
 }
@@ -217,6 +226,12 @@ double hp8672a_set_attenuation( double att )
 
 	fsc2_assert( att >= MAX_ATTEN && att <= hp8672a.min_attenuation );
 
+	if ( att > 3 )
+	{
+		hp8672a.is_10db = SET;
+		att -= 10;
+	}
+
 	a = irnd( - att ) + 3;
 
 	if ( a < 100 )
@@ -224,12 +239,17 @@ double hp8672a_set_attenuation( double att )
 	else if ( a < 110 )
 		sprintf( cmd, "K:%1d\n", a - 100 );
 	else if ( a < 120 )
-		sprintf( cmd, "K;%1d\n", a - 120 );
+		sprintf( cmd, "K;%1d\n", a - 110 );
 	else
 		sprintf( cmd, "K;%c\n", ':' + ( a - 120 ) );
 		
 	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8672a_comm_failure( );
+
+	/* Switch between extra 10 db on and off if necessary */
+
+	if ( hp8672a.state == SET )
+		hp8672a_output_state( SET );
 
 	return att;
 }
@@ -257,12 +277,17 @@ int hp8672a_set_modulation( void )
 		sprintf( cmd, "M%d6\n", 2 - hp8672a.mod_ampl[ hp8672a.mod_type ] );
 		if ( gpib_write( hp8672a.device, cmd, 4 ) == FAILURE )
 			hp8672a_comm_failure( );
+
+		fsc2_usleep( 15000, UNSET );
+
 		return 1;
 	}		
 
 	sprintf( cmd, "M0%d\n", 5 - hp8672a.mod_ampl[ hp8672a.mod_type ] );
 	if ( gpib_write( hp8672a.device, cmd, 4 ) == FAILURE )
 		hp8672a_comm_failure( );
+
+	fsc2_usleep( 50000, UNSET );
 
 	return 1;
 }
