@@ -815,6 +815,6 @@ static bool hp8647a_read_table( FILE *fp )
 
 static void hp8647_comm_failure( void )
 {
-	eprint( FATAL, "%s: Can't access the synthesizer.", DEVICE_NAME );
+	eprint( FATAL, "%s: Communication with device failed.", DEVICE_NAME );
 	THROW( EXCEPTION );
 }
