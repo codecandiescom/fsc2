@@ -17,7 +17,7 @@
 
 
 @titlepage
-@sp 6
+@sp 4
 @center @titlefont{fsc2}
 @sp 4
 @center A program for remote control of EPR spectrometers
@@ -25,6 +25,10 @@
 @center August 2000
 @sp 10
 @center Jens Thoms T@"orring
+@sp 1
+@center <{Jens.Toerring@@physik.fu-berlin.de}>
+@sp 16
+@center Copyright @copyright{} 1999 Jens Thoms T@"orring
 @end titlepage
 
 

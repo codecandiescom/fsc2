@@ -791,5 +791,5 @@ which are used to implement exceptions.
 
 The idea and most of the code used for exceptions in @b{fsc2} is taken
 from an article by Peter Simons in the the iX magzine
-(@url{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
+(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
 

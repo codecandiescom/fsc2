@@ -381,6 +381,7 @@ commands. The number should be an integer number (or an expression
 resulting in an integer).  The following block of statements will now be
 repeated as many times as specified by the number (or
 expression). Here's an example:
+@cindex REPEAT
 
 @example
     I = 0;
@@ -404,6 +405,7 @@ keyword a condition is needed first. Usually, this will be a comparison
 between two numbers, but also a simple number will suffice -- if its
 value is non-zero it will be interpreted as TRUE. Of course, the keyword
 and the condition have to be followed by a block of statements.
+@cindex WHILE
 
 Again, an example:
 
@@ -447,6 +449,19 @@ TRUE if the left side number is larger or equal to the
 right side number
 @end multitable
 @end quotation
+@cindex == (comparison operator)
+@cindex comparison operator
+@cindex != (unequality)
+@cindex unequality `!='
+@cindex < (less than)
+@cindex less than `<'
+@cindex <= (less or equal)
+@cindex less or equal `<='
+@cindex > (larger than)
+@cindex larger than `>'
+@cindex >= (larger or equal)
+@cindex larger or equal `>='
+
 
 And here is also an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:
@@ -484,6 +499,17 @@ operators. Here is a list of these operators and their meaning:
 @item @code{~} @tab exclusive or: TRUE if left or right hand side expressions are TRUE but not both
 @end multitable
 @end quotation
+@cindex ! (negation operator)
+@cindex negation operator `!'
+@cindex & (logical and operator)
+@cindex and operator `&'
+@cindex logical and operator  `&'
+@cindex | (logical or operator)
+@cindex or operator `|'
+@cindex logical or operator `|'
+@cindex ~ (logical xor operator)
+@cindex xor operator `~'
+@cindex logical xor operator `~'
 
 Before the @code{WHILE} loop on often has to initialise the loop
 variables and within the statement block the loop variable has to been
@@ -492,6 +518,7 @@ is simpler to use a @code{FOR} loop instead, because setting the loop
 variable as well as updating it is aromatically done in the condition
 part. Here's an example that does exactly the same as the first of the
 two preceeding examples:
+@cindex FOR
 
 @example
     Fact = 1;
@@ -529,3 +556,6 @@ variable!
 
 
 Finally there's the @code{IF}-@code{ELSE} construct.
+@cindex IF
+@cindex ELSE
+@cindex IF-ELSE
