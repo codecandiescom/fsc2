@@ -1,0 +1,36 @@
+DEVICES:
+
+sr810;
+
+
+VARIABLES:
+
+B1, B2;
+I = 1;
+
+PREPARATIONS:
+
+init_1d();
+
+EXPERIMENT:
+
+lockin_lock_keyboard( 0 );
+B1 = button_create( "NORMAL_BUTTON", "Clear curve" );
+B2 = button_create( "PUSH_BUTTON", "Pause" );
+
+FOREVER {
+
+	IF button_state( B2 ) {
+		wait( 0.5 s );
+		NEXT;
+	}
+
+	IF button_state( B1 ) {
+		clear_curve( );
+	    I = 1;
+    }
+
+	display( I, lockin_get_data( ) );
+	I += 1;
+	wait( lockin_time_constant( ) ); 
+}

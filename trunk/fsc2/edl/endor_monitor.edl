@@ -8,7 +8,7 @@ VARIABLES:
 
 I = 1;
 
-B0, B1, B2, B3, B4;
+B0, B1, B2, B3, B4, B5;
 S1;
 
 
@@ -43,8 +43,14 @@ B4 = button_create( "PUSH_BUTTON", "RF power on/off" );
 
 S1 = slider_create( "VALUE_SLIDER", -136 db, -3 db, "Attenuation (db)" );
 slider_value( S1, atten );
+B5 = button_create( "PUSH_BUTTON", "Pause" );
 
 FOREVER {
+
+	IF button_state( B5 ) {
+		wait( 0.5 s );
+		NEXT;
+	}
 
 	IF button_state( B1 ) {
 		synthesizer_sweep_up( );

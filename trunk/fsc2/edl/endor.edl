@@ -1,39 +1,85 @@
 DEVICES:
 
 hp8647a;
+sr810;
 
 
 VARIABLES:
 
-I;
-STATE = 0;
-att = -136.0;
+start_freq  =  8 MHz;
+end_freq    = 22 MHz;
+step_freq   = 25 kHz;
+
+attenuation = -5 db;
+
+mod_freq    = 19 kHz;
+mod_ampl    = 80 kHz;
+
+N_runs      = 20;
+
+
+I = 0;
+J;
+
+N_points = int( ( end_freq - start_freq ) / step_freq ) + 1;
+data[ N_points ];
+mean[ N_points ];
+tc;
+File_1, File_2;
 
 PREPARATIONS:
 
-square( att );
 
 synthesizer_use_table( );
-synthesizer_frequency( 10 MHz);
-synthesizer_step_frequency( 100 kHz );
-synthesizer_attenuation( -100 db );
-synthesizer_state( STATE );
-synthesizer_att_ref_freq( 14.0 MHz );
-synthesizer_modulation( "FM", "EXT AC", 50 kHz );
+synthesizer_attenuation( attenuation );
+synthesizer_att_ref_freq( 14 MHz );
+synthesizer_frequency( start_freq );
+synthesizer_modulation( "FM", "EXT DC", mod_ampl );
+
+init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
+	 "Frequency / MHz", "Signal / V" ); 
+
 
 EXPERIMENT:
 
+File_1=get_file( "File for storing all runs:" );
+File_2=get_file( "File for storing final result:" );
 
-FOR I = 1:1000 {
-	synthesizer_sweep_up( );
-//	print( "# #\n", 10MHz + I*100kHz, synthesizer_frequency( ) );
-//	wait( 0.1s );
-	IF ( STATE == 1 ) {
-		STATE = 0;
-	} ELSE {
-		STATE = 1;
-	}
-	att = att + 0.1;
-//	synthesizer_attenuation( att );
-//	synthesizer_state( STATE );
+lockin_ref_freq( mod_freq );
+lockin_ref_level( 1 V );
+tc = lockin_time_constant( );
+
+synthesizer_state( 1 );
+
+FOR I = 1 : N_runs {
+
+	print( "Starting #. run\n", I );
+
+    FOR J = 1 : N_points { 
+
+        data[ J ] = lockin_get_data( );
+        display( J, ( mean[ J ] + data[ J ] ) / I, 1, J, data[ J ], 2 );
+        IF J < N_points {
+            synthesizer_frequency( start_freq + J * step_freq );
+        }
+        wait( tc );
+    }
+
+	save( File_1, data );
+	mean += data;
+    synthesizer_frequency( start_freq );
+}
+
+ON_STOP:
+
+synthesizer_state( 0 );
+
+IF I > 0 {
+	save_program( File_2, "% " );
+	fsave( "%\n% Sens: # V, TC = # s, Phase = #\n% Mod_Freq = # kHz, Mod_Ampl = # kHz\n%\n"
+			lockin_sensitiviy( ), tc, lockin_phase( ),
+			mod_freq * 1e-3, mod_ampl * 1e-3 );
+	save_comment( "% " );
+	fsave( File_2, "%\n" );
+	save( File_2, mean / ( I - 1 ) );
 }
