@@ -288,7 +288,7 @@ struct DG2020 {
 	bool is_max_seq_len;
 
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	POD pod[ MAX_PODS ];
+	POD pod[ NUM_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
 
 	int needed_channels;     /* number of channels that are going to be needed
