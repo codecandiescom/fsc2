@@ -66,6 +66,7 @@ static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 
 /* declaration of all functions used only in this file */
 
+static double get_single_channel_data( Var *v );
 static bool sr530_init( const char *name );
 static double sr530_get_data( void );
 static double sr530_get_adc_data( long channel );
@@ -165,21 +166,77 @@ void sr530_exit_hook( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function returns the lock-in voltage. Returned value is the voltage */
-/* in V, with the range depending on the current sensitivity setting.  */
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Function returns the lock-in voltage(s) in V, with the range depending  */
+/* on the current sensitivity setting. It may be called with no parameter, */
+/* in which case the voltage at channel 1 is returned, with one parameter, */
+/* which designates the channel number (1 or 2), which returns the voltage */
+/* at the selected channel, or two parameters, both designating channels,  */
+/* which will return an array of the voltages at both the channels.        */
+/*-------------------------------------------------------------------------*/
 
 Var *lockin_get_data( Var *v )
 {
+	double val[ 2 ];
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, get_single_channel_data( v ) );
+
+	val[ 1 ] = get_single_channel_data( v );
+	v = vars_pop( v );
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, val[ 1 ] );
+
+	val[ 2 ] = get_single_channel_data( v );
+	v = vars_pop( v );
+
 	if ( v != NULL )
-		eprint( WARN, "%s:%ld: %s: Useless parameter in call of "
-				"lockin_get_data().\n", Fname, Lc, DEVICE_NAME );
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous paramter in call of "
+				"`lockin_get_data'.\n", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	return vars_push( FLOAT_TRANS_ARR, val, 2 );
+}
+
+
+/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+
+static double get_single_channel_data( Var *v )
+{
+	if ( v == NULL )
+		channel = 1;
+	else
+	{
+		vars_check( v, INT_VAR | FLOAT_VAR );
+
+		if ( v->type == IT_VAR )
+			channel = v->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: %s: Floating point value used as channel "
+					"number in call of `lockin_get_data'.\n",
+					Fname, Lc, DEVICE_NAME );
+			channel = lround( v->val.dval );
+		}
+	}
+
+	if ( channel != 1 && channel != 2 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid channel number %ld in call of "
+				"`lockin_get_data', valid is 1 or 2.\n",
+				Fname, Lc, DEVICE_NAME, channel );
+		THROW( EXCEPTION );
+	}
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, 0.0 );
+		return 0.0;
 	else
-		return vars_push( FLOAT_VAR, sr530_get_data( ) );
+		return sr530_get_data( ( int ) channel );
 }
 
 
@@ -632,13 +689,18 @@ bool sr530_init( const char *name )
 /* lockin_data() returns the measured voltage of the lock-in. */
 /*------------------------------------------------------------*/
 
-double sr530_get_data( void )
+double sr530_get_data( int channel )
 {
+	char cmd[ 3 ] = "Q*";
 	char buffer[ 20 ];
 	long length = 20;
 
 
-	if ( gpib_write( sr530.device, "Q1", 2 ) == FAILURE ||
+	assert( channel == 1 || channel == 2 );
+
+	cmd[ 1 ] = ( char ) ( channel + '0' );
+	
+	if ( gpib_write( sr530.device, cmd, 2 ) == FAILURE ||
 		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
