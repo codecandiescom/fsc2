@@ -70,6 +70,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include "config.h"
 #include "fsc2_types.h"
 
 /* pion specific stuff */

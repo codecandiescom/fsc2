@@ -114,9 +114,9 @@ archive go into the newly created directory fsc2. Open the Makefile in
 this directory with your favorite editor.
 
 Normally, fsc2 and all auxiliary files needed will be installed below
-/usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
-and /usr/local/share/doc). To change these locations edit the first lines
-of the Makefile.
+/usr/local (in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
+and /usr/local/share/doc). To change this location edit the lines
+defining the variable 'prefix' in the Makefile.
 
 The next two variables, OWNER and GROUP, will be used when setting the
 owner of all the files that will be installed as well as its group. See
