@@ -106,10 +106,6 @@ int main( int argc, char *argv[ ] )
 	if ( in_file != NULL )
 		T_free( in_file );
 
-	/* Delete the lock file */
-
-	unlink( LOCKFILE );
-
 	/* Make sure the TRY/CATCH stuff worked out right */
 
 	assert( exception_env_stack_pos == 0 );

@@ -334,6 +334,7 @@ bool fsc2_locking( void )
 		return FAIL;
 	}
 
+	unlink( LOCKFILE );
 	return OK;
 }
 
