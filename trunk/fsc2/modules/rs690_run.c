@@ -105,7 +105,7 @@ static bool rs690_update_pulses( bool flag )
 
 		rs690_pulse_check( f );
 
-		/* Set up and check pulses for each channel assoiciated with the
+		/* Set up and check pulses for each channel associated with the
 		   function according to the current phase. */
 
 		for ( j = 0; j < f->num_channels; j++ )
