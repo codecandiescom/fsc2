@@ -396,38 +396,46 @@ The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the other function names seem to fit the special purpose
 you have in mind for the pulses of this function.
 
-Before giving an example it is important to point out that there are
-some major differences between the @strong{Sony/Tektronix DG2020} on the
-one hand and the @strong{Tektronix HFS9003} and the @strong{Bruker
-EP385} on the other regarding the number and nomenclature of the output
-connectors. The latter pulsers are quite simple in that they have just
-output connectors. In the @strong{Bruker EP385} they are simply called
-@code{CH0} to @code{CH7}, while for the @strong{Tektronix HFS9003} they
-are divided into sets of channels belonging to the different channel
-boards in the device (with at least one board and a maximum of three),
-so channels are named @code{A1} to @code{A4}, @code{B1} to @code{B4} and
-@code{C1} to @code{C4}. Additionally, the @strong{Tektronix HFS9003} has
-a trigger output channel that can produce a single pulse of @w{5 ns}
-duration, this special channel is named @code{TRIG_OUT} (or
-@code{TRIGOUT}, @code{TRIGGER_OUT} or @code{TRIGGEROUT} ).
+Before showing some examples it is important to point out that there are
+some differences between the different devices.
 
-In contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
-(named @code{CH0} to @code{CH35}) that have to be mapped to what is
-called a POD, which (for both the Frankfurt S-band and and the Berlin
-X-band spectrometer) has 12 real output connectors, named @code{P0} to
-@code{P11}.
+The simplest one is the @strong{Bruker EP385}. It has 8 output
+connectors, which are named in the @code{EDL} script as @code{CH0} ti
+@code{CH7}. 
 
-Finally, the @strong{Interface Technology RS690} has 4 sets of output
-connectors (or even 8, if a second HSM card is installed), each with 16
-output channels. Each output channel can be addressed by a letter
-between @code{A} and @code{D} (or @code{H}, if two HSM cards are
-installed) for the connector, followed by a number between @code{0} and
-@code{15}, specifying the channel on the connector to use. Valid channel
+The @strong{Tektronix HFS9003} can has at least one and up to three
+channel boards, each with 4 channels. The channels of the first board
+are named @code{A1} to @code{A4} for the first, @code{B1} to @code{B4}
+for the second and @code{C1} to @code{C4} for the thrid channel
+board. Additionally, the @strong{Tektronix HFS9003} has a trigger output
+channel that can produce a single pulse of @w{5 ns} duration. This
+special channel can also be associated with a function (e.g.@: or
+generating a @code{DETECTION{ trigger pulse) and is named
+@code{TRIG_OUT} (or @code{TRIGOUT}, @code{TRIGGER_OUT} or
+@code{TRIGGEROUT} ).
+
+The @strong{Interface Technology RS690} has 4 sets of output connectors
+(or even 8, if a second HSM card is installed), each with 16 output
+channels. Each output channel can be addressed by a letter between
+@code{A} and @code{D} (or @code{H}, if two HSM cards are installed) for
+the connector, followed by a number between @code{0} and @code{15},
+specifying the channel on the connector to use. Valid channel
 designators are e.g.@: @code{A3}, @code{C13} etc. Moreover, the number
 of channels of a connector that can be used depends on the time base
 setting: for a time base of @w{4 ns} only the lowest 4 channels of each
 connector can be used, for a time base of @w{8 ns} only the lower 8
 channels.
+
+The @strong{Sony/Tektronix DG2020} is quite a bit different. It has 36
+internal channels (named @code{CH0} to @code{CH35}) that have to be
+mapped to pod channels (named @code{P0} to @code{P11}. The pod is the
+additional box, conected to the pulser by a cable and having (for both
+the Frankfurt S-band and and the Berlin X-band spectrometer) 12 output
+connectors, numbered from @code{0} to @code{11}. Instead of associating
+one of the (internal) channels for this device a pod channel has to be
+associated with a function. Optionally, it is also possible to tell
+@code{fsc2} which of the internal channels are to be used for a
+function.
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like (the keyword @code{CHANNEL} can be replaced
@@ -452,7 +460,8 @@ DETECTION: CHANNEL = D15;         /* connector D, channel 15 */
 
 
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
-one (or more pods, see below why sometimes more than one is needed):
+a pod (or several pods, see below why sometimes more than one is
+needed), with the pods named @code{P0} to @code{P11}:
 @example
 MICROWAVE: POD = P1, P2, P3, P4;
 RF:        POD = P6;
@@ -460,18 +469,18 @@ RF_GATE:   POD = P7;
 DETECTION: POD = P11;
 @end example
 @noindent
-Instead of @code{POD} you can also write @code{P}.
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also tell the
-program which of its 36 internal channels (numbered 0 to 35) should be
-used. If you don't the program will automatically grab as many of the
-internal channels as it needs, always using the ones with the lowest
-numbers first. To declare which of the internal channels are to be
-associated with the output connectors (PODs) use a statement like this:
+program which of the 36 internal channels (numbered @code{CH0} to
+@code{CH35}) should be used for a function. If you don't the program
+will automatically grab as many of the internal channels as it needs,
+always using the lowest numbered ones first. To declare which of the
+internal channels are to be associated with the output connectors (PODs)
+use a statement like this:
 @example
-MICROWAVE: POD = P1, P2, P3, P4  CHANNEL = 31, 32, 33, 34;
-RF:        POD = P6              CHANNEL = 35;
-RF_GATE:   POD = P7              CHANNEL = 17;
+MICROWAVE: POD = P1, P2, P3, P4  CHANNEL = CH31, CH32, CH33, CH34;
+RF:        POD = P6              CHANNEL = CH35;
+RF_GATE:   POD = P7              CHANNEL = CH17;
 DETECTION: POD = P11;   // leave it to the program to select the channel
 @end example
 
