@@ -94,8 +94,8 @@ void dg2020_do_checks( FUNCTION *f )
 			{
 				eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
 						"`%s' does not fit into the pulsers memory. Maybe, "
-						"you could try a longer pulser time base.", Fname, Lc,
-						pulser_struct.name, Function_Names[ f->self ] );
+						"you could try a longer pulser time base.\n", Fname,
+						Lc, pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -106,11 +106,11 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FATAL, "%s: Pulses %ld and %ld overlap.",
+				eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
 						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
 			else
 				eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
-						"overlap.", Fname, Lc, pulser_struct.name, p->num,
+						"overlap.\n", Fname, Lc, pulser_struct.name, p->num,
 						f->pulses[ i + 1 ]->num );
 			THROW( EXCEPTION );
 		}
@@ -188,7 +188,7 @@ void dg2020_full_reset( void )
 		if ( ! p->has_been_active )
 		{
 			if ( p->num >=0 )
-				eprint( WARN, "%s: Pulse %ld is never used.",
+				eprint( WARN, "%s: Pulse %ld is never used.\n",
 						pulser_struct.name, p->num );
 			p = dg2020_delete_pulse( p );
 			continue;
@@ -252,7 +252,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->function->num_pulses == 0 )
 	{
 		eprint( SEVERE, "%s: Function `%s' isn't used at all because all its "
-				"pulses are never used.", pulser_struct.name,
+				"pulses are never used.\n", pulser_struct.name,
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}

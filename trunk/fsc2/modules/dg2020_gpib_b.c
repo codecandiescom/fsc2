@@ -620,7 +620,7 @@ static bool dg2020_set_trigger_in_impedance( int state )
 
 static void dg2020_gpib_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.",
+	eprint( FATAL, "%s: Communication with device failed.\n",
 			pulser_struct.name );
 	THROW( EXCEPTION );
 }

@@ -104,8 +104,8 @@ void dg2020_do_checks( FUNCTION *f )
 			{
 				eprint( FATAL, "%s:%ld: %s: Pulse sequence for function "
 						"`%s' does not fit into the pulsers memory. Maybe, "
-						"you could try a longer pulser time base.", Fname, Lc,
-						pulser_struct.name, Function_Names[ f->self ] );
+						"you could try a longer pulser time base.\n", Fname,
+						Lc, pulser_struct.name, Function_Names[ f->self ] );
 				THROW( EXCEPTION );
 			}
 
@@ -116,11 +116,11 @@ void dg2020_do_checks( FUNCTION *f )
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
 			if ( dg2020_IN_SETUP )
-				eprint( FATAL, "%s: Pulses %ld and %ld overlap.",
+				eprint( FATAL, "%s: Pulses %ld and %ld overlap.\n",
 						pulser_struct.name, p->num, f->pulses[ i + 1 ]->num );
 			else
 				eprint( FATAL, "%s:%ld: %s: Pulses %ld and %ld begin to "
-						"overlap.", Fname, Lc, pulser_struct.name, p->num,
+						"overlap.\n", Fname, Lc, pulser_struct.name, p->num,
 						f->pulses[ i + 1 ]->num );
 			THROW( EXCEPTION );
 		}
@@ -240,7 +240,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		if ( p->pos - f->delay < f->psd )
 		{
 			eprint( FATAL, "%s:%ld: %s: Pulse %ld now starts too early to "
-					"allow setting of a phase pulse.",
+					"allow setting of a phase pulse.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
@@ -281,7 +281,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
 		{
 			eprint( FATAL, "%s:%ld: %s: Distance between pulses %ld and %ld "
-					"becomes too small to allow setting of phase pulses.",
+					"becomes too small to allow setting of phase pulses.\n",
 					Fname, Lc, pulser_struct.name, p->num, pp->num );
 			THROW( EXCEPTION );
 		}
@@ -316,8 +316,9 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 				 p->pc != pp->pc && for_pulse != p )
 			{
 				eprint( SEVERE, "%s:%ld: %s: Pulses %ld and %ld become so "
-						"close that problems with phase switching may result.",
-						Fname, Lc, pulser_struct.name, pp->num, p->num );
+						"close that problems with phase switching may "
+						"result.\n", Fname, Lc, pulser_struct.name, pp->num,
+						p->num );
 				for_pulse = p;
 			}
 		}
@@ -351,8 +352,9 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 				{
 					eprint( FATAL, "%s:%ld: %s: Distance between pulses "
 							"%ld and %ld becomes too small to allow setting "
-							"of phase pulses.", Fname, Lc, pulser_struct.name,
-							p->num, pppl[ i ]->for_pulse->num );
+							"of phase pulses.\n", Fname, Lc,
+							pulser_struct.name, p->num,
+							pppl[ i ]->for_pulse->num );
 					THROW( EXCEPTION );
 				}
 
@@ -364,7 +366,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 				{
 					eprint( SEVERE, "%s:%ld: %s: Pulses %ld and %ld become so "
 							"close that problems with phase switching may "
-							"result.", Fname, Lc, pulser_struct.name, p->num,
+							"result.\n", Fname, Lc, pulser_struct.name, p->num,
 							pppl[ i ]->for_pulse->num );
 					for_pulse = p;
 				}
@@ -424,7 +426,7 @@ set_length:
 		if ( phase_p->pos + phase_p->len < p->pos + p->len && p->pc != pn->pc )
 		{
 			eprint( FATAL, "%s:%ld: %s: Distance between pulses %ld and %ld "
-					"becomes too small to allow setting of phase pulses.",
+					"becomes too small to allow setting of phase pulses.\n",
 					Fname, Lc, pulser_struct.name, p->num, pn->num );
 			THROW( EXCEPTION );
 		}
@@ -434,7 +436,7 @@ set_length:
 			 p->pc != pn->pc && p != for_pulse )
 		{
 			eprint( SEVERE, "%s:%ld: %s: Pulses %ld and %ld become so close "
-					"that problems with phase switching may result.",
+					"that problems with phase switching may result.\n",
 					Fname, Lc, pulser_struct.name, p->num, pn->num );
 			for_pulse = p;
 		}
@@ -479,7 +481,7 @@ void dg2020_full_reset( void )
 		if ( ! p->has_been_active )
 		{
 			if ( p->num >=0 )
-				eprint( WARN, "%s: Pulse %ld is never used.",
+				eprint( WARN, "%s: Pulse %ld is never used.\n",
 						pulser_struct.name, p->num );
 			p = dg2020_delete_pulse( p );
 			continue;
@@ -557,7 +559,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	if ( p->function->num_pulses == 0 )
 	{
 		eprint( SEVERE, "%s: Function `%s' isn't used at all because all its "
-				"pulses are never used.", pulser_struct.name,
+				"pulses are never used.\n", pulser_struct.name,
 				Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;
 	}

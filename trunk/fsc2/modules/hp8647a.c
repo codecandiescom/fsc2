@@ -147,7 +147,7 @@ int hp8647a_exp_hook( void )
 {
 	if ( ! hp8647a_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Initialization of device failed.", DEVICE_NAME );
+		eprint( FATAL, "%s: Initialization of device failed.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -197,7 +197,7 @@ Var *synthesizer_state( Var *v )
 		else if ( I_am == PARENT )
 		{
 			eprint( FATAL, "%s:%ld: %s: Function `synthesizer_state' with no "
-					"argument can only be used in the EXPERIMENT section.",
+					"argument can only be used in the EXPERIMENT section.\n",
 					Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
@@ -211,8 +211,8 @@ Var *synthesizer_state( Var *v )
 
 	if ( v->type != INT_VAR )
 	{
-		eprint( WARN, "%s:%ld: %s: Float variable used for synthesizer state.",
-				Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Float variable used for synthesizer "
+				"state.\n", Fname, Lc, DEVICE_NAME );
 		state = ( v->val.dval != 0.0 );
 	}
 	else
@@ -248,7 +248,7 @@ Var *synthesizer_frequency( Var *v )
 			if ( ! hp8647a.freq_is_set )
 			{
 				eprint( FATAL, "%s:%ld: %s: RF frequency hasn't been set "
-						"yet.", Fname, Lc, DEVICE_NAME );
+						"yet.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			else
@@ -264,14 +264,14 @@ Var *synthesizer_frequency( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as RF frequency.",
+		eprint( WARN, "%s:%ld: %s: Integer variable used as RF frequency.\n",
 				Fname, Lc, DEVICE_NAME );
 
 	freq = VALUE( v );
 
 	if ( freq < 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative RF frequency.",
+		eprint( FATAL, "%s:%ld: %s: Invalid negative RF frequency.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -279,7 +279,7 @@ Var *synthesizer_frequency( Var *v )
 	if ( freq < MIN_FREQ || freq > MAX_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency (%f MHz) not within valid "
-				"range (%f kHz to %g Mhz).", Fname, Lc, DEVICE_NAME,
+				"range (%f kHz to %g Mhz).\n", Fname, Lc, DEVICE_NAME,
 				1.0e-6 * freq, 1.0e-3 * MIN_FREQ, 1.0e-6 * MAX_FREQ );
 		THROW( EXCEPTION );
 	}
@@ -287,7 +287,8 @@ Var *synthesizer_frequency( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_frequency'.", Fname, Lc, DEVICE_NAME );
+				"function `synthesizer_frequency'.\n", Fname, Lc,
+				DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -307,7 +308,7 @@ Var *synthesizer_frequency( Var *v )
 		if ( hp8647a.freq_is_set )
 		{
 			eprint( SEVERE, "%s:%ld: %s: RF frequency has already been set in "
-					"the PREPARATIONS section to %f MHz, keeping old value.",
+					"the PREPARATIONS section to %f MHz, keeping old value.\n",
 					Fname, Lc, DEVICE_NAME, 1.0e-6 * hp8647a.freq );
 			return vars_push( FLOAT_VAR, hp8647a.freq );
 		}
@@ -351,7 +352,7 @@ Var *synthesizer_attenuation( Var *v )
 			if ( ! hp8647a.attenuation_is_set )
 			{
 				eprint( FATAL, "%s:%ld: %s: RF attenuation has not been set "
-						"yet.", Fname, Lc, DEVICE_NAME );
+						"yet.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			else
@@ -367,7 +368,7 @@ Var *synthesizer_attenuation( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		eprint( WARN, "%s:%ld: %s: Integer variable used as RF attenuation.",
+		eprint( WARN, "%s:%ld: %s: Integer variable used as RF attenuation.\n",
 				Fname, Lc, DEVICE_NAME );
 
 	att = VALUE( v );
@@ -375,7 +376,7 @@ Var *synthesizer_attenuation( Var *v )
 	if ( att > MIN_ATTEN || att < MAX_ATTEN )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF attenuation (%g db) not within valid "
-				"range (%g dB to %g dB).", Fname, Lc, DEVICE_NAME, att,
+				"range (%g dB to %g dB).\n", Fname, Lc, DEVICE_NAME, att,
 				MAX_ATTEN, MIN_ATTEN );
 		THROW( EXCEPTION );
 	}
@@ -383,7 +384,7 @@ Var *synthesizer_attenuation( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `synthesizer_attenuation'.",
+				"function `synthesizer_attenuation'.\n",
 				Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
@@ -399,8 +400,8 @@ Var *synthesizer_attenuation( Var *v )
 		if ( hp8647a.attenuation_is_set )
 		{
 			eprint( SEVERE, "%s:%ld: %s: RF attenuation has already been set "
-					"in the PREPARATIONS section to %g dB, keeping old value.",
-					Fname, Lc, DEVICE_NAME, hp8647a.attenuation );
+					"in the PREPARATIONS section to %g dB, keeping old "
+					"value.\n", Fname, Lc, DEVICE_NAME, hp8647a.attenuation );
 			return vars_push( FLOAT_VAR, hp8647a.attenuation );
 		}
 
@@ -432,7 +433,7 @@ Var *synthesizer_step_frequency( Var *v )
 		{
 			eprint( SEVERE, "%s:%ld: %s: RF step frequency has already been "
 					"set in the PREPARATIONS section to %f MHz, keeping old "
-					"value.", Fname, Lc, DEVICE_NAME,
+					"value.\n", Fname, Lc, DEVICE_NAME,
 					1.0e-6 * hp8647a.step_freq );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
@@ -441,14 +442,14 @@ Var *synthesizer_step_frequency( Var *v )
 
 		if ( v->type == INT_VAR )
 			eprint( WARN, "%s:%ld: %s: Integer variable used as RF step "
-					"frequency.", Fname, Lc, DEVICE_NAME );
+					"frequency.\n", Fname, Lc, DEVICE_NAME );
 
 		hp8647a.step_freq = VALUE( v );
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
 			eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-					"function `synthesizer_step_frequency'.", Fname,
+					"function `synthesizer_step_frequency'.\n", Fname,
 					Lc, DEVICE_NAME );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
@@ -458,8 +459,8 @@ Var *synthesizer_step_frequency( Var *v )
 	}
 	else if ( ! hp8647a.step_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF step frequency has notz been set yet.",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: RF step frequency has notz been set "
+				"yet.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -480,7 +481,7 @@ Var *synthesizer_sweep_up( Var *v )
 
 	if ( ! hp8647a.step_freq_is_set )
 	{
-		eprint( FATAL, "%s:%ld: %s: RF step frequency hasn't been set.",
+		eprint( FATAL, "%s:%ld: %s: RF step frequency hasn't been set.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -490,7 +491,7 @@ Var *synthesizer_sweep_up( Var *v )
 	if ( new_freq < MIN_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is dropping below lower "
-				"limit of %f kHz.", Fname, Lc, DEVICE_NAME,
+				"limit of %f kHz.\n", Fname, Lc, DEVICE_NAME,
 				1.0e-3 * MIN_FREQ );
 		THROW( EXCEPTION );
 	}
@@ -498,7 +499,7 @@ Var *synthesizer_sweep_up( Var *v )
 	if ( new_freq > MAX_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: RF frequency is increased above upper "
-				"limit of %f MHz.", Fname, Lc, DEVICE_NAME,
+				"limit of %f MHz.\n", Fname, Lc, DEVICE_NAME,
 				1.0e-6 * MAX_FREQ );
 		THROW( EXCEPTION );
 	}
@@ -540,7 +541,7 @@ Var *synthesizer_reset_frequency( Var *v )
 	if ( ! hp8647a.start_freq_is_set )
 	{
 		eprint( FATAL, "%s:%ld: %s: No RF frequency has been set yet, so "
-				"can't do a frequency reset.", Fname, Lc, DEVICE_NAME );
+				"can't do a frequency reset.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -576,7 +577,7 @@ Var *synthesizer_use_table( Var *v )
 
 		if ( ( tfp = hp8647a_open_table( hp8647a.table_file ) ) == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Default table file `%s' not found.",
+			eprint( FATAL, "%s:%ld: %s: Default table file `%s' not found.\n",
 					Fname, Lc, DEVICE_NAME, hp8647a.table_file );
 			T_free( hp8647a.table_file );
 			THROW( EXCEPTION );
@@ -592,7 +593,7 @@ Var *synthesizer_use_table( Var *v )
 		if ( v != NULL )
 		{
 			eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-					"function `synthesizer_use_table'.",
+					"function `synthesizer_use_table'.\n",
 					Fname, Lc, DEVICE_NAME );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
@@ -789,7 +790,7 @@ FILE *hp8647a_find_table( char *name )
 
    if ( strchr( name, '/' ) != NULL )
    {
-	   eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.",
+	   eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
 			   Fname, Lc, name );
 	   T_free( name );
 	   THROW( EXCEPTION );
@@ -808,7 +809,7 @@ FILE *hp8647a_find_table( char *name )
 	if ( ( tfp = hp8647a_open_table( name ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found, neither in the "
-				"current dirctory nor in `%s'.", Fname, Lc,
+				"current dirctory nor in `%s'.\n", Fname, Lc,
 				strrchr( name, '/' ) + 1, libdir );
 		T_free( name );
 		THROW( EXCEPTION );
@@ -840,14 +841,14 @@ FILE *hp8647a_open_table( char *name )
 
 		T_free( name );
 		eprint( FATAL, "%s:%ld: %s: No read permission for table file "
-					"`%s'.", Fname, Lc, DEVICE_NAME, name );
+					"`%s'.\n", Fname, Lc, DEVICE_NAME, name );
 		THROW( EXCEPTION )
 	}
 
 	if ( ( tfp = fopen( hp8647a.table_file, "r" ) ) == NULL )
 	{
 		T_free( name );
-		eprint( FATAL, "%s:%ld: %s: Can't open table file `%s'.", Fname, Lc,
+		eprint( FATAL, "%s:%ld: %s: Can't open table file `%s'.\n", Fname, Lc,
 				DEVICE_NAME, name );
 		THROW( EXCEPTION );
 	}
@@ -873,6 +874,6 @@ static bool hp8647a_read_table( FILE *fp )
 
 static void hp8647_comm_failure( void )
 {
-	eprint( FATAL, "%s: Communication with device failed.", DEVICE_NAME );
+	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
 }

@@ -113,7 +113,7 @@ void tds754a_do_pre_exp_checks( void )
 		if ( width == 0.0 )
 		{
 			eprint( FATAL, "%s: Can't determine a reasonable value for "
-					"the missing window widths.", DEVICE_NAME );
+					"the missing window widths.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -150,14 +150,14 @@ void tds754a_do_pre_exp_checks( void )
 		{
 			w->width = tds754a.timebase / TDS_POINTS_PER_DIV;
 			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
-					"%s.", DEVICE_NAME, w->num, tds754a_ptime( w->width  ) );
+					"%s.\n", DEVICE_NAME, w->num, tds754a_ptime( w->width  ) );
 		}
 		else if ( cd % tb )
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
 			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
-					"%s.", DEVICE_NAME, w->num, tds754a_ptime( dcd ) );
+					"%s.\n", DEVICE_NAME, w->num, tds754a_ptime( dcd ) );
 			w->width = dcd;
 		}
 
@@ -179,7 +179,7 @@ void tds754a_do_pre_exp_checks( void )
              w->start + w->width < - tds754a.trig_pos * window )
         {
 			eprint( FATAL, "%s: Window %ld doesn't fit into current digitizer "
-					"time range.", DEVICE_NAME, w->num );
+					"time range.\n", DEVICE_NAME, w->num );
 			THROW( EXCEPTION );
 		}
     }

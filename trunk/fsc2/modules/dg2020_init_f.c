@@ -55,15 +55,15 @@ static void dg2020_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			eprint( FATAL, "%s: Pulse %ld is not associated with a function.",
-					pulser_struct.name, p->num );
+			eprint( FATAL, "%s: Pulse %ld is not associated with a "
+					"function.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
 			eprint( FATAL, "%s: The function `%s' of pulse %ld hasn't been "
-					"declared in the ASSIGNMENTS section.",
+					"declared in the ASSIGNMENTS section.\n",
 					pulser_struct.name, Function_Names[ p->function->self ],
 					p->num );
 			THROW( EXCEPTION );
@@ -82,7 +82,7 @@ static void dg2020_basic_pulse_check( void )
 				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
 			{
 				eprint( WARN, "%s: Length of detection pulse %ld is being set "
-						"to %s", pulser_struct.name, p->num,
+						"to %s.\n", pulser_struct.name, p->num,
 						dg2020_pticks( 1 ) );
 				p->len = 1;
 				p->is_len = SET;
@@ -108,7 +108,7 @@ static void dg2020_basic_pulse_check( void )
 		{
 			eprint( FATAL, "%s: Pulse %ld does not fit into the pulsers "
 					"memory. Maybe, you could try a longer pulser time "
-					"base.", pulser_struct.name, p->num );
+					"base.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -117,7 +117,7 @@ static void dg2020_basic_pulse_check( void )
 		if ( p->pc && p->function->phase_func == NULL )
 		{
 			eprint( FATAL, "%s: Pulse %ld needs phase cycling but its "
-					"function (%s) isn't associated with a phase function.",
+					"function (%s) isn't associated with a phase function.\n",
 					pulser_struct.name, p->num,
 					Function_Names[ p->function->self ] );
 			THROW( EXCEPTION );
@@ -179,7 +179,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->is_used && ! f->is_needed )
 			{
 				eprint( WARN, "%s: No pulses have been assigned to function "
-						"`%s'.", pulser_struct.name, Function_Names[ i ] );
+						"`%s'.\n.", pulser_struct.name, Function_Names[ i ] );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -201,7 +201,7 @@ static void dg2020_basic_functions_check( void )
 			if ( PSeq == NULL )
 			{
 				eprint( WARN, "%s: Phase functions `%s' isn't needed, "
-						"because no phase sequences have been defined.",
+						"because no phase sequences have been defined.\n",
 						pulser_struct.name, Function_Names[ f->self ] );
 				f->is_used = UNSET;
 
@@ -220,7 +220,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->phase_func == NULL )
 			{
 				eprint( WARN, "%s: Phase function `%s' isn't needed, "
-						"because it's not associated with a function.",
+						"because it's not associated with a function.\n",
 						pulser_struct.name, Function_Names[ f->self ] );
 				f->is_used = UNSET;
 
@@ -239,7 +239,7 @@ static void dg2020_basic_functions_check( void )
 			if ( f->pod2 == NULL)
 			{
 				eprint( FATAL, "%s: Function `%s' needs two pods assigned to "
-						"it.", pulser_struct.name, Function_Names[ i ] );
+						"it.\n", pulser_struct.name, Function_Names[ i ] );
 				THROW( EXCEPTION );
 			}
 
@@ -249,7 +249,7 @@ static void dg2020_basic_functions_check( void )
 			{
 				eprint( FATAL, "%s: Missing data on how to convert the pulse "
 						"phases into pod outputs for function `%s'. Add a "
-						"%s_SETUP command in the ASSIGNMENTS section.",
+						"%s_SETUP command in the ASSIGNMENTS section.\n",
 						pulser_struct.name, Function_Names[ i ],
 						Function_Names[ i ] );
 				THROW( EXCEPTION );
@@ -260,7 +260,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->pod == NULL )
 		{
-			eprint( FATAL, "%s: No pod has been assigned to function `%s'.",
+			eprint( FATAL, "%s: No pod has been assigned to function `%s'.\n",
 					pulser_struct.name, Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
@@ -297,7 +297,7 @@ static void dg2020_basic_functions_check( void )
 			{
 				eprint( WARN, "%s: Function `%s' is associated with phase "
 						"function `%s' but none of its pulses need phase "
-						"cycling.", pulser_struct.name,
+						"cycling.\n", pulser_struct.name,
 						Function_Names[ f->self ],
 						Function_Names[ f->phase_func->self ] );
 
@@ -324,7 +324,7 @@ static void dg2020_basic_functions_check( void )
 
 		if ( f->num_channels > f->num_needed_channels )
 			eprint( WARN, "%s: For function `%s' only %d channel%s needed "
-					"instead of the %d assigned to it.", pulser_struct.name,
+					"instead of the %d assigned to it.\n", pulser_struct.name,
 					Function_Names[ i ], f->num_needed_channels,
 					f->num_needed_channels == 1 ? " is" : "s are",
 					f->num_channels );
@@ -359,7 +359,7 @@ static void dg2020_basic_functions_check( void )
 			 f->phase_func != NULL )
 		{
 			eprint( WARN, "%s: Phase function `%s' isn't needed because "
-					"function `%s' it is associated with is not used.",
+					"function `%s' it is associated with is not used.\n",
 					pulser_struct.name, Function_Names[ f->phase_func->self ],
 					Function_Names[ f->self ] );
 
@@ -404,7 +404,7 @@ static void dg2020_distribute_channels( void )
 	if ( dg2020.needed_channels > MAX_CHANNELS )
 	{
 		eprint( FATAL, "%s: Running the experiment would require %d pulser "
-				"channels but only %d are available.", pulser_struct.name, 
+				"channels but only %d are available.\n", pulser_struct.name, 
 				dg2020.needed_channels, ( int ) MAX_CHANNELS );
 		THROW( EXCEPTION );
 	}
@@ -605,7 +605,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		if ( p->pos - f->delay < f->psd )
 		{
 			eprint( FATAL, "%s: Pulse %ld starts too early to allow setting "
-					"of a phase pulse.", pulser_struct.name, p->num );
+					"of a phase pulse.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -622,7 +622,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		if ( p->pos - pp->pos - pp->len < f->psd && p->pc != pp->pc )
 		{
 			eprint( FATAL, "%s: Distance between pulses %ld and %ld "
-					"is too small to allow setting of phase pulses.",
+					"is too small to allow setting of phase pulses.\n",
 					pulser_struct.name, pp->num, p->num );
 			THROW( EXCEPTION );
 		}
@@ -647,7 +647,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 				 p->pc != pp->pc && for_pulse != p )
 			{
 				eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
-						"problems with phase switching may result.",
+						"problems with phase switching may result.\n",
 						pulser_struct.name, pp->num, p->num );
 				for_pulse = p;
 			}
@@ -668,7 +668,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
 				{
 					eprint( FATAL, "%s: Distance between pulses %ld and %ld "
-							"is too small to allow setting of phase pulses.",
+							"is too small to allow setting of phase pulses.\n",
 							pulser_struct.name, p->num,
 							pppl[ i ]->for_pulse->num );
 					THROW( EXCEPTION );
@@ -681,7 +681,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 					 p != for_pulse )
 				{
 					eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
-							"problems with phase switching may result.",
+							"problems with phase switching may result.\n",
 							pulser_struct.name, p->num,
 							pppl[ i ]->for_pulse->num );
 					for_pulse = p;
@@ -711,7 +711,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		if ( np->pos + np->len < p->pos + p->len && p->pc != pn->pc )
 		{
 			eprint( FATAL, "%s: Distance between pulses %ld and %ld is too "
-					"small to allow setting of phase pulses.",
+					"small to allow setting of phase pulses.\n",
 					pulser_struct.name, p->num, pn->num );
 			THROW( EXCEPTION );
 		}
@@ -720,7 +720,7 @@ static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			 p->pc != pn->pc && p != for_pulse )
 		{
 			eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
-					"problems with phase switching may result.",
+					"problems with phase switching may result.\n",
 					pulser_struct.name, p->num, pn->num );
 			for_pulse = p;
 		}

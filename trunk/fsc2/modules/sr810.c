@@ -160,7 +160,7 @@ int sr810_exp_hook( void )
 
 	if ( ! sr810_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -241,7 +241,7 @@ Var *lockin_get_adc_data( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, "%s:%ld: %s: Floating point number used as ADC port "
-				"number.", Fname, Lc, DEVICE_NAME );
+				"number.\n", Fname, Lc, DEVICE_NAME );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 
@@ -249,7 +249,7 @@ Var *lockin_get_adc_data( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid ADC channel number (%ld) in "
 				"call of 'lockin_get_adc_data', valid channel are in the "
-				"range 1-%d.", Fname, Lc, DEVICE_NAME, port, NUM_ADC_PORTS );
+				"range 1-%d.\n", Fname, Lc, DEVICE_NAME, port, NUM_ADC_PORTS );
 		THROW( EXCEPTION );
 	}
 
@@ -278,7 +278,7 @@ Var *lockin_dac_voltage( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
-				"`lockin_dac_voltage`.", Fname, Lc, DEVICE_NAME );
+				"`lockin_dac_voltage`.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -287,7 +287,7 @@ Var *lockin_dac_voltage( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == FLOAT_VAR )
 		eprint( WARN, "%s:%ld: %s: Floating point number used as DAC port "
-				"number.", Fname, Lc, DEVICE_NAME );
+				"number.\n", Fname, Lc, DEVICE_NAME );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 	v = vars_pop( v );
@@ -296,7 +296,7 @@ Var *lockin_dac_voltage( Var *v )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC channel number (%ld) in "
 				"call of 'lockin_dac_voltage', valid channel are in the "
-				"range 1-%d.", Fname, Lc, DEVICE_NAME, port, NUM_DAC_PORTS );
+				"range 1-%d.\n", Fname, Lc, DEVICE_NAME, port, NUM_DAC_PORTS );
 		THROW( EXCEPTION );
 	}
 
@@ -310,15 +310,16 @@ Var *lockin_dac_voltage( Var *v )
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC voltage (%f V) in call of "
-				"'lockin_dac_voltage', valid range is between %f V and %f V.",
-				Fname, Lc, DEVICE_NAME, DAC_MIN_VOLTAGE, DAC_MAX_VOLTAGE );
+				"'lockin_dac_voltage', valid range is between %f V and "
+				"%f V.\n", Fname, Lc, DEVICE_NAME, DAC_MIN_VOLTAGE,
+				DAC_MAX_VOLTAGE );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
-				"`lockin_dac_voltage'.", Fname, Lc, DEVICE_NAME );
+				"`lockin_dac_voltage'.\n", Fname, Lc, DEVICE_NAME );
 
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
@@ -356,7 +357,7 @@ Var *lockin_sensitivity( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Function `lockin_sensitivity' "
 						"with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc, DEVICE_NAME );
+						"section.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_sens( ) );
@@ -369,7 +370,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative sensitivity.",
+		eprint( FATAL, "%s:%ld: %s: Invalid negative sensitivity.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -394,15 +395,15 @@ Var *lockin_sensitivity( Var *v )
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf mV, "
-					"using %.0lf mV instead.", Fname, Lc, DEVICE_NAME,
+					"using %.0lf mV instead.\n", Fname, Lc, DEVICE_NAME,
 					sens * 1.0e3, slist[ Sens ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf uV, "
-					"using %.0lfuV instead.", Fname, Lc, DEVICE_NAME,
+					"using %.0lf uV instead.\n", Fname, Lc, DEVICE_NAME,
 					sens * 1.0e6, slist[ Sens ] * 1.0e6 );
 		else
 			eprint( WARN, "%s:%ld: %s: Can't set sensitivity to %.0lf nV, "
-					"using %.0lfnV instead.", Fname, Lc, DEVICE_NAME,
+					"using %.0lf nV instead.\n", Fname, Lc, DEVICE_NAME,
 					sens * 1.0e9, slist[ Sens ] * 1.0e9 );
 		sr810.Sens_warn = SET;
 	}
@@ -418,11 +419,11 @@ Var *lockin_sensitivity( Var *v )
 		{
 			if ( sens >= 1.0 )
 				eprint( WARN, "%s:%ld: %s: Sensitivity of %.0lf V is too "
-						"low, using %.0lf V instead.", Fname, Lc, DEVICE_NAME,
-						sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+						"low, using %.0lf V instead.\n", Fname, Lc,
+						DEVICE_NAME, sens * 1.0e3, slist[ Sens ] * 1.0e3 );
 			else
 				eprint( WARN, "%s:%ld: %s: Sensitivity of %.0lf nV is too "
-						"high, using %.0lf nV instead.", Fname, Lc,
+						"high, using %.0lf nV instead.\n", Fname, Lc,
 						DEVICE_NAME, sens * 1.0e9, slist[ Sens ] * 1.0e9 );
 			sr810.Sens_warn = SET;
 		}
@@ -463,7 +464,7 @@ Var *lockin_time_constant( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Function `lockin_time_constant'"
 						" with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc, DEVICE_NAME );
+						"section.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_tc( ) );
@@ -476,7 +477,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative time constant.",
+		eprint( FATAL, "%s:%ld: %s: Invalid negative time constant.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -500,19 +501,19 @@ Var *lockin_time_constant( Var *v )
 	{
 		if ( tc > 1.0e3 )
 			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf ks,"
-					" using %.0lf ks instead.", Fname, Lc, DEVICE_NAME,
+					" using %.0lf ks instead.\n", Fname, Lc, DEVICE_NAME,
 					tc * 1.0e-3, tcs[ TC ] );
 		else if ( tc > 1.0 )
 			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf s, "
-					"using %.0lf s instead.", Fname, Lc, DEVICE_NAME, tc,
+					"using %.0lf s instead.\n", Fname, Lc, DEVICE_NAME, tc,
 					tcs[ TC ] );
 		else if ( tc > 1.0e-3 )
 			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf ms,"
-					" using %.0lf ms instead.", Fname, Lc, DEVICE_NAME,
+					" using %.0lf ms instead.\n", Fname, Lc, DEVICE_NAME,
 					tc * 1.0e3, tcs[ TC ] * 1.0e3 );
 		else
 			eprint( WARN, "%s:%ld: %s: Can't set time constant to %.0lf us,"
-					" using %.0lf us instead.", Fname, Lc, DEVICE_NAME,
+					" using %.0lf us instead.\n", Fname, Lc, DEVICE_NAME,
 					tc * 1.0e6, tcs[ TC ] * 1.0e6 );
 		sr810.TC_warn = SET;
 	}
@@ -528,11 +529,11 @@ Var *lockin_time_constant( Var *v )
 		{
 			if ( tc >= 3.0e4 )
 				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf ks is too"
-						" large, using %.0lf ks instead.", Fname, Lc,
+						" large, using %.0lf ks instead.\n", Fname, Lc,
 						DEVICE_NAME, tc * 1.0e-3, tcs[ TC ] * 1.0e-3 );
 			else
 				eprint( WARN, "%s:%ld: %s: Time constant of %.0lf us is too"
-						" small, using %.0lf us instead.", Fname, Lc,
+						" small, using %.0lf us instead.\n", Fname, Lc,
 						DEVICE_NAME, tc * 1.0e6, tcs[ TC ] * 1.0e6 );
 			sr810.TC_warn = SET;
 		}
@@ -575,7 +576,7 @@ Var *lockin_phase( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Function `lockin_phase' with "
 						"no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc, DEVICE_NAME );
+						"section.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 			return vars_push( FLOAT_VAR, sr810_get_phase( ) );
@@ -637,7 +638,7 @@ Var *lockin_ref_freq( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Function `lockin_ref_freq' "
 						"with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc, DEVICE_NAME );
+						"section.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 
@@ -652,7 +653,7 @@ Var *lockin_ref_freq( Var *v )
 	if ( sr810_get_ref_mode( ) != REF_MODE_INTERNAL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't set reference frequency while "
-				"reference source isn't internal.", Fname, Lc, DEVICE_NAME );
+				"reference source isn't internal.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -665,12 +666,12 @@ Var *lockin_ref_freq( Var *v )
 	{
 		if ( harm == 1 )
 			eprint( FATAL, "%s:%ld: %s: Reference frequency of %f Hz is "
-					"not within valid range (%f Hz - %f Hz).", Fname, Lc,
+					"not within valid range (%f Hz - %f Hz).\n", Fname, Lc,
 					DEVICE_NAME, MIN_REF_FREQ, MAX_REF_FREQ );
 		else
 			eprint( FATAL, "%s:%ld: %s: Reference frequency of %f Hz with "
 					"harmonic set to %ld is not within valid range "
-					"(%f Hz - %f Hz).", Fname, Lc, DEVICE_NAME, MIN_REF_FREQ,
+					"(%f Hz - %f Hz).\n", Fname, Lc, DEVICE_NAME, MIN_REF_FREQ,
 					MAX_REF_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
@@ -717,7 +718,7 @@ Var *lockin_ref_level( Var *v )
 			{
 				eprint( FATAL, "%s:%ld: %s: Function `lockin_ref_level' "
 						"with no argument can only be used in the EXPERIMENT "
-						"section.", Fname, Lc, DEVICE_NAME );
+						"section.\n", Fname, Lc, DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 
@@ -732,7 +733,7 @@ Var *lockin_ref_level( Var *v )
 	if ( level < MIN_REF_LEVEL || level > MAX_REF_LEVEL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Reference level of %f V is not within "
-				"valid range (%f V - %f V).", Fname, Lc, DEVICE_NAME,
+				"valid range (%f V - %f V).\n", Fname, Lc, DEVICE_NAME,
 				MIN_REF_LEVEL, MAX_REF_LEVEL );
 		THROW( EXCEPTION );
 	}
@@ -837,7 +838,7 @@ static double sr810_get_data( void )
 	if ( gpib_write( sr810.device, buffer, 6 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -862,7 +863,7 @@ static void sr810_get_xy_data( double data[ 2 ] )
 	if ( ( x1 = gpib_write( sr810.device, "SNAP?1,2", 8 ) ) == FAILURE ||
 		 ( x2 = gpib_read( sr810.device, buffer, &length ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier, 0x%s 0x%x.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier, 0x%s 0x%x.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -871,7 +872,7 @@ static void sr810_get_xy_data( double data[ 2 ] )
 	d2 = strchr( buffer, ',' );
 	if ( d2 == NULL )
 	{
-		eprint( FATAL, "%s: Lock-in amplifier does not react properly.",
+		eprint( FATAL, "%s: Lock-in amplifier does not react properly.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -902,7 +903,7 @@ static double sr810_get_adc_data( long channel )
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -929,7 +930,7 @@ static double sr810_set_dac_data( long port, double voltage )
 
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -952,7 +953,7 @@ static double sr810_get_sens( void )
 	if ( gpib_write( sr810.device, "SENS?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -979,7 +980,7 @@ static void sr810_set_sens( int Sens )
 	sprintf( buffer + 5, "%d", Sens );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1001,7 +1002,7 @@ static double sr810_get_tc( void )
 	if ( gpib_write( sr810.device, "OFLT?", 5 ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1026,7 +1027,7 @@ static void sr810_set_tc( int TC )
 	sprintf( buffer + 5, "%d", TC );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1048,7 +1049,7 @@ static double sr810_get_phase( void )
 	if ( gpib_write( sr810.device, "PHAS?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1083,7 +1084,7 @@ static double sr810_set_phase( double phase )
 	sprintf( buffer, "PHAS %.2f", phase );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1104,7 +1105,7 @@ static double sr810_get_ref_freq( void )
 	if ( gpib_write( sr810.device, "FREQ?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1127,7 +1128,7 @@ static double sr810_set_ref_freq( double freq )
 	sprintf( buffer, "FREQ %.4f", freq );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1140,7 +1141,7 @@ static double sr810_set_ref_freq( double freq )
 	real_freq = sr810_get_ref_freq( );
 	if ( ( real_freq - freq ) / freq > 1.0e-4 && real_freq - freq > 1.0e-4 )
 	{
-		eprint( FATAL, "%s: Failed to set reference frequency to %f Hz.",
+		eprint( FATAL, "%s: Failed to set reference frequency to %f Hz.\n",
 				DEVICE_NAME, freq );
 		THROW( EXCEPTION );
 	}
@@ -1161,7 +1162,7 @@ static long sr810_get_ref_mode( void )
 	if ( gpib_write( sr810.device, "FMOD?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1183,7 +1184,7 @@ static long sr810_get_harmonic( void )
 	if ( gpib_write( sr810.device, "HARM?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1206,7 +1207,7 @@ static long sr810_set_harmonic( long harmonic )
 	sprintf( buffer, "HARM %ld", harmonic );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1218,7 +1219,7 @@ static long sr810_set_harmonic( long harmonic )
 
 	if ( harmonic != sr810_get_harmonic( ) )
 	{
-		eprint( FATAL, "%s: Failed to set harmonic to %ld.",
+		eprint( FATAL, "%s: Failed to set harmonic to %ld.\n",
 				DEVICE_NAME, harmonic );
 		THROW( EXCEPTION );
 	}
@@ -1239,7 +1240,7 @@ static double sr810_get_ref_level( void )
 	if ( gpib_write( sr810.device, "SLVL?", 5L ) == FAILURE ||
 		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -1262,7 +1263,7 @@ static double sr810_set_ref_level( double level )
 	sprintf( buffer, "SLVL %f", level );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
-		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}

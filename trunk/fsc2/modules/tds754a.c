@@ -66,7 +66,7 @@ int tds754a_exp_hook( void )
 {
 	if ( ! tds754a_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Initialization of device failed.", DEVICE_NAME );
+		eprint( FATAL, "%s: Initialization of device failed.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -113,7 +113,7 @@ Var *digitizer_define_window( Var *v )
 	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of function "
-				"`digitizer_define_window', need at least two.",
+				"`digitizer_define_window', need at least two.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -126,7 +126,7 @@ Var *digitizer_define_window( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: %s: Floating point number used as window "
-				"number.", Fname, Lc, DEVICE_NAME );
+				"number.\n", Fname, Lc, DEVICE_NAME );
 		win_num = lround( v->val.dval );
 	}
 
@@ -138,15 +138,15 @@ Var *digitizer_define_window( Var *v )
 	if ( win_num < 0 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid negative window number: "
-				"%ld.", Fname, Lc, DEVICE_NAME, win_num );
+				"%ld.\n", Fname, Lc, DEVICE_NAME, win_num );
 		THROW( EXCEPTION );
 	}
 
 	for ( w = tds754a.w; w != NULL; w = w->next )
 		if ( ( long ) w->num == win_num )
 		{
-			eprint( FATAL, "%s:%ld: %s: Window %ld has already been defined.",
-					Fname, Lc, DEVICE_NAME, win_num );
+			eprint( FATAL, "%s:%ld: %s: Window %ld has already been "
+					"defined.\n", Fname, Lc, DEVICE_NAME, win_num );
 			THROW( EXCEPTION );
 		}
 
@@ -170,7 +170,7 @@ Var *digitizer_define_window( Var *v )
 			if ( v != NULL )
 			{
 				eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-						"function `digitizer_define_window'.",
+						"function `digitizer_define_window'.\n",
 						Fname, Lc, DEVICE_NAME );
 
 				while ( ( v = vars_pop( v ) ) != NULL )
@@ -234,7 +234,7 @@ Var *digitizer_timebase( Var *v )
 		else if ( I_am == PARENT )
 		{
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_timebase' with no "
-					"argument can only be used in the EXPERIMENT section.",
+					"argument can only be used in the EXPERIMENT section.\n",
 					Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
@@ -247,14 +247,14 @@ Var *digitizer_timebase( Var *v )
 	if ( I_am == CHILD || TEST_RUN )
 	{
 		eprint( FATAL, "%s:%ld: %s: Digitizer time base can only be set before"
-				" the EXPERIMENT section starts.", Fname, Lc, DEVICE_NAME );
+				" the EXPERIMENT section starts.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( tds754a.is_timebase )
 	{
-		eprint( FATAL, "%s:%ld: %s: Digitizer time base has already been set.",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Digitizer time base has already been "
+				"set.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -264,7 +264,7 @@ Var *digitizer_timebase( Var *v )
 
 	if ( timebase <= 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid zero or negative time base: %s.",
+		eprint( FATAL, "%s:%ld: %s: Invalid zero or negative time base: %s.\n",
 				Fname, Lc, DEVICE_NAME, tds754a_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
@@ -297,7 +297,7 @@ Var *digitizer_num_averages( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_num_averages' "
 					"with no argument can only be used in the EXPERIMENT "
-					"section.", Fname, Lc, DEVICE_NAME );
+					"section.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -312,7 +312,7 @@ Var *digitizer_num_averages( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: %s: Floating point number used as number "
-				"of averages.", Fname, Lc, DEVICE_NAME );
+				"of averages.\n", Fname, Lc, DEVICE_NAME );
 		num_avg = lround( v->val.dval );
 	}
 	vars_pop( v );
@@ -320,14 +320,14 @@ Var *digitizer_num_averages( Var *v )
 	if ( num_avg == 0 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't do zero averages. If you want "
-				"to set sample mode specify 1 as number of averages.",
+				"to set sample mode specify 1 as number of averages.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 	else if ( num_avg < 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid negative number of averages: %ld.",
-				Fname, Lc, DEVICE_NAME, num_avg );
+		eprint( FATAL, "%s:%ld: %s: Invalid negative number of averages: "
+				"%ld.\n", Fname, Lc, DEVICE_NAME, num_avg );
 		THROW( EXCEPTION );
 	}
 
@@ -381,7 +381,7 @@ Var *digitizer_trigger_channel( Var *v )
 		{
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_channel' "
 					"with no argument can only be used in the EXPERIMENT "
-					"section.", Fname, Lc, DEVICE_NAME );
+					"section.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -447,7 +447,7 @@ Var *digitizer_get_area( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
-				"function `digitizer_get_area'.", Fname, Lc, DEVICE_NAME );
+				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -458,7 +458,7 @@ Var *digitizer_get_area( Var *v )
 
 	if ( ch > TDS754A_REF4 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.",
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -476,7 +476,7 @@ Var *digitizer_get_area( Var *v )
 		if ( ( w = tds754a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
-					"defined.", Fname, Lc, DEVICE_NAME );
+					"defined.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -494,7 +494,7 @@ Var *digitizer_get_area( Var *v )
 		if ( w == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
-					"been defined.", Fname, Lc, DEVICE_NAME, v->val.lval );
+					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
 			THROW( EXCEPTION );
 		}
 	}
@@ -504,7 +504,7 @@ Var *digitizer_get_area( Var *v )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `digitizer_get_area'.", Fname, Lc, DEVICE_NAME );
+				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -536,7 +536,7 @@ Var *digitizer_get_curve( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
-				"function `digitizer_get_area'.", Fname, Lc, DEVICE_NAME );
+				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -547,7 +547,7 @@ Var *digitizer_get_curve( Var *v )
 
 	if ( ch > TDS754A_REF4 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.",
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -564,7 +564,7 @@ Var *digitizer_get_curve( Var *v )
 		if ( ( w = tds754a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
-					"defined.", Fname, Lc, DEVICE_NAME );
+					"defined.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 
@@ -582,7 +582,7 @@ Var *digitizer_get_curve( Var *v )
 		if ( w == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
-					"been defined.", Fname, Lc, DEVICE_NAME, v->val.lval );
+					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
 			THROW( EXCEPTION );
 		}
 	}
@@ -592,7 +592,7 @@ Var *digitizer_get_curve( Var *v )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `digitizer_get_area'.", Fname, Lc, DEVICE_NAME );
+				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
