@@ -39,7 +39,7 @@ int dg2020_init_hook( void )
 	   we have to set the pointers for the functions that will get called from
 	   pulser.c */
 
-	dg2020.need_update = UNSET;
+	dg2020.needs_update = UNSET;
 	dg2020.is_running = UNSET;
 
 	pulser_struct.set_timebase = set_timebase;
@@ -65,8 +65,6 @@ int dg2020_init_hook( void )
 	pulser_struct.set_pulse_position_change = set_pulse_position_change;
 	pulser_struct.set_pulse_length_change = set_pulse_length_change;
 	pulser_struct.set_pulse_phase_cycle = set_pulse_phase_cycle;
-	pulser_struct.set_pulse_maxlen = set_pulse_maxlen;
-	pulser_struct.set_pulse_replacements = set_pulse_replacements;
 
 	pulser_struct.get_pulse_function = get_pulse_function;
 	pulser_struct.get_pulse_position = get_pulse_position;
@@ -74,7 +72,6 @@ int dg2020_init_hook( void )
 	pulser_struct.get_pulse_position_change = get_pulse_position_change;
 	pulser_struct.get_pulse_length_change = get_pulse_length_change;
 	pulser_struct.get_pulse_phase_cycle = get_pulse_phase_cycle;
-	pulser_struct.get_pulse_maxlen = get_pulse_maxlen;
 
 	pulser_struct.setup_phase = setup_phase;
 
@@ -213,9 +210,6 @@ void dg2020_exit_hook( void )
 		if ( p->channel != NULL )
 			T_free( p->channel );
 		
-		if ( p->num_repl != 0 )
-			T_free( p->repl_list );
-
 		np = p->next;
 		T_free( p );
 	}
@@ -240,7 +234,7 @@ Var *pulser_start( Var *v )
 {
 	v = v;
 
-	if ( dg2020.need_update )
+	if ( dg2020.needs_update )
 	{
 		if ( TEST_RUN )
 			do_checks( );
@@ -264,4 +258,202 @@ Var *pulser_start( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
+Var *pulser_shift( Var *v )
+{
+	PULSE *p;
+
+
+	/* An empty pulse list means that we have to shift all active pulses that
+	   have a position change time value set */
+
+	if ( v == NULL )
+		for( p = Pulses; p != NULL; p = p->next )
+			if ( p->num > 0 && p->is_active && p->dpos != 0 )
+				pulser_shift( vars_push( INT_VAR, p->num ) );
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = get_pulse( v->val.lval );
+
+		if ( ! p->is_dpos )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Time for position change hasn't "
+					"been defined for pulse %ld.\n", Fname, Lc, p->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! p->is_old_pos )
+		{
+			p->old_pos = p->pos;
+			p->is_old_pos = SET;
+		}
+
+		if ( ( p->pos += p->dpos ) < 0 )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Shifting the position of pulse "
+					"%ld leads to an invalid  negative position of %s.\n",
+					Fname, Lc, p->num, pticks( p->pos ) );
+			THROW( EXCEPTION );
+		}
+
+		/* If the pulse is active we've got to update the pulser */
+
+		if ( p->is_active )
+		{
+			p->needs_update = dg2020.needs_update = SET;
+
+			/* stop the pulser */
+
+			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
+			{
+				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+						"failed.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_increment( Var *v )
+{
+	PULSE *p;
+	bool was_active = UNSET;
+
+
+	/* An empty pulse list means that we have to increment all active pulses
+	   that have a length change time value set */
+
+	if ( v == NULL )
+		for( p = Pulses; p != NULL; p = p->next )
+			if ( p->num > 0 && p->is_active && p->dlen != 0 )
+				pulser_shift( vars_push( INT_VAR, p->num ) );
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = get_pulse( v->val.lval );
+
+		if ( ! p->is_dlen )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Length change time hasn't been "
+					"defined for pulse %ld.\n", Fname, Lc, p->num );
+			THROW( EXCEPTION );
+		}
+	
+		if ( ! p->is_old_len )
+		{
+			p->old_len = p->len;
+			p->is_old_len = SET;
+		}
+
+		if ( ( p->len += p->dlen ) < 0 )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Incrementing the pulse length "
+					"of pulse %ld leads to an invalid negative pulse length "
+					"of %s.\n", Fname, Lc, p->num, pticks( p->len ) );
+			THROW( EXCEPTION );
+		}
+
+		was_active = p->is_active;
+
+		/* If the pulse wasn't active but has now got a non-zero length and has
+		   a defined position as well it becomes active */
+
+		if ( ! p->is_active && p->len > 0 && p->is_pos )
+			p->is_active = p->has_been_active = SET;
+
+		/* If the pulse was or is active we've got to update the pulser */
+
+		if ( was_active || p->is_active )
+		{
+			p->needs_update = dg2020.needs_update = SET;
+
+			/* stop the pulser */
+
+			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
+			{
+				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+						"failed.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_reset( Var *v )
+{
+	PULSE *p;
+	bool was_active;
+
+
+	/* An empty pulse list means that we have to reset all pulses (in this
+	   case even the inactive ones) */
+
+	if ( v == NULL )
+		for( p = Pulses; p != NULL; p = p->next )
+			if ( p->num >= 0 )
+				pulser_reset( vars_push( INT_VAR, p->num ) );
+
+	/* Otherwise run through the supplied pulse list */
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		vars_check( v, INT_VAR );
+		p = get_pulse( v->val.lval );
+
+		was_active = p->is_active;
+
+		/* Reset all changeable properties back to their initial values */
+
+		p->pos = p->initial_pos;
+		p->is_pos = p->initial_is_pos;
+		p->len = p->initial_len;
+		p->is_len = p->initial_is_len;
+		p->dpos = p->initial_dpos;
+		p->is_dpos = p->initial_is_dpos;
+		p->dlen = p->initial_dlen;
+		p->is_dlen = p->initial_is_dlen;
+
+		/* Pulse gets active if it has a position and a non-zero length */
+
+		p->is_active = ( p->is_pos && p->is_len && p->len > 0 );
+
+		/* If the pulse was or is active we've got to update the pulser */
+
+		if ( was_active || p->is_active )
+		{
+			p->needs_update = dg2020.needs_update = SET;
+
+			/* stop the pulser */
+
+			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
+			{
+				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
+						"failed.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}

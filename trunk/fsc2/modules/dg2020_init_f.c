@@ -31,31 +31,22 @@ void init_setup( void )
      and no length is set it's more or less silently set to one tick)
   4. the sum of function delay, pulse start position and length does not
      exceed the pulsers memory
-  5. that, if a maximum length is set, it's larger than the original length
-     and there are replacement pulses
-  6. if the pulse needs phase cycling its function is associated with a
-     pulse function and the pulse has no replacement pulses
-  7. if the pulse has replacement pulses check that 
-     a. also a maximum length is set,
-     b. the replacement pulses exist and
-	    have the same function and that
-	    dont't have replacement pulses on their own and
-		don't need phase cycling.
 --------------------------------------------------------------------------*/
 
 void basic_pulse_check( void )
 {
-	PULSE *p, *cp;
-	int i;
+	PULSE *p;
 
 
 	for ( p = Pulses; p != NULL; p = p->next )
 	{
+		p->is_active = SET;
+
 		/* Check the pulse function */
 
 		if ( ! p->is_function )
 		{
-			eprint( FATAL, "DG2020: Pulse %ld has no function assigned to"
+			eprint( FATAL, "DG2020: Pulse %ld has no function assigned to "
 					"it.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -71,17 +62,14 @@ void basic_pulse_check( void )
 		/* Check the start position */
 
 		if ( ! p->is_pos )
-		{
-			eprint( FATAL, "DG2020: No start position has been set for "
-					"pulse %ld.\n", p->num );
-			THROW( EXCEPTION );
-		}
+			p->is_active = UNSET;
 
 		/* Check the pulse length */
 
 		if ( ! p->is_len )
 		{
-			if ( p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
+			if ( p->is_pos &&
+				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
 			{
 				eprint( WARN, "DG2020: Length of detection pulse %ld is being "
 						"set to %s\n", p->num, ptime( 1 ) );
@@ -89,11 +77,7 @@ void basic_pulse_check( void )
 				p->is_len = SET;
 			}
 			else
-			{
-				eprint( FATAL, "DG2020: Length of pulse %ld has not been "
-						"set.\n", p->num );
-				THROW( EXCEPTION );
-			}
+				p->is_active = UNSET;
 		}
 
 		/* Check that the pulse fits into the pulsers memory
@@ -116,27 +100,6 @@ void basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
-		/* Check the maximum length */
-
-		if ( p->is_maxlen )
-		{
-			if ( p->maxlen <= p->len )
-			{
-				eprint( FATAL, "DG2020: For pulse %ld a maximum length has "
-						"been set that isn't longer than the start length.\n",
-						p->num );
-				THROW( EXCEPTION );
-			}
-
-			if ( p->num_repl == 0 )
-			{
-				eprint( FATAL, "DG2020: For pulse %ld a maximum length has "
-						"been set but no replacement pulses are defined.\n",
-						p->num );
-				THROW( EXCEPTION );
-			}
-		}
-
 		/* Check phase cycling of pulse */
 
 		if ( p->pc )
@@ -149,78 +112,10 @@ void basic_pulse_check( void )
 						Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
 			}
-
-			if ( p->num_repl != 0 )
-			{
-				eprint( FATAL, "DG2020: Pulse %ld needs replacement pulses "
-						"and phase cycling. This isn't implemented (yet?).\n",
-						p->num );
-				THROW( EXCEPTION );
-			}
 		}
 
-		/* Check the replacement pulse settings */
-
-		if ( p->num_repl != 0 )
-		{
-			/* No maximum length - no replacement pulses... */
-
-			if ( ! p->is_maxlen )
-			{
-				eprint( FATAL, "DG2020: For pulse %ld has replacement pulses "
-						"but no maximum length is set.\n", p->num );
-				THROW( EXCEPTION );
-			}
-
-			/* Check the replacement pulses */
-
-			for ( i = 0; i < p->num_repl; i++ )
-			{
-				cp = Pulses;         /* try to find the i. replacement pulse */
-				while ( cp != NULL )
-				{
-					if ( cp->num == p->repl_list[ i ] )
-						break;
-					cp = cp->next;
-				}
-
-				if ( cp == NULL )             /* replacement pulse not found */
-				{
-					eprint( FATAL, "DG2020: The %d. replacement pulse (%ld) "
-							"of pulse %ld does not exist.\n",
-							i + 1, p->repl_list[ i ], p->num );
-					THROW( EXCEPTION );
-				}
-
-				if ( p->function != cp->function )
-				{
-					eprint( FATAL, "DG2020: Pulse %ld and its %d. replacement "
-							"pulse %ld have different functions.\n",
-							p->num, i + 1, cp->num );
-					THROW( EXCEPTION );
-				}
-
-				if ( cp->num_repl != 0 )
-				{
-					eprint( FATAL, "DG2020: Pulse %ld is the %d. replacement "
-							"pulse for pulse %ld, so it can't have "
-							"replacement pulses of its own.\n",
-							cp->num, i + 1, p->num );
-					THROW( EXCEPTION );
-				}
-
-				if ( cp->pc != NULL )
-				{
-					eprint( FATAL, "DG2020: Pulse %ld is the %d. replacement "
-							"pulse of pulse %ld and needs phase cycling. This "
-							"isn't implemented (yet?).\n",
-							cp->num, i + 1, p->num );
-					THROW( EXCEPTION );
-				}
-
-				cp->is_a_repl = SET;
-			}
-		}
+		if ( p->is_active )
+			p->has_been_active = SET;
 	}
 }
 
@@ -380,25 +275,6 @@ void basic_functions_check( void )
 				
 				if ( cp->pc )
 					need_phases = SET;
-
-				if ( cp->num_repl != 0 )
-					f->num_needed_channels = 2;
-			}
-
-			/* If none of the pulses needs phase cycling but a phase function
-			   is associated with the function remove the association and put
-			   all channels of the phase function back into the pool (we don't
-			   need to check for the case that some pulses need phase cycling
-			   but no phase function is associated with the function, because
-			   this is already tested in the basic pulse check*/
-
-			if ( need_phases && f->num_needed_channels == 2 )
-			{
-				eprint( FATAL, "DG2020: Some of the pulses of function `%s' "
-						"need phase cycling while others need replacement "
-						"pulses. This is not implemented (yet?).\n",
-						Function_Names[ f->self ] );
-				THROW( EXCEPTION );
 			}
 
 			if ( ! need_phases && f->phase_func != NULL )
@@ -554,28 +430,18 @@ void pulse_start_setup( void )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		/* Set the inital state values of all pulses */
+		/* Sort the pulses of this channel by their start times, move inactive
+		   pulses to the end of the list */
 
-		for ( j = 0; j < f->num_pulses; j++ )
-		{
-			p = f->pulses[ j ];
-			p->initial_pos = p->pos;
-			p->initial_len = p->len;
-			p->initial_dpos = p->dpos;
-			p->initial_dlen = p->dlen;
-		}
-
-		/* Now sort the pulses of this channel by their start times, move
-		   replacement pulses to the end of the list */
-
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), init_compare );
+		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), start_compare );
 
 		/* Check that the relevant pulses are separated */
 
 		for ( j = 0; j < f->num_pulses; j++ )
 		{
 			p = f->pulses[ j ];
-			if ( j + 1 == f->num_pulses || f->pulses[ j + 1 ]->is_a_repl )
+			p->channel = f->channel[ 0 ];
+			if ( j + 1 == f->num_pulses || ! f->pulses[ j + 1 ]->is_active )
 			{
 				f->num_active_pulses = j + 1;
 				break;
@@ -587,34 +453,6 @@ void pulse_start_setup( void )
 						p->len + p->pos == f->pulses[ j + 1 ]->pos ?
 						"are not separated" : "overlap");
 				THROW( EXCEPTION );
-			}
-		}
-
-		/* Assign the pulses to channels - if the function has pulses that
-		   need replacement pulses, the normal pulses, that doesn't need
-		   replacement are assigned to both channels, the pulses, that need
-		   replacement only to the first, and the replacement pulses to
-		   the second channel */
-
-		for ( j = 0; j < f->num_pulses; j++ )
-		{
-			p = f->pulses[ j ];
-			if ( p->num_repl == 0 && ! p->is_a_repl )
-				p->channel = T_malloc( 2 * sizeof( CHANNEL * ) );
-			else
-				p->channel = T_malloc( sizeof( CHANNEL * ) );
-
-			if ( p->num_repl == 0 && ! p->is_a_repl )
-			{
-				p->channel[ 0 ] = f->channel[ 0 ];
-				p->channel[ 1 ] = f->channel[ 1 ];
-			}
-			else
-			{
-				if ( p->num_repl != 0 )
-					p->channel[ 0 ] = f->channel[ 0 ];
-				if ( p->is_a_repl )
-					p->channel[ 1 ] = f->channel[ 1 ];
 			}
 		}
 	}
@@ -639,10 +477,14 @@ void create_phase_pulses( int func )
 	int i, j, l;
 	PULSE *p;
 
+
 	if ( ! f->is_used )
 		return;
 
 	for ( i = 0; i < f->phase_func->num_pulses; i++ )
+	{
+		f->num_active_pulses = 0;
+
 		for ( j = 0; j < ASeq[ 0 ].len; j++ )
 			for ( l = 0; l < 2; l++ )
 			{
@@ -653,14 +495,29 @@ void create_phase_pulses( int func )
 					f->pulses = T_realloc( f->pulses, f->num_pulses
 										   * sizeof( PULSE * ) );
 					f->pulses[ f->num_pulses - 1 ] = p;
+
+					if ( p->is_active )
+					{
+						p->has_been_active = SET;
+						f->num_active_pulses++;
+					}
 				}
 			}
+
+		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), start_compare );
+	}
+
+	/* Now that we have these preliminary pulses we need to add some padding
+	   because the phase switches don't work instantaneously and check if the
+	   phase pulses stay separated (here we have to be even more carefully
+	   because to control one switch to pods are combined!)  */
+
+	/* MORE TO COME when I now about the padding times needed...*/
 }
 
 
 /*---------------------------------------------------------------------------
   ---------------------------------------------------------------------------*/
-
 
 PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod )
 {
@@ -704,28 +561,27 @@ PULSE *new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod )
 	/* Position and length and the changes are tentatively set to the
 	   properties of the pulse it is assigned to */
 
-	np->is_pos = SET;
+	np->is_pos = p->is_pos;
 	np->pos = np->initial_pos = p->pos;
-	np->is_len = SET;
+
+	np->is_len = p->is_len;
 	np->len = np->initial_len = p->len;
+
 	if ( ( np->is_dpos = p->is_dpos ) == SET )
 		np->dpos = np->initial_dpos = p->dpos;
 	if ( ( np->is_dlen = p->is_dlen ) == SET )
 		np->dlen = np->initial_dlen = p->dlen;
 
-	/* It's neither a replacement pulse nor needs it replacement */
-
-	np->num_repl = 0;
-	np->is_a_repl = UNSET;
+	np->is_active = p->is_active;
 
 	/* Set the channel it belongs to */
 
-	np->channel = T_malloc( sizeof( CHANNEL * ) );
-	np->channel[ 0 ] = f->channel[ 2 * type + pod ];
+	np->channel = f->channel[ 2 * type + pod ];
 
 	/* it doesn't needs updates yet */
 
-	np->need_update = UNSET;
+	np->is_old_pos = np->is_old_len = UNSET;
+	np->needs_update = UNSET;
 
 	/* Finally set the pulse it's assigned to */
 

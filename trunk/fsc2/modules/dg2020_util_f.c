@@ -92,6 +92,13 @@ PULSE *get_pulse( long pnum )
 	PULSE *cp = Pulses;
 
 
+	if ( pnum < 0 )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Invalid pulse number: %ld.\n",
+				Fname, Lc, pnum );
+		THROW( EXCEPTION );
+	}
+
 	while ( cp != NULL )
 	{
 		if ( cp->num == pnum )
@@ -161,26 +168,25 @@ CHANNEL *get_next_free_channel( void )
 
 
 /*---------------------------------------------------------------------------
-  Comparison function for two pulses: returns 0 if both pulses are replace-
-  ment pulses, -1 if only the second pulse is a replacement pulse or starts
-  at a late time and 1 if only the first pulse is a replacement pulse or the
-  second pulse starts earlier.
+  Comparison function for two pulses: returns 0 if both pulses are inactive,
+  -1 if only the second pulse is inactive or starts at a late time and 1 if
+  only the first pulse is inactive pulse or the second pulse starts earlier.
 ---------------------------------------------------------------------------*/
 
-int init_compare( const void *A, const void *B )
+int start_compare( const void *A, const void *B )
 {
 	PULSE *a = *( PULSE ** ) A,
 		  *b = *( PULSE ** ) B;
 
-	if ( a->is_a_repl )
+	if ( ! a->is_active )
 	{
-		if ( b->is_a_repl )
+		if ( ! b->is_active )
 			return 0;
 		else
 			return 1;
 	}
 
-	if ( b->is_a_repl || a->pos <= b->pos )
+	if ( ! b->is_active || a->pos <= b->pos )
 		return -1;
 
 	return 1;

@@ -17,6 +17,9 @@ void dg2020_exit_hook( void );
 
 
 Var *pulser_start( Var *v );
+Var *pulser_shift( Var *v );
+Var *pulser_increment( Var *v );
+Var *pulser_reset( Var *v );
 
 
 
@@ -87,7 +90,7 @@ typedef struct _F_ {
 	struct _C_ *channel[ MAX_CHANNELS ];
 
 	int num_pulses;              // number of pulses assigned to the function
-	int num_active_pulses        // number of pulses currenty in use
+	int num_active_pulses;       // number of pulses currenty in use
 	struct _p_ **pulses;         // list of pulse pointers
 
 	struct _F_ *phase_func;      // for phase functions here's stored which
@@ -143,7 +146,7 @@ typedef struct
 	int needed_channels;     // number of channels that are going to be needed
 	                         // for the experiment
 
-	bool need_update;        // set if pulse properties have been changed in
+	bool needs_update;       // set if pulse properties have been changed in
                              // test run or experiment
 	bool is_running;         // set if the pulser is in run mode
 
@@ -155,6 +158,9 @@ typedef struct _p_ {
 	long num;                // number of the pulse (pulses used fro realize
                              // phase cycling have negative, normal pulses
 	                         // positive numbers
+
+	bool is_active;          // set if the pulse is really used
+	bool has_been_active;    // used to find useless pulses
 
 	struct _p_ *next;
 	struct _p_ *prev;
@@ -168,34 +174,35 @@ typedef struct _p_ {
 
 	Phase_Sequence *pc;      // the pulse sequence to be used for the pulse
 	                         // (or NULL if none is to be used)
-	Ticks maxlen;            // maximum length of the pulse (only to be used
-                             // together with replacement pulses)
-	long num_repl;           // number of replacement pulses
-	long *repl_list;         // array of the numbers of the replacement pulses
-
-	bool is_a_repl;          // set if the pulse is a replacement pulse
 
 	bool is_function;        // flags that are set when the corresponding
 	bool is_pos;             // property has been set
 	bool is_len;
 	bool is_dpos;
 	bool is_dlen;
-	bool is_maxlen;
 
 	Ticks initial_pos;       // position, length, position change and length
 	Ticks initial_len;       // change at the start of the experiment
 	Ticks initial_dpos;
 	Ticks initial_dlen;
 
+	bool initial_is_pos;     // property has initially been set
+	bool initial_is_len;
+	bool initial_is_dpos;
+	bool initial_is_dlen;
+
 	Ticks old_pos;           // position and length of pulse before a change
 	Ticks old_len;           // is applied
 
-	CHANNEL **channel;       // list of channels the pulse belongs to
+	bool is_old_pos;
+	bool is_old_len;
+
+	CHANNEL *channel;        // channels the pulse belongs to
 
 	struct _p_ *for_pulse;   // only for phase cycling pulses: the pulse the
 	                         // phase cycling pulse is used for
 
-	bool need_update;        // set if the pulses properties have been changed
+	bool needs_update;       // set if the pulses properties have been changed
                              // in test run or experiment
 
 } PULSE;
@@ -247,8 +254,6 @@ bool set_pulse_length( long pnum, double time );
 bool set_pulse_position_change( long pnum, double time );
 bool set_pulse_length_change( long pnum, double time );
 bool set_pulse_phase_cycle( long pnum, int cycle );
-bool set_pulse_maxlen( long pnum, double time );
-bool set_pulse_replacements( long pnum, long num_repl, long *repl_list );
 
 bool get_pulse_function( long pnum, int *function );
 bool get_pulse_position( long pnum, double *time );
@@ -256,7 +261,6 @@ bool get_pulse_length( long pnum, double *time );
 bool get_pulse_position_change( long pnum, double *time );
 bool get_pulse_length_change( long pnum, double *time );
 bool get_pulse_phase_cycle( long pnum, int *cycle );
-bool get_pulse_maxlen( long pnum, double *time );
 
 bool change_pulse_position( long pnum, double time );
 bool change_pulse_length( long pnum, double time );
@@ -273,7 +277,7 @@ PULSE *get_pulse( long pnum );
 const char *ptime( double time );
 const char *pticks( Ticks ticks );
 CHANNEL *get_next_free_channel( void );
-int init_compare( const void *A, const void *B );
+int start_compare( const void *A, const void *B );
 
 
 /* The functions from dg2020_init.c */
