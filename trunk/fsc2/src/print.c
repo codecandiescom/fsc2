@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-#define INCH         25.4         /* mm in an inch */
+#define INCH         25.4         /* mm in an inch conversion factor */
 #define S2P          1            /* send to printer */
 #define P2F          2            /* print to file */
 
