@@ -46,8 +46,8 @@ GROUP            := fsc2
 
 
 # The next variable sets the GPIB library to use, it must be set to either
-# LLP, NI or JTT for the LLP library, the National Instruments library or
-# the library written by me. Alternatively, if no GPIB support is needed
+# LLP for the LLP library, NI for the National Instruments library or JTT
+# for the library written by me. Alternatively, if no GPIB support is needed
 # define GPIB_LIBRARY as NONE (which is also the default if not set).
 # Then the location of the GPIB configuration file is set (this is only needed
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
