@@ -2,7 +2,7 @@
 #
 # $Id$
 
-install-spex.chem.tu-berlin.de install-spex.mvl.local:
+install-spex.chem.tu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)
 	if [ !-e $(libdir)/rs_spec10.state ]; then \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) \
@@ -15,5 +15,5 @@ install-spex.chem.tu-berlin.de install-spex.mvl.local:
 	-$(LN) $(LNFLAGS) $(libdir)/ni6601.so $(libdir)/counter.so
 	-chown $(OWNER).$(GROUP) $(libdir)/counter.so
 
-uninstall-spex.chem.tu-berlin.de uninstall-spex.mvl.local:
+uninstall-spex.chem.tu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/counter.so

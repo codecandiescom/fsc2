@@ -405,10 +405,20 @@ ifneq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 endif
 
 
-# Set up a variable with the machines FQDN
+# Set up a variable with the machines FQDN - if necessary follow symbolic
+# links (in cases where the machine has been renamed and the files in the
+# machines subdirectory are still for the old name but a symbolic link has
+# been set from the new machine name to the old one)
 
-machine_name     := $(shell hostname -f 2>/dev/null)
-
+machine_name     := $(shell                                \
+					   mn=`hostname -f 2>/dev/null`;       \
+					   if [    -n $$mn                     \
+						    -a -L $(mchdir)/$$mn ]; then   \
+						   ls -l $(mchdir)/$$mn |          \
+						   sed 's/^.*->[ \t]+\(.*\)/\1/';  \
+					   else                                \
+						   echo $$mn;                      \
+					   fi; )
 
 # Try to include a configuration file for machines that are listed in the
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a
