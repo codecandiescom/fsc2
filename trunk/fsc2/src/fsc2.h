@@ -125,7 +125,8 @@ int cmdline_flags;
 
 long Lc = 0;                 /* line number in currently parsed file */
 char *Fname = NULL;          /* name of currently parsed file */
-const char *Cur_Func = NULL; /* name of currently executed function */
+const char *Cur_Func = NULL; /* name of the currently executed function */
+const Device *Cur_Dev = NULL;/* device ot the  currently executed function */
 Compilation compilation;     /* structure with infos about compilation state */
 Prg_Token *prg_token = NULL; /* array with predigested program */
 long prg_length = -1;        /* number of array elements in predigested
