@@ -22,7 +22,8 @@ GPIB_LOG       = /tmp/gpib.log
 
 #MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 MAIL_ADDRESS   = jens
-MAIL_PROGRAM   = $(shell which mail )
+MAIL_PROGRAM   = $(shell which mail)
+ADDR2LINE      = $(shell which addr2line)
 
 SHELL          = /bin/sh
 CC             = gcc
@@ -105,9 +106,14 @@ ifdef MAIL_ADDRESS
 	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
 
-ifdef MAIL_PROGRAM
+ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
 endif
+
+ifneq ($(word 1,$(ADDR2LINE)),which:)
+	CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+endif
+
 
 export            # export all variables to sub-makes
 
