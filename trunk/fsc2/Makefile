@@ -67,7 +67,7 @@ GPIB_LOG_LEVEL   := HIGH
 # the computer (defaults to 0 if not set)
 
 NUM_SERIAL_PORTS := 2
-
+SERIAL_LOCK_DIR  := "/var/lock"
 
 # This variable controls to whom mail with bug reports and crash messages will
 # be send - if not set no "Bug report" button will be shown. Please change
@@ -261,6 +261,10 @@ ifdef NUM_SERIAL_PORTS
 	CFLAGS += -DNUM_SERIAL_PORTS=$(NUM_SERIAL_PORTS)
 else
 	CFLAGS += -DNUM_SERIAL_PORTS=0
+endif
+
+ifdef SERIAL_LOCK_DIR
+	CFLAGS += -DSERIAL_LOCK_DIR=\"$(SERIAL_LOCK_DIR)\"
 endif
 
 
