@@ -56,23 +56,23 @@ MAX_LEN = 16777215;
 PREPARATIONS:
 
 P1:   FUNCTION = MW,
-	  START    = 120 ns,
+	  START    = 180 ns,
 	  LENGTH   = 60 ns;
 
 P2:   FUNCTION = MW,
-	  START    = 400 ns,
+	  START    = 460 ns,
 	  LENGTH   = 60 ns;
 
 P3:   FUNCTION = MW,
-	  START    = 700 ns,
+	  START    = 760 ns,
 	  LENGTH   = 100 ns;
 
 P4:   FUNCTION = RF,
-	  START    = 300 ns,
+	  START    = 360 ns,
 	  LENGTH   = 100 ns;
 
 P5:   FUNCTION = DETECTION,
-	  START    = 250 ns,
+	  START    = 310 ns,
 	  LENGTH   = 100 ns;
 
 init_1d( );
