@@ -1051,6 +1051,8 @@ void writer( int type, ... )
 
 			header.data.len = va_arg( ap, ptrdiff_t );
 
+			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
+
 			if ( write( pd[ WRITE ], &header, sizeof( CommStruct ) ) < 0 &&
 				 errno == EPIPE )
 			{
@@ -1080,6 +1082,8 @@ void writer( int type, ... )
 				header.data.len = 0;
 			else 
 				header.data.len = ( ptrdiff_t ) strlen( str[ 0 ] );
+
+			/* Don't try to continue writing on EPIPE (SIGPIPE is ignored) */
 
 			if ( write( pd[ WRITE ], &header, sizeof( CommStruct ) ) < 0 &&
 				 errno == EPIPE )
