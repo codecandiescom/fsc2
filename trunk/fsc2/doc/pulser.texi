@@ -90,7 +90,7 @@ is the length of one of these time slices. From the above it is clear,
 that all pulses (as well as all the times between pulses) have to be
 integer multiples of the length of this timebase.
 
-The statement to set the timebase, i.e.@ the length of the individual
+The statement to set the timebase, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 @code{TB:}, @code{T_B}, @code{TBASE:}, @code{T_BASE:}, @code{TIMEB},
 @code{TIME_B:} or @code{TIME_BASE:} instead of @code{TIMEBASE:}.}:
@@ -209,7 +209,7 @@ see the discussion of the problems introduced by @code{FOREVER} loops
 and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
 
 Whenever there is a reason to suspect that these problems may occur one
-can set the maximum pulse pattern length manually (i.e.@ the end point
+can set the maximum pulse pattern length manually (i.e.@: the end point
 of the last pulse when it has been set to its latest position in the
 experiment. This is done by a statement in the @code{ASSIGMENTS} section
 starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
@@ -463,7 +463,7 @@ the pulser etc.@footnote{As usual, the keyword @code{PHASE_SETUP} can be
 abbreviated, either to @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
 Since you actually can have 2 phase cycled function, you may append
 either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
-between the two phase setups, i.e.@ @code{PHASE_SETUP_1}.
+between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
 
 
 @strong{Frankurt S-band spectrometer}:
@@ -659,15 +659,16 @@ As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 
 Pulse numbers can be choosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
-@w{(2^32 - 1)}.
+@w{(2^32 - 1)}. Positions and lengths of pulses have to be positive
+(including 0). A pulse of zero length is invisible.
 
 There are three additional properties a pulse can have. The first one is
 the amount of time the start position of the pulse will be changed by
-during the experiment, keyword is
+during the experiment, the corresponding keyword is
 @code{DELTA_START}@footnote{@code{DELTA_START} can be abbreviated to
 @code{DELTASTART}, @code{DELTA_S}, @code{DELTAS}, @code{DEL_START},
 @code{DELSTART}, @code{DEL_S}, @code{DELS}, @code{D_START},
-@code{DSTART}, @code{D_S} or @code{DS}.}. Second, there's the length
+@code{DSTART}, @code{D_S} or @code{DS}.}. Second, there is the length
 change of the pulse, @code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH}
 can be shortened to @code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL},
 @code{DEL_LENGTH}, @code{DELLENGTH}., @code{DEL_L}. @code{DELL},
@@ -692,11 +693,10 @@ PULSE_1:    FUNCTION     = MICROWAVE,
 
 When setting the properties of further pulses the properties of pulses
 already defined can be used. This is done by specifying the name of the
-pulse (e.g.@ @code{P} and the pulse number), followed by a dot and the
-property to be used. If, for example, you want to create a second
-pulse, that is also a microwave pulse, starting @w{300 ns} after the end
-of the first pulse and twice as long, you could
-write:
+pulse (e.g.@: @code{PULSE_1}), followed by a dot and the property of the
+referenced pulse to be used. For example, if you want to create a second
+pulse that is also a microwave pulse, starts @w{300 ns} after the end
+of the first pulse and is twice as long, you could write:
 @example
 PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
             START        = PULSE_1.START + PULSE_1.LENGTH + 300 ns,
@@ -712,43 +712,45 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
 
 When pulses have been defined and the experiment is started with the
 begin of the @code{EXPERIMENT} section, all pulses get set (as long as
-their length is defined and is non-zero) and all channels or PODs, that
-have been assigned pulses (that are used in the experiment), are
+their lengths are defined and non-zero) and all channels or PODs that
+have been assigned pulses (that are really used in the experiment) are
 switched on.
 
-Now there are several methods to change the properties of pulses. To
-change the start position of pulse 1 by the start position change time
-(@code{DELTA_START}) as defined in the properties of the pulse the function
-@code{pulser_shift()} (see also @ref{Pulser Functions}) can be used:
+There are several methods to change the properties of pulses. To change
+the start position of pulse 1 by the start position change time
+(@code{DELTA_START}) as defined in the properties of the pulse the
+function @code{pulser_shift()} (see also @ref{Pulser Functions}) can be
+used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
 If the start position of several pulses has to be changed, this function
 also accepts a (comma separated) list of pulses. If the function is
-called with no arguments the start position of all pulses that have a
-@code{DELTA_START} defined are changed.
+called with no arguments the start position of all pulses that have the
+@code{DELTA_START} property defined are changed.
 
-There is also a similar function for changing the length of a pulse by
-it's @code{DELTA_LENGTH}, @code{pulser_increment()} (see also @ref{Pulser
+There is a similar function for changing the length of a pulse by it's
+@code{DELTA_LENGTH}, @code{pulser_increment()} (see also @ref{Pulser
 Functions}):
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
-As for the other function, also here a list of pulses can be passed to
-the function and calling it with no arguments automatically lengthens
-all pulses that have a @code{DELTA_LENGTH} defined.
+As for the @code{pulser_shift()} function, also here a comma separated
+list of pulses can be passed to the function and calling it with no
+arguments automatically lengthens all pulses that have the
+@code{DELTA_LENGTH} property defined.
 
-But it is also possible to change the start position or length of a pulse
-directly and in other increments as @code{DELTA_START} and
-@code{DELTA_LENGTH}. If, for example, the position of pulse 4 should be
-changed to @w{500 ns} and its length to @w{120 ns}, one could write
+But it is also possible to change the start position or length of a
+pulse directly and in increments differing from @code{DELTA_START} or
+@code{DELTA_LENGTH}. If, for example, the position of pulse 4 has to be
+changed to @w{500 ns} and its length to @w{120 ns}, one may write
 @example
 P4.START  = 500 ns;
 P4.LENGTH = 120 ns;
 @end example
 Please note that by setting the length of a pulse to 0 you switch it off.
 
-Of course, as in the definition of the pulses in the @code{PREPARTATION}
+Of course, as in the definition of the pulses in the @code{PREPARATION}
 section the properties of the pulse itself and other pulses can be used
 in setting the new values, e.g.:
 @example
@@ -756,43 +758,46 @@ P4.START  = P3.START + 200 ns;
 P4.LENGTH = 2 * P4.LENGTH + 20 ns;
 @end example
 Actually, these properties (i.e.@: start position and length and the
-corresponding delta's) of pulses can be treated as normal variables.
+corresponding delta's) of pulses can be treated nearly as if they are
+just normal variables.
 
-Even the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
-changed in this way anytime during the experiment:
+Also the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
+changed in this way at any time during the experiment:
 @example
 P4.DELTA_START  = 20 ns;
 P4.DELTA_LENGTH = 10 ns;
 @end example
-even if they haven't been defined in the @code{PREPARATION} section.
+This holds even if they haven't been defined in the @code{PREPARATION}
+section at all.
 
 The only pulse properties that may not be changed during the experiment
 are the function and the phase sequence associated with the pulse.
 
-There is only one point that needs to be taken care of: Just calling any
+There is only one point that needs to be taken care of: Just calling one
 of these functions does not change the real pulses immediately. Instead,
-all these changes are stored internally in the program and the changes
-get only send to the pulser when the function @code{pulser_update()}
-(see also @ref{Pulser Functions}) is called. Therefor, the normal way to
+all these changes are stored internally in the program. The changes get
+only send to the pulser when the function @code{pulser_update()} (see
+also @ref{Pulser Functions}) is called. Therefor, the normal way to
 change the pulse pattern is to change all necessary pulse properties and
-when everything is done @code{pulser_update()} is called to make the real
-changes. In this moment the program will also check that no pulses
-overlap.
+when everything is done @code{pulser_update()} is called to commit the
+changes. In this moment the program will also do all its usual checks,
+e.g.@: it will test that no pulses overlap.
 
-There's a further function that resets all pulses to their intial
+There is a further function that resets all pulses to their intial
 state, @code{pulser_pulse_reset()}. This function can, for example, be
 used for repeating the same experiment several times without having to
 reset each pulse individually. As in the other functions the argument
-can be either one pulse, a list of pulses, or no argument, in which case
-all pulses are reset to their initial positions and lengths (i.e.@: set
-in the initial defineition of the pulse in the @code{PREPARAIONS} section.
+can be either one pulse, a list of pulses or no argument, in which case
+all pulses are reset to their initial positions and lengths (i.e.@: as
+set in the initial definition of the pulse in the @code{PREPARAIONS}
+section.
 
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
-experiment. Two microwave pulses are needed, a pi/half and a pi-pulse,
-and a pulse to trigger the digitizer. The trigger pulse has to have
-about the same distance from the second microwave pulse as the distance
-between the two microwave pulses, i.e.@: it has to move twice as fast as
-the second microwave pulse:
+experiment. Two microwave pulses are needed, a pi-half and a pi pulse,
+plus a pulse to trigger the digitizer. The trigger pulse must move twice
+as fast as the second microwave pulse because the distance of the
+expected echo from the second pulse is always as large as the distance
+between both the microwave pulses.
 @example
 DEVICES:
 
@@ -802,7 +807,8 @@ tds520c;     // digitzer
 VARIABLES:
 
 tau_0     = 200 ns;
-delta_tau = 50 ns;
+delta_tau =  50 ns;
+pi_pulse  = 100 ns;
 
 I, J;
 data[ 20, 1024];
@@ -818,10 +824,10 @@ PREPARATIONS:
 
 P0:   FUNCTION    = MICROWAVE,       // 1st microwave pulse
       START       = 0 ns,
-      LENGTH      = 50 ns;
+      LENGTH      = pi_pulse / 2;
 
 P1:   FUNCTION    = MICROWAVE,       // 2nd microwave pulse
-      LENGTH      = 100 ns,
+      LENGTH      = pi_pulse,
       START       = P0.START + P0.LENGTH / 2 + tau_0 - P1.LENGTH / 2,
       DELTA_START = delta_tau;
 
@@ -836,8 +842,8 @@ FOR J = 1 : 20 @{          // repeat experiment 20 times
     FOR I = 1 : 1024 @{
         digitizer_start_acquisition( );
         data[ J, I ] = digitizer_get_area( CH1 );
-        pulser_shift( );             // move pulse 1 and 2
-        pulser_update( );            // tell pulser about it
+        pulser_shift( );             // move all pulses
+        pulser_update( );            // commit the changes
     @}
     pulser_pulse_reset( );           // reset all pulses
 @}
@@ -845,23 +851,29 @@ FOR J = 1 : 20 @{          // repeat experiment 20 times
 
 
 Beside the functions for changing the positions and lengths of pulses
-there are also functions needed to set the phase of the pulses, at least
-for phase cycled experiments. When the experiment starts the pulse
-phases are set to the first phase of the associated phase sequence (as
+there are also functions to set the phase of the pulses, as needed for
+for phase cycled experiments. When the experiment starts the phase of
+pulse is set to the first phase of its associated phase sequence (as
 defined in the @code{PHASES} section). To switch to the next phase the
 function @code{pulser_next_phase()} (see also @ref{Pulser Functions})
-has to be used. Again, the necessary changes are only send to the pulser
-when the function @code{pulser_update()} is called afterwards. By
-repeatedly invoking @code{pulser_next_phase()} one can run through the
-complete phase sequence. To reset all pulses to their start phases
-(i.e.@: the first of the associated phase sequence) the function
+has to be used. In contrast to the functions @code{pulser_shift()}
+and @code{pulser_increment()} this function can not be used for phase
+changes of individual pulses but alway applies to all pulses that have
+been assigned a phase sequence. Thus this function does not accepts any
+arguments.
+
+Again, the necessary changes are only send to the pulser when the
+function @code{pulser_update()} is called afterwards. By repeatedly
+invoking @code{pulser_next_phase()} one can run through the complete
+phase sequence. To reset all pulses to their start phases (i.e.@: the
+first of the associated phase sequence) the function
 @code{pulser_phase_reset()} (see also @ref{Pulser Functions}) can be
 used.
 
-The next (rather simplified) example is a phase cycled (1dimensional)
-stimulated echo experiment. We need three microwave pulses and a
-detection trigger pulse. During the experiment the first and second
-microwave pulse have to be phase cycled.
+The next (rather simplified) example is the program for a phase cycled
+(1-dimensional) stimulated echo experiment. We need three microwave
+pulses and a detection trigger pulse. During the experiment the first
+two microwave pulses have to be phase cycled.
 @example
 DEVICES:
 
@@ -953,16 +965,16 @@ this loop one could also define an acquisition sequence and use the
 @acronym{EDL} function @code{get_phase_cycled_area()}. This function
 automatically does everything spelled out explicitely in the loop in the
 previous example and thus makes the program much more legible. The only
-changes needed are in the @code{PHASES} section
+changes needed are in the @code{PHASES} and @code{EXPERIMENT} section:
 @example
 PHASES:
 
 PHASE_SEQUENCE_0     = +x, -x, +x, -x;  // for 1st pulse
 PHASE_SEQUENCE_1     = +x, +x, -x, -x;  // for 2nd pulse
 ACQUISITION_SEQUENCE =  +,  -,  -,  +;
-@end example
-and in the @code{EXPRIMENT} section, which becomes
-@example
+
+...
+
 EXPERIMENT:
 
 FOR I = 1: 128 @{
