@@ -153,6 +153,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "float_slice",         f_fslice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
 	{ "lin_space",           f_lspace,           3, ACCESS_ALL,  NULL, UNSET },
     { "reverse",             f_reverse,          1, ACCESS_ALL,  NULL, UNSET },
+	{ "spike_remove",	     f_spike_rem,	    -3, ACCESS_EXP,  NULL, UNSET },
 	{ "get_file",            f_getf,     	    -5, ACCESS_EXP,  NULL, UNSET },
 	{ "open_file",           f_openf,    	    -6, ACCESS_EXP,  NULL, UNSET },
 	{ "clone_file",          f_clonef,   	     3, ACCESS_EXP,  NULL, UNSET },

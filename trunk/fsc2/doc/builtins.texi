@@ -2486,10 +2486,10 @@ spectrum.
 @strong{Please note}: Never, ever use this function on data you intend to
 store as results of an experiment. It is only meant for situations where
 one wants to display data during the experiment to get a first impression
-of what's happening (e.g. to get rid of the nasty spikes one sometimes
-gets in spectra from a CCD camera when cosmic radiation hits the detector).
-It is no replacement at all for a careful analysis of a spectrum where
-one can use @i{a priori} knowledge to determine what are spikes and what
-not (and even the eye is often a much better guide than a stipud program)!
+of what's happening (e.g. to get rid of the spike one sometimes gets in
+spectra from a CCD camera when cosmic radiation hits the detector). It is
+no replacement at all for a careful analysis of a spectrum where one can
+use @i{a priori} knowledge to determine what are spikes and what not (and
+even the eye is often a much better guide than a stupid program)!
 
 @end table

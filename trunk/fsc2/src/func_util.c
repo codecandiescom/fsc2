@@ -3884,13 +3884,10 @@ Var *f_spike_rem( Var *v )
 	Var *nv;
 
 
-	CLOBBER_PROTECT( diffs );
 	CLOBBER_PROTECT( dpnt );
 	CLOBBER_PROTECT( i );
 	CLOBBER_PROTECT( stdev );
 	CLOBBER_PROTECT( mean );
-	CLOBBER_PROTECT( start );
-	CLOBBER_PROTECT( end );
 	CLOBBER_PROTECT( ol_indices );
 	CLOBBER_PROTECT( ol_len );
 	CLOBBER_PROTECT( ol_count );
