@@ -35,7 +35,7 @@ static int fsc2_xio_error_handler( Display *d );
 #if ( SIZE == HI_RES )
 #define WIN_MIN_WIDTH    220
 #define WIN_MIN_HEIGHT   570
-#define NORMAL_FONT_SIZE FL_LARGE_SIZE
+#define NORMAL_FONT_SIZE FL_MEDIUM_SIZE
 #define SMALL_FONT_SIZE  FL_SMALL_SIZE
 #define TOOLS_FONT_SIZE  FL_MEDIUM_FONT
 #define SLIDER_SIZE      0.075
