@@ -877,7 +877,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		}
 
 		/* If data have not been scaled yet to the interval [0,1] and maximum
-		   value isn't identical zto the minimum value anymore do calculate the
+		   value isn't identical to the minimum value anymore calculate the
 		   scaling */
 
 		if ( ! cv->is_scale_set && cv->rw_max != cv->rw_min )
