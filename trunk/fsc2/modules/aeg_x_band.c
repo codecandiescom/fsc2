@@ -803,9 +803,12 @@ static bool magnet_goto_field( double field, double error )
 
 
 	if ( last_mini_steps != 0.0 &&
-		 fabs( field - magnet.act_field ) <= fabs( last_field_step + error ) &&
-		 fabs( field - magnet.act_field ) >= fabs( last_field_step - error ) )
+		 fabs( field - magnet.act_field ) <= fabs( last_field_step ) + error &&
+		 fabs( field - magnet.act_field ) >= fabs( last_field_step ) - error )
 	{
+		if ( last_field_step != 0.0 )
+			 last_mini_steps *= fabs( field - magnet.act_field ) /
+			                    fabs( last_field_step );
 		if ( sign( field - magnet.act_field ) != sign( last_field_step ) )
 			last_mini_steps *= -1.0;
 	}
