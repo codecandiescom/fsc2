@@ -426,7 +426,7 @@ void fsc2_serial_cleanup( void )
 
 /*----------------------------------------------------------------*/
 /* This function is called when a new EDL file is loaded to reset */
-/* the structure used in granting access to the serial ports.     */
+/* the structures used in granting access to the serial ports.    */
 /*----------------------------------------------------------------*/
 
 void fsc2_final_serial_cleanup( void )
