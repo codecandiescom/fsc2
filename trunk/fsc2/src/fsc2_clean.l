@@ -447,8 +447,7 @@ int main( int argc, char *argv[ ] )
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		printf( "\x03\n%s:%ld: Running out of system resources "
-				"(memory).\n", Fname, Lc );
+		printf( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
@@ -459,8 +458,8 @@ int main( int argc, char *argv[ ] )
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		printf( "\x03\n%s: End of file in comment starting "
-				"at line %ld.\n", Fname, Comm_Lc );
+		printf( "\x03\n%s: End of file in comment starting at line %ld.\n",
+				Fname, Comm_Lc );
 		exit( EXIT_FAILURE );
 	}
 	CATCH( EOF_IN_STRING_EXCEPTION )
