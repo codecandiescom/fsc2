@@ -572,7 +572,7 @@ language should follow this rules. But sometimes there are cases where
 it is necessary to know exactly the precedence, i.e.@: the exact
 sequence an expression is evaluated.
 
-The unary `@code{+}' and '@code{-}' operators have the highest
+The unary `@code{+}' and `@code{-}' operators have the highest
 precedence, i.e.@: the operators defining the sign of a number. There is
 a further operator, to be discussed later, having the same precedence,
 the logical negation operator, `@code{!}'. The evaluation of an
@@ -585,9 +585,9 @@ the left, i.e.@:
 (This is not a very useful example but here for sake of completeness.)
 
 The exponentiation operator, `@code{^}', has the next highest
-precedence, i.e.@: it `binds' more tightly than any other binary
+precedence, i.e.@: it binds more tightly than any other binary
 operator. If there is more than one of these operators in a row the
-expression will evaluated from the right to the left:
+expression will be evaluated from the right to the left:
 @example
  2^3^4    @r{will be treated as if written as}    2^(3^4)
 @end example
