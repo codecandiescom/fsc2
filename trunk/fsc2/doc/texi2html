@@ -7,7 +7,8 @@
 # $Id$
 #
 # Slightly hacked to get some additional effects and to make the
-# output acceptable by the W3C validator.
+# output more acceptable to the W3C validator (getting it really
+# right seems to be hopeless).
 #                                          J. T. Toerring
 #
 ############################################################################
