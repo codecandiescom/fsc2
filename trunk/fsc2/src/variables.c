@@ -1388,13 +1388,25 @@ static void free_vars( void )
 void vars_check( Var *v, int type )
 {
 	int i;
-	int t = v->type;
+	int t;
 	const char *types[ ] = { "INTEGER", "FLOAT", "STRING", "INTEGER ARRAY",
 							 "FLOAT ARRAY", "FUNCTION", "ARRAY POINTER",
 							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE",
 	                         "ARRAY REFERENCE" };
 	
-	/* Being paranoid we first check that the variable exists at all -
+
+	/* Someone might call the function with a NULL pointer - handle this
+	   gracefully, i.e. by throwing an exception and don't crash (eventhough
+	   this clearly is a bug) */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, UNSET, "Variable used in %s() does not exist. Please "
+				"send a bug report!\n", Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	/* Being real paranoid we check that the variable exists at all -
 	   probably this can vanish later. */
 
 	fsc2_assert( vars_exist( v ) );
