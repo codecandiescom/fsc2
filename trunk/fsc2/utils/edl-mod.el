@@ -129,16 +129,16 @@
      "OFF\\>"
      "[+-]?[xX]\\>"
      "[+-]?[yY]\\>"
-	 "[cC][wW]\\>" ))
+	 "[cC][wW]\\>" ) )
 
 (defvar edl-section-keywords
   '( "DEV\\(ICE\\)?S?:"
-	 "ASS\\(IGNMENT\\)?S?:"
 	 "VAR\\(IABLE\\)?S?:"
+	 "ASS\\(IGNMENT\\)?S?:"
 	 "PHA\\(SE\\)?S?:"
 	 "PREP\\(ARATION\\)?S?:"
 	 "EXP\\(ERIMENT\\)?:"
-	 "ON_STOP:" ))
+	 "ON_STOP:" ) )
 
 
 (defvar edl-unit-keywords
@@ -181,7 +181,7 @@
 
   (setq comment-start "//" )
 
-  (run-hooks 'edl-mode-hook))
+  (run-hooks 'edl-mode-hook) )
 
 
 ;;; provide ourself

@@ -925,24 +925,28 @@ static bool display_file( char *name, FILE *fp )
 		/* Color section headings */
 
 		lp = line + len + 2;
-		if ( ! strncmp ( lp, "DEVICES:", 8 ) ||
-			 ! strncmp ( lp, "DEVICE:", 7 ) ||
-			 ! strncmp ( lp, "DEVS:\n", 7 ) ||
-			 ! strncmp ( lp, "DEV:", 4 ) ||
-			 ! strncmp ( lp, "VARIABLES:", 10 ) ||
-			 ! strncmp ( lp, "VARIABLE:", 9 ) ||
-			 ! strncmp ( lp, "VARS:", 5 ) ||
-			 ! strncmp ( lp, "VAR:", 4 ) ||
-			 ! strncmp ( lp, "ASSIGNMENTS:", 12 ) ||
-			 ! strncmp ( lp, "ASSIGNMENT:", 11 ) ||
-			 ! strncmp ( lp, "ASS:", 4 ) ||
-			 ! strncmp ( lp, "PREPARATIONS:", 13 ) ||
-			 ! strncmp ( lp, "PREPARATION:", 12 ) ||
-			 ! strncmp ( lp, "PREPS:", 6 ) ||
-			 ! strncmp ( lp, "PREP:", 5 ) ||
-			 ! strncmp ( lp, "EXPERIMENT:", 11 ) ||
-			 ! strncmp ( lp, "EXP:", 4 ) ||
-			 ! strncmp ( lp, "ON_STOP:", 8 ) )
+		if ( ! strncmp( lp, "DEVICES:", 8 ) ||
+			 ! strncmp( lp, "DEVICE:", 7 ) ||
+			 ! strncmp( lp, "DEVS:\n", 7 ) ||
+			 ! strncmp( lp, "DEV:", 4 ) ||
+			 ! strncmp( lp, "VARIABLES:", 10 ) ||
+			 ! strncmp( lp, "VARIABLE:", 9 ) ||
+			 ! strncmp( lp, "VARS:", 5 ) ||
+			 ! strncmp( lp, "VAR:", 4 ) ||
+			 ! strncmp( lp, "ASSIGNMENTS:", 12 ) ||
+			 ! strncmp( lp, "ASSIGNMENT:", 11 ) ||
+			 ! strncmp( lp, "ASS:", 4 ) ||
+			 ! strncmp( lp, "PHA:", 4 ) ||
+			 ! strncmp( lp, "PHAS:", 5 ) ||
+			 ! strncmp( lp, "PHASE:", 6 ) ||
+			 ! strncmp( lp, "PHASES:", 7 ) ||
+			 ! strncmp( lp, "PREPARATIONS:", 13 ) ||
+			 ! strncmp( lp, "PREPARATION:", 12 ) ||
+			 ! strncmp( lp, "PREPS:", 6 ) ||
+			 ! strncmp( lp, "PREP:", 5 ) ||
+			 ! strncmp( lp, "EXPERIMENT:", 11 ) ||
+			 ! strncmp( lp, "EXP:", 4 ) ||
+			 ! strncmp( lp, "ON_STOP:", 8 ) )
 		{
 			memmove( line + 6, line, strlen( line ) + 1 );
 			line[ 0 ] = '@';
