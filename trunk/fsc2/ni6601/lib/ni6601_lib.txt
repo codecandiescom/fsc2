@@ -276,7 +276,7 @@ int ni6601_is_counter_armed( int board, int counter, int *state )
 The function checks if a counter is armed and thus can be taken to
 be counting and busy.
 
-The state, either 'NI6601_BUSY' or 'NI6601_BUSY', will be returned
+The state, either 'NI6601_BUSY' or 'NI6601_IDLE', will be returned
 via the variable pointed to by 'state'.
 
    int board             Board number
