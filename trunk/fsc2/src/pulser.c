@@ -547,7 +547,7 @@ void p_phase_ref( long prot, long func, int ref )
 	switch ( prot )
 	{
 		case PHASE_FFM_PROT :
-			if ( ! exist_device( "dg2020_f" ) )
+			if ( ! exists_device( "dg2020_f" ) )
 			{
 				eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with "
 						"wrong pulser driver.\n", Fname, Lc );
@@ -580,7 +580,7 @@ void p_phase_ref( long prot, long func, int ref )
 			break;
 
 		case PHASE_BLN_PROT :
-			if ( ! exist_device( "dg2020_b" ) )
+			if ( ! exists_device( "dg2020_b" ) )
 			{
 				eprint( FATAL, "%s:%ld: Berlin phase syntax used with "
 						"wrong pulser driver.\n", Fname, Lc );
@@ -822,7 +822,7 @@ void p_set_psd( int func, Var *v )
 {
 	assert( func == 0 || func == 1 );
 
-	if ( ! exist_device( "dg2020_f" ) )
+	if ( ! exists_device( "dg2020_f" ) )
 	{
 		eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with wrong pulser "
 				"driver.\n", Fname, Lc );
@@ -848,7 +848,7 @@ void p_set_psd( int func, Var *v )
 
 void p_set_gp( Var *v )
 {
-	if ( ! exist_device( "dg2020_f" ) )
+	if ( ! exists_device( "dg2020_f" ) )
 	{
 		eprint( FATAL, "%s:%ld: Frankfurt phase syntax used with wrong pulser "
 				"driver.\n", Fname, Lc );
