@@ -5,11 +5,6 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 exp.c devices.c run.c gpib_if.c comm.c chld_func.c          \
 				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
 				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c
-
-ifeq ($(shell hostname -f),crowley.physik.fu-berlin.de)
-	c_sources += gpib_if.c
-endif
-
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.l)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) \
@@ -34,6 +29,8 @@ endif
 ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
 	CFLAGS    += -DIS_STILL_LIBC1
 endif
+
+# On door we need the parser and lexer for the GPIB configuration file */
 
 ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
 	c_source  += gpib_lexer.c gpib_parser.c
