@@ -34,9 +34,7 @@
 ;; one day of learning elisp and how to write a mode it may be good enough ;-)
 
 ;; The currently most annoying bugs are that a `"' in a commment will switch
-;; off displaying the comment in comment-face and that e.g. for both `0V' and
-;; `bV' the `V' will be shown with the variable-name-face, even though it
-;; should only in the first case.
+;; off displaying the comment in comment-face.
 ;;
 ;; To get support for EDL mode being loaded automatically for all files with
 ;; the extension ".els" add the following lines to your .emacs file:
@@ -142,8 +140,7 @@
      "ECL\\>"
      "[+-]?[xX]\\>"
      "[+-]?[yY]\\>"
-	 "[cC][wW]\\>"
-	 "KEEP_?ALL_?PULSES\\(#[0-9]+\\)?\\>" ) )
+	 "[cC][wW]\\>" ) )
 
 (defvar edl-section-keywords
   '( "DEV\\(ICE\\)?S?:"
@@ -162,7 +159,7 @@
 
 
 (defvar edl-unit-keywords
-  "\\([0-9]\\|\\<\\)\\(\\(n\\|u\\|m\\|k\\|M\\)?\\(s\\|G\\|V\\|A\\|db\\|dB\\|Hz\\)\\|\\(n\\|u\\|m\\)?T\\)\\>" )
+  "[+-]?\\(\\([0-9]+\\(\\.\\([0-9]+\\)?\\)?\\)\\|\\(\\.[0-9]\\)\\)\\([eE][\\+\\-]?[0-9]+\\)?[ 	]?[numkM]?\\(s\\|m\\|G\\|V\\|A\\|db\\|dB\\|Hz\\|T\\)\\>" )
 
 
 (defvar edl-font-lock-keywords

@@ -2157,42 +2157,6 @@ bool vars_exist( Var *v )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/* This function is called from the parsers for variable possibly followed  */
-/* by an unit. If there was no unit the second argument is NULL and nothing */
-/* has to be done. If it isn't NULL we've got to check that the token is    */
-/* really a simple number and multiply it with the unit.                    */
-/*--------------------------------------------------------------------------*/
-
-Var *apply_unit( Var *var, Var *unit )
-{
-	if ( var->type == UNDEF_VAR )
-	{
-		fsc2_assert( var->name != NULL );         /* just a bit paranoid ? */
-
-		print( FATAL, "The accessed variable '%s' has not been assigned a "
-			   "value.\n", var->name );
-		THROW( EXCEPTION );
-	}
-
-	if ( unit == NULL )
-		return var;
-
-	if ( var->type & ( INT_VAR | FLOAT_VAR ) )
-		return vars_mult( var, unit );
-	else
-	{
-		print( FATAL, "Syntax error: a unit is applied to something which "
-			   "isn't a number.\n" );
-		THROW( EXCEPTION );
-	}
-
-	return NULL;
-}
-
-
-
-
 /*-------------------------------------------------------------------*/
 /* This function is used to iterate over all elements of a (more-    */
 /* dimensional) array. On each call a (void) pointer to the next     */

@@ -48,32 +48,21 @@ typedef union {
 #define	E_LE	        267
 #define	E_GT	        268
 #define	E_GE	        269
-#define	E_NT_TOKEN	    270
-#define	E_UT_TOKEN	    271
-#define	E_MT_TOKEN	    272
-#define	E_T_TOKEN	    273
-#define	E_KT_TOKEN	    274
-#define	E_MGT_TOKEN	    275
-#define	E_NU_TOKEN	    276
-#define	E_UU_TOKEN	    277
-#define	E_MU_TOKEN	    278
-#define	E_KU_TOKEN	    279
-#define	E_MEG_TOKEN	    280
-#define	E_NEG	        281
-#define	E_AND           282
-#define	E_OR            283
-#define	E_XOR           284
-#define	E_NOT           285
-#define	E_PPOS          286
-#define	E_PLEN          287
-#define	E_PDPOS         288
-#define	E_PDLEN         289
-#define	E_PLSA          290
-#define	E_MINA          291
-#define	E_MULA          292
-#define	E_DIVA          293
-#define	E_MODA          294
-#define E_EXPA          295
+#define	E_NEG	        270
+#define	E_AND           271
+#define	E_OR            272
+#define	E_XOR           273
+#define	E_NOT           274
+#define	E_PPOS          275
+#define	E_PLEN          276
+#define	E_PDPOS         277
+#define	E_PDLEN         278
+#define	E_PLSA          279
+#define	E_MINA          280
+#define	E_MULA          281
+#define	E_DIVA          282
+#define	E_MODA          283
+#define E_EXPA          284
 
 /* The following don't get defined via `exp_run_parser.y' but are for local
    use only (actually, also `run.c' needs them also and gets them from here) */

@@ -141,7 +141,6 @@ Var *vars_arr_rhs( Var *v );
 void vars_assign( Var *src, Var *dest );
 Var *vars_init_list( Var *v, ssize_t level );
 void vars_arr_init( Var *dest );
-Var *apply_unit( Var *var, Var *unit );
 void *vars_iter( Var *v );
 void vars_save_restore( bool flag );
 Var *vars_free( Var *v, bool also_nameless );

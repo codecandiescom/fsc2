@@ -75,9 +75,7 @@ static char *f_error = NULL;
 %token AND OR XOR NOT
 %token PLSA MINA MULA DIVA MODA EXPA
 
-%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
-%token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> expr unit list1 l1e lhs
+%type <vptr> expr list1 l1e lhs
 
 
 %left '?' ':'
@@ -153,12 +151,10 @@ sep2:    /* empty */
        | ','
 ;
 
-expr:    INT_TOKEN unit           { if ( ! dont_exec )
-		                                $$ = apply_unit( vars_push( INT_VAR,
-														 $1 ), $2 ); }
-       | FLOAT_TOKEN unit         { if ( ! dont_exec )
-		                                $$ = apply_unit(
-		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    INT_TOKEN                { if ( ! dont_exec )
+		                                $$ = vars_push( INT_VAR, $1 ); }
+       | FLOAT_TOKEN              { if ( ! dont_exec )
+		                                $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                { if ( ! dont_exec )
 		                                $$ = vars_push_copy( $1 ); }
        | VAR_TOKEN '['            { if ( ! dont_exec )
@@ -265,32 +261,6 @@ expr:    INT_TOKEN unit           { if ( ! dont_exec )
                                   }
 ;
 
-unit:    /* empty */              { if ( ! dont_exec )
-		                                $$ = NULL; }
-       | NT_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | UT_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | MT_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | T_TOKEN                  { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | KT_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | MGT_TOKEN                { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | NU_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UU_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | MU_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | KU_TOKEN                 { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | MEG_TOKEN                { if ( ! dont_exec )
-		                                $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-;
-
 /* list of indices for access of array element */
 
 list1:   /* empty */              { if ( ! dont_exec )
@@ -342,8 +312,6 @@ static void prepserror ( const char *s )
 
 	if ( *prepstext == '\0' )
 		print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );
-	else if ( prepstext[ 0 ] == '\x4' )
-		print( FATAL, "Units can only applied to numbers.\n" );
 	else
 		print( FATAL, "Syntax error near '%s'.\n", prepstext );
 	THROW( EXCEPTION );

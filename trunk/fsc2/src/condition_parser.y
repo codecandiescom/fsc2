@@ -87,32 +87,21 @@ static int dont_exec = 0;
 %token E_LE			  267
 %token E_GT			  268
 %token E_GE			  269
-%token E_NT_TOKEN	  270
-%token E_UT_TOKEN	  271
-%token E_MT_TOKEN	  272
-%token E_T_TOKEN	  273
-%token E_KT_TOKEN	  274
-%token E_MGT_TOKEN	  275
-%token E_NU_TOKEN	  276
-%token E_UU_TOKEN	  277
-%token E_MU_TOKEN	  278
-%token E_KU_TOKEN	  279
-%token E_MEG_TOKEN	  280
-%token E_NEG		  281
-%token E_AND          282
-%token E_OR           283
-%token E_XOR          284
-%token E_NOT          285
-%token E_PPOS         286
-%token E_PLEN         287
-%token E_PDPOS        288
-%token E_PDLEN        289
-%token E_PLSA         290
-%token E_MINA         291
-%token E_MULA         292
-%token E_DIVA         293
-%token E_MODA         294
-%token E_EXPA         295
+%token E_NEG		  270
+%token E_AND          271
+%token E_OR           272
+%token E_XOR          273
+%token E_NOT          274
+%token E_PPOS         275
+%token E_PLEN         276
+%token E_PDPOS        277
+%token E_PDLEN        278
+%token E_PLSA         279
+%token E_MINA         280
+%token E_MULA         281
+%token E_DIVA         282
+%token E_MODA         283
+%token E_EXPA         284
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
 %token <vptr> E_VAR_REF
@@ -123,9 +112,7 @@ static int dont_exec = 0;
 %token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
-%token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
-%token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit list1 l1e
+%type <vptr> expr list1 l1e
 
 %left '?' ':'
 %left E_AND E_OR E_XOR
@@ -143,12 +130,10 @@ static int dont_exec = 0;
 input:   expr                     { YYACCEPT; }
 ;
 
-expr:    E_INT_TOKEN unit         { if ( ! dont_exec )
-                                        $$ = apply_unit( vars_push( INT_VAR,
-																  $1 ), $2 ); }
-       | E_FLOAT_TOKEN unit       { if ( ! dont_exec )
-		                                $$ = apply_unit(
-		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    E_INT_TOKEN              { if ( ! dont_exec )
+                                        $$ = vars_push( INT_VAR, $1 ); }
+       | E_FLOAT_TOKEN            { if ( ! dont_exec )
+		                                $$ = vars_push( FLOAT_VAR, $1 ); }
        | E_VAR_TOKEN              { if ( ! dont_exec )
 		                                $$ = vars_push_copy( $1 ); }
        | E_VAR_TOKEN '['          { if ( ! dont_exec )
@@ -271,33 +256,6 @@ expr:    E_INT_TOKEN unit         { if ( ! dont_exec )
                                    }
 ;
 
-unit:    /* empty */              { if ( ! dont_exec )
-                                        $$ = NULL; }
-       | E_NT_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | E_UT_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | E_MT_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | E_T_TOKEN                { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | E_KT_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | E_MGT_TOKEN              { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | E_NU_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | E_MU_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | E_KU_TOKEN               { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | E_MEG_TOKEN              { if ( ! dont_exec )
-                                        $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-;
-
-
 /* list of indices for access of an array element */
 
 list1:   /* empty */                 { if ( ! dont_exec )
@@ -345,10 +303,7 @@ static void conditionerror( const char *s )
 {
 	UNUSED_ARGUMENT( s );
 
-	if ( conditionchar >= E_NT_TOKEN && conditionchar <= E_MEG_TOKEN )
-		print( FATAL, "Units can only applied to numbers.\n" );
-	else
-		print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
+	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
 }
 

@@ -449,19 +449,6 @@ FUNC        {IDENT}"#"[0-9]+
 
 {WS}        /* Skip white space */
 
-"\x4ntesla" return NT_TOKEN;
-"\x4utesla" return UT_TOKEN;
-"\x4mtesla" return MT_TOKEN;
-"\x4tesla"  return T_TOKEN;
-"\x4ktesla" return KT_TOKEN;
-"\x4Mtesla" return MGT_TOKEN;
-
-"\x4nunit"  return NU_TOKEN;
-"\x4uunit"  return UU_TOKEN;
-"\x4munit"  return MU_TOKEN;
-"\x4kunit"  return KU_TOKEN;
-"\x4megunit" return MEG_TOKEN;
-
 			/* Handling of invalid input */
 .           {
 				print( FATAL, "Invalid input in PREPARATIONS section: '%s'.\n",

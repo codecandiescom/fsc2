@@ -63,9 +63,7 @@ static int dont_exec = 0;
 %token AND OR XOR NOT
 
 
-%token NT_TOKEN UT_TOKEN MT_TOKEN T_TOKEN KT_TOKEN MGT_TOKEN
-%token NU_TOKEN UU_TOKEN MU_TOKEN KU_TOKEN MEG_TOKEN
-%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e unit
+%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e
 
 
 %left '?' ':'
@@ -111,12 +109,10 @@ linet:   VAR_TOKEN                 { }        /* no assignment to be done */
 	                                 THROW( EXCEPTION ); }
 ;
 
-expr:    INT_TOKEN unit            { if ( ! dont_exec )
-	                                     $$ = apply_unit( vars_push( INT_VAR,
-														  $1 ), $2 ); }
-       | FLOAT_TOKEN unit          { if ( ! dont_exec )
-	                                     $$ = apply_unit(
-		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    INT_TOKEN                 { if ( ! dont_exec )
+	                                     $$ = vars_push( INT_VAR, $1 ); }
+       | FLOAT_TOKEN               { if ( ! dont_exec )
+	                                     $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { if ( ! dont_exec )
 	                                 {
 	                                     if ( $1->flags & NEW_VARIABLE )
@@ -240,34 +236,6 @@ expr:    INT_TOKEN unit            { if ( ! dont_exec )
                                    }
 ;
 
-
-unit:    /* empty */               { if ( ! dont_exec )
-	                                     $$ = NULL; }
-       | NT_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
-       | UT_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
-       | MT_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 10.0 ); }
-       | T_TOKEN                   { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e4 ); }
-       | KT_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e7 ); }
-       | MGT_TOKEN                 { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e10 ); }
-       | NU_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | UU_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
-       | MU_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
-       | KU_TOKEN                  { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
-       | MEG_TOKEN                 { if ( ! dont_exec )
-	                                     $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
-;
-
-
 /* list of sizes of newly declared array */
 
 list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
@@ -350,8 +318,6 @@ static void varserror ( const char *s )
 
 	if ( *varstext == '\0' )
 		print( FATAL, "Unexpected end of file in VARIABLES section.\n");
-	else if ( varstext[ 0 ] == '\x4' )
-		print( FATAL, "Units can only applied to numbers.\n" );
 	else
 		print( FATAL, "Syntax error near '%s'.\n", varstext );
 	THROW( EXCEPTION );

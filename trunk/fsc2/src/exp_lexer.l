@@ -349,19 +349,6 @@ FUNC        {IDENT}"#"[0-9]+
 
 {WS}        /* Skip white space */
 
-"\x4ntesla" return E_NT_TOKEN;
-"\x4utesla" return E_UT_TOKEN;
-"\x4mtesla" return E_MT_TOKEN;
-"\x4tesla"  return E_T_TOKEN;
-"\x4ktesla" return E_KT_TOKEN;
-"\x4Mtesla" return E_MGT_TOKEN;
-
-"\x4nunit"  return E_NU_TOKEN;
-"\x4uunit"  return E_UU_TOKEN;
-"\x4munit"  return E_MU_TOKEN;
-"\x4kunit"  return E_KU_TOKEN;
-"\x4megunit" return E_MEG_TOKEN;
-
 			/* Handling of invalid input */
 .           {
 				print( FATAL, "Invalid input in EXPERIMENT section: '%s'.\n",

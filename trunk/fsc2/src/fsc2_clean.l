@@ -387,20 +387,6 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {FKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
 {FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
 
-"nT"/[^a-zA-z0-9_]      output( "\x4ntesla" );
-"uT"/[^a-zA-z0-9_]      output( "\x4utesla" );
-"mT"/[^a-zA-z0-9_]      output( "\x4mtesla" );
-"T"/[^a-zA-z0-9_]       output( "\x4tesla" );
-"kT"/[^a-zA-z0-9_]      output( "\x4ktesla" );
-"MT"/[^a-zA-z0-9_]      output( "\x4Mtesla" );
-
-"n"{UNIT}/[^a-zA-z0-9_] output( "\x4nunit" );
-"u"{UNIT}/[^a-zA-z0-9_] output( "\x4uunit" );
-"m"{UNIT}/[^a-zA-z0-9_] output( "\x4munit" );
-{UNIT}/[^a-zA-z0-9_]
-"k"{UNIT}/[^a-zA-z0-9_] output( "\x4kunit" );
-"M"{UNIT}/[^a-zA-z0-9_] output( "\x4megunit" );
-
 			/* All the rest is simply copied to the output */
 
 {THROU}		{
