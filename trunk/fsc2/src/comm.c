@@ -147,9 +147,20 @@ bool setup_comm( void )
 		return FAIL;
 	}
 
-	/* Beside the pipes we need a shared memory segment to pass the key to
-	   further shared memory segments used to send data from the child to the
-	   parent */
+
+	/* Beside the pipes we need a semaphore which allows the parent to control
+	   when the child is allowed to send data and messages. It has to be
+	   initialized to zero. */
+
+	if ( ( semaphore = sema_create( 0 ) ) < 0 )
+	{
+		for ( i = 0; i < 4; i++ )
+			close( pd[ i ] );
+		return FAIL;
+	}
+
+	/* Finally we need a shared memory segment to pass the key to further
+	   shared memory segments used to send data from the child to the parent */
 
 	seteuid( EUID );
 	Key_Area = shmget( IPC_PRIVATE, 4 * sizeof( char ) + 2 * sizeof( int ),
@@ -167,6 +178,8 @@ bool setup_comm( void )
 	{
 		for ( i = 0; i < 4; i++ )
 			close( pd[ i ] );
+		sema_destroy( semaphore );
+		semaphore = -1;
 
 		shmctl( Key_Area, IPC_RMID, &shm_buf );
 		seteuid( getuid( ) );
@@ -222,6 +235,11 @@ void end_comm( void )
 	/* Deallocate the message queue */
 
 	T_free( Message_Queue );
+
+	/* Delete the semaphore */
+
+	sema_destroy( semaphore );
+	semaphore = -1;
 
 	/* Detach and remove shared memory segment used for the message queue */
 
@@ -375,7 +393,7 @@ long reader( void *ret )
 			str[ 0 ] = T_free( str[ 0 ] );
 			retval = 0;
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			break;
 
@@ -396,7 +414,7 @@ long reader( void *ret )
 
 			fl_show_messages( str[ 0 ] );
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			/* Send back just one character as indicator that the message has
 			   been read by the user */
@@ -424,7 +442,7 @@ long reader( void *ret )
 			else
 				str[ 0 ] = NULL;
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			/* Send back just one character as indicator that the alert has
 			   been acknowledged by the user */
@@ -462,7 +480,7 @@ long reader( void *ret )
 					str[ i ] = NULL;
 			}
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			/* Show the question, get the button number and pass it back to
 			   the child process (which does a read in the mean time) */
@@ -496,7 +514,7 @@ long reader( void *ret )
 					str[ i ] = NULL;
 			}
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			/* Call fl_show_fselector() and send the result back to the child
 			   process (which does a read in the mean time) */
@@ -514,7 +532,7 @@ long reader( void *ret )
 		case C_PROG : case C_OUTPUT :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			send_browser( header.type == C_PROG ?
 						  main_form->browser : main_form->error_browser );
@@ -540,7 +558,7 @@ long reader( void *ret )
 				else
 					str[ i ] = NULL;
 
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 
 			/* Send string from input form to child */
 
@@ -553,7 +571,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_layout( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -564,7 +582,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_bcreate( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -582,7 +600,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_bdelete( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -593,7 +611,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_bstate( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -611,7 +629,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_screate( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -622,7 +640,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_sdelete( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -633,7 +651,7 @@ long reader( void *ret )
 
 			data = T_malloc( header.data.len );
 			pipe_read( pd[ READ ], data, header.data.len );
-			kill( child_pid, DO_SEND );
+			sema_post( semaphore );
 			exp_sstate( data, header.data.len );
 			T_free( data );
 			retval = 0;
@@ -725,10 +743,7 @@ static bool pipe_read( int fd, void *buf, size_t bytes_to_read )
 
 	sigemptyset( &new_mask );
 	if ( I_am == CHILD )
-	{
-		sigaddset( &new_mask, DO_SEND );
 		sigaddset( &new_mask, DO_QUIT );
-	}
 	else
 	{
 		sigaddset( &new_mask, NEW_DATA );
@@ -826,9 +841,7 @@ void writer( int type, ... )
 		   between the determination of the value of 'do_send' and the start
 		   of pause() - and it happens... */
 
-		while ( ! do_send )             /* wait for parent to become ready */
-			usleep( 50000 );
-		do_send = UNSET;
+		sema_wait( semaphore );
 
 		Key->type = REQUEST;
 		kill( getppid( ), NEW_DATA );   /* tell parent to expect new data */

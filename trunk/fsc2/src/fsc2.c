@@ -272,6 +272,11 @@ static void final_exit_handler( void )
 		unlink( in_file );
 	unlink( FSC2_SOCKET );
 
+	/* Delete semaphore if it still exists */
+
+	if ( semaphore >= 0 )
+		sema_destroy( semaphore );
+
 	/* Delete the lock file */
 
 	setuid( EUID );

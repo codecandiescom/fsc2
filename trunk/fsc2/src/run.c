@@ -27,7 +27,6 @@ static void do_measurement( void );
 
 /* Locally used global variables used in parent, child and signal handlers */
 
-static volatile bool child_is_ready;
 static volatile bool child_is_quitting;
 
 jmp_buf alrm_env;
@@ -116,7 +115,7 @@ bool run( void )
 
 	start_graphics( );
 
-	child_is_ready = child_is_quitting = UNSET;
+	child_is_quitting = UNSET;
 
 	/* Set the signal handlers - for NEW_DATA signals we can't use XForms
 	signal handlers because they become blocked by when the display is busy
@@ -145,7 +144,10 @@ bool run( void )
 	pd[ READ ] = pd[ 2 ];
 
 	if ( child_pid != -1 )           /* if fork() succeeded */
+	{
+		sema_post( semaphore );      /* we're ready to read data */
 		return OK;
+	}
 
 	signal( SIGCHLD, main_sig_handler );
 	signal( SIGUSR1, main_sig_handler );
@@ -243,22 +245,13 @@ static void new_data_handler( int sig_type )
 {
 	assert( sig_type == NEW_DATA );
 
-	if ( ! child_is_ready )         /* if this is the very first signal */
-	{
-		child_is_ready = SET;
-		signal( NEW_DATA, new_data_handler );
-		kill( child_pid, DO_SEND );
-	}
-	else
-	{
-		Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
-		Message_Queue[ message_queue_high ].type = Key->type;
-		message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
+	Message_Queue[ message_queue_high ].shm_id = Key->shm_id;
+	Message_Queue[ message_queue_high ].type = Key->type;
+	message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 
-		signal( NEW_DATA, new_data_handler );
-		if ( Key->type == DATA )
-			kill( child_pid, DO_SEND );
-	}
+	signal( NEW_DATA, new_data_handler );
+	if ( Key->type == DATA )
+		sema_post( semaphore );
 }
 
 
@@ -500,29 +493,22 @@ static void run_child( void )
 
 	return_status = OK;
 	cur_prg_token = prg_token;
-	do_send = do_quit = UNSET;
+	do_quit = UNSET;
 
 	/* Set up signals */
 
-	signal( SIGILL,  SIG_DFL );
-	signal( SIGABRT, SIG_DFL );
-	signal( SIGFPE,  SIG_DFL );
-	signal( SIGSEGV, SIG_DFL );
-	signal( SIGPIPE, SIG_DFL );
-	signal( SIGTERM, SIG_DFL );
-	signal( SIGBUS,  SIG_DFL );
+	signal( SIGQUIT, child_sig_handler );
+	signal( SIGILL,  child_sig_handler );
+	signal( SIGABRT, child_sig_handler );
+	signal( SIGFPE,  child_sig_handler );
+	signal( SIGSEGV, child_sig_handler );
+	signal( SIGTERM, child_sig_handler );
+	signal( SIGPIPE, child_sig_handler );
+	signal( SIGTERM, child_sig_handler );
+	signal( SIGBUS,  child_sig_handler );
 
 	sact.sa_handler = child_sig_handler;
 	sigemptyset( &sact.sa_mask );
-	sigaddset( &sact.sa_mask, DO_QUIT );
-	sigaddset( &sact.sa_mask, SIGALRM );
-	sact.sa_flags = SA_RESTART;
-	if ( sigaction( DO_SEND, &sact, NULL ) < 0 )
-		_exit( -1 );
-
-	sact.sa_handler = child_sig_handler;
-	sigemptyset( &sact.sa_mask );
-	sigaddset( &sact.sa_mask, DO_SEND );
 	sigaddset( &sact.sa_mask, SIGALRM );
 	sact.sa_flags = 0;
 	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )
@@ -540,19 +526,6 @@ static void run_child( void )
 	while ( h );
 }
 */
-
-	/* Send parent process a NEW_DATA signal thus indicating that the child
-	   process is done with preparations and ready to start the experiment.
-	   Wait for reply by parent process (i.e. a DO_SEND signal). */
-
-	kill( getppid( ), NEW_DATA );
-
-	/* Using a pause() here is tempting but there exists a race condition
-	   between the determination of the value of 'do_send' and the start of
-	   pause() - and it happens... */
-
-	while ( ! do_send )
-		usleep( 50000 );
 
 	do_measurement( );                     /* run the experiment */
 
@@ -580,17 +553,17 @@ static void run_child( void )
 
 
 /*------------------------------------------------------------*/
-/* This is the signal handler for the three signals the child */
-/* is interested in.                                          */
+/* This is the signal handler for the signals the child is    */
+/* interested in.                                             */
 /* There's a twist: The SIGALRM signal can only come from the */
 /* f_wait() function (see func_util.c). Here we we wait in a  */
-/*  pause() for SIGALRM to get a reliable timer. On the other */
-/* hand, the pause() also has to be interruptible by the      */
-/* DO_QUIT signal, so by falling through from the switch of   */
-/* for this signal it is guaranteed that also this signal     */
-/* will end the pause() - it works even when the handler,     */
-/* while handling a SIGALRM signal, is interrupted by a       */
-/* DO_QUIT signal. In all other cases (i.e. when we're not    */
+/* pause() for SIGALRM to get a reliable timer. On the other  */
+/* hand, the pause() also has to be interruptible by the	  */
+/* DO_QUIT signal, so by falling through from the switch of	  */
+/* for this signal it is guaranteed that also this signal	  */
+/* will end the pause() - it works even when the handler,	  */
+/* while handling a SIGALRM signal, is interrupted by a		  */
+/* DO_QUIT signal. In all other cases (i.e. when we're not	  */
 /* waiting in the pause() in f_wait()) nothing bad happens.   */
 /*------------------------------------------------------------*/
 
@@ -598,10 +571,6 @@ void child_sig_handler( int signo )
 {
 	switch ( signo )
 	{
-		case DO_SEND :
-			do_send = SET;
-			return;
-
 		case DO_QUIT :
 			do_quit = SET;
 			/* fall through ! */
@@ -615,6 +584,12 @@ void child_sig_handler( int signo )
 			return;
 
 		default :
+			/* Test if parent still exists and if not (i.e. the parent died
+			   without sending the child a SGTERM signal) destroy the
+			   semaphore and the shared memory segments */
+
+			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
+				sema_destroy( semaphore );
 			_exit( -1 );
 	}
 }

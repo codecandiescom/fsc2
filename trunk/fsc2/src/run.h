@@ -10,7 +10,6 @@
 
 /* Signals sent by the parent and accepted by the child */
 
-#define DO_SEND   SIGUSR1
 #define DO_QUIT   SIGUSR2
 
 /* Signals sent by the child and accepted by the parent */

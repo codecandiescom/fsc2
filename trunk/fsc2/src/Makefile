@@ -4,7 +4,7 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 func.c func_basic.c func_util.c func_intact.c T.c phases.c  \
 				 exp.c devices.c gpib_if.c run.c comm.c chld_func.c \
 				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c \
-				 loader.c bugs.c print.c conn.c
+				 loader.c bugs.c print.c conn.c ipc.c
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \

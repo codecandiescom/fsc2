@@ -740,9 +740,7 @@ Var *f_display( Var *v )
 	   between the determination of the value of 'do_send' and the start of
 	   pause() - and it happens... */
 
-	while ( ! do_send )             /* wait for parent to become ready */
-		usleep( 50000 );
-	do_send = UNSET;
+	sema_wait( semaphore );
 
 	/* Now try to get a shared memory segment */
 
@@ -1124,9 +1122,7 @@ Var *f_clearcv( Var *v )
 	   between the determination of the value of 'do_send' and the start of
 	   pause() - and it happens... */
 
-	while ( ! do_send )             /* wait for parent to become ready */
-		usleep( 50000 );
-	do_send = UNSET;
+	sema_wait( semaphore );
 
 	/* Now try to get a shared memory segment */
 
