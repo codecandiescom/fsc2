@@ -132,7 +132,7 @@ inline long get_strict_long( Var *v, const char *snippet, const char *device )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-inline bool get_boolean( v, const char *device )
+inline bool get_boolean( Var *v, const char *device )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
