@@ -446,8 +446,7 @@ static int ni6601_disarm( Board *board, NI6601_DISARM *arg )
 		return -EINVAL;
 	}
 
-	writew( d.counter & 1 ? G1_RESET : G0_RESET,
-		board->regs.joint_reset[ d.counter ] );
+	writew( DISARM, board->regs.command[ d.counter ] );
 
 	return 0;
 }
