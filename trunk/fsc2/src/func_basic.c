@@ -1136,6 +1136,39 @@ Var *f_random( Var *v )
 }
 
 
+/*---------------------------------------------------*/
+/* Returns random numbers with gaussian distribution */
+/* and with zero mean value and a variance of 1.     */
+/*---------------------------------------------------*/
+
+Var *f_grand( Var *v )
+{
+	static bool is_old = UNSET;
+	static double next_val;
+	double factor, radius, val_1, val_2;
+
+
+	v = v;
+
+	if ( ! is_old )
+	{
+		do {
+			val_1 = 2.0 * ( double ) random( ) / ( double ) RAND_MAX - 1.0;
+			val_2 = 2.0 * ( double ) random( ) / ( double ) RAND_MAX - 1.0;
+			radius = val_1 * val_1 + val_2 * val_2;
+		} while ( radius < 0.0 || radius >= 1.0 );
+
+		factor = sqrt( - 2.0 * log( radius ) / radius );
+		next_val = val_1 * factor;
+		is_old = SET;
+		return vars_push( FLOAT_VAR, val_2 * factor );
+	}
+
+	is_old = UNSET;
+	return vars_push( FLOAT_VAR, next_val );
+}
+
+
 /*---------------------------------------------------------------------------*/
 /* Sets a seed for the random number generator. It expects either a positive */
 /* integer as argument or none, in which case the current time (in seconds   */

@@ -31,6 +31,7 @@ Var *f_ln(      Var *v );
 Var *f_log(     Var *v );
 Var *f_sqrt(    Var *v );
 Var *f_random(  Var *v );
+Var *f_grand(   Var *v );
 Var *f_setseed( Var *v );
 Var *f_time(    Var *v );
 Var *f_dtime(   Var *v );
