@@ -64,8 +64,9 @@ called for example @code{lockin_get_data()}. This name will be used in
 the module written in C as well as in the @acronym{EDL} file.
 
 Before starting to write a new module you have to decide about the name
-for the device, which will also be the name of the module. If the lock-in
-amplifier is a @i{Stanford Research 510} model a useful name might be SR510.
+for the device, which will also be the name of the module. E.g.@: for the
+@i{Stanford Research 510} lock-in amplifier I picked the name SR510
+because that's what's written on the front panel.
 
 A new device has to be included into the device name data base called
 @file{Devices}
@@ -75,11 +76,11 @@ supported devices. It can be found in the @file{config} subdirectory of
 the source tree and usually gets installed in
 @file{/usr/local/lib/fsc2}. The entries in this file are
 case-insensitive, so you might add `SR510', `sr510' or `Sr510'
-etc. Within the file C and C++ style comments can be used.  By adding
+etc. Within the file C and C++ style comments can be used. By adding
 the device name to this file you tell @acronym{fsc2} that there is now a
 module called `sr510' (take care - all modules are spelled with
 @strong{lower} case characters!). Actually, the file compiled from the C
-file defining the functions has to be @file{sr510.so} - that means it's
+file defining the functions has to be @file{sr510.so} - that means it is
 a shareable library, how to create it from the C file is described
 later. Here is a short snippet from the @file{Devices} file with the
 entries for the lock-in amplifiers:
@@ -607,7 +608,7 @@ into the configuration file for the device, no memory has been allocated
 for this string yet. This should be done as one of the first things after
 the include files having been included. Each and every device module
 should define a constant character array called @code{generic_type},
-that contaings the device type string, i.e. one of the first lines
+that contaings the device type string, i.e.@: one of the first lines
 should always be
 @example
 const char generic_type[ ] = DEVICE_TYPE;
@@ -773,12 +774,102 @@ value from a device reasonable, valid value most be returned.  This can
 be quite tricky, because, while writing the module it is less than clear
 what will be reasonable, valid value in all imaginable situations.
 
-I didn't found a fail safe method to select values to return during the
+I don't have a failsafe method to select values to return during the
 test run and I also fear that there isn't one. But after some
 experimenting the values now used in the modules didn't lead to too many
-problems. If necessary the users must be made aware of possible problems,
-i.e. if they test the return values from the @acronym{EDL} file they
-must be prepared to accept unexpected values.
+problems. If necessary the users must be made aware of possible
+problems, i.e.@: if they test values returned from the @acronym{EDL} file
+they must be prepared to write the @acronym{EDL} program to accept some
+unexpected values.
+
+
+@subsection How to compile a module
+
+A module is a shareable library that gets loaded while @acronym{fsc2} is
+running if the name of the module is listed in the @code{DEVICES}
+section of an @acronym{EDL} file. Probably the simplest way to make such
+a shareable library from the source files you have written is to include
+it in the existing @file{Makefile} in the @file{modules} subdirectory
+of the packages. But, of course, it's also possible to use other methods.
+
+
+If you want to include your module into the existing Makefile you have
+to distinguish between two cases:
+@enumerate
+@item The new module consists of just one @code{C} file with the same
+      name as the module and the @code{config} file (residing in the
+      @file{config} directory)
+@item The new module consists of several source files, one header file
+      (with the same name as the module and the extension @code{.h}) and
+      and the @code{config} file
+@end enumerate
+
+In both cases all you have to do is to edit the @file{Makefile} in the
+@file{modules} directory. In the first case look for the variable
+@code{simp_modules}, defined near the start of the file. The line
+defining this variable is at the moment (while I'm writing this):
+@example
+simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
+                 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
+                 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
+                 kontron4060.c lakeshore330.c pt2025.c
+@end example
+(The @code{\} characters at the ends of the lines tell make that the
+line countinues on the next line.) All you've got to do to include your
+new module is to append the name of the single @code{C} file you have
+written to this list, i.e.@: if it is called @file{abc.c} just change
+the last line to
+@example
+simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
+                 aeg_s_band.c aeg_x_band.c er035m.c er035m_s.c \
+                 er035m_sa.c er035m_sas.c bh15.c keithley228a.c egg4402.c \
+                 kontron4060.c lakeshore330.c pt2025.c abc.c
+@end example
+If you now re-compile it will also be compiled, a shareable library will
+be created from it and when you do @code{make install} it will be copied
+to the appropriate place where @acronym{fsc2} will find it (but don't
+forget that you also have to declare it in the devices data base file
+@file{conf/Devices} and the functions it exports in the functions data
+base file @file{conf/Functions}).
+
+If you wrote a larger module that consists of more than just one source
+file you will have to apply two changes to the @file{Makefile}. Directly
+beneath the definition of the make variable @code{simp_modules} another
+variable, @code{comp_modules}, is defined, which (at the moment) is set to:
+@example
+comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
+                 tds520a tds520 hp8647a
+@end example
+Here you have to append the name of your own module (just the name with
+no extension). Next you have to create a second variable that has the
+same name as your module (again without extension, i.e.@: identical to
+what you just appended to @code{comp_modules}) and which has to be set
+to the list of the all the names of your @code{C} source files. As an
+example lets have a look at the definition of the variable @code{tds754a}:
+@example
+tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
+@end example
+The module @code{tds754a} obviously consists of four @code{C} source
+files that are listed here. After you have created this additional
+variable according to this pattern you're done and can re-compile to
+create the new module.
+
+When you want to compile a module 'by hand' you'll have to make sure
+that the @file{src} and the @file{config} directory are in the include
+paths and that both the flags @code{-shared} and @code{-fpic} are set
+both for compiling as well as linking. If you have a @code{C} source
+called @code{abc123.c} in the @file{modules} directory and you want to
+make a shareable library out of it you should compile it with at least
+@example
+  gcc -I../src -I../config -shared -fpic -o abc.o abc.c
+@end example
+To create a shareable library from it you need
+@example
+  ld -shared -fpic -o abc.so abc.c
+@end example
+(assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
+you will still have to copy the library to the place where
+@acronym{fsc2} expects it, i.e.@: usually @file{/usr/local/lib/fsc2}.
 
 
 @subsection How to call an @acronym{EDL} function from a module
@@ -1002,7 +1093,7 @@ of the fowlloing two types. @code{OUT_OF_MEMORY_EXCEPTION} will only be
 thrown by @acronym{fsc2}s special functions for memory allocation (see
 next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
-the module is doing something rather time consuming (e.g. waiting for a
+the module is doing something rather time consuming (e.g.@: waiting for a
 device to become ready or doing some calbration) and the module detects
 that the user has pressed the stop button. To find about the this you
 can use a macro, @code{DO_STOP} - if it returns @code{TRUE} the user has
