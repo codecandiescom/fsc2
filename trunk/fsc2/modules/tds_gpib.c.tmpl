@@ -154,12 +154,10 @@ bool tds_tmpl_init( const char *name )
 			  ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
 		{
 			if ( ( tds_tmpl.channel_is_on[ ch ]
-				             = tds_tmpl_display_channel_state( ch ) ) &&
-				 ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
+				   = tds_tmpl_display_channel_state( ch ) ) )
 				on_count++;
 
-			if ( tds_tmpl.channels_in_use[ ch ] &&
-				 ch <= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
+			if ( tds_tmpl.channels_in_use[ ch ] )
 			{
 				needed_count++;
 
@@ -187,6 +185,7 @@ bool tds_tmpl_init( const char *name )
 						 tds_tmpl.channel_is_on[ ch ] )
 					{
 						tds_tmpl_display_channel( ch, UNSET );
+						tds_tmpl.channel_is_on[ ch ] = UNSET;
 						on_count--;
 						break;
 					}
@@ -623,7 +622,7 @@ bool tds_tmpl_display_channel_state( int channel )
          gpib_read( tds_tmpl.device, reply, &length ) == FAILURE )
 		tds_tmpl_gpib_failure( );
 
-	return reply[ 0 ] != 0;
+	return reply[ 0 ] != '0';
 }
 
 
@@ -941,7 +940,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	if ( channel != tds_tmpl.data_source )
 	{
-		sprintf( cmd, "DATA:SOURCE %s\n", Channel_Names[ channel ] );
+		sprintf( cmd, "DAT:SOU %s\n", Channel_Names[ channel ] );
 		if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds_tmpl_gpib_failure( );
 		tds_tmpl.data_source = channel;
