@@ -193,7 +193,7 @@ WS          [\n=: ]+
 {RF_GATE}   return RF_GATE_TOKEN;
 
 {PX1}       return PHX1_TOKEN;
-{PX1}       return PHX2_TOKEN;
+{PX2}       return PHX2_TOKEN;
 
 {PY1}       return PHY1_TOKEN;
 {PY2}       return PHY2_TOKEN;
