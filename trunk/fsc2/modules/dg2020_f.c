@@ -270,7 +270,7 @@ int dg2020_exp_hook( void )
 		dg2020_clear_padding_block( &dg2020.function[ i ] );
 	}
 
-	/* Finally tell the pulser to update we're always running in manual
+	/* Finally tell the pulser to update (we're always running in manual
 	   update mode) and than switch the pulser into run mode */
 
 	dg2020_update_data( );
@@ -329,7 +329,7 @@ void dg2020_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_start( Var *v )
+Var *pulser_update( Var *v )
 {
 	v = v;
 
@@ -416,18 +416,7 @@ Var *pulser_shift( Var *v )
 		p->needs_update = NEEDS_UPDATE( p );
 
 		if ( p->needs_update )
-		{
 			dg2020.needs_update = SET;
-
-			/* stop the pulser */
-
-			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
-			{
-				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
-						"failed.", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -497,18 +486,7 @@ Var *pulser_increment( Var *v )
 		/* If the pulse was or is active we've got to update the pulser */
 
 		if ( p->needs_update )
-		{
 			dg2020.needs_update = SET;
-
-			/* stop the pulser */
-
-			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
-			{
-				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
-						"failed.", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -578,6 +556,9 @@ Var *pulser_next_phase( Var *v )
 		}
 	}
 
+	if ( ! TEST_RUN )
+		dg2020_update_data( );
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -644,6 +625,9 @@ Var *pulser_phase_reset( Var *v )
 		f->next_phase = 2;
 	}
 
+	if ( ! TEST_RUN )
+		dg2020_update_data( );
+
 	return vars_push( INT_VAR, 1 );;
 }
 
@@ -702,18 +686,7 @@ Var *pulser_pulse_reset( Var *v )
 		p->needs_update = NEEDS_UPDATE( p );
 
 		if ( p->needs_update )
-		{
 			dg2020.needs_update = SET;
-
-			/* stop the pulser */
-
-			if ( ! TEST_RUN && ! dg2020_run( STOP ) )
-			{
-				eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
-						"failed.", Fname, Lc );
-				THROW( EXCEPTION );
-			}
-		}
 	}
 
 	return vars_push( INT_VAR, 1 );

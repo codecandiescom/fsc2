@@ -404,18 +404,7 @@ bool dg2020_change_pulse_position( long pnum, double time )
 	p->needs_update = NEEDS_UPDATE( p );
 
 	if ( p->needs_update )
-	{
 		dg2020.needs_update = SET;
-
-		/* stop the pulser */
-
-		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
-		{
-			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
-					"failed.", Fname, Lc );
-			THROW( EXCEPTION );
-		}
-	}
 
 	return OK;
 }
@@ -457,18 +446,7 @@ bool dg2020_change_pulse_length( long pnum, double time )
 	p->needs_update = NEEDS_UPDATE( p );
 
 	if ( p->needs_update )
-	{
 		dg2020.needs_update = SET;
-
-		/* stop the pulser */
-
-		if ( ! TEST_RUN && ! dg2020_run( STOP ) )
-		{
-			eprint( FATAL, "%s:%ld: DG2020: Communication with pulser "
-					"failed.", Fname, Lc );
-			THROW( EXCEPTION );
-		}
-	}
 
 	return OK;
 }

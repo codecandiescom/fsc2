@@ -42,7 +42,7 @@ field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
 
 // Functions exported by the pulser drivers (DG2020)
 
-pulser_start, 0, EXP;           // switches the pulser into run mode
+pulser_update, 0, EXP;          // commits changes
 pulser_shift, -1, EXP;          // shift pulse positions
 pulser_increment, -1, EXP;      // change pulse lengths
 pulser_pulse_reset, -1, EXP;    // set back pulses to initial state

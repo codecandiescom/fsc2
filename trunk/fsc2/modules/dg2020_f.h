@@ -18,7 +18,7 @@ int dg2020_end_of_exp_hook( void );
 void dg2020_exit_hook( void );
 
 
-Var *pulser_start( Var *v );
+Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
 Var *pulser_next_phase( Var *v );
