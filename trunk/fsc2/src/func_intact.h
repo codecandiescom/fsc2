@@ -79,7 +79,6 @@ struct IOBJECT {
 
 struct TOOLBOX {
 	int layout;               /* 0 / 1 <-> vertical / horizontal */
-	bool has_been_shown;
 	FL_FORM *Tools;
 	FL_COORD w,               /* size of form */
 		     h;
