@@ -738,7 +738,7 @@ Var *digitizer_start_acquisition( Var *v )
 
 Var *digitizer_get_area( Var *v )
 {
-	return get_area( v, SET );
+	return get_area( v, tds520a.w != NULL ? SET : UNSET );
 }
 
 Var *digitizer_get_area_fast( Var *v )

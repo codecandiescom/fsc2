@@ -729,7 +729,7 @@ Var *digitizer_start_acquisition( Var *v )
 
 Var *digitizer_get_area( Var *v )
 {
-	return get_area( v, SET );
+	return get_area( v, tds520c.w != NULL ? SET : UNSET );
 }
 
 Var *digitizer_get_area_fast( Var *v )
@@ -825,7 +825,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 Var *digitizer_get_curve( Var *v )
 {
-	return get_curve( v, SET );
+	return get_curve( v, tds520c.w != NULL ? SET : UNSET);
 }
 
 Var *digitizer_get_curve_fast( Var *v )
