@@ -1175,7 +1175,7 @@ static bool er035m_sas_comm( int type, ... )
 		case SERIAL_READ :
 			va_start( ap, type );
 			buf = va_arg( ap, char * );
-			lptr = va_arg( ap, long * );
+			lptr = va_arg( ap, size_t * );
 			va_end( ap );
 
 			/* The gaussmeter might not be ready yet to send data, in this
@@ -1200,7 +1200,7 @@ static bool er035m_sas_comm( int type, ... )
 			   sends seem to be invalid, so let's get rid of them... */
 
 			*lptr = len;
-			for ( len = 0; len < *lptr; len++ )
+			for ( len = 0; len < ( ssize_t ) *lptr; len++ )
 				buf[ len ] &= 0x3f;
 			break;
 

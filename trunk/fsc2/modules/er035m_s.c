@@ -1270,7 +1270,7 @@ static bool er035m_s_comm( int type, ... )
 			   sends are completely useless, so get rid of them... */
 
 			*lptr = len;
-			for ( len = 0; len < *lptr; len++ )
+			for ( len = 0; len < ( ssize_t ) *lptr; len++ )
 				buf[ len ] &= 0x3f;
 
 			break;
