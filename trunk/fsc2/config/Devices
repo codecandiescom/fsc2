@@ -96,3 +96,8 @@ kontron4060   // Kontron 4060 voltmeter
 // Temperature controllers
 
 lakeshore330  // Lakeshore 330 temperature controller
+
+
+// Frequency counter
+
+hp5340a       // HP5340A frequency counter

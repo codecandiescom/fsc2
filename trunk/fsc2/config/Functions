@@ -214,3 +214,8 @@ temp_contr_temperature, 0, EXP;
 temp_contr_sensor_unit, -1, EXP;
 temp_contr_sample_channel, -1, EXP;
 
+
+/* Functions exported by the frequency counter (HP5340A) */
+
+freq_counter_name, 0, ALL;
+freq_counter_measure, 0, EXP;
