@@ -145,7 +145,7 @@ spex_cd2a
 // Power Supplies (Thurlby&Thandar PL330DP, F.u.G. MCN700-2000)
 
 thurlby330
-mcn700
+mcn700_2000
 
 
 // DIOs (WITIO-48 card)
