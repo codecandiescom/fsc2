@@ -1010,8 +1010,7 @@ static void child_sig_handler( int signo )
 			   shared memory (as far as the child knows about it) and also
 			   kill the child for connections (if it exists). */
 
-			if ( getppid( ) == 1 ||
-				 ( kill( getppid( ), 0 ) == -1 && errno == ESRCH ) )
+			if ( getppid( ) == 1 )
 			{
 				if ( Internals.conn_pid > 0 )
 					kill( Internals.conn_pid, SIGTERM );
