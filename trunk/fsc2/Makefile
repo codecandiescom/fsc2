@@ -145,11 +145,14 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/tds520c.so
 
 install-crowley.fu-berlin.de:
-	rm -rf $(libdir)/gaussmeter.so $(libdir)/synthesizer.so
+	rm -rf $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
+		$(libdir)/boxcar.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 	ln -s $(libdir)/hp8647a.so $(libdir)/synthesizer.so
 	chown fsc2.fsc2 $(libdir)/synthesizer.so
+	ln -s $(libdir)/egg4402so $(libdir)/boxcar.so
+	chown fsc2.fsc2 $(libdir)/boxcar.so
 
 install-moebi.fu-berlin.de:
 	rm -rf $(libdir)/pulser.so $(libdir)/magnet.so $(libdir)/gaussmeter.so
