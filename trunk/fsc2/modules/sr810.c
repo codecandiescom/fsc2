@@ -734,13 +734,13 @@ Var *lockin_ref_freq( Var *v )
 	{
 		if ( harm == 1 )
 			eprint( FATAL, "%s:%ld: %s: Reference frequency of %f Hz is "
-					"not within valid range (%f Hz - %f Hz).\n", Fname, Lc,
-					DEVICE_NAME, MIN_REF_FREQ, MAX_REF_FREQ );
+					"not within valid range (%f Hz - %f kHz).\n", Fname, Lc,
+					DEVICE_NAME, freq, MIN_REF_FREQ, MAX_REF_FREQ * 1.0e-3 );
 		else
 			eprint( FATAL, "%s:%ld: %s: Reference frequency of %f Hz with "
 					"harmonic set to %ld is not within valid range "
-					"(%f Hz - %f Hz).\n", Fname, Lc, DEVICE_NAME, MIN_REF_FREQ,
-					MAX_REF_FREQ / ( double ) harm );
+					"(%f Hz - %f Hz).\n", Fname, Lc, DEVICE_NAME, freq, harm,
+					MIN_REF_FREQ, 1.0e-3 * MAX_REF_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
 
