@@ -479,7 +479,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{open_file}
 @item open_file( )
 @findex open_file()
-Thsi function is similar to the previous one with the main difference
+This function is similar to the previous one with the main difference
 that one may specify an hard-coded file name in the program. The
 function will use its first argument as a file name and try to open this
 file. If the file already exists (or can't be opened)  a warning will be
