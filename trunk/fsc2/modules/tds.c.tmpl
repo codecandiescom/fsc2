@@ -157,7 +157,19 @@ int tds_tmpl_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	tds_tmpl_do_pre_exp_checks( );
+	/* If the pre-experiment checks fail we must unlock the keyboard
+	   and switch back to a normal acquisition mode */
+
+	TRY
+	{
+		tds_tmpl_do_pre_exp_checks( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		tds_tmpl_finished( );
+		RETHROW( );
+	}
 
 	return 1;
 }

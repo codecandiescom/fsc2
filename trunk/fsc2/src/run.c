@@ -295,7 +295,7 @@ static bool init_devs_and_graphics( void )
 		check_for_further_errors( &compile_test, &EDL.compilation );
 
 		start_graphics( );
-		if ( G.dim & 1 )
+		if ( G.dim & 1 || ! G.is_init )
 			fl_set_object_callback( GUI.run_form_1d->stop_1d,
 									run_stop_button_callback, 0 );
 		if ( G.dim & 2 )

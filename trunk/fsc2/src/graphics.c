@@ -692,7 +692,7 @@ static void forms_adapt( void )
 
 	/* fdesign is unable to set the box type attributes for canvases... */
 
-	if ( G.dim & 1 )
+	if ( G.dim & 1 || ! G.is_init )
 	{
 		fl_set_canvas_decoration( GUI.run_form_1d->x_axis_1d, FL_FRAME_BOX );
 		fl_set_canvas_decoration( GUI.run_form_1d->y_axis_1d, FL_FRAME_BOX );

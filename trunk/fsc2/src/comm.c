@@ -250,7 +250,7 @@ int new_data_callback( XEvent *a, void *b )
 			kill( Internals.child_pid, DO_QUIT );
 		Internals.child_is_quitting = QUITTING_ACCEPTED;
 
-		if ( G.dim & 1 )
+		if ( G.dim & 1 || ! G.is_init )
 			fl_set_object_callback( GUI.run_form_1d->stop_1d, NULL, 0 );
 		if ( G.dim & 2 )
 			fl_set_object_callback( GUI.run_form_2d->stop_2d, NULL, 0 );

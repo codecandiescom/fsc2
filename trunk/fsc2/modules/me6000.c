@@ -275,7 +275,7 @@ Var *dac_voltage( Var *v )
 	if ( FSC2_MODE == EXPERIMENT && 
 		 me6x00_voltage( BOARD_NUMBER, dac, volts ) < 0 )
 	{
-		print( FATAL, "Failed to set new output voltage.\n" );
+		print( FATAL, "Failed to set output voltage.\n" );
 		THROW( EXCEPTION );
 	}
 
