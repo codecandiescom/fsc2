@@ -1297,7 +1297,7 @@ Var *f_mean( Var *v )
 	long slice_len;
 
 
-	if ( v == NULL || v->next == NULL )
+	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing parameter in call of function "
 				"mean().\n", Fname, Lc );

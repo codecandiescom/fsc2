@@ -78,7 +78,7 @@ FOR J = 1 : N_runs {
 	curve = digitizer_get_curve_fast( CH1 );
 	
 	IF Pretrigger != 0 {
-	    ground = mean( slice( curve, 1, Pretrigger ) );
+	    ground = mean( curve, 1, Pretrigger );
 	} ELSE {
 	    ground = 0;
 	}
