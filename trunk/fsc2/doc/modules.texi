@@ -80,7 +80,14 @@ module called `sr510' (take care - all modules are spelled with
 @strong{lower} case characters!). Actually, the file compiled from the C
 file defining the functions has to be @file{sr510.so} - that means it's
 a shareable library file, how to create it from the C file is described
-later.
+later. Here is a short snippet from the @file{Devices} file with the
+entries for the lock-in amplifiers:
+@example
+sr510         // Stanford Research lock-in amplifier, model 510
+sr530         // Stanford Research lock-in amplifier, model 530
+sr810         // Stanford Research lock-in amplifier, model 810
+sr830         // Stanford Research lock-in amplifier, model 830
+@end example
 
 The next thing is to append the function(s) exported by the module to
 the function data base called @file{Functions}
@@ -103,7 +110,25 @@ functions only during an experiment and, finally, @code{PREP} restricts
 the use of the function to the @code{PREPARATION} section of the
 @acronym{EDL} file.  Each line has to be ended with a semicolon and the
 entries in the line must be separated by commas.  As in the device data
-base, C and C++ style comments can be used.
+base, C and C++ style comments can be used. Here are a few lines from
+a valid @file{Functions} file with the entries for lock-in amplifier
+functions:
+@example
+/* Functions exported by the lock-in amplifier modules
+   (SR510, SR530, SR810, SR830) */
+
+lockin_name,           0, ALL;  // return the device name
+lockin_get_data,      -1, EXP;  // return the lock-in voltage 
+lockin_get_adc_data,   1, EXP;  // return a ADC voltage
+lockin_dac_voltage,   -1, ALL;  // get/set DAC voltage
+lockin_sensitivity,   -1, ALL;  // get/set the sensitivity
+lockin_time_constant, -1, ALL;  // get/set the time constant
+lockin_phase,         -1, ALL;  // get/set the phase
+lockin_ref_freq,      -1, EXP;  // Get/set mod frequency (SR8x0 only)
+lockin_ref_mode,       0, EXP;  // Get mod. mode (SR8x0 only)
+lockin_ref_level,     -1, ALL;  // Get/set mod. level (SR8x0 only)
+lockin_lock_keyboard, -1, EXP;  // Lock/unlock the keyboard
+@end example
 
 
 Writing the C file with the functions, compiling it to create a
@@ -112,19 +137,6 @@ data base is all there is to be done. If in the devices sections of the
 @acronym{EDL} file the new device is found (and it's also listed in
 @file{Devices}) the new module will be loaded by @acronym{fsc2} and the
 functions defined in the module can be used in the @acronym{EDL} file.
-
-
-What about having different lock-in amplifiers with modules defining
-functions with the same names, say @code{lockin_get_data()}? As long as
-only the module for one of the lock-in amplifiers is loaded (i.e.@: only
-one of them is mentioned in the devices section of the @acronym{EDL}
-file) there is no poblem at all. Only in the rather unusual case that
-more than one lock-in amplifier is to be used for an experiment (and
-thus be listed in the devices section) one would be in trouble and would
-have to change the names of the functions in the modules if they
-clash. Having modules exporting the functions with identical names will
-result in a severe warning while testing the @acronym{EDL} file and only
-the function defined in the first module will be usable.
 
 
 
@@ -199,7 +211,7 @@ the function expects even more arguments, @code{var->next->next}
 etc. would get you to them - that means the input variables are
 organized as a linked list:
 @example
-    var                               pointer passed to the function
+    var                               pointer passed to function
      |                                  |
      V                                  |
     ---------------                     V
@@ -227,8 +239,8 @@ parameters organized as a linked list also makes it easy to handle
 variable numbers of variables: as long as the @code{next}-pointer of a
 function argument isn't @code{NULL} there is still another one.
 
-@strong{One word of warning:} Never ever mess around with the @code{next}
-pointers!
+One word of warning: @strong{Never ever mess around with the @code{next}
+pointers!}
 
 What @acronym{fsc2} won't do is check if the arguments it passes to your
 function have the type you expect. Lets assume that you expect two
@@ -316,6 +328,7 @@ the same input and return values as their normal counterparts, i.e.@:
   void *T_malloc( size_t size )
   void *T_calloc( size_t nmemb, size_t size )
   void *T_realloc( void *ptr, size_t size )
+  char *T_strdup( const char *string )
   void  T_free( void *ptr )
 @end example
 @noindent
@@ -553,21 +566,25 @@ will not be able to use @acronym{fsc2}'s variables.
 @cindex hook functions
 @findex init_hook()
 @findex test_hook()
+@findex end_of_test_hook
 @findex exp_hook()
+@findex end_of_exp_hook
 @findex exit_hook()
 
 Each module may contain four pre-defined functions that don't have to be
 declared in the function data base file, *Functions'. They all start
 with the name of the module (always in lower case letters - the only
 exception is `User_Functions' to make it stand out), followed by the
-words @code{_init_hook}, @code{_test_hook}, @code{_exp_hook} and
-@code{_exit_hook}. Thus, if the new device is named `ABC123' and thus
-the module is `abc123' these functions are (together with the
-parameters):
+words @code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
+@code{_exp_hook}, @code{_end_of_exp_hook} and @code{_exit_hook}. Thus,
+if the new device is named `ABC123' and thus the module is `abc123'
+these functions are (together with the parameters):
 @example
     int abc123_init_hook( void )
     int abc123_test_hook( void )
+    int abc123_end_of_test_hook( void )
     int abc123_exp_hook( void )
+    int abc123_end_of_exp_hook( void )
     void abc123_exit_hook( void )
 @end example
 @noindent
@@ -575,15 +592,18 @@ The loader will test if these functions exist and if they do they will
 be called automatically at certain points in the interpretation of the
 @acronym{EDL} file.
 
-If it exists, the first function, i.e.@: @code{abc123_init_hook()} is called
-immediately after the functions defined in all modules are loaded. Its main
-purpose is to allow the module to get all kinds of initialization done. Since
-all other modules are already loaded, it also may be used to test for the
-existence of other modules. If the initialization completes successfully, the
-function must return a non-zero value. If there are problems that don't make
-the module unusable it may return a zero value --- in this case a warning
-message will be printed. If the initialization fails in a non-recoverable way,
-the function should throw an exception.
+If it exists, the first function, i.e.@: @code{abc123_init_hook()} is
+called immediately after the functions defined in all modules are
+loaded. Its main purpose is to allow the module to get all kinds of
+initialization done. Since all other modules are already loaded, it also
+may be used to test for the existence of other modules by calling a
+function called @code{exist_device()}. But you should not call functions
+from other modules at this stage, because the other module may still be
+uninitialized. If the initialization completes successfully, the
+function must return a non-zero value. If there are problems that don't
+make the module unusable it may return a zero value --- in this case a
+warning message will be printed. If the initialization fails in a
+non-recoverable way, the function should throw an exception.
 
 The second function, @code{abc123_test_hook()}, is called at the start
 of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
