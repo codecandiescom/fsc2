@@ -9,5 +9,12 @@ td.example { background-color:#FFFFE0;
              padding-left:4mm;
              padding-right:4mm;
              border-width:thin;
-			 border-style:solid;}
+			 border-style:solid;
+		   }
 
+table.navi { background-color:#EEEEEE;
+	         cellpadding:4;
+		     cellspacing:0;
+		     border:0;
+			 width:100%;
+	       }

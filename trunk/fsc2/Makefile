@@ -257,7 +257,8 @@ pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
-# Write zipped tarball to ZIP drive (with mount and unmount of ZIP drive)
+# Create zipped tarball and write to ZIP drive (at home with mount and
+# unmount of ZIP drive otherwise assume that it's already mounted)
 
 ZIP:
 	$(MAKE) pack
