@@ -535,9 +535,9 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 void dg2020_dump_channels( FILE *fp )
 {
 	FUNCTION *f;
-	POD *pod;
 	PULSE *p;
-	int i, j, k;
+	int i, k;
+	int next_phase;
 
 
 	if ( fp == NULL )
@@ -549,26 +549,51 @@ void dg2020_dump_channels( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed || f->num_channels == 0 )
+		if ( ! f->is_used || f->pulses == NULL )
 			continue;
 
-		for ( j = 0; j < f->num_pods; j++ )
+		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
+			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
-			pod = f->pod[ j ];
-
-			fprintf( fp, "%s:%d", f->name, pod->self );
+			fprintf( fp, "%s:%d", f->name, f->pod->self );
 			for ( k = 0; k < f->num_pulses; k++ )
 			{
-				p = f->pulses + k;
+				p = f->pulses[ k ];
 				if ( ! p->is_active )
 					continue;
-				if ( p->pc == NULL ||
-					 f->phase_setup->pod[ 
-						 p->pc->sequence[ f->next_phase ] - PHASE_PLUS_X ]
-					 == pod )
-					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+
+				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
 			}
 			fprintf( fp, "\n" );
+		}
+		else
+		{
+			fprintf( fp, "%s:%d", f->name, f->pod->self );
+
+			next_phase = f->next_phase;
+			if ( next_phase >= f->num_channels )
+			next_phase = 0;
+
+			for ( k = 0; k < f->num_pulses; k++ )
+			{
+				p = f->pulses[ k ];
+				if ( ! p->is_active || f->channel[ next_phase ] != p->channel )
+					continue;
+				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+			}
+			fprintf( fp, "\n" );
+
+			fprintf( fp, "%s:%d", f->name, f->pod2->self );
+			next_phase++;
+			for ( k = 0; k < f->num_pulses; k++ )
+			{
+				p = f->pulses[ k ];
+				if ( ! p->is_active || f->channel[ next_phase ] != p->channel )
+					continue;
+				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+			}
+			fprintf( fp, "\n" );
+
 		}
 	}
 }

@@ -766,18 +766,21 @@ Var *pulser_next_phase( Var *v )
 
 		if ( FSC2_MODE == EXPERIMENT )
 		{
-			if ( ! dg2020_channel_assign( f->channel[ f->next_phase ]->self,
+			if ( ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
 										  f->pod->self ) ||
-				 ! dg2020_channel_assign( f->channel[ f->next_phase ]->self,
+				 ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
 										  f->pod2->self ) ||
 				 ! dg2020_update_data( ) )
-			{
-				f->next_phase++;
 				return vars_push( INT_VAR, 0 );
-			}
 		}
-
-		f->next_phase++;
+		else
+		{
+			f->next_phase += 2;
+			if ( dg2020.dump_file != NULL )
+				dg2020_dump_channels( dg2020.dump_file );
+			if ( dg2020.show_file != NULL )
+				dg2020_dump_channels( dg2020.show_file );
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );
@@ -839,6 +842,13 @@ Var *pulser_phase_reset( Var *v )
 										  f->pod2->self ) ||
 				 ! dg2020_update_data( ) )
 				return vars_push( INT_VAR, 0 );
+		}
+		else
+		{
+			if ( dg2020.dump_file != NULL )
+				dg2020_dump_channels( dg2020.dump_file );
+			if ( dg2020.show_file != NULL )
+				dg2020_dump_channels( dg2020.show_file );
 		}
 
 		f->next_phase = 2;

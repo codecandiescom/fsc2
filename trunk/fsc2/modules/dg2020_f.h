@@ -119,6 +119,7 @@ typedef struct {                 /* needed in phase setup */
 typedef struct _F_ {
 
 	int self;                  /* the functions number */
+	const char *name;
 
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */

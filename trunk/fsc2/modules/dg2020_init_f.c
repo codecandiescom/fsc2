@@ -81,7 +81,7 @@ static void dg2020_init_print( FILE *fp )
 	{
 		f = dg2020.function + i;
 
-		if ( ! f->is_needed || f->pod == NULL )
+		if ( ! f->is_used || f->num_channels == 0 )
 			continue;
 
 		fprintf( fp, "%s:%d %ld\n", f->name, f->pod->self, f->delay );
