@@ -54,11 +54,11 @@ pulser_next_phase, -1, EXP;     // switch to next phase in phase cycling
 pulser_phase_reset, -1, EXP;    // switch back to first phase
 
 
-// Functions exported by the lock-in amplifier drivers (SR510, SR810)
+// Functions exported by the lock-in amplifier drivers (SR510, SR530, SR810)
 
 lockin_get_data, -1, EXP;       // returns the lock-in voltage 
 lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
-lockin_set_dac_data, 2, EXP;    // sets a DAC voltage
+lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase

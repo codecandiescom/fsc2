@@ -3,6 +3,11 @@
 */
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/* This device needs '\n' (0x0A) as EOS - set this correctly in `gpib.conf' */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 #include "fsc2.h"
 #include "gpib.h"
 
@@ -24,6 +29,7 @@ Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
+Var *lockin_set_dac( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -37,6 +43,7 @@ typedef struct
 	bool P;
 	int TC;
 	bool TC_warn;
+	double dac_voltage[ 2 ];
 } SR510;
 
 static SR510 sr510;
@@ -59,7 +66,7 @@ static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 
 /* declaration of all functions used only in this file */
 
-static bool lockin_init( const char *name );
+static bool sr510_init( const char *name );
 static double sr510_get_data( void );
 static double sr510_get_adc_data( long channel );
 static double sr510_get_sens( void );
@@ -68,6 +75,7 @@ static double sr510_get_tc( void );
 static void sr510_set_tc( int TC );
 static double sr510_get_phase( void );
 static double sr510_set_phase( double phase );
+static double sr510_set_dac_voltage( long channel, double voltage );
 
 
 
@@ -77,6 +85,9 @@ static double sr510_set_phase( double phase );
 
 int sr510_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
@@ -93,6 +104,10 @@ int sr510_init_hook( void )
 	sr510.TC = -1;               /* no time constant has to be set at the */
 	sr510.TC_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
+
+	for ( i = 0; i < 2; i++ )
+		src510.dac_voltage[ i ] = 0.0;
+
 	return 1;
 }
 
@@ -110,7 +125,7 @@ int sr510_exp_hook( void )
 
 	/* Initialize the lock-in */
 
-	if ( ! lockin_init( DEVICE_NAME ) )
+	if ( ! sr510_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -131,7 +146,7 @@ int sr510_end_of_exp_hook( void )
 
 	if ( sr510.device >= 0 )
 	{
-		gpib_write( sr510.device, "I0\n", 3 );
+		gpib_write( sr510.device, "I0", 2 );
 		gpib_local( sr510.device );
 	}
 
@@ -486,6 +501,83 @@ Var *lockin_phase( Var *v )
 }
 
 
+/*-----------------------------------------------------------*/
+/* Function sets or returns the voltage at one of the 2 DAC  */
+/* ports on the backside of the lock-in amplifier. The first */
+/* argument must be the channel number, either 5 or 6, the   */
+/* second the voltage in the range between -10.24 V and      */
+/* +10.24 V. If there isn't a second argument the set DAC    */
+/* voltage is returned (which is initially set to 0 V).      */
+/*-----------------------------------------------------------*/
+
+Var *lockin_set_dac( Var *v )
+{
+	long channel;
+	double voltage;
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	/* First argument must be the channel number (5 or 6) */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, "%s:%ld: %s: Floating point number used as DAC channel "
+				"number.", Fname, Lc, DEVICE_NAME );
+
+	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	v = vars_pop( v );
+
+	if ( channel != 5 && channel != 6 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
+				"valid are 5 or 6.", Fname, Lc, DEVICE_NAME, channel );
+		THROW( EXCEPTION );
+	}
+
+	/* If no second argument is specified return the current DAC setting */
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, sr510.dac_voltage[ channel - 5 ] );
+
+	/* Second argument must be a voltage between -10.24 V and +10.24 V */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as DAC voltage.",
+				Fname, Lc, DEVICE_NAME );
+
+	voltage = FLOAT( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
+				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL ) 
+				;
+	}
+
+	if ( fabs( voltage ) > 10.24 )
+	{
+		eprint( FATAL, "%s:%ld: %s: DAC voltage of %f V is out of valid "
+				"range (+/-10.24 V).", Fname, Lc, DEVICE_NAME, voltage );
+		THROW( EXCEPTION );
+	}
+
+	sr510.dac_voltage[ channel - 5 ] = voltage;
+
+	if ( TEST_RUN || I_am == PARENT)
+		return vars_push( FLOAT_VAR, voltage );
+
+	return vars_push( FLOAT_VAR, sr510_set_dac_voltage( channel, voltage ) );
+}
+
+
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
@@ -496,10 +588,11 @@ Var *lockin_phase( Var *v )
 /* it can be accessed by asking it to send its status byte.         */
 /*------------------------------------------------------------------*/
 
-bool lockin_init( const char *name )
+bool sr510_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
+	int i;
 
 
 	assert( sr510.device < 0 );
@@ -509,18 +602,19 @@ bool lockin_init( const char *name )
 
 	/* Ask lock-in to send status byte and test if it does */
 
-	if ( gpib_write( sr510.device, "Y\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr510.device, "Y", 1 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 		return FAIL;
 
 	/* Lock the keyboard */
 
-	if ( gpib_write( sr510.device, "I1\n", 3 ) == FAILURE )
+	if ( gpib_write( sr510.device, "I1", 2 ) == FAILURE )
 		return FAIL;
 
 	/* If sensitivity, time constant or phase were set in one of the
 	   preparation sections only the value was stored and we have to do the
-	   actual setting now because the lock-in could not be accessed before */
+	   actual setting now because the lock-in could not be accessed before.
+	   Finally set the DAC output voltages to a defined value (default 0 V).*/
 
 	if ( sr510.Sens != -1 )
 		sr510_set_sens( sr510.Sens );
@@ -528,6 +622,9 @@ bool lockin_init( const char *name )
 		sr510_set_phase( sr510.phase );
 	if ( sr510.TC != -1 )
 		sr510_set_tc( sr510.TC );
+	for ( i = 0; i < 2; i++ )
+		sr510_set_dac_voltage( i + 5, sr510.dac_voltage[ i ];
+		
 
 	return OK;
 }
@@ -543,7 +640,7 @@ double sr510_get_data( void )
 	long length = 20;
 
 
-	if ( gpib_write( sr510.device, "Q\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr510.device, "Q", 1 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -564,13 +661,15 @@ double sr510_get_data( void )
 
 double sr510_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "X*\n";
+	char buffer[ 3 ] = "X*";
 	long length = 16;
 
 
+	assert( channel >= 1 && channel <= 4 );
+
 	buffer[ 1 ] = ( char ) channel + '0';
 
-	if ( gpib_write( sr510.device, buffer, 3 ) == FAILURE ||
+	if ( gpib_write( sr510.device, buffer, 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -595,7 +694,7 @@ double sr510_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr510.device, "G\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr510.device, "G", 1 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -610,7 +709,7 @@ double sr510_get_sens( void )
 	   by a factor of 10 */
 
 	length = 10;
-	if ( gpib_write( sr510.device, "E\n", 2 ) == FAILURE ||
+	if ( gpib_write( sr510.device, "E", 1 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -649,7 +748,7 @@ void sr510_set_sens( int Sens )
 
 	if ( Sens <= 3 )
 	{
-		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
+		if ( gpib_write( sr510.device, "E1", 2 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 					DEVICE_NAME );
@@ -659,7 +758,7 @@ void sr510_set_sens( int Sens )
 	}
 	else
 	{
-		if ( gpib_write( sr510.device, "E0\n", 3 ) == FAILURE )
+		if ( gpib_write( sr510.device, "E0", 2 ) == FAILURE )
 		{
 			eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 					DEVICE_NAME );
@@ -669,7 +768,7 @@ void sr510_set_sens( int Sens )
 
 	/* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", Sens );
+	sprintf( buffer, "G%d", Sens );
 
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
@@ -692,7 +791,7 @@ double sr510_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr510.device, "T1\n", 3 ) == FAILURE ||
+	if ( gpib_write( sr510.device, "T1", 2 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -717,7 +816,7 @@ void sr510_set_tc( int TC )
 	char buffer[10];
 
 
-	sprintf( buffer, "T1,%d\n", TC );
+	sprintf( buffer, "T1,%d", TC );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -730,7 +829,7 @@ void sr510_set_tc( int TC )
 
 	/* Recheck this in the manual !!!!!!!!!! */
 
-	if ( TC <= 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
+	if ( TC <= 4 && gpib_write( sr510.device, "T2,0", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -738,14 +837,14 @@ void sr510_set_tc( int TC )
 	}
 
 	if ( TC > 4 && TC <= 6 &&
-		 gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
+		 gpib_write( sr510.device, "T2,1", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	if ( TC > 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
+	if ( TC > 6 && gpib_write( sr510.device, "T2,2", 4 ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -766,7 +865,7 @@ double sr510_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr510.device, "P\n", 2L ) == FAILURE ||
+	if ( gpib_write( sr510.device, "P", 1 ) == FAILURE ||
 		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -793,10 +892,10 @@ double sr510_get_phase( void )
 
 double sr510_set_phase( double phase )
 {
-	char buffer[20];
+	char buffer[ 20 ];
 
 
-	sprintf( buffer, "P%.2f\n", phase );
+	sprintf( buffer, "P%.2f", phase );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
@@ -805,4 +904,37 @@ double sr510_set_phase( double phase )
 	}
 
 	return phase;
+}
+
+
+/*----------------------------------------*/
+/* Functions sets the DAC output voltage. */
+/*----------------------------------------*/
+
+static double sr510_set_dac_voltage( long channel, double voltage )
+{
+	char buffer[ 30 ];
+
+
+	/* Just some more sanity checks, should already been done by calling
+       function... */
+
+	assert( channel == 5 || channel == 6 );
+	if ( fabs( voltage ) >= 10.24 )
+	{
+		if ( voltage > 0.0 )
+			voltage = 10.24;
+		else
+			voltage = -10.24;
+	}
+
+	sprintf( buffer, "X%1ld,%f", channel, voltage );
+	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+	
+	return voltage;
 }

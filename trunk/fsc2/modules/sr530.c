@@ -3,6 +3,11 @@
 */
 
 
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+/* This device needs '\n' (0x0A) as EOS - set this correctly in `gpib.conf' */
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
 #include "fsc2.h"
 #include "gpib.h"
 
@@ -24,6 +29,7 @@ Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
+Var *lockin_set_dac( Var *v );
 
 
 /* typedefs and global variables used only in this file */
@@ -37,7 +43,9 @@ typedef struct
 	bool P;
 	int TC;
 	bool TC_warn;
+	double dac_voltage[ 2 ];
 } SR530;
+
 
 static SR530 sr530;
 
@@ -59,7 +67,7 @@ static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 
 /* declaration of all functions used only in this file */
 
-static bool lockin_init( const char *name );
+static bool sr530_init( const char *name );
 static double sr530_get_data( void );
 static double sr530_get_adc_data( long channel );
 static double sr530_get_sens( void );
@@ -68,6 +76,7 @@ static double sr530_get_tc( void );
 static void sr530_set_tc( int TC );
 static double sr530_get_phase( void );
 static double sr530_set_phase( double phase );
+static double sr530_set_dac_voltage( long channel, double voltage );
 
 
 
@@ -93,6 +102,9 @@ int sr530_init_hook( void )
 	sr530.TC = -1;               /* no time constant has to be set at the */
 	sr530.TC_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
+	for ( i = 0; i < 2; i++ )
+		sr530.dac_voltage[ i ]  = 0.0;
+
 	return 1;
 }
 
@@ -110,7 +122,7 @@ int sr530_exp_hook( void )
 
 	/* Initialize the lock-in */
 
-	if ( ! lockin_init( DEVICE_NAME ) )
+	if ( ! sr530_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
 				DEVICE_NAME );
@@ -486,6 +498,83 @@ Var *lockin_phase( Var *v )
 }
 
 
+/*-----------------------------------------------------------*/
+/* Function sets or returns the voltage at one of the 2 DAC  */
+/* ports on the backside of the lock-in amplifier. The first */
+/* argument must be the channel number, either 5 or 6, the   */
+/* second the voltage in the range between -10.24 V and      */
+/* +10.24 V. If there isn't a second argument the set DAC    */
+/* voltage is returned (which is initially set to 0 V).      */
+/*-----------------------------------------------------------*/
+
+Var *lockin_set_dac( Var *v )
+{
+	long channel;
+	double voltage;
+
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	/* First argument must be the channel number (5 or 6) */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+		eprint( WARN, "%s:%ld: %s: Floating point number used as DAC channel "
+				"number.", Fname, Lc, DEVICE_NAME );
+
+	channel = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	v = vars_pop( v );
+
+	if ( channel != 5 && channel != 6 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid lock-in DAC channel number %ld, "
+				"valid are 5 or 6.", Fname, Lc, DEVICE_NAME, channel );
+		THROW( EXCEPTION );
+	}
+
+	/* If no second argument is specified return the current DAC setting */
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, sr530.dac_voltage[ channel - 5 ] );
+
+	/* Second argument must be a voltage between -10.24 V and +10.24 V */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as DAC voltage.",
+				Fname, Lc, DEVICE_NAME );
+
+	voltage = FLOAT( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
+				"`lockin_set_dac'.", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL ) 
+				;
+	}
+
+	if ( fabs( voltage ) > 10.24 )
+	{
+		eprint( FATAL, "%s:%ld: %s: DAC voltage of %f V is out of valid "
+				"range (+/-10.24 V).", Fname, Lc, DEVICE_NAME, voltage );
+		THROW( EXCEPTION );
+	}
+
+	sr530.dac_voltage[ channel - 5 ] = voltage;
+
+	if ( TEST_RUN || I_am == PARENT)
+		return vars_push( FLOAT_VAR, voltage );
+
+	return vars_push( FLOAT_VAR, sr530_set_dac_voltage( channel, voltage ) );
+}
+
+
 /******************************************************/
 /* The following functions are only used internally ! */
 /******************************************************/
@@ -496,7 +585,7 @@ Var *lockin_phase( Var *v )
 /* it can be accessed by asking it to send its status byte.         */
 /*------------------------------------------------------------------*/
 
-bool lockin_init( const char *name )
+bool sr530_init( const char *name )
 {
 	char buffer[ 20 ];
 	long length = 20;
@@ -805,4 +894,37 @@ double sr530_set_phase( double phase )
 	}
 
 	return phase;
+}
+
+
+/*----------------------------------------*/
+/* Functions sets the DAC output voltage. */
+/*----------------------------------------*/
+
+static double sr530_set_dac_voltage( long channel, double voltage )
+{
+	char buffer[ 30 ];
+
+
+	/* Just some more sanity checks, should already been done by calling
+       function... */
+
+	assert( channel == 5 || channel == 6 );
+	if ( fabs( voltage ) >= 10.24 )
+	{
+		if ( voltage > 0.0 )
+			voltage = 10.24;
+		else
+			voltage = -10.24;
+	}
+
+	sprintf( buffer, "X%1ld,%f", channel, voltage );
+	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
+	{
+		eprint( FATAL, "%s: Can't access the lock-in amplifier.",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+	
+	return voltage;
 }

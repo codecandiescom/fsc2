@@ -38,7 +38,7 @@ void sr810_exit_hook( void );
 
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
-Var *lockin_set_dac_data( Var *v );
+Var *lockin_dac_voltage( Var *v );
 Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
@@ -64,6 +64,7 @@ typedef struct
 	bool RL;
 	long harmonic;
 	bool H;
+	double dac_voltage[ NUM_DAC_PORTS ];
 } SR810;
 
 
@@ -114,6 +115,9 @@ static double sr810_set_ref_level( double level );
 
 int sr810_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
@@ -133,6 +137,9 @@ int sr810_init_hook( void )
 	sr810.RF = UNSET;            /* no reference frequency has to be set */
 	sr810.H = UNSET;             /* no harmonics has to be set */
 	sr810.RL = UNSET;            /* no rference level has to b set */
+
+	for ( i = 0; i < NUM_DAC_PORTS; i++ )
+		sr810.dac_voltage[ i ] = 0.0;
 
 	return 1;
 }
@@ -253,18 +260,27 @@ Var *lockin_get_adc_data( Var *v )
 }
 
 
-/*------------------------------------------------------------*/
-/* Fnction sets the voltage at one of the 4 DAC ports on the  */
-/* backside of the lock-in amplifier. The first argument must */
-/* be an integers between 1 and 4, the second the voltage in  */
-/* the range between -10.5 V and +10.5 V.                     */
-/*------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/* Function sets or returns the voltage at one of the 4 DAC  */
+/* ports on the backside of the lock-in amplifier. The first */
+/* argument must be an integer between 1 and 4, the second   */
+/* the voltage in the range between -10.5 V and +10.5 V. If  */
+/* there isn't a second argument the set DAC voltage is      */
+/* returned (which is initially set to 0 V).                 */
+/*-----------------------------------------------------------*/
 
-Var *lockin_set_dac_data( Var *v )
+Var *lockin_dac_voltage( Var *v )
 {
 	long port;
 	double voltage;
 
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"`lockin_dac_voltage`.", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
 
 	/* Get and check the port number */
 
@@ -274,6 +290,8 @@ Var *lockin_set_dac_data( Var *v )
 				"number.", Fname, Lc, DEVICE_NAME );
 
 	port = v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
+	v = vars_pop( v );
+
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid DAC channel number (%ld) in "
@@ -281,6 +299,9 @@ Var *lockin_set_dac_data( Var *v )
 				"range 1-%d.", Fname, Lc, DEVICE_NAME, port, NUM_DAC_PORTS );
 		THROW( EXCEPTION );
 	}
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR, sr810.dac_voltage[ port - 1 ] );
 
 	/* Get and check the voltage */
 
@@ -294,11 +315,21 @@ Var *lockin_set_dac_data( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, 0.0 );
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of function "
+				"`lockin_set_dac`.", Fname, Lc, DEVICE_NAME );
 
-	sr810_set_dac_data( port, voltage );
-	return vars_push( FLOAT_VAR, voltage );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+	
+	sr810.dac_voltage = voltage;
+
+	if ( TEST_RUN || I_am == PARENT )
+		return vars_push( FLOAT_VAR, voltage );
+
+	return vars_push( FLOAT_VAR, sr810_set_dac_data( port, voltage ) );
 }
 
 
@@ -785,6 +816,9 @@ static bool sr810_init( const char *name )
 	if ( sr810.RL )
 		sr810_set_ref_level( sr810.ref_level );
 
+	for ( i = 0; i < NUM_DAC_PORTS; i++ )
+		sr810_set_dac_data( i + 1, sr810.dac_voltage[ i ] );
+
 	return OK;
 }
 
@@ -1055,6 +1089,9 @@ static double sr810_set_phase( double phase )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static double sr810_get_ref_freq( void )
 {
 	char buffer[ 40 ];
@@ -1109,6 +1146,9 @@ static double sr810_set_ref_freq( double freq )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static long sr810_get_ref_mode( void )
 {
 	char buffer[ 10 ];
@@ -1128,6 +1168,9 @@ static long sr810_get_ref_mode( void )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static long sr810_get_harmonic( void )
 {
 	char buffer[ 20 ];
@@ -1146,6 +1189,9 @@ static long sr810_get_harmonic( void )
 	return  T_atol( buffer );
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 static long sr810_set_harmonic( long harmonic )
 {
@@ -1178,6 +1224,9 @@ static long sr810_set_harmonic( long harmonic )
 }
 
 
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+
 static double sr810_get_ref_level( void )
 {
 	char buffer[ 20 ];
@@ -1196,6 +1245,9 @@ static double sr810_get_ref_level( void )
 	return T_atof( buffer );
 }
 
+
+/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
 
 static double sr810_set_ref_level( double level )
 {
