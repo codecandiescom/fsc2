@@ -82,10 +82,6 @@ void rb_pulser_init( void )
 	}
 	else
 	{
-		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-									   RULBUS_DELAY_RAISING_EDGE )
-			 													 != RULBUS_OK )
-			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
 
 	if ( rulbus_delay_set_output_pulse_polarity( 
@@ -94,13 +90,14 @@ void rb_pulser_init( void )
 									 RULBUS_DELAY_RAISING_EDGE ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to initialize pulser" );
 
-	/* Set for all cards (execept the card for experiment repetition time and
-	   the card for the detection pulse) the input trigger slope to trigger on
-	   raising edge */
+	/* Set for all cards (execept the card for experiment repetition time,
+	   which must remain inactive until the experiment is started, and the
+	   card for the delay for the detection pulse, which is triggered on the
+	   falling edge) the input trigger slope to trigger on raising edge */
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{
-		if ( i == ERT_DELAY || i == DET_DELAY )
+		if ( i == ERT_DELAY || i == DET_DELAY_0 )
 			continue;
 
 		if ( rulbus_delay_set_trigger( delay_card[ i ].handle,
@@ -112,9 +109,24 @@ void rb_pulser_init( void )
 	/* Set the delay card for the detection delay to trigger on the falling
 	   edge (it's connected to the GATE output of the INIT_DELAY card) */
 
-	if ( rulbus_delay_set_trigger( delay_card[ DET_DELAY ].handle,
+	if ( rulbus_delay_set_trigger( delay_card[ DET_DELAY_0 ].handle,
 								   RULBUS_DELAY_FALLING_EDGE ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
+
+	/* All cards that have a successor (execpt the ERT card, that has to
+	   wait until the pulser is "switched on") must output an end pulse */
+
+	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+	{
+		if ( i == ERT_DELAY || ( i != RF_DELAY && ! delay_card[ i ].next ) )
+			continue;
+
+		if ( rulbus_delay_set_output_pulse( delay_card[ i ].handle,
+											RULBUS_DELAY_OUTPUT_BOTH,
+											RULBUS_DELAY_END_PULSE )
+																 != RULBUS_OK )
+			rb_pulser_failure( SET, "Failure to initialize pulser" );
+	}
 
 	/* Initialize synthesizer if it's required for RF pulses */
 
@@ -249,6 +261,18 @@ void rb_pulser_run( bool state )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 		}
+
+		/* Finally get the ERT card to run by first setting the trigger slope
+		   to falling, then to raising edge, afterwards it feeds itself it's
+		   own end pulse as trigger input */
+
+		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+									   RULBUS_DELAY_FALLING_EDGE )
+			 												    != RULBUS_OK ||
+			 rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+									   RULBUS_DELAY_RAISING_EDGE )
+			 													 != RULBUS_OK )
+			rb_pulser_failure( SET, "Failure to start pulser" );
 	}
 	else                        /* stop the pulser */
 	{
@@ -283,7 +307,7 @@ void rb_pulser_delay_card_state( int handle, bool state )
 
 	if ( rulbus_delay_set_output_pulse( handle, RULBUS_DELAY_OUTPUT_BOTH,
 										type ) != RULBUS_OK )
-		rb_pulser_failure( SET, "Failure to card trigger out mode" );
+		rb_pulser_failure( SET, "Failure to set card trigger out mode" );
 
 	if ( state == STOP )
 		rb_pulser_delay_card_delay( handle, 0 );
@@ -296,7 +320,7 @@ void rb_pulser_delay_card_state( int handle, bool state )
 void rb_pulser_delay_card_delay( int handle, unsigned long delay )
 {
 	if ( rulbus_delay_set_delay( handle, delay, 1 ) != RULBUS_OK )
-		rb_pulser_failure( SET, "Failure to card delay length" );
+		rb_pulser_failure( SET, "Failure to set card delay length" );
 }
 
 

@@ -149,7 +149,7 @@ int rb_pulser_init_hook( void )
 													   delay_card + MW_DELAY_0;
 	rb_pulser.function[ PULSER_CHANNEL_RF ].delay_card = delay_card + RF_DELAY;
 	rb_pulser.function[ PULSER_CHANNEL_DET ].delay_card =
-														delay_card + DET_DELAY;
+													  delay_card + DET_DELAY_0;
 
 	return 1;
 }
@@ -442,6 +442,8 @@ Var *pulser_shift( Var *v )
 			THROW( EXCEPTION );
 		}
 
+		p->pos += p->dpos;
+
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	}
 
@@ -500,6 +502,8 @@ Var *pulser_increment( Var *v )
 				   p->num, rb_pulser_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
+
+		p->len += p->dlen;
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	}
@@ -625,6 +629,10 @@ static void rb_pulser_card_setup( void )
 	delay_card[ RF_DELAY ].name = RF_DELAY_CARD;
 	delay_card[ RF_DELAY ].prev = delay_card + INIT_DELAY;
 
-	delay_card[ DET_DELAY ].name = DET_DELAY_CARD;
-	delay_card[ DET_DELAY ].prev = delay_card + INIT_DELAY;
+	delay_card[ DET_DELAY_0 ].name = DET_DELAY_CARD_0;
+	delay_card[ DET_DELAY_0 ].prev = delay_card + INIT_DELAY;
+	delay_card[ DET_DELAY_0 ].next = delay_card + DET_DELAY_1;
+
+	delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
+	delay_card[ DET_DELAY_1 ].prev = delay_card + DET_DELAY_0;
 }

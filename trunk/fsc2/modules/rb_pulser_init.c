@@ -125,6 +125,14 @@ static void rb_pulser_basic_functions_check( void )
 	{
 		f = rb_pulser.function + i;
 
+		if ( f->num_pulses == 0 )
+		{
+			if(  f->is_declared )
+				print( WARN, "No pulses have been assigned to function "
+					   "'%s'.\n", f->name );
+			f->is_used = UNSET;
+		}
+
 		if ( ! f->is_used )
 			continue;
 
@@ -140,17 +148,6 @@ static void rb_pulser_basic_functions_check( void )
 			f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
 													   * sizeof *f->pulses );
 			f->pulses[ f->num_pulses - 1 ] = cp;
-		}
-
-		/* Check if declared functions have pulses assigned to them, if not
-		   print a warning */
-
-		if ( f->num_pulses == 0 && f->is_declared )
-		{
-			print( WARN, "No pulses have been assigned to function '%s'.\n",
-				   f->name );
-			f->is_used = UNSET;
-			continue;
 		}
 	}
 }

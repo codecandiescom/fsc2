@@ -36,7 +36,7 @@
 #include <rulbus.h>
 
 
-#define NUM_DELAY_CARDS   9
+#define NUM_DELAY_CARDS  10
 #define NUM_CLOCK_CARDS   2
 
 #define DELAY_CARD        0
@@ -53,7 +53,8 @@
 #define MW_DELAY_3        5
 #define MW_DELAY_4        6
 #define RF_DELAY          7
-#define DET_DELAY         8
+#define DET_DELAY_0       8
+#define DET_DELAY_1       9
 
 #define PRECISION         0.01
 
@@ -119,7 +120,7 @@ struct FUNCTION {
 	int num_active_pulses;
 	PULSE **pulses;             /* list of pulse pointers */
 
-	Ticks last_pulse_len;
+	double last_pulse_len;
 
 	double delay;
 	bool is_delay;

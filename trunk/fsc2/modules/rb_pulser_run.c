@@ -84,7 +84,7 @@ bool rb_pulser_update_pulses( bool flag )
 
 void rb_pulser_function_init( void )
 {
-	int i;
+	int i, j;
 	FUNCTION *f;
 
 
@@ -95,8 +95,8 @@ void rb_pulser_function_init( void )
 		if ( ! f->is_used )
 			continue;
 
-		for ( f->num_active_pulses = 0, i = 0; i < f->num_pulses; i++ )
-			if ( f->pulses[ i ]->is_active )
+		for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
+			if ( f->pulses[ j ]->is_active )
 				f->num_active_pulses++;
 
 		if ( f->num_pulses > 1 )
@@ -173,7 +173,7 @@ void rb_pulser_delay_card_setup( void )
 	PULSE *p;
 	double start, delta, shift;
 	Ticks dT;
-	int i, j;
+	int i, j, k;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -194,9 +194,9 @@ void rb_pulser_delay_card_setup( void )
 		/* Loop over all active pulses of the function (which are already
 		   ordered by start position */
 
-		for ( card = f->delay_card, i = 0; i < f->num_active_pulses; i++ )
+		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
-			p = f->pulses[ i ];
+			p = f->pulses[ j ];
 
 			/* If no cards are left for the function we have too many pulses */
 
@@ -212,7 +212,7 @@ void rb_pulser_delay_card_setup( void )
 			   to make the pulse start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||
-				 ( f->self == PULSER_CHANNEL_MW && i != 0 ) )
+				 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
 			{
 				/* Find out the first possible moment the pulse could start
 				   at */
@@ -233,16 +233,16 @@ void rb_pulser_delay_card_setup( void )
 
 				if ( delta < 0.0 )
 				{
-					if ( i == 0 )
+					if ( j == 0 )
 						print( FATAL, "Pulse #%ld of function '%s' starts too "
 							   "early.\n", p->num, f->name );
 					else
 						print( FATAL, "Pulse #%ld of function '%s' gets too "
-							   "near to pulse pulse #%ld.\n", p->num, f->name,
-							   f->pulses[ i - 1 ]->num );
+							   "near to pulse #%ld.\n", p->num, f->name,
+							   f->pulses[ j - 1 ]->num );
 					THROW( EXCEPTION );
 				}
-					   
+
 				/* Now calculate how we have to set up the card, if necessary
 				   shift the pulse position */
 
@@ -260,8 +260,8 @@ void rb_pulser_delay_card_setup( void )
 						   "can't be realized, must shift it (and following "
 						   "pulses) by %s.\n", rb_pulser_ptime( shift ) );
 
-					for ( j = i; j < f->num_active_pulses; j++ )
-						f->pulses[ j ]->pos += shift;
+					for ( k = j; j < f->num_active_pulses; k++ )
+						f->pulses[ k ]->pos += shift;
 				}
 
 				if ( card->delay != dT || ! card->was_active )
@@ -380,6 +380,7 @@ static void rb_pulser_commit( bool flag )
 			rb_pulser_write_pulses( rb_pulser.dump_file );
 		if ( rb_pulser.show_file != NULL )
 			rb_pulser_write_pulses( rb_pulser.show_file );
+		return;
 	}
 
 	for ( card = delay_card + INIT_DELAY, i = 0; i < NUM_DELAY_CARDS;
@@ -424,7 +425,7 @@ static void rb_pulser_rf_pulse( void )
 		THROW( EXCEPTION );
 	}
 
-	vars_push( FLOAT_VAR, p->len * rb_pulser.timebase );
+	vars_push( FLOAT_VAR, f->last_pulse_len );
 	vars_pop( func_call( Func_ptr ) );
 }
 
