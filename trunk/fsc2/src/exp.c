@@ -6,7 +6,7 @@
 #include <signal.h>
 
 
-/* number of program token structures to be allocated as a chunk */
+/* Number of program token structures are to be allocated for as a chunk */
 
 #define PRG_CHUNK_SIZE 128
 
@@ -21,7 +21,7 @@ Token_Val exp_val;                        /* exported to exp_lexer.flex */
 
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
-extern Token_Val exp_runlval;             /* from exp__run_parser.y */
+extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern char *Fname;
@@ -69,11 +69,11 @@ void store_exp( FILE *in )
 	char *cur_Fname = NULL;
 
 
-	/* set input file */
+	/* Set input file */
 
 	expin = in;
 
-	/* Keep the lexer happy... */
+	/* Let's keep the lexer happy... */
 
 	if ( is_restart )
 	    exprestart( expin );
@@ -82,7 +82,7 @@ void store_exp( FILE *in )
 
 	prg_token = NULL;
 
-	/* get and store all tokens */
+	/* Get and store all tokens */
 
 	while ( ( ret = explex( ) ) != 0 )
 	{
@@ -155,7 +155,7 @@ void store_exp( FILE *in )
 		prg_length++;
 	}
 
-	/* check and initialize if's and loops */
+	/* Check and initialize if's and loops */
 
 	loop_setup( );
 }
@@ -502,7 +502,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 /* Function does the test run of the program. */
 /*--------------------------------------------*/
 
-void exp_run( void )
+void exp_test_run( void )
 {
 	Prg_Token *cur;
 	long old_FLL = File_List_Len;
@@ -534,7 +534,6 @@ void exp_run( void )
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
-
 			if ( ! just_testing && prg_length % 8 == 0 )
 				fl_check_only_forms( );
 
@@ -644,7 +643,7 @@ void exp_run( void )
 
 /*-------------------------------------------------------------------*/
 /* Routine works as a kind of virtual lexer by simply passing the    */
-/* parser the tokens we got from the lexer in store_exp(). The only  */
+/* parser the tokens we stored while running store_exp(). The only   */
 /* exception are tokens dealing with flow control - for most of them */
 /* the parser gets signaled an end of file, only the `}' is handled  */
 /* by the parser itself (but also as an EOF).                        */

@@ -103,7 +103,7 @@ typedef struct PT_ {
 
 void store_exp( FILE *in );
 void forget_prg( void );
-void exp_run( void );
+void exp_test_run( void );
 int exp_runlex( void );
 int conditionlex( void );
 bool test_condition( Prg_Token *cur );

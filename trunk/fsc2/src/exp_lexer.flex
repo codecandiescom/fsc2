@@ -306,7 +306,7 @@ int experiment_parser( FILE *in )
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
 	store_exp( in );
-	exp_run( );
+	exp_test_run( );
 
 	if ( Exp_Next_Section != NO_SECTION )
 	{
