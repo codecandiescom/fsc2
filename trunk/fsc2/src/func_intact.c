@@ -2269,6 +2269,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
+			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
 			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 			break;
@@ -2282,6 +2284,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
+			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
 			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
 			fl_set_input( io->self, buf );
 			break;
