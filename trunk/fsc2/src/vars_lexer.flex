@@ -80,6 +80,8 @@ L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 
+CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
+
 WS          [\n \t]+
 
 
@@ -197,6 +199,12 @@ WS          [\n \t]+
 				varstext[ strlen( varstext ) - 1 ] = '\0';
 				varslval.sptr = varstext + 1;
 				return STR_TOKEN;
+			}
+
+{CTRL}      {
+				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
+						"in the VARIABLES section.", Fname, Lc );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of function, variable and array identifiers */

@@ -89,6 +89,9 @@ PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 
 CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN))
 
+
+CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
+
 WS          [\n \t]+
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
@@ -287,6 +290,12 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 
 {CHT}       return preps_get_channel_name( );
+
+{CTRL}      {
+				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
+						"in the PREPARATIONS section.", Fname, Lc );
+				THROW( EXCEPTION );
+			}
 
 			/* handling of function, variable and array identifiers */
 {IDENT}     {

@@ -125,6 +125,8 @@ PSD         PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?):?
 
 GP          G(RACE)?_?P(ERIOD)?:?
 
+CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
+
 WS          [\n=: ]+
 
 
@@ -354,6 +356,12 @@ WS          [\n=: ]+
 				assigntext[ strlen( assigntext ) - 1 ] = '\0';
 				assignlval.sptr = assigntext + 1;
 				return STR_TOKEN;
+			}
+
+{CTRL}      {
+				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
+						"in the ASSIGNMENTS section.", Fname, Lc );
+				THROW( EXCEPTION );
 			}
 
 			/* handling of function, variable and array identifiers */
