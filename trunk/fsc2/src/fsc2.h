@@ -13,19 +13,10 @@
 #include <ctype.h>
 
 
-/* defines for several things already needed in the programs header files */
-
-
-/* make bool synonymous to unsigned char */
-
-typedef  unsigned char  bool;
-
-#define MAX_PHASE_SEQ_LEN  12    /* maximum length of phase sequence */
-
 
 /* inclusion of programs own header files */
 
-
+#include "global.h"                    /* must be the very first one ! */
 #include "exceptions.h"
 #include "T.h"
 #include "util.h"
@@ -37,61 +28,6 @@ typedef  unsigned char  bool;
 #include "ppcheck.h"
 
 
-#define	FAIL  ( bool ) 0         /* never ever change these ! */
-#define UNSET ( bool ) 0
-#define OK    ( bool ) 1
-#define SET   ( bool ) 1
-
-
-
-enum {                           /* error severity types */
-	   FATAL = 0,
-	   SEVERE,
-	   WARN,
-	   NO_ERROR
-};
-
-
-enum {                           /* all the different section types */
-	  NO_SECTION = ( int ) OK + 1,
-	  ASSIGNMENTS_SECTION,
-	  DEFAULTS_SECTION,
-	  VARIABLES_SECTION,
-	  PHASES_SECTION,
-	  PREPARATIONS_SECTION,
-	  EXPERIMENT_SECTION
-};
-
-enum {
-	  ACCESS_RESTRICTED,
-	  ACCESS_ALL_SECTIONS
-};
-
-
-enum {                           /* phase types for phase cycling */
-	   PHASE_PLUS_X,
-	   PHASE_MINUS_X,
-	   PHASE_PLUS_Y,
-	   PHASE_MINUS_Y
-};
-
-enum {                           /* acquisition types for phase cycling */
-	   ACQ_PLUS,
-	   ACQ_MINUS
-};
-
-
-typedef struct
-{
-	/* global compilation error states (FATAL, SEVERE and WARN) */
-
-	bool error[ 3 ];
-
-	/* indicates which sections have already been handled to detect
-	   multiple instances of the same section */
-
-	bool sections[ EXPERIMENT_SECTION + 1 ];
-} Compilation;
 
 
 /* The diverse lexers */
