@@ -14,42 +14,45 @@
    parent, knowing exactly what kind of data to expect.
 
    The first problem to be addressed is how to make the parent aware of data
-   send by the child. This is handled by two signals, DO_SEND and NEW_DATA.
-   The DO_SEND signal is raised by the parent when it is prepared to accept
-   data. The child always has to wait for this signal before it may send any
-   data. Then it posts its message and raises the NEW_DATA signal. Now the
-   parent has to accept the data and when it is done it again raises the
-   DO_SEND signal. Using the DO_SEND signal avoids flooding the parent with
-   too many requests and data.
+   or requests send by the child. This is handled by two signals, DO_SEND and
+   NEW_DATA. The DO_SEND signal is raised by the parent when it is prepared to
+   accept data. The child always has to wait for this signal before it may
+   send any data or requests. Then it posts its message and raises the
+   NEW_DATA signal. Now the parent has to accept the data and when it's done
+   it again raises the DO_SEND signal. Using the DO_SEND signal avoids
+   flooding the parent with too many requests and data.
 
-   The request type of messages is easy to implement - a simple pair of
-   pipes will do. All needed beside is a protocoll for the differerent types
-   of requests. Since requests are not real time critical the parent does
-   not have to reply immediately and the child waits until the parent honors
-   the request. Thus the way requests are handled by the parent is simple:
-   The parent catches the signal and triggers an invisible button which in
-   turn leads to the buttons handler function being called by the main loop
-   of the program as for every other event. Then the parent reads the pipe
-   and replies by sending the answer to the request via another pipe. No
-   synchronization is needed since the child will be blocked while reading
-   the reply pipe until the parent finishes writing its answer to the pipe.
+   The communication path for request type of messages is easy to implement -
+   a simple pair of pipes will do. All needed beside is a protocoll for the
+   differerent types of requests. Since requests are not really time critical
+   the parent does not have to reply immediately and the child waits until the
+   parent honors the request. Thus the way requests are handled by the parent
+   is as follows: The parent catches the NEW_DATA signal and triggers an
+   invisible button which in turn leads to the button handler function being
+   called by the main loop of the program as for every other event. Then the
+   parent reads the pipe and replies by sending the answer to the request via
+   another pipe. No synchronization is needed since the child will be blocked
+   while reading the reply pipe until the parent finishes writing its answer
+   to the pipe. The parent will also have to send a DO_SEND signal to allow
+   the child to send further data or requests.
 
    The implementation for the exchange of data is a bit more complicated. Here
    the child should not be forced to wait for the parent process to finally
-   react to the (self-created) event since this may take quite some time while
+   react to a (self-created) event since this may take quite some time while
    the parent is busy updating the display or is even waiting while the user
    resizes one of the windows. On the other hand, the parent can't store the
    data already in the handler for the NEW_DATA signal, because it would have
-   to call malloc() which is, unfortunately, not reentrant. Thus, the
+   to call malloc(), which is, unfortunately, not reentrant. Thus, the
    alternative is to use shared memory segments.
 
-   Thus, when the child process needs to send data to the parent it gets a
-   new shared mory segment, copies the data into the segment and then sends
-   the parent the identifier of the memory segment. Within the NEW_DATA
-   signal handler all the parent does is to store this identifier and then
-   it raises the DO_SEND immediately. This way the child can continue with
-   the measurement while the parent has time to handle the new data whenever
-   it is ready to do so.
+   Thus, when the child process needs to send data to the parent it gets a new
+   shared memory segment, copies the data into the segment and then sends the
+   parent just the identifier of the memory segment. Within the NEW_DATA
+   signal handler all the parent does is to store this identifier in a message
+   queue (that should have at least as many slots as there are shared memory
+   segments, see below) and then to raises the DO_SEND immediately. This way
+   the child can continue with the measurement while the parent has time to
+   handle the new data whenever it is ready to do so.
 
    How does the child send memory segment identifiers to the parent? This
    also is done via a shared memory segment created before the child is
@@ -88,7 +91,7 @@
 
    The only problem still unaddressed is data sets exceeding the maximum
    size of a shared memory segment. But this limit seems to be rather high
-   (32768 kB!), so I hope this never going to happen...  If it should ever
+   (32768 kB!), so I hope this is never going to happen...  If it should ever
    hapen this will result in the measurement getting stopped with an
    `internal communication error'.
 
@@ -98,9 +101,8 @@
    them. To make it simpler to find and then remove orphaned shared memory
    segments, i.e. segments that no process is interested in anymore, each
    memory segment allocated by fsc2 is labeled by the four byte magic number
-   'fsc2' at its very start. This makes it easier to write a utility that
-   checks all shared memory segments of the system and deletes only the ones
-   which were created by fsc2.
+   'fsc2' at its very start. Using this label at the next start of fsc2 all
+   orphaned segments can be identified and released.
 
 */
 
