@@ -50,6 +50,7 @@ measure_field, 0, EXP;          // return field value (ER035M_SA / ER035M_SAS)
 
 // Functions exported by the pulser drivers (DG2020)
 
+pulser_state, -1, ALL;          // switches pulser on/off
 pulser_update, 0, EXP;          // commits changes
 pulser_shift, -1, EXP;          // shift pulse positions
 pulser_increment, -1, EXP;      // change pulse lengths
@@ -88,10 +89,10 @@ digitizer_get_curve, -1, EXP;
 digitizer_get_curve_fast, -1, EXP;
 digitizer_get_amplitude, -1, EXP;
 digitizer_get_amplitude_fast, -1, EXP;
+digitizer_lock_keyboard, -1, EXP;       // Lock or unlock the keyboard
 
 digitizer_get_channel_number, 1, ALL;   // only for internal use !
 digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
-digitizer_lock_keyboard, -1, EXP;       // Lock or unlock the keyboard
 
 
 // functions exported by the rf synthesizer (HP8647A)

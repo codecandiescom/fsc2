@@ -17,6 +17,7 @@ int hfs9000_end_of_exp_hook( void );
 void hfs9000_exit_hook( void );
 
 
+Var *pulser_state( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );

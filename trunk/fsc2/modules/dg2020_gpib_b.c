@@ -162,7 +162,6 @@ bool dg2020_init( const char *name )
 
 	if ( gpib_write( dg2020.device, "STOP\n", 5 ) == FAILURE )
 		dg2020_gpib_failure( );
-	dg2020.is_running = 0;
 
 	/* Switch off remote command debugging function */
 
@@ -291,9 +290,6 @@ bool dg2020_init( const char *name )
 
 bool dg2020_run( bool flag )
 {
-	if ( flag == dg2020.is_running )          // if in requested state
-		return OK;
-
 	if ( gpib_write( dg2020.device, flag ? "*WAI;STAR\n": "*WAI;STOP\n", 10 )
 		 == FAILURE )
 		dg2020_gpib_failure( );

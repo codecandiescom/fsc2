@@ -40,7 +40,7 @@ int hfs9000_init_hook( void )
 	   pointers for the functions that will get called from pulser.c */
 
 	hfs9000.needs_update = UNSET;
-	hfs9000.is_running = UNSET;
+	hfs9000.is_running = SET;
 
 	pulser_struct.set_timebase = hfs9000_store_timebase;
 
@@ -205,7 +205,7 @@ int hfs9000_exp_hook( void )
 		if ( hfs9000.channel[ i ].function->is_used )
 			hfs9000_set_pulses( hfs9000.channel[ i ].function );
 
-	hfs9000_run( START );
+	hfs9000_run( hfs9000.is_running );
 
 	return 1;
 }
@@ -251,6 +251,32 @@ void hfs9000_exit_hook( void )
 		if ( hfs9000.channel[ i ].function != NULL &&
 			 hfs9000.channel[ i ].function->pulses != NULL )
 			T_free( hfs9000.channel[ i ].function->pulses );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_state( Var *v )
+{
+	bool state;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, ( long ) hfs9000.is_running );
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		state = v->val.lval != 0 ? SET : UNSET;
+	else
+		state = v->val.dval != 0.0 ? SET : UNSET;
+
+	if ( I_am == PARENT || TEST_RUN )
+		return vars_push( INT_VAR, ( long ) ( hfs9000.is_running = state ) );
+
+	hfs9000_run( state );
+	return vars_push( INT_VAR, ( long ) hfs9000.is_running );
 }
 
 

@@ -44,7 +44,7 @@ int dg2020_f_init_hook( void )
 	   pulser.c */
 
 	dg2020.needs_update = UNSET;
-	dg2020.is_running = UNSET;
+	dg2020.is_running = SET;
 
 	pulser_struct.set_timebase = dg2020_store_timebase;
 
@@ -240,12 +240,7 @@ int dg2020_f_exp_hook( void )
 	   update mode) and than switch the pulser into run mode */
 
 	dg2020_update_data( );
-	if ( ! dg2020_run( START ) )
-	{
-		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.\n",
-				Fname, Lc, pulser_struct.name );
-		THROW( EXCEPTION );
-	}
+	dg2020_run( dg2020.is_running );
 
 	return 1;
 }
@@ -259,6 +254,7 @@ int dg2020_f_end_of_exp_hook( void )
 	if ( ! dg2020_is_needed )
 		return 1;
 
+	dg2020_run( STOP );
     gpib_local( dg2020.device );
 
 	return 1;
@@ -290,6 +286,32 @@ void dg2020_f_exit_hook( void )
 
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *pulser_state( Var *v )
+{
+	bool state;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, ( long ) dg2020.is_running );
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		state = v->val.lval != 0 ? SET : UNSET;
+	else
+		state = v->val.dval != 0.0 ? SET : UNSET;
+
+	if ( I_am == PARENT || TEST_RUN )
+		return vars_push( INT_VAR, ( long ) ( dg2020.is_running = state ) );
+
+	dg2020_run( state );
+	return vars_push( INT_VAR, ( long ) dg2020.is_running );
+}
 
 
 /*----------------------------------------------------*/

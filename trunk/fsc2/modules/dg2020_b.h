@@ -17,6 +17,7 @@ int dg2020_b_end_of_exp_hook( void );
 void dg2020_b_exit_hook( void );
 
 
+Var *pulser_state( Var *v );
 Var *pulser_update( Var *v );
 Var *pulser_cw_mode( Var *v );
 Var *pulser_shift( Var *v );

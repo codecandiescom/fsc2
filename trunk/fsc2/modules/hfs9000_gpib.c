@@ -308,9 +308,6 @@ bool hfs9000_run( bool flag )
 	char cmd[ 100 ];
 
 
-	if ( flag == hfs9000.is_running )          // if already in requested state
-		return OK;
-
 	sprintf( cmd, "*WAI;:TBAS:RUN %s", flag ? "ON" : "OFF" );
 
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
