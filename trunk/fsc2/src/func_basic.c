@@ -2501,7 +2501,7 @@ Var *f_slice( Var *v )
 			if ( v->next->next->next != NULL )
 				print( WARN, "Too many arguments, discarding superfluous "
 					   "arguments.\n",
-					   v->->next->next->nextnext != NULL ? "s" : "" );
+					   v->->next->next->next->next != NULL ? "s" : "" );
 		}
 		else
 			len = v->len - start;
