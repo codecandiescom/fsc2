@@ -52,7 +52,13 @@ endef
 
 
 .SUFFIXES:
-.PHONY: all clean distclean
+.PHONY: all install clean distclean                     \
+        install-pion.anorg.chemie.uni-frankfurt.de      \
+		install-crowley.physik.fu-berlin.de             \
+		install-moebi.physik.fu-berlin.de               \
+		install-door.physik.fu-berlin.de                \
+		install-isaak.physik.fu-berlin.de               \
+		install-crowley.none
 
 
 all: $(addsuffix .so,$(comp_modules)) $(simp_modules:.c=.so)
