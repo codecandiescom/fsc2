@@ -93,7 +93,7 @@ fsc2: $(objects) $(header)
 mods: $(modules:.c=.so)
 
 %.so: %.c $(header)
-	$(CC) $(CFLAGS) -c -fPIC -DPIC $< -o $*.lo
+	$(CC) $(CFLAGS) -c -fPIC $< -o $*.lo
 	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
 	chmod 644 $@
 
