@@ -673,6 +673,7 @@ Var *digitizer_timebase( Var *v )
 
 	too_many_arguments( v );
 
+	tds_tmpl.timebase = tb[ TB ];
 	tds_tmpl.is_timebase = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
