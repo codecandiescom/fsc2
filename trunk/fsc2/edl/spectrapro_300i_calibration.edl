@@ -3,17 +3,33 @@
   /* Acton SpectraPro 300i monochromator and the Roper Scientific  */
   /* Spec-10 CCD camera.                                           */
   /*                                                               */
-  /* The script tries to determine the values of the pixel offset  */
-  /* from the center (due to misalignments between monochromator   */
-  /* and the CCD chip), the inclusion angle and the focal length   */
-  /* of the monochromator and the angle the CCD chip is out of     */
-  /* the focal plane.                                              */
+  /* The script tries to determine the offset angle and the factor */
+  /* for setting the correct center frequency of the monochromator */
+  /* as well as the inclusion angle, the focal length the angle    */
+  /* the CCD chip is out of the focal plane. These data are        */
+  /* written to file to read in in order to allow the display of   */
+  /* a well-calibrated wavelength scale.                           */
   /*                                                               */
   /* A calibration is done in several steps:                       */
   /* 1. Select the grating for which the calibration is to be done */
-  /* 2. Monochromator is set to 0 nm. Now adjust the pixel offset  */
-  /* so that the 0th order maximum is exactly at the zero position */
-  /*    of the scale                                               */
+  /* 2. Monochromator is set to 0 nm. On clicking on the button    */
+  /*    labeled "Calibrate offset" the program automatically tries */
+  /*    to determine the optimum setting for the offset. If the    */
+  /*    0th order line afterwards is at the center position you    */
+  /*    can continue, otherwise repeat the procedure. When you are */
+  /*    satisfied with the result press the "Continue" button      */
+  /* 3. In the input field labeled "Reference wavelength" enter    */
+  /*    wavelength of a wellknown and strong single line in the    */
+  /*    spectrum. The monochromators wavelength will now be set to */
+  /*    this wavelength. In the "Line position" input field enter  */
+  /*    the wavelength where it appears in the spectrum (you may   */
+  /*    use the "Peak find" button to improve the input value).    */
+  /*    then press the "Accept position" button. The monochromator */
+  /*    will now move the line a bit. Repeat the above procedure.  */
+  /*    The line should now be shifted to the correct position on  */
+  /*    wavelength scale. If the new position isn't correct yet    */
+  /*    repeat the above procedure. When satisfied press the       */
+  /*    "Continue" button.                                         */
   /* 3. Select the center wavelengths so that a well known line is */
   /*    once at the left side of the display and once at the right */
   /*    side. Repeat this for at least 2 calibration lines (to get */
@@ -25,8 +41,8 @@
   /*    to calculate the calibration parameters. The calculated    */
   /*    parameters are displayed when at least 4 data sets have    */
   /*    been entered.                                              */
-  /* 4. Repeat the above procedure until calibrations for all      */
-  /*    gratings.                                                  */
+  /* 4. Repeat the above procedure until the calibrations for all  */
+  /*    gratings is done.                                          */
   /* 5. When the script gets stopped by clicking on the "Stop"     */
   /*    select a file for writing out the calibration parameter.   */
   /*    The default extension for the file is ".calib".            */
@@ -82,9 +98,9 @@ State = 0;                /* state the program is currently in:
 W[ 2 ];                   /* with and height of CCD chip */
 CG = 1;                   /* number of current grating */
 GN[ NUM_GRATINGS ],       /* grating buttons in first form */
-LW,
-CP,
-cp0,
+LW,                       /* half-range for peak finding */
+CP,                       /* center position from maximum search */
+cp0,                      /* results of peak findings */
 cp1,
 DO,                       /* Execute button */
 GO,                       /* Continue etc. button */
@@ -264,7 +280,6 @@ FOREVER
 		DO = button_create( "NORMAL_BUTTON", "Calibrate offset" );
 		GO = button_create( "NORMAL_BUTTON", "Continue" );
 		hide_toolbox( 0 );
-		State = 2;
 
 		State = 2;
 		NEXT;
@@ -405,13 +420,10 @@ FOREVER
 		   for adjusting the grating rotation parameter. */
 
 		IF button_state( GO ) {
-
 			io[ CG ] = io_new;
 
 			hide_toolbox( 1 );
-			button_delete( GO );
-			button_delete( DO );
-			output_delete( LP );
+			object_delete( GO, DO, LP );
 
 			CWL = input_create( "FLOAT_INPUT", 0.0,
 								"Reference wavelength [nm]" );
@@ -432,6 +444,11 @@ FOREVER
 			change_label_1d( "Wavelength [nm]" );
 
 			clear_marker_1d( );
+
+			hide_toolbox( 0 );
+
+			State = 3;
+			NEXT;
 		}
 	}
 
@@ -473,6 +490,8 @@ FOREVER
 			CWL_is_set = 1;
 			clear_marker_1d( );
 			draw_marker_1d( round( lp ) );
+
+			ig_new = ig[ CG ];
 
 			CWL_is_set = 1;
 			NEXT;
@@ -548,8 +567,7 @@ FOREVER
 				input_value( LP, 0.0 );
 			}
 
-			IF ( ig_new == ig[ CG ] )
-			{
+			IF abs( ig_new - ig[ CG ] ) < 1.0e-9 {
 				cp0 = input_value( LP );
 				ig_new = ig[ CG ] + 0.2 + 0.1 * ( random( ) - 0.5 ); 
 				monochromator_init_adjust( CG, ig_new );
@@ -559,7 +577,7 @@ FOREVER
 				ig[ CG ] -=   ( cp0 - 0.5 * ( W[ 1 ] - 1 ) )
 							* ( io_new - ig[ CG ] ) / ( cp1 - cp0 );
 				monochromator_init_adjust( CG, ig[ CL ] );
-				ig_new = ig[ CG ];
+				ig[ CG ] = ig_new;
 				clear_marker_1d( );
 			}
 		}
@@ -568,6 +586,21 @@ FOREVER
 		   for adjusting the dispersion properties of the grating. */
 
 		IF button_state( GO ) {
+			IF abs( ig_new - ig[ CG ] ) > 1.0e-9 {
+				ig_new = ig[ CG ];
+			}
+
+			hide_toolbox( 1 );
+			object_delete( GO, DO, CL, LP, CWL );
+
+			LP  = input_create( "FLOAT_INPUT", 0.0, "Line position [nm]" );
+			lp  = 0.0;
+
+			CL = button_create( "NORMAL_BUTTON", "Find peak" );
+			DO = button_create( "NORMAL_BUTTON", "Accept position" );
+			GO = button_create( "NORMAL_BUTTON", "Continue" );
+
+
 			CWL = input_create( "FLOAT_INPUT", 0.0, "Center wavelength [nm]" );
 			cwl = 0.0;
 
@@ -597,13 +630,13 @@ FOREVER
 				px = slice( px, 1, 1 );
 			}
 
-			State = 3;
+			State = 4;
 		}
 	}
 
 /***************************************************************************/
 /*                                                                         */
-/*                            STAGE 5                                      */
+/*                            STAGE 4                                      */
 /*                                                                         */
 /***************************************************************************/
 
@@ -657,6 +690,39 @@ FOREVER
 			lwl = new_val;
 		}
 
+		/* Deal with the user pressing the "Find peak" button *
+
+		IF input_state( CL )
+		{
+			cp0 = input_value( LP );
+			cp0 = ( new_val * 1 nm - scale[ 1 ] ) / scale[ 2 ] + 1;
+
+			IF round( cp0 - LW ) < 1 | round( cp0 + LW ) > W[ 1 ] {
+				show_message( "Line seems to be too near to the edge.\n" );
+				NEXT;
+			}
+
+			cp0 = find_peak( slice( Spec, cp0 - LW, 2 * LW + 1 ) )
+				  + cp0 - LW - 1;
+
+			IF cp0 < 0 {
+				show_message( "Can't find a line.\n" );
+				NEXT;
+			}
+
+			IF round( cp0 ) < 1 | round( cp0 + LW ) > W[ 1 ] {
+				show_message( "Line seems to be too near to the edge.\n" );
+				NEXT;
+			}
+
+			print( "Found peak at #\n", cp0 );
+
+			draw_marker_1d( round( cp0 ) );
+			output_value( LP, (
+						  ( cp0 - 1 ) * scale[ 2 ] + scale[ 1 ] ) / 1 nm );
+			lp = cp0 - 0.5 * ( W[ 1 ] - 1 );
+		}
+
 		/* Deal with changes of the line position - the value must be within
 		   the currently displayed wavelength range. */
 
@@ -708,8 +774,8 @@ FOREVER
 			   this is the fourth data set the output fields need to be
 			   created. */
 
-			IF ( Count[ CG ] >= 4 )
-			{
+			IF Count[ CG ] >= 4 {
+
 				calib[ CG ] = monochromator_calibration( CG, l, lc, M, px );
 
 				/* Change the x-axis scale to reflect the new calibration. */
@@ -795,7 +861,7 @@ FOREVER
 				fl = fl_def;
 				da = da_def;
 
-				monochromator_set_calibration( CG, io[ CG ],ig[ CG ],
+				monochromator_set_calibration( CG, io[ CG ], ig[ CG ],
 											   ia, fl, da );
 				scale = monochromator_wavelength_axis( );
 				change_scale_1d( scale[ 1 ] / 1 nm, scale[ 2 ] / 1 nm );
@@ -839,12 +905,11 @@ FOREVER
 		IF button_state( DONE ) {
 			print( "\n" );
 			hide_toolbox( 1 );
-			button_delete( DONE );
+			object_delete( DONE, RESET_ALL, RESET_LAST,
+						   ADD, LP, DFO, LWL, CWL );
 			IF Count[ CG ] >= 4 {
 				output_delete( DA, FL, IA );
 			}
-			button_delete( RESET_ALL, RESET_LAST, ADD );
-			input_delete( LP, DFO, LWL, CWL );
 			hide_toolbox( 0 );
 			State = 0;
 		}
