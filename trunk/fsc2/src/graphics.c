@@ -54,21 +54,26 @@ void start_graphics( void )
 	if ( G.dim == 2 )
 		cut_form = create_form_cut( );
 
-	/* They still need some modifications... */
+	/* They still need some modifications - first set the pixmaps and
+	   help texts for both the buttons */
 
 	pixmap_file = get_string( strlen( auxdir ) + strlen( "/undo.xpm" ) );
 	strcpy( pixmap_file, auxdir );
 	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "undo.xpm" );
-    fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
-	fl_set_object_helper( run_form->undo_button,
-						  "Undo last rescaling operation" );
-	if ( G.dim == 2 )
+
+	if ( access( pixmap_file, R_OK ) == 0 )
 	{
-		fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
-		fl_set_object_helper( cut_form->cut_undo_button,
+		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
+		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
+		if ( G.dim == 2 )
+		{
+			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
+			fl_set_object_helper( cut_form->cut_undo_button,
+								  "Undo last rescaling operation" );
+		}
 	}
 	T_free( pixmap_file );
 
@@ -77,12 +82,16 @@ void start_graphics( void )
 	if ( auxdir[ strlen( auxdir ) - 1 ] != '/' )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "printer.xpm" );
-    fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
-	fl_set_object_helper( run_form->print_button, "Print window" );
-	if ( G.dim == 2 )
+	if ( access( pixmap_file, R_OK ) == 0 )
 	{
-		fl_set_pixmapbutton_file( cut_form->cut_print_button, pixmap_file );
-		fl_set_object_helper( cut_form->cut_print_button, "Print window" );
+		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
+		fl_set_object_helper( run_form->print_button, "Print window" );
+		if ( G.dim == 2 )
+		{
+			fl_set_pixmapbutton_file( cut_form->cut_print_button,
+									  pixmap_file );
+			fl_set_object_helper( cut_form->cut_print_button, "Print window" );
+		}
 	}
 	T_free( pixmap_file );
 
@@ -201,6 +210,7 @@ void start_graphics( void )
 	{
 #if ( SIZE == HI_RES )
 		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-14-*" );
+
 		if ( G.font == NULL )
 			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-14" );
 
@@ -212,6 +222,7 @@ void start_graphics( void )
 						  &font_prop );
 #else
 		G.font = XLoadQueryFont( G.d, "*-lucida-bold-r-normal-sans-10-*" );
+
 		if ( G.font == NULL )
 			G.font = XLoadQueryFont( G.d, "lucidasanstypewriter-10" );
 
@@ -309,8 +320,8 @@ static void G_struct_init( void )
 	if ( first_time )
 		create_colors( );
 
-	/* Define colours for the curves (in principal this should be made
-       configurable by the user) */
+	/* Define colours for the curves (in principal, this should be made
+       user-configurable...) */
 
 	G.colors[ 0 ] = FL_TOMATO;
 	G.colors[ 1 ] = FL_GREEN;
@@ -346,8 +357,10 @@ static void G_init_curves_1d( void )
 {
 	int i, j;
 	Curve_1d *cv;
-	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
+	unsigned int depth;
 
+
+	depth = fl_get_canvas_depth( G.canvas.obj );
 
 	fl_set_cursor_color( G.cur_1, FL_RED, FL_WHITE );
 	fl_set_cursor_color( G.cur_2, FL_RED, FL_WHITE );
@@ -442,8 +455,10 @@ static void G_init_curves_2d( void )
 	int i, j;
 	Curve_2d *cv;
 	Scaled_Point *sp;
-	unsigned int depth = fl_get_canvas_depth( G.canvas.obj );
+	unsigned int depth;
 
+
+	depth = fl_get_canvas_depth( G.canvas.obj );
 
 	fl_set_cursor_color( G.cur_1, FL_BLACK, FL_WHITE );
 	fl_set_cursor_color( G.cur_2, FL_BLACK, FL_WHITE );
