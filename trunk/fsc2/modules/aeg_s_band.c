@@ -388,7 +388,14 @@ Var *sweep_up( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`sweep_up'.\n", Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) )
+			;
+	}
 
 	if ( ! magnet.is_field_step )
 	{
@@ -399,7 +406,7 @@ Var *sweep_up( Var *v )
 
 	/* Check that new field value is still within bounds */
 
-	aeg_s_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
+	aeg_x_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
 	if ( err_flag )
 		return vars_push( FLOAT_VAR, magnet.act_field );
 
@@ -408,11 +415,9 @@ Var *sweep_up( Var *v )
 		magnet_sweep( 1 );
 		return vars_push( FLOAT_VAR, magnet.act_field );
 	}
-	else
-	{
-		magnet.target_field += magnet.field_step;
-		return vars_push( FLOAT_VAR, magnet.target_field );
-	}
+
+	magnet.target_field += magnet.field_step;
+	return vars_push( FLOAT_VAR, magnet.target_field );
 }
 
 
@@ -424,7 +429,14 @@ Var *sweep_down( Var *v )
 	bool err_flag = UNSET;
 
 
-	v = v;
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`sweep_down'.\n", Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) )
+			;
+	}
 
 	if ( ! magnet.is_field_step )
 	{
@@ -444,11 +456,9 @@ Var *sweep_down( Var *v )
 		magnet_sweep( -1 );
 		return vars_push( FLOAT_VAR, magnet.act_field );
 	}
-	else
-	{
-		magnet.target_field -= magnet.field_step;
-		return vars_push( FLOAT_VAR, magnet.target_field );
-	}
+
+	magnet.target_field -= magnet.field_step;
+	return vars_push( FLOAT_VAR, magnet.target_field );
 }
 
 
@@ -554,6 +564,8 @@ static double aeg_s_band_field_check( double field, bool *err_flag )
 				THROW( EXCEPTION );
 		}
 	}
+
+	return field;
 }
 
 

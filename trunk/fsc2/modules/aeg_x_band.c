@@ -39,6 +39,7 @@ Var *reset_field( Var *v );
 
 /* Locally used functions */
 
+static double aeg_x_band_field_check( double field, bool *err_flag );
 static bool magnet_init( void );
 static bool magnet_goto_field( double field );
 static bool magnet_goto_field_rec( double field, int rec );
@@ -300,6 +301,9 @@ void aeg_x_band_exit_hook( void )
 
 Var *magnet_setup( Var *v )
 {
+	bool err_flag = UNSET;
+
+
 	/* check that both variables are reasonable */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -312,6 +316,11 @@ Var *magnet_setup( Var *v )
 		eprint( WARN, "%s:%ld: %s: Integer value used for field step width.\n",
 				Fname, Lc, DEVICE_NAME );
 
+	/* Check that new field value is still within bounds */
+
+	aeg_x_band_field_check( VALUE( v ), &err_flag );
+	if ( err_flag )
+		THROW( EXCEPTION );
 
 	if ( VALUE( v->next ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
@@ -353,55 +362,17 @@ Var *magnet_fast_init( Var *v )
 Var *set_field( Var *v )
 {
 	double field;
+	bool err_flag = UNSET;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
 				Fname, Lc, DEVICE_NAME );
-	field = VALUE( v );
 
-	if ( exist_device( "er035m" ) )
-	{
-		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
-					DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
-					DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	/* Check the new field value and reduce value if necessary */
 
-	if ( exist_device( "bh15" ) )
-	{
-		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"BH15 field controller, minimum is %d G.\n", Fname, Lc,
-					DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
-			THROW( EXCEPTION );
-		}
-        
-		if ( magnet.field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
-		{
-			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"BH15 field controller, maximum is %d G.\n", Fname, Lc,
-					DEVICE_NAME, VALUE( v ),
-					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
-			THROW( EXCEPTION );
-		}
-	}
+	field = aeg_x_band_field_check( VALUE( v ), &err_flag );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
@@ -430,8 +401,17 @@ Var *set_field( Var *v )
 
 Var *sweep_up( Var *v )
 {
-	while ( ( v = vars_pop( v ) ) )
-		;
+	bool err_flag = UNSET;
+
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`sweep_up'.\n", Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) )
+			;
+	}
 
 	if ( ! magnet.is_field_step )
 	{
@@ -439,6 +419,12 @@ Var *sweep_up( Var *v )
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that new field value is still within bounds */
+
+	aeg_x_band_field_check( magnet.act_field + magnet.field_step, &err_flag );
+	if ( err_flag )
+		return vars_push( FLOAT_VAR, magnet.act_field );
 
 	if ( TEST_RUN )
 	{
@@ -456,8 +442,17 @@ Var *sweep_up( Var *v )
 
 Var *sweep_down( Var *v )
 {
-	while ( ( v = vars_pop( v ) ) )
-		;
+	bool err_flag = UNSET;
+
+
+	if ( v != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`sweep_down'.\n", Fname, Lc, DEVICE_NAME );
+
+		while ( ( v = vars_pop( v ) ) )
+			;
+	}
 
 	if ( ! magnet.is_field_step )
 	{
@@ -465,6 +460,12 @@ Var *sweep_down( Var *v )
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
+
+	/* Check that new field value is still within bounds */
+
+	aeg_x_band_field_check( magnet.act_field - magnet.field_step, &err_flag );
+	if ( err_flag )
+		return vars_push( FLOAT_VAR, magnet.act_field );
 
 	if ( TEST_RUN )
 	{
@@ -510,7 +511,7 @@ Var *reset_field( Var *v )
 /*****************************************************************************/
 
 
-double aeg_x_band_field_check( double field, bool *err_flag )
+static double aeg_x_band_field_check( double field, bool *err_flag )
 {
 	if ( exist_device( "er035m" ) )
 	{
