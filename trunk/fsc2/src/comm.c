@@ -449,9 +449,13 @@ void writer( int type, ... )
 
 		case C_STR :
 			str[ 0 ] = va_arg( ap, char * );
-			header.data.len = strlen( str[ 0 ] );
+			if ( str[ 0 ] != NULL )
+				header.data.len = strlen( str[ 0 ] );
+			else
+				header.data.len = 0;
 			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			if ( str[ 0 ] != NULL )
+				write( pd[ WRITE ], str[ 0 ], header.data.len );
 			break;
 
 		case C_INT :
