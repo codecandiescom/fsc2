@@ -27,7 +27,7 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOL_BOX *Tool_Box;
+extern TOOLBOX *Toolbox;
 
 
 static Var *f_screate_child( Var *v, long type, double start_val,
@@ -198,11 +198,11 @@ Var *f_screate( Var *var )
 	too_many_arguments( v );
 
 	/* Now that we're done with checking the parameters we can create the new
-       button - if the Tool_Box doesn't exist yet we've got to create it now */
+       button - if the Toolbox doesn't exist yet we've got to create it now */
 
 	TRY
 	{
-		if ( Tool_Box == NULL )
+		if ( Toolbox == NULL )
 			tool_box_create( VERT );
 
 		new_io = IOBJECT_P T_malloc( sizeof *new_io );
@@ -216,21 +216,21 @@ Var *f_screate( Var *var )
 		RETHROW( );
 	}
 
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
-		Tool_Box->objs = new_io;
+		Toolbox->objs = new_io;
 		new_io->next = new_io->prev = NULL;
 	}
 	else
 	{
-		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
+		for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = Tool_Box->next_ID++;
+	new_io->ID = Toolbox->next_ID++;
 	new_io->type = ( int ) type;
 	new_io->self = NULL;
 	new_io->start_val = start_val;
@@ -247,7 +247,7 @@ Var *f_screate( Var *var )
 
 	/* Draw the new slider */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -386,12 +386,12 @@ Var *f_sdelete( Var *v )
 			f_sdelete_parent( v );
 	} while ( ( v = vars_pop( v ) ) != NULL );
 
-	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Tool_Box )
+	if ( Internals.I_am == CHILD || Internals.mode == TEST || ! Toolbox )
 		return vars_push( INT_VAR, 1L );
 
 	/* Redraw the tool box without the slider */
 
-	recreate_Tool_Box( );
+	recreate_Toolbox( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -456,7 +456,7 @@ static void f_sdelete_parent( Var *v )
 
 	/* No tool box -> no sliders to delete */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No sliders have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -479,7 +479,7 @@ static void f_sdelete_parent( Var *v )
 	if ( io->prev != NULL )
 		io->prev->next = io->next;
 	else
-		Tool_Box->objs = io->next;
+		Toolbox->objs = io->next;
 
 	/* Delete the slider object if its drawn */
 
@@ -495,7 +495,7 @@ static void f_sdelete_parent( Var *v )
 
 	/* If this was the very last object also delete the form */
 
-	if ( Tool_Box->objs == NULL )
+	if ( Toolbox->objs == NULL )
 	{
 		tool_box_delete( );
 
@@ -533,7 +533,7 @@ Var *f_svalue( Var *v )
 
 	/* No tool box -> no sliders... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No slider have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -700,7 +700,7 @@ Var *f_schanged( Var *v )
 
 	/* No tool box -> no sliders... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No slider have been defined yet.\n" );
 		THROW( EXCEPTION );

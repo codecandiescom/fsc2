@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-TOOL_BOX *Tool_Box = NULL;
+TOOLBOX *Toolbox = NULL;
 
 struct {
 	int	VERT_OFFSET;
@@ -88,15 +88,15 @@ static Var *f_tb_wait_child( Var *v );
 
 void tool_box_create( long layout )
 {
-	if ( Tool_Box != NULL )
+	if ( Toolbox != NULL )
 		return;
 
-	Tool_Box                 = TOOL_BOX_P T_malloc( sizeof *Tool_Box );
-	Tool_Box->layout         = layout;
-	Tool_Box->Tools          = NULL;                 /* no form created yet */
-	Tool_Box->objs           = NULL;                 /* and also no objects */
-	Tool_Box->has_been_shown = UNSET;
-	Tool_Box->next_ID        = ID_OFFSET;
+	Toolbox                 = TOOL_BOX_P T_malloc( sizeof *Toolbox );
+	Toolbox->layout         = layout;
+	Toolbox->Tools          = NULL;                 /* no form created yet */
+	Toolbox->objs           = NULL;                 /* and also no objects */
+	Toolbox->has_been_shown = UNSET;
+	Toolbox->next_ID        = ID_OFFSET;
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
@@ -157,18 +157,18 @@ void tool_box_create( long layout )
 
 void tool_box_delete( void )
 {
-	if ( Internals.mode != TEST && Tool_Box->Tools )
+	if ( Internals.mode != TEST && Toolbox->Tools )
 	{
-		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
 			store_geometry( );
-			fl_hide_form( Tool_Box->Tools );
+			fl_hide_form( Toolbox->Tools );
 		}
 
-		fl_free_form( Tool_Box->Tools );
+		fl_free_form( Toolbox->Tools );
 	}
 
-	Tool_Box = TOOL_BOX_P T_free( Tool_Box );
+	Toolbox = TOOL_BOX_P T_free( Toolbox );
 }
 
 
@@ -198,41 +198,41 @@ Var *f_freeze( Var *v )
 
 void parent_freeze( int freeze )
 {
-	if ( Tool_Box == NULL ||  Tool_Box->Tools == NULL )
+	if ( Toolbox == NULL ||  Toolbox->Tools == NULL )
 	{
 		is_frozen = freeze ? SET : UNSET;
 		return;
 	}
 
-	if ( is_frozen && ! freeze )
+	if ( is_frozen && ! freeze )       /* unfreeze the toolbox */
 	{
 		if ( needs_pos )
 		{
-			fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
+			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
+			fl_show_form( Toolbox->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
 		else
 		{
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
+			fl_show_form( Toolbox->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
 						  "fsc2: Tools" );
-			tool_x = Tool_Box->Tools->x;
-			tool_y = Tool_Box->Tools->y;
+			tool_x = Toolbox->Tools->x;
+			tool_y = Toolbox->Tools->y;
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
 		   closed */
 
-		fl_set_form_atclose( Tool_Box->Tools, tool_box_close_handler, NULL );
+		fl_set_form_atclose( Toolbox->Tools, tool_box_close_handler, NULL );
 
-		Tool_Box->has_been_shown = SET;
+		Toolbox->has_been_shown = SET;
 	}
-	else if ( ! is_frozen && freeze )
+	else if ( ! is_frozen && freeze )    /* freeze the toolbox */
 	{
-		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
 			store_geometry( );
-			fl_hide_form( Tool_Box->Tools );
+			fl_hide_form( Toolbox->Tools );
 		}
 
 		needs_pos = SET;
@@ -256,7 +256,7 @@ Var *f_layout( Var *v )
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
 
-	if ( Internals.I_am == PARENT && Tool_Box != NULL )
+	if ( Internals.I_am == PARENT && Toolbox != NULL )
 	{
 		print( FATAL, "Layout of tool box must be set before any buttons or "
 			   "sliders are created.\n" );
@@ -455,7 +455,7 @@ static void f_objdel_parent( Var *v )
 
 	/* No tool box -> no objects -> no objects to delete... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -546,7 +546,7 @@ Var *f_obj_clabel( Var *v )
 
 	/* No tool box -> no objects -> no object label change possible... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -669,7 +669,7 @@ Var *f_obj_xable( Var *v )
 
 	/* No tool box -> no objects -> no object state change possible... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -761,15 +761,15 @@ IOBJECT *find_object_from_ID( long ID )
 	IOBJECT *io;
 
 
-	if ( Tool_Box == NULL )            /* no objects defined yet ? */
+	if ( Toolbox == NULL )            /* no objects defined yet ? */
 		return NULL;
 
-	if ( ID < ID_OFFSET || ID >= Tool_Box->next_ID )
+	if ( ID < ID_OFFSET || ID >= Toolbox->next_ID )
 		return NULL;
 
 	/* Loop through linked list to find the object */
 
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	for ( io = Toolbox->objs; io != NULL; io = io->next )
 		if ( io->ID == ID )
 			break;
 
@@ -790,23 +790,23 @@ void tools_clear( void )
 	is_frozen = UNSET;
 	needs_pos = SET;
 
-	if ( Tool_Box == NULL )
+	if ( Toolbox == NULL )
 		return;
 
-	if ( Tool_Box->Tools )
+	if ( Toolbox->Tools )
 	{
-		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
 			store_geometry( );
-			fl_hide_form( Tool_Box->Tools );
+			fl_hide_form( Toolbox->Tools );
 		}
 	}
 
-	for ( io = Tool_Box->objs; io != NULL; io = next )
+	for ( io = Toolbox->objs; io != NULL; io = next )
 	{
 		next = io->next;
 
-		if ( Tool_Box->Tools && io->self )
+		if ( Toolbox->Tools && io->self )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -828,10 +828,10 @@ void tools_clear( void )
 		T_free( io );
 	}
 
-	if ( Tool_Box->Tools )
-		fl_free_form( Tool_Box->Tools );
+	if ( Toolbox->Tools )
+		fl_free_form( Toolbox->Tools );
 
-	Tool_Box = TOOL_BOX_P T_free( Tool_Box );
+	Toolbox = TOOL_BOX_P T_free( Toolbox );
 }
 
 
@@ -839,7 +839,7 @@ void tools_clear( void )
 /* Function for redrawing the toolbox after changes have been applied */
 /*--------------------------------------------------------------------*/
 
-void recreate_Tool_Box( void )
+void recreate_Toolbox( void )
 {
 	IOBJECT *io, *last_io = NULL;
 	int flags;
@@ -852,15 +852,15 @@ void recreate_Tool_Box( void )
 	/* If the tool box already exists we've got to find out its position
 	   and then delete all the objects */
 
-	if ( Tool_Box->Tools != NULL )
+	if ( Toolbox->Tools != NULL )
 	{
-		if ( fl_form_is_visible( Tool_Box->Tools ) )
+		if ( fl_form_is_visible( Toolbox->Tools ) )
 		{
 			store_geometry( );
-			fl_hide_form( Tool_Box->Tools );
+			fl_hide_form( Toolbox->Tools );
 		}
 
-		for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		for ( io = Toolbox->objs; io != NULL; io = io->next )
 		{
 			if ( io->self )
 			{
@@ -872,17 +872,17 @@ void recreate_Tool_Box( void )
 			io->group = NULL;
 		}
 
-		fl_free_form( Tool_Box->Tools );
+		fl_free_form( Toolbox->Tools );
 
 		needs_pos = SET && ! is_frozen;
-		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
+		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 	}
 	else
 	{
 		needs_pos = UNSET;
-		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
+		Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
-		if ( ! Tool_Box->has_been_shown &&
+		if ( ! Toolbox->has_been_shown &&
 			 * ( char * ) xresources[ TOOLGEOMETRY ].var != '\0' )
 		{
 			flags = XParseGeometry( ( char * ) xresources[ TOOLGEOMETRY ].var,
@@ -897,44 +897,44 @@ void recreate_Tool_Box( void )
 		}
 	}
 
-	if ( Tool_Box->has_been_shown )
+	if ( Toolbox->has_been_shown )
 		needs_pos = SET;
 
-	Tool_Box->w = 2 * FI_sizes.VERT_OFFSET;
-	Tool_Box->h = 2 * FI_sizes.HORI_OFFSET;
+	Toolbox->w = 2 * FI_sizes.VERT_OFFSET;
+	Toolbox->h = 2 * FI_sizes.HORI_OFFSET;
 
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	for ( io = Toolbox->objs; io != NULL; io = io->next )
 	{
-		append_object_to_form( io, &Tool_Box->w, &Tool_Box->h );
+		append_object_to_form( io, &Toolbox->w, &Toolbox->h );
 		last_io = io;
 	}
 
 	fl_end_form( );
 
-	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
+	fl_set_form_size( Toolbox->Tools, Toolbox->w, Toolbox->h );
 
 	if ( ! is_frozen )
 	{
 		if ( needs_pos )
 		{
-			fl_set_form_position( Tool_Box->Tools, tool_x, tool_y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
+			fl_set_form_position( Toolbox->Tools, tool_x, tool_y );
+			fl_show_form( Toolbox->Tools, FL_PLACE_SIZE, FL_FULLBORDER,
 						  "fsc2: Tools" );
 		}
 		else
 		{
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
+			fl_show_form( Toolbox->Tools, FL_PLACE_MOUSE, FL_FULLBORDER,
 						  "fsc2: Tools" );
-			tool_x = Tool_Box->Tools->x;
-			tool_y = Tool_Box->Tools->y;
+			tool_x = Toolbox->Tools->x;
+			tool_y = Toolbox->Tools->y;
 		}
 
 		/* Set a close handler that avoids that the tool box window can be
 		   closed */
 
-		fl_set_form_atclose( Tool_Box->Tools, tool_box_close_handler, NULL );
+		fl_set_form_atclose( Toolbox->Tools, tool_box_close_handler, NULL );
 
-		Tool_Box->has_been_shown = SET;
+		Toolbox->has_been_shown = SET;
 	}
 }
 
@@ -971,7 +971,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 	}
 	else
 	{
-		if ( Tool_Box->layout == VERT )
+		if ( Toolbox->layout == VERT )
 		{
 			io->x = FI_sizes.VERT_OFFSET;
 			io->y = io->prev->y + io->prev->ht;
@@ -1083,7 +1083,7 @@ static void normal_button_setup( IOBJECT *io )
 		{
 			io->ht = io->h = FI_sizes.SYMBOL_SIZE_IN;
 
-			if ( Tool_Box->layout == VERT )
+			if ( Toolbox->layout == VERT )
 				io->wt = io->w = FI_sizes.NORMAL_BUTTON_WIDTH;
 			else
 				io->wt = io->w = FI_sizes.SYMBOL_SIZE_IN;
@@ -1198,8 +1198,8 @@ static void radio_button_setup( IOBJECT *io )
 	/* In horizontal mode line up radio buttons belonging to the same
 	   group so that they appear at the same vertical position */
 
-	if ( Tool_Box->layout == HORI )
-		for ( nio = Tool_Box->objs; nio != io; nio = nio->next )
+	if ( Toolbox->layout == HORI )
+		for ( nio = Toolbox->objs; nio != io; nio = nio->next )
 		{
 			if ( nio->type != RADIO_BUTTON ||
 				 nio->group != io->group )
@@ -1582,7 +1582,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 	/* Find out which object got changed */
 
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	for ( io = Toolbox->objs; io != NULL; io = io->next )
 		if ( io->self == obj )
 			break;
 
@@ -1609,7 +1609,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			io->state = fl_get_button( obj );
 			if ( io->state != old_state )
 			{
-				for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
+				for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
 				{
 					if ( oio == io || oio->type != RADIO_BUTTON ||
 						 oio->group != io->group || io->state == 0 )
@@ -1904,16 +1904,16 @@ void check_label( char *str )
 
 void store_geometry( void )
 {
-	if ( tool_x != Tool_Box->Tools->x - 1 &&
-		 tool_y != Tool_Box->Tools->y - 1 )
+	if ( tool_x != Toolbox->Tools->x - 1 &&
+		 tool_y != Toolbox->Tools->y - 1 )
 	{
-		tool_x = Tool_Box->Tools->x;
-		tool_y = Tool_Box->Tools->y;
+		tool_x = Toolbox->Tools->x;
+		tool_y = Toolbox->Tools->y;
 	}
 	else
 	{
-		tool_x = Tool_Box->Tools->x - 1;
-		tool_y = Tool_Box->Tools->y - 1;
+		tool_x = Toolbox->Tools->x - 1;
+		tool_y = Toolbox->Tools->y - 1;
 	}
 }
 
@@ -1939,7 +1939,7 @@ Var *f_tb_changed( Var *v )
 
 	/* No toolbox -> no objects -> no object can have changed */
 
-	if ( Tool_Box == NULL )
+	if ( Toolbox == NULL )
 		return vars_push( INT_VAR, 0L );	
 
 	/* If there's a list of objects loop over it until the first changed one
@@ -1962,7 +1962,7 @@ Var *f_tb_changed( Var *v )
 
 	/* If there were no arguments loop over all objects */
 
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	for ( io = Toolbox->objs; io != NULL; io = io->next )
 	{
 		if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 			continue;
@@ -2074,7 +2074,7 @@ Var *f_tb_wait( Var *v )
 	/* No tool box -> no objects -> no object state changes we could wait
 	   for... */
 
-	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	if ( Toolbox == NULL || Toolbox->objs == NULL )
 	{
 		print( FATAL, "No objects have been defined yet.\n" );
 		THROW( EXCEPTION );
@@ -2116,7 +2116,7 @@ Var *f_tb_wait( Var *v )
 	}
 	else    /* if there were no arguments loop over all objects */
 	{
-		for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		for ( io = Toolbox->objs; io != NULL; io = io->next )
 		{
 			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 				continue;
@@ -2143,7 +2143,7 @@ Var *f_tb_wait( Var *v )
 	}
 	else    /* if there were no arguments loop over all objects */
 	{
-		for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		for ( io = Toolbox->objs; io != NULL; io = io->next )
 		{
 			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
 				continue;
@@ -2299,7 +2299,7 @@ void tb_wait_handler( long ID )
 	result[ 0 ] = 1;
 	result[ 1 ] = ID >= 0 ? ID : 0;
 
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	for ( io = Toolbox->objs; io != NULL; io = io->next )
 		io->report_change = UNSET;
 
 	Internals.tb_wait = TB_WAIT_NOT_RUNNING;

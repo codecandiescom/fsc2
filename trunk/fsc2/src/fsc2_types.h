@@ -54,7 +54,7 @@
 #define DPOINT_P              ( DPoint * )
 #define FILE_LIST_P           ( FILE_LIST * )
 #define INPUT_RES_P           ( INPUT_RES * )
-#define TOOL_BOX_P            ( TOOL_BOX * )
+#define TOOLBOX_P             ( TOOLBOX * )
 #define IOBJECT_P             ( IOBJECT * )
 #define PHASE_SETUP_P         ( PHASE_SETUP * )
 #define PHASE_SEQUENCE_P      ( Phase_Sequence * )
@@ -105,7 +105,7 @@
 #define DPOINT_P
 #define FILE_LIST_P
 #define INPUT_RES_P
-#define TOOL_BOX_P
+#define TOOLBOX_P
 #define IOBJECT_P
 #define PHASE_SETUP_P
 #define PHASE_SEQUENCE_P

@@ -29,7 +29,7 @@
 
 
 typedef struct IOBJECT IOBJECT;
-typedef struct TOOL_BOX TOOL_BOX;
+typedef struct TOOLBOX TOOLBOX;
 
 
 struct IOBJECT {
@@ -76,7 +76,7 @@ struct IOBJECT {
 };
 
 
-struct TOOL_BOX {
+struct TOOLBOX {
 	int layout;               /* 0 / 1 <-> vertical / horizontal */
 	bool has_been_shown;
 	FL_FORM *Tools;
@@ -125,7 +125,7 @@ Var *f_freeze(  Var *v );
 Var *f_obj_clabel( Var * );
 Var *f_obj_xable( Var *v );
 IOBJECT *find_object_from_ID( long ID );
-void recreate_Tool_Box( void );
+void recreate_ToolBox( void );
 void convert_escapes( char *str );
 void check_label( char *str );
 bool check_format_string( char *buf );

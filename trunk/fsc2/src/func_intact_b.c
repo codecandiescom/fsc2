@@ -27,7 +27,7 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOL_BOX *Toolbox;
+extern TOOLBOX *Toolbox;
 
 
 static Var *f_bcreate_child( Var *v, long type, long coll );
