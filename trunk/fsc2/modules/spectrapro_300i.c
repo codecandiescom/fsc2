@@ -257,14 +257,14 @@ static void spectrapro_300i_send( const char *buf )
 		stop_on_user_request( );
 	}
 
-	if ( len < 5 || strncmp( reply, " ok\r\n", 5 ) )
+	if ( repeats < 0 || len != 5 || strncmp( reply, " ok\r\n", 5 ) )
 		spectrapro_300i_comm_fail( );
 }
 
 
 /*---------------------------------------------------------------*/
 /* Function sends a command and returns a buffer (with a maximum */
-/* length of *len bytes) with the reply of the device.           */
+/* length of 'len' bytes) with the reply of the device.          */
 /*---------------------------------------------------------------*/
 
 static char *spectrapro_300i_talk( const char *buf, size_t len )

@@ -337,6 +337,7 @@ int rs690_end_of_test_hook( void )
 				print( SEVERE, "Minimum left padding for function '%s' was %s "
 					   "instead of requested %s.\n", f->name,
 					   min, rs690_pticks( f->left_shape_padding ) );
+				TRY_SUCCESS;
 			}
 			OTHERWISE
 			{

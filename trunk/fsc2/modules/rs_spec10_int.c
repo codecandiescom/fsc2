@@ -185,6 +185,7 @@ static void rs_spec10_ccd_init( void )
 									 ( void_ptr ) ( exp_res_array + i ) ) )
 					rs_spec10_error_handling( );
 			}
+
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -492,6 +493,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 //			  print( FATAL, "Failure to obtain properly protected memory.\n" );
 //			  THROW( EXCEPTION );
 //		  }
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -524,6 +526,7 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 			if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) )
 				rs_spec10_error_handling( );
 		} while ( status != READOUT_COMPLETE );
+
 		TRY_SUCCESS;
 	}
 	OTHERWISE

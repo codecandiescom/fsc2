@@ -146,6 +146,7 @@ int *rs_spec10_get_fd_list( void )
 		{
 			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
 			fd_list[ num_fds++ ] = T_atoi( de->d_name );
+			TRY_SUCCESS;
 		}
 		OTHERWISE
 		{

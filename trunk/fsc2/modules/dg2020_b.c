@@ -211,7 +211,8 @@ int dg2020_b_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
-	TRY {
+	TRY
+	{
 		if ( dg2020.do_show_pulses )
 			dg2020_show_pulses( );
 		if ( dg2020.do_dump_pulses )

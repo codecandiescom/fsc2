@@ -291,7 +291,7 @@ ccd_camera_get_spectrum, 0, EXP;
 ccd_camera_temperature, -1, ALL;
 
 
-/* Functions exported by monochromators (Acton SpectaPro-300i)
+/* Functions exported by monochromators (Acton SpectaPro-300i) */
 
 monochromator_name, 0, ALL;		       // returns the device name
 monochromator_wavelength, -1, EXP;     // set/get wavelength

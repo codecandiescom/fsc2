@@ -453,6 +453,7 @@ Var *ccd_camera_get_picture( Var *v )
 	uns16 bin[ 2 ];
 	uns16 urc[ 2 ];
 	uns32 size;
+	double fac;
 
 
 	UNUSED_ARGUMENT( v );
@@ -524,7 +525,7 @@ Var *ccd_camera_get_picture( Var *v )
 		{
 			max_val = ~ ( uns16 ) 0 + 1;
 
-			size = ( uns32 ) ( width * sizeof *frame );
+			size = ( uns32 ) ( width * height *sizeof *frame );
 			frame = UNS16_P T_malloc( size );
 			for ( i = 0; i < width * height; i++ )
 				frame[ i ] = random( ) % max_val;
@@ -540,7 +541,10 @@ Var *ccd_camera_get_picture( Var *v )
 		   start only at the second element. This hack tries to avoid the
 		   problem.*/
 
-		cf = frame + size / sizeof *frame - width;
+		if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+			cf = frame + size / sizeof *frame - width * height;
+		else
+			cf = frame;
 
 		/* During the test run or for hardware binning or without binning (i.e.
 		   if both binning sizes are 1) we can leave most of the work to the
@@ -554,12 +558,20 @@ Var *ccd_camera_get_picture( Var *v )
 					  j < width; j++ )
 					*dest++ = ( long ) *cf++;
 		else
+		{
 			for ( i = 0; i < height; i++ )
 				for ( j = 0; j < rs_spec10->ccd.bin[ Y ]; j++ )
 					for ( dest = nv->val.vptr[ i ]->val.lpnt, k = 0;
 						  k < width; k++, dest++ )
 						for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
 							*dest += ( long ) *cf++;
+
+			fac = 1.0 / ( rs_spec10->ccd.bin[ X ] * rs_spec10->ccd.bin[ Y ] );
+			for ( i = 0; i < height; i++ )
+					for ( dest = nv->val.vptr[ i ]->val.lpnt, k = 0;
+						  k < width; k++, dest++ )
+						*dest = lrnd ( *dest * fac );
+		}
 
 		TRY_SUCCESS;
 	}
@@ -593,7 +605,7 @@ Var *ccd_camera_get_picture( Var *v )
 Var *ccd_camera_get_spectrum( Var *v )
 {
 	uns16 *frame = NULL;
-	long width, height;
+	long width;
 	unsigned long max_val;
 	Var *nv = NULL;
 	long i, j, k;
@@ -602,13 +614,13 @@ Var *ccd_camera_get_spectrum( Var *v )
 	uns16 bin[ 2 ];
 	uns16 urc[ 2 ];
 	uns32 size;
+	double fac;
 
 
 	UNUSED_ARGUMENT( v );
 
 	CLOBBER_PROTECT( frame );
 	CLOBBER_PROTECT( width );
-	CLOBBER_PROTECT( height );
 	CLOBBER_PROTECT( nv );
 	CLOBBER_PROTECT( bin[ X ] );
 	CLOBBER_PROTECT( bin[ Y ] );
@@ -682,23 +694,30 @@ Var *ccd_camera_get_spectrum( Var *v )
 		   start only at the second element. This hack tries to avoid the
 		   problem.*/
 
-		cf = frame + size / sizeof *frame - width;
+		if ( FSC2_MODE == TEST || rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+			cf = frame + size / sizeof *frame - width;
+		else
+			cf = frame;
 
 		/* During the test run or for hardware binning or without binning (i.e.
 		   if both binning sizes are 1) we can leave most of the work to the
 		   camera, otherwise we have to do the binning ourselves */
 
 		if ( FSC2_MODE == TEST ||
-			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
-			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
-
+			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
 			for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
 				*dest++ = ( long ) *cf++;
 		else
-			for ( i = 0; i < rs_spec10->ccd.bin[ Y ]; i++ )
+		{
+			for ( i = 0; i < CCD_PIXEL_HEIGHT; i++ )
 				for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
 					for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
 						*dest += ( long ) *cf++;
+
+			fac = 1.0 / ( rs_spec10->ccd.bin[ X ] * CCD_PIXEL_HEIGHT );
+			for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
+				*dest = lrnd( *dest * fac );
+		}
 
 		TRY_SUCCESS;
 	}

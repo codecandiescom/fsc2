@@ -376,7 +376,8 @@ int ep385_end_of_test_hook( void )
 				min = T_strdup( ep385_pticks( f->min_right_shape_padding ) );
 				print( SEVERE, "Minimum right shape padding for function '%s' "
 					   "was %s instead of the requested %s.\n",  f->name,
-				   min, ep385_pticks( f->right_shape_padding ) );
+					   min, ep385_pticks( f->right_shape_padding ) );
+				TRY_SUCCESS;
 			}
 			OTHERWISE
 			{
