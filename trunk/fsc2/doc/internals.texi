@@ -1540,27 +1540,83 @@ in @file{comm.h}. This structure consists of an array of structures of
 type @code{SLOT} and two marker variables, @code{low} and @code{high}.
 When the child needs to send data to the parent (there's no sending of
 data from the parent to the child that isn't initialized by the child)
-it creates a new shared memory segment for the data and then puts the
-key of this shared memory segment into the slot indexed by the
-@code{high} marker (which it increments afterwards). To keep the child
-process from sending more messages than there are free slots in the
-array of @code{SLOT} structures there's also a semaphore that starts off
-with the number of slots available and that the child process has to
-wait for (thereby decrementing it) before using a new slot. The parent,
-on the other hand, will post the semaphore each time it removes a key
-from the slot indexed by the @code{low} marker (which increments at the
-same time). The parent recognizes that there are no more messages to
-remove from the array of slots when the @code{low} marker is equal to
-the @code{high} marker.
+it sets the @code{type} field of the @code{SLOT} structure indexed by
+the @code{high} marker (which it increments when the message has been
+assembled) to the value @code{DATA}. It then creates a new shared memory
+segment for the data and then puts the key of this shared memory segment
+into the @code{shm_id} field of the slot. Whenever it has time the
+parent checks the values of the @code{high} and the @code{low} marker
+and, if they are different, deal with the new data, afterwards
+incrementing the @code{low} marker. Both markers wrap around when they
+reach the number of avalailable @code{SLOT} structures.
+
+
+To keep the child process from sending more messages than there are free
+slots in the shared array of @code{SLOT} structures there's a semaphore
+that starts off with the number of available slots and that the child
+process has to wait for (thereby decrementing it) before using a new
+slot. The parent, on the other hand, will post the semaphore each time
+it accepted a message from the slot indexed by the @code{low}
+marker.
 
 
 Beside data the child also may need to send what's called "requests" in
 the following. These requests always require an answer by the parent.
-In this case instead of shared memory segments a simple set of pipes is
-used to send the data of the "request" from the child to the parent and
-also for the answer. In this case the type field of the @code{SLOT}
-structure is set by the child to indicate that this is a request,
-inducing the parent to listen on the pipe.
+In this case the type field of the @code{SLOT} structure is set by the
+child to the value @code{REQUEST}, indicate that this is a request. The
+data exchange between parent and child for requests is not done via
+shared memory segments but by using a simple set of pipes isused, both
+for the data making up the request request from the child and the reply
+by the parent. A request will induce the parent to listen on the pipe
+and, depending on the type of the request, to execute some action on
+behalf of the child. It then either returns data collected in the
+process or just an acknowledgment, telling the child process that it's
+done and can continue with its work. Because the child has always to
+wait for a reply to its request there will be never more than one
+request in the message queue.
+
+
+After having run the start-of-experiment handlers in all modules,
+initializing the graphics and successfully setting up the communication
+channels the parent still has to set up a few signal handlers. One
+signal (@code{SIGUSR2}) will be sent by the child to the parent when
+it's about to exit and must be handled. And also for the @code{SIGCHLD}
+signal a special handler is installed during the experiment. This also
+out of the way, the parent finally forks to create the child process
+resonsible for running the experiment. From now on we will have to
+distinguish carefully about which process we're talking.
+
+
+If the call of @code{fork()} succeeded, the parent process just has to
+continue to wait for new events triggered by the user (e.g.@: by
+clicking on one of the buttons) and to reguarly check if new data from
+the child have arrived. The latter is done from within an idle handler,
+a function invoked whenever the parent process isn't busy. The function
+is called @code{new_data_callback()} and can be found in @file{comm.c}.
+But most of the actual work, i.e.@: accepting and displaying the data is
+done in the function @code{accept_new_data()} in @file{accept.c}.
+
+
+The child process will have itself initialized in the mean time in the
+function @code{run_child()} in @file{run.c}. It closes the ends of pipes
+it doesn't need anymore and sets up its own signal handlers. Then its
+main work starts. It then invokes the function @code{do_measurement()}
+where it, ust as already described above for the test run, starts
+interpreting the stored tokens from the @code{EXPERIMENT} section of the
+@code{EDL} script. Again. for tokens not involved with flow control it
+starts the parser created from @file{exp_parser.y}. This will in turn
+request new tokens, which it gets delivered from the array of stored
+tokens, and executes the code associated with the sequences of tokens.
+Only flow control tokens are treated differently, for handling of the
+tokens in conditions the parser generated from @file{condition_parser.y}
+is invoked temporarily, and the code in
+@code{deal_with_program_tokens()} takes care that the program is running
+according to the flow control tokens. The only real difference to the
+test run is that we now also have to make sure that when the child
+process gets a @code{SIGUSR2} signal, indicating that the parent tells
+it to stop the experiment, the @code{EDL} code folllowing the
+@code{ON_STOP} label is executed immediately and then the child process
+exits.
 
 
 
