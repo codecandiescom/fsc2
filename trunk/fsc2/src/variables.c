@@ -1996,16 +1996,17 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		dest = vars_push( ARR_PTR, ( dest->type == INT_ARR ) ?
 						  ( void * ) dest->val.lpnt :
 						  ( void * ) dest->val.dpnt, dest );
+		dest->len = 0;
 		dest->flags |= NEED_SLICE;
 
 		dest_needs_pop = SET;
 	}
 
+	d = dest->from;
+
 	/* Again being paranoid... */
 
-	assert( dest->flags & NEED_SLICE || dest->from->flags & NEED_ALLOC );
-
-	d = dest->from;
+	assert( dest->flags & NEED_SLICE || d->flags & NEED_ALLOC );
 
 	/* Do allocation of memory (set size of missing dimension to the one of
 	   the transient array) if the destination array needs it, otherwise check
@@ -2251,13 +2252,6 @@ Var *vars_val( Var *v )
 							  v->from->sizes[ v->from->dim - 1 ] );
 	}
 
-/*
-	{
-		eprint( FATAL, "%s:%ld: Left hand side of assignment must be an "
-				"integer or float variable, not a slice.\n", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-*/
 	if ( v->from->type == INT_ARR )
 		return vars_push( INT_VAR, *( ( long * ) v->val.gptr ) );
 	else if ( v->from->type == FLOAT_ARR )

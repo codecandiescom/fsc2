@@ -33,9 +33,6 @@ bool hp8647a_init( const char *name )
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
-	if ( gpib_write( hp8647a.device, "*RST\n" ) & GPIB_ERR )
-		return FAIL;
-
 	if ( gpib_write( hp8647a.device, "*OPC\n" ) == FAILURE )
 		return FAIL;
 
