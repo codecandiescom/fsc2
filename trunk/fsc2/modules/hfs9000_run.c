@@ -147,11 +147,11 @@ void hfs9000_do_checks( FUNCTION *f )
 				( FSC2_MODE == TEST ? MAX_PULSER_BITS : hfs9000.max_seq_len ) )
 			{
 				if ( FSC2_MODE == TEST )
-					print( FATAL, "Pulse sequence for function `%s' does not "
+					print( FATAL, "Pulse sequence for function '%s' does not "
 						   "fit into the pulsers memory.\n",
 						   Function_Names[ f->self ] );
 				else
-					print( FATAL, "Pulse sequence for function `%s' is too "
+					print( FATAL, "Pulse sequence for function '%s' is too "
 						   "long. Perhaps you should try the "
 						   "MAXIMUM_PATTERN_LENGTH command.\n",
 						   Function_Names[ f->self ] );
@@ -324,7 +324,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = T_free( p->function->pulses );
 
-		print( SEVERE, "Function `%s' isn't used at all because all its "
+		print( SEVERE, "Function '%s' isn't used at all because all its "
 			   "pulses are never used.\n",
 			   Function_Names[ p->function->self ] );
 		p->function->is_used = UNSET;

@@ -95,14 +95,14 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 
 	if ( p->is_function )
 	{
-		print( FATAL, "Function of pulse %ld has already been set to `%s'.\n",
+		print( FATAL, "Function of pulse %ld has already been set to '%s'.\n",
 			   pnum, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->channel == NULL )
 	{
-		print( FATAL, "No channel has been assigned to function `%s'.\n",
+		print( FATAL, "No channel has been assigned to function '%s'.\n",
 			   Function_Names[ hfs9000.function[ function ].self ] );
 		THROW( EXCEPTION );
 	}

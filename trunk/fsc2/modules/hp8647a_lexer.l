@@ -180,19 +180,19 @@ void hp8647a_read_table( FILE *fp )
 	}
 	CATCH( EOF_IN_COMMENT_EXCEPTION )
 	{
-		print( FATAL, "Unexpected end of table file `%s' in comment starting "
+		print( FATAL, "Unexpected end of table file '%s' in comment starting "
 			   "at line %ld.\n", hp8647a.table_file, hp8647a_Comm_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( DANGLING_END_OF_COMMENT )
 	{
-		print( FATAL, "End of comment found in table file `%s' at line %ld.\n",
+		print( FATAL, "End of comment found in table file '%s' at line %ld.\n",
 			   hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
 	}
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
-		print( FATAL, "Invalid entry in table file `%s' at line %ld.\n",
+		print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
 			   hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
 	}
@@ -279,7 +279,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 		if ( is_freq ^ is_att )                 // one of them is still set ?
 		{
-			print( FATAL, "Missing final %s in table file `%s'.\n",
+			print( FATAL, "Missing final %s in table file '%s'.\n",
 				   is_freq ? "attenuation" : "frequency", hp8647a.table_file );
 			THROW( EXCEPTION );
 		}
@@ -288,7 +288,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 		if ( hp8647a.att_table_len < 2 )
 		{
-			print( FATAL, "Table file `%s' contains less than 2 entries.\n",
+			print( FATAL, "Table file '%s' contains less than 2 entries.\n",
 				   hp8647a.table_file );
 			THROW( EXCEPTION );
 		}
@@ -312,7 +312,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_ATT && is_att )
 	{
-		print( FATAL, "Error while reading table file `%s': Two attenuation "
+		print( FATAL, "Error while reading table file '%s': Two attenuation "
 			   "values in a row at line %ld.\n",
 			   hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -320,7 +320,7 @@ static void hp8647a_new_table_entry( int type, double val )
 
 	if ( type == IS_FREQ && is_freq )
 	{
-		print( FATAL, "Error while reading table file `%s': Two frequency "
+		print( FATAL, "Error while reading table file '%s': Two frequency "
 			   "values in a row at line %ld.\n",
 			   hp8647a.table_file, hp8647a_Lc );
 		THROW( EXCEPTION );
@@ -352,13 +352,13 @@ static void hp8647a_new_table_entry( int type, double val )
 		if ( val < 0 )
 		{
 			print( FATAL, "Invalid negative RF frequency found in the table "
-				   "file `%s' at line %ld.\n",
+				   "file '%s' at line %ld.\n",
 				   hp8647a.table_file, hp8647a_Lc );
 			THROW( EXCEPTION );
 		}
 
 		if ( val > MAX_FREQ || val < MIN_FREQ )
-			print( WARN, "Frequency of %g MHz in table file `%s', line %ld, "
+			print( WARN, "Frequency of %g MHz in table file '%s', line %ld, "
 				   "is not within range of synthesizer (%f kHz - %f MHz).\n",
 				   val * 1.0e-6, hp8647a.table_file, hp8647a_Lc,
 				   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
@@ -369,7 +369,7 @@ static void hp8647a_new_table_entry( int type, double val )
 	{
 		if ( val > hp8647a.min_attenuation - MAX_ATTEN )
 		{
-			print( FATAL, "Attenuation of %.1f dB in table file `%s', line "
+			print( FATAL, "Attenuation of %.1f dB in table file '%s', line "
 				   "%ld, can't be achieved, maximum dynamic range is "
 				   "%.1f dB.\n", val, hp8647a.table_file, hp8647a_Lc,
 				   hp8647a.min_attenuation - MAX_ATTEN );
@@ -403,7 +403,7 @@ static int hp8647a_comp( const void *a, const void *b )
 
 	if ( A->freq == B->freq )
 	{
-		print( FATAL, "Frequency %s Hz appears twice in table file `%s'\n",
+		print( FATAL, "Frequency %s Hz appears twice in table file '%s'\n",
 			   A->freq, hp8647a.table_file );
 		THROW( EXCEPTION );
 	}

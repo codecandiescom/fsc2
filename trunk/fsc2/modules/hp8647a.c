@@ -217,7 +217,7 @@ Var *synthesizer_state( Var *v )
 /* experiment is started the frequency value is stored and set in the  */
 /* setup phase of the experiment. The frequency set the first time the */
 /* function is called is also set as the start frequency to be used in */
-/* calls of `synthesizer_reset_frequency'. The function can only be    */
+/* calls of 'synthesizer_reset_frequency'. The function can only be    */
 /* called once in the PREPARATIONS section, further calls just result  */
 /* in a warning and the new value isn't accepted.                      */
 /*---------------------------------------------------------------------*/
@@ -597,7 +597,7 @@ Var *synthesizer_use_table( Var *v )
 
 		if ( ( tfp = hp8647a_open_table( hp8647a.table_file ) ) == NULL )
 		{
-			print( FATAL, "Default table file `%s' not found.\n",
+			print( FATAL, "Default table file '%s' not found.\n",
 				   hp8647a.table_file );
 			hp8647a.table_file = T_free( hp8647a.table_file );
 			THROW( EXCEPTION );
@@ -722,7 +722,7 @@ Var *synthesizer_modulation( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Use functions `synthesizer_mod_(type|source|ampl)' "
+		print( FATAL, "Use functions 'synthesizer_mod_(type|source|ampl)' "
 			   "to determine modulation settings.\n" );
 		THROW( EXCEPTION );
 	}
@@ -732,7 +732,7 @@ Var *synthesizer_modulation( Var *v )
 		if ( ( 1 << ( ( res = hp8647a_set_mod_param( v, &ampl, &what ) )
 					  - 1 ) ) & set )
 			print( SEVERE, "Parameter for modulation %s set more than once in "
-				   "call of `synthesizer_modulation'.\n", str[ res ] );
+				   "call of 'synthesizer_modulation'.\n", str[ res ] );
 		else
 		{
 			switch ( res )
@@ -846,7 +846,7 @@ Var *synthesizer_mod_type( Var *v )
 	{
 		if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
 		{
-			print( FATAL, "Invalid modulation type `%s'.\n", v->val.sptr );
+			print( FATAL, "Invalid modulation type '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 	}
@@ -939,7 +939,7 @@ Var *synthesizer_mod_source( Var *v )
 				break;
 
 			default :
-				print( FATAL, "Invalid modulation source `%s'.\n",
+				print( FATAL, "Invalid modulation source '%s'.\n",
 					   v->val.sptr );
 				THROW( EXCEPTION );
 		}

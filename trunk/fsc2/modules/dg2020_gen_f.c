@@ -256,7 +256,7 @@ bool dg2020_set_function_low_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
-		print( FATAL, "Invalid low level of %g V for function `%s', valid "
+		print( FATAL, "Invalid low level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
@@ -556,16 +556,16 @@ bool dg2020_set_phase_reference( int phase, int function )
 
 	if ( p->phase_func != NULL )
 	{
-		print( FATAL, "Phase function `%s' has already been associated with "
-			   "function `%s'.\n", Function_Names[ p->self ],
+		print( FATAL, "Phase function '%s' has already been associated with "
+			   "function '%s'.\n", Function_Names[ p->self ],
 			   Function_Names[ p->phase_func->self ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->phase_func != NULL )
 	{
-		print( FATAL, "Function `%s' has already been associated with phase "
-			   "function `%s'.\n", Function_Names[ f->self ],
+		print( FATAL, "Function '%s' has already been associated with phase "
+			   "function '%s'.\n", Function_Names[ f->self ],
 			   Function_Names[ f->phase_func->self ] );
 		THROW( EXCEPTION );
 	}
@@ -620,7 +620,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 		if ( phs[ func ].is_var[ type ][ pod ] )
 		{
 			print( FATAL, "Both output states for phase %s of "
-				   "function `%s' already have been defined.\n",
+				   "function '%s' already have been defined.\n",
 				   Phase_Types[ type ], func == 0 ?
 				   Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 				   Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
@@ -630,7 +630,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 
 	if ( phs[ func ].is_var[ type ][ pod ] )
 	{
-		print( FATAL, "Output state of %d. pod for phase %s of function `%s' "
+		print( FATAL, "Output state of %d. pod for phase %s of function '%s' "
 			   "already has been defined.\n", pod + 1, Phase_Types[ type ],
 				func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 				Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
@@ -677,7 +677,7 @@ bool dg2020_phase_setup( int func )
 						   "functions.\n" );
 				else
 					print( FATAL, "Incomplete data for phase setup of "
-						   "function `%s'.\n", func == 0 ?
+						   "function '%s'.\n", func == 0 ?
 							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 							Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 				THROW( EXCEPTION );
@@ -694,7 +694,7 @@ bool dg2020_phase_setup( int func )
 		if ( ! cons[ i ] )
 		{
 			print( FATAL, "Inconsistent data for phase setup of function "
-				   "`%s'.\n", func == 0 ?
+				   "'%s'.\n", func == 0 ?
 				   Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
 				   Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
@@ -723,7 +723,7 @@ bool dg2020_phase_setup_finalize( int func, PHS p_phs )
 
 	if ( dg2020.function[ func ].is_phs )
 	{
-		print( WARN, "Phase setup for function `%s' has already been done.\n",
+		print( WARN, "Phase setup for function '%s' has already been done.\n",
 			   Function_Names[ func ] );
 		return FAIL;
 	}
@@ -752,7 +752,7 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 
 	if ( dg2020.function[ func ].is_psd )
 	{
-		print( FATAL, "Phase switch delay for phase function `%s' has already "
+		print( FATAL, "Phase switch delay for phase function '%s' has already "
 			   "been set.\n", Function_Names[ func ] );
 		THROW( EXCEPTION );
 	}

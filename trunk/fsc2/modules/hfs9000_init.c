@@ -74,7 +74,7 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( ! p->function->is_used )
 		{
-			print( FATAL, "The function `%s' of pulse %ld hasn't been "
+			print( FATAL, "The function '%s' of pulse %ld hasn't been "
 				   "declared in the ASSIGNMENTS section.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
@@ -84,7 +84,7 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( p->function->channel == NULL )
 		{
-			print( FATAL, "No channel has been set for function `%s' used for "
+			print( FATAL, "No channel has been set for function '%s' used for "
 				   "pulse %ld.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
@@ -142,7 +142,7 @@ static void hfs9000_basic_functions_check( void )
 
 		if ( ! f->is_needed )
 		{
-			print( WARN, "No pulses have been assigned to function `%s'.\n",
+			print( WARN, "No pulses have been assigned to function '%s'.\n",
 				   Function_Names[ i ] );
 			f->is_used = UNSET;
 
@@ -158,7 +158,7 @@ static void hfs9000_basic_functions_check( void )
 		if ( f->delay < 0 &&
 			 ( hfs9000.is_trig_in_mode || hfs9000.trig_in_mode == EXTERNAL ) )
 		{
-			print( FATAL, "Negative delay for function `%s' can't be used "
+			print( FATAL, "Negative delay for function '%s' can't be used "
 				   "with external triggert mode.\n",
 				   Function_Names[ f->self ] );
 			THROW( EXCEPTION );

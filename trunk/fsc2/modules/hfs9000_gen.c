@@ -74,7 +74,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	{
 		if ( f->is_inverted )
 		{
-			print( FATAL, "Function `%s' has been set to use inverted logic. "
+			print( FATAL, "Function '%s' has been set to use inverted logic. "
 				   "This can't be done with TRIGER_OUT channel.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
@@ -82,7 +82,7 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 
 		if ( f->is_high_level || f->is_low_level )
 		{
-			print( FATAL, "For function `%s', associated with Trigger Out, no "
+			print( FATAL, "For function '%s', associated with Trigger Out, no "
 				   "voltage levels can be set.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
@@ -95,20 +95,20 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		{
 			if ( channel == HFS9000_TRIG_OUT )
 				print( SEVERE, "TRIGGER_OUT channel is assigned more than "
-					   "once to function `%s'.\n",
+					   "once to function '%s'.\n",
 						Function_Names[ c->function->self ] );
 			else
 				print( SEVERE, "Channel %ld is assignedmore than once to "
-					   "function `%s'.\n",
+					   "function '%s'.\n",
 						channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
 		if ( channel == HFS9000_TRIG_OUT )
 			print( FATAL, "TRIGGER_OUT channel is already used for function "
-				   "`%s'.\n", Function_Names[ c->function->self ] );
+				   "'%s'.\n", Function_Names[ c->function->self ] );
 		else
-			print( FATAL, "Channel %ld is already used for function `%s'.\n",
+			print( FATAL, "Channel %ld is already used for function '%s'.\n",
 				   channel, Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -130,7 +130,7 @@ bool hfs9000_invert_function( int function )
 	if ( hfs9000.function[ function ].channel != NULL &&
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Polarity of function `%s' associated with Trigger Out "
+		print( FATAL, "Polarity of function '%s' associated with Trigger Out "
 			   "can't be inverted.\n", Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -153,7 +153,7 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 	if ( hfs9000.function[ function ].is_delay )
 	{
-		print( FATAL, "Delay for function `%s' has already been set.\n",
+		print( FATAL, "Delay for function '%s' has already been set.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -205,14 +205,14 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( f->is_high_level )
 	{
-		print( FATAL, "High level for function `%s' has already been set.\n",
+		print( FATAL, "High level for function '%s' has already been set.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Function `%s' is associated with Trigger Out that "
+		print( FATAL, "Function '%s' is associated with Trigger Out that "
 			   "doesn't allow setting of levels.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
@@ -222,7 +222,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_HIGH_VOLTAGE || voltage > MAX_POD_HIGH_VOLTAGE )
 	{
-		print( FATAL, "Invalid high level of %g V for function `%s', valid "
+		print( FATAL, "Invalid high level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_HIGH_VOLTAGE, MAX_POD_HIGH_VOLTAGE );
 		THROW( EXCEPTION );
@@ -249,14 +249,14 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 	if ( f->is_low_level )
 	{
-		print( FATAL, "Low level for function `%s' has already been set.\n",
+		print( FATAL, "Low level for function '%s' has already been set.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Function `%s' is associated with TRIGGER_OUT channel "
+		print( FATAL, "Function '%s' is associated with TRIGGER_OUT channel "
 			   "that doesn't allow setting of levels.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
@@ -266,7 +266,7 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 	if ( voltage < MIN_POD_LOW_VOLTAGE || voltage > MAX_POD_LOW_VOLTAGE )
 	{
-		print( FATAL, "Invalid low level of %g V for function `%s', valid "
+		print( FATAL, "Invalid low level of %g V for function '%s', valid "
 			   "range is %g V to %g V.\n", voltage, Function_Names[ function ],
 			   MIN_POD_LOW_VOLTAGE, MAX_POD_LOW_VOLTAGE );
 		THROW( EXCEPTION );
