@@ -19,8 +19,8 @@ Ticks dg2020_double2ticks( double time )
 
 	if ( ! dg2020.is_timebase )
 	{
-		eprint( FATAL, "%s:%ld: %s: Can't set a time because no pulser time "
-				"base has been set.", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Can't set a time because no pulser time "
+				"base has been set.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -29,8 +29,8 @@ Ticks dg2020_double2ticks( double time )
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
 		char *t = T_strdup( dg2020_ptime( time ) );
-		eprint( FATAL, "%s:%ld: %s: Specified time of %s is not an integer "
-				"multiple of the pulser time base of %s.", Fname, Lc,
+		eprint( FATAL, SET, "%s: Specified time of %s is not an integer "
+				"multiple of the pulser time base of %s.\n",
 				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
@@ -51,41 +51,42 @@ double dg2020_ticks2double( Ticks ticks )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Checks if the difference of the levels specified for a pod connector */
-/* are within the valid limits.                                         */
-/*----------------------------------------------------------------------*/
+/*------------------------------------------------------*/
+/* Checks if the difference of the levels specified for */
+/* a pod connector are within the valid limits.         */
+/*------------------------------------------------------*/
 
 void dg2020_check_pod_level_diff( double high, double low )
 {
 	if ( low > high )
 	{
-		eprint( FATAL, "%s:%ld: %s: Low voltage level is above high level, "
-				"use keyword INVERT to invert the polarity.",
-				Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Low voltage level is above high level, use "
+				"keyword INVERT to invert the polarity.\n",
+				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
-				"voltage of %g V is too big, maximum is %g V.", Fname, Lc,
+		eprint( FATAL, SET, "%s: Difference between high and low "
+				"voltage of %g V is too big, maximum is %g V.\n",
 				pulser_struct.name, high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
 	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
 	{
-		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
-				"voltage of %g V is too small, minimum is %g V.", Fname, Lc,
+		eprint( FATAL, SET, "%s: Difference between high and low "
+				"voltage of %g V is too small, minimum is %g V.\n",
 				pulser_struct.name, high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Returns pointer to the pulses structure if given a valid pulse number. */
+/*------------------------------------------------------------------------*/
 
 PULSE *dg2020_get_pulse( long pnum )
 {
@@ -94,8 +95,8 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( pnum < 0 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid pulse number: %ld.",
-				Fname, Lc, pulser_struct.name, pnum );
+		eprint( FATAL, SET, "%s: Invalid pulse number: %ld.\n",
+				pulser_struct.name, pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -108,8 +109,8 @@ PULSE *dg2020_get_pulse( long pnum )
 
 	if ( cp == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Referenced pulse %ld does not exist.",
-				Fname, Lc, pulser_struct.name, pnum );
+		eprint( FATAL, SET, "%s: Referenced pulse %ld does not exist.\n",
+				pulser_struct.name, pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -146,13 +147,13 @@ const char *dg2020_pticks( Ticks ticks )
 }
 
 
-/*-----------------------------------------------------------------------------
-   Functions returns a pointer to a free channel - the channels with the
-   lowest numbers are used first since most users probably tend to use the
-   high number channels for storing test pulse sequences that they don't like
-   too much being overwritten just because they didn't set a channel-to-
-   function-assignment in their EDL program.
------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Functions returns a pointer to a free channel - the channels with the   */
+/* lowest numbers are used first since most users probably tend to use the */
+/* high number channels for storing test pulse sequences that they don't   */
+/* like too much being overwritten just because they didn't set a channel- */
+/* to-function-assignment in their EDL program.                            */
+/*-------------------------------------------------------------------------*/
 
 CHANNEL *dg2020_get_next_free_channel( void )
 {
@@ -168,11 +169,12 @@ CHANNEL *dg2020_get_next_free_channel( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  Comparison function for two pulses: returns 0 if both pulses are inactive,
-  -1 if only the second pulse is inactive or starts at a later time and 1 if
-  only the first pulse is inactive pulse or the second pulse starts earlier.
----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Comparison function for two pulses: returns 0 if both pulses are */
+/* inactive, -1 if only the second pulse is inactive or starts at a */
+/* later time and 1 if only the first pulse is inactive pulse or    */
+/* the second pulse starts earlier.                                 */
+--------------------------------------------------------------------*/
 
 int dg2020_start_compare( const void *A, const void *B )
 {
@@ -194,9 +196,9 @@ int dg2020_start_compare( const void *A, const void *B )
 }
 
 
-/*---------------------------------------------------------
-  Determines the longest sequence of all pulse functions.
------------------------------------------------------------*/
+/*---------------------------------------------------------*/
+/* Determines the longest sequence of all pulse functions. */
+/*---------------------------------------------------------*/
 
 Ticks dg2020_get_max_seq_len( void )
 {
@@ -226,12 +228,12 @@ Ticks dg2020_get_max_seq_len( void )
 }
 
 
-/*---------------------------------------------------------------------------
-  Function calculates the amount of memory needed for padding to achieve the
-  requested repetition time. It then sets up the blocks if they are needed.
-  The additional bit in the memory size is needed because, due to a bug
-  in the pulsers firmware, the first bit can't be used
----------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* Function calculates the amount of memory needed for padding to achieve */
+/* the requested repetition time. It then sets up the blocks if they are  */
+/* needed. The additional bit in the memory size is needed because, due   */
+/* to a bug in the pulsers firmware, the first bit can't be used          */
+--------------------------------------------------------------------------*/
 
 void dg2020_calc_padding( void )
 {
@@ -247,9 +249,9 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, "%s: The requested pulse sequences don't fit into "
-				"the pulsers memory. Maybe, you could try a longer pulser "
-				"time base..", pulser_struct.name );
+		eprint( FATAL, UNSET, "%s: The requested pulse sequences don't fit "
+				"into the pulsers memory. You could try a longer pulser time "
+				"base.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -279,8 +281,8 @@ void dg2020_calc_padding( void )
 		if ( padding < 0 )
 		{
 			char *t = T_strdup( dg2020_pticks( dg2020.max_seq_len ) );
-			eprint( SEVERE, "%s: Pulse pattern is %s long and thus longer "
-					"than the repeat time of %s.", pulser_struct.name,
+			eprint( SEVERE, UNSET, "%s: Pulse pattern is %s long and thus "
+					"longer than the repeat time of %s.\n", pulser_struct.name,
 					t, dg2020_pticks( dg2020.repeat_time ) );
 			T_free( t );
 		}
@@ -305,9 +307,9 @@ void dg2020_calc_padding( void )
 
 	if ( dg2020.max_seq_len + padding + block_length >= MAX_PULSER_BITS )
 	{
-		eprint( FATAL, "%s: Can't set the repetition rate for the "
+		eprint( FATAL, UNSET, "%s: Can't set the repetition rate for the "
 				"experiment because it wouldn't fit into the pulsers "
-				"memory.", pulser_struct.name );
+				"memory.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 

@@ -40,16 +40,15 @@ static void vars_params( Var *v, long *elems, long **lpnt, double **dpnt )
 		case ARR_REF :
 			if ( v->from->dim != 1 )
 			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on numbers or array slices.\n", Fname, Lc );
+				eprint( FATAL, SET, "Arithmetic can be only done "
+						"on numbers or array slices.\n" );
 				THROW( EXCEPTION );
 			}
 
 			if ( v->from->flags & NEED_ALLOC )
 			{
-				eprint( FATAL, "%s:%ld: Array `%s' is a dynamically sized "
-						"array of still unknown size.\n",
-						Fname, Lc, v->from->name );
+				eprint( FATAL, SET. "Array `%s' is a dynamically sized "
+						"array of still unknown size.\n", v->from->name );
 				THROW( EXCEPTION );
 			}
 
@@ -185,8 +184,8 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -230,8 +229,8 @@ Var *vars_add_to_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			 eprint( FATAL, "%s:%ld: Sizes of array slices to be added "
-					 "differ.\n", Fname, Lc );
+			 eprint( FATAL, SET, "Sizes of array slices to be added "
+					 "differ.\n" );
 			 THROW( EXCEPTION );
 		}
 		else
@@ -281,8 +280,8 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -317,8 +316,8 @@ Var *vars_add_to_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be added "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be added "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -437,8 +436,8 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -483,8 +482,8 @@ Var *vars_sub_from_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be subtracted "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -533,8 +532,8 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -569,8 +568,8 @@ Var *vars_sub_from_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be subtracted "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be subtracted "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -688,8 +687,8 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -733,8 +732,8 @@ Var *vars_mult_by_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be multiplied "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -783,8 +782,8 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -819,8 +818,8 @@ Var *vars_mult_by_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be multiplied "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be multiplied "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -971,8 +970,8 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1018,8 +1017,8 @@ Var *vars_div_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be divided "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be divided "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1074,8 +1073,8 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1110,8 +1109,8 @@ Var *vars_div_of_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices to be divided "
-					"differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices to be divided "
+					"differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1141,7 +1140,7 @@ static void vars_div_check( double val )
 {
 	if ( val != 0.0 )
 		return;
-	eprint( FATAL, "%s:%ld: Division by zero.\n", Fname, Lc );
+	eprint( FATAL, SET, "Division by zero.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -1279,8 +1278,8 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1326,8 +1325,8 @@ Var *vars_mod_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
-					"calculated from differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
+					"calculated from differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1382,8 +1381,8 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1418,8 +1417,8 @@ Var *vars_mod_of_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices modulo is to be "
-					"calculated from differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices modulo is to be "
+					"calculated from differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1449,7 +1448,7 @@ static void vars_mod_check( double val )
 {
 	if ( val != 0.0 )
 		return;
-	eprint( FATAL, "%s:%ld: Modulo by zero.\n", Fname, Lc );
+	eprint( FATAL, SET, "Modulo by zero.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -1623,8 +1622,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == INT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1701,8 +1700,8 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices used in "
-					"exponentiation differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices used in "
+					"exponentiation differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1786,8 +1785,8 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 
 	if ( v1->type == FLOAT_ARR && v1->dim != 1 )
 	{
-		eprint( FATAL, "%s:%ld: Arithmetic can be only done on numbers and "
-				"array slices.\n", Fname, Lc );
+		eprint( FATAL, SET, "Arithmetic can be only done on numbers and "
+				"array slices.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1825,8 +1824,8 @@ Var *vars_pow_of_float_arr( Var *v1, Var *v2 )
 	{
 		if ( ! ( TEST_RUN && ( ( v1->flags | v2->flags ) & IS_DYNAMIC ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Sizes of array slices used in "
-					"exponentiation differ.\n", Fname, Lc );
+			eprint( FATAL, SET, "Sizes of array slices used in "
+					"exponentiation differ.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1857,8 +1856,8 @@ static void vars_pow_check( double v1, double v2 )
 {
 	if ( v1 < 0.0 && fmod( fabs( v2 ), 1.0 ) != 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Negative base while exponent is not an "
-				"integer value.\n", Fname, Lc );
+		eprint( FATAL, SET, "Negative base while exponent is not an "
+				"integer value.\n" );
 		THROW( EXCEPTION );
 	}
 }
@@ -1884,8 +1883,8 @@ Var *vars_array_check( Var *v1, Var *v2 )
 	{
 		if ( v1->type == ARR_REF && v1->from->dim != 1 )
 		{
-			eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-					"on array slices.\n", Fname, Lc );
+			eprint( FATAL, SET, "Arithmetic can be only done "
+					"on array slices.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -1907,8 +1906,7 @@ Var *vars_array_check( Var *v1, Var *v2 )
 		 || ( v2->type & ( ARR_REF | ARR_PTR ) &&
 			  v2->from->flags & NEED_ALLOC ) )
 	{
-		eprint( FATAL, "%s:%ld: Size of array can't be determined.\n",
-				Fname, Lc );
+		eprint( FATAL, SET, "Size of array can't be determined.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1919,8 +1917,8 @@ Var *vars_array_check( Var *v1, Var *v2 )
 		case ARR_REF :
 			if ( v2->from->dim != 1 )
 			{
-				eprint( FATAL, "%s:%ld: Arithmetic can be only done "
-						"on numbers or array slices.\n", Fname, Lc );
+				eprint( FATAL, SET, "Arithmetic can be only done "
+						"on numbers or array slices.\n" );
 				THROW( EXCEPTION );
 			}
 			vars_check( v2->from, INT_ARR | FLOAT_ARR );

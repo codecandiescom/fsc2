@@ -103,13 +103,13 @@ WS          [\n \t]+
 
 			/* Handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s\n", varstext + 2 );
+				eprint( FATAL, UNSET, "%s\n", varstext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				varstext = strchr( varstext, '\x03' );
-				eprint( FATAL, "%s\n", varstext + 2 );
+				eprint( FATAL, UNSET, "%s\n", varstext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -201,8 +201,8 @@ WS          [\n \t]+
 			}
 
 {CTRL}      {
-				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
-						"in the VARIABLES section.\n", Fname, Lc );
+				eprint( FATAL, SET, "Flow control structures can't be used "
+						"in the VARIABLES section.\n" );
 				THROW( EXCEPTION );
 			}
 
@@ -221,17 +221,16 @@ WS          [\n \t]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
-								 Fname, Lc, varstext );
+						eprint( FATAL, SET, "Function `%s' can only be used "
+								"in the EXPERIMENT section.\n", varstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
 				}
                 else
                 {
-                    eprint( FATAL, "%s:%ld: Function `%s' is not loaded.\n",
-							Fname, Lc, varstext );
+                    eprint( FATAL, SET, "Function `%s' is not loaded.\n",
+							varstext );
 					THROW( EXCEPTION );
                 }
             }
@@ -249,9 +248,8 @@ WS          [\n \t]+
 
 					if ( acc == ACCESS_EXP )
 					{
-						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.\n",
-								 Fname, Lc, varstext );
+						eprint( FATAL, SET, "Function `%s' can only be used "
+								"in the EXPERIMENT section.\n", varstext );
 						THROW( EXCEPTION );
 					}
 					return FUNC_TOKEN;
@@ -312,8 +310,8 @@ WS          [\n \t]+
 
 			/* Handling of invalid input */
 .           {
-				eprint( FATAL, "%s:%ld: Invalid input in VARIABLES section: "
-						"`%s'.\n", Fname, Lc, varstext );
+				eprint( FATAL, SET, "Invalid input in VARIABLES section: "
+						"`%s'.\n", varstext );
 				THROW( EXCEPTION );
 			}
 
@@ -350,8 +348,8 @@ int variables_parser( FILE *in )
 
 	if ( compilation.sections[ VARIABLES_SECTION ] )
 	{
-		eprint( FATAL, "%s:%ld: Multiple instances of VARIABLES section "
-		        "label.\n", Fname, Lc );
+		eprint( FATAL, SET, "Multiple instances of VARIABLES section "
+				"label.\n" );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ VARIABLES_SECTION ] = SET;
@@ -389,8 +387,8 @@ static Var *vars_get_channel_name( void )
 			 return v;
 	}
 
-	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
+	eprint( FATAL, SET, "Token `%s' can't be used, no digitizer module "
 			"loaded or module does not know how to interpret the token.\n",
-			Fname, Lc, varstext );
+			varstext );
 	THROW( EXCEPTION );
 }

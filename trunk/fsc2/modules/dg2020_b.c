@@ -26,9 +26,8 @@ int dg2020_b_init_hook( void )
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, "%s:%ld: While loading driver DG2020_B found that "
-				"driver for pulser %s is already installed.\n",
-				Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "While loading driver DG2020_B found that driver "
+				"for pulser %s is already installed.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -160,7 +159,7 @@ int dg2020_b_test_hook( void )
 	if ( dg2020_Pulses == NULL && ! dg2020.is_cw_mode )
 	{
 		dg2020_is_needed = UNSET;
-		eprint( WARN, "%s loaded but no pulses are defined.\n",
+		eprint( WARN, UNSET, "%s loaded but no pulses are defined.\n",
 				pulser_struct.name );
 		return 1;
 	}
@@ -223,7 +222,7 @@ int dg2020_b_exp_hook( void )
 	
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Failure to initialize the pulser: %s\n",
+		eprint( FATAL, UNSET, "%s: Failure to initialize the pulser: %s\n",
 				pulser_struct.name, gpib_error_msg );
 		THROW( EXCEPTION );
 	}
@@ -345,8 +344,8 @@ Var *pulser_state( Var *v )
 			state = SET;
 		else
 		{
-			eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-					"`pulser_state'.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, SET, "%s: Invalid argument in call of "
+					"`pulser_state'.\n", DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -365,8 +364,8 @@ Var *pulser_state( Var *v )
 Var *pulser_channel_state( Var *v )
 {
 	v = v;
-	eprint( SEVERE, "%s:%ld: %s: Individual pod channels can't be switched "
-			"on or off with this device.\n", Fname, Lc, DEVICE_NAME );
+	eprint( SEVERE, SET, "%s: Individual pod channels can't be switched "
+			"on or off with this device.\n", DEVICE_NAME );
 	return vars_push( INT_VAR, 0 );
 }
 
@@ -381,8 +380,8 @@ Var *pulser_update( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_update' can't be used "
-				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_update' can't be used "
+				"in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -415,8 +414,8 @@ Var *pulser_cw_mode( Var *v )
 
 	if ( dg2020_Pulses != NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: CW mode and use of pulses is mutually "
-				"exclusive.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: CW mode and use of pulses is mutually "
+				"exclusive.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -424,22 +423,22 @@ Var *pulser_cw_mode( Var *v )
 
 	if ( ! dg2020.function[ PULSER_CHANNEL_MW ].is_used )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `MICROWAVE' has not been defined "
-				"as needed for CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `MICROWAVE' has not been defined "
+				"as needed for CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
 	if ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == EXTERNAL )
 	{
-		eprint( FATAL, "%s:%ld: %s: External trigger mode can't be used "
-				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: External trigger mode can't be used "
+				"in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
 	if ( dg2020.is_repeat_time )
 	{
-		eprint( FATAL, "%s:%ld: %s: Repeat time/frequency can't be set "
-				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Repeat time/frequency can't be set "
+				"in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -467,8 +466,8 @@ Var *pulser_shift( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_shift' can't be used in "
-				"CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_shift' can't be used in "
+				"CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -492,17 +491,17 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			eprint( FATAL, "%s:ld: %s: Pulse %ld has no position set, so "
+			eprint( FATAL, SET, "%s: Pulse %ld has no position set, so "
 					"shifting it is impossible.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dpos )
 		{
-			eprint( FATAL, "%s:%ld: %s: Amount of position change hasn't "
+			eprint( FATAL, SET, "%s: Amount of position change hasn't "
 					"been defined for pulse %ld.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -514,10 +513,9 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Shifting the position of pulse "
+			eprint( FATAL, SET, "%s: Shifting the position of pulse "
 					"%ld leads to an invalid  negative position of %s.\n",
-					Fname, Lc, pulser_struct.name,
-					p->num, dg2020_pticks( p->pos ) );
+					pulser_struct.name, p->num, dg2020_pticks( p->pos ) );
 			THROW( EXCEPTION );
 		}
 
@@ -550,8 +548,8 @@ Var *pulser_increment( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_increment' can't be used "
-				"in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_increment' can't be used "
+				"in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -575,17 +573,16 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			eprint( FATAL, "%s:%ld: %s: Pulse %ld has no length set, so "
+			eprint( FATAL, SET, "%s: Pulse %ld has no length set, so "
 					"incrementing it is impossibe.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->is_dlen )
 		{
-			eprint( FATAL, "%s:%ld: %s: Length change time hasn't been "
-					"defined for pulse %ld.\n",
-					Fname, Lc, pulser_struct.name, p->num );
+			eprint( FATAL, SET, "%s: Length change time hasn't been "
+					"defined for pulse %ld.\n", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 	
@@ -597,10 +594,9 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Incrementing the length of pulse "
+			eprint( FATAL, SET, "%s: Incrementing the length of pulse "
 					"%ld leads to an invalid negative pulse length of %s.\n",
-					Fname, Lc, pulser_struct.name,
-					p->num, dg2020_pticks( p->len ) );
+					pulser_struct.name, p->num, dg2020_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
 
@@ -631,8 +627,8 @@ Var *pulser_next_phase( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_next_phase' can't be "
-				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_next_phase' can't be "
+				"used in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -645,8 +641,8 @@ Var *pulser_next_phase( Var *v )
 			 dg2020_phs[ 1 ].function == NULL &&
 			 TEST_RUN )
 		{
-			eprint( SEVERE, "%s:%ld: %s: No phase cycling is used any of the "
-					"functions.\n", Fname, Lc, pulser_struct.name );
+			eprint( SEVERE, SET, "%s: No phase cycling is used any of the "
+					"functions.\n", pulser_struct.name );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -661,8 +657,8 @@ Var *pulser_next_phase( Var *v )
 		vars_check( v, INT_VAR );
 		if ( v->val.lval != 1 && v->val.lval != 2 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.\n",
-					Fname, Lc, pulser_struct.name, v->val.lval );
+			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
+					pulser_struct.name, v->val.lval );
 			THROW( EXCEPTION );
 		}
 
@@ -672,8 +668,8 @@ Var *pulser_next_phase( Var *v )
 		if ( ! f->is_used )
 		{
 			if ( TEST_RUN )
-				eprint( SEVERE, "%s:%ld: %s: Function `%s' to be phase cycled "
-						"is not used.\n", Fname, Lc, pulser_struct.name,
+				eprint( SEVERE, SET, "%s: Function `%s' to be phase cycled "
+						"is not used.\n", pulser_struct.name,
 						Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
@@ -706,8 +702,8 @@ Var *pulser_phase_reset( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_next_reset' can't be "
-				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_next_reset' can't be "
+				"used in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -720,8 +716,8 @@ Var *pulser_phase_reset( Var *v )
 			 dg2020_phs[ 1 ].function == NULL &&
 			 TEST_RUN )
 		{
-			eprint( SEVERE, "%s:%ld: %s: No phase cycling is used any of the "
-					"functions.\n", Fname, Lc, pulser_struct.name );
+			eprint( SEVERE, SET, "%s: No phase cycling is used any of the "
+					"functions.\n", pulser_struct.name );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -736,8 +732,8 @@ Var *pulser_phase_reset( Var *v )
 		vars_check( v, INT_VAR );
 		if ( v->val.lval != 1 && v->val.lval != 2 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.\n",
-					Fname, Lc, pulser_struct.name, v->val.lval );
+			eprint( FATAL, SET, "%s: Invalid phase number: %ld.\n",
+					pulser_struct.name, v->val.lval );
 			THROW( EXCEPTION );
 		}
 
@@ -747,8 +743,8 @@ Var *pulser_phase_reset( Var *v )
 		if ( ! f->is_used )
 		{
 			if ( TEST_RUN )
-				eprint( SEVERE, "%s:%ld: %s: Function `%s' to be phase cycled "
-						"is not used.\n", Fname, Lc, pulser_struct.name,
+				eprint( SEVERE, SET, "%s: Function `%s' to be phase cycled "
+						"is not used.\n", pulser_struct.name,
 						Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
@@ -779,8 +775,8 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( dg2020.is_cw_mode )
 	{
-		eprint( FATAL, "%s:%ld: %s: Function `pulser_pulse_reset' can't be "
-				"used in CW mode.\n", Fname, Lc, pulser_struct.name );
+		eprint( FATAL, SET, "%s: Function `pulser_pulse_reset' can't be "
+				"used in CW mode.\n", pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 
@@ -873,8 +869,8 @@ Var *pulser_lock_keyboard( Var *v )
 				lock = SET;
 			else
 			{
-				eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-						"`pulser_lock_keyboard'.\n", name, Lc, DEVICE_NAME );
+				eprint( FATAL, SET, "%s: Invalid argument in call of "
+						"`pulser_lock_keyboard'.\n", DEVICE_NAME );
 				THROW( EXCEPTION );
 			}
 		}

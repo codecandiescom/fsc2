@@ -104,13 +104,11 @@ static Var *CV;
 input:   /* empty */
        | input eol
        | input line eol
-       | input line line           { eprint( FATAL, "%s:%ld: Missing semicolon"
-											 " before (or on) this line.\n",
-											 Fname, Lc );
+       | input line line           { eprint( FATAL, SET, "Missing semicolon"
+											 " before (or on) this line.\n" );
 	                                 THROW( EXCEPTION ); }
-       | input line ','            { eprint( FATAL, "%s:%ld: Missing semicolon"
-											 " before (or on) this line.\n",
-											 Fname, Lc );
+       | input line ','            { eprint( FATAL, SET, "Missing semicolon"
+											 " before (or on) this line.\n" );
 	                                 THROW( EXCEPTION ); }
 ;
 
@@ -134,9 +132,8 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
          list1 ']'                 { vars_arr_lhs( $4 ) }
          ass                       { fsc2_assert( Var_Stack == NULL ); }
        | E_FUNC_TOKEN '(' list2 ')'{ vars_pop( func_call( $1 ) ); }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
+       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
+											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS '=' expr           { p_set( $1, P_POS, $3 ); }
        | E_PPOS E_PLSA expr        { p_set( $1, P_POS, vars_add(
@@ -225,13 +222,11 @@ expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
          ')'                       { CV = func_call( $1 ); }
          unit                      { $$ = apply_unit( CV, $6 ); }
        | E_VAR_REF                 { $$ = $1; }
-       | E_VAR_TOKEN '('           { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											 "function.\n", Fname, Lc,
-											 $1->name );
+       | E_VAR_TOKEN '('           { eprint( FATAL, SET, "`%s' isn't a "
+											 "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
+       | E_FUNC_TOKEN '['          { eprint( FATAL, SET, "`%s' is a predefined"
+											 " function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | E_PPOS                    { $$ = p_get_by_num( $1, P_POS ); }
        | E_PLEN                    { $$ = p_get_by_num( $1, P_LEN ); }
@@ -309,7 +304,6 @@ int exp_runerror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 
-	eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.\n",
-			Fname, Lc );
+	eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );
 }

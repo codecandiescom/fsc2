@@ -78,13 +78,11 @@ linet:   VAR_TOKEN                 { } /* no assignment to be done */
          list1 ']'                 { vars_arr_lhs( $4 ); }
          arhs
        | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-								  			 "function and not an array.\n",
-								  			 Fname, Lc, $1->name );
+       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a function "
+											 "and not an array.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' is an "
-								  			 "array and not a function.\n",
-								  			 Fname, Lc, $1->name );
+       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' is an array and"
+											 " not a function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
 ;
 
@@ -99,13 +97,11 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | FUNC_TOKEN '(' list4 ')'  { CV = func_call( $1 ); }
          unit                      { $$ = apply_unit( CV, $6 ); }
        | VAR_REF                   { $$ = $1; }
-       | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											 "function.\n", Fname, Lc,
-											 $1->name );
+       | VAR_TOKEN '('             { eprint( FATAL, SET, "`%s' isn't a "
+											 "function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
-											 Fname, Lc, $1->name );
+       | FUNC_TOKEN '['            { eprint( FATAL, SET, "`%s' is a predefined"
+											 " function.\n",$1->name );
 	                                 THROW( EXCEPTION ); }
        | expr AND expr       	   { $$ = vars_comp( COMP_AND, $1, $3 ); }
        | expr OR expr        	   { $$ = vars_comp( COMP_OR, $1, $3 ); }
@@ -198,10 +194,8 @@ void varserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *varstext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in VARIABLES "
-				"section.\n", Fname, Lc );
+		eprint( FATAL, SET. "Unexpected end of file in VARIABLES section.\n");
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
-				Fname, Lc, varstext );
+		eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
 	THROW( EXCEPTION );
 }
