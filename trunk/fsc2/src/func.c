@@ -336,6 +336,8 @@ Var *func_call( Var *f )
 			THROW( EXCEPTION );
 		}
 	}
+	else
+		ac = -1;
 
 	/* Now call the function */
 
@@ -1451,6 +1453,23 @@ Var *f_display( Var *v )
 						   * sizeof( double );
 				break;
 
+			case ARR_REF :
+				if ( dp[ i ].v->from->dim != 1 )
+				{
+					eprint( FATAL, "%s:%ld: Only one-dimensional arrays or "
+							"slices of more-dimensional arrays can be "
+							"displayed.\n", Fname, Lc );
+				}
+
+
+				len += sizeof( long );
+
+				if ( dp[ i ].v->from->type == INT_ARR )
+					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( long );
+				else
+					len += dp[ i ].v->from->sizes[ 0 ] * sizeof( double );
+				break;
+
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, "Internal communication error at %s:%d.",
@@ -1514,6 +1533,8 @@ Var *f_display( Var *v )
 				break;
 
 			case ARR_PTR :
+				assert( dp[ i ].v->from->type == INT_ARR ||
+						dp[ i ].v->from->type == FLOAT_ARR );
 				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
 				ptr += sizeof( int );
 
@@ -1530,6 +1551,30 @@ Var *f_display( Var *v )
 				else
 				{
 					memcpy( ptr, dp[ i ].v->val.gptr,
+							len * sizeof( double ) );
+					ptr += len * sizeof( double );
+				}
+				break;
+
+			case ARR_REF :
+				assert( dp[ i ].v->from->type == INT_ARR ||
+						dp[ i ].v->from->type == FLOAT_ARR );
+				memcpy( ptr, &dp[ i ].v->from->type, sizeof( int ) );
+				ptr += sizeof( int );
+					
+				len = dp[ i ].v->from->sizes[ 0 ];
+				memcpy( ptr, &len, sizeof( long ) );
+				ptr += sizeof( long );
+
+				if ( dp[ i ].v->from->type == INT_ARR )
+				{
+					memcpy( ptr, dp[ i ].v->from->val.lpnt,
+							len * sizeof( long ) );
+					ptr += len * sizeof( long );
+				}
+				else
+				{
+					memcpy( ptr, dp[ i ].v->from->val.dpnt,
 							len * sizeof( double ) );
 					ptr += len * sizeof( double );
 				}
@@ -1649,7 +1694,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 			THROW( EXCEPTION );
 		}
 
-		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR );
+		vars_check( v, INT_VAR | FLOAT_VAR | ARR_PTR | ARR_REF );
 
 		dp[ *nsets ].v = v;
 
@@ -1930,11 +1975,11 @@ Var *f_getf( Var *var )
 
 
 	/* If there was a call of `f_save()' without a previous call to `f_getf()'
-	   `f_save()' did call already call `f_getf()' by itself and now expects
-	   no file identifiers at all anymore - in this case `No_File_Numbers' is
-	   set.So, if we get a call to `f_getf()' while `No_File_Numbers' is set we
-	   must tell the user that he can't have it both ways, i.e. he either has
-	   to call `f_getf()' before any call to `f_save()' or never. */
+	   `f_save()' did call already call `f_getf()' by itself and now don't
+	   expect file identifiers anymore - in this case `No_File_Numbers' is
+	   set. So, if we get a call to `f_getf()' while `No_File_Numbers' is set
+	   we must tell the user that he can't have it both ways, i.e. he either
+	   has to call `f_getf()' before any call to `f_save()' or never. */
 
 	if ( No_File_Numbers )
 	{
