@@ -216,7 +216,6 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		PASSTHROU( );
 	}
 	
-
 	fclose( func_listin );
 }
 
