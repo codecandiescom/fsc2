@@ -1074,10 +1074,10 @@ static void recalc_XPoints_2d( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Recalculates the graphics data for a curve using the the curves */
-/* settings for the scale and the offset.                          */
-/*-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Recalculates the graphic data for a curve using the the curves */
+/* settings for the scale and the offset.                         */
+/*----------------------------------------------------------------*/
 
 void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 {

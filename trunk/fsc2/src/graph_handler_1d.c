@@ -910,31 +910,32 @@ static void recalc_XPoints_1d( void )
 
 void recalc_XPoints_of_curve_1d( Curve_1d *cv )
 {
-	long j, k;
+	long j;
+	Scaled_Point *sp = cv->points;
+	XPoint *xp = cv->xpoints;
 
 
 	cv->up = cv->down = cv->left = cv->right = UNSET;
 
-	for ( k = j = 0; j < G.nx; j++ )
+	for ( j = 0; j < G.nx; sp++, j++ )
 	{
-		if ( cv->points[ j ].exist )
-		{
-			cv->xpoints[ k ].x = d2shrt( cv->s2d[ X ]
-										            * ( j + cv->shift[ X ] ) );
-			cv->xpoints[ k ].y = ( short ) G.canvas.h - 1 - 
+		if ( ! sp->exist )
+			continue;
+
+		xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+		xp->y = ( short ) G.canvas.h - 1 - 
 			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
-			if ( cv->xpoints[ k ].x < 0 )
-				cv->left = SET;
-			if ( cv->xpoints[ k ].x >= ( int ) G.canvas.w )
-				cv->right = SET;
-			if ( cv->xpoints[ k ].y < 0 )
-				cv->up = SET;
-			if ( cv->xpoints[ k ].y >= ( int ) G.canvas.h )
-				cv->down = SET;
+		if ( xp->x < 0 )
+			cv->left = SET;
+		if ( xp->x >= ( int ) G.canvas.w )
+			cv->right = SET;
+		if ( xp->y < 0 )
+			cv->up = SET;
+		if ( xp->y >= ( int ) G.canvas.h )
+			cv->down = SET;
 
-			k++;
-		}
+		xp++;
 	}
 }
 
