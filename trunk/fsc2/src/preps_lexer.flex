@@ -309,7 +309,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4sec"    return S_TOKEN;
 
 			/* handling of invalid input */
-.           THROW( INVALID_INPUT_EXCEPTION );
+.+          THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Preps_Next_Section = NO_SECTION;

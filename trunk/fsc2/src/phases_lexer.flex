@@ -56,7 +56,6 @@ PS          ^[ \t]*P(HASE)?_?S(EQ(UENCE)?)?_?[0-9]{0,2}
 AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?_?[XY]?
 
 WS          [\n=,:. ]+
-UNREC       [^\n=,;:. ]+
 
 
 		/*---------------*/
@@ -197,7 +196,7 @@ UNREC       [^\n=,;:. ]+
 ";"         return ';';              /* end of statement character */
 
 			/* handling of invalid input */
-{UNREC}     THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Phases_Next_Section = NO_SECTION;
