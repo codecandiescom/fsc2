@@ -34,13 +34,13 @@ to explain it to the new user. In this case it is possible to write some
 rather simple programs that interface to @acronym{fsc2} and handle this
 automatically.
 
-What such a program has to do is to create a @acronym{EDL} file and
-send it to @acronym{fsc2}. Usually, the program will have a graphical
+What such a program has to do is to create a @acronym{EDL} file and send
+it to @acronym{fsc2}. Usually, the program will have a graphical
 frontend that allows the user to set the parameter and will then create
 the @acronym{EDL} file using these parameter. To write such a program an
 interpreted language like Tcl/Tk or Perl/Tk (or even a simple shell
-script using e.g.@ the dialog utility) will be suficient. When it is
-done all it has to do is to call one of the programs
+script using e.g.@ the @code{dialog} utility) will be suficient. When it
+is done all it has to do is to call one of the programs
 @example
   fsc2_load
   fsc2_test
