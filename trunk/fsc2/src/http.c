@@ -292,7 +292,7 @@ static void http_send_error_browser( int pd )
 
 static void http_send_picture( int pd, int type )
 {
-	char filename[ ] = P_tmpdir "/fsc2XXXXXX";
+	char filename[ ] = P_tmpdir "/fsc2.XXXXXX";
 	char reply[ 2 ];
 	static int tmp_fd = -1;
 
