@@ -1566,6 +1566,29 @@ automatically, that the ability associated with the function is not
 available with the driver. You can be sure that all time values that
 these function receive are integer multiples of one nanosecond.
 
+
+Execpt four of the functions for setting pulse properties, i.e.@:
+@code{set_pulse_position()}, @code{set_pulse_length()},
+@code{set_pulse_position_change()} and @code{set_pulse_length_change()},
+and the functions for asking pulse properties from the module, i.e.@:
+all functions with names starting with @code{get_pulse_}, all functions
+will only be called before the experiment is started, i.e. in the time
+between the calls of the init_hook() and the test_hook() function.
+
+
+During the test run. i.e.@: between the @code{test_hook()} and the
+@code{exp_hook()} function call (while the global variable
+@code{TEST_RUN} is set) functions to change pulse positions and lengths
+will be called. In this functions the internal representation of the
+pulser state has to be updated and the consistency of the state has to
+be checked (i.e. do the pulses stay separated, don't they overtake each
+other, do the lengths remain larger than zero, do the positions stay
+larger than zero and don't exceed the maximum channel length, etc.). The
+driver also might choose to store the longest duration of a pulse
+sequence during the test run to be used later in the calculation of the
+padding needed to set a fixed repeat time for the experiment.
+
+
 @table @samp
 
 @item bool assign_channel_to_function( int function, long channel )
