@@ -250,7 +250,6 @@ bool fsc2_locking( void )
 {
 	int fd, flags;
 	struct flock lock;
-	char message[ 128 ] = "running. ";
 	char buf[ 10 ];
 	int i;
 
@@ -259,8 +258,7 @@ bool fsc2_locking( void )
 
 	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
-		fl_show_alert( "Error", "Sorry, can't create lock file:",
-					   LOCKFILE, 1 );
+		fprintf( stderr, "Error: Can't access lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
 
@@ -273,8 +271,10 @@ bool fsc2_locking( void )
 
 	if ( fcntl( fd, F_SETLK, &lock ) == -1 )           /* if lock failed */
 	{
+		fprintf( stderr, "Error: fsc2 is already running." );
+
 		/* Try to read from the lock file the PID of the process holding
-		   the lock and add it to the error message */
+		   the lock and append it to the error message */
 
 		i = 0;
 		do
@@ -283,54 +283,34 @@ bool fsc2_locking( void )
 		if ( i != 10 )
 		{
 			buf[ i ] = '\0';
-			strcat( message, " Its PID is " );
-			strcat( message, buf );
-			strcat( message, "." );
+			fprintf( stderr, " Its PID is %s.\n", buf );
 		}
-		
-		fl_show_alert( "Error", "Another instance of fsc2 is already",
-					   message, 1 );
+		else
+			fprintf( stderr, "\n" );
 		return FAIL;
 	}
 
-	/* Truncate to zero length */
-
-	if ( ftruncate( fd, 0 ) < 0 )
-	{
-		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lock file:",
-					   LOCKFILE, 1 );
-		return FAIL;
-	}
-
-	/* Write process ID into the lock file */
+	/* Truncate to zero length, write process ID into the lock file and
+	   get the close-on-exec flag*/
 
 	sprintf( buf, "%d\n", getpid( ) );
-	if ( write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) )
+	if ( ftruncate( fd, 0 ) < 0 ||
+		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
+		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
 	{
 		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lock file:",
-					   LOCKFILE, 1 );
+		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
 
-	/* Set the close-on-exec flag */
-
-	if ( ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
-	{
-		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lock file:",
-					   LOCKFILE, 1 );
-		return FAIL;
-	}
+	/* Finally set the close-on-exec flag */
 
 	flags |= FD_CLOEXEC;
 
 	if ( fcntl( fd, F_GETFD, flags ) < 0 )
 	{
 		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lock file:",
-					   LOCKFILE, 1 );
+		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
 		return FAIL;
 	}
 
@@ -343,42 +323,39 @@ bool fsc2_locking( void )
 
 void delete_stale_shms( void )
 {
-	char cmd[ 128 ];
-	FILE *pp;
-	int shm_id;
+	int max_id, id, shm_id;
+    struct shmid_ds shm_seg;
+	int euid = geteuid( );
 	void *buf;
 
 
-	/* Start the perl script 'shm_list' (must be located in `libdir') to get
-	   a list of all shared memory segments */
+	/* Get the maximum shared memory segment id (the following is more or
+	   less a copy of the code from ipcs utility) */
 
-	strcpy( cmd, libdir );
-	strcat( cmd, "/shm_list" );
-	if ( ( pp = popen( cmd, "r" ) ) == NULL )
-		return;
-	
-	/* Run through the list of memory segments */
+    max_id = shmctl ( 0, SHM_INFO, ( struct shmid_ds * ) &shm_seg );
 
-	while ( fscanf( pp, "%d", &shm_id ) != EOF )
+	/* Run through all of the possible IDs. If they belong to fsc2 and start
+	   with the magic 'fsc2' they are deleted. */
+
+    for ( id = 0; id <= max_id; id++ )
 	{
-		/* Try to attach to the segment */
+        shm_id = shmctl( id, SHM_STAT, &shm_seg );
+        if ( shm_id  < 0 ) 
+            continue;
 
-		if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
-			continue;
-
-		/* If the segments starts with the 'fsc2' delete it */
-
-		if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
+		if ( shm_seg.shm_perm.uid == euid )
 		{
-			shmdt( buf );
-			shmctl( shm_id, IPC_RMID, NULL );
+			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+				continue;
+			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
+			{
+				shmdt( buf );
+				shmctl( shm_id, IPC_RMID, NULL );
+			}
+			else
+				shmdt( buf );
 		}
-		else
-			shmdt( buf );
 	}
-
-	pclose( pp );
-	return;
 }
 
 
