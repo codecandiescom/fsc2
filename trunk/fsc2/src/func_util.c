@@ -3548,13 +3548,13 @@ Var *f_mean_part_array( Var *v )
 	Var *nv;
 
 
-	if ( v == NULL || v->next == NULL )
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	if ( v->len == 0 )
 	{
-		print( FATAL, "Missing argument(s).\n" );
+		print( FATAL, "Size of array isn't known yet.\n" );
 		THROW( EXCEPTION );
 	}
-
-	vars_check( v, INT_ARR | FLOAT_ARR );
 
 	size = get_strict_long( v->next, "size of partition" );
 
@@ -3586,6 +3586,9 @@ Var *f_mean_part_array( Var *v )
 		else
 			return vars_push( FLOAT_ARR, v->val.dpnt, v->len );
 	}
+
+	if ( size == v->len )
+		return f_mean( v );
 
 	m = T_calloc( size, sizeof *m );
 	par = v->len / size;

@@ -1952,7 +1952,7 @@ elements or sub-arrays specified as the third argument are used.
 @anchor{mean_part_array}
 @item mean_part_array()
 @findex mean_part_array()
-The function expects as its arguments an 1-dimensionl arrays of integers
+The function expects as its arguments an 1-dimensional arrays of integers
 or floats and a positive integer, with the length of the array being an
 integer multiple of this number. The array is now split into chunks of
 this size and the chunks are averaged. The resulting 1-dimensional float
