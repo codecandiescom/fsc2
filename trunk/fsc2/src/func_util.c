@@ -1166,7 +1166,7 @@ Var *f_clearcv( Var *v )
 	if ( ! G.is_init )
 	{
 		if ( TEST_RUN )
-			eprint( WARN, "$s:%ld: Can't clear curve, missing graphics "
+			eprint( WARN, "%s:%ld: Can't clear curve, missing graphics "
 					"initialisation.\n!\n", Fname, Lc );
 		return vars_push( INT_VAR, 0 );
 	}
