@@ -1189,7 +1189,6 @@ static void recreate_Tool_Box( void )
 		fl_free_object( Tool_Box->background_box );
 
 		fl_free_form( Tool_Box->Tools );
-		Tool_Box->Tools = NULL;
 	}
 
 	/* Now we've got to calculate its new size and create it */

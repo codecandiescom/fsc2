@@ -784,6 +784,7 @@ void writer( int type, ... )
 	int n1, n2;
 	int i;
 	char ack;
+	void *data;
 
 
 	/* The child process has to wait for the parent process to become ready to
@@ -964,8 +965,8 @@ void writer( int type, ... )
 
 			header.data.len = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
-			str[ 0 ] = va_arg( ap, char * );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			data = va_arg( ap, void * );
+			write( pd[ WRITE ], data, header.data.len );
 			break;
 
 		case C_BCREATE_REPLY : case C_SCREATE_REPLY : case C_SSTATE_REPLY :
@@ -973,8 +974,8 @@ void writer( int type, ... )
 
 			header.data.len = va_arg( ap, long );
 			write( pd[ WRITE ], &header, sizeof( CommStruct ) );
-			str[ 0 ] = va_arg( ap, char * );
-			write( pd[ WRITE ], str[ 0 ], header.data.len );
+			data = va_arg( ap, void * );
+			write( pd[ WRITE ], data, header.data.len );
 			break;
 
 		case C_BDELETE_REPLY : case C_BSTATE_REPLY : case C_SDELETE_REPLY :

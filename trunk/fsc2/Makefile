@@ -40,8 +40,8 @@ SHELL          = /bin/sh
 CC             = gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 -Wmissing-prototypes -Wmissing-declarations -W \
-				 # -DDEBUG \
 				 # -DMDEBUG # for malloc debugging
+				 # -DDEBUG \
 				 # -DMAX_DEBUG # for debugging of digitizer
 
 LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
