@@ -70,7 +70,7 @@ this chapter.
 
 The basic setup of a pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
-cycling is planned for the experiment.
+cycling is to be done in the experiment.
 
 
 @c ########################################################
@@ -95,14 +95,14 @@ etc.).
 
 The first statement of the @code{ASSIGNMENTS} section has to be the
 setting of the time base of the pulser. All pulsers function similarly:
-they have a certain number of time slices (65536, 2^16) and for each of
-them the output of the pulser can be either set to a high or a low
-voltage. By setting the output during one or more of these time slices
-to a high voltage (and for the neighboring slices to low) pulses are
-created.  The time base to be set first in the @code{ASSIGNMENT} section
-is the length of one of these time slices. From the above it is clear,
-that all pulses (as well as all the times between pulses) have to be
-integer multiples of the length of this time base.
+they have a certain number of time slices (usually 65536, 2^16) and for
+each of them the output of the pulser can be either set to a high or a
+low voltage. By setting the output during one or more of these time
+slices to a high voltage (and for the neighboring slices to low) pulses
+are created.  The time base to be set first in the @code{ASSIGNMENT}
+section is the length of each of these time slices. From the above it is
+clear, that all pulses (as well as all the times between pulses) have to
+be integer multiples of the length of the time base.
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -112,7 +112,7 @@ time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 TIMEBASE: 5 ns;
 @end example
 
-The minimum and maximum values for the time base differ for both types of
+The minimum and maximum values for the time base differ for the different
 pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
@@ -129,8 +129,7 @@ TIMEBASE#1:  5 ns;
 TIMEBASE#2: 25 ns;
 @end example
 @noindent
-As usual, the additional @code{#1} in the first statement can be left out.
-
+The additional @code{#1} in the statement for the first pulser is optional.
 
 
 @c ########################################################
@@ -221,9 +220,9 @@ For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 
-If you need to control more than one pulser you have a
+If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
-need to append a @code{#} and the number of the pulser to make tell the
+need to append a @code{#} and the number of the pulser to tell the
 program for which pulser the trigger mode is to be used.
 
 
@@ -268,7 +267,7 @@ output on different channels, depending on the current phase. So,
 instead of always specifying which output channel to use for a certain
 phase for each phase, the program is told about which channels to use
 for a function and then it's left to the program to do all the
-bookkeeping when to use which output channel.
+bookkeeping about when to use which output channel.
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -311,7 +310,7 @@ abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
 The names of the functions do not enforce what the channels that will
 become associated with them are really going to be used for, but it is
 probably a good idea not to use e.g.@: the @code{MICROWAVE} channel for
-something completely different (other people will have major problems
+something completely different (or other people will have major problems
 understanding what your @code{EDL} program is supposed to do and
 there's no Obfuscated EDL Contest yet;-).
 
@@ -336,7 +335,7 @@ RF_GATE:   CH = 3;
 DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
 @noindent
-Please note, that usually the output channels are numbered as printed on
+Please note that the output channels usually are numbered as printed on
 the device, the only exception for the @strong{Tektronix HFS9003} is the
 trigger-out channel, that is called @code{TRIGGER_OUT}, and has some
 special properties, e.g. allowing only one pulse of a fixed length.
@@ -357,11 +356,11 @@ Instead of @code{POD} you can also simply write @code{P}.
 
 
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
-which of the internal channels should be used. If you don't the channel
-the program will automatically grab as many of the internal channels as
-it needs (using always the ones with the lowest numbers first). You can
-tell the program which of the internal channels it should use via a
-statement like this:
+which of the internal channels should be used. If you don't the program
+will automatically grab as many internal channels as it needs, always
+using the ones with the lowest numbers first. But you also can tell the
+program which of the internal channels it should use via a statement
+like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
@@ -445,11 +444,11 @@ cycling is to be used.
 @strong{Berlin X-band spectrometer}:
 
 The Berlin bridge setup is rather simple in that it expects pulses with
-different phases to appear on different input channels of the microwave
-bridge. The bridge has 5 different inputs (one for each phase
+different phases to appear on different input connectors of the
+microwave bridge. The bridge has 5 different inputs (one for each phase
 @code{+X}, @code{-X}, @code{+Y} and @code{-Y} and one to be used for
 @i{cw} experiments) and the phase of the pulse coming from the bridge
-and going to the TWT amplifier depends on which input channel was used
+and going to the TWT amplifier depends on which input connector was used
 for the pulse.
 
 Now all you have to do is to tell the program once which pulser pod
@@ -466,12 +465,13 @@ PHASE_SETUP:  MICROWAVE,
 @end example
 @noindent
 In this example you obviously want to phase cycle the microwave pulses
-and the @code{+X} input of the bridge is connected to pod channel 1 of
-the pulser etc.@footnote{As usual, the keyword @code{PHASE_SETUP} can be
-abbreviated, either to @code{PH_SETUP}, @code{PHASE_S}, or @code{PHS}.}
-Since you actually can have 2 phase cycled function, you may append
-either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
-between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
+and the @code{+X} input connector of the bridge is connected to pod
+channel 1 of the pulser etc.@footnote{As usual, the keyword
+@code{PHASE_SETUP} can be abbreviated, either to @code{PH_SETUP},
+@code{PHASE_S}, or @code{PHS}.}  Since you actually can have 2 phase
+cycled function, you may append either @code{1} or @code{_1} and
+@code{2} or @code{_2} to distinguish between the two phase setups,
+i.e.@: @code{PHASE_SETUP_1}.
 
 
 @strong{Frankurt S-band spectrometer}:
@@ -480,7 +480,7 @@ The Frankfurt spectrometer is somewhat more complicated. The bridge has
 one microwave pulse input and two further input channels that control the
 setting of the bridges phase switch. So, while a microwave pulse is sent
 to the bridge, further phase pulses have to be present to control the
-phase switch. Two pulse inputs are enough to differentiate between the 4
+phase switch. Two phase inputs are enough to differentiate between the 4
 phases @code{+X}, @code{-X}, @code{+Y} and @code{-Y}.
 
 In order to create the phase pulses an extra function is needed for
@@ -517,11 +517,11 @@ to indicate a high output state, @code{OFF} and @code{0} stand for a low
 state.
 
 With these informations the program is able (or nearly is) to create the
-phase pulses (i.e.@: the pulses that control the phase switch) without
-the user having to deal with it. So, all that needs to be done later
-is to create the microwave pulses and define the sequence of phases for
-the pulse. The program will automatically create the pulses necessary to
-set the phases of the microwave pulses.
+the additional "phase" pulses (i.e.@: the pulses that control the phase
+switch) without the user having to deal with it. So, all that needs to
+be done later is to create the microwave pulses and define the sequence
+of phases for the pulses. The program will automatically create the
+pulses necessary to set the phases of the microwave pulses.
 
 One further information that is needed is the time the phase switch has
 to be set to a new phase before the microwave pulses (or other phase
@@ -611,7 +611,7 @@ This will tell the program to expect a maximum pattern length of 1.2
 micro-seconds. Unless in the test run a longer pattern length is found,
 this value is used. It is not a problem to specify too long a maximum
 pattern length, so a conservative guess will do. The only penalty
-incurred is a slightly longer time needed to set up the pulser at the
+incurred is are longer times needed to set up the pulser at the
 start of the experiment. On the other hand, too short a pattern length
 will lead to the experiment being stopped with an error message when the
 actual pattern length becomes larger than the one specified.
@@ -629,15 +629,15 @@ indicate for which pulser it is to be used.
 @cindex @code{KEEP_ALL_PULSES}
 
 Usually pulses that in the test run are found to be unused are deleted
-and a warning message is printed. Any further reference to or use of
-these deleted pulses leads to the immediate termination of the
-experiment. But there are a few situations where it can't be detected in
-the test run that a pulse is actually needed (e.g.@: if it is only used
-in an untestable @code{IF} construct) and thus the pulse gets deleted
-even though it is needed. In this case you have to force the program to
-keep all pulses even if they seem to be unused. This is done by
-specifying the keyword @code{KEEP_ALL_PULSES} in the @code{ASSIGNMENTS}
-section, i.e.@: just write
+and a warning message is printed indicating this. Any further reference
+to or use of these deleted pulses leads to the immediate termination of
+the experiment. But there are a few situations where it can't be
+detected in the test run that a pulse is actually needed (e.g.@: if it
+is only used in an untestable @code{IF} construct) and thus the pulse
+gets deleted even though it is needed. In this case you have to force
+the program to keep all pulses even if they seem to be unused. This is
+done by specifying the keyword @code{KEEP_ALL_PULSES} in the
+@code{ASSIGNMENTS} section, i.e.@: just write
 @example
 KEEP_ALL_PULSES;
 @end example
@@ -645,7 +645,7 @@ KEEP_ALL_PULSES;
 and pulses will not be deleted even if they seem to be unused.
 
 Again, when dealing with more than one pulser an additional @code{#}
-character, followed by the pulser number, may be needed.
+character followed by the pulser number may be needed.
 
 
 @c ########################################################
@@ -657,9 +657,9 @@ character, followed by the pulser number, may be needed.
 @cindex @code{ACQUISITION_SEQUENCE}
 
 
-The @code{PHASES} section is for defining phase sequences and,
+The @code{PHASES} section is for defining with phase sequences and,
 optionally, acquisition sequences. As the word says a phase sequence
-defines for one (or more) pulses the sequence of phases the pulse is
+defines for one (or more) pulses the sequence of phases a pulse is
 switched between in the experiment. For example, in a phase cycled
 stimulated echo experiment the first microwave pulse usually is set
 first to a @code{+X} phase, then to @code{-X}, again to @code{+X} and
@@ -682,8 +682,8 @@ only one phase sequence no number is needed). For the phase number any
 number between 0 and 2147483647 @w{(2^32 - 1)} can be chosen. Of course
 the lengths of all phase sequences have to be identical.
 
-In one of the following sections it is explained how the phase sequences
-become associated with certain pulses.
+The following sections explain how the phase sequences become
+associated with certain pulses.
 
 Beside the phase sequences also acquisition sequences can be defined.
 These are used by some @code{EDL} functions to determine how the
@@ -741,7 +741,7 @@ and, possibly, in the @code{PHASES} section, the definition of the
 pulses is done in the @code{PREPARATIONS} section.
 
 Each pulse has at least three properties: a unique number, a function
-and a start position. Actually, pulses also need a length, but as long
+and a start position. Actually, pulses also need a length, so as long
 as the length is not set (or is 0) the pulse stays switched off. Here is
 an example of how to create a pulse, numbered @code{1}, that is a
 microwave pulse, starts @w{100 ns} after the trigger) and has a length
@@ -785,20 +785,21 @@ the same number even when it is assigned to another pulser.
 
 
 There are three additional properties a pulse can have. The first one is
-the amount of time the start position of the pulse will be changed by
-during the experiment, the corresponding keyword is
+a constant amount of time the start position of the pulse will be
+changed by during the experiment, the corresponding keyword is
 @code{DELTA_START}@footnote{@code{DELTA_START} can be abbreviated to
 @code{DELTASTART}, @code{DELTA_S}, @code{DELTAS}, @code{DEL_START},
 @code{DELSTART}, @code{DEL_S}, @code{DELS}, @code{D_START},
-@code{DSTART}, @code{D_S} or @code{DS}.}. Second, there is the length
-change of the pulse, @code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH}
-can be shortened to @code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL},
-@code{DEL_LENGTH}, @code{DELLENGTH}, @code{DEL_L}, @code{DELL},
-@code{D_LENGTH}, @code{DLENGTH}, @code{DEL_L}, @code{DELL},
-@code{D_LENGTH}, @code{DLENGTH}, @code{D_L} or @code{DL}.}. And finally,
-there is the phase sequence to be used for phase cycling of the pulse --
-here the keyword is @code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can
-also be written as @code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC},
+@code{DSTART}, @code{D_S} or @code{DS}.}. Second, there is a constant
+length change of the pulse,
+@code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH} can be shortened to
+@code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL}, @code{DEL_LENGTH},
+@code{DELLENGTH}, @code{DEL_L}, @code{DELL}, @code{D_LENGTH},
+@code{DLENGTH}, @code{DEL_L}, @code{DELL}, @code{D_LENGTH},
+@code{DLENGTH}, @code{D_L} or @code{DL}.}. And finally, there is the
+phase sequence to be used for phase cycling of the pulse -- here the
+keyword is @code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can also be
+written as @code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC},
 @code{PH_CYCLE}, @code{PHCYCLE}, @code{PH_C} or @code{PHC}.}.
 
 With these additional properties (using, for phase cycling of the pulse,
