@@ -22,7 +22,7 @@
 */
 
 
-#if ! defined RS_SPEC10__HEADER
+#if ! defined RS_SPEC10_HEADER
 #define RS_SPEC10_HEADER
 
 
@@ -111,6 +111,7 @@ Var *ccd_camera_clear_cycles( Var *v );
 Var *ccd_camera_get_picture( Var *v );
 Var *ccd_camera_get_spectrum( Var *v );
 Var *ccd_camera_temperature( Var *v );
+Var *ccd_camera_pixel_size( Var *v );
 
 /* Functions from rs_spec10_int.c */
 
