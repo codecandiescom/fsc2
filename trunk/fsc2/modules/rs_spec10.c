@@ -618,9 +618,9 @@ Var *ccd_camera_get_spectrum( Var *v )
 		/* There is a bug in the PVCAM library: For some parallel hardware
 		   binning sizes the library needs two more bytes than would be
 		   required to hold all points (when stored as 2-byte values). In
-		   these cases the very first point of the returned array contains
+		   these cases the very first element of the returned array contains
 		   a bogus value and the real data seem to start only at the second
-		   array element. This hack tries to avoid this problem.*/
+		   element. This hack tries to avoid this problem.*/
 
 		cf = frame + size / sizeof *frame - width;
 
