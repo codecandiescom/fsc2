@@ -44,7 +44,6 @@
 // Function exported by the User_Functions modules
 
 get_phase_cycled_area, -1, EXP;
-get_phase_cycled_area_2, -1, EXP;
 
 
 // Functions exported by the magnet power supply drivers (AEG_S_BAND,
