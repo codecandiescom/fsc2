@@ -28,9 +28,11 @@
 
 #include "fsc2_module.h"
 
+
 /* Include configuration information for the device */
 
 #include "rb_pulser.conf"
+
 
 /* Include the Rulbus header file */
 
@@ -44,6 +46,9 @@
 #else
 #define NUM_CLOCK_CARDS   1
 #endif
+
+
+/* Define symbolic names for all of the cards the pulser is made of */
 
 #define DELAY_CARD        0
 #define CLOCK_CARD        1
@@ -65,7 +70,15 @@
 #define DET_DELAY_0       8
 #define DET_DELAY_1       9
 
+
+/* Minimum precision (relative to the timebase) for pulse positions and
+   lengths etc. - when the user requests a position or length that can't
+   be realized with at least this precision a warning is printed */
+
 #define PRECISION         0.01
+
+
+/* Intrinsic delays introduced by the delay cards and the synthesizer */
 
 #define MIN_DELAY         6.0e-8      /* Delay a delay card introduces even
 										 when delay time is set to 0, about
@@ -74,6 +87,9 @@
 #define SYNTHESIZER_DELAY 7.0e-8      /* Delay before the synthesizer starts
 										 a pulse, about 70 ns when using the
 										 shortest possible delay */
+
+/* Definitions for dealing with pulse positions and lengths in units of
+   the frequency of the clock card driving the delay card */
 
 #define Ticks       long         /* times in units of clock cards frequency */
 #define Ticks_max   l_max
@@ -224,6 +240,7 @@ extern RULBUS_CLOCK_CARD clock_card[ NUM_CLOCK_CARDS ];
 extern RULBUS_DELAY_CARD delay_card[ NUM_DELAY_CARDS ];
 
 
+/* Functions defined in rb_pulser.c */
 
 int rb_pulser_init_hook( void );
 int rb_pulser_test_hook( void );
@@ -243,11 +260,17 @@ Var *pulser_increment( Var *v );
 Var *pulser_reset( Var *v );
 Var *pulser_pulse_reset( Var *v );
 
+
+/* Functions defined in rb_pulser_gen.c */
+
 bool rb_pulser_store_timebase( double timebase );
 bool rb_pulser_set_function_delay( int function, double delay );
 bool rb_pulser_set_trigger_mode( int mode );
 bool rb_pulser_set_trig_in_slope( int slope );
 bool rb_pulser_set_repeat_time( double rep_time );
+
+
+/* Functions defined in rb_pulser_pulse.c */
 
 bool rb_pulser_new_pulse( long pnum );
 bool rb_pulser_set_pulse_function( long pnum, int function );
@@ -265,7 +288,13 @@ bool rb_pulser_change_pulse_length( long pnum, double p_time );
 bool rb_pulser_change_pulse_position_change( long pnum, double p_time );
 bool rb_pulser_change_pulse_length_change( long pnum, double p_time );
 
+
+/* Functions defined in rb_pulser_init.c */
+
 void rb_pulser_init_setup( void );
+
+
+/* Functions defined in rb_pulser_run.c */
 
 bool rb_pulser_do_update( void );
 bool rb_pulser_update_pulses( bool flag );
@@ -274,6 +303,9 @@ void rb_pulser_init_delay( void );
 void rb_pulser_delay_card_setup( void );
 void rb_pulser_full_reset( void );
 void rb_pulser_seq_length_check( void );
+
+
+/* Functions defined in rb_pulser_util.c */
 
 int rb_pulser_start_compare( const void *A, const void *B );
 Ticks rb_pulser_double2ticks( double p_time );
@@ -284,6 +316,9 @@ const char *rb_pulser_pticks( Ticks ticks );
 void rb_pulser_show_pulses( void );
 void rb_pulser_dump_pulses( void );
 void rb_pulser_write_pulses( FILE *fp );
+
+
+/* Functions defined in rb_pulser_ll.c */
 
 void rb_pulser_init( void );
 void rb_pulser_exit( void );
