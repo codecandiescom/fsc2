@@ -544,14 +544,14 @@ install:
 	$(INSTALL) -d $(auxdir)
 
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Functions $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Devices $(libdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/*.xpm $(auxdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.png $(auxdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.gif $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/Devices   $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/*.xpm     $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.png  $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.gif  $(auxdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/fsc2.jpeg $(auxdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.png $(auxdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.gif $(auxdir)
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.jpeg $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.png    $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.gif    $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(adir)/na.jpeg   $(auxdir)
 
 	$(MAKE) -C src install
 	$(MAKE) -C modules install
