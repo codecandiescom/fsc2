@@ -229,7 +229,21 @@ while for 2D-experiments it is
 display( n_x_point, n_y_point, data [ , n_curve [ , ... ] ] )
 @end example
 
-@item clear_curve( )
+
+@item change_scale()
+@anchor{change_scale}
+@findex change_scale()
+This function allows it to change the scale settings (originally set in
+the call of @code{init_1d()} or @ocde{init_2d()} after an experiment has
+been started. With a one-dimensional display the function can be passed
+a maximum of two arguments, the new start value of the @i{x}-axis and
+the new @i{x}-increment. For two-dimensional display the function also
+accepts a new start value for the @i{y}-axis as well as the
+@i{y}-increment. If one of these velues should remain unchanged instead
+of a value a string (e.g.@ @code{"keep"}) can be passed as the argument.
+
+
+@item clear_curve()
 @anchor{clear_curve}
 @findex clear_curve()
 Removes one or more curves from the display. As many arguments as there
