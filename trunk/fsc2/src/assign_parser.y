@@ -299,7 +299,7 @@ expr:    INT_TOKEN unit            { $$ = apply_unit( vars_push( INT_VAR, $1 ),
        | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											 "function.\n", Fname, Lc,
 											 $1->name );
-	                                  THROW( EXCEPTION ); }
+	                                 THROW( EXCEPTION ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
 											 Fname, Lc, $1->name );

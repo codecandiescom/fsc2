@@ -77,7 +77,7 @@ DET_GATE    DET(ECTION)?_?G(ATE)?:?
 DEF         DEF(ENSE)?:?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?:?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?:?
-PSH         P(ULSE)?_?SH(APE)?:?
+PSH         P(ULSE)?_?SH(APE(R)?)?:?
 PH1         PH(ASE)?(_?1)?:?
 PH2         PH(ASE)?_?2:?
 OI          O(THER)?(_?1)?:?
@@ -125,6 +125,8 @@ PSD1        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?(_?1)?:?
 PSD2        PH(ASE)?_?S(W(ITCH)?)?_?D(EL(AY)?)?_?2:?
 
 GP          G(RACE)?_?P(ERIOD)?:?
+
+TO          TRIG((GER)?_?OUT
 
 CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 
@@ -374,6 +376,13 @@ WS          [\n=: ]+
 						"in the ASSIGNMENTS section.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
+
+			/* This is here for the HFS9000 which has a special TRIGGER_OUT
+			   channel that is assigned the channel number 0 */
+{TO}        {
+            	assignlval.lval = 0;
+                return INT_TOKEN;
+            }
 
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
