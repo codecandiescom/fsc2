@@ -24,11 +24,15 @@
 @chapter Example EDL Scripts
 
 
-Since it is often much easier to understand a new language by examples
+Since it is often much easier to understand a new language from examples
 then by just learning the vocabulary and the syntax here are a few
 example @code{EDL} scripts, together with an explanation of how they
 work. If the explanations may look a bit verbose, please bear with me, I
 tried to make it as comprehensive and easy to understand as possible.
+Please note that the discussion of the functions used in the example
+scripts isn't complete in all cases, sometimes a function may accept
+more parameters than mentioned here etc.@:, please always look up the
+full documentation in the previous chapters when in doubt.
 
 
 @ifinfo
@@ -689,9 +693,9 @@ Finally two further buttons are created. The first one is for stopping
 and restarting the acquisition of data. This button must be either
 active or inactive, i.e.@: it's either pushed in or not. The natural
 choice in this case is to use a button of type @code{"PUSH_BUTTON"}
-whicg has exactly these properties. As we already have seen when
+which has exactly these properties. As we already have seen when
 creating radio buttons, the function to create a button is
-@code{button_create()} (@pxref{button_create}) and the first arguent
+@code{button_create()} (@pxref{button_create}) and the first argument
 passed to it must be the type of the button. The second argument is just
 the label string to be shown on its right side. Since push buttons start
 of in the inactive state per default but it is probably better not to
@@ -701,18 +705,18 @@ will have to set a reasonable field value) we have to activate button
 @code{button_state()} (@pxref{button_state}) with the buttons handle and
 the new state to be set.
 
-The second and last button for clearing the display is just a normal
-button, i.e.@: a button that just can be clicked on. This is indicated
-by the button type @code{"NORMAL_BUTTON"} as the first argument to
+The last button for clearing the display is just a normal button, i.e.@:
+a button that just can be clicked on. This is indicated by the button
+type @code{"NORMAL_BUTTON"} as the first argument to
 @code{button_create()} (@pxref{button_create}).
 
 The creation of all the buttons and in- and output fields is enclosed by
 two calls of the function @code{hide_toolbox()} (@pxref{hide_toolbox})
 (line 43 and 58). Before we start creating the buttons etc.@: this
-disables the immediate display of the newly created window (labled
-"Toolbox") and the redraw for each new object. When we're done with
-adding new objects we "un-hide" the window and it willl now be shown
-with all the new buttons etc.@: at once.  Actually, this isn't
+disables the immediate display of the newly created objects in a window
+labled "Toolbox", redrawing the window for each object. When we're done
+with adding new objects we "un-hide" the window and it willl now be
+visible with all the new buttons etc.@: at once.  Actually, this isn't
 necessary, it's just cosmetics to make the creation of the objects look
 nicer. The script will also work when you leave out both the lines.
 
@@ -741,7 +745,7 @@ extremely fast in paused mode, uselessly eating up computer time.
 
 
 Unless the acquistion hasn't been stopped (i.e.@: as long as
-@code{Pause_State} isn't set) we now ask the lock-in amplifier for new
+@code{Pause_State} is @code{0}) we now ask the lock-in amplifier for new
 data. To be able to display both the @i{x}- and @i{y}-phase signal we
 tell it to return data for both channel @code{1} and @code{2}. Of
 course, it must return 2 values, which it stores in an array with two
@@ -764,7 +768,7 @@ radio or push button is active it returns a non-zero number, otherwise
 
 The first of a series of tests is for the sweep up button. If it is
 active but we're not sweeping up (i.e.@: when @code{Sweep_State} isn't
-@code{1} we'll have to change the @code{Sweep_State} variable to in
+@code{1}) we'll have to change the @code{Sweep_State} variable to in
 accordance with the users request. To also give a visual indication that
 the sweep directon changed we then draw a marker at the current
 coordinate. This is one via the @code{draw_marker()}
@@ -864,7 +868,87 @@ of the display (instead to the right of the deleted curve).
 @node Hahn-echo detected EPR script, ESEEM script, cw-EPR monitor script, Example EDL Scripts
 @section Hahn-echo detected EPR script
 
-Still to be written...
+The following script is for an EPR experiment, measuring the area of a
+simple (2-pulse) Hahn-echo as a function of the field. Thus it is
+somewhat similar to the very first script of this chapter, but with the
+additional complication of adding the creation of pulses and using a
+digitizer instead of a lock-in amplifier to do the detection:
+@example
+ 1 DEVICES:
+ 2
+ 3 er032m;       // field controller
+ 4 dg2020_b;     // pulser
+ 5 tds754a;      // digitzer
+ 6
+ 7
+ 8 VARIABLES:
+ 9 
+10 start_field = 3400 G;
+11 end_field   = 3480 G;
+12 field_step  = 0.5 G;
+13 
+14 pi_half     = 40 ns;
+15 tau         = 200 ns;
+16 
+17 field = start_field;
+18 area[ 2 ];
+19 W1, W2;
+20 I = 1;
+31 
+32 
+33 ASSIGNMENTS:
+34 
+35 TIMEBASE:     5 ns;
+36 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 200 Hz;
+37 
+38 MICROWAVE:     POD = 1, V_HIGH = 5 V, V_LOW = 0 V;
+39 DETECTION:     POD = 3;
+40 
+41 
+42 PREPARATIONS:
+43 
+44 PULSE_1: FUNCTION = MICROWAVE,
+45          START    = 0 ns,
+46          LENGTH   = pi_half;
+47 
+48 PULSE_2: FUNCTION = MICROWAVE,
+49          START    = PULSE_1.START + PULSE_1.LENGTH + tau,
+50          LENGTH   = 2 * pi_half;
+51 
+52 PULSE_3: FUNCTION = DETECTION,
+53          START    = PULSE_2.START + PULSE_2.LENGTH / 2 + tau,
+54          LENGTH   = 5 ns;
+55 
+56 magnet_setup( start_field, end_field );
+57 init_1d( 1, 0, start_field, field_step,
+58          "Field [G]", "Echo area [mV * ns]" );
+59 
+60 
+61 EXPERIMENT:
+62 
+63 digitizer_num_averages( 100 );
+64 digitizer_trigger_channel( AUX );
+65 digitizer_trigger_position( 0.5 );
+66 
+67 W1 = digitizer_define_window( -5 ns, 10 ns );
+68 W2 = digitizer_define_window( 100 ns, 10 ns );
+69 
+70 WHILE field <= end_field @{
+81 
+82     digitizer_start_acquisition( );
+83     area[ 1 ] = digitizer_get_area( CH1, W1 );
+84     area[ 2 ] = digitizer_get_area( CH1, W2 );
+85     display( I, ( area[ 1 ] - area[ 2 ] ) * 1.0e12 );
+86     I += 1;
+87     fsave( "# # # #\n", field, area[ 1 ], area[ 2 ],
+88                         area[ 1 ] - area[ 2 ] );
+89     field = sweep_up( )
+90 @}
+@end example
+
+
+
+
 
 
 @node ESEEM script, Time-resolved EPR script, Hahn-echo detected EPR script, Example EDL Scripts
