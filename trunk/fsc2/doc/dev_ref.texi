@@ -186,7 +186,7 @@ pulser for the Berlin X-band spectrometer, with 36 internal channels and
 12 output pod channels.
 
 @paragraphindent 0
-Timebases: Between @w{5 ns} and @w{100 ms}, maximim pulse voltage
+Timebases: Between @w{5 ns} and @w{100 ms}, maximum pulse voltage
 between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
 @w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
 V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels
@@ -234,7 +234,7 @@ pulser for the Frankfurt S-band spectrometer, with 36 internal channels
 and 12 output pod channels.
 
 @paragraphindent 0
-Timebases: Between @w{5 ns} and @w{100 ms}, maximim pulse voltage
+Timebases: Between @w{5 ns} and @w{100 ms}, maximum pulse voltage
 between @w{-2 V} and @w{7 V}, minimum pulse voltage between @w{-3 V} and
 @w{6 V}, difference must be not more than @w{9 V} and at least @w{0.5
 V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels can
@@ -543,7 +543,7 @@ the range is @w{1460 G} to @w{19900 G}.
 in the Berlin W-band spectrometer. No support for phase cycled experiments.
 
 @paragraphindent 0
-Timebases: Between @w{1.6 ns} and @w{20 us}, maximim pulse voltage
+Timebases: Between @w{1.6 ns} and @w{20 us}, maximum pulse voltage
 between @w{-1.5 V} and @w{5.5 V}, minimum pulse voltage between @w{-2 V}
 and @w{5 V}, difference must be not more than @w{5.5 V} and at least
 @w{0.5 V}, resolution of pulse voltages is @w{10 mV}. Trigger-in levels
