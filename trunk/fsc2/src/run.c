@@ -481,6 +481,7 @@ void do_measurement( void )
 	Prg_Token *cur;
 	bool react_to_do_quit = SET;
 
+
 	TEST_RUN = UNSET;
 
 	TRY
