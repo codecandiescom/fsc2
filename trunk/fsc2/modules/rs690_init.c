@@ -709,6 +709,8 @@ static void rs690_setup_channels( void )
 			field++;
 		}
 
+		rs690.last_used_field = field;
+
 		/* If the function is supposed to deliver a high volatge level when
 		   there's no pulse set the bit to default to on */
 

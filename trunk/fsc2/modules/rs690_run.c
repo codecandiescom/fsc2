@@ -997,7 +997,7 @@ void rs690_channel_setup( bool flag )
 	/* If the sequence has that many state changes that it can't be 
 	   represented with the maximum number of words we got to bail out */
 
-	if ( rs690.new_fs_count > TS_MAX_WORDS - 3 )
+	if ( rs690.new_fs_count > TS_MAX_WORDS - 2 )
 	{
 		print( FATAL, "Pulse sequence is too complicated to create with "
 			   "this device.\n" );

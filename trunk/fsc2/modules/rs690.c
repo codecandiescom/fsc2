@@ -323,6 +323,8 @@ int rs690_end_of_test_hook( void )
 		}
 	}
 
+	rs690_cleanup_fs( );
+
 	return 1;
 }
 
@@ -426,6 +428,8 @@ int rs690_end_of_exp_hook( void )
 
 	rs690_run( UNSET );
 	gpib_local( rs690.device );
+
+	rs690_cleanup_fs( );
 
 	return 1;
 }

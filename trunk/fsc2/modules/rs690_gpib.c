@@ -28,6 +28,7 @@
 static bool rs690_field_channel_setup( void );
 static bool rs690_set_channels_4ns( void );
 static bool rs690_set_channels_8ns( void );
+static void rs690_calc_tables_16ns( void );
 static bool rs690_set_channels_16ns( void );
 static bool rs690_init_channels_16ns( void );
 static void rs690_gpib_failure( void );
@@ -113,8 +114,7 @@ bool rs690_init( const char *name )
 	   channels */
 
 	rs690_field_channel_setup( );
-
-	rs690_set_channels( );
+	rs690_do_update( );
 
 	return OK;
 }
@@ -240,10 +240,98 @@ static bool rs690_set_channels_8ns( void )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
+static void rs690_calc_tables_16ns( void )
+{
+	Ticks count = 0;
+
+
+	rs690.new_table.count = 1;
+	rs690.new_table.repeat_1 = 0;
+	rs690.new_table.repeat_2 = 0;
+
+	if ( rs690.last_new_fs )
+	{
+		count = rs690.last_new_fs->len;
+		if ( count / MAX_TICKS_PER_ENTRY <= MAX_LOOP_REPETITIONS )
+			rs690.new_table.count = 2;
+		else
+			rs690.new_table.count = 3;
+	}
+
+	if ( rs690.new_table.count == 1 )
+		rs690.new_table.len = rs690.new_fs_count;
+	else if ( rs690.new_table.count == 2 )
+	{
+		rs690.new_table.len = rs690.new_fs_count;
+		if ( count % MAX_TICKS_PER_ENTRY == 0 )
+			rs690.new_table.len--;
+		rs690.new_table.repeat_1 = count / MAX_TICKS_PER_ENTRY;
+	}
+	else
+	{
+		rs690.new_table.len = rs690.new_fs_count;
+		if ( count % MAX_TICKS_PER_ENTRY == 0 )
+			rs690.new_table.len--;
+		rs690.new_table.repeat_1 = ( count / MAX_TICKS_PER_ENTRY )
+								   % MAX_LOOP_REPETITIONS;
+		rs690.new_table.repeat_2 = MAX_LOOP_REPETITIONS;
+	}
+}
+
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 static bool rs690_set_channels_16ns( void )
 {
+	char buf[ 1000 ];
+	int i, k;
+	FS *n, *o;
+
+
 	if ( rs690.old_fs == NULL )
 		return rs690_init_channels_16ns( );
+
+
+	rs690.old_table = rs690.new_table;
+	rs690_calc_tables_16ns( );
+
+	if ( rs690.new_table.len != rs690.old_table.len )
+	{
+		sprintf( buf, "LTD0,T0,%d,T1,1,T2,1", rs690.new_table.len );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+	}
+
+	if ( rs690.new_table.repeat_1 != rs690.old_table.repeat_1 ||
+		 rs690.new_table.repeat_2 != rs690.old_table.repeat_2 )
+	{
+		sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,%d,M2,1,T2,%d!",
+				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
+				 rs690.new_table.repeat_1, rs690.new_table.repeat_2 );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+	}
+
+	for ( i = 0; i <= rs690.last_used_field; i++ )
+	{
+		for ( k = 0, n = rs690.new_fs, o = rs690.old_fs;
+			  n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0 &&
+			  o != NULL && o->len % MAX_TICKS_PER_ENTRY != 0 ;
+			  n = n->next, o = o->next, k++ )
+		{
+			if ( n->len != o->len || n->fields[ i ] != o->fields[ i ] )
+			{
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns",
+						 i, k, n->fields[ i ],
+						 ( n->len % MAX_TICKS_PER_ENTRY ) * 16L );	
+
+				if ( gpib_write( rs690.device, buf, strlen( buf ) )
+					 == FAILURE )
+					rs690_gpib_failure( );
+			}
+		}
+	}
 
 	return OK;
 }
@@ -254,64 +342,42 @@ static bool rs690_set_channels_16ns( void )
 
 static bool rs690_init_channels_16ns( void )
 {
-	int i;
+	int i, j;
 	FS *n;
-	char buf[ 10000 ];
-	int table_count;
-	Ticks count;
+	char buf[ 1000 ];
 
 
-	/* First we need to set how many tables we need */
+	rs690_calc_tables_16ns( );
 
-	count = rs690.last_new_fs->len;
-	if ( count <= MAX_TICKS_PER_ENTRY )
-		table_count = 1;
-	else if ( count / MAX_TICKS_PER_ENTRY <= MAX_LOOP_REPETITIONS )
-		table_count = 2;
-	else
-		table_count = 3;
+	sprintf( buf, "LTD0,T0,%d,T1,1,T2,1", rs690.new_table.len );
+	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		rs690_gpib_failure( );
 
-	if ( table_count == 1 )
-	{
-		sprintf( buf, "LTD0,T0,%d!", rs690.new_fs_count );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
-			rs690_gpib_failure( );
-		
-		sprintf( buf, "LOS0,%s,M1,1,T0,1!",
-				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT" );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
-			rs690_gpib_failure( );
-	}
-	else if ( table_count == 2 )
-	{
-		if ( count / MAX_TICKS_PER_ENTRY != 0 )
-			sprintf( buf, "LTD0,T0,%d,T1,1!", rs690.new_fs_count );
-		else
-			sprintf( buf, "LTD0,T0,%d,T1,1!", rs690.new_fs_count - 1 );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
-			rs690_gpib_failure( );
-
-		sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,1!",
-				 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT" );
-		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
-			rs690_gpib_failure( );
-	}
-	else
-	{
-	}
-
-
+	sprintf( buf, "LOS0,%s,M1,1,T0,1,T1,%d,M2,1,T2,%d!",
+			 rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
+			 rs690.new_table.repeat_1, rs690.new_table.repeat_2 );
+	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+		rs690_gpib_failure( );
 
 	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
 	{
-		sprintf( buf, "LDT,T0,FL%d,0,%d", i, rs690.new_fs_count );
+		sprintf( buf, "LDT,T0,FL%d,0,%d", i, rs690.new_table.len );
 		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
 			  n = n->next )
-			sprintf( buf, ",%X,%ldns", n->fields[ i ],
-					 ( n->len % MAX_TICKS_PER_ENTRY ) * 16 );
+			sprintf( buf + strlen( buf ), ",%X,%ldns", n->fields[ i ],
+					 ( n->len % MAX_TICKS_PER_ENTRY ) * 16L );
 		strcat( buf, "!" );
 		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 			rs690_gpib_failure( );
+
+		for ( j = 1; j <= 2; j++ )
+		{
+			sprintf( buf, "LDT,T%d,FL%d,0,1,%X,%ldns!", j, i,
+					 rs690_default_fields[ i ],
+					 MAX_TICKS_PER_ENTRY * 16L );
+			if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+				rs690_gpib_failure( );
+		}
 	}
 
 	return OK;
