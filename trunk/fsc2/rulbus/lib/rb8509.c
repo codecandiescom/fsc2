@@ -146,6 +146,8 @@ int rulbus_adc12_card_init( int handle )
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) ) < 0 )
 		return retval;
 
+	usleep( ADC12_DELAY );      /* allow for settling time of gain switching */
+
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
 	return rulbus_read( handle, DATA_LOW, &dummy, 1 );
