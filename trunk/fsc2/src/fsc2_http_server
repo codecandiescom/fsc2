@@ -74,7 +74,7 @@ my $server = IO::Socket::INET->new( LocalPort => $port,
 	or exit 1;
 
 
-# After we have the server up and running we must also make sure it gets
+# After we have the server up and running we should also make sure it gets
 # shutdown correctly when fsc2 tells us to close shop
 
 my $ppid = $$;
@@ -92,7 +92,6 @@ while ( $client = $server->accept( ) ) {
 	if ( my $pid = fork ) {         # parent on success
 		close $client;
 	} elsif ( defined $pid ) {      # child
-		$SIG{ TERM } = 'DEFAULT';
 		serve( );
 	} elsif ( $! == EAGAIN ) {      # (hopefully) recoverable fork problem
 		sleep 1;
