@@ -67,14 +67,14 @@ static void hfs9000_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			print( FATAL, "Pulse %ld is not associated with a function.\n",
+			print( FATAL, "Pulse #%ld is not associated with a function.\n",
 				   p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			print( FATAL, "The function '%s' of pulse %ld hasn't been "
+			print( FATAL, "The function '%s' of pulse #%ld hasn't been "
 				   "declared in the ASSIGNMENTS section.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
@@ -85,7 +85,7 @@ static void hfs9000_basic_pulse_check( void )
 		if ( p->function->channel == NULL )
 		{
 			print( FATAL, "No channel has been set for function '%s' used for "
-				   "pulse %ld.\n",
+				   "pulse #%ld.\n",
 				   Function_Names[ p->function->self ], p->num );
 			THROW( EXCEPTION );
 		}
@@ -100,7 +100,7 @@ static void hfs9000_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len && p->len != 0 &&
 			 p->pos + p->len + p->function->delay > MAX_PULSER_BITS )
 		{
-			print( FATAL, "Pulse %ld does not fit into the pulsers memory. "
+			print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
 				   "You could try a longer pulser time base.\n", p->num );
 			THROW( EXCEPTION );
 		}

@@ -38,7 +38,7 @@ bool hfs9000_new_pulse( long pnum )
 	{
 		if ( cp->num == pnum )
 		{
-			print( FATAL, "Pulse %ld already exists.\n", pnum );
+			print( FATAL, "Pulse #%ld already exists.\n", pnum );
 			THROW( EXCEPTION );
 		}
 		lp = cp;
@@ -95,7 +95,7 @@ bool hfs9000_set_pulse_function( long pnum, int function )
 
 	if ( p->is_function )
 	{
-		print( FATAL, "Function of pulse %ld has already been set to '%s'.\n",
+		print( FATAL, "Function of pulse #%ld has already been set to '%s'.\n",
 			   pnum, Function_Names[ p->function->self ] );
 		THROW( EXCEPTION );
 	}
@@ -168,15 +168,15 @@ bool hfs9000_set_pulse_position( long pnum, double p_time )
 
 	if ( p->is_pos )
 	{
-		print( FATAL, "The start position of pulse %ld has already been set "
+		print( FATAL, "The start position of pulse #%ld has already been set "
 			   "to %s.\n", pnum, hfs9000_pticks( p->pos ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0 )
 	{
-		print( FATAL, "Invalid (negative) start position for pulse %ld: %s.\n",
-			   pnum, hfs9000_ptime( p_time ) );
+		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
+			   "%s.\n", pnum, hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -208,14 +208,14 @@ bool hfs9000_set_pulse_length( long pnum, double p_time )
 
 	if ( p->is_len )
 	{
-		print( FATAL, "Length of pulse %ld has already been set to %s.\n",
+		print( FATAL, "Length of pulse #%ld has already been set to %s.\n",
 			   pnum, hfs9000_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( p_time < 0.0 )
 	{
-		print( FATAL, "Invalid negative length set for pulse %ld: %s.\n",
+		print( FATAL, "Invalid negative length set for pulse #%ld: %s.\n",
 			   pnum, hfs9000_ptime( p_time ) );
 		THROW( EXCEPTION );
 	}
@@ -224,7 +224,7 @@ bool hfs9000_set_pulse_length( long pnum, double p_time )
 		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
 		p->len = 1;
-		print( SEVERE, "Length of Trigger Out pulse %ld is fixed to 20 ns\n",
+		print( SEVERE, "Length of Trigger Out pulse #%ld is fixed to 20 ns\n",
 			   pnum );
 	}
 	else
@@ -256,14 +256,14 @@ bool hfs9000_set_pulse_position_change( long pnum, double p_time )
 
 	if ( p->is_dpos )
 	{
-		print( FATAL, "The position change of pulse %ld has already been set "
+		print( FATAL, "The position change of pulse #%ld has already been set "
 			   "to %s.\n", pnum, hfs9000_pticks( p->dpos ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000_double2ticks( p_time ) == 0 )
 	{
-		print( SEVERE, "Zero position change set for pulse %ld.\n", pnum );
+		print( SEVERE, "Zero position change set for pulse #%ld.\n", pnum );
 		return FAIL;
 	}
 
@@ -290,21 +290,21 @@ bool hfs9000_set_pulse_length_change( long pnum, double p_time )
 
 	if ( p->is_dlen )
 	{
-		print( FATAL, "Length change of pulse %ld has already been set to "
+		print( FATAL, "Length change of pulse #%ld has already been set to "
 			   "%s.\n", pnum, hfs9000_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( hfs9000_double2ticks( p_time ) == 0 )
 	{
-		print( SEVERE, "Zero length change set for pulse %ld.\n", pnum );
+		print( SEVERE, "Zero length change set for pulse #%ld.\n", pnum );
 		return FAIL;
 	}
 
 	if ( p->is_function && p->function->channel &&
 		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Length of Trigger Out pulse %ld can't be changed.\n",
+		print( FATAL, "Length of Trigger Out pulse #%ld can't be changed.\n",
 			   pnum );
 		THROW( EXCEPTION );
 	}
@@ -332,7 +332,7 @@ bool hfs9000_get_pulse_function( long pnum, int *function )
 
 	if ( ! p->is_function )
 	{
-		print( FATAL, "The function of pulse %ld hasn't been set.\n", pnum );
+		print( FATAL, "The function of pulse #%ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -351,7 +351,8 @@ bool hfs9000_get_pulse_position( long pnum, double *p_time )
 
 	if ( ! p->is_pos )
 	{
-		print( FATAL, "Start position of pulse %ld hasn't been set.\n", pnum );
+		print( FATAL, "Start position of pulse #%ld hasn't been set.\n",
+			   pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -370,14 +371,15 @@ bool hfs9000_get_pulse_length( long pnum, double *p_time )
 
 	if ( ! p->is_len )
 	{
-		print( FATAL, "Length of pulse %ld hasn't been set.\n", pnum );
+		print( FATAL, "Length of pulse #%ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
 	if ( p->is_function && p->function->channel &&
 		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Length of Trigger Out pulse %ld can't be referenced.\n",
+		print( FATAL, "Length of Trigger Out pulse #%ld can't be "
+			   "referenced.\n",
 			   pnum );
 		THROW( EXCEPTION );
 	}
@@ -397,7 +399,7 @@ bool hfs9000_get_pulse_position_change( long pnum, double *p_time )
 
 	if ( ! p->is_dpos )
 	{
-		print( FATAL, "Position change of pulse %ld hasn't been set.\n",
+		print( FATAL, "Position change of pulse #%ld hasn't been set.\n",
 			   pnum );
 		THROW( EXCEPTION );
 	}
@@ -417,7 +419,7 @@ bool hfs9000_get_pulse_length_change( long pnum, double *p_time )
 
 	if ( ! p->is_dlen )
 	{
-		print( FATAL, "Length change of pulse %ld hasn't been set.\n", pnum );
+		print( FATAL, "Length change of pulse #%ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -438,8 +440,8 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 
 	if ( p_time < 0 )
 	{
-		print( FATAL, "Invalid (negative) start position for pulse %ld: %s.\n",
-			   pnum, hfs9000_ptime( p_time ) );
+		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
+			   "%s.\n", pnum, hfs9000_ptime( p_time ) );
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
@@ -461,7 +463,7 @@ bool hfs9000_change_pulse_position( long pnum, double p_time )
 
 	if ( p->is_pos && new_pos == p->pos )
 	{
-		print( WARN, "Old and new position of pulse %ld are identical.\n",
+		print( WARN, "Old and new position of pulse #%ld are identical.\n",
 			   pnum );
 		return OK;
 	}
@@ -497,7 +499,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 
 	if ( p_time < 0 )
 	{
-		print( FATAL, "Invalid (negative) length for pulse %ld: %s.\n",
+		print( FATAL, "Invalid (negative) length for pulse #%ld: %s.\n",
 			   pnum, hfs9000_ptime( p_time ) );
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
@@ -522,7 +524,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 	{
 		if ( p->function->channel->self == HFS9000_TRIG_OUT )
 		{
-			print( FATAL, "Length of Trigger Out pulse %ld can't be "
+			print( FATAL, "Length of Trigger Out pulse #%ld can't be "
 				   "changed.\n", pnum );
 			if ( FSC2_MODE == EXPERIMENT )
 				return FAIL;
@@ -532,7 +534,7 @@ bool hfs9000_change_pulse_length( long pnum, double p_time )
 
 		if ( p->len == new_len )
 		{
-			print( WARN, "Old and new length of pulse %ld are identical.\n",
+			print( WARN, "Old and new length of pulse #%ld are identical.\n",
 				   pnum );
 			return OK;
 		}
@@ -581,7 +583,7 @@ bool hfs9000_change_pulse_position_change( long pnum, double p_time )
 
 	if ( new_dpos == 0 && FSC2_MODE == TEST )
 	{
-		print( SEVERE, "Zero position change value for pulse %ld.\n", pnum );
+		print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
 		return FAIL;
 	}
 
@@ -604,8 +606,8 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 	if ( p->is_function && p->function->channel &&
 		 p->function->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Length change of Trigger Out pulse %ld can't be set.\n",
-			   pnum );
+		print( FATAL, "Length change of Trigger Out pulse #%ld can't be "
+			   "set.\n", pnum );
 		if ( FSC2_MODE == EXPERIMENT )
 			return FAIL;
 		else
@@ -627,7 +629,7 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time )
 
 	if ( new_dlen == 0 && FSC2_MODE == TEST )
 	{
-		print( SEVERE, "Zero length change value for pulse %ld.\n", pnum );
+		print( SEVERE, "Zero length change value for pulse #%ld.\n", pnum );
 		return FAIL;
 	}
 

@@ -433,7 +433,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ! p->is_pos )
 		{
-			print( FATAL, "Pulse %ld has no position set, so shifting it is "
+			print( FATAL, "Pulse #%ld has no position set, so shifting it is "
 				   "impossible.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -441,7 +441,7 @@ Var *pulser_shift( Var *v )
 		if ( ! p->is_dpos )
 		{
 			print( FATAL, "Amount of position change hasn't been defined for "
-				   "pulse %ld.\n", p->num );
+				   "pulse #%ld.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -453,7 +453,7 @@ Var *pulser_shift( Var *v )
 
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
-			print( FATAL, "Shifting the position of pulse %ld leads to an "
+			print( FATAL, "Shifting the position of pulse #%ld leads to an "
 				   "invalid  negative position of %s.\n",
 				   p->num, hfs9000_pticks( p->pos ) );
 			THROW( EXCEPTION );
@@ -505,14 +505,14 @@ Var *pulser_increment( Var *v )
 
 		if ( ! p->is_len )
 		{
-			print( FATAL, "Pulse %ld has no length set, so incrementing its "
+			print( FATAL, "Pulse #%ld has no length set, so incrementing its "
 				   "length is impossibe.\n", p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( p->channel->self == HFS9000_TRIG_OUT )
 		{
-			print( FATAL, "Length of Trigger Out pulse %ld can't be "
+			print( FATAL, "Length of Trigger Out pulse #%ld can't be "
 				   "changed.\n", p->num );
 			THROW( EXCEPTION );
 		}
@@ -532,7 +532,7 @@ Var *pulser_increment( Var *v )
 
 		if ( ( p->len += p->dlen ) < 0 )
 		{
-			print( FATAL, "Incrementing the length of pulse %ld leads to an "
+			print( FATAL, "Incrementing the length of pulse #%ld leads to an "
 				   "invalid negative pulse length of %s.\n",
 				   p->num, hfs9000_pticks( p->len ) );
 			THROW( EXCEPTION );
