@@ -27,7 +27,7 @@
 
 #include "fsc2.h"
 
-void accept_new_data( void );
+void accept_new_data( bool empty_queue );
 
 #endif   /* ! ACCEPT_HEADER */
 

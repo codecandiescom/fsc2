@@ -231,9 +231,9 @@ void end_comm( void )
 /* queue is read as long as the low marker does not reach the high  */
 /* marker, both being incremented in a wrap-around fashion.         */
 /* When accepting new data or honoring a REQUEST things may fail,   */
-/* most probably by running out of memory. Therefore all the code   */
-/* has to be run in a TRY environment and when something fails we   */
-/* have to kill the child to prevent it sending further data we     */
+/* most probably due to running out of memory. Therefore all the    */
+/* code has to be run in a TRY environment and when something fails */
+/* we have to kill the child to prevent it sending further data we  */
 /* can't accept anymore. We also need to stop this function being   */
 /* an idle callback, and, because end_comm() calls this function a  */
 /* last time we also have to set the low and the high marker to the */
@@ -269,12 +269,19 @@ int new_data_callback( XEvent *a, void *b )
 	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED )
 		tb_wait_handler( 0 );
 
-	/* Now handle new data send by the child */
+	/* Now handle new data send by the child, first look for new data and, if
+	   afterwards there are still entries, check if there's a REQUEST. */
 
-	while ( Comm.MQ->low != Comm.MQ->high )
+	if ( Comm.MQ->low != Comm.MQ->high )
+	{
 		TRY
 		{
-			if ( Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
+			if ( Comm.MQ->slot[ Comm.MQ->low ].type != REQUEST )
+				accept_new_data( Internals.child_is_quitting
+								 != QUITTING_UNSET );
+
+			if ( Comm.MQ->low != Comm.MQ->high &&
+				 Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
 			{
 				Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
 				sema_post( Comm.data_semaphore );
@@ -282,15 +289,13 @@ int new_data_callback( XEvent *a, void *b )
 				if ( ! reader( NULL ) )
 					THROW( EXCEPTION );
 			}
-			else
-				accept_new_data( );
 
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 		{
 			/* Before killing the child on failures to get the new data test
-			   that its pid hasn't already been set to 0 (in which case we
+			   that its PID hasn't already been set to 0 (in which case we
 			   would commit suicide) and that it's still alive. The death of
 			   the child and all the necessary cleaning up is dealt with by
 			   the SIGCHLD handlers in run.c, so no need to worry about it
@@ -302,17 +307,24 @@ int new_data_callback( XEvent *a, void *b )
 			fl_set_idle_callback( idle_handler, NULL );
 			Comm.MQ->low = Comm.MQ->high;
 		}
-
-	/* Finally check for requests from the HTTP server and handle death
-	   of the HTTP server. */
+	}
 
 #if defined WITH_HTTP_SERVER
-	if ( Internals.http_pid > 0 )
-		http_check( );
-	else if ( Internals.http_server_died )
+
+	/* Finally check for requests from the HTTP server and handle death
+	   of the HTTP server (but only if the queue is empty, we don't want
+	   to slow down the experiment by serving pages when the process is
+	   struggling with keeping up with data the child sends). */
+
+	if ( Comm.MQ->low == Comm.MQ->high )
 	{
-		Internals.http_server_died = UNSET;
-		fl_call_object_callback( GUI.main_form->server );
+		if ( Internals.http_pid > 0 )
+			http_check( );
+		else if ( Internals.http_server_died )
+		{
+			Internals.http_server_died = UNSET;
+			fl_call_object_callback( GUI.main_form->server );
+		}
 	}
 #endif
 

@@ -517,7 +517,7 @@ Var *f_obj_clabel( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( Internals.mode != TEST )
+	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );
 
 	/* The child has to get parent to change the label */

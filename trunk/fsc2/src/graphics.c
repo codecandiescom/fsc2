@@ -1964,8 +1964,6 @@ void undo_button_callback_2d( FL_OBJECT *a, long b )
 	cv2->z_factor = cv2->old_z_factor;
 	cv2->old_z_factor = temp_z_factor;
 
-	recalc_XPoints_of_curve_2d( cv2 );
-
 	if ( cv2->is_fs )
 	{
 		cv2->is_fs = UNSET;
@@ -1976,6 +1974,7 @@ void undo_button_callback_2d( FL_OBJECT *a, long b )
 								  "and switch on automatic rescaling" );
 	}
 
+	cv2->needs_recalc = SET;
 	redraw_all_2d( );
 }
 

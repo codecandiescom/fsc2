@@ -1313,9 +1313,7 @@ void redraw_canvas_2d( Canvas *c )
 
 		if ( G2.active_curve != -1 &&
 			 G2.curve_2d[ G2.active_curve ]->count > 1 &&
-			 G2.curve_2d[ G2.active_curve ]->is_scale_set && 
-			 G2.curve_2d[ G2.active_curve ]->w <= 2 * c->w &&
-			 G2.curve_2d[ G2.active_curve ]->h <= 2 * c->h )
+			 G2.curve_2d[ G2.active_curve ]->is_scale_set )
 		{
 			cv = G2.curve_2d[ G2.active_curve ];
 
@@ -1431,6 +1429,10 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 
 	if ( cv->needs_recalc )
 		recalc_XPoints_of_curve_2d( cv );
+
+	if ( G2.curve_2d[ G2.active_curve ]->w > 2 * c->w ||
+		 G2.curve_2d[ G2.active_curve ]->h > 2 * c->h )
+		return;
 
 	if ( cv->w == 1 && cv->h == 1 )
 		for ( sp = cv->points, xp = cv->xpoints, count = cv->count,

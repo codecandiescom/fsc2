@@ -95,6 +95,13 @@ void print_it( FL_OBJECT *obj, long data )
 	char *name = NULL;
 
 
+	if ( data == 2 && G2.active_curve == -1 )
+	{
+		fl_show_alert( "Error", "Can't print - no curve is shown.", NULL, 1 );
+		fl_activate_object( obj );
+		return;
+	}
+
 	/* There's a race condition here, if the user is extremely fast she
 	   might already press another print button before it gets deactivated,
 	   but chances are very low and I'm too busy at the moment to implement
@@ -107,39 +114,18 @@ void print_it( FL_OBJECT *obj, long data )
 	if ( GUI.cut_form )
 		fl_deactivate_object( GUI.cut_form->cut_print_button );
 
-	if ( data == 2 && G2.active_curve == -1 )
-	{
-		fl_show_alert( "Error", "Can't print - no curve is shown.", NULL, 1 );
-		fl_activate_object( obj );
-		return;
-	}
-
-	lower_permissions( );     /* not really needed,just my usual paranoia... */
-
 	/* Find out about the way to print and get a file if needed */
 
 	if ( get_print_file( &fp, &name, data ) )
 	{
 		get_print_comm( data );
 
-		if ( data == 2 && G2.active_curve == -1 )
-		{
-			fl_show_alert( "Error", "Can't print - no curve is shown.",
-						   NULL, 1 );
-			if ( GUI.run_form_1d )
-				fl_activate_object( GUI.run_form_1d->print_button_1d );
-			if ( GUI.run_form_2d )
-				fl_activate_object( GUI.run_form_2d->print_button_2d );
-			if ( GUI.cut_form )
-				fl_activate_object( GUI.cut_form->cut_print_button );
-			return;
-		}
-
 		start_printing( fp, name, data );
 
 		if ( fp != NULL )
 			fclose( fp );
-		name = CHAR_P T_free( name );
+		if ( name )
+			name = CHAR_P T_free( name );
 	}
 
 	if ( GUI.run_form_1d )
@@ -285,7 +271,6 @@ static bool get_print_file( FILE **fp, char **name, long data )
 
 		default :
 			fl_free_form( print_form->print );
-			print_form = NULL;
 			return FAIL;
 	}
 
@@ -334,7 +319,8 @@ static bool get_print_file( FILE **fp, char **name, long data )
 
 	if ( obj == print_form->cancel_button )
 	{
-		*name = CHAR_P T_free( *name );
+		if ( *name )
+			*name = CHAR_P T_free( *name );
 		fl_free_form( print_form->print );
 		return FAIL;
 	}

@@ -64,23 +64,26 @@ static bool need_cut_redraw;
 /* due to the new data get udated.                                          */
 /*--------------------------------------------------------------------------*/
 
-void accept_new_data( void )
+void accept_new_data( bool empty_queue )
 {
 	char *buf;
-	int mq_next;
 	int type;
 	int dim = 0;
 	struct timeval time_struct;
-	double start_time;
+	double start_time = 0.0;
 
 
 	CLOBBER_PROTECT( dim );
+	CLOBBER_PROTECT( start_time );
 
 	/* Get the time we arrived here, it's later used to avoid spending too
 	   much time in the loop for accepting data sets */
 
-	gettimeofday( &time_struct, NULL );
-	start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
+	if ( ! empty_queue )
+	{
+		gettimeofday( &time_struct, NULL );
+		start_time = time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec;
+	}
 
 	/* Clear the flags that later tell us what really needs to be redrawn */
 
@@ -141,36 +144,28 @@ void accept_new_data( void )
 		Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
 		sema_post( Comm.data_semaphore );
 
-		/* Return if all entries in the message queue are used up */
+		/* Return if all entries in the message queue are used up or there's
+		   a REQUEST (which is always the last entry because the child has to
+		   wait for a reply and which gets handled by the calling routine) */
 
-		if ( Comm.MQ->low == Comm.MQ->high )
+		if ( Comm.MQ->low == Comm.MQ->high ||
+			 Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
 			break;
 
-		/* Also quit from the loop at least about every fifth of a second */
+		/* Also quit from the loop at least about every fifth of a second 
+		   unless 'empty_queue' is set, in which case the child is dead and
+		   we have to fetch everything it send during its live time. */
 
-		gettimeofday( &time_struct, NULL );
-		if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
-			 - start_time >= MAX_ACCEPT_TIME )
-			break;
-
-		/* Accept next data set if next slot in message queue contains DATA */
-
-		if ( Comm.MQ->slot[ Comm.MQ->low ].type & ( DATA_1D | DATA_2D ) )
-			continue;
-
-		/* Otherwise the next slot is occupied by a REQUEST. If this is the
-		   last occupied slot we're done (the calling routine will deal with
-		   it). Otherwise there are more DATA that we handle first by swapping
-		   them with the REQUEST entry */
-
-  		if ( ( mq_next = ( Comm.MQ->low + 1 ) % QUEUE_SIZE ) == Comm.MQ->high )
-  			break;
-
-  		Comm.MQ->slot[ Comm.MQ->low ].shm_id = Comm.MQ->slot[ mq_next ].shm_id;
-  		Comm.MQ->slot[ Comm.MQ->low ].type = Comm.MQ->slot[ mq_next ].type;
-
-  		Comm.MQ->slot[ mq_next ].shm_id = -1;
-  		Comm.MQ->slot[ mq_next ].type = REQUEST;
+		if ( ! empty_queue )
+		{
+			gettimeofday( &time_struct, NULL );
+			if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
+				 - start_time >= MAX_ACCEPT_TIME )
+			{
+				fprintf( stderr, "Hit timeout\n" );
+				break;
+			}
+		}
   	}
 
 	/* After being done with unpacking we display the new data by redrawing
