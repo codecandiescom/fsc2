@@ -170,6 +170,8 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 			}
 } /* end of <comm> */
 
+{EREM1}     THROW( DANGLING_END_OF_COMMENT )
+
 			/* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      Lc++;
 
@@ -346,6 +348,12 @@ int main( int argc, char *argv[ ] )
 	{
 		printf( "\x03\n%s: End of line in string constant starting at "
 				"line %ld\n.", Fname, Str_Lc );
+		exit( EXIT_FAILURE );
+	}
+	CATCH( DANGLING_END_OF_COMMENT )
+	{
+		printf( "\x03\n%s: End of comment found in program text at "
+				"line %ld\n.", Fname, Lc );
 		exit( EXIT_FAILURE );
 	}
 
