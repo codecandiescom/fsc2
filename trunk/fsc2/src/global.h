@@ -68,8 +68,10 @@ typedef  unsigned char  bool;
 
 #define	FAIL  ( ( bool ) 0 )      
 #define UNSET ( ( bool ) 0 )
+#define FALSE ( ( bool ) 0 )
 #define OK    ( ( bool ) 1 )
 #define SET   ( ( bool ) 1 )
+#define TRUE  ( ( bool ) 1 )
 
 #define UNDEFINED -1
 
