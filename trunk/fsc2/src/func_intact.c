@@ -11,6 +11,7 @@ static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
+static const char *float_format_check( const char *buf );
 static void convert_escapes( char *str );
 
 
@@ -38,8 +39,8 @@ Var *f_layout( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of layout().\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -62,7 +63,7 @@ Var *f_layout( Var *v )
 
 			default :
 				eprint( FATAL, "%s:%ld: Unknown layout keyword `%s' in "
-						"function layout().\n", Fname, Lc, v->val.sptr );
+						"%s().\n", Fname, Lc, v->val.sptr, Cur_Func );
 				THROW( EXCEPTION );
 		}
 
@@ -134,8 +135,8 @@ Var *f_bcreate( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"button_create().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -151,7 +152,7 @@ Var *f_bcreate( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: Float variable used as button type in "
-					"button_create().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			type = lround( v->val.dval );
 		}
 
@@ -160,7 +161,7 @@ Var *f_bcreate( Var *v )
 			 type != RADIO_BUTTON     )
 		{
 			eprint( FATAL, "%s:%ld: Invalid button type (%ld) in "
-					"button_create().\n", Fname, Lc, type );
+					"%s().\n", Fname, Lc, type, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -175,7 +176,7 @@ Var *f_bcreate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown button type (`%s') in function "
-					"button_create().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -194,7 +195,7 @@ Var *f_bcreate( Var *v )
 			if ( v->type == FLOAT_VAR )
 			{
 				eprint( WARN, "%s:%ld: Float variable used as button ID in "
-						"button_create().\n", Fname, Lc );
+						"%s().\n", Fname, Lc, Cur_Func );
 				coll = lround( v->val.dval );
 			}
 			else
@@ -210,7 +211,7 @@ Var *f_bcreate( Var *v )
 				if ( ( cio = find_object_from_ID( coll ) ) == NULL )
 				{
 					eprint( FATAL, "%s:%ld: Button with ID %ld doesn't exist "
-							"in button_create().\n", Fname, Lc, coll );
+							"in %s().\n", Fname, Lc, coll, Cur_Func );
 					THROW( EXCEPTION );
 				}
 
@@ -219,8 +220,8 @@ Var *f_bcreate( Var *v )
 				if ( cio->type != RADIO_BUTTON )
 				{
 					eprint( FATAL, "%s:%ld: Button with ID %ld isn't a "
-							"RADIO_BUTTON in button_create().\n",
-							Fname, Lc, coll );
+							"RADIO_BUTTON in %s().\n",
+							Fname, Lc, coll, Cur_Func );
 					THROW( EXCEPTION );
 				}
 			}
@@ -253,8 +254,8 @@ Var *f_bcreate( Var *v )
 
 	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"button_create().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -403,8 +404,8 @@ Var *f_bdelete( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"button_delete().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -427,8 +428,8 @@ Var *f_bdelete( Var *v )
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
-				eprint( FATAL, "%s:%ld: Invalid button identifier in "
-						"button_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid button identifier in %s().\n",
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -481,8 +482,8 @@ Var *f_bdelete( Var *v )
 			   io->type != PUSH_BUTTON   &&
 			   io->type != RADIO_BUTTON ) )
 		{
-			eprint( FATAL, "%s:%ld: Invalid button identifier in "
-					"button_delete().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid button identifier in %s().\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -540,8 +541,8 @@ Var *f_bdelete( Var *v )
 
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
-				eprint( FATAL, "%s:%ld: Invalid button identifier in "
-						"button_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid button identifier in %s().\n",
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -580,8 +581,8 @@ Var *f_bstate( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"button_state().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameters in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -600,8 +601,8 @@ Var *f_bstate( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid button identifier in "
-					"button_state().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid button identifier in %s().\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -631,8 +632,8 @@ Var *f_bstate( Var *v )
 						break;
 
 					default :
-						eprint( FATAL, "%s%ld: Invalid string `%s' in "
-								"button_state().\n", Fname, Lc, v->val.sptr );
+						eprint( FATAL, "%s%ld: Invalid string `%s' in %s().\n",
+								Fname, Lc, v->val.sptr, Cur_Func );
 						THROW( EXCEPTION );
 				}
 		}
@@ -641,8 +642,8 @@ Var *f_bstate( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"button_state().\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+					Fname, Lc, Cur_Func );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -702,8 +703,8 @@ Var *f_bstate( Var *v )
 		   io->type != PUSH_BUTTON   &&
 		   io->type != RADIO_BUTTON ) )
 	{
-		eprint( FATAL, "%s:%ld: Invalid button identifier in "
-				"button_state().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Invalid button identifier in %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -754,8 +755,8 @@ Var *f_bstate( Var *v )
 				break;
 
 			default :
-				eprint( FATAL, "%s%ld: Invalid string `%s' in "
-						"button_state().\n", Fname, Lc, v->val.sptr );
+				eprint( FATAL, "%s%ld: Invalid string `%s' in %s().\n",
+						Fname, Lc, v->val.sptr, Cur_Func );
 				THROW( EXCEPTION );
 		}
 
@@ -783,8 +784,8 @@ Var *f_bstate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"button_state().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -812,8 +813,8 @@ Var *f_screate( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"slider_create().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameters in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -828,14 +829,14 @@ Var *f_screate( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: Float variable used as slider type in "
-					"slider_create().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			type = lround( v->val.dval );
 		}
 
 		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER )
 		{
-			eprint( FATAL, "%s:%ld: Invalid slider type (%ld) in "
-					"slider_create().\n", Fname, Lc, type );
+			eprint( FATAL, "%s:%ld: Invalid slider type (%ld) in %s().\n",
+					Fname, Lc, type, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -848,7 +849,7 @@ Var *f_screate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown slider type (`%s') in function "
-					"slider_create().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -857,8 +858,8 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing minimum value in call of "
-				"slider_create().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing minimum value in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -867,8 +868,8 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing maximum value in call of "
-				"slider_create().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing maximum value in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -880,7 +881,7 @@ Var *f_screate( Var *v )
 	if ( end_val <= start_val )
 	{
 		eprint( FATAL, "%s:%ld: Maxinmum not larger than minimum value in "
-				"call of slider_create().\n", Fname, Lc );
+				"call of %s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -900,8 +901,8 @@ Var *f_screate( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"slider_create().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1048,8 +1049,8 @@ Var *f_sdelete( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"slider_delete().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1070,8 +1071,8 @@ Var *f_sdelete( Var *v )
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
-				eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-						"slider_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid slider identifier in %s().\n",
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1123,8 +1124,8 @@ Var *f_sdelete( Var *v )
 			 ( io->type != NORMAL_SLIDER &&
 			   io->type != VALUE_SLIDER ) )
 		{
-			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-					"slider_delete().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid slider identifier in %s().\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -1163,8 +1164,8 @@ Var *f_sdelete( Var *v )
 
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
-				eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-						"slider_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid slider identifier in %s().\n",
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1199,8 +1200,8 @@ Var *f_svalue( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameters in call of "
-				"slider_value().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameters in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1221,8 +1222,8 @@ Var *f_svalue( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-					"slider_value().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid slider identifier in %s().\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -1238,8 +1239,8 @@ Var *f_svalue( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"slider_value().\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+					Fname, Lc, Cur_Func );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -1307,8 +1308,8 @@ Var *f_svalue( Var *v )
 		 ( io->type != NORMAL_SLIDER &&
 		   io->type != VALUE_SLIDER ) )
 	{
-		eprint( FATAL, "%s:%ld: Invalid slider identifier in "
-				"slider_value().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Invalid slider identifier in %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1327,8 +1328,8 @@ Var *f_svalue( Var *v )
 
 	if ( io->value > io->end_val )
 	{
-		eprint( SEVERE, "%s:%ld: Value too large in slider_value().\n",
-				Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Value too large in %s().\n",
+				Fname, Lc, Cur_Func );
 		io->value = io->end_val;
 	}
 
@@ -1344,8 +1345,8 @@ Var *f_svalue( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"slider_value().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1374,8 +1375,8 @@ Var *f_icreate( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"input_create().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1391,7 +1392,7 @@ Var *f_icreate( Var *v )
 		else
 		{
 			eprint( WARN, "%s:%ld: Float variable used as input or output "
-					"object type in function input_create().\n", Fname, Lc );
+					"object type in function %s().\n", Fname, Lc, Cur_Func );
 			type = lround( v->val.dval );
 		}
 
@@ -1399,7 +1400,7 @@ Var *f_icreate( Var *v )
 			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
 		{
 			eprint( FATAL, "%s:%ld: Invalid input or output object type (%ld) "
-					"in function input_create().\n", Fname, Lc, type );
+					"in function %s().\n", Fname, Lc, type, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1416,7 +1417,7 @@ Var *f_icreate( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Unknown input or output object type (`%s')"
-					" in function input_create().\n", Fname, Lc );
+					" in function %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1432,8 +1433,8 @@ Var *f_icreate( Var *v )
 			 v->type == FLOAT_VAR )
 		{
 			eprint( SEVERE, "%s:%ld: Float value used as initial value for "
-					"new integer input or output object in function "
-					"input_create().\n", Fname, Lc );
+					"new integer input or output object in function %s().\n",
+					Fname, Lc, Cur_Func );
 			lval = lround( v->val.dval );
 		}
 		else
@@ -1472,7 +1473,11 @@ Var *f_icreate( Var *v )
 	if ( v != NULL )
 	{
 		vars_check( v, STR_VAR );
-		form_str = T_strdup( v->val.sptr );
+		if ( type == INT_INPUT || type == INT_OUTPUT )
+			eprint( WARN, "%s:%ld: Can't set format string for integer data "
+					"in %s()\n", Fname, Lc, Cur_Func );
+		else
+			form_str = T_strdup( v->val.sptr );
 		v = vars_pop( v );
 	}
 
@@ -1480,8 +1485,8 @@ Var *f_icreate( Var *v )
 
 	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-				"input_create().\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1630,7 +1635,16 @@ Var *f_icreate( Var *v )
 	new_io->group = NULL;
 	new_io->label = label;
 	new_io->help_text = help_text;
-	new_io->form_str = form_str;
+
+	if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+	{
+		if ( form_str )
+			new_io->form_str = form_str;
+		else
+			new_io->form_str = T_strdup( "%g" );
+	}
+	else
+		new_io->form_str = NULL;
 
 	/* If this isn't just a test run really draw the new object */
 
@@ -1655,8 +1669,8 @@ Var *f_idelete( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"input_delete().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1679,7 +1693,7 @@ Var *f_idelete( Var *v )
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
 				eprint( FATAL, "%s:%ld: Invalid input or output object "
-						"identifier in input_delete().\n", Fname, Lc );
+						"identifier in %s().\n", Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1732,7 +1746,7 @@ Var *f_idelete( Var *v )
 			   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 		{
 			eprint( FATAL, "%s:%ld: Invalid input or output object identifier "
-					"in input_delete().\n", Fname, Lc );
+					"in %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -1771,7 +1785,7 @@ Var *f_idelete( Var *v )
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
 				eprint( FATAL, "%s:%ld: Invalid input or output object "
-						"identifier in input_delete().\n", Fname, Lc );
+						"identifier in %s().\n", Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1857,8 +1871,8 @@ Var *f_ivalue( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			eprint( WARN, "%s:%ld: Superfluous arguments in call of "
-					"%s().\n", Fname, Lc, Cur_Func );
+			eprint( WARN, "%s:%ld: Superfluous arguments in call of %s().\n",
+					Fname, Lc, Cur_Func );
 			while ( ( v = vars_pop( v ) ) != NULL )
 				;
 		}
@@ -1988,8 +2002,8 @@ Var *f_ivalue( Var *v )
 		}
 		else
 		{
-			snprintf( buf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
-			fl_set_input( io->self, buf );
+			snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
+			fl_set_input( io->self, float_format_check( buf ) );
 		}
 	}
 
@@ -2157,7 +2171,6 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 	double prec;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 	IOBJECT *nio;
-	char *bptr = buf;
 
 
 	/* Calculate the width and height of the new object */
@@ -2269,21 +2282,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			if ( io->form_str )
-				snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str,
-						  io->val.lval );
-			else
-				snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
-			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ) &&
-					*bptr != '\0' )
-				bptr++;
-			if ( *bptr == '\0' )
-			{
-				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
-						Fname, Lc, Cur_Func );
-				THROW( EXCEPTION );
-			}
-			fl_set_input( io->self, bptr );
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			fl_set_input( io->self, buf );
 			break;
 
 		case FLOAT_INPUT :
@@ -2294,20 +2294,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
-			if ( io->form_str )
-				snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
-			else
-				snprintf( buf, MAX_INPUT_CHARS, "%g", io->val.dval );
-			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
-						*bptr == 'e' || *btptr != 'E' ) && *bptr != '\0' )
-				bptr++;
-			if ( *bptr == '\0' )
-			{
-				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
-						Fname, Lc, Cur_Func );
-				THROW( EXCEPTION );
-			}			
-			fl_set_input( io->self, buf );
+			snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
+			fl_set_input( io->self, float_format_check( buf ) );
 			break;
 
 		case INT_OUTPUT :
@@ -2321,20 +2309,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
-			if ( io->form_str )
-				snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str,
-						  io->val.lval );
-			else
-				snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
-			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ) &&
-					*bptr != '\0' )
-				bptr++;
-			if ( *bptr == '\0' )
-			{
-				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
-						Fname, Lc, Cur_Func );
-				THROW( EXCEPTION );
-			}
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
 			break;
 
@@ -2349,20 +2324,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
-			if ( io->form_str )
-				snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
-			else
-				snprintf( buf, MAX_INPUT_CHARS, "%g", io->val.dval );
-			while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
-						*bptr == 'e' || *btptr != 'E' ) && *bptr != '\0' )
-				bptr++;
-			if ( *bptr == '\0' )
-			{
-				eprint( FATAL, "%s:%ld: Invalid format string in %s.\n",
-						Fname, Lc, Cur_Func );
-				THROW( EXCEPTION );
-			}
-			fl_set_input( io->self, buf );
+			snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
+			fl_set_input( io->self, float_format_check( buf ) );
 			break;
 
 		default :
@@ -2435,17 +2398,11 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			buf = fl_get_input( obj );
 
 			if ( *buf == '\0' )
-			{
 				lval = 0;
-				fl_set_input( io->self, "0" );
-			}
 			else
 				sscanf( buf, "%ld", &lval );
 
-			if ( io->form_str )
-				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, lval );
-			else
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
 
 			if ( strcmp( buf, obuf ) )
 			{
@@ -2455,7 +2412,6 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 			if ( lval != io->val.lval )
 				io->val.lval = lval;
-
 			fl_set_input( io->self, obuf );
 			break;
 
@@ -2463,10 +2419,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			buf = fl_get_input( obj );
 
 			if ( *buf == '\0' )
-			{
 				dval = 0;
-				fl_set_input( io->self, "0" );
-			}
 			else
 				sscanf( buf, "%lf", &dval );
 
@@ -2486,39 +2439,48 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			}
 #endif
 
-			if ( io->form_str )
-				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
-			else
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%g", dval );
-			fl_set_input( io->self, obuf );
+			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
+			fl_set_input( io->self, float_format_check( obuf ) );
 
 			if ( dval != io->val.dval )
-			{
 				io->val.dval = dval;
-			}
 			break;
 
 		case INT_OUTPUT :
-			if ( io->form_str )
-				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str,
-						  io->val.lval );
-			else
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, obuf );
 			break;
 			
 		case FLOAT_OUTPUT :
-			if ( io->form_str )
-				snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str,
-						  io->val.dval );
-			else
-				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
-			fl_set_input( io->self, obuf );
+			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
+			fl_set_input( io->self, float_format_check( obuf ) );
 			break;
 
 		default :                 /* this can never happen :) */
 			assert( 1 == 0 );
 	}
+}
+
+
+/*------------------------------------------------------*/
+/*------------------------------------------------------*/
+
+static const char *float_format_check( const char *buf )
+{
+	const char *bptr = buf;
+
+
+	while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
+				*bptr == 'e' || *bptr != 'E' ) && *bptr != '\0' )
+		bptr++;
+	if ( *bptr == '\0' )
+	{
+		eprint( FATAL, "%s:%ld: Invalid format string in %s().\n",
+				Fname, Lc, Cur_Func );
+		THROW( EXCEPTION );
+	}			
+
+	return bptr;
 }
 
 
