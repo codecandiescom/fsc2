@@ -119,14 +119,14 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{get_field()}              @tab @ref{get_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init,,magnet_fast_init()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{get_field()}              @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
 @end multitable
 
 
@@ -163,14 +163,14 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{get_field()}              @tab @ref{get_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{magnet_fast_init()}       @tab @ref{magnet_fast_init,,magnet_fast_init()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{get_field()}              @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
 @end multitable
 
 
@@ -200,10 +200,10 @@ measured is from @w{-50 G} to @w{23000 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field}
-@item @code{find_field()}             @tab @ref{find_field}
-@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{find_field()}             @tab @ref{find_field,,find_field()}
+@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
 @item @code{gaussmeter_wait()}
 @end multitable
 
@@ -245,9 +245,9 @@ resolution setting.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field}
-@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution}
+@item @code{gaussmeter_name()}        @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}       @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{gaussmeter_resolution()}  @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
 @end multitable
 
 
@@ -294,25 +294,25 @@ for function/output channels declared as @code{INVERTED}).
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}           @tab @ref{pulser_name}
-@item @code{pulser_state()}          @tab @ref{pulser_state}
-@item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_shift()}          @tab @ref{pulser_shift}
-@item @code{pulser_increment()}      @tab @ref{pulser_increment}
-@item @code{pulser_reset()}          @tab @ref{pulser_reset}
-@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
-@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
-@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
-@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard}
-@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
-@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
-@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
-@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
-@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
-@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
-@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
-@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
+@item @code{pulser_name()}           @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}          @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_update()}         @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase,,pulser_next_phase()}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset,,pulser_phase_reset()}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard,,pulser_lock_keyboard()}
+@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance,,pulser_shape_to_defense_minimum_distance()}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance,,pulser_defense_to_shape_minimum_distance()}
+@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses,,pulser_automatic_shape_pulses()}
+@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses,,pulser_automatic_twt_pulses()}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance,,pulser_minimum_twt_pulse_distance()}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses,,pulser_keep_all_pulses()}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length,,pulser_maximum_pattern_length()}
+@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
 @end multitable
 
 
@@ -360,22 +360,22 @@ for function/output channels declared as @code{INVERTED}).
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}           @tab @ref{pulser_name}
-@item @code{pulser_state()}          @tab @ref{pulser_state}
-@item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_shift()}          @tab @ref{pulser_shift}
-@item @code{pulser_increment()}      @tab @ref{pulser_increment}
-@item @code{pulser_reset()}          @tab @ref{pulser_reset}
-@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
-@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
-@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
-@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard}
-@item @code{pulser_phase_switch_delay()} @tab @ref{pulser_phase_switch_delay}
-@item @code{pulser_grace_period()} @tab @ref{pulser_grace_period}
-@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
-@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
-@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
+@item @code{pulser_name()}           @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}          @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_update()}         @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase,,pulser_next_phase()}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset,,pulser_phase_reset()}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_lock_keyboard()}  @tab @ref{pulser_lock_keyboard,,pulser_lock_keyboard()}
+@item @code{pulser_phase_switch_delay()} @tab @ref{pulser_phase_switch_delay,,pulser_phase_switch_delay()}
+@item @code{pulser_grace_period()} @tab @ref{pulser_grace_period,,pulser_grace_period()}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses,,pulser_keep_all_pulses()}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length,,pulser_maximum_pattern_length()}
+@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
 @end multitable
 
 
@@ -404,12 +404,12 @@ currently supported.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{boxcar_name()}               @tab @ref{boxcar_name}
-@item @code{boxcar_curve_length()}       @tab @ref{boxcar_curve_length}
-@item @code{boxcar_get_curve()}          @tab @ref{boxcar_get_curve}
-@item @code{boxcar_start_acquisition()}  @tab @ref{boxcar_start_acquisition}
-@item @code{boxcar_stop_acquisition()}   @tab @ref{boxcar_stop_acquisition}
-@item @code{boxcar_single_shot()}        @tab @ref{boxcar_single_shot}
+@item @code{boxcar_name()}               @tab @ref{boxcar_name,,boxcar_name()}
+@item @code{boxcar_curve_length()}       @tab @ref{boxcar_curve_length,,boxcar_curve_length()}
+@item @code{boxcar_get_curve()}          @tab @ref{boxcar_get_curve,,boxcar_get_curve()}
+@item @code{boxcar_start_acquisition()}  @tab @ref{boxcar_start_acquisition,,boxcar_start_acquisition()}
+@item @code{boxcar_stop_acquisition()}   @tab @ref{boxcar_stop_acquisition,,boxcar_stop_acquisition()}
+@item @code{boxcar_single_shot()}        @tab @ref{boxcar_single_shot,,boxcar_single_shot()}
 @end multitable
 
 
@@ -446,22 +446,22 @@ Output channels: 8
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}           @tab @ref{pulser_name}
-@item @code{pulser_state()}          @tab @ref{pulser_state}
-@item @code{pulser_update()}         @tab @ref{pulser_update}
-@item @code{pulser_shift()}          @tab @ref{pulser_shift}
-@item @code{pulser_increment()}      @tab @ref{pulser_increment}
-@item @code{pulser_reset()}          @tab @ref{pulser_reset}
-@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase}
-@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset}
-@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset}
-@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
-@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
-@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
-@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
-@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
-@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses}
+@item @code{pulser_name()}           @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}          @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_update()}         @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}          @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}      @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}          @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_next_phase()}     @tab @ref{pulser_next_phase,,pulser_next_phase()}
+@item @code{pulser_phase_reset()}    @tab @ref{pulser_phase_reset,,pulser_phase_reset()}
+@item @code{pulser_pulse_reset()}    @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance,,pulser_shape_to_defense_minimum_distance()}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance,,pulser_defense_to_shape_minimum_distance()}
+@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses,,pulser_automatic_shape_pulses()}
+@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses,,pulser_automatic_twt_pulses()}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance,,pulser_minimum_twt_pulse_distance()}
+@item @code{pulser_show_pulses()}    @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}    @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
 @end multitable
 
 
@@ -490,23 +490,23 @@ analog-to-digital converter.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{lockin_name()}             @tab @ref{lockin_name}
-@item @code{lockin_get_data()}         @tab @ref{lockin_get_data}
-@item @code{lockin_sensitivity()}      @tab @ref{lockin_sensitivity}
-@item @code{lockin_time_constant()}    @tab @ref{lockin_time_constant}
-@item @code{lockin_phase()}            @tab @ref{lockin_phase}
-@item @code{lockin_offset()}           @tab @c{@ref{lockin_offset}}
-@item @code{lockin_conversion_time()}  @tab @ref{lockin_conversion_time}
-@item @code{lockin_ref_freq()}         @tab @ref{lockin_ref_freq}
-@item @code{lockin_ref_level()}        @tab @ref{lockin_ref_level}
-@item @code{lockin_harmonic()}         @tab @ref{lockin_harmonic}
-@item @code{lockin_resonator()}        @tab @c{@ref{lockin_resonator}}
-@item @code{lockin_is_overload()}      @tab @c{@ref{lockin_is_overload}}
-@item @code{lockin_rg()}               @tab @c{@ref{lockin_rg}}
-@item @code{lockin_tc()}               @tab @c{@ref{lockin_tc}}
-@item @code{lockin_ma()}               @tab @c{@ref{lockin_ma}}
-@item @code{lockin_ct()}               @tab @c{@ref{lockin_ct}}
-@item @code{lockin_mf()}               @tab @c{@ref{lockin_mf}}
+@item @code{lockin_name()}             @tab @ref{lockin_name,,lockin_name()}
+@item @code{lockin_get_data()}         @tab @ref{lockin_get_data,,lockin_get_data()}
+@item @code{lockin_sensitivity()}      @tab @ref{lockin_sensitivity,,lockin_sensitivity()}
+@item @code{lockin_time_constant()}    @tab @ref{lockin_time_constant,,lockin_time_constant()}
+@item @code{lockin_phase()}            @tab @ref{lockin_phase,,lockin_phase()}
+@item @code{lockin_offset()}           @tab @c{@ref{lockin_offset,,lockin_offset()}}
+@item @code{lockin_conversion_time()}  @tab @ref{lockin_conversion_time,,lockin_conversion_time()}
+@item @code{lockin_ref_freq()}         @tab @ref{lockin_ref_freq,,lockin_ref_freq()}
+@item @code{lockin_ref_level()}        @tab @ref{lockin_ref_level,,lockin_ref_level()}
+@item @code{lockin_harmonic()}         @tab @ref{lockin_harmonic,,lockin_harmonic()}
+@item @code{lockin_resonator()}        @tab @c{@ref{lockin_resonator,,lockin_resonator()}}
+@item @code{lockin_is_overload()}      @tab @c{@ref{lockin_is_overload,,lockin_is_overload()}}
+@item @code{lockin_rg()}               @tab @c{@ref{lockin_rg,,lockin_rg()}}
+@item @code{lockin_tc()}               @tab @c{@ref{lockin_tc,,lockin_tc()}}
+@item @code{lockin_ma()}               @tab @c{@ref{lockin_ma,,lockin_ma()}}
+@item @code{lockin_ct()}               @tab @c{@ref{lockin_ct,,lockin_ct()}}
+@item @code{lockin_mf()}               @tab @c{@ref{lockin_mf,,lockin_mf()}}
 @end multitable
 
 
@@ -535,13 +535,13 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}   @tab @ref{magnet_name}
-@item @code{magnet_setup()}  @tab @ref{magnet_setup}
-@item @code{set_field()}     @tab @ref{set_field}
-@item @code{get_field()}     @tab @ref{get_field}
-@item @code{sweep_up()}      @tab @ref{sweep_up}
-@item @code{sweep_down()}    @tab @ref{sweep_down}
-@item @code{reset_field()}   @tab @ref{reset_field}
+@item @code{magnet_name()}   @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}  @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{set_field()}     @tab @ref{set_field,,set_field()}
+@item @code{get_field()}     @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}      @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}    @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}   @tab @ref{reset_field,,reset_field()}
 @end multitable
 
 
@@ -572,14 +572,14 @@ range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
-@item @code{find_field()}                    @tab @ref{find_field}
-@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
-@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{find_field()}                    @tab @ref{find_field,,find_field()}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation,,gaussmeter_probe_orientation()}
 @item @code{gaussmeter_wait()}
-@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
-@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit,,gaussmeter_upper_search_limit()}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit,,gaussmeter_lower_search_limit()}
 @end multitable
 
 
@@ -610,14 +610,14 @@ range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
-@item @code{find_field()}                    @tab @ref{find_field}
-@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
-@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{find_field()}                    @tab @ref{find_field,,find_field()}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation,,gaussmeter_probe_orientation()}
 @item @code{gaussmeter_wait()}
-@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
-@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit,,gaussmeter_upper_search_limit()}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit,,gaussmeter_lower_search_limit()}
 @end multitable
 
 
@@ -647,13 +647,13 @@ the range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
-@item @code{measure_field()}                 @tab @ref{measure_field}
-@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
-@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
-@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
-@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{measure_field()}                 @tab @ref{measure_field,,measure_field()}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation,,gaussmeter_probe_orientation()}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit,,gaussmeter_upper_search_limit()}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit,,gaussmeter_lower_search_limit()}
 @end multitable
 
 
@@ -680,13 +680,13 @@ the range is @w{1460 G} to @w{19900 G}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
-@item @code{measure_field()}                 @tab @ref{measure_field}
-@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
-@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
-@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit}
-@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit}
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{measure_field()}                 @tab @ref{measure_field,,measure_field()}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation,,gaussmeter_probe_orientation()}
+@item @code{gaussmeter_upper_search_limit()} @tab @ref{gaussmeter_upper_search_limit,,gaussmeter_upper_search_limit()}
+@item @code{gaussmeter_lower_search_limit()} @tab @ref{gaussmeter_lower_search_limit,,gaussmeter_lower_search_limit()}
 @end multitable
 
 
@@ -716,9 +716,9 @@ card.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{chopper_name()}               @tab @ref{chopper_name}
-@item @code{chopper_rotation_frequency()} @tab @ref{chopper_rotation_frequency}
-@item @code{chopper_create_trigger()}     @tab @ref{chopper_create_trigger}
+@item @code{chopper_name()}               @tab @ref{chopper_name,,chopper_name()}
+@item @code{chopper_rotation_frequency()} @tab @ref{chopper_rotation_frequency,,chopper_rotation_frequency()}
+@item @code{chopper_create_trigger()}     @tab @ref{chopper_create_trigger,,chopper_create_trigger()}
 @end multitable
 
 
@@ -757,20 +757,20 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}            @tab @ref{pulser_name}
-@item @code{pulser_state()}           @tab @ref{pulser_state}
-@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
-@item @code{pulser_update()}          @tab @ref{pulser_update}
-@item @code{pulser_shift()}           @tab @ref{pulser_shift}
-@item @code{pulser_increment()}       @tab @ref{pulser_increment}
-@item @code{pulser_reset()}           @tab @ref{pulser_reset}
-@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
-@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
-@item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update}
-@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses}
-@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length}
-@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@item @code{pulser_name()}            @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}           @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state,,pulser_channel_state()}
+@item @code{pulser_update()}          @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard,,pulser_lock_keyboard()}
+@item @code{pulser_stop_on_update()}  @tab @ref{pulser_stop_on_update,,pulser_stop_on_update()}
+@item @code{pulser_keep_all_pulses()} @tab @ref{pulser_keep_all_pulses,,pulser_keep_all_pulses()}
+@item @code{pulser_maximum_pattern_length()} @tab @ref{pulser_maximum_pattern_length,,pulser_maximum_pattern_length()}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
 @end multitable
 
 
@@ -799,8 +799,8 @@ to return the measured frequency can be used.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{freq_counter_name_name()}           @tab @ref{freq_counter_name}
-@item @code{freq_counter_measure()}             @tab @ref{freq_counter_measure}
+@item @code{freq_counter_name_name()}           @tab @ref{freq_counter_name,,freq_counter_name()}
+@item @code{freq_counter_measure()}             @tab @ref{freq_counter_measure,,freq_counter_measure()}
 @end multitable
 
 
@@ -834,22 +834,22 @@ to @w{3 dB} in @w{0.1 dB} steps.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
-@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
-@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
-@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
-@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
-@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
-@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
-@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
-@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
-@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
-@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
-@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name,,synthesizer_name()}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state,,synthesizer_state()}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency,,synthesizer_frequency()}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency,,synthesizer_step_frequency()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation,,synthesizer_minimum_attenuation()}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up,,synthesizer_sweep_up()}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down,,synthesizer_sweep_down()}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency,,synthesizer_reset_frequency()}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table,,synthesizer_use_table()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq,,synthesizer_att_ref_freq()}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation,,synthesizer_modulation()}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl,,synthesizer_mod_ampl()}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type,,synthesizer_mod_type()}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source,,synthesizer_mod_source()}
 @end multitable
 
 
@@ -881,22 +881,22 @@ to @w{14.5 dB} in @w{0.1 dB} steps.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
-@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
-@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
-@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
-@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
-@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
-@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
-@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
-@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
-@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
-@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
-@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name,,synthesizer_name()}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state,,synthesizer_state()}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency,,synthesizer_frequency()}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency,,synthesizer_step_frequency()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation,,synthesizer_minimum_attenuation()}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up,,synthesizer_sweep_up()}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down,,synthesizer_sweep_down()}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency,,synthesizer_reset_frequency()}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table,,synthesizer_use_table()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq,,synthesizer_att_ref_freq()}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation,,synthesizer_modulation()}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl,,synthesizer_mod_ampl()}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type,,synthesizer_mod_type()}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source,,synthesizer_mod_source()}
 @end multitable
 
 
@@ -928,21 +928,21 @@ to @w{10 dB} in @w{1 dB} steps.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
-@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
-@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
-@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
-@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
-@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
-@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
-@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
-@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
-@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
-@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name,,synthesizer_name()}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state,,synthesizer_state()}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency,,synthesizer_frequency()}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency,,synthesizer_step_frequency()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation,,synthesizer_minimum_attenuation()}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up,,synthesizer_sweep_up()}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down,,synthesizer_sweep_down()}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency,,synthesizer_reset_frequency()}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table,,synthesizer_use_table()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq,,synthesizer_att_ref_freq()}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation,,synthesizer_modulation()}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl,,synthesizer_mod_ampl()}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type,,synthesizer_mod_type()}
 @end multitable
 
 
@@ -977,10 +977,10 @@ setting.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{mw_attenuator_name()}                @tab @ref{mw_attenuator_name}
-@item @code{mw_attenuator_load_calibration()}    @tab @ref{mw_attenuator_load_calibration}
-@item @code{mw_attenuator_initial_attenuation()} @tab @ref{mw_attenuator_initial_attenuation}
-@item @code{mw_attenuator_attenuation()}         @tab @ref{mw_attenuator_attenuation}
+@item @code{mw_attenuator_name()}                @tab @ref{mw_attenuator_name,,mw_attenuator_name()}
+@item @code{mw_attenuator_load_calibration()}    @tab @ref{mw_attenuator_load_calibration,,mw_attenuator_load_calibration()}
+@item @code{mw_attenuator_initial_attenuation()} @tab @ref{mw_attenuator_initial_attenuation,,mw_attenuator_initial_attenuation()}
+@item @code{mw_attenuator_attenuation()}         @tab @ref{mw_attenuator_attenuation,,mw_attenuator_attenuation()}
 @end multitable
 
 
@@ -1009,13 +1009,13 @@ voltage can be reduced via a potentiometer at the front panel.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{daq_name()}                   @tab @ref{daq_name}
-@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac}
-@item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage}
-@item @code{daq_maximum_output_voltage()} @tab @ref{daq_maximum_output_voltage}
-@item @code{daq_reserve_adc()}            @tab @ref{daq_reserve_adc}
-@item @code{daq_get_voltage()}            @tab @ref{daq_get_voltage}
-@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter}
+@item @code{daq_name()}                   @tab @ref{daq_name,,daq_name()}
+@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac,,daq_reserve_dac()}
+@item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage,,daq_set_voltage()}
+@item @code{daq_maximum_output_voltage()} @tab @ref{daq_maximum_output_voltage,,daq_maximum_output_voltage()}
+@item @code{daq_reserve_adc()}            @tab @ref{daq_reserve_adc,,daq_reserve_adc()}
+@item @code{daq_get_voltage()}            @tab @ref{daq_get_voltage,,daq_get_voltage()}
+@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter,,daq_dac_parameter()}
 @end multitable
 
 
@@ -1052,15 +1052,15 @@ can't be used, it gets reserved automatically for this module.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}             @tab @ref{magnet_name}
-@item @code{magnet_setup()}            @tab @ref{magnet_setup}
-@item @code{set_field()}               @tab @ref{set_field}
-@item @code{sweep_up()}                @tab @ref{sweep_up}
-@item @code{sweep_down()}              @tab @ref{sweep_down}
-@item @code{reset_field()}             @tab @ref{reset_field}
-@item @code{magnet_B0()}               @tab @ref{magnet_B0}
-@item @code{magnet_slope()}            @tab @ref{magnet_slope}
-@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file}
+@item @code{magnet_name()}             @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}            @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{set_field()}               @tab @ref{set_field,,set_field()}
+@item @code{sweep_up()}                @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}              @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}             @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_B0()}               @tab @ref{magnet_B0,,magnet_B0()}
+@item @code{magnet_slope()}            @tab @ref{magnet_slope,,magnet_slope()}
+@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file,,magnet_calibration_file()}
 @end multitable
 
 
@@ -1098,13 +1098,13 @@ automatically for this module.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
-@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file,,magnet_calibration_file()}
 @end multitable
 
 
@@ -1138,14 +1138,14 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}              @tab @ref{magnet_name}
-@item @code{magnet_setup()}             @tab @ref{magnet_setup}
-@item @code{get_field()}                @tab @ref{get_field}
-@item @code{set_field()}                @tab @ref{set_field}
-@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate}
-@item @code{magnet_sweep()}             @tab @ref{magnet_sweep}
-@item @code{reset_field()}              @tab @ref{reset_field}
-@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end}
+@item @code{magnet_name()}              @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}             @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{get_field()}                @tab @ref{get_field,,get_field()}
+@item @code{set_field()}                @tab @ref{set_field,,set_field()}
+@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate,,magnet_sweep_rate()}
+@item @code{magnet_sweep()}             @tab @ref{magnet_sweep,,magnet_sweep()}
+@item @code{reset_field()}              @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end,,magnet_goto_field_on_end()}
 @end multitable
 
 
@@ -1173,14 +1173,14 @@ magnet used for Leiden @w{275 GHz} spektrometer.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}              @tab @ref{magnet_name}
-@item @code{magnet_setup()}             @tab @ref{magnet_setup}
-@item @code{get_field()}                @tab @ref{get_field}
-@item @code{set_field()}                @tab @ref{set_field}
-@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate}
-@item @code{magnet_sweep()}             @tab @ref{magnet_sweep}
-@item @code{reset_field()}              @tab @ref{reset_field}
-@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end}
+@item @code{magnet_name()}              @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}             @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{get_field()}                @tab @ref{get_field,,get_field()}
+@item @code{set_field()}                @tab @ref{set_field,,set_field()}
+@item @code{magnet_sweep_rate()}        @tab @ref{magnet_sweep_rate,,magnet_sweep_rate()}
+@item @code{magnet_sweep()}             @tab @ref{magnet_sweep,,magnet_sweep()}
+@item @code{reset_field()}              @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_goto_field_on_end}   @tab @ref{magnet_goto_field_on_end,,magnet_goto_field_on_end()}
 @end multitable
 
 
@@ -1209,11 +1209,11 @@ the temperature.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{temp_contr_name()}            @tab @ref{temp_contr_name}
-@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature}
-@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel}
-@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit}
-@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard}
+@item @code{temp_contr_name()}            @tab @ref{temp_contr_name,,temp_contr_name()}
+@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature,,temp_contr_temperature()}
+@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel,,temp_contr_sample_channel()}
+@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit,,temp_contr_sensor_unit()}
+@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard,,temp_contr_lock_keyboard()}
 @end multitable
 
 
@@ -1254,15 +1254,15 @@ the currents through the sweep coil, not in field units!
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{magnet_use_correction()}  @tab @ref{magnet_use_correction}
-@item @code{magnet_use_dac_port()}    @tab @ref{magnet_use_dac_port}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{get_field()}              @tab @ref{get_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{magnet_use_correction()}  @tab @ref{magnet_use_correction,,magnet_use_correction()}
+@item @code{magnet_use_dac_port()}    @tab @ref{magnet_use_dac_port,,magnet_use_dac_port()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{get_field()}              @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
 @end multitable
 
 
@@ -1289,10 +1289,10 @@ the currents through the sweep coil, not in field units!
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{voltmeter_name()}            @tab @ref{voltmeter_name}
-@item @code{voltmeter_get_data()}        @tab @ref{voltmeter_get_data}
-@item @code{voltmeter_ac_measurement()}  @tab @ref{voltmeter_ac_measurement}
-@item @code{voltmeter_dc_measurement()}  @tab @ref{voltmeter_dc_measurement}
+@item @code{voltmeter_name()}            @tab @ref{voltmeter_name,,voltmeter_name()}
+@item @code{voltmeter_get_data()}        @tab @ref{voltmeter_get_data,,voltmeter_get_data()}
+@item @code{voltmeter_ac_measurement()}  @tab @ref{voltmeter_ac_measurement,,voltmeter_ac_measurement()}
+@item @code{voltmeter_dc_measurement()}  @tab @ref{voltmeter_dc_measurement,,voltmeter_dc_measurement()}
 @end multitable
 
 
@@ -1321,11 +1321,11 @@ the temperature.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{temp_contr_name()}            @tab @ref{temp_contr_name}
-@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature}
-@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel}
-@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit}
-@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard}
+@item @code{temp_contr_name()}            @tab @ref{temp_contr_name,,temp_contr_name()}
+@item @code{temp_contr_temperature()}     @tab @ref{temp_contr_temperature,,temp_contr_temperature()}
+@item @code{temp_contr_sample_channel()}  @tab @ref{temp_contr_sample_channel,,temp_contr_sample_channel()}
+@item @code{temp_contr_sensor_unit()}     @tab @ref{temp_contr_sensor_unit,,temp_contr_sensor_unit()}
+@item @code{temp_contr_lock_keyboard()}   @tab @ref{temp_contr_lock_keyboard,,temp_contr_lock_keyboard()}
 @end multitable
 
 
@@ -1353,21 +1353,21 @@ channels, 2 function channels (needed for averaging).
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                 @tab @ref{digitizer_name}
-@c @code{@item digitizer_define_window()}      @tab @ref{@item digitizer_define_window}
-@item @code{digitizer_timebase()}             @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}       @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}          @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_averaging()}            @tab @ref{digitizer_averaging}
-@item @code{digitizer_num_averages()}         @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}        @tab @ref{digitizer_record_length}
-@c @code{@item digitizer_trigger_position()}  @tab @ref{@item digitizer_trigger_position}
+@item @code{digitizer_name()}                 @tab @ref{digitizer_name,,digitizer_name()}
+@c @code{@item digitizer_define_window()}      @tab @ref{@item digitizer_define_window,,@item digitizer_define_window()}
+@item @code{digitizer_timebase()}             @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}       @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}          @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_averaging()}            @tab @ref{digitizer_averaging,,digitizer_averaging()}
+@item @code{digitizer_num_averages()}         @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}        @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@c @code{@item digitizer_trigger_position()}  @tab @ref{@item digitizer_trigger_position,,@item digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}      @tab for internal use only
-@c @code{@item digitizer_trigger_channel()}   @tab @ref{@item digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}    @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_curve()}            @tab @ref{digitizer_get_curve}
-@c @code{@item digitizer_get_curve_fast()}    @tab @ref{@item digitizer_get_curve_fast}
-@c @code{@item digitizer_run()}               @tab @ref{@item digitizer_run}
+@c @code{@item digitizer_trigger_channel()}   @tab @ref{@item digitizer_trigger_channel,,@item digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}    @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_curve()}            @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@c @code{@item digitizer_get_curve_fast()}    @tab @ref{@item digitizer_get_curve_fast,,@item digitizer_get_curve_fast()}
+@c @code{@item digitizer_run()}               @tab @ref{@item digitizer_run,,@item digitizer_run()}
 @end multitable
 
 
@@ -1396,10 +1396,10 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{daq_name()}                   @tab @ref{daq_name}
-@item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage}
-@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac}
-@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter}
+@item @code{daq_name()}                   @tab @ref{daq_name,,daq_name()}
+@item @code{daq_set_voltage()}            @tab @ref{daq_set_voltage,,daq_set_voltage()}
+@item @code{daq_reserve_dac()}            @tab @ref{daq_reserve_dac,,daq_reserve_dac()}
+@item @code{daq_dac_parameter()}          @tab @ref{daq_dac_parameter,,daq_dac_parameter()}
 @end multitable
 
 
@@ -1428,17 +1428,17 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{counter_name()}                     @tab @ref{counter_name}
-@item @code{counter_start_continuous_counter()} @tab @ref{counter_start_continuous_counter}
-@item @code{counter_start_timed_counter()}      @tab @ref{counter_start_timed_counter}
-@item @code{counter_timed_count()}              @tab @ref{counter_timed_count}
-@item @code{counter_intermediate_count()}       @tab @ref{counter_intermediate_count}
-@item @code{counter_final_count()}              @tab @ref{counter_final_count}
-@item @code{counter_stop_counter()}             @tab @ref{counter_stop_counter}
-@item @code{counter_single_pulse()}             @tab @ref{counter_single_pulse}
-@item @code{counter_continuous_pulses()}        @tab @ref{counter_continuous_pulses}
-@item @code{counter_dio_read()}                 @tab @ref{counter_dio_read}
-@item @code{counter_dio_write()}                @tab @ref{counter_dio_write}
+@item @code{counter_name()}                     @tab @ref{counter_name,,counter_name()}
+@item @code{counter_start_continuous_counter()} @tab @ref{counter_start_continuous_counter,,counter_start_continuous_counter()}
+@item @code{counter_start_timed_counter()}      @tab @ref{counter_start_timed_counter,,counter_start_timed_counter()}
+@item @code{counter_timed_count()}              @tab @ref{counter_timed_count,,counter_timed_count()}
+@item @code{counter_intermediate_count()}       @tab @ref{counter_intermediate_count,,counter_intermediate_count()}
+@item @code{counter_final_count()}              @tab @ref{counter_final_count,,counter_final_count()}
+@item @code{counter_stop_counter()}             @tab @ref{counter_stop_counter,,counter_stop_counter()}
+@item @code{counter_single_pulse()}             @tab @ref{counter_single_pulse,,counter_single_pulse()}
+@item @code{counter_continuous_pulses()}        @tab @ref{counter_continuous_pulses,,counter_continuous_pulses()}
+@item @code{counter_dio_read()}                 @tab @ref{counter_dio_read,,counter_dio_read()}
+@item @code{counter_dio_write()}                @tab @ref{counter_dio_write,,counter_dio_write()}
 @end multitable
 
 
@@ -1467,28 +1467,28 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{daq_name()}                     @tab @ref{daq_name}
-@item @code{daq_ao_channel_setup()}         @tab @ref{daq_ao_channel_setup}
-@item @code{daq_set_voltage()}              @tab @ref{daq_set_voltage}
-@item @code{daq_get_voltage()}              @tab @ref{daq_get_voltage}
-@item @code{daq_reserve_dac()}              @tab @ref{daq_reserve_dac}
-@item @code{daq_reserve_adc()}              @tab @ref{daq_reserve_adc}
-@item @code{daq_ai_channel_setup()}         @tab @ref{daq_ai_channel_setup}
-@item @code{daq_ai_acq_setup()}             @tab @ref{daq_ai_acq_setup}
-@item @code{daq_ai_start_acquisition()}     @tab @ref{daq_ai_start_acquisition}
-@item @code{daq_ai_get_curve()}             @tab @ref{daq_ai_get_curve}
-@item @code{daq_start_continuous_counter()} @tab @ref{daq_start_continuous_counter}
-@item @code{daq_start_timed_counter()}      @tab @ref{daq_start_timed_counter}
-@item @code{daq_timed_count()}              @tab @ref{daq_timed_count}
-@item @code{daq_intermediate_count()}       @tab @ref{daq_intermediate_count}
-@item @code{daq_final_count()}              @tab @ref{daq_final_count}
-@item @code{daq_stop_counter()}             @tab @ref{daq_stop_counter}
-@item @code{daq_single_pulse()}             @tab @ref{daq_single_pulse}
-@item @code{daq_continuous_pulses()}        @tab @ref{daq_continuous_pulses}
-@item @code{daq_freq_out()}                 @tab @ref{daq_freq_out}
-@item @code{daq_trigger_setup()}            @tab @ref{daq_trigger_setup}
-@item @code{daq_dio_read()}                 @tab @ref{daq_dio_read}
-@item @code{daq_dio_write()}                @tab @ref{daq_dio_write}
+@item @code{daq_name()}                     @tab @ref{daq_name,,daq_name()}
+@item @code{daq_ao_channel_setup()}         @tab @ref{daq_ao_channel_setup,,daq_ao_channel_setup()}
+@item @code{daq_set_voltage()}              @tab @ref{daq_set_voltage,,daq_set_voltage()}
+@item @code{daq_get_voltage()}              @tab @ref{daq_get_voltage,,daq_get_voltage()}
+@item @code{daq_reserve_dac()}              @tab @ref{daq_reserve_dac,,daq_reserve_dac()}
+@item @code{daq_reserve_adc()}              @tab @ref{daq_reserve_adc,,daq_reserve_adc()}
+@item @code{daq_ai_channel_setup()}         @tab @ref{daq_ai_channel_setup,,daq_ai_channel_setup()}
+@item @code{daq_ai_acq_setup()}             @tab @ref{daq_ai_acq_setup,,daq_ai_acq_setup()}
+@item @code{daq_ai_start_acquisition()}     @tab @ref{daq_ai_start_acquisition,,daq_ai_start_acquisition()}
+@item @code{daq_ai_get_curve()}             @tab @ref{daq_ai_get_curve,,daq_ai_get_curve()}
+@item @code{daq_start_continuous_counter()} @tab @ref{daq_start_continuous_counter,,daq_start_continuous_counter()}
+@item @code{daq_start_timed_counter()}      @tab @ref{daq_start_timed_counter,,daq_start_timed_counter()}
+@item @code{daq_timed_count()}              @tab @ref{daq_timed_count,,daq_timed_count()}
+@item @code{daq_intermediate_count()}       @tab @ref{daq_intermediate_count,,daq_intermediate_count()}
+@item @code{daq_final_count()}              @tab @ref{daq_final_count,,daq_final_count()}
+@item @code{daq_stop_counter()}             @tab @ref{daq_stop_counter,,daq_stop_counter()}
+@item @code{daq_single_pulse()}             @tab @ref{daq_single_pulse,,daq_single_pulse()}
+@item @code{daq_continuous_pulses()}        @tab @ref{daq_continuous_pulses,,daq_continuous_pulses()}
+@item @code{daq_freq_out()}                 @tab @ref{daq_freq_out,,daq_freq_out()}
+@item @code{daq_trigger_setup()}            @tab @ref{daq_trigger_setup,,daq_trigger_setup()}
+@item @code{daq_dio_read()}                 @tab @ref{daq_dio_read,,daq_dio_read()}
+@item @code{daq_dio_write()}                @tab @ref{daq_dio_write,,daq_dio_write()}
 @end multitable
 
 
@@ -1517,11 +1517,11 @@ T. Measured fields are returned in Gauss, not Tesla!
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name}
-@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field}
-@item @code{measure_field()}                 @tab @ref{measure_field}
-@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution}
-@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation}
+@item @code{gaussmeter_name()}               @tab @ref{gaussmeter_name,,gaussmeter_name()}
+@item @code{gaussmeter_field()}              @tab @ref{gaussmeter_field,,gaussmeter_field()}
+@item @code{measure_field()}                 @tab @ref{measure_field,,measure_field()}
+@item @code{gaussmeter_resolution()}         @tab @ref{gaussmeter_resolution,,gaussmeter_resolution()}
+@item @code{gaussmeter_probe_orientation()}  @tab @ref{gaussmeter_probe_orientation,,gaussmeter_probe_orientation()}
 @end multitable
 
 
@@ -1552,27 +1552,27 @@ to @w{13 dB} in @w{0.1 dB} steps.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
-@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
-@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
-@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
-@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
-@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
-@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
-@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
-@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
-@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
-@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
-@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
-@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
-@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
-@item @code{synthesizer_mod_freq()}             @tab @ref{synthesizer_mod_freq}
-@item @code{synthesizer_pulse_state()}          @tab @ref{synthesizer_pulse_state}
-@item @code{synthesizer_pulse_trigger_slope()}  @tab @ref{synthesizer_pulse_trigger_slope}
-@item @code{synthesizer_pulse_width()}          @tab @ref{synthesizer_pulse_width}
-@item @code{synthesizer_pulse_delay()}          @tab @ref{synthesizer_pulse_delay}
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name,,synthesizer_name()}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state,,synthesizer_state()}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency,,synthesizer_frequency()}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency,,synthesizer_step_frequency()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation,,synthesizer_minimum_attenuation()}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up,,synthesizer_sweep_up()}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down,,synthesizer_sweep_down()}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency,,synthesizer_reset_frequency()}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table,,synthesizer_use_table()}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation,,synthesizer_attenuation()}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq,,synthesizer_att_ref_freq()}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation,,synthesizer_modulation()}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl,,synthesizer_mod_ampl()}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type,,synthesizer_mod_type()}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source,,synthesizer_mod_source()}
+@item @code{synthesizer_mod_freq()}             @tab @ref{synthesizer_mod_freq,,synthesizer_mod_freq()}
+@item @code{synthesizer_pulse_state()}          @tab @ref{synthesizer_pulse_state,,synthesizer_pulse_state()}
+@item @code{synthesizer_pulse_trigger_slope()}  @tab @ref{synthesizer_pulse_trigger_slope,,synthesizer_pulse_trigger_slope()}
+@item @code{synthesizer_pulse_width()}          @tab @ref{synthesizer_pulse_width,,synthesizer_pulse_width()}
+@item @code{synthesizer_pulse_delay()}          @tab @ref{synthesizer_pulse_delay,,synthesizer_pulse_delay()}
 @end multitable
 
 
@@ -1608,17 +1608,17 @@ or turned upside-down.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{ccd_camera_name()}            @tab @ref{ccd_camera_name}
-@item @code{ccd_camera_roi()}             @tab @ref{ccd_camera_roi}
-@item @code{ccd_camera_binning()}         @tab @ref{ccd_camera_binning}
-@item @code{ccd_camera_binning_method()}  @tab @ref{ccd_camera_binning_method}
-@item @code{ccd_camera_exposure_time()}   @tab @ref{ccd_camera_exposure_time}
-@item @code{ccd_camera_clear_cycles()}    @tab @ref{ccd_camera_clear_cycles}
-@item @code{ccd_camera_get_image()}       @tab @ref{ccd_camera_get_image}
-@item @code{ccd_camera_get_spectrum()}    @tab @ref{ccd_camera_get_spectrum}
-@item @code{ccd_camera_temperature()}     @tab @ref{ccd_camera_temperature}
-@item @code{ccd_camera_pixel_size()}      @tab @ref{ccd_camera_pixel_size}
-@item @code{ccd_camera_pixel_area()}      @tab @ref{ccd_camera_pixel_area}
+@item @code{ccd_camera_name()}            @tab @ref{ccd_camera_name,,ccd_camera_name()}
+@item @code{ccd_camera_roi()}             @tab @ref{ccd_camera_roi,,ccd_camera_roi()}
+@item @code{ccd_camera_binning()}         @tab @ref{ccd_camera_binning,,ccd_camera_binning()}
+@item @code{ccd_camera_binning_method()}  @tab @ref{ccd_camera_binning_method,,ccd_camera_binning_method()}
+@item @code{ccd_camera_exposure_time()}   @tab @ref{ccd_camera_exposure_time,,ccd_camera_exposure_time()}
+@item @code{ccd_camera_clear_cycles()}    @tab @ref{ccd_camera_clear_cycles,,ccd_camera_clear_cycles()}
+@item @code{ccd_camera_get_image()}       @tab @ref{ccd_camera_get_image,,ccd_camera_get_image()}
+@item @code{ccd_camera_get_spectrum()}    @tab @ref{ccd_camera_get_spectrum,,ccd_camera_get_spectrum()}
+@item @code{ccd_camera_temperature()}     @tab @ref{ccd_camera_temperature,,ccd_camera_temperature()}
+@item @code{ccd_camera_pixel_size()}      @tab @ref{ccd_camera_pixel_size,,ccd_camera_pixel_size()}
+@item @code{ccd_camera_pixel_area()}      @tab @ref{ccd_camera_pixel_area,,ccd_camera_pixel_area()}
 @end multitable
 
 
@@ -1648,10 +1648,10 @@ the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{daq_name()}            @tab @ref{daq_name}
-@item @code{daq_get_voltage()}     @tab @ref{daq_get_voltage}
-@item @code{daq_trigger_mode()}    @tab @ref{daq_trigger_mode}
-@item @code{daq_gain()}            @tab @ref{daq_gain}
+@item @code{daq_name()}            @tab @ref{daq_name,,daq_name()}
+@item @code{daq_get_voltage()}     @tab @ref{daq_get_voltage,,daq_get_voltage()}
+@item @code{daq_trigger_mode()}    @tab @ref{daq_trigger_mode,,daq_trigger_mode()}
+@item @code{daq_gain()}            @tab @ref{daq_gain,,daq_gain()}
 @end multitable
 
 
@@ -1681,8 +1681,8 @@ the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{daq_name()}            @tab @ref{daq_name}
-@item @code{daq_set_voltage()}     @tab @ref{daq_get_voltage}
+@item @code{daq_name()}            @tab @ref{daq_name,,daq_name()}
+@item @code{daq_set_voltage()}     @tab @ref{daq_get_voltage,,daq_get_voltage()}
 @end multitable
 
 
@@ -1726,16 +1726,16 @@ pulse of a function).
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}            @tab @ref{pulser_name}
-@item @code{pulser_state()}           @tab @ref{pulser_state}
-@item @code{pulser_update()}          @tab @ref{pulser_update}
-@item @code{pulser_shift()}           @tab @ref{pulser_shift}
-@item @code{pulser_increment()}       @tab @ref{pulser_increment}
-@item @code{pulser_reset()}           @tab @ref{pulser_reset}
-@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
-@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
-@item @code{pulser_pulse_minimum_specs()}     @tab @ref{pulser_pulse_minimum_specs}
+@item @code{pulser_name()}            @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}           @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_update()}          @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
+@item @code{pulser_pulse_minimum_specs()}     @tab @ref{pulser_pulse_minimum_specs,,pulser_pulse_minimum_specs()}
 @end multitable
 
 
@@ -1781,22 +1781,22 @@ the repetition time may become larger by @w{8 ns}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{pulser_name()}            @tab @ref{pulser_name}
-@item @code{pulser_state()}           @tab @ref{pulser_state}
-@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state}
-@item @code{pulser_update()}          @tab @ref{pulser_update}
-@item @code{pulser_shift()}           @tab @ref{pulser_shift}
-@item @code{pulser_increment()}       @tab @ref{pulser_increment}
-@item @code{pulser_reset()}           @tab @ref{pulser_reset}
-@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset}
-@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard}
-@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance}
-@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance}
-@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses}
-@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses}
-@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance}
-@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses}
-@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses}
+@item @code{pulser_name()}            @tab @ref{pulser_name,,pulser_name()}
+@item @code{pulser_state()}           @tab @ref{pulser_state,,pulser_state()}
+@item @code{pulser_channel_state()}   @tab @ref{pulser_channel_state,,pulser_channel_state()}
+@item @code{pulser_update()}          @tab @ref{pulser_update,,pulser_update()}
+@item @code{pulser_shift()}           @tab @ref{pulser_shift,,pulser_shift()}
+@item @code{pulser_increment()}       @tab @ref{pulser_increment,,pulser_increment()}
+@item @code{pulser_reset()}           @tab @ref{pulser_reset,,pulser_reset()}
+@item @code{pulser_pulse_reset()}     @tab @ref{pulser_pulse_reset,,pulser_pulse_reset()}
+@item @code{pulser_lock_keyboard()}   @tab @ref{pulser_lock_keyboard,,pulser_lock_keyboard()}
+@item @code{pulser_shape_to_defense_minimum_distance()} @tab @ref{pulser_shape_to_defense_minimum_distance,,pulser_shape_to_defense_minimum_distance()}
+@item @code{pulser_defense_to_shape_minimum_distance()} @tab @ref{pulser_defense_to_shape_minimum_distance,,pulser_defense_to_shape_minimum_distance()}
+@item @code{pulser_automatic_shape_pulses()} @tab @ref{pulser_automatic_shape_pulses,,pulser_automatic_shape_pulses()}
+@item @code{pulser_automatic_twt_pulses()} @tab @ref{pulser_automatic_twt_pulses,,pulser_automatic_twt_pulses()}
+@item @code{pulser_minimum_twt_pulse_distance()} @tab @ref{pulser_minimum_twt_pulse_distance,,pulser_minimum_twt_pulse_distance()}
+@item @code{pulser_show_pulses()}     @tab @ref{pulser_show_pulses,,pulser_show_pulses()}
+@item @code{pulser_dump_pulses()}     @tab @ref{pulser_dump_pulses,,pulser_dump_pulses()}
 @end multitable
 
 
@@ -1826,14 +1826,14 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{get_field()}              @tab @ref{get_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
-@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{get_field()}              @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end,,magnet_goto_field_on_end()}
 @end multitable
 
 
@@ -1863,14 +1863,14 @@ Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range is
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{magnet_name()}            @tab @ref{magnet_name}
-@item @code{magnet_setup()}           @tab @ref{magnet_setup}
-@item @code{set_field()}              @tab @ref{set_field}
-@item @code{get_field()}              @tab @ref{get_field}
-@item @code{sweep_up()}               @tab @ref{sweep_up}
-@item @code{sweep_down()}             @tab @ref{sweep_down}
-@item @code{reset_field()}            @tab @ref{reset_field}
-@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end}
+@item @code{magnet_name()}            @tab @ref{magnet_name,,magnet_name()}
+@item @code{magnet_setup()}           @tab @ref{magnet_setup,,magnet_setup()}
+@item @code{set_field()}              @tab @ref{set_field,,set_field()}
+@item @code{get_field()}              @tab @ref{get_field,,get_field()}
+@item @code{sweep_up()}               @tab @ref{sweep_up,,sweep_up()}
+@item @code{sweep_down()}             @tab @ref{sweep_down,,sweep_down()}
+@item @code{reset_field()}            @tab @ref{reset_field,,reset_field()}
+@item @code{magnet_goto_field_on_end} @tab @ref{magnet_goto_field_on_end,,magnet_goto_field_on_end()}
 @end multitable
 
 
@@ -1899,21 +1899,21 @@ nm}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{monochromator_name()}             @tab @ref{monochromator_name}
-@item @code{monochromator_grating()}          @tab @ref{monochromator_grating}
-@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
-@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
-@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
-@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
-@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis}
-@item @code{monochromator_calc_wavelength()}  @tab @ref{monochromator_calc_wavelength}
-@item @code{monochromator_set_calibration()}  @tab @ref{monochromator_set_calibration}
-@item @code{monochromator_load_calibration()} @tab @ref{monochromator_load_calibration}
-@item @code{monochromator_zero_offset()}      @tab @ref{monochromator_zero_offset}
-@item @code{monochromator_grating_adjust()}   @tab @ref{monochromator_grating_adjust}
-@item @code{monochromator_turret()}           @tab @ref{monochromator_turret}
-@item @code{monochromator_install_grating()}  @tab @ref{monochromator_install_grating}
-@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate}
+@item @code{monochromator_name()}             @tab @ref{monochromator_name,,monochromator_name()}
+@item @code{monochromator_grating()}          @tab @ref{monochromator_grating,,monochromator_grating()}
+@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength,,monochromator_wavelength()}
+@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber,,monochromator_wavenumber()}
+@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density,,monochromator_groove_density()}
+@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis,,monochromator_wavelength_axis()}
+@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis,,monochromator_wavenumber_axis()}
+@item @code{monochromator_calc_wavelength()}  @tab @ref{monochromator_calc_wavelength,,monochromator_calc_wavelength()}
+@item @code{monochromator_set_calibration()}  @tab @ref{monochromator_set_calibration,,monochromator_set_calibration()}
+@item @code{monochromator_load_calibration()} @tab @ref{monochromator_load_calibration,,monochromator_load_calibration()}
+@item @code{monochromator_zero_offset()}      @tab @ref{monochromator_zero_offset,,monochromator_zero_offset()}
+@item @code{monochromator_grating_adjust()}   @tab @ref{monochromator_grating_adjust,,monochromator_grating_adjust()}
+@item @code{monochromator_turret()}           @tab @ref{monochromator_turret,,monochromator_turret()}
+@item @code{monochromator_install_grating()}  @tab @ref{monochromator_install_grating,,monochromator_install_grating()}
+@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate,,monochromator_calibrate()}
 @end multitable
 
 
@@ -1942,18 +1942,18 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{monochromator_name()}             @tab @ref{monochromator_name}
-@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength}
-@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber}
-@item @code{monochromator_laser_line()}       @tab @ref{monochromator_laser_line}
-@item @code{monochromator_scan_setup()}       @tab @ref{monochromator_scan_setup}
-@item @code{monochromator_start_scan()}       @tab @ref{monochromator_start_scan}
-@item @code{monochromator_scan_step()}        @tab @ref{monochromator_scan_step}
-@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis}
-@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis}
-@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate}
-@item @code{monochromator_shutter_limits()}   @tab @ref{monochromator_shutter_limits}
-@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density}
+@item @code{monochromator_name()}             @tab @ref{monochromator_name,,monochromator_name()}
+@item @code{monochromator_wavelength()}       @tab @ref{monochromator_wavelength,,monochromator_wavelength()}
+@item @code{monochromator_wavenumber()}       @tab @ref{monochromator_wavenumber,,monochromator_wavenumber()}
+@item @code{monochromator_laser_line()}       @tab @ref{monochromator_laser_line,,monochromator_laser_line()}
+@item @code{monochromator_scan_setup()}       @tab @ref{monochromator_scan_setup,,monochromator_scan_setup()}
+@item @code{monochromator_start_scan()}       @tab @ref{monochromator_start_scan,,monochromator_start_scan()}
+@item @code{monochromator_scan_step()}        @tab @ref{monochromator_scan_step,,monochromator_scan_step()}
+@item @code{monochromator_wavelength_axis()}  @tab @ref{monochromator_wavelength_axis,,monochromator_wavelength_axis()}
+@item @code{monochromator_wavenumber_axis()}  @tab @ref{monochromator_wavenumber_axis,,monochromator_wavenumber_axis()}
+@item @code{monochromator_calibrate()}        @tab @ref{monochromator_calibrate,,monochromator_calibrate()}
+@item @code{monochromator_shutter_limits()}   @tab @ref{monochromator_shutter_limits,,monochromator_shutter_limits()}
+@item @code{monochromator_groove_density()}   @tab @ref{monochromator_groove_density,,monochromator_groove_density()}
 @end multitable
 
 
@@ -1981,15 +1981,15 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{lockin_name()}           @tab @ref{lockin_name}
-@item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
-@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
-@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity}
-@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant}
-@item @code{lockin_phase()}          @tab @ref{lockin_phase}
-@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq}
-@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage}
-@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard}
+@item @code{lockin_name()}           @tab @ref{lockin_name,,lockin_name()}
+@item @code{lockin_get_data()}       @tab @ref{lockin_get_data,,lockin_get_data()}
+@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data,,lockin_get_adc_data()}
+@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity,,lockin_sensitivity()}
+@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant,,lockin_time_constant()}
+@item @code{lockin_phase()}          @tab @ref{lockin_phase,,lockin_phase()}
+@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq,,lockin_ref_freq()}
+@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage,,lockin_dac_voltage()}
+@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard,,lockin_lock_keyboard()}
 @end multitable
 
 
@@ -2017,15 +2017,15 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{lockin_name()}           @tab @ref{lockin_name}
-@item @code{lockin_get_data()}       @tab @ref{lockin_get_data}
-@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data}
-@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity}
-@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant}
-@item @code{lockin_phase()}          @tab @ref{lockin_phase}
-@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq}
-@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage}
-@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard}
+@item @code{lockin_name()}           @tab @ref{lockin_name,,lockin_name()}
+@item @code{lockin_get_data()}       @tab @ref{lockin_get_data,,lockin_get_data()}
+@item @code{lockin_get_adc_data()}   @tab @ref{lockin_get_adc_data,,lockin_get_adc_data()}
+@item @code{lockin_sensitivity()}    @tab @ref{lockin_sensitivity,,lockin_sensitivity()}
+@item @code{lockin_time_constant()}  @tab @ref{lockin_time_constant,,lockin_time_constant()}
+@item @code{lockin_phase()}          @tab @ref{lockin_phase,,lockin_phase()}
+@item @code{lockin_ref_freq()}       @tab @ref{lockin_ref_freq,,lockin_ref_freq()}
+@item @code{lockin_dac_voltage()}    @tab @ref{lockin_dac_voltage,,lockin_dac_voltage()}
+@item @code{lockin_lock_keyboard()}  @tab @ref{lockin_lock_keyboard,,lockin_lock_keyboard()}
 @end multitable
 
 
@@ -2053,20 +2053,20 @@ channel, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{lockin_name()}              @tab @ref{lockin_name}
-@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
-@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
-@item @code{lockin_get_data()}          @tab @ref{lockin_get_data}
-@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data}
-@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage}
-@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity}
-@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant}
-@item @code{lockin_phase()}             @tab @ref{lockin_phase}
-@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq}
-@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic}
-@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode}
-@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level}
-@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard}
+@item @code{lockin_name()}              @tab @ref{lockin_name,,lockin_name()}
+@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup,,lockin_auto_setup()}
+@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition,,lockin_auto_acquisition()}
+@item @code{lockin_get_data()}          @tab @ref{lockin_get_data,,lockin_get_data()}
+@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data,,lockin_get_adc_data()}
+@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage,,lockin_dac_voltage()}
+@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity,,lockin_sensitivity()}
+@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant,,lockin_time_constant()}
+@item @code{lockin_phase()}             @tab @ref{lockin_phase,,lockin_phase()}
+@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq,,lockin_ref_freq()}
+@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic,,lockin_harmonic()}
+@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode,,lockin_ref_mode()}
+@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level,,lockin_ref_level()}
+@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard,,lockin_lock_keyboard()}
 @end multitable
 
 
@@ -2094,20 +2094,20 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{lockin_name()}              @tab @ref{lockin_name}
-@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup}
-@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition}
-@item @code{lockin_get_data()}          @tab @ref{lockin_get_data}
-@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data}
-@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage}
-@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity}
-@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant}
-@item @code{lockin_phase()}             @tab @ref{lockin_phase}
-@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq}
-@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic}
-@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode}
-@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level}
-@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard}
+@item @code{lockin_name()}              @tab @ref{lockin_name,,lockin_name()}
+@item @code{lockin_auto_setup()}        @tab @ref{lockin_auto_setup,,lockin_auto_setup()}
+@item @code{lockin_auto_acquisition()}  @tab @ref{lockin_auto_acquisition,,lockin_auto_acquisition()}
+@item @code{lockin_get_data()}          @tab @ref{lockin_get_data,,lockin_get_data()}
+@item @code{lockin_get_adc_data()}      @tab @ref{lockin_get_adc_data,,lockin_get_adc_data()}
+@item @code{lockin_dac_voltage()}       @tab @ref{lockin_dac_voltage,,lockin_dac_voltage()}
+@item @code{lockin_sensitivity()}       @tab @ref{lockin_sensitivity,,lockin_sensitivity()}
+@item @code{lockin_time_constant()}     @tab @ref{lockin_time_constant,,lockin_time_constant()}
+@item @code{lockin_phase()}             @tab @ref{lockin_phase,,lockin_phase()}
+@item @code{lockin_ref_freq()}          @tab @ref{lockin_ref_freq,,lockin_ref_freq()}
+@item @code{lockin_harmonic()}          @tab @ref{lockin_harmonic,,lockin_harmonic()}
+@item @code{lockin_ref_mode()}          @tab @ref{lockin_ref_mode,,lockin_ref_mode()}
+@item @code{lockin_ref_level()}         @tab @ref{lockin_ref_level,,lockin_ref_level()}
+@item @code{lockin_lock_keyboard()}     @tab @ref{lockin_lock_keyboard,,lockin_lock_keyboard()}
 @end multitable
 
 
@@ -2136,28 +2136,28 @@ reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2186,28 +2186,28 @@ reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2236,28 +2236,28 @@ reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2286,28 +2286,28 @@ only), 3 math channels and 4 reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2336,28 +2336,28 @@ only), 3 math channels and 4 reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2386,28 +2386,28 @@ only), 3 math channels and 4 reference channels.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{digitizer_name()}                @tab @ref{digitizer_name}
-@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window}
-@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window}
-@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position}
-@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width}
-@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase}
-@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point}
-@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity}
-@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages}
-@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length}
-@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position}
+@item @code{digitizer_name()}                @tab @ref{digitizer_name,,digitizer_name()}
+@item @code{digitizer_define_window()}       @tab @ref{digitizer_define_window,,digitizer_define_window()}
+@item @code{digitizer_change_window()}       @tab @ref{digitizer_change_window,,digitizer_change_window()}
+@item @code{digitizer_window_position()}     @tab @ref{digitizer_window_position,,digitizer_window_position()}
+@item @code{digitizer_window_width()}        @tab @ref{digitizer_window_width,,digitizer_window_width()}
+@item @code{digitizer_timebase()}            @tab @ref{digitizer_timebase,,digitizer_timebase()}
+@item @code{digitizer_time_per_point()}      @tab @ref{digitizer_time_per_point,,digitizer_time_per_point()}
+@item @code{digitizer_sensitivity()}         @tab @ref{digitizer_sensitivity,,digitizer_sensitivity()}
+@item @code{digitizer_num_averages()}        @tab @ref{digitizer_num_averages,,digitizer_num_averages()}
+@item @code{digitizer_record_length()}       @tab @ref{digitizer_record_length,,digitizer_record_length()}
+@item @code{digitizer_trigger_position()}    @tab @ref{digitizer_trigger_position,,digitizer_trigger_position()}
 @item @code{digitizer_meas_channel_ok()}     @tab for internal use only
-@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel}
-@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition}
-@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area}
-@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast}
-@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve}
-@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast}
-@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude}
-@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast}
-@item @code{digitizer_run()}                 @tab @ref{digitizer_run}
-@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard}
+@item @code{digitizer_trigger_channel()}     @tab @ref{digitizer_trigger_channel,,digitizer_trigger_channel()}
+@item @code{digitizer_start_acquisition()}   @tab @ref{digitizer_start_acquisition,,digitizer_start_acquisition()}
+@item @code{digitizer_get_area()}            @tab @ref{digitizer_get_area,,digitizer_get_area()}
+@item @code{digitizer_get_area_fast()}       @tab @ref{digitizer_get_area_fast,,digitizer_get_area_fast()}
+@item @code{digitizer_get_curve()}           @tab @ref{digitizer_get_curve,,digitizer_get_curve()}
+@item @code{digitizer_get_curve_fast()}      @tab @ref{digitizer_get_curve_fast,,digitizer_get_curve_fast()}
+@item @code{digitizer_get_amplitude()}       @tab @ref{digitizer_get_amplitude,,digitizer_get_amplitude()}
+@item @code{digitizer_get_amplitude_fast()}  @tab @ref{digitizer_get_amplitude_fast,,digitizer_get_amplitude_fast()}
+@item @code{digitizer_run()}                 @tab @ref{digitizer_run,,digitizer_run()}
+@item @code{digitizer_lock_keyboard()}       @tab @ref{digitizer_lock_keyboard,,digitizer_lock_keyboard()}
 @end multitable
 
 
@@ -2437,13 +2437,13 @@ mV}, current range: @w{0 A} to @w{3 A} with resolution of @w{1 mA}.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{powersupply_name()}           @tab @ref{powersupply_name}
-@item @code{powersupply_damping()}        @tab @ref{powersupply_damping}
-@item @code{powersupply_channel_state()}  @tab @ref{powersupply_channel_state}
-@item @code{powersupply_voltage()}        @tab @ref{powersupply_voltage}
-@item @code{powersupply_voltage_limit()}  @tab @ref{powersupply_voltage_limit}
-@item @code{powersupply_current()}        @tab @ref{powersupply_current}
-@item @code{powersupply_current_limit()}  @tab @ref{powersupply_current_limit}
+@item @code{powersupply_name()}           @tab @ref{powersupply_name,,powersupply_name()}
+@item @code{powersupply_damping()}        @tab @ref{powersupply_damping,,powersupply_damping()}
+@item @code{powersupply_channel_state()}  @tab @ref{powersupply_channel_state,,powersupply_channel_state()}
+@item @code{powersupply_voltage()}        @tab @ref{powersupply_voltage,,powersupply_voltage()}
+@item @code{powersupply_voltage_limit()}  @tab @ref{powersupply_voltage_limit,,powersupply_voltage_limit()}
+@item @code{powersupply_current()}        @tab @ref{powersupply_current,,powersupply_current()}
+@item @code{powersupply_current_limit()}  @tab @ref{powersupply_current_limit,,powersupply_current_limit()}
 @end multitable
 
 
@@ -2472,8 +2472,8 @@ library are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{dio_name()}           @tab @ref{dio_name}
-@item @code{dio_reserve_dio()}    @tab @ref{dio_reserve_dio}
-@item @code{dio_mode()}           @tab @ref{dio_mode}
-@item @code{dio_value()}          @tab @ref{dio_value}
+@item @code{dio_name()}           @tab @ref{dio_name,,dio_name()}
+@item @code{dio_reserve_dio()}    @tab @ref{dio_reserve_dio,,dio_reserve_dio()}
+@item @code{dio_mode()}           @tab @ref{dio_mode,,dio_mode()}
+@item @code{dio_value()}          @tab @ref{dio_value,,dio_value()}
 @end multitable

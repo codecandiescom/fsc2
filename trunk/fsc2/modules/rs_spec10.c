@@ -509,7 +509,7 @@ Var *ccd_camera_get_image( Var *v )
 	long width, height;
 	unsigned long max_val;
 	Var *nv = NULL;
-	long i, j, k, l;
+	long i, j, k, l, row_index;
 	uns16 *cf;
 	long *dest;
 	uns16 bin[ 2 ];
@@ -617,23 +617,62 @@ Var *ccd_camera_get_image( Var *v )
 
 		/* During the test run or for hardware binning or without binning (i.e.
 		   if both binning sizes are 1) we can leave most of the work to the
-		   camera, otherwise we have to do the binning ourselves */
+		   camera, otherwise we have to do the binning ourselves. Take care,
+		   here we also have to turn the image upside-down or mirror it if
+		   required. */
 
 		if ( FSC2_MODE == TEST ||
 			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
 			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
+		{
 			for ( i = 0; i < height; i++ )
-				for ( dest = nv->val.vptr[ i ]->val.lpnt, j = 0;
-					  j < width; j++ )
-					*dest++ = ( long ) *cf++;
+			{
+				if ( RS_SPEC10_UPSIDE_DOWN == 1 )
+					row_index = height - 1 - i;
+				else
+					row_index = i;
+
+				if ( RS_SPEC10_MIRROR == 1 )
+				{
+					dest = nv->val.vptr[ row_index ]->val.lpnt + width - 1;
+					for ( j = 0; j < width; j++ )
+						*dest-- = ( long ) *cf++;
+				}
+				else
+				{
+					dest = nv->val.vptr[ row_index ]->val.lpnt;
+					for ( j = 0; j < width; j++ )
+						*dest++ = ( long ) *cf++;
+				}
+			}
+		}
 		else
 		{
 			for ( i = 0; i < height; i++ )
+			{
+				if ( RS_SPEC10_UPSIDE_DOWN == 1 )
+					row_index = height - 1 - i;
+				else
+					row_index = i;
+
 				for ( j = 0; j < rs_spec10->ccd.bin[ Y ]; j++ )
-					for ( dest = nv->val.vptr[ i ]->val.lpnt, k = 0;
-						  k < width; k++, dest++ )
-						for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
-							*dest += ( long ) *cf++;
+				{
+					if ( RS_SPEC10_MIRROR == 1 )
+					{
+						dest = nv->val.vptr[ row_index ]->val.lpnt + width - 1;
+						for ( k = 0; k < width; k++, dest-- )
+							for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
+								*dest += ( long ) *cf++;
+					}
+					else
+					{
+						dest = nv->val.vptr[ row_index ]->val.lpnt;
+						for ( k = 0; k < width; k++, dest++ )
+							for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
+								*dest += ( long ) *cf++;
+					}
+				}
+			}
 		}
 
 		TRY_SUCCESS;
@@ -714,22 +753,22 @@ Var *ccd_camera_get_spectrum( Var *v )
 		width = 1;
 	}
 
-	rs_spec10->ccd.bin[ Y ] =
-					 rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1;
-
 	if ( rs_spec10->ccd.bin[ X ] != bin[ X ] )
 		print( SEVERE, "Vertical binning parameter had to be changed from %ld "
 			   "to %ld because binning width was larger than ROI.\n",
 			   bin[ X ], rs_spec10->ccd.bin[ X ] );
 
-	/* Reduce the vertical ROI area to what we really need (in case the ROI
+	/* Reduce the horizontal ROI area to what we really need (in case the ROI
 	   sizes aren't integer multiples of the binning sizes) by moving the 
-	   right hand limit nearer to the left sed in order to speed up fetching
+	   right hand limit nearer to the left side in order to speed up fetching
 	   the picture a bit (before the function returns the ROI is set back to
 	   it's original size) */
 
 	rs_spec10->ccd.roi[ X + 2 ] =
 				 rs_spec10->ccd.roi[ X ] + width * rs_spec10->ccd.bin[ X ] - 1;
+
+	rs_spec10->ccd.bin[ Y ] =
+					 rs_spec10->ccd.roi[ Y + 2 ] - rs_spec10->ccd.roi[ Y ] + 1;
 
 	/* Now try to get the picture */
 

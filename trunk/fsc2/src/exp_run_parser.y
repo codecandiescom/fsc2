@@ -303,8 +303,8 @@ list2:   /* empty */
        | l2e
 ;
 
-l2e:     expr
-       | l2e ',' expr
+l2e:     expr                       { }
+       | l2e ',' expr               { }
 ;
 
 strs:    E_STR_TOKEN               { if ( ! dont_exec )

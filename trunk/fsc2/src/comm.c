@@ -1348,7 +1348,7 @@ bool writer( int type, ... )
 				return pipe_write( ( char * ) &header, sizeof header );
 
 			case C_FLOAT :
-				header.data.float_data = va_arg( ap, float );
+				header.data.float_data = ( float ) va_arg( ap, double );
 				va_end( ap );
 				return pipe_write( ( char * ) &header, sizeof header );
 

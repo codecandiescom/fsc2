@@ -460,11 +460,12 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	int16 status;
 	uns32 dummy;
 	char cur_dir[ PATH_MAX ];
+	uns16 temp;
 
 
 	region.s1   = rs_spec10->ccd.roi[ X ];
-	region.p1   = rs_spec10->ccd.roi[ Y ];
 	region.s2   = rs_spec10->ccd.roi[ X + 2 ];
+	region.p1   = rs_spec10->ccd.roi[ Y ];
 	region.p2   = rs_spec10->ccd.roi[ Y + 2 ];
 
 	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
@@ -486,6 +487,23 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 				 region.p2 > region.p1 &&
 				 ( region.s2 - region.s1 + 1 ) % region.sbin == 0 &&
 				 ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
+
+	/* If the image is to be mirrored or to be returned upside down we
+	   need to adjust the region of interest settings accordingly. */
+
+	if ( RS_SPEC10_MIRROR == 1 )
+	{
+		temp = region.s1;
+		region.s1 = rs_spec10->ccd.max_size[ X ] - region.s2;
+		region.s2 = rs_spec10->ccd.max_size[ X ] - temp;
+	}
+
+	if ( RS_SPEC10_UPSIDE_DOWN == 1 )
+	{
+		temp = region.p1;
+		region.p1 = rs_spec10->ccd.max_size[ Y ] - region.p2;
+		region.p2 = rs_spec10->ccd.max_size[ Y ] - temp;
+	}
 
 	/* The PVCAM library needs to load some additional data files. Unfortuna-
 	   tely, these are looked for only in the current working directory and,
@@ -517,8 +535,8 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 
 #else
 
-	*size =   ( ( region.s2 - region.s1 + 1 ) / region.sbin )
-			* ( ( region.p2 - region.p1 + 1 ) / region.pbin )
+	*size =   ( labs( region.s2 - region.s1 + 1 ) / region.sbin )
+			* ( labs( region.p2 - region.p1 + 1 ) / region.pbin )
 			* sizeof *frame;
 
 #endif /* ! defined RS_SPEC10_TEST */

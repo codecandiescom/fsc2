@@ -258,11 +258,12 @@ list1b:   /* empty */
 /* list of data for initialization of a newly declared array */
 
 arhs:    /* empty */               { vars_arr_init( NULL ); }
-      | '='                        { level = max_level; }
-	     arrass                    { vars_arr_init( $3 ); }
-       | '=' expr                  { vars_assign( $2, $2->prev ); }
+        | '='                      { level = max_level; }
+	      arrass                   { vars_arr_init( $3 ); }
+        | '=' expr                 { vars_assign( $2, $2->prev ); }
 ;
 	     
+
 arrass:  '{'                       { level--;
 									 vars_push( REF_PTR, NULL ); }
          alist '}'                 { $$ = vars_init_list( $3,
@@ -285,7 +286,7 @@ aitem:   expr                      { $$ = $1; }
 /* list of indices for access of an array element */
 
 list3:   /* empty */               { if ( ! dont_exec )
-	                                     $$ = vars_push( UNDEF_VAR ) }
+	                                     $$ = vars_push( UNDEF_VAR ); }
        | l3e                       { if ( ! dont_exec )
 	                                     $$ = $1; }
 ;
@@ -302,8 +303,8 @@ list4:   /* empty */
        | l4e
 ;
 
-l4e:      expr
-        | l4e ',' expr
+l4e:      expr                     { }
+        | l4e ',' expr             { }
 ;
 
 strs:    STR_TOKEN                 { if ( ! dont_exec )

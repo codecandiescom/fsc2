@@ -275,8 +275,8 @@ list2:   /* empty */
        | l2e
 ;
 
-l2e:     expr
-       | l2e ',' expr
+l2e:     expr                     { }
+       | l2e ',' expr             { }
 ;
 
 strs:    STR_TOKEN                { if ( ! dont_exec )

@@ -86,8 +86,10 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Handler that gets called for pressing on of the mouse */
+/* buttons in the axis areas or the camvas               */
+/*-------------------------------------------------------*/
 
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas *c )
@@ -263,8 +265,10 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*--------------------------------------------------------*/
+/* Handler that gets called for releasing on of the mouse */
+/* buttons in the axis areas or the camvas                */
+/*--------------------------------------------------------*/
 
 static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 								Canvas *c )
@@ -484,8 +488,10 @@ static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 }
 
 
-/*----------------------------------------------------------*/
-/*----------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Handler that gets called for moving the mouse after one of */
+/* the buttons was pressed in the axis areas or the camvas    */
+/*------------------------------------------------------------*/
 
 static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							   Canvas *c )

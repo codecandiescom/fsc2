@@ -1375,8 +1375,8 @@ Please note: the function will @strong{not} report changes due to
 function calls that change the state of an object, e.g.@: when setting a
 new slider position from within the @code{EDL} script. The function also
 will report a change until the new state of the object has been
-determined by an appropriate function call. I.e.@: it will repeatedly
-report e.g.@: a new slider value until you have called
+determined by an appropriate function call. I.e.@: it will keep
+reporting e.g.@: a new slider value until you have called
 @code{slider_value()} for the object.
 
 
