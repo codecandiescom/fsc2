@@ -837,6 +837,14 @@ int gpib_serial_poll( int device, unsigned char *stb )
         return FAILURE;
     }
 
+    if ( ll >= LL_CE )
+	{
+		seteuid( EUID );
+		fprintf( gpib_log, "-> Received status byte = 0x%x", *stb );
+		fflush( gpib_log );
+		seteuid( getuid( ) );
+	}
+
     return SUCCESS;
 }
 
