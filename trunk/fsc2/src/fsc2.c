@@ -127,7 +127,6 @@ int main( int argc, char *argv[ ] )
 	/* Delete the lock file */
 
 	setuid( EUID );
-
 	unlink( LOCKFILE );
 
 	/* Make sure the TRY/CATCH stuff worked out right */
