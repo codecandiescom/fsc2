@@ -3,9 +3,10 @@ I. Introduction
 
 This package is a driver (module) and a library for National Instruments
 6601 GPCT (General Purpose Counter and Timer) cards. It was mainly written
-to allow support for this type of cards for fsc2 and currently only
-supports using the board for event counting, pulse generation and DIO.
-The kernel module was tested with 2.4 kernels only.
+to allow support for this type of cards for a program for spectrometer
+control, fsc2, I have written and currently only supports using the board
+for event counting, pulse generation and DIO. The kernel module was tested
+with 2.4 kernels only.
 
 
 II. Preparation for installation
@@ -64,33 +65,33 @@ script:
 1. Major device number: Each and every device has a major device number
    (which gets associated with the device driver name via an entry in
    '/etc/modules.conf'). Actually, two devices may share a device number
-   if one of them is a character device (the NI6601 board is a character
-   device) and the other one is a block device (e.g. a hard disk). The
-   major device number can't be choosen at random or conflicts with other
-   devices may result!
+   if one of them is a character device (like the NI6601 board) and the
+   other one is a block device (e.g. a hard disk). The major device
+   number can't be choosen at random or conflicts with other devices may
+   result!
 
    Major device numbers must be in the range between 1 and 254. The file
-   '/proc/devices' is a list of all devices and their major number
-   currently used, so never pick one of these. It's best to choose a
+   '/proc/devices' is a list of all devices currently used and their
+   major number, so never pick one of these. It's best to choose a
    number that's completely unused yet - a list of the numbers already
    assigned to certain devices can be found in the kernel documentation 
    in '/usr/src/linux/Documentation/devices.txt'. I'd recommend to use a
    number from the ranges that are either unassigned or marked for local
    and experimental use (e.g. 60 to 63, 120 to 127 and 240 to 254).
 
-   As an alternative to specifying a fixed major device number you can (at
-   least with newer kernels) also use a dynamically assigned major device
-   number. This happens when you specify a major device number of 0. The
-   only disadvantage is that device files cannot be created in advance
+   As a (perhaps better) alternative to specifying a fixed major device
+   number you can also use a dynamically assigned major device number.
+   This happens when you specify a major device number of 0. The only
+   disadvantage is that device files cannot be created in advance
    because the major device number may not always be the same. But,
-   fortunately, the creation (and deletion) of the device files can be done
-   automatically, e.g. by an init script that loads the module for the NI6601
-   card and creates device files when the computer is booted and deletes
-   the device files at shutdown. (The init script supplied with the driver
-   expects your system to conform to the Linux Standard Base Specifications
-   version 1.1.0 (LSB), if it doesn't you may have to apply a few changes
-   to the script and install it as well as the links in the runlevel
-   directories manually.)
+   fortunately, the creation (and deletion) of the device files can be
+   done automatically, e.g. by an init script that loads the module for
+   the NI6601 card and creates device files when the computer is booted
+   and deletes the device files at shutdown. (The init script supplied
+   with the driver expects your system to conform to the Linux Standard
+   Base Specifications version 1.1.0 (LSB) or higher, if it doesn't you
+   may have to apply a few changes to the script and install it as well
+   as the links in the runlevel directories manually.)
 
 2. Debugging code: When debugging code is included into the driver internal
    function calls as well as some additional information will be added to
@@ -113,10 +114,11 @@ IV. Documentation
 =================
 
 In the 'driver' subdirectory you will find a file named 'ni6601_drv.txt',
-describing in detail which ioctl() calls can used to deal with the card.
+describing in detail which ioctl() calls that can used to deal with the
+card.
 
 In the 'lib' a file named 'ni6601_lib.c' describes the functionality
-supplies by the library.
+supplied by the library.
 
 
-    18.11.2002   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+    27.2.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
