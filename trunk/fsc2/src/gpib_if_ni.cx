@@ -1134,7 +1134,7 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
 /* in the fd subdirectory in the /proc directory for the current   */
 /* process. Then the function for initialisation of the GPIB board */
 /* gets called where the device file is opened. Afterwards, the    */
-/* second function gets called that compares the fd's in the list  */
+/* second function gets invoked that compares the fd's in the list */
 /* with the entries int the /proc/self/fd directory and sets the   */
 /* close-on-exec flag for the new fd. Of course, this will only    */
 /* work on Linux but fail (benignly) on other systems...           */
