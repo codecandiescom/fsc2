@@ -13,8 +13,6 @@
 
 int main( int argc, char *argv[ ] )
 {
-	int i = 20;
-
 #if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
@@ -31,11 +29,8 @@ int main( int argc, char *argv[ ] )
 
 	clean_up( );
 
-	while ( i-- )
-	{
-		split( argv[ 1 ] );
-		clean_up( );
-	}
+	split( argv[ 1 ] );
+	clean_up( );
 
 	return EXIT_SUCCESS;
 }
@@ -45,6 +40,10 @@ void clean_up( void )
 {
 	int i;
 
+
+	/* Make sure the TRY/CATCH stuff worked out right */
+
+	assert( exception_env_stack_pos == 0 );
 
 	/* clear up the compilation structure */
 
@@ -78,6 +77,10 @@ void clean_up( void )
 	/* clear up structures for phases */
 
 	phases_clear( );
+
+	/* clear up copy of variables from test run */
+
+	delete_var_list_copy( );
 
 	/* delete variables and get rid of variable stack */
 
