@@ -387,7 +387,7 @@ bool ep385_do_update( void );
 void ep385_do_checks( FUNCTION *f );
 void ep385_set_pulses( FUNCTION *f );
 void ep385_full_reset( void );
-PULSE *ep385_delete_pulse( PULSE *p );
+PULSE *ep385_delete_pulse( PULSE *p, bool warn );
 void ep385_shape_padding_check( CHANNEL *ch );
 void ep385_twt_padding_check( CHANNEL *ch );
 

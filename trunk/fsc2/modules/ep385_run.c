@@ -473,7 +473,7 @@ void ep385_full_reset( void )
 		if ( ! p->has_been_active && ! ep385.keep_all )
 		{
 			print( WARN, "Pulse #%ld is never used.\n", p->num );
-			p = ep385_delete_pulse( p );
+			p = ep385_delete_pulse( p, SET );
 			continue;
 		}
 
@@ -751,7 +751,7 @@ void ep385_twt_padding_check( CHANNEL *ch )
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
 
-static PULSE *ep385_delete_pulse( PULSE *p )
+PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 {
 	PULSE *pp;
 	int i;
@@ -762,7 +762,7 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 	if ( p->sp )
 	{
 		if ( p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
-			ep385_delete_pulse( p->sp );
+			ep385_delete_pulse( p->sp, warn );
 		else
 			p->sp->sp = NULL;
 	}
@@ -772,7 +772,7 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 	if ( p->tp )
 	{
 		if ( p->tp->function->self == PULSER_CHANNEL_TWT )
-			ep385_delete_pulse( p->tp );
+			ep385_delete_pulse( p->tp, warn );
 		else
 			p->tp->tp = NULL;
 	}
@@ -804,8 +804,9 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 	{
 		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
-		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are never used.\n", p->function->name );
+		if ( warn )
+			print( SEVERE, "Function '%s' isn't used at all because all its "
+				   "pulses are never used.\n", p->function->name );
 		p->function->is_used = UNSET;
 	}
 

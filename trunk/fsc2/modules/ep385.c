@@ -490,7 +490,7 @@ void ep385_exit_hook( void )
 	/* Free all memory that may have been allocated for the module */
 
 	for ( p = ep385_Pulses; p != NULL;  )
-		p= ep385_delete_pulse( p );
+		p= ep385_delete_pulse( p, UNSET );
 
 	ep385_Pulses = NULL;
 
