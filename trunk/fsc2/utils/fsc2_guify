@@ -419,7 +419,13 @@ sub get_string {
 sub cond_check {
 
     my $defs = "";
-    $defs .= "my \$$$_{ name } = \"$$_{ value }\"\n;" for ( @vars );
+	for ( @vars ) {
+		if ( $$_{ type } =~ /^int|float$/o ) {
+			$defs .= "my \$$$_{ name } = $$_{ value };\n" ;
+		} else {
+			$defs .= "my \$$$_{ name } = \"$$_{ value }\";\n" ;
+		}
+	}
 
     for ( @lines ) {
         next unless $$_{ line } =~ /$guify_entry/o;
@@ -442,6 +448,16 @@ sub cond_check {
 ################################################################
 
 sub write_script {
+
+	my $prot = "";
+	for ( @vars ) {
+		if ( $$_{ type } =~ /^int|float$/o  ) {
+			$prot .= "my \$$$_{ name } = $$_{value };\n";
+		} else {
+			$prot .= "my \$$$_{ name } = \"$$_{value }\";\n";
+		}
+		$prot .= " " x 16;
+	}
 
     # Write out the start of the script
 
@@ -664,18 +680,25 @@ EOT
     # function comes quite handy because we can simply treat the conditions
     # as some Perl code after prepending a $ to the variable name...
     # This way the user can use even rather complicated expressions as
-    # conditions (actually, even complete scripts... ;-)
+    # conditions (actually, even complete scripts ;-)
+	# But we've got to be a bit careful: In the condition the user may try
+	# to change the values of our variables, thus we must make all variables
+	# local to the eval in order to avoid this...
 
     print "    print \$fh \"";
+
     for ( @lines ) {
         my $line = $$_{ line };
         if ( $line =~ /$guify_entry/o ) {
             chomp $line;
             $line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
             my ( $type, $cmd ) = ( $1, $2 );
+
             if ( $type =~ /^if|elsif$/o ) {
                 $cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
+				$cmd = $prot . "eval { $cmd } ? 1 : 0; "
             }
+
             if ( $type =~ /^if$/o ) {
                 print "\";
 # $line
