@@ -998,7 +998,7 @@ static void quitting_handler( int signo )
 	int errno_saved;
 
 
-	signo = signo;
+	UNUSED_ARGUMENT( signo );
 	errno_saved = errno;
 	Internals.child_is_quitting = QUITTING_RAISED;
 	errno = errno_saved;
@@ -1507,7 +1507,7 @@ static void quitting_handler( int signo )
 	int errno_saved;
 
 
-	signo = signo;
+	UNUSED_ARGUMENT( signo );
 	errno_saved = errno;
 	Internals.child_is_quitting = QUITTING_RAISED;
 	errno = errno_saved;

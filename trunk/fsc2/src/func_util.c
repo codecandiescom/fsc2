@@ -1676,7 +1676,7 @@ Var *f_clearmark( Var *v )
 	int shm_id;
 
 
-	v = v;         /* keeps the compiler happy... */
+	UNUSED_ARGUMENT( v );
 
 	/* This function can only be called in the EXPERIMENT section and needs
 	   a previous graphics initialisation */

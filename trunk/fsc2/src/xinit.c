@@ -721,7 +721,7 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
 
 
-	b = b;
+	UNUSED_ARGUMENT( b );
 
 	fl_freeze_form( GUI.main_form->fsc2 );
 
