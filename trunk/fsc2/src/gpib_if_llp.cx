@@ -1025,16 +1025,15 @@ void gpib_log_message( const char *fmt, ... )
 /* process. Then the function for initialisation of the GPIB board */
 /* gets called where the device file is opened. Afterwards, the    */
 /* second function gets called, that compares the fd's in the list */
-/* with the entries int the /proc/PID/fd directory and sets the    */
-/* close-on-exec flag for the new fd. Of course, this probably     */
-/* will only work on Linux...                                      */
+/* with the entries int the /proc/self/fd directory and sets the   */
+/* close-on-exec flag for the new fd. Of course, this will only    */
+/* work on Linux but fail (benignly) on other systems...           */
 /*-----------------------------------------------------------------*/
 
 static int *get_fd_list( void )
 {
 	DIR *dir;
 	struct dirent *de;
-	char dir_name[ 100 ];
 	static int *fd_list;
 	static int num_fds;
 	char *dn;
@@ -1043,10 +1042,7 @@ static int *get_fd_list( void )
 	fd_list = NULL;
 	num_fds = 0;
  
-	if ( snprintf( dir_name, 100, "/proc/%d/fd", getpid( ) ) == -1 )
-		return NULL;
-
-	if ( ( dir = opendir( dir_name ) ) == NULL )
+	if ( ( dir = opendir( "/proc/self/fd" ) ) == NULL )
 		return NULL;
 
 	while ( ( de = readdir( dir ) ) != NULL )
