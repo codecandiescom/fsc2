@@ -21,7 +21,7 @@ Pulse *n2p( char *txt )
 	int num;
 
 
-	if ( *t == '.' )
+	if ( *txt == '.' )
 		return Cur_Pulse;
 
 	tp = t = get_string_copy( txt );
@@ -134,11 +134,12 @@ void pulse_set( Pulse *p, int type, Var *v )
 		THROW( PREPARATIONS_EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	switch ( type )
 	{
 		case P_FUNC :
+			vars_check( v, INT_VAR );
 			pulse_set_func( p, v );
 			break;
 
