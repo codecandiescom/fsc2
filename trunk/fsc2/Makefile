@@ -34,7 +34,7 @@ infodir        = $(prefix)/info
 
 # The next variable tells the Makefile whether to compile the program for a
 # high or a low resolution display (high is roughly 17" monitors and better),
-# set it to either HIGH or LOW.
+# set it to either HIGH or LOW ( if not set it default is HIGH)
 
 RESOLUTION     = HIGH
 
@@ -42,7 +42,7 @@ RESOLUTION     = HIGH
 # The first variable sets the GPIB library to use, it must be set to either
 # LLP, NI or JTT for the LLP library, the National Instruments library or
 # the library written by me. Alternatively, if no GPIB support is needed
-# define GPIB_LIBRARY as NONE.
+# define GPIB_LIBRARY as NONE (which is also the default if not set).
 # Then the location of the GPIB configuration file is set (this is only needed
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
 # defaults to /etc/gpib.conf).
@@ -60,9 +60,9 @@ GPIB_LOG_LEVEL = HIGH
 # Here the owner of the program of all files that will be installed as well
 # as the group the owner belongs to has to be set. It is highly recommended
 # to create a special account and group for the program, with 'fsc2' being
-# the natural choice. For a local install, i.e. if the program will be used
-# by one person only and everything is going to be installed in his/her home
-# directory this persons account and group can be used.
+# the natural choice (which is also the default). For a local install, i.e.
+# if the program will be used by one person only and everything is installed
+# in his/her home directory this persons account and group can be used.
 
 OWNER          = fsc2
 GROUP          = fsc2
@@ -99,7 +99,7 @@ LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 \
 				 # -lefence   # to run with efence
 BISON          = bison
 BISONFLAGS     = -d -v -t -p
-FLEX           = flex
+AFLEX           = flex
 FLEXFLAGS      = -B -P
 RM             = rm
 RMFLAGS        = -f
@@ -139,25 +139,25 @@ endif
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
 else
-	CFLAGS += -Dbindir=\"$(shell pwd)/\"
+	CFLAGS += -Dbindir=\"$(shell pwd)/bin/\"
 endif
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 else
-	CFLAGS += -Dlibdir=\"$(shell pwd)/\"
+	CFLAGS += -Dlibdir=\"$(shell pwd)/lib/fsc2/\"
 endif
 
 ifdef auxdir
-	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I../aux
+	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I$(shell pwd)/aux
 else
-	CFLAGS += -Dauxdir=\"$(shell pwd)/aux/\" -I../aux
+	CFLAGS += -Dauxdir=\"$(shell pwd)/lib/fsc2/aux/\" -I$(shell pwd)/aux
 endif
 
 ifdef docdir
 	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
 else
-	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
+	CFLAGS += -Ddocdir=\"$(shell pwd)/share/doc/\"
 endif
 
 ifdef GPIB_LOG_FILE
@@ -180,12 +180,20 @@ else
 	endif
 endif
 
-ifdef IS_I386
-	CFLAGS += -DIS_I386
-endif
-
 ifdef MAIL_ADDRESS
 	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
+endif
+
+ifndef OWNER
+	OWNER = fsc2
+endif 
+
+ifndef GROUP
+	GROUP = fsc2
+endif 
+
+ifdef IS_I386
+	CFLAGS += -DIS_I386
 endif
 
 
@@ -248,14 +256,14 @@ ifeq ($(machine_name),crowley.none)
 endif
 
 
-# Finally the definition of remaining variables that are needed...
+# Finally the definition of further needed variables
 
-ifeq ($(RESOLUTION),HIGH)
-	RESOLUTION   =  hr
-	CFLAGS      += -DSIZE=HI_RES
-else
+ifeq ($(RESOLUTION),LOW)
 	RESOLUTION   =  lr
 	CFLAGS      += -DSIZE=LOW_RES
+else
+	RESOLUTION   =  hr
+	CFLAGS      += -DSIZE=HI_RES
 endif
 
 ifeq ($(GPIB_LIBRARY),LLP)
@@ -345,7 +353,7 @@ install:
 
 
 # `clean' deletes all the files remaining from the compilation while
-# `distclean' also removes all executables and shared libraries
+# `distclean' also removes all executables, shared libraries and documentation
 
 clean:
 	$(MAKE) -C src clean
@@ -353,9 +361,10 @@ clean:
 	$(MAKE) -C doc clean
 
 distclean:
+	$(MAKE) -C src distclean
+	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
-	$(MAKE) clean
 	-$(RM) $(RMFLAGS) *~
 
 

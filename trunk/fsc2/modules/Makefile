@@ -47,7 +47,7 @@ LFLAGS         = -shared -fpic
 
 
 .SUFFIXES:
-.PHONY: all clean
+.PHONY: all clean distclean
 
 
 all: $(comp_modules:=.so) $(simp_modules:.c=.so)
@@ -119,7 +119,11 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *_lexer.c *.so TAGS *~
+	-$(RM) $(RMFLAGS) *.o *_lexer.c TAGS *~
+
+distclean:
+	$(MAKE) clean
+	-$(RM) $(RMFLAGS) *.so
 
 
 # don't automatically delete intermediate files created by flex

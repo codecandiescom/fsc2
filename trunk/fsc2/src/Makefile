@@ -36,7 +36,7 @@ export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all modules res gpib clean
+.PHONY:    all modules res gpib clean distclean
 
 
 # Default target - make only if RESOLUTION and GPIB_LIBRARY are set correctly
@@ -153,9 +153,13 @@ gpib:
 # How to get rid of stuff not needed anymore
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c fsc2 \
-					  fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch]     \
-					  fsc2_rsc_[hl]r.[ch] gpib_parser.y gpib_lexer.l mem *~
+	-$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
+					  gpib_if.[ch] fsc2_rsc.[ch] fsc2_rsc_[hl]r.[ch]     \
+					  gpib_parser.y gpib_lexer.l mem *~
+
+distclean:
+	$(MAKE) clean
+	 -$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect 
 
 
 # don't automatically delete intermediate files created by bison and flex
