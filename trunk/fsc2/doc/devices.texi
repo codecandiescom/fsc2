@@ -2941,7 +2941,8 @@ Returns a string with the name of the power supply being used.
 @findex powersupply_channel_state()
 This function alllows to switch the channels of the power supply on or
 off. It requires two arguments. The first one is the channel, which must
-be either @code{CH1} or @code{CH2} (don't try to use numbers directly!).
+be either @code{CH1} or @code{CH2} (don't use numbers directly
+or, if you do, use @code{0} for @code{CH1} and @code{1} for @code{CH2}).
 The second argument is the state, @:i.e. either @code{"ON"} or
 @code{"OFF"} (or @code{1} for on and @code{0} for off).
 
@@ -2955,9 +2956,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function alllows to switch damping of the output of one of the
 channels of the power supply on or off. It requires two arguments. The
 first one is the channel, which must be either @code{CH1} or @code{CH2}
-(don't try to use numbers directly!).  The second argument is the
-damping state, @:i.e. either @code{"ON"} or @code{"OFF"} (or @code{1} for
-on and @code{0} for off).
+(don't use numbers directly, or, if you do, use @code{0} for @code{CH1}
+and @code{1} for @code{CH2}).  The second argument is the damping state,
+@:i.e. either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
+@code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2967,8 +2969,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_voltage()
 This function allows to either set or query the output voltage of one of
 the channels. For a query only one argument is required, the channel,
-which must be specified as either @code{CH1} or @code{CH2} (don't try to
-use numbers directly!).  If there is no second argument the output
+which must be specified as either @code{CH1} or @code{CH2} (don't use
+numbers directly, or, if you do, use @code{0} for @code{CH1} and
+@code{1} for @code{CH2}).  If there is no second argument the output
 voltage at the channel is returned.
 
 If there is a second argument, being a voltage in the range between @w{0
@@ -2984,7 +2987,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_voltage_limit()
 This function allows to query the current setting of the voltage limit.
 It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't try to use numbers directly!).
+@code{CH1} or @code{CH2} (don't use numbers directly, or, if you do, use
+@code{0} for @code{CH1} and @code{1} for @code{CH2}).
 
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, this value is used as the new voltage limit. The same
@@ -2999,8 +3003,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_current()
 This function allows to either set or query the output current of one of
 the channels. For a query only one argument is required, the channel,
-which must be specified as either @code{CH1} or @code{CH2} (don't try to
-use numbers directly!).  If there is no second argument the output
+which must be specified as either @code{CH1} or @code{CH2} (don't use
+numbers directly, or, if you do, use @code{0} for @code{CH1} and
+@code{1} for @code{CH2}).  If there is no second argument the output
 current at the channel is returned.
 
 If there is a second argument, being a current in the range between @w{0
@@ -3016,7 +3021,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex powersupply_current_limit()
 This function allows to query the current setting of the current limit.
 It expects one argument, the channel, which must be specified as either
-@code{CH1} or @code{CH2} (don't try to use numbers directly!).
+@code{CH1} or @code{CH2} (don't use numbers directly, or, if you do, use
+@code{0} for @code{CH1} and @code{1} for @code{CH2}).
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, this value is used as the new current limit. The same
