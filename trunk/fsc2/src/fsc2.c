@@ -409,6 +409,7 @@ void load_file( FL_OBJECT *a, long reload )
 		if ( main_form->Load->u_ldata == 0 &&
 			 main_form->Load->u_cdata == NULL )
 		{
+			fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 			fn = fl_show_fselector( "Select input file:", NULL, "*.edl",
 									NULL );
 			if ( fn == NULL )

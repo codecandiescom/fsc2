@@ -1267,8 +1267,11 @@ getfile_retry:
 	   file name was passed to the routine and this is not a repeat call) */
 
 	if ( r == NULL )
+	{
+		fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 		r = get_string_copy( show_fselector( s[ 0 ], s[ 2 ], 
 											 s[ 1 ], s[ 3 ] ) );
+	}
 
 	if ( ( r == NULL || *r == '\0' ) &&
 		 show_choices( "Do you really want to cancel saving data?\n"
@@ -2100,6 +2103,7 @@ static void T_fprintf( int file_num, const char *fmt, ... )
 
 get_repl_retry:
 
+	fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 	new_name = get_string_copy( show_fselector( "Replacement file:", NULL,
 												NULL, NULL ) );
 

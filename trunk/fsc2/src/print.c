@@ -379,6 +379,7 @@ void print_callback( FL_OBJECT *obj, long data )
 	if ( obj == print_form->p2f_browse )
 	{
 		fl_invalidate_fselector_cache( );
+		fl_set_fselector_placement( FL_PLACE_MOUSE | FL_FREE_SIZE );
 		fn = fl_show_fselector( "Select output EPS file:", NULL,
 								"*.eps", NULL );
 		if ( fn != NULL )
