@@ -316,9 +316,11 @@ already measured curves is currently supported.
 @paragraphindent 0
 @strong{Supported functions}:
 @multitable @columnfractions .45 .45
-@item @code{boxcar_name()}          @tab @ref{boxcar_name}
-@item @code{boxcar_curve_length()}  @tab @ref{boxcar_curve_length}
-@item @code{boxcar_get_curve()}     @tab @ref{boxcar_get_curve}
+@item @code{boxcar_name()}               @tab @ref{boxcar_name}
+@item @code{boxcar_curve_length()}       @tab @ref{boxcar_curve_length}
+@item @code{boxcar_get_curve()}          @tab @ref{boxcar_get_curve}
+@item @code{boxcar_start_acquisition()}  @tab @ref{boxcar_start_acquisition}
+@item @code{boxcar_stop_acquisition()}   @tab @ref{boxcar_stop_acquisition}
 @end multitable
 
 
