@@ -243,7 +243,7 @@ int er035m_s_exp_hook( void )
 		er035m_s_set_resolution( nmr.resolution );
 
 	/* Ask gaussmeter to send status byte and test if it does - sometimes the
-	   f..king thing does not answer (i.e. it just seems to send the prompt
+	   fucking thing does not answer (i.e. it just seems to send the prompt
 	   character and nothing else) so in this case we give it another chance
 	   (or even two, see FAIL_RETRIES above) */
 

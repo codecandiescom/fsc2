@@ -241,15 +241,11 @@ try_again:
 
 			case '4' :      /* TRANS L-H -> test again */
 				fsc2_usleep( 500000, SET );
-				print( FATAL, "NMR gaussmeter can't find the actual "
-					   "field.\n" );
-				THROW( EXCEPTION );
+				goto try_again;
 
 			case '5' :      /* TRANS L-H -> test again */
 				fsc2_usleep( 500000, SET );
-				print( FATAL, "NMR gaussmeter can't find the actual "
-					   "field.\n" );
-				THROW( EXCEPTION );
+				goto try_again;
 
 			case '6' :      /* MOD OFF -> error (should never happen */
 				print( FATAL, "Modulation of NMR gaussmeter is switched "
