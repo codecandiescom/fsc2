@@ -788,13 +788,21 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 Var *vars_push_simple( Var *v )
 {
+	/* Make sure it's really a simple variable
+
 	if ( v->type == INT_ARR || v->type == FLOAT_ARR )
 	{
 		eprint( FATAL, "%s:%ld: `%s' is an array and can't be used in this "
 				"context.\n", Fname, Lc, v->name );
 		THROW( VARIABLES_EXCEPTION );
 	}
+
+	/* check that it exists etc. */
+
 	vars_check( v );
+
+	/* push a transient variable onto the stack with the relevant data set */
+
 	return( vars_push( v->type,
 					   v->type == INT_VAR ?
 					   ( void * ) &v->val.lval : ( void * ) &v->val.dval ) );
@@ -1112,6 +1120,15 @@ void vars_push_astack( Var *v )
 
 	assert( v->type == INT_ARR || v->type == FLOAT_ARR );
 
+	/* you can't assign to or use elements of a dynamically sized array */
+
+	if ( is_variable_array( v ) )
+	{
+		eprint( FATAL, "%s:%ld: Accessing elements of dynamically sized array "
+				"`%s' is not possible.\n", Fname, Lc, v->name );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
 	/* get memory on the array stack */
 
 	tmp = ( AStack * ) T_malloc( sizeof( AStack ) );
@@ -1280,7 +1297,7 @@ Var *vars_arr_assign( Var *a, Var *v )
 /* vars_update_astack() is called for each array index when accessing an */
 /* array element. The indices are successively stored in the array stack */
 /* variable (in the AStack structure entry `entries') on the array stack */
-/* for calculation of the position of the array element lateron (in the  */
+/* for calculation of the position of the array element later on (in the */
 /* function `vars_pop_astack()').                                        */
 /* ->                                                                    */
 /*    * variable with next array index                                   */
@@ -1290,15 +1307,6 @@ void vars_update_astack( Var *v )
 {
 	long index;
 
-
-	/* you can't assign to or use elements of an dynamically sized array */
-
-	if ( is_variable_array( Arr_Stack->var ) )
-	{
-		eprint( FATAL, "%s:%ld: Accessing elements of dynamically sized array "
-				"`%s' is not possible.\n", Fname, Lc, Arr_Stack->var->name );
-		THROW( VARIABLES_EXCEPTION );
-	}
 
 	/* make sure there are not more indices than dimensions */
 
