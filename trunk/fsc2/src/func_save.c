@@ -104,7 +104,6 @@ Var *f_getf( Var *var )
 	static char *r = NULL;
 	char *new_r, *m;
 	static FILE_LIST *old_File_List;
-	static bool first_time = SET;
 
 
 	r = NULL;
@@ -157,7 +156,9 @@ Var *f_getf( Var *var )
 	else
 		s[ 1 ] = T_strdup( s[ 1 ] );
 
-	/* Third string is the default directory */
+	/* Third string is the default directory - if unset use the one the file
+	   selector would choose anyway (but expand '.' to the full name of the
+	   current directory). */
 
 	if ( s[ 2 ] == NULL || s[ 2 ][ 1 ] == '\0' )
 	{
