@@ -1,0 +1,627 @@
+#
+# $Id$
+#
+
+ NI_DAQ Library Manual
+ =====================
+
+The maximum number of PCI E Series boards that can be used is controlled
+via the 'NI_DAQ_MAX_PCI_E_BOARDS' macro, which is currently set to 4.
+This isn't defined by the library but by the kernel module - if you want
+to use more boards you must change the define in the header file for the
+kernel module 'ni_daq_drv.h' and recompile and re-install both the kernel
+module and the library.
+
+To use the library you will have to include the header file 'ni_daq.h'.
+
+The library supplies the following groups of functions:
+
+a) Administrative and miscellaneous functions:
+
+    ni_daq_open()
+    ni_daq_close()
+    ni_daq_perror()
+    ni_daq_strerror()
+
+    ni_daq_msc_set_clock_speed()
+    ni_daq_msc_set_clock_output()
+    ni_daq_msc_get_clock_state()
+
+b) Functions for analog input (AI):
+
+    ni_daq_ai_set_speed()
+    ni_daq_ai_get_speed()
+    ni_daq_ai_channel_configuration()
+    ni_daq_ai_acq_setup()
+    ni_daq_ai_start_acq()
+    ni_daq_ai_get_acq_data()
+
+c) Functions for analog output (AO):
+
+    ni_daq_ao_channel_configuration()
+    ni_daq_ao()
+
+d) Counter/pulser functions (GPCT):
+
+    ni_daq_gpct_set_speed()
+    ni_daq_gpct_get_speed()
+    ni_daq_gpct_start_counter()
+    ni_daq_gpct_start_gated_counter()
+    ni_daq_gpct_stop_counter()
+    ni_daq_gpct_get_count()
+    ni_daq_gpct_single_pulse()
+    ni_daq_gpct_continuous_pulses()
+    ni_daq_gpct_stop_pulses()
+
+e) DIO functions (DIO):
+
+    ni_daq_dio_write()
+    ni_daq_dio_read()
+
+
+Most of these functions return an integer, indicating success or failure.
+On success, 'NI_DAQ_OK' (which is just 0) is returned. On failure a
+negative number is returned, indicating the type of failure. The
+following values can be expected:
+
+    NI_DAQ_OK            Success
+    NI_DAQ_ERR_NSB       No such board
+    NI_DAQ_ERR_NSC       No such counter
+    NI_DAQ_ERR_CBS       Counter is busy
+    NI_DAQ_ERR_IVA       Invalid argument
+    NI_DAQ_ERR_WFC       Can't wait for continuous counter to stop
+    NI_DAQ_ERR_BBS       Board is busy
+    NI_DAQ_ERR_IVS       Source argument invalid
+    NI_DAQ_ERR_BNO       Board not open
+    NI_DAQ_ERR_NDV       No driver loaded for board
+    NI_DAQ_ERR_NCB       Neighbouring counter is busy
+    NI_DAQ_ERR_ITR       Interrupted by signal
+    NI_DAQ_ERR_ACS       No permissions to open device file
+    NI_DAQ_ERR_DFM       Device file does not exist
+    NI_DAQ_ERR_DFP       Unspecified error when opening device file
+    NI_DAQ_ERR_INT       Internal driver or library error
+    NI_DAQ_ERR_NAO       Board is missing AO capabilities
+    NI_DAQ_ERR_NSS       Missing AI channel setup
+    NI_DAQ_ERR_NAS       Missing AI acquisition setup
+    NI_DAQ_ERR_NEM       Not enough memory
+    NI_DAQ_ERR_NPT       Timing impossible to realize
+
+
+The absolute value of the error code can be used as an index into a an
+array of short descriptions of the error encountered, which is defined as
+
+extern const char *ni_daq_errlist[ ];
+
+The length of this array is given by the (constant) global variable
+
+extern const int ni_daq_nerr;
+
+i.e. the largest  message number provided by the array of error messages
+is ni_daq_nerr - 1.
+
+
+The timings possible with the board take a bit of getting used to.
+Basically, the board has two clocks, a fast one running at 20 MHz and a
+slow clock, running at 200 kHz.
+
+The fast clock can be used by all subsystems (i.e. AI, AO and GPCT)
+and each subsystem can individually slow doen the clock rate it sees
+by a factor of 2. Thus, e.g. the AI system can use the 20 MHz clock
+while the GPCT subsystem at the same time can use the fast clock at
+half its normal rate, i.e. 10 MHz.
+
+In contrast, each subsystem gets the same rate from the slow clock,
+but this clock can also be slowed down also by a factor of 2, but
+for all subsystems at once. So, the speed of slow clock is common
+to all subsystems. Therefore it's important to take into consideration
+which speed it's currently running at when programming a subsystem,
+and when a subsystem needs to change the clock rate the programmer
+must be aware, that the change also applies to all the other subsystems.
+
+Beside the clocks seen by the subsystem there's also a FREQ_OUT pin
+of the board that can output one of the clocks. The speed of both
+clocks, when appearing on the FREQ_OUT pin can be reduced by an
+integer factor between 1 and 16 (without influencing the speed seen
+by the subsystems). Furthermore the frequencies can be further
+divided by a factor of 2 (but only both of them at once). When this
+additional divider is used the speed of the fast clock as seen by the
+subsystems does not change, but the slow speed clock encountered by
+the subsystems is changed.
+
+
+
+======================================================================
+
+int ni_daq_open( const char *name )
+
+This function must be called before the card can be used. It expects
+a single argument, the name of the device file for the board. This will
+usually be '/dev/pci_e_series_0' to /dev/pci_e_series_4' for the PCI E
+Series boards and '/dev/at_mio_series_0' to '/dev/at_mio_series_4' for
+the AT MIO Series boards.
+
+When successful the function returns an integer to be used as a handle
+for the board in all futher calls of functions for the board.
+
+The function may fail for several reasons. The board can be not installed
+at all, the driver for the board could be not loaded, the device file (i.e.
+the file name passed to the function) may not exist, the user may have
+no permission to open the board, the board could already be opened by
+a different process, or an unspecified error may occur when opening the
+file, or, finally, an internal error in the driver migth get triggered.
+In these cases a negative number is returned, with the following
+error codes:
+
+    NI_DAQ_ERR_NSB   NI_DAQ_ERR_NDV   NI_DAQ_ERR_DFM   NI_DAQ_ERR_ACS
+    NI_DAQ_ERR_BBS   NI_DAQ_ERR_DFP   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_close( int board )
+
+This function should be called when the coard isn't used anymore.
+
+The function can only fail for two reasons, either the board handle
+passed to the function is invalid or the board isn't open, in which
+case the following error codes are returned:
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO
+
+
+======================================================================
+
+int ni_daq_perror( const char *s )
+
+The function prints out a string to stderr, consisting of a string
+pased to it as the argument, a colon, a blank and a short descriptive
+text of the error encountered in the last invocation of one of the
+functions for the board, followed by a new-line. If the argument is
+NULL or an empty string only the error message is printed.
+
+The function returns the number of characters printed to stderr.
+
+
+======================================================================
+
+const char *ni_daq_strerror( void )
+
+The function returns a string with a short descriptive text of the
+error encountered in the last invocation of one of the functions for
+the board (or "Success" if the last function call was successful).
+
+
+======================================================================
+
+int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
+                                int divider )
+
+Function for setting the frequency divider the output at the FREQ_OUT
+pin. Beside the usual argument with the handle of the board, the speed
+of both clocks that can be output at the pin can be switched between
+full and half speed. Thus the second argument must be either
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+Please note that a change is also immediately visible for all subsystems
+using the slow clock!
+
+The third argument is a further divider to apply to the clock rate (only
+applied to the output at the FREQ_OUT pin) and has to be an integer
+between 1 and 16.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE clock,
+                                 NI_DAQ_STATE on_off )
+
+This function is for selecting one of the two clocks and enabling (or
+disabling) of the freuqency output at the FREQ_OUT pin. The first
+argument is as usual the board handle. The second is the clock to
+output, use
+
+    NI_DAQ_FAST_CLOCK   or   NI_DAQ_SLOW_CLOCK
+
+to select one of the clocks. The third argument allows to enable or
+disable output, use the constants
+
+    NI_DAQ_ENABLED    and    NI_DAQ_DISABLED
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *clock,
+                                NI_DAQ_STATE *on_off,
+                                NI_DAQ_CLOCK_SPEED_VALUE *speed,
+                                int *divider )
+
+This function can be used to find out about all current settings for
+the clock and the output at the FREQ_OUT pin. The first argument is
+as usual the board handle. The second argument is a pointer to a
+variable of type 'NI_DAQ_CLOCK_TYPE' and after a successful call
+it will be set to either 
+
+    NI_DAQ_FAST_CLOCK   or   NI_DAQ_SLOW_CLOCK
+
+telling which clock is selected for output at the FREQ_OUT pin.
+
+The second argument is a pointer to a variable of type 'NI_DAQ_STATE'
+and will be set to either 
+
+    NI_DAQ_ENABLED   or    NI_DAQ_DISABLED
+
+telling if output at the FREQ_OUT pin is enabled or disabled.
+
+The next to arguments are for returning the current speed settings for
+the clocks. The first one is a pointer to a variable of type
+'NI_DAQ_CLOCK_SPEED_VALUE' and can have the values 
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+and the last is an integer pointer, through which the current value of
+the divider for both clocks is returned.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA
+
+
+======================================================================
+
+int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+
+
+This function allows to set the speed of the fast clock as seen by the
+analog input (AI) subsystem. The first argument is as usual the board
+handle, while the second arguments determines the speed divider for
+the fast clock. It can have two values, either
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+When NI_DAQ_FAST_CLOCK is used, the clock speed is set to 20 MHz, otherwise
+to 10 MHz.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
+
+The function can be used to find out the current divider setting for
+teh fats clock as seen by the AI subsystem. The first argument is as
+usual the board handle, while the second arguments is a pointer to
+a variable of type 'NI_DAQ_CLOCK_SPEED_VALUE'. If successful the
+value of the variable pointed to will be set to either
+
+    NI_DAQ_FULL_SPEED   or   NI_DAQ_HALF_SPEED
+
+indicating if the clock is running at either 20 MHz or 10 MHz.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_IVA   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+int ni_daq_ai_channel_configuration( int board, int num_channels,
+                                     int *channels, NI_DAQ_AI_TYPE *types,
+                                     NI_DAQ_POLARITY *polarities,
+                                     double *ranges,
+                                     NI_DAQ_STATE *dither_enables )
+
+This function must be called before doing analog input to set the
+number of channels to be used and their properties.
+
+Beside the usual first argument with the board handle the function
+expects several arguments. The 'num_channels' argument is the number
+of channels to be sampled at once and 'channels' is an array of
+'num_channels' channel numbers (between 0 and one less than the
+maximum number of analog input channels of the card).
+
+The 'types' argument is an array of 'num_channels' values of type
+'NI_DAQ_AI_TYPE'. These can habe the following values:
+
+    NI_DAQ_AI_TYPE_NRSE
+    NI_DAQ_AI_TYPE_RSE
+    NI_DAQ_AI_TYPE_Differential
+    NI_DAQ_AI_TYPE_Calibration
+    NI_DAQ_AI_TYPE_Aux
+    NI_DAQ_AI_TYPE_Ghost
+
+'NI_DAQ_AI_TYPE_NRSE' is for single-ended nonreferenced measurements,
+i.e. where the ground of the signal is defined by the ground input line
+(i.e. for free floating ground measurements, like on a battery).
+
+'NI_DAQ_AI_TYPE_RSE' is for single-ended ground-referenced measurements,
+where the signal ground is connected to a common ground of the card and
+the ground of the instrument creating the voltage.
+
+'NI_DAQ_AI_TYPE_Differential' is for differential voltage measurements.
+These use use two AI channels and return the voltage differene between
+the channels. For these setting the channel number specicfied in the
+'channels' argument must be between 0 and 7, 16 and 23, 32 and 39 or
+19 and 55 (of course depending on the number of AI channels the board
+has). As the second channel the channel with the the number of the first
+channel plus 8 is than automatically used.
+
+The 'NI_DAQ_AI_TYPE_Calibration' setting is used for calibration of the
+board and shouldn't be needed for normal programms.
+
+'NI_DAQ_AI_TYPE_Aux' is for measuring the output voltage of a onboard
+temperature sensor (+100 mV = -40 degree Celsiusm +1.25 V = 125 degree
+Celsius). Not all boards have an onboard temerature sensor.
+
+'NI_DAQ_AI_TYPE_Ghost' is a seeting where *no* data is returned, the
+setting can be useful when different channels are to be sampled at
+different rates.
+
+The fifth argument, '*polarities', is an array of 'num_channels' values
+of type 'NI_DAQ_POLARITY'. These can have the values
+
+   NI_DAQ_BIPOLAR   or   NI_DAQ_UNIPOLAR
+
+When set to NI_DAQ_BIPOLAR and bipolar experiment is done (i.e. the
+input voltages are expected in a range symmetric with respect to 0V),
+otherwise the have to be unipolar, i.e. all input voltages must be
+between 0V and the upper limit of the measurement range (to be set by
+the next argument.
+
+The 'ranges' argument is an array of 'num_channels' floating point
+values. Each value represents the upper limit of the voltage range
+to be measured by the input channel and must be identical to one of
+the possible settings for the card (different cards have different
+allowed ranges).
+
+The final argument, 'dither_enables', is an array of 'num_channels'
+values of type 'NI_DAQ_STATE' and can assume the values 
+
+    NI_DAQ_ENABLED   or  NI_DAQ_DISABLED
+
+using these values hardware dithering can be enabled or disabled on a
+channel-by-channel basis. Hardware dithering means that approximately
+0.5 LSBrms of white Gaussian noise gets added to the signal to be
+converted by the ADC. This addition is useful for applications
+involving averaging to increase the resolution. In such applications,
+noise modulation is decreased and differential linearity is improved
+by the addition of the dither.
+
+
+On success the function returns the number of data points that will
+be returned for each conversion of all channels. Unless you specified
+one more channels to be of type 'NI_DAQ_AI_TYPE_Ghost', this number
+will be identical to the number of channels passed to the function
+as the second argument.
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+    NI_DAQ_ERR_NEM
+
+
+======================================================================
+
+int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
+                         NI_DAQ_POLARITY start_polarity,
+                         NI_DAQ_INPUT scan_start,
+                         NI_DAQ_POLARITY scan_polarity,
+                         double scan_duration,
+                         NI_DAQ_INPUT conv_start,
+                         NI_DAQ_POLARITY conv_polarity,
+                         double conv_duration,
+                         size_t num_scans )
+
+This functions needs to be called before doing analog input in order
+to determine after which triggers and when data are to be acquired.
+It reuqires that ni_daq_ai_channel_configuration() has already been
+successfully called.
+
+The most basic element of an analog input sequence is a single conversion,
+i.e. the conversion of an input voltage into a corresponding data value by
+the ADC. When more than a single channel is to be measured a set of
+conversions makes up a so called scan. During a scan the voltages at
+several analog input channels are converted, one after each other (there's
+only a single AD converter on the board). Finally, a set of scans constitutes
+a complete acquisition.
+
+An acquisition can be started either immediately or on receipt of a trigger
+event. The scans making up the acquisiton can be started according to a
+certain timing (e.g. a new scan is started every 10 ms) or can be externally
+triggered. And, finally, the moment each individual conversion of a scan
+is done can be controlled by the internal clock or an external event.
+
+The way the acquisition is started is controlled by the 'start' and
+'start_polarity' arguments of the function. 'start' is a variable of
+type 'NI_DAQ_INPUT' and can have one of the following values:
+
+   NI_DAQ_INTERNAL
+   NI_DAQ_NOW
+   NI_DAQ_PFI0 - NI_DAQ_PFI9
+   NI_DAQ_NI_DAQ_RTSI_0 - NI_DAQ_NI_DAQ_RTSI_6
+   NI_DAQ_GOUT_0
+
+For NI_DAQ_INTERNAL the acquisition is started when either the function
+ni_daq_ai_start_acq() (see below) is called or when data are requested
+for the first time by a call of the function ni_daq_ai_get_acq_data()
+(also see below).
+
+For NI_DAQ_NOW the acquisition is started immediately before the function
+returns.
+
+For NI_DAQ_PFI0 to NI_DAQ_PFI9 the acquisition is started when a trigger
+is received on the corresponding PFI0 to PFI9 input line of the board.
+
+For NI_DAQ_NI_DAQ_RTSI_0 to NI_DAQ_NI_DAQ_RTSI_6 a trigger on the
+RTSI0 to RTSI6 inputs starts the acquisition.
+
+Finally, for NI_DAQ_GOUT_0 the acquisition is started on a trigger from
+the output of counter 0 (see the documentation for the GPCT functions).
+
+The 'start_polarity' argument is of type 'NI_DAQ_POLARITY' and can have
+the values
+
+    NI_DAQ_NORMAL   or    NI_DAQ_INVERTED
+
+It's value is only evaluated when the acquisition is to be started by an
+external trigger. In this case NI_DAQ_NORMAL stands for a trigger on the
+raising edge of the input, while NI_DAQ_INVERTED detects the trigger on
+the falling edge of the input.
+
+
+The 'scan_start', 'scan_polarity' and 'scan_duration' control how a scan
+is started. 'scan_start' can have one of the following values:
+
+   NI_DAQ_INTERNAL:
+   NI_DAQ_PFI0 - NI_DAQ_PFI9
+   NI_DAQ_NI_DAQ_RTSI_0 - NI_DAQ_NI_DAQ_RTSI_6
+   NI_DAQ_GOUT_0
+
+When set to NI_DAQ_INTERNAL scans are started automatically and repeatedly
+with a time spacing given by the value of 'scan_duration'. 'scan_duration'
+is then a time in seconds - the timing is controlled by the internal clocks
+of the board. There is a hard restrictions converning this timing:
+'scan_duration' must be at least as long as the time resolution of the
+board multiplied by the number of conversions in a scan. A soft restriction
+comes into play when using different gains for different channels involved
+in the conversions. The switching times of the pre-amplifier is often
+longer than the time resolution of the board. Using a scan duration that
+does not allow for these switching times will result in unreliable data.
+
+For all other settings of 'scan_start' the 'scan_duration' argument isn't
+evaluated and instead the 'scan_polarity' argument is used to determine if
+a scan has to be triggered by the raising or falling edge of the trigger
+input.
+
+As for scans also conversions can be started according to an adjustable
+timing or by an external trigger signal. This is controlled by the
+'conversion_start' argument, which can have the same values as the
+'scan_start' argument. If set to NI_DAQ_INTERNAL conversions are started
+with a fixed time spacing given by the 'conversion_duration' argument.
+Otherwise each conversion is started by an external trigger where the
+'conversion_polarity' controls if the trigger is recognized by a raising
+or a falling edge of the trigger signal.
+
+Finally, the 'num_scans' argument determines how many scans make up
+a complete acquisition and must be a number between 1 and 2^24. The
+number of data points that will get sampled during the acquisition
+is this number times the return value of the function
+ni_daq_ai_channel_configuration().
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO    NI_DAQ_ERR_IVA    NI_DAQ_ERR_INT
+    NI_DAQ_ERR_IVS    NI_DAQ_ERR_NPT    NI_DAQ_ERR_NSS    NI_DAQ_ERR_NEM
+
+
+======================================================================
+
+int ni_daq_ai_start_acq( int board )
+
+This function can be used to start an AI acquisition with the board selected
+by the argument. Please note that starting an acquisition requires that
+both the functions ni_daq_ai_channel_configuration() and ni_daq_ai_acq_setup()
+have been called before successfully.
+
+Calling this function is unnecessary if in the 'start' argument of the call of
+function ni_daq_ai_acq_setup() had been NI_DAQ_NOW - in this case the
+acquisition is started automatically.
+
+Please note that an acquisition is also started automatically by calling
+the function ni_daq_ai_get_acq_data().
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NSS
+    NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM
+
+
+======================================================================
+
+int ni_daq_ai_stop_acq( int board )
+
+This function can be used to stop an AI acquisition with the board selected
+by the argument. Please note that that no data from the stopped acquisition
+are available after this function has been called, so first get all data
+you're interested in using the function ni_daq_ai_get_acq_data() before
+calling ni_daq_ai_stop_acq().
+
+On failure the function returns one of the following error codes
+
+On failure the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT
+
+
+======================================================================
+
+ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
+                                size_t offset, size_t num_data_per_channel,
+                                int wait_for_end )
+
+This function obtains measured data from an acquisition. If the acquisition
+hasn't been started yet (but the acquisition parameters have been set up
+using ni_daq_ai_channel_configuration() and ni_daq_ai_acq_setup()) calling
+the fucntion will automatically start an acquisition.
+
+As usual the first argument of the function is a handle for the board.
+The second argument is an array of as many double pointers as there are
+channels returning data, i.e. the return value of the function 
+ni_daq_ai_channel_configuration(). Each pointer has to point to an array
+of doubles with at least as many elements as there are scans to be fetched
+from (which is also the fourth element). Data coverted to volts (according
+to the gain setttings of the channels) are returned via these arrays.
+
+   -------
+  | volts |______________________
+   -------                       |
+   |   |__________               |
+   |              |              |
+   v              v              v
+   ----------     ----------     ----------
+  | volts[0] |   | volts[1] |   | volts[2] |
+   ----------     ----------     ----------
+   |               |_______    |______________________
+   |                       |                          |
+   v                       v                          v
+   --------------------    -----------------------    -----------------------
+  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+   --------------------    -----------------------    -----------------------
+
+   num_data_per_channel
+
+The third element is an offset into these arrays that finally will hold the
+returned data for the different channels. The offset can be useful when one
+doesn't want to wait until the acquisition is complete but instead wants to
+fetch intermediate data. Without the offset the function would start writing
+the newly acquired data starting at the first element of the arrays. But when
+a none-zero offset has been specified the offset is automatically added to
+the pointers pointed to by the first argument, thus not overwriting the
+elements with an index smaller than offset.
+
+The fifth and last element is a flag that tells if the function should either
+return immediately with as many data as where avaiable (if 'wait_for_data'
+is zero) or if the function should only return when the acquisition is
+complete (if 'wait_for_data' is non-zero).
+
+On success the function returns the number of data that have been acquired
+for each channel (but never more than 'num_data_per_channel'). On failure
+the function returns one of the following error codes
+
+    NI_DAQ_ERR_NSB    NI_DAQ_ERR_BNO   NI_DAQ_ERR_INT    NI_DAQ_ERR_NSS
+    NI_DAQ_ERR_NAS    NI_DAQ_ERR_NEM
+
+
+======================================================================
+

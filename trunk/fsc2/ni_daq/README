@@ -1,0 +1,6 @@
+Please note:  This is a device driver in the making and it is not
+              finished yet. Actually, the device driver for PCI E
+              series boards itself seems to work more or less, but
+              there's nothing yet for the AT MIO cards, there's no
+              documentation and the accompanying library also isn't
+              finished yet.
