@@ -92,12 +92,12 @@ complete list of all differences that might be expected:
   @code{open_file()} and @code{clone_file()} for the details.
 
 @item
-  Device modules that under normal conditions ask the user for
-  confirmation before starting potentially dangerous operations will
-  use a default answer. This may result in the execution of the script
-  ending prematurely, depending on the what the device module takes to
-  be the default answer. Take care that this this might deactivate some
-  security features!
+  Device modules that under normal circumstances ask the user for
+  confirmation before starting potentially dangerous operations will use a
+  default answer. This may result in the execution of the script ending
+  prematurely, depending on the what the device module takes to be the
+  default answer. Take care that this this might deactivate some security
+  features!
 @end itemize
 
 @quotation
