@@ -10,6 +10,7 @@
 static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
 static void dg2020_phase_setup_check( FUNCTION *f );
+static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
 
 
 /*---------------------------------------------------------------------------
@@ -111,6 +112,15 @@ void dg2020_basic_pulse_check( void )
 
 		if ( p->pc )
 		{
+			if ( p->function->num_pods == 1 )
+			{
+				eprint( FATAL, "%s: Phase %ld needs phase cycling but its "
+						"function `%s' has only one pod assigned to it.",
+						pulser_struct.name, p->num,
+						Function_Names[ p->function->self ] );
+				THROW( EXCEPTION );
+			}
+
 			if ( p->function->phase_setup == NULL )
 			{
 				eprint( FATAL, "%s: Pulse %ld needs phase cycling but a "
@@ -135,6 +145,11 @@ void dg2020_basic_pulse_check( void )
 				cur_type -= PHASE_PLUS_X;
 				p->function->phase_setup->is_needed[ cur_type ] = SET;
 			}
+		}
+		else if ( p->function->num_pods > 1 )
+		{
+			p->pc = dg2020_create_dummy_phase_seq( );
+			p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
 		}
 
 		if ( p->is_active )
@@ -216,6 +231,8 @@ static void dg2020_basic_functions_check( void )
 static void dg2020_phase_setup_check( FUNCTION *f )
 {
 	int i, j;
+	POD *free_pod_list[ MAX_PODS_PER_FUNC ];
+	int free_pods;
 
 
 	/* First let's see if the pods mentioned in the phase setup are really
@@ -258,9 +275,27 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 	}
 
 	/* Now we distribute pods of the function that aren't used for pulse types
-	   set in the PHASE_SETUP command to phase types that aren't needed for
+	   as set in the PHASE_SETUP command to phase types that aren't needed for
 	   real pulses (this way the unused pod is automatically set to a constant
 	   voltages as needed by the Berlin pulse bridge) */
+
+	free_pods = 0;
+	for ( i = 0; i < f->num_pods; i++ )
+	{
+		for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
+			if ( f->pod[ i ] == f->phase_setup->pod[ j ] )
+				break;
+		if ( j == PHASE_CW - PHASE_PLUS_X + 1 )
+			free_pod_list[ free_pods++ ] = f->pod[ i ];
+	}
+
+	for ( i = j = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
+		if ( ! f->phase_setup->is_set[ i ] )
+		{
+			f->phase_setup->is_set[ i ]= SET;
+			f->phase_setup->pod[ i ] = free_pod_list[ j ];
+			j = ( j + 1 ) % free_pods;
+		}
 
 	/* We also have to test that different phase types are not associated with
        the same pod (exception: the different phase types are never actually
@@ -298,4 +333,59 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 				THROW( EXCEPTION );
 			}
 		}
+}
+
+
+/*---------------------------------------------------------------------------*/
+/* Function creates a dummy phase sequence for pulses with no phase sequence */
+/* that belong to functions that have more than one pod assigned to it. This */
+/* dummy phase sequence consists of just '+X' phases (length is one if there */
+/* are no real phase sequences or the length of the normal phase sequences   */
+/* otherwise). If such a dummy phase sequence already exists the pulse gets  */
+/* assigned this already existing dummy sequence.                            */
+/*---------------------------------------------------------------------------*/
+
+static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
+{
+	Phase_Sequence *np, *pn;
+	int i;
+
+	/* First check if there's a phase sequence consisting of just '+X' - if it
+	   does use this as the phase sequence for the pulse */
+
+	for ( np = PSeq; np != NULL; np = np->next )
+	{
+		for ( i = 0; i < np->len; i++ )
+			if ( np->sequence[ i ] != PHASE_PLUS_X )
+				break;
+
+		if ( i == np->len )
+			return np;
+	}
+
+	/* Create a new phase sequence */
+
+	np = T_malloc( sizeof( Phase_Sequence ) );
+
+	if ( PSeq == NULL )
+	{
+		PSeq = np;
+		np->len = 1;
+		np->sequence = T_malloc( sizeof( int ) );
+		np->sequence[ 0 ] = PHASE_PLUS_X;
+	}
+	else
+	{
+		pn = PSeq;
+		while ( pn->next != NULL )
+			pn = pn->next;
+		pn->next = np;
+		np->len = PSeq->len;
+		np->sequence = T_malloc( np->len * sizeof( int ) );
+		for ( i = 0; i < np->len; i++ )
+			np->sequence[ i ] = PHASE_PLUS_X;
+	}
+
+	np->next = NULL;
+	return np;
 }
