@@ -281,6 +281,11 @@ pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
+ZIP:
+	mount /ZIP
+	cp ../fsc2.tgz /ZIP
+	umount /ZIP
+
 # don't automatically delete intermediate files created by bison and flex
 
 .PRECIOUS: %.c
