@@ -64,7 +64,6 @@ static bool is_tested = UNSET;       /* set when EDL file has been tested */
 static bool state = UNSET;           /* set when EDL passed the tests */
 static FILE *in_file_fp = NULL;
 static time_t in_file_mod = 0;
-static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
 static volatile sig_atomic_t fsc2_death = 0;
@@ -268,7 +267,7 @@ int main( int argc, char *argv[ ] )
 	else
 		fprintf( stderr, "fsc2: Internal failure on startup.\n" );
 
-	T_free( title );
+	T_free( Internals.title );
 	clean_up( );
 	xforms_close( );
 
@@ -307,6 +306,7 @@ static void globals_init( const char *pname )
 	Internals.http_server_died = UNSET;
 	Internals.conn_request = UNSET;
 	Internals.is_linux_i386 = UNSET;
+	Internals.title = NULL;
 
 	/* Figure out if the machine has an INTEL i386 type processor and we're
 	   running under Linux */
@@ -1079,9 +1079,9 @@ void load_file( FL_OBJECT *a, long reload )
 
 	/* Set a new window title */
 
-	T_free( title );
-	title = get_string( "fsc2: %s", EDL.in_file );
-	fl_set_form_title( GUI.main_form->fsc2, title );
+	T_free( Internals.title );
+	Internals.title = get_string( "fsc2: %s", EDL.in_file );
+	fl_set_form_title( GUI.main_form->fsc2, Internals.title );
 
 	/* Read in and display the new file */
 

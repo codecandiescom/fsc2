@@ -302,7 +302,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
 	/* Set the HTTP port the server is going to run on - if it has been given
-	   on the command line (or in XDefaults tec.) we take this value,
+	   on the command line (or in .XDefaults etc.) we take this value,
 	   otherwise we use the compiled in value, but if this also doesn't exist
 	   (or is also not within the range of non-privileged ports), we default
 	   to the alternate HTTP port of 8080. */
@@ -317,8 +317,8 @@ bool xforms_init( int *argc, char *argv[ ] )
 		Internals.http_port = DEFAULT_HTTP_PORT;
 #endif
 
-	/* Load the functions for creating forms from the library dealing
-	   with graphics */
+	/* Load the library dealing for creating the graphics resources and
+	   resolve the functions for creating forms defined in it */
 
 	TRY
 	{
@@ -474,8 +474,9 @@ bool xforms_init( int *argc, char *argv[ ] )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Setup the array used in handling the (remaining) command line options */
+/*-----------------------------------------------------------------------*/
 
 static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
@@ -580,8 +581,11 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Load the appropriate shared library for creating the graphic stuff */
+/* and try to resolve the addresses of the functions for creating the */
+/* various forms.                                                     */
+/*--------------------------------------------------------------------*/
 
 bool dl_fsc2_rsc( void )
 {
@@ -631,6 +635,8 @@ bool dl_fsc2_rsc( void )
 		return FAIL;
 	}
 
+	/* Try to find the function for creating the main form */
+
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_fsc2 = ( FD_fsc2 * ( * )( void ) )
 							 dlsym( Internals.rsc_handle, "create_form_fsc2" );
@@ -640,6 +646,8 @@ bool dl_fsc2_rsc( void )
 		T_free( lib_name );
 		return FAIL;
 	}
+
+	/* Try to find the function for creating the 1D display window */
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_run_1d = ( FD_run_1d * ( * )( void ) )
@@ -653,6 +661,8 @@ bool dl_fsc2_rsc( void )
 		return FAIL;
 	}
 
+	/* Try to find the function for creating the 2D display window */
+
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_run_2d = ( FD_run_2d * ( * )( void ) )
 						   dlsym( Internals.rsc_handle, "create_form_run_2d" );
@@ -664,6 +674,9 @@ bool dl_fsc2_rsc( void )
 		T_free( lib_name );
 		return FAIL;
 	}
+
+	/* Try to find the function for creating the form for entering comments
+	   (for the EDL function ave_comment()) */
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_input_form = ( FD_input_form * ( * )( void ) )
@@ -677,6 +690,9 @@ bool dl_fsc2_rsc( void )
 		return FAIL;
 	}
 
+	/* Try to find the function for creating the form for printing during
+	   the experiment */
+
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_print = ( FD_print * ( * )( void ) )
 							dlsym( Internals.rsc_handle, "create_form_print" );
@@ -689,6 +705,8 @@ bool dl_fsc2_rsc( void )
 		return FAIL;
 	}
 
+	/* Try to find the function for creating the cur section window */
+
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_form_cut = ( FD_cut * ( * )( void ) )
 							  dlsym( Internals.rsc_handle, "create_form_cut" );
@@ -700,6 +718,9 @@ bool dl_fsc2_rsc( void )
 		T_free( lib_name );
 		return FAIL;
 	}
+
+	/* Try to find the function for creating the form for entering comments
+	   to be include into the output when printing during the experiment */
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	GUI.G_Funcs.create_pc_form = ( FD_print_comment * ( * )( void ) )
@@ -719,8 +740,12 @@ bool dl_fsc2_rsc( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* Handler for the user clicking on the Close button of the window */
+/* decoration - this is interpreted as the as the user really      */
+/* meaning it, i.e. even when we're in batch mode and there are    */
+/* still EDL scripts to be run quit immediately.                   */
+/*-----------------------------------------------------------------*/
 
 static int main_form_close_handler( FL_FORM *a, void *b )
 {
@@ -730,6 +755,10 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 	if ( GUI.main_form->quit->active != 1 )
 		return FL_IGNORE;
 
+	/* Do the same as if the "Quit" button has been hit (but quit immediately
+	   in batch mode and don't load the next EDL script) */
+
+	T_free( title );
 	clean_up( );
 	xforms_close( );
 

@@ -207,6 +207,7 @@ struct INTERNALS {
 	volatile sig_atomic_t conn_request; /* set on request from the child
 										   process dealing with external
 										   connections */
+	char *title;                 /* string with title of the main window */
 };
 
 
