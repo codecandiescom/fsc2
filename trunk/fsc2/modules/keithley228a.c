@@ -160,7 +160,9 @@ int keithley228a_init_hook( void )
 
 int keithley228a_exp_hook( void )
 {
+	Cur_Func = "keithley228a_exp_hook";
 	keithley228a_init( DEVICE_NAME );
+	Cur_Func = NULL;
 	return 1;
 }
 
@@ -170,7 +172,9 @@ int keithley228a_exp_hook( void )
 
 int keithley228a_end_of_exp_hook( void )
 {
+	Cur_Func = "keithley228a_end_of_exp_hook";
 	keithley228a_to_local( );
+	Cur_Func = NULL;
 	return 1;
 }
 
@@ -605,7 +609,8 @@ static double keithley228a_goto_current( double new_current )
 		return keithley228a.current = new_current;
 
 	do_test =
-		fabs( keithley228a.current = new_current ) > KEITHLEY228A_MAX_JUMP;
+		fabs( keithley228a.current - new_current ) > KEITHLEY228A_MAX_JUMP;
+
 	/* Calculate the size of the current steps */
 
 	del_amps = 0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
@@ -621,9 +626,12 @@ static double keithley228a_goto_current( double new_current )
 		usleep( 100000 );
 	}
 
-	/* Do the final step (smaller than the previously used current steps) */
+	/* Do the final step (smaller than the previously used current steps)
+	   after we're done we still need to wait soem small amount of time -
+	   otherwise the Keithley starts acting up... */
 
 	keithley228a.current = keithley228a_set_current( new_current );
+	usleep( 100000 );
 
 	/* Wait for the current to stabilize at the requested value (checking
 	   also the voltage to go down to zero won't do because there is some
@@ -852,7 +860,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 
 	 if ( fabs( c ) >= 0.04 )
 	 {
-		 *psc = 1.0e-2 * lround( 1.e-2 * c );
+		 *psc = 1.0e-2 * lround( 1.0e2 * c );
 		 *dacv = V_TO_A_FACTOR * fabs( *psc - c );
 	 }
 	 else

@@ -903,6 +903,13 @@ Var *f_screate( Var *v )
 		v = vars_pop( v );
 		vars_check( v, INT_VAR | FLOAT_VAR );
 		step = fabs( VALUE( v ) );
+		if ( step < 0.0 )
+		{
+			eprint( FATAL, "%s:%ld: Negative slider step width in %s().\n",
+					Fname, Lc, Cur_Func );
+			THROW( EXCEPTION );
+		}
+
 		if ( step > end_val - start_val )
 		{
 			eprint( FATAL, "%s:%ld: Slider step size larger than difference "
@@ -1377,6 +1384,13 @@ Var *f_svalue( Var *v )
 		io->value = io->start_val;
 	}
 	
+	/* If a certain step width is used set the new value to the nearest
+	   allowed value */
+
+	if ( io->step != 0.0 )
+		io->value = lround( ( io->value - io->start_val ) / io->step )
+			        * io->step + io->start_val;
+
 	if ( ! TEST_RUN )
 		fl_set_slider_value( io->self, io->value );
 
@@ -2139,7 +2153,7 @@ void tools_clear( void )
 
 static void recreate_Tool_Box( void )
 {
-	IOBJECT *io;
+	IOBJECT *io, *last_io;
 	bool needs_pos = SET;
 	int flags, wx, wy, ww, wh;
 
@@ -2168,40 +2182,12 @@ static void recreate_Tool_Box( void )
 		}
 	}
 
-	/* Now calculate the new size of the tool box and create it */
-
-	Tool_Box->w = 2 * OFFSET_X0;
-	Tool_Box->h = 2 * OFFSET_Y0;
-
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
-		if ( Tool_Box->layout == VERT )
-			Tool_Box->h += OBJ_HEIGHT + VERT_OFFSET;
-		else
-			Tool_Box->w += OBJ_WIDTH + HORI_OFFSET
-				           - ( io->type == NORMAL_BUTTON ?
-							   2 * NORMAL_BUTTON_DELTA : 0 );
-
-	if ( Tool_Box->layout == VERT )
-	{
-		Tool_Box->w += OBJ_WIDTH;
-		Tool_Box->h -= VERT_OFFSET;
-	}
-	else
-	{
-		Tool_Box->w -= HORI_OFFSET;
-		Tool_Box->h += OBJ_HEIGHT;
-	}
-
-
 	if ( Tool_Box->Tools != NULL )
-	{
-		fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 		fl_addto_form( Tool_Box->Tools );
-	}
 	else
 	{
 		needs_pos = UNSET;
-		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, Tool_Box->w, Tool_Box->h );
+		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, 100, 100 );
 
 		if ( * ( ( char * ) xresources[ TOOLGEOMETRY ].var ) != '\0' )
 		{
@@ -2217,10 +2203,17 @@ static void recreate_Tool_Box( void )
 	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	{
 		append_object_to_form( io );
+		last_io = io;
+	}
 
 	fl_end_form( );
 
+	Tool_Box->w = last_io->x + OBJ_WIDTH + OFFSET_X0;
+	Tool_Box->h = last_io->y + OBJ_HEIGHT + OFFSET_Y0;
+
+	fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
 	fl_adjust_form_size( Tool_Box->Tools );
 
 	fl_show_form( Tool_Box->Tools, needs_pos ?
