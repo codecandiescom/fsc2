@@ -620,32 +620,32 @@ static void run_child( void )
 	do_quit = UNSET;
 	set_child_signals( );
 
-/*{
+#if 0                                    /* used for child process debugging */
 	bool h = SET;
 	while ( h );
-}*/
+#endif
 
 	TRY {
-		do_measurement( );                 /* run the experiment */
+		do_measurement( );               /* run the experiment */
 		TRY_SUCCESS;
 	}
-	OTHERWISE                              /* catch all exceptions */
+	OTHERWISE                            /* catch all exceptions */
 		return_status = FAIL;
 
-	close( pd[ READ ] );                   /* close read end of pipe */
-	close( pd[ WRITE ] );                  /* close also write end of pipe */
+	close( pd[ READ ] );                 /* close read end of pipe */
+	close( pd[ WRITE ] );                /* close also write end of pipe */
 
 	do_quit = UNSET;
-	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
+	kill( getppid( ), QUITTING );        /* tell parent that we're exiting */
 
 	/* Using a pause() here is tempting but there exists a race condition
 	   between the determination of the value of 'do_quit' and the start of
 	   pause() - and it happens... */
 
-	while ( ! do_quit )                    /* wait for acceptance of signal  */
+	while ( ! do_quit )                  /* wait for acceptance of signal  */
 		usleep( 50000 );
 
-	_exit( return_status );                /* ...and that's it ! */
+	_exit( return_status );              /* ...and that's it ! */
 }
 
 
