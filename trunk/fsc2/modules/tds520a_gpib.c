@@ -436,7 +436,16 @@ bool tds520a_set_trigger_channel( const char *name )
 	if ( strlen( name ) > 20 )
 		return FAIL;
 
-	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
+	if ( name[ 0 ] != 'A' )
+		sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
+	else
+	{
+		if ( name[ 3 ] == '1' )
+			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH3\n" );
+		else
+			strcpy( cmd, "TRIG:MAI:EDGE:SOU CH4\n" );
+	}
+
 	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds520a_gpib_failure( );
 
