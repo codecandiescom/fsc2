@@ -140,8 +140,6 @@ typedef struct {
 
 #if defined __KERNEL__
 
-#undef NI6601_DEBUG
-
 #include <linux/autoconf.h>
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
@@ -153,7 +151,6 @@ typedef struct {
 #endif
 
 #include <linux/module.h>
-
 #include <linux/version.h>
 
 #if ! defined ( CONFIG_PCI )
