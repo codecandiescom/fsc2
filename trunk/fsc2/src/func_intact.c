@@ -298,8 +298,8 @@ Var *f_bcreate( Var *v )
 	if ( Tool_Box == NULL )
 	{
 		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
+		Tool_Box->objs = NULL;
 		Tool_Box->layout = VERT;
-		Tool_Box->x = Tool_Box->y = 0;
 		Tool_Box->Tools = NULL;
 	}
 
@@ -333,15 +333,11 @@ Var *f_bcreate( Var *v )
 	{
 		recreate_Tool_Box( );
 
-		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+		if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 						  FL_FULLBORDER, "fsc2: Tools" );
 		else
-		{
-			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		}
+			fl_redraw_form( Tool_Box->Tools );
 
 		XFlush( fl_get_display( ) );
 	}
@@ -492,10 +488,6 @@ Var *f_bdelete( Var *v )
 			if ( ! TEST_RUN )
 			{
 				fl_hide_form( Tool_Box->Tools );
-
-				fl_delete_object( Tool_Box->background_box );
-				fl_free_object( Tool_Box->background_box );
-
 				fl_free_form( Tool_Box->Tools );
 			}
 
@@ -523,15 +515,11 @@ Var *f_bdelete( Var *v )
 
 	recreate_Tool_Box( );
 
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+	if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Tools" );
 	else
-	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tools" );
-	}
+		fl_redraw_form( Tool_Box->Tools );
 
 	XFlush( fl_get_display( ) );
 
@@ -898,6 +886,7 @@ Var *f_screate( Var *v )
 	if ( Tool_Box == NULL )
 	{
 		Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
+		Tool_Box->objs = NULL;
 		Tool_Box->layout = VERT;
 		Tool_Box->Tools = NULL;
 	}
@@ -930,15 +919,11 @@ Var *f_screate( Var *v )
 	{
 		recreate_Tool_Box( );
 
-		if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+		if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
 			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 						  FL_FULLBORDER, "fsc2: Tools" );
 		else
-		{
-			fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-			fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		}
+			fl_redraw_form( Tool_Box->Tools );
 
 		XFlush( fl_get_display( ) );
 	}
@@ -1036,7 +1021,7 @@ Var *f_sdelete( Var *v )
 
 		/* Delete the button */
 
-		if ( ! TEST_RUN )
+		if ( ! TEST_RUN && io->self )
 		{
 			fl_delete_object( io->self );
 			fl_free_object( io->self );
@@ -1051,10 +1036,6 @@ Var *f_sdelete( Var *v )
 			if ( ! TEST_RUN )
 			{
 				fl_hide_form( Tool_Box->Tools );
-
-				fl_delete_object( Tool_Box->background_box );
-				fl_free_object( Tool_Box->background_box );
-
 				fl_free_form( Tool_Box->Tools );
 			}
 
@@ -1079,15 +1060,11 @@ Var *f_sdelete( Var *v )
 
 	recreate_Tool_Box( );
 
-	if ( Tool_Box->x == 0 && Tool_Box->y == 0 )
+	if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
 		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2: Tools" );
 	else
-	{
-		fl_set_form_position( Tool_Box->Tools, Tool_Box->x, Tool_Box->y );
-		fl_show_form( Tool_Box->Tools, FL_PLACE_POSITION,
-					  FL_FULLBORDER, "fsc2: Tools" );
-	}
+		fl_redraw_form( Tool_Box->Tools );
 
 	XFlush( fl_get_display( ) );
 
@@ -1296,11 +1273,7 @@ void tools_clear( void )
 	}
 
 	if ( Tool_Box->Tools )
-	{
-		fl_delete_object( Tool_Box->background_box );
-		fl_free_object( Tool_Box->background_box );
 		fl_free_form( Tool_Box->Tools );
-	}
 
 	Tool_Box = T_free( Tool_Box );
 }
@@ -1311,30 +1284,17 @@ void tools_clear( void )
 
 static void recreate_Tool_Box( void )
 {
-    XWindowAttributes attr;
-    Window win, wdummy1, *wdummy2;
 	IOBJECT *io;
-    int temp;
 
 
 	if ( TEST_RUN )        /* just to make sure... */
 		return;
 
 	/* If the tool box already exists we've got to find out its position
-	   and then delete the form amnd all objects */
+	   and then delete all the objects */
 
 	if ( Tool_Box->Tools != NULL )
 	{
-		win = fl_show_form_window( Tool_Box->Tools );
-		XQueryTree( fl_get_display( ), win, &wdummy1, &win, &wdummy2, &temp );
-		XQueryTree( fl_get_display( ), win, &wdummy1, &win, &wdummy2, &temp );
-		XGetWindowAttributes( fl_get_display( ), win, &attr );
-
-		Tool_Box->x = attr.x;
-		Tool_Box->y = attr.y;
-
-		fl_hide_form( Tool_Box->Tools );
-
 		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
 			if ( io->self )
@@ -1343,13 +1303,9 @@ static void recreate_Tool_Box( void )
 				fl_free_object( io->self );
 				io->self = NULL;
 			}
+
 			io->group = NULL;
 		}
-		
-		fl_delete_object( Tool_Box->background_box );
-		fl_free_object( Tool_Box->background_box );
-
-		fl_free_form( Tool_Box->Tools );
 	}
 
 	/* Now calculate the new size of the tool box and create it */
@@ -1376,15 +1332,28 @@ static void recreate_Tool_Box( void )
 		Tool_Box->h += OBJ_HEIGHT;
 	}
 
-	Tool_Box->Tools = fl_bgn_form( FL_NO_BOX, Tool_Box->w, Tool_Box->h );
-	Tool_Box->background_box = fl_add_box( FL_UP_BOX, 0, 0,
-										   Tool_Box->w, Tool_Box->h, "" );
-
-	/* Finally re-populate the tool box */
+	if ( fl_form_is_visible ( Tool_Box->Tools ) )
+	{
+		fl_freeze_form( Tool_Box->Tools );
+		fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
+		Tool_Box->Tools->w = Tool_Box->w;
+		Tool_Box->Tools->h = Tool_Box->h;
+		Tool_Box->Tools->first->w = Tool_Box->w;
+		Tool_Box->Tools->first->h = Tool_Box->h;
+		fl_addto_form( Tool_Box->Tools );
+	}
+	else
+	{
+		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, Tool_Box->w, Tool_Box->h );
+		fl_freeze_form( Tool_Box->Tools );
+	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		append_object_to_form( io );
 	fl_end_form( );
+
+	fl_unfreeze_form( Tool_Box->Tools );
+
 }
 
 
@@ -1488,6 +1457,9 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_slider_precision( io->self,
 									prec <= 0.0 ? 0 : ( int ) lround( prec ) );
 			break;
+
+		default :
+			assert( 1 == 0 );
 	}
 
 	fl_set_object_gravity( io->self, FL_NoGravity, FL_NoGravity );
