@@ -176,32 +176,17 @@ void tds754a_do_pre_exp_checks( void )
 
 static void tds754a_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w, *wn;
+	WINDOW *w;
 
 
 	*is_start = *is_width = SET;
 
-	for ( w = tds754a.w; w != NULL; )
+	for ( w = tds754a.w; w != NULL; w = w->next )
 	{
-		if ( ! w->is_used )
-		{
-			if ( w == tds754a.w )
-				wn = tds754a.w = w->next;
-			else
-				wn = w->prev->next = w->next;
-
-			T_free( w );
-			tds754a.num_windows--;
-			w = wn;
-			continue;
-		}
-
 		if ( ! w->is_start )
 			*is_start = UNSET;
 		if ( ! w->is_width )
 			*is_width = UNSET;
-
-		w = w->next;
 	}
 }
 

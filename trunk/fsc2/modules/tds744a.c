@@ -261,8 +261,6 @@ Var *digitizer_define_window( Var *v )
 		w->width = win_width;
 	w->is_width = is_win_width;
 
-	w->is_used = UNSET;
-
 	return vars_push( INT_VAR, w->num );
 }
 
@@ -739,7 +737,7 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		i++;
 
-		if ( ( w = tds744a.w ) == NULL )
+		if ( tds744a.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -747,15 +745,8 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window_number" );
 
-		while ( w != NULL )
-		{
-			if ( w->num == win_num )
-			{
-				w->is_used = SET;
-				break;
-			}
-			w = w->next;
-		}
+		for ( w = tds744a.w; w != NULL && w->num != win_num; w = w->next )
+			;
 
 		if ( w == NULL )
 		{
@@ -837,7 +828,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		j++;
 
-		if ( ( w = tds744a.w ) == NULL )
+		if ( tds744a.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -845,15 +836,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window_number" );
 
-		while ( w != NULL )
-		{
-			if ( w->num == win_num )
-			{
-				w->is_used = SET;
-				break;
-			}
-			w = w->next;
-		}
+		for ( w = tds744a.w; w != NULL && w->num != win_num; w = w->next )
+			;
 
 		if ( w == NULL )
 		{
@@ -948,7 +932,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 		i++;
 
-		if ( ( w = tds744a.w ) == NULL )
+		if ( tds744a.w == NULL )
 		{
 			print( FATAL, "No measurement windows have been defined.\n" );
 			THROW( EXCEPTION );
@@ -956,15 +940,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 		win_num = get_strict_long( v, "window number" );
 
-		while ( w != NULL )
-		{
-			if ( w->num == win_num )
-			{
-				w->is_used = SET;
-				break;
-			}
-			w = w->next;
-		}
+		for ( w = tds744a.w; w != NULL && w->num != win_num; w = w->next )
+			;
 
 		if ( w == NULL )
 		{

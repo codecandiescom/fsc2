@@ -144,40 +144,25 @@ void tds520_do_pre_exp_checks( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Removes unused windows and checks if for all the used windows */
-/* a width is set - this is returned to the calling function     */
-/*---------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Checks if for all the used windows a width is set - */
+/* this is returned to the calling function            */
+/*-----------------------------------------------------*/
 
 static void tds520_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w, *wn;
+	WINDOW *w;
 
 
 	*is_start = *is_width = SET;
 
-	for ( w = tds520.w; w != NULL; )
+	for ( w = tds520.w; w != NULL; w = w->next )
 	{
-		if ( ! w->is_used )
-		{
-			if ( w == tds520.w )
-				wn = tds520.w = w->next;
-			else
-				wn = w->prev->next = w->next;
-
-			T_free( w );
-			tds520.num_windows--;
-			w = wn;
-			continue;
-		}
-
 		if ( ! w->is_start )
 			*is_start = UNSET;
 
 		if ( ! w->is_width )
 			*is_width = UNSET;
-
-		w = w->next;
 	}
 }
 

@@ -176,32 +176,17 @@ void tds520c_do_pre_exp_checks( void )
 
 static void tds520c_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w, *wn;
+	WINDOW *w;
 
 
 	*is_start = *is_width = SET;
 
-	for ( w = tds520c.w; w != NULL; )
+	for ( w = tds520c.w; w != NULL; w = w->next )
 	{
-		if ( ! w->is_used )
-		{
-			if ( w == tds520c.w )
-				wn = tds520c.w = w->next;
-			else
-				wn = w->prev->next = w->next;
-
-			T_free( w );
-			tds520c.num_windows--;
-			w = wn;
-			continue;
-		}
-
 		if ( ! w->is_start )
 			*is_start = UNSET;
 		if ( ! w->is_width )
 			*is_width = UNSET;
-
-		w = w->next;
 	}
 }
 

@@ -176,33 +176,18 @@ void lecroy9400_do_pre_exp_checks( void )
 
 static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w, *wn;
+	WINDOW *w;
 
 
 	*is_start = *is_width = SET;
 
-	for ( w = lecroy9400.w; w != NULL; )
+	for ( w = lecroy9400.w; w != NULL; w = w->next )
 	{
-		if ( ! w->is_used )
-		{
-			if ( w == lecroy9400.w )
-				wn = lecroy9400.w = w->next;
-			else
-				wn = w->prev->next = w->next;
-
-			T_free( w );
-			lecroy9400.num_windows--;
-			w = wn;
-			continue;
-		}
-
 		if ( ! w->is_start )
 			*is_start = UNSET;
 
 		if ( ! w->is_width )
 			*is_width = UNSET;
-
-		w = w->next;
 	}
 }
 

@@ -68,11 +68,10 @@
 
 
 /* Structure for description of a `window' on the digitizer, made up from the
-   area between the pair of cursors */
+   area between a pair of cursors */
 
 typedef struct _W {
 	long num;                   /* number of window                          */
-	bool is_used;               /* flag, set when window has been used		 */
 	double start;               /* start of window (in time units)			 */
 	double width;               /* width of window (in time units)			 */
 	long start_num;				/* first point of window                     */
