@@ -41,9 +41,7 @@
 
 #define YY_INPUT( buf, result, max_size )                   \
 {                                                           \
-	int c;                                                  \
-	while ( ( c = fgetc( expin ) ) == EOF )                 \
-		/* empty */ ;                                       \
+	int c = fgetc( dexpin );                                \
 	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 );  \
 }
 
