@@ -291,7 +291,13 @@ The @i{y}-point number (coordinate) of the data point or the coordinate
 for the first data point of an data array (arrays are always drawn to
 the right from the specified coordinate, i.e.@: in @i{x}-direction).
 @item
-The data point or a (one-dimensional) array of data.
+The data point or a 1-dimensional or 2-dimensional array of data. If a
+2-dimensional array is passed to the function, the first sub-array is
+drawn at the coordinates passed to the function, while for each of the
+following sub-arrays the @i{y}-point is incremented by 1. Not yet
+defined sub-arrays are skipped (but the @i{y}-position is incremented),
+at the row where this (undefined) sub-array would have appeared nothing
+is drawn.
 @item
 Number of the curve or data set the data are to be displayed belong
 to. If missing it defaults to the first curve, 1. If there is more than
