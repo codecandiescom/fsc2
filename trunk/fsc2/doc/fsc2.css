@@ -22,7 +22,7 @@
 --!>
 
 
-body        {  margin :           0%;
+body        { margin :            0%;
               padding :           0%;
             }
 
@@ -42,11 +42,11 @@ body        {  margin :           0%;
               z-level :           1;
             }
 
-code        { font-family :       monospace;
+code        { font-family :       Lucidatypewriter, monospace;
               font-weight :       bold;
             }
 
-samp        { font-family :       monospace;
+samp        { font-family :       Lucidatypewriter, monospace;
               font-weight :       bold;
             }
 
