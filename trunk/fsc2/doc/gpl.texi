@@ -1,7 +1,7 @@
 @c $Id$
 
 @node Copying, , Reserved Words, Top
-@appendix  Copying
+@appendix Copying
 @center @strong{GNU GENERAL PUBLIC LICENSE}
 @center Version 2, June 1991
 
@@ -15,7 +15,7 @@ Everyone is permitted to copy and distribute verbatim copies
 of this license document, but changing it is not allowed.
 @end display
 
-@unnumberedsec Preamble
+@subheading Preamble
 
   The licenses for most software are designed to take away your
 freedom to share and change it.  By contrast, the GNU General Public
@@ -65,12 +65,7 @@ patent must be licensed for everyone's free use or not licensed at all.
   The precise terms and conditions for copying, distribution and
 modification follow.
 
-@iftex
-@unnumberedsec Terms and Conditions for Copying, Distribution and Modification
-@end iftex
-@ifinfo
-@center Terms and Conditions for Copying, Distribution and Modification
-@end ifinfo
+@subheading Terms and Conditions for Copying, Distribution and Modification
 
 @enumerate 0
 @item
@@ -328,7 +323,7 @@ POSSIBILITY OF SUCH DAMAGES.
 @end ifinfo
 
 @page
-@unnumberedsec Appendix: How to Apply These Terms to Your New Programs
+@subheading How to Apply These Terms to Your New Programs
 
   If you develop a new program, and you want it to be of the greatest
 possible use to the public, the best way to achieve this is to make it

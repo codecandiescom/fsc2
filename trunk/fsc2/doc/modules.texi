@@ -1438,7 +1438,7 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 @end example
 
 
-@subsection @code{bool} type
+@subsection The @code{bool} type
 @cindex bool type
 
 @acronym{fsc2} already has a @code{typedef} for the @code{bool} type,

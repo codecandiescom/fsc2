@@ -34,6 +34,7 @@
 # the `--debug' option when making a bug report.
 
 # This string is expanded by rcs automatically when this file is checked out.
+
 rcs_revision='$Revision$'
 rcs_version=`set - $rcs_revision; echo $2`
 program=`echo $0 | sed -e 's!.*/!!'`
@@ -81,6 +82,7 @@ general questions and discussion to <help-texinfo@gnu.org>."
 # Initialize variables for option overriding and otherwise.
 # Don't use `unset' since old bourne shells don't have this command.
 # Instead, assign them an empty value.
+
 escape='\'
 batch=false     # eval for batch mode
 clean=
@@ -100,6 +102,7 @@ orig_pwd=`pwd`
 
 # Systems which define $COMSPEC or $ComSpec use semicolons to separate
 # directories in TEXINPUTS.
+
 if test -n "$COMSPEC$ComSpec"; then
   path_sep=";"
 else
@@ -107,8 +110,11 @@ else
 fi
 
 # Save this so we can construct a new TEXINPUTS path for each file.
+
 TEXINPUTS_orig="$TEXINPUTS"
+
 # Unfortunately makeindex does not read TEXINPUTS.
+
 INDEXSTYLE_orig="$INDEXSTYLE"
 export TEXINPUTS INDEXSTYLE
 
@@ -119,14 +125,17 @@ export TEXINPUTS INDEXSTYLE
 # Use ${1+"$@"} rather than "$@" because Digital Unix and Ultrix 4.3
 # still expand "$@" to a single argument (the empty string) rather
 # than nothing at all.
+
 arg_sep="$$--$$"
 set dummy ${1+"$@"} "$arg_sep"; shift
 
 # 
 # Parse command line arguments.
+
 while test x"$1" != x"$arg_sep"; do
 
   # Handle --option=value by splitting apart and putting back on argv.
+
   case "$1" in
     --*=*)
       opt=`echo "$1" | sed -e 's/=.*//'`
@@ -137,9 +146,12 @@ while test x"$1" != x"$arg_sep"; do
   esac
 
   # This recognizes --quark as --quiet.  So what.
+
   case "$1" in
     -@ ) escape=@;;
+
     # Silently and without documentation accept -b and --b[atch] as synonyms.
+
     -b | --b*) batch=eval;;
     -q | -s | --q* | --s*) quiet=t; batch=eval;;
     -c | --c*) clean=t;;
@@ -157,6 +169,7 @@ while test x"$1" != x"$arg_sep"; do
 $1";;
     -v | --vers*) echo "$version"; exit 0;;
     -V | --verb*) verbose=echo;;
+
     --) # What remains are not options.
       shift
       while test x"$1" != x"$arg_sep"; do
@@ -172,10 +185,13 @@ $1";;
    esac
    shift
 done
+
 # Pop the token
+
 shift
 
 # Interpret remaining command line args as filenames.
+
 if test $# = 0; then
   echo "$0: Missing file arguments." >&2
   echo "$0: Try \`--help' for more information." >&2
@@ -183,15 +199,18 @@ if test $# = 0; then
 fi
 
 # Prepare the temporary directory.  Remove it at exit, unless debugging.
+
 if test -z "$debug"; then
   trap "cd / && rm -rf $tmpdir" 0 1 2 3 7 13 15
 fi
 
 # Create the temporary directory with strict rights
+
 (umask 077 && mkdir $tmpdir) || exit 1
 
 # Prepare the tools we might need.  This may be extra work in some
 # cases, but improves the readibility of the script.
+
 utildir=$tmpdir/utils
 mkdir $utildir || exit 1
 
@@ -202,6 +221,7 @@ mkdir $utildir || exit 1
 # don't comment @macro/@end macro so that makeinfo does propagate
 # them.  Unfortunately makeinfo --iftex --no-ifhtml --no-ifinfo
 # doesn't work well enough (yet) to use that, so work around with sed.
+
 comment_iftex_sed=$utildir/comment.sed
 cat <<EOF >$comment_iftex_sed
 /^@tex/,/^@end tex/{
@@ -222,7 +242,9 @@ cat <<EOF >$comment_iftex_sed
   d
 }
 EOF
+
 # Uncommenting is simple: Remove any leading `@c texi2dvi'.
+
 uncomment_iftex_sed=$utildir/uncomment.sed
 cat <<EOF >$uncomment_iftex_sed
 s/^@c texi2dvi//
@@ -231,20 +253,27 @@ EOF
 # A shell script that computes the list of xref files.
 # Takes the filename (without extension) of which we look for xref
 # files as argument.  The index files must be reported last.
+
 get_xref_files=$utildir/get_xref.sh
 cat <<\EOF >$get_xref_files
+
 #! /bin/sh
 
 # Get list of xref files (indexes, tables and lists).
 # Find all files having root filename with a two-letter extension,
 # saves the ones that are really Texinfo-related files.  .?o? catches
 # LaTeX tables and lists.
+
 for this_file in "$1".?o? "$1".aux "$1".?? "$1".idx; do
+
   # If file is empty, skip it.
+
   test -s "$this_file" || continue
+
   # If the file is not suitable to be an index or xref file, don't
   # process it.  The file can't be if its first character is not a
   # backslash or single quote.
+
   first_character=`sed -n '1s/^\(.\).*$/\1/p;q' $this_file`
   if test "x$first_character" = "x\\" \
      || test "x$first_character" = "x'"; then
@@ -264,6 +293,7 @@ chmod 500 $get_xref_files
 # 5 tools output (turned off by --quiet)
 
 # Tools' output.  If quiet, discard, else redirect to the message flow.
+
 if test "$quiet" = t; then
   exec 5>/dev/null
 else
@@ -271,6 +301,7 @@ else
 fi
 
 # Enable tracing
+
 test "$debug" = t && set -x
 
 # 
@@ -281,6 +312,7 @@ for command_line_filename in ${1+"$@"}; do
 
   # If the COMMAND_LINE_FILENAME is not absolute (e.g., --debug.tex),
   # prepend `./' in order to avoid that the tools take it as an option.
+
   echo "$command_line_filename" | egrep '^(/|[A-z]:/)' >/dev/null \
   || command_line_filename="./$command_line_filename"
 
@@ -288,6 +320,7 @@ for command_line_filename in ${1+"$@"}; do
   # though the user may be able to reenter a valid filename at the tex
   # prompt (assuming they're attending the terminal), this script won't
   # be able to find the right xref files and so forth.
+
   if test ! -r "$command_line_filename"; then
     echo "$0: Could not read $command_line_filename, skipping." >&2
     continue
@@ -296,30 +329,38 @@ for command_line_filename in ${1+"$@"}; do
   # Get the name of the current directory.  We want the full path
   # because in clean mode we are in tmp, in which case a relative
   # path has no meaning.
+
   filename_dir=`echo $command_line_filename | sed 's!/[^/]*$!!;s!^$!.!'`
   filename_dir=`cd "$filename_dir" >/dev/null && pwd`
 
   # Strip directory part but leave extension.
+
   filename_ext=`basename "$command_line_filename"`
+
   # Strip extension.
+
   filename_noext=`echo "$filename_ext" | sed 's/\.[^.]*$//'`
   ext=`echo "$filename_ext" | sed 's/^.*\.//'`
 
   # _src.  Use same basename since we want to generate aux files with
   # the same basename as the manual.  If --expand, then output the
   # macro-expanded file to here, else copy the original file.
+
   tmpdir_src=$tmpdir/src
   filename_src=$tmpdir_src/$filename_noext.$ext
 
   # _xtr.  The file with the user's extra commands.
+
   tmpdir_xtr=$tmpdir/xtr
   filename_xtr=$tmpdir_xtr/$filename_noext.$ext
 
   # _bak.  Copies of the previous xref files (another round is run if
   # they differ from the new one).
+
   tmpdir_bak=$tmpdir/bak
 
   # Make all those directories and give up if we can't succeed.
+
   mkdir $tmpdir_src $tmpdir_xtr $tmpdir_bak || exit 1
 
   # Source file might include additional sources.  Put `.' and
@@ -328,6 +369,7 @@ for command_line_filename in ${1+"$@"}; do
   # etc. files in ${directory} don't get used in preference to fresher
   # files in `.'.  Include orig_pwd in case we are in clean mode, where
   # we've cd'd to a temp directory.
+
   common=".$path_sep$orig_pwd$path_sep$filename_dir$path_sep$txincludes$path_sep"
    TEXINPUTS="$common$TEXINPUTS_orig"
   INDEXSTYLE="$common$INDEXSTYLE_orig"
@@ -335,6 +377,7 @@ for command_line_filename in ${1+"$@"}; do
   # If the user explicitly specified the language, use that.
   # Otherwise, if the first line is \input texinfo, assume it's texinfo.
   # Otherwise, guess from the file extension.
+
   if test -n "$set_language"; then
     language=$set_language
   elif sed 1q "$command_line_filename" | fgrep 'input texinfo' >/dev/null; then
@@ -345,10 +388,13 @@ for command_line_filename in ${1+"$@"}; do
 
   # Get the type of the file (latex or texinfo) from the given language
   # we just guessed, or from the file extension if not set yet.
+
   case ${language:-$filename_ext} in
     [lL]a[tT]e[xX] | *.ltx | *.tex)
+
       # Assume a LaTeX file.  LaTeX needs bibtex and uses latex for
       # compilation.  No makeinfo.
+
       bibtex=${BIBTEX:-bibtex}
       makeinfo= # no point in running makeinfo on latex source.
       texindex=${MAKEINDEX:-makeindex}
@@ -361,6 +407,7 @@ for command_line_filename in ${1+"$@"}; do
 
     *)
       # Assume a Texinfo file.  Texinfo files need makeinfo, texindex and tex.
+
       bibtex=
       texindex=${TEXINDEX:-texindex}
       if test $oformat = dvi; then
@@ -368,19 +415,25 @@ for command_line_filename in ${1+"$@"}; do
       else
         tex=${PDFTEX:-pdftex}
       fi
+
       # Unless required by the user, makeinfo expansion is wanted only
       # if texinfo.tex is too old.
+
       if test "$expand" = t; then
         makeinfo=${MAKEINFO:-makeinfo}
       else
+
         # Check if texinfo.tex performs macro expansion by looking for
         # its version.  The version is a date of the form YEAR-MO-DA.
         # We don't need to use [0-9] to match the digits since anyway
         # the comparison with $txiprereq, a number, will fail with non
         # digits.
+
         txiversion_tex=txiversion.tex
         echo '\input texinfo.tex @bye' >$tmpdir/$txiversion_tex
+
         # Run in the tmpdir to avoid leaving files.
+
         eval `cd $tmpdir >/dev/null \
                     && $tex $txiversion_tex 2>/dev/null \
 | sed -n 's/^.*\[\(.*\)version \(....\)-\(..\)-\(..\).*$/txiformat=\1 txiversion="\2\3\4"/p'`
@@ -402,6 +455,7 @@ for command_line_filename in ${1+"$@"}; do
   # Always use `end' footnote style, since the `separate' style
   #   generates different output (arguably this is a bug in -E).
   # Discard main info output, the user asked to run TeX, not makeinfo.
+
   if test -n "$makeinfo"; then
     $verbose "Macro-expanding $command_line_filename to $filename_src ..."
     sed -f $comment_iftex_sed "$command_line_filename" \
@@ -412,6 +466,7 @@ for command_line_filename in ${1+"$@"}; do
   fi
 
   # If makeinfo failed (or was not even run), use the original file as input.
+
   if test $? -ne 0 \
      || test ! -r "$filename_src"; then
     $verbose "Reverting to $command_line_filename ..."
@@ -419,6 +474,7 @@ for command_line_filename in ${1+"$@"}; do
   fi
 
   # Used most commonly for @finalout, @smallbook, etc.
+
   if test -n "$textra"; then
     $verbose "Inserting extra commands: $textra"
     sed '/^@setfilename/a\
@@ -427,6 +483,7 @@ for command_line_filename in ${1+"$@"}; do
   fi
 
   # If clean mode was specified, then move to the temporary directory.
+
   if test "$clean" = t; then
     $verbose "cd $tmpdir_src"
 	if [ $oformat = "pdf" ]; then
@@ -441,6 +498,7 @@ for command_line_filename in ${1+"$@"}; do
     orig_xref_files=`$get_xref_files "$filename_noext"`
 
     # Save copies of originals for later comparison.
+
     if test -n "$orig_xref_files"; then
       $verbose "Backing up xref files: `echo $orig_xref_files | sed 's|\./||g'`"
       cp $orig_xref_files $tmpdir_bak
@@ -462,6 +520,7 @@ for command_line_filename in ${1+"$@"}; do
     # can be several AUX (if there are \include's), but a single LOG,
     # looking for missing citations in LOG is easier, though we take
     # the risk to match false messages.
+
     if test -n "$bibtex" \
        && test -r "$filename_noext.aux" \
        && test -r "$filename_noext.log" \
@@ -481,15 +540,18 @@ for command_line_filename in ${1+"$@"}; do
     # What we'll run texindex on -- exclude non-index files.
     # Since we know index files are last, it is correct to remove everything
     # before .aux and .?o?.
+
     index_files=`echo "$orig_xref_files" \
                  | sed "s!.*\.aux!!g;
                         s!./$filename_noext\..o.!!g;
                         s/^[ ]*//;s/[ ]*$//"`
+
     # Run texindex (or makeindex) on current index files.  If they
     # already exist, and after running TeX a first time the index
     # files don't change, then there's no reason to run TeX again.
     # But we won't know that if the index files are out of date or
     # nonexistent.
+
     if test -n "$texindex" && test -n "$index_files"; then
       $verbose "Running $texindex $index_files ..."
       if $texindex $index_files 2>&5 1>&2; then :; else
@@ -501,6 +563,7 @@ for command_line_filename in ${1+"$@"}; do
     # Finally, run TeX.
     # Prevent $ESCAPE from being interpreted by the shell if it happens
     # to be `/'.
+
     $batch tex_args="\\${escape}nonstopmode\ \\${escape}input"
     $verbose "Running $cmd ..."
     cmd="$tex $tex_args $filename_input"
@@ -512,8 +575,8 @@ for command_line_filename in ${1+"$@"}; do
       exit 1
     fi
 
-
     # Decide if looping again is needed.
+
     finished=t
 
     # LaTeX (and the package changebar) report in the LOG file if it
@@ -521,29 +584,37 @@ for command_line_filename in ${1+"$@"}; do
     # subdirs, since texi2dvi does not try to compare xref files in
     # subdirs.  Performing xref files test is still good since LaTeX
     # does not report changes in xref files.
+
     if fgrep "Rerun to get" "$filename_noext.log" >/dev/null 2>&1; then
       finished=
     fi
 
     # Check if xref files changed.
+
     new_xref_files=`$get_xref_files "$filename_noext"`
     $verbose "Original xref files = `echo $orig_xref_files | sed 's|\./||g'`"
     $verbose "New xref files      = `echo $new_xref_files | sed 's|\./||g'`"
 
     # If old and new lists don't at least have the same file list,
     # then one file or another has definitely changed.
+
     test "x$orig_xref_files" != "x$new_xref_files" && finished=
 
     # File list is the same.  We must compare each file until we find
     # a difference.
+
     if test -n "$finished"; then
       for this_file in $new_xref_files; do
         $verbose "Comparing xref file `echo $this_file | sed 's|\./||g'` ..."
+
         # cmp -s returns nonzero exit status if files differ.
+
         if cmp -s "$this_file" "$tmpdir_bak/$this_file"; then :; else
+
           # We only need to keep comparing until we find one that
           # differs, because we'll have to run texindex & tex again no
           # matter how many more there might be.
+
           finished=
           $verbose "xref file `echo $this_file | sed 's|\./||g'` differed ..."
           test "$debug" = t && diff -c "$tmpdir_bak/$this_file" "$this_file"
@@ -553,6 +624,7 @@ for command_line_filename in ${1+"$@"}; do
     fi
 
     # If finished, exit the loop, else rerun the loop.
+
     test -n "$finished" && break
   done
 
@@ -562,6 +634,7 @@ for command_line_filename in ${1+"$@"}; do
   # We also return to the original directory so that
   # - the next file is processed in correct conditions
   # - the temporary file can be removed
+
   if test -n "$clean"; then
     $verbose "Copying $oformat file from `pwd` to $orig_pwd"
     cp -p "./$filename_noext.$oformat" "$orig_pwd"
@@ -570,6 +643,7 @@ for command_line_filename in ${1+"$@"}; do
   fi
 
   # Remove temporary files.
+
   if test "x$debug" = "x"; then
     $verbose "Removing $tmpdir_src $tmpdir_xtr $tmpdir_bak ..."
     cd /
