@@ -116,9 +116,13 @@ Var *var_list = NULL;
 Var *Var_Stack = NULL;
 AStack *Arr_Stack = NULL;
 Var *Cur_Arr = NULL;
+
 ASSIGNMENTS assignment[ PULSER_CHANNEL_PHASE_Y + 1 ];
+
 Phase_Sequence PSeq[ MAX_PHASE_SEQ_LEN ];
 Acquisition_Sequence ASeq[ 2 ];
+
+Pulse *Plist;
 
 #else
 
@@ -135,6 +139,8 @@ extern ASSIGNMENTS assignment[ ];
 
 extern Phase_Sequence PSeq[ ];
 extern Acquisition_Sequence ASeq[ ];
+
+extern Pulse *Plist;
 
 
 #endif
