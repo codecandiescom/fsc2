@@ -47,10 +47,10 @@ static int rulbus_num_racks = 0;
 
 static int set_dev_file( const char *name );
 static int rack_addr( int addr );
-static int rack_name( char *name );
+static int rack_name( const char *name );
 static int setup_rack( void );
 static int finalize_rack( void );
-static int new_card( int type, char *name );
+static int new_card( int type, const char *name );
 static int set_defaults( RULBUS_CARD_LIST *card );
 static int set_rb8509_defaults( RULBUS_CARD_LIST *card );
 static int set_rb8510_defaults( RULBUS_CARD_LIST *card );
@@ -234,7 +234,7 @@ static int rack_addr( int addr )
  * Function called for rack name assignments
  *-------------------------------------------*/
 
-static int rack_name( char *name )
+static int rack_name( const char *name )
 {
 	char **rns;
 	int i;
@@ -332,7 +332,7 @@ static int finalize_rack( void )
  * Function to be called when a new card is found
  *------------------------------------------------*/
 
-static int new_card( int type, char *name )
+static int new_card( int type, const char *name )
 {
 	RULBUS_CARD_LIST *tmp;
 	int i;
