@@ -136,12 +136,11 @@ void device_add( const char *name )
 	   a path but the names in `Devices' are just names without a path
 	   compare only after stripping off the path */
 
-	if ( real_name != NULL )
-		search_name = strip_path( real_name );
+	search_name = real_name != NULL ? strip_path( real_name ) : NULL;
 
 	for ( dl = Device_Name_List; dl != NULL; dl = dl->next )
 		if ( ! strcmp( dl->name, dev_name ) ||
-			 ( real_name != NULL && ! strcmp( dl->name, search_name ) ) )
+			 ( search_name != NULL && ! strcmp( dl->name, search_name ) ) )
 			break;
 
 	if ( dl == NULL )
