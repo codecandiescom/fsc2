@@ -164,6 +164,8 @@ typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
+    char *old_d;
+    char *new_d;
 } CHANNEL;
 
 

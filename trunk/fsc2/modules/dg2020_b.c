@@ -144,6 +144,7 @@ int dg2020_b_init_hook( void )
 		dg2020.channel[ i ].self = i;
 		dg2020.channel[ i ].function = NULL;
 		dg2020.channel[ i ].needs_update = UNSET;
+        dg2020.channel[ i ].old_d = dg2020.channel[ i ].new_d = NULL;
 	}
 
 	for ( i = 0; i < 2; i++ )

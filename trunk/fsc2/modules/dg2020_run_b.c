@@ -358,12 +358,13 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	   its function send a warning and mark the function as useless */
 
 	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses =
+		p->function->pulses = PULSE_PP
 					  T_realloc( p->function->pulses,
-								 p->function->num_pulses * sizeof( PULSE * ) );
+								 p->function->num_pulses *
+								 sizeof *p->function->pulses );
 	else
 	{
-		p->function->pulses = T_free( p->function->pulses );
+		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
 			   "pulses are unused.\n", Function_Names[ p->function->self ] );
@@ -382,7 +383,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 	/* Special care has to be taken if this is the very last pulse... */
 
 	if ( p == dg2020_Pulses && p->next == NULL )
-		dg2020_Pulses = T_free( dg2020_Pulses );
+		dg2020_Pulses = PULSE_P T_free( dg2020_Pulses );
 	else
 		T_free( p );
 
@@ -435,8 +436,8 @@ void dg2020_commit( FUNCTION *f, bool flag )
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
 	{
-		f->channel[ i ]->old = T_calloc( 2 * dg2020.max_seq_len, 1 );
-		f->channel[ i ]->new = f->channel[ i ]->old + dg2020.max_seq_len;
+		f->channel[ i ]->old_d = CHAR_P T_calloc( 2 * dg2020.max_seq_len, 1 );
+		f->channel[ i ]->new_d = f->channel[ i ]->old_d + dg2020.max_seq_len;
 	}
 
 	/* Now loop over all pulses and pick the ones that need changes */
@@ -462,11 +463,11 @@ void dg2020_commit( FUNCTION *f, bool flag )
 				continue;
 
 			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
-				dg2020_set( p->channel[ j ]->old,
+				dg2020_set( p->channel[ j ]->old_d,
 							p->is_old_pos ? p->old_pos : p->pos,
 							p->is_old_len ? p->old_len : p->len, f->delay );
 			if ( p->is_pos && p->is_len && p->len != 0 )
-				dg2020_set( p->channel[ j ]->new, p->pos, p->len, f->delay );
+				dg2020_set( p->channel[ j ]->new_d, p->pos, p->len, f->delay );
 
 			p->channel[ j ]->needs_update = SET;
 		}
@@ -488,15 +489,15 @@ void dg2020_commit( FUNCTION *f, bool flag )
 	{
 		if ( f->channel[ i ]->needs_update )
 		{
-			while ( ( what = dg2020_diff( f->channel[ i ]->old,
-										  f->channel[ i ]->new,
+			while ( ( what = dg2020_diff( f->channel[ i ]->old_d,
+										  f->channel[ i ]->new_d,
 										  &start, &len ) ) != 0 )
 				dg2020_set_constant( f->channel[ i ]->self, start, len,
 								   what == -1 ? type_OFF( f ) : type_ON( f ) );
 		}
 
 		f->channel[ i ]->needs_update = UNSET;
-		T_free( f->channel[ i ]->old );
+		T_free( f->channel[ i ]->old_d );
 	}
 }
 
