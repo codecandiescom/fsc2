@@ -382,7 +382,7 @@ get_long( var, "baz" );
 @noindent
 the following warning message will be printed:
 @example
-foo.edl:17: XYZ: Floating point number used as bar in abc().
+foo.edl:17: XYZ: Floating point number used as baz in abc().
 @end example
 
 If, on the other hand, you expect a floating point number but are
