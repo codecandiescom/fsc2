@@ -67,7 +67,7 @@ Var *gaussmeter_wait( Var *v );
 static double er035m_get_field( void );
 static int er035m_get_resolution( void );
 static void er035m_set_resolution( int res_index );
-static bool er035_command( const char *cmd );
+static bool er035m_command( const char *cmd );
 static void er035m_failure( void );
 
 
@@ -604,7 +604,7 @@ Var *gaussmeter_command( Var *v )
 		TRY
 		{
 			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			er035_command( cmd );
+			er035m_command( cmd );
 			T_free( cmd );
 			TRY_SUCCESS;
 		}
@@ -765,9 +765,9 @@ static void er035m_set_resolution( int res_index )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static bool er035_command( const char *cmd )
+static bool er035m_command( const char *cmd )
 {
-	if ( gpib_write( er035.device, cmd, strlen( cmd ) ) == FAILURE )
+	if ( gpib_write( er035m.device, cmd, strlen( cmd ) ) == FAILURE )
 		er035m_failure( );
 
 	return OK;
