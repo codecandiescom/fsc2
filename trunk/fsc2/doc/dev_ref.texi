@@ -308,7 +308,8 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Description}: EG&G PARC box-car integrator - only download of
-already measured curves is currently supported.
+already measured curves and starting and stopping of acquisitions are
+currently supported.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
