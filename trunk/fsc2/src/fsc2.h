@@ -39,7 +39,6 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
-#include <assert.h>
 #include <math.h>
 #include <ctype.h>
 #include <errno.h>
