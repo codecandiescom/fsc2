@@ -69,12 +69,12 @@ static void comm_sig_handler( int signo )
 	{
 		case BUSY_SIGNAL :
 			is_busy = SET;
-			signal( BUSY_SIGNAL, comm_sig_handler );
 			break;
 
 		case UNBUSY_SIGNAL :
 			is_busy = UNSET;
-			signal( UNBUSY_SIGNAL, comm_sig_handler );
 			break;
 	}
+
+	signal( signo, comm_sig_handler );
 }
