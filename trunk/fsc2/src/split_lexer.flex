@@ -221,7 +221,7 @@ bool section_parser( int section )
 					break;
 	
 				case EXPERIMENT_SECTION :
-					section = primary_experiment_parser( splitin );
+					section = experiment_parser( splitin );
 					break;
 	
 				default :              /* this should never happen, but ... */

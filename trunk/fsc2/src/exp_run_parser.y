@@ -11,12 +11,12 @@
 
 #include "fsc2.h"
 
-extern int prim_exp_runlex( void );
+extern int exp_runlex( void );
 
 /* locally used functions */
 
-int prim_exp_runparse( void );
-int prim_exp_runerror( const char *s );
+int exp_runparse( void );
+int exp_runerror( const char *s );
 
 static Var *CV;
 
@@ -24,7 +24,7 @@ static Var *CV;
 
 
 /* the following union and the token definitions MUST be identical to the ones
-   in `prim_exp.h' and `condition_parser.y' ! */
+   in `exp.h' and `condition_parser.y' ! */
 
 %union {
 	long   lval;
@@ -195,7 +195,7 @@ exprs:   expr                      { }
 %%
 
 
-int prim_exp_runerror ( const char *s )
+int exp_runerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 

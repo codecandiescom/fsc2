@@ -12,7 +12,7 @@
 
 #define SHMMNI 128
 
-extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
+extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
@@ -34,6 +34,7 @@ static void do_measurement( void );
 
 static bool child_is_ready;
 static volatile int quitting;
+
 
 
 /*-------------------------------------------------------------------*/
@@ -567,7 +568,7 @@ void do_measurement( void )
 					break;
 
 				default :
-					prim_exp_runparse( );           /* (re)start the parser */
+					exp_runparse( );               /* (re)start the parser */
 					break;
 			}
 		}

@@ -2,12 +2,12 @@
   $Id$
 */
 
-#if ! defined PRIM_EXP_HEADER
-#define PRIM_EXP_HEADER
+#if ! defined EXP_HEADER
+#define EXP_HEADER
 
 
-/* this typedef MUST be identical to the YYSTYPE union defined in
-   `prim_exp_run_parser.h' which in turn results from `prim_exp_parser.y' !! */
+/* This typedef MUST be identical to the YYSTYPE union defined in
+   `exp_run_parser.h' which in turn results from `exp_run_parser.y' !! */
 
 typedef union {
 		long   lval;
@@ -103,8 +103,8 @@ typedef struct PT_ {
 
 void store_exp( FILE *in );
 void forget_prg( void );
-void prim_exp_run( void );
-int prim_exp_runlex( void );
+void exp_run( void );
+int exp_runlex( void );
 int conditionlex( void );
 bool test_condition( Prg_Token *cur );
 void get_max_repeat_count( Prg_Token *cur );
@@ -113,4 +113,4 @@ bool test_for_cond( Prg_Token *cur );
 void save_restore_variables( bool flag );
 
 
-#endif   /* ! PRIM_EXP_HEADER */
+#endif   /* ! EXP_HEADER */

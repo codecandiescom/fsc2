@@ -13,26 +13,26 @@
 
 static bool in_for_lex = UNSET;
 
-extern int prim_exp_runparse( void );     /* from prim_exp_run_parser.y */
+extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
 
 
-Token_Val prim_exp_val;                   /* exported to prim_exp_lexer.flex */
+Token_Val exp_val;                        /* exported to exp_lexer.flex */
 
-extern int prim_explex( void );           /* from prim_exp_lexer.flex */
-extern FILE *prim_expin;                  /* from prim_exp_lexer.flex */
-extern Token_Val prim_exp_runlval;        /* from prim_exp__run_parser.y */
+extern int explex( void );                /* from exp_lexer.flex */
+extern FILE *expin;                       /* from exp_lexer.flex */
+extern Token_Val exp_runlval;             /* from exp__run_parser.y */
 extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern char *Fname;
 extern long Lc;
 
-extern void prim_exprestart( FILE *prim_expin );
+extern void exprestart( FILE *expin );
 
 
 /* local functions */
 
-static void prim_loop_setup( void );
+static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
 
@@ -71,12 +71,12 @@ void store_exp( FILE *in )
 
 	/* set input file */
 
-	prim_expin = in;
+	expin = in;
 
 	/* Keep the lexer happy... */
 
 	if ( is_restart )
-	    prim_exprestart( prim_expin );
+	    exprestart( expin );
 	else
 		 is_restart = SET;
 
@@ -84,7 +84,7 @@ void store_exp( FILE *in )
 
 	/* get and store all tokens */
 
-	while ( ( ret = prim_explex( ) ) != 0 )
+	while ( ( ret = explex( ) ) != 0 )
 	{
 		if ( ret == ON_STOP_TOK )
 		{
@@ -110,7 +110,7 @@ void store_exp( FILE *in )
 		{
 			case E_STR_TOKEN :
 				prg_token[ prg_length ].tv.sptr =
-					get_string_copy( prim_exp_val.sptr );
+					get_string_copy( exp_val.sptr );
 				break;
 
 			case E_FUNC_TOKEN :
@@ -132,7 +132,7 @@ void store_exp( FILE *in )
 				break;
 
 			default :
-				memcpy( &prg_token[ prg_length ].tv, &prim_exp_val,
+				memcpy( &prg_token[ prg_length ].tv, &exp_val,
 						sizeof( Token_Val ) );
 		}
 
@@ -157,7 +157,7 @@ void store_exp( FILE *in )
 
 	/* check and initialize if's and loops */
 
-	prim_loop_setup( );
+	loop_setup( );
 }
 
 /*------------------------------------------------------------------------*/
@@ -223,7 +223,7 @@ void forget_prg( void )
 /* where a block is everything a between matching pair of curly braces.     */
 /*--------------------------------------------------------------------------*/
 
-void prim_loop_setup( void )
+void loop_setup( void )
 {
 	long i;
 	long cur_pos;
@@ -502,7 +502,7 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 /* Function does the test run of the program. */
 /*--------------------------------------------*/
 
-void prim_exp_run( void )
+void exp_run( void )
 {
 	Prg_Token *cur;
 	long old_FLL = File_List_Len;
@@ -613,7 +613,7 @@ void prim_exp_run( void )
 					break;
 
 				default :
-					prim_exp_runparse( );           /* (re)start the parser */
+					exp_runparse( );               /* (re)start the parser */
 					break;
 			}
 		}
@@ -650,7 +650,7 @@ void prim_exp_run( void )
 /* by the parser itself (but also as an EOF).                        */
 /*-------------------------------------------------------------------*/
 
-int prim_exp_runlex( void )
+int exp_runlex( void )
 {
 	int token;
 	Var *ret, *from, *next, *prev;
@@ -675,7 +675,7 @@ int prim_exp_runlex( void )
 				return '}';
 
 			case E_STR_TOKEN :
-				prim_exp_runlval.sptr = cur_prg_token->tv.sptr;
+				exp_runlval.sptr = cur_prg_token->tv.sptr;
 				cur_prg_token++;
 				return E_STR_TOKEN;
 
@@ -689,7 +689,7 @@ int prim_exp_runlex( void )
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
-				prim_exp_runlval.vptr = ret;
+				exp_runlval.vptr = ret;
 				cur_prg_token++;
 				return E_FUNC_TOKEN;
 
@@ -702,12 +702,12 @@ int prim_exp_runlex( void )
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
-				prim_exp_runlval.vptr = ret;
+				exp_runlval.vptr = ret;
 				cur_prg_token++;
 				return E_VAR_REF;
 
 			default :
-				memcpy( &prim_exp_runlval, &cur_prg_token->tv,
+				memcpy( &exp_runlval, &cur_prg_token->tv,
 						sizeof( Token_Val ) );
 				token = cur_prg_token->token;
 				cur_prg_token++;

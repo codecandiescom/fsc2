@@ -21,8 +21,8 @@ static Var *CV;
 %}
 
 
-/* the following union and the token definitions MUST be identical to the ones
-   in `prim_exp.h' and `prim_exp_run_parser.y' ! */
+/* The following union and the token definitions MUST be identical to
+   the ones in `exp.h' and `exp_run_parser.y' ! */
 
 %union {
 	long   lval;

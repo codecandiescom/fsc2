@@ -61,7 +61,7 @@
 #include "phases.h"
 #include "pulse.h"
 #include "ppcheck.h"
-#include "prim_exp.h"
+#include "exp.h"
 #include "run.h"
 #include "chld_func.h"
 #include "graphics.h"
@@ -76,7 +76,7 @@ int assignments_parser( FILE *in );
 int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
-int primary_experiment_parser( FILE *in );
+int experiment_parser( FILE *in );
 void sigchld_handler( int sig_type, void *data );
 
 
