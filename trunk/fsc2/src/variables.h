@@ -128,6 +128,7 @@ void vars_ass_from_ptr( Var *src, Var *dest );
 void vars_ass_from_trans_ptr( Var *src, Var *dest );
 void vars_arr_init( Var *dest );
 Var * apply_unit( Var *var, Var *unit );
+Var *vars_val( Var *v );
 
 
 #endif  /* ! VARIABLES_HEADER */

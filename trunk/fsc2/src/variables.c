@@ -2062,3 +2062,17 @@ Var *apply_unit( Var *var, Var *unit )
 		}
 	}
 }
+
+
+/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------*/
+
+Var *vars_val( Var *v )
+{
+	vars_check( v, ARR_PTR );
+
+	if ( v->from->type ==INT_ARR )
+		return vars_push( INT_VAR, *( ( long * ) v->val.gptr ) );
+	else
+		return vars_push( FLOAT_VAR, *( ( double * ) v->val.gptr ) );
+}
