@@ -440,7 +440,6 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
-@table @samp
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
 The function queries (if called with no argument) or sets (if called
