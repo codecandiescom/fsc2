@@ -123,6 +123,8 @@ typedef struct
 	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
 	bool lock_state;          /* set if keyboard is locked */
+
+	bool windows_are_checked;
 } TDS540;
 
 

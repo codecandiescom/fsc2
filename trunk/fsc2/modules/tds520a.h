@@ -121,6 +121,8 @@ typedef struct
 	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
 	bool lock_state;
+
+	bool windows_are_checked;
 } TDS520A;
 
 
