@@ -401,7 +401,7 @@ b[ 4, 7, 3 ];
 @noindent
 defines a 1-dimensional array @code{F} of 100 integers and a
 3-dimensional floating point array @code{b} of rank 4x7x3. Indices of
-arrays start with 1 (like in MATLab and FORTRAN, but this can actually
+arrays start with 1 (like in MathLab and FORTRAN, but this can actually
 be easily changed if you're prepared to recompile the program...).
 
 
