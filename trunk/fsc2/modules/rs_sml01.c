@@ -227,8 +227,7 @@ void rs_sml01_exit_hook( void )
 		rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
 
 	if ( rs_sml01.use_table && rs_sml01.att_table != NULL )
-		rs_sml01.att_table =
-							  ATT_TABLE_ENTRY_P T_free( rs_sml01.att_table );
+		rs_sml01.att_table = ATT_TABLE_ENTRY_P T_free( rs_sml01.att_table );
 }
 
 
