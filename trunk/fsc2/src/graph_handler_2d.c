@@ -1558,8 +1558,8 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
 	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = ( double ) SCALE_TICK_DIST * fabs( cv->rwc_delta[ coord ] ) /
-		                                                      cv->s2d[ coord ];
+	rwc_delta = ( double ) SCALE_TICK_DIST
+		        * fabs( cv->rwc_delta[ coord ] ) / cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
