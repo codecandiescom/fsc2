@@ -169,8 +169,9 @@ void start_graphics( void )
 			fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
 			fl_set_object_lsize( run_form->undo_button,
 								 GI_sizes.SMALL_FONT_SIZE );
-			fl_set_object_helper( run_form->undo_button,
-								  "Undo last rescaling operation" );
+			if ( ! ( cmdline_flags & NO_BALLOON )
+				 fl_set_object_helper( run_form->undo_button,
+									   "Undo last rescaling operation" );
 
 			if ( G.dim == 2 )
 			{
