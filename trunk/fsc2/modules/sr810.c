@@ -82,6 +82,7 @@ Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
+Var *lockin_harmonic( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
 Var *lockin_lock_keyboard( Var *v );
@@ -830,6 +831,77 @@ Var *lockin_ref_freq( Var *v )
 		return vars_push( FLOAT_VAR, freq );
 
 	return vars_push( FLOAT_VAR, sr810_set_mod_freq( freq ) );
+}
+
+
+/*-----------------------------------------*/
+/* Sets or returns the harmonic to be used */
+/*-----------------------------------------*/
+
+Var *lockin_harmonic( Var *v )
+{
+	long harm;
+	double freq;
+	Var *mod;
+
+
+	/* Without an argument just return current phase settting */
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+			return vars_push( INT_VAR, sr810.is_harmonic ? 
+							  sr810.is_harmonic : SR810_TEST_HARMONIC );
+		else
+			return vars_push( INT_VAR, sr810_get_harmonic( ) );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
+				DEVICE_NAME );
+		harm = ( long ) v->val.dval;
+	}
+	else
+		harm = v->val.lval;
+	
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( TEST_RUN )
+		freq = MIN_MOD_FREQ;
+	else
+		freq = sr810_get_mod_freq( );
+
+
+	if ( harm > MAX_HARMONIC || harm < MIN_HARMONIC )
+	{
+		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
+				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
+		THROW( EXCEPTION )
+	}
+
+	if ( freq > MAX_MOD_FREQ / ( double ) harm )
+	{
+		vars_pop( mod );
+		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
+				"harmonic set to %ld is not within valid range "
+				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
+				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
+		THROW( EXCEPTION )
+	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, harm );
+
+	return vars_push( INT_VAR, sr810_set_harmonic( harm ) );
 }
 
 

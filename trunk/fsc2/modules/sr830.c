@@ -43,6 +43,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SR830_TEST_PHASE         0.0
 #define SR830_TEST_MOD_FREQUENCY 5.0e3
 #define SR830_TEST_MOD_LEVEL     1.0
+#define SR830_TEST_HARMONIC      1
 #define SR830_TEST_MOD_MODE      1         // this must be INTERNAL, i.e. 1
 
 #define NUM_ADC_PORTS         4
@@ -81,6 +82,7 @@ Var *lockin_sensitivity( Var *v );
 Var *lockin_time_constant( Var *v );
 Var *lockin_phase( Var *v );
 Var *lockin_ref_freq( Var *v );
+Var *lockin_harmonic( Var *v );
 Var *lockin_ref_mode( Var *v );
 Var *lockin_ref_level( Var *v );
 Var *lockin_lock_keyboard( Var *v );
@@ -808,7 +810,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	if ( TEST_RUN )
-		harm = sr830.is_harmonic ? sr830.harmonic : 1;
+		harm = sr830.is_harmonic ? sr830.harmonic : SR830_TEST_HARMONIC;
 	else
 		harm = sr830_get_harmonic( );
 
@@ -830,6 +832,77 @@ Var *lockin_ref_freq( Var *v )
 		return vars_push( FLOAT_VAR, freq );
 
 	return vars_push( FLOAT_VAR, sr830_set_mod_freq( freq ) );
+}
+
+
+/*-----------------------------------------*/
+/* Sets or returns the harmonic to be used */
+/*-----------------------------------------*/
+
+Var *lockin_harmonic( Var *v )
+{
+	long harm;
+	double freq;
+	Var *mod;
+
+
+	/* Without an argument just return current phase settting */
+
+	if ( v == NULL )
+	{
+		if ( TEST_RUN )
+			return vars_push( INT_VAR, sr830.is_harmonic ? 
+							  sr830.is_harmonic : SR830_TEST_HARMONIC );
+		else
+			return vars_push( INT_VAR, sr830_get_harmonic( ) );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
+				DEVICE_NAME );
+		harm = ( long ) v->val.dval;
+	}
+	else
+		harm = v->val.lval;
+	
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( TEST_RUN )
+		freq = MIN_MOD_FREQ;
+	else
+		freq = sr830_get_mod_freq( );
+
+
+	if ( harm > MAX_HARMONIC || harm < MIN_HARMONIC )
+	{
+		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
+				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
+		THROW( EXCEPTION )
+	}
+
+	if ( freq > MAX_MOD_FREQ / ( double ) harm )
+	{
+		vars_pop( mod );
+		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
+				"harmonic set to %ld is not within valid range "
+				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
+				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
+		THROW( EXCEPTION )
+	}
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, harm );
+
+	return vars_push( INT_VAR, sr830_set_harmonic( harm ) );
 }
 
 
