@@ -36,7 +36,7 @@ inline double d_min( double a, double b );
 
 /* Needed for glib versions below 2.0 (or 2.1 ?) */
 
-#if ( ! defined ( lround ) )
+#if ! defined ( lround )
 inline long lround( double x );
 #endif
 

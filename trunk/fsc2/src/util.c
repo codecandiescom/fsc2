@@ -508,7 +508,7 @@ inline short i2shrt( int a )
 
 /* This function is needed for glib versions below 2.0 (or 2.1 ?) */
 
-#if ( ! defined ( lround ) )
+#if ! defined ( lround )
 inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 #endif
 

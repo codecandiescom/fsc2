@@ -1228,8 +1228,8 @@ static void cut_make_scale( Canvas *c, int coord )
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = r_scale * ( rwc_start_fine - rwc_start ) /
-		                                              cv->rwc_delta[ r_coord ];
+	d_start_fine = r_scale
+		           * ( rwc_start_fine - rwc_start ) / cv->rwc_delta[ r_coord ];
 	if ( lround( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
