@@ -200,19 +200,18 @@ int fsc2_tcflow( int fd, int action )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Attention: The man page states that cfmakeraw() returns an int */
+/* (indicating success) but in <termios.h> it is defined as void. */
+/*----------------------------------------------------------------*/
 
 int fsc2_cfmakeraw( struct termios *termios_p )
 {
-	int ret;
-
-
 	raise_permissions( );
-	ret = cfmakeraw( termios_p );
+	cfmakeraw( termios_p );
 	lower_permissions( );
 
-	return ret;
+	return 0;
 }
 
 
