@@ -150,6 +150,11 @@ like regular expressions: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
 variable names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}',
 '@code{xY}' and '@code{xy}' are four different variable names!
 
+The name of a variable can, in principle, consist of as many characters
+as you wish (I hope nobody is going to the extent to create a variable
+name with, say, a few hundred thousand characters just to prove me wrong
+-- I tested it only with two variables with names 10000 characters long
+and differing only in the very last character @code{;-)}
 
 There are a few exceptions to the valid variable names because a few
 characters or character combinations are already used for physical units
@@ -711,4 +716,4 @@ variable!
 @cindex IF-ELSE
 
 
-Finally there's the @code{IF}-@code{ELSE} construct.
+Finally there's the @code{IF-ELSE} construct.
