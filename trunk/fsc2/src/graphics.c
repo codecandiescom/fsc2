@@ -850,11 +850,11 @@ void graphics_free( void )
 	Curve_2d *cv2;
 
 
-	/* Deallocate memory for pixmaps, scaled data and XPoints */
-	/* The function must also work correctly when it is called because
-	   we ran out of memory. The way things are organized after allocating
-	   memory for a curve first the graphical elements are created and
-	   afterwards memory for the data are allocated. */
+	/* Deallocate memory for pixmaps, scaled data and XPoints. The function
+	   must also work correctly when it is called because we run out of
+	   memory. The way things are organized after allocating memory for a
+	   curve first the graphical elements are created and afterwards memory
+	   for the data is allocated. */
 
 	if ( G.dim == 1 )
 		for ( i = 0; i < G.nc; i++ )
@@ -929,6 +929,7 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj )
 
 	delete_pixmap( c );
 }
+
 
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
@@ -1596,7 +1597,7 @@ static void change_label_1d( char **label )
 {
 	if ( *label[ X ] != '\0' )
 	{
-		G.label[ X ] = T_free( G.label[ X ] );
+		T_free( G.label[ X ] );
 		G.label[ X ] = T_strdup( label[ X ] );
 		redraw_canvas_1d( &G.x_axis );
 	}
@@ -1632,7 +1633,7 @@ static void change_label_2d( char **label )
 	{
 		if ( G.label[ X ] != NULL )
 		{
-			G.label[ X ] = T_free( G.label[ X ] );
+			T_free( G.label[ X ] );
 			if ( CG.is_shown && CG.cut_dir == X )
 				XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
 		}
@@ -1658,12 +1659,12 @@ static void change_label_2d( char **label )
 		{
 			if ( G.label[ coord ] != NULL )
 			{
-				G.label[ coord ] = T_free( G.label[ coord ] );
+				T_free( G.label[ coord ] );
 				if ( G.font != NULL )
 					XFreePixmap( G.d, G.label_pm[ coord ] );
 			}
-
 			G.label[ coord ] = T_strdup( label[ coord ] );
+
 			if ( G.font != NULL )
 				create_label_pixmap( coord == Y ? &G.y_axis : &G.z_axis,
 									 coord, G.label[ coord ] );

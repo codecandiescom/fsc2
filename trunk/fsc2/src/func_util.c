@@ -361,7 +361,8 @@ Var *f_init_1d( Var *v )
 	G.nx = DEFAULT_1D_X_POINTS;
 	G.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = 1.0;
-	G.label[ X ] = G.label[ Y ] = G.label[ Z ] = NULL;
+	for ( i = X; i <= Z; i++ )
+		G.label[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
@@ -491,7 +492,8 @@ Var *f_init_2d( Var *v )
 	G.ny = DEFAULT_2D_Y_POINTS;
 	G.rwc_start[ X ] = G.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G.rwc_delta[ X ] = G.rwc_delta[ Y ] = 1.0; 
-	G.label[ X ] = G.label[ Y ] = G.label[ Z ] = NULL;
+	for ( i = X; i <= Z; i++ )
+		G.label[ i ] = NULL;
 
 	/* Now evaluate the arguments */
 
