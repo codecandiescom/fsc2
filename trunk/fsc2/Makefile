@@ -185,7 +185,7 @@ sdir             := $(fdir)/src
 mdir             := $(fdir)/modules
 adir             := $(fdir)/aux
 cdir             := $(fdir)/config
-
+ldir             := $(fdir)/Fcntl_Lock
 
 tagsfile         := $(fdir)/TAGS
 
@@ -468,6 +468,12 @@ all:
 	$(MAKE) -C src gpib_setup
 	$(MAKE) tags
 	$(MAKE) -C src all
+ifdef WITH_HTTP_SERVER
+	cd $(ldir); \
+	perl Makefile.PL ;\
+	cd $(fdir)
+	$(MAKE) -C Fcntl_Lock
+endif
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
 
@@ -495,6 +501,9 @@ install:
 	$(MAKE) -C modules install
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hp8647a.table $(libdir)
+ifdef WITH_HTTP_SERVER
+	$(MAKE) -C Fcntl_Lock install
+endif
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
@@ -513,6 +522,9 @@ uninstall:
 	done
 	$(MAKE) -C src uninstall
 	$(MAKE) -C modules uninstall
+ifdef WITH_HTTP_SERVER
+	$(MAKE) -C Fcntl_Lock uninstall
+endif
 	$(MAKE) -C utils uninstall
 	$(MAKE) -C scripts uninstall
 	$(MAKE) -C doc uninstall
@@ -549,6 +561,9 @@ distclean:
 	$(MAKE) -C src distclean
 	$(MAKE) -C modules distclean
 	$(MAKE) -C doc distclean
+ifdef WITH_HTTP_SERVER
+	$(MAKE) -C Fcntl_Lock distclean
+endif
 	$(MAKE) -C utils distclean
 	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
 
