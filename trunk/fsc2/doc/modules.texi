@@ -90,6 +90,7 @@ sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
 sr810         // Stanford Research lock-in amplifier, model 810
 sr830         // Stanford Research lock-in amplifier, model 830
+er023m        // Bruker Signal Channel, model ER 023 M
 @end example
 
 The next thing is to append the function(s) exported (in the sense that

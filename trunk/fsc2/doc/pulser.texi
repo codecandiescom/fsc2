@@ -970,29 +970,29 @@ PHASE_SEQUENCE_1 = +x, +x, -x, -x;  // for 2nd pulse
 
 PREPARATIONS:
 
-P0:  FUNCTION    = MW,
+P0:  FUNCTION    = MW,                        // 1st microwave pulse
      START       = 0 ns,
      LENGTH      = pi_half_pulse_length,
      PHASE_CYCLE = PHASE_SEQUENCE_0;
      
-P1:  FUNCTION    = MW,
+P1:  FUNCTION    = MW,                        // 2nd microwave pulse
      START       = P0.START + P0.LENGTH  + tau0,
      LENGTH      = pi_half_pulse_length,
      PHASE_CYCLE = PHASE_SEQUENCE_1;
 
-P2:  FUNCTION    = MW,
+P2:  FUNCTION    = MW,                        // 3rd microwave pulse
      START       = P1.START + P1.LENGTH + t0,
      LENGTH      = pi_half_pulse_length,
      DELTA_START = delta_t;
 
-P3:  FUNCTION    = DETECTION,
+P3:  FUNCTION    = DETECTION,                 // digitzer trigger pulse
      START       = P2.START + P2.LENGTH,
      LENGTH      = 10 ns,
      DELTA_START = delta_t;
 
+Window = digitizer_define_window( P3.START + 250 ns, 100 ns );
 init_1d( );
 
-Window = digitizer_define_window( P3.START + 250 ns, 100 ns );
 
 EXPERIMENT:
 
