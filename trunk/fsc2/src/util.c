@@ -640,6 +640,16 @@ inline short d2shrt( double a )
 }
 
 
+inline short i2shrt( int a )
+{
+	if ( a > SHRT_MAX_HALF )
+		return SHRT_MAX_HALF;
+	if ( a < SHRT_MIN_HALF )
+		return SHRT_MIN_HALF;
+	return ( short ) a;
+}
+
+
 inline unsigned short d2ushrt( double a )
 {
 	if ( a > USHRT_MAX )
@@ -649,15 +659,6 @@ inline unsigned short d2ushrt( double a )
 	return ( unsigned short ) lrnd( a );
 }
 
-
-inline short i2shrt( int a )
-{
-	if ( a > SHRT_MAX_HALF )
-		return SHRT_MAX_HALF;
-	if ( a < SHRT_MIN_HALF )
-		return SHRT_MIN_HALF;
-	return ( short ) a;
-}
 
 inline unsigned short i2ushrt( int a )
 {
