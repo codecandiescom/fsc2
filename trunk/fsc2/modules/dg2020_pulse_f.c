@@ -497,7 +497,7 @@ bool dg2020_change_pulse_position_change( long pnum, double time )
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( dg2020_double2ticks( time ) == 0 )
+	if ( dg2020_double2ticks( time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, "%s:%ld: DG2020: Zero position change value for pulse "
 				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );
@@ -519,7 +519,7 @@ bool dg2020_change_pulse_length_change( long pnum, double time )
 	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	if ( dg2020_double2ticks( time ) == 0 )
+	if ( dg2020_double2ticks( time ) == 0 && TEST_RUN )
 	{
 		eprint( SEVERE, "%s:%ld: DG2020: Zero length change value for pulse "
 				"%ld. Useless value isn't set.\n", Fname, Lc, pnum );

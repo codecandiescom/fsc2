@@ -462,7 +462,8 @@ Var *pulser_next_phase( Var *v )
 	if ( v == NULL )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
-			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
+			TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: DG2020: No phase functions are in use.\n",
 					Fname, Lc );
@@ -489,7 +490,7 @@ Var *pulser_next_phase( Var *v )
 							  PULSER_CHANNEL_PHASE_2 ];
 		vars_pop( v );
 
-		if ( ! f->is_used )
+		if ( ! f->is_used && TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: DG2020: Phase function `%s' is not "
 					"used.\n", Fname, Lc, Function_Names[ f->self ] );
@@ -521,7 +522,8 @@ Var *pulser_phase_reset( Var *v )
 	if ( v == NULL )
 	{
 		if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
-			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+			 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
+			TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: DG2020: No phase functions are in use.\n",
 					Fname, Lc );
@@ -548,7 +550,7 @@ Var *pulser_phase_reset( Var *v )
 							  PULSER_CHANNEL_PHASE_2 ];
 		vars_pop( v );
 
-		if ( ! f->is_used )
+		if ( ! f->is_used && TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: DG2020: Phase function `%s' is not "
 					"used.\n", Fname, Lc, Function_Names[ f->self ] );
