@@ -493,7 +493,7 @@ the file.
 
 @anchor{printf}
 @item printf()
-@findec printf()
+@findex printf()
 This function can also be used to write data into a file using a format
 string. In comparison to the @code{fsave()} function it gives you even
 more control over the format that is used by accepting a format string
