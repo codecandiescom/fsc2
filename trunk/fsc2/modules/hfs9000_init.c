@@ -104,16 +104,15 @@ static void hfs9000_basic_functions_check( void )
 	{
 		f = &hfs9000.function[ i ];
 
-		/* Phase functions are not supported in this driver... */
-
-		assert( ! f->is_used || ( f->is_used &&
-								  i != PULSER_CHANNEL_PHASE_1 &&
-								  i != PULSER_CHANNEL_PHASE_2    ) );
-
 		/* Don't do anything if the function has never been mentioned */
 
 		if ( ! f->is_used )
 			continue;
+
+		/* Phase functions are not supported in this driver... */
+
+		assert( i != PULSER_CHANNEL_PHASE_1 &&
+				i != PULSER_CHANNEL_PHASE_2 ) );
 
 		/* Check if the function has pulses assigned to it */
 

@@ -171,3 +171,32 @@ int hfs9000_start_compare( const void *A, const void *B )
 
 	return 1;
 }
+
+
+/*---------------------------------------------------------
+  Determines the longest sequence of all pulse functions.
+-----------------------------------------------------------*/
+
+Ticks hfs9000_get_max_seq_len( void )
+{
+	int i;
+	Ticks max = 0;
+	FUNCTION *f;
+
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &hfs9000.function[ i ];
+
+		/* Nothing to be done for unused functions and the phase functions */
+
+		if ( ! f->is_used ||
+			 f->self == PULSER_CHANNEL_PHASE_1 ||
+			 f->self == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		max = Ticks_max( max, f->max_seq_len + f->delay );
+	}
+
+	return max;
+}
