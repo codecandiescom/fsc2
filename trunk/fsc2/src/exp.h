@@ -85,9 +85,10 @@ typedef union {
 #define UNTIL_TOK      2053
 #define NEXT_TOK       2054
 #define BREAK_TOK      2055
-#define REPEAT_TOK     2056
-#define FOR_TOK        2057
-#define FOREVER_TOK    2058
+#define REDO_TOK       2056
+#define REPEAT_TOK     2057
+#define FOR_TOK        2058
+#define FOREVER_TOK    2059
 #define ON_STOP_TOK    3333
 
 
