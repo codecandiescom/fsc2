@@ -1270,11 +1270,11 @@ used. Within a linker script it's possible to declare which of the
 functions and global variables of the library are to be exported and
 which ones not.
 
-Of course, using a linker script isn't required, a module might work
+Of course, using linker scripts isn't required, modules might work
 perfectly well without one. They are only meant to help keep things
-cleanly separated and thereby reducing the probability of making some
+cleanly separated, thereby reducing the probability of making some
 difficult to trace errors. But if you feel you don't need them you can
-just as well skip the rest of the subsection.
+just as well skip the rest of this subsection.
 
 To be able to write a linker script one needs to know which symbols must
 be exported by a module. And there are only three classes of symbols.
