@@ -20,13 +20,21 @@
 # Boston, MA 02111-1307, USA.
 
 
-########################################################################
-#                                                                      #
-#  In this first section several variables can be set to configure     #
-#  fsc2. Please read the comments carefully and change the variables   #
-#  if necessary. Please take care, most settings are case-sensitive!   #
-#                                                                      #
-########################################################################
+#########################################################################
+#                                                                       #
+#  In this first section several variables can be set to configure      #
+#  fsc2. Please read the comments carefully and change the variables    #
+#  if necessary. Please take care, most settings are case-sensitive!    #
+#                                                                       #
+#  Also consider using a configuration file for your machine in the     #
+#  'machines' subdirectory. You simply can copy the 'template.nowhere'  #
+#  file in this directory to a file with the fully qualified hostname   #
+#  of your machine (that's what 'hostname -f returns) and then edit     #
+#  this file. Then, whenever you want to install a new version of       #
+#  fsc2, you only have to copy this file instead of editing this        #
+#  Makefile each time.                                                  #
+#                                                                       #
+#########################################################################
 
 
 # Please note: When in the following there is some talk about "commenting
@@ -330,9 +338,10 @@ endif
 machine_name     := $(shell hostname -f 2>/dev/null)
 
 
-# Here we try to include a Makefile for machines that we know well enough
-# so that we don't have to change this Makefile whenever there's a new
-# version
+# Try to include a configuration file for machines that are listed in the
+# 'machines' subdirectory. This makes configuring a new fsc2 version for a
+# certain machine much simpler since only the configuration file must be
+# copied instead of having always to edit this Makefile.
 
 -include $(mchdir)/$(machine_name)
 
