@@ -35,10 +35,10 @@
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
 
-#define LECROY9400_TEST_REC_LEN      500
-#define LECROY9400_TEST_TIME_BASE    0.1
+#define LECROY9400_TEST_REC_LEN      32000
+#define LECROY9400_TEST_TB_ENTRY     19        /* i.e. 100 ms */
 #define LECROY9400_TEST_SENSITIVITY  0.01
-#define LECROY9400_TEST_NUM_AVG      16
+#define LECROY9400_TEST_NUM_AVG      10
 #define LECROY9400_TEST_TRIG_POS     0.1
 #define LECROY9400_TEST_TRIG_CHANNEL 0
 
@@ -56,6 +56,16 @@
 #define LECROY9400_EXT     7
 #define LECROY9400_EXT10   8
 
+#define LECROY9400_MIN_TIMEBASE 5.0e-8
+#define LECROY9400_MAX_TIMEBASE 0.2
+#define LECROY9400_MIN_TB_INDEX 0
+#define LECROY9400_MAX_TB_INDEX 20
+
+
+#define LECROY9400_MAX_SENS     5.0e-3
+#define LECROY9400_MIN_SENS_1M  12.5
+#define LECROY9400_MIN_SENS_50  2.5
+
 
 #define INVALID_COUPL     -1         /* Input coupling for data channel */
 #define AC_1_MOHM          0
@@ -71,6 +81,8 @@
 #define TRG_CPL_DC         1
 #define TRG_CPL_LF_REJ     2
 #define TRG_CPL_HF_REJ     3
+
+#define MAX_DESC_LEN       160
 
 
 /* Structure for description of a `window' on the digitizer, made up from the
@@ -100,10 +112,16 @@ typedef struct
 	bool is_displayed[ MAX_CHANNELS ];
 
 	double timebase;
+	int tb_index;
 	bool is_timebase;
+
+	unsigned char wv_desc[ LECROY9400_FUNC_F + 1 ][ MAX_DESC_LEN ];
 
 	double sens[ MAX_CHANNELS ];
 	double is_sens[ MAX_CHANNELS ];
+
+	int coupl[ MAX_CHANNELS ];
+	double is_coupl[ MAX_CHANNELS ];
 
 	double offset[ MAX_CHANNELS ];
 	double is_offset[ MAX_CHANNELS ];
@@ -126,14 +144,11 @@ typedef struct
 	double trig_pos;
 	bool is_trig_pos;
 
-	long num_avg;
-	bool is_num_avg;
+	long num_avg[ MAX_CHANNELS ];
+	bool is_num_avg[ MAX_CHANNELS ];
 
 	WINDOW *w;               /* start element of list of windows             */
 	int num_windows;
-
-	long rec_len;
-	bool is_rec_len;
 
 	double cursor_pos;     /* current position of cursor 1                   */
 
@@ -185,8 +200,6 @@ void lecroy9400_do_pre_exp_checks( void );
 bool lecroy9400_init( const char *name );
 double lecroy9400_get_timebase( void );
 bool lecroy9400_set_timebase( double timebase);
-bool lecroy9400_set_record_length( long num_points );
-bool lecroy9400_get_record_length( long *ret );
 bool lecroy9400_set_trigger_pos( double pos );
 bool lecroy9400_get_trigger_pos( double *ret );
 long lecroy9400_get_num_avg( void );
@@ -216,13 +229,55 @@ bool lecroy9400_lock_state( bool lock );
 #ifdef LECROY9400_MAIN
 
 LECROY9400 lecroy9400;
-const char *Channel_Names[ ] = { "CH1", "CH2", "MEM_C", "MEM_D", "FUNC_E",
-								 "FUNC_F", "LINE", "EXT", "EXT10" };
+
+const char *Channel_Names[ 9 ] = { "CH1", "CH2", "MEM_C", "MEM_D", "FUNC_E",
+								   "FUNC_F", "LINE", "EXT", "EXT10" };
+/* List of all timebases (in s/div) - currently only timebases that can be
+   used in single shot mode are supported (i.e. neither random interleaved
+   sampling nor roll mode) */
+
+double tb[ 21 ] = {                      50.0e-9,
+					100.0e-9, 200.0e-9, 500.0e-9,
+					  1.0e-6,   2.0e-6,   5.0e-6,
+					 10.0e-9,  20.0e-9,  50.0e-9,
+					100.0e-6, 200.0e-6, 500.0e-6,
+					  1.0e-3,   2.0e-3,   5.0e-3,
+					 10.0e-3,  20.0e-3,  50.0e-3,
+					100.0e-3, 200.0e-3 };
+
+/* List of the corresponding sample rates, i.e. the time/point */
+
+double sr[ 21 ] = {						 10.0e-9,
+					 10.0e.9,  10.0e.9,  10.0e.9,
+					 10.0e.9,  10.0e.9,  10.0e.9,
+					 10.0e.9,  10.0e.9,  20.0e-9,
+					 40.0e-9,  80.0e-9, 200.0e-9,
+					400.0e-9, 800.0e-9,   2.0e-6,
+					  4.0e-6,   8.0e-6,  20.0e-6,
+					 40.0e-6,  80.0e-6 };
+
+/* List of points per division */
+
+int ppd[ 21 ] = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 2500,
+				  2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
+				  2500, 2500, 2500 };
+
+/* List of number of averages that can be done using the WP01 Waveform
+   Processing option */
+
+static long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
+						 20000, 50000, 100000, 200000, 500000, 1000000 };
 
 #else
 
 extern LECROY9400 lecroy9400;
-extern const char *Channel_Names[ ];
+
+extern const char *Channel_Names[ 9 ];
+
+external double tb[ 21 ];
+external double sr[ 21 ];
+external int ppd[ 21 ];
+external int long na[ 16 ];
 
 #endif
 
@@ -231,3 +286,7 @@ enum {
 	SAMPLE,
 	AVERAGE
 };
+
+
+#define TB_ENTRIES ( sizeof tb / sizeof tb[ 0 ] )
+#define NA_ENTRIES ( sizeof na / sizeof na[ 0 ] )

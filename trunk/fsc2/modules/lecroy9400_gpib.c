@@ -82,6 +82,12 @@ bool lecroy9400_init( const char *name )
 	if ( gpib_write( lecroy9400.device, "IL,OFF", 6 ) == FAILURE )
 		return FAIL;
 
+	/* Now get the waveform descriptor for all channels */
+
+	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+		lecroy9400_get_desc( i );
+
+
 	return OK;
 }
 
