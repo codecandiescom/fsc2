@@ -187,7 +187,7 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {FLOAT}     {
-                exp_val.dval = T_atof( exptext );
+                exp_val.dval = T_atod( exptext );
                 return E_FLOAT_TOKEN;
             }
 

@@ -126,7 +126,7 @@ double lecroy9400_get_timebase( void )
 		lecroy9400_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return T_atod( reply );
 }
 
 
@@ -215,7 +215,7 @@ double lecroy9400_get_trigger_level( void )
 		lecroy9400_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return T_atod( reply );
 }
 
 
@@ -253,7 +253,7 @@ double lecroy9400_get_sens( int channel )
 		lecroy9400_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	lecroy9400.sens[ channel ] = T_atof( reply );
+	lecroy9400.sens[ channel ] = T_atod( reply );
 
 	return lecroy9400.sens[ channel ];
 }
@@ -298,7 +298,7 @@ double lecroy9400_get_offset( int channel )
 		lecroy9400_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	lecroy9400.sens[ channel ] = T_atof( reply );
+	lecroy9400.sens[ channel ] = T_atod( reply );
 
 	return lecroy9400.sens[ channel ];
 }

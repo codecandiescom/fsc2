@@ -16,7 +16,7 @@ r@^ole has been Axel Weber in Frankfurt, who already dealt with the bugs
 and shortcomings of the very first version (yes, there was a
 @acronym{FSC}, then without a @code{1}).  Later in Berlin Stefan Weber,
 Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling,
-Michael Fuhs, Anton Savitsky, Alexander Schnegg and Radko took
+Michael Fuhs, Anton Savitsky, Alexander Schnegg and Radek Kowalczyk took
 over. Finally, also Iwo Gatlik and Tomasz Motylewski (Basel University)
 had some share of the fun. I would like to thank them not only for the
 constant stream of bug reports and proposals for improvements or new

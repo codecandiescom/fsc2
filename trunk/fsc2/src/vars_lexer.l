@@ -206,7 +206,7 @@ WS          [\n \t]+
             }
 
 {FLOAT}     {
-                varslval.dval = T_atof( varstext );
+                varslval.dval = T_atod( varstext );
                 return FLOAT_TOKEN;
             }
 

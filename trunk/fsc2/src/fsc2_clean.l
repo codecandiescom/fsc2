@@ -45,6 +45,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 #include "exceptions.h"
 
@@ -491,6 +493,7 @@ static void include_handler( char *file )
 	static char *fname[ MAX_INCLUDE_DEPTH ];
 	static bool eol_state[ MAX_INCLUDE_DEPTH ];
 	char *incl_file;
+	struct passwd *pwe;
 
 
 	if ( file != NULL )		      /* at the start of an include file */
@@ -507,9 +510,16 @@ static void include_handler( char *file )
 
 		if ( file[ 0 ] == '"' )
 		{
-
 			*( file + strlen( file ) - 1 ) = '\0';
-			incl_file = T_strdup( file + 1 );
+			if ( file[ 1 ] != '~' )
+				incl_file = T_strdup( file + 1 );
+			else
+			{
+				pwe = getpwuid( getuid( ) );
+				incl_file = T_malloc( strlen( pwe->pw_dir ) + strlen( file ) );
+				strcpy( incl_file, pwe->pw_dir );
+				strcat( incl_file, file + 2 );
+			}
 		}
 		else
 		{

@@ -433,7 +433,7 @@ Var *boxcar_get_curve( Var *v )
 		*cn = '\0';
 		cn += 2;                  /* the boxcar uses "\r\n" as separator */
 
-		ret_buffer[ i ] = T_atof( cc );
+		ret_buffer[ i ] = T_atod( cc );
 	}
 
 	T_free( buffer );

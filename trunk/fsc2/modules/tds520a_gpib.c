@@ -194,7 +194,7 @@ double tds520a_get_timebase( void )
 		tds520a_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return T_atod( reply );
 }
 
 
@@ -284,7 +284,7 @@ bool tds520a_get_trigger_pos( double *ret )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
-    *ret = 0.01 * T_atof( reply );
+    *ret = 0.01 * T_atod( reply );
     return OK;
 }
 
@@ -401,7 +401,7 @@ bool tds520a_get_cursor_position( int cur_no, double *cp )
 		tds520a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-    *cp = T_atof( reply );
+    *cp = T_atod( reply );
 
 	return OK;
 }
@@ -668,7 +668,7 @@ double tds520a_get_sens( int channel )
 		tds520a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds520a.sens[ channel ] = T_atof( reply );
+	tds520a.sens[ channel ] = T_atod( reply );
 
 	return tds520a.sens[ channel ];
 }
@@ -773,7 +773,7 @@ double tds520a_get_area( int channel, WINDOW *w, bool use_cursor )
 		tds520a_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return T_atod( reply );
 }
 
 
@@ -808,7 +808,7 @@ static double tds520a_get_area_wo_cursor( int channel, WINDOW *w )
 			 gpib_read( tds520a.device, buf, &len ) == FAILURE )
 			tds520a_gpib_failure( );
 
-		pos = T_atof( buf );
+		pos = T_atod( buf );
 	}
 
 	/* Return the integrated area, multiplied by the the time per point */
@@ -982,7 +982,7 @@ double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 		tds520a_gpib_failure( );
 
 	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return T_atod( reply );
 }
 
 

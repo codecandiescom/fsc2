@@ -510,7 +510,17 @@ Var *find_field( Var *v )
 
 Var *gaussmeter_resolution( Var *v )
 {
-	v = v;
+	if ( v != NULL )
+	{
+		print( FATAL, "This function cannot be called with arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == PREPARATION )
+	{
+		no_query_possible( );
+		THROW( EXCEPTION );
+	}
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, ER035M_TEST_RES );

@@ -43,7 +43,7 @@ void *T_malloc( size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
+		eprint( FATAL, UNSET,
 				"Internal error detected at %s:%d (malloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
@@ -54,8 +54,7 @@ void *T_malloc( size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
-				"Running out of memory.\n" );
+		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -90,7 +89,7 @@ void *T_calloc( size_t nmemb, size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
+		eprint( FATAL, UNSET,
 				"Internal error detected at %s:%d (calloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
@@ -101,8 +100,7 @@ void *T_calloc( size_t nmemb, size_t size )
 
 	if ( mem == NULL )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
-				"Running out of memory.\n" );
+		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -138,7 +136,7 @@ void *T_realloc( void *ptr, size_t size )
 #ifndef NDEBUG
 	if ( size == 0 )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
+		eprint( FATAL, UNSET,
 				"Internal error detected at %s:%d (realloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
@@ -149,8 +147,7 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
-				"Running out of memory.\n" );
+		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -219,8 +216,7 @@ char *T_strdup( const char *str )
 
 	if ( ( new_str = strdup( str ) ) == NULL )
 	{
-		eprint( FATAL, Fname != NULL ? SET : UNSET,
-				"Running out of memory.\n" );
+		eprint( FATAL, FSC2_MODE != TEST, "Running out of memory.\n" );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
@@ -249,12 +245,29 @@ char *T_strdup( const char *str )
 long T_atol( const char *txt )
 {
 	long ret;
+	char *end_p;
 
 
-	ret = strtol( txt, NULL, 10 );
+	if ( txt == NULL || *txt == '\0' )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	ret = strtol( txt, &end_p, 10 );
+
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, SET, "Long integer number out of range: %s.\n", txt );
+		eprint( FATAL, FSC2_MODE != TEST,
+				"Long integer number out of range: %s.\n", txt );
+		THROW( EXCEPTION );
+	}
+
+	if ( end_p == ( char * ) txt )
+	{
+		eprint( FATAL, FSC2_MODE != TEST,
+				"Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
@@ -268,12 +281,29 @@ long T_atol( const char *txt )
 int T_atoi( const char *txt )
 {
 	long ret;
+	char *end_p;
 
 
-	ret = strtol( txt, NULL, 10 );
+	if ( txt == NULL || *txt == '\0' )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	ret = strtol( txt, &end_p, 10 );
+
 	if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
 	{
-		eprint( FATAL, SET, "Integer number out of range: %s.\n", txt );
+		eprint( FATAL, FSC2_MODE != TEST,
+				"Integer number out of range: %s.\n", txt );
+		THROW( EXCEPTION );
+	}
+
+	if ( end_p == ( char * ) txt )
+	{
+		eprint( FATAL, FSC2_MODE != TEST,
+				"Not an integer number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 
@@ -284,15 +314,32 @@ int T_atoi( const char *txt )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-double T_atof( const char *txt )
+double T_atod( const char *txt )
 {
 	double ret;
+	char *end_p;
 
 
-	ret = strtod( txt, NULL );
+	if ( txt == NULL || *txt == '\0' )
+	{
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	ret = strtod( txt, &end_p );
+
 	if ( errno == ERANGE )
 	{
-		eprint( FATAL, SET, "Floating point number out of range: %s.\n", txt );
+		eprint( FATAL, FSC2_MODE != TEST, 
+				"Floating point number out of range: %s.\n", txt );
+		THROW( EXCEPTION );
+	}
+
+	if ( end_p == ( char * ) txt )
+	{
+		eprint( FATAL, FSC2_MODE != TEST,
+				"Not a floating point number: %s.\n", txt );
 		THROW( EXCEPTION );
 	}
 

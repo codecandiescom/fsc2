@@ -450,7 +450,7 @@ WS          [\n=: ]+
             }
 
 {FLOAT}     {
-            	assignlval.dval = T_atof( assigntext );
+            	assignlval.dval = T_atod( assigntext );
                 return FLOAT_TOKEN;
             }
 

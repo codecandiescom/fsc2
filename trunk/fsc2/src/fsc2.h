@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <string.h>
+#include <locale.h>
 #include <math.h>
 #include <ctype.h>
 #include <errno.h>

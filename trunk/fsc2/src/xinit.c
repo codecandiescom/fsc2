@@ -115,6 +115,13 @@ bool xforms_init( int *argc, char *argv[ ] )
 		 == NULL )
 		return FAIL;
 
+	/* Nowadays the xforms initalization obviously sets the locale to the
+	   one set in the environment variables. But for this program we need
+	   at least the "normal" formatting of numeric values, otherwise
+	   functions like strtod() don't work as expected. */
+
+	setlocale( LC_NUMERIC, "C" );
+
 	if ( *argc > 1 && argv[ 1 ][ 0 ] == '-' )
 	{
 		fprintf( stderr, "Unknown option \"%s\".\n", argv[ 1 ] );

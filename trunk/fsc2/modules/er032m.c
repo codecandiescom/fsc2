@@ -1009,7 +1009,7 @@ static double er032m_get_field( void )
 		er032m_failure( );
 
 	buf[ length ] = '\0';
-	return T_atof( buf + 2 );
+	return T_atod( buf + 2 );
 }
 
 
@@ -1060,7 +1060,7 @@ static double er032m_get_cf( void )
 		er032m_failure( );
 
 	buf[ len ] = '\0';
-	return T_atof( buf + 2 );
+	return T_atod( buf + 2 );
 }
 
 
@@ -1110,7 +1110,7 @@ static double er032m_get_sw( void )
 		er032m_failure( );
 
 	buf[ len ] = '\0';
-	return T_atof( buf + 2 );
+	return T_atod( buf + 2 );
 }
 
 

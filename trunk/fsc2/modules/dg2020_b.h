@@ -178,6 +178,7 @@ typedef struct {
 
 
 typedef struct _PHS_ {
+	bool is_defined;
 	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_CW - PHASE_PLUS_X + 1 ];
 	POD *pod[ PHASE_CW - PHASE_PLUS_X + 1 ];

@@ -33,7 +33,7 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define MAX_TRIES   100
+#define MAX_TRIES   150
 
 
 int  pt2025_init_hook( void );
@@ -43,15 +43,26 @@ int  pt2025_end_of_exp_hook( void );
 
 Var *gaussmeter_name( Var *v );
 Var *measure_field( Var *v );
+Var *gaussmeter_resolution( Var *v );
+Var *gaussmeter_probe_orientation( Var *v );
 
 
 static bool pt2025_init( const char *name );
 static double pt2025_get_field( void );
+static void pt2025_set_resolution( int res );
+
+
+#define PROBE_ORIENTATION_PLUS       0
+#define PROBE_ORIENTATION_MINUS      1
+#define PROBE_ORIENTATION_UNDEFINED -1
+#define UNDEF_RESOLUTION            -1
 
 
 typedef struct
 {
 	int device;
+	int probe_orientation;
+	int resolution;
 } PT2025;
 
 static PT2025 pt2025;
@@ -73,6 +84,8 @@ int pt2025_init_hook( void )
 	need_GPIB = SET;
 
 	pt2025.device = -1;
+	pt2025.probe_orientation = PROBE_ORIENTATION_UNDEFINED;
+	pt2025.resolution = UNDEF_RESOLUTION;
 
 	return 1;
 }
@@ -85,7 +98,7 @@ int pt2025_exp_hook( void )
 {
 	if ( ! pt2025_init( DEVICE_NAME ) )
 	{
-		print( FATAL, "%s: Failed to initialize device.\n" );
+		print( FATAL, "Failed to initialize device.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -132,7 +145,99 @@ Var *measure_field( Var *v )
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 34089.3 );
 
-	return vars_push( FLOAT_VAR, pt2025_get_field );
+	return vars_push( FLOAT_VAR, pt2025_get_field( ) );
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_resolution( Var *v )
+{
+	double res;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION &&
+			 pt2025.resolution == UNDEF_RESOLUTION )
+		{
+			no_query_possible( );
+			THROW( EXCEPTION );
+		}
+
+		if ( FSC2_MODE == TEST && pt2025.resolution == UNDEF_RESOLUTION )
+			return vars_push( FLOAT_VAR, 0.001  );
+		return vars_push( FLOAT_VAR, pt2025.resolution == LOW ? 0.01 : 0.001 );
+	}
+
+	res = get_double( v, "resolution" );
+
+	if ( res > 0.011 || res < 0.0009 )
+	{
+		print( FATAL, "Invalid resolution setting: %f.\n", res );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	pt2025.resolution = res < 0.00333 ? HIGH : LOW;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		pt2025_set_resolution( pt2025.resolution );
+
+	return vars_push( FLOAT_VAR, pt2025.resolution == LOW ? 0.01 : 0.001 );
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_probe_orientation( Var *v )
+{
+	long orientation;
+
+
+	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			no_query_possible( );
+			THROW( EXCEPTION );
+		}
+
+		if ( FSC2_MODE == TEST )
+			return vars_push( INT_VAR, 1 );
+
+		return vars_push( INT_VAR, ( long ) pt2025.probe_orientation );
+	}
+
+	if ( FSC2_MODE != PREPARATION )
+	{
+		print( FATAL, "Probe orientation can only be set during the "
+			   "PREPARATIONS section.\n" );
+		THROW( EXPERIMENT );
+	}
+
+	if ( v->type != STR_VAR )
+		orientation = get_long( v, "probe orientation" );
+	else
+	{
+		if ( strcmp( v->val.sptr, "+" ) && strcmp( v->val.sptr, "-" ) )
+		{
+			print( FATAL, "Invalid argument: %s\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+
+		orientation = v->val.sptr[ 0 ] == '+' ? 1 : 0;
+	}
+
+	pt2025.probe_orientation = orientation ?
+							  PROBE_ORIENTATION_PLUS : PROBE_ORIENTATION_MINUS;
+
+	too_many_arguments( v );
+
+	return vars_push( INT_VAR, ( long ) pt2025.probe_orientation );
 }
 
 
@@ -147,8 +252,9 @@ Var *measure_field( Var *v )
 
 static bool pt2025_init( const char *name )
 {
-	char buf[ 50 ];
+	unsigned char buf[ 50 ];
 	long len = 50;
+	long status;
 
 
 	/* Initialize GPIB communication with the temperature controller */
@@ -156,23 +262,73 @@ static bool pt2025_init( const char *name )
 	if ( gpib_init_device( name, &pt2025.device ) == FAILURE )
 		return FAIL;
 
-	/* Primary settings:
-	   1. Display field values (in T)
-	   2. Use multiplexer channel A
-	   3. Normal reading display rate
-	   4. medium fast search time (15 s over probes field range)
-	   5. Switch to search mode
-	*/
+	/* Get status byte #3 - unfortunately, we often get not the status byte
+	   but the current field value, so try again unless the reply starts
+	   with an 'S' an is exactly 3 bytes long. */
 
-	if ( gpib_write( pt2025.device, "D1\r\n", 4 ) == FAILURE ||
-		 gpib_write( pt2025.device, "PA\r\n", 4 ) == FAILURE ||
-		 gpib_write( pt2025.device, "F0\r\n", 4 ) == FAILURE ||
-		 gpib_write( pt2025.device, "O3\r\n", 4 ) == FAILURE ||
-		 gpib_write( pt2025.device, "H\r\n", 3 ) == FAILURE  )
+	do
+	{
+		len = 50;
+		if ( gpib_write( pt2025.device, "S3\r\n", 4 ) == FAILURE ||
+			 gpib_read( pt2025.device, buf, &len ) == FAILURE )
+			return FAIL;
+	} while ( buf[ 0 ] != 'S' || len != 3 );
+
+	buf[ 3 ] = '\0';
+	status = strtol( buf + 1, NULL, 16 );
+
+	/* If necessary switch to field display mode (i.e. send data in Tesla) */
+
+	if ( ! ( status & 1 ) &&
+		 gpib_write( pt2025.device, "D1\r\n", 4 ) == FAILURE )
 		return FAIL;
 
-	/* Get some random data to check if the device responds */
+	/* If necessary switch to multiplexer A */
 
+	if ( status & 0x70 &&
+		 gpib_write( pt2025.device, "PA\r\n", 4 ) == FAILURE )
+		return FAIL;
+
+	/* If necessary switch to field AUTO mode */
+
+	if ( ! ( status & 2 ) &&
+		 gpib_write( pt2025.device, "A1\r\n", 4 ) == FAILURE )
+		return FAIL;
+
+	/* If the probe orientation isn't the way the user asked for set it,
+	   otherwise keep the current setting */
+
+	if ( pt2025.probe_orientation != PROBE_ORIENTATION_UNDEFINED &&
+		 ( ( status & 4 &&
+			 pt2025.probe_orientation == PROBE_ORIENTATION_MINUS ) || 
+		   ( ! ( status & 4 ) &&
+			 pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ) ) &&
+		 gpib_write( pt2025.device,
+					 pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ?
+					 "F1\r\n" : "F0\r\n", 4 ) == FAILURE ) 
+		 return FAIL;
+	else
+		pt2025.probe_orientation = status & 4;
+
+	/* If necessary set the resolution */
+
+	if ( pt2025.resolution == UNDEF_RESOLUTION )
+		pt2025.resolution = status & 0x80 ? LOW : HIGH;
+	else if ( ( ( pt2025.resolution == LOW && ! ( status & 0x80 ) ) || 
+				( pt2025.resolution == HIGH && status & 0x80 ) ) &&
+			  gpib_write( pt2025.device,
+						  pt2025.resolution == LOW ? "V1\r\n" : "V0\r\n", 4 )
+			  == FAILURE )
+		return FAIL;
+
+	/* Activate the search, starting at about 3.15 T */
+
+	if ( gpib_write( pt2025.device, "H3500\r\n", 7 ) == FAILURE  )
+		return FAIL;
+
+	/* Get first field value */
+
+	len = 50;
 	if ( gpib_read( pt2025.device, buf, &len ) == FAILURE )
 		return FAIL;
 
@@ -224,6 +380,20 @@ static double pt2025_get_field( void )
 	return field * 1.0e4;
 }
 
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static void pt2025_set_resolution( int res )
+{
+	if ( gpib_write( pt2025.device, res == LOW ? "V1\r\n" : "V0\r\n", 4 )
+		 == FAILURE )
+	{
+		print( FATAL, "Can't access the NMR gaussmeter.\n" );
+		THROW( EXCEPTION );
+	}
+}
+		
 
 /*
  * Local variables:

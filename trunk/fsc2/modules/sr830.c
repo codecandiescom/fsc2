@@ -994,7 +994,7 @@ static double sr830_get_data( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -1048,7 +1048,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 		else
 			*( bp_next - 1 ) = '\0';
 
-		data[ i ] = T_atof( bp_cur );
+		data[ i ] = T_atod( bp_cur );
 	}
 }
 
@@ -1073,7 +1073,7 @@ static double sr830_get_adc_data( long channel )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -1194,7 +1194,7 @@ static double sr830_get_phase( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	phase = T_atof( buffer );
+	phase = T_atod( buffer );
 
 	while ( phase >= 360.0 )        /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -1242,7 +1242,7 @@ static double sr830_get_mod_freq( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -1354,7 +1354,7 @@ static double sr830_get_mod_level( void )
 		sr830_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 

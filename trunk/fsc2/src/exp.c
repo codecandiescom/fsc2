@@ -179,7 +179,7 @@ void store_exp( FILE *in )
 		prg_token[ prg_length ].Fname = cur_Fname;
 		prg_token[ prg_length ].Lc = Lc;
 
-		/* Initialise pointers needed for flow control and the data entries
+		/* Initialize pointers needed for flow control and the data entries
 		   used in repeat loops */
 
 		prg_token[ prg_length ].start = prg_token[ prg_length ].end = NULL;

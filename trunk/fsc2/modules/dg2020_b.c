@@ -149,6 +149,7 @@ int dg2020_b_init_hook( void )
 
 	for ( i = 0; i < 2; i++ )
 	{
+		dg2020_phs[ i ].is_defined = UNSET;
 		dg2020_phs[ i ].function = NULL;
 		for ( j = 0; j < PHASE_CW - PHASE_PLUS_X; j++ )
 		{
@@ -662,6 +663,13 @@ Var *pulser_next_phase( Var *v )
 		if ( phase_number != 1 && phase_number != 2 )
 		{
 			print( FATAL, "Invalid phase number: %ld.\n", phase_number );
+			THROW( EXCEPTION );
+		}
+
+		if ( ! dg2020_phs[ phase_number - 1 ].is_defined )
+		{
+			print( FATAL, "PHASE_SETUP_%ld has not been defined.\n",
+				   phase_number );
 			THROW( EXCEPTION );
 		}
 

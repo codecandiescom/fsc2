@@ -3,7 +3,7 @@
 % Load plain if necessary, i.e., if running under initex.
 \expandafter\ifx\csname fmtname\endcsname\relax\input plain\fi
 %
-\def\texinfoversion{2001-07-18.09}
+\def\texinfoversion{2001-11-24.22}
 %
 % Copyright (C) 1985, 86, 88, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
 % Free Software Foundation, Inc.
@@ -884,11 +884,11 @@ where each line of input produces a line of output.}
     \else
       \pdfximage
     \fi
-      \ifx\empty\imagewidth\else width \imagewidth \fi
-      \ifx\empty\imageheight\else height \imageheight \fi
+      \ifx\empty\imagewidth \else width\imagewidth \fi
+      \ifx\empty\imageheight \else height\imageheight \fi
       {#1.pdf}%
-    \ifnum\pdftexversion < 14 \else
-      \pdfrefximage \pdflastximage
+    \ifnum\pdftexversion < 14  \else
+      \pdfrefximage\pdflastximage
     \fi}
   \def\pdfmkdest#1{\pdfdest name{#1@} xyz}
   \def\pdfmkpgn#1{#1@}

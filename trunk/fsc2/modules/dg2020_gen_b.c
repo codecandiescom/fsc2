@@ -547,7 +547,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 
 	if ( dg2020_phs[ phs ].function != NULL )
 	{
-		print( FATAL, "PHASE_%1d_SETUP has already been assoiated with "
+		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
 			   "function %s.\n",
 			   phs, Function_Names[ dg2020_phs[ phs ].function->self ] );
 		THROW( EXCEPTION );
@@ -564,6 +564,7 @@ bool dg2020_set_phase_reference( int phs, int function )
 		return FAIL;
 	}
 
+	dg2020_phs[ phs ].is_defined = SET;
 	dg2020_phs[ phs ].function = f;
 	f->phase_setup = &dg2020_phs[ phs ];
 

@@ -723,7 +723,7 @@ double sr510_get_data( void )
 		sr510_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -748,7 +748,7 @@ double sr510_get_adc_data( long channel )
 		sr510_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -900,7 +900,7 @@ double sr510_get_phase( void )
 		sr510_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	phase = T_atof( buffer );
+	phase = T_atod( buffer );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -943,7 +943,7 @@ static double sr510_get_ref_freq( void )
 		sr510_failure( );
 
 	buffer[ length - 2 ] = '\0';
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 

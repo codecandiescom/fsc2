@@ -201,7 +201,7 @@ double hp8647a_get_frequency( void )
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -236,7 +236,7 @@ double hp8647a_get_attenuation( void )
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 
@@ -419,7 +419,7 @@ int hp8647a_get_mod_source( int type )
 		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
 			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 			hp8647a_comm_failure( );
-		freq = lrnd( T_atof ( buffer ) );
+		freq = lrnd( T_atod ( buffer ) );
 		source = freq == 400 ? MOD_SOURCE_1k : MOD_SOURCE_400;
 	}
 	else
@@ -531,7 +531,7 @@ double hp8647a_get_mod_ampl( int type )
 		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
 		hp8647a_comm_failure( );
 
-	return T_atof( buffer );
+	return T_atod( buffer );
 }
 
 

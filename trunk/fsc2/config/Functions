@@ -39,10 +39,6 @@
 /* PREP says that the function may only be used in the PREPARATION  */
 /* section (and thus will never really talk with the device).       */
 /*                                                                  */
-/* You may use C style and C++ style comments in this file, i.e     */
-/* comments enclosed in a pair of '/*' and '*/' or commants that    */
-/* start with a double slash '//' and extend to the end of line.    */
-/*                                                                  */
 /********************************************************************/
 
 
@@ -73,11 +69,12 @@ magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 
 gaussmeter_name, 0, ALL;        // returns the device name
 find_field, 0, EXP;             // return current field value
-gaussmeter_resolution, 0, EXP;  // returns resolution of field meter
+gaussmeter_resolution, -1, ALL; // returns resolution of field meter
 gaussmeter_wait, 0, EXP;        // wait for field to stabilize
 
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
 								// and PT2025)
+gaussmeter_probe_orientation, -1, ALL;
 
 
 /* Functions exported by the pulser drivers (DG2020, HFS9000)

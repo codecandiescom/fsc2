@@ -184,7 +184,7 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {FLOAT}     {
-                prepslval.dval = T_atof( prepstext );
+                prepslval.dval = T_atod( prepstext );
                 return FLOAT_TOKEN;
             }
 

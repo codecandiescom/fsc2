@@ -56,7 +56,7 @@ fsc2.html: $(docs) $(figures)
 	mv fsc2_frame.x fsc2_frame.html
 
 %.png: $(adir)/%.xbm
-	convert -page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ \
+	convert -page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ \
     2>/dev/null
 
 ps: fsc2.ps
@@ -97,15 +97,16 @@ fsc2.pdf: $(docs) $(pdf_pics)
 ifneq ($(word 1,$(shell which convert)),which:)
 %.pdf: $(adir)/%.xbm
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ 2>/dev/null
 %.pdf: %.png
 	convert -compress Zip \
-		-page `identify $< 2>/dev/null | awk '{print $$2}'` $< $@ 2>/dev/null
+		-page `identify $< 2>/dev/null | sed -e 's/^.*[ \t]\([0-9]*x[0-9]*\)[ \t].*$$/\1/'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
 	@echo "Can't make PDF documentation, program 'convert' not found."; \
 	exit 1;
 endif
+
 
 
 # How to install the documentation

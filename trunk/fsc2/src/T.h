@@ -34,7 +34,7 @@ void *T_free( void *ptr );
 char *T_strdup( const char *str );
 long T_atol( const char *txt );
 int T_atoi( const char *txt );
-double T_atof( const char *txt );
+double T_atod( const char *txt );
 
 
 #endif   /* ! T_HEADER */
