@@ -1601,9 +1601,9 @@ done in the function @code{accept_new_data()} in @file{accept.c}.
 The child process will have itself initialized in the mean time in the
 function @code{run_child()} in @file{run.c}. It closes the ends of pipes
 it doesn't need anymore and sets up its own signal handlers. Then its
-main work starts. It then invokes the function @code{do_measurement()}
-where, just as already described above for the test run, the stored
-tokens from the @code{EXPERIMENT} section of the @code{EDL} script get
+main work starts by invoking the function @code{do_measurement()} where,
+just as already described above for the test run, the stored tokens from
+the @code{EXPERIMENT} section of the @code{EDL} script get
 interpreted. Again for tokens not involved with flow control the parser
 created from @file{exp_parser.y} is used. This will in turn get new
 tokens delivered from the array of stored tokens by the function
