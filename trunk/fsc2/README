@@ -11,16 +11,16 @@ way the experiment is to be done or the hardware configuration.
 In contrast, fsc2 basically interprets a rather simple but powerful
 scripting language (in the following called EDL for Experiment Description
 Language) and has a strictly modular approach to handling of devices.
-This allows you to set up a new completely experiment (or to change an
-already existing experiment description) rather easily and in a short
-time without any detailed knowledge of the internals of fsc2 nor on how
-exactly the devices have to be controlled.
+This allows you to easily set up a completely new experiment (or to change
+an already existing experiment description) and in a short time without
+any detailed knowledge of the internals of fsc2 nor on how exactly the
+devices have to be controlled.
 
 Some key features:
 
 * The EDL language is similar to other medium to high level languages,
   borrowing from e.g. MathLab, C, Fortran and Perl etc. Moreover, it
-  comes with a lot of simple functions for displaying and saving measured
+  comes with a lot of functions for displaying and saving measured
   data in a completely user defined way. Thus writing a description
   for a new experiment (or adapting an already existing EDL script)
   won't be very difficult for anyone remotely acqainted with one of the
@@ -32,14 +32,14 @@ Some key features:
   functionality by usually changing not more than a single line in the
   EDL script.
 
-* Currently fsc2 can control devices that are either connected via the
-  serial ports or using the GPIB bus. Functions for simplifying access
-  of devices using these interfaces are built into fsc2.
+* Currently fsc2 controls devices that are either connected via the serial
+  ports or the GPIB bus. Functions for simplifying access of devices using
+  these interfaces are built into fsc2.
 
 * fsc2 allows other programs to send it EDL scripts to execute. This
-  allows to write for standard experiments a set of scripts that
-  automatically create EDL script from user input (e.g. via a graphical
-  interface). Once such scripts have been written, the "normal" user
+  allows to write a set of scripts for standard experiments that
+  automatically create EDL scripts from user input (e.g. via a graphical
+  interface). Once such scripts have been created, the "normal" user
   hasn't even to know how to write EDL programs. Several examples of such
   scripts, written in Perl/Tk, are included in the distribution of fsc2.
 
