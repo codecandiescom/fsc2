@@ -2,19 +2,12 @@
 
 # The following variables determine where the program files will be copied to
 # by 'make install' as well as the name of the GPIB configuration and log file
-# together with its ownerships
 
 prefix         = /usr/local
 bindir         = $(prefix)/bin
 libdir         = $(prefix)/lib/fsc2
 auxdir         = $(libdir)/aux
 docdir         = $(libdir)/doc
-
-#prefix         = $(shell pwd)
-#bindir         = $(prefix)
-#libdir         = $(prefix)
-#auxdir         = $(prefix)/aux
-#docdir         = $(prefix)/doc
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
@@ -33,7 +26,6 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DMDEBUG # for malloc debugging
 				 # -DDEBUG \
 				 # -DMAX_DEBUG # for debugging of digitizer
-
 LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
 				 #  -lmcheck   # for malloc debugging
 LDFLAGS        = -Wl,-E
@@ -58,32 +50,44 @@ AWK            = /usr/bin/awk
 
 ifdef GPIB_LOG
     CFLAGS += -DGPIB_LOG=\"$(GPIB_LOG)\"
+else
+	CFLAGS += -DGPIB_LOG=\"/tmp/gpib.log\"
 endif
 
 ifdef GPIB_CONF
     CFLAGS += -DGPIB_CONF=\"$(GPIB_CONF)\"
+else
+    CFLAGS += -DGPIB_CONF=\"/etc/gpib.conf\"
 endif
 
 ifdef AWK
     CFLAGS += -DAWK=\"$(AWK)\"
+else
+	CFLAGS += -DAWK=\"awk\"
 endif
-
-CFLAGS += $(patsubst %,-I%,$(subst :, ,$(VPATH)))
 
 ifdef bindir
 	CFLAGS += -Dbindir=\"$(bindir:/=)/\"
+else
+	CFLAGS += -Dbindir=\"$(shell pwd)/\"
 endif
 
 ifdef libdir
 	CFLAGS += -Dlibdir=\"$(libdir:/=)/\"
+else
+	CFLAGS += -Dlibdir=\"$(shell pwd)/\"
 endif
 
 ifdef auxdir
 	CFLAGS += -Dauxdir=\"$(auxdir:/=)/\" -I../aux
+else
+	CFLAGS += -Dauxdir=\"$(shell pwd)/aux/\" -I../aux
 endif
 
 ifdef docdir
 	CFLAGS += -Ddocdir=\"$(docdir:/=)/\"
+else
+	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
 endif
 
 export            # export all variables to sub-makes
@@ -123,13 +127,15 @@ install:
 	install -d $(auxdir)
 	install -d $(docdir)
 	$(MAKE) -C utils install
-	install -m 755 -o fsc2 -g fsc2 -s fsc2_connect $(bindir)
+	install -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
+#	install -m 755 -o fsc2 -g fsc2 -s fsc2_connect $(bindir)
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
 					 $(bindir)/fsc2_load
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_start
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
 	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
-	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
+	install -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
+#	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 *.so $(libdir)
