@@ -1071,13 +1071,13 @@ argument:
 =============== FORM ===============
 Name: cut
 Width: 620
-Height: 450
+Height: 455
 Number of Objects: 18
 
 --------------------
 class: FL_BOX
 type: UP_BOX
-box: 0 0 620 450
+box: 0 0 620 455
 boxtype: FL_UP_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -1203,7 +1203,7 @@ argument: 0
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 160 395 350 50
+box: 160 395 350 55
 boxtype: FL_FRAME_BOX
 colors: FL_NoColor FL_COL1
 alignment: FL_ALIGN_CENTER
@@ -1240,7 +1240,7 @@ value: 1
 --------------------
 class: FL_CANVAS
 type: NORMAL_CANVAS
-box: 515 5 100 440
+box: 515 5 100 445
 boxtype: FL_FRAME_BOX
 colors: FL_COL1 FL_COL1
 alignment: FL_ALIGN_CENTER
