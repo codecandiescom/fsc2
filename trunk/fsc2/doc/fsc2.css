@@ -22,33 +22,34 @@
 --!>
 
 
-body { background :  #FFFFFF;
-	 }
+body { margin :      0px 0px 0px 0px;
+       padding:      0px;
+       background :  white;
+     }
 
-#level0 { background :         #FFFFFF;
+#level0 { background :         white;
           background-image :   url(background.gif); 
           background-repeat :  repeat-y;
           width :              100%;
         }
 
-#level1 { margin-left :    180px;
-          padding-left :   10px;
-          background :     #FFFFFF;
-	    }
+#level1 { margin-left :    195px;
+          background :     white;
+        }
 
-#main { background :  #FFFFFF;
-	  }
+#main { background :  white;
+      }
 
-#lftBar { position :     fixed;
-          width :        180px;
-          top :          15px;
-          left :         15px;
-          background :   transparent;
-		}
+#links { position :     fixed;
+         width :        180px;
+         top :          15px;
+         left :         15px;
+         background :   transparent;
+       }
 
 code { font-family : monospace;
        font-weight : bold;
-	 }
+     }
 
 samp { font-family : monospace;
        font-weight : bold;
