@@ -241,6 +241,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 "=="        return E_EQ;      /* equal */
+"!="        return E_NE;      /* unequal */
 "<"         return E_LT;      /* less than */              
 "<="        return E_LE;      /* less than or equal */     
 ">"         return E_GT;      /* greater than */           
