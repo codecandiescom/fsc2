@@ -158,7 +158,7 @@ int conditionerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	eprint( FATAL, "%s:%ld: Syntax error in loop or if condition.\n",
+	eprint( FATAL, "%s:%ld: Syntax error in loop or IF condition.\n",
 			Fname, Lc  );
 	THROW( EXCEPTION );
 }
