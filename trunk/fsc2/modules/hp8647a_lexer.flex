@@ -20,7 +20,6 @@
 #define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
 
-
 static int hp8647a_lex( void );
 static int hp8647a_get_unit( void );
 static void hp8647a_new_table_entry( int type, double val );
