@@ -209,16 +209,16 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr510.Sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lf mV, using "
-					"%.0lf mV instead.\n", sens * 1.0e3,
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lfmV, using "
+					"%.0lfmV instead.\n", sens * 1.0e3,
 					slist[ Sens - 1 ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lf uV, using "
-					"%.0lf uV instead.\n", sens * 1.0e6,
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lfuV, using "
+					"%.0lfuV instead.\n", sens * 1.0e6,
 					slist[ Sens - 1 ] * 1.0e6 );
 		else
-			eprint( WARN, "sr510: Can't set sensitivity to %.0lf nV, using "
-					"%.0lf nV instead.\n", sens * 1.0e9, 
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lfnV, using "
+					"%.0lfnV instead.\n", sens * 1.0e9, 
 					slist[ Sens - 1 ] * 1.0e9 );
 		sr510.Sens_warn = SET;
 	}
@@ -232,8 +232,14 @@ Var *lockin_sensitivity( Var *v )
 
 		if ( ! sr510.Sens_warn )                      /* no warn message yet */
 		{
-			eprint( WARN, "sr510: Invalid sensitivity (%lf V), using %lf V "
-					"instead.\n", sens, slist[ Sens - 1 ] );
+		if ( sens >= 1.0e-3 )
+			eprint( WARN, "sr510: Invalid sensitivity to %.0lfV, using "
+					"%.0lfmV instead.\n", sens * 1.0e3,
+					slist[ Sens - 1 ] * 1.0e3 );
+		else
+			eprint( WARN, "sr510: Invalid sensitivity to %.0lfnV, using "
+					"%.0lfnV instead.\n", sens * 1.0e9, 
+					slist[ Sens - 1 ] * 1.0e9 );
 			sr510.Sens_warn = SET;
 		}
 	}
@@ -310,11 +316,11 @@ Var *lockin_time_constant( Var *v )
 		 ! sr510.TC_warn )                          /* no warn message yet ? */
 	{
 		if ( tc >= 1.0 )
-			eprint( WARN, "sr510: Can't set time constant to %.0lf s, using "
-					"%.0lf s instead.\n", tc, tcs[ TC - 1 ] );
+			eprint( WARN, "sr510: Can't set time constant to %.0lfs, using "
+					"%.0lfs instead.\n", tc, tcs[ TC - 1 ] );
 		else
-			eprint( WARN, "sr510: Can't set time constant to %.0lf ms, using "
-					"%.0lf ms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+			eprint( WARN, "sr510: Can't set time constant to %.0lfms, using "
+					"%.0lfms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 		sr510.TC_warn = SET;
 	}
 	
@@ -328,11 +334,11 @@ Var *lockin_time_constant( Var *v )
 		if ( ! sr510.TC_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 1.0 )
-				eprint( WARN, "sr510: Invalid time constant (%.0lf s), using "
-					"%.0lf s instead.\n", tc, tcs[ TC - 1 ] );
+				eprint( WARN, "sr510: Invalid time constant (%.0lfs), using "
+					"%.0lfs instead.\n", tc, tcs[ TC - 1 ] );
 			else
-				eprint( WARN, "sr510: Invalid time constant (%.0lf ms), using "
-					"%.0lf ms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
+				eprint( WARN, "sr510: Invalid time constant (%.0lfms), using "
+					"%.0lfms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 			sr510.TC_warn = SET;
 		}
 	}

@@ -265,7 +265,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4nvolt"   return E_NV_TOKEN;
 "\x4uvolt"   return E_UV_TOKEN;
 "\x4mvolt"   return E_MV_TOKEN;
-"\x4colt"    return E_V_TOKEN;
+"\x4volt"    return E_V_TOKEN;
 
 			/* handling of invalid input */
 .           {
