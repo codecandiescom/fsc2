@@ -1,0 +1,212 @@
+@c $Id$
+
+@node Device Functions, Functions, Modules, EDL, Top
+@chapter Device Functions
+
+@ifinfo
+@menu
+* Magnet functions::        Functions for controlling the magnet.
+* Gaussmeter functions::    Functions for meeasuring the magnetic field.
+* Lock-In functions::       Functions for accessing the lock-in amplifiers.
+@end menu
+@end ifinfo
+
+
+@node Magnet functions, Gaussmeter functions, Device Functions, Device Functions
+@section Magnet functions
+@cindex magnet functions
+
+
+All the following functions may be used to control the magnetic field of
+the magnet. Currently, AEG magnets (X-band and S-band) are
+supported. The modules that have to be listed in the @code{DEVICES}
+section to load the the functions are
+@example
+aeg_x_band
+aeg_s_band
+@end example
+Because magnets are hardly ever changed, if the program is set up
+correctly for the experiment) one can use @code{magnet} as the module
+name instead.
+
+Since it is not possible to measure the field using just the magnet
+power supply it is necessary also to specify a gaussmeter to enable
+@b{fsc2} to control the magnet. The module name of the gaussmeter has to
+appear @b{before} the magnet module entry in the @code{DEVICES}
+section. See the next section for the implemented gaussmeters and the
+related functions.
+
+If a magnet module is listed in the @code{DEVICES} section the program
+will try to calibrate the field sweep parameters at the start of the
+experiment, i.e.@: it will sweep the field up and down for some
+time. This may take some time. See below on how to reduce this time.
+
+
+@table @samp
+@item magnet_setup()
+@findex magnet_setup()
+The function can be called to set the start field and the field step
+size used in sweeps. The function expects two floating point parameters,
+i.e.@: the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@:
+@w{0.35 G}.
+
+
+@item magnet_fast_init()
+@findex magnet_fast_init()
+Calling this functions in the @code{PREPARATIONS} section will shorten
+the time @b{fsc2} uses for calibration of the field sweep at the start
+of the experiment. Unfortunately, this also reduces the precision of the
+field sweep. Whenever an experiment is restarted (i.e.@: if no new EDL
+file is loaded in between) this shortened calibration is done to check
+that the parameters didn't check significantly since the last run.
+
+
+@item set_field()
+@findex set_field()
+This function can be called in the @code{EXPERIMENT} section. It expects
+one floating point argument, i.e.@: the field value and will set the
+magnetic field to this value.
+
+
+@item sweep_up()
+@findex sweep_up()
+The function can be called in the @code{EXPERIMENT} section, but only if
+the function @code{magnet_setup()} (see above) has been called
+previously. It doesn't take an argument and will sweep up the magnet by
+the field step size value set in the @code{magnet_setup()} function.
+
+The precision of the field sweep depends on the step size. While the
+precision is usually quite good for step sizes of up to @w{1 G}, for much
+larger step sizes it may deteriorate quite significantly. It sometimes
+helps to add a short wait period (use function @code{wait()} after a
+sweep step) to allow the field to settle at the new point. On the other
+hand, it then might be faster (and more reliable) not to use the sweep
+function at all but @code{set_field()} instead.
+
+@item sweep_down()
+@findex sweep_down()
+Analog to @code{sweep_up()} but sweeping the magnetic field down by the
+field step size defined in @code{magnet_setup()}.
+
+@item reset_field()
+@findex reset_field()
+This function (to be called in the @code{EXPERIMENT} section only)
+resets the magnetic field to the start field value defined in
+@code{magnet_setup()} (which has to be called before).
+
+@end table
+
+
+@node Gaussmeter functions, Lock-In Functions, Magnet functions, , Device Functions
+@section Gaussmeter functions
+@cindex gaussmeter functions
+
+
+Currently, two types of gaussmeters are implemented, the Bruker ER035M
+NMR gaussmeter and the Bruker BH15 field controller, using a hall
+probe. The range of fields that can be measured with the Bruker ER035M
+NMR gaussmeter depends on the probe being used, with the F0 probe
+(S-band) the range is @w{460 G} to @w{2390 G} while with the F1 probe
+(X-band) a range between @w{1460 G} and @w{19900 G} can be measured.
+With the BH15 field controller a range between @w{-50 G} and @w{2300 G}
+can be used.
+
+The modules defining the gaussmeter functions (to be listed in the
+@code{DEVICES} section are:
+@example
+er035m
+er035m_s
+er035m_sa
+bh15
+@end example
+The first three modules are for the ER035M NMR gaussmeter, the first one
+is to be used when it is controlled via the GPIB bus and the second if it's
+connected using the serial port of the computer. The third module,
+@code{er035m_sa} is special in that respect that it doesn't allow field
+control and was added to allow calibrations of the BH15 field controller
+using the somewhat more precise ER035M NMR gaussmeter. If the program is
+correctly installed the appropriate driver is loaded by specifying
+`@code{gaussmeter}' instead of one of the listed module names.
+
+The gaussmeters are mainly used together with the magnet power supply
+and have to be specified in the @code{DEVICES} section @b{before} the
+magnet module.
+
+There are only two functions for gaussmeters, both only to be used in
+queries and in the @code{EXPERIMENT} section of the EDL program.
+
+@table @samp
+@item find_field()
+@findex find_field()
+The function returns the current value of the magnetic field in Gauss.
+
+@item field_resolution()
+@findex field_resolution()
+The function returns the resolution in Gauss used in measurements of the
+magnetc field.
+
+@end table
+
+
+@node Lock-In functions, , Gaussmeter functions, Device Functions
+@section Lock-In functions
+@cindex Lock-In functions
+
+There are modules for four types of lock-in amplifiers implemented. All
+of them are by Stanford Research and have the model names SR510, SR530,
+SR810 and SR830. Not too surprisingly, the module names to be specified
+in the @code{DEVICES} section are
+@example
+sr510
+sr530
+sr810
+sr830
+@end example
+
+Because the models have different capabilities, some of the functions
+are either only defined for parts of the models or may use slightly
+different parameters.
+
+Several of the following functions can be called to query settings of
+the lock-in amplifier or to set a value. In the first case the function
+usually has to be called with no argument, while to set a parameter an
+argument has to be passed to the function. Because of these different
+modes of calling the functions one should carefully check the arguments
+to achieve the desired results.
+
+@table @samp
+@item lockin_get_data()
+@findex lockin_get_data()
+This function only allows queries, i.e.@: to fetch the measured value
+from the lock-in amplifier. The parameters, that may be passed to the
+function differ according to the model.
+@table @samp
+@item SR510
+No argumnt is allowed - the function returns the measured value of the
+only channel as a floating point number (i.e.@: in Volts).
+
+@item SR530
+If no argument is specified the measured value at the first channel is
+returned. Alternatively, one parameter may be passed to the function
+with a value of either @code{1} or @code{2}, in which case the measure
+value from channel 1 or 2 is returned. Finally, two arguments can be
+given, with again values of @code{1} or @code{2}. In this case a
+1-dimensional array with two elements is returned, containing the
+measured values of the corresponding channels.
+
+@item SR810
+@item SR830
+@end table
+
+
+@end table
+
+lockin_get_data, -1, EXP;       // returns the lock-in voltage 
+lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
+lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
+lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
+lockin_time_constant, -1, ALL;  // gets or sets the time constant
+lockin_phase, -1, ALL;          // gets or sets the phase
+lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR8x0 only)
+lockin_ref_mode, 0, EXP;        // Get reference mode (SR8x0 only)
+lockin_ref_level, -1, ALL;      // Get or set reference level (SR8x0 only)
