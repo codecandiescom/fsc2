@@ -56,7 +56,7 @@
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
-* pci_mio_16e_1:    National Instruments PCI-MIO-16E-1 DAQ card
+* pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
