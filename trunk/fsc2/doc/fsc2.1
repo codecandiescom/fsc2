@@ -38,6 +38,12 @@ be names of \fBEDL\fR scripts that are executed automatically one after each
 other. Since some of the safety features need to be relaxed in this mode
 please read the full documentation before using this mode!
 .TP
+\fB\-I\fR
+Starts \fBfsc2\fR in graphics mode with the main window in icomic state, does
+a syntax check on FILE and, on success, immediatley starts the experiment.
+When the main window is still in iconic state at the end of the experiment
+the program terminates with the end of the experiment.
+.TP
 \fB\-ng\fR
 Starts \fBfsc2\fR and immediately does the test run as well as the experiment
 for the input \fBEDL\fR using no graphics. Requires that no \fBEDL\fR functions
