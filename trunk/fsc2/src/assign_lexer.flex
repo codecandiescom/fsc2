@@ -298,7 +298,7 @@ WS          [\n=: ]+
 ";"         return ';';               /* end of statement character */
 
 			/* handling of invalid input (i.e. everything else) */
-.+          THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>	    {
 				Assign_Next_Section = NO_SECTION;

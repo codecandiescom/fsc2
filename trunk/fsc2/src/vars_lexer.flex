@@ -259,7 +259,7 @@ WS          [\n \t]+
 {WS}        /* skip white space */
 
 			/* handling of invalid input */
-.+          THROW( INVALID_INPUT_EXCEPTION );
+.           THROW( INVALID_INPUT_EXCEPTION );
 
 			/* handling of end of file */
 <<EOF>>	    {
