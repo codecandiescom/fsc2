@@ -1245,7 +1245,7 @@ static FS *rs690_append_fs( Ticks pos )
 
 	if ( rs690.new_fs == NULL )
 	{
-		n = rs690.new_fs = T_malloc( sizeof *n );
+		n = rs690.new_fs = FS_P T_malloc( sizeof *n );
 		rs690.new_fs_count = 1;
 
 	}
@@ -1254,7 +1254,7 @@ static FS *rs690_append_fs( Ticks pos )
 		for ( p = rs690.new_fs; p->next != NULL; p = p->next )
 			/* empty */ ;
 
-		n = p->next = T_malloc( sizeof *n );
+		n = p->next = FS_P T_malloc( sizeof *n );
 		rs690.new_fs_count++;
 	}
 
@@ -1278,7 +1278,7 @@ static FS *rs690_insert_fs( FS *at, Ticks pos )
 	if ( rs690.new_fs == NULL )
 		return rs690_append_fs( pos );
 
-	n = T_malloc( sizeof *n );
+	n = FS_P T_malloc( sizeof *n );
 	rs690.new_fs_count++;
 
 	n->next = at->next;
@@ -1317,7 +1317,7 @@ void rs690_cleanup_fs( void )
 	{
 		while ( rs690.new_fs->next != NULL )
 			rs690_delete_fs_successor( rs690.new_fs );
-		rs690.new_fs = T_free( rs690.new_fs );
+		rs690.new_fs = FS_P T_free( rs690.new_fs );
 	}
 	rs690.new_fs_count = 0;
 
@@ -1326,7 +1326,7 @@ void rs690_cleanup_fs( void )
 	{
 		while ( rs690.old_fs->next != NULL )
 			rs690_delete_fs_successor( rs690.old_fs );
-		rs690.new_fs = T_free( rs690.old_fs );
+		rs690.old_fs = FS_P T_free( rs690.old_fs );
 	}
 	rs690.old_fs_count = 0;
 }
