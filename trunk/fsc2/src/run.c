@@ -697,11 +697,12 @@ static void run_sigchld_handler( int signo )
 
 		if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
 		{
-			GUI.main_form->sigchld->u_ldata = ( long ) return_status;
+			GUI.main_form->sigchld->u_ldata =
+										 ( long ) ! WIFEXITED( return_status );
 			fl_trigger_object( GUI.main_form->sigchld );
 		}
 		else
-			run_sigchld_callback( NULL, 0 );
+			Internals.check_return = ! WIFEXITED( return_status );
 	}
 
 	errno = errno_saved;
@@ -728,8 +729,6 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	int state = EXIT_SUCCESS;
 
 
-	UNUSED_ARGUMENT( b );
-
 	if ( Internals.child_is_quitting == QUITTING_UNSET )
 									/* missing notification by the child ? */
 	{
@@ -749,7 +748,8 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		mess = "Experiment stopped unexpectedly after running for";
 		state = EXIT_FAILURE;
 	}
-	else if ( ! a->u_ldata )          /* return status indicates error ? */
+	else if ( ( Internals.cmdline_flags & NO_GUI_RUN && b ) ||
+			  ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) && a->u_ldata ) )
 	{
 		if ( ! ( Internals.cmdline_flags & DO_CHECK ) &&
 			 ! ( Internals.cmdline_flags & BATCH_MODE ) &&
@@ -800,6 +800,9 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	fsc2_serial_cleanup( );
 
+	if ( Internals.cmdline_flags & NO_GUI_RUN )
+		return;
+
 	/* Print out for how long the experiment has been running */
 
 	secs  = irnd( experiment_time( ) );
@@ -823,35 +826,32 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	   handler that's responsible for closing the window. Also change the
 	   buttons label to 'Close'. */
 
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
+	if ( G.dim & 1 || ! G.is_init )
 	{
-		if ( G.dim & 1 || ! G.is_init )
-		{
-			fl_freeze_form( GUI.run_form_1d->run_1d );
-			fl_set_object_label( GUI.run_form_1d->stop_1d,
-								 G.dim == 1 ? "Close" : "Close all" );
-			fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
-			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( GUI.run_form_1d->stop_1d,
-									  "Removes all display windows" );
-			fl_set_object_callback( GUI.run_form_1d->stop_1d,
-									run_close_button_callback, 0 );
-			fl_unfreeze_form( GUI.run_form_1d->run_1d );
-		}
+		fl_freeze_form( GUI.run_form_1d->run_1d );
+		fl_set_object_label( GUI.run_form_1d->stop_1d,
+							 G.dim == 1 ? "Close" : "Close all" );
+		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_1d->stop_1d,
+								  "Removes all display windows" );
+		fl_set_object_callback( GUI.run_form_1d->stop_1d,
+								run_close_button_callback, 0 );
+		fl_unfreeze_form( GUI.run_form_1d->run_1d );
+	}
 
-		if ( G.dim & 2 )
-		{
-			fl_freeze_form( GUI.run_form_2d->run_2d );
-			fl_set_object_label( GUI.run_form_2d->stop_2d,
-								 G.dim == 2 ? "Close" : "Close all" );
-			fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
-			if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-				fl_set_object_helper( GUI.run_form_2d->stop_2d,
-									  "Removes all display windows" );
-			fl_set_object_callback( GUI.run_form_2d->stop_2d,
-									run_close_button_callback, 0 );
-			fl_unfreeze_form( GUI.run_form_2d->run_2d );
-		}
+	if ( G.dim & 2 )
+	{
+		fl_freeze_form( GUI.run_form_2d->run_2d );
+		fl_set_object_label( GUI.run_form_2d->stop_2d,
+							 G.dim == 2 ? "Close" : "Close all" );
+		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
+		if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_2d->stop_2d,
+								  "Removes all display windows" );
+		fl_set_object_callback( GUI.run_form_2d->stop_2d,
+								run_close_button_callback, 0 );
+		fl_unfreeze_form( GUI.run_form_2d->run_2d );
 	}
 
 	if ( Internals.cmdline_flags & DO_CHECK ||
@@ -861,9 +861,6 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 		Internals.check_return = state;
 		fl_trigger_object( GUI.main_form->quit );
 	}
-
-	if ( Internals.cmdline_flags & NO_GUI_RUN )
-		Internals.check_return = state;
 }
 
 

@@ -291,12 +291,9 @@ static void globals_init( const char *pname )
 	Internals.fsc2_clean_pid = 0;
 	Internals.fsc2_clean_died = SET;
     Internals.http_pid = 0;
-
-	/* Set up a lot of global variables */
-
 	Internals.state = STATE_IDLE;
 	Internals.mode = PREPARATION;
-	Internals.cmdline_flags = UNSET;
+	Internals.cmdline_flags = 0;
 	Internals.in_hook = UNSET;
 	Internals.I_am = PARENT;
 	Internals.exit_hooks_are_run = UNSET;
@@ -307,6 +304,7 @@ static void globals_init( const char *pname )
 	Internals.is_linux_i386 = UNSET;
 	Internals.conn_child_replied = UNSET;
 	Internals.title = NULL;
+	Internals.child_is_quitting = QUITTING_UNSET;
 
 	GUI.win_has_pos = UNSET;
 	GUI.win_has_size = UNSET;
@@ -570,11 +568,10 @@ static void no_gui_run( void )
 	if ( ! run( ) )
 		exit( EXIT_FAILURE );
 
-	while ( Internals.child_pid != 0 )
-	{
+	while ( Internals.child_is_quitting == QUITTING_UNSET )
 		pause( );
-		new_data_handler( );
-	}
+
+	run_sigchld_callback( NULL, Internals.check_return );
 
 	exit( Internals.check_return );
 }
