@@ -2065,9 +2065,21 @@ length of the pulse pattern and not use instead the maximum pattern
 length all the time? The reason is that clearing the whole pattern at
 the start of the experiment for some pulsers can take a rather long
 time. E.g.@: for the @strong{Sony/Tektronix DG2020} for each of the
-internal channels that are going to be used more than @w{64 kB} would
-have to be send to the pulser while in most experiments only a small
-fraction of the maximum pattern length is really needed.
+internal channels that are going to be used more than @w{64 kB} of data
+would have to be send to the pulser, probably taking several minutes,
+while in most experiments only a small fraction of the maximum pattern
+length is really needed.
+
+@quotation
+@cartouche
+The use of the keyword @code{MAXIMUM_SEQUENCE_LENGTH} is deprecated.
+Instead, the pulser module should supply, if necessary, a function
+@code{pulser_maximum_sequence_length()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{set_max_seq_len} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
 
 
 @item bool bool keep_all_pulses( void )
@@ -2079,9 +2091,20 @@ be used.
 The question, of course, is why delete pulses at all that are never used
 and not keep them? The reason is that when doing phase cycling it can
 happen that for each additional pulse lots of channels in the digitizer
-are needed, even to the point that the number of channels gets exceeded.
+are needed, even to the point that the number of channels is exceeded.
 Therefor, as a default, pulses that are found to be never used during
 the test run are removed (after printing out a message to the user).
+
+@quotation
+@cartouche
+The use of the keyword @code{KEEP_ALL_PULSES} is deprecated.  Instead,
+the pulser module should supply, if necessary, a function
+@code{pulser_keep_all_pulses()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{keep_all_pulses} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
 
 
 @item bool set_phase_reference( int phase, int function )
@@ -2143,6 +2166,18 @@ should (but that's not a necessity but just a recommendation) use a
 default value of @w{20 ns}.
 
 
+@quotation
+@cartouche
+The use of the keyword @code{PHASE_SWITCH_DELAY} is deprecated.
+Instead, the pulser module should supply, if necessary, a function
+@code{pulser_phase_switch_delay()} that can be used in the
+@code{PREPARATIONS} section and has the same effect. Assigning anything
+else then @code{NULL} to the @code{set_phase_switch_delay} member of the
+pulser structure is only for backward compatibility.
+@end cartouche
+@end quotation
+
+
 @item bool set_grace_period( double gp_time )
 This function is called when in the @code{ASSIGNMENTS} section a line like
 @example
@@ -2159,6 +2194,17 @@ reduced below the value set by the user. If the module is not prepared
 to create phase pulses at all, this function does not need to exist and
 the corresponding function pointer entry in the pulsers structure should
 remain a @code{NULL} pointer.
+
+@quotation
+@cartouche
+The use of the keyword @code{GRACE_PERIOD} is deprecated.  Instead, the
+pulser module should supply, if necessary, a function
+@code{pulser_grace_period()} that can be used in the @code{PREPARATIONS}
+section and has the same effect. Assigning anything else then
+@code{NULL} to the @code{set_grace_period} member of the pulser
+structure is only for backward compatibility.
+@end cartouche
+@end quotation
 
 
 @item bool phase_setup_prep( int func, int type, int pod, long val )
@@ -2320,9 +2366,9 @@ start position of a pulse, i.e.@: for lines like
   PULSE_13: START = 100 ns, ...
 @end example
 @noindent
-within the experiment section or when during the experiment the position
-of a pulse is changed directly by assigning a new start position i.e.@:
-for lines like
+within the @code{PREPARATIONS} section or when during the experiment the
+position of a pulse is changed directly by assigning a new start
+position i.e.@: for lines like
 @example
   P13.START = 260 ns;
 @end example
@@ -2341,11 +2387,26 @@ integer multiple of the pulsers time base).
 
 @item bool set_pulse_length( long pulse_number, double ptime )
 The function gets called when the length of a pulse is set in the
-@code{EDL} file. As usual, the first argument is the pulse number,
-the second is the initial length of the pulse in seconds. You will have
-to check yourself within the module that the pulse length hasn't an
-invalid value. If the length of the pulse is zero you should treat the
-pulse as switched off for the time being.
+@code{EDL} file, i.e.@: for lines like
+@example
+  PULSE_13: ...
+            LENGTH = 2 us, ...
+@end example
+@noindent
+within the @code{PREPARATIONS} section or, within the @code{EXPERIMENT}
+section, to directly change the length of a pulse, e.g.@:
+@example
+  P13_LENGTH = 2.1 us;
+@end example
+@noindent
+If you need different handling of both situations you can assign a new
+function pointer to the corresponding structure entry whenever you want.
+
+Obviously, the first argument to the function is the pulse number, the
+second is the new length of the pulse in seconds. You will have to check
+yourself within the module that the pulse length hasn't an invalid
+value. If the length of the pulse is zero you must treat the pulse as
+switched off for the time being.
 
 
 @item bool set_pulse_position_change( long pulse_number, double ptime )
@@ -2375,7 +2436,7 @@ like
   PULSE_13: PHASE_CYCLE = PHASE_SEQUENCE_1, ...
 @end example
 @noindent
-are found in the @code{EXPERIMENT} section of the @code{EDL} file.
+are found in the @code{PREPARATIONS} section of the @code{EDL} file.
 The second argument is either the number @code{1} or @code{2},
 indicating one of the currently allowed two phase sequences. But to
 avoid the necessity of changes of the module it is probably a good idea
@@ -2383,24 +2444,24 @@ to test this value within the function.
 
 
 @item bool get_pulse_function( long pulse_number, int *function )
-This function is called by @code{fsc2} to find out about the function
-of a pulse from the module. If a pulse with the number passed to the
-function exists (otherwise the module should print out an error message
-and throw an exception), it should set the variable pointed to by the
-second argument to the number of the pulses function and return a true
-value. If no function has been set for the pulse an error message should
-be printed out and an exception has to be thrown.
+This function is called by @code{fsc2} to find out about the function of
+a pulse from the module. If a pulse with the number passed to the
+function exists (if it doesn't the module should print out an error
+message and throw an exception), it should set the variable pointed to
+by the second argument to the number of the pulses function and return a
+true value. If no function has been set for the pulse an error message
+should be printed out and an exception has to be thrown.
 
 
 @item bool get_pulse_position( long pulse_number, double *ptime )
 This function is called by @code{fsc2} to find out about the current
-position of a pulse from the module. If a pulse with the number passed
-to the function exists (otherwise the module should print out an error
-message and throw an exception), it should set the variable pointed to
-by the second argument to the start position (in seconds) of the
-pulse. If no start position has been set for the pulse an error message
-should be printed out and an exception has to be thrown.
-
+position of a pulse (@strong} not including function delays) from the
+module. If a pulse with the number passed to the function exists
+(otherwise the module should print out an error message and throw an
+exception), it should set the variable pointed to by the second argument
+to the start position (in seconds) of the pulse. If no start position
+has been set for the pulse an error message should be printed out and an
+exception has to be thrown.
 
 
 @item bool get_pulse_length( long pulse_number, double *ptime )
@@ -2409,6 +2470,7 @@ a pulse. If a pulse with the number passed as the first argument exists
 the variable the second argument points to has to be set to the length
 of the pulse (in seconds).  If no length has been set for the pulse an
 error message should be printed out and an exception has to be thrown.
+
 
 @item bool get_pulse_position_change( long pulse_number, double *ptime )
 This function should return the current setting of the position change
