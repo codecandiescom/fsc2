@@ -94,6 +94,14 @@ static Var *CV;
 input:   /* empty */
        | input eol
        | input line eol
+       | input line line           { eprint( FATAL, "%s:%ld: Missing semicolon"
+											 " before (or on) this line.",
+											 Fname, Lc );
+	                                 THROW( EXCEPTION ); }
+       | input line ','            { eprint( FATAL, "%s:%ld: Missing semicolon"
+											 " before (or on) this line.",
+											 Fname, Lc );
+	                                 THROW( EXCEPTION ); }
 ;
 
 eol:     ';'                       { assert( Var_Stack == NULL );
@@ -205,11 +213,8 @@ int exp_runerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	if ( *exptext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
-				"section.", Fname, Lc );
-	else
-		eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.",
+
+	eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.",
 			Fname, Lc );
 	THROW( EXCEPTION );
 }

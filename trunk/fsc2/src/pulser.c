@@ -539,7 +539,6 @@ void p_set_rep_freq( Var *v )
 
 
 /*---------------------------------------------------*/
-/* Function for setting the trigger in level voltage */
 /*---------------------------------------------------*/
 
 void p_phase_ref( long func, int ref )

@@ -217,7 +217,7 @@ bool dg2020_set_pulse_length_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_set_pulse_phase_cycle( long pnum, int cycle )
+bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 	Phase_Sequence *pc = PSeq;
@@ -351,7 +351,7 @@ bool dg2020_get_pulse_length_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool dg2020_get_pulse_phase_cycle( long pnum, int *cycle )
+bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 {
 	PULSE *p = dg2020_get_pulse( pnum );
 

@@ -311,14 +311,14 @@ bool dg2020_set_pulse_position( long pnum, double time );
 bool dg2020_set_pulse_length( long pnum, double time );
 bool dg2020_set_pulse_position_change( long pnum, double time );
 bool dg2020_set_pulse_length_change( long pnum, double time );
-bool dg2020_set_pulse_phase_cycle( long pnum, int cycle );
+bool dg2020_set_pulse_phase_cycle( long pnum, long cycle );
 
 bool dg2020_get_pulse_function( long pnum, int *function );
 bool dg2020_get_pulse_position( long pnum, double *time );
 bool dg2020_get_pulse_length( long pnum, double *time );
 bool dg2020_get_pulse_position_change( long pnum, double *time );
 bool dg2020_get_pulse_length_change( long pnum, double *time );
-bool dg2020_get_pulse_phase_cycle( long pnum, int *cycle );
+bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle );
 
 bool dg2020_change_pulse_position( long pnum, double time );
 bool dg2020_change_pulse_length( long pnum, double time );

@@ -83,9 +83,9 @@ S           S(TART)?
 L			L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
-PC          P(HA(SE)?)?_?C(YC(LE)?)?
+PC          PH(ASE)?_?C(YC(LE)?)?
 
-PS          P(HASE)?_?S(EQ(UENCE)?)?(_?[0-9]{1,2})?
+PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 
 CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4)|(LIN))
 

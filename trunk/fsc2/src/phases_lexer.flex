@@ -52,7 +52,7 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
-PS          ^[ \t]*P(HA(SE)?)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
+PS          ^[ \t]*PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9]+)?
 AS          ^[ \t]*A(CQ(UISITION)?)?_?S(EQ(UENCE)?)?(_?[XY])?
 
 PX          "+"?[xX]

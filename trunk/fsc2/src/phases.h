@@ -10,7 +10,7 @@
 
 
 typedef struct _PhS_ {
-	int num;
+	long num;
 	int *sequence;                   /* array of phase types */
 	int len;                         /* length of array of phase types */
 	struct _PhS_ *next;

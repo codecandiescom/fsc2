@@ -77,7 +77,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 
 	while ( cp != NULL )
 	{
-		if ( cp->num == ( int ) phase_seq_num )
+		if ( cp->num == phase_seq_num )
 		{
 			eprint( FATAL, "%s:%ld: Phase sequence %ld has already been "
 					"defined.", Fname, Lc, cp->num );
@@ -101,7 +101,7 @@ Phase_Sequence *phase_seq_start( long phase_seq_num )
 	}
 	cp->next = NULL;
 
-	cp->num = ( int ) phase_seq_num;
+	cp->num = phase_seq_num;
 	cp->len = 0;
 	cp->sequence = NULL;
 
