@@ -80,6 +80,7 @@
 #define PULSE_PARAMS_P    ( PULSE_PARAMS * )
 #define ATT_TABLE_ENTRY_P ( ATT_TABLE_ENTRY * )
 #define FS_P              ( FS * )
+#define UNS16_P           ( uns16 * )
 
 #else
 
@@ -129,6 +130,7 @@
 #define PULSE_PARAMS_P
 #define ATT_TABLE_ENTRY_P
 #define FS_P
+#define UNS16_P
 
 #endif
 
