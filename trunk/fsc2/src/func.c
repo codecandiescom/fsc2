@@ -25,7 +25,7 @@ static int get_save_file( Var **v, const char *calling_function );
 static bool print_array( Var *v, long cur_dim, long *start, int fid );
 static bool print_slice( Var *v, int fid );
 static bool print_browser( int browser, int fid, const char* comment );
-static bool T_fprintf( int file_num, const char *fmt, ... );
+static void T_fprintf( int file_num, const char *fmt, ... );
 
 
 static bool No_File_Numbers;
@@ -2823,7 +2823,7 @@ getfile_retry:
 		goto getfile_retry;
 	}
 
-	if ( ( fp = fopen( r, "w" ) ) == NULL )
+	if ( ( fp = fopen( r, "w+" ) ) == NULL )
 	{
 		switch( errno )
 		{
@@ -2994,8 +2994,10 @@ void close_all_files( void )
 
 	for ( i = 0; i < File_List_Len; i++ )
 	{
-		T_free( File_List[ i ].name );
-		fclose( File_List[ i ].fp );
+		if ( File_List[ i ].name )
+			T_free( File_List[ i ].name );
+		if ( File_List[ i ].fp )
+			fclose( File_List[ i ].fp );
 	}
 
 	T_free( File_List );
@@ -3040,30 +3042,25 @@ Var *f_save( Var *v )
 		switch( v->type )
 		{
 			case INT_VAR :
-				if ( ! T_fprintf( file_num, "%ld\n", v->val.lval ) )
-					THROW( EXCEPTION );
+				T_fprintf( file_num, "%ld\n", v->val.lval );
 				break;
 
 			case FLOAT_VAR :
-				if ( ! T_fprintf( file_num, "%#.9g\n", v->val.dval ) )
-					THROW( EXCEPTION );
+				T_fprintf( file_num, "%#.9g\n", v->val.dval );
 				break;
 
 			case STR_VAR :
-				if ( ! T_fprintf( file_num, "%s\n", v->val.sptr ) )
-					THROW( EXCEPTION );
+				T_fprintf( file_num, "%s\n", v->val.sptr );
 				break;
 
 			case INT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					if ( ! T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] ) )
-						THROW( EXCEPTION );
+					T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
 				break;
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					if ( ! T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] ) )
-						THROW( EXCEPTION );
+					T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
 				break;
 
 			case ARR_PTR :
@@ -3113,19 +3110,12 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid )
 		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
 			if ( v->type == INT_ARR )
-			{
-				if ( ! T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] ) )
-					return FAIL;
-			}
+				T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] );
 			else
-			{
-				if ( ! T_fprintf( fid, "%f\n", v->val.dpnt[ *start ] ) )
-					return FAIL;
-			}
+				T_fprintf( fid, "%f\n", v->val.dpnt[ *start ] );
 		}
 
-		if ( ! T_fprintf( fid, "\n" ) )
-			return FAIL;
+		T_fprintf( fid, "\n" );
 	}
 
 	return OK;
@@ -3140,20 +3130,10 @@ static bool print_slice( Var *v, int fid )
 	long i;
 
 	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
-	{
 		if ( v->from->type == INT_ARR )
-		{
-			if ( ! T_fprintf( fid, "%ld\n", * 
-							  ( ( long * ) v->val.gptr + i ) ) )
-				return FAIL;
-		}
+			T_fprintf( fid, "%ld\n", * ( ( long * ) v->val.gptr + i ) );
 		else
-		{
-			if ( ! T_fprintf( fid, "%f\n",
-							  * ( ( double * ) v->val.gptr + i ) ) )
-				return FAIL;
-		}
-	}
+			T_fprintf( fid, "%f\n", * ( ( double * ) v->val.gptr + i ) );
 
 	return OK;
 }
@@ -3429,27 +3409,25 @@ Var *f_save_o( Var *v )
 static bool print_browser( int browser, int fid, const char* comment )
 {
 	char *line;
-	bool state;
 
 
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
 	if ( comment == NULL )
 		comment = "";
-	state = T_fprintf( fid, "%s\n", comment );
+	T_fprintf( fid, "%s\n", comment );
 
 	while ( 1 )
 	{
 		reader( &line );
-		if ( line != NULL && state )
-			state = T_fprintf( fid, "%s%s\n", comment, line );
+		if ( line != NULL )
+			T_fprintf( fid, "%s%s\n", comment, line );
 		else
 			break;
 	}
 
-	if ( state )
-		state = T_fprintf( fid, "%s\n", comment );
+	T_fprintf( fid, "%s\n", comment );
 
-	return state;
+	return OK;
 }
 
 
@@ -3540,80 +3518,233 @@ Var *f_save_c( Var *v )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static bool T_fprintf( int file_num, const char *fmt, ... )
+static void T_fprintf( int file_num, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static int size;            /* guess for number of characters needed */
 	char *p;
 	va_list ap;
-	int new_file_num;
+	char *new_name;
+	FILE *new_fp;
+	struct stat old_stat, new_stat;
+	char *buffer[ 1024 ];
+	int rw;
+	char *mess;
 
+
+	/* If the file has been closed because of insufficient place and no
+       replacement file has been given just don't print */
+
+	if ( File_List[ file_num ].fp == NULL )
+		return;
 
 	size = 1024;
 
 	/* First we've got to find out how many characters we need to write out */
 
-	TRY
-	{
-		p = T_malloc( size * sizeof( char ) );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-		return FAIL;
+	p = T_malloc( size * sizeof( char ) );
 
 	while ( 1 ) {
 
-		/* Try to print in the allocated space */
+        /* Try to print in the allocated space */
 
-		va_start( ap, fmt );
-		n = vsnprintf( p, size, fmt, ap );
-		va_end( ap );
+        va_start( ap, fmt );
+        n = vsnprintf( p, size, fmt, ap );
+        va_end( ap );
 
-		/* If that worked, try to write out the string */
+        /* If that worked, try to write out the string */
 
-		if ( n > -1 && n < size )
-			break;
+        if ( n > -1 && n < size )
+            break;
 
-		/* Else try again with more space */
+        /* Else try again with more space */
 
-		if ( n > -1 )            /* glibc 2.1 */
-			size = n + 1;        /* precisely what is needed */
-		else                     /* glibc 2.0 */
-		{
-			if ( size < INT_MAX / 2 )
-				size *= 2;           /* twice the old size */
-			else
-			{
-				T_free( p );
-				return FAIL;
-			}
-		}
+        if ( n > -1 )            /* glibc 2.1 */
+            size = n + 1;        /* precisely what is needed */
+        else                     /* glibc 2.0 */
+        {
+            if ( size < INT_MAX / 2 )
+                size *= 2;           /* twice the old size */
+            else
+            {
+				show_message( "String to be written is too long." );
+                T_free( p );
+                THROW( EXCEPTION );
+            }
+        }
 
-		TRY
-		{
-			p = T_realloc( p, size * sizeof( char ) );
-			TRY_SUCCESS;
-		}
-		CATCH( OUT_OF_MEMORY_EXCEPTION )
-			return FAIL;
+		p = T_realloc( p, size * sizeof( char ) );
+    }
+
+    /* Now we try to write the string to the file */
+
+    if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
+    {
+        T_free( p );
+        return;
 	}
 
-	/* Now we try to write the string to the file */
+    /* Couldn't write as many bytes as needed - disk seems to be full */
+
+	mess = get_string( strlen( "Disk full while writing to file" )
+					   + strlen( File_List[ file_num ].name )
+					   + strlen( "Please choose a new file." ) );
+	strcpy( mess, "Disk full while writing to file" );
+	strcat( mess, "\n" );
+	strcat( mess, File_List[ file_num ].name );
+	strcat( mess, "\n" );
+	strcat( mess, "Please choose a new file." );
+    show_message( mess );
+	T_free( mess );
+
+get_repl_retry:
+
+	new_name = get_string_copy( show_fselector( "Replacement file:", NULL,
+												NULL, NULL ) );
+
+	if ( ( new_name == NULL || *new_name == '\0' ) &&
+		 1 != show_choices( "Do you really want to stop saving data?\n"
+							"     All further data will be lost!",
+							2, "Yes", "No", NULL, 2 ) )
+	{
+		if ( new_name != NULL )
+		{
+			T_free( new_name );
+			new_name = NULL;
+		}
+		goto get_repl_retry;
+	}
+
+	if ( new_name == NULL || *new_name == '\0' )       /* confirmed 'Cancel' */
+	{
+		if ( new_name != NULL )
+			T_free( new_name );
+		T_free( File_List[ file_num ].name );
+		File_List[ file_num ].name = NULL;
+		fclose( File_List[ file_num ].fp );
+		File_List[ file_num ].fp = NULL;
+		return;
+	}
+
+	stat( File_List[ file_num ].name, &old_stat );
+	if ( 0 == stat( new_name, &new_stat ) &&
+		 ( old_stat.st_dev != new_stat.st_dev ||
+		   old_stat.st_ino != new_stat.st_ino ) &&
+		  1 != show_choices( "The selected file does already exist!\n"
+							 " Do you really want to overwrite it?",
+							 2, "Yes", "No", NULL, 2 ) )
+	{
+		T_free( new_name );
+		new_name = NULL;
+		goto get_repl_retry;
+	}
+
+	new_fp = NULL;
+	if ( ( old_stat.st_dev != new_stat.st_dev ||
+		   old_stat.st_ino != new_stat.st_ino ) &&
+		 ( new_fp = fopen( new_name, "w+" ) ) == NULL )
+	{
+		switch( errno )
+		{
+			case EMFILE :
+				show_message( "Sorry, you have too many open files!\n"
+							  "Please close at least one and retry." );
+				break;
+
+			case ENFILE :
+				show_message( "Sorry, system limit for open files exceeded!\n"
+							  " Please try to close some files and retry." );
+				break;
+
+			case ENOSPC :
+				show_message( "Sorry, no space left on device for more file!\n"
+							  "    Please delete some files and retry." );
+				break;
+
+			default :
+				show_message( "Sorry, can't open selected file for writing!\n"
+							  "       Please select a different file." );
+		}
+
+		T_free( new_name );
+		new_name = NULL;
+		goto get_repl_retry;
+	}
+
+	/* Switch off IO buffering for the new file */
+
+	if ( new_fp != NULL )
+		setbuf( new_fp, NULL );
+
+	/* Check if the new and the old file are identical. If they are we simpy
+	   continue to write to the old file, otherwise we first have to copy
+	   everything from the old to the new file and get rid of it */
+
+	if ( old_stat.st_dev == new_stat.st_dev &&
+		 old_stat.st_ino == new_stat.st_ino )
+		T_free( new_name );
+	else
+	{
+		fseek( File_List[ file_num ].fp, 0, SEEK_SET );
+		while( 1 )
+		{
+			clearerr( File_List[ file_num ].fp );
+			clearerr( new_fp );
+
+			rw = fread( buffer, sizeof( char ), 1024,
+						File_List[ file_num ].fp );
+
+			if ( rw != 0 )
+				fwrite( buffer, sizeof( char ), rw, new_fp );
+
+			if ( ferror( new_fp ) )
+			{
+				mess = get_string( strlen( "Can't write to replacement file" )
+								   + strlen( new_name )
+								   + strlen( "Please choose a different "
+											 "file." )
+								   + 2 );
+				strcpy( mess, "Can't write to replacement file" );
+				strcat( mess, "\n" );
+				strcat( mess, new_name );
+				strcat( mess, "\n" );
+				strcat( mess, "Please choose a different file." );
+
+				show_message( mess );
+				T_free( mess );
+				fclose( new_fp );
+				unlink( new_name );
+				T_free( new_name );
+				new_name = NULL;
+				goto get_repl_retry;
+			}
+
+			if ( feof( File_List[ file_num ].fp ) )
+				break;
+		}
+
+		fclose( File_List[ file_num ].fp );
+		unlink( File_List[ file_num ].name );
+		T_free( File_List[ file_num ].name );
+		File_List[ file_num ].name = new_name;
+		File_List[ file_num ].fp = new_fp;
+	}
 
 	if ( fprintf( File_List[ file_num ].fp, "%s", p ) == n )
 	{
 		T_free( p );
-		return OK;
+		return;
 	}
 
-	/* Couldn't write as many bytes as needed - disk seems to be full */
-
-	fl_show_alert( "Disk full while writing to file", 
-				   File_List[ file_num ].name, "Please choose a new file.",
-				   1 );
-
-	/* !!!!!!!!!!!!!!!!! THIS STILL NEEDS A LOT OF WORK !!!!!!!!!!!!!!!!!! */
-
-	T_free( p );
-	return FAIL;
+	mess = get_string( strlen( "Can't write to (replacement) file" )
+					   + strlen( File_List[ file_num ].name )
+					   + strlen( "Please choose a different file." ) + 2 );
+	strcpy( mess, "Can't write to (replacement) file" );
+	strcat( mess, "\n" );
+	strcat( mess, File_List[ file_num ].name );
+	strcat( mess, "\n" );
+	strcat( mess, "Please choose a different file." );
+	show_message( mess );
+	T_free( mess );
+	goto get_repl_retry;
 }
