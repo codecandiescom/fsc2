@@ -805,6 +805,7 @@ Var *p_get_by_num( long pnum, int type )
 
 		default :
 			fsc2_assert ( 1 == 0 );
+			break;
 	}
 
 	return v;

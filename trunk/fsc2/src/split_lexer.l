@@ -249,6 +249,7 @@ bool section_parser( int section )
 	
 				default :              /* this should never happen, but ... */
 					fsc2_assert( 1 == 0 );
+					break;
 			}
 	
 		} while ( s != NO_SECTION );

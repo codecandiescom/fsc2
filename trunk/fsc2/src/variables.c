@@ -453,6 +453,7 @@ Var *vars_add( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -526,6 +527,7 @@ Var *vars_sub( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -599,6 +601,7 @@ Var *vars_mult( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the variable stack (if they belong to it) */
@@ -672,6 +675,7 @@ Var *vars_div( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the stack */
@@ -745,6 +749,7 @@ Var *vars_mod( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the stack */
@@ -818,6 +823,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the stack */
@@ -922,6 +928,7 @@ Var *vars_negate( Var *v )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	if ( ilp != NULL )
@@ -1074,6 +1081,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 
 		default:               /* this should never happen... */
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	/* Pop the variables from the stack */
@@ -1199,6 +1207,7 @@ Var *vars_push( int type, ... )
 
 		default :
 			fsc2_assert( 1 == 0 );
+			break;
 	}
 
 	va_end( ap );
@@ -1946,6 +1955,7 @@ void vars_assign( Var *src, Var *dest )
 
 		default :
 			fsc2_assert( 1 == 0 );        /* we never should end up here... */
+			break;
 	}
 
 	dest->flags &= ~NEED_INIT;
@@ -2092,6 +2102,7 @@ static void vars_ass_from_var( Var *src, Var *dest )
 
 		default :                    /* we never should end up here... */
 			fsc2_assert ( 1 == 0 );
+			break;
 	}
 }
  
@@ -2130,7 +2141,10 @@ static void vars_ass_from_ptr( Var *src, Var *dest )
 		else if ( src->from->type == FLOAT_ARR )
 			src->val.gptr = src->from->val.dpnt;
 		else
+		{
 			fsc2_assert( 1 == 0 );
+			break;
+		}
 	}
 
 	if ( dest->type == ARR_PTR )
