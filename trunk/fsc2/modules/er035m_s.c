@@ -19,7 +19,7 @@
 #define SERIAL_PORT     1            /* serial port device file (COM1) */
 
 
-#define DEVICE_NAME "ER035M_S"     /* name of device */
+#define DEVICE_NAME "ER035M_S"       /* name of device */
 
 
 /* exported functions and symbols */
@@ -67,11 +67,25 @@ static char serial_port[ ] = "/dev/ttyS*";
 static char er035m_s_eol[ ] = "\r\n";
 
 
+
 /* The gaussmeter seems to be more cooperative if we wait for some time
    (i.e. 200 ms) after each write operation... */
 
 #define E2_US         100000    /* 100 ms, used in calls of usleep() */
 #define ER035M_S_WAIT 200000    /* this means 200 ms for usleep() */
+
+
+/* If the field is unstable the gausmeter might never get to the state where
+   the field value is valid with the requested resolution eventhough the look
+   state is achieved. `ER035M_S_MAX_RETRIES' tells how many times we retry in
+   this case. With a value of 100 and the current setting of `ER035M_S_WAIT'
+   of 200 ms it will take at least 20 s before this will happen.
+
+   Take care: This does not mean that we stop trying to get the field while
+   the gaussmeter is still actively searching but only in the case that a
+   lock is already achieved but the field value is too unstable! */
+
+#define ER035M_S_MAX_RETRIES 100
 
 
 enum {
@@ -99,6 +113,9 @@ enum {
 /*                                                                           */
 /*****************************************************************************/
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 int er035m_s_init_hook( void )
 {
@@ -158,11 +175,17 @@ int er035m_s_init_hook( void )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 int er035m_s_test_hook( void )
 {
 	return 1;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 int er035m_s_exp_hook( void )
 {
@@ -192,12 +215,6 @@ int er035m_s_exp_hook( void )
 
 	nmr.state = ER035M_S_UNKNOWN;
 
-	if ( er035m_s_write( "ED", 2 ) == FAIL )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.", nmr.name );
-		THROW( EXCEPTION );
-	}
-
 try_again:
 
 	if ( er035m_s_write( "PS", 2 ) == FAIL )
@@ -215,9 +232,10 @@ try_again:
 	}
 
 	/* Now look if the status byte says that device is OK where OK means that
-	   for the X-Band magnet the F0-probe is connected, modulation is on and
-	   the gaussmeter is either in locked state or is actively searching to
-	   achieve the lock (if it's just in TRANS L-H or H-L state check again) */
+	   for the X-Band magnet the F0-probe and for the S-band the F1-probe is
+	   connected, modulation is on and the gaussmeter is either in locked
+	   state or is actively searching to achieve the lock (if it's just in
+	   TRANS L-H or H-L state check again) */
 
 	bp = buffer;
 
@@ -250,8 +268,8 @@ try_again:
 
 			case '3' :      /* Error temperature -> error */
 				er035m_s_close( );
-				eprint( FATAL, "%s: Temperature error from NMR "
-						"gaussmeter.", nmr.name );
+				eprint( FATAL, "%s: Temperature error from NMR gaussmeter.",
+						nmr.name );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
@@ -279,8 +297,8 @@ try_again:
 			case '7' :      /* MOD POS -> OK (default state) */
 				break;
 
-			case '8' :      /* MOD NEG -> OK (should never happen */
-				break;      /* because of initialisation) */ 
+			case '8' :      /* MOD NEG -> OK */
+				break;
 
 			case '9' :      /* System in lock -> very good... */
 				nmr.state = ER035M_S_LOCKED;
@@ -314,7 +332,6 @@ try_again:
 		}
 
 	} while ( *bp++ ); 
-
 
 	/* Switch the display on */
 
@@ -386,6 +403,9 @@ try_again:
 }
 
 
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 int er035m_s_end_of_exp_hook( void )
 {
 	if ( ! nmr.is_needed )
@@ -396,6 +416,9 @@ int er035m_s_end_of_exp_hook( void )
 	return 1;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 void er035m_s_end_hook( void )
 {
@@ -428,9 +451,9 @@ Var *find_field( Var *v )
 
 
 	/* If gaussmeter is in oscillator up/down state or the state is unknown
-	   (i.e. it's standing somewhere but not searching) search for field.
-	   Starting with searching down is just as probable the wrong decision
-	   as searching up... */
+	   (i.e. it's standing somewhere and not searching at all) search for the
+	   field. Starting with searching down is just as probable the wrong
+	   decision as searching up... */
 
 	if ( ( nmr.state == ER035M_S_OU_ACTIVE ||
 		   nmr.state == ER035M_S_OD_ACTIVE ||
@@ -442,7 +465,7 @@ Var *find_field( Var *v )
 	}
 	usleep( ER035M_S_WAIT );
 
-	/* wait for gaussmeter to go into lock state (or FAIL) */
+	/* Wait for gaussmeter to go into lock state (or FAIL) */
 
 	while ( nmr.state != ER035M_S_LOCKED )
 	{
@@ -474,7 +497,7 @@ Var *find_field( Var *v )
 				case '7' : case '8' :  /* MOD POS or NEG -> just go on */
 					break;
 
-				case '9' :      /* System in lock -> very good... */
+				case '9' :      /* System finally in lock -> very good... */
 					nmr.state = ER035M_S_LOCKED;
 					break;
 
@@ -512,7 +535,7 @@ Var *find_field( Var *v )
 			}
 
 		} while ( *bp++ );
-	};
+	}
 
 	/* Finally  get current field value */
 
@@ -557,8 +580,11 @@ Var *field_meter_wait( Var *v )
 /*-----------------------------------------------------------------------*/
 /* er035m_s_get_field() returns the field value from the gaussmeter - it */
 /* will return the settled value but will report a failure if gaussmeter */
-/* isn't in lock state. Thus, if the gaussmeter isn't already in locked  */
-/* state call find_field() instead.                                      */
+/* isn't in lock state. Another reason for a failure is a field that is  */
+/* too unstable to achieve the requested resolution eventhough the       */
+/* gaussmeter is already in lock state.                                  */
+/* Take care: If the gaussmeter isn't already in the lock state call     */
+/*            the function find_field() instead.                         */
 /*-----------------------------------------------------------------------*/
 
 static double er035m_s_get_field( void )
@@ -567,10 +593,12 @@ static double er035m_s_get_field( void )
 	char *vs;
 	char *state_flag;
 	long length;
-	double sign;
+	long tries = ER035M_S_MAX_RETRIES;
 
 
-	/* Repeat asking for field value until it's correct up to LSD */
+	/* Repeat asking for field value until it's correct up to the LSD -
+	   it will give up after `ER035M_S_MAX_RETRIES' retries to avoid
+	   getting into an infinite loop when the field is too unstable */
 
 	do
 	{
@@ -604,20 +632,35 @@ static double er035m_s_get_field( void )
 			THROW( EXCEPTION );
 		}
 
-	} while ( *state_flag != '0' );
+	} while ( *state_flag != '0' && tries-- > 0 );
 
-	/* Finally interpret the field value string */
+	/* If the maximum number of retries was exceeded we've got to give up */
+
+	if ( tries < 0 )
+	{
+		er035m_s_close( );
+		eprint( FATAL, "%s: Field is too unstable to be measured with the "
+				"requested resolution of %s G.", nmr.name,
+				nmr.resolution == LOW ? "0.01" : "0.001" );
+		THROW( EXCEPTION );
+	}
+
+	/* Finally interpret the field value string - be careful because there can
+	   be spaces between the sign and the number, something that sscanf does
+	   not like. We also don't care about the sign of the field, so we just
+	   drop it... */
 
 	*( state_flag - 1 ) = '\0';
-	sign = buffer[ 0 ] == '+' ? +1.0 : -1.0;
 	for ( vs = buffer; ! isdigit( *vs ); vs++ )
 		;
 	sscanf( vs, "%lf", &nmr.field );
-	nmr.field *= sign;
 
 	return nmr.field;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 static bool er035m_s_open( void )
 {
@@ -625,11 +668,17 @@ static bool er035m_s_open( void )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 static bool er035m_s_close( void )
 {
 	return er035m_s_comm( SERIAL_EXIT );
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 static bool er035m_s_write( const char *buf, long len )
 {
@@ -660,6 +709,9 @@ static bool er035m_s_write( const char *buf, long len )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 static bool er035m_s_read( char *buf, long *len )
 {
 	char *ptr;
@@ -674,7 +726,8 @@ static bool er035m_s_read( char *buf, long *len )
 		return FAIL;
 	}
 
-	/* Make buffer end with zero and remove trailing `*'s */
+	/* Make buffer end with zero and remove trailing `*'s (they're always
+	   send at the start of a reply) */
 
 	*( strchr( buf, '\r' ) ) = '\0';
 	*len = strlen( buf );
@@ -686,6 +739,9 @@ static bool er035m_s_read( char *buf, long *len )
 	return OK;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 static bool er035m_s_comm( int type, ... )
 {
@@ -705,7 +761,7 @@ static bool er035m_s_comm( int type, ... )
 				return FAIL;
 
 			tcgetattr( nmr.fd, &nmr.old_tio );
-			memcpy( ( void * ) &nmr.new_tio, ( void * ) &nmr.old_tio,
+			memcpy( &nmr.new_tio, &nmr.old_tio,
 					sizeof( struct termios ) );
 			nmr.new_tio.c_cflag = SERIAL_BAUDRATE | CS8;
 			tcflush( nmr.fd, TCIOFLUSH );
@@ -714,7 +770,7 @@ static bool er035m_s_comm( int type, ... )
 
 		case SERIAL_EXIT :
 			er035m_s_write( "LOC", 3 );
-			tcflush( nmr.fd, TCIFLUSH );
+			tcflush( nmr.fd, TCIOFLUSH );
 			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
 			close( nmr.fd );
 			break;
@@ -739,8 +795,13 @@ static bool er035m_s_comm( int type, ... )
 				va_end( ap );
 				return FAIL;
 			}
+
+			/* The most significant bit of the bytes send by the gaussmeter is
+			   more or less random, so let's get rid of it... */
+
 			for ( len = 0; len < *lptr; len++ )
 				buf[ len ] &= 0x7f;
+
 			break;
 
 		default :

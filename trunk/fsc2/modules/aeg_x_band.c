@@ -107,6 +107,10 @@ enum {
 /* test if this driver will be loaded before the X-band driver.   */
 /*----------------------------------------------------------------*/
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
 int aeg_x_band_init_hook( void )
 {
 	bool *is_gaussmeter;
@@ -207,6 +211,9 @@ int aeg_x_band_init_hook( void )
 	return 1;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 int aeg_x_band_test_hook( void )
 {
@@ -574,7 +581,6 @@ Var *reset_field( Var *v )
 */
 
 
-
 /*--------------------------------------------------------------------------*/
 /* magnet_init() first initializes the serial interface and then tries to   */
 /* figure out what's the current minimal step size is for the magnet - this */
@@ -698,6 +704,9 @@ bool magnet_goto_field( double field )
 	return OK;
 }
 
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
 
 bool magnet_goto_field_rec( double field, int rec )
 {
