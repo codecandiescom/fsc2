@@ -5,14 +5,15 @@
 
 @ifinfo
 @menu
-* Output functions::        Functions for printing, drawing and storing
+* Output functions::        Functions for printing, drawing and storing.
+* Interaction functions::   Functions buttons and sliders.
 * Mathematical functions::  Function for doing mathematics.
 * Auxiliary functions::     All other functions.
 @end menu
 @end ifinfo
 
 
-@node Output functions, Mathematical functions, Built-in Functions, Built-in Functions
+@node Output functions, Interaction functions, Built-in Functions, Built-in Functions
 @section Output functions
 @cindex output functions
 
@@ -402,7 +403,19 @@ defaults to "Please enter a comment:".
 @end table
 
 
-@node Mathematical functions, Auxiliary functions, Output functions, Built-in Functions
+@node Interaction functions, Mathematical functions, Output functions, Built-in Functions
+@section Interaction functions
+@cindex interaction functions
+
+
+@table @samp
+@item button_create()
+@anchor{button_create}
+@findex button_create()
+
+@end table
+
+@node Mathematical functions, Auxiliary functions, Interaction functions, Built-in Functions
 @section Mathematical functions
 @cindex mathematical functions
 
