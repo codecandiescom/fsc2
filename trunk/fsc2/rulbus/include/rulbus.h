@@ -37,12 +37,33 @@ int rulbus_card_close( int handle );
 extern int rulbus_errno;
 
 
+/* Functions and definitions for the 12-bit ADC card module (RB8509) */
+
+int rulbus_adc12_set_channel( int handle, int channel );
+int rulbus_adc12_set_gain( int handle, int gain );
+int rulbus_adc12_set_trigger_mode( int handle, int mode );
+int rulbus_adc12_conversion_done( int handle );
+int rulbus_adc12_convert( int handle, double *volts );
+
+#define RULBUS_ADC12_INT_TRIG       0
+#define RULBUS_ADC12_EXT_TRIG       1
+
+
+/* Functions and definitions for the 12-bit DAC card module (RB8510) */
+
+int rulbus_dac12_set_voltage( int handle, double volts );
+
+#define RULBUS_DAC12_UNIPOLAR       0
+#define RULBUS_DAC12_BIPOLAR        1
+
+
 /* Functions and definitions for the delay card module (RB8514) */
 
 int rulbus_delay_set_delay( int handle, unsigned long delay );
 int rulbus_delay_set_trigger( int handle, int edge );
 int rulbus_delay_set_output_pulse( int handle, int output, int type );
 int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol );
+int rulbus_delay_busy( int handle );
 int rulbus_delay_software_start( int handle );
 
 #define RULBUS_DELAY_FALLING_EDGE      1
@@ -74,26 +95,6 @@ int rulbus_clock_set_frequency( int handle, int freq );
 #define RULBUS_CLOCK_FREQ_1MHz      5
 #define RULBUS_CLOCK_FREQ_10MHz     6
 #define RULBUS_CLOCK_FREQ_100MHz    7
-
-
-/* Functions and definitions for the 12-bit ADC card module (RB8509) */
-
-int rulbus_adc12_set_channel( int handle, int channel );
-int rulbus_adc12_set_gain( int handle, int gain );
-int rulbus_adc12_set_trigger_mode( int handle, int mode );
-int rulbus_adc12_conversion_done( int handle );
-int rulbus_adc12_convert( int handle, double *volts );
-
-#define RULBUS_ADC12_INT_TRIG       0
-#define RULBUS_ADC12_EXT_TRIG       1
-
-
-/* Functions and definitions for the 12-bit DAC card module (RB8510) */
-
-int rulbus_dac12_set_voltage( int handle, double volts );
-
-#define RULBUS_DAC12_UNIPOLAR       0
-#define RULBUS_DAC12_BIPOLAR        1
 
 
 /* Error codes of the library */

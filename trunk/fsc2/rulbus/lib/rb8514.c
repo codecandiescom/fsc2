@@ -327,6 +327,27 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
 }
 
 
+/*-----------------------------------------------------------------*
+ * Function to determine if the card is currently creating a delay
+ *-----------------------------------------------------------------*/
+
+int rulbus_delay_busy( int handle )
+{
+	RULBUS_DELAY_CARD *card;
+	unsigned char byte;
+	int retval;
+
+
+	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INV_HND;
+
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) < 0 )
+		return retval;
+
+	return ( byte & DELAY_BUSY ) ? 1 : 0;
+}
+
+
 /*---------------------------------------------------------------*
  * According to the manual a delay can be started by setting the
  * trigger first to falling and the immediately to raising edge
