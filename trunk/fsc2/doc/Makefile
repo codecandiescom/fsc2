@@ -83,6 +83,8 @@ fsc2.html: $(docs) $(figures)
 	done
 	@echo '	 <br>' >> TOC
 	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a>' >> TOC
+	@echo '  <br>' >> TOC
+	@echo '  <a href="mailto:Jens.Toerring@physik.fu-berlin.de">Contact</a>' >> TOC
 	@echo '	 </div>' >> TOC
 	@echo '	 <div id="level0">' >> TOC
 	@echo '	   <div id="level1">' >> TOC

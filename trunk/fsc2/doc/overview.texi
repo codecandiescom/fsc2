@@ -28,7 +28,7 @@
 @code{fsc2} is a program for remotely controlling spectrometers,
 currently still a bit biased toward cw- and pulsed EPR spectrometers. But
 the design of @code{fsc2} should make it also easy to use it to a broad
-range of experiments not releated to EPR. Its central component is an
+range of experiments not related to EPR. Its central component is an
 interpreter that executes a script describing the experiment in a
 language which in the following will be called @code{EDL}
 @cindex @code{EDL}
@@ -149,7 +149,7 @@ The next chapter (@pxref{Command Line Options}) lists all the command
 line options that can be passed to @code{fsc2} and the following chapter
 (@pxref{GUI-fying}) explains in detail how to convert an @code{EDL} into
 a script with a graphical user interface for editing the relevant
-paramters. The remaining chapters (@pxref{Cloning Devices},
+parameters. The remaining chapters (@pxref{Cloning Devices},
 @pxref{Internals}, @pxref{Modules}) explain in detail everything there
 is to know about writing new modules, including a short overview about
 how @code{fsc2} works internally, which may also be helpful when writing
