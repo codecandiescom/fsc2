@@ -201,6 +201,23 @@ your own. In this case sending these kind of mails to me obviously doesn't
 make too much sense...
 
 
+If you're going to use devices connected via the serial port there's
+another thing you got to check. The program needs to know to which of
+your serial ports the device is connected. This is controlled by
+entries in the files in the 'config' directory. For each device
+connected via the serial port there's a line like
+
+#define SERIAL_PORT     1
+
+This tells the program the number of the serial port. Serial ports are
+numbered starting at 0. So setting SERIAL_PORT to 0 means that the device
+will be accessed via the device file '/dev/ttyS0'. If you are more familiar
+with the DOS or Windows nomenclature, this means COM1. The serial port
+numbered 1 is accessed via 'dev/ttyS1' (re COM2 in DOS-speak). Make sure
+you to the correct number or the program will complain when it tries to
+access the device the first time.
+
+
 D) Compiling and Installing
 ===========================
 
