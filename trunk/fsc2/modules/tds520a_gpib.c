@@ -692,10 +692,11 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	*length = len / 2;
 
 	*data = T_malloc( *length * sizeof( double ) );
-	buffer = T_malloc( len );
+	buffer = T_malloc( len + 1 );
 
 	/* Now get all the data bytes... */
 
+	len = len + 1;
 	if ( gpib_read( tds520a.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );
