@@ -216,7 +216,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
 								"in the EXPERIMENT section.\n",
-								Fname, Lc, varstext );
+								Fname, Lc, prim_exptext );
 						THROW( EXCEPTION );
 					}
 					return E_FUNC_TOKEN;

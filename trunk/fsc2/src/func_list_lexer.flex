@@ -335,7 +335,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 					THROW( EXCEPTION );
 				}
 
-				swicth ( ret_token ) ==  )				
+				switch ( ret_token )
 				{
 				    case ALL_TOKEN :
 						fncts[ act ].access_flag = ACCESS_ALL;
