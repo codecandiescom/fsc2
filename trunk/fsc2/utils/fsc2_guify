@@ -662,7 +662,7 @@ EOT
 
 	# The user may change the variables from within the conditions. We must
 	# avoid that these changes are also visible in the rest of the script
-	# and thus must make them local to the current funtion in the script.
+	# and thus use variables local to the current funtion in the script.
 
 	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 

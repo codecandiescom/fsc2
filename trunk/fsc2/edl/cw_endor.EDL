@@ -1,0 +1,140 @@
+DEVICES:
+
+hp8647a;
+LOCKIN;
+
+
+VARIABLES:
+
+===  START_FREQ float [ 0.25 : 1000 ] [ 560 ] "Start frequency:" "MHz"
+start_freq  = START_FREQ MHz;
+=== END_FREQ float [ 0.25 : 1000 ] [ 600 ] "End frequency:" "MHz"
+end_freq    = END_FREQ MHz;
+=== STEP_FREQ float [ 0.25 : 1000 ] [ 250 ] "Frequency step size:" "kHz"
+=== if if ( END_FREQ < START_FREQ ) { STEP_FREQ *= -1}; 1
+step_freq   = STEP_FREQ kHz;
+=== endif
+=== ATTENUATION float [ -136 : -5 ] [ -20 ] "Attenuation:" "dB"
+attenuation = ATTENUATION dB;
+=== MOD_FREQ float [ 0 : 100 ] [ 19 ] "Modulation frequency:" "kHz"
+mod_freq    = MOD_FREQ kHz;
+=== MOD_AMPL float [ 0 : 100 ] [ 80 ] "Modulation amplitude:" "kHz"
+mod_ampl    = MOD_AMPL kHz;
+=== NUM_RUNS int [ 1 : ] [ 20 ] "Number of runs:"
+N_runs      = NUM_RUNS;
+=== LOCKIN menu [ "SR510", "SR530", "SR810", "SR830" ] [ 4 ] \
+=== "Lock-in amplifier:"
+=== TC menu [ "Don't set", "100 s", " 30 s", " 10 s", "  3 s", "  1 s", \
+===           "300 ms", "100 ms", " 30 ms", " 10 ms", "  3 ms", "  1 ms" ] \
+===         [ 1 ] "Time constant:"
+=== if TC ne "Don't set"
+tc = TC;
+=== else
+tc;
+=== endif
+=== SENS menu [ "Don't set", "500 mV", "200 mV", "100 mV", " 50 mV", \
+===             " 20 mV", " 10 mV", "  5 mv", "  2 mV", "  1 mV", "500 uV", \
+===             "200 uV", "100 uV", " 50 uV", " 20 uV", " 10 uV", "  5 uV", \
+===             "  2 uV", "  1 uV", "500 nV", "200 nV", "100 nV", " 50 nV", \
+===             " 10 nV", "  5 nV", "  2 nV" ] [ 1 ] \
+===             "Sensitivity:"
+=== if SENS ne "Don't set"
+sens = SENS;
+=== else
+sens;
+=== endif
+
+I = 0;
+J;
+K = 1;
+
+N_points = ceil( abs( ( end_freq - start_freq ) / step_freq ) ) + 1;
+data[ N_points ];
+mean_data[ N_points ];
+File_1, File_2;
+
+
+PREPARATIONS:
+
+synthesizer_attenuation( attenuation );
+synthesizer_frequency( start_freq );
+synthesizer_modulation( "FM", "EXT DC", mod_ampl );
+=== TF file "Table file:"
+=== if TF ne ""
+synthesizer_use_table( TF );
+=== endif
+
+init_1d( 3, N_points, start_freq * 1e-6, step_freq * 1e-6,
+		 "Frequency / MHz", "Signal / V" );
+
+
+EXPERIMENT:
+
+synthesizer_state( "ON" );
+=== if LOCKIN =~ /^SR8[31]0$/
+lockin_ref_freq( mod_freq );
+lockin_ref_level( 1 V );
+=== endif
+=== if TC ne "Don't set"
+lockin_time_constant( tc );
+=== else
+tc = lockin_time_constant( );
+=== endif
+=== if SENS ne "Don't set"
+lockin_sensitivity( sens );
+=== else
+sens = lockin_sensitivity( );
+=== endif
+
+File_1 = get_file( "File for storing all runs:" );
+File_2 = get_file( "File for storing final result:" );
+fsave( File_2, "% Start frequency = # MHz\n"
+               "% End frequency   = # MHz\n"
+               "% Step frequency  = # kHz\n"
+               "% Lock-in sens.   = # V\n"
+               "% Time constant   = # s\n"
+               "% Phase           = #\n"
+               "% Mod. frequency  = # kHz\n"
+               "% Mod. amplitude  = # kHz\n%\n",
+       start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
+       sens, tc, lockin_phase( ), mod_freq * 1.0e-3, mod_ampl * 1.0e-3 );
+save_comment( File_2, "% " );
+save_program( File_2, "% " );
+
+print( "Time needed for single sweep is ca. # s.\n", ceil( tc * N_points  ) );
+
+FOR I = 1 : N_runs
+{
+	print( "Starting #. run out of #\n", I, N_runs );
+
+	FOR J = 1 : N_points
+	{
+=== if START_FREQ <= END_FREQ
+		data[ J ] = lockin_get_data( );
+		display( J, data[ J ], 1, J, ( mean_data[ J ] + data[ J ] ) / I, 2 );
+=== else
+		data[ N_points - J + 1 ] = lockin_get_data( );
+		display( N_points - J + 1, data[ N_points - J + 1 ], 1,
+				 N_points - J + 1, ( mean_data[ N_points - J + 1 ]
+	             + data[ N_points - J + 1 ] ) / I, 2 );
+=== endif
+		synthesizer_frequency( start_freq + J * step_freq );
+		wait( tc );
+	}
+
+	save( File_1, data );
+	display( 1, data, 3 );
+	mean_data += data;
+	K = I;
+	synthesizer_frequency( start_freq );
+}
+
+
+ON_STOP:
+
+synthesizer_state( "OFF" );
+
+IF I > 0
+{
+    save( File_2, mean_data / K );
+}
