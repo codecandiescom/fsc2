@@ -343,7 +343,7 @@ long hfs9000_ch_to_num( long channel )
 {
 	switch ( channel )
 	{
-		case TRIG_OUT :
+		case CHANNEL_TRIG_OUT :
 			return 0;
 
 		case CHANNEL_CH1 : case CHANNEL_A1 :

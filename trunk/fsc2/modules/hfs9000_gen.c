@@ -64,9 +64,9 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 
 	if ( channel < HFS9000_TRIG_OUT || channel > MAX_CHANNEL )
 	{
-		print( FATAL, "Invalid channel, valid are %s[1-4] and "
-			   "TRIG_OUT.\n", NUM_CHANNEL_CARDS == 1 ? "A" :
-			   ( NUM_CHANNEL_CARDS == 2 ? "[AB]" : "[A-C]" ),
+		print( FATAL, "Invalid channel, valid are %s[1-4] and TRIG_OUT.\n",
+			   NUM_CHANNEL_CARDS == 1 ? "A" :
+			   ( NUM_CHANNEL_CARDS == 2 ? "[AB]" : "[A-C]" ) );
 		THROW( EXCEPTION );
 	}
 

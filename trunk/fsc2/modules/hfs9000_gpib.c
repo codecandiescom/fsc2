@@ -390,7 +390,7 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 	char cmd[ 100 ];
 
 
-	fsc2_assert ( IS_NOMAL_CHANNEL( channel ) );
+	fsc2_assert ( IS_NORMAL_CHANNEL( channel ) );
 
 	sprintf( cmd, "*WAI;:PGEN%c:CH%c:OUTP %s\n",
 			 CHANNEL_LETTER( channel ), CHANNEL_NUMBER( channel ),
