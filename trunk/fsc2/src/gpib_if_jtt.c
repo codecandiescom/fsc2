@@ -78,13 +78,13 @@ static char *gpib_get_dev_name( int device );
 /*------------------------------------------------------------------------*/
 
 
-int ll;                         /* log level                              */
-int gpib_is_active = 0;         /* flag, set after initialisation of bus  */
-int controller;                 /* device number assigned to controller   */
-int timeout;                    /* stores actual timeout period           */
-FILE *gpib_log;                 /* file pointer of GPIB log file          */
-GPIB_DEV *gpib_dev_list = NULL; /* list of symbolic names of devices etc. */
-char gpib_error_buffer[ 1024 ];
+static int ll;                      /* log level                             */
+static int gpib_is_active = 0;      /* flag, set after initialisation of bus */
+static int controller;              /* device number assigned to controller  */
+static int timeout;                 /* stores actual timeout period          */
+static FILE *gpib_log;              /* file pointer of GPIB log file         */
+static GPIB_DEV *gpib_dev_list = NULL;
+                                   /* list of symbolic names of devices etc. */
 
 
 /*-------------------------------------------------------------------------*/
