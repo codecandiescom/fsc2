@@ -886,16 +886,16 @@ very similar also in @code{C} using a few macros.
 
 When writing the program I had to deal a lot with memory leaks,
 segmentation faults etc.@: and hacked together a few routines for
-allocation and deallocation of memory, that have some build in code that
-helps me with debugging (and throws an exception when an allocation
-fails). You might find it useful also to use these routines for your
+allocation and deallocation of memory that have some build in code and
+which help me with debugging (and throw an exception when an allocation
+fails). You might find it useful to also use these routines for your
 modules.
 
 Finally, a boolean type is something that was missing until the new C99
-standard (which only a few compilersd already support, if any at all),
+standard (which only a few compilers already support, if any at all),
 so there's already a @code{typedef} for this type included in
 @acronym{fsc2} that you can use. It's also documented here in order to
-avoid confusion should you accidentally redefine it.
+avoid confusion should you accidentally try to redefine it.
 
 
 
