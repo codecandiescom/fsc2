@@ -135,18 +135,18 @@ modules:
 
 
 # The following rule looks a bit complicated because we have to check if
-# additional libraries are required the individual modules. These libraries
-# have to be defined by a variables consisting of the name of the module and
-# the the string "_libs". If no additional libraries are requires we compile
-# the module immediately. Otherwise we've got to distinguish between
-# libraries given with an absolute path (which are passed to gcc just as
-# they are) and libraries without a path, which are supposed to be in the
-# directories searched by the linker. For these we must remove the leading
-# "lib" and the trailing".so" extension and prepend the "-l" option. Before
-# we actually use the library we check if they really exist by an extra
-# call of gcc - if it fails the module can't be created (which takes care
-# of people who obviously don't need the module because they didn't care
-# to install the required libraries).
+# additional libraries are required for the individual modules. These
+# libraries have to be defined by a variables consisting of the name of
+# the module and the the string "_libs". If no additional libraries are
+# requires we compile the module immediately. Otherwise we've got to
+# distinguish between libraries given with an absolute path (which are
+# passed to gcc just as they are) and libraries without a path, which are
+# supposed to be in the directories searched by the linker. For these we
+# must remove the leading "lib" and the trailing".so" extension and
+# prepend the "-l" option. Before we actually use the library we check if
+# they really exist by an extra call of gcc - if it fails the module can't
+# be created (which takes care of people who obviously don't need the
+# module because they didn't care to install the required libraries).
 
 $(addsuffix .so,$(simp_modules)): %.so: %.o	
 	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
