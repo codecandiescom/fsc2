@@ -1,0 +1,525 @@
+#!/usr/bin/perl -w   -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 2001 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+use strict;
+use Tk;
+use Tk::Balloon;
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+my $start_field        = 3350;
+my $end_field	       = 3500;
+my $field_step	       = 1;
+my $num_runs	       = 1;
+my $tc_fact  	       = 1;
+my $tc			       = "Don't set";
+my $sens1		       = "Don't set";
+my $old_sens1          = $sens1;
+my $sens2              = "E+3";
+my $old_sens2          = $sens2;
+my $phase              = 0;
+my $mod_freq           = "Don't set";
+my $mod_amp            = 40;
+my $old_mod_amp        = $mod_amp;
+my $how			       = 'Start experiment';
+
+
+my %fp = ( '-side' => 'top',
+		   '-fill' => 'x',
+		   '-padx' => '2m',
+		   '-pady' => '2m' );
+
+my %wp = ( '-side' => 'left',
+		   '-fill' => 'x',
+		   '-padx' => '3m',
+		   '-expand' => 1 );
+
+# Get defaults
+
+&get_defs;
+
+# Create all the graphic stuff
+
+my $mw = MainWindow->new( );
+$mw->title( "cw_epr" );
+my $balloon = $mw->Balloon( );
+
+
+my $f1 = $mw->Frame( );
+my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief'          => 'sunken' );
+$balloon->attach( $f1_v, '-balloonmsg'    =>
+				         "Enter the start field (in Gauss)" );
+my $f1_l2 = $f1->Label( '-text'           => 'G',
+						'-width'          => 1 );
+
+$f1->pack( %fp );
+$f1_l1->pack( %wp );
+$f1_v->pack( %wp );
+$f1_l2->pack( %wp );
+
+
+my $f2 = $mw->Frame( );
+my $f2_l1 = $f2->Label( '-text'          => 'End field:',
+						'-width'         => '20',
+						'anchor'         => 'w' );
+my $f2_v = $f2->Entry( '-textvariable'   => \$end_field,
+					   '-width'          => '8',
+					   '-validate'       => 'key',
+					   '-validatecommand'=> \&is_numeric,
+					   '-relief'         => 'sunken' );
+$balloon->attach( $f2_v, '-balloonmsg'   => "Enter the end field (in Gauss)" );
+my $f2_l2 = $f2->Label( '-text'          => 'G',
+						'-width'         => 1 );
+
+$f2->pack( %fp );
+$f2_l1->pack( %wp );
+$f2_v->pack( %wp );
+$f2_l2->pack( %wp );
+
+
+my $f3 = $mw->Frame( );
+my $f3_l1 = $f3->Label( '-text'           => 'Field step size:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f3_v = $f3->Entry( '-textvariable'    => \$field_step,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief'          => 'sunken' );
+$balloon->attach( $f3_v, '-balloonmsg'    =>
+				         "Enter the size of the field steps (in Gauss)" );
+my $f3_l2 = $f3->Label( '-text'           => 'G',
+						'-width'          => 1 );
+
+$f3->pack( %fp );
+$f3_l1->pack( %wp );
+$f3_v->pack( %wp );
+$f3_l2->pack( %wp );
+
+
+my $f6 = $mw->Frame( );
+my $f6_l1 = $f6->Label( '-text'           => 'Number of runs:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f6_v = $f6->Entry( '-textvariable'    => \$num_runs,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^\s*\d*\s*$/ },
+					   '-relief'          => 'sunken' );
+my $f6_l2 = $f6->Label( '-text'           => ' ',
+						'-width'          => 1 );
+$balloon->attach( $f6_v, '-balloonmsg'    => "Determine how many times the\n" .
+                                             "experiment will be repeated" );
+$f6->pack( %fp );
+$f6_l1->pack( %wp );
+$f6_v->pack( %wp );
+$f6_l2->pack( %wp );
+
+
+my $f10 = $mw->Frame( );
+my $f10_l = $f10->Label( '-text'          => 'Amplification:',
+						 '-width'         => '20',
+						 'anchor'         => 'w' );
+my $f10_m1 = $f10->Optionmenu( '-options'  =>
+							   [ ( "Don't set", '1.0', '1.25', '1.5', '2.0',
+								   '2.5', '3.0', '4.0', '5.0', '6.0',
+								   '8.0' ) ],
+							   '-width'    => 4,
+							   '-textvariable' => \$sens1,
+							   '-command' => \&sens_check );
+$balloon->attach( $f10_m1, '-balloonmsg' =>
+				  "Select the lock-in amplifiers amplification factor" );
+my $f10_m2 = $f10->Optionmenu( '-options'  =>
+							   [ ( 'E+1', 'E+2', 'E+3', 'E+4', 'E+5', 'E+6',
+								   'E+7' ) ],
+							   '-width'    => 3,
+							   '-textvariable' => \$sens2,
+							   '-command' => \&sens_check );
+$balloon->attach( $f10_m2, '-balloonmsg' =>
+				  "Select the lock-in amplifiers amplification factor" );
+
+$f10->pack( %fp );
+$f10_l->pack( %wp );
+$f10_m1->pack( %wp );
+$f10_m2->pack( %wp );
+
+
+my $f9 = $mw->Frame( );
+my $f9_l = $f9->Label( '-text'          => 'Time constant (tc):',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f9_m = $f9->Optionmenu( '-options'  =>
+                            [ ( "Don't set", '2.5 ms', '5 ms', '10 ms',
+							    '20 ms', '40 ms', '65 ms', '130 ms', '330 ms',
+								'650 ms', '1.3 s', '2.6 s', '5.2 s' ) ],
+							'-width'    => 9,
+							'-textvariable' => \$tc );
+$balloon->attach( $f9_m, '-balloonmsg' =>
+				         "Select the lock-in amplifiers time constant" );
+$f9->pack( %fp );
+$f9_l->pack( %wp );
+$f9_m->pack( %wp );
+
+
+
+my $f7 = $mw->Frame( '-width'             => '29' );
+my $f7_l1 = $f7->Label( '-text'           => 'Waiting time:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f7_v = $f7->Entry( '-textvariable'    => \$tc_fact,
+					   '-width'           => '7',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&is_numeric,
+					   '-relief'          => 'sunken' );
+my $f7_l2 = $f7->Label( '-text'           => '* tc',
+						'-width'          => 2 );
+$balloon->attach( $f7_v, '-balloonmsg' =>
+				         "Enter the number of lock-in time constants\n" .
+				         "to wait before a new data point is recorded" );
+
+$f7->pack( %fp );
+$f7_l1->pack( %wp );
+$f7_v->pack( %wp );
+$f7_l2->pack( %wp );
+
+my $f4 = $mw->Frame( );
+my $f4_l1 = $f4->Label( '-text'           => 'Phase:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f4_v = $f4->Entry( '-textvariable'    => \$phase,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => sub { $_[ 0 ] =~ /^[+-]?\d*$/ },
+					   '-relief'          => 'sunken' );
+my $f4_l2 = $f4->Label( '-text'           => ' ',
+						'-width'          => 1 );
+$balloon->attach( $f4_v, '-balloonmsg'    =>
+				  "Set the lock-in amplifiers phase\n"  );
+$f4->pack( %fp );
+$f4_l1->pack( %wp );
+$f4_v->pack( %wp );
+$f4_l2->pack( %wp );
+
+my $f5 = $mw->Frame( );
+my $f5_l = $f5->Label( '-text'          => 'Modulation frequency:',
+					   '-width'         => '20',
+					   'anchor'         => 'w' );
+my $f5_m = $f5->Optionmenu( '-options'  =>
+                            [ ( "Don't set", '100 kHz', '50 kHz', '25 kHz',
+								'12.5 kHz', '6.25 kHz', '3.125 kHz' )],
+							'-width'    => 9,
+							'-textvariable' => \$mod_freq );
+$balloon->attach( $f5_m, '-balloonmsg' =>
+				         "Select the lock-in modulation frequency" );
+$f5->pack( %fp );
+$f5_l->pack( %wp );
+$f5_m->pack( %wp );
+
+my $f8 = $mw->Frame( );
+my $f8_l1 = $f8->Label( '-text'           => 'Modulation amplitude:',
+						'-width'          => '20',
+						'anchor'          => 'w' );
+my $f8_v = $f8->Entry( '-textvariable'    => \$mod_amp,
+					   '-width'           => '8',
+					   '-validate'        => 'key',
+					   '-validatecommand' => \&mod_amp_check,
+					   '-relief'          => 'sunken' );
+my $f8_l2 = $f8->Label( '-text'           => ' ',
+						'-width'          => 1 );
+$balloon->attach( $f8_v, '-balloonmsg'    =>
+				  "Set the lock-in amplifiers modulation amplitude\n" .
+				  "- use values between 0 and 80 (0 for maximum.\n" .
+				  "and 80 for minumum amplitude)" );
+$f8->pack( %fp );
+$f8_l1->pack( %wp );
+$f8_v->pack( %wp );
+$f8_l2->pack( %wp );
+
+$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
+								   'Load into fsc2' ) ],
+				 '-textvariable' => \$how,
+			   )->pack( '-padx' => '3m',
+						'-pady' => '3m' );
+
+my $f11 = $mw->Frame( );
+my $f11_a = $mw->Button( '-text' => 'Apply',
+						 '-command' => \&write_out );
+my $f11_q = $mw->Button( '-text' => 'Quit',
+						 '-command' => sub { &store_defs; $mw->destroy } );
+$f11->pack( '-side' => 'top',
+			'-fill' => 'x',
+			'-padx' => '4m' );
+$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+
+MainLoop;
+
+
+#############################################
+
+sub get_defs {
+
+local *F;
+my $ne;
+
+if ( $ARGV[ 0 ] ) {
+	open( F, "<$ARGV[ 0 ]" ) or return;
+} else {
+	open( F, "<$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+}
+
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$start_field = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$end_field = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
+chomp $ne;
+$field_step = $ne;
+
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
+chomp $ne;
+$num_runs = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
+chomp $ne;
+$tc = $ne;
+
+goto done_reading unless defined( $ne = <F> )
+	and $ne =~ /(^Don't set)|([125]0{0,2} [mun]V)$/;
+chomp $ne;
+$sens1 = $ne;
+
+done_reading:
+close F;
+}
+
+
+#############################################
+
+sub store_defs {
+	local *F;
+	my $sens;
+
+
+	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
+	open( F, ">$ENV{ HOME }/.fsc2/cw_epr" ) or return;
+
+	$start_field = 0 if $start_field eq ".";
+	$end_field = 0 if $end_field eq ".";
+	$field_step = 0 if $field_step eq ".";
+	if ( $sens1 eq "Don't set" ) {
+		$sens = 0;
+	} else {
+		$sens = $sens1 * "1.0$sens2";
+	}
+
+	print F "# Do not edit - created automatically!\n";
+
+	print F "$start_field\n$end_field\n$field_step\n$num_runs\n$sens\n$tc\n" .
+		    "$tc_fact\n$phase\n$mod_freq\n$mod_amp\n";
+
+	close F;
+}
+
+
+#############################################
+
+sub sens_check {
+
+	if ( $sens1 =~ /^\d\.\d+/ ) {
+		if ( $sens2 eq "E+7" and $sens1 ne "1.0" ) {
+			show_message( "Maximum sensitivity is 1.0 E+7." );
+			$sens1 = $old_sens1;
+			$sens2 = $old_sens2;
+			return;
+		} elsif ( $sens2 eq "E+1" and $sens1 =~ /^1/) {
+			show_message( "Minimum sensitivity is 2.0 E+1." );
+			$sens1 = $old_sens1;
+			$sens2 = $old_sens2;
+			return;
+		}
+	}
+
+	$old_sens1 = $sens1;
+	$old_sens2 = $sens2;
+}
+
+
+#############################################
+
+sub mod_amp_check {
+
+	my $new_val = shift;
+
+	return 1 if $new_val eq "";
+
+	if ( $new_val !~ /^\d*$/ ) {
+		$mod_amp = substr( $new_val, 0, -1 );
+		return;
+	}
+
+	if ( $new_val < 0 or $new_val > 80 ) {
+		show_message( "Use a value between 0 and 80" );
+		$mod_amp = $old_mod_amp;
+		return;
+	}
+
+	$old_mod_amp = $new_val;
+}
+
+
+#############################################
+
+sub is_numeric {
+
+	my $new_val = shift;
+	$new_val =~ /^((\d+\.?(\d+)?)|(\.(\d+)?))?$/;
+}
+
+
+#############################################
+
+sub write_out {
+
+	return if &do_checks( ) != 0;
+	return 0;
+}
+
+
+#############################################
+
+sub show_message {
+	my $text = shift;
+
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $text );
+}
+
+
+#DEVICES:
+#
+#er032m;
+#er023m;
+#
+#
+#VARIABLES:
+#
+#start_field = 2000 G;
+#field_step = 1 G;
+#N_points = 2500;
+#N_runs = 4;
+#I, J;
+#b0;
+#tc;
+#data[ N_points ];
+#new_data[ N_points ];
+#F1, F2;
+#
+#
+#PREPARATIONS:
+#
+#magnet_setup( start_field, field_step );
+#
+#init_1d( 3, N_points, start_field, field_step, "Magnetic Field / G",
+#		  "Signal / V" );
+#
+#
+#EXPERIMENT:
+#
+#
+#F1 = get_file( "\bbyd4.asc" );
+#F2 = get_file( );
+#save_program( F1,"# " );
+#save_comment( F1,"# " );
+#
+#
+#lockin_ma( 20 );
+#lockin_phase( 150 );
+#lockin_ref_freq( 12.5 kHz );
+#lockin_sensitivity( 1e+3 );
+#lockin_time_constant( 2000 ms);
+#lockin_conversion_time( 320 ms);
+#
+#
+#FOR J = 1 : N_runs {
+#
+#	 print( "Starting #. run of #\n", J, N_runs );
+#
+#	 FOR I = 1 : N_points {
+#
+#		 new_data[ I ] = lockin_get_data( );
+#
+#		 fsave( F1,"# #\n", start_field + ( I -  1 ) * field_step,
+#							( data[ I ] + new_data[ I ] ) / float( J ) );
+#
+#		 display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
+#		 display( I, new_data[ I ], 3 );
+#
+#		 sweep_up( );
+#	 }
+#
+#	 clear_curve( 1 );
+#
+#	 data += new_data;
+#	 display( 1, data / float( J ), 2 );
+#	 fsave( F1, "\n" );
+#	 reset_field( );
+#}
+#
+#ON_STOP:
+#
+#
+#fsave( F2, "\# Start Field: # G\n", start_field );
+#fsave( F2, "\# Field Step: # G\n", field_step );
+#fsave( F2, "\# Number of Fieldpoints: # \n", N_points );
+#fsave( F2, "\# Scans accumulated: # \n", J );
+#fsave( F2, "\# Time constant: # ms\n", lockin_time_constant( ) * 1e-3 );
+#fsave( F2, "\# Modulation Amplification: # dB\n", lockin_ma( ) );
+#fsave( F2, "\# Modulation Phase: # Deg\n", lockin_phase( ) );
+#fsave( F2, "\# Modulation Frequency: # \n", lockin_ref_freq( ) );
+#fsave( F2, "\# Receiver Gain: # \n", lockin_sensitivity( ) );
+#fsave( F2, "\# Time Constant: # \n", lockin_time_constant( ) );
+#fsave( F2, "\# Conversion Time: # \n", lockin_conversion_time( ) );
+#
+#FOR I = 1 : N_points {
+#	 fsave( F2, "# #\n", start_field + ( I - 1 ) * field_step, data[ I ] );
+#}
