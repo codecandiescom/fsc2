@@ -524,13 +524,13 @@ modifies the specification:
 @end itemize
 
 Following the flags the minimum field width as well as the precision may
-be specified. If the flags are followed by a number it is taken as the
-minimum field width. The converted argument will be printed in a field
-at least this wide, and wider if necessary. If the converted argument
-has fewer characters than the field width it will be padded on the left
-(or on the right, if left adjustment has been requested) to make up for
-the field with. The padding character os normally space, butis @code{0}
-if the zero padding flag is present.
+be specified. If the (optional) flags are followed by a number it is
+taken as the minimum field width. The converted argument will be printed
+in a field at least this wide, and wider if necessary. If the converted
+argument has fewer characters than the field width it will be padded on
+the left (or on the right, if left adjustment has been requested) to
+make up for the field with. The padding character os normally space,
+butis @code{0} if the zero padding flag is present.
 
 The next character can be a period, which separates the field width from
 the precision.
