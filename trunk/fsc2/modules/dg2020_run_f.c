@@ -27,38 +27,7 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-/*
-	if ( ! TEST_RUN )
-		printf( "\nChanges to the channels:\n\n" );
-*/
-
 	dg2020_reorganize_pulses( TEST_RUN );
-
-
-/*
-	{
-		PULSE *p = dg2020_Pulses;
-
-		if ( TEST_RUN )
-			printf( "\nTEST New pulse positions:\n\n" );
-		else
-			printf( "\nNew pulse positions:\n\n" );
-
-		while ( p != NULL )
-		{
-			if ( p->is_active )
-			{
-				printf( "%4ld (on %2d): %6ld %6ld", p->num, p->channel->self,
-						p->pos, p->len );
-				if ( p->num < 0 )
-					printf( " -> %4ld", p->for_pulse->num );
-				printf( "\n" );
-			}
-			p = p->next;
-		}
-		printf( "\n" );
-	}
-*/
 
 	/* Finally commit all changes */
 
