@@ -4,9 +4,9 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-prefix         = /usr/local
-bindir         = $(prefix)/bin
-libdir         = $(prefix)/lib/fsc2
+#prefix         = /usr/local
+#bindir         = $(prefix)/bin
+#libdir         = $(prefix)/lib/fsc2
 
 prefix         = .
 bindir         = $(prefix)/.
@@ -17,7 +17,7 @@ GPIB_LOG       = /tmp/gpib.log
 GPIB_LOG_OWNER = nobody
 GPIB_LOG_GROUP = nogroup
 
-# The name of the awk tool is just passed to the programs via a macro
+# The name of the awk tool is passed to the programs via a macro
 
 AWK            = /usr/bin/awk
 
@@ -42,6 +42,12 @@ FLEXFLAGS      = -B -P
 RM             = -rm
 RMFLAGS        = -f
 
+
+############################################################################
+############### Don't change anything below this line ######################
+############################################################################
+
+
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
 c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
@@ -60,8 +66,8 @@ dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 header         = ${c_sources:.c=.h} global.h
 
-# Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files (don't
-# forget to escape all `"' with backslashes!)
+# Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
+# (don't forget to escape all double quotes (`"') with backslashes!)
 
 ifdef GPIB_LOG
     CFLAGS += -DGPIB_LOG=\"$(GPIB_LOG)\"
