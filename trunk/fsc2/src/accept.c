@@ -325,7 +325,9 @@ static void other_data_request( int dim, int type, char *ptr )
 				else
 				{
 					clear_curve_2d( ca );
+					need_2d_redraw = SET;
 					cut_clear_curve( ca );
+					need_cut_redraw = SET;
 				}
 			}
 
@@ -335,9 +337,17 @@ static void other_data_request( int dim, int type, char *ptr )
 			memcpy( &is_set, ptr, sizeof is_set );  /* flags */
 			ptr += sizeof is_set;
 			if ( dim == DATA_1D )
+			{
 				change_scale_1d( is_set, ( void * ) ptr );
+				scale_1d_changed[ X ] = scale_1d_changed[ Y ] = SET;
+			}
 			else
+			{
 				change_scale_2d( is_set, ( void * ) ptr );
+				scale_2d_changed[ X ] =
+					scale_2d_changed[ Y ] = 
+						scale_2d_changed[ Z ] = SET;
+			}
 			break;
 
 		case D_CHANGE_LABEL :                 /* change label command */
@@ -349,16 +359,28 @@ static void other_data_request( int dim, int type, char *ptr )
 				ptr += lengths[ i ];
 			}
 			if ( dim == DATA_1D )
+			{
 				change_label_1d( label );
+				scale_1d_changed[ X ] = scale_1d_changed[ Y ] = SET;
+			}
 			else
+			{
 				change_label_2d( label );
+				scale_2d_changed[ X ] =
+					scale_2d_changed[ Y ] = 
+						scale_2d_changed[ Z ] = SET;
+			}
 			break;
 
 		case D_CHANGE_POINTS :                /* rescale command */
 			if ( dim == DATA_1D )
 				rescale_1d( * ( long * ) ptr );
 			else
+			{
 				rescale_2d( ( long * ) ptr );
+				need_2d_redraw = scale_2d_changed[ X ] =
+					scale_2d_changed[ Y ] = SET;
+			}
 			break;
 
 		case D_SET_MARKER :
@@ -381,6 +403,7 @@ static void other_data_request( int dim, int type, char *ptr )
 				ptr += sizeof color;
 				memcpy( &count, ptr, sizeof count );
 				set_marker_2d( x_pos, y_pos, color, count );
+				need_2d_redraw = SET;
 			}
 			break;
 
@@ -388,7 +411,10 @@ static void other_data_request( int dim, int type, char *ptr )
 			if ( dim == DATA_1D )
 				remove_markers_1d( );
 			else
+			{
 				remove_markers_2d( ( long * ) ptr );
+				need_2d_redraw = SET;
+			}
 			break;
 
 		case D_CHANGE_MODE :
