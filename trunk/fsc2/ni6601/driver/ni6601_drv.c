@@ -25,6 +25,7 @@
 #include "autoconf.h"
 #include "ni6601_drv.h"
 
+
 #define mite_CHOR( ch )             ( board->mite + 0x500 + 0x100 * ( ch ) )
 #define mite_CHCR( ch )             ( board->mite + 0x504 + 0x100 * ( ch ) )
 #define mite_TCR( ch )              ( board->mite + 0x508 + 0x100 * ( ch ) )
@@ -36,11 +37,11 @@
 #define mite_LKCR( ch )             ( board->mite + 0x51C + 0x100 * ( ch ) )
 #define mite_LKAR( ch )             ( board->mite + 0x520 + 0x100 * ( ch ) )
 #define mite_LLKAR( ch )            ( board->mite + 0x524 + 0x100 * ( ch ) )
-#define mite_BAR( ch )		    ( board->mite + 0x528 + 0x100 * ( ch ) )
-#define mite_BCR( ch )		    ( board->mite + 0x52C + 0x100 * ( ch ) )
-#define mite_SAR( ch )		    ( board->mite + 0x530 + 0x100 * ( ch ) )
-#define mite_WSCR( ch )		    ( board->mite + 0x534 + 0x100 * ( ch ) )
-#define mite_WSER( ch )		    ( board->mite + 0x538 + 0x100 * ( ch ) )
+#define mite_BAR( ch )	            ( board->mite + 0x528 + 0x100 * ( ch ) )
+#define mite_BCR( ch )	            ( board->mite + 0x52C + 0x100 * ( ch ) )
+#define mite_SAR( ch )	            ( board->mite + 0x530 + 0x100 * ( ch ) )
+#define mite_WSCR( ch )	            ( board->mite + 0x534 + 0x100 * ( ch ) )
+#define mite_WSER( ch )	            ( board->mite + 0x538 + 0x100 * ( ch ) )
 #define mite_FCR( ch )              ( board->mite + 0x540 + 0x100 * ( ch ) )
 
 
