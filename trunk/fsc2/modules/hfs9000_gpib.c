@@ -29,8 +29,9 @@ static void hfs9000_gpib_failure( void );
 static void hfs9000_setup_trig_in( void );
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+/*Intialization of the device at the start of the experiment */
+/*-----------------------------------------------------------*/
 
 bool hfs9000_init( const char *name )
 {
@@ -48,7 +49,7 @@ bool hfs9000_init( const char *name )
 	strcpy( cmd, "FPAN:MESS \"***  REMOTE  -  Keyboard disabled !  ***\"\n");
 	hfs9000_command( cmd );
 
-	/* Get current run state ans stop the pulser */
+	/* Get current run state and stop the pulser */
 
 	hfs9000_command( "TBAS:RUN?\n" );
 	if ( gpib_read( hfs9000.device, reply, &len ) == FAILURE )
@@ -304,8 +305,9 @@ static void hfs9000_setup_trig_in( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* Sets 'length' slots, starting at 'start', of a channel to either 1 or 0 */
+/*-------------------------------------------------------------------------*/
 
 bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 {
@@ -361,8 +363,9 @@ bool hfs9000_run( bool flag )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-----------------------------------------------*/
+/* Determines if a channel is switched on or off */
+/*-----------------------------------------------*/
 
 bool hfs9000_get_channel_state( int channel )
 {
@@ -382,8 +385,9 @@ bool hfs9000_get_channel_state( int channel )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*------------------------------*/
+/* Switches a channel on or off */
+/*------------------------------*/
 
 bool hfs9000_set_channel_state( int channel, bool flag )
 {
@@ -401,8 +405,9 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-------------------------------*/
+/* Sends a command to the device */
+/*-------------------------------*/
 
 bool hfs9000_command( const char *cmd )
 {
@@ -435,8 +440,9 @@ bool hfs9000_operation_complete( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Called on failures to communicate with the device */
+/*---------------------------------------------------*/
 
 static void hfs9000_gpib_failure( void )
 {
