@@ -115,7 +115,7 @@ void dg2020_basic_pulse_check( void )
 		}
 
 		if ( p->is_active )
-			p->has_been_active = SET;
+			p->was_active = p->has_been_active = SET;
 	}
 }
 
@@ -225,7 +225,7 @@ void dg2020_basic_functions_check( void )
 				continue;
 			}
 
-			/* No secoond pod assigned to phase function ? */
+			/* No second pod assigned to phase function ? */
 
 			if ( f->pod2 == NULL)
 			{
@@ -306,7 +306,7 @@ void dg2020_basic_functions_check( void )
 		else
 		{
 			f->needs_phases = UNSET;
-			f->num_needed_channels = PSeq->len;
+			f->num_needed_channels = 2 * PSeq->len;
 		}
 
 		/* Put channels not needed back into the pool */
@@ -427,15 +427,34 @@ void dg2020_distribute_channels( void )
 
 void dg2020_pulse_start_setup( void )
 {
+	FUNCTION *f;
+	int i, j;
+
+
 	/* Sort the pulses and check that they don't overlap */
 
-	dg2020_reorganize_pulses( SET );
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = &dg2020.function[ i ];
 
-	/* Now that all the normal pulses are set up we can also set the the
-	   pulses needed for phase cycling */
+		/* Nothing to be done for unused functions and the phase functions */
 
-	dg2020_create_phase_pulses( PULSER_CHANNEL_PHASE_1 );
-	dg2020_create_phase_pulses( PULSER_CHANNEL_PHASE_2 );
+		if ( ! f->is_used ||
+			 f->self == PULSER_CHANNEL_PHASE_1 ||
+			 f->self == PULSER_CHANNEL_PHASE_2 )
+			continue;
+
+		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+			   dg2020_start_compare );
+
+		dg2020_do_checks( f );
+
+		for ( j = 0; j < f->num_pulses; j++ )
+			f->pulses[ j ]->channel = f->channel[ 0 ];
+
+		if ( f->needs_phases )
+			dg2020_create_phase_pulses( f->phase_func );
+	}
 }
 
 
@@ -446,18 +465,11 @@ void dg2020_pulse_start_setup( void )
 -----------------------------------------------------------------------------*/
 
 
-void dg2020_create_phase_pulses( int func )
+void dg2020_create_phase_pulses( FUNCTION *f )
 {
-	FUNCTION *f = &dg2020.function[ func ];
 	int i, j, l;
 	PULSE *p;
 
-
-	assert( f == &dg2020.function[ PULSER_CHANNEL_PHASE_1 ] ||
-			f == &dg2020.function[ PULSER_CHANNEL_PHASE_2 ] );
-
-	if ( ! f->is_used )
-		return;
 
 	for ( i = 0; i < f->phase_func->num_pulses; i++ )
 	{
@@ -476,14 +488,12 @@ void dg2020_create_phase_pulses( int func )
 
 					if ( p->is_active )
 					{
-						p->has_been_active = SET;
+						p->was_active = p->has_been_active = SET;
 						f->num_active_pulses++;
 					}
 				}
 			}
 	}
-
-	qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), dg2020_start_compare );
 }
 
 
@@ -499,7 +509,6 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 {
 	PULSE *np, *cp;
 	int type;
-	char *dummy;
 
 
 	/* Figure out the phase type - its stored in the Phase_Sequence the entry
@@ -543,7 +552,8 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 
 	/* Its only active if the pulse it belongs to is active */
 
-	np->is_active = p->is_active;
+	np->was_active = np->is_active = p->is_active;
+	np->for_pulse = p;
 
 	/* Calculate its position and length if possible */
 
@@ -555,17 +565,10 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 	np->is_old_pos = np->is_old_len = UNSET;
 	np->needs_update = UNSET;
 
-	/* Finally set the pulse it's assigned to */
-
-	np->for_pulse = p;
-
-
-	dummy = get_string_copy( dg2020_pticks( np->pos ) );
-	printf( "Created phase pulse %ld for pulse %ld at %s with a length "
-			"of %s (pos is %sSET, len is %sSET).\n", np->num, p->num,
-			dummy, dg2020_pticks( np->len ),
-			np->is_pos ? "" : "UN", np->is_len ? "" : "UN" );
-	T_free( dummy );
+	np->initial_pos = np->pos;
+	np->initial_is_pos = SET;
+	np->initial_pos = np->pos;
+	np->initial_is_len = SET;
 
 	return np;
 }
@@ -584,97 +587,90 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 	static PULSE *for_pulse;
 
 
-	if ( ( np->is_pos = p->is_pos ) == SET )
+	if ( nth == 0 )                           // for first pulse ?
 	{
-		if ( nth == 0 )                           // for first pulse ?
+		/* We try to start the phase pulse for the first pulse as early as
+		   possible, i.e. even within the delay for the phase function */
+
+		if ( p->pos - f->delay < f->psd )
 		{
-			/* We try to start the phase pulse for the first pulse as early as
-			   possible, i.e. even within the delay for the phase function */
-
-			if ( p->pos - f->delay < f->psd )
-			{
-				eprint( FATAL, "DG2020: Pulse %ld starts too early to allow "
-						"setting of a phase pulse.\n", p->num );
-				THROW( EXCEPTION );
-			}
-
-			np->pos = np->initial_pos = - f->delay;
+			eprint( FATAL, "DG2020: Pulse %ld starts too early to allow "
+					"setting of a phase pulse.\n", p->num );
+			THROW( EXCEPTION );
 		}
-		else
+
+		np->pos = np->initial_pos = - f->delay;
+	}
+	else
+	{
+		pp = p->function->pulses[ nth - 1 ];
+
+		/* If the phase switch delay does not fit between the pulse it gets
+		   associated with and its predecessor we have to complain (except
+		   when both pulses use the same phase sequence or none at all) */
+
+		if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
 		{
-			pp = p->function->pulses[ nth - 1 ];
+			eprint( FATAL, "DG2020: Distance between pulses %ld and %ld "
+					"is too small to allow setting of phase pulses.\n",
+					pp->num, p->num );
+			THROW( EXCEPTION );
+		}
 
-			/* If the phase switch delay does not fit between the pulse it
-			   gets associated with and its predecessor we have to complain
-			   (except when both pulses use the same phase sequence or none
-			   at all) */
+		/* Try to start the phase pulse as late as possible, i.e. just the
+		   phase switch delay plus the grace period before the associated
+		   pulse, because the probablity is high that the preceeding pulse is
+		   going to be shifted to later times or is lenghtened */
 
-			if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
+		np->pos = np->initial_pos = p->pos - f->psd - dg2020.grace_period;
+
+		/* If this is too near to the preceeding pulse leave out the grace
+		   period, and if this still is too near to the previous pulse
+		   complain (except when both pulses use the same phase sequence since
+		   than both phase pulses get merged into one) */
+
+		if ( np->pos < pp->pos + pp->len + dg2020.grace_period )
+		{
+			np->pos += dg2020.grace_period;
+
+			if ( np->pos < pp->pos + pp->len + dg2020.grace_period  &&
+				 p->pc != pp->pc && for_pulse != p )
 			{
-				eprint( FATAL, "DG2020: Distance between pulses %ld and %ld "
-						"is too small to allow setting of phase pulses.\n",
-						pp->num, p->num );
-				THROW( EXCEPTION );
-			}
-
-			/* Try to set the phase pulse in the middle between the pulse and
-			   its predecessor */
-
-			np->pos = np->initial_pos = ( p->pos + pp->pos + pp->len ) / 2;
-
-			/* If this isn't early enough we start the phase pulse at the
-			   minimum time (i.e. the phase switch delay) before the pulse.
-			   But that also means that we have to shorten all the phase
-			   pulses associated with the previous pulse (if there are
-			   any). Again, there's the exception for the case that the pulse
-			   and its predecessor use the same phase sequence and thus both
-			   their phase pulses get merged into one pulse. */
-
-			if ( p->pos - np->pos < f->psd && p->pc != pp->pc )
-			{
-				np->pos = np->initial_pos = p->pos - f->psd;
-				if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
-				{
-					for ( i = 0; i < ppp_num; i++ )
-						if ( pppl[ i ]->is_len )
-							pppl[ i ]->len = np->pos - pppl[ i ]->pos;
-
-					T_free( pppl );
-				}
-			}
-
-			/* If the phase pulse is very near to the end of the previous
-			   (real) pulse we utter a warning */
-
-			if ( p != for_pulse && p->pc != pp->pc &&
-				 np->pos - pp->pos - pp->len < dg2020.grace_period )
-				eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld are "
-						"so close that problems with phase switching may "
+				eprint( SEVERE, "%s:%ld: DG2020: Pulses %ld and %ld are so "
+						"close that problems with phase switching may "
 						"result.\n", Fname, Lc, pp->num, p->num );
+				for_pulse = p;
+			}
 		}
-	}
 
-	if ( p->is_pos && ( ( np->is_len = p->is_len ) == SET ) )
-	{
-		/* We can't know the maximum possible length of the last phase pulse
-		   yet, this will only be known when we figured out the maximum
-		   sequence length in the test run, thus we flag our missing knowledge
-		   by setting the length to a negative value */
+		/* Adjust the length of all phase pulses associated with the
+		   precceding pulse */
 
-		if ( nth == p->function->num_active_pulses - 1 ) // last active pulse ?
-			np->len = np->initial_len = -1;
-		else
+		if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
 		{
-			pn = p->function->pulses[ nth + 1 ];
-			np->len = np->initial_len =
-				( p->pos + p->len + pn->pos ) / 2 - np->pos;
+			for ( i = 0; i < ppp_num; i++ )
+				if ( pppl[ i ]->is_len )
+					pppl[ i ]->len = np->pos - pppl[ i ]->pos;
+			T_free( pppl );
 		}
 	}
+	np->is_pos = p->is_pos == SET;
 
-	/* If the new pulse has either no position or no length reset both flags */
+	/* We can't know the maximum possible length of the last phase pulse yet,
+	   this will only be known when we figured out the maximum sequence length
+	   in the test run, thus we flag our missing knowledge by setting the
+	   length to a negative value */
 
-	if ( ! np->is_pos || ! np->is_len )
-		np->is_pos = np->is_len = UNSET;
+	if ( nth == p->function->num_active_pulses - 1 )    // last active pulse ?
+		np->len = np->initial_len = -1;
+	else
+	{
+		/* This length is only tentatively and will possibly change when the
+		   following phase pulse is set */
 
-	for_pulse = p;
+		pn = p->function->pulses[ nth + 1 ];
+		np->len = np->initial_len =
+			pn->pos - f->psd - dg2020.grace_period - np->pos;
+	}
+	np->is_len = p->is_len == SET;
 }
