@@ -61,6 +61,7 @@ typedef union {
 #define BREAK_TOK      2055
 #define REPEAT_TOK     2056
 #define FOR_TOK        2057
+#define FOREVER_TOK    2058
 #define ON_STOP_TOK    3333
 
 
