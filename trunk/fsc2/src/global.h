@@ -82,9 +82,7 @@ typedef enum
 enum {
 	PREPARATION = 0,
 	TEST,
-	SETUP,
-	EXPERIMENT,
-	SHUTDOWN
+	EXPERIMENT
 };
 
 
