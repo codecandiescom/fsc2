@@ -483,8 +483,8 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
+					"been defined.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -581,8 +581,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
+					"been defined.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
@@ -689,8 +689,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window %ld has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME, v->val.lval );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
+					"been defined.\n", Fname, Lc, DEVICE_NAME );
 			THROW( EXCEPTION );
 		}
 	}
