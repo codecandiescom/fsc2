@@ -13,16 +13,17 @@ init_1d( 2, N, sf, df, "Field [ G ]", "Signal [uV]" );
 
 EXPERIMENT:
 
+
 FOREVER {
 	print( "Starting #. run\n", J );
 	FOR I = 1 : N {
-		d1[ N ] = d1[ N ] * float( J - 1 ) / float( J )
-				  + ( grandom( ) + - 0.5 * ( I - N / 2 ) *
-				      exp( - ( I - N / 2 )^2 / 55.0^2 ) ) / J;
-		d2[ N ] = d2[ N ] * float( J - 1 ) / float( J )
-				  + ( grandom( ) + 0.07 * ( I - N / 2 ) *
-					  exp( - ( I - N / 2 )^2 / 55.0^2 ) ) / J;
-		display( I, d1[ N ], 1, I, d2[ N ], 2 );
+		r2[ I ] = ( r2[ I ] * float( J - 1 )
+				    + 0.07 * ( I - N / 2 ) *
+					  exp( - ( I - N / 2 )^2 / 55.0^2 ) )  / float( J );
+		d2[ I ] = ( d2[ I ] * float( J - 1 )
+				    + grandom( ) + 0.07 * ( I - N / 2 ) *
+					  exp( - ( I - N / 2 )^2 / 55.0^2 ) ) / float( J );
+		display( I, d1[ I ], 1, I, d2[ I ], 2 );
 		wait( 0.05 );
 	}
 	J += 1;
