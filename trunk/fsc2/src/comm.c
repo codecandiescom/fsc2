@@ -339,6 +339,7 @@ long reader( void *ret )
 	int n1, n2;
 	long retval = 0;
 	static char *retstr = NULL;
+	void *data;
 
 
 	/* Get the header - failure indicates that the child is dead */
@@ -550,10 +551,11 @@ long reader( void *ret )
 		case C_BCREATE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
+			exp_bcreate( data, header.data.len );
+			T_free( data );
 			kill( child_pid, DO_SEND );
-			exp_bcreate( ( void * ) str[ 0 ], header.data.len );
 			retval = 0;
 			break;
 
@@ -567,20 +569,22 @@ long reader( void *ret )
 		case C_BDELETE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
+			exp_bdelete( data, header.data.len );
+			T_free( data );
 			kill( child_pid, DO_SEND );
-			exp_bdelete( ( void * ) str[ 0 ], header.data.len );
 			retval = 0;
 			break;
 
 		case C_BSTATE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
+			exp_bstate( data, header.data.len );
+			T_free( data );
 			kill( child_pid, DO_SEND );
-			exp_bstate( ( void * ) str[ 0 ], header.data.len );
 			retval = 0;
 			break;
 
@@ -594,30 +598,33 @@ long reader( void *ret )
 		case C_SCREATE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
 			kill( child_pid, DO_SEND );
-			exp_screate( ( void * ) str[ 0 ], header.data.len );
+			exp_screate( data, header.data.len );
+			T_free( data );
 			retval = 0;
 			break;
 
 		case C_SDELETE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
 			kill( child_pid, DO_SEND );
-			exp_sdelete( ( void * ) str[ 0 ], header.data.len );
+			exp_sdelete( data, header.data.len );
+			T_free( data );
 			retval = 0;
 			break;
 
 		case C_SSTATE :
 			assert( I_am == PARENT );       /* only to be read by the parent */
 
-			str[ 0 ] = T_malloc( header.data.len );
-			pipe_read( pd[ READ ], ( void * ) str[ 0 ], header.data.len );
+			data = T_malloc( header.data.len );
+			pipe_read( pd[ READ ], data, header.data.len );
 			kill( child_pid, DO_SEND );
-			exp_sstate( ( void * ) str[ 0 ], header.data.len );
+			exp_sstate( data, header.data.len );
+			T_free( data );
 			retval = 0;
 			break;
 

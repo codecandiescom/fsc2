@@ -178,7 +178,7 @@ long *exp_bcreate( void *buffer, long len )
 		memcpy( &Lc, pos, sizeof( long ) );      /* get current line number */
 		pos += sizeof( long );
 
-		vars_push( INT_VAR, *( ( long * ) pos ) );
+		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
 		memcpy( &val, pos, sizeof( long ) );     /* get colleague */
@@ -200,9 +200,6 @@ long *exp_bcreate( void *buffer, long len )
 		TRY
 		{
 			ret = func_call( Func_ptr );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			TRY_SUCCESS;
@@ -211,6 +208,8 @@ long *exp_bcreate( void *buffer, long len )
 			result[ 0 ] = 0;
 
 		vars_pop( ret );
+		Fname = old_Fname;
+		Lc = old_Lc;
 		writer( C_BCREATE_REPLY, 2 * sizeof( long ), result );
 
 		return NULL;
@@ -248,7 +247,7 @@ bool exp_bdelete( void *buffer, long len )
 		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
 		pos += sizeof( long );
 
-		vars_push( INT_VAR, *( ( long * ) pos ) );
+		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
 		Fname = ( char * ) pos;                /* get current file name */
@@ -258,20 +257,14 @@ bool exp_bdelete( void *buffer, long len )
 		TRY
 		{
 			vars_pop( func_call( Func_ptr ) );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_BDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_BDELETE_REPLY, 0L );
-		}
 
+		Fname = old_Fname;
+		Lc = old_Lc;
 		return SET;
 	}
 }
@@ -308,7 +301,7 @@ long exp_bstate( void *buffer, long len )
 		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
 		pos += sizeof( long );
 
-		vars_push( INT_VAR, *( ( long * ) pos ) );
+		vars_push( INT_VAR, * ( ( long * ) pos ) );
 		pos += sizeof( long );
 
 		memcpy( &val, pos, sizeof( long ) );   /* get state to be set */
@@ -323,22 +316,15 @@ long exp_bstate( void *buffer, long len )
 		TRY
 		{
 			ret = func_call( Func_ptr );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_BSTATE_REPLY, ret->val.lval );
-			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			vars_pop( ret );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_BSTATE_REPLY, -1L );
-		}
 
+		Fname = old_Fname;
+		Lc = old_Lc;
+		vars_pop( ret );
 		return 0;
 	}
 }
@@ -404,9 +390,6 @@ long *exp_screate( void *buffer, long len )
 		TRY
 		{
 			ret = func_call( Func_ptr );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			TRY_SUCCESS;
@@ -414,6 +397,8 @@ long *exp_screate( void *buffer, long len )
 		OTHERWISE
 			result[ 0 ] = 0;
 
+		Fname = old_Fname;
+		Lc = old_Lc;
 		vars_pop( ret );
 		writer( C_SCREATE_REPLY, 2 * sizeof( long ), result );
 
@@ -462,20 +447,17 @@ bool exp_sdelete( void *buffer, long len )
 		TRY
 		{
 			vars_pop( func_call( Func_ptr ) );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_SDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 		{
 			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			writer( C_SDELETE_REPLY, 0L );
 		}
 
+		Fname = old_Fname;
+		Lc = old_Lc;
 		return SET;
 	}
 }
@@ -502,7 +484,6 @@ double *exp_sstate( void *buffer, long len )
 		char *old_Fname = Fname;
 		long old_Lc = Lc;
 		long lval;
-		double dval;
 		Var *Func_ptr;
 		Var *ret = NULL;
 		int access;
@@ -526,10 +507,7 @@ double *exp_sstate( void *buffer, long len )
 		memcpy( &lval, pos, sizeof( long ) );
 		pos += sizeof( long );
 		if ( lval > 0 )
-		{
-			memcpy( &dval, pos, sizeof( long ) );
-			vars_push( FLOAT_VAR, dval );
-		}
+			vars_push( FLOAT_VAR, * ( ( double * ) pos ) );
 		pos += sizeof( double );
 
 		Fname = ( char * ) pos;                /* get current file name */
@@ -539,23 +517,16 @@ double *exp_sstate( void *buffer, long len )
 		TRY
 		{
 			ret = func_call( Func_ptr );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			res[ 0 ] = 10.0;
 			res[ 1 ] = ret->val.dval;
-			vars_pop( ret );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
-		{
-			vars_pop( ret );
-			T_free( buffer );
-			Fname = old_Fname;
-			Lc = old_Lc;
 			res[ 0 ] = -10.0;
-		}
 
+		vars_pop( ret );
+		Fname = old_Fname;
+		Lc = old_Lc;
 		writer( C_SSTATE_REPLY, 2 * sizeof( double ), res );
 		return NULL;
 	}

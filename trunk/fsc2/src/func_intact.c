@@ -501,8 +501,8 @@ Var *f_bstate( Var *v )
 			io->state = 0;
 			return vars_push( INT_VAR, state );
 		}
-		else
-			return vars_push( INT_VAR, io->state != 0 ? 1 : 0 );
+
+		return vars_push( INT_VAR, io->state != 0 ? 1 : 0 );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -517,7 +517,11 @@ Var *f_bstate( Var *v )
 	if ( v->type == INT_VAR )
 		io->state = v->val.lval != 0 ? 1 : 0;
 	else
+	{
+		eprint( WARN, "%s:%ld: Float value used as button state in "
+				"`button_state'.\n", Fname, Lc );
 		io->state = v->val.dval != 0.0 ? 1 : 0;
+	}
 
 	if ( ! TEST_RUN )
 		fl_set_button( io->self, io->state );
@@ -943,9 +947,8 @@ Var *f_svalue( Var *v )
 				;
 		}
 
-		buffer = T_malloc( 3 * sizeof( long ) + sizeof( double )
-						   + strlen( Fname ) + 1 );
-		pos = buffer;
+		pos = buffer = T_malloc( 3 * sizeof( long ) + sizeof( double )
+								 + strlen( Fname ) + 1 );
 
 		memcpy( pos, &Lc, sizeof( long ) );
 		pos += sizeof( long );
