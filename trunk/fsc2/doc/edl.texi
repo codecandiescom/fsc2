@@ -22,25 +22,25 @@
 
 
 To do an experiment using @acronym{fsc2} you have to write a program
-describing how the experiment is to be done. While this may seem to be a
-daunting task if you have no programming experience at all this has the
-advantage that you have complete control over the way the experiment is
-done. So you don't have to rely on some programmer (who probably isn't
-around when you need him most) to have got everything right. And writing
-@acronym{EDL} programs really isn't that difficult.
-
+describing the experiment. While this may seem like a daunting task if
+you have no programming experience at all it has the advantage that you
+have complete control over the way the experiment is done. You don't
+have to rely on some programmer (who probably isn't around when you need
+him most) to have got everything right before you even started planning
+the experiment. And writing @acronym{EDL} programs isn't really that
+difficult.
 
 An @acronym{EDL} program is roughly structured along the way an
 experiment is done. Before you start an experiment you first have to
-select the devices to be used and set them up. So also the first part of
-an @acronym{EDL} program mainly consists of specifying the devices to be
+select the devices to be used and set them up. So the first part of an
+@acronym{EDL} program mainly consists of specifying the devices to be
 controlled by the program and setting their parameter, i.e.@: the time
 base of the digitizer or which pulses are to be created by the pulse
-generator.  And as you would now start the experiment the second part of
+generator. And as you would now start the experiment the second part of
 the @acronym{EDL} program describes how the experiment is to be done.
 
-To give you an impression here's an example for a relatively simple cw-EPR
-experiment:
+To give you an impression how an @acronym{EDL} program looks like here's
+the program for a relatively simple cw-EPR experiment:
 @example
 DEVICES:
 
@@ -79,33 +79,33 @@ EXPERIMENT:
 
 Obviously, the very first section of the program, starting with the
 keyword @code{DEVICES:}, specifies the names of the devices to be used
-(everything after the double-slashes are comments). In the example these
-are the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
+(everything after double-slashes are comments). In the example these are
+the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
 Research lock-in amplifier SR530.
 
-In the following section, started by the keyword @code{VARIABLES:}, all
-variables that are going to be used in the program are listed and, if
-appropriate, initialized. The first variables are for storing the start
-and end field of the field sweep as well as the step width between the
-data points. The variable @code{field} will later be used for storing the
-current field value and is initialized to the value of the start field.
-Finally, a counter variable @code{I}, initialized to 1, and another
-variable, @code{data}, for storing the data received from the lock-in
-amplifier, are declared.
+In the following section, starting with the keyword @code{VARIABLES:},
+all variables, that are going to be used in the program, are listed and,
+if appropriate, initialized. The first variables are for storing the
+start and end field of the field sweep as well as the step width between
+the data points. The variable @code{field} will later be used for
+storing the current field value and is initialized to the value of the
+start field.  Finally, a counter variable @code{I}, initialized to 1,
+and another variable, @code{data}, for storing the data received from
+the lock-in amplifier, are declared.
 
-In the next section, headed by the @code{PREPARATIONS:} keyword, the
-devices are set. In the function @code{magnet_setup} the magnet is setup
+In the next section, following the @code{PREPARATIONS:} keyword, the
+devices are set up. The function @code{magnet_setup} tells the magnet
 to start with the field stored in the variable @w{@code{start_field}}
 and to use a step size of @w{@code{field_step}}. Next, the lock-in
 amplifier is set to a sensitivity of @w{5 uV} and a time constant of
 @w{300 ms}. The last function call in the section, @code{init_1d()},
-tells the program that this is a 1-dimensional experiment and to use the
-appropriate kind of display for the data.
+tells the program that this is a 1-dimensional experiment and to use
+the appropriate kind of display for the data.
 
 Now we're already done with the preparations and can start the
-experiment, as indicated by the keyword @code{EXPERIMENT}. The whole
-experiment is done in a loop that is repeated as long as the value
-currently stored in the variable @code{field} is less or equal to
+experiment, as indicated by the keyword @code{EXPERIMENT:}. The whole
+experiment is done in a loop that is repeated as long as the field (
+stored in the variable @code{field}) is less or equal to
 @code{end_field}. To tell the program where the loop starts and ends all
 statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
@@ -128,24 +128,23 @@ value of the field, which is then used in the test of the loop condition
 to decide if the experiment is finished, i.e.@: the end field is
 reached.
 
-The last function call of @code{wait} makes the program wait for @w{300
-ms} (the lock-in amplifiers time constant) to give the lock-in amplifier
-time to measure a new data point.
+The last function call of @code{wait} in the loop makes the program wait
+for @w{300 ms} (the lock-in amplifiers time constant) to give the
+lock-in amplifier time to measure a new data point.
 
-
-When you have written such a program (e.g.@: using a simple ASCII
-editor) you load it into @acronym{fsc2} and press the test or the start
-button. @acronym{fsc2} will now analyze the program very thoroughly. It
-will not only check for misspelt keywords, undefined variables, syntax
-errors etc.@: but will also repeat the loop in the experiment section as
-often as in the real experiment to find out if no errors will happen in
-the experiment. This includes for example checking that the field will
-not be sweeped into regions the magnet or the gaussmeter can not handle
-etc.@: (e.g.@: by incidentally setting an end field value of @w{34500.0
-G} the magnet can't produce). So you can be reasonable sure that the
-experiment will not crash due to a faulty @acronym{EDL} program after it
-has run for 2 hours and you have to start all over again.
-
+When you have written such a program (using a simple ASCII editor) you
+load it into @acronym{fsc2} and press the test or the start button.
+@acronym{fsc2} will now analyze the program very thoroughly. It will not
+only check for misspelt keywords, undefined variables, syntax errors
+etc.@: but will also repeat the loop in the experiment section as often
+as in the real experiment to find out if no errors will happen in the
+experiment. This includes, for example, checking that the field will not
+be sweeped into regions the magnet or the gaussmeter can not handle
+(e.g.@: by incidentally setting an end field value of @w{34500.0 G} the
+magnet can't produce instead of @w{3450.00 G}). So you can be reasonable
+sure that the experiment will not abort due to a faulty @acronym{EDL}
+program after it has run for 2 hours and you have to start all over
+again.
 
 As you can already see form the example most of an @acronym{EDL} program
 consists of function calls. Functions can be devided into two
@@ -186,59 +185,53 @@ PREPARATIONS
 EXPERIMENT
 @end example
 
-
 The first and last two you have already seen: The @code{DEVICES} section
 is simply a list of all the devices that will be used in the experiment
 (or at least the ones that are going to be controlled by the computer).
 
 Please note that the section keyword has always to be followed by a
 colon, `@code{:}'. Another important syntax element is the semicolon,
-`@code{;}', that always ends a line of code. So, you also have to write
-a semicolon after each of the device names.
+`@code{;}', that always indicates the end of a line of code. So, you
+also have to write a semicolon after each of the device names.
 
 The @code{VARIABLES} section for declaring and initializing variables
 did also appear already in the example.
 
 Because pulses play such an important r@^ole in modern EPR experiments
-lots of elements for handling pulses and the pulser that creates them is
-built-in into @acronym{fsc2}. This is also reflected in two of the
-sections, @code{ASSIGNMENTS} and @code{PHASES} being exclusively devoted
-to the pulser setup. The basic setup of the pulser (e.g.@: setting the
-time base and trigger mode as well as setting up the pulser channels) is
-done in the @code{ASSIGNMENTS} section while the @code{PHASES} section
-is all about phase-cycling -- here you will have to define the phase
-sequences to be used in the experiment as well as the way the resulting
-echos will be added up. Because this is a rather extensive subject (and
-because of the different ways the pulser is integrated into the
-supported spectrometers, an in-depth explanation of both these sections
-is part of a whole chapter (@pxref{Using Pulsers}).
+lots of elements for handling pulses and the pulser, that creates them,
+is built-in into @acronym{fsc2}. There are even two sections,
+@code{ASSIGNMENTS} and @code{PHASES} exclusively devoted to the pulser
+setup. The basic setup of the pulser (e.g.@: setting the time base and
+trigger mode as well as setting up the pulser channels) is done in the
+@code{ASSIGNMENTS} section while the @code{PHASES} section is all about
+phase-cycling -- here you will have to define the phase sequences to be
+used in the experiment as well as the way the resulting echos will be
+added up. Because this is a rather extensive subject (and because of the
+different ways pulsers are used in the supported spectrometers, an
+in-depth explanation of both these sections is part of a whole chapter
+(@pxref{Using Pulsers}).
 
 As you already have seen the @code{PREPARATIONS} section is for setting
 up the other devices and the graphics. But this is also the section
 where the pulses are going to be defined. For more details about this
-see the chapter about pulse generators and pulses.
-
+also see the chapter about pulse generators and pulses.
 
 Finally, there is the @code{EXPERIMENT} section. As you already have
-seen this section usually consists of one or more loops (possibly with
-more loops nested into the main loops).
-
-
+seen this section usually consists of one or more loops (possibly nested).
 While the sections of the @acronym{EDL} file don't have to appear in the
 sequence they are listed above it is probably best not to experiment to
 much with this. In any case, if it exists the @code{EXPERIMENT} section
-must always be the last.
+must always be the last one.
 
 All the section keywords can be abbreviated, here's the complete list of
 valid section keywords:
-
 @itemize @bullet
-@item @code{DEVICES}, @code{DEV}, @code{DEVS}, @code{DEVICE}
-@item @code{VARIABLES}, @code{VAR}, @code{VARS}, @code{VARIABLE}
-@item @code{ASSIGNMENTS}, @code{ASS}, @code{ASSIGNMENT}
-@item @code{PHASES}, @code{PHA}, @code{PHAS}, @code{PHASE}
-@item @code{PREPARATIONS}, @code{PREP}, @code{PREPS}, @code{PREPARATION}
-@item @code{EXPERIMENT}, @code{EXP}
+@item @code{DEVICES}, or @code{DEV}, @code{DEVS}, @code{DEVICE}
+@item @code{VARIABLES}, or @code{VAR}, @code{VARS}, @code{VARIABLE}
+@item @code{ASSIGNMENTS}, or @code{ASS}, @code{ASSIGNMENT}
+@item @code{PHASES}, or @code{PHA}, @code{PHAS}, @code{PHASE}
+@item @code{PREPARATIONS}, or @code{PREP}, @code{PREPS}, @code{PREPARATION}
+@item @code{EXPERIMENT}, or @code{EXP}
 @end itemize
 
 
@@ -253,9 +246,9 @@ newline characters in between) by a colon, `@code{:}'.
 
 Each section of the program consists of statements. What a valid
 statement is may depend on the section (e.g.@: in the @code{DEVICES}
-section all valid statements are just the names of devices while in
+section all valid statements are just names of devices while in
 other sections a valid statement may be a complicated equation), but in
-all cases a statement must always be ended with a semicolon, `@code{;}'.
+all cases a statement must always end in a semicolon, `@code{;}'.
 There is nothing special about continuing a statement on a new line
 (i.e.@: a statement can span several lines), @acronym{fsc2} recognizes
 where a statement ends by the semicolon.
@@ -281,7 +274,6 @@ parenthesis). If the function does accept more than one argument the
 arguments have to be separated by commas.
 
 
-
 @node Variables, Arithmetic, Syntax, EDL
 @section Variables
 @cindex variables
@@ -293,36 +285,35 @@ arguments have to be separated by commas.
 
 
 Within the @code{VARIABLES}, @code{ASSIGNMENTS}, @code{PREPARATIONS} and
-@code{EXPERIMENT} section variables may be used. Each variable to be
-used has to be declared, i.e.@: it has to be listed in the
-@code{VARIABLES} section before it may be used. The start of the
-@code{VARIABLES} section is declared by a line stating
+@code{EXPERIMENT} section variables may be used. Each variable that is
+used in an @acronym{EDL program must be declared, i.e.@: it has to be
+listed in the @code{VARIABLES} section before it may be used. The start
+of the @code{VARIABLES} section is indicated by a line stating
 @example
 VARIABLES:
 @end example
 
 
-
 @subsection Variable names
 
-Names of variables must always start with a character, i.e.@: A-Z and
+Names of variables must always start with a character, i.e.@: A-Z or
 a-z. The remaining part of the variable name can consist of characters,
 numbers and the underscore character, '@code{_}' (or shorter, if you
 like regular expressions, valid names follow the following pattern:
 @code{[A-Za-z][A-Za-z_0-9]*}). Thus, '@code{AbC_12x}' and
 '@code{aBc_12X}' are legal variable names, while '@code{12xy}' or
-'@code{_Yx2}' aren't. Please take note that the variable names are case
+'@code{_Yx2}' are not. Please note that the variable names are case
 sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}' and '@code{xy}'
-are four different variable names!
+are four completely different variables!
 
 The name of a variable can, in principle, consist of as many characters
 as you wish (I hope nobody is going to the extent to create a variable
 name with, say, a few hundred thousand characters just to prove me wrong
--- I tested it only with two variables with names 10000 characters long,
-differing only in the very last character @code{;-)}
+-- I tested it only with two variables with names consisting of 10000
+characters and differing only in the very last character...
 
-There are a few exceptions to the valid variable names because a few
-characters or character combinations are already used for physical units
+There are some combinations of characters that can't be used as variable
+names because a they are already used for physical units
 as well as combinations of these with the characters @code{n} (nano),
 @code{u} (micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).
 Here's the complete list:
@@ -338,13 +329,12 @@ Here's the complete list:
 @end multitable
 @end quotation
 
-Of course, also the reserved words can't be used as variable names. But
+And, of course, also the reserved words can't be used as variable names. But
 they are easy to avoid, because all reserved words are spelt in all capital
 letters only.
 
 
 @subsection Variable types
-
 
 Variables can be divided into two classes, variables to hold integer
 values and variables for storing floating point values.
@@ -358,29 +348,31 @@ depending on the machine @acronym{fsc2} is running on.
 To distinguish between integer and floating point variables the
 following convention is used: The names of all integer variables start
 with a upper case letter, i.e.@: A-Z, while the names of floating point
-variables start with a lower case character, i.e.@: a-z.
+variables always start with a lower case character, i.e.@:
+a-z. (Actually, changing just one line of the program allows to set a
+completely different behaviour.)
 
 
 @subsection Arrays
 
-
 Beside `normal' variables you can also use arrays of variables. The
-types of the arrays follow the same convention as with normal variables,
-i.e.@: if the name starts with an upper case character it is an integer
-array, if it starts with a lower case character it is a floating point
-array. To define an array append the sizes of the dimensions of the
-array, separated by commas, in square brackets. E.g.
+names of the arrays follow the same convention as normal variables,
+i.e.@: if an array name starts with an upper case character it is an
+integer array and if it starts with a lower case character it's a
+floating point array. To define an array in the @code{VARIABLES} section
+just append the sizes of the dimensions of the array, separated by
+commas, in square brackets. E.g.
 @example
 A[ 100 ];
 b[ 4, 7, 3 ];
 @end example
 @noindent
 defines a 1-dimensional integer array @code{A} with 100 elements and a
-floating point array @code{b} of rank 4x7x3.
+3-dimensional floating point array @code{b} of rank 4x7x3.
 
 
-Arrays are automatically initialized to zero for all elements. On the
-other hand, arrays can be initialized also within the @acronym{EDL} file
+All elements of an arrays are automatically initialized to zero. On the
+other hand, arrays can also be initialized within the @acronym{EDL} file
 by equating it to a list of values, enclosed in curly braces.
 @example
 C[ 3 ] = @{ 2, 1, -1 @};
@@ -390,40 +382,41 @@ E[ 2, 3 ] = @{ 1, 2, 3, 4, 5, 6 @};
 @noindent
 The first line in the example shows the standard way -- each element of
 @code{C} is initialized by an element from the list. In the second line
-there are less initializers then elements array @code{d}, and only the
-first two elements are set, i.e.@: @code{d[ 1 ]} and @code{d[ 2 ]},
-while the remaining elements are set to zero. The third examples shows
-the initialization of a multidimensional array, the elements of the
-array @code{E} being set starting with the first row and continuing to
-with the next rows until all initializers are used up. I.e.@: the array
-@code{E} will be initialized to
+there are less initializers than the array @code{d} has elements, thus
+only the first two elements are set, i.e.@: @code{d[ 1 ]} and @code{d[ 2
+]}, while all the remaining elements are set to zero. The third examples
+shows the initialization of a multidimensional array, the elements of
+the array @code{E} being set starting with the first row and continuing
+to with the next rows until all initializers are used up. Thus the
+array @code{E} will be initialized to
 @example
 E[ 1, 1 ] = 1     E[ 1, 2 ] = 2     E[ 1, 3 ] = 3
 E[ 2, 1 ] = 4     E[ 2, 2 ] = 5     E[ 2, 3 ] = 6
 @end example
 
 
-There are some situations where on can't know the size of an array
-already in the @code{VARIABLES} section. Therefor, one may also define
-arrays with the size of the last dimension remaining undefined by
-specifying a @code{*} instead of a number.
+There are some situations where on doesn't know the size of an array in
+advance, so setting it in the @code{VARIABLES} section is
+impossible. Therefor, one may also define arrays with the size of the
+last dimension remaining undefined by specifying a @code{*} instead of a
+number.
 @example
 G[ * ];
 h[ 2, * ];
 @end example
 @noindent
 This defines an 1-dimensional integer array @code{G} with a still
-undefined number of elements and a floating point matrix @code{h} with
-two rows of undefined length. The sizes of these arrays remain undefined
-until 1-dimensional arrays are assigned to them. The following
-assignment will set the length of @code{G} to 3
+undefined number of elements and a 2-dimensional floating point matrix
+@code{h} with two rows of undefined length. The sizes of these arrays
+remain undefined until 1-dimensional arrays are assigned to them. The
+following assignment will set the length of @code{G} to 3 by assigning
+the second row of elements of @code{E} to @code{G}:
 @example
 G = E[ 2 ];
 @end example
 @noindent
-because the length of a row of @code{E} is three. The assignment will
-copy the elements of the second row of @code{E} to @code{G}. After this
-assignment the size of @code{G} is fixed and can't be changed anymore.
+because the length of a row of @code{E} is three. After this assignment
+the size of @code{G} is fixed and can't be changed anymore.
 
 In the same way the assignment
 @example
@@ -434,9 +427,10 @@ will set the rank of @code{h} to 2x5 (because the length of @code{d} is 5).
 
 Of course, these are somewhat contrived examples, in a real experiments
 arrays with undefined sizes are usually used for storing data received
-from functions that return arrays of a size that would be difficult to
-determine before the experiment is actually started, e.g.@: curves
-fetched from a digitizing oscilloscope.
+from functions that return arrays of a size that would be difficult or
+impossible to determine before the experiment is actually started,
+e.g.@: curves fetched from a digitizing oscilloscope.
+
 
 @node Arithmetic, Control structures, Variables, EDL
 @section Arithmetic
@@ -450,11 +444,10 @@ surprisingly represented by the characters `@code{+}', `@code{-}',
 @cindex - (subtraction operator)
 @cindex * (multiplication operator)
 @cindex / (division operator)
-They can be applied to simple integer and floating point values (see
-below how they may be used with 1-dimensional arrays). If one of the
-values is a floating point value the result is also a floating point
-number - only if both values are integer the result also has integer
-type.
+They can be applied to simple integer and floating point values as well
+as with 1-dimensional arrays (see also below). If one of the values is a
+floating point value the result is also a floating point number - only
+if both values are integers the result is also an integer.
 
 Some care has to be taken in arithmetic with integers.
 @cindex integer overflow
@@ -475,14 +468,14 @@ be completely bogus, e.g.@:
 @end example
 @noindent
 (There is actually some logic behind this result but that doesn't help
-much.)  So, if you suspect the result of an integer operation to exceed
+much.) So, if you suspect the result of an integer operation to exceed
 the range of representable values, convert the values to floating point
-type (see the function @code{float()} below) before you do the
-potentially problematic arithmetic operation.
+type (see the function @code{float()}) before you do the potentially
+problematic arithmetic operation.
 
 Of course, there are also limits to the range of numbers representable by a
 floating point number. Fortunately, these limits are much larger - typically
-the size of the maximum numbers is in the range of 10^300.
+the maximum size of the floating point numbers is in the range of 10^300.
 @cindex floating point numbers, range of
 @cindex range of floating point numbers
 @cindex floating point overflow
@@ -501,8 +494,8 @@ digits following the decimal point. Thus, typical results are
 @cindex / (division operator)
 @cindex integer division
 @noindent
-To avoid this truncation convert (see the function @code{float()} below)
-at least one of the values used in the division to floating point type,
+To avoid this truncation convert (see the function @code{float()}) at
+least one of the values used in the division to floating point type,
 i.e.@:
 
 @example
@@ -510,13 +503,12 @@ float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
 @end example
 
 
-Beside the normal arithmetic operations there are two more operations,
-the modulo function and the exponentiation. For the modulo operation the
-percent sign @code{%}
+Beside the normal arithmetic operations there are two more very useful
+operations, the modulo function and the exponentiation. For the modulo
+operation the percent sign @code{%}
 @findex % (modulo operator)
 @cindex modulo operator
-is used and the result is the remainder of the division, e.g.@:
-
+is used and the result is the remainder of the division, e.g.@
 @example
 7 % 3 = 2         6.5 % 2.5 = 1.5 
 @end example
@@ -530,7 +522,8 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 3^2 = 9           6.5^1.5 = 16.5718134219...
 @end example
 @noindent
-As usual, non-integer exponents can only be used with non-negative bases!
+As the usual mathematics dictate non-integer exponents can only be used
+with non-negative bases!
 
 
 @subsection Assignment operators
@@ -544,8 +537,9 @@ As usual, non-integer exponents can only be used with non-negative bases!
 @cindex @code{^=} (exponentiation and assign)
 
 When assigning to a variable usually the assignment operator `@code{=}'
-is used. But there are many cases where just a number is added to a
-variable and one would have to write
+is used. But there are often cases where a variable just has to be
+incremented as in
+variable:
 @example
 I = I + 1;
 @end example
@@ -565,7 +559,6 @@ assignment operators
 @subsection Operator precedence
 @cindex operator precedence
 
-
 Usually one doesn't think about the precedence of operators. We already
 learned in primary school that multiplication and division have higher
 precedence than addition or subtraction. Of course, a programming
@@ -573,7 +566,8 @@ language should follow this rules. But sometimes there are cases where
 it is necessary to know exactly the precedence, i.e.@: the exact
 sequence an expression is evaluated.
 
-The unary `@code{+}' and `@code{-}' operators have the highest
+The unary `@code{+}' and `@code{-}' operators (unary in the sense that
+they apply only to just one number or variable) have the highest
 precedence, i.e.@: the operators defining the sign of a number. There is
 a further operator, to be discussed later, having the same precedence,
 the logical negation operator, `@code{!}'. The evaluation of an
@@ -586,9 +580,10 @@ the left, i.e.@:
 (This is not a very useful example but here for sake of completeness.)
 
 The exponentiation operator, `@code{^}', has the next highest
-precedence, i.e.@: it binds more tightly than any other binary
-operator. If there is more than one of these operators in a row the
-expression will be evaluated from the right to the left:
+precedence, i.e.@: it binds more tightly than any other binary operator
+(i.e.@: an operator involving two numbers or variables). If there is
+more than one of these operators in a row the expression will be
+evaluated from the right to the left:
 @example
  2^3^4    @r{will be treated as if written as}    2^(3^4)
 @end example
@@ -605,11 +600,13 @@ Now the multiplication and division operators, `@code{*}' and `@code{/},
 follow. Both have exactly the same precedence and expressions involving
 more than one of these operators are evaluated left to right, i.e.@:
 @example
- 3 * 22 / 7    @r{will be treated as if written as}    ( 3 * 22 ) / 7
+ 3 * 20 / 7    @r{will be treated as if written as}    ( 3 * 20 ) / 7
 @end example
 @noindent
-(Take care: This can make a lot of a difference when e.g.@: integer
-multiplication is involved.)
+(Take care: This can make a lot of a difference - due to the rules of
+integer division @code{(3 * 20) / 7} will evaluate to @code{8}, while
+@code{3 * (20 / 7)} would result in @code{6}).
+
 
 The next lower precedence operators are the addition and subtraction
 operators, `@code{+}' and `@code{-}'. Also for these operators
@@ -631,9 +628,10 @@ right of the expression:
 @example
  a | b & c    @r{will be treated as if written as}    ( a | b ) & c
 @end example
-But to make your intentions more clear to human readers of your
-@acronym{EDL} programs it's probably a good idea to use the
-parenthesis even when they are not required.
+
+To make your intentions more clear to human readers of your
+@acronym{EDL} programs it's probably a good idea to use parenthesis in
+these cases even when they are not required.
 
 Finally, the lowest precedence operators are the comparison operators
 (also the be discussed below in more detail), i.e.@: the test for equality,
@@ -658,7 +656,6 @@ use parenthesis -- this won't slow down the program significantly.
 @subsection Arithmetic with arrays
 @cindex Arithmetic with arrays
 
-
 Beside the usual arithmetic with numbers it is also possible to use
 arithmetic with (one-dimensional) arrays. Also all built-in functions
 can (as far as this makes any sense) can be applied to these kinds of
@@ -667,15 +664,15 @@ arrays.
 As long as the sizes of two arrays are identical they can be added or
 subtracted. If the arrays @code{a} and @code{b} are defined as
 @example
-      a[ 3 ] = @{ 0.5, 1.0, 2.0 @};
+      a[ 3 ] = @{ 0.5,  1.0,  2.0 @};
       b[ 3 ] = @{ 1.0, -2.0, -3.0 @};
 @end example
 @noindent
 they can be added and subtracted in a element-by-element fashion,
 resulting in
 @example
-      a + b      ->   @{ 1.5, -1.0, -1.0 @}
-      a - b      ->   @{ -0.5, 3.0, 5.0 @}
+      a + b      ->   @{  1.5, -1.0, -1.0 @}
+      a - b      ->   @{ -0.5,  3.0,  5.0 @}
 @end example
 @noindent
 Of course, you can also invert the sign of all the elements of an array
@@ -710,9 +707,9 @@ defined as shown here:
       3 / a      ->   @{ 6.0, 3.0, 1.5 @}
 @end example
 
-Finally, also calculation of the modulo and exponentiation can be done on
-arrays. Also these operations are implemented as element-by-element
-calculations, i.e.@: resulting in an array:
+Finally, also calculation of the modulo function and exponentiation can
+be done with whole arrays. These operations are also implemented as
+element-by-element calculations, i.e.@: resulting in an array:
 @example
       a % b      ->   @{ 0.5, 1.0, 2.0 @}
       b % a      ->   @{ 0.0, 0.0, -1.0 @}
@@ -743,7 +740,6 @@ Finally, for obvious reasons, when computed assignments are used
 (i.e.@: `@code{+=}', `@code{-=}', `@code{*=}', `@code{/=}', `@code{%=}'
 or `@code{^=}') the left hand side variable of an equation has to be an
 array when arithmetic with arrays is used.
-
 
 
 @node Control structures, Miscellaneous, Arithmetic, EDL
