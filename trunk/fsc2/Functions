@@ -29,21 +29,28 @@ get_phase_cycled_area_1d, -1, EXP;
 get_phase_cycled_area_2d, -1, EXP;
 
 
-// Functions exported by the magnet power supply drivers (S_BAND)
+// Functions exported by the magnet power supply drivers (AEG_S_BAND,
+// AEG_X_BAND and, for all functions without the word field in its name,
+// also the W_BAND)
 
-magnet_setup, 2, ALL;           // set start field and sweep step size
+magnet_setup, 2, ALL;           // set start field and sweep step size (S,X,W)
 magnet_fast_init, 0, ALL;       // shortens magnet setup time
-set_field, -1, EXP;             // goto to a field value
-sweep_up, 0, EXP;               // sweep magnet up
-sweep_down, 0, EXP;             // sweep magnet down
+set_field, -1, EXP;             // go to to a field value
+sweep_up, 0, EXP;               // sweep magnet up (S,X,W)
+sweep_down, 0, EXP;             // sweep magnet down (S,X,W)
 reset_field, 0, EXP;            // go back to start field
+
+// Functions for the W_BAND power supply driver only
+
+set_current, 1, EXP;            // go to a current value
+reset_current, 0, EXP;          // go back st start current
 
 
 // Functions exported by the field meter drivers (BH15, ER035M)
 
 find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
-field_meter_wait, 0, EXP;       // wait a bit for field to stabilize
+field_meter_wait, 0, EXP;       // wait for field to stabilize
 
 measure_field, 0, EXP;          // return field value (ER035M_SA / ER035M_SAS)
 

@@ -38,7 +38,6 @@
 int keithley228a_init_hook( void );
 int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
-void keithley228a_exit_hook( void );
 
 Var *magnet_setup( Var *v );
 Var *set_current( Var *v );
@@ -46,7 +45,7 @@ Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
 Var *reset_current( Var *v );
 
-
+/* internally used functions */
 
 static bool keithley228a_init( const char *name );
 static void keithley228a_to_local(void);
@@ -122,7 +121,7 @@ int keithley228a_init_hook( void )
 	}
 	vars_pop( func_ptr );
 
-	/* Now set the port number of the lock-ins DAC the modulation input of
+	/* Set the port number of the lock-ins DAC the modulation input of
 	   the power supply is connected to */
 
 	if ( exist_device( "sr510" ) )
@@ -134,7 +133,7 @@ int keithley228a_init_hook( void )
 	else if ( exist_device( "sr830" ) )
 		keithley228a.lockin_dac_port = SR830_DAC_PORT;
 
-	/* Set some variables in the magnets structure */
+	/* Unset some flags in the power supplies structure */
 
 	keithley228a.is_req_current = UNSET;
 	keithley228a.is_current_step = UNSET;
@@ -163,11 +162,11 @@ int keithley228a_end_of_exp_hook( void )
 }
 
 
-/*****************************************************************************/
-/*                                                                           */
-/*              exported functions, i.e. EDL functions                       */
-/*                                                                           */
-/*****************************************************************************/
+/***********************************************************************/
+/*                                                                     */
+/*           exported functions, i.e. EDL functions                    */
+/*                                                                     */
+/***********************************************************************/
 
 
 /*-----------------------------------------------------------------------*/
@@ -414,6 +413,8 @@ static bool keithley228a_init( const char *name )
 
 
 /*-----------------------------------------------------------------------*/
+/* Brings the power supply back into local state after sweeping down the */
+/* current down to 0 A.                                                  */
 /*-----------------------------------------------------------------------*/
 
 static void keithley228a_to_local( void )
@@ -501,7 +502,7 @@ static bool keithley228a_set_state( bool new_state )
 /*-------------------------------------------------------------------*/
 /* In principle, the Keithley power supply is not supposed to drive  */
 /* large inductive loads. On the other hand, the sweep coil of the   */
-/* magnet has a inductance of about 4 H and a very low resistance    */
+/* magnet has an inductance of about 4 H and a very low resistance   */
 /* (mainly just due to the leads). The inductance reaction voltage   */
 /* (the voltage induced by the coil due to the current change as     */
 /* imposed by the power supply) and given by the product of the      */
