@@ -45,7 +45,15 @@ Ticks hfs9000_double2ticks( double p_time )
 
 	ticks = p_time / hfs9000.timebase;
 
-	if ( fabs( ticks - lrnd( ticks ) ) > 1.0e-2 )
+	if ( ticks > TICKS_MAX || ticks < TICKS_MIN )
+	{
+		print( FATAL, "Specified time is too long for time base of %s.\n",
+			   dg2020_ptime( dg2020.timebase ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2 ||
+		 ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
 	{
 		char *t = T_strdup( hfs9000_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of the "
@@ -55,7 +63,7 @@ Ticks hfs9000_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	return ( Ticks ) lrnd( ticks );
+	return Ticksrnd( ticks );
 }
 
 

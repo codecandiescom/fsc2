@@ -69,6 +69,8 @@ Var *pulser_lock_keyboard( Var *v );
 #define TICKS_MAX LONG_MAX
 #define TICKS_MIN LONG MIN
 
+#define Ticksrnd lrnd
+
 #define FIXED_TIMEBASE         8.0e-9   /* fixed pulser time base: 8 ns */
 
 #define MAX_CHANNELS            8       /* number of channels */

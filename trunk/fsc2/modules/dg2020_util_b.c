@@ -34,7 +34,6 @@
 Ticks dg2020_double2ticks( double p_time )
 {
 	double ticks;
-	double ip, fp;
 
 
 	if ( ! dg2020.is_timebase )
@@ -45,9 +44,16 @@ Ticks dg2020_double2ticks( double p_time )
 	}
 
 	ticks = p_time / dg2020.timebase;
-	fp = modf( ticks, &ip );
 
-	if ( fabs( fp ) > 1.0e-2 )
+	if ( ticks > TICKS_MAX || ticks < TICKS_MIN )
+	{
+		print( FATAL, "Specified time is too long for time base of %s.\n",
+			   dg2020_ptime( dg2020.timebase ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2 ||
+		 ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
 	{
 		char *t = T_strdup( dg2020_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of the "
@@ -57,14 +63,7 @@ Ticks dg2020_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( ticks > TICKS_MAX )
-	{
-		print( FATAL, "Specified time is too long for time base of %s.\n",
-			   dg2020_ptime( dg2020.timebase ) );
-		THROW( EXCEPTION );
-	}
-
-	return ( Ticks ) lrnd( ticks );
+	return Ticksrnd( ticks );
 }
 
 

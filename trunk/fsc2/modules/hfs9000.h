@@ -60,6 +60,10 @@ Var *pulser_stop_on_update( Var *v );
 #define Ticks_max l_max
 #define Ticks_min l_min
 
+#define TICKS_MAX LONG_MAX
+#define TICKS_MIN LONG_MIN
+
+#define Ticksrnd lrnd
 
 #define MIN_TIMEBASE           1.6e-9   /* minimum pulser time base: 1.6 ns */
 #define MAX_TIMEBASE           2.0e-5   /* maximum pulser time base: 20 us */
