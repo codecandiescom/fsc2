@@ -545,15 +545,13 @@ void er023m_set_re( int re )
 /* Returns the number of bytes to be expected when fetching  */
 /* ADC data in single mode (SM) - again the manual is lying  */
 /* by claiming that the maximum number is 3 while in reality */
-/* it seems to be 4.                                         */
+/* it 4 (actually, only 2 or 4 can happen).                  */
 /*-----------------------------------------------------------*/
 
 int er023m_nb( void )
 {
 	char buf[ 30 ];
 	long len = 30;
-	unsigned int fac;
-	int i;
 	int nb;
 
 
