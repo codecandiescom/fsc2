@@ -43,8 +43,6 @@ NI_DAQ_DEV ni_daq_dev[ NI_DAQ_MAX_BOARDS ];
 
 int ni_daq_errno = 0;
 
-const char *error_message = "";
-
 static const char *ni_daq_errlist[ ] = {
     "Success",                                       /* NI_DAQ_OK      */
     "No such board",                                 /* NI_DAQ_ERR_NSB */
