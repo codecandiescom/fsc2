@@ -730,23 +730,24 @@ First of all, each module has to include the header file
 @code{fsc2}'s variables. It should @strong{not} include
 @file{fsc2.h}, this header file is for @code{fsc2} itself.
 @file{fsc2_module.h} already includes all definitions and declarations
-of macros, variables and functions for GPIB functions.
+of macros, variables and functions of @code{fsc2} that can be used
+within modules.
 
-Second, each module should put its basic configuration information into
+Second, each module must put its basic configuration information into
 a special file which should be commented well enough to allow even
 people without much programming experience to adapt the behavior of the
 module to his/her needs. A good example are modules for devices that are
 accessed via the serial port. Because you probably won't know which
 serial port the user is going to use you shouldn't hide this information
 somewhere deep down in the innards of your module but put it in a
-prominent place where it's easy to find. Thus this is one of the items
+prominent place where it is easy to find. Thus this is one of the items
 that should go into the configuration file.
 
 All configuration files are in the @file{config} directory. For obvious
 reasons the names of the configuration files should make it clear for
-which module they are supposed to be. Currently, all of them have the
-extension @code{.conf}. Each configuration file should contain at least
-to items. First a string with the device name should be defined, e.g.
+which module they are used for. Currently, all of them have the extension
+@code{.conf}. Each configuration file must contain at least
+two items: first a string with the device name should be defined, e.g.
 @example
 #define DEVICE_NAME     "TDS754A"
 @end example
@@ -766,27 +767,26 @@ the device type, e.g.
 #define DEVICE_TYPE     "digitizer"
 @end example
 @noindent
-The device type string is used by @code{fsc2} to figure out if more
-than one device with the same functionality is being used by an
-@code{EDL} script. You probably already have read that when you have
-two such devices you can access the second device by appending a
-'@code{#2}' when calling an @code{EDL}-function. But, obviously, for
-this to work @code{fsc2} must know which devices have similar
-capabilities and which don't. This it finds out from the device type
-string. Thus if you decide which device type string you're going to use
-please first check the device types of other devices as defined in their
-configuration files.  If your device is similar enough to one of the
-existing devices pick the same device type string, otherwise pick a
-new and descriptive name.
+The device type string is used by @code{fsc2} when more than one device
+with the same functionality is being used by an @code{EDL} script. You
+probably already have read that when you have two such devices you can
+access the second one by appending a '@code{#2}' when calling an
+@code{EDL}-function. But, obviously, for this to work @code{fsc2} must
+know which devices have similar capabilities and which don't. This it
+finds out from the device type string. Thus if you decide which device
+type string you're going to use please first check the device types of
+other devices as defined in their configuration files. If your device
+is similar enough to one of the existing devices pick the same device
+type string, otherwise pick a new and descriptive name.
 
 
 @subsection Variables a module must define
 
-In the previous section the meaning of the device name and type type
-strings has already been discussed. While the definition of the strings
+In the previous section the meanings of the device name and type type
+strings have already been discussed. While the definitions of the strings
 should go into the configuration file for the device, no memory has been
 allocated for these strings yet. This should be done as one of the first
-things after the include files having been included. Each and every
+things after the include files have been included. Each and every
 device module should define two constant character arrays called
 @code{device_name} and @code{generic_type}, that contain the device name
 and type strings, i.e.@: one of the first lines should always be
@@ -810,9 +810,9 @@ Another important point is that if in two modules with different
 @code{generic_type} settings the same function name is used only one of
 this modules can be used at the same time. If the user tries to list
 both modules simultaneously in the @code{DEVICES} section an error
-message will be printed and interpretation of the script will be
-stopped. Thus it must be avoided to use identical @code{EDL} function
-names in modules for devices of different types.
+message will be printed and interpretation of the @code{EDL} script
+will be stopped. Thus it must be avoided to use identical @code{EDL}
+function names in modules for devices of different types.
 
 
 @subsection Global variables
