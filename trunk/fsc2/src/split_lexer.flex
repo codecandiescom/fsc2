@@ -23,11 +23,15 @@
 	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }
 
+
 #include "fsc2.h"
 
 
-int splitlex( void );
-bool section_parser( int section );
+/* local functions */
+
+static int splitlex( void );
+static bool section_parser( int section );
+
 
 %}
 
@@ -110,12 +114,12 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 				return FAIL;
 			}
 
-"\n"        /* dump carriage returns */
+[\t \n]+    /* dump white space */
 
 			/* handling of invalid input */
-[^ \n]+		{
-				eprint( FATAL, "%s:%ld: Invalid input: `%s'.\n",
-						Fname, Lc, splittext );
+.   		{
+				eprint( FATAL, "%s:%ld: Missing section label at start of "
+							   "file.\n", Fname, Lc );
 				return FAIL;
 			}
 
@@ -167,7 +171,7 @@ bool split( char *file )
 
 /*--------------------------------------------------------------------*/
 /* This routine is the central distributor for starting the different */
-/* parsers for all of the sections in the EDL file. It's called once  */
+/* parsers for all of the sections in the EDL file. It is called once */
 /* from splitlex(), which just finds the very first section label and */
 /* passes it to this routine. Here the appropriate lexer is called,   */
 /* which returns the next label if it finishes successfully. The new  */
@@ -222,7 +226,7 @@ bool section_parser( int section )
 	
 		} while ( section != NO_SECTION );
 
-		/* Finally, we have to do all the checks on that only can be done
+		/* Finally, we have to do all the checks that only can be done
 		   after the EDL file has been completely parsed */
 
 		post_parse_check( );
