@@ -48,10 +48,9 @@ union semun {
 void *get_shm( int *shm_id, long len )
 {
 	void *buf;
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
 								IPC_CREAT | SHM_R | SHM_A ) ) < 0 )
@@ -60,7 +59,7 @@ void *get_shm( int *shm_id, long len )
 			usleep( 10000 );
 		else                                      /* non-recoverable failure */
 		{
-			lower_permissions( must_reset );
+			lower_permissions( );
 			return ( void * ) -1;
 		}
 	}
@@ -70,7 +69,7 @@ void *get_shm( int *shm_id, long len )
 
 	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return ( void * ) -1;
 	}
 
@@ -80,7 +79,7 @@ void *get_shm( int *shm_id, long len )
 	memcpy( buf, "fsc2", 4 );                         /* magic id */
 	buf += 4;
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return buf;
 }
 
@@ -94,24 +93,18 @@ void *get_shm( int *shm_id, long len )
 void *attach_shm( int key )
 {
 	void *buf;
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
 		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
-		lower_permissions( must_reset );
-		if ( must_reset )
-		{
-			seteuid( getuid( ) );
-			setegid( getgid( ) );
-		}
+		lower_permissions( );
 		return ( void * ) -1;
 	}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return buf + 4;
 }
 
@@ -124,10 +117,7 @@ void *attach_shm( int key )
 
 void detach_shm( void *buf, int *key )
 {
-	bool must_reset = UNSET;
-
-
-	must_reset = raise_permissions( );
+	raise_permissions( );
 	
 	shmdt( buf - 4 );
 	if ( key != NULL )
@@ -136,7 +126,7 @@ void detach_shm( void *buf, int *key )
 		*key = -1;
 	}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -152,10 +142,9 @@ void detach_shm( void *buf, int *key )
 void delete_all_shm( void )
 {
 	int i;
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	/* If message queue exists check that all memory segments indixed in it
 	   are deleted */
@@ -175,7 +164,7 @@ void delete_all_shm( void )
 	if ( Key_ID >= 0 )
 		detach_shm( Key, &Key_ID );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -257,15 +246,14 @@ int sema_create( void )
 {
 	int sema_id;
 	union semun sema_arg;
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	if ( ( sema_id = semget( IPC_PRIVATE, 1,
 							 IPC_CREAT | IPC_EXCL | SEM_R | SEM_A ) ) < 0 )
 	{
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return -1;
 	}
 
@@ -273,11 +261,11 @@ int sema_create( void )
 	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
 	{
 		semctl( sema_id, 0, IPC_RMID, sema_arg );
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return -1;
 	}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return sema_id;
 }
 
@@ -289,19 +277,18 @@ int sema_create( void )
 
 int sema_destroy( int sema_id )
 {
-	bool must_reset = UNSET;
 	union semun sema_arg;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
 	{
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return -1;
 	}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return 0;
 }
 
@@ -316,19 +303,18 @@ int sema_destroy( int sema_id )
 int sema_wait( int sema_id )
 {
 	struct sembuf wait = { 0, -1, 0 };
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	while ( semop( sema_id, &wait, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
-			lower_permissions( must_reset );
+			lower_permissions( );
 			return -1;
 		}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return 0;
 }
 
@@ -342,18 +328,17 @@ int sema_wait( int sema_id )
 int sema_post( int sema_id )
 {
 	struct sembuf post = { 0, 1, 0 };
-	bool must_reset = UNSET;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	while ( semop( sema_id, &post, 1 ) < 0 )
 		if ( errno != EINTR )
 		{
-			lower_permissions( must_reset );
+			lower_permissions( );
 			return -1;
 		}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return 0;
 }

@@ -86,7 +86,7 @@ pid_t spawn_conn( bool start_state )
 	{
 		umask( old_mask );
 		unlink( FSC2_SOCKET );
-		lower_permissions( SET );
+		lower_permissions( );
 		return -1;
 	}
 
@@ -95,7 +95,7 @@ pid_t spawn_conn( bool start_state )
 	if ( listen( listen_fd, SOMAXCONN ) < 0 )
 	{
 		unlink( FSC2_SOCKET );
-		lower_permissions( SET );
+		lower_permissions( );
 		return -1;
 	}
 
@@ -116,7 +116,7 @@ pid_t spawn_conn( bool start_state )
 	else
 		unlink( FSC2_SOCKET );
 
-	lower_permissions( SET );
+	lower_permissions( );
 	return new_pid;
 }
 

@@ -109,7 +109,6 @@ int num_init_devices = 0;
 int gpib_init( const char *log_file_name, int log_level )
 {
 	int i;
-	bool must_reset;
 
 
 	if ( gpib_is_active )
@@ -121,7 +120,7 @@ int gpib_init( const char *log_file_name, int log_level )
 	if ( ll > LL_ALL )
 		ll = LL_ALL;
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     gpib_init_log( log_file_name );             /* initialize logging */
 
@@ -134,12 +133,12 @@ int gpib_init( const char *log_file_name, int log_level )
 
 	if ( gpib_parse_config( GPIB_CONF_FILE ) != SUCCESS )
 	{
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return FAILURE;
 	}
 
     gpib_is_active = 1;
-	lower_permissions( must_reset );
+	lower_permissions( );
     return SUCCESS;
 }
 
@@ -154,15 +153,14 @@ static int gpib_parse_config( const char *file )
     extern FILE *gpibin;
     FILE *fp;
     int retval;
-	bool must_reset;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
     if ( ( fp = fopen( file, "r" ) ) == NULL )
     {
         sprintf( gpib_error_msg, "Can't open data base %s.", file );
         iberr = ECAP;
-		lower_permissions( must_reset );
+		lower_permissions( );
         return FAILURE;
     }
 
@@ -171,7 +169,7 @@ static int gpib_parse_config( const char *file )
         iberr = ECAP;
 
     fclose( fp );
-	lower_permissions( must_reset );
+	lower_permissions( );
     return retval;
 }
 
@@ -229,12 +227,11 @@ int gpib_dev_setup( GPIB_Device *temp_dev )
 int gpib_shutdown( void )
 {
 	int i;
-	bool must_reset;
 
 
     TEST_BUS_STATE;
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].is_online )
@@ -253,7 +250,7 @@ int gpib_shutdown( void )
     }
 
     gpib_is_active = 0;
-	lower_permissions( must_reset );
+	lower_permissions( );
     return SUCCESS;
 }
 
@@ -274,13 +271,12 @@ static void gpib_init_log( const char *log_file_name )
 	const char *name;
 	bool access_ok = UNSET;
 	bool set_perms = UNSET;
-	bool must_reset;
 
 
     if ( ll == LL_NONE )
         return;
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( log_file_name == NULL || *log_file_name == '\0' )
 	{
@@ -312,7 +308,7 @@ static void gpib_init_log( const char *log_file_name )
 
     fprintf( gpib_log, "GPIB bus is being initialized.\n" );
     fflush( gpib_log );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -331,13 +327,12 @@ static void gpib_init_log( const char *log_file_name )
 int gpib_init_device( const char *device_name, int *dev )
 {
 	int i;
-	bool must_reset;
 
 
     if ( ! strcmp( device_name, CONTROLLER ) )
 		return SUCCESS;
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
@@ -354,7 +349,7 @@ int gpib_init_device( const char *device_name, int *dev )
 				 device_name, GPIB_CONF_FILE );
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
-		lower_permissions( must_reset );
+		lower_permissions( );
         return FAILURE;
 	}
 
@@ -364,7 +359,7 @@ int gpib_init_device( const char *device_name, int *dev )
 				 "devices.\n", device_name );
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
-		lower_permissions( must_reset );
+		lower_permissions( );
         return FAILURE;
 	}
 
@@ -374,7 +369,7 @@ int gpib_init_device( const char *device_name, int *dev )
 				 device_name );
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
-		lower_permissions( must_reset );
+		lower_permissions( );
         return SUCCESS;
 	}
 
@@ -391,7 +386,7 @@ int gpib_init_device( const char *device_name, int *dev )
 				 device_name );
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
-		lower_permissions( must_reset );
+		lower_permissions( );
 		return FAILURE;
 	}
 
@@ -402,7 +397,7 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_init_device", device_name );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return SUCCESS;
 }
 
@@ -413,10 +408,9 @@ int gpib_init_device( const char *device_name, int *dev )
 int gpib_local( int device )
 {
 	int i;
-	bool must_reset;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
@@ -424,11 +418,11 @@ int gpib_local( int device )
 			if ( devices[ i ].is_online )
 				ibloc( device );
 
-			lower_permissions( must_reset );
+			lower_permissions( );
 			return SUCCESS;
 		}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 	return FAILURE;
 }
 
@@ -445,7 +439,6 @@ int gpib_local( int device )
 int gpib_timeout( int device, int period )
 {
 	GPIB_Device *devp;
-	bool must_reset;
     const char tc[ ][ 9 ] = { "infinity", "10us", "30us", "100us",
 							  "300us", "1ms", "3ms", "10ms", "30ms",
 							  "100ms", "300ms", "1s", "3s", "10s",
@@ -473,7 +466,7 @@ int gpib_timeout( int device, int period )
     if ( period > T1000s )
         period = T1000s;
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
     {
@@ -490,7 +483,7 @@ int gpib_timeout( int device, int period )
     {
         sprintf( gpib_error_msg, "Can't set timeout period for device %s, "
 				 "ibsta = 0x%x.", devp->name, ibsta );
-		lower_permissions( must_reset );
+		lower_permissions( );
         return FAILURE;
     }
 
@@ -501,7 +494,7 @@ int gpib_timeout( int device, int period )
         fflush( gpib_log );
     }
 
-	lower_permissions( must_reset );
+	lower_permissions( );
     return SUCCESS;
 }
 
@@ -518,7 +511,6 @@ int gpib_timeout( int device, int period )
 int gpib_clear_device( int device )
 {
 	GPIB_Device *devp;
-	bool must_reset;
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -538,7 +530,7 @@ int gpib_clear_device( int device )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", devp->name );
@@ -548,7 +540,7 @@ int gpib_clear_device( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", devp->name );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -573,7 +565,6 @@ int gpib_clear_device( int device )
 int gpib_trigger( int device )
 {
 	GPIB_Device *devp;
-	bool must_reset;
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -592,7 +583,7 @@ int gpib_trigger( int device )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", devp->name );
@@ -602,7 +593,7 @@ int gpib_trigger( int device )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", devp->name );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -637,7 +628,6 @@ int gpib_trigger( int device )
 int gpib_wait( int device, int mask, int *status )
 {
 	GPIB_Device *devp;
-	bool must_reset:
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -656,7 +646,7 @@ int gpib_wait( int device, int mask, int *status )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
     {
@@ -681,7 +671,7 @@ int gpib_wait( int device, int mask, int *status )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_wait", devp->name );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -707,7 +697,6 @@ int gpib_wait( int device, int mask, int *status )
 int gpib_write( int device, const char *buffer, long length )
 {
 	GPIB_Device *devp;
-	bool must_reset;
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -726,7 +715,7 @@ int gpib_write( int device, const char *buffer, long length )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( length <= 0 )           /* check validity of length parameter */
     {
@@ -738,7 +727,7 @@ int gpib_write( int device, const char *buffer, long length )
             fflush( gpib_log );
         }
 
-		lower_permissions( must_reset );
+		lower_permissions( );
         sprintf( gpib_error_msg, "Can't write %ld bytes.", length );
         return FAILURE;
     }
@@ -751,7 +740,7 @@ int gpib_write( int device, const char *buffer, long length )
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", devp->name );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -806,7 +795,6 @@ int gpib_read( int device, char *buffer, long *length )
 {
     unsigned long expected = ( unsigned long ) *length;
 	GPIB_Device *devp;
-	bool must_reset;
 
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
@@ -825,7 +813,7 @@ int gpib_read( int device, char *buffer, long *length )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( *length <= 0 )          /* check validity of length parameter */
     {
@@ -837,7 +825,7 @@ int gpib_read( int device, char *buffer, long *length )
             fflush( gpib_log );
         }
 
-		lower_permissions( must_reset );
+		lower_permissions( );
         sprintf( gpib_error_msg, "Can't read %ld bytes.", *length );
         return FAILURE;
     }
@@ -855,7 +843,7 @@ int gpib_read( int device, char *buffer, long *length )
     if ( ll > LL_NONE )
         gpib_read_end( devp->name, buffer, *length, expected );
 
-	lower_permissions( must_reset );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -908,7 +896,6 @@ static void gpib_read_end( const char *dev_name, char *buffer, long received,
 int gpib_serial_poll( int device, unsigned char *stb )
 {
 	GPIB_Device *devp;
-	bool must_reset;
 
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
@@ -920,7 +907,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 		return FAILURE;
 	}
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", devp->name );
@@ -932,7 +919,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 
     if ( ibsta & ERR )
     {
-		lower_permissions( must_reset );
+		lower_permissions( );
         sprintf( gpib_error_msg, "Can't serial poll device %s, "
 				 "gpib_status = 0x%x", devp->name, ibsta );
         return FAILURE;
@@ -944,7 +931,7 @@ int gpib_serial_poll( int device, unsigned char *stb )
 		fflush( gpib_log );
 	}
 
-	lower_permissions( must_reset );
+	lower_permissions( );
     return SUCCESS;
 }
 
@@ -958,15 +945,14 @@ int gpib_serial_poll( int device, unsigned char *stb )
 void gpib_log_message( const char *fmt, ... )
 {
 	va_list ap;
-	bool must_reset;
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
 	gpib_log_date( );
 	va_start( ap, fmt );
 	vfprintf( gpib_log, fmt, ap );
 	va_end( ap );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -979,7 +965,6 @@ static void gpib_log_date( void )
     static char tc[ 26 ];
 	struct timeb mt;
     time_t t;
-	bool must_reset;
 
 
     t = time( NULL );
@@ -988,9 +973,9 @@ static void gpib_log_date( void )
 	tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
 	ftime( &mt );
-	must_reset = raise_permissions( );
+	raise_permissions( );
     fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -1004,7 +989,6 @@ static void gpib_log_date( void )
 static void gpib_log_error( const char *type )
 {
     int i;
-	bool must_reset;
     static int stat[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
                               0x0800, 0x0400, 0x0200, 0x0100,
                               0x0080, 0x0040, 0x0020, 0x0010,
@@ -1021,7 +1005,7 @@ static void gpib_log_error( const char *type )
                                   "ENSD", "ENWE", "ENTF", "EMEM" };
 
 
-	must_reset = raise_permissions( );
+	raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
@@ -1031,7 +1015,7 @@ static void gpib_log_error( const char *type )
     }
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
     fflush( gpib_log );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -1046,14 +1030,11 @@ static void gpib_log_error( const char *type )
 static void gpib_log_function_start( const char *function,
 									 const char *dev_name )
 {
-	bool must_reset;
-
-
-	must_reset = raise_permissions( );
+	raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "CALL of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
@@ -1068,10 +1049,7 @@ static void gpib_log_function_start( const char *function,
 static void gpib_log_function_end( const char *function,
 								   const char *dev_name )
 {
-	bool must_reset;
-
-
-	must_reset = raise_permissions( );
+	raise_permissions( );
     if ( ibsta & IBERR )
         gpib_log_error( function );
     else
@@ -1084,7 +1062,7 @@ static void gpib_log_function_end( const char *function,
     }
 
     fflush( gpib_log );
-	lower_permissions( must_reset );
+	lower_permissions( );
 }
 
 
