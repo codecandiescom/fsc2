@@ -115,7 +115,7 @@ sub l_pid {
     my $flock_struct = shift;
     return $flock_struct->{ l_pid } unless @_;
     my $l_pid = shift;
-    croak "Invalid value for l_pid" unless $l_pid >= 0;
+    croak "Invalid value for l_pid member" unless $l_pid >= 0;
     $flock_struct->{ l_pid } = $l_pid;
 }
 
@@ -153,7 +153,7 @@ Fcntl_Lock - Perl extension for file locking using fcntl()
   $fs->l_len( 123 );
 
   my $fh;
-  open( $fh, ">file_name" ) or die "Can't open file: $!\n";
+  open( $fh, ">>file_name" ) or die "Can't open file: $!\n";
   $fs->fcntl_lock( $fh, F_SETLK ) or die "Can't obtain lock: $!\n";
 
 =head1 DESCRIPTION
@@ -274,7 +274,7 @@ SEEK_SET SEEK_CUR SEEK_END
 
 =head1 CREDITS
 
-Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
+Thanks to Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
 <goldbb2@earthlink.net> for discussions, code and encouragement.
 
 =head1 AUTHOR
