@@ -16,7 +16,7 @@ export headers     # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY: all clean distclean \
+.PHONY: all clean distclean hi_res lo_res gpib_old gpib_jtt gpib_ni \
 		pion.anorg.chemie.uni-frankfurt.de \
 		moebi.physik.fu-berlin.de \
 		door.physik.fu-berlin.de \
@@ -76,56 +76,61 @@ clean:
 # for the graphical interface are needed...
 
 pion.anorg.chemie.uni-frankfurt.de:
+	$(MAKE) hi_res
+	$(MAKE) gpib_old
+
+moebi.physik.fu-berlin.de:
+	$(MAKE) low_res
+	$(MAKE) gpib_jtt
+
+crowley.physik.fu-berlin.de:
+	$(MAKE) hi_res
+	$(MAKE) gpib_jtt
+
+door.physik.fu-berlin.de:
+	$(MAKE) hi_res
+	$(MAKE) gpib_ni
+
+crowley.none:
+	$(MAKE) hi_res
+	$(MAKE) gpib_jtt
+
+
+# How to create the resource files
+
+hi_res: fsc2_rsc_hr.fd
 	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch]
 	fdesign -convert fsc2_rsc_hr.fd
 	cp fsc2_rsc_hr.c fsc2_rsc.c
 	cp fsc2_rsc_hr.h fsc2_rsc.h
 	echo "#define SIZE HI_RES" >> fsc2_rsc.h
-	$(RM) $(RMFLAGS) gpib_if.[ch]
-	cp gpib_if_old.c gpib_if.c
-	cp gpib_if_old.h gpib_if.h
 
-moebi.physik.fu-berlin.de:
+lo_res: fsc2_rsc_lr.fd
 	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch]
 	fdesign -convert fsc2_rsc_lr.fd
 	cp fsc2_rsc_lr.c fsc2_rsc.c
 	cp fsc2_rsc_lr.h fsc2_rsc.h
 	echo "#define SIZE LOW_RES" >> fsc2_rsc.h
+
+
+# How to create the GPIB interface files
+
+gpib_old: gpib_if_old.[ch]
+	$(RM) $(RMFLAGS) gpib_if.[ch]
+	cp gpib_if_old.c gpib_if.c
+	cp gpib_if_old.h gpib_if.h
+
+gpib_jtt: gpib_if_jtt.[ch]
 	$(RM) $(RMFLAGS) gpib_if.[ch]
 	cp gpib_if_jtt.c gpib_if.c
 	cp gpib_if_jtt.h gpib_if.h
 
-crowley.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch]
-	fdesign -convert fsc2_rsc_hr.fd
-	cp fsc2_rsc_hr.c fsc2_rsc.c
-	cp fsc2_rsc_hr.h fsc2_rsc.h
-	echo "#define SIZE HI_RES" >> fsc2_rsc.h
-	$(RM) $(RMFLAGS) gpib_if.[ch]
-	cp gpib_if_jtt.c gpib_if.c
-	cp gpib_if_jtt.h gpib_if.h
-
-door.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch]
-	fdesign -convert fsc2_rsc_hr.fd
-	cp fsc2_rsc_hr.c fsc2_rsc.c
-	cp fsc2_rsc_hr.h fsc2_rsc.h
-	echo "#define SIZE HI_RES" >> fsc2_rsc.h
+gpib_ni: gpib_if_ni.[ch]
 	$(RM) $(RMFLAGS) gpib_if.[ch]
 	cp gpib_if_ni.c gpib_if.c
 	cp gpib_if_ni.h gpib_if.h
 	cp gpib_parser.yy gpib_parser.y
 	cp gpib_lexer.ll gpib_lexer.l
-
-crowley.none:
-	$(RM) $(RMFLAGS) fsc2_rsc_[hl]r.[ch]
-	fdesign -convert fsc2_rsc_hr.fd
-	cp fsc2_rsc_hr.c fsc2_rsc.c
-	cp fsc2_rsc_hr.h fsc2_rsc.h
-	echo "#define SIZE HI_RES" >> fsc2_rsc.h
-	$(RM) $(RMFLAGS) gpib_if.[ch]
-	cp gpib_if_jtt.c gpib_if.c
-	cp gpib_if_jtt.h gpib_if.h
 
 
 # don't automatically delete intermediate files created by bison and flex
