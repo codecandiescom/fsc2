@@ -1371,7 +1371,6 @@ const char *fsc2_show_fselector( const char *message, const char *dir,
 								 const char *pattern, const char *def_name )
 {
 	const char *ret;
-	char *ep;
 
 
 	/* If no directory is specified and this is the first invocation use
