@@ -134,7 +134,7 @@ static void spawn_server( void )
 	}
 
 	if ( Internals.cmdline_flags & DO_CHECK )
-		a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( sdir ) );
+		a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( srcdir ) );
 	else
 		a[ 0 ] = get_string( "%s%sfsc2_http_server", bindir, slash( bindir ) );
 

@@ -530,8 +530,8 @@ built:
 					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
 		grep -v 'sed\|grep' |                                            \
 		sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' >> version
-	gzip -c -9 version | uuencode - > version.ugz
-	$(RM) $(RMFLAGS) version
+	-@gzip -c -9 version | uuencode - > version.ugz
+	-@$(RM) $(RMFLAGS) version
 
 
 # Install the program and everything else
