@@ -198,7 +198,8 @@ int sr530_end_of_exp_hook( void )
 
 void sr530_exit_hook( void )
 {
-	sr530_end_of_exp_hook( );
+    if ( sr530.device >= 0 )
+		sr530_end_of_exp_hook( );
 }
 
 

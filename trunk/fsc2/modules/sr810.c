@@ -88,34 +88,36 @@ typedef struct
 	int Sens;
 	bool Sens_warn;
 	double phase;
-	bool P;
-	int TC;
+	bool is_phase;
+	int tc_index;
 	bool TC_warn;
 	double ref_freq;
-	bool RF;
+	bool is_ref_freq;
 	double ref_level;
-	bool RL;
+	bool is_ref_level;
 	long harmonic;
-	bool H;
+	bool is_harmonic;
 	double dac_voltage[ NUM_DAC_PORTS ];
 } SR810;
 
 
 static SR810 sr810;
+static SR810 sr810_store;
+
 
 /* Lists of valid sensitivity settings */
 
-static double slist[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
-						   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
-						   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
-						   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
-						   2.0e-1, 5.0e-1, 1.0 };
+static double sens_list[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
+							   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
+							   2.0e-5, 5.0e-5, 1.0e-4, 2.0e-4, 5.0e-4, 1.0e-3,
+							   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
+							   2.0e-1, 5.0e-1, 1.0 };
 
 /* List of all available time constants */
 
-static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
-						 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
-						 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
+static double tc_list[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
+							 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
+							 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
 
 /* Declaration of all functions used only within this file */
@@ -129,7 +131,7 @@ static double sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
 static void sr810_set_sens( int Sens );
 static double sr810_get_tc( void );
-static void sr810_set_tc( int TC );
+static void sr810_set_tc( int tc_index );
 static double sr810_get_phase( void );
 static double sr810_set_phase( double phase );
 static double sr810_get_ref_freq( void );
@@ -164,14 +166,14 @@ int sr810_init_hook( void )
 	sr810.Sens = -1;             /* no sensitivity has to be set at start of */
 	sr810.Sens_warn = UNSET;     /* experiment and no warning concerning the */
                                  /* sensitivity setting has been printed yet */
-	sr810.P = UNSET;             /* no phase has to be set at start of the */
+	sr810.is_phase = UNSET;      /* no phase has to be set at start of the */
 	                             /* experiment */
-	sr810.TC = -1;               /* no time constant has to be set at the */
+	sr810.tc_index = -1;         /* no time constant has to be set at the */
 	sr810.TC_warn = UNSET;       /* start of the experiment and no warning */
 	                             /* concerning it has been printed yet */
-	sr810.RF = UNSET;            /* no reference frequency has to be set */
-	sr810.H = UNSET;             /* no harmonics has to be set */
-	sr810.RL = UNSET;            /* no rference level has to b set */
+	sr810.is_ref_freq = UNSET;   /* no reference frequency has to be set */
+	sr810.is_harmonic = UNSET;   /* no harmonics has to be set */
+	sr810.is_ref_level = UNSET;  /* no rference level has to b set */
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 		sr810.dac_voltage[ i ] = 0.0;
@@ -192,6 +194,8 @@ int sr810_exp_hook( void )
 		return 1;
 
 	/* Initialize the lock-in */
+
+	memcpy( &sr810_store, &sr810, sizeof( SR810 ) );
 
 	if ( ! sr810_init( DEVICE_NAME ) )
 	{
@@ -215,6 +219,7 @@ int sr810_end_of_exp_hook( void )
 	if ( sr810.device >= 0 )
 		gpib_local( sr810.device );
 
+	memcpy( &sr810, &sr810_store, sizeof( SR810 ) );
 	sr810.device = -1;
 
 	return 1;
@@ -227,7 +232,8 @@ int sr810_end_of_exp_hook( void )
 
 void sr810_exit_hook( void )
 {
-//	sr810_end_of_exp_hook( );
+	if ( sr810.device >= 0 )
+		sr810_end_of_exp_hook( );
 }
 
 
@@ -482,38 +488,38 @@ Var *lockin_sensitivity( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 
 	for ( i = 0; i < 25; i++ )
-		if ( sens >= slist[ i ] && sens <= slist[ i + 1 ] )
+		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
-			Sens = i +
-				   ( ( slist[ i ] / sens > sens / slist[ i + 1 ] ) ? 0 : 1 );
+			Sens = i + ( ( sens_list[ i ] / sens > sens /
+						   sens_list[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
 
-	if ( Sens < 0 && sens < slist[ 26 ] * 1.01 )
+	if ( Sens < 0 && sens < sens_list[ 26 ] * 1.01 )
 		Sens = 26;
 
 	if ( Sens >= 0 &&                                    /* value found ? */
-		 fabs( sens - slist[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
+		 fabs( sens - sens_list[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
 		 ! sr810.Sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ Sens ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, slist[ Sens ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ Sens ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, slist[ Sens ] * 1.0e9 );
+					sens * 1.0e9, sens_list[ Sens ] * 1.0e9 );
 		sr810.Sens_warn = SET;
 	}
 
 	if ( Sens < 0 )                                   /* not found yet ? */
 	{
-		if ( sens < slist[ 0 ] )
+		if ( sens < sens_list[ 0 ] )
 			Sens = 0;
 		else
 		    Sens = 26;
@@ -523,11 +529,11 @@ Var *lockin_sensitivity( Var *v )
 			if ( sens >= 1.0 )
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too "
 						"low, using %.0lf mV instead.\n",
- 						DEVICE_NAME, sens * 1.0e3, slist[ Sens ] * 1.0e3 );
+ 						DEVICE_NAME, sens * 1.0e3, sens_list[ Sens ] * 1.0e3 );
 			else
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too "
 						"high, using %.0lf nV instead.\n",
-						DEVICE_NAME, sens * 1.0e9, slist[ Sens ] * 1.0e9 );
+						DEVICE_NAME, sens * 1.0e9, sens_list[ Sens ] * 1.0e9 );
 			sr810.Sens_warn = SET;
 		}
 	}
@@ -540,7 +546,7 @@ Var *lockin_sensitivity( Var *v )
 			sr810.Sens = Sens;
 	}
 	
-	return vars_push( FLOAT_VAR, slist[ Sens ] );
+	return vars_push( FLOAT_VAR, sens_list[ Sens ] );
 }
 
 
@@ -553,7 +559,7 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int TC = -1;
+	int tc_index = -1;
 	int i;
 
 
@@ -595,52 +601,53 @@ Var *lockin_time_constant( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 	
 	for ( i = 0; i < 18; i++ )
-		if ( tc >= tcs[ i ] && tc <= tcs[ i + 1 ] )
+		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
-			TC = i + ( ( tc / tcs[ i ] < tcs[ i + 1 ] / tc ) ? 0 : 1 );
+			tc_index = i + ( ( tc / tc_list[ i ] <
+							   tc_list[ i + 1 ] / tc ) ? 0 : 1 );
 			break;
 		}
 
-	if ( TC >= 0 &&                                 /* value found ? */
-		 fabs( tc - tcs[ TC ] ) > tc * 1.0e-2 &&    /* error > 1% ? */
+	if ( tc_index >= 0 &&                                   /* value found ? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&   /* error > 1% ? */
 		 ! sr810.TC_warn )                          /* no warning yet ? */
 	{
 		if ( tc > 1.0e3 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ks,"
 					" using %.0lf ks instead.\n", DEVICE_NAME,
-					tc * 1.0e-3, tcs[ TC ] );
+					tc * 1.0e-3, tc_list[ tc_index ] );
 		else if ( tc > 1.0 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf s, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tcs[ TC ] );
+					tc_list[ tc_index ] );
 		else if ( tc > 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ms,"
 					" using %.0lf ms instead.\n", DEVICE_NAME,
-					tc * 1.0e3, tcs[ TC ] * 1.0e3 );
+					tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		else
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf us,"
 					" using %.0lf us instead.\n", DEVICE_NAME,
-					tc * 1.0e6, tcs[ TC ] * 1.0e6 );
+					tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 		sr810.TC_warn = SET;
 	}
 	
-	if ( TC < 0 )                                  /* not found yet ? */
+	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
-		if ( tc < tcs[ 0 ] )
-			TC = 0;
+		if ( tc < tc_list[ 0 ] )
+			tc_index = 0;
 		else
-			TC = 19;
+			tc_index = 19;
 
 		if ( ! sr810.TC_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 3.0e4 )
 				eprint( WARN, SET, "%s: Time constant of %.0lf ks is too"
-						" large, using %.0lf ks instead.\n",
- 						DEVICE_NAME, tc * 1.0e-3, tcs[ TC ] * 1.0e-3 );
+						" large, using %.0lf ks instead.\n", DEVICE_NAME,
+						tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
 			else
 				eprint( WARN, SET, "%s: Time constant of %.0lf us is too"
-						" small, using %.0lf us instead.\n",
- 						DEVICE_NAME, tc * 1.0e6, tcs[ TC ] * 1.0e6 );
+						" small, using %.0lf us instead.\n", DEVICE_NAME,
+						tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 			sr810.TC_warn = SET;
 		}
 	}
@@ -648,12 +655,12 @@ Var *lockin_time_constant( Var *v )
 	if ( ! TEST_RUN )
 	{
 		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr810_set_tc( TC );
+			sr810_set_tc( tc_index );
 		else                         /* if called in a preparation sections */ 
-			sr810.TC = TC;
+			sr810.tc_index = tc_index;
 	}
 	
-	return vars_push( FLOAT_VAR, tcs[ TC ] );
+	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
 
@@ -717,8 +724,8 @@ Var *lockin_phase( Var *v )
 			return vars_push( FLOAT_VAR, sr810_set_phase( phase ) );
 		else                         /* if called in a preparation sections */ 
 		{
-			sr810.phase = phase;
-			sr810.P = SET;
+			sr810.phase    = phase;
+			sr810.is_phase = SET;
 			return vars_push( FLOAT_VAR, phase );
 		}
 	}
@@ -760,7 +767,7 @@ Var *lockin_ref_freq( Var *v )
 	}
 
 	if ( TEST_RUN )
-		harm = sr810.H ? sr810.harmonic : 1;
+		harm = sr810.is_harmonic ? sr810.harmonic : 1;
 	else
 		harm = sr810_get_harmonic( );
 
@@ -768,7 +775,8 @@ Var *lockin_ref_freq( Var *v )
 	{
 		if ( harm == 1 )
 			eprint( FATAL, SET, "%s: Reference frequency of %f Hz is "
-					"not within valid range (%f Hz - %f kHz).\n", 					DEVICE_NAME, freq, MIN_REF_FREQ, MAX_REF_FREQ * 1.0e-3 );
+					"not within valid range (%f Hz - %f kHz).\n", DEVICE_NAME,
+					freq, MIN_REF_FREQ, MAX_REF_FREQ * 1.0e-3 );
 		else
 			eprint( FATAL, SET, "%s: Reference frequency of %f Hz with "
 					"harmonic set to %ld is not within valid range "
@@ -843,7 +851,7 @@ Var *lockin_ref_level( Var *v )
 	else                                /* if called in preparation sections */
 	{
 		sr810.ref_level = level;
-		sr810.RL = SET;
+		sr810.is_ref_level = SET;
 		return vars_push( FLOAT_VAR, level );
 	}
 }
@@ -944,15 +952,15 @@ static bool sr810_init( const char *name )
 
 	if ( sr810.Sens != -1 )
 		sr810_set_sens( sr810.Sens );
-	if ( sr810.P )
+	if ( sr810.is_phase )
 		sr810_set_phase( sr810.phase );
-	if ( sr810.TC != -1 )
-		sr810_set_tc( sr810.TC );
-	if ( sr810.H )
+	if ( sr810.tc_index != -1 )
+		sr810_set_tc( sr810.tc_index );
+	if ( sr810.is_harmonic )
 		sr810_set_harmonic( sr810.harmonic );
-	if ( sr810.RF )
+	if ( sr810.is_ref_freq )
 		sr810_set_ref_freq( sr810.ref_freq );
-	if ( sr810.RL )
+	if ( sr810.is_ref_level )
 		sr810_set_ref_level( sr810.ref_level );
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
@@ -1098,7 +1106,7 @@ static double sr810_get_sens( void )
 		sr810_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	sens = slist[ T_atol( buffer ) ];
+	sens = sens_list[ T_atol( buffer ) ];
 
 	return sens;
 }
@@ -1108,7 +1116,7 @@ static double sr810_get_sens( void )
 /* Function sets the sensitivity of the lock-in amplifier to one of the */
 /* valid values. The parameter can be in the range from 0 to 26,  where */
 /* 0 is 2 nV and 26 is 1 V - these and the other values in between are  */
-/* listed in the global array 'slist' at the start of the file.         */
+/* listed in the global array 'sens_list' at the start of the file.     */
 /*----------------------------------------------------------------------*/
 
 static void sr810_set_sens( int Sens )
@@ -1124,8 +1132,8 @@ static void sr810_set_sens( int Sens )
 
 /*----------------------------------------------------------------------*/
 /* Function returns the current time constant of the lock-in amplifier. */
-/* See also the global array 'tcs' with the possible time constants at  */
-/* the start of the file.                                               */
+/* See also the global array 'tc_list' with the possible time constants */
+/* at the start of the file.                                            */
 /*----------------------------------------------------------------------*/
 
 static double sr810_get_tc( void )
@@ -1139,7 +1147,7 @@ static double sr810_get_tc( void )
 		sr810_failure( );
 
 	buffer[ length - 1 ] = '\0';
-	return tcs[ T_atol( buffer ) ];
+	return tc_list[ T_atol( buffer ) ];
 }
 
 
@@ -1147,15 +1155,15 @@ static double sr810_get_tc( void )
 /* Fuunction sets the time constant to one of the valid values. The  */
 /* parameter can be in the range from 0 to 19, where 0 is 10 us and  */
 /* 19 is 30 ks - these and the other values in between are listed in */
-/* the global array 'tcs' (cf. start of file)                        */
+/* the global array 'tc_list' (cf. start of file)                    */
 /*-------------------------------------------------------------------*/
 
-static void sr810_set_tc( int TC )
+static void sr810_set_tc( int tc_index )
 {
 	char buffer[ 10 ] = "OFLT ";
 
 
-	sprintf( buffer + 5, "%d\n", TC );
+	sprintf( buffer + 5, "%d\n", tc_index );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr810_failure( );
 }
