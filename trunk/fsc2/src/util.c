@@ -259,7 +259,7 @@ bool fsc2_locking( void )
 
 	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
 	{
-		fl_show_alert( "Error", "Sorry, can't create a lockfile.",
+		fl_show_alert( "Error", "Sorry, can't create a lock file.",
 					   LOCKFILE, 1 );
 		return FAIL;
 	}
@@ -309,7 +309,7 @@ bool fsc2_locking( void )
 	if ( write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) )
 	{
 		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+		fl_show_alert( "Error", "Sorry, can't write lock file:",
 					   LOCKFILE, 1 );
 		return FAIL;
 	}
@@ -319,7 +319,7 @@ bool fsc2_locking( void )
 	if ( ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
 	{
 		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+		fl_show_alert( "Error", "Sorry, can't write lock file:",
 					   LOCKFILE, 1 );
 		return FAIL;
 	}
@@ -329,7 +329,7 @@ bool fsc2_locking( void )
 	if ( fcntl( fd, F_GETFD, flags ) < 0 )
 	{
 		unlink( LOCKFILE );
-		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+		fl_show_alert( "Error", "Sorry, can't write lock file:",
 					   LOCKFILE, 1 );
 		return FAIL;
 	}

@@ -29,7 +29,7 @@ float *y;
 /* Locally used functions */
 
 
-static void xforms_init( int *argc, char *argv[ ] );
+static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
 
@@ -67,18 +67,14 @@ int main( int argc, char *argv[ ] )
 	else
 		just_testing = UNSET;
 
-	/* Initialize xforms stuff */
+	/* Initialize xforms stuff, while doing so also check for the lock file */
 
-	xforms_init( &argc, argv );
+	if ( ! xforms_init( &argc, argv ) )
+		return EXIT_SUCCESS;
 
-	/* Check if there is already a lock file, otherwise create one and remove
-	   orphaned shared memory segments resulting from previous crashes */
+	/* Remove orphaned shared memory segments resulting from previous
+	   crashes */
 
-	if ( ! fsc2_locking( ) )
-	{
-		xforms_close( );
-		return( EXIT_SUCCESS );
-	}
 	delete_stale_shms( );
 
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
@@ -127,13 +123,26 @@ int main( int argc, char *argv[ ] )
 /* and creates all the forms needed by the program.*/
 /*-------------------------------------------------*/
 
-void xforms_init( int *argc, char *argv[] )
+bool xforms_init( int *argc, char *argv[] )
 {
 	FL_Coord h, H;
 	FL_Coord x1, y1, w1, h1, x2, y2, w2, h2;
 
 
 	fl_initialize( argc, argv, "fsc2", 0, 0 );
+
+	/* Set some properties of goodies */
+
+	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
+	fl_set_fselector_fontsize( FL_LARGE_SIZE );
+	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+
+	/* Check via the lock file if there is already a process holding a lock,
+	   otherwise create one */
+
+	if ( ! fsc2_locking( ) )
+		return FAIL;
 
 	/* Create and display the main form */
 
@@ -168,12 +177,7 @@ void xforms_init( int *argc, char *argv[] )
 
 	input_form = create_form_input_form( );
 
-	/* Set some properties of goodies */
-
-	fl_set_tooltip_font( FL_NORMAL_STYLE, FL_MEDIUM_SIZE );
-	fl_set_fselector_fontsize( FL_LARGE_SIZE );
-	fl_set_goodies_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
-	fl_set_oneliner_font( FL_NORMAL_STYLE, FL_LARGE_SIZE );
+	return OK;
 }
 
 
