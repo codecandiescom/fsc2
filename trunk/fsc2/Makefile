@@ -33,16 +33,14 @@ infodir          := $(prefix)/info
 
 
 # Here the owner of the program of all files that will be installed as well
-# as the group the owner belongs to has to be set. It is highly recommended
-# to create a special account and group for the program, with 'fsc2' being
-# the natural choice (which is also the default). For a local install, i.e.
-# if the program will be used by one person only and everything is installed
-# in his/her home directory this persons account and group can be used. The
-# owner and group ID will be used when accessing lock and log files and
-# shared memory segments. 
+# as the group the owner belongs to has to be set. I would recommended
+# to create a special account for the program, with 'fsc2' being the natural
+# choice (which is also the default). The group fsc2 belongs to (as its
+# primary group, not a supplementary group) should be one that allows
+# access to the device files. See the longert discussion in the INSTALL file.
 
 OWNER            := fsc2
-GROUP            := fsc2
+GROUP            := uucp
 
 
 # The next variable sets the GPIB library to use, it must be set to either
@@ -53,7 +51,8 @@ GROUP            := fsc2
 # with the National Instruments GPIB library, if not set GPIB_CONF_FILE
 # defaults to /etc/gpib.conf).
 # Next set the file for writing logs about the activity on the GPIB bus.
-# If not given logs will be written to stderr.
+# Make sure that fsc2 or its users have write access to the directory the
+# log file will be created in. If not given logs will be written to stderr.
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
 # or OFF. If not set it defaults to LOW and only errors will be logged.
 
@@ -65,11 +64,12 @@ GPIB_LOG_LEVEL   := HIGH
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
 # the computer and defaults to 0 if not set (in which case no serial ports
-# can be used). The second variable, SERIAL_LOCK_DIR, is the directory where
-# UUCP style lock files for the serial ports are created. If this variable
-# is not set, no lock files will be created or tested for. If it is defined
-# fsc2 must belong to the group (as secondary group) that has write access
-# rights to this directory, this group usually is 'uucp'.
+# can be used).
+# The second variable, SERIAL_LOCK_DIR, is the directory where UUCP style
+# lock files for the serial ports are created. This should be '/var/lock'
+# according to version 2.2 of the Filesystem Hierachy Standard. Either fsc2
+# itself or all its users must have read and write permissions for this
+# directory. See the longer discussion in the INSTALL file.
 
 NUM_SERIAL_PORTS := 2
 SERIAL_LOCK_DIR  := "/var/lock"
@@ -260,7 +260,7 @@ ifndef OWNER
 endif 
 
 ifndef GROUP
-	GROUP = fsc2
+	GROUP = uucp
 endif 
 
 ifdef NUM_SERIAL_PORTS
