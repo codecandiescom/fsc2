@@ -79,6 +79,7 @@ Acquisition_Sequence ASeq[ 2 ];
 Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
+int TEST_RUN;
 
 #else   /*  ! FSC2_MAIN */
 
@@ -105,6 +106,7 @@ extern Acquisition_Sequence ASeq[ ];
 extern Pulse *Plist;
 extern Pulse *Cur_Pulse;
 
+extern int TEST_RUN;
 
 #endif
 
