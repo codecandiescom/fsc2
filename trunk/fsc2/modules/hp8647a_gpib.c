@@ -82,9 +82,9 @@ bool hp8647a_init( const char *name )
 			}
 			if ( att > hp8647a.min_attenuation )
 			{
-				eprint( SEVERE, "Attenuation range is insufficient, using "
-						"%f db instead of %f db.\n",
-						hp8647a.min_attenuation, att );
+				print( SEVERE, "Attenuation range is insufficient, using "
+					   "%f db instead of %f db.\n",
+					   hp8647a.min_attenuation, att );
 				att = hp8647a.min_attenuation;
 			}
 		}
