@@ -594,6 +594,7 @@ static void get_print_comm( void )
 static void print_header( FILE *fp, char *name )
 {
 	time_t d;
+	static char *tstr = NULL;
 
 
 	/* Writes EPS header plus some routines into the file */
@@ -691,8 +692,22 @@ static void print_header( FILE *fp, char *name )
 
 	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-RomanISOLatin1 4 sf\n" );
-	fprintf( fp, "5 5 m (%s %s) show\n", ctime( &d ),
+
+	TRY
+	{
+		tstr = T_strdup( ctime( &d ) );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		fprintf( fp, "5 5 m (%s) show\n\n", getpwuid( getuid( ) )->pw_name );
+		return;
+	}
+
+	tstr[ strlen( tstr ) - 1 ] = '\0';
+	fprintf( fp, "5 5 m (%s %s) show\n\n", tstr,
 			 getpwuid( getuid( ) )->pw_name );
+	T_free( tstr );
 }
 
 
@@ -864,8 +879,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			else
 				label = paren_replace( G.label[ dim < 0 ? X : Y ] );
 
-			fprintf( fp, "%f (%s) cw sub %f m (%s) show\n",
-					 x_0 + w, label, margin, label );
+			fprintf( fp, "(%s) dup cw %f exch sub %f m show\n",
+					 label, x_0 + w, margin );
 			T_free( label );
 			TRY_SUCCESS;
 		}
@@ -915,9 +930,9 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 				label = paren_replace( G.label[ Z ] );
 
 			if ( label != NULL )
-				fprintf( fp, "gs %f (%s) ch add %f (%s) cw sub t 90 r 0 0 m "
-						 "(%s) show gr\n", margin, label, paper_width - margin,
-					 label, label );
+				fprintf( fp, "gs (%s) dup dup ch %f add exch cw %f exch sub\n"
+						 "t 90 r 0 0 m show gr\n",
+						 label, margin, paper_width - margin );
 			T_free( label );
 			TRY_SUCCESS;
 		}
