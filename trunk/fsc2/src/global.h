@@ -356,9 +356,10 @@ enum {
 
 
 /* The following number is the start number for numbers designating file
-   identifiers. Valid file numbers start from FILE_START_NUMBER */
+   identifiers. Valid file numbers start from FILE_NUMBER_OFFSET. */
 
-#define FILE_START_NUMBER  215927
+#define FILE_NUMBER_OFFSET    215927
+#define FILE_NUMBER_NOT_OPEN  ( FILE_NUMBER_OFFSET - 1 )
 
 
 /* This constants are used in converting integer and double numbers to short
