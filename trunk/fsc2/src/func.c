@@ -85,7 +85,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "dim",           f_dim,      1, ACCESS_ALL,  UNSET },
 	{ "size",          f_size,     2, ACCESS_ALL,  UNSET },
 	{ "sizes",         f_sizes,    1, ACCESS_ALL,  UNSET },
-	{ "mean",          f_mean,     1, ACCESS_ALL,  UNSET },
+	{ "mean",          f_mean,    -1, ACCESS_ALL,  UNSET },
 	{ "rms",           f_rms,      1, ACCESS_ALL,  UNSET },
 	{ "slice",         f_slice,   -1, ACCESS_ALL,  UNSET },
 	{ "square",        f_square,   1, ACCESS_ALL,  UNSET },

@@ -1268,31 +1268,107 @@ Var *f_sizes( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Calculates the mean of the elements of an one dimensional array. */
-/*------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+/* Calculates the mean of the elements of an one dimensional array.     */
+/* If only an array (or a pointer to an array is passed to the function */
+/* the mean of all array elements is calculated. If there's a second    */
+/* argument it's taken to be an index into the array at which the       */
+/* calculation of the maen starts. If there's a third argument it has   */
+/* be the number of elements to be included into the mean.              */
+/*----------------------------------------------------------------------*/
 
 Var *f_mean( Var *v )
 {
 	long i;
 	long len;
-	long *ilp;
-	double *idp;
+	long *ilp = NULL;
+	double *idp = NULL;
 	double val = 0.0;
+	long index;
+	long slice_len;
 
+
+	if ( v == NULL || v->next == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of function "
+				"`mean()'.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
 
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
 	get_array_params( v, "mean", &len, &ilp, &idp );
+	slice_len = len;
 
-	for ( i = 0; i < len; i++ )
+	/* The following optional parameter are the start index into to the array
+	   and the length of the subarray to be used for the calculation */
+
+	if ( v->next != NULL )
+	{
+		vars_check( v->next, INT_VAR | FLOAT_VAR );
+
+		if ( v->next->type == FLOAT_VAR )
+		{
+			eprint( WARN, "%s:%ld: Float value used as array index in "
+					"function `mean()'.\n", Fname, Lc );
+			index = lround( v->next->val.dval ) - ARRAY_OFFSET;
+		}
+		else
+			index = v->next->val.lval - ARRAY_OFFSET;
+
+		if ( index < 0 )
+		{
+			eprint( FATAL, "%s:%ld: Invalid array index (%ld) in function "
+					"`mean()'.\n", Fname, Lc, index + ARRAY_OFFSET );
+			THROW( EXCEPTION );
+		}
+
+		ilp += index;
+		idp += index;
+
+		if ( v->next->next != NULL )
+		{
+			vars_check( v->next->next, INT_VAR | FLOAT_VAR );
+
+			if ( v->next->type == FLOAT_VAR )
+			{
+				eprint( WARN, "%s:%ld: Float value used as length of slice "
+						"parameter in function `mean()'.\n", Fname, Lc );
+				slice_len = lround( v->next->next->val.dval );
+			}
+			else
+				slice_len = v->next->next->val.lval;
+
+			if ( slice_len < 1 )
+			{
+				eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
+						"function `mean()'.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+
+			/* Test that the slice is within the arrays range */
+
+			if ( index + slice_len >= len &&
+				 ! ( TEST_RUN && ( v->flags & IS_DYNAMIC ) ) )
+			{
+				eprint( FATAL, "%s:%ld: Sum of index and slice length "
+						"parameter exceeds length of array in function "
+						"`mean()'.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
+		}
+		else
+			slice_len = len - index - 1;
+	}
+
+	for ( i = 0; i < slice_len; i++ )
 		if ( ilp != NULL )
 			val += ( double ) *ilp++;
 		else
 			val += *idp++;
 
-	return vars_push( FLOAT_VAR, val / ( double ) len );
+	return vars_push( FLOAT_VAR, val / ( double ) slice_len );
 }
 
 
