@@ -73,8 +73,7 @@ bool hfs9000_init( const char *name )
 	}
 	else
 	{
-		eprint( FATAL, UNSET, "%s: Timebase of pulser has not been set.\n",
-				pulser_struct.name );
+		print( FATAL, "Timebase of pulser has not been set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -418,8 +417,7 @@ bool hfs9000_set_channel_state( int channel, bool flag )
 
 static void hfs9000_gpib_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Communication with device failed.\n",
-			pulser_struct.name );
+	print( FATAL, "Communication with device failed.\n" );
 	THROW( EXCEPTION );
 }
 
