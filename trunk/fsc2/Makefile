@@ -61,7 +61,7 @@ RMFLAGS        = -f
 
 VPATH          = .:src:modules
 
-c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c \
+c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 func.c T.c phases.c exp.c devices.c gpib.c run.c comm.c \
 				 chld_func.c graphics.c accept.c graph_handler_1d.c \
 				 graph_handler_2d.c loader.c bugs.c print.c

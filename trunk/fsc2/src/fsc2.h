@@ -77,6 +77,7 @@
 #include "T.h"
 #include "util.h"
 #include "variables.h"
+#include "vars_util.h"
 #include "func.h"                 /* load before "devices.h" */
 #include "devices.h"              /* load before "loader.h"  */
 #include "loader.h"
