@@ -58,7 +58,7 @@ static struct BH15 {
 	const char *name;
 	double field;
 	double resolution;
-} BH15 bh15;
+} bh15;
 
 bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 

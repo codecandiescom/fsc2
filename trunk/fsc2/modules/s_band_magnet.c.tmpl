@@ -61,8 +61,6 @@ static double magnet_goto_field( double field );
 static bool magnet_do( int command );
 
 
-typedef struct MAGNET MAGNET;
-
 struct MAGNET {
 	double start_field;     /* the start field given by the user */
 	double field_step;      /* the field steps to be used */
@@ -83,7 +81,7 @@ struct MAGNET {
 };
 
 
-MAGNET magnet, magnet_saved;
+static struct MAGNET magnet, magnet_saved;
 
 
 enum {
