@@ -38,9 +38,6 @@ static int vars_get_channel_name( void );
 
 extern void varsparse( void );
 
-#ifdef DEBUG
-void print_all_vars( void );
-#endif
 
 /* locally used global variables */
 
@@ -337,60 +334,8 @@ int variables_parser( FILE *in )
 
 	varsparse( );
 
-
-#ifdef DEBUG
-/*
-	print_all_vars( );
-*/
-#endif
-
 	return Vars_Next_Section;
 }
-
-
-#ifdef DEBUG
-void print_all_vars( void )
-{
-	Var *v = var_list;
-	long i;
-
-	while ( v != NULL )
-	{
-		if ( ! ( v->flags & NEW_VARIABLE ) )
-		{
-			switch ( v->type )
-			{	
-				case INT_VAR :
-					printf( "%s = %ld\n", v->name, v->val.lval );
-					break;
-
-				case FLOAT_VAR :
-					printf( "%s = %f\n", v->name, v->val.dval );
-					break;
-
-				case INT_ARR :
-					if ( need_alloc( v ) )
-					    break;
-					for ( i = 0; i < v->len; ++i )
-						printf( "%s[%ld] = %ld\n", v->name, i,
-								v->val.lpnt[ i ] );
-					break;
-
-				case FLOAT_ARR :
-					for ( i = 0; i < v->len; ++i )
-						printf( "%s[%ld] = %f\n", v->name, i,
-								v->val.dpnt[ i ] );
-					break;
-
-				default :             /* this never should happen... */
-					assert ( 1 == 0 );
-			}
-		}
-
-		v = v->next;
-	}
-}
-#endif
 
 
 static int vars_get_channel_name( void )
