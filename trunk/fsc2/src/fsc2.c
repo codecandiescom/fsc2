@@ -1566,17 +1566,19 @@ static void set_main_signals( void )
 void main_sig_handler( int signo )
 {
 	int errno_saved;
+	pid_t pid;
 
 
 	switch ( signo )
 	{
 		case SIGCHLD :
 			errno_saved = errno;
-			if ( Internals.http_pid == wait( NULL ) )
-			{
-				Internals.http_pid = -1;
-				fl_trigger_object( GUI.main_form->server );
-			}
+			while ( ( pid = waitpid( -1, NULL, WNOHANG ) ) > 0 )
+				if ( pid == Internals.http_pid )
+				{
+					Internals.http_pid = -1;
+					fl_trigger_object( GUI.main_form->server );
+				}
 			errno = errno_saved;
 			return;
 
