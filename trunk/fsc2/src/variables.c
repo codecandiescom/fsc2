@@ -798,7 +798,7 @@ Var *vars_negate( Var *v )
 	{
 		rdp = T_malloc( len * sizeof( double ) );
 		for ( i = 0; i < len; idp++, i++ )
-			rlp[ i ] = - *idp;
+			rdp[ i ] = - *idp;
 		new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
 		T_free( rdp );
 	}
