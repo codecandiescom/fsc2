@@ -278,7 +278,7 @@ bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
 PULSE *dg2020_Pulses = NULL;
 bool dg2020_IN_SETUP = UNSET;
-PHS phs[ 3 ];
+PHS phs[ 2 ];
 
 #else
 
