@@ -619,29 +619,13 @@ bool dg2020_set_phase_reference( int phase, int function )
 /*    set yet)                                                           */
 /* 'val' means high or low to be set on the pod channel to set the       */
 /*    requested phase(0: low, non-zero: high)                            */
-/* 'protocol': there are different ways to realize a phase, currently    */
-/*    there's the Frankfurt and the Berlin method. This driver can only  */
-/*    accept settings the Frankfurt type method. Sometimes it is not     */
-/*    possible to tell from the input which of these methods is used, in */
-/*    this case also accept the data.                                    */
 /*-----------------------------------------------------------------------*/
 
-bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
-							  long protocol )
+bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 {
 	/* First a sanity check... */
 
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
-
-	/* This driver only accepts the Frankfurt method of declaring a
-	   phase setup - unrecognized method is also ok */ 
-
-	if ( protocol != PHASE_FFM_PROT && protocol != PHASE_UNKNOWN_PROT )
-	{
-		eprint( FATAL, SET, "%s: Invalid syntax for this driver.\n",
-				pulser_struct.name );
-		THROW( EXCEPTION )
-	}
 
 	/* Not all phase types are valid here */
 
@@ -683,7 +667,14 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
 		THROW( EXCEPTION )
 	}
 
-	phs[ func ].var[ type ][ pod ] = val != 0 ? 1 : 0;
+	if ( val != 0 && val != 1 )
+	{
+		eprint( FATAL, SET, "%s: Invalid output state (%ld), use '1' and '0' "
+				"or 'ON' and 'OFF'.\n", pulser_struct.name, val );
+		THROW( EXCEPTION )
+	}
+
+	phs[ func ].var[ type ][ pod ] = val;
 	phs[ func ].is_var[ type ][ pod ] = SET;
 
 	return OK;
