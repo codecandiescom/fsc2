@@ -242,8 +242,8 @@ Var *func_get( const char *name, int *access )
 		{
 			if ( Fncts[ i ].fnct == NULL )
 			{
-				eprint( FATAL, "%s:%ld: Function `%s' has not (yet) been "
-                        "loaded.\n", Fname, Lc, Fncts[ i ].name );
+				eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
+						Fname, Lc, Fncts[ i ].name );
 				THROW( EXCEPTION );
 			}
 						
