@@ -576,6 +576,9 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 }
 
 
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 bool dg2020_set_pod_high_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
@@ -590,6 +593,9 @@ bool dg2020_set_pod_high_level( int pod, double voltage )
 	return OK;
 }
 
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
 
 bool dg2020_set_pod_low_level( int pod, double voltage )
 {
@@ -606,6 +612,9 @@ bool dg2020_set_pod_low_level( int pod, double voltage )
 }
 
 
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 bool dg2020_set_trigger_in_level( double voltage )
 {
 	char cmd[ 100 ];
@@ -621,6 +630,9 @@ bool dg2020_set_trigger_in_level( double voltage )
 }
 
 
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 bool dg2020_set_trigger_in_slope( int slope )
 {
 	char cmd[ 100 ];
@@ -635,6 +647,9 @@ bool dg2020_set_trigger_in_slope( int slope )
 }
 
 
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
 bool dg2020_set_trigger_in_impedance( int state )
 {
 	char cmd[ 100 ];
@@ -648,6 +663,9 @@ bool dg2020_set_trigger_in_impedance( int state )
 	return OK;
 }
 
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
 
 void dg2020_gpib_failure( void )
 {
