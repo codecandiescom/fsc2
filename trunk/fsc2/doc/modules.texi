@@ -638,6 +638,10 @@ should always be
 @example
 const char generic_type[ ] = DEVICE_TYPE;
 @end example
+or
+@example
+const char *generic_type = DEVICE_TYPE;
+@end example
 @acronym{fsc2} will try to find a variable with this name in the module
 to find out about the type of the device. If this variable does not
 exist it won't have any information about the device type and having
@@ -646,10 +650,11 @@ another device of the same type recognized automatically will not work.
 
 @subsection Global variables
 
-There are a few important global variables for modules. The first on is
-a flag, called @code{TEST_RUN}. If it is set, the function in the module
-is called during a test run, thus can devices  be used yet. Only
-if @code{TEST_RUN} is unset the hardware interfaces to the devices are
+There are a few important global variables in @acronym{fsc2} to be used
+by modules. The first on is a flag of type @code{bool} (see below),
+called @code{TEST_RUN}. If it is set, the function in the module is
+called during a test run, thus can devices be used yet. Only if
+@code{TEST_RUN} is unset the hardware interfaces to the devices are
 initialized and devices may be used. During a test run, the module
 should try to return reasonable dummy data.  That means that the module
 functions should at least return data of the same type as it will do in
@@ -657,14 +662,13 @@ the actual experiment. E.g., if a function will return an array during
 the experiment it should do the same during the a test run, even though
 the data in the array probably are going to be completely bogus.
 
-Another important global variable, @code{need_GPIB}, has to be set by the
-init hook function if the hardware interface for the device controlled
-by the module is the GPIB bus. Thus, if the GPIB bus is needed, include
-a line in the init hook function similar to
+Another important global variable, @code{need_GPIB}, being also of type
+@code{bool}, has to be set by the init hook function if the device is
+controlled via the GPIB bus. Thus, if the GPIB bus is needed, include a
+line in the init hook function similar to
 @example
 need_GPIB = SET;
 @end example
-Don't try to assign anything else to this variable.
 
 
 @subsection Requesting hardware
