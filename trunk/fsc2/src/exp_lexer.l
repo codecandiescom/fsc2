@@ -47,6 +47,7 @@
 	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
 }
 
+
 #include "fsc2.h"
 
 
