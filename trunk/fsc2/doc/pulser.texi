@@ -344,12 +344,14 @@ where none of the function names seem to fit the special purpose you
 have in mind.
 
 Before giving an example it is important to point out that there are
-some major differences between the @strong{Sony/Tektronix DG2020} and
-the @strong{Tektronix HFS9003}. The @strong{Tektronix HFS9003} is quite
-simple in that it has just a number of output channels. In contrast, the
+some major differences between the @strong{Sony/Tektronix DG2020} on the
+one hand and the @strong{Tektronix HFS9003} and teh @strong{Bruker
+EP385} on the other. The @strong{Tektronix HFS9003} and the
+@strong{Bruker EP385} are quite simple in that they have just a number
+(4 and 8, respectively) of output channels. In contrast, the
 @strong{Sony/Tektronix DG2020} has 36 internal channels that have to be
 mapped to what is called the POD, that in both cases (Frankfurt S-band
-and Berlin X-band spectrometer) has 12 real output channels. 
+and Berlin X-band spectrometer) has 12 real output channels (pods).
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like
