@@ -1,6 +1,6 @@
 Most of the files in this directory are configuration files for the
 supported devices. They are included as header files by the modules
-an thus have to be in valid C syntax.
+and thus have to have valid C syntax.
 
 
 Most of these files define just two macro. The first is DEVICE_NAME,
@@ -37,7 +37,7 @@ Currently the following device type names are used:
 -  "lock-in amplifier"
 -  "magnet power supply"
 -  "pulser"
--  "RF synthesizer"
+-  "synthesizer"
 -  "temperature controller"
 -  "voltmeter"
 
