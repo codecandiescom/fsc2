@@ -740,8 +740,7 @@ void child_sig_handler( int signo )
 		/* All remaining signals are deadly... */
 
 		default :
-			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
-				 ! ( cmdline_flags & NO_MAIL ) )
+			if ( ! ( cmdline_flags & NO_MAIL ) )
 			{
 				DumpStack( );
 				death_mail( signo );
@@ -886,7 +885,7 @@ static void do_measurement( void )
 					cur_prg_token = cur_prg_token->start;
 					break;
 
-				case IF_TOK :
+				case IF_TOK : case UNLESS_TOK :
 					cur = cur_prg_token;
 					cur_prg_token
 						       = test_condition( cur ) ? cur->start : cur->end;
