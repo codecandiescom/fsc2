@@ -1,0 +1,32 @@
+FOUT_Timebase_Select Divider   Slow_Internal_Timebase    Slow_Internal_Time_Divide_By_2    G_Source_Divide_By_2  IN_TIMEBASE     Frequency
+
+    disabled      1              enabled                       disabled                      disabled              1             20 MHz
+    disabled      1              enabled                       disabled                      enabled               1             10 MHz
+    disabled      1              enabled                       disabled                      disabled              2             200 kHz
+    disabled      1              enabled                       disabled                      enabled               2             200 kHz
+
+    disabled      1              enabled                       enabled                       disabled              1             20 MHz
+    disabled      1              enabled                       enabled                       enabled               1             10 MHz
+    disabled      1              enabled                       enabled                       disabled              2             100 kHz
+    disabled      1              enabled                       enabled                       enabled               2             100 kHz
+
+    disabled      1              disabled                      disabled                      disabled              1             20 MHz
+    disabled      1              disabled                      disabled                      enabled               1             10 MHz
+    disabled      1              disabled                      disabled                      disabled              2             -
+    disabled      1              disabled                      disabled                      enabled               2             -
+
+    disabled      2              enabled                       disabled                      disabled              1             20 MHz
+    disabled      2              enabled                       disabled                      enabled               1             10 MHz
+    disabled      2              enabled                       disabled                      disabled              2             200 kHz
+    disabled      2              enabled                       disabled                      enabled               2             200 kHz
+
+    disabled      1              enabled                       disabled                      disabled             FOUT           20 MHz
+    disabled      1              enabled                       disabled                      enabled              FOUT           20 MHz
+    disabled      1              enabled                       enabled                       disabled             FOUT           10 MHz
+    disabled      2              enabled                       disabled                      enabled              FOUT           10 MHz
+    disabled      4              enabled                       disabled                      enabled              FOUT            5 MHz
+
+    enabled       1              enabled                       disabled                      disabled             FOUT           200 kHz
+    enabled       1              enabled                       enabled                       disabled             FOUT           100 kHz
+    enabled       2              enabled                       enabled                       disabled             FOUT           50 kHz
+    enabled      16              enabled                       enabled                       disabled             FOUT           6.25 kHz

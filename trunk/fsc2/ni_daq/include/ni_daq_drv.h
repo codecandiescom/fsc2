@@ -210,7 +210,7 @@ typedef struct {
 	int num_ai_channels;
 	int num_ai_bits;
 	int num_ai_ranges;
-	double ai_ranges[ 2 ][ 8 ];
+	int ai_mV_ranges[ 2 ][ 8 ];
 	unsigned long ai_time_res;
 
 	int num_ao_channels;
@@ -326,7 +326,6 @@ typedef struct {
 	NI_DAQ_AI_CHANNEL_ARGS *channel_args;
 	NI_DAQ_ACQ_SETUP *acq_args;
 	size_t num_points;
-	void *data;
 } NI_DAQ_AI_ARG;
 
 

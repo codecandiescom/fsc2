@@ -75,9 +75,10 @@ install:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) *~ include/*~
+	$(RM) $(RMFLAGS) *~ include/*~ misc_doc/*~
 
 
 distclean:
-	$(MAKE) clean
-	$(RM) $(RMFLAGS) makelog
+	$(MAKE) -C driver distclean
+	$(MAKE) -C lib distclean
+	$(RM) $(RMFLAGS) makelog *~ include/*~ misc_doc/*~

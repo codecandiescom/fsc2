@@ -4,14 +4,18 @@ I. Introduction
 This package is a driver (module) and a library for National Instruments
 several PCI E Series DAQ boards (thus the name "ni_daq" is a bit of a
 misnomer, I hope to remedy this a bit by also including support for
-AT MIO Series (ISA) boards in the future). It was mainly written to allow
-support for this type of cards for a program for spectrometer control, fsc2,
-I have written and currently supports analog input (AI) more or less
-completely, analog output (AO) only in direct mode, i.e. no time or
-trigger controlled output, just simply setting the output, event counting,
-pulse generation and DIO. Calibration of the cards (except by reading the
-factory values stored in the EEPROM) isn't possible yet. The kernel module
-was tested with 2.4 kernels only.
+AT MIO Series (ISA) boards in the future). It currently supports only
+the boards of the PCI E Series (PCI-MIO-16E-1, PCI-MIO-16E-4,
+PCI-MIO-16XE-10, PCI-MIO-16XE-50, PCI-6023E, PCI-6024E, PCI-6031E,
+PCI-6033E, PCI-6033E, PCI-6052E and PCI-6071E) and has only been tested
+with the PCI-MIO-16E-1 board. It was mainly written to allow support for
+this type of card for a program for spectrometer control, fsc2, I have
+written and currently supports analog input (AI) more or less completely,
+analog output (AO) only in direct mode, i.e. no time or trigger controlled
+output, just simply setting the output, event counting, pulse generation
+and DIO. Calibration of the cards (except by reading the factory values
+stored in the EEPROM) isn't possible yet. The driver was tested with 2.4
+kernels only.
 
 
 II. Preparation for installation

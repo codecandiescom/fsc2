@@ -1,0 +1,1112 @@
+#
+# $Id$
+#
+
+NI DAQ Device Driver Description
+================================
+
+The driver currently supports only the boards of the PCI E Series
+(PCI-MIO-16E-1, PCI-MIO-16E-4, PCI-MIO-16XE-10, PCI-MIO-16XE-50,
+PCI-6023E, PCI-6024E, PCI-6031E, PCI-6033E, PCI-6033E, PCI-6052E
+and PCI-6071E) and has only been tested with the PCI-MIO-16E-1
+
+While the driver supports the open(), close(), read(), poll() and select()
+system calls, most of its functionality can only be used via ioctl() calls.
+Since they are that important I will start with then and only will talk
+about the other functions at the end of the documentation.
+
+The functionality of the driver can be basically devided into 5 subsystems.
+The first one is the analog input (AI) system, the second the analog output
+(AO) system, the third the general purpose counter and timer (GPCT) system,
+the fourth the digital I/O (DIO) system, and the fifth beeing a catch-all
+system, the miscellaneous (MSC) system (for dealing with the boards
+timebases, trigger setup etc.).
+
+Accordingly, there are 5 different ioctl() calls, one for each of the
+subsystems. The structures passed to the kernel with the ioctl() all
+have a 'cmd' field, that indicates which property of the subsystem
+the ioctl() call is supposed to deal with. Here is the declaration of
+these structures:
+
+  typedef struct {
+      NI_DAQ_AI_CMD cmd;
+      NI_DAQ_CLOCK_SPEED_VALUE speed;
+      unsigned int num_channels;
+      NI_DAQ_AI_CHANNEL_ARGS *channel_args;
+      NI_DAQ_ACQ_SETUP *acq_args;
+      size_t num_points;
+  } NI_DAQ_AI_ARG;
+
+
+  typedef struct {
+      NI_DAQ_AO_CMD cmd;
+      unsigned int channel;
+      NI_DAQ_AO_CHANNEL_ARGS *channel_args;
+      int value;
+  } NI_DAQ_AO_ARG;
+
+
+  typedef struct {
+      NI_DAQ_GPCT_CMD cmd;
+  
+      unsigned int counter;
+      NI_DAQ_STATE output_state;
+  
+      unsigned long low_ticks;
+      unsigned long high_ticks;
+  
+      NI_DAQ_INPUT gate;
+      NI_DAQ_INPUT source;
+  
+      NI_DAQ_POLARITY output_polarity;
+      NI_DAQ_POLARITY source_polarity;
+      NI_DAQ_POLARITY gate_polarity;
+  
+      int continuous;
+      int wait_for_end;
+      unsigned long count;
+  
+      NI_DAQ_CLOCK_SPEED_VALUE speed;
+  
+      int is_armed;
+  } NI_DAQ_GPCT_ARG;
+
+
+  typedef struct {
+      NI_DAQ_DIO_CMD cmd;
+      unsigned char value;
+      unsigned char mask;
+  } NI_DAQ_DIO_ARG;
+
+
+  typedef struct {
+      NI_DAQ_MSC_CMD cmd;
+      NI_DAQ_CLOCK_TYPE clock;
+      NI_DAQ_STATE output_state;
+      NI_DAQ_CLOCK_SPEED_VALUE speed;
+      unsigned int divider;
+      NI_DAQ_TRIG_TYPE trigger_type;
+      int trigger_low;
+      int trigger_high;
+      NI_DAQ_BOARD_PROPERTIES *properties;
+  } NI_DAQ_MSC_ARG;
+
+
+In the following the ioctl() calls for the different subsystems are
+discussed in some detail. To be able to understand the following you
+probably must already have read and understood the DAQ-STC manual
+
+
+==================================================================
+
+1. AI subsystem
+===============
+
+The possible values for the 'cmd' element of the NI_DAQ_AI_ARG structure
+are typedef'ed as
+
+  typedef enum {
+      NI_DAQ_AI_SET_CLOCK_SPEED,
+      NI_DAQ_AI_GET_CLOCK_SPEED,
+      NI_DAQ_AI_CHANNEL_SETUP,
+      NI_DAQ_AI_ACQ_SETUP,
+      NI_DAQ_AI_ACQ_START,
+      NI_DAQ_AI_ACQ_WAIT,
+      NI_DAQ_AI_ACQ_STOP
+  } NI_DAQ_AI_CMD;
+
+The different AI specific commands are discussed in the following. Please
+note that There's no command to fetch the data sampled during an acquisistion,
+this is done using the read() system call (see section 6.3).
+
+
+1.1 NI_DAQ_AI_SET_CLOCK_SPEED
+-----------------------------
+
+The time base used for timings of the AI subsystem can be either the boards
+fast or the slow timebase. While the slow timebase has a rate of either
+200 kHz or 100 kHz (which is common for all subsystems and can be set
+by a ioctl() call for the MSC subsystem) the fast timebase rate can be
+switched between 20 MHz and 10 MHz by an ioctl() call for the AI subsystem
+with the 'cmd' element of the NI_DAQ_AI_ARG structure being set to
+NI_DAQ_AI_SET_CLOCK_SPEED. In this case the 'speed' element of the
+structure must be set to one of the values from the enumeration
+
+  typedef enum {
+      NI_DAQ_FULL_SPEED,
+      NI_DAQ_HALF_SPEED
+  } NI_DAQ_CLOCK_SPEED_VALUE;
+
+when set to NI_DAQ_FULL_SPEED the fast timebase is switched to run at
+20 MHz, when set to NI_DAQ_HALF_SPEED it's set to 10 MHz.
+
+
+1.2 NI_DAQ_AI_GET_CLOCK_SPEED
+-----------------------------
+
+To find out about the current setting for the fast timebase for the AI
+subsystem make an ioctl() call for the AI subsystem with the 'cmd'
+element of the NI_DAQ_AI_ARG structure being set to
+NI_DAQ_AI_GET_CLOCK_SPEED. On return the 'speed' element of the
+structure is going to be set to either NI_DAQ_FULL_SPEED or
+NI_DAQ_HALF_SPEED, indicating that the fast timebase is running at
+20 MHz or 10 MHz, respectively.
+
+
+1.3 NI_DAQ_AI_CHANNEL_SETUP
+---------------------------
+
+Before any AI acquisition can be done setting up the channels to be used
+in the acquisition is required. This is done by an ioctl() call for the
+AI subsystem with the 'cmd' element of the NI_DAQ_AI_ARG structure being
+set to NI_DAQ_AI_CHANNEL_SETUP. In this case the 'num_channels' element
+must be set to the number of channels that are to be used during an
+acquisition, and the 'channel_args' argument must point to an array of
+structures of type NI_DAQ_AI_CHANNEL_ARGS
+
+  typedef struct {
+      unsigned int channel;
+      NI_DAQ_AI_TYPE channel_type;
+      NI_DAQ_STATE generate_trigger;
+      NI_DAQ_STATE dither_enable;
+      NI_DAQ_BU_POLARITY polarity;
+      NI_DAQ_AI_GAIN_TYPES gain;
+  } NI_DAQ_AI_CHANNEL_ARGS;
+
+with as many elements as there are channels to be set up.
+
+The first element of the NI_DAQ_AI_CHANNEL_ARGS structure, 'channel',
+is the number of the channel to be set up, running from 0 to the maximum
+number of channels minus one the board has.
+
+The second element, 'channel_type', must be a value from the enumeration
+typdef'ed as
+
+  typedef enum {
+      NI_DAQ_AI_TYPE_Calibration,
+      NI_DAQ_AI_TYPE_Differential,
+      NI_DAQ_AI_TYPE_NRSE,
+      NI_DAQ_AI_TYPE_RSE,
+      NI_DAQ_AI_TYPE_Aux,
+      NI_DAQ_AI_TYPE_Ghost
+  } NI_DAQ_AI_TYPE;
+
+It informs the driver about the way the channel is to be used. 
+
+NI_DAQ_AI_TYPE_Calibration is only used in calibrations of the
+board.
+
+NI_DAQ_AI_TYPE_Differential is for differential voltage measurements.
+These use use two AI channels and return the voltage differene between
+the channels. For these setting the channel number specicfied in the
+'channels' argument must be between 0 and 7, 16 and 23, 32 and 39 or
+19 and 55 (of course depending on the number of AI channels the board
+has). As the second channel the channel with the the number of the first
+channel plus 8 is than automatically used.
+
+NI_DAQ_AI_TYPE_NRSE is for single-ended nonreferenced measurements,
+i.e. where the ground of the signal is defined by the ground input line
+(i.e. for free floating ground measurements, like on a battery).
+
+NI_DAQ_AI_TYPE_RSE is for single-ended ground-referenced measurements,
+where the signal ground is connected to a common ground of the card and
+the ground of the instrument creating the voltage.
+
+NI_DAQ_AI_TYPE_Aux is for measuring the output voltage of a onboard
+temperature sensor (+100 mV = -40 degree Celsius and +1.25 V = 125 degree
+Celsius). Not all boards have an onboard temperature sensor.
+
+NI_DAQ_AI_TYPE_Ghost is a setting where *no* data is returned, the
+setting can be useful when different channels are to be sampled at
+different rates.
+
+The third element of the NI_DAQ_AI_CHANNEL_ARGS structure, 
+'generate_trigger', must be a value from the enumeration typdef'ed as
+
+  typedef enum {
+      NI_DAQ_DISABLED,
+      NI_DAQ_ENABLED
+  } NI_DAQ_STATE;
+
+If enabled, an active low trigger pulse is sent top the RTSI_BRD0 input
+of the DAQ-STC during the CONVERT signal.
+
+The fourth member, 'dither_enable', must have a value of the same
+'NI_DAQ_STATE' enumeration. It is used to decide if the dither
+circuitry feeding the analog input is enabled.
+
+The fifth member, 'polarity', must be set to a value from the
+enumeration typedef'ed as
+
+  typedef enum {
+      NI_DAQ_BIPOLAR,
+      NI_DAQ_UNIPOLAR
+  } NI_DAQ_BU_POLARITY;
+
+and is used to configure the ADC for the channel to unipolar or
+bipolar mode.
+
+The sixth and final member, 'gain', must be a value of the enumeration
+typedef'ed as
+
+typedef enum {
+    NI_DAQ_GAIN_0_5,        /* divide by 2 gain */
+    NI_DAQ_GAIN_1,          /* no amplification */
+    NI_DAQ_GAIN_2,          /* amplify by a factor of 2 */
+    NI_DAQ_GAIN_5,          /* amplify by a factor of 5 */
+    NI_DAQ_GAIN_10,         /* amplify by a factor of 10 */
+    NI_DAQ_GAIN_20,         /* amplify by a factor of 20 */
+    NI_DAQ_GAIN_50,         /* amplify by a factor of 50 */
+    NI_DAQ_GAIN_100,        /* amplify by a factor of 100 */
+} NI_DAQ_AI_GAIN_TYPES;
+
+It is used to set the ADC input amplifier gain. Please note that some
+boards only allow subsets of these gains, see the tables with the
+specifications in the PCI E Series User Manual for the different
+boards.
+
+On successful return the ioctk() call returns the number of data that
+will be returned for each scan (which is the number of channels to set
+up the function was called with minus the number of channels that are
+set to channel type NI_DAQ_AI_TYPE_Ghost).
+
+
+1.4 NI_DAQ_AI_ACQ_SETUP
+-----------------------
+
+Before starting AI conversions also the triggering and timing as well
+as the number of scans have to be specified. This is done by an ioctl()
+call for the AI subsystem with the 'cmd' element of the NI_DAQ_AI_ARG
+structure being set to NI_DAQ_AI_ACQ_SETUP. In this case the 'acq_args'
+element must be a pointer to a structure of type
+
+  typedef struct {
+      NI_DAQ_INPUT START_source;
+      NI_DAQ_INPUT START1_source;
+      NI_DAQ_INPUT CONVERT_source;
+      NI_DAQ_INPUT SI_source;
+      NI_DAQ_INPUT SI2_source;
+      
+      NI_DAQ_TRIGGER_MODE START_mode;
+  
+      NI_DAQ_POLARITY START_polarity;
+      NI_DAQ_POLARITY START1_polarity;
+      NI_DAQ_POLARITY CONVERT_polarity;
+  
+      unsigned long SI_start_delay;
+      unsigned long SI_stepping;
+  
+      unsigned int SI2_start_delay;
+      unsigned int SI2_stepping;
+  
+      unsigned long num_scans;
+  } NI_DAQ_ACQ_SETUP;
+
+
+The first five member of this structure are values from an enumeration
+of type
+
+   typedef enum {
+       NI_DAQ_IN_TIMEBASE1,
+       NI_DAQ_AI_START1_Pulse,
+       NI_DAQ_SI_TC,
+       NI_DAQ_SI2_TC,
+       NI_DAQ_SAME_AS_SI,
+       NI_DAQ_AI_IN_TIMEBASE1,
+       NI_DAQ_PFI0,
+       NI_DAQ_TRIG1,
+       NI_DAQ_PFI1,
+       NI_DAQ_PFI2,
+       NI_DAQ_PFI3,
+       NI_DAQ_PFI4,
+       NI_DAQ_PFI5,
+       NI_DAQ_PFI6,
+       NI_DAQ_PFI7,
+       NI_DAQ_PFI8,
+       NI_DAQ_PFI9,
+       NI_DAQ_RTSI_0,
+       NI_DAQ_RTSI_1,
+       NI_DAQ_RTSI_2,
+       NI_DAQ_RTSI_3,
+       NI_DAQ_RTSI_4,
+       NI_DAQ_RTSI_5,
+       NI_DAQ_RTSI_6,
+       NI_DAQ_AI_START_Pulse,
+       NI_DAQ_GOUT_0,
+       NI_DAQ_START1,
+       NI_DAQ_LOW,
+       NI_DAQ_IN_TIMEBASE2,
+       NI_DAQ_NONE
+   } NI_DAQ_INPUT;
+
+The 'START_source' member determines the source of the START signal, i.e.
+the signal that starts a scan. It can be set to either 'NI_DAQ_SI_TC',
+'NI_DAQ_PFI0' to 'NI_DAQ_PFI9', NI_DAQ_RTSI0' to 'NI_DAQ_RTSI6',
+'NI_DAQ_GOUT_0', NI_DAQ_AI_START_Pulse' or 'NI_DAQ_LOW'.
+
+If set to 'NI_DAQ_SI_TC' the DAQ-STC is in internal START mode and the
+START signal comes from the SI counter TC event. The DAQ-STC is also
+in internal START mode when 'START_Source' is 'NI_DAQ_AI_START_Pulse',
+in which case the trigger is a software strobe. Otherwise the START
+signal is external and can come either from one of the PFI<0..9>, the
+RTSI<0..6> lines, the G_OUT signal from the general purpose counter 0
+or is always low.
+
+The 'START1_source' member determines the source of the START1 signal,
+i.e. the signal that starts the acquisition. It can be set to either
+'NI_DAQ_AI_START1_Pulse',  'NI_DAQ_PFI0' to 'NI_DAQ_PFI9', NI_DAQ_RTSI0'
+to 'NI_DAQ_RTSI6', 'NI_DAQ_GOUT_0' or 'NI_DAQ_LOW'.
+
+If set to 'NI_DAQ_AI_START1_Pulse', the START1 signal must be raised
+by software. Otherwise it is external and can come either from one of
+the PFI<0..9>, the RTSI<0..6> lines, the G_OUT signal from the general
+purpose counter 0 or is always low. 
+
+The 'CONVERT_source' member determines the source of the CONVERT signal,
+starting a conversion. It can be set to either 'NI_DAQ_SI2_TC',
+'NI_DAQ_PFI0' to 'NI_DAQ_PFI9', NI_DAQ_RTSI0' to 'NI_DAQ_RTSI6',
+'NI_DAQ_GOUT_0' or 'NI_DAQ_LOW'.
+
+If set to 'NI_DAQ_SI2_TC', the DAQ-STC is in internal CONVERT mode and
+the CONVERT signal comes from the SI2 counter TC event. Otherwise the
+CONVERT signal is external and comes from one of the PFI<0..9>, the
+RTSI<0..6> lines, the G_OUT signal from the general purpose counter 0
+or is always low.
+
+The 'SI_source' member, which needs to be set when the 'START_source'
+member is 'NI_DAQ_SI_TC', determines what the SI counter is counting.
+It then must have one of the values 'NI_DAQ_AI_IN_TIMEBASE1',
+'NI_DAQ_PFI0' to 'NI_DAQ_PFI9', 'NI_DAQ_RTSI0' to 'NI_DAQ_RTSI6',
+'NI_DAQ_IN_TIMEBASE2' or 'NI_DAQ_LOW'.
+
+Please note that on some of the boards the PFI0 pin can be used either
+as a "digital" (i.e. TTL level) trigger input and a an anlog trigger
+input with adjustable trigger levels (see section 5.5 how to switch
+between "digital" and analog trigger mode).
+
+If set to 'NI_DAQ_AI_IN_TIMEBASE1' the counter is based on the
+AI_IN_TIMEBASE1 signal, when set to 'NI_DAQ_IN_TIMEBASE2' on the
+_IN_TIMEBASE2 signal, both of them internal. Otherwise the counter is
+based on an external signal, either PFI<0..9> or RTSI<0..6>.
+
+The 'SI2_source' member, which must be set when the 'CONVERT_source'
+member is 'NI_DAQ_SI2_TC', determines what the SI2 counter is counting.
+It must have the value 'NI_DAQ_SAME_AS_SI' or 'NI_DAQ_AI_IN_TIMEBASE1'.
+
+If set to 'NI_DAQ_SAME_AS_SI' the SI2 counter will count what the SI
+counter is counting (which then must be set up correctly). Otherwise
+the SI2 counter is based on the AI_IN_TIMEBASE1 signal.
+
+The 'START_polarity' member determines the polarity of the START
+trigger and can be set to either 'NI_DAQ_NORMAL' (for trigger on
+rising edge) or 'NI_DAQ_INVERTED' (for trigger on falling edge).
+The value is only used when using an external trigger for START
+(i.e. the 'START_source' member isn't set to 'NI_DAQ_SI_TC').
+
+The 'START1_polarity' member determines the polarity of the START1
+trigger and can be set to either 'NI_DAQ_NORMAL' (for trigger on
+rising edge) or 'NI_DAQ_INVERTED' (for trigger on falling edge).
+The value is only used when using an external trigger for START1
+(i.e. the 'START1_source' member isn't set to 'NI_DAQ_AI_START1_Pulse').
+
+The 'CONVERT_polarity' member determines the polarity of the
+CONVERT trigger and can be set to either 'NI_DAQ_NORMAL' (for
+trigger on rising edge) or 'NI_DAQ_INVERTED' (for trigger on
+falling edge). The value is only used when using an external
+trigger for CONVERT (i.e. when the 'CONVERT_source' member isn't
+set to 'NI_DAQ_SI2_TC').
+
+The 'SI_start_delay' member determines how long the SI counter is
+counting before the first TC event happens, resulting in the first
+START signal. The value must be between 1 and 2^24.
+
+The 'SI_stepping' member determines how long the SI counter is counting
+between TC events, which result in START signals, starting a new scan.
+The value must be between 1 and 2^24.
+
+The 'SI2_start_delay' member determines how long the SI2 counter is
+counting before the first TC event happens, resulting in the first
+CONVERT signal. The value must be between 1 and 2^16.
+
+The 'SI2_stepping' member determines how long the SI2 counter is
+counting between TC events, each event resulting in a CONVERT signal.
+The value must be between 1 and 2^16 and the duration resulting from
+this setting (which depends on the setting for 'CONVERT_source' and
+possibly the timing settings for the AI subsystem of the board) must
+not be less than 100 ns.
+
+The 'num_scans' member determines the number of scans to be done
+during an acquisition. This value must be between 1 and 2^24.
+
+
+1.5 NI_DAQ_AI_ACQ_START
+-----------------------
+
+Finally starting an AI acquisition can be done by an ioctl() call for
+the AI subsystem with the 'cmd' element of the NI_DAQ_AI_ARG structure
+being set to NI_DAQ_AI_ACQ_START. Note that this isn't the only way
+to start an acquisition: When an acquisition is set up also a call of
+the read() system call for the driver (see section 6.3) will automatically
+start the acquisition.
+
+
+1.6 NI_DAQ_AI_ACQ_WAIT
+----------------------
+
+When an AI acquisition is running you can wait for the acquisition to
+finish by an ioctl() call for the AI subsystem with the 'cmd' element
+of the NI_DAQ_AI_ARG structure being set to NI_DAQ_AI_ACQ_WAIT. The
+call will only return when the acquisition is done except when a signal
+is received before the acquisition is finished, in which case errno will
+be set to EAGAIN. When no acquisition is under way when this ioctl() call
+is done errno is set to EIO.
+
+
+1.7 NI_DAQ_AI_ACQ_STOP
+----------------------
+
+To abort a running acquisition make an ioctl() call for the AI subsystem
+with the 'cmd' element of the NI_DAQ_AI_ARG structure being set to
+NI_DAQ_AI_ACQ_STOP. If no acquisition was under way at the moment the
+ioctl() call was made, the return value will indicate success. Note that
+no data can be fetched anymore already acquired by the aborted acquisition
+when this ioctl() call has been made.
+
+
+==================================================================
+
+2. AO subsystem
+===============
+
+Please note that not all boards allow analog output. In this case
+making an AO specific ioctl() call for the board will return failure
+and errno is getting set to EINVAL.
+
+The possible values for the 'cmd' element of the NI_DAQ_AO_ARG structure
+are typedef'ed as
+
+  typedef enum {
+      NI_DAQ_AO_CHANNEL_SETUP,
+      NI_DAQ_AO_DIRECT_OUTPUT,
+  } NI_DAQ_AO_CMD;
+
+The different AO specific commands are discussed in the following.
+
+
+2.1 NI_DAQ_AO_CHANNEL_SETUP
+---------------------------
+
+Before AO is done the channel to be used should be set up by an ioctl()
+call for the AO subsystem with the 'cmd' element of the NI_DAQ_AO_ARG
+structure being set to NI_DAQ_AO_CHANNEL_SETUP. In this case the 'channel'
+element is to be set to the number of the channel to be setup (between 0
+and the maximum number of AO channels minus one) and the 'channel_args'
+element must point to a structure of type NI_DAQ_AO_CHANNEL_ARGS:
+
+  typedef struct {
+      NI_DAQ_STATE ground_ref;
+      NI_DAQ_STATE external_ref;
+      NI_DAQ_STATE reglitch;
+      NI_DAQ_BU_POLARITY polarity;
+  } NI_DAQ_AO_CHANNEL_ARGS;
+
+The 'ground_ref' element of this structure can be set to the values from
+the enumeration typdef'ed as
+
+  typedef enum {
+      NI_DAQ_DISABLED,
+      NI_DAQ_ENABLED
+  } NI_DAQ_STATE;
+
+When set to NI_DAQ_ENABLED, this connects the reference for both channels
+to ground, which can be useful for calibration of the DAC linearity. It
+always applies to all (both) channels and isn't available for all cards.
+Normally, it should be set to NI_DAQ_DISABLED.
+
+The 'external_ref' element controls the reference selection of the DAC for
+the selected channel. If set to NI_DAQ_DISABLED, the internal +10 V reference
+voltage is ised as the DAC reference. Otherwise, the voltage applied to the
+EXT_REF input is used for the DACs reference voltage. Not all boards allow
+to set this bit to NI_DAQ_ENABLED.
+
+The 'reglitch' element when set to NI_DAQ_ENABLED configures the DAC of the
+selected channel to have a more uniform glitch when changing the output
+at the expense of a higher average glitch energy. Not all boards allow
+this element to be set to NI_DAQ_ENABLED.
+
+Finally, the 'polarity' element must have one of the enumerated values 
+
+  typedef enum {
+      NI_DAQ_BIPOLAR,
+      NI_DAQ_UNIPOLAR
+  } NI_DAQ_BU_POLARITY;
+
+and allows to select the output range between bipolar and unipolar mode.
+Some boards only allow biploar mode.
+
+
+2.2 NI_DAQ_AO_DIRECT_OUTPUT
+---------------------------
+
+To change the ouput voltage of one of the AO channels make an ioctl()
+call for the AO subsystem with the 'cmd' element of the NI_DAQ_AO_ARG
+structure being set to NI_DAQ_AO_DIRECT_OUTPUT. In this case the 'channel'
+element is to be set to the number of the channel to be setup (between 0
+and the maximum number of AO channels minus one) and the 'value' element
+must be set to a number representing the voltage to be output.
+
+When the channel is configured in bipolar mode for boards with 12-bit DACs
+the allowed range for 'value' is between -2048 and +2047, while for 16-bit
+DACs the range is -32768 to +32767, with the lower end of the range standing
+for the most negative voltage that can be created from the reference voltage
+and the upper end for the maximum positive voltage. If configured for
+unipolar output the range is 0 to 4095 for boards with 12-bit DACs and
+0 to 65535 for 16-bit DACs, 0 standing for 0 V and the upper end of the range
+for the maximum voltage that can be derived from the reference voltage.
+
+
+==================================================================
+
+3. GPCT subsystem
+=================
+
+The possible values for the 'cmd' element of the NI_DAQ_GPCT_ARG structure
+are typedef'ed as
+
+  typedef enum {
+      NI_DAQ_GPCT_SET_CLOCK_SPEED,
+      NI_DAQ_GPCT_GET_CLOCK_SPEED,
+      NI_DAQ_GPCT_COUNTER_OUTPUT_STATE,
+      NI_DAQ_GPCT_START_COUNTER,
+      NI_DAQ_GPCT_START_PULSER,
+      NI_DAQ_GPCT_GET_COUNT,
+      NI_DAQ_GPCT_DISARM_COUNTER,
+      NI_DAQ_GPCT_IS_BUSY
+  } NI_DAQ_GPCT_CMD;
+
+The different GPCT specific commands are discussed in the following.
+
+
+3.1 NI_DAQ_GPCT_SET_CLOCK_SPEED
+-------------------------------
+
+The time base used for timings of the GPCT subsystem can be either the
+boards fast or the slow timebase. While the slow timebase has a rate of
+either 200 kHz or 100 kHz (which is common for all subsystems and can be
+set by a ioctl() call for the MSC subsystem) the fast timebase rate can be
+switched between 20 MHz and 10 MHz by an ioctl() call for the GPCT
+subsystem with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being
+set to NI_DAQ_GPCT_SET_CLOCK_SPEED. In this case the 'speed' element of the
+structure must be set to one of the values from the enumeration
+
+  typedef enum {
+      NI_DAQ_FULL_SPEED,
+      NI_DAQ_HALF_SPEED
+  } NI_DAQ_CLOCK_SPEED_VALUE;
+
+when set to NI_DAQ_FULL_SPEED the fast timebase is switched to run at
+20 MHz, when set to NI_DAQ_HALF_SPEED it's set to 10 MHz.
+
+
+3.2 NI_DAQ_GPCT_GET_CLOCK_SPEED
+-------------------------------
+
+To find out about the current setting for the fast timebase for the GPCT
+subsystem make an ioctl() call for the GPCT subsystem with the 'cmd'
+element of the NI_DAQ_GPCT_ARG structure being set to
+NI_DAQ_GPCT_GET_CLOCK_SPEED. On return the 'speed' element of the
+structure is going to be set to either NI_DAQ_FULL_SPEED or
+NI_DAQ_HALF_SPEED, indicating that the fast timebase is running at
+20 MHz or 10 MHz, respectively.
+
+
+3.3 NI_DAQ_GPCT_COUNTER_OUTPUT_STATE
+------------------------------------
+
+To enable or disable output for one of the two counters (e.g. when it's
+used to create pulses) make an ioctl() call for the GPCT subsystem
+with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
+NI_DAQ_GPCT_COUNTER_OUTPUT_STATE. In this case the 'counter' element
+of the structure must be set to the number of the counter (0 or 1) and
+the 'state' element to a value from the enumeration
+
+  typedef enum {
+      NI_DAQ_DISABLED,
+      NI_DAQ_ENABLED
+  } NI_DAQ_STATE;
+
+When set NI_DAQ_DISABLED theoutput of the counter is disabled, otherwise
+enabled.
+
+
+3.4 NI_DAQ_GPCT_START_COUNTER
+-----------------------------
+
+To start a counter make an ioctl() call for the GPCT subsystem with the
+'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
+NI_DAQ_GPCT_START_COUNTER. In this case the 'counter' element of the
+structure must be set to the number of the counter (0 or 1) to be started.
+
+The 'source' element must be set to the source of what the counter is
+supposed to count. It can be set to either NI_DAQ_IN_TIMEBASE1 (to count
+on the fast timebase), NI_DAQ_PFI0 to NI_DAQ_PFI9 to count on the input
+signal at the corresponding input pin, NI_DAQ_RTSI_0 to NI_DAQ_RTSI_6
+to count on the corrsponding RTSI pin, NI_DAQ_G_TC_OTHER to count TC
+events of the other counter, NI_DAQ_IN_TIMEBASE2 to cxount on the slow
+timebase and NI_DAQ_LOW to count on a constantly low input (which
+probabky won't make too much sense).
+
+The 'source_polarity' element of the NI_DAQ_GPCT_ARG structure must
+be set to either NI_DAQ_NORMAL to make the counter count an event
+on the raising edge of the input signal and to NI_DAQ_INVERTED to
+count on the falling edge.
+
+Counting can be temporarily disabled by an external signal, which can
+be specified via the 'gate' element of the NI_DAQ_GPCT_ARG structure.
+It has to be set to either NI_DAQ_NONE, NI_DAQ_PFI0 to NI_DAQ_PFI9,
+NI_DAQ_RTSI_0 to NI_DAQ_RTSI_6, or NI_DAQ_G_TC_OTHER (to count only
+while the TC event signal from the other counter is high or low).
+
+The 'gate_polarity' element of the structure then determines if the
+counter is to be disabled while the gate signal is high or low. If
+set to NI_DAQ_NORMAL the counter is disabled while the gate signal
+is high, when set to NI_DAQ_INVERTED it's disabled when the gate signal
+is low. To disable gating use NI_DAQ_NONE for the 'gate' element and
+NI_DAQ_NORMAL for 'gate_polarity'.
+
+
+3.5 NI_DAQ_GPCT_START_PULSER
+----------------------------
+
+The counters can also be used to create single or multiple pulses.
+This requires an ioctl() call for the GPCT subsystem with the 'cmd'
+element of the NI_DAQ_GPCT_ARG structure being set to
+NI_DAQ_GPCT_GPCT_START_PULSER. In this case the counter' element
+of the structure must be set to the number of the counter (0 or 1)
+that is to create the pulses (please don't forget also to enable
+output from the counter by an ioctl() call with 'cmd' set to
+NI_DAQ_GPCT_COUNTER_OUTPUT_STATE).
+
+The output of the counter switches between low and high state (thus
+creating a pulse), whenever the counter has count down to zero
+TC event). Thus the counter must count on a source input which has
+to be set via 'source' element of the NI_DAQ_GPCT_ARG structure. It
+must be set to either NI_DAQ_IN_TIMEBASE1 (to count on the fast
+timebase), NI_DAQ_PFI0 to NI_DAQ_PFI9 to count on the input signal
+at the corresponding input pin, NI_DAQ_RTSI_0 to NI_DAQ_RTSI_6
+to count on the corrsponding RTSI pin, NI_DAQ_G_TC_OTHER to count TC
+events of the other counter, NI_DAQ_IN_TIMEBASE2 to cxount on the slow
+timebase and NI_DAQ_LOW to count on a constantly low input (which
+probabky won't make too much sense). Usually, you will use either
+NI_DAQ_IN_TIMEBASE1 or NI_DAQ_IN_TIMEBASE2.
+
+The 'source_polarity' element of the NI_DAQ_GPCT_ARG structure must
+be set to either NI_DAQ_NORMAL to make the counter count an event
+on the raising edge of the input signal and to NI_DAQ_INVERTED to
+count on the falling edge.
+
+Pulse generation can be temporarily suspended by an external signal,
+which can be specified via the 'gate' element of the NI_DAQ_GPCT_ARG
+structure. It has to be set to either NI_DAQ_NONE, NI_DAQ_PFI0 to
+NI_DAQ_PFI9, NI_DAQ_RTSI_0 to NI_DAQ_RTSI_6, or NI_DAQ_G_TC_OTHER
+(to count only while the TC event signal from the other counter is
+high or low).
+
+The 'gate_polarity' element of the structure then determines if the
+pulse generation is to be disabled while the gate signal is high or
+low. If set to NI_DAQ_NORMAL the counter creating the pulse is
+disabled while the gate signal is high, when set to NI_DAQ_INVERTED
+it's disabled when the gate signal is low. To disable gating use
+NI_DAQ_NONE for the 'gate' element and NI_DAQ_NORMAL for 'gate_polarity'.
+
+The 'low_ticks' and 'high_ticks' elements of the structure determine
+for how many counts the pulse is in logic low and for how many counts
+it remains in the logic high state. When either NI_DAQ_IN_TIMEBASE1 or
+NI_DAQ_IN_TIMEBASE2 are selected as the counter source these values
+directly translate into times by multiplying with the inverse of current
+frequency of the respective timebase. Both 'low_ticks' and 'high_ticks'
+must be between 2 and 16777216.
+
+The 'output_polarity' element of the structure has to be set to
+NI_DAQ_NORMAL to have the a high output voltage when the counter output
+is in logic high state and a low output voltage while the counter
+output is in its logic low state. When set the NI_DAQ_INVERTED the
+output voltage is low while the counter output is in logic high
+state and high while the counter is in logic low state.
+
+Finally, the 'continuous' element must be set to 0 if only a single
+pulse is to be output, otherwise a continuos train of pulses is output
+until the counter creating the pulses is stopped.
+
+
+3.6 NI_DAQ_GPCT_GET_COUNT
+-------------------------
+
+To fetch a value from a counter make an ioctl() call for the GPCT
+subsystem with the 'cmd' element of the NI_DAQ_GPCT_ARG structure
+being set to NI_DAQ_GPCT_GPCT_GET_COUNT. In this case the 'counter'
+element of the structure must be set to the number of the counter
+(0 or 1) from which the value is to be fetched.
+
+To create a counter that only counts for a welldefined time interval
+a counter can be used in conjunction with the second counter, which
+creates a single gate pulse of welldefined length, during with the
+counter is counting. For this appliction the 'wait_for_end' element
+of the NI_DAQ_GPCT_ARG structure is required. When it is set to a
+non-zero value the function will wait for the other counter to stop
+before the value of the counter under consideration is returned
+and both counters are stopped (only if a signal is received the
+function returns immediately, indicating failure with errno being
+set to EAGAIN).
+
+On return from the ioctl() call the 'count' element of the NI_DAQ_GPCT_ARG
+structure will be set to the current value of the counter. Please note
+that the counter has only 24 bits, so the highest value that can be
+returned is 16777215, if the counter received more events the returned
+value will be the modulus of the real number of counts and 16777216.
+
+
+3.7 NI_DAQ_GPCT_DISARM_COUNTER
+------------------------------
+
+To stop a running counter (it doesn't matter if it's just counting or
+also creating pulses) make an ioctl() call with the 'cmd' element of
+the NI_DAQ_GPCT_ARG structure being set to NI_DAQ_GPCT_GPCT_DISARM_COUNTER.
+In this case the 'counter' element of the structure must be set to the
+number of the counter (0 or 1) to be stopped.
+
+
+3.8 NI_DAQ_GPCT_IS_BUSY
+-----------------------
+
+To find out if a counter is currently busy counting or idle make an ioctl()
+with the 'cmd' element of the NI_DAQ_GPCT_ARG structure being set to
+NI_DAQ_GPCT_GPCT_IS_BUSY. In this case the 'counter' element of the
+structure must be set to the number of the counter (0 or 1) of which you
+want to determine the state. On return the 'is_armed' element of the
+structure is set to 1 if the counter is busy, otherwise it is set to 0.
+
+
+==================================================================
+
+4. DIO subsystem
+================
+
+The possible values for the 'cmd' element of the NI_DAQ_DIO_ARG structure
+are typedef'ed as
+
+  typedef enum {
+      NI_DAQ_DIO_INPUT,
+      NI_DAQ_DIO_OUTPUT
+  } NI_DAQ_DIO_CMD;
+
+The different DIO specific commands are discussed in the following.
+
+
+4.1 NI_DAQ_DIO_INPUT
+--------------------
+
+To determine the state of one or more of the DIO lines make an 
+ioctl() call with the 'cmd' element of the NI_DAQ_DIO_ARG structure
+being set to NI_DAQ_DIO_INPUT. To determine which of the lines to
+check set the 'mask' element of the structure to a 8-bit value where
+setting the least significant bit denotes DIO line 0 and setting the
+most significant bit denotes DIO line 7. On return the correspoding
+bits of the 'value' element of the structure are set if the DIO line
+was in a high state, otherwise the corresponding bit is set to 0.
+
+
+4.2 NI_DAQ_DIO_OUPUT
+---------------------
+
+To set one of the DIO lines make an ioctl() call with the 'cmd' element
+of the NI_DAQ_DIO_ARG structure being set to NI_DAQ_DIO_INPUT. To
+determine which of the lines are to be set set the 'mask' element of
+the structure to a 8-bit value where setting the least significant
+bit denotes DIO line 0 and setting the most significant bit denotes
+DIO line 7. If the corresponding bit of the 'value' element of the
+structure is set the DIO line is raised otherwise it's lowered.
+
+
+==================================================================
+
+5. MSC subsystem
+================
+
+The possible values for the 'cmd' element of the NI_DAQ_MSC_ARG structure
+are typedef'ed as
+
+  typedef enum {
+      NI_DAQ_MSC_BOARD_PROPERTIES,
+      NI_DAQ_MSC_SET_CLOCK_SPEED,
+      NI_DAQ_MSC_CLOCK_OUTPUT,
+      NI_DAQ_MSC_GET_CLOCK,
+      NI_DAQ_MSC_TRIGGER_STATE
+  } NI_DAQ_MSC_CMD;
+
+The different MSC specific commands are discussed in the following.
+
+
+5.1 NI_DAQ_MSC_BOARD_PROPERTIES
+-------------------------------
+
+To determine information about the boards capabilities make an ioctl()
+call with the 'cmd' element of the NI_DAQ_MSC_ARG structure being set
+to NI_DAQ_MSC_BOARD_PROPERTIES. In this case the 'properties' element
+of the strUcture must point to a structure of the following type:
+
+  typedef struct {
+      char name[ 20 ];
+  
+      int num_ai_channels;
+      int num_ai_bits;
+      int num_ai_ranges;
+      int ai_mV_ranges[ 2 ][ 8 ];
+      unsigned long ai_time_res;
+  
+      int num_ao_channels;
+      int num_ao_bits;
+      int ao_does_unipolar;
+      int ao_has_ext_ref;
+  
+      int has_analog_trig;
+      int atrig_bits;
+  } NI_DAQ_BOARD_PROPERTIES;
+
+When the function returns all elements of this structure will be set
+in accordance with the boards properties and capabilities.
+
+The 'name' element of the NI_DAQ_BOARD_PROPERTIES structure is set to
+the a string with the name of the board.
+
+The 'num_ai_channels' is set to the number of AI channels the board has,
+'num_ai_bits' is set to the number of bits of the AI ADC. 'num_ranges'
+is the number of ranges (or gains) the board has and 'ai_mV_ranges' is
+a 2-dimensional array of the ranges the board supports. The elements of
+'ai_mV_ranges[0]' are the ranges in mV when the channel is set up to do
+biploar AI and the elements of 'ai_mV_ranges[1]' are the ranges (again
+in mV) if the channel is in unipolar mode. If a value is set to zero
+or a negative value (which can happen for either the bipolar or the
+unipolar value, but never for both) the corresponding range can't be
+used. 'ai_time_resolution' is the minimum time in nanoseconds between
+conversions.
+
+The 'num_ao_channels' is set to the number of AO channels the board features.
+If it is 0 the board has no AO channels. 'num_ao_bits' is the number of
+bits the DAC doing the conversions has. If 'ao_does_unipolar' is non-zero
+the board supports unipolar AO, otherwise only biploar AO is possible.
+If 'ao_has_ext_ref' i non-zero the AO output voltage can be derived from
+an external reference voltage applied to the EXT_REF input pin, otherwise
+only the internal reference voltage of 10 V can be used.
+
+If the 'has_analog_trig' of the NI_DAQ_BOARD_PROPERTIES structure is
+non-zero the PFI0/TRIG1 pin can be used as an analog trigger input,
+otherwise it can be only used as an TTL level trigger input. If using
+the pin for analog triggering the 'atrig_bits' is set to the number
+of bits of the DACs that are used to create the voltages that the trigger
+input voltage is compared to.
+
+
+5.2 NI_DAQ_MSC_SET_CLOCK_SPEED
+------------------------------
+
+An ioctl() call for the MSC subsystem with the 'cmd' element of the
+NI_DAQ_MSC_ARG structure being set to NI_DAQ_MSC_SET_CLOCK_SPEED
+must be used to set the speeds of both the fast and the slow timebase
+of the board. In this case both 'speed' and the 'divider' element
+of the structure must be set. When 'speed' is set to NI_DAQ_HALF_SPEED
+both timebases operate at half the maximum speed (i.e. 10 MHz/100 kHZ)
+while they operate at full speed (20 MHz/200 kHz) when 'speed' is
+set to NI_DAQ_FULL_SPEED. The speed of both timebases can be further
+divided down by a factor between 1 and 16, which must be stored in
+the 'divider' element.
+
+Please note: Independent of these settings the fast timebase as seen by
+the other subsystems is always the full speed of 20 MHz (unless it has
+been slowed down by a factor of 2 for the subsystem explicitely by a
+subsystem specific call). The slow timebase as seen by the other
+subsystems is always either 200 kHz or 100 kHz, depending on how it was
+set according to the 'speed' element of the structure. The 'divider'
+does not influence the timebases as seen by the subsystems.
+
+Only the frequency-out signal that can be routed to the FREQ_OUT pin
+is completely controlled by the settings made by this ioctl() call,
+i.e. both the value of the 'speed' and the 'divider' element determine
+the output frequency.
+ 
+
+5.3 NI_DAQ_MSC_CLOCK_OUTPUT
+---------------------------
+
+To route one of the timebases (after adjustment according to the settings
+made by the ioctl() call described above) to the FREQ_OUT pin make an
+ioctl() call for the MSC subsystem with the 'cmd' element of the
+NI_DAQ_MSC_ARG structure being set to NI_DAQ_MSC_CLOCK_OUTPUT. In this
+case the 'clock' element of the structure must be set to one of the
+values enumerated by
+
+  typedef enum {
+      NI_DAQ_FAST_CLOCK,
+      NI_DAQ_SLOW_CLOCK
+  } NI_DAQ_CLOCK_TYPE;
+
+When set to NI_DAQ_FAST_CLOCK the frequency of the fast timebase, when
+set to NI_DAQ_SLOW_CLOCK the frequency of the slow timebase (after
+division by the factors set in previously described ioctl() call)
+is routed to the FREQ_OUT pin of the board. The value of the
+'output_state' element of the structure determines if the frequency
+is visible: when set to NI_DAQ_ENABLED the frequency appears at the
+FREQ_OUT pin, when set to NI_DAQ_DISABLED the FREQ_OUT output of
+the frequency is switched off.
+
+
+5.4 NI_DAQ_MSC_GET_CLOCK
+------------------------
+
+To find out about all current timebase settings and the state of the
+FREQ_OUT pin make an ioctl() call for the MSC subsystem with the 'cmd'
+element of the NI_DAQ_MSC_ARG structure being set to NI_DAQ_MSC_GET_CLOCK.
+When on return the 'speed' element is set to NI_DAQ_FULL_SPEED both
+timebases run at their full speeds, and if it's NI_DAQ_HALF_SPEED both
+timebases are running at half the maximum speed. The 'divider' element
+is set to a number between 1 and 16, telling the current setting of the
+frequency divider that is used to divide down the frequency appearing at
+the FREQ_OUT pin. If the 'clock' element is set to NI_DAQ_FAST_CLOCK the
+fast timebase is currently routed to the FREQ_OUT pin, if it is
+NI_DAQ_SLOW_CLOCK it's the slow timebase. Finally, when the 'output_state'
+element is set to NI_DAQ_DISABLED, currently no output appears on the
+FREQ_OUT pin, when it's set to NI_DAQ_ENABLED the selected timebase is
+being output at the FREQ_OUT pin.
+
+
+5.5 NI_DAQ_MSC_TRIGGER_STATE
+----------------------------
+
+As has been already mentioned in the discussion of the analog input (AI)
+subsystem, the PFI0/TRIG1 input pin can be used as an "digital" (i.e.
+TTL level) trigger input as well as an analog trigger input for some
+of the boards. For these boards make an ioctl()  call for the MSC
+subsystem with the 'cmd' element of the NI_DAQ_MSC_ARG structure being
+set to NI_DAQ_MSC_TRIGGER_STATE to switch between "digital" and analog
+trigger mode for the pin as well as selecting one of the 5 analog
+trigger modes and setting the required trigger levels.
+
+In this case the 'trigger_type' element of the structure must be set
+to NI_DAQ_TRIG_TTL to select "digital trigger mode or one of the
+following values to select on of the different analog trigger modes:
+
+* NI_DAQ_TRIG_LOW_WINDOW :
+      A trigger signal is raised when the input voltage at the PFI0/TRIG1
+	  pin falls below a voltage specified by the 'trigger_low' element of
+	  the structure. The trigger signal goes back to low when the input
+	  voltage is raised above this level.
+
+* NI_DAQ_TRIG_HIGH_WINDOW :
+      A trigger signal is raised when the input voltage at the PFI0/TRIG1
+	  starts to exceed a voltage specified by the 'trigger_high' element of
+	  the structure. It goes back into the low state when the input
+	  voltage again falls below this level.
+
+* NI_DAQ_TRIG_MIDDLE_WINDOW :
+      A trigger signal gets raised when the input voltage enters a the
+	  interval of voltages specified by the 'trigger_low' and 'trigger_high'
+	  elements of the structure. It is again lowered when the input voltage
+	  leaves the interval.
+
+* NI_DAQ_TRIG_HIGH_HYSTERESIS :
+      A trigger signal gets raised when the input voltage at the PFI0/TRIG1
+	  starts to exceed a voltage specified by the 'trigger_high' element of
+	  the structure. It goes back into the low state when the input voltage
+      drops below the voltage specified by the 'trigger_low' element of
+	  the structure.
+
+* NI_DAQ_TRIG_LOW_HYSTERESIS :
+      A trigger signal gets raised when the input voltage at the PFI0/TRIG1
+	  starts to drop below a voltage specified by the 'trigger_low' element of
+	  the structure. It goes back into the low state when the input voltage
+      exceeds the the voltage specified by the 'trigger_high' element of
+	  the structure.
+
+In all cases where both the 'trigger_low' and the 'trigger_low' element of
+the structure is used the voltage represented by 'trigger_low' must be
+larger than the one represented by 'trigger_low'.
+
+For both elements a value of 0 indicates the lowest possible trigger level
+of -10 V. The maximum value, representing a trigger level of +10 V, depends
+on the number of bits of the DAC converters used to create the voltages used
+by a comparator. The number of bits can be determined by an ioctl() call
+with the 'cmd' element set to NI_DAQ_MSC_BOARD_PROPERTIES - afterwards
+the 'atrig_bits' of the NI_DAQ_BOARD_PROPERTIES structure filled in during
+this call is the bit resolution of the DAC. The maximum value for the
+'trigger_low' and 'trigger_high' elements of the NI_DAQ_MSC_ARG structure
+can now be determined by raising 2 to the power of the number of bits and
+the subtracting 1. E.g. for a 8-bit DAC the maximum trigger level of +10V
+is achieved by a value of 255, while for a 12-bit DAC it's 4095.
+
+
+==================================================================
+
+6. System calls
+===============
+
+6.1 open()
+----------
+
+Before the board is used open() has to be called on the device file of
+the board. Only one user can have the board open at any moment. Always
+initialize all subsystems to the states they are supposed to be in.
+
+
+6.2 close()
+-----------
+
+When close() is called and the user that open()ed the board is closing
+its last file handle for the board all activity if the board is stopped.
+
+
+6.3 read()
+----------
+
+The read() system call for the board is to be used to fetch data from
+an AI acquisition. If an acquisition was correctly initialized but not
+yet started it is automatically started by calling read(). If there was
+no valid AI acquisition initialization read() returns indicating failure
+and errno is set to EINVAL.
+
+Invoking read() returns as many data as are currently available - if none
+are available yet and the boards device file was open()ed in blocking
+mode th function blocks until data become available. A return value
+indicating failure is returned and errno is set to EAGAIN when a signal
+is received before the data became available.
+
+The number of data points returned by a read() call is always a multiple
+of the number of data points to be expected from one scan (which is the
+return value of the AI specific ioctl() call with the 'cmd' element of
+the relevant structure being set to NI_DAQ_AI_CHANNEL_SETUP). Each of
+the data points consists of 2 bytes in low endian form. The range of
+the data values depends on the ADC used on the board and if the channel
+is set up for biploar or unipolar AI mode. For the 12-bit ADC boards
+the range in biploar mode is -2048 to +2048, in unipolar mode 0 to +4095.
+For 16-bit ADC boards the range is -32768 to +32767 in bipolar and 0 to
+65535 in unipolar mode. When the gain for the channel is 1 these numbers
+represent a range between -5 V and +5 V in bipolar and a range between
+0 V and +5 V when in unipolar mode.
+
+The data are sorted exactly in the sequence the AI channels were set up
+during the AI specific ioctl() call with the 'cmd' element of the relevant
+structure being set to NI_DAQ_AI_CHANNEL_SETUP - the first data point is
+from the oldest scan for the first channel, the next for the second channel
+etc., and this pattern is repeated for all scans up to the newest one (or
+the one where the user supplied buffer has been filled up).
+
+The return value of the read() call is the number of bytes that have been
+transfered to the user.
+
+
+6.4 poll() and select()
+-----------------------
+
+Both the select() and poll() function can be used with the file handle
+for the device file to determine if new data from an AI acquisition are
+available or to wait until data become available (the later of course
+requiring that an acquisition is under way).

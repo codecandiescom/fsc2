@@ -26,7 +26,6 @@
 # Set here the path where the library and include file will be installed
 
 lib_dir   = $(prefix)/lib
-incl_dir  = $(prefix)/include
 
 CFLAGS    = -ggdb -O0 -Wall -Wwrite-strings -Wstrict-prototypes \
 			-Wmissing-prototypes -Wmissing-declarations -W
@@ -52,5 +51,13 @@ libni_daq.a: ${sources:.c=.o} $(headers)
 %.o: %.c $(headers)
 	$(CC) -ggdb $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+install:
+	$(INSTALL) -d $(lib_dir)
+	$(INSTALL) -m 644 libni_daq.so $(lib_dir)
+	$(INSTALL) -m 644 libni_daq.a  $(lib_dir)
+
 clean:
 	$(RM) $(RMFLAGS) *.o *.so *.a *~
+
+distclean:
+	$(MAKE) clean

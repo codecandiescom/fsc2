@@ -169,11 +169,11 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
 
 		for ( j = 0; j < 8; j++ )
 		{
-			if ( ni_daq_dev[ board ].props.ai_ranges[ gi ][ j ] <= 0.0 )
+			if ( ni_daq_dev[ board ].props.ai_mV_ranges[ gi ][ j ] <= 0 )
 				continue;
 
-			if ( fabs(   ni_daq_dev[ board ].props.ai_ranges[ gi ][ j ]
-					   - ranges[ i ] ) <= 0.00001 * ranges[ i ] )
+			if ( fabs( ni_daq_dev[ board ].props.ai_mV_ranges[ gi ][ j ]
+					   - 1000 * ranges[ i ] ) <= 0.01 * ranges[ i ] )
 			{
 				cargs[ i ].gain = ( NI_DAQ_AI_GAIN_TYPES ) j;
 				break;
@@ -194,7 +194,7 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
 			continue;
 
 		ni_daq_dev[ board ].ai_state.channels[ num_data_channels ].range =
-								ni_daq_dev[ board ].props.ai_ranges[ gi ][ j ];
+					 0.001 * ni_daq_dev[ board ].props.ai_mV_ranges[ gi ][ j ];
 		ni_daq_dev[ board ].ai_state.channels[ num_data_channels++ ].pol =
 															   polarities[ i ];
 	}
@@ -519,7 +519,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 
 		if ( ret < 0 )
 		{
-			if ( errno == EINTR )
+			if ( errno == EAGAIN )
 			{
 				free( buf );
 				return ni_daq_errno = NI_DAQ_ERR_SIG;
@@ -546,7 +546,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 			if ( ret < 0 )
 			{
 				free( buf );
-				if ( errno == EINTR )
+				if ( errno == EAGAIN )
 					return ni_daq_errno = NI_DAQ_ERR_SIG;
 				else
 					return ni_daq_errno = NI_DAQ_ERR_INT;
@@ -566,7 +566,7 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 	if ( count < 0 )
 	{
 		free( buf );
-		if ( errno == EINTR )
+		if ( errno == EAGAIN )
 			return ni_daq_errno = NI_DAQ_ERR_SIG;
 		else if ( errno == EAGAIN )
 			return 0;

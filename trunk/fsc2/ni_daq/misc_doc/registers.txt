@@ -1,0 +1,2080 @@
+=============================================================================
+
+
+AI_Status_1_Register (offset: 2), width: 1
+
+
+  15: Interrupt_A_St
+    This bit indicates whether an interrupt is asserted in interrupt
+    group A:
+       0: No interrupts asserted.
+       1: At least one interrupt asserted.
+
+
+  14: AI_FIFO_Full_St
+
+    This bit reflects the state of the AIFFF pin (after the polarity
+    selection), which indicates the AI data FIFO status:
+       0: Not full.
+       1: Full.
+
+
+  13: AI_FIFO_Half_Full_St
+
+    This bit reflects the state of the AIFHF pin (after the polarity
+    selection), which indicates the AI data FIFO status:
+       0: Less than half-full.
+       1: At least half-full.
+
+
+  12: AI_FIFO_Empty_St
+
+    This bit reflects the state of the AIFEF pin (after the polarity
+    selection), which indicates the AI data FIFO status:
+       0: Not empty.
+       1: Empty.
+
+
+  11: AI_Overrun_St
+
+    This bit indicates the detection of an ADC overrun error:
+       0: No error.
+       1: Error.
+    The overrun error indicates that the ADC interval is not long enough
+    to complete a conversion. This bit can be cleared by setting
+    AI_Error_Interrupt_Ack to 1.
+
+
+  10: AI_Overflow_St
+
+    This bit indicates the detection of an ADC overflow error:
+       0: No error.
+       1: Error.
+    The overflow error indicates that an attempt was made to write the
+    ADC result to a full AI data FIFO; that is, the reading from the
+    FIFO is too slow to match the writing to the FIFO. If the overflow
+    error occurs, at least one point of data has been lost. This bit is
+    cleared by setting AI_Error_Interrupt_Ack to 1.
+
+
+   9: AI_SC_TC_Error_St
+
+    This bit indicates the detection of an SC_TC error:
+       0: No error.
+       1: Error.
+    An SC_TC error is detected if AI_SC_TC_Interrupt_Ack is not set
+    between two SC TCs. This allows you to detect large interrupt
+    latencies and potential problems associated with them. To clear
+    this bit, set SC_TC_Error_Confirm to 1.
+
+
+   8: AI_START2_St
+
+    This bit indicates whether a valid START2 trigger has been received
+    by the SC counter in the pretrigger acquisition mode:
+       0: No.
+       1: Yes.
+    A valid START2 signal is one that is received while the SC counter
+    is in the WAIT2 state.
+
+
+   7: AI_START1_St
+
+    This bit indicates that a valid START1 trigger has been received by
+    the DAQ-STC:
+       0: No.
+       1: Yes.
+    A valid START1 trigger is one that is received while the SC counter
+    is armed and in the WAIT1 state. This bit can be cleared by setting
+    AI_START1_Interrupt_Ack to 1.
+
+
+   6: AI_SC_TC_St
+
+    This bit indicates whether the SC counter has reached TC:
+       0: No.
+       1: Yes.
+    You can clear this bit by setting AI_SC_TC_Interrupt_Ack to 1.
+
+
+   5: AI_START_St
+
+    This bit indicates that a valid START trigger has been received by
+    the AITM:
+       0: No.
+       1: Yes.
+    A valid START trigger is one that is received while the SC counter is
+    enabled to count.
+
+
+   4: AI_STOP_St
+
+    This bit indicates that a valid STOP signal has been received by
+    the AITM:
+       0: No.
+       1: Yes.
+    A valid STOP trigger is one that is received while the SC counter is
+    enabled to count yet after a valid START. This bit is cleared by
+    setting AI_STOP_Interrupt_Ack to 1.
+
+
+   3: G0_TC_St
+
+    This bit indicates whether general-purpose counter 0 has reached TC:
+	   0: No.
+	   1: Yes.
+	You can use this bit for overflow detection in some applications.
+	This bit is cleared by setting G0_TC_Interrupt_Ack to 1.
+
+
+  2: G0_Gate_Interrupt_St
+
+   This bit indicates whether a gate interrupt has occurred in general-
+   purpose counter 0:
+      0: No interrupt.
+	  1: Interrupt request generated.
+   This bit can be cleared by setting G0_Gate_Interrupt_Ack to 1.
+
+
+   1: AI_FIFO_Request_St
+
+    This bit indicates the status of the DMA request (output pin AIFREQ)
+    and the FIFO interrupt:
+       0: Not asserted.
+       1: Asserted.
+    AI_FIFO_Mode selects the condition on which to generate the DMA
+    request and FIFO interrupt. Related bitfields: AI_FIFO_Mode.
+
+
+   0: Pass_Thru_0_Interrupt_St
+
+    This bit indicates whether a pass through AI_Status_1_Register interrupt
+    is asserted:
+       0: Interrupt not asserted.
+       1: Interrupt asserted.
+
+
+
+=============================================================================
+
+
+AI_Status_2_Register (offset: 10), width: 1
+
+
+  15: Reserved_2000_St
+
+
+  14: AI_DIV_Armed_St
+
+    This bit indicates whether the DIV counter is armed:
+       0: Disarmed.
+       1: Armed.
+
+
+  13: AI_DIV_Q_St
+
+    This bit reflects the state of the DIV control circuit:
+       0: WAIT.
+       1: CNT.
+
+
+  12: AI_SI2_Next_Load_Source_St
+
+    This bit indicates the next load source of the SI2 counter:
+       0: Load register A.
+       1: Load register B.
+
+
+  11: AI_SI2_Armed_St
+
+    This bit indicates whether the SI2 counter is armed:
+       0: Disarmed.
+       1: Armed.
+
+
+9-10: AI_SI_Q_St
+
+    This bitfield reflects the state of the SI control circuit:
+       0: WAIT 1.
+       1: CNT 1.
+
+
+   8: AI_SI_Count_Enabled_St
+
+    If the SI counter is armed, this bit indicates whether the SI counter
+    is enabled to count:
+       0: No.
+       1: Yes.
+
+
+   7: Reserved
+
+
+   6: AI_SI_Next_Load_Source_St
+
+    This bit indicates the next load source of the SI counter:
+       0: Load register A.
+       1: Load register B.
+
+
+   5: AI_SI_Armed_St
+
+    This bit indicates whether the SI counter is armed:
+       0: Disarmed
+       1: Armed
+
+ 3-4: AI_SC_Q_St
+
+    This bitfield reflects the state of the SC control circuit:
+       0: WAIT 1.
+       1: PCNT.
+       2: WAIT 2.
+       3: CNT.
+
+
+   2: AI_SC_Save_St
+
+    This bit indicates the status of the SC save register:
+       0: SC save register is tracing the counter.
+       1: SC save register is latched for later read.
+
+
+   1: AI_SC_Next_Load_Source_St
+
+    This bit indicates the next load source of the SC counter:
+       0: Load register A.
+       1: Load register B.
+
+
+   0: AI_SC_Armed_St
+
+    This bit indicates whether the SC counter is armed:
+       0: Disarmed.
+       1: Armed.
+
+
+
+=============================================================================
+
+
+Joint_Status_1_Register (offset: 27), width: 1
+
+
+  15: AI_Last_Shiftin_St
+
+    This bit indicates that the last SHIFTIN of the acquisition has
+	occurred. The bit is set on the SHIFTIN following the SC_TC trailing
+	edge. It is cleared by setting AI_SC_TC_Interrupt_Ack to 1.
+
+    Note: If the SC_CLK is slow with respect to the conversion period,
+	      the trailing edge of SC_TC may miss the SHIFTIN pulse. This
+		  can happen in the internal CONVERT mode if you select
+		  IN_TIMEBASE2 as the SI2 source. For this reason, you must not
+		  rely on this bit as an end of acquisition indicator.
+
+
+  14: AO_UC_Q_St
+
+    This bit reflects state of the UC control circuit.
+	   0: WAIT.
+	   1: CNT.
+	See section 3.8, Detailed Description, for more information on the
+	UC control circuit.
+
+
+  13: AO_UI2_Gate_St
+
+    This bit reflects the state of the secondary external gate. The
+	secondary external gate is set to:
+	   0: Pause the UI2 counter.
+	   1: Enable the UI2 counter.
+
+
+  12: DIO_Serial_IO_In_Progress_St
+
+    This bit indicates whether serial digital I/O is in progress:
+	   0: Not in progress.
+	   1: In progress.
+
+
+  11: AO_External_Gate_St
+
+    This bit indicates whether the external gate and software gate are
+	set to enable waveform generation:
+	   0: Pause analog output operation.
+	   1: Enable analog output operation.
+	This bit is currently not supported, and it must be set to 0.
+
+
+  10: AI_External_Gate_St
+
+    This bit indicates whether the external gate and the software gate
+	are set to enable analog input operation:
+	   0: Pause analog input operation.
+	   1: Enable analog input operation.
+
+
+ 8-9: AI_SI2_Q_St
+
+    This bitfield reflects the state of the SI2 control circuit:
+	     0: WAIT 1.
+		 1: CNT.
+		 2: WAIT 2.
+
+
+   7: AO_Start_Stop_Gate_St
+
+    This bit indicates the status of the start/stop gate, if start/stop
+	gating is enabled.
+	   0: Inactive gate.
+	   1: Active gate.
+	This bit is currently not supported, and its setting is undefined.
+
+
+   6: AO_BC_Gate_St
+
+    When the BC_GATE is enabled (see AO_BC_Gate_Enable), this bit
+	indicates the state of the BC_GATE:
+	   0: Inactive. External UPDATEs are blocked.
+	   1: Active. External UPDATEs are allowed to pass.
+	The BC_GATE is active only when the BC counter is enabled to count.
+	When the BC_GATE is disabled, this bit is undefined. You must disable
+	the BC_GATE in the internal UPDATE mode.
+
+
+   5: AI_Start_Stop_Gate_St
+
+    This bit indicates the status of the start/stop gate, if start/stop
+	gating is enabled:
+	   0: External CONVERTs are blocked because a valid START has not
+	      been received.
+	   1: External CONVERTs are allowed to pass.
+
+
+   4: AI_SC_Gate_St
+
+    This bit indicates the status of the SC gate if the SC gate is enabled.
+	   0: SC gate blocks external CONVERTs
+	   1: SC gate allows external CONVERTs to pass.
+
+
+  3: G1_Gate_St
+
+   This bit indicates status of the general-purpose counter gate 1:
+      0: Inactive gate.
+	  1: Active gate.
+   This bit can only be used in the level-gating mode. Note that active
+   gate does not always mean high logic
+
+
+  2: G0_Gate_St
+
+   This bit indicates status of the general-purpose counter gate 0:
+      0: Inactive gate.
+	  1: Active gate.
+   This bit can only be used in the level-gating mode. Note that active
+   gate does not always mean high logic
+
+
+   1: G1_Bank_St
+
+    This bit indicates the load register bank used by general-purpose
+	counter 1:
+	   0: Bank X.
+	   1: Bank Y.
+
+
+   0: G0_Bank_St
+
+    This bit indicates the load register bank used by general-purpose
+	counter 0:
+	   0: Bank X.
+	   1: Bank Y.
+
+
+
+=============================================================================
+
+
+Joint_Status_2_Register (offset: 29), width: 1
+
+
+  15: G1_Permanent_Stale_Data_St
+
+    This bit indicates the detection of a permanent stale data error:
+	   0: No error.
+	   1: Error.
+
+
+  14: G0_Permanent_Stale_Data_St
+
+    This bit indicates the detection of a permanent stale data error:
+	   0: No error.
+	   1: Error.
+
+
+  13: G1_HW_Save_St
+
+    This bit indicates the status of the HW save register for general-
+	purpose counter 1:
+	   0: HW save register is tracing the counter.
+	   1: HW save register is latched for later read.
+
+
+  12: G0_HW_Save_St
+
+    This bit indicates the status of the HW save register for general-
+	purpose counter 0:
+	   0: HW save register is tracing the counter.
+	   1: HW save register is latched for later read.
+
+
+8-11: Generic_Status
+
+    This bitfield reflects the value of the STATUS<0..3> pins.
+
+
+   7: AI_Scan_In_Progress_St
+
+    This bit indicates whether a scan is currently in progress. The
+	bit is set when a valid START is received and the bit is cleared
+	when a valid STOP is received.
+
+
+   6: AI_Config_Memory_Empty_St
+
+    This bit indicates the state of the MUXFEF input pin (after the
+	polarity selection).
+
+
+   5: AO_TMRDACWRs_In_Progress_St
+
+    This bit indicates whether the TMRDACWR sequence initiated by an
+	UPDATE or by setting AO_Not_An_UPDATE to 1 has completed:
+	   0: Completed.
+	   1: n progress.
+	You can poll this bit if you want to wait on the DAC loading before
+	arming the analog output counters.
+
+
+   4: AI_EOC_St
+
+    This bit indicates the state of the EOC pin (after the polarity
+	selection). This bit is useful for device diagnostic applications.
+
+
+   3: AI_SOC_St
+
+    This bit reflects the state of the SOC pin (after the polarity
+	selection). This bit is useful for device diagnostic applications.
+
+
+   2: AO_STOP_St
+
+    This bit indicates that a valid STOP trigger has been received by
+	the AOTM:
+	   0: No.
+	   1: Yes.
+	This bit is currently not supported, and its setting is undefined.
+
+
+   1: G1_Output_St
+
+    This bit indicates the current G_OUT state (after the polarity
+	selection):
+	   0: Low.
+	   1: High.
+
+
+   0: G0_Output_St
+
+    This bit indicates the current G_OUT state (after the polarity
+	selection):
+	   0: Low.
+	   1: High.
+
+
+
+=============================================================================
+
+
+AI_Joint_Reset_Register (offset: 72), width: 1
+
+   8: AI_Configuration_End
+
+    This bit clears AI_Configuration_Start, which holds the analog input
+	circuitry in reset to prevent glitches on the output pins during
+	configuration. You should set this bit to 1 when ending the
+	configuration of the analog input circuitry. This bit is cleared
+	automatically.
+
+
+   4: AI_Configuration_Start
+
+    This bit holds the analog input circuitry in reset to prevent glitches
+	on the output pins during configuration. The following analog input
+	circuits are affected:
+       * Output circuits
+	   * Counter control circuits
+	   * Trigger circuits
+	   * Interrupt circuits
+	The following circuits are also affected:
+	   * Interrupt_A_Ack_Register
+	   * Autoacknowledge circuit for general-purpose counter 0.
+	You should set this bit to 1 when beginning the configuration of the
+	analog input circuitry. By doing this you ensure that no spurious
+	glitches appear on the output pins and on the internal circuit
+	components. If you do not set this bit to 1, the DAQ-STC may behave
+	erroneously. This bit is cleared by setting AI_Configuration_End to 1.
+
+
+   0: AI_Reset
+
+    Setting this bit to 1 resets all the resetable registers to their
+	power-on state. The resetable registers are:
+	   * AI_Command_1_Register
+	   * AI_Command_2_Register
+	   * AI_Mode_1_Register
+	   * AI_Mode_2_Register
+	   * AI_Mode_3_Register
+	   * AI_Output_Control_Register
+	   * AI_Personal_Register
+	   * AI_START_STOP_Select_Register
+	   * AI_Trigger_Select_Register
+	Setting this bit to 1 also clears all the status bits and interrupts
+	related to AI, except those associated with the AI data FIFO. This
+	bit is cleared automatically.
+
+
+
+=============================================================================
+
+
+AI_START_STOP_Select_Register (offset: 62), width: 1
+
+
+  15: AI_START_Polarity
+
+    This bit determines the polarity of START trigger:
+       0: Active high or rising edge.
+       1: Active low or falling edge.
+
+
+  14: AI_STOP_Polarity
+
+    This bit determines the polarity of STOP trigger:
+       0: Active high or rising edge.
+       1: Active low or falling edge.
+    Set this bit to 0 if AI_STOP_Select is set to 0. You should set this
+    bit to 1 if AI_STOP_Select is set to 31.
+
+
+  13: AI_STOP_Sync
+
+    This bit enables internal synchronization of the STOP trigger to the
+    internal signal FSC_SRC:
+       0: Disabled.
+       1: Enabled.
+    You should set this bit to 0 if the STOP is generated by a
+    configuration memory on your board. Otherwise, you should set this
+    bit to 1 (unless you can guarantee synchronization by some other
+    means). You must set this bit to 1 if AI_STOP_Select is set to 0.
+
+
+  12: AI_STOP_Edge
+
+    This bit enables edge detection of the STOP trigger:
+       0: Disabled (level-sensitive trigger).
+       1: Enabled (edge-sensitive trigger).
+    You should set this bit to 0 if AI_STOP_Select is set to 31, or if
+    you want single-channel operation. You should set this bit to 1 if
+    AI_STOP_Select is set to 0.
+
+
+7-11: AI_STOP_Select
+
+    This bitfield selects the STOP trigger:
+       0:     The internal signal DIV_TC or bitfield AI_STOP_Pulse.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       18:    The internal signal SI2_TC.
+       19:    Signal present on the AI_STOP_IN pin.
+       31:    Logic low.
+    Set this bit to 31 for single-channel operation if your board does
+    not have configuration memory.
+
+
+   6: AI_START_Sync
+
+    This bit enables internal synchronization of the START trigger:
+       0: Disabled.
+       1: Enabled.
+    You should normally set this bit to 1. You must set this bit to 0 for
+    the single-wire case.
+
+
+   5: AI_START_Edge
+
+    This bit enables edge detection of the START trigger:
+       0: Disabled (level-sensitive trigger).
+       1: Enabled (edge-sensitive trigger).
+    This bit should normally be set to 1. 
+
+
+ 0-4: AI_START_Select
+
+    This bit selects the START trigger:
+       0:     The internal signal SI_TC.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       18:    Bitfield AI_START_Pulse.
+       19:    The internal signal G_OUT from general-purpose counter 0.
+       31:    Logic low.
+    When you set this bit to 0, the DAQ-STC is in the internal START mode.
+    When you select any other signal as the START trigger, the DAQ-STC is
+    in the external START mode.
+
+
+
+=============================================================================
+
+AI_Trigger_Select_Register (offset: 63), width: 1
+
+
+  15: AI_START1_Polarity
+
+    This bit determines the polarity of the START1 trigger:
+       0: Active high or rising edge.
+       1: Active low or falling edge.
+    You should set this bit to 0 if AI_START1_Select is set to 0.
+
+
+  14: AI_START2_Polarity
+
+    This bit determines the polarity of START2 trigger:
+       0: Active high or rising edge.
+       1: Active low or falling edge.
+    You should set this bit to 0 if AI_START2_Select is set to 0.
+
+
+  13: AI_START2_Sync
+
+    This bit enables internal synchronization of the START2 trigger to
+    the SC source:
+       0: Disabled.
+       1: Enabled.
+    You should set this bit to 1 unless START2 is synchronized externally
+    (to the signal that is selected as the CONVERT source). You must set
+    this bit to 1 if AI_START2_Select is set to 0. You should set this
+    bit to 0 if the ASIC is a START2 slave to another DAQ-STC.
+
+
+  12: AI_START2_Edge
+
+    This bit enables edge detection of the START2 trigger:
+       0: Disabled.  
+       1: Enabled.
+    You should normally set this bit to 1 unless the DAQ-STC is used in
+    a very noisy environment. You should set this bit to 0 if the ASIC
+    is a START2 slave to another DAQ-STC.
+
+
+7-11: AI_START2_Select
+
+    This bitfield selects the START2 trigger:
+       0:     Bitfield AI_START2_Pulse.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       31: Logic low.
+
+
+   6: AI_START1_Sync
+
+    This bit enables internal synchronization of the START1 trigger to
+    the SC source:
+       0: Disabled.
+       1: Enabled.
+    You should set this bit to 1 unless START1 is synchronized externally
+    (to the signal selected as the CONVERT source). You must set this bit
+    to 1 if AI_START1_Select is set to 0. You should set this bit to 0 if
+    the ASIC is a START1 slave to another DAQ-STC.
+
+
+   5: AI_START1_Edge
+
+    This bit enables edge detection of the START1 trigger:
+       0: Disabled (level-sensitive trigger).
+       1: Enabled (edge-sensitive trigger).
+    You should normally set this bit to 1. You must set this bit to 1
+    if AI_START1_Select is set to 0. You should set this bit to 0 if
+    the ASIC is a START1 slave to another DAQ-STC.
+
+
+ 0-4: AI_START1_Select
+
+    This bitfield selects the START1 trigger:
+       0:     Bitfield AI_START1_Pulse.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       18:    The internal signal G_OUT from general-purpose counter 0.
+       31:    Logic low.
+
+
+
+=============================================================================
+
+
+AI_Command_1_Register (offset: 8), width: 1
+
+  15: Reserved
+
+
+  14: AI_Analog_Trigger_Reset
+
+    This bit clears the hysteresis registers in the analog trigger circuit.
+    Set this bit to 1 at the time you arm the analog input counters if you
+    want to use analog triggering in hysteresis mode for any analog input
+    signal. Before setting this bit to 1, make sure that the analog trigger
+    is not being used by any other part of the DAQ-STC. You should not set
+    this bit to 1 in any other case. This bit is cleared automatically.
+
+
+  13: AI_Disarm
+
+    Setting this bit to 1 asynchronously disarms the SC, SI, SI2, and DIV
+    counters. This command should only be used to disarm idle counters. To
+    disarm non-idle counters, use AI_Software_Reset. This bit is cleared
+    automatically.
+
+
+  12: AI_SI2_Arm
+
+    Setting this bit to 1 arms the SI2 counter. The counter remains armed
+    and the bit remains set until it is disarmed, either by hardware or by
+    setting AI_Disarm to 1.
+
+
+  11: AI_SI2_Load
+
+    If the SI2 counter is disarmed, this bit loads the SI2 counter with
+    the contents of the selected SI2 load register (A or B). If the SI2
+    counter is armed, writing to this bit has no effect. This bit is
+    cleared automatically.
+
+
+  10: AI_SI_Arm
+
+    Setting this bit to 1 arms the SI counter. The counter remains armed
+    (and the bit remains set) until it is disarmed, either by hardware or
+    by setting AI_Disarm to 1.
+
+
+   9: AI_SI_Load
+
+    If the SI counter is disarmed, this bit loads the SI counter with the
+    contents of the selected SI load register (A or B). If the SI counter
+    is armed, writing to this bit has no effect. This bit is cleared
+    automatically.
+
+
+   8: AI_DIV_Arm
+
+    This bit arms the DIV counter. The counter remains armed (and the bit
+    remains set) until it is disarmed, either by hardware or by setting
+    AI_Disarm to 1.
+
+
+   7: AI_DIV_Load
+
+    If the DIV counter is disarmed, this bit loads the DIV counter with
+    the contents of the DIV load register. If the DIV counter is armed,
+    writing to this bit has no effect. This bit is cleared automatically.
+
+
+   6: AI_SC_Arm
+
+    This bit arms the SC counter. The counter remains armed (and the bit
+    remains set) until it is disarmed, either by hardware or by setting
+    AI_Disarm to 1.
+
+
+   5: AI_SC_Load
+
+    If the SC counter is disarmed, this bit loads the SC counter with the
+    contents of the selected SC load register (A or B). If the SC counter
+    is armed, writing to this bit has no effect. This bit is cleared
+    automatically.
+
+
+   4: AI_SCAN_IN_PROG_Pulse
+
+    Set this bit to 1 to begin a pulse on the SCAN_IN_PROG output signal,
+    if the output is enabled. Set this bit to 0 to end the pulse.
+
+
+   3: AI_EXTMUX_CLK_Pulse
+
+    Setting this bit to 1 produces a pulse on the EXTMUX_CLK output signal
+    if the output is enabled. The pulsewidth is determined by
+    AI_EXTMUX_CLK_Pulse_Width. This bit is cleared automatically.
+
+
+   2: AI_LOCALMUX_CLK_Pulse
+
+    Setting this bit to 1 produces a pulse on the LOCALMUX_CLK output
+    signal, if the output is enabled. The pulsewidth of the output signal
+    is determined by AI_LOCALMUX_CLK_Pulse_Width. LOCALMUX_CLK must also
+    be cleared by an SOC. This bit is cleared automatically.
+
+
+   1: AI_SC_TC_Pulse
+
+    Set this bit to 1 to begin a pulse on the SC_TC output signal if the
+    output is enabled. Set this bit to 0 to end the pulse.
+
+
+   0: AI_CONVERT_Pulse
+
+    Setting this bit to 1 produces a pulse on the CONVERT and PFI2/CONV
+    output signals, if the signals are enabled for output and if CONVERT
+    pulses are not blocked. CONVERT pulses can be blocked by the external
+    gate, the software gate, the start/stop gate, or the SC gate. The
+    pulsewidths of the output signals are determined by
+    AI_CONVERT_Pulse_Width. This bit is cleared automatically. This bit
+    is disabled when AI_Configuration_Start is set to 1.
+
+
+
+=============================================================================
+
+
+AI_Personal_Register (offset: 77), width: 1
+
+
+  15: AI_SHIFTIN_Pulse_Width
+
+    This bit determines the pulsewidth of the SHIFTIN and AI_FIFO_SHIFTIN
+	output signals:
+	   0: 0.5-1.5 AI_OUT_TIMEBASE periods.
+	   1: 1.5-2 AI_OUT_TIMEBASE periods.
+    The leading edge of the SHIFTIN and AI_FIFO_SHIFTIN pulses occurs
+	immediately after the active edge of EOC.
+
+
+  14: AI_EOC_Polarity
+
+    This bit determines which edge of the EOC input signal indicates end
+	of conversion:
+	   0: Rising edge.
+	   1: Falling edge.
+
+
+  13: AI_SOC_Polarity
+
+    This bit determines which edge of the SOC input signal indicates start
+	of conversion:
+	   0: Rising edge.
+	   1: Falling edge.
+
+
+  12: AI_SHIFTIN_Polarity
+
+    This bit selects the polarity of the AI_FIFO_SHIFTIN output signal:
+	   0: Active low.
+	   1: Active high.
+
+
+  11: AI_CONVERT_Pulse_Timebase
+
+    This bit determines how the pulsewidths of the CONVERT and PFI2/CONV
+	signals are selected:
+	   0: Selected by AI_CONVERT_Pulse_Width.
+	   1: Selected by AI_CONVERT_Original_Pulse.
+
+
+  10: AI_CONVERT_Pulse_Width
+
+    If AI_CONVERT_Pulse_Timebase is 0, this bit determines the pulsewidth
+	of the CONVERT and PFI2/ CONV output signals. If
+	AI_CONVERT_Pulse_Timebase is 1 and AI_CONVERT_Original_Pulse is 0,
+	this bit determines the maximal pulsewidth of the CONVERT and
+	PFI2/CONV signals (so that the pulsewidth is equal to the shorter of
+	this pulsewidth and the original signal pulsewidth). The pulsewidths
+	are as follows:
+	   0: 1.5-2 AI_OUT_TIMEBASE periods.
+	   1: 0.5-1 AI_OUT_TIMEBASE periods.
+
+
+   9: AI_CONVERT_Original_Pulse
+
+    If AI_CONVERT_Pulse_Timebase is 1, this bit determines the pulsewidth
+	of the CONVERT and PFI2/ CONV signals. The pulsewidth of the CONVERT
+	signals is:
+	   0: Equal to the pulsewidth of the signal used to generate the
+	      CONVERT signal, with the maximum pulsewidth determined by
+		  AI_CONVERT_Pulse_Width.
+	   1: Equal to the pulsewidth of the signal used to generate the
+	      CONVERT signal.
+
+
+   8: AI_FIFO_Flags_Polarity
+
+    This bit selects the polarity of the AI data FIFO flags (input
+	signals AIFFF, AIFHF, AIFEF, and MUXFEF):
+	   0: Active low.
+	   1: Active high.
+
+
+   7: AI_Overrun_Mode
+
+    This bit selects the period during which new CONVERT pulses are
+	not allowed:
+       0: From SOC to EOC.
+       1: From SOC to the trailing edge of SHIFTIN.
+    If a CONVERT pulse occurs within the selected interval, an overrun
+	error is detected (AI_Overrun_St bit is set to 1).
+
+
+   6: AI_EXTMUX_CLK_Pulse_Width
+
+    This bit selects the pulsewidth and assertion time of the EXTMUX_CLK
+	output signal:
+	   0: Pulsewidth is 4.5 AI_OUT_TIMEBASE periods. EXTMUX_CLK trails
+	      the LOCALMUX_CLK pulse by 0.5-1.5 AI_OUT_TIMEBASE periods.
+	   1: Pulsewidth is equal to the pulsewidth of the LOCALMUX_CLK
+          read pulse selected by AI_LOCALMUX_CLK_Pulse_Width.
+		  EXTMUX_CLK and LOCALMUX_CLK are asserted at the same time.
+
+
+   5: AI_LOCALMUX_CLK_Pulse_Width
+
+    This bit selects the pulsewidth of the LOCALMUX_FFRT output signal
+	and the minimum pulsewidth of the LOCALMUX_CLK output signal:
+	   0: LOCALMUX_FFRT is 0.5-1 AI_OUT_TIMEBASE periods and LOCALMUX_CLK
+	      is 1.5-2 AI_OUT_TIMEBASE periods.
+	   1: LOCALMUX_FFRT is 0.5 AI_OUT_TIMEBASE periods and LOCALMUX_CLK
+	      is 0.5-1 AI_OUT_TIMEBASE periods. LOCALMUX_CLK must also be
+		  cleared by an SOC.
+
+
+   4: AI_AIFREQ_Polarity
+
+    This bit selects the polarity of the AIFREQ output signal:
+	   0: Active high.
+	   1: Active low.
+
+
+ 0-3: Reserved
+
+
+
+=============================================================================
+
+
+AI_Command_2_Register (offset: 4), width: 1
+
+
+  15: AI_End_On_SC_TC
+
+    Setting this bit to 1 disarms the SC, SI, SI2, and DIV counters at
+    the next SC_TC. You can use this bit to stop the acquisition in
+    continuous acquisition mode. This bit is cleared automatically.
+
+
+  14: AI_End_On_End_Of_Scan
+
+    Setting this bit to 1 disarms the SC, SI, SI2, and DIV counters at
+    the next STOP. You can use this bit to stop the acquisition in
+    continuous acquisition mode. This bit is cleared automatically.
+
+
+  13: Reserved
+
+
+  12: Reserved
+
+
+  11: AI_START1_Disable
+
+    This bit disables recognition of the START1 trigger:
+       0: Enabled.
+       1: Disabled.
+    Use this bit if you want the same START1 trigger to start several
+    activities. First, disable START1 by setting this bit to 1, do the
+    necessary programming on all DAQ-STCs, and then enable START1 by
+    setting this bit to 0.
+
+
+  10: AI_SC_Save_Trace
+
+    Setting this bit to 1 causes the SC save register to latch the
+    SC counter value at the next SC_CLK falling edge. Setting this
+    bit to 0 causes the SC save register to trace the SC counter.
+
+
+   9: AI_SI_Switch_Load_On_SC_TC
+
+    Setting this bit to 1 causes the SI counter to switch load registers
+    at the next SC_TC. This action is internally synchronized to the
+    falling edge of the internal signal SI_CLK. You can use this bit for
+    scan rate change during an acquisition and for staged analog input.
+    This bit is cleared automatically.
+
+
+   8: AI_SI_Switch_Load_On_STOP
+
+    Setting this bit to 1 causes the SI counter to switch load registers
+    upon receiving a STOP trigger. This action is internally synchronized
+    to the falling edge of the internal signal SI_CLK. This bit is cleared
+    automatically.
+
+
+   7: AI_SI_Switch_Load_On_TC
+
+    Setting this bit to 1 causes the SI counter to switch load registers
+    at its next TC. This action is internally synchronized to the falling
+    edge of the internal signal SI_CLK. You can use this bit for scan rate
+    change during an acquisition. This bit is cleared automatically.
+
+
+   6: Reserved
+
+
+   5: Reserved
+
+
+   4: AI_SC_Switch_Load_On_TC
+
+    Setting this bit to 1 causes the SC counter to switch load registers
+    at the next SC_TC. You can use this bit for staged analog input. This
+    bit is cleared automatically.
+
+
+   3: AI_STOP_Pulse
+
+    Setting this bit to 1 sends a STOP trigger to the counters if the
+    STOP software strobe is selected (AI_STOP_Select is set to 0). This
+    bit is cleared automatically.
+
+
+   2: AI_START_Pulse
+
+    Setting this bit to 1 sends a START trigger to the counters if the
+    START software strobe is selected (AI_START_Select is set to 18).
+    This bit is cleared automatically.
+
+
+   1: AI_START2_Pulse
+
+    Setting this bit to 1 sends a START2 trigger to the SC counter if the
+    START2 software strobe is selected (AI_START2_Select is set to 0).
+    This bit is cleared automatically.
+
+
+   0: AI_START1_Pulse
+
+    Setting this bit to 1 sends a START1 trigger to the counters if the
+    START1 software strobe is selected (AI_START1_Select is set to 0).
+    This bit is cleared automatically.
+
+
+
+=============================================================================
+
+
+AI_Mode_1_Register (offset: 12), width: 1
+
+
+11-15: AI_CONVERT_Source_Select
+
+    This bitfield selects the CONVERT source:
+       0:     The internal signal SI2_TC, inverted.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       19:    The internal signal GOUT from general-purpose counter 0.
+       31:    Logic low.
+    When you set this bit to 0, the DAQ-STC is in the internal CONVERT
+    mode. When you select any other signal as the CONVERT source, the
+    DAQ-STC is in the external CONVERT mode.
+
+
+6-10: AI_SI_Source_Select
+
+    This bitfield selects the SI source:
+       0:     AI_IN_TIMEBASE1.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       19:    IN_TIMEBASE2.
+       31:    Logic low.
+
+
+   5: AI_CONVERT_Source_Polarity
+
+    This bit selects the of active edge of the CONVERT source (the signal
+    that is selected by AI_CONVERT_Source_Select):
+       0: Falling edge.
+       1: Rising edge.
+    You must set this bit to 0 in the internal CONVERT mode.
+
+
+   4: AI_SI_Source_Polarity
+
+    This bit selects the active edge of the SI source (the signal that
+    is selected by AI_SI_Source_Select):
+       0: Rising edge.
+       1: Falling edge.
+    Set this bit to 0 if an internal timebase is used.
+
+
+   3: AI_Start_Stop
+
+    This bit enables START and STOP control of the analog input operation:
+       0: Disabled.
+       1: Enabled.
+    You should normally set this bit to 1.
+
+
+   2: Reserved_One
+
+    Always set this bit to 1.
+
+
+   1: AI_Continuous
+
+    This bit determines the behavior of the SC, SI, SI2, and DIV counters
+    during SC_TC:
+       0: If AI_Pre_Trigger is 0, the counters will return to idle on
+          the first SC_TC. If AI_Pre_Trigger is 1, the counters will
+          return to idle on the second SC_TC.
+       1: The counters will ignore SC_TC. Set this bit to 0 to select
+          the pretrigger or posttrigger acquisition modes if you want
+          to acquire a predetermined number of scans.
+    Set this bit to 1 to select the continuous acquisition mode if you
+    wish to continuously acquire data or to perform staged analog input.
+    You can use AI_End_On_End_Of_Scan and AI_End_On_SC_TC to stop an
+    analog input operation in the continuous acquisition mode.
+
+
+   0: AI_Trigger_Once
+
+    This bit controls the retriggerability of the SC, SI, SI2, and DIV
+    counters:
+       0: The counters remain armed and retriggerable after generating
+          a timing sequence.
+       1: The counters are disarmed after one analog input timing
+	      sequence.
+    Set this bit to 1 only if AI_Continuous is set to 0. Set this bit to 0
+    for a single-finite-pretrigger-infiniteposttrigger analog input
+    operation.
+
+
+
+=============================================================================
+
+
+AI_Mode_2_Register (offset: 13), width: 1
+
+
+  15: AI_SC_Gate_Enable
+
+    This bit enables the SC gate:
+       0: Disabled.
+       1: Enabled.
+    When the SC gate is enabled, external CONVERT signals pass through
+    the DAQ-STC only when the SC counter is counting or, if in
+    pretriggered mode, waiting for trigger. You must disable the SC gate
+    when internally generated CONVERT pulses are used.
+
+
+  14: AI_Start_Stop_Gate_Enable
+
+    This bit enables the start/stop gate (STST_GATE):
+       0: Disabled.
+       1: Enabled.
+    When start/stop gate is enabled, external CONVERT pulses pass through
+    the DAQ-STC only during the interval between the assertion of START
+    and the assertion of STOP. You should enable the start/stop gate in
+    the external CONVERT mode. You must disable the start/stop gate in
+    the internal CONVERT mode.
+
+
+  13: AI_Pre_Trigger
+
+    If AI_Continuous is 0, this bit selects between the posttrigger
+    acquisition mode and the pretrigger acquisition mode:
+       0: Posttrigger acquisition mode.
+       1: Pretrigger acquisition mode.
+    If AI_Continuous is 1, this bit is not used. Refer to section 2.4.3,
+    Acquisition-Level Timing and Control, for more information on the
+    acquisition modes.
+
+
+  12: AI_External_MUX_Present
+
+    This bit determines when the LOCALMUX_CLK output signal pulses:
+       0: Pulse on every CONVERT.
+       1: Pulse only on CONVERTs that occur during DIV_TC.
+    This bit allows you to use the DIV counter for LOCALMUX_CLK signal
+    control. This is useful if one or more external multiplexers, such
+    as an AMUX-64T or SCXI, are connected to the board the DAQ-STC is
+    on. You should set this bit to 0 if no external multiplexers are
+    present or if each external channel corresponds to one internal
+    channel. You should set this bit to 1 if one or more external
+    multiplexers are present and if you are multiplexing more than one
+    external channel onto each internal channel. If this bit is set
+    to 1, the DIV counter must be used to determine the number of
+    EXTMUX_CLK pulses that will correspond to one LOCALMUX_CLK pulse.
+
+
+  11: Reserved
+
+
+  10: Reserved
+
+
+   9: AI_SI2_Initial_Load_Source
+
+    This bit selects the initial SI2 load register:
+       0: Load register A.
+       1: Load register B.
+    Do not change this bit while the counter is counting.
+
+
+   8: AI_SI2_Reload_Mode
+
+    This bit selects the reload mode for the SI2 counter:
+       0: No automatic change of the SI2 load register.
+       1: Alternate first period on every STOP.
+    Set this bit to 1 in the internal CONVERT mode to make the time
+    interval between the START trigger and the first CONVERT different
+    from the time interval between CONVERTs.
+
+
+   7: AI_SI_Initial_Load_Source
+
+    If the SI counter is disarmed, this bit selects the initial SI load
+    register:
+       0: Load register A.
+       1: Load register B.
+    If the SI counter is armed, writing to this bit has no effect.
+
+
+ 4-6: AI_SI_Reload_Mode
+
+    This bitfield selects the reload mode for the SI counter:
+       0: No automatic change of the SI load register.
+       4: Alternate first period on every STOP. Use this setting to
+          make the time interval between the START trigger and the
+          first sample pulse different from the remaining sample
+          intervals.
+       5: Switch load register on every STOP. Use this setting to
+          synchronously change the sample interval at each STOP.
+       6: Alternate first period on every SC_TC. Use this setting
+          to make the interval between the START1 trigger and the
+          first scan different from the scan interval.
+       7: Switch load register on every SC_TC. Use this setting to
+          synchronously change the scan interval at each SC_TC.
+
+
+   3: AI_SI_Write_Switch
+
+    This bit enables the write switch feature of the SI load registers.
+    Writes to SI load register A are:
+       0: Unconditionally directed to SI load register A.
+       1: Directed to the inactive SI load register.
+
+
+   2: AI_SC_Initial_Load_Source
+
+    If the SC counter is disarmed, this bit selects the initial SC load
+    register:
+       0: Load register A.
+       1: Load register B.
+    If the SC counter is armed, this bit has no effect.
+
+
+   1: AI_SC_Reload_Mode
+
+    This bit selects the reload mode for the SC counter:
+       0: No automatic change of the SC load register.
+       1: The SC counter will switch load registers on every SC_TC.
+    You can use setting 1 for pretrigger acquisition mode and for staged
+    analog input.
+
+
+   0: AI_SC_Write_Switch
+
+    This bit enables the write switch feature of the SC load registers.
+    Writes to SC load register A are:
+       0: Unconditionally directed to SC load register A.
+       1: Directed to the inactive SC load register.
+
+
+
+=============================================================================
+
+
+AI_Mode_3_Register (offset: 87), width: 1
+
+
+  15: AI_Trigger_Length
+
+    This bit determines the length of the signals appearing on the
+    bidirectional pins PFI0/AI_START1 and PFI1/AI_START2 when the pins
+    are configured for output. It also determines the length of the
+    signal appearing on the bidirectional pin PFI7/AI_START when the pin
+    is configured to output the internal signal AD_START:
+       0: Output the normal internal version of the signal.
+       1: Pulse stretch the internal signal to be 1-2 AI_OUT_TIMEBASE
+          periods long.
+    Use the bitfield AI_START_Output_Select to select the signal appearing
+    on the pin PFI/AI_START. Refer to section 5.3, Pin Interface, for a
+    description of the internal signal appearing on each bidirectional
+    PFI pin.
+
+
+  14: AI_Delay_START
+
+    This bit selects the internal clock that synchronizes the START trigger
+    when START synchronization is selected:
+       0: START synchronizes to SI2_SRC (internal CONVERT) or to
+          FSCLK (external CONVERT).
+       1: START synchronizes to SC_SRC.
+    Since the clock SC_SRC is internally delayed relative to SI2_SRC and
+    FSCLK, setting this bit to 1 provides additional margin for the
+    external START to reach the synchronization flip-flop, but allows
+    less margin for the output of the synchronization flip-flop to reach
+    the counter control circuits. You should normally set this bit to 0.
+
+
+  13: AI_Software_Gate
+
+    This bit controls the software gate, which you can use to pause an
+    analog input operation:
+       0: Enable operation.
+       1: Pause operation.
+    Refer to section 2.4.4, Gating, for more information on software gating.
+
+
+  12: AI_SI_Special_Trigger_Delay
+
+    Setting this bit to 1 in the external START mode causes the SI counter
+    to block START pulses for a fixed time period after the START1 trigger.
+    This feature allows you to have an extra timing parameter in the scan
+    timing when you use an external START. Refer to section 2.4.2,
+    Scan-Level Timing and Control, for more information on the
+    SI Special Trigger Delay. Notice that the time period may be expressed
+    as the number of START pulses blocked. Do not set this bit to 1 in the
+    internal START mode.
+
+
+  11: AI_SI2_Source_Select
+
+    This bit selects the SI2 source:
+       0: The same signal selected as the SI source. Refer to
+          AI_SI_Source_Select.
+       1: AI_IN_TIMEBASE1.
+
+
+  10: AI_Delayed_START2
+
+    This bit determines when the START2 trigger is used by the AITM:
+       0: Use START2 trigger immediately.
+       1: Delay the START2 trigger by synchronizing it to the
+          CONVERT source.
+    Set this bit to 1 in the master ASIC during master/slave trigger.
+    The slave ASIC can then synchronize to the same clock as the master
+    by triggering on the START2 signal that is output from the master.
+
+
+   9: AI_Delayed_START1
+
+    This bit determines when the START1 trigger is used by the AITM:
+       0: Use START1 trigger immediately.
+       1: Delay the START1 trigger by synchronizing it to the
+          CONVERT source.
+    Set this bit to 1 in the master ASIC during master/slave trigger.
+    The slave ASIC(s) can then synchronize to the same clock as the master
+    by triggering on the START1 signal that is output from the master.
+
+
+   8: AI_External_Gate_Mode
+
+    This bit determines the gating mode, if gating is enabled.
+       0: Free-run gating mode.
+       1: Halt-gating mode.
+    Refer to section 2.4.4, Gating, for more information on gating modes.
+
+
+ 6-7: AI_FIFO_Mode
+
+    This bit selects the AI data FIFO condition on which to generate the
+    DMA request (output signal AIFREQ) and the FIFO interrupt (if the
+    FIFO interrupt is enabled):
+       0: Generate DMA request and FIFO interrupt on FIFO not empty.
+          Keep the request and interrupt asserted while the FIFO is
+          not empty.
+       1: Generate DMA request and FIFO interrupt on FIFO half-full.
+          Keep the request and interrupt asserted while the FIFO is
+          half-full.
+       2: Generate DMA request and FIFO interrupt on FIFO full. Keep
+          the request and interrupt asserted while the FIFO is full.
+       3: Generate DMA request and FIFO interrupt on FIFO half-full.
+          Keep the request and interrupt asserted while the FIFO is
+          not empty.
+    Selection 3 will cause the request and FIFO interrupt to assert at the
+    end of the acquisition and remain asserted until the FIFO empties,
+    provided that SHIFTIN arrives after the trailing edge of the last SC_TC.
+    The SHIFTIN signal may arrive before the trailing edge of the last
+    SC_TC if an internal CONVERT is used and the SI2 clock is slow with
+    respect to the ADC interval. In this case, you should use the SC_TC
+    interrupt to initiate the final FIFO read at the end at the acquisition.
+
+
+   5: AI_External_Gate_Polarity
+
+    This bit selects the polarity of the external gate signal:
+       0: Active high (high enables operation).
+       1: Active low (low enables operation).
+
+
+ 0-4: AI_External_Gate_Select
+
+    This bitfield enables and selects the external gate:
+       0:     External gate disabled.
+       1-10:  PFI<0..9>.
+       11-17: RTSI_TRIGGER<0..6>.
+       31: Logic low.
+    You can use the external gate to pause an analog input operation in
+    progress. Refer to section 2.4.4, Gating, for more information on
+    external gating.
+
+
+
+=============================================================================
+
+AI_Output_Control_Register (offset: 60), width: 1
+
+
+  10: AI_START_Output_Select
+
+    This bit selects the output source for the bidirectional pin
+	PFI7/AI_START_Pulse if the pin is configured for output:
+	   0: If AI_Trigger_Length is set to 0, the pin will reflect the
+	      internal signal AD_START. If AI_Trigger_Length is set to 1,
+		  the pin will reflect the internal signal AD_START after it
+		  has been pulse stretched to be 1-2 AI_OUT_TIMEBASE periods
+		  long.
+	   1: The pin will output the same signal as SCAN_IN_PROG. If
+	      SCAN_IN_PROG is configured for high impedance, the pin will
+		  output ground.
+
+
+ 8-9: AI_SCAN_IN_PROG_Output_Select
+
+    This bitfield enables and selects the polarity of the SCAN_IN_PROG
+	output signal:
+	   0: High Z.
+	   1: Ground.
+	   2: Enable, active low.
+	   3: Enable, active high.
+
+
+ 6-7: AI_EXTMUX_CLK_Output_Select
+
+    This bit enables and selects polarity for the EXTMUX_CLK output signal:
+	   0: High Z.
+	   1: Ground.
+	   2: Enable, active low.
+	   3: Enable, active high.
+
+
+ 4-5: AI_LOCALMUX_CLK_Output_Select
+
+    The bitfield enables and selects the polarity of the LOCALMUX_CLK
+	output signal:
+	   0: High Z.
+	   1: Ground.
+	   2: Enable, active low.
+	   3: Enable, active high.
+
+
+  2-3: AI_SC_TC_Output_Select
+
+     This bitfield enables and selects polarity for the SC_TC output
+	 signal:
+	    0: High Z.
+		1: Ground.
+		2: Enable, active low.
+		3: Enable, active high.
+
+
+ 0-1: AI_CONVERT_Output_Select
+
+    This bit enables and selects the polarity of the CONVERT output
+	signal:
+	   0: High Z.
+	   1: Ground.
+	   2: Enable, active low.
+	   3: Enable, active high.
+	This bitfield also selects the polarity of the PFI2/CONV output signal,
+	if enabled for output:
+	   0: Active low.
+	   1: Ground.
+	   2: Active low.
+	   3: Active high.
+
+
+
+=============================================================================
+
+
+G0_Command (offset: 6), G1_Command (offset: 7), width: 1
+
+
+  15:  Gi_Disarm_Copy          (strobe)
+
+       Setting this bit to 1 disarms general-purpose counter i. This bit is
+       cleared automatically.
+
+
+  14:  Gi_Save_Trace_Copy
+
+       Setting this bit or Gi_Save_Trace to 1 places the general-purpose
+       counter i save register in the latched data state. Setting both this
+       bit and Gi_Save_Trace to 0 makes the save register trace the counter.
+       To latch the counter contents in the save register, you must make
+       the save register trace the counter before issuing the save command.
+
+
+  13:  Gi_Arm_Copy             (strobe)
+
+       Setting this bit to 1 arms general purpose counter i. The counter
+       remains armed (and the bit remains set) until it is disarmed,
+       either by hardware or by setting Gi_Disarm to 1. Related
+       bitfields: Gi_Disarm.
+
+
+  12:  Gi_Bank_Switch_Enable
+
+       If the general-purpose counter i is not armed, this bit selects
+       the bank to which you can write:
+         0: Bank X.
+         1: Bank Y.
+       If the general-purpose counter i is armed, this bit enables bank
+       switching:
+         0: Disabled.
+         1: Enabled.
+
+
+  11:  Gi_Bank_Switch_Mode
+
+       This bit selects the source that controls general purpose counter i
+       load register bank switching, if bank switching is enabled:
+          0: Gate.
+          1: Software.
+       Related bitfields: Gi_Bank_Switch_Enable, Gi_Bank_Switch_Start.
+
+
+  10:  Gi_Bank_Switch_Start    (strobe)
+
+       Setting this bit to 1 indicates load register bank switching on the
+       condition selected by Gi_Bank_Switch_Mode.
+       You will typically use this bit in an interrupt service program.
+       This bit is cleared automatically.
+       Related bitfields: Gi_Bank_Switch_Start.
+
+
+   9:  Gi_Little_Big_Endian
+
+       This bit selects the load or save register segment to be used for
+       automatic interrupt acknowledgment:
+         0: Low register.
+         1: High register.
+       Related bitfields: Gi_Read_Acknowledges_Irq, Gi_Write_Acknowledges_Irq.
+
+
+   8:  Gi_Synchronized_Gate
+
+       This bit enables gate synchronization to the source:
+         0: Disabled.
+         1: Enabled.
+       You should normally set this bit to 1. You can set this bit to 0
+       if you know that the gate signal is synchronized to the source
+       signal.
+
+
+   7:  Gi_Write_Switch
+
+       This bit enables the write switch feature of the general-purpose
+       counter i load registers. Writes to load register A are:
+         0: Unconditionally directed to load register A.
+         1: Directed to the inactive load register.
+
+
+ 6-5:  Gi_Up_Down
+
+       This bit selects the up/down mode:
+         0: Software-selected down counting.
+         1: Software-selected up counting.
+         2: Hardware-selected up/down counting controlled by the G_UP_DOWNi
+            input pins:
+             Logic low :Count down.
+             Logic high :Count up.
+         3: Hardware-selected up/down counting controlled by the internal
+            gate value (see G_Gating_Polarity):
+             Active gate level:Count up.
+             Inactive gate level:Count down.
+       Selection can be changed while the counter is counting.
+       Related bitfields: Gi_Gating_Polarity.
+
+
+   4:  Gi_Disarm               (strobe)
+
+       Setting this bit to 1 disarms general-purpose counter i. This bit is
+       cleared automatically.
+
+
+   3:  Gi_Analog_Trigger_Reset (strobe)
+
+       This bit clears the hysteresis registers in the analog trigger
+       circuit. Set this bit to 1 at the time you arm general purpose
+       counter i if you want to use analog triggering in hysteresis mode
+       for any general-purpose counter i input signal. Before setting this
+       bit to 1, make sure that the analog trigger is not being used by
+       any other part of the DAQ-STC. You should not set this bit to 1 in
+       any other case. This bit is cleared automatically.
+
+
+   2:  Gi_Load                 (strobe)
+
+       Setting this bit to 1 loads the contents of the selected load
+       register into general-purpose counter i. This bit is cleared
+       automatically. Related bitfields: Gi_Load_Source_Select.
+
+   1:  Gi_Save_Trace
+
+       Setting this bit or Gi_Save_Trace_Copy to 1 places the general-
+       purpose counter i save register in the latched data state. Setting
+       both this bit and Gi_Save_Trace_Copy to 0 makes the save register
+       trace the counter. To latch the counter contents in the save register,
+       you must make the save register trace the counter before issuing the
+       save command.
+
+
+   0:  Gi_Arm                  (strobe)
+
+       Setting this bit to 1 arms general-purpose counter i. The counter
+       remains armed (and the bit remains set) until it is disarmed, either
+       by hardware or by setting Gi_Disarm to 1. Related bitfields: Gi_Disarm.
+
+
+
+=============================================================================
+
+
+G0_Mode_Register (offset: 26), G1_Mode_Register (offset: 27), width 1
+
+   15:  Gi_Reload_Source_Switching
+
+        If Gi_Gate_Select_Load_Source is set to 0, this bit enables load
+        register selection in the following manner:
+          0: Always use the same load register.
+          1: Alternate between the two load registers.
+        Related bitfields: Gi_Gate_Select_Load_Source.
+
+
+   14:  Gi_Loading_On_Gate
+
+        This bit determines whether the gate signal causes counter reload:
+          0: Gate signal does not cause counter reload.
+          1: Counter is reloaded on gate edge that stops the counter,
+             unless edge gating is used and Gi_Trigger_Mode_For_Edge_Gate
+             is set to 3. In the later case, counter is reloaded on every
+             selected gate edge.
+        Reloading occurs on active source edge. Notice that it is legal to
+        set both Gi_Loading_On_Gate and Gi_Loading_On_TC to 1 simultaneously.
+        Related bitfields: Gi_Trigger_Mode_For_Edge_Gate.
+
+
+   13: Gi_Gate_Polarity
+
+       This bit selects the polarity of the G_GATE input signal:
+         0: Active high.
+         1: Active low.
+
+
+   12: Gi_Loading_On_TC
+
+       This bit determines the counter behavior on TC:
+         0: Roll over on TC.
+         1: Reload on TC.
+       Notice that it is legal to set both Gi_Loading_On_Gate and
+       Gi_Loading_On_TC to 1 simultaneously.
+
+
+11-10: Gi_Counting_Once_Field
+
+       This bit determines whether the hardware disarms the counter when the
+       counter stops due to a hardware condition:
+         0: No hardware disarm.
+         1: Disarm at the TC that stops counting.
+         2: Disarm at the G_GATE that stops counting.
+         3: Disarm at the TC or G_GATE that stops counting, whichever
+            comes first.
+
+
+  9-8: Gi_Output_Mode_Field
+
+       This bit selects the mode for the G_OUT signal:
+         0: Reserved.
+         1: TC mode. The counter TC signal appears on G_OUT.
+         2: Toggle output on TC mode. G_OUT changes state on the trailing
+            edge of counter TC.
+         3: Toggle output on TC or gate mode. G_OUT changes state on the
+            trailing edge of counter TC and on the active gate edge. This
+            mode can be used for sequential scanning.
+       Related bitfields: Gi_Output_Polarity.
+
+
+    7: Gi_Load_Source_Select
+
+       If general-purpose counter i is disarmed, this bit selects the
+       initial counter load register:
+         0: Load register A.
+         1: Load register B.
+       The source for subsequent loads depends on Gi_Reload_Source_Switching.
+       If general-purpose counter i is armed, writing to this bit has no
+       effect. Related bitfields: Gi_Reload_Source_Switching, Gi_Arm,
+       Gi_Arm_Copy.
+
+
+  6-5: Gi_Stop_Mode_Field
+
+       This bit selects the condition on which the counter will stop:
+         0: Stop on gate condition.
+         1: Stop on gate condition or at the first TC, whichever comes first.
+         2: Stop by gate condition or at the second TC, whichever comes first.
+         3: Reserved.
+       Notice that, regardless of this bitfield setting, you can always use
+       the software disarm command, Gi_Disarm, to stop the counter. The gate
+       condition that stops the counter is determined by Gi_Gating_Mode (in
+       case of level gating) or by a combination of Gi_Gating_Mode and
+       Gi_Trigger_Mode_For_Edge_Gate (in case of edge gating). Selections 1
+       and 2 are valid only if Gi_Trigger_Mode_For_Edge_Gate is set to 2 (no
+       hardware limit on this). Related bitfields: Gi_Disarm, Gi_Gating_Mode,
+       Gi_Trigger_Mode_For_Edge_Gate.
+
+
+  4-3: Gi_Trigger_Mode_For_Edge_Gate_Field
+
+       This bit selects the triggering mode, if gating is not disabled:
+         0: The first gate edge starts, the next stops the counting.
+         1: The first gate edge stops, the next starts the counting.
+         2: Gate edge always starts the counting, unless counting is
+            already in progress, in which case the edge is ignored;
+            this setting should associate the Stop_Mode setting with TC
+            stop of counting.
+         3: Gate is used for reload, save, or load select only, if any of
+            those options is enabled; not for stopping.
+       Selections 0 and 1 are valid only if Gi_Stop_Mode is set to 0 (no
+       hardware limit on this). Selections 0, 1, and 2 are valid only if
+       Gi_Gating_Mode is set to 2 or 3. Selection 3 is valid only if
+       Gi_Gating_Mode is not set to 0. Related bitfields: Gi_Gating_Mode,
+       Gi_Stop_Mode.
+
+
+    2: Gi_Gate_On_Both_Edges
+
+       This bit enables you to use both gate edges to generate the gate
+       interrupt and/or to control counter operation:
+         0: Disabled.
+         1: Enabled.
+       This bit also affects where interrupts are generated.
+
+
+  0-1: Gi_Gating_Mode_Field
+
+       This bit enables and selects the counter gating mode:
+         0: Gating is disabled.
+         1: Level gating.
+         2: Edge gating:
+           Rising edge if Gi_Gating_Polarity is set to 0.
+           Falling edge if Gi_Gating_Polarity is set to 1.
+         3: Edge gating:
+           Falling edge if Gi_Gating_Polarity is set to 0.
+           Rising edge if Gi_Gating_Polarity is set to 1.
+      When Gi_Gating_Mode is 0 (gating disabled), gate level is available
+      only for control of counting direction (up/down), and for no other
+      purpose. Related bitfields: Gi_Gating_Polarity.
+
+
+
+=============================================================================
+
+
+G0_Load_A_Register (offset: 28), G1_Load_A_Register (offset: 32), width: 2
+
+     i = 0    bits: <0..7>      offset 28
+              bits: <0..15>     offset 29
+     i = 1    bits: <0..7>      offset 32
+              bits: <0..15>     offset 33
+
+     This bitfield is load register A for general-purpose counter i.
+     If load register A is the selected load register, the counter loads
+     the value contained in this bitfield on Gi_Load, on the counter TC,
+     and on the G_GATE induced counter reload condition (if G_GATE
+     reloading is enabled). The eight MSBs are located at the lower
+     address and the 16 LSBs are located at the higher address.
+     Related Bitfields: Gi_Next_Load_Source_St, Gi_Load, Gi_Loading_On_Gate.
+
+
+
+=============================================================================
+
+
+G0_Load_B_Register (offset: 30), G1_Load_B_Register (offset: 34), width: 2
+
+     i = 0 bits: <0..7>         offset 30
+           bits: <0..15>        offset 31
+     i = 1 bits: <0..7>         offset 34
+           bits: <0..15>        offset 35
+
+     This bitfield is load register B for general-purpose counter i. If load
+     register B is the selected load register, the counter loads the value
+     contained in this bitfield on Gi_Load, on the counter TC, and on the
+     G_GATE induced counter reload condition (if G_GATE reloading is
+     enabled). The eight MSBs are located at the lower address and the 16 LSBs
+     are located at the higher address. Related Bitfields:
+     Gi_Next_Load_Source_St, Gi_Load, Gi_Loading_On_Gate.
+
+
+
+=============================================================================
+
+
+G0_Input_Select_Register (offset: 36), G1_Input_Select_Register (offset: 37),
+width: 1
+
+
+  15: Gi_Source_Polarity
+
+      This bit selects the active edge of the general-purpose counter i
+      source:
+        0: Rising edge.
+        1: Falling edge.
+      Related bitfields: Gi_Source_Select.
+
+
+  14: Gi_Output_Polarity
+
+      This bit selects the polarity of the G_OUT pulse (in the TC mode)
+      or the initial G_OUT level (in the toggle output mode):
+        0: Active high pulse or initial low level.
+        1: Active low pulse or initial high level.
+      Related bitfields: Gi_Output_Mode.
+
+
+  13: Gi_OR_Gate
+
+      This bit determines whether the selected gate signal is OR-ed with
+      the output of the other general-purpose counter:
+        0: No.
+        1: Yes.
+      You can use setting 1 for hardware-triggered buffered pulse-train
+      generation. The selected gate signal is only OR-ed while the counter
+      is not counting. When the counter is counting, only the output of
+      the other counter applies.
+
+
+  12: Gi_Gate_Select_Load_Source
+
+      This bit enables the selection of the load register by the
+      counter gate:
+        0: Disabled.
+        1: Enabled.
+      When this bit is set to 1, an active gate level selects load
+      register A, and an inactive gate level selects load register B.
+      Also, Gi_Reload_Source_Switching is ignored. This feature can be
+      used only in conjunction with level gating. Related bitfields:
+      Gi_Gating_Mode, Gi_Reload_Source_Switching.
+
+
+11-7: Gi_Gate_Select_Field
+
+      This bitfield selects the G_GATE source for general-purpose
+      counter i:
+         1-10: PFI<0..9>.
+        11-17: RTSI_TRIGGER<0..6>.
+           18: The internal analog input signal START2.
+           19: The internal analog output signal UI2_TC. See
+               AO_UPDATE2_Output_Toggle.
+           20: The G_TC signal from the other general-purpose counter.
+           21: The internal analog input signal START1.
+           31: Logic low.
+      Related bitfields: AO_UPDATE2_Output_Toggle.
+
+
+ 6-2: Gi_Source_Select_Field
+
+      This bitfield selects the general-purpose counter i source:
+            0 : The internal signal G_IN_TIMEBASE1.
+         1-10: PFI<0..9>.
+        11-17: RTSI_TRIGGER<0..6>.
+           18: The internal signal IN_TIMEBASE2.
+           19: The G_TC signal from the other general-purpose counter.
+           31: Logic low.
+
+
+   1: Gi_Write_Acknowledges_Irq
+
+      Setting this bit to 1 causes load register write accesses to
+      clear Gi_TC_St and to reset the associated interrupt latency
+      error-detection circuitry. To select between the high/low load
+      register, use Gi_Little_Big_Endian. Do not set this bit to 1
+      if Gi_Read_Acknowledge_Irq is set to 1. Related bitfields:
+      Gi_TC_St, Gi_Little_Big_Endian.
+
+
+   0: Gi_Read_Acknowledges_Irq
+
+      Setting this bit to 1 causes hardware save register accesses to
+      clear Gi_Gate_Interrupt_St and to reset the associated interrupt
+      latency error-detection circuitry. To select between the high/low
+      save register, use Gi_Little_Big_Endian. Do not set this bit to 1
+      if Gi_Write_Acknowledges_Irq is set to 1. Related bitfields:
+      Gi_Gate_Interrupt_St, Gi_Little_Big_Endian.
+
+
+
+=============================================================================
+
+
+G0_Autoincrement_Register (offset: 68), G1_Autoincrement_Register (offset: 69),
+width: 1
+
+
+  i = 0 bits: <0..7>   offset 68
+  i = 1 bits: <0..7>   offset 69
+
+  This 8-bit register holds a fixed value that is added to the contents
+  of load register A after each counter reload, so that on the next
+  reload the counter will load the incremented value. You should use
+  the autoincrement feature in pulse-train generation for ETS to
+  automatically increase the pulse delay after each trigger.
+
+
+
+=============================================================================
+
+
+CLOCK_and_FOUT_Register (offset: 56), width: 1
+
+
+  15: FOUT_Enable
+
+    Setting this bit to 1 enables and starts frequency output:
+	   0: Disabled.
+	   1: Enabled.
+	To change the frequency divider value, first clear this bit, then
+	change FOUT_Divider, and set this bit again. If this bit is clear,
+	FOUT is disabled and output is in the high impedance state.
+
+
+  14: FOUT_Timebase_Select
+
+    This bit selects the timebase used for FOUT, that is FOUT_TIMEBASE:
+	   0: FOUT_TIMEBASE = IN_TIMEBASE if Slow_Internal_Time_Divide_By_2
+	      is 0. FOUT_TIMEBASE = IN_TIMEBASE/2 if
+		  Slow_Internal_Time_Divide_By_2 is 1.
+       1: FOUT_TIMEBASE = IN_TIMEBASE2.
+
+
+  13: DIO_Serial_Out_Divide_By_2
+
+    Divide the clock used for serial digital I/O timing by 2, provided
+	hardware timing is used:
+	   0: No. SERIAL_TIMEBASE is IN_TIMEBASE.
+	   1: Yes. SERIAL_TIMEBASE is IN_TIMEBASE divided by 2.
+
+
+  12: Slow_Internal_Time_Divide_By_2
+
+    This bit determines whether to divide the IN_TIMEBASE2 clock
+	(obtained by dividing the IN_TIMEBASE clock by 100) by 2:
+	   0: No.
+	   1: Yes.
+
+
+  11: Slow_Internal_Timebase
+
+    This bit enables the slow internal clock (IN_TIMEBASE2) and the
+	clocks used for serial digital output for communication with SCXI
+	(SERIAL_TIMEBASE):
+	   0: Disabled.
+	   1: Enabled.
+
+
+  10: G_Source_Divide_By_2
+
+    This bit determines the frequency of the internal timebase
+	G_IN_TIMEBASE:
+	   0: Same as IN_TIMEBASE.
+	   1: IN_TIMEBASE divided by 2.
+
+
+   9: Clock_To_Board_Divide_By_2
+
+    If the Clock_To_Board bit is set to 1, this bit selects whether
+	IN_TIMEBASE (as selected by the RTSI_Clock_Mode bitfield) will be
+	divided by 2 when it is fed to the board through the OUTBRD_OSC
+	pin.
+	   0: Do not divide by 2.
+	   1: Divide by 2.
+
+
+   8: Clock_To_Board
+
+    This bit enables the IN_TIMEBASE to feedback or feedthrough to the
+	board through the OUTBRD_OSC pin:
+	   0: Disabled.
+	   1: Enabled.
+
+
+   7: AI_Output_Divide_By_2
+
+    This bit determines the frequency of the internal timebase
+	AI_OUT_TIMEBASE.
+	   0: Same as IN_TIMEBASE. 1:
+	   IN_TIMEBASE divided by two.
+
+
+   6: AI_Source_Divide_By_2
+
+    This bit determines the frequency of the internal timebase
+	AI_IN_TIMEBASE1:
+	   0: Same as IN_TIMEBASE.
+	   1: IN_TIMEBASE divided by two.
+
+
+   5: AO_Output_Divide_By_2
+
+    This bit determines the frequency of the internal timebase
+	AO_OUT_TIMEBASE:
+	   0: Same as IN_TIMEBASE.
+	   1: IN_TIMEBASE divided by 2.
+
+
+   4: AO_Source_Divide_By_2
+
+    This bit determines the frequency of the internal timebase
+	AO_IN_TIMEBASE1:
+	   0: Same as IN_TIMEBASE.
+	   1: IN_TIMEBASE divided by two.
+
+
+ 3-0: FOUT_Divider
+
+    This bit selects the divide ratio for the FOUT output signal:
+	   0: Divide by 16.FOUT = FOUT_TIMEBASE divided by 16.
+	   1-15: Divide by 1-15.FOUT = FOUT_TIMEBASE divided by 1-15.

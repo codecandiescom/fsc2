@@ -239,7 +239,7 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 	     ( ret = AI_start_acq( board ) ) < 0 )
 		return ret;
 
-	/* If the device file wasopened in blocking mode make sure there are
+	/* If the device file was opened in blocking mode make sure there are
 	   data: if no data are available immediately enable the STOP
 	   interrupt (which gets raised when a scan is finished) and then
 	   wait for it (or for the SC TC interrupt, which is raised at the
@@ -254,7 +254,7 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 			   board->irq_hand[ IRQ_AI_SC_TC ].raised ||
 			   board->irq_hand[ IRQ_AI_STOP ].raised ) ) {
 			daq_irq_disable( board, IRQ_AI_STOP );
-			return -EINTR;
+			return -EAGAIN;
 		}
 
 		daq_irq_disable( board, IRQ_AI_STOP );

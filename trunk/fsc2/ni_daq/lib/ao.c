@@ -72,7 +72,7 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 			return ni_daq_errno = NI_DAQ_ERR_NER;
 
 		if ( polarity[ i ] == NI_DAQ_UNIPOLAR &&
-			 ! ni_daq_dev[ board ].props.has_unipolar_ao )
+			 ! ni_daq_dev[ board ].props.ao_does_unipolar )
 			return ni_daq_errno = NI_DAQ_ERR_UAO;
 	}
 

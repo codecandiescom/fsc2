@@ -1,4 +1,5 @@
 /*
+
   $Id$
  
   Driver for National Instruments DAQ boards based on a DAQ-STC
@@ -601,8 +602,8 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 
 		switch ( board->type->ai_gains[ i ] ) {
 			case NI_DAQ_GAIN_0_5 :
-				p.ai_ranges[ 0 ][ i ] = 10.0;
-				p.ai_ranges[ 1 ][ i ] = -1;
+				p.ai_mV_ranges[ 0 ][ i ] = 10000;
+				p.ai_mV_ranges[ 1 ][ i ] = -1;
 				break;
 
 			case NI_DAQ_GAIN_1 :
@@ -612,12 +613,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 5.0;
-					p.ai_ranges[ 1 ][ i ] = 10.0;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 10.0;
-					p.ai_ranges[ 1 ][ i ] = 10.0;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 5000;
+					p.ai_mV_ranges[ 1 ][ i ] = 10000;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+					      p.ai_mV_ranges[ 1 ][ i ] = 10000;
 				break;
 
 			case NI_DAQ_GAIN_2 :
@@ -627,12 +627,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 2.5;
-					p.ai_ranges[ 1 ][ i ] = 5.0;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 5.0;
-					p.ai_ranges[ 1 ][ i ] = 5.0;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 2500;
+					p.ai_mV_ranges[ 1 ][ i ] = 5000;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+					       p.ai_mV_ranges[ 1 ][ i ] = 5000;
 				break;
 
 			case NI_DAQ_GAIN_5 :
@@ -642,12 +641,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 1.0;
-					p.ai_ranges[ 1 ][ i ] = 2.0;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 2.0;
-					p.ai_ranges[ 1 ][ i ] = 2.0;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 1000;
+					p.ai_mV_ranges[ 1 ][ i ] = 2000;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+					       p.ai_mV_ranges[ 1 ][ i ] = 2000;
 				break;
 
 			case NI_DAQ_GAIN_10 :
@@ -657,12 +655,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 0.5;
-					p.ai_ranges[ 1 ][ i ] = 1.0;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 1.0;
-					p.ai_ranges[ 1 ][ i ] = 1.0;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 500;
+					p.ai_mV_ranges[ 1 ][ i ] = 1000;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+					       p.ai_mV_ranges[ 1 ][ i ] = 1000;
 				break;
 
 			case NI_DAQ_GAIN_20 :
@@ -672,12 +669,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 0.25;
-					p.ai_ranges[ 1 ][ i ] = 0.5;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 0.5;
-					p.ai_ranges[ 1 ][ i ] = 0.5;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 250;
+					p.ai_mV_ranges[ 1 ][ i ] = 500;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+						p.ai_mV_ranges[ 1 ][ i ] = 500;
 				break;
 
 			case NI_DAQ_GAIN_50 :
@@ -687,12 +683,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 0.1;
-					p.ai_ranges[ 1 ][ i ] = 0.2;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 0.2;
-					p.ai_ranges[ 1 ][ i ] = 0.2;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 100;
+					p.ai_mV_ranges[ 1 ][ i ] = 200;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+						p.ai_mV_ranges[ 1 ][ i ] = 200;
 				break;
 
 			case NI_DAQ_GAIN_100 :
@@ -702,12 +697,11 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 					       "pci-mio-16e-4" ) ||
 				     ! strcmp( board->type->name,
 					       "pci-6071e" ) ) {
-					p.ai_ranges[ 0 ][ i ] = 0.05;
-					p.ai_ranges[ 1 ][ i ] = 0.1;
-				} else {
-					p.ai_ranges[ 0 ][ i ] = 0.1;
-					p.ai_ranges[ 1 ][ i ] = 0.1;
-				}
+					p.ai_mV_ranges[ 0 ][ i ] = 50;
+					p.ai_mV_ranges[ 1 ][ i ] = 100;
+				} else
+					p.ai_mV_ranges[ 0 ][ i ] =
+						p.ai_mV_ranges[ 1 ][ i ] = 100;
 				break;
 
 			case NI_DAQ_GAIN_NOT_AVAIL :
@@ -717,12 +711,12 @@ int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
 
 	p.ai_time_res = board->type->ai_speed;
 
-	p.num_ao_channels = board->type->ao_num_channels;
-	p.num_ao_bits     = board->type->ao_num_bits;
-	p.has_unipolar_ao = board->type->ao_unipolar;
-	p.ao_has_ext_ref  = board->type->ao_has_ext_ref;
-	p.has_analog_trig = board->type->has_analog_trig;
-	p.atrig_bits      = board->type->atrig_bits;
+	p.num_ao_channels  = board->type->ao_num_channels;
+	p.num_ao_bits      = board->type->ao_num_bits;
+	p.ao_does_unipolar = board->type->ao_unipolar;
+	p.ao_has_ext_ref   = board->type->ao_has_ext_ref;
+	p.has_analog_trig  = board->type->has_analog_trig;
+	p.atrig_bits       = board->type->atrig_bits;
 
 	if ( copy_to_user( arg, &p, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
