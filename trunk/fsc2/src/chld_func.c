@@ -1861,7 +1861,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 
 		TRY
 		{
-			/* Get function to delete an input object */
+			/* Get function to enable or disable an input object */
 
 			Func_ptr = func_get( "object_enable", &acc );
 

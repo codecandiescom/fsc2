@@ -166,9 +166,9 @@ bool run( void )
 
 	if ( ( Internals.child_pid = fork( ) ) == 0 )
 	{
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		if ( GUI.is_init )
 			close( ConnectionNumber( GUI.d ) );
-		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		run_child( );
 	}
 
@@ -1021,8 +1021,6 @@ static void run_child( void )
 	EDL.cur_prg_token = EDL.prg_token;
 	EDL.do_quit = UNSET;
 	setup_child_signals( );
-	if ( ! ( Internals.cmdline_flags & NO_GUI_RUN ) )
-		dlclose( Internals.rsc_handle );
 
 #ifndef NDEBUG
 	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
@@ -1039,7 +1037,14 @@ static void run_child( void )
 		sleep( 36000 );
 	}
 	else
-		signal( SIGTRAP, SIG_IGN );
+	{
+		struct sigaction sact;
+
+		sact.sa_handler = child_sig_handler;
+		sigemptyset( &sact.sa_mask );
+		sact.sa_flags = 0;
+		sigaction( SIGTRAP, &sact, NULL );
+	}
 #endif
 
 	/* Initialization is done and the child can start doing its real work */
@@ -1147,14 +1152,9 @@ static void child_sig_handler( int signo )
 
 		/* Ignored signals : */
 
-		case SIGHUP :
-		case SIGINT :
-		case SIGUSR1 :
-		case SIGCHLD :
-		case SIGCONT :
-		case SIGTTIN :
-		case SIGTTOU :
-		case SIGVTALRM :
+		case SIGHUP :  case SIGINT :    case SIGUSR1 :
+		case SIGCHLD : case SIGCONT :   case SIGTTIN :
+		case SIGTTOU : case SIGVTALRM : case SIGTRAP :
 			return;
 
 		case SIGPIPE:

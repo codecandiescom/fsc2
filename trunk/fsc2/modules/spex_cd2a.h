@@ -31,9 +31,9 @@
 /* Define the following for test purposes only where no real communication
    with the monochromator is supposed to happen */
 
-
+/*
 #define SPEX_CD2A_TEST
-
+*/
 
 /* Defines for the parity used by the device */
 
@@ -227,8 +227,8 @@ double spex_cd2a_UMwn2Swl( double wn );
 double spex_cd2a_SAwn2Uwl( double wn );
 
 
-#define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;     \
-                                   THROW( x );                      \
+#define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;      \
+                                   THROW( x );                       \
                                  } while ( 0 )
 
 #define SPEX_CD2A_RETHROW( )  do { spex_cd2a.fatal_error = SET;      \

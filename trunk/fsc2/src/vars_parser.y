@@ -311,8 +311,8 @@ list3:   /* empty */
        | l3e
 ;
 
-l3e:      expr
-        | l3e ',' expr
+l3e:      expr                     { }
+        | l3e ',' expr             { }
 ;
 
 strs:    STR_TOKEN                 { if ( ! dont_exec )
