@@ -43,6 +43,7 @@ my $else_entry = $guify_entry . 'else\s*$';
 my $endif_entry = $guify_entry . 'endif\s*$';
 my $if_level = 0;
 my $lino;
+my $need_file_sel = 0;
 
 # By changing the following variables the layout of the form can be changed!
 
@@ -125,11 +126,14 @@ while ( <$if> ) {
                             line => $cur_line };
         if ( defined $4 ) {
             my $option = $4;
+			$option = "\"\"" if $var_options->{ type } =~ /^file$/o and
+								$option =~ /^\s*$/;
             die "Syntax error at line $lino, garbage after variable type\n"
-                unless $option =~ /^\s*[\"\[]/;
+                unless $option =~ /^\s*[\"\[]/o;
             analyze_var_options( $var_options, $option );
         }
         push @vars, $var_options;
+		$need_file_sel = 1 if $var_options->{ type } =~ /^file$/o;
         next;
     }
 
@@ -897,6 +901,12 @@ EOT
   done_reading:
     close $fh;
 };
+EOT
+
+	# Append the code for a file selector if it's going to be needed
+
+	if ( $need_file_sel ) {
+		print <<'EOT';
 
 
 ################################################################
@@ -1059,4 +1069,5 @@ sub populate_fs {
 
 1;
 EOT
+	}
 }
