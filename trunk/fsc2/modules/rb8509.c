@@ -44,6 +44,7 @@ static struct {
 	int gain;
 	bool gain_is_set;
 	int trig_mode;
+	int has_ext_trigger;
 	bool trig_mode_is_set;
 } rb8509, rb8509_stored;
 
@@ -83,9 +84,10 @@ int rb8509_init_hook( void )
 	rb8509.handle = -1;
 	rb8509.channel = 0;
 	rb8509.nchan = card_info.num_channels;
-	rb8509.gain = RULBUS_ADC12_GAIN_1;
+	rb8509.gain = RULBUS_RB8509_ADC12_GAIN_1;
 	rb8509.gain_is_set = SET;
-	rb8509.trig_mode = RULBUS_ADC12_INT_TRIG;
+	rb8509.has_ext_trigger = card_info.has_ext_trigger;
+	rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
 	rb8509.trig_mode_is_set = SET;
 
 	return 1;
@@ -123,8 +125,9 @@ int rb8509_exp_hook( void )
 	/* If necessary set the gain (card switches to a gain of 1 on
 	   initialization) */
 
-	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_ADC12_GAIN_1 &&
-		 rulbus_adc12_set_gain( rb8509.handle, rb8509.gain ) != RULBUS_OK )
+	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 &&
+		 rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain )
+																 != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -135,8 +138,9 @@ int rb8509_exp_hook( void )
 	   mode on initialization) */
 
 	if ( rb8509.trig_mode_is_set &&
-		 rb8509.trig_mode != RULBUS_ADC12_INT_TRIG &&
-		 rulbus_adc12_set_trigger_mode( rb8509.handle, rb8509.trig_mode ) 
+		 rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG &&
+		 rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+											   rb8509.trig_mode ) 
 		 														 != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
@@ -211,7 +215,8 @@ Var *daq_get_voltage( Var *v )
 	/* If necessary switch the current channel */
 
 	if ( channel != rb8509.channel &&
-		 rulbus_adc12_set_channel( rb8509.handle, channel ) != RULBUS_OK )
+		 rulbus_rb8509_adc12_set_channel( rb8509.handle, channel )
+																 != RULBUS_OK )
 	{
 		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
 		THROW( EXCEPTION );
@@ -222,9 +227,10 @@ Var *daq_get_voltage( Var *v )
 	/* In internal trigger mode just trigger a conversion and return the
 	   value */
 
-	if ( rb8509.trig_mode == RULBUS_ADC12_INT_TRIG )
+	if ( rb8509.trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
 	{
-		if ( rulbus_adc12_convert( rb8509.handle, &volts ) != RULBUS_OK )
+		if ( rulbus_rb8509_adc12_convert( rb8509.handle, &volts )
+																 != RULBUS_OK )
 		{
 			print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
 			THROW( EXCEPTION );
@@ -238,7 +244,7 @@ Var *daq_get_voltage( Var *v )
 
 	while ( ! retval )
 	{
-		retval = rulbus_adc12_check_convert( rb8509.handle, &volts );
+		retval = rulbus_rb8509_adc12_check_convert( rb8509.handle, &volts );
 		if ( retval < 0 )
 		{
 			print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
@@ -267,10 +273,19 @@ Var *daq_trigger_mode( Var *v )
 
 	if ( ! strcasecmp( v->val.sptr, "EXT" ) ||
 		 ! strcasecmp( v->val.sptr, "EXTERNAL" ) )
-		rb8509.trig_mode = RULBUS_ADC12_EXT_TRIG;
+	{
+		if ( ! rb8509.has_ext_trigger )
+		{
+			print( FATAL, "The ADC card does not have an exernal trigger "
+				   "input\n" );
+			THROW( EXCEPTION );
+		}
+
+		rb8509.trig_mode = RULBUS_RB8509_ADC12_EXT_TRIG;
+	}
 	else if ( ! strcasecmp( v->val.sptr, "INT" ) ||
 			  ! strcasecmp( v->val.sptr, "INTERNAL" ) )
-		rb8509.trig_mode = RULBUS_ADC12_INT_TRIG;
+		rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
 	else
 	{
 		print( FATAL, "Invalid trigger mode argument.\n" );
@@ -282,7 +297,8 @@ Var *daq_trigger_mode( Var *v )
 	rb8509.trig_mode_is_set = SET;
 
 	if ( FSC2_MODE == EXPERIMENT &&
-		 rulbus_adc12_set_trigger_mode( rb8509.handle, rb8509.trig_mode )
+		 rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+											   rb8509.trig_mode )
 																 != RULBUS_OK )
 	{
 		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
@@ -308,12 +324,15 @@ Var *daq_gain( Var *v )
 
 	gain = get_long( v, "ADC gain" );
 
-	if ( gain != RULBUS_ADC12_GAIN_1 && gain != RULBUS_ADC12_GAIN_2 &&
-		 gain != RULBUS_ADC12_GAIN_4 && gain != RULBUS_ADC12_GAIN_8 )
+	if ( gain != RULBUS_RB8509_ADC12_GAIN_1 &&
+		 gain != RULBUS_RB8509_ADC12_GAIN_2 &&
+		 gain != RULBUS_RB8509_ADC12_GAIN_4 &&
+		 gain != RULBUS_RB8509_ADC12_GAIN_8 )
 	{
 		print( FATAL, "Invalid gain factor, only %d, %d, %d and %d are "
-			   "possible.\n", RULBUS_ADC12_GAIN_1, RULBUS_ADC12_GAIN_2,
-			   RULBUS_ADC12_GAIN_4, RULBUS_ADC12_GAIN_8 );
+			   "possible.\n", RULBUS_RB8509_ADC12_GAIN_1,
+			   RULBUS_RB8509_ADC12_GAIN_2, RULBUS_RB8509_ADC12_GAIN_4,
+			   RULBUS_RB8509_ADC12_GAIN_8 );
 		THROW( EXCEPTION );
 	}
 
@@ -323,7 +342,8 @@ Var *daq_gain( Var *v )
 	rb8509.gain_is_set = SET;
 
 	if ( FSC2_MODE == EXPERIMENT &&
-		 rulbus_adc12_set_gain( rb8509.handle, rb8509.gain ) != RULBUS_OK )
+		 rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain )
+		 														 != RULBUS_OK )
 	{
 		print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
 		THROW( EXCEPTION );
@@ -380,4 +400,3 @@ static int rb8509_translate_channel( long channel )
  * tags-file-name: "../TAGS"
  * End:
  */
-

@@ -84,38 +84,40 @@ typedef enum
 #define RULBUS_INV_CARD_ADDR      0xff
 
 
-#define RB_GENERIC  0          /* card of unspecified type */
-#define RB8509      8509       /* 12-bit ADC card */
-#define RB8510      8510       /* 12-bit DAC card */
-#define RB8514      8514       /* Delay card */
-#define RB8515      8515       /* Clock card */
-#define RB8506      8506       /* unsupported */
-#define RB8506      8506       /* unsupported */
-#define RB8506      8506       /* unsupported */
-#define RB8513      8513       /* unsupported */
-#define RB8905      8905       /* unsupported */
-#define RB9005      9005       /* unsupported */
-#define RB9603      9603       /* unsupported */
+#define RB_GENERIC             0       /* card of unspecified type */
+#define RB8506_PIA             1       /* unsupported */
+#define RB8506_SIFU            2       /* unsupported */
+#define RB8506_VIA             3       /* unsupported */
+#define RB8509_ADC12           4       /* 12-bit ADC card */
+#define RB8510_DAC12           5       /* 12-bit DAC card */
+#define RB8513_TIMEBASE        6       /* unsupported */
+#define RB8514_DELAY           7       /* Delay card */
+#define RB8515_CLOCK           8       /* Clock card */
+#define RB8905_ADC12           9       /* unsupported */
+#define RB9005_AMPLIFIER      10       /* unsupported */
+#define RB9603_MONOCHROMATOR  11       /* unsupported */
 
-#define RULBUS_RB8509_DEF_ADDR           0xC0
-#define RULBUS_RB8509_WIDTH              2
-#define RULBUS_RB8509_DEF_BIPOLAR        1
-#define RULBUS_RB8509_DEF_VPB            5.0e-3
-#define RULBUS_RB8509_DEF_NUM_CHANNELS   8
-#define RULBUS_RB8509_DEF_EXT_TRIGGER    1
-#define RULBUS_RB8509_MAX_CHANNELS       8
+#define RULBUS_RB_GENERIC_DEF_ADDR             0x00
 
-#define RULBUS_RB8510_DEF_ADDR           0xD0
-#define RULBUS_RB8510_WIDTH              2
-#define RULBUS_RB8510_DEF_BIPOLAR        1
-#define RULBUS_RB8510_DEF_VPB            5.0e-3
+#define RULBUS_RB8509_ADC12_DEF_ADDR           0xC0
+#define RULBUS_RB8509_ADC12_WIDTH              2
+#define RULBUS_RB8509_ADC12_DEF_BIPOLAR        1
+#define RULBUS_RB8509_ADC12_DEF_VPB            5.0e-3
+#define RULBUS_RB8509_ADC12_DEF_NUM_CHANNELS   8
+#define RULBUS_RB8509_ADC12_DEF_EXT_TRIGGER    0
+#define RULBUS_RB8509_ADC12_MAX_CHANNELS       8
 
-#define RULBUS_RB8514_DEF_ADDR           0xC4
-#define RULBUS_RB8514_WIDTH              4
-#define RULBUS_RB8514_DEF_INTR_DELAY     6.0e-8
+#define RULBUS_RB8510_DAC12_DEF_ADDR           0xD0
+#define RULBUS_RB8510_DAC12_WIDTH              2
+#define RULBUS_RB8510_DAC12_DEF_BIPOLAR        1
+#define RULBUS_RB8510_DAC12_DEF_VPB            5.0e-3
 
-#define RULBUS_RB8515_DEF_ADDR           0xC8
-#define RULBUS_RB8515_WIDTH              1
+#define RULBUS_RB8514_DELAY_DEF_ADDR           0xC4
+#define RULBUS_RB8514_DELAY_WIDTH              4
+#define RULBUS_RB8514_DELAY_DEF_INTR_DELAY     6.0e-8
+
+#define RULBUS_RB8515_CLOCK_DEF_ADDR           0xC8
+#define RULBUS_RB8515_CLOCK_WIDTH              1
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
@@ -131,7 +133,7 @@ struct RULBUS_CARD_LIST {
 	int num_channels;
 	double vpb;
 	int bipolar;
-	int ext_trigger;
+	int has_ext_trigger;
 	double intr_delay;
 };
 
@@ -143,33 +145,33 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 				 size_t len );
 
 
-/* Internal functions for delay cards (RB8514) */
-
-int rulbus_delay_init( void );
-void rulbus_delay_exit( void );
-int rulbus_delay_card_init( int handle );
-void rulbus_delay_card_exit( int handle );
-
-/* Internal functions for clock cards (RB8515) */
-
-int rulbus_clock_init( void );
-void rulbus_clock_exit( void );
-int rulbus_clock_card_init( int handle );
-void rulbus_clock_card_exit( int handle );
-
 /* Internal functions for 12-bit ADC cards (RB8509) */
 
-int rulbus_adc12_init( void );
-void rulbus_adc12_exit( void );
-int rulbus_adc12_card_init( int handle );
-void rulbus_adc12_card_exit( int handle );
+int rulbus_rb8509_adc12_init( void );
+void rulbus_rb8509_adc12_exit( void );
+int rulbus_rb8509_adc12_card_init( int handle );
+void rulbus_rb8509_adc12_card_exit( int handle );
 
 /* Internal functions for 12-bit DAC cards (RB8510) */
 
-int rulbus_dac12_init( void );
-void rulbus_dac12_exit( void );
-int rulbus_dac12_card_init( int handle );
-void rulbus_dac12_card_exit( int handle );
+int rulbus_rb8510_dac12_init( void );
+void rulbus_rb8510_dac12_exit( void );
+int rulbus_rb8510_dac12_card_init( int handle );
+void rulbus_rb8510_dac12_card_exit( int handle );
+
+/* Internal functions for delay cards (RB8514) */
+
+int rulbus_rb8514_delay_init( void );
+void rulbus_rb8514_delay_exit( void );
+int rulbus_rb8514_delay_card_init( int handle );
+void rulbus_rb8514_delay_card_exit( int handle );
+
+/* Internal functions for clock cards (RB8515) */
+
+int rulbus_rb8515_clock_init( void );
+void rulbus_rb8515_clock_exit( void );
+int rulbus_rb8515_clock_card_init( int handle );
+void rulbus_rb8515_clock_card_exit( int handle );
 
 /* Internal functions for generic cards (RB_GENERIC) */
 

@@ -59,14 +59,15 @@ void rb_pulser_init( void )
 	   in turn trigger the following cards), then stop the clock card feeding
 	   the ERT delay card and finally set the delay for the card to 0 */
 
-	if ( rulbus_delay_set_output_pulse( delay_card[ ERT_DELAY ].handle,
-										RULBUS_DELAY_OUTPUT_BOTH,
-										RULBUS_DELAY_PULSE_NONE )
+	if ( rulbus_rb8514_delay_set_output_pulse( delay_card[ ERT_DELAY ].handle,
+										RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+										RULBUS_RB8514_DELAY_PULSE_NONE )
 		 														!= RULBUS_OK ||
-		 rulbus_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
-									 RULBUS_CLOCK_FREQ_OFF ) != RULBUS_OK ||
-		 rulbus_delay_set_delay( delay_card[ ERT_DELAY ].handle,
-								 0, 1 ) != RULBUS_OK )
+		 rulbus_rb8515_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
+											RULBUS_RB8515_CLOCK_FREQ_OFF )
+																!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_raw_delay( delay_card[ ERT_DELAY ].handle,
+									 0, 1 ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to stop pulser" );
 
 	/* In external trigger mode set the trigger input slope of the ERT delay
@@ -76,26 +77,27 @@ void rb_pulser_init( void )
 
 	if ( rb_pulser.trig_in_mode == EXTERNAL )
 	{
-		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+		if ( rulbus_rb8514_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
 									   ( rb_pulser.trig_in_slope 
 										 						== POSITIVE ) ?
-									   RULBUS_DELAY_RAISING_EDGE :
-									   RULBUS_DELAY_FALLING_EDGE )
+									   RULBUS_RB8514_DELAY_RAISING_EDGE :
+									   RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 													 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
 	else
 	{
-		if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-									   RULBUS_DELAY_FALLING_EDGE )
+		if ( rulbus_rb8514_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
+									   RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 													 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
 
-	if ( rulbus_delay_set_output_pulse_polarity(
-			 						delay_card[ ERT_DELAY ].handle,
-									RULBUS_DELAY_END_PULSE,
-									RULBUS_DELAY_RAISING_EDGE ) != RULBUS_OK )
+	if ( rulbus_rb8514_delay_set_output_pulse_polarity(
+			 								delay_card[ ERT_DELAY ].handle,
+											RULBUS_RB8514_DELAY_END_PULSE,
+											RULBUS_RB8514_DELAY_RAISING_EDGE )
+																 != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	/* Set for all cards (execept the card for experiment repetition time,
@@ -108,8 +110,8 @@ void rb_pulser_init( void )
 		if ( i == ERT_DELAY || i == DET_DELAY_0 )
 			continue;
 
-		if ( rulbus_delay_set_trigger( delay_card[ i ].handle,
-									   RULBUS_DELAY_RAISING_EDGE )
+		if ( rulbus_rb8514_delay_set_trigger( delay_card[ i ].handle,
+									   		 RULBUS_RB8514_DELAY_RAISING_EDGE )
 			 													 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 	}
@@ -117,15 +119,16 @@ void rb_pulser_init( void )
 	/* Set the delay card for the detection delay to trigger on the falling
 	   edge (it's connected to the GATE output of the INIT_DELAY card) */
 
-	if ( rulbus_delay_set_trigger( delay_card[ DET_DELAY_0 ].handle,
-								   RULBUS_DELAY_FALLING_EDGE ) != RULBUS_OK )
+	if ( rulbus_rb8514_delay_set_trigger( delay_card[ DET_DELAY_0 ].handle,
+										  RULBUS_RB8514_DELAY_FALLING_EDGE )
+																 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	/* Have the clock feeding the delay cards (except the ERT card run at
 	   the frequency required for the timebase */
 
 #ifndef FIXED_TIMEBASE
-	if ( rulbus_clock_set_frequency( clock_card[ TB_CLOCK ].handle,
+	if ( rulbus_rb8515_clock_set_frequency( clock_card[ TB_CLOCK ].handle,
 									 clock_card[ TB_CLOCK ].freq )
 																 != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to start pulser" );
@@ -208,8 +211,8 @@ void rb_pulser_exit( void )
 			/* Commented out according to Huibs wishes, he want's the clocks
 			   to continue to run even after the end of the experiment.
 
-			rulbus_clock_set_frequency( clock_card[ i ].handle,
-										RULBUS_CLOCK_FREQ_OFF );
+			rulbus_rb8515_clock_set_frequency( clock_card[ i ].handle,
+										RULBUS_RB8515_CLOCK_FREQ_OFF );
 			*/
 
 			rulbus_card_close( clock_card[ i ].handle );
@@ -224,10 +227,10 @@ void rb_pulser_exit( void )
 			/* Commented out according to Huibs wishes, he want's the pulses
 			   to stay where they were at the end of the experiement.
 
-			rulbus_delay_set_output_pulse( delay_card[ i ].handle,
-										   RULBUS_DELAY_OUTPUT_BOTH,
-										   RULBUS_DELAY_PULSE_NONE );
-			rulbus_delay_set_delay( delay_card[ i ].handle, 0, 1 );
+			rulbus_rb8514_delay_set_output_pulse( delay_card[ i ].handle,
+										   RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+										   RULBUS_RB8514_DELAY_PULSE_NONE );
+			rulbus_rb8514_delay_set_raw_delay( delay_card[ i ].handle, 0, 1 );
 
 			*/
 
@@ -253,14 +256,17 @@ void rb_pulser_run( bool state )
 			   after the input trigger) and make the card output end pulses
 			   on the first start/end pulse output connector */
 
-			if ( rulbus_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
-											 RULBUS_CLOCK_FREQ_100MHz )
+			if ( rulbus_rb8515_clock_set_frequency(
+											 clock_card[ ERT_CLOCK ].handle,
+											 RULBUS_RB8515_CLOCK_FREQ_100MHz )
 				 												!= RULBUS_OK ||
-				 rulbus_delay_set_delay( delay_card[ ERT_DELAY ].handle, 0, 1 )
-				 												!= RULBUS_OK ||
-				 rulbus_delay_set_output_pulse( delay_card[ ERT_DELAY ].handle,
-												RULBUS_DELAY_OUTPUT_1,
-												RULBUS_DELAY_END_PULSE )
+				 rulbus_rb8514_delay_set_raw_delay(
+					 							delay_card[ ERT_DELAY ].handle,
+											 	0, 1 ) != RULBUS_OK ||
+				 rulbus_rb8514_delay_set_output_pulse(
+					 							delay_card[ ERT_DELAY ].handle,
+												RULBUS_RB8514_DELAY_OUTPUT_1,
+												RULBUS_RB8514_DELAY_END_PULSE )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 		}
@@ -271,15 +277,18 @@ void rb_pulser_run( bool state )
 			   the card accordingly and the make the card output end pulses
 			   on both the first and second start/end pulse connector */
 
-			if ( rulbus_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
+			if ( rulbus_rb8515_clock_set_frequency(
+											 clock_card[ ERT_CLOCK ].handle,
 											 clock_card[ ERT_CLOCK ].freq )
 				 												!= RULBUS_OK ||
-				 rulbus_delay_set_delay( delay_card[ ERT_DELAY ].handle,
-										 delay_card[ ERT_DELAY ].delay,
-										 1 ) != RULBUS_OK ||
-				 rulbus_delay_set_output_pulse( delay_card[ ERT_DELAY ].handle,
-												RULBUS_DELAY_OUTPUT_BOTH,
-												RULBUS_DELAY_END_PULSE )
+				 rulbus_rb8514_delay_set_raw_delay(
+					 							delay_card[ ERT_DELAY ].handle,
+												delay_card[ ERT_DELAY ].delay,
+												1 ) != RULBUS_OK ||
+				 rulbus_rb8514_delay_set_output_pulse(
+					 						   delay_card[ ERT_DELAY ].handle,
+											   RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+											   RULBUS_RB8514_DELAY_END_PULSE )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 
@@ -287,11 +296,13 @@ void rb_pulser_run( bool state )
 			   to falling, then to raising edge, afterwards it feeds itself
 			   it's own end pulse as trigger input */
 
-			if ( rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-										   RULBUS_DELAY_FALLING_EDGE )
+			if ( rulbus_rb8514_delay_set_trigger(
+											delay_card[ ERT_DELAY ].handle,
+										    RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 												    != RULBUS_OK ||
-				 rulbus_delay_set_trigger( delay_card[ ERT_DELAY ].handle,
-										   RULBUS_DELAY_RAISING_EDGE )
+				 rulbus_rb8514_delay_set_trigger(
+					 					   delay_card[ ERT_DELAY ].handle,
+										   RULBUS_RB8514_DELAY_RAISING_EDGE )
 																!= RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 		}
@@ -303,15 +314,16 @@ void rb_pulser_run( bool state )
 		   feeding the ERT delay card and finally set the delay for the card
 		   to 0 */
 
-		if ( rulbus_delay_set_output_pulse( delay_card[ ERT_DELAY ].handle,
-											RULBUS_DELAY_OUTPUT_BOTH,
-											RULBUS_DELAY_PULSE_NONE )
+		if ( rulbus_rb8514_delay_set_output_pulse(
+											delay_card[ ERT_DELAY ].handle,
+											RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+											RULBUS_RB8514_DELAY_PULSE_NONE )
 			 													!= RULBUS_OK ||
-			 rulbus_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
-										 RULBUS_CLOCK_FREQ_OFF )
+			 rulbus_rb8515_clock_set_frequency( clock_card[ ERT_CLOCK ].handle,
+												RULBUS_RB8515_CLOCK_FREQ_OFF )
 			 													!= RULBUS_OK ||
-			 rulbus_delay_set_delay( delay_card[ ERT_DELAY ].handle,
-									 0, 1 ) != RULBUS_OK )
+			 rulbus_rb8514_delay_set_raw_delay( delay_card[ ERT_DELAY ].handle,
+										 0, 1 ) != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to stop pulser" );
 	}
 }
@@ -327,11 +339,12 @@ void rb_pulser_run( bool state )
 void rb_pulser_delay_card_state( int handle, bool state )
 {
 	unsigned char type = state == START ?
-							  RULBUS_DELAY_END_PULSE : RULBUS_DELAY_PULSE_NONE;
+				RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
 
 
-	if ( rulbus_delay_set_output_pulse( handle, RULBUS_DELAY_OUTPUT_BOTH,
-										type ) != RULBUS_OK )
+	if ( rulbus_rb8514_delay_set_output_pulse(
+									   handle, RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+									   type ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to set card trigger out mode" );
 
 	if ( state == STOP )
@@ -345,7 +358,7 @@ void rb_pulser_delay_card_state( int handle, bool state )
 
 void rb_pulser_delay_card_delay( int handle, unsigned long delay )
 {
-	if ( rulbus_delay_set_delay( handle, delay, 1 ) != RULBUS_OK )
+	if ( rulbus_rb8514_delay_set_raw_delay( handle, delay, 1 ) != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to set card delay length" );
 }
 

@@ -38,93 +38,148 @@ colon are optional. If such a line isn't in the file the library
 will use '/dev/rulbus_epp' per default.
 
 For each rack connected to the Rulbus interface that you want to use
-you need a line starting with the keyword 'rack' and followed by
+you need a line starting with the keyword 'rack' and an optional rack
+name (a string, enclosed in single or double quotes") and followed by
 a set of further instructions enclosed in curly braces in the
 configuration file:
 
-rack {
+rack "top rack" {
 
-   addr = 3;
+   address = 3;
 
-    card {
-        name    = "DELAY_0";
-        type    = RB8514;
-        addr    = 0x64;
+    rb8514_delay  "DELAY_0" {
+        address      = 0x64;
+		intr_delay   = 60 n;
     }
 
-    card {
-        name    = "CLOCK";
-        type    = RB8515;
-        addr    = 0x12;
+    rb8515_clock "CLOCK" {
+        address      = 0x12;
     }
 
-    card {
-        name    = "ADC12";
-        type    = RB8509;
-        addr    = 0x68;
-        nchan   = 8;
-		Vmax    = 5.1175;
-        polar   = "bipolar";
-		ext_trg = 1;
+    rb8509_adc12 "ADC12" {
+        address      = 0x68;
+        num_channels = 8;
+        bipolar      = true;
+		volt_per_bit = 2.5 m;
     }
 
-    card {
-        name    = "DAC12_0";
-        type    = RB8510;
-        addr    = 0x45;
-        Vmax    = 10.0;
-        polar   = "bipolar";
+    rb8510_dac12 "DAC12_CH0" {
+        address      = 0x45;
+        bipolar      = false;
+        volt_per_bit = 1.25 m;
     }
+
+	rb_generic   "GENERIC";
 }
 
-Within the set of instructions for a rack at least a line starting with
-the keyword 'addr', followed by the Rulbus rack number, is required. The
-rack number can be given as a decimal number as well as a hexadecimal
-number (if it starts with '0x') or as a octal number (if it starts with
-a '0').
+Within the set of configuration informations for the rack you normally
+shold specify the rack address by a line containing the keyword 'address'
+and followed by the address. The rack address can be given as a decimal
+number as well as a hexadecimal number (if it starts with '0x') or as a
+octal number (if it starts with a '0'). If you only have a single rack
+in the file (and there is only a single rack connected to the Rulbus)
+the rack address can be omitted and the rack is assumed to be always
+selected.
 
-Further entries (as many as there are cards in the rack) are for the cards
-in the rack. Each starts with the keyword 'card', followed by a set of
-card specific instructions, enclosed in curly braces.
+Further entries for a rack are for the cards in the rack ((as many as there
+are cards). Each card description starts with the type of the rack, either
+'rb8509_adc12' (for the 12-bit ADC card RB8509), 'rb8510_dac12', (for the
+12-bit DAC card RB8510), 'rb8514_delay' (for the RB8514 delay card),
+'rb8515_clock' (for the RB8515 clock card) or 'rb_generic' (a card type
+to be discussed later) and the card name (a string, enclosed in single or
+double quotes) and followed by a set of card specific informations,
+enclosed in curly braces. The name of that card must be unique, i.e. the
+same name can't be used for two or more cards. Using this name the card
+is later going to be accessed from your program.
 
-For each card a unique name must be given (a string enclosed in either
-single or double quotes), following the 'name' keyword. Using this name
-the card is later going to be initialized from your program. The next
-required information is the card type, given on a line starting with
-the keyword 'type' and followed by either the type of the card, which
-currently can be either RB8509 (for the 12-bit ADC cards), RB8510 (for
-12-bit DAC cards), RB8514 (for delay cards) or RB8515 (for clock cards)
-The last bit of information that is required for all cards is the Rulbus
-base address assigned to the card, following the 'addr' keyword. You can
-use decimal numbers as well as hexadecimal numbers (if the number starts
-with '0x') and octal numbers (if it starts with a '0').
+For each card its address should be specified by a line starting with the
+keyword 'address' and followed by the numeric card address. If no address
+is specified for the card a default address is used. Please note that the
+default address can't be used for two cards at the same time in a single
+rack.
 
-For the 12-bit ADCs (RB8509) some additional information must be specified.
-One of the items is the number of channels the ADC card has. This number
-has to follow the keyword 'nchan' and must be number between 1 and a
-maximum of 8 (when less channels are specified than the card has higher
-numbered channels can't be used). The next item is the polarity or the
-card, i.e. if it can convert voltages symmetrical to 0 V or positive
-voltages only. It has to be specified following the keyword 'polar' as
-a string, i.e. enclosed in single or double quotes, and must be either
-"bipolar" or "unipolar". Another required item is the upper input voltage
-level of the card (for a gain factor of 1). It must be set after the 'Vmax'
-keyword as a floating point number (please specify the exact upper limit
-as it was adjusted for the card). Finally, it must be set if the cards
-can do conversions on receipt of an external trigger. This is done by
-specifying either 1 or 0 (for yes or no) after the 'ext_trg' keyword.
+For the 12-bit ADCs (RB8509) the default address is 0xC0. Additional
+informations to be specified are the number of channels, if the card
+works in bipolar or unipolar mode and its sensitivity.
 
-Also the 12-bit DACs (RB8510) also requires some additional informations.
-The first required item is the upper voltage limit the DAC can create.
-This must be, following the 'Vmax' keyword, either 5 V, 5.12 V, 10 V or
-10.24 V (please always specify the digits after the dot when applicable).
-It must also be declared if the card can output voltages symmetrical to
-0 V or only positive voltages. This must be specified as a string
-(enclosed in either single or double quotes) following the 'polar' keyword,
-either "bipolar" or "unipolar".  Please note that each of the two outputs
-of the RB8510 card need their own 'card' entry in the configuration file
-- while they sit on the same card they are treated as independend devices
-(both have a different Rulbus base address
+The number of channels of the ADC card has to follow the keyword
+'num_channels' and must be number between 1 and a maximum of 8 (when
+less channels are specified than the card has higher numbered channels
+can't be used). If not specified a default value of 8 is used.
+
+Another entry tells if the ADC works in bipolar or unipolar mode, i.e. if
+it can convert voltages symmetrical to 0 V (biploar mode) or positive
+voltages only (unipolar mode). It has to be specified following the keyword
+'bipolar' as a boolean value, either 'true' or 'yes' to indicates that the
+card works in bipolar mode or 'false' or 'yes' (if a numerical (integer)
+value is used instead 0 stands for 'false' and all other values for 'true').
+If not specified the library will assume that the card works in bipolar
+mode.
+
+The final entry specifies the sensitivity of the card. There are several
+versions of these cards with different sensitivities. The sensitivity has
+to be specified as a voltage per bit. The following table (by Martin J.
+Moene <moene@biophys.LeidenUniv.nl>) shows the voltage per bit for
+different ranges of the card:
+
+      	 Voltage range      |  volt_per_bit   bipolar
+      ----------------------+--------------------------
+      	 0    ..  5.11875 V |    1.25 mV        0
+      	 0    .. 10.2375  V |    2.5  mV        0
+      	 0    .. 20.475   V |    5    mV        0
+      	-5.12 ..  5.1175  V |    2.5  mV        1
+       -10.24 .. 10.235   V |    5    mV        1
+
+To calculate to 'volt_per_bit' property for other types of cards just divide
+the total range by 4095. Put this value after the keyword 'volt_per_bit'
+into the configuration information for the card. If not specified a default
+value of 5 mV is used.
+
+
+Also the 12-bit DACs (RB8510) may require some additional information.
+Unless specified a default address of 0xD0 is used. And like for the
+RB8509 ADC12 card also for the DAC card a 'bipolar' (a boolean value)
+and a 'volt_per_bit' property (a floating point value) usually has to
+be specified. Like in the case of the ADC card, the 'volt_per_bit'
+value for a card can be calculated by dividing the total input range
+by 4095. When not given, 'bipolar' defaults to 'true' and volt_per_bit'
+to 5 mV.
+
+Please note: For each RB8510 12-bit DAC two card entries are required,
+one for each of the two inputs of the card!
+
+The RB8514 delay card expects, beside the address which defaults to 0xC4
+when not specified, a line describing the intrinsic delay of the card.
+Each delay card introduces a minimum delay, which is typically in the
+order of 55-65 ns. To tell the library about the exact value a line
+consisting of the the keyword 'intr_delay' and the length of this
+minimum delay can be specified. If not given it defaults to 60 ns.
+
+The RB8515 clock card does not properties have any properties that can
+be set in the configuration file except its address, which defaults to
+0xC8.
+
+Finally, the generic card, 'rb_generic', does not allow to specify any
+properties at all, not even an address. This card type isn't meant to
+stand for a "real" card but allows to read from and write to each
+address in the rack in belongs to. Thus in all calls of the functions
+for dealing with thi card, the absolute Rulbus address has to be given.
+
+Numerical (floating point) values used in the configuration file can be
+written as a number, followed by a suffix, indicating a unit:
+
+     suffix | meaning
+     -------+-------------
+        f   | femto  1e-15
+        p   | pico   1e-12
+		n   | nano   1e-9
+        u   | micro  1e-6
+        m   | milli  1e-3
+        k   | kilo   1e+3
+        M   | mega   1e+6
+        G   | giga   1e+9
+        T   | tera   1e+12
+
 
 After having written a configuration file you usually will copy it to
 the '/etc' directory, giving it the name 'rulbus.conf'. That's where
@@ -139,64 +194,96 @@ configuration file that should be used by the library.
 II General Functions
 --------------------
 
-The following 6 functions are general functions that can  be used
+The following 7 functions are general functions that can  be used
 for all cards.
 
 Most of the functions described below (including the card-specific
 ones) return an integer indicating if the operation was successful
 or failed. On success RULBUS_OK (which is 0) is returned while on
 failure a negative value gets returned. Here is the complete list
-of error codes with a short explanation:
+of return codes with a short explanation:
 
-    RULBUS_CFG_ACC   Not permission to open configurarion file
-    RULBUS_INV_CFG   Invalid name for configuration file (or not found)
-    RULBUS_OPN_CFG   Can't open configuration file
-    RULBUS_DVF_ACC   No permission to open device file
-    RULBUS_DVF_CFG   Invalid name for device file
-    RULBUS_DVF_OPN   Can't open device file
-    RULBUS_STX_ERR   Syntax error in configuration file
-    RULBUS_NO_MEM    Running out of memory
-    RULBUS_RCK_CNT   Too many racks listed in configuration file
-    RULBUS_RCK_DUP   Duplicate rack address in configuration file
-    RULBUS_NO_RCK    Missing rack address in configuration file
-    RULBUS_INV_RCK   Invalid rack address in configuration file
-    RULBUS_DVF_CNT   More than one device file in configuration file
-    RULBUS_MAX_CRD   Too many cards in configuration file
-    RULBUS_CRD_ADD   Invalid card address in configuration file
-    RULBUS_NAM_DUP   Duplicate card name in configuration file
-    RULBUS_DUP_NAM   More than one name for a card
-    RULBUS_ADD_DUP   More than one address for a card
-    RULBUS_TYP_DUP   More than one type for a card
-    RULBUS_CHN_DUP   More than one number of channel setting
-    RULBUS_CHN_INV   Invalid number of channels for ADC12 card
-    RULBUS_MIS_CHN   Missing number of channels for ADC12 card
-    RULBUS_RNG_DUP   More than one range for card
-    RULBUS_POL_DUP   More than one polarity for card
-    RULBUS_INV_POL   Invalid polarity setting
-	RULBUS_EXT_DUP   More thann one setting for external trigger
-	RULBUS_EXT_INV   Invalid argument for external trigger setting
-	RULBUS_EXT_NO    Missing external trigger setting
-    RULBUS_NO_RNG    Missing range setting for DAC12 card
-    RULBUS_INV_RNG   Invalid range setting for DAC12 card
-    RULBUS_NO_POL    Missing polarity setting for DAC12 card
-    RULBUS_CRD_CNT   Too many cards for single rack
-    RULBUS_NO_CRD    No cards found in configuration file
-    RULBUS_CRD_NAM   Missing card name in configuration file
-    RULBUS_INV_TYP   Invalid card type in configuration file
-    RULBUS_ADD_CFL   Address conflict between two cards in the same rack
-    RULBUS_TYP_HND   Missing modules for card
-    RULBUS_NO_INIT   Missing intialization of Rulbus library
-    RULBUS_INV_ARG   Invalid function argument
-    RULBUS_INV_CRD   No such card
-    RULBUS_INV_HND   Invalid card handle
-    RULBUS_CRD_NOP   Card has not been opened
-    RULBUS_INV_OFF   Invalid card address offset
-    RULBUS_WRT_ERR   Write error
-    RULBUS_RD_ERR    Read error
-    RULBUS_CRD_BSY   Card is busy
-    RULBUS_INV_VLT   Voltage out of range
-	RULBUS_NO_EXT    Card can't be triggered externally
-    RULBUS_TIM_OUT   Timeout
+
+  RULBUS_OK                           No error (success)
+  RULBUS_NO_MEMORY                    Running out of memory
+  RULBUS_CONF_FILE_ACCESS             No permission to open configuration file
+  RULBUS_CONF_FILE_NAME_INVALID       Invalid configuration file name (probably
+									  the file doesn't exist)
+  RULBUS_CONF_FILE_OPEN_FAIL          Failure to opne the configuration file
+  RULBUS_CF_SYNTAX_ERROR              Syntax error in the configration file
+  RULBUS_CF_EOF_IN_COMMENT            End of file detected in configuration
+                                      file within a comment
+  RULBUS_CF_DEV_FILE_DUPLICATE        Two or more different entries in the
+                                      configuration file for the device file
+  RULBUS_CF_RACK_ADDR_DUPLICATE       Two or more different values for the
+                                      address of a rack
+  RULBUS_CF_RACK_ADDR_INVALID         Invalid rack address
+  RULBUS_CF_RACK_ADDR_CONFLICT        Two or more racks have the same address
+  RULBUS_CF_RACK_ADDR_DEF_DUPLICATE   Two or more racks without a specified
+                                      address
+  RULBUS_CF_UNSUPPORTED_CARD_TYPE     Unsupported card in configuration file
+  RULBUS_CF_CARD_NAME_CONFLICT        Two or more cards with the same name
+  RULBUS_CF_CARD_ADDR_INVALID         Invalid card address
+  RULBUS_CF_CARD_ADDR_CONFLICT        Two or more cards in a rack have been
+									  assigned the same address
+  RULBUS_CF_CARD_ADDR_DUPLICATE       Two or more different address assigned
+									  to the same card
+  RULBUS_CF_CARD_ADDR_DEF_CONFLICT    Two or more cards of the same type in a
+									  rack have no address assigned to them
+  RULBUS_CF_CARD_ADDR_OVERLAP         The address ranges of two or more cards
+									  in a rack overlap
+  RULBUS_CF_CARD_ADDR_GENERIC         An address has been assigned to a card
+									  of type 'rb_generic'
+  RULBUS_CF_CARD_PROPERTY_INVALID     A property has been specifed for a card
+									  that does not have this property
+  RULBUS_CF_DUPLICATE_NUM_CHANNELS    Two or more different values for the
+									  number of channels have been specified
+									  for a card of type 'rb8509_adc12'
+  RULBUS_CF_INVALID_NUM_CHANNELS      Invalid number of channels specified for
+									   a card of type 'rb8509_adc12'
+  RULBUS_CF_VPB_DUPLICATE             Two or more different values for the
+									  'volt_per_bit' property have been
+									  specified for a 
+  RULBUS_CF_INVALID_VPB               An invalid (negative or zero) value has
+									  been specified for the 'volt_per_bit'
+									  property of a card of type 'rb8509_adc12'
+									  or 'rb8910_dac12'
+  RULBUS_CF_BIPLOAR_DUPLICATE         Two different values have been specified
+									  for the 'bipolar' property of a card of
+									  type 'rb8509_adc12' or 'rb8910_dac12'
+  RULBUS_CF_INTR_DELAY_DUPLICATE      Two or more different values have been
+									  specified for the 'intr_delay' property
+									  of a card of type 'rb8514_delay'
+  RULBUS_CF_INTR_DELAY_INVALID        An invalid (negative) value has been
+									  specfied  for the 'intr_delay' property
+									  of a card of type 'rb8514_delay'
+  RULBUS_DEV_FILE_ACCESS              No permission to open the device file
+									  for the Rulbus
+  RULBUS_DEV_FILE_NAME_INVALID        Invalid device file name (probably the
+									  file doesn't exist)
+  RULBUS_DEV_NO_DEVICE                File does not exist (probably because
+									  driver for the device isn't loaded)
+  RULBUS_DEV_FILE_OPEN_FAIL           Failure to open the device file
+  RULBUS_NO_INITIALIZATION            rulbus_open() hasn't been called
+  RULBUS_INVALID_ARGUMENT             Invalid function argument
+  RULBUS_INVALID_CARD_NAME            Specified card name does not exist
+  RULBUS_INVALID_CARD_HANDLE          Specified card handle does not exist
+  RULBUS_CARD_NOT_OPEN                Missing call of rulbus_card_open()
+									  for card of specified handle
+  RULBUS_INVALID_CARD_OFFSET          Address offset for the card is invalid
+  RULBUS_WRITE_ERROR                  Write error while trying to write data
+									  to the card
+  RULBUS_READ_ERROR                   Read error while trying to read data from
+									  the card
+  RULBUS_CARD_IS_BUSY                 Card of type 'rb8614_delay' is producing
+									  delay while rulbus_delay_set_delay() is
+									  called without the 'force' flag being set
+  RULBUS_INVALID_VOLTAGE              Output voltage of range in call of
+									  rulbus_dac12_set_voltage()
+  RULBUS_TIME_OUT                     Time-out error while trying to write to
+									  or reading from a card 
+  RULBUS_NO_CLOCK_FREQ                No input clock frequency has been set
+									  before rulbus_delay_set_delay() is called
 
 
 ----------------------------------------------------------------------
@@ -224,8 +311,8 @@ indicating the reason for the failure.
 
 void rulbus_close( void )
 
-When done with the RULBUS this may be called to clean up. All opened
-cards are closed automatically.
+When done with the RULBUS this function should be called for a clean up.
+All opened cards are closed automatically.
 
 
 ----------------------------------------------------------------------
@@ -251,10 +338,7 @@ const char *rulbus_strerror( void )
 The function returns a string with a short descriptive text of the
 error encountered in the last invocation of one of the functions for
 the board (or "Success" if the last function call was successful).
-
-If the RULBUS isn't open (i.e. rulbus_open() has never been called
-or rulbus_close() hase been called before this function) the function
-returns an empty string.
+Each new invocation overwrites the content of the string.
 
 
 ----------------------------------------------------------------------
@@ -279,6 +363,46 @@ This function can be called to "deactivate" the card. Once it has been
 called the card can't be used anymore unless rulbus_card_open() is
 called again for the card. The function is called automatically when
 the function rulbus_close() is invoked.
+
+
+----------------------------------------------------------------------
+
+int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
+
+This function can be used to obtain information about the contents
+of an entry int the configuration file for a certain card without
+calling rulbus_open() (and thus without accessing the hardware). All
+it does is opening the configuration file, reading it in and returning
+returning the information about the card specified by the string
+'card_name'. It returns the information about the card in a user-
+defined structure of type RULBUS_CARD_INFO which is typedef'ed to
+
+      typedef struct {
+      	  int type;
+      	  int num_channels;
+      	  double volt_per_bit;
+      	  int bipolar;
+      	  double intr_delay;
+      } RULBUS_CARD_INFO;
+
+'type' is the type of the card, one of the (numerical) values 'RB8509',
+'RB8510', 'RB8514', 'RB8515 or 'RB_GENERIC'.
+
+'num_channels' is only set for cards of type 'RB8509' and specifies the
+number if input channels of the ADC card.
+
+'bipolar' is only set for cards of type 'RB8509' and 'RB8510' and tells
+if the card is working in bipolar (in which case it has a non-zero value'
+or in unipolar mode (if it has a value of 0).
+
+Also 'volt_per_bit' is only set for cards of type 'RB8509' and 'RB8510'.
+It specifies the sensitivity of the card, in the voltage for a single bit.
+To find out the total range of the card multiply this value by 4095. For
+bipolar card the most negative input or output voltage is 2048 times this
+value, and to get the most positive voltage multiply it by 2047
+
+'intr_delay' is only set for RB8514 delay cards and represents the
+shortest possible delay that can be created by the card.
 
 
 ======================================================================
@@ -330,16 +454,6 @@ to set the gain factor to either 1, 2, 4, or 8.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure.
-
-
-----------------------------------------------------------------------
-
-int rulbus_adc12_has_external_trigger( int handle )
-
-This function can be used to safely test if the card allows use of
-an external trigger. It returns 1 when an external trigger can be
-used, otherwise 0. It can only fail due to an invalid 'handle'
-argument, in which case RULBUS_INV_HND is returned.
 
 
 ----------------------------------------------------------------------
@@ -451,12 +565,15 @@ the card is left in the state it is at that moment.
 
 ----------------------------------------------------------------------
 
-int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
+int rulbus_delay_set_raw_delay( int handle, unsigned long delay, int force )
 
 The function is for setting the number of ticks of an external clock
 during which the card will output a pulse. It must be a number between
 0 and 16777215 (2^24 - 1). Setting a delay of 0 will create no output
-at the gate outputs, just a start or end pulse if they are enabled.
+at the gate outputs, just start or end pulses if they are enabled.
+Please note that each card has an intrinsic delay of the order of
+60 ns that has to be added to the product of the delay set and the
+input clock frequency to determine the delay created by the card.
 
 Usually when the card is just in the process of creating a delay the
 function will return the error RULBUS_CRD_BSY and not set a new delay.

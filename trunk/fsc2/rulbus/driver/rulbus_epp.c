@@ -134,7 +134,7 @@ static struct rulbus_device {
         spinlock_t spinlock;
         unsigned char rack;         /* currently addressed rack */
         unsigned char direction;
-} rulbus = { NULL, NULL, 0, 0, 0, { }, 0xf0, FORWARD };
+} rulbus = { NULL, NULL, 0, 0, 0, { }, 0x0F, FORWARD };
 
 
 struct file_operations rulbus_file_ops = {
@@ -322,6 +322,14 @@ static int rulbus_open( struct inode *inode_p, struct file *file_p )
         rulbus.owner = current->uid;
 
         rulbus.in_use++;
+
+		/* Set the currently rack address to the value of the default rack
+		   address. While this address isn't a valid rack address it indicates
+		   that there's only a single rack that is always selected, so no
+		   rack addressing needs to be done unless no other rack address is
+		   requested. */
+
+		rulbus.rack = 0x0F;
 
         MOD_INC_USE_COUNT;
 

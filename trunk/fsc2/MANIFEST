@@ -642,6 +642,7 @@ rulbus/driver/Makefile
 rulbus/driver/rulbus_epp.c
 rulbus/driver/rulbus_epp.txt
 
+rulbus/lib/grammar.txt
 rulbus/lib/lexer.l
 rulbus/lib/Makefile
 rulbus/lib/parser.y
@@ -649,6 +650,7 @@ rulbus/lib/rb8509.c
 rulbus/lib/rb8510.c
 rulbus/lib/rb8514.c
 rulbus/lib/rb8515.c
+rulbus/lib/rb_generic.c
 rulbus/lib/rulbus_lib.c
 rulbus/lib/rulbus_lib.map
 rulbus/lib/rulbus_lib.txt

@@ -138,13 +138,18 @@ void rb_pulser_init_delay( void )
 
 	p = f->pulses[ 0 ];
 
-	pos = p->pos + p->function->delay * rb_pulser.timebase - 2 * MIN_DELAY;
+	pos =   p->pos + p->function->delay * rb_pulser.timebase
+		  - delay_card[ INIT_DELAY ].intr_delay
+		  - delay_card[ MW_DELAY_0 ].intr_delay;
 
-	if ( pos < 0.0 )
+	if ( pos < - PRECISION * rb_pulser.timebase )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
 		THROW( EXCEPTION );
 	}
+
+	if ( pos < 0.0 )
+		pos = 0.0;
 
 	shift = Ticks_rnd( pos / rb_pulser.timebase ) * rb_pulser.timebase - pos;
 
@@ -197,7 +202,7 @@ void rb_pulser_delay_card_setup( void )
 		   ordered by start position */
 
 		start =   delay_card[ INIT_DELAY ].delay * rb_pulser.timebase
-			    + MIN_DELAY;
+			    + delay_card[ INIT_DELAY ].intr_delay;
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -226,9 +231,9 @@ void rb_pulser_delay_card_setup( void )
 				   channel we have to include the intrinsic delay of the
 				   synthesizer creating the pulse... */
 
-				start += MIN_DELAY;
+				start += card->intr_delay;
 				if ( card->next != NULL )
-					start += MIN_DELAY;
+					start += card->next->intr_delay;
 				else if ( f->self == PULSER_CHANNEL_RF )
 					start += SYNTHESIZER_DELAY;
 
@@ -273,7 +278,7 @@ void rb_pulser_delay_card_setup( void )
 				}
 			}
 			else
-				start += MIN_DELAY;
+				start += card->intr_delay;
 
 			if ( card->delay != p->len || ! card->was_active )
 				card->needs_update = SET;
@@ -342,13 +347,13 @@ void rb_pulser_seq_length_check( void )
 		seq_len = 0.0;
 		for ( card = f->delay_card; card != NULL && card->is_active;
 			  card = card->next )
-			seq_len += card->delay * rb_pulser.timebase + MIN_DELAY;
+			seq_len += card->delay * rb_pulser.timebase + card->intr_delay;
 
 		max_seq_len = d_max( max_seq_len, seq_len );
 	}
 
 	max_seq_len +=   delay_card[ INIT_DELAY ].delay * rb_pulser.timebase
-				   + MIN_DELAY;
+				   + delay_card[ INIT_DELAY ].intr_delay;
 
 	if ( max_seq_len > rb_pulser.rep_time )
 	{

@@ -54,13 +54,16 @@ static const char *rulbus_errlist[ ] = {
 										/* RULBUS_CF_EOF_IN_COMMENT */
 	"More than one device file in configuration file before line %d, "
 	"column %d",                        /* RULBUS_CF_DEV_FILE_DUPLICATE */
+	"Missing rack name in configuration file before line %d, column %d",
+										/* RULBUS_CF_NO_RACK_NAME */
 	"More than one address for the same rack in configuration file before "
 	"line %d, column %d",				/* RULBUS_CF_RACK_ADDR_DUPLICATE */
 	"Invalid rack address in configuration file before line %d, column %d",
 										/* RULBUS_CF_RACK_ADDR_INVALID */
 	"Address conflict between racks in configuration file before line %d, "
 	"column %d",                        /* RULBUS_CF_RACK_ADDR_CONFLICT */
-	"Missing rack addresses in configuration file before line %d, column %d",
+	"Only one rack can be used when no rack addresses is specified in "
+	"configuration file before line %d, column %d",
 										/* RULBUS_CF_RACK_ADDR_DEF_DUPLICATE */
 	"Unsupported card type in configuration file before line %d, column %d",
 										/* RULBUS_CF_UNSUPPORTED_CARD_TYPE */
@@ -68,16 +71,16 @@ static const char *rulbus_errlist[ ] = {
 	"column %d",                        /* RULBUS_CF_CARD_NAME_CONFLICT */
 	"Invalid card address in configuration file before line %d, column %d",
 										/* RULBUS_CF_CARD_ADDR_INVALID */
-	"Identical addresses for different cards same rack in in configuration "
+	"Identical addresses for different cards in same rack in in configuration "
 	"file before line %d",              /* RULBUS_CF_CARD_ADDR_CONFLICT  */
-	"Different addresses already specified for card in configuration file "
+	"Different address already specified for card in configuration file "
 	"before line %d, column %d",        /* RULBUS_CF_CARD_ADDR_DUPLICATE */
-	"More than one card of same type without specified addresses in "
+	"More than one card of same type without specified address in same rack "
 	"configuration file before line %d, column %d",
 										/* RULBUS_CF_CARD_ADDR_DEF_CONFLICT */
 	"Address ranges of cards overlap in configuration file before line %d, "
 	"column %d",                        /* RULBUS_CF_CARD_ADDR_OVERLAP */
-	"Address specified specified for card of type \"rb_generic\" in "
+	"Non-zero address specified for card of type \"rb_generic\" in "
 	"configuration file before line %d, column %d",
 										/* RULBUS_CF_CARD_ADDR_GENERIC */
 	"Specified property not applicable for card of this type in configuration "
@@ -94,7 +97,7 @@ static const char *rulbus_errlist[ ] = {
 	"Different settings for 'bipolar' property specified for card in "
 	"configuration file before line %d, column %d",
 										/* RULBUS_CF_BIPLOAR_DUPLICATE */
-	"Different settings for 'ext_trigger' proper specified for card in "
+	"Different settings for 'has_ext_trigger' proper specified for card in "
 	"configuration file before line %d, column %d",
 										/* RULBUS_CF_EXT_TRIGGER_DUPLICATE */
 	"Different 'intr_delay' value already pecified for card in configuration "
@@ -170,35 +173,35 @@ static RULBUS_CARD_HANDLER rulbus_card_handler[ ] =
 	},
 				
 	{                /* RB8509 12-bit ADC card */
-		RB8509,
-		rulbus_adc12_init,
-		rulbus_adc12_exit,
-		rulbus_adc12_card_init,
-		rulbus_adc12_card_exit,
+		RB8509_ADC12,
+		rulbus_rb8509_adc12_init,
+		rulbus_rb8509_adc12_exit,
+		rulbus_rb8509_adc12_card_init,
+		rulbus_rb8509_adc12_card_exit,
 		UNSET
 	},
 	{                /* RB8510 12 bit DAC card */
-		RB8510,
-		rulbus_dac12_init,
-		rulbus_dac12_exit,
-		rulbus_dac12_card_init,
-		rulbus_dac12_card_exit,
+		RB8510_DAC12,
+		rulbus_rb8510_dac12_init,
+		rulbus_rb8510_dac12_exit,
+		rulbus_rb8510_dac12_card_init,
+		rulbus_rb8510_dac12_card_exit,
 		UNSET
 	},
 	{                /* RB8514 delay card */
-		RB8514,
-		rulbus_delay_init,
-		rulbus_delay_exit,
-		rulbus_delay_card_init,
-		rulbus_delay_card_exit,
+		RB8514_DELAY,
+		rulbus_rb8514_delay_init,
+		rulbus_rb8514_delay_exit,
+		rulbus_rb8514_delay_card_init,
+		rulbus_rb8514_delay_card_exit,
 		UNSET
 	},
 	{                /* RB8515 clock card */
-		RB8515,
-		rulbus_clock_init,
-		rulbus_clock_exit,
-		rulbus_clock_card_init,
-		rulbus_clock_card_exit,
+		RB8515_CLOCK,
+		rulbus_rb8515_clock_init,
+		rulbus_rb8515_clock_exit,
+		rulbus_rb8515_clock_card_init,
+		rulbus_rb8515_clock_card_exit,
 		UNSET
 	},
 };
@@ -754,7 +757,7 @@ int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
 	card_info->num_channels = rulbus_card[ i ].num_channels;
 	card_info->volt_per_bit = rulbus_card[ i ].vpb;
 	card_info->bipolar = rulbus_card[ i ].bipolar;
-	card_info->ext_trigger = rulbus_card[ i ].ext_trigger;
+	card_info->has_ext_trigger = rulbus_card[ i ].has_ext_trigger;
 	card_info->intr_delay = rulbus_card[ i ].intr_delay;
 
 	rulbus_cleanup( );

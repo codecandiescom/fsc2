@@ -109,8 +109,9 @@ int rb8510_0_exp_hook( void )
 
 	/* Find out about minimum and maximum output voltage */
 
-	if ( rulbus_dac12_properties( rb8510.handle, &rb8510.Vmax, &rb8510.Vmin,
-								  &rb8510.dV ) != RULBUS_OK )
+	if ( rulbus_rb8510_dac12_properties( rb8510.handle, &rb8510.Vmax,
+										 &rb8510.Vmin, &rb8510.dV )
+																 != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -134,7 +135,8 @@ int rb8510_0_exp_hook( void )
 	}
 
 	if ( rb8510.volts_is_set &&
-		 rulbus_dac12_set_voltage( rb8510.handle, rb8510.volts ) != RULBUS_OK )
+		 rulbus_rb8510_dac12_set_voltage( rb8510.handle, rb8510.volts )
+																 != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -235,7 +237,7 @@ Var *daq_set_voltage( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( rulbus_dac12_set_voltage( rb8510.handle, volts ) != RULBUS_OK )
+	if ( rulbus_rb8510_dac12_set_voltage( rb8510.handle, volts ) != RULBUS_OK )
 	{
 		print( FATAL, "Setting output voltage failed: %s.\n",
 			   rulbus_strerror( ) );

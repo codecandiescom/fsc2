@@ -78,11 +78,7 @@
 #define PRECISION         0.01
 
 
-/* Intrinsic delays introduced by the delay cards and the synthesizer */
-
-#define MIN_DELAY         5.0e-8      /* Delay a delay card introduces even
-										 when delay time is set to 0, about
-										 60 ns */
+/* Intrinsic delays introduced by the synthesizer for the RF pulse*/
 
 #define SYNTHESIZER_DELAY 7.0e-8      /* Delay before the synthesizer starts
 										 a pulse, about 70 ns when using the
@@ -95,7 +91,7 @@
 #define Ticks_max   l_max
 #define Ticks_min   l_min
 #define Ticks_rnd   lrnd
-#define MAX_TICKS   RULBUS_DELAY_CARD_MAX
+#define MAX_TICKS   RULBUS_RB8514_DELAY_CARD_MAX
 
 
 /* A pulse is acive if it has a position and a length set and if the length

@@ -101,7 +101,8 @@ bool rb_pulser_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->is_pos && p->pos + p->function->delay < MIN_DELAY )
+	if ( p->is_pos &&
+		 p->pos + p->function->delay < delay_card[ INIT_DELAY ].intr_delay )
 	{
 		print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
 		THROW( EXCEPTION );
@@ -368,7 +369,7 @@ bool rb_pulser_change_pulse_position( long pnum, double p_time )
 			THROW( EXCEPTION );
 	}
 
-	if ( p_time + p->function->delay < MIN_DELAY )
+	if ( p_time + p->function->delay < delay_card[ INIT_DELAY ].intr_delay )
 	{
 		print( FATAL, "Start position for pulse #%ld is too early.\n",
 			   pnum );

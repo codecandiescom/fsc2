@@ -28,49 +28,48 @@
 #include "rulbus_lib.h"
 
 
-typedef struct RULBUS_RB8515_CLOCK_CARD RULBUS_RB8515_CLOCK_CARD;
+typedef struct RULBUS_GENERIC_CARD RULBUS_GENERIC_CARD;
 
-struct RULBUS_RB8515_CLOCK_CARD {
+struct RULBUS_GENERIC_CARD {
 	int handle;
-	unsigned char ctrl;
 };
 
 
-static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card = NULL;
-static int rulbus_num_clock_cards = 0;
+static RULBUS_GENERIC_CARD *rulbus_generic_card = NULL;
+static int rulbus_num_generic_cards = 0;
 
 
-static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle );
+static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle );
 
 
 /*------------------------------------------------------------------*
- * Function for initializing the clock card subsystem (gets invoked
+ * Function for initializing the generic card subsystem (gets invoked
  * automatically by the rulbus_open( ) function, so it's not to be
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-int rulbus_rb8515_clock_init( void )
+int rulbus_generic_init( void )
 {
-	rulbus_rb8515_clock_card = NULL;
-	rulbus_num_clock_cards = 0;
+	rulbus_generic_card = NULL;
+	rulbus_num_generic_cards = 0;
 	return RULBUS_OK;
 }
 
 
 /*------------------------------------------------------------------*
- * Function for deactivating the clock card subsystem (gets invoked
+ * Function for deactivating the generic card subsystem (gets invoked
  * automatically by the rulbus_close( ) function, so it's not to be
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-void rulbus_rb8515_clock_exit( void )
+void rulbus_generic_exit( void )
 {
-	if ( rulbus_rb8515_clock_card == NULL )
+	if ( rulbus_generic_card == NULL )
 		return;
 
-	free( rulbus_rb8515_clock_card );
-	rulbus_rb8515_clock_card = NULL;
-	rulbus_num_clock_cards = 0;
+	free( rulbus_generic_card );
+	rulbus_generic_card = NULL;
+	rulbus_num_generic_cards = 0;
 }
 
 
@@ -80,28 +79,21 @@ void rulbus_rb8515_clock_exit( void )
  * user directly)
  *----------------------------------------------------------------------*/
 
-int rulbus_rb8515_clock_card_init( int handle )
+int rulbus_generic_card_init( int handle )
 {
-	RULBUS_RB8515_CLOCK_CARD *tmp;
-	int retval;
+	RULBUS_GENERIC_CARD *tmp;
 
 
-	tmp = realloc( rulbus_rb8515_clock_card,
-				   ( rulbus_num_clock_cards + 1 ) * sizeof *tmp );
+	tmp = realloc( rulbus_generic_card,
+				   ( rulbus_num_generic_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
 		return RULBUS_NO_MEMORY;
 
-	rulbus_rb8515_clock_card = tmp;
-	tmp += rulbus_num_clock_cards++;
+	rulbus_generic_card = tmp;
+	tmp += rulbus_num_generic_cards++;
 
 	tmp->handle = handle;
-	tmp->ctrl = RULBUS_RB8515_CLOCK_FREQ_OFF;
-
-	/* Stop the clock */
-
-	if ( ( retval = rulbus_write( handle, 0, &tmp->ctrl, 1 ) ) != 1 )
-		return retval;
 
 	return RULBUS_OK;
 }
@@ -113,60 +105,72 @@ int rulbus_rb8515_clock_card_init( int handle )
  * by the user directly)
  *----------------------------------------------------------------*/
 
-void rulbus_rb8515_clock_card_exit( int handle )
+void rulbus_generic_card_exit( int handle )
 {
-	RULBUS_RB8515_CLOCK_CARD *card;
+	RULBUS_GENERIC_CARD *card;
 
 
 	/* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
+	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
 		return;
 
 	/* Remove the entry for the card */
 
-	if ( card != rulbus_rb8515_clock_card + rulbus_num_clock_cards - 1 )
+	if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
 		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_clock_cards -
-				( card - rulbus_rb8515_clock_card ) - 1 );
+				rulbus_num_generic_cards -
+				( card - rulbus_generic_card ) - 1 );
 
-	card = realloc( rulbus_rb8515_clock_card,
-					( rulbus_num_clock_cards - 1 ) * sizeof *card );
+	card = realloc( rulbus_generic_card,
+					( rulbus_num_generic_cards - 1 ) * sizeof *card );
 
 	if ( card != NULL )
-		rulbus_rb8515_clock_card = card;
+		rulbus_generic_card = card;
 
-	rulbus_num_clock_cards--;
+	rulbus_num_generic_cards--;
 }
 
 
-/*-------------------------------------------------*
- * Function for setting the frequency of the clock
- *-------------------------------------------------*/
+/*----------------------------------------------*
+ * Function for writing data to a generic card
+ *---------------------------------------------*/
 
-int rulbus_rb8515_clock_set_frequency( int handle, int freq )
+int rulbus_generic_write( int handle, unsigned char address,
+						  unsigned char *data, size_t len )
 {
-	RULBUS_RB8515_CLOCK_CARD *card;
-	int retval;
+	RULBUS_GENERIC_CARD *card;
 
 
-	/* Try to find the card, if it doesn't exist just return */
-
-	if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
-
-	if ( freq < RULBUS_RB8515_CLOCK_FREQ_OFF ||
-		 freq > RULBUS_RB8515_CLOCK_FREQ_100MHz )
+	if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
+		 data == NULL || len == 0 )
 		return RULBUS_INVALID_ARGUMENT;
 
-	if ( card->ctrl == freq )
-		return RULBUS_OK;
+	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	card->ctrl = freq;
-	if ( ( retval = rulbus_write( handle, 0, &card->ctrl, 1 ) ) != 1 )
-		return retval;
+	return rulbus_write( handle, address, data, len );
+}
 
-	return RULBUS_OK;
+
+/*-----------------------------------------------*
+ * Function for reading data from a generic card
+ *-----------------------------------------------*/
+
+int rulbus_generic_read( int handle, unsigned char address,
+						 unsigned char *data, size_t len )
+{
+	RULBUS_GENERIC_CARD *card;
+
+
+	if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
+		 data == NULL || len == 0 )
+		return RULBUS_INVALID_ARGUMENT;
+
+	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
+
+	return rulbus_write( handle, address, data, len );
 }
 
 
@@ -174,7 +178,7 @@ int rulbus_rb8515_clock_set_frequency( int handle, int freq )
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle )
+static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle )
 {
 	int i;
 
@@ -182,9 +186,9 @@ static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle )
 	if ( handle < 0 )
 		return NULL;
 
-	for ( i = 0; i < rulbus_num_clock_cards; i++ )
-		if ( handle == rulbus_rb8515_clock_card[ i ].handle )
-			return rulbus_rb8515_clock_card + i;
+	for ( i = 0; i < rulbus_num_generic_cards; i++ )
+		if ( handle == rulbus_generic_card[ i ].handle )
+			return rulbus_generic_card + i;
 
 	return NULL;
 }

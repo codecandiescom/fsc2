@@ -29,10 +29,13 @@ static double timebases[ ] = { 1.0e-8, 1.0e-7, 1.0e-6, 1.0e-5,
 							   1.0e-4, 1.0e-3, 1.0e-2 };
 static int num_timebases = sizeof timebases / sizeof *timebases;
 
-static int tb_index[ ] = { RULBUS_CLOCK_FREQ_100MHz, RULBUS_CLOCK_FREQ_10MHz,
-						   RULBUS_CLOCK_FREQ_1MHz, RULBUS_CLOCK_FREQ_100kHz,
-						   RULBUS_CLOCK_FREQ_10kHz, RULBUS_CLOCK_FREQ_1kHz,
-						   RULBUS_CLOCK_FREQ_100Hz };
+static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
+						   RULBUS_RB8515_CLOCK_FREQ_10MHz,
+						   RULBUS_RB8515_CLOCK_FREQ_1MHz,
+						   RULBUS_RB8515_CLOCK_FREQ_100kHz,
+						   RULBUS_RB8515_CLOCK_FREQ_10kHz,
+						   RULBUS_RB8515_CLOCK_FREQ_1kHz,
+						   RULBUS_RB8515_CLOCK_FREQ_100Hz };
 
 
 /*-----------------------------------------------------------------*
@@ -233,7 +236,7 @@ bool rb_pulser_set_repeat_time( double rep_time )
 	   clock speed */
 
 	for ( i = 0; i < num_timebases; i++ )
-		if ( rep_time <= RULBUS_DELAY_CARD_MAX * timebases[ i ] )
+		if ( rep_time <= RULBUS_RB8514_DELAY_CARD_MAX * timebases[ i ] )
 			break;
 
 	if ( i == num_timebases )

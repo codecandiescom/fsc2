@@ -707,8 +707,8 @@ static void rb_pulser_card_setup( void )
 		if ( rulbus_get_card_info( delay_card[ i ].name, &card_info )
 			 													 != RULBUS_OK )
 		{
-			print( FATAL, "Failed to get RULBUS configuration: %s.\n",
-				   rulbus_strerror( ) );
+			print( FATAL, "Failed to obtain RULBUS configuration "
+				   "information: %s.\n", rulbus_strerror( ) );
 			THROW( EXCEPTION );
 		}
 

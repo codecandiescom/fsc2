@@ -33,6 +33,8 @@
 
 %{
 
+#include "rulbus_lib.h"
+
 #define YY_NO_TOP_STATE
 
 #include "parser.h"
@@ -51,7 +53,6 @@ STRING   [\"\'][^\"\']*[\"\']
 INT      [0-9]+
 EXPO     [Ee][+-]?{INT}
 FLOAT    [+-]*((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
-CARD     "rb"("8506_pia"|"8506_sifu"|"8506_via"|"8509_adc12"|"8510_dac12"|"8513_timebase"|"8514_delay"|"8515_clock"|"8905_adc12"|"9005_amplifier"|"9603_monochromator")
 BOOL_T   "true"|"yes"
 BOOL_F   "false"|"no"
 UNIT     ("f"|"p"|"n"|"u"|"m"|"k"|"M"|"G"|"T")
@@ -78,11 +79,9 @@ DEC      [+-]*[1-9][0-9]*
 	               count( );
 				   yy_pop_state( );
 			   }
-
 .              { count( ); } /* Skip everything else in a comment */
-
+"\n"           { count( ); }
 <<EOF>>        { return EOFC_TOKEN; }  /* End of file in comment */
-
 }              /* End of C style comment handling */
 
 "file"         { count(); return FILE_TOKEN; }
@@ -96,15 +95,75 @@ DEC      [+-]*[1-9][0-9]*
 
 "rb_generic"   {
 			       count( );
-			       rulbus_lval.ival = 0;
+			       rulbus_lval.ival = RB_GENERIC;
 			       return CARD_TOKEN;
 			   }
 
-{CARD}         {
+"rb8506_pia"   {
 			       count( );
-			       rulbus_lval.ival = atoi( rulbus_text + 2 );
+			       rulbus_lval.ival = RB8506_PIA;
 			       return CARD_TOKEN;
-               }
+			   }
+
+"rb8506_sifu"  {
+			       count( );
+			       rulbus_lval.ival = RB8506_SIFU;
+			       return CARD_TOKEN;
+			   }
+
+"rb8506_via"   {
+			       count( );
+			       rulbus_lval.ival = RB8506_VIA;
+			       return CARD_TOKEN;
+			   }
+
+"rb8509_adc12" {
+			       count( );
+			       rulbus_lval.ival = RB8509_ADC12;
+			       return CARD_TOKEN;
+			   }
+
+"rb8510_dac12" {
+			       count( );
+			       rulbus_lval.ival = RB8510_DAC12;
+			       return CARD_TOKEN;
+			   }
+
+"rb8513_timebase" {
+			       count( );
+			       rulbus_lval.ival = RB8513_TIMEBASE;
+			       return CARD_TOKEN;
+			   }
+
+"rb8514_delay" {
+			       count( );
+			       rulbus_lval.ival = RB8514_DELAY;
+			       return CARD_TOKEN;
+			   }
+
+"rb8515_clock" {
+			       count( );
+			       rulbus_lval.ival = RB8515_CLOCK;
+			       return CARD_TOKEN;
+			   }
+
+"rb8905_adc12" {
+			       count( );
+			       rulbus_lval.ival = RB8905_ADC12;
+			       return CARD_TOKEN;
+			   }
+
+"rb9005_amplifier" {
+			       count( );
+			       rulbus_lval.ival = RB9005_AMPLIFIER;
+			       return CARD_TOKEN;
+			   }
+
+"rb9603_monochromator" {
+			       count( );
+			       rulbus_lval.ival = RB9603_MONOCHROMATOR;
+			       return CARD_TOKEN;
+			   }
 
 {UNIT}         {
 	               count( );
@@ -174,15 +233,15 @@ DEC      [+-]*[1-9][0-9]*
                    return NUM_TOKEN;
                }
 
-{DEC}          { /* decimal number */
+{HEX}          { /* hexadecimal number */
 			       count( );
-                   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
+                   sscanf( rulbus_text + 2, "%x", &rulbus_lval.ival );
                    return NUM_TOKEN;
                }
 
-{HEX}          { /* hexadecimal number */
+{DEC}          { /* decimal number */
 			       count( );
-                   sscanf( rulbus_text, "0x%x", &rulbus_lval.ival );
+                   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
                    return NUM_TOKEN;
                }
 

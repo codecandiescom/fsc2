@@ -833,7 +833,7 @@ test:
 
 pack:
 	@$(MAKE) distclean
-	tar -c fsc2 | gzip -c -9 > ../fsc2.tar.gz
+	tar -c ../fsc2 | gzip -c -9 > ../fsc2.tar.gz
 
 
 # Make distributions of the device modules etc.

@@ -26,14 +26,17 @@
 
 
 #include "rulbus_lib.h"
+#include <limits.h>
 
 
-typedef struct RULBUS_DELAY_CARD RULBUS_DELAY_CARD;
+typedef struct RULBUS_RB8514_DELAY_CARD RULBUS_RB8514_DELAY_CARD;
 
-struct RULBUS_DELAY_CARD {
+struct RULBUS_RB8514_DELAY_CARD {
 	int handle;
 	unsigned char ctrl;
 	unsigned long delay;
+	double intr_delay;
+	double clock_time;
 };
 
 
@@ -58,14 +61,15 @@ struct RULBUS_DELAY_CARD {
 
 #define DELAY_BUSY                ( 1 << 1 )
 
-#define INVALID_DELAY             ( RULBUS_DELAY_CARD_MAX + 1 )
+#define INVALID_DELAY             ( RULBUS_RB8514_DELAY_CARD_MAX + 1 )
 
 
-static RULBUS_DELAY_CARD *rulbus_delay_card = NULL;
+static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card = NULL;
 static int rulbus_num_delay_cards = 0;
 
 
-static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle );
+static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card_find( int handle );
+static inline long lrnd( double x );
 
 
 /*------------------------------------------------------------------*
@@ -74,9 +78,9 @@ static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle );
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-int rulbus_delay_init( void )
+int rulbus_rb8514_delay_init( void )
 {
-	rulbus_delay_card = NULL;
+	rulbus_rb8514_delay_card = NULL;
 	rulbus_num_delay_cards = 0;
 	return RULBUS_OK;
 }
@@ -88,13 +92,13 @@ int rulbus_delay_init( void )
  * called by the user directly)
  *------------------------------------------------------------------*/
 
-void rulbus_delay_exit( void )
+void rulbus_rb8514_delay_exit( void )
 {
-	if ( rulbus_delay_card == NULL )
+	if ( rulbus_rb8514_delay_card == NULL )
 		return;
 
-	free( rulbus_delay_card );
-	rulbus_delay_card = NULL;
+	free( rulbus_rb8514_delay_card );
+	rulbus_rb8514_delay_card = NULL;
 	rulbus_num_delay_cards = 0;
 }
 
@@ -105,25 +109,26 @@ void rulbus_delay_exit( void )
  * user directly)
  *----------------------------------------------------------------------*/
 
-int rulbus_delay_card_init( int handle )
+int rulbus_rb8514_delay_card_init( int handle )
 {
-	RULBUS_DELAY_CARD *tmp;
+	RULBUS_RB8514_DELAY_CARD *tmp;
 	unsigned char i;
 	unsigned char byte;
 	int retval;
 
 
-	tmp = realloc( rulbus_delay_card,
+	tmp = realloc( rulbus_rb8514_delay_card,
 				   ( rulbus_num_delay_cards + 1 ) * sizeof *tmp );
 
 	if ( tmp == NULL )
-		return RULBUS_NO_MEM;
+		return RULBUS_NO_MEMORY;
 
-	rulbus_delay_card = tmp;
+	rulbus_rb8514_delay_card = tmp;
 	tmp += rulbus_num_delay_cards++;
 
 	tmp->handle = handle;
 	tmp->delay = 0;
+	tmp->clock_time = -1.0;
 	tmp->ctrl = START_PULSE_POSITIVE | END_PULSE_POSITIVE;
 
 	/* Set a few defaults: output neither start nor end pulses, dsiable
@@ -149,27 +154,28 @@ int rulbus_delay_card_init( int handle )
  * by the user directly)
  *----------------------------------------------------------------*/
 
-void rulbus_delay_card_exit( int handle )
+void rulbus_rb8514_delay_card_exit( int handle )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 
 
 	/* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
 		return;
 
 	/* Remove the entry for the card */
 
-	if ( card != rulbus_delay_card + rulbus_num_delay_cards - 1 )
+	if ( card != rulbus_rb8514_delay_card + rulbus_num_delay_cards - 1 )
 		memcpy( card, card + 1, sizeof *card *
-				rulbus_num_delay_cards - ( card - rulbus_delay_card ) - 1 );
+				rulbus_num_delay_cards -
+				( card - rulbus_rb8514_delay_card ) - 1 );
 
-	card = realloc( rulbus_delay_card,
+	card = realloc( rulbus_rb8514_delay_card,
 					( rulbus_num_delay_cards - 1 ) * sizeof *card );
 
 	if ( card != NULL )
-		rulbus_delay_card = card;
+		rulbus_rb8514_delay_card = card;
 
 	rulbus_num_delay_cards--;
 }
@@ -179,19 +185,45 @@ void rulbus_delay_card_exit( int handle )
  * Function for setting the delay duration
  *-----------------------------------------*/
 
-int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
+int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
 {
-	RULBUS_DELAY_CARD *card;
-	unsigned char byte;
-	unsigned char i;
+	RULBUS_RB8514_DELAY_CARD *card;
+
+
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
+
+	if ( freq <= 0.0 )
+		return RULBUS_INVALID_ARGUMENT;
+
+	card->clock_time = 1.0 / freq;
+	return RULBUS_OK;
+}
+
+
+/*-----------------------------------------*
+ * Function for setting the delay duration
+ *-----------------------------------------*/
+
+int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
+{
+	RULBUS_RB8514_DELAY_CARD *card;
+	long ldelay;
 	int retval;
+	unsigned char i;
+	unsigned char byte;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	if ( delay > RULBUS_DELAY_CARD_MAX )
-		return RULBUS_INV_ARG;
+	if ( card->clock_time <= 0.0 )
+		return RULBUS_NO_CLOCK_FREQ;
+
+	ldelay = lrnd( ( delay - card->intr_delay ) / card->clock_time );
+
+	if ( ldelay < 0 || ldelay > RULBUS_RB8514_DELAY_CARD_MAX )
+		return RULBUS_INVALID_ARGUMENT;
 
 	if ( delay == card->delay )
 		return RULBUS_OK;
@@ -205,7 +237,55 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 		 return retval;
 
 	if ( byte & DELAY_BUSY && ! force )
-		return RULBUS_CRD_BSY;
+		return RULBUS_CARD_IS_BUSY;
+
+	card->delay = ldelay;
+
+	for ( i = 0; i <= DATA_LSBYTE; ldelay >>= 8, i++ )
+	{
+		byte = ( unsigned char ) ( ldelay & 0xFF );
+		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
+									  &byte, 1 ) ) != 1 )
+			return retval;
+	}
+
+	return RULBUS_OK;
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for setting the delay duration given in clock ticks
+ * (the intrinsic delay has to be dealt with by the caller)
+ *--------------------------------------------------------------*/
+
+int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
+									   int force )
+{
+	RULBUS_RB8514_DELAY_CARD *card;
+	unsigned char byte;
+	unsigned char i;
+	int retval;
+
+
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
+
+	if ( delay > RULBUS_RB8514_DELAY_CARD_MAX )
+		return RULBUS_INVALID_ARGUMENT;
+
+	if ( delay == card->delay )
+		return RULBUS_OK;
+
+	/* Check that the card isn't currently creating a delay - if it is tell
+	   the user it's busy unless the 'force' flag is set (which allows the
+	   user to set a new delay even though a delay is already created, which
+	   then ends prematurely) */
+
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
+		 return retval;
+
+	if ( byte & DELAY_BUSY && ! force )
+		return RULBUS_CARD_IS_BUSY;
 
 	card->delay = delay;
 
@@ -214,7 +294,7 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
 		byte = ( unsigned char ) ( delay & 0xFF );
 		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
 									  &byte, 1 ) ) != 1 )
-			 return retval;
+			return retval;
 	}
 
 	return RULBUS_OK;
@@ -226,23 +306,23 @@ int rulbus_delay_set_delay( int handle, unsigned long delay, int force )
  * the raising edge of the external trigger
  *------------------------------------------------------------------*/
 
-int rulbus_delay_set_trigger( int handle, int edge )
+int rulbus_rb8514_delay_set_trigger( int handle, int edge )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
 	int retval;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	if ( edge != RULBUS_DELAY_FALLING_EDGE &&
-		 edge != RULBUS_DELAY_RAISING_EDGE )
-		return RULBUS_INV_ARG;
+	if ( edge != RULBUS_RB8514_DELAY_FALLING_EDGE &&
+		 edge != RULBUS_RB8514_DELAY_RAISING_EDGE )
+		return RULBUS_INVALID_ARGUMENT;
 
 	ctrl = card->ctrl;
 
-	if ( edge == RULBUS_DELAY_FALLING_EDGE )
+	if ( edge == RULBUS_RB8514_DELAY_FALLING_EDGE )
 		ctrl |= TRIGGER_ON_FALLING_EDGE;
 	else
 		ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
@@ -265,40 +345,40 @@ int rulbus_delay_set_trigger( int handle, int edge )
  * output at output 1 and/or 2
  *-------------------------------------------------------------*/
 
-int rulbus_delay_set_output_pulse( int handle, int output, int type )
+int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
 	int retval;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	if ( ( output != RULBUS_DELAY_OUTPUT_1 &&
-		   output != RULBUS_DELAY_OUTPUT_2 &&
-		   output != RULBUS_DELAY_OUTPUT_BOTH ) ||
-		 ( type != RULBUS_DELAY_START_PULSE &&
-		   type != RULBUS_DELAY_END_PULSE &&
-		    type != RULBUS_DELAY_PULSE_BOTH &&
-		   type != RULBUS_DELAY_PULSE_NONE ) )
-		return RULBUS_INV_ARG;
+	if ( ( output != RULBUS_RB8514_DELAY_OUTPUT_1 &&
+		   output != RULBUS_RB8514_DELAY_OUTPUT_2 &&
+		   output != RULBUS_RB8514_DELAY_OUTPUT_BOTH ) ||
+		 ( type != RULBUS_RB8514_DELAY_START_PULSE &&
+		   type != RULBUS_RB8514_DELAY_END_PULSE &&
+		    type != RULBUS_RB8514_DELAY_PULSE_BOTH &&
+		   type != RULBUS_RB8514_DELAY_PULSE_NONE ) )
+		return RULBUS_INVALID_ARGUMENT;
 
 	ctrl = card->ctrl & 0xF0;
 
-	if ( output & RULBUS_DELAY_OUTPUT_1 )
+	if ( output & RULBUS_RB8514_DELAY_OUTPUT_1 )
 	{
-		if ( type & RULBUS_DELAY_START_PULSE )
+		if ( type & RULBUS_RB8514_DELAY_START_PULSE )
 			ctrl |= START_PULSE_OUT_1_ENABLE;
-		if ( type & RULBUS_DELAY_END_PULSE )
+		if ( type & RULBUS_RB8514_DELAY_END_PULSE )
 			ctrl |= END_PULSE_OUT_1_ENABLE;
 	}
 		
-	if ( output & RULBUS_DELAY_OUTPUT_2 )
+	if ( output & RULBUS_RB8514_DELAY_OUTPUT_2 )
 	{
-		if ( type & RULBUS_DELAY_START_PULSE )
+		if ( type & RULBUS_RB8514_DELAY_START_PULSE )
 			ctrl |= START_PULSE_OUT_2_ENABLE;
-		if ( type & RULBUS_DELAY_END_PULSE )
+		if ( type & RULBUS_RB8514_DELAY_END_PULSE )
 			ctrl |= END_PULSE_OUT_2_ENABLE;
 	}
 
@@ -320,36 +400,37 @@ int rulbus_delay_set_output_pulse( int handle, int output, int type )
  * output at output 1 and/or 2
  *-------------------------------------------------------------*/
 
-int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
+int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
+												   int pol )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
 	int retval;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
-	if ( ( type != RULBUS_DELAY_START_PULSE &&
-		   type != RULBUS_DELAY_END_PULSE &&
-		   type != RULBUS_DELAY_PULSE_BOTH ) ||
-		 ( pol != RULBUS_DELAY_POLARITY_NEGATIVE &&
-		   pol != RULBUS_DELAY_POLARITY_POSITIVE ) )
-		return RULBUS_INV_ARG;
+	if ( ( type != RULBUS_RB8514_DELAY_START_PULSE &&
+		   type != RULBUS_RB8514_DELAY_END_PULSE &&
+		   type != RULBUS_RB8514_DELAY_PULSE_BOTH ) ||
+		 ( pol != RULBUS_RB8514_DELAY_POLARITY_NEGATIVE &&
+		   pol != RULBUS_RB8514_DELAY_POLARITY_POSITIVE ) )
+		return RULBUS_INVALID_ARGUMENT;
 
 	ctrl = card->ctrl;
 
-	if ( type & RULBUS_DELAY_START_PULSE )
+	if ( type & RULBUS_RB8514_DELAY_START_PULSE )
 	{
-		if ( pol == RULBUS_DELAY_POLARITY_NEGATIVE )
+		if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
 			ctrl &= ~ START_PULSE_POSITIVE;
 		else
 			ctrl |= START_PULSE_POSITIVE;
 	}
 
-	if ( type & RULBUS_DELAY_END_PULSE )
+	if ( type & RULBUS_RB8514_DELAY_END_PULSE )
 	{
-		if ( pol == RULBUS_DELAY_POLARITY_NEGATIVE )
+		if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
 			ctrl &= ~ END_PULSE_POSITIVE;
 		else
 			ctrl |= END_PULSE_POSITIVE;
@@ -372,15 +453,15 @@ int rulbus_delay_set_output_pulse_polarity( int handle, int type, int pol )
  * Function to determine if the card is currently creating a delay
  *-----------------------------------------------------------------*/
 
-int rulbus_delay_busy( int handle )
+int rulbus_rb8514_delay_busy( int handle )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char byte;
 	int retval;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
 		return retval;
@@ -394,15 +475,15 @@ int rulbus_delay_busy( int handle )
  * trigger first to falling and the immediately to raising edge
  *---------------------------------------------------------------*/
 
-int rulbus_delay_software_start( int handle )
+int rulbus_rb8514_delay_software_start( int handle )
 {
-	RULBUS_DELAY_CARD *card;
+	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
 	int retval;
 
 
-	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
-		return RULBUS_INV_HND;
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
 
 	ctrl = card->ctrl;
 
@@ -422,11 +503,27 @@ int rulbus_delay_software_start( int handle )
 }
 
 
+/*---------------------------------------------------------*
+ * Function returns the minimum delay the card can produce
+ *---------------------------------------------------------*/
+
+double rulbus_rb8514_delay_get_intrinsic_delay( int handle )
+{
+	RULBUS_RB8514_DELAY_CARD *card;
+
+
+	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+		return RULBUS_INVALID_CARD_HANDLE;
+
+	return card->intr_delay;
+}
+
+
 /*----------------------------------------------------*
  * Function for finding a cards entry from its handle
  *----------------------------------------------------*/
 
-static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle )
+static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card_find( int handle )
 {
 	int i;
 
@@ -435,12 +532,25 @@ static RULBUS_DELAY_CARD *rulbus_delay_card_find( int handle )
 		return NULL;
 
 	for ( i = 0; i < rulbus_num_delay_cards; i++ )
-		if ( handle == rulbus_delay_card[ i ].handle )
-			return rulbus_delay_card + i;
+		if ( handle == rulbus_rb8514_delay_card[ i ].handle )
+			return rulbus_rb8514_delay_card + i;
 
 	return NULL;
 }
 
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+
+static inline long lrnd( double x )
+{
+    if ( x > LONG_MAX )
+        return LONG_MAX;
+    if ( x < LONG_MIN )
+        return LONG_MIN;
+
+    return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+}
 
 /*
  * Local variables:
