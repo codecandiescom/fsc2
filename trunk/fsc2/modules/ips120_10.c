@@ -27,14 +27,14 @@
 
 /* Include configuration information for the device */
 
-#include "ips120_20.conf"
+#include "ips120_10.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define TEST_CURRENT       2.315
-#define TEST_SWEEP_RATE    ( 0.02 / 60.0 )
+#define TEST_CURRENT       63.0      /* about 9 T */
+#define TEST_SWEEP_RATE    1.0e-3    /* about 1.5 G/s */
 
 
 /* How many time we retry when an error happens during communication with
