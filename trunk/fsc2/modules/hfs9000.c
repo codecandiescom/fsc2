@@ -298,7 +298,7 @@ Var *pulser_shift( Var *v )
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -374,7 +374,7 @@ Var *pulser_increment( Var *v )
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -456,11 +456,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( hfs9000_phs[ 0 ].function != NULL ||
-			 hfs9000_phs[ 1 ].function != NULL )
-			pulser_phase_reset( NULL );
-
-		for( p = hfs9000_Pulses; p != NULL; p = p->next )
+		for ( p = hfs9000_Pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				pulser_pulse_reset( vars_push( INT_VAR, p->num ) );
 	}
