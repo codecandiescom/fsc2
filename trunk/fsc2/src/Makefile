@@ -24,6 +24,15 @@ else
 	CFLAGS    += -DSIZE=1
 endif
 
+ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
+	CFLAGS    += IS_STILL_LIBC1
+endif
+
+ifneq ($(shell hostname -f),crowley.none)
+	CFLAGS    += HAS_SEMUN
+endif
+
+
 export headers
 
 

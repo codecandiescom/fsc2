@@ -18,6 +18,10 @@ src_headers    = $(addprefix ../src/,$(headers))
 
 CFLAGS        += -I../src
 
+ifneq ($(shell hostname -f),pion.anorg.chemie.uni-frankfurt.de)
+	simp_modules = $(simp_modules:egg4402.c=)
+endif
+
 
 .SUFFIXES:
 .PHONY: all clean

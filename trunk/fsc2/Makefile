@@ -117,7 +117,8 @@ all:
 
 install:
 	install -d $(bindir)
-	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
+	install -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
+#	install -m 6755 -o fsc2 -g fsc2 -s fsc2 $(bindir)
 	install -d $(libdir)
 	install -d $(auxdir)
 	install -d $(docdir)
@@ -131,7 +132,8 @@ install:
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
+	install -m 644 -o fsc2 -g fsc2 *.so $(libdir)
+#	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	$(MAKE) install-$(shell hostname -f)

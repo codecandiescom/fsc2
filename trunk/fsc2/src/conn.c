@@ -19,6 +19,17 @@ static void conn_sig_handler( int signo );
 static volatile bool is_busy;
 
 
+/* pion specific stuff */
+
+#if defined IS_STILL_LIBC1
+
+#define AF_LOCAL AF_UNIX
+
+typedef unsigned int socklen_t;
+
+#endif
+
+
 /*------------------------------------------------------*/
 /* Creates a child process that will listen on a socket */
 /* to allow other processes to run an EDL program.      */

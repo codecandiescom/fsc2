@@ -46,10 +46,22 @@
 #include <errno.h>
 #include <assert.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+
+/* pion specific stuff */
+
+#if defined IS_STILL_LIBC1
+
+#define AF_LOCAL AF_UNIX
+
+typedef unsigned int socklen_t;
+
+#endif
 
 
 /* FSC2_SOCKET must be identical to the definition in fsc2.h ! */
