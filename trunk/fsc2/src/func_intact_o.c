@@ -271,6 +271,7 @@ Var *f_ocreate( Var *var )
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->is_changed = UNSET;
+	new_io->report_change = UNSET;
 
 	/* Draw the new object */
 
@@ -485,6 +486,7 @@ static void f_odelete_child( Var *v )
 	/* Do all possible checking of the parameter */
 
 	ID = get_strict_long( v, "input or output object ID" );
+
 	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
@@ -581,8 +583,8 @@ static void f_odelete_parent( Var *v )
 
 		if ( v->next != NULL )
 		{
-			print( FATAL, "Invalid input or output object "
-				   "identifier.\n" );
+			print( FATAL, "Invalid input or output object identifier%s.\n",
+				   v->next->next != NULL ? "s" : "" );
 			THROW( EXCEPTION );
 		}
 	}

@@ -107,6 +107,7 @@ Var *f_mcreate( Var *var )
 		new_io->self = NULL;
 		new_io->state = 1;
 		new_io->is_changed = UNSET;
+		new_io->report_change = UNSET;
 
 		new_io->label = NULL;
 		new_io->menu_items = NULL;
