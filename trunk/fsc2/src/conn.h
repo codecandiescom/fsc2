@@ -31,7 +31,7 @@
 #define UNBUSY_SIGNAL  SIGUSR2
 
 
-pid_t spawn_conn( bool start_state );
+pid_t spawn_conn( bool start_state, FILE *in_file_fp );
 
 
 #endif  /* ! CONN_HEADER */

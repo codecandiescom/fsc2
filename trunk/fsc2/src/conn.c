@@ -53,10 +53,11 @@ typedef unsigned int socklen_t;
 
 /*------------------------------------------------------*/
 /* Creates a child process that will listen on a socket */
-/* to allow other processes to run an EDL program.      */
+/* to allow other processes to run an EDL program. Must */
+/* return -1 on errors.                                 */
 /*------------------------------------------------------*/
 
-pid_t spawn_conn( bool start_state )
+pid_t spawn_conn( bool start_state, FILE *in_file_fp )
 {
 	int listen_fd;
 	struct sockaddr_un serv_addr;
@@ -104,7 +105,11 @@ pid_t spawn_conn( bool start_state )
 	/* Fork a child to handle the communication */
 
 	if ( ( new_pid = fork( ) ) == 0 )
+	{
+		if ( in_file_fp )
+			fclose( in_file_fp );
 		connect_handler( listen_fd );
+	}
 
 	/* Wait for child to signal that it got its signal handlers installed */
 
@@ -118,6 +123,7 @@ pid_t spawn_conn( bool start_state )
 	else
 		unlink( FSC2_SOCKET );
 
+	close( listen_fd );
 	lower_permissions( );
 	return new_pid;
 }

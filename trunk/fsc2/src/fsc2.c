@@ -204,7 +204,8 @@ int main( int argc, char *argv[ ] )
 
 	if ( ( Internals.conn_pid = spawn_conn( Internals.cmdline_flags &
 											( DO_TEST | DO_START )
-											&& is_loaded ) ) != -1 )
+											&& is_loaded, in_file_fp ) )
+		 != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
