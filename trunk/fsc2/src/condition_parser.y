@@ -210,6 +210,6 @@ int conditionerror( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	eprint( FATAL, SET, "Syntax error in loop, IF or UNLESS condition.\n" );
+	eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );
 }

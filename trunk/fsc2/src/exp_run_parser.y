@@ -118,7 +118,6 @@ void exp_runerror( const char *s );
 
 %%
 
-
 input:   /* empty */
        | input eol
        | input line eol
@@ -201,24 +200,24 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 ;
 
 ass:     '=' expr                  { vars_assign( $2, $2->prev ); }
-       | E_PLSA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_add( vars_val( C ),
-															$2 ), C ); }
-       | E_MINA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_sub( vars_val( C ),
-															$2 ), C ); }
-       | E_MULA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_mult( vars_val( C ),
-															$2 ), C ); }
-       | E_DIVA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_div( vars_val( C ),
-															$2 ), C ); }
-       | E_MODA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_div( vars_val( C ),
-															$2 ), C ); }
-       | E_EXPA expr               { Var *C = $2->prev;
-	                                 vars_assign( vars_pow( vars_val( C ),
-															$2 ), C ); }
+       | E_PLSA expr               { vars_assign( vars_add(
+		                                                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | E_MINA expr               { vars_assign( vars_sub(
+										                  vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | E_MULA expr               { vars_assign( vars_mult(
+										                  vars_val( $2->prev ),
+														  $2 ), $2->prev ); }
+       | E_DIVA expr               { vars_assign( vars_div(
+                                                          vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | E_MODA expr               { vars_assign( vars_div(
+                                                          vars_val( $2->prev ),
+															$2 ), $2->prev ); }
+       | E_EXPA expr               { vars_assign( vars_pow(
+                                                          vars_val( $2->prev ),
+															$2 ), $2->prev ); }
 ;
 
 expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
@@ -301,8 +300,7 @@ exprs:   expr                     { }
 ;
 
 strs:    /* empty */
-       | strs E_STR_TOKEN         { Var *v;
-		                            v = vars_push( STR_VAR, $2 );
+       | strs E_STR_TOKEN         { Var *v = vars_push( STR_VAR, $2 );
 	                                vars_add( v->prev, v ); }
 ;
 

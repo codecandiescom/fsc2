@@ -579,7 +579,7 @@ static void setup_while_or_repeat( int type, long *pos )
 				break;
 
 			case ELSE_TOK :
-				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF or UNLESS in "
+				eprint( FATAL, UNSET, "%s:%ld: ELSE without IF/UNLESS in "
 						"current block.\n", prg_token[ i ].Fname,
 						prg_token[ i ].Lc );
 				THROW( EXCEPTION );
@@ -654,8 +654,8 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	if ( prg_token[ i ].token == '{' )
 	{
-		eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF or "
-				"UNLESS.\n", prg_token[ i ].Fname, prg_token[ i ].Lc );
+		eprint( FATAL, UNSET, "%s:%ld: Missing condition after IF/UNLESS.\n",
+				prg_token[ i ].Fname, prg_token[ i ].Lc );
 	}
 
 	/* Now let's get things done... */
@@ -766,7 +766,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	}
 
 	eprint( FATAL, UNSET, "Missing `}' for %s starting at %s:%ld.\n",
-			in_if ? "IF or UNLESS" : "ELSE", cur->Fname, cur->Lc );
+			in_if ? "IF/UNLESS" : "ELSE", cur->Fname, cur->Lc );
 	THROW( EXCEPTION );
 }
 

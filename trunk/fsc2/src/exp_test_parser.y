@@ -38,8 +38,8 @@ extern int exp_testlex( void );
 int exp_testparse( void );
 void exp_testerror( const char *s );
 
-static bool no_error_print = UNSET;
-
+static bool dont_print_error = UNSET;
+static bool in_cond = UNSET;
 %}
 
 
@@ -135,20 +135,26 @@ input:   /* empty */
 
 eol:     ';'
        | '}'
-       |                           { no_error_print = SET; }
-         error                     { eprint( FATAL, SET, "Missing semicolon "
-											 "before (or on) this line.\n" );
-	                                 THROW( EXCEPTION ); }
+       |                         { dont_print_error = SET; }
+         error                   { eprint( FATAL, SET, "Missing semicolon "
+										   "before (or on) this line.\n" );
+	                               THROW( EXCEPTION ); }
 ;
 
-cond:    FOR_TOK E_VAR_TOKEN '=' expr ':' expr fi ls
+cond:    FOR_TOK                 { in_cond = SET; }
+         E_VAR_TOKEN '='
+         expr ':' expr fi ls     { in_cond = UNSET; }
        | FOREVER_TOK ls
-       | REPEAT_TOK expr ls
-       | WHILE_TOK expr ls
-       | UNTIL_TOK expr ls
-       | IF_TOK expr ls
-       | UNLESS_TOK expr ls
+       | sc                      { in_cond = SET; }
+         expr ls                 { in_cond = UNSET; }
        | ELSE_TOK et
+;
+
+sc:      REPEAT_TOK
+       | WHILE_TOK
+       | UNTIL_TOK
+       | IF_TOK
+       | UNLESS_TOK
 ;
 
 fi:      /* empty */
@@ -156,14 +162,15 @@ fi:      /* empty */
 ;
 
 ls:      '{'
-       |                           { no_error_print = SET; }
-         error                     { eprint( FATAL, SET, "Invalid loop, IF "
-											 "or UNLESS condition.\n" );
-	                                 THROW( EXCEPTION ); }
+       |                         { dont_print_error = SET; }
+         error                   { eprint( FATAL, SET, "Syntax error in "
+									       "loop or IF/UNLESS condition.\n" );
+	                               THROW( EXCEPTION ); }
 ;
 
 et:      ls
-       | IF_TOK expr ls
+       | IF_TOK                  { in_cond = SET; }
+         expr ls                 { in_cond = UNSET; }
 
 
 line:    E_VAR_TOKEN ass                              { }
@@ -247,8 +254,7 @@ unit:    /* empty */
        | E_MEG_TOKEN
 ;
 
-
-/* list of indices for access of an array element */
+/* list of indices of array element */
 
 list1:   /* empty */
 	   | expr
@@ -271,20 +277,32 @@ strs:    /* empty */
        | strs E_STR_TOKEN
 ;
 
-
 %%
 
 
 void exp_testerror( const char *s )
 {
-	s = s;                    /* stupid but avoids compiler warning */
+	s = s;                    /* avoid compiler warning */
 
 
-	if ( ! no_error_print )
+	if ( ! dont_print_error && ! in_cond )
 	{
 		eprint( FATAL, SET, "Syntax error in EXPERIMENT section.\n" );
 		THROW( EXCEPTION );
 	}
 
-	no_error_print = UNSET;
+	if ( in_cond )
+	{
+		if ( ( cur_prg_token - 1 )->token == '=' )
+			eprint( FATAL, SET, "Assignment '=' used in loop or IF/UNLESS "
+					"condition instead of comparison '=='.\n" );
+		else
+			eprint( FATAL, SET, "Syntax error in loop or IF/UNLESS "
+					"condition.\n" );
+
+		in_cond = UNSET;
+		THROW( EXCEPTION );
+	}
+
+	dont_print_error = UNSET;
 }
