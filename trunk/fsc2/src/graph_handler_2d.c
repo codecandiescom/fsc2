@@ -82,7 +82,8 @@ void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	the pressed buttons have lost there meaning */
 
 	if ( ( c != &G.canvas && G.raw_button_state != 0 ) ||
-		 ( G.button_state == 0 && G.raw_button_state != 0 ) )
+		 ( G.button_state == 0 && G.raw_button_state != 0 ) ||
+		 G.active_curve == -1 )
 	{
 		G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
 		return;
@@ -225,7 +226,8 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 	/* If the released button didn't has a meaning just clear it from the
 	   button state pattern and then forget about it */
 
-	if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) )
+	if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) ||
+		 G.active_curve == -1 )
 	{
 		G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
 		return;
@@ -355,6 +357,9 @@ void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 		fl_XNextEvent( ev );                  /* get the next event */
 	}
+
+	if ( G.active_curve == -1 )
+		return;
 
 	fl_get_win_mouse( window, &c->ppos[ X ], &c->ppos[ Y ], &dummy );
 

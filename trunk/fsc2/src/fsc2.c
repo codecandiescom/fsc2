@@ -418,6 +418,7 @@ void test_file( FL_OBJECT *a, long b )
 	static bool user_break = UNSET;
 	struct stat file_stat;
 
+
 	a->u_ldata	= 0;
 	b = b;
 
@@ -454,10 +455,10 @@ void test_file( FL_OBJECT *a, long b )
 	stat( in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime )
 	{
-		if ( 1 == fl_show_choice( "EDL file on disk has changed.",
-								  "Reload the file ?",
+		if ( 1 == fl_show_choice( "EDL file on diskis newer than loaded.",
+								  "file. Reload the file from disk?",
 								  "",
-								  2, "Abort", "Ok", "", 1 ) )
+								  2, "No", "Yes", "", 1 ) )
 			return;
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
@@ -521,6 +522,9 @@ void test_file( FL_OBJECT *a, long b )
 
 void run_file( FL_OBJECT *a, long b )
 {
+	struct stat file_stat;
+
+
 	a = a;
 	b = b;
 
@@ -535,6 +539,26 @@ void run_file( FL_OBJECT *a, long b )
 		test_file( main_form->test_file, 1 );
 		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
 			return;
+	}
+	else
+	{
+		stat( in_file, &file_stat );
+		if ( in_file_mod != file_stat.st_mtime )
+		{
+			if ( 1 != fl_show_choice( "EDL file on disk is newer than loaded",
+									  "file. Reload the file from disk?",
+									  "",
+									  2, "No", "Yes", "", 1 ) )
+			{
+				load_file( main_form->browser, 1 );
+				if ( ! is_loaded )
+					return;
+				is_tested = UNSET;
+				test_file( main_form->test_file, 1 );
+				if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
+					return;
+			}
+		}
 	}
 
 	if ( ! state )               /* quit if program failed the test */
