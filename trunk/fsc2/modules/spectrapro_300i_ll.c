@@ -674,7 +674,7 @@ void spectrapro_300i_set_offset( long grating, long offset )
 		T_free( buf );
 		RETHROW( );
 	}
-/*
+#if 0
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
@@ -693,7 +693,7 @@ void spectrapro_300i_set_offset( long grating, long offset )
 		T_free( buf );
 		RETHROW( );
 	}
-*/
+#endif
 }
 
 
@@ -768,7 +768,7 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 		T_free( buf );
 		RETHROW( );
 	}
-/*
+#if 0
 	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
 	T_free( buf );
 
@@ -787,7 +787,7 @@ void spectrapro_300i_set_adjust( long grating, long adjust )
 		T_free( buf );
 		RETHROW( );
 	}
-*/
+#endif
 }
 
 
