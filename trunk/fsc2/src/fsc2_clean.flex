@@ -76,7 +76,7 @@ IFNE    [^"<\t \n]*\n?
 EXIT    ^[ \t]*#exit
 QUIT    ^[ \t]*#quit
 
-KEEP    [^\t" \n(\/*),;]+
+KEEP    [^\t" \n(\/*),;:=%\^]+
 
 
 %x      str
