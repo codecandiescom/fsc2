@@ -228,11 +228,12 @@ changes to a crosshair cursor
 @ifnotinfo
 ,@image{cursor4,5mm,},
 @end ifnotinfo
-and in the upper left hand
-corner the exact coordinates of the current mouse position is
-shown. Because different curves can have a different scaling, if you
-have more than one curve displayed the coordinates in the scaling system
-of each curve are shown.
+and in the upper left hand corner a pair of values with the exact
+coordinates (in the units of the axis scales) of the current mouse
+position is shown. Because different curves can have a different scaling
+(see below), if you have more than one curve displayed the coordinates
+in the scaling system of each of the curves are shown (in the color of
+the curve they belong to).
 
 Beside finding out the exact values of your measured data you also may
 determine differences between different data points. If you press both
@@ -241,17 +242,14 @@ a encircled crosshair cursor
 @ifnotinfo
 ,@image{cursor5,5mm,}.
 @end ifnotinfo
-@ifnothtml
-@ifnottex
-.
-@end ifnottex
-@end ifnothtml
-After moving the mouse while
-keeping both buttons pressed down a circle is drawn at the position you
-started from and a vertical and horizontal dashed line from this point
-to the current mouse position. In the left upper corner of the
-differences between the point where you first pressed the mouse buttons
-and the current mouse position.
+and a circle is drawn at the position where you pressed the mouse
+button.  When you move the mouse (while keeping both middle and right
+mouse buttons pressed down) a vertical and a horizontal dashed line from
+the starting point to the current mouse position is drawn and in the
+left upper corner of the display area pairs of x- and y-differences (in
+units of the axis scales) between the two points are shown (and updated
+whenever you move the mouse). Again, for each curve a pair of values is
+displayed in the color of the curve they belong to.
 
 
 @subsubsection Rescaling and moving
@@ -346,3 +344,13 @@ into which direction you have to look for the missing parts of the curve
 an arrow in the color of the curve will be shown for each direction in
 which non-displayable data the curve can be found.
 
+Whenever you rescale curves or move them around the "Full Scale" button,
+labeled @code{FS}, will become in-active (its color changes from green
+to grey). When you want to get back to the full scale display you simply
+have to click onto it and all curves (even the ones that usually extempt
+from rescaling because their button is in-active) get rescaled so that
+all data will fit into the display. A side effect of having the
+@code{FS} button active is that the display will be rescaled
+automatically when new data arrive that wouldn't fit into the display
+area. To switch this behaviour off simply deactivate the @code{FS}
+button.
