@@ -2972,7 +2972,7 @@ use numbers directly!).  If there is no second argument the output
 voltage at the channel is returned.
 
 If there is a second argument, being a voltage in the range between @w{0
-V} and @w{32 V} the output voltage is set instead. Please note that this
+V} and @w{32 V}, the output voltage is set instead. Please note that this
 voltage may not appear at the outputs when the setting for the current
 limit does not allow it.
 
@@ -3004,7 +3004,7 @@ use numbers directly!).  If there is no second argument the output
 current at the channel is returned.
 
 If there is a second argument, being a current in the range between @w{0
-A} and @w{3 A} the output current is set instead. Please note that this
+A} and @w{3 A}, the output current is set instead. Please note that this
 current may not appear at the outputs when the setting for the voltage
 limit does not allow it.
 
