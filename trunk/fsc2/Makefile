@@ -103,7 +103,6 @@ all:
 	cp src/fsc2 .
 	cp src/fsc2_clean .
 	cp modules/*.so .
-	$(MAKE) -C src untest
 
 
 # Install the program in $bindir and all the other stuff in $libdir and $auxdir

@@ -27,33 +27,15 @@ export headers
 .PHONY: all clean distclean
 
 
-all: test fsc2 fsc2_clean modules
+all: fsc2 fsc2_clean modules
 
 # make the main program from the c, flex and bison source files
 
-fsc2: test $(objects)
+fsc2: $(objects)
 	$(CC) -o $@ $(objects) $(LIBS) $(LDFLAGS)
-
-test:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
-		 -a -e gpib_if_old.c -a -e gpib_if_old.h ]; then \
-		mv gpib_if.c gpib_if_new.c; \
-		mv gpib_if.h gpib_if_new.h; \
-		mv gpib_if_old.c gpib_if.c; \
-		mv gpib_if_old.h gpib_if.h; \
-	fi;
 
 modules:
 	$(MAKE) -C ../modules all
-
-untest:
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" \
-		 -a -e gpib_if_new.c -a -e gpib_if_new.h ]; then \
-		mv gpib_if.c gpib_if_old.c; \
-		mv gpib_if.h gpib_if_old.h; \
-		mv gpib_if_new.c gpib_if.c; \
-		mv gpib_if_new.h gpib_if.h; \
-	fi;
 
 
 %.o: %.c $(headers)
