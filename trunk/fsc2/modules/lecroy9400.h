@@ -41,10 +41,8 @@
 #define LECROY9400_TEST_TRIG_CHANNEL 0
 #define LECROY9400_TEST_REC_LEN      1250
 
-
 #define MAX_CHANNELS       9         /* number of channel names */
 #define MAX_USED_CHANNELS  4
-
 
 #define LECROY9400_UNDEF   -1
 #define LECROY9400_CH1      0
@@ -57,31 +55,25 @@
 #define LECROY9400_EXT      7
 #define LECROY9400_EXT10    8
 
-
 #define GENERAL_TO_LECROY9400 0
 #define LECROY9400_TO_GENERAL 1
-
 
 #define LECROY9400_MIN_TIMEBASE 5.0e-8
 #define LECROY9400_MAX_TIMEBASE 0.2
 #define LECROY9400_MIN_TB_INDEX 0
 #define LECROY9400_MAX_TB_INDEX 20
 
-
 #define LECROY9400_MAX_SENS     5.0e-3
 #define LECROY9400_MIN_SENS_1M  12.5
 #define LECROY9400_MIN_SENS_50  2.5
-
 
 #define INVALID_COUPL     -1         /* Input coupling for data channel */
 #define AC_1_MOHM          0
 #define DC_1_MOHM          1
 #define DC_50_OHM          2
 
-
 #define MAX_OFFSET         8.0       /* Offset for data channel */
 #define MIN_OFFSET        -8.0
-
 
 #define TRG_CPL_AC         0         /* Trigger coupling */
 #define TRG_CPL_DC         1
@@ -90,9 +82,8 @@
 
 #define UNDEFINED_REC_LEN  -1
 
-#define MAX_DESC_LEN       160
-
-
+#define MAX_DESC_LEN       160       /* amount of memory that needs to be
+										allocated for a curve descriptor */
 
 /* Structure for description of a `window' on the digitizer, made up from the
    area between the pair of cursors */
