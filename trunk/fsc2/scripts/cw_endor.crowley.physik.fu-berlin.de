@@ -276,7 +276,7 @@ $f12_e->pack( %wp );
 
 
 my $f13 = $mw->Frame( );
-my $f13_l = $f13->Label( '-text'         => 'Measure field:',
+my $f13_l = $f13->Label( '-text'         => 'Use ER035M:',
 						 '-width'        => '20',
 						 'anchor'        => 'w' );
 my $f13_m = $f13->Optionmenu( '-options' => [ ( "Yes", "No" ) ],
