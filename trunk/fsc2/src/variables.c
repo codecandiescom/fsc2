@@ -1338,8 +1338,7 @@ static void vars_assign_to_nd_from_nd( Var *src, Var *dest )
 	/* Unless the destination array is dynamically sized the sizes of
 	   both arrays must be identical */
 
-	if ( ! ( dest->flags & IS_DYNAMIC ) )
-		 vars_size_check( src, dest );
+	vars_size_check( src, dest );
 
 	vars_arr_assign( src, dest );
 }
@@ -1354,19 +1353,20 @@ static void vars_size_check( Var *src, Var *dest )
 	ssize_t i;
 
 
+	if ( dest->flags & IS_DYNAMIC )
+		return;
+
 	if ( dest->len != src->len )
 	{
 		print( FATAL, "Sizes of arrays differ.\n" );
 		THROW( EXCEPTION );
 	}
 
-	/* If there are sub-arrays and unless these are dynamically sized do
-	   size comparision also for the sub-arrays */
+	/* If this isn't an 1-dimensional array also do checks on the sub-arrays */
 
 	if ( dest->type & ( INT_REF | FLOAT_REF ) )
 		for( i = 0; i < dest->len; i++ )
-			if ( ! ( dest->val.vptr[ i ] != NULL &&
-					 dest->val.vptr[ i ]->flags & IS_DYNAMIC ) )
+			if ( dest->val.vptr[ i ] != NULL )
 				vars_size_check( src->val.vptr[ i ], dest->val.vptr[ i ] );
 }
 
