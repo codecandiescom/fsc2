@@ -53,6 +53,21 @@ Var *vars_add( Var *v1, Var *v2 )
 		THROW( EXCEPTION );
 	}
 
+	switch( v1->type )
+	{
+		case REF_PTR :
+			v1 = v1->from;
+			break;
+
+		case INT_PTR :
+			v1 = vars_push( INT_VAR, *v1->val.lpnt );
+			break;
+
+		case FLOAT_PTR :
+			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
+			break;
+	}
+
 	switch ( v1->type )
 	{
 		case STR_VAR :
@@ -77,18 +92,6 @@ Var *vars_add( Var *v1, Var *v2 )
 
 		case INT_REF : case FLOAT_REF :
 			new_var = vars_ref_add( v1, v2 );
-			break;
-
-		case REF_PTR :
-			v1 = v1->from;
-			break;
-
-		case INT_PTR :
-			v1 = vars_push( INT_VAR, *v1->val.lpnt );
-			break;
-
-		case FLOAT_PTR :
-			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
 			break;
 
 #ifndef NDEBUG
