@@ -235,7 +235,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 int fll_count_functions( void )
 {
 	int ret_token;
-	int last_token = "";
+	int last_token = 0;
 	int num = 0;
 
 
