@@ -592,7 +592,7 @@ all:
 
 
 config: fsc2_config.h
-	@if [ -n $(machine_name) ]; then                        \
+	@if [ -n "$(machine_name)" ]; then                      \
 		echo "Configuring for machine $(machine_name)...";  \
 		if [ -r $(mchdir)/$(machine_name)-config ]; then    \
 			$(SHELL) $(mchdir)/$(machine_name)-config;      \
@@ -704,7 +704,7 @@ install:
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/hjs_attenuator.calib \
 						 $(libdir)
 	spex_cd2a_calib=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE' $(cdir)/spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                   \
-	if [      -n $$spex_cd2a_calib                                        \
+	if [      -n "$$spex_cd2a_calib"                                      \
 		 -a   -e $(cdir)/$$spex_cd2a_calib                                \
 		 -a ! -e $(libdir)/$$spex_cd2a_calib ]; then                      \
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $(cdir)/spex_cd2a.calib \
@@ -730,41 +730,38 @@ endif
 # Makefile hasn't been changed significantly since the installation!
 
 uninstall:
-	-$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
-	-$(RM) $(RMFLAGS) $(libdir)/hp8648b.table
+	$(RM) $(RMFLAGS) $(libdir)/hp8647a.table
+	$(RM) $(RMFLAGS) $(libdir)/hp8648b.table
 ifdef WITH_SPEC10
-	-$(RM) $(RMFLAGS) $(libdir)/spectrapro_300i.calib
+	$(RM) $(RMFLAGS) $(libdir)/spectrapro_300i.calib
 endif
 	spex_cd2a_calib=`grep '^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE' $(cdir)/spex_cd2a.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}SPEX_CD2A_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                 \
-	if [ -n $$spex_cd2a_calib ]; then                   \
-		-$(RM) $(RMFLAGS) $(libdir)/$$spex_cd2a_calib;  \
+	if [ -n "$$spex_cd2a_calib" ]; then                 \
+		$(RM) $(RMFLAGS) $(libdir)/$$spex_cd2a_calib;   \
 	fi
-	-$(RM) $(RMFLAGS) $(libdir)/hjs_attenuator.calib
+	$(RM) $(RMFLAGS) $(libdir)/hjs_attenuator.calib
 ifdef WITH_WITIO_48
-	-$(RM) $(RMFLAGS) $(libdir)//hjs_fc.calib
+	$(RM) $(RMFLAGS) $(libdir)//hjs_fc.calib
 endif
-	-$(RM) $(RMFLAGS) $(libdir)/hjs_sfc.calib
-	-$(RM) $(RMFLAGS) $(libdir)/version.ugz
-	-$(RM) $(RMFLAGS) $(libdir)/Functions
-	-$(RM) $(RMFLAGS) $(libdir)/Devices
-	-for file in $(adir)/*.xpm; do                     \
+	$(RM) $(RMFLAGS) $(libdir)/hjs_sfc.calib
+	$(RM) $(RMFLAGS) $(libdir)/version.ugz
+	$(RM) $(RMFLAGS) $(libdir)/Functions
+	$(RM) $(RMFLAGS) $(libdir)/Devices
+	for file in $(adir)/*.xpm; do                      \
 		$(RM) $(RMFLAGS) $(auxdir)/`basename $$file`;  \
 	done
 	$(MAKE) -C $(sdir) uninstall
 	$(MAKE) -C $(mdir) uninstall
-ifdef WITH_HTTP_SERVER
-	$(MAKE) -C Fcntl_Lock uninstall
-endif
 	$(MAKE) -C $(udir) uninstall
 	$(MAKE) -C scripts uninstall
 	$(MAKE) -C $(ddir) uninstall
-	-if [ -z "`ls -A $(bindir)`" ]; then  \
+	if [ -z "`ls -A $(bindir)`" ]; then   \
 		rmdir $(bindir);                  \
 	fi
-	-if [ -z "`ls -A $(auxdir)`" ]; then  \
+	if [ -z "`ls -A $(auxdir)`" ]; then   \
 		rmdir $(auxdir);                  \
 	fi
-	-if [ -z "`ls -A $(libdir)`" ]; then  \
+	if [ -z "`ls -A $(libdir)`" ]; then   \
 		rmdir $(libdir);                  \
 	fi
 
@@ -802,7 +799,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) distclean
-	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
+	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
 	$(MAKE) -C me6x00 distclean
 	$(MAKE) -C ni6601 distclean
 	$(MAKE) -C witio_48 distclean
@@ -814,7 +811,7 @@ mostlyclean:
 	$(MAKE) -C $(mdir) distclean
 	$(MAKE) -C $(ddir) clean
 	$(MAKE) -C $(udir) distclean
-	-$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
+	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog *~
 
 
 # Create a tags file to be used with emacs or vi

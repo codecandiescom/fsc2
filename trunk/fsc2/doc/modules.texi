@@ -1148,12 +1148,13 @@ script to accept some unexpected values.
 
 @subsection How to compile a module
 
-A module is a shareable library that gets loaded while @code{fsc2} is
-running if the name of the module is listed in the @code{DEVICES}
-section of an @code{EDL} file. Probably the simplest way to make such
-a shareable library from the source files you have written is to include
-it in the existing @file{Makefile} in the @file{modules} subdirectory
-of the packages. But, of course, it's also possible to use other methods.
+A module is a shareable library (with an extension of @file{.fsc2_so})
+that gets loaded while @code{fsc2} is running if the name of the module
+is listed in the @code{DEVICES} section of an @code{EDL} file. Probably
+the simplest way to make such a shareable library from the source files
+you have written is to include it in the existing @file{Makefile} in the
+@file{modules} subdirectory of the packages. But, of course, it's also
+possible to use other methods.
 
 
 If you want to include your module into the existing Makefile you have
@@ -1173,10 +1174,10 @@ In both cases all you have to do is to edit the @file{Makefile} in the
 defining this variable is at the moment (while I'm writing this):
 @example
 simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
-				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
-				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
-				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
-				 thurlby330
+                 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
+                 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
+                 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
+                 thurlby330 hjs_daadc gg_chopper itc503
 @end example
 @noindent
 (The @code{\} characters at the ends of the lines tell make that the
@@ -1186,10 +1187,10 @@ written to this list but without the @code{.c} extension, i.e.@: if it
 is called @file{abc.c} just change the last line to
 @example
 simp_modules  := User_Functions sr510 sr530 sr810 sr830 aeg_s_band        \
-				 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
-				 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
-				 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
-				 thurlby330 abc
+                 aeg_x_band er035m er035m_s hp5340a er035m_sa er035m_sas  \
+                 bh15 keithley228a egg4402 kontron4060 lakeshore330       \
+                 pt2025 er032m ips20_4 $(s_band_list) ni6601 me6000       \
+                 thurlby330 hjs_daadc gg_chopper itc503 abc
 @end example
 @noindent
 If you now re-compile it will also be compiled, a shareable library will
@@ -1204,8 +1205,9 @@ file you will have to apply two changes to the @file{Makefile}. Directly
 beneath the definition of the make variable @code{simp_modules} another
 variable, @code{comp_modules}, is defined, which (at the moment) is set to:
 @example
-comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
-                 tds520a tds520 hp8647a er023m lecroy9400
+comp_modules  := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
+                 hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
+                 hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a rs_sml01
 @end example
 @noindent
 Here you have to append the name of your own module (just the name with
@@ -1213,16 +1215,15 @@ no extension). Next you have to create a second variable that has the
 same name as your module (again without extension, i.e.@: identical to
 what you just appended to @code{comp_modules}) and which has to be set
 to the list of the all the names of your @code{C} source files. As an
-example have a look at the definition of the variable @code{tds754a}:
+example have a look at the definition of the variable @code{lecroy9400}:
 @example
-tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
+lecroy9400    := lecroy9400.c lecroy9400_gpib.c lecroy9400_util.c
 @end example
 @noindent
-The module @code{tds754a} consists of the four @code{C} source files
+The module @code{lecroy9400} consists of the three @code{C} source files
 listed here. You have to create a similar entry for your own
-module. That's all that's need done and you can now re-compile to
-create the new module and re-install to make it available to
-@code{fsc2}.
+module. That's all that's need done and you can now re-compile to create
+the new module and re-install to make it available to @code{fsc2}.
 
 If you should want to compile a module 'by hand' you'll have to make sure
 that the @file{src} and the @file{config} directory are in the include
@@ -1236,7 +1237,7 @@ make a shareable library out of it you should compile it with at least
 @noindent
 To create a shareable library from it you need
 @example
-  ld -shared -fpic -o abc.so abc.c
+  ld -shared -fpic -o abc.fsc2_so abc.c
 @end example
 @noindent
 (assuming you're using GNU's @code{gcc} and @code{ld}). If this succeeds
@@ -1362,10 +1363,10 @@ etc. Within the file C and C++ style comments can be used. By adding the
 device name to this file you tell @code{fsc2} that there is now a module
 called `sr510' (take care - all modules are spelled with @strong{lower}
 case characters!). Actually, the file compiled from the C file defining
-the functions has to be @file{sr510.so} - that means it is a shared
-library (how to create one from the C file is described later). Here is
-a short snippet from the @file{Devices} file with the entries for the
-lock-in amplifiers:
+the functions has to be @file{sr510.fsc2_so} - that means it is a shared
+library that can be used as a plugin for @code{fsc2} (how to create one
+from the C file is described later). Here is a short snippet from the
+@file{Devices} file with the entries for the lock-in amplifiers:
 @example
 sr510         // Stanford Research lock-in amplifier, model 510
 sr530         // Stanford Research lock-in amplifier, model 530
@@ -1854,14 +1855,14 @@ long **foo( size_t count, size_t len )
 
     TRY
     @{
-    	for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; i++ )
             buffer[ i ] = T_malloc( len * sizeof **buffer );
         buffer[ 0 ] = 123;
         TRY_SUCCESS;
     @}
     CATCH( OUT_OF_MEMORY_EXECPTION )
     @{
-    	for ( i -= 1; i >= 0; i-- )
+        for ( i -= 1; i >= 0; i-- )
             T_free( i )
         RETHROW( );
     @}

@@ -57,7 +57,7 @@ all:
 # Everything not belonging to the modules
 
 src:
-	$(MAKE) fsc2_rsc_lr.so fsc2_rsc_hr.so
+	$(MAKE) fsc2_rsc_lr.fsc2_so fsc2_rsc_hr.fsc2_so
 	$(MAKE) fsc2
 	$(MAKE) fsc2_clean
 	$(MAKE) fsc2_connect
@@ -92,7 +92,7 @@ fsc2: $(objects)
 	sed 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
 	sed 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
-	-$(RM) $(RMFLAGS) $@.x
+	$(RM) $(RMFLAGS) $@.x
 
 
 # Make the primary lexer (which does the cleanup of the input EDL files)
@@ -112,7 +112,7 @@ fsc2_connect: fsc2_connect.o
 
 # Create libraries for the graphical interface
 
-%.so: %.o
+%.fsc2_so: %.o
 	$(CC) $(LFLAGS) $^ -o $@
 	chmod 644 $@
 
@@ -175,23 +175,23 @@ install:
 	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
-	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test     \
-					  $(bindir)/fsc2_load
-	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
-	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
-	-$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
+	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test     \
+					 $(bindir)/fsc2_load
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 
 ifdef WITH_HTTP_SERVER
 	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
 endif
 
 uninstall:
-	-$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean          \
+	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \
 					  $(bindir)/fsc2_connect $(bindir)/fsc2_start  \
 					  $(bindir)/fsc2_test $(bindir)/fsc2_load
-	-for f in *.so; do                                             \
+	for f in *.fsc2_so; do                                         \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                            \
 	done
 
@@ -199,13 +199,13 @@ uninstall:
 # How to get rid of stuff not needed anymore
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
-		   gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c  \
+		  gpib_if.[ch] gpib_parser.y gpib_lexer.l mem cscope.out *~
 
 distclean:
 	$(MAKE) clean
-	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
-		   *.so *.bak
+	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
+		  *.fsc2_so *.bak
 
 
 # don't automatically delete intermediate files created by bison and flex

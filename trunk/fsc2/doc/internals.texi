@@ -502,10 +502,10 @@ Reading symbols from /lib/libnsl.so.1...done.
 Loaded symbols for /lib/libnsl.so.1
 Reading symbols from /usr/lib/gconv/ISO8859-1.so...done.
 Loaded symbols for /usr/lib/gconv/ISO8859-1.so
-Reading symbols from /usr/local/lib/fsc2/fsc2_rsc_lr.so...done.
-Loaded symbols for /usr/local/lib/fsc2/fsc2_rsc_lr.so
-Reading symbols from /usr/local/lib/fsc2/User_Functions.so...done.
-Loaded symbols for /usr/local/lib/fsc2/User_Functions.so
+Reading symbols from /usr/local/lib/fsc2/fsc2_rsc_lr.fsc2_so...done.
+Loaded symbols for /usr/local/lib/fsc2/fsc2_rsc_lr.fsc2_so
+Reading symbols from /usr/local/lib/fsc2/User_Functions.fsc2_so...done.
+Loaded symbols for /usr/local/lib/fsc2/User_Functions.fsc2_so
 0x40698951 in __libc_nanosleep () from /lib/libc.so.6
 (gdb) handle SIGUSR1 nostop noprint
 (gdb) handle SIGUSR2 nostop noprint
@@ -551,8 +551,8 @@ done. All the code for doing so is in the file @file{xinit.c}. You will
 have to read a bit about the @code{Xforms} library to understand what's
 going on there. Mostly it's loading a shared library for creating the
 forms used by the program (there are two shared libraries,
-@file{fsc2_rsc_lr.so} and @file{fsc2_rsc_hr.so}, which one is loaded
-depends on the screen resolution and the comand line option
+@file{fsc2_rsc_lr.fsc2_so} and @file{fsc2_rsc_hr.fsc2_so}, which one is
+loaded depends on the screen resolution and the comand line option
 @code{-size}), evaluating the settings in the @file{.Xdefaults} and
 @file{.Xresources} files, again setting up lots of global variables and
 doing further checks on the command line arguments.
@@ -750,8 +750,8 @@ which is central to the plugin-like architecture of device handling in
 
 The first part of @code{load_all_drivers()} consists of loading the
 libraries for the devices listed in the @code{DEVICES} section (plus
-another one called @code{User_Functions.so}) and then trying to find the
-(non-builtin) functions in the libraries that are listed in the
+another one called @code{User_Functions.fsc2_so}) and then trying to
+find the (non-builtin) functions in the libraries that are listed in the
 @file{Functions} file in the @file{config} subdirectory, which already
 has been read in. This is done in the @code{load_functions} subroutine.
 Here first a library gets loaded (using @code{dlopen(3)}), and if this

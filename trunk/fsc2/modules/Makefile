@@ -59,8 +59,8 @@ hp8647a         := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
 hp8648b         := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
 hp8672a         := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m          := er023m.c  er023m_addon.c er023m_gpib.c
-lecroy9400      := lecroy9400.c lecroy9400_gpib.c  lecroy9400_util.c
-lecroy9400_s    := lecroy9400_s.c lecroy9400_serial.c  lecroy9400_util.c
+lecroy9400      := lecroy9400.c lecroy9400_gpib.c lecroy9400_util.c
+lecroy9400_s    := lecroy9400_s.c lecroy9400_serial.c lecroy9400_util.c
 rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 				   spectrapro_300i_lexer.c
@@ -139,7 +139,7 @@ all:
 	$(MAKE) -C .. modules
 
 modules:
-	$(MAKE) $(addsuffix .so,$(simp_modules))
+	$(MAKE) $(addsuffix .fsc2_so,$(simp_modules))
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \
@@ -179,7 +179,7 @@ modules:
 # additional libraries are required for the individual modules. These
 # libraries have to be defined by a variables consisting of the name of
 # the module and the the string "_libs". If no additional libraries are
-# requires we compile the module immediately. Otherwise we've got to
+# required we compile the module immediately. Otherwise we've got to
 # distinguish between libraries given with an absolute path (which are
 # passed to gcc just as they are) and libraries without a path, which are
 # supposed to be in the directories searched by the linker. For these we
@@ -189,13 +189,13 @@ modules:
 # be created (which takes care of people who obviously don't need the
 # module because they didn't care to install the required libraries).
 
-$(addsuffix .so,$(simp_modules)): %.so: %.o	
-	@if [ -z "$($(patsubst %.so,%_libs,$@))" ]; then               \
+$(addsuffix .fsc2_so,$(simp_modules)): %.fsc2_so: %.o
+	@if [ -z "$($(patsubst %.fsc2_so,%_libs,$@))" ]; then          \
 		echo "$(CC) $(LFLAGS) $^ -o $@";                           \
 		$(CC) $(LFLAGS) $^ -o $@;                                  \
 		chmod 644 $@;                                              \
 	else                                                           \
-		for l in "$($(patsubst %.so,%_libs,$@))"; do               \
+		for l in "$($(patsubst %.fsc2_so,%_libs,$@))"; do          \
 			if [ "$(notdir $$l)" == "$$l" ]; then                  \
 				l=$${l%.so};                                       \
 				libs="$$libs -l$${l#lib}";                         \
@@ -241,7 +241,7 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 
 install:
 	$(INSTALL) -d $(libdir)
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.so $(libdir)
+	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
 		$(MAKE) install-$(machine_name);               \
 	fi
@@ -249,7 +249,7 @@ install:
 # How to uninstall the modules
 
 uninstall:
-	-for f in *.so; do                                 \
+	-for f in *.fsc2_so; do                            \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                \
 	done
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
@@ -260,7 +260,7 @@ uninstall:
 # How to clean up the mess we created
 
 clean:
-	-$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make *~
+	$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make *~
 
 distclean:
 	$(MAKE) clean
@@ -279,7 +279,7 @@ distclean:
 	-for n in $(s_band_list); do                  \
 		$(RM) $(RMFLAGS) $$n.c;                   \
 	done;
-	-$(RM) $(RMFLAGS) *.so
+	$(RM) $(RMFLAGS) *.fsc2_so
 
 # don't automatically delete intermediate files created by flex
 

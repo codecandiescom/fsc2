@@ -718,10 +718,9 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 
 bool dl_fsc2_rsc( void )
 {
-	char *lib_name = NULL;
-	char *ld_path;
-	char *ld = NULL;
-	char *ldc;
+	const char *lib_name = GUI.G_Funcs.size == LOW ? "fsc2_rsc_lr.fsc2_so" : 
+													 "fsc2_rsc_hr.fsc2_so";
+	char *alt_lib_name;
 
 
 	/* Try to open the library with the stuff dealing with creating the forms.
@@ -731,36 +730,20 @@ bool dl_fsc2_rsc( void )
 
 	Internals.rsc_handle = NULL;
 
-	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
-	{
-		ld = T_strdup( ld_path );
-		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
-		{
-			lib_name = get_string( "%s%sfsc2_rsc_%cr.so", ldc, slash( ldc ),
-								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-			if ( ( Internals.rsc_handle = dlopen( lib_name, RTLD_NOW ) )
-				 != NULL )
-				break;
-			lib_name = CHAR_P T_free( lib_name );
-		}
-		T_free( ld );
-	}
+	Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
 
 	if ( Internals.rsc_handle == NULL &&
 		 ! ( Internals.cmdline_flags & DO_CHECK ) )
 	{
-		lib_name = get_string( "%s%sfsc2_rsc_%cr.so", libdir, slash( libdir ),
-							   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
-		Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
+		alt_lib_name = get_string( "%s%s%s", libdir, slash( libdir ),
+								   lib_name );
+		Internals.rsc_handle = dlopen( alt_lib_name, RTLD_NOW );
+		T_free( alt_lib_name );
 	}
 
 	if ( Internals.rsc_handle == NULL )
 	{
-		if ( lib_name == NULL )
-			lib_name = get_string( "fsc2_rsc_%cr.so",
-								   GUI.G_Funcs.size == LOW ? 'l' : 'h' );
 		fprintf( stderr, "Can't open graphics library '%s'.\n", lib_name );
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -772,7 +755,6 @@ bool dl_fsc2_rsc( void )
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -786,7 +768,6 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -800,7 +781,6 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -815,7 +795,6 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -830,7 +809,6 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -844,7 +822,6 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
 
@@ -859,11 +836,8 @@ bool dl_fsc2_rsc( void )
 		fprintf( stderr, "Error in graphics library '%s'\n", lib_name );
 		dlclose( Internals.rsc_handle );
 		Internals.rsc_handle = NULL;
-		T_free( lib_name );
 		return FAIL;
 	}
-
-	T_free( lib_name );
 
 	return OK;
 }
