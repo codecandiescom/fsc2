@@ -18,6 +18,7 @@ int dg2020_f_end_of_exp_hook( void );
 void dg2020_f_exit_hook( void );
 
 
+Var *pulser_name( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );

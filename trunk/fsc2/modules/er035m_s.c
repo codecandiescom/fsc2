@@ -30,6 +30,7 @@ int er035m_s_exp_hook( void );
 int er035m_s_end_of_exp_hook( void );
 void er035m_s_end_hook( void );
 
+Var *gaussmeter_name( Var *v );
 Var *find_field( Var *v );
 Var *field_resolution( Var *v );
 Var *field_meter_wait( Var *v );
@@ -416,6 +417,16 @@ void er035m_s_end_hook( void )
 /*              exported functions                                           */
 /*                                                                           */
 /*****************************************************************************/
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
 
 
 /*----------------------------------------------------------------*/

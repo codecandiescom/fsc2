@@ -27,6 +27,7 @@ int aeg_x_band_exp_hook( void );
 int aeg_x_band_end_of_exp_hook( void );
 void aeg_x_band_exit_hook( void );
 
+Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
 Var *magnet_fast_init( Var *v );
 Var *set_field( Var *v );

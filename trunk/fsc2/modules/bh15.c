@@ -6,12 +6,16 @@
 #include "gpib_if.h"
 
 
+#define DEVICE_NAME "BH15"
+
+
 int bh15_init_hook( void );
 int bh15_test_hook( void );
 int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
 void bh15_exit_hook( void );
 
+Var *gaussmeter_field( Var *v );
 Var *find_field( Var *v );
 Var *field_resolution( Var *v );
 Var *field_meter_wait( Var *v );
@@ -79,7 +83,7 @@ int bh15_init_hook( void )
 	{
 		need_GPIB = SET;
 		bh15.is_needed = SET;
-		bh15.name = "BH15";
+		bh15.name = DEVICE_NAME;
 	}
 
 	bh15.state = BH15_UNKNOWN;
@@ -213,6 +217,16 @@ void bh15_exit_hook( void )
 /*              exported functions                                           */
 /*                                                                           */
 /*****************************************************************************/
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
 
 
 /*--------------------------------------------------------*/

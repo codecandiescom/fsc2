@@ -18,6 +18,7 @@ int kontron4060_init_hook( void );
 int kontron4060_exp_hook( void );
 int kontron4060_end_of_exp_hook( void );
 
+Var *voltmeter_name( Var *v );
 Var *voltmeter_get_data( Var *v );
 Var *voltmeter_ac_measurement( Var *v );
 Var *voltmeter_dc_measurement( Var *v );
@@ -100,6 +101,16 @@ int kontron4060_end_of_exp_hook( void )
 	kontron4060.device = -1;
 
 	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *voltmeter_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 

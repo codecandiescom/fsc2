@@ -34,7 +34,7 @@ int lakeshore330_end_of_exp_hook( void );
 void lakeshore330_exit_hook( void );
 
 
-
+Var *temp_contr_name( Var *v );
 Var *temp_contr_temperature( Var *v );
 Var *temp_contr_sample_channel( Var *v );
 Var *temp_contr_sensor_unit( Var *v );
@@ -121,6 +121,16 @@ int lakeshore330_end_of_exp_hook( void )
 /*          EDL functions                                 */
 /*                                                        */
 /**********************************************************/
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *temp_contr_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
 
 
 /*---------------------------------------------*/

@@ -45,6 +45,7 @@ int keithley228a_init_hook( void );
 int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
 
+Var *magnet_name( Var *v );
 Var *magnet_setup( Var *v );
 Var *magnet_use_correction( Var *v );
 Var *magnet_use_dac_port( Var *v );
@@ -185,6 +186,16 @@ int keithley228a_end_of_exp_hook( void )
 /*           exported functions, i.e. EDL functions                    */
 /*                                                                     */
 /***********************************************************************/
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Var *magnet_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
 
 
 /*-----------------------------------------------------------------------*/

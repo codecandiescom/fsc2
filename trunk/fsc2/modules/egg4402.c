@@ -19,6 +19,7 @@ int egg4402_init_hook( void );
 int egg4402_exp_hook( void );
 int egg4402_end_of_exp_hook( void );
 
+Var *boxcar_name( Var *v );
 Var *boxcar_curve_length( Var *v );
 Var *boxcar_get_curve( Var *v );
 
@@ -101,6 +102,16 @@ int egg4402_end_of_exp_hook( void )
 	egg4402.device = -1;
 
 	return 1;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *boxcar_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 

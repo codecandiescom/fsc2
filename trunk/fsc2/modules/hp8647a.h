@@ -46,6 +46,7 @@ int hp8647a_end_of_exp_hook( void );
 void hp8647a_exit_hook( void );
 
 
+Var *synthesizer_name( Var *v );
 Var *synthesizer_state( Var *v );
 Var *synthesizer_frequency( Var *v );
 Var *synthesizer_step_frequency( Var *v );

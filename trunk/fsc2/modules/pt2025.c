@@ -16,6 +16,7 @@ int  pt2025_exp_hook( void );
 int  pt2025_end_of_exp_hook( void );
 
 
+Var *gaussmeter_name( Var *v );
 Var *measure_field( Var *v );
 
 
@@ -85,6 +86,16 @@ int pt2025_end_of_exp_hook( void )
 /*              Exported functions                        */
 /*                                                        */
 /**********************************************************/
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+Var *gaussmeter_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
 
 
 /*--------------------------------------------------------*/

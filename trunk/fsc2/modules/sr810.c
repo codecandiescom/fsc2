@@ -39,6 +39,7 @@ int sr810_exp_hook( void );
 int sr810_end_of_exp_hook( void );
 void sr810_exit_hook( void );
 
+Var *lockin_name( Var *v );
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
 Var *lockin_dac_voltage( Var *v );
@@ -206,6 +207,16 @@ int sr810_end_of_exp_hook( void )
 void sr810_exit_hook( void )
 {
 //	sr810_end_of_exp_hook( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *lockin_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 

@@ -32,6 +32,7 @@ get_phase_cycled_area_2d, -1, EXP;
 // AEG_X_BAND and, for all functions without the word field in its name,
 // also the W_BAND)
 
+magnet_name, 0, ALL;            // returns the device name
 magnet_setup, 2, ALL;           // set start field and sweep step size (S,X,W)
 magnet_fast_init, 0, ALL;       // shortens magnet setup time (X)
 set_field, -1, EXP;             // go to to a field value (S,W,X)
@@ -46,6 +47,7 @@ magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 
 // Functions exported by the field meter drivers (BH15, ER035M)
 
+gaussmeter_name, 0, ALL;        // returns the device name
 find_field, 0, EXP;             // return current field value
 field_resolution, 0, EXP;       // returns resolution of field meter
 field_meter_wait, 0, EXP;       // wait for field to stabilize
@@ -56,6 +58,7 @@ measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
 // Functions exported by the pulser drivers (DG2020, HFS9000)
 // (functions involving phases and keyboard for DG2020 only)
 
+pulser_name, 0, ALL;            // returns the device name
 pulser_state, -1, ALL;          // switches pulser on/off
 pulser_channel_state, -1, ALL;  // switches pulser channel on/off
 pulser_update, 0, EXP;          // commits changes
@@ -71,6 +74,7 @@ pulser_cw_mode, 0, PREP;        // CW mode experiment (DG2020/Berlin only)
 // Functions exported by the lock-in amplifier drivers
 // (SR510, SR530, SR810, SR830)
 
+lockin_name, 0, ALL;            // returns the device name
 lockin_get_data, -1, EXP;       // returns the lock-in voltage 
 lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
 lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
@@ -86,6 +90,7 @@ lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard
 // Functions exported by the digitizer
 // (TDS520, TDS520A, TDS520C, TDS540, TDS744A, TDS754A)
 
+digitizer_name, 0, ALL;                 // returns the device name
 digitizer_define_window, -1, PREP;      // defines a cursor window
 digitizer_timebase, -1, ALL;            // set or get the time base
 digitizer_sensitivity, -1, ALL;         // set or get the sensitivity
@@ -108,6 +113,7 @@ digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
 
 // Functions exported by the rf synthesizer (HP8647A)
 
+synthesizer_name, 0, ALL;             // returns the device name
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
 synthesizer_frequency, -1, ALL;       // set/get frequency
 synthesizer_attenuation, -1, ALL;     // set/get attenuation
@@ -127,12 +133,14 @@ synthesizer_mod_ampl, -1, EXP;
 
 // Functions exported by the boxcar (EGG4402)
 
+boxcar_name, 0, ALL;
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
 
 
 // Functions exported by the voltmeter (Kontron 4060)
 
+voltmeter_name, 0, ALL;
 voltmeter_get_data, 0, EXP;
 voltmeter_ac_measurement, 0, EXP;
 voltmeter_dc_measurement, 0, EXP;
@@ -140,6 +148,7 @@ voltmeter_dc_measurement, 0, EXP;
 
 // Functions exported by the temperature controller (Lake Shore 330)
 
+temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
 temp_contr_temperature, 0, EXP;
 temp_contr_sensor_unit, -1, EXP;

@@ -24,6 +24,7 @@ int sr530_exp_hook( void );
 int sr530_end_of_exp_hook( void );
 void sr530_exit_hook( void );
 
+Var *lockin_name( Var *v );
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
 Var *lockin_sensitivity( Var *v );
@@ -173,6 +174,16 @@ int sr530_end_of_exp_hook( void )
 void sr530_exit_hook( void )
 {
 	sr530_end_of_exp_hook( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *lockin_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 

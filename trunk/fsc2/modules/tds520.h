@@ -94,6 +94,7 @@ int tds520_end_of_exp_hook( void );
 void tds520_exit_hook( void );
 
 
+Var *digitizer_name( Var *v );
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
 Var *digitizer_sensitivity( Var *v );
