@@ -145,7 +145,8 @@ static int func_cmp( const void *a, const void *b )
 
 /*---------------------------------------------------------------*/
 /* Function tests if the device driver passed to the function by */
-/* name is loaded.                                               */
+/* name is loaded. If it exists it returns the number that needs */
+/* to be appended to the function names, otherwise 0.            */
 /*---------------------------------------------------------------*/
 
 int exists_device( const char *name )
