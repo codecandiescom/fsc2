@@ -62,8 +62,9 @@ Var *daq_gain( Var *v );
 static int rb8509_translate_channel( long channel );
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function called immediately after the module has been loaded
+ *--------------------------------------------------------------*/
 
 int rb8509_init_hook( void )
 {
@@ -82,8 +83,9 @@ int rb8509_init_hook( void )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*----------------------------------------------*
+ * Function called at the start of the test run
+ *----------------------------------------------*/
 
 int rb8509_test_hook( void )
 {
@@ -91,8 +93,9 @@ int rb8509_test_hook( void )
 	return 1;
 }
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*------------------------------------------------*
+ * Function called at the start of the experiment
+ *------------------------------------------------*/
 
 int rb8509_exp_hook( void )
 {
@@ -131,7 +134,7 @@ int rb8509_exp_hook( void )
 	}
 
 	/* Check if during the test run an external trigger was used but the
-	   card does not support external triggers */
+	   card does not support external triggering */
 
 	if ( ( has_ext_trig =
 					 rulbus_adc12_has_external_trigger( rb8509.handle ) ) < 0 )
@@ -176,8 +179,9 @@ int rb8509_exp_hook( void )
 }
 
 
-/*------------------------------------------------------*
- *------------------------------------------------------*/
+/*----------------------------------------------*
+ * Function called at the end of the experiment
+ *----------------------------------------------*/
 
 int rb8509_end_of_exp_hook( void )
 {
@@ -275,8 +279,11 @@ Var *daq_get_voltage( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting or quering the trigger mode - note that some
+ * versions of the card do not support external triggerin, but this
+ * can only be determined when the experiment is started
+ *-------------------------------------------------------------------*/
 
 Var *daq_trigger_mode( Var *v )
 {
@@ -315,8 +322,10 @@ Var *daq_trigger_mode( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for setting or quering the pre-amplifier gain,
+ * argument must be either 1, 2, 4 or 8
+ *---------------------------------------------------------*/
 
 Var *daq_gain( Var *v )
 {
@@ -353,8 +362,10 @@ Var *daq_gain( Var *v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Internally used function for converting a channel number as we
+ * get it from the EDL script into a "real" channel number
+ *----------------------------------------------------------------*/
 
 static int rb8509_translate_channel( long channel )
 {
