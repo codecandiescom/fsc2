@@ -1,4 +1,9 @@
-1. When increasing the magnification of the display of the measured data
+1. Introduce something like a not-opened file for discarding data. This
+   would be useful for cases where in a program it is assumed that a
+   file has ben opened for saving data but the user decided not to
+   open the file.
+
+2. When increasing the magnification of the display of the measured data
    further and further there is a point after which rubish will get
    displayed (but the program does not crash). Since it will probably
    take a lot of work to get this resolved and, on the other hand, it

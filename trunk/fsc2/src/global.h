@@ -355,6 +355,12 @@ enum {
 #define WINDOW_START_NUMBER  172438
 
 
+/* The following number is the start number for numbers designating file
+   identifiers. Valid file numbers start from FILE_START_NUMBER */
+
+#define FILE_START_NUMBER  215927
+
+
 /* This constants are used in converting integer and double numbers to short
    integers as expected by the X library routines as point coordinates */
 
