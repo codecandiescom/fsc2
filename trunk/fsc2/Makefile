@@ -146,6 +146,7 @@ install:
 	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	$(MAKE) install-$(shell hostname -f)
+	$(MAKE) -C scripts all
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
@@ -192,7 +193,7 @@ install-moebi.physik.fu-berlin.de:
 	ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
-install-crowley.none:
+install-crowley.none: ;
 
 
 # make all types of documentation
