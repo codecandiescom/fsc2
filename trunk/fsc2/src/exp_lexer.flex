@@ -177,7 +177,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 {P}			{
-				exp_val.vptr = p_num( exptext );
+				exp_val.lval = p_num( exptext );
 				return E_INT_TOKEN;
 			}
 
