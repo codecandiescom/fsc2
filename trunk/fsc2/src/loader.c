@@ -83,18 +83,37 @@ void load_all_drivers( void )
 	   before each init_hook() function is called and is restored to its
 	   previous values if necessary. */
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	IN_HOOK = SET;
+
+	TRY
 	{
-		saved_need_GPIB = need_GPIB;
+		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		{
+			saved_need_GPIB = need_GPIB;
 
-		if ( cd->is_loaded && cd->driver.is_init_hook &&
-			 ! cd->driver.init_hook( ) )
-			eprint( WARN, UNSET, "Initialisation of module `%s.so' failed.\n",
-					cd->name );
+			if ( cd->is_loaded && cd->driver.is_init_hook )
+			{
+				call_push( NULL, cd->device_name );
+				if ( ! cd->driver.init_hook( ) )
+					eprint( WARN, UNSET, "Initialisation of module `%s.so' "
+							"failed.\n", cd->name );
+				call_pop( );
+			}
 
-		if ( need_GPIB == UNSET && saved_need_GPIB == SET )
-			need_GPIB = SET;
+			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
+				need_GPIB = SET;
+		}
+
+		TRY_SUCCESS;
 	}
+	OTHERWISE
+	{
+		call_pop( );
+		IN_HOOK = UNSET;
+		PASSTHROUGH( );
+	}
+
+	IN_HOOK = UNSET;
 }
 
 
@@ -452,11 +471,30 @@ void run_test_hooks( void )
 {
 	Device *cd;
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
-		if ( cd->is_loaded && cd->driver.is_test_hook &&
-			 ! cd->driver.test_hook( ) )
-			eprint( SEVERE, UNSET, "Initialisation of test run failed for "
-					"module `%s'.\n", cd->name );
+	IN_HOOK = SET;
+
+	TRY
+	{
+		for ( cd = Device_List; cd != NULL; cd = cd->next )
+			if ( cd->is_loaded && cd->driver.is_test_hook )
+			{
+				call_push( NULL, cd->device_name );
+				if ( ! cd->driver.test_hook( ) )
+					eprint( SEVERE, UNSET, "Initialisation of test run failed "
+							"for module `%s'.\n", cd->name );
+				call_pop( );
+			}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		IN_HOOK = UNSET;
+		PASSTHROUGH( );
+	}
+
+	IN_HOOK = UNSET;
 }
 
 
@@ -468,11 +506,30 @@ void run_end_of_test_hooks( void )
 {
 	Device *cd;
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
-		if ( cd->is_loaded && cd->driver.is_end_of_test_hook &&
-			 ! cd->driver.end_of_test_hook( ) )
-			eprint( SEVERE, UNSET, "Final checks after test run failed for "
-					"module `%s'.\n", cd->name );
+	IN_HOOK = SET;
+
+	TRY
+	{
+		for ( cd = Device_List; cd != NULL; cd = cd->next )
+			if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
+			{
+				call_push( NULL, cd->device_name );
+				if ( ! cd->driver.end_of_test_hook( ) )
+					eprint( SEVERE, UNSET, "Final checks after test run "
+							"failed for module `%s'.\n", cd->name );
+				call_pop( );
+			}
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		IN_HOOK = UNSET;
+		PASSTHROUGH( );
+	}
+
+	IN_HOOK = UNSET;
 }
 
 
@@ -484,21 +541,43 @@ void run_exp_hooks( void )
 {
 	Device *cd;
 
-	for ( cd = Device_List; cd != NULL; cd = cd->next )
+	IN_HOOK = SET;
+
+	TRY
 	{
-		if ( cd->is_loaded && cd->driver.is_exp_hook &&
-			 ! cd->driver.exp_hook( ) )
-			eprint( SEVERE, UNSET, "Initialisation of experiment failed for "
-					"module `%s'.\n", cd->name );
-		else
-			cd->driver.exp_hook_is_run = SET;
+		for ( cd = Device_List; cd != NULL; cd = cd->next )
+		{
+			if ( cd->is_loaded && cd->driver.is_exp_hook )
+			{
+				call_push( NULL, cd->device_name );
+				if ( ! cd->driver.exp_hook( ) )
+					eprint( SEVERE, UNSET, "Initialisation of experiment "
+							"failed for module `%s'.\n", cd->name );
+				else
+					cd->driver.exp_hook_is_run = SET;
 
-		/* Give user a chance to stop while running the experiment hooks */
+				call_pop( );
+			}
+			else
+				cd->driver.exp_hook_is_run = SET;
 
-		fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
+			/* Give user a chance to stop while running the experiment hooks */
+
+			fl_check_only_forms( );
+			if ( DO_STOP )
+				THROW( USER_BREAK_EXCEPTION );
+		}
+
+		TRY_SUCCESS;
 	}
+	OTHERWISE
+	{
+		call_pop( );
+		IN_HOOK = UNSET;
+		PASSTHROUGH( );
+	}
+
+	IN_HOOK = UNSET;
 }
 
 
@@ -517,22 +596,32 @@ void run_end_of_exp_hooks( void )
 	   run, probably because the exp-hook for a previous device in the list
 	   failed. */
 
+	IN_HOOK = SET;
+
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
 		if ( ! cd->driver.exp_hook_is_run )
 			continue;
 
-		TRY
-		{
-			cd->driver.exp_hook_is_run = UNSET;
+		cd->driver.exp_hook_is_run = UNSET;
 
-			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
-				 ! cd->driver.end_of_exp_hook( ) )
-				eprint( SEVERE, UNSET, "Resetting module `%s' after "
-						"experiment failed.\n", cd->name );
-			TRY_SUCCESS;
+		if ( cd->is_loaded && cd->driver.is_end_of_exp_hook )
+		{
+			call_push( NULL, cd->device_name );
+
+			TRY
+			{
+				if( ! cd->driver.end_of_exp_hook( ) )
+					eprint( SEVERE, UNSET, "Resetting module `%s' after "
+							"experiment failed.\n", cd->name );
+				TRY_SUCCESS;
+			}
+
+			call_pop( );
 		}
 	}
+
+	IN_HOOK = UNSET;
 }
 
 
@@ -555,15 +644,26 @@ void run_exit_hooks( void )
 	for( cd = Device_List; cd->next != NULL; cd = cd->next )
 		;
 
+	IN_HOOK = SET;
+
 	for ( ; cd != NULL; cd = cd->prev )
 	{
 		TRY
 		{
 			if ( cd->is_loaded && cd->driver.is_exit_hook )
+			{
+				call_push( NULL, cd->device_name );
 				cd->driver.exit_hook( );
+			}
+
 			TRY_SUCCESS;
 		}
+
+		if ( cd->is_loaded && cd->driver.is_exit_hook )
+			call_pop( );
 	}
+
+	IN_HOOK = UNSET;
 
 	/* Set global variable to show that exit hooks already have been run */
 

@@ -224,8 +224,8 @@ int sr830_exp_hook( void )
 
 	if ( ! sr830_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, UNSET, "%s: Initialization of device failed: %s\n",
-				DEVICE_NAME, gpib_error_msg );
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
 
@@ -302,8 +302,7 @@ Var *lockin_get_data( Var *v )
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
-			eprint( FATAL, SET, "%s: Invalid channel number %ld in call of "
-					"`lockin_get_data'.\n", DEVICE_NAME, channels[ i ] );
+			print( FATAL, "Invalid channel number %ld.\n", channels[ i ] );
 			THROW( EXCEPTION );
 		}
 
@@ -312,9 +311,8 @@ Var *lockin_get_data( Var *v )
 
 	if ( v != NULL )
 	{
-		eprint( SEVERE, SET, "%s: More than 6 parameters in call of "
-				"%s(), discarding superfluous ones.\n",
-				DEVICE_NAME, Cur_Func );
+		print( SEVERE, "More than 6 parameters, discarding superfluous "
+			   "ones.\n" );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -361,9 +359,8 @@ Var *lockin_get_adc_data( Var *v )
 
 	if ( port < 1 || port > NUM_ADC_PORTS )
 	{
-		eprint( FATAL, SET, "%s: Invalid ADC channel number (%ld) in "
-				"call of 'lockin_get_adc_data', valid channel are in the "
-				"range 1-%d.\n", DEVICE_NAME, port, NUM_ADC_PORTS );
+		print( FATAL, "Invalid ADC channel number (%ld), valid channels are "
+			   "in the range between 1 and %d.\n", port, NUM_ADC_PORTS );
 		THROW( EXCEPTION );
 	}
 
@@ -391,8 +388,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing arguments in call of function "
-				"`lockin_dac_voltage`.\n", DEVICE_NAME );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -402,21 +398,15 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
-		eprint( FATAL, SET, "%s: Invalid DAC channel number (%ld) in "
-				"call of 'lockin_dac_voltage', valid channel are in the "
-				"range 1-%d.\n", DEVICE_NAME, port, NUM_DAC_PORTS );
+		print( FATAL, "Invalid DAC channel number (%ld), valid channels are "
+			   "in the range between 1 and %d.\n", port, NUM_DAC_PORTS );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == PREPARATION )
-		{
-			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION );
-		}
+			no_query_possible( );
 
 		return vars_push( FLOAT_VAR, sr830.dac_voltage[ port - 1 ] );
 	}
@@ -427,10 +417,8 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
-		eprint( FATAL, SET, "%s: Invalid DAC voltage (%f V) in call of "
-				"'lockin_dac_voltage', valid range is between %f V and "
-				"%f V.\n", DEVICE_NAME, DAC_MIN_VOLTAGE,
-				DAC_MAX_VOLTAGE );
+		print( FATAL, "Invalid DAC voltage (%f V), valid range is between "
+			   "%f V and %f V.\n", voltage, DAC_MIN_VOLTAGE, DAC_MAX_VOLTAGE );
 		THROW( EXCEPTION );
 	}
 
@@ -478,8 +466,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( sens < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative sensitivity.\n",
-				DEVICE_NAME );
+		print( FATAL, "Invalid negative sensitivity.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -508,17 +495,17 @@ Var *lockin_sensitivity( Var *v )
 		 ! sr830.sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
-					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
+				   "instead.\n",
+				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
-					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
+			print( WARN, "%s: Can't set sensitivity to %.0lf uV, using "
+				   "%.0lf uV instead.\n",
+				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
-			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
-					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+			print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "
+				   "instead.\n",
+				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 		sr830.sens_warn = SET;
 	}
 
@@ -532,13 +519,13 @@ Var *lockin_sensitivity( Var *v )
 		if ( ! sr830.sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
-				eprint( WARN, SET, "%s: Sensitivity of %.0lf V is too "
-						"low, using %.0lf V instead.\n", DEVICE_NAME,
-						sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+				print( WARN, "Sensitivity of %.0lf V is too low, using "
+					   "%.0lf V instead.\n",
+					   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 			else
-				eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too "
-						"high, using %.0lf nV instead.\n", DEVICE_NAME,
-						sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+				print( WARN, "Sensitivity of %.0lf nV is too high, using "
+					   "%.0lf nV instead.\n",
+					   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 			sr830.sens_warn = SET;
 		}
 	}
@@ -586,8 +573,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc < 0.0 )
 	{
-		eprint( FATAL, SET, "%s: Invalid negative time constant.\n",
-				DEVICE_NAME );
+		print( FATAL, "Invalid negative time constant.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -610,21 +596,17 @@ Var *lockin_time_constant( Var *v )
 		 ! sr830.tc_warn )                          /* no warning yet ? */
 	{
 		if ( tc > 1.0e3 )
-			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ks,"
-					" using %.0lf ks instead.\n", DEVICE_NAME,
-					tc * 1.0e-3, tc_list[ tc_index ] );
+			print( WARN, "Can't set time constant to %.0lf ks, using %.0lf ks "
+				   "instead.\n", tc * 1.0e-3, tc_list[ tc_index ] );
 		else if ( tc > 1.0 )
-			eprint( WARN, SET, "%s: Can't set time constant to %.0lf s, "
-					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index ] );
+			print( WARN, "Can't set time constant to %.0lf s, using %.0lf s "
+				   "instead.\n", tc, tc_list[ tc_index ] );
 		else if ( tc > 1.0e-3 )
-			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ms,"
-					" using %.0lf ms instead.\n", DEVICE_NAME,
-					tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+			print( WARN, "Can't set time constant to %.0lf ms, using %.0lf ms "
+				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		else
-			eprint( WARN, SET, "%s: Can't set time constant to %.0lf us,"
-					" using %.0lf us instead.\n", DEVICE_NAME,
-					tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+			print( WARN, "Can't set time constant to %.0lf us, using %.0lf us "
+				   "instead.\n", tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 		sr830.tc_warn = SET;
 	}
 
@@ -638,13 +620,13 @@ Var *lockin_time_constant( Var *v )
 		if ( ! sr830.tc_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 3.0e4 )
-				eprint( WARN, SET, "%s: Time constant of %.0lf ks is too"
-						" large, using %.0lf ks instead.\n", DEVICE_NAME,
-						tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
+				print( WARN, "Time constant of %.0lf ks is too large, using "
+					   "%.0lf ks instead.\n",
+					   tc * 1.0e-3, tc_list[ tc_index ] * 1.0e-3 );
 			else
-				eprint( WARN, SET, "%s: Time constant of %.0lf us is too"
-						" small, using %.0lf us instead.\n", DEVICE_NAME,
-						tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
+				print( WARN, "Time constant of %.0lf us is too small, using "
+					   "%.0lf us instead.\n",
+					   tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
 			sr830.tc_warn = SET;
 		}
 	}
@@ -679,10 +661,7 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				eprint( FATAL, SET, "%s: Function `lockin_phase' with "
-						"no argument can only be used in the EXPERIMENT "
-						"section.\n", DEVICE_NAME );
-				THROW( EXCEPTION );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_phase ?
@@ -749,17 +728,16 @@ Var *lockin_harmonic( Var *v )
 
 	if ( harm > MAX_HARMONIC || harm < MIN_HARMONIC )
 	{
-		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
-				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
+		print( FATAL, "Harmonic of %ld not within allowed range of %ld-%ld.\n",
+			   harm, MIN_HARMONIC, MAX_HARMONIC );
 		THROW( EXCEPTION );
 	}
 
 	if ( freq > MAX_MOD_FREQ / ( double ) harm )
 	{
-		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
-				"harmonic set to %ld is not within valid range "
-				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
-				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
+		print( FATAL, "Modulation frequency of %f Hz with harmonic set to "
+			   "%ld is not within valid range (%f Hz - %f kHz).\n", freq, harm,
+			   MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
 
@@ -819,8 +797,8 @@ Var *lockin_ref_freq( Var *v )
 	
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
-		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
-				"modulation source isn't internal.\n", DEVICE_NAME );
+		print( FATAL, "Can't set modulation frequency while modulation source "
+			   "isn't internal.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -832,14 +810,14 @@ Var *lockin_ref_freq( Var *v )
 	if ( freq < MIN_MOD_FREQ || freq > MAX_MOD_FREQ / ( double ) harm )
 	{
 		if ( harm == 1 )
-			eprint( FATAL, SET, "%s: Modulation frequency of %f Hz is "
-					"not within valid range (%f Hz - %f kHz).\n",
-					DEVICE_NAME, freq, MIN_MOD_FREQ, MAX_MOD_FREQ * 1.0e-3 );
+			print( FATAL, "Modulation frequency of %f Hz is not within valid "
+				   "range (%f Hz - %f kHz).\n",
+				   freq, MIN_MOD_FREQ, MAX_MOD_FREQ * 1.0e-3 );
 		else
-			eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
-					"harmonic set to %ld is not within valid range "
-					"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
-					MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
+			print( FATAL, "Modulation frequency of %f Hz with harmonic set to "
+				   "%ld is not within valid range (%f Hz - %f kHz).\n",
+				   freq, harm, MIN_MOD_FREQ,
+				   1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION );
 	}
 
@@ -881,9 +859,8 @@ Var *lockin_ref_level( Var *v )
 
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
-		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
-				"valid range (%f V - %f V).\n", DEVICE_NAME,
-				MIN_MOD_LEVEL, MAX_MOD_LEVEL );
+		print( FATAL, "Modulation level of %f V is not within valid range "
+			   "(%f V - %f V).\n", level, MIN_MOD_LEVEL, MAX_MOD_LEVEL );
 		THROW( EXCEPTION );
 	}
 
@@ -989,8 +966,8 @@ static bool sr830_init( const char *name )
 		if ( sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 			sr830_set_mod_freq( sr830.mod_freq );
 		else
-			eprint( SEVERE, UNSET, "%s: Can't set modulation frequency, "
-					"lock-in uses internal modulation.\n", DEVICE_NAME );
+			print( SEVERE, "Can't set modulation frequency, lock-in uses "
+				   "internal modulation.\n" );
 	}
 	if ( sr830.is_mod_level )
 		sr830_set_mod_level( sr830.mod_level );
@@ -1065,8 +1042,7 @@ static void sr830_get_xy_data( double *data, long *channels, int num_channels )
 
 		if ( bp_next == NULL )
 		{
-			eprint( FATAL, UNSET, "%s: Lock-in amplifier does not react "
-					"properly.\n", DEVICE_NAME );
+			print( FATAL, "Lock-in amplifier does not react properly.\n" );
 			THROW( EXCEPTION );
 		}
 		else
@@ -1291,8 +1267,7 @@ static double sr830_set_mod_freq( double freq )
 	real_freq = sr830_get_mod_freq( );
 	if ( ( real_freq - freq ) / freq > 1.0e-4 && real_freq - freq > 1.0e-4 )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to set modulation frequency to %f "
-				"Hz.\n", DEVICE_NAME, freq );
+		print( FATAL, "Failed to set modulation frequency to %f Hz.\n", freq );
 		THROW( EXCEPTION );
 	}
 
@@ -1357,8 +1332,7 @@ static long sr830_set_harmonic( long harmonic )
 
 	if ( harmonic != sr830_get_harmonic( ) )
 	{
-		eprint( FATAL, UNSET, "%s: Failed to set harmonic to %ld.\n",
-				DEVICE_NAME, harmonic );
+		print( FATAL, "Failed to set harmonic to %ld.\n", harmonic );
 		THROW( EXCEPTION );
 	}
 
@@ -1421,8 +1395,7 @@ static void sr830_lock_state( bool lock )
 
 static void sr830_failure( void )
 {
-	eprint( FATAL, UNSET, "%s: Can't access the lock-in amplifier.\n",
-			DEVICE_NAME );
+	print( FATAL, "%s: Can't access the lock-in amplifier.\n" );
 	THROW( EXCEPTION );
 }
 
