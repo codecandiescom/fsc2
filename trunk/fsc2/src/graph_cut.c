@@ -176,6 +176,9 @@ void cut_show( int dir, int pos )
 
 
 /*----------------------------------------------------------*/
+/* Extracts the points of the 2d-surface in direction 'dir' */
+/* at point 'index', writes them into a 1d-curve and scales */
+/* this curve.                                              */
 /*----------------------------------------------------------*/
 
 static void cut_calc_curve( int dir, long index )
