@@ -1408,8 +1408,8 @@ void vars_check( Var *v, int type )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, UNSET, "Internal error: Variable used in %s() does "
-				"not exist. Please send a bug report!\n", Cur_Func );
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
 
@@ -1462,25 +1462,24 @@ static void vars_warn_new( Var *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* vars_exist() checks if a variable really exists by looking it */
-/* up in the variable list as well as on the variable stack.     */
-/*---------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* vars_exist() checks if a variable really exists by looking */
+/* it up in the variable list or on the variable stack.       */
+/*------------------------------------------------------------*/
 
 bool vars_exist( Var *v )
 {
 	Var *lp;
 
 
-	for ( lp = v->is_on_stack ? Var_Stack : var_list; lp != NULL;
+	for ( lp = v->is_on_stack ? Var_Stack : var_list; lp && lp != v;
 		  lp = lp->next )
-		if ( lp == v )
-			return OK;
+		;
 
-	/* If variable can't be found in of the lists we're really fucked */
+	/* If variable can't be found in one of the lists we're fucked */
 
-	fsc2_assert( 1 == 0 );
-	return FAIL;
+	fsc2_assert( lp == v );
+	return lp == v;
 }
 
 
