@@ -288,6 +288,7 @@ list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
 
 list2:   /* empty */               { }
        | list2 ',' expr            { $$ = $3; }
+;
 
 /* list of function arguments */
 

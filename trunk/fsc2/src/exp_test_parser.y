@@ -262,6 +262,7 @@ list1:   /* empty */
 
 list2:   /* empty */
        | list2 ',' expr
+;
 
 /* list of function arguments */
 
