@@ -55,7 +55,7 @@ and/or starts the program when used in conjunction with the @code{-T} or
 when @acronym{fsc2} is done with it, i.e.@ when either @acronym{fsc2}
 exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
-isn't needed anymore, so better be @strong{real careful}.
+isn't needed anymore, so better be @strong{really careful}.
 
 @item @option{-h, --help}
 Displays a very short help text and exits.
@@ -70,8 +70,9 @@ displays with a resolution of less than 1152x870, for all other to
 
 @item @option{-geometry geometry_string}
 This option specifies the preferred size and position of the main
-window, see man page for X for a description of the correct format for
-the geometry string.
+window in the form @code{_height_x_width_+_x-position_+_y-position_},
+see also the man page for X for a description of correct formats of
+geometry strings.
 
 @item @option{-displayGeometry geometry_string}
 Sets the preferred size and position for the display window, i.e.@: the
@@ -84,7 +85,7 @@ cross-section through a 2D data set.
 @item @option{-toolGeometry geometry_string}
 Sets the preferred position for the window with the user defined objects
 like buttons, sliders and in- and output fields.  Please note that for
-this window only the position part of the geometry string will be used.
+this window only the position part of the geometry string is used.
 
 @item @option{-browserFontSize number}
 Sets the size (in pixels) of the font to be used in both browsers in the
@@ -102,7 +103,7 @@ Sets the size (in pixels) of the font to be used for the texts and
 labels of input and output fields.
 
 @item @option{-helpFontSize number}
-Sets the size (in pixels) of the font to be used for the popup help
+Sets the size (in pixels) of the font to be used for the pop-up help
 texts.
 
 @item @option{-fileselectorFontSize number}
@@ -111,10 +112,10 @@ Sets the size (in pixels) of the font used in the file selector.
 @item @option{-axisFont font}
 This option sets the font to be used in the axes in the display window.
 You will find the various X fonts in the /usr/lib/X11/fonts directory.
-To find out about available X fonts the tools xlsfonts, xfontsel and xfd
-can be rather useful. When you specify a font be sure to enclose the
-font name in quotes if the name contains characters that the shell might
-try to expand.
+To find out about available X fonts the tools @code{xlsfonts},
+@code{xfontsel} and @code{xfd} can be rather useful. When you specify a
+font be sure to enclose the font name in quotes if the name contains
+characters that the shell might try to expand.
 
 @item @option{-stopMouseButton button_identifier}
 Specifies which mouse button has to be used to activate the @code{Stop}
@@ -130,8 +131,9 @@ the currently loaded @acronym{EDL} program. If you would prefer
 @acronym{fsc2} @b{not} to send such an email use this option.
 
 @item @option{-noBalloons}
-Normally, whenever the mouse hoovers over a button after some time a
-little help message is shown, explaining what the button does. If you
-get annoyed with this you can switch off the display of the help balloons.
+Normally, whenever the mouse hoovers over a button a little help message
+is shown after some time, explaining what the button is supposed to
+do. If you get annoyed with this you can switch off the display of the
+help balloons.
 
 @end table
