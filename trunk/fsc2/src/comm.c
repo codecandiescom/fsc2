@@ -479,7 +479,7 @@ long reader( void *ret )
 			sema_post( semaphore );
 
 			/* Call fl_show_fselector() and send the result back to the child
-			   process (which does a read in the mean time) */
+			   process (which is waiting to read in the mean time) */
 
 			writer( C_STR, fl_show_fselector( str[ 0 ], str[ 1 ],
 											  str[ 2 ], str[ 3 ] ) );
