@@ -60,7 +60,7 @@ void *get_shm( int *shm_id, long len )
 		else                                      /* non-recoverable failure */
 		{
 #if defined  ( DEBUG )
-			eprint( FATAL, UNSET, "Internal error at %s:%u, shmget() failed "
+			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
 					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
 					"CITING THESE LINES *** Thank you.\n",
 					__FILE__, __LINE__, errno );
@@ -105,7 +105,7 @@ void *attach_shm( int key )
 	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 	{
 #if defined ( DEBUG )
-		eprint( FATAL, UNSET, "Internal error at %s:%u, shmat() with "
+		eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
 				"SHM_RDONLY failed for key %d with error number %d.\n"
 				"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
 				"Thank you.\n", __FILE__, __LINE__, key, errno );

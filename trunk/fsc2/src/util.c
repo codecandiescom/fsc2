@@ -722,7 +722,7 @@ Var *get_digitizer_channel_number( const char *channel_name )
 #ifndef NDEBUG
 	if ( channel == NUM_DIGITIZER_CHANNEL_NAMES )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

@@ -33,7 +33,8 @@ typedef struct {
 
 
 int fsc2_assert_print( const char *expression, const char *filename,
-					   unsigned int line );
+					   int line );
+
 
 #ifdef NDEBUG
 #define fsc2_assert( ignore ) ( 0 )

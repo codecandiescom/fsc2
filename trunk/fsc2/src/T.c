@@ -44,7 +44,7 @@ void *T_malloc( size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%u (malloc with size 0).\n",
+				"Internal error detected at %s:%d (malloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -92,7 +92,7 @@ void *T_calloc( size_t nmemb, size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%u (calloc with size 0).\n",
+				"Internal error detected at %s:%d (calloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -140,7 +140,7 @@ void *T_realloc( void *ptr, size_t size )
 	if ( size == 0 )
 	{
 		eprint( FATAL, UNSET,
-				"Internal error detected at %s:%u (realloc with size 0).\n",
+				"Internal error detected at %s:%d (realloc with size 0).\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -255,7 +255,7 @@ long T_atol( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -291,7 +291,7 @@ int T_atoi( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -327,7 +327,7 @@ double T_atod( const char *txt )
 
 	if ( txt == NULL || *txt == '\0' )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

@@ -768,7 +768,7 @@ Var *f_cscale( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -888,7 +888,7 @@ Var *f_clabel( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		T_free( l[ Z ] );
 		T_free( l[ Y ] );
@@ -1011,7 +1011,7 @@ Var *f_rescale( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1146,7 +1146,7 @@ Var *f_display( Var *v )
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%u.\n", __FILE__, __LINE__ );
+						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
@@ -1156,7 +1156,7 @@ Var *f_display( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( dp );
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1281,7 +1281,7 @@ Var *f_display( Var *v )
 			default :                   /* this better never happens... */
 				T_free( dp );
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%u.\n", __FILE__, __LINE__ );
+						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 	}
@@ -1502,7 +1502,7 @@ Var *f_clearcv( Var *v )
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
 		T_free( ca );
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1632,7 +1632,7 @@ Var *f_setmark( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1715,7 +1715,7 @@ Var *f_clearmark( Var *v )
 
 	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
 	{
-		eprint( FATAL, UNSET, "Internal communication problem at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal communication problem at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

@@ -1533,7 +1533,7 @@ bool test_for_cond( Prg_Token *cur )
 
 	/* We can't end up here... */
 
-	eprint( FATAL, UNSET, "Internal error at %s:%u.\n", __FILE__, __LINE__ );
+	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
 	THROW( EXCEPTION );
 
 	return FAIL;
@@ -1681,7 +1681,7 @@ static const char *get_construct_name( int type )
 			return "UNLESS construct";
 
 		default :
-			eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

@@ -267,7 +267,7 @@ static void resolve_hook_functions( Device *dev )
 	app = hook_func_name + strlen( strip_path( dev->name ) );
 	strcpy( app, "_init_hook" );
 
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.init_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -276,7 +276,7 @@ static void resolve_hook_functions( Device *dev )
 	/* Get test hook function if available */
 
 	strcpy( app, "_test_hook" );
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.test_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -285,7 +285,7 @@ static void resolve_hook_functions( Device *dev )
 	/* Get end-of-test hook function if available */
 
 	strcpy( app, "_end_of_test_hook" );
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.end_of_test_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -294,7 +294,7 @@ static void resolve_hook_functions( Device *dev )
 	/* Get pre-experiment hook function if available */
 
 	strcpy( app, "_exp_hook" );
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.exp_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -303,7 +303,7 @@ static void resolve_hook_functions( Device *dev )
 	/* Get end-of-experiment hook function if available */
 
 	strcpy( app, "_end_of_exp_hook" );
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.end_of_exp_hook =
 		     ( int ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -312,7 +312,7 @@ static void resolve_hook_functions( Device *dev )
 	/* Finally check if there's also an exit hook function */
 
 	strcpy( app, "_exit_hook" );
-	dlerror( );           /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->driver.exit_hook =
 		    ( void ( * )( void ) ) dlsym( dev->driver.handle, hook_func_name );
 	if ( dlerror( ) == NULL )
@@ -355,7 +355,7 @@ static void resolve_functions( Device *dev )
 		   also add a function with '#' and the number. Otherwise append a
 		   new function */
 
-		if ( Fncts[ num ].fnct == ( Var * ( * )( Var * ) ) 0 )
+		if ( Fncts[ num ].fnct == ( Var * ( * )( Var * ) ) NULL )
 		{
 			Fncts[ num ].fnct = ( Var * ( * )( Var * ) ) cur;
 			Fncts[ num ].device = dev;
@@ -393,8 +393,8 @@ static void add_function( int num, void *new_func, Device *new_dev )
 		   strcasecmp( new_dev->generic_type,
 					   Fncts[ num ].device->generic_type ) != 0 ) )
 	{
-		eprint( FATAL, SET, "Functions both with name %s() are defined in "
-				"modules of different types, '%s' and '%s'.\n",
+		eprint( FATAL, SET, "Functions with name %s() are defined in modules "
+				"of different types, '%s' and '%s'.\n",
 				Fncts[ num ].name, Fncts[ num ].device->name, new_dev->name );
 		THROW( EXCEPTION );
 	}
@@ -420,7 +420,7 @@ static void add_function( int num, void *new_func, Device *new_dev )
 
 static void resolve_device_name( Device *dev )
 {
-	dlerror( );                    /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->device_name = ( const char * ) dlsym( dev->driver.handle,
 											   "device_name" );
 	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
@@ -446,7 +446,7 @@ static void resolve_generic_type( Device *dev )
 
 
 	dev->count = 1;
-	dlerror( );                    /* make sure it's NULL before we continue */
+	dlerror( );
 	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
 												"generic_type" );
 
@@ -756,7 +756,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	/* Try to load the symbol */
 
-	dlerror( );                    /* make sure it's NULL before we continue */
+	dlerror( );
 	*symbol_ptr = dlsym( cd->driver.handle, symbol );
 
 	if ( dlerror( ) != NULL )               /* symbol not found in library ? */

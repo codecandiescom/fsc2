@@ -111,7 +111,7 @@ void device_add( const char *name )
 					pathmax = PATH_MAX_GUESS;
 				else
 				{
-					eprint( FATAL, UNSET, "%s:%ld: This operating system "
+					eprint( FATAL, UNSET, "%s:%d: This operating system "
 							"sucks!\n", __FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );

@@ -473,7 +473,7 @@ static void f_objdel_parent( Var *v )
 			break;
 
 		default :
-			eprint( FATAL, UNSET, "Internal error at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

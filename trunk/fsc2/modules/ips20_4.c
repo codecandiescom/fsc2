@@ -1303,7 +1303,7 @@ static int ips20_4_set_activity( int activity )
 			break;
 
 		default :
-			print( FATAL, "Internal error detected at %s:%u,\n",
+			print( FATAL, "Internal error detected at %s:%d,\n",
 				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

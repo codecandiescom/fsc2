@@ -1935,7 +1935,7 @@ static void sr810_set_display_channel( long type )
 	{
 		if ( dsp_ch_list[ i ] == DSP_CH_UNDEF )
 		{
-			eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 		}
@@ -2051,7 +2051,7 @@ static double sr810_get_auto_data( int type )
 #ifndef NDEBUG
 	if ( sr810.dsp_ch != type )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

@@ -412,7 +412,7 @@ long lecroy9400_translate_channel( int dir, long channel )
 				return DIGITIZER_CHANNEL_EXT10;
 
 			default :
-				print( FATAL, "Internal error detected at %s:%u.\n",
+				print( FATAL, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}

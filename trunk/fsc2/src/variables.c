@@ -1335,7 +1335,7 @@ Var *vars_pop( Var *v )
 
 	if ( stack == NULL )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1475,7 +1475,7 @@ void vars_check( Var *v, int type )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}

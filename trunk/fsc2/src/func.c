@@ -428,8 +428,10 @@ Var *func_call( Var *f )
 	/* Now call the function after storing some information about the
 	   function on the call stack */
 
-	call_push( f->val.fnct,
-			   f->val.fnct->device ? f->val.fnct->device->name : NULL );
+	if ( call_push( f->val.fnct,
+					f->val.fnct->device ? f->val.fnct->device->name : NULL )
+		 == NULL )
+		THROW( OUT_OF_MEMORY_EXCEPTION );
 
 	TRY
 	{
@@ -443,11 +445,11 @@ Var *func_call( Var *f )
 		{
 			if ( EDL.Call_Stack->f != NULL &&
 				 ! EDL.Call_Stack->f->to_be_loaded )
-				eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 			else
 				eprint( FATAL, SET, "Function %s() from module %s.so messed "
-						"up the variable stack at %s:%u.\n",
+						"up the variable stack at %s:%d.\n",
 						EDL.Call_Stack->f->name,
 						EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
 			call_pop( );
@@ -468,11 +470,11 @@ Var *func_call( Var *f )
 	if ( ! vars_exist( f ) )
 	{
 		if ( EDL.Call_Stack->f != NULL && ! EDL.Call_Stack->f->to_be_loaded )
-			eprint( FATAL, UNSET, "Internal error detected at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%u.\n",
+					"up the variable stack at %s:%d.\n",
 					EDL.Call_Stack->f->name, EDL.Call_Stack->f->device->name,
 					__FILE__, __LINE__ );
 		THROW( EXCEPTION );
@@ -499,6 +501,7 @@ Var *func_call( Var *f )
 /* function must be stored as well the global variable 'Cur_Pulser' must  */
 /* be set and on return from the called function reset to to the previous */
 /* be reset to the previous value.                                        */
+/* A return value of NULL means we're running out of memory.              */
 /*------------------------------------------------------------------------*/
 
 CALL_STACK *call_push( Func *f, const char *device_name )
@@ -507,7 +510,14 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	CALL_STACK *cs;
 
 
-	cs = T_malloc( sizeof *cs );
+	TRY
+	{
+		cs = T_malloc( sizeof *cs );
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+		return NULL;
+
 	cs->prev = EDL.Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;

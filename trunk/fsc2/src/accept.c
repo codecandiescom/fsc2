@@ -63,14 +63,14 @@ void accept_new_data( void )
 			 == ( void * ) - 1 )
 		{
 #ifndef NDEBUG
-			eprint( FATAL, UNSET, "Internal communication error at %s:%u, "
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d, "
 					"message_queue_low = %d, shm_id = %d.\n"
 					"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
 					"Thank you.\n",
 					__FILE__, __LINE__, Comm.MQ->low,
 					Comm.MQ->slot[ Comm.MQ->low ].shm_id );
 #else
-			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 #endif
 			THROW( EXCEPTION );
@@ -204,7 +204,7 @@ static void unpack_and_accept( char *ptr )
 
 			default :
 				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%u.\n", __FILE__, __LINE__ );
+						"%s:%d.\n", __FILE__, __LINE__ );
 				THROW( EXCEPTION );
 		}
 
@@ -284,7 +284,7 @@ static void other_data_request( int type, char *ptr )
 			break;
 
 		default :                             /* unknown command */
-			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -316,7 +316,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%u, there is no "
+		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -487,7 +487,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 #ifndef NDEBUG
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%u, there is no "
+		eprint( FATAL, SET, "Internal error detected at %s:%d, there is no "
 				"curve %ld.\n", __FILE__, __LINE__, curve + 1 );
 		THROW( EXCEPTION );
 	}
@@ -665,7 +665,7 @@ static long get_number_of_new_points( char **ptr, int type )
 			break;
 
 		default :
-			eprint( FATAL, UNSET, "Internal communication error at %s:%u.\n",
+			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
@@ -673,7 +673,7 @@ static long get_number_of_new_points( char **ptr, int type )
 #ifndef NDEBUG
 	if ( len <= 0 )
 	{
-		eprint( FATAL, SET, "Internal error detected at %s:%u, number of "
+		eprint( FATAL, SET, "Internal error detected at %s:%d, number of "
 				"points to be drawn: %ld.\n", __FILE__, __LINE__, len );
 		THROW( EXCEPTION );
 	}

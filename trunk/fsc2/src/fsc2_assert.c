@@ -29,9 +29,9 @@ Fsc2_Assert Assert_struct;
 
 
 int fsc2_assert_print( const char *expression, const char *filename,
-					   unsigned int line )
+					   int line )
 {
-	fprintf( stderr, "%s:%u: failed assertion: %s\n", filename, line,
+	fprintf( stderr, "%s:%d: failed assertion: %s\n", filename, line,
 			 expression );
 	fflush( stderr );
 	Assert_struct.expression = expression;

@@ -1007,7 +1007,7 @@ static bool er035m_s_comm( int type, ... )
 			break;
 
 		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
+			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
 				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

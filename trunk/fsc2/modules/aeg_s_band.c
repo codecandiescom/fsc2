@@ -143,7 +143,7 @@ int aeg_s_band_init_hook( void )
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
-		print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
+		print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -1048,7 +1048,7 @@ static bool magnet_do( int command )
 			break;
 
 		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%u.\n",
+			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
 				   __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}
