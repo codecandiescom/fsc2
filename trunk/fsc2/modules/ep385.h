@@ -164,13 +164,12 @@ typedef struct _F_ {
 	Ticks min_right_shape_padding;
 
 	bool uses_auto_twt_pulses;
-	bool has_auto_twt_pulses;
 	Ticks left_twt_padding;
 	Ticks right_twt_padding;
 	Ticks min_left_twt_padding;
 	Ticks min_right_twt_padding;
 
-	Ticks max_len;
+	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
 
 } FUNCTION;
 
@@ -391,7 +390,8 @@ const char *ep385_ptime( double p_time );
 const char *ep385_pticks( Ticks ticks );
 int ep385_pulse_compare( const void *A, const void *B );
 void ep385_dump_channels( FILE *fp );
-void ep385_calc_max_length( FUNCTION *f );
+void ep385_duty_check( void );
+Ticks ep385_calc_max_length( FUNCTION *f );
 
 
 /* Functions fron ep385_run.c */

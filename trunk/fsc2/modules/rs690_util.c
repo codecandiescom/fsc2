@@ -217,7 +217,33 @@ void rs690_dump_channels( FILE *fp )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-void rs690_calc_max_length( FUNCTION *f )
+void rs690_duty_check( void )
+{
+	FUNCTION *f;
+	int i;
+	int fns[ ] = { PULSER_CHANNEL_TWT, PULSER_CHANNEL_TWT_GATE };
+
+	if ( ! rs690.is_repeat_time )
+		return;
+
+
+	for ( i = 0; i < 2; i++ )
+	{
+		f = rs690.function + fns[ i ];
+		if ( f->is_used && f->num_channels > 0 &&
+			 rs690_calc_max_length( f ) >
+									MAX_TWT_DUTY_CYCLE * rs690.repeat_time &&
+				 f->max_duty_warning++ == 0 )
+				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
+					   "%s pulses.\n", f->name );
+	}
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Ticks rs690_calc_max_length( FUNCTION *f )
 {
 	int i, j;
 	CHANNEL *ch;
@@ -225,7 +251,7 @@ void rs690_calc_max_length( FUNCTION *f )
 
 
 	if ( ! f->is_needed || f->num_channels == 0 )
-		return;
+		return 0;
 
 	for ( j = 0; j < f->num_channels; j++ )
 	{
@@ -235,7 +261,7 @@ void rs690_calc_max_length( FUNCTION *f )
 			max_len += ch->pulse_params[ i ].len;
 	}
 
-	f->max_len = l_max( f->max_len, max_len );
+	return max_len;
 }
 
 

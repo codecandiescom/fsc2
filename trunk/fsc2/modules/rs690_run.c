@@ -908,31 +908,7 @@ static void rs690_commit( bool flag )
 
 	/* Only really set the pulses while doing an experiment */
 
-	if ( ! flag )
-	{
-		rs690.function[ PULSER_CHANNEL_TWT ].max_len =
-			rs690.function[ PULSER_CHANNEL_TWT_GATE ].max_len = 0;
-	}
-
-	rs690_calc_max_length( rs690.function + PULSER_CHANNEL_TWT );
-	rs690_calc_max_length( rs690.function + PULSER_CHANNEL_TWT_GATE );
-
 	rs690_channel_setup( flag );
-
-	if ( rs690.trig_in_mode == INTERNAL && rs690.is_repeat_time )
-	{
-		f = rs690.function + PULSER_CHANNEL_TWT;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE * rs690.repeat_time )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
-		
-		f = rs690.function + PULSER_CHANNEL_TWT_GATE;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE  * rs690.repeat_time )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
-	}
 
 	if ( flag )
 	{
@@ -940,6 +916,8 @@ static void rs690_commit( bool flag )
 			rs690_dump_channels( rs690.dump_file );
 		if ( rs690.show_file != NULL )
 			rs690_dump_channels( rs690.show_file );
+
+		rs690_duty_check( );
 	}
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )

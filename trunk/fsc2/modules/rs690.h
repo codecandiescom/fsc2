@@ -30,6 +30,11 @@
 #include "rs690.conf"
 
 
+/* Uncomment the next line for debugging of data sent via GPIB bus */
+
+#define RS690_GPIB_DEBUG 1
+
+
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
@@ -141,13 +146,12 @@ typedef struct _F_ {
 	Ticks min_right_shape_padding;
 
 	bool uses_auto_twt_pulses;
-	bool has_auto_twt_pulses;
 	Ticks left_twt_padding;
 	Ticks right_twt_padding;
 	Ticks min_left_twt_padding;
 	Ticks min_right_twt_padding;
 
-	Ticks max_len;
+	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
 
 } FUNCTION;
 
@@ -414,7 +418,8 @@ const char *rs690_ptime( double p_time );
 const char *rs690_pticks( Ticks ticks );
 int rs690_pulse_compare( const void *A, const void *B );
 void rs690_dump_channels( FILE *fp );
-void rs690_calc_max_length( FUNCTION *f );
+void rs690_duty_check( void );
+Ticks rs690_calc_max_length( FUNCTION *f );
 char *rs690_num_2_channel( int num );
 
 

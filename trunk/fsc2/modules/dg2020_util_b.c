@@ -485,6 +485,52 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
+void dg2020_duty_check( void )
+{
+	FUNCTION *f;
+	int i;
+	int fns[ ] = { PULSER_CHANNEL_TWT, PULSER_CHANNEL_TWT_GATE };
+
+	if ( ! dg2020.is_repeat_time )
+		return;
+
+
+	for ( i = 0; i < 2; i++ )
+	{
+		f = dg2020.function + fns[ i ];
+		if ( f->is_used && f->num_channels > 0 &&
+			 dg2020_calc_max_length( f ) > 
+			 						MAX_TWT_DUTY_CYCLE * dg2020.repeat_time &&
+			 f->max_duty_warning++ == 0 ) 
+			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
+				   "pulses.\n", f->name );
+	}
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function calculates the total length of all active pulses of a function */
+/*-------------------------------------------------------------------------*/
+
+Ticks dg2020_calc_max_length( FUNCTION *f )
+{
+	int i;
+	Ticks max_len = 0;
+
+
+	if ( ! f->is_needed || f->num_channels == 0 || f->num_active_pulses == 0 )
+		return 0;
+
+	for ( i = 0; i < f->num_active_pulses; i++ )
+		max_len += f->pulse_params[ i ].len;
+
+	return max_len;
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
 void dg2020_dump_channels( FILE *fp )
 {
 	FUNCTION *f;

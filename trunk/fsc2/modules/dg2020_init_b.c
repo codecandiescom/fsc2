@@ -885,8 +885,6 @@ static void dg2020_create_twt_pulses( void )
 			 ! f->uses_auto_twt_pulses )
 			continue;
 
-		tpf->has_auto_twt_pulses = SET;
-
 		np = PULSE_P T_malloc( sizeof *np );
 
 		np->prev = cp;

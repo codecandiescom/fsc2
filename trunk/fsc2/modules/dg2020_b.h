@@ -30,6 +30,8 @@
 #include "dg2020_b.conf"
 
 
+/* Uncomment the next line for debugging of data sent via GPIB bus */
+
 #define DG2020_B_GPIB_DEBUG 1
 
 
@@ -186,13 +188,12 @@ typedef struct _F_ {
 	Ticks min_right_shape_padding;
 
 	bool uses_auto_twt_pulses;
-	bool has_auto_twt_pulses;
 	Ticks left_twt_padding;
 	Ticks right_twt_padding;
 	Ticks min_left_twt_padding;
 	Ticks min_right_twt_padding;
 
-	Ticks max_len;
+	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
 
 } FUNCTION;
 
@@ -448,6 +449,8 @@ void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
 void dg2020_set( char *arena, Ticks start, Ticks len );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
+void dg2020_duty_check( void );
+Ticks dg2020_calc_max_length( FUNCTION *f );
 void dg2020_dump_channels( FILE *fp );
 
 

@@ -689,17 +689,7 @@ static void rs690_setup_channels( void )
 			}
 		}
 		else
-		{
-			/* Tell the user that the channel is never used when it never
-			   contained a pulse and its function is not set up for phase
-			   cycling */
-
-			if ( ! ch->function->phase_setup )
-				print( WARN, "Channel %s associated with function '%s' is not "
-					   "used.\n", rs690_num_2_channel( ch->self ),
-					   ch->function->name );
 			ch->pulse_params = ch->old_pulse_params = NULL;
-		}
 
 		/* Associate a bit in one of the flags with the channel - just take
 		   the next free one */

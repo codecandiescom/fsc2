@@ -221,7 +221,34 @@ void ep385_dump_channels( FILE *fp )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-void ep385_calc_max_length( FUNCTION *f )
+void ep385_duty_check( void )
+{
+	FUNCTION *f;
+	int i;
+	int fns[ ] = { PULSER_CHANNEL_TWT, PULSER_CHANNEL_TWT_GATE };
+
+	if ( ! ep385.is_repeat_time )
+		return;
+
+
+	for ( i = 0; i < 2; i++ )
+	{
+		f = ep385.function + fns[ i ];
+		if ( f->is_used && f->num_channels > 0 &&
+			 ep385_calc_max_length( f ) > MAX_TWT_DUTY_CYCLE
+							  * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
+								  REPEAT_TICKS * ep385.repeat_time ) &&
+				 f->max_duty_warning++ == 0 )
+				print( SEVERE, "Duty cycle of TWT exceeded due to length of "
+					   "%s pulses.\n", f->name );
+	}
+}
+
+
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+Ticks ep385_calc_max_length( FUNCTION *f )
 {
 	int i, j;
 	CHANNEL *ch;
@@ -229,7 +256,7 @@ void ep385_calc_max_length( FUNCTION *f )
 
 
 	if ( ! f->is_needed || f->num_channels == 0 )
-		return;
+		return 0;
 
 	for ( j = 0; j < f->num_channels; j++ )
 	{
@@ -239,7 +266,7 @@ void ep385_calc_max_length( FUNCTION *f )
 			max_len += ch->pulse_params[ i ].len;
 	}
 
-	f->max_len = l_max( f->max_len, max_len );
+	return max_len;
 }
 
 

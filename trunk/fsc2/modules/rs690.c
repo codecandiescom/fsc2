@@ -168,7 +168,7 @@ int rs690_init_hook( void )
 		f->uses_auto_twt_pulses = UNSET;
 		for ( j = 0; j <= MAX_CHANNELS; j++ )
 			f->channel[ j ] = NULL;
-		f->max_len = 0;
+		f->max_duty_warning = 0;
 	}
 
 	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
@@ -265,22 +265,22 @@ int rs690_end_of_test_hook( void )
 	if ( ! rs690.is_cw_mode )
 		rs690_full_reset( );
 
-	/* Check that TWT duty cycle isn't exceeded due to excessive length of
-	   TWT and TWT_GATE pulses */
+	/* Check that TWT duty cycle isn't exceeded due to an excessive length of
+	   TWT or TWT_GATE pulses */
 
-	if ( rs690.trig_in_mode == INTERNAL && rs690.is_repeat_time )
+	if ( rs690.is_repeat_time )
 	{
 		f = rs690.function + PULSER_CHANNEL_TWT;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE * rs690.repeat_time )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT exceeded %ld time%s due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
 
 		f = rs690.function + PULSER_CHANNEL_TWT_GATE;
-		if ( f->is_used && f->num_channels > 0 &&
-			 f->max_len > MAX_TWT_DUTY_CYCLE * rs690.repeat_time )
-			print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
-				   "pulses.\n", f->name );
+		if ( f->max_duty_warning != 0 )
+			print( SEVERE, "Duty cycle of TWT exceeded %ld time%s due to "
+				   "length of %s pulses.\n", f->max_duty_warning,
+				   f->max_duty_warning == 1 ? "" : "s", f->name );
 	}
 
 	/* If in the test it was found that shape and defense pulses got too

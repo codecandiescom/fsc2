@@ -64,6 +64,8 @@ bool dg2020_do_update( void )
 			dg2020_dump_channels( dg2020.dump_file );
 		if ( dg2020.show_file != NULL )
 			dg2020_dump_channels( dg2020.show_file );
+
+		dg2020_duty_check( );
 	}
 
 	dg2020.needs_update = UNSET;
@@ -131,7 +133,7 @@ bool dg2020_reorganize_pulses( bool flag )
 
 	}
 
-	/* Send all the changes to the pulser */
+	/* Send all the changes to the pulser after some more checks */
 
 	dg2020_shape_padding_check_2 ( );
 

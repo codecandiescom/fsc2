@@ -340,8 +340,6 @@ static void ep385_create_twt_pulses( void )
 			 ! f->uses_auto_twt_pulses )
 			continue;
 
-		tpf->has_auto_twt_pulses = SET;
-
 		np = PULSE_P T_malloc( sizeof *np );
 
 		np->prev = cp;
@@ -687,16 +685,7 @@ static void ep385_setup_channels( void )
 			}
 		}
 		else
-		{
-			/* Tell the user that the channel is never used when it never
-			   contained a pulse and its function is not set up for phase
-			   cycling */
-
-			if ( ! ch->function->phase_setup )
-				print( WARN, "Channel %d associated with function '%s' is not "
-					   "used.\n", ch->self, ch->function->name );
 			ch->pulse_params = ch->old_pulse_params = NULL;
-		}
 	}
 }
 
@@ -816,7 +805,8 @@ static void ep385_channel_start_check( CHANNEL *ch )
 		   sizeof *ch->pulse_params, ep385_pulse_compare );
 
 	ep385_shape_padding_check_1( ch );
-	ep385_twt_padding_check( ch );
+	if ( ch->function->self == PULSER_CHANNEL_TWT )
+		ep385_twt_padding_check( ch );
 }
 
 
