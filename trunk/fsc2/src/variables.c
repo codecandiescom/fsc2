@@ -2,6 +2,12 @@
    $Id$
 
    $Log$
+   Revision 1.17  1999/07/20 23:30:32  jens
+   Quite some changes: vars_push() has now a variable arguments list, thus we
+   don't have to pass it a void pointer to the data but, depending on the type,
+   it can find out what type of data the variable data is. Makes things a lot
+   easier...
+
    Revision 1.16  1999/07/20 12:01:39  jens
    *** empty log message ***
 
@@ -378,8 +384,6 @@ Var *vars_new_assign( Var *src, Var *dest )
 Var *vars_add( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long ires;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values 
@@ -393,24 +397,18 @@ Var *vars_add( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v2->type == INT_VAR )
-		{
-			ires = v1->val.lval + v2->val.lval;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, v1->val.lval + v2->val.lval );
 		else
-		{
-			dres = ( double ) v1->val.lval + v2->val.dval;
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-		}
+			new_var = vars_push( FLOAT_VAR,
+								 ( double ) v1->val.lval + v2->val.dval );
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = v1->val.dval + ( double ) v2->val.lval;
+			new_var = vars_push( FLOAT_VAR,
+								 v1->val.dval + ( double ) v2->val.lval );
 		else
-			dres = v1->val.dval + v2->val.dval;
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
 	}
 
 	/* pop the variables from the variable stack (if they belong to it) */
@@ -433,8 +431,6 @@ Var *vars_add( Var *v1, Var *v2 )
 Var *vars_sub( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long ires;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values 
@@ -448,24 +444,18 @@ Var *vars_sub( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v2->type == INT_VAR )
-		{
-			ires = v1->val.lval - v2->val.lval;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, v1->val.lval - v2->val.lval );
 		else
-		{
-			dres = ( double ) v1->val.lval - v2->val.dval;
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-		}
+			new_var = vars_push( FLOAT_VAR,
+								 ( double ) v1->val.lval - v2->val.dval );
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = v1->val.dval - ( double ) v2->val.lval;
+			new_var = vars_push( FLOAT_VAR,
+								 v1->val.dval - ( double ) v2->val.lval );
 		else
-			dres = v1->val.dval - v2->val.dval;
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR, v1->val.dval - v2->val.dval );
 	}
 
 	/* pop the variables from the variable stack (if they belong to it) */
@@ -488,8 +478,6 @@ Var *vars_sub( Var *v1, Var *v2 )
 Var *vars_mult( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long ires;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values 
@@ -503,24 +491,18 @@ Var *vars_mult( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v2->type == INT_VAR )
-		{
-			ires = v1->val.lval * v2->val.lval;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, v1->val.lval * v2->val.lval );
 		else
-		{
-			dres = ( double ) v1->val.lval * v2->val.dval;
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-		}
+			new_var = vars_push( FLOAT_VAR,
+								 ( double ) v1->val.lval * v2->val.dval );
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = v1->val.dval * ( double ) v2->val.lval;
+			new_var = vars_push( FLOAT_VAR,
+								 v1->val.dval * ( double ) v2->val.lval );
 		else
-			dres = v1->val.dval * v2->val.dval;
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR, v1->val.dval * v2->val.dval );
 	}
 
 	/* pop the variables from the variable stack (if they belong to it) */
@@ -543,8 +525,6 @@ Var *vars_mult( Var *v1, Var *v2 )
 Var *vars_div( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long ires;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values
@@ -567,24 +547,18 @@ Var *vars_div( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v2->type == INT_VAR )
-		{
-			ires = v1->val.lval / v2->val.lval;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, v1->val.lval / v2->val.lval );
 		else
-		{
-			dres = ( double ) v1->val.lval / v2->val.dval;
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-		}
+			new_var = vars_push( FLOAT_VAR,
+								 ( double ) v1->val.lval / v2->val.dval );
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = v1->val.dval / ( double ) v2->val.lval;
+			new_var = vars_push( FLOAT_VAR,
+								 v1->val.dval / ( double ) v2->val.lval );
 		else
-			dres = v1->val.dval / v2->val.dval;
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR, v1->val.dval / v2->val.dval );
 	}
 
 	/* pop the variables from the stack */
@@ -607,8 +581,6 @@ Var *vars_div( Var *v1, Var *v2 )
 Var *vars_mod( Var *v1, Var *v2 )
 {
 	Var *new_var;
-	long ires;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values
@@ -631,24 +603,19 @@ Var *vars_mod( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v2->type == INT_VAR )
-		{
-			ires = v1->val.lval % v2->val.lval;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, v1->val.lval % v2->val.lval );
 		else
-		{
-			dres = fmod( ( double ) v1->val.lval, v2->val.dval );
-			new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-		}
+			new_var = vars_push( FLOAT_VAR, fmod( ( double ) v1->val.lval,
+												  v2->val.dval ) );
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = fmod( v1->val.dval, ( double ) v2->val.lval );
+			new_var = vars_push( FLOAT_VAR, fmod( v1->val.dval,
+												  ( double ) v2->val.lval ) );
 		else
-			dres = fmod( v1->val.dval, v2->val.dval );
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR,
+								 fmod( v1->val.dval, v2->val.dval ) );
 	}
 
 	/* pop the variables from the stack */
@@ -673,7 +640,6 @@ Var *vars_pow( Var *v1, Var *v2 )
 {
 	Var *new_var;
 	long ires, i;
-	double dres;
 
 
 	/* make sure that `v1' and `v2' exist, are integers or float values
@@ -699,10 +665,7 @@ Var *vars_pow( Var *v1, Var *v2 )
 	if ( v1->type == INT_VAR )
 	{
 		if ( v1->val.lval == 0 )   /* powers of zero are always 1 */
-		{
-			ires = 1;
-			new_var = vars_push( INT_VAR, ( void * ) &ires );
-		}
+			new_var = vars_push( INT_VAR, 1L );
 		else
 		{
 			if ( v2->type == INT_VAR )
@@ -711,28 +674,23 @@ Var *vars_pow( Var *v1, Var *v2 )
 					  i < labs( v2->val.lval ); ++i )
 					ires *= v1->val.lval;
 				if ( v2->val.lval >= 0 )
-					new_var = vars_push( INT_VAR, ( void * ) &ires );
+					new_var = vars_push( INT_VAR, ires );
 				else
-				{
-					dres = 1.0 / ( double ) ires;
-					new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-				}
+					new_var = vars_push( FLOAT_VAR, 1.0 / ( double ) ires );
 			}
 			else
-			{
-				dres = pow( ( double ) v1->val.lval, v2->val.dval );
-				new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
-			}
+				new_var = vars_push( FLOAT_VAR, pow( ( double ) v1->val.lval,
+													 v2->val.dval ) );
 		}
 	}
 	else
 	{
 		if ( v2->type == INT_VAR )
-			dres = pow( v1->val.dval, ( double ) v2->val.lval );
+			new_var = vars_push( FLOAT_VAR, pow( v1->val.dval,
+												 ( double ) v2->val.lval ) );
 		else
-			dres = pow( v1->val.dval, v2->val.dval );
-
-		new_var = vars_push( FLOAT_VAR, ( void * ) &dres );
+			new_var = vars_push( FLOAT_VAR,
+								 pow( v1->val.dval, v2->val.dval ) );
 	}
 
 	/* pop the variables from the stack */
@@ -800,21 +758,21 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    == ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, ( void * ) &res );
+			new_var = vars_push( INT_VAR, res );
 			break;
 
 		case COMP_LESS :
 			res = (   ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    < ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, ( void * ) &res );
+			new_var = vars_push( INT_VAR, res );
 			break;
 
 		case COMP_LESS_EQUAL :
 			res = (    ( v1->type == INT_VAR ? v1->val.lval : v1->val.dval )
 				    <= ( v2->type == INT_VAR ? v2->val.lval : v2->val.dval ) )
 				  ? 1 : 0;
-			new_var = vars_push( INT_VAR, ( void * ) &res );
+			new_var = vars_push( INT_VAR, res );
 			break;
 
 		default:               /* this should never happen... */
@@ -859,9 +817,10 @@ Var *vars_push_simple( Var *v )
 
 	/* push a transient variable onto the stack with the relevant data set */
 
-	return( vars_push( v->type,
-					   v->type == INT_VAR ?
-					   ( void * ) &v->val.lval : ( void * ) &v->val.dval ) );
+	if ( v->type == INT_VAR )
+		return( vars_push( INT_VAR, v->val.lval ) );
+	else
+		return( vars_push( FLOAT_VAR, v->val.dval ) );
 }
 
 
@@ -874,36 +833,56 @@ Var *vars_push_simple( Var *v )
 /* variables name.                                                       */
 /*-----------------------------------------------------------------------*/
 
-Var *vars_push( int type, void *data )
+Var *vars_push( int type, ... )
 {
 	Var *new_stack_var, *stack;
+	va_list ap;
 
 
-	/* get memory for the new variable to be apppended to the stack */
+	/* get memory for the new variable to be apppended to the stack
+	   and setits type */
 
 	new_stack_var = ( Var * ) T_malloc( sizeof( Var ) );
-
-	/* if the type is undefine and data non-zero this comes from the start of
-	   a print statement and data is a pointer to the format string which is
-	   copied in the new stack variables name. Otherwise set name to NULL. */
-
-	if ( type == UNDEF_VAR && data != NULL )
-		new_stack_var->name = get_string_copy( ( char * ) data );
-	else
-		new_stack_var->name = NULL;
-
-	/* set its type and clear the `new_flag' */
-
 	new_stack_var->type = type;
+
+	/* get the data for the new variable */
+
+	va_start( ap, type );
+
+	switch ( type )
+	{
+		case UNDEF_VAR :
+			/* if the type is undefine and data non-zero this comes from
+			   the start of a print statement and data is a pointer to the
+			   format string which is copied in the new stack variables name.
+			   Otherwise set name to NULL. */
+			new_stack_var->name = get_string_copy( va_arg( ap, char * ) );
+			break;
+
+		case INT_VAR :
+			new_stack_var->val.lval = va_arg( ap, long );
+			break;
+
+		case FLOAT_VAR :
+			new_stack_var->val.dval = va_arg( ap, double );
+			break;
+
+		case STR_VAR :
+			new_stack_var->val.sptr = get_string_copy( va_arg( ap, char * ) );
+
+		case FUNC :
+			new_stack_var->name = NULL;
+			break;
+
+		default :
+			assert( 1 == 0 );
+	}
+
+	va_end( ap );
+	
+	/* clear its `new_flag' and set the `next' entry to NULL */
+
 	new_stack_var->new_flag = UNSET;
-
-	/* set its value and the `next' entry to NULL */
-
-	if ( type == INT_VAR )
-		new_stack_var->val.lval = *( ( long * ) data );
-	if ( type == FLOAT_VAR )
-		new_stack_var->val.dval = *( ( double * ) data );
-
 	new_stack_var->next = NULL;
 
 	/* and finally append it to the end of the stack */
@@ -923,10 +902,10 @@ Var *vars_push( int type, void *data )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* vars_pop() checks if a variable belongs to the variable stack and */
-/* if it does removes it from the linked list making up the stack    */
-/*-------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* vars_pop() checks if a variable is on the variable stack and   */
+/* if it does removes it from the linked list making up the stack */
+/*----------------------------------------------------------------*/
 
 void vars_pop( Var *v )
 {
@@ -957,8 +936,11 @@ void vars_pop( Var *v )
 		else
 			Var_Stack = stack->next;
 
-		if ( stack->name != NULL ) /* functions store the format string here */
+		if ( stack->type == STR_VAR )
+			free( stack->val.sptr );
+		if ( stack->type == FUNC )
 			free( stack->name );
+
 		free( stack );
 	}
 }
@@ -1260,9 +1242,9 @@ Var *vars_pop_astack( void )
 	/* create the resulting data by pushing it on the stack */
 
 	if ( Arr_Stack->var->type == INT_ARR )
-		ret = vars_push( INT_VAR, &Arr_Stack->var->val.lpnt[ index ] );
+		ret = vars_push( INT_VAR, Arr_Stack->var->val.lpnt[ index ] );
 	else
-		ret = vars_push( FLOAT_VAR, &Arr_Stack->var->val.dpnt[ index ] );
+		ret = vars_push( FLOAT_VAR, Arr_Stack->var->val.dpnt[ index ] );
 
 	/* finally delete the current Arr_Stack entry */
 
@@ -1494,6 +1476,28 @@ void free_vars( void )
 }
 
 
+void vars_check2( Var *v, int type )
+{
+	/* we should never end here with an undefined variable... */
+
+	if ( v->type == UNDEF_VAR )
+	{
+		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
+				__FILE__, __LINE__ );
+		exit( EXIT_FAILURE );
+	}
+	
+	if ( ! ( v->type & type ) )
+	{
+		eprint( FATAL, "%s:%ld: Wrong type of variable.\n",
+				Fname, Lc, v->name );
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	vars_warn_new( v );
+}
+
+
 /*-----------------------------------------------------------------------*/
 /* vars_check() checks that a variable exists, has integer or float type */
 /* and warns if it hasn't been assigned a value                          */
@@ -1516,7 +1520,7 @@ void vars_check( Var *v )
 			   never end up here...) */ 
 
 			eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s.\n",
-					__FILE__, __LINE__ );
+					__FILE__, __LINE__);
 			exit( EXIT_FAILURE );
 		}
 	}
