@@ -992,8 +992,6 @@ void test_file( FL_OBJECT *a, long b )
 	a->u_ldata = 0;
 	b = b;
 
-	notify_conn( BUSY_SIGNAL );
-
 	/* While program is being tested the test can be aborted by pressing the
 	   test button again - in this case we simply throw an exception */
 
@@ -1004,10 +1002,11 @@ void test_file( FL_OBJECT *a, long b )
 		delete_devices( );                       /* run the exit hooks ! */
 		eprint( FATAL, UNSET,
 				"Test of program aborted, received user break.\n" );
-		notify_conn( UNBUSY_SIGNAL );
 		running_test = UNSET;
 		THROW( EXCEPTION );
 	}
+
+	notify_conn( BUSY_SIGNAL );
 
 	/* If fsc2 is too busy testing a program to react to clicks of the "Stop
 	   Test" button and the user presses the button several times strange

@@ -39,13 +39,16 @@
    by byte instead of larger chunks - since the lexer might be called by
    another lexer we thus avoid reading stuff which isn't to be handled here. */
 
-#define YY_INPUT( buf, result, max_size )                   \
-{                                                           \
-	int c;                                                  \
-	while ( ( c = fgetc( devicesin ) ) == EOF )             \
-		/* empty */ ;                                       \
-	result = ( c == 0x07 ) ? YY_NULL : ( buf[ 0 ] = c, 1 ); \
+#define YY_INPUT( buf, result, max_size )                          \
+{                                                                  \
+	char c;                                                        \
+	ssize_t count;                                                 \
+	while ( ( count = read( fileno( devicesin ), &c, 1 ) ) < 0 &&  \
+			errno == EINTR )                                       \
+		/* empty */ ;                                              \
+	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );       \
 }
+
 
 #include "fsc2.h"
 #include "devices_parser.h"

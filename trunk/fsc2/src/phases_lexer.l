@@ -39,10 +39,14 @@
    another lexer we thus avoid reading stuff which is to be handled by
    the calling lexer. */
 
-#define YY_INPUT( buf, result, max_size )                   \
-{                                                           \
-	int c = fgetc( phasesin );                              \
-	result = ( c == EOF ) ? YY_NULL : ( buf[ 0 ] = c, 1 );  \
+#define YY_INPUT( buf, result, max_size )                         \
+{                                                                 \
+	char c;                                                       \
+	ssize_t count;                                                \
+	while ( ( count = read( fileno( phasesin ), &c, 1 ) ) < 0 &&  \
+			errno == EINTR )                                      \
+		/* empty */ ;                                             \
+	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );      \
 }
 
 
