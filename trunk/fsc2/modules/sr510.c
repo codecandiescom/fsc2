@@ -156,6 +156,16 @@ int sr510_init_hook( void )
 }
 
 
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int sr510_test_hook( void )
+{
+	memcpy( &sr510_stored, &sr510, sizeof( SR510 ) );
+}
+
+
 /*--------------------------------------------------*/
 /* Start of experiment hook function for the module */
 /*--------------------------------------------------*/
@@ -232,10 +242,10 @@ Var *lockin_get_data( Var *v )
 		eprint( WARN, SET, "%s: Useless parameter%s in call of %s().\n",
 				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
+	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, 0.0 );
-	else
-		return vars_push( FLOAT_VAR, sr510_get_data( ) );
+
+	return vars_push( FLOAT_VAR, sr510_get_data( ) );
 }
 
 
@@ -267,7 +277,7 @@ Var *lockin_get_adc_data( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
+	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, SR510_TEST_ADC_VOLTAGE );
 
 	return vars_push( FLOAT_VAR, sr510_get_adc_data( port ) );
@@ -289,21 +299,20 @@ Var *lockin_sensitivity( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, SR510_TEST_SENSITIVITY );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr510_get_sens( ) );
+
+			case TEST :                    /* return dummy value in test run */
+				return vars_push( FLOAT_VAR, SR510_TEST_SENSITIVITY );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr510_get_sens( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -387,13 +396,9 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr510_set_sens( sens_index );
-		else                         /* if called in a preparation sections */ 
-			sr510.sens_index = sens_index;
-	}
+	sr510.sens_index = sens_index;
+	if ( FSC2_MODE == EXPERIMENT )
+		sr510_set_sens( sens_index );
 	
 	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
@@ -413,21 +418,20 @@ Var *lockin_time_constant( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR510_TEST_TIME_CONSTANT );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr510_get_tc( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR, SR510_TEST_TIME_CONSTANT );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr510_get_tc( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -504,13 +508,9 @@ Var *lockin_time_constant( Var *v )
 		}
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr510_set_tc( tc_index );
-		else                         /* if called in a preparation sections */ 
-			sr510.tc_index = tc_index;
-	}
+	sr510.tc_index = tc_index;
+	if ( FSC2_MODE == EXPERIMENT )
+		sr510_set_tc( tc_index );
 
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
@@ -532,21 +532,20 @@ Var *lockin_phase( Var *v )
 	/* Without an argument just return current phase settting */
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR510_TEST_PHASE );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr510_get_phase( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR, SR510_TEST_PHASE );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr510_get_phase( ) );
 		}
-	}
 
 	/* Otherwise set phase to value passed to the function */
 
@@ -576,19 +575,13 @@ Var *lockin_phase( Var *v )
 		phase = 360.0 - phase;
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, phase );
-	else
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			return vars_push( FLOAT_VAR, sr510_set_phase( phase ) );
-		else                         /* if called in a preparation sections */ 
-		{
-			sr510.phase    = phase;
-			sr510.is_phase = SET;
-			return vars_push( FLOAT_VAR, phase );
-		}
-	}
+	sr510.phase    = phase;
+	sr510.is_phase = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		return vars_push( FLOAT_VAR, sr510_set_phase( phase ) );
+
+	return vars_push( FLOAT_VAR, phase );
 }
 
 
@@ -606,18 +599,18 @@ Var *lockin_ref_freq( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_VAR, SR510_TEST_REF_FREQUENCY );
-	else
+	switch ( FSC2_MODE )
 	{
-		if ( I_am == PARENT )
-		{
+		case PREPARATION :
 			eprint( FATAL, SET, "%s: Function %s() can only be used in the "
 					"EXPERIMENT section.\n", DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION )
-		}
-		return vars_push( FLOAT_VAR, sr510_get_ref_freq( ) );
+
+		case TEST :
+			return vars_push( FLOAT_VAR, SR510_TEST_REF_FREQUENCY );
 	}
+
+	return vars_push( FLOAT_VAR, sr510_get_ref_freq( ) );
 }
 
 
@@ -693,7 +686,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	sr510.dac_voltage[ channel - first_DAC_port ] = voltage;
 
-	if ( TEST_RUN || I_am == PARENT)
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
 
 	return vars_push( FLOAT_VAR, sr510_set_dac_voltage( channel, voltage ) );
@@ -742,7 +735,7 @@ Var *lockin_lock_keyboard( Var *v )
 			;
 	}
 	
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		sr510_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0);
