@@ -30,8 +30,9 @@ static       int dac_ports[ ] = { 6,       6,       4,       4      };
 #define KEITHLEY228A_MAX_VOLTAGE      5.0  /* admissible voltage range */
 #define KEITHLEY228A_MAX_SWEEP_SPEED  1.0  /* max. current change per second */
 
-#define KEITHLEY228A_MAXMAX_CURRENT 10.01  /* really maximum current ;-) */
+#define KEITHLEY228A_MAXMAX_CURRENT  10.01 /* really maximum current ;-) */
 
+#define KEITHLEY228A_MAX_JUMP         0.1  /* maximum uncontrolled jump */
 
 #define	STANDBY  ( ( bool ) 0 )      
 #define OPERATE  ( ( bool ) 1 )
@@ -57,7 +58,7 @@ Var *reset_field( Var *v );
 static bool keithley228a_init( const char *name );
 static void keithley228a_to_local(void);
 static bool keithley228a_set_state( bool new_state );
-static double keithley228a_goto_current( double current, bool do_test );
+static double keithley228a_goto_current( double current );
 static double keithley228a_set_current( double current );
 static void keithley228a_gpib_failure( void );
 static double keithley228a_current_check( double current );
@@ -321,7 +322,7 @@ Var *set_field( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( new_current, SET ) );
+					  keithley228a_goto_current( new_current ) );
 }
 
 
@@ -355,7 +356,7 @@ Var *sweep_up( Var *v )
 											  + keithley228a.current_step );
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( new_current, UNSET ) );
+					  keithley228a_goto_current( new_current ) );
 }
 
 
@@ -389,7 +390,7 @@ Var *sweep_down( Var *v )
 											  - keithley228a.current_step );
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( new_current, UNSET ) );
+					  keithley228a_goto_current( new_current ) );
 }
 
 
@@ -414,8 +415,7 @@ Var *reset_field( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( keithley228a.req_current,
-												 SET ) );
+					  keithley228a_goto_current( keithley228a.req_current ) );
 }
 
 
@@ -482,7 +482,7 @@ static bool keithley228a_init( const char *name )
 
 	if ( keithley228a.is_req_current )
 		keithley228a.current =
-			keithley228a_goto_current( keithley228a.req_current, SET );
+			keithley228a_goto_current( keithley228a.req_current );
 
 	return OK;
 }
@@ -547,7 +547,7 @@ static bool keithley228a_set_state( bool new_state )
 		sscanf( reply, "%lf,%lf", &dummy, &keithley228a.current);
 
 		if ( keithley228a.current != 0.0 )
-			keithley228a.current = keithley228a_goto_current( 0.0, SET );
+			keithley228a.current = keithley228a_goto_current( 0.0 );
 	}
 	else
 	{
@@ -600,7 +600,7 @@ static bool keithley228a_set_state( bool new_state )
 /* to STANDBY state !                                                */
 /*-------------------------------------------------------------------*/
 
-static double keithley228a_goto_current( double new_current, bool do_test )
+static double keithley228a_goto_current( double new_current )
 {
 	double del_amps;
 	double act_amps;
@@ -608,6 +608,7 @@ static double keithley228a_goto_current( double new_current, bool do_test )
 	long length = 100;
 	double dummy;
 	int max_tries = 100;
+	bool do_test;
 
 	
 	assert( fabs( new_current ) <= KEITHLEY228A_MAXMAX_CURRENT );
@@ -617,6 +618,8 @@ static double keithley228a_goto_current( double new_current, bool do_test )
 	if ( TEST_RUN )
 		return keithley228a.current = new_current;
 
+	do_test =
+		fabs( keithley228a.current = new_current ) > KEITHLEY228A_MAX_JUMP;
 	/* Calculate the size of the current steps */
 
 	del_amps = 0.1 * KEITHLEY228A_MAX_SWEEP_SPEED
