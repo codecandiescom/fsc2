@@ -181,7 +181,11 @@ If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
 start of the experiment, i.e.@: it will sweep the field up and down for
 some time, so please be patient. Also see below on how to reduce the
-amount of time spent for field calibration.
+amount of time spent for field calibration. If the program finds during
+the calibration procedure that the sweep speed isn't set to the highest
+speed it will stop and ask you to do so. When running in batch mode
+having the sweep speed not set to the highest possible speed will
+make @code{fsc2} skip the @code{EDL} script.
 
 The Keithley 228A power supply is used for the sweep coil of the Berlin
 W-band magnet. Because there is no well-defined relationship between the
@@ -1834,7 +1838,9 @@ microwave power. The default minimum value for this distance is
 intentionally set to an unreasonably long value and this function allows
 to reduce (but also enlarge) the value. As another security measure the
 function requires the user to explicitely confirm the new value before
-an experiment is started.
+an experiment is started. When running in batch mode this security
+feature is @strong{deactivated}, @code{fsc2} will accept any value you
+set without requesting a confirmation, so be careful.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
@@ -1856,7 +1862,9 @@ The default minimum value for this distance is intentionally set to an
 unreasonably long value and this function allows to reduce (but also
 enlarge) the value. As another security measure the function requires
 the user to explicitely confirm the new value before an experiment is
-started.
+started. When running in batch mode this security feature is
+@strong{deactivated}, @code{fsc2} will accept any value you set without
+requesting a confirmation, so be careful.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.

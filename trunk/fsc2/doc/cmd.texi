@@ -24,6 +24,94 @@
 @chapter Command Line Options
 @cindex command ine options
 
+@ifinfo
+@menu
+* Batch mode::              Non-supervised operation
+* Non-exclusive mode::      Running more than one instance at once
+* Options summary::         List of all command line options
+@end menu
+@end ifinfo
+
+
+@node Batch mode, Non-exclusive mode, Command Line Options, Command Line Options
+@section Batch mode
+@cindex batch mode
+
+Under normal circumstances an @code{EDL} script gets loaded into
+@code{fsc2} and this script is then executed. During the experiment
+@code{fsc2} might expect further user input (e.g.@: the user selecting
+file names etc.). When the experiment is finished @code{fsc2} waits for
+further instructions by the user.
+
+But sometimes it might be advantageous to pass a whole set of @code{EDL}
+scripts to @code{fsc2}, which then get executed one after another
+without the need for further user interaction and supervision.  This is
+called @strong{batch mode} and gets invoked by starting @code{fsc2} with
+the '@code{-B}' option, directly followed by the complete list of
+@code{EDL} scripts to be executed. @code{fsc2} will then try to execute
+the @code{EDL} scripts in the order they were specified on the command
+line and afterwards quit.
+
+To make @code{fsc2} run ndependent of user input it must behave
+differently from normal mode in several situations. Here's a hopefully
+complete list of all differences that might be expected:
+@itemize @bullet
+@item
+  If one of the @code{EDL} scripts specified on the command line does
+  not exist or can't be opened, an error message is printed to the
+  (error channel) of the terminal @code{fsc2} was started from and
+  the next script from the list is executed.
+
+@item
+  If the test of an @code{EDL} script fails with a fatal error an error
+  message is printed to the (error channel) of the terminal @code{fsc2}
+  was started from and execution of this script is skipped.
+
+@item
+  If the test of an @code{EDL} script results in warnings or severe
+  warnings it is executed anyway without asking for permission by the
+  user. Thus scripts to be run in batch mode should be carefully tested
+  before used in this way.
+
+@item
+  If the experiment gets stopped due to a fatal error an error message is
+  printed to the (error channel) of the terminal @code{fsc2} was started
+  from and execution of the next script from the list is scheduled.
+
+@item
+  Pressing the @code{Stop} button in the display window stops the
+  currently running @code{EDL} script and execution of the next script
+  from the list starts automatically.
+
+@item
+  In batch mode does not query the user for names of output file names.
+  Instead, a file name is constructed from the name of the currently
+  executed @code{EDL} script and an extension of  "@code{.batch_output.}",
+  followed by a unique integer nuber, is used. See the description of
+  the built-in @code{EDL} functions @code{get_file()}, @code{open_file()}
+  and @code{clone_file()} for the details.
+
+@item
+  Device modules, that under normal conditions ask the user for
+  confirmation before starting potentially dangerous operations will
+  use a default answer. This may result in the execution of the script
+  ending prematurely, depending on the what the device module takes to
+  be the default answer. Take care that this this might deactivate some
+  security features!
+@end itemize
+
+@quotation
+@cartouche
+Because some of the safety mechanisms normally built into @code{fsc2}
+must be switched off when running in batch mode it is important to check
+the scripts to be used carefully before running them in batch mode.
+@end cartouche
+@end quotation
+
+
+@node Non-exclusive mode, Options summary, Batch mode, Command Line Options
+@section Non-exclusive mode
+@cindex non-exlusive mode
 
 Normally it is not possible to start @code{fsc2} more than once, if you
 try a short error message is printed out and the program aborts. It was
@@ -71,6 +159,12 @@ consider some possible problems:
   instances via the @code{-httpPort} option.
 @end itemize
 
+
+@node Options summary, , Non-exclusive mode, Command Line Options
+@section Options summary
+@cindex options summary
+
+
 @code{fsc2} can be invoked from the command line with the following
 syntax:
 
@@ -94,6 +188,9 @@ further commands.
 Starts @code{fsc2} in graphics mode and immediately does a syntax
 check on FILE. If the syntax check does not fail the experiment is
 started without the need for further user input.
+
+@item @option{-S}
+Starts @code{fsc2} in batch mode, see discussion above.
 
 @item @option{--delete}
 Starts @code{fsc2} in graphics mode and loads FILE (or also tests
