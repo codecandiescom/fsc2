@@ -319,7 +319,7 @@ int dg2020_b_exp_hook( void )
 	   "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-	if ( ! dg2020.is_confirmation && 
+	if ( ! dg2020.is_cw_mode && ! dg2020.is_confirmation && 
 		 ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ) )
 	{
 		char str[ 500 ];
@@ -557,9 +557,9 @@ Var *pulser_automatic_shape_pulses( Var *v )
 	too_many_arguments( v );
 
 	dg2020.function[ func ].min_left_shape_padding = 
-									 dg2020.function[ func ].left_shape_padding;
+									dg2020.function[ func ].left_shape_padding;
 	dg2020.function[ func ].min_right_shape_padding =
-									dg2020.function[ func ].right_shape_padding;
+								   dg2020.function[ func ].right_shape_padding;
 
 	return vars_push( INT_VAR, 1 );
 }

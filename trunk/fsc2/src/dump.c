@@ -72,8 +72,8 @@ void DumpStack( void )
 	int answer_fd[ 2 ];
 	int pipe_fd[ 4 ];
 	pid_t pid;
-	int i, k = 1;
-	char buf[ 40 ];
+	int i, k = 0;
+	char buf[ 128 ];
 	struct sigaction sact;
 	Device *cd;
 
@@ -221,7 +221,7 @@ static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
 {
 	char buf[ 128 ];
 	char c;
-	Device *cd;
+	Device *cd1, *cd2;
 
 
 	/* Since addr2line is only translating addresses from fsc2 itself we
@@ -231,15 +231,24 @@ static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
 	   infomation to make it possible to figure out the exact location of
 	   the error by manually using addr2line on the library. */
 
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+	for ( cd1 = cd2 = EDL.Device_List; cd2 != NULL; cd2 = cd2->next )
 	{
-		if ( ! cd->is_loaded ||
-			 ( int ) addr < * ( int * ) cd->driver.handle )
+		if ( ! cd2->is_loaded )
 			continue;
 
+		if ( ( int ) addr > * ( int * ) cd1->driver.handle &&
+			 ( int ) addr < * ( int * ) cd2->driver.handle )
+			break;
+
+		cd1 = cd2;
+	}
+
+	if ( cd1 != NULL && cd1->is_loaded &&
+		 ( int ) addr > * ( int * ) cd1->driver.handle )
+	{
 		sprintf( buf, "#%-3d %-10p  %p in %s.so\n", k, addr,
-				 ( void * ) ( ( int ) addr - * ( int * ) cd->driver.handle ),
-				 cd->name );
+				 ( void * ) ( ( int ) addr - * ( int * ) cd1->driver.handle ),
+					 cd1->name );
 		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 		return;
 	}
