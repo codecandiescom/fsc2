@@ -136,7 +136,7 @@ int rulbus_adc12_card_init( int handle )
 	if ( rulbus_card[ handle ].nchan >= 0 )
 		tmp->nchan = rulbus_card[ handle ].nchan;
 	else
-		tmp->nchan = ADC12_MAX_CHANNELS;
+		tmp->nchan = RULBUS_ADC12_MAX_CHANNELS;
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
 	tmp->ctrl = 0;

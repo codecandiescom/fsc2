@@ -46,6 +46,8 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode );
 int rulbus_adc12_check_convert( int handle, double *volts );
 int rulbus_adc12_convert( int handle, double *volts );
 
+#define RULBUS_ADC12_MAX_CHANNELS   16    /* there are also some with only 8 */
+
 #define RULBUS_ADC12_GAIN_1         1
 #define RULBUS_ADC12_GAIN_2         2
 #define RULBUS_ADC12_GAIN_4         4

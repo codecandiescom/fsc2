@@ -65,12 +65,12 @@ typedef enum
 #endif
 
 
-#define RULBUS_MAX_CARDS         256     /* maximum total number of cards */
-#define RULBUS_MAX_RACK_NO      0x0f     /* maximum number of racks */
-#define RULBUS_MAX_CARDS_IN_RACK   8     /* maximum number of cards in rack */
-#define RULBUS_MIN_CARD_ADDR    0x01
-#define RULBUS_MAX_CARD_ADDR    0xfe
-#define RULBUS_INVALID_ADDR     0xff
+#define RULBUS_MAX_CARDS           256    /* maximum total number of cards */
+#define RULBUS_MAX_RACK_NO        0x0f    /* maximum number of racks */
+#define RULBUS_MAX_CARDS_IN_RACK     8    /* maximum number of cards in rack */
+#define RULBUS_MIN_CARD_ADDR      0x01
+#define RULBUS_MAX_CARD_ADDR      0xfe
+#define RULBUS_INVALID_ADDR       0xff
 
 
 #define RB8509   8509       /* 12-bit ADC card */
@@ -82,9 +82,6 @@ typedef enum
 #define RB8510_WIDTH 2
 #define RB8514_WIDTH 4
 #define RB8515_WIDTH 1
-
-
-#define ADC12_MAX_CHANNELS   16          /* there are also some with only 8 */
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
