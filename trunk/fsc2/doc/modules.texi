@@ -1724,6 +1724,7 @@ struct @{
     bool ( *set_function_delay )( int function, double delay );
 
     bool ( *set_timebase )( double timebase );
+    bool ( *set_timebase_level )( int level );
 
     bool ( *set_trigger_mode )( int mode );
     bool ( *set_repeat_time )( double rep_time );
@@ -1966,6 +1967,20 @@ ASSIGNMENTS:
 You will have to check that this is an acceptable time base value and
 you will also have to check later that all pulse positions, lengths
 etc.@: are integer multiples of this time base.
+
+
+@item bool set_timebase_level( int level )
+This function gets called when the @code{TIMEBASE} keyword is foundin 
+the @code{ASSIGNMENTS} section, followed by either @code{TTL} or
+@code{ECL}, i.e.
+@example
+ASSIGNMENTS:
+  TIMEBASE: 16 ns, TTL;
+@end example
+@noindent
+This indicates that the time base is derived from external input with
+either TTL or ECL levels. The argument the function gets passed is an
+integer, either @code{TTL_LEVEL} or @code{ECL_LEVEL}.
 
 
 @item bool set_trigger_mode( int mode )
