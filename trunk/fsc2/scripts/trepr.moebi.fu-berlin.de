@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w  -*- cperl -*-
 #
 # $Id$
 #
@@ -46,6 +46,7 @@ my $trig_channels      = \@trig_channels_1;
 my $trig_channel       = $trig_channels_1[ 0 ];
 my $num_avg            = 1;
 my $how                = 'Start experiment';
+my $calls              = 0;
 
 
 #my ( $f8_m, $f9_m );
@@ -488,6 +489,7 @@ sub show_message {
 
 sub write_out {
 
+return if $calls == 0;
 return if &do_checks( ) != 0;
 
 local *F;
