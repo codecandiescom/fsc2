@@ -435,12 +435,17 @@ Var *boxcar_get_curve( Var *v )
 		gpib_timeout( egg4402.device, old_timo );
 		TRY_SUCCESS;
 	}
-	CATCH( EXCEPTION )
+	CATCH( USER_BREAK_EXCEPTION )
 	{
 		if ( old_timo > 0 )
 			gpib_timeout( egg4402.device, old_timo );
 		T_free( buffer );
-		THROW( EXCEPTION );
+		PASSTHROU( );
+	}
+	CATCH( EXCEPTION )
+	{
+		T_free( buffer );
+		PASSTHROU( );
 	}
 
 	/* Get a buffer for the data in binary form and convert the ASCII data */
@@ -511,7 +516,7 @@ static void egg4402_query( char *buffer, long *length )
 	{
 		usleep( 100000 );
 		if ( do_quit )
-			THROW( EXCEPTION );
+			THROW( USER_BREAK_EXCEPTION );
 		if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
 			egg4402_failure( );
 	} while ( ! ( stb & 0x80 ) && ! ( stb & 1 ) );
