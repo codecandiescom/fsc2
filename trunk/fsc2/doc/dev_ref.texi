@@ -529,7 +529,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @paragraphindent 0
 @strong{Description}: Hewlett-Packard HP frequency counterHP5340A. This is
 a very old device even pre-dating the GPIB-standard. Only its capability
-to return the measured frequency can be used-
+to return the measured frequency can be used.
 
 
 @paragraphindent 0
