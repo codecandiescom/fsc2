@@ -706,8 +706,8 @@ Returns a string with the current time in the form @code{hh:mm:ss}.
 @anchor{delta_time}
 @findex delta_time()
 This function (that can only be used in the @code{EXPERIMENT} section of
-the program) returns a floating point variable with the time (in
-seconds) since the last call of the functions. When it is called for the
+the program) returns the time (in seconds) since the last call of the
+functions as a floating point value. When it is called for the
 very first time it returns the time since the start of the experiment.
 The time returned by the function has micro-second resolution.
 
