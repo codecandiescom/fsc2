@@ -72,6 +72,8 @@
 #include "bugs.h"
 #include "xinit.h"
 #include "comm.h"
+#include "help.h"
+#include "edit.h"
 #include "mail.h"
 #include "ipc.h"
 #include "exceptions.h"
