@@ -110,8 +110,8 @@ const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 #else
 
 extern HP8647A hp8647a;
-extern const char **mod_types;
-extern const char **mod_sources;
+extern const char *mod_types[ ];
+extern const char *mod_sources[ ];
 
 #endif
 
