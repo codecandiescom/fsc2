@@ -32,12 +32,12 @@ mandir           := $(prefix)/man
 infodir          := $(prefix)/info
 
 
-# Here the owner of the program of all files that will be installed as well
-# as the group the owner belongs to has to be set. I would recommended
-# to create a special account for the program, with 'fsc2' being the natural
-# choice (which is also the default). The group fsc2 belongs to (as its
-# primary group, not a supplementary group) should be one that allows
-# access to the device files. See the longert discussion in the INSTALL file.
+# Here the owner and the group of the program and all files that will be
+# installed have to be set. I would recommended to create a special account
+# for the program, with 'fsc2' being the natural choice (which is also the
+# default). The group that owns the files, escpecially the executable fsc2
+# should be one that allows access to the device files. See the longer
+# discussion in section B of the INSTALL file.
 
 OWNER            := fsc2
 GROUP            := uucp
