@@ -44,7 +44,6 @@ static Var *CV;
 %token DL_TOK                   /* pulse length change */
 %token PH_TOK                   /* phase sequence */
 %token ML_TOK                   /* maximum pulse length */
-%token <vptr> PFUNC             /* variable with pulse function
 %token <vptr> RP_TOK            /* replacement pulse list */
 %token RPP_TOK
 
@@ -102,7 +101,7 @@ line:    P_TOK prop
 ;
 
 prop:   /* empty */
-       | prop F_TOK sep1 PFUNC sep2 { p_set( Cur_Pulse, P_FUNC, $4 ); }
+       | prop F_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_FUNC, $4 ); }
        | prop S_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_POS, $4 ); }
        | prop L_TOK sep1 expr sep2  { p_set( Cur_Pulse, P_LEN,$4 ); }
        | prop DS_TOK sep1 expr sep2 { p_set( Cur_Pulse, P_DPOS, $4 ); }

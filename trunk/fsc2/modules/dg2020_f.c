@@ -3,128 +3,17 @@
 */
 
 
-#include "fsc2.h"
-
-
-#define Ticks long
-
-
-#define MIN_TIMEBASE            5.0e-9     /* 5 ns */
-#define MAX_TIMEBASE            0.1        /* 0.1 s */
-
-#define MAX_PODS                12
-#define MAX_CHANNELS            36
-
-
-# define MIN_POD_HIGH_VOLTAGE  -2.0   /* Data for P3420 (Variable Ouput Pod) */
-# define MAX_POD_HIGH_VOLTAGE   7.0
-
-# define MIN_POD_LOW_VOLTAGE   -3.0
-# define MAX_POD_LOW_VOLTAGE    6.0
-
-#define MAX_POD_VOLTAGE_SWING   9.0
-#define MIN_POD_VOLTAGE_SWING   0.5
-
-#define VOLTAGE_RESOLUTION      0.1
-
-#define MAX_TRIG_IN_LEVEL       5.0
-#define MIN_TRIG_IN_LEVEL      -5.0
-
-
-
-#define MIN_BLOCK_SIZE     64     /* minimum length of block */
-#define MAX_BLOCK_REPEATS  65536  /* maximum of repeats of block in sequence */
-#define MAX_PULSER_BITS    65536  /* maximum number of bits in channel */
-
-#define NO_PULSE           -1     /* marks unused pulse numbers */
-#define NO_CHANNEL         -1     /* marks unused channels */
-
-
-
-
-int dg2020_init_hook( void );
-int dg2020_test_hook( void );
-int dg2020_exp_hook( void );
-void dg2020_exit_hook( void );
-
-static bool set_timebase( double timebase );
-static bool assign_function( int function, long pod );
-static bool assign_channel_to_function( int function, long channel );
-static bool invert_function( int function );
-static bool set_delay_function( int function, double delay );
-static bool set_function_high_level( int function, double voltage );
-static bool set_function_low_level( int function, double voltage );
-static bool set_trigger_mode( int mode );
-static bool set_trig_in_level( double voltage );
-static bool set_trig_in_slope( int slope );
-static bool set_repeat_time( double time );
-
-
-static Ticks double2ticks( double time );
-static double ticks2double( Ticks ticks );
-static void check_pod_level_diff( double high, double low );
+#include "dg2020.h"
 
 
 
 static bool dg2020_is_needed;
-
-
-typedef struct {
-	int self;
-
-	bool is_used;
-
-	struct _P_ *pod;
-	bool is_inverted;
-
-	int num_channels;
-	struct _C_ *channel[ MAX_CHANNELS ];
-
-	Ticks delay;
-	bool is_delay;
-
-	double high_level;
-	double low_level;
-	bool is_high_level;
-	bool is_low_level;
-} FUNCTION;
-
-
-typedef struct _P_ {
-	FUNCTION *function;
-} POD;
-
-
-typedef struct _C_ {
-	FUNCTION *function;
-} CHANNEL;
-
-
-typedef struct
-{
-	double timebase;
-	bool is_timebase;
-
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
-	double trig_in_level;    /* only in EXTERNAL mode */
-	Ticks repeat_time;       /* only in INTERNAL mode */
-
-	bool is_trig_in_mode;
-	bool is_trig_in_slope;
-	bool is_trig_in_level;
-	bool is_repeat_time;
-
-	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	POD pod[ MAX_PODS ];
-	CHANNEL channel[ MAX_CHANNELS ];
-
-} DG2020;
-
-
-
 static DG2020 dg2020;
+static PULSE *Pulses;
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 int dg2020_init_hook( void )
 {
@@ -162,20 +51,21 @@ int dg2020_init_hook( void )
 	pulser_struct.set_trig_in_level = set_trig_in_level;
 	pulser_struct.set_trig_in_slope = set_trig_in_slope;
 
-	pulser_struct.set_pulse_function = NULL;
-	pulser_struct.set_pulse_position = NULL;
-	pulser_struct.set_pulse_length = NULL;
-	pulser_struct.set_pulse_position_change = NULL;
-	pulser_struct.set_pulse_length_change = NULL;
-	pulser_struct.set_pulse_maxlen = NULL;
-	pulser_struct.set_pulse_replacements = NULL;
+	pulser_struct.new_pulse = new_pulse;
+	pulser_struct.set_pulse_function = set_pulse_function;
+	pulser_struct.set_pulse_position = set_pulse_position;
+	pulser_struct.set_pulse_length = set_pulse_length;
+	pulser_struct.set_pulse_position_change = set_pulse_position_change;
+	pulser_struct.set_pulse_length_change = set_pulse_length_change;
+	pulser_struct.set_pulse_maxlen = set_pulse_maxlen;
+	pulser_struct.set_pulse_replacements = set_pulse_replacements;
 
-	pulser_struct.get_pulse_function = NULL;
-	pulser_struct.get_pulse_position = NULL;
-	pulser_struct.get_pulse_length = NULL;
-	pulser_struct.get_pulse_position_change = NULL;
-	pulser_struct.get_pulse_length_change = NULL;
-	pulser_struct.get_pulse_maxlen = NULL;
+	pulser_struct.get_pulse_function = get_pulse_function;
+	pulser_struct.get_pulse_position = get_pulse_position;
+	pulser_struct.get_pulse_length = get_pulse_length;
+	pulser_struct.get_pulse_position_change = get_pulse_position_change;
+	pulser_struct.get_pulse_length_change = get_pulse_length_change;
+	pulser_struct.get_pulse_maxlen = get_pulse_maxlen;
 
 
 	dg2020.is_timebase = UNSET;
@@ -194,6 +84,7 @@ int dg2020_init_hook( void )
 	{
 		dg2020.function[ i ].self = i;
 		dg2020.function[ i ].is_used = UNSET;
+		dg2020.function[ i ].is_needed = UNSET;
 		dg2020.function[ i ].pod = NULL;
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].is_inverted = UNSET;
@@ -211,18 +102,26 @@ int dg2020_init_hook( void )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 int dg2020_test_hook( void )
 {
-/*
-	if ( Plist == NULL )
+	if ( Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
 		eprint( WARN, "DG2020 loaded but no pulses defined.\n" );
 		return 1;
 	}
-*/
+
+	check_consistency( );
+
 	return 1;
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 int dg2020_exp_hook( void )
 {
@@ -231,6 +130,10 @@ int dg2020_exp_hook( void )
 
 	return 1;
 }
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 void dg2020_exit_hook( void )
 {
@@ -241,14 +144,19 @@ void dg2020_exit_hook( void )
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool set_timebase( double timebase )
 {
 	if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid time base %g s, valid range  "
-				"is %g-%g s.\n", Fname, Lc, timebase,
-				MIN_TIMEBASE, MAX_TIMEBASE );
+		char *min = get_string_copy( ptime( ( double ) MIN_TIMEBASE ) );
+		char *max = get_string_copy( ptime( ( double ) MAX_TIMEBASE ) );
+		eprint( FATAL, "%s:%ld: DG2020: Invalid time base %s, valid range  "
+				"is %s to %s.\n", Fname, Lc, ptime( timebase ), min, max );
+		T_free( min );
+		T_free( max );
 		THROW( EXCEPTION );
 	}
 
@@ -257,6 +165,9 @@ static bool set_timebase( double timebase )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool assign_function( int function, long pod )
 {
@@ -286,6 +197,9 @@ static bool assign_function( int function, long pod )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool assign_channel_to_function( int function, long channel )
 {
@@ -324,6 +238,9 @@ static bool assign_channel_to_function( int function, long channel )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool invert_function( int function )
 {
 	dg2020.function[ function ].is_used = SET;
@@ -331,6 +248,9 @@ static bool invert_function( int function )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool set_delay_function( int function, double delay )
 {
@@ -341,12 +261,24 @@ static bool set_delay_function( int function, double delay )
 		THROW( EXCEPTION );
 	}
 
+	/* check that the delay value is reasonable */
+
+	if ( delay < 0 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid negative delay: %s\n", Fname, Lc,
+				ptime( delay ) );
+		THROW( EXCEPTION );
+	}
+
 	dg2020.function[ function ].delay = double2ticks( delay );
 	dg2020.function[ function ].is_used = SET;
 
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool set_function_high_level( int function, double voltage )
 {
@@ -372,6 +304,9 @@ static bool set_function_high_level( int function, double voltage )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool set_function_low_level( int function, double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
@@ -396,6 +331,9 @@ static bool set_function_low_level( int function, double voltage )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool set_trigger_mode( int mode )
 {
@@ -443,6 +381,9 @@ static bool set_trigger_mode( int mode )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool set_trig_in_level( double voltage )
 {
 	voltage = VOLTAGE_RESOLUTION * lround( voltage / VOLTAGE_RESOLUTION );
@@ -471,7 +412,7 @@ static bool set_trig_in_level( double voltage )
 
 	if ( voltage > MAX_TRIG_IN_LEVEL || voltage < MIN_TRIG_IN_LEVEL )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Inalid level for trigger of %g V, "
+		eprint( FATAL, "%s:%ld: DG2020: Invalid level for trigger of %g V, "
 				"valid range is %g V to %g V.\n", Fname, Lc, MIN_TRIG_IN_LEVEL,
 				MAX_TRIG_IN_LEVEL );
 		THROW( EXCEPTION );
@@ -483,6 +424,9 @@ static bool set_trig_in_level( double voltage )
 	return OK;
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 static bool set_trig_in_slope( int slope )
 {
@@ -517,13 +461,16 @@ static bool set_trig_in_slope( int slope )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
 static bool set_repeat_time( double time )
 {
 	if ( dg2020.is_repeat_time && dg2020.repeat_time != double2ticks( time ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: A different repeat time/frequency of "
-				"%g s / %g Hz has already been set.\n", Fname, Lc,
-				ticks2double( dg2020.repeat_time ),
+				"%s / %g Hz has already been set.\n", Fname, Lc,
+				pticks( dg2020.repeat_time ),
 				1.0 / ticks2double( dg2020.repeat_time ) );
 		THROW( EXCEPTION );
 	}
@@ -549,11 +496,333 @@ static bool set_repeat_time( double time )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool new_pulse( long pnum )
+{
+	PULSE *cp = Pulses;
+	PULSE *lp;
 
 
+	while ( cp != NULL )
+	{
+		if ( cp->num == pnum )
+		{
+			eprint( FATAL, "%s:%ld: DG2020: Can't create pulse with number "
+					"%ld, it already exists.\n", Fname, Lc, pnum );
+			THROW( EXCEPTION );
+		}
+		lp = cp;
+		cp = cp->next;
+	}
+
+	cp = T_malloc( sizeof( PULSE ) );
+
+	if ( Pulses == NULL )
+	{
+		Pulses = cp;
+		cp->prev = NULL;
+	}
+	else
+	{
+		cp->prev = lp;
+		lp->next = cp;
+	}
+
+	cp->next = NULL;
+
+	cp->num = pnum;
+	cp->is_function = UNSET;
+	cp->is_pos = UNSET;
+	cp->is_len = UNSET;
+	cp->is_dpos = UNSET;
+	cp->is_dlen = UNSET;
+	cp->is_maxlen = UNSET;
+	cp->num_repl = 0;
+
+	return OK;
+}
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
+static bool set_pulse_function( long pnum, int function )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_function )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The function of pulse %ld has already "
+				"been set to `%s'.\n", Fname, Lc, pnum,
+				Function_Names[ p->function->self ] );
+		THROW( EXCEPTION );
+	}
+
+	p->function = &dg2020.function[ function ];
+	p->is_function = SET;
+	p->function->is_needed = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_position( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_pos )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The start position of pulse %ld has "
+				"already been set to %s.\n", Fname, Lc, pnum,
+				pticks( p->pos ) );
+		THROW( EXCEPTION );
+	}
+
+	p->pos = double2ticks( time );
+	p->is_pos = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_length( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_len )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The length of pulse %ld has "
+				"already been set to %s.\n", Fname, Lc, pnum,
+				pticks( p->len ) );
+		THROW( EXCEPTION );
+	}
+
+	p->len = double2ticks( time );
+	p->is_len = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_position_change( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_dpos )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The position change of pulse %ld has "
+				"already been set to %s.\n", Fname, Lc, pnum,
+				pticks( p->dpos ) );
+		THROW( EXCEPTION );
+	}
+
+	p->dpos = double2ticks( time );
+	p->is_dpos = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_length_change( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_dlen )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The length change of pulse %ld has "
+				"already been set to %s.\n", Fname, Lc, pnum,
+				pticks( p->len ) );
+		THROW( EXCEPTION );
+	}
+
+	p->dlen = double2ticks( time );
+	p->is_dlen = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_maxlen( long pnum, double time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->is_maxlen )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The maximum length of pulse %ld has "
+				"already been set to %s.\n", Fname, Lc, pnum,
+				pticks( p->maxlen ) );
+		THROW( EXCEPTION );
+	}
+
+	p->maxlen = double2ticks( time );
+	p->is_maxlen = SET;
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool set_pulse_replacements( long pnum, long num_repl, long *repl_list )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( p->num_repl )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Replacement pulses for pulse %ld "
+				"have already been set.\n", Fname, Lc, pnum );
+		THROW( EXCEPTION );
+	}
+
+	p->num_repl = num_repl;
+	p->repl_list = get_memcpy( repl_list, num_repl * sizeof( long ) );
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_function( long pnum, int *function )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_function )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The function of pulse %ld hasn't "
+				"been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*function = p->function->self;
+	return OK;
+}
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_position( long pnum, double *time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_pos )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The start position of pulse %ld "
+				"hasn't been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*time = ticks2double( p->pos );
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_length( long pnum, double *time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_len )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The length of pulse %ld hasn't "
+				"been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*time = ticks2double( p->len );
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_position_change( long pnum, double *time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_dpos )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The position change of pulse %ld "
+				"hasn't been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*time = ticks2double( p->dpos );
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_length_change( long pnum, double *time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_dlen )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The length change of pulse %ld hasn't "
+				"been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*time = ticks2double( p->dlen );
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static bool get_pulse_maxlen( long pnum, double *time )
+{
+	PULSE *p = get_pulse( pnum );
+
+
+	if ( ! p->is_maxlen )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: The maximum length of pulse %ld "
+				"hasn't been set.\n", Fname, Lc, pnum );
+		THROW(EXCEPTION );
+	}
+
+	*time = ticks2double( p->maxlen );
+	return OK;
+}
 
 
 
@@ -566,10 +835,11 @@ static Ticks double2ticks( double time )
 {
 	double ticks;
 
+
 	if ( ! dg2020.is_timebase )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Can't set a time because no time base "
-				"has been set yet.\n",Fname, Lc );
+		eprint( FATAL, "%s:%ld: DG2020: Can't set a time because no pulser "
+				"time base has been set.\n",Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -577,9 +847,11 @@ static Ticks double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Specified time %g is not a integer "
-				"multiple of the pulsers time base of %g s.\n", Fname, Lc,
-				time, dg2020.timebase );
+		char *t = get_string_copy( ptime( time ) );
+		eprint( FATAL, "%s:%ld: DG2020: Specified time of %s is not an "
+				"integer multiple of the pulser time base of %s.\n",
+				Fname, Lc, t, ptime( dg2020.timebase ) );
+		T_free( t );
 		THROW( EXCEPTION );
 	}
 
@@ -613,19 +885,103 @@ static void check_pod_level_diff( double high, double low )
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.04 )
+	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.01 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Diference between high and low "
+		eprint( FATAL, "%s:%ld: DG2020: Difference between high and low "
 				"voltage of %g V is too big, maximum is %g V.\n", Fname, Lc,
 				high - low, MAX_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.04 )
+	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.01 )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Diference between high and low "
+		eprint( FATAL, "%s:%ld: DG2020: Difference between high and low "
 				"voltage of %g V is too small, minimum is %g V.\n", Fname, Lc,
 				high - low, MIN_POD_VOLTAGE_SWING );
 		THROW( EXCEPTION );
+	}
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static PULSE *get_pulse( long pnum )
+{
+	PULSE *cp = Pulses;
+
+
+	while ( cp != NULL )
+	{
+		if ( cp->num == pnum )
+			break;
+		cp = cp->next;
+	}
+
+	if ( cp == NULL )
+	{
+		eprint( FATAL, "%s:%ld: DG2020: Referenced pulse %ld does not "
+				"exist.\n", Fname, Lc, pnum );
+		THROW( EXCEPTION );
+	}
+
+	return cp;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static const char *ptime( double time )
+{
+	static char buffer[ 128 ];
+
+	if ( time >= 1.0 )
+		sprintf( buffer, "%g s", time );
+	else if ( time >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * time );
+	else if ( time >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * time );
+	else
+		sprintf( buffer, "%g ns", 1.e9 * time );
+
+	return buffer;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static const char *pticks( Ticks ticks )
+{
+	return ptime( ticks2double( ticks ) );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static void check_consistency( void )
+{
+	int i;
+
+	/* Check that or each function that's used there's also a pod assigned to
+       it */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		if ( dg2020.function[ i ].is_used && ! dg2020.function[ i ].is_needed )
+		{
+			eprint( WARN, "DG2020: No pulses have been assigned to function "
+					"%s.\n", Function_Names[ i ] );
+		}
+
+		if ( dg2020.function[ i ].is_needed &&
+			 dg2020.function[ i ].pod == NULL )
+		{
+			eprint( FATAL, "DG2020: No pod has been assigned to "
+					"function %s.\n", Function_Names[ i ] );
+			THROW( EXCEPTION );
+		}
 	}
 }

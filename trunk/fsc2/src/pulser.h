@@ -79,6 +79,7 @@ void is_pulser_driver( void );
 void is_pulser_func( void *func, const char *text );
 double is_mult_ns( double val, const char * text );
 
+long p_new( long pnum );
 void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
 

@@ -189,7 +189,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {P}"."{F}   {
 				prepslval.vptr = p_get( prepstext, P_FUNC );
-				return PFUNC;
+				return VAR_REF;
             }
 
 {P}"."{S}   {
@@ -236,51 +236,51 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {MW}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
-				return PFUNC;
+				return VAR_REF;
 			}
 {TWT}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
-				return PFUNC;
+				return VAR_REF;
 			}
 {TWT_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
-				return PFUNC;
+				return VAR_REF;
 			}
 {DET}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
-				return PFUNC;
+				return VAR_REF;
 			}
 {DET_GATE}  {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
-				return PFUNC;
+				return VAR_REF;
 			}
 {RF}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
-				return PFUNC;
+				return VAR_REF;
 			}
 {RF_GATE}   {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
-				return PFUNC;
+				return VAR_REF;
 			}
 
 {OI}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_1 );
-				return PFUNC;
+				return VAR_REF;
 			}
 
 {OII}        {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_2 );
-				return PFUNC;
+				return VAR_REF;
 			}
 
 {OIII}      {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_3 );
-				return PFUNC;
+				return VAR_REF;
 			}
 
 {OIV}       {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_4 );
-				return PFUNC;
+				return VAR_REF;
 			}
 
 

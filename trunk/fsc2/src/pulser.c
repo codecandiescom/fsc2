@@ -123,7 +123,7 @@ double is_mult_ns( double val, const char * text )
 	val *= 1.e9;
 	if ( fabs( val - lround( val ) ) > 1.e-2 )
 	{
-		eprint( FATAL, "%s:%ld: %s has to be a multiple of 1 ns\n",
+		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns\n",
 				Fname, Lc, text );
 		THROW( EXCEPTION );
 	}
@@ -244,16 +244,8 @@ void p_set_delay( long func, Var *v )
 	/* check the variable and get its value */
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	delay = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
+	delay = ( ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval );
 	vars_pop( v );
-
-	/* check that the delay value is reasonable */
-
-	if ( delay < 0 )
-	{
-		eprint( FATAL, "%s:%ld: Invalid delay: %f\n", Fname, Lc, delay );
-		THROW( EXCEPTION );
-	}
 
 	delay = is_mult_ns( delay, "Delay" );
 
@@ -350,7 +342,8 @@ void p_set_timebase( Var *v )
 
 	if ( timebase < 9.9e-10 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid timebase: %f\n", Fname, Lc, timebase );
+		eprint( FATAL, "%s:%ld: Invalid timebase: %g s\n", Fname, Lc,
+				timebase );
 		THROW( EXCEPTION );
 	}
 
@@ -478,7 +471,7 @@ void p_set_rep_time( Var *v )
 
 	if ( time < 9.9e-10 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat time: %f s\n",
+		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s\n",
 				Fname, Lc, time );
 		THROW( EXCEPTION );
 	}
@@ -509,7 +502,7 @@ void p_set_rep_freq( Var *v )
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %f s\n",
+		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s\n",
 				Fname, Lc, freq );
 		THROW( EXCEPTION );
 	}
@@ -524,6 +517,18 @@ void p_set_rep_freq( Var *v )
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
+}
+
+
+/*-----------------------------------*/
+/* Function for creating a new pulse */
+/*-----------------------------------*/
+
+long p_new( long pnum )
+{
+	is_pulser_func( pulser_struct.new_pulse, "creating a new pulse" );
+	( *pulser_struct.new_pulse )( pnum );
+	return pnum;
 }
 
 
@@ -549,9 +554,13 @@ void p_set( long pnum, int type, Var *v )
 	switch ( type )
 	{
 		case P_FUNC :
-			vars_check( v, INT_VAR );
-			assert( v->val.lval >= PULSER_CHANNEL_FUNC_MIN &&
-					v->val.lval <= PULSER_CHANNEL_FUNC_MAX );
+			if ( v->type != INT_VAR ||
+				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
+				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
+			{
+				eprint( FATAL, "%s:%ld: Invalid function.\n", Fname, Lc );
+				THROW( EXCEPTION );
+			}
 			is_pulser_func( pulser_struct.set_pulse_function,
 							"setting a pulse function" );
 			( *pulser_struct.set_pulse_function )( pnum, ( int ) v->val.lval );
@@ -570,7 +579,7 @@ void p_set( long pnum, int type, Var *v )
 			vars_check( v, INT_VAR | FLOAT_VAR );
 			is_pulser_func( pulser_struct.set_pulse_length,
 							"setting a pulse length" );
-			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+			( *pulser_struct.set_pulse_length )( pnum, VALUE( v ) );
 			vars_pop( v );
 			break;
 

@@ -45,6 +45,7 @@ typedef struct {
 	int self;
 
 	bool is_used;
+	bool is_needed;
 
 	struct _P_ *pod;
 	bool is_inverted;
@@ -164,5 +165,8 @@ static bool get_pulse_maxlen( long pnum, double *time );
 static Ticks double2ticks( double time );
 static double ticks2double( Ticks ticks );
 static void check_pod_level_diff( double high, double low );
-PULSE *get_pulse( long pnum );
+static PULSE *get_pulse( long pnum );
+static const char *ptime( double time );
+static const char *pticks( Ticks ticks );
+static void check_consistency( void );
 
