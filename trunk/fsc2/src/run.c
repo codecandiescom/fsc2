@@ -34,6 +34,7 @@ extern FL_resource xresources[ ];             /* from xinit.c */
 
 /* Routines of the main process exclusively used in this file */
 
+static void stop_while_exp_hook( FL_OBJECT *a, long b );
 static bool no_prog_to_be_run( void );
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void new_data_handler( int signo	);
@@ -115,21 +116,38 @@ bool run( void )
 
 	memcpy( &compile_test, &compilation, sizeof( Compilation ) );
 
-	/* Set zero point for the dtime() function, run the experiment hooks,
-	   initialize the graphics and create two pipes for two-way communication
-	   between the parent and child process. */
+	/* Set zero point for the dtime() function, run the experiment hooks
+	   (while allowing the user to break in between), initialize the graphics
+	   and create two pipes for two-way communication between the parent and
+	   child process. */
 
 	TRY
 	{
 		vars_pop( f_dtime( NULL ) );
+
+		do_quit = react_to_do_quit = UNSET;
+		fl_set_object_callback( main_form->run, stop_while_exp_hook, 0 );
+
 		run_exp_hooks( );
+
+		fl_set_object_callback( main_form->run, run_file, 0 );
+		fl_deactivate_object( main_form->run );
+		fl_set_object_label( main_form->run, "Start" );
+		fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
+		XFlush( fl_get_display( ) );
+
 		check_for_further_errors( &compile_test, &compilation );
+
 		start_graphics( );
 		setup_comm( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
+		do_quit = react_to_do_quit = UNSET;
+		fl_set_object_label( main_form->run, "Start" );
+		fl_set_object_callback( main_form->run, run_file, 0 );
+
 		run_end_of_exp_hooks( );
 
 		vars_del_stack( );             /* some stack variables might be left
@@ -141,6 +159,9 @@ bool run( void )
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
 	}
+
+	fl_set_object_label( main_form->run, "Start" );
+	fl_set_object_callback( main_form->run, run_file, 0 );
 
 	child_is_quitting = UNSET;
 
@@ -223,6 +244,18 @@ bool run( void )
 		gpib_shutdown( );
 	stop_measurement( NULL, 1 );
 	return FAIL;
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+static void stop_while_exp_hook( FL_OBJECT *a, long b )
+{
+	a = a;
+	b = b;
+
+	do_quit = react_to_do_quit = SET;
 }
 
 
@@ -549,9 +582,6 @@ static void set_buttons_for_run( int active )
 
 		fl_deactivate_object( main_form->reload );
 		fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
-
-		fl_deactivate_object( main_form->run );
-		fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
 
 		fl_deactivate_object( main_form->quit );
 		fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );

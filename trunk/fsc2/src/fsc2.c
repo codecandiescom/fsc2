@@ -941,12 +941,16 @@ void run_file( FL_OBJECT *a, long b )
 
 	TRY
 	{
+		fl_set_object_label( main_form->run, "Stop" );
 		run( );
 		TRY_SUCCESS;
 	}
 	CATCH( EXCEPTION )
+	{
+		fl_set_object_label( main_form->run, "Start" );
 		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
+	}
 }
 
 

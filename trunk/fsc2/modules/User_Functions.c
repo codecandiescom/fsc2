@@ -32,8 +32,6 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-int User_Functions_exp_hook( void );
-
 Var *get_phase_cycled_area( Var *v );
 
 static Var *get_phase_cycled_area_1( Var *v );
@@ -44,28 +42,6 @@ static bool get_channel_number( Var *v, const char *func_name, long *channel );
 static void pc_basic_check( const char *func_name, const char *func_1,
 							bool *is_1, const char *func_2, bool *is_2,
 							const char *str );
-
-
-int User_Functions_exp_hook( void )
-{
-	int i;
-
-
-	eprint( NO_ERROR, UNSET, "Start of User_Functions_exp_hook\n" );
-
-	for ( i = 0; i < 5; i++ )
-	{
-		sleep( 1 );
-		if ( I_am == PARENT )
-			fl_check_only_forms( );
-		if ( DO_STOP )
-			THROW( USER_BREAK_EXCEPTION );
-	}
-
-	eprint( NO_ERROR, UNSET, "End of User_Functions_exp_hook\n" );
-
-	return 1;
-}
 
 
 /*-----------------------------------------------------------------*/
