@@ -29,8 +29,8 @@ Unfortunately, all devices listed in the @code{DEVICES} section must be
 different. This is due to limitations of to the way shared libraries are
 handled and, as far as devices are concerned that are controlled via the
 GPIB bus, to certain ideosyncrasies of the GPIB libraries . Thus, if two
-or more exactly identical devices are to be used simultaneously one or
-more extra shared libraries for these devices have to be created.
+or more exactly identical devices are to be used simultaneously extra
+shared libraries for these devices have to be created.
 
 Fortunately, this is such a simple process that it can be done via a
 script. There are basically three or four steps:
@@ -43,13 +43,13 @@ directory
 @end enumerate
 
 The script @file{clone_device} is a Perl script (thus you need Perl
-installed to be able to run it). The scriot resides in the @code{utils}
-subdirectory of @acronym{fsc2}s and can only be run from within this
-directory. It asks for the name of the device to be cloned (i.e.@: the
-name of the device of which two or more are to be used simultaneously),
-a new name for the device and finally for another name that is going to
-be used in warnings, error mesaages, and, if applicable, in the GPIB
-configuration file.
+installed to be able to run it). The script resides in the @code{utils}
+subdirectory of @acronym{fsc2}s main directory and can only be run from
+within this directory. It asks for the name of the device to be cloned
+(i.e.@: the name of the device of which two or more are to be used
+simultaneously), a new name for the device and finally for another name
+that is going to be used in warnings, error mesaages, and, if
+applicable, in the GPIB configuration file.
 
 Lets assume you have use two lock-in amplifiers of type @code{sr510} and
 need a second device module that will be invoked by the name

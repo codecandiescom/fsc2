@@ -82,7 +82,7 @@ close F;
 
 die "Sorry, can't find DEVICE_NAME in configuration file " .
 	"../config/$dev.conf.\n" unless defined $dev_name;
-print "\nPlease now enter the name for the new module :  ";
+print "\nPlease enter the name for the new module    :  ";
 $new_dev = <>;
 chomp $new_dev;
 die "Sorry, invalid module name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
@@ -101,7 +101,7 @@ die "Sorry, invalid device name.\n" unless $new_dev =~ /^[A-Za-z0-9_]+$/;
 die "Sorry, the old and the new device name are identical.\n"
 	if $dev_name eq $new_dev_name;
 
-print "\nThanks, that's all the needed information...\n\n";
+print "\nThanks, that's all the information needed...\n\n";
 
 
 #
@@ -161,7 +161,7 @@ print "Everything worked out well. Now you simply have to re-make fsc2\n" .
 	  "If the device is controlled via the GPIB bus you still have to\n" .
 	  "update the GPIB configuration file manually (usually, it's\n" .
 	  "/etc/gpib.conf). Just copy the section for the old device,\n" .
-	  "replace the device name by \`$new_dev\'_name and change the GPIB\n" .
+	  "replace the device name by \`$new_dev_name\' and change the GPIB\n" .
 	  "address to the one of the new device.\n\n";
 
 #
