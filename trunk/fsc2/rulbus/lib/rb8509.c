@@ -33,8 +33,8 @@ typedef struct RULBUS_ADC12_CARD RULBUS_ADC12_CARD;
 struct RULBUS_ADC12_CARD {
 	int handle;
 	int nchan;
-	double range;
 	double gain;
+	double Vmax;
 	double Vmin;
 	double dV;
 	int exttrg;
@@ -52,11 +52,12 @@ struct RULBUS_ADC12_CARD {
 
 /* Bits in the control byte */
 
-#define CTRL_CHANNEL_MASK              ( 0x0F << 0 )
+#define CTRL_CHANNEL_MASK              ( 7 << 0 )
+#define CTRL_MULTIPLEXER_MASK          ( 1 << 3 )       /* keep always low ! */
+#define CTRL_GAIN_MASK                 ( 3 << 4 )
+#define CTRL_EXT_TRIGGER_ENABLE        ( 1 << 6 )
+#define CTRL_INTERRUPT_ENABLE          ( 1 << 7 )
 #define CTRL_GAIN_SHIFT                4
-#define CTRL_GAIN_MASK                 (    3 << 4 )
-#define CTRL_EXT_TRIGGER_ENABLE        (    1 << 6 )
-#define CTRL_INTERRUPT_ENABLE          (    1 << 7 )
 
 
 /* Bits in the status byte */
@@ -70,11 +71,8 @@ struct RULBUS_ADC12_CARD {
 
 #define ADC12_RANGE                    0x0FFF
 
-#define ADC12_DELAY                    18            /* 18 us */
+#define ADC12_DELAY                    18               /* 18 us */
 
-/* The possible ranges (in units of 10 mV) */
-
-static long ranges[ ] = { 1024, 1000, 512, 500 };
 
 static RULBUS_ADC12_CARD *rulbus_adc12_card = NULL;
 static int rulbus_num_adc12_cards = 0;
@@ -143,72 +141,22 @@ int rulbus_adc12_card_init( int handle )
 	if ( rulbus_card[ handle ].polar == -1 )
 		return RULBUS_NO_POL;
 
-	/* Check the range setting */
+	/* Check the range setting and calculate the minumum voltage and
+	   resolution (it looks as if the cards where built to allow outputting
+	   an exact voltage of 0 V */
 
-	if ( rulbus_card[ handle ].range < 0.0 )
+	if ( rulbus_card[ handle ].range <= 0.0 )
 		return RULBUS_NO_RNG;
 
-	for ( i = 0; i < sizeof ranges / sizeof *ranges; i++ )
-		if ( ranges[ i ] ==
-			 		( int ) floor( rulbus_card[ handle ].range * 1e2 + 0.5 ) )
-			break;
-	
-	switch ( i )
+	if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 	{
-		case 0 :    /* 0 V to +10.2375 V   or   -10.24 to +10.235 V */
-			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
-			{
-				Vmin = 0.0;
-				dV = 2.5e-3;
-			}
-			else
-			{
-				Vmin = -10.24;
-				dV = 5.0e-3;
-			}
-			break;
-
-		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V */
-			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
-			{
-				Vmin = 0.0;
-				dV = 10.0 / ADC12_RANGE;
-			}
-			else
-			{
-				Vmin = -10.0;
-				dV = 20.0 / ADC12_RANGE;
-			}
-			break;
-
-		case 2 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V */
-			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
-			{
-				Vmin = 0.0;
-				dV = 1.25e-3;
-			}
-			else
-			{
-				Vmin = -5.12;
-				dV = 2.5e-3;
-			}
-			break;
-
-		case 3 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V */
-			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
-			{
-				Vmin = 0.0;
-				dV = 5.0 / ADC12_RANGE;
-			}
-			else
-			{
-				Vmin = -5.0;
-				dV = 10.0 / ADC12_RANGE;
-			}
-			break;
-
-		default :
-			return RULBUS_INV_RNG;
+		dV = rulbus_card[ handle ].range / ADC12_RANGE;
+		Vmin = 0.0;
+	}
+	else
+	{
+		dV = rulbus_card[ handle ].range / ( ADC12_RANGE >> 1 );
+		Vmin = -rulbus_card[ handle ].range - dV;
 	}
 
 	if ( rulbus_card[ handle ].exttrg < 0 )
@@ -225,6 +173,7 @@ int rulbus_adc12_card_init( int handle )
 
 	tmp->handle = handle;
 	tmp->nchan = rulbus_card[ handle ].nchan;
+	tmp->Vmax = rulbus_card[ handle ].range;
 	tmp->Vmin = Vmin;
 	tmp->dV = dV;
 	tmp->exttrg = rulbus_card[ handle ].exttrg;
@@ -466,7 +415,7 @@ int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
 		return RULBUS_INV_HND;
 
 	if ( Vmax != NULL )
-		*Vmax = card->dV * ADC12_RANGE + card->Vmin;
+		*Vmax = card->Vmax;
 
 	if ( Vmin != NULL )
 		*Vmin = card->Vmin;

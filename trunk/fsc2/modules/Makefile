@@ -108,7 +108,7 @@ endif
 
 ifdef WITH_RULBUS
 simp_modules    += rb8509
-#comp_modules    += rulbus_pulser
+#comp_modules    += rb_pulser
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h

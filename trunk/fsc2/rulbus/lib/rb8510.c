@@ -41,7 +41,7 @@ struct RULBUS_DAC12_CARD {
 
 /* Upper limit voltages the DACs can be configured to */
 
-static double ranges[ ] = { 2000, 1000, 500, 2048, 1024, 512 };
+static double ranges[ ] = { 1000, 500, 1024, 512 };
 
 #define DAC12_RANGE  0x0FFF
 
@@ -116,14 +116,7 @@ int rulbus_dac12_card_init( int handle )
 	
 	switch ( i )
 	{
-		case 0 :    /* 0 V to +20 V (no bipolar variant!) */
-			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
-				return RULBUS_INV_RNG;
-			Vmin = 0.0;
-			dV = 20.0 / DAC12_RANGE;
-			break;
-
-		case 1:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V */
+		case 0:     /* 0 V to +10.0 V   or   -10.0 V to +10.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -136,7 +129,7 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 2 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V */
+		case 1 :    /* 0 V to +5.0 V   or   -5.0 V to +5.0 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -149,14 +142,7 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 3 :    /* 0 V to +20.475 V (no bipolar variant!) */
-			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
-				return RULBUS_INV_RNG;
-			Vmin = 0.0;
-			dV = 5.0e-3;
-			break;
-			
-		case 4:     /* 0 V to +10.2375 V   or   -10.24 V to +10.235 V */
+		case 2:     /* 0 V to +10.2375 V   or   -10.24 V to +10.235 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
@@ -169,7 +155,7 @@ int rulbus_dac12_card_init( int handle )
 			}
 			break;
 
-		case 5 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V */
+		case 3 :    /* 0 V to +5.11875 V   or   -5.12 V to +5.1175 V */
 			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
 			{
 				Vmin = 0.0;
