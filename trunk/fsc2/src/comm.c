@@ -114,6 +114,7 @@
 static bool pipe_read( int fd, void *buf, size_t bytes_to_read );
 static void send_browser( FL_OBJECT *browser );
 
+extern bool need_post;
 
 /*----------------------------------------------------------------*/
 /* This routine sets up the resources needed for the interprocess */
@@ -231,7 +232,7 @@ void end_comm( void )
 
 /*------------------------------------------------------------*/
 /* new_data_callback() is responsible for either honoring a   */
-/* a REQUEST or storing and displaying DATA from the child.   */
+/* a REQUEST for storing and displaying DATA from the child.  */
 /* Actually, this routine is the handler for an idle call-    */
 /* back.                                                      */
 /* The message queue is read as long as the low marker hasn't */
@@ -239,7 +240,7 @@ void end_comm( void )
 /* around fashion.                                            */
 /* When accepting new data or honoring a REQUEST things may   */
 /* fail, most probably by running out of memory. Therefore    */
-/* all the code has to e run in a TRY environment and when    */
+/* all the code has to be run in a TRY environment and when   */
 /* something bad happens we have to kill the child to prevent */
 /* it sending further data we can't accept anymore. We also   */
 /* need to stop this function being an idle callback, and     */
@@ -252,9 +253,11 @@ void end_comm( void )
 
 int new_data_callback( XEvent *a, void *b )
 {
+	bool is_end = UNSET;
+
+
 	a = a;
 	b = b;
-
 
 	TRY
 	{
@@ -262,9 +265,14 @@ int new_data_callback( XEvent *a, void *b )
 		{
 			if ( Message_Queue[ message_queue_low ].type == REQUEST )
 			{
-				/* Increment of queue pointer must come first ! */
+				/* Increment of low queue pointer must come before call of
+				   reader() ! */
 			
 				message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
+
+				/* Also increment high queue pointer if this hasn't been done
+				   because the message queue was full */
+
 				reader( NULL );
 			}
 			else
@@ -280,11 +288,20 @@ int new_data_callback( XEvent *a, void *b )
 		   The death of the child and all the necessary cleaning up is handled
 		   by the SIGCHLD handlers in run.c, so no need to worry here */
 
+		is_end = SET;
+
 		if ( child_pid > 0 && kill( child_pid, -1 ) )
 			kill( child_pid, SIGTERM );
 
 		fl_set_idle_callback( 0, NULL );
 		message_queue_low = message_queue_high;
+	}
+
+	if ( need_post )
+	{
+		need_post = UNSET;
+		message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
+		sema_post( semaphore );
 	}
 
 	return 0;

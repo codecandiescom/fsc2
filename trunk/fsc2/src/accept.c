@@ -6,6 +6,8 @@
 #include "fsc2.h"
 
 
+extern bool need_post;
+
 static void	unpack_and_accept( void *ptr );
 static void	other_data_request( int type, void *ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
@@ -29,7 +31,7 @@ void accept_new_data( void )
 	int mq_next;
 	int shm_id;
 
-	
+
 	while ( 1 )
 	{
 		/* Attach to the shared memory segment pointed to by the oldest
@@ -61,7 +63,7 @@ void accept_new_data( void )
 
 		detach_shm( buf, &Message_Queue[ message_queue_low ].shm_id );
 
-		/* Increment the queue pointer */
+		/* Increment the low queue pointer */
 
 		message_queue_low = ( message_queue_low + 1 ) % QUEUE_SIZE;
 
