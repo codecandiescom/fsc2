@@ -786,7 +786,7 @@ void dg2020_set_phase_pulses( FUNCTION *f )
 /* so that the data in the pulser get in sync with the its internal   */
 /* representation. Care has taken to minimize the number of commands  */
 /* and their length.                                                  */
-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
 
 void dg2020_commit( FUNCTION * f, bool flag )
 {
