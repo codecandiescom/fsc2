@@ -103,11 +103,10 @@ data_from_2nd_lockin = lockin_get_data#2( );
 and @code{fsc2} will automatically know that now the second of the
 lock-in amplifiers from the list of devices is meant.
 
-Of course, if there are three lock-ins, for the third one would have to
-append @code{"#3"} to the function name (assuming there's a third
-lock-in in the @code{DEVICES} section) etc. (One could also append the
-string @code{"#1"} to the name of the function for the first lock-in
-amplifier, but that's optional.)
+Of course, if there are three lock-ins listed in the DEVICE section for
+the third one would have to append @code{"#3"} to the function name
+etc. (One could also append the string @code{"#1"} to the name of the
+function for the first lock-in amplifier, but that's optional.)
 
 
 In situations where only the module of the second of two similar devices

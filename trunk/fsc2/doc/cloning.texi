@@ -48,7 +48,7 @@ subdirectory of @acronym{fsc2}s main directory and can only be run from
 within this directory. It asks for the name of the device to be cloned
 (i.e.@: the name of the device of which two or more are to be used
 simultaneously), a new name for the device and finally for another name
-that is going to be used in warnings, error mesaages, and, if
+that is going to be used in warnings, error messages, and, if
 applicable, in the GPIB configuration file.
 
 Lets assume you have use two lock-in amplifiers of type @code{sr510} and
