@@ -87,7 +87,7 @@ PC          P(HA(SE)?)?_?C(YC(LE)?)?
 
 PS          P(HASE)?_?S(EQ(UENCE)?)?(_?[0-9]{1,2})?
 
-CHT         "CH1"|"CH2"|"CH3"|"CH4"|"AUX"|"MATH1"|"MATH2"|"MATH3"|"REF1"|"REF2"|"REF3"|"REF4"
+CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4))
 
 WS          [\n \t]+
 
@@ -286,7 +286,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			}
 
 
-CHT         return preps_get_channel_name( );
+{CHT}       return preps_get_channel_name( );
 
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
@@ -422,7 +422,7 @@ static int preps_get_channel_name( void )
 		vars_push( STR_VAR, prepstext );
 		v = func_call( func );
 		if ( v !=NULL && v->val.lval != UNDEFINED )
-			 return E_VAR_REF;
+			 return VAR_REF;
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "

@@ -34,6 +34,8 @@
 
 
 int varslex( void );
+static int vars_get_channel_name( void );
+
 extern void varsparse( void );
 
 #ifdef DEBUG
@@ -65,6 +67,8 @@ ESTR        \x5.*\x3\n.*\n
 INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+
+CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4))
 
 IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
@@ -376,3 +380,24 @@ void print_all_vars( void )
 	}
 }
 #endif
+
+static int preps_get_channel_name( void )
+{
+	Var *func, *v;
+	int access;
+
+
+	if ( ( func = func_get_long( "digitizer_get_channel_number",
+								 &access, SET ) ) != NULL )
+	{
+		vars_push( STR_VAR, varstext );
+		v = func_call( func );
+		if ( v !=NULL && v->val.lval != UNDEFINED )
+			 return VAR_REF;
+	}
+
+	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
+			"loaded or module does not know how to interpret the token.\n",
+			Fname, Lc, varstext );
+	THROW( EXCEPTION );
+}

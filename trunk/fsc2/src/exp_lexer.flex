@@ -73,7 +73,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
 
-CHT         "CH1"|"CH2"|"CH3"|"CH4"|"AUX"|"MATH1"|"MATH2"|"MATH3"|"REF1"|"REF2"|"REF3"|"REF4"
+CHT         ((CH1)|(CH2)|(CH3)|(CH4)|(AUX)|(MATH1)|(MATH2)|(MATH3)|(REF1)|(REF2)|(REF3)|(REF4))
 
 WS          [\n \t]+
 
@@ -210,7 +210,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
             }
 
 
-CHT         return exp_get_channel_name( );
+{CHT}       return exp_get_channel_name( );
 
 
 {IDENT}     {
