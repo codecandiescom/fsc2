@@ -670,7 +670,7 @@ long *exp_icreate( void *buffer, long len )
 		vars_push( INT_VAR, type );              /* type of input object */
 		pos += sizeof( long );
 
-		if ( type == INT_INPUT )
+		if ( type == INT_INPUT || type == INT_OUTPUT )
 		{
 			vars_push( INT_VAR, * ( ( long * ) pos ) );
 			pos += sizeof( long );

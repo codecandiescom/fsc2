@@ -2263,6 +2263,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
 									 io->label );
+			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -2275,6 +2276,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->h = INPUT_HEIGHT;
 			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
 									 io->w, io->h, io->label );
+			fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
@@ -2381,10 +2383,17 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			else
 				sscanf( buf, "%lf", &dval );
 
-/* Don't know yet how to do this on older machines... */
+/* If macro isfinite() isn't defined we try the older BSD version */
 
-#if defined( fpclassify ) & defined( FP_NORMAL )
-			if ( fpclassify( dval ) != FP_NORMAL )
+#if defined( isfinite )
+			if ( ! isfinite( dval ) )
+			{
+				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+				fl_set_input( io->self, obuf );
+				break;
+			}
+#elif defined( finite )
+			if ( ! finite( dval ) )
 			{
 				snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
 				fl_set_input( io->self, obuf );
