@@ -152,9 +152,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			v = vars_pop( v );
-
-			if ( v != NULL )
+			if ( ( v = vars_pop( v ) ) != NULL )
 			{
 				eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
 						"function `digitizer_define_window'.\n",

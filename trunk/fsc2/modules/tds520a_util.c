@@ -188,7 +188,7 @@ void tds520a_do_pre_exp_checks( void )
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
 			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
 					"%s to %s.\n", DEVICE_NAME, w->num,
-					ds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
+					tds520a_ptime( w->width  ), tds520a_ptime( dcd ) );
 			w->width = dcd;
 		}
 
