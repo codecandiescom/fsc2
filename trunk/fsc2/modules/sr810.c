@@ -33,6 +33,19 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+/* Here values are defined that get returned by the driver in the test run
+   when the lock-in can't be accessed - these values must really be
+   reasonable ! */
+
+#define SR810_TEST_ADC_VOLTAGE   0.0
+#define SR810_TEST_SENSITIVITY   0.5
+#define SR810_TEST_TIME_CONSTANT 0.1
+#define SR810_TEST_PHASE         0.0
+#define SR810_TEST_REF_FREQUENCY 5.0e3
+#define SR810_TEST_REF_LEVEL     1.0
+#define SR830_TEST_REF_MODE      1         // this must be INTERNAL
+
+
 #define NUM_ADC_PORTS         4
 #define NUM_DAC_PORTS         4
 #define DAC_MAX_VOLTAGE       10.5
@@ -357,7 +370,7 @@ Var *lockin_get_adc_data( Var *v )
 	}
 
 	if ( TEST_RUN )                  /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, 0.0 );
+		return vars_push( FLOAT_VAR, SR810_TEST_ADC_VOLTAGE );
 
 	return vars_push( FLOAT_VAR, sr810_get_adc_data( port ) );
 }
@@ -453,7 +466,7 @@ Var *lockin_sensitivity( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, 0.5 );
+			return vars_push( FLOAT_VAR, SR810_TEST_SENSITIVITY );
 		else
 		{
 			if ( I_am == PARENT )
@@ -566,7 +579,7 @@ Var *lockin_time_constant( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0.1 );
+			return vars_push( FLOAT_VAR, SR810_TEST_TIME_CONSTANT );
 		else
 		{
 			if ( I_am == PARENT )
@@ -682,7 +695,7 @@ Var *lockin_phase( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 0.0 );
+			return vars_push( FLOAT_VAR, SR810_TEST_PHASE );
 		else
 		{
 			if ( I_am == PARENT )
@@ -742,12 +755,12 @@ Var *lockin_ref_freq( Var *v )
 	double freq;
 
 
-	/* Without an argument just return current phase settting */
+	/* Without an argument just return current frequency settting */
 
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 1.0e5 );
+			return vars_push( FLOAT_VAR, SR810_TEST_REF_FREQUENCY );
 		else
 			return vars_push( FLOAT_VAR, sr810_get_ref_freq( ) );
 	}
@@ -798,6 +811,10 @@ Var *lockin_ref_freq( Var *v )
 Var *lockin_ref_mode( Var *v )
 {
 	v = v;
+
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, SR810_TEST_REF_MODE );
 	return vars_push( INT_VAR, sr810_get_ref_mode( ) );
 }
 
@@ -813,7 +830,7 @@ Var *lockin_ref_level( Var *v )
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, 1.0 );
+			return vars_push( FLOAT_VAR, SR810_TEST_REF_LEVEL );
 		else
 		{
 			if ( I_am == PARENT )
