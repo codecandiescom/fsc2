@@ -11,14 +11,11 @@
 
 %{
 
-/* if not defined set default directory for include files */
-
-
-
-
 #include "fsc2.h"
 
 int func_listlex( void );
+int fll_count_functions( void );
+void fll_get_functions( Func *fncts, int num_def_func );
 
 extern long Lc;
 static char *Fname;
@@ -145,22 +142,56 @@ EXP         return EXP_TOKEN;
 
 void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 {
-	int ret_token;
-	int last_token;
-	int num = 0;
+	int num;
 	int cur;
-	int state;
-	int i;
 
 
 	Fname = get_string_copy( "Functions" );
-	Lc = 1;
-	Eol = SET;
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )
 	   return;
 
+	eprint( NO_ERROR, "Parsing file `%s'.\n", Fname );
+
 	/* count the number of functions defined in the file */
+
+	num = fll_count_functions( );
+
+	if ( num == 0 )                  /* none found in input file ? */
+	    return;
+
+	/* rewind input file, allocate memory for the functions and set defaults */
+
+	rewind( func_listin );
+	*fncts = T_realloc( *fncts, ( num + num_def_func + 1 ) * sizeof( Func ) );
+	*num_func = num + num_def_func;
+
+	for ( cur = num_def_func; cur <= *num_func; cur++ )
+	{
+		( *fncts )[ cur ].name = NULL;
+		( *fncts )[ cur ].fnct = NULL;
+		( *fncts )[ cur ].nargs = 0;
+		( *fncts )[ cur ].access_flag = ACCESS_RESTRICTED;
+	}
+
+	/* Now parse file again */
+
+	fll_get_functions( *fncts, num_def_func );
+
+	fclose( func_listin );
+	free( Fname );
+}
+
+
+int fll_count_functions( void )
+{
+	int ret_token;
+	int last_token;
+	int num = 0;
+
+
+	Lc = 1;
+	Eol = SET;
 
 	TRY
 	{
@@ -201,28 +232,25 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		THROW( FUNCTION_EXCEPTION );
 	}
 
-	if ( num == 0 )     /* none found in input file ? */
-	    return;
+	return num;
+}
 
-	/* rewind input file, allocate memory for the functions and set defaults */
 
-	rewind( func_listin );
-	*fncts = T_realloc( *fncts, ( num + num_def_func + 1 ) * sizeof( Func ) );
-	*num_func = num + num_def_func;
 
-	for ( cur = num_def_func; cur <= *num_func; cur++ )
-	{
-		( *fncts )[ cur ].name = NULL;
-		( *fncts )[ cur ].fnct = NULL;
-		( *fncts )[ cur ].access_flag = ACCESS_RESTRICTED;
-	}
+void fll_get_functions( Func *fncts, int num_def_func )
+{
+	int ret_token;
+	int state;
+	int cur;
+	int act;
+	int i;
 
-	/* Now parse file again */
 
-	cur = num_def_func;
 	Lc = 1;
 	Eol = SET;
 	state = 0;
+	act = cur = num_def_func;
+
 	while ( ( ret_token = func_listlex( ) ) != 0 )
 	{
 		switch ( ret_token )
@@ -237,18 +265,33 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 					THROW( FUNCTION_EXCEPTION );
 				}
 
-				for ( i = 0; i < cur; i++ )
-					if ( ! strcmp( ( *fncts )[ i ].name, func_listtext ) )
+				/* Allow overloading of buit-in functions... */
+
+				for ( i = 0; i < num_def_func; i++ )
+					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
+					{
+						eprint( WARN, "%s:%ld: User-defined function `%s()' "
+								"will hide built-in function.\n",
+								Fname, Lc, func_listtext );
+						act = i;
+					}
+
+				/* ... but don't allow multiple user definitions */
+
+				for ( ; i < cur; i++ )
+					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
 					{
 						fclose( func_listin );
-						eprint( FATAL, "%s:%ld: Function `%s' is declared "
+						eprint( FATAL, "%s:%ld: Function `%s()' is declared "
 								"more than once.\n",
 								Fname, Lc, func_listtext );
-						free( Fname );
+								free( Fname );
 						THROW( FUNCTION_EXCEPTION );
 					}
 
-				( *fncts )[ cur ].name = get_string_copy( func_listtext );
+
+				if ( act >= num_def_func )
+				    fncts[ act ].name = get_string_copy( func_listtext );
 				state = 1;
 				break;
 
@@ -262,7 +305,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 					THROW( FUNCTION_EXCEPTION );
 				}
 
-				( *fncts )[ cur ].nargs = atol( func_listtext );
+				fncts[ act ].nargs = atol( func_listtext );
 				state = 2;
 				break;
 
@@ -277,9 +320,9 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 				}
 
 				if ( ret_token == ALL_TOKEN )				
-					( *fncts )[ cur ].access_flag = ACCESS_ALL_SECTIONS;
+					fncts[ act ].access_flag = ACCESS_ALL_SECTIONS;
 				else
-					( *fncts )[ cur ].access_flag = ACCESS_RESTRICTED,
+					fncts[ act ].access_flag = ACCESS_RESTRICTED,
 				state = 3;
 				break;
 
@@ -287,21 +330,17 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 				 if ( state != 0 && state < 2 )
 				{
 					fclose( func_listin );
-					eprint( FATAL, "%s:%ld: Missing number of arguments.\n",
-							Fname, Lc );
+					eprint( FATAL, "%s:%ld: Missing number of arguments for "
+							"function `%s'.\n", Fname, Lc, fncts[ act ].name );
 					free( Fname );
 					THROW( FUNCTION_EXCEPTION );
 				}
 				state = 0;
-				cur++;
+				act = ++cur;
 				break;
 
 			default:
 				assert( 1 == 0 );
 		}
 	}
-
-
-	fclose( func_listin );
-	free( Fname );
 }
