@@ -117,7 +117,7 @@ void rb_pulser_function_init( void )
  *
  * There's a problem here: If there are no MW pulses the card is set to
  * a delay of 0 and therefor there's no GATE output and thus no detection
- * trigger. This hasn't become a problem yet but needs repair!
+ * trigger. This hasn't become a problem yet but needs repairing!
  *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )
@@ -144,8 +144,19 @@ void rb_pulser_init_delay( void )
 	p = f->pulses[ 0 ];
 
 	pos =   p->pos + p->function->delay * rb_pulser.timebase
+		  - rb_pulser.delay_card[ ERT_DELAY  ].intr_delay
 		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
+
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
+	/* If the pulser is in external trigger mode and the trigger goes
+	   into the INIT_DELAY card (instead of the ERT_DELAY card) the
+	   delay due to the ERT_DELAY card is irrelevant */
+
+		if ( rb_pulser.trig_in_mode == EXTERNAL )
+			pos += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
+#endif
+
 
 	if ( pos < - PRECISION * rb_pulser.timebase )
 	{
@@ -408,24 +419,26 @@ static void rb_pulser_commit( bool flag )
 		if ( rb_pulser.show_file != NULL )
 			rb_pulser_write_pulses( rb_pulser.show_file );
 
-#if 0
-		for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
-			  i < NUM_DELAY_CARDS; card++, i++ )
-		{
-			if ( card->old_delay != card->delay )
-			{
-				fprintf( stderr, "%d: %ld\n", i, card->delay );
-				card->old_delay = card->delay;
-			}
-		}
-#endif
-
 		return;
 	}
 
-	for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
+	for ( i = 0, card = rb_pulser.delay_card;
 		  i < NUM_DELAY_CARDS; card++, i++ )
 	{
+		/* Don't mess with the ERT_DELAY card, it only gets set by starting
+		   or stopping the pulser (if at all) */
+
+		if ( i == ERT_DELAY )
+			continue;
+
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
+		/* If the external trigger goes into the INIT_DELAY card also don't
+		   touch this card, it gets set when the pulser is started */
+
+		if ( rb_pulser.trig_in_mode == EXTERNAL && i == INIT_DELAY )
+			continue;
+#endif
+
 		if ( card->was_active && ! card->is_active )
 		{
 			rb_pulser_delay_card_state( card->handle, STOP );
