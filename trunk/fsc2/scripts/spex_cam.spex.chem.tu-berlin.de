@@ -45,7 +45,7 @@ my $Dead_Points = 5;
 # really continue if he tries to use one that's nearer (the script for
 # setting up the ROI and binning does not accept them at all).
 
-my $Min_Dist = 200.0;
+my $Min_Dist = 200.0;                  # in cm^-1
 
 
 ########################################################################
@@ -1658,7 +1658,9 @@ FOREVER {
 
     IF toolbox_changed( B_lpos ) {
         new = input_value( B_lpos );
-        IF new == lpos OR abs( new - wn ) / pixel_diff > w {
+        IF new == lpos OR
+		( ll == 0.0 AND abs( new - wn ) / pixel_diff > w ) OR
+        ( ll != 0.0 AND abs( new - ll + wn ) / pixel_diff > w ) {
 		    input_value( B_lpos, lpos );
             NEXT;
         }
@@ -1666,7 +1668,7 @@ FOREVER {
         lpos = new;
         clear_marker_1d( );
 		IF ll != 0 {
-       		draw_marker_1d( round( ( lpos - wn ) / pixel_diff + w ) + 1 );
+       		draw_marker_1d( round( ( wn - ll + lpos  ) / pixel_diff + w ) + 1 );
 		} ELSE {
        		draw_marker_1d( round( ( wn - lpos ) / pixel_diff + w ) + 1 );
 		}
@@ -2122,7 +2124,7 @@ sub realtime_run {
 	}
 
 	no warnings "exec";
-    unless ( open $fh, "|fsc2_load" ) {
+    unless ( open $fh, "|fsc2_start" ) {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
@@ -2738,7 +2740,7 @@ FOR I = 1 : N_scans {
 
 	spec = spike_remove( spec );
 	avg += spec;
-	display_1d( 1, spec, 1, 1, avg / I, 2 );
+	display_1d( 1, spec, 2, 1, avg / I, 1 );
 
 	IF ! toolbox_changed( ) {
 		NEXT;
@@ -3407,7 +3409,7 @@ FOR I = 1 : N_scans {
 
 	spec = spike_remove( spec );
 	avg += spec;
-	display_1d( 1, spec, 1, 1, avg / I, 2 );
+	display_1d( 1, spec, 2, 1, avg / I, 1 );
 
 	IF ! toolbox_changed( ) {
 		NEXT;
@@ -3754,7 +3756,7 @@ EOF
 			scan = spec;
 			min = min_of( scan );
 			scan -= min;
-			display_1d( 1, scan, 1 );
+			display_1d( 1, scan, 2 );
 			Next_X = CCD_Points - Overlap_Points + 1;
 		} ELSE {
 			spec -= min;
@@ -3778,7 +3780,7 @@ EOF
 				min += new_min;
 			}
 
-			display_1d( 1, slice( scan, 1, Next_X + CCD_Points - 1 ), 1 );
+			display_1d( 1, slice( scan, 1, Next_X + CCD_Points - 1 ), 2 );
 			Next_X += CCD_Points - Overlap_Points;
 		}
 
@@ -3851,8 +3853,8 @@ EOF
 
 	avg = ( ( I - 1 ) * avg + scan ) / I;
     Scan_is_done = 1;
-	display_1d( 1, avg, 2 );
-	clear_curve( 1 );
+	clear_curve( 2 );
+	display_1d( 1, avg, 1 );
 }
 
 I -= 1;
@@ -4076,7 +4078,7 @@ sub ask_if_safe {
 		if ( ! defined $ewn and
 			 $mw->Dialog( '-text' =>
 						  "The selected wavenumber is\n" .
-						  "less than$ Min_Dist cm^-1 away\n" .
+						  "less than $Min_Dist cm^-1 away\n" .
 						  "from the laser line.\n" .
 						  "Do you really want to continue?",
 						  '-buttons' => [ "Yes", "No" ],
