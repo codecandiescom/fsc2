@@ -230,13 +230,8 @@ Var *digitizer_define_window( Var *v )
 			is_win_width = SET;
 
 			if ( ( v = vars_pop( v ) ) != NULL )
-			{
 				eprint( WARN, SET, "%s: Superfluous arguments in call of "
 						"function %s().\n", DEVICE_NAME, Cur_Func );
-
-				while ( ( v = vars_pop( v ) ) != NULL )
-					;
-			}
 		}
 	}
 
@@ -364,12 +359,8 @@ Var *digitizer_timebase( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	tds520.timebase = tb[ TB ];
 	tds520.is_timebase = SET;
@@ -452,12 +443,8 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	tds520.sens[ channel ] = sens;
 	tds520.is_sens[ channel ] = SET;
@@ -523,12 +510,8 @@ Var *digitizer_num_averages( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	tds520.is_num_avg = SET;
 	tds520.num_avg = num_avg;
@@ -613,12 +596,8 @@ Var *digitizer_record_length( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	tds520.rec_len = record_lengths[ i ];
 	tds520.is_rec_len = SET;
@@ -679,12 +658,8 @@ Var *digitizer_trigger_position( Var *v )
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	tds520.trig_pos = trig_pos;
 	tds520.is_trig_pos = SET;
@@ -756,12 +731,8 @@ Var *digitizer_trigger_channel( Var *v )
 	channel = tds520_translate_channel( GENERAL_TO_TDS520, v->val.lval );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
     switch ( channel )
     {
@@ -881,12 +852,8 @@ static Var *get_area( Var *v, bool use_cursor )
 		w = NULL;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -982,12 +949,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 		w = NULL;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -1097,12 +1060,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		w = NULL;
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
 		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -1161,12 +1120,8 @@ Var *digitizer_lock_keyboard( Var *v )
 		}
 
 		if ( ( v = vars_pop( v ) ) != NULL )
-		{
 			eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
 					DEVICE_NAME, Cur_Func );
-			while ( ( v = vars_pop( v ) ) != NULL )
-				;
-		}
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
