@@ -238,6 +238,8 @@ Var *vars_new( char *name )
 	/* Get memory for a new structure and for storing the name */
 
 	vp = T_malloc( sizeof( Var ) );
+	vp->name = NULL;
+	vp->sizes = NULL;
 	vp->name = get_string_copy( name );
 
 	/* Set relevant entries in the new structure and make it the very first
@@ -874,6 +876,33 @@ void free_vars( void )
 
 	while ( var_list != NULL )
 	{
+		if ( var_list->name != NULL )
+			T_free( var_list->name );
+
+		switch( var_list->type )
+		{
+			case INT_ARR :
+				if ( var_list->sizes != NULL )
+					T_free( var_list->sizes );
+				if ( ! ( var_list->flags & NEED_ALLOC ) &&
+					 var_list->val.lpnt != NULL )
+					T_free( var_list->val.lpnt );
+				break;
+
+			case FLOAT_ARR :
+				if ( var_list->sizes != NULL )
+					T_free( var_list->sizes );
+				if ( ! ( var_list->flags & NEED_ALLOC ) &&
+					 var_list->val.dpnt != NULL )
+					T_free( var_list->val.dpnt );
+				break;
+
+			case STR_VAR :
+				if ( var_list->val.sptr != NULL )
+					T_free( var_list->val.sptr );
+				break;
+		}
+
 		vp = var_list->next;
 		T_free( var_list );
 		var_list = vp;
@@ -1224,7 +1253,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 	a->flags &= ~NEW_VARIABLE;
 	a->len = 1;
 
-	/* run through the variables with the sizes after ppopping the variable
+	/* run through the variables with the sizes after popping the variable
        with the array pointer */
 
 	vn = v->next;
@@ -1681,7 +1710,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	{
 		if ( d->sizes[ d->dim - 1 ] != src->len )
 		{
-			eprint( FATAL, "%s:%ld: Array slices assigned to array `%s' does "
+			eprint( FATAL, "%s:%ld: Array slice assigned to array `%s' does "
 					"not fit its length.\n", Fname, Lc, d->name );
 			THROW( EXCEPTION );
 		}

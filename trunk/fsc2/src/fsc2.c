@@ -6,14 +6,16 @@
 
 #include "fsc2.h"
 
-#if defined DEBUG
+#if defined MDEBUG
 #include <mcheck.h>
 #endif
 
 
 int main( int argc, char *argv[ ] )
 {
-#if defined DEBUG
+	int i = 20;
+
+#if defined MDEBUG
 	if ( mcheck( NULL ) != 0 )
 	{
 		printf( "Can't start mcheck() !\n" );
@@ -28,19 +30,13 @@ int main( int argc, char *argv[ ] )
 	}
 
 	clean_up( );
-/*
-	while ( 1 )
+
+	while ( i-- )
 	{
-*/
 		split( argv[ 1 ] );
 		clean_up( );
-
-#if defined DEBUG
-		fprintf( stderr, "\n\n" );
-#endif
-/*
 	}
-*/
+
 	return EXIT_SUCCESS;
 }
 

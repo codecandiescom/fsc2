@@ -65,6 +65,7 @@ Var *int_slice( Var *var )
 
 	array = T_calloc( size, sizeof( long ) );
 	ret = vars_push( INT_TRANS_ARR, array, size );
+	T_free( array );
 
 	return ret;
 }
@@ -86,6 +87,7 @@ Var *float_slice( Var *var )
 
 	array = T_calloc( size, sizeof( double ) );
 	ret = vars_push( FLOAT_TRANS_ARR, array, size );
+	T_free( array );
 
 	return ret;
 }

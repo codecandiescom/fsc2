@@ -152,10 +152,6 @@ bool split( char *file )
 
 	splitin = popen( cmd, "r" );
 
-	if ( Fname != NULL )
-		T_free( Fname );
-	Fname = NULL;
-
 	/* now try to parse the cleaned up contents */
 
 	split_error = splitlex( );

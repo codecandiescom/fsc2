@@ -48,9 +48,6 @@ void eprint( int severity, const char *fmt, ... )
 {
 	va_list ap;
 
-	if ( severity == FATAL )
-		vars_clean_up( );
-
 	compilation.error[ severity ] = SET;
 
 	if ( severity != NO_ERROR )

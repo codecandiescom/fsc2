@@ -5,7 +5,9 @@
 
 #include "fsc2.h"
 
+#if defined MDEBUG
 #include <mcheck.h>
+#endif
 
 
 void *T_malloc( size_t size )
@@ -20,7 +22,7 @@ void *T_malloc( size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined DEBUG
+#if defined MDEBUG
 	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
 #endif
 
@@ -40,7 +42,7 @@ void *T_calloc( size_t nmemb, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined DEBUG
+#if defined MDEBUG
 	fprintf( stderr, "calloc:  %p (%u)\n", mem, nmemb * size );
 #endif
 	return mem;
@@ -59,7 +61,7 @@ void *T_realloc( void *ptr, size_t size )
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-#if defined DEBUG
+#if defined MDEBUG
 	fprintf( stderr, "realloc: %p -> %p (%u)\n", ptr, new_ptr, size );
 #endif
 
@@ -69,8 +71,10 @@ void *T_realloc( void *ptr, size_t size )
 
 void T_free( void *ptr )
 {
-#if defined DEBUG
-	fprintf( stderr, "free:    %p (check : %d)\n", ptr, mprobe( ptr ) );
+#if defined MDEBUG
+	fprintf( stderr, "free:    %p\n", ptr );
+	fflush( stderr );
+	assert( mprobe( ptr ) == MCHECK_OK );
 #endif
 
 	free( ptr );

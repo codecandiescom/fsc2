@@ -1,36 +1,51 @@
 #! /usr/bin/perl -w
+#
+# Script checks if for each malloc, calloc or realloc there is a free.
+# To be able to use it define MDEBUG when compiling fsc2 and run it with
+# stderr redirected to a file, which is in turn read in by memcheck.
+
 
 use strict;
 
 
 my ( %h, $a, @f, $key );
 
-open( F, "<mem" ) or die "Can' open mem";
+if ( $#ARGV == -1 ) {
+	open( F, "<mem" ) or die "Can' open file `mem'";
+} else {
+	open( F, "<$ARGV[0]" ) or die "Can' open file `$ARGV[0]'";
+}
 
 while ( <F> ) {
 	@f = split /\s+/;
 
-	if ( $f[ 0 ] =~ /malloc:/ ) {
-		$h{ $f[ 1 ] } = "malloc";
+	if ( $_ =~ /^malloc:/ ) {
+		$h{ $f[ 1 ] } = "malloc $f[ 2 ].";
 	}
 
-	if ( $f[ 0 ] =~ /calloc:/ ) {
-		$h{ $f[ 1 ] } = "calloc";
+	if ( $_ =~ /^calloc:/ ) {
+		$h{ $f[ 1 ] } = "calloc $f[ 2 ].";
 	}
 
-	if ( $f[ 0 ] =~ /realloc:/ ) {
+	if ( $_ =~ /realloc:/ ) {
 		if ( $f[ 1 ] eq "(nil)" ) {
-			$h{ $f[ 3 ] } = "realloc (from (nil))";
+			$h{ $f[ 3 ] } = "realloc from (nil) $f[ 4 ].";
 		} else {
-			die "realloc error for $f[ 1 ]\n" if not defined $h{ $f[ 1 ] };
-			delete $h{ $f[ 1 ] };
-			$h{ $f[ 3 ] } = "realloc";
+			if ( not defined $h{ $f[ 1 ] } ) {
+				print "realloc error for $f[ 1 ] at $.\n";
+			} else {
+				delete $h{ $f[ 1 ] };
+			}
+			$h{ $f[ 3 ] } = "realloc $f[ 4 ]";
 		}
 	}
 
-	if ( $f[ 0 ] =~ /free:/ ) {
-		die "free error for $[ 1 ]\n" if not defined $h{ $f[ 1 ] };
-		delete $h{ $f[ 1 ] };
+	if ( $_ =~ /free:/ ) {
+		if ( not defined $h{ $f[ 1 ] } ) {
+			print "free error for $f[ 1 ] at line $.\n";
+		} else {
+			delete $h{ $f[ 1 ] };
+		}
 	}
 }
 
