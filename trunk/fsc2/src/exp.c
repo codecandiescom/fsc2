@@ -398,7 +398,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case CONT_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, "%s:%ld: CONTINUE not within WHILE, REPEAT "
+					eprint( FATAL, "%s:%ld: NEXT not within WHILE, REPEAT "
 							"or FOR loop.\n", prg_token[ i ].Fname,
 							prg_token[ i ].Lc );
 					THROW( EXCEPTION );
