@@ -33,6 +33,14 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
+# This variable tells the minimum number of pixels we cut off from spectra
+# fetched from the camera during "real" measurements, i.e. the single-window
+# and multi-window experiments
+
+my $Dead_Points = 5;
+
+########################################################################
+
 my @f;
 my @b;
 my %fp = ( '-side' => 'top',
@@ -2111,7 +2119,7 @@ spec[ * ];
 B_rel,B_abs, B_wl;
 I, J;
 ROI[ 4 ];
-Bin[ 2 ];
+BIN[ 2 ];
 CCD_size[ 2 ];
 calib[ 2 ];
 
@@ -2129,10 +2137,10 @@ laser_line = monochromator_laser_line( );
 calib = monochromator_calibrate( );
 CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
-Bin = ccd_camera_binning( );
+BIN = ccd_camera_binning( );
 
-N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
-step_wn = calib[ 2 ] * Bin[ 1 ];
+N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ];
+step_wn = calib[ 2 ] * BIN[ 1 ];
 
 // Calculate offset for center wavenumber due to asymmetric ROI
 
@@ -2287,6 +2295,12 @@ sub run {
 		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
 		main::show_message( "Please set ROI and binning parameters first." );
 		return;
+	}
+
+	if ( $Dead_Points % $BIN[ 0 ] ) {
+		$ROI[ 0 ] += ( int( $Dead_Points / $BIN[ 0 ] ) + 1 ) * $BIN[ 0 ];
+	} else {
+		$ROI[ 0 ] += $Dead_Points;
 	}
 
 	$wn_width = ( ( $ROI[ 2 ] - $ROI[ 0 ] ) + 1 ) * $pixel_diff;
@@ -2588,9 +2602,10 @@ wn[ * ];
 B_rel,B_abs, B_wl, B_eas, I_scan;
 I, J;
 ROI[ 4 ];
-Bin[ 2 ];
+BIN[ 2 ];
 CCD_size[ 2 ];
 calib[ 2 ];
+Dead_Points = $Dead_Points;
 F_all, F_cur;
 
 
@@ -2607,10 +2622,15 @@ laser_line = monochromator_laser_line( );
 calib = monochromator_calibrate( );
 CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
-Bin = ccd_camera_binning( );
+BIN = ccd_camera_binning( );
 
-N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
-step_wn = calib[ 2 ] * Bin[ 1 ];
+IF Dead_Points % BIN[ 1 ] != 0 {
+		ROI[ 1 ] += int( ceil( Dead_Points / BIN[ 1 ] ) + 1 ) * BIN[ 1 ];
+} ELSE {
+	ROI[ 1 ] += Dead_Points;
+}
+N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ];
+step_wn = calib[ 2 ] * BIN[ 1 ];
 
 // Calculate offset for center wavenumber due to asymmetric ROI
 
@@ -2669,7 +2689,7 @@ F_all = get_file( "", "*.dat", "", "", "dat" );
 
 FOR I = 1 : N_scans {
 	output_value( I_scan, I );
-	spec = ccd_camera_get_spectrum( );
+	spec = slice( ccd_camera_get_spectrum( ), Dead_Points + 1 );
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 	FOR J = 1 : N_Points {
@@ -2727,13 +2747,13 @@ EOF
 	if ( $units[ 0 ] == 1 ) {
 		print $fh <<EOF;
               date( ), time( ), laser_line - cwn,
-			  ( N_Points - 1 ) * Bin[ 1 ] * calib[ 2 ],
-              calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+			  ( N_Points - 1 ) * BIN[ 1 ] * calib[ 2 ],
+              calib[ 2 ] *  BIN[ 1 ], exposure_time, N_scans );
 EOF
 	} else {
 		print $fh <<EOF;
-              date( ), time( ), cwn, ( N_Points - 1 ) * Bin[ 1 ] * calib[ 2 ],
-              calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
+              date( ), time( ), cwn, ( N_Points - 1 ) * BIN[ 1 ] * calib[ 2 ],
+              calib[ 2 ] *  BIN[ 1 ], exposure_time, N_scans );
 EOF
 	}
 	print $fh <<EOF;
@@ -2803,13 +2823,9 @@ our ( $laser_line,             # position of laser line (abs. cm^-1)
 	                           # unsymmetric ROI (abs. cm^-1)
 	  $exp_time,               # exposure time
 	  $N_scans,                # number of repetitions of experiment
-	  @units,
-	  $Dead_Points );          # How many points from the camera to throw away
-							   # (independent of the ROI settings!)
+	  @units );
 
 sub run {
-	$Dead_Points = 5;
-
 	my ( $top, $geom, $ccd_w );
 	( $top, $start_wn, $end_wn, $overlap, $exp_time, $N_scans, $geom ) = @_;
 	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
@@ -2839,7 +2855,7 @@ sub run {
 	if ( $Dead_Points % $BIN[ 0 ] ) {
 		$ROI[ 0 ] += ( int( $Dead_Points / $BIN[ 0 ] ) + 1 ) * $BIN[ 0 ];
 	} else {
-		$ROI[0 ] += $Dead_Points;
+		$ROI[ 0 ] += $Dead_Points;
 	}
 
 	$wn_width = ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) * $pixel_diff;
@@ -3239,7 +3255,7 @@ wn[ * ];                               // array of wavenumbers of spectrum
 B_rel,B_abs, B_wl, B_eas, I_scan;      // button identifierrs
 I, J;
 ROI[ 4 ];
-Bin[ 2 ];
+BIN[ 2 ];
 CCD_size[ 2 ];
 calib[ 2 ];
 F_all, F_cur;
@@ -3257,11 +3273,15 @@ laser_line = monochromator_laser_line( );
 calib = monochromator_calibrate( );
 CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
-Bin = ccd_camera_binning( );
+BIN = ccd_camera_binning( );
 
-ROI[ 1 ] += Dead_Points;
-CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
-step_wn = calib[ 2 ] * Bin[ 1 ];
+IF Dead_Points % BIN[ 1 ] != 0 {
+		ROI[ 1 ] += int( ceil( Dead_Points / BIN[ 1 ] ) + 1 ) * BIN[ 1 ];
+} ELSE {
+	ROI[ 1 ] += Dead_Points;
+}
+CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ];
+step_wn = calib[ 2 ] * BIN[ 1 ];
 
 // Calculate offset of center wavenumber due to asymmetric ROI
 
@@ -3390,12 +3410,12 @@ EOF
 		print $fh <<EOF;
               date( ), time( ), laser_line - start_wn,
 			  ( CCD_Points - 1 ) * calib[ 2 ],
-              calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+              calib[ 2 ] *  BIN[ 1 ], exposure_time, I );
 EOF
 	} else {
 		print $fh <<EOF;
               date( ), time( ), start_wn, ( CCD_Points - 1 ) * calib[ 2 ],
-              calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+              calib[ 2 ] *  BIN[ 1 ], exposure_time, I );
 EOF
 	}
 	print $fh <<EOF;
@@ -3500,7 +3520,7 @@ I, J, K, L;
 Next_X;
 min, new_min;
 ROI[ 4 ];
-Bin[ 2 ];
+BIN[ 2 ];
 CCD_size[ 2 ];
 calib[ 2 ];
 F_all, F_cur;
@@ -3519,11 +3539,15 @@ laser_line = monochromator_laser_line( );
 calib = monochromator_calibrate( );
 CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
-Bin = ccd_camera_binning( );
+BIN = ccd_camera_binning( );
 
-ROI[ 1 ] += Dead_Points;
-CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
-step_wn = calib[ 2 ] * Bin[ 1 ];
+IF Dead_Points % BIN[ 1 ] != 0 {
+		ROI[ 1 ] += int( ceil( Dead_Points / BIN[ 1 ] ) + 1 ) * BIN[ 1 ];
+} ELSE {
+	ROI[ 1 ] += Dead_Points;
+}
+CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ];
+step_wn = calib[ 2 ] * BIN[ 1 ];
 
 // Calculate offset for center wavenumber due to asymmetric ROI
 
@@ -3539,7 +3563,7 @@ cwn_offset = 0.5 * calib[ 2 ]
 
 N_specs = 1;
 
-ccd_width = CCD_Points * Bin[ 1 ] * calib[ 2 ];
+ccd_width = CCD_Points * BIN[ 1 ] * calib[ 2 ];
 cur_width = spec_width - ccd_width + overlap;
 
 WHILE ( 1 ) {
@@ -3792,11 +3816,11 @@ EOF
 	if ( $laser_line != 0.0 and $units[ 0 ] == 1 ) {
 		print $fh <<EOF;
 	              date( ), time( ), laser_line - start_wn, laser_line - end_wn,
-				  calib[ 2 ] *  Bin [ 1 ], exposure_time, I );
+				  calib[ 2 ] *  BIN[ 1 ], exposure_time, I );
 EOF
 	} else {
 		print $fh <<EOF;
-	              date( ), time( ), start_wn, end_wn, calib[ 2 ] *  Bin [ 1 ],
+	              date( ), time( ), start_wn, end_wn, calib[ 2 ] *  BIN [ 1 ],
 				  exposure_time, I );
 EOF
 	}
