@@ -96,7 +96,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 				;
 		fprintf( tmp, "%s\n", clp );
 	}
-	fprintf( tmp, "--------------------------------------------------\n\n" );
+
+	fprintf( tmp, "\n--------------------------------------------------\n\n" );
 
 	fprintf( tmp, "Content of output browser:\n\n" );
 	lines = fl_get_browser_maxline( main_form->error_browser );
@@ -113,8 +114,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	fprintf( tmp, "Current dir:  %s\n", cur_dir );
 	fprintf( tmp, "libdir:       %s\n\n", libdir );
 
-	/* Append a directory listing of configuration files and modules
-	   to allow a check of the permissions */
+	/* Append output of ulimit */
 
 	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
 	fclose( tmp );
@@ -130,90 +130,11 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	system( cmd );
 	T_free( cmd );
 
-	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
-					  + strlen( "/Devices " ) + strlen( filename ) );
-	strcpy( cmd, "ls -al " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "Devices >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
-					  + strlen( "/Functions " ) + strlen( filename ) );
-	strcpy( cmd, "ls -al " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "Functions >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir ) +
-					  strlen( "/*.so " ) + strlen( filename ) );
-	strcpy( cmd, "ls -al " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "*.so >> " );
-	strcat( cmd, filename );
-	system( cmd );
-
-	strcpy( cmd, "echo >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
 	/* Append current disk usage to the file to detect problems due to a
 	   full disk */
 
 	cmd = get_string( strlen( "df >> " ) + strlen( filename ) );
 	strcpy( cmd, "df >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	/* Append the devices data base file */
-
-	cmd = get_string( strlen( "echo \"\nDevices:\n\" >> " )
-					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\nDevices:\n\" >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/Devices " ) + strlen( filename ) );
-	strcpy( cmd, "cat " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "Devices" );
-	strcat( cmd, " >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	/* Append the Functions data base file */
-
-	cmd = get_string( strlen( "echo \"\n\nFunctions:\n\" >> " )
-					  + strlen( filename ) );
-	strcpy( cmd, "echo \"\n\nFunctions:\n\" >> " );
-	strcat( cmd, filename );
-	system( cmd );
-	T_free( cmd );
-
-	cmd = get_string( strlen( "cat  >> " ) + strlen( libdir )
-					  + strlen( "/Functions " ) + strlen( filename ) );
-	strcpy( cmd, "cat " );
-	strcat( cmd, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
-	strcat( cmd, "Functions" );
-	strcat( cmd, " >> " );
 	strcat( cmd, filename );
 	system( cmd );
 	T_free( cmd );

@@ -45,9 +45,9 @@ The XFORMS library is available from e.g. (some links may be outdated)
 The GPIB library consists of a library and a module to interface GPIB cards.
 You can either use the one I've written (works, as ar as I know, for fsc2
 with 2.2 and 2.4 kernels and should also work with 2.0 kernels but I really
-didn't test yet), the older LLP (Linux Lab Project) library to be found at
+didn't test it), the older LLP (Linux Lab Project) library to be found at
 
-  ftp.llp.fu-berlin.de/pub/linux/LINUX-LAB/IEEE488
+  http://www.llp.fu-berlin.de
 
 (which, at least the last time I checked, didn't work with 2.2. and 2.4
 kernels) or the one from National Instruments, to be downloaded from
