@@ -90,7 +90,7 @@ SERIAL_LOCK_DIR   := /var/lock
 
 
 # Comment out the next two lines if you don't want a HTTP server that allows
-# to control fsc2's current state via the Internet. The default port number
+# to monitor fsc2's current state via the Internet. The default port number
 # must be between 1024 and 65535.
 
 WITH_HTTP_SERVER  := yes

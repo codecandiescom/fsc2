@@ -1,5 +1,5 @@
-
-Please read the following carefully before trying to install and run fsc2.
+Please take the time to read the following carefully before trying to
+install and run fsc2.
 
 A) Requirements
 ===============
@@ -25,7 +25,7 @@ Optionally, you should have
 13) ppmtojpeg
 
 but if it is missing the basic functionality is still there (without Perl
-and the next to utilities the built-in web server won't work)
+and the next two utilities the built-in web server won't work)
 
 To create the complete documentation beside Perl you also need
 
@@ -68,24 +68,24 @@ may also compile fsc2 without having a GPIB library, but then devices
 controlled via the GPIB bus can't be used for obvious reasons.
 
 
-B) Permissions and Related Problems
-===================================
+B) Permissions
+==============
 
 If you want to do more than just very basic tests with fsc2 you should
 create a special account for it. fsc2 needs to be installed setuid'ed,
 so for security reasons its account should have as low privileges as
-possible and should not be able to log into the system (e.g. by setting
-its shell in /etc/passwd to /bin/false) and not be installed with root
-privileges. Most of the time fsc2 runs with the effective user ID (EUID)
-and effective group ID (EGID) set to the real users ID and group but in
-a few places (e.g. when writing to log files, manipulating lock files or
-accessing shared memory or device files) it reverts back to the EUID and
+possible so that no-one with this account is able to log in (e.g. by
+setting its shell in /etc/passwd to /bin/false) and the account shouldn't
+have root privileges! Most of the time fsc2 runs with the effective user
+ID (EUID) and effective group ID (EGID) set to the real users ID and group
+but in a few places (e.g. when writing to log files, manipulating lock files
+or accessing shared memory or device files) it reverts back to the EUID and
 EGID of the fsc2 account.
 
-What group the fsc2 account belongs to does not matter. Relevant is only
-the group of the executable, i.e the file itself. I would recommend to
+What group the fsc2 account belongs to does not really matter. Relevant is
+only the group of the executable, i.e the file itself. I would recommend to
 use the group that has read and write access for the serial port device
-files, (/dev/ttyS* where * stands for a positive number). On many Linux
+files, (/dev/ttyS* where * stands for a positive number). On the Linux
 systems I have seen this group was either 'uucp' or 'dialout'. If the
 fsc2 executable file is owned by this group the program automatically has
 the permisssion to access these device files. Otherwise you will have to
@@ -95,17 +95,17 @@ to this group (probably as one of their supplementary groups).
 
 By setting the group of the device file for the GPIB board to the group
 that fsc2 belongs to (i.e. usually 'uucp' or 'dialout') also the access
-permissions to the boards device file don't have to be set to allow either
-access by 'other' or to make all users members of the group that has
-access permissions but can be restricted to this group.
+permissions to the board's device file don't have to be set to allow
+either access by 'other' or to make all users members of the group that
+has access permissions but can be restricted to this group.
 
 
 C) Preparing for Installation
 =============================
 
 After installing the required tools and libraries and extracting the
-archive go into the newly created directory fsc2. Edit the Makefile in
-this directory.
+archive go into the newly created directory fsc2. Open the Makefile in
+this directory with your favorite editor.
 
 Normally, fsc2 and all auxiliary files needed will be installed below
 /usr/local (i.e. in /usr/local/bin, /usr/local/lib/fsc2, /usr/local/info
@@ -114,7 +114,7 @@ of the Makefile.
 
 The next two variables, OWNER and GROUP, will be used when setting the
 owner of all the files that will be installed as well as its group. See
-the preceding section for the details.
+the preceding section for details.
 
 The next lines are for setting the GPIB library that you are going to use.
 You may set the first variable, GPIB_LIBRARY either to LLP for the old
@@ -134,13 +134,15 @@ While running fsc2 may write out information about the activity on the
 GPIB bus into a log file. You can change the default log file /tmp/gpib.log
 to something appropriate for your setup (or even to /dev/null). You can also
 set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
-either HIGH, MEDIUM, LOW or OFF.
+either HIGH, MEDIUM, LOW or OFF (but to help me find bugs setting it to
+HIGH is recommended, the log file will be truncated to zero length each time
+a new experiment is started).
 
 The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used in
 handling of the serial ports. NUM_SERIAL_PORTS should be set to the number
-of serial ports that your computer has (or which you want fsc2 to have
-access to). If the variable is not set (or set to 0) no serial ports can
-be used.
+of serial ports that your computer has (or how many of these you want fsc2
+to have access to). If the variable is not set (or set to 0) no serial ports
+can be used.
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where UUCP
 type lock files for the serial ports are created (there is a convention that
@@ -158,15 +160,15 @@ not try to remove stale lock files and instead print an error message to the
 terminal that the lock file has to be removed manually.
 
 The WITH_HTTP_SERVER variable tells if support for the web server should be
-built into fsc2. Just comment out the line and it's going to vanish. If the
-web server gets included the next variable, DEFAULT_HTTP_PORT, tells on
-which port the web server will listen for incoming connections by default.
+built into fsc2. Just comment out the line and the web server going to vanish.
+If the web server gets included the next variable, DEFAULT_HTTP_PORT, tells
+on which port the web server will listen for incoming connections by default.
 
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
-not change this variable except when you apply changes to the program. In
-this case sending these kind of mails to me obviously doesn't make too much
-sense...
+not change this variable except when you apply changes to the program on
+your own. In this case sending these kind of mails to me obviously doesn't
+make too much sense...
 
 
 D) Compiling and Installing
@@ -182,12 +184,12 @@ the documentation). This does *not* mean that the program didn't compile
 succesfully!
 
 Please don't start 'make' from one of the subdirectories, this is bound to
-fail in most cases and will never create everything needed.
+fail in most cases and will never create everything you'll need.
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program (or
 the make process fails completely please send me an email with the output
-of make. You can save the output of make to a file, e.g. makelog, by
+of make. You can save the output of make to a file, e.g. 'makelog', by
 running make with the command
 
     make > makelog 2>&1
@@ -200,10 +202,27 @@ if you use the C shell (csh) or tcsh.
 
 When the compilation of the program succeeds (even though making the
 documentation failed at some stage), you can now install the program by
-typing 'make install'. Normally, you will need root privileges to do this.
-If making the documentation failed with an error also the installon may
-fail while installing the documentation, but this is not something to
-worry about too much...
+typing
+
+    make install
+
+Normally, you will need root privileges to do this. If making the
+documentation failed with an error also the installon may fail when trying
+to install the documentation, but this is not something to worry about
+too much...
+
+If you want to you can also try to test your built of fsc2 before
+installation by running
+
+    make test
+
+This will make fsc2 run a set of EDL programs that (hopefully) test most
+of its built-in functions at least once. Be prepared for lots of windows
+popping up during the test run and for seeing some rather strange graphics.
+Normally, the test should run without any errors, otherwise you probably
+should contact me and complain ;-) All these tests don't access any of the
+devices, writing a test suite for the supported devices is still on my
+to-do list...
 
 Please note: If you installed the program and then decide that you don't
 like it and want to get rid of it, you can always de-install it by running
@@ -213,29 +232,30 @@ like it and want to get rid of it, you can always de-install it by running
 as long as you haven't changed the makefiles in between.
 
 To manualy remove the installed package you have to delete the following
-files and directories (assuming you used the default locations):
+files and directories (assuming you've used the default locations, i.e.
+/usr/local):
 
-/usr/local/bin/fsc2
-/usr/local/bin/fsc2_connect
-/usr/local/bin/fsc2_clean
-/usr/local/bin/fsc2_test
-/usr/local/bin/fsc2_load
-/usr/local/bin/fsc2_start
-/usr/lib/fsc2/
-/usr/local/share/doc/fsc2/
-/usr/local/man/man1/fsc2.1.gz
-/usr/local/info/fsc2.info.gz
-/usr/local/info/fsc2-*.info.gz     with * set to the numbers from 1 to 10
+/usr/local/bin/fsc2               (file)
+/usr/local/bin/fsc2_connect       (file)
+/usr/local/bin/fsc2_clean         (file)
+/usr/local/bin/fsc2_test          (symbolic link)
+/usr/local/bin/fsc2_load          (symbolic link)
+/usr/local/bin/fsc2_start         (symbolic link)
+/usr/local/lib/fsc2/              (directory)
+/usr/local/share/doc/fsc2/        (directory)
+/usr/local/man/man1/fsc2.1.gz     (file)
+/usr/local/info/fsc2.info.gz      (file)
+/usr/local/info/fsc2-*.info.gz    (file, with * being the numbers from 1 to 10)
 
 
-E) Simple Tests
-===============
+E) Getting started
+==================
 
 The subdirectory 'edl' contains several several EDL programs that you can
-use to test fsc2 and get acquainted with the syntax. Unfortunately, some
-of the files will not work - I didn't had time to systematically weed out
-the ones that are outdated. There are a few programs that will even work
-without any devices, these are
+use to get an impression of fsc2 and to get acquainted with the syntax.
+Unfortunately, some of the files will not work - I didn't had time yet to
+systematically weed out the ones that are outdated. There are a few programs
+that should even work without any devices, these are
 
   a.edl
   gr.edl
@@ -251,11 +271,11 @@ Just start by typing 'fsc2 edl/a.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click onto the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-             March 13, 2002               Much luck, Jens
+             March 16, 2002               Much luck, Jens
 
 -----------------------------------------------------------------------------
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
    _  | |  | |    | |           AG Moebius, Institut fuer Moelkuelphysik
   | |_| |  | |    | |           Fachbereich Physik, Freie Universitaet Berlin
-   \___/ens|_|homs|_|oerring    Tel: ++49 (0)30 838 - 53394 / FAX: - 5????
+   \___/ens|_|homs|_|oerring    Tel: ++49 (0)30 838 - 53394 / FAX: - 56046
