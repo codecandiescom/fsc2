@@ -339,7 +339,7 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	/* If the size is not defined the whole of the rest of the array must be
-	   dynamically sized and can be only set up by an assignement sometime
+	   dynamically sized and can be only set up by an assignment sometime
 	   later. */
 
 	if ( v->flags & IS_DYNAMIC )
@@ -391,7 +391,7 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 
 	a->flags &= ~ IS_DYNAMIC;
 
-	/* If this is the last dimension allocate memory (intialized to 0) for
+	/* If this is the last dimension allocate memory (initialized to 0) for
 	   a data array */
 
 	if ( a->dim == 1 )
@@ -609,7 +609,7 @@ void vars_arr_init( Var *v )
 	Var *dest;
 
 
-	/* If there aren't any intializers we get v being set to NULL. All we
+	/* If there aren't any initializers we get v being set to NULL. All we
 	   need to do is to clear up the variables stack that still contains
 	   reference to the new array */
 
@@ -668,7 +668,7 @@ static void vars_do_init( Var *src, Var *dest )
 												  * sizeof *dest->val.lpnt );
 			}
 			else if ( src->len > dest->len )
-				print( WARN, "Superfluous intitialization data.\n" );
+				print( WARN, "Superfluous initialization data.\n" );
 
 			if ( src->type == INT_ARR )
 				memcpy( dest->val.lpnt, src->val.lpnt,
@@ -676,7 +676,7 @@ static void vars_do_init( Var *src, Var *dest )
 						* sizeof *dest->val.lpnt );
 			else
 			{
-				print( WARN, "Intialization of integer array with floating "
+				print( WARN, "Initialization of integer array with floating "
 					   "point values.\n" );
 				for ( i = 0; i < ( dest->len < src->len ?
 								   dest->len : src->len ); i++ )
@@ -696,7 +696,7 @@ static void vars_do_init( Var *src, Var *dest )
 													* sizeof *dest->val.dpnt );
 			}
 			else if ( src->len > dest->len )
-				print( WARN, "Superfluous intitialization data.\n" );
+				print( WARN, "Superfluous initialization data.\n" );
 
 			if ( src->type == FLOAT_ARR )
 				memcpy( dest->val.dpnt, src->val.dpnt,
@@ -721,7 +721,7 @@ static void vars_do_init( Var *src, Var *dest )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
 			else if ( src->len > dest->len )
-				print( WARN, "Superfluous intitialization data.\n" );
+				print( WARN, "Superfluous initialization data.\n" );
 
 			for ( i = 0; i < ( dest->len < src->len ?
 							   dest->len : src->len ); i++ )
@@ -753,7 +753,7 @@ static void vars_do_init( Var *src, Var *dest )
 					dest->val.vptr[ dest->len ] = NULL;
 			}
 			else if ( src->len > dest->len )
-				print( WARN, "Superfluous intitialization data.\n" );
+				print( WARN, "Superfluous initialization data.\n" );
 
 			for ( i = 0; i < ( dest->len < src->len ?
 							   dest->len : src->len ); i++ )
@@ -1155,7 +1155,7 @@ void vars_assign( Var *src, Var *dest )
 	}
 #endif
 
-	/* First we distingush between the different possible types of variables
+	/* First we distinguish between the different possible types of variables
 	   on the left hand side */
 
 	switch ( dest->type )
@@ -2478,7 +2478,7 @@ void *vars_iter( Var *v )
 
 /*--------------------------------------------------------------*/
 /* Returns a pointer to an element within an array or matrix    */
-/* as indxed by the 'iter' array. If the indeces in the 'iter'  */
+/* as indexed by the 'iter' array. If the indices in the 'iter' */
 /* array are to large it corrects them by stepping up the index */
 /* one dimension "further up". If there is no more following    */
 /* element a NULL pointer is returned.                          */
@@ -2601,7 +2601,7 @@ void vars_save_restore( bool flag )
 	{
 		fsc2_assert( exists_copy );             /* no restore without save ! */
 
-		/* Remove all submatrices that got created during the test run */
+		/* Remove all sub-matrices that got created during the test run */
 
 		for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
 		{
