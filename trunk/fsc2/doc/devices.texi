@@ -582,7 +582,8 @@ out. The device has a switch at its front panel where the resolution can
 be set and calling this function is for making the module aware of the
 setting of the switch (its position can't be determined from within the
 program). This @strong{necessary} to be able to interpret the data
-received from the device correctly.
+received from the device correctly. Per default the module will assume
+that the resolution is set to @code{0.1 G}.
 
 
 @anchor{gaussmeter_probe_orientation}
