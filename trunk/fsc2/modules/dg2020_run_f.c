@@ -100,7 +100,6 @@ bool dg2020_reorganize_pulses( bool flag )
 
 		TRY
 		{
-
 			dg2020_do_checks( f );
 
 			/* Reorganize the phase pulses of the phase function associated
