@@ -74,6 +74,12 @@ line:    VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
          list3 ']' '=' expr        { vars_arr_assign( $1, $7 );
                                      assert( Var_Stack == NULL );
 	                                 assert( Arr_Stack == NULL ); }
+       | PRINT_TOK '(' STR_TOKEN   { P_Var = print_call( $3 ); }
+         list5 ')'                 { vars_pop( print_args( P_Var ) ); }
+       | PRINT_TOK '['             { eprint( FATAL, "%s:%ld: `print' is a "
+											 "predefined function.\n",
+											 Fname, Lc );
+	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
 
 

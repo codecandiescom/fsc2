@@ -141,6 +141,8 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^]+
 
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
+				int acc;
+
 				/* special treatent for calls of print() function */
 
 				if ( ! strcmp( prepstext, "print" ) )
@@ -151,8 +153,6 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\%\^]+
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )
 				{
-					int acc;
-
 					if ( acc != ACCESS_ALL_SECTIONS )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
