@@ -333,56 +333,56 @@ Var *lockin_sensitivity( Var *v )
 	   value, depending on the size of the argument. If the value does not fit
 	   within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
+	for ( i = 0; i < SENS_ENTRIES - 1; i++ )
 		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
 		{
 			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
-				sens_index = i + 1;
+				sens_index = i;
 			else
-				sens_index = i + 2;
+				sens_index = i + 1;
 			break;
 		}
 
 	if ( sens_index < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
-		sens_index = SENS_ENTRIES;
+		sens_index = SENS_ENTRIES - 1;
 
 	if ( sens_index > 0 &&                                  /* value found ? */
-		 fabs( sens - sens_list[ sens_index - 1 ] ) > sens * 1.0e-2 &&
+		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
 		                                                   /* error > 1% ? */
 		 ! sr510.sens_warn  )                       /* no warn message yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf V instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, sens_list[ sens_index - 1 ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 		sr510.sens_warn = SET;
 	}
 
 	if ( sens_index < 0 )                                 /* not found yet ? */
 	{
 		if ( sens > sens_list[ 0 ] )
-			sens_index = 1;
+			sens_index = 0;
 		else
-		    sens_index = SENS_ENTRIES;
+		    sens_index = SENS_ENTRIES - 1;
 
 		if ( ! sr510.sens_warn )                      /* no warn message yet */
 		{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too low, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ sens_index - 1 ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else
 			eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too high,"
 					" using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ sens_index - 1 ] * 1.0e9 );
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 			sr510.sens_warn = SET;
 		}
 	}
@@ -395,7 +395,7 @@ Var *lockin_sensitivity( Var *v )
 			sr510.sens_index = sens_index;
 	}
 	
-	return vars_push( FLOAT_VAR, sens_list[ sens_index - 1 ] );
+	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
 
@@ -461,45 +461,45 @@ Var *lockin_time_constant( Var *v )
 		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
 		{
 			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
-				tc_index = i + 1;
+				tc_index = i;
 			else
-				tc_index = i + 2;
+				tc_index = i + 1;
 			break;
 		}
 
 	if ( tc_index > 0 &&                                    /* value found ? */
-		 fabs( tc - tc_list[ tc_index - 1 ] ) > tc * 1.0e-2 &&/* error > 1%? */
+		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1%? */
 		 ! sr510.tc_warn )                          /* no warn message yet ? */
 	{
 		if ( tc >= 1.0 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf s, "
 					"using %.0lf s instead.\n", DEVICE_NAME, tc,
-					tc_list[ tc_index - 1 ] );
+					tc_list[ tc_index ] );
 		else
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ms,"
 					" using %.0lf ms instead.\n", DEVICE_NAME,
-					tc * 1.0e3, tc_list[ tc_index - 1 ] * 1.0e3 );
+					tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
 		sr510.tc_warn = SET;
 	}
 	
 	if ( tc_index < 0 )                                  /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
-			tc_index = 1;
+			tc_index = 0;
 		else
-			tc_index = TC_ENTRIES;
+			tc_index = TC_ENTRIES - 1;
 
 		if ( ! sr510.tc_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 1.0 )
 				eprint( WARN, SET, "%s: Time constant of %.0lf s is too "
 						"large, using %.0lf s instead.\n",
-						DEVICE_NAME, tc, tc_list[ tc_index - 1 ] );
+						DEVICE_NAME, tc, tc_list[ tc_index ] );
 			else
 				eprint( WARN, SET, "%s: Time constant of %.0lf ms is too"
 						" short, using %.0lf ms instead.\n",
 						DEVICE_NAME, tc * 1.0e3,
-						tc_list[ tc_index - 1 ] * 1.0e3 );
+						tc_list[ tc_index ] * 1.0e3 );
 			sr510.tc_warn = SET;
 		}
 	}
@@ -512,7 +512,7 @@ Var *lockin_time_constant( Var *v )
 			sr510.tc_index = tc_index;
 	}
 
-	return vars_push( FLOAT_VAR, tc_list[ tc_index - 1 ] );
+	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
 
@@ -898,12 +898,12 @@ void sr510_set_sens( int sens_index )
 	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
 	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	sens_index = SENS_ENTRIES + 1 - sens_index;
+	sens_index = SENS_ENTRIES - sens_index;
 
 	/* For sensitivities lower than 100 nV EXPAND has to be switched on
 	   otherwise it got to be switched off */
 
-	if ( sens_index <= 3 )
+	if ( sens_index < 3 )
 	{
 		if ( gpib_write( sr510.device, "E1\n", 3 ) == FAILURE )
 			sr510_failure( );
@@ -917,10 +917,12 @@ void sr510_set_sens( int sens_index )
 
 	/* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", sens_index );
+	sprintf( buffer, "G%d\n", sens_index + 1 );
 
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr510_failure( );
+
+	sr510.sens_index = sens_index;
 }
 
 
@@ -947,8 +949,8 @@ double sr510_get_tc( void )
 
 /*-------------------------------------------------------------------------*/
 /* Fuunction sets the time constant (plus the post time constant) to one   */
-/* of the valid values. The parameter can be in the range from 1 to 11,    */
-/* where 1 is 1 ms and 11 is 100 s - these and the other values in between */
+/* of the valid values. The parameter can be in the range from 0 to 10,    */
+/* where 0 is 1 ms and 10 is 100 s - these and the other values in between */
 /* are listed in the global array 'tc_list' (cf. start of file)            */
 /*-------------------------------------------------------------------------*/
 
@@ -957,21 +959,21 @@ void sr510_set_tc( int tc_index )
 	char buffer[ 10 ];
 
 
-	sprintf( buffer, "T1,%d\n", tc_index );
+	sprintf( buffer, "T1,%d\n", tc_index + 1 );
 	if ( gpib_write( sr510.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr510_failure( );
 
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
-	if ( tc_index <= 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
+	if ( tc_index < 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
 		sr510_failure( );
 
-	if ( tc_index > 4 && tc_index <= 6 &&
+	if ( tc_index >= 4 && tc_index < 6 &&
 		 gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
 		sr510_failure( );
 
-	if ( tc_index > 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
+	if ( tc_index >= 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
 		sr510_failure( );
 }
 
