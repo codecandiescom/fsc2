@@ -55,10 +55,10 @@ static ssize_t spex_cd2a_pos_mess_len;
 static bool spex_cd2a_do_print_message = UNSET;
 
 
-/*--------------------------------------------------------------*/
-/* Function for initializing the monochromator to bring it into */
-/* a well-defined state.                                        */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for initializing the monochromator to bring it into
+ * a well-defined state.
+ *--------------------------------------------------------------*/
 
 void spex_cd2a_init( void )
 {
@@ -142,9 +142,9 @@ void spex_cd2a_init( void )
 }
 
 
-/*---------------------------------------------------*/
-/* Function for setting a new wavelength or -number */
-/*---------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting a new wavelength or -number
+ *--------------------------------------------------*/
 
 void spex_cd2a_set_wavelength( void )
 {
@@ -181,9 +181,9 @@ void spex_cd2a_set_wavelength( void )
 }
 
 
-/*------------------------------*/
-/* Function for stopping a scan */
-/*------------------------------*/
+/*------------------------------*
+ * Function for stopping a scan
+ *------------------------------*/
 
 void spex_cd2a_halt( void )
 {
@@ -193,9 +193,9 @@ void spex_cd2a_halt( void )
 }
 
 
-/*------------------------------------------------*/
-/* Function for starting a (triggered burst) scan */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for starting a (triggered burst) scan
+ *------------------------------------------------*/
 
 void spex_cd2a_start_scan( void )
 {
@@ -217,9 +217,9 @@ void spex_cd2a_start_scan( void )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function sends a trigger (only possible during a scan) */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function sends a trigger (only possible during a scan)
+ *--------------------------------------------------------*/
 
 void spex_cd2a_trigger( void )
 {
@@ -230,19 +230,19 @@ void spex_cd2a_trigger( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function for setting the position of the laser line. This is only */
-/* possible when the monochromator is wavenumber driven. It also     */
-/* switches the way positions are treated by the device: if no laser */
-/* line position is set positions are taken to be absolute wave-     */
-/* numbers. But when the laser line is set positions are taken to be */
-/* relative to the laser line (i.e. position of the laser line minus */
-/* the absolute position). The only exception is when setting the    */
-/* laser line position itself: the value passed to the device is     */
-/* always taken to be a position in  absolute wavenumbers.           */
-/* The laser line position can also be switched off (thus reverting  */
-/* to absolute positions) by setting the laser line position to 0.   */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting the position of the laser line. This is only
+ * possible when the monochromator is wavenumber driven. It also
+ * switches the way positions are treated by the device: if no laser
+ * line position is set positions are taken to be absolute wave-
+ * numbers. But when the laser line is set positions are taken to be
+ * relative to the laser line (i.e. position of the laser line minus
+ * the absolute position). The only exception is when setting the
+ * laser line position itself: the value passed to the device is
+ * always taken to be a position in  absolute wavenumbers.
+ * The laser line position can also be switched off (thus reverting
+ * to absolute positions) by setting the laser line position to 0.
+ *-------------------------------------------------------------------*/
 
 void spex_cd2a_set_laser_line( void )
 {
@@ -269,9 +269,9 @@ void spex_cd2a_set_laser_line( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function for setting the shutter limits of the device */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for setting the shutter limits of the device
+ *-------------------------------------------------------*/
 
 void spex_cd2a_set_shutter_limits( void )
 {
@@ -305,9 +305,9 @@ void spex_cd2a_set_shutter_limits( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for setting the start position of scans */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting the start position of scans
+ *--------------------------------------------------*/
 
 void spex_cd2a_scan_start( void )
 {
@@ -339,12 +339,12 @@ void spex_cd2a_scan_start( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for sending the end point of scans to the upper wavelength */
-/* and lower wavenumber limit (since we never know the end point of a  */
-/* scan in advance the end point is set to the maximum wavelength or   */
-/* minimum wavenumber).                                                */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for setting the end point of scans to the upper wavelength
+ * and lower wavenumber limit (since we never know the end point of a
+ * scan in advance the end point is set to the maximum wavelength or
+ * minimum wavenumber).
+ *---------------------------------------------------------------------*/
 
 static void spex_cd2a_scan_end( void )
 {
@@ -365,9 +365,9 @@ static void spex_cd2a_scan_end( void )
 }
 
 
-/*---------------------------------------------*/
-/* Function for setting the step size of scans */
-/*---------------------------------------------*/
+/*---------------------------------------------*
+ * Function for setting the step size of scans
+ *---------------------------------------------*/
 
 void spex_cd2a_scan_step( void )
 {
@@ -391,10 +391,10 @@ void spex_cd2a_scan_step( void )
 }	
 
 
-/*-----------------------------------------------------------------------*/
-/* Function assembles a numeric string in the format the device expects. */
-/* The string is never going to be longer than 'digits'.                 */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function assembles a numeric string in the format the device expects.
+ * The string is never going to be longer than 'digits'.
+ *-----------------------------------------------------------------------*/
 
 static void spex_cd2a_print( char *mess, int digits, double val )
 {
@@ -432,10 +432,10 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function for opening the device file for the device */
-/* and setting up the communication parameters.        */
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for opening the device file for the device
+ * and setting up the communication parameters.
+ *-----------------------------------------------------*/
 
 void spex_cd2a_open( void )
 {
@@ -538,11 +538,11 @@ void spex_cd2a_open( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/* Function for sending a message to the device. It also adds everything */
-/* required by the communication protocol (i.e. <STX>, <CAN>, <ETX>, the */
-/* checksum and <CR>).                                                   */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for sending a message to the device. It also adds everything
+ * required by the communication protocol (i.e. <STX>, <CAN>, <ETX>, the
+ * checksum and <CR>).
+ *-----------------------------------------------------------------------*/
 
 static size_t spex_cd2a_write( int type, const char *mess )
 {
@@ -588,6 +588,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 		 <= 0 )
 	{
 		T_free( tmx );
+		fprintf( stderr, "Write Failure\n" );
 		spex_cd2a_comm_fail( );
 	}
 
@@ -601,12 +602,12 @@ static size_t spex_cd2a_write( int type, const char *mess )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for reading the acknowledgment send by the device, */
-/* consisting of <ACK> and <CAN> in case of success, <ACK> and */
-/* <BEL> in case of command errors and a single <NAK> in case  */
-/* of communication problems.                                  */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for reading the acknowledgment send by the device,
+ * consisting of <ACK> and <CAN> in case of success, <ACK> and
+ * <BEL> in case of command errors and a single <NAK> in case
+ * of communication problems.
+ *-------------------------------------------------------------*/
 
 static void spex_cd2a_read_ack( void )
 {
@@ -620,13 +621,19 @@ static void spex_cd2a_read_ack( void )
 	do {
 		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
 											1000000, SET ) ) <= 0 )
+		{
+			fprintf( stderr, "Read 1 Failure\n" );
 			spex_cd2a_comm_fail( );
+		}
 	} while ( *buf == CAN );
 
 	if ( *buf != NAK &&
 		 ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
 										1, 1000000, SET ) ) <= 0 )
+	{
+		fprintf( stderr, "Read 2 Failure\n" );
 		spex_cd2a_comm_fail( );
+	}
 
 	/* A <NAK> character means that there are communication problems */
 
@@ -661,14 +668,20 @@ static void spex_cd2a_read_ack( void )
 			if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
 												len - count, 1000000, SET ) )
 				 <= 0 )
+			{
+				fprintf( stderr, "Read 3 Failure\n" );
 				spex_cd2a_comm_fail( );
+			}
 
 			count += received;
 			len -= received;
 		}
 
 		if ( buf[ 4 ] != EOT )
+		{
+			fprintf( stderr, "Read 4 Failure\n" );
 			spex_cd2a_comm_fail( );
+		}
 
 		buf[ 4 ] = '\0';
 		if ( spex_cd2a_do_print_message )
@@ -683,9 +696,9 @@ static void spex_cd2a_read_ack( void )
 }
 
 
-/*----------------------------------------------------*/
-/* Function for reading in a message sent by the CD2A */
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for reading in a message sent by the CD2A
+ *----------------------------------------------------*/
 
 static char *spex_cd2a_read_mess( ssize_t to_be_read )
 {
@@ -702,7 +715,10 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
 		if ( ( already_read +=
 			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
 							  to_be_read - already_read, 1000000, SET ) ) < 0 )
+		{
+			fprintf( stderr, "Read 5 Failure\n" );
 			spex_cd2a_comm_fail( );
+		}
 		stop_on_user_request( );
 
 		/* Throw away <CAN> characters, the device sends them sometimes in the
@@ -758,14 +774,14 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
 }
 
 
-/*-------------------------------------------------------------*/
-/* Function for reading the acknowledgment send by the device  */
-/* when it received a command. Most commands not only send an  */
-/* ACK/CAN sequence but also make the device transmit position */
-/* information until the command is executed. This function    */
-/* looks for the sequence to be expected for a command,        */
-/* throwing an exception if it isn't coming from the device.   */
-/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for reading the acknowledgment send by the device
+ * when it received a command. Most commands not only send an
+ * ACK/CAN sequence but also make the device transmit position
+ * information until the command is executed. This function
+ * looks for the sequence to be expected for a command,
+ * throwing an exception if it isn't coming from the device.
+ *-------------------------------------------------------------*/
 
 static void spex_cd2a_read_cmd_ack( const char *cmd )
 {
@@ -783,16 +799,19 @@ static void spex_cd2a_read_cmd_ack( const char *cmd )
 			spex_cd2a_read_scan_ack( );
 			break;
 
+		case 'H' :                /* "HALT" command */
+			break;
+
 		default :                 /* no other commands are used */
 			SPEX_CD2A_ASSERT( 1 == 0 );
 	}
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Function for handling of messages received after a position command */
-/* ("P") has been send to the device.                                  */
-/*---------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for handling of messages received after a position command
+ * ("P") has been send to the device.
+ *---------------------------------------------------------------------*/
 
 static void spex_cd2a_read_set_pos_ack( void )
 {
@@ -823,10 +842,10 @@ static void spex_cd2a_read_set_pos_ack( void )
 }
 		
 
-/*-----------------------------------------------------------------------*/
-/* Function for handling of messages received after a start trigger scan */
-/* command ("T") has been send to the device.                            */
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for handling of messages received after a start trigger scan
+ * command ("T") has been send to the device.
+ *-----------------------------------------------------------------------*/
 
 static void spex_cd2a_read_start_scan_ack( void )
 {
@@ -857,10 +876,10 @@ static void spex_cd2a_read_start_scan_ack( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Function for handling of messages received after a trigger command */
-/* ("E") during a burst scan has been send to the device.             */
-/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for handling of messages received after a trigger command
+ * ("E") during a burst scan has been send to the device.
+ *--------------------------------------------------------------------*/
 
 static void spex_cd2a_read_scan_ack( void )
 {
@@ -890,9 +909,9 @@ static void spex_cd2a_read_scan_ack( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Function that gets called to close the device file for the device */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function that gets called to close the device file for the device
+ *-------------------------------------------------------------------*/
 
 void spex_cd2a_close( void )
 {
@@ -902,10 +921,10 @@ void spex_cd2a_close( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function to handle situations where the communication */
-/* with the device failed completely.                    */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function to handle situations where the communication
+ * with the device failed completely.
+ *-------------------------------------------------------*/
 
 static void spex_cd2a_comm_fail( void )
 {
@@ -915,10 +934,10 @@ static void spex_cd2a_comm_fail( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for situations where the device reacted */
-/* but send a message it wasn't supposed to send.   */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for situations where the device reacted
+ * but send a message it wasn't supposed to send.
+ *--------------------------------------------------*/
 
 static void spex_cd2a_wrong_data( void )
 {
@@ -927,16 +946,16 @@ static void spex_cd2a_wrong_data( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function calculates the length of position messages send by the device. */
-/* The message consists at least of a status char, a char indicating the   */
-/* unit, an eighth byte long floating point number in ASCII format and a   */
-/* carriage return. When STANDARD data format is used the message starts   */
-/* with a STX char and an ETX char is send directly after tne number. If   */
-/* checksums are transmitted two additional bytes are send directly before */
-/* carriage return. And if the device is set up to send a linefeed this is */
-/* send at the end of the string.                                          */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function calculates the length of position messages send by the device.
+ * The message consists at least of a status char, a char indicating the
+ * unit, an eighth byte long floating point number in ASCII format and a
+ * carriage return. When STANDARD data format is used the message starts
+ * with a STX char and an ETX char is send directly after tne number. If
+ * checksums are transmitted two additional bytes are send directly before
+ * carriage return. And if the device is set up to send a linefeed this is
+ * send at the end of the string.
+ *-------------------------------------------------------------------------*/
 
 static ssize_t spex_cd2a_calc_pos_mess_len( void )
 {
@@ -954,9 +973,9 @@ static ssize_t spex_cd2a_calc_pos_mess_len( void )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Reads in data send from the device with information about its position. */
-/*-------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Reads in data send from the device with information about its position
+ *------------------------------------------------------------------------*
 
 static void spex_cd2a_pos_mess_check( const char *bp )
 {
