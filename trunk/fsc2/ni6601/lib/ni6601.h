@@ -25,6 +25,9 @@
 #include <ni6601_drv.h>
 #include <math.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 
 typedef struct {
@@ -61,6 +64,8 @@ int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask );
 int ni6601_is_counter_armed( int board, int counter, int *state );
 
 
+#define NI6601_OK        0
+
 #define NI6601_ERR_NSB  -1
 #define NI6601_ERR_NSC  -2
 #define NI6601_ERR_CBS  -3
@@ -69,12 +74,14 @@ int ni6601_is_counter_armed( int board, int counter, int *state );
 #define NI6601_ERR_BBS  -6
 #define NI6601_ERR_IVS  -7
 #define NI6601_ERR_BNO  -8
-#define NI6601_ERR_IBN  -9
-#define NI6601_ERR_NDF -10
-#define NI6601_ERR_NCB -11
-#define NI6601_ERR_ITR -12
+#define NI6601_ERR_NDV  -9
+#define NI6601_ERR_NCB -10
+#define NI6601_ERR_ITR -11
+#define NI6601_ERR_ACS -12
+#define NI6601_ERR_DFM -13
+#define NI6601_ERR_DFP -14
 
-#define NI6601_ERR_INT -13
+#define NI6601_ERR_INT -15
 
 #define NI6601_ERR_NSB_MESS  "No such board"
 #define NI6601_ERR_NSC_MESS  "No such counter"
@@ -84,9 +91,11 @@ int ni6601_is_counter_armed( int board, int counter, int *state );
 #define NI6601_ERR_BBS_MESS  "Board is busy"
 #define NI6601_ERR_IVS_MESS  "Source argument invalid"
 #define NI6601_ERR_BNO_MESS  "Board not open"
-#define NI6601_ERR_IBN_MESS  "Invalid board number"
-#define NI6601_ERR_NDF_MESS  "No device file"
+#define NI6601_ERR_NDV_MESS  "No driver loaded for board"
 #define NI6601_ERR_NCB_MESS  "Neighbouring counter is busy"
 #define NI6601_ERR_ITR_MESS  "Interrupted by signal"
+#define NI6601_ERR_ACS_MESS  "No permissions to open file"
+#define NI6601_ERR_DFM_MESS  "Device file does not exist"
+#define NI6601_ERR_DFP_MESS  "Unspecified error when opening device file"
 
 #define NI6601_ERR_INT_MESS  "Internal driver or library error"

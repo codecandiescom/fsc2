@@ -1,0 +1,340 @@
+#
+# $Id$
+#
+
+ NI6601 Library Manual
+ =====================
+
+
+The library expects device files for the board(s) to exist in the '/dev'
+subdirectory. The device file for the first board has to be '/dev/ni6601_0',
+for the second board '/dev/ni6601_1' etc. They are sorted according to the
+sequence the boards are found on the PCI bus.
+
+
+The maximum number of boards that can be used is controlled via
+'NI6601_MAX_BOARDS', which is currently set to 4. This isn't defined by
+the library but by the kernel module - if you want to use more boards
+you must change the define in the header file for the kernel module
+'ni6601_drv.h' and recompile and re-install both the kernel module and
+the library.
+
+
+To use the library you will have to include the header file 'ni6601.h'.
+
+
+The library supplies the following functions:
+
+    ni6601_start_counter()
+    ni6601_start_gated_counter()
+    ni6601_stop_counter()
+    ni6601_get_count()
+    ni6601_generate_continuous_pulses()
+    ni6601_stop_pulses()
+    ni6601_generate_single_pulse()
+    ni6601_dio_write()
+    ni6601_dio_read()
+    ni6601_is_counter_armed()
+    ni6601_close()
+
+
+All functions return an integer, indicating success or failure. On success,
+'NI6601_OK' (which is just 0) is returned. On failure a negative number,
+is returned, indicating the type of failure. The following values can be
+expected:
+
+	NI6601_OK         Function call was successful
+    NI6601_ERR_NSB    Invalid board number
+    NI6601_ERR_NSC    Invalid counter number
+    NI6601_ERR_CBS    Requested counter is busy
+    NI6601_ERR_IVA    Invalid argument passed to the function
+    NI6601_ERR_WFC    Trying to wait for a continuous counter to stop
+    NI6601_ERR_BBS    The requested board is already in use by another process
+    NI6601_ERR_IVS    The 'source' argument passed to a function is invalid
+    NI6601_ERR_BNO    The requested board is not open
+    NI6601_ERR_NDV    Driver for board not loaded or board does not exist
+    NI6601_ERR_NCB    Neighbouring counter of specified counter is busy
+    NI6601_ERR_ITR    Function was interrupted by a signal
+	NI6601_ERR_ACS    Missing permission to open the device file
+	NI6601_ERR_DFM    Device file for the requested board does not exist
+	NI6601_ERR_DFP    Unspecified error when opening the device file
+    NI6601_ERR_INT    Internal driver or library error
+
+
+All functions except ni6601_close() may return at least one of the
+following error codes:
+
+    NI6601_ERR_NSB    NI6601_ERR_NSC   	NI6601_ERR_DFM
+    NI6601_ERR_DFP    NI6601_ERR_NDV    NI6601_ERR_ACS
+    NI6601_ERR_BBS    NI6601_ERR_DFP    NI6601_ERR_INT
+
+These error codes will not be mentioned explicitely in the description
+of the functions anymore.
+
+
+All functions require the number of the board as the first argument.
+This argument is an integer numberbetween 0 and (NI6601_MAX_BOARDS - 1)
+or the number of installed boards minus 1, whatever is smaller.
+
+
+Most functions expect a counter number as the second argument. The valid
+range for this argument is between 0 and 3. Instead of directly
+specifiying the counter number also 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2', or 'NI6601_COUNTER_3' can be used.
+
+
+Some functions require a 'source' argument, i.e. the source of the
+events to be counted. Valid values for this argument are
+
+    NI6601_LOW                 No source input at all, input always low
+    NI6601_DEFAULT_SOURCE      Default source input for the counter
+    NI6601_SOURCE_0            Default input source of counter 0
+    NI6601_SOURCE_1            Default input source of counter 1
+    NI6601_SOURCE_2            Default input source of counter 2
+    NI6601_SOURCE_3            Default input source of counter 3
+    NI6601_NEXT_GATE           Gate input of other counter in pair
+    NI6601_TIMEBASE_1          Fast internal timebase (20 MHz)
+    NI6601_TIMEBASE_2          Slow internal timebase (100 kHz)
+    NI6601_TIMEBASE_3          Same as TIMEBASE_1
+
+
+There is no need to "open" a board before using it - the first call
+to one of the functions will automatically open the board and make it
+exclusively accessable by the process that opened the board this way.
+
+
+Processes that get started by a call to the exec-family of functions
+won't be able to access the board, i.e. the close-on-exec flag is
+set for the file handle used for accessing the board.
+
+
+======================================================================
+
+int ni6601_start_counter( int board, int counter, int source )
+
+The function starts a countinuously counting counter. The counter is
+initialized to 0 at the start and counts upwards.
+
+   int board        Board number
+   int counter      Number of the counter
+   int source       Number indicating the the source of events to be counted
+
+The counter will remain busy and can't be used for other purposes until
+the function ni6601_stop_counter() has been called for the counter.
+
+Beside the error codes mentioned above the function may return:
+
+     NI6601_ERR_IVS    NI6601_ERR_CBS
+
+
+======================================================================
+
+int ni6601_start_gated_counter( int board, int counter, double gate_length,
+								int source )
+
+The function starts a gated counter. The counter will run only for the
+time specified by the 'gate_length' argument and then stop. The counter
+is initialized with 0 and counts upwards.
+
+The function does require a second counter beside the one specified
+by the 'counter' argument to create the gate for the counter. For the
+counter numbered 0 also counter 1 is required (and vice versa), and
+for the counter numbered 2 also counter 3 is required (and vice versa).
+Thus both counters must be available, i.e. not being counting when the
+function gets called.
+
+   int board        Board number
+   int counter      Number of the counter
+   int gate_length  length of time to count in seconds
+   int source       Number indicating the the source of events to be counted
+
+'gate_length' must be at least 100 ns and must also be an integer multiple
+of 50 ns. It must not be longer than 214.7483648 s.
+
+Beside the error codes mentioned above the function may return:
+
+     NI6601_ERR_IVS    NI6601_ERR_IVA
+	 NI6601_ERR_CBS    NI6601_ERR_NCB
+
+
+======================================================================
+
+int ni6601_stop_counter( int board, int counter )
+
+The function stops a counter. If the specified counter isn't counting
+nothing happens (i.e. success is reported).
+
+   int board        Board number
+   int counter      Number of the counter
+
+
+======================================================================
+
+int ni6601_get_count( int board, int counter, int wait_for_end,
+					  unsigned long *count, int *state )
+
+The function returns the current value of a counter. If the
+'wait_for_end' argument has a non-zero value, the function will
+only return after the counter has stopped counting with the final
+result - because a continuous counter will never stop the function
+will return indicating an error when this ius tried with a continuously
+running counter. If a signal gets caught while waiting for the counter
+to finish the error code NI6601_ERR_ITR gets returned.
+
+The counters value is returned in the variable pointed to by 'count'.
+The maximum return value is 4294967295 (ULONG_MAX). If the counter
+did overflow (more events than this number happened) the counter did
+reset to 0 and the final result is the modulo of the real number of
+events and 4294967296 (ULONG_MAX + 1).
+
+The current state of the counter, i.e. if the counter is still counting
+or is already stopped is returned in the variable pointed to by the
+'state' argument (unless 'state' is NULL). The variable 'state' is
+pointing to will either get set to 'NI6601_BUSY' or 'NI6601_BUSY'.
+
+   int board             Board number
+   int counter           Number of the counter
+   int wait_for_end      When non-zero function will wait for counter to stop
+   unsigned long *count  pointer for returning the counter value
+   int *state            pointer for returning the counter state
+
+Beside the error codes mentioned above the function may return:
+
+     NI6601_ERR_IVA    NI6601_ERR_WFC    NI6601_ERR_ITR
+
+
+======================================================================
+
+int ni6601_generate_single_pulse( int board, int counter, double duration )
+
+The function creates a single pulse of 'duration' length at the output
+connectors of the specified counter.
+
+'duration' must be at least 100 ns and must also be an integer multiple
+of 50 ns. It must not be longer than 214.7483648 s.
+
+   int board             Board number
+   int counter           Number of the counter
+   double duration       Length of the pulse in seconds
+
+Beside the error codes mentioned above the function may return:
+
+    NI6601_ERR_CBS  NI6601_ERR_CBS
+
+
+======================================================================
+
+int ni6601_generate_continuous_pulses( int board, int counter,
+									   double high_phase, double low_phase )
+
+The function creates a continuous train of pulses at the output
+connectors of of the specified counter.
+
+The arguments 'high_phase' and 'low_phase' specify the durations of the
+pulses being in a high state and the time between pulses. Thus the repe-
+tition frequency of the created pulses is the sum of both arguments.
+
+Both 'high_phase' and 'low_phase' must be at least 100 ns and must also
+be integer multiples of 50 ns. They must not be longer than 214.7483648 s.
+
+   int board             Board number
+   int counter           Number of the counter
+   double high_phase     Length of the pulses in seconds
+   double low_phase      Length of time between pulses
+
+Beside the error codes mentioned above the function may return:
+
+    NI6601_ERR_CBS  NI6601_ERR_CBS
+
+
+======================================================================
+
+int ni6601_stop_pulses( int board, int counter )
+
+The function is just an alias for the ni6601_stop_counter() function.
+
+
+======================================================================
+
+int ni6601_is_counter_armed( int board, int counter, int *state )
+
+The function checks if a counter is armed and thus can be taken to
+be counting and busy.
+
+The state, either 'NI6601_BUSY' or 'NI6601_BUSY', will be returned
+via the variable pointed to by 'state'.
+
+   int board             Board number
+   int counter           Number of the counter
+   int *state            Pointer to variable for storing the counters state
+
+
+======================================================================
+
+int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
+
+The function sets a subset, selected via the 'mask' argument, of the
+8 DIO output lines of the board to the states given by the 'bits'
+argument.
+
+'mask' must be used to select a subset of the DIO lines. Setting bit 0 
+(i.e. the least sigificant bit) of 'mask' allows to set the DIO line 0,
+Setting bit 1 allows to set DIO line 1 etc. To allow setting all lines
+thus 255 (or 0xFF) has to be specified for 'mask'.
+
+'bits' specifies the state the lines specified by 'mask' are to be set
+to. Setting bit 0 ((i.e. the least sigificant bit) of 'bits' to 1 will
+set the DIO line 0 to a high voltage level, setting this bit to 0 will
+set this line to a low voltage level (of course requiring that also
+bit 0 of 'mask' is set). Setting or unsetting bit 1 of 'bits' will
+change the DIO line 1 accordingly (as long as also bit 1 of 'mask' is
+set) etc.
+
+DIO lines for which no bit is set in 'mask' can be used for input
+simultaneously.
+
+   int board             Board number
+   unsigned char bits    Value with states the DIO lines are to be set to
+   unsigned char bits    Mask with for DIO lines that are to be set
+
+
+======================================================================
+
+int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
+
+The function returns the state of a subset, selected via the 'mask'
+argument, of the 8 DIO output lines of the board.
+
+'mask' must be used to select a subset of the DIO lines. Setting bit 0 
+(i.e. the least sigificant bit) of 'mask' allows to read the state of
+DIO line 0, Setting bit 1 allows to read DIO line 1 etc. To allow
+reading all lines thus 255 (or 0xFF) has to be specified for 'mask'.
+
+In the variable pointed to by 'bits' the state of the lines selected
+by 'mask' is returned. Bit 0 (i.e. the least sigificant bit of 'bits')
+reflects the state of DIO line 0 (1 for a high voltage level, 0 for a
+low level), bit 1 the state of line 1 etc.
+
+DIO lines for which no bit is set in 'mask' can be used for output
+simultaneously.
+
+   int board             Board number
+   unsigned char bits    Pointer to value for states the DIO lines
+   unsigned char bits    Mask with for DIO lines that are to be read
+
+
+======================================================================
+
+int ni6601_close( int board )
+
+The function can be used to close the boards device file and thus make
+the board accessible by other processes.
+
+   int board             Board number
+
+Beside the error codes mentioned above the function may return:
+
+    NI6601_ERR_BNO
+
+
+======================================================================

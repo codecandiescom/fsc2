@@ -100,19 +100,28 @@ int ni6601_exp_hook( void )
 
 	switch ( ni6601_is_counter_armed( BOARD_NUMBER, NI6601_COUNTER_0, &s ) )
 	{
-		case 0 :             /* everything ok */
+		case NI6601_OK :
 			break;
 
-		case NI6601_ERR_IBN :
+		case NI6601_ERR_NSB :
 			print( FATAL, "Invalid board number.\n" );
 			THROW( EXCEPTION );
 
-		case NI6601_ERR_NSB :
+		case NI6601_ERR_NDV :
 			print( FATAL, "Driver for board not loaded.\n" );
 			THROW( EXCEPTION );
 
-		case NI6601_ERR_NDF :
-			print( FATAL, "Device file for board missing or inaccessible.\n" );
+		case NI6601_ERR_ACS :
+			print( FATAL, "No permissions to open device file for board.\n" );
+			THROW( EXCEPTION );
+
+		case NI6601_ERR_DFM :
+			print( FATAL, "Device file for board missing.\n" );
+			THROW( EXCEPTION );
+
+		case NI6601_ERR_DFP :
+			print( FATAL, "Unspecified error when opening device file for "
+				   "board.\n" );
 			THROW( EXCEPTION );
 
 		case NI6601_ERR_BBS :
@@ -120,7 +129,7 @@ int ni6601_exp_hook( void )
 			THROW( EXCEPTION );
 
 		case NI6601_ERR_INT :
-			print( FATAL, "Internal error in baord driver or library.\n" );
+			print( FATAL, "Internal error in board driver or library.\n" );
 			THROW( EXCEPTION );
 
 		default :
@@ -194,7 +203,7 @@ Var *counter_start_continuous_counter( Var *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		switch( ni6601_start_counter( BOARD_NUMBER, counter, source ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				break;
 
 			case NI6601_ERR_CBS :
@@ -259,7 +268,7 @@ Var *counter_start_timed_counter( Var *v )
 		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
 											 source ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				break;
 
 			case NI6601_ERR_CBS :
@@ -332,7 +341,7 @@ Var *counter_timed_count( Var *v )
 		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
 											 source ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				break;
 
 			case NI6601_ERR_CBS :
@@ -371,7 +380,7 @@ Var *counter_timed_count( Var *v )
 
 		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				if ( count > LONG_MAX )
 				{
 					print( SEVERE, "Counter value too large.\n" );
@@ -456,7 +465,7 @@ Var *counter_final_count( Var *v )
 
 		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				if ( count > LONG_MAX )
 				{
 					print( SEVERE, "Counter value too large.\n" );
@@ -524,7 +533,7 @@ Var *counter_single_pulse( Var *v )
 		switch ( ni6601_generate_single_pulse( BOARD_NUMBER, counter,
 											   duration ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				break;
 
 			case NI6601_ERR_CBS :
@@ -592,7 +601,7 @@ Var *counter_continuous_pulses( Var *v )
 		switch ( ni6601_generate_continuous_pulses( BOARD_NUMBER, counter,
 													len_hi, len_low ) )
 		{
-			case 0 :
+			case NI6601_OK :
 				break;
 
 			case NI6601_ERR_CBS :

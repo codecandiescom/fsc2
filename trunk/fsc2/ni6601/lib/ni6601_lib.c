@@ -57,7 +57,7 @@ static NI6601_Device_Info dev_info[ NI6601_MAX_BOARDS ];
 int ni6601_close( int board )
 {
 	if ( board < 0 || board >= NI6601_MAX_BOARDS )
-		return NI6601_ERR_IBN;
+		return NI6601_ERR_NSB;
 
 	if ( ! dev_info[ board ].is_init )
 		return NI6601_ERR_BNO;
@@ -67,7 +67,7 @@ int ni6601_close( int board )
 
 	dev_info[ board ].is_init = 0;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -108,13 +108,13 @@ int ni6601_start_counter( int board, int counter, int source )
 
 	dev_info[ board ].state[ counter ] = NI6601_CONT_COUNTER_RUNNING;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
 /*----------------------------------------------------------------------*/
 /* Function starts a counter that will be gated by its adjacent counter */
-/* for 'gate_length'. It stops automatically at the end og the gate.    */
+/* for 'gate_length'. It stops automatically at the end of the gate.    */
 /*----------------------------------------------------------------------*/
 
 int ni6601_start_gated_counter( int board, int counter, double gate_length,
@@ -195,7 +195,7 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
 	dev_info[ board ].state[ counter ] = NI6601_COUNTER_RUNNING;
 	dev_info[ board ].state[ pulser ]  = NI6601_PULSER_RUNNING;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -219,7 +219,7 @@ int ni6601_stop_counter( int board, int counter )
 		return ret;
 
 	if ( state == NI6601_IDLE )
-		return 0;
+		return NI6601_OK;
 
 	d.counter = counter;
 
@@ -231,7 +231,7 @@ int ni6601_stop_counter( int board, int counter )
 
 	dev_info[ board ].state[ counter ] = NI6601_IDLE;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -277,7 +277,7 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 
 	*count = v.count;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -324,7 +324,7 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 
 	dev_info[ board ].state[ counter ] = NI6601_PULSER_RUNNING;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -341,7 +341,7 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 
 
 	if ( counter < NI6601_COUNTER_0 || counter > NI6601_COUNTER_3 )
-		return EINVAL;
+		return NI6601_ERR_NSC;
 
 	if ( ni6601_time_to_ticks( high_phase, &ht ) < 0 ||
 		 ni6601_time_to_ticks( low_phase, &lt ) < 0 )
@@ -370,7 +370,7 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 
 	dev_info[ board ].state[ counter ] = NI6601_CONT_PULSER_RUNNING;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -401,7 +401,7 @@ int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_DIO_OUT, &dio ) < 0 )
 		return NI6601_ERR_INT;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -425,7 +425,7 @@ int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
 		return NI6601_ERR_INT;
 
 	*bits = dio.value;
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -465,7 +465,7 @@ static int ni6601_is_armed( int board, int counter, int *state )
 
 	*state = a.state ? NI6601_BUSY : NI6601_IDLE;
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -477,14 +477,14 @@ static int ni6601_state( int board, int counter, int *state )
 	if ( dev_info[ board ].state[ counter ] == NI6601_IDLE )
 	{
 		*state = NI6601_IDLE;
-		return 0;
+		return NI6601_OK;
 	}
 
 	if ( dev_info[ board ].state[ counter ] == NI6601_CONT_COUNTER_RUNNING ||
 		 dev_info[ board ].state[ counter ] == NI6601_CONT_PULSER_RUNNING )
 	{
 		*state = NI6601_BUSY;
-		return 0;
+		return NI6601_OK;
 	}
 
 	return ni6601_is_armed( board, counter, state );
@@ -507,10 +507,11 @@ static int check_board( int board )
 {
 	char name[ 20 ] = "/dev/" NI6601_DEVICE_NAME;
 	int i;
+	struct stat buf;
 
 
 	if ( board < 0 || board >= NI6601_MAX_BOARDS )
-		return NI6601_ERR_IBN;
+		return NI6601_ERR_NSB;
 
 	if ( ! dev_info[ board ].is_init )
 	{
@@ -525,19 +526,37 @@ static int check_board( int board )
 
 		snprintf( name + strlen( name ), 20 - strlen( name ), "%d", board );
 
+		/* Check if the device file exists and can be accessed */
+
+		if ( stat( name, &buf ) < 0 )
+			switch ( errno )
+			{
+				case ENOENT :
+					return NI6601_ERR_DFM;
+
+				case EACCES :
+					return NI6601_ERR_ACS;
+
+				default :
+					return NI6601_ERR_DFP;
+			}
+
 		/* Try to open it in non-blocking mode */
 
 		if ( ( dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK ) )< 0 )
 			switch ( errno )
 			{
 				case ENODEV : case ENXIO :
-					return NI6601_ERR_NSB;
+					return NI6601_ERR_NDV;
 			
+				case EACCES :
+					return NI6601_ERR_ACS;
+
 				case EBUSY :
 					return NI6601_ERR_BBS;
 
 				default :
-					return NI6601_ERR_NDF;
+					return NI6601_ERR_DFP;
 			}
 
 		/* Set the FD_CLOEXEC bit for the device file - exec()'ed application
@@ -553,7 +572,7 @@ static int check_board( int board )
 			dev_info[ board ].state[ i ] = NI6601_IDLE;
 	}
 
-	return 0;
+	return NI6601_OK;
 }
 
 
@@ -572,7 +591,7 @@ static int check_source( int source )
 		 source == NI6601_TIMEBASE_1 ||
 		 source == NI6601_TIMEBASE_2 ||
 		 source == NI6601_TIMEBASE_3 )
-		return 0;
+		return NI6601_OK;
 
 	return NI6601_ERR_IVS;
 }
@@ -598,5 +617,5 @@ static int ni6601_time_to_ticks( double time, unsigned long *ticks )
 	
 	*ticks = t;
 
-	return 0;
+	return NI6601_OK;
 }
