@@ -154,7 +154,7 @@ UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 {IDENT}     {
 				int acc;
 
-				/* special treatent for calls of print() function */
+				/* special treatment for calls of print() function */
 
 				if ( ! strcmp( variablestext, "print" ) )
 				    return( PRINT_TOK );
