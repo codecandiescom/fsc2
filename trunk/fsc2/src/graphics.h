@@ -122,6 +122,7 @@ typedef struct {
 
 	int start[ 3 ];
 
+	long axis_curve;
 } Graphics;
 
 

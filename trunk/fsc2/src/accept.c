@@ -158,7 +158,7 @@ void accept_new_data( void )
 
 	/* Finally display the new data by redrawing the canvas */
 
-	redraw_canvas( &G.canvas );
+	redraw_all( );
 }
 
 
@@ -175,7 +175,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		   rw_y_min;
 	void *cur_ptr;
 	double data;
-	double new_y_scale;
+	double new_rwc_delta_y;
 	Curve_1d *cv;
 	long i, j;
 
@@ -276,33 +276,29 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( G.rw_y_max < rw_y_max || G.rw_y_min > rw_y_min )
 	{
+		new_rwc_delta_y = rw_y_max - rw_y_min;
+
 		if ( G.is_scale_set )
 		{
-			new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
 
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
 
 				for ( j = 0; j < G.nx; j++ )
-				{
 					if ( cv->points[ j ].exist )
-						cv->points[ j ].y = new_y_scale
-							* ( cv->points[ j ].y / G.rw2s
-								+ G.rw_y_min - rw_y_min );
-				}
+						cv->points[ j ].y = ( G.rwc_delta[ Y ]
+						        * cv->points[ j ].y + G.rw_y_min - rw_y_min ) /
+							                                   new_rwc_delta_y;
 
 				if ( ! G.is_fs )
 				{
-					cv->s2d[ Y ] *= G.rw2s / new_y_scale;
-					cv->shift[ Y ] *= new_y_scale / G.rw2s;
-					if ( rw_y_max > G.rw_y_max )
-						cv->shift[ Y ] += 
-							( rw_y_max - G.rw_y_max ) * new_y_scale;
+					cv->s2d[ Y ] *= new_rwc_delta_y / G.rwc_delta[ Y ];
+					cv->shift[ Y ] *= G.rwc_delta[ Y ] / new_rwc_delta_y;
 				}
 			}
 
-			G.rw2s = new_y_scale;
+			G.rwc_delta[ Y ] = new_rwc_delta_y;
 		}
 
 		/* If the data have not been scaled to [0,1] yet and the maximum
@@ -310,18 +306,16 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 		if ( ! G.is_scale_set && rw_y_max != rw_y_min )
 		{
-			new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
-
 			for ( i = 0; i < G.nc; i++ )
 			{
 				cv = G.curve[ i ];
 				for ( j = 0; j < G.nx; j++ )
 					if ( cv->points[ j ].exist )
-						cv->points[ j ].y = new_y_scale
-							                * ( cv->points[ j ].y - rw_y_min );
+						cv->points[ j ].y = ( cv->points[ j ].y - rw_y_min ) /
+						                                       new_rwc_delta_y;
 			}
 
-			G.rw2s = new_y_scale;
+			G.rwc_delta[ Y ] = new_rwc_delta_y;
 			G.is_scale_set = SET;
 		}
 
@@ -352,7 +346,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		}
 
 		if ( G.is_scale_set )
-			G.curve[ curve ]->points[ i ].y = G.rw2s * ( data - G.rw_y_min );
+			G.curve[ curve ]->points[ i ].y = ( data - G.rw_y_min ) /
+				                                              G.rwc_delta[ Y ];
 		else
 			G.curve[ curve ]->points[ i ].y = data;
 
@@ -369,6 +364,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( ! G.is_scale_set )
 		return;
+
+	G.rwc_start[ Y ] = rw_y_min;
 
 	for ( i = 0; i < G.nc; i++ )
 	{

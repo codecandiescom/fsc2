@@ -326,6 +326,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 	fl_set_object_helper( run_form->stop, "Remove this window" );
 	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
 	fl_unfreeze_form( run_form->run );
+	fl_redraw_form( run_form->run );
 }
 
 

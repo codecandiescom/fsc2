@@ -1062,33 +1062,33 @@ void f_wait_alarm_handler( int sig_type )
 
 Var *f_init_1d( Var *v )
 {
-	long nc = 1;
-	long n = 0;
-	double rwc_start = 0.0,
-		   rwc_delta = 0.0;
-	char *label = NULL;
-
-
 	if ( v != NULL )
 	{
 		if ( v->type == STR_VAR )
+		{
+			G.nc = 0;
+			G.nx = 0;
+			G.is_nx = UNSET;
+			G.rwc_start[ X ] = ARRAY_OFFSET;
+			G.rwc_delta[ X ] = 1.0;
 			goto label_1d;
+		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR );             /* get # of curves */
 
 		if ( v->type == INT_VAR )
-			nc = v->val.lval;
+			G.nc = v->val.lval;
 		else
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"curves in `init_1d()'.\n", Fname, Lc );
-			nc = rnd( v->val.dval );
+			G.nc = rnd( v->val.dval );
 		}
 
-		if ( nc < 1 || nc > MAX_CURVES )
+		if ( G.nc < 1 || G.nc > MAX_CURVES )
 		{
 			eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-					"`init_1d()'.\n", Fname, Lc, nc );
+					"`init_1d()'.\n", Fname, Lc, G.nc );
 			THROW( EXCEPTION );
 		}
 
@@ -1098,17 +1098,23 @@ Var *f_init_1d( Var *v )
 	if ( v != NULL )
 	{
 		if ( v->type == STR_VAR )
+		{
+			G.nx = 0;
+			G.is_nx = UNSET;
+			G.rwc_start[ X ] = ARRAY_OFFSET;
+			G.rwc_delta[ X ] = 1.0;
 			goto label_1d;
+		}
 
 		vars_check( v, INT_VAR | FLOAT_VAR );  /* # of points in x-direction */
 
 		if ( v->type == INT_VAR )
-			n = v->val.lval;
+			G.nx = v->val.lval;
 		else
 		{
 			eprint( WARN, "%s:%ld: Floating point value used as number of "
 					"points in `init_1d()'.\n", Fname, Lc );
-			n = rnd( v->val.dval );
+			G.nx = rnd( v->val.dval );
 		}
 
 		v = v->next;
@@ -1130,8 +1136,13 @@ Var *f_init_1d( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			rwc_start = VALUE( v );
-			rwc_delta = VALUE( v->next );
+			G.rwc_start[ X ] = VALUE( v );
+			G.rwc_delta[ X ] = VALUE( v->next );
+			if ( G.rwc_start[ X ] == 0.0 && G.rwc_delta[ X ] == 0.0 )
+			{
+				G.rwc_start[ X ] = ARRAY_OFFSET;
+				G.rwc_delta[ X ] = 1.0;
+			}
 			v = v->next->next;
 		}
 
@@ -1140,11 +1151,13 @@ label_1d:
 		if ( v != NULL )
 		{
 			vars_check ( v, STR_VAR );
-			label = get_string_copy( v->val.sptr );
+			G.label[ X ] = get_string_copy( v->val.sptr );
 		}
 	}
 	
-	graphics_init( 1, nc, n, 0, rwc_start, rwc_delta, 0.0, 0.0, label, NULL );
+	G.dim = 1;
+	G.is_init = SET;
+
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -1296,7 +1309,7 @@ void graphics_init( long dim, long nc, long nx, long ny,
 	long i;
 
 
-	G.x_label = G.y_label = NULL;
+	G.label[ X ] = G.label[ Y ] = NULL;
 	for ( i = 0; i < MAX_CURVES; i++ )
 		G.curve[ i ] = NULL;
 	G.is_init = SET;
@@ -1344,36 +1357,38 @@ void graphics_init( long dim, long nc, long nx, long ny,
        both the start and the increment value are zero this means there aren't
        any) */
 
-	G.rwc_x_start = rwc_x_start;
-	G.rwc_x_delta = rwc_x_delta;
+	G.rwc_start[ X ] = rwc_x_start;
+	G.rwc_delta[ X ] = rwc_x_delta;
 
-	if ( rwc_x_start == 0.0 && rwc_x_delta == 0.0 )
-		G.is_rwc_x = UNSET;
-	else
-		G.is_rwc_x = SET;
+	if ( rwc_x_start == 0.0 && rwc_y_delta == 0.0 )
+	{
+		G.rwc_start[ X ] = ARRAY_OFFSET;
+		G.rwc_delta[ X ] = 1.0;
+	}
 
-	G.rwc_y_start = rwc_y_start;
-	G.rwc_y_delta = rwc_y_delta;
+	G.rwc_start[ Y ] = rwc_y_start;
+	G.rwc_delta[ Y ] = rwc_y_delta;
 
 	if ( rwc_y_start == 0.0 && rwc_y_delta == 0.0 )
-		G.is_rwc_y = UNSET;
-	else
-		G.is_rwc_y = SET;
+	{
+		G.rwc_start[ Y ] = ARRAY_OFFSET;
+		G.rwc_delta[ Y ] = 1.0;
+	}
 
 	/* Store the labels for x and y direction */
 
 	if ( x_label != NULL )
 	{
-		if ( G.x_label != NULL )
-			T_free( G.x_label );
-		G.x_label = get_string_copy( x_label );
+		if ( G.label[ X ] != NULL )
+			T_free( G.label[ X ] );
+		G.label[ X ] = get_string_copy( x_label );
 	}
 
 	if ( dim == 2 && y_label != NULL )
 	{
-		if ( G.y_label != NULL )
-			T_free( G.y_label );
-		G.y_label = get_string_copy( y_label );
+		if ( G.label[ Y ] != NULL )
+			T_free( G.label[ Y ] );
+		G.label[ Y ] = get_string_copy( y_label );
 	}
 }
 

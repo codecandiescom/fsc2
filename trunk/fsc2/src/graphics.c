@@ -25,7 +25,8 @@ static void delete_pixmap( Canvas *c );
 static void fs_rescale_1d( void );
 static void fs_rescale_2d( void );
 static void redraw_x_axis( void );
-static void make_x_scale( Curve_1d *c );
+static void redraw_y_axis( void );
+static void make_scale( Curve_1d *cv, Canvas *c, int coord );
 
 
 /*----------------------------------------------------------------------*/
@@ -109,9 +110,7 @@ void start_graphics( void )
 	if ( G.is_init )
 		G_struct_init( );
 
-	redraw_canvas( &G.x_axis );
-	redraw_canvas( &G.y_axis );
-	redraw_canvas( &G.canvas );
+	redraw_all( );
 
 	fl_raise_form( run_form->run );
 }
@@ -175,9 +174,10 @@ void G_struct_init( void )
 	G.is_fs = SET;
 	G.scale_changed =  SET;
 
+	G.axis_curve = 0;
+
 	G.rw_y_min = HUGE_VAL;
 	G.rw_y_max = - HUGE_VAL;
-	G.rw2s = 1.0;
 	G.is_scale_set = UNSET;
 
 	for ( i = 0; i < G.nc; i++ )
@@ -493,15 +493,26 @@ void reconfigure_window( Canvas *c, int w, int h )
 
 	delete_pixmap( &G.canvas );
 	create_pixmap( &G.canvas );
-	redraw_canvas( &G.canvas );
 
 	delete_pixmap( &G.y_axis );
 	create_pixmap( &G.y_axis );
-	redraw_canvas( &G.y_axis );
 
 	delete_pixmap( &G.x_axis );
 	create_pixmap( &G.x_axis );
+
+	redraw_all( );
+}
+
+
+/*-----------------------------------------*/
+/* Does a complete redraw of all canvases. */
+/*-----------------------------------------*/
+
+void redraw_all( void )
+{
+	redraw_canvas( &G.canvas );
 	redraw_canvas( &G.x_axis );
+	redraw_canvas( &G.y_axis );
 }
 
 
@@ -555,11 +566,17 @@ void redraw_canvas( Canvas *c )
 
 		if ( c == &G.x_axis )
 			redraw_x_axis( );
+
+		if ( c == &G.y_axis )
+			redraw_y_axis( );
 	}
 
 	repaint_canvas( c );
 }
 
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
 
 void redraw_x_axis( void )
 {
@@ -590,21 +607,59 @@ void redraw_x_axis( void )
 	if ( i == G.nc )                          /* no active curve -> no scale */
 		return;
 
-	XDrawLine( G.d, c->pm, cv->gc, 0, c->h / 2, c->w - 1, c->h / 2 );
-
-	make_x_scale( cv );
+	make_scale( cv, c, X );
 }
 
 
-void make_x_scale( Curve_1d *cv )
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void redraw_y_axis( void )
+{
+	Canvas *c = &G.y_axis;
+	Curve_1d *cv;
+	int width;
+	int i;
+
+/*
+	if ( G.label[ X ] != NULL && G.font != NULL )
+	{
+		width = XTextWidth( G.font, G.label[ X ], strlen( G.label[ X ] ) );
+		XDrawString( G.d, c->pm, c->font_gc, c->w - width - 5,
+					 c->h - 5 - G.font_desc,
+					 G.label[ X ], strlen( G.label[ X ] ) );
+	}
+*/
+	if ( ! G.is_scale_set )
+		return;
+
+	for ( i = 0; i < G.nc; i++ )
+	{
+		cv = G.curve[ i ];
+		if ( cv->active )
+			break;
+	}
+
+	if ( i == G.nc )                          /* no active curve -> no scale */
+		return;
+
+	make_scale( cv, c, Y );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+void make_scale( Curve_1d *cv, Canvas *c, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
-		   order;              /* and its order of magitude */
+		   order,              /* and its order of magitude */
+		   mag;
 	double d_delta_fine,       /* distance between small ticks (in points) */
 		   d_start_fine,       /* position of first small tick (in points) */
 		   d_start_medium,     /* position of first medium tick (in points) */
 		   d_start_coarse,     /* position of first large tick (in points) */
-		   cur_x;              /* loop variable with position */
+		   cur_p;              /* loop variable with position */
 	int medium_factor,         /* number of small tick spaces between medium */
 		coarse_factor;         /* and large tick spaces */
 	int medium,                /* loop counters for medium and large ticks */
@@ -613,17 +668,19 @@ void make_x_scale( Curve_1d *cv )
 		   rwc_start_fine,     /* rwc value of first small tick */
 		   rwc_start_medium,   /* rwc value of first medium tick */
 		   rwc_start_coarse;   /* rwc value of first large tick */
+	double rwc_coarse;
 	short x, y;
 
 
 	/* The distance between the smallest ticks should be about 8 points -
 	   calculate the corresponding delta in real word units */
 
-	rwc_delta = 8.0 * fabs( G.rwc_delta[ X ] ) / cv->s2d[ X ];
+	rwc_delta = 8.0 * fabs( G.rwc_delta[ coord ] ) / cv->s2d[ coord ];
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
 
-	order = pow( 10.0, floor( log10( rwc_delta ) ) );
+	mag = floor( log10( rwc_delta ) );
+	order = pow( 10.0, mag );
 	modf( rwc_delta / order, &rwc_delta );
 
 	/* Now get a `smooth' value for the ticks distance, i.e. either 2, 2.5,
@@ -637,8 +694,8 @@ void make_x_scale( Curve_1d *cv )
 	}
 	else if ( rwc_delta <= 3.0 )  /* in ] 2, 3 ] -> units of 2.5 */
 	{
-		medium_factor = 2;
-		coarse_factor = 4;
+		medium_factor = 4;
+		coarse_factor = 20;
 		rwc_delta = 2.5 * order;
 	}
 	else if ( rwc_delta <= 6.0 )  /* in ] 3, 6 ] -> units of 5 */
@@ -654,68 +711,101 @@ void make_x_scale( Curve_1d *cv )
 		rwc_delta = 10.0 * order;
 	}
 
+	/* Calculate the distance between the small ticks in points */
 
-	/* Calculate the distance between the small ticks (in points) */
-
-	d_delta_fine = cv->s2d[ X ] * rwc_delta / fabs( G.rwc_delta[ X ] );
+	d_delta_fine = cv->s2d[ coord ] * rwc_delta / fabs( G.rwc_delta[ coord ] );
 
 
-	/* `rwc_start' is the leftmost value in the display, `rwc_start_fine' the
-	   position of the leftmost small tick (in real world coordinates) and,
-	   finally, `d_start_fine' the same position but in points */
+	/* `rwc_start' is the first value in the display, `rwc_start_fine' the
+	   position of the first small tick (both in real world coordinates)
+	   and, finally, `d_start_fine' the same position but in points */
 
-	rwc_start = G.rwc_start[ X ] - cv->shift[ X ] * G.rwc_delta[ X ];
+	rwc_start = G.rwc_start[ coord ]
+		        - cv->shift[ coord ] * G.rwc_delta[ coord ];
+
+	printf( "%s: rwc_start = %f\n", coord == X ? "X" : "Y", rwc_start );
+	printf( "%s: shift = %f\n", coord == X ? "X" : "Y", cv->shift[ coord ] );
 
 	modf( rwc_start / rwc_delta, &rwc_start_fine );
 	rwc_start_fine *= rwc_delta;
 
-	d_start_fine = cv->s2d[ X ] * ( rwc_start_fine - rwc_start ) /
-		                                                      G.rwc_delta[ X ];
-	if ( d_start_fine < 0 )
+	d_start_fine = cv->s2d[ coord ] * ( rwc_start_fine - rwc_start ) /
+		                                                  G.rwc_delta[ coord ];
+	if ( rnd( d_start_fine ) < 0 )
 		d_start_fine += d_delta_fine;
 
 
-	/* Calculate start index for leftmost medium tick */
+	/* Calculate start index for first medium tick */
 
 	modf( rwc_start / ( medium_factor * rwc_delta ), &rwc_start_medium );
 	rwc_start_medium *= medium_factor * rwc_delta;
 
-	d_start_medium = cv->s2d[ X ] * ( rwc_start_medium - rwc_start ) /
-			                                                  G.rwc_delta[ X ];
-	if ( d_start_medium < 0 )
+	d_start_medium = cv->s2d[ coord ] * ( rwc_start_medium - rwc_start ) /
+			                                              G.rwc_delta[ coord ];
+	if ( rnd( d_start_medium ) < 0 )
 		d_start_medium += medium_factor * d_delta_fine;
 
 	medium = rnd( ( d_start_fine - d_start_medium ) / d_delta_fine );
 
-	/* Calculate start index for leftmost large tick */
+	/* Calculate start index for first large tick */
 
 	modf( rwc_start / ( coarse_factor * rwc_delta ), &rwc_start_coarse );
 	rwc_start_coarse *= coarse_factor * rwc_delta;
 
-	d_start_coarse = cv->s2d[ X ] * ( rwc_start_coarse - rwc_start ) /
-			                                                  G.rwc_delta[ X ];
-	if ( d_start_coarse < 0 )
+	d_start_coarse = cv->s2d[ coord ] * ( rwc_start_coarse - rwc_start ) /
+			                                              G.rwc_delta[ coord ];
+	if ( rnd( d_start_coarse ) < 0 )
 		d_start_coarse += coarse_factor * d_delta_fine;
 
 	coarse = rnd( ( d_start_fine - d_start_coarse ) / d_delta_fine );
 
 
-	/* Now, finally we can strt drawing the axis... */
+	/* Now, finally we can draw the axis... */
 
-	for ( cur_x = d_start_fine; cur_x < G.x_axis.w;
-		  medium++, coarse++, cur_x += d_delta_fine )
+	rwc_coarse = rwc_start_coarse;
+
+	if ( coord == X )
 	{
-		x = d2shrt( cur_x );
-		y = G.x_axis.h / 2;
+		y = 20;
+		XDrawLine( G.d, c->pm, cv->gc, 0, y, c->w - 1, y );
 
-		if ( coarse % coarse_factor == 0 )
-			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y + 3, x, y - 12 );
-		else if ( medium % medium_factor == 0 )
-			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y, x, y - 9 );
-		else
-			XDrawLine( G.d, G.x_axis.pm, cv->gc, x, y, x, y - 5 );
+		for ( cur_p = d_start_fine; cur_p < c->w; 
+			  medium++, coarse++, cur_p += d_delta_fine )
+		{
+			x = d2shrt( cur_p );
+
+			if ( coarse % coarse_factor == 0 )
+			{
+				XDrawLine( G.d, c->pm, cv->gc, x, y + 3, x, y - 14 );
+				rwc_coarse += coarse_factor * rwc_delta;
+			}
+			else if ( medium % medium_factor == 0 )
+				XDrawLine( G.d, c->pm, cv->gc, x, y, x, y - 10 );
+			else
+				XDrawLine( G.d, c->pm, cv->gc, x, y, x, y - 5 );
+		}
 	}
+	else
+	{
+		x = c->w - 21;
+		XDrawLine( G.d, c->pm, cv->gc, x, 0, x, c->h - 1 );
 
+		for ( cur_p = c->h - 1 - d_start_fine; cur_p >= 0; 
+			  medium++, coarse++, cur_p -= d_delta_fine )
+		{
+			y = d2shrt( cur_p );
+
+			if ( coarse % coarse_factor == 0 )
+			{
+				XDrawLine( G.d, c->pm, cv->gc, x - 3, y, x + 14, y );
+				rwc_coarse += coarse_factor * rwc_delta;
+			}
+			else if ( medium % medium_factor == 0 )
+				XDrawLine( G.d, c->pm, cv->gc, x, y, x + 10, y );
+			else
+				XDrawLine( G.d, c->pm, cv->gc, x, y, x + 5, y );
+		}
+	}
 }
 
 
@@ -788,10 +878,11 @@ void repaint_canvas( Canvas *c )
 			{
 				cv = G.curve[ i ];
 
-				x_pos = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
-				x_pos = G.rwc_start[ X ] + G.rwc_delta[ X ] * x_pos;
-				y_pos = ( 1.0 - c->ppos[ Y ] / cv->s2d[ Y ] 
-						  - cv->shift[ Y ] ) / G.rw2s;
+				x_pos = G.rwc_start[ X ] + G.rwc_delta[ X ]
+					        * ( c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ] );
+				y_pos = G.rwc_start[ Y ] + G.rwc_delta[ Y ]
+					       * ( ( ( double ) G.canvas.h - 1.0 - c->ppos[ Y ] ) /
+									           cv->s2d[ Y ] - cv->shift[ Y ] );
 
 				sprintf( buf, "%#g, %#g", x_pos, y_pos );
 				if ( G.font != NULL )
@@ -810,8 +901,8 @@ void repaint_canvas( Canvas *c )
 
 				x_pos = G.rwc_delta[ X ] * ( c->ppos[ X ] - G.start[ X ] ) /
 					                                              cv->s2d[ X ];
-				y_pos = ( c->ppos[ Y ] - G.start[ Y ] ) /
-					                                 ( cv->s2d[ Y ] * G.rw2s );
+				y_pos = G.rwc_delta[ Y ] * ( c->ppos[ Y ] - G.start[ Y ] ) /
+					                                              cv->s2d[ Y ];
 
 				sprintf( buf, "%#g, %#g", x_pos, y_pos );
 				if ( G.font != NULL )
@@ -894,14 +985,14 @@ void recalc_XPoints_of_curve( Curve_1d *cv )
 
 	cv->up = cv->down = cv->left = cv->right = UNSET;
 
-	for ( k = 0, j = 0; j < G.nx; j++ )
+	for ( k = j = 0; j < G.nx; j++ )
 	{
 		if ( cv->points[ j ].exist )
 		{
 			cv->xpoints[ k ].x = d2shrt( cv->s2d[ X ]
 										            * ( j + cv->shift[ X ] ) );
-			cv->xpoints[ k ].y = d2shrt( cv->s2d[ Y ]
-						  * ( 1.0 - ( cv->points[ j ].y + cv->shift[ Y ] ) ) );
+			cv->xpoints[ k ].y = ( short ) G.canvas.h - 1 - 
+			   d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].y + cv->shift[ Y ] ) );
 
 			if ( cv->xpoints[ k ].x < 0 )
 				cv->left = SET;
@@ -909,8 +1000,10 @@ void recalc_XPoints_of_curve( Curve_1d *cv )
 				cv->right = SET;
 			if ( cv->xpoints[ k ].y < 0 )
 				cv->up = SET;
-			if ( cv->xpoints[ k++ ].y >= ( int ) G.canvas.h )
+			if ( cv->xpoints[ k ].y >= ( int ) G.canvas.h )
 				cv->down = SET;
+
+			k++;
 		}
 	}
 }
@@ -955,7 +1048,7 @@ void undo_button_callback( FL_OBJECT *a, long b )
 	}
 
 	if ( is_undo )
-		redraw_canvas( &G.canvas );
+		redraw_all( );
 }
 
 
@@ -1012,7 +1105,7 @@ void fs_button_callback( FL_OBJECT *a, long b )
 
 	/* Redraw the graphic */
 
-	redraw_canvas( &G.canvas );
+	redraw_all( );
 }
 
 
@@ -1027,7 +1120,7 @@ void fs_rescale_1d( void )
 	double rw_y_min,
 		   rw_y_max;
 	double data;
-	double new_y_scale;
+	double new_rwc_delta_y;
 	Curve_1d *cv;
 
 
@@ -1051,13 +1144,13 @@ void fs_rescale_1d( void )
 
 	/* Calculate new real world maximum and minimum */
 
-	rw_y_min = min / G.rw2s + G.rw_y_min;
-	rw_y_max = max / G.rw2s + G.rw_y_min;
+	rw_y_min = G.rwc_delta[ Y ] * min + G.rw_y_min;
+	rw_y_max = G.rwc_delta[ Y ] * max + G.rw_y_min;
 
 	/* Calculate new scaling factor and rescale the scaled data as well as the
 	   points for drawing */
 
-	new_y_scale = 1.0 / ( rw_y_max - rw_y_min );
+	new_rwc_delta_y = rw_y_max - rw_y_min;
 
 	for ( i = 0; i < G.nc; i++ )
 	{
@@ -1071,16 +1164,16 @@ void fs_rescale_1d( void )
 
 		for ( k = 0, j = 0; j < G.nx; j++ )
 			if ( cv->points[ j ].exist )
-				cv->points[ j ].y = new_y_scale * ( cv->points[ j ].y /
-											  G.rw2s + G.rw_y_min - rw_y_min );
+				cv->points[ j ].y = ( G.rwc_delta[ Y ] * cv->points[ j ].y 
+								   + G.rw_y_min - rw_y_min ) / new_rwc_delta_y;
 
 		recalc_XPoints_of_curve( cv );
 	}
 
 	/* Store new minimum and maximum and the new scale factor */
 
-	G.rw2s = new_y_scale;
-	G.rw_y_min = rw_y_min;
+	G.rwc_delta[ Y ] = new_rwc_delta_y;
+	G.rw_y_min = G.rwc_start[ Y ] = rw_y_min;
 	G.rw_y_max = rw_y_max;
 }
 
