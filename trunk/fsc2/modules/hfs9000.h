@@ -44,6 +44,8 @@ void hfs9000_exit_hook( void );
 Var *pulser_name( Var *v );
 Var *pulser_show_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
+Var *pulser_keep_all_pulses( Var *v );
+Var *pulser_maximum_pattern_length( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );

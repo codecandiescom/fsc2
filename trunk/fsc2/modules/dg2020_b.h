@@ -53,6 +53,8 @@ Var *pulser_show_pulses( Var *v );
 Var *pulser_dump_pulses( Var *v );
 Var *pulser_shape_to_defense_minimum_distance( Var *v );
 Var *pulser_defense_to_shape_minimum_distance( Var *v );
+Var *pulser_keep_all_pulses( Var *v );
+Var *pulser_maximum_pattern_length( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
