@@ -405,7 +405,6 @@ void p_set_trigger_slope( Var *v )
 	if ( slope != POSITIVE && slope != NEGATIVE )
 	{
 		eprint( FATAL, SET, "Invalid trigger slope specification.\n" );
-				Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

@@ -194,7 +194,7 @@ void varserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *varstext == '\0' )
-		eprint( FATAL, SET. "Unexpected end of file in VARIABLES section.\n");
+		eprint( FATAL, SET, "Unexpected end of file in VARIABLES section.\n");
 	else
 		eprint( FATAL, SET, "Syntax error near token `%s'.\n", varstext );
 	THROW( EXCEPTION );

@@ -177,7 +177,7 @@ Var *boxcar_curve_length( Var *v )
 		inter /= 2;
 		if ( inter != 1 && inter & 1 )
 		{
-			eprint( FATAL, SET, "%s:%ld: %s: Invalid number of points (%ld) "
+			eprint( FATAL, SET, "%s: Invalid number of points (%ld) "
 					"in function %s().\n", DEVICE_NAME, num_points, Cur_Func );
 			THROW( EXCEPTION );
 		}

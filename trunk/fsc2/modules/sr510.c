@@ -195,7 +195,7 @@ Var *lockin_name( Var *v )
 Var *lockin_get_data( Var *v )
 {
 	if ( v != NULL )
-		eprint( WARN, SET, "%s:%ld: %s: Useless parameter in call of "
+		eprint( WARN, SET, "%s: Useless parameter in call of "
 				"lockin_get_data().\n", DEVICE_NAME );
 
 	if ( TEST_RUN )                  /* return dummy value in test run */

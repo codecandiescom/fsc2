@@ -173,7 +173,7 @@ int devices_parser( FILE *in )
 		if ( compilation.sections[ i ] == UNSET)
 		    continue;
 
-		eprint( FATAL, SET. "Sorry, the DEVICES section has to be the very "
+		eprint( FATAL, SET, "Sorry, the DEVICES section has to be the very "
 				"first section.\n" );
 		THROW( EXCEPTION );
 	}
