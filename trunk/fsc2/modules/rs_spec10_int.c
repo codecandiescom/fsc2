@@ -376,8 +376,10 @@ static void rs_spec10_temperature_init( void )
 }
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*-------------------------------------------------*/
+/* Function sets the number of clear cycles to be  */
+/* done before a picture is taken with the camera. */
+/*-------------------------------------------------*/
 
 void rs_spec10_clear_cycles( uns16 cycles )
 {
@@ -394,8 +396,14 @@ void rs_spec10_clear_cycles( uns16 cycles )
 }
 
 
-/*-----------------------------------------*/
-/*-----------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function fetches a single picture from the camera. Fetching more */
+/* than a single picture hasn't been implemented because the camera */
+/* has no shutter and only supports CLEAR_PRE_SEQUENCE mode. This   */
+/* means that the CCD can't be cleared between the exposures, so    */
+/* fetching more than one picture would basically be identical to   */
+/* just using a longer exposure time.                               */
+/*------------------------------------------------------------------*/
 
 uns16 *rs_spec10_get_pic( uns32 *size )
 {
@@ -406,15 +414,15 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 	char cur_dir[ PATH_MAX ];
 
 
-	region.s1   = rs_spec10->ccd.roi[ 0 ];
-	region.p1   = rs_spec10->ccd.roi[ 1 ];
-	region.s2   = rs_spec10->ccd.roi[ 2 ];
-	region.p2   = rs_spec10->ccd.roi[ 3 ];
+	region.s1   = rs_spec10->ccd.roi[ X ];
+	region.p1   = rs_spec10->ccd.roi[ Y ];
+	region.s2   = rs_spec10->ccd.roi[ X + 2 ];
+	region.p2   = rs_spec10->ccd.roi[ Y + 2 ];
 
 	if ( rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
 	{
-		region.sbin = rs_spec10->ccd.bin[ 0 ];
-		region.pbin = rs_spec10->ccd.bin[ 1 ];
+		region.sbin = rs_spec10->ccd.bin[ X ];
+		region.pbin = rs_spec10->ccd.bin[ Y ];
 	}
 	else
 	{
@@ -547,9 +555,9 @@ double rs_spec10_get_temperature( void )
 }
 
 
-/*------------------------------------------*/
-/* Sets a target temperature for the camera */
-/*------------------------------------------*/
+/*-------------------------------------------*/
+/* Sets a target temperature for the camera. */
+/*-------------------------------------------*/
 
 double rs_spec10_set_temperature( double temp )
 {

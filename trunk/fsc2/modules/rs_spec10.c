@@ -85,6 +85,7 @@ int rs_spec10_test_hook( void )
 
 	rs_spec10->ccd.exp_time = 100000;
 	rs_spec10->ccd.exp_res = 1.0e-6;
+	rs_spec10->ccd.clear_cycles = CCD_DEFAULT_CLEAR_CYCLES;
 
 	rs_spec10->ccd.test_min_exp_time = HUGE_VAL;
 
@@ -408,20 +409,47 @@ Var *ccd_camera_exposure_time( Var *v )
 /*-----------------------------------------------*/
 /*-----------------------------------------------*/
 
+Var *ccd_camera_clear_cycles( Var *v )
+{
+	long count;
+
+
+	if ( v == 0 )
+		return vars_push( INT_VAR, ( long ) rs_spec10->ccd.clear_cycles );
+
+	count = get_strict_long( v, "number of clear cycles" );
+
+	if ( count < CCD_MIN_CLEAR_CYCLES ||
+		 count > CCD_MAX_CLEAR_CYCLES )
+	{
+		print( FATAL, "Invalid number of clear clear cycles, valid range is "
+			   "%d to %d.\n", CCD_MIN_CLEAR_CYCLES, CCD_MAX_CLEAR_CYCLES );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == TEST )
+		rs_spec10->ccd.clear_cycles = ( uns16 ) count;
+	else
+		rs_spec10_clear_cycles( ( uns16 ) count );
+
+	return vars_push( INT_VAR, count );
+}
+
+
+/*-----------------------------------------------*/
+/*-----------------------------------------------*/
+
 Var *ccd_camera_get_picture( Var *v )
 {
 	uns16 *frame = NULL;
 	long width, height;
-	long w;
 	unsigned long max_val;
 	Var *nv = NULL;
-	long i, j, k;
-	long *bin_arr = NULL;
-	long *bap;
-	long *cl;
+	long i, j, k, l;
 	uns16 *cf;
 	long *dest;
-	double divs;
 	uns16 bin[ 2 ];
 	uns16 urc[ 2 ];
 	uns32 size;
@@ -433,7 +461,6 @@ Var *ccd_camera_get_picture( Var *v )
 	CLOBBER_PROTECT( width );
 	CLOBBER_PROTECT( height );
 	CLOBBER_PROTECT( nv );
-	CLOBBER_PROTECT( bin_arr );
 	CLOBBER_PROTECT( bin[ X ] );
 	CLOBBER_PROTECT( bin[ Y ] );
 	CLOBBER_PROTECT( urc[ X ] );
@@ -523,52 +550,21 @@ Var *ccd_camera_get_picture( Var *v )
 			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
 			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
 			for ( i = 0; i < height; i++ )
-			{
-				cl = nv->val.vptr[ i ]->val.lpnt;
-				for ( j = 0; j < width; j++ )
-					*cl++ = ( long ) *cf++;
-			}
+				for ( dest = nv->val.vptr[ i ]->val.lpnt, j = 0;
+					  j < width; j++ )
+					*dest++ = ( long ) *cf++;
 		else
-		{
-			w = width * rs_spec10->ccd.bin[ X ];
-			divs = 1.0 / ( rs_spec10->ccd.bin[ X ] * rs_spec10->ccd.bin[ Y ] );
-
-			bin_arr = LONG_P T_malloc( w * sizeof *bin_arr );
-
 			for ( i = 0; i < height; i++ )
-			{
-				memset( bin_arr, 0, w * sizeof *bin_arr );
-
-				/* Add up all values for the current piece in y-direction */
-
-				for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
-					for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
-						*bap += ( long ) *cf;
-
-				/* Now do the binning in x-direction for all pieces - since
-				   with hardware binning the sum of all pixel counts is
-				   divided by the number of pixels in the binning area we also
-				   have to do this division for the total result of each of
-				   the pieces. */
-
-				for ( bap = bin_arr, dest = nv->val.vptr[ i ]->val.lpnt,
-						  j = 0; j < width; j++, dest++ )
-				{
-					for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
-						*dest += *bap;
-					*dest = lrnd( *dest * divs );
-				}
-			}
-
-			bin_arr = LONG_P T_free( bin_arr );
-		}
+				for ( j = 0; j < rs_spec10->ccd.bin[ Y ]; j++ )
+					for ( dest = nv->val.vptr[ i ]->val.lpnt, k = 0;
+						  k < width; k++, dest++ )
+						for ( l = 0; l < rs_spec10->ccd.bin[ X ]; l++ )
+							*dest += ( long ) *cf++;
 
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		if ( bin_arr != NULL )
-			T_free( bin_arr );
 		if ( frame != NULL )
 			T_free( frame );
 		if ( nv != NULL )
@@ -598,16 +594,11 @@ Var *ccd_camera_get_spectrum( Var *v )
 {
 	uns16 *frame = NULL;
 	long width, height;
-	long w;
 	unsigned long max_val;
 	Var *nv = NULL;
 	long i, j, k;
-	long *bin_arr = NULL;
-	long *bap;
-	long *cl;
 	uns16 *cf;
 	long *dest;
-	double divs;
 	uns16 bin[ 2 ];
 	uns16 urc[ 2 ];
 	uns32 size;
@@ -619,7 +610,6 @@ Var *ccd_camera_get_spectrum( Var *v )
 	CLOBBER_PROTECT( width );
 	CLOBBER_PROTECT( height );
 	CLOBBER_PROTECT( nv );
-	CLOBBER_PROTECT( bin_arr );
 	CLOBBER_PROTECT( bin[ X ] );
 	CLOBBER_PROTECT( bin[ Y ] );
 	CLOBBER_PROTECT( urc[ X ] );
@@ -679,7 +669,7 @@ Var *ccd_camera_get_spectrum( Var *v )
 			size = ( uns32 ) ( width * sizeof *frame );
 			frame = UNS16_P T_malloc( size );
 			for ( i = 0; i < width; i++ )
-				frame[ i ] = random( ) % max_val;
+				frame[ i ] = random( ) * max_val;
 		}
 
 		nv = vars_push( INT_ARR, NULL, width );
@@ -702,49 +692,18 @@ Var *ccd_camera_get_spectrum( Var *v )
 			 rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
 			 ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
 
-		{
-			cl = nv->val.lpnt;
-			for ( j = 0; j < width; j++ )
-				*cl++ = ( long ) *cf++;
-		}
+			for ( dest = nv->val.lpnt, j = 0; j < width; j++ )
+				*dest++ = ( long ) *cf++;
 		else
-		{
-			w = width * rs_spec10->ccd.bin[ X ];
-			divs = 1.0 / ( rs_spec10->ccd.bin[ X ] );
-
-			bin_arr = LONG_P T_malloc( w * sizeof *bin_arr );
-
-			memset( bin_arr, 0, w * sizeof *bin_arr );
-
-			/* Add up all values for the current piece in y-direction */
-
-			for ( bap = bin_arr, j = 0; j < w; j++, bap++ )
-				for ( k = 0; k < rs_spec10->ccd.bin[ Y ]; k++, cf++ )
-					*bap += ( long ) *cf;
-
-			/* Now do the binning in x-direction for all pieces - since
-			   with hardware binning the sum of all pixel counts is
-			   divided by the number of pixels in the binning area we also
-			   have to do this division for the total result of each of
-			   the pieces. */
-
-			for ( bap = bin_arr, dest = nv->val.lpnt,
-					  j = 0; j < width; j++, dest++ )
-			{
-				for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++, bap++ )
-					*dest += *bap;
-				*dest = lrnd( *dest * divs );
-			}
-
-			bin_arr = LONG_P T_free( bin_arr );
-		}
+			for ( i = 0; i < rs_spec10->ccd.bin[ Y ]; i++ )
+				for ( dest = nv->val.lpnt, j = 0; j < width; j++, dest++ )
+					for ( k = 0; k < rs_spec10->ccd.bin[ X ]; k++ )
+						*dest += ( long ) *cf++;
 
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		if ( bin_arr != NULL )
-			T_free( bin_arr );
 		if ( frame != NULL )
 			T_free( frame );
 		if ( nv != NULL )

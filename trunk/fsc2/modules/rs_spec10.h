@@ -61,6 +61,7 @@ struct RS_SPEC10 {
 		double exp_res;
 		flt64 exp_min_time;
 		uns32 exp_time;           /* exposure time in multiples of 1 us */
+		uns16 clear_cycles;
 
 		double test_min_exp_time;
 	} ccd;
@@ -87,12 +88,10 @@ extern RS_SPEC10 *rs_spec10, rs_spec10_prep, rs_spec10_test, rs_spec10_exp;
 #endif
 
 
-#define RS_SPEC10_TEST_TEMP      120.0
+#define RS_SPEC10_TEST_TEMP      180.0    /* in Kelvin */
 
 #define HARDWARE_BINNING         0
 #define SOFTWARE_BINNING         1
-
-#define CCD_EXPOSURE_RESOLUTION   1.0e-6       /*   1 us */
 
 
 /* Functions from rs_spec10.c */
@@ -108,6 +107,7 @@ Var *ccd_camera_roi( Var *v );
 Var *ccd_camera_binning( Var *v );
 Var *ccd_camera_binning_method( Var *v );
 Var *ccd_camera_exposure_time( Var *v );
+Var *ccd_camera_clear_cycles( Var *v );
 Var *ccd_camera_get_picture( Var *v );
 Var *ccd_camera_get_spectrum( Var *v );
 Var *ccd_camera_temperature( Var *v );
@@ -115,6 +115,7 @@ Var *ccd_camera_temperature( Var *v );
 /* Functions from rs_spec10_int.c */
 
 void rs_spec10_init_camera( void );
+void rs_spec10_clear_cycles( uns16 cycles );
 uns16 *rs_spec10_get_pic( uns32 *size );
 double rs_spec10_get_temperature( void );
 double rs_spec10_set_temperature( double temp );
