@@ -123,13 +123,22 @@ Var *pulser_command( Var *v );
 
 /* typedefs of structures needed in the module */
 
-typedef struct {                 /* needed in phase setup */
+typedef struct PHS PHS;
+typedef struct FUNCTION FUNCTION;
+typedef struct POD POD;
+typedef struct CHANNEL CHANNEL;
+typedef struct PULSE PULSE;
+typedef struct BLOCK BLOCK;
+typedef struct DG2020 DG2020;
+
+
+struct PHS {                 /* needed in phase setup */
 	int var[ 4 ][ 2 ];
 	bool is_var[ 4 ][ 2 ];
-} PHS;
+};
 
 
-typedef struct FUNCTION {
+struct FUNCTION {
 
 	int self;                  /* the functions number */
 	const char *name;
@@ -139,8 +148,8 @@ typedef struct FUNCTION {
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
 
-	struct POD *pod;           /* points to the pod assigned to the function */
-	struct POD *pod2;          /* points to the second pod assigned to the
+	POD *pod;                  /* points to the pod assigned to the function */
+	POD *pod2;                 /* points to the second pod assigned to the
 								    function (phase functions only) */
 
 	PHS phs;                   /* phase functions only: how to translate
@@ -149,20 +158,19 @@ typedef struct FUNCTION {
 
 	int num_channels;          /* number of channels assigned to function */
 	int num_needed_channels;   /* number of channels really needed */
-	struct CHANNEL *channel[ MAX_CHANNELS ];
+	CHANNEL *channel[ MAX_CHANNELS ];
 
 	int num_pulses;            /* number of pulses assigned to the function */
 	int num_active_pulses;     /* number of pulses currently in use */
-	struct PULSE **pulses;     /* list of pulse pointers */
+	PULSE **pulses;            /* list of pulse pointers */
 
 	bool needs_phases;         /* set if phase cycling is needed */
 
 	int next_phase;
-	struct FUNCTION *phase_func;  /* for phase functions here is stored which
-									 function it's going to take care of while
-									 for normal functions it's a pointer to the
-									 phase function responsible for it. */
-
+	FUNCTION *phase_func;      /* for phase functions here is stored which
+								  function it's going to take care of while
+								  for normal functions it's a pointer to the
+								  phase function responsible for it. */
 	Ticks psd;                 /* delay due to phase switches (only needed */
 	bool is_psd;               /* for the phase functions) */
 
@@ -179,31 +187,84 @@ typedef struct FUNCTION {
 	bool is_high_level;
 	bool is_low_level;
 
-} FUNCTION;
+};
 
 
-typedef struct POD {
+struct POD {
 	int self;
 	FUNCTION *function;
-} POD;
+};
 
 
-typedef struct CHANNEL {
+struct CHANNEL {
 	int self;
 	FUNCTION *function;
-} CHANNEL;
+};
 
 
-typedef struct {
+struct PULSE {
+	long num;                /* number of the pulse (pulses used for realize
+								phase cycling have negative, normal pulses
+								positive numbers */
+	bool is_active;          /* set if the pulse is really used */
+	bool was_active;
+	bool has_been_active;    /* used to find useless pulses */
+
+	PULSE *next;
+	PULSE *prev;
+
+	FUNCTION *function;      /* function the pulse is associated with */
+
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
+	Ticks dlen;
+
+	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
+								(or NULL if none is to be used) */
+
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
+	bool is_len;
+	bool is_dpos;
+	bool is_dlen;
+
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
+	Ticks initial_dpos;
+	Ticks initial_dlen;
+
+	bool initial_is_pos;     /* property has initially been set */
+	bool initial_is_len;
+	bool initial_is_dpos;
+	bool initial_is_dlen;
+
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
+
+	bool is_old_pos;
+	bool is_old_len;
+
+	CHANNEL *channel;        /* channel the pulse belongs to - only needed
+								for phase pulses */
+
+	PULSE *for_pulse;        /* only for phase cycling pulses: the pulse the
+								phase cycling pulse is used for */
+
+	bool needs_update;       /* set if the pulses properties have been changed
+								in test run or experiment */
+};
+
+
+struct BLOCK {
 	bool is_used;
 	char blk_name[ 9 ];
 	Ticks start;
 	long repeat;
-} BLOCK;
+};
 
 
-typedef struct
-{
+struct DG2020 {
 	int device;              /* GPIB number of the device */
 
 	double timebase;         /* time base of the digitizer */
@@ -249,66 +310,7 @@ typedef struct
 
 	FILE *show_file;
 	FILE *dump_file;
-
-} DG2020;
-
-
-typedef struct PULSE {
-
-	long num;                /* number of the pulse (pulses used for realize
-								phase cycling have negative, normal pulses
-								positive numbers */
-
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
-
-	struct PULSE *next;
-	struct PULSE *prev;
-
-	FUNCTION *function;      /* function the pulse is associated with */
-
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
-
-	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
-								(or NULL if none is to be used) */
-
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
-
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
-
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
-
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
-
-	bool is_old_pos;
-	bool is_old_len;
-
-	CHANNEL *channel;        /* channel the pulse belongs to - only needed
-								for phase pulses */
-
-	struct PULSE *for_pulse; /* only for phase cycling pulses: the pulse the
-								phase cycling pulse is used for */
-
-	bool needs_update;       /* set if the pulses properties have been changed
-								in test run or experiment */
-
-} PULSE;
-
+};
 
 
 /* Here the global variables of the module are declared */

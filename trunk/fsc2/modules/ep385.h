@@ -139,8 +139,15 @@ Var *pulser_maximum_pattern_length( Var *v );
 
 /* typedefs of structures needed in the module */
 
+typedef struct FUNCTION FUNCTION;
+typedef struct CHANNEL CHANNEL;
+typedef struct PULSE PULSE;
+typedef struct PHASE_SETUP PHASE_SETUP;
+typedef struct PULSE_PARAMS PULSE_PARAMS;
+typedef struct EP385 EP385;
 
-typedef struct FUNCTION {
+
+struct FUNCTION {
 	int self;                  /* the functions number */
 	const char *name;          /* name of function */
 	bool is_used;              /* set if the function has been declared in
@@ -148,16 +155,15 @@ typedef struct FUNCTION {
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
 	int num_channels;
-	struct CHANNEL *channel[ MAX_CHANNELS ];
-							   /* channels assigned to function */
+	CHANNEL *channel[ MAX_CHANNELS ];  /* channels assigned to function */
 
 	int num_pulses;            /* number of pulses assigned to the function */
-	struct PULSE **pulses;     /* list of pulse pointers */
+	PULSE **pulses;            /* list of pulse pointers */
 
-	struct PULSE ***pl;        /* array of currently active pulse lists */
-	struct PULSE ***pm;        /* (channel x phases) pulse list matrix */
+	PULSE ***pl;               /* array of currently active pulse lists */
+	PULSE ***pm;               /* (channel x phases) pulse list matrix */
 
-	struct PHASE_SETUP *phase_setup;
+	PHASE_SETUP *phase_setup;
 	int next_phase;
 	int pc_len;                /* length of the phase cycle */
 
@@ -179,18 +185,17 @@ typedef struct FUNCTION {
 	Ticks min_right_twt_padding;
 
 	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
+};
 
-} FUNCTION;
 
-
-typedef struct {
+struct PULSE_PARAMS {
 	Ticks pos;
 	Ticks len;
-	struct PULSE *pulse;
-} PULSE_PARAMS;
+	PULSE *pulse;
+};
 
 
-typedef struct CHANNEL {
+struct CHANNEL {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
@@ -199,19 +204,77 @@ typedef struct CHANNEL {
 	int old_num_active_pulses;
 	PULSE_PARAMS *pulse_params;
 	PULSE_PARAMS *old_pulse_params;
-} CHANNEL;
+};
 
 
-typedef struct PHASE_SETUP {
+struct PULSE {
+	long num;                /* (positive) number of the pulse */
+
+	bool is_active;          /* set if the pulse is really used */
+	bool was_active;
+	bool has_been_active;    /* used to find useless pulses */
+
+	PULSE *next;
+	PULSE *prev;
+
+	FUNCTION *function;      /* function the pulse is associated with */
+
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
+	Ticks dlen;
+
+	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
+								(or NULL if none is to be used) */
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
+	bool is_len;
+	bool is_dpos;
+	bool is_dlen;
+
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
+	Ticks initial_dpos;
+	Ticks initial_dlen;
+
+	bool initial_is_pos;     /* property has initially been set */
+	bool initial_is_len;
+	bool initial_is_dpos;
+	bool initial_is_dlen;
+
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
+
+	bool is_old_pos;
+	bool is_old_len;
+
+	bool needs_update;       /* set if the pulses properties have been changed
+								in test run or experiment */
+
+	bool left_shape_warning; /* stores if for pulse the left or right shape */
+	bool right_shape_warning;/* padding couldn't be set correctly */
+	PULSE *sp;               /* for normal pulses reference to related shape
+								pulse (if such exists), for shape pulses
+								reference to pulse it is associated with */
+
+	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
+	bool right_twt_warning;  /* padding couldn't be set correctly */
+	PULSE *tp;               /* for normal pulses reference to related TWT
+								pulse (if such exists), for TWT pulses
+								reference to pulse it is associated with */
+};
+
+
+struct PHASE_SETUP {
 	bool is_defined;
 	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	CHANNEL *channels[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	FUNCTION *function;
-} PHASE_SETUP;
+};
 
 
-typedef struct {
+struct EP385 {
 	int device;              /* GPIB number of the device */
 
 	double timebase;         /* time base of the digitizer */
@@ -268,67 +331,7 @@ typedef struct {
 	bool is_minimum_twt_pulse_distance;
 	long twt_distance_warning;
 
-} EP385;
-
-
-typedef struct PULSE {
-
-	long num;                /* (positive) number of the pulse */
-
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
-
-	struct PULSE *next;
-	struct PULSE *prev;
-
-	FUNCTION *function;      /* function the pulse is associated with */
-
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
-
-	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
-								(or NULL if none is to be used) */
-
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
-
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
-
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
-
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
-
-	bool is_old_pos;
-	bool is_old_len;
-
-	bool needs_update;       /* set if the pulses properties have been changed
-								in test run or experiment */
-
-	bool left_shape_warning; /* stores if for pulse the left or right shape */
-	bool right_shape_warning;/* padding couldn't be set correctly */
-	struct PULSE *sp;        /* for normal pulses reference to related shape
-								pulse (if such exists), for shape pulses
-								reference to pulse it is associated with */
-
-	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
-	bool right_twt_warning;  /* padding couldn't be set correctly */
-	struct PULSE *tp;        /* for normal pulses reference to related TWT
-								pulse (if such exists), for TWT pulses
-								reference to pulse it is associated with */
-} PULSE;
+};
 
 
 #if defined( EP385_MAIN )

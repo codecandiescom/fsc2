@@ -135,34 +135,44 @@ Var *pulser_command( Var *v );
 
 /* typedefs of structures needed in the module */
 
-typedef struct {
+typedef struct PULSE_PARAMS PULSE_PARAMS; 
+typedef struct PULSE PULSE;
+typedef struct FUNCTION FUNCTION;
+typedef struct PHASE_SETUP PHASE_SETUP;
+typedef struct CHANNEL CHANNEL;
+typedef struct POD POD;
+typedef struct BLOCK BLOCK;
+typedef struct DG2020 DG2020;
+
+
+struct PULSE_PARAMS {
 	Ticks pos;
 	Ticks len;
-	struct PULSE *pulse;
-} PULSE_PARAMS;
+	PULSE *pulse;
+};
 
 
-typedef struct _F_ {
+struct FUNCTION {
 	int self;                   /* the functions number */
 	const char *name;           /* name of function */
 	bool is_used;               /* set if the function has been declared in
 								   the ASSIGNMENTS section */
 
-	struct POD *pod[ MAX_PODS_PER_FUNC ];   /* list of pointers to pods 
-											   assigned to the function */
+	POD *pod[ MAX_PODS_PER_FUNC ];   /* list of pointers to pods 
+										assigned to the function */
 	int num_pods;
 
 	int num_channels;           /* number of channels assigned to function */
 	int num_needed_channels;    /* number of channels really needed */
-	struct CHANNEL *channel[ MAX_CHANNELS ];  /* list of pointers to channels
-											 assigned to the function */
+	CHANNEL *channel[ MAX_CHANNELS ];  /* list of pointers to channels
+										  assigned to the function */
 	bool need_constant;
 
 	int num_pulses;             /* number of pulses assigned to the function */
 	int num_active_pulses;      /* number of pulses currenty in use */
-	struct PULSE **pulses;      /* list of pulse pointers */
+	PULSE **pulses;             /* list of pulse pointers */
 
-	struct PHASE_SETUP *phase_setup;
+	PHASE_SETUP *phase_setup;
 	int next_phase;
 	int pc_len;                 /* length of the phase cycle */
 
@@ -180,7 +190,7 @@ typedef struct _F_ {
 	bool is_low_level;          /* specified for the function */
 
 	bool *pm;
-	struct CHANNEL **pcm;       /* phase matrix */
+	CHANNEL **pcm;              /* phase matrix */
 
 	PULSE_PARAMS *pulse_params;
 	int num_params;
@@ -200,43 +210,106 @@ typedef struct _F_ {
 										what was requested) */
 
 	long max_duty_warning;   /* number of times TWT duty cycle was exceeded */
+};
 
-} FUNCTION;
 
-
-typedef struct POD {
+struct POD {
 	int self;                   /* pod number */
 	FUNCTION *function;         /* the function the pod is assigned to */
-} POD;
+};
 
 
-typedef struct CHANNEL {
+struct CHANNEL {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
     char *old_d;
     char *new_d;
-} CHANNEL;
+};
 
 
-typedef struct {
+struct PULSE {
+	long num;                /* number of the pulse (automatically created
+								pulses have negative, normal pulses
+								positive numbers */
+	bool is_active;          /* set if the pulse is really used */
+	bool was_active;
+	bool has_been_active;    /* used to find useless pulses */
+
+	PULSE *next;
+	PULSE *prev;
+
+	FUNCTION *function;      /* function the pulse is associated with */
+
+	Ticks pos;               /* current position, length, position change */
+	Ticks len;               /* and length change of pulse (in units of the */
+	Ticks dpos;              /* pulsers time base) */
+	Ticks dlen;
+
+	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
+								(or NULL if none is to be used) */
+
+	bool is_function;        /* flags that are set when the corresponding */
+	bool is_pos;             /* property has been set */
+	bool is_len;
+	bool is_dpos;
+	bool is_dlen;
+
+	Ticks initial_pos;       /* position, length, position change and length */
+	Ticks initial_len;       /* change at the start of the experiment */
+	Ticks initial_dpos;
+	Ticks initial_dlen;
+
+	bool initial_is_pos;     /* property has initially been set */
+	bool initial_is_len;
+	bool initial_is_dpos;
+	bool initial_is_dlen;
+
+	Ticks old_pos;           /* position and length of pulse before a change */
+	Ticks old_len;           /* is applied */
+
+	bool is_old_pos;
+	bool is_old_len;
+
+	CHANNEL **channel;
+
+	bool needs_update;       /* set if the pulses properties have been
+								changed in test run or experiment */
+
+	bool left_shape_warning; /* stores if for pulse the left or right shape */
+	bool right_shape_warning;/* padding couldn't be set correctly */
+	PULSE *sp;               /* for normal pulses reference to related shape
+								pulse (if such exists), for shape pulses
+								reference to pulse it is associated with */
+
+	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
+	bool right_twt_warning;  /* padding couldn't be set correctly */
+	PULSE *tp;               /* for normal pulses reference to related TWT
+								pulse (if such exists), for TWT pulses
+								reference to pulse it is associated with */
+	PULSE_PARAMS *pp;
+	PULSE_PARAMS *old_pp;
+};
+
+
+struct  BLOCK {
 	bool is_used;
 	char blk_name[ 9 ];
 	Ticks start;
 	long repeat;
-} BLOCK;
+};
 
 
-typedef struct PHASE_SETUP {
+struct PHASE_SETUP {
 	bool is_defined;
 	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	POD *pod[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	FUNCTION *function;
-} PHASE_SETUP;
+};
 
 
-typedef struct {
+struct DG2020 {
 	int device;              /* GPIB number of the device */
 
 	double timebase;         /* time base of the digitizer */
@@ -307,73 +380,7 @@ typedef struct {
 
 	PHASE_SETUP *dummy_phase_setup;
 	int num_dummy_phase_setups;
-
-} DG2020;
-
-
-typedef struct PULSE {
-
-	long num;                /* number of the pulse (automatically created
-								pulses have negative, normal pulses
-								positive numbers */
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
-
-	struct PULSE *next;
-	struct PULSE *prev;
-
-	FUNCTION *function;      /* function the pulse is associated with */
-
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
-
-	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
-								(or NULL if none is to be used) */
-
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
-
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
-
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
-
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
-
-	bool is_old_pos;
-	bool is_old_len;
-
-	CHANNEL **channel;
-
-	bool needs_update;       /* set if the pulses properties have been
-								changed in test run or experiment */
-
-	bool left_shape_warning; /* stores if for pulse the left or right shape */
-	bool right_shape_warning;/* padding couldn't be set correctly */
-	struct PULSE *sp;        /* for normal pulses reference to related shape
-								pulse (if such exists), for shape pulses
-								reference to pulse it is associated with */
-
-	bool left_twt_warning;   /* stores if for pulse the left or right TWT */
-	bool right_twt_warning;  /* padding couldn't be set correctly */
-	struct PULSE *tp;        /* for normal pulses reference to related TWT
-								pulse (if such exists), for TWT pulses
-								reference to pulse it is associated with */
-	PULSE_PARAMS *pp;
-	PULSE_PARAMS *old_pp;
-} PULSE;
+};
 
 
 /* Here the global variables of the module are declared */
