@@ -169,31 +169,31 @@ name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
-All magnet power supplies except the magnet used for the @w{360 GHz}
-don't really do continuous sweeps but the field current is stepped. Thus
-normally no sweep rates are used but field (or current, see below) step
-sizes are needed when defining a sweep. The only exception is the power
-supply for the Oxford magnet, here continuous sweeps can be done and
-sweep reates must be specified.
+All magnet power supplies (except the one used with the Oxford magnet
+for the @w{360 GHz} spectrometer) don't do continuous sweeps but instead
+the field current is stepped. Thus not sweep rates are used but field
+(or current, see below) step sizes are needed in defining a sweep. The
+only exception is the power supply for the Oxford magnet, here only
+continuous sweeps can be done and sweep rates must be specified.
 
 If a @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
 start of the experiment, i.e.@: it will sweep the field up and down for
 some time, so please be patient. Also see below on how to reduce the
-amount of time spent with field calibration.
+amount of time spent for field calibration.
 
-The Keithley 228A power supply is used for the sweep coil of Berlin
+The Keithley 228A power supply is used for the sweep coil of the Berlin
 W-band magnet. Because there is no well-defined relationship between the
-current produced by the power supply and the total magnetic field and
-because the magnetic field can't be measured directly during
-measurements for this device the following functions expect arguments in
-current units (i.e. Ampere) instead of field units (i.e. Gauss) as the
-other devices.
+current produced by the power supply and the magnetic field and because
+the magnetic field can't be measured directly during measurements, for
+this device the following functions expect arguments in current units
+(i.e. Ampere) instead of field units (i.e. Gauss) as for the other
+devices.
 
-The same holds for the magnet used for the @w{360 GHz} spectrometer.
-Here also no fixed relation between the current and the field can be
-given, so also for this module all values have to be given in current
-instead of field units.
+It's similar for the magnet used for the @w{360 GHz} spectrometer:
+there's also no fixed relation between the current and the field, so
+also for this module all values have to be given in current instead of
+field units.
 
 Because the normal current resolution of the Keithley power supply is
 not sufficient an additional device is needed supplying DC voltages in
@@ -202,10 +202,10 @@ power supply. Currently the DAC ports of one of the Stanford Research
 lock-in amplifiers (SR510, SR530, SR810 or SR830)) are used for this
 purpose. Which of the lock-ins is used can be specified during
 compilation by an entry in the configuration file for the Keithley
-driver, usually the @code{SR510} lock-in amplifier. Alternatively, if no
-lock-in has been set in the configuration file the @code{keithley228a}
-module will assume that the first lock-in listed in the devices section
-is to be used.
+driver, usually it's the @code{SR510} lock-in amplifier. Alternatively,
+if no lock-in has been set in the configuration file the
+@code{keithley228a} module will assume that the very first lock-in
+listed in the devices section is to be used.
 
 In the configuration file it also can be defined which of the DAC ports
 of the lock-in amplifiers is to be used. If not defined, port 6 will be
