@@ -7,9 +7,15 @@
 
 #define DEVICE_NAME "HP8647A"      /* compare entry in /etc/gpib.conf ! */
 
+/* On Chris request the minimum attenuation was set to -3 dB. In principle,
+   minimum attenuations of up to +10 dB are possible, but at attenuations of
+   less than -3 dB the maximum input voltage of both amplifiers  of 1 V is
+   reached and at higher input levels they go into saturation */
+
+
 #define MIN_FREQ        2.5e5            /* 250 kHz  */
 #define MAX_FREQ        1.0e9            /* 1000 MHz */
-#define MIN_ATTEN       10.0             /* +10 db   */
+#define MIN_ATTEN        -3.0
 #define MAX_ATTEN      -136.0            /* -136 db  */
 #define ATT_RESOLUTION  0.1
 
