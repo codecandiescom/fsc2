@@ -413,7 +413,7 @@ static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	/* Notice the nice irregularity in the DEF and ADD command: for DEF we
 	   need the block name without quotes while in ADD we need quotes...*/
 
-	sprintf( dummy, "%ld,%s", block[ 0 ].start, block[ 0 ].blk_name );
+	sprintf( dummy, "%ld,%s\n", block[ 0 ].start, block[ 0 ].blk_name );
 	l = strlen( dummy );
 	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );

@@ -795,7 +795,7 @@ double sr530_get_sens( void )
 
 void sr530_set_sens( int Sens )
 {
-	char buffer[10];
+	char buffer[ 10 ];
 
 
 	/* Coding of sensitivity commands work just the other way round as
@@ -921,7 +921,7 @@ void sr530_set_tc( int TC )
 
 double sr530_get_phase( void )
 {
-	char buffer[20];
+	char buffer[ 20 ];
 	long length = 20;
 	double phase;
 
@@ -953,7 +953,7 @@ double sr530_get_phase( void )
 
 double sr530_set_phase( double phase )
 {
-	char buffer[20];
+	char buffer[ 20 ];
 
 
 	sprintf( buffer, "P%.2f\n\r", phase );
