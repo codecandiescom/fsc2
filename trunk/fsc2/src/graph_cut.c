@@ -1947,12 +1947,12 @@ static void cut_make_scale( Canvas *c, int coord )
 		if ( CG.cut_dir == X )
 		{
 			r_coord = X;
-			r_scale = ( double ) c->h / ( double ) ( G.nx - 1 );
+			r_scale = ( double ) ( c->h - 1 ) / ( double ) ( G.nx - 1 );
 		}
 		else
 		{
 			r_coord = Y;
-			r_scale = ( double ) c->h / ( double ) ( G.ny - 1 );
+			r_scale = ( double ) ( c->h - 1 ) / ( double ) ( G.ny - 1 );
 		}
 	}
 

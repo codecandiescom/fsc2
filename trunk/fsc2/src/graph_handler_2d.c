@@ -286,8 +286,8 @@ static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  keymask & ShiftMask )
 						cut_show( X, lround(
 							( double ) ( c->box_x + c->box_w )
-							/ G.curve_2d[ G.active_curve]->s2d[ X ]
-							- G.curve_2d[ G.active_curve]->shift[ X ] ) );
+							/ G.curve_2d[ G.active_curve ]->s2d[ X ]
+							- G.curve_2d[ G.active_curve ]->shift[ X ] ) );
 					break;
 
 				case 2 :                       /* in y-axis window */
