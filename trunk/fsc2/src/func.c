@@ -309,7 +309,9 @@ int func_exists( const char *name )
 
 	fn = T_strdup( name );
 
-	/* If the function name ends in "#1" strip it off */
+	/* If the function name ends in "#1" strip it off, the function for
+	   the first device of a generic type is stored in the list of functions
+	   without it.*/
 
 	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
 		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
@@ -412,7 +414,9 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 
 	fn = T_strdup( name );
 
-	/* If the function name ends in "#1" strip it off */
+	/* If the function name ends in "#1" strip it off, the function for
+	   the first device of a generic type is stored in the list of functions
+	   without it.*/
 
 	if ( ( hp = strrchr( fn, '#' ) ) != NULL &&
 		 * ( hp + 1 ) == '1' && * ( hp + 2 ) == '\0' )
