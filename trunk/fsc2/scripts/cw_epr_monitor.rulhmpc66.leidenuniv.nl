@@ -46,7 +46,7 @@ Draw_While_Stopped = 0;
 Pause_State = 0;
 TB_Changed;
 I, J;
-dt, new_dt, st = 0.0;
+st = 0.0;
 
 /* Some variables to make the program  easier to read */
 
@@ -132,7 +132,7 @@ Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 hide_toolbox( "OFF" );
 
 I = 0;
-dt = delta_time( );
+delta_time( );
 
 FOREVER {
 
@@ -170,9 +170,7 @@ FOREVER {
 
 	IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
 
-	    new_dt = delta_time( );
-    	st += new_dt - dt;
-		dt = new_dt;
+    	st += delta_time( );
 
 		WHILE st >= 1 / acq_rate {
 			I += 1;
@@ -198,7 +196,7 @@ FOREVER {
 			}
 
 			lockin_auto_acquisition( "ON" );
-			dt = delta_time( );
+			delta_time( );
 			st = 0.0 s;
 		}
 
@@ -218,7 +216,7 @@ FOREVER {
 			}
 
 			lockin_auto_acquisition( "ON" );
-			dt = delta_time( );
+			delta_time( );
 			st = 0.0 s;
 		}
 
@@ -236,7 +234,7 @@ FOREVER {
 
 			IF Draw_While_Stopped {
 				lockin_auto_acquisition( "ON" );
-				dt = delta_time( );
+				delta_time( );
 				st = 0.0 s;
 			}
 		}
@@ -264,7 +262,7 @@ FOREVER {
 
 					IF Draw_While_Stopped {
 						lockin_auto_acquisition( "ON" );
-						dt = delta_time( );
+						delta_time( );
 						st = 0.0 s;
 					}
 				}
@@ -296,7 +294,7 @@ FOREVER {
 
 					IF Draw_While_Stopped {
 						lockin_auto_acquisition( "ON" );
-						dt = delta_time( );
+						delta_time( );
 						st = 0.0 s;
 					}
 				}
@@ -328,7 +326,7 @@ FOREVER {
 
 					IF Draw_While_Stopped {
 						lockin_auto_acquisition( "ON" );
-						dt = delta_time( );
+						delta_time( );
 						st = 0.0 s;
 					}
 				}
@@ -352,7 +350,7 @@ FOREVER {
 		IF ! Pause_State & ( Sweep_State != STOPPED | Draw_While_Stopped ) {
 			lockin_auto_acquisition( "OFF" );
 			lockin_auto_acquisition( "ON" );
-			dt = delta_time( );
+			delta_time( );
 			st = 0.0 s;
 		}
 	}
@@ -366,7 +364,7 @@ FOREVER {
 			}
 		} ELSE IF Sweep_State != STOPPED | Draw_While_Stopped {
 			lockin_auto_acquisition( "ON" );
-			dt = delta_time( );
+			delta_time( );
 			st = 0.0 s;
 		}
 
