@@ -412,6 +412,7 @@ bool dg2020_update_data( void )
 	dg2020_command( "DATA:UPD\n" );
 	dg2020_command( "*OPC\n" );
 
+/*
 	while( 1 )
 	{
 		dg2020_command( "*ESE\n" );
@@ -427,6 +428,7 @@ bool dg2020_update_data( void )
 			break;
 		usleep( 50000 );
 	}
+*/
 
 	return OK;
 }
