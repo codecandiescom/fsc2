@@ -20,7 +20,7 @@ html: fsc2.html
 
 fsc2.html: $(docs)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
-	sed -e 's/fsc2_[0-9]\+/fsc2_1/' fsc2_frame.html > fsc2_frame.x
+	sed -e 's/fsc2_[0-9]\+/fsc2/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
 
 ps: fsc2.ps

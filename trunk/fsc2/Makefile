@@ -125,6 +125,7 @@ install:
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
+	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
