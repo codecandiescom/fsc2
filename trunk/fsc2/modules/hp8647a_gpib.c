@@ -66,10 +66,10 @@ bool hp8647a_init( const char *name )
 	   synthesizer for its currents setting */
 
 	if ( hp8647a.mod_type_is_set )
-		hp8647a_set_mod_state( hp8647a.mod_type, SET );
+		hp8647a_set_mod_type( hp8647a.mod_type );
 	else 
 	{
-		if ( ( hp8647a.mod_type = hp8647a_get_mod_states( ) ) != UNDEFINED )
+		if ( ( hp8647a.mod_type = hp8647a_get_mod_type( ) ) != UNDEFINED )
 			hp8647a.mod_type_is_set = SET;
 	}
 
@@ -202,7 +202,7 @@ double hp8647a_get_attenuation( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-bool hp8647a_set_mod_state( int type, bool state )
+int hp8647a_set_mod_type( int type )
 {
 	char cmd[ 100 ];
 	const char *types[ ] = { "FM", "AM", "PM" };
@@ -214,42 +214,19 @@ bool hp8647a_set_mod_state( int type, bool state )
 	/* The manual is not really clear about this but it looks as if we
 	   have to make sure that only one modulation type is switched on... */
 
-	if ( state == SET )
-		for ( i = 1; i < NUM_MOD_TYPES; i++ )
-		{
-			sprintf( cmd, "%s:STAT OFF", 
-					 types[ ( type + i ) % NUM_MOD_TYPES ] );
-			if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
-				hp8647a_comm_failure( );
-		}
+	for ( i = 1; i < NUM_MOD_TYPES; i++ )
+	{
+		sprintf( cmd, "%s:STAT OFF", 
+				 types[ ( type + i ) % NUM_MOD_TYPES ] );
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
+			hp8647a_comm_failure( );
+	}
 
-	sprintf( cmd, "%s:STAT %s", types[ type ], state ? "ON" : "OFF" );
+	sprintf( cmd, "%s:STAT ON", types[ type ] );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8647a_comm_failure( );
 
-	return state;
-}
-
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-bool hp8647a_get_mod_state( int type )
-{
-	const char *types[ ] = { "FM", "AM", "PM" };
-	char cmd[ 100 ];
-	char buffer[ 100 ];
-	long length = 100;
-
-
-	assert( type >= 0 && type < NUM_MOD_TYPES );
-	sprintf( cmd, "%s:STAT?", types[ type ] );
-
-	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
-		hp8647a_comm_failure( );
-
-	return buffer[ 0 ] == '1';
+	return type;
 }
 
 
@@ -259,7 +236,7 @@ bool hp8647a_get_mod_state( int type )
 /* or -1 if none is switched on.                                */
 /*--------------------------------------------------------------*/
 
-int hp8647a_get_mod_states( void )
+int hp8647a_get_mod_type( void )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
@@ -350,13 +327,58 @@ int hp8647a_set_mod_source( int type, int source )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
+int hp8647a_get_mod_source( int type )
+{
+	const char *types[ ] = { "FM", "AM", "PM" };
+	char cmd[ 100 ];
+	char buffer[ 100 ];
+	long length;
+	int source;
+	long freq;
+
+
+	assert( type >= 0 && type < NUM_MOD_TYPES );
+
+	sprintf( cmd, "%s:SOUR?", types[ type ] );
+	length = 100;
+	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+		hp8647a_comm_failure( );
+
+	source = buffer[ 0 ] == 'I' ? 0 : 1;
+
+	length = 0;
+	if ( source == 0 )
+	{
+		sprintf( cmd, "%s:INT:FREQ?", types[ type ] );
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+			hp8647a_comm_failure( );
+		freq = lround( T_atof ( buffer ) );
+		source = freq == 400 ? MOD_SOURCE_1k : MOD_SOURCE_400;
+	}
+	else
+	{
+		sprintf( cmd, "%s:EXT:COUP?", types[ type ] );
+		if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+			hp8647a_comm_failure( );
+		source = buffer[ 0 ] == 'A' ? MOD_SOURCE_AC : MOD_SOURCE_DC;
+	}
+
+	return source;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 double hp8647a_set_mod_ampl( int type, double ampl )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
 
 
-	assert( type >= 0 && type < NUM_MOD_TYPES );
 	assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	if ( ampl < 0.0 )
@@ -438,6 +460,27 @@ double hp8647a_set_mod_ampl( int type, double ampl )
 		hp8647a_comm_failure( );
 
 	return ampl;
+}
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
+double hp8647a_get_mod_ampl( int type )
+{
+	const char *cmds[ ] = { "FM:DEV?", "AM:DEPT?", "PM:DEV?" };
+	char buffer[ 100 ];
+	long length = 100;
+
+
+	assert( type >= 0 && type < NUM_MOD_TYPES );
+
+	if ( gpib_write( hp8647a.device, cmds[ type ], strlen( cmds[ type ] ) )
+		 == FAILURE ||
+		 gpib_read( hp8647a.device, buffer, &length ) == FAILURE )
+		hp8647a_comm_failure( );
+
+	return T_atof( buffer );
 }
 
 
