@@ -30,30 +30,6 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-/* List of all timebases (in s/div) - currently only timebases that can be
-   used in single shot mode are supported (i.e. neither random interleaved
-   sampling nor roll mode) */
-
-static double tb[ 21 ] = {                      50.0e-9,
-						   100.0e-9, 200.0e-9, 500.0e-9,
-							 1.0e-6,   2.0e-6,   5.0e-6,
-							10.0e-9,  20.0e-9,  50.0e-9,
-						   100.0e-6, 200.0e-6, 500.0e-6,
-							 1.0e-3,   2.0e-3,   5.0e-3,
-							10.0e-3,  20.0e-3,  50.0e-3,
-						   100.0e-3, 200.0e-3 };
-
-/* List of the corresponding sample rates, i.e. the time/point */
-
-static double sr[ 21 ] = {						10.0e-9,
-							10.0e.9,  10.0e.9,  10.0e.9,
-							10.0e.9,  10.0e.9,  10.0e.9,
-							10.0e.9,  10.0e.9,  20.0e-9,
-							40.0e-9,  80.0e-9, 200.0e-9,
-						   400.0e-9, 800.0e-9,   2.0e-6,
-							 4.0e-6,   8.0e-6,  20.0e-6,
-							40.0e-6,  80.0e-6 };
-
 
 
 /*******************************************/
@@ -88,7 +64,7 @@ int lecroy9400_init_hook( void )
 
 	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
 		lecroy9400.is_sens[ i ] = UNSET;
-	for ( i = LECROY9400_MATH1; i <= LECROY9400_REF4; i++ )
+	for ( i = LECROY9400_MEM_C; i <= LECROY9400_FUNC_F; i++ )
 	{
 		lecroy9400.is_sens[ i ] = SET;
 		lecroy9400.sens[ i ] = 1.0;
@@ -111,6 +87,7 @@ int lecroy9400_exp_hook( void )
 	   we need this when starting the same experiment again... */
 
 	lecroy9400_store.is_timebase = lecroy9400.is_timebase;
+	lecroy9400_store.tb_index    = lecroy9400.tb_index;
 	lecroy9400_store.timebase    = lecroy9400.is_timebase;
 
 	lecroy9400_store.is_num_avg  = lecroy9400.is_num_avg;
@@ -124,8 +101,6 @@ int lecroy9400_exp_hook( void )
 
 	lecroy9400_store.data_source = lecroy9400.data_source;
 	lecroy9400_store.meas_source = lecroy9400.meas_source;
-
-	lecroy9400_store.lock_state  = lecroy9400.lock_state;
 
 	for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
 	{
@@ -163,7 +138,7 @@ int lecroy9400_end_of_exp_hook( void )
 	lecroy9400.is_reacting      = UNSET;
 
 	lecroy9400.is_timebase      = lecroy9400_store.is_timebase;
-	lecroy9400.is_timebase      = lecroy9400_store.timebase;
+	lecroy9400.timebase         = lecroy9400_store.timebase;
 
 	lecroy9400_store.is_num_avg = lecroy9400.is_num_avg;
 	lecroy9400.num_avg          = lecroy9400_store.num_avg;
@@ -334,6 +309,7 @@ Var *digitizer_timebase( Var *v )
 		}
 
 		lecroy9400.timebase = lecroy9400_get_timebase( );
+		lecroy9400.tb_index = lecroy9400_get_tb_index( lecroy9400.timebase );
 		lecroy9400.is_timebase = SET;
 		return vars_push( FLOAT_VAR, lecroy9400.timebase );
 	}
@@ -365,7 +341,7 @@ Var *digitizer_timebase( Var *v )
 
 	/* Pick the allowed timebase nearest to the user supplied value */
 
-	for ( i = 0; i < 21; i++ )
+	for ( i = 0; i < TB_ENTRIES - 1; i++ )
 		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
 		{
 			TB = i +
@@ -388,23 +364,24 @@ Var *digitizer_timebase( Var *v )
 
 		if ( timebase < tb[ 0 ] )
 		{
-			timebase = tb[ 0 ];
+			TB = 0;
 			eprint( WARN, SET, "%s: Timebase of %s is too low, using %s "
 					"instead.\n", DEVICE_NAME, t,
-					lecroy9400_ptime( timebase ) );
+					lecroy9400_ptime( tb[ TB ] ) );
 		}
 		else
 		{
-		    timebase = tb[ 21 ];
+		    TB = TB_ENTRIES - 1;
 			eprint( WARN, SET, "%s: Timebase of %s is too large, using %s "
 					"instead.\n", DEVICE_NAME, t,
-					lecroy9400_ptime( timebase ) );
+					lecroy9400_ptime( tb[ TB ] ) );
 		}
 
 		T_free( t );
 	}
 
-	lecroy9400.timebase = timebase;
+	lecroy9400.timebase = tb[ TB ];
+	lecroy9400.tb_index = TB;
 	lecroy9400.is_timebase = SET;
 
 	return vars_push( FLOAT_VAR, lecroy9400.timebase );
@@ -422,7 +399,7 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "%s: Missing parameter in call of %s().\n",
+		eprint( FATAL, SET, "%s: No channel specified in call of %s().\n",
 				DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION )
 	}
@@ -466,7 +443,50 @@ Var *digitizer_sensitivity( Var *v )
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	sens = VALUE( v );
 
-	if ( sens < max_sens || sens > min_sens )
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous parameter%s in call of %s().\n",
+				DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	/* Check that the sensitivity setting is'nt out of range */
+
+	if ( sens < LECROY9400_MAX_SENS )
+	{
+		eprint( FATAL, SET, "%s: Sensitivity setting is out of range.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION )
+	}
+
+	if ( TEST_RUN )
+	{
+		if ( ! lecroy9400.is_coupl[ channel ] )
+			coupl = AC_1_MOHM;
+		else
+			coupl = lecroy9400.coupl[ channel ];
+	}
+	else
+	{
+		if ( ! lecroy9400.is_coupl[ channel ] )
+		{
+			coupl = lecroy9400.coupl[ channel ] =
+				lecroy9400_get_coupling( channel );
+			lecroy9400.is_coupl[ channel ] = SET;
+		}
+		else
+			coupl = lecroy9400.coupl[ channel ];
+	}
+
+	if ( coupl == DC_50_OHM && sens > LECROY9400_MIN_SENS_50 )
+	{
+		eprint( FATAL, SET, "%s: Sensitivity is out of range for the "
+				"current impedance of 50 Ohm for %s.\n", DEVICE_NAME,
+				Channel_Names[ channel ] );
+		THROW( EXCEPTION )
+	}
+	else if ( coupl != DC_50_OHM && sens > LECROY9400_MIN_SENS_1M )
 	{
 		eprint( FATAL, SET, "%s: Sensitivity setting is out of range.\n",
 				DEVICE_NAME );
@@ -478,10 +498,6 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( ! TEST_RUN )
 		lecroy9400_set_sens( channel, sens );
-
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous parameter in call of %s().\n",
-				DEVICE_NAME, Cur_Func );
 
 	return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
 }
@@ -497,17 +513,41 @@ Var *digitizer_num_averages( Var *v )
 
 	if ( v == NULL )
 	{
+		eprint( FATAL, SET, "%s: Insufficient number of arguments in call of "
+				"%s().\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	/* If there's no second argument this is a query and the argument is
+	   a channel number. Otherwise the first number is the number of averages,
+	   the second the channel number. */
+
+	if ( v->next == NULL )
+		vars_check( INT_VAR, v->next == NULL ? v : v->next );
+
+	channel = VALUE( v->next == NULL ? v : v->next );
+
+	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
+	{
+		eprint( FATAL, SET, "%s: Averaging can only be done with channel %s "
+				"and %s.\n", DEVICE_NAME, Channel_Names[ LECROY9400_FUNC_E ],
+				Channel_Names[ LECROY9400_FUNC_F ] );
+		THROW( EXCEPTION )
+	}
+
+	if ( v->next == NULL )                    /* Query form of call */
+	{
 		if ( TEST_RUN )
 		{
-			if ( lecroy9400.is_num_avg )
-				return vars_push( INT_VAR, lecroy9400.num_avg );
+			if ( lecroy9400.is_num_avg[ channel ] )
+				return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 			else
 				return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( lecroy9400.is_num_avg )
-				return vars_push( INT_VAR, lecroy9400.num_avg );
+			if ( lecroy9400.is_num_avg[ channel ] )
+				return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 
 			eprint( FATAL, SET, "%s: Function %s() with no argument can "
 					"only be used in the EXPERIMENT section.\n",
@@ -515,9 +555,10 @@ Var *digitizer_num_averages( Var *v )
 			THROW( EXCEPTION )
 		}
 
-		lecroy9400.num_avg = lecroy9400_get_num_avg( );
-		lecroy9400.is_num_avg = SET;
-		return vars_push( INT_VAR, lecroy9400.num_avg );
+		lecroy9400.num_avg[ channel ] = lecroy9400_get_num_avg( channel );
+		if ( lecroy9400.num_avg[ channel ] != -1 )
+			lecroy9400.is_num_avg[ channel ] = SET;
+		return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -529,12 +570,12 @@ Var *digitizer_num_averages( Var *v )
 				"of averages in %s().\n", DEVICE_NAME, Cur_Func );
 		num_avg = lrnd( v->val.dval );
 	}
-	vars_pop( v );
+	v = vars_pop( vars_pop( v ) );
 
 	if ( num_avg == 0 )
 	{
 		eprint( FATAL, SET, "%s: Can't do zero averages. If you want "
-				"to set sample mode specify 1 as number of averages.\n",
+				"single acqusitions specify 1 as number of averages.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION )
 	}
@@ -545,7 +586,27 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	lecroy9400.num_avg = num_avg;
+	/* Third argument must be the channel to be averaged, either CH1 or CH2 */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, SET, "%s: Channel to be averaged is missing in call of "
+				"%s().\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	vars_check( v, INT_VAR );
+
+	src_channel = v->val.lval;
+	if ( src_channel != LECROY9400_CH1 && src_channel != LECROY9400_CH2 )
+	{
+		eprint( FATAL, SET, "%s: Invalid source channel for averaging in "
+				"%s().\n", DEVICE_NAME, Cur_Func );
+		THROW( EXCEPTION )
+	}
+
+	lecroy9400.num_avg[ channel ] = num_avg;
+	lecroy9400.avg_src[ channel ] = src_channel;
 	if ( I_am == CHILD )
 		lecroy9400_set_num_avg( num_avg );
 	if ( ! TEST_RUN )                 // store value if in PREPARATIONS section
@@ -588,75 +649,13 @@ Var *digitizer_record_length( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-		{
-			if ( lecroy9400.is_rec_len )
-				return vars_push( INT_VAR, lecroy9400.rec_len );
-			else
-				return vars_push( INT_VAR, LECROY9400_TEST_REC_LEN );
-		}
-		else if ( I_am == PARENT )
-		{
-			if ( lecroy9400.is_rec_len )
-				return vars_push( INT_VAR, lecroy9400.rec_len );
+		return vars_push( INT_VAR, 32000 );
 
-			eprint( FATAL, SET, "%s: Function %s() with no argument can "
-					"only be used in the EXPERIMENT section.\n",
-					DEVICE_NAME, Cur_Func );
-			THROW( EXCEPTION )
-		}
+	eprint( FATAL, SET, "%s: Digitizer does not allow to set record "
+			"lengths.\n", DECVICE_NAME );
+	THROW( EXCEPTION )
 
-		if ( ! lecroy9400_get_record_length( &rec_len ) )
-			lecroy9400_gpib_failure( );
-
-		lecroy9400.rec_len = rec_len;
-		lecroy9400.is_rec_len = SET;
-		return vars_push( INT_VAR, lecroy9400.rec_len );
-	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Floating point value used as record "
-				"length in %s().\n", DEVICE_NAME, Cur_Func );
-		rec_len = lrnd( v->val.dval );
-	}
-	else
-		rec_len = v->val.lval;
-
-	i = 0;
-	while ( 1 )
-	{
-		if ( record_lengths[ i ] == 0 )
-		{
-			eprint( FATAL, SET, "%s: Record length %ld too long in %s().\n",
-					DEVICE_NAME, rec_len, Cur_Func );
-			THROW( EXCEPTION )
-		}
-
-		if ( rec_len == record_lengths[ i ] )
-			break;
-
-		if ( rec_len < record_lengths[ i ] )
-		{
-			eprint( SEVERE, SET, "%s: Can't set record length to %ld, "
-					"using next larger allowed value of %ld instead.\n",
-					DEVICE_NAME, rec_len, record_lengths[ i ] );
-			break;
-		}
-
-		i++;
-	}
-
-	lecroy9400.rec_len = record_lengths[ i ];
-	lecroy9400.is_rec_len = SET;
-
-	if ( I_am == CHILD && ! lecroy9400_set_record_length( lecroy9400.rec_len ) )
-		lecroy9400_gpib_failure( );
-
-	return vars_push( INT_VAR, lecroy9400.rec_len );
+	return NULL;
 }
 
 
@@ -1155,45 +1154,4 @@ Var *digitizer_run( Var *v )
 	if ( ! TEST_RUN )
 		lecroy9400_free_running( );
 	return vars_push( INT_VAR,1 );
-}
-
-
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
-
-Var *digitizer_lock_keyboard( Var *v )
-{
-	bool lock;
-
-
-	if ( v == NULL )
-		lock = SET;
-	else
-	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			lock = v->val.lval != 0;
-		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval != 0.0;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				lock = UNSET;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				lock = SET;
-			else
-			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-		}
-	}
-
-	if ( ! TEST_RUN )
-		lecroy9400_lock_state( lock );
-
-	lecroy9400.lock_state = lock;
-	return vars_push( INT_VAR, lock ? 1 : 0 );
 }

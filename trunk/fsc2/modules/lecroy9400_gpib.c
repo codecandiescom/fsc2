@@ -31,22 +31,53 @@
 
 bool lecroy9400_init( const char *name )
 {
+	char buffer[ 100 ];
+	long len = 100;
+
+
 	if ( gpib_init_device( name, &lecroy9400.device ) == FAILURE )
         return FAIL;
 
     /* Set digitizer to short form of replies and make it only send a line
-       feed at the end of replies */
+       feed at the end of replies. Then ask it for the status byte 1 to test
+	   if the device reacts. */
 
-    if ( gpib_write( lecroy9400.device, "CHDR,OFF", 8 ) == FAILURE ||
-		 gpib_write( lecroy9400.device, "CTRL,LF", 7 ) == FAILURE )
+    if ( gpib_write( lecroy9400.device, "CHDR,OFF;CTRL,LF", 16 ) == FAILURE ||
+		 gpib_write( lecroy9400.device, "STB,1", 5 ) == FAILURE ||
+		 gpib_read( lecroy9400.device, buffer, &len ) == FAILURE )
 	{
 		gpib_local( lecroy9400.device );
         return FAIL;
 	}
 
+	lecroy9400.is_reacting = SET;
+
+	/* Set or get the time base, if necessary change it to a valid value */
+
+	if ( is_timebase )
+		lecroy9400_set_timebase( lecroy9400.timebase );
+	else
+	{
+		lecroy9400.timebase = lecroy9400_set_timebase( );
+		if ( lecroy9400.timebase < tb[ 0 ] )
+		{
+			lecroy9400_set_timebase( lecroy9400.timebase = tb[ 0 ] );
+			eprint( SEVERE, UNSET, "%s: Timebase too fast, changing to %s.\n",
+					DEVICE_NAME, lecroy9400_ptime( lecroy9400.timebase ) );
+		}
+		else if ( lecroy9400.timebase > tb[ TB_ENTRIES - 1 ] )
+		{
+			lecroy9400_set_timebase( lecroy9400.timebase
+									 = tb[ TB_ENTRIES - 1 ] );
+			eprint( SEVERE, UNSET, "%s: Timebase too slow, changing to %s.\n",
+					DEVICE_NAME, lecroy9400_ptime( lecroy9400.timebase ) );
+		}
+
+		lecroy9400.tb_index = lecroy9400_get_tb_index( lecroy9400.timebase );
+	}
 
 	/* After we're know reasonable sure that the time constant is 50 ns/div
-	   or lower we can switch off interleaved mode */
+	   or longer we can switch off interleaved mode */
 
 	if ( gpib_write( lecroy9400.device, "IL,OFF", 6 ) == FAILURE )
 		return FAIL;
@@ -267,14 +298,13 @@ bool lecroy9400_set_offset( int channel, double offset )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool lecroy9400_get_coupling( int channel, int *type )
+int lecroy9400_get_coupling( int channel )
 {
     char cmd[ 20 ];
+	int type = INVALID_COUPL;
 
 
 	fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_CH2 );
-
-	*type = INVALID_COUPL;
 
 	sprintf( cmd, "C%1dCP,?", channel + 1 );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
@@ -284,15 +314,15 @@ bool lecroy9400_get_coupling( int channel, int *type )
     reply[ length - 1 ] = '\0';
 
 	if ( reply[ 0 ] == 'A' )
-		*type = AC_1_MOHM;
+		type = AC_1_MOHM;
 	else if ( reply[ 1 ] == '1' )
-		*type = DC_1_MOHM;
+		type = DC_1_MOHM;
 	else
-		*type = DC_50_OHM;
+		type = DC_50_OHM;
 
 	fsc2_assert( *type != INVALID_COUPL );    /* call me paranoid... */
 
-	return OK;
+	return type;
 }
 
 
@@ -311,6 +341,178 @@ bool lecroy9400_set_coupling( int channel, int type )
 
 	sprintf( cmd, "C%1dCP,%s", channel + 1, cpl[ type ] );
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy9400_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool lecroy9400_is_displayed( int channel )
+{
+    char cmd[ 20 ];
+	char reply[ 30 ];
+	long length = 30;
+
+
+	switch( channel )
+	{
+		case LECROY9400_CH1 :
+			strcpy( cmd, "TRC1,?" );
+			break;
+
+		case LECROY9400_CH2 :
+			strcpy( cmd, "TRC2,?" );
+			break;
+
+		case LECROY9400_MEM_C :
+			strcpy( cmd, "TRMC,?" );
+			break;
+
+		case LECROY9400_MEM_D :
+			strcpy( cmd, "TRMD,?" );
+			break;
+
+		case LECROY9400_FUNC_E :
+			strcpy( cmd, "TRFE,?" );
+			break;
+
+		case LECROY9400_FUNC_F :
+			strcpy( cmd, "TRFF,?" );
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+	if ( gpib_write( lecroy9400.device, cmd, 6 ) == FAILURE ||
+		 gpib_read( lecroy9400.device, reply, &length ) == FAILURE )
+		lecroy9400_gpib_failure( );
+
+    reply[ length - 1 ] = '\0';
+
+	return strcmp( reply, "ON" ) ? UNSET : SET;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool lecroy9400_display( int channel, int on_off )
+{
+    char cmd[ 20 ];
+
+
+	switch( channel )
+	{
+		case LECROY9400_CH1 :
+			strcpy( cmd, on_off ? "TRC1,ON" : "TRC1,OFF" );
+			break;
+
+		case LECROY9400_CH2 :
+			strcpy( cmd, on_off ? "TRC2,ON" : "TRC2,OFF" );
+			break;
+
+		case LECROY9400_MEM_C :
+			strcpy( cmd, on_off ? "TRMC,ON" : "TRMC,OFF" );
+			break;
+
+		case LECROY9400_MEM_D :
+			strcpy( cmd, on_off ? "TRMD,ON" : "TRMD,OFF" );
+			break;
+
+		case LECROY9400_FUNC_E :
+			strcpy( cmd, on_off ? "TRFE,ON" : "TRFE,OFF" );
+			break;
+
+		case LECROY9400_FUNC_F :
+			strcpy( cmd, on_off ? "TRFF,ON" : "TRFF,OFF" );
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy9400_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+long lecroy9400_get_num_avg( int channel )
+{
+	int i;
+	long num_avg;
+
+
+	fsc2_assert( channel == LECROY9400_FUNC_E ||
+				 channel == LECROY9400_FUNC_F );
+
+	/* Check that the channel is in averaging mode (in which case the byte
+	   at offset 34 of the waveform description is 0), if not return -1 */
+
+	if ( lecroy9400.wv_desc[ 34 ] != 99 )
+		return -1;
+
+	/* 32 bit word (MSB first) at offset 70 of the waveform description is
+	   the number of averages */
+
+	for ( num_avg = 0, i = 70; i < 74; i++ )
+		num_avg = num_avg * 256 + ( long ) lecroy9400.wv_desc[ channel ][ i ];
+
+	return num_avg;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool lecroy9400_get_desc( int channel )
+{
+	long len = MAX_DESC_LEN;
+	char cmd[ 30 ];
+
+
+	switch( channel )
+	{
+		case LECROY9400_CH1 :
+			strcpy( cmd, "RD,C1.DE" );
+			break;
+
+		case LECROY9400_CH2 :
+			strcpy( cmd, "RD,C2.DE" );
+			break;
+
+		case LECROY9400_MEM_C :
+			strcpy( cmd, "RD,MC.DE" );
+			break;
+
+		case LECROY9400_MEM_D :
+			strcpy( cmd, "RD,MD.DE" );
+			break;
+
+		case LECROY9400_FUNC_E :
+			strcpy( cmd, "RD,FE.DE" );
+			break;
+
+		case LECROY9400_FUNC_F :
+			strcpy( cmd, "RD,FF.DE" );
+			break;
+
+		default :
+			fsc2_assert( 1 == 0 );
+	}
+
+
+	if ( gpib_write( lecroy9400.device, cmd, 8 ) == FAILURE ||
+		 gpib_read( lecroy9400.device, lecroy9400.wv_desc, MAX_DESC_LEN )
+		 == FAILURE )
 		lecroy9400_gpib_failure( );
 
 	return OK;
