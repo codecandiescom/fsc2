@@ -335,7 +335,7 @@ static int get_print_file( FILE **fp, char **name )
 		}
 		TRY_SUCCESS;
 	}
-	CATCH ( EXCEPTION )
+	CATCH ( OUT_OF_MEMORY_EXCEPTION )
 		obj = print_form->cancel_button;
 
 	if ( 1 == fl_get_button( print_form->A6 ) )
@@ -383,7 +383,7 @@ static int get_print_file( FILE **fp, char **name )
 			*name = T_strdup( filename );
 			TRY_SUCCESS;
 		}
-		CATCH( EXCEPTION )
+		CATCH( OUT_OF_MEMORY_EXCEPTION )
 			return 0;
 
 		return S2P;          /* print mode is 'send to printer' */
