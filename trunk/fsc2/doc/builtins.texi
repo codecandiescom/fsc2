@@ -246,10 +246,23 @@ instead of a value a string (e.g.@ @code{"keep"}) can be passed as the
 argument.
 
 
+@anchor{change_label}
+@item change_label()
+@findex change_label()
+Using this function the labels at the axis of te display window (and, if
+shown, of the cross section window) can be changed from within as
+@acronym{EDL} program. For 1D-display it accepts up to two strings for
+the @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third
+for the @i{z}-axis label. To leave a label unchanged pass the function
+an empty string, i.e.@ @code{""}. If no label should be drawn pass it
+a string that just contains one (or more) space characters, i.e.@:
+@code{" "}.
+
+
 @anchor{rescale}
 @item rescale()
 @findex rescale()
-In the funtion @code(init_1d()} or @code{init_2d()} the number of points
+In the funtion @code{init_1d()} or @code{init_2d()} the number of points
 in @i{x}- (and @i{y}-) direction can be set. If, during the experiment
 more points are displayed then set in the initialization, the scaling of
 the axis (or axis in the 2D-case) will be changed automatically. Using

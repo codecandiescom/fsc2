@@ -188,6 +188,8 @@ static void other_data_request( int type, void * ptr )
 	long count;
 	long *ca;
 	int is_set;
+	char *label[ 3 ];
+	char lengths[ 3 ];
 
 
 	switch( type )
@@ -209,6 +211,17 @@ static void other_data_request( int type, void * ptr )
 			is_set = *( ( int * ) ptr );      /* flags */
 			ptr += sizeof( int );
 			change_scale( is_set, ( double * ) ptr );
+			break;
+
+		case D_CHANGE_LABEL :                 /* rescale command */
+			for ( i = X; i <= Z; i++ )
+			{
+				lengths[ i ] = * ( long * ) ptr;
+				ptr += sizeof( long );
+				label[ i ] = T_strdup( ( char * ) ptr );
+				ptr += lengths[ i ];
+			}
+			change_label( label );
 			break;
 
 		case D_CHANGE_POINTS :                /* rescale command */

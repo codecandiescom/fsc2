@@ -1,0 +1,49 @@
+VARIABLES:
+
+B0, B1, IX, IY, B2, B3;
+I = 1, J = 1, K, R;
+M = 0;
+
+PREPARATIONS:
+
+init_2d( 2, 0, 0, 0, 0, "ABC", "DEF", "GHI" );
+
+EXPERIMENT:
+
+B0 = button_create( "NORMAL_BUTTON", "Set" );
+B1 = button_create( "NORMAL_BUTTON", "Rescale" );
+IX = input_create( "INT_INPUT", 0, "x points" );
+IY = input_create( "INT_INPUT", 0, "y points" );
+B2 = button_create( "NORMAL_BUTTON", "Clear curve" );
+B3 = button_create( "NORMAL_BUTTON", "Change label" );
+
+FOREVER {
+	wait( 0.25 );
+	R = button_state( B0 );
+	FOR K = 1 : R {
+		display( I, J, random( ), 1,
+				 I, J, random( ), 2,
+				 I, J + 2, random( ), 2 );
+		I += 2;
+		J += 1;
+	}
+
+	IF button_state( B2 ) {
+		clear_curve( 1, 2 );
+		I = 1;
+		J = 1;
+	}
+
+	IF button_state( B1 ) {
+		rescale( input_value( IX ), input_value( IY ) );
+	}
+
+	IF button_state( B3 ) {
+		IF M == 0 {
+			change_label( "Bla", "Hihi", "Vulkanier" );
+		} ELSE IF M == 1 {
+			change_label( "Hallo", "World", "Good Bye" );
+		}
+		M = ( M + 1 ) % 2;
+	}
+}

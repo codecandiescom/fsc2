@@ -38,7 +38,6 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 								XEvent *ev, Canvas *c );
 static void redraw_cut_canvas( Canvas *c );
 static void repaint_cut_canvas( Canvas * );
-static void redraw_cut_axis( int coord );
 static void cut_make_scale( Canvas *c, int coord );
 static void shift_XPoints_of_cut_curve( Canvas *c );
 static bool cut_change_x_range( Canvas *c );
@@ -61,9 +60,8 @@ extern FL_resource xresources[ ];
 #endif
 
 
-static bool is_shown  = UNSET;  /* set on fl_show_form()    */
 static bool is_mapped = UNSET;  /* set while form is mapped */
-static Cut_Graphics CG;
+Cut_Graphics CG;
 static int cur_1,
 	       cur_2,
 	       cur_3,
@@ -108,7 +106,7 @@ void cut_show( int dir, long index )
 	   initialize now, otherwise, it's just unmapped, so make it visible
 	   again */
 
-	if ( ! is_shown )
+	if ( ! CG.is_shown )
 	{
 		if ( ! cut_has_been_shown &&
 			 * ( ( char * ) xresources[ CUTGEOMETRY ].var ) != '\0' )
@@ -169,9 +167,9 @@ void cut_show( int dir, long index )
 	/* Set up the labels if the cut window does't not exist yet or the cut
 	   direction changed */
 
-	if ( ! is_shown || CG.cut_dir != dir )
+	if ( ! CG.is_shown || CG.cut_dir != dir )
 	{
-		if ( is_shown )
+		if ( CG.is_shown )
 		{
 			if ( CG.cut_dir == X )                /* new direction is Y ! */
 			{
@@ -218,7 +216,7 @@ void cut_show( int dir, long index )
 
 	is_mapped = SET;
 	G.is_cut = SET;
-	is_shown = SET;
+	CG.is_shown = SET;
 	CG.curve = G.active_curve;
 
 	/* Draw the curve and the axes */
@@ -477,7 +475,7 @@ void cut_form_close( void )
 	Curve_1d *cv = &G.cut_curve;
 
 
-	if ( ! is_shown )
+	if ( ! CG.is_shown )
 		return;
 
 	/* Get rid of canvas related stuff (needs to be done *before*
@@ -518,7 +516,7 @@ void cut_form_close( void )
 
 	fl_free_form( cut_form->cut );
 
-	is_shown = is_mapped = UNSET;
+	CG.is_shown = is_mapped = UNSET;
 }
 
 
@@ -576,7 +574,7 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 
 	CG.nx = ( CG.cut_dir == X ) ? G.ny : G.nx;
 
-	if ( ! is_shown || ! is_mapped || ! has_been_shown )
+	if ( ! CG.is_shown || ! is_mapped || ! has_been_shown )
 	{
 		if ( scv->is_fs )
 		{
@@ -1918,7 +1916,7 @@ static void repaint_cut_canvas( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static void redraw_cut_axis( int coord )
+void redraw_cut_axis( int coord )
 {
 	Canvas *c;
 	int width;
@@ -1926,6 +1924,9 @@ static void redraw_cut_axis( int coord )
 
 
 	assert( coord >= X && coord <= Z );
+
+	printf( "Drawing %c cut axis\n", ( char ) ( coord + 'X' ) );
+	fflush( stdout );
 
 	/* First draw the label - for the x-axis it's just done by drawing the
 	   string while for the y- and z-axis we have to copy a pixmap since the

@@ -755,6 +755,132 @@ Var *f_cscale( Var *v )
 }
 
 
+/*------------------------------------------------------------------*/
+/* Function to change one or more axis labels during the experiment */
+/*------------------------------------------------------------------*/
+
+Var *f_clabel( Var *v )
+{
+	char *l[ 3 ] = { NULL, NULL, NULL };
+	long lengths[ 3 ];
+	int shm_id;
+	long len = 0;                    /* total length of message to send */
+	void *buf;
+	void *ptr;
+	int i;
+	int type = D_CHANGE_LABEL;
+
+
+	/* No changing of labels without graphics... */
+
+	if ( ! G.is_init )
+	{
+		eprint( SEVERE, "%s:%ld: Can't change labels, missing "
+				"initialization in %s().\n", Fname, Lc, Cur_Func );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* Check and store the parameter */
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, STR_VAR );
+
+	l[ X ] = T_strdup( v->val.sptr );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		vars_check( v, STR_VAR );
+		l[ Y ] = T_strdup( v->val.sptr );
+
+		if ( ( v = vars_pop( v ) ) != NULL )
+		{
+			if ( G.dim == 1 )
+			{
+				eprint( FATAL, "%s:%ld: Can't change z-label in 1D-display in "
+						"%s().\n", Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
+
+			vars_check( v, STR_VAR );
+			l[ Z ] = T_strdup( v->val.sptr );
+		}
+	}
+			
+	/* In a test run we're already done */
+
+	if ( TEST_RUN )
+		return vars_push( INT_VAR, 1 );
+
+	/* Function can only be used in experiment section */
+
+	assert( I_am == CHILD );
+
+	len =   sizeof( len )                 /* length field itself */
+		  + 2 * sizeof( int )             /* type field */
+		  + 3 * sizeof( long );           /* label lengths */
+	for ( i = X; i <= Z; i++ )
+	{
+		if ( l[ i ] )
+			len += lengths[ i ] = strlen( l[ i ] ) + 1;
+		else
+			len += lengths[ i ] = 1;
+	}
+
+	/* Now try to get a shared memory segment */
+
+	if ( ( buf = get_shm( &shm_id, len ) ) == ( void * ) - 1 )
+	{
+		eprint( FATAL, "Internal communication problem at %s:%d.\n",
+				__FILE__, __LINE__ );
+		THROW( EXCEPTION );
+	}
+
+	/* Copy the data to the segment */
+
+	ptr = buf;
+
+	memcpy( ptr, &len, sizeof( long ) );               /* total length */
+	ptr += sizeof( long );
+
+	memcpy( ptr, &type, sizeof( int ) );               /* type indicator  */
+	ptr += sizeof( int );
+
+	for ( i = X; i <= Z; i++ )
+	{
+		memcpy( ptr, lengths + i, sizeof( long ) );
+		ptr += sizeof( long );
+		if ( lengths[ i ] > 1 )
+		{
+			memcpy( ptr, l[ i ], lengths[ i ] );
+			T_free( l[ i ] );
+		}
+		else
+			* (char * ) ptr = '\0';
+		ptr += lengths[ i ];
+	}
+
+	/* Detach from the segment with the data segment */
+
+	detach_shm( buf, NULL );
+
+	/* Wait for parent to become ready to accept new data, then store
+	   identifier and send signal to tell parent about the data */
+
+	sema_wait( semaphore );
+	Key->shm_id = shm_id;
+	Key->type = DATA;
+	kill( getppid( ), NEW_DATA );
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /*---------------------------------------------------------*/
 /* Function to change the number of points to be displayed */
 /* during the experiment.                                  */

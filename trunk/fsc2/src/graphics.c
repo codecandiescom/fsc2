@@ -19,12 +19,16 @@
 #include "right_arrow.xbm"
 
 
+extern Cut_Graphics CG;             /* exported by graph_cut.c */
+
 static int run_form_close_handler( FL_FORM *a, void *b );
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
 static void setup_canvas( Canvas *c, FL_OBJECT *obj );
 static void canvas_off( Canvas *c, FL_OBJECT *obj );
+static void change_label_1d( char **label );
+static void change_label_2d( char **label );
 static void rescale_1d( long new_nx );
 static void rescale_2d( long new_nx, long new_ny );
 
@@ -77,6 +81,8 @@ void start_graphics( void )
 	/* Create the forms for running experiments */
 
 	run_form = create_form_run( );
+
+	CG.is_shown = UNSET;
 	if ( G.dim == 2 )
 		cut_form = create_form_cut( );
 
@@ -783,6 +789,8 @@ void stop_graphics( void )
 		memcpy( &G, G_stored, sizeof( Graphics ) );
 		T_free( G_stored );
 	}
+
+	G.is_init = UNSET;
 }
 
 
@@ -841,28 +849,12 @@ void graphics_free( void )
 			G.curve_2d[ i ] = NULL;
 		}
 
-	if ( G.font != NULL )
-		for ( coord = Y; coord <= Z; coord++ )
-			if ( G.label[ coord ] != NULL )
-				XFreePixmap( G.d, G.label_pm[ coord ] );
-}
-
-
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
-
-void free_graphics( void )
-{
-	int i;
-
-
-	G.is_init = UNSET;
-
-	for ( i = X; i <=Z; i++ )
-		if ( G.label[ i ] != NULL )
+	for ( coord = Y; coord <= ( G.dim == 1 ? Y : Z ); coord++ )
+		if ( G.label[ coord ] != NULL )
 		{
-			T_free( G.label[ i ] );
-			G.label[ i ] = NULL;
+			G.label[ coord ] = T_free( G.label[ coord ] );
+			if ( G.font != NULL )
+				XFreePixmap( G.d, G.label_pm[ coord ] );
 		}
 }
 
@@ -1542,6 +1534,149 @@ void change_scale( int is_set, double *vals )
 		for ( i = 0; i < G.nc; i++ )
 			G.curve_2d[ i ]->rwc_delta[ Y ] = vals[ 3 ];
 	}
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+void change_label( char **label )
+{
+	if ( G.dim == 1 )
+		change_label_1d( label );
+	else
+		change_label_2d( label );
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void change_label_1d( char **label )
+{
+	if ( *label[ X ] != '\0' )
+	{
+		if ( G.label[ X ] != NULL )
+			G.label[ X ] = T_free( G.label[ X ] );
+
+		G.label[ X ] = label[ X ];
+		redraw_canvas_1d( &G.x_axis );
+	}
+
+	if ( *label[ Y ] != '\0' )
+	{
+		if ( G.label[ Y ] != NULL )
+		{
+			G.label[ Y ] = T_free( G.label[ Y ] );
+			if ( G.font != NULL )
+				XFreePixmap( G.d, G.label_pm[ Y ] );
+		}
+
+
+		G.label[ Y ] = label[ Y ];
+		if ( G.font != NULL )
+		{
+			create_label_pixmap( &G.y_axis, Y, G.label[ Y ] );
+			redraw_canvas_1d( &G.y_axis );
+		}
+	}
+}
+
+
+/*----------------------------------------------------------*/
+/*----------------------------------------------------------*/
+
+static void change_label_2d( char **label )
+{
+	int coord;
+
+
+	if ( *label[ X ] != '\0' )
+	{
+		if ( G.label[ X ] != NULL )
+		{
+			G.label[ X ] = T_free( G.label[ X ] );
+			if ( CG.is_shown && CG.cut_dir == X )
+				XFreePixmap( G.d, G.label_pm[ Z + 3 ] );
+		}
+		G.label[ X ] = label[ X ];
+
+		redraw_canvas_2d( &G.x_axis );
+
+		if ( CG.is_shown )
+		{
+			if ( CG.cut_dir == X )
+			{
+				if ( G.label[ X ] != NULL && G.font != NULL )
+					create_label_pixmap( &G.cut_z_axis, Z, G.label[ X ] );
+
+				printf( "Redrawing Z axis: %s\n", G.label[ X ] );
+				fflush( stdout );
+				redraw_cut_axis( Z );
+			}
+			else
+			{
+				printf( "Redrawing X axis: %s\n", G.label[ X ] );
+				fflush( stdout );
+				redraw_cut_axis( X );
+			}
+		}
+	}
+
+	for ( coord = Y; coord <= Z; coord++ )
+		if ( *label[ coord ] != '\0' )
+		{
+			if ( G.label[ coord ] != NULL )
+			{
+				G.label[ coord ] = T_free( G.label[ coord ] );
+				if ( G.font != NULL )
+					XFreePixmap( G.d, G.label_pm[ coord ] );
+			}
+
+			G.label[ coord ] = label[ coord ];
+			if ( G.font != NULL )
+				create_label_pixmap( coord == Y ? &G.y_axis : &G.z_axis,
+									 coord, G.label[ coord ] );
+			redraw_canvas_2d( coord == Y ? &G.y_axis : &G.z_axis );
+
+			if ( CG.is_shown )
+			{
+				if ( coord == Y )
+				{
+					if ( CG.cut_dir == Y )
+					{
+						if ( G.label[ Y ] != NULL && G.font != NULL )
+						{
+							G.label_pm[ Z + 3 ] = G.label_pm[ Y ];
+							G.label_w[ Z + 3 ] = G.label_w[ Y ];
+							G.label_h[ Z + 3 ] = G.label_h[ Y ];
+						}
+						printf( "Redrawing Z axis: %s\n", G.label[ Y ] );
+						fflush( stdout );
+						redraw_cut_axis( Z );
+					}
+					else
+					{
+						printf( "Redrawing X axis: %s\n", G.label[ X ] );
+						fflush( stdout );
+						redraw_cut_axis( X );
+					}
+				}
+
+				if ( coord == Z )
+				{
+					if ( G.label[ Z ] != NULL && G.font != NULL )
+					{
+						G.label_pm[ Y + 3 ] = G.label_pm[ Z ];
+						G.label_w[ Y + 3 ]  = G.label_w[ Z ];
+						G.label_h[ Y + 3 ]  = G.label_h[ Z ];
+					}
+					printf( "Redrawing Y axis: %s\n", G.label[ Z ] );
+					fflush( stdout );
+					redraw_cut_axis( Y );
+				}
+			}
+		}
 }
 
 

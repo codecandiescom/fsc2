@@ -1007,8 +1007,6 @@ void clean_up( void )
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		need_Serial_Port[ i ] = UNSET;
-
-	free_graphics( );
 }
 
 

@@ -1,12 +1,13 @@
 VARIABLES:
 
-BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2, I1, I2, I3, I4;
-
+BID1, BID2, BID3, BID4, BID5, BID6, BID7, SID1, SID2, I1, I2, I3, I4, I5;
+NX = 32;
+NNX;
 I = 0;
 
 PREPARATIONS:
 
-init_1d( 4, "Blödsinn [nT]", "Schwachsinn [V]" );
+init_1d( 4, 32, "Blödsinn [nT]", "Schwachsinn [V]" );
 
 EXPERIMENT:
 
@@ -28,6 +29,7 @@ I1   = input_create( "INT_INPUT", 17, "Na, was wohl", "Weiss auch nicht..." );
 I2   = input_create( "FLOAT_INPUT", -13, "Noch eins", "Foobar", "%15.2f" );
 I3   = output_create( "INT_OUTPUT", 17, "", "Weiss auch nicht..." );
 I4   = output_create( "FLOAT_OUTPUT", -13, "Noch eins", "", "%.5f" );
+I5   = input_create( "INT_INPUT", NX, "Points in x direction" );
 
 FOREVER {
 
@@ -49,7 +51,11 @@ FOREVER {
 	display( I, slider_value( SID2 ) * slider_value( SID1 ) );
 	wait( 500 ms );
 
-	rescale( I );
+	NNX = input_value( I5 );
+	IF NNX != NX {
+		rescale( NNX );
+		NX = NNX;
+	}
 }
 
 ON_STOP:
