@@ -80,6 +80,8 @@ Var *f_exp(     Var *v );
 Var *f_ln(      Var *v );
 Var *f_log(     Var *v );
 Var *f_sqrt(    Var *v );
+Var *f_random(  Var *v );
+Var *f_setseed( Var *v );
 Var *f_print(   Var *v );
 Var *f_wait(    Var *v );
 Var *f_init_1d( Var *v );
@@ -95,7 +97,6 @@ Var *f_fsave(   Var *v );
 Var *f_save_p(  Var *v );
 Var *f_save_o(  Var *v );
 Var *f_save_c(  Var *v );
-
 
 /* The following variables are shared with loader.c which adds further 
    functions from the loaded modules */
@@ -127,6 +128,8 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "ln",           f_ln,       1, ACCESS_ALL,  0 },
 	{ "log",          f_log,      1, ACCESS_ALL,  0 },
 	{ "sqrt",         f_sqrt,     1, ACCESS_ALL,  0 },
+	{ "random",       f_random,   0, ACCESS_ALL,  0 },
+	{ "set_seed",     f_setseed,  1, ACCESS_ALL,  0 },
 	{ "print",        f_print,   -1, ACCESS_ALL,  0 },
 	{ "wait",         f_wait,     1, ACCESS_ALL,  0 },
 	{ "init_1d",      f_init_1d, -1, ACCESS_PREP, 0 },
@@ -763,6 +766,50 @@ Var *f_sqrt( Var *v )
 		THROW( EXCEPTION );
 	}
 	return vars_push( FLOAT_VAR, sqrt( arg ) );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Returns a random number between 0 and 1 (i.e. result is float) */
+/*----------------------------------------------------------------*/
+
+
+Var *f_random( Var *v )
+{
+	v = v;
+
+	return vars_push( FLOAT_VAR, ( double ) random( ) / ( double ) RAND_MAX );
+}
+
+
+/*---------------------------------------------*/
+/* Sets a seed for the random number generator */
+/*---------------------------------------------*/
+
+
+Var *f_setseed( Var *v )
+{
+	unsigned int arg;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+	{
+		if ( v->val.lval < 0 )
+			eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer "
+				"as argument, using absolute value.", Fname, Lc );
+		arg = ( unsigned int ) labs( v->val.lval );
+	}
+	else
+	{
+		eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer and not "
+				"a float variable as argument, using 1 instead.", Fname, Lc );
+		arg = 1;
+	}
+
+	srandom( arg );
+	return vars_push( INT_VAR, 1 );
 }
 
 
