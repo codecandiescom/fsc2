@@ -2,20 +2,22 @@ fsc2 "phoning home"
 ===================
 
 If you have been reading the documentation or had a look at the Makefile
-you may have noticed that fsc2 per defaults tries to send emails when
-it's about to crash. This feature was built in because it is extremely
-difficult to find the reasons for such problems when they are either
-hard to reproduce or happened on a machine I don't have easy access to.
+you may have noticed that fsc2 per defaults trie to send me an emails
+when it's about to crash. This feature was built in because it is
+extremely difficult to find the reasons for such problems when they
+are either hard to reproduce or happened on a machine I don't have
+easy access to.
 
 The contents of the mail are not revealing much about the user running
 fsc2 (except the fact that (s)he is using fsc2). It contains mainly
 information about the place in the program where the error happened
-and how teh program got to this place. Then follows a list of the EDL
+and how the program got to this place. Then follows a list of the EDL
 script that was run at the time of the crash, the output that appeared
-at the error browser and finally some uuencoded text with information
-about the versions of all the sources the program was created from
-(just a copy of the file "version.ugz" in the main fsc2 directory
-which gets created when fsc2 is compiled, you can use the command
+at the error browser and, finally, some uuencoded text with information
+about the versions of all the source files the program was created
+from. Its just a copy of the file "version.ugz" in the main fsc2
+directory, which gets created when fsc2 is compiled. You can use the
+command
 
    uudecode version.ugz | gunzip -c
 
@@ -26,9 +28,9 @@ your system you don't want me to see it's very easy getting rid of
 this feature. First, this can be done during compilation of the program.
 If you define the variable NO_MAIL somewhere at the start of the main
 Makefile the program is compiled so that it is unable to send any
-mails on crashes. In this case another variable, ADDR2LINE, won't be
+emails on crashes. (In this case another variable, ADDR2LINE, won't be
 set and without it no crash mails can be generated, see the files
-dump.c and bugs.c.
+dump.c and bugs.c).
 
 An alternative method, which still sends crash emails, but not to me
 but to someone you can select is changing the variable MAIL_ADDRESS
