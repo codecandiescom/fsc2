@@ -1926,11 +1926,14 @@ this function (without an argument).
 @findex pulser_maximum_pattern_length()
 This function only exists for the @strong{Sony/Tektronix DG2020} pulser
 (both the @code{dg2020_b} and @code{dg2020_b} module) and the
-@strong{Tektronix HFS9003} pulser. For the @strong{Bruker EP385} no
-maximum pattern length can be specified, it is fixed to 32768 times the
-clocks oscillation period (i.e.@: @w{262.144 us} when using the internal
-clock). The @strong{Interface Technology RS690} uses a rather different
-concept and, in principle, there is no maximum pattern length.
+@strong{Tektronix HFS9003} pulser.
+
+For the @strong{Bruker EP385} a maximum pattern length can't be
+specified, it is fixed to 32768 times the clocks oscillation period
+(i.e.@: @w{262.144 us} when using the internal clock). The
+@strong{Interface Technology RS690} uses a rather different concept and
+there is no maximum pattern length. Calling the function for either of
+these pulsers does nothing.
 
 In most cases the program will be able to figure out automatically how
 long the length of the longest pulse pattern in the experiment is going
@@ -1945,14 +1948,14 @@ and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
 
 Whenever there is a reason to suspect that these problems may occur one
 can set the maximum pulse pattern length manually (i.e.@: the end point
-of the last pulse when it has been set to its latest position in the
-experiment by calling @code{pulser_maximum_pattern_length()} with the
+of the last pulse when it has been set to its latest position during the
+experiment) by calling @code{pulser_maximum_pattern_length()} with the
 the maximum pulse pattern length as the only argument.
 
 Unless in the test run an even longer pattern length is found, this
 value is used. It is not a problem to specify too long a maximum pattern
 length, so a conservative guess will do. The only penalty incurred is
-are longer times needed to set up the pulser at the start of the
+longer time needed to set up the pulser at the start of the
 experiment. On the other hand, too short a pattern length will lead to
 the experiment being stopped with an error message when the actual
 pattern length becomes larger than the one specified.

@@ -1476,7 +1476,6 @@ Var *pulser_maximum_pattern_length( Var *v )
 }
 
 
-
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
