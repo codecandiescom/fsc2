@@ -345,8 +345,8 @@ Var *func_call( Var *f )
 		ret = ( *f->val.fnct )( NULL );
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
-	   all parameters - just keep the return value (which is alway the last
-	   variable on the stack). Before this do a sanity check. */
+	   all parameters - just keep the return value. Before starting to delete
+	   the defunct variables we do another sanity check. */
 
 	if ( ! vars_exist( f ) )
 	{
@@ -355,7 +355,7 @@ Var *func_call( Var *f )
 		THROW( EXCEPTION );
 	}
 
-	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
+	for ( ap = f; ap != NULL; ap = ap == ret ? ap->next : vars_pop( ap ) )
 		;
 
 	return ret;
