@@ -83,7 +83,7 @@ There usually are a few functions in a module beside the ones that are
 going to be invoked from @code{EDL} scripts that get called from
 @code{fsc2}. These are the so-called hook functions that (if they exist)
 get invoked at certain stages of the execution of an @code{EDL} script,
-i.e. after loading the module, before and after the test run, at the
+i.e.@: after loading the module, before and after the test run, at the
 start and the end of the experiment and, finally, just before the module
 is unloaded. From within these functions you can initialize the internal
 data of the module, initialize the device you're controlling and finally
@@ -1974,7 +1974,7 @@ set_pulse_length_change()
 @noindent
 and the functions for asking pulse properties, i.e.@: the functions with
 names starting with @code{get_pulse_}, all functions will only be called
-before the experiment is started, i.e. in the time between the calls of
+before the experiment is started, i.e.@: in the time between the calls of
 the init_hook() and the test_hook() function.
 
 
@@ -1983,12 +1983,12 @@ During the test run. i.e.@: between the @code{test_hook()} and the
 @code{TEST_RUN} is set) functions to change pulse positions and lengths
 will be called. In this functions the internal representation of the
 pulser state has to be updated and the consistency of the state has to
-be checked (i.e. do the pulses stay separated, don't they overtake each
-other, do the lengths remain larger than zero, do the positions stay
-larger than zero and don't exceed the maximum channel length, etc.@:). The
-driver also might choose to store the longest duration of a pulse
-sequence during the test run to be used later in the calculation of the
-padding needed to set a fixed repeat time for the experiment.
+be checked (i.e.@: do the pulses stay separated, don't they overtake
+each other, do the lengths remain larger than zero, do the positions
+stay larger than zero and don't exceed the maximum channel length,
+etc.@:). The driver also might choose to store the longest duration of a
+pulse sequence during the test run to be used later in the calculation
+of the padding needed to set a fixed repeat time for the experiment.
 
 
 @table @samp

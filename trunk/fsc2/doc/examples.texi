@@ -632,8 +632,8 @@ of at the field value it has been set to manually.
 
 All the lines 43 to 58 are for setting up an additional window with
 graphical elements, i.e.@: buttons and in- and output fields. The first
-element is an output field, i.e. a field to just display values.  It is
-created by calling the function @code{output_create()}
+element is an output field, i.e.@: a field to just display values.  It
+is created by calling the function @code{output_create()}
 (@pxref{output_create}) with three arguments. The first is the type of
 the field where "FLOAT_OUTPUT" stands for a field for displaying
 floating point values. The second is the value to display in the field

@@ -52,8 +52,8 @@ also may tell @code{fsc2} to use a different port instead of 8080
 through the @code{-httpPort} command line option.
 
 When @code{fsc2}'s web server is running your browser will display a
-page telling you @code{fsc2}'s current state, i.e. whether it is idle,
-running and experiment, waiting for user input (when e.g. a file
+page telling you @code{fsc2}'s current state, i.e.@: whether it is idle,
+running and experiment, waiting for user input (when e.g.@: a file
 selector is shown) or has finished the experiment. Furthermore, it
 displays a copy of the display windows and, if @code{fsc2} is showing
 it, of the cross section window. Both are shown in exactly the same way

@@ -1245,7 +1245,7 @@ Engraved triangular arrow pointing to the right.
 
 It is also possible to rotate most of the symbols. When a symbol name is
 preceeded by a digit between @code{1} and @code{9} (except @code{5}) the
-symbol is rotated like on the numerical keypad, i.e. @: @code{6}
+symbol is rotated like on the numerical keypad, i.e.@: @code{6}
 indicates no rotation, @code{9} a rotation by 45 degrees
 anti-clockwise,8 a rotation by 90 degrees, etc. Hence the order is
 @code{6,9,8,7,4,1,2,3} (just think of the keypad as consisting of arrow

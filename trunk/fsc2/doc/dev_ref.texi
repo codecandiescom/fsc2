@@ -653,7 +653,7 @@ Number of channels: 16 (4 per output connector) with internal @w{4 ns}
 time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
 time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
 Maximum repetition time: 2,147,483,647 times the time base for external
-clock or @w{4 ns} internal clock (i.e. @w{8.5899 s}), @w{17.1799 s} for
+clock or @w{4 ns} internal clock (i.e.@: @w{8.5899 s}), @w{17.1799 s} for
 @w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
 
 @paragraphindent 0

@@ -89,8 +89,8 @@ cycling is to be done in the experiment.
 
 Within the @code{ASSIGNMENTS} section the pulsers time bases and trigger
 modes are set. It also deals with the basic setup of the channels,
-i.e. associating some or more output connectors with pulse functions and
-setting the physical characteristics of the output (e.g.@: voltage
+i.e.@: associating some or more output connectors with pulse functions
+and setting the physical characteristics of the output (e.g.@: voltage
 levels, inverting the output etc.).
 
 @c ########################################################
@@ -540,7 +540,7 @@ difficult. By the way, the keyword @code{DELAY} can be abbreviated to
 
 If you are dealing with two or more pulsers simultaneously you will have
 to append a @code{#} character plus the pulser number to each of the
-channel function setup statements, i.e. use
+channel function setup statements, i.e.@: use
 @example
 MICROWAVE#1: POD = 3;
 TWT#2:       CH  = A7;

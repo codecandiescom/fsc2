@@ -187,7 +187,7 @@ W-band magnet. Because there is no well-defined relationship between the
 current produced by the power supply and the magnetic field and because
 the magnetic field can't be measured directly during measurements, for
 this device the following functions expect arguments in current units
-(i.e. Ampere) instead of field units (i.e. Gauss) as for the other
+(i.e.@: Ampere) instead of field units (i.e.@: Gauss) as for the other
 devices.
 
 It's similar for the magnet used for the @w{360 GHz} spectrometer:
@@ -774,18 +774,18 @@ the value at the moment of the call of the function).
 
 When called with an argument of @code{0} (or a string @code{"OFF"})
 auto-acquisition is stopped and the internal buffer of the lock-in is
-cleared. Calls of @code{lockin_get_data()} will again return values
-measured in the 'normal' way.
+cleared. Following calls of @code{lockin_get_data()} will then return
+values measured in the 'normal' way.
 
-@strong{Important}: The sizes of the internal buffers of the lock-in
+@strong{Please note}: The sizes of the internal buffers of the lock-in
 amplifiers are restricted: while the @code{SR830} can store up to 16383
 data points for each of the two channel, the @code{SR810} can only store
-a maximum of 8191 samples. If the program detects when fetching new
-data that the maximum number of data have already been fetched from
-the lock-in the internal buffer is cleared. In this case data which
-should have been acquired between the time the lock-in's internal buffer
-got filled up and the moment the program noticed that the buffers are
-full will be lost and an error message will be printed. Thus prudence
+a maximum of 8191 samples. If the program detects when fetching new data
+that the maximum number of data have already been fetched from the
+lock-in the internal buffer is cleared. In this case data which should
+have been acquired between the time the lock-in's internal buffer got
+filled up and the moment the program noticed that the buffers are full
+will be lost and an error message will be printed. Thus prudence
 dictates to stop auto-acquisition, thereby automatically clearing the
 lock-in's internal buffers, whenever possible.
 
@@ -849,7 +849,7 @@ function will return the sensitivity that has been set.
 
 Valid sensitivity settings for the @strong{SR510} and @strong{SR530} are
 in the range between @w{10 nV} and @w{500 mV} in steps of about @w{3
-dB}, i.e. you can use @w{10 uV}, @w{20 uV}, @w{50 uV}, @w{100 uV} etc.
+dB}, i.e.@: you can use @w{10 uV}, @w{20 uV}, @w{50 uV}, @w{100 uV} etc.
 To achieve the two highest sensitivity settings the @code{EXPAND} button
 is automatically switched on.
 
@@ -883,7 +883,7 @@ constant setting that has been set.
 
 For the @strong{SR510} and @strong{SR530} lock-ins valid time constant
 settings are @w{1 ms} and @w{100 s} with steps of about a factor of 3,
-i.e. you can use @w{10 ms}, @w{30 ms}, @w{100 ms} etc. The POST time
+i.e.@: you can use @w{10 ms}, @w{30 ms}, @w{100 ms} etc. The POST time
 constant is set to a value equal or lower than the time constant.
 
 For the @strong{SR810} and @strong{SR810} lock-ins vali time constants
@@ -2768,8 +2768,8 @@ of time and only then returns with the masured count. In every other
 respect, e.g.@: the required arguments etc.@: it is identical to the
 previous function.
 
-The largest value that can be returned is @w{2147483647}, i.e. @w{2^31 -
-1}.
+The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31
+- 1}.
 
 @anchor{counter_intermediate_count}
 @item counter_intermediate_count()
@@ -2784,7 +2784,7 @@ specified by one of the symbolic names between @code{CH0} and @code{CH3}
 symbolic values and channel numbers is non-trivial).
 
 The largest value that can be returned for a counter is @w{2147483647},
-i.e. @w{2^31 - 1}.
+i.e.@: @w{2^31 - 1}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2805,7 +2805,7 @@ numbers directly, the mapping between the symbolic values and channel
 numbers is non-trivial).
 
 The largest value that can be returned for a counter is @w{2147483647},
-i.e. @w{2^31 - 1}.
+i.e.@: @w{2^31 - 1}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2951,7 +2951,7 @@ This function alllows to switch the channels of the power supply on or
 off. It requires two arguments. The first one is the channel, which must
 be either @code{CH1} or @code{CH2} (don't use numbers directly
 or, if you do, use @code{0} for @code{CH1} and @code{1} for @code{CH2}).
-The second argument is the state, @:i.e. either @code{"ON"} or
+The second argument is the state, i.e.@: either @code{"ON"} or
 @code{"OFF"} (or @code{1} for on and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -2966,7 +2966,7 @@ channels of the power supply on or off. It requires two arguments. The
 first one is the channel, which must be either @code{CH1} or @code{CH2}
 (don't use numbers directly, or, if you do, use @code{0} for @code{CH1}
 and @code{1} for @code{CH2}).  The second argument is the damping state,
-@:i.e. either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
+i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on and
 @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an

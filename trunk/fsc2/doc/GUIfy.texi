@@ -573,7 +573,7 @@ connection to @code{fsc2} (please send a bug report)
 @item 1
 A different user is already running fsc2
 @item 2
-@code{fsc2} is busy, i.e. it's already running an experiment
+@code{fsc2} is busy, i.e.@: it's already running an experiment
 (or a test run)
 @item 3
 Internal error in @code{fsc2} detected (please send a bug report)
