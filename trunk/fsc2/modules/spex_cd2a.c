@@ -711,19 +711,20 @@ Var *monochromator_scan_step( Var *v )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function for setting the laser line position. This can only be */
-/* for monochromators the are wave.number driven. When a laser    */
-/* line has been set in the following only relative wavenumbers   */
-/* can be used (i.e. differences between the laser line position  */
-/* and absolute wavenumbers), and all functions involving wave-   */
-/* numbers return relative positions. A laser line position can   */
-/* switched of (reverting also to use of absolute wave-numbers)   */
-/* by setting a zero or negatibe laser line position.             */
-/* If called without an argument the function returns the current */
-/* Setting of the laser line position (always in absolute wave-   */
-/* numbers) or zero if no laser line position is set.             */
-/*----------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for setting the laser line position. This can only */
+/* be done for monochromators that are wavenumber driven. When */
+/* a laser line has been set in the following only relative    */
+/* wavenumbers can be used (i.e. differences between the laser */
+/* line position and absolute wavenumbers), and all functions  */
+/* involving wavenumbers return relative positions. A laser    */
+/* line position can switched of (reverting also to use of     */
+/* absolute wave-numbers) by setting a zero or negatibe laser  */
+/* line position. If called without an argument the function   */
+/* returns the current setting of the laser line position      */
+/* (always in absolute wavenumbers) or zero if no laser line   */
+/* position has been set.                                      */
+/*-------------------------------------------------------------*/
 
 Var *monochromator_laser_line( Var *v )
 {

@@ -479,7 +479,7 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	}
 
 	/* If required wait for counting to stop (by waiting for the
-	   neighboring counter, creating the gate pulse, to stop) and then
+	   neighboring counter creating the gate pulse to stop) and then
 	   reset both counters. */
 
 	if ( cs.wait_for_end ) {
@@ -488,7 +488,8 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 		init_waitqueue_head( &waitqueue );
 		while ( readw( board->regs.joint_status[ cs.counter ] ) &
 			( cs.counter & 1 ? G0_COUNTING : G1_COUNTING ) ) {
-			interruptible_sleep_on_timeout( &waitqueue, 1 );
+			udelay( 100 );
+//			interruptible_sleep_on_timeout( &waitqueue, 1 );
 			if ( signal_pending( current ) ) {
 				PDEBUG( "Aborted by signal\n" );
 				return -EINTR;
@@ -698,11 +699,11 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 
 	/* Test if the counter is armed */
 
-	a.state =  readw( board->regs.joint_status[ a.counter ] ) &
-		   ( a.counter & 1 ? G1_ARMED : G0_ARMED );
+	a.state =  ( readw( board->regs.joint_status[ a.counter ] ) &
+		     ( ( a.counter & 1 ) ? G1_ARMED : G0_ARMED ) ) ? 1 : 0;
 	
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
+	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
+		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}
 

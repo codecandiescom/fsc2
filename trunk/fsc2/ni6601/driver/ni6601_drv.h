@@ -189,6 +189,11 @@ typedef struct {
 #endif
 
 
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
+
+
 #define NI6601_NAME "ni6601"
 
 #define PCI_VENDOR_NATINST         0x1093
