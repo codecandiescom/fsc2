@@ -123,7 +123,6 @@ distclean:
 	$(MAKE) clean
 	-$(RM) $(RMFLAGS) *.so
 
-
 # don't automatically delete intermediate files created by flex
 
 .PRECIOUS: %.c
