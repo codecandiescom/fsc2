@@ -52,6 +52,7 @@ typedef struct _IOBJ_ {
 								 or currently seletced menu item */
 	volatile bool is_changed; /* set when objects state changed but state 
 								 change wasn't detected by the script yet */
+	bool report_change;
 
 	FL_OBJECT *group;         /* group a radio button belongs to */
 	long partner;
@@ -76,6 +77,7 @@ typedef struct {
 	FL_COORD w,               /* size of form */
 		     h;
 	IOBJECT *objs;            /* linked list of objects in form */
+	long next_ID;             /* ID for next created object */
 } TOOL_BOX;
 
 
@@ -116,6 +118,9 @@ bool check_format_string( char *buf );
 void store_geometry( void );
 void parent_freeze( int freeze );
 void tools_clear( void );
+Var *f_tb_changed( Var *v );
+void tb_wait_handler( long ID );
+Var *f_tb_wait( Var *v );
 
 
 #endif   /* ! INTERACTIVE_HEADER */

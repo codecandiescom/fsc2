@@ -523,6 +523,80 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 
 /*--------------------------------------------------------------*/
 /* Child and parent side function for passing the arguments and */
+/* the return values of the button_changed() function .         */
+/*--------------------------------------------------------------*/
+
+long *exp_bchanged( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_BCHANGED, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = LONG_P T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long ID;
+		long result[ 2 ];
+
+
+		TRY
+		{
+			/* Get variable with address of function to determine a button
+			   state change */
+
+			Func_ptr = func_get( "button_changed", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_BCHANGED_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
 /* the return values of the slider_create() function .          */
 /*--------------------------------------------------------------*/
 
@@ -751,6 +825,80 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
 		if ( ! writer( C_SSTATE_REPLY, sizeof res, res ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing and returning the */
+/* arguments and results of the slider_changed() function       */
+/*--------------------------------------------------------------*/
+
+long *exp_schanged( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_SCHANGED, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = LONG_P T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = -1;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long res[ 2 ];
+		long ID;
+
+
+		TRY
+		{
+			/* Get variable with address of function to determine state
+			   changes */
+
+			Func_ptr = func_get( "slider_value", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                       /* get current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			res[ 0 ] = 1;
+			res[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			res[ 0 ] = -1;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_SCHANGED_REPLY, sizeof res, res ) )
 			THROW( EXCEPTION );
 		return NULL;
 	}
@@ -1034,6 +1182,79 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*/
+/* Child and parent side function for passing and returning the */
+/* arguments and results of the input_value() function          */
+/*--------------------------------------------------------------*/
+
+long *exp_ichanged( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *res;
+
+
+		if ( ! writer( C_ICHANGED, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		res = LONG_P T_malloc( sizeof *res );
+		if ( ! reader( ( void * ) res ) )
+			res[ 0 ] = -1;
+		return res;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long res[ 2 ];
+		long ID;
+
+
+		TRY
+		{
+			/* Get variable with address of function to change state */
+
+			Func_ptr = func_get( "input_changed", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );    /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );            /* object ID */
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                          /* current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			res[ 0 ] = 0;
+			res[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			res[ 0 ] = -1;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_ICHANGED_REPLY, sizeof res, res ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
 /* Child and parent side function for passing the arguments and */
 /* the return values of the menu_create() function.             */
 /*--------------------------------------------------------------*/
@@ -1242,7 +1463,242 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 		EDL.Lc = old_Lc;
 		if ( ! writer( C_MCHOICE_REPLY, sizeof result, result ) )
 			THROW( EXCEPTION );
-		return 0;
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+long *exp_mchanged( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_MCHANGED, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = LONG_P T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long ID;
+		long result[ 2 ];
+
+
+		TRY
+		{
+			/* Get function for dealing with menu state */
+
+			Func_ptr = func_get( "menu_changed", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &ID, pos, sizeof ID );
+			vars_push( INT_VAR, ID );
+			pos += sizeof ID;
+
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_MCHANGED_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+long *exp_tbchanged( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_TBCHANGED, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = LONG_P T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		Var *ret = NULL;
+		int acc;
+		char *pos;
+		long var_count;
+		long ID;
+		long result[ 2 ];
+
+
+		TRY
+		{
+			/* Get function for dealing with menu state */
+
+			Func_ptr = func_get( "toolbox_changed", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &var_count, pos, sizeof var_count );
+			pos += sizeof var_count;
+
+			while ( var_count-- )
+			{
+				memcpy( &ID, pos, sizeof ID );
+				vars_push( INT_VAR, ID );
+				pos += sizeof ID;
+			}
+				
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
+			ret = func_call( Func_ptr );
+			result[ 0 ] = 1;
+			result[ 1 ] = ret->val.lval;
+			vars_pop( ret );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			result[ 0 ] = 0;
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+		if ( ! writer( C_TBCHANGED_REPLY, sizeof result, result ) )
+			THROW( EXCEPTION );
+		return NULL;
+	}
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+long *exp_tbwait( char *buffer, ptrdiff_t len )
+{
+	if ( Internals.I_am == CHILD )
+	{
+		long *result;
+
+
+		if ( ! writer( C_TBWAIT, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		result = LONG_P T_malloc( 2 * sizeof *result );
+		if ( ! reader( ( void * ) result ) )
+			result[ 0 ] = 0;
+		return result;
+	}
+	else
+	{
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+		Var *Func_ptr;
+		int acc;
+		char *pos;
+		double duration;
+		long var_count;
+		long ID;
+
+
+		TRY
+		{
+			/* Get function for waiting for toolbox state change */
+
+			Func_ptr = func_get( "toolbox_wait", &acc );
+
+			/* Unpack parameter and push them onto the stack */
+
+			pos = buffer;
+			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+			pos += sizeof EDL.Lc;
+
+			memcpy( &duration, pos, sizeof duration );
+			vars_push( FLOAT_VAR, duration );
+			pos += sizeof duration;
+
+			memcpy( &var_count, pos, sizeof var_count );
+			pos += sizeof var_count;
+
+			while ( var_count-- )
+			{
+				memcpy( &ID, pos, sizeof ID );
+				vars_push( INT_VAR, ID );
+				pos += sizeof ID;
+			}
+				
+			EDL.Fname = pos;                         /* current file name */
+
+			/* Call the function */
+
+			vars_pop( func_call( Func_ptr ) );
+
+			EDL.Fname = old_Fname;
+			EDL.Lc = old_Lc;
+
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			long result[ 2 ] = { 0, 0 };
+
+
+			EDL.Fname = old_Fname;
+			EDL.Lc = old_Lc;
+			if ( ! writer( C_TBWAIT_REPLY, sizeof result, result ) )
+				THROW( EXCEPTION );
+		}
+
+		return NULL;
 	}
 }
 

@@ -34,7 +34,7 @@ static Var *f_ocreate_child( Var *v, long type, long lval, double dval );
 static void f_odelete_child( Var *v );
 static void f_odelete_parent( Var *v );
 static Var *f_ovalue_child( Var *v );
-
+static Var *f_ochanged_child( Var *v );
 
 
 /*--------------------------------------*/
@@ -50,7 +50,6 @@ Var *f_ocreate( Var *var )
 	static char *form_str;
 	static IOBJECT *new_io;
 	IOBJECT *ioi;
-	static long ID;
 	static long lval;
 	static double dval;
 
@@ -60,7 +59,6 @@ Var *f_ocreate( Var *var )
 	help_text = NULL;
 	form_str = NULL;
 	new_io = NULL;
-	ID = 0;
 	lval = 0;
 	dval = 0.0;
 
@@ -257,13 +255,12 @@ Var *f_ocreate( Var *var )
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
-		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = ID;
+	new_io->ID = Tool_Box->next_ID++;
 	new_io->type = ( int ) type;
 	if ( type == INT_INPUT || type == INT_OUTPUT )
 		new_io->val.lval = lval;
@@ -273,6 +270,7 @@ Var *f_ocreate( Var *var )
 	new_io->group = NULL;
 	new_io->label = label;
 	new_io->help_text = help_text;
+	new_io->is_changed = UNSET;
 
 	/* Draw the new object */
 
@@ -487,7 +485,7 @@ static void f_odelete_child( Var *v )
 	/* Do all possible checking of the parameter */
 
 	ID = get_strict_long( v, "input or output object ID" );
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );
@@ -635,6 +633,8 @@ Var *f_ovalue( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	io->is_changed = UNSET;
+
 	/* If there are no more arguments just return the objects value */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -705,7 +705,7 @@ static Var *f_ovalue_child( Var *v )
 
 	ID = get_strict_long( v, "input or output object ID" );
 
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );
@@ -796,6 +796,112 @@ static Var *f_ovalue_child( Var *v )
 		return vars_push( INT_VAR, lval );
 	else
 		return vars_push( FLOAT_VAR, dval );
+}
+
+
+/*----------------------------------------------------------*/
+/* Sets or returns the content of an input or output object */
+/*----------------------------------------------------------*/
+
+Var *f_ochanged( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need at least the objects ID */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child has to pass the arguments to the parent and ask it
+	   to return if the objects got changed */
+
+	if ( Internals.I_am == CHILD )
+		return f_ochanged_child( v );
+
+	/* No tool box -> no input or output objects... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No input or output objects have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that ID is ID of an input or output object */
+
+	io = find_object_from_ID( get_strict_long( v,
+											   "input or output object ID" ) );
+	if ( io == NULL ||
+		 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
+		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
+	{
+		print( FATAL, "Invalid input or output object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, io->is_changed );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static Var *f_ochanged_child( Var *v )
+{
+	long ID;
+	long changed;
+	char *buffer, *pos;
+	long *res;
+	size_t len;
+
+
+	/* Very basic sanity check... */
+
+	ID = get_strict_long( v, "input or output object ID" );
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid input or output object identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	len = sizeof EDL.Lc + sizeof ID + 1;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname );
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );          /* sliders ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );           /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	res = exp_ichanged( buffer, pos - buffer );
+
+	/* Bomb out on failure */
+
+	if ( res[ 0 ] < 0 )
+	{
+		T_free( res );
+		THROW( EXCEPTION );
+	}
+
+	changed = res[ 1 ];
+	T_free( res );
+
+	return vars_push( INT_VAR, changed );
 }
 
 

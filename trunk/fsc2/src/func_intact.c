@@ -25,7 +25,6 @@
 #include "fsc2.h"
 
 
-
 TOOL_BOX *Tool_Box = NULL;
 
 struct {
@@ -67,6 +66,8 @@ static void f_objdel_parent( Var *v );
 static int tool_box_close_handler( FL_FORM *a, void *b );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
+static Var *f_tb_changed_child( Var *v );
+static Var *f_tb_wait_child( Var *v );
 
 
 
@@ -83,6 +84,7 @@ void tool_box_create( long layout )
 	Tool_Box->Tools          = NULL;                 /* no form created yet */
 	Tool_Box->objs           = NULL;                 /* and also no objects */
 	Tool_Box->has_been_shown = UNSET;
+	Tool_Box->next_ID        = ID_OFFSET;
 
 	if ( GUI.G_Funcs.size == LOW )
 	{
@@ -353,7 +355,7 @@ Var *f_objdel( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	/* Loop over all object numbers - since the object 'belong' to the parent,
+	/* Loop over all object numbers - since the object 'belongs' to the parent,
 	   the child needs to ask the parent to delete the object. The ID of each
 	   object to be deleted gets passed to the parent in a buffer and the
 	   parent is asked to delete the object. */
@@ -440,7 +442,7 @@ static void f_objdel_parent( Var *v )
 
 	/* Do checks on parameters */
 
-	io = find_object_from_ID(  get_strict_long( v, "object ID" ) );
+	io = find_object_from_ID( get_strict_long( v, "object ID" ) );
 
 	if ( io == NULL )
 	{
@@ -458,6 +460,8 @@ static void f_objdel_parent( Var *v )
 
 		case NORMAL_SLIDER :
 		case VALUE_SLIDER :
+		case SLOW_NORMAL_SLIDER :
+		case SLOW_VALUE_SLIDER :
 			vars_pop( f_sdelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
@@ -492,7 +496,7 @@ IOBJECT *find_object_from_ID( long ID )
 	if ( Tool_Box == NULL )            /* no objects defined yet ? */
 		return NULL;
 
-	if ( ID < 0 )                       /* all IDs are >= 0 */
+	if ( ID < ID_OFFSET || ID >= Tool_Box->next_ID )
 		return NULL;
 
 	/* Loop through linked list to find the object */
@@ -724,13 +728,15 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			io->x = FI_sizes.OFFSET_X0 + ( io->type == NORMAL_BUTTON ?
 										   FI_sizes.NORMAL_BUTTON_DELTA : 0 );
 			io->y = io->prev->y + io->prev->h + FI_sizes.VERT_OFFSET +
-				( io->prev->type == NORMAL_SLIDER ||
-				  io->prev->type == VALUE_SLIDER  ||
-				  io->prev->type == INT_INPUT     ||
-				  io->prev->type == FLOAT_INPUT   ||
-				  io->prev->type == INT_OUTPUT    ||
-				  io->prev->type == FLOAT_OUTPUT  ||
-				  io->prev->type == MENU ?
+				( io->prev->type == NORMAL_SLIDER      ||
+				  io->prev->type == VALUE_SLIDER       ||
+				  io->prev->type == SLOW_NORMAL_SLIDER ||
+				  io->prev->type == SLOW_VALUE_SLIDER  ||
+				  io->prev->type == INT_INPUT          ||
+				  io->prev->type == FLOAT_INPUT        ||
+				  io->prev->type == INT_OUTPUT         ||
+				  io->prev->type == FLOAT_OUTPUT       ||
+				  io->prev->type == MENU ? 
 				  FI_sizes.LABEL_VERT_OFFSET : 0 );
 		}
 		else
@@ -785,14 +791,15 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_button( io->self, io->state ? 1 : 0 );
 			break;
 
-		case NORMAL_SLIDER :
+		case NORMAL_SLIDER : case SLOW_NORMAL_SLIDER :
 			io->w = FI_sizes.SLIDER_WIDTH;
 			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_slider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 									  io->w, io->h, io->label );
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
-			fl_set_slider_return( io->self, FL_RETURN_END );
+			fl_set_slider_return( io->self, io->type == NORMAL_SLIDER ?
+								  FL_RETURN_CHANGED : FL_RETURN_END_CHANGED );
 			fl_set_object_lsize( io->self, xcntl.sliderFontSize );
 			if ( io->step != 0.0 )
 				fl_set_slider_step( io->self, io->step );
@@ -801,14 +808,16 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 								 fabs( io->end_val - io->start_val ) / 200.0 );
 			break;
 
-		case VALUE_SLIDER :
+		case VALUE_SLIDER : case SLOW_VALUE_SLIDER :
 			io->w = FI_sizes.SLIDER_WIDTH;
 			io->h = FI_sizes.SLIDER_HEIGHT;
 			io->self = fl_add_valslider( FL_HOR_BROWSER_SLIDER, io->x, io->y,
 										 io->w, io->h, io->label );
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
-			fl_set_slider_return( io->self, FL_RETURN_END );
+			fl_set_object_lsize( io->self, xcntl.sliderFontSize );
+			fl_set_slider_return( io->self, io->type == VALUE_SLIDER ?
+								  FL_RETURN_CHANGED : FL_RETURN_END_CHANGED );
 			prec = - floor( log10 ( ( io->end_val - io->start_val ) /
 									( 0.825 * io->w ) ) );
 			fl_set_slider_precision( io->self,
@@ -914,12 +923,13 @@ static void tools_callback( FL_OBJECT *obj, long data )
 	long lval;
 	double dval;
 	const char *buf;
+	int old_state;
 	char obuf[ MAX_INPUT_CHARS + 1 ];
 
 
 	data = data;
 
-	/* Find out which button or slider got changed */
+	/* Find out which object got changed */
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		if ( io->self == obj )
@@ -931,25 +941,43 @@ static void tools_callback( FL_OBJECT *obj, long data )
 	{
 		case NORMAL_BUTTON :
 			io->state += 1;
+			io->is_changed = SET;
+			if ( io->report_change )
+				tb_wait_handler( io->ID );
 			break;
 
 		case PUSH_BUTTON :
 			io->state = fl_get_button( obj );
+			io->is_changed = SET;
+			if ( io->report_change )
+				tb_wait_handler( io->ID );
 			break;
 
 		case RADIO_BUTTON :
+			old_state = io->state;
 			io->state = fl_get_button( obj );
-			for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
+			if ( io->state != old_state )
 			{
-				if ( oio == io || oio->type != RADIO_BUTTON ||
-					 oio->group != io->group || io->state == 0 )
-					continue;
-				oio->state = 0;
+				for ( oio = Tool_Box->objs; oio != NULL; oio = oio->next )
+				{
+					if ( oio == io || oio->type != RADIO_BUTTON ||
+						 oio->group != io->group || io->state == 0 )
+						continue;
+					oio->state = 0;
+				}
+
+				io->is_changed = SET;
+				if ( io->report_change )
+					tb_wait_handler( io->ID );
 			}
 			break;
 
 		case NORMAL_SLIDER : case VALUE_SLIDER :
+		case SLOW_NORMAL_SLIDER : case SLOW_VALUE_SLIDER :
 			io->value = fl_get_slider_value( obj );
+			io->is_changed = SET;
+			if ( io->report_change )
+				tb_wait_handler( io->ID );
 			break;
 
 		case INT_INPUT :
@@ -968,13 +996,18 @@ static void tools_callback( FL_OBJECT *obj, long data )
 				break;
 			}
 
-			if ( lval != io->val.lval )
-				io->val.lval = lval;
 			fl_set_input( io->self, obuf );
+			if ( lval != io->val.lval )
+			{
+				io->val.lval = lval;
+				io->is_changed = SET;
+				if ( io->report_change )
+					tb_wait_handler( io->ID );
+			}
 			break;
 
 		case FLOAT_INPUT :
-			buf = fl_get_input( obj );
+			buf = fl_get_input( io->self );
 
 			if ( *buf == '\0' )
 				dval = 0;
@@ -999,9 +1032,17 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
 			fl_set_input( io->self, obuf );
+			sscanf( obuf, "%lf", &dval );
 
-			if ( dval != io->val.dval )
+			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
+			if ( strcasecmp( obuf, fl_get_input( io->self ) ) )
+			{
 				io->val.dval = dval;
+				io->is_changed = SET;
+				if ( io->report_change )
+					tb_wait_handler( io->ID );
+			}
+
 			break;
 
 		case INT_OUTPUT :
@@ -1015,7 +1056,14 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			break;
 
 		case MENU :
+			old_state = io->state;
 			io->state = fl_get_choice( io->self );
+			if ( io->state != old_state )
+			{
+				io->is_changed = SET;
+				if ( io->report_change )
+					tb_wait_handler( io->ID );
+			}
 			break;
 
 		default :                 /* this can never happen :) */
@@ -1195,9 +1243,9 @@ void check_label( char *str )
 }
 
 
-/*----------------------------------------------------*/
-/* Another function for dealing with an XForms bug... */
-/*----------------------------------------------------*/
+/*---------------------------------------------------*/
+/* Another function for dealing with a XForms bug... */
+/*---------------------------------------------------*/
 
 void store_geometry( void )
 {
@@ -1212,6 +1260,374 @@ void store_geometry( void )
 		tool_x = Tool_Box->Tools->x - 1;
 		tool_y = Tool_Box->Tools->y - 1;
 	}
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Function returns the ID of the first object from a list (or of all    */
+/* objects in the toolbox when an empty list was passed to the function) */
+/* which has been changed (by the user by manipulating the toolbox). If  */
+/* none of the objects were changed 0 is returned. Output objects aren't */
+/* taken into account because they can't be changed by the user via the  */
+/* toolbox but only from within the EDL script.                          */
+/*-----------------------------------------------------------------------*/
+
+Var *f_tb_changed( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* The child process has it's own way of dealing with this */
+
+	if ( Internals.I_am == CHILD )
+		return f_tb_changed_child( v );
+
+	/* No toolbox -> no objects -> no object can have changed */
+
+	if ( Tool_Box == NULL )
+		return vars_push( INT_VAR, 0 );	
+
+	/* If there's a list of objects loop over it until the first changed one
+	   is found. If none of them were changed return 0. Don't tell about
+	   output objects. */
+
+	if ( v != NULL )
+	{
+		for ( ; v != NULL; v = vars_pop( v ) )
+		{
+			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+				continue;
+			if ( io->is_changed )
+				return vars_push( INT_VAR, io->ID );
+		}
+
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* If there were no arguments loop over all objects */
+
+	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+	{
+		if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+			continue;
+		if ( io->is_changed )
+			return vars_push( INT_VAR, io->ID );
+	}
+
+	return vars_push( INT_VAR, 0 );
+}
+
+
+/*--------------------------------------------------------------------*/
+/* To figure out if any of the objects changed the child process must */
+/* pass the list of objects (which may be empty) to the parent and    */
+/* wait for it's reply.                                               */
+/*--------------------------------------------------------------------*/
+
+static Var *f_tb_changed_child( Var *v )
+{
+	char *buffer, *pos;
+	Var *cv;
+	size_t len;
+	long *result;
+	long cid;
+	long var_count = 0;
+
+
+	/* Calculate length of buffer needed */
+
+	len = sizeof EDL.Lc + sizeof var_count + 1;
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname );
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		vars_check( v, INT_VAR );
+		if ( cv->val.lval < ID_OFFSET )
+		{
+			print( FATAL, "Invalid object identifier.\n" );
+			THROW( EXCEPTION );
+		}
+
+		len += sizeof cv->val.lval;
+		var_count++;
+	}
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &var_count, sizeof var_count );   /* number of arguments */
+	pos += sizeof var_count;
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		memcpy( pos, &v->val.lval, sizeof v->val.lval );
+		pos += sizeof v->val.lval;
+	}
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );                  /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent process to return the ID of the first changed object */
+
+	result = exp_tbchanged( buffer, pos - buffer );
+
+	/* Bomb out if parent returns failure */
+
+	if ( result[ 0 ] <= 0 )
+	{
+		T_free( result );
+		THROW( EXCEPTION );
+	}
+
+	cid = result[ 1 ];
+	T_free( result );
+
+	return vars_push( INT_VAR, cid );
+}
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+Var *f_tb_wait( Var *v )
+{
+	IOBJECT *io;
+	double duration;
+	double secs;
+	struct itimerval sleepy;
+
+
+	/* The child process has it's own way of dealing with this */
+
+	if ( Internals.I_am == CHILD )
+		return f_tb_wait_child( v );
+
+	if ( v != NULL )
+	{
+		duration = get_double( v, "maximum wait time for object change" );
+		v = vars_pop( v );
+	}
+	else
+		duration = -1.0;
+
+	if ( Internals.mode == TEST )
+		return vars_push( INT_VAR, 0 );
+
+	Internals.tb_wait = 0;
+
+	if ( Tool_Box != NULL )
+	{
+		/* If there's a list of objects loop over it until the first changed
+		   one is found. Don't tell about output objects. */
+
+		if ( v != NULL )
+		{
+			for ( ; v != NULL; v = v->next )
+			{
+				io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+					continue;
+				if ( io->is_changed )
+				{
+					tb_wait_handler( io->ID );
+					return vars_push( INT_VAR, 0 );
+				}
+			}
+		}
+		else    /* if there were no arguments loop over all objects */
+		{
+			for ( io = Tool_Box->objs; io != NULL; io = io->next )
+			{
+				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+					continue;
+				if ( io->is_changed )
+				{
+					tb_wait_handler( io->ID );
+					return vars_push( INT_VAR, 0 );
+				}
+			}
+		}
+
+		/* None of the objects have changed - set up all objects we need to
+		   wait for to report a change */
+
+		if ( v != NULL )
+		{
+			for ( ; v != NULL; v = vars_pop( v ) )
+			{
+				io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+					continue;
+				io->report_change = SET;
+			}
+		}
+		else    /* if there were no arguments loop over all objects */
+		{
+			for ( io = Tool_Box->objs; io != NULL; io = io->next )
+			{
+				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+					continue;
+				io->report_change = SET;
+			}
+		}
+	}
+
+	/* Only really wait if the duration is at least 1 ms, we don't have
+	   a better time resolution anyway. Also don't wait for indefinite
+	   times if there's no toolbox. */
+
+	if ( ( duration > 0.0 || Tool_Box == NULL ) && duration < 1.0e-3 )
+	{
+		tb_wait_handler( 0 );
+		return vars_push( INT_VAR, 0 );
+	}
+
+	/* If the duration is a real time set up a timer */
+
+	if ( duration > 0.0 )
+	{ 
+		sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
+		sleepy.it_value.tv_usec = lrnd( modf( duration, &secs ) * 1.0e6 );
+		sleepy.it_value.tv_sec = lrnd( secs );
+		Internals.tb_wait = TB_WAIT_TIMER_RUNNING;
+		setitimer( ITIMER_REAL, &sleepy, NULL );
+	}
+	else
+		Internals.tb_wait = TB_WAIT_RUNNING_WITH_NO_TIMER;
+
+	return vars_push( INT_VAR, 0 );
+}
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+void tb_wait_handler( long ID )
+{
+	long result[ 2 ];
+	IOBJECT *io;
+	struct itimerval sleepy;
+
+
+	/* Do nothing if the timer has expired and we arrive here from the
+	   callback for an object or the callback for the 'STOP' button (in
+	   which case we're called with an argument of -1). */
+
+	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED && ID != 0 )
+		return;
+
+	/* If the timer hasn't expired yet stop it */
+
+	if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
+	{
+		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
+		setitimer( ITIMER_REAL, &sleepy, NULL );
+	}
+
+	result[ 0 ] = 1;
+	result[ 1 ] = ID >= 0 ? ID : 0;
+
+	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		io->report_change = UNSET;
+
+	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+
+	writer( C_TBWAIT_REPLY, sizeof result, result );
+}
+
+
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+static Var *f_tb_wait_child( Var *v )
+{
+	char *buffer, *pos;
+	Var *cv;
+	size_t len;
+	double duration;
+	long *result;
+	long cid;
+	long var_count = 0;
+
+
+	/* Calculate length of buffer needed */
+
+	len = sizeof EDL.Lc + sizeof duration + sizeof var_count + 1;
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname );
+
+	if ( v != NULL )
+	{
+		duration = get_double( v, "maximum wait time for object change" );
+		v = vars_pop( v );
+	}
+	else
+		duration = -1.0;
+
+	for ( cv = v; cv != NULL; cv = cv->next )
+	{
+		vars_check( v, INT_VAR );
+		if ( cv->val.lval < ID_OFFSET )
+		{
+			print( FATAL, "Invalid object identifier.\n" );
+			THROW( EXCEPTION );
+		}
+
+		len += sizeof cv->val.lval;
+		var_count++;
+	}
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &duration, sizeof duration );
+	pos += sizeof( duration );
+
+	memcpy( pos, &var_count, sizeof var_count );   /* number of arguments */
+	pos += sizeof var_count;
+
+	for ( ; v != NULL; v = vars_pop( v ) )
+	{
+		memcpy( pos, &v->val.lval, sizeof v->val.lval );
+		pos += sizeof v->val.lval;
+	}
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );                  /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent process to return the ID of the first changed object */
+
+	result = exp_tbwait( buffer, pos - buffer );
+
+	/* Bomb out if parent returns failure (but only if we didn't got a
+	   legal DO_QUIT signal) */
+
+	if ( result[ 0 ] <= 0 && ! EDL.do_quit && ! EDL.react_to_do_quit )
+	{
+		T_free( result );
+		THROW( EXCEPTION );
+	}
+
+	cid = result[ 1 ];
+	T_free( result );
+
+	return vars_push( INT_VAR, cid );
 }
 
 

@@ -1597,8 +1597,9 @@ static void set_main_signals( void )
 {
 	struct sigaction sact;
 	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
-						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2, SIGCHLD,
-						SIGCONT, SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM, 0 };
+						SIGALRM, SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGUSR2,
+						SIGCHLD, SIGCONT, SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM,
+						0 };
 	int i;
 
 
@@ -1650,11 +1651,15 @@ void main_sig_handler( int signo )
 			conn_child_replied = SET;
 			return;
 
+		case SIGALRM :
+			if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
+				Internals.tb_wait = TB_WAIT_TIMER_EXPIRED;
+			return;
+
 		/* Ignored signals : */
 
 		case SIGHUP :
 		case SIGINT :
-		case SIGALRM :
 		case SIGCONT :
 		case SIGTTIN :
 		case SIGTTOU :
@@ -1662,23 +1667,27 @@ void main_sig_handler( int signo )
 		case SIGPIPE :
 			return;
 
-		/* All the remaining signals are deadly - set fsc2_death to the signal
-		   number so final_exit_handler() can do the appropriate things. */
+		/* All the remaining signals are deadly - we set 'fsc2_death' to the
+		   signal number so final_exit_handler() can do the appropriate
+		   things. */
 
 		default :
 			fsc2_death = signo;
 
 			if ( ! ( Internals.cmdline_flags & NO_MAIL ) )
 			{
+
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
+
+				/* Of course, we're now deep in UB-land, so we can only hope
+				   that it won't make nasal daemons come out of our nose... */
+
 				if ( Internals.is_i386 )
 				{
 					asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-					Internals.crash_address =
-								   ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET );
+					DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
 				}
 #endif
-				DumpStack( );
 			}
 
 			exit( EXIT_FAILURE );

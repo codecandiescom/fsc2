@@ -34,6 +34,7 @@ static Var *f_mcreate_child( Var *v, size_t len, long num_strs );
 static void f_mdelete_child( Var *v );
 static void f_mdelete_parent( Var *v );
 static Var *f_mchoice_child( Var *v );
+static Var *f_mchanged_child( Var *v );
 
 
 /*---------------------------*/
@@ -48,13 +49,11 @@ Var *f_mcreate( Var *var )
 	size_t len = 0;
 	static IOBJECT *new_io;
 	static IOBJECT *ioi;
-	static long ID;
 	long i;
 
 
 	v = var;
 	num_strs = 0;
-	ID = 0;
 
 	/* At least a label and two menu entries must be specified */
 
@@ -98,16 +97,16 @@ Var *f_mcreate( Var *var )
 		{
 			for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 				/* empty */ ;
-			ID = ioi->ID + 1;
 			ioi->next = new_io;
 			new_io->prev = ioi;
 			new_io->next = NULL;
 		}
 
-		new_io->ID = ID;
+		new_io->ID = Tool_Box->next_ID++;
 		new_io->type = MENU;
 		new_io->self = NULL;
 		new_io->state = 1;
+		new_io->is_changed = UNSET;
 
 		new_io->label = NULL;
 		new_io->menu_items = NULL;
@@ -274,7 +273,7 @@ static void f_mdelete_child( Var *v )
 
 	ID = get_strict_long( v, "menu ID" );
 
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -419,6 +418,8 @@ Var *f_mchoice( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	io->is_changed = UNSET;
+
 	/* If there's no second parameter just return the currently selected menu
 	   item */
 
@@ -484,7 +485,7 @@ static Var *f_mchoice_child( Var *v )
 
 	ID = get_strict_long( v, "menu ID" );
 
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid menu identifier.\n" );
 		THROW( EXCEPTION );
@@ -555,6 +556,114 @@ static Var *f_mchoice_child( Var *v )
 	T_free( result );           /* free result buffer */
 
 	return vars_push( INT_VAR, select_item );
+}
+
+
+/*-------------------------------------------------------*/
+/* Returns if the selected item of a menu object changed */
+/*-------------------------------------------------------*/
+
+Var *f_mchanged( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need at least the ID of the menu */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argumnts.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child doesn't know about the menu, so it got to ask the
+	   parent process */
+
+	if ( Internals.I_am == CHILD )
+		return f_mchanged_child( v );
+
+	/* No tool box -> no menus -> no menu item to set or get... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No menus have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the button ID parameter */
+
+	io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+
+	if ( io == NULL || io->type != MENU )
+	{
+		print( FATAL, "Invalid menu identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, io->is_changed );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static Var *f_mchanged_child( Var *v )
+{
+	long ID;
+	char *buffer, *pos;
+	size_t len;
+	long *result;
+	long changed;
+
+
+	/* Basic check of menu identifier - always the first parameter */
+
+	ID = get_strict_long( v, "menu ID" );
+
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid menu identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Make up buffer to send to parent process */
+
+	len = sizeof EDL.Lc + sizeof ID + 1;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname );
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );          /* buttons ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );           /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent process if the selected item changed - bomb out if it
+	   returns a non-positive value, indicating a severe error */
+
+	result = exp_mchanged( buffer, pos - buffer );
+
+	if ( result[ 0 ] == 0 )      /* failure -> bomb out */
+	{
+		T_free( result );
+		THROW( EXCEPTION );
+	}
+
+	changed = result[ 1 ];
+	T_free( result );           /* free result buffer */
+
+	return vars_push( INT_VAR, changed );
 }
 
 

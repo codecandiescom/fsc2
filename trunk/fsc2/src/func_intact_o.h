@@ -33,6 +33,7 @@
 Var *f_ocreate( Var *v );
 Var *f_odelete( Var *v );
 Var *f_ovalue(  Var *v );
+Var *f_ochanged( Var *v );
 
 
 #endif   /* ! INTERACTIVE_OBJECTS_HEADER */

@@ -177,8 +177,9 @@ typedef struct {
 	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
 									been run */
 
-	void *crash_address;         /* stores the program counter of the place
-									where a crash happened */
+	volatile sig_atomic_t tb_wait; /* set if the child is waiting for the
+									  change of the state of an object in the
+									  toolbox */
 } INTERNALS;
 
 

@@ -35,6 +35,7 @@ static Var *f_screate_child( Var *v, long type, double start_val,
 static void f_sdelete_child( Var *v );
 static void f_sdelete_parent( Var *v );
 static Var *f_svalue_child( Var *v );
+static Var *f_schanged_child( Var *v );
 
 
 /*----------------------*/
@@ -51,14 +52,12 @@ Var *f_screate( Var *var )
 	static double step;
 	static char *label = NULL;
 	static char *help_text = NULL;
-	static long ID;
 
 
 	v = var;
 	new_io = NULL;
 	step = 0.0;
 	label = help_text = NULL;
-	ID = 0;
 
 	/* We need at least the type of the slider and the minimum and maximum
 	   value */
@@ -77,7 +76,8 @@ Var *f_screate( Var *var )
 	{
 		type = get_strict_long( v, "slider type" );
 
-		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER )
+		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER &&
+			 type != SLOW_NORMAL_SLIDER && type != SLOW_VALUE_SLIDER )
 		{
 			print( FATAL, "Invalid slider type (%ld).\n", type );
 			THROW( EXCEPTION );
@@ -89,6 +89,10 @@ Var *f_screate( Var *var )
 			type = NORMAL_SLIDER;
 		else if ( ! strcasecmp( v->val.sptr, "VALUE_SLIDER" ) )
 			type = VALUE_SLIDER;
+		else if ( ! strcasecmp( v->val.sptr, "SLOW_NORMAL_SLIDER" ) )
+			type = SLOW_NORMAL_SLIDER;
+		else if ( ! strcasecmp( v->val.sptr, "SLOW_VALUE_SLIDER" ) )
+			type = SLOW_VALUE_SLIDER;
 		else
 		{
 			print( FATAL, "Unknown slider type: '%s'.\n", v->val.sptr );
@@ -217,13 +221,12 @@ Var *f_screate( Var *var )
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
-		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = ID;
+	new_io->ID = Tool_Box->next_ID++;
 	new_io->type = ( int ) type;
 	new_io->self = NULL;
 	new_io->start_val = start_val;
@@ -235,6 +238,7 @@ Var *f_screate( Var *var )
 		                + start_val;
 	new_io->label = label;
 	new_io->help_text = help_text;
+	new_io->is_changed = UNSET;
 
 	/* Draw the new slider */
 
@@ -401,8 +405,7 @@ static void f_sdelete_child( Var *v )
 	/* Very basic sanity check */
 
 	ID = get_strict_long( v, "slider ID" );
-
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -459,7 +462,8 @@ static void f_sdelete_parent( Var *v )
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
 	if ( io == NULL ||
-		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER ) )
+		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
+		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -537,12 +541,14 @@ Var *f_svalue( Var *v )
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
 	if ( io == NULL ||
-		 ( io->type != NORMAL_SLIDER &&
-		   io->type != VALUE_SLIDER ) )
+		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
+		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
 	}
+
+	io->is_changed = UNSET;
 
 	/* If there are no more arguments just return the sliders value */
 
@@ -601,8 +607,7 @@ static Var *f_svalue_child( Var *v )
 	/* Very basic sanity check... */
 
 	ID = get_strict_long( v, "slider ID" );
-
-	if ( v->val.lval < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -666,6 +671,118 @@ static Var *f_svalue_child( Var *v )
 	T_free( res );
 
 	return vars_push( FLOAT_VAR, val );
+}
+
+
+/*---------------------------------------*/
+/* Sets or returns the value of a slider */
+/*---------------------------------------*/
+
+Var *f_schanged( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need the sliders ID */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child has to pass the arguments to the parent and ask it
+	   to set or return the slider value */
+
+	if ( Internals.I_am == CHILD )
+		return f_schanged_child( v );
+
+	/* No tool box -> no sliders... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No slider have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check that ID is ID of a slider */
+
+	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
+
+	if ( io == NULL ||
+		 ( io->type != NORMAL_SLIDER && io->type != VALUE_SLIDER &&
+		   io->type != SLOW_NORMAL_SLIDER && io->type != SLOW_VALUE_SLIDER ) )
+	{
+		print( FATAL, "Invalid slider identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, io->is_changed );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static Var *f_schanged_child( Var *v )
+{
+	long ID;
+	char *buffer, *pos;
+	long *res;
+	long val;
+	size_t len;
+
+
+	/* Very basic sanity check... */
+
+	ID = get_strict_long( v, "slider ID" );
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid slider identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	len = sizeof EDL.Lc + sizeof ID;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );             /* sliders ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );              /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent if the slider got changed - it will return an array with two
+	   longs, the first indicating if it was successful (when the value is
+	   positive) and the second indicated if the slider got changed. */
+
+	res = exp_schanged( buffer, pos - buffer );
+
+	/* Bomb out on failure */
+
+	if ( res[ 0 ] < 0 )
+	{
+		T_free( res );
+		THROW( EXCEPTION );
+	}
+
+	val = res[ 1 ];
+	T_free( res );
+
+	return vars_push( INT_VAR, val );
 }
 
 

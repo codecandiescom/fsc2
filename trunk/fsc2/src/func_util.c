@@ -398,10 +398,7 @@ Var *f_wait( Var *v )
 	   kill the child prematurely. */
 
 	if ( EDL.do_quit )
-	{
-		sleepy.it_value.tv_usec = 0;
-		sleepy.it_value.tv_sec  = 0;
-	}
+		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec  = 0;
 
 	return vars_push( INT_VAR, EDL.do_quit ? 0 : 1 );
 }

@@ -34,6 +34,7 @@ static Var *f_bcreate_child( Var *v, long type, long coll );
 static void f_bdelete_child( Var *v );
 static void f_bdelete_parent( Var *v );
 static Var *f_bstate_child( Var *v );
+static Var *f_bchanged_child( Var *v );
 
 
 /*----------------------*/
@@ -49,14 +50,12 @@ Var *f_bcreate( Var *var )
 	static char *help_text;
 	static IOBJECT *new_io;
 	IOBJECT *ioi, *cio;
-	static long ID = 0;
 
 
 	v = var;
 	coll = -1;
 	label = help_text = NULL;
 	new_io = NULL;
-	ID = 0;
 
 	/* At least the type of the button must be specified */
 
@@ -143,7 +142,7 @@ Var *f_bcreate( Var *var )
 	if ( Internals.I_am == CHILD )
 		return f_bcreate_child( v, type, coll );
 
-	/* Next argument gto to be the label string */
+	/* Next argument got to be the label string */
 
 	if ( v != NULL )
 	{
@@ -219,13 +218,12 @@ Var *f_bcreate( Var *var )
 	{
 		for ( ioi = Tool_Box->objs; ioi->next != NULL; ioi = ioi->next )
 			/* empty */ ;
-		ID = ioi->ID + 1;
 		ioi->next = new_io;
 		new_io->prev = ioi;
 		new_io->next = NULL;
 	}
 
-	new_io->ID = ID;
+	new_io->ID = Tool_Box->next_ID++;
 	new_io->type = ( int ) type;
 	if ( type == RADIO_BUTTON && coll == -1 )
 		new_io->state = 1;
@@ -236,6 +234,7 @@ Var *f_bcreate( Var *var )
 	new_io->label = label;
 	new_io->help_text = help_text;
 	new_io->partner = coll;
+	new_io->is_changed = UNSET;
 
 	/* Draw the new button */
 
@@ -408,7 +407,7 @@ static void f_bdelete_child( Var *v )
 
 	ID = get_strict_long( v, "button ID" );
 
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -579,6 +578,8 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	io->is_changed = UNSET;
+
 	/* If there's no second parameter just return the button state - for
 	   NORMAL_BUTTONs return the number it was pressed since the last call
 	   and reset the counter to zero */
@@ -659,7 +660,7 @@ static Var *f_bstate_child( Var *v )
 
 	ID = get_strict_long( v, "button ID" );
 
-	if ( ID < 0 )
+	if ( ID < ID_OFFSET )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -720,6 +721,118 @@ static Var *f_bstate_child( Var *v )
 
 	return vars_push( INT_VAR, chld_state );
 }
+
+
+/*---------------------------------------*/
+/* Sets or returns the state of a button */
+/*---------------------------------------*/
+
+Var *f_bchanged( Var *v )
+{
+	IOBJECT *io;
+
+
+	/* We need at least the ID of the button */
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argumnts.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Again, the child doesn't know about the button, so it got to ask the
+	   parent process */
+
+	if ( Internals.I_am == CHILD )
+		return f_bchanged_child( v );
+
+	/* No tool box -> no buttons -> no button state change possible... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No buttons have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Check the button ID parameter */
+
+	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
+
+	if ( io == NULL ||
+		 ( io->type != NORMAL_BUTTON &&
+		   io->type != PUSH_BUTTON   &&
+		   io->type != RADIO_BUTTON ) )
+	{
+		print( FATAL, "Invalid button identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return vars_push( INT_VAR, io->is_changed );
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+static Var *f_bchanged_child( Var *v )
+{
+	long ID;
+	char *buffer, *pos;
+	size_t len;
+	long *result;
+	int chld_changed;
+	
+
+	/* Basic check of button identifier - always the first parameter */
+
+	ID = get_strict_long( v, "button ID" );
+
+	if ( ID < ID_OFFSET )
+	{
+		print( FATAL, "Invalid button identifier.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Make up buffer to send to parent process */
+
+	len = sizeof EDL.Lc + sizeof ID + 1;
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
+	pos += sizeof EDL.Lc;
+
+	memcpy( pos, &ID, sizeof ID );     /* buttons ID */
+	pos += sizeof ID;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );           /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	/* Ask parent process to return the state change indicator */
+
+	result = exp_bchanged( buffer, pos - buffer );
+
+	/* Bomb out if parent returns failure */
+
+	if ( result[ 0 ] == 0 )
+	{
+		T_free( result );
+		THROW( EXCEPTION );
+	}
+
+	chld_changed = result[ 1 ];
+	T_free( result );
+
+	return vars_push( INT_VAR, chld_changed );
+}
+
 
 
 /*

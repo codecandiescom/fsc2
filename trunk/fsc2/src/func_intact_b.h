@@ -33,6 +33,7 @@
 Var *f_bcreate( Var *v );
 Var *f_bdelete( Var *v );
 Var *f_bstate(  Var *v );
+Var *f_bchanged( Var *v );
 
 
 #endif   /* ! INTERACTIVE_BUTTONS_HEADER */

@@ -67,7 +67,7 @@ enum {
 /* in the Makefile.                                                      */
 /*-----------------------------------------------------------------------*/
 
-void DumpStack( void )
+void DumpStack( void *crash_address )
 {
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
@@ -150,12 +150,11 @@ void DumpStack( void )
 	close( pipe_fd[ DUMP_CHILD_READ  ] );
 	close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
-	/* The program counter where the crash happened has (hopefully) been
-	   written into 'Internals.crash_address' by the signal handler from
-	   which we were called. We now feed it to ADDR2LINE to get the
-	   function name, source file and line number. */
+	/* The program counter where the crash happened has been passed by the
+	   signal handler from which we are called. We now feed it to ADDR2LINE
+	   to get the function name, source file and line number. */
 
-	write_dump( pipe_fd, answer_fd, k++, Internals.crash_address );
+	write_dump( pipe_fd, answer_fd, k++, crash_address );
 
 	/* Load content of ebp register into EBP - ebp always points to the stack
 	   address before the return address of the current subroutine, and the
@@ -211,6 +210,8 @@ void DumpStack( void )
 	close( answer_fd[ DUMP_ANSWER_WRITE ] );
 
 	fail_mess_fd = answer_fd[ DUMP_ANSWER_READ ];
+#else
+	crash_address = crash_address;
 #endif
 }
 

@@ -33,6 +33,7 @@
 Var *f_screate( Var *v );
 Var *f_sdelete( Var *v );
 Var *f_svalue(  Var *v );
+Var *f_schanged( Var *v );
 
 
 #endif   /* ! INTERACTIVE_SLIDERSS_HEADER */

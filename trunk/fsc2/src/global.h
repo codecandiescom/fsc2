@@ -367,6 +367,11 @@ enum {
 #define FILE_NUMBER_NOT_OPEN  ( FILE_NUMBER_OFFSET - 1 )
 
 
+/* This constant is the start number for the IDs of objects in the toolbox */
+
+#define ID_OFFSET             328102
+
+
 /* This constants are used in converting integer and double numbers to short
    integers as expected by the X library routines as point coordinates */
 
@@ -381,6 +386,17 @@ enum {
    gcc of the versions where I tested it...) */
 
 #define CRASH_ADDRESS_OFFSET 0x11
+
+
+/* The following are the states the function for waiting for an
+   event from the toolbox can be in */
+
+enum {
+	TB_WAIT_NOT_RUNNING,
+	TB_WAIT_RUNNING_WITH_NO_TIMER,
+	TB_WAIT_TIMER_EXPIRED,
+	TB_WAIT_TIMER_RUNNING
+};
 
 
 #endif /* ! FSC2_GLOBAL */

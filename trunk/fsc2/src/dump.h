@@ -25,7 +25,7 @@
 #define DUMP__HEADER
 
 
-void DumpStack( void );
+void DumpStack( void *crash_address );
 
 
 #endif   /* ! DUMP__HEADER */

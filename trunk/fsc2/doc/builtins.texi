@@ -958,6 +958,46 @@ vertical or horizontal layout.
 Of course this function has to be called @b{before} a function to create
 an object (button, slider or in- or output field) has been invoked.
 
+@anchor{toolbox_changed}
+@item toolbox_changed()
+@findex toolbox_changed()
+This function lets you test if the state of one of the objects in the
+toolbox has been changed by the user, i.e.@: a button has been pressed,
+a slider has been moved, an input field has been edited or the selected
+of a menu has been changed. You can pass this function a list of object
+IDs, in which case only the objects in the list are checked. When no
+arguments are passed to the function all objects (except output fields)
+are checked. If the state of one or more objects has been changed the
+function returns the ID of the first object (in the list or of all
+objects in the toolbox) that has been changed. If none have been changed
+@code{0} will be returned.
+
+Please note: the function will @strong{not} report changes due to
+function calls that change the state of an object, e.g.@: when setting a
+new slider position from within the @code{EDL} program. The function
+also will report a change until the new state of the object has been
+determined by an appropriate function call. I.e.@: it will repeatedly
+report e.g.@: a new slider value until you have called
+@code{slider_value()} for the object.
+
+@anchor{toolbox_wait}
+@item toolbox_wait()
+@findex toolbox_wait()
+This function is very similar to the previous function,
+@code{toolbox_change()}. The main difference is that it will wait for a
+certain time and only returns when either this time has expired or an
+objects state has changed. Thus it needs on additional argument: the
+first argument must be the maximum time the function will block if none
+of the objects were changed. This first argument may be followed of a
+list of objects to check. The function also returns the ID of the first
+changed object or @code{0} if the time expired and no objects were
+changed during the time interval.
+
+If you want to wait indefinitely you may pass the function a value of
+@code{0} or a negative value. If you pass no arguments at all to the
+function it will block until one of the objects in the toolbox has
+been changed by the user.
+
 
 @anchor{button_create}
 @item button_create()
@@ -1046,6 +1086,22 @@ activate another button from its group instead. The state of normal
 buttons cannot be set.
 
 
+@anchor{button_changed}
+@item button_changed()
+@findex button_changed()
+The function takes one argument, the ID of a button. It will return
+@code{1} if the button has been activated and @code{0} if the state of
+the button hasn't been changed. Please note that the function will
+repeatedly report a change of the button state until you have determined
+the new state of the button by calling @code{button_state()} for the
+button.
+
+For radio buttons, the function will only report a change for a newly
+activated button, but none for a button that automatically got switched
+off, i.e.@: only for the button that has become active from a group of
+radio buttons.
+
+
 @anchor{slider_create}
 @item slider_create()
 @findex slider_create()
@@ -1063,9 +1119,9 @@ The first argument the function expects is a string, either
 are case-insensitive). @code{NORMAL} sliders are just sliders without
 any decoration while @code{VALUE} sliders have an extra field showing
 the current value set via the slider. Normally, a slider reports a new
-value whenever the slider has been moved, @code{SLOW} sliders only
-report a new value only when also the mouse button (which has to be kept
-pressed down while the slider is moved) has been released.
+value whenever the slider has been moved. In contrast, @code{SLOW}
+sliders only acquire a new value when also the mouse button (which has
+to be kept pressed down while the slider is moved) has been released.
 
 The second argument must be the minimum value the slider can be adjusted
 to and the third argument is the maximum value. The minimum value must
@@ -1105,6 +1161,16 @@ range of the slider as defined by the minimum and maximum value set in
 slider value is set to the next value still within the allowed range.
 If a step size is set for the slider and the new value does not fit with
 the step size the nearest allowed value is set.
+
+
+@anchor{slider_changed}
+@item slider_changed()
+@findex slider_changed()
+The function takes one argument, the ID of a slider. It will return
+@code{1} if the value of the slider has been changed by the user and
+@code{0} if not. Please note that the function will repeatedly report a
+change of the sliders value until you have determined the new value by
+calling @code{slider_value()} for the slider.
 
 
 @anchor{input_create}
@@ -1153,7 +1219,20 @@ This function returns or sets the value of an input field. The first
 argument must be an input field identifier as returned by the function
 @code{input_create()}. If this is the only argument the value the input
 field is set to is returned. If there's a second value the input field
-is set to this value. Obviously, the value must be number.
+is set to this value. Obviously, the value must be number, an integer
+for code{INT_INPUT} fields and a floating point number (but integers
+will also be accepted) for @code{FLOAT_INPUT} objects.
+
+
+@anchor{input_changed}
+@item input_changed()
+@findex input_changed()
+The function takes one argument, the ID of a input. It will return
+@code{1} if the value of the input field has been edited by the user
+(and thereby changed) and @code{0} if not. Please note that the function
+will repeatedly report a change of the input fields value until you have
+determined the new value by calling @code{input_value()} for the input
+field.
 
 
 @anchor{output_create}
@@ -1245,6 +1324,16 @@ If called with a second argument this must be an integer number between
 number indicates which of the items has to become marked as selected
 (where, obviously, @code{1} will select the first item, @code{2} the
 second etc.).
+
+
+@anchor{menu_changed}
+@item menu_changed()
+@findex menu_changed()
+The function takes one argument, the ID of a menu. It will return
+@code{1} if the the user has selected a new menu item and @code{0} if
+not. Please note that the function will repeatedly report a change of
+the selected menu item until you have determined the new item by calling
+@code{menu_choice()} for the menu object.
 
 
 @anchor{object_delete}
