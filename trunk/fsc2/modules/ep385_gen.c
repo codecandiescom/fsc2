@@ -169,7 +169,9 @@ bool ep385_set_function_delay( int function, double delay )
 			THROW( EXCEPTION );
 		}
 
-		if ( Delay < ep385.neg_delay )
+		ep385.is_neg_delay = SET;
+
+		if ( Delay < - ep385.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
