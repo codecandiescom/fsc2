@@ -945,10 +945,8 @@ void run_file( FL_OBJECT *a, long b )
 		TRY_SUCCESS;
 	}
 	CATCH( EXCEPTION )
-	{
 		fl_show_alert( "Error", "Sorry, can't run the experiment.",
 					   "See browser for more information.", 1 );
-	}
 }
 
 
