@@ -271,4 +271,4 @@ counter_stop_counter, 1, EXP;
 counter_single_pulse, 2, EXP;
 counter_continuous_pulses, -1, EXP;
 counter_dio_read, -1, EXP;
-counter_dio_write1, -1, EXP;
+counter_dio_write, -1, EXP;
