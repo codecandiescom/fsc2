@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
 #  $Id$
 #
@@ -25,13 +25,13 @@
 use strict;
 use IO::Socket::INET;
 use POSIX;
-use Fcntl qw( :DEFAULT :flock );
 use Errno;
 
 
-my $client;       # The Most Important Entity ;-)
+my $client;            # The Most Important Entity ;-)
+my $max_reqs = 16;     # how many simultaneous requests get accepted
 
-# Check if we got a port as the first argument...
+# Check if we got a port number as the first argument...
 
 my $port = 8080;
 $port = $ARGV[ 0 ] if
@@ -48,7 +48,7 @@ $auxdir = $ARGV[ 1 ] if defined $ARGV[ 1 ];
 # Un-buffer the (write) connection to fsc2 or it may never react to what
 # we're sending its way
 
-autoflush STDOUT 1;
+$| = 1;
 
 
 # SIGPIPE signals should only come from a spawned server while it's writing,
@@ -70,24 +70,36 @@ $SIG{ CHLD } = sub { 1 until waitpid( -1, WNOHANG ) == -1 };
 my $server = IO::Socket::INET->new( LocalPort => $port,
 									Type      => SOCK_STREAM,
 									Reuse     => 1,
-									Listen    => 16 )
+									Listen    => $max_reqs )
 	or exit 1;
 
 
-# Now wait for the unwashed masses to hammer on our little server - at least
-# 16 requests will get served simultaneously. This requires the child
-# processes to look out for locks on STDOUT, i.e. the write-connection to fsc2
-# (to be more precise, each single server has to get an exclusive lock on
-# STDOUT before writing to it and must release this lock only after reading
-# the complete reply from fsc2).
+# After we have the server up and running we must also make sure it gets
+# shutdown correctly when fsc2 tells us to close shop
+
+my $ppid = $$;
+$SIG{ TERM } = sub { shutdown( $server, 2 ) if $$ == $ppid; exit 0; };
+
+
+# Now wait for the users to hammer on our little server - at least $max_reqs
+# requests can get served simultaneously. This requires the child processes
+# to look out for locks on STDOUT, i.e. the write-connection to fsc2. To be
+# more precise, each single server has to get an lock on STDOUT by calling
+# stdout_lock() before writing to it and must release this lock (by calling
+# stdout_unlock()) only after reading the complete reply from fsc2.
 
 while ( $client = $server->accept( ) ) {
-	if ( fork( ) == 0 ) {
-		serve( );
+	if ( my $pid = fork ) {         # parent on success
 		close $client;
-		exit 0;
+	} elsif ( defined $pid ) {      # child
+		$SIG{ TERM } = 'DEFAULT';
+		serve( );
+	} elsif ( $! == EAGAIN ) {      # (hopefully) recoverable fork problem
+		sleep 1;
+		redo;
+	} else {                        # fork failed badly
+		exit 1;
 	}
-	close $client;
 }
 
 
@@ -96,32 +108,35 @@ while ( $client = $server->accept( ) ) {
 
 sub serve {
 
-	my ( $file, $req, $txt );
+	my $txt;
 	my ( $has_png, $has_gif ) = ( 0, 0 );
 
-	# Skip leading blank lines from the client, give up when the client closes
-	# the connection
+
+	# Make the client connection the default I/O channel
+
+	select $client;
+	$| = 1;
+
+	# Skip leading blank lines from the client, give up when the client
+	# closes the connection
 
 	1 while defined( $txt = <$client> ) and $txt =~ /^\r*$/o;
 	return unless defined $txt;
 
-	$txt =~ s/\r*\n$//;
-
-	# The "server" currently only handles wellformed GET requests...
+	# The "server" only handles well-formed GET requests...
 
 	return illegal_request( $1, $txt )
-		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*|io;
+		unless $txt =~ m|^\s*([^ \t]+)\s+([^ \t]+)\s+HTTP/\d+\.\d+\s*\r*$|io;
 
-	( $req, $file ) = ( $1, $2 );
+	my ( $req, $file ) = ( $1, $2 );
 	return illegal_request( $req, $txt ) unless $req =~ /^GET$/io;
 
 	# Check if client accepts PNG or GIF files and skip the rest of the noise,
-	# we're done with listening when we get an empty line
+	# we're done listening when we get an empty line
 
 	while ( defined( $txt = <$client> ) and $txt !~ /^\r*\n$/o ) {
 		$has_png = 1 if $txt =~ m|^\s*Accept:.*\s+image/png[^a-zA-Z0-9]|io;
 		$has_gif = 1 if $txt =~ m|^\s*Accept:.*\s*image/gif[^a-zA-Z0-9]|io;
-		$txt =~ s/\r*\n$//o;
 	}
 
 	# Give up if the client bailed out in between...
@@ -130,18 +145,24 @@ sub serve {
 
 	# Ok, now it's finally our turn...
 
-	if ( $file eq "/" or $file eq "/index.html" ) {
+	if ( $file =~ m|^/(index.html*)*$|o ) {
 		serve_main( $has_png, $has_gif );
-	} elsif ( $file =~ m+^/(fsc2\.(png|gif))+o ) {
+	} elsif ( $file =~ m{^/(fsc2\.(png|gif))$}o ) {
 		serve_logo( $1, $2 );
-	} else {                         # more's coming here real soon....
+	} elsif ( $file =~ m{^/fsc2_(a|b)\.(png|gif)$}o ) {
+		serve_pics( $1, $2 );
+	} else {
 		not_found( $file );
 	}
+
+	close $client;
+	exit 0;
 }
 
 
 #########################################################
-#
+# Sends the client the main page, cobbled together according to what fsc2
+# tells us about its state.
 
 sub serve_main {
 
@@ -155,80 +176,104 @@ sub serve_main {
 	my $state;
 	my $txt;
 	my $date = rfc_1123_date( );
+	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
 
 
-	# Ask the parent for its current state - and don't forget to set a lock on
-	# STDOUT (and later to also release it) or other processes might interfere
+	# Ask the parent for its current state - and don't forget to set a lock
+	# on STDOUT while doing it or other processes might interfere
 
-	flock( STDIN, LOCK_EX );
-	print 'S';
-	1 while ( $state = <STDIN> ) =~ /^$/o;
-	flock( STDIN, LOCK_UN );
+	stdout_lock( ) or exit 1;
+	print STDOUT 'S';
+	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
+	stdout_unlock( );
 
-	print $client "HTTP/1.0 200 OK\r\n" .
-			"Date: $date\r\n" .
-			"Server: fsc2/0.1\r\n" .
-			"Allow: GET\r\n" .
-			"Content-Type: text/html; charset=iso-8859-1\r\n" .
-			"Connection: close\r\n" .
-			"Expires: $date\r\n\r\n";
+	return unless defined $state;
 
-	print $client
-	    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">\r\n" .
-		"<HTML><HEAD>\r\n" .
-		"<meta name=\"robots\" content=\"noindex\">\r\n";
+	print "HTTP/1.0 200 OK\r\n" .
+		  "Date: $date\r\n" .
+		  "Server: fsc2/0.1\r\n" .
+		  "Allow: GET\r\n" .
+		  "Content-Type: text/html; charset=iso-8859-1\r\n" .
+		  "Connection: close\r\n" .
+		  "Expires: $date\r\n\r\n";
 
-	if ( $state =~ /^[0-3]$/ ) {
-		print $client "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
+	print "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\">\r\n" .
+		  "<HTML><HEAD>\r\n" .
+		  "<meta name=\"robots\" content=\"noindex\">\r\n";
 
-		print $client
-			"<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-			"\" ALT=\"fsc2\"></CENTER></P>\r\n"
-			if $has_png or $has_gif;
+	if ( $state =~ /^[0-3]$/o ) {
+		print "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>\r\n";
 
-		print $client
-			"<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>\r\n" .
-			"<CENTER>(" . strftime( "%a", localtime ) . ", "  .
-			strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>\r\n";
+		print "<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
+			  "\" ALT=\"fsc2\"></CENTER></P>\r\n" if $has_png or $has_gif;
+
+		print "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>\r\n" .
+			  "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
+			  strftime( "%d %b %G %T %Z", localtime ) . ")</CENTER></P>\r\n";
 	} else {
-		print $client "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
+		print "<TITLE>fsc2: WEIRD</TITLE></HEAD>\r\n";
 
-		if ( $has_png or $has_gif ) {
-			print $client
-				"<P><CENTER><IMG SRC=\"fsc2." . ( $has_gif ? "gif" : "png" ) .
-				"\" ALT=\"fsc2\"></CENTER></P>\r\n";
-		}
+		print "<P><CENTER><IMG SRC=\"fsc2." .
+			  ( $has_gif ? "gif" : "png" ) .
+			  "\" ALT=\"fsc2\"></CENTER></P>\r\n"
+			  if $has_png or $has_gif;
 
-		print $client
-			"<P><CENTER><H1>Status:  Something weird is happening here" .
-			"</H1></CENTER>\r\n" .
-			"<P>Ok, you seem to have found a bug. Please tell nobody ;-) " .
-			"</P>\r\n</BODY></HTML>\r\n";
+		print "<P><CENTER><H1>Status:  Something weird is happening here..." .
+			  "</H1></CENTER>\r\n" .
+			  "<P>Ok, you seem to have found a bug. Please tell nobody ;-)" .
+			  "</P>\r\n</BODY></HTML>\r\n";
 		return;
 	}
 
-	# Ask fsc2 for the contents of the error browser and, when we got it,
-	# pass it on to the client in the appropriate form
+	if ( $state =~ /^[1-3]$/ and ( $has_png or $has_gif ) ) {
+		stdout_lock( ) or exit 1;
+		print STDOUT 'W';
+		1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
+		stdout_unlock( );
 
-	flock( STDIN, LOCK_EX );
-	print 'E';
-	while ( <STDIN> ) {
-		last if /^$/;
-		chomp;
-		$txt .= $_ . "\r\n";
+		return unless defined $state;
+
+		print "<H2>Display window:</H2>\r\n" .
+			  "<P><CENTER><IMG SRC=\"fsc2_a." .
+			  ( $has_gif ? "gif" : "png" ) .
+			  "\" ALT=\"Display window\"></CENTER></P>\r\n"
+				  if $state =~ /^[1-3]$/;
+		print "<H2>Cross section window:</H2>\r\n" .
+			  "<P><CENTER><IMG SRC=\"fsc2_b." .
+			  ( $has_gif ? "gif" : "png" ) .
+			  "\" ALT=\"Cross section window\"></CENTER></P>\r\n"
+				  if $state =~ /^3$/;
 	}
-	flock( STDIN, LOCK_UN );
 
-	print $client "<H2>Output browser:</H2>\r\n" .
-		"<P><PRE>$txt</PRE></P>\r\n</BODY></HTML>\r\n"
-			if $txt !~ /^$/;
+	# Ask fsc2 for the contents of the error browser and, when we got it (and
+	# if there's any content), pass it on to the client after some changes.
+
+	stdout_lock( ) or exit 1;
+	print STDOUT 'E';
+	while ( <STDIN> ) {
+		last if /^$/o;
+		chomp;
+		s/^@(C)(\d+)@(f)(.*)$/$4/o;
+		if ( ! ( defined $2 and defined $colors[ $2 - 1 ] ) ) {
+			$txt .= "$_\r\n";
+		} else {
+			$txt .= "<FONT COLOR=#" . $colors[ $2 - 1 ] .
+				    ">$_</FONT>\r\n";
+		}
+	}
+	stdout_unlock( );
+
+	print "<H2>Output browser:</H2>\r\n" .
+		  "<P><PRE>$txt</PRE></P>\r\n" if defined $txt;
+
+	print "</BODY></HTML>\r\n";
 }
 
 
 #########################################################
-# Passes the fsc2 logo file on to our client if it can be found where we
-# expect it (also telling the client that the logo won't change anytime
-# in the near future, so it may happily use a cached version)
+# Passes the fsc2 logo file on to the client if it can be found where we
+# expect it (also telling the client via th expiry date that the logo
+# won't change anytime in the near future, so it may happily cache it)
 
 sub serve_logo {
 
@@ -240,17 +285,68 @@ sub serve_logo {
 
 	open( F, $auxdir . $file ) or return not_found( $file );
 
-	print $client <F> if print $client
-		"HTTP/1.0 200 OK\r\n" .
-		"Date: $date\r\n" .
-		"Server: fsc2/0.1\r\n" .
-		"Allow: GET\r\n" .
-		"Accept-Ranges: none\r\n" .
-		"Connection: close\r\n" .
-		"Expires: $edate\r\n" .
-		"Content-Type: image/$type\r\n" .
-		"Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
+	print "HTTP/1.0 200 OK\r\n" .
+		  "Date: $date\r\n" .
+		  "Server: fsc2/0.1\r\n" .
+		  "Allow: GET\r\n" .
+		  "Accept-Ranges: none\r\n" .
+		  "Connection: close\r\n" .
+		  "Expires: $edate\r\n" .
+		  "Content-Type: image/$type\r\n" .
+		  "Content-Length: " . ( stat( $auxdir . $file ) )[ 7 ] . "\r\n\r\n";
+	print <F>;
 
+	close F;
+}
+
+
+#########################################################
+#
+
+sub serve_pics {
+	my ( $which, $ext ) = @_;
+	my $state;
+	my $date = rfc_1123_date( );
+	local *F;
+	my $file;
+
+
+	# We need a special SIGPIPE handler here because we must remove the
+	# temporary file fsc2 created for us...
+
+	$SIG{ PIPE } = sub {  if ( defined $file and $file !~ /na\.$ext$/ ) {
+							  close F;
+							  unlink( $file );
+						  }
+						  close $client;
+						  exit 0
+					   };
+
+	stdout_lock( ) or exit 1;
+	print STDOUT ( $ext eq 'png' ? uc( $which ) : $which );
+	1 while defined ( $state = <STDIN> ) and $state =~ /^$/o;
+	return stdout_unlock( ) unless defined $state;
+
+	if ( $state !~ /^0$/ ) {
+		$file = <STDIN>;
+		chomp $file;
+	} else {
+		$file = $auxdir . "na.$ext";
+	}
+	stdout_unlock( );
+
+	open( F, $file ) or return not_found( "$which.$ext" );
+	print "HTTP/1.0 200 OK\r\n" .
+		  "Date: $date\r\n" .
+		  "Server: fsc2/0.1\r\n" .
+		  "Allow: GET\r\n" .
+		  "Accept-Ranges: none\r\n" .
+		  "Connection: close\r\n" .
+		  "Expires: $date\r\n" .
+		  "Content-Type: image/$ext\r\n" .
+		  "Content-Length: " . ( stat( $file ) )[ 7 ] . "\r\n\r\n";
+	print <F>;
+	unlink $file unless $file =~ /na\.$ext$/;
 	close F;
 }
 
@@ -261,21 +357,20 @@ sub serve_logo {
 sub not_found {
 	my $file = shift;
 
-	print $client
-		"HTTP/1.0 404 Not Found\r\n" .
-		"Date: ". rfc_1123_date( ) . "\r\n" .
-		"Server: fsc2/0.1\r\n" .
-		"Connection: close\r\n" .
-		"Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
-	    "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
-		"<HTML><HEAD>\r\n" .
-		"<TITLE>404 Not Found</TITLE>\r\n" .
-		"</HEAD><BODY>\r\n" .
-		"<HR>\r\n" .
-		"<H1>Not Found</H1>\r\n" .
-		"<P>The requested URL ($file) was not found on this server.</P>\r\n" .
-		"<HR>\r\n" .
-		"</BODY></HTML>\r\n";
+	print "HTTP/1.0 404 Not Found\r\n" .
+		  "Date: ". rfc_1123_date( ) . "\r\n" .
+		  "Server: fsc2/0.1\r\n" .
+		  "Connection: close\r\n" .
+		  "Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
+	      "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
+		  "<HTML><HEAD>\r\n" .
+		  "<TITLE>404 Not Found</TITLE>\r\n" .
+		  "</HEAD><BODY>\r\n" .
+		  "<HR>\r\n" .
+		  "<H1>Not Found</H1>\r\n" .
+		  "<P>The requested URL ($file) was not found.</P>\r\n" .
+		  "<HR>\r\n" .
+		  "</BODY></HTML>\r\n";
 }
 
 
@@ -284,37 +379,36 @@ sub not_found {
 
 sub illegal_request {
 	my ( $type, $string ) = @_;
-
 	my $date = rfc_1123_date( );
-	print $client
-		"HTTP/1.0 400 Bad Request\r\n" .
-		"Date: " . rfc_1123_date( ) . "\r\n" .
-		"Server: fsc2/0.1\r\n" .
-		"Connection: close\r\n" .
-		"Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
-		"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\r\n" .
-		"<HTML><HEAD>\r\n" .
-		"<TITLE>400 Bad Request</TITLE>\r\n" .
-		"</HEAD><BODY>\r\n" .
-		"<HR>\r\n" .
-		"<H1>Bad Request</H1>\r\n";
 
-	if ( $type !~ /^GET$/ ) {
-		print $client
-			"<P>This simple server only supports GET requests.</P>\r\n";
+
+	print "HTTP/1.0 400 Bad Request\r\n" .
+		  "Date: " . rfc_1123_date( ) . "\r\n" .
+		  "Server: fsc2/0.1\r\n" .
+		  "Connection: close\r\n" .
+		  "Content-Type: text/html; charset=iso-8859-1\r\n\r\n" .
+		  "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 4.0//EN\">\r\n" .
+		  "<HTML><HEAD>\r\n" .
+		  "<TITLE>400 Bad Request</TITLE>\r\n" .
+		  "</HEAD><BODY>\r\n" .
+		  "<HR>\r\n" .
+		  "<H1>Bad Request</H1>\r\n";
+
+	if ( $type !~ /^GET$/o ) {
+		print "<P>This simple server only supports GET requests.</P>\r\n";
 	} else {
-		print $client
-			"<P>Malformed request: <SAMP>$string</SAMP>.</P>\r\n";
+		$string =~ s/\r*\n$//o;
+		print "<P>Malformed request: <SAMP>$string</SAMP>.</P>\r\n";
 	}
 
-	print $client "<HR>\r\n</BODY></HTML>\r\n";
+	print "<HR>\r\n</BODY></HTML>\r\n";
 }
 
 
 #########################################################
 # If called without an argument the fucntion returns the current (GMT) date
-# in RFC 1123 format, otherwise the date in one years time (to be used as
-# the 'infinite' expiry date, according to RFC 2616)
+# in RFC 1123 format, otherwise the date in ca. one years time (to be used
+# as the 'infinite' expiry date, according to RFC 2616)
 
 sub rfc_1123_date {
 	if ( @_ == 0 ) {
@@ -325,4 +419,23 @@ sub rfc_1123_date {
 			strftime( "%d %b %G %T", gmtime( time + 31557600 ) ) .
 				" GMT";
 	}
+}
+
+
+#########################################################
+# Creates an advisory lock on STDOUT. Uses fcntl() in a somewhat cryptic way
+# because flock() doesn't seem to work at all...
+
+sub stdout_lock {
+	return defined fcntl STDOUT, F_SETLKW,
+						 pack( "sslll", F_WRLCK, SEEK_SET, 0, 0, 0 );
+}
+
+
+#########################################################
+# Releases the advisory lock on STDOUT created by a call of stdout_lock().
+
+sub stdout_unlock {
+	return defined fcntl STDOUT, F_SETLK,
+						 pack( "sslll", F_UNLCK, SEEK_SET, 0, 0, 0 );
 }
