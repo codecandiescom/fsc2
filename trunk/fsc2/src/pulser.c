@@ -11,6 +11,7 @@ static void is_driver( void );
 static void is_func( bool ( *func ) ( ), const char *text );
 
 
+
 /* Function clears the complete pulser structure, that has to be set up
    by the init_hook( ) function of the pulser driver */
 
@@ -80,6 +81,20 @@ static void is_func( bool ( *func ) ( ), const char *text )
 		THROW( EXCEPTION );
 	}
 }
+
+static double is_mult_ns( double val, const char * text )
+{
+	val *= 1.e9;
+	if ( fabs( val - lround( val ) ) > 1.e-2 )
+	{
+		eprint( FATAL, "%s:%ld: %s has to be a multiple of 1 ns\n",
+				Fname, Lc, text );
+		THROW( EXCEPTION );
+	}
+
+	return lround( val ) * 1.e-9;
+}
+
 
 /* 
    This function is called for the assignment of a function for a pod - it
@@ -200,6 +215,16 @@ void p_set_delay( long func, Var *v )
 
 	vars_pop( v );
 
+	/* check that the delay value is reasonable */
+
+	if ( delay < 0 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid delay: %f\n", Fname, Lc, delay );
+		THROW( EXCEPTION );
+	}
+
+	delay = is_mult_ns( delay, "Delay" );
+
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_delay_function, "setting a delay" );
@@ -222,7 +247,7 @@ void p_inv( long func )
 
 
 /*
-   Function for setting the high voltage level for a certain connector
+   Function for setting the high voltage trigger level for a certain connector
 */
 
 void p_set_v_high( long func, Var *v )
@@ -252,6 +277,10 @@ void p_set_v_high( long func, Var *v )
 }
 
 
+/*
+   Function for setting the high voltage trigger level for a certain connector
+*/
+
 void p_set_v_low( long func, Var *v )
 {
 	double voltage;
@@ -279,6 +308,10 @@ void p_set_v_low( long func, Var *v )
 }
 
 
+/*
+   Function for setting the timebase of the pulser
+*/
+
 void p_set_timebase( Var *v )
 {
 	double timebase;
@@ -294,12 +327,26 @@ void p_set_timebase( Var *v )
 
 	vars_pop( v );
 
+	/* check that the timebase has a reasonable value */
+
+	if ( timebase < 0.99.e-9 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid timebase: %f\n", Fname, Lc, timebase );
+		THROW( EXCEPTION );
+	}
+
+	timebase = is_mult_ns( timebase, "Time base"  );
+
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_timebase,"setting the timebase" );
 	pulser_struct.set_timebase( timebase );
 }
 
+
+/*
+   Function for setting the trigger in mode (EXTERNAL or INTERNAL)
+*/
 
 void p_set_trigger_mode( Var *v)
 {
@@ -320,11 +367,22 @@ void p_set_trigger_mode( Var *v)
 
 	vars_pop( v );
 
+	if ( mode != INTERNAL && mode != EXTERNAL )
+	{
+		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_trigger_mode, "setting the trigger mode" );
 	pulser_struct.set_trigger_mode( mode );
 }
+
+/*
+   Function for setting the trigger in slope (POSITIVE or NEGATIVE)
+*/
 
 void p_set_trigger_slope( Var *v )
 {
@@ -345,12 +403,23 @@ void p_set_trigger_slope( Var *v )
 
 	vars_pop( v );
 
+	if ( mode != POSITIVE && mode != NEGATIVE )
+	{
+		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	/* finally call the function (if it exists...) */
 
 	is_func( pulser_struct.set_trig_in_slope, "setting the trigger slope" );
 	pulser_struct.set_trig_in_slope( slope );
 }
 
+
+/*
+   Function for setting the trigger in level voltage
+*/
 
 void p_set_trigger_level( Var *v )
 {
@@ -364,11 +433,7 @@ void p_set_trigger_level( Var *v )
 	if ( v->type == INT_VAR )
 	    level = ( double ) v->val.lval;
 	else
-	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger slope.\n",
-				Fname, Lc );
 		level = v->val.dval;
-	}
 
 	vars_pop( v );
 
@@ -379,10 +444,76 @@ void p_set_trigger_level( Var *v )
 }
 
 
+/*
+   Function for setting the (minimum) repeat time for the experiment
+*/
+
 void p_set_rep_time( Var *v )
 {
+	double time;
+
+
+	/* check the variable and get its value */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+	    time = ( double ) v->val.lval;
+	else
+		time = v->val.dval;
+
+	vars_pop( v );
+
+	if ( time < 0.99.e-9 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid repeat time: %f s\n",
+				Fname, Lc, time );
+		THROW( EXCEPTION );
+	}
+
+	time = is_mult_ns( time, "Repeat time" );
+
+	/* finally call the function (if it exists...) */
+
+	is_func( pulser_struct.set_repeat_time, "setting a repeat time" );
+	pulser_struct.set_repeat_time( time );
 }
+
+
+/*
+   Function for setting the (maximum) repeat frequency for the experiment
+*/
 
 void p_set_rep_freq( Var *v )
 {
+	double freq, time;
+
+
+	/* check the variable and get its value */
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+	    freq = ( double ) v->val.lval;
+	else
+		freq = v->val.dval;
+
+	vars_pop( v );
+
+	if ( freq > 1.01e9 || freq <= 0.0 )
+	{
+		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %f s\n",
+				Fname, Lc, freq );
+		THROW( EXCEPTION );
+	}
+
+	/* make sure we get a repeat time that's a multiple of 1 ns */
+
+	time = 1.0 / freq;
+	time = lround( time * 1.e9 ) * 1.e-9;
+
+	/* finally call the function (if it exists...) */
+
+	is_func( pulser_struct.set_repeat_time, "setting a repeat frequency" );
+	pulser_struct.set_repeat_time( time );
 }
