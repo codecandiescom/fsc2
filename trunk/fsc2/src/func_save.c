@@ -499,7 +499,7 @@ void close_all_files( void )
 /* be used and no file identifier is allowed as first argument to `save()'. */
 /* This version of save writes the data in an unformatted way, i.e. each    */
 /* on its own line with the only exception of arrays of more than one       */
-/* dimension where a empty line is put between the slices.                  */
+/* dimension where an empty line is put between the slices.                 */
 /* It returns the number of characters written.                             */
 /*--------------------------------------------------------------------------*/
 

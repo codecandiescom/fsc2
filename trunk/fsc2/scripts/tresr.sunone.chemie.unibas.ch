@@ -34,7 +34,8 @@ my $no_ranges = 1;
 my $old_no_ranges = 0;
 my $how = 'Start experiment';
 my $num_averages = 50;
-my ( @start_field, @end_field, $field_step, @fs, @fe, @fr );
+my ( @start_field, @end_field, $field_step, @fs, @fe, @fr, @rsf, @ref,
+	 $min_field );
 
 
 my %fp = ( '-side' => 'top',
@@ -113,7 +114,7 @@ for ( my $i = 0; $i < 10; $i++ ) {
 
 goto done_reading unless defined( $ne = <F> ) and is_numeric( $ne );
 chomp $ne;
-$field_step = $ne if $ne != 0;
+$field_step = $ne if $ne eq "." or $ne != 0;
 
 goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
 chomp $ne;
@@ -194,26 +195,27 @@ VARIABLES:
 if ( $no_ranges > 1 ) {
     print F "start_field[ $no_ranges ] = { ";
     for ( my $i = 0; $ i < $no_ranges - 1; $i++ ) {
-        print F $start_field[ $i ] . " G, ";
+        print F $rsf[ $i ] . " G, ";
     }
-    print F $start_field[ $no_ranges - 1 ] . " G };\n";
+    print F $rsf[ $no_ranges - 1 ] . " G };\n";
 
-    print F "end_field[ $no_ranges ] = { ";
+    print F "end_field[ $no_ranges ]   = { ";
     for ( my $i = 0; $ i < $no_ranges - 1; $i++ ) {
-        print F $end_field[ $i ] . " G, ";
+        print F $ref[ $i ] . " G, ";
     }
-    print F $end_field[ $no_ranges - 1 ] . " G };\n";
+    print F $ref[ $no_ranges - 1 ] . " G };\n";
 } else {
-    print F "start_field = $start_field[ 1 ] G;
-end_field = $end_field[ 1 ] G;\n";
+    print F "start_field = $rsf[ 0 ] G;
+end_field   = $ref[ 0 ] G;\n";
 }
 
-print F "field_step = $field_step G;
+print F "field_step  = " . abs( $field_step ) . " G;
 
 field";
 print F " = start_field" if $no_ranges == 1;
-print F ";
-data[ * ];\n";
+print F ";\n";
+print F "min_field = $min_field G;\n" if $no_ranges > 1;
+print F "data[ * ];\n";
 print F "I = 1;\n" if $no_ranges == 1;
 print F "J, K, F1, F2;
 
@@ -221,8 +223,12 @@ print F "J, K, F1, F2;
 PREPARATIONS:
 
 init_2d( 1, 0, 0, 0, 0, 0, 0, \"Time [us]\", \"Field [G]\" );
-magnet_setup( start_field";
-print F "[ 1 ]" if $no_ranges > 1;
+magnet_setup( ";
+if ( $no_ranges > 1 ) {
+	print F "min_field";
+} else {
+	print F "start_field";
+}
 print F ", field_step );
 digitizer_averaging( FUNC_E, CH1, $num_averages );
 
@@ -230,8 +236,12 @@ digitizer_averaging( FUNC_E, CH1, $num_averages );
 EXPERIMENT:
 
 change_scale( 0, 10e6 * digitizer_time_per_point( ),
-			  start_field";
-print F "[ 1 ]" if $no_ranges > 1;
+			  ";
+if ( $no_ranges > 1 ) {
+	print F "min_field" ;
+} else {
+	print F "start_field";
+}
 
 print F ", field_step );
 
@@ -262,7 +272,7 @@ if ( $no_ranges > 1 ) {
 	WHILE field <= end_field[ K ] {
 		digitizer_start_acquisition( );
 		data = digitizer_get_curve( FUNC_E );
-		display( 1, round( ( field - start_field[ 1 ] ) / field_step ) + 1,
+		display( 1, round( ( field - min_field ) / field_step ) + 1,
 			     data );
 	    field = sweep_up( );
 		FOR J = 1 : size( data ) {
@@ -313,8 +323,17 @@ if ( $? != 0 ) {
 
 sub do_checks {
 
+	$min_field = 1e9;
+
+    if ( ! defined( $field_step ) or $field_step =~ /^\.?$/ ) {
+        &show_message( "Field step size hasn't been set." );
+        return -1;
+    }
+
     for ( my $i = 0; $i < $no_ranges; $i++ ) {
-        if ( $start_field[ $i ] =~ /^\.?$/ ) {
+
+        if ( ! defined( $start_field[ $i ] ) or
+			 $start_field[ $i ] =~ /^\.?$/ ) {
             &show_message( "Start field #" . ( $i + 1 ) .
                            " hasn't been set." );
             return -1;
@@ -329,7 +348,8 @@ sub do_checks {
             &show_message( "Start field #" . ( $i + 1 ) . " is too high." );
         }
 
-        if ( $end_field[ $i ] =~ /^\.?$/ ) {
+        if ( ! defined( $end_field[ $i ] ) or
+			 $end_field[ $i ] =~ /^\.?$/ ) {
             &show_message( "End field #" . ( $i + 1 ) . " hasn't been set." );
             return -1;
         }
@@ -344,52 +364,48 @@ sub do_checks {
             return -1;
         }
 
+		if ( $start_field[ $i ] <= $end_field[ $i ] ) {
+			$rsf[ $i ] = $start_field[ $i ];
+			$ref[ $i ] = $end_field[ $i ];
+		} else {
+			$ref[ $i ] = $start_field[ $i ];
+			$rsf[ $i ] = $end_field[ $i ];
+		}
+
+		if ( abs( $field_step ) > $ref[ $i ] - $rsf[ $i ] ) {
+			if ( $no_ranges == 1 ) {
+				&show_message( "Field step size larger than\n" .
+							   "difference between start and\n" .
+							   "end field." );
+			} else {
+				&show_message( "Field step size larger than\n" .
+							   "difference between start and\n" .
+							   "end of " . ( $i + 1 ) . ". field range." );
+			}
+			return -1;
+		}
+
+		$min_field = $rsf[ $i ] if $rsf[ $i ] < $min_field;
+	}
+
+    for ( my $i = 0; $i < $no_ranges; $i++ ) {
         for ( my $j = 0; $j < $no_ranges; $j++ ) {
             next if $i == $j;
 
-            if ( $start_field[ $j ] <= $end_field[ $j ] ) {
-                if ( $start_field[ $i ] > $start_field[ $j ] and
-                     $start_field[ $i ] < $end_field[ $j ] ) {
-                    &show_message( "Field ranges " . ( $i + 1 ) . " and " .
-                                   ( $j + 1 ) . " overlap." );
-                    return -1;
-                }
+			if ( $rsf[ $i ] > $rsf[ $j ] and $rsf[ $i ] < $ref[ $j ] ) {
+				&show_message( "Field ranges " . ( $i + 1 ) . " and " .
+							   ( $j + 1 ) . " overlap." );
+				return -1;
+			}
 
-                if ( $end_field[ $i ] > $start_field[ $j ] and
-                     $end_field[ $i ] < $end_field[ $j ] ) {
-                    &show_message( "Field ranges " . ( $i + 1 ) . " and " .
-                                   ( $j + 1 ) . " overlap." );
-                    return -1;
-                }
-            } else {
-                if ( $start_field[ $i ] < $start_field[ $j ] and
-                     $start_field[ $i ] > $end_field[ $j ] ) {
-                    &show_message( "Field ranges " . ( $i + 1 ) . " and " .
-                                   ( $j + 1 ) . " overlap." );
-                    return -1;
-                }
+			if ( $ref[ $i ] > $rsf[ $j ] and $ref[ $i ] < $ref[ $j ] ) {
+				&show_message( "Field ranges " . ( $i + 1 ) . " and " .
+							   ( $j + 1 ) . " overlap." );
+				return -1;
+			}
+		}
 
-                if ( $end_field[ $i ] < $start_field[ $j ] and
-                     $end_field[ $i ] > $end_field[ $j ] ) {
-                    &show_message( "Field ranges " . ( $i + 1 ) . " and " .
-                                   ( $j + 1 ) . " overlap." );
-                    return -1;
-                }
-            }
-        }
     }
-
-    if ( $field_step =~ /^\.?$/ ) {
-        &show_message( "Field step size hasn't been set." );
-        return -1;
-    }
-
-	if ( abs( $field_step ) > abs( $end_field[ 0 ] - $start_field[ 0 ] ) ) {
-		&show_message( "Field step size larger than\n" .
-					   "difference between start and\n" .
-					   "end field." );
-		return -1;
-	}
 
 	return 0;
 }
