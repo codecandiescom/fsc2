@@ -80,7 +80,7 @@ Var *pulser_pulse_reset( Var *v );
 
 #define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
                             ( ( p )->is_old_pos &&                      \
-							  ( p )->old_pos != ( p )->pos ) ||         \
+							  ( p )->old_pos != ( p )->pos )         || \
                             ( ( p )->is_old_len &&                      \
 							  ( p )->old_len != ( p )->len ) )
 

@@ -27,14 +27,14 @@ void dg2020_do_update( void )
 	/* Resort the pulses and, while in a test run, we also have to check that
 	   the new pulse settings are reasonable */
 
-/*
+
 	if ( ! TEST_RUN )
 		printf( "\nChanges to the channels:\n\n" );
-*/
+
 
 	dg2020_reorganize_pulses( TEST_RUN );
 
-/*
+
 	{
 		PULSE *p = dg2020_Pulses;
 
@@ -57,7 +57,7 @@ void dg2020_do_update( void )
 		}
 		printf( "\n" );
 	}
-*/
+
 
 	/* Finally commit all changes */
 
@@ -296,7 +296,7 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 		   previous pulse */
 
 		if ( phase_p->is_pos &&
-			 ( ( phase_p->pos <= p->pos - f->psd - dg2020.grace_period &&
+			 ( ( phase_p->pos <= p->pos - f->psd &&
 				 phase_p->pos >= pp->pos + pp->len + dg2020.grace_period ) ||
 			   p->pc == pp->pc ) )
 			goto set_length;
@@ -357,7 +357,20 @@ void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
 			for ( i = 0; i < ppp_num; i++ )
 			{
 				if ( pppl[ i ]->is_len )
+				{
+					if ( ! pppl[ i ]->is_old_len )
+					{
+						pppl[ i ]->is_old_len = SET;
+						pppl[ i ]->old_len = pppl[ i ]->len;
+					}
+
 					pppl[ i ]->len = phase_p->pos - pppl[ i ]->pos;
+
+					if ( pppl[ i ]->old_len == pppl[ i ]->len )
+						pppl[ i ]->is_old_len = UNSET;
+
+					pppl[ i ]->needs_update = NEEDS_UPDATE( pppl[ i ] );
+				}
 
 				if ( pppl[ i ]->pos + pppl[ i ]->len <
 					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
@@ -426,11 +439,12 @@ set_length:
 		   following phase pulse is set */
 
 		if ( phase_p->is_len &&
-			 phase_p->pos + phase_p->len >=
-			 p->pos + p->len + dg2020.grace_period &&
-			 phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
-			 phase_p->pos + phase_p->len <= pn->pos - f->psd )
-			return;
+			 ( ( phase_p->pos + phase_p->len >=
+				 p->pos + p->len + dg2020.grace_period || p->pc == pn->pc ) &&
+			   phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
+			   ( phase_p->pos + phase_p->len <= pn->pos - f->psd ||
+				 p->pc == pn->pc ) ) )
+			goto done_setting;
 
 		phase_p->len = pn->pos - f->psd - phase_p->pos;
 
@@ -454,14 +468,29 @@ set_length:
 
 	}
 
+done_setting:
+
 	phase_p->is_len = SET;
-	phase_p->needs_update = NEEDS_UPDATE( phase_p );
 
 	/* Make sure the flags for an old position or length are only set if the
 	   old and the new value really differ */
 
 	if ( phase_p->is_old_len && phase_p->old_len == phase_p->len )
 		phase_p->is_old_len = UNSET;
+
+if ( phase_p->is_active )
+	printf( "\n 13131313131\n"
+			"num = %ld\n"
+			"pos = %ld\n"
+			"len = %ld\n"
+			"old_pos = %ld\n"
+			"old_len = %ld\n"
+			"%s\n\n", phase_p->num, phase_p->pos, phase_p->len,
+			phase_p->old_pos, phase_p->old_len,
+			NEEDS_UPDATE( phase_p ) ? "reset" : "unchanged" );
+			
+
+	phase_p->needs_update = NEEDS_UPDATE( phase_p );
 
 	if ( phase_p->len < -1 )
 		printf( "!Q!Q!Q! pulse %ld has len of %ld\n",
@@ -759,6 +788,7 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	bool *old, *new;
 	int what;
 	bool needs_changes = UNSET;
+	int ch;
 
 
 	/* As so often the phase functions need some special treatment */
@@ -798,6 +828,8 @@ void dg2020_commit( FUNCTION * f, bool flag )
 	old = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
 	new = T_calloc( dg2020.max_seq_len, sizeof( bool ) );
 
+	printf( "Handling channel %d\n", f->pulses[ 0 ]->channel->self );
+
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
 		p = f->pulses[ i ];
@@ -812,11 +844,12 @@ void dg2020_commit( FUNCTION * f, bool flag )
 
 		if ( p->is_old_pos || p->is_old_len )
 			dg2020_set( old, p->is_old_pos ? p->old_pos : p->pos,
-						p->is_old_len ? p->old_len : p->len,f->delay );
+						p->is_old_len ? p->old_len : p->len, f->delay );
 		dg2020_set( new, p->pos, p->len, f->delay );
 
 		p->is_old_len = p->is_old_pos = UNSET;
-		p->was_active = p->is_active;
+		if ( p->is_active )
+			p->was_active = SET;
 		p->needs_update = UNSET;
 	}
 
@@ -825,9 +858,14 @@ void dg2020_commit( FUNCTION * f, bool flag )
        the different area or 0 if no differences are found anymore */
 
 	if ( needs_changes )
+	{
+		ch = f->pulses[ 0 ]->channel->self;
+		printf( "Changing channel %d\n", ch );
+
 		while ( ( what = dg2020_diff( old, new, &start, &len ) ) != 0 )
-			dg2020_set_constant( p->channel->self, start, len,
-								   what == -1 ? OFF( f ) : ON( f ) );
+			dg2020_set_constant( ch, start, len,
+								 what == -1 ? OFF( f ) : ON( f ) );
+	}
 
 	T_free( old );
 	T_free( new );

@@ -158,7 +158,7 @@ int dg2020_test_hook( void )
 
 	dg2020_IN_SETUP = UNSET;
 
-/*
+
 	{
 		PULSE *p = dg2020_Pulses;
 
@@ -178,7 +178,7 @@ int dg2020_test_hook( void )
 		}
 		printf( "\n" );
 	}
-*/
+
 
 	/* We need some somewhat different functions for setting some of the
 	   pulser properties */
