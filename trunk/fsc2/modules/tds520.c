@@ -372,7 +372,7 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "%s: Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 

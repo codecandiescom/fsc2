@@ -656,8 +656,8 @@ Var *lockin_sensitivity( Var *v )
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
-			print( WARN, "%s: Can't set sensitivity to %.0lf uV, using "
-				   "%.0lf uV instead.\n",
+			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
+				   "instead.\n",
 				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "

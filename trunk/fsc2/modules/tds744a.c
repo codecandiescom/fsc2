@@ -327,7 +327,7 @@ Var *digitizer_timebase( Var *v )
 		if ( timebase < tb[ 0 ] )
 		{
 			TB = 0;
-			print( WARN, "%s: Timebase of %s is too low, using %s instead.\n",
+			print( WARN, "Timebase of %s is too low, using %s instead.\n",
 				   t, tds744a_ptime( tb[ TB ] ) );
 		}
 		else

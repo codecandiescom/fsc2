@@ -788,7 +788,7 @@ Var *synthesizer_modulation( Var *v )
 
 		if ( ampl >= 0.0 )
 		{
-			print( FATAL, "%s: Can't set modulation amplitude as long as "
+			print( FATAL, "Can't set modulation amplitude as long as "
 				   "modulation type hasn't been set.\n" );
 			THROW( EXCEPTION );
 		}
