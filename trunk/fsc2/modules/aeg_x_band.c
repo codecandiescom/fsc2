@@ -375,6 +375,8 @@ Var *set_field( Var *v )
 
 	field = aeg_x_band_field_check( VALUE( v ), &err_flag );
 
+	/* The second argument an be the maximum error */
+
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		vars_check( v, INT_VAR | FLOAT_VAR );
