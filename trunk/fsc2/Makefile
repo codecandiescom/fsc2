@@ -4,6 +4,7 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
+
 #prefix         = /usr/local
 #bindir         = $(prefix)/bin
 #libdir         = $(prefix)/lib/fsc2
@@ -16,12 +17,12 @@ auxdir         = $(libdir)/aux
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
-GPIB_LOG_OWNER = nobody
-GPIB_LOG_GROUP = nogroup
+
 
 # The name of the awk tool is passed to the programs via a macro
 
 AWK            = /usr/bin/awk
+
 
 # Here follow settings determining the make process - which compiler and
 # tools to use together with the respective options
@@ -47,7 +48,8 @@ RMFLAGS        = -f
 
 
 ############################################################################
-############### Don't change anything below this line ######################
+##############  Don't change anything below this line  #####################
+############## (unless you know what you're doing ...) #####################
 ############################################################################
 
 
@@ -101,7 +103,6 @@ ifdef auxdir
 endif
 
 
-
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
@@ -112,6 +113,7 @@ endif
 # default rule: make the main program, the modules and the primary lexer
 
 all: fsc2 fsc2_clean mods
+
 
 # make the main program from the c, flex and bison source files
 
@@ -129,6 +131,7 @@ fsc2: $(objects)
 	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
+
 # make the primary lexer that's utilized by the main program
 
 fsc2_clean: fsc2_clean.o exceptions.o
@@ -136,6 +139,7 @@ fsc2_clean: fsc2_clean.o exceptions.o
 
 fsc2_clean.c: fsc2_clean.flex $(headers)
 	$(FLEX) -B -o$@ $<
+
 
 # make the modules - the pulser and digitizer modules have to be handled
 # specially since each has its own header file and is divided into several
@@ -186,6 +190,8 @@ install:
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 
 
+# make a tags file, needs still some changes to really work
+
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(headers)  \
 		  ${modules} ${dg2020_f} dg2020_f.h ${dg2020_b} dg2020_b.h \
@@ -203,6 +209,7 @@ distclean:
 	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so TAGS
 
-# don't delete intermediate files created by bison and flex
+
+# don't automatically delete intermediate files created by bison and flex
 
 .PRECIOUS: %.c
