@@ -1574,6 +1574,8 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_slider_bounds( io->self, io->start_val, io->end_val );
 			fl_set_slider_value( io->self, io->value );
 			fl_set_slider_return( io->self, FL_RETURN_END );			
+			fl_set_slider_step( io->self,
+								fabs( io->end_val - io->start_val ) / 200.0 );
 			prec = - floor( log10 ( ( io->end_val - io->start_val ) /
 									( 0.825 * io->w ) ) );
 			fl_set_slider_precision( io->self,

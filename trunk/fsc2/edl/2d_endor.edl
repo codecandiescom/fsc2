@@ -84,7 +84,6 @@ EXPERIMENT:
 
 synthesizer_state( "ON" );
 
-
 /* Get the digitizers record length, trigger position and time base to be able
    to readjust the RF scale and to find out how many points we have before the
    laser starts - these points are used to get rid of changing 'zero levels' */
@@ -101,7 +100,7 @@ max_time   = min_time + Rec_len * time_res;
 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 
-/* Get a file for storing all data and write out experiment parameter */
+/* Get a file for storing all data */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
@@ -165,7 +164,7 @@ FOR J = 1 : N_runs
 			digitizer_start_acquisition( );
 		}
 
-		/* Save the new date to file */
+		/* Write the new date to file */
 
 		IF is_file( F1 ) {
 			fsave( F1, "% #.run, frequency = # MHz\n\n", J, freq * 1.0e-6 );
@@ -257,6 +256,8 @@ FOR J = 1 : N_runs
 }
 
 
+/* Post-experiment stuff */
+
 ON_STOP:
 
 synthesizer_state( "OFF" );
@@ -296,7 +297,7 @@ IF is_file( F2 )
 	}
 }
 
-/* Create two buttons for saving integrals and stopping */
+/* Create two buttons for saving integrals and finally stopping */
 
 B1 = button_create( "NORMAL_BUTTON", "Save" );
 B2 = button_create( "NORMAL_BUTTON", "Done" );
@@ -307,7 +308,7 @@ FOREVER
 		BREAK;
 	}
 
-	IF button_state( B1 )           // check Save button
+	IF button_state( B1 )            // check Save button
 	{
 		F3 = get_file( "File for storing integrated region:" );		
 		IF is_file( F3 ) {
@@ -349,7 +350,7 @@ FOREVER
 	new_start_time = slider_value( S1 );
 	new_end_time   = slider_value( S2 );
 	IF start_time == new_start_time & end_time == new_end_time {
-		wait( 0.2 s );
+		wait( 0.3 s );
 		NEXT;
 	}
 
