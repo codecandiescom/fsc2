@@ -699,6 +699,8 @@ void test_file( FL_OBJECT *a, long b )
 		THROW( EXCEPTION );
 	}
 
+	/* Avoid executing the  handler while it's already running... */
+
 	if ( in_test )
 		return;
 	else
