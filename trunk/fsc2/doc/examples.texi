@@ -243,8 +243,8 @@ the file.
 @node GUI-fying the script, cw-EPR monitor script, An enhanced cw-EPR experiment, Example EDL Scripts
 @section GUI-fying the script
 
-Having a final look at the above script one may find that there are a
-few variables that always need editing when doing a new
+Having a final look at the above script one may find that there are only
+a few variables that always need editing when doing a new
 experiment. These are the start and end field, the field step size and
 the number of runs. Having to edit the script all of the time can become
 rather tedious. But there's a simple method to add a graphical user
