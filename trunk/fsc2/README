@@ -86,13 +86,13 @@ Devices for which functional drivers already exist are:
 fsc2 currently works with three different GPIB driver/library combinations,
 the Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
 Instruments driver (http://www.natinst.com) and a driver for NI PCII and
-AT-GPIB/TNT (ISA) cards I wrote (can be downloaded from the same URL as
-fsc2, see below).
+AT-GPIB/TNT (ISA) cards I wrote an which can be downloaded from the same
+URL as fsc2, see below.
 
-Of course, there are some limitations: Due to my professional background
+Of course, there are some limitations: due to my professional background
 fsc2 has been written with the different types of EPR (Electron Paramagnetic
 Resonance) experiments in mind. On the other hand, fsc2's basic concepts
-should make it easy to use it also for a large range of other types of
+should make it easy to use it also for a wide range of other types of
 spectrometers.
 
 You can download the sources for the program and the existing modules or
