@@ -143,7 +143,7 @@ bool device_list_parse( void )
 	if ( Fname != NULL )
 	    T_free( Fname );
 
-	Fname = get_string( strlen( libdir ) + strlen( "/Devices" );
+	Fname = get_string( strlen( libdir ) + strlen( "/Devices" ) );
 	strcpy( Fname, libdir );
 	strcat( Fname, "/Devices" );
 
