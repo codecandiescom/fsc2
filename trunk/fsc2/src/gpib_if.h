@@ -50,7 +50,7 @@ GPIB_VARIABLE int gpib_clear_device( int device );
 GPIB_VARIABLE int gpib_local( int device );
 GPIB_VARIABLE int gpib_trigger( int device );
 GPIB_VARIABLE int gpib_wait( int device, int mask, int *status );
-GPIB_VARIABLE int gpib_write( int device, const char *buffer, long length );
+GPIB_VARIABLE int gpib_write( int device, const char *buffer );
 GPIB_VARIABLE int gpib_read( int device, char *buffer, long *length );
 GPIB_VARIABLE void gpib_log_message( const char *fmt, ... );
 

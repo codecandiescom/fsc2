@@ -624,11 +624,12 @@ int gpib_wait( int device, int mask, int *status )
 /*  * SUCCESS: OK, FAILURE: write error              */
 /*---------------------------------------------------*/
 
-int gpib_write( int device, const char *buffer, long length )
+int gpib_write( int device, const char *buffer )
 {
 	char *dev_name;
 	char *b;
 	int eos;
+	long length;
 
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
@@ -639,6 +640,8 @@ int gpib_write( int device, const char *buffer, long length )
 				 "(device number %d)\n", device );
 		return FAILURE;
 	}
+
+	length = strlen( buffer );
 
     if ( length <= 0 )           /* check validity of length parameter */
     {
