@@ -275,6 +275,7 @@ if ( $tc eq "Don't set" ) {
 if ( $num_runs != 1 ) {
 	print F
 "FOR J = 1 : N_runs \{
+
 	print( \"Starting #. run of #\\n\", J, N_runs );
 
 	FOR I = 1 : N_points \{
