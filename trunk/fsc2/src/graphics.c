@@ -19,6 +19,7 @@
 #include "right_arrow.xbm"
 
 
+static int run_form_close_handler( FL_FORM *a, void *b );
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
@@ -258,13 +259,29 @@ void start_graphics( void )
 	}
 
 	if ( G.is_init )
+	{
 		G_struct_init( );
+		fl_set_form_atclose( run_form->run, run_form_close_handler, NULL );
+	}
 
 	if ( G.dim == 1 )
 		redraw_all_1d( );
 
 	fl_raise_form( run_form->run );
 	XFlush( G.d );
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+int run_form_close_handler( FL_FORM *a, void *b )
+{
+	a = a;
+	b = b;
+	if ( child_pid == 0 )          /* if child has already exited */
+		stop_measurement( run_form->stop, 0 );
+	return FL_IGNORE;
 }
 
 

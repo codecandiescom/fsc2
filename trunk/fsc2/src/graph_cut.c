@@ -6,6 +6,7 @@
 #include "fsc2.h"
 
 
+static int cut_form_close_handler( FL_FORM *a, void *b );
 static void cut_setup_canvas( Canvas *c, FL_OBJECT *obj );
 static int cut_canvas_handler( FL_OBJECT *obj, Window window, int w, int h,
 							   XEvent *ev, void *udata );
@@ -29,10 +30,16 @@ static bool is_mapped = UNSET;  /* while form is mapped */
 
 void cut_show( int dir, int pos )
 {
+	/* Don't do anything if no curve is currently displayed */
+
 	if ( G.active_curve == -1 )
 		return;
 
-	if ( ! is_shown )	
+	/* If the cross section window hasn't been shown before create and
+	   initialize it now, otherwise, if it's just unmapped make it visible
+	   again */
+
+	if ( ! is_shown )
 	{
 		fl_show_form( cut_form->cut,
 					  FL_PLACE_MOUSE | FL_FREE_SIZE, FL_FULLBORDER,
@@ -44,6 +51,7 @@ void cut_show( int dir, int pos )
 		cut_setup_canvas( &G.cut_canvas, cut_form->cut_canvas );
 
 		fl_winminsize( cut_form->cut->window, 500, 335 );
+		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
 
 		is_shown = is_mapped = SET;
 	}
@@ -58,6 +66,18 @@ void cut_show( int dir, int pos )
 	XFlush( G.d );
 }
 
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
+static int cut_form_close_handler( FL_FORM *a, void *b )
+{
+	a = a;
+	b = b;
+
+	cut_close_callback( cut_form->cut_close_button, 0 );
+	return FL_IGNORE;
+}
 
 
 /*--------------------------------------------------------------*/

@@ -389,7 +389,7 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 	a = a;
 	b = b;
 
-	if ( main_form->quit->active )
+	if ( main_form->quit->active != 1 )
 		return FL_IGNORE;
 
 	clean_up( );
