@@ -66,7 +66,7 @@ void dg2020_check_pod_level_diff( double high, double low )
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.01 )
+	if ( high - low > MAX_POD_VOLTAGE_SWING + 0.1 * VOLTAGE_RESOLUTION )
 	{
 		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
 				"voltage of %g V is too big, maximum is %g V.", Fname, Lc,
@@ -74,7 +74,7 @@ void dg2020_check_pod_level_diff( double high, double low )
 		THROW( EXCEPTION );
 	}
 
-	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.01 )
+	if ( high - low < MIN_POD_VOLTAGE_SWING - 0.1 * VOLTAGE_RESOLUTION )
 	{
 		eprint( FATAL, "%s:%ld: %s: Difference between high and low "
 				"voltage of %g V is too small, minimum is %g V.", Fname, Lc,

@@ -15,7 +15,7 @@
   is to initialize all global variables that are needed in the module.
 ---------------------------------------------------------------------------*/
 
-int dg2020_b_init_hook( void )
+int hfs9000_init_hook( void )
 {
 	int i;
 
@@ -45,8 +45,9 @@ int dg2020_b_init_hook( void )
 
 	pulser_struct.set_timebase = hfs9000_store_timebase;
 
-	pulser_struct.assign_function = hfs9000_assign_function;
-	pulser_struct.assign_channel_to_function = NULL;
+	pulser_struct.assign_function = NULL;
+	pulser_struct.assign_channel_to_function
+		= hfs9000_assign_channel_to_function;
 	pulser_struct.invert_function = hfs9000_invert_function;
 	pulser_struct.set_function_delay = hfs9000_set_function_delay;
 	pulser_struct.set_function_high_level = hfs9000_set_function_high_level;
@@ -56,7 +57,7 @@ int dg2020_b_init_hook( void )
 	pulser_struct.set_repeat_time = hfs9000_set_repeat_time;
 	pulser_struct.set_trig_in_level = hfs9000_set_trig_in_level;
 	pulser_struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
-	pulser_struct.set_trig_in_impedance = hfs9000_set_trig_in_impedance;
+	pulser_struct.set_trig_in_impedance = NULL;
 
 	pulser_struct.set_phase_reference = NULL;
 
