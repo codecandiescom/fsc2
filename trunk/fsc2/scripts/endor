@@ -430,12 +430,6 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $start_freq < 1 ) {
-		$text = "Start frequency is too low.";
-		&show_message( $text );
-		return -1;
-	}
-
 	if ( $step_freq =~ /^$/ ) {
 		$text = "Step frequency hasn't been set.";
 		&show_message( $text );

@@ -1,0 +1,71 @@
+DEVICES:
+
+er035m_s;
+aeg_x_band;
+sr810;
+//sr830;
+//sr530;
+
+
+VARIABLES:
+
+I, J;
+
+start_field = 3375 G;
+field_step = 0.25 G;
+N_points = 601;
+N_runs = 1;
+
+b0;
+tc;
+data[ N_points ];
+new_data[ N_points ];
+
+PREPARATIONS:
+
+magnet_setup( start_field, field_step );
+
+init_1d( 3, N_points, start_field, field_step, "Magnetic Field / G", "Signal / V" );
+
+
+EXPERIMENT:
+
+save_program( "% " );
+
+tc = lockin_time_constant( );
+
+FOR J = 1 : N_runs {
+
+	print( "Starting #. run of #\n", J, N_runs );
+
+	FOR I = 1 : N_points {
+
+		new_data[ I ] = lockin_get_data( );
+
+                fsave( "# #\n", start_field + ( I -  1)*field_step, new_data[ I ]);
+
+		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
+		display( I, new_data[ I ], 3 );
+
+		sweep_up( );
+		wait( tc );
+	}
+
+	clear_curve( 1, 3 );
+
+	FOR I = 1 : N_points {
+		 data[ I ] += new_data[ I ];
+		 display( I, data[ I ] / float( J ), 2 );
+	}
+        fsave( "\n" );
+	reset_field( );
+}
+
+ON_STOP:
+
+FOR I = 1 : N_points {
+    
+    fsave( "# #\n", start_field + ( I - 1 )*field_step, data[ I ] );
+
+}
+

@@ -1972,6 +1972,12 @@ Var *f_save_c( Var *v )
 	if ( r == NULL )
 		return vars_push( INT_VAR, 1 );
 
+	if ( *r == '\0' )
+	{
+		T_free( r );
+		return vars_push( INT_VAR, 1 );
+	}
+
 	cl = r;
 	if ( cc == NULL )
 		cc = "";
