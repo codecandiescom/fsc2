@@ -115,7 +115,7 @@ static bool Func_is_set = UNSET;
 %left '*' '/'
 %left '%'
 %right '^'
-%left NEG NOT
+%right NEG NOT
 
 
 %%
