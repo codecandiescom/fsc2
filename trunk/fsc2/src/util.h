@@ -16,10 +16,12 @@ void eprint( int severity, const char *fmt, ... );
 bool fsc2_locking( void );
 void delete_stale_shms( void );
 void i2rgb( double h, int *rgb );
+void create_colors( void );
+inline unsigned long d2color( double a );
+
 
 inline short  d2shrt( double a );
 inline short  i2shrt( int a );
-inline unsigned long d2color( double a );
 
 inline int    i_max( int    a, int    b );
 inline int    i_min( int    a, int    b );

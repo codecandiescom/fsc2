@@ -5,6 +5,10 @@
 #include "fsc2.h"
 
 
+/*-------------------------------------*/
+/* Function returns a copy of a string */
+/*-------------------------------------*/
+
 char *get_string_copy( const char *str )
 {
 	char *new;
@@ -17,11 +21,20 @@ char *get_string_copy( const char *str )
 }
 
 
+/*-----------------------------------------------------------------*/
+/* Function allocates memory for a string with one extra character */
+/* for the end-of-string null-byte.                                */
+/*-----------------------------------------------------------------*/
+
 char *get_string( size_t len )
 {
 	return T_malloc( ( len + 1 ) * sizeof( char ) );
 }
 
+
+/*---------------------------------------------------------------------------*/
+/* Routine converts all upper cas characters in a string to lower case ones. */
+/*---------------------------------------------------------------------------*/
 
 char *string_to_lower( char *str )
 {
@@ -38,6 +51,10 @@ char *string_to_lower( char *str )
 }
 
 
+/*----------------------------------------------------*/
+/* This routuine returns a copy of a piece of memory. */
+/*----------------------------------------------------*/
+
 void *get_memcpy( const void *array, size_t size )
 {
 	void *new;
@@ -50,7 +67,7 @@ void *get_memcpy( const void *array, size_t size )
 
 /*----------------------------------------------------------------------*/
 /* Function replaces all occurences iof the character combination "\n"  */
-/* in a string by line the break character '\n'. This is done in place, */
+/* in a string by the line break character '\n'. This is done in place, */
 /* i.e. the string passed to the function is changed, not a copy. So,   */
 /* never call it with a char array defined as const.                    */
 /*----------------------------------------------------------------------*/
@@ -140,6 +157,9 @@ long get_file_length( char *name, int *len )
 	return( lc );
 }
 
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
 
 void eprint( int severity, const char *fmt, ... )
 {
@@ -238,7 +258,6 @@ void eprint( int severity, const char *fmt, ... )
 		va_end( ap );
 		fflush( stdout );
 	}
-
 }
 
 
@@ -249,12 +268,12 @@ void eprint( int severity, const char *fmt, ... )
 /* created at the very start of the program and a write lock is set on    */
 /* the whole length of the file. Then the PID and user name are written   */
 /* into the lock file. Thus fsc2 can find out who is currently holding    */
-/* the lock and tell the user about it. Te lock automatically expires     */
-/* fsc2 exits (it may also delete the lock file).                         */
+/* the lock and tell the user about it. The lock automatically expires    */
+/* when fsc2 exits (it may also delete the lock file).                    */
 /* To make this work correctly for more then one user the lock file must  */
 /* belong to a special user (e.g. a user named `fsc2' belonging to a      */
 /* also named `fsc2') and the program belong to this user and have the    */
-/* setuid and the setgid bit set, i.e. install it with                    */
+/* setuid and the setgid bit set, i.e. installed it with                  */
 /*                                                                        */
 /*            chown fsc2.fsc2 fsc2                                        */
 /*            chmod 6755 fsc2                                             */
@@ -263,8 +282,8 @@ void eprint( int severity, const char *fmt, ... )
 /* that remain after fsc2 crashed or was killed. Therefore, all shared    */
 /* memory segment have to be created with the EUID of fsc2 so that even   */
 /* another user may delete them when he starts fsc2.                      */
+/* This routine is mostly taken from R. Stevens' APitUE (A&W, 1997)       */
 /*------------------------------------------------------------------------*/
-
 
 bool fsc2_locking( void )
 {
@@ -293,9 +312,8 @@ bool fsc2_locking( void )
 	{
 		fprintf( stderr, "Error: fsc2 is already running." );
 
-		/* Try to read from the lock file the PID of the process holding
-		   the lock as well as the user name and append it to the error
-		   message */
+		/* Try to read the PID of the process holding the lock as well as the
+		   user name from the lock file and append it to the error message */
 
 		if ( read( fd, ( void * ) buf, 127 * sizeof( char ) ) != -1 &&
 			 ( name = strchr( buf, '\n' ) + 1 ) != NULL )
@@ -315,8 +333,8 @@ bool fsc2_locking( void )
 		return FAIL;
 	}
 
-	/* Truncate to zero length, write process ID into the lock file and
-	   get the close-on-exec flag*/
+	/* Truncate to zero length, write process ID and user name into the lock
+	   file and get the close-on-exec flag*/
 
 	sprintf( buf, "%d\n%s\n", getpid( ), getpwuid( getuid( ) )->pw_name );
 	if ( ftruncate( fd, 0 ) < 0 ||
@@ -350,6 +368,8 @@ bool fsc2_locking( void )
 /* they are debris from a crashes and have to be deleted to avoid using   */
 /* up all segments after some time. Since the segments belong to the user */
 /* fsc2 this routine must be run with the effective ID of fsc2.           */
+/* This routine is more or less a copy of the code from the ipcs utility, */
+/* hopefully it will continue to work with newer versions of Linux...     */
 /*------------------------------------------------------------------------*/
 
 void delete_stale_shms( void )
@@ -360,11 +380,9 @@ void delete_stale_shms( void )
 	void *buf;
 
 
-	/* Get the maximum shared memory segment id (the following is more or
-	   less a copy of the code from the ipcs utility, hopefully this will
-	   continue to work with newer versions of Linux...) */
+	/* Get the current maximum shared memory segment id */
 
-    max_id = shmctl ( 0, SHM_INFO, ( struct shmid_ds * ) &shm_seg );
+    max_id = shmctl( 0, SHM_INFO, ( struct shmid_ds * ) &shm_seg );
 
 	/* Run through all of the possible IDs. If they belong to fsc2 and start
 	   with the magic 'fsc2' they are deleted. */
@@ -378,12 +396,14 @@ void delete_stale_shms( void )
 		if ( shm_seg.shm_perm.uid == euid )     /* segment belongs to fsc2 ? */
 		{
 			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
-				continue;
+				continue;                          /* can't attach... */
+
 			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
 			{
-				if ( shm_seg.shm_nattch != 0 )
+				if ( shm_seg.shm_nattch != 0 )     /* attach count != 0 */
 					fprintf( stderr, "Something fishy is going on here!\n"
-							 "Orphaned shm has attach count of %d.\n", 
+							 "Stale shm has attach count of %d.\n"
+							 "-- Please send a bug report --\n",
 							 shm_seg.shm_nattch );
 				else
 				{
@@ -486,6 +506,10 @@ inline unsigned long d2color( double a )
 		return fl_get_pixel( FL_FREE_COL1 + 1
 							 + lround( a * ( NUM_COLORS - 1 ) ) );
 }
+
+
+
+// long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x ); }
 
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
