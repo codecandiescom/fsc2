@@ -210,7 +210,7 @@ W      [ \t]
 
 {NAME}          {
                     char *p;
-                    gpiblval.sval = malloc( strlen( gpibtext ) );
+                    gpiblval.sval = CHAR_P malloc( strlen( gpibtext ) );
                     strcpy( gpiblval.sval, gpibtext + 1 ); 
                     p = gpiblval.sval;
 				    gpiblval.sval = p;
