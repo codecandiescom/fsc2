@@ -7,6 +7,9 @@
 #include "gpib.h"
 
 
+#define DEVICE_NAME "ER035M"     /* name, compare /etc/gpib.conf */
+
+
 /* exported functions and symbols */
 
 int er035m_init_hook( void );
@@ -97,7 +100,7 @@ int er035m_init_hook( void )
 	{
 		need_GPIB = SET;
 		nmr.is_needed = SET;
-		nmr.name = "ER035M";
+		nmr.name = DEVICE_NAME;
 	}
 
 	nmr.state = ER035M_UNKNOWN;
