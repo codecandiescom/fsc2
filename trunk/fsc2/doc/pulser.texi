@@ -119,11 +119,11 @@ pulsers:
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
 @end itemize
 
-If you're using more than one pulser simultaneously you need as many
-@code{TIMEBASE} statements in your program. In this case you need to
-append a @code{#} character plus the number of the pulser to indicate
-for which this statement is to be used. E.g.@: if you have two pulsers
-you will need two @code{TIMEBASE} statements:
+If you're using two or more pulsers simultaneously you need as many
+@code{TIMEBASE} statements in your program as you have pulsers. In this
+case you need to append a @code{#} character plus the number of the
+pulser to indicate for which this statement is to be used. E.g.@: if you
+have two pulsers you will need two @code{TIMEBASE} statements:
 @example
 TIMEBASE#1:  5 ns;
 TIMEBASE#2: 25 ns;
@@ -221,10 +221,10 @@ For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 
-If you need to control more than one pulser you may have a
+If you need to control more than one pulser you have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
-need to append a @code{#} and the number of the pulser to make it clear
-for which pulser the trigger mode is to be used.
+need to append a @code{#} and the number of the pulser to make tell the
+program for which pulser the trigger mode is to be used.
 
 
 @c ########################################################
@@ -573,8 +573,8 @@ pulses. If the pulse distances get very small it may drop the grace
 period but the phase switch delay will always be there (or the program
 will abort with an error message).
 
-Too all of these statements a @code{#} character plus the pulser number
-must be added when more than pulser is used.
+To all of these keywords a @code{#} character plus the pulser number
+must be added when more than one pulser is used.
 
 
 @c ########################################################
@@ -765,8 +765,8 @@ numbers are positive (including 0) and not larger than 2147483647
 (including 0). A pulse of zero length is invisible.
 
 If more than one pulser is used it must also be indicated which pulser
-is supposed to create the pulse. This must be done by appending the
-@code{#} character, followed by the pulser number, to the @code{PULSE}
+is supposed to create the pulse. This is done by appending the @code{#}
+character, followed by the pulser number, to the @code{PULSE}
 keyword. Thus, if e.g.@: the pulse numbered 3 has to be created by the
 second pulser it must be created by a command like the follwoing:
 @example
