@@ -564,9 +564,11 @@ inline short i2shrt( int a )
 }
 
 
-/* This function is needed for glib versions below 2.0 (or 2.1 ?) */
+/* This function is needed for #glib versions below 2.0 (or 2.1 ?) */
 
+#if defined ( NEED_LROUND )
 inline long lround( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
+#endif
 
 
 inline int    i_max( int    a, int    b ) { return a > b ? a : b ; }
