@@ -287,9 +287,10 @@ Var *vars_free( Var *v, bool also_nameless )
 		case INT_REF : case FLOAT_REF :
 			if ( v->len == 0 )
 				break;
-			for ( i = 0; i < v->len; i++ )
-				if ( v->val.vptr[ i ] != NULL )
-					vars_free( v->val.vptr[ i ], SET );
+			if ( ! ( v->flags & DONT_RECURSE ) )
+				for ( i = 0; i < v->len; i++ )
+					if ( v->val.vptr[ i ] != NULL )
+						vars_free( v->val.vptr[ i ], SET );
 			v->val.vptr = VAR_PP T_free( v->val.vptr );
 			break;
 	}

@@ -31,6 +31,9 @@ static int vars_check_rhs_indices( Var **v, Var **a, int *range_count );
 static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 								int range_count );
 static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end );
+static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
+						   bool *needs_stage_2 );
+static void prune_stage_2( Var *nv );
 static void vars_fix_dims( Var *v, int max_dim );
 
 
@@ -262,7 +265,7 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 	else if ( cv->type == FLOAT_ARR )
 		cv = vars_push( cv->type, cv->val.dpnt, cv->len );
 	else
-		cv = vars_push_copy( cv );
+		cv = vars_push( cv->type, cv );
 
 	/* Remove everything from the copy not covered by ranges */
 
@@ -275,11 +278,6 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 	if ( index_count > range_count )
 		vars_fix_dims( cv, cv->dim - index_count + range_count );
 
-	/* Pop the remaining indices from the stack */
-
-	while ( ( v = vars_pop( v ) ) != cv )
-		/* empty */ ;
-
 	return cv;
 }
 
@@ -289,191 +287,181 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 
 static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 {
-	ssize_t range_start, range_end, i;
-	Var *cv;
-	Var **old_vptr_list;
+	bool needs_stage_2 = UNSET;
+
+	prune_stage_1( nv, v, a, end, &needs_stage_2 );
+
+	if ( needs_stage_2 )
+		prune_stage_2( nv );
+
+	while ( ( v = vars_pop( v ) ) != end )
+		/* empty */ ;
+}
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
+						   bool *needs_stage_2 )
+{
+	ssize_t range_start, range_end, range, i;
+	bool keep = UNSET;
+	Var *old_vptr;
 
 
-	CLOBBER_PROTECT( v );
-
-	fsc2_assert( v->val.lval < 0 );
-
-	/* Whenever we get here the next two indices make up a range. We now must
-	   prune the array of either values or variable pointers of the current
-	   submatrix according to these indices */
-
-	range_start = - v->val.lval - 1;
-	v = v->next;
-	range_end = v->val.lval;
-	v = v->next;
-
-	if ( range_start > nv->len )
+	if ( v->val.lval < 0  )
 	{
-		print( FATAL, "Invalid start of range for array '%s'.\n",
-			   a->name );
-		THROW( EXCEPTION );
+		range_start = - v->val.lval - 1;
+		v = v->next;
+
+		if ( range_start > nv->len )
+		{
+			print( FATAL, "Invalid start of range for array '%s'.\n",
+				   a->name );
+			THROW( EXCEPTION );
+		}
+
+		range_end = v->val.lval;
+		v = v->next;
+
+		if ( range_end > nv->len )
+		{
+			print( FATAL, "Invalid end of range for array '%s'.\n", a->name );
+			THROW( EXCEPTION );
+		}
+
+		range = range_end - range_start + 1;
 	}
-
-	if ( range_end > nv->len )
+	else
 	{
-		print( FATAL, "Invalid end of range for array '%s'.\n",
-			   a->name );
-		THROW( EXCEPTION );
+		range_start = range_end = v->val.lval;
+		v = v->next;
+
+		if ( range_start > nv->len )
+		{
+			print( FATAL, "Invalid start index for array '%s'.\n", a->name );
+			THROW( EXCEPTION );
+		}
+
+		range = 1;
 	}
 
 	if ( nv->type & ( INT_ARR | FLOAT_ARR ) )
 	{
-		nv->len = range_end - range_start + 1;
+		fsc2_assert( v == end );
 
 		if ( nv->type == INT_ARR )
 		{
 			if ( range_start > 0 )
 				memmove( nv->val.lpnt, nv->val.lpnt + range_start,
-						 nv->len * sizeof *nv->val.lpnt );
-			nv->val.lpnt = T_realloc( nv->val.lpnt,
-									  nv->len * sizeof *nv->val.lpnt );
+						 range * sizeof *nv->val.lpnt );
+			if ( range != nv->len )
+				nv->val.lpnt = T_realloc( nv->val.lpnt,
+										  range * sizeof *nv->val.lpnt );
 		}
 		else
 		{
 			if ( range_start > 0 )
 				memmove( nv->val.dpnt, nv->val.dpnt + range_start,
-						 nv->len * sizeof *nv->val.dpnt );
-			nv->val.dpnt = T_realloc( nv->val.dpnt,
-									  nv->len * sizeof *nv->val.dpnt );
+						 range * sizeof *nv->val.dpnt );
+			if ( range != nv->len )
+				nv->val.dpnt = T_realloc( nv->val.dpnt,
+										  range * sizeof *nv->val.dpnt );
+		}
+
+		nv->len = range;
+		if ( range == 1 )
+			*needs_stage_2 = SET;
+		return range == 1;
+	}
+
+	for ( i = 0; i < range_start; i++ )
+		vars_free( nv->val.vptr[ i ], SET );
+
+	for ( i = range_end + 1; i < nv->len; i++ )
+		vars_free( nv->val.vptr[ i ], SET );
+
+	if ( range_start > 0 )
+		memmove( nv->val.vptr, nv->val.vptr + range_start,
+				 range * sizeof *nv->val.vptr );
+
+	if ( range != nv->len )
+	{
+		nv->val.vptr = T_realloc( nv->val.vptr,
+								  range * sizeof *nv->val.vptr );
+		nv->len = range;
+	}
+
+	if ( v == end )
+		return UNSET;
+
+	for ( i = 0; i < nv->len; i++ )
+		keep = prune_stage_1( nv->val.vptr[ i ], v, a, end, needs_stage_2 );
+
+	if ( keep )
+		return UNSET;
+
+	if ( nv->val.vptr[ 0 ]->len == 1 )
+	{
+		nv->type = nv->val.vptr[ 0 ]->type;
+
+		for ( i = 0; i < nv->len; i++ )
+		{
+			old_vptr = nv->val.vptr[ i ];
+			nv->val.vptr[ i ] = nv->val.vptr[ i ]->val.vptr[ 0 ];
+			nv->val.vptr[ i ]->from = nv;
+			old_vptr->flags |= DONT_RECURSE;
+			if ( ! vars_pop( old_vptr ) )
+				vars_free( old_vptr, SET );
+		}
+	}
+
+	return keep;
+}
+
+
+/*--------------------------------------------------------*/
+/*--------------------------------------------------------*/
+
+static void prune_stage_2( Var *nv )
+{
+	ssize_t i;
+	Var **old_vptr_list;
+
+
+	if ( nv->val.vptr[ 0 ]->len > 1 )
+	{
+		for ( i = 0; i < nv->len; i++ )
+			prune_stage_2( nv->val.vptr[ i ] );
+		return;
+	}
+
+	old_vptr_list = nv->val.vptr;
+
+	if ( nv->val.vptr[ 0 ]->type == INT_ARR )
+	{
+		nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
+		nv->type = INT_ARR;
+
+		for ( i = 0; i < nv->len; i++ )
+		{
+			nv->val.lpnt[ i ] = old_vptr_list[ i ]->val.lpnt[ 0 ];
+			vars_free( old_vptr_list[ i ], SET );
 		}
 	}
 	else
 	{
-		for ( i = 0; i < range_start; i++ )
-			vars_free( nv->val.vptr[ i ], SET );
+		nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
+		nv->type = FLOAT_ARR;
 
-		for ( i = range_end + 1; i < nv->len; i++ )
-			vars_free( nv->val.vptr[ i ], SET );
-
-		nv->len = range_end - range_start + 1;
-		if ( range_start > 0 )
-			memmove( nv->val.vptr, nv->val.vptr + range_start,
-					 nv->len * sizeof *nv->val.vptr );
-		nv->val.vptr = T_realloc( nv->val.vptr,
-								  nv->len * sizeof *nv->val.vptr );
-
-		/* If we're not already at the end of the list of indices and the
-		   next indices make up a range again we've got to prune all the
-		   submatrices of the current submatrix recursively */
-
-		if ( v != end && v->val.lval < 0 )
+		for ( i = 0; i < nv->len; i++ )
 		{
-			for ( i = 0; i < nv->len; i++ )
-				vars_arr_rhs_slice_prune( nv->val.vptr[ i ], v, a, end );
-			return;
+			nv->val.dpnt[ i ] = old_vptr_list[ i ]->val.dpnt[ 0 ];
+			vars_free( old_vptr_list[ i ], SET );
 		}
 	}
 
-	/* If we get here we have an index and not a range and the submatrix we're
-	   operating on has at least two dimensions. */
-
-	while ( v != end && v->val.lval >= 0 )
-	{
-		fsc2_assert( nv->type & ( INT_REF | FLOAT_REF ) );
-
-		if ( ! ( nv->val.vptr[ 0 ]->type & ( INT_ARR | FLOAT_ARR ) ) )
-		{
-			/* Throw away all subarrays that aren't indexed */
-
-			for ( i = 0; i < nv->len; i++ )
-				if ( i != v->val.lval )
-					vars_free( nv->val.vptr[ i ], SET );
-
-			/* Delete the old 'vptr' array and replace it by the one of the
-			   indexed element one level down */
-
-			cv = nv->val.vptr[ v->val.lval ];
-
-			T_free( nv->val.vptr );
-			nv->val.vptr = cv->val.vptr;
-
-			/* Adjust the length of the current level and make all subarrays
-			   'from' fields to it */
-
-			nv->len = cv->len;
-			for ( i = 0; i < nv->len; i++ )
-				nv->val.vptr[ i ]->from = nv;
-
-			/* Finally throw away the variable representing the former
-			   intermediate level (but not its still linked subarrays, they
-			   now belong to the current level!) */
-
-			cv->flags |= DONT_RECURSE;
-			vars_pop( cv );
-		}
-		else
-		{
-			/* If we're on the lowest level pick the indexed elements of all
-			   the subarrays */
-
-			for ( i = 0; i < nv->len; i++ )
-				if ( v->val.lval >= nv->val.vptr[ i ]->len )
-				{
-					print( FATAL, "Invalid index for array '%s'.\n", a->name );
-					THROW( EXCEPTION );
-				}
-
-			old_vptr_list = nv->val.vptr;
-
-			if ( nv->val.vptr[ 0 ]->type == INT_ARR )
-			{
-				TRY
-				{
-					nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
-					TRY_SUCCESS;
-				}
-				OTHERWISE
-				{
-					nv->val.vptr = old_vptr_list;
-					RETHROW( );
-				}
-
-				for ( i = 0; i < nv->len; i++ )
-				{
-					nv->val.lpnt[ i ] =
-								   old_vptr_list[ i ]->val.lpnt[ v->val.lval ];
-					vars_free( old_vptr_list[ i ], SET );
-				}
-
-				nv->type = INT_ARR;
-			}
-			else
-			{
-				TRY
-				{
-					nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
-					TRY_SUCCESS;
-				}
-				OTHERWISE
-				{
-					nv->type = FLOAT_REF;
-					nv->val.vptr = old_vptr_list;
-					RETHROW( );
-				}
-
-				for ( i = 0; i < nv->len; i++ )
-				{
-					nv->val.dpnt[ i ] =
-								   old_vptr_list[ i ]->val.dpnt[ v->val.lval ];
-					vars_free( old_vptr_list[ i ], SET );
-				}
-
-				nv->type = FLOAT_ARR;
-			}
-
-			T_free( old_vptr_list );
-		}
-
-		v = v->next;
-	}
-
-	if ( v != end )
-		vars_arr_rhs_slice_prune( nv, v, a, end );
+	T_free( old_vptr_list );
 }
 
 
@@ -522,10 +510,8 @@ Var *vars_subref_to_rhs_conv( Var *v )
 			range_count++;
 	}
 
-	nv = vars_arr_rhs_slice( v->from, sv, v->len - range_count,
-							 range_count );
-
-	return nv;
+	return vars_arr_rhs_slice( v->from, sv, v->len - range_count,
+							   range_count );
 }
 
 
