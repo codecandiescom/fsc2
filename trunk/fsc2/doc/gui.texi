@@ -286,15 +286,14 @@ hand
 .
 @end ifnottex
 @end ifnothtml
-While you keep the middle mouse button
-pressed down the displayed curves will move around following the mouse.
-As in the case of zooming you can restrict movements to either the x- or
-y-direction by pressing the middle mousebutton in the area of the x-axis
-or the y-axis.
+As long as you keep the middle mouse button pressed down the displayed
+curves will move around following the mouse. As in the case of zooming
+you can restrict movements to either the x- or y-direction by pressing
+the middle mousebutton in the area of the x-axis or the y-axis.
 
 Finally, there's a third method to change the scaling. Whenever you
 press the right mouse button in either the display area or the axis
-field the cursor changes to a magnifiying glass
+fields the cursor changes to a magnifiying glass
 @ifnotinfo
 , @image{cursor3,5mm,}.
 @end ifnotinfo
@@ -303,43 +302,47 @@ field the cursor changes to a magnifiying glass
 .
 @end ifnottex
 @end ifnothtml
-When you move the mouse around at first nothing
-will happen, but if you release the mouse button the display will either
-get magnified or de-magnified.  This follows the following rules: The
-point where you pressed the left mouse button will stay at exactly the
-same position. If you move the mouse up, the display will be
-de-magnified in y-direction only, if ypou move the mouse down, it will
-be magnified in this direction. By moving the mouse to the right you can
-reduce the x-scale, by moving to the left you increase the x-scaling. If
-you do this operation in the areas of either the x- or y-axis only the
-corresponding scaling gets changed. The factor by which the scle is
-changed depends on how far away from the starting point you moved the
-mouse before releasing the left button. If you move the mouse along the
-whole length of the display area the scaling is changed by a factor of
-4.
+When you move the mouse at first nothing will happen, but if you release
+the mouse button the display scaling will either get magnified or
+de-magnified. This follows the some simple rules: The point where you
+first pressed the right mouse button will stay at exactly the same
+position. If you move the mouse up, the display will be de-magnified in
+y-direction only, if you move the mouse down, the y-scale factor becomes
+larger, i.e.@: you do a zoom in y-direction. By moving the mouse to the
+right you can reduce the x-scale, by moving to the left you increase it.
+If you do this operation in the areas of either the x- or y-axis only
+the corresponding scaling gets changed. The factor by which the scale
+gets changed depends on how far away from the starting point you moved
+the mouse before releasing the left button. If you move the mouse along
+the whole length of the display area the scaling is changed by a factor
+of 4.
 
 You don't have to change the scaling or the position for all curves at
 once - this is what the buttons with the numbers in the colors of the
 curves are meant for. Rescaling or moving will only apply to curves for
-which the corresponding button is active, i.e.@: pressed down. By
-de-activating one or more of these buttons you can extempt the
-corresponding curves (i.e.@: the curves with the same color as the button)
-from all rescaling or movement operations.
+which the corresponding button is active, i.e.@: pressed down (if not
+activated they are drawn with a grey background instead of the color of
+the curve they are associated with). By de-activating one or more of the
+buttons you can extempt the corresponding curves (i.e.@: the curves with
+the color as the button has in active state) from being rescaled or
+moved around.
 
 Of course, this leads to a problem: If you de-activate some of the
 buttons and rescale, the question is for which curve the axis scales are
-now valid.  That's the reason why the horizontal line of the x-axis and
+valid now. That's the reason why the horizontal line of the x-axis and
 the vertical line of the y-axis is not black but colored: When the lines
-are red, you can b sure that the displayed axis scales are valid for (at
-least) athe red curve, if they are green they are valid for (at least)
-the green curve, etc. As a rule, the axis scale is always valid for the
-lowest numbered curve for which its button is activated. That's also the
-reason why, when examining data (using either the middle or right button
-together with the left button), not just one pair of values is displayed
-but as many pairs as there are curves.
+are red, you can be sure that the displayed axis scales are valid for
+(at least) the red curve, if they are green they are valid for (at
+least) the green curve, etc. As a rule, the axis scale is always valid
+for the lowest numbered curve for which its button is activated. That's
+also the reason why, when examining data (using either the middle or
+right button together with the left button), not just one pair of values
+is displayed but as many pairs as there are curves -- the scaling for
+each of the curves could be different
 
-Finally, when you zoom into the display parts of a curve or a complete
-curve will not fit into the display anymore. To indicate into which
-direction you have to look for the missing parts of the curve on each
-side in which non-displayable data of a curve can be found an arrow in
-the color of the curve will be shown.
+Finally, when you zoom into the display parts of a curve or even
+complete curves will not fit into the display area anymore. To indicate
+into which direction you have to look for the missing parts of the curve
+an arrow in the color of the curve will be shown for each direction in
+which non-displayable data the curve can be found.
+
