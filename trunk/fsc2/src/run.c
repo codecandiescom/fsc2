@@ -763,7 +763,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 /*-------------------------------------------------------*/
 /* This function gets called whenever the 'Close' button */
-/* in the display window gets pressed.                   */
+/* in (one of) the display window(s) gets pressed.       */
 /*-------------------------------------------------------*/
 
 void run_close_button_callback( FL_OBJECT *a, long b )
