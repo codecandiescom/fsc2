@@ -266,17 +266,16 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 "\x4msec"   return E_MS_TOKEN;
 "\x4sec"    return E_S_TOKEN;
 
-"\x4nvolt"  return E_NV_TOKEN;
-"\x4uvolt"  return E_UV_TOKEN;
-"\x4mvolt"  return E_MV_TOKEN;
-"\x4volt"   return E_V_TOKEN;
-			
-"\x4mgauss" return E_MG_TOKEN;
-"\x4gauss"  return E_G_TOKEN;
+"\x4ntesla" return E_NT_TOKEN;
+"\x4utesla" return E_UT_TOKEN;
+"\x4mtesla" return E_MT_TOKEN;
+"\x4tesla"  return E_T_TOKEN;
 
-"\x4mhertz" return E_MHZ_TOKEN;
-"\x4khertz" return E_KHZ_TOKEN;
-"\x4hertz"  return E_HZ_TOKEN;
+"\x4nunit"  return E_NU_TOKEN;
+"\x4uunit"  return E_UU_TOKEN;
+"\x4mvolt"  return E_MU_TOKEN;
+"\x4kunit"  return E_KT_TOKEN
+"\x4megunit" return E_MEG_TOKEN
 
 			/* handling of invalid input */
 .           {

@@ -269,7 +269,7 @@ WS          [\n \t]+
 "\x4nunit"  return NU_TOKEN;
 "\x4uunit"  return UU_TOKEN;
 "\x4mvolt"  return MU_TOKEN;
-"\x4kunit"  return KT_TOKEN
+"\x4kunit"  return KU_TOKEN
 "\x4megunit" return MEG_TOKEN
 
 			/* handling of invalid input */
