@@ -214,7 +214,7 @@ Var *f_int( Var *v )
 	if ( v->type == INT_VAR )
 		return vars_push( INT_VAR, v->val.lval );
 	else
-		return vars_push( INT_VAR, (long ) v->val.dval );
+		return vars_push( INT_VAR, ( long ) v->val.dval );
 }
 
 
