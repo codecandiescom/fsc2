@@ -23,6 +23,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	char cur_dir[ PATH_MAX ];
 	char *ed;
 	int res;
+	struct sigaction sact, oact;
+
 
 
 	a = a;
@@ -35,12 +37,13 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
 		 ( tmp = fdopen( tmp_fd, "w" ) ) == NULL )
 	{
-		fl_show_messages( "Sorry can't send a bug report." );
+		fl_show_messages( "Sorry, can't send a bug report." );
 		notify_conn( UNBUSY_SIGNAL );
 		return;
 	}
 
-	signal( SIGCHLD, SIG_IGN );
+	sact.sa_handler = SIG_IGN;
+	sigaction( SIGCHLD, &sact, &oact );
 
 	fl_set_cursor( FL_ObjWin( a ), XC_watch );
 	XFlush( fl_get_display( ) );
@@ -76,10 +79,23 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	getcwd( cur_dir, PATH_MAX );
 	fprintf( tmp, "Current dir:  %s\n", cur_dir );
 	fprintf( tmp, "libdir:       %s\n\n", libdir );
-	fclose( tmp );
 
 	/* Append a directory listing of configuration files and modules
 	   to allow a check of the permissions */
+
+	fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
+	fclose( tmp );
+	cmd = get_string( strlen( "ulimit -a -S >> " ) + strlen( filename ) );
+	strcpy( cmd, "ulimit -a -S >> " );
+	strcat( cmd, filename );
+	system( cmd );
+	T_free( cmd );
+
+	cmd = get_string( strlen( "echo >> " ) + strlen( filename ) );
+	sprintf( cmd, "echo >> %s", filename );
+	system( cmd );
+	system( cmd );
+	T_free( cmd );
 
 	cmd = get_string( strlen( "ls -al  >> " ) + strlen( libdir )
 					  + strlen( "/Devices" ) + strlen( filename ) );
@@ -232,6 +248,6 @@ void bug_report_callback( FL_OBJECT *a, long b )
 	}
 
 	unlink( filename );                /* delete the temporary file */
-	signal( SIGCHLD, main_sig_handler );
+	sigaction( SIGCHLD, &oact, NULL );
 	notify_conn( UNBUSY_SIGNAL );
 }
