@@ -51,9 +51,7 @@ RMFLAGS        = -f
 ############## (unless you know what you're doing ...) #####################
 ############################################################################
 
-
 VPATH          = .:src:modules
-
 
 c_sources      = fsc2.c fsc2_rsc.c pulser.c util.c exceptions.c variables.c \
 				 func.c T.c phases.c exp.c devices.c gpib.c run.c comm.c \
