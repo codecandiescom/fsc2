@@ -125,21 +125,21 @@ gaussmeter) and the @w{SR 530} lock-in amplifier.
 
 Also the first lines of the @code{VARIABLES} section are identical, we
 need three variables for the start field, the end field and the field
-step size. But now also we need another variable for the number of runs
-we'll do during the experiment, which we declare in line 10.
+step size. But now also another variable for the number of runs we'll do
+during the experiment is needed, which we declare in line 10.
 
-The following variables are all used for auxiliary
-variables. @code{Number_of_points} is automatically initialized to the
-number of points during one run (we got to add 1, otherwise we wouldn't
-the last point of the field range. The next variables, @code{data} and
+The following variables are all used for auxiliary variables.
+@code{Number_of_points} is automatically initialized to the number of
+points during one run (we got to add 1, otherwise we wouldn't the last
+point of the field range. The next variables, @code{data} and
 @code{mean_data} are both for storing the results f the experiment. But
 since (as the name indicates) @code{mean_data} is going to be used to
 store the mean value of all data points it needs to be an array with
 enough space for all points of the spectrum.
 
 The variables @code{I} and @code{J} are simple counters and
-@code{File_1} and @code{File_2} are integer variables that we will
-use for file handles -- we are going to use two files, one for storing
+@code{File_1} and @code{File_2} are integer variables that we will be
+used for file handles -- we are going to use two files, one for storing
 intermediate results, i.e.@: all single run spectra, and a second one
 for saving the end results, the mean values of the data of all runs.
 Finally, @code{tc} is going to be used for the lock-in's time constant.
@@ -194,13 +194,13 @@ next three arguments are for the new mean value, we only have to take
 care to divide the @code{mean_value} array element by @code{I}, the
 number of runs done so far.
 
-If you should have any trouble understanding the @i{x}-coordinate given
-as an integer numbers while on the screen the scale is to be shown in
-field units, here's an explanation: in the @code{init_1d()} function
-(@pxref{init_1d}) call during the @code{PREPARATIONS} section we told
-the program that the first @i{x}-axis value would be at a field of the
-value of @code{start_field} and that all following fields would be
-equally spaced by a field difference according to the value of the
+If you should have any trouble understanding that the @i{x}-coordinate
+is given as an integer numbers but on the screen the scale is to be
+shown in field units, here's an explanation: in the @code{init_1d()}
+function call (@pxref{init_1d}) during the @code{PREPARATIONS} section
+we told the program that the first @i{x}-axis value would be at a field
+of the value of @code{start_field} and that all following fields would
+be equally spaced by a field difference according to the value of the
 variable @code{field_step}. The program uses this information to convert
 a @i{x}-coordinate of @code{1} to make the data point appear at the
 field scale value of @code{start_field}, a @i{x}-coordinate of @code{2}
