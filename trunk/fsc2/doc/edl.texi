@@ -372,7 +372,7 @@ function results in:
 
 
 Within the @code{EXPERIMENT} section flow control structures can be
-used. These are @code{FOR}, @code{WHILE} and @code{REPEAT} loops and
+used. These are @code{REPEAT}, @code{WHILE} and @code{FOR} loops and
 @code{IF}-@code{ELSE} constructs. (Please note: all of these keywords
 have to be spelt in capital letters!).
 
