@@ -42,7 +42,8 @@ static void fork_failure( int stored_errno );
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all );
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
-static void set_buttons_for_run( int active );
+static void stop_measurement( int state );
+static void set_buttons_for_run( int run_state );
 
 
 /* Routines of the child process doing the measurement */
@@ -81,6 +82,7 @@ static int child_return_status;
 bool run( void )
 {
 	int stored_errno;
+	sigset_t new_mask, old_mask;
 
 
 	/* We can't run more than one experiment - so quit if child_pid != 0 */
@@ -99,27 +101,18 @@ bool run( void )
 	Internals.state = STATE_RUNNING;
 
 	if ( ! start_gpib( ) )
-	{
-		Internals.state = STATE_IDLE;
 		return FAIL;
-	}
 
 	/* If there are no commands but an EXPERIMENT section label we just run
 	   all the init hooks, then the exit hooks and are already done. */
 
 	if ( EDL.prg_token == NULL )
-	{
-		Internals.state = STATE_IDLE;
 		return no_prog_to_run( );
-	}
 
 	/* Initialize devices and graphics */
 
-	if ( ! init_devs_and_graphics(  ) )
-	{
-		Internals.state = STATE_IDLE;
+	if ( ! init_devs_and_graphics( ) )
 		return FAIL;
-	}
 
 	/* Setup the signal handlers for signals used for communication between
 	   parent and child process and an idle callback function for displaying
@@ -129,16 +122,29 @@ bool run( void )
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
-	/* Here the experiment starts - the child process is forked */
-
 	fl_set_idle_callback( 0, NULL );
 
+	/* We have to be careful: When the child process gets forked it may
+	   already be finished running *before* the fork() call returns in the
+	   parent. In this case the signal handlers of the parent don't know the
+	   PID of the child process and thus won't work correctly. Therefore the
+	   signals the child may send are blocked until we can be sure the parent
+	   has got the childs PID. */
+
+	sigemptyset( &new_mask );
+	sigaddset( &new_mask, SIGCHLD );
+	sigaddset( &new_mask, QUITTING );
+	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+	/* Here the experiment starts - the child process is forked */
+
 	if ( ( Internals.child_pid = fork( ) ) == 0 )
+	{
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		run_child( );
+	}
 
-	fl_set_idle_callback( new_data_callback, NULL );
-
-	stored_errno = errno;            /* for later dissemination... */
+	stored_errno = errno;            /* stored for later examination... */
 	close_all_files( );              /* only child is going to write to them */
 
 	close( Comm.pd[ READ ] );        /* close unused ends of pipes */
@@ -147,12 +153,15 @@ bool run( void )
 
 	if ( Internals.child_pid > 0 )   /* fork() did succeeded */
 	{
+		fl_set_idle_callback( new_data_callback, NULL );
+		sigprocmask( SIG_SETMASK, &old_mask, NULL );
 		Internals.mode = PREPARATION;
 		return OK;
 	}
 
 	/* If forking the child failed we end up here */
 
+	sigprocmask( SIG_SETMASK, &old_mask, NULL );
 	fork_failure( stored_errno );
 	return FAIL;
 }
@@ -167,8 +176,8 @@ static bool start_gpib( void )
 {
 	/* Disable some buttons and show a watch cusor */
 
-	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+	set_buttons_for_run( 1 );
 	XFlush( fl_get_display( ) );
 
 	/* If there are devices that need the GPIB bus initialize it now */
@@ -177,8 +186,10 @@ static bool start_gpib( void )
 	{
 		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
 				gpib_error_msg );
-		set_buttons_for_run( 1 );
+		set_buttons_for_run( 0 );
+		Internals.state = STATE_IDLE;
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		XFlush( fl_get_display( ) );
 		return FAIL;
 	}
 
@@ -199,6 +210,15 @@ static bool no_prog_to_run( void )
 
 	TRY
 	{
+		EDL.do_quit = UNSET;
+		EDL.react_to_do_quit = SET;
+
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
+		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
+
+		Internals.mode = EXPERIMENT;
+
 		experiment_time( );
 		EDL.experiment_time = 0.0;
 		vars_pop( f_dtime( NULL ) );
@@ -209,11 +229,12 @@ static bool no_prog_to_run( void )
 	}
 	OTHERWISE
 	{
-		run_end_of_exp_hooks( );
-		vars_del_stack( );                /* some stack variables might be left
-										     over if an exception got thrown */
+		vars_del_stack( );
 		ret = FAIL;
 	}
+
+	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+	fl_set_object_callback( GUI.main_form->run, NULL, 0 );
 
 	run_end_of_exp_hooks( );
 
@@ -222,8 +243,13 @@ static bool no_prog_to_run( void )
 
 	fsc2_serial_cleanup( );
 
-	set_buttons_for_run( 1 );
+	Internals.mode = PREPARATION;
+
+	fl_set_object_label( GUI.main_form->run, "Start" );
+	fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+	Internals.state = STATE_IDLE;
 
 	return ret;
 }
@@ -249,9 +275,10 @@ static bool init_devs_and_graphics( void )
 	{
 		EDL.do_quit = UNSET;
 		EDL.react_to_do_quit = SET;
-		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
 
+		fl_set_object_callback( GUI.main_form->run, stop_while_exp_hook, 0 );
 		fl_set_object_label( GUI.main_form->run, "Stop" );
+		XFlush( fl_get_display( ) );
 
 		Internals.mode = EXPERIMENT;
 
@@ -263,10 +290,10 @@ static bool init_devs_and_graphics( void )
 
 		EDL.react_to_do_quit = UNSET;
 
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 		fl_deactivate_object( GUI.main_form->run );
 		fl_set_object_label( GUI.main_form->run, "Start" );
 		fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 		XFlush( fl_get_display( ) );
 
 		check_for_further_errors( &compile_test, &EDL.compilation );
@@ -278,21 +305,27 @@ static bool init_devs_and_graphics( void )
 	OTHERWISE
 	{
 		EDL.do_quit = EDL.react_to_do_quit = UNSET;
-		fl_set_object_label( GUI.main_form->run, "Start" );
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+
+		end_comm( );
 
 		run_end_of_exp_hooks( );
-		vars_del_stack( );             /* some stack variables might be left
-										  over when an exception got thrown */
+		vars_del_stack( );
+
 		if ( need_GPIB )
 			gpib_shutdown( );
 		fsc2_serial_cleanup( );
 
 		Internals.mode = PREPARATION;
 
-		set_buttons_for_run( 1 );
-		stop_graphics( );
+		run_close_button_callback( GUI.run_form->stop, 0 );
+
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+		fl_set_object_label( GUI.main_form->run, "Start" );
+		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+		fl_activate_object( GUI.main_form->run );
+		XFlush( fl_get_display( ) );
+
 		return FAIL;
 	}
 
@@ -324,8 +357,6 @@ static void setup_signal_handlers( void )
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
 	sigaction( SIGCHLD, &sact, &sigchld_old_act );
-
-	fl_set_idle_callback( new_data_callback, NULL );
 }
 
 
@@ -375,11 +406,12 @@ static void fork_failure( int stored_errno )
 				eprint( FATAL, UNSET, "Unknown system error (errno = %d) "
 						"when trying to start experiment.\n", errno );
 			fl_show_alert( "FATAL Error", "System error on start of "
-						   "experiment.", "", 1 );
+						   "experiment.", NULL, 1 );
 			break;
 	}
 
 	Internals.child_pid = 0;
+
 	end_comm( );
 
 	run_end_of_exp_hooks( );
@@ -390,16 +422,17 @@ static void fork_failure( int stored_errno )
 
 	Internals.mode = PREPARATION;
 
-	stop_measurement( NULL, 1 );
-
-	Internals.state = STATE_IDLE;
+	fl_set_idle_callback( idle_handler, NULL );
+	run_close_button_callback( GUI.run_form->stop, 0 );
+	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+	fl_activate_object( GUI.main_form->run );
 }
 
 
 /*-------------------------------------------------------------------*/
 /* Checks if new errors etc. were found while running the exp_hooks. */
-/* In this case it asks the user if she wants to continue - unless   */
-/* an exception was thrown.                                          */
+/* In this case ask the user if she wants to continue - unless an    */
+/* exception was thrown.                                             */
 /*-------------------------------------------------------------------*/
 
 static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
@@ -407,6 +440,7 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 	Compilation diff;
 	char str1[ 128 ],
 		 str2[ 128 ];
+	const char *mess = "During start of the experiment there where";
 	int i;
 
 
@@ -420,21 +454,19 @@ static void check_for_further_errors( Compilation *c_old, Compilation *c_all )
 		{
 			if ( diff.error[ WARN ] != 0 )
 			{
-				sprintf( str1, "During start of the experiment there where %d "
-						 "severe", diff.error[ SEVERE ] );
-				sprintf( str2, "and %d warnings.", diff.error[ WARN ] );
+				sprintf( str1, "%s %d severe", mess, diff.error[ SEVERE ] );
+				sprintf( str2, "and normal %d warnings.", diff.error[ WARN ] );
 			}
 			else
 			{
-				sprintf( str1, "During start of the experiment there where %d "
-						 "severe warnings.", diff.error[ SEVERE ] );
+				sprintf( str1, "%s %d severe warnings.",
+						 mess, diff.error[ SEVERE ] );
 				str2[ 0 ] = '\0';
 			}
 		}
 		else
 		{
-			sprintf( str1, "During start of the experiment there where %d "
-					 "warnings.", diff.error[ WARN ] );
+			sprintf( str1, "%s %d warnings.", mess, diff.error[ WARN ] );
 			str2[ 0 ] = '\0';
 		}
 
@@ -459,16 +491,49 @@ static void quitting_handler( int signo )
 	signo = signo;
 	errno_saved = errno;
 	child_is_quitting = SET;
+	if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
+		kill( Internals.child_pid, DO_QUIT );
+	fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+	errno = errno_saved;
+}
 
-	if ( kill( Internals.child_pid, DO_QUIT ) < 0 )
+
+/*--------------------------------------------------------------------*/
+/* Callback function for the 'Stop' button - used to kill the child   */
+/* process. After the child is dead another callback function is used */
+/* for this button, see run_close_button_callback().                  */
+/*--------------------------------------------------------------------*/
+
+void run_stop_button_callback( FL_OBJECT *a, long b )
+{
+	int bn;
+
+
+	b = b;
+
+	/* Activating the Stop button when the child is already dead should
+	   not be possible, but to make real sure (in case of some real
+	   subtle timing problems) we better make sure it doesn't has any
+	   effects. */
+
+	if ( Internals.child_pid == 0 || kill( Internals.child_pid, 0 ) == -1 )
+		return;
+
+	/* Only send DO_QUIT signal if the mouse button has been used
+	   the user told us he/she would use... */
+
+	if ( GUI.stop_button_mask != 0 )
 	{
-		Internals.child_pid = 0;                         /* child is dead... */
-		sigaction( SIGCHLD, &sigchld_old_act, NULL );
-		fl_trigger_object( GUI.run_form->sigchld );
-		stop_measurement( NULL, 1 );
+		bn = fl_get_button_numb( a );
+		if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
+			return;
 	}
 
-	errno = errno_saved;
+	kill( Internals.child_pid, DO_QUIT );
+
+	/* Disable the stop button for the time until the child has died */
+
+	fl_set_object_callback( a, NULL, 0 );
 }
 
 
@@ -517,10 +582,13 @@ static void run_sigchld_handler( int signo )
 	Internals.child_pid = 0;                             /* child is dead... */
 	sigaction( SIGCHLD, &sigchld_old_act, NULL );
 
+	/* Disable the 'Stop' button */
+
+	fl_set_object_callback( GUI.run_form->stop, NULL, 0 );
+
 	GUI.run_form->sigchld->u_ldata = ( long ) return_status;
 	fl_trigger_object( GUI.run_form->sigchld );
 
-	Internals.state = STATE_FINISHED;
 	errno = errno_saved;
 }
 
@@ -538,66 +606,50 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 	b = b;
 
 
-	if ( ! ( Internals.cmdline_flags & DO_CHECK ) )
+	if ( ! child_is_quitting )   /* missing notification by the child ? */
 	{
-		if ( ! child_is_quitting )   /* missing notification by the child ? */
-			fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
-					   NULL, 2 );
-
-		if ( ! a->u_ldata )          /* return status indicates error ? */
-			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
-						   NULL, 3 );
+		Internals.state = STATE_WAITING;
+		fl_show_alert( "Fatal Error", "Experiment stopped prematurely.",
+						   NULL, 1 );
+		Internals.state = STATE_RUNNING;
+		stop_measurement( 2 );
 	}
-
-	stop_measurement( NULL, 1 );
+	else if ( ! a->u_ldata )          /* return status indicates error ? */
+	{
+		Internals.state = STATE_WAITING;
+		fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
+					   NULL, 1 );
+		Internals.state = STATE_RUNNING;
+		stop_measurement( 3 );
+	}
+	else                              /* normal death of child */
+		stop_measurement( 1 );
 }
 
 
 /*-----------------------------------------------------------------*/
-/* stop_measurement() has two functions: if called with the second */
-/* argument b set to 0 it serves as the callback for the "STOP"    */
-/* button and just sends a DO_QUIT signal to the child telling it  */
-/* to exit. This in turn will cause another call of the function,  */
-/* this time with b set to 1 by run_sigchld_handler(), catching    */
-/* the SIGCHLD from the child in order to get the post-measurement */
-/* clean-up done.                                                  */
+/* stop_measurement() is the function that gets called to clean up */
+/* after an experiment is finished, i.e. it has to shutdown the    */
+/* now defunct communication channels to the child, reset the      */
+/* devices and set up the graphics to reflect the new state. It    */
+/* won't yet close the display window, this is only done when the  */
+/* now 'Close' labeled 'Stop' button is pressed.                   */
 /*-----------------------------------------------------------------*/
 
-void stop_measurement( FL_OBJECT *a, long b )
+static void stop_measurement( int state )
 {
-	int bn;
-	int hours, mins;
-	double secs;
+	int hours, mins, secs;
+	const char *mess[ 3 ] = 
+		{ "Experiment finished after running for",
+		  "Experiment stopped prematurely after running for",
+		  "Experiment had to be stopped after running for" };
 
 
-	if ( b == 0 )                           /* callback from stop button ? */
-	{
-		if ( Internals.child_pid != 0 )          /* child is still running */
-		{
-			/* Only send DO_QUIT signal if the mouse button has been used
-			   the user told us he/she would use... */
-
-			if ( GUI.stop_button_mask != 0 )
-			{
-				bn = fl_get_button_numb( a );
-				if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
-					return;
-			}
-
-			kill( Internals.child_pid, DO_QUIT );
-		}
-		else                             /* child already exited */
-		{
-			stop_graphics( );
-			set_buttons_for_run( 1 );
-		}
-
-		return;
-	}
+	Internals.state = STATE_FINISHED;
 
 	end_comm( );
 
-	/* Remove the handler for DO_QUIT signals */
+	/* Reset the handler for the QUITTING signal */
 
 	sigaction( QUITTING, &quitting_old_act, NULL );
 
@@ -615,81 +667,96 @@ void stop_measurement( FL_OBJECT *a, long b )
 		gpib_shutdown( );
 	fsc2_serial_cleanup( );
 
-	secs  = experiment_time( );
-	hours = ( int ) floor( secs / 3600.0 );
-	secs -= hours * 3600.0;
-	mins  = ( int ) floor( secs / 60.0 );
-	secs -= mins * 60.0;
+	secs  = irnd( experiment_time( ) );
+	hours = secs / 3600;
+	mins  = ( secs / 60 ) % 60;
+	secs %= 60;
 
-	switch ( b )
+	switch ( state )
 	{
 		case 1 :
 			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "Experiment finished after running "
-						"for %d h, %d m and %.2f s.\n", hours, mins, secs );
+				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+						mess[ 0 ], hours, mins, secs );
 			else
 			{
 				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "Experiment finished after "
-							"running for %d m and %.2f s.\n", mins, secs );
+					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
+							mess[ 0 ], mins, secs );
 				else
-					eprint( NO_ERROR, UNSET, "Experiment finished after "
-							"running for %.2f s.\n", secs );
+					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 0 ], secs );
 			}
 			break;
 
 		case 2 :
 			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
-						"after running for %d h, %d m and %.2f s.\n",
-						hours, mins, secs );
+				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+						mess[ 1 ], hours, mins, secs );
 			else
 			{
 				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
-							"after running for %d m and %.2f s.\n",
-							mins, secs );
+					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
+							mess[ 1 ], mins, secs );
 				else
-					eprint( NO_ERROR, UNSET, "Experiment stopped prematurely "
-							"after running for %.2f s.\n", secs );
+					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 1 ], secs );
 			}
 			break;
 
 		case 3 :
 			if ( hours > 0 )
-				eprint( NO_ERROR, UNSET, "Experiment had to be stopped after "
-						"running for %d h, %d m and %.2f s.\n",
-						hours, mins, secs );
+				eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+						mess[ 2 ], hours, mins, secs );
 			else
 			{
 				if ( mins > 0 )
-					eprint( NO_ERROR, UNSET, "Experiment had to be stopped "
-							"after running for %d m and %.2f s.\n",
-							mins, secs );
+					eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n",
+							mess[ 2 ], mins, secs );
 				else
-					eprint( NO_ERROR, UNSET, "Experiment had to be stopped "
-							"after running for %.2f s.\n", secs );
+					eprint( NO_ERROR, UNSET, "%s %d s.\n", mess[ 2 ], secs );
 			}
 			break;
 
-		default :
+#if ! defined NDEBUG
+		default :                  /* we should never get here... */
 			fsc2_assert( 1 == 0 );
+#endif
 	}
+
+	/* Reenable the stop button (which was disabled when the DO_QUIT
+	   signal was send to the child) by associating it with a new
+	   handler that's responsible for closing the window. Also change the
+	   buttons label to 'Close'. */
 
 	fl_freeze_form( GUI.run_form->run );
 	fl_set_object_label( GUI.run_form->stop, "Close" );
 	fl_set_button_shortcut( GUI.run_form->stop, "C", 1 );
 	if ( ! ( Internals.cmdline_flags & NO_BALLOON ) )
-		fl_set_object_helper( GUI.run_form->stop, "Remove this window" );
+		fl_set_object_helper( GUI.run_form->stop, "Removes this window" );
+	fl_set_object_callback( GUI.run_form->stop, run_close_button_callback, 0 );
 	fl_unfreeze_form( GUI.run_form->run );
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 	{
-		stop_graphics( );
-		set_buttons_for_run( 1 );
-		Internals.check_return = b;
+		run_close_button_callback( GUI.run_form->stop, 0 );
+		Internals.check_return = state;
 		fl_trigger_object( GUI.main_form->quit );
 	}
+}
+
+
+/*-------------------------------------------------------*/
+/* This function gets called whenever the 'Close' button */
+/* in the display window gets pressed.                   */
+/*-------------------------------------------------------*/
+
+void run_close_button_callback( FL_OBJECT *a, long b )
+{
+	a = a;
+	b = b;
+
+	stop_graphics( );
+	set_buttons_for_run( 0 );
+	Internals.state = STATE_IDLE;
 }
 
 
@@ -700,11 +767,11 @@ void stop_measurement( FL_OBJECT *a, long b )
 /* again when the experiment is finished.                   */
 /*----------------------------------------------------------*/
 
-static void set_buttons_for_run( int active )
+static void set_buttons_for_run( int run_state )
 {
 	fl_freeze_form( GUI.main_form->fsc2 );
 
-	if ( active == 0 )
+	if ( run_state == 1 )
 	{
 		fl_deactivate_object( GUI.main_form->Load );
 		fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
@@ -861,9 +928,9 @@ static void setup_child_signals( void )
 /*----------------------------------------------------------------*/
 /* This is the signal handler for the signals the child receives. */
 /* There are two signals that have a real meaning, SIGUSR2 (aka   */
-/* DO_QUIT ) and SIGALRM. The others are either ignored or kill   */
+/* DO_QUIT) and SIGALRM. The others are either ignored or kill    */
 /* the child (but in a, hopefully, controlled way to allow        */
-/* deletion of shared memory if the parent didn't do it itself.   */
+/* deletion of shared memory if the parent didn't do it itself).  */
 /* There's a twist: The SIGALRM signal can only come from the     */
 /* f_wait() function (see func_util.c). Here we wait in a pause() */
 /* for SIGALRM to get a reliable timer. On the other hand, the    */
@@ -968,7 +1035,7 @@ static void wait_for_confirmation( void )
 	   we can't send the signal to the parent stop the child. */
 
     if ( kill( getppid( ), QUITTING ) == -1 )
-		kill( getpid( ), SIGTERM );             /* commit controlled suicide */
+		_exit( child_return_status );           /* commit controlled suicide */
 
 	/* This seemingly infinite loop looks worse than it is, the child really
 	   exits in the signal handler for DO_QUIT. */
