@@ -38,7 +38,6 @@ int sr810_init_hook( void );
 int sr810_exp_hook( void );
 int sr810_end_of_exp_hook( void );
 void sr810_exit_hook( void );
-void sr810_lock_state( bool lock );
 
 Var *lockin_get_data( Var *v );
 Var *lockin_get_adc_data( Var *v );
