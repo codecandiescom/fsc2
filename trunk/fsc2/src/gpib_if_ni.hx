@@ -31,6 +31,8 @@
 
 #include <sys/ugpib.h>
 
+#include <dirent.h>
+
 #define GPIB_NI
 
 #define GPIB_MAX_DEV      30

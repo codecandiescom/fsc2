@@ -74,6 +74,8 @@ static void  gpib_log_function_start( const char *function,
 static void  gpib_log_function_end( const char *function,
 									char const *dev_name );
 static char *gpib_get_dev_name( int device );
+static int *get_fd_list( void );
+static void close_on_exec_hack( int *fd_list );
 
 
 /*------------------------------------------------------------------------*/
@@ -171,15 +173,25 @@ int gpib_init( const char *log_file_name, int log_level )
 
 static int gpib_init_controller( void )
 {
+	int *fd_list;
+
+
 	raise_permissions( );
+
+	fd_list = get_fd_list( );
+
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
 	{
+		if ( fd_list )
+			T_free( fd_list );
 		lower_permissions( );
         return FAILURE;
 	}
 
     if( ! ibIsMaster( controller ) )
 	{
+		if ( fd_list )
+			T_free( fd_list );
 		lower_permissions( );
         return FAILURE;
 	}
@@ -187,9 +199,13 @@ static int gpib_init_controller( void )
     if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
             ibsre( controller, ON ) ) & IBERR )
 	{
+		if ( fd_list )
+			T_free( fd_list );
 		lower_permissions( );
 		return FAILURE;
 	}
+
+	close_on_exec_hack( fd_list );
 
     return SUCCESS;
 }
@@ -893,10 +909,10 @@ static void gpib_log_date( void )
 static void gpib_log_error( const char *type )
 {
     int i;
-    static int stat[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
-                              0x0800, 0x0400, 0x0200, 0x0100,
-                              0x0080, 0x0040, 0x0020, 0x0010,
-                              0x0008, 0x0004, 0x0002, 0x0001 };
+    static int state[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
+							   0x0800, 0x0400, 0x0200, 0x0100,
+							   0x0080, 0x0040, 0x0020, 0x0010,
+							   0x0008, 0x0004, 0x0002, 0x0001 };
     static char is[ 16 ][ 6 ] = {  "IBERR", "TIMO", "END",  "SRQI",
                                    "RQS",   "\b",   "\b",   "CMPL",
                                    "LOK",   "REM",  "CIC",  "ATN",
@@ -913,7 +929,7 @@ static void gpib_log_error( const char *type )
     fprintf( gpib_log, "ERROR in function %s: <", type );
     for ( i = 15; i >= 0; i-- )
     {
-        if ( ibsta & stat[ 15 - i ] )
+        if ( ibsta & state[ 15 - i ] )
             fprintf( gpib_log, " %s", is[ 15 - i ] );
     }
     fprintf( gpib_log, " > -> %s\n", ie[ iberr ] );
@@ -997,6 +1013,114 @@ void gpib_log_message( const char *fmt, ... )
 	vfprintf( gpib_log, fmt, ap );
 	va_end( ap );
 	lower_permissions( );
+}
+
+
+/*-----------------------------------------------------------------*/
+/* The following functions are part of a dirty hack to get around  */
+/* the problem that the LLP library does not set the close-on-exec */
+/* flag for the GPIB board device file. In the first function we   */
+/* built up a list with all open file descriptor from the entries  */
+/* in the fd subdirectory in the /proc directory for the current   */
+/* process. Then the function for initialisation of the GPIB board */
+/* gets called where the device file is opened. Afterwards, the    */
+/* second function gets called, that compares the fd's in the list */
+/* with the entries int the /proc/PID/fd directory and sets the    */
+/* close-on-exec flag for the new fd. Of course, this probably     */
+/* will only work on Linux...                                      */
+/*-----------------------------------------------------------------*/
+
+static int *get_fd_list( void )
+{
+	DIR *dir;
+	struct dirent *de;
+	char dir_name[ 100 ];
+	static int *fd_list;
+	static int num_fds;
+	char *dn;
+
+
+	fd_list = NULL;
+	num_fds = 0;
+ 
+	if ( snprintf( dir_name, 100, "/proc/%d/fd", getpid( ) ) == -1 )
+		return NULL;
+
+	if ( ( dir = opendir( dir_name ) ) == NULL )
+		return NULL;
+
+	while ( ( de = readdir( dir ) ) != NULL )
+	{
+		for ( dn = de->d_name; *dn && isdigit( *dn ); dn++ )
+			; /* empty */
+
+		if ( *dn != '\0' )
+			continue;
+
+		TRY
+		{
+			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
+			fd_list[ num_fds++ ] = T_atoi( de->d_name );
+		}
+		OTHERWISE
+		{
+			if ( fd_list != NULL )
+				T_free( fd_list );
+			closedir( dir );
+			return NULL;
+		}
+
+		fd_list[ num_fds ] = -1;
+	}
+
+	closedir( dir );
+	return fd_list;
+}
+
+
+static void close_on_exec_hack( int *fd_list )
+{
+	int *new_fd_list;
+	int i, j;
+	bool found;
+	int flags;
+
+
+	if ( fd_list == NULL )
+		return;
+
+	/* Get list of open file descriptors */
+
+	if ( ( new_fd_list = get_fd_list( ) ) == NULL )
+	{
+		T_free( fd_list );
+		return;
+	}
+
+	/* Check for files that weren't in the old list and set the close-on-exec
+	   flag for these files (there should be only one...) */
+
+	for ( i = 0; new_fd_list[ i ] != -1; i++ )
+	{
+		found = UNSET;
+		for ( j = 0; fd_list[ j ] != -1; j++ )
+			if ( new_fd_list[ i ] == fd_list[ j ] )
+			{
+				found = SET;
+				break;
+			}
+
+		if ( found )
+			continue;
+
+		if ( ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) < 0 )
+			continue;
+
+		fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
+	}
+
+	T_free( new_fd_list );
+	T_free( fd_list );
 }
 
 

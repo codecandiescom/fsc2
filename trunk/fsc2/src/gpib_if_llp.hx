@@ -34,6 +34,7 @@
 
 #include <ib.h>
 
+#include <dirent.h>
 
 /* In older versions of the GPIB driver ERR is defined but this clashes
    with newer kernel versions. So, an old GPIB driver is still used the

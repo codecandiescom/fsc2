@@ -126,10 +126,12 @@ gpib_setup:
 			    -o "$(GPIB_LIBRARY)" = "ni"                          \
 			    -o "$(GPIB_LIBRARY)" = "jtt"                         \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then             \
-		if [ ! gpib_if_$(GPIB_LIBRARY).cx -ef gpib_if.c ]; then      \
+		if [  ! gpib_if_$(GPIB_LIBRARY).cx -ef gpib_if.c             \
+			 -o gpib_if_$(GPIB_LIBRARY).cx -nt gpib_if.c ]; then     \
 			$(RM) $(RMFLAGS) gpib_if.c;                              \
 		fi;                                                          \
-		if [ ! gpib_if_$(GPIB_LIBRARY).hx -ef gpib_if.h ]; then      \
+		if [  ! gpib_if_$(GPIB_LIBRARY).hx -ef gpib_if.h             \
+			 -o gpib_if_$(GPIB_LIBRARY).hx -nt gpib_if.h ]; then     \
 			$(RM) $(RMFLAGS) gpib_if.h;                              \
 		fi;                                                          \
 		if [ ! -e gpib_if.c ]; then                                  \
