@@ -39,6 +39,11 @@ bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 /* internally used functions */
 
 static double er035m_s_get_field( void );
+static bool er035m_s_open( void );
+static bool er035m_s_close( void );
+static bool er035m_s_write( char *buf, long len );
+static bool er035m_s_read( char *buf, long *len );
+static bool er035m_s_comm( int type, ... );
 
 
 
@@ -256,7 +261,7 @@ try_again:
 						"field.", nmr.name );
 				THROW( EXCEPTION );
 
-			case '6' :      /* MOD OFF -> error (should never happen */
+			case '6' :      /* MOD OFF -> error (should never happen) */
 				eprint( FATAL, "%s: Modulation of NMR gaussmeter is switched "
 						"off.", nmr.name );
 				THROW( EXCEPTION );
@@ -536,7 +541,7 @@ Var *field_meter_wait( Var *v )
 /* state call find_field() instead.                                      */
 /*-----------------------------------------------------------------------*/
 
-double er035m_s_get_field( void )
+static double er035m_s_get_field( void )
 {
 	char buffer[ 21 ];
 	char *state_flag;
@@ -571,8 +576,8 @@ double er035m_s_get_field( void )
 
 		if ( *state_flag >= '3' )
 		{
-			eprint( FATAL, "%s: NMR gaussmeter can't lock on the current "
-					"field.", nmr.name );
+			eprint( FATAL, "%s: NMR gaussmeter can't get lock onto the "
+					"current field.", nmr.name );
 			THROW( EXCEPTION );
 		}
 
@@ -587,19 +592,19 @@ double er035m_s_get_field( void )
 }
 
 
-bool er035m_s_open( void )
+static bool er035m_s_open( void )
 {
 	return er035m_s_comm( SERIAL_INIT );
 }
 
 
-bool er035m_s_close( void )
+static bool er035m_s_close( void )
 {
 	return er035m_s_comm( SERIAL_EXIT );
 }
 
 
-bool er035m_s_write( char *buf, long len )
+static bool er035m_s_write( char *buf, long len )
 {
 	char *wbuf;
 	long wlen;
@@ -625,7 +630,7 @@ bool er035m_s_write( char *buf, long len )
 }
 
 
-bool er035m_s_read( char *buf, long *len )
+static bool er035m_s_read( char *buf, long *len )
 {
 	if ( buf == NULL || *len == 0 )
 		return OK;
@@ -634,7 +639,7 @@ bool er035m_s_read( char *buf, long *len )
 }
 
 
-bool er035m_s_comm( int type, ... )
+static bool er035m_s_comm( int type, ... )
 {
 	va_list ap;
 	char *buf;
@@ -681,6 +686,7 @@ bool er035m_s_comm( int type, ... )
 			*lptr = read( nmr.fd, ( void * ) buf, *lptr );
 			if ( *lptr < 0 )
 			{
+				*lptr = 0;
 				va_end( ap );
 				return FAIL;
 			}
