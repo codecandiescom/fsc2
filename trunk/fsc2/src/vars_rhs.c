@@ -77,7 +77,11 @@ Var *vars_arr_rhs( Var *v )
 	{
 		if ( v->val.lval >= cv->len )
 		{
-			print( FATAL, "Invalid index for array '%s'.\n", a->name );
+			if ( cv->len > 0 )
+				print( FATAL, "Invalid index for array '%s'.\n", a->name );
+			else
+				print( FATAL, "Size of array '%s' is still unknown.\n",
+					   a->name );
 			THROW( EXCEPTION );
 		}
 
@@ -85,20 +89,26 @@ Var *vars_arr_rhs( Var *v )
 	}
 
 	if ( v == NULL )
-	{
-		if ( cv->type == INT_ARR )
-			return vars_push( cv->type, cv->val.lpnt, cv->len );
-		else if ( cv->type == FLOAT_ARR )
-			return vars_push( cv->type, cv->val.dpnt, cv->len );
-		else
-			return vars_push( cv->type, cv );
-	}
+		switch ( cv->type )
+		{
+			case INT_ARR :
+				return vars_push( cv->type, cv->val.lpnt, cv->len );
+
+			case FLOAT_ARR :
+				return vars_push( cv->type, cv->val.dpnt, cv->len );
+
+			default :
+				return vars_push( cv->type, cv );
+		}
 
 	ind = v->val.lval;
 
 	if ( ind >= cv->len )
 	{
-		print( FATAL, "Invalid index for array '%s'.\n", a->name );
+		if ( cv->len > 0 )
+			print( FATAL, "Invalid index for array '%s'.\n", a->name );
+		else
+			print( FATAL, "Size of array '%s' is still unknown.\n", a->name );
 		THROW( EXCEPTION );
 	}
 
@@ -152,8 +162,8 @@ static int vars_check_rhs_indices( Var **v, Var **a, int *range_count )
 				print( WARN, "FLOAT value used as index for array '%s'.\n",
 					   ( *a )->name );
 			else
-				print( WARN, "FLOAT value used as start of range for array "
-					   "'%s'.\n", ( *a )->name );
+				print( WARN, "FLOAT value used as start of range for "
+					   "array '%s'.\n", ( *a )->name );
 			cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
 			cv->type = INT_VAR;
 		}
@@ -184,7 +194,7 @@ static int vars_check_rhs_indices( Var **v, Var **a, int *range_count )
 
 		if ( cv->type == INT_VAR )
 			cv->val.lval -= ARRAY_OFFSET;
-		else
+		else if ( cv->type == FLOAT_VAR )
 		{
 			print( WARN, "FLOAT value used as end of range for array '%s'.\n",
 				   ( *a )->name );
@@ -250,7 +260,11 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 	{
 		if ( v->val.lval >= cv->len )
 		{
-			print( FATAL, "Invalid index for array '%s'.\n", a->name );
+			if ( cv->len )
+				print( FATAL, "Invalid index for array '%s'.\n", a->name );
+			else
+				print( FATAL, "Size of array '%s' is still unknown.\n",
+					   a->name );
 			THROW( EXCEPTION );
 		}
 
@@ -260,12 +274,20 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 	
 	/* Make a copy of it */
 
-	if ( cv->type == INT_ARR )
-		cv = vars_push( cv->type, cv->val.lpnt, cv->len );
-	else if ( cv->type == FLOAT_ARR )
-		cv = vars_push( cv->type, cv->val.dpnt, cv->len );
-	else
-		cv = vars_push( cv->type, cv );
+	switch ( cv->type )
+	{
+		case INT_ARR :
+			cv = vars_push( cv->type, cv->val.lpnt, cv->len );
+			break;
+
+		case FLOAT_ARR :
+			cv = vars_push( cv->type, cv->val.dpnt, cv->len );
+			break;
+
+		default :
+			cv = vars_push( cv->type, cv );
+			break;
+	}
 
 	/* Remove everything from the copy not covered by ranges */
 
@@ -277,6 +299,9 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 
 	if ( index_count > range_count )
 		vars_fix_dims( cv, cv->dim - index_count + range_count );
+
+	while ( ( v = vars_pop( v ) ) != cv )
+		/* empty */ ;
 
 	return cv;
 }
@@ -293,9 +318,6 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 
 	if ( needs_stage_2 )
 		prune_stage_2( nv );
-
-	while ( ( v = vars_pop( v ) ) != end )
-		/* empty */ ;
 }
 
 /*--------------------------------------------------------*/
@@ -314,17 +336,21 @@ static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
 		range_start = - v->val.lval - 1;
 		v = v->next;
 
-		if ( range_start > nv->len )
+		if ( range_start >= nv->len )
 		{
-			print( FATAL, "Invalid start of range for array '%s'.\n",
-				   a->name );
+			if ( nv->len > 0 )
+				print( FATAL, "Invalid start of range for array '%s'.\n",
+					   a->name );
+			else
+				print( FATAL, "Size of array '%s' is still unknown.\n",
+					   a->name );
 			THROW( EXCEPTION );
 		}
 
 		range_end = v->val.lval;
 		v = v->next;
 
-		if ( range_end > nv->len )
+		if ( range_end >= nv->len )
 		{
 			print( FATAL, "Invalid end of range for array '%s'.\n", a->name );
 			THROW( EXCEPTION );
@@ -337,9 +363,14 @@ static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
 		range_start = range_end = v->val.lval;
 		v = v->next;
 
-		if ( range_start > nv->len )
+		if ( range_start >= nv->len )
 		{
-			print( FATAL, "Invalid start index for array '%s'.\n", a->name );
+			if ( nv->len > 0 )
+				print( FATAL, "Invalid start index for array '%s'.\n",
+					   a->name );
+			else
+				print( FATAL, "Size of array '%s' is still unknown.\n",
+					   a->name );
 			THROW( EXCEPTION );
 		}
 

@@ -203,22 +203,40 @@ static void vars_assign_to_nd( Var *src, Var *dest )
 	switch ( src->type )
 	{
 		case INT_VAR : case FLOAT_VAR :
-			if ( dest->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
-				vars_assign_to_nd_from_1d( src, dest );
-			else if ( dest->type == SUB_REF_PTR )
-				vars_assign_to_snd_from_1d( src, dest->from, dest );
-			else
-				vars_assign_to_nd_from_1d( src, dest->from );
+			switch ( dest->type )
+			{
+				case INT_ARR : case FLOAT_ARR :
+				case INT_REF : case FLOAT_REF :
+					vars_assign_to_nd_from_1d( src, dest );
+					break;
+
+				case SUB_REF_PTR :
+					vars_assign_to_snd_from_1d( src, dest->from, dest );
+					break;
+
+				default :
+					vars_assign_to_nd_from_1d( src, dest->from );
+					break;
+			}
 			break;
 
 		case INT_ARR : case FLOAT_ARR :
 		case INT_REF : case FLOAT_REF :
-			if ( dest->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
-				vars_assign_to_nd_from_nd( src, dest );
-			else if ( dest->type == SUB_REF_PTR )
-				vars_assign_to_snd_from_nd( src, dest->from, dest );
-			else
-				vars_assign_to_nd_from_nd( src, dest->from );
+			switch ( dest->type )
+			{
+				case INT_ARR : case FLOAT_ARR :
+				case INT_REF : case FLOAT_REF :
+					vars_assign_to_nd_from_nd( src, dest );
+					break;
+
+				case SUB_REF_PTR :
+					vars_assign_to_snd_from_nd( src, dest->from, dest );
+					break;
+
+				default :
+					vars_assign_to_nd_from_nd( src, dest->from );
+					break;
+			}
 			break;
 
 #ifndef NDEBUG
@@ -272,7 +290,7 @@ static void vars_assign_to_nd_from_1d( Var *src, Var *dest )
 	}
 
 	if ( vars_set_all( dest, lval, dval ) == 0 )
-		print( WARN, "No elements were set in assignment because size of "
+		print( SEVERE, "No elements were set in assignment because size of "
 			   "destination isn't known yet.\n" );
 }
 
@@ -338,7 +356,7 @@ static void vars_assign_to_snd_from_1d( Var *src, Var *dest, Var *sub )
 	}
 
 	if ( vars_assign_to_snd_range_from_1d( dest, sub, 0, lval, dval ) == 0 )
-		print( WARN, "No elements were set in assignment because size of "
+		print( SEVERE, "No elements were set in assignment because size of "
 			   "destination isn't known yet.\n" );
 }
 
@@ -629,12 +647,20 @@ static void vars_assign_snd_range_from_nd( Var *dest, Var *sub, ssize_t cur,
 
 	if ( cur == sub->len )
 	{
-		if ( src->type == INT_PTR )
-			nsrc = vars_push( INT_VAR, *src->val.lpnt );
-		else if ( src->type == FLOAT_PTR )
-			nsrc = vars_push( FLOAT_VAR, *src->val.dpnt );
-		else
-			nsrc = vars_push_copy( src );
+		switch ( src->type )
+		{
+			case INT_PTR :
+				nsrc = vars_push( INT_VAR, *src->val.lpnt );
+				break;
+
+			case FLOAT_PTR :
+				nsrc = vars_push( FLOAT_VAR, *src->val.dpnt );
+				break;
+
+			default :
+				nsrc = vars_push_copy( src );
+				break;
+		}
 
 		if ( dest->type & ( INT_PTR | FLOAT_PTR ) )
 			ndest = dest;
@@ -649,12 +675,20 @@ static void vars_assign_snd_range_from_nd( Var *dest, Var *sub, ssize_t cur,
 
 	if ( ind >= 0 )
 	{
-		if ( dest->type == INT_ARR )
-			ndest = vars_push( INT_PTR, dest->val.lpnt + ind );
-		else if ( dest->type == FLOAT_ARR )
-			ndest = vars_push( FLOAT_PTR, dest->val.dpnt + ind );
-		else
-			ndest = dest->val.vptr[ ind ];
+		switch ( dest->type )
+		{
+			case INT_ARR :
+				ndest = vars_push( INT_PTR, dest->val.lpnt + ind );
+				break;
+
+			case FLOAT_ARR :
+				ndest = vars_push( FLOAT_PTR, dest->val.dpnt + ind );
+				break;
+
+			default :
+				ndest = dest->val.vptr[ ind ];
+				break;
+		}
 
 		vars_assign_snd_range_from_nd( ndest, sub, cur, src );
 		return;
@@ -664,85 +698,99 @@ static void vars_assign_snd_range_from_nd( Var *dest, Var *sub, ssize_t cur,
 	range_end = sub->val.index[ cur++ ];
 	range = range_end - range_start + 1;
 
-	if ( src->type & ( INT_REF | FLOAT_REF ) )
+	switch( src->type )
 	{
-		if ( src->len != range )
-		{
-			print( FATAL, "Sizes of array slices don't fit in "
-				   "assignment.\n" );
-			THROW( EXCEPTION );
-		}
+		case INT_REF : case  FLOAT_REF :
+			if ( src->len != range )
+			{
+				print( FATAL, "Sizes of array slices don't fit in "
+					   "assignment.\n" );
+				THROW( EXCEPTION );
+			}
 
-		if ( dest->type == INT_ARR )
-		{
-			if ( src->type == INT_REF )
-				for ( i = range_start; i <= range_end; i++ )
-					dest->val.lpnt[ i ] = *src->val.lpnt;
-			else
-				for ( i = range_start; i <= range_end; i++ )
-					dest->val.lpnt[ i ] = round( *src->val.dpnt );
-		}
-		else if ( dest->type == FLOAT_ARR )
-		{
-			if ( src->type == INT_REF )
-				for ( i = range_start; i <= range_end; i++ )
-					dest->val.dpnt[ i ] = *src->val.lpnt;
-			else
-				for ( i = range_start; i <= range_end; i++ )
-					dest->val.dpnt[ i ] = *src->val.dpnt;
-		}
-		else
-			for ( i = 0; i < range; i++ )
-				vars_assign_snd_range_from_nd(
+			switch ( dest->type )
+			{
+				case INT_ARR :
+					if ( src->type == INT_REF )
+						for ( i = range_start; i <= range_end; i++ )
+							dest->val.lpnt[ i ] = *src->val.lpnt;
+					else
+						for ( i = range_start; i <= range_end; i++ )
+							dest->val.lpnt[ i ] = round( *src->val.dpnt );
+					break;
+
+				case FLOAT_ARR :
+					if ( src->type == INT_REF )
+						for ( i = range_start; i <= range_end; i++ )
+							dest->val.dpnt[ i ] = *src->val.lpnt;
+					else
+						for ( i = range_start; i <= range_end; i++ )
+							dest->val.dpnt[ i ] = *src->val.dpnt;
+					break;
+
+				default :
+					for ( i = 0; i < range; i++ )
+						vars_assign_snd_range_from_nd(
 											 dest->val.vptr[ i + range_start ],
 											 sub, cur, src->val.vptr[ i ] );
-	}
-	else if ( src->type & ( INT_ARR | FLOAT_ARR ) )
-	{
-		if ( src->len != range )
-		{
-			print( FATAL, "Sizes of array slices don't fit in "
-				   "assignment.\n" );
-			THROW( EXCEPTION );
-		}
+					break;
+			}
+			break;
 
-		if ( dest->type == INT_ARR )
-		{
-			if ( src->type == INT_ARR )
-				memcpy( dest->val.lpnt + range_start, src->val.lpnt,
-						range * sizeof *dest->val.lpnt );
-			else
-				for ( i = 0; i < range; i++ )
-					dest->val.lpnt[ i + range_start ] =
-												   round( src->val.dpnt[ i ] );
-		}
-		else if ( dest->type ==  FLOAT_ARR )
-		{
-			if ( src->type == INT_ARR )
-				for ( i = 0; i < range; i++ )
-					dest->val.lpnt[ i + range_start ] = src->val.lpnt[ i ];
-			else
-				memcpy( dest->val.dpnt + range_start, src->val.dpnt,
-						range * sizeof *dest->val.dpnt );
-		}
-		else
-			for ( i = 0; i < range; i++ )
+		case INT_ARR : case FLOAT_ARR :
+			if ( src->len != range )
 			{
-				if ( src->type == INT_ARR )
-					nsrc = vars_push( INT_PTR, src->val.lpnt + i );
-				else
-					nsrc = vars_push( FLOAT_PTR, src->val.dpnt + i );
-				vars_assign_snd_range_from_nd(
+				print( FATAL, "Sizes of array slices don't fit in "
+					   "assignment.\n" );
+				THROW( EXCEPTION );
+			}
+
+			switch ( dest->type )
+			{
+				case INT_ARR :
+					if ( src->type == INT_ARR )
+						memcpy( dest->val.lpnt + range_start, src->val.lpnt,
+								range * sizeof *dest->val.lpnt );
+					else
+						for ( i = 0; i < range; i++ )
+							dest->val.lpnt[ i + range_start ] =
+												   round( src->val.dpnt[ i ] );
+					break;
+
+				case FLOAT_ARR :
+					if ( src->type == INT_ARR )
+						for ( i = 0; i < range; i++ )
+							dest->val.lpnt[ i + range_start ] =
+															src->val.lpnt[ i ];
+					else
+						memcpy( dest->val.dpnt + range_start, src->val.dpnt,
+								range * sizeof *dest->val.dpnt );
+					break;
+
+				default :
+					for ( i = 0; i < range; i++ )
+					{
+						if ( src->type == INT_ARR )
+							nsrc = vars_push( INT_PTR, src->val.lpnt + i );
+						else
+							nsrc = vars_push( FLOAT_PTR, src->val.dpnt + i );
+						vars_assign_snd_range_from_nd(
 											 dest->val.vptr[ i + range_start ],
 											 sub, cur, nsrc );
-				if ( src->type & ( INT_ARR | FLOAT_ARR ) )
-					vars_pop( nsrc );
+						if ( src->type & ( INT_ARR | FLOAT_ARR ) )
+							vars_pop( nsrc );
+					}
+					break;
 			}
+			break;
+
+		default :
+			for ( i = 0; i < range; i++ )
+				vars_assign_snd_range_from_nd(
+											 dest->val.vptr[ i + range_start ],
+											 sub, cur, src );
+			break;
 	}
-	else
-		for ( i = 0; i < range; i++ )
-			vars_assign_snd_range_from_nd( dest->val.vptr[ i + range_start ],
-										   sub, cur, src );
 }
 
 
