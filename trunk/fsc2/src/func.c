@@ -353,7 +353,7 @@ Var *func_call( Var *f )
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
 				;
-			for ( ; ap != NULL; ap = vars_pop( ap ) )
+			while ( ( ap = vars_pop( ap ) ) != NULL )
 				;
 		}
 
@@ -361,30 +361,30 @@ Var *func_call( Var *f )
 
 		if ( ac < f->dim )
 		{
-			eprint( FATAL, SET, "Function `%s' needs %d argument%s but found "
-					"only %d.\n", f->name, f->dim,
+			eprint( FATAL, SET, "Function `%s' expects %d argument%s but only "
+					"%d where found.\n", f->name, f->dim,
 					f->dim == 1 ? "" : "s", ac );
 			THROW( EXCEPTION );
 		}
 	}
 	else
-		ac = -1;
+		ac = -1;        /* for functions with a variable number of arguments */
 
-	/* Now call the function */
+	/* Now call the function - but first set the global variable 'Cur_Func'
+	   to the functions name which is usually used in error messages (the
+	   only exception is when from an EDL function another EDL is called,
+	   in which case the name of the 'topmost' function is kept). */
 
 	if ( in_call++ == 0 )
 		Cur_Func = f->name;
 
-	if ( ac != 0 )
-		ret = ( *f->val.fnct )( f->next );
-	else
-		ret = ( *f->val.fnct )( NULL );
+	ret = ( *f->val.fnct )( f->next );
 
 	if ( --in_call == 0 )
 		Cur_Func = NULL;
 
-	/* Before starting to delete the now defunct variables do another
-	   sanity check, testing that the stack didn't get corrupted. */
+	/* Before starting to delete the now defunct variables do another sanity
+	   check, i.e. test that the variables stack didn't get corrupted. */
 
 	if ( ! vars_exist( f ) )
 	{
@@ -401,7 +401,7 @@ Var *func_call( Var *f )
 	/* Finally do the clean up, i.e. remove the variable with the function
 	   and all parameters that survived - just keep the return value. */
 
-	for ( ap = f; ap != NULL; ap = ( ap == ret ) ? ap->next : vars_pop( ap ) )
+	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
 		;
 
 	return ret;
