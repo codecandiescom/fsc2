@@ -1,16 +1,23 @@
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
+c_sources      = fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
+				 phases.c ppcheck.c pulse.c prim_exp.c devices.c
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
-			     fsc2.c assign.c util.c exceptions.c variables.c func.c T.c \
-				 phases.c ppcheck.c pulse.c prim_exp.c devices.c \
-				 User_Functions.c
+				 ${c_sources}
 objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
-			     -Wmissing-prototypes -Wmissing-declarations -DDEBUG
+			     -Wmissing-prototypes -Wmissing-declarations -W -DDEBUG
+modules        = User_Functions.c
+
+
+
+.PHONY: all
+all: tags fsc2 mods
+
 
 
 fsc2: $(objects) fsc_clean fsc2.h
-	gcc $(CFLAGS) -lm -o $@ $(objects)
+	libtool gcc -export-dynamic -o $@ $(objects) -lm -ldl
 
 split_lexer.c: split_lexer.flex fsc2.h
 	flex -B -Psplit -osplit_lexer.c split_lexer.flex
@@ -67,10 +74,22 @@ fsc_clean.c: fsc_clean.flex fsc2.h
 	flex -B -ofsc_clean.c fsc_clean.flex
 
 
-.PHONY:
+
+
+mods: lib_fsc2_$(modules:.c=.la)
+	export LD_LIBRARY_PATH=`pwd`/.libs
+
+lib_fsc2_%.la: %.c fsc2.h
+	libtool gcc $(CFLAGS) -c $<
+	libtool gcc -module -o $@ $*.lo -rpath /usr/local/lib -lm
+
+
+
 clean: 
-	   rm $(objects) fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
-	   fsc_clean.c fsc_clean.o TAGS
+	-rm *.o fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
+	    fsc_clean.c lib*.la TAGS
+	-rm -rf .libs
+
 
 tags:
-	etags -T *.c *.h *.flex *.y *.h
+	etags -T ${c_sources} *.flex *.y *.h

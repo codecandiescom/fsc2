@@ -3,7 +3,23 @@
 */
 
 
+#include <dlfcn.h>
 #include "fsc2.h"
+
+
+
+static int num_def_func;    /* number of built-in functions */
+static int num_func;        /* number of built-in  and listed functions */
+static Func *fncts;         /* structure for list of functions */
+
+
+static void **Lib_Handle;   /* array of dynamically loaded library handles */
+static int Num_Libs;        /* number of dynamically loaded libaries */
+
+void load_functions( const char *name, Func *fncts,
+					 int num_def_func, int num_func );
+
+
 
 
 /* When in the input an identifier is found it is always tried first if the
@@ -64,34 +80,31 @@ static Var *f_print( Var *v  );
 
 static Func def_fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",    f_int,     1, ACCESS_ALL_SECTIONS	},
-	{ "float",  f_float,   1, ACCESS_ALL_SECTIONS	},
-	{ "round",  f_round,   1, ACCESS_ALL_SECTIONS	},
-	{ "floor",  f_floor,   1, ACCESS_ALL_SECTIONS	},
-	{ "ceil",   f_ceil,    1, ACCESS_ALL_SECTIONS	},
-	{ "abs",    f_abs,     1, ACCESS_ALL_SECTIONS	},
-	{ "sin",    f_sin,     1, ACCESS_ALL_SECTIONS	},
-	{ "cos",    f_cos,     1, ACCESS_ALL_SECTIONS	},
-	{ "tan",    f_tan,     1, ACCESS_ALL_SECTIONS	},
-	{ "asin",   f_asin,    1, ACCESS_ALL_SECTIONS	},
-	{ "acos",   f_acos,    1, ACCESS_ALL_SECTIONS	},
-	{ "atan",   f_atan,    1, ACCESS_ALL_SECTIONS	},
-	{ "sinh",   f_sinh,    1, ACCESS_ALL_SECTIONS	},
-	{ "cosh",   f_cosh,    1, ACCESS_ALL_SECTIONS	},
-	{ "tanh",   f_tanh,    1, ACCESS_ALL_SECTIONS	},
-	{ "exp",    f_exp,     1, ACCESS_ALL_SECTIONS	},
-	{ "ln",     f_ln,      1, ACCESS_ALL_SECTIONS	},
-	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS	},
-	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS	},
-	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS	},
-	{ NULL,     NULL,      0, 0 }        /* marks last entry, don't remove ! */
+	{ "int",    f_int,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "float",  f_float,   1, ACCESS_ALL_SECTIONS, 0 },
+	{ "round",  f_round,   1, ACCESS_ALL_SECTIONS, 0 },
+	{ "floor",  f_floor,   1, ACCESS_ALL_SECTIONS, 0 },
+	{ "ceil",   f_ceil,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "abs",    f_abs,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sin",    f_sin,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "cos",    f_cos,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "tan",    f_tan,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "asin",   f_asin,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "acos",   f_acos,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "atan",   f_atan,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sinh",   f_sinh,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "cosh",   f_cosh,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "tanh",   f_tanh,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "exp",    f_exp,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "ln",     f_ln,      1, ACCESS_ALL_SECTIONS, 0 },
+	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS, 0 },
+	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS, 0 },
+	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS, 0 },
+	{ NULL,     NULL,      0, 0,                   0 }   /* marks last entry, 
+															don't remove ! */
 };
 
 
-
-static int num_def_func;
-static int num_func;
-static Func *fncts;
 
 
 bool functions_init_hook( void )
@@ -101,6 +114,8 @@ bool functions_init_hook( void )
 	for ( num_def_func = 0; def_fncts[ num_def_func ].fnct != NULL;
 		  num_def_func++ )
 		;
+
+	Lib_Handle = NULL;
 
 	num_func = num_def_func;
 
@@ -116,7 +131,7 @@ bool functions_init_hook( void )
 		fncts = T_malloc( ( num_def_func + 1 ) * sizeof( Func ) );
 		memcpy( fncts, def_fncts, ( num_def_func + 1 ) * sizeof( Func ) );
 		func_list_parse( &fncts, num_def_func, &num_func );
-		load_user_functions( fncts, num_def_func, num_func );
+		load_functions( "User_Functions", fncts, num_def_func, num_func );
 	}
 	if ( exception_id == NO_EXCEPTION )    /* everything worked out fine */
    		TRY_SUCCESS;
@@ -144,6 +159,15 @@ void functions_exit_hook( void )
 		if ( fncts[ i ].name != NULL )
 			free( ( char * ) fncts[ i ].name );
 	free( fncts );
+
+	if ( Lib_Handle == NULL )
+		return;
+
+	for ( i = 0; i < Num_Libs; ++i )
+		dlclose( Lib_Handle[ Num_Libs ] );
+
+	free( Lib_Handle );
+	Num_Libs = 0;
 }
 
 
@@ -163,8 +187,8 @@ Var *func_get( char *name, int *access )
 		{
 			if ( fncts[ i ].fnct == NULL )
 			{
-				eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
-						Fname, Lc, fncts[ i ].name );
+				eprint( FATAL, "%s:%ld: Function `%s' has not (yet) been "
+                        "loaded.\n", Fname, Lc, fncts[ i ].name );
 				THROW( FUNCTION_EXCEPTION );
 			}
 						
@@ -695,3 +719,65 @@ Var *f_print( Var *v )
 
 	return vars_push( INT_VAR, in_format );
 }
+
+
+void load_functions( const char *name, Func *fncts,
+					 int num_def_func, int num_func )
+{
+	int num;
+	char *library;
+	void *cur;
+
+
+	/* Put together name of library to be loaded */
+
+	library = get_string( strlen( name ) + 14 );
+	strcpy( library, "lib_fsc2_" );
+	strcat( library, name );
+	strcat( library, ".so.0" );
+
+	/* Increase memory allocated for library handles and try to open
+	   dynamically loaded library */
+
+	Lib_Handle = T_realloc( Lib_Handle, ( Num_Libs + 1 ) * sizeof( void ) );
+	Lib_Handle[ Num_Libs ] = dlopen( library, RTLD_LAZY );
+	if ( Lib_Handle[ Num_Libs ] == NULL )
+	{
+		eprint( FATAL, "Can't open library for `%s', %s.\n",
+				name, dlerror( ) );
+		THROW( FUNCTION_EXCEPTION );
+	}
+
+	eprint( NO_ERROR, "Loading functions from file `%s'.\n", name );
+
+	/* Run trough all the functions in the function list and if they need
+	   loading  store the address of the function - check that the function
+	   has not already been loaded (but overloading built-in functions is
+	   acceptable). */
+
+	for ( num = 0; num < num_func; num++ )
+	{
+		/* Don't try to load if function isn't listed in `Functions' */
+
+		if ( ! fncts[ num ].to_be_loaded )
+			continue;
+
+		cur = dlsym( Lib_Handle[ Num_Libs ], fncts[ num ].name );
+
+		if ( dlerror( ) != NULL )     /* function not found in library ? */
+			continue;
+
+		if ( num >= num_def_func && fncts[ num ].fnct != NULL )
+		{
+			eprint( FATAL, " Redefinition of function `%s()'.\n",
+					fncts[ num ].name );
+			THROW( FUNCTION_EXCEPTION );
+		}
+
+		eprint( NO_ERROR, "  Loading function `%s()'.\n", fncts[ num ].name );
+		fncts[ num ].fnct = cur;
+	}
+
+	Num_Libs++;
+}
+

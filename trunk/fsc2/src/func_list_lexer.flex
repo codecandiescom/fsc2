@@ -172,6 +172,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 		( *fncts )[ cur ].fnct = NULL;
 		( *fncts )[ cur ].nargs = 0;
 		( *fncts )[ cur ].access_flag = ACCESS_RESTRICTED;
+		( *fncts )[ cur ].to_be_loaded = UNSET;
 	}
 
 	/* Now parse file again */
@@ -292,6 +293,7 @@ void fll_get_functions( Func *fncts, int num_def_func )
 
 				if ( act >= num_def_func )
 				    fncts[ act ].name = get_string_copy( func_listtext );
+				fncts[ act ].to_be_loaded = SET;
 				state = 1;
 				break;
 

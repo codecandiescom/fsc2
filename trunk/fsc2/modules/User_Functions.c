@@ -6,84 +6,17 @@
 #include "fsc2.h"
 
 
-
-/* 
-   To define a new function do:
-
-   1. Append the name of the function (as will be called from the EDL file!),
-      the number of arguments and the accessibility flag to the list in the
-	  file `Functions' (also see comment for syntax)
-   2. Enter the declaration of the function - all functions have to be of typ
-
-            static Var *function_name( Var *variable_name )
-
-	  i.e. each function must return a variable on the variable stack and each
-	  functions has a variable pointer as its argument - even functions that
-	  don't need an argument have to be defined this way, but they only will
-	  get passed a NULL pointer, so there is nothing to worry about.
-   3. Append the name of the function by which it will be called in the EDL
-      file as well as the address of the function to the function list
-	  `Function_List'.
-   4. Apppend the definition of the function to this file.
-
-*/
+Var *square( Var *v );
+Var *int_slice( Var *v );
+Var *float_slice( Var *v );
 
 
-static Var *square( Var *v );
-static Var *islice( Var *v );
-static Var *fslice( Var *v );
-
-
-static Function_List FL[ ] =
-{
-	{ "square", square },
-	{ "int_slice", islice },
-	{ "float_slice", fslice },
-	{ NULL,   NULL }
-};
-
-
-
-void load_user_functions( Func *fncts, int num_def_func, int num_func )
-{
-	Function_List *cfl = FL;
-	int num;
-
-	eprint( NO_ERROR, "Loading functions from file `%s'.\n", __FILE__ );
-
-	/* Run trough all the functions in the function list and if they need
-	   loading (i.e. they are listed in `Functions') store the address of 
-	   the function - check that the function has not already been loaded
-	   (but overloading built-in functions is acceptable). */
-
-	while ( cfl->name != NULL )
-	{
-		for ( num = 0; num < num_func; num++ )
-			if ( ! strcmp( fncts[ num ].name, cfl->name ) )
-			{
-				if ( num >= num_def_func && fncts[ num ].fnct != NULL )
-				{
-					eprint( FATAL, "  Redefinition of function `%s()'.\n",
-							fncts[ num ].name );
-					THROW( FUNCTION_EXCEPTION );
-				}
-				else
-				{
-					eprint( NO_ERROR, "  Loading function `%s()' from file "
-							"`%s'.\n", fncts[ num ].name, __FILE__ );
-					fncts[ num ].fnct = cfl->fnct;
-				}
-				break;
-			}
-
-		cfl++;
-	}
-}
 
 
 /****************************************************************/
 /* Enter the definition of all nedded functions below this line */
 /****************************************************************/
+
 
 				 
 Var *square( Var *v )
@@ -97,7 +30,7 @@ Var *square( Var *v )
 }
 
 
-Var *islice( Var *v )
+Var *int_slice( Var *v )
 {
 	long *x;
 	long size;
@@ -115,7 +48,7 @@ Var *islice( Var *v )
 }
 
 
-Var *fslice( Var *v )
+Var *float_slice( Var *v )
 {
 	long *x;
 	long size;
