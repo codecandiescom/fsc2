@@ -117,9 +117,10 @@ sub calib {
 /*    deviation between the theoretical and the observed     */
 /*    line position should be zero or at least very small.   */
 /*-----------------------------------------------------------*/
+
 DEVICES:
 
-//ni6601;
+ni6601;
 spex_cd2a;
 
 
@@ -284,6 +285,8 @@ FOREVER {
 
 	IF button_state( B_scan ) {
 
+		object_enable( B_scan, "OFF" );
+
 		IF start_wn < end_wn {
 			show_message( "Scan start is not larger than scan end" );
 			NEXT;
@@ -305,12 +308,7 @@ FOREVER {
 
 		FOR I = 1 : N_points {
 
-//			data[ I ] = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
-			data[ I ] = 0;
-
-			IF I == ( N_points + 1 ) / 2 {
-				data[ I ] = 200;
-			}
+			data[ I ] = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
 
 			display( I, data[ I ] );
 
@@ -319,6 +317,7 @@ FOREVER {
 			}
 		}
 
+		object_enable( B_scan, "ON" );
 		object_enable( B_find, "ON" );
 		object_enable( B_lpos, "ON" );
 	}
@@ -400,7 +399,7 @@ sub monit {
 	print F <<EOF;
 DEVICES:
 
-//ni6601;
+ni6601;
 spex_cd2a;
 
 
@@ -410,7 +409,8 @@ start_wn  = 100.0 cm^-1;
 step_size = 1 cm^-1;
 mtime     = 0.1 s;
 cwn = start_wn;
-old_start_wn, old_step_size;
+old_start_wn = start_wn;
+old_step_size = step_size;
 
 ll;
 new;
@@ -480,13 +480,15 @@ FOREVER {
 
 			new = input_value( B_swn );
 
-			IF ll - new > 44000.0 | ll - new < 46000.0 / 3.0 {
+			IF ( Mode == 0 &
+				 ( ll - new > 44000.0 | ll - new < 46000.0 / 3.0 ) ) |
+			   ( Mode == 1 &
+				 ( new > 44000.0 | new < 46000.0 / 3.0 ) ) {
 				input_value( B_swn, Mode == 0 ? start_wn : ll - start_wn);
 				NEXT;
 			}
 
-			start_wn = new;
-			output_value( B_cwn, Mode == 0 ? cwn: ll - cwn );
+			start_wn = Mode == 0 ? new : ll - new;
 			IF ! Doing_Scan {
 				object_enable( B_scan, "ON" );
 			}
@@ -539,6 +541,10 @@ FOREVER {
 
 			object_enable( B_scan, "OFF" );
 			object_enable( B_stop, "ON" );
+
+			cwn = start_cwn;
+			output_value( B_cwn, Mode == 0 ? cwn : ll - cwn );
+
 			IF Mode == 0 {
 				change_scale( start_wn - ( I - 1 ) * step_size, step_size );
 			} ELSE {
@@ -553,7 +559,6 @@ FOREVER {
 			Doing_Scan = 1;
 		}
 
-
 		IF button_state( B_stop ) {
 			draw_marker( I );
 			object_enable( B_scan, "ON" );
@@ -562,8 +567,7 @@ FOREVER {
 		}
 
 	} ELSE IF Doing_Scan {
-//		data = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
-		data = grandom( );
+		data = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
 		display( I, data );
 		I += 1;
 
@@ -913,7 +917,7 @@ sub start_exp {
 	print F <<EOF;
 DEVICES:
 
-//ni6601;
+ni6601;
 spex_cd2a;
 
 
@@ -992,8 +996,7 @@ FOR I = 1 : N_scans {
 			Display_Mode = 0;
 		}
 
-//		data[ J ] = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
-		data[ J ] = grandom( );
+		data[ J ] = 2.0 * counter_timed_count( CH0, mtime ) / mtime;
 		new_mean = ( ( I - 1 ) * mean_data[ J ] + data[ J ] ) / I;
 		display( J, new_mean, 2, J, data[ J ], 1 );
 
