@@ -47,7 +47,7 @@ char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xaxisFont[ 256 ], xsmb[ 64 ], xsizeStr[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
-	xfileselectorfs, xhelpfs, xnocm;
+	xfileselectorfs, xhelpfs, xnocm, xnob;
 
 FL_resource xresources[ N_APP_OPT ] = {
 	{ "geometry", "*.geometry", FL_STRING, xGeoStr, "", 64 },

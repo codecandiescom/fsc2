@@ -278,6 +278,15 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			continue;
 		}
 
+		if ( ! strcmp( argv[ cur_arg ], "-noBalloon" ) )
+		{
+			flags |= NO_BALLOON;
+			for ( i = cur_arg; i < *argc; i++ )
+				argv[ i ] = argv[ i + 1 ];
+			*argc -= 1;
+			continue;
+		}
+
 		if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
 		{
 			if ( flags & DO_TEST )
