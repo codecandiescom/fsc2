@@ -184,12 +184,13 @@ bool scan_main( const char *name, FILE *fp )
 	fclose( splitin );
 
 	/* Wait for the child process doing the filtering to die and also check
-	   its return value */
+	   its return value (unless we already found out about a failure, in
+	   which case writing out a second error message doesn't make sense) */
 
 	while ( Internals.fsc2_clean_pid != -1 )
 		fsc2_usleep( 10000, UNSET );
 
-	if ( WIFEXITED( Internals.fsc2_clean_status ) == 0 )
+	if ( split_error == OK && WIFEXITED( Internals.fsc2_clean_status ) == 0 )
 	{
 		print( FATAL, "Parsing the EDL script '%s' failed due to some "
 			   "internal problems.\n" );
