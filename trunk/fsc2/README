@@ -73,9 +73,9 @@ Features
   for developing drivers for new devices.
 
 * fsc2 is well-documented, an 200+ page documentation in HTML, info,
-  PostScript and PDF format, covering all aspects of fsc2, i.e the
-  graphical interface, the EDL language, device functions and writing of
-  new device modules, is part of the package.
+  PostScript and PDF format is part of the package, covering all aspects
+  of fsc2, i.e the graphical interface, the EDL language, device functions
+  and the writing of new device modules.
 
 * fsc2 has been extensively tested and is currently used to control seven
   EPR spectrometers and a Single Molecule spectrometer, using a broad range
