@@ -516,6 +516,8 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 		else
 			THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	if ( p->is_pos && new_pos == p->pos )
 	{
@@ -600,6 +602,8 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 		else
 			THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	if ( p->is_len && p->is_function && p->function->channel &&
 		 p->len == new_len )
@@ -676,6 +680,8 @@ bool ep385_change_pulse_position_change( long pnum, double p_time )
 		else
 			THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	if ( new_dpos == 0 && FSC2_MODE == TEST )
 	{
@@ -721,6 +727,8 @@ bool ep385_change_pulse_length_change( long pnum, double p_time )
 		else
 			THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 
 	if ( new_dlen == 0 && FSC2_MODE == TEST )
 	{

@@ -196,6 +196,8 @@ void hp8672a_read_table( FILE *fp )
 			   hp8672a.table_file, hp8672a_Lc );
 		THROW( EXCEPTION );
 	}
+	OTHERWISE
+		RETHROW( );
 }
 
 

@@ -125,6 +125,8 @@ static bool hfs9000_update_pulses( bool flag )
 
 			return FAIL;
 		}
+		OTHERWISE
+			RETHROW( );
 
 		hfs9000_commit( f, flag );
 	}

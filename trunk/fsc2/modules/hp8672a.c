@@ -602,7 +602,7 @@ Var *synthesizer_use_table( Var *v )
 			hp8672a.table_file = tfname;
 			TRY_SUCCESS;
 		}
-		CATCH( EXCEPTION )
+		OTHERWISE
 		{
 			T_free( tfname );
 			RETHROW( );
@@ -616,7 +616,7 @@ Var *synthesizer_use_table( Var *v )
 		hp8672a_read_table( tfp );
 		TRY_SUCCESS;
 	}
-	CATCH( EXCEPTION )
+	OTHERWISE
 	{
 		fclose( tfp );
 		hp8672a.table_file = CHAR_P T_free( hp8672a.table_file );

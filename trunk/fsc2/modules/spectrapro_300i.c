@@ -511,7 +511,7 @@ Var *monochromator_groove_density( Var *v )
 Var *monochromator_load_calibration( Var * v )
 {
 	char *calib_file = NULL;
-	FILE *cfp;
+	FILE *cfp = NULL;
 
 
 	CLOBBER_PROTECT( cfp );
@@ -549,14 +549,11 @@ Var *monochromator_load_calibration( Var * v )
 			cfp = spectrapro_300i_find_calib( calib_file );
 			TRY_SUCCESS;
 		}
-		CATCH( EXCEPTION )
+		OTHERWISE
 		{
 			T_free( calib_file );
 			RETHROW( );
 		}
-		OTHERWISE
-			RETHROW( );
-
 	}
 
 	TRY
@@ -564,14 +561,12 @@ Var *monochromator_load_calibration( Var * v )
 		spectrapro_300i_read_calib( cfp, calib_file );
 		TRY_SUCCESS;
 	}
-	CATCH( EXCEPTION )
+	OTHERWISE
 	{
 		fclose( cfp );
 		T_free( calib_file );
 		RETHROW( );
 	}
-	OTHERWISE
-		RETHROW( );
 
 	fclose( cfp );
 	T_free( calib_file );

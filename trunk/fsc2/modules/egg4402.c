@@ -385,7 +385,7 @@ Var *boxcar_get_curve( Var *v )
 		T_free( buffer );
 		RETHROW( );
 	}
-	CATCH( EXCEPTION )
+	OTHERWISE
 	{
 		T_free( buffer );
 		RETHROW( );
