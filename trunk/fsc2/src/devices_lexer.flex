@@ -157,12 +157,26 @@ WS          [\n\t ]+
 
 int devices_parser( FILE *in )
 {
+	/* Make sure there is only one DEVICES section and that it is the very
+	   first section */
+
 	if ( compilation.sections[ DEVICES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of DEVICES section "
 		        "label.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
+	for ( i = ASSIGNMENTS_SECTION; i <= EXPERIMENT_SECTION; i++ )
+	{
+		if ( compilation.sections[ i ] == UNSET)
+		    continue;
+
+		eprint( FATAL, "%s:%ld: Sorry, the DEVICES section has to be the very "
+				"first section.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
 	compilation.sections[ DEVICES_SECTION ] = SET;
 
 	devicesin = in;

@@ -33,11 +33,6 @@ typedef  unsigned char  bool;
 #define MAX_PHASE_SEQ_LEN  12    
 
 
-/* Define the default time base (in ns) to be used in the program */
-
-#define DEFAULT_TIME_UNIT 1
-
-
 /* Define number of colors to be used in 2D graphics (must be less than
    FL_MAX_COLORS - FL_FREE_COL1 + 3, i.e. not more than about 1005 */
 
