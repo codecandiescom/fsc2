@@ -3035,12 +3035,12 @@ Returns a string with the name of the CCD camera being used.
 @findex ccd_camera_roi()
 The function is used to query or set the region of interest (ROI) of the
 CCD chip to be used when fetching spectra or images from the
-camera. When no arguments are specified, the function returns an array
-with 4 elements, where the first element is the @i{x}-coordinate of the
-lower left hand of the ROI, the second element is the @i{y}-coordinate
-of the same point and the third and fourth element are the @i{x}- and
+camera. When no arguments are specified the function returns an array
+with 4 elements. Its first element is the @i{x}-coordinate of the lower
+left hand of the ROI, the second element the @i{y}-coordinate of the
+same point and the third and fourth element are the @i{x}- and
 @i{y}-coordonate of the right hand upper corner of the ROI. The
-coorsinate of the lower left hand pixel of the CCD chip is @code{1,1},
+coordinate of the lower left hand pixel of the CCD chip is @code{1,1},
 the coordinates of the upper right hand corner are the width and height
 of the chip.
 
@@ -3058,10 +3058,9 @@ chip is used as the ROI.
 @findex ccd_camera_binning()
 The function allows to set or query the binning (i.e.@: the combining of
 several pixels) done by the camera. If called with no arguments the
-function returns an array with 2 elements, where the first element is
-the number of pixels that get binned in the (horizontal)
-@i{x}-direction, and the second element is the binning number in
-(vertical) @i{y}-direction.
+function returns an array with 2 elements. The first element is the
+number of pixels that get binned in the (horizontal) @i{x}-direction,
+the second element is the binning number in (vertical) @i{y}-direction.
 
 If the function is called with arguments the first argument must be an
 array with 2 elements. The first element is the number of pixels to be
