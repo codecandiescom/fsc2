@@ -110,8 +110,8 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 	                                 THROW( EXCEPTION ); }
 ;
 
-expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 )
-													 , $2 ); }
+expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													 $2 ); }
        | E_FLOAT_TOKEN unit       { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
