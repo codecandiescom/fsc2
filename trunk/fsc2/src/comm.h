@@ -152,7 +152,7 @@ enum {
 
 void setup_comm( void );
 void end_comm( void );
-int new_data_callback( XEvent *a, void *b );
+int new_data_handler( void );
 bool reader( void *ret );
 bool writer( int type, ... );
 void send_data( int type, int shm_id );

@@ -186,7 +186,7 @@ void end_comm( void )
 	/* Handle remaining messages */
 
 	if ( Comm.MQ->low != Comm.MQ->high )
-		new_data_callback( NULL, 0 );
+		new_data_handler( );
 
 	/* Get rid of all the shared memory segments */
 
@@ -204,28 +204,23 @@ void end_comm( void )
 }
 
 
-/*------------------------------------------------------------------*/
-/* new_data_callback() is an idle callback function in which the    */
-/* parent checks for new messages in the message queue. The message */
-/* queue is read as long as the low marker does not reach the high  */
-/* marker, both being incremented in a wrap-around fashion.         */
-/* When accepting new data or honoring a REQUEST things may fail,   */
-/* most probably due to running out of memory. Therefore all the    */
-/* code has to be run in a TRY environment and when something fails */
-/* we have to kill the child to prevent it sending further data we  */
-/* can't accept anymore. We also need to stop this function being   */
-/* an idle callback, and, because end_comm() calls this function a  */
-/* last time we also have to set the low and the high marker to the */
-/* same value which keeps the function from being executed because  */
-/* the child is now already dead and can't change the high marker   */
-/* anymore.                                                         */
-/*------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* In new_data_handler() the parent checks for new messages in the */
+/* message queue. The message queue is read as long as the low     */
+/* marker does not reach the high marker, both being incremented   */
+/* in a wrap-around fashion. Accepting new data or honoring a      */
+/* REQUEST may fail, most probably due to running out of memory.   */
+/* Therefore all the code has to be run in a TRY environment and   */
+/* when something fails we have to kill the child to prevent it    */
+/* sending further data we can't accept anymore. end_comm() calls  */
+/* this function a last time, so we also have to set the low and   */
+/* the high marker to the same value which keeps the function from */
+/* being executed because the child is now already dead and can't  */
+/* change the high marker anymore.                                 */
+/*-----------------------------------------------------------------*/
 
-int new_data_callback( XEvent *a, void *b )
+int new_data_callback( void )
 {
-	UNUSED_ARGUMENT( a );
-	UNUSED_ARGUMENT( b );
-
 	/* Check if the child raised a signal to tell us it's done. If it did
 	   send it a DO_QUIT signal (but only if it's still alive) and remove
 	   the callback for the 'STOP' button */
@@ -282,7 +277,6 @@ int new_data_callback( XEvent *a, void *b )
 			if ( Internals.child_pid > 0 && ! kill( Internals.child_pid, 0 ) )
 				kill( Internals.child_pid, SIGTERM );
 
-			fl_set_idle_callback( idle_handler, NULL );
 			Comm.MQ->low = Comm.MQ->high;
 		}
 	}
@@ -305,6 +299,15 @@ int new_data_callback( XEvent *a, void *b )
 		}
 	}
 #endif
+
+	/* Check if a request from the child for external conections has
+	   come in */
+
+	if ( Internals.conn_request )
+	{
+		Internals.conn_request = UNSET;
+		conn_request_handler( );
+	}
 
 	return 0;
 }
