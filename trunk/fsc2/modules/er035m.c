@@ -237,9 +237,7 @@ try_again:
 
 	stop_on_user_request( );
 
-	er035_command( "PS\r" );
-	fsc2_usleep( ER035M_WAIT, UNSET );
-
+	er035m_command( "PS\r" );
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		er035m_failure( );
@@ -416,7 +414,7 @@ Var *find_field( Var *v )
 	   as searching up... */
 
 	if ( nmr.state == ER035M_OU_ACTIVE || nmr.state == ER035M_OD_ACTIVE ||
-		   nmr.state == ER035M_UNKNOWN )
+		 nmr.state == ER035M_UNKNOWN )
 		 er035m_command( "SD\r" );
 
 	/* Wait for gaussmeter to go into lock state (or FAILURE) */
