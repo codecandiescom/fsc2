@@ -3,25 +3,41 @@
 */
 
 #include "fsc2.h"
+#include <signal.h>
+
 
 static bool in_for_lex = UNSET;
 
-extern int prim_exp_runparse( void );
-extern int conditionparse( void );
+extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
+extern int conditionparse( void );        /* from condition_parser.y */
 
 
-Token_Val prim_exp_val;
+Token_Val prim_exp_val;                   /* exported to prim_exp_lexer.flex */
 
-extern int prim_explex( void );
-extern FILE *prim_expin;
-extern Token_Val prim_exp_runlval;
-extern Token_Val conditionlval;
+extern int prim_explex( void );           /* from prim_exp_lexer.flex */
+extern FILE *prim_expin;                  /* from prim_exp_lexer.flex */
+extern Token_Val prim_exp_runlval;        /* from prim_exp__run_parser.y */
+extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern char *Fname;
 extern long Lc;
 static long var_count = 0;
 
+static volatile bool Stop_Signal = UNSET;
+
 extern void prim_exprestart( FILE *prim_expin );
+
+
+/* local functions */
+
+static void prim_loop_setup( void );
+static void setup_while_or_repeat( int type, long *pos );
+static void setup_if_else( long *pos, Prg_Token *cur_wr );
+static void save_restore_variables( bool flag );
+
+static void set_stop_signal_handler( bool flag );
+static void test_stopper( int sig );
+
 
 
 /*
@@ -196,12 +212,15 @@ void forget_prg( void )
 }
 
 
+/*--------------------------------------------------------------------------*/
+/* Sets up the blocks of while, repeat and for loops and if-else constructs */
+/* where a block is everything a between matching pair of curly braces.     */
+/*--------------------------------------------------------------------------*/
+
 void prim_loop_setup( void )
 {
 	long i;
 
-
-	/* set up blocks for while and repeat loops and if-else constructs */
 
 	for ( i = 0; i < prg_length; ++i )
 	{
@@ -219,12 +238,22 @@ void prim_loop_setup( void )
 }
 
 
+/*----------------------------------------------------------------*/
+/* Does the real work for setting up while, repeat and for loops. */
+/* Can be called recursively to allow nested loops.               */
+/* ->                                                             */
+/*    1. Type of loop (WHILE_TOK, REPEAT_TOK or FOR_TOK)          */
+/*    2. pointer to number of token                               */
+/*----------------------------------------------------------------*/
+
 void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	const char *t;
 
+
+	/* Start of with some sanity checks */
 
 	if ( i == prg_length )
 	{
@@ -301,6 +330,15 @@ void setup_while_or_repeat( int type, long *pos )
 }
 
 
+/*---------------------------------------------------------------------*/
+/* Does the real work for setting up if-else constructs. Can be called */
+/* recursively to allow nested if's.                                   */
+/* ->                                                                  */
+/*    1. pointer to number of token                                    */
+/*    2. Pointer to program token of enclosing while, repeat or for    */
+/*       loop (needed for handling of `break' and `continue').         */
+/*---------------------------------------------------------------------*/
+
 void setup_if_else( long *pos, Prg_Token *cur_wr )
 {
 	Prg_Token *cur = prg_token + *pos;
@@ -308,6 +346,8 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 	bool in_if = SET;
 	bool dont_need_close_paran = UNSET;      /* set for ELSE IF constructs */
 
+
+	/* Start of with some sanity checks */
 
 	if ( i == prg_length )
 	{
@@ -323,6 +363,9 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	for ( ; i < prg_length; i++ )
 	{
+		if ( Stop_Signal )
+			THROW( EXCEPTION );
+
 		switch( prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
@@ -437,6 +480,10 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 }
 
 
+/*--------------------------------------------*/
+/* Function does the test run of the program. */
+/*--------------------------------------------*/
+
 void prim_exp_run( void )
 {
 	Prg_Token *cur;
@@ -448,14 +495,25 @@ void prim_exp_run( void )
 
 	TRY
 	{
+		/* 1. Run the test run hook functions of the modules.
+		   2. Save the variables so we can reset them to their intial values
+		      when the test run is completed.
+		   3. Set up a signal handler so that it's possible to stop the test
+		      if there are e.g. infinite loops.
+		*/
+
 		run_test_hooks( );
 		save_restore_variables( SET );
+		set_stop_signal_handler( SET );
 
 		cur_prg_token = prg_token;
 
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
+			if ( Stop_Signal )
+				THROW( EXCEPTION );
+
 			switch ( cur_prg_token->token )
 			{
 				case '}' :
@@ -531,22 +589,33 @@ void prim_exp_run( void )
 					break;
 
 				default :
-					prim_exp_runparse( );
+					prim_exp_runparse( );           /* (re)start the parser */
 					break;
 			}
 		}
+
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		delete_var_list_copy( );
+		set_stop_signal_handler( UNSET );
 		Fname = NULL;
 		PASSTHROU( );
 	}
 
+	set_stop_signal_handler( UNSET );
 	Fname = NULL;
 	save_restore_variables( UNSET );
 }
 
+
+/*-------------------------------------------------------------------*/
+/* Routine works as a kind of virtual lexer by simply passing the    */
+/* parser the tokens we got from the lexer in store_exp(). The only  */
+/* exception are tokens dealing with flow control - for most of them */
+/* parser gets an end of file signaled, onyl the `}' is handled by   */
+/* the parser itself (but also as an EOF)                            */
+/*-------------------------------------------------------------------*/
 
 int prim_exp_runlex( void )
 {
@@ -556,6 +625,9 @@ int prim_exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
+		if ( Stop_Signal )
+			THROW( EXCEPTION );
+
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
 
@@ -626,6 +698,9 @@ int conditionlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
+		if ( Stop_Signal )
+			THROW( EXCEPTION );
+
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
 
@@ -918,7 +993,7 @@ void get_for_cond( Prg_Token *cur )
 
 	/* Set the increment */
 
-	if ( cur_prg_token->token != ':' )      /* no increment given */
+	if ( cur_prg_token->token != ':' )   /* no increment given, default to 1 */
 	{
 		if ( cur->count.forl.act->type == INT_VAR )
 		{
@@ -1204,6 +1279,51 @@ void delete_var_list_copy( void )
 	var_list_copy = NULL;
 }
 
+
+/*------------------------------------------------------*/
+/* Functions sets up a handler for SIGHUP signals which */
+/* are used for user breaks.                            */
+/* ->                                                   */
+/*    Flag, if set install signal handler, otherwise    */
+/*    reinstall the signal the default signal handler.  */
+/*------------------------------------------------------*/
+
+void set_stop_signal_handler( bool flag )
+{
+	static void ( * old_sig_handler ) ( int ) = NULL;
+
+	if ( flag )
+		old_sig_handler = signal( SIGHUP, test_stopper );
+	else
+	{
+		if ( old_sig_handler != NULL )
+			signal( SIGHUP, old_sig_handler );
+	}
+
+	if ( Stop_Signal )
+		eprint( FATAL, "Program test aborted, received user break.\n" );
+
+	Stop_Signal = UNSET;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Signal handler for SIGHUP signals just sets a global variable, which  */
+/* has to be evaluated again and again. While just throwing an exception */
+/* would look much nicer, it would require all functions used in the     */
+/* program to be written in a way to allow asynchronous breaks at every  */
+/* moment. And this would be rather difficult if not even impossible     */
+/* if the routines have to deal with real world devices.                 */
+/*-----------------------------------------------------------------------*/
+
+void test_stopper( int sig )
+{
+	if ( sig != SIGHUP )
+		return;
+
+	Stop_Signal = SET;
+}
+	
 
 /*###########################################################################*/
 
