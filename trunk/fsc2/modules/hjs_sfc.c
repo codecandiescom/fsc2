@@ -115,7 +115,7 @@ int hjs_sfc_init_hook( void )
 	if ( dev_num == 1 )
 		hjs_sfc.dac_func = T_strdup( "daq_set_voltage" );
 	else
-		hjs_sfc.dac_func = get_string( "daq_set_voltage#%ld", dev_num );
+		hjs_sfc.dac_func = get_string( "daq_set_voltage#%d", dev_num );
 
 	if ( ! func_exists( hjs_sfc.dac_func ) )
 	{
