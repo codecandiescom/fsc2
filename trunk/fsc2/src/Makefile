@@ -17,10 +17,10 @@ export headers             # export headers to the modules Makefile
 
 .SUFFIXES:
 .PHONY: all clean hi_res low_res gpib_old gpib_jtt gpib_ni \
-		pion.anorg.chemie.uni-frankfurt.de \
-		moebi.physik.fu-berlin.de          \
-		door.physik.fu-berlin.de           \
-		crowley.physik.fu-berlin.de        \
+		pion.anorg.chemie.uni-frankfurt.de                 \
+		moebi.physik.fu-berlin.de                          \
+		door.physik.fu-berlin.de                           \
+		crowley.physik.fu-berlin.de                        \
 		crowley.none
 
 
