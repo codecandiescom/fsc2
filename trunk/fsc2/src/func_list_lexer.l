@@ -178,8 +178,8 @@ int func_list_parse( Func **fncts, int num_func )
 
 	nf = num_func;
 	T_free( Fname );
-	Fname = get_init_string( "%s%sFunctions", libdir,
-							libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "" );
+	Fname = get_string( "%s%sFunctions", libdir,
+						libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "" );
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )
 	{

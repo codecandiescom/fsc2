@@ -45,8 +45,8 @@ Var *f_abort( Var *v )
 
 	if ( ! TEST_RUN )
 	{
-		str = get_init_string( "Exit due to call of abort() in\n"
-							   "%s at line %ld.", Fname, Lc );
+		str = get_string( "Exit due to call of abort() in\n"
+						  "%s at line %ld.", Fname, Lc );
 		show_message( str );
 		T_free( str );
 		THROW( ABORT_EXCEPTION );

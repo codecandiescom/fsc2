@@ -80,7 +80,7 @@ void fsc2_request_serial_port( int sn, const char *devname )
 
 	/* Assemble name of the device file */
 
-	Serial_Port[ sn ].dev_file = get_init_string( "/dev/ttyS%d", sn );
+	Serial_Port[ sn ].dev_file = get_string( "/dev/ttyS%d", sn );
 
 	/* Finally test if device file exists and we have read and write
 	   permissions */

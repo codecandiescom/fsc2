@@ -43,9 +43,8 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( *name )[ 0 ] == '~' )
 	{
-		new_name = get_init_string( "%s%s%s", getenv( "HOME" ), 
-									( *name )[ 1 ] != '/' ? "/" : "",
-									*name + 1 );
+		new_name = get_string( "%s%s%s", getenv( "HOME" ), 
+							   ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
 		T_free( *name );
 		*name = new_name;
 	}
@@ -70,9 +69,9 @@ FILE *hp8647a_find_table( char **name )
 
 	/* Last chance: The table file is in the library directory... */
 
-	new_name = get_init_string( "%s%s%s", libdir,
-							  libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
-							  *name );
+	new_name = get_string( "%s%s%s", libdir,
+						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+						   *name );
 	T_free( *name );
 	*name = new_name;
 

@@ -156,8 +156,9 @@ static void load_functions( Device *dev )
 	/* Assemble name of library to be loaded - this will also work for cases
 	   where the device name contains a relative path */
 
-	lib_name = get_init_string( "%s%s%s.so", libdir,
-				 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev->name );
+	lib_name = get_string( "%s%s%s.so", libdir,
+						   libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "",
+						   dev->name );
 
 	/* Try to open the library. If it can't be found in the place defined at
 	   compilation time give it another chance by checking the paths defined
@@ -347,8 +348,7 @@ static void resolve_functions( Device *dev )
 			f->device = dev;
 			if ( dev->count != 1 )
 			{
-				new_func_name = get_init_string( "%s#%d",
-												 f->name, dev->count );
+				new_func_name = get_string( "%s#%d", f->name, dev->count );
 				T_free( ( char * ) f->name );
 				f->name = new_func_name;
 			}
@@ -399,8 +399,7 @@ static void add_function( int index, void *new_func, Device *new_dev,
 		for ( i = 0, f = Fncts; i < Num_Func + num_new; f++, i++ )
 			if ( f->device == new_dev )
 			{
-				new_func_name = get_init_string( "%s#%d",
-												 f->name, new_dev->count );
+				new_func_name = get_string( "%s#%d", f->name, new_dev->count );
 				T_free( ( char * ) f->name );
 				f->name = new_func_name;
 			}
@@ -414,7 +413,7 @@ static void add_function( int index, void *new_func, Device *new_dev,
 			for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
 				if ( Fncts[ i ].device == new_dev )
 				{
-					new_func_name = get_init_string( "%*s%d",
+					new_func_name = get_string( "%*s%d",
 										  strchr( f->name, '#' ) - f->name + 1,
 										  f->name, new_dev->count );
 					T_free( ( char * ) f->name );
@@ -432,11 +431,10 @@ static void add_function( int index, void *new_func, Device *new_dev,
 	f->fnct   = new_func;
 	f->device = new_dev;
 	if ( ( temp = strchr( Fncts[ index ].name, '#' ) ) == NULL )
-		f->name = get_init_string( "%s#%d",
-								   Fncts[ index ].name, new_dev->count );
+		f->name = get_string( "%s#%d", Fncts[ index ].name, new_dev->count );
 	else
-		f->name = get_init_string( "%*s%d", temp - Fncts[ index ].name + 1,
-								   Fncts[ index ].name, new_dev->count );
+		f->name = get_string( "%*s%d", temp - Fncts[ index ].name + 1,
+							  Fncts[ index ].name, new_dev->count );
 }
 
 

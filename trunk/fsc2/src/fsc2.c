@@ -535,7 +535,7 @@ void load_file( FL_OBJECT *a, long reload )
 	/* Set a new window title */
 
 	T_free( title );
-	title = get_init_string( "fsc2: %s", in_file );
+	title = get_string( "fsc2: %s", in_file );
 	fl_set_form_title( main_form->fsc2, title );
 
 	/* Read in and display the new file */
@@ -1193,16 +1193,18 @@ static void start_help_browser( void )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
-		av[ 2 ] = get_init_string( "file:%s%s%sfsc2.html",
-				 docdir[ 0 ] != '/' ? "/" : "", docdir,
-				 docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+		av[ 2 ] = get_string( "file:%s%s%sfsc2.html",
+							  docdir[ 0 ] != '/' ? "/" : "", docdir,
+							  docdir[ strlen( docdir ) - 1 ] != '/' ?
+							  "/" : "" );
 	}
 	else if ( browser && ! strcasecmp( browser, "konqueror" ) )
 	{
 		av[ 0 ] = T_strdup( "konqueror" );
-		av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
-							docdir[ 0 ] != '/' ? "/" : "", docdir,
-							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+							  docdir[ 0 ] != '/' ? "/" : "", docdir,
+							  docdir[ strlen( docdir ) - 1 ] != '/' ?
+							  "/" : "" );
 	}
 	else if ( browser && ( ! strcasecmp( browser, "lynx" ) ||
 						   ! strcasecmp( browser, "w3m" ) ) )
@@ -1210,15 +1212,17 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "xterm" );
 		av[ 1 ] = T_strdup( "-e" );
 		av[ 2 ] = T_strdup( browser );
-		av[ 3 ] = get_init_string( "%s%sfsc2.html", docdir,
-							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+		av[ 3 ] = get_string( "%s%sfsc2.html", docdir,
+							  docdir[ strlen( docdir ) - 1 ] != '/' ?
+							  "/" : "" );
 	}
 	else if ( browser && strcasecmp( browser, "netscape" ) )
 	{
 		av[ 0 ] = T_strdup( browser );
-		av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
-							docdir[ 0 ] != '/' ? "/" : "", docdir,
-							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+		av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+							  docdir[ 0 ] != '/' ? "/" : "", docdir,
+							  docdir[ strlen( docdir ) - 1 ] != '/' ?
+							  "/" : "" );
 	}
 	else
 	{
@@ -1228,16 +1232,17 @@ static void start_help_browser( void )
 		av[ 0 ] = T_strdup( "netscape" );
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
-			av[ 1 ] = get_init_string( "file:%s%s%sfsc2.html",
-							docdir[ 0 ] != '/' ? "/" : "", docdir,
-							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+			av[ 1 ] = get_string( "file:%s%s%sfsc2.html",
+								  docdir[ 0 ] != '/' ? "/" : "", docdir,
+								  docdir[ strlen( docdir ) - 1 ] != '/' ?
+								  "/" : "" );
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = get_init_string(
-							"openURL(file:%s%s%sfsc2.html,new-window)",
-							docdir[ 0 ] != '/' ? "/" : "", docdir,
-							docdir[ strlen( docdir ) - 1 ] != '/' ? "/" : "" );
+			av[ 2 ] = get_string( "openURL(file:%s%s%sfsc2.html,new-window)",
+								  docdir[ 0 ] != '/' ? "/" : "", docdir,
+								  docdir[ strlen( docdir ) - 1 ] != '/' ?
+								  "/" : "" );
 		}
 	}
 
