@@ -41,6 +41,9 @@
 #endif
 
 
+#define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
+
+
 GPIB_VARIABLE int gpib_init( const char *log_file_name, int log_level );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
