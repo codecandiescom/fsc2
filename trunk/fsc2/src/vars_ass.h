@@ -22,19 +22,17 @@
 */
 
 
-#if ! defined VARS_LHS_HEADER
-#define VARS_LHS_HEADER
+#if ! defined VARS_ASS_HEADER
+#define VARS_ASS_HEADER
 
 
 #include "fsc2.h"
 
 
-Var *vars_arr_lhs( Var *v );
-Var *vars_init_list( Var *v, ssize_t level );
-void vars_arr_init( Var *dest );
+void vars_assign( Var *src, Var *dest );
 
 
-#endif  /* ! VARS_LHS_HEADER */
+#endif  /* ! VARS_ASS_HEADER */
 
 
 /*

@@ -437,7 +437,7 @@ Var *magnet_calibration_file( Var *v )
 	else if ( *v->val.sptr == '~' )
 		hjs_fc.calib_file = get_string( "%s%s%s", getenv( "HOME" ),
 										v->val.sptr[ 1 ] != '/' ? "/" : "",
-										*v->val.sptr + 1 );
+										v->val.sptr + 1 );
 	else
 	{
 		buf = CHAR_P T_malloc( PATH_MAX );

@@ -28,6 +28,11 @@ HJS_FC {
 				device_name;
 				hjs_fc_*_hook;
 				magnet_*;
+				set_field;
+				get_field;
+				reset_field;
+				sweep_up;
+				sweep_down;
 
 	local:      *;
 };

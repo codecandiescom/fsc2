@@ -64,7 +64,7 @@ static int dont_exec = 0;
 %token AND OR XOR NOT
 
 
-%type <vptr> arrass alist alist1 aitem expr list1 list1a list3 l3e strs
+%type <vptr> arrass alist alist1 aitem expr list1 list1a list2 l2e ind strs
 
 
 %left '?' ':'
@@ -138,9 +138,9 @@ expr:    INT_TOKEN                 { if ( ! dont_exec )
 										 }
 										 vars_arr_start( $1 ); }
 	                               }
-         list3 ']'                 { if ( ! dont_exec )
+         list2 ']'                 { if ( ! dont_exec )
 	                                     $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list4 ')'  { if ( ! dont_exec )
+       | FUNC_TOKEN '(' list3 ')'  { if ( ! dont_exec )
 	                                     $$ = func_call( $1 ); }
        | FUNC_TOKEN                { print( FATAL, "'%s()' is a predefind "
 											"function.\n", $1->name );
@@ -285,26 +285,34 @@ aitem:   expr                      { $$ = $1; }
 
 /* list of indices for access of an array element */
 
-list3:   /* empty */               { if ( ! dont_exec )
+list2:   /* empty */               { if ( ! dont_exec )
 	                                     $$ = vars_push( UNDEF_VAR ); }
-       | l3e                       { if ( ! dont_exec )
+       | l2e                       { if ( ! dont_exec )
 	                                     $$ = $1; }
 ;
 
-l3e:     expr                      { if ( ! dont_exec )
+l2e:     ind                       { if ( ! dont_exec )
 	                                     $$ = $1; }
-       | l3e ',' expr              { if ( ! dont_exec )
+       | l2e ',' ind               { if ( ! dont_exec )
 	                                     $$ = $3; }
+;
+
+ind:     expr                      { if ( ! dont_exec )
+		                                 $$ = $1; }
+	   | expr ':'                  { if ( ! dont_exec )
+										 vars_push( STR_VAR, ":" ); }
+         expr                      { if ( ! dont_exec )
+		                                 $$ = $4; }
 ;
 
 /* list of function arguments */
 
-list4:   /* empty */
-       | l4e
+list3:   /* empty */
+       | l3e
 ;
 
-l4e:      expr                     { }
-        | l4e ',' expr             { }
+l3e:      expr
+        | l3e ',' expr
 ;
 
 strs:    STR_TOKEN                 { if ( ! dont_exec )

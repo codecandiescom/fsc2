@@ -61,8 +61,9 @@ enum {
     FLOAT_REF       = ( 1 <<  6 ),      /*    64 */
 	INT_PTR         = ( 1 <<  7 ),      /*   128 */
 	FLOAT_PTR       = ( 1 <<  8 ),      /*   256 */
-	REF_PTR         = ( 1 <<  9 ),      /*   512 */
-	FUNC            = ( 1 << 10 )       /*  1024 */
+	SUB_REF_PTR     = ( 1 <<  9 ),      /*   512 */
+	REF_PTR         = ( 1 << 10 ),      /*  1024 */
+	FUNC            = ( 1 << 11 )       /*  2048 */
 };
 
 
@@ -81,6 +82,7 @@ struct Var {
 		char        *sptr;         /* for strings */
 		Var         **vptr;        /* for array references */
 		struct Func *fnct;         /* for functions */
+		ssize_t     *index;        /* for indices of LHS sub-array */
 	} val;
 
 	int dim;                       /* dimension of array */
@@ -138,11 +140,6 @@ void vars_clean_up( void );
 void vars_check( Var *v, int type );
 bool vars_exist( Var *v );
 Var *vars_arr_start( Var *v );
-Var *vars_arr_lhs( Var *v );
-Var *vars_arr_rhs( Var *v );
-void vars_assign( Var *src, Var *dest );
-Var *vars_init_list( Var *v, ssize_t level );
-void vars_arr_init( Var *dest );
 void *vars_iter( Var *v );
 void vars_save_restore( bool flag );
 Var *vars_free( Var *v, bool also_nameless );

@@ -41,7 +41,10 @@ Var *vars_negate( Var *v )
 
 	/* Make sure that 'v' exists and has RHS type */
 
-	vars_check( v, RHS_TYPES );
+	vars_check( v, RHS_TYPES | SUB_REF_PTR );
+
+	if ( v->type == SUB_REF_PTR )
+		v = vars_subref_to_rhs_conv( v );
 
 	switch( v->type )
 	{

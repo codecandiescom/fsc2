@@ -81,6 +81,7 @@
 #include "variables.h"
 #include "vars_rhs.h"
 #include "vars_lhs.h"
+#include "vars_ass.h"
 #include "vars_add.h"
 #include "vars_sub.h"
 #include "vars_mult.h"

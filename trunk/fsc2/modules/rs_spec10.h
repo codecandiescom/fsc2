@@ -28,9 +28,9 @@
 /* Define the following for test purposes where no real communication with
    the camera is supposed to happen */
 
-/*
+
 #define RS_SPEC10_TEST
-*/
+
 
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
@@ -56,7 +56,7 @@
 #endif
 
 #if ! defined RS_SPEC10_MIRROR
-#defined RS_SPEC10_MIRROR 0
+#define RS_SPEC10_MIRROR 0
 #endif
 
 

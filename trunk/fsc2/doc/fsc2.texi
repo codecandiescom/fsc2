@@ -25,7 +25,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate May 28, 2004
+@set lastupdate June 20, 2004
 @iftex
 @afourpaper
 @end iftex
@@ -42,7 +42,7 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center May 2004
+@center June 2004
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1

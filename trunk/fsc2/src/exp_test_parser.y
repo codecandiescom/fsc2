@@ -237,8 +237,12 @@ list1:   /* empty */
        | l1e
 ;
 
-l1e:     expr
-       | l1e ',' expr
+l1e:     ind
+       | l1e ',' ind
+;
+
+ind:     expr
+       | expr ':' expr
 ;
 
 /* list of function arguments */

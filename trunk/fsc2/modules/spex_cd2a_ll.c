@@ -554,7 +554,9 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 
 #ifdef SPEX_CD2A_TEST
+/*
 	fprintf( stderr, "%s\n", mess );
+*/
 	return 0;
 #endif
 
@@ -612,7 +614,7 @@ static void spex_cd2a_read_ack( void )
 	ssize_t received, len, count;
 
 
-	/* Skip initial <CAN> characters, the device sometimes sends one without
+	/* Skip initial <CAN> characters, the device sometimes sends them without
 	   good reasons (at least in contrast to what's written in the manual) */
 
 	do {
@@ -621,12 +623,10 @@ static void spex_cd2a_read_ack( void )
 			spex_cd2a_comm_fail( );
 	} while ( *buf == CAN );
 
-	while ( *buf != NAK )
-	{
-		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
-											1, 1000000, SET ) ) <= 0 )
-			spex_cd2a_comm_fail( );
-	}
+	if ( *buf != NAK &&
+		 ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
+										1, 1000000, SET ) ) <= 0 )
+		spex_cd2a_comm_fail( );
 
 	/* A <NAK> character means that there are communication problems */
 
@@ -662,6 +662,7 @@ static void spex_cd2a_read_ack( void )
 												len - count, 1000000, SET ) )
 				 <= 0 )
 				spex_cd2a_comm_fail( );
+
 			count += received;
 			len -= received;
 		}
@@ -908,7 +909,7 @@ void spex_cd2a_close( void )
 
 static void spex_cd2a_comm_fail( void )
 {
-	if ( spex_cd2a_do_print_message )
+//	if ( spex_cd2a_do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
 	SPEX_CD2A_THROW( EXCEPTION );
 }

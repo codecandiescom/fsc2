@@ -113,7 +113,7 @@ static int dont_exec = 0;
 %token E_EQ E_NE E_LT E_LE E_GT E_GE
 %token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
 
-%type <vptr> expr list1 l1e strs
+%type <vptr> expr list1 l1e ind strs
 
 %left '?' ':'
 %left E_AND E_OR E_XOR
@@ -266,10 +266,18 @@ list1:   /* empty */                 { if ( ! dont_exec )
 	   | l1e
 ;
 
-l1e:     expr                        { if ( ! dont_exec )
+l1e:     ind                        { if ( ! dont_exec )
 	                                       $$ = $1; }
-       | l1e ',' expr                { if ( ! dont_exec )
+       | l1e ',' ind                { if ( ! dont_exec )
 	                                       $$ = $3; }
+;
+
+ind:     expr                       { if ( ! dont_exec )
+		                                  $$ = $1; }
+	   | expr ':'                   { if ( ! dont_exec )
+										  vars_push( STR_VAR, ":" ); }
+         expr                       { if ( ! dont_exec )
+		                                  $$ = $4; }
 ;
 
 /* list of function arguments */

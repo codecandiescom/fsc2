@@ -28,6 +28,11 @@ HJS_SFC {
 				device_name;
 				hjs_sfc_*_hook;
 				magnet_*;
+				set_field;
+				get_field;
+				sweep_up;
+				sweep_down;
+				reset_field;
 
 	local:      *;
 };

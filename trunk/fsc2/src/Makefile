@@ -21,9 +21,9 @@
 
 
 c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
-				vars_rhs.c vars_lhs.c vars_add.c vars_sub.c vars_mult.c     \
-				vars_div.c vars_mod.c vars_pow.c vars_util.c func.c         \
-				func_basic.c func_util.c func_save.c chld_func.c            \
+				vars_rhs.c vars_lhs.c vars_ass.c vars_add.c vars_sub.c      \
+				vars_mult.c vars_div.c vars_mod.c vars_pow.c vars_util.c    \
+				func.c func_basic.c func_util.c func_save.c chld_func.c     \
 				func_intact.c func_intact_b.c func_intact_s.c               \
 				func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
 				exp.c run.c comm.c accept.c gpib_if.c loader.c conn.c       \
