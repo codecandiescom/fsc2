@@ -122,6 +122,20 @@
 #include "gpib.h"
 
 
+/* Functions that re used only locally... */
+
+static bool dg2020_set_timebase( double timebase );
+static bool dg2020_set_memory_size( long mem_size );
+static bool dg2020_make_blocks( int num_blocks, BLOCK *block );
+static bool dg2020_make_seq( int num_blocks, BLOCK *block );
+static bool dg2020_set_pod_high_level( int pod, double voltage );
+static bool dg2020_set_pod_low_level( int pod, double voltage );
+static bool dg2020_set_trigger_in_level( double voltage );
+static bool dg2020_set_trigger_in_slope( int slope );
+static bool dg2020_set_trigger_in_impedance( int state );
+static void dg2020_gpib_failure( void );
+
+
 
 /*------------------------------------------------------*/
 /* dg2020_init() initializes the Sony/Tektronix DG2020. */
@@ -290,7 +304,7 @@ bool dg2020_run( bool flag )
 /*  * 2: 1: ok, 0: error                                         */
 /*---------------------------------------------------------------*/
 
-bool dg2020_set_timebase( double timebase )
+static bool dg2020_set_timebase( double timebase )
 {
 	char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
 
@@ -317,7 +331,7 @@ bool dg2020_set_timebase( double timebase )
 /*  * 1: ok, 0: error                                         */
 /*------------------------------------------------------------*/
 
-bool dg2020_set_memory_size( long mem_size )
+static bool dg2020_set_memory_size( long mem_size )
 {
 	char cmd[ 20 ] = ":DATA:MSIZ ";
 
@@ -389,7 +403,7 @@ bool dg2020_update_data( void )
 /*  * 1: ok, 0: error                                                    */
 /*-----------------------------------------------------------------------*/
 
-bool dg2020_make_blocks( int num_blocks, BLOCK *block )
+static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1000 ];
@@ -435,7 +449,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*  * 1: ok, 0: error                                             */
 /*----------------------------------------------------------------*/
 
-bool dg2020_make_seq( int num_blocks, BLOCK *block )
+static bool dg2020_make_seq( int num_blocks, BLOCK *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1024 ];
@@ -469,47 +483,6 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 		)
 		dg2020_gpib_failure( );
 
-	return OK;
-}
-
-
-/*----------------------------------------------------*/
-/* dg2020_set_channel() sets a bit pattern in one of  */
-/* the channels of the pulser.                        */
-/* ->                                                 */
-/*  * channel number                                  */
-/*  * start address for pattern (0 to 0xFFFF)         */
-/*  * length of pattern (1 to 0xFFFF)                 */
-/*    (address + length must be less or equal 0xFFFF) */
-/*  * array with pattern (as a char array)            */
-/* <-                                                 */
-/*  * 1: ok, 0: error                                 */
-/*----------------------------------------------------*/
-
-bool pulser_set_channel( int channel, Ticks address,
-						 Ticks length, char *pattern )
-{
-	char *cmd;
-	Ticks k, l;
-
-
-	/* Check parameters, allocate memory and set up start of command string */
-
-	if ( ! dg2020_prep_cmd( &cmd, channel, address, length ) )
-		return FAIL;
-
-	/* Assemble rest of command string */
-
-	for ( k = 0, l = strlen( cmd ); k < length; ++k, ++l )
-		cmd[ l ] = ( pattern[ k ] ? '1' : '0' );
-	cmd[ l ] = '\0';
-
-	/* Send command string to the pulser */
-
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
-
-	T_free( cmd );
 	return OK;
 }
 
@@ -575,7 +548,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 }
 
 
-bool dg2020_set_pod_high_level( int pod, double voltage )
+static bool dg2020_set_pod_high_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
 
@@ -590,7 +563,7 @@ bool dg2020_set_pod_high_level( int pod, double voltage )
 }
 
 
-bool dg2020_set_pod_low_level( int pod, double voltage )
+static bool dg2020_set_pod_low_level( int pod, double voltage )
 {
 	char cmd[ 100 ];
 
@@ -605,7 +578,7 @@ bool dg2020_set_pod_low_level( int pod, double voltage )
 }
 
 
-bool dg2020_set_trigger_in_level( double voltage )
+static bool dg2020_set_trigger_in_level( double voltage )
 {
 	char cmd[ 100 ];
 
@@ -620,7 +593,7 @@ bool dg2020_set_trigger_in_level( double voltage )
 }
 
 
-bool dg2020_set_trigger_in_slope( int slope )
+static bool dg2020_set_trigger_in_slope( int slope )
 {
 	char cmd[ 100 ];
 
@@ -634,7 +607,7 @@ bool dg2020_set_trigger_in_slope( int slope )
 }
 
 
-bool dg2020_set_trigger_in_impedance( int state )
+static bool dg2020_set_trigger_in_impedance( int state )
 {
 	char cmd[ 100 ];
 
@@ -648,7 +621,7 @@ bool dg2020_set_trigger_in_impedance( int state )
 }
 
 
-void dg2020_gpib_failure( void )
+static void dg2020_gpib_failure( void )
 {
 	eprint( FATAL, "%s: Communication with device failed.",
 			pulser_struct.name );
