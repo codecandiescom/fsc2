@@ -839,6 +839,8 @@ void dg2020_set_pulses( FUNCTION *f )
 
 	for ( i = 0; i < f->num_needed_channels; i++ )
 	{
+		start = len = 0;
+
 		while ( ( what = dg2020_diff( f->channel[ i ]->old_d,
 									  f->channel[ i ]->new_d,
 									  &start, &len ) ) != 0 )
@@ -846,8 +848,9 @@ void dg2020_set_pulses( FUNCTION *f )
 								 what == -1 ? type_OFF( f ) : type_ON( f ) );
 
 		if ( start + len < dg2020.mem_size - 1 )
-			dg2020_set_constant( f->channel[ i ]->self, len,
-								 dg2020.mem_size - 1 - len, type_OFF( f ) );
+			dg2020_set_constant( f->channel[ i ]->self, start + len,
+								 dg2020.mem_size - 1 - start - len,
+								 type_OFF( f ) );
 
 		f->channel[ i ]->needs_update = UNSET;
 		T_free( f->channel[ i ]->old_d );
