@@ -27,7 +27,8 @@
 /* dynamically sized arrays have (as long as their dimension is still
    undetermined) a size of 0 for the very last dimension */
 
-#define is_variable_array( a )  ( ( a )->sizes[ ( a )->dim - 1 ] <= 0 )
+
+#define need_alloc( a )  ( ( a )->sizes[ ( a )->dim - 1 ] == 0 )
 
 
 typedef struct Var_
@@ -50,15 +51,8 @@ typedef struct Var_
 	long flags;
 	struct Var_ *from;
 	struct Var_ *next;
+	struct Var_ *prev;
 } Var;
-
-typedef struct AStack_
-{
-	Var *var;
-	long act_entry;
-	long *entries;
-	struct AStack_ *next;
-} AStack;
 
 
 enum {
@@ -70,8 +64,6 @@ enum {
 
 Var *vars_get( char *name );
 Var *vars_new( char *name );
-Var *vars_new_assign( Var *src, Var *dest );
-void vars_default( Var *v );
 Var *vars_add( Var *v1, Var *v2 );
 Var *vars_sub( Var *v1, Var *v2 );
 Var *vars_mult( Var *v1, Var *v2 );
@@ -84,22 +76,21 @@ Var *vars_push_copy( Var *v );
 Var *vars_push( int type, ... );
 void vars_pop( Var *v );
 void vars_del_stack( void );
-void vars_arr_start( Var *a );
-void vars_arr_extend( Var *a, Var *s );
-void vars_arr_init( Var *a, Var *d );
-void vars_push_astack( Var *v );
-Var *vars_pop_astack( void );
-void vars_arr_assign( Var *a, Var *v );
-void vars_del_top_astack( void );
-void vars_del_astack( void );
-void vars_update_astack( Var *v );
 void vars_clean_up( void );
 void free_vars( void );
-void vars_check2( Var *v, int type );
-void vars_check( Var *v );
+void vars_check( Var *v, int type );
 void vars_warn_new( Var *v );
-Var *vars_assign( Var *src, Var *dest );
 bool vars_exist( Var *v );
+Var *vars_arr_start( Var *v );
+Var *vars_arr_lhs( Var *v );
+Var *vars_get_lhs_pointer( Var *a, Var *v, int dim );
+long vars_calc_index( Var *a, Var *v );
+Var *vars_setup_new_array( Var *a, int dim, Var *v );
+Var *vars_arr_rhs( Var *v );
+void vars_assign( Var *src, Var *dest );
+void vars_ass_from_var( Var *src, Var *dest );
+void vars_ass_from_ptr( Var *src, Var *dest );
+void vars_arr_init( Var *dest );
 
 
 #endif  /* ! VARIABLES_HEADER */

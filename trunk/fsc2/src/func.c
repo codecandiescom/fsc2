@@ -4,6 +4,9 @@
    $Id$
 
    $Log$
+   Revision 1.9  1999/07/27 16:19:13  jens
+   *** empty log message ***
+
    Revision 1.8  1999/07/22 16:37:26  jens
    *** empty log message ***
 
@@ -123,7 +126,6 @@ Var *func_get( char *name, int *access )
 		if ( ! strcmp( fncts[ i ].name, name ) )
 		{
 			ret = vars_push( FUNC, fncts[ i ].fnct );
-/*			ret->val.fnct = fncts[ i ].fnct; */
 			ret->name = get_string_copy( name );
 			ret->dim = fncts[ i ].nargs;
 			*access = fncts[ i ].access_flag;
@@ -209,7 +211,7 @@ Var *func_call( Var *f )
 
 Var *f_int( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( INT_VAR, v->val.lval ) );
@@ -220,7 +222,7 @@ Var *f_int( Var *v )
 
 Var *f_float( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, ( double ) v->val.lval ) );
@@ -231,7 +233,7 @@ Var *f_float( Var *v )
 
 Var *f_round( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( INT_VAR, v->val.lval ) );
@@ -243,7 +245,7 @@ Var *f_round( Var *v )
 
 Var *f_floor( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( INT_VAR, v->val.lval ) );
@@ -254,7 +256,7 @@ Var *f_floor( Var *v )
 
 Var *f_ceil( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( INT_VAR, v->val.lval ) );
@@ -265,7 +267,7 @@ Var *f_ceil( Var *v )
 
 Var *f_abs( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( INT_VAR, labs( v->val.lval ) ) );
@@ -276,7 +278,7 @@ Var *f_abs( Var *v )
 
 Var *f_sin( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) ) );
@@ -287,7 +289,7 @@ Var *f_sin( Var *v )
 
 Var *f_cos( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) ) );
@@ -298,7 +300,7 @@ Var *f_cos( Var *v )
 
 Var *f_tan( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, tan( ( double ) v->val.lval ) ) );
@@ -311,7 +313,7 @@ Var *f_asin( Var *v )
 {
 	double arg;
 
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		arg = ( double ) v->val.lval;
@@ -333,7 +335,7 @@ Var *f_acos( Var *v )
 {
 	double arg;
 
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		arg = ( double ) v->val.lval;
@@ -353,7 +355,7 @@ Var *f_acos( Var *v )
 
 Var *f_atan( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, atan( ( double ) v->val.lval ) ) );
@@ -364,7 +366,7 @@ Var *f_atan( Var *v )
 
 Var *f_sinh( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, sinh( ( double ) v->val.lval ) ) );
@@ -375,7 +377,7 @@ Var *f_sinh( Var *v )
 
 Var *f_cosh( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, cosh( ( double ) v->val.lval ) ) );
@@ -386,7 +388,7 @@ Var *f_cosh( Var *v )
 
 Var *f_tanh( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, tanh( ( double ) v->val.lval ) ) );
@@ -397,7 +399,7 @@ Var *f_tanh( Var *v )
 
 Var *f_exp( Var *v )
 {
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		return( vars_push( FLOAT_VAR, exp( ( double ) v->val.lval ) ) );
@@ -410,7 +412,7 @@ Var *f_ln( Var *v )
 {
 	double arg;
 
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		arg = ( double ) v->val.lval;
@@ -431,7 +433,7 @@ Var *f_log( Var *v )
 {
 	double arg;
 
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		arg = ( double ) v->val.lval;
@@ -452,7 +454,7 @@ Var *f_sqrt( Var *v )
 {
 	double arg;
 
-	vars_check2( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
 		arg = ( double ) v->val.lval;
@@ -485,7 +487,7 @@ Var *f_print( Var *v )
 
 	/* make sure the first argument is a string */
 
-	vars_check2( v, STR_VAR );
+	vars_check( v, STR_VAR );
 
 	/* count the number of specifiers `#' in the format string but don't count
 	   escaped `#' (i.e "\#") */
@@ -499,7 +501,7 @@ Var *f_print( Var *v )
 	   string */
 
 	for  ( cv = v->next, on_stack = 0; cv != NULL; ++on_stack, cv = cv->next )
-		vars_check2( cv, INT_VAR | FLOAT_VAR | STR_VAR );
+		vars_check( cv, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	/* check that there are at least as many variables are on the stack 
 	   as there specifiers in the format string */

@@ -53,7 +53,7 @@ Var *P_Var;
 %token EQ LT LE GT GE
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
-%type <vptr> expr line time unit
+%type <vptr> expr time unit list3
 
 
 %left EQ LT LE GT GE
@@ -69,7 +69,7 @@ Var *P_Var;
 
 input:   /* empty */
        | input ';'
-       | input line ';'
+       | input line ';'            { assert( Var_Stack == NULL ); }
        | input error ';'           { THROW( SYNTAX_ERROR_EXCEPTION ); }
        | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -80,14 +80,11 @@ input:   /* empty */
 
 /* currently only the variables related stuff */
 
-line:    P_TOK prop                {}
-       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
-                                     assert( Var_Stack == NULL );
-	                                 assert( Arr_Stack == NULL ); }
-       | VAR_TOKEN '['             { vars_push_astack( $1 ); }
-         list3 ']' '=' expr        { vars_arr_assign( $1, $7 );
-                                     assert( Var_Stack == NULL );
-	                                 assert( Arr_Stack == NULL ); }
+line:    P_TOK prop
+       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list3 ']'                 { vars_arr_lhs( $4 ); }
+         '=' expr                  { vars_assign( $8, $8->prev ); }
        | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
 											 "predefined function.\n",
@@ -138,8 +135,8 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { $$ = vars_push_copy( $1 ); }
        | VAR_REF                   { $$ = $1; }
-       | VAR_TOKEN '['             { vars_push_astack( $1 ); }
-         list3 ']'                 { $$ = vars_pop_astack( ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
        | expr EQ expr              { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr LT expr              { $$ = vars_comp( COMP_LESS, $1, $3 ); }
@@ -161,9 +158,10 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
 
 /* list of indices for access of an array element */
 
-list3:   /* empty */
-	   | expr                      { vars_update_astack( $1 ); }
-       | list3 ',' expr            { vars_update_astack( $3 ); }
+
+list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                      { $$ = $1; }
+       | list3 ',' expr            { $$ = $3; }
 ;
 
 /* list of function arguments */

@@ -91,7 +91,7 @@ void pulse_set( Pulse *p, int type, Var *v )
 		THROW( PREPARATIONS_EXCEPTION );
 	}
 
-	vars_check( v );
+	vars_check( v, INT_VAR );
 
 	switch ( type )
 	{
@@ -287,7 +287,7 @@ void pulse_set_pos( Pulse *p, Var *v )
 		return;
 	}
 
-	vars_check( v );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
 
 	if ( val < 0 )
@@ -354,7 +354,7 @@ void pulse_set_dpos( Pulse *p, Var *v )
 		return;
 	}
 
-	vars_check( v );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
@@ -381,7 +381,7 @@ void pulse_set_dlen( Pulse *p, Var *v )
 		return;
 	}
 
-	vars_check( v );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)
@@ -408,7 +408,7 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 		return;
 	}
 
-	vars_check( v );
+	vars_check( v, INT_VAR | FLOAT_VAR );
 	val = v->type == INT_VAR ? v->val.lval : rnd( v->val.dval );
 
 	if ( val > LONG_MAX || val < LONG_MIN)

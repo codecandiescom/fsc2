@@ -2,6 +2,9 @@
   $Id$
 
   $Log$
+  Revision 1.9  1999/07/27 16:23:21  jens
+  *** empty log message ***
+
   Revision 1.8  1999/07/20 23:32:03  jens
   Changed to reflect new treatment of variables and functions.
 
@@ -298,7 +301,7 @@ void print_all_vars( void )
 
 	while ( v != NULL )
 	{
-		if ( ! v->new_flag )
+		if ( ! ( v->flags & NEW_VARIABLE ) )
 		{
 			switch ( v->type )
 			{	
@@ -311,6 +314,8 @@ void print_all_vars( void )
 					break;
 
 				case INT_ARR :
+					if ( need_alloc( v ) )
+					    break;
 					for ( i = 0; i < v->len; ++i )
 						printf( "%s[%ld] = %ld\n", v->name, i,
 								v->val.lpnt[ i ] );

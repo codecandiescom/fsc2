@@ -36,7 +36,7 @@ Var *P_Var;
 %token EQ LT LE GT GE
 
 
-%type <vptr> expr line
+%type <vptr> expr line arrass list1 list2 list3
 
 %left EQ LT LE GT GE
 %left '+' '-'
@@ -50,23 +50,21 @@ Var *P_Var;
 
 input:   /* empty */
        | input ';'
-       | input line ';'
-/*       | input line */
+       | input line ';'            { assert( Var_Stack == NULL ); }
        | input line line           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL       { YYACCEPT; }
 ;
 
 line:    VAR_TOKEN                 /* no assignment to be done */
-       | VAR_TOKEN '=' expr        { vars_new_assign( $3, $1 );
-                                     assert( Var_Stack == NULL );
-	                                 assert( Arr_Stack == NULL ); }
-       | VAR_TOKEN '['             { vars_arr_start( Cur_Arr = $1 ); }
-         list1 ']' arrass          { assert( Var_Stack == NULL );
-	                                 assert( Arr_Stack == NULL ); }
+       | VAR_TOKEN '=' expr        { vars_assign( $3, $1 );
+                                     assert( Var_Stack == NULL ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list1 ']'                 { vars_arr_lhs( $4 ); }
+         arhs
        | FUNC_TOKEN '(' list4 ')'  { vars_pop( func_call( $1 ) ); }
        | FUNC_TOKEN '['            { eprint( FATAL, "%s:%ld: `%s' is a "
-											 "predefined function.\n",
+											 "function and not an array.\n",
 											 Fname, Lc, $1->name );
 	                                 THROW( VARIABLES_EXCEPTION ); }
 ;
@@ -74,8 +72,8 @@ line:    VAR_TOKEN                 /* no assignment to be done */
 expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | FLOAT_TOKEN               { $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { $$ = vars_push_copy( $1 ); }
-       | VAR_TOKEN '['             { vars_push_astack( $1 ); }
-         list3 ']'                 { $$ = vars_pop_astack( ); }
+       | VAR_TOKEN '['             { vars_arr_start( $1 ); }
+         list3 ']'                 { $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list4 ')'  { $$ = func_call( $1 ); }
        | VAR_TOKEN '('             { eprint( FATAL, "%s:%ld: `%s' isn't a "
 											 "function.\n", Fname, Lc,
@@ -102,29 +100,38 @@ expr:    INT_TOKEN                 { $$ = vars_push( INT_VAR, $1 ); }
        | '(' expr ')'              { $$ = $2 }
 ;
 
+
+
+arhs:    /* empty */               { vars_arr_init( vars_push( UNDEF_VAR ) ); }
+       | '=' arrass                { vars_arr_init( $2 ); }
+       | '=' expr                  { vars_assign( $2, $2->prev ); }
+;
+
 /* list of sizes of newly declared array */
 
-list1:   expr                      { vars_arr_extend( Cur_Arr, $1 ); }
-       | '*'                       { vars_arr_extend( Cur_Arr, NULL ); }
-       | list1 ',' expr            { vars_arr_extend( Cur_Arr, $3 ); }
-       | list1 ',' '*'             { vars_arr_extend( Cur_Arr, NULL ); }
+list1:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+       | expr                      { $$ = $1; }
+       | '*'                       { ( $$ = vars_push( INT_VAR, 0 ) )->flags
+										 |= VARIABLE_SIZED; }
+       | list1 ',' expr            { $$ = $1; }
+       | list1 ',' '*'             { ( $$ = vars_push( INT_VAR, 0 ) )->flags
+										 |= VARIABLE_SIZED; }
 ;
 
 /* list of data for assignment to newly declared array */
 
-arrass:  /* empty */
-       | '=' '{' list2 '}'
+arrass:  '{' list2 '}'             { $$ = $2; }
 ;
 
-list2:   expr                      { vars_arr_init( Cur_Arr, $1 ); }
-       | list2 ',' expr            { vars_arr_init( Cur_Arr, $3 ); }
+list2:   expr                      { $$ = $1; }
+       | list2 ',' expr            { $$ = $3; }
 ;
 
 /* list of indices for access of an array element */
 
-list3:   /* empty */
-	   | expr                      { vars_update_astack( $1 ); }
-       | list3 ',' expr            { vars_update_astack( $3 ); }
+list3:   /* empty */               { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                      { $$ = $1; }
+       | list3 ',' expr            { $$ = $3; }
 ;
 
 /* list of function arguments */
