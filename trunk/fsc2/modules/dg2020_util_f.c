@@ -615,6 +615,131 @@ void dg2020_dump_channels( FILE *fp )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+long dg2020_ch_to_num( long channel )
+{
+	switch ( channel )
+	{
+		case CHANNEL_CH0 :
+			return 0;
+
+		case CHANNEL_CH1 :
+			return 1;
+
+		case CHANNEL_CH2 :
+			return 2;
+
+		case CHANNEL_CH3 :
+			return 3;
+
+		case CHANNEL_CH4 :
+			return 4;
+
+		case CHANNEL_CH5 :
+			return 5;
+
+		case CHANNEL_CH6 :
+			return 6;
+
+		case CHANNEL_CH7 :
+			return 7;
+
+		case CHANNEL_CH8 :
+			return 8;
+
+		case CHANNEL_CH9 :
+			return 9;
+
+		case CHANNEL_CH10 :
+			return 10;
+
+		case CHANNEL_CH11 :
+			return 11;
+
+		case CHANNEL_CH12 :
+			return 12;
+
+		case CHANNEL_CH13 :
+			return 13;
+
+		case CHANNEL_CH14 :
+			return 14;
+
+		case CHANNEL_CH15 :
+			return 15;
+
+		case CHANNEL_CH16 :
+			return 16;
+
+		case CHANNEL_CH17 :
+			return 17;
+
+		case CHANNEL_CH18 :
+			return 18;
+
+		case CHANNEL_CH19 :
+			return 19;
+
+		case CHANNEL_CH20 :
+			return 20;
+
+		case CHANNEL_CH21 :
+			return 21;
+
+		case CHANNEL_CH22 :
+			return 22;
+
+		case CHANNEL_CH23 :
+			return 23;
+
+		case CHANNEL_CH24 :
+			return 24;
+
+		case CHANNEL_CH25 :
+			return 25;
+
+		case CHANNEL_CH26 :
+			return 26;
+
+		case CHANNEL_CH27 :
+			return 27;
+
+		case CHANNEL_CH28 :
+			return 28;
+
+		case CHANNEL_CH29 :
+			return 29;
+
+		case CHANNEL_CH30 :
+			return 30;
+
+		case CHANNEL_CH31 :
+			return 31;
+
+		case CHANNEL_CH32 :
+			return 32;
+
+		case CHANNEL_CH33 :
+			return 33;
+
+		case CHANNEL_CH34 :
+			return 34;
+
+		case CHANNEL_CH35 :
+			return 35;
+
+		default :
+			print( FATAL, "Pulser has no channel %s.\n",
+				   Channel_Names[ channel ] );
+			THROW( EXCEPTION );
+	}
+
+	return -1;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

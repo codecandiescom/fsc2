@@ -452,6 +452,7 @@ bool rs690_run( bool state );
 bool rs690_lock_state( bool lock );
 bool rs690_set_channels( void );
 bool rs690_command( const char *cmd );
+long rs690_ch_to_num( long channel );
 
 
 #endif /* ! RS690_HEADER */

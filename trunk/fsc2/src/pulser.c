@@ -30,6 +30,7 @@
 
 
 #include "fsc2.h"
+#include "pulser.h"
 
 
 Pulser_Struct *pulser_struct = NULL;
@@ -117,6 +118,7 @@ void pulser_struct_init( void )
 		pulser_struct[ i ].get_pulse_position_change  = NULL;
 		pulser_struct[ i ].get_pulse_length_change    = NULL;
 		pulser_struct[ i ].get_pulse_phase_cycle      = NULL;
+		pulser_struct[ i ].ch_to_num                  = NULL;
 
 		pulser_struct[ i ].phase_setup_prep           = NULL;
 		pulser_struct[ i ].phase_setup                = NULL;
@@ -1567,7 +1569,7 @@ void keep_all_pulses( void )
 	is_pulser_driver( );
 
 	is_pulser_func( pulser_struct[ Cur_Pulser ].keep_all_pulses,
-					"enforcing of keeping all pulses" );
+					"enforcing to keep all pulses" );
 
 	print( WARN, "Use of KEEP_ALL_PULSES keyword is deprecated, in the "
 		   "future please use the function pulser_keep_all_pulses() in "
@@ -1592,6 +1594,46 @@ void keep_all_pulses( void )
 	}
 
 	call_pop( );
+}
+
+
+/*------------------------------------------------------------------*/
+/* Function to ask the pulser driver to convert a number associated */
+/* with a symbolic channel name to an internaly used channel number */
+/*------------------------------------------------------------------*/
+
+long p_ch2num( long channel )
+{
+	long num;
+
+
+	is_pulser_driver( );
+
+	is_pulser_func( pulser_struct[ Cur_Pulser ].ch_to_num,
+					"converting symbolic channel names to internal channel"
+					"numbers" );
+	
+	TRY
+	{
+		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
+				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		TRY_SUCCESS;
+	}
+
+	TRY
+	{
+		num = pulser_struct[ Cur_Pulser ].ch_to_num( channel );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		call_pop( );
+		RETHROW( );
+	}
+
+	call_pop( );
+
+	return num;
 }
 
 

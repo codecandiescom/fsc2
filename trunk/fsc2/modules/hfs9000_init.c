@@ -198,7 +198,7 @@ static void hfs9000_basic_functions_check( void )
 			 ( hfs9000.is_trig_in_mode || hfs9000.trig_in_mode == EXTERNAL ) )
 		{
 			print( FATAL, "Negative delay for function '%s' can't be used "
-				   "with external triggert mode.\n",
+				   "with external trigger mode.\n",
 				   Function_Names[ f->self ] );
 			THROW( EXCEPTION );
 		}

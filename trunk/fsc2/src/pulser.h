@@ -73,13 +73,14 @@ struct Pulser_Struct {
 	bool ( *phase_setup_prep )( int func, int type, int pod, long val );
 	bool ( *phase_setup )( int func );
 
+	long ( *ch_to_num )( long channel );
+
 	/* The remaining functions are for backward compatibility only */
 
 	bool ( *set_max_seq_len )( double seq_len );
 	bool ( *keep_all_pulses )( void );
 	bool ( *set_phase_switch_delay )( int function, double del_time );
 	bool ( *set_grace_period )( double gp_time );
-
 };
 
 
@@ -98,6 +99,13 @@ struct P_List {
 	long dev_num;
 	P_List *next;
 };
+
+
+/* Variables defined in pulser.c and accessible by all files including
+   pulser.h */
+
+extern Pulser_Struct *pulser_struct;
+extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 
 
 void pulser_struct_init( void );
@@ -125,6 +133,7 @@ Var *p_get_by_num( long pnum, int type );
 void p_phs_setup( int func, int type, int pod, long val, bool is_pod );
 void p_phs_end( int func );
 void p_exists_function( int function );
+long p_ch2num( long channel );
 
 /* The following functions are for backward compatibility only */
 

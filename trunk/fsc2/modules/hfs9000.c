@@ -107,6 +107,8 @@ int hfs9000_init_hook( void )
 
 	pulser_struct.keep_all_pulses = hfs9000_keep_all;
 
+	pulser_struct.ch_to_num = hfs9000_ch_to_num;
+
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	hfs9000.trig_in_mode = EXTERNAL;
@@ -272,13 +274,13 @@ int hfs9000_exp_hook( void )
 			 hfs9000.channel[ i ].function->is_used )
 		{
 			hfs9000_set_pulses( hfs9000.channel[ i ].function );
-			if ( i != HFS9000_TRIG_OUT )
+			if ( IS_NORMAL_CHANNEL( i ) )
 				hfs9000_set_channel_state( i, hfs9000.channel[ i ].state );
 		}
 		else
 		{
 			hfs9000.channel[ i ].state = UNSET;
-			if ( i != HFS9000_TRIG_OUT )
+			if ( IS_NORMAL_CHANNEL( i ) )
 				hfs9000_set_channel_state( i, hfs9000.channel[ i ].state );
 		}
 
@@ -569,7 +571,7 @@ Var *pulser_channel_state( Var *v )
 
 	channel = get_strict_long( v, "pulser channel" );
 
-	if ( channel < MIN_CHANNEL || channel > MAX_CHANNEL )
+	if ( ! IS_NORMAL_CHANNEL( channel ) )
 	{
 		print( FATAL, "Invalid channel parameter.\n" );
 		THROW( EXCEPTION );

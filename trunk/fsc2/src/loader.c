@@ -24,6 +24,7 @@
 
 #include <dlfcn.h>
 #include "fsc2.h"
+#include "pulser.h"
 
 
 /* Variables imported from func.c */

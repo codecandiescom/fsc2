@@ -336,6 +336,77 @@ void hfs9000_dump_channels( FILE *fp )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+long hfs9000_ch_to_num( long channel )
+{
+	switch ( channel )
+	{
+		case TRIG_OUT :
+			return 0;
+
+		case CHANNEL_CH1 : case CHANNEL_A1 :
+			return 1;
+
+		case CHANNEL_CH2 : case CHANNEL_A2 :
+			return 2;
+
+		case CHANNEL_CH3 : case CHANNEL_A3 :
+			return 3;
+
+		case CHANNEL_CH4 : case CHANNEL_A4 :
+			return 4;
+
+		case CHANNEL_B1 :
+			if ( NUM_CHANNEL_CARDS < 2 )
+				break;
+			return 6;
+
+		case CHANNEL_B2 :
+			if ( NUM_CHANNEL_CARDS < 2 )
+				break;
+			return 7;
+
+		case CHANNEL_B3 :
+			if ( NUM_CHANNEL_CARDS < 2 )
+				break;
+			return 8;
+
+		case CHANNEL_B4 :
+			if ( NUM_CHANNEL_CARDS < 2 )
+				break;
+			return 9;
+
+		case CHANNEL_C1 :
+			if ( NUM_CHANNEL_CARDS < 3 )
+				break;
+			return 11;
+
+		case CHANNEL_C2 :
+			if ( NUM_CHANNEL_CARDS < 3 )
+				break;
+			return 12;
+
+		case CHANNEL_C3 :
+			if ( NUM_CHANNEL_CARDS < 3 )
+				break;
+			return 13;
+
+		case CHANNEL_C4 :
+			if ( NUM_CHANNEL_CARDS < 3 )
+				break;
+			return 14;
+	}
+
+	print( FATAL, "Pulser has no channel named '%s'.\n",
+		   Channel_Names[ channel ] );
+	THROW( EXCEPTION );
+
+	return -1;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

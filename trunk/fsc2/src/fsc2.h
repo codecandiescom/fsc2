@@ -88,7 +88,6 @@
 #include "func_save.h"
 #include "loader.h"
 #include "phases.h"
-#include "pulser.h"
 #include "exp.h"
 #include "run.h"
 #include "chld_func.h"
@@ -310,13 +309,11 @@ extern Cut_Graphics CG;
 
 extern bool need_GPIB;
 
-extern Pulser_Struct *pulser_struct;
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ 2 ];
 extern long Cur_Pulser;
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
-extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
 

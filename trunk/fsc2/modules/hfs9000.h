@@ -72,15 +72,31 @@ Var *pulser_command( Var *v );
 #define MIN_TIMEBASE           1.6e-9   /* minimum pulser time base: 1.6 ns */
 #define MAX_TIMEBASE           2.0e-5   /* maximum pulser time base: 20 us */
 
-#define MIN_CHANNEL            1
-#define MAX_CHANNEL            4        /* number of channels */
+
+#define MIN_CHANNEL           1
+
+#if NUM_CHANNEL_CARDS == 1
+#define MAX_CHANNEL            4
+#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 1 && ( x ) <= 4 )
+#endif
+#if NUM_CHANNEL_CARDS == 2
+#define MAX_CHANNEL            9
+#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 1 && ( x ) <= 9 )
+#endif
+#if NUM_CHANNEL_CARDS == 3
+#define MAX_CHANNEL            14
+#define IS_NORMAL_CHANNEL( x ) ( ( x ) > 0 && ( x ) <= 14 )
+#endif
+
+#define CHANNEL_LETTER( x )   ( 'A' + ( x ) % 5 )
+#define CHANNEL_NUMBER( x )   ( '0' + ( x ) % 5 )
 
 
-# define MIN_POD_HIGH_VOLTAGE  -1.5
-# define MAX_POD_HIGH_VOLTAGE   5.5
+#define MIN_POD_HIGH_VOLTAGE  -1.5
+#define MAX_POD_HIGH_VOLTAGE   5.5
 
-# define MIN_POD_LOW_VOLTAGE   -2.0
-# define MAX_POD_LOW_VOLTAGE    5.0
+#define MIN_POD_LOW_VOLTAGE   -2.0
+#define MAX_POD_LOW_VOLTAGE    5.0
 
 #define MAX_POD_VOLTAGE_SWING   5.5
 #define MIN_POD_VOLTAGE_SWING   0.5
@@ -338,6 +354,7 @@ bool hfs9000_run( bool flag );
 bool hfs9000_get_channel_state( int channel );
 bool hfs9000_set_channel_state( int channel, bool flag );
 bool hfs9000_command( const char *cmd );
+long hfs9000_ch_to_num( long channel );
 
 
 /*

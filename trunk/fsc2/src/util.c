@@ -982,11 +982,18 @@ Var *convert_to_channel_number( const char *channel_name )
 			break;
 
 	/* If the name was not recognized the reason might by that the
-	   abbreviation "LIN" may have been used for "LINE"...*/
+	   abbreviation "LIN" may have been used for "LINE" or instead of
+	   "TRIG_OUT" "TRIGGER_OUT" or "TRIGGEROUT" or "TRIGOUT"... */
 
-	if ( channel == NUM_CHANNEL_NAMES &&
-		 ! strcmp( channel_name, "LIN" ) )
-		channel = CHANNEL_LINE;
+	if ( channel == NUM_CHANNEL_NAMES )
+	{
+		if ( ! strcmp( channel_name, "LIN" ) )
+			channel = CHANNEL_LINE;
+		if ( ! strcmp( channel_name, "TRIGGER_OUT" ) ||
+			 ! strcmp( channel_name, "TRIGOUT" ) ||
+			 ! strcmp( channel_name, "TRIGGEROUT" ) )
+			channel = CHANNEL_TRIG_OUT;
+	}
 
 #ifndef NDEBUG
 	if ( channel == NUM_CHANNEL_NAMES )

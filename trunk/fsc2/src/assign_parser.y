@@ -29,6 +29,7 @@
 %{
 
 #include "fsc2.h"
+#include "pulser.h"
 
 void assignparser_init( void );
 
@@ -123,7 +124,6 @@ static int dont_exec = 0;
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
 %token <lval> PXY_TOK        /* X, Y, -X, -Y -- for phases */
-%token <lval> CHN_TOKEN      /* channels for RS690 */
 %token AND OR XOR NOT
 %token EQ NE LT LE GT GE
 
@@ -312,11 +312,7 @@ chd:    CH_TOKEN sep1 ch
 
 ch:     INT_TOKEN sep2             { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $1 ) ); }
-      | CHN_TOKEN sep2             { p_assign_channel( Channel_Type,
-												  vars_push( INT_VAR, $1 ) ); }
       | ch INT_TOKEN sep2          { p_assign_channel( Channel_Type,
-												  vars_push( INT_VAR, $2 ) ); }
-      | ch CHN_TOKEN sep2          { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
 
@@ -596,12 +592,6 @@ phsp:     /* empty */
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
 												  0, $3, SET ); }
 		| CH_TOKEN sep1 INT_TOKEN
-          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, UNSET ); }
-		| POD_TOKEN sep1 CHN_TOKEN
-          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, SET ); }
-		| CH_TOKEN sep1 CHN_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
 												  0, $3, UNSET ); }
 ;

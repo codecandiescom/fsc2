@@ -62,11 +62,11 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 	CHANNEL *c = hfs9000.channel + channel;
 
 
-	if ( channel != HFS9000_TRIG_OUT &&
-		 ( channel < MIN_CHANNEL || channel > MAX_CHANNEL ) )
+	if ( channel < HFS9000_TRIG_OUT || channel > MAX_CHANNEL )
 	{
-		print( FATAL, "Invalid channel, valid are CH[%d-%d] and "
-			   "TRIGGER_OUT.\n", ( int ) MIN_CHANNEL, ( int ) MAX_CHANNEL );
+		print( FATAL, "Invalid channel, valid are %s[1-4] and "
+			   "TRIG_OUT.\n", NUM_CHANNEL_CARDS == 1 ? "A" :
+			   ( NUM_CHANNEL_CARDS == 2 ? "[AB]" : "[A-C]" ),
 		THROW( EXCEPTION );
 	}
 
@@ -75,15 +75,15 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		if ( f->is_inverted )
 		{
 			print( FATAL, "Function '%s' has been set to use inverted logic. "
-				   "This can't be done with TRIGGER_OUT channel.\n",
+				   "This can't be done with TRIG_OUT.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
 
 		if ( f->is_high_level || f->is_low_level )
 		{
-			print( FATAL, "For function '%s', associated with a TRIGGER_OUT "
-				   "channel, no voltage levels can be set.\n",
+			print( FATAL, "For function '%s', associated with TRIG_OUT, no "
+				   "voltage levels can be set.\n",
 				   Function_Names[ function ] );
 			THROW( EXCEPTION );
 		}
@@ -94,22 +94,24 @@ bool hfs9000_assign_channel_to_function( int function, long channel )
 		if ( c->function->self == function )
 		{
 			if ( channel == HFS9000_TRIG_OUT )
-				print( SEVERE, "TRIGGER_OUT channel is assigned more than "
-					   "once to function '%s'.\n",
-						Function_Names[ c->function->self ] );
-			else
-				print( SEVERE, "Channel %ld is assigned more than once to "
+				print( SEVERE, "TRIG_OUT is assigned more than once to "
 					   "function '%s'.\n",
-						channel, Function_Names[ c->function->self ] );
+					   Function_Names[ c->function->self ] );
+			else
+				print( SEVERE, "Channel %c%c is assigned more than once to "
+					   "function '%s'.\n", CHANNEL_LETTER( channel ),
+					   CHANNEL_NUMBER( channel ),
+					   Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
 		if ( channel == HFS9000_TRIG_OUT )
-			print( FATAL, "TRIGGER_OUT channel is already used for function "
-				   "'%s'.\n", Function_Names[ c->function->self ] );
+			print( FATAL, "TRIG_OUT is already used for function '%s'.\n",
+				   Function_Names[ c->function->self ] );
 		else
-			print( FATAL, "Channel %ld is already used for function '%s'.\n",
-				   channel, Function_Names[ c->function->self ] );
+			print( FATAL, "Channel %c%c is already used for function '%s'.\n",
+				   CHANNEL_LETTER( channel ), CHANNEL_NUMBER( channel ),
+				   Function_Names[ c->function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -130,7 +132,7 @@ bool hfs9000_invert_function( int function )
 	if ( hfs9000.function[ function ].channel != NULL &&
 		 hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Polarity of function '%s' associated with TRIGGER_OUT "
+		print( FATAL, "Polarity of function '%s' associated with TRIG_OUT "
 			   "can't be inverted.\n", Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}
@@ -211,7 +213,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Function '%s' is associated with TRIGGER_OUT that "
+		print( FATAL, "Function '%s' is associated with TRIG_OUT which "
 			   "doesn't allow setting of levels.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
@@ -259,8 +261,8 @@ bool hfs9000_set_function_low_level( int function, double voltage )
 
 	if ( f->channel != NULL && f->channel->self == HFS9000_TRIG_OUT )
 	{
-		print( FATAL, "Function '%s' is associated with TRIGGER_OUT channel "
-			   "that doesn't allow setting of levels.\n",
+		print( FATAL, "Function '%s' is associated with TRIG_OUT "
+			   "which doesn't allow setting of levels.\n",
 			   Function_Names[ function ] );
 		THROW( EXCEPTION );
 	}

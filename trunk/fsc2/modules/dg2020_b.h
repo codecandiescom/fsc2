@@ -493,6 +493,7 @@ bool dg2020_set_constant( int channel, Ticks address,
 						  Ticks length, int state );
 bool dg2020_lock_state( bool lock );
 bool dg2020_command( const char *cmd );
+long dg2002_ch_to_num( long channel );
 
 
 #endif /* ! DG2020_B_HEADER */

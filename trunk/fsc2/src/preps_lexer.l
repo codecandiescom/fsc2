@@ -52,7 +52,9 @@
 
 
 #include "fsc2.h"
+#include "pulser.h"
 #include "preps_parser.h"
+
 extern void prepsparser_init( void );
 
 int prepslex( void );

@@ -53,6 +53,8 @@
 
 #include "fsc2.h"
 #include "vars_parser.h"
+#include "pulser.h"
+
 extern void varsparser_init( void );
 
 int varslex( void );

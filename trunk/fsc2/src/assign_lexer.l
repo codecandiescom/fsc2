@@ -51,6 +51,7 @@
 
 
 #include "fsc2.h"
+#include "pulser.h"
 #include "assign_parser.h"
 
 extern void assignparser_init( void );
@@ -134,7 +135,8 @@ CH          CH(ANNEL)?
 INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
-CHN         [A-H]([0-9]|(1[0-5]))
+PODSPEC     P([0-9]|(1[01]))
+CHN         ([A-H]([0-9]|(1[0-5])))|(CH([0-9]|(1[0-5])))|(TRIG(GER)?_?OUT)
 
 
 TB          T(IME)?_?B(ASE)?(#{INT})?:?
@@ -151,8 +153,6 @@ LOW         L(OW)?
 HIGH        H(IGH)?
 REPT        REP(EAT)?_?T(IME)?
 REPF        REP(EAT)?_?F(REQ(UENCY)?)?
-
-TO          TRIG(GER)?_?OUT
 
 CTRL        (WHILE)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 
@@ -345,10 +345,18 @@ WS          [\n=: ]+
 				return OIV_TOKEN;
 			}
 
+{PODSPEC}  {
+				assignlval.lval = T_atol( assigntext + 1 );
+				return INT_TOKEN;
+            }
+
 {CHN}       {
-				assignlval.lval =   ( assigntext[ 0 ] - 'A' ) * 16
-								  + T_atol( assigntext + 1 );
-				return CHN_TOKEN;
+				Var *v;
+
+				v = convert_to_channel_number( assigntext );
+				assignlval.lval = p_ch2num( v->val.lval );
+				vars_pop( v );
+				return INT_TOKEN;
             }
 
 "TTL"       return TTL_TOKEN;
@@ -470,13 +478,6 @@ WS          [\n=: ]+
 				THROW( EXCEPTION );
 			}
 
-			/* This is here for the HFS9000 which has a special TRIGGER_OUT
-			   channel that is assigned the channel number 0 */
-{TO}        {
-            	assignlval.lval = 0;
-                return INT_TOKEN;
-            }
-
 			/* handling of function, variable and array identifiers */
 {IDENT}     {
 				int acc;
@@ -585,6 +586,8 @@ int assignments_parser( FILE *in )
 		 needs_restart = SET;
 
 	assignparser_init( );
+
+	Cur_Pulser = 0;
 
 	assignparse( );
 

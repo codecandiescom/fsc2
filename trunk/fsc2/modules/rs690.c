@@ -112,6 +112,8 @@ int rs690_init_hook( void )
 
 	pulser_struct.keep_all_pulses = rs690_keep_all;
 
+	pulser_struct.ch_to_num = rs690_ch_to_num;
+
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	rs690.is_trig_in_mode = UNSET;

@@ -432,6 +432,24 @@ bool rs690_set_max_seq_len( double seq_len )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+long rs690_ch_to_num( long channel )
+{
+	if ( channel < CHANNEL_A0 ||
+		 ( channel > CHANNEL_D15 && NUM_HSM_CARDS == 1 ) ||
+		 ( channel > CHANNEL_H15 && NUM_HSM_CARDS == 2 ) )
+	{
+		 print( FATAL, "Pulser has no channel named '%s'.\n",
+				Channel_Names[ channel ] );
+		 THROW( EXCEPTION );
+	}
+
+	return channel - CHANNEL_A0;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

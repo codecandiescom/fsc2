@@ -110,6 +110,8 @@ int dg2020_f_init_hook( void )
 
 	pulser_struct.keep_all_pulses = dg2020_keep_all;
 
+	pulser_struct.ch_to_num = dg2020_ch_to_num;
+
 	/* Finally, we initialize variables that store the state of the pulser */
 
 	dg2020.is_timebase = UNSET;

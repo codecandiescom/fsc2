@@ -432,6 +432,7 @@ bool dg2020_set_trigger_in_impedance( int state );
 void dg2020_gpib_failure( void );
 bool dg2020_lock_state( bool lock );
 bool dg2020_command( const char *cmd );
+long dg2020_ch_to_num( long channel );
 
 
 #endif /* ! DG2020_F_HEADER */

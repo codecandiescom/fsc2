@@ -401,11 +401,18 @@ Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} on the
 one hand and the @strong{Tektronix HFS9003} and the @strong{Bruker
 EP385} on the other. The latter pulsers are quite simple in that they
-have just a number (4 and 8, respectively) of output connectors. In
-contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
-that have to be mapped to what is called a POD, that in both cases
-(Frankfurt S-band and Berlin X-band spectrometer) has 12 real output
-connectors.
+have just a number of output connectors. In the @strong{Bruker EP385}
+they are simply called @code{CH0} to @code{CH7}, while for the
+@strong{Tektronix HFS9003} they are divided into sets of channels
+belonging to the different channel boards in the device (at least one
+board and a maximum of three), so channels are named @code{A1} to
+@code{A4}, @code{B1} to @code{B4} and @code{C1} to @code{C4}. 
+
+In contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
+(named @code{CH0} to @code{CH35}) that have to be mapped to what is
+called a POD, that in both cases (Frankfurt S-band and Berlin X-band
+spectrometer) has 12 real output connectors, named @code{P0} to
+@code{P11}.
 
 Finally, the @strong{Interface Technology RS690} has 4 sets of output
 connectors (or even 8, if a second HSM card is installed), each with 16
@@ -420,15 +427,18 @@ connector can be used, for a time base of @w{8 ns} only the lower 8
 channels.
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
-function by statements like
+function by statements like (the keyword @code{CHANNEL} can be replaced
+by @code{CH})
 @example
-MICROWAVE: CHANNEL = 1;
-RF:        CHANNEL = 2;
-RF_GATE:   CH = 3;
-DETECTION: CHANNEL = TRIGGER_OUT;
+MICROWAVE: CHANNEL = A1;
+RF:        CHANNEL = A2;
+RF_GATE:   CH = B3;
+DETECTION: CHANNEL = TRIG_OUT;
 @end example
 @noindent
-or, for the @strong{Interface Technology RS690},
+(where the @code{A} in the channel specifier stands for the first
+channel card and @code{B} for the second card) or, for the
+@strong{Interface Technology RS690},
 @example
 MICROWAVE: CHANNEL = A3;
 RF:        CHANNEL = B7;
@@ -438,10 +448,11 @@ DETECTION: CHANNEL = D15;
 @noindent
 The output channels usually are numbered as printed on the device, one
 exception is the trigger-out channel of the @strong{Tektronix HFS9003},
-that is called @code{TRIGGER_OUT}, and has some special properties,
-e.g.@: allowing only one pulse of fixed length.  The keyword
-@code{CHANNEL} can be replaced by @code{CH} and @code{TRIGGER_OUT} by
-either @code{TRIGGEROUT}, @code{TRIG_OUT} or @code{TRIGOUT}.
+that is called @code{TRIG_OUT}, and has some special properties, e.g.@:
+allowing only one pulse of fixed length.  The keyword @code{TRIG_OUT} by
+either @code{TRIGOUT}, @code{TRIGGER_OUT} or
+@code{TRIGGEROUT}. 
+
 
 Please note: the @strong{Tektronix HFS9003} has only 4 channels and does
 not allow assignment of more than one channel to a single function.
@@ -449,10 +460,10 @@ not allow assignment of more than one channel to a single function.
 For the @strong{Sony/Tektronix DG2020} the function gets associated with
 one (or more pods, see below why sometimes more than one is needed):
 @example
-MICROWAVE: POD = 1, 2, 3, 4;
-RF:        POD = 6;
-RF_GATE:   POD = 7;
-DETECTION: POD = 11;
+MICROWAVE: POD = P1, P2, P3, P4;
+RF:        POD = P6;
+RF_GATE:   POD = P7;
+DETECTION: POD = P11;
 @end example
 @noindent
 Instead of @code{POD} you can also write @code{P}.
@@ -464,18 +475,18 @@ internal channels as it needs, always using the ones with the lowest
 numbers first. To declare which of the internal channels are to be
 associated with the output connectors (PODs) use a statement like this:
 @example
-MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
-RF:        POD = 6           CHANNEL = 35;
-RF_GATE:   POD = 7           CHANNEL = 17;
-DETECTION: POD = 11;   // leave it to the program to select the channel
+MICROWAVE: POD = P1, P2, P3, P4  CHANNEL = 31, 32, 33, 34;
+RF:        POD = P6              CHANNEL = 35;
+RF_GATE:   POD = P7              CHANNEL = 17;
+DETECTION: POD = P11;   // leave it to the program to select the channel
 @end example
 
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
 @itemize @bullet
-@item Sony/Tektronix DG2020: POD = 0..11, CH = 0..35
-@item Tektronix HFS9003: CH = 1..4
-@item Bruker EP385: CH = 0..7
+@item Sony/Tektronix DG2020: POD = P0..P11, CH = CH0..CH35
+@item Tektronix HFS9003: CH = X1..X4, with X standing for A..C, TRIG_OUT
+@item Bruker EP385: CH = CH0..CH7
 @item Interface Technology RS690: CH = X0..15 with X standing for A..D
 (or A..H when two HSM cards are installed)
 @end itemize
@@ -488,9 +499,9 @@ keywords @code{V_HIGH} and @code{V_LOW}@footnote{Instead of
 @code{V_HIGH} you can also write @code{VHIGH}, @code{V_H} or @code{VH}
 and for @code{V_LOW} you may use @code{VLOW}, @code{V_L} or @code{VL}.}:
 @example
-MICROWAVE: POD = 1, 2, 3, 4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
-RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
-RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
+MICROWAVE: POD = P1, P2, P3, P4  V_HIGH = 4.3 V, V_LOW = -0.5 V;
+RF:        POD = P6              V_HIGH = 2.6 V, V_LOW = 0 V;
+RF_GATE:   POD = P7              V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
 @noindent
 The high voltage must always be larger than the low voltage, to get
@@ -513,7 +524,7 @@ voltage is high while there are no pulses and low during pulses) use the
 @code{INVERTED} keyword@footnote{The keyword @code{INVERTED} can be
 shortened to @code{INVERT} or @code{INV}.}:
 @example
-RF:        POD = 6   V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
+RF:        POD = P6   V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
 @end example
 
 
@@ -527,7 +538,7 @@ Finally, in order to take care of different cable lengths a delay for a
 function can be set. This delay will be automatically added to the start
 position of each pulse of this function:
 @example
-MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
+MICROWAVE: POD = P1, P2, P3, P4  DELAY = 50 ns;
 @end example
 @noindent
 For obvious reasons setting negative delays are only possible when in
@@ -542,7 +553,7 @@ If you are dealing with two or more pulsers simultaneously you will have
 to append a @code{#} character plus the pulser number to each of the
 channel function setup statements, i.e.@: use
 @example
-MICROWAVE#1: POD = 3;
+MICROWAVE#1: POD = P3;
 TWT#2:       CH  = A7;
 @end example
 @noindent
@@ -579,10 +590,10 @@ for some sanity checks, which functions is to be phase cycled). This is
 done via a statement in the @code{ASSIGNMENTS} section like the following:
 @example
 PHASE_SETUP:  MICROWAVE,
-               X: POD = 1,
-              +Y: POD = 2,
-              -X: POD = 4,
-              -Y: 5;
+               X: POD = P1,
+              +Y: POD = P2,
+              -X: POD = P4,
+              -Y: P5;
 @end example
 @noindent
 or
@@ -627,7 +638,7 @@ function looks nearly identical to the other functions, the only
 exception is that also the name of the function to be phase cycled using the
 phase function needs to be specified:
 @example
-PHASE:        MICROWAVE, POD = 8, 9, V_HIGH = 5 V, V_LOW = 0 V;
+PHASE:        MICROWAVE, POD = P8, P9, V_HIGH = 5 V, V_LOW = 0 V;
 @end example
 @noindent
 In this example the phase function is used to phase cycle the microwave

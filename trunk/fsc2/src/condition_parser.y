@@ -30,6 +30,7 @@
 %{
 
 #include "fsc2.h"
+#include "pulser.h"
 
 int conditionparse( void );
 void conditionparser_init( void );
