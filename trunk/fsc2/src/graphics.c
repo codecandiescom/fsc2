@@ -26,6 +26,11 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj );
 
 
 static Graphics *G_stored;
+static int cur_1,
+	       cur_2,
+	       cur_3,
+	       cur_4,
+	       cur_5;
 
 
 /*----------------------------------------------------------------------*/
@@ -240,21 +245,30 @@ static void G_struct_init( void )
 
 	/* Create the  different cursors */
 
-	G.cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
-									   cursor_1_width, cursor_1_height,
-									   cursor_1_x_hot, cursor_1_y_hot );
-	G.cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
-									   cursor_2_width, cursor_2_height,
-									   cursor_2_x_hot, cursor_2_y_hot );
-	G.cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
-									   cursor_3_width, cursor_3_height,
-									   cursor_3_x_hot, cursor_3_y_hot );
-	G.cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
-									   cursor_4_width, cursor_4_height,
-									   cursor_4_x_hot, cursor_4_y_hot );
-	G.cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
-									   cursor_5_width, cursor_5_height,
-									   cursor_5_x_hot, cursor_5_y_hot );
+	if ( first_time )
+	{
+		cur_1 = fl_create_bitmap_cursor( cursor_1_bits, cursor_1_bits,
+										 cursor_1_width, cursor_1_height,
+										 cursor_1_x_hot, cursor_1_y_hot );
+		cur_2 = fl_create_bitmap_cursor( cursor_2_bits, cursor_2_bits,
+										 cursor_2_width, cursor_2_height,
+										 cursor_2_x_hot, cursor_2_y_hot );
+		cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
+										 cursor_3_width, cursor_3_height,
+										 cursor_3_x_hot, cursor_3_y_hot );
+		cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
+										 cursor_4_width, cursor_4_height,
+										 cursor_4_x_hot, cursor_4_y_hot );
+		cur_5 = fl_create_bitmap_cursor( cursor_5_bits, cursor_5_bits,
+										 cursor_5_width, cursor_5_height,
+										 cursor_5_x_hot, cursor_5_y_hot );
+	}
+
+	G.cur_1 = cur_1;
+	G.cur_2 = cur_2;
+	G.cur_3 = cur_3;
+	G.cur_4 = cur_4;
+	G.cur_5 = cur_5;
 
 	/* On the first call also create the colours needed for 2D displays */
 
