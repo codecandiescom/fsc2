@@ -1840,7 +1840,7 @@ been set by calling the function with an argument).
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
 the attenuation it accepts one argument, the attenuation in the range
-between @w{+10 db} and @w{-136 db}.
+between @w{+10 db} and @w{-136 db} with a resolution of @w{0.1 db}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the attenuation has already
@@ -1850,10 +1850,14 @@ been set by calling the function with an argument).
 @anchor{synthesizer_minimum_attenuation}
 @item synthesizer_minimum_attenuation()
 @findex synthesizer_minimum_attenuation()
-The function queries or sets the minimum output attenuation. If called to set
-the attenuation it accepts one argument, the attenuation in the range
-between @w{+10 db} and @w{-136 db}. Calling the function restricts
-setting the attenuation to ranges below the value set by this function.
+The function can be used to restrict the minimum output attenuation to
+avoid to inadvertently set too high output power levels. It can be
+called to both query and sets the minimum output attenuation. If called
+to set the attenuation it accepts one argument, the attenuation in the
+range between @w{+10 db} and @w{-136 db}. Calling the function disables
+setting the attenuation by further calls of
+@code{synthesizer_attenuation()} to ranges below the value set by
+this function.
 
 
 @anchor{synthesizer_step_frequency}
