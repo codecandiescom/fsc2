@@ -150,6 +150,19 @@ typedef struct
 } Compilation;
 
 
+/* directions of pipe */
+
+enum {
+	READ = 0,
+	WRITE
+};
+
+
+enum {
+	PARENT = 0,
+	CHILD
+};
+
 
 /* convinience macros for accessing the value of simple variables */
 

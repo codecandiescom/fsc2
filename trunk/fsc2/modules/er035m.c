@@ -18,7 +18,7 @@ Var *find_field( Var *v );
 Var *field_resolution( Var *v );
 Var *field_meter_wait( Var *v );
 
-bool is_init = UNSET;         /* tested by magnet power supply driver */
+bool is_gaussmeter = UNSET;         /* tested by magnet power supply driver */
 
 
 /* internally used functions */
@@ -78,19 +78,30 @@ int er035m_init_hook( void )
 	/* Set global flag to tell magnet poswer supply driver that the
 	   gaussmeter has already been loaded */
 
-	is_init = SET;
+	is_gaussmeter = SET;
 
-	/* what's missing: check that not the other field controller is loaded */
+	if ( exist_device( "bh15" ) )
+	{
+		eprint( FATAL, "er035m: Driver for Bruker BH15 field controller is "
+				"already loaded - there can only be one gaussmter.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( ! exist_device( "s_band" ) && ! exist_device( "x_band" ) )
-		eprint( WARN, "Driver for Bruker ER035M gaussmeter is loaded but no "
-				"magnet power supply driver.\n" );
+	{	
+		eprint( WARN, "er035m: Driver for Bruker ER035M gaussmeter is loaded "
+				"but no appropriate magnet power supply driver.\n" );
 		nmr.is_needed = UNSET;
+	}
+	else
+	{
+		need_GPIB = SET;
+		nmr.is_needed = SET;
+		nmr.name = "ER035M";
+	}
 
-	need_GPIB = SET;
-	nmr.is_needed = SET;
-	nmr.name = "ER035M";
 	nmr.state = ER035M_UNKNOWN;
+	nmr.device = -1;
 
 	return 1;
 }
@@ -115,6 +126,7 @@ int er035m_exp_hook( void )
 
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
+		nmr.device = -1;
 		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
@@ -314,7 +326,7 @@ void er035m_exit_hook( void )
 	if ( ! nmr.is_needed )
 		return;
 
-	if ( nmr.device != -1 )
+	if ( nmr.device >= 0 )
 		gpib_local( nmr.device );
 }
 
@@ -440,7 +452,10 @@ Var *find_field( Var *v )
 Var *field_resolution( Var *v )
 {
 	v = v;
-	return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
+	if ( ! TEST_RUN )
+		return vars_push( FLOAT_VAR, nmr.resolution == LOW ? 0.01 : 0.001 );
+	else
+		return vars_push( FLOAT_VAR, 0.001 );
 }
 
 
@@ -451,7 +466,7 @@ Var *field_meter_wait( Var *v )
 {
 	v = v;
 
-	if ( nmr.is_needed )
+	if ( ! TEST_RUN && nmr.is_needed )
 		usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US );
 	return vars_push( INT_VAR, 1 );
 }

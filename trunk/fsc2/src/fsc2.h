@@ -43,6 +43,7 @@
 
 #include "fsc2_rsc.h"
 #include "global.h"               /* must be the very first to be included ! */
+#include "comm.h"
 #include "exceptions.h"
 #include "T.h"
 #include "util.h"
@@ -112,10 +113,6 @@ Pulse *Cur_Pulse = NULL;
 bool TEST_RUN = UNSET;       /* flag, set while EXPERIMENT section is tested */
 bool need_GPIB = UNSET;      /* flag, set if GPIB bus is needed */
 
-volatile bool do_send = UNSET;  /* globals used with the signal handlers */
-volatile bool do_quit = UNSET;
-
-
 
 bool just_testing;
 FD_fsc2 *main_form;
@@ -123,6 +120,13 @@ FD_run *run_form;
 FD_device *device_form;
 
 
+int I_am = PARENT;
+int pd[ 2 ];                    /* pipe descriptors */
+int child_pid = 0;              /* pid of child */
+volatile bool do_send = UNSET;  /* globals used with the signal handlers */
+volatile bool do_quit = UNSET;
+volatile bool Is_Written = UNSET;
+bool exit_hooks_are_run = UNSET;
 
 
 #else   /*  ! FSC2_MAIN */
@@ -152,10 +156,6 @@ extern Pulse *Cur_Pulse;
 extern bool TEST_RUN;
 extern bool need_GPIB;
 
-extern volatile bool do_send;      /* globals used with the signal handlers */
-extern volatile bool do_quit;
-
-
 
 extern bool just_testing;
 extern FD_fsc2 *main_form;
@@ -163,6 +163,13 @@ extern FD_run *run_form;
 extern FD_device *device_form;
 
 
+extern int I_am;
+extern int pd[ ];                  /* pipe descriptors */
+extern int child_pid;              /* pid of child */
+extern volatile bool do_send;      /* globals used with the signal handlers */
+extern volatile bool do_quit;
+extern volatile bool Is_Written;
+extern bool exit_hooks_are_run;
 
 #endif
 

@@ -404,6 +404,40 @@ void run_exp_hooks( void )
 }
 
 
+/*-------------------------------------------------------*/
+/* Functions runs the test hook functions of all modules */
+/*-------------------------------------------------------*/
+
+void run_exit_hooks( void )
+{
+	Device *cd;
+
+
+	if ( Device_List == NULL )
+		return;
+
+	/* Run all exit hooks but starting with the last device and ending with
+	   the very first one in the list */
+
+	for( cd = Device_List; cd->next != NULL; cd = cd->next )
+		;
+
+	for ( ; cd != NULL; cd = cd->prev )
+	{
+		TRY
+		{
+			if ( cd->is_loaded && cd->driver.is_exit_hook )
+				cd->driver.exit_hook( );
+			TRY_SUCCESS;
+		}
+	}
+
+	/* Set global variable to show that exit hooks already have been run */
+
+	exit_hooks_are_run = SET;
+}
+
+
 /*-----------------------------------------------------------------------*/
 /* This function is intended to allow user defined modules access to the */
 /* symbols in another module. Probably it's a BAD thing if they do, but  */
@@ -960,7 +994,7 @@ Var *f_print( Var *v )
 
 	/* get string long enough to replace each `#' by a 4-char sequence */
 
-	fmt = get_string( strlen( sptr ) + 3 * s + 1 );
+	fmt = get_string( strlen( sptr ) + 4 * s + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0' ; ++cp )
@@ -975,7 +1009,8 @@ Var *f_print( Var *v )
 		if ( *cp == '#' )
 		{
 			for ( ep = fmt + strlen( fmt ) + 1; ep != cp; --ep )
-				*( ep + 3 ) = *ep;
+				*( ep + 4 ) = *ep;
+			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp++ = '\x01';
 			*cp++ = '\x01';
@@ -1041,8 +1076,9 @@ Var *f_print( Var *v )
 	/* now lets start printing... */
 
 	cp = fmt;
+	strcat( cp, "\x7E" );
 	cv = v->next;
-	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01" ) ) != NULL )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
@@ -1050,17 +1086,17 @@ Var *f_print( Var *v )
 				switch ( cv->type )
 				{
 					case INT_VAR :
-						strcpy( ep, "%ld" );
+						strcpy( ep, "%ld\x7F" );
 						eprint( NO_ERROR, cp, cv->val.lval );
 						break;
 
 					case FLOAT_VAR :
-						strcpy( ep, "%#g" );
+						strcpy( ep, "%#g\x7F" );
 						eprint( NO_ERROR, cp, cv->val.dval );
 						break;
 
 					case STR_VAR :
-						strcpy( ep, "%s" );
+						strcpy( ep, "%s\x7F" );
 						eprint( NO_ERROR, cp, sptr );
 						break;
 				}
@@ -1068,10 +1104,10 @@ Var *f_print( Var *v )
 			cv = cv->next;
 		}
 
-		cp = ep + 4;
+		cp = ep + 5;
 	}
 
-	if ( *cp != '\0' && ( ! TEST_RUN || print_anyway ) )
+	if ( ! TEST_RUN || print_anyway ) 
 		eprint( NO_ERROR, cp );
 
 	/* finally free the copy of the format string and return number of

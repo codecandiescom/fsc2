@@ -166,20 +166,38 @@ void eprint( int severity, const char *fmt, ... )
 				space_left = 0;
 		}
 
-		/* Output line only after newline char has been found */
+		/* Catch stuff from f_print(), skip actual printing as long as last
+		   character is '\x7F' */
 
-		if ( buffer[ strlen( buffer ) - 1 ] != '\n' )
+		if ( buffer[ strlen( buffer ) - 1 ] == '\x7F' )
+		{
+
+			buffer[ strlen( buffer ) - 1 ] = '\0';
+			cp--;
+			space_left += 1;
 			return;
+		}
 
-		buffer[ strlen( buffer ) - 1 ] = '\0';
-		fl_freeze_form( main_form->error_browser->form );
-		fl_add_browser_line( main_form->error_browser, buffer );
+		/* Catch stuff from f_print() */
 
-		fl_set_browser_topline( main_form->error_browser,
+		if ( buffer[ strlen( buffer ) - 1 ] == '\x7E' )
+			 buffer[ strlen( buffer ) - 1 ] = '\0';
+
+		if ( I_am == PARENT )
+		{
+			if ( buffer[ strlen( buffer ) - 1 ] == '\n' )
+				buffer[ strlen( buffer ) - 1 ] = '\0';
+			fl_freeze_form( main_form->error_browser->form );
+			fl_add_browser_line( main_form->error_browser, buffer );
+
+			fl_set_browser_topline( main_form->error_browser,
 				   fl_get_browser_maxline( main_form->error_browser )
 				 - fl_get_browser_screenlines( main_form->error_browser ) + 1);
 
-		fl_unfreeze_form( main_form->error_browser->form );
+			fl_unfreeze_form( main_form->error_browser->form );
+		}
+		else
+			writer( C_EPRINT, buffer );
 
 		cp = buffer;
 		space_left = BROWSER_MAXLINE - 1;
@@ -187,12 +205,12 @@ void eprint( int severity, const char *fmt, ... )
 	else
 	{
 		if ( severity != NO_ERROR )
-			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+			fprintf( stdout, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
 		va_start( ap, fmt );
-		vfprintf( stderr, fmt, ap );
+		vfprintf( stdout, fmt, ap );
 		va_end( ap );
-		fflush( stderr );
+		fflush( stdout );
 	}
 
 }

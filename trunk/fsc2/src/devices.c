@@ -97,7 +97,7 @@ void delete_devices( void )
 		cdp = cd->prev;
 		if ( cd->is_loaded )
 		{
-			if ( cd->driver.is_exit_hook )
+			if ( ! exit_hooks_are_run && cd->driver.is_exit_hook )
 			{
 				TRY                      /* catch exceptions from the exit   */
 				{                        /* hooks, we've got to run them all */

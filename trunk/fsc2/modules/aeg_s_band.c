@@ -31,6 +31,7 @@ Var *magnet_setup( Var *v );
 Var *set_field( Var *v );
 Var *sweep_up( Var *v );
 Var *sweep_down( Var *v );
+Var *reset_field( Var *v );
 
 
 
@@ -49,8 +50,8 @@ static bool magnet_do( int command );
 #define S_BAND_MIN_FIELD_STEP              1.5e-3
 #define S_BAND_WITH_ER035M_MIN_FIELD       460
 #define S_BAND_WITH_ER035M_MAX_FIELD       2390
-#define S_BAND_WITH_XXXXXX_MIN_FIELD       0          /* ???? !!!!!!!!!!!*/
-#define S_BAND_WITH_XXXXXX_MAX_FIELD       9000       /* ???? !!!!!!!!!!!*/
+#define S_BAND_WITH_BH15_MIN_FIELD         0          /* ???? !!!!!!!!!!!*/
+#define S_BAND_WITH_BH15_MAX_FIELD         9000       /* ???? !!!!!!!!!!!*/
 
 
 typedef struct
@@ -104,13 +105,13 @@ enum {
 
 int s_band_init_hook( void )
 {
-	bool *is_init;
+	bool *is_gaussmeter;
 	int ret;
 
 
 	/* Check if there's a field meter */
 
-	if ( ! exist_device( "er035m" ) && ! exist_device( "xxxxxx" ) ) /*!!!!!*/
+	if ( ! exist_device( "er035m" ) && ! exist_device( "bh15" ) )
 	{
 		eprint( FATAL, "s_band: Can't find a field meter.\n" );
 		THROW( EXCEPTION );
@@ -123,10 +124,11 @@ int s_band_init_hook( void )
 	   as it might look... */
 
 	if ( exist_device( "er035m" ) )
-		ret = get_lib_symbol( "er035m", "is_init", ( void ** ) &is_init );
+		ret = get_lib_symbol( "er035m", "is_gaussmeter",
+							  ( void ** ) &is_gaussmeter );
 	else
-		ret = get_lib_symbol( "xxxxxx", "is_init", ( void ** ) &is_init );
-                              /*!!!!!!!! */
+		ret = get_lib_symbol( "bh15", "is_gaussmeter",
+							  ( void ** ) &is_gaussmeter );
 
 	assert( ret != LIB_ERR_NO_LIB );      /* this can't happen....*/
 
@@ -137,7 +139,7 @@ int s_band_init_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! *is_init )
+	if ( ! *is_gaussmeter )
 	{
 		eprint( FATAL, "s_band: Problem in DEVICES section - driver for "
 				"field meter must be listed before S-band driver.\n" );
@@ -264,7 +266,26 @@ Var *magnet_setup( Var *v )
 		}
 	}
 
-	/* What about the other field measurement device ? */
+	if ( exist_device( "bh15" ) )
+	{
+		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too low for Bruker "
+					"BH15 field controller, minimum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+			THROW( EXCEPTION );
+		}
+        
+		if ( VALUE( v ) > S_BAND_WITH_BH15_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Start field (%lf G) too high for Bruker "
+					"BH15 field controller, maximum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+			THROW( EXCEPTION );
+		}
+	}
 
 	if ( VALUE( v->next ) < S_BAND_MIN_FIELD_STEP )
 	{
@@ -310,7 +331,26 @@ Var *set_field( Var *v )
 		}
 	}
 
-	/* What about the other field measurement device ? !!!!!!!!!!!!!*/
+	if ( exist_device( "bh15" ) )
+	{
+		if ( VALUE( v ) < S_BAND_WITH_BH15_MIN_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too low for Bruker BH15 "
+					"field controller, minimum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_BH15_MIN_FIELD );
+			THROW( EXCEPTION );
+		}
+        
+		if ( magnet.field > S_BAND_WITH_BH15_MAX_FIELD )
+		{
+			eprint( FATAL, "%s:%ld: Field (%lf G) too high for Bruker BH15 "
+					"field controller, maximum is %d G.\n", Fname, Lc,
+					( double ) VALUE( v ),
+					( int ) S_BAND_WITH_BH15_MAX_FIELD );
+			THROW( EXCEPTION );
+		}
+	}
 
 	if ( TEST_RUN )
 		return vars_push( FLOAT_VAR, VALUE( v ) );
@@ -318,8 +358,8 @@ Var *set_field( Var *v )
 	{
 		if ( ! magnet_goto_field( VALUE( v ) ) )
 		{
-			eprint( FATAL, "%s:%ld: Can't reach requested field of %lf G.\n",
-					Fname, Lc, ( double ) VALUE( v ) );
+			eprint( FATAL, "Can't reach requested field of %lf G.\n",
+					VALUE( v ) );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, magnet.act_field );
@@ -379,6 +419,34 @@ Var *sweep_down( Var *v )
 		magnet.target_field -= magnet.field_step;
 		return vars_push( FLOAT_VAR, magnet.target_field );
 	}
+}
+
+
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+Var *reset_field( Var *v )
+{
+	v = v;
+
+	if ( ! magnet.is_field )
+	{
+		eprint( FATAL, "%s:%ld: Start field has not been defined.\n",
+				Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! TEST_RUN )
+	{
+		magnet_goto_field( magnet.field );
+		return vars_push( FLOAT_VAR, magnet.act_field );
+	}
+	else
+	{
+		magnet.target_field = magnet.field;
+		return vars_push( FLOAT_VAR, magnet.target_field );
+	}
+
 }
 
 

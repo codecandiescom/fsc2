@@ -131,7 +131,8 @@ void xforms_init( int *argc, char *argv[] )
 	fl_set_browser_fontsize( main_form->error_browser, FL_NORMAL_SIZE );
 	fl_set_browser_fontstyle( main_form->error_browser, FL_FIXED_STYLE );
 
-	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE, FL_FULLBORDER, "fsc2" );
+	fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
+				  FL_FULLBORDER, "fsc2" );
 
 	/* Create the form for running experiments */
 
@@ -402,7 +403,7 @@ void test_file( FL_OBJECT *a, long b )
 	static bool user_break = UNSET;
 	struct stat file_stat;
 
-	a = a;
+	a->u_ldata	= 0;
 	b = b;
 
 	/* While program is being tested the test can be aborted by pressing the
@@ -436,6 +437,11 @@ void test_file( FL_OBJECT *a, long b )
 	stat( in_file, &file_stat );
 	if ( in_file_mod != file_stat.st_mtime )
 	{
+		if ( 1 == fl_show_choice( "EDL file on disk has changed.",
+								  "Re-read file ?",
+								  "",
+								  2, "Abort", "Ok", "", 1 ) )
+			return;
 		load_file( main_form->browser, 1 );
 		if ( ! is_loaded )
 			return;
@@ -445,12 +451,21 @@ void test_file( FL_OBJECT *a, long b )
 	   which serves as a stop button for the test - so all the others got to
 	   be deactivated while the test is run */
 
+	fl_clear_browser( main_form->error_browser );
+
 	fl_deactivate_object( main_form->Load );
+	fl_set_object_lcol( main_form->Load, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->reload );
+	fl_set_object_lcol( main_form->reload, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->Edit );
+	fl_set_object_lcol( main_form->Edit, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->device_button );
+	fl_set_object_lcol( main_form->device_button, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->run );
+	fl_set_object_lcol( main_form->run, FL_INACTIVE_COL );
 	fl_deactivate_object( main_form->quit );
+	fl_set_object_lcol( main_form->quit, FL_INACTIVE_COL );
+	fl_set_object_label( main_form->test_file, "Stop Test" );
 
 	user_break = UNSET;
 	running_test = SET;
@@ -458,16 +473,29 @@ void test_file( FL_OBJECT *a, long b )
 	running_test = UNSET;
 
 	if ( ! user_break )
+	{
 		is_tested = SET;                  /* show that file has been tested */
+		a->u_ldata = 0;
+	}
 	else
+	{
+		a->u_ldata = 1;
 		user_break = UNSET;
+	}
 
+	fl_set_object_label( main_form->test_file, "Test" );
 	fl_activate_object( main_form->Load );
+	fl_set_object_lcol( main_form->Load, FL_BLACK );
 	fl_activate_object( main_form->reload );
+	fl_set_object_lcol( main_form->reload, FL_BLACK );
 	fl_activate_object( main_form->Edit );
+	fl_set_object_lcol( main_form->Edit, FL_BLACK );
 	fl_activate_object( main_form->device_button );
+	fl_set_object_lcol( main_form->device_button, FL_BLACK );
 	fl_activate_object( main_form->run );
+	fl_set_object_lcol( main_form->run, FL_BLACK );
 	fl_activate_object( main_form->quit );
+	fl_set_object_lcol( main_form->quit, FL_BLACK );
 }
 
 
@@ -488,7 +516,11 @@ void run_file( FL_OBJECT *a, long b )
 	}
 
 	if ( ! is_tested )              /* test file if not already done */
-		test_file( NULL, 1 );
+	{
+		test_file( main_form->test_file, 1 );
+		if ( main_form->test_file->u_ldata == 1 )  /* user break ? */
+			return;
+	}
 
 	if ( ! state )               /* quit if program failed the test */
 	{
@@ -499,7 +531,6 @@ void run_file( FL_OBJECT *a, long b )
 	/* Finally start the experiment */
 
 	run( );
-
 }
 
 
@@ -642,13 +673,8 @@ void new_data_callback( FL_OBJECT *a, long b )
 {
 	a = a;
 	b = b;
-/*
-	for ( ; m.act_point_drawn < m.act_point; ++m.act_point_drawn )
-		m.y[ m.act_point_drawn ] = ( float ) m.data[ m.act_point_drawn ];
-
-	fl_set_xyplot_data( run_form->xy_plot, m.x, m.y, ( int ) m.max_points,
-						NULL, NULL, NULL );
-*/
+	reader( );
+	kill( child_pid, DO_SEND );
 }
 
 

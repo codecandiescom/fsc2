@@ -79,7 +79,9 @@ input:   /* empty */
        | input line eol
 ;
 
-eol:     ';'                       { assert( Var_Stack == NULL ); }
+eol:     ';'                       { assert( Var_Stack == NULL );
+                                     if ( do_quit || Is_Written ) 
+                                         YYACCEPT; }
        | '}'                       { assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
 

@@ -30,7 +30,6 @@ extern void prim_exprestart( FILE *prim_expin );
 static void prim_loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
-static void save_restore_variables( bool flag );
 
 
 
@@ -506,7 +505,8 @@ void prim_exp_run( void )
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
-			fl_check_only_forms( );
+			if ( ! just_testing && prg_length % 16 )
+				fl_check_only_forms( );
 
 			switch ( cur_prg_token->token )
 			{
@@ -593,6 +593,7 @@ void prim_exp_run( void )
 	OTHERWISE
 	{
 		Fname = NULL;
+		save_restore_pulses( UNSET );
 		save_restore_variables( UNSET );
 		TEST_RUN = UNSET;
 		PASSTHROU( );
@@ -621,7 +622,9 @@ int prim_exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		fl_check_only_forms( );
+		if ( TEST_RUN && ! just_testing &&
+			 ( cur_prg_token - prg_token ) % 16 )
+			fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
@@ -693,8 +696,6 @@ int conditionlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		fl_check_only_forms( );
-
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
 

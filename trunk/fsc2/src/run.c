@@ -9,7 +9,6 @@ extern int prim_exp_runparse( void );     /* from prim_exp__run_parser.y */
 void new_data_handler( int sig_type, void *data );
 void quitting_handler( int sig_type, void *data );
 void run_sigchld_handler( int sig_type, void *data );
-bool get_data_from_pipe( int rd );
 void init_exp_grafics( void );
 FILE *get_save_file( void );
 void clear_up_after_measurement( void );
@@ -27,8 +26,6 @@ bool do_measurement( void );
 
 /* Global variables used by parent, child and signal handlers */
 
-int child_pid = 0;           /* pid of child */
-int pd[ 2 ];                 /* pipe descriptors */
 bool is_data_saved;
 bool child_is_ready;
 FILE *tf = NULL;
@@ -90,6 +87,7 @@ bool run( void )
 
 	/* Run all the experiment hooks - on failure reset GPIB bus */
 
+	exit_hooks_are_run = UNSET;
 	TRY
 	{
 		run_exp_hooks( );
@@ -97,6 +95,7 @@ bool run( void )
 	}
 	OTHERWISE
 	{
+		run_exit_hooks( );
 		gpib_shutdown( );
 		set_buttons( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
@@ -117,7 +116,9 @@ bool run( void )
     if ( pipe( pd ) != 0 )                 /* try to open pipe */
 	{
 		eprint( FATAL, "Not enough file handles to run experiment." );
-		gpib_shutdown( );
+		run_exit_hooks( );
+		if ( need_GPIB )
+			gpib_shutdown( );
 		is_data_saved = SET;
 		clear_up_after_measurement( );
 		return FAIL;
@@ -147,7 +148,10 @@ bool run( void )
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* start child */
+	{
+		I_am = CHILD;
 		run_child( );
+	}
 
 	if ( child_pid != -1 )                  /* return if fork() succeeded */
 		return OK;
@@ -164,9 +168,11 @@ bool run( void )
 			break;
 	}
 
-	gpib_shutdown( );
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
+	run_exit_hooks( );
+	if ( need_GPIB )
+		gpib_shutdown( );
 	stop_measurement( NULL, 1 );
 	is_data_saved = SET;
 	clear_up_after_measurement( );
@@ -189,9 +195,6 @@ bool run( void )
 
 void new_data_handler( int sig_type, void *data )
 {
-	static bool need_more_data;
-
-
 	data = data;
 
 	if ( sig_type != NEW_DATA )
@@ -200,15 +203,10 @@ void new_data_handler( int sig_type, void *data )
 	if ( ! child_is_ready )         /* is this the very first signal ? */
 	{
 		child_is_ready = SET;
-		need_more_data = SET;
+		kill( child_pid, DO_SEND );
 	}
 	else
-	{
-		if ( need_more_data )
-			need_more_data = get_data_from_pipe( pd[ 0 ] );
-	}
-
-	kill( child_pid, DO_SEND );
+		fl_trigger_object( run_form->redraw_dummy);
 }
 
 
@@ -298,42 +296,21 @@ void stop_measurement( FL_OBJECT *a, long b )
 		return;
 	}
 
-	close( pd[ 0 ] );               /* close also read end of pipe */
+	close( pd[ READ ] );               /* close also end of pipe */
+	close( pd[ WRITE ] );              /* close also write end of pipe */
 	fl_remove_signal_callback( NEW_DATA );
 	fl_remove_signal_callback( QUITTING );
 
 	/* reset all the devices and finally the GPIB bus */
 
-	gpib_shutdown( );
+	run_exit_hooks( );
+	if ( need_GPIB )
+		gpib_shutdown( );
 
 	fl_activate_object( run_form->save );
 	fl_set_object_lcol( run_form->save, FL_BLACK );
 	fl_set_object_label( run_form->stop, "Quit" );
 	fl_set_cursor( FL_ObjWin( run_form->stop ), XC_left_ptr );
-}
-
-
-/*-------------------------------------------------------------------*/
-/* get_data_from_pipe() reads the next data point from the pipe into */
-/* the data array and returns 1 as long as more data are needed.     */
-/*-------------------------------------------------------------------*/
-
-bool get_data_from_pipe( int rd )
-{
-	/* If no data are needed return immediately */
-/*
-	if ( m.act_point >= m.max_points )
-		return UNSET;
-*/
-	/* Otherwise read data from pipe, force a redraw of the data by
-	   triggering an invisible button via the buttons callback function
-	   and return value indicating if more data are needed */
-/*
-	read( rd, ( void * ) ( m.data + m.act_point++ ), sizeof( DataType ) );
-	fl_trigger_object( run_form->redraw_dummy );
-	return m.act_point < m.max_points;
-*/
-	return OK;
 }
 
 
@@ -355,10 +332,13 @@ void init_exp_grafics( void )
 
 void save_data( FL_OBJECT *a, long b )
 {
-	FILE *sf;
+/*	FILE *sf;
 	long i;
 	int key;
+*/
 
+	a = a;
+	b = b;
 
 	/* First, get a file name for saving the data */
 /*
@@ -484,13 +464,7 @@ void clear_up_after_measurement( void )
 		fclose( tf );
 		tf = NULL;
 	}
-/*
-	if ( m.dim != -1 )
-	{
-		free( m.data );
-		free( m.x );
-	}
-*/
+
 	fl_set_object_label( run_form->stop, "Stop" );
 	if ( fl_form_is_visible( run_form->run ) )
 		fl_hide_form( run_form->run );
@@ -546,50 +520,55 @@ int return_status;
 
 /*------------------------------------------------------------------*/
 /* run_child() is the child process for doing the real measurement. */
-/* It closes the read end of the pipe, sets up the signal handlers  */
-/* and its global variables and then goes into an (infinite) loop.  */
-/* In the loop it first sends a NEW_DATA signal (by the very first  */
-/* signal telling the parent that it is ready to accept signals,    */
-/* later on to signal available data). Then it sets the DO_QUIT     */
-/* signal handler to the handler that just sets a global variable   */
-/* and starts to try to acquire new data. If this fails or the      */
-/* program reached its end (indicated by a zero return of the       */
-/* function 'do_measurement) or it received a DO_QUIT signal in the */
-/*  meantime (as indicated by the global variable 'do_quit') it     */
-/* exits. After switching back to the "real" DO_QUIT" handler as    */
-/* the next and final step of the loop it waits for the global      */
-/* variable indicating a DO_SEND signal to become true - this is    */
-/* necessary in order to avoid loosing data by flooding the parent  */
-/* with data and signals it might not be able to handle.            */
+/* It sets up the signal handlers and its global variables and then */
+/* goes into an (infinite) loop. In the loop it first sends a       */
+/* NEW_DATA signal (by this first signal it just tells the parent   */
+/* that it's ready to accept signals, later on to signal available  */
+/* data). Then it sets the DO_QUIT signal handler to the handler    */
+/* that just sets a global variable and starts to try to acquire    */
+/* data. If this fails or the program reached its end (indicated    */
+/* by a zero return of the function 'do_measurement) or it received */
+/* a DO_QUIT signal in the  meantime (as indicated by the global    */
+/* variable 'do_quit') it exits. After switching back to the "real" */
+/* DO_QUIT" handler as the next and final step of the loop it waits */
+/* for the global variable indicating a DO_SEND signal to become    */
+/* true - this is necessary in order to avoid loosing data by       */
+/* flooding the parent with data and signals it might not be able   */
+/* to handle.                                                       */
 /*------------------------------------------------------------------*/
 
 void run_child( void )
 {
+	int dummy = 1;
+
 	/* Set up pointers and global variables used with the signal handlers,
-	   close read end of pipe and set handler for DO_SEND signals */
+	   and set handler for DO_SEND signals */
 
 	return_status = OK;
 	cur_prg_token = prg_token;
 	do_send = do_quit = UNSET;
 	signal( DO_SEND, do_send_handler );
 
+//	while ( dummy );
+
 	while ( 1 )
 	{
 		signal( DO_QUIT, do_quit_handler_1 );
-		kill( getppid( ), NEW_DATA );
+		kill( getppid( ), NEW_DATA );             /* tell parent we're ready */
+
+		while ( ! do_send )                       /* wait for parents reply */
+			pause( );
+		do_send = UNSET;
 
 		if ( ! do_measurement( ) || do_quit )
 		{
-			if ( ! do_quit && cur_prg_token != NULL )
+			if ( cur_prg_token != prg_token + prg_length && ! do_quit )
 				return_status = FAIL;             /* signal hardware failure */
 			do_quit_handler_0( DO_QUIT );
 		}
 
 		signal( DO_QUIT, do_quit_handler_0 );
 
-		while ( ! do_send )
-			pause( );
-		do_send = UNSET;
 	}
 }
 
@@ -627,7 +606,8 @@ void do_quit_handler_0( int sig_type )
 	if ( sig_type != DO_QUIT )
 		return;
 
-	close( pd[ 1 ] );                       /* close also write end of pipe */
+	close( pd[ READ ] );                    /* close read end of pipe */
+	close( pd[ WRITE ] );                   /* close also write end of pipe */
 	signal( DO_QUIT, do_quit_handler_1 );     /* set (other) signal handler */
 	do_quit = UNSET;
 	kill( getppid( ), QUITTING );    /* signal parent that child is exiting */
@@ -664,15 +644,17 @@ bool do_measurement( void )
 	Prg_Token *cur;
 
 
-	if ( Fname != NULL )
-		T_free( Fname );
-	Fname = NULL;
-
 	TRY
 	{
+		if ( cur_prg_token == prg_token )
+		{
+			save_restore_variables( SET );
+			save_restore_pulses( SET );
+		}
+
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length &&
-				! do_quit )
+				! do_quit && ! Is_Written )
 		{
 			switch ( cur_prg_token->token )
 			{
@@ -756,7 +738,20 @@ bool do_measurement( void )
 
 		TRY_SUCCESS;
 	}
+	OTHERWISE
+	{
+		save_restore_pulses( UNSET );
+		save_restore_variables( UNSET );
+		return FAIL;
+	}
 
-	Fname = NULL;
-	return OK;
+	if ( Is_Written )
+	{
+		Is_Written = UNSET;
+		return OK;
+	}
+	
+	save_restore_pulses( UNSET );
+	save_restore_variables( UNSET );
+	return FAIL;
 }
