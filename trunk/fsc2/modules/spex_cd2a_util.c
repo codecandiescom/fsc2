@@ -168,7 +168,8 @@ bool spex_cd2a_store_state( void )
 
 	if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
 	{
-		print( SEVERE, "Can't store state data in '%s'.\n", fn );
+		print( SEVERE, "Can't store state data in '%s', can't open file "
+			   "for writing.\n", fn );
 		return FAIL;
 	}
 

@@ -87,7 +87,7 @@ void spex_cd2a_init( void )
 			if ( 1 != show_choices( "Please press the \"REMOTE\" button at\n"
 									"the console to allow computer control\n"
 									"of the monochromator.",
-									1, "Abort", "Done", NULL, 1 ) )
+									2, "Abort", "Done", NULL, 1 ) )
 				continue;
 			SPEX_CD2A_THROW( EXCEPTION );
 			
@@ -588,7 +588,6 @@ static size_t spex_cd2a_write( int type, const char *mess )
 		 <= 0 )
 	{
 		T_free( tmx );
-		fprintf( stderr, "Write Failure\n" );
 		spex_cd2a_comm_fail( );
 	}
 
@@ -621,19 +620,13 @@ static void spex_cd2a_read_ack( void )
 	do {
 		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
 											1000000, SET ) ) <= 0 )
-		{
-			fprintf( stderr, "Read 1 Failure\n" );
 			spex_cd2a_comm_fail( );
-		}
 	} while ( *buf == CAN );
 
 	if ( *buf != NAK &&
 		 ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
 										1, 1000000, SET ) ) <= 0 )
-	{
-		fprintf( stderr, "Read 2 Failure\n" );
 		spex_cd2a_comm_fail( );
-	}
 
 	/* A <NAK> character means that there are communication problems */
 
@@ -668,20 +661,14 @@ static void spex_cd2a_read_ack( void )
 			if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
 												len - count, 1000000, SET ) )
 				 <= 0 )
-			{
-				fprintf( stderr, "Read 3 Failure\n" );
 				spex_cd2a_comm_fail( );
-			}
 
 			count += received;
 			len -= received;
 		}
 
 		if ( buf[ 4 ] != EOT )
-		{
-			fprintf( stderr, "Read 4 Failure\n" );
 			spex_cd2a_comm_fail( );
-		}
 
 		buf[ 4 ] = '\0';
 		if ( spex_cd2a_do_print_message )
@@ -715,10 +702,7 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
 		if ( ( already_read +=
 			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
 							  to_be_read - already_read, 1000000, SET ) ) < 0 )
-		{
-			fprintf( stderr, "Read 5 Failure\n" );
 			spex_cd2a_comm_fail( );
-		}
 		stop_on_user_request( );
 
 		/* Throw away <CAN> characters, the device sends them sometimes in the

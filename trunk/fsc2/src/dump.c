@@ -236,7 +236,7 @@ void DumpStack( UNUSED_ARG void *crash_address )
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 
-static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
+static void write_dump( int *pipe_fd, int *answer_fd, int k, void *addr )
 {
 	char buf[ 128 ];
 	char c;
@@ -250,26 +250,34 @@ static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr )
 	   infomation to make it possible to figure out the exact location of
 	   the error by manually using addr2line on the library. */
 
-	for ( cd1 = cd2 = EDL.Device_List; cd2 != NULL; cd2 = cd2->next )
-	{
-		if ( ! cd2->is_loaded )
-			continue;
-
-		if ( ( int ) addr > * ( int * ) cd1->driver.handle &&
-			 ( int ) addr < * ( int * ) cd2->driver.handle )
+	for ( cd1 = EDL.Device_List; cd1 != NULL; cd1 = cd1->next )
+		if ( cd1->is_loaded )
 			break;
 
-		cd1 = cd2;
-	}
-
-	if ( cd1 != NULL && cd1->is_loaded &&
-		 ( int ) addr > * ( int * ) cd1->driver.handle )
+	if ( cd1 != NULL )
 	{
-		sprintf( buf, "#%-3d %-10p  %p in %s.so\n", k, addr,
-				 ( void * ) ( ( int ) addr - * ( int * ) cd1->driver.handle ),
+		for ( cd2 = cd1->next; cd2 != NULL; cd2 = cd2->next )
+		{
+			if ( ! cd2->is_loaded )
+				continue;
+
+			if ( ( int ) addr >= * ( int * ) cd1->driver.handle &&
+				 ( int ) addr < * ( int * ) cd2->driver.handle )
+				break;
+
+			cd1 = cd2;
+		}
+
+		if ( cd1->is_loaded &&
+			 ( int ) addr > * ( int * ) cd1->driver.handle )
+		{
+			sprintf( buf, "#%-3d %-10p  %p in %s.so\n", k, addr,
+					 ( void * ) ( ( int ) addr
+								  - * ( int * ) cd1->driver.handle ),
 					 cd1->name );
-		write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
-		return;
+			write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+			return;
+		}
 	}
 
 	sprintf( buf, "%p\n", addr );
