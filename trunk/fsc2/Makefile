@@ -112,7 +112,7 @@ install:
 	install -d $(libdir)
 	install -d $(auxdir)
 	install -d $(docdir)
-	$(MAKE) -c utils install
+	$(MAKE) -C utils install
 	install -m 755 -o fsc2 -g fsc2 -s fsc2_clean $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
