@@ -7,10 +7,13 @@
 #include "gpib.h"
 
 
+static void hp8647a_comm_failure( void );
+
+
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static bool hp8647a_init( const char *name )
+bool hp8647a_init( const char *name )
 {
 	double att;
 
@@ -65,7 +68,7 @@ static bool hp8647a_init( const char *name )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static void hp8647a_finished( void )
+void hp8647a_finished( void )
 {
 	gpib_local( hp8647a.device );
 	if ( hp8647a.att_table != NULL )
@@ -79,7 +82,7 @@ static void hp8647a_finished( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static bool hp8647a_set_output_state( bool state )
+bool hp8647a_set_output_state( bool state )
 {
 	char cmd[ 100 ];
 
@@ -95,7 +98,7 @@ static bool hp8647a_set_output_state( bool state )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static bool hp8647a_get_output_state( void )
+bool hp8647a_get_output_state( void )
 {
 	char buffer[ 10 ];
 	long length = 10;
@@ -112,7 +115,7 @@ static bool hp8647a_get_output_state( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static double hp8647a_set_frequency( double freq )
+double hp8647a_set_frequency( double freq )
 {
 	char cmd[ 100 ];
 
@@ -130,7 +133,7 @@ static double hp8647a_set_frequency( double freq )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static double hp8647a_get_frequency( void )
+double hp8647a_get_frequency( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
@@ -147,7 +150,7 @@ static double hp8647a_get_frequency( void )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static double hp8647a_set_attenuation( double att )
+double hp8647a_set_attenuation( double att )
 {
 	char cmd[ 100 ];
 
@@ -165,7 +168,7 @@ static double hp8647a_set_attenuation( double att )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static double hp8647a_get_attenuation( void )
+double hp8647a_get_attenuation( void )
 {
 	char buffer[ 100 ];
 	long length = 100;
