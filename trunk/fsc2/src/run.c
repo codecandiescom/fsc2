@@ -13,7 +13,7 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 static void new_data_handler( int sig_type );
 static void quitting_handler( int sig_type, void *data );
-static void run_sigchld_handler( int sig_type, void *data );
+static void run_sigchld_handler( int sig_type );
 static void set_buttons_for_run( int active );
 
 
@@ -111,16 +111,17 @@ bool run( void )
 	child_is_ready = child_is_quitting = UNSET;
 
 	/* Set the signal handlers - for NEW_DATA signals we can't use XForms
-	   signal handlers because they become blocked by when the display is busy
-	   and no SEND_DATA is send back to the child, effectively stopping it
-	   completely, so we have to use the traditional approach for this type
-	   of signal */
+	signal handlers because they become blocked by when the display is busy
+	and no SEND_DATA is send back to the child, effectively stopping it
+	completely, so we have to use the traditional approach for this type of
+	signal. Also with SIGCHLD there was a problem - the XForms signal andler
+	wasn't reliable enough, so... */
 
 	signal( NEW_DATA, new_data_handler );
 	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
 
 	fl_remove_signal_callback( SIGCHLD );
-	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
+	signal( SIGCHLD, run_sigchld_handler );
 
 	fl_set_idle_callback( new_data_callback, NULL );
 
@@ -230,17 +231,17 @@ void quitting_handler( int sig_type, void *data )
 /* of its callback function run_sigchld_callback().                  */
 /*-------------------------------------------------------------------*/
 
-void run_sigchld_handler( int sig_type, void *data )
+void run_sigchld_handler( int sig_type )
 {
 	int return_status;
-	int no;
+	int pid;
 
-
-	data = data;
 
 	assert( sig_type == SIGCHLD );
 
-	if ( ( no = wait( &return_status ) ) != child_pid )
+	signal( SIGCHLD, run_sigchld_handler );
+
+	if ( ( pid = wait( &return_status ) ) != child_pid )
 		return;                       /* if some other child process died... */
 
 #if defined ( DEBUG )
@@ -250,7 +251,7 @@ void run_sigchld_handler( int sig_type, void *data )
 #endif
 
 	child_pid = 0;                          /* the child is dead... */
-	fl_remove_signal_callback( SIGCHLD );
+//	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
 	run_form->sigchld->u_ldata = ( long ) return_status;
