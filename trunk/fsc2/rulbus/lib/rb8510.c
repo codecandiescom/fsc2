@@ -34,7 +34,7 @@ struct RULBUS_DAC12_CARD {
 	int handle;
 	unsigned short int v;
 	double dV;
-	double Vmax;
+	double Vmin;
 	double Vmax;
 };
 
