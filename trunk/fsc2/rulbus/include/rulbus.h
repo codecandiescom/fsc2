@@ -42,7 +42,10 @@ extern int rulbus_errno;
 int rulbus_adc12_num_channels( int handle );
 int rulbus_adc12_set_channel( int handle, int channel );
 int rulbus_adc12_set_gain( int handle, int gain );
+int rulbus_adc12_has_external_trigger( int handle );
 int rulbus_adc12_set_trigger_mode( int handle, int mode );
+int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
+							 double *dV );
 int rulbus_adc12_check_convert( int handle, double *volts );
 int rulbus_adc12_convert( int handle, double *volts );
 
@@ -58,9 +61,8 @@ int rulbus_adc12_convert( int handle, double *volts );
 /* Functions and definitions for the 12-bit DAC card module (RB8510) */
 
 int rulbus_dac12_set_voltage( int handle, double volts );
-
-#define RULBUS_DAC12_UNIPOLAR       0
-#define RULBUS_DAC12_BIPOLAR        1
+int rulbus_dac12_properties( int handle, double *Vmax, double *Vmin,
+							 double *dV );
 
 
 /* Functions and definitions for the delay card module (RB8514) */

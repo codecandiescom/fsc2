@@ -65,6 +65,10 @@ typedef enum
 #endif
 
 
+#define RULBUS_UNIPOLAR       0
+#define RULBUS_BIPOLAR        1
+
+
 #define RULBUS_MAX_CARDS           256    /* maximum total number of cards */
 #define RULBUS_MAX_RACK_NO        0x0f    /* maximum number of racks */
 #define RULBUS_MAX_CARDS_IN_RACK     8    /* maximum number of cards in rack */
@@ -84,7 +88,7 @@ typedef enum
 #define RB8515_WIDTH 1
 
 
-#define RULBUS_ADC12_MAX_CHANNELS   16    /* there are also some with only 8 */
+#define RULBUS_ADC12_MAX_CHANNELS   8    /* there are also some with only 4 */
 
 
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
@@ -98,8 +102,9 @@ struct RULBUS_CARD_LIST {
 	struct RULBUS_CARD_HANDLER *handler;
 	bool in_use;
 	int nchan;
-	int range;
+	double range;
 	int polar;
+	int exttrg;
 };
 
 extern RULBUS_CARD_LIST *rulbus_card;

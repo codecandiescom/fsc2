@@ -72,10 +72,9 @@ struct RULBUS_ADC12_CARD {
 
 #define ADC12_DELAY                    18            /* 18 us */
 
-/* The possible ranges (in thenths of a mV) - the first two are for unipolar
-   cards, the second two for bipolar cards) */
+/* The possible ranges (in units of 10 mV) */
 
-static long ranges = { 102375, 100000, 51175, 102350 };
+static long ranges[ ] = { 1024, 1000, 512, 500 };
 
 static RULBUS_ADC12_CARD *rulbus_adc12_card = NULL;
 static int rulbus_num_adc12_cards = 0;
@@ -124,9 +123,98 @@ void rulbus_adc12_exit( void )
 int rulbus_adc12_card_init( int handle )
 {
 	RULBUS_ADC12_CARD *tmp;
-	int retval;
+	int retval = RULBUS_OK;
 	unsigned char dummy;
+	unsigned int i;
+	double Vmin;
+	double dV;
 
+
+	/* Check if the number of channels of the card has been set and is
+	   reasonable */
+
+	if ( rulbus_card[ handle ].nchan < 0 )
+		return RULBUS_MIS_CHN;
+	else if ( rulbus_card[ handle ].nchan > RULBUS_ADC12_MAX_CHANNELS )
+		return RULBUS_CHN_INV;
+		
+	/* Check that the polarity is specified */
+
+	if ( rulbus_card[ handle ].polar == -1 )
+		return RULBUS_NO_POL;
+
+	/* Check the range setting - there are only 4 maximum input voltages
+	   and from exact value we can also determine if this is a bi- or
+	   unipolar card */
+
+	if ( rulbus_card[ handle ].range < 0.0 )
+		return RULBUS_NO_RNG;
+
+	for ( i = 0; i < sizeof ranges / sizeof *ranges; i++ )
+		if ( ranges[ i ] ==
+			 		( int ) floor( rulbus_card[ handle ].range * 1e2 + 0.5 ) )
+			break;
+	
+	switch ( i )
+	{
+		case 0 :
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 2.5e-3;
+			}
+			else
+			{
+				Vmin = -10.24;
+				dV = 5.0e-3;
+			}
+			break;
+
+		case 1:
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 10.0 / ADC12_RANGE;
+			}
+			else
+			{
+				Vmin = -10.0;
+				dV = 20.0 / ADC12_RANGE;
+			}
+			break;
+
+		case 2 :
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 1.25e-3;
+			}
+			else
+			{
+				Vmin = -5.12;
+				dV = 2.5e-3;
+			}
+			break;
+
+		case 3 :
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 5.0 / ADC12_RANGE;
+			}
+			else
+			{
+				Vmin = -5.0;
+				dV = 10.0 / ADC12_RANGE;
+			}
+			break;
+
+		default :
+			return RULBUS_INV_RNG;
+	}
+
+	if ( rulbus_card[ handle ].exttrg < 0 )
+		return RULBUS_EXT_NO;
 
 	tmp = realloc( rulbus_adc12_card,
 				   ( rulbus_num_adc12_cards + 1 ) * sizeof *tmp );
@@ -138,57 +226,9 @@ int rulbus_adc12_card_init( int handle )
 	tmp += rulbus_num_adc12_cards++;
 
 	tmp->handle = handle;
-
-	/* Check if the number of channels of the card has been set and is
-	   reasonable */
-
-	if ( rulbus_card[ handle ].nchan < 0 )
-		return RULBUS_MIS_CHN;
-	else if ( rulbus_card[ handle ].nchan > RULBUS_ADC12_MAX_CHANNELS )
-		return RULBUS_CHN_INV;
-		
 	tmp->nchan = rulbus_card[ handle ].nchan;
-
-	/* Check the range setting - there are only 4 maximum input voltages
-	   and from exact value we can also determine if this is a bi- or
-	   unipolar card */
-
-	if ( rulbus_card[ handle ].range < 0.0 )
-		return RULBUS_NO_RNG;
-
-	for ( i = 0; i < 4; i++ )
-		if ( ranges[ i ] ==
-			 		( int ) floor( rulbus_card[ handle ].range * 1e4 + 0.5 ) )
-			break;
-	
-	if ( i == 4 )
-		return RULBUS_INV_RNG;
-
-	switch ( i )
-	{
-		case 0 :
-			tmp->Vmin = 0.0;
-			tmp->dV = 2.5e-3;
-			break;
-
-		case 1:
-			tmp->Vmin = 0.0;
-			tmp->dV = 10.0 / ADC12_RANGE;
-			break;
-
-		case 2 :
-			tmp->Vmin = -5.12 V;
-			tmp->dV = 2.5e-3;
-			break;
-
-		case 3 :
-			tmp->Vmin = -10.24;
-			tmp->dV = 5.0e-3;
-	}
-
-	if ( rulbus_card[ handle ].exttrg < 0 )
-		return RULBUS_EXT_NO;
-
+	tmp->Vmin = Vmin;
+	tmp->dV = dV;
 	tmp->exttrg = rulbus_card[ handle ].exttrg;
 	tmp->gain = 1.0;
 	tmp->trig_mode = RULBUS_ADC12_INT_TRIG;
@@ -198,13 +238,29 @@ int rulbus_adc12_card_init( int handle )
 	   trigger and no interrupts */
 
 	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) ) < 0 )
+	{
+		tmp = realloc( rulbus_adc12_card,
+					   --rulbus_num_adc12_cards * sizeof *tmp );
+		if ( tmp == NULL )
+			return RULBUS_NO_MEM;
+		rulbus_adc12_card = tmp;
 		return retval;
+	}
 
 	usleep( ADC12_DELAY );      /* allow for settling time of gain switching */
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
 
-	return rulbus_read( handle, DATA_LOW_ADDR, &dummy, 1 );
+	if ( ( retval = rulbus_read( handle, DATA_LOW_ADDR, &dummy, 1 ) ) < 0 )
+	{
+		tmp = realloc( rulbus_adc12_card,
+					   --rulbus_num_adc12_cards * sizeof *tmp );
+		if ( tmp == NULL )
+			return RULBUS_NO_MEM;
+		rulbus_adc12_card = tmp;
+	}
+
+	return retval;
 }
 	
 
@@ -396,6 +452,34 @@ int rulbus_adc12_set_trigger_mode( int handle, int mode )
 }
 
 
+/*---------------------------------------------------------------------*
+ * Function to determine the minimum and maximum input voltage as well
+ * as the coltage resolution of the card.
+ *---------------------------------------------------------------------*/
+
+int rulbus_adc12_properties( int handle, double *Vmax, double *Vmin,
+							 double *dV )
+
+{
+	RULBUS_ADC12_CARD *card;
+
+
+	if ( ( card = rulbus_adc12_card_find( handle ) ) == NULL )
+		return RULBUS_INV_HND;
+
+	if ( Vmax )
+		*Vmax = card->dV * ADC12_RANGE + card->Vmin;
+
+	if ( Vmin )
+		*Vmin = card->Vmin;
+
+	if ( dV )
+		*dV = card->dV;
+
+	return RULBUS_OK;
+}
+
+
 /*----------------------------------------------------------------------*
  * Function for testing if a conversion is already finished. It returns
  * 1 and stores the voltage in what 'volts' points to if a conversion
@@ -441,7 +525,6 @@ int rulbus_adc12_check_convert( int handle, double *volts )
 	/* Calculate the voltage from the data we just received */
 
 	card->data = ( ( hi & STATUS_DATA_MASK ) << 8 ) | low;
-
 	*volts = ( card->dV * card->data - card->Vmin ) / card->gain;
 	return 1;
 }

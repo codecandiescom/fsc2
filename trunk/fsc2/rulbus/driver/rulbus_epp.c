@@ -449,10 +449,10 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 	/* Select the rack (if necessary) and then write the data */
 
 	if ( rulbus.rack != rulbus_arg->rack ) {
-		if ( rulbus.port->ops->epp_write_addr( rulbus.port,
-						       &rulbus_arg->rack,
+		if ( rulbus.port->ops->epp_write_addr( rulbus.port, &null,
 						       1, 0 ) != 1 ||
-		     rulbus.port->ops->epp_write_data( rulbus.port, &null,
+		     rulbus.port->ops->epp_write_data( rulbus.port,
+						       &rulbus_arg->rack,
 						       1, 0  ) != 1 ) {
 			if ( rulbus_arg->len > 1 )
 				kfree( data );
@@ -549,10 +549,10 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 	/* Select the rack (if necessary) and then read the data */
 
 	if ( rulbus.rack != rulbus_arg->rack ) {
-		if ( rulbus.port->ops->epp_write_addr( rulbus.port,
-						       &rulbus_arg->rack,
+		if ( rulbus.port->ops->epp_write_addr( rulbus.port, &null,
 						       1, 0 ) != 1 ||
-		     rulbus.port->ops->epp_write_data( rulbus.port, &null,
+		     rulbus.port->ops->epp_write_data( rulbus.port, 
+						       &rulbus_arg->rack,
 						       1, 0  ) != 1 ) {
 			if ( rulbus_arg->len > 1 )
 				kfree( data );

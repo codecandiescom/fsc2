@@ -39,12 +39,11 @@ struct RULBUS_DAC12_CARD {
 };
 
 
-/* Voltage resolutions and minimum voltages of DAC12 cards */
+/* Upper limit voltages the DACs can configured to */
 
-static double dV[ ] =   { 1.25e-3, 2.5e-3, 5.0e-3, 2.5e-3, 5.0e-3 };
-static double Vmin[ ] = { 0.0, 0.0, 0.0, -5.12, -10.24 };
+static double ranges[ ] = { 2000, 1000, 500, 2048, 1024, 512 };
 
-#define DAC12_MAX_VALUE      0x0FFF
+#define DAC12_RANGE  0x0FFF
 
 #define DAC12_MSB    0
 #define DAC12_LSB    1
@@ -97,7 +96,9 @@ void rulbus_dac12_exit( void )
 int rulbus_dac12_card_init( int handle )
 {
 	RULBUS_DAC12_CARD *tmp;
-	int index;
+	unsigned int i;
+	double Vmin;
+	double dV;
 
 
 	/* Evaluate the range and polarity settings for the card */
@@ -108,24 +109,81 @@ int rulbus_dac12_card_init( int handle )
 	if ( rulbus_card[ handle ].polar == -1 )
 		return RULBUS_NO_POL;
 
-	switch ( rulbus_card[ handle ].range )
+	for ( i = 0; i < sizeof ranges / sizeof *ranges; i++ )
+		if ( ranges[ i ] ==
+			 		( int ) floor( rulbus_card[ handle ].range * 1e2 + 0.5 ) )
+			break;
+	
+	switch ( i )
 	{
-		case 5 :
-			index = rulbus_card[ handle ].polar ? 3 : 0;
-			break;
-
-		case 10 :
-			index = rulbus_card[ handle ].polar ? 4 : 1;
-			break;
-
-		case 20 :
-			if ( rulbus_card[ handle ].polar == RULBUS_DAC12_BIPOLAR )
+		case 0 :
+			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
 				return RULBUS_INV_RNG;
-			index = 5;
+			Vmin = 0.0;
+			dV = 20.0 / DAC12_RANGE;
+			break;
+
+		case 1:
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 10.0 / DAC12_RANGE;
+			}
+			else
+			{
+				Vmin = -10.0;
+				dV = 20.0 / DAC12_RANGE;
+			}
+			break;
+
+		case 2 :
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 5.0 / DAC12_RANGE;
+			}
+			else
+			{
+				Vmin = -5.0;
+				dV = 10.0 / DAC12_RANGE;
+			}
+			break;
+
+		case 3 :
+			if ( rulbus_card[ handle ].polar != RULBUS_UNIPOLAR )
+				return RULBUS_INV_RNG;
+			Vmin = 0.0;
+			dV = 5.0e-3;
+			break;
+			
+		case 4:
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 2.5e-3;
+			}
+			else
+			{
+				Vmin = -10.24;
+				dV = 5.0e-3;
+			}
+			break;
+
+		case 5 :
+			if ( rulbus_card[ handle ].polar == RULBUS_UNIPOLAR )
+			{
+				Vmin = 0.0;
+				dV = 1.25e-3;
+			}
+			else
+			{
+				Vmin = -5.12;
+				dV = 2.5e-3;
+			}
 			break;
 
 		default :
-				return RULBUS_INV_RNG;
+			return RULBUS_INV_RNG;
 	}
 
 	tmp = realloc( rulbus_dac12_card,
@@ -138,10 +196,10 @@ int rulbus_dac12_card_init( int handle )
 	tmp += rulbus_num_dac12_cards++;
 
 	tmp->handle = handle;
-	tmp->dV = dV[ index ];
-	tmp->Vmin = Vmin[ index ];
-	tmp->Vmax = DAC12_MAX_VALUE * dV[ index ] + Vmin[ index ];
-	tmp->v = DAC12_MAX_VALUE + 1;
+	tmp->Vmin = Vmin;
+	tmp->dV = dV;
+	tmp->Vmax = DAC12_RANGE * tmp->dV + tmp->Vmin;
+	tmp->v = DAC12_RANGE + 1;
 
 	return RULBUS_OK;
 }
@@ -176,6 +234,32 @@ void rulbus_dac12_card_exit( int handle )
 		rulbus_dac12_card = card;
 
 	rulbus_num_dac12_cards--;
+}
+
+
+/*--------------------------------------------------*
+ * Function for enquiring about the DACs properties 
+ *--------------------------------------------------*/
+
+int rulbus_dac12_properties( int handle, double *Vmax, double *Vmin,
+							 double *dV )
+{
+	RULBUS_DAC12_CARD *card;
+
+
+	if ( ( card = rulbus_dac12_card_find( handle ) ) == NULL )
+		return RULBUS_INV_HND;
+
+	if ( Vmax )
+		*Vmax = card->Vmax;
+
+	if ( Vmin )
+		*Vmin = card->Vmin;
+
+	if ( dV )
+		*dV = card->dV;
+
+	return RULBUS_OK;
 }
 
 

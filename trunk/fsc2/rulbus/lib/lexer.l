@@ -34,6 +34,9 @@
 %{
 
 #include "parser.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
 unsigned int rulbus_column = 0;
 int rulbus_lex( void );
 static void count( void );
@@ -43,6 +46,9 @@ static void count( void );
 %}
 
 STRING   [\"\'][^\"\']*[\"\']
+INT         [0-9]+
+EXPO        [Ee][+-]?{INT}
+FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 		/*---------------*/
 %%		/*     RULES     */
@@ -59,6 +65,7 @@ STRING   [\"\'][^\"\']*[\"\']
 "nchan"    { count(); return NCHAN_TOKEN; }
 "range"    { count(); return RANGE_TOKEN; }
 "polar"    { count(); return POLAR_TOKEN; }
+"ext_trg"  { count(); return EXTTRG_TOKEN; }
 
 0[0-3][0-7]{0,2} {   /* octal number between 0 and 0377 */
 			   count( );
@@ -84,7 +91,13 @@ STRING   [\"\'][^\"\']*[\"\']
                return NUM_TOKEN;
            }
 
-[ \t\n]*   { count( ); } /* Skip white space */
+(FLOAT)    {
+	           count( );
+			   rulbus_lval.dval = atof( rulbus_text );
+			   return FLOAT_TOKEN;
+		   }
+
+[ \t\n]*   {   count( ); } /* Skip white space */
 
 {STRING}   {
                char *p;

@@ -44,8 +44,9 @@ static int set_name( const char *name );
 static int set_addr( unsigned int addr );
 static int set_type( unsigned int type );
 static int set_nchan( unsigned int chan );
-static int set_range( unsigned int range );
+static int set_range( double range );
 static int set_polar( const char *polar );
+static int set_exttrg( unsigned int exttrg );
 static int set_rack( void );
 static void rulbus_error( const char *s );
 
@@ -54,14 +55,16 @@ static void rulbus_error( const char *s );
 %union
 {
     unsigned int ival;
+	double dval;
     char *sval;
 }
 
 %token FILE_TOKEN RACK_TOKEN CARD_TOKEN NAME_TOKEN TYPE_TOKEN ADDR_TOKEN
 %token RANGE_TOKEN POLAR_TOKEN NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN
-%token NCHAN_TOKEN ERR_TOKEN
+%token NCHAN_TOKEN ERR_TOKEN FLOAT_TOKEN EXTTRG_TOKEN
 
 %type <ival> NUM_TOKEN CARD_TYPE_TOKEN
+%type <dval> FLOAT_TOKEN number
 %type <sval> STR_TOKEN
 
 
@@ -100,23 +103,31 @@ rdata:    /* empty */
 
 cdata:    /* empty */
 		| cdata NAME_TOKEN sep1 STR_TOKEN sep2
-										  { if ( ( ret =  set_name( $4 ) )  )
+										  { if ( ( ret = set_name( $4 ) )  )
 												return ret; }
 		| cdata ADDR_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret =  set_addr( $4 ) ) )
+										  { if ( ( ret = set_addr( $4 ) ) )
 												return ret; }
 		| cdata TYPE_TOKEN sep1 CARD_TYPE_TOKEN sep2
-										  { if ( ( ret =  set_type( $4 ) ) )
+										  { if ( ( ret = set_type( $4 ) ) )
 												return ret; }
 		| cdata NCHAN_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret =  set_nchan( $4 ) ) )
+										  { if ( ( ret = set_nchan( $4 ) ) )
 												return ret; }
-		| cdata RANGE_TOKEN sep1 NUM_TOKEN sep2
-										  { if ( ( ret =  set_range( $4 ) ) )
+		| cdata RANGE_TOKEN sep1 number sep2
+										  { if ( ( ret = set_range( $4 ) ) )
 												return ret; }
 		| cdata POLAR_TOKEN sep1 STR_TOKEN sep2
-										  { if ( ( ret =  set_polar( $4 ) ) )
+										  { if ( ( ret = set_polar( $4 ) ) )
 												return ret; }
+		| cdata EXTTRG_TOKEN sep1 NUM_TOKEN sep2
+										  { if ( ( ret = set_exttrg( $4 ) ) )
+												return ret; }
+;
+
+
+number:   NUM_TOKEN                        { $$ = ( double ) $1; }
+        | FLOAT_TOKEN                      { $$ = $1; }
 ;
 
 
@@ -184,7 +195,8 @@ static int new_card( void )
 	rulbus_card[ rulbus_num_cards ].addr = RULBUS_INVALID_ADDR;
 	rulbus_card[ rulbus_num_cards ].type = -1;
 	rulbus_card[ rulbus_num_cards ].nchan = -1;
-	rulbus_card[ rulbus_num_cards ].range = -1;
+	rulbus_card[ rulbus_num_cards ].range = -1.0;
+	rulbus_card[ rulbus_num_cards ].exttrg = -1;
 	rulbus_card[ rulbus_num_cards++ ].polar = -1;
 
 	return RULBUS_OK;
@@ -281,11 +293,11 @@ static int set_nchan( unsigned int nchan )
  * Function that gets called when a card range is found 
  *------------------------------------------------------*/
 
-static int set_range( unsigned int range )
+static int set_range( double range )
 {
 	/* Check that the card hasn't already been assigned a range */
 
-	if ( rulbus_card[ rulbus_num_cards - 1 ].range != -1 )
+	if ( rulbus_card[ rulbus_num_cards - 1 ].range >= 0.0 )
 		return RULBUS_RNG_DUP;
 
 	rulbus_card[ rulbus_num_cards - 1 ].range = range;
@@ -306,13 +318,32 @@ static int set_polar( const char *polar )
 
 	/* Check the string */
 
-	if ( strcasecmp( polar, "unipolar" ) && strcasecmp( polar, "bipolar" ) )
+	if ( ! strcasecmp( polar, "unipolar" ) )
+		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_UNIPOLAR;
+	else if ( ! strcasecmp( polar, "bipolar" ) )
+		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_BIPOLAR;
+	else
 		return RULBUS_INV_POL;
 
-	if ( strcasecmp( polar, "unipolar" ) )
-		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_DAC12_UNIPOLAR;
-	else
-		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_DAC12_BIPOLAR;
+	return RULBUS_OK;
+}
+
+
+/*--------------------------------------------------------------------*
+ * Function that gets called when a external trigger setting is found
+ *--------------------------------------------------------------------*/
+
+static int set_exttrg( unsigned int exttrg )
+{
+	/* Check that the card hasn't already been assigned a type */
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].exttrg != -1 )
+		return RULBUS_EXT_DUP;
+
+	if ( exttrg != 0 && exttrg != 1 )
+		return RULBUS_EXT_INV;
+
+	rulbus_card[ rulbus_num_cards - 1 ].exttrg = exttrg;
 	return RULBUS_OK;
 }
 
