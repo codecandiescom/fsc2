@@ -283,8 +283,11 @@ Var *vars_arr_lhs( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Function is called when the closing ']' is found in the definition of */
+/* an array in the VARIABLES section. It creates the array as far as     */
+/*  possible (i.e. if the sizes are specified including the sub-arrays). */
+/*-----------------------------------------------------------------------*/
 
 static Var* vars_setup_new_array( Var *v, int dim )
 {
@@ -300,13 +303,13 @@ static Var* vars_setup_new_array( Var *v, int dim )
 		THROW( EXCEPTION );
 	}
 
-	/* Create the array as far as possible */
+	/* Set the arrays type and create it as far as possible */
 
 	a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
 
 	vars_arr_create( a, v->next, dim, UNSET );
 
-	/* Get rid of variables that aren't needed anymore */
+	/* Get rid of variables specifying the sizes that aren't needed anymore */
 
 	while ( ( v = vars_pop( v ) ) != NULL )
 		/* empty */ ;
@@ -318,6 +321,7 @@ static Var* vars_setup_new_array( Var *v, int dim )
 
 
 /*----------------------------------------------------------------------*/
+/* Function creates a new array by creating recursively all sub-arrays. */
 /*----------------------------------------------------------------------*/
 
 void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
@@ -383,49 +387,42 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	/* The current dimension is obviously not dynamically sized or we
 	   wouldn't have gotten here */
 
-	a->len = len;
 	a->flags &= ~ IS_DYNAMIC;
 
-	/* If this is the last dimension we really allocate memory (intialized
-	   to 0) for a data array and then are done */
+	/* If this is the last dimension allocate memory (intialized to 0) for
+	   a data array */
 
 	if ( a->dim == 1 )
 	{
 		a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
 		if ( a->type == INT_ARR )
-			a->val.lpnt = LONG_P T_calloc( a->len, sizeof *a->val.lpnt );
+			a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
 		else
 		{
-			a->val.dpnt = DOUBLE_P T_malloc( a->len * sizeof *a->val.dpnt );
-			for ( i = 0; i < a->len; i++ )
+			a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
+			for ( i = 0; i < len; i++ )
 				a->val.dpnt[ i ] = 0.0;
 		}
 
+		a->len = len;
 		return;
 	}
 	
-	/* Otherwise we need an array of references to arrays of lower
-	   dimensions */
+	/* Otherwise we need an array of references to arrays of lower dimensions
+	   which then in turn must be created */
 
-	TRY
-	{
-		a->val.vptr = VAR_PP T_malloc( a->len * sizeof *a->val.vptr );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		a->len = 0;
-		RETHROW( );
-	}
+	a->val.vptr = VAR_PP T_malloc( len * sizeof *a->val.vptr );
 
-	for ( i = 0; i < a->len; i++ )
+	for ( i = 0; i < len; i++ )
 		a->val.vptr[ i ] = NULL;
 
+	a->len = len;
+
 	for ( i = 0; i < a->len; i++ )
 	{
-		a->val.vptr[ i ]         = vars_new( NULL );
-		a->val.vptr[ i ]->type   = a->type;
-		a->val.vptr[ i ]->from   = a;
+		a->val.vptr[ i ] = vars_new( NULL );
+		a->val.vptr[ i ]->type  = a->type;
+		a->val.vptr[ i ]->from  = a;
 		if ( is_temp )
 			a->val.vptr[ i ]->flags |= IS_TEMP;
 		vars_arr_create( a->val.vptr[ i ], v->next, dim - 1, is_temp );
@@ -562,6 +559,9 @@ Var *vars_init_list( Var *v, ssize_t level )
 		RETHROW( );
 	}
 
+	for ( i = 0; i < nv->len; i++ )
+		nv->val.vptr[ i ] = NULL;
+
 	for ( i = 0; i < nv->len; v = v->next )
 	{
 		if ( v->dim != level )
@@ -595,13 +595,17 @@ Var *vars_init_list( Var *v, ssize_t level )
 /* Function initializes a new array. When called the stack at 'v' contains  */
 /* all the data for the initialization (the last data on top of the stack)  */
 /* and, directly below the data, an REF_PTR to the array to be initialized. */
-/* If 'v' is an UNDEF_VAR no initialization has to be done.                 */
+/* If 'v' is NULL no initialization has to be done.                         */
 /*--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var *v )
 {
 	Var *dest;
 
+
+	/* If there aren't any intializers we get v being set to NULL. All we
+	   need to do is to clear up the variables stack that still contains
+	   reference to the new array */
 
 	if ( v == NULL )
 	{
@@ -697,20 +701,10 @@ static void vars_do_init( Var *src, Var *dest )
 		case INT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->len = src->len;
-				TRY
-				{
-					dest->val.dpnt = VAR_PP T_malloc( dest->len
+				dest->val.dpnt = VAR_PP T_malloc(   src->len
 												  * sizeof *dest->val.vptr );
-					TRY_SUCCESS;
-				}
-				OTHERWISE
-				{
-					dest->len = 0;
-					RETHROW( );
-				}
-				for ( i = 0; i < dest->len; i++ )
-					dest->val.vptr[ i ] = NULL;
+				for ( ; dest->len < src->len; dest->len++ )
+					dest->val.vptr[ dest->len ] = NULL;
 			}
 			else if ( src->len > dest->len )
 				print( WARN, "Superfluous intitialization data.\n" );
@@ -738,20 +732,10 @@ static void vars_do_init( Var *src, Var *dest )
 		case FLOAT_REF :
 			if ( dest->flags & IS_DYNAMIC )
 			{
-				dest->len = src->len;
-				TRY
-				{
-					dest->val.dpnt = VAR_PP T_malloc( dest->len
-													* sizeof *dest->val.vptr );
-					TRY_SUCCESS;
-				}
-				OTHERWISE
-				{
-					dest->len = 0;
-					RETHROW( );
-				}
-				for ( i = 0; i < dest->len; i++ )
-					dest->val.vptr[ i ] = NULL;
+				dest->val.dpnt = VAR_PP T_malloc(   src->len
+												  * sizeof *dest->val.vptr );
+				for ( ; dest->len < src->len; dest->len++ )
+					dest->val.vptr[ dest->len ] = NULL;
 			}
 			else if ( src->len > dest->len )
 				print( WARN, "Superfluous intitialization data.\n" );
@@ -1905,27 +1889,19 @@ Var *vars_make( int type, Var *src )
 			return nv;
 
 		case INT_REF : case FLOAT_REF :
-			nv->len = src->len;
 			nv->dim = src->dim;
-			if ( nv->len != 0 )
+			if ( src->len != 0 )
 			{
-				TRY
-				{
-					nv->val.vptr = VAR_PP T_malloc(   nv->len
-													* sizeof *nv->val.vptr );
-					TRY_SUCCESS;
-				}
-				OTHERWISE
-				{
-					nv->len = 0;
-					RETHROW( );
-				}
-
-				for ( i = 0; i < nv->len; i++ )
-					nv->val.vptr[ i ] = NULL;
+				nv->val.vptr = VAR_PP T_malloc(   src->len
+												* sizeof *nv->val.vptr );
+				for ( nv->len = 0; nv->len < src->len; nv->len++ )
+					nv->val.vptr[ nv->len ] = NULL;
 			}
 			else
+			{
 				nv->val.vptr = NULL;
+				nv->len = 0;
+			}
 			return nv;
 	}
 
@@ -2047,7 +2023,7 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 	for ( i = 0; i < nsv->len; i++ )
 		nsv->val.vptr[ i ] = NULL;
 
-	for ( i = 0; i < src->len; i++ )
+	for ( i = 0; i < nsv->len; i++ )
 	{
 		vd = nsv->val.vptr[ i ] = vars_new( NULL );
 		vd->from = nsv;
