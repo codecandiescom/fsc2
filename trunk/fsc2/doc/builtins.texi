@@ -32,6 +32,33 @@
 @end menu
 @end ifinfo
 
+In this chapter all the functions built into @acronym{fsc2} are
+explained. These functions are available even when no device modules
+have been specified in the @code{DEVICES} section.
+
+The built-in functions can be roughly devided into four classes. The
+first class of functions are functions that are concerned with the
+output of the program, either by writing text to the browser in the
+lower half of the main window, by writing data etc.@: into files
+(including functions for specifying the files to be used) or by
+drawing the measured data onto the screen, i.e.@: the main area
+of the display window (including functions for changing the axis
+scaling and labels etc.@:).
+
+The second class of functions are interaction functions, functions that
+allow to deal with additional graphical elements like buttons, sliders and
+in- and output fields. These functions control the creation, setting,
+query and deletion of these objetcts.
+
+The third class of functions are mathematical functions that one would
+expect to find in most programming languages like. Finally, the fourth
+class are auxillary functions that can't be assigned to any of the other
+groups like functions for dealing with time or date issues or functions
+for determining the sizes of arrays.
+
+Please note that not all of the following functions can be used in all
+sections of an @acronym{EDL} program but only in the experiment section.
+
 
 @node Output functions, Interaction functions, Built-in Functions, Built-in Functions
 @section Output functions
@@ -667,7 +694,7 @@ defaults to "Please enter a comment:".
 @item is_file()
 @findex is_file()
 This function expects a file handle as returned by @code{get_file()} and
-checks if it is valid and if the associated file is open for writing.
+checks if it is valid and the associated file is open for writing.
 @end table
 
 
@@ -676,22 +703,23 @@ checks if it is valid and if the associated file is open for writing.
 @cindex interaction functions
 
 These functions are for creating, handling and deleting of buttons,
-sliders and input fields. When such an object is created for the first
-time a new window with the title "Toolbox" opens up. The objects (i.e.@:
-buttons, sliders and input and output fields) displayed in the toolbox
-allow the user to influence the experiment when it is already
-running. The toolbox window will vanish automatically when all objects
-have been deleted. The toolbox with its objects can only be used while
-the experiment, i.e.@: the functions for creating, handling and deleting
-of objects can only be used within the @code{EXPERIMENT} section of the
-program.
+sliders and in- and output fields. When such an object is created for
+the first time a new window with the title "Toolbox" opens up. The
+objects (i.e.@: buttons, sliders and in- and output fields) displayed
+in the toolbox allow the user to influence the experiment when it is
+already running. The toolbox window will vanish automatically when all
+objects have been deleted. The toolbox with its objects can only be used
+during the experiment, i.e.@: the functions for creating, handling and
+deleting of objects can only be used within the @code{EXPERIMENT}
+section of the program.
 
-Please note that if the objects in the toolbox are used it is
-not possible anymore to check the complete experiment before it is run
+Please note that when the objects in the toolbox are used it usually
+isn't possible anymore to check the complete experiment before it is run
 because it is impossible to forsee which buttons, sliders or input
-fields are used at what moment. Therefore, these functions should only
-be used where it is really necessary, i.e.@: when trying to find the
-optimum parameters for an experiment but not in the final experiment.
+fields are used at what moment (the only exception is when only output
+fields are used). Therefore, these functions should only be used where
+it is really necessary, e.g.@: when you're trying to find the optimum
+parameters for an experiment but not in the final experiment.
 
 When the program is tested before the experiment is started it is
 assumed that all buttons are not pressed and switched off (unless they
@@ -727,22 +755,23 @@ create an event, push buttons that stay on or off, and finally radio
 buttons, that are also some kind of push buttons but that belong to a
 group of buttons of which only one button can be switched on at once,
 i.e.@: if a radio button gets pressed all the other radio buttons
-belonging to the group become automatically unset.
+belonging to the same group (which has to be specified when the button
+is created) become automatically unset.
 
 Normal buttons are drawn as large rectangular boxes with the label in
-thwe middle, push buttons are drawn as squares, standing on a corner,
+the middle, push buttons are drawn as squares, standing on a corner,
 that become yellow when pressed, and radio buttons as round buttons,
 that become red when activated.
 
-The first argument the function needs is the type of the button, i.e.@:
-on of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
-@code{RADIO_BUTTON"} (the case of the letters doesn't matter).
+The first argument the function expects is the type of the button,
+i.e.@: on of the strings @code{"NORMAL_BUTTON"}, @code{"PUSH_BUTTON"} or
+@code{"RADIO_BUTTON"} (the case of the letters doesn't matter).
 
 For a radio button it must be specified which group it belongs to. Each
 group has a button functioning as the group leader which is always the
 first button of the group. For all other members of this group the
 identifier of the group leader button must be specified as the second
-argument. I.e.@: to create a group of three rdio buttons you would use
+argument. I.e.@: to create a group of three radio buttons use
 @example
 B_ID_1 = button_create( "RADIO_BUTTON", "Label 1" );
 B_ID_2 = button_create( "RADIO_BUTTON", B_ID_1, "Label 2" );
@@ -751,9 +780,9 @@ B_ID_3 = button_create( "RADIO_BUTTON", B_ID_1, "Label 3" );
 
 For all buttons except radio buttons the second (optional) argument is
 the string that is to appear as the label of the button. The final (also
-optional) argument is a further string that is an additional help text
-that will appear when the mouse remains for some time over the button.
-Both label and help text may contain some escape sequences, namely
+optional) argument is another string that is the help text that will
+appear when the mouse hoovers over the button for some time. Both label
+and help text may contain two different escape sequences, namely
 `@code{\n}', standing for a line break (to create a multi-line label or
 help text) and `@code{\\}', standing for the backslash character to
 allow a backslash in front of an `n'.
@@ -778,18 +807,20 @@ leader automatically.
 @item button_state()
 @findex button_state()
 The function returns or sets the state of a button, depending on the
-number of argument. The first argument is the identifier of the button
-as returned by the function @code{button_create()}. If there are no more
-arguments the state of the button is returned. There is a difference
-between normal buttons and push and radio buttons. For normal buttons
-the number of times the button was pressed since the last call of the
-function is returned. For push and radio buttons the state of the
-button, i.e.@: either @code{0} for off or @code{1} for on is returned.
+number of arguments passed to the function. The non-optional first
+argument is the identifier of the button as returned by the function
+@code{button_create()}. If there are no more arguments the state of the
+button is returned. There is a difference between the values returned in
+this case between normal buttons and push and radio buttons. For normal
+buttons the number of times the button was pressed since the last call
+of the function is returned. For push and radio buttons the state of the
+button, i.e.@: either @code{0}, meaning off, or @code{1} for on is
+returned.
 
-If there is a second argument the state of push and radio buttons can be
-set. This argument must be either a string (@code{"ON"} or @code{"OFF"})
-or a number with @code{0} standing for off and a non-zero number for
-on. The state of normal buttons cannot be set.
+If for push and radio buttons there is a second argument the state of
+the button will be be set. This argument must be either a string
+(@code{"ON"} or @code{"OFF"}) or a number with @code{0} standing for off
+and a non-zero number for on. The state of normal buttons cannot be set.
 
 
 @anchor{slider_create}

@@ -40,6 +40,7 @@ FILE2 = clone_file( FILE1, "dat", "dxx" );
 FOREVER {
 
 	IF ( button_state( BID1 ) ) {
+		button_state( BID4, 0 );
 		clear_curve( );
 		I = 0;
 	}
