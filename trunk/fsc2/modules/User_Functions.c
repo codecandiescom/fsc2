@@ -117,6 +117,11 @@ Var *filename( Var *var )
 	const char *r;
 
 
+	/* While test is running just rerturn an empty string */
+
+	if ( TEST_RUN )
+		return vars_push( STR_VAR, "" );
+
 	for ( i = 0, cur = var; cur != NULL; i++, cur = cur->next )
 	{
 		vars_check( cur, STR_VAR );

@@ -54,6 +54,16 @@ void show_alert( const char *str )
 }
 
 
+/*------------------------------------------------------------------------*/
+/* Shows a choice box with up to three buttons, returns the number of the */
+/* pressed button (int he range from 1 - 3).                              */
+/* ->                                                                     */
+/*    1. message text, use embedded newlines for multi-line messages      */
+/*    2. number of buttons to show                                        */
+/*    3. texts for the three buttons                                      */
+/*    4. number of button to be used as default button (range 1 - 3)      */
+/*------------------------------------------------------------------------*/
+
 int show_choices( const char *text, int numb, const char *b1, const char *b2,
 				  const char *b3, int def )
 {
@@ -69,6 +79,17 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
 	}
 }
 
+
+/*---------------------------------------------------------------*/
+/* Shows a file selector box and returns the selected file name. */
+/* ->                                                            */
+/*    1. short message to be shown                               */
+/*    2. name of directory the file might be in                  */
+/*    3. pattern for files to be listed (e.g. "*.edl")           */
+/*    4. default file name                                       */
+/* <-                                                            */
+/* Returns either a static buffer with the file name or NULL.    */
+/*---------------------------------------------------------------*/
 
 const char *show_fselector( const char *message, const char *directory,
 							const char *pattern, const char *def )

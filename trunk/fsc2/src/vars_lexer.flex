@@ -318,10 +318,11 @@ int variables_parser( FILE *in )
 
 	varsparse( );
 
+/*
 #ifdef DEBUG
 	print_all_vars( );
 #endif
-
+*/
 	return Vars_Next_Section;
 }
 

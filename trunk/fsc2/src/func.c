@@ -307,8 +307,9 @@ Var *func_call( Var *f )
 /****************************************************************/
 
 
-
+/*-------------------------------------------------*/
 /* Conversion float to integer (result is integer) */
+/*-------------------------------------------------*/
 
 Var *f_int( Var *v )
 {
@@ -321,7 +322,9 @@ Var *f_int( Var *v )
 }
 
 
+/*----------------------------------------------------*/
 /* Conversion int to floating point (result is float) */
+/*----------------------------------------------------*/
 
 Var *f_float( Var *v )
 {
@@ -334,7 +337,9 @@ Var *f_float( Var *v )
 }
 
 
+/*--------------------------------------------------------*/
 /* Rounding of floating point numbers (result is integer) */
+/*--------------------------------------------------------*/
 
 Var *f_round( Var *v )
 {
@@ -348,7 +353,9 @@ Var *f_round( Var *v )
 }
 
 
+/*---------------------------------*/
 /* Floor value (result is integer) */
+/*---------------------------------*/
 
 Var *f_floor( Var *v )
 {
@@ -361,7 +368,9 @@ Var *f_floor( Var *v )
 }
 
 
+/*-----------------------------------*/
 /* Ceiling value (result is integer) */
+/*-----------------------------------*/
 
 Var *f_ceil( Var *v )
 {
@@ -374,7 +383,9 @@ Var *f_ceil( Var *v )
 }
 
 
+/*-------------------------------------------------*/
 /* abs of value (result has same as type argument) */
+/*-------------------------------------------------*/
 
 Var *f_abs( Var *v )
 {
@@ -387,7 +398,9 @@ Var *f_abs( Var *v )
 }
 
 
+/*-----------------------------------------------*/
 /* sin of argument (in radian) (result is float) */
+/*-----------------------------------------------*/
 
 Var *f_sin( Var *v )
 {
@@ -400,7 +413,9 @@ Var *f_sin( Var *v )
 }
 
 
+/*-----------------------------------------------*/
 /* cos of argument (in radian) (result is float) */
+/*-----------------------------------------------*/
 
 Var *f_cos( Var *v )
 {
@@ -413,7 +428,9 @@ Var *f_cos( Var *v )
 }
 
 
+/*-----------------------------------------------*/
 /* tan of argument (in radian) (result is float) */
+/*-----------------------------------------------*/
 
 Var *f_tan( Var *v )
 {
@@ -426,7 +443,9 @@ Var *f_tan( Var *v )
 }
 
 
+/*--------------------------------------------------------------------*/
 /* asin (in radian) of argument (with -1 <= x <= 1) (result is float) */
+/*--------------------------------------------------------------------*/
 
 Var *f_asin( Var *v )
 {
@@ -450,7 +469,9 @@ Var *f_asin( Var *v )
 }
 
 
+/*--------------------------------------------------------------------*/
 /* acos (in radian) of argument (with -1 <= x <= 1) (result is float) */
+/*--------------------------------------------------------------------*/
 
 Var *f_acos( Var *v )
 {
@@ -474,7 +495,9 @@ Var *f_acos( Var *v )
 }
 
 
+/*------------------------------------------------*/
 /* atan (in radian) of argument (result is float) */
+/*------------------------------------------------*/
 
 Var *f_atan( Var *v )
 {
@@ -487,7 +510,9 @@ Var *f_atan( Var *v )
 }
 
 
+/*------------------------------------*/
 /* sinh of argument (result is float) */
+/*------------------------------------*/
 
 Var *f_sinh( Var *v )
 {
@@ -500,7 +525,9 @@ Var *f_sinh( Var *v )
 }
 
 
+/*------------------------------------*/
 /* cosh of argument (result is float) */
+/*------------------------------------*/
 
 Var *f_cosh( Var *v )
 {
@@ -513,7 +540,9 @@ Var *f_cosh( Var *v )
 }
 
 
+/*------------------------------------*/
 /* tanh of argument (result is float) */
+/*------------------------------------*/
 
 Var *f_tanh( Var *v )
 {
@@ -526,7 +555,9 @@ Var *f_tanh( Var *v )
 }
 
 
+/*-----------------------------------*/
 /* exp of argument (result is float) */
+/*-----------------------------------*/
 
 Var *f_exp( Var *v )
 {
@@ -539,7 +570,9 @@ Var *f_exp( Var *v )
 }
 
 
+/*-----------------------------------------------*/
 /* ln of argument (with x > 0) (result is float) */
+/*-----------------------------------------------*/
 
 Var *f_ln( Var *v )
 {
@@ -562,7 +595,9 @@ Var *f_ln( Var *v )
 }
 
 
+/*------------------------------------------------*/
 /* log of argument (with x > 0) (result is float) */
+/*------------------------------------------------*/
 
 Var *f_log( Var *v )
 {
@@ -585,7 +620,9 @@ Var *f_log( Var *v )
 }
 
 
+/*--------------------------------------------------*/
 /* sqrt of argument (with x >= 0) (result is float) */
+/*--------------------------------------------------*/
 
 Var *f_sqrt( Var *v )
 {
@@ -608,7 +645,8 @@ Var *f_sqrt( Var *v )
 }
 
 
-/* Prints variable number of arguments using a format string supplied as
+/*------------------------------------------------------------------------
+   Prints variable number of arguments using a format string supplied as
    the first argument. Types of arguments to be printed are integer and
    float data and strings. To get a value printed the format string has
    to contain the character `#'. The escape character is the backslash,
@@ -617,7 +655,8 @@ Var *f_sqrt( Var *v )
    ('\a', '\b', '\f', '\n', '\r', '\t', '\v' and '\"') do function.
 
    The function returns the number of variables it printed, not counting
-   the format string. */
+   the format string.
+--------------------------------------------------------------------------*/
 
 Var *f_print( Var *v )
 {
