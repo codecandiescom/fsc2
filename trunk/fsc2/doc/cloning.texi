@@ -34,7 +34,7 @@ shared libraries with unique names for these devices have to be created.
 
 Fortunately, this is such a simple process that it can be done via a
 script (at least as long as the modules are written following the
-conventions discussed in the preceeding chapter). There are basically
+conventions discussed in the next chapter). There are basically
 three or four steps:
 @enumerate
 @item @code{cd} into the @file{utils} subdirectory of @acronym{fsc2}s main
