@@ -6,7 +6,7 @@
  ==================================
 
 
-This driver only supports a subset of the functionality of the board.
+The driver only supports a subset of the functionality of the board.
 It only supports simple DIO using the two 82C55A chips on the board in
 mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips also on
 the board are not supported.
