@@ -142,10 +142,13 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 };
 
 
-/* Locally used functions */
+/* Locally used functions and variables */
 
 static int func_cmp1( const void *a, const void *b );
 static int func_cmp2( const void *a, const void *b );
+
+static long in_call = 0;
+static  char *fname = NULL;
 
 
 
@@ -220,6 +223,9 @@ void functions_exit( void )
 			T_free( ( char * ) Fncts[ i ].name );
 
 	Fncts = T_free( Fncts );
+
+	fname = T_free( fname );
+	in_call = 0;
 
 	No_File_Numbers = UNSET;
 	Dont_Save = UNSET;
@@ -299,13 +305,15 @@ static int func_cmp2( const void *a, const void *b )
 }
 
 
-/*------------------------------------------------------------*/
-/* This function is called to really execute an EDL function. */
-/*------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* This function is called to really execute an EDL function.    */
+/* It must be able to also handle situations where, for example, */
+/* an EDL function calls another EDL function, which throws an   */
+/* exception, that is caught by thje first function etc.         */
+/*---------------------------------------------------------------*/
 
 Var *func_call( Var *f )
 {
-	static long in_call = 0;
 	Var *ap;
 	Var *ret = NULL;
 	int ac;
@@ -375,10 +383,25 @@ Var *func_call( Var *f )
 	   only exception is when from an EDL function another EDL is called,
 	   in which case the name of the 'topmost' function is kept). */
 
-	if ( in_call++ == 0 )
-		Cur_Func = f->name;
+	fname = T_strdup( f->name );
 
-	ret = ( *f->val.fnct )( f->next );
+	if ( in_call++ == 0 )
+		Cur_Func = fname;
+
+	TRY
+	{
+		ret = ( *f->val.fnct )( f->next );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		fname = T_free( fname );
+		if ( --in_call == 0 )
+			Cur_Func = NULL;
+		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
+			;
+		PASSTHROU( );
+	}
 
 	if ( --in_call == 0 )
 		Cur_Func = NULL;
@@ -393,10 +416,13 @@ Var *func_call( Var *f )
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n", f->name,
+					"up the variable stack at %s:%d.\n", fname,
 					Fncts[ i ].device->name, __FILE__, __LINE__ );
+		fname = T_free( fname );
 		THROW( EXCEPTION );
 	}
+
+	fname = T_free( fname );
 
 	/* Finally do the clean up, i.e. remove the variable with the function
 	   and all parameters that survived - just keep the return value. */
