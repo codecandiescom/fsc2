@@ -97,7 +97,7 @@ int kontron4060_exp_hook( void )
 
 	if ( ! kontron4060_init( DEVICE_NAME ) )
 	{
-		print( FATAL, "%s: Initialization of device failed: %s\n",
+		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}

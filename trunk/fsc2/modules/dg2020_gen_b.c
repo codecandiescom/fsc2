@@ -610,7 +610,7 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val )
 
 	if ( val < 0 || val >= MAX_PODS )
 	{
-		print( FATAL, "%s: Invalid pod number %ld.\n", val );
+		print( FATAL, "Invalid pod number %ld.\n", val );
 		THROW( EXCEPTION );
 	}
 

@@ -371,7 +371,7 @@ Var *lockin_sensitivity( Var *v )
 				   "instead.\n",
 				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else
-			print( WARN, "%s: Sensitivity of %.0lf nV is too high, using "
+			print( WARN, "Sensitivity of %.0lf nV is too high, using "
 				   "%.0lf nV instead.\n",
 				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
 			sr510.sens_warn = SET;
@@ -466,7 +466,7 @@ Var *lockin_time_constant( Var *v )
 				print( WARN, "Time constant of %.0lf s is too large, using "
 					   "%.0lf s instead.\n", tc, tc_list[ tc_index ] );
 			else
-				print( WARN, "%s: Time constant of %.0lf ms is too short, "
+				print( WARN, "Time constant of %.0lf ms is too short, "
 					   "using %.0lf ms instead.\n", tc * 1.0e3,
 					   tc_list[ tc_index ] * 1.0e3 );
 			sr510.tc_warn = SET;
@@ -582,7 +582,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "%s: Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -592,7 +592,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
-		print( FATAL, "%s: Invalid lock-in DAC channel number %ld, valid "
+		print( FATAL, "Invalid lock-in DAC channel number %ld, valid "
 			   "channels are in the range between %d and %d.\n",
 			   channel, first_DAC_port, last_DAC_port );
 		THROW( EXCEPTION );
@@ -615,7 +615,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	if ( fabs( voltage ) > 10.24 )
 	{
-		print( FATAL, "%s: DAC voltage of %f V is out of valid range "
+		print( FATAL, "DAC voltage of %f V is out of valid range "
 			   "(+/-10.24 V).\n", voltage );
 		THROW( EXCEPTION );
 	}

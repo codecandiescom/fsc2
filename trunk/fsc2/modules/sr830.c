@@ -2064,19 +2064,21 @@ static long sr830_get_display_channel( int channel )
 
 static void sr830_auto( int flag )
 {
-	char cmd_1[ 2 ][ 6 ] = { "REST\n", "STRT\n",  };
-	char cmd_2[ 2 ][ 8 ] = { "TSTR 0\n", "TSTR 1\n" };
+	const char *cmd_1[ 2 ] = { "REST\n", "SEND 0;STRT\n",  };
+	const char *cmd_2[ 2 ] = { "TSTR 0\n", "TSTR 1\n" };
 	int i;
 
 
 	fsc2_assert( sr830.is_auto_setup == SET );
 	fsc2_assert( flag == 0 || flag == 1 );
 
-	if ( gpib_write( sr830.device, cmd_1[ flag ], 5 ) == FAILURE )
+	if ( gpib_write( sr830.device, cmd_1[ flag ], strlen( cmd_1[ flag ] ) )
+		 == FAILURE )
 		sr830_failure( );
 
 	if ( sr830.st_index == ST_TRIGGRED &&
-		 gpib_write( sr830.device, cmd_2[ flag ], 7 ) == FAILURE )
+		 gpib_write( sr830.device, cmd_2[ flag ], strlen( cmd_2[ flag ] ) )
+		 == FAILURE )
 		sr830_failure( );
 
 	if ( flag == 0 )
@@ -2188,7 +2190,7 @@ static void sr830_lock_state( bool lock )
 
 static void sr830_failure( void )
 {
-	print( FATAL, "%s: Can't access the lock-in amplifier.\n" );
+	print( FATAL, "Can't access the lock-in amplifier.\n" );
 	THROW( EXCEPTION );
 }
 

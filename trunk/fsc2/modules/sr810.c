@@ -1126,7 +1126,7 @@ Var *lockin_auto_setup( Var *v )
 	   numbers 2 and 4). All other combinations must be rejected. */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
-			dsp_ch = DSP_CH_UNDEF;
+		dsp_ch = DSP_CH_UNDEF;
 	else
 	{
 		dsp_ch = get_long( v, "channel to display" );
@@ -1294,7 +1294,8 @@ static bool sr810_init( const char *name )
 
 	if ( gpib_write( sr810.device, "OUTX 1\n", 7 ) == FAILURE ||
 		 gpib_write( sr810.device, "*CLS\n", 5 )   == FAILURE ||
-		 gpib_write( sr810.device, "OVRM 0\n", 7 ) == FAILURE )
+		 gpib_write( sr810.device, "OVRM 0\n", 7 ) == FAILURE ||
+		 gpib_write( sr810.device, "*SRE 1\n", 7 ) == FAILURE )
 		return FAIL;
 	   
 	/* Ask lock-in to send the error status byte and test if it does */
@@ -1918,7 +1919,7 @@ static long sr810_get_sample_time( void )
 static void sr810_set_display_channel( long type )
 {
 	char cmd[ 100 ];
-	int symbol_to_dsp[ ] = { 0, 0, 1, 3, 4, 2 };
+	int symbol_to_dsp[ ] = { 0, 0, -1, 1, -1, 3, 4, -1, -1, 2 };
 #ifndef NDEBUG
 	int i;
 #endif
@@ -2005,18 +2006,20 @@ static long sr810_get_display_channel( void )
 
 static void sr810_auto( int flag )
 {
-	char cmd_1[ 2 ][ 6 ] = { "REST\n", "STRT\n",  };
-	char cmd_2[ 2 ][ 8 ] = { "TSTR 0\n", "TSTR 1\n" };
+	const char *cmd_1[ 2 ] = { "REST\n", "SEND 0;STRT\n" };
+	const char *cmd_2[ 2 ] = { "TSTR 0\n", "TSTR 1\n" };
 
 
 	fsc2_assert( sr810.is_auto_setup == SET );
 	fsc2_assert( flag == 0 || flag == 1 );
 
-	if ( gpib_write( sr810.device, cmd_1[ flag ], 5 ) == FAILURE )
+	if ( gpib_write( sr810.device, cmd_1[ flag ], strlen( cmd_1[ flag ] ) )
+					 == FAILURE )
 		sr810_failure( );
 
 	if ( sr810.st_index == ST_TRIGGRED &&
-		 gpib_write( sr810.device, cmd_2[ flag ], 7 ) == FAILURE )
+		 gpib_write( sr810.device, cmd_2[ flag ], strlen( cmd_2[ flag ] ) )
+					 == FAILURE )
 		sr810_failure( );
 
 	if ( flag == 0 )
@@ -2037,7 +2040,21 @@ static double sr810_get_auto_data( int type )
 	long length = 100;
 	int channel;
 	char *ptr;
+	static bool dont = SET;
 
+
+#if 0
+	if ( gpib_write( sr810.device, "*STB?\n", 6 ) == FAILURE ||
+		 gpib_read( sr810.device, buffer, &length ) == FAILURE )
+		sr810_failure( );
+	buffer[ length - 1 ] = '\0';
+	if ( dont && ( T_atol( buffer ) & 1 ) )
+	{
+		sr810.data_fetched = l_max( sr810.data_fetched - 12, 0 );
+		dont = UNSET;
+	}
+	length = 100;
+#endif
 
 #ifndef NDEBUG
 	if ( sr810.dsp_ch != type )
@@ -2120,7 +2137,7 @@ static void sr810_lock_state( bool lock )
 
 static void sr810_failure( void )
 {
-	print( FATAL, "%s: Can't access the lock-in amplifier.\n" );
+	print( FATAL, "Can't access the lock-in amplifier.\n" );
 	THROW( EXCEPTION );
 }
 

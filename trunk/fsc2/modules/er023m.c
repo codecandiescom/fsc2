@@ -222,7 +222,7 @@ Var *lockin_sensitivity( Var *v )
 
 	if ( rg <= 0.0 )
 	{
-		print( FATAL, "%s: Negative or zero receiver gain.\n" );
+		print( FATAL, "Negative or zero receiver gain.\n" );
 		THROW( EXCEPTION );
 	}
 

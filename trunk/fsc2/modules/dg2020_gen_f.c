@@ -138,8 +138,8 @@ bool dg2020_assign_channel_to_function( int function, long channel )
 	{
 		if ( c->function->self == function )
 		{
-			print( SEVERE, "%s: Channel %ld is assigned twice to function "
-				   "`%s'.\n", channel, Function_Names[ c->function->self ] );
+			print( SEVERE, "Channel %ld is assigned twice to function `%s'.\n",
+				   channel, Function_Names[ c->function->self ] );
 			return FAIL;
 		}
 
@@ -518,7 +518,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 
 	if ( seq_len <= 0 )
 	{
-		print( FATAL, "%s: Zero or negative minimum pattern length.\n" );
+		print( FATAL, "Zero or negative minimum pattern length.\n" );
 		THROW( EXCEPTION );
 	}
 
