@@ -45,8 +45,6 @@ static time_t in_file_mod = 0;
 static char *title = NULL;
 static bool delete_file = UNSET;
 static bool delete_old_file = UNSET;
-static pid_t conn_pid;               /* pid of child process for handling
-                                        communication with scripts */
 static volatile int fsc2_death = 0;
 
 extern FL_resource xresources[ ];    /* from xinit.c */
@@ -190,9 +188,9 @@ int main( int argc, char *argv[ ] )
 	/* Only if starting the server for external connections succeeds really
 	   start the main loop */
 
-	if ( ( conn_pid = spawn_conn( Internals.cmdline_flags &
-								  ( DO_TEST | DO_START )
-								  && is_loaded ) ) != -1 )
+	if ( ( Internals.conn_pid = spawn_conn( Internals.cmdline_flags &
+											( DO_TEST | DO_START )
+											&& is_loaded ) ) != -1 )
 	{
 		/* Trigger test or start of current EDL program if the appropriate
 		   flags were passed to the program on the command line */
@@ -407,8 +405,8 @@ static void final_exit_handler( void )
 	/* Stop the process that is waiting for external connections as well
 	   as the child process */
 
-	if ( conn_pid > 0 )
-		kill( conn_pid, SIGTERM );
+	if ( Internals.conn_pid > 0 )
+		kill( Internals.conn_pid, SIGTERM );
 
 	if ( Internals.child_pid > 0 )
 		kill( Internals.child_pid, SIGTERM );
@@ -1440,10 +1438,10 @@ void notify_conn( int signo )
        experiment is running - in this case fsc2 is busy anyway and the
        connection process has already been informed about this. */
 
-	if ( conn_pid <= 0 || Internals.child_pid > 0 )
+	if ( Internals.conn_pid <= 0 || Internals.child_pid > 0 )
 		return;
 
-	kill( conn_pid, signo );
+	kill( Internals.conn_pid, signo );
 
 	/* Wait for reply from child but avoid waiting when it in fact already
 	   did reply (as indicated by the variable). */

@@ -35,10 +35,12 @@ extern int exp_testlex( void );
 /* locally used functions */
 
 int exp_testparse( void );
+void exp_test_init( void );
 static void exp_testerror( const char *s );
 
-static bool dont_print_error = UNSET;
-static bool in_cond = UNSET;
+static bool dont_print_error;
+static bool in_cond;
+static int allow_str;
 
 %}
 
@@ -145,8 +147,10 @@ cond:    FOR_TOK                 { in_cond = SET; }
          E_VAR_TOKEN '='
          expr ':' expr fi ls     { in_cond = UNSET; }
        | FOREVER_TOK ls
-       | sc                      { in_cond = SET; }
-         expr ls                 { in_cond = UNSET; }
+       | sc                      { in_cond = SET;
+	   							   allow_str++; }
+         expr ls                 { in_cond = UNSET;
+                                   allow_str--; }
        | ELSE_TOK et
 ;
 
@@ -169,13 +173,17 @@ ls:      '{'
 ;
 
 et:      ls
-       | IF_TOK                  { in_cond = SET; }
-         expr ls                 { in_cond = UNSET; }
+       | IF_TOK                  { in_cond = SET;
+                                   allow_str++; }
+         expr ls                 { in_cond = UNSET;
+                                   allow_str--; }
 
 
-line:    E_VAR_TOKEN ass                              { }
-       | E_VAR_TOKEN '[' list1 ']' ass                { }
-       | E_FUNC_TOKEN '(' list2 ')'                   { }
+line:    E_VAR_TOKEN ass                             { }
+       | E_VAR_TOKEN '[' list ']' ass                { }
+       | E_FUNC_TOKEN '('                            { allow_str++; }
+	     list
+         ')'                                         { allow_str--; }
        | E_FUNC_TOKEN '['
           { eprint( FATAL, SET, "`%s' is a predefined function.\n", $1->name );
 		    THROW( EXCEPTION ); }
@@ -203,15 +211,22 @@ ass:     '=' expr
        | E_EXPA expr
 ;
 
-expr:    E_INT_TOKEN unit                             { }
-       | E_FLOAT_TOKEN unit                           { }
-       | E_VAR_TOKEN unit                             { }
-       | E_VAR_TOKEN '[' list1 ']' unit               { }
-       | E_FUNC_TOKEN '(' list2 ')' unit              { }
-       | E_VAR_REF                                    { }
-/* This is needed far string comaprisons but leads to 2 reduce/reduce conflicts
-       | E_STR_TOKEN                                  { }
-*/
+expr:    E_INT_TOKEN unit               { }
+       | E_FLOAT_TOKEN unit             { }
+       | E_VAR_TOKEN unit               { }
+       | E_VAR_TOKEN '[' list ']' unit  { }
+       | E_FUNC_TOKEN '('               { allow_str++; }
+	     list
+	     ')'                            { allow_str--; }
+	     unit                           { }
+       | E_VAR_REF                      { }
+       | E_STR_TOKEN              { if ( allow_str <= 0 )
+	                                {
+		                                eprint( FATAL, SET, "No string "
+												"allowed in this context.\n" );
+										THROW( EXCEPTION );
+									}
+	                              }
        | E_FUNC_TOKEN '['         { eprint( FATAL, SET, "`%s' is a predefined "
 									        "function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
@@ -257,31 +272,29 @@ unit:    /* empty */
        | E_MEG_TOKEN
 ;
 
-/* list of indices of array element */
+/* list of indices of array element or list of function arguments */
 
-list1:   /* empty */
+list:    /* empty */
 	   | expr
-       | list1 ',' expr
-;
-
-/* list of function arguments */
-
-list2:   /* empty */
-       | exprs
-	   | list2 ',' exprs
-;
-
-exprs:   expr
-       | E_STR_TOKEN
-         strs
-;
-
-strs:    /* empty */
-       | strs E_STR_TOKEN
+       | list ',' expr
 ;
 
 %%
 
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
+
+void exp_test_init( void )
+{
+	dont_print_error = UNSET;
+	in_cond = UNSET;
+	allow_str = 0;
+}
+
+
+/*---------------------------------------------------------*/
+/*---------------------------------------------------------*/
 
 static void exp_testerror( const char *s )
 {

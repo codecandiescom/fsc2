@@ -831,7 +831,7 @@ repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 `@code{@}}', follow the statements to be executed in the loop.
 
 Please note: If the number of repetitions of the loop is a variable or
-an expression the variable or expresson will be evaluated just once at
+an expression the variable or expression will be evaluated just once at
 the very start, i.e.@: once before the loop is executed, so if you
 change the value of the variable (or the variables involved in the
 expression) within the loop the number of repetitions won't change.

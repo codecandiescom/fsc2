@@ -34,16 +34,16 @@
 /* locally used functions */
 
 int conditionparse( void );
- static bool check_result( Var *v );
+static bool check_result( Var *v );
 static void conditionerror( const char *s );
 
 
-/* Special problem are expressions of the form 'expr & expr' or 'expr | expr'.
+/* A problem are expressions of the form 'expr & expr' or 'expr | expr'.
    Here the second part (i.e. after the '&' or '|') must not be evaluated if
-   the first part already determines the final resut completely because it is
-   false (for the AND case) or true (for the OR case). In theses cases the
-   second expression must not be evaluated where it is especially important
-   not to run functions that might have side-effects. Thus when such a case is
+   the first part already determines the final result completely because it
+   is false (for the AND case) or true (for OR). In theses cases the second
+   expression must not be evaluated where it is especially important not to
+   run functions that might have side-effects. Thus when such a case is
    detected 'condition_gobble' is set to 1 which will prevent the evaluation.
    At the end of the expression 'condition_gobble' is decremented back to 0.
 
@@ -125,7 +125,7 @@ int condition_gobble;
 
 %token E_NT_TOKEN E_UT_TOKEN E_MT_TOKEN E_T_TOKEN E_KT_TOKEN E_MGT_TOKEN
 %token E_NU_TOKEN E_UU_TOKEN E_MU_TOKEN E_KU_TOKEN E_MEG_TOKEN
-%type <vptr> expr unit list1
+%type <vptr> expr unit list
 
 
 %left E_AND E_OR E_XOR
@@ -157,11 +157,11 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
 		                                vars_arr_start( $1 );
 	                                else
 										vars_pop( $1 ); }
-         list1 ']'                { if ( ! condition_gobble )
+         list ']'                 { if ( ! condition_gobble )
                                         $$ = vars_arr_rhs( $4 ); }
          unit                     { if ( ! condition_gobble )
                                         $$ = apply_unit( $<vptr>6, $7); }
-       | E_FUNC_TOKEN '(' list2
+       | E_FUNC_TOKEN '(' list
          ')'                      { if ( ! condition_gobble )
 			                            $$ = func_call( $1 );
 	                                else
@@ -170,10 +170,8 @@ expr:    E_INT_TOKEN unit         { if ( ! condition_gobble )
                                         $$ = apply_unit( $<vptr>5, $6 ); }
        | E_VAR_REF                { if ( condition_gobble )
 		                                 vars_pop( $1 ); }
-/* This is needed far string comaprisons but leads to 2 reduce/reduce conflicts
        | E_STR_TOKEN              { if ( ! condition_gobble )
 		                                 $$ = vars_push( STR_VAR, $<sptr>1 ); }
-*/
        | E_VAR_TOKEN '('          { eprint( FATAL, SET, "`%s' isn't a "
 											"function.\n", $1->name );
 	                                THROW( EXCEPTION ); }
@@ -287,36 +285,13 @@ unit:    /* empty */              { $$ = NULL; }
 ;
 
 
-/* list of indices for access of an array element */
+/* List of indices of an array element or list of function arguments */
 
-list1:   /* empty */              { if ( ! condition_gobble )
+list :   /* empty */              { if ( ! condition_gobble )
                                         $$ = vars_push( UNDEF_VAR ); }
        | expr
-       | list1 ',' expr           { if ( ! condition_gobble )
+       | list ',' expr            { if ( ! condition_gobble )
                                         $$ = $3; }
-;
-
-/* list of function arguments */
-
-list2:   /* empty */
-       | exprs
-	   | list2 ',' exprs
-;
-
-exprs:   expr                     { }
-       | E_STR_TOKEN              { if ( ! condition_gobble )
-                                        vars_push( STR_VAR, $1 ); }
-         strs
-;
-
-strs:    /* empty */
-       | strs E_STR_TOKEN         { Var *v;
-		                            if ( ! condition_gobble )
-									{
-                                        v = vars_push( STR_VAR, $2 );
-										vars_add( v->prev, v );
-									}
-	                              }
 ;
 
 

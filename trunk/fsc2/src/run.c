@@ -809,7 +809,7 @@ static void setup_child_signals( void )
 		sigemptyset( &sact.sa_mask );
 		sact.sa_flags = 0;
 		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
-			_exit( -1 );
+			_exit( EXIT_FAILURE );
 	}
 
 	sact.sa_handler = child_sig_handler;
@@ -817,13 +817,13 @@ static void setup_child_signals( void )
 	sigaddset( &sact.sa_mask, SIGALRM );
 	sact.sa_flags = 0;
 	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
-		_exit( -1 );
+		_exit( EXIT_FAILURE );
 
 	sact.sa_handler = child_sig_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
 	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-		_exit( -1 );
+		_exit( EXIT_FAILURE );
 }
 
 
@@ -885,19 +885,24 @@ static void child_sig_handler( int signo )
 				death_mail( signo );
 			}
 
-			/* Test if parent still exists - if not (i.e. if the parent died
+			/* Test if parent still exists - if not (i.e. the parent died
 			   without sending a SIGTERM signal) destroy the semaphore and
-			   shared memory (as far as the child knows about it) */
+			   shared memory (as far as the child knows about it), kill also
+			   the child for connections and remove the lock file. */
 
-			if ( kill( getppid( ), 0 ) == -1 && errno == ESRCH )
+			if ( getppid( ) == 1 ||
+				 ( kill( getppid( ), 0 ) == -1 && errno == ESRCH ) )
 			{
+				kill( Internals.conn_pid, SIGTERM );
 				delete_all_shm( );
 				sema_destroy( Comm.data_semaphore );
 				sema_destroy( Comm.request_semaphore );
+				setuid( Internals.EUID );
+				unlink( FSC2_LOCKFILE );
 			}
 
 			EDL.do_quit = SET;
-			_exit( -1 );
+			_exit( EXIT_FAILURE );
 	}
 }
 
@@ -920,17 +925,22 @@ static void wait_for_confirmation( void )
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
 	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
-		_exit( -1 );
+		_exit( EXIT_FAILURE );
 
 	sact.sa_handler = child_confirmation_handler;
 	sigemptyset( &sact.sa_mask );
 	sact.sa_flags = 0;
 	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-		_exit( -1 );
+		_exit( EXIT_FAILURE );
 
-	/* Tell parent that we're done and just wait for its DO_QUIT signal */
+	/* Tell parent that we're done and just wait for its DO_QUIT signal - if
+	   we can't send the signal to the parent stop the child. */
 
-    kill( getppid( ), QUITTING );
+    if ( kill( getppid( ), QUITTING ) == -1 )
+		kill( getpid( ), SIGTERM );             /* commit controlled suicide */
+
+	/* This seemingly infinite loop looks worse than it is, the child really
+	   exits in the signal handler for DO_QUIT. */
 
 	while ( 1 )
 		pause( );

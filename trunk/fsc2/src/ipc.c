@@ -327,6 +327,13 @@ int sema_wait( int sema_id )
 	struct sembuf wait_flags = { 0, -1, 0 };
 
 
+
+	/* In the child process check that it hasn't become a zombie before doing
+	   the wait on the semaphore and commit controlled suicide if it is. */
+
+	if ( Internals.I_am == CHILD && getppid( ) == 1 )
+		kill( getpid( ), SIGTERM );
+
 	raise_permissions( );
 
 	while ( semop( sema_id, &wait_flags, 1 ) < 0 )

@@ -273,7 +273,7 @@ Var *f_round( Var *v )
 		case FLOAT_VAR :
 			if ( v->val.dval >= LONG_MAX - 0.5 ||
 				 v->val.dval <= LONG_MIN + 0.5 )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
 							           - ( long ) v->val.dval );
 
@@ -289,7 +289,7 @@ Var *f_round( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
 		}
 
@@ -326,7 +326,7 @@ Var *f_floor( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval < LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, lrnd( floor( v->val.dval )  ) );
 
 		default :
@@ -341,7 +341,7 @@ Var *f_floor( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			rlp[ i ] = lrnd( floor( *idp ) );
 		}
 
@@ -378,7 +378,7 @@ Var *f_ceil( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval > LONG_MAX )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, lrnd( ceil( v->val.dval ) ) );
 
 		default :
@@ -393,7 +393,7 @@ Var *f_ceil( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			rlp[ i ] = lrnd( ceil( *idp ) );
 		}
 
@@ -429,7 +429,7 @@ Var *f_abs( Var *v )
 	{
 		case INT_VAR :
 			if ( v->val.lval == LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			return vars_push( INT_VAR, labs( v->val.lval ) );
 
 		case FLOAT_VAR :
@@ -445,7 +445,7 @@ Var *f_abs( Var *v )
 		for ( i = 0; i < len; ilp++, i++ )
 		{
 			if ( *ilp == LONG_MIN )
-				print( SEVERE, "Argument integer overflow.\n" );
+				print( SEVERE, "Integer argument overflow.\n" );
 			rlp[ i ] = labs( *ilp );
 		}
 		new_var = vars_push( INT_ARR, rlp, len );
@@ -614,7 +614,7 @@ Var *f_asin( Var *v )
 		arg = VALUE( v );
 		if ( fabs( arg ) > 1.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, asin( arg ) );
@@ -629,7 +629,7 @@ Var *f_asin( Var *v )
 		arg = is_int ? ( double ) *ilp++ : *idp++;
 		if ( fabs( arg ) > 1.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
 			THROW( EXCEPTION );
 		}
 
@@ -669,7 +669,7 @@ Var *f_acos( Var *v )
 		arg = VALUE( v );
 		if ( fabs( arg ) > 1.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, acos( arg ) );
@@ -684,7 +684,7 @@ Var *f_acos( Var *v )
 		arg = is_int ? ( double ) *ilp++ : *idp++;
 		if ( fabs( arg ) > 1.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
 			THROW( EXCEPTION );
 		}
 
@@ -954,7 +954,7 @@ Var *f_ln( Var *v )
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 
@@ -975,7 +975,7 @@ Var *f_ln( Var *v )
 
 		if ( arg <= 0.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
 			THROW( EXCEPTION );
 		}
 
@@ -1019,7 +1019,7 @@ Var *f_log( Var *v )
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 
@@ -1040,7 +1040,7 @@ Var *f_log( Var *v )
 
 		if ( arg <= 0.0 )
 		{
-			print( FATAL, "Argument out of range.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
 			THROW( EXCEPTION );
 		}
 
@@ -1084,7 +1084,7 @@ Var *f_sqrt( Var *v )
 		arg = VALUE( v );
 		if ( arg < 0.0 )
 		{
-			print( FATAL, "Argument is negative.\n" );
+			print( FATAL, "Argument (%f) out of range.\n", arg );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, sqrt( arg ) );
@@ -1100,7 +1100,7 @@ Var *f_sqrt( Var *v )
 
 		if ( arg < 0.0 )
 		{
-			print( FATAL, "Argument is negative.\n" );
+			print( FATAL, "Argument #%ld (%f) out of range.\n", i + 1, arg );
 			THROW( EXCEPTION );
 		}
 
@@ -1132,14 +1132,7 @@ Var *f_random( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, random( ) / ( double ) RAND_MAX );
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		print( WARN, "Floating point number used as number of points.\n" );
-	    len = lrnd( v->val.dval );
-	}
-	else
-		len = v->val.lval;
+	len = get_long( v, "number of points" );
 
 	if ( len <= 0 )
 	{
@@ -1173,14 +1166,7 @@ Var *f_grand( Var *v )
 	if ( v == NULL )
 		return vars_push( FLOAT_VAR, gauss_random( ) );
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		print( WARN, "Floating point number used as number of points.\n" );
-	    len = lrnd( v->val.dval );
-	}
-	else
-		len = v->val.lval;
+	len = get_long( v, "number of points" );
 
 	if ( len <= 0 )
 	{
@@ -1452,15 +1438,7 @@ Var *f_mean( Var *v )
 
 	if ( v->next != NULL )
 	{
-		vars_check( v->next, INT_VAR | FLOAT_VAR );
-
-		if ( v->next->type == FLOAT_VAR )
-		{
-			print( WARN, "Floating point value used as array index.\n" );
-			a_index = lrnd( v->next->val.dval ) - ARRAY_OFFSET;
-		}
-		else
-			a_index = v->next->val.lval - ARRAY_OFFSET;
+		a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
 
 		if ( a_index < 0 )
 		{
@@ -1476,20 +1454,12 @@ Var *f_mean( Var *v )
 
 		if ( v->next->next != NULL )
 		{
-			vars_check( v->next->next, INT_VAR | FLOAT_VAR );
-
-			if ( v->next->type == FLOAT_VAR )
-			{
-				print( WARN, "Floating point value used as length of slice "
-					   "parameter.\n" );
-				slice_len = lrnd( v->next->next->val.dval );
-			}
-			else
-				slice_len = v->next->next->val.lval;
+			slice_len = get_long( v->next->next, "length of slice" );
 
 			if ( slice_len < 1 )
 			{
-				print( FATAL, "Zero or negative slice length.\n" );
+				print( FATAL, "Zero or negative slice length (%ld).\n",
+					   slice_len );
 				THROW( EXCEPTION );
 			}
 
@@ -1576,38 +1546,22 @@ Var *f_slice( Var *v )
 
 	get_array_params( v, &len, &ilp, &idp );
 
-	vars_check( v->next, INT_VAR | FLOAT_VAR );
-
-	if ( v->next->type == FLOAT_VAR )
-	{
-		print( WARN, "Floating point value used as array index.\n" );
-		a_index = lrnd( v->next->val.dval ) - ARRAY_OFFSET;
-	}
-	else
-		a_index = v->next->val.lval - ARRAY_OFFSET;
+	a_index = get_long( v->next, "array index" ) - ARRAY_OFFSET;
 
 	if ( a_index < 0 )
 	{
-		print( FATAL, "Negative array index.\n" );
+		print( FATAL, "Invalid array index (%ld).\n", a_index + ARRAY_OFFSET );
 		THROW( EXCEPTION );
 	}
 
 	if ( v->next->next != NULL )
 	{
-		vars_check( v->next->next, INT_VAR | FLOAT_VAR );
-
-		if ( v->next->type == FLOAT_VAR )
-		{
-			print( WARN, "Floating point value used as length of slice "
-				   "parameter.\n" );
-			slice_len = lrnd( v->next->next->val.dval );
-		}
-		else
-			slice_len = v->next->next->val.lval;
+		slice_len = get_long( v->next->next, "length of slice" );
 
 		if ( slice_len < 1 )
 		{
-			print( FATAL, "Zero or negative slice length.\n" );
+			print( FATAL, "Zero or negative slice length (%ld).\n",
+				   slice_len );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1702,23 +1656,15 @@ Var *f_islice( Var *v )
 	Var *ret;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
-	else
-	{
-		print( SEVERE, "Floating point value used as array size.\n" );
-		size = lrnd( v->val.dval );
-	}
+	size = get_long( v, "array size" );
 
 	if ( size <= 0 )
 	{
 		if ( v->type == INT_VAR )
-			print( FATAL, "Negative value (%d) used as array size.\n",
+			print( FATAL, "Negative or zero value (%ld) used as array size.\n",
 				   v->val.lval );
 		else
-			print( FATAL, "Negative value (%f) used as array size.\n",
+			print( FATAL, "Negative or zero value (%f) used as array size.\n",
 				   v->val.dval );
 		THROW( EXCEPTION );
 	}
@@ -1742,24 +1688,12 @@ Var *f_fslice( Var *v )
 	long i;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		size = v->val.lval;
-	else
-	{
-		print( SEVERE, "Floating point value used as array size.\n" );
-		size = lrnd( v->val.dval );
-	}
+	size = get_long( v, "array size" );
 
 	if ( size <= 0 )
 	{
-		if ( v->type == INT_VAR )
-			print( FATAL, "Negative value (%d) used as array size.\n",
-				   v->val.lval );
-		else
-			print( FATAL, "Negative value (%f) used as array size.\n",
-				   v->val.dval );
+		print( FATAL, "Zero or negative value (%ld) used as array size.\n",
+			   size );
 		THROW( EXCEPTION );
 	}
 

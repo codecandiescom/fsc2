@@ -331,7 +331,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{draw_marker}
 @item draw_marker()
 @findex draw_marker()
-This function is only available for 1D grahics and draws a vertical
+This function is only available for 1D graphics and draws a vertical
 dashed line on the display window. It expects at least one argument, an
 integer number defining the @i{x}-position of the marker to be drawn. A
 second, optional argument is the color of the marker, here one may
@@ -355,7 +355,7 @@ marker drawn last).
 @anchor{clear_marker}
 @item clear_marker()
 @findex clear_marker()
-This function is only available for 1D grahics and deletes all
+This function is only available for 1D graphics and deletes all
 previously set markers. It accepts no arguments.
 
 
@@ -822,7 +822,7 @@ checks if it is valid and the associated file is open for writing.
 The following functions are for creating, handling and deleting of
 buttons, sliders and input and output fields. When such an object is
 created for the first time a new window with the title "Toolbox" gets
-created.  The objects (i.e.@: buttons, sliders and iput and output
+created.  The objects (i.e.@: buttons, sliders and input and output
 fields) displayed in this toolbox window allow the user to influence the
 experiment when it is already running. The toolbox window will vanish
 automatically when all objects have been deleted. The toolbox with its
@@ -926,7 +926,7 @@ digit, can be used to make small size adjustments. These prefixes must
 either follow immediately after the @code{'@@'} or the @code{'#'}. The
 @code{'+'} indicates an increase of the symbol size while @code{'-'}
 will decrease the size. The digit following the prefix indicates the
-incement or decrement in pixels. For example, to draw a circle that is 3
+increment or decrement in pixels. For example, to draw a circle that is 3
 pixels smaller than the default size use the label string
 @code{"@@-3circle"}.
 
@@ -1230,7 +1230,7 @@ total number of items, indicating that the last item is selected.
 
 If called with a second argument this must be an integer number between
 @code{1} and the total number of items of the popup-menu button. The
-number indicates which of the itens has to become marked as selected
+number indicates which of the items has to become marked as selected
 (where, obviously, @code{1} will select the first item, @code{2} the
 second etc.).
 

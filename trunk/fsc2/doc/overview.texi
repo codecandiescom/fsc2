@@ -80,7 +80,7 @@ because one can use variables in the program it's easy to have a block
 for defining the parameters somewhere at the start of the program and
 change only these if necessary. If this is still too much hassle it is
 even possible to write a script (not an @acronym{EDL} program but, for
-example, a Perl script or whatever your prefered scripting language is)
+example, a Perl script or whatever your preferred scripting language is)
 which allows to set the parameters via a graphical user interface and
 then have the script generate the @acronym{EDL} program which in turn is
 passed directly to @acronym{fsc2} without any further user

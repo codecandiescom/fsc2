@@ -104,6 +104,6 @@ done. Otherwise you will have also to edit (still with @code{root}
 privileges) the GPIB configuration file (which usually is
 @file{/etc/gpib.conf}) and copy the entry for the cloned device. Then
 you only have to change in the copy the device name to the one you have
-entered while runing the script (i.e.@: in the example @code{SR510}) to
+entered while running the script (i.e.@: in the example @code{SR510}) to
 the new device name @code{SR510_B} and finally correct the entry for the
 new devices GPIB address.

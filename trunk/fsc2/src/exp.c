@@ -45,6 +45,7 @@ static long token_count;
 static CB_Stack *cb_stack = NULL;         /* curly brace stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
+extern void exp_test_init( void );
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
@@ -781,6 +782,7 @@ static void exp_syntax_check( void )
 	TRY
 	{
 		EDL.cur_prg_token = EDL.prg_token;
+		exp_test_init( );
 		exp_testparse( );
 		TRY_SUCCESS;
 	}

@@ -29,7 +29,6 @@ does work internally. I hope that this will help especially if you try
 to write a new module for a device (or if you get upset about things
 @acronym{fsc2} does differently from the way you would like it to do).
 
-
 As you will already have understood @acronym{fsc2} is basically an
 interpreter for @acronym{EDL} programs. But in contrast to other
 interpreters it does not interpret each line of input individually,
@@ -43,10 +42,19 @@ checks are done. In the second step, a complete test run of
 @code{EXPERIMENT} section of the program is done to avoid that the
 experiment will have to be stopped due to syntactic or logical errors in
 the @acronym{EDL} program. Only if this test run succeeds the third
-stage, the qexecution of the @code{EXPERIMENT} section of the
+stage, the execution of the @code{EXPERIMENT} section of the
 @acronym{EDL} program, is started, i.e.@: the experiment is run.
 
+@ifinfo
+@menu
+* First stage of interpretation::
+* Second stage of interpretation::
+* Third stage of interpretation::
+@end menu
+@end ifinfo
 
+
+@node First stage of interpretation, Second stage of interpretation, Internals, Internals
 @section First stage of interpretation
 
 
@@ -204,13 +212,14 @@ interpreting the @acronym{EDL} file.
 Another thing module writers should keep in mind is that this first (and
 also the second) stage is only run once, while the experiment itself may
 be run several times. Thus it is important that the values with which a
-device must be intialized at the start of an experiment are stored in a
+device must be initialized at the start of an experiment are stored in a
 way that they aren't overwritten during the experiment. For example, it
 does not suffice to have one single variable for the lock-in amplifiers
 sensitivity because the sensitivity and thus the variable might get
 changed during the experiment.
 
 
+@node Second stage of interpretation, Third stage of interpretation, First stage of interpretation, Internals
 @section Second stage of interpretation
 
 The second stage of the interpretation of an @acronym{EDL} program is
@@ -224,7 +233,7 @@ experiment. For example, without a "dry" run it could happen that only
 after a long time it is detected that the field of the magnet is
 requested to be set to a value that the magnet can't produce. In this
 case there usually are only few alternatives, if any, to aborting the
-experiment. Forseeing and taking the appropiate measures for such
+experiment. Foreseeing and taking the appropriate measures for such
 possibly fatal situation would complicate both the writing of modules
 and @acronym{EDL} programs enormously and probably would still not catch
 all of them.
@@ -240,7 +249,7 @@ whole time), calls of the @code{wait()} function do not make the program
 sleep for the requested time, no graphics are drawn etc.
 
 
-The writers of modules have an important responcibility to make running
+The writers of modules have an important responsibility to make running
 the test run possible. During the test run the devices can't be
 accessed. Despite this the modules have to deal in a reasonable way with
 requests for returning data from the devices. Thus the modules must,
@@ -260,13 +269,13 @@ arguments were really acceptable and, if not, stop the experiment.
 One real-world example of this case are the settings for windows for the
 digitizers, defining the parts of the complete measured curve that get
 returned or that are integrated over etc. Because during the test run
-neither the time base nor the amount of pretrigger the digitizer is set
+neither the time base nor the amount of pre-trigger the digitizer is set
 to are known (unless both have been set explicitely from the
 @acronym{EDL} program) it can't be tested if the windows start and end
 positions are within the time slice the digitizer measures. Thus the
 module can just store these settings and tell @acronym{fsc2} that they
 seem to be reasonable. Only when the experiment starts and the module
-has it's first chance to find out the real time base and pretrigger
+has it's first chance to find out the real time base and pre-trigger
 setting it can do the necessary checks on the window settings and should
 abort the experiment at the earliest possible point of time if
 necessary.
@@ -277,6 +286,7 @@ be defined within a module that get called automatically at the start of
 the test run and after the test run finished successfully.
 
 
+@node Third stage of interpretation, , Second stage of interpretation, Internals
 @section Third stage of interpretation
 
 
@@ -312,7 +322,7 @@ separate tasks is the following: The execution of the experiment, as far
 as concerned with acquiring data from the devices etc.@: should be
 unimpeded (at least as far as possible) from the task of dealing with
 user requests to allow maximum execution speed and to make the timing of
-the experiment less dependend on user interruptions. Take for example
+the experiment less dependent on user interruptions. Take for example
 the case that the user starts to move one of @acronym{fsc2}s windows
 around on the screen. As long as she is moving the window no other
 instructions of the program can be executed, which effectively would
@@ -342,7 +352,7 @@ must pass newly acquired data to be drawn to the parent process. The
 child processes stores the new data (together with the information where
 they are to be drawn) in a shared memory segment and stores the the key
 for this memory segment in an used slot in a buffer (that is also
-resides in shared memory). Then it sends the parent prorcess a signal to
+resides in shared memory). Then it sends the parent process a signal to
 inform it that new data are available and can continue immediately.
 
 
@@ -358,7 +368,7 @@ against overflows by a semaphore that is initialized to the number of
 slots in the buffer and on which the child process does a down operation
 before writing data into the buffer while the parent process posts it
 after removing an item.}. Only in this case the child process would have
-to halt the expriment until the parent empties some of the slots for
+to halt the experiment until the parent empties some of the slots for
 keys in the buffer. But, fortunately, in practice this rarely
 happens. And as a further safeguard against this happening the parent is
 written in a way that it will empty slots in the buffer as fast as

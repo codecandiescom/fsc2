@@ -602,11 +602,11 @@ size and position have to be specified in the form
 @code{+}@i{x}@code{+}@i{y}) can be given alone.
 
 @item displayGeometry
-Sets the size and postion of the display window, where size and position
+Sets the size and position of the display window, where size and position
 have to be specified as above.
 
 @item cutGeometry
-Sets the size and postion of the window showing a cut through a surface
+Sets the size and position of the window showing a cut through a surface
 (only relevant for 2D display).
 
 @item toolGeometry

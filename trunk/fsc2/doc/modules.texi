@@ -451,7 +451,7 @@ characters) an error message is printed:
 foo.edl:17: XYZ: Invalid boolean argument ("bla") in abc().
 @end example
 @noindent
-(assuming that the string was @code{"bla"}) and an execption is thrown
+(assuming that the string was @code{"bla"}) and an exception is thrown
 in all cases, even during the experiment.
 
 
@@ -1086,7 +1086,7 @@ Finally, the sixth and final function, @code{sr510_exit_hook()}, is run
 just before the module is unloaded.
 
 Please note that the first three functions, i.e.@:
-@code{sr510__init_hook}, @code{sr510_test_hook} and
+@code{sr510_init_hook}, @code{sr510_test_hook} and
 @code{sr510_end_of_test_hook} as well as the last function,
 @code{sr510_exit_hook()}, will be run only once, while both the
 remaining functions, @code{sr510_exp_hook()} and
@@ -1446,8 +1446,8 @@ instead of @code{CATCH}.  Finally, if you can not really deal with the
 error condition but need to do some cleaning up but before bailing out
 you can catch the exception using either @code{CATCH} or
 @code{OTHERWISE} and then re-throw the exception by calling
-@code{PASSTHROUGH()}
-@findex PASSTHROUGH()
+@code{RETHROW()}
+@findex RETHROW()
 to pass it on to higher level routines that are supposed to take care of
 the problem. Here's some example code
 @example
@@ -1459,7 +1459,7 @@ TRY
 OTHERWISE
 @{
     do_cleanup();       /* e.g. deallocate memory */
-    PASSTHROUGH();
+    RETHROW();
 @}
 @end example
 
@@ -1494,11 +1494,11 @@ next section), so don't throw it yourself without a very good reason. A
 @code{USER_BREAK_EXCEPTION} should be thrown from within a module when
 the module is doing something rather time consuming (e.g.@: waiting for
 a device to become ready or doing some calibration) and the user has
-pressed the @code{STOP} button. Fot this purpose there is a function
+pressed the @code{STOP} button. For this purpose there is a function
 @example
 void stop_on_user_request( void )
 @end example
-that should be called. It will automtically determine if the user has
+that should be called. It will automatically determine if the user has
 pressed the @code{STOP} button and, if she did, will throw an
 @code{USER_BREAK_EXCEPTION}.
 
@@ -1524,9 +1524,11 @@ while ( 1 )                   /* loop forever */
 @end example
 
 
-The idea and most of the code used for exceptions in @acronym{fsc2} is taken
-from an article by Peter Simons in the the iX magazine
-(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162.
+The basic ideas for the exceptions code came from an article by Peter
+Simons in the iX magazine (@uref{http://www.heise.de/ix/}), No. 5, 1998,
+pp. 160-162. It has been changed a lot thanks to the very constructive
+criticism by Chris Torek (@email{nospam@@elf.eng.bsdi.com}) on
+@uref{news://comp.lang.c}.
 
 
 @subsection Functions for memory allocation
@@ -1542,7 +1544,7 @@ These functions not only allocate memory but also check that the
 allocation really returned as much memory as you asked for (on failure
 the program is stopped and an appropriate error message is
 printed). That means that you don't have to care for error handling --
-if thesr memory allocation functions return everything is ok, otherwise
+if these memory allocation functions return everything is ok, otherwise
 they won't return at all. The first of these functions called
 @code{T_malloc()} (think about it as @i{tested malloc}). And, of course,
 there is also a replacement for @code{realloc()} and @code{calloc()},
@@ -1565,7 +1567,7 @@ pointer, which is always @code{NULL}.
 
 There might be cases where you need a call of one of the functions for
 allocation of memory to return even if it fails. In this case you have
-to call the fucntion from within a @code{TRY} block and be prepared to
+to call the function from within a @code{TRY} block and be prepared to
 catch the @code{OUT_OF_MEMORY_EXCEPTION} exception that gets thrown when
 the memory allocation fails. Here's some example code:
 @example

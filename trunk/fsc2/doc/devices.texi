@@ -186,11 +186,11 @@ Here also no fixed relation between the current and the field can be
 given, so also for this module all values have to be given in current
 units instead of field units.
 
-Because the nomal current resolution of the Keithley power supply is not
+Because the normal current resolution of the Keithley power supply is not
 sufficient an additional device is needed supplying DC voltages in the
 range between @w{-10 V} and @w{+10 V} to the modulation input of the
 power supply. Currently the DAC ports of one of the Stanford Research
-lock-in amplfiers (SR510, SR530, SR810 or SR830)) are used for this
+lock-in amplifiers (SR510, SR530, SR810 or SR830)) are used for this
 purpose. Which of the lock-ins is used can be specified during
 compilation by a corresponding entry in the configuration file for the
 Keithley driver, usually the @code{SR510} lock-in amplifier. Alternatively,
@@ -199,7 +199,7 @@ if no lock-in has been set in the configuration file the
 the devices section is to be used.
 
 In the configuration file it also can be defined which of the DAC ports
-of the lock-in ampliers is to be used. If not defined, port 6 will be
+of the lock-in amplifiers is to be used. If not defined, port 6 will be
 used for the SR510 and SR530 and port 4 for the SR810 and SR830 lock-in
 amplifier. But there exists also a function to directly select the DAC
 port to be used, see below.
@@ -220,7 +220,7 @@ size used in sweeps. The function expects two floating point parameters,
 the start field, e.g.@: @w{0.345 T}, and, in most cases, the step size,
 e.g.@: @w{0.35 G}.
 
-Use curent instead of field units for the Keithley 228A power supply
+Use current instead of field units for the Keithley 228A power supply
 (@code{keithley228a}).
 
 Because the Oxford magnet sweep power supply (@code{ips20_4}) does
@@ -363,7 +363,7 @@ and current values, an argument of @code{-1} to start a downward sweep
 or, finally, an argument of @code{0} to stop a running sweep.
 
 To be able to do a sweep a sweep rate must have been set. This can be
-either done by a cal of the function @code{magnet_setup()} (see above)
+either done by a call of the function @code{magnet_setup()} (see above)
 during the @code{PREPARATIONS} section or by calling
 @code{magnet_sweep_rate()} (see below).
 
@@ -373,14 +373,14 @@ sweeping up or down or the sweep is stopped.
 
 Sweeps will be automatically stopped when a current limit is reached. By
 calling this function without an argument you may check if this has
-happend.
+happened.
 
 
 @anchor{magnet_sweep_rate}
 @item magnet_sweep_rate()
 @findex magnet_sweep_rate()
 This function is only available for the Oxford magnet sweep power supply
-(@code{ips20_4}) to set or query the sweep rate for continous sweeps.
+(@code{ips20_4}) to set or query the sweep rate for continuous sweeps.
 If no argument is passed to the function the currently set sweep rate is
 returned. Otherwise a (positive) sweep rate in units of @code{A/s} must be
 passed to the function.
@@ -427,7 +427,7 @@ The first three gaussmeter modules, @code{er035m}, @code{er035m_s} and
 @code{bh15}, are only to be used for controlling the sweep of a magnet
 power supply. Thus only one of these gaussmeter drivers can be loaded,
 if other gaussmeters are also used, it must be the first in the
-@code{DEVICES} ection and must be specified @b{before} the magnet
+@code{DEVICES} section and must be specified @b{before} the magnet
 module (see above) which relies on its existence,
 
 In contrast, the three other modules, @code{er035m_sa},
@@ -462,7 +462,7 @@ measurements of the magnetic field.
 
 To set a resolution the values @code{0.1 G}, @code{0.01 G} and
 @code{0.001 G} can be used for the Bruker NMR gaussmeter, while for the
-Metrolab Gaussmeter only @code{0.01 G} and @code{0.001 G} are usuable.
+Metrolab Gaussmeter only @code{0.01 G} and @code{0.001 G} are usable.
 
 Please note that for the modules @code{er035m} and @code{er035m_s},
 i.e.@: the modules for direct field control, the resolution will be
@@ -483,7 +483,7 @@ returns the value in Gauss. The function can only be called in the
 @anchor{gaussmeter_probe_orientation}
 @item gaussmeter_probe_orientation()
 @findex gaussmeter_probe_orientation()
-This function is currently implemented for the Metrolab NMR gausmeter
+This function is currently implemented for the Metrolab NMR gaussmeter
 @code{pt2025} only. It allows to set or query the current probe
 orientation relative to the field. To set an orientation a parameter of
 @code{1} or @code{"+"} can be used to define an orientation parallel to
@@ -611,7 +611,7 @@ No argument is allowed -- the function returns a floating point value.
 This function is only available for the Stanford Research lock-in
 amplifiers @strong{SR810} and @strong{SR830}. Both these lock-in
 amplifiers have the capability to automatically acquire data at fixed
-time intervalls (or on receiving an external trigger) and store the data
+time intervals (or on receiving an external trigger) and store the data
 into an internal buffer. Using this acquisition mode one can be sure
 that the data have been sampled at well-defined times (in contrast to
 normal measurements where the exact time interval can vary slightly
@@ -626,7 +626,7 @@ sample two data types simultaneously.
 passed to the function is the sample time, i.e.@: the time interval at
 which data are sampled. Sample times can range between @w{1.953125 ms}
 (@w{512 Hz}) and @w{16 s}. Allowed values are powers of 2, multiplied by
-the shortest sample time. As an alternative an @strong{interger} value
+the shortest sample time. As an alternative an @strong{integer} value
 of @code{0} or @code{-1} can be passed to the function. If it is
 @code{0} a sample time equal or larger than the lock-in's time constant
 is used. If @code{-1} is passed to the function it is assumed that an
@@ -635,7 +635,7 @@ external trigger, applied to the rear trigger input, is going to be used
 than @w{512 Hz}.
 
 The next one or two parameter define which data type should be sampled
-in auto-acqusition mode (the @code{SR810} only accepts one data type
+in auto-acquisition mode (the @code{SR810} only accepts one data type
 arguments while the @code{SR830} accepts two). You may specify integer
 numbers with exactly the same meaning as the arguments to the function
 @code{lockin_get_data()}. This will also automatically switch the type
@@ -652,7 +652,7 @@ values are allowed
 @end multitable
 For the @code{SR810} only the first column is relevant.
 
-Additionaly you also may specify a value of @code{0}, indicating that
+Additionally, you also may specify a value of @code{0}, indicating that
 the function to be displayed should not be changed, i.e.@: the data type
 already set manually should be used.
 
@@ -1211,9 +1211,9 @@ existing window. As the first parameter the function expects a window
 number as returned by @code{digitizer_define_window()}. The following
 two arguments are the new position and width for this window. During the
 experiment neither the position nor the width argument must be
-specified.  If non of them are given the positiona of the cursors
+specified.  If non of them are given the positions of the cursors
 displayed on the screen is used to define the windows new start position
-and width. If only a new start positon is given the distance between the
+and width. If only a new start position is given the distance between the
 cursors on the screen is used for the window width.
 
 
@@ -1972,7 +1972,7 @@ The function switches the voltmeter to doing DC measurements.
 @section Boxcar Integrator Functions
 @cindex Boxcar Integrator Functions
 Currently there is only rudimentary support for one type of boxcar
-integrators, the @strong{EG&G PARC 4402}. Its module is loaded by specifying
+integrator, the @strong{EG&G PARC 4402}. Its module is loaded by specifying
 @example
 egg4402
 @end example

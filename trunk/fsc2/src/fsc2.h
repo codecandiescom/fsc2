@@ -128,6 +128,8 @@ typedef struct {
 
 	pid_t child_pid;             /* pid of child process doing the
                                     measurement */
+	pid_t conn_pid;               /* pid of child process for handling
+									 communication with scripts */
 	bool is_i386;                /* Set if running on an i386 processor */
 
 	int cmdline_flags;           /* Stores command line options */
