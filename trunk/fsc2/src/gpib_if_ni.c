@@ -56,7 +56,7 @@ static void gpib_log_function_end( const char *function,
 static GPIB_Device *gpib_get_dev( int device );
 
 
-static GPIB_DEVICES devices[ GPIB_MAX_DEV ];
+static GPIB_Device devices[ GPIB_MAX_DEV ];
 
 
 /*------------------------------------------------------------------------*/
@@ -324,21 +324,15 @@ int gpib_init_device( const char *device_name, int *dev )
 
 	devices[ i ].number = ibdev( 0, devices[ i ].pad, devices[ i ].sad,
 								 devices[ i ].timo,
-								 ( devices[ i ].eosmode << 8 ) |
-								 ( devices[ i ].eos & 0xff ),
+								 ( ( devices[ i ].eosmode &
+									 ( GPIB_REOS | GPIB_XEOS | GPIB_BIN ) )
+								   << 8 ) | ( devices[ i ].eos & 0xff ),
 								 devices[ i ].eosmode & GPIB_EOT ? 1 : 0);
 
     if ( devices[ i ].number < 0 )
 	{
         sprintf( gpib_error_msg, "Initialization of device %s failed.\n",
 				 device_name );
-		for ( i = 0; i < GPIB_MAX_DEV; i++ )
-			if ( devices[ i ].is_online )
-			{
-				ibonl( devices[ i ].number, 0 );
-				devices[ i ].is_online = 0;
-			}
-
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
 		return FAILURE;
