@@ -1192,7 +1192,7 @@ magnet used for Leiden @w{275 GHz} spektrometer.
 @subheading Oxford Temperature Controller ITC503
 @end iftex
 @ifnottex
-@section Oxford Temperature Controller503
+@section Oxford Temperature Controller ITC503
 @end ifnottex
 
 @paragraphindent 0
