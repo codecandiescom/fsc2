@@ -575,8 +575,11 @@ Var *digitizer_record_length( Var *v )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function either sets or returns the amount of pretrigger as a value */
+/* between 0 and 1, which, when multiplied by the record length gives  */
+/* the number of points recorded before the trigger.                   */
+/*---------------------------------------------------------------------*/
 
 Var *digitizer_trigger_position( Var *v )
 {
