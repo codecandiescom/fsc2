@@ -136,8 +136,6 @@ typedef struct {
 
 	Display *d;             /* pointer to display structure */
 
-	Pixmap pm;              /* pixmap for double buffering */
-
 	Canvas x_axis;
 	Canvas y_axis;
 	Canvas z_axis;
