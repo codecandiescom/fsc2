@@ -1364,8 +1364,11 @@ ssize_t writen( int fd, const void *vptr, size_t n )
 }
 
 
-/*-----------------------------------------------------*/
-/*-----------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* This function is just a wrapper around fl_show_fselector() to set the */
+/* start directory on the very first invokation if no start directory is */
+/* specified by the user.                                                */
+/*-----------------------------------------------------------------------*/
 
 const char *fsc2_show_fselector( const char *message, const char *dir,
 								 const char *pattern, const char *def_name )
