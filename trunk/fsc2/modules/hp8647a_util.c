@@ -48,7 +48,7 @@ FILE *hp8647a_find_table( char **name )
 	if ( strchr( *name, '/' ) != NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found.\n",
-				Fname, Lc, *name );
+				Fname, Lc, DEVICE_NAME, *name );
 		THROW( EXCEPTION );
 	}
 
@@ -65,7 +65,7 @@ FILE *hp8647a_find_table( char **name )
 	if ( ( tfp = hp8647a_open_table( *name ) ) == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Table file `%s' not found, neither in the "
-				"current dirctory nor in `%s'.\n", Fname, Lc,
+				"current dirctory nor in `%s'.\n", Fname, Lc, DEVICE_NAME,
 				strrchr( *name, '/' ) + 1, libdir );
 		THROW( EXCEPTION );
 	}
