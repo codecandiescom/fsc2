@@ -87,34 +87,6 @@ static inline void rulbus_parport_reverse( void );
 static int rulbus_epp_interface_present( void );
 
 
-struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
-                                     rulbus_epp_attach,
-                                     rulbus_epp_detach };
-
-static struct rulbus_device {
-        struct parport *port;
-        struct pardevice *dev;
-        int in_use;                 /* set when device is opened */
-        int is_claimed;             /* set while we have exclusive access */
-        uid_t owner;                /* current owner of the device */
-        spinlock_t spinlock;
-        unsigned char rack;         /* currently addressed rack */
-        unsigned char direction;
-} rulbus = { NULL, NULL, 0xf0 };
-
-
-struct file_operations rulbus_file_ops = {
-        owner:          THIS_MODULE,
-        ioctl:          rulbus_ioctl,
-        open:           rulbus_open,
-        release:        rulbus_release,
-};
-
-
-static int major = RULBUS_EPP_MAJOR;
-static unsigned long base = RULBUS_EPP_BASE;
-
-
 #define FORWARD     0
 #define REVERSE     1
 
@@ -147,6 +119,35 @@ static unsigned long base = RULBUS_EPP_BASE;
 #define SPP_EnaBiDirect     ( 1 << 5 )   /* SPP enable bidirectional */
 #define SPP_Unused1         ( 1 << 6 )   /* SPP unused1 */
 #define SPP_Unused2	        ( 1 << 7 )   /* SPP unused2 */
+
+
+struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
+                                     rulbus_epp_attach,
+                                     rulbus_epp_detach };
+
+static struct rulbus_device {
+        struct parport *port;
+        struct pardevice *dev;
+        int in_use;                 /* set when device is opened */
+        int is_claimed;             /* set while we have exclusive access */
+        uid_t owner;                /* current owner of the device */
+        spinlock_t spinlock;
+        unsigned char rack;         /* currently addressed rack */
+        unsigned char direction;
+} rulbus = { NULL, NULL, 0, 0, 0, { }, 0xf0, FORWARD };
+
+
+struct file_operations rulbus_file_ops = {
+        owner:          THIS_MODULE,
+        ioctl:          rulbus_ioctl,
+        open:           rulbus_open,
+        release:        rulbus_release,
+};
+
+
+static int major = RULBUS_EPP_MAJOR;
+static unsigned long base = RULBUS_EPP_BASE;
+
 
 
 /*------------------------------------------------------*
@@ -405,9 +406,9 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
 }
 
 
-/*------------------------------------------------------*
- * Function for reading data from a card
- *------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for reading data from a card in one of the racks
+ *-----------------------------------------------------------*/
 
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 {
@@ -448,7 +449,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 				return -ENOMEM;
 		}
 
-        /* Select the rack (if necessary) */
+        /* Select the rack (unless it's not already selected) */
 
         if ( rulbus.rack != rulbus_arg->rack ) {
                 rulbus_parport_write_addr( 0 );
@@ -477,9 +478,9 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 }
 
 
-/*-------------------------------------*
- * Function for writing data to a card
- *-------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for writing data to a card in one of the racks
+ *---------------------------------------------------------*/
 
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
 {
