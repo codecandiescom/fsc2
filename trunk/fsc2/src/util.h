@@ -33,4 +33,9 @@ inline double d_max( double a, double b );
 inline double d_min( double a, double b );
 
 
+/* Needed for glib versions below 2.0 (or 2.1 ?) */
+
+// inline long lround( double x );
+
+
 #endif  /* ! UTIL_HEADER */

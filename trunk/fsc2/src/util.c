@@ -463,6 +463,11 @@ void i2rgb( double h, int *rgb )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* Function creates a set of colors in XFORMs internal color map for use */
+/* in 2D graphics (NUM_COLORS is defined in global.h).                   */
+/*-----------------------------------------------------------------------*/
+
 void create_colors( void )
 {
     FL_COLOR i;
@@ -478,32 +483,42 @@ void create_colors( void )
 					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 	}
 
-	/* Finally create colors for values too large and values too small */
+	/* Finally create colors for values too small or too large */
 
-	i2rgb( 2.0, rgb );
+	i2rgb( -1.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
-	i2rgb( -1.0, rgb );
+	i2rgb( 2.0, rgb );
 	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 2,
 				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 }
 
 
+/***********************************************************************/
+/* The following functions are that short that inlining them seemed to */
+/* be a good idea...                                                   */
+/***********************************************************************/
+
+/*-------------------------------------------------------------------------*/
+/* Returns the pixel value of an entry in XFORMs internal color map from   */
+/* the colors set in crfeate_colors(). For values slightly above 1 as well */
+/* as for values just below 0 only one color pixel value is returned while */
+/* for intermediate values one of NUM_COLORS (as defined in global.h) is   */
+/* returned, depending on the value.                                       */
+/*-------------------------------------------------------------------------*/
+
 inline unsigned long d2color( double a )
 {
 	if ( a <= - 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
-	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
+	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 	else
 		return fl_get_pixel( FL_FREE_COL1 + 1
 							 + lround( a * ( NUM_COLORS - 1 ) ) );
 }
 
 
-
-/* Here some more utility functions - they are that short that inlining them
-   seemed to be a good idea... */
 
 /* The next two functions do a conversion of double or integer values to
    short. Both are exclusively used in the conversion of data to points to be
