@@ -195,7 +195,10 @@ magnetic fields in combination with power supply controllers
 measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos}, @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -289,7 +292,10 @@ minimum pulse voltage for the duration of the time base (this also holds
 for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -355,7 +361,10 @@ minimum pulse voltage for the duration of the time base (this also holds
 for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -399,7 +408,10 @@ already measured curves and starting and stopping of acquisitions are
 currently supported.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -441,7 +453,10 @@ Maximum number of pulses per channel: 59@*
 Output channels: 8
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos}, @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -485,7 +500,10 @@ Bruker EPR spectrometers -- lock-in amplifier with built-in
 analog-to-digital converter.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -530,7 +548,10 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @w{-50 G} to @w{23000 G}, minimum field step width is @w{1 mG}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -567,7 +588,10 @@ with the magnet power supply controllers @code{aeg_s_band} and
 range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -642,7 +666,10 @@ with @code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
 the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -752,7 +779,10 @@ Number of channels: 4 plus a TRIGGER_OUT channel@*
 Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -794,7 +824,10 @@ a very old device even pre-dating the GPIB-standard. Only its capability
 to return the measured frequency can be used.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos} @code{set-xeos} and @code{set-bin}
+to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -829,7 +862,10 @@ Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 dB}
 to @w{3 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -876,7 +912,10 @@ Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 dB}
 to @w{14.5 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin}
+to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1133,7 +1172,10 @@ units!
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488) via the Oxford ITC 503
-temperature controller transfering data between GPIB and Oxford ISOBUS.
+temperature controller transfering data between GPIB and Oxford ISOBUS.@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1168,7 +1210,10 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 magnet used for Leiden @w{275 GHz} spektrometer.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488)
+@strong{Controlled via}: GPIB bus (IEEE 488)@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1204,7 +1249,10 @@ only temperature measurements are supported, no automatic adjustment of
 the temperature.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1249,7 +1297,10 @@ Please note: With this module the functions expect arguments in terms of
 the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1284,7 +1335,10 @@ the currents through the sweep coil, not in field units!
 @strong{Description}: Kontron digital voltmeter 4060.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1316,7 +1370,10 @@ only temperature measurements are supported, no automatic adjustment of
 the temperature.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1512,7 +1569,10 @@ only deals with the 1.5 T to 3.4 T probe and fields above 3.15
 T. Measured fields are returned in Gauss, not Tesla!
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1776,7 +1836,10 @@ for certain pulse seqences the repetition time may be increases slightly
 the repetition time may become larger by @w{8 ns}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} to @code{yes} and @code{set-xeos} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1976,7 +2039,10 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 channel, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2012,7 +2078,10 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 channels, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2048,7 +2117,10 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 channel, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2089,7 +2161,10 @@ channel, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2131,7 +2206,10 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2181,7 +2259,10 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2231,7 +2312,10 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2281,7 +2365,10 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2331,7 +2418,10 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2381,7 +2471,10 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2432,7 +2525,10 @@ mV}, current range: @w{0 A} to @w{3 A} with resolution of @w{1 mA}.
 
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
