@@ -251,7 +251,7 @@ double hp8672a_set_attenuation( double att )
 	/* Switch between extra 10 db on and off if necessary */
 
 	if ( hp8672a.state == SET )
-		hp8672a_output_state( SET );
+		hp8672a_set_output_state( SET );
 
 	return att;
 }
