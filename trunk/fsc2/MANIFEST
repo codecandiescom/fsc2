@@ -66,6 +66,8 @@ config/hfs9000.conf
 config/hjs_attenuator.calib
 config/hjs_attenuator.conf
 config/hjs_daadc.conf
+config/hjs_fc.calib
+config/hjs_fc.calib~
 config/hjs_fc.conf
 config/hjs_sfc.calib
 config/hjs_sfc.conf
@@ -203,6 +205,8 @@ modules/hjs_attenuator.h
 modules/hjs_attenuator_lexer.l
 modules/hjs_daadc.c
 modules/hjs_fc.c
+modules/hjs_fc.h
+modules/hjs_fc_lexer.l
 modules/hjs_sfc.c
 modules/hjs_sfc.h
 modules/hjs_sfc_lexer.l

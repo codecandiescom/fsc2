@@ -1002,8 +1002,7 @@ sub show {
     $fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
     $fs{ top }->bind( '<End>' =>
                       sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
-    $fs{ top }->bind( '<Delete>' => sub { $selected = "" } );
-    $fs{ top }->bind( '<BackSpace>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<Escape>' => sub { $selected = "" } );
     $fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
     $fs{ top }->bind( '<Tab>' =>
                       sub { populate_fs( $fs{ list }, $cur_dir ) } );
