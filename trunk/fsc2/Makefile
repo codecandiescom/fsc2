@@ -21,8 +21,7 @@
 
 
 # The following variables determine where the program, auxiliary files and
-# the documentation will be copied to by 'make install' (set 'prefix' e.g.
-# to '.' for a local install).
+# the documentation will be copied to by 'make install'.
 
 prefix         = /usr/local
 bindir         = $(prefix)/bin
