@@ -185,8 +185,7 @@ sub serve {
 
 sub serve_main {
 
-	my $f = shift;
-	my $req = shift;
+	my ( $f, $req ) = @_;
 	my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
 	my @st2 = ( "Idle", "Experiment running",
 				"<FONT COLOR=#FF0000>Waiting for user input</FONT>",
@@ -326,7 +325,7 @@ sub serve_logo {
 	my $fh;
 
 
-	open( $fh, $auxdir . $file ) or return not_found( $file );
+	open( $fh, $auxdir . $file ) or return not_found( $file, $req );
 
 	print "HTTP/1.1 200 OK$crlf" . def_txt( 1 ) .
 		  "Accept-Ranges: none$crlf" .
@@ -384,7 +383,7 @@ sub serve_pics {
 		}
 	} elsif ( $state =~ /^0$/o ) {
 		$file = $auxdir . "na.$ext";
-		open( $fh, $file ) or return not_found( "fsc2_$which$ext" );
+		open( $fh, $file ) or return not_found( "fsc2_$which$ext", $req );
 	}
 	stdout_lock( 0 );
 
