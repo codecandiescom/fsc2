@@ -210,14 +210,14 @@ in \$NI6601_KERNEL_SOURCE/include/linux this will also do.\n\
 	 exit 1;
 fi
 
-# Compile the library and the driver
+# Compile the driver and the library
 
+echo "Compiling driver and library, please wait..."
 make all > makelog 2>&1
 
 if [ $? -ne 0 ]; then
     dialog --msgbox \
-"Sorry, compilation failed.\n
-See \"makelog\" for the reasons.\n" 6 40;
+"  Sorry, compilation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
     exit 1;
 fi
 

@@ -238,14 +238,14 @@ in \$WITIO_48_KERNEL_SOURCE/include/linux this will also do.\n\
 	 exit 1;
 fi
 
-# Compile the library and the driver
+# Compile the driver and the library
 
+echo "Compiling driver and library, please wait..."
 make all > makelog 2>&1
 
 if [ $? -ne 0 ]; then
     dialog --msgbox \
-"Sorry, compilation failed.\n
-See \"makelog\" for the reasons.\n" 6 40;
+"  Sorry, compilation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
     exit 1;
 fi
 
@@ -290,10 +290,11 @@ fi
 # find out if user wants to update the modules dependency file
 
 if [ -z "$WITIO_48_KERNEL_SOURCE" ]; then
-    make install
+    make install >> makelog 2>&1
 
     if [ $? -ne 0 ]; then
-	    dialog --msgbox "Sorry, installation failed.\n" 5 30
+	    dialog --msgbox \
+"  Sorry, instalation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
 	    exit 1
     fi
 
