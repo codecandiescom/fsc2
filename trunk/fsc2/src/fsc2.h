@@ -135,7 +135,7 @@ Prg_Token *cur_prg_token;    /* index of currently handled element in
 long On_Stop_Pos = -1;       /* index of the ON_STOP command in the array with
 								the predigested program */
 
-Var *var_list = NULL;        /* list of all variables used in the program */
+Var *Var_List = NULL;        /* list of all variables used in the program */
 Var *Var_Stack = NULL;       /* list for stack of variables used in evaluation
 								of expressions and function calls */
 
@@ -216,7 +216,7 @@ extern Device *Device_List;
 extern Device_Name *Device_Name_List;
 extern int Max_Devices_of_a_Kind;
 
-extern Var *var_list;
+extern Var *Var_List;
 extern Var *Var_Stack;
 
 extern Pulser_Struct pulser_struct;

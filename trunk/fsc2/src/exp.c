@@ -1607,7 +1607,7 @@ static void save_restore_variables( bool flag )
 	{
 		fsc2_assert( ! exists_copy );      /* don't save twice ! */
 
-		if ( var_list == NULL )
+		if ( Var_List == NULL )
 		{
 			old_var_list = var_list_copy = NULL;
 			exists_copy = SET;
@@ -1616,7 +1616,7 @@ static void save_restore_variables( bool flag )
 
 		/* Count the number of variables and get memory for storing them */
 
-		for ( var_count = 0, src = var_list; src != NULL;
+		for ( var_count = 0, src = Var_List; src != NULL;
 			  var_count++, src = src->next )
 			;
 
@@ -1624,7 +1624,7 @@ static void save_restore_variables( bool flag )
 
 		/* Copy all of them into the backup region */
 
-		for ( src = var_list, cpy = var_list_copy; src != NULL;
+		for ( src = Var_List, cpy = var_list_copy; src != NULL;
 			  cpy++, src = src->next )
 		{
 			memcpy( cpy, src, sizeof( Var ) );
@@ -1651,13 +1651,13 @@ static void save_restore_variables( bool flag )
 			}
 		}
 
-		old_var_list = var_list;
+		old_var_list = Var_List;
 		exists_copy = SET;
 	}
 	else
 	{
 		fsc2_assert( exists_copy );             /* no restore without save ! */
-		fsc2_assert( var_list == old_var_list );   /* just a bit paranoid... */
+		fsc2_assert( Var_List == old_var_list );   /* just a bit paranoid... */
 
 		if ( var_list_copy == NULL )
 		{
@@ -1668,7 +1668,7 @@ static void save_restore_variables( bool flag )
 		/* Get rid of memory for arrays that might have been changed during
 		   the test */
 
-		for ( cpy = var_list; cpy != NULL; cpy = cpy->next )
+		for ( cpy = Var_List; cpy != NULL; cpy = cpy->next )
 		{
 			if ( cpy->type == INT_CONT_ARR && ! ( cpy->flags & NEED_ALLOC ) &&
 				 cpy->val.lpnt != NULL )
@@ -1682,7 +1682,7 @@ static void save_restore_variables( bool flag )
 				T_free( cpy->sizes );
 		}
 
-		for ( src = var_list_copy, cpy = var_list; cpy != NULL;
+		for ( src = var_list_copy, cpy = Var_List; cpy != NULL;
 			  cpy = src->next, src++  )
 			memcpy( cpy, src, sizeof( Var ) );
 

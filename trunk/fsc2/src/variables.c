@@ -249,9 +249,9 @@ Var *vars_get( char *name )
 	/* Try to find the variable with the name passed to the function */
 
 	if ( is_sorted )
-		return bsearch( name, var_list, num_vars, sizeof( Var ), comp_vars_2 );
+		return bsearch( name, Var_List, num_vars, sizeof( Var ), comp_vars_2 );
 	else
-		for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
+		for ( ptr = Var_List; ptr != NULL; ptr = ptr->next )
 			if ( ! strcmp( ptr->name, name ) )
 				return ptr;
 
@@ -277,7 +277,7 @@ void vars_sort( void )
 
 	/* Find out how many variables exist */
 
-	for ( num_vars = 0, ptr = var_list; ptr != NULL;
+	for ( num_vars = 0, ptr = Var_List; ptr != NULL;
 		  ptr = ptr->next, num_vars++ )
 		;
 
@@ -285,26 +285,26 @@ void vars_sort( void )
 	   to the variable names */
 
 	new_var_list = T_malloc( num_vars * sizeof( Var ) );
-	for ( i = 0, ptr = var_list; i < num_vars; i++, ptr = next_ptr )
+	for ( i = 0, ptr = Var_List; i < num_vars; i++, ptr = next_ptr )
 	{
 		memcpy( new_var_list + i, ptr, sizeof( Var ) );
 		next_ptr = ptr->next;
 		T_free( ptr );
 	}
 
-	var_list = new_var_list;
+	Var_List = new_var_list;
 
-	qsort( var_list, num_vars, sizeof( Var ), comp_vars_1 );
+	qsort( Var_List, num_vars, sizeof( Var ), comp_vars_1 );
 
 	/* Reset the next and prev pointers */
 
-	for ( i = 0, ptr = var_list; i < num_vars; ptr++, i++ )
+	for ( i = 0, ptr = Var_List; i < num_vars; ptr++, i++ )
 	{
 		ptr->next = ptr + 1;
 		ptr->prev = ptr - 1;
 	}
 
-	var_list->prev = NULL;
+	Var_List->prev = NULL;
 	( --ptr )->next = NULL;
 
 	/* Set a flag that indicates that the list has been sorted */
@@ -362,10 +362,10 @@ Var *vars_new( char *name )
 	vp->flags = NEW_VARIABLE;    /* set flag to indicate it's new */
 	vp->type = UNDEF_VAR;        /* set type to still undefined */
 
-	vp->next = var_list;         /* set pointer to it's successor */
-	if ( var_list != NULL )      /* set previous pointer in successor */
-		var_list->prev = vp;     /* (if this isn't the very first) */ 
-    var_list = vp;               /* make it the head of the list */
+	vp->next = Var_List;         /* set pointer to it's successor */
+	if ( Var_List != NULL )      /* set previous pointer in successor */
+		Var_List->prev = vp;     /* (if this isn't the very first) */ 
+    Var_List = vp;               /* make it the head of the list */
 
 	return vp;                   /* return pointer to the structure */
 }
@@ -1345,7 +1345,7 @@ static void free_vars( void )
 	Var *ptr;
 
 
-	for ( ptr = var_list; ptr != NULL; ptr = ptr->next )
+	for ( ptr = Var_List; ptr != NULL; ptr = ptr->next )
 	{
 		if ( ptr->name != NULL )
 			T_free( ptr->name );
@@ -1373,7 +1373,7 @@ static void free_vars( void )
 		}
 	}
 
-	var_list = T_free( var_list );
+	Var_List = T_free( Var_List );
 }
 
 
@@ -1475,10 +1475,10 @@ bool vars_exist( Var *v )
 	else
 	{
 		if ( is_sorted )
-			lp = bsearch( v->name, var_list, num_vars, sizeof( Var ),
+			lp = bsearch( v->name, Var_List, num_vars, sizeof( Var ),
 						  comp_vars_2 );
 		else
-			for ( lp = var_list; lp != NULL && lp != v; lp = lp->next )
+			for ( lp = Var_List; lp != NULL && lp != v; lp = lp->next )
 				;
 	}
 
