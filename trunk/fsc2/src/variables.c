@@ -291,7 +291,7 @@ static Var* vars_setup_new_array( Var *v, int dim )
 	Var *a = v->from;
 
 
-	/* We can't continue with a (LHS) definition like "a[ ]"...*/
+	/* We can't continue without indices, i.e. with a definition like "a[ ]" */
 
 	if ( v->next->type == UNDEF_VAR )
 	{
@@ -303,11 +303,10 @@ static Var* vars_setup_new_array( Var *v, int dim )
 	/* Create the array as far as possible */
 
 	a->type = VAR_TYPE( a->name ) == INT_VAR ? INT_REF : FLOAT_REF;
-	a->flags &= ~ NEW_VARIABLE;
 
 	vars_arr_create( a, v->next, dim, UNSET );
 
-	/* Get rid of variables that are not needed anymore */
+	/* Get rid of variables that aren't needed anymore */
 
 	while ( ( v = vars_pop( v ) ) != NULL )
 		/* empty */ ;
@@ -328,11 +327,12 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	ssize_t len;
 
 
-	a->dim = dim;
+	a->dim    = dim;
+	a->flags &= ~ NEW_VARIABLE;
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	/* If the size is not defined the whole of the rest of the array is
+	/* If the size is not defined the whole of the rest of the array must be
 	   dynamically sized and can be only set up by an assignement sometime
 	   later. */
 
@@ -341,10 +341,17 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 		a->len = 0;
 		a->flags |= IS_DYNAMIC;
 
-		if ( v->next == NULL )
-			a->type = INT_TYPE( a ) ? INT_ARR : FLOAT_ARR;
+		/* If we're dealing with the last index we just need to adjust the
+		   variable type */
 
-		/* Also all the following sizes must be dynamically sized */
+		if ( a->dim == 1 )
+		{
+			a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
+			return;
+		}
+
+		/* Otherwise check that all the following sizes are also dynamically
+		   sized */
 
 		for ( c = v->next; c != NULL; c = c->next )
 			if ( ! ( c->flags & IS_DYNAMIC ) )
@@ -382,13 +389,17 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 	/* If this is the last dimension we really allocate memory (intialized
 	   to 0) for a data array and then are done */
 
-	if ( v->next == NULL )
+	if ( a->dim == 1 )
 	{
 		a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
 		if ( a->type == INT_ARR )
 			a->val.lpnt = LONG_P T_calloc( a->len, sizeof *a->val.lpnt );
 		else
-			a->val.dpnt = DOUBLE_P T_calloc( a->len, sizeof *a->val.dpnt );
+		{
+			a->val.dpnt = DOUBLE_P T_malloc( a->len * sizeof *a->val.dpnt );
+			for ( i = 0; i < a->len; i++ )
+				a->val.dpnt[ i ] = 0.0;
+		}
 
 		return;
 	}
@@ -403,9 +414,9 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 
 	for ( i = 0; i < a->len; i++ )
 	{
-		a->val.vptr[ i ] = vars_new( NULL );
-		a->val.vptr[ i ]->type = a->type;
-		a->val.vptr[ i ]->from = a;
+		a->val.vptr[ i ]         = vars_new( NULL );
+		a->val.vptr[ i ]->type   = a->type;
+		a->val.vptr[ i ]->from   = a;
 		if ( is_temp )
 			a->val.vptr[ i ]->flags |= IS_TEMP;
 		vars_arr_create( a->val.vptr[ i ], v->next, dim - 1, is_temp );
@@ -931,8 +942,10 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 
 			case FLOAT_REF :
 				cv->type = FLOAT_ARR;
-				cv->val.dpnt = DOUBLE_P T_calloc( ind + 1,
-												  sizeof *cv->val.dpnt );
+				cv->val.dpnt = DOUBLE_P T_malloc( ( ind + 1 )
+												  * sizeof *cv->val.dpnt );
+				for ( i = 0; i <= ind; i++ )
+					cv->val.dpnt[ i ] = 0.0;
 				break;
 
 			default :
@@ -1629,6 +1642,7 @@ Var *vars_push( int type, ... )
 {
 	Var *nsv, *stack, *src;
 	va_list ap;
+	ssize_t i;
 
 
 	/* Get memory for the new variable to be appended to the stack, set its
@@ -1699,8 +1713,12 @@ Var *vars_push( int type, ... )
 					nsv->val.dpnt = DOUBLE_P get_memcpy( nsv->val.dpnt,
 											nsv->len * sizeof *nsv->val.dpnt );
 				else
-					nsv->val.dpnt = DOUBLE_P T_calloc( nsv->len,
+				{
+					nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len *
 													   sizeof *nsv->val.dpnt );
+					for ( i = 0; i < nsv->len; i++ )
+						nsv->val.dpnt[ i ] = 0.0;
+				}
 			}
 			break;
 
