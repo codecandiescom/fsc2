@@ -33,13 +33,13 @@ static volatile bool child_is_quitting;
 
 
 /*-------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initialises all needed    */
+/* run() starts an experiment. To do so it initializes all needed    */
 /* devices and opens a new window for displaying the measured data.  */
 /* Then a pipe is opened for passing measured data from the child    */
 /* process (to be created for acquiring the data) and the main       */
 /* process (that just accepts and displays the data). After          */
-/* initialising some global variables and setting up signal handlers */
-/* used for synchronisation the processes the child process is       */
+/* initializing some global variables and setting up signal handlers */
+/* used for synchronization the processes the child process is       */
 /* started.                                                          */
 /*-------------------------------------------------------------------*/
 
@@ -63,12 +63,12 @@ bool run( void )
 	set_buttons_for_run( 0 );
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_watch );
 
-	/* If the devices need the GPIB bus initialise it now */
+	/* If the devices need the GPIB bus initialism it now */
 
 #ifndef MAX_DEBUG
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
 	{
-		eprint( FATAL, "Can't initialise GPIB bus." );
+		eprint( FATAL, "Can't initialize GPIB bus." );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
