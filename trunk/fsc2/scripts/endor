@@ -127,7 +127,7 @@ $f5->pack( %fp );
 $f5_l1->pack( %wp );
 $f5_v->pack( %wp );
 $f5_l2->pack( %wp );
-
+$f5->{ is_shown } = 1;
 
 my $f6 = $mw->Frame( );
 my $f6_l1 = $f6->Label( '-text' => 'Modulation amplitude:',
@@ -194,24 +194,50 @@ $mw->Button( '-text' => 'Quit',
 MainLoop;
 
 
+#############################################
+
 sub is_numeric {
 
 	my $new_val = shift;
 	return $new_val =~ /^[+-]?([0-9]+(\.[0-9]*)?)?$/;
 }
 
+
+#############################################
+
 sub li_conf {
 
 	my ( $self, $li ) = @_;
 
 	if ( $li =~ /^sr8/ ) {
-		$f5_v->configure( '-state' => 'normal' );
+		unless ( $f5->{ is_shown } == 1 ) {
+			$f5_l1 = $f5->Label( '-text' => 'Modulation frequency:',
+								 '-width' => '20',
+								 'anchor' => 'w' );
+			$f5_v = $f5->Entry( '-textvariable' => \$mod_freq,
+								'-width' => '6',
+								'-validate' => 'key',
+								'-vcmd' => \&is_numeric,
+								'-relief' => 'sunken' );
+			$f5_l2 = $f5->Label( '-text' => 'kHz',
+								 '-width' => 3 );
+			$f5_l1->pack( %wp );
+			$f5_v->pack( %wp );
+			$f5_l2->pack( %wp );
+			$f5->{ is_shown } = 1;
+		}
 	} else {
-		$f5_v->configure( '-state' => 'disabled' );
-		$mod_freq = "";
+		unless ( $f5->{ is_shown } == 0 ) {
+			$f5_l1->destroy;
+			$f5_v->destroy;
+			$f5_l2->destroy;
+			$f5->{ is_shown } = 0;
+		}
 	}
 }
 
+
+#############################################
 
 sub write_out {
 
@@ -357,6 +383,8 @@ if ( $? != 0 ) {
 }
 
 
+#############################################
+
 sub do_checks {
 
 	my $text = "";
@@ -499,6 +527,8 @@ sub do_checks {
 	return 0;
 }
 
+
+#############################################
 
 sub show_message {
 	my $text = shift;
