@@ -78,13 +78,12 @@ void spex_cd2a_init( void )
 		TRY
 		{
 			fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-
 			spex_cd2a_write( PARAMETER, "TYB" );
 			TRY_SUCCESS;
 		}
 		CATCH( EXCEPTION )
 		{
-			if ( 1 != show_choices( "Please press the \"REMOTE\" button of\n"
+			if ( 1 != show_choices( "Please press the \"REMOTE\" button at\n"
 									"the console to allow computer control\n"
 									"of the monochromator.",
 									2, "Abort", "Done", NULL, 1 ) )
@@ -156,9 +155,15 @@ void spex_cd2a_set_wavelength( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* Set a position... */
+	/* When the wavelength or wavenumber is in absolute units we have to
+	   send the already offset-corrected wavelength or or wavenumber, but
+	   when in delta-wavenumber mode we have to remove the offset because
+	   it's already in the laser line position */
 
-	if ( spex_cd2a.mode & WN_MODES )
+	if ( spex_cd2a.mode == WN )
+		spex_cd2a_print( mess + 2, 8,
+						 spex_cd2a_wl2mwn( spex_cd2a.wavelength ) );
+	else if ( spex_cd2a.mode == WND )
 		spex_cd2a_print( mess + 2, 8,
 						 spex_cd2a_wl2mwn( spex_cd2a.wavelength )
 						 - spex_cd2a.offset );
@@ -226,14 +231,14 @@ void spex_cd2a_trigger( void )
 
 /*-------------------------------------------------------------------*/
 /* Function for setting the position of the laser line. This is only */
-/* possible when the monochromator is wavenumber driven. It als o    */
+/* possible when the monochromator is wavenumber driven. It also     */
 /* switches the way positions are treated by the device: if no laser */
-/* line position is set positions are handled as absolute wave-      */
-/* numbers. But when the laser line is set, positions are treated as */
+/* line position is set positions are taken to be absolute wave-     */
+/* numbers. But when the laser line is set positions are taken to be */
 /* relative to the laser line (i.e. position of the laser line minus */
 /* the absolute position). The only execption is when setting the    */
 /* laser line position itself: the value passed to the device is     */
-/* always treated as a position in  absolute wavenumbers.            */
+/* always taken to be a position in  absolute wavenumbers.           */
 /* The laser line position can also be switched off (thus reverting  */
 /* to absolute positions) by setting the laser line position to 0.   */
 /*-------------------------------------------------------------------*/
@@ -261,8 +266,9 @@ void spex_cd2a_set_laser_line( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function for setting the shutter limits of the device */
+/*-------------------------------------------------------*/
 
 void spex_cd2a_set_shutter_limits( void )
 {
@@ -313,7 +319,15 @@ void spex_cd2a_scan_start( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	if ( spex_cd2a.mode & WN_MODES )
+	/* When the wavelength or wavenumber is in absolute units we have to
+	   send the already offset-corrected wavelength or or wavenumber, but
+	   when in delta-wavenumber mode we have to remove the offset because
+	   it's already in the laser line position */
+
+	if ( spex_cd2a.mode == WN )
+		spex_cd2a_print( mess + 2, 8,
+						 spex_cd2a_wl2mwn( spex_cd2a.scan_start ) );
+	else if ( spex_cd2a.mode == WND )
 		spex_cd2a_print( mess + 2, 8,
 						 spex_cd2a_wl2mwn( spex_cd2a.scan_start )
 						 - spex_cd2a.offset );
@@ -380,6 +394,8 @@ void spex_cd2a_scan_step( void )
 
 
 /*-----------------------------------------------------------------------*/
+/* Function assembles a numeric string in the format the device expects. */
+/* The string is never going to be longer than 'digits'.                 */
 /*-----------------------------------------------------------------------*/
 
 static void spex_cd2a_print( char *mess, int digits, double val )
@@ -418,8 +434,10 @@ static void spex_cd2a_print( char *mess, int digits, double val )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------*/
+/* Function for opening the device file for the device */
+/* and setting up the communication parameters.        */
+/*-----------------------------------------------------*/
 
 void spex_cd2a_open( void )
 {
@@ -519,6 +537,9 @@ void spex_cd2a_open( void )
 
 
 /*-----------------------------------------------------------------------*/
+/* Function for sending a message to the device. It also adds everything */
+/* required by the communication protocol (i.e. <STX>, <CAN>, <ETX>, the */
+/* checksum and <CR>).                                                   */
 /*-----------------------------------------------------------------------*/
 
 static size_t spex_cd2a_write( int type, const char *mess )
@@ -576,10 +597,10 @@ static size_t spex_cd2a_write( int type, const char *mess )
 }
 
 
-/*----------------------------------------------------------------------*/
-/* Function for reading the acknowledgement send by the device when it  */
-/* received a parameter or a command.                                   */ 
-/*----------------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for reading the acknowledgement send by the device */
+/* when it received a parameter.                               */ 
+/*-------------------------------------------------------------*/
 
 static void spex_cd2a_read_ack( void )
 {
@@ -603,18 +624,19 @@ static void spex_cd2a_read_ack( void )
 		}
 	}
 
-	/* Device send an ACK and a CAN so everything is fine */
+	/* Device send an ACK and a CAN so everything seems to be fine */
 
 	if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
 		return;
 
-	/* An ACK followed by BEL means something went wrong and we get an
+	/* An ACK followed by BEL means something went wrong and we got an
 	   error code in the next to bytes. */
 
 	if ( buf[ 0 ] == ACK || buf[ 1 ] == '\a' )
 	{
 		buf[ 4 ] = '\0';
-		print( FATAL, "Failure to execute command, error code: %s.\n",
+		if ( do_print_message )
+			print( FATAL, "Failure to execute command, error code: %s.\n",
 			   buf + 2 );
 		THROW( EXCEPTION );
 	}
@@ -626,32 +648,36 @@ static void spex_cd2a_read_ack( void )
 }
 
 
-/*---------------------------------------------------------------------*/
-/* Most commands not only send a ACK, CAN sequence but also make the   */
-/* device transmit position information until the command is executed. */
-/*---------------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for reading the acknowledgement send by the device */
+/* when it received a command. Most commands not only send an  */
+/* ACK/CAN sequence but also make the device transmit position */
+/* information until the command is executed. This function    */
+/* looks for the sequence to expected for a command, throwing  */
+/* an exception if it isn't coming from the device.            */
+/*-------------------------------------------------------------*/
 
 static void spex_cd2a_read_cmd_ack( const char *cmd )
 {
 	switch ( *cmd )
 	{
-		case 'P' :
+		case 'P' :                /* "GO TO SET POSITION" command */
 			spex_cd2a_read_set_pos_ack( );
 			break;
 
-		case 'T' :
+		case 'T' :                /* "ENABLE TRIGGER SCAN" command */
 			spex_cd2a_read_start_scan_ack( );
 			break;
 
-		case 'E' :
+		case 'E' :                /* "START TRIGGER SCAN" command */
 			spex_cd2a_read_scan_ack( );
 			break;
 
-		case 'H' :
+		case 'H' :                /* "HALT" command */
 			spex_cd2a_read_ack( );
 			break;
 
-		default :
+		default :                 /* no other commands are used */
 			fsc2_assert( 1 == 0 );
 	}
 }
@@ -668,7 +694,6 @@ static void spex_cd2a_read_set_pos_ack( void )
 	ssize_t to_be_read = 5;
 	ssize_t already_read = 0;
 	char *bp;
-	bool done = UNSET;
 
 	
 	while ( already_read < to_be_read )
@@ -682,7 +707,7 @@ static void spex_cd2a_read_set_pos_ack( void )
 	}
 
 	/* According to the manual the device is supposed to send an ACK and
-	   then a CAN, but tests did show that it instead sends a CAN, an ACK,
+	   then a CAN, but tests did show that instead it sends a CAN, an ACK,
 	   and then a CAN for three times before it starts reporting the
 	   current position until the final position is reached. */
 
@@ -695,7 +720,7 @@ static void spex_cd2a_read_set_pos_ack( void )
 
 	to_be_read = pos_mess_len;
 
-	while ( ! done )
+	while ( 1 )
 	{
 		already_read = 0;
 
@@ -721,19 +746,16 @@ static void spex_cd2a_read_set_pos_ack( void )
 		switch ( *bp++ )
 		{
 			case '*' :          /* final position reached ? */
-				done = SET;
-				break;
+				spex_cd2a_pos_mess_check( bp );
+				return;
 
 			case 'P' :          /* still moving to final position ? */
+				spex_cd2a_pos_mess_check( bp );
 				break;
 
 			default :
 				spex_cd2a_wrong_data( );
 		}
-
-		/* Check the rest of the message */
-
-		spex_cd2a_pos_mess_check( bp );
 	}
 }
 		
@@ -749,7 +771,6 @@ static void spex_cd2a_read_start_scan_ack( void )
 	ssize_t to_be_read = pos_mess_len;
 	ssize_t already_read = 0;
 	char *bp;
-	bool done = UNSET;
 
 	
 	/* Read the ACK and CAN that get send at first (or an error indication) */
@@ -759,7 +780,7 @@ static void spex_cd2a_read_start_scan_ack( void )
 	/* Now repeatedly read in the current position until the start position
 	   for the scan is reached. */
 
-	while ( ! done )
+	while ( 1 )
 	{
 		already_read = 0;
 
@@ -783,19 +804,16 @@ static void spex_cd2a_read_start_scan_ack( void )
 		switch ( *bp++ )
 		{
 			case 'S' :          /* final position reached ? */
-				done = SET;
-				break;
+				spex_cd2a_pos_mess_check( bp );
+				return;
 
 			case 'P' :          /* still moving to final position ? */
+				spex_cd2a_pos_mess_check( bp );
 				break;
 
 			default :
 				spex_cd2a_wrong_data( );
 		}
-
-		/* Check the rest of the message */
-
-		spex_cd2a_pos_mess_check( bp );
 	}
 }
 
@@ -811,7 +829,6 @@ static void spex_cd2a_read_scan_ack( void )
 	ssize_t to_be_read = pos_mess_len;
 	ssize_t already_read = 0;
 	char *bp;
-	bool done = UNSET;
 
 	
 	/* Read the ACK and CAN that get send at first (or an error indication) */
@@ -821,7 +838,7 @@ static void spex_cd2a_read_scan_ack( void )
 	/* Now repeatedly read in the position until the burst movement is
 	   complete */
 
-	while ( ! done )
+	while ( 1 )
 	{
 		already_read = 0;
 
@@ -845,19 +862,16 @@ static void spex_cd2a_read_scan_ack( void )
 		switch ( *bp++ )
 		{
 			case 'B' :          /* final position reached ? */
-				done = SET;
-				break;
+				spex_cd2a_pos_mess_check( bp );
+				return;
 
 			case 'P' :          /* still moving to final position ? */
+				spex_cd2a_pos_mess_check( bp );
 				break;
 
 			default :
 				spex_cd2a_wrong_data( );
 		}
-
-		/* Check the rest of the message */
-
-		spex_cd2a_pos_mess_check( bp );
 	}
 }
 
@@ -875,6 +889,8 @@ void spex_cd2a_close( void )
 
 
 /*-----------------------------------------------------------------------*/
+/* Function to handle situations where the communication with the device */
+/* failed completely.                                                    *
 /*-----------------------------------------------------------------------*/
 
 static void spex_cd2a_comm_fail( void )
@@ -885,8 +901,10 @@ static void spex_cd2a_comm_fail( void )
 }
 
 
-/*-----------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for situations where the device reacted but send a message */
+/* it wasn't supposed to send.                                         */
+/*---------------------------------------------------------------------*/
 
 static void spex_cd2a_wrong_data( void )
 {
@@ -923,6 +941,7 @@ static ssize_t spex_cd2a_pos_mess_len( void )
 
 
 /*-------------------------------------------------------------------------*/
+/* Reads in data send from the device with information about its position. */
 /*-------------------------------------------------------------------------*/
 
 static void spex_cd2a_pos_mess_check( const char *bp )
@@ -931,8 +950,11 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 	const char *eu = bp;
 
 
-	/* Check that the reported unit is reasonable */
-
+	/* When the device is wavenumber driven it sends either a 'W' (when
+	   no laser line has been set) or a 'D' (for delta wavelength),
+	   otherwise either a 'N' or 'A', depending if it's set up to use
+	   nanometer or Angstroem units */
+	   
 	if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
 		 ( spex_cd2a.mode == WND && *bp == 'D' ) ||
 		 ( spex_cd2a.mode == WL &&
@@ -942,10 +964,9 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 	else
 		spex_cd2a_wrong_data( );
 
-	/* Check that the reported wavelength or -number is reasonable, i.e.
-	   is a number consisting of 8 bytes (take care, negative numbers
-	   have a minus sign which is possibly followed by spaces before
-	   the number starts). */
+	/* No follows an 8-byte long numeric field - for negative numbers
+	   we have a minus sign which is possibly followed by spaces before
+	   the number starts. */
 
 	if ( *bp == '-' )
 		bp++;
@@ -973,7 +994,7 @@ static void spex_cd2a_pos_mess_check( const char *bp )
 		spex_cd2a_wrong_data( );
 
 	/* Finally, there might be a linefeed if the device is configured to
-	   do send one */
+	   send one */
 
 	if ( spex_cd2a.sends_lf && *bp != '\n' )
 		spex_cd2a_wrong_data( );
