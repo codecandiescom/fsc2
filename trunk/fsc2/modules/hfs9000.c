@@ -443,7 +443,7 @@ Var *pulser_shift( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_pos )
 		{
@@ -517,7 +517,7 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_len )
 		{
@@ -598,7 +598,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" );
+		p = hfs9000_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		/* Reset all changeable properties back to their initial values */
 

@@ -487,7 +487,7 @@ Var *pulser_increment( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = dg2020_get_pulse( get_strict_long( v, "pulse number" );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_len )
 		{
@@ -693,7 +693,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = dg2020_get_pulse( get_strict_long( v, "pulse number" );
+		p = dg2020_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		/* Reset all changeable properties back to their initial values */
 

@@ -378,7 +378,7 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel > LECROY9400_CH2 )
 	{
@@ -493,7 +493,7 @@ Var *digitizer_averaging( Var *v )
 	/* Get the channel to use for averaging */
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -513,7 +513,7 @@ Var *digitizer_averaging( Var *v )
 	}
 
 	source_ch = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
 	{
@@ -651,7 +651,7 @@ Var *digitizer_num_averages( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -713,7 +713,7 @@ Var *digitizer_record_length( Var *v )
 	}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -793,7 +793,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel > LECROY9400_FUNC_F )
 		return vars_push( INT_VAR, 0 );
@@ -834,7 +834,7 @@ Var *digitizer_trigger_channel( Var *v )
 		}
 
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel >= MAX_CHANNELS )
 	{
@@ -920,7 +920,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( ch < LECROY9400_CH1 ||
 		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
@@ -947,7 +947,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 			THROW( EXCEPTION );
 		}
 
-		win_num = get_strict_long( v, "window number", DEVICE_NAME  );
+		win_num = get_strict_long( v, "window number" );
 
 		while ( w != NULL )
 		{

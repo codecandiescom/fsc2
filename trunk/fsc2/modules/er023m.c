@@ -758,7 +758,7 @@ Var *lockin_harmonic( Var *v )
 				return vars_push( INT_VAR, ( long ) ( er023m_get_ph( ) + 1 ) );
 		}
 
-	ha = ( int ) get_long( v, "harmonic", DEVICE_NAME ) - 1;
+	ha = ( int ) get_long( v, "harmonic" ) - 1;
 
 	too_many_arguments( v );
 
@@ -804,7 +804,7 @@ Var *lockin_resonator( Var *v )
 				return vars_push( INT_VAR, ( long ) ( er023m_get_re( ) + 1 ) );
 		}
 
-	re = ( int ) get_long( v, "resonator number", DEVICE_NAME ) - 1;
+	re = ( int ) get_long( v, "resonator number" ) - 1;
 
 	too_many_arguments( v );
 

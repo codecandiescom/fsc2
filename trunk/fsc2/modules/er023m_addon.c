@@ -37,7 +37,7 @@ Var *lockin_rg( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long ) 
@@ -48,9 +48,9 @@ Var *lockin_rg( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_rg( ) );
 		}
 
-	rg_index = get_long( v, "receiver gain index", DEVICE_NAME );
+	rg_index = get_long( v, "receiver gain index" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( rg_index < 0 || rg_index > RG_MAX_INDEX )
 	{
@@ -80,7 +80,7 @@ Var *lockin_tc( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long ) 
@@ -90,7 +90,7 @@ Var *lockin_tc( Var *v )
 				return vars_push( INT_VAR, er023m_get_tc( ) );
 		}
 
-	tc_index = get_long( v, "time constant index", DEVICE_NAME );
+	tc_index = get_long( v, "time constant index" );
 
 	if ( tc_index > 0 && tc_index < TC_MIN_INDEX )
 	{
@@ -108,7 +108,7 @@ Var *lockin_tc( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 	
 	er023m.tc_index = ( int ) tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -140,7 +140,7 @@ Var *lockin_ma( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -151,7 +151,7 @@ Var *lockin_ma( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ma( ) );
 		}
 
-	ma = get_long( v, "modulation attenuation index", DEVICE_NAME );
+	ma = get_long( v, "modulation attenuation index" );
 
 	if ( ma > MAX_MA_INDEX || ma < MIN_MA_INDEX )
 	{
@@ -162,7 +162,7 @@ Var *lockin_ma( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	er023m.ma_index = ( int ) ma;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -184,7 +184,7 @@ Var *lockin_ct( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -195,7 +195,7 @@ Var *lockin_ct( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_ct( ) );
 		}
 
-	ct_mult = get_long( v, "conversion time multiplicator", DEVICE_NAME );
+	ct_mult = get_long( v, "conversion time multiplicator" );
 	if ( ct_mult < 0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative conversion time multiplier "
@@ -241,7 +241,7 @@ Var *lockin_ct( Var *v )
 		ct_mult = new_ct_mult;
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 	
 	er023m.ct_mult = ( int ) ct_mult;
 	if ( FSC2_MODE == EXPERIMENT )
@@ -264,7 +264,7 @@ Var *lockin_mf( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -277,7 +277,7 @@ Var *lockin_mf( Var *v )
 
 	old_mf_index = er023m.mf_index;
 
-	mf_index = get_long( v, "modulation frequency index", DEVICE_NAME );
+	mf_index = get_long( v, "modulation frequency index" );
 
 	if ( mf_index < 0 )
 	{
@@ -294,7 +294,7 @@ Var *lockin_mf( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 	
 	er023m.mf_index = ( int ) mf_index;
 	if ( FSC2_MODE == EXPERIMENT )
