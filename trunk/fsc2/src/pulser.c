@@ -202,14 +202,20 @@ void is_pulser_func( void *func, const char *text )
 
 double is_mult_ns( double val, const char *text )
 {
+	double ip, fp;
+
 	val *= 1.e9;
-	if ( fabs( val - lrnd( val ) ) > 1.e-2 )
+	fp = modf( val, &ip );
+
+	if ( fabs( fp ) > 1.e-2 )
 	{
 		print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
 		THROW( EXCEPTION );
 	}
 
-	return lrnd( val ) * 1.e-9;
+	if ( fp < 0.0 )
+		return ( ip - ( fp <= 0.5 ? 1 : 0 ) ) * 1.e-9;
+	return ( ip + ( fp >= 0.5 ? 1 : 0 ) ) * 1.e-9;
 }
 
 
