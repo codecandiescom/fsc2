@@ -21,8 +21,7 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 
-# TODO: 1. Also send number of curently displayed curve for 2D display
-#       2. Evaluate If-fields in meta-data the browser sends
+# TODO: 1. Evaluate If-fields in meta-data the browser sends
 
 
 use strict;
@@ -193,6 +192,7 @@ sub serve_main {
 	my $pic;
 	my $txt;
 	my $ext;
+	my $curve;
 	my $date = rfc_1123_date( );
 	my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
 	my $logo_file;
@@ -271,7 +271,7 @@ sub serve_main {
 	if ( $state =~ /^[1-3]$/o and defined $ext ) {
 		stdout_lock( 1 ) or exit 1;
 		print STDOUT 'W';
-		1 while defined ( $pic = <STDIN> ) and $state =~ /^$/o;
+		1 while defined ( $pic = <STDIN> ) and $pic =~ /^$/o;
 		stdout_lock( 0 );
 
 		return unless defined $pic;
@@ -279,6 +279,18 @@ sub serve_main {
 		print "<H2>Display window:</H2>" .
 			  "<P><CENTER><IMG SRC=\"fsc2_a.$ext\"" .
 			  "ALT=\"Display window\"></CENTER></P>$crlf";
+
+		if ( $pic =~ /^[23]$/ ) {
+			stdout_lock( 1 ) or exit 1;
+			print STDOUT 'C';
+			1 while defined ( $curve = <STDIN> ) and $curve =~ /^$/o;
+			stdout_lock( 0 );
+
+			return unless defined $curve;
+
+			print "<P><CENTER>Curve $curve</CENTER></P>$crlf"
+				if $curve =~ /^[1-4]$/;
+		}
 
 		print "<H2>Cross section window:</H2>" .
 			  "<P><CENTER><IMG SRC=\"fsc2_b.$ext\"" .
