@@ -293,10 +293,10 @@ ccd_camera_temperature, -1, ALL;
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP) */
 
 powersupply_name, 0, ALL;			   // returns the device name 
-powersupply_damping, -1, EXP;		   // sets damping of output to ON or OFF 
-powersupply_channel_state, -1, EXP;	   // switches power supply output on/off 
-powersupply_voltage, -1, EXP;          // set/get output voltage 
-powersupply_voltage_limit, -1, EXP;    // set/get voltage limit
-powersupply_current, -1, EXP;          // set/set output current
-powersupply_current_limit, -1, EXP;	   // get/set current limit
+powersupply_damping, -1, EXP;		   // sets damping of output to on/off
+powersupply_channel_state, -1, EXP;	   // switches power supply channel on/off 
+powersupply_voltage, -1, EXP;          // set/get channel voltage 
+powersupply_voltage_limit, -1, EXP;    // set/get channel voltage limit
+powersupply_current, -1, EXP;          // set/set channeloutput current
+powersupply_current_limit, -1, EXP;	   // get/set channelcurrent limit
 powersupply_command, 1, EXP;
