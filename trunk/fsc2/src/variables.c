@@ -95,13 +95,13 @@ static void vars_ass_from_trans_ptr( Var *src, Var *dest );
   variable or an array.
 
   What kind of type a variable has, i.e. integer or float, is controlled via
-  the function VAR_TYPE(), defined as macro in variables.h, which gets the
-  passed the variable's name - if the function returns INT_VAR the variable
-  is an integer (or the array is an integer array) otherwise its type is
-  FLOAT. So, changing VAR_TYPE() and recompiling will change the behaviour of
-  the program in this respect. Currently, as agreed with Axel and Thomas,
-  VAR_TYPE returns INT_VAR for variables starting with a capital letters,
-  thus making the variable an integer. But this is easily changed...
+  the function VAR_TYPE(), defined as macro in variables.h, which gets passed
+  the variable's name - if the function returns INT_VAR the variable is an
+  integer (or the array is an integer array) otherwise its type is FLOAT.
+  So, changing VAR_TYPE() and recompiling will change the behaviour of the
+  program in this respect. Currently, as agreed with Axel and Thomas,
+  VAR_TYPE returns INT_VAR for variables starting with a capital letters.
+  But this can be changed easily...
 
   Now, when the input file is read in, lines like
 

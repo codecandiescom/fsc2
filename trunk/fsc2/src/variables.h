@@ -35,7 +35,7 @@
 /* Variables with a name starting with a capital letter will be integers, all
    others float variables */
 
-#define IF_FUNC( a )  ( isupper( a[ 0 ] ) )
+#define VAR_TYPE( a )  ( ( isupper( a[ 0 ] ) ) ? INT_VAR : FLOAT_VAR )
 
 
 /* some people prefer C-style arrays, some FORTRAN- or MATLAB-style arrays -

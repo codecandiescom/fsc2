@@ -1300,7 +1300,7 @@ void get_for_cond( Prg_Token *cur )
 	if ( EDL.cur_prg_token->tv.vptr->type == UNDEF_VAR )
 	{
 		EDL.cur_prg_token->tv.vptr->type =
-			IF_FUNC( EDL.cur_prg_token->tv.vptr->name ) ? INT_VAR : FLOAT_VAR;
+								  VAR_TYPE( EDL.cur_prg_token->tv.vptr->name );
 		EDL.cur_prg_token->tv.vptr->flags &= ~ NEW_VARIABLE;
 	}
 
