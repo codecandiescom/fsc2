@@ -49,7 +49,7 @@ typedef struct {
 
 	bool ( *phase_setup_prep )( int func, int type, int pod, long val,
 								long protocol);
-	bool ( *setup_phase )( int function );
+	bool ( *phase_setup )( int function );
 	bool ( *set_phase_switch_delay )( int function, double time );
 	bool ( *set_grace_period )( double time );
 
