@@ -335,16 +335,20 @@ CFLAGS           := -Wall \
 				    # -pedantic
 
 
-ifneq ($(MAKECMDGOALS),debug)
-	CFLAGS       +=	$(OPTIMIZATION)
+ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
+	CFLAGS       += -O0
 else
-	CFLAGS       += -O0 -DFSC2_MDEBUG     # for built-in malloc debugging
+	CFLAGS       +=	$(OPTIMIZATION)
 endif
 
 ifneq ($(MAKECMDGOALS),release)
 	CFLAGS       += -ggdb
 else
-	CFLAGS       += -DNDEBUG              # switch off built-in debugging code
+	CFLAGS       += -DNDEBUG              # switch off all debugging code
+endif
+
+ifeq ($(MAKECMDGOALS),mdebug)
+	CFLAGS       += -DFSC2_MDEBUG         # for built-in malloc debugging
 endif
 
 ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
@@ -590,7 +594,7 @@ export            # export all variables to sub-makes
 # via the Makefile in src), the HTTP server, and then the documentation and
 # some other, more or less useful stuff
 
-all release debug:
+all release debug mdebug:
 	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 	$(MAKE) -C $(sdir) modules
