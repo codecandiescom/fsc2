@@ -72,9 +72,9 @@ struct WITIO_48 {
 static struct WITIO_48 witio_48, witio_48_saved;
 
 
-/*------------------------------------------------------*/
-/* Function that gets called when the module is loaded. */
-/*------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function that gets called when the module is loaded.
+ *------------------------------------------------------*/
 
 int witio_48_init_hook( void )
 {
@@ -93,9 +93,9 @@ int witio_48_init_hook( void )
 }
 
 
-/*--------------------------------------------------------*/
-/* Function that gets called at the start of the test run */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function that gets called at the start of the test run
+ *--------------------------------------------------------*/
 
 int witio_48_test_hook( void )
 {
@@ -114,9 +114,9 @@ int witio_48_test_hook( void )
 }
 
 
-/*---------------------------------------------------------*/
-/* Function that gets called at the start of an experiment */
-/*---------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function that gets called at the start of an experiment
+ *---------------------------------------------------------*/
 
 int witio_48_exp_hook( void )
 {
@@ -157,9 +157,9 @@ int witio_48_exp_hook( void )
 }
 
 
-/*-------------------------------------------------------*/
-/* Function that gets called at the end of an experiment */
-/*-------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function that gets called at the end of an experiment
+ *-------------------------------------------------------*/
 
 int witio_48_end_of_exp_hook( void )
 {
@@ -172,9 +172,9 @@ int witio_48_end_of_exp_hook( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function that gets called just before the module is unloaded */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function that gets called just before the module is unloaded
+ *--------------------------------------------------------------*/
 
 void witio_48_exit_hook( void )
 {
@@ -193,9 +193,9 @@ void witio_48_exit_hook( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/* Function returns a string variable with the name of the device */
-/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function returns a string variable with the name of the device
+ *----------------------------------------------------------------*/
 
 Var_T *dio_name( UNUSED_ARG Var_T *v )
 {
@@ -203,21 +203,21 @@ Var_T *dio_name( UNUSED_ARG Var_T *v )
 }
 
 
-/*-----------------------------------------------------------*/
-/* The module allows to get locks on the DIOs. This is done */
-/* so that another module can reserve a DIO for its own use  */
-/* and the user can't accidentally mess around with the DIO. */
-/* To get a lock this function must be called with the DIO   */
-/* number and a pass-phrase (usually the device name for the */
-/* module requesting the lock). If there's also a third      */
-/* argument it must be boolean and if set the function will  */
-/* look the DIO, otherwise it is unlocked.                   */
-/* The function never throws an exception, it just returns 1 */
-/* on success (the requested DIO is now locked or unlocked)  */
-/* or 0 if the lock state could not be changed. Trying to    */
-/* lock twice for with the same pass-phrase succeeds but is  */
-/* basically a NOP.                                          */
-/*------------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * The module allows to get locks on the DIOs. This is done
+ * so that another module can reserve a DIO for its own use
+ * and the user can't accidentally mess around with the DIO.
+ * To get a lock this function must be called with the DIO
+ * number and a pass-phrase (usually the device name for the
+ * module requesting the lock). If there's also a third
+ * argument it must be boolean and if set the function will
+ * look the DIO, otherwise it is unlocked.
+ * The function never throws an exception, it just returns 1
+ * on success (the requested DIO is now locked or unlocked)
+ * or 0 if the lock state could not be changed. Trying to
+ * lock twice with the same pass-phrase succeeds but is
+ * basically a NOP.
+ *-----------------------------------------------------------*/
 
 Var_T *dio_reserve_dio( Var_T *v )
 {
@@ -297,12 +297,12 @@ Var_T *dio_reserve_dio( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Function for querying or setting the mode of one of the DIOs. */
-/* Modes are either "3x8", "2x12", "1x24" or "16_8". If the DIO  */
-/* has been reserved, the first argument must be the correct     */
-/* pass-phrase agreed upon in the lock operation.                */
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for querying or setting the mode of one of the DIOs.
+ * Modes are either "3x8", "2x12", "1x24" or "16_8". If the DIO
+ * has been reserved, the first argument must be the correct
+ * pass-phrase agreed upon in the lock operation.
+ *---------------------------------------------------------------*/
 
 Var_T *dio_mode( Var_T *v )
 {
@@ -409,11 +409,11 @@ Var_T *dio_mode( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function reads from or writes to one of the channels of one of  */
-/* the DIOs. If the DIO has been reserved, the first argument must */
-/* be the correct pass-phrase agreed upon in the lock operation.   */
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function reads from or writes to one of the channels of one of
+ * the DIOs. If the DIO has been reserved, the first argument must
+ * be the correct pass-phrase agreed upon in the lock operation.
+ *-----------------------------------------------------------------*/
 
 Var_T *dio_value( Var_T *v )
 {
@@ -562,12 +562,12 @@ Var_T *dio_value( Var_T *v )
 }
 
 
-/*--------------------------------------------------------------*/
-/* The function is used to translate back and forth between the */
-/* channel numbers the way the user specifies them in the EDL   */
-/* program and the channel numbers as specified in the header   */
-/* file of the device library.                                  */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * The function is used to translate back and forth between the
+ * channel numbers the way the user specifies them in the EDL
+ * program and the channel numbers as specified in the header
+ * file of the device library.
+ *--------------------------------------------------------------*/
 
 static long translate_channel( long channel )
 {
@@ -595,8 +595,8 @@ static long translate_channel( long channel )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
 
 static void check_ret( int ret_val )
 {
