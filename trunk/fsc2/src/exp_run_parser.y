@@ -12,6 +12,7 @@
 #include "fsc2.h"
 
 extern int exp_runlex( void );
+extern char *exptext;
 
 /* locally used functions */
 
@@ -110,45 +111,45 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
 	                                 THROW( EXCEPTION ); }
 ;
 
-expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
-													 $2 ); }
-       | E_FLOAT_TOKEN unit       { $$ = apply_unit(
+expr:    E_INT_TOKEN unit          { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													  $2 ); }
+       | E_FLOAT_TOKEN unit        { $$ = apply_unit(
 		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
-       | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
-       | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
-         list1 ']'                { CV = vars_arr_rhs( $4 ); }
-         unit                     { $$ = apply_unit( CV, $7 ); }
+       | E_VAR_TOKEN unit          { $$ = apply_unit( $1, $2 ); }
+       | E_VAR_TOKEN '['           { vars_arr_start( $1 ); }
+         list1 ']'                 { CV = vars_arr_rhs( $4 ); }
+         unit                      { $$ = apply_unit( CV, $7 ); }
        | E_FUNC_TOKEN '(' list2
-         ')'                      { CV = func_call( $1 ); }
-         unit                     { $$ = apply_unit( CV, $6 ); }
-       | E_VAR_REF                { $$ = $1; }
-       | E_VAR_TOKEN '('          { eprint( FATAL, "%s:%ld: `%s' isn't a "
-											"function.\n", Fname, Lc,
-											$1->name );
+         ')'                       { CV = func_call( $1 ); }
+         unit                      { $$ = apply_unit( CV, $6 ); }
+       | E_VAR_REF                 { $$ = $1; }
+       | E_VAR_TOKEN '('           { eprint( FATAL, "%s:%ld: `%s' isn't a "
+											 "function.\n", Fname, Lc,
+											 $1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_FUNC_TOKEN '['         { eprint( FATAL, "%s:%ld: `%s' is a "
-											"predefined function.\n",
-											Fname, Lc, $1->name );
-	                                THROW( EXCEPTION ); }
-       | expr E_AND expr          { $$ = vars_comp( COMP_AND, $1, $3 ); }
-       | expr E_OR expr           { $$ = vars_comp( COMP_OR, $1, $3 ); }
-       | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr               { $$ = vars_lnegate( $2 ); }
-       | expr E_EQ expr           { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr E_LT expr           { $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr E_GT expr           { $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr E_LE expr           { $$ = vars_comp( COMP_LESS_EQUAL,
-													$1, $3 ); }
-       | expr E_GE expr           { $$ = vars_comp( COMP_LESS_EQUAL, 
-													$3, $1 ); }
-       | expr '+' expr            { $$ = vars_add( $1, $3 ); }
-       | expr '-' expr            { $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr            { $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr            { $$ = vars_div( $1, $3 ); }
-       | expr '%' expr            { $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr            { $$ = vars_pow( $1, $3 ); }
-       | '-' expr %prec E_NEG     { $$ = vars_negate( $2 ); }
-       | '(' expr ')' unit        { $$ = apply_unit( $2, $4 ); }
+       | E_FUNC_TOKEN '['          { eprint( FATAL, "%s:%ld: `%s' is a "
+											 "predefined function.\n",
+											 Fname, Lc, $1->name );
+	                                 THROW( EXCEPTION ); }
+       | expr E_AND expr           { $$ = vars_comp( COMP_AND, $1, $3 ); }
+       | expr E_OR expr            { $$ = vars_comp( COMP_OR, $1, $3 ); }
+       | expr E_XOR expr           { $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | E_NOT expr                { $$ = vars_lnegate( $2 ); }
+       | expr E_EQ expr            { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr E_LT expr            { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr E_GT expr            { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr E_LE expr            { $$ = vars_comp( COMP_LESS_EQUAL,
+													 $1, $3 ); }
+       | expr E_GE expr            { $$ = vars_comp( COMP_LESS_EQUAL, 
+													 $3, $1 ); }
+       | expr '+' expr             { $$ = vars_add( $1, $3 ); }
+       | expr '-' expr             { $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr             { $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr             { $$ = vars_div( $1, $3 ); }
+       | expr '%' expr             { $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr             { $$ = vars_pow( $1, $3 ); }
+       | '-' expr %prec E_NEG      { $$ = vars_negate( $2 ); }
+       | '(' expr ')' unit         { $$ = apply_unit( $2, $4 ); }
 ;
 
 unit:    /* empty */               { $$ = NULL; }
@@ -190,7 +191,11 @@ int exp_runerror ( const char *s )
 {
 	s = s;                    /* stupid but avoids compiler warning */
 
-	eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.\n",
+	if ( *exptext == '\0' )
+		eprint( FATAL, "%s:%ld: Unexpected end of file in EXPERIMENT "
+				"section.\n", Fname, Lc );
+	else
+		eprint( FATAL, "%s:%ld: Syntax error in EXPERIMENT section.\n",
 			Fname, Lc );
 	THROW( EXCEPTION );
 }
