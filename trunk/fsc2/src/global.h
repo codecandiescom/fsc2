@@ -116,17 +116,16 @@ enum {
 
 enum {
 	UNDEF_VAR       = 0,
-	INT_VAR         = ( 1 << 0  ),
-	FLOAT_VAR       = ( 1 << 1  ),
-	STR_VAR         = ( 1 << 2  ),
-	INT_ARR         = ( 1 << 3  ),
-	FLOAT_ARR       = ( 1 << 4  ),
-	FUNC            = ( 1 << 5  ),
-	ARR_PTR         = ( 1 << 6  ),
-	INT_TRANS_ARR   = ( 1 << 7  ),
-	FLOAT_TRANS_ARR = ( 1 << 8  ),
-	INT_ARR_REF     = ( 1 << 9  ),
-	FLOAT_ARR_REF   = ( 1 << 10 )
+	INT_VAR         = ( 1 << 0 ),
+	FLOAT_VAR       = ( 1 << 1 ),
+	STR_VAR         = ( 1 << 2 ),
+	INT_ARR         = ( 1 << 3 ),
+	FLOAT_ARR       = ( 1 << 4 ),
+	FUNC            = ( 1 << 5 ),
+	ARR_PTR         = ( 1 << 6 ),
+	INT_TRANS_ARR   = ( 1 << 7 ),
+	FLOAT_TRANS_ARR = ( 1 << 8 ),
+	ARR_REF         = ( 1 << 9 )
 };
 
 
