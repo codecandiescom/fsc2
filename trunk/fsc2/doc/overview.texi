@@ -82,9 +82,10 @@ at the start of the program for setting the parameters and only change
 these if necessary. And if this is still too much hassle it is even
 possible to write a program (not an @acronym{EDL} program but for
 example a Perl script) where the parameters can be set via a graphical
-user interface, create a program from a template and then pass it
-directly to @acronym{fsc2}. If such a utility exists one doesn't even
-have to learn how to write an experiment description program.
+user interface, an @acronym{EDL} program is created from a template and
+then this passed directly to @acronym{fsc2}. If such a utility exists
+one doesn't even have to learn how to write an experiment description
+program.
 
 
 Another problem with the traditional type of program is the use of
