@@ -282,9 +282,9 @@ As usual, non-integer exponents can only be used with non-negative bases!
 @b{We still need to talk about operator precedence...}
 
 
-@node Arithmetic on arrays, Arithmetic, Control structures,EDL
-@section Arithmetic on arrays
-@cindex arithmetic on arrays
+@node Arithmetic with arrays, Arithmetic, Control structures,EDL
+@section Arithmetic with arrays
+@cindex arithmetic with arrays
 
 
 Beside the usual artithmetic with numbers it is also possible to use
@@ -360,7 +360,7 @@ function results in:
 @end example
 
 
-@node Control structures, , Arithmetic on arrays, EDL
+@node Control structures, , Arithmetic with arrays, EDL
 @section Control structures
 @cindex control structures
 @cindex flow control
