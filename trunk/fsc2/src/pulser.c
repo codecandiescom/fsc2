@@ -30,28 +30,6 @@
 
 
 #include "fsc2.h"
-#include "pulser.h"
-
-
-Pulser_Struct *pulser_struct = NULL;
-long Cur_Pulser = -1;
-
-const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
-			{ "MW",
-			  "PULSE_SHAPE",
-              "PHASE_1",
-              "PHASE_2",
-              "TWT",
-              "TWT_GATE",
-              "DEFENSE",
-              "DETECTION",
-			  "DETECTION_GATE",
-              "RF",
-              "RF_GATE",
-			  "OTHER_1",
-              "OTHER_2",
-              "OTHER_3",
-              "OTHER_4" };
 
 
 static void is_pulser_func( void *func, const char *text );

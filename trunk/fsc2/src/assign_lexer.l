@@ -51,11 +51,10 @@
 
 
 #include "fsc2.h"
-#include "pulser.h"
 #include "assign_parser.h"
 
-extern void assignparser_init( void );
 
+extern void assignparser_init( void );
 
 int assignlex( void );
 extern void assignparse( void );

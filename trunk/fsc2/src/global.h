@@ -235,7 +235,7 @@ enum {
 
 /* Define names for often used digitizer and pulser channels - if more get
    added put them before the very last element and don't forget also to
-   update the array with the channel names defined near the start of fsc2.c. */
+   update the array with the channel names defined in global.c. */
 
 enum {
 	CHANNEL_INVALID = -1,

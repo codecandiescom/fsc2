@@ -24,7 +24,9 @@
 
 #include "fsc2.h"
 
-/* This file only exists to hodl the definitions of all global variables */
+/* This file only exists to hold the definitions of all global variables
+   in a single, easy tzo find place */
+
 
 const char *prog_name;           /* Name the program was started with */
 
@@ -63,6 +65,28 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 	  "H0", "H1", "H2", "H3", "H4", "H5", "H6", "H7", "H8", "H9", "H10",
 	  "H11", "H12", "H13", "H14", "H15",
 	  "TRIG_OUT"
+	};
+
+
+Pulser_Struct *pulser_struct = NULL;
+long Cur_Pulser = -1;
+
+const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
+	{ "MW",
+	  "PULSE_SHAPE",
+	  "PHASE_1",
+	  "PHASE_2",
+	  "TWT",
+	  "TWT_GATE",
+	  "DEFENSE",
+	  "DETECTION",
+	  "DETECTION_GATE",
+	  "RF",
+	  "RF_GATE",
+	  "OTHER_1",
+	  "OTHER_2",
+	  "OTHER_3",
+	  "OTHER_4"
 	};
 
 const char *Phase_Types[ NUM_PHASE_TYPES ] = { "+X", "-X", "+Y", "-Y" };

@@ -307,7 +307,6 @@ extern Graphics_1d G1;
 extern Graphics_2d G2;
 extern Cut_Graphics CG;
 
-
 extern bool need_GPIB;
 
 extern Phase_Sequence *PSeq;
@@ -316,7 +315,6 @@ extern long Cur_Pulser;
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
-
 
 
 #endif  /* ! FSC2_HEADER */

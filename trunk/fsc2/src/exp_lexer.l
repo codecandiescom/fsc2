@@ -51,7 +51,7 @@
 
 
 #include "fsc2.h"
-#include "pulser.h"
+
 
 int explex( void );
 
