@@ -280,8 +280,7 @@ Var *f_getf( Var *var )
 	{
 		for ( i = 0, cur = var; i < 5 && cur != NULL; i++, cur = cur->next )
 			vars_check( cur, STR_VAR );
-		if ( i > 0 && *var->val.sptr == '\\' &&
-			 EDL.Call_Stack->f->fnct != f_clonef )
+		if ( i > 0 && *var->val.sptr == '\\' )
 			print( WARN, "Use of hard-coded file names is deprecated, please "
 				   "use open_file() instead.\n" );
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
@@ -300,11 +299,10 @@ Var *f_getf( Var *var )
 
 	/* First string is the message */
 
-	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' &&
-		 EDL.Call_Stack->f->fnct != f_clonef )
+	if ( s[ 0 ] != NULL && s[ 0 ][ 0 ] == '\\' )
 	{
-		print( WARN, "Use of hard-coded file names is deprecated, please use "
-			   "open_file() instead.\n" );
+		print( WARN, "Use of hard-coded file names is deprecated, please "
+			   "use open_file() instead.\n" );
 		r = T_strdup( s[ 0 ] + 1 );
 	}
 
@@ -492,7 +490,7 @@ Var *f_clonef( Var *v )
 {
 	char *fn;
 	char *n;
-	Var *new_v, *arg[ 5 ];
+	Var *new_v, *arg[ 6 ];
 	int i;
 	long file_num;
 
@@ -516,10 +514,16 @@ Var *f_clonef( Var *v )
 
 	file_num = v->val.lval - FILE_NUMBER_OFFSET;
 
-	if ( v->next->type != STR_VAR || v->next->next->type != STR_VAR ||
+	if ( v->next->type != STR_VAR )
+	{
+		print( FATAL, "Invalid second argument.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next->next->type != STR_VAR ||
 		 *v->next->next->val.sptr == '\0' )
 	{
-		print( FATAL, "Invalid second and third argument.\n" );
+		print( FATAL, "Invalid third argument.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -527,9 +531,8 @@ Var *f_clonef( Var *v )
 		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
 	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
-						  + strlen( v->next->next->val.sptr ) + 3 );
-	strcpy( fn, "\\" );
-	strcat( fn, EDL.File_List[ file_num ].name );
+						  + strlen( v->next->next->val.sptr ) + 2 );
+	strcpy( fn, EDL.File_List[ file_num ].name );
 
 	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
 	if ( n > fn + 1 && *( n - 1 ) == '.' &&
@@ -544,17 +547,19 @@ Var *f_clonef( Var *v )
 	arg[ 0 ] = vars_push( STR_VAR, fn );
 	T_free( fn );
 
+	arg[ 1 ] = vars_push( STR_VAR, "" );
+
 	n = get_string( "*.%s", v->next->next->val.sptr );
-	arg[ 1 ] = vars_push( STR_VAR, n );
+	arg[ 2 ] = vars_push( STR_VAR, n );
 	T_free( n );
 
-	arg[ 2 ] = vars_push( STR_VAR, "" );
 	arg[ 3 ] = vars_push( STR_VAR, "" );
-	arg[ 4 ] = vars_push( STR_VAR, v->next->next->val.sptr );
+	arg[ 4 ] = vars_push( STR_VAR, "" );
+	arg[ 5 ] = vars_push( STR_VAR, v->next->next->val.sptr );
 
-	new_v = f_getf( arg[ 0 ] );
+	new_v = f_openf( arg[ 0 ] );
 
-	for ( i = 4; i >= 0; i-- )
+	for ( i = 5; i >= 0; i-- )
 		vars_pop( arg[ i ] );
 
 	return new_v;
