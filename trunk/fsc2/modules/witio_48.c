@@ -55,15 +55,19 @@ Var *dio_mode( Var *v );
 Var *dio_value( Var *v );
 
 
+#define NUMBER_OF_DIOS   2
+
+
 static long translate_channel( long channel );
 static void check_ret( int ret_val );
 
 
 typedef struct {
 	bool is_open;
-	WITIO_48_MODE mode[ 2 ];
-	char *reserved_by[ 2 ];
+	WITIO_48_MODE mode[ NUMBER_OF_DIOS ];
+	char *reserved_by[ NUMBER_OF_DIOS ];
 } WITIO_48;
+
 
 static WITIO_48 witio_48, witio_48_saved;
 
@@ -79,7 +83,7 @@ int witio_48_init_hook( void )
 
 	witio_48.is_open = SET;
 
-	for ( i = 0; i < 2; i++ )
+	for ( i = 0; i < NUMBER_OF_DIOS; i++ )
 	{
 		witio_48.mode[ i ] = WITIO_48_MODE_1x24;
 		witio_48.reserved_by[ i ] = NULL;
@@ -98,7 +102,7 @@ int witio_48_test_hook( void )
 	int i;
 
 
-	for ( i = 0; i < 2; i++ )
+	for ( i = 0; i < NUMBER_OF_DIOS; i++ )
 	{
 		witio_48_saved.mode[ i ] = witio_48.mode[ i ];
 		if ( witio_48.reserved_by[ i ] )
@@ -121,7 +125,7 @@ int witio_48_exp_hook( void )
 
 	TRY
 	{
-		for ( i = 0; i < 2; i++ )
+		for ( i = 0; i < NUMBER_OF_DIOS; i++ )
 		{
 			check_ret( witio_48_set_mode( ( WITIO_48_DIO ) i,
 										  witio_48.mode[ i ] ) );
@@ -179,7 +183,7 @@ void witio_48_exit_hook( void )
 
 	/* Get rid of the strings that might have been used for locking */
 
-	for ( i = 0; i < 2; i++ )
+	for ( i = 0; i < NUMBER_OF_DIOS; i++ )
 	{
 		if ( witio_48.reserved_by[ i ] )
 			T_free( witio_48.reserved_by[ i ] );
@@ -241,10 +245,10 @@ Var *dio_reserve_dio( Var *v )
 
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
-	if ( dio < 0 || dio > 1 )
+	if ( dio < 0 || dio >= NUMBER_OF_DIOS )
 	{
-		print( FATAL, "Invalid DIO number %ld, must be 1 or 2 "
-			   "(or DIO1 or DIO2).\n", dio + 1 );
+		print( FATAL, "Invalid DIO number %ld, must be DIO1 or DIO2 (or 1 or "
+			   "2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -340,10 +344,10 @@ Var *dio_mode( Var *v )
 
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
-	if ( dio < 0 || dio > 1 )
+	if ( dio < 0 || dio >= NUMBER_OF_DIOS )
 	{
-		print( FATAL, "Invalid DIO number %ld, must be 1 or 2 "
-			   "(or DIO or DIO2).\n", dio + 1 );
+		print( FATAL, "Invalid DIO number %ld, must be DIO1 or DIO2 (or 1 or "
+			   "2).\n", dio + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -453,7 +457,7 @@ Var *dio_value( Var *v )
 
 	dio = get_strict_long( v, "DIO number" ) - 1;
 
-	if ( dio < 0 || dio > 1 )
+	if ( dio < 0 || dio >= NUMBER_OF_DIOS )
 	{
 		print( FATAL, "Invalid DIO number %ld, must be 'DIO1' or 'DIO2' "
 			   "(or 1 or 2).\n", dio + 1 );
