@@ -37,7 +37,26 @@ typedef struct {
 									  long number_of_replacement_pulses,
 									  long *list_of_replacement_pulses );
 
+	bool ( *get_pulse_function )( long pulse_number, int *function );
+	bool ( *get_pulse_position )( long pulse_number, double *time );
+	bool ( *get_pulse_length )( long pulse_number, double *time );
+	bool ( *get_pulse_position_change )( long pulse_number, double *time );
+	bool ( *get_pulse_length_change )( long pulse_number, double *time );
+	bool ( *get_pulse_maxlen )( long pulse_number, double *time );
+
 } Pulser_Struct;
+
+
+
+enum {
+	P_FUNC    = ( 1 << 0 ),
+	P_POS     = ( 1 << 1 ),
+	P_LEN     = ( 1 << 2 ),
+	P_DPOS    = ( 1 << 3 ),
+	P_DLEN    = ( 1 << 4 ),
+	P_MAXLEN  = ( 1 << 5 ),
+	P_REPL    = ( 1 << 6 )
+};
 
 
 void pulser_struct_init( void );
@@ -54,9 +73,13 @@ void p_set_trigger_level( Var *v );
 void p_set_rep_time( Var *v );
 void p_set_rep_freq( Var *v );
 
+long p_num( char *txt );
 void is_pulser_driver( void );
 void is_pulser_func( void *func, const char *text );
 double is_mult_ns( double val, const char * text );
+
+void p_set( long pnum, int type, Var *v );
+Var *p_get( char *txt, int type );
 
 
 #endif  /* ! PULSER_HEADER */

@@ -137,7 +137,7 @@ const char *Function_Names[ ] = { "MW", "TWT", "TWT_GATE", "DET", "DET_GATE",
 								  "PHASE_Y1", "PHASE_Y2", "OTHER_1", "OTHER_2",
 								  "OTHER_3", "OTHER_4" };
 #else
-extern char**Function_Names;
+extern const char *Function_Names[ ];
 #endif
 
 #define PULSER_CHANNEL_FUNC_MIN PULSER_CHANNEL_MW

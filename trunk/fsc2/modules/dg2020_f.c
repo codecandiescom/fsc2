@@ -3,6 +3,11 @@
 */
 
 
+#include "fsc2.h"
+
+
+#define Ticks long
+
 
 #define MIN_TIMEBASE   5.0e-9     /* 5 ns */
 #define MAX_TIMEBASE   0.1        /* 0.1 s */
@@ -35,10 +40,6 @@
 #define NO_CHANNEL         -1     /* marks unused channels */
 
 
-#define Ticks long
-
-
-#include "fsc2.h"
 
 
 int dg2020_init_hook( void );
@@ -59,8 +60,8 @@ static bool set_trig_in_slope( int slope );
 static bool set_repeat_time( double time );
 
 
-static Ticks double2time( double time );
-static double time2double( Ticks ticks );
+static Ticks double2ticks( double time );
+static double ticks2double( Ticks ticks );
 static void check_pod_level_diff( double high, double low );
 
 
@@ -69,6 +70,8 @@ static bool dg2020_is_needed;
 
 
 typedef struct {
+	int self;
+
 	bool is_used;
 
 	struct POD *pod;
@@ -94,7 +97,6 @@ typedef struct {
 
 typedef struct {
 	FUNCTION *function;
-	int func_num;
 } CHANNEL;
 
 
@@ -190,6 +192,7 @@ int dg2020_init_hook( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
+		dg2020.function[ i ].self = i;
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].pod = NULL;
 		dg2020.function[ i ].num_channels = 0;
@@ -259,15 +262,16 @@ static bool assign_function( int function, long pod )
 {
 	if ( pod < 0 || pod > MAX_PODS )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invalid pod number %ld, valid pod "
-				"number are %d-%d.\n", Fname, pod, 0, MAX_PODS - 1 );
+		eprint( FATAL, "%s:%ld: DG2020: Invalid pod number: %ld, valid pod "
+				"number are %d-%d.\n", Fname, Lc, pod, 0, MAX_PODS - 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( dg2020.pod[ pod ].function != NULL )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Pod number %ld has already been "
-				"assigned a function.\n", Fname, Lc, pod );
+				"assigned to function %s.\n", Fname, Lc, pod,
+				Function_Names[ dg2020.pod[ pod ].function->self ] );
 		THROW( EXCEPTION );
 	}
 
@@ -281,8 +285,8 @@ static bool assign_channel_to_function( int function, long channel )
 {
 	if ( channel < 0 || channel >= MAX_CHANNELS )
 	{
-		eprint( FATAL, "%s:%ld: DG2020: Invali channel number %ld, valid "
-				"range is 0-%d.\n", Fname, Lc, MAX_CHANNELS - 1 );
+		eprint( FATAL, "%s:%ld: DG2020: Invalid channel number: %ld, valid "
+				"range is 0-%d.\n", Fname, Lc, channel, MAX_CHANNELS - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -290,17 +294,16 @@ static bool assign_channel_to_function( int function, long channel )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Channel %ld is already used for "
 				"function %s.\n", Fname, Lc,
-				Function_Names[ dg2020.channel[ channel ].func_num ] );
+				Function_Names[ dg2020.channel[ channel ].function->self ] );
 		THROW( EXCEPTION );
 	}
 
-	dg2020.channel[ channel ].func_num = function;
 	dg2020.channel[ channel ].function = &dg2020.function[ function ];
 
 	dg2020.function[ function ].is_used = SET;
 	dg2020.function[ function ].channel[ 
 		dg2020.function[ function ].num_channels++ ] = channel;
-	
+
 	return OK;
 }
 
@@ -322,7 +325,7 @@ static bool set_delay_function( int function, double delay )
 		THROW( EXCEPTION );
 	}
 
-	dg2020.function[ function ].delay = double2time( delay );
+	dg2020.function[ function ].delay = double2ticks( delay );
 	dg2020.function[ function ].is_used = SET;
 
 	return OK;
@@ -500,12 +503,12 @@ static bool set_trig_in_slope( int slope )
 
 static bool set_repeat_time( double time )
 {
-	if ( dg2020.is_repeat_time && dg2020.repeat_time != double2time( time ) )
+	if ( dg2020.is_repeat_time && dg2020.repeat_time != double2ticks( time ) )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: A different repeat time/frequency of "
 				"%f s / %f Hz has already been set.\n", Fname, Lc,
-				time2double( dg2020.repeat_time ),
-				1.0 / time2double( dg2020.repeat_time ) );
+				ticks2double( dg2020.repeat_time ),
+				1.0 / ticks2double( dg2020.repeat_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -523,7 +526,7 @@ static bool set_repeat_time( double time )
 		THROW( EXCEPTION );
 	}
 
-	dg2020.repeat_time = double2time( time );
+	dg2020.repeat_time = double2ticks( time );
 	dg2020.is_repeat_time = SET;
 
 	return OK;
@@ -543,7 +546,7 @@ static bool set_repeat_time( double time )
 /* i.e. a integer multiple of the time base                        */
 /*-----------------------------------------------------------------*/
 
-static Ticks double2time( double time )
+static Ticks double2ticks( double time )
 {
 	double ticks;
 
@@ -571,7 +574,7 @@ static Ticks double2time( double time )
 /* Does the exact opposite of the previous function... */
 /*-----------------------------------------------------*/
 
-static double time2double( Ticks ticks )
+static double ticks2double( Ticks ticks )
 {
 	assert( dg2020.is_timebase );
 	return ( double ) ( dg2020.timebase * ticks );

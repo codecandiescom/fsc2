@@ -43,7 +43,33 @@ void pulser_struct_init( void )
 	pulser_struct.get_pulse_position_change = NULL;
 	pulser_struct.get_pulse_length_change = NULL;
 	pulser_struct.get_pulse_maxlen = NULL;
-	pulser_struct.get_pulse_replacements = NULL;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* Extracts the pulse number from a pulse name, i.e. a string of the form */
+/* /^P(ULSE)?_?[0-9]+$/i (in Perl speak)                                  */
+/*------------------------------------------------------------------------*/
+
+long p_num( char *txt )
+{
+	long num;
+
+
+	while ( txt != NULL && ! isdigit( *txt ) )
+		txt++;
+
+	assert( txt != NULL );          /* Paranoia ? */
+
+	num = strtol( txt, NULL, 10 );
+	if ( errno == ERANGE )
+	{
+		eprint( FATAL, "%s:%ld: Pulse number (%s) out of range.\n",
+				Fname, Lc, txt );
+		THROW( EXCEPTION );
+	}
+
+	return num;
 }
 
 
@@ -498,4 +524,170 @@ void p_set_rep_freq( Var *v )
 	is_pulser_func( pulser_struct.set_repeat_time,
 					"setting a repeat frequency" );
 	( *pulser_struct.set_repeat_time )( time );
+}
+
+
+/*-------------------------------------------------------*/
+/* Function for setting one of the properties of a pulse */
+/*-------------------------------------------------------*/
+
+void p_set( long pnum, int type, Var *v )
+{
+	long np;                                 /* number of replacement pulses */
+	long *pl;                                /* list  of replacement pulses */
+	Var *first, *cur;
+	long i;
+
+
+	/* Now the correct driver function is called. All but the last switch just
+	   check that the variable has the correct type and that the driver
+	   function exists. Only the switch for setting replacement pulses has to
+	   be different: here we first need to count the number of variables on
+	   the stack, create an array of the pulse numbers and than call the
+	   appropriate function. */
+
+	switch ( type )
+	{
+		case P_FUNC :
+			vars_check( v, INT_VAR );
+			assert( v->val.lval >= PULSER_CHANNEL_FUNC_MIN &&
+					v->val.lval <= PULSER_CHANNEL_FUNC_MAX );
+			is_pulser_func( pulser_struct.set_pulse_function,
+							"setting a pulse function" );
+			( *pulser_struct.set_pulse_function )( pnum, ( int ) v->val.lval );
+			vars_pop( v );
+			break;
+
+		case P_POS :
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_position,
+							"setting a pulse position" );
+			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+			vars_pop( v );
+			break;
+
+		case P_LEN :
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_length,
+							"setting a pulse length" );
+			( *pulser_struct.set_pulse_position )( pnum, VALUE( v ) );
+			vars_pop( v );
+			break;
+
+		case P_DPOS :
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_position_change,
+							"setting a pulse position change" );
+			( *pulser_struct.set_pulse_position_change )( pnum, VALUE( v ) );
+			vars_pop( v );
+			break;
+
+		case P_DLEN :
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_length_change,
+							"setting a pulse length change" );
+			( *pulser_struct.set_pulse_length_change )( pnum, VALUE( v ) );
+			vars_pop( v );
+			break;
+
+		case P_MAXLEN :
+			vars_check( v, INT_VAR | FLOAT_VAR );
+			is_pulser_func( pulser_struct.set_pulse_maxlen,
+							"setting a maximum length for a pulse" );
+			( *pulser_struct.set_pulse_maxlen )( pnum, VALUE( v ) );
+			vars_pop( v );
+			break;
+
+		case P_REPL :
+			is_pulser_func( pulser_struct.set_pulse_replacements,
+							"setting replacement pulses" );
+
+			/* check and count the variables on the stack (there's always 
+			   going to be at least one) */
+
+			vars_check( v, INT_VAR );
+			for ( first = v, np = 1; v->next != NULL; np++, v = v->next )
+				vars_check( v, INT_VAR );
+
+			/* create the array of replacment pulse numbers, while doing so
+			   get rid of stack variables that aren't needed any longer */
+
+			pl = T_malloc( np * sizeof( long ) );
+			for ( i = 0, v = first; i < np; i++ )
+			{
+				pl[ i ] = v->val.lval;
+				cur = v;
+				v = v->next;
+				vars_pop( cur );
+			}
+
+			( *pulser_struct.set_pulse_replacements )( pnum, np, pl );
+
+			T_free( pl );
+			break;
+	}
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Function for asking the pulser driver about the properties of a pulse */
+/*-----------------------------------------------------------------------*/
+
+Var *p_get( char *txt, int type )
+{
+	long pnum = p_num( txt );               /* determine pulse number */
+	int function;
+	double time;
+	Var *v;
+
+
+	switch ( type )
+	{
+		case P_FUNC :
+			is_pulser_func( pulser_struct.get_pulse_function,
+							"returning a pulses function" );
+			( *pulser_struct.get_pulse_function )( pnum, &function );
+			v = vars_push( INT_VAR, ( long ) function );
+			break;
+
+		case P_POS :
+			is_pulser_func( pulser_struct.get_pulse_position,
+							"returning a pulses position" );
+			( *pulser_struct.get_pulse_position )( pnum, &time );
+			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		case P_LEN :
+			is_pulser_func( pulser_struct.get_pulse_length,
+							"returning a pulses length" );
+			( *pulser_struct.get_pulse_length )( pnum, &time );
+			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		case P_DPOS :
+			is_pulser_func( pulser_struct.get_pulse_position_change,
+							"returning a pulses position change" );
+			( *pulser_struct.get_pulse_position_change )( pnum, &time );
+			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		case P_DLEN :
+			is_pulser_func( pulser_struct.get_pulse_length_change,
+							"returning a pulses length change" );
+			( *pulser_struct.get_pulse_length_change )( pnum, &time );
+			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		case P_MAXLEN :
+			is_pulser_func( pulser_struct.get_pulse_maxlen,
+							"returning a pulses maximum length" );
+			( *pulser_struct.get_pulse_maxlen )( pnum, &time );
+			v = vars_push( FLOAT_VAR, time );
+			break;
+
+		default :
+			assert ( 1 == 0 );
+	}
+
+	return v;
 }

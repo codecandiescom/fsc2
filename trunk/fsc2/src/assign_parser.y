@@ -155,9 +155,7 @@ func:    MW_TOKEN                  { Channel_Type = PULSER_CHANNEL_MW; }
    keywords is arbitrary. */
 
 
-pcd:    /* empty */                { p_assign_channel( Channel_Type, 
-													   vars_push( INT_VAR,
-															   UNDEFINED ) ); }
+pcd:    /* empty */
       | pcd pod
       | pcd chd
       | pcd del
