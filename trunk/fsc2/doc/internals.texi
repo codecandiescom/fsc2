@@ -67,6 +67,7 @@ that try eliminate bugs or even extend @code{fsc2}.
 * Second stage of interpretation::
 * Third stage of interpretation::
 * Reading the sources::
+* Coding conventions::
 @end menu
 @end ifinfo
 
@@ -419,7 +420,7 @@ a pair of pipes between the processes.
 
 
 
-@node Reading the sources, , Third stage of interpretation, Internals
+@node Reading the sources, Coding conventions, Third stage of interpretation, Internals
 @section Reading the sources
 
 
@@ -1751,3 +1752,41 @@ have to be read in and tested again but the program would immediately go
 to the start of the @code{EXPERIMENT} section. But, of course a
 completely new experiment can be done by loading a new @code{EDL}
 script.
+
+
+@node Coding conventions, , Reading the sources, Internals
+@section Coding conventions
+
+
+When you try the source it might be helpful to know about a few conventions
+I try to follow. This concerns mostly the names and spelling of variables.
+And while I try to be consistent were I, unfortunately, don't follow my
+own rules and later have to try to to correct these mistakes. I can't promise
+that I am always successful in this endeavor.
+
+Local variables with function scope should always be in all lower case
+characters, i.e.@: @code{num_points}. For local variables with file scope
+(i.e. variables that are global for a whole C file but not further) I tend
+to use an upper case for the very first character of the name and all others
+in lower case, i.e.@: @code{Child_return_status}. Truely global variables
+(there are more than I like but it's basically impossible to throw out all
+of them) mostly consist of more than a single word, where I use an underscore
+character between the words, and have each of the words start with an upper
+case letter, i.e.@: @code{Function_Names}. Sometimes that rule gets a bit
+loosened up when one of the words is an acronym, where I then use all upper
+case characters for the word.
+
+When I use @code{typedef}'ed types I use a similar convention like for global
+variables but append the suffix @code{_T} to the end of the name to make them
+stick out, like in @code{GUI_Stuff_T}. For @code{#define}'d constants I try
+to use all upper case, e.g.@: code{NUM_CHANNEL_NAMES} - the same holds for
+enumerated values.
+
+With a few exceptions function names are always in all lower case.
+
+Of course, these conventions only hold for my own variables etc. When I use
+symbols from libraries I have to use what I get, so e.g. @code{XPoint} is
+some @code{typedef}'ed type from X, even though it looks like a global
+variable. But I didn't want to go as far as refefining everything else
+because it would make things unreasonably difficult to read for people
+with experience with the other libraries.
