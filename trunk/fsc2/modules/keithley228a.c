@@ -30,6 +30,8 @@ static int dac_ports[ ] = { 6, 6, 1, 1 };
 #define KEITHLEY228A_MAX_VOLTAGE      5.0  /* admissible voltage range */
 #define KEITHLEY228A_MAX_SWEEP_SPEED  1.0  /* max. current change per second */
 
+#define KEITHLEY228A_MAXMAX_CURRENT 10.01  /* really maximum current ;-) */
+
 
 #define	STANDBY  ( ( bool ) 0 )      
 #define OPERATE  ( ( bool ) 1 )
@@ -606,7 +608,7 @@ static double keithley228a_goto_current( double new_current )
 	double dummy;
 
 	
-	assert( fabs( new_current <= 10.0 ) );       /* paranoia ? */
+	assert( fabs( new_current <= KEITHLEY228A_MAXMAX_CURRENT ) );
 
 	/* Nothing really to be done in a test run */
 
@@ -676,7 +678,7 @@ static double keithley228a_set_current( double new_current )
 	int access;
 
 
-	assert( fabs( new_current <= 10.0 ) );       /* paranoia ? */
+	assert( fabs( new_current <= KEITHLEY228A_MAXMAX_CURRENT ) );
 
 	if ( ! keithley228a.use_correction )
 	{
