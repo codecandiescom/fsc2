@@ -26,7 +26,8 @@ bool tds520_init( const char *name )
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds520.device, "VERB OFF;:HEAD OFF\n", 19 ) == FAILURE ||
+    if ( gpib_write( tds520.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
+		 == FAILURE ||
 		 gpib_write( tds520.device, "*STB?\n", 6 ) == FAILURE ||
 		 gpib_read( tds520.device, buffer, &len ) == FAILURE )
 	{
@@ -119,6 +120,12 @@ bool tds520_init( const char *name )
 	else
 		tds520.timebase = tds520_get_timebase( );
 
+	/* If sensitivities have been set in the preparation set them now */
+
+	for ( ch = TDS520_CH1; ch <= TDS520_CH2; ch++ )
+		if ( tds520.is_sens[ ch ] )
+			tds520_set_sens( ch, tds520.sens[ ch ] );
+
 	/* If the number of averages has been set in the PREPARATIONS section send
        to the digitizer now */
 
@@ -207,6 +214,7 @@ bool tds520_get_record_length( long *ret )
 {
     char reply[ 30 ];
     long length = 30;
+	char *r = reply;
 
 
     if ( gpib_write( tds520.device, "HOR:RECO?\n", 10 ) == FAILURE ||
@@ -214,7 +222,9 @@ bool tds520_get_record_length( long *ret )
         return FAIL;
 
     reply[ length - 1 ] = '\0';
-    *ret = T_atol( reply );
+	while ( ! isdigit( *r ) && *r++ )
+		;
+    *ret = T_atol( r );
     return OK;
 }
 
@@ -334,7 +344,7 @@ int tds520_get_acq_mode( void )
 
 
 	if ( gpib_write( tds520.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
-		 gpib_read ( tds520.device, reply, &length ) == FAILURE )
+		 gpib_read( tds520.device, reply, &length ) == FAILURE )
 		tds520_gpib_failure( );
 
 	if ( *reply == 'A' )		/* digitizer is in average mode */
@@ -355,7 +365,7 @@ int tds520_get_acq_mode( void )
 
 bool tds520_get_cursor_position( int cur_no, double *cp )
 {
-	char cmd[ 30 ] = "CURS:VBA:POSITION";
+	char cmd[ 40 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
     long length = 30;
 
@@ -581,9 +591,28 @@ double tds520_get_sens( int channel )
 		tds520_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds520.channel_sens[ channel ] = T_atof( reply );
+	tds520.sens[ channel ] = T_atof( reply );
 
-	return tds520.channel_sens[ channel ];
+	return tds520.sens[ channel ];
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds520_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+
+
+	assert( channel >= TDS520_CH1 && channel <= TDS520_CH2 );
+
+	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
+	gcvt( sens, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( tds520.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520_gpib_failure( );
+
+	return OK;
 }
 
 
@@ -681,7 +710,7 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds520.channel_sens[ channel ] / ( double ) 0xFFFF;
+	scale = 10.24 * tds520.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 

@@ -57,6 +57,9 @@ typedef struct
 	double timebase;
 	bool is_timebase;
 
+	double sens[ MAX_CHANNELS ];
+	double is_sens[ TDS744A_CH4 - TDS744A_CH1 + 1 ];
+
 	double num_avg;
 	bool is_num_avg;
 
@@ -82,7 +85,6 @@ typedef struct
 	int data_source;          // currently selected data source channel
 
 	bool channels_in_use[ MAX_CHANNELS ];
-	double channel_sens[ MAX_CHANNELS ];
 
 } TDS744A;
 
@@ -98,6 +100,7 @@ void tds744a_exit_hook( void );
 
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
@@ -145,6 +148,7 @@ bool tds744a_set_track_cursors( bool flag );
 bool tds744a_set_gated_meas( bool flag );
 bool tds744a_set_snap( bool flag );
 bool tds744a_display_channel( int channel );
+bool tds744a_set_sens( int channel, double val );
 double tds744a_get_sens( int channel );
 bool tds744a_start_aquisition( void );
 double tds744a_get_area( int channel, WINDOW *w, bool use_cursors );

@@ -18,6 +18,27 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 
 static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 0 };
 
+/* List of all allowed time base values (in seconds) */
+
+static double tb[ 32 ] = { 5.0e-10,
+						   1.0e-9,   2.0e-9,   5.0e-9,
+						   10.0e-9,  20.0e-9,  50.0e-9,
+						   100.0e-9, 200.0e-9, 400.0e-9,
+						   1.0e-6,   2.0e-6,   5.0e-6,
+						   10.0e-6,  20.0e-6,  50.0e-6,
+						   100.0e-6, 200.0e-6, 500.0e-6,
+						   1.0e-3,   2.0e-3,   5.0e-3,
+						   10.0e-3,  20.0e-3,  50.0e-3,
+						   100.0e-3, 200.0e-3, 500.0e-3,
+						   1.0,      2.0,      5.0,
+						   10.0 };
+
+/* Maximum and minimum sensitivity (in V) */
+
+static double max_sens = 1e-3,
+              min_sens = 10.0;
+
+
 
 /*******************************************/
 /*   We start with the hook functions...   */
@@ -29,6 +50,9 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 0 };
 
 int tds520_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
@@ -44,6 +68,9 @@ int tds520_init_hook( void )
 	tds520.num_windows = 0;
 	tds520.data_source = TDS520_UNDEF;
 	tds520.meas_source = TDS520_UNDEF;
+
+	for ( i = TDS520_CH1; i <= TDS520_CH2; i++ )
+		tds520.is_sens[ i ] = UNSET;
 
 	return 1;
 }
@@ -188,6 +215,9 @@ Var *digitizer_define_window( Var *v )
 Var *digitizer_timebase( Var *v )
 {
 	double timebase;
+	int TB = -1;
+	int i;
+	char *t;
 	
 
 	if ( v == NULL )
@@ -240,10 +270,129 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	/* Pick the allowed timebase nearest to the user supplied value */
+
+	for ( i = 0; i < 31; i++ )
+		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
+		{
+			TB = i +
+				   ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ? 0 : 1 );
+			break;
+		}
+
+	if ( TB >= 0 &&                                         /* value found ? */
+		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+	{
+		t = T_strdup( tds520_ptime( timebase ) );
+		eprint( WARN, "%s:%ld: %s: Can't set timebase to %s, using %s "
+				"instead.\n", Fname, Lc, DEVICE_NAME,
+				t, tds520_ptime( tb[ TB ] ) );
+		T_free( t );
+	}
+
+	if ( TB < 0 )                                   /* not found yet ? */
+	{
+		t = T_strdup( tds520_ptime( timebase ) );
+
+		if ( timebase < tb[ 0 ] )
+		{
+			timebase = tb[ 0 ];
+			eprint( WARN, "%s:%ld: %s: Timebase of %s is too low, using %s "
+					"instead.\n", Fname, Lc, DEVICE_NAME,
+					t, tds520_ptime( timebase ) );
+		}
+		else
+		{
+		    timebase = tb[ 31 ];
+			eprint( WARN, "%s:%ld: %s: Timebase of %s is too large, using "
+					"%s instead.\n", Fname, Lc, DEVICE_NAME,
+					t, tds520_ptime( timebase ) );
+		}
+
+		T_free( t );
+	}
+
 	tds520.timebase = timebase;
 	tds520.is_timebase = SET;
 
 	return vars_push( FLOAT_VAR, tds520.timebase );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *digitizer_sensitivity( Var *v )
+{
+	long channel;
+	double sens;
+	
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of "
+				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+
+	if ( v->val.lval < TDS520_CH1 || v->val.lval > TDS520_CH2 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Can't set or obtain sensitivity for "
+				"channel %s.\n", Fname, Lc, DEVICE_NAME,
+				Channel_Names[ v->val.lval ] );
+		THROW( EXCEPTION );
+	}
+
+	channel = v->val.lval;
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( TEST_RUN )
+		{
+			if ( tds520.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
+			else
+				return vars_push( FLOAT_VAR, 0.01 );
+		}
+		else if ( I_am == PARENT )
+		{
+			if ( tds520.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
+
+			eprint( FATAL, "%s:%ld: %s: Function `digitizer_sensitivity' with "
+					"no argument can only be used in the EXPERIMENT "
+					"section.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		tds520.sens[ channel ] = tds520_get_sens( channel );
+		tds520.is_sens[ channel ] = SET;
+		return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	sens = VALUE( v );
+
+	if ( sens < max_sens || sens > min_sens )
+	{
+		eprint( FATAL, "%s:%ld: %s: Sensitivity setting is out of range.\n",
+				Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	tds520.sens[ channel ] = sens;
+	tds520.is_sens[ channel ] = SET;
+
+	if ( ! TEST_RUN )
+		tds520_set_sens( channel, sens );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+
+	return vars_push( FLOAT_VAR, tds520.sens[ channel ] );
 }
 
 

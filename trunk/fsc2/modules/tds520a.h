@@ -54,6 +54,9 @@ typedef struct
 	double timebase;
 	bool is_timebase;
 
+	double sens[ MAX_CHANNELS ];
+	double is_sens[ TDS520A_CH2 - TDS520A_CH1 + 1 ];
+
 	double num_avg;
 	bool is_num_avg;
 
@@ -79,8 +82,6 @@ typedef struct
 	int data_source;       /* currently selected data source channel         */
 
 	bool channels_in_use[ MAX_CHANNELS ];
-	double channel_sens[ MAX_CHANNELS ];
-
 } TDS520A;
 
 
@@ -95,6 +96,7 @@ void tds520a_exit_hook( void );
 
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
@@ -142,6 +144,7 @@ bool tds520a_set_track_cursors( bool flag );
 bool tds520a_set_gated_meas( bool flag );
 bool tds520a_set_snap( bool flag );
 bool tds520a_display_channel( int channel );
+bool tds520a_set_sens( int channel, double val );
 double tds520a_get_sens( int channel );
 bool tds520a_start_aquisition( void );
 double tds520a_get_area( int channel, WINDOW *w, bool use_cursor );

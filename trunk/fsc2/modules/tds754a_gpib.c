@@ -126,6 +126,12 @@ bool tds754a_init( const char *name )
 	else
 		tds754a.timebase = tds754a_get_timebase( );
 
+	/* If sensitivities have been set in the preparation set them now */
+
+	for ( ch = TDS754A_CH1; ch <= TDS754A_CH4; ch++ )
+		if ( tds754a.is_sens[ ch ] )
+			tds754a_set_sens( ch, tds754a.sens[ ch ] );
+
 	/* If the number of averages has been set in the PREPARATIONS section send
        to the digitizer now */
 
@@ -628,9 +634,57 @@ double tds754a_get_sens( int channel )
 		tds754a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds754a.channel_sens[ channel ] = T_atof( reply );
+	tds754a.sens[ channel ] = T_atof( reply );
 
-	return tds754a.channel_sens[ channel ];
+	return tds754a.sens[ channel ];
+}
+
+
+/*-------------------------------------------------------------------*/
+/* !!! Still need to find out if checking for the input impedance is */
+/*     really necessary with this digitizer...                       */
+/*-------------------------------------------------------------------*/
+
+bool tds754a_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+	char reply[ 40 ];
+	long length = 40;
+
+
+	assert( channel >= TDS754A_CH1 && channel <= TDS754A_CH4 );
+
+	/* On this digitizer the sensitivity can only be set to higher values than
+	   1 V when using 50 Ohm input impedance */ 
+
+	if ( sens > 1.0 )
+	{
+		sprintf( cmd, "CH%1d:IMP?\n", channel );
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
+			tds754a_gpib_failure( );
+
+		if ( strncmp( reply, "MEG", 3 ) )
+		{
+			if ( I_am == PARENT )
+				eprint( FATAL, "%s: Can't set sensitivity of channel %s to "
+						"%f V while input impedance is 50 Ohm.\n", DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			else
+				eprint( FATAL, "%s:%ld: %s: Can't set sensitivity of channel "
+						"%s to %f V while input impedance is 50 Ohm.\n",
+						Fname, Lc, DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			THROW( EXCEPTION );
+		}
+	}
+
+	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
+	gcvt( sens, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	return OK;
 }
 
 
@@ -761,7 +815,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds754a.channel_sens[ channel ] / ( double ) 0xFFFF;
+	scale = 10.24 * tds754a.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 

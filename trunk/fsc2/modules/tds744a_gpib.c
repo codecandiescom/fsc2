@@ -13,7 +13,6 @@ static double tds744a_get_area_wo_cursor( int channel, WINDOW *w );
 int gpib_read_w( int device, char *buffer, long *length );
 
 
-
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
@@ -125,6 +124,12 @@ bool tds744a_init( const char *name )
 		tds744a_set_timebase( tds744a.timebase );
 	else
 		tds744a.timebase = tds744a_get_timebase( );
+
+	/* If sensitivities have been set in the preparation set them now */
+
+	for ( ch = TDS744A_CH1; ch <= TDS744A_CH4; ch++ )
+		if ( tds744a.is_sens[ ch ] )
+			tds744a_set_sens( ch, tds744a.sens[ ch ] );
 
 	/* If the number of averages has been set in the PREPARATIONS section send
        it to the digitizer now */
@@ -628,9 +633,55 @@ double tds744a_get_sens( int channel )
 		tds744a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds744a.channel_sens[ channel ] = T_atof( reply );
+	tds744a.sens[ channel ] = T_atof( reply );
 
-	return tds744a.channel_sens[ channel ];
+	return tds744a.sens[ channel ];
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds744a_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+	char reply[ 40 ];
+	long length = 40;
+
+
+	assert( channel >= TDS744A_CH1 && channel <= TDS744A_CH4 );
+
+	/* On this digitizer the sensitivity can only be set to higher values than
+	   1 V when using 50 Ohm input impedance */ 
+
+	if ( sens > 1.0 )
+	{
+		sprintf( cmd, "CH%1d:IMP?\n", channel );
+		if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE ||
+			 gpib_read( tds744a.device, reply, &length ) == FAILURE )
+			tds744a_gpib_failure( );
+
+		if ( strncmp( reply, "MEG", 3 ) )
+		{
+			if ( I_am == PARENT )
+				eprint( FATAL, "%s: Can't set sensitivity of channel %s to "
+						"%f V while input impedance is 50 Ohm.\n", DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			else
+				eprint( FATAL, "%s:%ld: %s: Can't set sensitivity of channel "
+						"%s to %f V while input impedance is 50 Ohm.\n",
+						Fname, Lc, DEVICE_NAME,
+						Channel_Names[ channel ], sens );
+			THROW( EXCEPTION );
+		}
+	}
+
+	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
+	gcvt( sens, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( tds744a.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds744a_gpib_failure( );
+
+	return OK;
 }
 
 
@@ -763,7 +814,7 @@ bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds744a.channel_sens[ channel ] / ( double ) 0xFFFF;
+	scale = 10.24 * tds744a.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 

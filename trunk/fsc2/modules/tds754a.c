@@ -18,6 +18,29 @@ static Var *get_amplitude( Var *v, bool use_cursor );
 
 static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
+/* List of all allowed time base values (in seconds) */
+/* Still needs checking!!! */
+
+static double tb[ 32 ] = { 5.0e-10,
+						   1.0e-9,   2.0e-9,   5.0e-9,
+						   12.5e-9,  25.0e-9,  50.0e-9,
+						   100.0e-9, 200.0e-9, 400.0e-9,
+						   1.0e-6,   2.0e-6,   5.0e-6,
+						   10.0e-6,  20.0e-6,  50.0e-6,
+						   100.0e-6, 200.0e-6, 500.0e-6,
+						   1.0e-3,   2.0e-3,   5.0e-3,
+						   10.0e-3,  20.0e-3,  50.0e-3,
+						   100.0e-3, 200.0e-3, 500.0e-3,
+						   1.0,      2.0,      5.0,
+						   10.0 };
+
+/* Maximum and minimum sensitivity (in V) */
+/* Still needs checking !!! Might have the same dependence as on the TDS754A
+   where the minimum sensitivity is 1V for 1 M ohm and 10 V for 50 ohm */
+
+static double max_sens = 1e-3,
+              min_sens = 10.0;
+
 
 /*******************************************/
 /*   We start with the hook functions...   */
@@ -29,6 +52,9 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
 int tds754a_init_hook( void )
 {
+	int i;
+
+
 	/* Set global variable to indicate that GPIB bus is needed */
 
 	need_GPIB = SET;
@@ -44,6 +70,9 @@ int tds754a_init_hook( void )
 	tds754a.num_windows = 0;
 	tds754a.data_source = TDS754A_UNDEF;
 	tds754a.meas_source = TDS754A_UNDEF;
+
+	for ( i = TDS754A_CH1; i <= TDS754A_CH4; i++ )
+		tds754a.is_sens[ i ] = UNSET;
 
 	return 1;
 }
@@ -188,6 +217,9 @@ Var *digitizer_define_window( Var *v )
 Var *digitizer_timebase( Var *v )
 {
 	double timebase;
+	int TB = -1;
+	int i;
+	char *t;
 	
 
 	if ( v == NULL )
@@ -240,10 +272,136 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION );
 	}
 
+	if ( timebase <= 0 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid zero or negative time base: %s.\n",
+				Fname, Lc, DEVICE_NAME, tds754a_ptime( timebase ) );
+		THROW( EXCEPTION );
+	}
+
+	/* Pick the allowed timebase nearest to the user supplied value */
+
+	for ( i = 0; i < 31; i++ )
+		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
+		{
+			TB = i +
+				   ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ? 0 : 1 );
+			break;
+		}
+
+	if ( TB >= 0 &&                                         /* value found ? */
+		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+	{
+		t = T_strdup( tds754a_ptime( timebase ) );
+		eprint( WARN, "%s:%ld: %s: Can't set timebase to %s, using %s "
+				"instead.\n", Fname, Lc, DEVICE_NAME,
+				t, tds754a_ptime( tb[ TB ] ) );
+		T_free( t );
+	}
+
+	if ( TB < 0 )                                   /* not found yet ? */
+	{
+		t = T_strdup( tds754a_ptime( timebase ) );
+
+		if ( timebase < tb[ 0 ] )
+		{
+			timebase = tb[ 0 ];
+			eprint( WARN, "%s:%ld: %s: Timebase of %s is too low, using %s "
+					"instead.\n", Fname, Lc, DEVICE_NAME,
+					t, tds754a_ptime( timebase ) );
+		}
+		else
+		{
+		    timebase = tb[ 31 ];
+			eprint( WARN, "%s:%ld: %s: Timebase of %s is too large, using "
+					"%s instead.\n", Fname, Lc, DEVICE_NAME,
+					t, tds754a_ptime( timebase ) );
+		}
+
+		T_free( t );
+	}
+
 	tds754a.timebase = timebase;
 	tds754a.is_timebase = SET;
 
 	return vars_push( FLOAT_VAR, tds754a.timebase );
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+Var *digitizer_sensitivity( Var *v )
+{
+	long channel;
+	double sens;
+	
+
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of "
+				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_VAR );
+
+	if ( v->val.lval < TDS754A_CH1 || v->val.lval > TDS754A_CH4 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Can't set or obtain sensitivity for "
+				"channel %s.\n", Fname, Lc, DEVICE_NAME,
+				Channel_Names[ v->val.lval ] );
+		THROW( EXCEPTION );
+	}
+
+	channel = v->val.lval;
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		if ( TEST_RUN )
+		{
+			if ( tds754a.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+			else
+				return vars_push( FLOAT_VAR, 0.01 );
+		}
+		else if ( I_am == PARENT )
+		{
+			if ( tds754a.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+
+			eprint( FATAL, "%s:%ld: %s: Function `digitizer_sensitivity' with "
+					"no argument can only be used in the EXPERIMENT "
+					"section.\n", Fname, Lc, DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
+
+		tds754a.sens[ channel ] = tds754a_get_sens( channel );
+		tds754a.is_sens[ channel ] = SET;
+		return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	sens = VALUE( v );
+
+	if ( sens < max_sens || sens > min_sens )
+	{
+		eprint( FATAL, "%s:%ld: %s: Sensitivity setting is out of range.\n",
+				Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	tds754a.sens[ channel ] = sens;
+	tds754a.is_sens[ channel ] = SET;
+
+	if ( ! TEST_RUN )
+		tds754a_set_sens( channel, sens );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
+				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+
+	return vars_push( FLOAT_VAR, tds754a.sens[ channel ] );
 }
 
 

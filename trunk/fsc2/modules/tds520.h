@@ -6,7 +6,7 @@
 #include "fsc2.h"
 
 
-#define DEVICE_NAME "TDS520"    /* compare entry in /etc/gpib.conf ! */
+#define DEVICE_NAME "TDS520"     /* compare entry in /etc/gpib.conf ! */
 
 #define TDS_POINTS_PER_DIV 50
 
@@ -54,6 +54,9 @@ typedef struct
 	double timebase;
 	bool is_timebase;
 
+	double sens[ MAX_CHANNELS ];
+	double is_sens[ TDS520_CH2 - TDS520_CH1 + 1 ];
+
 	double num_avg;
 	bool is_num_avg;
 
@@ -75,8 +78,6 @@ typedef struct
 	int data_source;       /* currently selected data source channel         */
 
 	bool channels_in_use[ MAX_CHANNELS ];
-	double channel_sens[ MAX_CHANNELS ];
-
 } TDS520;
 
 
@@ -91,6 +92,7 @@ void tds520_exit_hook( void );
 
 Var *digitizer_define_window( Var *v );
 Var *digitizer_timebase( Var *v );
+Var *digitizer_sensitivity( Var *v );
 Var *digitizer_num_averages( Var *v );
 Var *digitizer_get_channel_number( Var *v );
 Var *digitizer_record_length( Var *v );
@@ -133,6 +135,7 @@ void tds520_finished( void );
 bool tds520_set_cursor( int cur_num, double pos );
 bool tds520_set_snap( bool flag );
 bool tds520_display_channel( int channel );
+bool tds520_set_sens( int channel, double val );
 double tds520_get_sens( int channel );
 bool tds520_start_aquisition( void );
 double tds520_get_area( int channel, WINDOW *w, bool use_cursor );

@@ -4,9 +4,9 @@
 
 
 
-#define TDS744A_MAIN
+#define TDS540_MAIN
 
-#include "tds744a.h"
+#include "tds540.h"
 
 
 static Var *get_area( Var *v, bool use_cursor );
@@ -22,7 +22,7 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 
 static double tb[ 32 ] = { 5.0e-10,
 						   1.0e-9,   2.0e-9,   5.0e-9,
-						   12.5e-9,  25.0e-9,  50.0e-9,
+						   10.0e-9,  20.0e-9,  50.0e-9,
 						   100.0e-9, 200.0e-9, 400.0e-9,
 						   1.0e-6,   2.0e-6,   5.0e-6,
 						   10.0e-6,  20.0e-6,  50.0e-6,
@@ -33,10 +33,7 @@ static double tb[ 32 ] = { 5.0e-10,
 						   1.0,      2.0,      5.0,
 						   10.0 };
 
-/* Maximum and minimum sensitivity (in V)
-   Take care: The minimum sensitivity of 10 V only works with 1 M Ohm input
-   impedance, while for 50 Ohm the minimum sensitivity is only 1V.
-   Unfortunately, this can only be tested after the digitizer is online. */
+/* Maximum and minimum sensitivity (in V) */
 
 static double max_sens = 1e-3,
               min_sens = 10.0;
@@ -50,7 +47,7 @@ static double max_sens = 1e-3,
 /* Init hook function for the module. */
 /*------------------------------------*/
 
-int tds744a_init_hook( void )
+int tds540_init_hook( void )
 {
 	int i;
 
@@ -61,18 +58,18 @@ int tds744a_init_hook( void )
 
 	/* Initialize some variables in the digitizers structure */
 
-	tds744a.is_reacting = UNSET;
-	tds744a.w = NULL;
-	tds744a.is_timebase = UNSET;
-	tds744a.is_num_avg = UNSET;
-	tds744a.is_rec_len = UNSET;
-	tds744a.is_trig_pos = UNSET;
-	tds744a.num_windows = 0;
-	tds744a.data_source = TDS744A_UNDEF;
-	tds744a.meas_source = TDS744A_UNDEF;
+	tds540.is_reacting = UNSET;
+	tds540.w = NULL;
+	tds540.is_timebase = UNSET;
+	tds540.is_num_avg = UNSET;
+	tds540.is_rec_len = UNSET;
+	tds540.is_trig_pos = UNSET;
+	tds540.num_windows = 0;
+	tds540.data_source = TDS540_UNDEF;
+	tds540.meas_source = TDS540_UNDEF;
 
-	for ( i = TDS744A_CH1; i <= TDS744A_CH4; i++ )
-		tds744a.is_sens[ i ] = UNSET;
+	for ( i = TDS540_CH1; i <= TDS540_CH4; i++ )
+		tds540.is_sens[ i ] = UNSET;
 
 	return 1;
 }
@@ -82,15 +79,15 @@ int tds744a_init_hook( void )
 /* Start of experiment hook function for the module */
 /*--------------------------------------------------*/
 
-int tds744a_exp_hook( void )
+int tds540_exp_hook( void )
 {
-	if ( ! tds744a_init( DEVICE_NAME ) )
+	if ( ! tds540_init( DEVICE_NAME ) )
 	{
 		eprint( FATAL, "%s: Initialization of device failed.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	tds744a_do_pre_exp_checks( );
+	tds540_do_pre_exp_checks( );
 
 	return 1;
 }
@@ -100,9 +97,9 @@ int tds744a_exp_hook( void )
 /* End of experiment hook function for the module */
 /*------------------------------------------------*/
 
-int tds744a_end_of_exp_hook( void )
+int tds540_end_of_exp_hook( void )
 {
-	tds744a_finished( );
+	tds540_finished( );
 	return 1;
 }
 
@@ -112,9 +109,9 @@ int tds744a_end_of_exp_hook( void )
 /*------------------------------------------*/
 
 
-void tds744a_exit_hook( void )
+void tds540_exit_hook( void )
 {
-	tds744a_delete_windows( );
+	tds540_delete_windows( );
 }
 
 
@@ -129,7 +126,7 @@ Var *digitizer_define_window( Var *v )
 	WINDOW *w;
 
 
-	if ( tds744a.num_windows >= MAX_NUM_OF_WINDOWS )
+	if ( tds540.num_windows >= MAX_NUM_OF_WINDOWS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Maximum number of digitizer windows (%ld) "
 				"exceeded.\n", Fname, Lc, DEVICE_NAME, MAX_NUM_OF_WINDOWS );
@@ -178,14 +175,14 @@ Var *digitizer_define_window( Var *v )
 
 	/* Create a new window structure and append it to the list of windows */
 
-	if ( tds744a.w == NULL )
+	if ( tds540.w == NULL )
 	{
-		tds744a.w = w = T_malloc( sizeof( WINDOW ) );
+		tds540.w = w = T_malloc( sizeof( WINDOW ) );
 		w->prev = NULL;
 	}
 	else
 	{
-		w = tds744a.w;
+		w = tds540.w;
 		while ( w->next != NULL )
 			w = w->next;
 		w->next = T_malloc( sizeof( WINDOW ) );
@@ -194,7 +191,7 @@ Var *digitizer_define_window( Var *v )
 	}
 
 	w->next = NULL;
-	w->num = tds744a.num_windows++ + WINDOW_START_NUMBER;
+	w->num = tds540.num_windows++ + WINDOW_START_NUMBER;
 	w->start = win_start;
 
 	if ( is_win_width )
@@ -226,15 +223,15 @@ Var *digitizer_timebase( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_timebase )
-				return vars_push( FLOAT_VAR, tds744a.timebase );
+			if ( tds540.is_timebase )
+				return vars_push( FLOAT_VAR, tds540.timebase );
 			else
 				return vars_push( FLOAT_VAR, 0.1 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_timebase )
-				return vars_push( FLOAT_VAR, tds744a.timebase );
+			if ( tds540.is_timebase )
+				return vars_push( FLOAT_VAR, tds540.timebase );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_timebase' with no "
 					"argument can only be used in the EXPERIMENT section.\n",
@@ -242,9 +239,9 @@ Var *digitizer_timebase( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		tds744a.timebase = tds744a_get_timebase( );
-		tds744a.is_timebase = SET;
-		return vars_push( FLOAT_VAR, tds744a.timebase );
+		tds540.timebase = tds540_get_timebase( );
+		tds540.is_timebase = SET;
+		return vars_push( FLOAT_VAR, tds540.timebase );
 	}
 
 	if ( I_am == CHILD || TEST_RUN )
@@ -254,7 +251,7 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( tds744a.is_timebase )
+	if ( tds540.is_timebase )
 	{
 		eprint( FATAL, "%s:%ld: %s: Digitizer time base has already been "
 				"set.\n", Fname, Lc, DEVICE_NAME );
@@ -268,7 +265,7 @@ Var *digitizer_timebase( Var *v )
 	if ( timebase <= 0 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid zero or negative time base: %s.\n",
-				Fname, Lc, DEVICE_NAME, tds744a_ptime( timebase ) );
+				Fname, Lc, DEVICE_NAME, tds540_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
 
@@ -285,39 +282,39 @@ Var *digitizer_timebase( Var *v )
 	if ( TB >= 0 &&                                         /* value found ? */
 		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
 	{
-		t = T_strdup( tds744a_ptime( timebase ) );
+		t = T_strdup( tds540_ptime( timebase ) );
 		eprint( WARN, "%s:%ld: %s: Can't set timebase to %s, using %s "
 				"instead.\n", Fname, Lc, DEVICE_NAME,
-				t, tds744a_ptime( tb[ TB ] ) );
+				t, tds540_ptime( tb[ TB ] ) );
 		T_free( t );
 	}
 
 	if ( TB < 0 )                                   /* not found yet ? */
 	{
-		t = T_strdup( tds744a_ptime( timebase ) );
+		t = T_strdup( tds540_ptime( timebase ) );
 
 		if ( timebase < tb[ 0 ] )
 		{
 			timebase = tb[ 0 ];
 			eprint( WARN, "%s:%ld: %s: Timebase of %s is too low, using %s "
 					"instead.\n", Fname, Lc, DEVICE_NAME,
-					t, tds744a_ptime( timebase ) );
+					t, tds540_ptime( timebase ) );
 		}
 		else
 		{
 		    timebase = tb[ 31 ];
 			eprint( WARN, "%s:%ld: %s: Timebase of %s is too large, using "
 					"%s instead.\n", Fname, Lc, DEVICE_NAME,
-					t, tds744a_ptime( timebase ) );
+					t, tds540_ptime( timebase ) );
 		}
 
 		T_free( t );
 	}
 
-	tds744a.timebase = timebase;
-	tds744a.is_timebase = SET;
+	tds540.timebase = timebase;
+	tds540.is_timebase = SET;
 
-	return vars_push( FLOAT_VAR, tds744a.timebase );
+	return vars_push( FLOAT_VAR, tds540.timebase );
 }
 
 
@@ -339,7 +336,7 @@ Var *digitizer_sensitivity( Var *v )
 
 	vars_check( v, INT_VAR );
 
-	if ( v->val.lval < TDS744A_CH1 || v->val.lval > TDS744A_CH4 )
+	if ( v->val.lval < TDS540_CH1 || v->val.lval > TDS540_CH4 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't set or obtain sensitivity for "
 				"channel %s.\n", Fname, Lc, DEVICE_NAME,
@@ -353,15 +350,15 @@ Var *digitizer_sensitivity( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
+			if ( tds540.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 			else
 				return vars_push( FLOAT_VAR, 0.01 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_sens[ channel ] )
-				return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
+			if ( tds540.is_sens[ channel ] )
+				return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_sensitivity' with "
 					"no argument can only be used in the EXPERIMENT "
@@ -369,9 +366,9 @@ Var *digitizer_sensitivity( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		tds744a.sens[ channel ] = tds744a_get_sens( channel );
-		tds744a.is_sens[ channel ] = SET;
-		return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
+		tds540.sens[ channel ] = tds540_get_sens( channel );
+		tds540.is_sens[ channel ] = SET;
+		return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -384,17 +381,17 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	tds744a.sens[ channel ] = sens;
-	tds744a.is_sens[ channel ] = SET;
+	tds540.sens[ channel ] = sens;
+	tds540.is_sens[ channel ] = SET;
 
 	if ( ! TEST_RUN )
-		tds744a_set_sens( channel, sens );
+		tds540_set_sens( channel, sens );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
 				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
 
-	return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
+	return vars_push( FLOAT_VAR, tds540.sens[ channel ] );
 }
 
 
@@ -410,15 +407,15 @@ Var *digitizer_num_averages( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_num_avg )
-				return vars_push( INT_VAR, tds744a.num_avg );
+			if ( tds540.is_num_avg )
+				return vars_push( INT_VAR, tds540.num_avg );
 			else
 				return vars_push( INT_VAR, 16 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_num_avg )
-				return vars_push( INT_VAR, tds744a.num_avg );
+			if ( tds540.is_num_avg )
+				return vars_push( INT_VAR, tds540.num_avg );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_num_averages' "
 					"with no argument can only be used in the EXPERIMENT "
@@ -426,9 +423,9 @@ Var *digitizer_num_averages( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		tds744a.num_avg = tds744a_get_num_avg( );
-		tds744a.is_num_avg = SET;
-		return vars_push( INT_VAR, tds744a.num_avg );
+		tds540.num_avg = tds540_get_num_avg( );
+		tds540.is_num_avg = SET;
+		return vars_push( INT_VAR, tds540.num_avg );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -456,13 +453,13 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	tds744a.num_avg = num_avg;
+	tds540.num_avg = num_avg;
 	if ( I_am == CHILD )
-		tds744a_set_num_avg( num_avg );
+		tds540_set_num_avg( num_avg );
 	if ( ! TEST_RUN )                 // store value if in PREPARATIONS section
-		tds744a.is_num_avg = SET;
+		tds540.is_num_avg = SET;
 
-	return vars_push( INT_VAR, tds744a.num_avg );
+	return vars_push( INT_VAR, tds540.num_avg );
 }
 
 
@@ -499,15 +496,15 @@ Var *digitizer_record_length( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_rec_len )
-				return vars_push( INT_VAR, tds744a.rec_len );
+			if ( tds540.is_rec_len )
+				return vars_push( INT_VAR, tds540.rec_len );
 			else
 				return vars_push( INT_VAR, 500 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_rec_len )
-				return vars_push( INT_VAR, tds744a.rec_len );
+			if ( tds540.is_rec_len )
+				return vars_push( INT_VAR, tds540.rec_len );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_record_length' "
 					"with no argument can only be used in the EXPERIMENT "
@@ -515,12 +512,12 @@ Var *digitizer_record_length( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! tds744a_get_record_length( &rec_len ) )
-			tds744a_gpib_failure( );
+		if ( ! tds540_get_record_length( &rec_len ) )
+			tds540_gpib_failure( );
 
-		tds744a.rec_len = rec_len;
-		tds744a.is_rec_len = SET;
-		return vars_push( INT_VAR, tds744a.rec_len );
+		tds540.rec_len = rec_len;
+		tds540.is_rec_len = SET;
+		return vars_push( INT_VAR, tds540.rec_len );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -558,13 +555,13 @@ Var *digitizer_record_length( Var *v )
 		i++;
 	}
 
-	tds744a.rec_len = record_lengths[ i ];
-	tds744a.is_rec_len = SET;
+	tds540.rec_len = record_lengths[ i ];
+	tds540.is_rec_len = SET;
 
-	if ( I_am == CHILD && ! tds744a_set_record_length( tds744a.rec_len ) )
-		tds744a_gpib_failure( );
+	if ( I_am == CHILD && ! tds540_set_record_length( tds540.rec_len ) )
+		tds540_gpib_failure( );
 
-	return vars_push( INT_VAR, tds744a.rec_len );
+	return vars_push( INT_VAR, tds540.rec_len );
 }
 
 
@@ -580,15 +577,15 @@ Var *digitizer_trigger_position( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_trig_pos )
-				return vars_push( FLOAT_VAR, tds744a.trig_pos );
+			if ( tds540.is_trig_pos )
+				return vars_push( FLOAT_VAR, tds540.trig_pos );
 			else
 				return vars_push( FLOAT_VAR, 0.1 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_trig_pos )
-				return vars_push( FLOAT_VAR, tds744a.trig_pos );
+			if ( tds540.is_trig_pos )
+				return vars_push( FLOAT_VAR, tds540.trig_pos );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_position' "
 					"with no argument can only be used in the EXPERIMENT "
@@ -596,12 +593,12 @@ Var *digitizer_trigger_position( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! tds744a_get_trigger_pos( &trig_pos ) )
-			tds744a_gpib_failure( );
+		if ( ! tds540_get_trigger_pos( &trig_pos ) )
+			tds540_gpib_failure( );
 
-		tds744a.trig_pos = trig_pos;
-		tds744a.is_trig_pos = SET;
-		return vars_push( FLOAT_VAR, tds744a.trig_pos );
+		tds540.trig_pos = trig_pos;
+		tds540.is_trig_pos = SET;
+		return vars_push( FLOAT_VAR, tds540.trig_pos );
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -615,13 +612,13 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	tds744a.trig_pos = trig_pos;
-	tds744a.is_trig_pos = SET;
+	tds540.trig_pos = trig_pos;
+	tds540.is_trig_pos = SET;
 
-	if ( I_am == CHILD && ! tds744a_set_trigger_pos( tds744a.trig_pos ) )
-		tds744a_gpib_failure( );
+	if ( I_am == CHILD && ! tds540_set_trigger_pos( tds540.trig_pos ) )
+		tds540_gpib_failure( );
 
-	return vars_push( FLOAT_VAR, tds744a.trig_pos );
+	return vars_push( FLOAT_VAR, tds540.trig_pos );
 }
 
 
@@ -635,7 +632,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 {
 	vars_check( v, INT_VAR );
 
-	if ( v->val.lval < TDS744A_CH1 || v->val.lval > TDS744A_REF4 )
+	if ( v->val.lval < TDS540_CH1 || v->val.lval > TDS540_REF4 )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -653,15 +650,15 @@ Var *digitizer_trigger_channel( Var *v )
 	{
 		if ( TEST_RUN )
 		{
-			if ( tds744a.is_trigger_channel )
-				return vars_push( INT_VAR, tds744a.trigger_channel );
+			if ( tds540.is_trigger_channel )
+				return vars_push( INT_VAR, tds540.trigger_channel );
 			else
 				return vars_push( INT_VAR, 0 );
 		}
 		else if ( I_am == PARENT )
 		{
-			if ( tds744a.is_trigger_channel )
-				return vars_push( INT_VAR, tds744a.trigger_channel );
+			if ( tds540.is_trigger_channel )
+				return vars_push( INT_VAR, tds540.trigger_channel );
 
 			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_channel' "
 					"with no argument can only be used in the EXPERIMENT "
@@ -669,7 +666,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		return vars_push( tds744a_get_trigger_channel( ) );
+		return vars_push( tds540_get_trigger_channel( ) );
 	}
 
 	vars_check( v, INT_VAR );
@@ -683,13 +680,13 @@ Var *digitizer_trigger_channel( Var *v )
 
     switch ( v->val.lval )
     {
-        case TDS744A_CH1 : case TDS744A_CH2 : case TDS744A_CH3 :
-		case TDS744A_CH4 : case TDS744A_AUX : case TDS744A_LIN :
-			tds744a.trigger_channel = v->val.lval;
+        case TDS540_CH1 : case TDS540_CH2 : case TDS540_CH3 :
+		case TDS540_CH4 : case TDS540_AUX : case TDS540_LIN :
+			tds540.trigger_channel = v->val.lval;
 			if ( I_am == CHILD )
-				tds744a_set_trigger_channel( Channel_Names[ v->val.lval ] );
+				tds540_set_trigger_channel( Channel_Names[ v->val.lval ] );
 			if ( ! TEST_RUN )
-				tds744a.is_trigger_channel = SET;
+				tds540.is_trigger_channel = SET;
             break;
 
 		default :
@@ -712,7 +709,7 @@ Var *digitizer_start_acquisition( Var *v )
 	v = v;
 
 	if ( ! TEST_RUN )
-		tds744a_start_aquisition( );
+		tds540_start_aquisition( );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -746,18 +743,18 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
+	for ( ch = 0; ch <= TDS540_REF4; ch++ )
 		if ( ch == ( int ) v->val.lval )
 			break;
 
-	if ( ch > TDS744A_REF4 )
+	if ( ch > TDS540_REF4 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	tds744a.channels_in_use[ ch ] = SET;
+	tds540.channels_in_use[ ch ] = SET;
 
 	v = vars_pop( v );
 
@@ -767,7 +764,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	{
 		vars_check( v, INT_VAR );
 
-		if ( ( w = tds744a.w ) == NULL )
+		if ( ( w = tds540.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
 					"defined.\n", Fname, Lc, DEVICE_NAME );
@@ -807,7 +804,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	   value */
 
 	if ( I_am == CHILD )
-		return vars_push( FLOAT_VAR, tds744a_get_area( ch, w, use_cursor ) );
+		return vars_push( FLOAT_VAR, tds540_get_area( ch, w, use_cursor ) );
 
 	return vars_push( FLOAT_VAR, 1.234e-8 );
 }
@@ -845,18 +842,18 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
+	for ( ch = 0; ch <= TDS540_REF4; ch++ )
 		if ( ch == ( int ) v->val.lval )
 			break;
 
-	if ( ch > TDS744A_REF4 )
+	if ( ch > TDS540_REF4 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	tds744a.channels_in_use[ ch ] = SET;
+	tds540.channels_in_use[ ch ] = SET;
 
 	v = vars_pop( v );
 
@@ -865,7 +862,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	if ( v != NULL )
 	{
 		vars_check( v, INT_VAR );
-		if ( ( w = tds744a.w ) == NULL )
+		if ( ( w = tds540.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
 					"defined.\n", Fname, Lc, DEVICE_NAME );
@@ -906,7 +903,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( I_am == CHILD )
 	{
-		tds744a_get_curve( ch, w, &array, &length, use_cursor );
+		tds540_get_curve( ch, w, &array, &length, use_cursor );
 		nv = vars_push( FLOAT_TRANS_ARR, array, length );
 		T_free( array );
 		return nv;
@@ -954,18 +951,18 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	for ( ch = 0; ch <= TDS744A_REF4; ch++ )
+	for ( ch = 0; ch <= TDS540_REF4; ch++ )
 		if ( ch == ( int ) v->val.lval )
 			break;
 
-	if ( ch > TDS744A_REF4 )
+	if ( ch > TDS540_REF4 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
-	tds744a.channels_in_use[ ch ] = SET;
+	tds540.channels_in_use[ ch ] = SET;
 
 	v = vars_pop( v );
 
@@ -974,7 +971,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	if ( v != NULL )
 	{
 		vars_check( v, INT_VAR );
-		if ( ( w = tds744a.w ) == NULL )
+		if ( ( w = tds540.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
 					"defined.\n", Fname, Lc, DEVICE_NAME );
@@ -1016,7 +1013,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	if ( I_am == CHILD )
 	{
 		nv = vars_push( FLOAT_VAR,
-						tds744a_get_amplitude( ch, w, use_cursor ) );
+						tds540_get_amplitude( ch, w, use_cursor ) );
 		return nv;
 	}
 
@@ -1046,7 +1043,7 @@ Var *digitizer_lock_keyboard( Var *v )
 	}
 
 	if ( ! TEST_RUN )
-		tds744a_lock_state( lock );
+		tds540_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0 );
 }

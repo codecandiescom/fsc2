@@ -207,7 +207,7 @@ void tds520_do_pre_exp_checks( void )
 		w->start_num = lround( ( w->start + tds520.trig_pos * window )
 							   * TDS_POINTS_PER_DIV / tds520.timebase ) + 1;
 		w->end_num = lround( ( w->start + w->width + tds520.trig_pos * window )
-							   * TDS_POINTS_PER_DIV / tds520.timebase ) + 1;
+							 * TDS_POINTS_PER_DIV / tds520.timebase ) + 1;
 
 		if ( w->end_num - w->start_num <= 0 )
         {

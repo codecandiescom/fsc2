@@ -124,6 +124,12 @@ bool tds520a_init( const char *name )
 	else
 		tds520a.timebase = tds520a_get_timebase( );
 
+	/* If sensitivities have been set in the preparation set them now */
+
+	for ( ch = TDS520A_CH1; ch <= TDS520A_CH2; ch++ )
+		if ( tds520a.is_sens[ ch ] )
+			tds520a_set_sens( ch, tds520a.sens[ ch ] );
+
 	/* If the number of averages has been set in the PREPARATIONS section send
        to the digitizer now */
 
@@ -625,9 +631,28 @@ double tds520a_get_sens( int channel )
 		tds520a_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
-	tds520a.channel_sens[ channel ] = T_atof( reply );
+	tds520a.sens[ channel ] = T_atof( reply );
 
-	return tds520a.channel_sens[ channel ];
+	return tds520a.sens[ channel ];
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+bool tds520a_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+
+
+	assert( channel >= TDS520A_CH1 && channel <= TDS520A_CH2 );
+
+	sprintf( cmd, "%s:SCA ", Channel_Names[ channel ] );
+	gcvt( sens, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( tds520a.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds520a_gpib_failure( );
+
+	return OK;
 }
 
 
@@ -759,7 +784,7 @@ bool tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
 
-	scale = 10.24 * tds520a.channel_sens[ channel ] / ( double ) 0xFFFF;
+	scale = 10.24 * tds520a.sens[ channel ] / ( double ) 0xFFFF;
 
 	/* Set the data source channel (if it's not already set correctly) */ 
 
