@@ -1200,12 +1200,24 @@ Var *f_setseed( Var *v )
 			arg = 1;
 		}
 
+		if ( arg > RAND_MAX )
+		{
+			eprint( SEVERE, "%s:%ld: Seed for random generator too large in "
+					"%s(), maximum is %ld. Using 1 instead\n",
+					Fname, Lc, Cur_Func, RAND_MAX );
+			arg = 1;
+		}
+
 		if ( v->next != NULL )
 			eprint( WARN, "%s:%ld: Superfluous argument in call of %s().\n",
 					Fname, Lc, Cur_Func );
 	}
 	else
+	{
 		arg = ( unsigned int ) time( NULL );
+		while ( arg > RAND_MAX )
+			arg >>= 1;
+	}
 
 	srandom( arg );
 	return vars_push( INT_VAR, 1 );
