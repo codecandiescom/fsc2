@@ -87,6 +87,7 @@ int main( int argc, char *argv[ ] )
 
 	EUID = geteuid( );
 	EGID = getegid( );
+
 	lower_permissions( );
 
 	/* Figure out if the machine has an INTEL type processor */

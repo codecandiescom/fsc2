@@ -72,7 +72,8 @@ void fsc2_request_serial_port( int sn, const char *devname )
 		THROW( EXCEPTION )
 	}
 
-	/* Check that serial port isn't already in use by another device */
+	/* Check that serial port hasn't already been requested by another
+	   module */
 
 	if ( Serial_Port[ sn ].in_use )
 	{
@@ -87,31 +88,18 @@ void fsc2_request_serial_port( int sn, const char *devname )
 	Serial_Port[ sn ].is_open   = UNSET;
 	Serial_Port[ sn ].devname   = devname;
 
-	/* Assemble name of the device file */
+	/* Assemble name of device file and (optionally) lock file */
 
 	Serial_Port[ sn ].dev_file  = get_string( "/dev/ttyS%d", sn );
+#ifdef SERIAL_LOCK_DIR
 	if ( *( SERIAL_LOCK_DIR + strlen( SERIAL_LOCK_DIR ) - 1 ) == '/' )
 		Serial_Port[ sn ].lock_file = get_string( "%sLCK..ttyS%d",
 												  SERIAL_LOCK_DIR, sn );
 	else
 		Serial_Port[ sn ].lock_file = get_string( "%s/LCK..ttyS%d",
 												  SERIAL_LOCK_DIR, sn );
+#endif
 
-	/* Finally test if device file exists and we have read and write
-	   permissions */
-
-	if ( access( Serial_Port[ sn ].dev_file, W_OK | R_OK ) < 0 )
-	{
-		if ( errno == ENOENT )
-			eprint( FATAL, UNSET, "%s: Device file '%s' for serial port %d "
-					"does not exist.\n", devname,
-					sn, Serial_Port[ sn ].dev_file );
-		else
-			eprint( FATAL, UNSET, "%s: No permission to access device file "
-					"'%s' for serial port %d. %s\n", devname,
-					Serial_Port[ sn ].dev_file, sn, strerror( errno ) );
-		THROW( EXCEPTION )
-	}
 #else
 	sn = sn;
 
@@ -230,7 +218,9 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 	if ( Serial_Port[ sn ].is_open )
 	{
-		tcgetattr( fd, &Serial_Port[ sn ].new_tio );
+		raise_permissions( );
+		tcgetattr( Serial_Port[ sn ].fd, &Serial_Port[ sn ].new_tio );
+		lower_permissions( );
 		return &Serial_Port[ sn ].new_tio;
 	}
 
@@ -244,9 +234,11 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 
 	/* Try to open the serial port */
 
+	raise_permissions( );
 	if ( ( fd = open( Serial_Port[ sn ].dev_file, flags ) ) < 0 )
 	{
 		remove_serial_lock( sn );
+		lower_permissions( );
 		errno = EACCES;
 		return NULL;
 	}
@@ -257,6 +249,7 @@ struct termios *fsc2_serial_open( int sn, const char *devname, int flags )
 	tcgetattr( fd, &Serial_Port[ sn ].old_tio );
 	memcpy( &Serial_Port[ sn ].new_tio, &Serial_Port[ sn ].old_tio,
 			sizeof( struct termios ) );
+	lower_permissions( );
 
 	Serial_Port[ sn ].is_open = SET;
 	Serial_Port[ sn ].fd = fd;
@@ -287,9 +280,11 @@ void fsc2_serial_close( int sn )
 
 	if ( Serial_Port[ sn ].is_open )
 	{
+		raise_permissions( );
 		tcflush( Serial_Port[ sn ].fd, TCIFLUSH );
 		tcsetattr( Serial_Port[ sn ].fd, TCSANOW, &Serial_Port[ sn ].old_tio );
 		close( Serial_Port[ sn ].fd );
+		lower_permissions( );
 		Serial_Port[ sn ].is_open = UNSET;
 	}
 
@@ -308,13 +303,20 @@ void fsc2_serial_close( int sn )
 
 ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
 {
+	ssize_t write_count;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return write( Serial_Port[ sn ].fd, buf, count );
+	raise_permissions( );
+	write_count =  write( Serial_Port[ sn ].fd, buf, count );
+	lower_permissions( );
+
+	return write_count;
 }
 
 
@@ -323,13 +325,20 @@ ssize_t fsc2_serial_write( int sn, const void *buf, size_t count )
 
 ssize_t fsc2_serial_read( int sn, void *buf, size_t count )
 {
+	ssize_t read_count;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return read( Serial_Port[ sn ].fd, buf, count );
+	raise_permissions( );
+	read_count = read( Serial_Port[ sn ].fd, buf, count );
+	lower_permissions( );
+
+	return read_count;
 }
 
 
@@ -357,12 +366,75 @@ static bool get_serial_lock( int sn )
 	int mask;
 
 
-	/* First check if a lock file already exists and if we can access it */
+	/* Try to open lock file - if it exists we can check its content and
+	   decide what to do, i.e. find out if the process it belonged to is
+	   dead, in which case it can be removed */
 
-	if ( access( Serial_Port[ sn ].lock_file, R_OK ) < 0 )
+	raise_permissions( );
+
+	if ( ( fd = open( Serial_Port[ sn ].lock_file, O_RDONLY ) ) >= 0 )
 	{
-		if ( errno == EACCES )               /* no access permission */
+		n = read( fd, buf, sizeof( buf ) - 1 );
+		close( fd );
+
+		if ( n == 11 )                    /* expect standard HDB UUCP format */
 		{
+			buf[ n ] = '\0';
+			n = 0;
+			bp = buf;
+			while ( *bp && *bp == ' ' )
+				bp++;
+
+			if ( *bp && isdigit( *bp ) )
+				n = sscanf( bp, "%d", &pid );
+
+			if ( n == 0 || n == EOF )
+			{
+				lower_permissions( );
+				fprintf( stderr, "Lock file '%s' for serial port %d (COM%d) "
+						 "has unknown format.\n",
+						 Serial_Port[ sn ].lock_file, sn, sn + 1 );
+				return FAIL;
+			}
+
+			/* Check if the lock file belongs to a running process, if not
+			   try to delete it */
+
+			if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 &&
+				 errno == ESRCH )
+			{
+				if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
+				{
+					lower_permissions( );
+					fprintf( stderr, "Can't delete stale lock '%s' file "
+							 "for serial port %d (COM%d).\n",
+							 Serial_Port[ sn ].lock_file, sn, sn + 1 );
+					return FAIL;
+				}
+			}
+			else
+			{
+				lower_permissions( );
+				fprintf( stderr, "Serial port %d (COM%d) is locked by "
+						 "another program according to lock file '%s'.\n",
+						 sn, sn + 1, Serial_Port[ sn ].lock_file );
+				return FAIL;
+			}
+		}
+		else
+		{
+			lower_permissions( );
+			fprintf( stderr, "Can't read lock file '%s' for serial port "
+					 "%d (COM%d) or it has has unknown format.\n",
+					 Serial_Port[ sn ].lock_file, sn, sn + 1 );
+			return FAIL;
+		}
+	}
+	else                               /* couldn't open lock file, check why */
+	{
+		if ( errno == EACCES )                       /* no access permission */
+		{
+			lower_permissions( );
 			fprintf( stderr, "No permission to access lock file '%s' for "
 					 "serial port %d (COM%d).\n",
 					 Serial_Port[ sn ].lock_file, sn, sn + 1 );
@@ -371,70 +443,8 @@ static bool get_serial_lock( int sn )
 
 		if ( errno != ENOENT )    /* other errors except file does not exist */
 		{
+			lower_permissions( );
 			fprintf( stderr, "Can't access lock file '%s' for serial port %d "
-					 "(COM%d).\n", Serial_Port[ sn ].lock_file, sn, sn + 1 );
-			return FAIL;
-		}
-	}
-	else                             /* lock file exists and can be accessed */
-	{
-		if ( ( fd = open( Serial_Port[ sn ].lock_file, O_RDONLY ) ) >= 0 )
-		{
-			n = read( fd, buf, sizeof( buf ) - 1 );
-			close( fd );
-
-			if ( n == 11 )                /* expect standard HDB UUCP format */
-			{
-				buf[ n ] = '\0';
-				n = 0;
-				bp = buf;
-				while ( *bp && *bp == ' ' )
-					bp++;
-
-				if ( *bp && isdigit( *bp ) )
-					n = sscanf( bp, "%d", &pid );
-
-				if ( n == 0 || n == EOF )
-				{
-					fprintf( stderr, "Lock file '%s' for serial port %d "
-							 "(COM%d) has unknown format.\n",
-							 Serial_Port[ sn ].lock_file, sn, sn + 1 );
-					return FAIL;
-				}
-
-				/* Check if the lock file belongs to a running process, if not
-				   try to delete it */
-
-				if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 &&
-					 errno == ESRCH )
-				{
-					if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
-					{
-						fprintf( stderr, "Can't delete stale lock '%s' file "
-								 "for serial port %d (COM%d).\n",
-								 Serial_Port[ sn ].lock_file, sn, sn + 1 );
-						return FAIL;
-					}
-				}
-				else
-				{
-					fprintf( stderr, "Serial port %d (COM%d) is locked by "
-							 "another program according to lock file '%s'.\n",
-							 sn, sn + 1, Serial_Port[ sn ].lock_file );
-					return FAIL;
-				}
-			}
-			else
-			{
-				fprintf( stderr, "Can't read lock file '%s' for serial port "
-						 "%d (COM%d) or it has has unknown format.\n",
-						 Serial_Port[ sn ].lock_file, sn, sn + 1 );
-				return FAIL;
-			}
-		}
-		else
-		{
-			fprintf( stderr, "Can't open lock file '%s' for serial port %d "
 					 "(COM%d).\n", Serial_Port[ sn ].lock_file, sn, sn + 1 );
 			return FAIL;
 		}
@@ -446,6 +456,7 @@ static bool get_serial_lock( int sn )
     if ( ( fd = open( Serial_Port[ sn ].lock_file,
 					  O_WRONLY | O_CREAT | O_EXCL, 0666 ) ) < 0 )
 	{
+		lower_permissions( );
         fprintf( stderr, "Can't create lockfile '%s' for serial port %d "
 				 "(COM%d).\n", Serial_Port[ sn ].lock_file, sn, sn + 1 );
         return FAIL;
@@ -456,6 +467,8 @@ static bool get_serial_lock( int sn )
     snprintf( buf, sizeof( buf ), "%10d\n", ( int ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );
+
+	lower_permissions( );
 	Serial_Port[ sn ].have_lock = SET;
 #else
 	sn = sn;
@@ -473,7 +486,9 @@ static void remove_serial_lock( int sn )
 #ifdef SERIAL_LOCK_DIR
 	if ( Serial_Port[ sn ].have_lock )
 	{
+		raise_permissions( );
 		unlink( Serial_Port[ sn ].lock_file );
+		lower_permissions( );
 		Serial_Port[ sn ].have_lock = UNSET;
 	}
 #endif
@@ -485,13 +500,20 @@ static void remove_serial_lock( int sn )
 
 int fsc2_tcgetattr( int sn, struct termios *termios_p )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcgetattr( Serial_Port[ sn ].fd, termios_p );
+	raise_permissions( );
+	ret_val = tcgetattr( Serial_Port[ sn ].fd, termios_p );
+	lower_permissions( );
+
+	return ret_val;
 }
 
 
@@ -500,13 +522,20 @@ int fsc2_tcgetattr( int sn, struct termios *termios_p )
 
 int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcsetattr( Serial_Port[ sn ].fd, optional_actions, termios_p );
+	raise_permissions( );
+	ret_val = tcsetattr( Serial_Port[ sn ].fd, optional_actions, termios_p );
+	lower_permissions( );
+
+	return ret_val;
 }
 
 
@@ -515,13 +544,20 @@ int fsc2_tcsetattr( int sn, int optional_actions, struct termios *termios_p )
 
 int fsc2_tcsendbreak( int sn, int duration )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcsendbreak( Serial_Port[ sn ].fd, duration );
+	raise_permissions( );
+	ret_val =  tcsendbreak( Serial_Port[ sn ].fd, duration );
+	lower_permissions( );
+
+	return ret_val;
 }
 
 
@@ -530,13 +566,20 @@ int fsc2_tcsendbreak( int sn, int duration )
 
 int fsc2_tcdrain( int sn )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcdrain( Serial_Port[ sn ].fd );
+	raise_permissions( );
+	ret_val = tcdrain( Serial_Port[ sn ].fd );
+	lower_permissions( );
+
+	return ret_val;
 }
 
 
@@ -545,13 +588,20 @@ int fsc2_tcdrain( int sn )
 
 int fsc2_tcflush( int sn, int queue_selector )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcflush( Serial_Port[ sn ].fd, queue_selector );
+	raise_permissions( );
+	ret_val = tcflush( Serial_Port[ sn ].fd, queue_selector );
+	lower_permissions( );
+
+	return ret_val;
 }
 
 
@@ -560,11 +610,18 @@ int fsc2_tcflush( int sn, int queue_selector )
 
 int fsc2_tcflow( int sn, int action )
 {
+	int ret_val;
+
+
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
 		errno = EBADF;
 		return -1;
 	}
 
-	return tcflow( Serial_Port[ sn ].fd, action );
+	raise_permissions( );
+	ret_val = tcflow( Serial_Port[ sn ].fd, action );
+	lower_permissions( );
+
+	return ret_val;
 }
