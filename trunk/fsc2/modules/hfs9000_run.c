@@ -27,7 +27,7 @@
 
 static PULSE *hfs9000_delete_pulse( PULSE *p );
 static bool hfs9000_update_pulses( bool flag );
-static void hfs9000_commit( FUNCTION *f, bool flag );
+static bool hfs9000_commit( FUNCTION *f, bool flag );
 
 
 /*---------------------------------------------------------------------------
@@ -82,6 +82,7 @@ static bool hfs9000_update_pulses( bool flag )
 	int i;
 	FUNCTION *f;
 	PULSE *p;
+	bool needed_update = UNSET;
 
 
 	CLOBBER_PROTECT( i );
@@ -128,8 +129,16 @@ static bool hfs9000_update_pulses( bool flag )
 		OTHERWISE
 			RETHROW( );
 
-		hfs9000_commit( f, flag );
+		needed_update |= hfs9000_commit( f, flag );
 	}
+
+	/* Wait for all the commands thant might have been send being finished -
+	   otherwise a new acquisition might get started before the pulser is
+	   really done with updating the pulses - thanks to Anton for finding
+	   the problem */
+
+	if ( ! flag && needed_update )
+		hfs9000_operation_complete( );
 
 	return OK;
 }
@@ -367,7 +376,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
   Some care has taken to minimize the number of commands and their length.
 ----------------------------------------------------------------------------*/
 
-static void hfs9000_commit( FUNCTION *f, bool flag )
+static bool hfs9000_commit( FUNCTION *f, bool flag )
 {
 	PULSE *p;
 	int i;
@@ -388,7 +397,7 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 			p->is_old_pos = p->is_old_len = UNSET;
 		}
 
-		return;
+		return UNSET;
 	}
 
 	/* In a real run we now have to change the pulses. The only way to keep
@@ -456,8 +465,15 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 									  what == -1 ? 0 : 1 );
 	}
 
-	f->channel->needs_update = UNSET;
 	T_free( f->channel->old_d );
+
+	if ( f->channel->needs_update )
+	{
+		f->channel->needs_update = UNSET;
+		return SET;
+	}
+
+	return UNSET;
 }
 
 

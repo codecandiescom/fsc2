@@ -412,6 +412,29 @@ bool hfs9000_command( const char *cmd )
 }
 
 
+/*---------------------------------------------------------------*/
+/* Function to poll the device until all operations are complete */
+/*---------------------------------------------------------------*/
+
+bool hfs9000_operation_complete( void )
+{
+	char reply[ 10 ];
+	long len;
+
+
+	do
+	{
+		stop_on_user_request( );
+		len = 10;
+		if ( gpib_write( hfs9000.device, "*OPC\n", 5 ) == FAILURE ||
+			 gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+			hfs9000_gpib_failure( );
+	} while ( reply[ 0 ] != '1' );
+
+	return OK;
+}
+
+
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
