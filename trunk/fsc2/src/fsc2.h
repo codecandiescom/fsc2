@@ -11,7 +11,7 @@
 
 /* define my email address for bug reports
 
-#define MAIL_ADDRES "Jens.Toerring@physik.fu-berlin.de"
+#define MAIL_ADDRESS "Jens.Toerring@physik.fu-berlin.de"
 
 
 /* AWK might be defined via compiler flags - otherwise define it here */
