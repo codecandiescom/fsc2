@@ -574,27 +574,11 @@ Var *digitizer_averaging( Var *v )
 				THROW( EXCEPTION );
 			}
 
-			i = 0;
-			while ( 1 )
+			if ( FSC2_MODE != EXPERIMENT && rec_len > ml[  ML_ENTRIES - 1 ] )
 			{
-				if ( i >= ( int ) CL_ENTRIES )
-				{
-					print( FATAL, "Record length %ld too long.\n", rec_len );
-					THROW( EXCEPTION );
-				}
-
-				if ( rec_len == cl[ i ] )
-					break;
-
-				if ( rec_len < cl[ i ] )
-				{
-					print( SEVERE, "Can't set record length to %ld, using %ld "
-						   "instead.\n", rec_len, cl[ i ] );
-					rec_len = cl[ i ];
-					break;
-				}
-
-				i++;
+				print( FATAL, "Record length %ld too long.\n",
+					   rec_len );
+				THROW( EXCEPTION );
 			}
 		}
 
@@ -639,11 +623,9 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION );
 	}
 
-
 	if ( FSC2_MODE == TEST )
 	{
-		if ( lecroy9400.is_num_avg[ channel ] &&
-			 lecroy9400.rec_len[ channel ] != UNDEFINED_REC_LEN )
+		if ( lecroy9400.is_num_avg[ channel ] )
 			return vars_push( INT_VAR, lecroy9400.num_avg[ channel ] );
 		else
 			return vars_push( INT_VAR, LECROY9400_TEST_NUM_AVG );
@@ -665,11 +647,9 @@ Var *digitizer_num_averages( Var *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function either sets or returns the current record length of the */
-/* digitizer. When trying to set a record length that does not fit  */
-/* the possible settings the next larger is used instead.           */
-/*------------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function returns the current record length of the digitizer. */
+/*--------------------------------------------------------------*/
 
 Var *digitizer_record_length( Var *v )
 {
@@ -682,28 +662,33 @@ Var *digitizer_record_length( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( v->next != NULL )
-	{
-		print( FATAL, "Function can only be used for queries.\n" );
-		THROW( EXCEPTION );
-	}
-
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
+	if ( v->next == NULL )
 	{
-		print( FATAL, "Averaging can only be done using channels %s and %s.\n",
-			   Channel_Names[ LECROY9400_FUNC_E ],
-			   Channel_Names[ LECROY9400_FUNC_F ] );
-		THROW( EXCEPTION );
+		switch ( FSC2_MODE )
+		{
+			case PREPARATION :
+				if ( lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
+					no_query_possible( );
+				return vars_push( INT_VAR,
+								  lecroy9400.rec_len[ channel ] );
+
+			case TEST :
+				return vars_push( INT_VAR,
+					lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN ?
+					lecroy9400.rec_len[ channel ] : LECROY9400_TEST_REC_LEN );
+
+			case EXPERIMENT :
+				return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
+		}
 	}
 
-	if ( FSC2_MODE == TEST &&
-		 lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
-		return vars_push( INT_VAR, LECROY9400_TEST_REC_LEN );
+	print( FATAL, "Currently the record length can only be queried\n" );
+	THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
+	return vars_push( INT_VAR, -1 );
 }
 
 
@@ -890,7 +875,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch, i;
-	double *array;
+	double *array = NULL;
 	long length;
 	Var *nv;
 #if 0

@@ -90,13 +90,20 @@ GPIB_VARIABLE char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 
 
 /*----------------------------------------------------------*/
-/* definition of log levels allowed in calls of gpib_init() */
+/* Definition of log levels allowed in calls of gpib_init() */
 /*----------------------------------------------------------*/
 
 #define  LL_NONE  0    /* log nothing */
 #define  LL_ERR   1    /* log errors only */
 #define  LL_CE    2    /* log function calls and function exits */
 #define  LL_ALL   3    /* log calls with parameters and function exits */
+
+
+/*-------------------------------*/
+/* Definitions of utility macros */
+/*-------------------------------*/
+
+#define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
 
 
 /*

@@ -120,6 +120,12 @@ GPIB_VARIABLE int gpiblineno;
 #define  LL_ALL   3    /* log calls with parameters and function exits */
 
 
+/*-------------------------------*/
+/* Definitions of utility macros */
+/*-------------------------------*/
+
+#define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

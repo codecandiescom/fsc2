@@ -88,17 +88,16 @@ bool lecroy9400_init( const char *name )
 		lecroy9400.tb_index = lecroy9400_get_tb_index( lecroy9400.timebase );
 	}
 
-	/* After we're know reasonable sure that the time constant is 50 ns/div
+	/* After we're now reasonable sure that the time constant is 50 ns/div
 	   or longer we can switch off interleaved mode */
 
 	if ( gpib_write( lecroy9400.device, "IL,OFF", 6 ) == FAILURE )
 		return FAIL;
 
-	/* Now get the waveform descriptor for all used channels */
+	/* Now get the waveform descriptors for all channels */
 
 	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
-		if ( lecroy9400.channels_in_use[ i ] )
-			lecroy9400_get_desc( i );
+		lecroy9400_get_desc( i );
 
 	/* Set up averaging for function channels */
 
@@ -519,17 +518,35 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
-	/* If the record length hasn't been set use one that is as least as
-	   long as the number of points we can fetch for an averaged curve
-	   (which is just the number of points displayed on the screen) */
+	/* If the record length hasn't been set use the numbr of points on the
+	   screen (which depends on the time base). Otherwise check that the
+	   number we got isn't larger than the number of points on the screen
+	   and, if necessary reduce it. */
 
 	if ( rec_len == UNDEFINED_REC_LEN )
+		rec_len = lecroy9400.rec_len[ channel ] = ml[ lecroy9400.tb_index ];
+	else
 	{
-		for ( i = 0; i < CL_ENTRIES; i++ )
-			if ( cl[ i ] >= ml[ lecroy9400.tb_index ] )
-				break;
-		rec_len = lecroy9400.rec_len[ channel ] = cl[ i ];
+		if ( rec_len > ml[ lecroy9400.tb_index ] )
+		{
+			print( SEVERE, "Record length of %ld too large, using %ld "
+				   "instead\n", rec_len, ml[ lecroy9400.tb_index ] );
+			rec_len = lecroy9400.rec_len[ channel ] =
+													 ml[ lecroy9400.tb_index ];
+		}
+		else
+			lecroy9400.rec_len[ channel ] = rec_len;
+
 	}
+
+	/* We need to send the digitizer the number of points it got to average
+	   over. This number isn't identical to the number of points on the
+	   screen, so we pick one of the list of allowed values that's at least
+	   as large as the number of points we're going to fetch. */
+
+	for ( i = 0; i < CL_ENTRIES && rec_len > cl[ i ]; i++ )
+		/* empty */ ;
+	rec_len = cl[ i ];
 
 	snprintf( cmd, 100, "SEL,%s;RDF,AVG,SUMMED,%ld,%s,%ld,%s,0",
 			  channel == LECROY9400_FUNC_E ? "FE" : "FF", rec_len,
@@ -589,7 +606,14 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 
 	if ( ch >= LECROY9400_CH1 && ch <= LECROY9400_CH2 )
 	{
-		print( FATAL, "Getting normal channels is not implemented yet.\n" );
+		print( FATAL, "Getting normal, non-averaged channels is not "
+			   "yet implemented.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ch >= LECROY9400_MEM_C && ch <= LECROY9400_MEM_D )
+	{
+		print( FATAL, "Getting memory channels is not yet implemented.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -608,7 +632,7 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 		THROW( EXCEPTION );
 	}
 
-	/* Poll the device until the averaging is finished, i.e. get the channel
+	/* Poll the device until averaging is finished, i.e. get the channel
 	   description and check if there are as many averages as we need */
 
 	while ( 1 )
@@ -639,6 +663,17 @@ void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
 	lecroy9400_talk( cmd, ( char * ) data, &len );
 
 	*length = ( ( long ) data[ 2 ] * 256 + ( long ) data[ 3 ] ) / 2;
+
+	/* Make sure we didn't get less data than the header of the data set
+	   tells us. */
+
+	if ( len < 2 * *length + 4 )
+	{
+		is_acquiring = UNSET;
+		T_free( data );
+		print( FATAL, "Received invalid data from digitizer.\n" );
+		THROW( EXCEPTION );
+	}
 
 	TRY
 	{
