@@ -314,10 +314,10 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
 }
 
 
-/*------------------------------------------------------------------*
- * Function for selecting if the delay is started by the falling or
- * the raising edge of the external trigger
- *------------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for selecting if the delay is started by the falling
+ * or the raising edge of the external trigger
+ *---------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_trigger( int handle, int edge )
 {
@@ -373,7 +373,7 @@ int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
 		   output != RULBUS_RB8514_DELAY_OUTPUT_BOTH ) ||
 		 ( type != RULBUS_RB8514_DELAY_START_PULSE &&
 		   type != RULBUS_RB8514_DELAY_END_PULSE &&
-		    type != RULBUS_RB8514_DELAY_PULSE_BOTH &&
+		   type != RULBUS_RB8514_DELAY_PULSE_BOTH &&
 		   type != RULBUS_RB8514_DELAY_PULSE_NONE ) )
 		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
@@ -462,13 +462,13 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
 }
 
 
-/*------------------------------------------------------------------*
+/*-------------------------------------------------------------------*
  * Function to start a delay via software (by setting the trigger
  * first to falling, then to raising edge). Afterwards, the trigger
  * slope is set back to the original setting. And, to make sure we
- * have a state transition from raising to falling edge it first
- * gets set to raising edge (probably that's being too careful).
- *------------------------------------------------------------------*/
+ * have a state transition from raising to falling edge the slope
+ * first is set to raising edge (probably that's being too careful).
+ *-------------------------------------------------------------------*/
 
 int rulbus_rb8514_software_start( int handle )
 {
