@@ -51,7 +51,7 @@ static void spectrapro_300i_comm_fail( void );
 FILE *spectrapro_300i_find_calib( char *name )
 {
 	FILE *cfp = NULL;
-	char *new_name = NULL;
+	char *new_name;
 
 
 	CLOBBER_PROTECT( new_name );
@@ -72,8 +72,7 @@ FILE *spectrapro_300i_find_calib( char *name )
 	}
 	OTHERWISE
 	{
-		if ( new_name != NULL )
-			T_free( new_name );
+		T_free( new_name );
 		RETHROW( );
 	}
 
@@ -135,18 +134,18 @@ FILE *spectrapro_300i_open_calib( char *name )
 	if ( access( name, R_OK ) == -1 )
 	{
 		if ( errno == ENOENT )       /* file not found */
-			return NULL;
-
-		print( FATAL, "No read permission for calibration file '%s'.\n",
-			   name );
-		T_free( name );
+			print( FATAL, "Calibration file '%s' not found.\n", name );
+		else if ( errno == EACCES )
+			print( FATAL, "No permission to read calibration file '%s'.\n",
+				   name );
+		else
+			print( FATAL, "Can't access calibration file '%s'.\n", name );
 		THROW( EXCEPTION );
 	}
 
 	if ( ( cfp = fopen( name, "r" ) ) == NULL )
 	{
 		print( FATAL, "Can't open calibration file '%s'.\n", name );
-		T_free( name );
 		THROW( EXCEPTION );
 	}
 

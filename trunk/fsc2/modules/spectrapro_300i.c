@@ -510,7 +510,7 @@ Var *monochromator_groove_density( Var *v )
 
 Var *monochromator_load_calibration( Var * v )
 {
-	char *calib_file;
+	char *calib_file = NULL;
 	FILE *cfp;
 
 
@@ -527,12 +527,7 @@ Var *monochromator_load_calibration( Var * v )
 
 		TRY
 		{
-			if ( ( cfp = spectrapro_300i_open_calib( calib_file ) ) == NULL )
-			{
-				print( FATAL, "Default calibration file '%s' not found.\n",
-					   calib_file );
-				THROW( EXCEPTION );
-			}
+			cfp = spectrapro_300i_open_calib( calib_file );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
