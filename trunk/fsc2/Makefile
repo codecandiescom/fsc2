@@ -22,7 +22,7 @@
 
 # The following variables determine where the program files will be copied to
 # by 'make install' as well as the name of the GPIB configuration and log file
-# (set 'prefix' to './' for a local install)
+# (set 'prefix' to '.' for a local install)
 
 prefix         = /usr/local
 bindir         = $(prefix)/bin
@@ -85,12 +85,12 @@ EXEC_INSTALL   = install             # command for installing executables
 
 # Set up a variable with the machines FQDN
 
-machine_name   = $(shell hostname -f)
+machine_name = $(shell hostname -f)
 
 # Last time I checked the pion still had the old libc...
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	CFLAGS    += -DIS_STILL_LIBC1
+	CFLAGS += -DIS_STILL_LIBC1
 endif
 
 # Pass variables via macros to the source files
@@ -232,10 +232,17 @@ install:
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
 
+# Here links for module libraries for often used devices for the different
+# spectrometers are created. If, for example, the spectrometer always uses
+# the aeg_x_band.so as the driver for the magnet power supply by creating
+# a link with the name magnet.so allows to use magnet as an alternative name
+# for the power supply in EDL programs. Don't forget already existing links
+# before creating new ones!
+
 install-pion.anorg.chemie.uni-frankfurt.de:
-	$(RM) $(RMFLAGS)  $(libdir)/dg2020.so $(libdir)/s_band.so \
-					  $(libdir)/lockin.so $(libdir)/gaussmeter.so \
-					  $(libdir)/magnet.so $(libdir)/pulser.so
+	$(RM) $(RMFLAGS) $(libdir)/dg2020.so $(libdir)/s_band.so     \
+					 $(libdir)/lockin.so $(libdir)/gaussmeter.so \
+					 $(libdir)/magnet.so $(libdir)/pulser.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
 	chown fsc2.fsc2 $(libdir)/dg2020.so
 	ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so
@@ -250,7 +257,6 @@ install-pion.anorg.chemie.uni-frankfurt.de:
 	chown fsc2.fsc2 $(libdir)/lockin.so
 
 install-crowley.physik.fu-berlin.de:
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
 					 $(libdir)/boxcar.so
 	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
@@ -259,6 +265,7 @@ install-crowley.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/synthesizer.so
 	ln -s $(libdir)/egg4402so $(libdir)/boxcar.so
 	chown fsc2.fsc2 $(libdir)/boxcar.so
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
 	$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
@@ -271,10 +278,15 @@ install-moebi.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
-	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so
+	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so \
+					 $(libdir)/magnet.so
 	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	chown fsc2.fsc2 $(libdir)/hfs9003.so
 	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
+	chown fsc2.fsc2 $(libdir)/w_band.so
+	ln -s $(libdir)/keithley228a.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 
 install-crowley.none:
 	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
@@ -327,12 +339,13 @@ pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
-# Create zipped tarball and write to ZIP drive (at home with mount and
-# unmount of ZIP drive otherwise assume that it's already mounted)
+# Create zipped tarball and write to ZIP drive (at home or on moebi with
+# mount and unmount of ZIP drive otherwise assume that it's already mounted)
 
 ZIP:
 	$(MAKE) pack
-	if [ `hostname -f` = "crowley.none" ]; then \
+	if [ `hostname -f` = "crowley.none" \
+		 -o `hostname -f` = "moebi.physik.fu-berlin.de"]; then \
 		if ! `grep ZIP /etc/mtab > /dev/null`; then \
 			sleep 1; \
 			mount /ZIP; \

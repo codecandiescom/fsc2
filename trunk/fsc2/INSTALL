@@ -14,11 +14,11 @@ The following tools and libraries are needed to create fsc2:
  9) XFORMS library (version 0.89 or higher)
 10) GPIB library
 
-To create the complete documentation also needed are
+To create the complete documentation you will also need
 
 11) makeinfo
 12) tex
-13) convert
+13) convert (from ImageMagick)
 14) dvips
 15) perl (version 5.0 or higher)
 16) pdftex
@@ -42,8 +42,8 @@ kernels), the older LLP library to be found at
 
   ftp.llp.fu-berlin.de/pub/linux/LINUX-LAB/IEEE488
 
-(probably won't work with 2.2. and 2.4 kernels) or the library by National
-Instruments to be downloaded from
+(probably won't work with 2.2. and 2.4 kernels) or the one from National
+Instruments, to be downloaded from
 
   http://www.natinst.com
 
@@ -62,10 +62,12 @@ Normally, the program and all auxiliary files will be installed in /usr/local
 /usr/local/share/doc). To change this edit the first lines of the Makefile.
 
 If you use the National Instruments GPIB driver you can change the place
-where fsc2 expects the configuration file. Usually this does need to be
-changed. When running fsc2 writes a lot of information about the activity
-on the GPIB bus into a log file. You may change the default, /tmp/gpib.log,
-to something more appropriate, or even /dev/null.
+where fsc2 expects the configuration file. Usually this does not need to be
+changed.
+While running fsc2 may write information about the activity on the GPIB bus
+into a log file. You may change the default, /tmp/gpib.log, to something more
+appropriate, or even /dev/null. You can also set the verbosity of the logs by
+changing the variable GPIB_LOG_LEVEL to either HIGH, MEDIUM, LOW or OFF.
 
 If you are still using the old libc (version 1) please search for the line
 
@@ -73,7 +75,7 @@ If you are still using the old libc (version 1) please search for the line
 	  CFLAGS    += -DIS_STILL_LIBC1
   endif
 
-and relace 'pion.anorg.chemie.uni-frankfurt.de' replaced with fully qualified
+and relace 'pion.anorg.chemie.uni-frankfurt.de' with the fully qualified
 hostname of your machine.
 
 
