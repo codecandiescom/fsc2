@@ -1,7 +1,6 @@
 #
 # $Id$
 #
-
 #
 # Makefile for Wasco WITIO-48 ISA DIO card kernel (2.4 series) module
 #
