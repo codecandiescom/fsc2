@@ -26,7 +26,9 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "LAKESHORE330"    /* compare entry in /etc/gpib.conf ! */
+/* Include configuration information for the device */
+
+#include "lakeshore330.conf"
 
 const char generic_type[ ] = "temperature_controller";
 
@@ -72,8 +74,6 @@ static void lakeshore330_lock( int state );
 static void lakeshore330_gpib_failure( void );
 
 
-
-
 typedef struct {
 	int device;
 	int lock_state;
@@ -90,7 +90,6 @@ static LAKESHORE330 lakeshore330;
 /*                  hook functions                        */
 /*                                                        */
 /**********************************************************/
-
 
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
@@ -145,7 +144,6 @@ int lakeshore330_end_of_exp_hook( void )
 /*                                                        */
 /**********************************************************/
 
-
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
@@ -172,7 +170,7 @@ Var *temp_contr_temperature( Var *v )
 
 
 /*-----------------------------------------------------------------*/
-/* Sets or returns sample channel (fuction returns either 1 or 2   */
+/* Sets or returns sample channel (function returns either 1 or 2  */
 /* for channel A or B and accepts 1 or 2 or the strings "A" or "B" */
 /* as input arguments).                                            */
 /*-----------------------------------------------------------------*/
@@ -221,6 +219,7 @@ Var *temp_contr_sample_channel( Var *v )
 		lakeshore330.sample_channel = channel;
 		return vars_push( INT_VAR, channel + 1 );
 	}
+
 	return vars_push( INT_VAR, lakeshore330_sample_channel( channel ) + 1 );
 }
 
@@ -343,7 +342,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 
 /**********************************************************/
 /*                                                        */
-/*       Internal (not-exported) functions                */
+/*       Internal (non-exported) functions                */
 /*                                                        */
 /**********************************************************/
 

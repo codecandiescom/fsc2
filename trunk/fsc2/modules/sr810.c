@@ -26,9 +26,9 @@
 #include "gpib_if.h"
 
 
-/* name of device as given in GPIB configuration file /etc/gpib.conf */
+/* Include configuration information for the device */
 
-#define DEVICE_NAME "SR810"
+#include "sr810.conf"
 
 const char generic_type[ ] = "lockin";
 
@@ -54,7 +54,7 @@ const char generic_type[ ] = "lockin";
 										  make too much sense... */
 
 
-/* declaration of exported functions */
+/* Declaration of exported functions */
 
 int sr810_init_hook( void );
 int sr810_exp_hook( void );
@@ -74,13 +74,13 @@ Var *lockin_ref_level( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
-/* exported symbols (use by W-band power supply driver) */
+/* Exported symbols (used by W-band power supply driver) */
 
 int first_DAC_port = 1;
 int last_DAC_port = 4;
 
 
-/* typedefs and global variables used only in this file */
+/* Typedefs and global variables used only in this file */
 
 typedef struct
 {
@@ -103,7 +103,7 @@ typedef struct
 
 static SR810 sr810;
 
-/* lists of valid sensitivity settings */
+/* Lists of valid sensitivity settings */
 
 static double slist[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
 						   2.0e-7, 5.0e-7, 1.0e-6, 2.0e-6, 5.0e-6, 1.0e-5,
@@ -111,14 +111,14 @@ static double slist[ ] = { 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8, 1.0e-7,
 						   2.0e-3, 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
 						   2.0e-1, 5.0e-1, 1.0 };
 
-/* list of all available time constants */
+/* List of all available time constants */
 
 static double tcs[ ] = { 1.0e-5, 3.0e-5, 1.0e-4, 3.0e-4, 1.0e-3, 3.0e-3,
 						 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1, 1.0, 3.0, 1.0e1,
 						 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 3.0e4 };
 
 
-/* declaration of all functions used only within this file */
+/* Declaration of all functions used only within this file */
 
 static bool sr810_init( const char *name );
 static double sr810_get_data( void );
@@ -141,7 +141,6 @@ static double sr810_get_ref_level( void );
 static double sr810_set_ref_level( double level );
 static void sr810_lock_state( bool lock );
 static void sr810_failure( void );
-
 
 
 

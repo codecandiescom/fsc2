@@ -26,7 +26,10 @@
 #include "gpib_if.h"
 
 
-#define DEVICE_NAME "PT2025"
+/* Include configuration information for the device */
+
+#include "pt2025.conf"
+
 
 const char generic_type[ ] = "gaussmeter";
 
@@ -137,7 +140,6 @@ Var *measure_field( Var *v )
 /*              Internal functions                        */
 /*                                                        */
 /**********************************************************/
-
 
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/

@@ -31,14 +31,14 @@
 #include "gpib_if.h"
 
 
-/* name of device as given in GPIB configuration file /etc/gpib.conf */
+/* Include configuration information for the device */
 
-#define DEVICE_NAME "SR530"
+#include "sr530.conf"
 
 const char generic_type[ ] = "lockin";
 
 
-/* declaration of exported functions */
+/* Declaration of exported functions */
 
 int sr530_init_hook( void );
 int sr530_exp_hook( void );
@@ -56,13 +56,13 @@ Var *lockin_dac_voltage( Var *v );
 Var *lockin_lock_keyboard( Var *v );
 
 
-/* exported symbols (use by W-band power supply driver) */
+/* Exported symbols (used by W-band power supply driver) */
 
 int first_DAC_port = 5;
 int last_DAC_port = 6;
 
 
-/* typedefs and global variables used only in this file */
+/* Typedefs and global variables used only in this file */
 
 typedef struct
 {
@@ -78,7 +78,7 @@ typedef struct
 
 static SR530 sr530;
 
-/* lists of valid sensitivity and time constant settings (the last three
+/* Lists of valid sensitivity and time constant settings (the last three
    entries in the sensitivity list are only usable when the EXPAND button
    is switched on!) */
 
@@ -88,13 +88,13 @@ static double slist[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
 						   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
 						   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
 
-/* list of all available time constants */
+/* List of all available time constants */
 
 static double tcs[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
 						 1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
-/* declaration of all functions used only in this file */
+/* Declaration of all functions used only in this file */
 
 static double get_single_channel_data( Var *v );
 static bool sr530_init( const char *name );

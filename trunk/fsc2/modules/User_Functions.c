@@ -25,6 +25,10 @@
 #include "fsc2.h"
 
 
+/* Include dummy configuration file */
+
+#include "User_Functions.conf"
+
 const char generic_type[ ] = "User_Functions";
 
 

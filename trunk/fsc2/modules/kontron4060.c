@@ -26,9 +26,9 @@
 #include "gpib_if.h"
 
 
-/* Name of device as given in GPIB configuration file /etc/gpib.conf */
+/* Include configuration information for the device */
 
-#define DEVICE_NAME "KONTRON4060"
+#include "kontron4060.conf"
 
 const char generic_type[ ] = "voltmeter";
 
