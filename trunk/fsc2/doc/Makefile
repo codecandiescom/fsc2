@@ -87,18 +87,18 @@ install:
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
 	$(INSTALL) -d $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.css $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2fig*.png $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2fig*.png $(docdir)
 	if [ -f fsc2.ps ]; then \
-		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir); \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.ps $(docdir); \
 	fi
 	if [ -f fsc2.pdf ]; then \
-		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.pdf $(docdir); \
+		$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.pdf $(docdir); \
 	fi
 	install-info --delete fsc2 $(infodir)/dir
 	$(RM) $(RMFLAGS) $(infodir)/fsc2.info*.gz
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.info* $(infodir)
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.info* $(infodir)
 	gzip -9 -f $(infodir)/fsc2.info*
 	install-info $(infodir)/fsc2.info $(infodir)/dir
 
