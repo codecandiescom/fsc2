@@ -35,9 +35,6 @@ static void setup_while_or_repeat( int type, long *pos );
 static void setup_if_else( long *pos, Prg_Token *cur_wr );
 static void save_restore_variables( bool flag );
 
-static void set_stop_signal_handler( bool flag );
-static void test_stopper( int sig );
-
 
 
 /*
@@ -363,9 +360,6 @@ void setup_if_else( long *pos, Prg_Token *cur_wr )
 
 	for ( ; i < prg_length; i++ )
 	{
-		if ( Stop_Signal )
-			THROW( EXCEPTION );
-
 		switch( prg_token[ i ].token )
 		{
 			case WHILE_TOK : case REPEAT_TOK : case FOR_TOK :
@@ -495,6 +489,9 @@ void prim_exp_run( void )
 	if ( prg_length == 0 )                       /* no program no test... */
 		return;
 
+	fprintf( stderr, "TRY...\n" );
+	fflush( stderr );
+
 	TRY
 	{
 		/* 1. Run the test run hook functions of the modules.
@@ -508,7 +505,6 @@ void prim_exp_run( void )
 		TEST_RUN = SET;
 		save_restore_variables( SET );
 		save_restore_pulses( SET );
-		set_stop_signal_handler( SET );
 		run_test_hooks( );
 
 		cur_prg_token = prg_token;
@@ -516,8 +512,7 @@ void prim_exp_run( void )
 		while ( cur_prg_token != NULL &&
 				cur_prg_token < prg_token + prg_length )
 		{
-			if ( Stop_Signal )
-				THROW( EXCEPTION );
+			fl_check_only_forms( );
 
 			switch ( cur_prg_token->token )
 			{
@@ -603,13 +598,13 @@ void prim_exp_run( void )
 	}
 	OTHERWISE
 	{
-		set_stop_signal_handler( UNSET );
+		fprintf( stderr, "OTHERWISE...\n" );
+		fflush( stderr );
 		Fname = NULL;
 		TEST_RUN = UNSET;
 		PASSTHROU( );
 	}
 
-	set_stop_signal_handler( UNSET );
 	Fname = NULL;
 	save_restore_pulses( UNSET );
 	save_restore_variables( UNSET );
@@ -633,8 +628,7 @@ int prim_exp_runlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		if ( Stop_Signal )
-			THROW( EXCEPTION );
+		fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
@@ -706,8 +700,7 @@ int conditionlex( void )
 
 	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
 	{
-		if ( Stop_Signal )
-			THROW( EXCEPTION );
+		fl_check_only_forms( );
 
 		Fname = cur_prg_token->Fname;
 		Lc = cur_prg_token->Lc;
@@ -1285,51 +1278,6 @@ void delete_var_list_copy( void )
 
 	T_free( var_list_copy );
 	var_list_copy = NULL;
-}
-
-
-/*------------------------------------------------------*/
-/* Functions sets up a handler for SIGHUP signals which */
-/* are used for user breaks.                            */
-/* ->                                                   */
-/*    Flag, if set install signal handler, otherwise    */
-/*    reinstall the signal the default signal handler.  */
-/*------------------------------------------------------*/
-
-void set_stop_signal_handler( bool flag )
-{
-	static void ( * old_sig_handler ) ( int ) = NULL;
-
-	if ( flag )
-		old_sig_handler = signal( SIGHUP, test_stopper );
-	else
-	{
-		if ( old_sig_handler != NULL )
-			signal( SIGHUP, old_sig_handler );
-	}
-
-	if ( Stop_Signal )
-		eprint( FATAL, "Program test aborted, received user break.\n" );
-
-	Stop_Signal = UNSET;
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* Signal handler for SIGHUP signals just sets a global variable, which  */
-/* has to be evaluated again and again. While just throwing an exception */
-/* would look much nicer, it would require all functions used in the     */
-/* program to be written in a way to allow asynchronous breaks at every  */
-/* moment. And this would be rather difficult if not even impossible     */
-/* if the routines have to deal with real world devices.                 */
-/*-----------------------------------------------------------------------*/
-
-void test_stopper( int sig )
-{
-	if ( sig != SIGHUP )
-		return;
-
-	Stop_Signal = SET;
 }
 	
 
