@@ -15,6 +15,9 @@ static void convert_escapes( char *str );
 
 
 
+/*--------------------------------------------------------*/
+
+
 Var *f_layout( Var *v )
 {
 	int layout;
@@ -27,12 +30,27 @@ Var *f_layout( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR )
 		layout = v->val.lval != 0 ? HORI : VERT;
-	else
+	else if ( v->type == FLOAT_VAR )
 		layout = v->val.dval != 0.0 ? HORI : VERT;
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "VERT" ) ||
+			 ! strcasecmp( v->val.sptr, "VERTICAL" ) )
+			layout = 0;
+		else if ( ! strcasecmp( v->val.sptr, "HORI" ) ||
+				  ! strcasecmp( v->val.sptr, "HORIZONTAL" ) )
+			layout = 1;
+		else
+		{
+			eprint( FATAL, "%s:%ld: Unknown layout keyword `%s' in function "
+					"`layout'.\n", Fname, Lc, v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
 
 	if ( I_am == CHILD )
 	{
@@ -69,7 +87,6 @@ Var *f_layout( Var *v )
 
 	Tool_Box = T_malloc( sizeof( TOOL_BOX ) );
 	Tool_Box->layout = layout;
-	Tool_Box->x = Tool_Box->y = 0;
 	Tool_Box->Tools = NULL;
 	Tool_Box->objs = NULL;
 
@@ -117,11 +134,11 @@ Var *f_bcreate( Var *v )
 	}
 	else
 	{
-		if ( ! strcmp( v->val.sptr, "NORMAL_BUTTON" ) )
+		if ( ! strcasecmp( v->val.sptr, "NORMAL_BUTTON" ) )
 			type = NORMAL_BUTTON;
-		else if ( ! strcmp( v->val.sptr, "PUSH_BUTTON" ) )
+		else if ( ! strcasecmp( v->val.sptr, "PUSH_BUTTON" ) )
 			type = PUSH_BUTTON;
-		else if ( ! strcmp( v->val.sptr, "RADIO_BUTTON" ) )
+		else if ( ! strcasecmp( v->val.sptr, "RADIO_BUTTON" ) )
 			type = RADIO_BUTTON;
 		else
 		{
@@ -333,17 +350,7 @@ Var *f_bcreate( Var *v )
 	/* If this isn't just a test run really draw the new button */
 
 	if ( ! TEST_RUN )
-	{
 		recreate_Tool_Box( );
-
-		if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		else
-			fl_redraw_form( Tool_Box->Tools );
-
-		XFlush( fl_get_display( ) );
-	}
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -517,14 +524,6 @@ Var *f_bdelete( Var *v )
 	/* Redraw the form without the deleted buttons */
 
 	recreate_Tool_Box( );
-
-	if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tools" );
-	else
-		fl_redraw_form( Tool_Box->Tools );
-
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -748,9 +747,9 @@ Var *f_screate( Var *v )
 	}
 	else
 	{
-		if ( ! strcmp( v->val.sptr, "NORMAL_SLIDER" ) )
+		if ( ! strcasecmp( v->val.sptr, "NORMAL_SLIDER" ) )
 			type = NORMAL_SLIDER;
-		else if ( ! strcmp( v->val.sptr, "VALUE_SLIDER" ) )
+		else if ( ! strcasecmp( v->val.sptr, "VALUE_SLIDER" ) )
 			type = VALUE_SLIDER;
 		else
 		{
@@ -921,17 +920,7 @@ Var *f_screate( Var *v )
 	new_io->help_text = help_text;
 	
 	if ( ! TEST_RUN )
-	{
 		recreate_Tool_Box( );
-
-		if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
-			fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-						  FL_FULLBORDER, "fsc2: Tools" );
-		else
-			fl_redraw_form( Tool_Box->Tools );
-
-		XFlush( fl_get_display( ) );
-	}
 
 	return vars_push( INT_VAR, new_io->ID );
 }
@@ -1064,14 +1053,6 @@ Var *f_sdelete( Var *v )
 		return vars_push( INT_VAR, 1 );
 
 	recreate_Tool_Box( );
-
-	if ( ! fl_form_is_visible ( Tool_Box->Tools ) )
-		fl_show_form( Tool_Box->Tools, FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Tools" );
-	else
-		fl_redraw_form( Tool_Box->Tools );
-
-	XFlush( fl_get_display( ) );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -1290,6 +1271,7 @@ void tools_clear( void )
 static void recreate_Tool_Box( void )
 {
 	IOBJECT *io;
+	bool needs_pos = SET;
 
 
 	if ( TEST_RUN )        /* just to make sure... */
@@ -1339,25 +1321,24 @@ static void recreate_Tool_Box( void )
 
 	if ( fl_form_is_visible ( Tool_Box->Tools ) )
 	{
-		fl_freeze_form( Tool_Box->Tools );
+		fl_hide_form( Tool_Box->Tools );
 		fl_set_form_size( Tool_Box->Tools, Tool_Box->w, Tool_Box->h );
-	Tool_Box->Tools->w = Tool_Box->w;
-	Tool_Box->Tools->h = Tool_Box->h;
-	Tool_Box->Tools->first->w = Tool_Box->w;
-	Tool_Box->Tools->first->h = Tool_Box->h;
 		fl_addto_form( Tool_Box->Tools );
 	}
 	else
 	{
+		needs_pos = UNSET;
 		Tool_Box->Tools = fl_bgn_form( FL_UP_BOX, Tool_Box->w, Tool_Box->h );
-		fl_freeze_form( Tool_Box->Tools );
 	}
 
 	for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		append_object_to_form( io );
+
 	fl_end_form( );
 
-	fl_unfreeze_form( Tool_Box->Tools );
+	fl_show_form( Tool_Box->Tools, needs_pos ?
+				  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+				  FL_FULLBORDER, "fsc2: Tools" );
 }
 
 
@@ -1391,7 +1372,10 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 		}
 		else
 		{
-			io->x = io->prev->x + io->prev->w + HORI_OFFSET;
+			io->x = io->prev->x + io->prev->w + HORI_OFFSET
+				- ( io->type == NORMAL_BUTTON ? NORMAL_BUTTON_DELTA : 0 )
+				- ( io->prev->type == NORMAL_BUTTON ?
+					NORMAL_BUTTON_DELTA : 0 );
 			io->y = OFFSET_Y0;
 		}
 	}
