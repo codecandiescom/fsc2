@@ -40,9 +40,9 @@ hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
 comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
                  tds520a tds520 hp8647a
 
-src_headers    = $(addprefix ../src/,$(headers))
+src_headers    = $(addprefix $(sdir)/,$(headers))
 
-CFLAGS        += -I../src
+CFLAGS        += -I$(sdir) -I$(cdir)
 LFLAGS         = -shared -fpic
 
 define libmake
@@ -89,16 +89,16 @@ hp8647a.so: $(hp8647a:.c=.o)
 	$(libmake)
 
 
-$(dg2020_f:.c=.o): %.o: dg2020_f.h ../config/dg2020_f.conf
-$(dg2020_b:.c=.o): %.o: dg2020_b.h ../config/dg2020_b.conf
-$(hfs9000:.c=.o):  %.o: hfs9000.h  ../config/hfs9000.conf
-$(tds754a:.c=.o):  %.o: tds754a.h  ../config/tds754a.conf
-$(tds744a:.c=.o):  %.o: tds744a.h  ../config/tds744a.conf
-$(tds540:.c=.o):   %.o: tds540.h   ../config/tds540.conf
-$(tds520c:.c=.o):  %.o: tds520c.h  ../config/tds520c.conf
-$(tds520a:.c=.o):  %.o: tds520a.h  ../config/tds520a.conf
-$(tds520:.c=.o):   %.o: tds520.h   ../config/tds520.conf
-$(hp8647a:.c=.o):  %.o: hp8647a.h  ../config/hp8647a.conf
+$(dg2020_f:.c=.o): %.o: dg2020_f.h $(cdir)/dg2020_f.conf
+$(dg2020_b:.c=.o): %.o: dg2020_b.h $(cdir)/dg2020_b.conf
+$(hfs9000:.c=.o):  %.o: hfs9000.h  $(cdir)/hfs9000.conf
+$(tds754a:.c=.o):  %.o: tds754a.h  $(cdir)/tds754a.conf
+$(tds744a:.c=.o):  %.o: tds744a.h  $(cdir)/tds744a.conf
+$(tds540:.c=.o):   %.o: tds540.h   $(cdir)/tds540.conf
+$(tds520c:.c=.o):  %.o: tds520c.h  $(cdir)/tds520c.conf
+$(tds520a:.c=.o):  %.o: tds520a.h  $(cdir)/tds520a.conf
+$(tds520:.c=.o):   %.o: tds520.h   $(cdir)/tds520.conf
+$(hp8647a:.c=.o):  %.o: hp8647a.h  $(cdir)/hp8647a.conf
 
 
 %.o: %.c $(src_headers)
@@ -110,7 +110,7 @@ hp8647a_lexer.c: hp8647a_lexer.l $(src_header)
 			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
 	mv -f $@.x $@
 
-$(simp_modules:.c=.o): %.o: %.c ../config/%.conf $(src_headers)
+$(simp_modules:.c=.o): %.o: %.c $(cdir)/%.conf $(src_headers)
 	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
 
 %.so: %.o

@@ -121,6 +121,13 @@ EXEC_INSTALL   = install
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
+# These variables are used internally in the make process
+
+mdir    := $(shell pwd)
+sdir    := $(mdir)/src
+adir    := $(mdir)/aux
+cdir    := $(mdir)/config
+
 
 # To whom mail with bug reports and crash messages will get send
 
