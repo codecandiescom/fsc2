@@ -148,6 +148,42 @@ static int func_cmp( const void *a, const void *b )
 }
 
 
+/*--------------------------------------------*/
+/* Function tests if the device driver passed */
+/* to the function by name is loaded.         */
+/*--------------------------------------------*/
+
+bool exists_device( const char *name )
+{
+	Device *cd;
+
+	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+		if ( cd->is_loaded &&
+			 ! strcasecmp( strip_path( cd->name ), name ) )
+			return OK;
+
+	return FAIL;
+}
+
+
+/*-------------------------------------------------------------------*/
+/* Routine tests if a function passed to the routine by name exists. */
+/*-------------------------------------------------------------------*/
+
+bool exists_function( const char *name )
+{
+	size_t i;
+
+
+	for ( i = 0; i < Num_Func; i++ )
+		if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) &&
+			 Fncts[ i ].fnct != NULL )
+			return OK;
+
+	return FAIL;
+}
+
+
 /*-------------------------------------------------------------------*/
 /* Function links a library file with the name passed to it (after   */
 /* adding the extension '.so') and then tries to find all references */
