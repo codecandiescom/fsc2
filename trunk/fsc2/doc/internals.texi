@@ -423,14 +423,14 @@ a pair of pipes between the processes.
 @section Reading the sources
 
 
-The following is supposed to give you an introduction to where to look
-when you are searching for something in the source code of @code{fsc2}.
-Of course, the program has gotten too complex to be described easily
-(and with less space then required for the program itself). Thus all I
-can try is showing you the red line through the jungle of code along
-what's about to happen when @code{fsc2} is started, an @code{EDL} script
-gets loaded, tested and finally executed. This is yet far from complete
-but work in progress at best.
+The following tries to give you an introduction to where to look when
+you are searching for something in the source code of @code{fsc2}. Of
+course, the program has gotten too complex to be described easily (and
+with less space then required for the program itself). Thus all I can
+try is to show you the red line through the jungle of code along what's
+about to happen when @code{fsc2} is started, an @code{EDL} script gets
+loaded, tested and finally executed. This is still far from complete and
+work in progress at best.
 
 
 Lets start with what to do when you want to debug @code{fsc2}. It's
@@ -448,21 +448,21 @@ to ignore the two signals @code{SIGUSR1} and @code{SIGUSR2}. Under
 
 Debugging the child process that runs the experiment requires the
 debugger to attach to the newly created child process. To be able to do
-so without the child process already starting to execute while you're
-still in the process of attaching to it you should set the environment
-variable @code{FSC2_CHILD_DEBUG}, e.g.@:
+so without the child process already starting to run the experiment while
+you're still in the process of attaching to it you have to set the
+environment variable @code{FSC2_CHILD_DEBUG}, e.g.@:
 @example
 jens@@crowley:~/Lab/fsc2> export FSC2_CHILD_DEBUG=1
 @end example
 @noindent
 When this environment variable is defined (what you set it to doesn't
-matter) the child process will sleep for about ten hour before it
-starts, which should be more than enough for you to attach to
-it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a line telling you the
-PID of the child process is printed out when the child process gets
-started. All you have to do is to start the debugger with the PID to
-attach to. Here's an example of a typical session where I start to debug
-the child process using @code{gdb}:
+matter if it's not an empty string) the child process will sleep for
+about ten hour before it starts, which should be more than enough for
+you to attach to it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a
+line telling you the PID of the child process is printed out when the
+child process gets started. All you have to do is to start the debugger
+with the PID to attach to. Here's an example of a typical session where
+I start to debug the child process using @code{gdb}:
 @example
 jens@@crowley:~/Lab/fsc2 > export FSC2_CHILD_DEBUG=1
 jens@@crowley:~/Lab/fsc2 > src/fsc2 &
@@ -549,8 +549,8 @@ that it isn't able to do it itself.
 When this hurdle has been taken the initialization of the graphics is
 done. All the code for doing so is in the file @file{xinit.c}. You will
 have to read a bit about the @code{Xforms} library to understand what's
-going on there. Mostly it's loading a shared library for creating the
-forms used by the program (there are two shared libraries,
+going on there. Mostly it consists of loading a shared library for
+creating the forms used by the program (there are two shared libraries,
 @file{fsc2_rsc_lr.fsc2_so} and @file{fsc2_rsc_hr.fsc2_so}, which one is
 loaded depends on the screen resolution and the comand line option
 @code{-size}), evaluating the settings in the @file{.Xdefaults} and
@@ -565,7 +565,7 @@ loop of the program. But before this loop is entered another new process
 is spawned that opens a socket (of type @code{AF_UNIX}) to listen on
 incoming connections from external programs that want to send @code{EDL}
 scripts to @code{fsc2} for execution. The code for spawning this child
-process and the code for the child process itself is to be found in the
+process and the code for the child process itself can be found in the
 @file{conn.c}.
 
 

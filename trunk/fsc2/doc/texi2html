@@ -430,6 +430,7 @@ $T2H_OPTIONS -> {l2h} =
  verbose => 'if set, uses latex2html for @math and @tex',
 };
 
+
 ######################
 # The following options are only relevant if $T2H_L2H is set
 #
@@ -878,6 +879,7 @@ $T2H_DOCTYPE
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 $T2H_EXTRA_HEAD
 <LINK REL=STYLESHEET TYPE="text/css" HREF="fsc2.css">
+<LINK REL="icon" HREF="fsc2.ico" TYPE="image/x-icon">
 </HEAD>
 
 <BODY>
