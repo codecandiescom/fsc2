@@ -7,12 +7,14 @@ dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 dg2020_b       = dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
+hfs9000        = hfs9000.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a        = tds744a.c tds744a_gpib.c tds744a_util.c
 tds520a        = tds520a.c tds520a_gpib.c tds520a_util.c
 tds520         = tds520.c tds520_gpib.c tds520_util.c
 hp8647a        = hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-comp_modules   = dg2020_f dg2020_b tds754a tds744a tds520a tds520 hp8647a
+comp_modules   = dg2020_f dg2020_b hfs9000 tds754a tds744a tds520a tds520 \
+				 hp8647a
 
 src_headers    = $(addprefix ../src/,$(headers))
 
@@ -41,6 +43,10 @@ dg2020_f.so: ${dg2020_f:.c=.o}
 
 dg2020_b.so: ${dg2020_b:.c=.o}
 	$(CC) -shared -o $@ ${dg2020_b:.c=.o} -lm $(LDFLAGS)
+	chmod 644 $@
+
+hfs9000.so: ${hfs9000:.c=.o}
+	$(CC) -shared -o $@ ${hfs9000:.c=.o} -lm $(LDFLAGS)
 	chmod 644 $@
 
 tds754a.so: ${tds754a:.c=.o}

@@ -214,7 +214,7 @@ typedef struct {
 
 typedef struct _p_ {
 
-	long num;                // number of the pulse (pulses used fro realize
+	long num;                // number of the pulse (pulses used to realize
                              // phase cycling have negative, normal pulses
 	                         // positive numbers
 
