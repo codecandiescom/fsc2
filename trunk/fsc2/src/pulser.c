@@ -679,11 +679,11 @@ void p_set( long pnum, int type, Var *v )
 
 Var *p_get( char *txt, int type )
 {
-	return p_get_by_num( pnum( txt ), type );
+	return p_get_by_num( p_num( txt ), type );
 }
 
 
-Var *p_get_by_num( long p_num, int type )
+Var *p_get_by_num( long pnum, int type )
 {
 	int function;
 	double time;

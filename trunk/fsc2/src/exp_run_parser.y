@@ -121,7 +121,7 @@ line:    E_VAR_TOKEN '=' expr      { vars_assign( $3, $1 ); }
        | E_PDLEN '=' expr          { p_set( $1, P_DLEN, $3 ); }
        | E_PMAXLEN                 { eprint( FATAL, "%s:%ld: Maximum length "
 											 "of a pulse can't be changed.\n",
-											 Fname, LC );
+											 Fname, Lc );
 	                                 THROW( EXCEPTION ); }
 ;
 

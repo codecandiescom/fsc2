@@ -179,7 +179,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}"."{F}   {
-				exp_val.vlptr = p_get( exptext, P_FUNC );
+				exp_val.vptr = p_get( exptext, P_FUNC );
 				return E_VAR_REF;
             }
 
