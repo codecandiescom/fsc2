@@ -124,6 +124,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "clone_file",    f_clonef,   		 3, ACCESS_EXP,  NULL, UNSET },
 	{ "save",          f_save,    LONG_MIN, ACCESS_EXP,  NULL, UNSET },
 	{ "fsave",         f_fsave,   LONG_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "printf",        f_printf,  LONG_MIN, ACCESS_EXP,  NULL, UNSET },
 	{ "save_program",  f_save_p,   		-2, ACCESS_EXP,  NULL, UNSET },
 	{ "save_output",   f_save_o,   		-2, ACCESS_EXP,  NULL, UNSET },
 	{ "save_comment",  f_save_c,   		-4, ACCESS_EXP,  NULL, UNSET },

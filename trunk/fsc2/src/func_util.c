@@ -2757,8 +2757,8 @@ static long do_printf( int file_num, Var *v )
 
 					case 'x' :
 						if ( ! isdigit( *( fmt_end + 2 ) ) &&
-							 toupper( *( fmt_end + 2 ) ) < 'A' &&
-							 toupper( *( fmt_end + 2 ) ) > 'F' )
+							 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
+							   toupper( *( fmt_end + 2 ) ) > 'F' ) )
 						{
 							eprint( FATAL, SET, "'\\x' escape sequence "
 									"without hex number in format string in "
@@ -2770,18 +2770,18 @@ static long do_printf( int file_num, Var *v )
 							       *fmt_end - '0' : *fmt_end - 'A' + 10;
 
 						if ( isdigit( *( fmt_end + 3 ) ) ||
-							 toupper( *( fmt_end + 3 ) ) >= 'A' ||
-							 toupper( *( fmt_end + 3 ) ) <= 'F' )
+							 ( toupper( *( fmt_end + 3 ) ) >= 'A' &&
+							   toupper( *( fmt_end + 3 ) ) <= 'F' ) )
 						{
 							esc_len++;
 						    *fmt_end = *fmt_end * 16 + 
-                                       + isdigit( *fmt_end + 2 ) ?
+                                       + isdigit( *fmt_end + 3 ) ?
 							             *fmt_end - '0' : *fmt_end - 'A' + 10;
 						}
 
 						if ( isdigit( *( fmt_end + 4 ) ) ||
-							 toupper( *( fmt_end + 4 ) ) >= 'A' ||
-							 toupper( *( fmt_end + 4 ) ) <= 'F' )
+							 ( toupper( *( fmt_end + 4 ) ) >= 'A' &&
+							   toupper( *( fmt_end + 4 ) ) <= 'F' ) )
 						{
 							eprint( FATAL, SET, "'\\x' escape sequence out of "
 									"range in format string in %s().\n",
@@ -2807,7 +2807,7 @@ static long do_printf( int file_num, Var *v )
 						if ( *( fmt_end + 2 ) >= '0' &&
 							 *( fmt_end + 2 ) <= '0' )
 						{
-							*fmt_end = *fmt_end * 8 + *( fmt_end + 1 ) - '0';
+							*fmt_end = *fmt_end * 8 + *( fmt_end + 2 ) - '0';
 							esc_len = 2;
 						}
 
@@ -2821,7 +2821,7 @@ static long do_printf( int file_num, Var *v )
 										Cur_Func );
 							}
 
-							*fmt_end = *fmt_end * 8 + *( fmt_end + 1 ) - '0';
+							*fmt_end = *fmt_end * 8 + *( fmt_end + 3 ) - '0';
 							esc_len = 3;
 						}
 
@@ -3011,8 +3011,8 @@ static long do_printf( int file_num, Var *v )
 
 						case 'x' :
 							if ( ! isdigit( *( fmt_end + 2 ) ) &&
-								 toupper( *( fmt_end + 2 ) ) < 'A' &&
-								 toupper( *( fmt_end + 2 ) ) > 'F' )
+								 ( toupper( *( fmt_end + 2 ) ) < 'A' ||
+								   toupper( *( fmt_end + 2 ) ) > 'F' ) )
 							{
 								eprint( FATAL, SET, "'\\x' escape sequence "
 										"without hex number in format string "
@@ -3024,18 +3024,18 @@ static long do_printf( int file_num, Var *v )
 								       *fmt_end - '0' : *fmt_end - 'A' + 10;
 
 							if ( isdigit( *( fmt_end + 3 ) ) ||
-								 toupper( *( fmt_end + 3 ) ) >= 'A' ||
-								 toupper( *( fmt_end + 3 ) ) <= 'F' )
+								 ( toupper( *( fmt_end + 3 ) ) >= 'A' &&
+								   toupper( *( fmt_end + 3 ) ) <= 'F' ) )
 							{
 								esc_len++;
 								*fmt_end = *fmt_end * 16 + 
-									      + isdigit( *fmt_end + 2 ) ?
+									      + isdigit( *fmt_end + 3 ) ?
 							              *fmt_end - '0' : *fmt_end - 'A' + 10;
 							}
 
 							if ( isdigit( *( fmt_end + 4 ) ) ||
-								 toupper( *( fmt_end + 4 ) ) >= 'A' ||
-								 toupper( *( fmt_end + 4 ) ) <= 'F' )
+								 ( toupper( *( fmt_end + 4 ) ) >= 'A' &&
+								   toupper( *( fmt_end + 4 ) ) <= 'F' ) )
 							{
 								eprint( FATAL, SET, "'\\x' escape sequence "
 										"out of range in format string in "
@@ -3064,7 +3064,7 @@ static long do_printf( int file_num, Var *v )
 								 *( fmt_end + 2 ) <= '0' )
 							{
 								*fmt_end = *fmt_end * 8
-									       + *( fmt_end + 1 ) - '0';
+									       + *( fmt_end + 2 ) - '0';
 								esc_len = 2;
 							}
 
@@ -3079,7 +3079,7 @@ static long do_printf( int file_num, Var *v )
 								}
 
 								*fmt_end = *fmt_end * 8
-                                           + *( fmt_end + 1 ) - '0';
+                                           + *( fmt_end + 3 ) - '0';
 								esc_len = 3;
 							}
 
@@ -3100,7 +3100,7 @@ static long do_printf( int file_num, Var *v )
 			switch ( need_vars )
 			{
 				case 0 :
-					fsc2_assert( need_type == 5 );          /* must be count */
+					fsc2_assert( need_type == 5 );        /* must be a count */
 					fprintf( stderr, "count\n" );
 					count += T_fprintf( file_num, fmt_start, count );
 					break;
@@ -3141,7 +3141,7 @@ static long do_printf( int file_num, Var *v )
 						case 5 :
 							fprintf( stderr, "num count\n" );
 							count += T_fprintf( file_num, fmt_start,
-												( int )cv->val.lval, count );
+												( int ) cv->val.lval, count );
 							break;
 
 						default :
