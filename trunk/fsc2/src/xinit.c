@@ -758,7 +758,7 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 	/* Do the same as if the "Quit" button has been hit (but quit immediately
 	   in batch mode and don't load the next EDL script) */
 
-	T_free( title );
+	T_free( Internals.title );
 	clean_up( );
 	xforms_close( );
 
