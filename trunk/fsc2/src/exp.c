@@ -225,7 +225,7 @@ void forget_prg( void )
 /* where a block is everything a between matching pair of curly braces.     */
 /*--------------------------------------------------------------------------*/
 
-void loop_setup( void )
+static void loop_setup( void )
 {
 	long i;
 	long cur_pos;
@@ -269,7 +269,7 @@ void loop_setup( void )
 /*    2. pointer to number of token                               */
 /*----------------------------------------------------------------*/
 
-void setup_while_or_repeat( int type, long *pos )
+static void setup_while_or_repeat( int type, long *pos )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
@@ -362,7 +362,7 @@ void setup_while_or_repeat( int type, long *pos )
 /*       loop (needed for handling of `break' and `continue').         */
 /*---------------------------------------------------------------------*/
 
-void setup_if_else( long *pos, Prg_Token *cur_wr )
+static void setup_if_else( long *pos, Prg_Token *cur_wr )
 {
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;

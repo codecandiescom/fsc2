@@ -657,7 +657,7 @@ void free_graphics( void )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-sttic void canvas_off( Canvas *c, FL_OBJECT *obj )
+static void canvas_off( Canvas *c, FL_OBJECT *obj )
 {
 	FL_HANDLE_CANVAS ch;
 
