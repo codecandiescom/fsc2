@@ -30,6 +30,7 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
+my $lockin     = 'SR510';
 my $start_freq = 135;
 my $end_freq   = 150;
 my $step_freq  = 50;
@@ -41,7 +42,6 @@ my $tc         = "Don't set";
 my $sens       = "Don't set";
 my $current    = 0;
 my $how        = 'Start program';
-my $calls      = 0;
 
 
 my %fp = ( '-side' => 'top',
@@ -195,6 +195,20 @@ $f7_v->pack( %wp );
 $f7_l2->pack( %wp );
 
 
+my $f8 = $mw->Frame( );
+my $f8_l = $f8->Label( '-text'              => 'Lock-in amplifier:',
+					   '-width'             => '20',
+					   'anchor'             => 'w' );
+my $f8_m = $f8->Optionmenu( '-options'      =>
+							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
+							'-width'        => 9,
+							'-textvariable' => \$lockin );
+
+$f8->pack( %fp );
+$f8_l->pack( %wp );
+$f8_m->pack( %wp );
+
+
 my $f9 = $mw->Frame( );
 my $f9_l = $f9->Label( '-text' => 'Time constant:',
 					   '-width' => '20',
@@ -312,6 +326,10 @@ goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
 chomp $ne;
 $N_runs = $ne;
 
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^SR[58][13]0$/;
+chomp $ne;
+$lockin = $ne;
+
 goto done_reading unless defined( $ne = <F> )
 	 and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
 chomp $ne;
@@ -349,7 +367,7 @@ sub store_defs {
 
 	print F "# Do not edit - created automatically!\n";
 	print F "$start_freq\n$end_freq\n$step_freq\n$atten\n" .
-	        "$mod_freq\n$mod_ampl\n$N_runs\n$tc\n$sens\n$current\n";
+	        "$mod_freq\n$mod_ampl\n$N_runs\n$lockin\n$tc\n$sens\n$current\n";
 
 	close F;
 }
@@ -411,11 +429,11 @@ sub li_conf {
 
 sub write_out {
 
-return if $calls++ == 0;
 return if &do_checks( ) != 0;
 
 local *F;
 my $text = "";
+my $lin = $lockin eq "SR510" ? "" : "#2";
 
 open( F, "|fsc2_" . lc $how )
 	or die "Can't find utility fsc2_" . lc $how . ".\n";
@@ -425,10 +443,15 @@ print F
 
 hp8647a;
 sr510;
-keithley228a;
+keithley228a;\n";
 
+if ( $lockin eq "SR510" ) {
+	print F "\n";
+} else {
+	print F lc $lockin, ";\n\n";
+}
 
-VARIABLES:
+print F "VARIABLES:
 
 start_freq  = $start_freq MHz;
 end_freq    = $end_freq MHz;
@@ -467,13 +490,13 @@ synthesizer_modulation( \"FM\", \"EXT DC\", mod_ampl );
 
 init_1d( 2, N_points, start_freq * 1e-6, step_freq * 1e-6,
 		 \"Frequency / MHz\", \"Signal / V\" );\n";
-print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
-print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
+print F "lockin_time_constant$lin( tc );\n" if $tc ne "Don't set";
+print F "lockin_sensitivity$lin( $sens );\n" if $sens ne "Don't set";
 print F "\n\nEXPERIMENT:
 
 synthesizer_state( \"ON\" );
-tc = lockin_time_constant( );
-mod_freq = lockin_ref_freq( );
+tc = lockin_time_constant$lin( );
+mod_freq = lockin_ref_freq$lin( );
 
 File_1 = get_file( \"File for storing all runs:\" );
 File_2 = get_file( \"File for storing final result:\" );
@@ -487,7 +510,7 @@ fsave( File_2, \"% Start frequency = # MHz\\n\"
                \"% Mod. amplitude  = # kHz\\n\"
                \"% Field current   = # A\\n%\\n\",
        start_freq * 1.0e-6, end_freq * 1.0e-6, step_freq * 1.0e-3,
-       lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
+       lockin_sensitivity$lin( ), tc, lockin_phase$lin( ), mod_freq * 1.0e-3,
        mod_ampl * 1.0e-3, current );
 save_comment( File_2, \"% \" );
 save_program( File_2, \"% \" );\n\n";
@@ -499,7 +522,7 @@ FOR I = 1 : N_runs
 
 	FOR J = 1 : N_points
 	{
-		data[ J ] = lockin_get_data( );
+		data[ J ] = lockin_get_data$lin( );
 		display( J, data[ J ], 1, J, ( mean_data[ J ] + data[ J ] ) / I, 2 );
 		synthesizer_frequency( start_freq + J * step_freq );
 		wait( tc );
@@ -564,7 +587,7 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $start_freq > 50 ) {
+	if ( $start_freq > 200 ) {
 		$text = "Start frequency is too high.";
 		&show_message( $text );
 		return -1;
@@ -582,7 +605,7 @@ sub do_checks {
 		return -1;
 	}
 
-	if ( $end_freq > 50 ) {
+	if ( $end_freq > 200 ) {
 		$text = "End frequency is too high.";
 		&show_message( $text );
 		return -1;
