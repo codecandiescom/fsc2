@@ -25,6 +25,63 @@
 #include "pci_mio_16e_1.h"
 
 
+/*---------------------------------------------------------------------*/
+/* Functions allows to reserve (or un-reserve) the FREQ_OUT so that in */
+/* the following changes to the FREQ_OUT require a pass-phrase (i.e.   */
+/* when calling the function daq_freq_out() withb an argument.         */
+/*---------------------------------------------------------------------*/
+
+Var *daq_reserve_freq_out( Var *v )
+{
+	bool lock_state = SET;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR,
+						  pci_mio_16e_1.msc_state.reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Argument isn't a pass-phrase.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+
+	if ( pci_mio_16e_1.msc_state.reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( pci_mio_16e_1.msc_state.reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( pci_mio_16e_1.msc_state.reserved_by, v->val.sptr ) )
+			{
+				pci_mio_16e_1.msc_state.reserved_by =
+						  CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	pci_mio_16e_1.msc_state.reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* Function for setting the output at the FREQ_OUT pin. It can be queried, */
 /* returning the currently output frequency or 0 if switched off, or can   */
@@ -44,6 +101,7 @@ Var *daq_freq_out( Var *v )
 	double freqs[ 4 ] = { 2.0e7, 1.0e7, 2.0e5, 1.0e5 };
 	int indx[ 4 ] = { 0, 0, 0, 0 };
 	int i, j;
+	char *pass;
 
 
 	/* In the real experiment ask the driver for the current clock settings,
@@ -83,6 +141,31 @@ Var *daq_freq_out( Var *v )
 			freq /= divider;
 
 		return vars_push( FLOAT_VAR, freq );
+	}
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = T_strdup( v->val.sptr );
+
+		if ( pci_mio_16e_1.msc_state.reserved_by )
+		{
+			if ( strcmp( pci_mio_16e_1.msc_state.reserved_by, pass ) )
+			{
+				print( FATAL, "FRQ_OUT is reserved, wrong phase-phrase.\n" );
+				T_free( pass );
+				THROW( EXCEPTION );
+			}
+		}
+		else 
+			print( WARN, "Pass-phrase for non-reserved FREQ_OUT.\n" );
+
+		T_free( pass );
+		v = vars_pop( v );
+	}
+	else if ( pci_mio_16e_1.msc_state.reserved_by )
+	{
+		print( FATAL, "FREQ_OUT is reserved, phase-phrase required.\n" );
+		THROW( EXCEPTION );
 	}
 
 	/* Get the frequency the user asked for */

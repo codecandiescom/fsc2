@@ -60,6 +60,7 @@ Var *f_get_pos( Var *v );
 Var *f_find_peak( Var *v );
 Var *f_index_of_max( Var *v );
 Var *f_index_of_min( Var *v );
+Var *f_mean_part_array( Var *v );
 
 
 #endif  /* ! FUNC_UTIL_HEADER */

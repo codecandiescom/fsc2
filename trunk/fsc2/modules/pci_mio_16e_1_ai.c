@@ -646,7 +646,8 @@ Var *daq_ai_get_curve( Var * v )
 						break;
 
 					default :
-						print( FATAL, "Failed to get AI data: %s.\n" );
+						print( FATAL, "Failed to get AI data: %s.\n",
+							   ni_daq_strerror( ) );
 				}
 
 				vars_pop( nv );
@@ -723,7 +724,7 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
 	trig->start = trig->scan_start = trig->conv_start = NI_DAQ_INTERNAL;
 	trig->start_polarity = trig->scan_polarity =
 						   trig->conv_polarity = NI_DAQ_NORMAL;
-	trig->scan_duration = trig->conv_duration = 0.0;
+	trig->scan_duration = trig->conv_duration = - HUGE_VAL;
 
 	switch ( method )
 	{
@@ -741,7 +742,6 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var *v,
 			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
 			v = pci_mio_16e_1_ai_get_T_conv( v, trig );
 			break;
-
 
 		case TRIGGER_SCAN_CONV :
 			v = pci_mio_16e_1_ai_get_S_scan( v, trig );
@@ -1047,11 +1047,11 @@ static void pci_mio_16e_1_ai_check_T_conv( double t, double t_scan )
 		t = pci_mio_16e_1.ai_state.ampl_switch_needed ?
 			PCI_MIO_16E_1_AMPL_SWITCHING_TIME : PCI_MIO_16E_1_MIN_CONV_TIME;
 
-	if ( t * pci_mio_16e_1.ai_state.num_channels < t_scan )
+	if ( t * pci_mio_16e_1.ai_state.num_channels > t_scan && t_scan > 0.0 )
 	{
-		print( FATAL, "Requested conversion time of %ld ns is too long, under "
-			   "the current conditions %ld ns can't be exceeded.\n",
-			   lrnd( t * 1.0e9 ),
+		print( FATAL, "Requested conversion time of %ld ns is too long, with "
+			   "the current setting for the scan time %ld ns can't be "
+			   "exceeded.\n", lrnd( t * 1.0e9 ),
 			   lrnd ( 1.0e9 * t_scan /
 					  pci_mio_16e_1.ai_state.num_channels ) );
 		THROW( EXCEPTION );

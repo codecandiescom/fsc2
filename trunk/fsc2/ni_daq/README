@@ -128,10 +128,11 @@ rebuild the linkers database of libraries.
 IV. Documentation
 =================
 
-In the 'driver' subdirectory you will find a file named 'ni_daq_drv.txt'.
-It's supposed to become a complete description of the system calls that
-can used to deal with the card. Unfortuately I am not finished with it
-yet.
+In the 'driver' subdirectory you will find a file named 'ni_daq_drv.txt'
+with the documentation of the module. It may be hard to understand unless
+you already have read the PCI E Series and DAQ-STC Register Programming
+manual, which both can be downloaded from National Instruments website
+(http://www.natinst.com).
 
 In the 'lib' subdirectory a file named 'ni_daq_lib.txt' describes the
 functionality supplied by the library.
@@ -166,4 +167,4 @@ much of the missing informations as he was able to get permission for from
 his superiors.
 
 
-    22.10.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+    23.10.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>

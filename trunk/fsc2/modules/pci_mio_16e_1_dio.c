@@ -25,6 +25,63 @@
 #include "pci_mio_16e_1.h"
 
 
+/*--------------------------------------------------------------------*/
+/* Functions allows to reserve (or un-reserve) the DIO so that in the */
+/* following changes to the DIO require a pass-phrase (i.e. when      */
+/* calling the function daq_dio_write() and daq_dio_read().           */
+/*--------------------------------------------------------------------*/
+
+Var *daq_reserve_dio( Var *v )
+{
+	bool lock_state = SET;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR,
+						  pci_mio_16e_1.ao_state.reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "Argument isn't a pass-phrase.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+
+	if ( pci_mio_16e_1.dio_state.reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
+			{
+				pci_mio_16e_1.dio_state.reserved_by =
+						  CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	pci_mio_16e_1.dio_state.reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
@@ -32,11 +89,31 @@ Var *daq_dio_read( Var *v )
 {
 	long mask;
 	unsigned char bits = 0;
+	char *pass;
 
 
-	if ( v == 0 )
+	if ( v != NULL && v->type == STR_VAR )
 	{
-		print( FATAL, "No DIO channel specified\n" );
+		pass = T_strdup( v->val.sptr );
+
+		if ( pci_mio_16e_1.dio_state.reserved_by )
+		{
+			if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
+			{
+				print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
+				T_free( pass );
+				THROW( EXCEPTION );
+			}
+		}
+		else 
+			print( WARN, "Pass-phrase for non-reserved DIO.\n" );
+
+		T_free( pass );
+		v = vars_pop( v );
+	}
+	else if ( pci_mio_16e_1.dio_state.reserved_by )
+	{
+		print( FATAL, "DIO is reserved, phase-phrase required.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -47,7 +124,7 @@ Var *daq_dio_read( Var *v )
 		mask = get_strict_long( v, "DIO bit mask" );
 		if ( mask < 0 || mask > 0xFF )
 		{
-			print( FATAL, "Invalid mask of 0x%X, valif range is [0-255].\n",
+			print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
 				   mask );
 			THROW( EXCEPTION );
 		}
@@ -72,7 +149,33 @@ Var *daq_dio_write( Var *v )
 {
 	long bits;
 	long mask;
+	char *pass;
 
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = T_strdup( v->val.sptr );
+
+		if ( pci_mio_16e_1.dio_state.reserved_by )
+		{
+			if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
+			{
+				print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
+				T_free( pass );
+				THROW( EXCEPTION );
+			}
+		}
+		else 
+			print( WARN, "Pass-phrase for non-reserved DIO.\n" );
+
+		T_free( pass );
+		v = vars_pop( v );
+	}
+	else if ( pci_mio_16e_1.dio_state.reserved_by )
+	{
+		print( FATAL, "DIO is reserved, phase-phrase required.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( v == NULL )
 	{

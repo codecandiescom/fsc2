@@ -122,10 +122,11 @@ Var *daq_ao_channel_setup( Var *v )
 
 	if ( v != NULL && v->type == STR_VAR )
 	{
-		pass = v->val.sptr;
-		if ( ( v = v->next ) == NULL )
+		pass = T_strdup( v->val.sptr );
+		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing arguments.\n" );
+			T_free( pass );
 			THROW( EXCEPTION );
 		}
 	}
@@ -144,9 +145,15 @@ Var *daq_ao_channel_setup( Var *v )
 		else if ( strcmp( pci_mio_16e_1.ao_state.reserved_by[ dac ], pass ) )
 		{
 			print( FATAL, "CH%ld is reserved, wrong phase-phrase.\n", dac );
+			T_free( pass );
 			THROW( EXCEPTION );
 		}
 	}
+	else if ( pass != NULL )
+		print( WARN, "Pass-phrase for non-reserved CH%ld.\n", dac );
+
+	if ( pass )
+		T_free( pass );
 
 	other_count = 0;
 	while ( ( v = vars_pop( v ) ) != NULL &&
@@ -335,7 +342,7 @@ Var *daq_set_voltage( Var *v )
 	if ( v != NULL && v->type == STR_VAR )
 	{
 		pass = v->val.sptr;
-		if ( ( v = v->next ) == NULL )
+		if ( ( v = vars_pop( v ) ) == NULL )
 		{
 			print( FATAL, "Missing arguments.\n" );
 			THROW( EXCEPTION );

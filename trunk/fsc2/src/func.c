@@ -137,6 +137,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "mean",                f_mean,     	    -3, ACCESS_ALL,  NULL, UNSET },
 	{ "rms",                 f_rms,      	    -3, ACCESS_ALL,  NULL, UNSET },
 	{ "slice",               f_slice,    	    -3, ACCESS_ALL,  NULL, UNSET },
+	{ "mean_part_array",     f_mean_part_array,  2, ACCESS_ALL, NULL, UNSET },
 	{ "square",              f_square,   	     1, ACCESS_ALL,  NULL, UNSET },
 	{ "G_to_T",              f_G2T,              1, ACCESS_ALL,  NULL, UNSET },
 	{ "T_to_G",              f_T2G,              1, ACCESS_ALL,  NULL, UNSET },

@@ -79,10 +79,15 @@ struct PCI_MIO_16E_1 {
 	} gpct_state;
 
 	struct {
+		char *reserved_by;
+	} dio_state;
+
+	struct {
 		NI_DAQ_CLOCK_TYPE daq_clock;
 		NI_DAQ_STATE on_off;
 		NI_DAQ_CLOCK_SPEED_VALUE speed;
 		int divider;
+		char *reserved_by;
 	} msc_state;
 
 } PCI_MIO_16E_1;
@@ -130,12 +135,14 @@ Var *daq_continuous_pulses( Var *v );
 
 /* Functions from pci_mio_16e_1_dio.c */
 
+Var *daq_reserve_dio( Var *v );
 Var *daq_dio_read( Var *v );
 Var *daq_dio_write( Var *v );
 
 
 /* Functions from pci_mio_16e_1_msc.c */
 
+Var *daq_reserve_freq_out( Var *v );
 Var *daq_freq_out( Var *v );
 Var *daq_trigger_setup( Var *v );
 

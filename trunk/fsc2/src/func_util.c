@@ -3517,6 +3517,89 @@ Var *f_index_of_min( Var *v )
 }
 
 
+/*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+
+Var *f_mean_part_array( Var *v )
+{
+	long size;
+	double *m;
+	long par;
+	long i, j;
+	long *lfrom;
+	double *dfrom;
+	double ipar;
+	Var *nv;
+
+
+	if ( v == NULL || v->next == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	vars_check( v, INT_ARR | FLOAT_ARR );
+
+	size = get_strict_long( v->next, "size of partition" );
+
+	if ( size <= 0 )
+	{
+		print( FATAL, "Invalid zero or negative partition size.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->len % size != 0 )
+	{
+		print( FATAL, "Length of array isn't an integer multiple of the "
+			   "subpartition size.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( size == 1 )
+	{
+		if ( v->type == INT_ARR )
+		{
+			m = T_malloc( v->len * sizeof *m );
+			lfrom = v->val.lpnt;
+			for ( i = 0; i < v->len; i++ )
+				m[ i ] = *lfrom++;
+			nv = vars_push( FLOAT_ARR, m, v->len );
+			T_free( m );
+			return nv;
+		}
+		else
+			return vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+	}
+
+	m = T_calloc( size, sizeof *m );
+	par = v->len / size;
+
+	if ( v->type == INT_ARR )
+	{
+		lfrom = v->val.lpnt;
+		for ( i = 0; i < par; i++ )
+			for ( j = 0; j < size; j++ )
+				m[ j ] += *lfrom++;
+	}
+	else
+	{
+		memcpy( m, v->val.dpnt, size * sizeof *m );
+		dfrom = v->val.dpnt + size;
+		for ( i = 1; i < par; i++ )
+			for ( j = 0; j < size; j++ )
+				m[ j ] += *dfrom++;
+	}
+
+	ipar = 1.0 / par;
+	for ( i = 0; i < size; i++ )
+		m[ i ] *= ipar;
+
+	nv = vars_push( FLOAT_ARR, m, size );
+	T_free( m );
+	return nv;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
