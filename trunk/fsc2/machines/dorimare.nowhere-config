@@ -18,7 +18,7 @@ if [ $? -ne 0 ]; then
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
-grep -E '^[ \t]*#define[ \t]+RS_SPEC10_UPSIDE_DOWN[ \t]+1[[:space:]]*$' \
+grep -E '^[ \t]*#define[ \t]+RS_SPEC10_UPSIDE_DOWN[ \t]+0[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
 	sed 's/^\s*\(#define[ \t]\{1,\}RS_SPEC10_UPSIDE_DOWN\).*$/\1 0/' \
@@ -26,7 +26,7 @@ if [ $? -ne 0 ]; then
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
-grep -E '^[ \t]*#define[ \t]+RS_SPEC10_MIRROR[ \t]+1[[:space:]]*$' \
+grep -E '^[ \t]*#define[ \t]+RS_SPEC10_MIRROR[ \t]+0[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
 	sed 's/^\s*\(#define[ \t]\{1,\}RS_SPEC10_MIRROR\).*$/\1 0/' \
