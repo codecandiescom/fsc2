@@ -36,7 +36,7 @@ FD_fsc2 *create_form_fsc2(void)
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
     fl_set_object_callback(obj,run_file,0);
-  fdui->quit = obj = fl_add_button(FL_NORMAL_BUTTON,50,700,130,50,"Quit");
+  fdui->quit = obj = fl_add_button(FL_NORMAL_BUTTON,50,630,130,50,"Quit");
     fl_set_button_shortcut(obj,"Q",1);
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_LARGE_SIZE);
@@ -58,6 +58,11 @@ FD_fsc2 *create_form_fsc2(void)
     fl_set_slider_value(obj, 0.172727);
     fl_set_slider_size(obj, 0.05);
      fl_set_slider_return(obj, FL_RETURN_END_CHANGED);
+  fdui->bug_report = obj = fl_add_button(FL_NORMAL_BUTTON,50,730,130,40,"Bug Report");
+    fl_set_button_shortcut(obj,"B",1);
+    fl_set_object_color(obj,FL_MCOL,FL_COL1);
+    fl_set_object_lsize(obj,FL_MEDIUM_SIZE);
+    fl_set_object_callback(obj,bug_report_callback,0);
   fl_end_form();
 
   fdui->fsc2->fdui = fdui;
