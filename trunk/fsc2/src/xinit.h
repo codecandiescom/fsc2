@@ -27,6 +27,7 @@
 
 
 typedef struct {
+	bool size;
 	FD_fsc2 *       ( * create_form_fsc2       ) ( void );
 	FD_run *        ( * create_form_run        ) ( void );
 	FD_input_form * ( * create_form_input_form ) ( void );

@@ -124,6 +124,7 @@ void usage( void );
 #define HELPFONTSIZE    12
 #define STOPMOUSEBUTTON 13
 #define NOCRASHMAIL     14
+#define RESOLUTION      15
 
 
 /* Global variables */
