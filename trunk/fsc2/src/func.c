@@ -246,16 +246,12 @@ void functions_exit( void )
 
 #ifndef NDEBUG
 	if ( EDL.Call_Stack != NULL )
-	{
-		eprint( SEVERE, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		while ( call_pop( ) )
-			/* empty */ ;
-	}
-#else
+		eprint( SEVERE, UNSET, "Internal error detected at %s:%d, call stack "
+				"not empty!\n", __FILE__, __LINE__ );
+#endif
+
 	while ( call_pop( ) )
 		/* empty */ ;
-#endif
 
 	No_File_Numbers = UNSET;
 	Dont_Save = UNSET;
@@ -305,11 +301,11 @@ Var *func_get( const char *name, int *acc )
 
 	   1. There's still a function call that has not yet returned in which
 	      case the call stack isn't empty.
-	   2. The function which is still running comes from a module - in thisa
+	   2. The function which is still running comes from a module - in this
 	      case the device member of the last call stack element isn't NULL.
-	   3. The function that's still running came from a device that's
-	      not the first of a set of devices with the same generic type in
-		  which case the dev_count member of the last call stack element is
+	   3. The function that's still running came from a device that's not
+	      the first of a set of devices with the same generic type, indicated 
+		  by the dev_count member of the last call stack element being
 		  larger than 1.
 	   4. The functions name we got as the argument hasn't already a '#'
 	      appended to it.
@@ -389,9 +385,9 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 }
 
 
-/*--------------------------------------------------*/
-/* Function for bsearch for a function by its name. */
-/*--------------------------------------------------*/
+/*------------------------------------------------------------*/
+/* Function for bsearch to search for a function by its name. */
+/*------------------------------------------------------------*/
 
 static int func_cmp2( const void *a, const void *b )
 {
@@ -575,22 +571,23 @@ Var *func_call( Var *f )
 /* properties and the creation of pulses). The information stored in the */
 /* call stack elements is a pointer to the EDL function structure (if    */
 /* applicable, i.e. for EDL function calls), a pointer to the module     */
-/* structure (for calsl from modules) and the name of the device         */
+/* structure (for calls from modules) and the name of the device         */
 /* controlled by the module (i.e. not the module name, but the name as   */
-/* it should appear in error messages for the device), and the
- */
-/* more than one devices of the same generic type 
-
-/* The call stack elements store some information about the EDL function, 
-
-/* Before a function gets called a few data items have to be stored for   */
-/* utility functions like print() and for handling pulsers. print() needs */
-/* the name of the function and, for functions from modules, the name of  */
-/* the device. For pulser functions the pulsers number that supplies the  */
-/* function must be stored as well as the global variable 'Cur_Pulser'    */
-/* must be set, and on return from the called function reset to the       */
-/* previous value.                                                        */
-/*------------------------------------------------------------------------*/
+/* it should appear in error messages for the device), and, finally, the */
+/* number of the device (this can be larger than 1 if there's more than  */
+/* one devices of the same generic type).                                */
+/* These informations are used in two situations: First when printing    */
+/* messages. The print() function is supposed to prepend EDL file name   */
+/* and line number, device name (if applicable) and function name. It    */
+/* gets the device and function name from the current call stack entry.  */
+/* Second, when within a module an EDL function from the same module is  */
+/* called (via func_get() and func_call()) the writer of the module has  */
+/* no information if there are other modules with the same generic type  */
+/* loaded, supplying a function by the same name. The information in the */
+/* current call stack entry is used to determine this and thus to auto-  */
+/* matically return the appropriate fucntion handle to the module, i.e.  */
+/* the function from the same module the func_get() call came from.      */
+/*-----------------------------------------------------------------------*/
 
 CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 					   int dev_count )

@@ -499,6 +499,9 @@ void run_test_hooks( void )
 	TRY
 	{
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+		{
+			fsc2_assert( EDL.Call_Stack == NULL );
+
 			if ( cd->is_loaded && cd->driver.is_test_hook )
 			{
 				if ( cd->generic_type != NULL &&
@@ -512,6 +515,7 @@ void run_test_hooks( void )
 							"for module '%s'.\n", cd->name );
 				call_pop( );
 			}
+		}
 
 		TRY_SUCCESS;
 	}
@@ -541,6 +545,9 @@ void run_end_of_test_hooks( void )
 	TRY
 	{
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+		{
+			fsc2_assert( EDL.Call_Stack == NULL );
+
 			if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
 			{
 				if ( cd->generic_type != NULL &&
@@ -554,6 +561,7 @@ void run_end_of_test_hooks( void )
 							"failed for module '%s'.\n", cd->name );
 				call_pop( );
 			}
+		}
 
 		TRY_SUCCESS;
 	}
@@ -584,6 +592,8 @@ void run_exp_hooks( void )
 	{
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
+			fsc2_assert( EDL.Call_Stack == NULL );
+
 			if ( cd->is_loaded && cd->driver.is_exp_hook )
 			{
 				if ( cd->generic_type != NULL &&
@@ -643,6 +653,8 @@ void run_end_of_exp_hooks( void )
 
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 	{
+		fsc2_assert( EDL.Call_Stack == NULL );
+
 		if ( cd->generic_type != NULL &&
 			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser++;
@@ -695,6 +707,8 @@ void run_exit_hooks( void )
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
+		fsc2_assert( EDL.Call_Stack == NULL );
+
 		if ( cd->generic_type != NULL &&
 			 ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			Cur_Pulser = EDL.Num_Pulsers - 1;
@@ -825,6 +839,8 @@ int get_lib_number( const char *name )
 
 void unload_device( Device *dev )
 {
+	fsc2_assert( EDL.Call_Stack == NULL );
+
 	if ( dev->driver.handle &&
 		 ! Internals.exit_hooks_are_run && dev->driver.is_exit_hook )
 	{
