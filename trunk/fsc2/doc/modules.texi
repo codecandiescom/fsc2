@@ -752,9 +752,10 @@ const char *generic_type = DEVICE_TYPE;
 @acronym{fsc2} will use the first variable with the name for printing of
 @noindent
 warnings and error messages. The second string is needed to find out
-about the type of the device. If this variable does not exist it won't
-have any information about the device type and having another device of
-the same type recognized automatically will not work.
+about the type of the device. If this variable does not exist
+@acronym{fsc2} won't have any information about the device type and
+having another device of the same type recognized automatically will fail.
+
 
 Another important point is that if in two modules with different
 @code{generic_type} settings the same function name is used only one of
