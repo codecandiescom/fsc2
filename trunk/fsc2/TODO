@@ -1,0 +1,8 @@
+1. Check if the starting an experiment, then starting the web server (or
+   e.g. printing to gv) and *not* closing the exec()ed program results
+   in a failure to initialize the GPIB bus when trying to start a new
+   experiment in combination with using either the LLP or the National
+   Instrument GPIB driver and library is used. If this happens we need a
+   patch for setting the close-on-exec flag for the device file of the
+   GPIB board! Only tested to work correcty for my own GPIB driver/library
+   (thanks to Martin Fuchs for pointing out the problem).
