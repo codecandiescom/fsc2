@@ -25,7 +25,8 @@ Optionally, you should have
 12) pnmtopng
 13) ppmtojpeg
 
-but if it is missing the basic functionality is still there (without Perl
+but if it is missing the basic functionality is still there (without mail
+and addr2line no automatic bug reports can be sent and without Perl
 and the next two utilities e.g. the built-in web server won't work)
 
 To create the complete documentation beside Perl you also need
@@ -63,10 +64,10 @@ kernels) or the one from National Instruments, to be downloaded from
 
   http://www.natinst.com
 
-(which is supposed to work with 2.2 kernels). Unfortunately, only the LLP
-library supports cards from other companies than National Instruments. You
-may also compile fsc2 without having a GPIB library, but then devices
-controlled via the GPIB bus can't be used for obvious reasons.
+(which is supposed to work with 2.2 and 2,4 kernels). Unfortunately, only
+the LLP library supports cards from other companies than National
+Instruments. You may also compile fsc2 without having a GPIB library, but
+then devices controlled via the GPIB bus can't be used for obvious reasons.
 
 Please make sure that the GPIB library you want to use is already compiled
 and installed before trying to compile fsc2 (unless you don't need GPIB
