@@ -105,7 +105,7 @@ while ( $client = $server->accept( ) ) {
 
 #########################################################
 # This function handles a single new connection from the outside world. It
-# must close the connection when done and may never return.
+# must close the connection when done and must never return.
 
 sub serve {
 
