@@ -46,6 +46,11 @@ typedef struct
 
 
 static NMR nmr;
+static enum {
+	RES_VERY_LOW,
+	RES_LOW,
+	RES_HIGH
+};
 
 
 
@@ -279,17 +284,15 @@ try_again:
 	switch ( buffer[ 2 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
-			if ( gpib_write( nmr.device, "RS2\r", 4 ) == FAILURE )
-				er035m_sa_failure( );
-			usleep( ER035M_SA_WAIT );
-			/* drop through */
+			nmr.resolution = RES_VERY_LOW;
+			break;
 
 		case '2' :
-			nmr.resolution = LOW;
+			nmr.resolution = RES_LOW;
 			break;
 
 		case '3' :
-			nmr.resolution = HIGH;
+			nmr.resolution = RES_HIGH;
 			break;
 
 		default :                     /* should never happen... */
@@ -471,6 +474,7 @@ double er035m_sa_get_field( void )
 	char *state_flag;
 	long length;
 	long tries = ER035M_SA_MAX_RETRIES;
+	char *res[ ] = { "0.1", "0.01", "0.001" };
 
 
 	/* Repeat asking for field value until it's correct up to LSD -
@@ -513,7 +517,7 @@ double er035m_sa_get_field( void )
 	{
 		eprint( FATAL, "%s: Field is too unstable to be measured with the "
 				"requested resolution of %s G.\n", nmr.name,
-				nmr.resolution == LOW ? "0.01" : "0.001" );
+				res[ nmr.resolution ] );
 		THROW( EXCEPTION );
 	}
 

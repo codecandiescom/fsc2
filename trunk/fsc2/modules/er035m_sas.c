@@ -51,7 +51,8 @@ typedef struct
 	bool is_needed;         /* is the gaussmter needed at all? */
 	int state;              /* current state of the gaussmeter */
 	double field;           /* last measured field */
-	int resolution;         /* LOW = 0.01 G, HIGH = 0.001 G */
+	int resolution;         /* set to either RES_VERY_LOW = 0.1 G,
+							   RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
     int fd;                 /* file descriptor for serial port */
     struct termios old_tio, /* serial port terminal interface structures */
 		           new_tio; /* (stored old and current one) */
@@ -62,7 +63,11 @@ typedef struct
 static NMR nmr;
 static char serial_port[ ] = "/dev/ttyS*";
 static char er035m_sas_eol[ ] = "\r\n";
-
+static enum {
+	RES_VERY_LOW,
+	RES_LOW,
+	RES_HIGH
+};
 
 
 /* The gaussmeter seems to be more cooperative if we wait for some time
@@ -316,17 +321,15 @@ try_again:
 	switch ( buffer[ 0 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
-			if ( er035m_sas_write( "RS2" ) == FAIL )
-				er035_sas_comm_fail( );
-			usleep( ER035M_SAS_WAIT );
-			/* drop through */
+			nmr.resolution = RES_VERY_LOW;
+			break;
 
 		case '2' :
-			nmr.resolution = LOW;
+			nmr.resolution = RES_LOW;
 			break;
 
 		case '3' :
-			nmr.resolution = HIGH;
+			nmr.resolution = RES_HIGH;
 			break;
 
 		default :                     /* should never happen... */
@@ -533,6 +536,7 @@ static double er035m_sas_get_field( void )
 	long length;
 	long tries = ER035M_SAS_MAX_RETRIES;
 	long retries;
+	char *res[ ] = { "0.1", "0.01", "0.001" };
 
 
 	/* Repeat asking for field value until it's correct up to the LSD -
@@ -583,8 +587,8 @@ static double er035m_sas_get_field( void )
 	if ( tries < 0 )
 	{
 		eprint( FATAL, "%s: Field is too unstable to be measured with the "
-				"requested resolution of %s G.\n", DEVICE_NAME,
-				nmr.resolution == LOW ? "0.01" : "0.001" );
+				"current resolution of %s G.\n", DEVICE_NAME,
+				res[ nmr.resolution ] );
 		THROW( EXCEPTION );
 	}
 
