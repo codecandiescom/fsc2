@@ -100,7 +100,7 @@ char *string_to_lower( char *str )
 
 /*---------------------------------------------------*/
 /* This routine returns a copy of a piece of memory. */
-/* On failure a OUT_OF_MEMORY exception is thrown.   */
+/* On failure an OUT_OF_MEMORY exception is thrown.  */
 /*---------------------------------------------------*/
 
 void *get_memcpy( const void *array, size_t size )
