@@ -134,6 +134,7 @@ named @file{simple_cw.Edl}) just type
 
 @kbd{fsc2_guify simple_cw.Edl simple_cw}
 
+@noindent
 This should create an executable script called @file{simple_cw}.
 
 @ifnotinfo
@@ -178,7 +179,7 @@ and the underscore character. But you must make sure that its name does
 not coincide with the name of a variable already used in the
 @code{EDL} program. The next required item is the type of the
 variable, which can be either @code{int}, @code{float}, @code{menu} or
-@code{file}.
+@code{file} (all four in lower case characters).
 
 For variables of type @code{int} and @code{float} all the following
 items are optional. The first thing you can tell the conversion program
@@ -186,11 +187,12 @@ is an allowed range for the value of a variable. Ranges have to be given
 in square braces and the start and end value of the range must be
 separated by a colon. Thus @w{@code{[ 2000 : 5000 ]}} tells the
 conversion program to let the resulting script accept only values
-between 2000 and 5000 for the variable @code{START_FIELD} to be entered
-by the user. You don't have to give both a start and end value, if
-e.g.@: the end value is missing the conversion program will only make
-sure that the value of @code{START_FIELD} is always at least 2000 but
-won't care about the end value.
+between 2000 and 5000 for the variable @code{START_FIELD} entered by the
+user. You don't have to give both a start and end value, if e.g.@: the
+end value is missing the conversion program will only make sure that the
+value of @code{START_FIELD} is always at least 2000 but won't care about
+the end value (but you will need the colon, @code{:}, to make clear if
+you mean the lower or upper boarder).
 
 The next item, a single number in square braces, is the default value
 for the variable, i.e.@: the value to be shown when the script is
@@ -209,12 +211,13 @@ values but will use the default values for values that didn't made sense
 Of course, beside this extra line we also must tell the script in which
 places the user supplied value has to be used. In this example it's only
 one location, just below the special line, where the original value of
-@code{3360.0} has been replaced with the name of the variable
+@code{3360.0 G} has been replaced with the name of the variable
 @code{START_FIELD}.
 
 The only difference between a @code{float} and an @code{int} variable
 is that, obviously, for @code{int} variables you may only use integer
-numbers for the range values and the initial value.
+numbers for the range values and the initial value and the user can also
+only enter integer numbers.
 
 But there's also a third type of variables, @code{menu}. These are for
 cases where you want to have one value selected from a list of
@@ -525,10 +528,9 @@ that's exactly what you want to do.
 
 
 The @code{fsc2_guify} conversion tool (or, to be exact, the scripts
-created by this tool) relies on an inbuilt property of @code{fsc2},
-i.e.@: that @code{fsc2} is prepared to listen to external programs
-that might want to send it @code{EDL} programs. These external
-programs are
+created by this tool) relies on an property of @code{fsc2}, i.e.@: that
+@code{fsc2} is prepared to listen to external programs that might want
+to send it @code{EDL} programs. These external programs are
 @example
 fsc2_load
 fsc2_test
@@ -582,9 +584,9 @@ executable could not found)
 
 Using these programs you are able to send @code{EDL} programs, created
 with whichever method or programming language you prefer, to
-@code{fsc2}.  A few example scripts (written in Perl) can be found the
-@code{scripts} subdirectory of the main directory of the package. (You
-could also examine on of the scripts created by @code{fsc2_guify} but be
-warned that these scripts may not look too nice because they were
-written by a program that doesn't care too much about proper indentation
-etc.)
+@code{fsc2}.  A few example scripts (written in Perl) can be found in
+the @code{scripts} subdirectory of the main directory of the
+package. You could also examine one of the scripts created by
+@code{fsc2_guify} but be warned that these scripts may not look too nice
+because they were written by a program that doesn't care too much about
+proper indentation and readability etc.
