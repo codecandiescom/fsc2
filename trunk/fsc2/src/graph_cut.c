@@ -50,8 +50,8 @@ static bool cut_zoom_xy( Canvas *c );
 static void cut_save_scale_state( void );
 
 
-static bool is_shown  = UNSET;  /* set on fl_show_form() */
-static bool is_mapped = UNSET;  /* while form is mapped */
+static bool is_shown  = UNSET;  /* set on fl_show_form()    */
+static bool is_mapped = UNSET;  /* set while form is mapped */
 static Cut_Graphics CG;
 static int cur_1,
 	       cur_2,
@@ -313,8 +313,8 @@ static void cut_calc_curve( int dir, long index, bool has_been_shown )
 /* The function calculates the points as to be displayed */
 /* from the scaled points. As a side effect it also sets */
 /* the flags that indicate if out of range arrows have   */
-/* be shown.                                             */
-/*--------------------------------------------------------*/
+/* be shown and counts the number of displayed points.   */
+/*-------------------------------------------------------*/
 
 static void cut_recalc_XPoints( void )
 {
@@ -451,7 +451,7 @@ void cut_new_curve_handler( void )
 bool cut_data_rescaled( long curve, double y_min, double y_max )
 {
 	long i;
-	Curve_1d *cv = &G.cut_curve;
+	Curve_1d *cv  = &G.cut_curve;
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 	Scaled_Point *sp, *ssp;
 
@@ -2536,4 +2536,7 @@ void cut_clear_curve( long curve )
 	for ( sp = G.cut_curve.points, i = 0; i < CG.nx; sp++, i++ )
 		sp->exist = UNSET;
 	G.cut_curve.count = 0;
+
+	G.cut_curve.points = T_free( G.cut_curve.points );
+	G.cut_curve.xpoints = T_free( G.cut_curve.xpoints );
 }
