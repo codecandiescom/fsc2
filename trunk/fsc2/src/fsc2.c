@@ -111,7 +111,8 @@ int main( int argc, char *argv[ ] )
 												 NON_EXCLUSIVE ),
 											 In_file_fp ) ) == -1 )
 	{
-		fprintf( stderr, "Failed to setup daemon process for fsc2.\n" );
+		fprintf( stderr, "Failed to start or connect to daemon process for "
+				 "fsc2.\n" );
 		return EXIT_FAILURE;
 	}
 
