@@ -591,11 +591,11 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 
 	/* Set start and end point of curve to be fetched */
 
-	sprintf( cmd, "DAT:START %ld\n", w->start_num );
+	sprintf( cmd, "DAT:START %ld\n", w != NULL ? w->start_num : 1 );
 	if ( gpib_write( tds520.device, cmd ) == FAILURE )
 		tds520_gpib_failure( );
 
-	sprintf( cmd, "DAT:STOP %ld\n", w->end_num );
+	sprintf( cmd, "DAT:STOP %ld\n", w != NULL ? w->end_num : tds520.rec_len );
 	if ( gpib_write( tds520.device, cmd ) == FAILURE )
 		tds520_gpib_failure( );
 
