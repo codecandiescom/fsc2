@@ -6,24 +6,24 @@ c_sources      = fsc2.c pulser.c util.c exceptions.c variables.c vars_util.c \
 				 graphics.c accept.c graph_handler_1d.c graph_handler_2d.c   \
 				 graph_cut.c loader.c bugs.c print.c conn.c ipc.c
 
+# On moebi a version with low-resolution is needed - add the appropriate
+# graphics files to the c files and set the SIZE flag correctly
+
+ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
+	c_sources += fsc2_rsc_lr.c
+	CFLAGS    += -DSIZE=0
+else
+	c_sources += fsc2_rsc_hr.c
+	CFLAGS    += -DSIZE=1
+endif
+
+
 # On door we need the parser and lexer for the GPIB configuration file
 
 ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
 	c_source  += gpib_lexer.c gpib_parser.c
 endif
 
-# On moebi a version with low-resolution is needed - add the appropriate
-# graphics files to the c files and set the SIZE flag correctly
-
-ifeq ($(shell hostname -f),moebi.physik.fu-berlin.de)
-	c_sources += fsc2_rsc_lr.c
-	headers   += fsc2_rsc_lr.h
-	CFLAGS    += -DSIZE=0
-else
-	c_sources += fsc2_rsc_hr.c
-	headers   += fsc2_rsc_hr.h
-	CFLAGS    += -DSIZE=1
-endif
 
 bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.l)
@@ -34,9 +34,8 @@ headers        = ${c_sources:.c=.h} global.h
 
 
 ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
-objects += /usr/local/lib/libgpib.a
+	objects += /usr/local/lib/libgpib.a
 endif
-
 
 
 export headers
@@ -47,7 +46,6 @@ export headers
 
 
 all:
-	echo $(CFLAGS)
 	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		$(MAKE) pion; \
 	fi
@@ -122,6 +120,7 @@ door:
 	if [ ! -e gpib_lexer.l ]; then       \
 		cp gpib_lexer.ll gpib_lexer.l; \
 	fi
+
 
 # don't automatically delete intermediate files created by bison and flex
 
