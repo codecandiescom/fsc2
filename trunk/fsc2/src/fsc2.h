@@ -114,8 +114,6 @@ Device_Name *Device_Name_List = NULL;
 
 Pulser_Struct pulser_struct;
 
-ASSIGNMENTS assignment[ PULSER_CHANNEL_NUM_FUNC ];
-
 Phase_Sequence *PSeq = NULL;
 Acquisition_Sequence ASeq[ 2 ] = { { 0, NULL, 0 }, { 0, NULL, 0 } };
 
@@ -166,8 +164,6 @@ extern Var *var_list;
 extern Var *Var_Stack;
 
 extern Pulser_Struct pulser_struct;
-
-extern ASSIGNMENTS assignment[ ];
 
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];

@@ -143,12 +143,12 @@ line:    func pcd                  { }
        | tm func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | tm PDS_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | tm PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs                       { p_phs_end( Cur_PHS ); }
        | phs func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | phs PDS_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phs PSD_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd                       { }
        | psd func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | psd TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -444,7 +444,7 @@ phsv:     INT_TOKEN                { $$ = $1; }
         | OFF_TOK                  { $$ = 0; }
 ;
 
-psd:      PDS_TOKEN expr           { p_set_pds( $1, $2 ); }
+psd:      PSD_TOKEN expr           { p_set_psd( $1, $2 ); }
 ;
 
 %%

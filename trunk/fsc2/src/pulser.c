@@ -814,7 +814,7 @@ void p_phs_end( int func )
   PHASE_1, 1 means PHASE_2)
 */
 
-void p_set_psd( int func, double time )
+void p_set_psd( int func, Var *v )
 {
 	assert( func == 0 || func == 1 );
 
