@@ -18,7 +18,6 @@
 #define QUITTING  SIGUSR2
 
 
-
 bool run( void );
 
 
