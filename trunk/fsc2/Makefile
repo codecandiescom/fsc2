@@ -19,7 +19,7 @@ docdir         = $(libdir)/doc
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
 
-# here one defines if the program is for a high or a low resolution screen
+# Defines here if the program is for a high or a low resolution screen
 # (set SIZE to either `HI_RES' or `LOW_RES')
 
 SIZE           = HI_RES
@@ -97,7 +97,7 @@ export            # export all variables to sub-makes
 # Switch off all implicit rules and set suffices of file to be made by make
 
 .SUFFIXES:
-.PHONY: all clean distclean pack
+.PHONY: all install clean distclean pack
 
 
 # default rule: make the main program, the primary lexer and the modules
@@ -169,30 +169,32 @@ tags:
 		  ${tds520} tds520.h
 
 
-# make all documentation
+# make all types of documentation
 
 all-docs:
 	$(MAKE) -C doc all
 
-# make just the info documentation
+# make info documentation
 
 info-docs:
 	$(MAKE) -C doc info
 
-# make just the html documentation
+# make html documentation
 
 html-docs:
 	$(MAKE) -C doc html
 
-# make just the Postscript documentation
+# make Postscript documentation
 
 ps-docs:
 	$(MAKE) -C doc ps
 
+# make PDF documentation
+
 pdf-docs:
 	$(MAKE) -C doc pdf
 
-# `clean' deletes just all the files remaining from the compilation while
+# `clean' deletes all the files remaining from the compilation while
 # `distclean' also removes all executables and shared libraries
 
 clean:
@@ -205,9 +207,13 @@ distclean:
 	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean *.so *~
 
+# Clean up everything for a distribution and create a zipped tarball
+
 pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2a | gzip -c -9 > fsc2a.tgz
+
+# Write zipped tarball to ZIP drive (with mount and unmount of ZIP drive)
 
 ZIP:
 	if ! `grep ZIP /etc/mtab > /dev/null`; then \
@@ -216,7 +222,3 @@ ZIP:
 	fi
 	cp ../fsc2a.tgz /ZIP
 	umount /ZIP
-
-# don't automatically delete intermediate files created by bison and flex
-
-.PRECIOUS: %.c
