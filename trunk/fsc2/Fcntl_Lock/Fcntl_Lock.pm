@@ -8,6 +8,30 @@
 # $Id$
 
 
+package Fcntl_Lock;
+
+use 5.006;
+use strict;
+use warnings;
+use POSIX;
+use Errno;
+use Carp;
+
+require Exporter;
+require DynaLoader;
+
+our @ISA = qw(Exporter DynaLoader);
+
+# Items to export into callers namespace by default.
+
+our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
+				  F_RDLCK F_WRLCK F_UNLCK
+				  SEEK_SET SEEK_CUR SEEK_END
+);
+
+our $VERSION = '0.06';
+
+
 =pod
 
 =head1 NAME
@@ -44,29 +68,6 @@ calling the function B<fcntl_lock> a lock can be set or determined which
 process currently holds the lock.
 
 =cut
-
-package Fcntl_Lock;
-
-use 5.006;
-use strict;
-use warnings;
-use POSIX;
-use Errno;
-use Carp;
-
-require Exporter;
-require DynaLoader;
-
-our @ISA = qw(Exporter DynaLoader);
-
-# Items to export into callers namespace by default.
-
-our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
-				  F_RDLCK F_WRLCK F_UNLCK
-				  SEEK_SET SEEK_CUR SEEK_END
-);
-
-our $VERSION = '0.05';
 
 # Set up an hash with the error messages, but only for errno's that Errno
 # knows about. The texts represent what's written in SUSV3 and in the man

@@ -1,4 +1,4 @@
-Fcntl_Lock version 0.05
+Fcntl_Lock version 0.06
 =======================
 
 Fcntl_Lock is a module to do file locking using the fcntl(2) system call.
