@@ -1680,10 +1680,10 @@ Var *f_fsave( Var *v )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
 				"`save()' format string.\n", Fname, Lc );
 
-	/* Get string long enough to replace each `#' by a 3-char sequence 
+	/* Get string long enough to replace each `#' by a 5-char sequence 
 	   plus a '\0' */
 
-	fmt = get_string( strlen( sptr ) + 3 * in_format + percs + 2 );
+	fmt = get_string( strlen( sptr ) + 5 * in_format + percs + 2 );
 	strcpy( fmt, sptr );
 
 	for ( cp = fmt; *cp != '\0'; ++cp )
@@ -1693,15 +1693,15 @@ Var *f_fsave( Var *v )
 		if ( *cp != '\\' && *cp != '#' && *cp != '%' )
 			continue;
 
-		/* Convert format descriptor (un-escaped `#') to 4 \x01 */
+		/* Convert format descriptor (un-escaped `#') to 5 \x01 */
 
 		if ( *cp == '#' )
 		{
 			if ( on_stack-- )
 			{
-				memmove( cp + 3, cp, strlen( cp ) + 1 );
-				memset( cp, '\x01', 4 );
-				cp += 3;
+				memmove( cp + 5, cp, strlen( cp ) + 1 );
+				memset( cp, '\x01', 6 );
+				cp += 5;
 				n++;
 			}
 			continue;
@@ -1754,7 +1754,7 @@ Var *f_fsave( Var *v )
 
 	cp = fmt;
 	cv = v->next;
-	while ( ( ep = strstr( cp, "\x01\x01\x01\x01" ) ) != NULL )
+	while ( ( ep = strstr( cp, "\x01\x01\x01\x01\x01\x01" ) ) != NULL )
 	{
 		if ( cv != NULL )      /* skip printing if there are not enough data */
 		{
@@ -1782,7 +1782,7 @@ Var *f_fsave( Var *v )
 			cv = cv->next;
 		}
 
-		cp = ep + 4;
+		cp = ep + 6;
 	}
 
 	T_fprintf( file_num, cp );
