@@ -41,7 +41,7 @@ bool tds_tmpl_init( const char *name )
 	double cp1, cp2;
 	char buffer[ 100 ];
 	long len = 100;
-	bool lock_state;
+	static bool lock_state;
 	int on_count, needed_count, needed_on_count;
 
 
@@ -52,6 +52,7 @@ bool tds_tmpl_init( const char *name )
         return FAIL;
 
 	in_init = SET;
+	lock_state = SET;
 	TRY
 	{
 		/* Store the lock state the user asked for and for the initialization

@@ -103,7 +103,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 	unsigned int ww, wh;
 	XFontStruct *font;
 	FL_CMD_OPT app_opt[ N_APP_OPT ];
-	bool needs_pos = UNSET;
+	volatile bool needs_pos = UNSET;
 	XWindowAttributes attr;
 	Window root, parent, *children;
 	unsigned int nchilds;

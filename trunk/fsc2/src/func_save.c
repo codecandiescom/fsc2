@@ -98,7 +98,7 @@ Var *f_getf( Var *var )
 	Var *cur;
 	int i;
 	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
-	FILE *fp;
+	static FILE *fp;
 	size_t len;
 	struct stat stat_buf;
 	static char *r = NULL;
