@@ -2,6 +2,12 @@
 #
 # $Id$
 #
+#  This program is free software; you can redistribute it and/or modify it
+#  under the same terms as Perl itself.
+#
+#  Copyright (C) 2002-2003 Jens Thoms Toerring
+#                <Jens.Toerring@physik.fu-berlin.de>
+#
 # Before `make install' is performed this script should be runnable with
 # `make test'. After `make install' it should work as `perl test.pl'
 
