@@ -152,7 +152,7 @@ magnetic fields in combination with power supply controllers
 measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -187,7 +187,7 @@ V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels
 can range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -230,7 +230,7 @@ V}, resolution of pulse voltages is @w{0.1 V}. Trigger-in levels can
 range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -265,7 +265,7 @@ range from @w{-5 V} to @w{5 V}.
 already measured curves is currently supported.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -293,7 +293,7 @@ Bruker EPR spectrometers -- lock-in amplifier with built-in
 analog-to-digital converter.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -335,7 +335,7 @@ the field in older Bruker EPR spectrometers. Maximum field range is from
 @w{-50 G} to @w{23000 G}, minimum field step width is @w{1 mG}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -369,7 +369,7 @@ with the magnet power supply controllers @code{aeg_s_band} and
 range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -432,7 +432,7 @@ with @code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
 the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -495,7 +495,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -530,7 +530,7 @@ files. For safety reasons only output attenuations below @w{-5 db} are
 allowed -- change the configuration file to allow higher output levels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -575,7 +575,7 @@ the currents through the sweep coil (or current changes), not in field
 units!
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE) via the Oxford ITC 503
+@strong{Controlled via}: GPIB bus (IEEE 488) via the Oxford ITC 503
 temperature controller transfering data between GPIB and Oxford ISOBUS.
 
 @paragraphindent 0
@@ -618,7 +618,7 @@ Please note: With this module the functions expect arguments in terms of
 the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -649,7 +649,7 @@ the currents through the sweep coil, not in field units!
 @strong{Description}: Kontron digital voltmeter 4060.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -678,7 +678,7 @@ only temperature measurements are supported, no automatic adjustment of
 the temperature.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -707,7 +707,7 @@ the temperature.
 channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -747,7 +747,7 @@ only deals with the 1.5 T to 3.4 T probe and fields above 3.15
 T. Measured fields are returned in Gauss, not Tesla!
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -774,7 +774,7 @@ T. Measured fields are returned in Gauss, not Tesla!
 channel, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -807,7 +807,7 @@ channel, no internal modulation, 4 ADC and 2 DAC ports.
 channels, no internal modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -836,11 +836,11 @@ channels, no internal modulation, 4 ADC and 2 DAC ports.
 @strong{Module name}: @code{sr810}
 
 @paragraphindent 0
-@strong{Description}: Stanford Research lock-in amplifier SR810, two
-channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
+@strong{Description}: Stanford Research lock-in amplifier SR810, one
+channel, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -878,7 +878,7 @@ channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 channels, auto acquisition, internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -917,7 +917,7 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -964,7 +964,7 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1011,7 +1011,7 @@ measurement channels, 2 auxiliary channels, 3 math channels and 4
 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1058,7 +1058,7 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1105,7 +1105,7 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1152,7 +1152,7 @@ measurement channels, 1 auxiliary channel (to be used as trigger input
 only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE).
+@strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
 @strong{Supported functions}:
