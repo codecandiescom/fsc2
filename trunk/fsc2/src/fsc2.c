@@ -278,7 +278,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			continue;
 		}
 
-		if ( ! strcmp( argv[ cur_arg ], "-noBalloon" ) )
+		if ( ! strcmp( argv[ cur_arg ], "-noBalloons" ) )
 		{
 			flags |= NO_BALLOON;
 			for ( i = cur_arg; i < *argc; i++ )
