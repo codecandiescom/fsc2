@@ -217,7 +217,7 @@ void start_fsc2( const char *pname, const char *fname )
 		strcat( av[ 0 ], "/" );
 	strcat( av[ ac++ ], "fsc2" );
 
-	av[ ac++ ] = ( char * ) "-d";
+	av[ ac++ ] = ( char * ) "-delete";
 	av[ ac++ ] = ( char * ) "-s";
 
 	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )

@@ -1314,9 +1314,6 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 					break;
 
 				case 4 :                       /* in z-axis window */
-					if ( ! ( keymask & ShiftMask ) )
-						break;
-
 					fl_set_cursor( window, CG.cur_8 );
 					G.cut_select = CUT_SELECT_X;
 					c->box_x = c->box_h = 0;
@@ -1421,6 +1418,7 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 	if ( c->ppos[ Y ] < 0 )
 		c->ppos[ Y ] = 0;
+
 	if ( c != &G.cut_z_axis )
 	{
 		if ( c->ppos[ Y ] >= ( int ) G.cut_canvas.h )
@@ -1443,11 +1441,10 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 					break;
 
 				case 4 :                       /* in z-axis window */
-					if ( G.cut_select == CUT_SELECT_X )
-						cut_show( CG.cut_dir,
-							    lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
-							    * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
-								/ c->h ) );
+					cut_show( CG.cut_dir,
+							  lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+								    * ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
+									/ c->h ) );
 					break;
 
 				case 7 :                       /* in canvas window */
@@ -1520,13 +1517,14 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	XEvent new_ev;
 	bool scale_changed = UNSET;
 	int keymask;
+	long index;
 
 	
 	obj = obj;
 
-	/* We need to do event compression to avoid being flooded with motion
-	   events - instead of handling them all individually we only react to
-	   the latest in the series of motion events for the current window */
+	/* We do event compression to avoid being flooded with motion events -
+	   instead of handling them all individually we only react to the latest
+	   in the series of motion events for the current window */
 
 	while ( fl_XEventsQueued( QueuedAfterReading ) > 0 )
 	{
@@ -1547,13 +1545,6 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 	switch ( G.button_state )
 	{
 		case 1 :                               /* left mouse button */
-			if ( G.cut_select == CUT_SELECT_X &&
-				 ! ( keymask & ShiftMask ) )
-			{
-				G.cut_select = CUT_SELECT_BREAK;
-				fl_reset_cursor( window );
-			}
-
 			if ( G.drag_canvas & 1 )           /* x-axis or canvas window */
 			{
 				c->box_w = c->ppos[ X ] - G.start[ X ];
@@ -1585,6 +1576,14 @@ static void cut_motion_handler( FL_OBJECT *obj, Window window,
 
 				if ( c->box_y + c->box_h < 0 )
 					c->box_h = - c->box_y;
+				index = lround( ( double ) ( c->h - 1 - c->ppos[ Y ] )
+								* ( ( CG.cut_dir == X ? G.nx : G.ny ) - 1 )
+								/ c->h );
+				if ( index != CG.index )
+				{
+					cut_show( CG.cut_dir, index );
+					break;
+				}
 			}
 
 			repaint_cut_canvas( c );
@@ -2638,6 +2637,7 @@ void cut_next_index( FL_OBJECT *a, long b )
 void cut_change_dir( FL_OBJECT *a, long b )
 {
 	Curve_1d *cv = &G.cut_curve;
+	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 	long index;
 	int keymask;
 	int px, py;
@@ -2671,6 +2671,24 @@ void cut_change_dir( FL_OBJECT *a, long b )
 			index = G.nx - 1;
 		if ( index < 0 )
 			index = 0;
+	}
+
+	if ( ! CG.is_fs[ G.active_curve ] )
+	{
+		if ( CG.cut_dir == Y )
+		{
+			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
+								 scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 ) 
+								 * ( double ) ( G.cut_canvas.w - 1 );
+			CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = scv->shift[ Y ];
+		}
+		else
+		{
+			CG.s2d[ G.active_curve ][ X ] = cv->s2d[ X ] =
+					              scv->s2d[ X ] / ( double ) ( G.canvas.w - 1 )
+							      * ( double ) ( G.cut_canvas.w - 1 );
+			CG.shift[ G.active_curve ][ X ] = cv->shift[ X ] = scv->shift[ X ];
+		}
 	}
 
 	cut_show( CG.cut_dir == X ? Y : X, index );
