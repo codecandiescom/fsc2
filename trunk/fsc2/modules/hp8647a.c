@@ -84,6 +84,14 @@ int hp8647a_init_hook( void )
 
 int hp8647a_test_hook( void )
 {
+	if ( ! hp8647a.SF )
+	{
+		eprint( FATAL, "%s: Start frequency has not been set.\n",
+				DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+	hp8647a.freq = hp8647a.start_freq;
+
 	return 1;
 }
 
@@ -169,17 +177,18 @@ Var *synthesizer_set_frequency( Var *v )
 	}
 
 	
-	hp8647a.freq = hp8647a_set_frequency( freq );
+	if ( TEST_RUN )                      /* In test run of experiment */
+		hp8647a.freq = freq;
+	else if ( I_am == PARENT )           /* in PREPARATIONS section */
+	{
+		hp8647a.start_freq = freq;
+		hp8647a.SF = SET;
+	}
+	else
+		hp8647a.freq = hp8647a_set_frequency( freq );
+
 	return vars_push( FLOAT_VAR, freq );
 }
-
-
-Var *synthesizer_get_frequency( Var *v )
-{
-	v = v;
-	return vars_push( FLOAT_VAR, hp8647a_get_frequency( ) );
-}
-
 
 
 Var *synthesizer_set_step_frequency( Var *v )
@@ -192,77 +201,102 @@ Var *synthesizer_set_step_frequency( Var *v )
 				Lc, DEVICE_NAME );
 
 	hp8647a.freq_step = VALUE( v );
+
 	return vars_push( FLOAT_VAR, hp8647a.freq_step );
 }
 
 
+/*
+  This function may only get called in the EXPERIMENT section!
+*/
+
+Var *synthesizer_get_frequency( Var *v )
+{
+	v = v;
+	return vars_push( FLOAT_VAR, hp8647a_get_frequency( ) );
+}
+
+
+/*
+  This function may only get called in the EXPERIMENT section!
+*/
+
 Var *synthesizer_sweep_up( Var *v )
 {
-	double new_freq = hp8647a.freq + hp8647a.freq_step;
+	double new_freq;
 
 
 	v = v;
+
+	if ( hp8647a.freq_step == 0.0 )
+	{
+		eprint( FATAL, "%s:%ld: %s: Step frequency hasn't been set.",
+				Fname, Lc, DEVICE_NAME );
+		THROW( EXCEPTION );
+	}
+
+	new_freq = hp8647a.freq + hp8647a.freq_step;
+
 	if ( new_freq < MIN_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: Frequency is getting below lower limit of "
-				"%f kHz in function `synthesizer_sweep_up'.", Fname, Lc,
-				DEVICE_NAME, 1.0e-3 * MIN_FREQ );
+				"%f kHz.", Fname, Lc, DEVICE_NAME, 1.0e-3 * MIN_FREQ );
 		THROW( EXCEPTION );
 	}
 
 	if ( new_freq > MAX_FREQ )
 	{
 		eprint( FATAL, "%s:%ld: %s: Frequency is getting above upper limit of "
-				"%f MHz in function `synthesizer_sweep_up'.", Fname, Lc,
-				DEVICE_NAME, 1.0e-6 * MAX_FREQ );
+				"%f MHz.", Fname, Lc, DEVICE_NAME, 1.0e-6 * MAX_FREQ );
 		THROW( EXCEPTION );
 	}
 
-	hp8647a.freq = hp8647a_set_frequency( new_freq );
+	if ( TEST_RUN )
+		hp8647a.freq = new_freq;
+	else
+		hp8647a.freq = hp8647a_set_frequency( new_freq );
+
 	return vars_push( FLOAT_VAR, hp8647a.freq );
 }
 
 
+
+/*
+  This function may only get called in the EXPERIMENT section!
+*/
 
 Var *synthesizer_sweep_down( Var *v )
 {
-	double new_freq = hp8647a.freq - hp8647a.freq_step;
+	Var *nv;
 
 
 	v = v;
-	if ( new_freq < MIN_FREQ )
-	{
-		eprint( FATAL, "%s:%ld: %s: Frequency is getting below lower limit of "
-				"%f kHz in function `synthesizer_sweep_up'.", Fname, Lc,
-				DEVICE_NAME, 1.0e-3 * MIN_FREQ );
-		THROW( EXCEPTION );
-	}
-
-	if ( new_freq > MAX_FREQ )
-	{
-		eprint( FATAL, "%s:%ld: %s: Frequency is getting above upper limit of "
-				"%f MHz in function `synthesizer_sweep_up'.", Fname, Lc,
-				DEVICE_NAME, 1.0e-6 * MAX_FREQ );
-		THROW( EXCEPTION );
-	}
-
-	hp8647a.freq = hp8647a_set_frequency( new_freq );
-	return vars_push( FLOAT_VAR, hp8647a.freq );
+	hp8647a.freq_step *= -1.0;
+	nv = synthesizer_sweep_down( NULL );
+	hp8647a.freq_step *= -1.0;
+	return nv;
 }
 
+
+/*
+  This function may only get called in the EXPERIMENT section!
+*/
 
 Var *synthesizer_reset_frequency( Var *v )
 {
 	v = v;
-	hp8647a.freq = hp8647a_set_frequency( hp8647a.start_freq );
+
+	if ( TEST_RUN )
+		hp8647a.freq = hp8647a.start_freq;
+	else
+		hp8647a.freq = hp8647a_set_frequency( hp8647a.start_freq );
+
 	return vars_push( FLOAT_VAR, hp8647a.freq );
 }
 
 
 static bool hp8647a_init( const char *name )
 {
-	assert( hp8647a.device < 0 );
-
 	if ( gpib_init_device( name, &hp8647a.device ) == FAILURE )
         return FAIL;
 
@@ -285,7 +319,7 @@ static double hp8647a_set_frequency( double freq )
 
 	assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-	sprintf( cmd, "%f", freq );
+	sprintf( cmd + strlen( cmd ), "%f", freq );
 	if ( gpib_write( hp8647a.device, cmd, strlen( cmd ) ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the synthesizer.",
