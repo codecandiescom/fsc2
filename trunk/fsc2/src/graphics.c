@@ -302,13 +302,13 @@ static void set_default_sizes( void )
 								&GI.display_w, &GI.display_h );
 
 			if ( WidthValue & flags && HeightValue & flags )
-				GI.is_pos = SET;
+				GI.is_size = SET;
 
 			if ( XValue & flags && YValue & flags )
 			{
 				GI.display_x += GUI.border_offset_x - 1;
 				GI.display_y += GUI.border_offset_y - 1;
-				GI.is_size = SET;
+				GI.is_pos = SET;
 			}
 		}
 

@@ -88,7 +88,7 @@ case "$1" in
 				log_failure_msg "Creating device files for ME6X00 cards failed."
 				exit 1
 			fi
-			chmod 444 /dev/me6x00_$i
+			chmod 666 /dev/me6x00_$i
 		done
 		test "$2" = "restart" || log_success_msg "Starting ME6X00 support."
 		;;
@@ -102,7 +102,7 @@ case "$1" in
 			fi
 		done
 		rmmod me6x00
-		if [ $? = 0 ]; then
+		if [ $? != 0 ]; then
 			log_failure_msg "Unloading ME6X00 module failed."
 			exit 1
 		fi

@@ -102,7 +102,7 @@ case "$1" in
 			fi
 		done
 		rmmod ni6601
-		if [ $? = 0 ]; then
+		if [ $? != 0 ]; then
 			log_failure_msg "Unloading NI6601 module failed."
 			exit 1
 		fi
