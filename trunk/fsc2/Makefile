@@ -87,7 +87,7 @@ lib_fsc2_%.la: %.c fsc2.h
 
 clean: 
 	-rm *.o fsc_clean fsc2 *.output *_parser.c *_parser.h *_lexer.c \
-	    fsc_clean.c lib*.la TAGS
+	    fsc_clean.c lib*.la *.lo TAGS
 	-rm -rf .libs
 
 
