@@ -879,7 +879,7 @@ static void ips20_4_get_complete_status( void )
 	{
 		case '0' :     /* normal */
 		case '1' :     /* on positive voltage limit */
-		case '2' :     /* on negative volatge limit */
+		case '2' :     /* on negative voltage limit */
 			break;
 
 		case '4' :
