@@ -1363,8 +1363,11 @@ Var *f_display( Var *v )
 
 	dp = eval_display_args( v, &nsets );
 
-	if ( I_am == PARENT )      /* i.e. as long as this is only a test run... */
+	if ( TEST_RUN )
+	{
+		T_free( dp );
 		return vars_push( INT_VAR, 1 );
+	}
 
 	/* We need to determine the amount of shared memory needed */
 
@@ -1395,6 +1398,7 @@ Var *f_display( Var *v )
 				break;
 
 			default :                   /* this better never happens... */
+				T_free( dp );
 				eprint( FATAL, "Internal communication error at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
@@ -1419,6 +1423,7 @@ Var *f_display( Var *v )
 				usleep( 10000 );
 			else                             /* non-recoverable failure... */
 			{
+				T_free( dp );
 				eprint( FATAL, "Internal communication problem at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
@@ -1431,6 +1436,7 @@ Var *f_display( Var *v )
 
 	if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
 	{
+		T_free( dp );
 		shmctl( shm_id, IPC_RMID, &shm_buf );       /* delete the segment */
 		eprint( FATAL, "Internal communication error at %s:%d.\n",
 				__FILE__, __LINE__ );
