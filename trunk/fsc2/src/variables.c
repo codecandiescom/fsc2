@@ -184,12 +184,14 @@ typedef VarretFnct *FnctPtr;
 
   But beside these fixed sized arrays there are also variable sized arrays.
   These are needed e.g. for storing data sets received from the transient
-  recorder where it is sometimes impossible to know the length of the data
-  set in advance. Only the very last dimension of an array may be variable
-  sized and making it variable sized is indicated by writing a star (`*') as
-  the size of this dimension. In contrast to fixed sized arrays, variable
-  sized arrays cannot be initialized and the very first assignment to such
-  an array must be an array slice, i.e. an one-dimensional array.
+  recorder where it is sometimes impossible to know the length of the data set
+  in advance. Only the very last dimension of an array may be variable sized
+  and making it variable sized is indicated by writing a star (`*') as the
+  size of this dimension. In contrast to fixed sized arrays, variable sized
+  arrays cannot be initialized and the very first assignment to such an array
+  must be an array slice, i.e. an one-dimensional array. This is done by
+  either assigning an existing array or by assigning the data from an
+  array-returning function.
 */
 
 
@@ -1646,7 +1648,6 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 }
 
 
-
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
@@ -1743,7 +1744,6 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		}
 	}
 }
-
 
 
 /*----------------------------------------------------------------------*/
