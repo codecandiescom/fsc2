@@ -449,16 +449,6 @@ sub cond_check {
 
 sub write_script {
 
-	my $prot = "";
-	for ( @vars ) {
-		if ( $$_{ type } =~ /^int|float$/o  ) {
-			$prot .= "my \$$$_{ name } = $$_{value };\n";
-		} else {
-			$prot .= "my \$$$_{ name } = \"$$_{value }\";\n";
-		}
-		$prot .= " " x 16;
-	}
-
     # Write out the start of the script
 
     print '#!/usr/bin/perl
@@ -523,10 +513,10 @@ my \%$$_{ name };
 EOT
 
         if ( $$_{ type } =~ /^int|float$/o ) {
-            print "my \$$$_{ name } = $$_{ value };
+            print "\$$$_{ name }\{ value \} = $$_{ value };
 \$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : "undef" ) . ";
 \$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : "undef" ) . ";
-\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name }\{ value \},
 -width => $entry_width,
 -validate => 'key',
 -validatecommand => sub{ $$_{ type }_check( shift,
@@ -538,7 +528,7 @@ EOT
 \" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
 ";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
-            print "my \$$$_{ name } = \"$$_{ value }\";
+            print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
 my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
             for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
                 print ", \"" . ${ $$_{ menu_entries } }[ $i ] . "\"";
@@ -547,11 +537,11 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
 "-options => \\\@$$_{ name },
 -width => $entry_width,
--textvariable => \\\$$$_{ name } );
+-textvariable => \\\$$$_{ name }\{ name \} );
 ";
         } elsif( $$_{ type } =~ /^file$/o ) {
-            print "my \$$$_{ name } = \"$$_{ value }\";
-\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name },
+            print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
+\$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name }\{ value \},
 -width => $entry_width,
 -relief => 'sunken' );
 ";
@@ -565,9 +555,9 @@ EOT
         } elsif ( $$_{ type } =~ /^file$/o ) {
             print <<"EOT";
 \$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"...\",
--command => sub { my \$fn = \$fsc2_main_window->fsc2_filesel::show( \$$$_{ name } );
-                  \$$$_{ name } = \$fn if defined \$fn;
-                  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width ) }
+-command => sub { my \$fn = \$fsc2_main_window->fsc2_filesel::show( \$$$_{ name }\{ value \} );
+                  \$$$_{ name }\{ value \} = \$fn if defined \$fn;
+                  \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name }\{ value \} ) - $entry_width ) }
 );
 EOT
         }
@@ -598,7 +588,7 @@ load_defs( );
 EOT
 
     for ( @vars ) {
-    print "\$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name } ) - $entry_width );
+    print "\$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name }\{ value \} ) - $entry_width );
 " if $$_{ type } =~ /^file$/o;
     }
 
@@ -666,8 +656,15 @@ sub float_check {
 sub write_out {
     my \$fh;
     open( \$fh, \"|fsc2_\" . lc \$fsc2_how_to_run )
-        or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n\\n\";
+        or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n";
+
 EOT
+
+	# The user may change the variables from within the conditions. We must
+	# avoid that these changes are also visible in the rest of the script
+	# and thus must make them local to the current funtion in the script.
+
+	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 
     # Here the body of the EDL script that the script we are just writing is
     # going to send to fsc2 is written. For normal lines we just have to
@@ -681,11 +678,8 @@ EOT
     # as some Perl code after prepending a $ to the variable name...
     # This way the user can use even rather complicated expressions as
     # conditions (actually, even complete scripts ;-)
-	# But we've got to be a bit careful: In the condition the user may try
-	# to change the values of our variables, thus we must make all variables
-	# local to the eval in order to avoid this...
 
-    print "    print \$fh \"";
+    print "\n    print \$fh \"";
 
     for ( @lines ) {
         my $line = $$_{ line };
@@ -696,7 +690,6 @@ EOT
 
             if ( $type =~ /^if|elsif$/o ) {
                 $cmd =~ s/\b$$_{ name }\b/\$$$_{ name }/g for ( @vars );
-				$cmd = $prot . "eval { $cmd } ? 1 : 0; "
             }
 
             if ( $type =~ /^if$/o ) {
@@ -800,27 +793,27 @@ EOT
     for ( @vars ) {
         if ( $$_{ type } =~ /^int$/o ) {
             print "
-    if ( \$$$_{ name } =~ /^[+-]?\\d+\$/o and
-         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
-         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
-        print \$fh \"\$$$_{ name }\\n\";
+    if ( \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o and
+         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 ) and
+         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
+        print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
     }
 ";
         } elsif ( $$_{ type } =~ /^float$/o ) {
             print "
-    if ( \$$$_{ name } =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
-         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name } : 1 ) and
-         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name } : 1 ) ) {
-        print \$fh \"\$$$_{ name }\\n\";
+    if ( \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
+         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 ) and
+         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
+        print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
     }
 ";
         } elsif ( $$_{ type } =~ /^menu$|file/o ) {
             print "
-    print \$fh \"\$$$_{ name }\\n\";
+    print \$fh \"\$$$_{ name }\{ value \}\\n\";
 ";
         }
     }
@@ -860,7 +853,7 @@ EOT
     chomp \$ne;
     goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
                          ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
-    \$$$_{ name } = \$ne;
+    \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^float$/o ) {
             print "
@@ -869,7 +862,7 @@ EOT
     chomp \$ne;
     goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
                          ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
-    \$$$_{ name } = \$ne;
+    \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
             print"
@@ -883,13 +876,13 @@ EOT
         }
     }
     goto done_reading unless \$found;
-    \$$$_{ name } = \$ne;
+    \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^file$/o ) {
             print "
     goto done_reading unless defined( \$ne = <\$fh> );
     chomp \$ne;
-    \$$$_{ name } = \$ne;
+    \$$$_{ name }\{ value \} = \$ne;
 ";
         }
     }
@@ -976,7 +969,7 @@ sub show {
                                  -pady => '1m'
                                );
     $fs{ frame }->Button( -text => 'Rescan',
-                          -command => [ &populate_fs, $fs{ list },
+                          -command => [ \&populate_fs, $fs{ list },
                                         $cur_dir ]
                         )->pack( -side => 'left',
                                  -padx => '2m',
@@ -989,7 +982,7 @@ sub show {
                                   -pady => '1m'
                                 );
     $fs{ list }->bind( '<ButtonPress-1>' =>
-                       [ &new_selection, $fs{ list }, Ev( 'y' ) ] );
+                       [ \&new_selection, $fs{ list }, Ev( 'y' ) ] );
     $fs{ top }->bind( '<ButtonPress-4>' =>
                        sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
     $fs{ top }->bind( '<Up>' =>
