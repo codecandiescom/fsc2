@@ -868,6 +868,7 @@ sub longest_sequence {
 
 	for ( @{ $self->{ channels } } ) {
 		my $l = $_->longest_sequence;
+		next unless defined $l;
 		$duration = $l if $duration < $l;
 	}
 
@@ -883,6 +884,7 @@ sub first_pulse {
 
     for ( @{ $self->{ channels } } ) {
         my $e = $_->first_pulse;
+		next unless defined $e;
         $first = $e if ! defined $first or $first > $e;
     }
 
@@ -974,16 +976,6 @@ sub first_pulse {
 
     return $first;
 }
-
-#---------------------------------------------------------
-
-#sub find_pulse_by_num {
-#
-#	 my ( $self, $num ) = ( shift, shift );
-#	 for ( keys %{ $self->{ 'plist' } } ) {
-#		 return if 
-#
-#}
 
 1;
 

@@ -118,6 +118,12 @@ bool dg2020_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
+	if ( p->is_pos && p->pos + p->function->delay < 0 )
+	{
+		print( FATAL, "Start position for pulse #%ld is nagtive.\n", pnum );
+		THROW( EXCEPTION );
+	}
+
 	p->function = dg2020.function + function;
 	p->is_function = SET;
 	p->function->is_needed = SET;
@@ -141,7 +147,7 @@ bool dg2020_set_pulse_position( long pnum, double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p_time < 0 )
+	if ( p->is_function && p_time + p->function->delay * dg2020.timebase < 0 )
 	{
 		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
 			   "%s.\n", pnum, dg2020_ptime( p_time ) );
@@ -432,7 +438,7 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 	static Ticks new_pos = 0;
 
 
-	if ( p_time < 0 )
+	if ( p_time + p->function->delay * dg2020.timebase < 0 )
 	{
 		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
 			   "%s.\n", pnum, dg2020_ptime( p_time ) );
