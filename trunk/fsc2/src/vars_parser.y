@@ -89,8 +89,8 @@ linet:   VAR_TOKEN                { } /* no assignment to be done */
 
 expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
 													 $2 ); }
-       | FLOAT_TOKEN unit         { $$ = apply_unit( vars_push( FLOAT_VAR, $1),
-													 $2 ); }
+       | FLOAT_TOKEN unit         { $$ = apply_unit(
+		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list3 ']'                { CV = vars_arr_rhs( $4 ); }

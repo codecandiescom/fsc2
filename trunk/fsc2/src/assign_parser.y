@@ -171,8 +171,10 @@ invd:   INV_TOKEN                 { assign_inv_channel( Channel_Type ); }
       | INV_TOKEN ','             { assign_inv_channel( Channel_Type ); }
 ;
 
-expr:    INT_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
-       | FLOAT_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
+expr:    INT_TOKEN unit           { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													 $2 ); }
+       | FLOAT_TOKEN unit         { $$ = apply_unit( vars_push( FLOAT_VAR, $1),
+													 $2 ); }
        | VAR_TOKEN unit           { $$ = apply_unit( $1, $2 ); }
        | VAR_TOKEN '['            { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
