@@ -46,16 +46,17 @@ void dg2020_basic_pulse_check( void )
 
 		if ( ! p->is_function )
 		{
-			eprint( FATAL, "DG2020: Pulse %ld is not associated with a "
-					"function.", p->num );
+			eprint( FATAL, "%s: Pulse %ld is not associated with a function.",
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( ! p->function->is_used )
 		{
-			eprint( FATAL, "DG2020: The function `%s' of pulse %ld hasn't "
-					"been declared in the ASSIGNMENTS section.",
-					Function_Names[ p->function->self ], p->num );
+			eprint( FATAL, "%s: The function `%s' of pulse %ld hasn't been "
+					"declared in the ASSIGNMENTS section.",
+					pulser_struct.name, Function_Names[ p->function->self ],
+					p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -71,8 +72,9 @@ void dg2020_basic_pulse_check( void )
 			if ( p->is_pos &&
 				 p->function == &dg2020.function[ PULSER_CHANNEL_DET ] )
 			{
-				eprint( WARN, "DG2020: Length of detection pulse %ld is being "
-						"set to %s", p->num, dg2020_ptime( 1 ) );
+				eprint( WARN, "%s: Length of detection pulse %ld is being set "
+						"to %s", pulser_struct.name, p->num,
+						dg2020_ptime( 1 ) );
 				p->len = 1;
 				p->is_len = SET;
 			}
@@ -95,9 +97,9 @@ void dg2020_basic_pulse_check( void )
 		if ( p->is_pos && p->is_len &&
 			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
-			eprint( FATAL, "DG2020: Pulse %ld does not fit into the pulsers "
+			eprint( FATAL, "%s: Pulse %ld does not fit into the pulsers "
 					"memory. Maybe, you could try a longer pulser time "
-					"base.", p->num );
+					"base.", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -107,9 +109,9 @@ void dg2020_basic_pulse_check( void )
 		{
 			if ( p->function->phase_func == NULL )
 			{
-				eprint( FATAL, "DG2020: Pulse %ld needs phase cycling but its "
+				eprint( FATAL, "%s: Pulse %ld needs phase cycling but its "
 						"function (%s) isn't associated with a phase "
-						"function.", p->num,
+						"function.", pulser_struct.name, p->num,
 						Function_Names[ p->function->self ] );
 				THROW( EXCEPTION );
 			}
@@ -170,8 +172,8 @@ void dg2020_basic_functions_check( void )
 
 			if ( f->is_used && ! f->is_needed )
 			{
-				eprint( WARN, "DG2020: No pulses have been assigned to "
-						"function `%s'.", Function_Names[ i ] );
+				eprint( WARN, "%s: No pulses have been assigned to function "
+						"`%s'.", pulser_struct.name, Function_Names[ i ] );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -192,9 +194,9 @@ void dg2020_basic_functions_check( void )
 
 			if ( PSeq == NULL )
 			{
-				eprint( WARN, "DG2020: Phase functions `%s' isn't needed, "
+				eprint( WARN, "%s: Phase functions `%s' isn't needed, "
 						"because no phase sequences have been defined.",
-						Function_Names[ f->self ] );
+						pulser_struct.name, Function_Names[ f->self ] );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -211,9 +213,9 @@ void dg2020_basic_functions_check( void )
 
 			if ( f->phase_func == NULL )
 			{
-				eprint( WARN, "DG2020: Phase function `%s' isn't needed, "
+				eprint( WARN, "%s: Phase function `%s' isn't needed, "
 						"because it's not associated with a function.",
-						Function_Names[ f->self ] );
+						pulser_struct.name, Function_Names[ f->self ] );
 				f->is_used = UNSET;
 
 				for ( j = 0; j < f->num_channels; j++ )
@@ -230,8 +232,8 @@ void dg2020_basic_functions_check( void )
 
 			if ( f->pod2 == NULL)
 			{
-				eprint( FATAL, "DG2020: Function `%s' needs two pods "
-						"assigned to it.", Function_Names[ i ] );
+				eprint( FATAL, "%s: Function `%s' needs two pods assigned to "
+						"it.", pulser_struct.name, Function_Names[ i ] );
 				THROW( EXCEPTION );
 			}
 
@@ -239,10 +241,11 @@ void dg2020_basic_functions_check( void )
 
 			if ( ! f->is_phs )
 			{
-				eprint( FATAL, "DG2020: Missing data on how to convert the "
-						"pulse phases into pod outputs for function `%s'. "
-						"Add a %s_SETUP command in the ASSIGNMENTS section.",
-						Function_Names[ i ], Function_Names[ i ] );
+				eprint( FATAL, "%s: Missing data on how to convert the pulse "
+						"phases into pod outputs for function `%s'. Add a "
+						"%s_SETUP command in the ASSIGNMENTS section.",
+						pulser_struct.name, Function_Names[ i ],
+						Function_Names[ i ] );
 				THROW( EXCEPTION );
 			}
 		}
@@ -251,8 +254,8 @@ void dg2020_basic_functions_check( void )
 
 		if ( f->pod == NULL )
 		{
-			eprint( FATAL, "DG2020: No pod has been assigned to "
-					"function `%s'.", Function_Names[ i ] );
+			eprint( FATAL, "%s: No pod has been assigned to function `%s'.",
+					pulser_struct.name, Function_Names[ i ] );
 			THROW( EXCEPTION );
 		}
 
@@ -286,9 +289,10 @@ void dg2020_basic_functions_check( void )
 
 			if ( ! f->needs_phases && f->phase_func != NULL )
 			{
-				eprint( WARN, "DG2020: Function `%s' is associated with phase "
+				eprint( WARN, "%s: Function `%s' is associated with phase "
 						"function `%s' but none of its pulses need phase "
-						"cycling.", Function_Names[ f->self ],
+						"cycling.", pulser_struct.name,
+						Function_Names[ f->self ],
 						Function_Names[ f->phase_func->self ] );
 
 				for ( j = 0; j < f->phase_func->num_channels; j++ )
@@ -313,8 +317,8 @@ void dg2020_basic_functions_check( void )
 		/* Put channels not needed back into the pool */
 
 		if ( f->num_channels > f->num_needed_channels )
-			eprint( WARN, "DG2020: For function `%s' only %d channel%s needed "
-					"instead of the %d assigned to it.",
+			eprint( WARN, "%s: For function `%s' only %d channel%s needed "
+					"instead of the %d assigned to it.", pulser_struct.name,
 					Function_Names[ i ], f->num_needed_channels,
 					f->num_needed_channels == 1 ? " is" : "s are",
 					f->num_channels );
@@ -348,9 +352,9 @@ void dg2020_basic_functions_check( void )
 			 f->self != PULSER_CHANNEL_PHASE_2 &&
 			 f->phase_func != NULL )
 		{
-			eprint( WARN, "DG2020: Phase function `%s' isn't needed because "
+			eprint( WARN, "%s: Phase function `%s' isn't needed because "
 					"function `%s' it is associated with is not used.",
-					Function_Names[ f->phase_func->self ],
+					pulser_struct.name, Function_Names[ f->phase_func->self ],
 					Function_Names[ f->self ] );
 
 			for ( j = 0; j < f->phase_func->num_channels; j++ )
@@ -393,8 +397,8 @@ void dg2020_distribute_channels( void )
 
 	if ( dg2020.needed_channels > MAX_CHANNELS )
 	{
-		eprint( FATAL, "DG2020: Running the experiment would require %d "
-				"pulser channels but only %d are available.",
+		eprint( FATAL, "%s: Running the experiment would require %d pulser "
+				"channels but only %d are available.", pulser_struct.name, 
 				dg2020.needed_channels, ( int ) MAX_CHANNELS );
 		THROW( EXCEPTION );
 	}
@@ -595,8 +599,8 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 		if ( p->pos - f->delay < f->psd )
 		{
-			eprint( FATAL, "DG2020: Pulse %ld starts too early to allow "
-					"setting of a phase pulse.", p->num );
+			eprint( FATAL, "%s: Pulse %ld starts too early to allow setting "
+					"of a phase pulse.", pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -612,9 +616,9 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 		if ( p->pos - pp->pos - pp->len < f->psd && p->pc != pp->pc )
 		{
-			eprint( FATAL, "DG2020: Distance between pulses %ld and %ld "
+			eprint( FATAL, "%s: Distance between pulses %ld and %ld "
 					"is too small to allow setting of phase pulses.",
-					pp->num, p->num );
+					pulser_struct.name, pp->num, p->num );
 			THROW( EXCEPTION );
 		}
 
@@ -637,9 +641,9 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			if ( np->pos < pp->pos + pp->len + dg2020.grace_period &&
 				 p->pc != pp->pc && for_pulse != p )
 			{
-				eprint( SEVERE, "DG2020: Pulses %ld and %ld are so "
-						"close that problems with phase switching may "
-						"result.", pp->num, p->num );
+				eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
+						"problems with phase switching may result.",
+						pulser_struct.name, pp->num, p->num );
 				for_pulse = p;
 			}
 		}
@@ -658,9 +662,10 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
 					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
 				{
-					eprint( FATAL, "DG2020: Distance between pulses %ld and "
-							"%ld is too small to allow setting of phase "
-							"pulses.", p->num, pppl[ i ]->for_pulse->num );
+					eprint( FATAL, "%s: Distance between pulses %ld and %ld "
+							"is too small to allow setting of phase pulses.",
+							pulser_struct.name, p->num,
+							pppl[ i ]->for_pulse->num );
 					THROW( EXCEPTION );
 				}
 
@@ -670,9 +675,10 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
 					 p != for_pulse )
 				{
-					eprint( SEVERE, "DG2020: Pulses %ld and %ld are so close "
-							"that problems with phase switching may result.",
-							p->num, pppl[ i ]->for_pulse->num );
+					eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
+							"problems with phase switching may result.",
+							pulser_struct.name, p->num,
+							pppl[ i ]->for_pulse->num );
 					for_pulse = p;
 				}
 			}
@@ -699,18 +705,18 @@ void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 
 		if ( np->pos + np->len < p->pos + p->len && p->pc != pn->pc )
 		{
-			eprint( FATAL, "DG2020: Distance between pulses %ld and %ld is "
-					"too small to allow setting of phase pulses.",
-					p->num, pn->num );
+			eprint( FATAL, "%s: Distance between pulses %ld and %ld is too "
+					"small to allow setting of phase pulses.",
+					pulser_struct.name, p->num, pn->num );
 			THROW( EXCEPTION );
 		}
 
 		if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&
 			 p->pc != pn->pc && p != for_pulse )
 		{
-			eprint( SEVERE, "DG2020: Pulses %ld and %ld are so close "
-					"that problems with phase switching may result.",
-					p->num, pn->num );
+			eprint( SEVERE, "%s: Pulses %ld and %ld are so close that "
+					"problems with phase switching may result.",
+					pulser_struct.name, p->num, pn->num );
 			for_pulse = p;
 		}
 	}
