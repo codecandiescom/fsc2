@@ -1,7 +1,7 @@
 # $Id$
 
 
-docs  = $(wildcard fsc2_*.texi)
+docs  = $(wildcard *.texi)
 
 
 all:
