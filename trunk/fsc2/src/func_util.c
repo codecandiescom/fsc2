@@ -115,14 +115,12 @@ Var *f_print( Var *v )
 	   as there specifiers in the format string */
 
 	if ( on_stack < in_format )
-		eprint( SEVERE, SET, "Less data than format descriptors in "
-				"%s() format string.\n", Cur_Func );
+		print( SEVERE, "Less data than format descriptors format string.\n" );
 
 	/* Utter a warning if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
-		eprint( SEVERE, SET, "More data than format descriptors in "
-				"%s() format string.\n", Cur_Func );
+		print( SEVERE, "More data than format descriptors format string.\n" );
 
 	/* Get string long enough to replace each `#' by a 3 char sequence
 	   plus a '\0' character */
@@ -186,8 +184,8 @@ Var *f_print( Var *v )
 				break;
 
 			default :
-				eprint( WARN, SET, "Unknown escape sequence \\%c in %s() "
-						"format string.\n", *( cp + 1 ), Cur_Func );
+				print( WARN, "Unknown escape sequence \\%c in format "
+					   "string.\n", *( cp + 1 ) );
 				*cp = *( cp + 1 );
 				break;
 		}
@@ -264,8 +262,7 @@ Var *f_wait( Var *v )
 
 	if ( how_long < 0.0 )
 	{
-		eprint( WARN, SET, "Negative time in call of function %s().\n",
-				Fname );
+		print( WARN, "Negative time value.\n" );
 		if ( TEST_RUN )
 			return vars_push( INT_VAR, 1 );
 		return vars_push( INT_VAR, do_quit ? 0 : 1 );
@@ -273,15 +270,13 @@ Var *f_wait( Var *v )
 
 	if ( how_long > ( double ) LONG_MAX )
 	{
-		eprint( FATAL, SET, "Time of more that %ld seconds as argument "
-				"of function %s().\n", LONG_MAX, Cur_Func );
+		print( FATAL, "Argument larger than %ld seconds.\n", LONG_MAX );
 		THROW( EXCEPTION );
 	}
 
 	if ( lrnd( modf( how_long, &secs ) * 1.0e6 ) == 0 && lrnd( secs ) == 0 )
 	{
-		eprint( WARN, SET, "Argument is less than 1 ms in function %s().\n",
-				Cur_Func );
+		print( WARN, "Argument is less than 1 ms.\n" );
 		return 0;
 	}
 
@@ -395,15 +390,13 @@ Var *f_init_1d( Var *v )
 		G.nc = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Floating point value used as number of "
-				      "curves in %s().\n", Cur_Func );
+		print( WARN, "Floating point value used as number of curves.\n" );
 		G.nc = lrnd( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
-		eprint( FATAL, SET, "Invalid number of curves (%ld) in %s().\n",
-				G.nc, Cur_Func );
+		print( FATAL, "Invalid number of curves (%ld).\n", G.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -419,8 +412,7 @@ Var *f_init_1d( Var *v )
 		G.nx = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Floating point value used as number of "
-				      "points in %s().\n", Cur_Func );
+		print( WARN, "Floating point value used as number of points.\n" );
 		G.nx = lrnd( v->val.dval );
 	}
 
@@ -441,8 +433,8 @@ Var *f_init_1d( Var *v )
 		if ( v->next == NULL || 
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( FATAL, SET, "Real word coordinate found but missing "
-					"increment in %s().", Cur_Func );
+			print( FATAL, "Real word coordinate found but missing "
+				   "increment." );
 			THROW( EXCEPTION );
 		}
 
@@ -526,15 +518,13 @@ Var *f_init_2d( Var *v )
 		G.nc = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Floating point value used as number of "
-				      "curves in %s().\n", Cur_Func );
+		print( WARN, "Floating point value used as number of curves.\n" );
 		G.nc = lrnd( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
-		eprint( FATAL, SET, "Invalid number of curves (%ld) in %s().\n",
-				G.nc, Cur_Func );
+		print( FATAL, "Invalid number of curves (%ld).\n", G.nc );
 		THROW( EXCEPTION );
 	}
 
@@ -550,8 +540,8 @@ Var *f_init_2d( Var *v )
 		G.nx = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Floating point value used as number of points "
-				"in x-direction in %s().\n", Cur_Func );
+		print( WARN, "Floating point value used as number of points "
+			   "in x-direction.\n" );
 		G.nx = lrnd( v->val.dval );
 	}
 
@@ -570,8 +560,8 @@ Var *f_init_2d( Var *v )
 		G.ny = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Floating point value used as number of points "
-				"in y-direction in %s().\n", Cur_Func );
+		print( WARN, "Floating point value used as number of points "
+			   "in y-direction.\n" );
 		G.ny = lrnd( v->val.dval );
 	}
 
@@ -592,8 +582,7 @@ Var *f_init_2d( Var *v )
 		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( FATAL, SET, "Incomplete real world x coordinates "
-					"in %s().\n", Cur_Func );
+			print( FATAL, "Incomplete real world x coordinates.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -622,8 +611,7 @@ Var *f_init_2d( Var *v )
 		if ( v->next == NULL ||
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
-			eprint( FATAL, SET, "Incomplete real world y coordinates "
-					"in %s().\n", Cur_Func );
+			print( FATAL, "Incomplete real world y coordinates.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -697,8 +685,7 @@ Var *f_cscale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		eprint( SEVERE, SET, "Can't change scale, missing "
-				"initialization in %s().\n", Cur_Func );
+		print( SEVERE, "Can't change scale, missing initialization.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -706,7 +693,7 @@ Var *f_cscale( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -729,8 +716,8 @@ Var *f_cscale( Var *v )
 	{
 		if ( G.dim == 1 )
 		{
-			eprint( FATAL, SET, "With 1D graphics only the x-scaling can "
-					"be changed in %s().\n", Cur_Func );
+			print( FATAL, "With 1D graphics only the x-scaling can be "
+				   "changed.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -832,8 +819,7 @@ Var *f_clabel( Var *v )
 
 	if ( ! G.is_init )
 	{
-		eprint( SEVERE, SET, "Can't change labels, missing initialization in "
-				"%s().\n", Cur_Func );
+		print( SEVERE, "Can't change labels, missing initialization.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -841,7 +827,7 @@ Var *f_clabel( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -860,8 +846,7 @@ Var *f_clabel( Var *v )
 		{
 			if ( G.dim == 1 )
 			{
-				eprint( FATAL, SET, "Can't change z-label in 1D-display in "
-						"%s().\n", Cur_Func );
+				print( FATAL, Can't change z-label in 1D-display.\n" );
 				T_free( l[ Y ] );
 				T_free( l[ X ] );
 				THROW( EXCEPTION );
@@ -959,8 +944,8 @@ Var *f_rescale( Var *v )
 
 	if ( ! G.is_init )
 	{
-		eprint( SEVERE, SET, "Can't change number of points, missing "
-				"initialization in %s().\n", Cur_Func );
+		print( SEVERE, "Can't change number of points, missing "
+			   "initialization.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -968,7 +953,7 @@ Var *f_rescale( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "Missing parameter in call of %s().\n", Cur_Func );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -978,15 +963,13 @@ Var *f_rescale( Var *v )
 		new_nx = v->val.lval;
 	else
 	{
-		eprint( WARN, SET, "Float number used as new number of points in "
-				"%s().\n", Cur_Func );
+		print( WARN, "Float number used as new number of points.\n" );
 		new_nx = lrnd( v->val.dval );
 	}
 
 	if ( new_nx < -1 )
 	{
-		eprint( FATAL, SET, "Invalid negative number of points (%ld) in "
-				"%s().\n", new_nx, Cur_Func );
+		print( FATAL, "Invalid negative number of points (%ld).\n", new_nx );
 		THROW( EXCEPTION );
 	}
 
@@ -994,8 +977,8 @@ Var *f_rescale( Var *v )
 	{
 		if ( G.dim == 1 )
 		{
-			eprint( FATAL, SET, "With 1D graphics only the number of "
-					"points in x-direction be changed in %s().\n", Cur_Func );
+			print( FATAL, "With 1D graphics only the number of points in "
+				   "x-direction be changed.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -1005,15 +988,14 @@ Var *f_rescale( Var *v )
 			new_ny = v->val.lval;
 		else
 		{
-			eprint( WARN, SET, "Float number used as new number of points "
-					"in %s().\n", Cur_Func );
+			print( WARN, "Float number used as new number of points.\n" );
 			new_ny = lrnd( v->val.dval );
 		}
 
 		if ( new_ny < -1 )
 		{
-			eprint( FATAL, SET, "Invalid negative number of points (%ld) "
-					"in %s().\n", new_nx, Cur_Func );
+			print( FATAL, "Invalid negative number of points (%ld).\n",
+				   new_nx );
 			THROW( EXCEPTION );
 		}
 	} else if ( G.dim == 2 )
@@ -1093,8 +1075,7 @@ Var *f_display( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			eprint( WARN, SET, "Can't display data, missing "
-					"initialisation in %s().\n", Cur_Func );
+			print( WARN, SET, "Can't display data, missing initialisation\n" );
 			G.is_warn = SET;
 		}
 
@@ -1145,9 +1126,8 @@ Var *f_display( Var *v )
 			case ARR_REF :
 				if ( dp[ i ].v->from->dim != 1 )
 				{
-					eprint( FATAL, SET, "Only one-dimensional arrays or "
-							"slices of more-dimensional arrays can be "
-							"displayed in %s().\n", Cur_Func );
+					print( FATAL,"Only one-dimensional arrays or slices of "
+						   "more-dimensional arrays can be displayed.\n" );
 					T_free( dp );
 					THROW( EXCEPTION );
 				}
@@ -1336,7 +1316,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	*nsets = 0;
 	if ( v == NULL )
 	{
-		eprint( FATAL, SET, "Missing x-index in %s().\n", Cur_Func );
+		print( FATAL, "Missing x-index.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1357,8 +1337,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
-			eprint( FATAL, SET, "Invalid x-index (= %ld) in %s().\n",
-					dp[ *nsets ].nx + ARRAY_OFFSET, Cur_Func );
+			print( FATAL, "Invalid x-index (%ld).\n",
+				   dp[ *nsets ].nx + ARRAY_OFFSET );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1371,7 +1351,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		{
 			if ( v == NULL )
 			{
-				eprint( FATAL, SET, "Missing y-index in %s().\n", Cur_Func );
+				print( FATAL, "Missing y-index.\n" );
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
@@ -1385,8 +1365,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 			if ( dp[ *nsets ].ny < 0 )
 			{
-				eprint( FATAL, SET, "Invalid y-index (= %ld) in %s().\n",
-						dp[ *nsets ].ny + ARRAY_OFFSET, Cur_Func );
+				print( FATAL, "Invalid y-index (%ld).\n",
+						dp[ *nsets ].ny + ARRAY_OFFSET );
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
@@ -1399,7 +1379,7 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( v == NULL )
 		{
-			eprint( FATAL, SET, "Missing data in %s().\n", Cur_Func );
+			print( FATAL, "Missing data.\n" );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1431,8 +1411,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
-			eprint( FATAL, SET, "Invalid curve number (%ld) in %s().\n",
-					dp[ *nsets ].nc + 1, Cur_Func );
+			print( FATAL, "Invalid curve number (%ld).\n",
+				   dp[ *nsets ].nc + 1 );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1468,8 +1448,8 @@ Var *f_clearcv( Var *v )
 	if ( ! G.is_init )
 	{
 		if ( TEST_RUN )
-			eprint( WARN, SET, "Can't clear curve, missing graphics "
-					"initialisation in %s().\n", Cur_Func );
+			print( WARN, "Can't clear curve, missing graphics "
+				   "initialisation.\n" );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -1500,8 +1480,8 @@ Var *f_clearcv( Var *v )
 			else
 			{
 				if ( TEST_RUN )
-					eprint( WARN, SET, "Floating point value used as curve "
-							"number in function %s().\n", Cur_Func );
+					print( WARN, "Floating point value used as curve "
+						   "number.\n" );
 				curve = lrnd( v->val.dval );
 			}
 
@@ -1510,8 +1490,8 @@ Var *f_clearcv( Var *v )
 			if ( curve < 0 || curve > G.nc )
 			{
 				if ( TEST_RUN )
-					eprint( SEVERE, SET, "Can't clear curve %ld, curve "
-							"does not exist in %s().\n", curve, Cur_Func );
+					print( SEVERE, "Can't clear curve %ld, curve "
+						   "does not exist.\n", curve );
 				continue;
 			}
 
@@ -1523,8 +1503,7 @@ Var *f_clearcv( Var *v )
 		
 		if ( ca == NULL )
 		{
-			eprint( SEVERE, SET, "No valid argument found in function "
-					"%s().\n", Cur_Func );
+			print( SEVERE, "No valid argument found.\n" );
 			return vars_push( INT_VAR, 0 );
 		}
 	}
