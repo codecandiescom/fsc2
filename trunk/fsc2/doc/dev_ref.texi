@@ -56,7 +56,7 @@
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
-* mcn700::          F.u.G. Elektronik Power Supply MCN 700-2000
+* mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
@@ -1389,7 +1389,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node lecroy9400, mcn700, lakeshore330, Device Reference
+@node lecroy9400, mcn700_2000, lakeshore330, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9400
 @end iftex
@@ -1430,16 +1430,16 @@ channels, 2 function channels (needed for averaging).
 
 @c #############################################################
 
-@node mcn700, me6000, lecroy9400, Device Reference
+@node mcn700_2000, me6000, lecroy9400, Device Reference
 @iftex
-@subheading F.u.G. Elektronik Power Supply MCN 700-2000
+@subheading F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 @end iftex
 @ifnottex
-@section F.u.G. Elektronik Power Supply MCN 700-2000
+@section F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{mcn700}
+@strong{Module name}: @code{mcn700_2000}
 
 @paragraphindent 0
 @strong{Description}: Power supply, voltage range @w{0 -} @w{2000 V}
@@ -1461,7 +1461,7 @@ with @w{1 V} resolution, current range @w{0 -} @w{300 mA} with
 @c #############################################################
 
 
-@node me6000, ni6601, mcn700, Device Reference
+@node me6000, ni6601, mcn700_2000, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex

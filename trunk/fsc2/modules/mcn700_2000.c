@@ -91,7 +91,7 @@ int mcn700_2000_init_hook( void )
 
 	/* Reset variables in the structure describing the state of the device */
 
-	mcn700_2000.device = -1;
+	mcn700_2000.device     = -1;
 	mcn700_2000.test_volts = TEST_VOLTAGE;
 	mcn700_2000.test_amps  = TEST_CURRENT;
 
@@ -195,13 +195,13 @@ Var_T *powersupply_voltage( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*
- * Function sets or returns the current.
- * The argument must be the current in the range between 0mA and
- * 300mA (in 1mA steps). If there isn't a argument the
- * current at the output is returned (which may be smaller than
- * current that had been set due to the voltage limit).
- *---------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function sets or returns the current. The argument must be the
+ * current in the range between 0mA and 300mA (in 1mA steps). If
+ * there isn't a argument the current at the output is returned
+ * (which may be smaller than current that had been set due to
+ * the voltage limit).
+ *----------------------------------------------------------------*/
 
 Var_T *powersupply_current( Var_T *v )
 {
@@ -275,9 +275,9 @@ Var_T *powersupply_command( Var_T *v )
 }
 
 
-/*---------------------------------------------------------*
- * Internal functions for initialization of power suppply.
- *---------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Internal functions for initialization of power suppply
+ *--------------------------------------------------------*/
 
 static bool mcn700_2000_init( const char *name )
 {
@@ -375,6 +375,7 @@ static double mcn700_2000_get_current( void )
 void mcn700_2000_set_voltage_completed( void )
 {
 	unsigned char stb = 0; 
+
 
 	while ( ! ( stb & 0x04 ) )
 	{
