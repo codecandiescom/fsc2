@@ -55,9 +55,12 @@ set_field, -1, EXP;             // go to to a field value
 get_field, 0, EXP;              // returns the current field 
 reset_field, 0, EXP;            // go back to start field
 
-magnet_B0, -1, EXP;                 // hjs_sfc only
-magnet_slope, -1, EXP;              // hjs_sfc only
-magnet_calibration_file, -1, PREP;  // hjs_sfc only
+
+/* Functions supported by the Steinhoff magnet (hjs_sfc)
+
+magnet_B0, -1, PREP;
+magnet_slope, -1, PREP;
+magnet_calibration_file, -1, PREP;
 
 /* Functions not supported by the Oxford IPS20-4 sweep power supply driver */
 
