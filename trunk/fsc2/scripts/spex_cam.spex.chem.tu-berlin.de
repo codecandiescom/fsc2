@@ -2353,7 +2353,7 @@ cwn = 0.5 * abs( start_wn + end_wn );  // center of spectrum
 ccd_start_wn;                          // start of CCD recorded spectrum
 step_wn;                               // wavenumber spacing between points
 N_Points;                              // points of spectrum
-Total_N_Points;                        // points of CCD recorded spectrum
+CCD_Points;                            // points of CCD recorded spectrum
 Start_Point;                           // start point of spectrum in spectrum
                                        // recorded by CCD
 laser_line;                            // position of laser line
@@ -2386,7 +2386,7 @@ CCD_size = ccd_camera_pixel_area( );
 ROI = ccd_camera_roi( );
 Bin = ccd_camera_binning( );
 
-Total_N_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
+CCD_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / Bin[ 1 ];
 step_wn = calib[ 2 ] * Bin[ 1 ];
 
 cwn_offset = 0.5 * calib[ 2 ]
@@ -2396,7 +2396,7 @@ hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 IF laser_line != 0.0 {
-	ccd_start_wn = cwn - 0.5 * ( Total_N_Points - 1 ) * step_wn;
+	ccd_start_wn = cwn - 0.5 * ( CCD_Points - 1 ) * step_wn;
 	Start_Point = floor( ( start_wn - ccd_start_wn ) / step_wn );
 	cwn_offset += ( start_wn - ccd_start_wn ) - Start_Point * step_wn;
 	N_Points = round( width / step_wn ) + 1;
@@ -2412,7 +2412,7 @@ IF laser_line != 0.0 {
 	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
 
 } ELSE {
-	ccd_start_wn = cwn + 0.5 * ( Total_N_Points - 1 ) * step_wn;
+	ccd_start_wn = cwn + 0.5 * ( CCD_Points - 1 ) * step_wn;
 	Start_Point = floor( ( ccd_start_wn - start_wn ) / step_wn );
 	cwn_offset -= Start_Point * step_wn - ( ccd_start_wn - start_wn );
 	N_Points = round( width / step_wn ) + 1;
@@ -2493,7 +2493,7 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Resolution        = # cm^-1\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
-              date( ), time( ), start_wn, ( Total_N_Points - 1 ) * calib[ 2 ],
+              date( ), time( ), start_wn, ( CCD_Points - 1 ) * calib[ 2 ],
               calib[ 2 ] *  Bin [ 1 ], exposure_time, N_scans );
 
 IF laser_line != 0.0 {
@@ -2621,7 +2621,7 @@ cwn_offset = 0.5 * calib[ 2 ]
 // broader than requested).
 
 N_specs = 1;
-ccd_width = CCD_Points * calib[ 2 ];
+ccd_width = ( CCD_Points - 1 ) * Bin[ 1 ] * calib[ 2 ];
 cur_width = spec_width - ccd_width + overlap;
 
 WHILE ( 1 ) {
@@ -2684,7 +2684,7 @@ FOR I = 1 : N_scans {
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
 
 	FOR J = 1 : N_specs {
-		// Reposition monichromator and get a spectrum from the CCD camera
+		// Reposition monochromator and get a spectrum from the CCD camera
 
 		monochromator_wavenumber( cur_cwn );
 		spec = ccd_camera_get_spectrum( );
