@@ -581,6 +581,55 @@ tds744a
 tds754a
 @end example
 
+When a digitizer channel is used as an argument in the call of one of
+the following functions the symbolic channel names can be replaced by
+integer numbers:
+@table @samp
+@item CH1
+@code{0}
+@item CH2
+@code{1}
+@item CH3
+@code{2}
+@item CH4
+@code{3}
+@item MATH1
+@code{4}
+@item MATH2
+@code{5}
+@item MATH3
+@code{6}
+@item REF1
+@code{7}
+@item REF2
+@code{8}
+@item REF3
+@code{9}
+@item REF4
+@code{10}
+@item AUX
+@code{11}
+@item AUX1
+@code{12}
+@item AUX2
+@code{13}
+@item LINE
+@code{14}
+@item MEM_C
+@code{15}
+@item MEM_D
+@code{16}
+@item FUNC_E
+@code{17}
+@item FUNC_F
+@code{18}
+@item EXT
+@code{19}
+@item EXT10
+@code{20}
+@end table
+
+
 @table @samp
 @item digitizer_name()
 @findex digitizer_name()
@@ -658,18 +707,16 @@ numeric!):
 @item TDS520
 @itemx TDS520A
 @itemize @bullet
-@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@item @code{AUX1}, @code{AUX2} or @code{LINE} or, alternatively @code{9},
-@code{10} or @code{11} (@code{LINE} can be abbreviated to @code{LIN})
+@item @code{CH1} or @code{CH2}
+@item @code{AUX1}, @code{AUX2} or @code{LINE}
+(@code{LINE} can be abbreviated to @code{LIN})
 @end itemize
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
-@code{0}, @code{1}, @code{2} or @code{3}
-@item @code{AUX} or @code{LINE} or, alternatively, @code{11} or
-@code{12} (@code{LINE} can be abbreviated to @code{LIN})
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{AUX} or @code{LINE} (@code{LINE} can be abbreviated to @code{LIN})
 @end itemize
 @end table
 The function can be called in query mode (i.e.@: without an argument)
@@ -761,22 +808,17 @@ the digitizer:
 @item TDS520
 @itemx TDS520A
 @itemize @bullet
-@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{2}, @code{3} or @code{4}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item @code{CH1} or @code{CH2}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
-@code{0}, @code{1}, @code{2} or @code{3}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{4}, @code{5} or @code{6} 
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{7}, @code{8}, @code{9}, or @code{10} 
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} 
 @end itemize
 @end table
 Except for the model @code{TDS520}, this function positions the cursors
@@ -820,22 +862,17 @@ of the digitizer:
 @item TDS520
 @itemx TDS520A
 @itemize @bullet
-@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{2}, @code{3} or @code{4}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item @code{CH1} or @code{CH2}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
-@code{0}, @code{1}, @code{2} or @code{3}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{4}, @code{5} or @code{6} 
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{7}, @code{8}, @code{9}, or @code{10}
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
 @end itemize
 @end table
 
@@ -871,22 +908,17 @@ of the digitizer:
 @item TDS520
 @itemx TDS520A
 @itemize @bullet
-@item @code{CH1} or @code{CH2} or, alternatively @code{0} or @code{1}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{2}, @code{3} or @code{4}
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{5}, @code{6}, @code{7} or @code{8}
+@item @code{CH1} or @code{CH2}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
 @itemize @bullet
-@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4} or, alternatively
-@code{0}, @code{1}, @code{2} or @code{3}
-@item @code{MATH1}, @code{MATH2} or @code{MATH3} or, alternatively,
-@code{4}, @code{5} or @code{6} 
-@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4} or,
-alternatively, @code{7}, @code{8}, @code{9}, or @code{10}
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MATH1}, @code{MATH2} or @code{MATH3}
+@item @code{REF1}, @code{REF2}, @code{REF3}, @code{REF4}
 @end itemize
 @end table
 Except for the model @code{TDS520}, this function positions the cursors
