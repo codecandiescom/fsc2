@@ -148,7 +148,8 @@ modules:
 			fi;                                                     \
 		done;                                                       \
 		if [ ! -e tds$$n.map -a -e tds.map.tmpl ]; then             \
-				sed "s/tds_tmpl/$$n/g" tds.map.tmpl > $$n.map;      \
+				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"             \
+					tds.map.tmpl > $$n.map;                         \
 		fi;                                                         \
 	done;
 	@for n in $(hp864_list); do                                     \
@@ -161,7 +162,8 @@ modules:
 			fi;                                                     \
 		done;                                                       \
 		if [ ! -e $$n.map -a -e hp864.map.tmpl ]; then              \
-				sed "s/hp864_tmpl/$$n/g" hp864.map.tmpl > $$n.map;  \
+				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"         \
+					hp864.map.tmpl > $$n.map;                       \
 		fi;                                                         \
 	done;
 	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do    \
