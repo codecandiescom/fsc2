@@ -58,6 +58,8 @@ static Var *CV;
 
 %token NS_TOKEN US_TOKEN MS_TOKEN S_TOKEN
 %token NV_TOKEN UV_TOKEN MV_TOKEN V_TOKEN
+%token MG_TOKEN G_TOKEN
+%token MHZ_TOKEN KHZ_TOKEN HZ_TOKEN
 %type <vptr> expr unit list1
 
 
@@ -185,6 +187,11 @@ unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
        | UV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | MV_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
        | V_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | MG_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | G_TOKEN                   { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | MHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
+       | KHZ_TOKEN                 { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | HZ_TOKEN                  { $$ = vars_push( FLOAT_VAR, 1.0 ); }
 ;
 
 /* list of indices for access of an array element */

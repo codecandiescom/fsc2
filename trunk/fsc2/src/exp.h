@@ -36,7 +36,12 @@ typedef union {
 #define	E_UV_TOKEN	    274
 #define	E_MV_TOKEN	    275
 #define	E_V_TOKEN	    276
-#define	E_NEG	        277
+#define	E_MG_TOKEN	    277
+#define	E_G_TOKEN	    278
+#define	E_MHZ_TOKEN	    279
+#define	E_KHZ_TOKEN	    280
+#define	E_HZ_TOKEN	    281
+#define	E_NEG	        282
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050

@@ -51,7 +51,12 @@ static Var *CV;
 %token E_UV_TOKEN	  274
 %token E_MV_TOKEN	  275
 %token E_V_TOKEN	  276
-%token E_NEG		  277
+%token E_MG_TOKEN	  277
+%token E_G_TOKEN	  278
+%token E_MHZ_TOKEN	  279
+%token E_KHZ_TOKEN	  280
+%token E_HZ_TOKEN	  281
+%token E_NEG		  282
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -63,6 +68,9 @@ static Var *CV;
 %token E_EQ E_LT E_LE E_GT E_GE
 
 %token E_NS_TOKEN E_US_TOKEN E_MS_TOKEN E_S_TOKEN
+%token E_NV_TOKEN E_UV_TOKEN E_MV_TOKEN E_V_TOKEN
+%token E_MG_TOKEN E_G_TOKEN
+%token E_MHZ_TOKEN E_KHZ_TOKEN E_HZ_TOKEN
 %type <vptr> expr unit list1
 
 
@@ -128,11 +136,20 @@ expr:    E_INT_TOKEN unit         { $$ = vars_mult( vars_push( INT_VAR, $1 ),
        | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
-       | E_NS_TOKEN                { $$ = vars_push( INT_VAR, 1L ); }
-       | E_US_TOKEN                { $$ = vars_push( INT_VAR, 1000L ); }
-       | E_MS_TOKEN                { $$ = vars_push( INT_VAR, 1000000L ); }
-       | E_S_TOKEN                 { $$ = vars_push( INT_VAR, 1000000000L ); }
+unit:    /* empty */              { $$ = vars_push( INT_VAR, 1L ); }
+       | E_NS_TOKEN               { $$ = vars_push( INT_VAR, 1L ); }
+       | E_US_TOKEN               { $$ = vars_push( INT_VAR, 1000L ); }
+       | E_MS_TOKEN               { $$ = vars_push( INT_VAR, 1000000L ); }
+       | E_S_TOKEN                { $$ = vars_push( INT_VAR, 1000000000L ); }
+       | E_NV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
+       | E_UV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
+       | E_MV_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_V_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_MG_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
+       | E_G_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0 ); }
+       | E_MHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e6 ); }
+       | E_KHZ_TOKEN              { $$ = vars_push( FLOAT_VAR, 1.0e3 ); }
+       | E_HZ_TOKEN               { $$ = vars_push( FLOAT_VAR, 1.0 ); }
 ;
 
 

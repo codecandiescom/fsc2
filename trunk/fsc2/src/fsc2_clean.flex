@@ -35,7 +35,7 @@ int yylex( void );
 void include_handler( char *file );
 void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 			 FILE *primary_fp, FILE **fp, int *incl_depth );
-void time_spec( char *text, long len, const char *unit );
+void unit_spec( char *text, long len, const char *unit );
 
 
 long Lc,
@@ -63,12 +63,20 @@ FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 NS       N(ANO)?S(ECOND(S)?)?
 US       (MICRO?S(ECOND(S)?)?)|(US)
 MS       M(ILLI)?S(SECOND(S)?)?
-S        S(ECOND(S)?)
+S        S(ECOND(S)?)?
 
 NV       N(ANO)?V(OLT(S)?)?
 UV       (MICRO?V(OLT(S)?)?)|(UV)
 MV       M(ILLI)?V(OLT(S)?)?
-V        V(OLT(S)?)
+V        V(OLT(S)?)?
+
+MG       M(ILLI)?G(AUSS)?
+G        G(AUSS)?
+
+HZ       H(ERT)?Z
+KHZ      K(ILO)?H(ERT)?Z
+MHZ      M(EGA)?H(ERT)?Z
+
 
 INS      {INT}{NS}
 IUS      {INT}{US}
@@ -80,15 +88,29 @@ IUV      {INT}{UV}
 IMV      {INT}{MV}
 IV       {INT}{V}
 
+IMG      {INT}{MG}
+IG       {INT}{G}
+
+IMHZ     {INT}{MHZ}
+IKHZ     {INT}{KHZ}
+IHZ      {INT}{HZ}
+
 FNS      {FLOAT}{NS}
 FUS      {FLOAT}{US}
 FMS      {FLOAT}{MS}
 FS       {FLOAT}{S}
 
-FNS      {FLOAT}{NV}
-FUS      {FLOAT}{UV}
-FMS      {FLOAT}{MV}
-FS       {FLOAT}{V}
+FNV      {FLOAT}{NV}
+FUV      {FLOAT}{UV}
+FMV      {FLOAT}{MV}
+FV       {FLOAT}{V}
+
+FMG      {INT}{MG}
+FG       {INT}{G}
+
+FMHZ     {FLOAT}{MHZ}
+FKHZ     {FLOAT}{KHZ}
+FHZ      {FLOAT}{HZ}
 
 WLWS     ^[\t ]*\n
 LWS      ^[\t ]+
@@ -273,22 +295,22 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {MS}        printf( "\x04msec" );
 {S}/(;|,)   printf( "\x04sec" );
 {S}         printf( "\x04sec" );
-{INS}/(;|,) time_spec( yytext, yyleng, "\x04nsec" );
-{INS}       time_spec( yytext, yyleng, "\x04nsec" );
-{IUS}/(;|,) time_spec( yytext, yyleng, "\x04usec" );
-{IUS}       time_spec( yytext, yyleng, "\x04usec" );
-{IMS}/(;|,) time_spec( yytext, yyleng, "\x04msec" );
-{IMS}       time_spec( yytext, yyleng, "\x04msec" );
-{IS}/(;|,)  time_spec( yytext, yyleng, "\x04sec" );
-{IS}        time_spec( yytext, yyleng, "\x04sec" );
-{FNS}/(;|,) time_spec( yytext, yyleng, "\x04nsec" );
-{FNS}       time_spec( yytext, yyleng, "\x04nsec" );
-{FUS}/(;|,) time_spec( yytext, yyleng, "\x04usec" );
-{FUS}       time_spec( yytext, yyleng, "\x04usec" );
-{FMS}/(;|,) time_spec( yytext, yyleng, "\x04msec" );
-{FMS}       time_spec( yytext, yyleng, "\x04msec" );
-{FS}/(;|,)  time_spec( yytext, yyleng, "\x04sec" );
-{FS}        time_spec( yytext, yyleng, "\x04sec" );
+{INS}/(;|,) unit_spec( yytext, yyleng, "\x04nsec" );
+{INS}       unit_spec( yytext, yyleng, "\x04nsec" );
+{IUS}/(;|,) unit_spec( yytext, yyleng, "\x04usec" );
+{IUS}       unit_spec( yytext, yyleng, "\x04usec" );
+{IMS}/(;|,) unit_spec( yytext, yyleng, "\x04msec" );
+{IMS}       unit_spec( yytext, yyleng, "\x04msec" );
+{IS}/(;|,)  unit_spec( yytext, yyleng, "\x04sec" );
+{IS}        unit_spec( yytext, yyleng, "\x04sec" );
+{FNS}/(;|,) unit_spec( yytext, yyleng, "\x04nsec" );
+{FNS}       unit_spec( yytext, yyleng, "\x04nsec" );
+{FUS}/(;|,) unit_spec( yytext, yyleng, "\x04usec" );
+{FUS}       unit_spec( yytext, yyleng, "\x04usec" );
+{FMS}/(;|,) unit_spec( yytext, yyleng, "\x04msec" );
+{FMS}       unit_spec( yytext, yyleng, "\x04msec" );
+{FS}/(;|,)  unit_spec( yytext, yyleng, "\x04sec" );
+{FS}        unit_spec( yytext, yyleng, "\x04sec" );
 
 {NV}/(,|;)  printf( "\x04nsec" );
 {NV}        printf( "\x04nsec" );
@@ -298,22 +320,54 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 {MV}        printf( "\x04msec" );
 {V}/(;|,)   printf( "\x04sec" );
 {V}         printf( "\x04sec" );
-{INV}/(;|,) time_spec( yytext, yyleng, "\x04nvolt" );
-{INV}       time_spec( yytext, yyleng, "\x04nvolt" );
-{IUV}/(;|,) time_spec( yytext, yyleng, "\x04uvolt" );
-{IUV}       time_spec( yytext, yyleng, "\x04uvolt" );
-{IMV}/(;|,) time_spec( yytext, yyleng, "\x04mvolt" );
-{IMV}       time_spec( yytext, yyleng, "\x04mvolt" );
-{IV}/(;|,)  time_spec( yytext, yyleng, "\x04volt" );
-{IV}        time_spec( yytext, yyleng, "\x04volt" );
-{FNV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
-{FNV}       time_spec( yytext, yyleng, "\x04volt" );
-{FUV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
-{FUV}       time_spec( yytext, yyleng, "\x04volt" );
-{FMV}/(;|,) time_spec( yytext, yyleng, "\x04volt" );
-{FMV}       time_spec( yytext, yyleng, "\x04volt" );
-{FV}/(;|,)  time_spec( yytext, yyleng, "\x04volt" );
-{FV}        time_spec( yytext, yyleng, "\x04volt" );
+{INV}/(;|,) unit_spec( yytext, yyleng, "\x04nvolt" );
+{INV}       unit_spec( yytext, yyleng, "\x04nvolt" );
+{IUV}/(;|,) unit_spec( yytext, yyleng, "\x04uvolt" );
+{IUV}       unit_spec( yytext, yyleng, "\x04uvolt" );
+{IMV}/(;|,) unit_spec( yytext, yyleng, "\x04mvolt" );
+{IMV}       unit_spec( yytext, yyleng, "\x04mvolt" );
+{IV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
+{IV}        unit_spec( yytext, yyleng, "\x04volt" );
+{FNV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
+{FNV}       unit_spec( yytext, yyleng, "\x04volt" );
+{FUV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
+{FUV}       unit_spec( yytext, yyleng, "\x04volt" );
+{FMV}/(;|,) unit_spec( yytext, yyleng, "\x04volt" );
+{FMV}       unit_spec( yytext, yyleng, "\x04volt" );
+{FV}/(;|,)  unit_spec( yytext, yyleng, "\x04volt" );
+{FV}        unit_spec( yytext, yyleng, "\x04volt" );
+
+{MG}/(;|,)  printf( "\x04mgauss" );
+{MG}        printf( "\x04mgauss" );
+{G}/(;|,)   printf( "\x04gauss" );
+{G}         printf( "\x04gauss" );
+{IMG}/(;|,) unit_spec( yytext, yyleng, "\x04mgauss" );
+{IMG}       unit_spec( yytext, yyleng, "\x04mgauss" );
+{IG}/(;|,)  unit_spec( yytext, yyleng, "\x04gauss" );
+{IG}        unit_spec( yytext, yyleng, "\x04gauss" );
+{FMG}/(;|,) unit_spec( yytext, yyleng, "\x04mgauss" );
+{FMG}       unit_spec( yytext, yyleng, "\x04mgauss" );
+{FG}/(;|,)  unit_spec( yytext, yyleng, "\x04gauss" );
+{FG}        unit_spec( yytext, yyleng, "\x04gauss" );
+
+{MHZ}/(;|,) printf( "\x04mhertz" );
+{MHZ}       printf( "\x04mhertz" );
+{KHZ}/(;|,) printf( "\x04khertz" );
+{KHZ}       printf( "\x04khertz" );
+{HZ}/(;|,)  printf( "\x04hertz" );
+{HZ}        printf( "\x04hertz" );
+{IMHZ}/(;|,) unit_spec( yytext, yyleng, "\x04mhertz" );
+{IMHZ}       unit_spec( yytext, yyleng, "\x04mhertz" );
+{IKHZ}/(;|,) unit_spec( yytext, yyleng, "\x04khertz" );
+{IKHZ}       unit_spec( yytext, yyleng, "\x04khertz" );
+{IHZ}/(;|,)  unit_spec( yytext, yyleng, "\x04hertz" );
+{IHZ}        unit_spec( yytext, yyleng, "\x04hertz" );
+{FMHZ}/(;|,) unit_spec( yytext, yyleng, "\x04mhertz" );
+{FMHZ}       unit_spec( yytext, yyleng, "\x04mhertz" );
+{FKHZ}/(;|,) unit_spec( yytext, yyleng, "\x04khertz" );
+{FKHZ}       unit_spec( yytext, yyleng, "\x04khertz" );
+{FHZ}/(;|,)  unit_spec( yytext, yyleng, "\x04hertz" );
+{FHZ}        unit_spec( yytext, yyleng, "\x04hertz" );
 
 			/* all the rest is simply copied to the output */
 
@@ -536,7 +590,7 @@ void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 
 /* Takes combinations like "100ns" apart and writes them out as "100 nsec" */
 
-void time_spec( char *text, long len, const char *unit )
+void unit_spec( char *text, long len, const char *unit )
 {
 	register char *q = text + len - 1;
 
