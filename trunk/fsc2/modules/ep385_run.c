@@ -26,7 +26,7 @@
 
 
 static bool ep385_update_pulses( bool flag );
-static void ep385_channel_check( CHANNEL *ch );
+static void ep385_pulse_check( FUNCTION *f );
 static void ep385_defense_shape_check( FUNCTION *shape );
 static PULSE *ep385_delete_pulse( PULSE *p );
 static void ep385_commit( bool flag );
@@ -79,16 +79,21 @@ static bool ep385_update_pulses( bool flag )
 	PULSE *p;
 	CHANNEL *ch;
 	PULSE **pm_entry;
+	PULSE_PARAMS *pp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &ep385.function[ i ];
+		f = ep385.function + i;
 
 		/* Nothing to be done for unused functions */
 
 		if ( ! f->is_used )
 			continue;
+
+		/* Check that pulses don't start to overlap */
+
+		ep385_pulse_check( f );
 
 		/* Set up and check pulses for each channel assoiciated with the
 		   function according to the current phase. */
@@ -116,14 +121,25 @@ static bool ep385_update_pulses( bool flag )
 			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
 				if ( p->is_active )
 				{
-					ch->pulse_params[ ch->num_active_pulses ].pos =
-															 p->pos + f->delay;
-					ch->pulse_params[ ch->num_active_pulses ].len = p->len;
-					ch->pulse_params[ ch->num_active_pulses++ ].pulse = p;
+					pp = ch->pulse_params + ch->num_active_pulses++;
+
+					pp->pos = p->pos + f->delay;
+					pp->len = p->len;
+					pp->pulse = p;
+
+					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
+						 p->sp != NULL )
+					{
+						pp->pos -= p->function->left_shape_padding;
+						pp->len +=   p->function->left_shape_padding
+								   + p->function->right_shape_padding;
+					}
 				}			
 
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
+
+			ep385_shape_padding_check( ch );
 
 			/* Compare old and new state, if nothing changed, i.e. the number
 			   of active pulses is the same and all positions and lengths are
@@ -148,15 +164,36 @@ static bool ep385_update_pulses( bool flag )
 
 			ch->needs_update = SET;
 
-			/* Otherwise we have to check that the pulses still fit within the
-			   pulsers memory and don't start to overlap - if they do stop
-			   immediately when doing a test run but during a real experiment
-			   instead just reset the pulses to their old values and return
-			   FAIL.*/
+			/* If the following tests fail stop immediately when doing a test
+			   run but during a real experiment instead just reset the pulses
+			   to their old values and return FAIL.*/
 
 			TRY
 			{
-				ep385_channel_check( ch );
+				/* Check that there aren't to many pulses for the chanel */
+
+				if ( ch->num_active_pulses > MAX_PULSES_PER_CHANNEL )
+				{
+					print( FATAL, "More than %d pulses (%d) are required on "
+						   "channel %d associated with function '%s'.\n",
+						   MAX_PULSES_PER_CHANNEL, ch->num_active_pulses,
+						   ch->self + CHANNEL_OFFSET,
+						   Function_Names[ ch->function->self ] );
+					THROW( EXCEPTION );
+				}
+
+				/* Check that defense and shape pulses don't get to near to
+				   each other (this checks are done when either one of the
+				   minimum distances has been set or TWT or TWT_GATE pulses
+				   are used) */
+
+				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
+					 ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+					 ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
+					   ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
+					   ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+					ep385_defense_shape_check( f );
+
 				TRY_SUCCESS;
 			}
 			CATCH( EXCEPTION )
@@ -186,17 +223,6 @@ static bool ep385_update_pulses( bool flag )
 				return FAIL;
 			}
 		}
-
-		/* Check that defense and shape pulses don't get to near to each
-		   other (this checks are done when either one of the minimum
-		   distances has been set or TWT or TWT_GATE pulses are used) */
-
-		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-			 ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-			 ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
-			   ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
-			   ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
-			ep385_defense_shape_check( f );
 	}
 
 	ep385_commit( flag );
@@ -205,57 +231,52 @@ static bool ep385_update_pulses( bool flag )
 }
 
 
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
 
-static void ep385_channel_check( CHANNEL *ch )
+static void ep385_pulse_check( FUNCTION *f )
 {
-	PULSE_PARAMS *pp;
-	int i;
+	PULSE *p1, *p2;
+	int i, j;
 
 
-	/* Check that there aren't more pulses per channel than the pulser can
-	   deal with */
+	if ( f->num_pulses < 2 )
+		return;
 
-	if ( ch->num_active_pulses > MAX_PULSES_PER_CHANNEL )
+	for ( i = 0; i < f->num_pulses - 1; i++ )
 	{
-		print( FATAL, "More than %d pulses (%d) are required on channel %d "
-			   "associated with function '%s'.\n", MAX_PULSES_PER_CHANNEL,
-			   ch->num_active_pulses, ch->self + CHANNEL_OFFSET,
-			   Function_Names[ ch->function->self ] );
-		THROW( EXCEPTION );
-	}
-
-	for ( i = 0; i < ch->num_active_pulses; i++ )
-	{
-		pp = ch->pulse_params + i;
-		if ( pp->pos + pp->len > MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse #%ld of function '%s' does not fit into the "
-				   "pulsers memory.\n",
-				   pp->pulse->num, Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
-		}
-
-		if ( i == ch->num_active_pulses - 1 )
+		p1 = f->pulses[ i ];
+		if ( ! p1->is_active )
 			continue;
 
-		if ( pp->pos + pp->len == ch->pulse_params[ i + 1 ].pos )
+		for ( j = i + 1; j < f->num_pulses; j++ )
 		{
-			print( FATAL, "Pulses %ld and %ld of function '%s' are not "
-				   "separated anymore.\n", pp->pulse->num,
-				   ch->pulse_params[ i + 1 ].pulse->num,
-				   Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
-		}
+			p2 = f->pulses[ j ];
+			if ( ! p2->is_active )
+				continue;
 
-		if ( pp->pos + pp->len > ch->pulse_params[ i + 1 ].pos )
-		{
-			print( FATAL, "Pulses %ld and %ld of function '%s' start to "
-				   "overlap.\n",
-				   pp->pulse->num, ch->pulse_params[ i + 1 ].pulse->num,
-				   Function_Names[ ch->function->self ] );
-			THROW( EXCEPTION );
+			if ( ( p1->pos == p2->pos ) ||
+				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+				 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+			{
+				if ( ep385.auto_shape_pulses &&
+					 p1->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+				{
+					if ( p1->function != p2->function )
+						print( FATAL, "Shape pulses for pulses #%ld function "
+							   "'%s') and #%ld (function '%s') start to "
+							   "overlap.\n", p1->sp->num,
+							   Function_Names[ p1->sp->function->self ],
+							   p2->sp->num,
+							   Function_Names[ p2->sp->function->self ] );
+				}
+				else
+					print( FATAL, "Pulses #%ld and #%ld of function '%s' "
+						   "start to overlap.\n", p1->num, p2->num,
+						   Function_Names[ f->self ] );
+
+				THROW( EXCEPTION );
+			}
 		}
 	}
 }
@@ -301,19 +322,38 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					print( FATAL, "Distance between PULSE_SHAPE pulse #%ld "
-						   "and DEFENSE pulse #%ld got shorter than %s.\n",
-						   shape_p->num, defense_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.shape_2_defense ) ) );
+					if ( shape_p->sp == NULL )
+						print( FATAL, "Distance between PULSE_SHAPE pulse "
+							   "#%ld and DEFENSE pulse #%ld got shorter than "
+							   "%s.\n", shape_p->num,
+							   defense_p->num, ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
+					else
+						print( FATAL, "Distance between shape pulse for pulse "
+							   "#%ld (function '%s') and DEFENSE pulse #%ld "
+							   "got shorter than %s.\n", shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   defense_p->num, ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
 					THROW( EXCEPTION );
 				}
 
 				if ( ! ep385.shape_2_defense_too_near )
 				{
-					print( SEVERE, "Distance between PULSE_SHAPE pulse #%ld "
-						   "and DEFENSE pulse #%ld got shorter than %s.\n",
-						   shape_p->num, defense_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.shape_2_defense ) ) );
+					if ( shape_p->sp == NULL )
+						print( SEVERE, "Distance between PULSE_SHAPE pulse "
+							   "#%ld and DEFENSE pulse #%ld got shorter than "
+							   "%s.\n", shape_p->num, defense_p->num,
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
+					else
+						print( SEVERE, "Distance between shape pulse for "
+							   "pulse #%ld (function '%s') and DEFENSE pulse "
+							   "#%ld got shorter than %s.\n", shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   defense_p->num,
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.shape_2_defense ) ) );
 					ep385.shape_2_defense_too_near = SET;
 				}
 
@@ -325,19 +365,39 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 			{
 				if ( FSC2_MODE == EXPERIMENT )
 				{
-					print( FATAL, "Distance between DEFENSE pulse #%ld and "
-						   "PULSE_SHAPE pulse #%ld got shorter than %s.\n",
-						   defense_p->num, shape_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.defense_2_shape ) ) );
+					if ( shape_p->sp == NULL )
+						print( FATAL, "Distance between DEFENSE pulse #%ld "
+							   "and PULSE_SHAPE pulse #%ld got shorter than "
+							   "%s.\n", defense_p->num, shape_p->num,
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
+					else
+						print( FATAL, "Distance between DEFENSE pulse #%ld "
+							   "and shape pulse for pulse #%ld (function "
+							   "'%s') got shorter than %s.\n", defense_p->num,
+							   shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
 					THROW( EXCEPTION );
 				}
 
 				if ( ! ep385.defense_2_shape_too_near )
 				{
-					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
-						   "PULSE_SHAPE pulse #%ld got shorter than %s.\n",
-						   defense_p->num, shape_p->num, ep385_ptime(
-							   ep385_ticks2double( ep385.defense_2_shape ) ) );
+					if ( shape_p->sp == NULL )
+						print( SEVERE, "Distance between DEFENSE pulse #%ld "
+							   "and PULSE_SHAPE pulse #%ld got shorter than "
+							   "%s.\n", defense_p->num, shape_p->num,
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
+					else
+						print( SEVERE, "Distance between DEFENSE pulse #%ld "
+							   "and shape pulse for pulse #%ld (function "
+							   "'%s') got shorter than %s.\n", defense_p->num,
+							   shape_p->sp->num,
+							   Function_Names[ shape_p->sp->function->self ],
+							   ep385_ptime( ep385_ticks2double(
+												   ep385.defense_2_shape ) ) );
 					ep385.defense_2_shape_too_near = SET;
 				}
 			}
@@ -358,6 +418,7 @@ void ep385_full_reset( void )
 	FUNCTION *f;
 	CHANNEL *ch;
 	PULSE **pm_entry;
+	PULSE_PARAMS *pp;
 
 
 	while ( p != NULL )
@@ -385,9 +446,7 @@ void ep385_full_reset( void )
 		p->is_dlen = p->initial_is_dlen;
 
 		p->needs_update = UNSET;
-
 		p->is_old_pos = p->is_old_len = UNSET;
-
 		p->is_active = ( p->is_pos && p->is_len && p->len > 0 );
 
 		p = p->next;
@@ -426,28 +485,79 @@ void ep385_full_reset( void )
 			for ( m = 0; ( p = pm_entry[ m ] ) != NULL; m++ )
 				if ( p->is_active )
 				{
-					ch->pulse_params[ ch->num_active_pulses ].pos =
-															 p->pos + f->delay;
-					ch->pulse_params[ ch->num_active_pulses ].len = p->len;
-					ch->pulse_params[ ch->num_active_pulses ].pulse = p;
-					ch->num_active_pulses++;
+					pp = ch->pulse_params + ch->num_active_pulses++;
+
+					pp->pos = p->pos + f->delay;
+					pp->len = p->len;
+					pp->pulse = p;
+
+					if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
+						 p->sp != NULL )
+					{
+						pp->pos -= p->function->left_shape_padding;
+						pp->len +=   p->function->left_shape_padding
+								   + p->function->right_shape_padding;
+					}
 				}
 
 			qsort( ch->pulse_params, ch->num_active_pulses,
 				   sizeof *ch->pulse_params, ep385_pulse_compare );
 
-			if ( ch->num_active_pulses == ch->old_num_active_pulses )
-			{
-				for ( m = 0; m < ch->num_active_pulses; m++ )
-				if ( ch->pulse_params[ m ].pos !=
-					 ch->old_pulse_params[ m ].pos ||
-					 ch->pulse_params[ m ].len !=
-					 ch->old_pulse_params[ m ].len )
-					break;
+			ep385_shape_padding_check( ch );
+		}
+	}
+}
 
-				if ( m == ch->num_active_pulses )
-					continue;
+
+/*------------------------------------------------*/
+/*------------------------------------------------*/
+
+void ep385_shape_padding_check( CHANNEL *ch )
+{
+	PULSE_PARAMS *pp, *ppp;
+	int i;
+
+
+	if ( ch->function->self == PULSER_CHANNEL_PULSE_SHAPE ||
+		 ! ch->function->uses_auto_shape_pulses ||
+		 ch->num_active_pulses == 0 )
+		return;
+
+	pp = ch->pulse_params;
+	if ( pp->pos < 0 )
+	{
+		if ( ! pp->pulse->left_warning )
+		{
+			print( SEVERE, "Pulse #%ld too early to set left padding of %s.\n",
+				   pp->pulse->num, ep385_ptime( ep385_ticks2double(
+										ch->function->left_shape_padding ) ) );
+			pp->pulse->left_warning = SET;
+		}
+
+		pp->len += pp->pos;
+		pp->pos = 0;
+	}
+
+	for ( i = 1; i < ch->num_active_pulses; i++ )
+	{
+		ppp = pp;
+		pp = pp + 1;
+
+		if ( ppp->pos + ppp->len > pp->pos )
+			ppp->len -= ppp->pos + ppp->len - pp->pos;
+
+		if ( pp->pos + pp->len > MAX_PULSER_BITS )
+		{
+			if ( ! pp->pulse->right_warning )
+			{
+				print( SEVERE, "Pulse #%ld too long to set right padding of "
+					   "%s.\n", pp->pulse->num,
+					   ep385_ptime( ep385_ticks2double(
+								   ch->function->right_shape_padding ) ) );
+				pp->pulse->right_warning = SET;
 			}
+
+			pp->len = MAX_PULSER_BITS - pp->pos;
 		}
 	}
 }
@@ -463,6 +573,11 @@ static PULSE *ep385_delete_pulse( PULSE *p )
 	PULSE *pp;
 	int i;
 
+
+	/* If the pulse has an associated shape pulse delete it */
+
+	if ( p->sp && p->sp->function->self == PULSER_CHANNEL_PULSE_SHAPE )
+		ep385_delete_pulse( p->sp );
 
 	/* First we've got to remove the pulse from its functions pulse list */
 
@@ -535,7 +650,7 @@ static void ep385_commit( bool flag )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = &ep385.function[ i ];
+		f = ep385.function + i;
 
 		/* Nothing to be done for unused functions */
 
