@@ -28,7 +28,7 @@ typedef struct
 	bool is_needed;
 	const char *name;
 	double field;
-	int resolution;
+	double resolution;
 } BH15;
 
 static BH15 bh15;
@@ -93,6 +93,11 @@ int bh15_test_hook( void )
 
 int bh15_exp_hook( void )
 {
+	char buffer[ 20 ];
+	long len;
+	int tries = 0;
+
+
 	if ( ! bh15.is_needed )
 		return 1;
 
@@ -124,6 +129,28 @@ int bh15_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
+	sleep( 5 );
+
+	do
+	{
+		usleep( 100000 );
+
+		if ( gpib_write( bh15.device, "LE", 2 ) == FAILURE )
+		{
+			eprint( FATAL, "Can't access the Bruker BH15 field "
+					"controller.\n" );
+			THROW( EXCEPTION );
+		}
+
+		len = 20;
+		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
+		{
+			eprint( FATAL, "Can't access the Bruker BH15 field "
+					"controller.\n" );
+			THROW( EXCEPTION );
+		}
+	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
+
 	bh15.state = BH15_FAR_OFF;
 
 	/* We are always going to achieve a resolution of 50mG ... */
@@ -140,6 +167,7 @@ void bh15_exit_hook( void )
 	if ( ! bh15.is_needed )
 		return;
 
+	bh15_get_field( );
 	if ( bh15.device >= 0 )
 		gpib_local( bh15.device );
 }
@@ -155,17 +183,14 @@ void bh15_exit_hook( void )
 Var *find_field( Var *v )
 {
 	v = v;
-	return vars_push( FLOAT_VAR, bh15.field );
+	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
 
 
 Var *field_resolution( Var *v )
 {
 	v = v;
-	if ( ! TEST_RUN )
-		return vars_push( FLOAT_VAR, bh15.resolution );
-	else
-		return vars_push( FLOAT_VAR, 0.05 );
+	return vars_push( FLOAT_VAR, bh15.resolution );
 }
 
 
@@ -173,6 +198,7 @@ Var *field_meter_wait( Var *v )
 {
 	v = v;
 	/* do this thing needs a time out ? */
+	usleep( 100000 );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -196,10 +222,34 @@ double bh15_get_field( void )
 	if ( TEST_RUN )
 		return 0.0;
 
+	do
+	{
+		usleep( 100000 );
+
+		if ( gpib_write( bh15.device, "LE", 2 ) == FAILURE )
+		{
+			eprint( FATAL, "Can't access the Bruker BH15 field "
+					"controller.\n" );
+			THROW( EXCEPTION );
+		}
+
+		len = 20;
+		if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
+		{
+			eprint( FATAL, "Can't access the Bruker BH15 field "
+					"controller.\n" );
+			THROW( EXCEPTION );
+		}
+	} while ( ++tries < BH15_MAX_TRIES && strchr( buffer, '1' ) != NULL );
+
+
+	tries = 0;
 	bh15.state = BH15_FAR_OFF;
 
 	do
 	{
+		usleep( 100000 );
+
 		if ( gpib_write( bh15.device, "FV", 2 ) == FAILURE )
 		{
 			eprint( FATAL, "Can't access the Bruker BH15 field "
@@ -214,8 +264,6 @@ double bh15_get_field( void )
 					"controller.\n" );
 			THROW( EXCEPTION );
 		}
-
-		tries++;
 
 		/* Try to find the qualifier */
 
@@ -260,7 +308,7 @@ double bh15_get_field( void )
 				THROW( EXCEPTION );
 		}
 
-	} while ( bh15.state != BH15_LOCKED && tries < BH15_MAX_TRIES );
+	} while ( bh15.state != BH15_LOCKED && ++tries < BH15_MAX_TRIES );
 
 	if ( bh15.state != BH15_LOCKED )
 	{

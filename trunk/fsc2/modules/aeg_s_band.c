@@ -296,7 +296,7 @@ Var *magnet_setup( Var *v )
 	}
 		
 	magnet.field = VALUE( v );
-	magnet.is_field_step = VALUE( v->next );
+	magnet.field_step = VALUE( v->next );
 	magnet.is_field = magnet.is_field_step = SET;
 
 	return vars_push( INT_VAR, 1 );
@@ -469,6 +469,8 @@ Var *reset_field( Var *v )
 #define MAGNET_ZERO_STEP  ( 0x800 - 0.5 )  /* data for zero sweep speed */
 #define MAGNET_MAX_STEP   ( 0x7FF + 0.5 )  /* maximum sweep speed setting */
 
+//#define MAGNET_TEST_STEPS 0x10   /* number of steps to do in test */
+
 #define MAGNET_TEST_STEPS 0x10   /* number of steps to do in test */
 #define MAGNET_TEST_WIDTH 0x400  /* sweep speed setting for test */
 #define MAGNET_MAX_TRIES  3      /* number of retries after failure of magnet
@@ -602,7 +604,8 @@ try_again:
 
 	if ( magnet.mini_step < 0.00074 )
 	{
-/* We still have to include the XFORMS stuff !!!!!!!!!!!!!!!!!!!
+
+/*
 		if ( 1 == fl_show_choice( "Please set sweep speed on magnet front",
 								  "panel to maximum value of 6666 Oe/min.",
 								  "Also make sure remote control is enabled !",
@@ -617,6 +620,7 @@ try_again:
 	}
 
 	/* Finally using this ratio we go to the start field */
+
 
 	if ( magnet.is_field )
 		return magnet_goto_field( magnet.field );

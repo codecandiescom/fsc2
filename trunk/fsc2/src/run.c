@@ -67,7 +67,7 @@ bool run( void )
 
 	/* If the devices need the GPIB bus initialize it now */
 
-	if ( need_GPIB && gpib_init( &gpib_log, LL_ERR ) == FAILURE )
+	if ( need_GPIB && gpib_init( &gpib_log, LL_LOG ) == FAILURE )
 	{
 		eprint( FATAL, "Can't initialize GPIB bus.\n" );
 		THROW( EXCEPTION );
