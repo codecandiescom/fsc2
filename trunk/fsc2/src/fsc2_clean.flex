@@ -19,6 +19,7 @@
 
 
 #define FSC2_MAIN
+#define FSC_CLEAN
 #include "fsc2.h"
 
 #if defined MDEBUG
