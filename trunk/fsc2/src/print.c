@@ -261,6 +261,7 @@ void print_2d( FL_OBJECT *obj, long data )
 static int get_print_file( FILE **fp, char **name )
 {
 	static FL_OBJECT *obj;
+	int fd;
 	char filename[ ] = P_tmpdir "/fsc2.eps.XXXXXX";
 	struct stat stat_buf;
 
@@ -412,11 +413,13 @@ static int get_print_file( FILE **fp, char **name )
 	{
 		/* Create a temporary file */
 
-		if ( mkstemp( filename ) < 0 ||
-			 ( *fp = fopen( filename, "w" ) ) == NULL )
+		if ( ( fd = mkstemp( filename ) < 0 ) ||
+			 ( *fp = fdopen( fd, "w" ) ) == NULL )
 		{
 			fl_show_alert( "Error", "Sorry, can't open a temporary file.",
 						   NULL, 1 );
+			if ( fd >= 0 )
+				close( fd );
 			return 0;
 		}
 
