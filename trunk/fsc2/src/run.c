@@ -320,7 +320,7 @@ static bool init_devs_and_graphics( void )
 
 		Internals.mode = PREPARATION;
 
-		run_close_button_callback( GUI.run_form->stop, 0 );
+		run_close_button_callback( NULL, 0 );
 
 		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 		fl_set_object_label( GUI.main_form->run, "Start" );
@@ -428,7 +428,7 @@ static void fork_failure( int stored_errno )
 	Internals.mode = PREPARATION;
 
 	fl_set_idle_callback( idle_handler, NULL );
-	run_close_button_callback( GUI.run_form->stop, 0 );
+	run_close_button_callback( NULL, 0 );
 	fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
 	fl_activate_object( GUI.main_form->run );
 }
@@ -709,7 +709,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 
 	if ( Internals.cmdline_flags & DO_CHECK )
 	{
-		run_close_button_callback( GUI.run_form->stop, 0 );
+		run_close_button_callback( NULL, 0 );
 		Internals.check_return = state;
 		fl_trigger_object( GUI.main_form->quit );
 	}
