@@ -40,25 +40,26 @@ frontend that allows the user to set the parameter and will then create
 the @acronym{EDL} file using these parameter. To write such a program an
 interpreted language like Tcl/Tk or Perl/Tk (or even a simple shell
 script using e.g.@ the @code{dialog} utility) will be suficient. When it
-is done all it has to do is to call one of the programs
+has obtained the necessary parameter all it has to do is to call one of
+the three programs
 @example
   fsc2_load
   fsc2_test
   fsc2_start
 @end example
-with the programs text as its standard input. Each of the three programs
-will either start @acronym{fsc2} or, if @acronym{fsc2} is already
-running, connect to it, and will ask @acronym{fsc2} to use the program
-text as its new input file. The difference between the three programs is
-that @code{fsc2_load} will only make @acronym{fsc2} load the program,
-@code{fsc2_test} will also tell @acronym{fsc2} to run a test on the
-input program, and @code{fsc2_start} will make @acronym{fsc2} start the
-experiment immediately (at least if the test of the @acronym{EDL} file
-was successful).
+with the @acronym{EDL} program text as standard input. Each of the three
+programs will either start @acronym{fsc2} or, if @acronym{fsc2} is
+already running, connect to it, and will ask @acronym{fsc2} to use the
+program text as its new input file. The difference between the three
+programs is that @code{fsc2_load} will only make @acronym{fsc2} load the
+program, @code{fsc2_test} will also tell @acronym{fsc2} to run a test on
+the input program, and @code{fsc2_start} will make @acronym{fsc2} start
+the experiment immediately (at least if the test of the @acronym{EDL}
+file was successful).
 
-When @acronym{fsc2} has accepted the @acronym{EDL} file the programs
-return immediately. Using the return value you can find out if they were
-successful. The return values have the following meaning:
+When @acronym{fsc2} has accepted the new @acronym{EDL} file the programs
+return immediately. Using their return values you can find out if they
+were successful. The return values have the following meaning:
 @table @samp
 @item 0 
 Everything ok, program finished succesfully
