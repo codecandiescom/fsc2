@@ -32,17 +32,26 @@ sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
 objects       = $(sources:.c=.o)
 headers       = ${c_sources:.c=.h} global.h
 
-export headers             # export headers to the modules Makefile
+export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
 .PHONY:    all clean high_res low_res gpib_old gpib_jtt gpib_ni
 
 
+# Default target - make only if RESOLUTION and GPIB_LIBRARY are set correctly
+
 all:
-	$(MAKE) $(RESOLUTION)
-	$(MAKE) $(GPIB_LIBRARY)
-	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
+	if [ -n "$(RESOLUTION)" -a -n "$(GPIB_LIBRARY)"          \
+		 -a \(    "$(RESOLUTION)" = "low_res"                \
+			   -o "$(RESOLUTION)" = "high_res" \)            \
+		 -a \(    "$(GPIB_LIBRARY)" = "gpib_old"             \
+			   -o "$(GPIB_LIBRARY)" = "gpib_ni"              \
+			   -o "$(GPIB_LIBRARY)" = "gpib_old" \) ]; then  \
+		$(MAKE) $(RESOLUTION);                               \
+		$(MAKE) $(GPIB_LIBRARY);                             \
+		$(MAKE) fsc2 fsc2_clean fsc2_connect modules;        \
+	fi
 
 
 # Make the main program from the c, flex and bison source files
@@ -96,11 +105,11 @@ high_res:
 		 -o fsc2_rsc_hr.fd -nt fsc2_rsc_hr.h          \
 		 -o ! fsc2_rsc_hr.c -ef fsc2_rsc.c            \
 		 -o ! fsc2_rsc_hr.h -ef fsc2_rsc.h ]; then    \
-		rm -f fsc2_rsc.[ch];                          \
-		rm -f fsc2_rsc_[lh]r.[ch];                    \
+		$(RM) $(RMFLAGS) fsc2_rsc.[ch];               \
+		$(RM) $(RMFLAGS) fsc2_rsc_[lh]r.[ch];         \
 		fdesign -convert fsc2_rsc_hr.fd;              \
-		ln -s fsc2_rsc_hr.c fsc2_rsc.c;               \
-		ln -s fsc2_rsc_hr.h fsc2_rsc.h;               \
+		$(LN) $(LNFLAGS) fsc2_rsc_hr.c fsc2_rsc.c;    \
+		$(LN) $(LNFLAGS) fsc2_rsc_hr.h fsc2_rsc.h;    \
 	fi
 
 low_res:
@@ -110,52 +119,62 @@ low_res:
 		 -o fsc2_rsc_lr.fd -nt fsc2_rsc_lr.h          \
          -o ! fsc2_rsc_lr.c -ef fsc2_rsc.c            \
 	     -o ! fsc2_rsc_lr.h -ef fsc2_rsc.h ]; then    \
-		rm -f fsc2_rsc.[ch];                          \
-		rm -f fsc2_rsc_[lh]r.[ch];                    \
+		$(RM) $(RMFLAGS) fsc2_rsc.[ch];               \
+		$(RM) $(RMFLAGS) fsc2_rsc_[lh]r.[ch];         \
 		fdesign -convert fsc2_rsc_lr.fd;              \
-		ln -s fsc2_rsc_lr.c fsc2_rsc.c;               \
-		ln -s fsc2_rsc_lr.h fsc2_rsc.h;               \
+		$(LN) $(LNFLAGS) fsc2_rsc_lr.c fsc2_rsc.c;    \
+		$(LN) $(LNFLAGS) fsc2_rsc_lr.h fsc2_rsc.h;    \
 	fi
 
 
 # How to create the GPIB interface files - they need making if either
 # gpib_if.[ch] doesn't exit or the files they're made from are newer.
 # When using the NI driver also the parser and lexer for the GPIB
-# configuration file are needed
+# configuration file are needed.
 
 gpib_old:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o gpib_if_old.c -nt gpib_if.c              \
-		 -o gpib_if_old.h -nt gpib_if.h ]; then      \
-		rm -f gpib_if.[ch];                          \
-		cp gpib_if_old.c gpib_if.c;                  \
-		cp gpib_if_old.h gpib_if.h;                  \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h               \
+		 -o gpib_if_old.c -nt gpib_if.c                 \
+		 -o gpib_if_old.h -nt gpib_if.h                 \
+		 -o gpib_if_old.c -ef gpib_if.c                 \
+		 -o gpib_if_old.h -ef gpib_if.h ]; then         \
+		$(RM) $(RMFLAGS) gpib_if.[ch];                  \
+		$(LN) $(LNFLAGS) gpib_if_old.c gpib_if.c;       \
+		$(LN) $(LNFLAGS) gpib_if_old.h gpib_if.h;       \
 	fi
 
 gpib_jtt:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o gpib_if_jtt.c -nt gpib_if.c              \
-		 -o gpib_if_jtt.h -nt gpib_if.h ]; then      \
-		rm -f gpib_if.[ch];                          \
-		cp gpib_if_jtt.c gpib_if.c;                  \
-		cp gpib_if_jtt.h gpib_if.h;                  \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h               \
+		 -o gpib_if_jtt.c -nt gpib_if.c                 \
+		 -o gpib_if_jtt.h -nt gpib_if.h                 \
+		 -o gpib_if_jtt.c -ef gpib_if.c                 \
+		 -o gpib_if_jtt.h -ef gpib_if.h ]; then         \
+		$(RM) $(RMFLAGS) gpib_if.[ch];                  \
+		$(LN) $(LNFLAGS) gpib_if_jtt.c gpib_if.c;       \
+		$(LN) $(LNFLAGS) gpib_if_jtt.h gpib_if.h;       \
 	fi
 
 gpib_ni:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h            \
-		 -o gpib_if_ni.c -nt gpib_if.c               \
-		 -o gpib_if_ni.h -nt gpib_if.h ]; then       \
-		rm -f gpib_if.[ch];                          \
-		cp gpib_if_ni.c gpib_if.c;                   \
-		cp gpib_if_ni.h gpib_if.h;                   \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h               \
+		 -o gpib_if_ni.c -nt gpib_if.c                  \
+		 -o gpib_if_ni.h -nt gpib_if.h                  \
+		 -o gpib_if_ni.c -ef gpib_if.c                  \
+		 -o gpib_if_ni.h -ef gpib_if.h ]; then          \
+		$(RM) $(RMFLAGS) gpib_if.[ch];                  \
+		$(LN) $(LNFLAGS) gpib_if_ni.c gpib_if.c;        \
+		$(LN) $(LNFLAGS) gpib_if_ni.h gpib_if.h;        \
 	fi
-	if [ ! -e gpib_parser.y                          \
-		 -o gpib_parser.yy -nt gpib_parser.y ]; then \
-		cp gpib_parser.yy gpib_parser.y;             \
+	if [ ! -e gpib_parser.y                             \
+		 -o gpib_parser.yy -nt gpib_parser.y            \
+		 -o gpib_parser.yy -ef gpib_parser.y ]; then    \
+		$(RM) $(RMFLAGS) gpib_parser.y;                 \
+		$(LN) $(LNFLAGS) gpib_parser.yy gpib_parser.y;  \
 	fi
-	if [ ! -e gpib_lexer.l                           \
-	     -o gpib_lexer.ll -nt gpib_lexer.l ]; then   \
-		cp gpib_lexer.ll gpib_lexer.l;               \
+	if [ ! -e gpib_lexer.l                              \
+	     -o gpib_lexer.ll -nt gpib_lexer.l              \
+	     -o gpib_lexer.ll -ed gpib_lexer.l ]; then      \
+		$(RM) $(RMFLAGS) gpib_lexer.l;                  \
+		$(LN) $(LNFLAGS) gpib_lexer.ll gpib_lexer.l;    \
 	fi
 
 
