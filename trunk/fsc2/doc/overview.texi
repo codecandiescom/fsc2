@@ -33,7 +33,7 @@ called @acronym{EDL}
 (@b{E}xperiment @b{D}escription @b{L}anguage). Making the execution of
 the experiment completely controllable by the person doing the
 experiment is rather different from the usual programs for remote
-spectrometer control that tend to have a graphical user interface where
+spectrometer control which tend to have a graphical user interface where
 the experimental parameters are set and then one of a set of predefined
 experiment is started.
 
