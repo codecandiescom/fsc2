@@ -59,7 +59,7 @@ struct SPECTRAPRO_300I {
 };
 
 
-SPECTRAPRO_300I spectrapro_300i, spectrapro_300i_stored;
+SPECTRAPRO_300I spectrapro_300i;
 
 
 enum {
