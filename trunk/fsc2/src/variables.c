@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.23  1999/07/22 22:07:21  jens
+   *** empty log message ***
+
    Revision 1.22  1999/07/22 16:37:00  jens
    *** empty log message ***
 
@@ -72,8 +75,6 @@
 
 typedef Var *VarretFnct( Var * );
 typedef VarretFnct *FnctPtr;
-
-
 
 
 /*
@@ -994,6 +995,8 @@ void vars_del_stack( void )
 }
 
 
+#if 0
+
 /*-----------------------------------------------------------*/
 /* vars_arr_start() starts the declaration of an array       */
 /* ->                                                        */
@@ -1480,6 +1483,8 @@ void vars_del_astack( void )
 }
 
 
+#endif
+
 /*----------------------------------------------------------*/
 /* vars_clean_up() deletes the variable and array stack and */
 /* removes all variables from the list of variables         */
@@ -1488,7 +1493,7 @@ void vars_del_astack( void )
 void vars_clean_up( void )
 {
 	vars_del_stack( );
-	vars_del_astack( );
+/*	vars_del_astack( );*/
 	free_vars( );
 }
 
@@ -1724,9 +1729,9 @@ Var *vars_arr_start( Var *v )
    1. when called in VARIABLES section for a new array
      a. for a non-variable array a pointer to the first element of the
 	    array is returned
-     b. for a variable sized array a ARR_PTR variable pointing to NULL
-	    is returned (thus making initialisation of this kind of arrays
-		impossible
+     b. for a variable sized array an array pointer variable pointing to
+	    NULL is returned (thus making initialisation of this kind of arrays
+		impossible)
 
    2. normally
      a. for new, variable sized arrays a generic pointer to the array is
@@ -1742,8 +1747,7 @@ Var *vars_arr_start( Var *v )
 Var *vars_arr_set( Var *v )
 {
 	int dim;
-	Var *a, *cv, *ret;
-	long index;
+	Var *a, *cv;
 
 
 	/* check that it's really a variable with a generic array pointer */
@@ -1772,24 +1776,23 @@ Var *vars_arr_set( Var *v )
 	   return a variable on the stack pointing to the very first element of
 	   the array which can be used in the following to initialize the new
 	   array. If, on the other hand, vars_setup_new_array() just returns a
-	   NULL generic array pointer which means it's an dynamically sized array
-	   and makes sure we can't assign data to it. We now pop the array pointer
+	   NULL array pointer which means it's an dynamically sized array and
+	   makes sure we can't assign data to it. We now pop the array pointer
 	   and return the variable pointer we got from vars_setup_new_array().
 
 	   `New' dynamically sized arrays have already been set up as far as
 	   possible by an earlier call to vars_setup_new_array() (otherwise the
-	   VARIABLE_SIZED flag couldn't be set). We now expect an assignment of
-	   an array slice which will finally determine the still missing
-	   size. The function doing this assignment will have to do all things
-	   normally done here, i.e. after determining the size of the last
-	   dimension the allocation memory and calculation of the location for
-	   storing the data all by itself. Thus we simply leave the pointer to
-	   the array on the stack untouched and return.
-	*/
+	   VARIABLE_SIZED flag couldn't be set). We now expect an assignment of an
+	   array slice which will finally determine the still missing size. The
+	   function doing this assignment will have to do all things normally done
+	   here, i.e. after determining the size of the last dimension the
+	   allocation memory and the calculation of the location for storing the
+	   data, all by itself. Thus we simply leave the pointer to the array on
+	   the stack untouched and return.  */
 
 	if ( a->flags & NEW_VARIABLE )
 	{
-		if ( ! ( a->flags & VARIABLE_SIZED ) )
+		if ( ! ( a->flags & VARIABLE_SIZED ) )  /* in VARIABLES section only */
 		{
 			ret = vars_setup_new_array( a, dim, v->next );
 			vars_pop( v );
@@ -1798,6 +1801,18 @@ Var *vars_arr_set( Var *v )
 		else
 			return( v );
 	}
+
+	/* push a pointer to the indexed element onto the stack */
+
+	return( vars_get_element_pointer( a, v, dim ) );
+}
+
+
+Var *vars_get_element_pointer( Var *a, Var *v, int dim )
+{
+	Var *ret;
+	long index;
+
 
 	/* check that there are enough indices on the stack (since variable sized
        arrays allow assignment of array slices there needs to be only one
@@ -1829,7 +1844,7 @@ Var *vars_arr_set( Var *v )
 
 	vars_pop( v );
 
-	/* push a pointer to the accessed element onto the stack */
+	/* push a pointer to the indexed element onto the stack */
 
 	if ( a->type == INT_ARR )
 		ret = vars_push( INT_PTR, a->val.lpnt + index, a );
@@ -1939,10 +1954,13 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 					THROW( VARIABLES_EXCEPTION );
 				}
 
-				a->flags |= VARIABLE_SIZED;
-				
 				vars_pop( v );
-				return( vars_push( ARR_PTR, NULL ) );
+
+				a->flags |= VARIABLE_SIZED;
+				if ( a->type == INT_ARR )
+					return( vars_push( INT_PTR, NULL ) );
+				else
+					return( vars_push( INT_PTR, NULL ) );
 			}
 
 			cur = ( int ) v->val.lval;
@@ -2077,14 +2095,132 @@ Var *vars_arr_get( Var *v )
 }
 
 
-Var *vars_assign( Var *src, Var *dest )
+void vars_assign( Var *src, Var *dest )
 {
 	/* <PARANOID> check that both variables really exist </PARANOID> */
 
 	assert( vars_exist( src ) && vars_exist( dest ) );
 
-	if ( src->type & ( INT_PTR | FLOAT_PTR ) && src->flags & IS_ARRAY_SLICE )
+	/* 1. both variables are simple variables (*/
+
+	if ( dest->type & ( INT_VAR | FLOAT_VAR ) &&
+		 src->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		vars_ass_var_to_var( src, dest );
+		return;
+	}
+
+	/* 2. dest is simple variable, src is an array slice */
+
+	if ( dest->type & ( INT_VAR | FLOAT_VAR ) &&
+		 src->type & ( INT_PTR | FLOAT_PTR ) )
+	{
+		vars_ass_slice_to_var( src, dest );
+		return;
+	}
+
+	/* 3. dest is an */
+
+	if ( dest->type == ARR_PTR &&
+		 src->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		
+
+}
+
+
+void vars_ass_var_to_var( Var *src, Var *dest )
+{
+	Var null;
+
+
+	if ( src->flags & NEW_VARIABLE )
+	{
+		eprint( WARN, "%s:%ld: WARNING: Variable used in assignment that "
+				"never has been assigned a value.\n", Fname, Lc );
+		vars_pop( src );
+		null.type = INT_VAR;
+		null.val.lval = 0;
+		src = &null;
+	}
+
+	if ( dest->type == INT_VAR )
+	{
+		if ( src->type == INT_VAR )
+			dest->val.lval = src->val.lval;
+		else
+		{
+			eprint( WARN, "%s:%ld: WARNING: Assigning to integer "
+					"variable from float value.\n", Fname, Lc );
+			dest->val.lval = ( long ) src->val.dval;
+		}
+	}
+	else
+	{
+		if ( src->type == INT_VAR )
+			dest->val.dval = ( double ) src->val.lval;
+		else
+			dest->val.dval = src->val.dval;
+	}
+	
+	dest->flags &= ~NEW_VARIABLE;
+	vars_pop( src );
+}
+
+
+void vars_ass_arrelem_to_var( Var *src, Var *dest )
+{
+	assert( src->flags & IS_ARRAY_SLICE );
+
+	eprint( FATAL, "%s:%ld: Array slice can't be assigned to a variable.\n",
+			Fname, Lc );
+	THROW( VARIABLES_EXCEPTION );
+}
+
+
+
+
+
+		case INT_PTR :
+
+		if ( dest_type & ( INT_VAR | FLOAT_VAR ) )
+		{
+
+
+
+
+
+
+
+
+
+
+
+
+	if ( src->type & INT_VAR | FLOAT_VAR )
+	{
+		if ( src->flags & NEW_VARIABLE )
+			eprint( WARN, "%s:%ld: WARNING: Variable used in assignment that "
+					"never has been assigned a value.\n", Fname, Lc );
+
+		if ( dest->type & ( INT_VAR | FLOAT_VAR ) ||
+			 dest->flags & NEW_VARIABLE )
+		{
+			if ( src->flags & NEW_VARIABLE )
+				if ( dest_type & INT_VAR || )
+					dest->val.
+
+
+
+	vars_check( src, INT_PTR | FLOAT_PTR );
+
+	
+
+	if ( src->flags & IS_ARRAY_SLICE )
 	{
 		switch ( dest->type )
 		{
-			case INT_PTR : case 
+			case INT_PTR : case FLOAT_PTR :
+				if ( ! ( dest->flags & NEED_ARRAY_SLICE ) )
+			
+
