@@ -16,7 +16,7 @@ extern int exp_runparse( void );              /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
-static void new_data_handler( int sig_type, void *data );
+static void new_data_handler( int sig_type );
 static void quitting_handler( int sig_type, void *data );
 static void run_sigchld_handler( int sig_type, void *data );
 static void set_buttons_for_run( int active );
@@ -113,17 +113,23 @@ bool run( void )
 
 	start_graphics( );
 
-	/* Here the experiment really starts - process for doing it is forked. */
-
 	child_is_ready = child_is_quitting = UNSET;
 
-	fl_add_signal_callback( NEW_DATA, new_data_handler, NULL );
+	/* Set the signal handlers - for NEW_DATA signals we can't use XForms
+	   signal handlers because they become blocked by when the display is busy
+	   and no SEND_DATA is send back to the child, evectively stopping it
+	   completely, so we have to use the traditional approach... for this type
+	   of signal */
+
+	signal( NEW_DATA, new_data_handler );
 	fl_add_signal_callback( QUITTING, quitting_handler, NULL );
 
 	fl_remove_signal_callback( SIGCHLD );
 	fl_add_signal_callback( SIGCHLD, run_sigchld_handler, NULL );
 
 	fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
+
+	/* Here the experiment really starts - process for doing it is forked. */
 
 	if ( ( child_pid = fork( ) ) == 0 )     /* fork the child */
 		run_child( );
@@ -179,16 +185,14 @@ bool run( void )
 /* parent with excessive amounts of data and signals).               */
 /*-------------------------------------------------------------------*/
 
-void new_data_handler( int sig_type, void *data )
+void new_data_handler( int sig_type )
 {
-	data = data;
-
-	if ( sig_type != NEW_DATA )
-		return;
+	assert( sig_type == NEW_DATA );
 
 	if ( ! child_is_ready )         /* if this is the very first signal */
 	{
 		child_is_ready = SET;
+		signal( NEW_DATA, new_data_handler );
 		kill( child_pid, DO_SEND );
 	}
 	else
@@ -198,6 +202,7 @@ void new_data_handler( int sig_type, void *data )
 		message_queue_high = ( message_queue_high + 1 ) % QUEUE_SIZE;
 		fl_trigger_object( run_form->redraw_dummy);
 
+		signal( NEW_DATA, new_data_handler );
 		if ( Key->type == DATA )
 			kill( child_pid, DO_SEND );
 	}
@@ -214,9 +219,7 @@ void quitting_handler( int sig_type, void *data )
 {
 	data = data;
 
-	if ( sig_type != QUITTING )
-		return;
-
+	assert( sig_type == QUITTING );
 	child_is_quitting = SET;
 	kill( child_pid, DO_QUIT );
 }
@@ -239,8 +242,7 @@ void run_sigchld_handler( int sig_type, void *data )
 
 	data = data;
 
-	if ( sig_type != SIGCHLD )
-		return;
+	assert( sig_type == SIGCHLD );
 
 	if ( ( no = wait( &return_status ) ) != child_pid )
 		return;                       /* if some other child process died... */
@@ -311,7 +313,10 @@ void stop_measurement( FL_OBJECT *a, long b )
 	}
 
 	end_comm( );
-	fl_remove_signal_callback( NEW_DATA );
+
+	/* Remove the signal handlers */
+
+	signal( NEW_DATA, SIG_DFL );
 	fl_remove_signal_callback( QUITTING );
 
 	/* reset all the devices and finally the GPIB bus */
@@ -446,9 +451,7 @@ void run_child( void )
 
 void do_send_handler( int sig_type )
 {
-	if ( sig_type != DO_SEND )
-		return;
-
+	assert( sig_type == DO_SEND );
 	signal( DO_SEND, do_send_handler );
 	do_send = SET;
 }
@@ -463,9 +466,7 @@ void do_send_handler( int sig_type )
 
 void do_quit_handler( int sig_type )
 {
-	if ( sig_type != DO_QUIT )
-		return;
-
+	assert( sig_type == DO_QUIT );
 	signal( DO_QUIT, do_quit_handler );
 	do_quit = SET;
 }
