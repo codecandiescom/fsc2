@@ -269,7 +269,8 @@ bool section_parser( int section )
 			return FAIL;
 		CATCH( FUNCTION_EXCEPTION )
 			return FAIL;
-
+		CATCH( BLOCK_ERROR_EXCEPTION )
+			return FAIL;
 	} while ( section != NO_SECTION );
 
 	/* Finally, we have to do all the checks on the that only can be done
