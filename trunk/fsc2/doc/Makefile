@@ -61,14 +61,14 @@ fsc2.pdf: $(docs) $(patsubst %.gif,%.pdf,$(figures))
 	convert -compress Zip $< $@
 
 clean:
-	$(RM) $(RMFLAGS) fsc2.dvi *.log
+	$(RM) $(RMFLAGS) fsc2.dvi *.log fsc2fig*.eps fsc2fig*.pdf
 
 
 install:
 	$(INSTALL) -m 444 fsc2.1.gz /usr/local/man/man1
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2*.html $(docdir)
-	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2fig*.gif $(docdir)
 	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.css $(docdir)
+	$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2fig*.gif $(docdir)
 	if [ -f fsc2.ps ]; then \
 		$(INSTALL) -m 444 -o fsc2 -g fsc2 fsc2.ps $(docdir); \
 	fi
@@ -83,4 +83,5 @@ install:
 
 
 distclean:
+	$(MAKE) clean
 	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html fsc2.ps fsc2.pdf *.info* *~ *.gz
