@@ -3320,12 +3320,12 @@ change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
 @strong{Please note}: the wavelength difference between two neighboring
 pixels isn't really constant over the whole width of the CCD chip. When
 you use the returned values only for the center of the chip the results
-are in quite good an agreement with the real wavelengths, but for the
-edges of the chip the accuracy deteriorates significantly. For example
-for a grating with 1200 grooves per mm the deviation is about @w{0.5 nm}
-and for gratings with lower groove densities the deviation gets even
-larger, proportional to the inverse of the groove density. To obtain the
-exact wavelength for a certain pixel on the chip use the function
+are in quite good agreement with the real wavelengths, but for the edges
+of the chip the accuracy deteriorates significantly. For example for a
+grating with 1200 grooves per mm the deviation is about @w{0.5 nm} and
+for gratings with lower groove densities the deviation gets even larger,
+proportional to the inverse of the groove density. To obtain the exact
+wavelength for a certain pixel on the chip use the function
 @code{monochromator_calc_wavelength()} discussed below.
 
 The function can only be used in the @code{EXPERIMENT} section of an

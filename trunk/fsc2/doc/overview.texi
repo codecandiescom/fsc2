@@ -27,7 +27,7 @@
 
 @code{fsc2} is a program for remotely controlling spectrometers,
 currently still a bit biased toward cw- and pulsed EPR spectrometers. But
-the design of @code{fsc2} should make it also easy to use it to a broad
+the design of @code{fsc2} should make it also easy to use it for a broad
 range of experiments not related to EPR. Its central component is an
 interpreter that executes a script describing the experiment in a
 language which in the following will be called @code{EDL}
