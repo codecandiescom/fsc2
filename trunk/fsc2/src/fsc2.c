@@ -1228,12 +1228,12 @@ void main_sig_handler( int signo )
 			return;
 
 		/* All the remaining signals are deadly... We set fsc2_death to the
-		   signal number so final_exit_handler can do appropriate things. */
+		   signal number so final_exit_handler() can do appropriate things. */
 
 		default :
 			fsc2_death = signo;
 
-			if ( signo != SIGABRT && ! ( flags & NO_MAIL ) )
+			if ( ! ( flags & NO_MAIL ) )
 				DumpStack( );
 
 			exit( EXIT_FAILURE );

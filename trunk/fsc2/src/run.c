@@ -720,10 +720,11 @@ void child_sig_handler( int signo )
 		/* All the remaining signals are deadly... */
 
 		default :
-			if ( signo != SIGABRT  )
-				DumpStack( );
 			if ( ! ( flags & 32 ) )                  /* 32 means NO_MAIL */
+			{
+				DumpStack( );
 				death_mail( signo );
+			}
 
 			/* Test if parent still exists and if not (i.e. the parent died
 			   without sending the child a SGTERM signal) destroy the

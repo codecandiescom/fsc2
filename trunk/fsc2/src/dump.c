@@ -14,7 +14,7 @@ enum {
 };
 
 enum {
-	ANSWER_READ,
+	ANSWER_READ = 0,
 	ANSWER_WRITE
 };
 

@@ -308,7 +308,7 @@ void death_mail( int signo )
 				 Assert_struct.expression );
 #endif
 
-	if ( signo != SIGABRT && fail_mess_fd >= 0 )
+	if ( fail_mess_fd >= 0 )
 	{
 		while ( ( count = read( fail_mess_fd, buffer, 512 ) ) > 0 )
 			fwrite( buffer, count, 1, mail );
