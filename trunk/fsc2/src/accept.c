@@ -161,10 +161,7 @@ void accept_new_data( bool empty_queue )
 			gettimeofday( &time_struct, NULL );
 			if ( time_struct.tv_sec + 1.0e-6 * time_struct.tv_sec
 				 - start_time >= MAX_ACCEPT_TIME )
-			{
-				fprintf( stderr, "Hit timeout\n" );
 				break;
-			}
 		}
   	}
 
