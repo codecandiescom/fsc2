@@ -28,6 +28,7 @@
 %{
 
 #include "rulbus_lib.h"
+#include <limits.h>
 
 extern int rulbus_lex( void );
 
