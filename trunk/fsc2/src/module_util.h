@@ -27,6 +27,7 @@
 
 
 inline int get_mode( void );
+inline int get_check_state( void );
 inline void stop_on_user_request( void );
 inline void too_many_arguments( Var *v );
 inline void no_query_possible( void );

@@ -36,6 +36,17 @@ inline int get_mode( void )
 }
 
 
+/*-------------------------------------------------------------*/
+/* This function is called by modules to determine if this is  */
+/* just a check run without graphical interface or a check run */
+/*-------------------------------------------------------------*/
+
+inline int get_check_state( void )
+{
+	return Internals.cmdline_flags & DO_CHECK || Internals.just_testing;
+}
+
+
 /*------------------------------------------------------*/
 /* Function tests if the user has hit the "Stop" button */
 /* and throws an USER_BREAK_EXCEPTION in this case.     */

@@ -73,6 +73,7 @@
 
 
 #define FSC2_MODE get_mode( )
+#define FSC2_IS_CHECK_RUN get_check_state( )
 
 
 extern void show_message( const char *str );
