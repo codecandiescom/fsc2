@@ -485,7 +485,7 @@ Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: POD = P0..P11, CH = CH0..CH35
-@item Tektronix HFS9003: CH = X1..X4, with X standing for A..C, TRIG_OUT
+@item Tektronix HFS9003: CH = A1..A4, B1..B4, C1..C4, TRIG_OUT
 @item Bruker EP385: CH = CH0..CH7
 @item Interface Technology RS690: CH = X0..15 with X standing for A..D
 (or A..H when two HSM cards are installed)
@@ -983,8 +983,8 @@ ASSIGNMENTS:
 
 TIMEBASE:     5 ns;
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 20 ms;
-MICROWAVE:    POD = 8,  V_HIGH = 5 V, V_LOW = 0 V;
-DETECTION:    POD = 5,  V_HIGH = 3 V, V_LOW = 0 V;
+MICROWAVE:    POD = P8,  V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:    POD = P5,  V_HIGH = 3 V, V_LOW = 0 V;
 
 PREPARATIONS:
 
@@ -1063,18 +1063,18 @@ I, J;
 
 ASSIGNMENTS:
 
-TIMEBASE:      5 ns;
-TRIGGER_MODE:  INTERNAL, REP_FREQ = 200 Hz;
+TIMEBASE:     5 ns;
+TRIGGER_MODE: INTERNAL, REP_FREQ = 200 Hz;
 
-MW:            POD = 1, 2, 3, 4, 5, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
-DETECTION:     POD = 0,                       V_HIGH = 5 V, V_LOW = 0 V;
+MW:           POD = P1, P2, P3, P4, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
+DETECTION:    POD = P0,                       V_HIGH = 5 V, V_LOW = 0 V;
       
        
-PHASE_SETUP:   MW,           // cycle microwave channel
-               +X: POD = 1,  // POD 1 on for +X
-               -X: POD = 2,  // POD 2 on for -X
-               +Y: POD = 3,  // POD 3 on for +Y
-               -Y: POD = 4;  // POD 4 on for -Y
+PHASE_SETUP:  MW,           // cycle microwave channel
+              +X: POD = P1,  // POD 1 on for +X
+              -X: POD = P2,  // POD 2 on for -X
+              +Y: POD = P3,  // POD 3 on for +Y
+              -Y: POD = P4;  // POD 4 on for -Y
 
 PHASES:
 

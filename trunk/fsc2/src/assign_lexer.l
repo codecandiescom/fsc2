@@ -88,8 +88,6 @@ INT         [0-9]+
 EXPO        [Ee][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-P           P(ULSE)?_?{INT}
-
 F           F(UNC(TION)?)?
 S           S(TART)?
 L			L(EN(GTH)?)?
@@ -128,14 +126,14 @@ ON          ON
 OFF         OFF
 
 DEL         ((DEL)|(DELAY)):?
+PODSPEC     P([0-9]|(1[01]))
 POD         P(OD)?
-POD1        {POD}_?1
-POD2        {POD}_?2
+POD1        POD_?1
+POD2        POD_?2
 CH          CH(ANNEL)?
 INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
-PODSPEC     P([0-9]|(1[01]))
 CHN         ([A-H]([0-9]|(1[0-5])))|(CH([0-9]|(1[0-5])))|(TRIG(GER)?_?OUT)
 
 
@@ -351,9 +349,7 @@ WS          [\n=: ]+
             }
 
 {CHN}       {
-				Var *v;
-
-				v = convert_to_channel_number( assigntext );
+				Var *v = convert_to_channel_number( assigntext );
 				assignlval.lval = p_ch2num( v->val.lval );
 				vars_pop( v );
 				return INT_TOKEN;
@@ -414,35 +410,6 @@ WS          [\n=: ]+
 				set_cur_pulser( );
 				return GP_TOKEN;
 			}
-
-			/* all pulse related keywords... */
-
-			/* combinations of pulse and property, e.g. 'P3.LEN' */
-
-{P}"."{F}   {
-				assignlval.vptr = p_get( assigntext, P_FUNC );
-				return VAR_REF;
-            }
-
-{P}"."{S}   {
-				assignlval.vptr = p_get( assigntext, P_POS );
-				return VAR_REF;
-            }
-
-{P}"."{L}   {
-				assignlval.vptr = p_get( assigntext, P_LEN );
-				return VAR_REF;
-            }
-
-{P}"."{DS}  {
-				assignlval.vptr = p_get( assigntext, P_DPOS );
-				return VAR_REF;
-            }
-
-{P}"."{DL}  {
-				assignlval.vptr = p_get( assigntext, P_DLEN );
-				return VAR_REF;
-            }
 
 {PSD1}		{
 				assignlval.lval	= 0;
