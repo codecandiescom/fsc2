@@ -44,6 +44,8 @@ static int new_card( void );
 static int set_name( const char *name );
 static int set_addr( unsigned int addr );
 static int set_type( unsigned int type );
+static int set_range( unsigned int range );
+static int set_polar( const char *polar );
 static int set_rack( void );
 static void yyerror( const char *s );
 
@@ -56,7 +58,7 @@ static void yyerror( const char *s );
 }
 
 %token FILE_TOKEN RACK_TOKEN CARD_TOKEN NAME_TOKEN TYPE_TOKEN ADDR_TOKEN
-%token NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN ERR_TOKEN
+%token RANGE_TOKEN POLAR_TOKEN NUM_TOKEN CARD_TYPE_TOKEN STR_TOKEN ERR_TOKEN
 
 %type <ival> NUM_TOKEN CARD_TYPE_TOKEN
 %type <sval> STR_TOKEN
@@ -77,7 +79,8 @@ file:     FILE_TOKEN sep1 STR_TOKEN sep2  { if ( ( ret = set_dev_file( $3 ) ) )
 ;
 
 
-rack:     RACK_TOKEN sep1				  { card_no = rulbus_num_cards; }
+rack:     RACK_TOKEN sep1				  { card_no = rulbus_num_cards;
+											rack = -1; }
 		  '{' rdata '}' sep2			  { if ( ( ret = set_rack( ) ) )
 												return ret; }
 ;
@@ -101,8 +104,14 @@ cdata:    /* empty */
 		| cdata ADDR_TOKEN sep1 NUM_TOKEN sep2
 										  { if ( ( ret =  set_addr( $4 ) ) )
 												return ret; }
-		| cdata CARD_TYPE_TOKEN sep1 NUM_TOKEN sep2
+		| cdata TYPE_TOKEN sep1 CARD_TYPE_TOKEN sep2
 										  { if ( ( ret =  set_type( $4 ) ) )
+												return ret; }
+		| cdata RANGE_TOKEN sep1 NUM_TOKEN sep2
+										  { if ( ( ret =  set_range( $4 ) ) )
+												return ret; }
+		| cdata POLAR_TOKEN sep1 STR_TOKEN sep2
+										  { if ( ( ret =  set_polar( $4 ) ) )
 												return ret; }
 ;
 
@@ -166,7 +175,9 @@ static int new_card( void )
 
 	rulbus_card[ rulbus_num_cards ].name = NULL;
 	rulbus_card[ rulbus_num_cards ].addr = RULBUS_INVALID_ADDR;
-	rulbus_card[ rulbus_num_cards++ ].type = -1;
+	rulbus_card[ rulbus_num_cards ].type = -1;
+	rulbus_card[ rulbus_num_cards ].range = -1;
+	rulbus_card[ rulbus_num_cards++ ].polar = -1;
 
 	return RULBUS_OK;
 }
@@ -239,6 +250,46 @@ static int set_type( unsigned int type )
 }
 
 
+/*------------------------------------------------------*
+ * Function that gets called when a card range is found 
+ *------------------------------------------------------*/
+
+static int set_range( unsigned int range )
+{
+	/* Check that the card hasn't already been assigned a range */
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].range != -1 )
+		return RULBUS_RNG_DUP;
+
+	rulbus_card[ rulbus_num_cards - 1 ].range = range;
+	return RULBUS_OK;
+}
+
+
+/*---------------------------------------------------------*
+ * Function that gets called when a card polarity is found 
+ *---------------------------------------------------------*/
+
+static int set_polar( const char *polar )
+{
+	/* Check that the card hasn't already been assigned a polarity */
+
+	if ( rulbus_card[ rulbus_num_cards - 1 ].polar != -1 )
+		return RULBUS_POL_DUP;
+
+	/* Check the string */
+
+	if ( strcasecmp( polar, "unipolar" ) && strcasecmp( polar, "bipolar" ) )
+		return RULBUS_INV_POL;
+
+	if ( strcasecmp( polar, "unipolar" ) )
+		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_DAC12_UNIPOLAR;
+	else
+		rulbus_card[ rulbus_num_cards - 1 ].range = RULBUS_DAC12_BIPOLAR;
+	return RULBUS_OK;
+}
+
+
 /*-----------------------------------------------------------------------*
  * Function that gets called when the end of a rack description is found
  *-----------------------------------------------------------------------*/
@@ -281,5 +332,7 @@ static int set_rack( void )
 
 static void yyerror( const char *s )
 {
+	extern char *yytext;
 	s = s;
+	fprintf( stderr, "%s %s\n", s, yytext );
 }
