@@ -24,12 +24,19 @@
 #include "fsc2.h"
 
 
-/*-----------------------------------------------------------------*/
-/* Function gets a format string as in printf and arguments which  */
-/* must correspond to the given format string and returns a string */
-/* of the right length into which the arguments are written. The   */
-/* caller of the function is responsible for free-ing the string.  */
-/*-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function expects a format string as in printf and arguments which */
+/* must correspond to the given format string and returns a string   */
+/* of the right length into which the arguments are written. The     */
+/* caller of the function is responsible for free-ing the string.    */
+/* -> 1. printf()-type format string                                 */
+/*    2. As many arguments as there are conversion specifiers etc.   */
+/*       in the format string                                        */
+/* <- Pointer to character array of exactly the right length into    */
+/*    which the string characterized by the format string has been   */
+/*    written. On failure, i.e. if there is not enough space, the    */
+/*    function throws an OUT_OF_MEMORY exception.                    */
+/*-------------------------------------------------------------------*/
 
 #define GET_STRING_TRY_LENGTH 128
 
@@ -70,9 +77,11 @@ char *get_string( const char *fmt, ... )
 }
 
 
-/*---------------------------------------------------------------*/
-/* Converts all upper case characters in a string to lower case. */
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Converts all upper case characters in a string to lower case */
+/* (in place, i.e. the string itself is changed, not a copy of  */
+/* the string).                                                 */
+/*--------------------------------------------------------------*/
 
 char *string_to_lower( char *str )
 {
@@ -91,6 +100,7 @@ char *string_to_lower( char *str )
 
 /*---------------------------------------------------*/
 /* This routine returns a copy of a piece of memory. */
+/* On failure a OUT_OF_MEMORY exception is thrown.   */
 /*---------------------------------------------------*/
 
 void *get_memcpy( const void *array, size_t size )
@@ -127,10 +137,10 @@ char *correct_line_breaks( char *str )
 }
 
 
-/*-----------------------------------------------*/
-/* strip_path() returns pointer to bare name the */
-/* function from a path like "/usr/bin/emacs".   */
-/*-----------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* strip_path() returns a pointer to the basename of a path, i.e. for */
+/* "/usr/bin/emacs" a pointer to "emacs" in the string is returned.   */
+/*--------------------------------------------------------------------*/
 
 const char *strip_path( const char *path )
 {

@@ -79,7 +79,7 @@ FILE *hp8647a_find_table( char **name )
 	{
 		eprint( FATAL, UNSET, "%s: Table file `%s' not found, neither in the "
 				"current dirctory nor in `%s'.\n", DEVICE_NAME,
-				strrchr( *name, '/' ) + 1, libdir );
+				strip_path( *name ), libdir );
 		THROW( EXCEPTION );
 	}
 

@@ -114,8 +114,7 @@ bool exists_device( const char *name )
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		if ( cd->is_loaded &&
-			 ! strcasecmp( strchr( cd->name, '/' ) == NULL ?
-						   cd->name : strrchr( cd->name, '/' ) + 1, name ) )
+			 ! strcasecmp( strip_path( cd->name ), name ) )
 			return OK;
 
 	return FAIL;
@@ -169,7 +168,7 @@ static void load_functions( Device *dev )
 	dev->driver.handle = dlopen( lib_name, RTLD_NOW );
 
 	if ( dev->driver.handle == NULL )
-		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_NOW );
+		dev->driver.handle = dlopen( strip_path( lib_name ), RTLD_NOW );
 
 	if ( dev->driver.handle == NULL )
 	{
@@ -181,8 +180,7 @@ static void load_functions( Device *dev )
 	if ( dev->driver.handle == NULL )
 	{
 		eprint( FATAL, UNSET, "Can't open module for device `%s': %s\n", 
-				strchr( dev->name, '/' ) == NULL ?
-				dev->name : strrchr( dev->name, '/' ) + 1, dlerror( ) );
+				strip_path( dev->name ), dlerror( ) );
 		T_free( lib_name );
 		THROW( EXCEPTION );
 	}
@@ -194,10 +192,7 @@ static void load_functions( Device *dev )
 	/* The device name used as prefix in the hook functions may not contain
 	   a path */
 
-	if ( strchr( dev->name, '/' ) != NULL )
-		dev_name = strrchr( dev->name, '/' ) + 1;
-	else
-		dev_name = dev->name;
+	dev_name = strip_path( dev->name );
 
 	/* Now that we know that the module exists and can be used try to resolve
 	   all functions we may need */
@@ -602,9 +597,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded &&
-			 ( ! strcasecmp( cd->name, from ) || 
-			   ( strchr( cd->name, '/' ) != NULL &&
-				 ! strcasecmp( strrchr( cd->name, '/' ) + 1, from ) ) ) )
+			 ! strcasecmp( strip_path( cd->name ), from ) )
 			break;
 
 	if ( cd == NULL )                    /* library not found ? */
@@ -642,9 +635,7 @@ int get_lib_number( const char *name )
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
 		if ( cd->is_loaded && cd->generic_type != NULL &&
-			 ( ! strcasecmp( cd->name, name ) || 
-			   ( strchr( cd->name, '/' ) != NULL &&
-				 ! strcasecmp( strrchr( cd->name, '/' ) + 1, name ) ) ) )
+			 ! strcasecmp( strip_path( cd->name ), name ) || 
 		{
 			sd = cd;
 			break;

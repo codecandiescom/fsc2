@@ -70,7 +70,7 @@ void device_add( const char *name )
 	   LD_LIBRARY_PATH) - don't follow links yet */
 
 	if ( lstat( lib_name, &buf ) < 0 &&
-		 lstat( strrchr( lib_name, '/' ) + 1, &buf ) < 0 )
+		 lstat( strip_path( lib_name ), &buf ) < 0 )
 	{
 		eprint( FATAL, UNSET, "Can't find or access module `%s.so'.\n",
 				dev_name );
