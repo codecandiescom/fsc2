@@ -34,6 +34,7 @@ float *y;
 static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
+static void start_browser( void );
 
 
 
@@ -861,7 +862,6 @@ void win_slider_callback( FL_OBJECT *a, long b )
 void run_help( FL_OBJECT *a, long b )
 {
 	int res;
-	char *cmd;
 
 
 	/* Keep the compiler happy... */
@@ -872,29 +872,55 @@ void run_help( FL_OBJECT *a, long b )
 	/* Fork and execute help browser in child process */
 
 	if ( ( res = fork( ) ) == 0 )
-	{
-		/* Assemble command string, first for the case that netscape is
-		   already running */
-
-		cmd = get_string( 100 + strlen( docdir ) );
-
-		strcpy( cmd, "netscape -remote 'openURL(file:" );
-		strcat( cmd, docdir );
-		strcat( cmd, "fsc2_frame.html,new-window)' 2>/dev/null" );
-
-		if ( system( cmd ) != 0 )
-		{
-			strcpy( cmd, "netscape file:" );
-			strcat( cmd, docdir );
-			strcat( cmd, "fsc2_frame.html 2>/dev/null" );
-			system( cmd );
-		}
-
-		T_free( cmd );
-		_exit( 0 );
-	}
+		start_browser( );
 
 	if ( res == -1 )                                /* fork failed ? */
 		fl_show_alert( "Error", "Sorry, unable to start the help browser.",
 					   NULL, 1 );
+}
+
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
+
+static void start_browser( void )
+{
+	char *cmd;
+	int status;
+	int res;
+
+
+	if ( ( res = fork( ) ) == 0 )
+	{
+
+		/* If netscape isn't running start it, otherwise ask it to just open a
+		   new window */
+
+		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
+		{
+			cmd = get_string( 41 + strlen( docdir ) );
+			strcpy( cmd, "netscape file:" );
+			strcat( cmd, docdir );
+			strcat( cmd, "fsc2_frame.html 2>/dev/null" );
+		}
+		else
+		{
+			cmd = get_string( 71 + strlen( docdir ) );
+			strcpy( cmd, "netscape -remote 'openURL(file:" );
+			strcat( cmd, docdir );
+			strcat( cmd, "fsc2_frame.html,new-window)' 2>/dev/null" );
+		}
+
+		status = system( cmd );
+		T_free( cmd );
+
+		_exit( status );
+	}
+
+	if ( res == -1 )
+		_exit( EXIT_FAILURE );
+
+	waitpid( res, &status, 1 );
+
+	_exit( status );
 }

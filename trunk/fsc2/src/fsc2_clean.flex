@@ -109,11 +109,11 @@ LWS      ^[\t ]+
 WS       [\t ]+
 TWS      [\t ]+\n
 
-INCL    ^[ \t]*#incl?u?d?e?[\t ]*
+INCL    ^[ \t]*#INCLUDE[\t ]*
 IFN     \"[^"\n]*\"[\t ]*\n?|<[^>\n]*>[\t ]*\n?
 IFNE    [^"<\t \n]*\n?
-EXIT    ^[ \t]*#exit
-QUIT    ^[ \t]*#quit
+EXIT    ^[ \t]*#EXIT
+QUIT    ^[ \t]*#QUIT
 
 
 THROU   [+-][A-Za-z]+
