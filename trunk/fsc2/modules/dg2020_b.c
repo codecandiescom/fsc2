@@ -532,6 +532,11 @@ int dg2020_b_end_of_exp_hook( void )
 		f->old_pulse_params = PULSE_PARAMS_P T_free( f->old_pulse_params );
 	}
 
+	/* Finally reset the internal representation back to its initial state
+	   in case another experiment is started */
+
+	dg2020_full_reset( );
+
 	return 1;
 }
 

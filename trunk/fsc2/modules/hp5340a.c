@@ -108,6 +108,10 @@ int hp5340a_exp_hook( void )
 
 int hp5340a_end_of_exp_hook( void )
 {
+	/* Do a reset and switch device to local mode */
+
+	gpib_write( hp5340a.device, "NH", 2 );
+
 	hp5340a.device = -1;
 	return 1;
 }
@@ -189,8 +193,9 @@ static bool hp5340a_init( const char *name )
 	if ( gpib_init_device( name, &hp5340a.device ) == FAILURE )
         return FAIL;
 
-	/* Tell device to use internal sample rate and to output data only
-	   if addressed as talker. */
+	/* Tell device to use internal sample rate and to output data only if
+	   addressed as talker(don't lock the keyboard, the user is supposed
+	   to do settngs at the front panel) */
 
 	if ( gpib_write( hp5340a.device, "JL", 2 ) == FAILURE )
 		return FAIL;

@@ -603,7 +603,7 @@ void ep385_full_reset( void )
 			for ( ch->num_active_pulses = 0, m = 0;
 				  ( p = pm_entry[ m ] ) != NULL; m++ )
 			{
-				if ( p->is_active )
+				if ( ! p->is_active )
 					continue;
 
 				pp = ch->pulse_params + ch->num_active_pulses++;
