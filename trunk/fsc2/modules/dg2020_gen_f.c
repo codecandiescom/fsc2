@@ -51,13 +51,13 @@ bool dg2020_store_timebase( double timebase )
 	dg2020.timebase = timebase;
 
 	dg2020.function[ PULSER_CHANNEL_PHASE_1 ].psd =
-		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
+		( Ticks ) lround( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
 	dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
-		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
+		( Ticks ) lround( ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase ) );
 
 	if ( GRACE_PERIOD != 0 )
-		dg2020.grace_period =
-			  Ticks_max( ( Ticks ) ceil( GRACE_PERIOD / dg2020.timebase ), 1 );
+		dg2020.grace_period = Ticks_max( ( Ticks )
+						 lround( ceil( GRACE_PERIOD / dg2020.timebase ), 1 ) );
 	else
 		dg2020.grace_period = 0;
 
@@ -756,7 +756,7 @@ bool dg2020_phase_setup( int func )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool dg2020_phase_setup_finalize( int func, PHS phs )
+bool dg2020_phase_setup_finalize( int func, PHS p_phs )
 {
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );
@@ -769,7 +769,7 @@ bool dg2020_phase_setup_finalize( int func, PHS phs )
 		return FAIL;
 	}
 
-	memcpy( &dg2020.function[ func].phs, &phs, sizeof( PHS ) );
+	memcpy( &dg2020.function[ func].phs, &p_phs, sizeof( PHS ) );
 	dg2020.function[ func ].is_phs = SET;
 
 	return OK;
@@ -808,7 +808,8 @@ bool dg2020_set_phase_switch_delay( int func, double del_time )
 	}
 
 	dg2020.function[ func ].is_psd = SET;
-	dg2020.function[ func ].psd = ( Ticks ) ceil( del_time / dg2020.timebase );
+	dg2020.function[ func ].psd = 
+		                ( Ticks ) lround( ceil( del_time / dg2020.timebase ) );
 
 	return OK;
 }
@@ -842,7 +843,8 @@ bool dg2020_set_grace_period( double gp_time )
 	}
 
 	dg2020.is_grace_period = SET;
-	dg2020.grace_period = ( Ticks ) ceil( gp_time / dg2020.timebase );
+	dg2020.grace_period =
+		                 ( Ticks ) lround( ceil( gp_time / dg2020.timebase ) );
 
 	return OK;
 }
