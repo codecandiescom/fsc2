@@ -33,8 +33,9 @@ static Var *vars_float_arr_sub( Var *v1, Var *v2, bool exc );
 static Var *vars_ref_sub( Var *v1, Var *v2, bool exc );
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function for subtracting of two variables of arbitrary types */
+/*--------------------------------------------------------------*/
 
 Var *vars_sub( Var *v1, Var *v2 )
 {
