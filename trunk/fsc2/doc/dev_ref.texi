@@ -227,7 +227,7 @@ WITIO-48 DIO card (@code{witio_48}) is loaded.
 @paragraphindent 0
 @strong{Please note}: If a field resolution other than @w{0.1 G} is set
 at the front panel of the device, the function
-@code{gausmeter_resolution()} must be called, otherwise the field values
+@code{gaussmeter_resolution()} must be called, otherwise the field values
 returned by the module will be wrong. Also note that for a resolution
 setting of @w{0.01 G} the kG part of the field will be missing, i.e.@: a
 field of @w{3125.63 G} will be reported as being @w{125.63 G} for this
