@@ -1240,7 +1240,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 {
 	int keymask;
 	bool scale_changed = UNSET;
-	double v;
 
 
 	obj = obj;
@@ -1289,7 +1288,6 @@ static void cut_release_handler( FL_OBJECT *obj, Window window,
 
 				case 4 :                       /* in z-axis window */
 					if ( G.cut_select == CUT_SELECT_X )
-					{
 						cut_show( CG.cut_dir, ( int ) lround(
 							( double ) ( CG.cut_dir == X ?
 										 ( ( c->h - 1 - c->ppos[ Y ] )
