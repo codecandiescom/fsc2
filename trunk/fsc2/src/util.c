@@ -456,13 +456,17 @@ void create_colors( void )
 
 inline unsigned long d2color( double a )
 {
-	if ( a <= - 0.5 / ( double ) NUM_COLORS )
+	long index;
+
+
+	index = lround( a * ( NUM_COLORS - 1 ) );
+
+	if ( index < 0 )
 		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 1 );
-	if ( a >= 1.0 + 0.5 / ( double ) NUM_COLORS )
-		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
+	else if ( index < NUM_COLORS )
+		return fl_get_pixel( FL_FREE_COL1 + 1 + index );
 	else
-		return fl_get_pixel( FL_FREE_COL1 + 1
-							 + lround( a * ( NUM_COLORS - 1 ) ) );
+		return fl_get_pixel( NUM_COLORS + FL_FREE_COL1 + 2 );
 }
 
 
