@@ -906,6 +906,12 @@ void free_vars( void )
 
 void vars_check( Var *v, int type )
 {
+	int i;
+	int t = v->type;
+	const char *types[ ] = { "INTEGER", "FLOAT", "STRING", "INTEGER ARRAY",
+							 "FLOAT ARRAY", "FUNCTION", "ARRAY POINTER",
+							 "INTEGER ARRAY SLICE", "FLOAT ARRAY SLICE" };
+	
 	/* being paranoid we first check that the variable exists at all -
 	   probably this can be left out later. */
 
@@ -933,8 +939,12 @@ void vars_check( Var *v, int type )
 
 	if ( ! ( v->type & type ) )
 	{
-		eprint( FATAL, "%s:%ld: Wrong type of variable.\n",
-				Fname, Lc );
+		i = 0;
+		t = v->type;
+		while ( ! ( t >>= 1 & 1 ) )
+			i++;
+		eprint( FATAL, "%s:%ld: A variable of type %s cannot be used in this "
+				"context.\n", Fname, Lc, types[ i ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1885,10 +1895,15 @@ void vars_arr_init( Var *v )
 /* of parsing and print an error message instead.                           */
 /*--------------------------------------------------------------------------*/
 
-Var * apply_unit( Var *var, Var *unit ) 
+Var *apply_unit( Var *var, Var *unit ) 
 {
 	if ( unit == NULL )
-		return var;
+	{
+		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
+			return var;
+		eprint( FATAL, "%s:%ld: Some shit is happening here...\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
 	else
 	{
 		if ( var->type & ( INT_VAR | FLOAT_VAR ) )
