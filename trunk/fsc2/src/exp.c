@@ -21,8 +21,6 @@ extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern char *Fname;
 extern long Lc;
-static Var *var_list_copy = NULL;         /* area for storing variables */
-static long var_count = 0;                /* numberof variables to save */
 
 extern void prim_exprestart( FILE *prim_expin );
 
@@ -1163,7 +1161,9 @@ void save_restore_variables( bool flag )
 {
 	Var *src;
 	Var *cpy;
-	static Var *old_var_list;
+	static Var *var_list_copy = NULL;      /* area for storing variables */
+	static Var *old_var_list;              /* needed to satisfy my paranoia */
+	long var_count;                        /* number of variables to save */
 
 
 	if ( flag )
@@ -1172,11 +1172,9 @@ void save_restore_variables( bool flag )
 
 		/* count the number of variables and get memory for storing them */
 
-		if ( var_count == 0 )
-			for ( var_count = 0, src = var_list; src != NULL;
-				  var_count++, src = src->next )
-				;
-		prg_token[ prg_length ].tv.vptr = NULL;
+		for ( var_count = 0, src = var_list; src != NULL;
+			  var_count++, src = src->next )
+			;
 		var_list_copy = T_malloc( var_count * sizeof( Var ) );
 
 		/* copy all of them into the backup region */
@@ -1199,7 +1197,7 @@ void save_restore_variables( bool flag )
 					  get_memcpy( cpy->val.dpnt, cpy->len * sizeof( double ) );
 			}
 
-			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) )
+			if ( cpy->type & ( INT_ARR | FLOAT_ARR ) && cpy->sizes != NULL )
 			{
 				src->sizes = NULL;
 				src->sizes
