@@ -2126,13 +2126,11 @@ int get_mouse_pos_cut( double *pa )
 				  - cv->shift[ Y ] );
 
 	if ( CG.cut_dir == X )
-		pa[ Z ] = ( CG.index - scv->shift[ X ] ) * scv->rwc_delta[ X ] +
-				  + scv->rwc_start[ X ];
+		pa[ Z ] = scv->rwc_delta[ X ] * CG.index + scv->rwc_start[ X ];
 	else
-		pa[ Z ] = ( CG.index - scv->shift[ Y ] ) * scv->rwc_delta[ Y ] +
-				  + scv->rwc_start[ Y ];
+		pa[ Z ] = scv->rwc_delta[ Y ] * CG.index + scv->rwc_start[ Y ];
 
-	return 4;
+	return 3;
 }
 
 
