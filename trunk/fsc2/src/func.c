@@ -474,7 +474,7 @@ Var *func_call( Var *f )
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n",
+					"up the variables stack at %s:%d.\n",
 					EDL.Call_Stack->f->name, EDL.Call_Stack->f->device->name,
 					__FILE__, __LINE__ );
 		THROW( EXCEPTION );
