@@ -91,7 +91,7 @@ WS          [\n \t]+
 {FILE}      {
 				*( varstext + varsleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( varstext + 2 );
+				Fname = T_strdup( varstext + 2 );
 			}
 
 			/* handling of line number lines */

@@ -259,7 +259,7 @@ static int fll_count_functions( Func *fncts, int num_def_func )
 						"built-in function (line %ld in function data "
 						"base `%s').\n", f->name, Lc, Fname );
 
-				f->name = get_string_copy( f->name );
+				f->name = T_strdup( f->name );
 				f->fnct = NULL;
 				f->nargs = 0;
 				f->access_flag = ACCESS_EXP;
@@ -345,7 +345,7 @@ static void fll_get_functions( Func *fncts, int num_def_func )
 					}
 
 				if ( act >= num_def_func )
-				    fncts[ act ].name = get_string_copy( func_listtext );
+				    fncts[ act ].name = T_strdup( func_listtext );
 
 				state = 1;
 				break;

@@ -142,7 +142,7 @@ void tds520_do_pre_exp_checks( void )
 		{
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
-			buffer = get_string_copy( tds520_ptime( dcs ) );
+			buffer = T_strdup( tds520_ptime( dcs ) );
 			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num, 
 					tds520_ptime( w->start ), buffer );
@@ -166,7 +166,7 @@ void tds520_do_pre_exp_checks( void )
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
 			dcd = tds520.timebase / TDS_POINTS_PER_DIV;
-			buffer = get_string_copy( tds520_ptime( dcd ) );
+			buffer = T_strdup( tds520_ptime( dcd ) );
 			eprint( SEVERE, "%s: Width of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num,
 					tds520_ptime( w->width ), buffer );
@@ -177,7 +177,7 @@ void tds520_do_pre_exp_checks( void )
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			buffer = get_string_copy( tds520_ptime( dcd ) );
+			buffer = T_strdup( tds520_ptime( dcd ) );
 			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
 					"%s to %s.\n", DEVICE_NAME, w->num,
 					tds520_ptime( w->width ), buffer );

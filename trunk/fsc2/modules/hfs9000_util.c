@@ -28,7 +28,7 @@ Ticks hfs9000_double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		char *t = get_string_copy( hfs9000_ptime( time ) );
+		char *t = T_strdup( hfs9000_ptime( time ) );
 		eprint( FATAL, "%s:%ld: %s: Specified time of %s is not an integer "
 				"multiple of the pulser time base of %s.", Fname, Lc,
 				pulser_struct.name, t, hfs9000_ptime( hfs9000.timebase ) );

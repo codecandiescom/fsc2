@@ -241,7 +241,7 @@ Var *vars_new( char *name )
 	vp = T_malloc( sizeof( Var ) );
 	vp->name = NULL;
 	vp->sizes = NULL;
-	vp->name = get_string_copy( name );
+	vp->name = T_strdup( name );
 
 	/* Set relevant entries in the new structure and make it the very first
 	   element in the list of variables */
@@ -1034,7 +1034,7 @@ Var *vars_push( int type, ... )
 			break;
 
 		case STR_VAR :
-			new_stack_var->val.sptr = get_string_copy( va_arg( ap, char * ) );
+			new_stack_var->val.sptr = T_strdup( va_arg( ap, char * ) );
 			break;
 
 		case FUNC :

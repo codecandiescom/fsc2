@@ -17,8 +17,8 @@ bool dg2020_store_timebase( double timebase )
 {
 	if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
 	{
-		char *min = get_string_copy( dg2020_ptime( ( double ) MIN_TIMEBASE ) );
-		char *max = get_string_copy( dg2020_ptime( ( double ) MAX_TIMEBASE ) );
+		char *min = T_strdup( dg2020_ptime( ( double ) MIN_TIMEBASE ) );
+		char *max = T_strdup( dg2020_ptime( ( double ) MAX_TIMEBASE ) );
 
 		eprint( FATAL, "%s:%ld: %s: Invalid time base of %s, valid range is "
 				"%s to %s.\n", Fname, Lc, pulser_struct.name,

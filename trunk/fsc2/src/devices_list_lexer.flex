@@ -166,7 +166,7 @@ bool device_list_parse( void )
 		while ( devices_listlex( ) )
 		{
 			new_device_name = T_malloc( sizeof( Device_Name ) );
-			new_device_name->name = get_string_copy( devices_listtext );
+			new_device_name->name = T_strdup( devices_listtext );
 			string_to_lower( new_device_name->name );
 			new_device_name->next = Device_Name_List;
 			Device_Name_List = new_device_name;

@@ -629,7 +629,7 @@ Var *synthesizer_use_table( Var *v )
 	{
 		vars_check( v, STR_VAR );
 
-		tfname = get_string_copy( v->val.sptr );
+		tfname = T_strdup( v->val.sptr );
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{

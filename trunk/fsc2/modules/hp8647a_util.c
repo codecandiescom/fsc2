@@ -39,7 +39,7 @@ FILE *hp8647a_find_table( char **name )
 
 	if ( ( tfp = hp8647a_open_table( *name ) ) != NULL )
 	{
-		hp8647a.table_file = get_string_copy( *name );
+		hp8647a.table_file = T_strdup( *name );
 		return tfp;
 	}
 

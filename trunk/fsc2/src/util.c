@@ -338,7 +338,7 @@ int is_in( const char *supplied_in, const char **altern, int max )
 	/* Get copy of input string and get rid of leading and trailing white
 	   space */
 
-	in = cpy = get_string_copy( supplied_in );
+	in = cpy = T_strdup( supplied_in );
 	while ( isspace( *in ) )
 		in++;
 	while( isspace( cpy[ strlen( cpy ) - 1 ] ) )

@@ -70,7 +70,7 @@ WS          [\n\t ]+
 {FILE}      {
 				*( devicestext + devicesleng - 1 ) = '\0';
 				T_free( Fname );
-				Fname = get_string_copy( devicestext + 2 );
+				Fname = T_strdup( devicestext + 2 );
 			}
 
 			/* handling of line number lines */
@@ -128,7 +128,7 @@ WS          [\n\t ]+
 			}
 
 {IDENT}     {
-				deviceslval.sptr = get_string_copy( devicestext );
+				deviceslval.sptr = T_strdup( devicestext );
 				return DEV_TOKEN;
 			}
 
