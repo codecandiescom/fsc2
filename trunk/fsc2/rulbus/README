@@ -78,8 +78,8 @@ script:
    interface is going to be connected from the leftmost column as the
    base address. If you later want to use the module with a different
    parallel port you don't have to recompile it, you can tell the
-   module to use a different base address by invoking it with the
-   "base" option, i.e. load it with e.g. 
+   module to use a different base address by loading it with the "base"
+   option, i.e. use e.g. 
 
 	   modprobe -k rulbus_epp base=0x378
 
@@ -136,7 +136,7 @@ problems finding them. In this case you may have to run 'ldconfig' to
 rebuild the linkers database of libraries.
 
 When you're done with installing program you will still have to write
-a configuration file for the Rulbus. listing which devices are sitting
+a configuration file for the Rulbus, listing which devices are sitting
 in which racks. Please see the rulbus_lib.txt file in the 'lib' sub-
 directory for more information.
 
@@ -158,14 +158,15 @@ functionality supplied by the library.
 V. Acknowledgments
 ==================
 
-Martin J. Moene and Arno (?) from the Electronics workshop of the
-Physics department of the Rijksuniversiteit Leiden, who developed
-the interface, were extremely helpful supplying informations and
-answering all my stupid questions.
+Martin J. Moene (moene@biophys.LeidenUniv.nl) and Arno van Amersfoort
+(arnova@molphys.leidenuniv.nl) from the Physics department of the
+Rijksuniversiteit Leiden, who developedthe interface, were extremely
+helpful by supplying all kinds of informations, very well-documented
+Windows code and answering all my stupid questions.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
 the driver and library in order to extend my fsc2 program to make
 it work with their 275 GHz EPR and ENDOR spectrometer.
 
 
-23.11.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+24.11.2003   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
