@@ -330,7 +330,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 	{
 		writer( C_BDELETE, len, buffer );
 		T_free( buffer );
-		return ( bool ) reader( NULL );
+		return reader( NULL ) ? SET: UNSET;
 	}
 	else
 	{
@@ -385,7 +385,7 @@ long exp_bstate( char *buffer, ptrdiff_t len )
 	{
 		writer( C_BSTATE, len, buffer );
 		T_free( buffer );
-		return reader( NULL );
+		return reader( NULL ) ? SET : UNSET;
 	}
 	else
 	{
@@ -529,7 +529,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 	{
 		writer( C_SDELETE, len, buffer );
 		T_free( buffer );
-		return ( bool ) reader( NULL );
+		return reader( NULL ) ? SET : UNSET;
 	}
 	else
 	{
@@ -761,7 +761,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 	{
 		writer( C_IDELETE, len, buffer );
 		T_free( buffer );
-		return ( bool ) reader( NULL );
+		return reader( NULL ) ? SET : UNSET;
 	}
 	else
 	{
@@ -904,7 +904,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 	{
 		writer( C_ODELETE, len, buffer );
 		T_free( buffer );
-		return ( bool ) reader( NULL );
+		return reader( NULL ) ? SET : UNSET;
 	}
 	else
 	{
