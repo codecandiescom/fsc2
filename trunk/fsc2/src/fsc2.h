@@ -66,9 +66,8 @@ int variables_parser( FILE *in );
 int phases_parser( FILE *in );
 int preparations_parser( FILE *in );
 int primary_experiment_parser( FILE *in );
-
-
-
+void sigchld_handler( int sig_type, void *data );
+bool run( void );
 
 
 #define TAB_LENGTH          4

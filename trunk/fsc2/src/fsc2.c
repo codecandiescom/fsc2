@@ -32,7 +32,7 @@ float *y;
 static void xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
-static void sigchld_handler( int sig_type, void *data );
+
 
 
 /**************************/
@@ -497,9 +497,9 @@ void run_file( FL_OBJECT *a, long b )
 	}
 
 	/* Finally start the experiment */
-/*
+
 	run( );
-*/
+
 }
 
 
