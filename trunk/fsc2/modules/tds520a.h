@@ -24,7 +24,7 @@
 #define TDS520A_REF2   6
 #define TDS520A_REF3   7
 #define TDS520A_REF4   8
-#define TDS520A_AUX1   0         /* Auxiliary (for triggger only) */
+#define TDS520A_AUX1   9         /* Auxiliary (for triggger only) */
 #define TDS520A_AUX2  10         /* Auxiliary (for triggger only) */
 #define TDS520A_LIN   11         /* Line In (for triggger only) */
 
