@@ -35,6 +35,7 @@ bool functions_init( void );
 void functions_exit( void );
 Var *func_get( const char *name, int *access );
 Var *func_call( Var *f );
+void close_all_files( void );
 
 /* from func_list_lexer.flex */
 
