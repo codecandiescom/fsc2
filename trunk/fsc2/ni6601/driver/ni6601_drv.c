@@ -38,9 +38,7 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
 static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
 static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
 static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
-#if 0
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
-#endif
 
 
 static Board boards[ NI6601_MAX_BOARDS ];
@@ -149,9 +147,7 @@ static void __exit ni6601_cleanup( void )
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
 	board->dev = dev;
-#if 0
 	board->irq = 0;
-#endif
 
         if ( pci_enable_device( dev ) )
 	{
@@ -192,7 +188,6 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 
 	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x80,
 		board->mite + 0xC0 );
-#if 0
 	/* Request the interrupt used by the board */
 
 	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
@@ -203,7 +198,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	}
 
 	board->irq = dev->irq;
-#endif
+
 	spin_lock_init( &board->spinlock );
 
 	ni6601_register_setup( board );
@@ -388,7 +383,7 @@ static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 
 	/* Read in data value from DIO parallel input register */
 
-	dio.value = ( unsigned char ) 
+	dio.value = ( unsigned char )
 		    ( readw( board->regs.dio_parallel_in ) & dio.mask );
 
 	if ( copy_to_user( arg, &dio, sizeof *arg ) ) {
@@ -494,8 +489,7 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 		init_waitqueue_head( &waitqueue );
 		while ( readw( board->regs.joint_status[ cs.counter ] ) &
 			( cs.counter & 1 ? G0_COUNTING : G1_COUNTING ) ) {
-			udelay( 100 );
-//			interruptible_sleep_on_timeout( &waitqueue, 1 );
+			interruptible_sleep_on_timeout( &waitqueue, 1 );
 			if ( signal_pending( current ) ) {
 				PDEBUG( "Aborted by signal\n" );
 				return -EINTR;
@@ -720,7 +714,7 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 /*----------------------------------------------------------*/
 /* Interrupt handler for all boards, not doing anything yet */
 /*----------------------------------------------------------*/
-#if 0
+
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 {
 	Board *board = ( Board * ) data;
@@ -733,7 +727,6 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 
 	PDEBUG( "Got interrupt\n" );
 }
-#endif
 
 
 EXPORT_NO_SYMBOLS;
