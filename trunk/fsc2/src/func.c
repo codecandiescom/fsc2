@@ -89,6 +89,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
 	{ "save_program",  f_save_p,  -1, ACCESS_EXP,  UNSET	},
 	{ "save_output",   f_save_o,  -1, ACCESS_EXP,  UNSET	},
 	{ "save_comment",  f_save_c,  -1, ACCESS_EXP,  UNSET	},
+    { "layout",        f_layout,   1, ACCESS_EXP,  UNSET    },
     { "button_create", f_bcreate, -1, ACCESS_EXP,  UNSET	},
     { "button_delete", f_bdelete, -1, ACCESS_EXP,  UNSET	},
     { "button_state",  f_bstate,  -1, ACCESS_EXP,  UNSET	},

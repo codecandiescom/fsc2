@@ -107,6 +107,7 @@ typedef struct {
 /* exported functions */
 
 
+Var *f_layout( Var *v );
 Var *f_bcreate( Var *v );
 Var *f_bdelete( Var *v );
 Var *f_bstate( Var *v );
