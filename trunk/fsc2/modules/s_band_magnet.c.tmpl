@@ -148,10 +148,14 @@ int s_band_magnet_tmpl_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
+	/* If a start field was given set it, otherwise go to the middle of the
+	   allowed field range */
+
 	if ( magnet.is_start_field )
 		magnet_goto_field( magnet.start_field );
 	else
-		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD );
+		magnet_goto_field( S_BAND_MAGNET_TMPL_MIN_FIELD
+						   + 2047 * magnet.resolution );
 
 	/* >>> Should we wait here a bit ? <<< */
 /*
@@ -243,7 +247,7 @@ Var *magnet_setup( Var *v )
 
 	field_step = get_double( v, "field step width" );
 
-	if ( fabs( field_step ) < magnet.resolution )
+	if ( fabs( field_step ) * 1.01 < magnet.resolution )
 	{
 		print( FATAL, "Field sweep step size (%lf G) too small, minimum is "
 			   "%f G.\n", field_step, magnet.resolution );
