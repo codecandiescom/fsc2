@@ -14,6 +14,7 @@ typedef struct Dev_ {
 	bool is_loaded;
 	struct Dev_ *next;
 	struct Dev_ *prev;
+	int count;
 } Device;
 
 
