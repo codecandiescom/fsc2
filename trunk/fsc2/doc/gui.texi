@@ -488,9 +488,9 @@ changes to an arrow pointing to the left
 , @image{cursor8,5mm,},
 @end ifnotinfo
 and if you move the mouse (while keeping the left mouse button pressed
-down) new cross sections are displayed corrseponding to the current
-mouse position (and the indicator gets redrawn at the position of the
-current cross section). If you want to run through all cross sections
+down) new cross sections are displayed according to the current mouse
+position (and the indicator gets redrawn at the position of the current
+cross section). If you want to run through all cross sections
 sequentially you can also use the up- and down-cursor keys. To get to
 the first cross section (i.e.@: the one at the lower end of the z-scale)
 press the @code{Page down} key, to get to the last press the @code{Page
