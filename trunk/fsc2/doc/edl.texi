@@ -103,10 +103,10 @@ the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
 Research lock-in amplifier SR530.
 
 In the following section, starting with the keyword @code{VARIABLES:},
-all variables, that are going to be used in the program, are listed and,
-if appropriate, initialized. The first variables are for storing the
+all variables that are used in the program are listed and, if
+appropriate, initialized. The first three variables are for storing the
 start and end field of the field sweep as well as the step width between
-the data points. The variable @code{field} will later be used for
+the data points. The next variable @code{field} will later be used for
 storing the current field value and is initialized to the value of the
 start field.  Finally, a counter variable @code{I}, initialized to 1,
 and another variable, @code{data}, later to be used for storing the data
