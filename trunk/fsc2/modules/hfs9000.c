@@ -170,13 +170,14 @@ int hfs9000_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
-
 	hfs9000_IN_SETUP = SET;
 	hfs9000_init_setup( );
 	hfs9000_IN_SETUP = UNSET;
 
-	/* We need some somewhat different functions for setting some of the
-	   pulser properties */
+	/* We need some somewhat different functions (or disable some) for
+	   setting the pulse properties */
+
+	pulser_struct.set_pulse_function = NULL;
 
 	pulser_struct.set_pulse_position = hfs9000_change_pulse_position;
 	pulser_struct.set_pulse_length = hfs9000_change_pulse_length;

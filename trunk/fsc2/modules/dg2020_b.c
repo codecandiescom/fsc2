@@ -194,8 +194,11 @@ int dg2020_b_test_hook( void )
 	dg2020_init_setup( );
 	dg2020_IN_SETUP = UNSET;
 
-	/* We need some somewhat different functions for setting some of the
-	   pulser properties */
+	/* We need some somewhat different functions (or disable some of them) for
+	   setting of pulse properties */
+
+	pulser_struct.set_pulse_function = NULL;
+	pulser_struct.set_pulse_phase_cycle = NULL;
 
 	pulser_struct.set_pulse_position = dg2020_change_pulse_position;
 	pulser_struct.set_pulse_length = dg2020_change_pulse_length;

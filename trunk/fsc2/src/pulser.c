@@ -57,6 +57,7 @@ void pulser_struct_init( void )
 	pulser_struct.set_trig_in_impedance      = NULL;
 	pulser_struct.set_max_seq_len            = NULL;
 	pulser_struct.set_phase_reference        = NULL;
+	pulser_struct.new_pulse                  = NULL;
 	pulser_struct.set_pulse_function         = NULL;
 	pulser_struct.set_pulse_position         = NULL;
 	pulser_struct.set_pulse_length           = NULL;
@@ -114,9 +115,12 @@ void is_pulser_driver( void )
 /* This function is called to determine if a certain pulser function    */
 /* needed by the experiment is supplied by the pulser driver. The first */
 /* argument is the functions address, the second a piece of text to be  */
-/* inserted in the error message (for convenience it is also tested if  */
-/* there's a driver at all so that not each function has to test for    */
-/* this even when the name of the pulser isn't explicitely needed).     */
+/* inserted in the error message - some function may become disabled    */
+/* during the test run and the experiment, so a different error message */
+/* is printed depending on the context. For convenience it is also      */
+/* tested if there's a driver at all so that not each function has to   */
+/* test for this even when the name of the pulser isn't explicitely     */
+/* needed).                                                             */
 /*----------------------------------------------------------------------*/
 
 void is_pulser_func( void *func, const char *text )
@@ -125,8 +129,13 @@ void is_pulser_func( void *func, const char *text )
 
 	if ( func == NULL )
 	{
-		eprint( FATAL, SET, "%s: Function for %s not found in module.\n",
-				pulser_struct.name, text );
+		if ( TEST_RUN || I_am == CHILD )
+			eprint( FATAL, SET, "%s: Function for %s doesn't exist or can't "
+					"be used during the experiment.\n",
+					pulser_struct.name, text );
+		else
+			eprint( FATAL, SET, "%s: Function for %s not found in module.\n",
+					pulser_struct.name, text );
 		THROW( EXCEPTION )
 	}
 }
