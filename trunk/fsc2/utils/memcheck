@@ -1,29 +1,21 @@
 #! /usr/bin/perl -w
 #
-# Script checks if for each malloc, calloc or realloc there is a free.
-# To be able to use it define MDEBUG when compiling fsc2 and run it with
-# stderr redirected to a file, which is in turn read in by memcheck.
-
+# Script checks if for each malloc(), calloc(), strdup() or realloc() there's
+# also a free(). To be able to use it define MDEBUG when compiling fsc2 and
+# run it with stderr redirected to a file which in turn is feed to the script.
 
 use strict;
 
+my ( $h, %h1, %h2, @f, $key );
 
-my ( $h, %h1, %h2, $a, @f, $key );
+while ( <> ) {
 
-if ( $#ARGV == -1 ) {
-	open( F, "<mem" ) or die "Can' open file `mem'";
-} else {
-	open( F, "<$ARGV[0]" ) or die "Can' open file `$ARGV[0]'";
-}
-
-while ( <F> ) {
 	@f = split /\s+/;
 
 	$h = $f[ 0 ] eq "(0)" ? \%h1 : \%h2;
 
-	$$h{ $f[ 2 ] } = "malloc $f[ 2 ] at line $." if $f[ 1 ] eq "malloc:";
-	$$h{ $f[ 2 ] } = "calloc $f[ 2 ] at line $." if $f[ 1 ] eq "calloc:";
-	$$h{ $f[ 2 ] } = "strdup $f[ 2 ] at line $." if $f[ 1 ] eq "strdup:";
+	$$h{ $f[ 2 ] } = "$1 $f[ 2 ] at line $."
+		if $f[ 1 ] =~ /^((malloc)|(calloc)|(strdup)):$/;
 
 	if ( $f[ 1 ] eq "realloc:" ) {
 		if ( $f[ 2 ] eq "(nil)" ) {
@@ -47,18 +39,12 @@ while ( <F> ) {
 	}
 }
 
-close( F );
-
 if ( ( keys %h1 ) ) {
 	print "Remaing memory from parent:\n";
-	foreach $key ( keys %h1 ) {
-		print "$h1{ $key }\n";
-	}
+	print "$h1{ $_ }\n" for ( keys %h1 );
 }
 
 if ( ( keys %h1 ) ) {
 	print "Remaing memory from child:\n";
-	foreach $key ( keys %h2 ) {
-		print "$h2{ $key }\n";
-	}
+	print "$h2{ $_ }\n" for ( keys %h2 );
 }
