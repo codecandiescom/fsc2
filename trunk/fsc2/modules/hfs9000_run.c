@@ -67,7 +67,7 @@ void hfs9000_do_update( void )
 
 static bool hfs9000_update_pulses( bool flag )
 {
-	int i;
+	static int i;
 	FUNCTION *f;
 	PULSE *p;
 

@@ -2240,7 +2240,7 @@ Var *f_ivalue( Var *v )
 
 static IOBJECT *find_object_from_ID( long ID )
 {
-	IOBJECT *io = NULL;
+	IOBJECT *io;
 
 
 	if ( Tool_Box == NULL )            /* no objects defined yet ? */

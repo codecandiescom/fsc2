@@ -220,23 +220,26 @@ Var *boxcar_curve_length( Var *v )
 
 Var *boxcar_get_curve( Var *v )
 {
-	unsigned char *buffer;
+	static unsigned char *buffer;
 	double *ret_buffer;
 	char cmd[ 100 ];
 	long length;
 	long curve_type;
 	long curve_number = 0;
 	long max_points;
-	long first, last;
+	static long first, last;
 	long num_points;
 	long i;
 	unsigned char *cc, *cn;
 	Var *cl;
 	double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
-	int new_timo, old_timo = -1;
+	int new_timo;
+	static int old_timo;
 	double max_time;
 	bool size_dynamic = UNSET;
 
+
+	old_timo = -1;
 
 	if ( ! TEST_RUN && I_am == PARENT )
 	{

@@ -61,7 +61,7 @@ void dg2020_do_update( void )
 
 bool dg2020_reorganize_pulses( bool flag )
 {
-	int i;
+	static int i;
 	FUNCTION *f;
 	PULSE *p;
 

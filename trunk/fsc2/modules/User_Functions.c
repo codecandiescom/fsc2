@@ -64,6 +64,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 
 Var *get_phase_cycled_area( Var *v )
 {
+	static Var *V;
 	Var *func_ptr;
 	Var *vn;                                /* all purpose variable */
 	static bool first_time = SET;
@@ -71,7 +72,7 @@ Var *get_phase_cycled_area( Var *v )
 	static bool is_get_area_fast;
 	bool is_channel;
 	long channel[ 2 ];
-	long num_windows;
+	static long num_windows;
 	long *win_list;
 	long i, j;
 	int access;
@@ -79,6 +80,8 @@ Var *get_phase_cycled_area( Var *v )
 	int channels_needed = 1;
 	Acquisition_Sequence *aseq = ASeq;      /* first acquisition sequence */
 
+
+	V = v;
 
 	/* The first time we get here we need to do some basic checks, i.e. find
 	   out if all needed functions can be used */
@@ -93,7 +96,7 @@ Var *get_phase_cycled_area( Var *v )
 
 	/* Next step: check the parameter */
 
-	if ( v == NULL )
+	if ( V == NULL )
 	{
 		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
 		THROW( EXCEPTION );
@@ -110,7 +113,7 @@ Var *get_phase_cycled_area( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, Cur_Func, channel ) )
+	if ( ! get_channel_number( V, Cur_Func, channel ) )
 	{
 		eprint( FATAL, SET, "%s(): Invalid digitizer "
 				"channel number: %ld.\n", Cur_Func, channel[ 0 ] );
@@ -121,9 +124,9 @@ Var *get_phase_cycled_area( Var *v )
 	   next argument must be a channel number. If only one channel is needed
 	   the next argument can be either a channel number or a window number */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	if ( ( V = vars_pop( V ) ) != NULL )
 	{
-		is_channel = get_channel_number( v , Cur_Func, channel + 1 );
+		is_channel = get_channel_number( V , Cur_Func, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
@@ -137,7 +140,7 @@ Var *get_phase_cycled_area( Var *v )
 					"found as second argument.\n", Cur_Func );
 
 		if ( is_channel )
-			v = vars_pop( v );
+			V = vars_pop( V );
 	}
 
 	/* Now we've got to count the remaining arguments on the stack to find out
@@ -145,9 +148,9 @@ Var *get_phase_cycled_area( Var *v )
 
 	num_windows = 1;
 
-	if ( v != NULL )
+	if ( V != NULL )
 	{
-		vn = v;
+		vn = V;
 		while ( ( vn = vn->next ) != NULL )
 			num_windows++;
 	}
@@ -156,22 +159,22 @@ Var *get_phase_cycled_area( Var *v )
 
 	TRY
 	{
-		if ( v != NULL )
+		if ( V != NULL )
 		{
 			for ( i = 0; i < num_windows; i++ )
 			{
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				vars_check( V, INT_VAR | FLOAT_VAR );
 
-				if ( v->type == INT_VAR )
-					win_list[ i ] = v->val.lval;
+				if ( V->type == INT_VAR )
+					win_list[ i ] = V->val.lval;
 				else
 				{
 					eprint( WARN, SET, "%s(): Floating point value used as "
 							"window number.\n", Cur_Func );
-					win_list[ i ] = lround( v->val.dval );
+					win_list[ i ] = lround( V->val.dval );
 				}
 
-				v = vars_pop( v );
+				V = vars_pop( V );
 			}
 		}
 		else
@@ -283,6 +286,7 @@ Var *get_phase_cycled_area( Var *v )
 
 Var *get_phase_cycled_area_2( Var *v )
 {
+	static Var *V;
 	Var *func_ptr;
 	Var *vn;                                /* all purpose variable */
 	static bool first_time = SET;
@@ -291,7 +295,7 @@ Var *get_phase_cycled_area_2( Var *v )
 	bool is_channel;
 	bool need_A, need_B;
 	long channel[ 2 ];
-	long num_windows;
+	static long num_windows;
 	long *win_list;
 	long i, j;
 	int access;
@@ -320,7 +324,7 @@ Var *get_phase_cycled_area_2( Var *v )
 
 	/* Next step: check the parameter */
 
-	if ( v == NULL )
+	if ( V == NULL )
 	{
 		eprint( FATAL, SET, "%s(): Missing arguments.\n", Cur_Func );
 		THROW( EXCEPTION );
@@ -345,7 +349,7 @@ Var *get_phase_cycled_area_2( Var *v )
 	/* The first parameter must be a channel number in any case, ask digitizer
 	   module if it really is one */
 
-	if ( ! get_channel_number( v, Cur_Func, channel ) )
+	if ( ! get_channel_number( V, Cur_Func, channel ) )
 	{
 		eprint( FATAL, SET, "%s(): Invalid digitizer channel number: %ld.\n",
 				Cur_Func, channel[ 0 ] );
@@ -356,9 +360,9 @@ Var *get_phase_cycled_area_2( Var *v )
 	   next argument must be a channel number. If only one channel is needed
 	   the next argument can be either a channel number or a window number */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
+	if ( ( V = vars_pop( V ) ) != NULL )
 	{
-		is_channel = get_channel_number( v , Cur_Func, channel + 1 );
+		is_channel = get_channel_number( V , Cur_Func, channel + 1 );
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
@@ -372,7 +376,7 @@ Var *get_phase_cycled_area_2( Var *v )
 					"found as second argument.\n", Cur_Func );
 
 		if ( is_channel )
-			v = vars_pop( v );
+			V = vars_pop( V );
 	}
 
 	/* Now we've got to count the remaining arguments on the stack to find out
@@ -380,9 +384,9 @@ Var *get_phase_cycled_area_2( Var *v )
 
 	num_windows = 1;
 
-	if ( v != NULL )
+	if ( V != NULL )
 	{
-		vn = v;
+		vn = V;
 		while ( ( vn = vn->next ) != NULL )
 			num_windows++;
 	}
@@ -391,24 +395,24 @@ Var *get_phase_cycled_area_2( Var *v )
 
 	TRY
 	{
-		if ( v != NULL )
+		if ( V != NULL )
 		{
 			for ( i = 0; i < num_windows; i++ )
 			{
-				vars_check( v, INT_VAR | FLOAT_VAR );
+				vars_check( V, INT_VAR | FLOAT_VAR );
 				TRY_SUCCESS;
 			}
 
-			if ( v->type == INT_VAR )
-				win_list[ i ] = v->val.lval;
+			if ( V->type == INT_VAR )
+				win_list[ i ] = V->val.lval;
 			else
 			{
 				eprint( WARN, SET, "%s(): Floating point value used as "
 						"window number.\n", Cur_Func );
-				win_list[ i ] = lround( v->val.dval );
+				win_list[ i ] = lround( V->val.dval );
 			}
 
-			v = vars_pop( v );
+			V = vars_pop( V );
 		}
 		else
 			win_list[ 0 ] = -1;              /* No window is to be used ! */

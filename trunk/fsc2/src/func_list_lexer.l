@@ -170,7 +170,7 @@ PREP        return PREP_TOKEN;
 int func_list_parse( Func **fncts, int num_func )
 {
 	static bool is_restart = UNSET;
-	static nf;
+	static int nf;
 	int num_predef_func = num_func;
 	int num;
 	int cur;
