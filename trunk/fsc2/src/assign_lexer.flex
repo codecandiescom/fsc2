@@ -48,10 +48,24 @@ PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
 
-WS          [\n=,:. ]+
+P           P(ULSE)?_?{INT}
+
+F           F(UNC(TION)?)?
+S           S(TART)?
+L			L(EN(GTH)?)?
+DS          D(EL(TA)?)?_?S(TART)?
+DL          D(EL(TA)?)?_?L(EN(GTH)?)?
+ML          M(AX(IMUM)?)?_?L(EN(GTH)?)?
+
+STR         \x5[^\x6]*\x6
+ESTR        \x5.*\x3\n.*\n
+
+IDENT       [A-Za-z]+[A-Za-z0-9_]*
+
 INT         [+-]?[0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
+
 MW          M(ICRO)?_?W(AVE)?:?
 TWT         T(RAVELING)?_?W(AVE)?_?T(UBE)?:?
 TWT_GATE    T(RAVELING)?_?W(AVE)?_?T(UBE)?_?G(ATE)?:?
@@ -61,11 +75,14 @@ RF          R(ADIO)?_?F(REQUENCY)?:?
 RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
 PX          PH(ASE)?_?X:?
 PY          PH(ASE)?_?Y:?
+
 DEL         ((D)|(DEL)|(DELAY)):?
 POD         P(OD)?
 CH          C(H(ANNEL)?)?
 INV         I(NV(ERT(ED)?)?)?
-UNREC       [^\n=,;:. ]+
+
+WS          [\n=,:. ]+
+UNREC       [^\n \t;,\(\)\=\+\-\*\/\[\]\{\}\%\^]+
 
 
 		/*---------------*/
@@ -89,6 +106,11 @@ UNREC       [^\n=,;:. ]+
 
 			/* handling of error messages from the cleaner */
 {ERR}		THROW( CLEANER_EXCEPTION );
+
+{ESTR}		{
+				assigntext = strchr( assigntext, '\x03' );
+				THROW( CLEANER_EXCEPTION );
+			}
 
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
@@ -150,6 +172,53 @@ UNREC       [^\n=,;:. ]+
 
 {CH}        return CH_TOKEN;
 
+{INV}       return INV_TOKEN;
+
+"\x4nsec"   return NS_TOKEN;
+"\x4usec"   return US_TOKEN;
+"\x4msec"   return MS_TOKEN;
+"\x4sec"    return S_TOKEN;
+
+			/* all needed pulse related keywords... */
+
+			/* combinations of pulse and property, e.g. `P3.LEN' */
+
+{P}?"."{F}  {
+				assignlval.vptr
+				              = pulse_get_by_addr( n2p( assigntext ), P_FUNC );
+				return VAR_REF;
+            }
+
+{P}?"."{S}  {
+				assignlval.vptr
+				               = pulse_get_by_addr( n2p( assigntext ), P_POS );
+				return VAR_REF;
+            }
+
+{P}?"."{L}  {
+				assignlval.vptr
+				               = pulse_get_by_addr( n2p( assigntext ), P_LEN );
+				return VAR_REF;
+            }
+
+{P}?"."{DS} {
+				assignlval.vptr
+				              = pulse_get_by_addr( n2p( assigntext ), P_DPOS );
+				return VAR_REF;
+            }
+
+{P}?"."{DL} {
+				assignlval.vptr
+				              = pulse_get_by_addr( n2p( assigntext ), P_DLEN );
+				return VAR_REF;
+            }
+
+{P}?"."{ML} {
+				assignlval.vptr
+				            = pulse_get_by_addr( n2p( assigntext ), P_MAXLEN );
+				return VAR_REF;
+            }
+
 {INT}       {
             	assignlval.lval = atol( assigntext );
                 return INT_TOKEN;
@@ -160,12 +229,65 @@ UNREC       [^\n=,;:. ]+
                 return FLOAT_TOKEN;
             }
 
-{INV}       return INV_TOKEN;
+            /* handling of string constants (to be used as format strings in
+			   the print() function only */
+{STR}       {
+				assigntext[ strlen( assigntext ) - 1 ] = '\0';
+				assignlval.sptr = assigntext + 1;
+				return STR_TOKEN;
+			}
 
-"\x4nsec"   return NS_TOKEN;
-"\x4usec"   return US_TOKEN;
-"\x4msec"   return MS_TOKEN;
-"\x4sec"    return S_TOKEN;
+			/* handling of function, variable and array identifiers */
+{IDENT}     {
+				int acc;
+
+				/* first check if the identifier is a function name */
+
+				assignlval.vptr = func_get( assigntext, &acc );
+				if ( assignlval.vptr != NULL )
+				{
+					/* if it's a function check that the function can be used
+					   in the current context */
+
+					if ( acc != ACCESS_ALL_SECTIONS )
+					{
+						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
+								 "in ASSIGN section.\n",
+								 Fname, Lc, assigntext );
+						THROW( SYNTAX_ERROR_EXCEPTION );
+					}
+					return FUNC_TOKEN;
+				}
+
+				/* if it's not a function it's got to be a variable */
+
+				if ( ( assignlval.vptr = vars_get( assigntext ) )
+				     == NULL )
+			         assignlval.vptr = vars_new( assigntext );
+				return VAR_TOKEN;
+			}
+
+			/* stuff used with functions, arrays and math */
+
+"=="        return EQ;        /* equal */
+"<"         return LT;        /* less than */
+"<="        return LE;        /* less than or equal */
+">"         return GT;        /* greater than */
+">="        return GE;        /* greater than or equal */
+"="         return '=';       /* assignment operator */
+"["         return '[';       /* start of array indices */
+"]"         return ']';       /* end of array indices */
+","         return ',';       /* list separator */
+"("         return '(';       /* start of function argument list */
+")"         return ')';       /* end of function argument list */
+"{"         return '{';       /* start of initialisation data list */
+"}"         return '}';       /* end of initialisation data list */
+"+"         return '+';       /* addition operator */
+"-"         return '-';       /* subtraction operator or unary minus */
+"*"         return '*';       /* multiplication operator */
+"/"         return '/';       /* division operator */
+"%"         return '%';       /* modulo operator */
+"^"         return '^';       /* exponentiation operator */
 
 {WS}        /* skip prettifying characters */
 

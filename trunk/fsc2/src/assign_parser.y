@@ -25,6 +25,8 @@ int Channel_Type;
 %union {
 	long   lval;
 	double dval;
+	char   *sptr;
+	Var    *vptr;
 }
 
 
@@ -46,10 +48,24 @@ int Channel_Type;
 %token US_TOKEN              /* usec */
 %token MS_TOKEN              /* msec */
 %token S_TOKEN               /* sec */
+
+%token <vptr> VAR_TOKEN            /* variable */
+%token <vptr> VAR_REF
+%token <vptr> FUNC_TOKEN           /* function */
 %token <lval> INT_TOKEN
 %token <dval> FLOAT_TOKEN
+%token <sptr> STR_TOKEN
+%token EQ LT LE GT GE
 
 %type <dval> time unit
+%type <vptr> expr list1
+
+%left EQ LT LE GT GE
+%left '+' '-'
+%left '*' '/'
+%left '%'
+%right '^'
+%left NEG
 
 
 %%
@@ -65,10 +81,22 @@ input:   /* empty */
 
 /* A (non-empty) line has to start with one of the channel keywords */
 
-line:    keywd pcd ';'
+line:    keywd pcd ';'                { }
        | keywd pcd SECTION_LABEL      { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | keywd pcd keywd error ';'    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | error ';'                    { THROW ( SYNTAX_ERROR_EXCEPTION ); }
+       | VAR_TOKEN ';'                { }    /* no assignment to be done */
+       | VAR_TOKEN '=' expr ';'       { vars_assign( $3, $1 );
+                                        assert( Var_Stack == NULL ); }
+       | VAR_TOKEN '['                { vars_arr_start( $1 ); }
+         list1 ']'                    { vars_arr_lhs( $4 ); }
+         '=' expr ';'                 { vars_assign( $8, $8->prev );
+                                        assert( Var_Stack == NULL ); }
+       | FUNC_TOKEN '(' list2 ')' ';' { vars_pop( func_call( $1 ) ); }
+       | FUNC_TOKEN '['               { eprint( FATAL, "%s:%ld: `%s' is a "
+												"function and not an array.\n",
+												Fname, Lc, $1->name );
+	                                    THROW( VARIABLES_EXCEPTION ); }
 ;
 
 
@@ -127,6 +155,53 @@ unit:   /* empty */                  { $$ = 1.0; }
       | MS_TOKEN                     { $$ = 1.0e6; }
       | S_TOKEN                      { $$ = 1.0e9; }
 ;
+
+
+expr:    INT_TOKEN                    { $$ = vars_push( INT_VAR, $1 ); }
+       | FLOAT_TOKEN                  { $$ = vars_push( FLOAT_VAR, $1 ); }
+       | VAR_TOKEN                    { $$ = vars_push_copy( $1 ); }
+       | VAR_TOKEN '['                { vars_arr_start( $1 ); }
+         list1 ']'                    { $$ = vars_arr_rhs( $4 ); }
+       | FUNC_TOKEN '(' list2 ')'     { $$ = func_call( $1 ); }
+       | VAR_REF                      { $$ = $1; }
+       | expr EQ expr                 { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+       | expr LT expr                 { $$ = vars_comp( COMP_LESS, $1, $3 ); }
+       | expr GT expr                 { $$ = vars_comp( COMP_LESS, $3, $1 ); }
+       | expr LE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
+								      					$1, $3 ); }
+       | expr GE expr                 { $$ = vars_comp( COMP_LESS_EQUAL,
+								      					$3, $1 ); }
+       | expr '+' expr                { $$ = vars_add( $1, $3 ); }
+       | expr '-' expr                { $$ = vars_sub( $1, $3 ); }
+       | expr '*' expr                { $$ = vars_mult( $1, $3 ); }
+       | expr '/' expr                { $$ = vars_div( $1, $3 ); }
+       | expr '%' expr                { $$ = vars_mod( $1, $3 ); }
+       | expr '^' expr                { $$ = vars_pow( $1, $3 ); }
+       | '-' expr %prec NEG           { $$ = vars_negate( $2 ); }
+       | '(' expr ')'                 { $$ = $2 }
+;
+
+
+/* list of indices for access of an array element */
+
+
+list1:   /* empty */                  { $$ = vars_push( UNDEF_VAR ); }
+	   | expr                         { $$ = $1; }
+       | list1 ',' expr               { $$ = $3; }
+;
+
+/* list of function arguments */
+
+list2:   /* empty */
+       | exprs
+	   | list2 ',' exprs
+;
+
+exprs:   expr                         { }
+       | STR_TOKEN                    { vars_push( STR_VAR, $1 ); }
+;
+
+
 
 %%
 
