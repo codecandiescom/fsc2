@@ -34,7 +34,7 @@
 
 Using the pulsers has its own chapter covering the special methods to
 handle the pulser setup, create pulses and do phase cycling. It also
-describes how the way the pulser is to be used depends on the hardware
+describes how the way the pulsers are to be used depends on the hardware
 used in the spectrometer. Currently, there are three
 pulsers/spectrometer combinations of implemented:
 @itemize @bullet
@@ -52,9 +52,9 @@ ASSIGNMENTS:
 PHASES:
 @end example
 @noindent
-The first section deals with the basic setup of the pulser, the second
+The first section deals with the basic setup of the pulsers, the second
 is only needed when phase cycling is used.  Valid statements in these
-sections differ slightly depending on the type of the pulser and the
+sections differ slightly depending on the type of the pulsers and the
 spectrometer.
 
 Beside these additional sections there are several other constructs for
@@ -68,7 +68,7 @@ this chapter.
 @node Setting up the Pulser, Defining Pulses, Using Pulsers, Using Pulsers
 @section Setting up the Pulser
 
-The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
+The basic setup of a pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
 cycling is planned for the experiment.
 
@@ -79,8 +79,8 @@ cycling is planned for the experiment.
 @subsection @code{ASSIGNMENTS} section
 @cindex @code{ASSIGNMENTS} section
 
-Within the @code{ASSIGNMENTS} section the pulsers time base and the
-trigger mode is set. It also deals with the basic setup of the channels,
+Within the @code{ASSIGNMENTS} section the pulsers time bases and trigger
+modes are set. It also deals with the basic setup of the channels,
 i.e. associating some or more output channels with certain functions and
 setting the physical characteristics of the channels (e.g.@: voltages
 etc.).
@@ -118,6 +118,19 @@ pulsers:
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
 @end itemize
+
+If you're using more than one pulser simultaneously you need as many
+@code{TIMEBASE} statements in your program. In this case you need to
+append a @code{#} character plus the number of the pulser to indicate
+for which this statement is to be used. E.g.@: if you have two pulsers
+you will need two @code{TIMEBASE} statements:
+@example
+TIMEBASE#1:  5 ns;
+TIMEBASE#2: 25 ns;
+@end example
+@noindent
+As usual, the additional @code{#1} in the first statement can be left out.
+
 
 
 @c ########################################################
@@ -207,6 +220,11 @@ Please note: The trigger input impedance can only be set for the
 For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
+
+If you need to control more than one pulser you may have a
+@code{TRIGGER_MODE} statement for each of the pulsers. In this case you
+need to append a @code{#} and the number of the pulser to make it clear
+for which pulser the trigger mode is to be used.
 
 
 @c ########################################################
@@ -404,6 +422,11 @@ difficult. By the way, the keyword @code{DELAY} can be abbreviated to
 @code{DEL}.}.
 
 
+If you are dealing with two or more pulsers simultaneously you will have
+to append a @code{#} character plus the pulser number to each of the
+channel function setup statements.
+
+
 @c ########################################################
 
 @anchor{Phase channel setup}
@@ -550,6 +573,9 @@ pulses. If the pulse distances get very small it may drop the grace
 period but the phase switch delay will always be there (or the program
 will abort with an error message).
 
+Too all of these statements a @code{#} character plus the pulser number
+must be added when more than pulser is used.
+
 
 @c ########################################################
 
@@ -590,6 +616,10 @@ start of the experiment. On the other hand, too short a pattern length
 will lead to the experiment being stopped with an error message when the
 actual pattern length becomes larger than the one specified.
 
+When more than one pulser is used you may to append a @code{#} character
+plus the pulser number to the @code{MAXIMUM_PATTERN_LENGTH} keyword to
+indicate for which pulser it is to be used.
+
 
 @c ########################################################
 
@@ -598,7 +628,7 @@ actual pattern length becomes larger than the one specified.
 @cindex Keeping unused pulses
 @cindex @code{KEEP_ALL_PULSES}
 
-Usually, pulses that in the test run are found to be unused are deleted
+Usually pulses that in the test run are found to be unused are deleted
 and a warning message is printed. Any further reference to or use of
 these deleted pulses leads to the immediate termination of the
 experiment. But there are a few situations where it can't be detected in
@@ -613,6 +643,9 @@ KEEP_ALL_PULSES;
 @end example
 @noindent
 and pulses will not be deleted even if they seem to be unused.
+
+Again, when dealing with more than one pulser an additional @code{#}
+character, followed by the pulser number, may be needed.
 
 
 @c ########################################################
@@ -694,7 +727,7 @@ the phase sequences.
 @node Defining Pulses, Using Pulses, Setting up the Pulser, Using Pulsers
 @section Defining Pulses
 
-@cindex @code{PULSE_}x
+@cindex @code{PULSE_}
 @cindex @code{FUNCTION}
 @cindex @code{START}
 @cindex @code{LENGTH}
@@ -730,6 +763,26 @@ Pulse numbers can be chosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
 @w{(2^32 - 1)}. Positions and lengths of pulses have to be positive
 (including 0). A pulse of zero length is invisible.
+
+If more than one pulser is used it must also be indicated which pulser
+is supposed to create the pulse. This must be done by appending the
+@code{#} character, followed by the pulser number, to the @code{PULSE}
+keyword. Thus, if e.g.@: the pulse numbered 3 has to be created by the
+second pulser it must be created by a command like the follwoing:
+@example
+PULSE_3#2:   FUNCTION = RADIO_FREQUENCY,
+             START    = 2 ms,
+             LENGTH   = 8 ms;
+@end example
+@noindent
+Please note that in this case a @code{RADIO_FREQUENCY} function must
+have been defined for the @strong{second} pulser.
+
+Even when using more than one pulser the pulse numbers still have to be
+unique. If e.g.@: a pulse numbered @code{1} has been created for the
+first pulser it is @strong{not} allowed to create a second pulse with
+the same number even when it is assigned to another pulser.
+
 
 There are three additional properties a pulse can have. The first one is
 the amount of time the start position of the pulse will be changed by
