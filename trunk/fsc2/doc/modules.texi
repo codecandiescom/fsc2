@@ -517,9 +517,10 @@ Var *square( Var *var )
 @end example
 @noindent
 As you see it is checked first that the variable passed to the function
-has the correct type - both integer and floating point values are ok.
+has the correct type - both integer and floating point values are ok
+(otherwise the interpretation of the @acronym{EDL} program woul be stopped).
 Next we distinguish between the possibilities that the value is
-either an integer or a floating point number by testing the @code{type}
+an integer or a floating point number by testing the @code{type}
 field of the variable. Then we create either a new integer variable by
 calling @code{vars_push()} with the square of the integer value or a new
 floating point variable. Finally, we return the variable pointer
@@ -553,11 +554,11 @@ return NULL;
 
 
 What if you want to write to function that returns more than one value?
-Again we use a function for a digitizer that has to return a curve as
-an array as an example. Let's assume the data you got from the digitizer
-are stored in an array of integers called @code{data} which has
-@code{len} elements (where @code{len} is a @code{long}). Now all you've
-got to do is call the function @code{vars_push()} as
+Again we use a function for a digitizer that has to return a curve
+stored in an array as an example. Let's assume the data you got from the
+digitizer are stored in an array of integers called @code{data} which
+has @code{len} elements (where @code{len} is a @code{long}). Now all
+you've got to do is call the function @code{vars_push()} as
 @example
 Var *ret_var;
 
