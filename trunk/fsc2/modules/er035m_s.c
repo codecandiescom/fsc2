@@ -65,20 +65,16 @@ static void er035_s_comm_fail( void );
 
 
 
-typedef struct
+static struct
 {
 	bool is_needed;         /* is the gaussmter needed at all? */
 	int state;              /* current state of the gaussmeter */
 	double field;           /* last measured field */
 	int resolution;         /* LOW = 0.01 G, HIGH = 0.001 G */
-    int fd;                 /* file descriptor for serial port */
-    struct termios old_tio, /* serial port terminal interface structures */
-		           new_tio; /* (stored old and current one) */
+    struct termios *tio;    /* serial port terminal interface structure */
 	char prompt;            /* prompt character send on each reply */
-} NMR;
+} nmr;
 
-
-static NMR nmr;
 static const char *er035m_s_eol = "\r\n";
 
 
@@ -796,40 +792,34 @@ static bool er035m_s_comm( int type, ... )
 			   should not become the controlling terminal, otherwise line
 			   noise read as a CTRL-C might kill the program. */
 
-			if ( ( nmr.fd = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-							  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) < 0 )
+			if ( ( nmr.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
 				return FAIL;
-
-			tcgetattr( nmr.fd, &nmr.old_tio );
-			memcpy( &nmr.new_tio, &nmr.old_tio, sizeof( struct termios ) );
 
 			/* Switch off parity checking (8N1) and use of 2 stop bits and
 			   clear character size mask, set character size mask to CS8 and
 			   the flag for ignoring modem lines, enable reading and, finally,
 			   set the baud rate. */
 
-			nmr.new_tio.c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-			nmr.new_tio.c_cflag |= CS8 | CLOCAL | CREAD;
-			cfsetispeed( &nmr.new_tio, SERIAL_BAUDRATE );
-			cfsetospeed( &nmr.new_tio, SERIAL_BAUDRATE );
-//			cfsetispeed( &nmr.new_tio, 0 );
+			nmr.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+			nmr.tio->c_cflag |= CS8 | CLOCAL | CREAD;
+			cfsetispeed( nmr.tio, SERIAL_BAUDRATE );
+			cfsetospeed( nmr.tio, SERIAL_BAUDRATE );
 
-			nmr.new_tio.c_iflag = IGNBRK;
-			nmr.new_tio.c_oflag = 0;
+			nmr.tio->c_iflag = IGNBRK;
+			nmr.tio->c_oflag = 0;
 
 			/* I don't think we can use canonical mode here... */
 
-			nmr.new_tio.c_lflag = 0;
+			nmr.tio->c_lflag = 0;
 
-			tcflush( nmr.fd, TCIOFLUSH );
-			tcsetattr( nmr.fd, TCSANOW, &nmr.new_tio );
+			fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
+			fsc2_tcsetattr( SERIAL_PORT, TCSANOW, nmr.tio );
 			break;
 
 		case SERIAL_EXIT :
 			er035m_s_write( "LOC" );
-			tcflush( nmr.fd, TCIOFLUSH );
-			tcsetattr( nmr.fd, TCSANOW, &nmr.old_tio );
-			close( nmr.fd );
+			fsc2_serial_close( SERIAL_PORT );
 			break;
 
 		case SERIAL_WRITE :
@@ -838,7 +828,7 @@ static bool er035m_s_comm( int type, ... )
 			va_end( ap );
 
 			len = strlen( buf );
-			if ( write( nmr.fd, buf, len ) != len )
+			if ( fsc2_serial_write( SERIAL_PORT, buf, len ) != len )
 				return FAIL;
 			break;
 
@@ -856,7 +846,7 @@ static bool er035m_s_comm( int type, ... )
 			{
 				if ( len < 0 )
 					usleep( ER035M_S_WAIT );
-				len = read( nmr.fd, buf, *lptr );
+				len = fsc2_serial_read( SERIAL_PORT, buf, *lptr );
 			}
 			while ( len < 0 && errno == EAGAIN && read_retries-- > 0 );
 				
