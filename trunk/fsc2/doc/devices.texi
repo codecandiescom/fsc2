@@ -50,7 +50,7 @@ limitations - if you've got a device with only 2 DACs no software
 trickery will ever magically convert it into a device with 4 DACs
 (additional hardware may, but that's a different topic...)
 
-The gist is, that, while a lot of abstraction possible, not all device
+The gist is, that, while a lot of abstraction is possible, not all device
 functions can be completely identical for all devices. Thus, while the
 names of the functions remain identical, the arguments the functions are
 called with may differ for different devices. But while this can be as
