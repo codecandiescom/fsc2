@@ -610,6 +610,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 	nv = vars_push( FLOAT_TRANS_ARR, array, length );
+	nv->flags |= IS_DYNAMIC;
 	T_free( array );
 	return nv;
 }

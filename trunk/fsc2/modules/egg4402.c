@@ -202,6 +202,7 @@ Var *boxcar_get_curve( Var *v )
 	double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
 	int new_timo, old_timo = -1;
 	double max_time;
+	bool size_dynamic = UNSET;
 
 
 	if ( ! TEST_RUN && I_am == PARENT )
@@ -319,6 +320,7 @@ Var *boxcar_get_curve( Var *v )
 	{
 		first = 0;
 		last = max_points - 1;
+		size_dynamic = SET;
 	}
 	else
 	{
@@ -342,7 +344,10 @@ Var *boxcar_get_curve( Var *v )
 		}
 
 		if ( ( v = vars_pop( v ) ) == NULL )
+		{
 			last = max_points - 1;
+			size_dynamic = SET;
+		}
 		else
 		{
 			if ( v->type == INT_VAR )
@@ -389,6 +394,8 @@ Var *boxcar_get_curve( Var *v )
 		
 		buffer = T_calloc( num_points, sizeof( double ) );
 		cl = vars_push( FLOAT_TRANS_ARR, buffer, last - first + 1 );
+		if ( size_dynamic )
+			cl->flags |= IS_DYNAMIC;
 		T_free( buffer );
 		return cl;
 	}

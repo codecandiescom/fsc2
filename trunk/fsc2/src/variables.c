@@ -1382,6 +1382,7 @@ Var *vars_arr_start( Var *v )
 			v->val.lpnt = NULL;
 		else
 			v->val.dpnt = NULL;
+		v->flags |= NEED_INIT;
 	}
 	else
 		vars_check( v, INT_ARR | FLOAT_ARR );
@@ -1580,8 +1581,9 @@ long vars_calc_index( Var *a, Var *v )
 		   we're still in the test phase, the array slice size might be a
 		   dummy value that get's corrected in the real measurement. In this
 		   case (i.e. test phase and array is dynamically sized and its the
-		   last index into the array) we accept the index and readjust it to
-		   the currenty possible maximum value. */
+		   last index into the array) we accept even an index that's to large
+		   and readjust it to the currenty possible maximum value hoping that
+		   everthing will work out well in the experiment. */
 
 		if ( cur >= a->sizes[ i ] )
 		{
@@ -1723,10 +1725,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 	else
 		a->val.dpnt = ( double * ) T_calloc( a->len, sizeof( double ) );
 
-	a->flags &= ~NEW_VARIABLE;
-	ret = vars_push( ARR_PTR, NULL, a );
-
-	return ret;
+	return vars_push( ARR_PTR, NULL, a );
 }
 
 
@@ -1849,6 +1848,8 @@ void vars_assign( Var *src, Var *dest )
 		default :
 			assert( 1 == 0 );           /* we never should end up here... */
 	}
+
+	dest->flags &= ~NEED_INIT;
 
 	if ( ! ( dest->type & ( INT_ARR | FLOAT_ARR ) ) )
 		vars_pop( dest );
@@ -1991,10 +1992,12 @@ void vars_ass_from_var( Var *src, Var *dest )
 }
  
 
-/*------------------------------------------------------*/
-/* The function assigns complete array slices. Both the */
-/* source and the destination type must be ARR_PTR.     */  
-/*------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/* The function assigns complete array slices. The source type must be    */
+/* an ARR_PTR while the destination can either be an array or an ARR_PTR  */
+/* (in the later case the array pointed to must expect to be assigned an  */
+/* array slice).                                                          */
+/*------------------------------------------------------------------------*/
 
 void vars_ass_from_ptr( Var *src, Var *dest )
 {
@@ -2025,8 +2028,6 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 		else
 			assert( 1 == 0 );
 	}
-
-	/* Again being paranoid... */
 
 	if ( dest->type == ARR_PTR )
 	{
@@ -2141,6 +2142,11 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 				*dest->val.dpnt++ = ( double ) *src->val.lpnt++;
 		}
 	}
+
+	/* The size of the destination array is now fixed if the source array has
+	   a fixed size */
+
+	d->flags &= d->flags & src->from->flags & IS_DYNAMIC;
 }
 
 
@@ -2192,12 +2198,6 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 	}
 
 	d = dest->from;
-
-	/* If the source array has a fixed size the size of the destination array
-	   becomes now alo fixed by the assignment, reflect this in its flags */
-
-	if ( ! ( src->flags & IS_DYNAMIC ) )
-		 dest->flags &= ~IS_DYNAMIC;
 
 	/* Again being paranoid... */
 
@@ -2278,6 +2278,8 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 		}
 	}
 
+	d->flags &= d->flags & src->flags & IS_DYNAMIC;
+
 	if ( dest_needs_pop )
 		vars_pop( dest );
 }
@@ -2303,6 +2305,7 @@ void vars_arr_init( Var *v )
 
 	if ( v->type == UNDEF_VAR )
 	{
+		v->prev->from->flags &= ~NEED_INIT;
 		vars_pop( v->prev );
 		vars_pop( v );
 		return;
@@ -2337,7 +2340,7 @@ void vars_arr_init( Var *v )
 
 	/* If the array isn't newly declared we can't do an assignment */
 
-	if ( ! ( v->flags & NEED_INIT ) )
+	if ( ! ( a->flags & NEED_INIT ) )
 	{
 		eprint( FATAL, "%s:%ld: Initialisation of array `%s' only allowed "
 				"immediately after declaration.\n", Fname, Lc, a->name );
@@ -2393,6 +2396,7 @@ void vars_arr_init( Var *v )
 		vars_pop( p1 );
 	}
 
+	a->flags &= ~NEED_INIT;
 	vars_pop( v );
 }
 
