@@ -26,7 +26,8 @@ void *T_malloc( size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
+	fprintf( stderr, "(%d) malloc:  %p (%u)\n",
+			 I_am == CHILD, mem, size );
 #endif
 
 	return mem;
@@ -49,7 +50,8 @@ void *T_calloc( size_t nmemb, size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "calloc:  %p (%u)\n", mem, nmemb * size );
+	fprintf( stderr, "(%d) calloc:  %p (%u)\n",
+			 I_am == CHILD, mem, nmemb * size );
 #endif
 	return mem;
 }
@@ -74,7 +76,8 @@ void *T_realloc( void *ptr, size_t size )
 	}
 
 #if defined MDEBUG
-	fprintf( stderr, "realloc: %p -> %p (%u)\n", ptr, new_ptr, size );
+	fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
+			 I_am == CHILD, ptr, new_ptr, size );
 #endif
 
 	return new_ptr;
@@ -90,7 +93,7 @@ void *T_free( void *ptr )
 		return NULL;
 
 #if defined MDEBUG
-	fprintf( stderr, "free:    %p\n", ptr );
+	fprintf( stderr, "(%d) free:    %p\n", I_am == CHILD, ptr );
 	fflush( stderr );
 	assert( mprobe( ptr ) == MCHECK_OK );
 #endif
