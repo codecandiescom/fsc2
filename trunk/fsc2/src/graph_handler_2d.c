@@ -1122,23 +1122,23 @@ void redraw_canvas_2d( Canvas *c )
 			/* Now draw the out of range arrows */
 
 			if ( cv->up )
-				XCopyArea( G.d, cv->up_arr, c->pm, c->gc, 0, 0,
+				XCopyArea( G.d, cv->up_arrow, c->pm, c->gc, 0, 0,
 						   G.up_arrow_w, G.up_arrow_h,
 						   ( G.canvas.w - G.up_arrow_w ) / 2, 5 );
 
 			if ( cv->down )
-				XCopyArea( G.d, cv->down_arr, c->pm, c->gc, 0, 0,
+				XCopyArea( G.d, cv->down_arrow, c->pm, c->gc, 0, 0,
 						   G.down_arrow_w, G.down_arrow_h,
 						   ( G.canvas.w - G.down_arrow_w ) / 2,
 						   G.canvas.h - 5 - G.down_arrow_h );
 
 			if ( cv->left )
-				XCopyArea( G.d, cv->left_arr, c->pm, c->gc, 0, 0,
+				XCopyArea( G.d, cv->left_arrow, c->pm, c->gc, 0, 0,
 						   G.left_arrow_w, G.left_arrow_h, 5,
 						   ( G.canvas.h - G.left_arrow_h ) / 2 );
 
 			if ( cv->right )
-				XCopyArea( G.d, cv->right_arr, c->pm, c->gc, 0, 0,
+				XCopyArea( G.d, cv->right_arrow, c->pm, c->gc, 0, 0,
 						   G.right_arrow_w, G.right_arrow_h,
 						   G.canvas.w - 5 - G.right_arrow_w,
 						   ( G.canvas.h - G.right_arrow_h ) / 2 );

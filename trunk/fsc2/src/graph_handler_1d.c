@@ -983,23 +983,23 @@ void redraw_canvas_1d( Canvas *c )
 					continue;
 
 				if ( cv->up )
-					XCopyArea( G.d, cv->up_arr, c->pm, c->gc,
+					XCopyArea( G.d, cv->up_arrow, c->pm, c->gc,
 							   0, 0, G.up_arrow_w, G.up_arrow_h,
 							   G.canvas.w / 2 - 32 + 16 * i, 5 );
 
 				if ( cv->down )
-					XCopyArea( G.d, cv->down_arr, c->pm, c->gc,
+					XCopyArea( G.d, cv->down_arrow, c->pm, c->gc,
 							   0, 0, G.down_arrow_w, G.down_arrow_h,
 							   G.canvas.w / 2 - 32 + 16 * i,
 							   G.canvas.h - 5 - G.down_arrow_h );
 
 				if ( cv->left )
-					XCopyArea( G.d, cv->left_arr, c->pm, c->gc,
+					XCopyArea( G.d, cv->left_arrow, c->pm, c->gc,
 							   0, 0, G.left_arrow_w, G.left_arrow_h,
 							   5, G.canvas.h / 2 -32 + 16 * i );
 
 				if ( cv->right )
-					XCopyArea( G.d, cv->right_arr, c->pm, c->gc,
+					XCopyArea( G.d, cv->right_arrow, c->pm, c->gc,
 							   0, 0, G.right_arrow_w, G.right_arrow_h,
 							   G.canvas.w - 5 - G.right_arrow_w,
 							   G.canvas.h / 2 - 32 + 16 * i );

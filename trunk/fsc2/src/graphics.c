@@ -235,7 +235,7 @@ static void G_struct_init( void )
 									   cursor_2_x_hot, cursor_2_y_hot );
 	G.cur_3 = fl_create_bitmap_cursor( cursor_3_bits, cursor_3_bits,
 									   cursor_3_width, cursor_3_height,
-									   cursor_3_x_hot, c3_y_hot );
+									   cursor_3_x_hot, cursor_3_y_hot );
 	G.cur_4 = fl_create_bitmap_cursor( cursor_4_bits, cursor_4_bits,
 									   cursor_4_width, cursor_4_height,
 									   cursor_4_x_hot, cursor_4_y_hot );
