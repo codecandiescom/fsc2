@@ -56,6 +56,14 @@ GPIB_LOG_LEVEL   = HIGH
 # the natural choice (which is also the default). For a local install, i.e.
 # if the program will be used by one person only and everything is installed
 # in his/her home directory this persons account and group can be used.
+#
+# A further important point is that due to the necessity to access physical
+# devices the program needs the permissions to access these devices, i.e.
+# the corresponding device files. Therefor the permissions for these device
+# files must be set so that either everyone is allowed to access these files
+# or (which is probably the saver alternative) that fsc2 itself is allowed
+# to access the devices, i.e. by including just fsc2 (and not everyone) into
+# the group that has the necessary access permissions.
 
 OWNER            = fsc2
 GROUP            = fsc2
