@@ -117,11 +117,11 @@ font name in quotes if the name contains characters that the shell might
 try to expand.
 
 @item @option{-stopMouseButton button_identifier}
-Specifies which mouse button has to be used to activate the stop button
-while the experiment is running. Use the string @code{left} or the
-number @code{1} for the left mouse button, @code{middle} or @code{2} for
-the middle and @code{right} or @code{3} for the right mouse button. Per
-default each of the three mouse buttons can be used.
+Specifies which mouse button has to be used to activate the @code{Stop}
+button while the experiment is running. Use the string @code{left} or
+the number @code{1} for the left mouse button, @code{middle} or @code{2}
+for the middle and @code{right} or @code{3} for the right mouse
+button. Per default each of the three mouse buttons can be used.
 
 @item @option{-noCrashMail}
 Usually, @acronym{fsc2} sends an email to the author whenever it
