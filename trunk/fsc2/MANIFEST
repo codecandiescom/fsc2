@@ -64,6 +64,8 @@ config/er035m_sa.conf
 config/er035m_sas.conf
 config/gpib.conf
 config/hfs9000.conf
+config/hjs_attenuator.calib
+config/hjs_attenuator.conf
 config/hjs_daadc.conf
 config/hp5340a.conf
 config/hp8647a.conf
@@ -193,6 +195,9 @@ modules/hfs9000_init.c
 modules/hfs9000_pulse.c
 modules/hfs9000_run.c
 modules/hfs9000_util.c
+modules/hjs_attenuator.c
+modules/hjs_attenuator.h
+modules/hjs_attenuator_lexer.l
 modules/hjs_daadc.c
 modules/hp5340a.c
 modules/hp864.c.tmpl

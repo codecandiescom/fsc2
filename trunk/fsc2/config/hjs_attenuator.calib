@@ -1,0 +1,81 @@
+# $Id$
+#
+# Default calibration list of attenuations versus setting of the
+# stepper motor for the hjs_attenuator module.
+#
+# About the syntax of the calibration file:
+# 1. Lines starting with a `#' are comments,
+# 2. Each line must have 2 entries, the first entry being the attenuation
+#    (which can have an unit appended to it), the second the corresponding
+#    stepper motor position.
+# 3. The entries don't have to be sorted.
+# 4. The entries don't have to be equidistant, for intermediate
+#    attenuations linear interpolation is used.
+# 5. The stepper motor positions must be monotonically decreasing function
+#    of the attenuations.
+# 6. Entries can be separated by spaces, commata, semicolons, colons, tabs
+#    or any combination of these characters (a unit will also work as a
+#    separator).
+# 7. Empty lines don't matter.
+
+
+  0.0 dB,  2400
+  0.2 dB,  2165
+  0.4 dB,  2071
+  0.6 dB,  1998
+  0.8 dB,  1937
+  1.0 dB,  1884
+  1.5 dB,  1774
+  2.0 dB,  1680
+  2.5 dB,  1598
+  3.0 dB,  1526
+  3.5 dB,  1460
+  4.0 dB,  1400
+  4.5 dB,  1345
+  5.0 dB,  1293
+  5.5 dB,  1245
+  6.0 dB,  1200
+  6.5 dB,  1157
+  7.0 dB,  1116
+  7.5 dB,  1078
+  8.0 dB,  1041
+  8.5 dB,  1007
+  9.0 dB,	974
+  9.5 dB,	942
+ 10.0 dB,	911
+ 11.0 dB,	854
+ 12.0 dB,	800
+ 13.0 dB,	752
+ 14.0 dB,	706
+ 15.0 dB,	664
+ 16.0 dB,	624
+ 17.0 dB,	587
+ 18.0 dB,	552
+ 19.0 dB,	520
+ 20.0 dB,	490
+ 21.0 dB,	462
+ 22.0 dB,	435
+ 23.0 dB,	410
+ 24.0 dB,	387
+ 25.0 dB,	364
+ 26.0 dB,	344
+ 27.0 dB,	324
+ 28.0 dB,	305
+ 29.0 dB,	288
+ 30.0 dB,	272
+ 31.0 dB,	256
+ 32.0 dB,	241
+ 33.0 dB,	228
+ 34.0 dB,	216
+ 35.0 dB,	203
+ 36.0 dB,	192
+ 37.0 dB,	181
+ 38.0 dB,	171
+ 39.0 dB,	161
+ 40.0 dB,	152
+ 42.0 dB,	135
+ 44.0 dB,	120
+ 46.0 dB,	107
+ 48.0 dB,	 95
+ 50.0 dB,	 85
+100.0 db,    -1
