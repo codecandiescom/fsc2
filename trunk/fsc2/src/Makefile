@@ -75,9 +75,9 @@ modules:
 
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
-# done because 'ECHO' (that is #defined in these files) is already also
+# done because 'ECHO' (which is #defined in these files) is already also
 # defined in termios.h. The second replacement is for avoiding other compiler
-# warnings about unitialized variables in the flex created files.
+# warnings about unitialized variables in the files created by flex.
 
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
