@@ -522,15 +522,16 @@ The function can only be used in the @code{PREPARATIONS} section.
 @item magnet_calibration_file()
 @findex magnet_calibration_file()
 This function is only available for the module @code{hfs_sfc}. For this
-module the magnet is controlled via the output voltage of a DAC (module
-@code{hjs_daadc}). To find out how the field changes with the DAC output
-voltage, two data are read from a calibration file, the field values for
-the minumum and the maximum DAC output voltage. Normally the name of the
-calibration file is taken from the configuration file for the module (if
-it isn't given with an absolute path the default directory where modules
-etc.@: get installed, usually @file{/usr/local/lib/fsc2}, is prepended
-to the file name). Using this function, a different calibration file can
-be used. The function expects the name of an existent, readable file (if
+module the magnet is controlled via the output voltage of a DAC
+(currently only module @code{hjs_daadc} is supported). To find out how
+the field changes with the DAC output voltage, two data are read from a
+calibration file, the field values for the minumum and the maximum DAC
+output voltage. Normally the name of the calibration file is taken from
+the configuration file for the module (if it isn't given with an
+absolute path the default directory where modules etc.@: get installed,
+usually @file{/usr/local/lib/fsc2}, is prepended to the file
+name). Using this function, a different calibration file can be
+used. The function expects the name of an existent, readable file (if
 given without an absolute path it's looked up relative to the current
 working directory, i.e.@: the directory @code{fsc2} was started from).
 This file must contain two values, first the field (in Gauss) at the
