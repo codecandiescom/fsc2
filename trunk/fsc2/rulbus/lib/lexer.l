@@ -49,7 +49,7 @@ static void count( void );
 
 %}
 
-STRING   [\"\'][^\"\']*[\"\']
+STRING   ("\""[^\"]*"\"")|("'"[^']*"'")
 INT      [0-9]+
 EXPO     [Ee][+-]?{INT}
 FLOAT    [+-]*((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
@@ -67,202 +67,202 @@ DEC      [+-]*[1-9][0-9]*
 %%		/*     RULES     */
 		/*---------------*/
 
-"#".*          { count( ); } /* Skip UNIX configuration file style comments */
-"//".*         { count( ); } /* Skip C++ style comments */
-"/*"           {  /* C style comment */
-	                count( );
-					yy_push_state( comm );
-               }
+"#".*              { count( ); } /* Skip UNIX config file style comments */
+"//".*             { count( ); } /* Skip C++ style comments */
+"/*"               {  /* C style comment */
+	              	    count( );
+			      	    yy_push_state( comm );
+                   }
 
-<comm>{        /* Handling of C style comments */
-"*"+"/"        { /* End of comment found */
-	               count( );
-				   yy_pop_state( );
-			   }
-.              { count( ); } /* Skip everything else in a comment */
-"\n"           { count( ); }
-<<EOF>>        { return EOFC_TOKEN; }  /* End of file in comment */
-}              /* End of C style comment handling */
+<comm>{            /* Handling of C style comments */
+"*"+"/"            { /* End of comment found */
+	                   count( );
+				       yy_pop_state( );
+			       }
+.                  { count( ); } /* Skip everything else in a comment */
+"\n"               { count( ); }
+<<EOF>>            { return EOFC_TOKEN; }  /* End of file in comment */
+}                  /* End of C style comment handling */
 
-"file"         { count(); return FILE_TOKEN; }
-"rack"         { count(); return RACK_TOKEN; }
-"address"      { count(); return ADDR_TOKEN; }
-"num_channels" { count(); return NCHAN_TOKEN; }
-"volt_per_bit" { count(); return VPB_TOKEN; }
-"bipolar"      { count(); return POL_TOKEN; }
-"intr_delay"   { count(); return IDEL_TOKEN; }
-"ext_trigger"  { count(); return EXTTRIG_TOKEN; }
+"file"             { count(); return FILE_TOKEN; }
+"rack"             { count(); return RACK_TOKEN; }
+"address"          { count(); return ADDR_TOKEN; }
+"num_channels"     { count(); return NCHAN_TOKEN; }
+"volt_per_bit"     { count(); return VPB_TOKEN; }
+"bipolar"          { count(); return POL_TOKEN; }
+"intr_delay"       { count(); return IDEL_TOKEN; }
+"has_ext_trigger"  { count(); return EXTTRIG_TOKEN; }
 
-"rb_generic"   {
-			       count( );
-			       rulbus_lval.ival = RB_GENERIC;
-			       return CARD_TOKEN;
-			   }
+"rb_generic"       {
+			           count( );
+			           rulbus_lval.ival = RB_GENERIC;
+			           return CARD_TOKEN;
+			       }
 
-"rb8506_pia"   {
-			       count( );
-			       rulbus_lval.ival = RB8506_PIA;
-			       return CARD_TOKEN;
-			   }
+"rb8506_pia"       {
+			           count( );
+			           rulbus_lval.ival = RB8506_PIA;
+			           return CARD_TOKEN;
+			       }
 
-"rb8506_sifu"  {
-			       count( );
-			       rulbus_lval.ival = RB8506_SIFU;
-			       return CARD_TOKEN;
-			   }
+"rb8506_sifu"      {
+			           count( );
+			           rulbus_lval.ival = RB8506_SIFU;
+			           return CARD_TOKEN;
+			       }
 
-"rb8506_via"   {
-			       count( );
-			       rulbus_lval.ival = RB8506_VIA;
-			       return CARD_TOKEN;
-			   }
+"rb8506_via"       {
+			           count( );
+			           rulbus_lval.ival = RB8506_VIA;
+			           return CARD_TOKEN;
+			       }
 
-"rb8509_adc12" {
-			       count( );
-			       rulbus_lval.ival = RB8509_ADC12;
-			       return CARD_TOKEN;
-			   }
+"rb8509_adc12"     {
+			           count( );
+			           rulbus_lval.ival = RB8509_ADC12;
+			           return CARD_TOKEN;
+			       }
 
-"rb8510_dac12" {
-			       count( );
-			       rulbus_lval.ival = RB8510_DAC12;
-			       return CARD_TOKEN;
-			   }
+"rb8510_dac12"     {
+			      	   count( );
+			      	   rulbus_lval.ival = RB8510_DAC12;
+			      	   return CARD_TOKEN;
+			       }
 
-"rb8513_timebase" {
-			       count( );
-			       rulbus_lval.ival = RB8513_TIMEBASE;
-			       return CARD_TOKEN;
-			   }
+"rb8513_timebase"  {
+			           count( );
+			           rulbus_lval.ival = RB8513_TIMEBASE;
+			           return CARD_TOKEN;
+			       }
 
-"rb8514_delay" {
-			       count( );
-			       rulbus_lval.ival = RB8514_DELAY;
-			       return CARD_TOKEN;
-			   }
+"rb8514_delay"     {
+			       	   count( );
+			       	   rulbus_lval.ival = RB8514_DELAY;
+			       	   return CARD_TOKEN;
+			       }
 
-"rb8515_clock" {
-			       count( );
-			       rulbus_lval.ival = RB8515_CLOCK;
-			       return CARD_TOKEN;
-			   }
+"rb8515_clock"     {
+			      	   count( );
+			      	   rulbus_lval.ival = RB8515_CLOCK;
+			       	   return CARD_TOKEN;
+			       }
 
-"rb8905_adc12" {
-			       count( );
-			       rulbus_lval.ival = RB8905_ADC12;
-			       return CARD_TOKEN;
-			   }
+"rb8905_adc12"     {
+			      	   count( );
+			      	   rulbus_lval.ival = RB8905_ADC12;
+			      	   return CARD_TOKEN;
+			       }
 
 "rb9005_amplifier" {
-			       count( );
-			       rulbus_lval.ival = RB9005_AMPLIFIER;
-			       return CARD_TOKEN;
-			   }
+			           count( );
+			           rulbus_lval.ival = RB9005_AMPLIFIER;
+			           return CARD_TOKEN;
+			       }
 
 "rb9603_monochromator" {
-			       count( );
-			       rulbus_lval.ival = RB9603_MONOCHROMATOR;
-			       return CARD_TOKEN;
-			   }
+			           count( );
+			           rulbus_lval.ival = RB9603_MONOCHROMATOR;
+			           return CARD_TOKEN;
+			       }
 
-{UNIT}         {
-	               count( );
-	               switch ( *rulbus_text )
-				   {
-					   case 'f' :
-						   rulbus_lval.dval = 1.0e-15;
-						   break;
+{UNIT}             {
+	                   count( );
+	                   switch ( *rulbus_text )
+					   {
+						   case 'f' :
+							   rulbus_lval.dval = 1.0e-15;
+							   break;
 	
-					   case 'p' :
-						   rulbus_lval.dval = 1.0e-12;
-						   break;
+						   case 'p' :
+							   rulbus_lval.dval = 1.0e-12;
+							   break;
 
-					   case 'n' :
-						   rulbus_lval.dval = 1.0e-9;
-						   break;
+						   case 'n' :
+							   rulbus_lval.dval = 1.0e-9;
+							   break;
 
-					   case 'u' :
-						   rulbus_lval.dval = 1.0e-6;
-						   break;
+						   case 'u' :
+							   rulbus_lval.dval = 1.0e-6;
+							   break;
 
-					   case 'm' :
-						   rulbus_lval.dval = 1.0e-3;
-						   break;
+						   case 'm' :
+							   rulbus_lval.dval = 1.0e-3;
+							   break;
 
-					   case 'k' :
-						   rulbus_lval.dval = 1.0e3;
-						   break;
+						   case 'k' :
+							   rulbus_lval.dval = 1.0e3;
+							   break;
 
-					   case 'M' :
-						   rulbus_lval.dval = 1.0e6;
-						   break;
+						   case 'M' :
+							   rulbus_lval.dval = 1.0e6;
+							   break;
 
-					   case 'G' :
-						   rulbus_lval.dval = 1.0e9;
-						   break;
+						   case 'G' :
+							   rulbus_lval.dval = 1.0e9;
+							   break;
 
-					   case 'T' :
-						   rulbus_lval.dval = 1.0e12;
-						   break;
-				   }
+						   case 'T' :
+							   rulbus_lval.dval = 1.0e12;
+							   break;
+					   }
 
-				   return UNIT_TOKEN;
-			   }
+					   return UNIT_TOKEN;
+			       }
 
-{FLOAT}        {
-	               count( );
-			       rulbus_lval.dval = atof( rulbus_text );
-			       return FLOAT_TOKEN;
-		       }
+{FLOAT}            {
+	                   count( );
+					   rulbus_lval.dval = atof( rulbus_text );
+					   return FLOAT_TOKEN;
+		           }
 
-{BOOL_T}       { /* true boolean value */
-	               count( );
-                   rulbus_lval.ival = 1;
-                   return NUM_TOKEN;
-               }
+{BOOL_T}           { /* true boolean value */
+	                   count( );
+					   rulbus_lval.ival = 1;
+					   return NUM_TOKEN;
+                   }
 
-{BOOL_F}       { /* false boolean value */
-	               count( );
-                   rulbus_lval.ival = 0;
-                   return NUM_TOKEN;
-               }
+{BOOL_F}           { /* false boolean value */
+	                   count( );
+					   rulbus_lval.ival = 0;
+					   return NUM_TOKEN;
+                   }
 
-{OCT}          { /* octal number */
-			       count( );
-                   sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
-                   return NUM_TOKEN;
-               }
+{OCT}              { /* octal number */
+			           count( );
+					   sscanf( rulbus_text, "%o", &rulbus_lval.ival ); 
+					   return NUM_TOKEN;
+                   }
 
-{HEX}          { /* hexadecimal number */
-			       count( );
-                   sscanf( rulbus_text + 2, "%x", &rulbus_lval.ival );
-                   return NUM_TOKEN;
-               }
+{HEX}              { /* hexadecimal number */
+			           count( );
+					   sscanf( rulbus_text + 2, "%x", &rulbus_lval.ival );
+					   return NUM_TOKEN;
+                   }
 
-{DEC}          { /* decimal number */
-			       count( );
-                   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
-                   return NUM_TOKEN;
-               }
+{DEC}              { /* decimal number */
+			           count( );
+					   sscanf( rulbus_text, "%d", &rulbus_lval.ival ); 
+					   return NUM_TOKEN;
+                   }
 
-[ \t\n]+       { count( ); } /* Skip white space */
+[ \t\n]+           { count( ); } /* Skip white space */
 
-{STRING}       {
-                   char *p;
+{STRING}           {
+                       char *p;
 
-			       count( );
-                   rulbus_lval.sval = p = rulbus_text + 1;
-			       while ( *p && *p != *rulbus_text )
-                 	   p++;
-			       if ( ! *p )
-			     	   return ERR_TOKEN;
-                   *p = '\0';
-                   return STR_TOKEN;
-               }
+					   count( );
+					   rulbus_lval.sval = p = rulbus_text + 1;
+					   while ( *p && *p != *rulbus_text )
+						   p++;
+					   if ( ! *p )
+						   return ERR_TOKEN;
+					   *p = '\0';
+					   return STR_TOKEN;
+                   }
 
-.              { count( ); return *rulbus_text; }
+.                  { count( ); return *rulbus_text; }
 
-<<EOF>>        { rulbus_column = 0; return 0; }
+<<EOF>>            { rulbus_column = 0; return 0; }
 
 
 		/*----------------------*/

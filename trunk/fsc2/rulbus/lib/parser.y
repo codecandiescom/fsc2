@@ -32,6 +32,7 @@
 extern int rulbus_lex( void );
 
 void rulbus_parser_init( void );
+void rulbus_parser_clean_up( void );
 
 extern RULBUS_CARD_LIST *rulbus_card;
 extern int rulbus_num_cards;
@@ -40,11 +41,14 @@ static int rack;                 /* address of current rack */
 static RULBUS_CARD_LIST *card;   /* pointer to current card */
 static int ret;                  
 static bool rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR + 1 ];
+static char **rulbus_rack_names = NULL;
+static int rulbus_num_racks = 0;
 
 static int set_dev_file( const char *name );
 static int rack_addr( int addr );
+static int rack_name( char *name );
 static int setup_rack( void );
-static int setup_cards( void );
+static int finalize_rack( void );
 static int new_card( int type, char *name );
 static int set_defaults( RULBUS_CARD_LIST *card );
 static int set_rb8509_defaults( RULBUS_CARD_LIST *card );
@@ -64,7 +68,7 @@ static void rulbus_error( const char *s );
 
 %union
 {
-    unsigned int ival;
+    int ival;
 	double dval;
     char *sval;
 }
@@ -75,7 +79,7 @@ static void rulbus_error( const char *s );
 
 %type <ival> NUM_TOKEN CARD_TOKEN
 %type <dval> FLOAT_TOKEN UNIT_TOKEN number unit
-%type <sval> STR_TOKEN
+%type <sval> STR_TOKEN rname;
 
 
 %%
@@ -96,15 +100,17 @@ file:     FILE_TOKEN sep1 STR_TOKEN
 ;
 
 rack:     RACK_TOKEN     		   		{ rack = RULBUS_INV_RACK_ADDR; }
-		  rname sep1 rinit sep2
+		  rname                         { if ( ( ret = rack_name( $3 ) ) )
+			                                  return ret; }
+		  sep1 rinit sep2
 ;
 
 rname:    /* empty */                   { return RULBUS_CF_NO_RACK_NAME; }
-		| STR_TOKEN                     { }
+		| STR_TOKEN                     { $$ = $1; }
 ;
 
 rinit:    /* empty */
-		| '{' rdata '}'                 { if ( ( ret = setup_cards( ) ) )
+		| '{' rdata '}'                 { if ( ( ret = finalize_rack( ) ) )
 			                                  return ret; }
 ;
 
@@ -203,9 +209,6 @@ static int set_dev_file( const char *name )
 
 static int rack_addr( int addr )
 {
-	int i;
-
-
 	/* Check that no other address has been set for the rack yet */
 
 	if ( rack == addr )
@@ -219,22 +222,34 @@ static int rack_addr( int addr )
 	if ( addr < 0 || addr > RULBUS_DEF_RACK_ADDR )
 		return RULBUS_CF_RACK_ADDR_INVALID;
 
-	/* Check that it isn't already used by a different rack */
-
-	if ( rulbus_rack_addrs[ addr ] )
-		return RULBUS_CF_RACK_ADDR_CONFLICT;
-
-	/* Mark the address as used */
-
-	rulbus_rack_addrs[ addr ] = SET;
-
 	rack = addr;
 
-	/* Set the rack address for all cards that haven't been assigned one */
+	return RULBUS_OK;
+}
 
-	for ( i = rulbus_num_cards - 1;
-		  rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR && i >= 0; --i )
-		rulbus_card[ i ].rack = ( unsigned char ) rack;
+
+/*-------------------------------------------*
+ * Function called for rack name assignments
+ *-------------------------------------------*/
+
+static int rack_name( char *name )
+{
+	char **rns;
+	int i;
+
+
+	for ( i = 0; i < rulbus_num_racks; i++ )
+		if ( ! strcmp( name, rulbus_rack_names[ i ] ) )
+			return RULBUS_CF_RACK_NAME_CONFLICT;
+
+	if ( ( rns = realloc( rulbus_rack_names,
+						  ( rulbus_num_racks + 1 ) * sizeof *rns ) ) == NULL )
+		return RULBUS_NO_MEMORY;
+
+	rulbus_rack_names = rns;
+
+	if ( ( rulbus_rack_names[ rulbus_num_racks++ ] = strdup( name ) ) == NULL )
+		return RULBUS_NO_MEMORY;
 
 	return RULBUS_OK;
 }
@@ -249,13 +264,25 @@ static int setup_rack( void )
 	int i;
 
 
+	if ( rack != RULBUS_INV_RACK_ADDR )
+	{
+		if ( rulbus_rack_addrs[ rack ] )
+			return RULBUS_CF_RACK_ADDR_CONFLICT;
+
+		if ( rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR ] )
+			return RULBUS_CF_RACK_ADDR_DEF_DUPLICATE;
+
+		rulbus_rack_addrs[ rack ] = SET;
+		return RULBUS_OK;
+	}
+
 	/* Handle the situation where no rack address has been specified. In this
 	   case assign it the default address of 0x0F (that also has the special
 	   property that then this is the only rack that can be accessed and is
 	   always selected). */
 
 	if ( rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR ] )
-		return RULBUS_CF_RACK_ADDR_CONFLICT;
+		return RULBUS_CF_RACK_ADDR_DEF_DUPLICATE;
 
 	for ( i = 0; i < RULBUS_DEF_RACK_ADDR; i++ )
 		if ( rulbus_rack_addrs[ i ] )
@@ -273,29 +300,27 @@ static int setup_rack( void )
  * Function called at the end of a rack definition that contains cards
  *---------------------------------------------------------------------*/
 
-static int setup_cards( void )
+static int finalize_rack( void )
 {
 	int retval;
 	int i = 0;
 
 
-	/* Make sure all cards have an rack address. If the rack address isn't
-	   set use the default address (but set the default address only if
-	   there are cards, the default rack address isn't to be used up for an
-	   rack without cards). */
+	/* No further checks needed if there are no cards without a valid
+	   rack address (i.e there are no racks in the rack) */
 
-	if ( rack == RULBUS_INV_RACK_ADDR &&
-		 rulbus_card[ rulbus_num_cards - 1 ].rack == RULBUS_INV_RACK_ADDR )
-	{
-		if ( ( retval = setup_rack( ) ) != RULBUS_OK )
-			return retval;
-	}
-	else
+	if ( rulbus_num_cards == 0 ||
+		 rulbus_card[ rulbus_num_cards - 1 ].rack != RULBUS_INV_RACK_ADDR )
 		return RULBUS_OK;
+
+	/* Check the rack address */
+	
+	if ( ( retval = setup_rack( ) ) != RULBUS_OK )
+		return retval;
 
 	for ( i = rulbus_num_cards - 1;
 		  rulbus_card[ i ].rack == RULBUS_INV_RACK_ADDR && i >= 0; --i )
-		rulbus_card[ i ].rack = RULBUS_DEF_RACK_ADDR;
+		rulbus_card[ i ].rack = rack;
 
 	return RULBUS_OK;
 }
@@ -338,11 +363,11 @@ static int new_card( int type, char *name )
 
 	card = rulbus_card + rulbus_num_cards++;
 	card->type = type;
-	card->rack = ( unsigned char ) rack;
 
 	/* Set all other card properties to invalid values so we we can tell where
 	   we need to set default values later on */
 
+	card->rack = RULBUS_INV_RACK_ADDR;
 	card->addr = RULBUS_INV_CARD_ADDR;
 	card->num_channels = -1;
 	card->vpb = -1.0;
@@ -762,4 +787,26 @@ void rulbus_parser_init( void )
 
 	for ( i = 0; i <= RULBUS_DEF_RACK_ADDR; i++ )
 		rulbus_rack_addrs[ i ] = UNSET;
+}
+
+
+/*----------------------------------------------------------*
+ * Function that must be called when the parser is finished
+ *----------------------------------------------------------*/
+
+void rulbus_parser_clean_up( void )
+{
+	int i;
+
+
+	if ( rulbus_rack_names != NULL )
+	{
+		for ( i = 0; i < rulbus_num_racks; i++ )
+			if ( rulbus_rack_names[ i ] != NULL )
+				free( rulbus_rack_names[ i ] );
+		free( rulbus_rack_names );
+	}
+
+	rulbus_num_racks = 0;
+	rulbus_rack_names = NULL;
 }

@@ -111,6 +111,7 @@ typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
 
 struct RULBUS_CARD_LIST {
 	char *name;
+	char *rack_name;
 	int type;
 	unsigned char rack;
 	unsigned char addr;

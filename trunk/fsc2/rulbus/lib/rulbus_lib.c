@@ -62,9 +62,11 @@ static const char *rulbus_errlist[ ] = {
 										/* RULBUS_CF_RACK_ADDR_INVALID */
 	"Address conflict between racks in configuration file before line %d, "
 	"column %d",                        /* RULBUS_CF_RACK_ADDR_CONFLICT */
-	"Only one rack can be used when no rack addresses is specified in "
-	"configuration file before line %d, column %d",
+	"Only one rack can be used when the default rack address must be used as "
+	"detected in configuration file before line %d, column %d",
 										/* RULBUS_CF_RACK_ADDR_DEF_DUPLICATE */
+	"Name conflict  between racks in configuration file before line %d, "
+	"column %d",                        /* RULBUS_CF_RACK_NAME_CONFLICT */
 	"Unsupported card type in configuration file before line %d, column %d",
 										/* RULBUS_CF_UNSUPPORTED_CARD_TYPE */
 	"Identical names used for two cards in configuration file before line %d, "
@@ -148,6 +150,7 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 
 extern int rulbus_parse( void );
 extern void rulbus_parser_init( void );
+extern void rulbus_parser_clean_up( void );
 
 
 typedef struct RULBUS_CARD_HANDLER RULBUS_CARD_HANDLER;
@@ -256,14 +259,17 @@ int rulbus_open( void )
 	/* Parse the configuration file */
 
 	rulbus_parser_init( );
-    if ( ( retval = rulbus_parse( ) ) != RULBUS_OK )
+    retval = rulbus_parse( );
+	rulbus_parser_clean_up( );
+
+	fclose( rulbus_in );
+	rulbus_parser_clean_up( );
+
+	if ( retval != RULBUS_OK )
 	{
-		fclose( rulbus_in );
 		rulbus_cleanup( );
 		return rulbus_errno = retval;
     }
-
-    fclose( rulbus_in );
 
 	/* Check that the data from the configuration file were reasonable */
 
