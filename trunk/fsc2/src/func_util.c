@@ -22,11 +22,11 @@ extern bool Dont_Save;
 
 
 static DPoint *eval_display_args( Var *v, int *npoints );
-static int get_save_file( Var **v, const char *calling_function );
+static int get_save_file( Var **v );
 static bool print_array( Var *v, long cur_dim, long *start, int fid );
 static bool print_slice( Var *v, int fid );
 static bool print_browser( int browser, int fid, const char* comment );
-static void T_fprintf( int file_num, const char *func, const char *fmt, ... );
+static void T_fprintf( int file_num, const char *fmt, ... );
 
 extern void child_sig_handler( int signo );
 
@@ -107,13 +107,13 @@ Var *f_print( Var *v )
 
 	if ( on_stack < in_format )
 		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
-				"print() format string.\n", Fname, Lc );
+				"%s() format string.\n", Fname, Lc, Cur_Func );
 
 	/* Utter a warning if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
-				"print() format string.\n", Fname, Lc );
+				"%s() format string.\n", Fname, Lc, Cur_Func );
 
 	/* Get string long enough to replace each `#' by a 3 char sequence
 	   plus a '\0' character */
@@ -177,8 +177,8 @@ Var *f_print( Var *v )
 				break;
 
 			default :
-				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
-						"print() format string.\n", Fname, Lc, *( cp + 1 ) );
+				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in %s() "
+						"format string.\n", Fname, Lc, *( cp + 1 ), Cur_Func );
 				*cp = *( cp + 1 );
 				break;
 		}
@@ -254,8 +254,8 @@ Var *f_wait( Var *v )
 
 	if ( how_long < 0.0 )
 	{
-		eprint( WARN, "%s:%ld: Negative time in call of function `wait'.\n",
-				Fname, Lc );
+		eprint( WARN, "%s:%ld: Negative time in call of function %s().\n",
+				Fname, Lc, Cur_Func );
 		if ( TEST_RUN )
 			return vars_push( INT_VAR, 1 );
 		return vars_push( INT_VAR, do_quit ? 0 : 1 );
@@ -264,7 +264,7 @@ Var *f_wait( Var *v )
 	if ( how_long > LONG_MAX )
 	{
 		eprint( FATAL, "%s:%ld: Time of more that %ld seconds as argument "
-				"of function wait().\n", Fname, Lc, LONG_MAX );
+				"of function %s().\n", Fname, Lc, LONG_MAX, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -374,14 +374,14 @@ Var *f_init_1d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "curves in init_1d().\n", Fname, Lc );
+				      "curves in %s().\n", Fname, Lc, Cur_Func );
 		G.nc = lround( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
-		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				       "init_1d().\n", Fname, Lc, G.nc );
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in %s().\n",
+				Fname, Lc, G.nc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -398,7 +398,7 @@ Var *f_init_1d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in init_1d().\n", Fname, Lc );
+				      "points in %s().\n", Fname, Lc, Cur_Func );
 		G.nx = lround( v->val.dval );
 	}
 
@@ -420,7 +420,7 @@ Var *f_init_1d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Real word coordinate given but no "
-					       "increment in init_1d().", Fname, Lc );
+					       "increment in %s().", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -485,14 +485,14 @@ Var *f_init_2d( Var *v )
 	else
 	{
 		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "curves in init_1d().\n", Fname, Lc );
+				      "curves in %s().\n", Fname, Lc, Cur_Func );
 		G.nc = lround( v->val.dval );
 	}
 
 	if ( G.nc < 1 || G.nc > MAX_CURVES )
 	{
-		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in "
-				"init_1d().\n", Fname, Lc, G.nc );
+		eprint( FATAL, "%s:%ld: Invalid number of curves (%ld) in %s().\n",
+				Fname, Lc, G.nc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -508,8 +508,8 @@ Var *f_init_2d( Var *v )
 		G.nx = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in x-direction.\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Floating point value used as number of points "
+				"in x-direction in %s().\n", Fname, Lc, Cur_Func );
 		G.nx = lround( v->val.dval );
 	}
 
@@ -528,8 +528,8 @@ Var *f_init_2d( Var *v )
 		G.ny = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Floating point value used as number of "
-				      "points in y-direction.\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Floating point value used as number of points "
+				"in y-direction in %s().\n", Fname, Lc, Cur_Func );
 		G.ny = lround( v->val.dval );
 	}
 
@@ -551,7 +551,7 @@ Var *f_init_2d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Incomplete real world x coordinates "
-					       "in init_2d().\n", Fname, Lc );
+					       "in %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -581,7 +581,7 @@ Var *f_init_2d( Var *v )
 			 ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
 		{
 			eprint( FATAL, "%s:%ld: Incomplete real world y coordinates "
-				 	        "in init_2d().\n", Fname, Lc );
+				 	        "in %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -647,8 +647,8 @@ Var *f_cscale( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of "
-				"change_scale().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -672,7 +672,7 @@ Var *f_cscale( Var *v )
 		if ( G.dim == 1 )
 		{
 			eprint( FATAL, "%s:%ld: With 1D graphics only the x-scaling can "
-					"be changed.\n", Fname, Lc );
+					"be changed in %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -775,7 +775,7 @@ Var *f_display( Var *v )
 		if ( ! G.is_warn )                         /* warn only once */
 		{
 			eprint( WARN, "%s:%ld: Can't display data, missing "
-					"initialisation.\n", Fname, Lc );
+					"initialisation in %s().\n", Fname, Lc, Cur_Func );
 			G.is_warn = SET;
 		}
 
@@ -828,7 +828,7 @@ Var *f_display( Var *v )
 				{
 					eprint( FATAL, "%s:%ld: Only one-dimensional arrays or "
 							"slices of more-dimensional arrays can be "
-							"displayed.\n", Fname, Lc );
+							"displayed in %s().\n", Fname, Lc, Cur_Func );
 					T_free( dp );
 					THROW( EXCEPTION );
 				}
@@ -1021,8 +1021,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 	*nsets = 0;
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing x-index in display().\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing x-index in %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1043,8 +1043,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nx < 0 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid x-index (= %ld) in display().\n",
-					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET );
+			eprint( FATAL, "%s:%ld: Invalid x-index (= %ld) in %s().\n",
+					Fname, Lc, dp[ *nsets ].nx + ARRAY_OFFSET, Cur_Func );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1057,8 +1057,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 		{
 			if ( v == NULL )
 			{
-				eprint( FATAL, "%s:%ld: Missing y-index in display().\n",
-						Fname, Lc );
+				eprint( FATAL, "%s:%ld: Missing y-index in %s().\n",
+						Fname, Lc, Cur_Func );
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
@@ -1072,9 +1072,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 			if ( dp[ *nsets ].ny < 0 )
 			{
-				eprint( FATAL, "%s:%ld: Invalid y-index (= %ld) in "
-						"display().\n",
-						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET );
+				eprint( FATAL, "%s:%ld: Invalid y-index (= %ld) in %s().\n",
+						Fname, Lc, dp[ *nsets ].ny + ARRAY_OFFSET, Cur_Func );
 				T_free( dp );
 				THROW( EXCEPTION );
 			}
@@ -1087,8 +1086,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( v == NULL )
 		{
-			eprint( FATAL, "%s:%ld: Missing data in display().\n",
-					Fname, Lc );
+			eprint( FATAL, "%s:%ld: Missing data in %s().\n",
+					Fname, Lc, Cur_Func );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1120,8 +1119,8 @@ static DPoint *eval_display_args( Var *v, int *nsets )
 
 		if ( dp[ *nsets ].nc < 0 || dp[ *nsets ].nc >= G.nc )
 		{
-			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in "
-					"display().\n", Fname, Lc, dp[ *nsets ].nc + 1 );
+			eprint( FATAL, "%s:%ld: Invalid curve number (%ld) in %s().\n",
+					Fname, Lc, dp[ *nsets ].nc + 1, Cur_Func );
 			T_free( dp );
 			THROW( EXCEPTION );
 		}
@@ -1158,7 +1157,7 @@ Var *f_clearcv( Var *v )
 	{
 		if ( TEST_RUN )
 			eprint( WARN, "%s:%ld: Can't clear curve, missing graphics "
-					"initialisation.\n!\n", Fname, Lc );
+					"initialisation in %s().\n", Fname, Lc, Cur_Func );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -1190,7 +1189,8 @@ Var *f_clearcv( Var *v )
 			{
 				if ( TEST_RUN )
 					eprint( WARN, "%s:%ld: Floating point value used as curve "
-							"number in function clear_curve().\n", Fname, Lc );
+							"number in function %s().\n",
+							Fname, Lc, Cur_Func );
 				curve = lround( v->val.dval );
 			}
 
@@ -1200,7 +1200,8 @@ Var *f_clearcv( Var *v )
 			{
 				if ( TEST_RUN )
 					eprint( SEVERE, "%s:%ld: Can't clear curve %ld, curve "
-							"does not exist.\n", Fname, Lc, curve );
+							"does not exist in %s().\n",
+							Fname, Lc, curve, Cur_Func );
 				continue;
 			}
 
@@ -1213,7 +1214,7 @@ Var *f_clearcv( Var *v )
 		if ( ca == NULL )
 		{
 			eprint( SEVERE, "%s:%ld: No valid argument found in function "
-					"clear_curve().\n", Fname, Lc );
+					"%s().\n", Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, 0 );
 		}
 	}
@@ -1324,9 +1325,9 @@ Var *f_getf( Var *var )
 
 	if ( No_File_Numbers )
 	{
-		eprint( FATAL, "%s:%ld: Call of get_filename() after call of "
-				"save() without previous call of get_filename().\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Call of %s() after call of save()-type "
+				"function without previous call of %s().\n",
+				Fname, Lc, Cur_Func, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1497,7 +1498,7 @@ getfile_retry:
 /* family of functions.                                                */
 /*---------------------------------------------------------------------*/
 
-static int get_save_file( Var **v, const char *calling_function )
+static int get_save_file( Var **v )
 {
 	Var *get_file_ptr;
 	Var *file;
@@ -1540,7 +1541,7 @@ static int get_save_file( Var **v, const char *calling_function )
 			if ( ( *v )->type != INT_VAR )
 			{
 				eprint( FATAL, "%s:%ld: First argument in %s() isn't a "
-						"file identifier.\n", Fname, Lc, calling_function );
+						"file identifier.\n", Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			file_num = ( int ) ( *v )->val.lval;
@@ -1548,7 +1549,7 @@ static int get_save_file( Var **v, const char *calling_function )
 		else
 		{
 			eprint( WARN, "%s:%ld: Call of %s() without any arguments.\n",
-					Fname, Lc, calling_function );
+					Fname, Lc, Cur_Func );
 			return -1;
 		}
 		*v = ( *v )->next;
@@ -1561,14 +1562,14 @@ static int get_save_file( Var **v, const char *calling_function )
 	if ( file_num < 0 )
 	{
 		eprint( WARN, "%s:%ld: File has never been opened, skipping "
-				"%s() command.\n", Fname, Lc, calling_function );
+				"%s() command.\n", Fname, Lc, Cur_Func );
 		return -1;
 	}
 
 	if ( file_num >= File_List_Len )
 	{
 		eprint( FATAL, "%s:%ld: Invalid file identifier in %s().\n",
-				Fname, Lc, calling_function );
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1622,13 +1623,13 @@ Var *f_save( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v, "save" ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
 	{
-		eprint( WARN, "%s:%ld: Call of save() without data to save.\n",
-				Fname, Lc );
+		eprint( WARN, "%s:%ld: Call of %s() without data.\n",
+				Fname, Lc, Cur_Func );
 		return vars_push( INT_VAR, 0 );
 	}
 
@@ -1640,25 +1641,25 @@ Var *f_save( Var *v )
 		switch( v->type )
 		{
 			case INT_VAR :
-				T_fprintf( file_num, "save", "%ld\n", v->val.lval );
+				T_fprintf( file_num, "%ld\n", v->val.lval );
 				break;
 
 			case FLOAT_VAR :
-				T_fprintf( file_num, "save", "%#.9g\n", v->val.dval );
+				T_fprintf( file_num, "%#.9g\n", v->val.dval );
 				break;
 
 			case STR_VAR :
-				T_fprintf( file_num, "save", "%s\n", v->val.sptr );
+				T_fprintf( file_num, "%s\n", v->val.sptr );
 				break;
 
 			case INT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					T_fprintf( file_num, "save", "%ld\n", v->val.lpnt[ i ] );
+					T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
 				break;
 				
 			case FLOAT_TRANS_ARR :
 				for ( i = 0; i < v->len; i++ )
-					T_fprintf( file_num, "save", "%#.9g\n", v->val.dpnt[ i ] );
+					T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
 				break;
 
 			case ARR_PTR :
@@ -1670,8 +1671,8 @@ Var *f_save( Var *v )
 				if ( v->from->flags && NEED_ALLOC )
 				{
 					eprint( WARN, "%s:%ld: Variable sized array `%s' is still "
-							"undefined in svae() - skipping'.\n", 
-							Fname, Lc, v->from->name );
+							"undefined in %s() - skipping'.\n", 
+							Fname, Lc, v->from->name, Cur_Func );
 					break;
 				}
 				start = 0;
@@ -1708,12 +1709,12 @@ static bool print_array( Var *v, long cur_dim, long *start, int fid )
 		for ( i = 0; i < v->sizes[ cur_dim ]; (*start)++, i++ )
 		{
 			if ( v->type == INT_ARR )
-				T_fprintf( fid, "save", "%ld\n", v->val.lpnt[ *start ] );
+				T_fprintf( fid, "%ld\n", v->val.lpnt[ *start ] );
 			else
-				T_fprintf( fid, "save", "%#.9g\n", v->val.dpnt[ *start ] );
+				T_fprintf( fid, "%#.9g\n", v->val.dpnt[ *start ] );
 		}
 
-		T_fprintf( fid, "save", "\n" );
+		T_fprintf( fid, "\n" );
 	}
 
 	return OK;
@@ -1729,10 +1730,9 @@ static bool print_slice( Var *v, int fid )
 
 	for ( i = 0; i < v->from->sizes[ v->from->dim - 1 ]; i++ )
 		if ( v->from->type == INT_ARR )
-			T_fprintf( fid, "save", "%ld\n",
-					   * ( ( long * ) v->val.gptr + i ) );
+			T_fprintf( fid, "%ld\n", * ( ( long * ) v->val.gptr + i ) );
 		else
-			T_fprintf( fid, "save", "%#.9g\n",
+			T_fprintf( fid, "%#.9g\n",
 					   * ( ( double * ) v->val.gptr + i ) );
 
 	return OK;
@@ -1763,20 +1763,20 @@ Var *f_fsave( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v, "fsave" ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v == NULL )
 	{
-		eprint( WARN, "%s:%ld: Call of fsave() without format string and "
-				"data.\n", Fname, Lc );
+		eprint( WARN, "%s:%ld: Call of %s() without format string and "
+				"data.\n", Fname, Lc, Cur_Func );
 		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( v->type != STR_VAR )
 	{
-		eprint( FATAL, "%s:%ld: Missing format string in call of fsave()\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing format string in call of %s()\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1810,13 +1810,13 @@ Var *f_fsave( Var *v )
 
 	if ( on_stack < in_format )
 		eprint( SEVERE, "%s:%ld: Less data than format descriptors in "
-				"save() format string.\n", Fname, Lc );
+				"%s() format string.\n", Fname, Lc, Cur_Func );
 
 	/* Warn if there are more data than format descriptors */
 
 	if ( on_stack > in_format )
 		eprint( SEVERE, "%s:%ld: More data than format descriptors in "
-				"save() format string.\n", Fname, Lc );
+				"%s() format string.\n", Fname, Lc, Cur_Func );
 
 	/* Get string long enough to replace each `#' by a 5-char sequence 
 	   plus a '\0' */
@@ -1879,8 +1879,8 @@ Var *f_fsave( Var *v )
 				break;
 
 			default :
-				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in "
-						"save() format string.\n", Fname, Lc, *( cp + 1 ) );
+				eprint( WARN, "%s:%ld: Unknown escape sequence \\%c in %s() "
+						"format string.\n", Fname, Lc, *( cp + 1 ), Cur_Func );
 				*cp = *( cp + 1 );
 				break;
 		}
@@ -1900,17 +1900,17 @@ Var *f_fsave( Var *v )
 			{
 				case INT_VAR :
 					strcpy( ep, "%ld" );
-					T_fprintf( file_num, "fsave", cp, cv->val.lval );
+					T_fprintf( file_num, cp, cv->val.lval );
 					break;
 
 				case FLOAT_VAR :
 					strcpy( ep, "%#.9g" );
-					T_fprintf( file_num, "fsave", cp, cv->val.dval );
+					T_fprintf( file_num, cp, cv->val.dval );
 					break;
 
 				case STR_VAR :
 					strcpy( ep, "%s" );
-					T_fprintf( file_num, "fsave", cp, cv->val.sptr );
+					T_fprintf( file_num, cp, cv->val.sptr );
 					break;
 
 				default :
@@ -1922,13 +1922,13 @@ Var *f_fsave( Var *v )
 		else
 		{
 			strcpy( ep, "#" );
-			T_fprintf( file_num, "fsave", cp );
+			T_fprintf( file_num, cp );
 		}
 
 		cp = ep + 6;
 	}
 
-	T_fprintf( file_num, "fsave", cp );
+	T_fprintf( file_num, cp );
 
 	/* Finally free the copy of the format string and return */
 
@@ -1955,7 +1955,7 @@ Var *f_save_p( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v, "save_program" ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v != NULL )
@@ -1987,7 +1987,7 @@ Var *f_save_o( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v, "save_output" ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
 	if ( v != NULL )
@@ -2020,8 +2020,7 @@ static bool print_browser( int browser, int fid, const char* comment )
 	writer( browser ==  0 ? C_PROG : C_OUTPUT );
 	if ( comment == NULL )
 		comment = "";
-	T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
-			   "%s\n", comment );
+	T_fprintf( fid, "%s\n", comment );
 
 	while ( 1 )
 	{
@@ -2039,15 +2038,13 @@ static bool print_browser( int browser, int fid, const char* comment )
 					;
 			}
 
-			T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
-					   "%s%s\n", comment, lp );
+			T_fprintf( fid, "%s%s\n", comment, lp );
 		}
 		else
 			break;
 	}
 
-	T_fprintf( fid, browser == 0 ? "save_program" : "save_output",
-			   "%s\n", comment );
+	T_fprintf( fid, "%s\n", comment );
 
 	return OK;
 }
@@ -2073,7 +2070,7 @@ Var *f_save_c( Var *v )
 
 	/* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v, "save_comment" ) ) == -1 )
+	if ( ( file_num = get_save_file( &v ) ) == -1 )
 		return vars_push( INT_VAR, 0 );
 
 	if ( TEST_RUN )
@@ -2123,19 +2120,19 @@ Var *f_save_c( Var *v )
 	cl = r;
 	if ( cc == NULL )
 		cc = "";
-	T_fprintf( file_num, "save_comment", "%s\n", cc );
+	T_fprintf( file_num, "%s\n", cc );
 
 	while ( cl != NULL )
 	{
 		nl = strchr( cl, '\n' );
 		if ( nl != NULL )
 			*nl++ = '\0';
-		T_fprintf( file_num, "save_comment", "%s%s\n", cc, cl );
+		T_fprintf( file_num, "%s%s\n", cc, cl );
 		cl = nl;
 	}
 
 	if ( cc != NULL )
-		T_fprintf( file_num, "save_comment", "%s\n", cc );
+		T_fprintf( file_num, "%s\n", cc );
 
 	T_free( r );
 
@@ -2146,7 +2143,7 @@ Var *f_save_c( Var *v )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
+static void T_fprintf( int file_num, const char *fmt, ... )
 {
 	int n;                      /* number of bytes we need to write */
 	static int size;            /* guess for number of characters needed */
@@ -2166,7 +2163,7 @@ static void T_fprintf( int file_num, const char *func, const char *fmt, ... )
 	if ( file_num < 0 || file_num >= File_List_Len )
 	{
 		eprint( FATAL, "%s:%ld: Invalid file handler used in call of "
-				"function %s().\n", Fname, Lc, func );
+				"function %s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -2397,14 +2394,14 @@ Var *f_is_file( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Missing argument in call of function "
-				"is_file().\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	if ( v->type != INT_VAR )
 	{
-		eprint( FATAL, "%s:%ld: Parameter of function is_file() is not a "
-				"file handler.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Parameter of function %s() is not a "
+				"file handler.\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 

@@ -11,7 +11,7 @@ static IOBJECT *find_object_from_ID( long ID );
 static void recreate_Tool_Box( void );
 static FL_OBJECT *append_object_to_form( IOBJECT *io );
 static void tools_callback( FL_OBJECT *ob, long data );
-static const char *float_format_check( const char *buf );
+static bool check_format_string( const char *buf );
 static void convert_escapes( char *str );
 
 
@@ -1477,7 +1477,15 @@ Var *f_icreate( Var *v )
 			eprint( WARN, "%s:%ld: Can't set format string for integer data "
 					"in %s()\n", Fname, Lc, Cur_Func );
 		else
+		{
+			if ( ! check_format_string( v->val.sptr ) )
+			{
+				eprint( FATAL, "%s:%ld: Invalid format string in %s().\n",
+						Fname, Lc, Cur_Func );
+				THROW( EXCEPTION );
+			}
 			form_str = T_strdup( v->val.sptr );
+		}
 		v = vars_pop( v );
 	}
 
@@ -1562,8 +1570,16 @@ Var *f_icreate( Var *v )
 
 		if ( help_text )                        /* help text string */
 		{
-			strcpy( ( char * ) pos, help_text );
-			pos += strlen( help_text ) + 1;
+			if ( *help_text == '\0' )
+			{
+				*( ( unsigned char * ) pos ) = 0xff;
+				pos += 1;
+			}
+			else
+			{
+				strcpy( ( char * ) pos, help_text );
+				pos += strlen( help_text ) + 1;
+			}
 		}
 		else
 			*( ( char * ) pos++ ) = '\0';
@@ -2003,7 +2019,7 @@ Var *f_ivalue( Var *v )
 		else
 		{
 			snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
-			fl_set_input( io->self, float_format_check( buf ) );
+			fl_set_input( io->self, buf );
 		}
 	}
 
@@ -2296,7 +2312,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
-			fl_set_input( io->self, float_format_check( buf ) );
+			fl_set_input( io->self, buf );
 			break;
 
 		case INT_OUTPUT :
@@ -2326,7 +2342,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 			fl_set_object_color( io->self, FL_COL1, FL_COL1 );
 			fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
 			snprintf( buf, MAX_INPUT_CHARS, io->form_str, io->val.dval );
-			fl_set_input( io->self, float_format_check( buf ) );
+			fl_set_input( io->self, buf );
 			break;
 
 		default :
@@ -2441,7 +2457,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 #endif
 
 			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
-			fl_set_input( io->self, float_format_check( obuf ) );
+			fl_set_input( io->self, obuf );
 
 			if ( dval != io->val.dval )
 				io->val.dval = dval;
@@ -2454,7 +2470,7 @@ static void tools_callback( FL_OBJECT *obj, long data )
 			
 		case FLOAT_OUTPUT :
 			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
-			fl_set_input( io->self, float_format_check( obuf ) );
+			fl_set_input( io->self, obuf );
 			break;
 
 		default :                 /* this can never happen :) */
@@ -2466,23 +2482,40 @@ static void tools_callback( FL_OBJECT *obj, long data )
 /*------------------------------------------------------*/
 /*------------------------------------------------------*/
 
-static const char *float_format_check( const char *buf )
+static bool check_format_string( const char *buf )
 {
-	const char *bptr = buf;
+	const char *bp = buf;
+	const char *lcp;
 
 
-	while ( ! ( isdigit( *bptr ) || *bptr == '+' || *bptr == '-' ||
-				*bptr == 'e' || *bptr != 'E' ) && *bptr != '\0' )
-		bptr++;
-	if ( *bptr == '\0' )
-	{
-		eprint( FATAL, "%s:%ld: Invalid format string in %s().\n",
-				Fname, Lc, Cur_Func );
-		THROW( EXCEPTION );
-	}			
+	if ( *bp != '%' )     /* format must start with '%' */
+		return FAIL;
 
-	return bptr;
+	lcp = bp + strlen( bp ) - 1;      /* last char must be g, f or e */
+	if ( *lcp != 'g' && *lcp != 'f' && *lcp != 'e' )
+		return FAIL;
+
+
+	if ( *++bp != '.' )                 /* test for length */
+		while ( isdigit( *bp++ ) )
+			;
+
+	if ( bp == lcp )
+		return OK;
+
+
+	if ( *bp++ != '.' )
+		return FAIL;
+
+	if ( bp == lcp )
+		return OK;
+
+	while ( isdigit( *bp ) )
+		bp++;
+
+	return lcp == bp;
 }
+
 
 
 /*------------------------------------------------------*/

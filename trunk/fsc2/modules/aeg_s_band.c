@@ -426,6 +426,8 @@ Var *sweep_up( Var *v )
 	bool err_flag = UNSET;
 
 
+	v = v;
+
 	if ( ! magnet.is_field_step )
 	{
 		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined "
@@ -457,6 +459,8 @@ Var *sweep_down( Var *v )
 {
 	bool err_flag = UNSET;
 
+
+	v = v;
 
 	if ( ! magnet.is_field_step )
 	{

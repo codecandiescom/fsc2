@@ -57,7 +57,7 @@ Var *reset_field( Var *v );
 static bool keithley228a_init( const char *name );
 static void keithley228a_to_local(void);
 static bool keithley228a_set_state( bool new_state );
-static double keithley228a_goto_current( double current );
+static double keithley228a_goto_current( double current, bool do_test );
 static double keithley228a_set_current( double current );
 static void keithley228a_gpib_failure( void );
 static double keithley228a_current_check( double current );
@@ -232,8 +232,8 @@ Var *magnet_use_correction( Var *v )
 {
 	if ( v != NULL )
 	{
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"`sweep_up'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 
 		while ( ( v = vars_pop( v ) ) )
 			;
@@ -298,8 +298,8 @@ Var *set_field( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
-				"`set_field'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in function %s().\n",
+				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -315,12 +315,13 @@ Var *set_field( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"function `set_field'.\n", Fname, Lc, DEVICE_NAME );
+				"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
 
-	return vars_push( FLOAT_VAR, keithley228a_goto_current( new_current ) );
+	return vars_push( FLOAT_VAR,
+					  keithley228a_goto_current( new_current, SET ) );
 }
 
 
@@ -354,7 +355,7 @@ Var *sweep_up( Var *v )
 											  + keithley228a.current_step );
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( new_current ) );
+					  keithley228a_goto_current( new_current, UNSET ) );
 }
 
 
@@ -388,7 +389,7 @@ Var *sweep_down( Var *v )
 											  - keithley228a.current_step );
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( new_current ) );
+					  keithley228a_goto_current( new_current, UNSET ) );
 }
 
 
@@ -413,7 +414,8 @@ Var *reset_field( Var *v )
 	}
 
 	return vars_push( FLOAT_VAR,
-					  keithley228a_goto_current( keithley228a.req_current ) );
+					  keithley228a_goto_current( keithley228a.req_current,
+												 SET ) );
 }
 
 
@@ -472,7 +474,7 @@ static bool keithley228a_init( const char *name )
 		 gpib_read( keithley228a.device, reply, &length ) == FAILURE )
 		keithley228a_gpib_failure( );
 
-	keithley228a.state = reply[ 0 ] == '1' ? OPERATE : STANDBY;
+	keithley228a.state = ( reply[ 1 ] == '1')  ? OPERATE : STANDBY;
 
 	keithley228a.state = keithley228a_set_state( OPERATE );
 
@@ -480,7 +482,7 @@ static bool keithley228a_init( const char *name )
 
 	if ( keithley228a.is_req_current )
 		keithley228a.current =
-			keithley228a_goto_current( keithley228a.req_current );
+			keithley228a_goto_current( keithley228a.req_current, SET );
 
 	return OK;
 }
@@ -545,7 +547,7 @@ static bool keithley228a_set_state( bool new_state )
 		sscanf( reply, "%lf,%lf", &dummy, &keithley228a.current);
 
 		if ( keithley228a.current != 0.0 )
-			keithley228a.current = keithley228a_goto_current( 0.0 );
+			keithley228a.current = keithley228a_goto_current( 0.0, SET );
 	}
 	else
 	{
@@ -598,7 +600,7 @@ static bool keithley228a_set_state( bool new_state )
 /* to STANDBY state !                                                */
 /*-------------------------------------------------------------------*/
 
-static double keithley228a_goto_current( double new_current )
+static double keithley228a_goto_current( double new_current, bool do_test )
 {
 	double del_amps;
 	double act_amps;
@@ -633,27 +635,29 @@ static double keithley228a_goto_current( double new_current )
 	/* Do the final step (smaller than the previously used current steps) */
 
 	keithley228a.current = keithley228a_set_current( new_current );
-	usleep( 100000 );
 
 	/* Wait for the current to stabilize at the requested value (checking
 	   also the voltage to go down to zero won't do because there is some
 	   resistance due to the leads which forces the power supply to maintain
 	   a small voltage, depending on the current) */
 
-	do
+	if ( do_test )
 	{
-		usleep( 100000 );
-		length = 100;
-		if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
-			keithley228a_gpib_failure( );
-		sscanf( reply, "%lf,%lf", &dummy, &act_amps );
-	} while ( fabs( act_amps - keithley228a.current ) > 0.05 &&
-			  max_tries-- > 0 );
+		do
+		{
+			usleep( 100000 );
+			length = 100;
+			if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
+				keithley228a_gpib_failure( );
+			sscanf( reply, "%lf,%lf", &dummy, &act_amps );
+		} while ( fabs( act_amps - keithley228a.current ) > 0.05 &&
+				  max_tries-- > 0 );
 
-	if ( max_tries < 0 )
-	{
-		eprint( FATAL, "%s: Can't set requested current.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
+		if ( max_tries < 0 )
+		{
+			eprint( FATAL, "%s: Can't set requested current.\n", DEVICE_NAME );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return keithley228a.current;

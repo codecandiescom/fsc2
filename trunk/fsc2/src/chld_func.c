@@ -689,8 +689,16 @@ long *exp_icreate( void *buffer, long len )
 
 		if ( *( ( char * ) pos ) != '\0' )       /* get help text */
 		{
-			vars_push( STR_VAR, ( char * ) pos );
-			pos += strlen( ( char * ) pos ) + 1;
+			if ( * ( ( unsigned char * ) pos ) == 0xff )
+			{
+				vars_push( STR_VAR, "" );
+				pos += 1;
+			}
+			else
+			{
+				vars_push( STR_VAR, ( char * ) pos );
+				pos += strlen( ( char * ) pos ) + 1;
+			}
 		}
 		else
 			pos++;

@@ -6,8 +6,7 @@
 #include "fsc2.h"
 
 
-static void get_array_params( Var *v, const char *name, long *len,
-							  long **ilp, double **idp );
+static void get_array_params( Var *v, long *len, long **ilp, double **idp );
 
 
 
@@ -21,7 +20,8 @@ Var *f_abort( Var *v )
 
 	v = v;                       /* keeps the compiler happy */
 
-	eprint( NO_ERROR, "%s:%ld: Exit due to call of abort().\n", Fname, Lc );
+	eprint( NO_ERROR, "%s:%ld: Exit due to call of %s().\n",
+			Fname, Lc, Cur_Func );
 
 	if ( ! TEST_RUN )
 	{
@@ -40,8 +40,7 @@ Var *f_abort( Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-static void get_array_params( Var *v, const char *name, long *len,
-							  long **ilp, double **idp )
+static void get_array_params( Var *v, long *len, long **ilp, double **idp )
 {
 	*ilp = NULL;
 	*idp = NULL;
@@ -53,7 +52,7 @@ static void get_array_params( Var *v, const char *name, long *len,
 			{
 				eprint( FATAL, "%s:%ld: Argument of function %s() is "
 						"neither a number nor a 1-dimensional array.\n",
-						Fname, Lc, name );
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			*len = v->len;
@@ -65,7 +64,7 @@ static void get_array_params( Var *v, const char *name, long *len,
 			{
 				eprint( FATAL, "%s:%ld: Argument of function %s() is "
 						"neither a number nor a 1-dimensional array.\n",
-						Fname, Lc, name );
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			*len = v->len;
@@ -85,7 +84,7 @@ static void get_array_params( Var *v, const char *name, long *len,
 			{
 				eprint( FATAL, "%s:%ld: Argument of function %s() is "
 						"neither a number nor a 1-dimensional array.\n",
-						Fname, Lc, name );
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -93,7 +92,7 @@ static void get_array_params( Var *v, const char *name, long *len,
 			{
 				eprint( FATAL, "%s:%ld: Argument of function %s() is "
 						"a dynamically sized array of still unknown size.\n",
-						Fname, Lc, name );
+						Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -147,12 +146,12 @@ Var *f_int( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"int().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, ( long ) v->val.dval );
 
 		default :
-			get_array_params( v, "int", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -163,8 +162,8 @@ Var *f_int( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp > LONG_MAX || *idp < LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"int().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = ( long ) *idp;
 		}
 
@@ -205,7 +204,7 @@ Var *f_float( Var *v )
 			return vars_push( FLOAT_VAR, v->val.dval );
 
 		default :
-			get_array_params( v, "float", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( idp != NULL )
@@ -249,13 +248,13 @@ Var *f_round( Var *v )
 		case FLOAT_VAR :
 			if ( v->val.dval >= LONG_MAX - 0.5 ||
 				 v->val.dval <= LONG_MIN + 0.5 )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"round().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR,   ( long ) ( 2 * v->val.dval )
 							           - ( long ) v->val.dval );
 
 		default :
-			get_array_params( v, "round", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -266,8 +265,8 @@ Var *f_round( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp >= LONG_MAX - 0.5 || *idp <= LONG_MIN + 0.5 )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"round().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = ( long ) ( 2 * *idp ) - ( long ) *idp;
 		}
 
@@ -304,12 +303,12 @@ Var *f_floor( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval < LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"floor().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, ( long ) floor( v->val.dval ) );
 
 		default :
-			get_array_params( v, "floor", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -320,8 +319,8 @@ Var *f_floor( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"floor().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = ( long ) floor( *idp );
 		}
 
@@ -358,12 +357,12 @@ Var *f_ceil( Var *v )
 
 		case FLOAT_VAR :
 			if ( v->val.dval > LONG_MAX )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"ceil().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, ( long ) ceil( v->val.dval ) );
 
 		default :
-			get_array_params( v, "ceil", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -374,8 +373,8 @@ Var *f_ceil( Var *v )
 		for ( i = 0; i < len; idp++, i++ )
 		{
 			if ( *idp < LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"ceil().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = ( long ) ceil( *idp );
 		}
 
@@ -411,15 +410,15 @@ Var *f_abs( Var *v )
 	{
 		case INT_VAR :
 			if ( v->val.lval == LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"abs().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, labs( v->val.lval ) );
 
 		case FLOAT_VAR :
 			return vars_push( FLOAT_VAR, fabs( v->val.dval ) );
 
 		default :
-			get_array_params( v, "abs", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -428,8 +427,8 @@ Var *f_abs( Var *v )
 		for ( i = 0; i < len; ilp++, i++ )
 		{
 			if ( *ilp == LONG_MIN )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"abs().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = labs( *ilp );
 		}
 		new_var = vars_push( INT_TRANS_ARR, rlp, len );
@@ -469,7 +468,7 @@ Var *f_sin( Var *v )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
 
-	get_array_params( v, "sin", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	rdp = T_malloc( len * sizeof( double ) );
 	if ( ilp != NULL )
@@ -508,7 +507,7 @@ Var *f_cos( Var *v )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
 
-	get_array_params( v, "cos", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	rdp = T_malloc( len * sizeof( double ) );
 	if ( ilp != NULL )
@@ -550,12 +549,12 @@ Var *f_tan( Var *v )
 	{
 		res = tan( VALUE( v ) );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function tan().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "tan", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -563,8 +562,8 @@ Var *f_tan( Var *v )
 	{
 		rdp[ i ] = tan( is_int ? ( double ) *ilp++ : *idp++ );
 		if ( fabs( rdp[ i ] ) == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function tan().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 	}
 
 	new_var = vars_push( FLOAT_TRANS_ARR, rdp, len );
@@ -600,14 +599,14 @@ Var *f_asin( Var *v )
 		arg = VALUE( v );
 		if ( fabs( arg ) > 1.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function asin() is out "
-					"of range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is out "
+					"of range.\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, asin( arg ) );
 	}
 
-	get_array_params( v, "asin", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -616,8 +615,8 @@ Var *f_asin( Var *v )
 		arg = is_int ? ( double ) *ilp++ : *idp++;
 		if ( fabs( arg ) > 1.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function asin() is out "
-					"of range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is out "
+					"of range.\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -657,14 +656,14 @@ Var *f_acos( Var *v )
 		arg = VALUE( v );
 		if ( fabs( arg ) > 1.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function acos() is out "
-					"of range.\n",  Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is out "
+					"of range.\n",  Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, acos( arg ) );
 	}
 
-	get_array_params( v, "acos", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -673,8 +672,8 @@ Var *f_acos( Var *v )
 		arg = is_int ? ( double ) *ilp++ : *idp++;
 		if ( fabs( arg ) > 1.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function acos() is out "
-					"of range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is out "
+					"of range.\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -710,7 +709,7 @@ Var *f_atan( Var *v )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
 
-	get_array_params( v, "atan", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	rdp = T_malloc( len * sizeof( double ) );
 	if ( ilp != NULL )
@@ -752,12 +751,12 @@ Var *f_sinh( Var *v )
 	{
 		res = sinh( VALUE ( v ) );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function sinh().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "sinh", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -765,8 +764,8 @@ Var *f_sinh( Var *v )
 	{
 		res = sinh( is_int ? ( double ) *ilp++ : *idp++ );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function sinh().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		rdp[ i ] = res;
 	}
@@ -803,12 +802,12 @@ Var *f_cosh( Var *v )
 	{
 		res = cosh( VALUE( v ) );
 		if ( res == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function cosh().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "cosh", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -816,8 +815,8 @@ Var *f_cosh( Var *v )
 	{
 		res = cosh( is_int ? ( double ) *ilp++ : *idp++ );
 		if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function cosh().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		rdp[ i ] = res;
 	}
@@ -851,7 +850,7 @@ Var *f_tanh( Var *v )
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 		return vars_push( FLOAT_VAR, tanh( VALUE( v ) ) );
 
-	get_array_params( v, "tanh", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	rdp = T_malloc( len * sizeof( double ) );
 	if ( ilp != NULL )
@@ -893,15 +892,15 @@ Var *f_exp( Var *v )
 	{
 		res = exp( VALUE( v ) );
 		if ( res == 0.0 && errno == ERANGE )
-			eprint( WARN, "%s:%ld: Underflow in function exp() - result "
-					"is 0.\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Underflow in function %s() - result "
+					"is 0.\n", Fname, Lc, Cur_Func );
 		if ( res == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function exp().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "exp", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -910,11 +909,11 @@ Var *f_exp( Var *v )
 		res = tanh( is_int ? ( double ) *ilp++ : *idp++ );
 
 		if ( res == 0.0 && errno == ERANGE )
-			eprint( WARN, "%s:%ld: Underflow in function exp() - result "
-					"is 0.\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Underflow in function %s() - result "
+					"is 0.\n", Fname, Lc, Cur_Func );
 		if ( res == HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function exp().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		rdp[ i ] = res;
 	}
@@ -952,20 +951,20 @@ Var *f_ln( Var *v )
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function ln() is out of "
-					"range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of %s() is out of range.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		res = log( arg );
 		if ( res == - HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function ln().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "ln", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -975,15 +974,15 @@ Var *f_ln( Var *v )
 
 		if ( arg <= 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function ln() is out of "
-					"range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of %s() is out of range.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		res = log( arg );
 		if ( res == - HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function ln().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		rdp[ i ] = res;
 	}
@@ -1021,20 +1020,20 @@ Var *f_log( Var *v )
 		arg = VALUE( v );
 		if ( arg <= 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function log() is out "
-					"of range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of %s() is out of range.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		res = log10( arg );
 		if ( res == - HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function log().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		return vars_push( FLOAT_VAR, res );
 	}
 
-	get_array_params( v, "log", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -1044,15 +1043,15 @@ Var *f_log( Var *v )
 
 		if ( arg <= 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function log() is out "
-					"of range.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of %s() is out of range.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
 		res = log10( arg );
 		if ( res == - HUGE_VAL && errno == ERANGE )
-			eprint( SEVERE, "%s:%ld: Overflow in function log().\n",
-					Fname, Lc );
+			eprint( SEVERE, "%s:%ld: Overflow in function %s().\n",
+					Fname, Lc, Cur_Func );
 
 		rdp[ i ] = res;
 	}
@@ -1090,14 +1089,14 @@ Var *f_sqrt( Var *v )
 		arg = VALUE( v );
 		if ( arg < 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function sqrt() is "
-					"negative.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is negative.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 		return vars_push( FLOAT_VAR, sqrt( arg ) );
 	}
 
-	get_array_params( v, "sqrt", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	is_int = ilp != NULL ? SET : UNSET;
 	rdp = T_malloc( len * sizeof( double ) );
@@ -1107,8 +1106,8 @@ Var *f_sqrt( Var *v )
 
 		if ( arg < 0.0 )
 		{
-			eprint( FATAL, "%s:%ld: Argument of function sqrt() is "
-					"negative.\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Argument of function %s() is negative.\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -1155,21 +1154,22 @@ Var *f_setseed( Var *v )
 		if ( v->type == INT_VAR )
 		{
 			if ( v->val.lval < 0 )
-				eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer "
-						"as argument, using absolute value.\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: %s() needs a positive integer as "
+						"argument, using absolute value.\n",
+						Fname, Lc, Cur_Func );
 			arg = ( unsigned int ) labs( v->val.lval );
 		}
 		else
 		{
-			eprint( SEVERE, "%s:%ld: set_seed() needs a positive integer and "
+			eprint( SEVERE, "%s:%ld: %s() needs a positive integer and "
 					"not a float variable as argument, using 1 instead.\n",
-					Fname, Lc );
+					Fname, Lc, Cur_Func );
 			arg = 1;
 		}
 
 		if ( v->next != NULL )
-			eprint( WARN, "%s:%ld: Superfluous argument in call of "
-					"setseed().\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Superfluous argument in call of %s().\n",
+					Fname, Lc, Cur_Func );
 	}
 	else
 		arg = ( unsigned int ) time( NULL );
@@ -1193,8 +1193,8 @@ Var *f_time( Var *v )
 	time( &tp );
 	if ( strftime( ts, 100, "%H:%M:%S", localtime( &tp ) ) == 0 )
 	{
-		eprint( SEVERE, "%s:%ld: time() returns invalid time string.\n",
-				Fname, Lc );
+		eprint( SEVERE, "%s:%ld: %s() returns invalid time string.\n",
+				Fname, Lc, Cur_Func );
 		strcat( ts, "(Unknown time)" );
 	}
 
@@ -1246,8 +1246,8 @@ Var *f_date( Var *v )
 	time( &tp );
 	if ( strftime( ts, 100, "%a %b %d, %Y", localtime( &tp ) ) == 0 )
 	{
-		eprint( SEVERE, "%s:%ld: date() returns invalid date string.\n",
-				Fname, Lc );
+		eprint( SEVERE, "%s:%ld: %s() returns invalid date string.\n",
+				Fname, Lc, Cur_Func );
 		strcat( ts, "(Unknown date)" );
 	}
 
@@ -1283,7 +1283,7 @@ Var *f_size( Var *v )
 	if ( v->next->type == FLOAT_VAR )
 	{
 		eprint( WARN, "%s:%ld: WARNING: Float value used as index for array "
-				"`%s' in function `size'.\n", Fname, Lc, v->from->name );
+				"`%s' in function %s.\n", Fname, Lc, v->from->name, Cur_Func );
 		size = ( int ) v->next->val.dval - ARRAY_OFFSET;
 	}
 	else
@@ -1335,15 +1335,15 @@ Var *f_mean( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Missing parameter in call of function "
-				"mean().\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Missing parameter in call of function %s().\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	get_array_params( v, "mean", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 	slice_len = len;
 
 	/* The following optional parameter are the start index into to the array
@@ -1356,7 +1356,7 @@ Var *f_mean( Var *v )
 		if ( v->next->type == FLOAT_VAR )
 		{
 			eprint( WARN, "%s:%ld: Float value used as array index in "
-					"function mean().\n", Fname, Lc );
+					"function %s().\n", Fname, Lc, Cur_Func );
 			index = lround( v->next->val.dval ) - ARRAY_OFFSET;
 		}
 		else
@@ -1365,7 +1365,7 @@ Var *f_mean( Var *v )
 		if ( index < 0 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid array index (%ld) in function "
-					"mean().\n", Fname, Lc, index + ARRAY_OFFSET );
+					"%s().\n", Fname, Lc, index + ARRAY_OFFSET, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -1381,7 +1381,7 @@ Var *f_mean( Var *v )
 			if ( v->next->type == FLOAT_VAR )
 			{
 				eprint( WARN, "%s:%ld: Float value used as length of slice "
-						"parameter in function mean().\n", Fname, Lc );
+						"parameter in function %s().\n", Fname, Lc, Cur_Func );
 				slice_len = lround( v->next->next->val.dval );
 			}
 			else
@@ -1390,7 +1390,7 @@ Var *f_mean( Var *v )
 			if ( slice_len < 1 )
 			{
 				eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
-						"function mean().\n", Fname, Lc );
+						"function %s().\n", Fname, Lc, Cur_Func );
 				THROW( EXCEPTION );
 			}
 
@@ -1403,7 +1403,7 @@ Var *f_mean( Var *v )
 				{
 					eprint( FATAL, "%s:%ld: Sum of index and slice length "
 							"parameter exceeds length of array in function "
-							"mean().\n", Fname, Lc );
+							"%s().\n", Fname, Lc, Cur_Func );
 					THROW( EXCEPTION );
 				}
 			}
@@ -1437,7 +1437,7 @@ Var *f_rms( Var *v )
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	get_array_params( v, "rms", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	for ( i = 0; i < len; i++ )
 		if ( ilp != NULL )
@@ -1470,21 +1470,21 @@ Var *f_slice( Var *v )
 	if ( v == NULL || v->next == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Not enough parameter in call of function "
-				"`slice'.\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
 	vars_check( v, INT_ARR | FLOAT_ARR | ARR_REF | ARR_PTR |
 				   INT_TRANS_ARR | FLOAT_TRANS_ARR );
 
-	get_array_params( v, "slice", &len, &ilp, &idp );
+	get_array_params( v, &len, &ilp, &idp );
 
 	vars_check( v->next, INT_VAR | FLOAT_VAR );
 
 	if ( v->next->type == FLOAT_VAR )
 	{
 		eprint( WARN, "%s:%ld: Float value used as array index in function "
-				"`slice'.\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		index = lround( v->next->val.dval ) - ARRAY_OFFSET;
 	}
 	else
@@ -1493,7 +1493,7 @@ Var *f_slice( Var *v )
 	if ( index < 0 )
 	{
 		eprint( FATAL, "%s:%ld: Negative array index used in function "
-				"`slice'.\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -1504,7 +1504,7 @@ Var *f_slice( Var *v )
 		if ( v->next->type == FLOAT_VAR )
 		{
 			eprint( WARN, "%s:%ld: Float value used as length of slice "
-					"parameter in function `slice'.\n", Fname, Lc );
+					"parameter in function %s().\n", Fname, Lc, Cur_Func );
 			slice_len = lround( v->next->next->val.dval );
 		}
 		else
@@ -1513,7 +1513,7 @@ Var *f_slice( Var *v )
 		if ( slice_len < 1 )
 		{
 			eprint( FATAL, "%s:%ld; Zero or negative slice length used in "
-					"function `slice'.\n", Fname, Lc );
+					"function %s().\n", Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1529,8 +1529,8 @@ Var *f_slice( Var *v )
 		else
 		{
 			eprint( FATAL, "%s:%ld: Sum of index and slice length parameter "
-					"exceeds length of array in function slice.\n",
-					Fname, Lc );
+					"exceeds length of array in function %s().\n",
+					Fname, Lc, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1563,15 +1563,15 @@ Var *f_square( Var *v )
 	{
 		case INT_VAR :
 			if ( ( double ) v->val.lval >= sqrt( LONG_MAX ) )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"square().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			return vars_push( INT_VAR, v->val.lval * v->val.lval );
 
 		case FLOAT_VAR :
 			return vars_push( FLOAT_VAR, v->val.dval * v->val.dval );
 
 		default :
-			get_array_params( v, "square", &len, &ilp, &idp );
+			get_array_params( v, &len, &ilp, &idp );
 	}
 
 	if ( ilp != NULL )
@@ -1580,8 +1580,8 @@ Var *f_square( Var *v )
 		for ( i = 0; i < len; ilp++, i++ )
 		{
 			if ( ( double ) *ilp >= sqrt( LONG_MIN ) )
-				eprint( SEVERE, "%s:%ld: Integer overflow in function "
-						"sqrt().\n", Fname, Lc );
+				eprint( SEVERE, "%s:%ld: Integer overflow in function %s().\n",
+						Fname, Lc, Cur_Func );
 			rlp[ i ] = *ilp * *ilp;
 		}
 		new_var = vars_push( INT_TRANS_ARR, rlp, len );
@@ -1618,7 +1618,7 @@ Var *f_islice( Var *v )
 	else
 	{
 		eprint( SEVERE, "%s:%ld: Float value used as array size in function "
-				"int_slice().\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		size = lround( v->val.dval );
 	}
 
@@ -1648,7 +1648,7 @@ Var *f_fslice( Var *v )
 	else
 	{
 		eprint( SEVERE, "%s:%ld: Float value used as array size in function "
-				"float_slice().\n", Fname, Lc );
+				"%s().\n", Fname, Lc, Cur_Func );
 		size = lround( v->val.dval );
 	}
 

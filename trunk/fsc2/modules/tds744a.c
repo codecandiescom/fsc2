@@ -150,7 +150,8 @@ Var *digitizer_define_window( Var *v )
 	if ( tds744a.num_windows >= MAX_NUM_OF_WINDOWS )
 	{
 		eprint( FATAL, "%s:%ld: %s: Maximum number of digitizer windows (%ld) "
-				"exceeded.\n", Fname, Lc, DEVICE_NAME, MAX_NUM_OF_WINDOWS );
+				"exceeded in %s().\n",
+				Fname, Lc, DEVICE_NAME, MAX_NUM_OF_WINDOWS, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -171,9 +172,8 @@ Var *digitizer_define_window( Var *v )
 			win_width = VALUE( v );
 			if ( win_width <= 0.0 )
 			{
-				eprint( FATAL, "%s:%ld: %s: Zero or negative width for "
-						"window in `digitizer_define_window'.\n",
-						Fname, Lc, DEVICE_NAME );
+				eprint( FATAL, "%s:%ld: %s: Zero or negative width for window "
+						"in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 			is_win_width = SET;
@@ -181,8 +181,7 @@ Var *digitizer_define_window( Var *v )
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
 				eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-						"function `digitizer_define_window'.\n",
-						Fname, Lc, DEVICE_NAME );
+						"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 
 				while ( ( v = vars_pop( v ) ) != NULL )
 					;
@@ -249,9 +248,9 @@ Var *digitizer_timebase( Var *v )
 			if ( tds744a.is_timebase )
 				return vars_push( FLOAT_VAR, tds744a.timebase );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_timebase' with no "
-					"argument can only be used in the EXPERIMENT section.\n",
-					Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -345,8 +344,8 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of "
-				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in call of %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -355,7 +354,8 @@ Var *digitizer_sensitivity( Var *v )
 	if ( v->val.lval < TDS744A_CH1 || v->val.lval > TDS744A_CH4 )
 	{
 		eprint( FATAL, "%s:%ld: %s: Can't set or obtain sensitivity for "
-				"specified channel.\n", Fname, Lc, DEVICE_NAME );
+				"specified channel in %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -375,9 +375,9 @@ Var *digitizer_sensitivity( Var *v )
 			if ( tds744a.is_sens[ channel ] )
 				return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_sensitivity' with "
-					"no argument can only be used in the EXPERIMENT "
-					"section.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -391,8 +391,8 @@ Var *digitizer_sensitivity( Var *v )
 
 	if ( sens < max_sens || sens > min_sens )
 	{
-		eprint( FATAL, "%s:%ld: %s: Sensitivity setting is out of range.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Sensitivity setting is out of range in "
+				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -403,8 +403,8 @@ Var *digitizer_sensitivity( Var *v )
 		tds744a_set_sens( channel, sens );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of "
-				"`digitizer_sensitivity'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Superfluous parameter in call of %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 
 	return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
 }
@@ -432,9 +432,9 @@ Var *digitizer_num_averages( Var *v )
 			if ( tds744a.is_num_avg )
 				return vars_push( INT_VAR, tds744a.num_avg );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_num_averages' "
-					"with no argument can only be used in the EXPERIMENT "
-					"section.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -448,8 +448,8 @@ Var *digitizer_num_averages( Var *v )
 		num_avg = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: %s: Floating point number used as number "
-				"of averages.\n", Fname, Lc, DEVICE_NAME );
+		eprint( WARN, "%s:%ld: %s: Floating point number used as number of "
+				"averages in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		num_avg = lround( v->val.dval );
 	}
 	vars_pop( v );
@@ -524,9 +524,9 @@ Var *digitizer_record_length( Var *v )
 			if ( tds744a.is_rec_len )
 				return vars_push( INT_VAR, tds744a.rec_len );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_record_length' "
-					"with no argument can only be used in the EXPERIMENT "
-					"section.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -543,7 +543,7 @@ Var *digitizer_record_length( Var *v )
 	if ( v->type == FLOAT_VAR )
 	{
 		eprint( WARN, "%s:%ld: %s: Floating point value used as record "
-				"length.\n", Fname, Lc, DEVICE_NAME );
+				"length in %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		rec_len = lround( v->val.dval );
 	}
 	else
@@ -554,8 +554,8 @@ Var *digitizer_record_length( Var *v )
 	{
 		if ( record_lengths[ i ] == 0 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Record length %ld too long.\n",
-					Fname, Lc, DEVICE_NAME, rec_len );
+			eprint( FATAL, "%s:%ld: %s: Record length %ld too long in %s().\n",
+					Fname, Lc, DEVICE_NAME, rec_len, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -608,9 +608,9 @@ Var *digitizer_trigger_position( Var *v )
 			if ( tds744a.is_trig_pos )
 				return vars_push( FLOAT_VAR, tds744a.trig_pos );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_position' "
-					"with no argument can only be used in the EXPERIMENT "
-					"section.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -681,9 +681,9 @@ Var *digitizer_trigger_channel( Var *v )
 			if ( tds744a.is_trigger_channel )
 				return vars_push( INT_VAR, tds744a.trigger_channel );
 
-			eprint( FATAL, "%s:%ld: %s: Function `digitizer_trigger_channel' "
-					"with no argument can only be used in the EXPERIMENT "
-					"section.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Function %s() with no argument can "
+					"only be used in the EXPERIMENT section.\n",
+					Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -694,8 +694,8 @@ Var *digitizer_trigger_channel( Var *v )
 
 	if ( v->val.lval < 0 || v->val.lval >= MAX_CHANNELS )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid trigger channel name.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Invalid trigger channel name in %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -712,8 +712,8 @@ Var *digitizer_trigger_channel( Var *v )
 
 		default :
 			eprint( FATAL, "%s:%ld: %s: Channel %s can't be used as "
-					"trigger channel.\n", Fname, Lc, DEVICE_NAME,
-					Channel_Names[ v->val.lval ] );
+					"trigger channel in %s().\n", Fname, Lc, DEVICE_NAME,
+					Channel_Names[ v->val.lval ], Cur_Func );
 			THROW( EXCEPTION );
     }
 
@@ -758,8 +758,8 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
-				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -770,8 +770,8 @@ static Var *get_area( Var *v, bool use_cursor )
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification in %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -788,7 +788,7 @@ static Var *get_area( Var *v, bool use_cursor )
 		if ( ( w = tds744a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
-					"defined.\n", Fname, Lc, DEVICE_NAME );
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -805,8 +805,8 @@ static Var *get_area( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not been "
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -816,7 +816,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+				"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -857,8 +857,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
-				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -869,8 +869,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification in %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -886,7 +886,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 		if ( ( w = tds744a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
-					"defined.\n", Fname, Lc, DEVICE_NAME );
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -903,8 +903,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not been "
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -914,7 +914,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+				"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -965,9 +965,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of "
-				"function `digitizer_get_amplitude'.\n", Fname, Lc,
-				DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Missing arguments in call of function "
+				"%s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -978,8 +977,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 	if ( ch > TDS744A_REF4 )
 	{
-		eprint( FATAL, "%s:%ld: %s: Invalid channel specification.\n",
-				Fname, Lc, DEVICE_NAME );
+		eprint( FATAL, "%s:%ld: %s: Invalid channel specification in %s().\n",
+				Fname, Lc, DEVICE_NAME, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
@@ -995,7 +994,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 		if ( ( w = tds744a.w ) == NULL )
 		{
 			eprint( FATAL, "%s:%ld: %s: No measurement windows have been "
-					"defined.\n", Fname, Lc, DEVICE_NAME );
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 
@@ -1012,8 +1011,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 
 		if ( w == NULL )
 		{
-			eprint( FATAL, "%s:%ld: %s: Measurement window has not "
-					"been defined.\n", Fname, Lc, DEVICE_NAME );
+			eprint( FATAL, "%s:%ld: %s: Measurement window has not been "
+					"defined for %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1023,7 +1022,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	if ( v != NULL )
 	{
 		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
-				"function `digitizer_get_area'.\n", Fname, Lc, DEVICE_NAME );
+				"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1070,8 +1069,7 @@ Var *digitizer_lock_keyboard( Var *v )
 			else
 			{
 				eprint( FATAL, "%s:%d: %s: Invalid argument in call of "
-						"`digitizer_lock_keyboard'.\n",
-						Fname, Lc, DEVICE_NAME );
+						"function %s().\n", Fname, Lc, DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION );
 			}
 		}
