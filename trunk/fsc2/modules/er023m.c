@@ -205,7 +205,7 @@ Var *lockin_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -217,9 +217,9 @@ Var *lockin_sensitivity( Var *v )
 		}
 
 
-	rg = get_double( v, "receiver gain", DEVICE_NAME );
+	rg = get_double( v, "receiver gain" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( rg <= 0.0 )
 	{
@@ -290,7 +290,7 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -301,9 +301,9 @@ Var *lockin_time_constant( Var *v )
 				return vars_push( FLOAT_VAR, tc_list[ er023m_get_tc( ) ] );
 		}
 
-	tc = get_double( v, "time constant", DEVICE_NAME );
+	tc = get_double( v, "time constant" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( tc <= 0.0 )
 	{
@@ -399,7 +399,7 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, ( double )
@@ -417,7 +417,7 @@ Var *lockin_phase( Var *v )
 	else
 		phase = irnd( v->val.dval );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	while ( phase < 0 )
 		phase += 360;
@@ -447,7 +447,7 @@ Var *lockin_offset( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, ( long )
@@ -458,9 +458,9 @@ Var *lockin_offset( Var *v )
 				return vars_push( INT_VAR, ( long ) er023m_get_of( ) );
 		}
 
-	of = get_long( v, "offset", DEVICE_NAME );
+	of = get_long( v, "offset" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( of < MIN_OF || of > MAX_OF )
 	{
@@ -494,7 +494,7 @@ Var *lockin_conversion_time( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, BASE_CT * 
@@ -505,9 +505,9 @@ Var *lockin_conversion_time( Var *v )
 				return vars_push( FLOAT_VAR, BASE_CT * er023m_get_ct( ) );
 		}
 
-	ct = get_double( v, "conversion time", DEVICE_NAME );
+	ct = get_double( v, "conversion time" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( ct <= 0.0 )
 	{
@@ -580,7 +580,7 @@ Var *lockin_ref_freq( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -593,9 +593,9 @@ Var *lockin_ref_freq( Var *v )
 
 	old_mf_index = er023m.mf_index;
 
-	mf = get_double( v, "modulation frequency", DEVICE_NAME );
+	mf = get_double( v, "modulation frequency" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( mf <= 0.0 )
 	{
@@ -674,7 +674,7 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -687,9 +687,9 @@ Var *lockin_ref_level( Var *v )
 
 	old_ma_index = er023m.ma_index;
 
-	ma = get_double( v, "modulation amplitude", DEVICE_NAME );
+	ma = get_double( v, "modulation amplitude" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( ma < 0.0 )
 	{
@@ -747,7 +747,7 @@ Var *lockin_harmonic( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, 1L + ( long )
@@ -760,7 +760,7 @@ Var *lockin_harmonic( Var *v )
 
 	ha = ( int ) get_long( v, "harmonic", DEVICE_NAME ) - 1;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( ha < MIN_HARMONIC || ha > MAX_HARMONIC )
 	{
@@ -793,7 +793,7 @@ Var *lockin_resonator( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, 1L + ( long )
@@ -806,7 +806,7 @@ Var *lockin_resonator( Var *v )
 
 	re = ( int ) get_long( v, "resonator number", DEVICE_NAME ) - 1;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( re < MIN_RESONATOR || re > MAX_RESONATOR )
 	{

@@ -296,7 +296,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	start_field = get_double( v, "magnetic field", DEVICE_NAME );
+	start_field = get_double( v, "magnetic field" );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -305,9 +305,9 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	field_step = get_double( v, "field step width", DEVICE_NAME );
+	field_step = get_double( v, "field step width" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Check that new field value is still within bounds */
 
@@ -363,7 +363,7 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	field = get_double( v, "magnetic field", DEVICE_NAME );
+	field = get_double( v, "magnetic field" );
 
 	/* Check the new field value and reduce value if necessary */
 
@@ -374,13 +374,13 @@ Var *set_field( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		error = get_double( v, "magnetic field precision", DEVICE_NAME );
+		error = get_double( v, "magnetic field precision" );
 		if ( error > 0.1 * fabs( field ) )
 			eprint( SEVERE, SET, "%s: Field precision is larger than 10% "
 					"of field value in %s().\n", DEVICE_NAME, Cur_Func );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, field );

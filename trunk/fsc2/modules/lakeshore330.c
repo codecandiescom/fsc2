@@ -239,7 +239,7 @@ Var *temp_contr_sensor_unit( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		unit = get_long( v, "unit number", DEVICE_NAME );
+		unit = get_long( v, "unit number" );
 
 		if ( unit < UNIT_KELVIN || unit > UNIT_SENSOR )
 		{
@@ -300,7 +300,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 	{
 		lock = get_boolean( v, DEVICE_NAME ) ?
 			                   LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
-		too_many_arguments( v, DEVICE_NAME );
+		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

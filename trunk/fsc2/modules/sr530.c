@@ -259,7 +259,7 @@ Var *lockin_get_data( Var *v )
 
 	val[ 1 ] = get_single_channel_data( v );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	return vars_push( FLOAT_ARR, val, 2 );
 }
@@ -277,7 +277,7 @@ static double get_single_channel_data( Var *v )
 		channel = 1;
 	else
 		channel = ( v == NULL ) ?
-					  1 : get_long( v, "channel number", DEVICE_NAME );
+					  1 : get_long( v, "channel number" );
 
 	if ( channel != 1 && channel != 2 )
 	{
@@ -306,7 +306,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	port = get_long( v, "ADC number", DEVICE_NAME );
+	port = get_long( v, "ADC number" );
 
 	if ( port < 1 || port > 4 )
 	{
@@ -341,7 +341,7 @@ Var *lockin_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -353,9 +353,7 @@ Var *lockin_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, sr530_get_sens( ) );
 		}
 
-	sens = get_double( v, "sensitivity", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
+	sens = get_double( v, "sensitivity" );
 
 	if ( sens < 0.0 )
 	{
@@ -425,6 +423,8 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
+	too_many_arguments( v );
+
 	sr530.sens_index = sens_index;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -451,7 +451,7 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr530.tc_index == UNDEF_TC_INDEX ?
@@ -462,9 +462,7 @@ Var *lockin_time_constant( Var *v )
 				return vars_push( FLOAT_VAR, sr530_get_tc( ) );
 		}
 
-	tc = get_double( v, "time constant", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
+	tc = get_double( v, "time constant" );
 
 	if ( tc < 0.0 )
 	{
@@ -519,6 +517,8 @@ Var *lockin_time_constant( Var *v )
 					tc_list[ tc_index ] * 1.0e3 );
 	}
 
+	too_many_arguments( v );
+
 	sr530.tc_index = tc_index;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -547,7 +547,7 @@ Var *lockin_phase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr530.is_phase ?
@@ -559,9 +559,7 @@ Var *lockin_phase( Var *v )
 
 	/* Otherwise set phase to value passed to the function */
 
-	phase = get_double( v, "phase", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
+	phase = get_double( v, "phase" );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -573,6 +571,8 @@ Var *lockin_phase( Var *v )
 			phase -= 360.0;
 		phase = 360.0 - phase;
 	}
+
+	too_many_arguments( v );
 
 	sr530.phase    = phase;
 	sr530.is_phase = SET;
@@ -637,7 +637,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* First argument must be the channel number (5 or 6) */
 
-	channel = get_long( v, "DAC channel", DEVICE_NAME );
+	channel = get_long( v, "DAC channel" );
 
 	if ( channel < first_DAC_port || channel > last_DAC_port )
 	{
@@ -665,9 +665,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Second argument must be a voltage between -10.24 V and +10.24 V */
 
-	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
+	voltage = get_double( v, "DAC voltage" );
 
 	if ( fabs( voltage ) > 10.24 )
 	{
@@ -675,6 +673,8 @@ Var *lockin_dac_voltage( Var *v )
 				"range (+/-10.24 V).\n", DEVICE_NAME, voltage );
 		THROW( EXCEPTION );
 	}
+
+	too_many_arguments( v );
 
 	sr530.dac_voltage[ channel - first_DAC_port ] = voltage;
 
@@ -697,8 +697,8 @@ Var *lockin_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		lock = get_boolean( v, DEVICE_NAME );
-		too_many_arguments( v, DEVICE_NAME );
+		lock = get_boolean( v );
+		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

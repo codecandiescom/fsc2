@@ -313,7 +313,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	cur = get_double( v, "magnet current", DEVICE_NAME );
+	cur = get_double( v, "magnet current" );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
@@ -322,7 +322,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	cur_step = get_double( v, "magnet current step width", DEVICE_NAME );
+	cur_step = get_double( v, "magnet current step width" );
 
 	/* Check that new field value is still within bounds */
 
@@ -358,7 +358,7 @@ Var *magnet_use_dac_port( Var *v )
 	int *last_DAC_port;
 
 
-	port = ( int ) get_long( v, "DAC port", DEVICE_NAME );
+	port = ( int ) get_long( v, "DAC port" );
 
 	if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
 						 ( void ** ) &first_DAC_port ) != LIB_OK ||
@@ -400,13 +400,13 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	cur = get_double( v, "magnet field current", DEVICE_NAME );
+	cur = get_double( v, "magnet field current" );
 
 	/* Check the new current value and reduce it if necessary */
 
 	new_current = keithley228a_current_check( cur );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	return vars_push( FLOAT_VAR,
 					  keithley228a_goto_current( new_current ) );

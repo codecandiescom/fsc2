@@ -360,26 +360,21 @@ case that you expect an integer variable but would be prepared also to
 deal with a floating number (after it has been rounded to the nearest
 integer. This is the function @code{get_long()}, defined as
 @example
-long get_long( Var *var, const char *snippet, const char *device )
+long get_long( Var *var, const char *snippet )
 @end example
 The first argument is a pointer to the variable you want to
-evaluate. The second and third parameter are used to setup a warning
-message when the variable isn't an integer variable but a float
-value. This message always starts with the name of the currently
-interpreted @acronym{EDL} file, followed by the line number, then the
-name. To make it even clearer what triggered the warning message the
-next item in the message is name of the device, which you have to pass
-the function as the third argument (and which usually should be just
-@code{DEVICE_NAME} as defined in the configuration file for the device,
-see above). The second parameter is a string that gets embedded into the
-message. For example if the currently interpreted @acronym{EDL} file is
-@file{foo.edl} and the line where your function is called is line 17,
-the name of your device is @code{XYZ}, your function (that expects an
-integer but got a floating point number) is @code{abc()} and the string
-you pass to the function @code{get_long()} as the second argument is
-@code{"bar"}, i.e.
+evaluate. The second parameter is used to setup a warning message when
+the variable isn't an integer variable but a float value. This message
+always starts with the name of the currently interpreted @acronym{EDL}
+file, followed by the line number and the device name. The second
+parameter is a string that gets embedded into the message. For example
+if the currently interpreted @acronym{EDL} file is @file{foo.edl}, the
+line where your function is called is line 17 and the device name is
+@code{XYZ}, your function (that expects an integer but got a floating
+point number) is @code{abc()} and the string you pass to the function
+@code{get_long()} as the second argument is @code{"bar"}, i.e.
 @example
-get_long( var, "baz", "XYZ" );
+get_long( var, "baz" );
 @end example
 the following warning message will be printed:
 @example
@@ -389,7 +384,7 @@ foo.edl:17: XYZ: Floating point number used as bar in abc().
 If, on the other hand, you expect a floating point number but are
 prepared to also accept an integer, you can use the function
 @example
-long get_double( Var *var, const char *snippet, const char *device )
+long get_double( Var *var, const char *snippet )
 @end example
 The arguments to this function are the same you would pass to the
 previous function (i.e. @code{get_long()}) and the only difference is
@@ -404,7 +399,7 @@ foo.edl:17: XYZ: Integer number used as bar in abc().
 If your function can accept integer variables only there's a third
 function:
 @example
-long get_strict_long( Var *var, const char *snippet, const char *device )
+long get_strict_long( Var *var, const char *snippet )
 @end example
 This function has the same arguments as the two other functions but it
 will usually throw an exception to stop the interpretation of the

@@ -416,7 +416,10 @@ Var *func_call( Var *f )
 	   in which case the name of the 'topmost' function is kept). */
 
 	if ( in_call++ == 0 )
+	{
+		Cur_Dev  = f->device;
 		Cur_Func = f->name;
+	}
 
 	TRY
 	{
@@ -426,7 +429,11 @@ Var *func_call( Var *f )
 	OTHERWISE
 	{
 		if ( --in_call == 0 )
+		{
+			Cur_Dev  = NULL;
 			Cur_Func = NULL;
+		}
+
 #ifndef NDEBUG
 		if ( ! vars_exist( f ) )
 		{
@@ -446,7 +453,10 @@ Var *func_call( Var *f )
 	}
 
 	if ( --in_call == 0 )
+	{
+		Cur_Dev  = f->device;
 		Cur_Func = NULL;
+	}
 
 #ifndef NDEBUG
 	/* Before starting to delete the now defunct variables do another sanity

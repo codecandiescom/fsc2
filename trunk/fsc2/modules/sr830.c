@@ -298,7 +298,7 @@ Var *lockin_get_data( Var *v )
 
 	for ( num_channels = i = 0; i < 6 && v != NULL; i++, v = vars_pop( v ) )
 	{
-		channels[ i ] = get_long( v, "channel number", DEVICE_NAME );
+		channels[ i ] = get_long( v, "channel number" );
 
 		if ( channels[ i ] < 1 || channels[ i ] > NUM_CHANNELS )
 		{
@@ -357,7 +357,7 @@ Var *lockin_get_adc_data( Var *v )
 	long port;
 
 
-	port = get_double( v, "ADC port number", DEVICE_NAME );
+	port = get_double( v, "ADC port number" );
 
 	if ( port < 1 || port > NUM_ADC_PORTS )
 	{
@@ -398,7 +398,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the port number */
 
-	port = get_long( v, "DAC port number", DEVICE_NAME );
+	port = get_long( v, "DAC port number" );
 
 	if ( port < 1 || port > NUM_DAC_PORTS )
 	{
@@ -423,7 +423,7 @@ Var *lockin_dac_voltage( Var *v )
 
 	/* Get and check the voltage */
 
-	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
+	voltage = get_double( v, "DAC voltage" );
 
 	if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
 	{
@@ -434,7 +434,7 @@ Var *lockin_dac_voltage( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 	
 	sr830.dac_voltage[ port - 1 ] = voltage;
 
@@ -462,7 +462,7 @@ Var *lockin_sensitivity( Var *v )
 		switch( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR,
@@ -474,7 +474,7 @@ Var *lockin_sensitivity( Var *v )
 			return vars_push( FLOAT_VAR, sr830_get_sens( ) );
 		}
 
-	sens = get_double( v, "sensitivity", DEVICE_NAME );
+	sens = get_double( v, "sensitivity" );
 
 	if ( sens < 0.0 )
 	{
@@ -543,7 +543,7 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.sens_index = sens_index;
 
@@ -571,7 +571,7 @@ Var *lockin_time_constant( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.tc_index == UNDEF_TC_INDEX ?
@@ -582,7 +582,7 @@ Var *lockin_time_constant( Var *v )
 				return vars_push( FLOAT_VAR, sr830_get_tc( ) );
 		}
 
-	tc = get_double( v, "time constant", DEVICE_NAME );
+	tc = get_double( v, "time constant" );
 
 	if ( tc < 0.0 )
 	{
@@ -649,7 +649,7 @@ Var *lockin_time_constant( Var *v )
 		}
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.tc_index = tc_index;
 
@@ -694,7 +694,7 @@ Var *lockin_phase( Var *v )
 
 	/* Otherwise set phase to value passed to the function */
 
-	phase = get_double( v, "phase", DEVICE_NAME );
+	phase = get_double( v, "phase" );
 
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
@@ -707,7 +707,7 @@ Var *lockin_phase( Var *v )
 		phase = 360.0 - phase;
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.phase    = phase;
 	sr830.is_phase = SET;
@@ -740,7 +740,7 @@ Var *lockin_harmonic( Var *v )
 			return vars_push( INT_VAR, sr830_get_harmonic( ) );
 	}
 
-	harm = get_long( v, "harmonic", DEVICE_NAME );
+	harm = get_long( v, "harmonic" );
 	
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
@@ -763,7 +763,7 @@ Var *lockin_harmonic( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.harmonic = harm;
 	sr830.is_harmonic = SET;
@@ -805,7 +805,7 @@ Var *lockin_ref_freq( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_freq ?
@@ -815,7 +815,7 @@ Var *lockin_ref_freq( Var *v )
 				return vars_push( FLOAT_VAR, sr830_get_mod_freq( ) );
 		}
 
-	freq = get_double( v, "modulation frequency", DEVICE_NAME );
+	freq = get_double( v, "modulation frequency" );
 	
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
@@ -843,7 +843,7 @@ Var *lockin_ref_freq( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.mod_freq    = freq;
 	sr830.is_mod_freq = SET;
@@ -867,7 +867,7 @@ Var *lockin_ref_level( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, sr830.is_mod_level ?
@@ -877,7 +877,7 @@ Var *lockin_ref_level( Var *v )
 				return vars_push( FLOAT_VAR, sr830_get_mod_level( ) );
 		}
 
-	level = get_double( v, "modulation level", DEVICE_NAME );
+	level = get_double( v, "modulation level" );
 
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
@@ -887,7 +887,7 @@ Var *lockin_ref_level( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	sr830.mod_level = level;
 	sr830.is_mod_level = SET;
@@ -911,8 +911,8 @@ Var *lockin_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		lock = get_boolean( v, DEVICE_NAME );
-		too_many_arguments( v, DEVICE_NAME );
+		lock = get_boolean( v );
+		too_many_arguments( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

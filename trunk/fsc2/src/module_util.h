@@ -27,12 +27,12 @@
 
 
 inline int get_mode( void );
-inline void too_many_arguments( Var *v, const char *device );
-inline void no_query_possible( const char *device );
-inline long get_long( Var *v, const char *snippet, const char *device );
-inline double get_double( Var *v, const char *snippet, const char *device );
-inline long get_strict_long( Var *v, const char *snippet, const char *device );
-inline bool get_boolean( Var *v, const char *device );
+inline void too_many_arguments( Var *v );
+inline void no_query_possible( void );
+inline long get_long( Var *v, const char *snippet );
+inline double get_double( Var *v, const char *snippet );
+inline long get_strict_long( Var *v, const char *snippet );
+inline bool get_boolean( Var *v );
 
 
 #endif  /* ! MODULE_UTIL_HEADER */

@@ -230,7 +230,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	start_field = get_double( v, "start field", DEVICE_NAME );
+	start_field = get_double( v, "start field" );
 
 	er032m_field_check( start_field );
 
@@ -241,7 +241,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	field_step = get_double( v, "field step width", DEVICE_NAME );
+	field_step = get_double( v, "field step width" );
 
 	if ( fabs( field_step ) < ER032M_MIN_FIELD_STEP )
 	{
@@ -251,7 +251,7 @@ Var *magnet_setup( Var *v )
 		THROW( EXCEPTION );
 	}
 		
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	start_field = start_field;
 	magnet.field_step = field_step;
@@ -415,13 +415,13 @@ Var *set_field( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	field = get_double( v, "magnetic field", DEVICE_NAME );
+	field = get_double( v, "magnetic field" );
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 		eprint( SEVERE, SET, "%s: Can't use a maximum field error in %s().\n",
 				DEVICE_NAME, Cur_Func );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	er032m_field_check( field );
 

@@ -202,8 +202,8 @@ Var *synthesizer_state( Var *v )
 											 hp8647a_get_output_state( ) ) );
 		}
 
-	state = get_boolean( v, DEVICE_NAME );
-	too_many_arguments( v, DEVICE_NAME );
+	state = get_boolean( v );
+	too_many_arguments( v );
 
 	hp8647a.state = state;
 
@@ -249,7 +249,7 @@ Var *synthesizer_frequency( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.freq );
 	}
 
-	freq = get_double( v, "RF frequency", DEVICE_NAME );
+	freq = get_double( v, "RF frequency" );
 
 	if ( freq < 0 )
 	{
@@ -261,7 +261,7 @@ Var *synthesizer_frequency( Var *v )
 			THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* In test run stop program if value is out of range while in real run
 	   just keep the current value on errors */
@@ -362,9 +362,9 @@ Var *synthesizer_attenuation( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.attenuation );
 	}
 
-	att = get_double( v, "RF attenuation", DEVICE_NAME );
+	att = get_double( v, "RF attenuation" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Check that attenuation is within valid range, if not throw exception
 	   in test run, but in real run just don't change the attenuation */
@@ -423,9 +423,9 @@ Var *synthesizer_minimum_attenuation( Var *v )
 		return vars_push( FLOAT_VAR, hp8647a.min_attenuation );
 
 
-	min_atten = get_double( v, "minimum RF attenuation", DEVICE_NAME );
+	min_atten = get_double( v, "minimum RF attenuation" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( min_atten > MIN_MIN_ATTEN )
 	{
@@ -466,10 +466,10 @@ Var *synthesizer_step_frequency( Var *v )
 			return vars_push( FLOAT_VAR, hp8647a.step_freq );
 		}
 
-		hp8647a.step_freq = get_double( v, "RF step frequency", DEVICE_NAME );
+		hp8647a.step_freq = get_double( v, "RF step frequency" );
 		hp8647a.step_freq_is_set = SET;
 
-		too_many_arguments( v, DEVICE_NAME );
+		too_many_arguments( v );
 	}
 	else if ( ! hp8647a.step_freq_is_set )
 	{
@@ -617,7 +617,7 @@ Var *synthesizer_use_table( Var *v )
 
 		tfname = T_strdup( v->val.sptr );
 
-		too_many_arguments( v, DEVICE_NAME );
+		too_many_arguments( v );
 
 		TRY
 		{
@@ -669,11 +669,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 
 	/* Otherwise check the supplied variable */
 
-	freq = get_double( v, "RF attenuation reference frequency", DEVICE_NAME );
-
-	/* Get rid of the variables */
-
-	too_many_arguments( v, DEVICE_NAME );
+	freq = get_double( v, "RF attenuation reference frequency" );
 
 	/* Check that the frequency is within the synthesizers range */
 
@@ -688,6 +684,8 @@ Var *synthesizer_att_ref_freq( Var *v )
 		else
 			THROW( EXCEPTION );
 	}
+
+	too_many_arguments( v );
 
 	hp8647a.att_ref_freq = freq;	
 
@@ -865,7 +863,7 @@ Var *synthesizer_mod_type( Var *v )
 		}
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	hp8647a.mod_type = res;
 	hp8647a.mod_type_is_set = SET;
@@ -959,7 +957,7 @@ Var *synthesizer_mod_source( Var *v )
 		}
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
@@ -1016,9 +1014,9 @@ Var *synthesizer_mod_ampl( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	ampl = get_double( v, "modulation amplitude", DEVICE_NAME );
+	ampl = get_double( v, "modulation amplitude" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( hp8647a.mod_type == MOD_TYPE_OFF )
 	{

@@ -187,14 +187,14 @@ Var *digitizer_define_window( Var *v )
 	{
 		/* Get the start point of the window */
 
-		win_start = get_double( v, "window startposition", DEVICE_NAME );
+		win_start = get_double( v, "window start position" );
 		is_win_start = SET;
 
 		/* If there's a second parameter take it to be the window width */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			win_width = get_double( v, "window width", DEVICE_NAME );
+			win_width = get_double( v, "window width" );
 
 			/* Allow window width to be zero in test run... */
 
@@ -207,7 +207,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			too_many_arguments( v, DEVICE_NAME );
+			too_many_arguments( v );
 		}
 	}
 
@@ -261,7 +261,7 @@ Var *digitizer_timebase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_timebase? 
@@ -290,7 +290,7 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	timebase = get_double( v, "time base", DEVICE_NAME );
+	timebase = get_double( v, "time base" );
 
 	if ( timebase <= 0 )
 	{
@@ -391,7 +391,7 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ? 
@@ -404,9 +404,9 @@ Var *digitizer_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
 		}
 
-	sens = get_double( v, "sensitivity", DEVICE_NAME );
+	sens = get_double( v, "sensitivity" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Check that the sensitivity setting isn't out of range */
 
@@ -534,7 +534,7 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	num_avg = get_long( v, "number of averages", DEVICE_NAME );
+	num_avg = get_long( v, "number of averages" );
 
 	if ( num_avg <= 0 )
 	{
@@ -577,13 +577,13 @@ Var *digitizer_averaging( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		reject = get_boolean( v, DEVICE_NAME );
+		reject = get_boolean( v );
 
 		/* Last (optional) value is the number of points to use in averaging */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			rec_len = get_long( v, "record length", DEVICE_NAME );
+			rec_len = get_long( v, "record length" );
 
 			if ( rec_len <= 0 )
 			{
@@ -618,7 +618,7 @@ Var *digitizer_averaging( Var *v )
 			}
 		}
 
-		too_many_arguments( v, DEVICE_NAME );
+		too_many_arguments( v );
 	}
 
 	lecroy9400_set_up_averaging( channel, source_ch, num_avg,
@@ -746,7 +746,7 @@ Var *digitizer_trigger_position( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, lecroy9400.is_trig_pos ?
@@ -759,7 +759,7 @@ Var *digitizer_trigger_position( Var *v )
 				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
 		}
 
-	trig_pos = get_double( v, "trigger position", DEVICE_NAME );
+	trig_pos = get_double( v, "trigger position" );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
@@ -768,7 +768,7 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	lecroy9400.trig_pos = trig_pos;
 	lecroy9400.is_trig_pos = SET;
@@ -816,7 +816,7 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				if ( lecroy9400.is_trigger_channel )
@@ -860,7 +860,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION );
     }
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -970,7 +970,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 #endif
 		w = NULL;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */

@@ -215,13 +215,13 @@ Var *digitizer_define_window( Var *v )
 	{
 		/* Get the start point of the window */
 
-		win_start = get_double( v, "window start position", DEVICE_NAME );
+		win_start = get_double( v, "window start position" );
 
 		/* If there's a second parameter take it to be the window width */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			win_width = get_double( v, "window width", DEVICE_NAME );
+			win_width = get_double( v, "window width" );
 
 			/* Allow window width to be zero in test run... */
 
@@ -234,7 +234,7 @@ Var *digitizer_define_window( Var *v )
 			}
 			is_win_width = SET;
 
-			too_many_arguments( v, DEVICE_NAME );
+			too_many_arguments( v );
 		}
 	}
 
@@ -287,7 +287,7 @@ Var *digitizer_timebase( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds744a.is_timebase ?
@@ -306,7 +306,7 @@ Var *digitizer_timebase( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	timebase = get_double( v, "time base", DEVICE_NAME );
+	timebase = get_double( v, "time base" );
 
 	if ( timebase <= 0 )
 	{
@@ -354,7 +354,7 @@ Var *digitizer_timebase( Var *v )
 		T_free( t );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	tds744a.timebase = tb[ TB ];
 	tds744a.is_timebase = SET;
@@ -394,7 +394,7 @@ Var *digitizer_sensitivity( Var *v )
 	}
 
 	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel > TDS744A_CH4 )
 	{
@@ -408,7 +408,7 @@ Var *digitizer_sensitivity( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds744a.is_sens[ channel ] ?
@@ -420,7 +420,7 @@ Var *digitizer_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, tds744a.sens[ channel ] );
 		}
 
-	sens = get_double( v, "sensitivity", DEVICE_NAME );
+	sens = get_double( v, "sensitivity" );
 
 	if ( sens < max_sens || sens > min_sens )
 	{
@@ -429,7 +429,7 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	tds744a.sens[ channel ] = sens;
 	tds744a.is_sens[ channel ] = SET;
@@ -453,7 +453,7 @@ Var *digitizer_num_averages( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, tds744a.is_num_avg ?
@@ -465,7 +465,7 @@ Var *digitizer_num_averages( Var *v )
 				return vars_push( INT_VAR, tds744a.num_avg );
 		}
 
-	num_avg = get_long( v, "number of averages", DEVICE_NAME );
+	num_avg = get_long( v, "number of averages" );
 
 	if ( num_avg == 0 )
 	{
@@ -481,7 +481,7 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	tds744a.num_avg = num_avg;
 	tds744a.is_num_avg = SET;
@@ -509,7 +509,7 @@ Var *digitizer_record_length( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, tds744a.is_rec_len ?
@@ -524,7 +524,7 @@ Var *digitizer_record_length( Var *v )
 				return vars_push( INT_VAR, tds744a.rec_len );
 		}
 
-	rec_len = get_long( v, "record length", DEVICE_NAME );
+	rec_len = get_long( v, "record length" );
 
 	i = 0;
 	while ( 1 )
@@ -550,7 +550,7 @@ Var *digitizer_record_length( Var *v )
 		i++;
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	tds744a.rec_len = record_lengths[ i ];
 	tds744a.is_rec_len = SET;
@@ -578,7 +578,7 @@ Var *digitizer_trigger_position( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( FLOAT_VAR, tds744a.is_trig_pos ?
@@ -593,7 +593,7 @@ Var *digitizer_trigger_position( Var *v )
 				return vars_push( FLOAT_VAR, tds744a.trig_pos );
 		}
 
-	trig_pos = get_double( v, "trigger position", DEVICE_NAME );
+	trig_pos = get_double( v, "trigger position" );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
@@ -602,7 +602,7 @@ Var *digitizer_trigger_position( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	tds744a.trig_pos = trig_pos;
 	tds744a.is_trig_pos = SET;
@@ -627,7 +627,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 
 	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( channel > TDS744A_REF4 )
 		return vars_push( INT_VAR, 0 );
@@ -650,7 +650,7 @@ Var *digitizer_trigger_channel( Var *v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( DEVICE_NAME );
+				no_query_possible( );
 
 			case TEST :
 				return vars_push( INT_VAR, tds744a_translate_channel(
@@ -664,7 +664,7 @@ Var *digitizer_trigger_channel( Var *v )
 		}
 
 	channel = tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
     switch ( channel )
     {
@@ -683,7 +683,7 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION );
     }
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	return vars_push( INT_VAR, 1 );
 }
@@ -740,7 +740,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 	
 	if ( ch > TDS744A_REF4 )
 	{
@@ -764,7 +764,7 @@ static Var *get_area( Var *v, bool use_cursor )
 			THROW( EXCEPTION );
 		}
 
-		win_num = get_strict_long( v, "window_number", DEVICE_NAME );
+		win_num = get_strict_long( v, "window_number" );
 
 		while ( w != NULL )
 		{
@@ -786,7 +786,7 @@ static Var *get_area( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -838,7 +838,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( ch > TDS744A_REF4 )
 	{
@@ -862,7 +862,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 			THROW( EXCEPTION );
 		}
 
-		win_num = get_strict_long( v, "window_number", DEVICE_NAME );
+		win_num = get_strict_long( v, "window_number" );
 
 		while ( w != NULL )
 		{
@@ -884,7 +884,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   array */
@@ -949,7 +949,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	ch = ( int ) tds744a_translate_channel( GENERAL_TO_TDS744A,
-						 get_strict_long( v, "channel number", DEVICE_NAME ) );
+									  get_strict_long( v, "channel number" ) );
 
 	if ( ch > TDS744A_REF4 )
 	{
@@ -973,7 +973,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 			THROW( EXCEPTION );
 		}
 
-		win_num = get_strict_long( v, "window number", DEVICE_NAME );
+		win_num = get_strict_long( v, "window number" );
 
 		while ( w != NULL )
 		{
@@ -995,7 +995,7 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	else
 		w = NULL;
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	/* Talk to digitizer only in the real experiment, otherwise return a dummy
 	   value */
@@ -1033,8 +1033,7 @@ Var *digitizer_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		lock = get_boolean( v, DEVICE_NAME );
-		too_many_arguments( v, DEVICE_NAME );
+		lock = get_boolean( v );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

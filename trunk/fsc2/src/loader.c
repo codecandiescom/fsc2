@@ -40,6 +40,7 @@ static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
 static void add_function( int num, void *new_func, Device *new_dev );
 static int func_cmp( const void *a, const void *b );
+static void resolve_device_name( Device *dev );
 static void resolve_generic_type( Device *dev );
 
 
@@ -204,6 +205,7 @@ static void load_functions( Device *dev )
 	/* Now that we know that the module exists and can be used try to resolve
 	   all functions we may need */
 
+	resolve_device_name( dev );
 	resolve_generic_type( dev );
 	resolve_hook_functions( dev, dev_name );
 	resolve_functions( dev );
@@ -385,6 +387,25 @@ static void add_function( int num, void *new_func, Device *new_dev )
 	f->fnct   = ( Var * ( * )( Var * ) ) new_func;
 	f->device = new_dev;
 	f->name = get_string( "%s#%d", Fncts[ num ].name, new_dev->count );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* In each device module a device name string should be defined that */
+/* is going to be used in warnings and error messages. This function */
+/* tries to locate the variable with the name 'device_name' within   */
+/* the module and stores it in the Device structure.                 */
+/*-------------------------------------------------------------------*/
+
+static void resolve_device_name( Device *dev )
+{
+	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
+												"device_name" );
+
+	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
+		dev->generic_type = NULL;
+
+	return;
 }
 
 

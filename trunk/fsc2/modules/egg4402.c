@@ -156,9 +156,9 @@ Var *boxcar_curve_length( Var *v )
 		return vars_push( INT_VAR, T_atol( buffer ) );
 	}
 
-	num_points = get_long( v, "number of points", DEVICE_NAME );
+	num_points = get_long( v, "number of points" );
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	if ( num_points < 32 || num_points > 4096 )
 	{
@@ -224,7 +224,7 @@ Var *boxcar_get_curve( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		curve_type = get_long( v, "curve type", DEVICE_NAME );
+		curve_type = get_long( v, "curve type" );
 
 		if ( ( v = vars_pop( v ) ) == NULL )
 		{
@@ -313,7 +313,7 @@ Var *boxcar_get_curve( Var *v )
 	}
 	else
 	{
-		first = get_long( v, "first point", DEVICE_NAME );
+		first = get_long( v, "first point" );
 
 		if ( first < 0 || first >= max_points )
 		{
@@ -356,7 +356,7 @@ Var *boxcar_get_curve( Var *v )
 		}
 	}
 
-	too_many_arguments( v, DEVICE_NAME );
+	too_many_arguments( v );
 
 	num_points = last - first + 1;
 
