@@ -93,7 +93,7 @@ of different devices or the integration of new ones. Usually, the
 devices are hard-coded into the program and just changing one device
 requires a major rewrite. In contrast, @acronym{fsc2} has a strictly
 modular approach to the handling of devices. For each device a seperate
-module exists that only gets loaded if it is stated explicitely in the
+module exists that only gets loaded if it is listed explicitely in the
 @acronym{EDL} program that this device is needed. Thus changing the
 experiment to work with e.g.@: a different lock-in amplifier or
 digitizer usually does not require more than changing one line of the
