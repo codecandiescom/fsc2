@@ -29,6 +29,10 @@ static double gauss_random( void );
 static double datanh( double arg );
 
 
+#define C2K_OFFSET   273.16
+#define D2R_FACTOR   ( atan( 1.0 ) / 45.0 )
+#define R2D_FACTOR   ( 45.0 / atan( 1.0 ) )
+
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
@@ -407,7 +411,7 @@ Var *f_abs( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_abs( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
@@ -419,7 +423,7 @@ Var *f_abs( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_abs( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
@@ -2439,7 +2443,349 @@ Var *f_square( Var *v )
 					new_var->val.vptr[ i ] = NULL;
 				else
 				{
-					new_var->val.vptr[ i ] = f_ceil( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ] = f_square( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_G2T( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval * 1.0e-4 );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval * 1.0e-4 );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc * 1.0e-4;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc * 1.0e-4;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_G2T( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_T2G( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval * 1.0e4 );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval * 1.0e4 );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc * 1.0e4;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc * 1.0e4;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_T2G( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_C2K( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval + C2K_OFFSET );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval + C2K_OFFSET );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc + C2K_OFFSET;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc + C2K_OFFSET;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_C2K( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_K2C( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval - C2K_OFFSET );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval - C2K_OFFSET );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc - C2K_OFFSET;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc - C2K_OFFSET;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_K2C( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_D2R( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval * D2R_FACTOR );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval * D2R_FACTOR );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc * D2R_FACTOR;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc * D2R_FACTOR;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_D2R( v->val.vptr[ i ] );
+					new_var->val.vptr[ i ]->from = new_var;
+				}
+			return new_var;
+	}
+
+	fsc2_assert( 1 == 0 );
+	return NULL;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+Var *f_R2D( Var *v )
+{
+	Var *new_var;
+	ssize_t i;
+	long *lsrc, *ldest;
+	double *dsrc, *ddest;
+	double lmax, dmax;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				   INT_REF | FLOAT_REF );
+
+	switch ( v->type )
+	{
+		case INT_VAR :
+			return vars_push( FLOAT_VAR, ( double ) v->val.lval * R2D_FACTOR );
+
+		case FLOAT_VAR :
+			return vars_push( FLOAT_VAR, v->val.dval * R2D_FACTOR );
+
+		case INT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			for ( lsrc = v->val.lpnt, ddest = new_var->val.lpnt, i = 0;
+				  i < v->len; i++, lsrc++, ldest++ )
+				*ddest = ( double ) *lsrc * R2D_FACTOR;
+			return new_var;
+
+		case FLOAT_ARR :
+			new_var = vars_make( FLOAT_ARR, v );
+			dmax = sqrt( HUGE_VAL );
+			for ( dsrc = v->val.dpnt, ddest = new_var->val.dpnt, i = 0;
+				  i < v->len; i++, dsrc++, ddest++ )
+				*ddest = *dsrc * R2D_FACTOR;
+			}
+			return new_var;
+
+		case INT_REF : case FLOAT_REF :
+			new_var = vars_make( FLOAT_REF, v );
+			for ( i = 0; i < v->len; i++ )
+				if ( v->val.vptr[ i ] == NULL )
+					new_var->val.vptr[ i ] = NULL;
+				else
+				{
+					new_var->val.vptr[ i ] = f_R2D( v->val.vptr[ i ] );
 					new_var->val.vptr[ i ]->from = new_var;
 				}
 			return new_var;
