@@ -393,7 +393,7 @@ bool dg2020_change_pulse_position( long pnum, double time )
 		return OK;
 	}
 
-	if ( p->is_pos && ! p->is_old_pos  )
+	if ( p->is_pos && ! p->is_old_pos )
 	{
 		p->old_pos = p->pos;
 		p->is_old_pos = SET;
