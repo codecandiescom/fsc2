@@ -40,6 +40,7 @@ static void exp_testerror( const char *s );
 
 static bool dont_print_error = UNSET;
 static bool in_cond = UNSET;
+
 %}
 
 
