@@ -105,7 +105,7 @@ void rb_pulser_init( void )
 																 != RULBUS_OK )
 		rb_pulser_failure( SET, "Failure to initialize pulser" );
 
-	/* Set for all cards (except the card for experiment repetition time,
+	/* Set for all cards (except the card for the experiment repetition time,
 	   which must remain inactive until the experiment is started, and the
 	   card for the delay for the detection pulse, which is triggered on the
 	   falling edge) the input trigger slope to trigger on raising edge */
@@ -130,7 +130,7 @@ void rb_pulser_init( void )
 																 != RULBUS_OK )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
-	/* Have the clock feeding the delay cards (except the ERT card run at
+	/* Have the clock feeding the delay cards (except the ERT card) run at
 	   the frequency required for the timebase */
 
 #ifndef FIXED_TIMEBASE
@@ -262,7 +262,7 @@ void rb_pulser_run( bool state )
 		{
 			/* In external trigger mode set the rate of the clock feeding the
 			   ERT delay card to the highest possible rate, set the delay
-			   of thar card to 0 (so the end pulse comes as fast as possible
+			   of that card to 0 (so the end pulse comes as fast as possible
 			   after the input trigger) and make the card output end pulses
 			   on the first start/end pulse output connector */
 
@@ -302,9 +302,10 @@ void rb_pulser_run( bool state )
 				 												 != RULBUS_OK )
 				rb_pulser_failure( SET, "Failure to start pulser" );
 
-			/* now get the ERT card to run by first setting the trigger slope
-			   to falling, then to raising edge, afterwards it feeds itself
-			   it's own end pulse as trigger input */
+			/* Now get the ERT card to run by first setting the trigger slope
+			   to falling, then to raising edge. That makes it emit a pulse
+			   and afterwards it keeps running because it's own end pulse is
+			   fed to itself as the trigger input */
 
 			if ( rulbus_rb8514_delay_set_trigger(
 									  rb_pulser.delay_card[ ERT_DELAY ].handle,
