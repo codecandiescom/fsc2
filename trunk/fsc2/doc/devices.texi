@@ -657,8 +657,8 @@ alternatively, @code{7}, @code{8}, @code{9}, or @code{10}
 Except for the model @code{TDS520}, this function positions the cursors
 at the start and end point of the specified window (or the first and
 last point if no window as been specified) and uses the function
-built into the digitizer to compute the area. For the model @code{TDS520}
-that misses this built-in function the curve in the interval is fetched
+built into the digitizer to compute the area. For the model @code{TDS520},
+that misses this built-in function, the curve in the interval is fetched
 which is than used to compute the area. To give some visual feedback
 also for this model the cursors are moved to the borders of the
 interval.
@@ -1164,11 +1164,170 @@ in is automatically loaded, so it needs no special entry in the
 
 @table @samp
 
-@item get_phase_cycled_area_1d()
-@findex get_phase_cycled_area_1d()
+@item get_phase_cycled_area()
+@findex get_phase_cycled_area()
+This function is for doing a complete measurement sequence in a phase
+cycled experiment, It goes through a complete phase cycle, setting the
+pulser, fetching the data from the digitizer and finally returning the
+measured data, i.e.@: the areas returned by the digitizer and added up
+according to the setting of the @code{ACQUISITION_SEQUENCE}.
+
+This function is for cases where there's only one
+@code{ACQUISITION_SEQUENCE}, if there are two use the function
+@code{get_phase_cycled_area()} instead.
+
+The first argument the function expects is a digitizer channel to be
+used for meauring the area of the signal, see above which channels can
+be used for the different digitizers. If the @code{ACQUISITION_SEQUENCE}
+is written in way that it is clear that two digitizer channels are
+needed, i.e.@: you have a line in the @code{PHASES} section like
+@example
+ACQUISITION_SEQUENCE = +A, -B, -A, +B;
+@end example
+also the second argument to the function must be a digitizer
+channel. The first channel is used for feteching the @code{A} data, the
+second for the @code{B} data. This is, of course, only relevant when you
+have two different signals, e.g.@: the two outputs of a quadrature mixer
+and the measured data consist of adding up signals from both channels.
+
+The following arguments are as many window indentifiers (as returned by
+@code{digitizer_define_window()} as there are needed. If no window
+argument is given always the area of the complete curve is returned!
+
+The type of the return value depends on the number of window identifiers
+passed to the function. If there is only one window identifier (or none)
+a floating point value with the resultof the meaurement is returned. If,
+on the other hand, there is more than one window identifier an array
+will be returned with as many elements as there are window identifiers,
+the first element of the returned array containing the result for the
+first window, the second element the value for the second window etc.
+
+As an example here parts of an @code{EDL} program for a 1-dimensional
+stimulated echo experiment with phase cycling. The parts with the
+definition of the pulses etc. are left out for sake of brevity.
+
+@example
+DEVICES:
+
+dg2020_f;
+tds754a;
 
 
-@item get_phase_cycled_area_2d()
-@findex get_phase_cycled_area_2d()
+VARIABLES:
+
+Num_points = 256;
+raw_data[ 2 ];
+data[ Num_points ];
+Win_ID_1;                // signal window
+Win_ID_2;                // background window
+I;
+
+...
+
+ASSIGNMENTS:
+
+...
+
+PHASES:
+
+PHASE_SEQUENCE_1     = +x, -x, +x, -x;  // sequence for 1st pulse
+PHASE_SEQUENCE_2     = +x, +x, -x, -x;  // sequence for 2nd pulse
+ACQUISITION_SEQUENCE =  +,  -,  -,  +;
+
+
+PREPARATIONS:
+
+init_1d( 1, Num_points );
+Win_ID_1 = digitizer_define_window( 388 ns, 4 ns );
+Win_ID_2 = digitizer_define_window( 620 ns, 4 ns );
+
+...
+
+EXPERIMENT:
+
+FOR I = 1 : : Num_points @{
+    raw_data = get_phase_cycled_area( CH1, Win_ID_1, Win_ID_2 );
+    data[ I ] = raw_data[ 1 ] - raw_data[ 2 ];
+    display( I, data[ I ] );
+    pulser_shift( );
+@}
+
+...
+@end example
+You may note, that in this program @code{pulser_update()} isn't called
+after @code{pulser_shift()}. This is possible because
+@code{get_phase_cycled_area()} internally calls @code{pulser_update()}
+before it starts doing the measurement.
+
+
+
+
+@item get_phase_cycled_area_2()
+@findex get_phase_cycled_area_2()
+
+This function is very similar to the previous one,
+@code{get_phase_cycled_area()}. The main difference is that instead of
+just one value for each window two are returned, usually the real and
+the imaginary part of a signal. The arguments of the function are
+identical to the one of @code{get_phase_cycled_area()}. But when only
+one window identifier (or none) was passe to the function it returns
+an array with two elements and if there were more window identifiers it
+returns and array with twice as many elements. To be able to use this
+function two @code{ACQUISITION_SEQUENCE}s must have been defined in the
+@code{PHASES} section of the @code{EDL} program and you need quadrature
+detection.
+
+This function would for example be used in an inversion recovery
+experiment with FID detection and phase cycling. Parts of the program
+would look like this:
+@example
+DEVICES:
+
+dg2020_f;
+tds754a;
+
+
+VARIABLES:
+
+Num_points = 256;
+raw_data[ 4 ];
+data[ Num_x_points, 2 ];
+Win_ID_1;                // signal window
+Win_ID_2;                // background window
+I;
+
+...
+
+ASSIGNMENTS:
+
+...
+
+PHASES:
+
+PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
+PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
+ACQUISITION_SEQUENCE_1 = +A, -A, +B, -B, +A, -A, +B, -B;
+ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
+
+
+PREPARATIONS:
+
+init_1d( 2, Num_points );
+Win_ID_1 = digitizer_define_window( 388 ns, 4 ns );
+Win_ID_2 = digitizer_define_window( 620 ns, 4 ns );
+
+...
+
+EXPERIMENT:
+
+FOR I = 1 : : Num_points @{
+    raw_data = get_phase_cycled_area_2( CH1, CH2,
+                                        Win_ID_1, Win_ID_2 );
+    data[ I, 1 ] = raw_data[ 1 ] - raw_data[ 3 ];
+    data[ I, 2 ] = raw_data[ 2 ] - raw_data[ 4 ];
+    display( I, data[ I, 1 ], 1, I, data[ I, 2 ], 2 );
+    pulser_shift( );
+@}
+@end example
 
 @end table

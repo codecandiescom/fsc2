@@ -1095,10 +1095,10 @@ static void start_help_browser( void )
 	{
 		av[ 0 ] = T_strdup( "opera" );
 		av[ 1 ] = T_strdup( "-newbrowser" );
-		av[ 2 ] = get_string( 21 + strlen( docdir ) );
+		av[ 2 ] = get_string( 15 + strlen( docdir ) );
 		strcpy( av[ 2 ], "file:/" );
 		strcat( av[ 2 ], docdir );
-		strcat( av[ 2 ], "fsc2_frame.html" );
+		strcat( av[ 2 ], "fsc2.html" );
 	}
 	else
 	{
@@ -1109,18 +1109,18 @@ static void start_help_browser( void )
 
 		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 		{
-			av[ 1 ] = get_string( 20 + strlen( docdir ) );
+			av[ 1 ] = get_string( 14 + strlen( docdir ) );
 			strcpy( av[ 1 ], "file:" );
 			strcat( av[ 1 ], docdir );
-			strcat( av[ 1 ], "fsc2_frame.html" );
+			strcat( av[ 1 ], "fsc2.html" );
 		}
 		else
 		{
 			av[ 1 ] = T_strdup( "-remote" );
-			av[ 2 ] = get_string( 40 + strlen( docdir ) );
+			av[ 2 ] = get_string( 34 + strlen( docdir ) );
 			strcpy( av[ 2 ], "openURL(file:" );
 			strcat( av[ 2 ], docdir );
-			strcat( av[ 2 ], "fsc2_frame.html,new-window)" );
+			strcat( av[ 2 ], "fsc2.html,new-window)" );
 		}
 	}
 
