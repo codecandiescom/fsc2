@@ -155,31 +155,31 @@ int s_band_init_hook( void )
 
 	if ( ! exist_function( "find_field" ) )
 	{
-		eprint( FATAL, "s_band: Can't find function to do field "
+		eprint( FATAL, "s_band: No function available to do field "
 				"measurements.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_meter_wait" ) )
 	{
-		eprint( FATAL, "s_band: Can't find function needed for field "
-				"measurements.\n" );
+		eprint( FATAL, "s_band: Function needed for field measurements not "
+				"available.\n" );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_resolution" ) )
 	{
-		eprint( FATAL, "s_band: Can't find function to determine field "
-				"measurement resolution.\n" );
+		eprint( FATAL, "s_band: Function to determine field measurement "
+				"resolution is missing.\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* Claim the serial port */
 
-	if ( SERIAL_PORT >= NUM_SERIAL_PORTS )
+	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
 	{
-		eprint( FATAL, "s_band: Serial port number out of valid range (0-%d).",
-				NUM_SERIAL_PORTS - 1 );
+		eprint( FATAL, "s_band: Serial port number %d out of valid range "
+				"(0-%d).", SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -262,7 +262,6 @@ void s_band_exit_hook( void )
 /* Function for registering the start field and the field step size. */
 /*-------------------------------------------------------------------*/
 
-
 Var *magnet_setup( Var *v )
 {
 	/* check that both variables are reasonable */
@@ -326,7 +325,7 @@ Var *magnet_setup( Var *v )
 
 /*--------------------------------------------------------------------*/
 /* If called the function reduces the time needed for calibrating the */
-/* magnet sweep, alas also reducing the accuracy.                     */
+/* magnet sweep but unfortunately also reducing the accuracy.         */
 /*--------------------------------------------------------------------*/
 
 Var *magnet_fast_init( Var *v )
@@ -388,7 +387,7 @@ Var *set_field( Var *v )
 	{
 		if ( ! magnet_goto_field( VALUE( v ) ) )
 		{
-			eprint( FATAL, "Can't reach requested field of %lf G.\n",
+			eprint( FATAL, "s_band: Can't reach requested field of %lf G.\n",
 					VALUE( v ) );
 			THROW( EXCEPTION );
 		}
@@ -643,7 +642,7 @@ try_again:
 	{
 		if ( 1 != show_choices( "Please set sweep speed on magnet front\n"
 								"panel to maximum value of 6666 Oe/min\n."
-								"Also make sure remote control is enabled !",
+								"Also make sure remote control is enabled!",
 								2, "Abort", "Done", "", 3 ) )
 			goto try_again;
 		return FAIL;
