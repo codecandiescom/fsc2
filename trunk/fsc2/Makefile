@@ -6,10 +6,11 @@
 
 #prefix         = /usr/local
 #bindir         = $(prefix)/bin
+#libdir         = $(prefix)/lib/fsc2
 
 prefix         = .
 bindir         = $(prefix)/.
-libdir         = $(prefix)/.
+libdir         = $(prefix)/
 
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log

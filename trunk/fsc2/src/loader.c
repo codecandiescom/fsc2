@@ -116,13 +116,14 @@ void load_functions( Device *dev )
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
 	if ( dev->driver.handle == NULL )
 		dev->driver.handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_LAZY );
-	T_free( lib_name );
 
 	if ( dev->driver.handle == NULL )
 	{
 		eprint( FATAL, "Can't open module `%s'.\n", lib_name );
+		T_free( lib_name );
 		THROW( EXCEPTION );
 	}
+	T_free( lib_name );
 
 	dev->is_loaded = SET;
 	dev->driver.is_init_hook = dev->driver.is_test_hook =
