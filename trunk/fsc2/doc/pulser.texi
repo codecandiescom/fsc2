@@ -103,35 +103,36 @@ etc.).
 
 
 For most pulsers the first statement of the @code{ASSIGNMENTS} section
-has to be the setting of the time base of the pulser unless the pulser
+has to be the setting of the time base of the pulser (unless the pulser
 has a fixed time base, in which case no setting of the time base is
-possible. Most of the pulsers function similarly: they have a certain
-number of time slices (usually 65536, 2^16) and for each of them the
-output of the pulser can be either set to a high or a low voltage. By
-setting the output during one or more of these time slices to a high
-voltage (and for the neighboring slices to low) pulses are created.  The
-time base to be set first in the @code{ASSIGNMENT} section is the length
-of each of these time slices. From the above it is clear, that all
-pulses (as well as all the times between pulses) have to be integer
-multiples of the length of the time base.
+possible). Most of the pulsers function similarly: the output is divided
+into certain number of time slices (usually 65536, 2^16) and for each of
+them the output can be either set to a high or a low voltage. By setting
+the output during one or more of these time slices to a high voltage
+(and for the neighboring slices to low) pulses are created.  The time
+base set in the @code{ASSIGNMENT} section is the length of these time
+slices. From the above it is clear that all pulses (as well as all the
+times between pulses) have to be integer multiples of the length of the
+time base.
 
 An exception is the @strong{Bruker EP385} pulse programmer. This pulser
 has a fixed built-in time base of @w{8 ns}. In this case a
-@code{TIMEBASE} statement (see below) may only be given if you use an
-external clock input, in which case you need to specify the inverse of
+@code{TIMEBASE} statement (see below) may only be given if an external
+clock input is used, in which case you need to specify the inverse of
 the frequency of the external clock to be able to use correct values for
 pulse lengths etc.
 
 In case of the @strong{Interface Technology RS690} the internal clock is
 automatically used for time bases of @w{4 ns}, @w{8 ns} and @w{16 ns},
 all other time bases require an external clock. To distinguish between
-the @code{TTL} and @code{ECL} level input for the external clock the
-additional keywords @code{TTL} and @code{ECL} can be given together with
-the time base value. When one of these keywords is given the external
-clock will be used, even if the time base value is one of the three
-values that can be realized using the internal clock. When neither of
-the two keywords is given and the specified time base requires an
-external clock the @code{TTL} level clock input is used per default.
+the @code{TTL} and @code{ECL} level input connectors for the external
+clock the additional keywords @code{TTL} and @code{ECL} can be given
+together with the time base value. When one of these keywords is given
+the external clock will be used, even if the time base value is one of
+the three values that can be realized using the internal clock. When
+neither of the two keywords is given and the specified time base
+requires an external clock the @code{TTL} level clock input connector is
+used per default.
 
 
 The statement to set the time base, i.e.@: the length of the individual
@@ -143,7 +144,7 @@ TIMEBASE: 5 ns;
 @end example
 @noindent
 or, for the @strong{Interface Technology RS690}, when using an external
-clock:
+clock at the @code{TTL} level input connector:
 @example
 TIMEBASE: 25 ns, TTL;
 @end example
@@ -153,17 +154,18 @@ pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
 @item Tektronix HFS9003: @w{1.6 ns} to @w{20 us}
-@item Bruker EP385 (external clock only): @w{8 ns}, no upper limit specified
-in the manual.
+@item Bruker EP385: internal clock @w{8 ns} only, external clock @w{8 ns} and
+larger
 @item Interface Technology R690: @w{4 ns}, @w{8 ns} and @w{16 ns}
-internal clock, @w{4 ns} and larger internal clock
+for the internal clock, @w{4 ns} and larger with an external clock
 @end itemize
 
 If you're using two or more pulsers simultaneously you need as many
 @code{TIMEBASE} statements in your program as you have pulsers. In this
 case you need to append a @code{#} character plus the number of the
-pulser to indicate for which this statement is to be used. E.g.@: if you
-have two pulsers you will need two @code{TIMEBASE} statements:
+pulser to indicate for which of the pulsers the statement is to be
+used. E.g.@: if you have two pulsers you normally will need two
+@code{TIMEBASE} statements:
 @example
 TIMEBASE#1:  5 ns;
 TIMEBASE#2: 25 ns;
@@ -189,15 +191,15 @@ The additional @code{#1} in the statement for the first pulser is optional.
 
 The next statement concerns the triggering of the pulser. A pulser
 starts a new sequence of pulses either on receiving an external trigger
-or it has to use an internal trigger. Which type of triggering to use
-depends, of course, on the experiment. To set either internal or
-external trigger use a statement like this@footnote{Instead of
-@code{TRIGGER_MODE} also @code{TM:}, @code{T_M:}, @code{TRIGM:},
-@code{TRIG_M:}, @code{TRIGMODE:}, @code{TRIG_MODE:}, @code{T_MODE:},
-@code{TMODE:}, @code{TRIGGER_M:}, @code{TRIGGERM:} or
-@code{TRIGGERMODE:} can be used. And the keywords @code{INTERNAL} and
-@code{EXTERNAL} can be shortened to @code{INTERN} or @code{INT} and
-@code{EXTERN} or @code{EXT}.}:
+or it uses an internal trigger. Which type of triggering to use depends,
+of course, on the experiment. To set either internal or external trigger
+mode use a statement like this@footnote{Instead of @code{TRIGGER_MODE}
+also @code{TM:}, @code{T_M:}, @code{TRIGM:}, @code{TRIG_M:},
+@code{TRIGMODE:}, @code{TRIG_MODE:}, @code{T_MODE:}, @code{TMODE:},
+@code{TRIGGER_M:}, @code{TRIGGERM:} or @code{TRIGGERMODE:} can be
+used. And the keywords @code{INTERNAL} and @code{EXTERNAL} can be
+shortened to @code{INTERN} or @code{INT} and @code{EXTERN} or
+@code{EXT}.}:
 @example
 TRIGGER_MODE: INTERNAL;
 @end example
@@ -207,11 +209,11 @@ or
 TRIGGER_MODE: EXTERNAL;
 @end example
 
-When using the internal trigger it is useful to be able to set the rate
-or the frequency with which the experiment is repeated. Thus for the
-@strong{Sony/Tektronix DG2020}, the @code{Bruker EP385} and
-@strong{Interface Technology RS690} an additional keyword can be
-specified, either @code{REPEAT_TIME} or
+Especially when using the internal trigger it is useful to be able to
+set the rate or the frequency with which the experiment is
+repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @code{Bruker
+EP385} and @strong{Interface Technology RS690} an additional keyword can
+be specified, either @code{REPEAT_TIME} or
 @code{REPEAT_FREQUENCY}@footnote{@code{REPEAT_TIME} and
 @code{REPEAT_FREQUENCY} may also be abbreviated to @code{REPT},
 @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME}, @code{REPEAT_T},
@@ -232,11 +234,11 @@ TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 to set the repetition rate of the the experiment to @w{100 Hz}. The
 repeat time must be an integer multiple of the time base of the pulser.
 
-When a repetition time is specified when using an external trigger
-a repetition time or frequency obviously can't be enforced. It can only
-be guaranteed that the pulse sequence is as long as the repetition time,
-thus keeping the pulser from accepting a new trigger before the end of
-the repetition time.
+if a repetition time is specified when using an external trigger a
+repetition time or frequency obviously can't be enforced. It can only be
+guaranteed that the pulse sequence is as long as the repetition time,
+thus keeping the pulser from getting restarted before the end of the
+repetition time.
 
 Please note: Unfortunately, for the @strong{Tektronix HFS9000} no
 frequency or rate can be set, so an external trigger has to be used to
@@ -251,13 +253,13 @@ increments of @w{102.4 us} of the shortest repeat time (or in increments
 of 12800 times the external clocks oscillation period). If necessary,
 repetition frequencies are set to the next lower allowed value.
 
-For the @strong{Interface Technology RS690} it might happen that under
+For the @strong{Interface Technology RS690} it might happen that for
 certain pulse settings the repetition time must be lengthened slightly,
 but never more than three times the time base.
 
 On the other hand, when using an external trigger one may want to set
 the trigger level, slope and, possibly, the trigger input impedance. For
-pulsers allowing this this done using a statement similar to one of
+pulsers allowing this it is done using a statement similar to one of
 these@footnote{The keywords @code{LEVEL} can be shortens to @code{LEV},
 @code{SLOPE} to @code{SL}, @code{POSITIVE} to @code{POS},
 @code{NEGATIVE} to @code{NEG}, @code{IMPEDANCE} to @code{IMP} and,
@@ -270,28 +272,28 @@ or
 @example
 TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
-@noindent
-Please note: The trigger input impedance can only be set for the
-@strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385} does not
-allow the setting of any of these parameters.
+
+The @strong{Bruker EP385} does not allow the setting of any of these
+parameters.
+
+The trigger input impedance can only be set for the
+@strong{Sony/Tektronix DG2020}.
 
 For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
 
-For the @strong{Bruker EP385} trigger slopes, trigger levels or input
-impedances can't be set.
-
-For the @strong{Interface Technology RS690} no input trigger level can be
-set but it has two trigger input connectors, one for @code{TTL} and one
-for @code{ECL} level trigger input. To distinguish between both the
-input ports the additional keywords @code{TTL} and @code{ECL} can be
-given. If none is given the @code{TTL} level input port is used per default.
+For the @strong{Interface Technology RS690} no input trigger level nor
+input impedance can be set, but it has two trigger input connectors, one
+for @code{TTL} and one for @code{ECL} level trigger input. To
+distinguish between both the input ports the additional keywords
+@code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
+level input port is used per default.
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
 need to append a @code{#} and the number of the pulser to tell the
-program for which pulser the trigger mode is to be used.
+@code{fsc2} for which pulser the trigger mode is to be used.
 
 
 @c ########################################################
@@ -323,19 +325,20 @@ program for which pulser the trigger mode is to be used.
 The statements described in the following deal with setting up the
 channels of the pulser. The basic idea is to abstract from the real
 output connectors of the pulser and to use symbolic names for the
-channels. Instead of telling the pulser to output a pulse from e.g.@:
-connector @w{numbered 1} of the pulser in the experiment, in the
-@code{ASSIGNMENTS} section symbolic names for the functions of the
-channels are defined and these symbolic names are used when specifying
-pulses. While this may be only a convenience in simple experiments (you
-only have to do a change in one place when changing the output instead
-of finding and changing it for all pulses concerned) it makes doing
-phase cycling much simpler because here the same pulse may have to be
-output on different channels, depending on the current phase. So,
-instead of always specifying which output channel to use for a certain
-phase for each phase, the program is told about which channels to use
-for a function and then it's left to the program to do all the
-bookkeeping about when to use which output channel.
+channels. Instead of telling the pulser to output a pulse at e.g.@: the
+output connector @w{numbered 1} during the experiment, in the
+@code{ASSIGNMENTS} section output connectors are associated with
+symbolic names for the functions and these symbolic names are used when
+specifying pulses. While this may be only a convenience in simple
+experiments (you only have to apply changes in one place when changing
+the output connectors instead of finding and changing it for all pulses
+concerned) it makes doing phase cycling much simpler because here the
+same pulse may have to be output at different output connectors,
+depending on the current phase. So, instead of always specifying which
+output connector to use for a certain phase for each phase, the program is
+told about which connectors to use for a function and then it's left to
+the program to do all the bookkeeping about when to use which output
+connector.
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -375,12 +378,12 @@ abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
 @item @code{OTHER_3} (or @code{OTHER3}, @code{O_3} or @code{O3})
 @item @code{OTHER_4} (or @code{OTHER4}, @code{O_4} or @code{O4})
 @end itemize
-The names of the functions do not enforce what the channels that will
+The names of the functions do not enforce what the connectors that will
 become associated with them are really going to be used for, but it is
-probably a good idea not to use e.g.@: the @code{MICROWAVE} channel for
+probably a good idea not to use e.g.@: the @code{MICROWAVE} function for
 something completely different (or other people will have major problems
-understanding what your @code{EDL} program is supposed to do and
-there's no Obfuscated EDL Contest yet;-).
+understanding what your @code{EDL} program is supposed to do and there's
+no obfuscated EDL contest yet;-).
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the function names seem to fit the special purpose you
@@ -389,23 +392,23 @@ have in mind.
 Before giving an example it is important to point out that there are
 some major differences between the @strong{Sony/Tektronix DG2020} on the
 one hand and the @strong{Tektronix HFS9003} and the @strong{Bruker
-EP385} on the other. The @strong{Tektronix HFS9003} and the
-@strong{Bruker EP385} are quite simple in that they have just a number
-(4 and 8, respectively) of output channels. In contrast, the
-@strong{Sony/Tektronix DG2020} has 36 internal channels that have to be
-mapped to what is called the POD, that in both cases (Frankfurt S-band
-and Berlin X-band spectrometer) has 12 real output channels (pods).
+EP385} on the other. The latter pulsers are quite simple in that they
+have just a number (4 and 8, respectively) of output connectors. In
+contrast, the @strong{Sony/Tektronix DG2020} has 36 internal channels
+that have to be mapped to what is called a POD, that in both cases
+(Frankfurt S-band and Berlin X-band spectrometer) has 12 real output
+connectors.
 
-Finally, the @strong{Interface Technology RS690} has 4 output connectors
-(or even 8, if a second HSM card is installed), each with 16 output
-channels. Each output channel can be addressed by a letter between
-@code{A} and @code{D} (or @code{H}, if two HSM cards are installed) for
-the connector, followed by a number between @code{0} and @code{16},
-specifying the channel on the connector to use. Valid channel
+Finally, the @strong{Interface Technology RS690} has 4 sets of output
+connectors (or even 8, if a second HSM card is installed), each with 16
+output channels. Each output channel can be addressed by a letter
+between @code{A} and @code{D} (or @code{H}, if two HSM cards are
+installed) for the connector, followed by a number between @code{0} and
+@code{15}, specifying the channel on the connector to use. Valid channel
 designators are e.g. @code{A3}, @code{C13} etc. Please note that the
-number of channels of a connector, that can be used, depends on the time
+number of channels of a connector that can be used depends on the time
 base setting: for a time base of @w{4 ns} only the lowest 4 channels of
-a connector can be used, for a time base of @w{8 ns} only the lower 8
+each connector can be used, for a time base of @w{8 ns} only the lower 8
 channels.
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
@@ -444,12 +447,12 @@ DETECTION: POD = 11;
 Instead of @code{POD} you can also simply write @code{P}.
 
 
-Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
-which of the internal channels should be used. If you don't the program
-will automatically grab as many internal channels as it needs, always
-using the ones with the lowest numbers first. But you also can tell the
-program which of the internal channels it should use via a statement
-like this:
+Optionally, for the @strong{Sony/Tektronix DG2020} you can also tell the
+program which of the internal channels should be used. If you don't the
+program will automatically grab as many internal channels as it needs,
+always using the ones with the lowest numbers first. To declare which of
+the internal channels are to be associated with the output connectors
+(PODs) use a statement like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;
@@ -457,20 +460,8 @@ RF_GATE:   POD = 7           CHANNEL = 17;
 DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
-
-In contrast, for the @strong{Tektronix HFS9003}, the @strong{Bruker
-EP385} and the @strong{Interface Technology RS690} not @code{POD}s but
-channels get associated with a function, e.g.@:
-@example
-MICROWAVE: CH = 0, 1, 2, 3;
-RF:        CH = 5;
-RF_GATE:   CH = 6;
-DETECTION: CH = 7;
-@end example
-@noindent
-(This example will only work with the @strong{Bruker EP385}, the
-@strong{Tektronix HFS9003} has only 4 channels and does not allow
-assignment of more than one channel to a single function.)
+Please note: the strong{Tektronix HFS9003} has only 4 channels and does
+not allow assignment of more than one channel to a single function.
 
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
@@ -495,8 +486,8 @@ RF:        POD = 6           V_HIGH = 2.6 V, V_LOW = 0 V;
 RF_GATE:   POD = 7           V_HIGH = 5 V,   V_LOW = 0 V;
 @end example
 @noindent
-Please note that the high voltage must always be larger than the low
-voltage.
+The high voltage must always be larger than the low voltage, to get
+inverted pulses use the @code{INVERTED} keyword, see below.
 
 For the @strong{Sony/Tektronix DG2020} the high voltage can be adjusted
 to values between @w{-2 V} and @w{+7 V} and the low voltage can be in
@@ -511,7 +502,7 @@ swing is @w{0.5 V} and @w{5.5 V}, respectively, and the voltage
 resolution is @w{10 mV}.
 
 If a function requires the output levels to be inverted (i.e.@: that the
-voltage is high while there are no pulses and low on pulses) use the
+voltage is high while there are no pulses and low during pulses) use the
 @code{INVERTED} keyword@footnote{The keyword @code{INVERTED} can be
 shortened to @code{INVERT} or @code{INV}.}:
 @example
@@ -521,8 +512,8 @@ RF:        POD = 6   V_HIGH = 2.6 V, V_LOW = 0 V, INVERTED;
 
 For both the @strong{Bruker EP385} and @strong{Interface Technology
 RS690} pulser pulse levels can't be specified. For the @strong{Bruker
-EP385} also the @code{INVERTED} keyword cannot be used, use instead the
-inverted output connectors.
+EP385} also the @code{INVERTED} keyword cannot be used, use the inverted
+output connectors instead.
 
 
 Finally, in order to take care of different cable lengths a delay for a
@@ -532,7 +523,7 @@ position of each pulse of this function:
 MICROWAVE: POD = 1, 2, 3, 4  DELAY = 50 ns;
 @end example
 @noindent
-For obvious reasons setting negative delays is only possible when using
+For obvious reasons setting negative delays are only possible when in
 internal trigger mode@footnote{The obvious reason is, of course,
 causality - the pulser can't know when the external trigger is going to
 happen, so starting before the trigger is detected would be a bit
@@ -542,7 +533,14 @@ difficult. By the way, the keyword @code{DELAY} can be abbreviated to
 
 If you are dealing with two or more pulsers simultaneously you will have
 to append a @code{#} character plus the pulser number to each of the
-channel function setup statements.
+channel function setup statements, i.e. use
+@example
+MICROWAVE#1: POD = 3;
+TWT#2:       CH  = A7;
+@end example
+@noindent
+to create microwave pulses with the first pulser and TWT pulses with the
+second one.
 
 
 @c ########################################################
