@@ -1075,7 +1075,7 @@ Var *f_display( Var *v )
 	{
 		if ( ! G.is_warn )                         /* warn only once */
 		{
-			print( WARN, SET, "Can't display data, missing initialisation\n" );
+			print( WARN, "Can't display data, missing initialisation\n" );
 			G.is_warn = SET;
 		}
 

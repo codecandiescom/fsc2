@@ -1320,15 +1320,15 @@ avoid confusion should you accidentally try to redefine it.
 
 
 @subsection Printing out messages
-@cindex eprint()
+@cindex print()
 
 When writing a module one often has places where it is necessary to
 print out messages to inform the user e.g.@: about invalid arguments
-etc.  For this purpose there's the @code{eprint()} function in
+etc.  For this purpose there's the @code{print()} function in
 @acronym{fsc2} that helps you deal with this and prints messages to the
-lower browser in the main form. Except for the first two arguments the
+lower browser in the main form. Except for the first argument the
 function is identical to the @code{printf()} in @code{C}, i.e.@: the
-third parameter is a format string in exactly the same format
+second parameter is a format string of exactly the same format as
 @code{printf()} expects, followed by as many values as there are
 conversion specifiers in the format string.
 
@@ -1344,23 +1344,11 @@ There are four levels:
       now throw an exception (see next subsection) to make the program stop.
 @end itemize
 
-The second parameter is a boolean value, use
-@itemize
-@item @code{SET} This will start your error message with the name of the
-      current @acronym{EDL} file, followed by a colon and the actual
-      line number, again followed by a colon and a space character.
-@item @code{UNSET} Don't print file name and line number - use this e.g.
-      in the hook functions where the position in the @acronym{EDL} file
-      is irrelevant.
-@end itemize
-
 The full @code{C} declaration of this function is:
 @example
-void eprint( int severity, bool flag, const char *fmt, ... )
+void eprint( int severity, const char *fmt, ... )
 @end example
 @noindent
-See the one of the following subsections for the definition of the
-@code{bool} type.
 
 
 @subsection Exceptions

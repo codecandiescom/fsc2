@@ -522,7 +522,7 @@ Var *f_bdelete( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, SET, "Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1362,7 +1362,7 @@ Var *f_svalue( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, SET, "Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1492,7 +1492,7 @@ Var *f_svalue( Var *v )
 
 	if ( io->value < io->start_val )
 	{
-		eprint( SEVERE, "Slider value too small.\n" );
+		print( SEVERE, "Slider value too small.\n" );
 		io->value = io->start_val;
 	}
 	
@@ -1509,7 +1509,7 @@ Var *f_svalue( Var *v )
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
 		print( WARN, "Too many arguments, discarding superfluous "
-			   "arguments.\n" )
+			   "arguments.\n" );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1564,7 +1564,7 @@ Var *f_icreate( Var *v )
 		if ( type != INT_INPUT && type != FLOAT_INPUT &&
 			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
 		{
-			print( FATAL, SET, "Invalid in- or output object type (%ld).\n",
+			print( FATAL, "Invalid in- or output object type (%ld).\n",
 				   type );
 			THROW( EXCEPTION );
 		}
@@ -1642,8 +1642,7 @@ Var *f_icreate( Var *v )
 		{
 			if ( ! check_format_string( v->val.sptr ) )
 			{
-				print( FATAL, SET, "Invalid format string \"%s\".\n",
-					   v->val.sptr );
+				print( FATAL, "Invalid format string \"%s\".\n", v->val.sptr );
 				THROW( EXCEPTION );
 			}
 			form_str = T_strdup( v->val.sptr );
@@ -1655,8 +1654,8 @@ Var *f_icreate( Var *v )
 
 	if ( v != NULL )
 	{
-		eprint( WARN, "Too many arguments, discarding superfluous "
-				"arguments.\n" );
+		print( WARN, "Too many arguments, discarding superfluous "
+			   "arguments.\n" );
 		while ( ( v = vars_pop( v ) ) != NULL )
 			;
 	}
@@ -1852,7 +1851,7 @@ Var *f_idelete( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, SET, "Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -2780,7 +2779,7 @@ Var *f_objdel( Var *v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, SET, "Missing arguments.\n" );
+		print( FATAL, "Missing arguments.\n" );
 		THROW( EXCEPTION );
 	}
 
