@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Command Line Options, EDL, Overview, Top
+@node Command Line Options, GUI, Overview, Top
 @chapter Command line options
 @cindex command line options
 

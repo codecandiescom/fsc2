@@ -110,10 +110,10 @@ Instead of @code{TRIGGER_MODE} also @code{TM:}, @code{T_M:},
 
 When using the internal trigger it is useful to be able to set the rate
 or the frequency the experiment is repeated. For this type of triggering
-on the Sony/Tektronix DG2020 (unfortunately, this can't be done with the
-Tektronix HFS9000, so an external trigger must be used) an additional
-keyword can be specified, either @code{REPEAT_TIME} or
-@code{REPEAT_FREQUENCY}, i.e.@ one may use
+on the @strong{Sony/Tektronix DG2020} (unfortunately, this can't be done
+with the @strong{Tektronix HFS9000}, so an external trigger must be
+used) an additional keyword can be specified, either @code{REPEAT_TIME}
+or @code{REPEAT_FREQUENCY}, i.e.@ one may use
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
 @end example
@@ -143,7 +143,7 @@ or
 TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
 Please note: The trigger input impedance can only be set for the
-Sony/Tektronix DG2020.
+@strong{Sony/Tektronix DG2020}.
 
 The keywords @code{LEVEL} can be shortend to @code{LEV}, @code{SLOPE} to
 @code{SL}, @code{POSITIVE} to @code{POS}, @code{NEGATIVE} to @code{NEG},
@@ -212,14 +212,15 @@ use e.g. the @code{MICRO_WAVE} channel for something completely
 different or other people will have major problems understanding what
 your @acronym{EDL} program is supposed to do.
 
-Before giving an example it is important to point out that there are some
-major differences between the Sony/Tektronix DG2020 and the Tektronix
-HFS9003. The Tektronix HFS9003 is quite simple in that it has just a
-number of output channels and that's it. In contrast, the Sony/Tektronix
-DG2020 has 36 internal channels that can be mapped to what is called the
-POD, that in both cases (Frankfurt S-band and Berlin X-band
-spectrometer) has 12 output channels. So, while for the Tektronix
-HFS9003 simply a channel is associated with a function by statements like
+Before giving an example it is important to point out that there are
+some major differences between the @strong{Sony/Tektronix DG2020} and
+the @strong{Tektronix HFS9003}. The @strong{Tektronix HFS9003} is quite
+simple in that it has just a number of output channels. In contrast, the
+@strong{Sony/Tektronix DG2020} has 36 internal channels that can be
+mapped to what is called the POD, that in both cases (Frankfurt S-band
+and Berlin X-band spectrometer) has 12 output channels. So, while for
+the @strong{Tektronix HFS9003} simply a channel is associated with a
+function by statements like
 @example
 MICROWAVE: CHANNEL = 1;
 RF:        CHANNEL = 2;
@@ -228,12 +229,12 @@ DETECTION: CHANNEL = TRIGGER_OUT;
 @end example
 
 Please note, that usually the output channels are numbered as printed on
-the device, the only exception for the Tektronix HFS9003 is the trigger
-out channel, that is called @code{TRIGGER_OUT}, and has some special
-properties, e.g. allowing only one pulse of a fixed length.
+the device, the only exception for the @strong{Tektronix HFS9003} is the
+trigger out channel, that is called @code{TRIGGER_OUT}, and has some
+special properties, e.g. allowing only one pulse of a fixed length.
 
-For the Sony/Tektronix DG2020 the function gets associated with one (or
-more pods, see below, why sometimes more than one is needed):
+For the @strong{Sony/Tektronix DG2020} the function gets associated with
+one (or more pods, see below, why sometimes more than one is needed):
 @example
 MICROWAVE: POD = 1, 2, 3, 4;
 RF:        POD = 6;
@@ -241,11 +242,11 @@ RF_GATE:   POD = 7;
 DETECTION: POD = 11;
 @end example
 
-Optionally, for the Sony/Tektronix DG2020 you can also set which of the
-internal channels are going to be used. If you don't the program will
-automatically grab as many as it needs (using always the ones with the
-lowest numbers first). You tell the program which of the internal
-channels to use via a statement like this:
+Optionally, for the @strong{Sony/Tektronix DG2020} you can also set
+which of the internal channels are going to be used. If you don't the
+program will automatically grab as many as it needs (using always the
+ones with the lowest numbers first). You tell the program which of the
+internal channels to use via a statement like this:
 @example
 MICROWAVE: POD = 1, 2, 3, 4  CHANNEL = 31, 32, 33, 34;
 RF:        POD = 6           CHANNEL = 35;

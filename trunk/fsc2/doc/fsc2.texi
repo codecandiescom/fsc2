@@ -2,7 +2,6 @@
 
 @c $Id$
 
-
 @c %**start of header
 @setfilename fsc2.info
 @settitle fsc2
@@ -54,7 +53,8 @@ devices to be used in the experiment.
 
 @menu
 * Overview::                Basic concepts of fsc2.
-* Command Line Options::    Different ways to invoke @acronym{fsc2}
+* Command Line Options::    How to invoke @acronym{fsc2}
+* GUI::                     The grahical user interface
 * EDL::                     Description of EDL the language.
 * Built-in Functions::      Built-in functions.
 * Device Functions::        Functions for accessing devices.
@@ -70,6 +70,7 @@ devices to be used in the experiment.
 
 @include overview.texi
 @include cmd.texi
+@include gui.texi
 @include edl.texi
 @include builtins.texi
 @include devices.texi
