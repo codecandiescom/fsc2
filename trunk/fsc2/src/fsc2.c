@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 #define FSC2_MAIN
 
 #include "fsc2.h"
@@ -91,15 +92,15 @@ int main( int argc, char *argv[ ] )
 #endif
 
 	/* As the very first action the effective UID and GID gets stored and
-	   then the program lowers the permissions of the real UID and GID, only
-	   switching back when creating or attaching to shared memory segments
-	   or accessing lock and log files. */
+	   then the program lowers the permissions to the ones of the real UID
+	   and GID, only switching back when creating or attaching to shared
+	   memory segments or accessing lock and log files. */
 
 	EUID = geteuid( );
 	EGID = getegid( );
 	lower_permissions( );
 
-	/* Figure out if the machine is a INTEL type processor */
+	/* Figure out if the machine has an INTEL type processor */
 
 	test_machine_type( );
 
@@ -128,7 +129,7 @@ int main( int argc, char *argv[ ] )
 
 	if ( ! xforms_init( &argc, argv ) )
 	{
-		unlink( LOCKFILE );
+		unlink( FSC2_LOCKFILE );
 		return EXIT_FAILURE;
 	}
 
@@ -395,7 +396,7 @@ static void final_exit_handler( void )
 	/* Delete the lock file */
 
 	setuid( EUID );
-	unlink( LOCKFILE );
+	unlink( FSC2_LOCKFILE );
 
 	/* If program was killed by a signal indicating an unrecoverable error
 	   print out a message and (if this feature isn't switched off) send me

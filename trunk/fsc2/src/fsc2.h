@@ -28,12 +28,8 @@
 
 #define _GNU_SOURCE 1
 
-#define HI_RES  1
-#define LOW_RES 0
 
-#define FSC2_SOCKET  "/tmp/fsc2.uds"
-
-/* inclusion system header files */
+/* Inclusion of system header files */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,29 +99,6 @@ int experiment_parser( FILE *in );
 void main_sig_handler( int signo );
 void notify_conn( int signo );
 void usage( void );
-
-
-
-#define TAB_LENGTH        4
-#define MAXLINE        4096
-
-
-#define GEOMETRY         0
-#define BROWSERFONTSIZE  1
-#define BUTTONFONTSIZE   2
-#define INPUTFONTSIZE    3
-#define LABELFONTSIZE    4
-#define DISPLAYGEOMETRY  5
-#define CUTGEOMETRY      6
-#define TOOLGEOMETRY     7
-#define AXISFONT         8
-#define CHOICEFONTSIZE   9
-#define SLIDERFONTSIZE  10
-#define FILESELFONTSIZE 11
-#define HELPFONTSIZE    12
-#define STOPMOUSEBUTTON 13
-#define NOCRASHMAIL     14
-#define RESOLUTION      15
 
 
 /* Global variables */

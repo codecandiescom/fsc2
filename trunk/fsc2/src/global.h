@@ -28,7 +28,12 @@
 
 /* Define the name of fsc2's lock file */
 
-#define LOCKFILE "/tmp/fsc2.lock"
+#define FSC2_LOCKFILE "/tmp/fsc2.lock"
+
+
+/* Define the name of fsc2's (Unix domain) socket file */
+
+#define FSC2_SOCKET  "/tmp/fsc2.uds"
 
 
 /* Define number of colors to be used in 2D graphics - must be less than
@@ -39,6 +44,12 @@
    number of available colors...) */
 
 #define NUM_COLORS 128
+
+
+/* Sone definitions used for the program display browser */
+
+#define TAB_LENGTH        4
+#define MAXLINE        4096
 
 
 /******************************************************************/
@@ -71,28 +82,50 @@ enum {
 	NO_ERROR,
 };
 
-/* definitions for slopes (e.g. trigger slopes etc.) */
+/* Enumeration for command line flags */
 
 enum {
-	NEGATIVE = 0,
-	POSITIVE,
+	GEOMETRY = 0,
+	BROWSERFONTSIZE,
+	BUTTONFONTSIZE,
+	INPUTFONTSIZE,
+	LABELFONTSIZE,
+	DISPLAYGEOMETRY,
+	CUTGEOMETRY,
+	TOOLGEOMETRY,
+	AXISFONT,
+	CHOICEFONTSIZE,
+	SLIDERFONTSIZE,
+	FILESELFONTSIZE,
+	HELPFONTSIZE,
+	STOPMOUSEBUTTON,
+	NOCRASHMAIL,
+	RESOLUTION
 };
 
-/* definition for trigger modes etc. */
-
-enum {
-	INTERNAL = 0,
-	EXTERNAL,
-};
-
-/* definition for HIGH/LOW states */
+/* Definition for HIGH/LOW states */
 
 enum {
 	LOW,
 	HIGH,
 };
 
-/* some definitions used in graphic */
+/* Definitions for slopes (e.g. trigger slopes etc.) */
+
+enum {
+	NEGATIVE = 0,
+	POSITIVE,
+};
+
+/* Definition for trigger modes etc. */
+
+enum {
+	INTERNAL = 0,
+	EXTERNAL,
+};
+
+
+/* Some definitions used in graphic */
 
 enum {
 	X = 0,
@@ -108,7 +141,7 @@ enum {
 };
 
 
-/* define the different section types */
+/* Define the different section types */
 
 enum {
 	NO_SECTION = ( int ) OK + 1,
@@ -217,11 +250,11 @@ enum {
 
 typedef struct
 {
-	/* global compilation error states (FATAL, SEVERE and WARN) */
+	/* Global compilation error states (FATAL, SEVERE and WARN) */
 
 	int error[ 3 ];
 
-	/* indicates which sections have already been handled to detect
+	/* Indicates which sections have already been handled to detect
 	   multiple instances of the same section */
 
 	bool sections[ EXPERIMENT_SECTION + 1 ];
@@ -243,7 +276,7 @@ enum {
 };
 
 
-/* convenience macros for accessing the value of simple variables
+/* Convenience macros for accessing the value of simple variables
    (but be careful with the VALUE macro: the returned value is always
    a double !) */
 
@@ -257,7 +290,7 @@ enum {
 #define DO_STOP ( do_quit && react_to_do_quit )
 
 
-/* return codes from function get_lib_symbol() (in func.c) */
+/* Return codes from function get_lib_symbol() (in func.c) */
 
 enum {
 	LIB_OK          =  0,        // everything fine

@@ -286,10 +286,12 @@ bool fsc2_locking( void )
 
 	raise_permissions( );
 
-	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
+	if ( ( fd = open( FSC2_LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) )
+		 < 0 )
 	{
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't access lock file `%s'.\n", LOCKFILE );
+		fprintf( stderr, "Error: Can't access lock file `%s'.\n",
+				 FSC2_LOCKFILE );
 		return FAIL;
 	}
 
@@ -335,9 +337,10 @@ bool fsc2_locking( void )
 		 write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) ||
 		 ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
 	{
-		unlink( LOCKFILE );
+		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
+		fprintf( stderr, "Error: Can't write lock file `%s'.\n",
+				 FSC2_LOCKFILE );
 		return FAIL;
 	}
 
@@ -347,9 +350,10 @@ bool fsc2_locking( void )
 
 	if ( fcntl( fd, F_GETFD, flags ) < 0 )
 	{
-		unlink( LOCKFILE );
+		unlink( FSC2_LOCKFILE );
 		lower_permissions( );
-		fprintf( stderr, "Error: Can't write lock file `%s'.\n", LOCKFILE );
+		fprintf( stderr, "Error: Can't write lock file `%s'.\n",
+				 FSC2_LOCKFILE );
 		return FAIL;
 	}
 
