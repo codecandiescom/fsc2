@@ -25,12 +25,12 @@
 #include "fsc2.h"
 
 
-static Var *vars_pow_i( Var *v1, Var *v2, bool exc );
-static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc );
-static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc );
-static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc );
-static Var *vars_float_arr_pow( Var *v1, Var *v2, bool exc );
-static Var *vars_ref_pow( Var *v1, Var *v2, bool exc );
+static Var_T *vars_pow_i( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_int_var_pow( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_float_var_pow( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_int_arr_pow( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_float_arr_pow( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_ref_pow( Var_T *v1, Var_T *v2, bool exc );
 static void vars_pow_check( double v1, double v2 );
 
 
@@ -38,7 +38,7 @@ static void vars_pow_check( double v1, double v2 );
 /* Function for taking the power of two variables of arbitrary types */
 /*-------------------------------------------------------------------*/
 
-Var *vars_pow( Var *v1, Var *v2 )
+Var_T *vars_pow( Var_T *v1, Var_T *v2 )
 {
 	vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
 	vars_check( v2, RHS_TYPES );
@@ -59,6 +59,10 @@ Var *vars_pow( Var *v1, Var *v2 )
 
 		case SUB_REF_PTR :
 			v1 = vars_subref_to_rhs_conv( v1 );
+			break;
+
+		default :
+			break;
 	}
 
 	return vars_pow_i( v1, v2, UNSET );
@@ -68,9 +72,9 @@ Var *vars_pow( Var *v1, Var *v2 )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_pow_i( Var *v1, Var *v2, bool exc )
+static Var_T *vars_pow_i( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	switch ( v1->type )
@@ -95,7 +99,10 @@ static Var *vars_pow_i( Var *v1, Var *v2, bool exc )
 			new_var = vars_ref_pow( v1, v2, exc );
 			break;
 
-#ifndef NDEBUG
+#ifdef NDEBUG
+		default :
+			break;
+#else
 		default :
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
@@ -110,9 +117,9 @@ static Var *vars_pow_i( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc )
+static Var_T *vars_int_var_pow( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 	long ir;
@@ -274,9 +281,9 @@ static Var *vars_int_var_pow( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc )
+static Var_T *vars_float_var_pow( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 	double dr;
@@ -423,10 +430,10 @@ static Var *vars_float_var_pow( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc )
+static Var_T *vars_int_arr_pow( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 	long ir;
 	double dr;
@@ -538,10 +545,10 @@ static Var *vars_int_arr_pow( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_float_arr_pow( Var *v1, Var *v2, bool exc )
+static Var_T *vars_float_arr_pow( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 	double dr;
 
@@ -631,10 +638,10 @@ static Var *vars_float_arr_pow( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_ref_pow( Var *v1, Var *v2, bool exc )
+static Var_T *vars_ref_pow( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 
 

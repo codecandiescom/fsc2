@@ -27,19 +27,19 @@
 
 #include "fsc2.h"
 
-typedef struct Phase_Sequence Phase_Sequence;
-typedef struct Acquisition_Sequence Acquisition_Sequence;
+typedef struct Phs_Seq Phs_Seq_T;
+typedef struct Acq_Seq Acq_Seq_T;
 
 
-struct Phase_Sequence {
+struct Phs_Seq {
 	long num;
 	int *sequence;                   /* array of phase types */
 	int len;                         /* length of array of phase types */
-	Phase_Sequence *next;
+	Phs_Seq_T *next;
 };
 
 
-struct Acquisition_Sequence {
+struct Acq_Seq {
 	bool defined;                    /* is the acquisition sequence defined? */
 	int *sequence;                   /* array of acquisition types */
 	int len;                         /* length of array of acquisition types */
@@ -50,10 +50,10 @@ struct Acquisition_Sequence {
 void phases_clear( void );
 void acq_seq_start( long acq_num, long acq_type );
 void acq_seq_cont(  long acq_type );
-Phase_Sequence * phase_seq_start( long phase_seq_num );
-void phases_add_phase( Phase_Sequence *p, int phase_type );
+Phs_Seq_T * phase_seq_start( long phase_seq_num );
+void phases_add_phase( Phs_Seq_T *p, int phase_type );
 void acq_miss_list( void );
-void phase_miss_list( Phase_Sequence *p );
+void phase_miss_list( Phs_Seq_T *p );
 void phases_end( void );
 
 

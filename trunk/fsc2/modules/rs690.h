@@ -40,38 +40,6 @@
 #define RS690_GPIB_DEBUG 1
 */
 
-/* Here are all the directly exported functions (i.e. exported either implicit
-   as a hook functions or via the Functions data base) */
-
-int rs690_init_hook( void );
-int rs690_test_hook( void );
-int rs690_end_of_test_hook( void );
-int rs690_exp_hook( void );
-int rs690_end_of_exp_hook( void );
-void rs690_exit_hook( void );
-
-
-Var *pulser_name( Var *v );
-Var *pulser_automatic_shape_pulses( Var *v );
-Var *pulser_automatic_twt_pulses( Var *v );
-Var *pulser_show_pulses( Var *v );
-Var *pulser_dump_pulses( Var *v );
-Var *pulser_shape_to_defense_minimum_distance( Var *v );
-Var *pulser_defense_to_shape_minimum_distance( Var *v );
-Var *pulser_minimum_twt_pulse_distance( Var *v );
-Var *pulser_state( Var *v );
-Var *pulser_channel_state( Var *v );
-Var *pulser_update( Var *v );
-Var *pulser_shift( Var *v );
-Var *pulser_increment( Var *v );
-Var *pulser_reset( Var *v );
-Var *pulser_pulse_reset( Var *v );
-Var *pulser_next_phase( Var *v );
-Var *pulser_phase_reset( Var *v );
-Var *pulser_lock_keyboard( Var *v );
-Var *pulser_command( Var *v );
-Var *pulser_maximum_pattern_length( Var *v );
-
 
 /* Definitions needed for the pulser */
 
@@ -120,17 +88,17 @@ Var *pulser_maximum_pattern_length( Var *v );
 /* typedefs of structures needed in the module */
 
 
-typedef struct FUNCTION FUNCTION;
-typedef struct CHANNEL CHANNEL;
-typedef struct PULSE PULSE;
-typedef struct PHASE_SETUP PHASE_SETUP;
-typedef struct PULSE_PARAMS PULSE_PARAMS;
-typedef struct FS FS;
-typedef struct FS_TABLE FS_TABLE;
-typedef struct RS690 RS690;
+typedef struct RS690 RS690_T;
+typedef struct Function Function_T;
+typedef struct Channel Channel_T;
+typedef struct Pulse Pulse_T;
+typedef struct Phase_Setup Phase_Setup_T;
+typedef struct Pulse_Params Pulse_Params_T;
+typedef struct FS FS_T;
+typedef struct FS_Table FS_Table_T;
 
 
-struct FUNCTION {
+struct Function {
 	int self;                  /* the functions number */
 	const char *name;          /* name of function */
 	bool is_used;              /* set if the function has been declared in
@@ -138,15 +106,15 @@ struct FUNCTION {
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
 	int num_channels;
-	CHANNEL *channel[ MAX_CHANNELS ];  /* channels assigned to function */
+	Channel_T *channel[ MAX_CHANNELS ];  /* channels assigned to function */
 
 	int num_pulses;            /* number of pulses assigned to the function */
-	PULSE **pulses;            /* list of pulse pointers */
+	Pulse_T **pulses;          /* list of pulse pointers */
 
-	PULSE ***pl;               /* array of currently active pulse lists */
-	PULSE ***pm;               /* (channel x phases) pulse list matrix */
+	Pulse_T ***pl;             /* array of currently active pulse lists */
+	Pulse_T ***pm;             /* (channel x phases) pulse list matrix */
 
-	PHASE_SETUP *phase_setup;
+	Phase_Setup_T *phase_setup;
 	int next_phase;
 	int pc_len;                 /* length of the phase cycle */
 
@@ -174,45 +142,45 @@ struct FUNCTION {
 };
 
 
-struct PULSE_PARAMS {
+struct Pulse_Params {
 	Ticks pos;
 	Ticks len;
-	PULSE *pulse;
+	Pulse_T *pulse;
 };
 
 
-struct CHANNEL {
+struct Channel {
 	int self;
-	FUNCTION *function;
+	Function_T *function;
 	bool needs_update;
 	int field;
 	int bit;
 	int num_pulses;
 	int num_active_pulses;
 	int old_num_active_pulses;
-	PULSE_PARAMS *pulse_params;
-	PULSE_PARAMS *old_pulse_params;
+	Pulse_Params_T *pulse_params;
+	Pulse_Params_T *old_pulse_params;
 };
 
 
-struct PULSE {
+struct Pulse {
 	long num;                /* (positive) number of the pulse */
 
 	bool is_active;          /* set if the pulse is really used */
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	PULSE *next;
-	PULSE *prev;
+	Pulse_T *next;
+	Pulse_T *prev;
 
-	FUNCTION *function;      /* function the pulse is associated with */
+	Function_T *function;    /* function the pulse is associated with */
 
 	Ticks pos;               /* current position, length, position change */
 	Ticks len;               /* and length change of pulse (in units of the */
 	Ticks dpos;              /* pulsers time base) */
 	Ticks dlen;
 
-	Phase_Sequence *pc;      /* the pulse sequence to be used for the pulse
+	Phs_Seq_T *pc;           /* the pulse sequence to be used for the pulse
 								(or NULL if none is to be used) */
 
 	bool is_function;        /* flags that are set when the corresponding */
@@ -241,23 +209,23 @@ struct PULSE {
 								in test run or experiment */
 
 	bool left_shape_warning;
-	PULSE *sp;               /* for normal pulses reference to related shape
+	Pulse_T *sp;             /* for normal pulses reference to related shape
 								pulse (if such exists), for shape pulses
 								reference to pulse it is associated with */
 
 	bool left_twt_warning;
-	PULSE *tp;               /* for normal pulses reference to related TWT
+	Pulse_T *tp;             /* for normal pulses reference to related TWT
 								pulse (if such exists), for TWT pulses
 								reference to pulse it is associated with */
 };
 
 
-struct PHASE_SETUP {
+struct Phase_Setup {
 	bool is_defined;
 	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
-	CHANNEL *channels[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
-	FUNCTION *function;
+	Channel_T *channels[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
+	Function_T *function;
 };
 
 
@@ -266,11 +234,11 @@ struct FS {
 	Ticks pos;                                    /* position of the slice */
 	Ticks len;                                    /* length of the slice */
 	bool is_composite;
-	FS *next;
+	FS_T *next;
 };
 
 
-struct FS_TABLE {
+struct FS_Table {
 	int table_loops_1;
 	int middle_loops;
 	int table_loops_2;
@@ -279,6 +247,9 @@ struct FS_TABLE {
 
 struct RS690 {
 	int device;              /* GPIB number of the device */
+
+	Pulse_T *pulses;
+	Phase_Setup_T phs[ 2 ];
 
 	double timebase;         /* time base of the digitizer */
 	bool is_timebase;
@@ -304,8 +275,8 @@ struct RS690 {
 	Ticks neg_delay;
 	bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	CHANNEL channel[ MAX_CHANNELS ];
+	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+	Channel_T channel[ MAX_CHANNELS ];
 
 	int needed_channels;     /* number of channels that are going to be needed
 								in the experiment */
@@ -347,25 +318,54 @@ struct RS690 {
 
 	int last_used_field;
 
-	FS *new_fs;
-	int new_fs_count;
-	FS *last_new_fs;
-	FS *old_fs;
-	int old_fs_count;
-	FS *last_old_fs;
+	unsigned short default_fields[ 4 * NUM_HSM_CARDS ];
 
-	FS_TABLE new_table,
-			 old_table;
+	FS_T *new_fs;
+	int new_fs_count;
+	FS_T *last_new_fs;
+	FS_T *old_fs;
+	int old_fs_count;
+	FS_T *last_old_fs;
+
+	FS_Table_T new_table,
+			   old_table;
 };
 
 
-extern bool rs690_is_needed;
-extern RS690 rs690;
-extern PULSE *rs690_Pulses;
-extern bool rs690_IN_SETUP;
-extern PHASE_SETUP rs690_phs[ 2 ];
-extern double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ];
-extern unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
+extern RS690_T rs690;
+
+
+/* Here are all the directly exported functions (i.e. exported either implicit
+   as a hook functions or via the Functions data base) */
+
+int rs690_init_hook( void );
+int rs690_test_hook( void );
+int rs690_end_of_test_hook( void );
+int rs690_exp_hook( void );
+int rs690_end_of_exp_hook( void );
+void rs690_exit_hook( void );
+
+
+Var_T *pulser_name( Var_T *v );
+Var_T *pulser_automatic_shape_pulses( Var_T *v );
+Var_T *pulser_automatic_twt_pulses( Var_T *v );
+Var_T *pulser_show_pulses( Var_T *v );
+Var_T *pulser_dump_pulses( Var_T *v );
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v );
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v );
+Var_T *pulser_minimum_twt_pulse_distance( Var_T *v );
+Var_T *pulser_state( Var_T *v );
+Var_T *pulser_channel_state( Var_T *v );
+Var_T *pulser_update( Var_T *v );
+Var_T *pulser_shift( Var_T *v );
+Var_T *pulser_increment( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_pulse_reset( Var_T *v );
+Var_T *pulser_next_phase( Var_T *v );
+Var_T *pulser_phase_reset( Var_T *v );
+Var_T *pulser_lock_keyboard( Var_T *v );
+Var_T *pulser_command( Var_T *v );
+Var_T *pulser_maximum_pattern_length( Var_T *v );
 
 
 /* Here follow the functions from rs690_gen.c */
@@ -417,7 +417,7 @@ void rs690_init_setup( void );
 
 Ticks rs690_double2ticks( double p_time );
 double rs690_ticks2double( Ticks ticks );
-PULSE *rs690_get_pulse( long pnum );
+Pulse_T *rs690_get_pulse( long pnum );
 const char *rs690_ptime( double p_time );
 const char *rs690_pticks( Ticks ticks );
 int rs690_pulse_compare( const void *A, const void *B );
@@ -425,7 +425,7 @@ void rs690_show_pulses( void );
 void rs690_dump_pulses( void );
 void rs690_dump_channels( FILE *fp );
 void rs690_duty_check( void );
-Ticks rs690_calc_max_length( FUNCTION *f );
+Ticks rs690_calc_max_length( Function_T *f );
 char *rs690_num_2_channel( int num );
 bool rs690_set_max_seq_len( double seq_len );
 
@@ -433,13 +433,13 @@ bool rs690_set_max_seq_len( double seq_len );
 /* Functions fron rs690_run.c */
 
 bool rs690_do_update( void );
-void rs690_do_checks( FUNCTION *f );
-void rs690_set_pulses( FUNCTION *f );
+void rs690_do_checks( Function_T *f );
+void rs690_set_pulses( Function_T *f );
 void rs690_full_reset( void );
-PULSE *rs690_delete_pulse( PULSE *p, bool warn );
-void rs690_shape_padding_check_1( CHANNEL *ch );
+Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn );
+void rs690_shape_padding_check_1( Channel_T *ch );
 void rs690_shape_padding_check_2( void );
-void rs690_twt_padding_check( CHANNEL *ch );
+void rs690_twt_padding_check( Channel_T *ch );
 void rs690_seq_length_check( void );
 void rs690_channel_setup( bool flag );
 void rs690_cleanup_fs( void );

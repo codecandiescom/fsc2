@@ -26,9 +26,9 @@
 #define XINIT_HEADER
 
 
-typedef struct G_FUNCS G_FUNCS;
+typedef struct G_Funcs G_Funcs_T;
 
-struct G_FUNCS {
+struct G_Funcs {
 	bool size;
 	FD_fsc2 *          ( * create_form_fsc2       ) ( void );
 	FD_run_1d *        ( * create_form_run_1d     ) ( void );

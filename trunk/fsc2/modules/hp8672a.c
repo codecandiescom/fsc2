@@ -45,7 +45,7 @@ int hp8672a_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	hp8672a.device = -1;
 
@@ -165,7 +165,7 @@ void hp8672a_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *synthesizer_name( UNUSED_ARG Var *v )
+Var_T *synthesizer_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -174,7 +174,7 @@ Var *synthesizer_name( UNUSED_ARG Var *v )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-Var *synthesizer_state( Var *v )
+Var_T *synthesizer_state( Var_T *v )
 {
 	bool state;
 
@@ -217,7 +217,7 @@ Var *synthesizer_state( Var *v )
 /* in a warning and the new value isn't accepted.                      */
 /*---------------------------------------------------------------------*/
 
-Var *synthesizer_frequency( Var *v )
+Var_T *synthesizer_frequency( Var_T *v )
 {
 	double freq;
 	double att;
@@ -325,7 +325,7 @@ Var *synthesizer_frequency( Var *v )
 /* and the new value isn't accepted.                                     */
 /*-----------------------------------------------------------------------*/
 
-Var *synthesizer_attenuation( Var *v )
+Var_T *synthesizer_attenuation( Var_T *v )
 {
 	double att;
 
@@ -390,7 +390,7 @@ Var *synthesizer_attenuation( Var *v )
 /* Sets (or returns) the minimum attentuation that can be set. */
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_minimum_attenuation( Var *v )
+Var_T *synthesizer_minimum_attenuation( Var_T *v )
 {
 	double min_atten;
 
@@ -426,7 +426,7 @@ Var *synthesizer_minimum_attenuation( Var *v )
 /* step frequency for RF sweeps.                             */
 /*-----------------------------------------------------------*/
 
-Var *synthesizer_step_frequency( Var *v )
+Var_T *synthesizer_step_frequency( Var_T *v )
 {
 	if ( v != NULL )
 	{
@@ -459,7 +459,7 @@ Var *synthesizer_step_frequency( Var *v )
 /* This function may only be called in the EXPERIMENT section! */
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_sweep_up( UNUSED_ARG Var *v )
+Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
 {
 	double att;
 
@@ -516,9 +516,9 @@ Var *synthesizer_sweep_up( UNUSED_ARG Var *v )
 /* This function may only be called in the EXPERIMENT section! */
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_sweep_down( UNUSED_ARG Var *v )
+Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
 {
-	Var *nv;
+	Var_T *nv;
 
 
 	hp8672a.step_freq *= -1.0;
@@ -532,7 +532,7 @@ Var *synthesizer_sweep_down( UNUSED_ARG Var *v )
 /* This function may only be called in the EXPERIMENT section! */
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_reset_frequency( UNUSED_ARG Var *v )
+Var_T *synthesizer_reset_frequency( UNUSED_ARG Var_T *v )
 {
 	if ( ! hp8672a.start_freq_is_set )
 	{
@@ -553,7 +553,7 @@ Var *synthesizer_reset_frequency( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_use_table( Var *v )
+Var_T *synthesizer_use_table( Var_T *v )
 {
 	FILE *tfp = NULL;
 	char *tfname;
@@ -626,7 +626,7 @@ Var *synthesizer_use_table( Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_att_ref_freq( Var *v )
+Var_T *synthesizer_att_ref_freq( Var_T *v )
 {
 	double freq;
 
@@ -686,7 +686,7 @@ Var *synthesizer_att_ref_freq( Var *v )
 /* exception is thrown.                                            */
 /*-----------------------------------------------------------------*/
 
-Var *synthesizer_modulation( Var *v )
+Var_T *synthesizer_modulation( Var_T *v )
 {
 	int res;
 	int set = 0;
@@ -747,7 +747,7 @@ Var *synthesizer_modulation( Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_mod_type( Var *v )
+Var_T *synthesizer_mod_type( Var_T *v )
 {
 	int res;
 
@@ -806,7 +806,7 @@ Var *synthesizer_mod_type( Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-Var *synthesizer_mod_ampl( Var *v )
+Var_T *synthesizer_mod_ampl( Var_T *v )
 {
 	double ampl;
 
@@ -864,7 +864,7 @@ Var *synthesizer_mod_ampl( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *synthesizer_command( Var *v )
+Var_T *synthesizer_command( Var_T *v )
 {
 	char *cmd = NULL;
 

@@ -51,16 +51,16 @@ int sr510_test_hook( void );
 int sr510_exp_hook( void );
 int sr510_end_of_exp_hook( void );
 
-Var *lockin_name( Var *v );
-Var *lockin_get_data( Var *v );
-Var *lockin_get_adc_data( Var *v );
-Var *lockin_sensitivity( Var *v );
-Var *lockin_time_constant( Var *v );
-Var *lockin_phase( Var *v );
-Var *lockin_ref_freq( Var *v );
-Var *lockin_dac_voltage( Var *v );
-Var *lockin_lock_keyboard( Var *v );
-Var *lockin_command( Var *v );
+Var_T *lockin_name( Var_T *v );
+Var_T *lockin_get_data( Var_T *v );
+Var_T *lockin_get_adc_data( Var_T *v );
+Var_T *lockin_sensitivity( Var_T *v );
+Var_T *lockin_time_constant( Var_T *v );
+Var_T *lockin_phase( Var_T *v );
+Var_T *lockin_ref_freq( Var_T *v );
+Var_T *lockin_dac_voltage( Var_T *v );
+Var_T *lockin_lock_keyboard( Var_T *v );
+Var_T *lockin_command( Var_T *v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -140,7 +140,7 @@ int sr510_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset several variables in the structure describing the device */
 
@@ -216,7 +216,7 @@ int sr510_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_name( UNUSED_ARG Var *v )
+Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -227,7 +227,7 @@ Var *lockin_name( UNUSED_ARG Var *v )
 /* in V, with the range depending on the current sensitivity setting.  */
 /*---------------------------------------------------------------------*/
 
-Var *lockin_get_data( Var *v )
+Var_T *lockin_get_data( Var_T *v )
 {
 	if ( v != NULL )
 		print( WARN, "Useless parameter%s found.\n",
@@ -247,7 +247,7 @@ Var *lockin_get_data( Var *v )
 /* Returned values are in the interval [ -10.24V, +10.24V ].       */
 /*-----------------------------------------------------------------*/
 
-Var *lockin_get_adc_data( Var *v )
+Var_T *lockin_get_adc_data( Var_T *v )
 {
 	long port;
 
@@ -275,7 +275,7 @@ Var *lockin_get_adc_data( Var *v )
 /* be increased by a factor of 10.                                         */
 /*-------------------------------------------------------------------------*/
 
-Var *lockin_sensitivity( Var *v )
+Var_T *lockin_sensitivity( Var_T *v )
 {
 	double sens;
 	int sens_index = UNDEF_SENS_INDEX;
@@ -384,7 +384,7 @@ Var *lockin_sensitivity( Var *v )
 /* with an argumet the time constant is set to this value.                */
 /*------------------------------------------------------------------------*/
 
-Var *lockin_time_constant( Var *v )
+Var_T *lockin_time_constant( Var_T *v )
 {
 	double tc;
 	int tc_index = UNDEF_TC_INDEX;
@@ -486,7 +486,7 @@ Var *lockin_time_constant( Var *v )
 /* and the value the phase is set to is returned.                  */
 /*-----------------------------------------------------------------*/
 
-Var *lockin_phase( Var *v )
+Var_T *lockin_phase( Var_T *v )
 {
 	double phase;
 
@@ -539,7 +539,7 @@ Var *lockin_phase( Var *v )
 /* for queries.                                               */
 /*------------------------------------------------------------*/
 
-Var *lockin_ref_freq( Var *v )
+Var_T *lockin_ref_freq( Var_T *v )
 {
 	if ( v != NULL )
 	{
@@ -569,7 +569,7 @@ Var *lockin_ref_freq( Var *v )
 /* voltage is returned (which is initially set to 0 V).      */
 /*-----------------------------------------------------------*/
 
-Var *lockin_dac_voltage( Var *v )
+Var_T *lockin_dac_voltage( Var_T *v )
 {
 	long channel;
 	double voltage;
@@ -629,7 +629,7 @@ Var *lockin_dac_voltage( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_lock_keyboard( Var *v )
+Var_T *lockin_lock_keyboard( Var_T *v )
 {
 	bool lock;
 
@@ -652,7 +652,7 @@ Var *lockin_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_command( Var *v )
+Var_T *lockin_command( Var_T *v )
 {
 	char *cmd = NULL;
 

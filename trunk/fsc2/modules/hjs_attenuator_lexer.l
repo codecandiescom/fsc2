@@ -211,7 +211,7 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 	{
 		last_type = TABLE_INIT;
 		hjs_attenuator.att_table =
-			HJS_ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
+			  ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
 										  * sizeof *hjs_attenuator.att_table );
 	    cur_table_len = TABLE_CHUNK_SIZE;
 		return;
@@ -246,12 +246,12 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 		   set lowest and highest frequency in structure for synthesizer */
 
 		hjs_attenuator.att_table =
-			HJS_ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
+			 ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
 										  hjs_attenuator.att_table_len
 										  * sizeof *hjs_attenuator.att_table );
 		cur_table_len = hjs_attenuator.att_table_len;
 		qsort( hjs_attenuator.att_table, hjs_attenuator.att_table_len,
-			   sizeof( HJS_ATT_TABLE_ENTRY ), hjs_attenuator_comp );
+			   sizeof( Att_Table_Entry_T ), hjs_attenuator_comp );
 
 		/* Finally check if the stepper motor postitions drop monotonuosly
 		   with increasing attenuation - otherwise something very fishy is
@@ -281,7 +281,7 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 		{
 			cur_table_len += TABLE_CHUNK_SIZE;
 			hjs_attenuator.att_table =
-				HJS_ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
+				ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
 										  cur_table_len
 										  * sizeof *hjs_attenuator.att_table );
 		}
@@ -304,8 +304,8 @@ static void hjs_attenuator_new_table_entry( int type, double val )
 
 static int hjs_attenuator_comp( const void *a, const void *b )
 {
-	HJS_ATT_TABLE_ENTRY *A = ( HJS_ATT_TABLE_ENTRY * ) a,
-						*B = ( HJS_ATT_TABLE_ENTRY * ) b;
+	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+					  *B = ( Att_Table_Entry_T * ) b;
 
 
 	if ( A->att == B->att )

@@ -75,17 +75,17 @@
 #define NUM_1D_COLS ( MAX_CURVES + 6 )
 
 
-typedef struct Scaled_Point Scaled_Point;
-typedef struct Marker_1D Marker_1D;
-typedef struct Marker_2D Marker_2D;
-typedef struct Curve_1d Curve_1d;
-typedef struct Curve_2d Curve_2d;
-typedef struct Canvas Canvas;
-typedef struct G_Hash_Entry G_Hash_Entry;
-typedef G_Hash_Entry* G_Hash;
-typedef struct Graphics Graphics;
-typedef struct Graphics_1d Graphics_1d;
-typedef struct Graphics_2d Graphics_2d;
+typedef struct Scaled_Point Scaled_Point_T;
+typedef struct Marker_1d Marker_1d_T;
+typedef struct Marker_2d Marker_2d_T;
+typedef struct Curve_1d Curve_1d_T;
+typedef struct Curve_2d Curve_2d_T;
+typedef struct Canvas Canvas_T;
+typedef struct G_Hash_Entry G_Hash_Entry_T;
+typedef struct G_Hash_Entry* G_Hash_T;
+typedef struct Graphics Graphics_T;
+typedef struct Graphics_1d Graphics_1d_T;
+typedef struct Graphics_2d Graphics_2d_T;
 
 
 struct Scaled_Point {
@@ -95,25 +95,25 @@ struct Scaled_Point {
 };
 
 
-struct Marker_1D {
+struct Marker_1d {
 	long x_pos;
 	long color;
 	GC gc;
-	Marker_1D *next;
+	Marker_1d_T *next;
 };
 
 
-struct Marker_2D {
+struct Marker_2d {
 	long x_pos;
 	long y_pos;
 	long color;
 	GC gc;
-	Marker_2D *next;
+	Marker_2d_T *next;
 };
 
 
 struct Curve_1d {
-	Scaled_Point *points;
+	Scaled_Point_T *points;
 	XPoint *xpoints;
 	long count;             /* points in curve */
 
@@ -147,7 +147,7 @@ struct Curve_2d {
 	bool is_fs;
 	bool is_scale_set;
 
-	Scaled_Point *points;
+	Scaled_Point_T *points;
 	XPoint *xpoints;
 	long count;             /* points in curve */
 
@@ -185,8 +185,8 @@ struct Curve_2d {
 	double old_shift[ 3 ];
 	double old_z_factor;
 
-	Marker_2D *marker_2d;
-	Marker_1D *cut_marker;  /* linked list of markers in cut through curve */
+	Marker_2d_T *marker_2d;
+	Marker_1d_T *cut_marker;  /* linked list of markers in cut through curve */
 
 	GC font_gc;             /* gc for font */
 };
@@ -270,7 +270,7 @@ struct Graphics {
 	int z_line_width;       /* width of colour scale */
 	int enlarge_box_width;	/* width of enlarge box */
 
-	G_Hash color_hash;
+	G_Hash_T color_hash;
 	unsigned int color_hash_size;
 
 };
@@ -303,13 +303,13 @@ struct Graphics_1d {
 
 	int cursor[ 7 ];        /* the different cursors */
 
-	Canvas x_axis;
-	Canvas y_axis;
-	Canvas canvas;
+	Canvas_T x_axis;
+	Canvas_T y_axis;
+	Canvas_T canvas;
 
-	Curve_1d *curve[ MAX_CURVES ];
+	Curve_1d_T *curve[ MAX_CURVES ];
 
-	Marker_1D *marker_1d;   /* linked list of markers */
+	Marker_1d_T *marker_1d;   /* linked list of markers */
 };
 
 
@@ -342,18 +342,18 @@ struct Graphics_2d {
 
 	GC gcs[ NUM_COLORS + 2 ];
 
-	Canvas x_axis;
-	Canvas y_axis;
-	Canvas z_axis;
-	Canvas canvas;
+	Canvas_T x_axis;
+	Canvas_T y_axis;
+	Canvas_T z_axis;
+	Canvas_T canvas;
 
-	Canvas cut_x_axis;
-	Canvas cut_y_axis;
-	Canvas cut_z_axis;
-	Canvas cut_canvas;
+	Canvas_T cut_x_axis;
+	Canvas_T cut_y_axis;
+	Canvas_T cut_z_axis;
+	Canvas_T cut_canvas;
 
-	Curve_2d *curve_2d[ MAX_CURVES ];
-	Curve_1d cut_curve;
+	Curve_2d_T *curve_2d[ MAX_CURVES ];
+	Curve_1d_T cut_curve;
 
 	int active_curve;       /* curve shown in 2d display (or -1 if none) */
 
@@ -381,12 +381,12 @@ struct Graphics_2d {
 void start_graphics( void );
 void stop_graphics( void );
 void make_label_string( char *lstr, double num, int res );
-void create_label_pixmap( Canvas *c, int coord, char *label );
+void create_label_pixmap( Canvas_T *c, int coord, char *label );
 void switch_off_special_cursors( void );
 void clear_curve_1d( long curve );
 void clear_curve_2d( long curve );
-void create_pixmap( Canvas *c );
-void delete_pixmap( Canvas *c );
+void create_pixmap( Canvas_T *c );
+void delete_pixmap( Canvas_T *c );
 void redraw_axis_1d( int coord );
 void redraw_axis_2d( int coord );
 void change_scale_1d( int is_set, void *ptr );
@@ -395,7 +395,7 @@ void change_label_1d( char **label );
 void change_label_2d( char **label );
 void rescale_1d( long new_nx );
 void rescale_2d( long *new_dims );
-void redraw_canvas_2d( Canvas *c );
+void redraw_canvas_2d( Canvas_T *c );
 void change_mode( long mode, long width );
 
 

@@ -53,7 +53,7 @@ int er023m_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Device hasn't been assigned a GPIB number yet */
 
@@ -162,7 +162,7 @@ int er023m_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_name( UNUSED_ARG Var *v )
+Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -172,7 +172,7 @@ Var *lockin_name( UNUSED_ARG Var *v )
 /* Function returns a lock-in data value */
 /*---------------------------------------*/
 
-Var *lockin_get_data( Var *v )
+Var_T *lockin_get_data( Var_T *v )
 {
 	double val;
 
@@ -200,7 +200,7 @@ Var *lockin_get_data( Var *v )
 /* a power of 10).                                                       */
 /*-----------------------------------------------------------------------*/
 
-Var *lockin_sensitivity( Var *v )
+Var_T *lockin_sensitivity( Var_T *v )
 {
 	double rg;
 	int rg_index = UNDEF_RG_INDEX;
@@ -284,7 +284,7 @@ Var *lockin_sensitivity( Var *v )
 /* usuable time constant is 2.56 ms.                                      */
 /*------------------------------------------------------------------------*/
 
-Var *lockin_time_constant( Var *v )
+Var_T *lockin_time_constant( Var_T *v )
 {
 	double tc;
 	int tc_index = UNDEF_TC_INDEX;
@@ -386,7 +386,7 @@ Var *lockin_time_constant( Var *v )
 /* 0-359 range).                                                         */
 /*-----------------------------------------------------------------------*/
 
-Var *lockin_phase( Var *v )
+Var_T *lockin_phase( Var_T *v )
 {
 	int phase;
 
@@ -438,7 +438,7 @@ Var *lockin_phase( Var *v )
 /* argument the offset is set to this value.                              */
 /*------------------------------------------------------------------------*/
 
-Var *lockin_offset( Var *v )
+Var_T *lockin_offset( Var_T *v )
 {
 	int of;
 
@@ -484,7 +484,7 @@ Var *lockin_offset( Var *v )
 /* time constant is 3.2 ms.                                               */
 /*------------------------------------------------------------------------*/
 
-Var *lockin_conversion_time( Var *v )
+Var_T *lockin_conversion_time( Var_T *v )
 {
 	double ct;
 	int ct_mult;
@@ -567,7 +567,7 @@ Var *lockin_conversion_time( Var *v )
 /* the modulation frequency is set to this value.                           */
 /*--------------------------------------------------------------------------*/
 
-Var *lockin_ref_freq( Var *v )
+Var_T *lockin_ref_freq( Var_T *v )
 {
 	double mf;
 	int mf_index = UNDEF_MF_INDEX;
@@ -660,7 +660,7 @@ Var *lockin_ref_freq( Var *v )
 /* the modulation amplitude is set to this value.                           */
 /*--------------------------------------------------------------------------*/
 
-Var *lockin_ref_level( Var *v )
+Var_T *lockin_ref_level( Var_T *v )
 {
 	double ma;
 	int ma_index = UNDEF_MA_INDEX;
@@ -734,7 +734,7 @@ Var *lockin_ref_level( Var *v )
 /* called with an argument the harmonic is set to this value.           */
 /*----------------------------------------------------------------------*/
 
-Var *lockin_harmonic( Var *v )
+Var_T *lockin_harmonic( Var_T *v )
 {
 	int ha;
 
@@ -779,7 +779,7 @@ Var *lockin_harmonic( Var *v )
 /* called with an argument the resonator is set to this value.           */
 /*-----------------------------------------------------------------------*/
 
-Var *lockin_resonator( Var *v )
+Var_T *lockin_resonator( Var_T *v )
 {
 	int re;
 
@@ -824,7 +824,7 @@ Var *lockin_resonator( Var *v )
 /* last data fetched from the device an overload occurred, otherwise 0.  */
 /*-----------------------------------------------------------------------*/
 
-Var *lockin_is_overload( UNUSED_ARG Var *v )
+Var_T *lockin_is_overload( UNUSED_ARG Var_T *v )
 {
 	long res;
 
@@ -845,7 +845,7 @@ Var *lockin_is_overload( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_command( Var *v )
+Var_T *lockin_command( Var_T *v )
 {
 	char *cmd = NULL;
 

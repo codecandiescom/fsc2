@@ -141,7 +141,7 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 bool device_list_parse( void )
 {
 	static bool is_restart = UNSET;
-	Device_Name *new_device_name;
+	Device_Name_T *new_device_name;
 
 
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
@@ -167,7 +167,8 @@ bool device_list_parse( void )
 	{
 		while ( devices_listlex( ) )
 		{
-			new_device_name = DEVICE_NAME_P T_malloc( sizeof( Device_Name ) );
+			new_device_name =
+							 DEVICE_NAME_P T_malloc( sizeof *new_device_name );
 			new_device_name->name = T_strdup( devices_listtext );
 			string_to_lower( new_device_name->name );
 			new_device_name->next = EDL.Device_Name_List;

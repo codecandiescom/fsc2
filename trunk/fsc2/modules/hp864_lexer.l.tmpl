@@ -309,7 +309,7 @@ static void hp864_tmpl_new_table_entry( int type, double val )
 											  * sizeof *hp864_tmpl.att_table );
 		cur_table_len = hp864_tmpl.att_table_len;
 		qsort( hp864_tmpl.att_table, hp864_tmpl.att_table_len,
-			   sizeof ( ATT_TABLE_ENTRY ), hp864_tmpl_comp );
+			   sizeof ( Att_Table_Entry_T ), hp864_tmpl_comp );
 		hp864_tmpl.min_table_freq = hp864_tmpl.att_table[ 0 ].freq;
 		hp864_tmpl.max_table_freq =
 					 hp864_tmpl.att_table[ hp864_tmpl.att_table_len - 1 ].freq;
@@ -408,8 +408,8 @@ static void hp864_tmpl_new_table_entry( int type, double val )
 
 static int hp864_tmpl_comp( const void *a, const void *b )
 {
-	ATT_TABLE_ENTRY *A = ( ATT_TABLE_ENTRY * ) a,
-					*B = ( ATT_TABLE_ENTRY * ) b;
+	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+					  *B = ( Att_Table_Entry_T * ) b;
 
 
 	if ( A->freq == B->freq )

@@ -25,6 +25,8 @@
 
 
 static int Cur_PHS = -1;                 /* used for internal sanity checks */
+static double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
+													{ 4.0e-9, 8.0e-9, 1.6e-8 };
 
 
 /*------------------------------------------------------------------*/
@@ -153,8 +155,8 @@ bool rs690_store_timebase_level( int level_type )
 
 bool rs690_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = rs690.function + function;
-	CHANNEL *c = rs690.channel + channel;
+	Function_T *f = rs690.function + function;
+	Channel_T *c = rs690.channel + channel;
 
 
 	fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
@@ -530,7 +532,7 @@ bool rs690_set_repeat_time( double rep_time )
 
 bool rs690_set_phase_reference( int phs, int function )
 {
-	FUNCTION *f;
+	Function_T *f;
 
 
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
@@ -557,11 +559,11 @@ bool rs690_set_phase_reference( int phs, int function )
 
 	/* Check if a function has already been assigned to the phase setup */
 
-	if ( rs690_phs[ phs ].function != NULL )
+	if ( rs690.phs[ phs ].function != NULL )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
 			   "function %s.\n",
-			   phs + 1, rs690_phs[ phs ].function->name );
+			   phs + 1, rs690.phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -576,9 +578,9 @@ bool rs690_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
-	rs690_phs[ phs ].is_defined = SET;
-	rs690_phs[ phs ].function = f;
-	f->phase_setup = rs690_phs + phs;
+	rs690.phs[ phs ].is_defined = SET;
+	rs690.phs[ phs ].function = f;
+	f->phase_setup = rs690.phs + phs;
 
 	return OK;
 }
@@ -607,14 +609,14 @@ bool rs690_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 
 	/* Complain if a channel has already been assigned for this phase type */
 
-	if ( rs690_phs[ phs ].is_set[ type ] )
+	if ( rs690.phs[ phs ].is_set[ type ] )
 	{
-		fsc2_assert( rs690_phs[ phs ].channels[ type ] != NULL );
+		fsc2_assert( rs690.phs[ phs ].channels[ type ] != NULL );
 
 		print( SEVERE, "Channel for controlling phase type '%s' has already "
 			   "been set to %s.\n", Phase_Types[ type ],
 			   rs690_num_2_channel(
-								   rs690_phs[ phs ].channels[ type ]->self ) );
+								   rs690.phs[ phs ].channels[ type ]->self ) );
 		return FAIL;
 	}
 
@@ -670,8 +672,8 @@ bool rs690_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 			fsc2_assert( 1 == 0 );
 	}
 
-	rs690_phs[ phs ].is_set[ type ] = SET;
-	rs690_phs[ phs ].channels[ type ] = rs690.channel + channel;
+	rs690.phs[ phs ].is_set[ type ] = SET;
+	rs690.phs[ phs ].channels[ type ] = rs690.channel + channel;
 
 	return OK;
 }
@@ -686,13 +688,13 @@ bool rs690_phase_setup( int phs )
 {
 	bool is_set = UNSET;
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
 	Cur_PHS = -1;
 
-	if ( rs690_phs[ phs ].function == NULL )
+	if ( rs690.phs[ phs ].function == NULL )
 	{
 		print( SEVERE, "No function has been associated with "
 			   "PHASE_SETUP_%1d.\n", phs + 1 );
@@ -701,24 +703,24 @@ bool rs690_phase_setup( int phs )
 
 	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 	{
-		if ( ! rs690_phs[ phs ].is_set[ i ] )
+		if ( ! rs690.phs[ phs ].is_set[ i ] )
 			 continue;
 
 		is_set = SET;
-		f = rs690_phs[ phs ].function;
+		f = rs690.phs[ phs ].function;
 
 		/* Check that the channel needed for the current phase is reserved
 		   for the function that we're going to phase-cycle */
 
 		for ( j = 0; j < f->num_channels; j++ )
-			if ( rs690_phs[ phs ].channels[ i ] == f->channel[ j ] )
+			if ( rs690.phs[ phs ].channels[ i ] == f->channel[ j ] )
 				break;
 
 		if ( j == f->num_channels )
 		{
 			print( FATAL, "Channel %s needed for phase '%s' is not reserved "
 				   "for function '%s'.\n",
-				   rs690_num_2_channel( rs690_phs[ phs ].channels[ i ]->self ),
+				   rs690_num_2_channel( rs690.phs[ phs ].channels[ i ]->self ),
 				   Phase_Types[ i ], f->name );
 			THROW( EXCEPTION );
 		}
@@ -726,12 +728,12 @@ bool rs690_phase_setup( int phs )
 		/* Check that the channel isn't already used for a different phase */
 
 		for ( j = 0; j < i; j++ )
-			if ( rs690_phs[ phs ].is_set[ j ] &&
-				 rs690_phs[ phs ].channels[ i ] ==
-				 							   rs690_phs[ phs ].channels[ j ] )
+			if ( rs690.phs[ phs ].is_set[ j ] &&
+				 rs690.phs[ phs ].channels[ i ] ==
+				 							   rs690.phs[ phs ].channels[ j ] )
 			{
 				print( FATAL, "The same channel %d is used for phases '%s' "
-					   "and '%s'.\n", rs690_phs[ phs ].channels[ i ],
+					   "and '%s'.\n", rs690.phs[ phs ].channels[ i ],
 					   Phase_Types[ j ], Phase_Types[ i ] );
 				THROW( EXCEPTION );
 			}

@@ -77,7 +77,7 @@ void DumpStack( void *crash_address )
 	int i, k = 0;
 	char buf[ 128 ];
 	struct sigaction sact;
-	Device *cd;
+	Device_T *cd;
 	static bool already_crashed = UNSET;
 
 
@@ -240,7 +240,7 @@ static void write_dump( int *pipe_fd, int *answer_fd, int k, void *addr )
 {
 	char buf[ 128 ];
 	char c;
-	Device *cd1, *cd2;
+	Device_T *cd1, *cd2;
 
 
 	/* Since addr2line is only translating addresses from fsc2 itself we

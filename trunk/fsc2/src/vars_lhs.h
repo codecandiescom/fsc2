@@ -29,9 +29,9 @@
 #include "fsc2.h"
 
 
-Var *vars_arr_lhs( Var *v );
-Var *vars_init_list( Var *v, ssize_t level );
-void vars_arr_init( Var *dest );
+Var_T *vars_arr_lhs( Var_T *v );
+Var_T *vars_init_list( Var_T *v, ssize_t level );
+void vars_arr_init( Var_T *dest );
 
 
 #endif  /* ! VARS_LHS_HEADER */

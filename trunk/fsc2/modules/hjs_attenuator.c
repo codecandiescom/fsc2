@@ -31,12 +31,12 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-HJS_ATTENUATOR hjs_attenuator;
+HJS_Attenuator_T hjs_attenuator;
 
 
 /* Local variables */
 
-static HJS_ATTENUATOR hjs_attenuator_stored;
+static HJS_Attenuator_T hjs_attenuator_stored;
 
 
 /* Local functions */
@@ -128,7 +128,7 @@ void hjs_attenuator_exit_hook( void )
 
 	if ( hjs_attenuator.att_table )
 		hjs_attenuator.att_table =
-					  HJS_ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+						  ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
 }
 
 
@@ -156,7 +156,7 @@ void hjs_attenuator_child_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *mw_attenuator_name( UNUSED_ARG Var *v )
+Var_T *mw_attenuator_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -173,7 +173,7 @@ Var *mw_attenuator_name( UNUSED_ARG Var *v )
 /* used.                                                     */
 /*-----------------------------------------------------------*/
 
-Var *mw_attenuator_load_calibration( Var *v )
+Var_T *mw_attenuator_load_calibration( Var_T *v )
 {
 	FILE *tfp = NULL;
 	char *tfname;
@@ -193,7 +193,7 @@ Var *mw_attenuator_load_calibration( Var *v )
 	if ( hjs_attenuator.att_table != NULL )
 	{
 		hjs_attenuator.att_table =
-					  HJS_ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+						  ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
 		hjs_attenuator.att_table_len = 0;
 	}
 
@@ -270,7 +270,7 @@ Var *mw_attenuator_load_calibration( Var *v )
 /* calculate the number of steps needed to change to a new attenuation. */
 /*----------------------------------------------------------------------*/
 
-Var *mw_attenuator_initial_attenuation( Var *v )
+Var_T *mw_attenuator_initial_attenuation( Var_T *v )
 {
 	if ( hjs_attenuator.is_step )
 	{
@@ -299,7 +299,7 @@ Var *mw_attenuator_initial_attenuation( Var *v )
 /* attenuation set at the device.                                 */
 /*----------------------------------------------------------------*/
 
-Var *mw_attenuator_attenuation( Var *v )
+Var_T *mw_attenuator_attenuation( Var_T *v )
 {
 	double att;
 	long step;

@@ -176,7 +176,7 @@ static void dg2020_gpib_failure( void );
 bool dg2020_init( const char *name )
 {
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 #ifndef DG2020_B_GPIB_DEBUG
 	char reply[ 100 ];
 	long len = 100;
@@ -444,7 +444,7 @@ bool dg2020_update_data( void )
 /*  * 1: ok, 0: error                                                    */
 /*-----------------------------------------------------------------------*/
 
-bool dg2020_make_blocks( int num_blocks, BLOCK *block )
+bool dg2020_make_blocks( int num_blocks, Block_T *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1000 ];
@@ -477,7 +477,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*----------------------------------------------------------------*/
 /* dg2020_make_seq() creates a completely new sequence (i.e. old  */
 /* sequences will be lost) consisting of 'num_blocks' blocks with */
-/* names and block repeat counts defined by the array of BLOCK    */
+/* names and block repeat counts defined by the array of Block_T  */
 /* structures 'block'                                             */
 /* ->                                                             */
 /*  * number of blocks in sequence                                */
@@ -486,7 +486,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*  * 1: ok, 0: error                                             */
 /*----------------------------------------------------------------*/
 
-bool dg2020_make_seq( int num_blocks, BLOCK *block )
+bool dg2020_make_seq( int num_blocks, Block_T *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1024 ];

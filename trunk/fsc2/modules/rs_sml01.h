@@ -93,38 +93,38 @@ int rs_sml01_end_of_exp_hook( void );
 void rs_sml01_exit_hook( void );
 
 
-Var *synthesizer_name( Var *v );
-Var *synthesizer_state( Var *v );
-Var *synthesizer_frequency( Var *v );
-Var *synthesizer_step_frequency( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_minimum_attenuation( Var *v );
-Var *synthesizer_sweep_up( Var *v );
-Var *synthesizer_sweep_down( Var *v );
-Var *synthesizer_reset_frequency( Var *v );
-Var *synthesizer_use_table( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_att_ref_freq( Var *v );
-Var *synthesizer_modulation( Var *v );
-Var *synthesizer_mod_freq( Var *v );
-Var *synthesizer_mod_ampl( Var *v );
-Var *synthesizer_mod_type( Var *v );
-Var *synthesizer_mod_source( Var *v );
-Var *synthesizer_command( Var *v );
+Var_T *synthesizer_name( Var_T *v );
+Var_T *synthesizer_state( Var_T *v );
+Var_T *synthesizer_frequency( Var_T *v );
+Var_T *synthesizer_step_frequency( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_minimum_attenuation( Var_T *v );
+Var_T *synthesizer_sweep_up( Var_T *v );
+Var_T *synthesizer_sweep_down( Var_T *v );
+Var_T *synthesizer_reset_frequency( Var_T *v );
+Var_T *synthesizer_use_table( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_att_ref_freq( Var_T *v );
+Var_T *synthesizer_modulation( Var_T *v );
+Var_T *synthesizer_mod_freq( Var_T *v );
+Var_T *synthesizer_mod_ampl( Var_T *v );
+Var_T *synthesizer_mod_type( Var_T *v );
+Var_T *synthesizer_mod_source( Var_T *v );
+Var_T *synthesizer_command( Var_T *v );
 
 #if defined WITH_PULSE_MODULATION
-Var *synthesizer_pulse_state( Var *v );
-Var *synthesizer_pulse_trigger_slope( Var *v );
-Var *synthesizer_pulse_width( Var *v );
-Var *synthesizer_pulse_delay( Var *v );
+Var_T *synthesizer_pulse_state( Var_T *v );
+Var_T *synthesizer_pulse_trigger_slope( Var_T *v );
+Var_T *synthesizer_pulse_width( Var_T *v );
+Var_T *synthesizer_pulse_delay( Var_T *v );
 #endif /* WITH_PULSE_MODULATION */
 
 
-typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
+typedef struct Att_Table_Entry Att_Table_Entry_T;
 typedef struct RS_SML01 RS_SML01;
 
 
-struct ATT_TABLE_ENTRY {
+struct Att_Table_Entry {
 	double freq;
 	double att;
 };
@@ -144,7 +144,7 @@ struct RS_SML01 {
 
 	char *table_file;               /* name of attenuation table file */
 	bool use_table;
-	ATT_TABLE_ENTRY *att_table;
+	Att_Table_Entry_T *att_table;
 	long att_table_len;
 	double min_table_freq;
 	double max_table_freq;
@@ -187,7 +187,7 @@ FILE *rs_sml01_find_table( char **name );
 FILE *rs_sml01_open_table( char *name );
 double rs_sml01_get_att_from_table( double freq );
 double rs_sml01_get_att( double freq );
-unsigned int rs_sml01_get_mod_param( Var **v, double *dres, int *ires );
+unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires );
 void rs_sml01_check_mod_ampl( double freq );
 
 #if defined WITH_PULSE_MODULATION

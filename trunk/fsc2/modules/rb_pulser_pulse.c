@@ -31,8 +31,8 @@
 
 bool rb_pulser_new_pulse( long pnum )
 {
-	PULSE *cp = rb_pulser_Pulses;
-	PULSE *lp = NULL;
+	Pulse_T *cp = rb_pulser.pulses;
+	Pulse_T *lp = NULL;
 
 
 	while ( cp != NULL )
@@ -50,9 +50,9 @@ bool rb_pulser_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( rb_pulser_Pulses == NULL )
+	if ( rb_pulser.pulses == NULL )
 	{
-		rb_pulser_Pulses = cp;
+		rb_pulser.pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -82,7 +82,7 @@ bool rb_pulser_new_pulse( long pnum )
 
 bool rb_pulser_set_pulse_function( long pnum, int function )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( function != PULSER_CHANNEL_MW &&
@@ -102,7 +102,8 @@ bool rb_pulser_set_pulse_function( long pnum, int function )
 	}
 
 	if ( p->is_pos &&
-		 p->pos + p->function->delay < delay_card[ INIT_DELAY ].intr_delay )
+		 p->pos + p->function->delay <
+		 						rb_pulser.delay_card[ INIT_DELAY ].intr_delay )
 	{
 		print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
 		THROW( EXCEPTION );
@@ -121,7 +122,7 @@ bool rb_pulser_set_pulse_function( long pnum, int function )
 
 bool rb_pulser_set_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( p->is_pos )
@@ -153,7 +154,8 @@ bool rb_pulser_set_pulse_position( long pnum, double p_time )
 
 bool rb_pulser_set_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
+
 
 	if ( p->is_len )
 	{
@@ -185,7 +187,7 @@ bool rb_pulser_set_pulse_length( long pnum, double p_time )
 
 bool rb_pulser_set_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( p->is_dpos )
@@ -217,7 +219,7 @@ bool rb_pulser_set_pulse_position_change( long pnum, double p_time )
 
 bool rb_pulser_set_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( p->is_dlen )
@@ -249,7 +251,7 @@ bool rb_pulser_set_pulse_length_change( long pnum, double p_time )
 
 bool rb_pulser_get_pulse_function( long pnum, int *function )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( ! p->is_function )
@@ -269,7 +271,7 @@ bool rb_pulser_get_pulse_function( long pnum, int *function )
 
 bool rb_pulser_get_pulse_position( long pnum, double *p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( ! p->is_pos )
@@ -291,7 +293,7 @@ bool rb_pulser_get_pulse_position( long pnum, double *p_time )
 
 bool rb_pulser_get_pulse_length( long pnum, double *p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( ! p->is_len )
@@ -311,7 +313,7 @@ bool rb_pulser_get_pulse_length( long pnum, double *p_time )
 
 bool rb_pulser_get_pulse_position_change( long pnum, double *p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( ! p->is_dpos )
@@ -332,7 +334,7 @@ bool rb_pulser_get_pulse_position_change( long pnum, double *p_time )
 
 bool rb_pulser_get_pulse_length_change( long pnum, double *p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( ! p->is_dlen )
@@ -352,7 +354,7 @@ bool rb_pulser_get_pulse_length_change( long pnum, double *p_time )
 
 bool rb_pulser_change_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 	double new_pos = 0.0;
 
 
@@ -369,7 +371,8 @@ bool rb_pulser_change_pulse_position( long pnum, double p_time )
 			THROW( EXCEPTION );
 	}
 
-	if ( p_time + p->function->delay < delay_card[ INIT_DELAY ].intr_delay )
+	if ( p_time + p->function->delay <
+		 						rb_pulser.delay_card[ INIT_DELAY ].intr_delay )
 	{
 		print( FATAL, "Start position for pulse #%ld is too early.\n",
 			   pnum );
@@ -399,7 +402,7 @@ bool rb_pulser_change_pulse_position( long pnum, double p_time )
 
 bool rb_pulser_change_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 	Ticks new_len = 0;
 
 
@@ -452,7 +455,7 @@ bool rb_pulser_change_pulse_length( long pnum, double p_time )
 
 bool rb_pulser_change_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
 
 	if ( p_time == 0 && FSC2_MODE == TEST )
@@ -474,7 +477,7 @@ bool rb_pulser_change_pulse_position_change( long pnum, double p_time )
 
 bool rb_pulser_change_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = rb_pulser_get_pulse( pnum );
+	Pulse_T *p = rb_pulser_get_pulse( pnum );
 	Ticks new_dlen = 0;
 
 

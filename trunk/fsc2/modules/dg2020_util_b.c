@@ -113,9 +113,9 @@ void dg2020_check_pod_level_diff( double high, double low )
 /* Returns pointer to the pulses structure if given a valid pulse number. */
 /*------------------------------------------------------------------------*/
 
-PULSE *dg2020_get_pulse( long pnum )
+Pulse_T *dg2020_get_pulse( long pnum )
 {
-	PULSE *cp = dg2020_Pulses;
+	Pulse_T *cp = dg2020.pulses;
 
 
 	if ( pnum < 0 )
@@ -178,7 +178,7 @@ const char *dg2020_pticks( Ticks ticks )
 /* to-function-assignment in their EDL program.                            */
 /*-------------------------------------------------------------------------*/
 
-CHANNEL *dg2020_get_next_free_channel( void )
+Channel_T *dg2020_get_next_free_channel( void )
 {
 	int i = 0;
 
@@ -201,8 +201,8 @@ CHANNEL *dg2020_get_next_free_channel( void )
 
 int dg2020_start_compare( const void *A, const void *B )
 {
-	PULSE *a = *( PULSE ** ) A,
-		  *b = *( PULSE ** ) B;
+	Pulse_T *a = *( Pulse_T ** ) A,
+			*b = *( Pulse_T ** ) B;
 
 	if ( ! a->is_active )
 	{
@@ -227,7 +227,7 @@ Ticks dg2020_get_max_seq_len( void )
 {
 	int i;
 	Ticks max = 0;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -497,7 +497,7 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 
 void dg2020_duty_check( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 	int fns[ ] = { PULSER_CHANNEL_TWT, PULSER_CHANNEL_TWT_GATE };
 
@@ -522,7 +522,7 @@ void dg2020_duty_check( void )
 /* Function calculates the total length of all active pulses of a function */
 /*-------------------------------------------------------------------------*/
 
-Ticks dg2020_calc_max_length( FUNCTION *f )
+Ticks dg2020_calc_max_length( Function_T *f )
 {
 	int i;
 	Ticks max_len = 0;
@@ -684,9 +684,9 @@ void dg2020_dump_pulses( void )
 
 void dg2020_dump_channels( FILE *fp )
 {
-	FUNCTION *f;
-	POD *pod;
-	PULSE_PARAMS *pp;
+	Function_T *f;
+	Pod_T *pod;
+	Pulse_Params_T *pp;
 	int i, j, k;
 
 

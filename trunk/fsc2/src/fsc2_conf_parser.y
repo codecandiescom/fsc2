@@ -94,6 +94,7 @@ static void fsc2_conferror ( UNUSED_ARG const char *s )
 {
 }
 
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

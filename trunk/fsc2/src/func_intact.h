@@ -28,15 +28,15 @@
 #include "fsc2.h"
 
 
-typedef struct IOBJECT IOBJECT;
-typedef struct TOOLBOX TOOLBOX;
+typedef struct Iobject Iobject_T;
+typedef struct Toolbox Toolbox_T;
 
 
-struct IOBJECT {
+struct Iobject {
 	long ID;                  /* ID of object */
 	FL_OBJECT *self;
-	IOBJECT *prev;            /* pointer to previous object */
-	IOBJECT *next;            /* pointer to next object */
+	Iobject_T *prev;          /* pointer to previous object */
+	Iobject_T *next;          /* pointer to next object */
 
 	int type;                 /* object type (BUTTON, SLIDER, etc.) */
 
@@ -77,12 +77,12 @@ struct IOBJECT {
 };
 
 
-struct TOOLBOX {
+struct Toolbox {
 	int layout;               /* 0 / 1 <-> vertical / horizontal */
 	FL_FORM *Tools;
 	FL_COORD w,               /* size of form */
 		     h;
-	IOBJECT *objs;            /* linked list of objects in form */
+	Iobject_T *objs;          /* linked list of objects in form */
 	long next_ID;             /* ID for next created object */
 };
 
@@ -119,21 +119,21 @@ struct TOOLBOX {
 
 void toolbox_create( long layout );
 void toolbox_delete( void );
-Var *f_layout(  Var *v );
-Var *f_objdel(  Var *v );
-Var *f_freeze(  Var *v );
-Var *f_obj_clabel( Var * );
-Var *f_obj_xable( Var *v );
-IOBJECT *find_object_from_ID( long ID );
+Var_T *f_layout(  Var_T *v );
+Var_T *f_objdel(  Var_T *v );
+Var_T *f_freeze(  Var_T *v );
+Var_T *f_obj_clabel( Var_T * );
+Var_T *f_obj_xable( Var_T *v );
+Iobject_T *find_object_from_ID( long ID );
 void recreate_Toolbox( void );
 void convert_escapes( char *str );
 void check_label( char *str );
 bool check_format_string( char *buf );
 void parent_freeze( int freeze );
 void tools_clear( void );
-Var *f_tb_changed( Var *v );
+Var_T *f_tb_changed( Var_T *v );
 void tb_wait_handler( long ID );
-Var *f_tb_wait( Var *v );
+Var_T *f_tb_wait( Var_T *v );
 
 
 #endif   /* ! INTERACTIVE_HEADER */

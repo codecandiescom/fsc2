@@ -60,7 +60,7 @@ void hfs9000_init_setup( void )
 
 static void hfs9000_init_print( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 
 
@@ -92,8 +92,8 @@ static void hfs9000_init_print( FILE *fp )
 
 static void hfs9000_basic_pulse_check( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 
 
 
@@ -164,7 +164,7 @@ static void hfs9000_basic_pulse_check( void )
 
 static void hfs9000_basic_functions_check( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 
 
@@ -216,7 +216,7 @@ static void hfs9000_basic_functions_check( void )
 
 static void hfs9000_pulse_start_setup( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 
 
@@ -235,7 +235,7 @@ static void hfs9000_pulse_start_setup( void )
 
 		/* Sort the pulses of current the function */
 
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+		qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
 			   hfs9000_start_compare );
 
 		hfs9000_do_checks( f );

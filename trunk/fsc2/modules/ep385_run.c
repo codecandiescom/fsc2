@@ -26,8 +26,8 @@
 
 
 static bool ep385_update_pulses( bool flag );
-static void ep385_pulse_check( FUNCTION *f );
-static void ep385_defense_shape_check( FUNCTION *shape );
+static void ep385_pulse_check( Function_T *f );
+static void ep385_defense_shape_check( Function_T *shape );
 static void ep385_commit( bool flag );
 
 
@@ -71,11 +71,11 @@ static bool ep385_update_pulses( bool flag )
 {
 	int i, j;
 	int l, m;
-	FUNCTION *f;
-	PULSE *p;
-	CHANNEL *ch;
-	PULSE **pm_elem;
-	PULSE_PARAMS *pp;
+	Function_T *f;
+	Pulse_T *p;
+	Channel_T *ch;
+	Pulse_T **pm_elem;
+	Pulse_Params_T *pp;
 
 
 	CLOBBER_PROTECT( i );
@@ -233,7 +233,7 @@ static bool ep385_update_pulses( bool flag )
 						ch->num_active_pulses = ch->old_num_active_pulses;
 					}
 
-				for ( p = ep385_Pulses; p != NULL; p = p->next )
+				for ( p = ep385.pulses; p != NULL; p = p->next )
 				{
 					if ( p->is_old_pos )
 						p->pos = p->old_pos;
@@ -280,10 +280,10 @@ static bool ep385_update_pulses( bool flag )
 		 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
 	{
 		Ticks add;
-		CHANNEL *cs =
+		Channel_T *cs =
 					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
-				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
-		PULSE_PARAMS *shape_p, *defense_p;
+				  *cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		Pulse_Params_T *shape_p, *defense_p;
 
 		if ( cd->num_active_pulses > 0 && cs->num_active_pulses > 0 )
 		{
@@ -336,7 +336,7 @@ static bool ep385_update_pulses( bool flag )
 	   we only will come to this place when the pulser is initialized and
 	   then we need to set up the empty channels */
 
-	if ( ep385.needs_update || ! ep385_is_needed )
+	if ( ep385.needs_update || ! ep385.is_needed )
 		ep385_commit( flag );
 
 	return OK;
@@ -347,9 +347,9 @@ static bool ep385_update_pulses( bool flag )
 /* This function simply checks that no pulses of a function overlap. */
 /*-------------------------------------------------------------------*/
 
-static void ep385_pulse_check( FUNCTION *f )
+static void ep385_pulse_check( Function_T *f )
 {
-	PULSE *p1, *p2;
+	Pulse_T *p1, *p2;
 	int i, j;
 
 
@@ -443,10 +443,10 @@ static void ep385_pulse_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-static void ep385_defense_shape_check( FUNCTION *shape )
+static void ep385_defense_shape_check( Function_T *shape )
 {
-	FUNCTION *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
-	PULSE *shape_p, *defense_p;
+	Function_T *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
+	Pulse_T *shape_p, *defense_p;
 	long i, j;
 
 
@@ -478,7 +478,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( ep385_IN_SETUP )
+				if ( ep385.in_setup )
 					print( SEVERE, "Distance between PULSE_SHAPE pulse %s#%ld "
 						   "and DEFENSE pulse #%ld is shorter than %s.\n",
 						   shape_p->sp ? "for pulse " : "",
@@ -511,7 +511,7 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( ep385_IN_SETUP )
+				if ( ep385.in_setup )
 					print( SEVERE, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
 						   defense_p->num,
@@ -541,9 +541,9 @@ static void ep385_defense_shape_check( FUNCTION *shape )
 void ep385_full_reset( void )
 {
 	int i, j;
-	PULSE *p = ep385_Pulses;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Pulse_T *p = ep385.pulses;
+	Function_T *f;
+	Channel_T *ch;
 
 
 	/* Reset all pulses */
@@ -613,9 +613,9 @@ void ep385_full_reset( void )
 /* Checks if shape padding can be set correctly for all pulses of a channel */
 /*--------------------------------------------------------------------------*/
 
-void ep385_shape_padding_check_1( CHANNEL *ch )
+void ep385_shape_padding_check_1( Channel_T *ch )
 {
-	PULSE_PARAMS *pp, *ppp;
+	Pulse_Params_T *pp, *ppp;
 	int i;
 
 
@@ -686,10 +686,10 @@ void ep385_shape_padding_check_1( CHANNEL *ch )
 
 void ep385_shape_padding_check_2( void )
 {
-	CHANNEL *ch1, *ch2;
-	FUNCTION *f1, *f2;
+	Channel_T *ch1, *ch2;
+	Function_T *f1, *f2;
 	int i, j, k, l, m, n;
-	PULSE_PARAMS *pp1, *pp2;
+	Pulse_Params_T *pp1, *pp2;
 
 
 	/* We need to check all pulses of functions that expect automatically
@@ -757,9 +757,9 @@ void ep385_shape_padding_check_2( void )
 /* if the time between two TWT gets too short.                     */
 /*-----------------------------------------------------------------*/
 
-void ep385_twt_padding_check( CHANNEL *ch )
+void ep385_twt_padding_check( Channel_T *ch )
 {
-	PULSE_PARAMS *pp, *ppp;
+	Pulse_Params_T *pp, *ppp;
 	int i;
 
 
@@ -900,11 +900,11 @@ void ep385_twt_padding_check( CHANNEL *ch )
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
 
-PULSE *ep385_delete_pulse( PULSE *p, bool warn )
+Pulse_T *ep385_delete_pulse( Pulse_T *p, bool warn )
 {
-	PULSE *pp;
-	FUNCTION *f;
-	PULSE **pm_elem;
+	Pulse_T *pp;
+	Function_T *f;
+	Pulse_T **pm_elem;
 	int i, j, k;
 
 
@@ -992,8 +992,8 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == ep385_Pulses )
-		ep385_Pulses = p->next;
+	if ( p == ep385.pulses )
+		ep385.pulses = p->next;
 	T_free( p );
 
 	return pp;
@@ -1007,9 +1007,9 @@ PULSE *ep385_delete_pulse( PULSE *p, bool warn )
 
 static void ep385_commit( bool flag )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	/* Only really set the pulses while doing an experiment */

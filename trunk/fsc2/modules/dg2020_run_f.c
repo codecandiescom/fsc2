@@ -42,7 +42,7 @@
 
 bool dg2020_do_update( void )
 {
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return OK;
 
 	/* Resort the pulses and, while in a test run, we also have to check that
@@ -83,8 +83,8 @@ bool dg2020_do_update( void )
 bool dg2020_reorganize_pulses( bool flag )
 {
 	int i;
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 
 
 	CLOBBER_PROTECT( i );
@@ -100,7 +100,7 @@ bool dg2020_reorganize_pulses( bool flag )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( PULSE * ),
+		qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( Pulse_T * ),
 			   dg2020_start_compare );
 
 		/* Check the pulse positions and lengths, if test fails in test run
@@ -124,7 +124,7 @@ bool dg2020_reorganize_pulses( bool flag )
 			if ( flag )
 				THROW( EXCEPTION );
 
-			for ( p = dg2020_Pulses; p != NULL; p = p->next )
+			for ( p = dg2020.pulses; p != NULL; p = p->next )
 			{
 				if ( p->is_old_pos )
 					p->pos = p->old_pos;
@@ -153,9 +153,9 @@ bool dg2020_reorganize_pulses( bool flag )
 /* if the new settings are still ok.                              */
 /*----------------------------------------------------------------*/
 
-void dg2020_do_checks( FUNCTION *f )
+void dg2020_do_checks( Function_T *f )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i;
 
 
@@ -191,7 +191,7 @@ void dg2020_do_checks( FUNCTION *f )
 		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
 			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
 		{
-			if ( dg2020_IN_SETUP )
+			if ( dg2020.in_setup )
 				print( FSC2_MODE == TEST ? FATAL : SEVERE,
 					   "Pulses %ld and %ld overlap.\n",
 					   p->num, f->pulses[ i + 1 ]->num );
@@ -213,10 +213,10 @@ void dg2020_do_checks( FUNCTION *f )
 /* with.                                                                     */
 /*---------------------------------------------------------------------------*/
 
-void dg2020_reorganize_phases( FUNCTION *f, bool flag )
+void dg2020_reorganize_phases( Function_T *f, bool flag )
 {
 	int i, j;
-	PULSE *p;
+	Pulse_T *p;
 	bool need_update = UNSET;
 
 
@@ -259,14 +259,14 @@ void dg2020_reorganize_phases( FUNCTION *f, bool flag )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-void dg2020_recalc_phase_pulse( FUNCTION *f, PULSE *phase_p,
-								PULSE *p, int nth, bool flag )
+void dg2020_recalc_phase_pulse( Function_T *f, Pulse_T *phase_p,
+								Pulse_T *p, int nth, bool flag )
 {
-	PULSE **pppl;                 /* list of phase pulses for previous pulse */
+	Pulse_T **pppl;               /* list of phase pulses for previous pulse */
 	int ppp_num;                  /* and the length of this list */
-	PULSE *pp, *pn;
+	Pulse_T *pp, *pn;
 	int i;
-	PULSE *for_pulse = NULL;
+	Pulse_T *for_pulse = NULL;
 
 
 	/* If the pulse the phase pulse is associated with has become inactive
@@ -533,7 +533,7 @@ done_setting:
 
 void dg2020_full_reset( void )
 {
-	PULSE *p = dg2020_Pulses;
+	Pulse_T *p = dg2020.pulses;
 
 
 	while ( p != NULL )
@@ -578,9 +578,9 @@ void dg2020_full_reset( void )
 /* pulse list.                                                             */
 /*-------------------------------------------------------------------------*/
 
-PULSE *dg2020_delete_pulse( PULSE *p )
+Pulse_T *dg2020_delete_pulse( Pulse_T *p )
 {
-	PULSE *pp;
+	Pulse_T *pp;
 	int i;
 
 
@@ -589,7 +589,7 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 
 	if ( p->num >= 0 && p->function->needs_phases )
 	{
-		pp = dg2020_Pulses;
+		pp = dg2020.pulses;
 		while ( pp != NULL )
 			if ( pp->num < 0 && pp->for_pulse == p )
 				pp = dg2020_delete_pulse( pp );
@@ -640,8 +640,8 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == dg2020_Pulses && p->next == NULL )
-		dg2020_Pulses = PULSE_P T_free( dg2020_Pulses );
+	if ( p == dg2020.pulses && p->next == NULL )
+		dg2020.pulses = PULSE_P T_free( dg2020.pulses );
 	else
 		T_free( p );
 
@@ -658,9 +658,9 @@ PULSE *dg2020_delete_pulse( PULSE *p )
 
 void dg2020_finalize_phase_pulses( int func )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
-	PULSE *p;
+	Pulse_T *p;
 
 
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
@@ -689,10 +689,10 @@ void dg2020_finalize_phase_pulses( int func )
 /* assigned to the function passed as argument.                     */
 /*------------------------------------------------------------------*/
 
-void dg2020_set_pulses( FUNCTION *f )
+void dg2020_set_pulses( Function_T *f )
 {
-	PULSE *p,
-		  *pp;
+	Pulse_T *p,
+		    *pp;
 	Ticks start, end = 0;
 	int i;
 
@@ -767,9 +767,9 @@ void dg2020_set_pulses( FUNCTION *f )
 /* real work.                                                                */
 /*---------------------------------------------------------------------------*/
 
-void dg2020_set_phase_pulses( FUNCTION *f )
+void dg2020_set_phase_pulses( Function_T *f )
 {
-	FUNCTION dummy_f;
+	Function_T dummy_f;
 	int i;
 
 
@@ -815,9 +815,9 @@ void dg2020_set_phase_pulses( FUNCTION *f )
 /* and their length.                                                  */
 /*--------------------------------------------------------------------*/
 
-void dg2020_commit( FUNCTION * f, bool flag )
+void dg2020_commit( Function_T * f, bool flag )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i;
 	Ticks start, len;
 	char *old_p, *new_p;
@@ -909,10 +909,11 @@ void dg2020_commit( FUNCTION * f, bool flag )
 /* representation. Actually, the real work is done in dg2020_commit().      */
 /*--------------------------------------------------------------------------*/
 
-void dg2020_commit_phases( FUNCTION * f, bool flag )
+void dg2020_commit_phases( Function_T * f, bool flag )
 {
-	FUNCTION dummy_f;
+	Function_T dummy_f;
 	int i;
+
 
 	dummy_f.self = PULSER_CHANNEL_NO_TYPE;
 	dummy_f.is_inverted = f->is_inverted;
@@ -938,7 +939,7 @@ void dg2020_commit_phases( FUNCTION * f, bool flag )
 /* to the low state                                                          */
 /*---------------------------------------------------------------------------*/
 
-void dg2020_clear_padding_block( FUNCTION *f )
+void dg2020_clear_padding_block( Function_T *f )
 {
 	int i;
 

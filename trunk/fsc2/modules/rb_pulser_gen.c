@@ -88,7 +88,7 @@ bool rb_pulser_store_timebase( double timebase )
 
 bool rb_pulser_set_function_delay( int function, double delay )
 {
-	FUNCTION *f = rb_pulser.function + function;
+	Function_T *f = rb_pulser.function + function;
 	int i;
 
 

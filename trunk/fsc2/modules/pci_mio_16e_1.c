@@ -288,7 +288,7 @@ void pci_mio_16e_1_exit_hook( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_name( UNUSED_ARG Var *v )
+Var_T *daq_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }

@@ -38,7 +38,7 @@
 #include "right_arrow.xbm"
 
 
-Graphics G;
+Graphics_T G;
 
 
 static void fonts_init( void );
@@ -49,13 +49,13 @@ static int run_form_close_handler( FL_FORM *a, void *b );
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
-static void setup_canvas( Canvas *c, FL_OBJECT *obj );
-static void canvas_off( Canvas *c, FL_OBJECT *obj );
+static void setup_canvas( Canvas_T *c, FL_OBJECT *obj );
+static void canvas_off( Canvas_T *c, FL_OBJECT *obj );
 static void graphics_free( void );
 
-static Graphics *G_stored = NULL;
-static Graphics_1d *G_1d_stored = NULL;
-static Graphics_2d *G_2d_stored = NULL;
+static Graphics_T *G_stored = NULL;
+static Graphics_1d_T *G_1d_stored = NULL;
+static Graphics_2d_T *G_2d_stored = NULL;
 
 
 extern FL_resource xresources[ ];
@@ -941,7 +941,7 @@ static void G_struct_init( void )
 static void G_init_curves_1d( void )
 {
 	long i, j;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	unsigned int depth;
 
 
@@ -1043,8 +1043,8 @@ static void G_init_curves_1d( void )
 static void G_init_curves_2d( void )
 {
 	long i, j;
-	Curve_2d *cv;
-	Scaled_Point *sp;
+	Curve_2d_T *cv;
+	Scaled_Point_T *sp;
 	unsigned int depth;
 
 
@@ -1176,7 +1176,7 @@ static void G_init_curves_2d( void )
 /* pixmap and then rotate this pixmap 'by hand'.                        */
 /*----------------------------------------------------------------------*/
 
-void create_label_pixmap( Canvas *c, int coord, char *label )
+void create_label_pixmap( Canvas_T *c, int coord, char *label )
 {
 	Pixmap pm;
 	int width, height;
@@ -1252,7 +1252,7 @@ void create_label_pixmap( Canvas *c, int coord, char *label )
 void stop_graphics( void )
 {
 	int i;
-	Marker_1D *m, *mn;
+	Marker_1d_T *m, *mn;
 
 
 	G.is_fully_drawn = UNSET;
@@ -1398,9 +1398,9 @@ static void graphics_free( void )
 {
 	long i;
 	int coord;
-	Curve_1d *cv;
-	Curve_2d *cv2;
-	Marker_2D *m2, *mn2;
+	Curve_1d_T *cv;
+	Curve_2d_T *cv2;
+	Marker_2d_T *m2, *mn2;
 
 
 	/* Deallocate memory for pixmaps, scaled data and XPoints. The function
@@ -1473,7 +1473,7 @@ static void graphics_free( void )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-static void canvas_off( Canvas *c, FL_OBJECT *obj )
+static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
 {
 	FL_HANDLE_CANVAS ch;
 
@@ -1505,7 +1505,7 @@ static void canvas_off( Canvas *c, FL_OBJECT *obj )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-static void setup_canvas( Canvas *c, FL_OBJECT *obj )
+static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 {
 	XSetWindowAttributes attributes;
 	FL_HANDLE_CANVAS ch;
@@ -1569,7 +1569,7 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 /* Creates a pixmap for a canvas for buffering. */
 /*----------------------------------------------*/
 
-void create_pixmap( Canvas *c )
+void create_pixmap( Canvas_T *c )
 {
 	char dashes[ ] = { 2, 2 };
 
@@ -1607,7 +1607,7 @@ void create_pixmap( Canvas *c )
 /* Deletes the pixmap for a canvas for buffering. */
 /*------------------------------------------------*/
 
-void delete_pixmap( Canvas *c )
+void delete_pixmap( Canvas_T *c )
 {
 	XFreeGC( G.d, c->gc );
 	XFreePixmap( G.d, c->pm );
@@ -1623,8 +1623,8 @@ void delete_pixmap( Canvas *c )
 
 void redraw_axis_1d( int coord )
 {
-	Canvas *c;
-	Curve_1d *cv = NULL;
+	Canvas_T *c;
+	Curve_1d_T *cv = NULL;
 	int width;
 	long i;
 
@@ -1680,7 +1680,7 @@ void redraw_axis_1d( int coord )
 
 void redraw_axis_2d( int coord )
 {
-	Canvas *c;
+	Canvas_T *c;
 	int width;
 
 
@@ -1852,7 +1852,7 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
 	long i;
 	bool is_undo = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double temp_s2d,
 		   temp_shift;
 	int j;
@@ -1903,7 +1903,7 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 
 void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
 {
-	Curve_2d *cv2;
+	Curve_2d_T *cv2;
 	double temp_s2d,
 		   temp_shift;
 	double temp_z_factor;
@@ -2189,7 +2189,7 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 void clear_curve_1d( long curve )
 {
 	long i;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 
 
 	for ( sp = G1.curve[ curve ]->points, i = 0; i < G1.nx; sp++, i++ )
@@ -2205,7 +2205,7 @@ void clear_curve_1d( long curve )
 void clear_curve_2d( long curve )
 {
 	long i;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 
 
 	for ( sp = G2.curve_2d[ curve ]->points, i = 0; i < G2.nx * G2.ny;
@@ -2398,8 +2398,8 @@ void rescale_1d( long new_nx )
 {
 	long i, k, count;
 	long max_x = 0;
-	Scaled_Point *sp;
-	Marker_1D *m;
+	Scaled_Point_T *sp;
+	Marker_1d_T *m;
 
 
 	/* Return immediately on negative values, they're silently ignored */
@@ -2477,7 +2477,7 @@ void rescale_2d( long *new_dims )
 	long i, j, k, l, count;
 	long max_x = 0,
 		 max_y = 0;
-	Scaled_Point *sp, *old_sp, *osp;
+	Scaled_Point_T *sp, *old_sp, *osp;
 	bool need_cut_redraw = UNSET;
 	long new_nx, new_ny;
 
@@ -2589,9 +2589,9 @@ void change_mode( long mode, long width )
 {
 	long curves;
 	long i;
-	Scaled_Point *sp;
-	Marker_1D *m, *mn;
-	Curve_1d *cv;
+	Scaled_Point_T *sp;
+	Marker_1d_T *m, *mn;
+	Curve_1d_T *cv;
 
 
 	if ( G.mode == mode )

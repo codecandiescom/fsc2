@@ -329,8 +329,8 @@ bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
 
 bool hfs9000_set_trig_out_pulse( void )
 {
-	FUNCTION *f = hfs9000.channel[ HFS9000_TRIG_OUT ].function;
-	PULSE *p = f->pulses[ 0 ];
+	Function_T *f = hfs9000.channel[ HFS9000_TRIG_OUT ].function;
+	Pulse_T *p = f->pulses[ 0 ];
 	char cmd[ 100 ];
 
 

@@ -33,13 +33,12 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-RB_PULSER rb_pulser;
-PULSE *rb_pulser_Pulses;
-RULBUS_CLOCK_CARD clock_card[ NUM_CLOCK_CARDS ];
-RULBUS_DELAY_CARD delay_card[ NUM_DELAY_CARDS ];
+RB_Pulser_T rb_pulser;
+Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
+Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
 static void rb_pulser_card_setup( void );
-static bool is_running_at_start;
+static bool Is_running_at_start;
 
 
 /*------------------------------------------------------------------------*
@@ -49,61 +48,61 @@ static bool is_running_at_start;
 int rb_pulser_init_hook( void )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 
 
-	pulser_struct.name     = DEVICE_NAME;
-	pulser_struct.has_pods = UNSET;
+	Pulser_Struct.name     = DEVICE_NAME;
+	Pulser_Struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that Rulbus is needed */
 
-	need_RULBUS = SET;
+	Need_RULBUS = SET;
 
 	rb_pulser.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
 
 #ifndef FIXED_TIMEBASE
-	pulser_struct.set_timebase = rb_pulser_store_timebase;
+	Pulser_Struct.set_timebase = rb_pulser_store_timebase;
 #else
-	pulser_struct.set_timebase = NULL;
+	Pulser_Struct.set_timebase = NULL;
 #endif
 
-	pulser_struct.set_trigger_mode = rb_pulser_set_trigger_mode;
-	pulser_struct.set_repeat_time = rb_pulser_set_repeat_time;
-	pulser_struct.set_trig_in_slope = rb_pulser_set_trig_in_slope;
-	pulser_struct.set_function_delay = rb_pulser_set_function_delay;
+	Pulser_Struct.set_trigger_mode = rb_pulser_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = rb_pulser_set_repeat_time;
+	Pulser_Struct.set_trig_in_slope = rb_pulser_set_trig_in_slope;
+	Pulser_Struct.set_function_delay = rb_pulser_set_function_delay;
 
-	pulser_struct.new_pulse = rb_pulser_new_pulse;
-	pulser_struct.set_pulse_function = rb_pulser_set_pulse_function;
-	pulser_struct.set_pulse_position = rb_pulser_set_pulse_position;
-	pulser_struct.set_pulse_length = rb_pulser_set_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.new_pulse = rb_pulser_new_pulse;
+	Pulser_Struct.set_pulse_function = rb_pulser_set_pulse_function;
+	Pulser_Struct.set_pulse_position = rb_pulser_set_pulse_position;
+	Pulser_Struct.set_pulse_length = rb_pulser_set_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 										   rb_pulser_set_pulse_position_change;
-	pulser_struct.set_pulse_length_change = rb_pulser_set_pulse_length_change;
+	Pulser_Struct.set_pulse_length_change = rb_pulser_set_pulse_length_change;
 
-	pulser_struct.get_pulse_function = rb_pulser_get_pulse_function;
-	pulser_struct.get_pulse_position = rb_pulser_get_pulse_position;
-	pulser_struct.get_pulse_length = rb_pulser_get_pulse_length;
-	pulser_struct.get_pulse_position_change =
+	Pulser_Struct.get_pulse_function = rb_pulser_get_pulse_function;
+	Pulser_Struct.get_pulse_position = rb_pulser_get_pulse_position;
+	Pulser_Struct.get_pulse_length = rb_pulser_get_pulse_length;
+	Pulser_Struct.get_pulse_position_change =
 										   rb_pulser_get_pulse_position_change;
-	pulser_struct.get_pulse_length_change = rb_pulser_get_pulse_length_change;
+	Pulser_Struct.get_pulse_length_change = rb_pulser_get_pulse_length_change;
 
-	pulser_struct.assign_function = NULL;
-	pulser_struct.assign_channel_to_function = NULL;
-	pulser_struct.invert_function = NULL;
-	pulser_struct.set_max_seq_len = NULL;
-	pulser_struct.set_function_high_level = NULL;
-	pulser_struct.set_function_low_level = NULL;
-	pulser_struct.set_trig_in_level = NULL;
-	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_phase_reference = NULL;
-	pulser_struct.get_pulse_phase_cycle = NULL;
-	pulser_struct.phase_setup_prep = NULL;
-	pulser_struct.phase_setup = NULL;
-	pulser_struct.set_phase_switch_delay = NULL;
-	pulser_struct.set_pulse_phase_cycle = NULL;
-	pulser_struct.set_grace_period = NULL;
-	pulser_struct.ch_to_num = NULL;
-	pulser_struct.keep_all_pulses = NULL;
+	Pulser_Struct.assign_function = NULL;
+	Pulser_Struct.assign_channel_to_function = NULL;
+	Pulser_Struct.invert_function = NULL;
+	Pulser_Struct.set_max_seq_len = NULL;
+	Pulser_Struct.set_function_high_level = NULL;
+	Pulser_Struct.set_function_low_level = NULL;
+	Pulser_Struct.set_trig_in_level = NULL;
+	Pulser_Struct.set_trig_in_impedance = NULL;
+	Pulser_Struct.set_phase_reference = NULL;
+	Pulser_Struct.get_pulse_phase_cycle = NULL;
+	Pulser_Struct.phase_setup_prep = NULL;
+	Pulser_Struct.phase_setup = NULL;
+	Pulser_Struct.set_phase_switch_delay = NULL;
+	Pulser_Struct.set_pulse_phase_cycle = NULL;
+	Pulser_Struct.set_grace_period = NULL;
+	Pulser_Struct.ch_to_num = NULL;
+	Pulser_Struct.keep_all_pulses = NULL;
 
 	rb_pulser.is_needed = SET;
 
@@ -160,10 +159,11 @@ int rb_pulser_init_hook( void )
 	rb_pulser_card_setup( );
 
 	rb_pulser.function[ PULSER_CHANNEL_MW ].delay_card =
-													   delay_card + MW_DELAY_0;
-	rb_pulser.function[ PULSER_CHANNEL_RF ].delay_card = delay_card + RF_DELAY;
+										     rb_pulser.delay_card + MW_DELAY_0;
+	rb_pulser.function[ PULSER_CHANNEL_RF ].delay_card =
+											rb_pulser.delay_card + RF_DELAY;
 	rb_pulser.function[ PULSER_CHANNEL_DET ].delay_card =
-													  delay_card + DET_DELAY_0;
+											rb_pulser.delay_card + DET_DELAY_0;
 
 	return 1;
 }
@@ -175,13 +175,13 @@ int rb_pulser_init_hook( void )
 
 int rb_pulser_test_hook( void )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	/* If a RF pulse exists make sure the synthesizer module got loaded before
 	   the pulser module, otherwise we'll get into trouble */
 
-	for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+	for ( p = rb_pulser.pulses; p != NULL; p = p->next )
 		if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
 		{
 			if ( ! rb_pulser.exists_synthesizer )
@@ -207,7 +207,7 @@ int rb_pulser_test_hook( void )
 			THROW( EXCEPTION );
 		}
 
-		is_running_at_start = rb_pulser.is_running;
+		Is_running_at_start = rb_pulser.is_running;
 		if ( rb_pulser.do_show_pulses )
 			rb_pulser_show_pulses( );
 		if ( rb_pulser.do_dump_pulses )
@@ -236,21 +236,21 @@ int rb_pulser_test_hook( void )
 	   th structure for the card creating the repetition time */
 
 	if ( rb_pulser.trig_in_mode == INTERNAL ) {
-		clock_card[ ERT_CLOCK ].freq = rb_pulser.rep_time_index;
-		delay_card[ ERT_DELAY ].delay = rb_pulser.rep_time_ticks;
+		rb_pulser.clock_card[ ERT_CLOCK ].freq = rb_pulser.rep_time_index;
+		rb_pulser.delay_card[ ERT_DELAY ].delay = rb_pulser.rep_time_ticks;
 	}
 
 	/* We now need some somewhat different functions for setting of pulse
 	   properties */
 
-	pulser_struct.set_pulse_position = rb_pulser_change_pulse_position;
-	pulser_struct.set_pulse_length = rb_pulser_change_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.set_pulse_position = rb_pulser_change_pulse_position;
+	Pulser_Struct.set_pulse_length = rb_pulser_change_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 										rb_pulser_change_pulse_position_change;
-	pulser_struct.set_pulse_length_change =
+	Pulser_Struct.set_pulse_length_change =
 										  rb_pulser_change_pulse_length_change;
 
-	if ( rb_pulser_Pulses == NULL )
+	if ( rb_pulser.pulses == NULL )
 		rb_pulser.is_needed = UNSET;
 
 	return 1;
@@ -295,7 +295,7 @@ int rb_pulser_exp_hook( void )
 		return 1;
 
 	rb_pulser_full_reset( );
-	rb_pulser.is_running = is_running_at_start;
+	rb_pulser.is_running = Is_running_at_start;
 
 	/* Initialize the device */
 
@@ -333,8 +333,8 @@ int rb_pulser_end_of_exp_hook( void )
 
 void rb_pulser_exit_hook( void )
 {
-	PULSE *p, *pn;
-	FUNCTION *f;
+	Pulse_T *p, *pn;
+	Function_T *f;
 	int i;
 
 
@@ -343,7 +343,7 @@ void rb_pulser_exit_hook( void )
 
 	/* Free all memory allocated within the module */
 
-	p = rb_pulser_Pulses;
+	p = rb_pulser.pulses;
 	while ( p != NULL )
 	{
 		pn = p->next;
@@ -382,7 +382,7 @@ void rb_pulser_exit_hook( void )
  * EDL function that returns the device name
  *-------------------------------------------*/
 
-Var *pulser_name( UNUSED_ARG Var *v )
+Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -393,7 +393,7 @@ Var *pulser_name( UNUSED_ARG Var *v )
  * of all pulses used during the experiment displayed
  *----------------------------------------------------*/
 
-Var *pulser_show_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rb_pulser.do_show_pulses = SET;
@@ -407,7 +407,7 @@ Var *pulser_show_pulses( UNUSED_ARG Var *v )
  * of all pulses during the experiment gets written to a file
  *------------------------------------------------------------*/
 
-Var *pulser_dump_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rb_pulser.do_dump_pulses = SET;
@@ -420,7 +420,7 @@ Var *pulser_dump_pulses( UNUSED_ARG Var *v )
  * Switches the output of the pulser on or off
  *---------------------------------------------*/
 
-Var *pulser_state( Var *v )
+Var_T *pulser_state( Var_T *v )
 {
 	bool state;
 
@@ -445,7 +445,7 @@ Var *pulser_state( Var *v )
  * not the state of the "real" pulser
  *---------------------------------------------------------*/
 
-Var *pulser_update( UNUSED_ARG Var *v )
+Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
 	if ( ! rb_pulser.is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -466,9 +466,9 @@ Var *pulser_update( UNUSED_ARG Var *v )
  *            the function pulser_update() !
  *----------------------------------------------------------------------*/
 
-Var *pulser_shift( Var *v )
+Var_T *pulser_shift( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! rb_pulser.is_needed )
@@ -478,7 +478,7 @@ Var *pulser_shift( Var *v )
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -519,9 +519,9 @@ Var *pulser_shift( Var *v )
  *            function pulser_update() !
  *-------------------------------------------------------------------------*/
 
-Var *pulser_increment( Var *v )
+Var_T *pulser_increment( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! rb_pulser.is_needed )
@@ -531,7 +531,7 @@ Var *pulser_increment( Var *v )
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -574,7 +574,7 @@ Var *pulser_increment( Var *v )
  * Function for resetting the pulser back to its initial state
  *-------------------------------------------------------------*/
 
-Var *pulser_reset( UNUSED_ARG Var *v )
+Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
 	if ( ! rb_pulser.is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -589,9 +589,9 @@ Var *pulser_reset( UNUSED_ARG Var *v )
  * Function for resetting one or more pulses back to their initial state
  *-----------------------------------------------------------------------*/
 
-Var *pulser_pulse_reset( Var *v )
+Var_T *pulser_pulse_reset( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! rb_pulser.is_needed )
@@ -604,7 +604,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 	}
@@ -645,34 +645,34 @@ Var *pulser_pulse_reset( Var *v )
  * minimum delay between the end of its predecessor and its start.
  *---------------------------------------------------------------------*/
 
-Var *pulser_pulse_minimum_specs( Var *v )
+Var_T *pulser_pulse_minimum_specs( Var_T *v )
 {
-	PULSE *p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+	Pulse_T *p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
 	double t = 0.0;
 
 
 	if ( p->function == rb_pulser.function + PULSER_CHANNEL_MW )
 	{
 		if ( p == p->function->pulses[ 0 ] )
-			t =   delay_card[ INIT_DELAY ].intr_delay
-				+ delay_card[ MW_DELAY_0 ].intr_delay;
+			t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+				+ rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 		else if ( p == p->function->pulses[ 1 ] )
-			t =   delay_card[ MW_DELAY_1 ].intr_delay
-				+ delay_card[ MW_DELAY_2 ].intr_delay;
+			t =   rb_pulser.delay_card[ MW_DELAY_1 ].intr_delay
+				+ rb_pulser.delay_card[ MW_DELAY_2 ].intr_delay;
 		else if ( p == p->function->pulses[ 2 ] )
-			t =   delay_card[ MW_DELAY_3 ].intr_delay
-				+ delay_card[ MW_DELAY_4 ].intr_delay;
+			t =   rb_pulser.delay_card[ MW_DELAY_3 ].intr_delay
+				+ rb_pulser.delay_card[ MW_DELAY_4 ].intr_delay;
 		else
 			fsc2_assert( 1 == 0 );
 	}
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
-		t =   delay_card[ INIT_DELAY ].intr_delay
-			+ delay_card[ RF_DELAY ].intr_delay
+		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ RF_DELAY ].intr_delay
 			+ SYNTHESIZER_DELAY;
 	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_DET )
-		t =   delay_card[ INIT_DELAY ].intr_delay
-			+ delay_card[ DET_DELAY_0 ].intr_delay
-			+ delay_card[ DET_DELAY_1 ].intr_delay;
+		t =   rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser.delay_card[ DET_DELAY_0 ].intr_delay
+			+ rb_pulser.delay_card[ DET_DELAY_1 ].intr_delay;
 	else
 		fsc2_assert( 1 == 0 );
 
@@ -691,60 +691,72 @@ static void rb_pulser_card_setup( void )
 	RULBUS_CARD_INFO card_info;
 
 
-	clock_card[ ERT_CLOCK ].name  = ERT_CLOCK_CARD;
+	rb_pulser.clock_card[ ERT_CLOCK ].name  = ERT_CLOCK_CARD;
 #ifndef FIXED_TIMEBASE
-	clock_card[ TB_CLOCK ].name   = TB_CLOCK_CARD;
+	rb_pulser.clock_card[ TB_CLOCK ].name   = TB_CLOCK_CARD;
 #endif
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-		clock_card[ i ].handle = -1;
+		rb_pulser.clock_card[ i ].handle = -1;
 
-	delay_card[ ERT_DELAY ]. name = ERT_DELAY_CARD;
-	delay_card[ ERT_DELAY ]. prev = NULL;
-	delay_card[ ERT_DELAY ]. next = NULL;
+	rb_pulser.delay_card[ ERT_DELAY ]. name = ERT_DELAY_CARD;
+	rb_pulser.delay_card[ ERT_DELAY ]. prev = NULL;
+	rb_pulser.delay_card[ ERT_DELAY ]. next = NULL;
 
-	delay_card[ INIT_DELAY ].name = INIT_DELAY_CARD;
-	delay_card[ INIT_DELAY ]. prev = NULL;
-	delay_card[ INIT_DELAY ]. next = NULL;
+	rb_pulser.delay_card[ INIT_DELAY ].name = INIT_DELAY_CARD;
+	rb_pulser.delay_card[ INIT_DELAY ]. prev = NULL;
+	rb_pulser.delay_card[ INIT_DELAY ]. next = NULL;
 
-	delay_card[ MW_DELAY_0 ].name = MW_DELAY_CARD_0;
-	delay_card[ MW_DELAY_0 ].prev = delay_card + INIT_DELAY;
-	delay_card[ MW_DELAY_0 ].next = delay_card + MW_DELAY_1;
+	rb_pulser.delay_card[ MW_DELAY_0 ].name = MW_DELAY_CARD_0;
+	rb_pulser.delay_card[ MW_DELAY_0 ].prev =
+											rb_pulser.delay_card + INIT_DELAY;
+	rb_pulser.delay_card[ MW_DELAY_0 ].next =
+											rb_pulser.delay_card + MW_DELAY_1;
 
-	delay_card[ MW_DELAY_1 ].name = MW_DELAY_CARD_1;
-	delay_card[ MW_DELAY_1 ].prev = delay_card + MW_DELAY_0;
-	delay_card[ MW_DELAY_1 ].next = delay_card + MW_DELAY_2;
+	rb_pulser.delay_card[ MW_DELAY_1 ].name = MW_DELAY_CARD_1;
+	rb_pulser.delay_card[ MW_DELAY_1 ].prev =
+											rb_pulser.delay_card + MW_DELAY_0;
+	rb_pulser.delay_card[ MW_DELAY_1 ].next =
+											rb_pulser.delay_card + MW_DELAY_2;
 
-	delay_card[ MW_DELAY_2 ].name = MW_DELAY_CARD_2;
-	delay_card[ MW_DELAY_2 ].prev = delay_card + MW_DELAY_1;
-	delay_card[ MW_DELAY_2 ].next = delay_card + MW_DELAY_3;
+	rb_pulser.delay_card[ MW_DELAY_2 ].name = MW_DELAY_CARD_2;
+	rb_pulser.delay_card[ MW_DELAY_2 ].prev =
+											rb_pulser.delay_card + MW_DELAY_1;
+	rb_pulser.delay_card[ MW_DELAY_2 ].next =
+											rb_pulser.delay_card + MW_DELAY_3;
 
-	delay_card[ MW_DELAY_3 ].name = MW_DELAY_CARD_3;
-	delay_card[ MW_DELAY_3 ].prev = delay_card + MW_DELAY_2;
-	delay_card[ MW_DELAY_3 ].next = delay_card + MW_DELAY_4;
+	rb_pulser.delay_card[ MW_DELAY_3 ].name = MW_DELAY_CARD_3;
+	rb_pulser.delay_card[ MW_DELAY_3 ].prev =
+											rb_pulser.delay_card + MW_DELAY_2;
+	rb_pulser.delay_card[ MW_DELAY_3 ].next =
+											rb_pulser.delay_card + MW_DELAY_4;
 
-	delay_card[ MW_DELAY_4 ].name = MW_DELAY_CARD_4;
-	delay_card[ MW_DELAY_4 ].prev = delay_card + MW_DELAY_3;
-	delay_card[ MW_DELAY_4 ].next = NULL;
+	rb_pulser.delay_card[ MW_DELAY_4 ].name = MW_DELAY_CARD_4;
+	rb_pulser.delay_card[ MW_DELAY_4 ].prev =
+											rb_pulser.delay_card + MW_DELAY_3;
+	rb_pulser.delay_card[ MW_DELAY_4 ].next = NULL;
 
-	delay_card[ RF_DELAY ].name = RF_DELAY_CARD;
-	delay_card[ RF_DELAY ].prev = delay_card + INIT_DELAY;
-	delay_card[ RF_DELAY ].next = NULL;
+	rb_pulser.delay_card[ RF_DELAY ].name = RF_DELAY_CARD;
+	rb_pulser.delay_card[ RF_DELAY ].prev = rb_pulser.delay_card + INIT_DELAY;
+	rb_pulser.delay_card[ RF_DELAY ].next = NULL;
 
-	delay_card[ DET_DELAY_0 ].name = DET_DELAY_CARD_0;
-	delay_card[ DET_DELAY_0 ].prev = delay_card + INIT_DELAY;
-	delay_card[ DET_DELAY_0 ].next = delay_card + DET_DELAY_1;
+	rb_pulser.delay_card[ DET_DELAY_0 ].name = DET_DELAY_CARD_0;
+	rb_pulser.delay_card[ DET_DELAY_0 ].prev =
+											rb_pulser.delay_card + INIT_DELAY;
+	rb_pulser.delay_card[ DET_DELAY_0 ].next =
+											rb_pulser.delay_card + DET_DELAY_1;
 
-	delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
-	delay_card[ DET_DELAY_1 ].prev = delay_card + DET_DELAY_0;
-	delay_card[ DET_DELAY_1 ].next = NULL;
+	rb_pulser.delay_card[ DET_DELAY_1 ].name = DET_DELAY_CARD_1;
+	rb_pulser.delay_card[ DET_DELAY_1 ].prev =
+											rb_pulser.delay_card + DET_DELAY_0;
+	rb_pulser.delay_card[ DET_DELAY_1 ].next = NULL;
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{
-		delay_card[ i ].handle = -1;
-		delay_card[ i ].needs_update = UNSET;
-		delay_card[ i ].is_active = UNSET;
-		if ( rulbus_get_card_info( delay_card[ i ].name, &card_info )
+		rb_pulser.delay_card[ i ].handle = -1;
+		rb_pulser.delay_card[ i ].needs_update = UNSET;
+		rb_pulser.delay_card[ i ].is_active = UNSET;
+		if ( rulbus_get_card_info( rb_pulser.delay_card[ i ].name, &card_info )
 			 													 != RULBUS_OK )
 		{
 			print( FATAL, "Failed to obtain RULBUS configuration "
@@ -752,7 +764,7 @@ static void rb_pulser_card_setup( void )
 			THROW( EXCEPTION );
 		}
 
-		delay_card[ i ].intr_delay = card_info.intr_delay;
+		rb_pulser.delay_card[ i ].intr_delay = card_info.intr_delay;
 	}
 }
 

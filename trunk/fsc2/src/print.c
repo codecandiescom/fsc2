@@ -67,7 +67,7 @@ static void do_1d_printing( FILE *fp, long what );
 static void do_2d_printing( FILE *fp );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
 static void eps_color_scale( FILE *fp );
-static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir );
+static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir );
 static void eps_draw_surface( FILE *fp, int cn );
 static void eps_draw_contour( FILE *fp, int cn );
 static void print_comm( FILE *fp );
@@ -913,25 +913,25 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 	if ( dim == 1 )
 	{
-		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G1.canvas.w;
-		s2d[ Y ] = h * ( ( Curve_1d * ) cv )->s2d[ Y ] / G1.canvas.h;
+		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G1.canvas.w;
+		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G1.canvas.h;
 
 		rwcs = G1.rwc_start[ coord ];
 		rwcd = G1.rwc_delta[ coord ];
 	}
 	else if ( dim == 2 )
 	{
-		s2d[ X ] = w * ( ( Curve_2d * ) cv )->s2d[ X ] / G2.canvas.w;
-		s2d[ Y ] = h * ( ( Curve_2d * ) cv )->s2d[ Y ] / G2.canvas.h;
-		s2d[ Z ] = h * ( ( Curve_2d * ) cv )->s2d[ Z ] / G2.z_axis.h;
+		s2d[ X ] = w * ( ( Curve_2d_T * ) cv )->s2d[ X ] / G2.canvas.w;
+		s2d[ Y ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Y ] / G2.canvas.h;
+		s2d[ Z ] = h * ( ( Curve_2d_T * ) cv )->s2d[ Z ] / G2.z_axis.h;
 
-		rwcs = ( ( Curve_2d * ) cv )->rwc_start[ coord ];
-		rwcd = ( ( Curve_2d * ) cv )->rwc_delta[ coord ];
+		rwcs = ( ( Curve_2d_T * ) cv )->rwc_start[ coord ];
+		rwcd = ( ( Curve_2d_T * ) cv )->rwc_delta[ coord ];
 	}
 	else
 	{
-		s2d[ X ] = w * ( ( Curve_1d * ) cv )->s2d[ X ] / G2.cut_canvas.w;
-		s2d[ Y ] = h * ( ( Curve_1d * ) cv )->s2d[ Y ] / G2.cut_canvas.h;
+		s2d[ X ] = w * ( ( Curve_1d_T * ) cv )->s2d[ X ] / G2.cut_canvas.w;
+		s2d[ Y ] = h * ( ( Curve_1d_T * ) cv )->s2d[ Y ] / G2.cut_canvas.h;
 
 		if ( coord == X )
 			r_coord = ( dim < 0 ? X : Y );
@@ -991,9 +991,9 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 	   'd_start_fine' is the same position but in points */
 
 	if ( dim <= 1 )
-		rwc_start = rwcs - ( ( Curve_1d * ) cv )->shift[ coord ] * rwcd;
+		rwc_start = rwcs - ( ( Curve_1d_T * ) cv )->shift[ coord ] * rwcd;
 	else if ( dim == 2 )
-		rwc_start = rwcs - ( ( Curve_2d * ) cv )->shift[ coord ] * rwcd;
+		rwc_start = rwcs - ( ( Curve_2d_T * ) cv )->shift[ coord ] * rwcd;
 
 	if ( rwcd < 0 )
 		rwc_delta *= -1.0;
@@ -1234,7 +1234,7 @@ static void eps_color_scale( FILE *fp )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
+static void eps_draw_curve_1d( FILE *fp, Curve_1d_T *cv, int i, long dir )
 {
 	double s2d[ 2 ];
 	long k;
@@ -1322,7 +1322,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 
 static void eps_draw_surface( FILE *fp, int cn )
 {
-	Curve_2d *cv = G2.curve_2d[ cn ];
+	Curve_2d_T *cv = G2.curve_2d[ cn ];
 	double s2d[ 2 ];
 	double dw,
 		   dh;
@@ -1377,7 +1377,7 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 static void eps_draw_contour( FILE *fp, int cn )
 {
-	Curve_2d *cv = G2.curve_2d[ cn ];
+	Curve_2d_T *cv = G2.curve_2d[ cn ];
 	double s2d[ 2 ];
 	double dw,
 		   dh;
@@ -1700,8 +1700,8 @@ static char *paren_replace( const char *str )
 static void print_markers_1d( FILE *fp )
 {
 	long i;
-	Curve_1d *cv = NULL;
-	Marker_1D *m;
+	Curve_1d_T *cv = NULL;
+	Marker_1d_T *m;
 	double s2d;
 
 
@@ -1768,8 +1768,8 @@ static void print_markers_1d( FILE *fp )
 
 static void print_markers_2d( FILE *fp )
 {
-	Curve_2d *cv = NULL;
-	Marker_2D *m;
+	Curve_2d_T *cv = NULL;
+	Marker_2d_T *m;
 	double s2d[ 2 ];
 	double dw, dh;
 

@@ -32,7 +32,7 @@
 /* calling the function daq_ao_channel_setup and daq_set_voltage().         */
 /*--------------------------------------------------------------------------*/
 
-Var *daq_reserve_dac( Var *v )
+Var_T *daq_reserve_dac( Var_T *v )
 {
 	bool lock_state = SET;
 	long channel;
@@ -106,7 +106,7 @@ Var *daq_reserve_dac( Var *v )
 /* and if an external reference is to be used                   */
 /*--------------------------------------------------------------*/
 
-Var *daq_ao_channel_setup( Var *v )
+Var_T *daq_ao_channel_setup( Var_T *v )
 {
 	int dac;
 	int er;
@@ -331,7 +331,7 @@ Var *daq_ao_channel_setup( Var *v )
 /* Function for outputting an volatge at an AO channel */
 /*-----------------------------------------------------*/
 
-Var *daq_set_voltage( Var *v )
+Var_T *daq_set_voltage( Var_T *v )
 {
 	int dac;
 	double volts;

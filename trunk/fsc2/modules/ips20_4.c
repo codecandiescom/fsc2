@@ -49,16 +49,16 @@ int ips20_4_test_hook( void );
 int ips20_4_exp_hook( void );
 int ips20_4_end_of_exp_hook( void );
 
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *get_field( Var *v );
-Var *set_field( Var *v );
-Var *set_sweep_rate( Var *v );
-Var *magnet_sweep( Var *v );
-Var *magnet_sweep_rate( Var *v );
-Var *reset_field( Var *v );
-Var *magnet_goto_field_on_end( Var *v );
-Var *magnet_command( Var *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *set_sweep_rate( Var_T *v );
+Var_T *magnet_sweep( Var_T *v );
+Var_T *magnet_sweep_rate( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_goto_field_on_end( Var_T *v );
+Var_T *magnet_command( Var_T *v );
 
 
 static void magnet_sweep_up( void );
@@ -161,7 +161,7 @@ static struct IPS20_4 ips20_4, ips20_4_stored;
 
 int ips20_4_init_hook( void )
 {
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	ips20_4.device = -1;
 
@@ -248,7 +248,7 @@ int ips20_4_end_of_exp_hook( void )
 /* Function returns the name the device is known as. */
 /*---------------------------------------------------*/
 
-Var *magnet_name( UNUSED_ARG Var *v )
+Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -258,7 +258,7 @@ Var *magnet_name( UNUSED_ARG Var *v )
 /* Function for registering the start current and the sweep rate. */
 /*----------------------------------------------------------------*/
 
-Var *magnet_setup( Var *v )
+Var_T *magnet_setup( Var_T *v )
 {
 	double cur;
 	double sweep_rate;
@@ -298,7 +298,7 @@ Var *magnet_setup( Var *v )
 /* time spent since the last call for determining the current.             */
 /*-------------------------------------------------------------------------*/
 
-Var *get_field( UNUSED_ARG Var *v )
+Var_T *get_field( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 	{
@@ -360,7 +360,7 @@ Var *get_field( UNUSED_ARG Var *v )
 /* that setting a new current also stops a running sweep. */
 /*--------------------------------------------------------*/
 
-Var *set_field( Var *v )
+Var_T *set_field( Var_T *v )
 {
 	double cur;
 
@@ -393,10 +393,10 @@ Var *set_field( Var *v )
 /* inquiring about the current sweep state. */
 /*----------------------------------------------------*/
 
-Var *magnet_sweep( Var *v )
+Var_T *magnet_sweep( Var_T *v )
 {
 	long dir;
-	Var *vc;
+	Var_T *vc;
 
 
 	if ( v == NULL || FSC2_MODE == TEST )
@@ -550,7 +550,7 @@ static void magnet_stop_sweep( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *magnet_sweep_rate( Var *v )
+Var_T *magnet_sweep_rate( Var_T *v )
 {
 	double sweep_rate;
 
@@ -589,7 +589,7 @@ Var *magnet_sweep_rate( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *reset_field( UNUSED_ARG Var *v )
+Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
 	return set_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }
@@ -601,7 +601,7 @@ Var *reset_field( UNUSED_ARG Var *v )
 /* the experiment has ended.                                 */
 /*-----------------------------------------------------------*/
 
-Var *magnet_goto_field_on_end( Var *v )
+Var_T *magnet_goto_field_on_end( Var_T *v )
 {
 	double cur;
 
@@ -617,7 +617,7 @@ Var *magnet_goto_field_on_end( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *magnet_command( Var *v )
+Var_T *magnet_command( Var_T *v )
 {
 	char *cmd = NULL;
 	char reply[ 100 ];

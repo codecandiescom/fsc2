@@ -44,7 +44,7 @@ static bool in_for_lex = UNSET;           /* set while handling for loop
 static int in_cond = 0;                   /* counts conditional construts in
 											 conditionals */
 static long token_count;
-static CB_Stack *cb_stack = NULL;         /* curly brace stack */
+static CB_Stack_T *cb_stack = NULL;       /* curly brace stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
 extern void exp_test_init( void );
@@ -69,7 +69,7 @@ static void push_curly_brace( const char *fname, long lc );
 static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int type, long *pos );
-static void setup_if_else( long *pos, Prg_Token *cur_wr );
+static void setup_if_else( long *pos, Prg_Token_T *cur_wr );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
 static const char *get_construct_name( int type );
@@ -282,9 +282,9 @@ void store_exp( FILE *in )
 			case E_FUNC_TOKEN :
 				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
 				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-											   VAR_P T_malloc( sizeof( Var ) );
+											 VAR_P T_malloc( sizeof( Var_T ) );
 				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
-						sizeof( Var ) );
+						sizeof *EDL.Var_Stack );
 				EDL.prg_token[ EDL.prg_length ].tv.vptr->name = NULL;
 				EDL.prg_token[ EDL.prg_length ].tv.vptr->name =
 					                           T_strdup( EDL.Var_Stack->name );
@@ -294,9 +294,9 @@ void store_exp( FILE *in )
 			case E_VAR_REF :
 				EDL.prg_token[ EDL.prg_length ].tv.vptr = NULL;
 				EDL.prg_token[ EDL.prg_length ].tv.vptr =
-											   VAR_P T_malloc( sizeof( Var ) );
+											 VAR_P T_malloc( sizeof( Var_T ) );
 				memcpy( EDL.prg_token[ EDL.prg_length ].tv.vptr, EDL.Var_Stack,
-						sizeof( Var ) );
+						sizeof *EDL.Var_Stack );
 				vars_pop( EDL.Var_Stack );
 				break;
 
@@ -398,10 +398,10 @@ void store_exp( FILE *in )
 
 static void push_curly_brace( const char *fname, long lc )
 {
-	CB_Stack *new_cb;
+	CB_Stack_T *new_cb;
 
 
-	new_cb = CB_STACK_P T_malloc( sizeof( CB_Stack ) );
+	new_cb = CB_STACK_P T_malloc( sizeof *new_cb );
 	new_cb->next = cb_stack;
 	new_cb->Fname = T_strdup( fname );
 	new_cb->Lc = lc;
@@ -420,7 +420,7 @@ static void push_curly_brace( const char *fname, long lc )
 
 static bool pop_curly_brace( void )
 {
-	CB_Stack *old_cb;
+	CB_Stack_T *old_cb;
 
 
 	if ( cb_stack == NULL )
@@ -549,7 +549,7 @@ static void loop_setup( void )
 
 static void setup_while_or_repeat( int type, long *pos )
 {
-	Prg_Token *cur = EDL.prg_token + *pos;
+	Prg_Token_T *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
 
 
@@ -642,9 +642,9 @@ static void setup_while_or_repeat( int type, long *pos )
 /*       loop (needed for handling of 'break' and 'continue').          */
 /*----------------------------------------------------------------------*/
 
-static void setup_if_else( long *pos, Prg_Token *cur_wr )
+static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
 {
-	Prg_Token *cur = EDL.prg_token + *pos;
+	Prg_Token_T *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
 	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and
@@ -945,7 +945,7 @@ void exp_test_run( void )
 
 static void deal_with_token_in_test( void )
 {
-	Prg_Token *cur;
+	Prg_Token_T *cur;
 
 
 	switch ( EDL.cur_prg_token->token )
@@ -1067,7 +1067,7 @@ static void deal_with_token_in_test( void )
 
 int exp_runlex( void )
 {
-	Var *ret, *from, *next, *prev;
+	Var_T *ret, *from, *next, *prev;
 
 
 	if ( EDL.cur_prg_token != NULL &&
@@ -1098,7 +1098,7 @@ int exp_runlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
 				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
@@ -1111,7 +1111,7 @@ int exp_runlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
@@ -1139,7 +1139,7 @@ int exp_runlex( void )
 int conditionlex( void )
 {
 	int token;
-	Var *ret, *from, *next, *prev;
+	Var_T *ret, *from, *next, *prev;
 
 
 	if ( EDL.cur_prg_token != NULL &&
@@ -1182,7 +1182,7 @@ int conditionlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
 				ret->name = T_strdup( ret->name );
 				ret->from = from;
 				ret->next = next;
@@ -1196,7 +1196,7 @@ int conditionlex( void )
 				from = ret->from;
 				next = ret->next;
 				prev = ret->prev;
-				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof( Var ) );
+				memcpy( ret, EDL.cur_prg_token->tv.vptr, sizeof *ret );
 				ret->from = from;
 				ret->next = next;
 				ret->prev = prev;
@@ -1227,7 +1227,7 @@ int conditionlex( void )
 /* or an IF or UNLESS construct.                                      */
 /*--------------------------------------------------------------------*/
 
-bool test_condition( Prg_Token *cur )
+bool test_condition( Prg_Token_T *cur )
 {
 	bool condition;
 
@@ -1266,7 +1266,7 @@ bool test_condition( Prg_Token *cur )
 /* Functions determines the repeat count for a REPEAT loop */
 /*---------------------------------------------------------*/
 
-void get_max_repeat_count( Prg_Token *cur )
+void get_max_repeat_count( Prg_Token_T *cur )
 {
 	EDL.cur_prg_token++;                         /* skip the REPEAT token */
 	conditionparse( );                           /* get the value */
@@ -1308,7 +1308,7 @@ void get_max_repeat_count( Prg_Token *cur )
 /* end and increment variable must be integers.                             */
 /*--------------------------------------------------------------------------*/
 
-void get_for_cond( Prg_Token *cur )
+void get_for_cond( Prg_Token_T *cur )
 {
 	/* First of all get the loop variable */
 
@@ -1529,7 +1529,7 @@ void get_for_cond( Prg_Token *cur )
 /* Function tests the loop condition of a for loop. */
 /*--------------------------------------------------*/
 
-bool test_for_cond( Prg_Token *cur )
+bool test_for_cond( Prg_Token_T *cur )
 {
 	bool sign = UNSET;
 
@@ -1591,7 +1591,7 @@ bool test_for_cond( Prg_Token *cur )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-bool check_result( Var *v )
+bool check_result( Var_T *v )
 {
     if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{

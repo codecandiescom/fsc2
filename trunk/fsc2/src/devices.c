@@ -42,14 +42,14 @@ static long pathmax = 0;
 
 void device_add( const char *name )
 {
-	Device_Name *dl;
+	Device_Name_T *dl;
 	char *dev_name;
 	char *real_name = NULL;
 	const char *search_name;
 	char *lib_name = NULL;
 	struct stat buf;
 	int length;
-	Device *cd;
+	Device_T *cd;
 	char *ld_path;
 	char *ld = NULL;
 	char *ldc;
@@ -214,7 +214,7 @@ void device_add( const char *name )
 
 void device_append_to_list( const char *dev_name )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	/* Append a new new Device structure to the list of devices */
@@ -263,7 +263,7 @@ void device_append_to_list( const char *dev_name )
 
 void delete_devices( void )
 {
-	Device *cd, *cdp;
+	Device_T *cd, *cdp;
 
 
 	if ( EDL.Device_List == NULL )  /* list is empty or does not exist */
@@ -294,7 +294,7 @@ void delete_devices( void )
 
 void delete_device_name_list( void )
 {
-	Device_Name *cd, *cdn;
+	Device_Name_T *cd, *cdn;
 
 	for ( cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
 	{

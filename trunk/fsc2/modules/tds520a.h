@@ -73,11 +73,11 @@
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
-typedef struct WINDOW WINDOW;
+typedef struct Window Window_T;
 typedef struct TDS520A TDS520A;
 
 
-struct WINDOW {
+struct Window {
 	long num;                   /* number of window                          */
 	double start;               /* start of window (in time units)           */
 	double width;               /* width of window (in time units)           */
@@ -86,8 +86,8 @@ struct WINDOW {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	WINDOW *next;               /* pointer to next window structure          */
-	WINDOW *prev;               /* pointer to previous window structure      */
+	Window_T *next;             /* pointer to next window structure          */
+	Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
@@ -105,7 +105,7 @@ struct TDS520A {
 	long num_avg;
 	bool is_num_avg;
 
-	WINDOW *w;               /* start element of list of windows */
+	Window_T *w;             /* start element of list of windows */
 	bool is_equal_width;     /* all windows have equal width -> tracking
 								cursors can be used without further checking */
 	bool gated_state;        /* use gated measurements ? */
@@ -207,31 +207,31 @@ int tds520a_end_of_exp_hook( void );
 void tds520a_exit_hook( void );
 
 
-Var *digitizer_name( Var *v );
-Var *digitizer_define_window( Var *v );
-Var *digitizer_change_window( Var *v );
-Var *digitizer_window_position( Var *v );
-Var *digitizer_window_width( Var *v );
-Var *digitizer_display_channel( Var *v );
-Var *digitizer_timebase( Var *v );
-Var *digitizer_time_per_point( Var *v );
-Var *digitizer_sensitivity( Var *v );
-Var *digitizer_num_averages( Var *v );
-Var *digitizer_record_length( Var *v );
-Var *digitizer_trigger_position( Var *v );
-Var *digitizer_meas_channel_ok( Var *v );
-Var *digitizer_trigger_channel( Var *v );
-Var *digitizer_start_acquisition( Var *v );
-Var *digitizer_get_area( Var *v );
-Var *digitizer_get_area_fast( Var *v );
-Var *digitizer_get_curve( Var *v );
-Var *digitizer_get_curve_fast( Var *v );
-Var *digitizer_get_amplitude( Var *v );
-Var *digitizer_get_amplitude_fast( Var *v );
-Var *digitizer_run( Var *v );
-Var *digitizer_lock_keyboard( Var *v );
-Var *digitizer_copy_curve( Var *v );
-Var *digitizer_command( Var *v );
+Var_T *digitizer_name( Var_T *v );
+Var_T *digitizer_define_window( Var_T *v );
+Var_T *digitizer_change_window( Var_T *v );
+Var_T *digitizer_window_position( Var_T *v );
+Var_T *digitizer_window_width( Var_T *v );
+Var_T *digitizer_display_channel( Var_T *v );
+Var_T *digitizer_timebase( Var_T *v );
+Var_T *digitizer_time_per_point( Var_T *v );
+Var_T *digitizer_sensitivity( Var_T *v );
+Var_T *digitizer_num_averages( Var_T *v );
+Var_T *digitizer_record_length( Var_T *v );
+Var_T *digitizer_trigger_position( Var_T *v );
+Var_T *digitizer_meas_channel_ok( Var_T *v );
+Var_T *digitizer_trigger_channel( Var_T *v );
+Var_T *digitizer_start_acquisition( Var_T *v );
+Var_T *digitizer_get_area( Var_T *v );
+Var_T *digitizer_get_area_fast( Var_T *v );
+Var_T *digitizer_get_curve( Var_T *v );
+Var_T *digitizer_get_curve_fast( Var_T *v );
+Var_T *digitizer_get_amplitude( Var_T *v );
+Var_T *digitizer_get_amplitude_fast( Var_T *v );
+Var_T *digitizer_run( Var_T *v );
+Var_T *digitizer_lock_keyboard( Var_T *v );
+Var_T *digitizer_copy_curve( Var_T *v );
+Var_T *digitizer_command( Var_T *v );
 
 
 /* Declaration of internally used functions */
@@ -239,15 +239,15 @@ Var *digitizer_command( Var *v );
 const char *tds520a_ptime( double p_time );
 void tds520a_delete_windows( TDS520A *s );
 void tds520a_do_pre_exp_checks( void );
-void tds520a_window_checks( WINDOW *w );
-void tds520a_set_tracking( WINDOW *w );
-void tds520a_set_meas_window( WINDOW *w );
-void tds520a_set_curve_window( WINDOW *w );
-void tds520a_set_window( WINDOW *w );
+void tds520a_window_checks( Window_T *w );
+void tds520a_set_tracking( Window_T *w );
+void tds520a_set_meas_window( Window_T *w );
+void tds520a_set_curve_window( Window_T *w );
+void tds520a_set_window( Window_T *w );
 long tds520a_translate_channel( int dir, long channel, bool flag );
 void tds520a_store_state( TDS520A *dest, TDS520A *src );
 void tds520a_state_check( double timebase, long rec_len, double trig_pos );
-WINDOW *tds520a_get_window_by_number( long win_number );
+Window_T *tds520a_get_window_by_number( long win_number );
 
 bool tds520a_init( const char *name );
 double tds520a_get_timebase( void );
@@ -275,10 +275,10 @@ void tds520a_display_channel( int channel, bool on_flag );
 double tds520a_get_sens( int channel );
 void tds520a_set_sens( int channel, double val );
 void tds520a_start_acquisition( void );
-double tds520a_get_area( int channel, WINDOW *w, bool use_cursor );
-void tds520a_get_curve( int channel, WINDOW *w, double **data, long *length,
+double tds520a_get_area( int channel, Window_T *w, bool use_cursor );
+void tds520a_get_curve( int channel, Window_T *w, double **data, long *length,
 						bool use_cursor );
-double tds520a_get_amplitude( int channel, WINDOW *w, bool use_cursor );
+double tds520a_get_amplitude( int channel, Window_T *w, bool use_cursor );
 void tds520a_free_running( void );
 void tds520a_lock_state( bool lock );
 void tds520a_copy_curve( int src, int dest );

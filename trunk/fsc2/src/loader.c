@@ -28,21 +28,21 @@
 
 /* Variables imported from func.c */
 
-extern size_t Num_Func;     /* number of built-in and listed functions */
-extern Func *Fncts;         /* structure for list of functions */
-extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
+extern size_t Num_Func;       /* number of built-in and listed functions */
+extern Func_T *Fncts;         /* structure for list of functions */
+extern Func_T Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
 static size_t num_func;
 static int Max_Devices_of_a_Kind;
 
-static void resolve_hook_functions( Device *dev );
-static void load_functions( Device *dev );
-static void resolve_functions( Device *dev );
-static void add_function( int num, void *new_func, Device *new_dev );
+static void resolve_hook_functions( Device_T *dev );
+static void load_functions( Device_T *dev );
+static void resolve_functions( Device_T *dev );
+static void add_function( int num, void *new_func, Device_T *new_dev );
 static int func_cmp( const void *a, const void *b );
-static void resolve_device_name( Device *dev );
-static void resolve_generic_type( Device *dev );
+static void resolve_device_name( Device_T *dev );
+static void resolve_generic_type( Device_T *dev );
 
 
 /*-------------------------------------------------------------------------*/
@@ -53,9 +53,11 @@ static void resolve_generic_type( Device *dev );
 
 void load_all_drivers( void )
 {
-	Device *cd;
+	Device_T *cd;
 	bool saved_need_GPIB;
+#if defined WITH_RULBUS
 	bool saved_need_RULBUS;
+#endif
 
 
 	CLOBBER_PROTECT( cd );
@@ -93,7 +95,7 @@ void load_all_drivers( void )
 	/* This done run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
 	   program it is supposed to throw an exception). To keep modules writers
-	   from erroneously unsetting the global variable 'need_GPIB' it's stored
+	   from erroneously unsetting the global variable 'Need_GPIB' it's stored
 	   before each init_hook() function is called and is restored to its
 	   previous values if necessary. */
 
@@ -103,8 +105,10 @@ void load_all_drivers( void )
 	{
 		for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
 		{
-			saved_need_GPIB = need_GPIB;
-			saved_need_RULBUS = need_RULBUS;
+			saved_need_GPIB   = Need_GPIB;
+#if defined WITH_RULBUS
+			saved_need_RULBUS = Need_RULBUS;
+#endif
 
 			if ( cd->is_loaded && cd->driver.is_init_hook )
 			{
@@ -138,14 +142,14 @@ void load_all_drivers( void )
 				cd->driver.init_hook_is_run = SET;
 			}
 
-			if ( need_GPIB == UNSET && saved_need_GPIB == SET )
-				need_GPIB = SET;
+			if ( Need_GPIB == UNSET && saved_need_GPIB == SET )
+				Need_GPIB = SET;
 
 #if defined WITH_RULBUS
-			if ( need_RULBUS == UNSET && saved_need_RULBUS == SET )
-				need_RULBUS = SET;
+			if ( Need_RULBUS == UNSET && saved_need_RULBUS == SET )
+				Need_RULBUS = SET;
 #else
-			if ( need_RULBUS )
+			if ( Need_RULBUS )
 			{
 				eprint( FATAL, UNSET, "Module '%s' requires RULBUS but fsc2 "
 						"hasn't been built with RULBUS support.\n", cd->name );
@@ -174,8 +178,8 @@ void load_all_drivers( void )
 
 static int func_cmp( const void *a, const void *b )
 {
-	return strcmp( ( ( const Func * ) a )->name,
-				   ( ( const Func * ) b )->name );
+	return strcmp( ( ( const Func_T * ) a )->name,
+				   ( ( const Func_T * ) b )->name );
 }
 
 
@@ -187,7 +191,7 @@ static int func_cmp( const void *a, const void *b )
 
 int exists_device( const char *name )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
@@ -206,7 +210,7 @@ int exists_device( const char *name )
 
 bool exists_device_type( const char *type )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
@@ -242,7 +246,7 @@ bool exists_function( const char *name )
 /* data base 'Functions'.                                      */
 /*-------------------------------------------------------------*/
 
-static void load_functions( Device *dev )
+static void load_functions( Device_T *dev )
 {
 	char *lib_name;
 
@@ -306,7 +310,7 @@ static void load_functions( Device *dev )
 /* and determines the pointers to these functions.                    */
 /*--------------------------------------------------------------------*/
 
-static void resolve_hook_functions( Device *dev )
+static void resolve_hook_functions( Device_T *dev )
 {
 	char *hook_func_name;
 	char *app;
@@ -395,7 +399,7 @@ static void resolve_hook_functions( Device *dev )
 /* to be resolved try to find them in the device driver functions.     */
 /*---------------------------------------------------------------------*/
 
-static void resolve_functions( Device *dev )
+static void resolve_functions( Device_T *dev )
 {
 	size_t num;
 	void *cur;
@@ -421,9 +425,9 @@ static void resolve_functions( Device *dev )
 		   also add a function with '#' and the number. Otherwise append a
 		   new function */
 
-		if ( Fncts[ num ].fnct == ( Var * ( * )( Var * ) ) NULL )
+		if ( Fncts[ num ].fnct == ( Var_T * ( * )( Var_T * ) ) NULL )
 		{
-			Fncts[ num ].fnct = ( Var * ( * )( Var * ) ) cur;
+			Fncts[ num ].fnct = ( Var_T * ( * )( Var_T * ) ) cur;
 			Fncts[ num ].device = dev;
 			if ( dev->count != 1 )
 			{
@@ -448,9 +452,9 @@ static void resolve_functions( Device *dev )
 /* current device.                                                      */
 /*----------------------------------------------------------------------*/
 
-static void add_function( int num, void *new_func, Device *new_dev )
+static void add_function( int num, void *new_func, Device_T *new_dev )
 {
-	Func *f;
+	Func_T *f;
 
 
 	if ( new_dev->count == 1 ||
@@ -467,11 +471,11 @@ static void add_function( int num, void *new_func, Device *new_dev )
 
 	/* Add an entry for the new function to the list of functions */
 
-	Fncts = FUNC_P T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+	Fncts = FUNC_P T_realloc( Fncts, ( Num_Func + 1 ) * sizeof *Fncts );
 	f = Fncts + Num_Func++;
-	memcpy( f, Fncts + num, sizeof( Func ) );
+	memcpy( f, Fncts + num, sizeof *f );
 
-	f->fnct   = ( Var * ( * )( Var * ) ) new_func;
+	f->fnct   = ( Var_T * ( * )( Var_T * ) ) new_func;
 	f->device = new_dev;
 	f->name = get_string( "%s#%d", Fncts[ num ].name, new_dev->count );
 }
@@ -484,7 +488,7 @@ static void add_function( int num, void *new_func, Device *new_dev )
 /* the module and stores it in the Device structure.                 */
 /*-------------------------------------------------------------------*/
 
-static void resolve_device_name( Device *dev )
+static void resolve_device_name( Device_T *dev )
 {
 	dlerror( );
 	dev->device_name = ( const char * ) dlsym( dev->driver.handle,
@@ -506,9 +510,9 @@ static void resolve_device_name( Device *dev )
 /* are - the result is stored in the Device structure.                  */
 /*----------------------------------------------------------------------*/
 
-static void resolve_generic_type( Device *dev )
+static void resolve_generic_type( Device_T *dev )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	dev->count = 1;
@@ -541,7 +545,7 @@ static void resolve_generic_type( Device *dev )
 
 void run_test_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	Cur_Pulser = -1;
@@ -590,7 +594,7 @@ void run_test_hooks( void )
 
 void run_end_of_test_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	Cur_Pulser = -1;
@@ -638,7 +642,7 @@ void run_end_of_test_hooks( void )
 
 void run_exp_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	Cur_Pulser = -1;
@@ -700,7 +704,7 @@ void run_exp_hooks( void )
 
 void run_end_of_exp_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	CLOBBER_PROTECT( cd );
@@ -765,7 +769,7 @@ void run_end_of_exp_hooks( void )
 
 void run_exit_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	CLOBBER_PROTECT( cd );
@@ -826,7 +830,7 @@ void run_exit_hooks( void )
 
 void run_child_exit_hooks( void )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	CLOBBER_PROTECT( cd );
@@ -898,7 +902,7 @@ void run_child_exit_hooks( void )
 
 int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 {
-	Device *cd;
+	Device_T *cd;
 
 
 	/* Try to find the library fitting the name */
@@ -929,7 +933,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 /* than closes the connection to the modules.                  */
 /*-------------------------------------------------------------*/
 
-void unload_device( Device *dev )
+void unload_device( Device_T *dev )
 {
 	fsc2_assert( EDL.Call_Stack == NULL );
 

@@ -257,7 +257,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long type;
@@ -267,7 +267,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to set the layout */
 
-			Func_ptr = func_get( "layout", &acc );
+			func_ptr = func_get( "layout", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -283,7 +283,7 @@ bool exp_layout( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_LAYOUT_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -324,8 +324,8 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		long val;
 		int acc;
 		long result[ 2 ];
@@ -337,7 +337,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to create a button */
 
-			Func_ptr = func_get( "button_create", &acc );
+			func_ptr = func_get( "button_create", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -365,7 +365,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -405,7 +405,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -415,7 +415,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to delete a button */
 
-			Func_ptr = func_get( "button_delete", &acc );
+			func_ptr = func_get( "button_delete", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -431,7 +431,7 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_BDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -473,8 +473,8 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		long val;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long ID;
@@ -485,7 +485,7 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to get a button state */
 
-			Func_ptr = func_get( "button_state", &acc );
+			func_ptr = func_get( "button_state", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -506,7 +506,7 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -551,8 +551,8 @@ long *exp_bchanged( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long ID;
@@ -564,7 +564,7 @@ long *exp_bchanged( char *buffer, ptrdiff_t len )
 			/* Get variable with address of function to determine a button
 			   state change */
 
-			Func_ptr = func_get( "button_changed", &acc );
+			func_ptr = func_get( "button_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -580,7 +580,7 @@ long *exp_bchanged( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -625,8 +625,8 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		long result[ 2 ];
 		char *pos;
@@ -639,7 +639,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to create a slider */
 
-			Func_ptr = func_get( "slider_create", &acc );
+			func_ptr = func_get( "slider_create", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -669,7 +669,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -708,7 +708,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -718,7 +718,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to delete a slider */
 
-			Func_ptr = func_get( "slider_delete", &acc );
+			func_ptr = func_get( "slider_delete", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -734,7 +734,7 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_SDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -776,8 +776,8 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		long val;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		double res[ 2 ];
@@ -788,7 +788,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to set/get slider value */
 
-			Func_ptr = func_get( "slider_value", &acc );
+			func_ptr = func_get( "slider_value", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -816,7 +816,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			res[ 0 ] = 1.0;
 			res[ 1 ] = ret->val.dval;
 			vars_pop( ret );
@@ -861,8 +861,8 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long res[ 2 ];
@@ -874,7 +874,7 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
 			/* Get variable with address of function to determine state
 			   changes */
 
-			Func_ptr = func_get( "slider_changed", &acc );
+			func_ptr = func_get( "slider_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -890,7 +890,7 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			res[ 0 ] = 1;
 			res[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -935,8 +935,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		long result[ 2 ];
 		char *pos;
@@ -947,7 +947,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to create an input object */
 
-			Func_ptr = func_get( "input_create", &acc );
+			func_ptr = func_get( "input_create", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1003,7 +1003,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1042,7 +1042,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -1052,7 +1052,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to delete an input object */
 
-			Func_ptr = func_get( "input_delete", &acc );
+			func_ptr = func_get( "input_delete", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1068,7 +1068,7 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_IDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -1087,11 +1087,11 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
 /* arguments and results of the input_value() function          */
 /*--------------------------------------------------------------*/
 
-INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
+Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 {
 	if ( Internals.I_am == CHILD )
 	{
-		INPUT_RES *input_res;
+		Input_Res_T *input_res;
 
 
 		if ( ! writer( C_ISTATE, len, buffer ) )
@@ -1110,11 +1110,11 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		long type;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
-		INPUT_RES input_res;
+		Input_Res_T input_res;
 		long ID;
 
 
@@ -1122,7 +1122,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to set/get slider value */
 
-			Func_ptr = func_get( "input_value", &acc );
+			func_ptr = func_get( "input_value", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1158,7 +1158,7 @@ INPUT_RES *exp_istate( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			if ( ret->type == INT_VAR )
 			{
 				input_res.res = 0;
@@ -1211,8 +1211,8 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long res[ 2 ];
@@ -1223,7 +1223,7 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to change state */
 
-			Func_ptr = func_get( "input_changed", &acc );
+			func_ptr = func_get( "input_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1239,7 +1239,7 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			res[ 0 ] = 0;
 			res[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1284,8 +1284,8 @@ long *exp_mcreate( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		long result[ 2 ];
 		char *pos;
@@ -1297,7 +1297,7 @@ long *exp_mcreate( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to create an input object */
 
-			Func_ptr = func_get( "menu_create", &acc );
+			func_ptr = func_get( "menu_create", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1317,7 +1317,7 @@ long *exp_mcreate( char *buffer, ptrdiff_t len )
 				pos += strlen( pos ) + 1;
 			}
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1354,7 +1354,7 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -1364,7 +1364,7 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to delete a menu */
 
-			Func_ptr = func_get( "menu_delete", &acc );
+			func_ptr = func_get( "menu_delete", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1380,7 +1380,7 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_MDELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -1420,8 +1420,8 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		long val;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long ID;
@@ -1432,7 +1432,7 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 		{
 			/* Get function for dealing with menu state */
 
-			Func_ptr = func_get( "menu_choice", &acc );
+			func_ptr = func_get( "menu_choice", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1453,7 +1453,7 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1496,8 +1496,8 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long ID;
@@ -1508,7 +1508,7 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 		{
 			/* Get function for dealing with menu state */
 
-			Func_ptr = func_get( "menu_changed", &acc );
+			func_ptr = func_get( "menu_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1524,7 +1524,7 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1567,8 +1567,8 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
-		Var *ret = NULL;
+		Var_T *func_ptr;
+		Var_T *ret = NULL;
 		int acc;
 		char *pos;
 		long var_count;
@@ -1580,7 +1580,7 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
 		{
 			/* Get function for dealing with menu state */
 
-			Func_ptr = func_get( "toolbox_changed", &acc );
+			func_ptr = func_get( "toolbox_changed", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1602,7 +1602,7 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			ret = func_call( Func_ptr );
+			ret = func_call( func_ptr );
 			result[ 0 ] = 1;
 			result[ 1 ] = ret->val.lval;
 			vars_pop( ret );
@@ -1645,7 +1645,7 @@ long *exp_tbwait( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		double duration;
@@ -1657,7 +1657,7 @@ long *exp_tbwait( char *buffer, ptrdiff_t len )
 		{
 			/* Get function for waiting for toolbox state change */
 
-			Func_ptr = func_get( "toolbox_wait", &acc );
+			func_ptr = func_get( "toolbox_wait", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1683,7 +1683,7 @@ long *exp_tbwait( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 
 			EDL.Fname = old_Fname;
 			EDL.Lc = old_Lc;
@@ -1727,7 +1727,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -1737,7 +1737,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to delete an input object */
 
-			Func_ptr = func_get( "object_delete", &acc );
+			func_ptr = func_get( "object_delete", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1753,7 +1753,7 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_ODELETE_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -1788,7 +1788,7 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -1798,7 +1798,7 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to delete an input object */
 
-			Func_ptr = func_get( "object_change_label", &acc );
+			func_ptr = func_get( "object_change_label", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1817,7 +1817,7 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_CLABEL_REPLY, 1L );
 			TRY_SUCCESS;
 		}
@@ -1852,7 +1852,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 	{
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
-		Var *Func_ptr;
+		Var_T *func_ptr;
 		int acc;
 		char *pos;
 		long ID;
@@ -1863,7 +1863,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 		{
 			/* Get function to enable or disable an input object */
 
-			Func_ptr = func_get( "object_enable", &acc );
+			func_ptr = func_get( "object_enable", &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1883,7 +1883,7 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 
 			/* Call the function */
 
-			vars_pop( func_call( Func_ptr ) );
+			vars_pop( func_call( func_ptr ) );
 			writer( C_XABLE_REPLY, 1L );
 			TRY_SUCCESS;
 		}

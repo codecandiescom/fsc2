@@ -30,12 +30,12 @@ static void rs690_basic_pulse_check( void );
 static void rs690_create_shape_pulses( void );
 static void rs690_create_twt_pulses( void );
 static void rs690_basic_functions_check( void );
-static void rs690_create_phase_matrix( FUNCTION *f );
+static void rs690_create_phase_matrix( Function_T *f );
 static void rs690_setup_channels( void );
 static void rs690_pulse_start_setup( void );
-static void rs690_channel_start_check( CHANNEL *ch );
-static void rs690_pulse_init_check( FUNCTION *f );
-static void rs690_defense_shape_init_check( FUNCTION *shape );
+static void rs690_channel_start_check( Channel_T *ch );
+static void rs690_pulse_init_check( Function_T *f );
+static void rs690_defense_shape_init_check( Function_T *shape );
 
 
 /*-----------------------------------------------------------------*/
@@ -46,7 +46,7 @@ static void rs690_defense_shape_init_check( FUNCTION *shape );
 
 void rs690_init_setup( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -107,7 +107,7 @@ void rs690_init_setup( void )
 
 static void rs690_init_print( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -138,17 +138,17 @@ static void rs690_init_print( FILE *fp )
 
 static void rs690_basic_pulse_check( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 
 
-	if ( rs690_Pulses == NULL )
+	if ( rs690.pulses == NULL )
 	{
 		print( SEVERE, "No pulses have been defined.\n" );
 		return;
 	}
 
-	for ( p = rs690_Pulses; p != NULL; p = p->next )
+	for ( p = rs690.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -195,23 +195,23 @@ static void rs690_basic_pulse_check( void )
 
 static void rs690_create_shape_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+	Function_T *f;
+	Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
 
 
-	if ( ! rs690.auto_shape_pulses || rs690_Pulses == NULL )
+	if ( ! rs690.auto_shape_pulses || rs690.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further shape
 	   pulses) */
 
-	for ( cp = rs690_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = rs690.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = rs690_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = rs690.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 
@@ -292,7 +292,7 @@ static void rs690_create_shape_pulses( void )
 	   reported as overlaps of the pulses they belong to, which is the only
 	   reason this could happen). */
 
-	for ( p1 = rs690_Pulses; p1 != old_end->next; p1 = p1->next )
+	for ( p1 = rs690.pulses; p1 != old_end->next; p1 = p1->next )
 	{
 		if ( ! p1->is_active ||
 			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
@@ -360,23 +360,23 @@ static void rs690_create_shape_pulses( void )
 
 static void rs690_create_twt_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np = NULL, *cp, *rp, *old_end;
+	Function_T *f;
+	Pulse_T *np = NULL, *cp, *rp, *old_end;
 
 
-	if ( ! rs690.auto_twt_pulses || rs690_Pulses == NULL )
+	if ( ! rs690.auto_twt_pulses || rs690.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT
 	   pulses) */
 
-	for ( cp = rs690_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = rs690.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = rs690_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = rs690.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 
@@ -456,8 +456,8 @@ static void rs690_create_twt_pulses( void )
 
 static void rs690_basic_functions_check( void )
 {
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 	int i;
 	Ticks delay;
 
@@ -493,7 +493,7 @@ static void rs690_basic_functions_check( void )
 		f->num_pulses = 0;
 		f->pc_len = 1;
 
-		for ( p = rs690_Pulses; p != NULL; p = p->next )
+		for ( p = rs690.pulses; p != NULL; p = p->next )
 		{
 			if ( p->function != f )
 				continue;
@@ -551,12 +551,12 @@ static void rs690_basic_functions_check( void )
 /* and don't overlap.                                                    */
 /*-----------------------------------------------------------------------*/
 
-static void rs690_create_phase_matrix( FUNCTION *f )
+static void rs690_create_phase_matrix( Function_T *f )
 {
-	PULSE *p;
-	PULSE **pm_elem;
+	Pulse_T *p;
+	Pulse_T **pm_elem;
 	int phase_type;
-	CHANNEL *ch;
+	Channel_T *ch;
 	int i, j, k, l, m;
 
 
@@ -689,9 +689,9 @@ static void rs690_create_phase_matrix( FUNCTION *f )
 
 static void rs690_setup_channels( void )
 {
-	CHANNEL *ch;
-	FUNCTION *f;
-	PULSE **pm_elem;
+	Channel_T *ch;
+	Function_T *f;
+	Pulse_T **pm_elem;
 	int i, j, k, l, m;
 	int field = 0,
 		bit = 0;
@@ -765,7 +765,7 @@ static void rs690_setup_channels( void )
 		   field corresponding to the channel to default to on */
 
 		if ( f-> is_inverted )
-			rs690_default_fields[ ch->field ] |= 1 << ch->bit;
+			rs690.default_fields[ ch->field ] |= 1 << ch->bit;
 	}
 }
 
@@ -775,12 +775,12 @@ static void rs690_setup_channels( void )
 
 static void rs690_pulse_start_setup( void )
 {
-	FUNCTION *f;
-	CHANNEL *ch;
-	PULSE **pm_elem;
-	PULSE *p;
+	Function_T *f;
+	Channel_T *ch;
+	Pulse_T **pm_elem;
+	Pulse_T *p;
 	int i, j, m;
-	PULSE_PARAMS *pp, *opp;
+	Pulse_Params_T *pp, *opp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -871,7 +871,7 @@ static void rs690_pulse_start_setup( void )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void rs690_channel_start_check( CHANNEL *ch )
+static void rs690_channel_start_check( Channel_T *ch )
 {
 	qsort( ch->pulse_params, ch->num_active_pulses,
 		   sizeof *ch->pulse_params, rs690_pulse_compare );
@@ -885,9 +885,9 @@ static void rs690_channel_start_check( CHANNEL *ch )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void rs690_pulse_init_check( FUNCTION *f )
+static void rs690_pulse_init_check( Function_T *f )
 {
-	PULSE *p1, *p2;
+	Pulse_T *p1, *p2;
 	int i, j;
 
 
@@ -957,10 +957,10 @@ static void rs690_pulse_init_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-static void rs690_defense_shape_init_check( FUNCTION *shape )
+static void rs690_defense_shape_init_check( Function_T *shape )
 {
-	FUNCTION *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
-	PULSE *shape_p, *defense_p;
+	Function_T *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
+	Pulse_T *shape_p, *defense_p;
 	long i, j;
 
 

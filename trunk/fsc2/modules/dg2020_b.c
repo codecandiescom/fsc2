@@ -32,11 +32,7 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-bool dg2020_is_needed = UNSET;
-DG2020 dg2020;
-PULSE *dg2020_Pulses = NULL;
-bool dg2020_IN_SETUP = UNSET;
-PHASE_SETUP dg2020_phs[ 2 ];
+DG2020_T dg2020;
 
 
 /*---------------------------------------------------------------------------
@@ -47,16 +43,16 @@ PHASE_SETUP dg2020_phs[ 2 ];
 int dg2020_b_init_hook( void )
 {
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
-	pulser_struct.name     = DEVICE_NAME;
-	pulser_struct.has_pods = SET;
+	Pulser_Struct.name     = DEVICE_NAME;
+	Pulser_Struct.has_pods = SET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
 #ifndef DG2020_B_GPIB_DEBUG
-	need_GPIB = SET;
+	Need_GPIB = SET;
 #endif
 
 	/* We have to set up the global structure for the pulser, especially the
@@ -65,50 +61,52 @@ int dg2020_b_init_hook( void )
 	dg2020.needs_update = UNSET;
 	dg2020.is_running   = SET;
 	dg2020.keep_all     = UNSET;
+	dg2020.pulses       = NULL;
+	dg2020.in_setup     = UNSET;
 
-	pulser_struct.set_timebase = dg2020_store_timebase;
+	Pulser_Struct.set_timebase = dg2020_store_timebase;
 
-	pulser_struct.assign_function = dg2020_assign_function;
-	pulser_struct.assign_channel_to_function =
+	Pulser_Struct.assign_function = dg2020_assign_function;
+	Pulser_Struct.assign_channel_to_function =
 											 dg2020_assign_channel_to_function;
-	pulser_struct.invert_function = dg2020_invert_function;
-	pulser_struct.set_function_delay = dg2020_set_function_delay;
-	pulser_struct.set_function_high_level = dg2020_set_function_high_level;
-	pulser_struct.set_function_low_level = dg2020_set_function_low_level;
+	Pulser_Struct.invert_function = dg2020_invert_function;
+	Pulser_Struct.set_function_delay = dg2020_set_function_delay;
+	Pulser_Struct.set_function_high_level = dg2020_set_function_high_level;
+	Pulser_Struct.set_function_low_level = dg2020_set_function_low_level;
 
-	pulser_struct.set_trigger_mode = dg2020_set_trigger_mode;
-	pulser_struct.set_repeat_time = dg2020_set_repeat_time;
-	pulser_struct.set_trig_in_level = dg2020_set_trig_in_level;
-	pulser_struct.set_trig_in_slope = dg2020_set_trig_in_slope;
-	pulser_struct.set_trig_in_impedance = dg2020_set_trig_in_impedance;
-	pulser_struct.set_max_seq_len = dg2020_set_max_seq_len;
+	Pulser_Struct.set_trigger_mode = dg2020_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = dg2020_set_repeat_time;
+	Pulser_Struct.set_trig_in_level = dg2020_set_trig_in_level;
+	Pulser_Struct.set_trig_in_slope = dg2020_set_trig_in_slope;
+	Pulser_Struct.set_trig_in_impedance = dg2020_set_trig_in_impedance;
+	Pulser_Struct.set_max_seq_len = dg2020_set_max_seq_len;
 
-	pulser_struct.set_phase_reference = dg2020_set_phase_reference;
+	Pulser_Struct.set_phase_reference = dg2020_set_phase_reference;
 
-	pulser_struct.new_pulse = dg2020_new_pulse;
-	pulser_struct.set_pulse_function = dg2020_set_pulse_function;
-	pulser_struct.set_pulse_position = dg2020_set_pulse_position;
-	pulser_struct.set_pulse_length = dg2020_set_pulse_length;
-	pulser_struct.set_pulse_position_change = dg2020_set_pulse_position_change;
-	pulser_struct.set_pulse_length_change = dg2020_set_pulse_length_change;
-	pulser_struct.set_pulse_phase_cycle = dg2020_set_pulse_phase_cycle;
-	pulser_struct.set_grace_period = NULL;
+	Pulser_Struct.new_pulse = dg2020_new_pulse;
+	Pulser_Struct.set_pulse_function = dg2020_set_pulse_function;
+	Pulser_Struct.set_pulse_position = dg2020_set_pulse_position;
+	Pulser_Struct.set_pulse_length = dg2020_set_pulse_length;
+	Pulser_Struct.set_pulse_position_change = dg2020_set_pulse_position_change;
+	Pulser_Struct.set_pulse_length_change = dg2020_set_pulse_length_change;
+	Pulser_Struct.set_pulse_phase_cycle = dg2020_set_pulse_phase_cycle;
+	Pulser_Struct.set_grace_period = NULL;
 
-	pulser_struct.get_pulse_function = dg2020_get_pulse_function;
-	pulser_struct.get_pulse_position = dg2020_get_pulse_position;
-	pulser_struct.get_pulse_length = dg2020_get_pulse_length;
-	pulser_struct.get_pulse_position_change = dg2020_get_pulse_position_change;
-	pulser_struct.get_pulse_length_change = dg2020_get_pulse_length_change;
-	pulser_struct.get_pulse_phase_cycle = dg2020_get_pulse_phase_cycle;
+	Pulser_Struct.get_pulse_function = dg2020_get_pulse_function;
+	Pulser_Struct.get_pulse_position = dg2020_get_pulse_position;
+	Pulser_Struct.get_pulse_length = dg2020_get_pulse_length;
+	Pulser_Struct.get_pulse_position_change = dg2020_get_pulse_position_change;
+	Pulser_Struct.get_pulse_length_change = dg2020_get_pulse_length_change;
+	Pulser_Struct.get_pulse_phase_cycle = dg2020_get_pulse_phase_cycle;
 
-	pulser_struct.phase_setup_prep = dg2020_phase_setup_prep;
-	pulser_struct.phase_setup = dg2020_phase_setup;
+	Pulser_Struct.phase_setup_prep = dg2020_phase_setup_prep;
+	Pulser_Struct.phase_setup = dg2020_phase_setup;
 
-	pulser_struct.set_phase_switch_delay = NULL;
+	Pulser_Struct.set_phase_switch_delay = NULL;
 
-	pulser_struct.keep_all_pulses = dg2020_keep_all;
+	Pulser_Struct.keep_all_pulses = dg2020_keep_all;
 
-	pulser_struct.ch_to_num = dg2020_ch_to_num;
+	Pulser_Struct.ch_to_num = dg2020_ch_to_num;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
@@ -197,17 +195,17 @@ int dg2020_b_init_hook( void )
 
 	for ( i = 0; i < 2; i++ )
 	{
-		dg2020_phs[ i ].is_defined = UNSET;
-		dg2020_phs[ i ].function = NULL;
+		dg2020.phs[ i ].is_defined = UNSET;
+		dg2020.phs[ i ].function = NULL;
 		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
 		{
-			dg2020_phs[ i ].is_set[ j ] = UNSET;
-			dg2020_phs[ i ].is_needed[ j ] = UNSET;
-			dg2020_phs[ i ].pod[ j ] = NULL;
+			dg2020.phs[ i ].is_set[ j ] = UNSET;
+			dg2020.phs[ i ].is_needed[ j ] = UNSET;
+			dg2020.phs[ i ].pod[ j ] = NULL;
 		}
 	}
 
-	dg2020_is_needed = SET;
+	dg2020.is_needed = SET;
 
 	return 1;
 }
@@ -228,14 +226,14 @@ int dg2020_b_test_hook( void )
 			dg2020_show_pulses( );
 		if ( dg2020.do_dump_pulses )
 			dg2020_dump_pulses( );
-		dg2020_IN_SETUP = SET;
+		dg2020.in_setup = SET;
 		dg2020_init_setup( );
-		dg2020_IN_SETUP = UNSET;
+		dg2020.in_setup = UNSET;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		dg2020_IN_SETUP = UNSET;
+		dg2020.in_setup = UNSET;
 		if ( dg2020.dump_file )
 		{
 			fclose( dg2020.dump_file );
@@ -254,17 +252,17 @@ int dg2020_b_test_hook( void )
 	/* We need some somewhat different functions (or disable some of them) for
 	   setting of pulse properties */
 
-	pulser_struct.set_pulse_function = NULL;
-	pulser_struct.set_pulse_phase_cycle = NULL;
+	Pulser_Struct.set_pulse_function = NULL;
+	Pulser_Struct.set_pulse_phase_cycle = NULL;
 
-	pulser_struct.set_pulse_position = dg2020_change_pulse_position;
-	pulser_struct.set_pulse_length = dg2020_change_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.set_pulse_position = dg2020_change_pulse_position;
+	Pulser_Struct.set_pulse_length = dg2020_change_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 		dg2020_change_pulse_position_change;
-	pulser_struct.set_pulse_length_change = dg2020_change_pulse_length_change;
+	Pulser_Struct.set_pulse_length_change = dg2020_change_pulse_length_change;
 
-	if ( dg2020_Pulses == NULL )
-		dg2020_is_needed = UNSET;
+	if ( dg2020.pulses == NULL )
+		dg2020.is_needed = UNSET;
 
 	return 1;
 }
@@ -277,14 +275,14 @@ int dg2020_b_end_of_test_hook( void )
 {
 	char *min = NULL;
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	CLOBBER_PROTECT( min );
 	CLOBBER_PROTECT( i );
 	CLOBBER_PROTECT( f );
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 	{
 		dg2020.max_seq_len = dg2020_get_max_seq_len( );
 		dg2020_calc_padding( );
@@ -507,13 +505,13 @@ int dg2020_b_exp_hook( void )
 
 	/* Now we have to tell the pulser about all the pulses */
 
-	dg2020_IN_SETUP = SET;
+	dg2020.in_setup = SET;
 	if ( ! dg2020_reorganize_pulses( SET ) )
 	{
-		dg2020_IN_SETUP = UNSET;
+		dg2020.in_setup = UNSET;
 		THROW( EXCEPTION );
 	}
-	dg2020_IN_SETUP = UNSET;
+	dg2020.in_setup = UNSET;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( dg2020.function[ i ].is_used )
@@ -552,14 +550,14 @@ int dg2020_b_end_of_exp_hook( void )
 
 void dg2020_b_exit_hook( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 	int i;
 
 
 	/* Free all memory allocated within the module */
 
-	p = dg2020_Pulses;
+	p = dg2020.pulses;
 	while ( p != NULL )
 		p = dg2020_delete_pulse( p, UNSET );
 
@@ -582,7 +580,7 @@ void dg2020_b_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( UNUSED_ARG Var *v )
+Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -591,7 +589,7 @@ Var *pulser_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_shape_pulses( Var *v )
+Var_T *pulser_automatic_shape_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -710,7 +708,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_twt_pulses( Var *v )
+Var_T *pulser_automatic_twt_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -829,7 +827,7 @@ Var *pulser_automatic_twt_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_show_pulses = SET;
@@ -841,7 +839,7 @@ Var *pulser_show_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		dg2020.do_dump_pulses = SET;
@@ -853,7 +851,7 @@ Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_shape_to_defense_minimum_distance( Var *v )
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 {
 	double s2d;
 
@@ -891,7 +889,7 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_defense_to_shape_minimum_distance( Var *v )
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
 {
 	double d2s;
 
@@ -935,7 +933,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 /* next call of pulser_update().                                     */
 /*-------------------------------------------------------------------*/
 
-Var *pulser_minimum_twt_pulse_distance( Var *v )
+Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
 {
 	double mtpd;
 
@@ -973,7 +971,7 @@ Var *pulser_minimum_twt_pulse_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_keep_all_pulses( UNUSED_ARG Var_T *v )
 {
 	dg2020_keep_all( );
 	return vars_push( INT_VAR, 1L );
@@ -983,7 +981,7 @@ Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_maximum_pattern_length( Var *v )
+Var_T *pulser_maximum_pattern_length( Var_T *v )
 {
 	double pl;
 
@@ -997,7 +995,7 @@ Var *pulser_maximum_pattern_length( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_state( Var *v )
+Var_T *pulser_state( Var_T *v )
 {
 	bool state;
 
@@ -1018,7 +1016,7 @@ Var *pulser_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_channel_state( UNUSED_ARG Var *v )
+Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 {
 	print( SEVERE, "Individual pod channels can't be switched on or off with "
 		   "this device.\n" );
@@ -1029,12 +1027,12 @@ Var *pulser_channel_state( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( UNUSED_ARG Var *v )
+Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
 	bool state = OK;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
@@ -1059,12 +1057,12 @@ Var *pulser_update( UNUSED_ARG Var *v )
 /*            function pulser_update() !                                */
 /*----------------------------------------------------------------------*/
 
-Var *pulser_shift( Var *v )
+Var_T *pulser_shift( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
@@ -1074,7 +1072,7 @@ Var *pulser_shift( Var *v )
 	{
 		long ret = 1;
 
-		for ( p = dg2020_Pulses; p != NULL; p = p->next )
+		for ( p = dg2020.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				ret &= pulser_shift( vars_push( INT_VAR, p->num ) )->val.lval;
 		return vars_push( INT_VAR, ret );
@@ -1155,12 +1153,12 @@ Var *pulser_shift( Var *v )
 /*            function pulser_update() !                                   */
 /*-------------------------------------------------------------------------*/
 
-Var *pulser_increment( Var *v )
+Var_T *pulser_increment( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
@@ -1170,7 +1168,7 @@ Var *pulser_increment( Var *v )
 	{
 		long ret = 1;
 
-		for ( p = dg2020_Pulses; p != NULL; p = p->next )
+		for ( p = dg2020.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				ret &=
 					pulser_increment( vars_push( INT_VAR, p->num ) )->val.lval;
@@ -1249,14 +1247,14 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_next_phase( Var *v )
+Var_T *pulser_next_phase( Var_T *v )
 {
 	int j;
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
@@ -1264,17 +1262,17 @@ Var *pulser_next_phase( Var *v )
 		long res = 1;
 
 
-		if ( dg2020_phs[ 0 ].function == NULL &&
-			 dg2020_phs[ 1 ].function == NULL &&
+		if ( dg2020.phs[ 0 ].function == NULL &&
+			 dg2020.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( dg2020_phs[ 0 ].function != NULL )
+		if ( dg2020.phs[ 0 ].function != NULL )
 			res &= pulser_next_phase( vars_push( INT_VAR, 1L ) )->val.lval;
-		if ( dg2020_phs[ 1 ].function != NULL )
+		if ( dg2020.phs[ 1 ].function != NULL )
 			res &= pulser_next_phase( vars_push( INT_VAR, 2L ) )->val.lval;
 		return vars_push( INT_VAR, res );
 	}
@@ -1289,14 +1287,14 @@ Var *pulser_next_phase( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! dg2020_phs[ phase_number - 1 ].is_defined )
+		if ( ! dg2020.phs[ phase_number - 1 ].is_defined )
 		{
 			print( FATAL, "PHASE_SETUP_%ld has not been defined.\n",
 				   phase_number );
 			THROW( EXCEPTION );
 		}
 
-		f = dg2020_phs[ phase_number - 1 ].function;
+		f = dg2020.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1327,14 +1325,14 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( UNUSED_ARG Var *v )
+Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	vars_pop( pulser_pulse_reset( NULL ) );
-	if ( dg2020_phs[ 0 ].function != NULL ||
-		 dg2020_phs[ 1 ].function != NULL )
+	if ( dg2020.phs[ 0 ].function != NULL ||
+		 dg2020.phs[ 1 ].function != NULL )
 		vars_pop( pulser_phase_reset( NULL ) );
 
 	return pulser_update( NULL );
@@ -1344,29 +1342,29 @@ Var *pulser_reset( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_phase_reset( Var *v )
+Var_T *pulser_phase_reset( Var_T *v )
 {
 	int j;
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
-		if ( dg2020_phs[ 0 ].function == NULL &&
-			 dg2020_phs[ 1 ].function == NULL &&
+		if ( dg2020.phs[ 0 ].function == NULL &&
+			 dg2020.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( dg2020_phs[ 0 ].function != NULL )
+		if ( dg2020.phs[ 0 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1L ) ) );
-		if ( dg2020_phs[ 1 ].function != NULL )
+		if ( dg2020.phs[ 1 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2L ) ) );
 		return vars_push( INT_VAR, 1L );
 	}
@@ -1382,7 +1380,7 @@ Var *pulser_phase_reset( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		f = dg2020_phs[ phase_number - 1 ].function;
+		f = dg2020.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1411,12 +1409,12 @@ Var *pulser_phase_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_pulse_reset( Var *v )
+Var_T *pulser_pulse_reset( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
@@ -1424,11 +1422,11 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( dg2020_phs[ 0 ].function != NULL ||
-			 dg2020_phs[ 1 ].function != NULL )
+		if ( dg2020.phs[ 0 ].function != NULL ||
+			 dg2020.phs[ 1 ].function != NULL )
 			vars_pop( pulser_phase_reset( NULL ) );
 
-		for ( p = dg2020_Pulses; p != NULL; p = p->next )
+		for ( p = dg2020.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 
@@ -1513,7 +1511,7 @@ Var *pulser_pulse_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_lock_keyboard( Var *v )
+Var_T *pulser_lock_keyboard( Var_T *v )
 {
 	bool lock;
 
@@ -1536,7 +1534,7 @@ Var *pulser_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_command( Var *v )
+Var_T *pulser_command( Var_T *v )
 {
 	char *cmd = NULL;
 

@@ -39,11 +39,11 @@ int kontron4060_init_hook( void );
 int kontron4060_exp_hook( void );
 int kontron4060_end_of_exp_hook( void );
 
-Var *voltmeter_name( Var *v );
-Var *voltmeter_get_data( Var *v );
-Var *voltmeter_ac_measurement( Var *v );
-Var *voltmeter_dc_measurement( Var *v );
-Var *voltmeter_command( Var *v );
+Var_T *voltmeter_name( Var_T *v );
+Var_T *voltmeter_get_data( Var_T *v );
+Var_T *voltmeter_ac_measurement( Var_T *v );
+Var_T *voltmeter_dc_measurement( Var_T *v );
+Var_T *voltmeter_command( Var_T *v );
 
 
 /* Locally used functions */
@@ -73,7 +73,7 @@ int kontron4060_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset several variables in the structure describing the device */
 
@@ -125,7 +125,7 @@ int kontron4060_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *voltmeter_name( UNUSED_ARG Var *v )
+Var_T *voltmeter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -135,7 +135,7 @@ Var *voltmeter_name( UNUSED_ARG Var *v )
 /* Switches the voltmeter to AC measurement mode */
 /*--------------------------------------------------*/
 
-Var *voltmeter_ac_measurement( UNUSED_ARG Var *v )
+Var_T *voltmeter_ac_measurement( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -150,7 +150,7 @@ Var *voltmeter_ac_measurement( UNUSED_ARG Var *v )
 /* Switches the voltmeter to DC measurement mode */
 /*-----------------------------------------------*/
 
-Var *voltmeter_dc_measurement( UNUSED_ARG Var *v )
+Var_T *voltmeter_dc_measurement( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -165,7 +165,7 @@ Var *voltmeter_dc_measurement( UNUSED_ARG Var *v )
 /* Returns the current voltage from the voltmeter */
 /*------------------------------------------------*/
 
-Var *voltmeter_get_data( UNUSED_ARG Var *v )
+Var_T *voltmeter_get_data( UNUSED_ARG Var_T *v )
 {
 	char reply[ 100 ];
 	long length = 100;
@@ -188,7 +188,7 @@ Var *voltmeter_get_data( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *voltmeter_command( Var *v )
+Var_T *voltmeter_command( Var_T *v )
 {
 	char *cmd = NULL;
 

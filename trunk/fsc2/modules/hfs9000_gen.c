@@ -58,8 +58,8 @@ bool hfs9000_store_timebase( double timebase )
 
 bool hfs9000_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = hfs9000.function + function;
-	CHANNEL *c = hfs9000.channel + channel;
+	Function_T *f = hfs9000.function + function;
+	Channel_T *c = hfs9000.channel + channel;
 
 
 	if ( channel < HFS9000_TRIG_OUT || channel > MAX_CHANNEL )
@@ -200,7 +200,7 @@ bool hfs9000_set_function_delay( int function, double delay )
 
 bool hfs9000_set_function_high_level( int function, double voltage )
 {
-	FUNCTION *f = hfs9000.function + function;
+	Function_T *f = hfs9000.function + function;
 	long v;
 
 
@@ -248,7 +248,7 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 
 bool hfs9000_set_function_low_level( int function, double voltage )
 {
-	FUNCTION *f = hfs9000.function + function;
+	Function_T *f = hfs9000.function + function;
 	long v;
 
 

@@ -85,7 +85,7 @@ bool rb_pulser_update_pulses( bool flag )
 void rb_pulser_function_init( void )
 {
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -114,11 +114,11 @@ void rb_pulser_function_init( void )
 
 void rb_pulser_init_delay( void )
 {
-	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_MW;
-	PULSE *p;
+	Function_T *f = rb_pulser.function + PULSER_CHANNEL_MW;
+	Pulse_T *p;
 	double pos, shift;
 	Ticks delay;
-	RULBUS_DELAY_CARD *card = delay_card + INIT_DELAY;
+	Rulbus_Delay_Card_T *card = rb_pulser.delay_card + INIT_DELAY;
 
 
 	card->was_active = card->is_active;
@@ -139,8 +139,8 @@ void rb_pulser_init_delay( void )
 	p = f->pulses[ 0 ];
 
 	pos =   p->pos + p->function->delay * rb_pulser.timebase
-		  - delay_card[ INIT_DELAY ].intr_delay
-		  - delay_card[ MW_DELAY_0 ].intr_delay;
+		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 
 	if ( pos < - PRECISION * rb_pulser.timebase )
 	{
@@ -175,9 +175,9 @@ void rb_pulser_init_delay( void )
 
 void rb_pulser_delay_card_setup( void )
 {
-	RULBUS_DELAY_CARD *card;
-	FUNCTION *f;
-	PULSE *p;
+	Rulbus_Delay_Card_T *card;
+	Function_T *f;
+	Pulse_T *p;
 	volatile double start, delta, shift;
 	Ticks dT;
 	int i, j;
@@ -201,8 +201,9 @@ void rb_pulser_delay_card_setup( void )
 		/* Loop over all active pulses of the function (which are already
 		   ordered by start position */
 
-		start =   delay_card[ INIT_DELAY ].delay * rb_pulser.timebase
-			    + delay_card[ INIT_DELAY ].intr_delay;
+		start =   rb_pulser.delay_card[ INIT_DELAY ].delay
+				* rb_pulser.timebase
+			    + rb_pulser.delay_card[ INIT_DELAY ].intr_delay;
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -301,7 +302,7 @@ void rb_pulser_delay_card_setup( void )
 
 void rb_pulser_full_reset( void )
 {
-	PULSE *p = rb_pulser_Pulses;
+	Pulse_T *p = rb_pulser.pulses;
 
 
 	while ( p != NULL )
@@ -328,8 +329,8 @@ void rb_pulser_full_reset( void )
 void rb_pulser_seq_length_check( void )
 {
 	int i;
-	FUNCTION *f;
-	RULBUS_DELAY_CARD *card;
+	Function_T *f;
+	Rulbus_Delay_Card_T *card;
 	double max_seq_len = 0.0, seq_len;
 
 
@@ -355,8 +356,9 @@ void rb_pulser_seq_length_check( void )
 		max_seq_len = d_max( max_seq_len, seq_len );
 	}
 
-	max_seq_len +=   delay_card[ INIT_DELAY ].delay * rb_pulser.timebase
-				   + delay_card[ INIT_DELAY ].intr_delay;
+	max_seq_len +=   rb_pulser.delay_card[ INIT_DELAY ].delay
+				   * rb_pulser.timebase
+				   + rb_pulser.delay_card[ INIT_DELAY ].intr_delay;
 
 	if ( max_seq_len > rb_pulser.rep_time )
 	{
@@ -375,7 +377,7 @@ void rb_pulser_seq_length_check( void )
 
 static void rb_pulser_commit( bool flag )
 {
-	RULBUS_DELAY_CARD *card;
+	Rulbus_Delay_Card_T *card;
 	int i;
 
 
@@ -388,7 +390,8 @@ static void rb_pulser_commit( bool flag )
 		return;
 	}
 
-	for ( card = delay_card + INIT_DELAY, i = INIT_DELAY; i < NUM_DELAY_CARDS;
+	for ( card = rb_pulser.delay_card + INIT_DELAY, i = INIT_DELAY;
+		  i < NUM_DELAY_CARDS;
 		  card++, i++ )
 	{
 /*
@@ -415,9 +418,9 @@ static void rb_pulser_commit( bool flag )
 
 static void rb_pulser_rf_pulse( void )
 {
-	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_RF;
-	PULSE *p;
-	Var *Func_ptr;
+	Function_T *f = rb_pulser.function + PULSER_CHANNEL_RF;
+	Pulse_T *p;
+	Var_T *func_ptr;
 	int acc;
 
 
@@ -428,7 +431,7 @@ static void rb_pulser_rf_pulse( void )
 
 	if ( p->is_active )
 	{
-		if ( ( Func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) )
+		if ( ( func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) )
 																	  == NULL )
 		{
 			print( FATAL, "Function for setting synthesizer pulse length is "
@@ -437,7 +440,7 @@ static void rb_pulser_rf_pulse( void )
 		}
 
 		vars_push( FLOAT_VAR, f->last_pulse_len );
-		vars_pop( func_call( Func_ptr ) );
+		vars_pop( func_call( func_ptr ) );
 	}
 
 	/* Switch synthesizer output on or off if the pulse just became active or
@@ -446,7 +449,7 @@ static void rb_pulser_rf_pulse( void )
 	if ( ( p->was_active && ! p->is_active ) ||
 		 ( ! p->was_active && p->is_active ) )
 	{
-		if ( ( Func_ptr = func_get( rb_pulser.synth_state, &acc ) ) == NULL )
+		if ( ( func_ptr = func_get( rb_pulser.synth_state, &acc ) ) == NULL )
 		{
 			print( FATAL, "Function for setting synthesizer output state is "
 				   "not available.\n" );
@@ -458,7 +461,7 @@ static void rb_pulser_rf_pulse( void )
 		else
 			vars_push( STR_VAR, "ON" );
 
-		vars_pop( func_call( Func_ptr ) );
+		vars_pop( func_call( func_ptr ) );
 
 		p->was_active = p->is_active;
 	}

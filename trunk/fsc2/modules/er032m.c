@@ -107,14 +107,14 @@ int er032m_exp_hook( void );
 int er032m_end_of_exp_hook( void );
 
 
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
-Var *magnet_command( Var *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_command( Var_T *v );
 
 
 
@@ -183,7 +183,7 @@ int er032m_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed. */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Initialize some variables in the magnets structure. */
 
@@ -297,7 +297,7 @@ int er032m_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( UNUSED_ARG Var *v )
+Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -308,7 +308,7 @@ Var *magnet_name( UNUSED_ARG Var *v )
 /* field step size during the PREPARATIONS section. */
 /*--------------------------------------------------*/
 
-Var *magnet_setup( Var *v )
+Var_T *magnet_setup( Var_T *v )
 {
 	double start_field;
 	double field_step;
@@ -384,7 +384,7 @@ Var *magnet_setup( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_up( UNUSED_ARG Var *v )
+Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
 	int steps;
 	int new_swa;
@@ -463,7 +463,7 @@ Var *sweep_up( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_down( UNUSED_ARG Var *v )
+Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
 	int steps;
 	int new_swa;
@@ -538,7 +538,7 @@ Var *sweep_down( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *reset_field( UNUSED_ARG Var *v )
+Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
 	if ( ! magnet.is_init )
 	{
@@ -556,7 +556,7 @@ Var *reset_field( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *get_field( UNUSED_ARG Var *v )
+Var_T *get_field( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, er032m_get_field( ) );
 }
@@ -565,7 +565,7 @@ Var *get_field( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *set_field( Var *v )
+Var_T *set_field( Var_T *v )
 {
 	double field;
 
@@ -592,7 +592,7 @@ Var *set_field( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *magnet_command( Var *v )
+Var_T *magnet_command( Var_T *v )
 {
 	char *cmd = NULL;
 

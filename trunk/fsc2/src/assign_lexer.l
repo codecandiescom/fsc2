@@ -348,7 +348,7 @@ WS          [\n=: ]+
             }
 
 {CHN}       {
-				Var *v = convert_to_channel_number( assigntext );
+				Var_T *v = convert_to_channel_number( assigntext );
 				assignlval.lval = p_ch2num( v->val.lval );
 				vars_pop( v );
 				return INT_TOKEN;

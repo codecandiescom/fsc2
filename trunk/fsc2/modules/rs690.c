@@ -32,17 +32,10 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-RS690 rs690;
-bool rs690_is_needed = UNSET;
-PULSE *rs690_Pulses = NULL;
-bool rs690_IN_SETUP = UNSET;
-PHASE_SETUP rs690_phs[ 2 ];
-double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
-													{ 4.0e-9, 8.0e-9, 1.6e-8 };
-unsigned short rs690_default_fields[ 4 * NUM_HSM_CARDS ];
+RS690_T rs690;
 
-
-static bool in_reset = UNSET;
+static bool Is_needed = UNSET;
+static bool In_reset = UNSET;
 
 
 /*-------------------------------------------------------------------------*/
@@ -54,20 +47,20 @@ static bool in_reset = UNSET;
 int rs690_init_hook( void )
 {
 	int i, j;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 
 
 	fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 );
 	fsc2_assert( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
 
-	pulser_struct.name     = DEVICE_NAME;
-	pulser_struct.has_pods = UNSET;
+	Pulser_Struct.name     = DEVICE_NAME;
+	Pulser_Struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
 #ifndef RS690_GPIB_DEBUG
-	need_GPIB = SET;
+	Need_GPIB = SET;
 #endif
 
 	/* We have to set up the global structure for the pulser, especially the
@@ -76,43 +69,43 @@ int rs690_init_hook( void )
 	rs690.needs_update = SET;
 	rs690.keep_all     = UNSET;
 
-	pulser_struct.set_timebase = rs690_store_timebase;
-	pulser_struct.set_timebase_level = rs690_store_timebase_level;
-	pulser_struct.assign_channel_to_function =
+	Pulser_Struct.set_timebase = rs690_store_timebase;
+	Pulser_Struct.set_timebase_level = rs690_store_timebase_level;
+	Pulser_Struct.assign_channel_to_function =
 											  rs690_assign_channel_to_function;
-	pulser_struct.invert_function = rs690_invert_function;
-	pulser_struct.set_function_delay = rs690_set_function_delay;
+	Pulser_Struct.invert_function = rs690_invert_function;
+	Pulser_Struct.set_function_delay = rs690_set_function_delay;
 
-	pulser_struct.set_trigger_mode = rs690_set_trigger_mode;
-	pulser_struct.set_repeat_time = rs690_set_repeat_time;
-	pulser_struct.set_trig_in_slope = rs690_set_trig_in_slope;
-	pulser_struct.set_trig_in_level = rs690_set_trig_in_level_type;
+	Pulser_Struct.set_trigger_mode = rs690_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = rs690_set_repeat_time;
+	Pulser_Struct.set_trig_in_slope = rs690_set_trig_in_slope;
+	Pulser_Struct.set_trig_in_level = rs690_set_trig_in_level_type;
 
-	pulser_struct.set_phase_reference = rs690_set_phase_reference;
+	Pulser_Struct.set_phase_reference = rs690_set_phase_reference;
 
-	pulser_struct.new_pulse = rs690_new_pulse;
-	pulser_struct.set_pulse_function = rs690_set_pulse_function;
-	pulser_struct.set_pulse_position = rs690_set_pulse_position;
-	pulser_struct.set_pulse_length = rs690_set_pulse_length;
-	pulser_struct.set_pulse_position_change = rs690_set_pulse_position_change;
-	pulser_struct.set_pulse_length_change = rs690_set_pulse_length_change;
-	pulser_struct.set_pulse_phase_cycle = rs690_set_pulse_phase_cycle;
+	Pulser_Struct.new_pulse = rs690_new_pulse;
+	Pulser_Struct.set_pulse_function = rs690_set_pulse_function;
+	Pulser_Struct.set_pulse_position = rs690_set_pulse_position;
+	Pulser_Struct.set_pulse_length = rs690_set_pulse_length;
+	Pulser_Struct.set_pulse_position_change = rs690_set_pulse_position_change;
+	Pulser_Struct.set_pulse_length_change = rs690_set_pulse_length_change;
+	Pulser_Struct.set_pulse_phase_cycle = rs690_set_pulse_phase_cycle;
 
-	pulser_struct.get_pulse_function = rs690_get_pulse_function;
-	pulser_struct.get_pulse_position = rs690_get_pulse_position;
-	pulser_struct.get_pulse_length = rs690_get_pulse_length;
-	pulser_struct.get_pulse_position_change = rs690_get_pulse_position_change;
-	pulser_struct.get_pulse_length_change = rs690_get_pulse_length_change;
-	pulser_struct.get_pulse_phase_cycle = rs690_get_pulse_phase_cycle;
+	Pulser_Struct.get_pulse_function = rs690_get_pulse_function;
+	Pulser_Struct.get_pulse_position = rs690_get_pulse_position;
+	Pulser_Struct.get_pulse_length = rs690_get_pulse_length;
+	Pulser_Struct.get_pulse_position_change = rs690_get_pulse_position_change;
+	Pulser_Struct.get_pulse_length_change = rs690_get_pulse_length_change;
+	Pulser_Struct.get_pulse_phase_cycle = rs690_get_pulse_phase_cycle;
 
-	pulser_struct.phase_setup_prep = rs690_phase_setup_prep;
-	pulser_struct.phase_setup = rs690_phase_setup;
+	Pulser_Struct.phase_setup_prep = rs690_phase_setup_prep;
+	Pulser_Struct.phase_setup = rs690_phase_setup;
 
-	pulser_struct.set_max_seq_len = rs690_set_max_seq_len;
+	Pulser_Struct.set_max_seq_len = rs690_set_max_seq_len;
 
-	pulser_struct.keep_all_pulses = rs690_keep_all;
+	Pulser_Struct.keep_all_pulses = rs690_keep_all;
 
-	pulser_struct.ch_to_num = rs690_ch_to_num;
+	Pulser_Struct.ch_to_num = rs690_ch_to_num;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
@@ -123,6 +116,7 @@ int rs690_init_hook( void )
 	rs690.neg_delay = 0;
 	rs690.is_running = SET;
 	rs690.has_been_running = SET;
+	rs690.pulses = NULL;
 	rs690.is_timebase = UNSET;
 	rs690.timebase_mode = EXTERNAL;
 	rs690.timebase_level = TTL_LEVEL;
@@ -194,9 +188,9 @@ int rs690_init_hook( void )
 	}
 
 	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
-		rs690_default_fields[ i ] = 0;
+		rs690.default_fields[ i ] = 0;
 
-	rs690_is_needed = SET;
+	Is_needed = SET;
 
 	return 1;
 }
@@ -210,7 +204,7 @@ int rs690_test_hook( void )
 	/* Check consistency of pulse settings and do everything to setup the
 	   pulser for the test run */
 
-	if ( rs690_Pulses == NULL && ! rs690.is_repeat_time )
+	if ( rs690.pulses == NULL && ! rs690.is_repeat_time )
 	{
 		rs690.is_repeat_time = SET;
 		rs690.repeat_time = 1 << rs690.timebase_type;
@@ -246,16 +240,16 @@ int rs690_test_hook( void )
 	/* We need some somewhat different functions (or disable some) for
 	   setting the pulse properties */
 
-	pulser_struct.set_pulse_function = NULL;
+	Pulser_Struct.set_pulse_function = NULL;
 
-	pulser_struct.set_pulse_position = rs690_change_pulse_position;
-	pulser_struct.set_pulse_length = rs690_change_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.set_pulse_position = rs690_change_pulse_position;
+	Pulser_Struct.set_pulse_length = rs690_change_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 											rs690_change_pulse_position_change;
-	pulser_struct.set_pulse_length_change = rs690_change_pulse_length_change;
+	Pulser_Struct.set_pulse_length_change = rs690_change_pulse_length_change;
 
-	if ( rs690_Pulses == NULL )
-		rs690_is_needed = UNSET;
+	if ( rs690.pulses == NULL )
+		Is_needed = UNSET;
 
 	return 1;
 }
@@ -267,7 +261,7 @@ int rs690_test_hook( void )
 int rs690_end_of_test_hook( void )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 	char *min = NULL;
 
 
@@ -464,8 +458,8 @@ int rs690_end_of_exp_hook( void )
 
 void rs690_exit_hook( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 	int i, j;
 
 
@@ -481,15 +475,15 @@ void rs690_exit_hook( void )
 		rs690.show_file = NULL;
 	}
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return;
 
 	/* Free all memory that may have been allocated for the module */
 
-	for ( p = rs690_Pulses; p != NULL;  )
+	for ( p = rs690.pulses; p != NULL;  )
 		p= rs690_delete_pulse( p, UNSET );
 
-	rs690_Pulses = NULL;
+	rs690.pulses = NULL;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 		rs690.channel[ i ].pulse_params =
@@ -521,7 +515,7 @@ void rs690_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( UNUSED_ARG Var *v )
+Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -530,7 +524,7 @@ Var *pulser_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_shape_pulses( Var *v )
+Var_T *pulser_automatic_shape_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -649,7 +643,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_twt_pulses( Var *v )
+Var_T *pulser_automatic_twt_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -768,7 +762,7 @@ Var *pulser_automatic_twt_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_show_pulses = SET;
@@ -780,7 +774,7 @@ Var *pulser_show_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_dump_pulses = SET;
@@ -792,7 +786,7 @@ Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_shape_to_defense_minimum_distance( Var *v )
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 {
 	double s2d;
 
@@ -823,7 +817,7 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_defense_to_shape_minimum_distance( Var *v )
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
 {
 	double d2s;
 
@@ -859,7 +853,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 /* next call of pulser_update().                                     */
 /*-------------------------------------------------------------------*/
 
-Var *pulser_minimum_twt_pulse_distance( Var *v )
+Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
 {
 	double mtpd;
 
@@ -898,7 +892,7 @@ Var *pulser_minimum_twt_pulse_distance( Var *v )
 /* Switches the output of the pulser on or off */
 /*---------------------------------------------*/
 
-Var *pulser_state( Var *v )
+Var_T *pulser_state( Var_T *v )
 {
 	bool state;
 
@@ -919,7 +913,7 @@ Var *pulser_state( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *pulser_channel_state( UNUSED_ARG Var *v )
+Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 {
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
@@ -930,9 +924,9 @@ Var *pulser_channel_state( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( UNUSED_ARG Var *v )
+Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
@@ -952,19 +946,19 @@ Var *pulser_update( UNUSED_ARG Var *v )
 /*            function pulser_update() !                                */
 /*----------------------------------------------------------------------*/
 
-Var *pulser_shift( Var *v )
+Var_T *pulser_shift( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for ( p = rs690_Pulses; p != NULL; p = p->next )
+		for ( p = rs690.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -1046,19 +1040,19 @@ Var *pulser_shift( Var *v )
 /*            function pulser_update() !                                   */
 /*-------------------------------------------------------------------------*/
 
-Var *pulser_increment( Var *v )
+Var_T *pulser_increment( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for ( p = rs690_Pulses; p != NULL; p = p->next )
+		for ( p = rs690.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -1137,19 +1131,19 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( UNUSED_ARG Var *v )
+Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
-	in_reset = SET;
+	In_reset = SET;
 
 	vars_pop( pulser_pulse_reset( NULL ) );
-	if ( rs690_phs[ 0 ].function != NULL ||
-		 rs690_phs[ 1 ].function != NULL )
+	if ( rs690.phs[ 0 ].function != NULL ||
+		 rs690.phs[ 1 ].function != NULL )
 		vars_pop( pulser_phase_reset( NULL ) );
 
-	in_reset = UNSET;
+	In_reset = UNSET;
 
 	return pulser_update( NULL );
 }
@@ -1158,12 +1152,12 @@ Var *pulser_reset( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_pulse_reset( Var *v )
+Var_T *pulser_pulse_reset( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
@@ -1173,7 +1167,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		for ( p = rs690_Pulses; p != NULL; p = p->next )
+		for ( p = rs690.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 	}
@@ -1256,28 +1250,28 @@ Var *pulser_pulse_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_next_phase( Var *v )
+Var_T *pulser_next_phase( Var_T *v )
 {
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
-		if ( rs690_phs[ 0 ].function == NULL &&
-			 rs690_phs[ 1 ].function == NULL &&
+		if ( rs690.phs[ 0 ].function == NULL &&
+			 rs690.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( rs690_phs[ 0 ].function != NULL )
+		if ( rs690.phs[ 0 ].function != NULL )
 			vars_pop( pulser_next_phase( vars_push( INT_VAR, 1L ) ) );
-		if ( rs690_phs[ 1 ].function != NULL )
+		if ( rs690.phs[ 1 ].function != NULL )
 			vars_pop( pulser_next_phase( vars_push( INT_VAR, 2L ) ) );
 		return vars_push( INT_VAR, 1L );
 	}
@@ -1292,14 +1286,14 @@ Var *pulser_next_phase( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! rs690_phs[ phase_number - 1 ].is_defined )
+		if ( ! rs690.phs[ phase_number - 1 ].is_defined )
 		{
 			print( FATAL, "PHASE_SETUP_%ld has not been defined.\n",
 				   phase_number );
 			THROW( EXCEPTION );
 		}
 
-		f = rs690_phs[ phase_number - 1 ].function;
+		f = rs690.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1322,28 +1316,28 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_phase_reset( Var *v )
+Var_T *pulser_phase_reset( Var_T *v )
 {
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! rs690_is_needed )
+	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
-		if ( rs690_phs[ 0 ].function == NULL &&
-			 rs690_phs[ 1 ].function == NULL &&
+		if ( rs690.phs[ 0 ].function == NULL &&
+			 rs690.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( rs690_phs[ 0 ].function != NULL )
+		if ( rs690.phs[ 0 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1L ) ) );
-		if ( rs690_phs[ 1 ].function != NULL )
+		if ( rs690.phs[ 1 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2L ) ) );
 		return vars_push( INT_VAR, 1L );
 	}
@@ -1358,7 +1352,7 @@ Var *pulser_phase_reset( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		f = rs690_phs[ phase_number - 1 ].function;
+		f = rs690.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1372,7 +1366,7 @@ Var *pulser_phase_reset( Var *v )
 	}
 
 	rs690.needs_update = SET;
-	if ( ! in_reset )
+	if ( ! In_reset )
 		pulser_update( NULL );
 	return vars_push( INT_VAR, 1L );
 }
@@ -1381,7 +1375,7 @@ Var *pulser_phase_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_lock_keyboard( Var *v )
+Var_T *pulser_lock_keyboard( Var_T *v )
 {
 	bool lock;
 
@@ -1404,7 +1398,7 @@ Var *pulser_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_command( Var *v )
+Var_T *pulser_command( Var_T *v )
 {
 	char *cmd = NULL;
 
@@ -1438,7 +1432,7 @@ Var *pulser_command( Var *v )
 /* largest representable number.                  */
 /*------------------------------------------------*/
 
-Var *pulser_maximum_pattern_length( UNUSED_ARG Var *v )
+Var_T *pulser_maximum_pattern_length( UNUSED_ARG Var_T *v )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	if ( ! rs690.is_timebase )

@@ -86,10 +86,10 @@ static void rb_pulser_init_print( FILE *fp )
 
 static void rb_pulser_basic_pulse_check( void )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	for ( p = rb_pulser_Pulses; p != NULL; p = p->next )
+	for ( p = rb_pulser.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -118,9 +118,9 @@ static void rb_pulser_basic_pulse_check( void )
 
 static void rb_pulser_basic_functions_check( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
-	PULSE *cp;
+	Pulse_T *cp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -132,7 +132,7 @@ static void rb_pulser_basic_functions_check( void )
 
 		/* Assemble a list of all pulses assigned to the function */
 
-		for ( f->num_pulses = 0, cp = rb_pulser_Pulses;
+		for ( f->num_pulses = 0, cp = rb_pulser.pulses;
 			  cp != NULL; cp = cp->next )
 		{
 			if ( cp->function != f )
@@ -163,10 +163,10 @@ static void rb_pulser_basic_functions_check( void )
 
 static void rb_pulser_rf_synth_init( void )
 {
-	FUNCTION *f = rb_pulser.function + PULSER_CHANNEL_RF;
+	Function_T *f = rb_pulser.function + PULSER_CHANNEL_RF;
 	int dev_num;
 	char *func;
-	Var *Func_ptr;
+	Var_T *func_ptr;
 	int acc;
 
 
@@ -189,7 +189,7 @@ static void rb_pulser_rf_synth_init( void )
 		func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
 	
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
 		print( FATAL, "Function for switching pulse modulation on or off is "
@@ -206,7 +206,7 @@ static void rb_pulser_rf_synth_init( void )
 		func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
 	
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		rb_pulser.synth_pulse_state =
 								  CHAR_P T_free( rb_pulser.synth_pulse_state );
@@ -224,7 +224,7 @@ static void rb_pulser_rf_synth_init( void )
 		func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
 	
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		rb_pulser.synth_pulse_state =
 								  CHAR_P T_free( rb_pulser.synth_pulse_state );
@@ -244,7 +244,7 @@ static void rb_pulser_rf_synth_init( void )
 		func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
 	
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		rb_pulser.synth_pulse_state =
 								  CHAR_P T_free( rb_pulser.synth_pulse_state );
@@ -266,7 +266,7 @@ static void rb_pulser_rf_synth_init( void )
 		func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
 	
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		rb_pulser.synth_pulse_state =
 								  CHAR_P T_free( rb_pulser.synth_pulse_state );

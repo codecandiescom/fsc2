@@ -235,7 +235,7 @@ double rs_sml01_get_att( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-unsigned int rs_sml01_get_mod_param( Var **v, double *dres, int *ires )
+unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
 			   *source[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };

@@ -31,9 +31,9 @@
 /* Define the following for test purposes only where no real communication
    with the monochromator is supposed to happen */
 
-/*
+
 #define SPEX_CD2A_TEST
-*/
+
 
 /* Defines for the parity used by the device */
 
@@ -170,19 +170,19 @@ int spex_cd2a_exp_hook( void );
 void spex_cd2a_child_exit_hook( void );
 int spex_cd2a_end_of_exp_hook( void );
 
-Var *monochromator_name( Var *v );
-Var *monochromator_scan_setup( Var *v );
-Var *monochromator_wavelength( Var *v );
-Var *monochromator_wavenumber( Var *v );
-Var *monochromator_offset( Var *v );
-Var *monochromator_start_scan( Var *v );
-Var *monochromator_scan_step( Var *v );
-Var *monochromator_laser_line( Var *v );
-Var *monochromator_groove_density( Var *v );
-Var *monochromator_shutter_limits( Var *v );
-Var *monochromator_calibrate( Var *v );
-Var *monochromator_wavelength_axis( Var * v );
-Var *monochromator_wavenumber_axis( Var * v );
+Var_T *monochromator_name( Var_T *v );
+Var_T *monochromator_scan_setup( Var_T *v );
+Var_T *monochromator_wavelength( Var_T *v );
+Var_T *monochromator_wavenumber( Var_T *v );
+Var_T *monochromator_offset( Var_T *v );
+Var_T *monochromator_start_scan( Var_T *v );
+Var_T *monochromator_scan_step( Var_T *v );
+Var_T *monochromator_laser_line( Var_T *v );
+Var_T *monochromator_groove_density( Var_T *v );
+Var_T *monochromator_shutter_limits( Var_T *v );
+Var_T *monochromator_calibrate( Var_T *v );
+Var_T *monochromator_wavelength_axis( Var_T * v );
+Var_T *monochromator_wavenumber_axis( Var_T * v );
 
 
 /* Functions from spex_cd2a_ll.c */

@@ -77,9 +77,9 @@ int bnm12_test_hook( void );
 int bnm12_exp_hook( void );
 void bnm12_exit_hook( void );
 
-Var *gaussmeter_name( Var *v );
-Var *gaussmeter_field( Var *v );
-Var *gaussmeter_resolution( Var *v );
+Var_T *gaussmeter_name( Var_T *v );
+Var_T *gaussmeter_field( Var_T *v );
+Var_T *gaussmeter_resolution( Var_T *v );
 
 
 /* Local functions */
@@ -105,9 +105,9 @@ static void bnm12_check_field( void );
 
 int bnm12_init_hook( void )
 {
-	Var *Func_ptr;
+	Var_T *Func_ptr;
 	int acc;
-	Var *v;
+	Var_T *v;
 	int dev_num;
 	char *func;
 
@@ -247,7 +247,7 @@ void bnm12_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_name( UNUSED_ARG Var *v )
+Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -257,7 +257,7 @@ Var *gaussmeter_name( UNUSED_ARG Var *v )
 /* Measure a new field value and return it to the caller */
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_field( UNUSED_ARG Var *v )
+Var_T *gaussmeter_field( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, bnm12_get_field( ) );
 }
@@ -269,7 +269,7 @@ Var *gaussmeter_field( UNUSED_ARG Var *v )
 /* trust what the user tells us...                                */
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_resolution( Var *v )
+Var_T *gaussmeter_resolution( Var_T *v )
 {
 	double res;
 	int i;
@@ -337,9 +337,9 @@ Var *gaussmeter_resolution( Var *v )
 
 static double bnm12_get_field( void )
 {
-	Var *Func_ptr;
+	Var_T *Func_ptr;
 	int acc;
-	Var *v;
+	Var_T *v;
 	unsigned long res;
 	unsigned long raw_field;
 	int i;
@@ -392,9 +392,9 @@ static double bnm12_get_field( void )
 
 static void bnm12_check_field( void )
 {
-	Var *Func_ptr;
+	Var_T *Func_ptr;
 	int acc;
-	Var *v;
+	Var_T *v;
 	unsigned long res = ~ 0,
 				  old_res;
 

@@ -30,12 +30,12 @@ static void ep385_basic_pulse_check( void );
 static void ep385_create_shape_pulses( void );
 static void ep385_create_twt_pulses( void );
 static void ep385_basic_functions_check( void );
-static void ep385_create_phase_matrix( FUNCTION *f );
+static void ep385_create_phase_matrix( Function_T *f );
 static void ep385_setup_channels( void );
 static void ep385_pulse_start_setup( void );
-static void ep385_channel_start_check( CHANNEL *ch );
-static void ep385_pulse_init_check( FUNCTION *f );
-static void ep385_defense_shape_init_check( FUNCTION *shape );
+static void ep385_channel_start_check( Channel_T *ch );
+static void ep385_pulse_init_check( Function_T *f );
+static void ep385_defense_shape_init_check( Function_T *shape );
 
 
 /*-----------------------------------------------------------------*/
@@ -46,7 +46,7 @@ static void ep385_defense_shape_init_check( FUNCTION *shape );
 
 void ep385_init_setup( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -120,7 +120,7 @@ void ep385_init_setup( void )
 
 static void ep385_init_print( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -150,11 +150,11 @@ static void ep385_init_print( FILE *fp )
 
 static void ep385_basic_pulse_check( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 
 
-	for ( p = ep385_Pulses; p != NULL; p = p->next )
+	for ( p = ep385.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -201,23 +201,23 @@ static void ep385_basic_pulse_check( void )
 
 static void ep385_create_shape_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+	Function_T *f;
+	Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
 
 
-	if ( ! ep385.auto_shape_pulses || ep385_Pulses == NULL )
+	if ( ! ep385.auto_shape_pulses || ep385.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further shape
 	   pulses) */
 
-	for ( cp = ep385_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = ep385.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = ep385_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = ep385.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 
@@ -298,7 +298,7 @@ static void ep385_create_shape_pulses( void )
 	   reported as overlaps of the pulses they belong to, which is the only
 	   reason this could happen). */
 
-	for ( p1 = ep385_Pulses; p1 != old_end->next; p1 = p1->next )
+	for ( p1 = ep385.pulses; p1 != old_end->next; p1 = p1->next )
 	{
 		if ( ! p1->is_active ||
 			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
@@ -365,23 +365,23 @@ static void ep385_create_shape_pulses( void )
 
 static void ep385_create_twt_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np = NULL, *cp, *rp, *old_end;
+	Function_T *f;
+	Pulse_T *np = NULL, *cp, *rp, *old_end;
 
 
-	if ( ! ep385.auto_twt_pulses || ep385_Pulses == NULL )
+	if ( ! ep385.auto_twt_pulses || ep385.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT
 	   pulses) */
 
-	for ( cp = ep385_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = ep385.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = ep385_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = ep385.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 
@@ -461,8 +461,8 @@ static void ep385_create_twt_pulses( void )
 
 static void ep385_basic_functions_check( void )
 {
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 	int i;
 	Ticks delay;
 
@@ -496,7 +496,7 @@ static void ep385_basic_functions_check( void )
 		f->num_pulses = 0;
 		f->pc_len = 1;
 
-		for ( p = ep385_Pulses; p != NULL; p = p->next )
+		for ( p = ep385.pulses; p != NULL; p = p->next )
 		{
 			if ( p->function != f )
 				continue;
@@ -554,12 +554,12 @@ static void ep385_basic_functions_check( void )
 /* and don't overlap.                                                    */
 /*-----------------------------------------------------------------------*/
 
-static void ep385_create_phase_matrix( FUNCTION *f )
+static void ep385_create_phase_matrix( Function_T *f )
 {
-	PULSE *p;
-	PULSE **pm_elem;
+	Pulse_T *p;
+	Pulse_T **pm_elem;
 	int phase_type;
-	CHANNEL *ch;
+	Channel_T *ch;
 	int i, j, k, l, m;
 
 
@@ -691,9 +691,9 @@ static void ep385_create_phase_matrix( FUNCTION *f )
 
 static void ep385_setup_channels( void )
 {
-	CHANNEL *ch;
-	FUNCTION *f;
-	PULSE **pm_elem;
+	Channel_T *ch;
+	Function_T *f;
+	Pulse_T **pm_elem;
 	int i, j, k, l, m;
 
 
@@ -755,12 +755,12 @@ static void ep385_setup_channels( void )
 
 static void ep385_pulse_start_setup( void )
 {
-	FUNCTION *f;
-	CHANNEL *ch;
-	PULSE **pm_elem;
-	PULSE *p;
+	Function_T *f;
+	Channel_T *ch;
+	Pulse_T **pm_elem;
+	Pulse_T *p;
 	int i, j, m;
-	PULSE_PARAMS *pp, *opp;
+	Pulse_Params_T *pp, *opp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -874,10 +874,10 @@ static void ep385_pulse_start_setup( void )
 		 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
 	{
 		Ticks add;
-		CHANNEL *cs =
+		Channel_T *cs =
 					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
-				*cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
-		PULSE_PARAMS *shape_p, *defense_p;
+				  *cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		Pulse_Params_T *shape_p, *defense_p;
 
 		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
 		{
@@ -930,7 +930,7 @@ static void ep385_pulse_start_setup( void )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void ep385_channel_start_check( CHANNEL *ch )
+static void ep385_channel_start_check( Channel_T *ch )
 {
 	/* Check that there aren't more pulses per channel than the pulser can
 	   deal with */
@@ -955,9 +955,9 @@ static void ep385_channel_start_check( CHANNEL *ch )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void ep385_pulse_init_check( FUNCTION *f )
+static void ep385_pulse_init_check( Function_T *f )
 {
-	PULSE *p1, *p2;
+	Pulse_T *p1, *p2;
 	int i, j;
 
 
@@ -1027,10 +1027,10 @@ static void ep385_pulse_init_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-static void ep385_defense_shape_init_check( FUNCTION *shape )
+static void ep385_defense_shape_init_check( Function_T *shape )
 {
-	FUNCTION *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
-	PULSE *shape_p, *defense_p;
+	Function_T *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
+	Pulse_T *shape_p, *defense_p;
 	long i, j;
 
 

@@ -45,44 +45,43 @@
 #define UCHAR_PP              ( unsigned char ** )
 #define SSIZE_T_P             ( ssize_t * )
 #define BOOL_P                ( bool * )
-#define DEVICE_NAME_P         ( Device_Name * )
-#define FUNC_P                ( Func * )
-#define PULSER_STRUCT_P       ( Pulser_Struct * )
-#define P_LIST_P              ( P_List * )
-#define VAR_P                 ( Var * )
-#define VAR_PP                ( Var ** )
-#define CALL_STACK_P          ( CALL_STACK * )
-#define DPOINT_P              ( DPoint * )
-#define FILE_LIST_P           ( FILE_LIST * )
-#define INPUT_RES_P           ( INPUT_RES * )
-#define TOOLBOX_P             ( TOOLBOX * )
-#define IOBJECT_P             ( IOBJECT * )
-#define PHASE_SETUP_P         ( PHASE_SETUP * )
-#define PHASE_SEQUENCE_P      ( Phase_Sequence * )
-#define DEVICE_P              ( Device * )
-#define PRG_TOKEN_P           ( Prg_Token * )
-#define CB_STACK_P            ( CB_Stack * )
-#define SCALED_POINT_P        ( Scaled_Point * )
+#define DEVICE_NAME_P         ( Device_Name_T * )
+#define FUNC_P                ( Func_T * )
+#define PULSER_STRUCT_P       ( Pulser_Struct_T * )
+#define P_LIST_P              ( P_List_T * )
+#define VAR_P                 ( Var_T * )
+#define VAR_PP                ( Var_T ** )
+#define CALL_STACK_P          ( Call_Stack_T * )
+#define DPOINT_P              ( dpoint_T * )
+#define FILE_LIST_P           ( File_List_T * )
+#define INPUT_RES_P           ( Input_Res * )
+#define TOOLBOX_P             ( Toolbox_T * )
+#define IOBJECT_P             ( Iobject_T* )
+#define PHASE_SETUP_P         ( Phase_Setup_T * )
+#define PHS_SEQ_P             ( Phs_Seq_T * )
+#define DEVICE_P              ( Device_T * )
+#define PRG_TOKEN_P           ( Prg_Token_T * )
+#define CB_STACK_P            ( CB_Stack_T * )
+#define SCALED_POINT_P        ( Scaled_Point_T * )
 #define XPOINT_P              ( XPoint * )
-#define CURVE_1D_P            ( Curve_1d * )
-#define CURVE_2D_P            ( Curve_2d * )
-#define MARKER_1D_P           ( Marker_1D * )
-#define MARKER_2D_P           ( Marker_2D * )
-#define GRAPHICS_P            ( Graphics * )
-#define GRAPHICS_1D_P         ( Graphics_1d * )
-#define GRAPHICS_2D_P         ( Graphics_2d * )
-#define G_HASH_ENTRY_P        ( G_Hash_Entry * )
-#define PULSE_P               ( PULSE * )
-#define PULSE_PP              ( PULSE ** )
-#define PULSE_PPP             ( PULSE *** )
-#define DG2020_STORE_P        ( DG2020_STORE * )
-#define CHANNEL_PP            ( CHANNEL ** )
-#define WINDOW_P              ( WINDOW * )
-#define PULSE_PARAMS_P        ( PULSE_PARAMS * )
-#define ATT_TABLE_ENTRY_P     ( ATT_TABLE_ENTRY * )
-#define FS_P                  ( FS * )
+#define CURVE_1D_P            ( Curve_1d_T * )
+#define CURVE_2D_P            ( Curve_2d_T * )
+#define MARKER_1D_P           ( Marker_1d_T * )
+#define MARKER_2D_P           ( Marker_2d_T * )
+#define GRAPHICS_P            ( Graphics_T * )
+#define GRAPHICS_1D_P         ( Graphics_1d_T * )
+#define GRAPHICS_2D_P         ( Graphics_2d_T * )
+#define G_HASH_ENTRY_P        ( G_Hash_Entry_T * )
+#define PULSE_P               ( Pulse_T * )
+#define PULSE_PP              ( Pulse_T ** )
+#define PULSE_PPP             ( Pulse_T *** )
+#define DG2020_STORE_P        ( dg2020_store_T * )
+#define CHANNEL_PP            ( Channel_T ** )
+#define WINDOW_P              ( Window_T * )
+#define PULSE_PARAMS_P        ( Pulse_Params_T * )
+#define ATT_TABLE_ENTRY_P     ( Att_Table_Entry_T * )
+#define FS_P                  ( FS_T * )
 #define UNS16_P               ( uns16 * )
-#define HJS_ATT_TABLE_ENTRY_P ( HJS_ATT_TABLE_ENTRY * )
 
 #else
 
@@ -110,7 +109,7 @@
 #define TOOLBOX_P
 #define IOBJECT_P
 #define PHASE_SETUP_P
-#define PHASE_SEQUENCE_P
+#define PHS_SEQ_P
 #define DEVICE_P
 #define PRG_TOKEN_P
 #define CB_STACK_P
@@ -134,7 +133,6 @@
 #define ATT_TABLE_ENTRY_P
 #define FS_P
 #define UNS16_P
-#define HJS_ATT_TABLE_ENTRY_P
 
 #endif
 

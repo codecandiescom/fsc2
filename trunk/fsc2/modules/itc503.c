@@ -60,12 +60,12 @@ int itc503_exp_hook( void );
 int itc503_end_of_exp_hook( void );
 
 
-Var *temp_contr_name( Var *v );
-Var *temp_contr_temperature( Var *v );
-Var *temp_contr_sample_channel( Var *v );
-Var *temp_contr_sensor_unit( Var *v );
-Var *temp_contr_lock_keyboard( Var *v );
-Var *temp_contr_command( Var *v );
+Var_T *temp_contr_name( Var_T *v );
+Var_T *temp_contr_temperature( Var_T *v );
+Var_T *temp_contr_sample_channel( Var_T *v );
+Var_T *temp_contr_sensor_unit( Var_T *v );
+Var_T *temp_contr_lock_keyboard( Var_T *v );
+Var_T *temp_contr_command( Var_T *v );
 
 
 static bool itc503_init( const char *name );
@@ -96,7 +96,7 @@ static struct {
 
 int itc503_init_hook( void )
 {
-	need_GPIB = SET;
+	Need_GPIB = SET;
 	itc503.device = -1;
 	itc503.lock_state = REMOTE_AND_LOCKED;
 	itc503.sample_channel = DEFAULT_SAMPLE_CHANNEL;
@@ -141,7 +141,7 @@ int itc503_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_name( UNUSED_ARG Var *v )
+Var_T *temp_contr_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -152,7 +152,7 @@ Var *temp_contr_name( UNUSED_ARG Var *v )
 /* (in the currently selected units)           */
 /*---------------------------------------------*/
 
-Var *temp_contr_temperature( UNUSED_ARG Var *v )
+Var_T *temp_contr_temperature( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR,
@@ -171,7 +171,7 @@ Var *temp_contr_temperature( UNUSED_ARG Var *v )
 /* constant that can be changed in the configuration file.             */
 /*---------------------------------------------------------------------*/
 
-Var *temp_contr_sample_channel( Var *v )
+Var_T *temp_contr_sample_channel( Var_T *v )
 {
 	long channel;
 
@@ -219,7 +219,7 @@ Var *temp_contr_sample_channel( Var *v )
 /* when reporting temperatures.                           */
 /*--------------------------------------------------------*/
 
-Var *temp_contr_sensor_unit( Var *v )
+Var_T *temp_contr_sensor_unit( Var_T *v )
 {
 	long unit = 0;
 	const char *in_units  = "KC";
@@ -268,7 +268,7 @@ Var *temp_contr_sensor_unit( Var *v )
 /* unlocked during an experiment.                      */
 /*-----------------------------------------------------*/
 
-Var *temp_contr_lock_keyboard( Var *v )
+Var_T *temp_contr_lock_keyboard( Var_T *v )
 {
 	int lock;
 
@@ -291,7 +291,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_command( Var *v )
+Var_T *temp_contr_command( Var_T *v )
 {
 	char *cmd = NULL;
 

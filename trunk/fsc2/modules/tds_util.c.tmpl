@@ -26,8 +26,8 @@
 
 
 static void tds_tmpl_window_check_1( bool *is_start, bool *is_width );
-static void tds_tmpl_window_check_2( WINDOW *w );
-static void tds_tmpl_window_check_3( WINDOW *w );
+static void tds_tmpl_window_check_2( Window_T *w );
+static void tds_tmpl_window_check_3( Window_T *w );
 
 
 /*-----------------------------------------------------------------*/
@@ -57,7 +57,7 @@ const char *tds_tmpl_ptime( double p_time )
 
 void tds_tmpl_delete_windows( TDS_TMPL *s )
 {
-	WINDOW *w;
+	Window_T *w;
 
 	while ( s->w != NULL )
 	{
@@ -73,7 +73,7 @@ void tds_tmpl_delete_windows( TDS_TMPL *s )
 
 void tds_tmpl_do_pre_exp_checks( void )
 {
-	WINDOW *w;
+	Window_T *w;
 	bool is_start, is_width;
     double width;
 
@@ -159,7 +159,7 @@ void tds_tmpl_do_pre_exp_checks( void )
 
 static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w;
+	Window_T *w;
 
 
 	*is_start = *is_width = SET;
@@ -177,7 +177,7 @@ static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-void tds_tmpl_window_checks( WINDOW *w )
+void tds_tmpl_window_checks( Window_T *w )
 {
 	tds_tmpl_window_check_2( w );
 	tds_tmpl_window_check_3( w );
@@ -197,7 +197,7 @@ void tds_tmpl_window_checks( WINDOW *w )
 /* equal - than we can use tracking cursors.                           */
 /*---------------------------------------------------------------------*/
 
-static void tds_tmpl_window_check_2( WINDOW *w )
+static void tds_tmpl_window_check_2( Window_T *w )
 {
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
@@ -286,7 +286,7 @@ static void tds_tmpl_window_check_2( WINDOW *w )
 /* and the end of the windows in units of points.              */
 /*-------------------------------------------------------------*/
 
-static void tds_tmpl_window_check_3( WINDOW *w )
+static void tds_tmpl_window_check_3( Window_T *w )
 {
     double window;
 	char *buf1, *buf2, *buf3;
@@ -641,7 +641,7 @@ long tds_tmpl_translate_channel( int dir, long channel, bool flag )
 
 void tds_tmpl_store_state( TDS_TMPL *dest, TDS_TMPL *src )
 {
-	WINDOW *w, *dw;
+	Window_T *w, *dw;
 
 
 	while ( dest->w != NULL )
@@ -689,7 +689,7 @@ void tds_tmpl_store_state( TDS_TMPL *dest, TDS_TMPL *src )
 
 void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 {
-	WINDOW *w;
+	Window_T *w;
 	double window;
 	char *buf1, *buf2, *buf3;
 	double start, width;
@@ -828,9 +828,9 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 /* all windows are equal or not.                                     */
 /*-------------------------------------------------------------------*/
 
-void tds_tmpl_set_tracking( WINDOW *w )
+void tds_tmpl_set_tracking( Window_T *w )
 {
-	WINDOW *ww;
+	Window_T *ww;
 	double window;
 
 
@@ -886,7 +886,7 @@ void tds_tmpl_set_tracking( WINDOW *w )
 /* calculation on the complete curve.                               */
 /*------------------------------------------------------------------*/
 
-void tds_tmpl_set_meas_window( WINDOW *w )
+void tds_tmpl_set_meas_window( Window_T *w )
 {
 	if ( w != NULL )
 	{
@@ -922,7 +922,7 @@ void tds_tmpl_set_meas_window( WINDOW *w )
 /* is to be fetched from the digitizer.                     */
 /*----------------------------------------------------------*/
 
-void tds_tmpl_set_curve_window( WINDOW *w )
+void tds_tmpl_set_curve_window( Window_T *w )
 {
 	if ( w != NULL )
 	{
@@ -947,7 +947,7 @@ void tds_tmpl_set_curve_window( WINDOW *w )
 /* to be set.                                                     */
 /*----------------------------------------------------------------*/
 
-void tds_tmpl_set_window( WINDOW *w )
+void tds_tmpl_set_window( Window_T *w )
 {
 	/* If all windows have the same width we only have to set the first
 	   cursor (and only if its not already at the correct position),
@@ -976,9 +976,9 @@ void tds_tmpl_set_window( WINDOW *w )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-WINDOW *tds_tmpl_get_window_by_number( long win_num )
+Window_T *tds_tmpl_get_window_by_number( long win_num )
 {
-	WINDOW *w;
+	Window_T *w;
 
 	if ( win_num >= WINDOW_START_NUMBER )
 		for ( w = tds_tmpl.w; w != NULL; w = w->next )

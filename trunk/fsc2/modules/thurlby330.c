@@ -39,14 +39,14 @@ int thurlby330_init_hook( void );
 int thurlby330_exp_hook( void );
 int thurlby330_end_of_exp_hook( void );
 
-Var *powersupply_name( Var *v );
-Var *powersupply_damping( Var *v );
-Var *powersupply_channel_state( Var *v );
-Var *powersupply_voltage( Var *v );
-Var *powersupply_voltage_limit( Var *v );
-Var *powersupply_current( Var *v );
-Var *powersupply_current_limit( Var *v );
-Var *powersupply_command( Var *v );
+Var_T *powersupply_name( Var_T *v );
+Var_T *powersupply_damping( Var_T *v );
+Var_T *powersupply_channel_state( Var_T *v );
+Var_T *powersupply_voltage( Var_T *v );
+Var_T *powersupply_voltage_limit( Var_T *v );
+Var_T *powersupply_current( Var_T *v );
+Var_T *powersupply_current_limit( Var_T *v );
+Var_T *powersupply_command( Var_T *v );
 
 
 /* Locally used functions */
@@ -61,7 +61,7 @@ static double thurlby330_get_current_limit( long channel );
 static bool thurlby330_command( const char *cmd );
 static bool thurlby330_talk( const char *cmd, char *reply, long *length );
 static void thurlby330_failure( void );
-static long thurlby330_get_channel( Var *v );
+static long thurlby330_get_channel( Var_T *v );
 
 
 #define TEST_VOLTAGE        12.12   /* in V */
@@ -89,7 +89,7 @@ int thurlby330_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset several variables in the structure describing the device */
 
@@ -138,7 +138,7 @@ int thurlby330_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *powersupply_name( UNUSED_ARG Var *v )
+Var_T *powersupply_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -148,7 +148,7 @@ Var *powersupply_name( UNUSED_ARG Var *v )
 /* Switch on/off damping of a power supply channel */
 /*-------------------------------------------------*/
 
-Var *powersupply_damping( Var *v )
+Var_T *powersupply_damping( Var_T *v )
 {   
 	long channel;
 	long status;
@@ -183,7 +183,7 @@ Var *powersupply_damping( Var *v )
 /* Switch on/off a power supply channel */
 /*--------------------------------------*/
 
-Var *powersupply_channel_state( Var *v )
+Var_T *powersupply_channel_state( Var_T *v )
 {   
 	long channel;
 	long status;
@@ -223,7 +223,7 @@ Var *powersupply_channel_state( Var *v )
 /* voltage that had been set due to the current limit).          */
 /*---------------------------------------------------------------*/
 
-Var *powersupply_voltage( Var *v )
+Var_T *powersupply_voltage( Var_T *v )
 {
 	long channel;
 	double voltage;
@@ -277,7 +277,7 @@ Var *powersupply_voltage( Var *v )
 /* module is started is 0 V.                                      */
 /*----------------------------------------------------------------*/
 
-Var *powersupply_voltage_limit( Var *v )
+Var_T *powersupply_voltage_limit( Var_T *v )
 {
 	long channel;
 	double voltage;
@@ -334,7 +334,7 @@ Var *powersupply_voltage_limit( Var *v )
 /* current that had been set due to the voltage limit).          */
 /*---------------------------------------------------------------*/
 
-Var *powersupply_current( Var *v )
+Var_T *powersupply_current( Var_T *v )
 {
 	long channel;
 	double current;
@@ -389,7 +389,7 @@ Var *powersupply_current( Var *v )
 /* module is started is 0 A.                                      */
 /*----------------------------------------------------------------*/
 
-Var *powersupply_current_limit( Var *v )
+Var_T *powersupply_current_limit( Var_T *v )
 {
 	long channel;
 	double current;
@@ -440,7 +440,7 @@ Var *powersupply_current_limit( Var *v )
 /* Function for sending a GPIB command directly to power supply */
 /*--------------------------------------------------------------*/
 
-Var *powersupply_command( Var *v )
+Var_T *powersupply_command( Var_T *v )
 {
 	char *cmd = NULL;
 
@@ -641,7 +641,7 @@ static void thurlby330_failure( void )
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-static long thurlby330_get_channel( Var *v )
+static long thurlby330_get_channel( Var_T *v )
 {
 	long channel;
 

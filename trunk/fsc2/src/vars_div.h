@@ -29,7 +29,7 @@
 #include "fsc2.h"
 
 
-Var *vars_div( Var *v1, Var *v2 );
+Var_T *vars_div( Var_T *v1, Var_T *v2 );
 
 
 #endif  /* ! VARS_DIV_HEADER */

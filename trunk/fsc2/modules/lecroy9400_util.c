@@ -74,7 +74,7 @@ const char *lecroy9400_ptime( double p_time )
 
 void lecroy9400_delete_windows( LECROY9400 *s )
 {
-	WINDOW *w;
+	Window_T *w;
 
 
 	while ( s->w != NULL )
@@ -92,7 +92,7 @@ void lecroy9400_delete_windows( LECROY9400 *s )
 void lecroy9400_do_pre_exp_checks( void )
 {
 #if 0
-	WINDOW *w;
+	Window_T *w;
 	bool is_start, is_width;
     double width;
 #endif
@@ -176,7 +176,7 @@ void lecroy9400_do_pre_exp_checks( void )
 
 static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 {
-	WINDOW *w;
+	Window_T *w;
 
 
 	*is_start = *is_width = SET;
@@ -207,7 +207,7 @@ static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
 
 static void lecroy9400_window_check_2( void )
 {
-	WINDOW *w;
+	Window_T *w;
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
 	char *buffer;
@@ -285,7 +285,7 @@ static void lecroy9400_window_check_2( void )
 
 static void lecroy9400_window_check_3( void )
 {
-	WINDOW *w;
+	Window_T *w;
     double window;
 
 
@@ -429,7 +429,7 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 
 void lecroy9400_store_state( LECROY9400 *dest, LECROY9400 *src )
 {
-	WINDOW *w;
+	Window_T *w;
 	int i;
 
 

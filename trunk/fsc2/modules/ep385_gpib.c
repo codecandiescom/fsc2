@@ -130,8 +130,8 @@ bool ep385_run( bool state )
 bool ep385_set_channels( void )
 {
 	int i, j, k;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 	char buf[ 1024 ];
 
 

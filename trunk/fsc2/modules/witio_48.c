@@ -49,10 +49,10 @@ int witio_48_end_of_exp_hook( void );
 void witio_48_exit_hook( void );
 
 
-Var *dio_name( Var *v );
-Var *dio_reserve_dio( Var *v );
-Var *dio_mode( Var *v );
-Var *dio_value( Var *v );
+Var_T *dio_name( Var_T *v );
+Var_T *dio_reserve_dio( Var_T *v );
+Var_T *dio_mode( Var_T *v );
+Var_T *dio_value( Var_T *v );
 
 
 #define NUMBER_OF_DIOS   2
@@ -197,7 +197,7 @@ void witio_48_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *dio_name( UNUSED_ARG Var *v )
+Var_T *dio_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -219,7 +219,7 @@ Var *dio_name( UNUSED_ARG Var *v )
 /* basically a NOP.                                          */
 /*------------------------------------------------------------*/
 
-Var *dio_reserve_dio( Var *v )
+Var_T *dio_reserve_dio( Var_T *v )
 {
 	long dio;
 	bool lock_state = SET;
@@ -304,7 +304,7 @@ Var *dio_reserve_dio( Var *v )
 /* pass-phrase agreed upon in the lock operation.                */
 /*---------------------------------------------------------------*/
 
-Var *dio_mode( Var *v )
+Var_T *dio_mode( Var_T *v )
 {
 	long dio;
 	long mode;
@@ -415,7 +415,7 @@ Var *dio_mode( Var *v )
 /* be the correct pass-phrase agreed upon in the lock operation.   */
 /*-----------------------------------------------------------------*/
 
-Var *dio_value( Var *v )
+Var_T *dio_value( Var_T *v )
 {
 	long dio;
 	long ch;

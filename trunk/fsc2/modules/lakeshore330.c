@@ -57,12 +57,12 @@ int lakeshore330_exp_hook( void );
 int lakeshore330_end_of_exp_hook( void );
 
 
-Var *temp_contr_name( Var *v );
-Var *temp_contr_temperature( Var *v );
-Var *temp_contr_sample_channel( Var *v );
-Var *temp_contr_sensor_unit( Var *v );
-Var *temp_contr_lock_keyboard( Var *v );
-Var *temp_contr_command( Var *v );
+Var_T *temp_contr_name( Var_T *v );
+Var_T *temp_contr_temperature( Var_T *v );
+Var_T *temp_contr_sample_channel( Var_T *v );
+Var_T *temp_contr_sensor_unit( Var_T *v );
+Var_T *temp_contr_lock_keyboard( Var_T *v );
+Var_T *temp_contr_command( Var_T *v );
 
 
 static bool lakeshore330_init( const char *name );
@@ -96,7 +96,7 @@ static struct {
 
 int lakeshore330_init_hook( void )
 {
-	need_GPIB = SET;
+	Need_GPIB = SET;
 	lakeshore330.device = -1;
 	lakeshore330.lock_state = LOCK_STATE_REMOTE_LLO;
 	lakeshore330.sample_channel = DEFAULT_SAMPLE_CHANNEL;
@@ -139,7 +139,7 @@ int lakeshore330_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_name( UNUSED_ARG Var *v )
+Var_T *temp_contr_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -149,7 +149,7 @@ Var *temp_contr_name( UNUSED_ARG Var *v )
 /* Returns temperature reading from controller */
 /*---------------------------------------------*/
 
-Var *temp_contr_temperature( UNUSED_ARG Var *v )
+Var_T *temp_contr_temperature( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 123.45 );
@@ -164,7 +164,7 @@ Var *temp_contr_temperature( UNUSED_ARG Var *v )
 /* as input arguments).                                            */
 /*-----------------------------------------------------------------*/
 
-Var *temp_contr_sample_channel( Var *v )
+Var_T *temp_contr_sample_channel( Var_T *v )
 {
 	long channel;
 
@@ -208,7 +208,7 @@ Var *temp_contr_sample_channel( Var *v )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-Var *temp_contr_sensor_unit( Var *v )
+Var_T *temp_contr_sensor_unit( Var_T *v )
 {
 	long unit = 0;
 	const char *in_units  = "KCS";
@@ -274,7 +274,7 @@ Var *temp_contr_sensor_unit( Var *v )
 /* unlocked during an experiment.                          */
 /*---------------------------------------------------------*/
 
-Var *temp_contr_lock_keyboard( Var *v )
+Var_T *temp_contr_lock_keyboard( Var_T *v )
 {
 	int lock;
 
@@ -297,7 +297,7 @@ Var *temp_contr_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *temp_contr_command( Var *v )
+Var_T *temp_contr_command( Var_T *v )
 {
 	char *cmd = NULL;
 

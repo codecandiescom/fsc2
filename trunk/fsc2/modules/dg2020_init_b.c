@@ -28,13 +28,13 @@
 static void dg2020_init_print( FILE *fp );
 static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
-static int dg2020_calc_channels_needed( FUNCTION *f );
-static void dg2020_phase_setup_check( FUNCTION *f );
+static int dg2020_calc_channels_needed( Function_T *f );
+static void dg2020_phase_setup_check( Function_T *f );
 static void dg2020_distribute_channels( void );
-static void dg2020_setup_phase_matrix( FUNCTION *f );
+static void dg2020_setup_phase_matrix( Function_T *f );
 static void dg2020_pulse_start_setup( void );
-static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f );
-static Phase_Sequence *dg2020_create_dummy_phase_seq( void );
+static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f );
+static Phs_Seq_T *dg2020_create_dummy_phase_seq( void );
 static void dg2020_create_shape_pulses( void );
 static void dg2020_create_twt_pulses( void );
 
@@ -72,7 +72,7 @@ void dg2020_init_setup( void )
 
 static void dg2020_init_print( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -109,12 +109,12 @@ static void dg2020_init_print( FILE *fp )
 
 void dg2020_basic_pulse_check( void )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i, j;
 	int cur_type;
 
 
-	for ( p = dg2020_Pulses; p != NULL; p = p->next )
+	for ( p = dg2020.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -224,9 +224,9 @@ void dg2020_basic_pulse_check( void )
 
 static void dg2020_basic_functions_check( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
-	PULSE *cp;
+	Pulse_T *cp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -259,7 +259,7 @@ static void dg2020_basic_functions_check( void )
 		f->num_pulses = 0;
 		f->num_active_pulses = 0;
 
-		for ( cp = dg2020_Pulses; cp != NULL; cp = cp->next )
+		for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
 		{
 			if ( cp->function != f )
 				continue;
@@ -314,7 +314,7 @@ static void dg2020_basic_functions_check( void )
 /* constant voltage.                                                 */
 /*-------------------------------------------------------------------*/
 
-static int dg2020_calc_channels_needed( FUNCTION *f )
+static int dg2020_calc_channels_needed( Function_T *f )
 {
 	int i, j;
 	int num_channels;
@@ -355,10 +355,10 @@ static int dg2020_calc_channels_needed( FUNCTION *f )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static void dg2020_phase_setup_check( FUNCTION *f )
+static void dg2020_phase_setup_check( Function_T *f )
 {
 	int i, j;
-	POD *free_pod_list[ MAX_PODS_PER_FUNC ];
+	Pod_T *free_pod_list[ MAX_PODS_PER_FUNC ];
 	int free_pods;
 
 
@@ -466,7 +466,7 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 static void dg2020_distribute_channels( void )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	dg2020.needed_channels = 0;
@@ -522,7 +522,7 @@ static void dg2020_distribute_channels( void )
 /* the stages of the phase cycle this is the minimum number of channels.    */
 /*--------------------------------------------------------------------------*/
 
-static void dg2020_setup_phase_matrix( FUNCTION *f )
+static void dg2020_setup_phase_matrix( Function_T *f )
 {
 	int i, j;
 	int cur_channel;
@@ -555,7 +555,7 @@ static void dg2020_setup_phase_matrix( FUNCTION *f )
 
 static void dg2020_pulse_start_setup( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j, k;
 
 
@@ -610,9 +610,9 @@ static void dg2020_pulse_start_setup( void )
 		 dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
 	{
 		Ticks add;
-		FUNCTION *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
-				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
-		PULSE_PARAMS *shape_p, *defense_p;
+		Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
+				   *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
+		Pulse_Params_T *shape_p, *defense_p;
 
 		if ( fd->num_params > 0 && fs->num_params > 0 )
 		{
@@ -658,7 +658,7 @@ static void dg2020_pulse_start_setup( void )
 /* assigned to it will stay low all of the time.                        */
 /*----------------------------------------------------------------------*/
 
-static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
+static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f )
 {
 	int i, j;
 
@@ -697,16 +697,16 @@ static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
 /* this already existing dummy sequence.                                 */
 /*-----------------------------------------------------------------------*/
 
-static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
+static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 {
-	Phase_Sequence *np, *pn;
+	Phs_Seq_T *np, *pn;
 	int i;
 
 
 	/* First check if there's a phase sequence consisting of just '+X' - if it
 	   does use this as the phase sequence for the pulse */
 
-	for ( np = PSeq; np != NULL; np = np->next )
+	for ( np = Phs_Seq; np != NULL; np = np->next )
 	{
 		for ( i = 0; i < np->len; i++ )
 			if ( np->sequence[ i ] != PHASE_PLUS_X )
@@ -718,22 +718,22 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 
 	/* Create a new phase sequence */
 
-	np = PHASE_SEQUENCE_P T_malloc( sizeof *np );
+	np = PHS_SEQ_P T_malloc( sizeof *np );
 
-	if ( PSeq == NULL )
+	if ( Phs_Seq == NULL )
 	{
-		PSeq = np;
+		Phs_Seq = np;
 		np->len = 1;
 		np->sequence = INT_P T_malloc( sizeof *np->sequence );
 		np->sequence[ 0 ] = PHASE_PLUS_X;
 	}
 	else
 	{
-		pn = PSeq;
+		pn = Phs_Seq;
 		while ( pn->next != NULL )
 			pn = pn->next;
 		pn->next = np;
-		np->len = PSeq->len;
+		np->len = Phs_Seq->len;
 		np->sequence = INT_P T_malloc( np->len * sizeof *np->sequence );
 		for ( i = 0; i < np->len; i++ )
 			np->sequence[ i ] = PHASE_PLUS_X;
@@ -757,26 +757,26 @@ static Phase_Sequence *dg2020_create_dummy_phase_seq( void )
 
 static void dg2020_create_shape_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+	Function_T *f;
+	Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
 
 
 	/* Nothing to be done if no automatic setting of shape pulses is
 	   required or no pulses exist */
 
-	if ( ! dg2020.auto_shape_pulses || dg2020_Pulses == NULL )
+	if ( ! dg2020.auto_shape_pulses || dg2020.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to append the new shape
 	   pulses) */
 
-	for ( cp = dg2020_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = dg2020_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 
@@ -859,7 +859,7 @@ static void dg2020_create_shape_pulses( void )
 	if ( np == NULL )    /* no shape pulses have been created automatically */
 		return;
 
-	for ( p1 = dg2020_Pulses; p1 != old_end->next; p1 = p1->next )
+	for ( p1 = dg2020.pulses; p1 != old_end->next; p1 = p1->next )
 	{
 		if ( ! p1->is_active ||
 			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
@@ -925,26 +925,26 @@ static void dg2020_create_shape_pulses( void )
 
 static void dg2020_create_twt_pulses( void )
 {
-	FUNCTION *f;
-	PULSE *np, *cp, *rp, *old_end;
+	Function_T *f;
+	Pulse_T *np, *cp, *rp, *old_end;
 
 
 	/* Nothing to be done if no automatic setting of TWT pulses is
 	   required or no pulses exist */
 
-	if ( ! dg2020.auto_twt_pulses  || dg2020_Pulses == NULL )
+	if ( ! dg2020.auto_twt_pulses  || dg2020.pulses == NULL )
 		return;
 
 	/* Find the end of the pulse list (to be able to add further TWT
 	   pulses) */
 
-	for ( cp = dg2020_Pulses; cp->next != NULL; cp = cp->next )
+	for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
 		/* empty */ ;
 	old_end = cp;
 
 	/* Loop over all pulses */
 
-	for ( rp = dg2020_Pulses; rp != NULL; rp = rp->next )
+	for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
 	{
 		f = rp->function;
 

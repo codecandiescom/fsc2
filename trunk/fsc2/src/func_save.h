@@ -29,24 +29,24 @@
 #include "fsc2.h"
 
 
-typedef struct FILE_LIST FILE_LIST;
+typedef struct File_List File_List_T;
 
-struct FILE_LIST {
+struct File_List {
 	FILE *fp;
 	char *name;
 };
 
 
-Var *f_openf( Var *var );
-Var *f_getf(    Var *v );
-Var *f_clonef(  Var *v );
-Var *f_save(    Var *v );
-Var *f_fsave(   Var *v );
-Var *f_ffsave(  Var *v );
-Var *f_save_p(  Var *v );
-Var *f_save_o(  Var *v );
-Var *f_save_c(  Var *v );
-Var *f_is_file( Var *v );
+Var_T *f_openf( Var_T *var );
+Var_T *f_getf(    Var_T *v );
+Var_T *f_clonef(  Var_T *v );
+Var_T *f_save(    Var_T *v );
+Var_T *f_fsave(   Var_T *v );
+Var_T *f_ffsave(  Var_T *v );
+Var_T *f_save_p(  Var_T *v );
+Var_T *f_save_o(  Var_T *v );
+Var_T *f_save_c(  Var_T *v );
+Var_T *f_is_file( Var_T *v );
 
 
 #endif  /* ! FUNC_SAVE_HEADER */

@@ -30,16 +30,16 @@
 #include "hjs_attenuator.conf"
 
 
-typedef struct HJS_ATTENUATOR HJS_ATTENUATOR;
-typedef struct HJS_ATT_TABLE_ENTRY HJS_ATT_TABLE_ENTRY;
+typedef struct HJS_Attenuator HJS_Attenuator_T;
+typedef struct Att_Table_Entry Att_Table_Entry_T;
 
 
-struct HJS_ATT_TABLE_ENTRY {
+struct Att_Table_Entry {
 	double att;
 	double step;
 };
 
-struct HJS_ATTENUATOR {
+struct HJS_Attenuator {
 	bool is_open;                   /* set when serial port has been opened */
     struct termios *tio;            /* serial port interface structure */
 	double att;                     /* current attenuation */
@@ -47,7 +47,7 @@ struct HJS_ATTENUATOR {
 	bool is_step;                   /* set when initial position of stepper
 									   motor has been set */
 	char *calib_file;               /* name of attenuation calibration file */
-	HJS_ATT_TABLE_ENTRY *att_table; /* (sorted) array of attenuation/position
+	Att_Table_Entry_T *att_table;   /* (sorted) array of attenuation/position
 									   of motor settings */
 	size_t att_table_len;           /* length of this array */
 	double min_table_att;           /* lowest attenuation in array */
@@ -55,7 +55,7 @@ struct HJS_ATTENUATOR {
 };
 
 
-extern HJS_ATTENUATOR hjs_attenuator;
+extern HJS_Attenuator_T hjs_attenuator;
 
 
 /* Exported functions */
@@ -68,10 +68,10 @@ void hjs_attenuator_exit_hook( void );
 void hjs_attenuator_child_exit_hook( void );
 
 
-Var *mw_attenuator_name( Var *v );
-Var *mw_attenuator_load_calibration( Var *v );
-Var *mw_attenuator_initial_attenuation( Var *v );
-Var *mw_attenuator_attenuation( Var *v );
+Var_T *mw_attenuator_name( Var_T *v );
+Var_T *mw_attenuator_load_calibration( Var_T *v );
+Var_T *mw_attenuator_initial_attenuation( Var_T *v );
+Var_T *mw_attenuator_attenuation( Var_T *v );
 
 
 /* Functions from hjs_attenuator_lexer.l */

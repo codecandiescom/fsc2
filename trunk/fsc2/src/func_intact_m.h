@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var *f_mcreate( Var *v );
-Var *f_mdelete( Var *v );
-Var *f_mchoice(  Var *v );
-Var *f_mchanged( Var *v );
+Var_T *f_mcreate( Var_T *v );
+Var_T *f_mdelete( Var_T *v );
+Var_T *f_mchoice( Var_T *v );
+Var_T *f_mchanged( Var_T *v );
 
 
 #endif   /* ! INTERACTIVE_MENUS_HEADER */

@@ -235,7 +235,7 @@ double hp864_tmpl_get_att( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-int hp864_tmpl_set_mod_param( Var *v, double *dres, int *ires )
+int hp864_tmpl_set_mod_param( Var_T *v, double *dres, int *ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
 		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",

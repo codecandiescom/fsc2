@@ -25,21 +25,21 @@
 #include "fsc2.h"
 
 
-static Var *vars_str_var_add( Var *v1, Var *v2 );
-static Var *vars_int_var_add( Var *v1, Var *v2 );
-static Var *vars_float_var_add( Var *v1, Var *v2 );
-static Var *vars_int_arr_add( Var *v1, Var *v2 );
-static Var *vars_float_arr_add( Var *v1, Var *v2 );
-static Var *vars_ref_add( Var *v1, Var *v2 );
+static Var_T *vars_str_var_add( Var_T *v1, Var_T *v2 );
+static Var_T *vars_int_var_add( Var_T *v1, Var_T *v2 );
+static Var_T *vars_float_var_add( Var_T *v1, Var_T *v2 );
+static Var_T *vars_int_arr_add( Var_T *v1, Var_T *v2 );
+static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 );
+static Var_T *vars_ref_add( Var_T *v1, Var_T *v2 );
 
 
 /*---------------------------------------------------------*/
 /* Function for adding of two variables of arbitrary types */
 /*---------------------------------------------------------*/
 
-Var *vars_add( Var *v1, Var *v2 )
+Var_T *vars_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR |
@@ -70,6 +70,10 @@ Var *vars_add( Var *v1, Var *v2 )
 
 		case SUB_REF_PTR :
 			v1 = vars_subref_to_rhs_conv( v1 );
+			break;
+
+		default :
+			break;
 	}
 
 	switch ( v1->type )
@@ -114,9 +118,9 @@ Var *vars_add( Var *v1, Var *v2 )
 /* Function for "adding" (i.e. concatenation) of two strings */
 /*-----------------------------------------------------------*/
 
-static Var *vars_str_var_add( Var *v1, Var *v2 )
+static Var_T *vars_str_var_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	char *new_str;
 
 
@@ -133,9 +137,9 @@ static Var *vars_str_var_add( Var *v1, Var *v2 )
 /* Function for adding a variable of arbitrary type to an integer variable */
 /*-------------------------------------------------------------------------*/
 
-static Var *vars_int_var_add( Var *v1, Var *v2 )
+static Var_T *vars_int_var_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 
@@ -238,9 +242,9 @@ static Var *vars_int_var_add( Var *v1, Var *v2 )
 /* to a floating point variable                     */
 /*--------------------------------------------------*/
 
-static Var *vars_float_var_add( Var *v1, Var *v2 )
+static Var_T *vars_float_var_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 
@@ -331,10 +335,10 @@ static Var *vars_float_var_add( Var *v1, Var *v2 )
 /* Function for adding a variable of arbitrary type to an 1D integer array */
 /*-------------------------------------------------------------------------*/
 
-static Var *vars_int_arr_add( Var *v1, Var *v2 )
+static Var_T *vars_int_arr_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 
 
@@ -421,10 +425,10 @@ static Var *vars_int_arr_add( Var *v1, Var *v2 )
 /* to an 1D floating point array                    */
 /*--------------------------------------------------*/
 
-static Var *vars_float_arr_add( Var *v1, Var *v2 )
+static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 
 
@@ -504,10 +508,10 @@ static Var *vars_float_arr_add( Var *v1, Var *v2 )
 /* a more-dimensional integer or floating point array    */
 /*-------------------------------------------------------*/
 
-static Var *vars_ref_add( Var *v1, Var *v2 )
+static Var_T *vars_ref_add( Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 
 

@@ -50,7 +50,9 @@
 
 /* Different types of variables */
 
-enum {
+typedef enum Var_Type Var_Type_T;
+
+enum Var_Type {
 	UNDEF_VAR       = 0,                /*     0 */
 	STR_VAR         = ( 1 <<  0 ),      /*     1 */
 	INT_VAR         = ( 1 <<  1 ),      /*     2 */
@@ -67,11 +69,11 @@ enum {
 };
 
 
-typedef struct Var Var;
+typedef struct Var Var_T;
 
 struct Var {
-	char *name;                    /* name of the variable */
-	int  type;                     /* type of the variable */
+	char       *name;              /* name of the variable */
+	Var_Type_T type;               /* type of the variable */
 
 	union
 	{
@@ -80,7 +82,7 @@ struct Var {
 		long        *lpnt;         /* for integer arrays */
 		double      *dpnt;         /* for double arrays */
 		char        *sptr;         /* for strings */
-		Var         **vptr;        /* for array references */
+		Var_T       **vptr;        /* for array references */
 		struct Func *fnct;         /* for functions */
 		ssize_t     *index;        /* for indices of LHS sub-array */
 	} val;
@@ -89,9 +91,9 @@ struct Var {
 	ssize_t len;                   /* total len of array */
 	unsigned long flags;
 
-	Var *from;                     /* used in pointer variables */
-	Var *next;                     /* next variable in list or stack */
-	Var *prev;                     /* previous variable in list or stack */
+	Var_T *from;                   /* used in pointer variables */
+	Var_T *next;                   /* next variable in list or stack */
+	Var_T *prev;                   /* previous variable in list or stack */
 
 };
 
@@ -127,22 +129,22 @@ enum {
 };
 
 
-Var *vars_get( char *name );
-Var *vars_new( char *name );
-void vars_arr_create( Var *a, Var *v, int dim, bool is_temp );
-Var *vars_push_copy( Var *v );
-Var *vars_push_matrix( int type, int dim, ... );
-Var *vars_push( int type, ... );
-Var *vars_pop( Var *v );
-Var *vars_make( int type, Var *src );
+Var_T *vars_get( char *name );
+Var_T *vars_new( char *name );
+void vars_arr_create( Var_T *a, Var_T *v, int dim, bool is_temp );
+Var_T *vars_push_copy( Var_T *v );
+Var_T *vars_push_matrix( Var_Type_T type, int dim, ... );
+Var_T *vars_push( Var_Type_T type, ... );
+Var_T *vars_pop( Var_T *v );
+Var_T *vars_make( Var_Type_T type, Var_T *src );
 void vars_del_stack( void );
 void vars_clean_up( void );
-void vars_check( Var *v, int type );
-bool vars_exist( Var *v );
-Var *vars_arr_start( Var *v );
-void *vars_iter( Var *v );
+void vars_check( Var_T *v, int type );
+bool vars_exist( Var_T *v );
+Var_T *vars_arr_start( Var_T *v );
+void *vars_iter( Var_T *v );
 void vars_save_restore( bool flag );
-Var *vars_free( Var *v, bool also_nameless );
+Var_T *vars_free( Var_T *v, bool also_nameless );
 
 
 #endif  /* ! VARIABLES_HEADER */

@@ -33,9 +33,9 @@
 #include "fsc2.h"
 
 int func_listlex( void );
-static size_t fll_count_functions( Func *fncts, size_t num_predef_func );
+static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func );
 static int ffl_func_cmp2( const void *a, const void *b );
-static void fll_get_functions( Func *fncts, size_t num_predef_func );
+static void fll_get_functions( Func_T *fncts, size_t num_predef_func );
 
 static long Comm_Lc;
 
@@ -153,7 +153,7 @@ PREP        return PREP_TOKEN;
 		/*----------------------*/
 
 
-size_t func_list_parse( Func **fncts, size_t num_func )
+size_t func_list_parse( Func_T **fncts, size_t num_func )
 {
 	static bool is_restart = UNSET;
 	size_t nf = num_func;
@@ -209,7 +209,7 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 	nf = num + num_predef_func;
 
 	if ( num != 0 )
-		*fncts = FUNC_P T_realloc( *fncts, nf * sizeof( Func ) );
+		*fncts = FUNC_P T_realloc( *fncts, nf * sizeof **fncts );
 
 	for ( cur = num_predef_func; cur < nf; cur++ )
 	{
@@ -244,12 +244,12 @@ size_t func_list_parse( Func **fncts, size_t num_func )
 /* file and counts the number of defined functions   */
 /*---------------------------------------------------*/
 
-static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
+static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func )
 {
 	int ret_token;
 	int last_token = 0;
 	size_t num = 0;
-	Func *f = NULL;
+	Func_T *f = NULL;
 
 
 	EDL.Lc = 1;
@@ -263,7 +263,7 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 		if ( ret_token == IDENT_TOKEN )
 		{
 			if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
-									   sizeof( Func ), ffl_func_cmp2 ) )
+									   sizeof( Func_T ), ffl_func_cmp2 ) )
 				 != NULL )
 			{
 				eprint( WARN, UNSET, "Loadable function '%s()' hides "
@@ -305,7 +305,7 @@ static size_t fll_count_functions( Func *fncts, size_t num_predef_func )
 
 static int ffl_func_cmp2( const void *a, const void *b )
 {
-	return strcmp( ( const char * ) a, ( ( const Func * ) b )->name );
+	return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
 
 
@@ -314,7 +314,7 @@ static int ffl_func_cmp2( const void *a, const void *b )
 /* and tries to make sense from the entries                   */
 /*------------------------------------------------------------*/
 
-static void fll_get_functions( Func *fncts, size_t num_predef_func )
+static void fll_get_functions( Func_T *fncts, size_t num_predef_func )
 {
 	int ret_token;
 	int state;

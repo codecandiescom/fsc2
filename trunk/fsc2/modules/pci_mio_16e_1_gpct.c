@@ -34,7 +34,7 @@ static NI_DAQ_INPUT pci_mio_16e_1_gpct_source( const char *tname,
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_start_continuous_counter( Var *v )
+Var_T *daq_start_continuous_counter( Var_T *v )
 {
 	long counter;
 	NI_DAQ_INPUT source;
@@ -98,7 +98,7 @@ Var *daq_start_continuous_counter( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_start_timed_counter( Var *v )
+Var_T *daq_start_timed_counter( Var_T *v )
 {
 	int counter;
 	NI_DAQ_INPUT source;
@@ -181,7 +181,7 @@ Var *daq_start_timed_counter( Var *v )
 /* for the count interval finish and then fetches the count.       */
 /*-----------------------------------------------------------------*/
 
-Var *daq_timed_count( Var *v )
+Var_T *daq_timed_count( Var_T *v )
 {
 	int counter;
 	NI_DAQ_INPUT source;
@@ -310,7 +310,7 @@ Var *daq_timed_count( Var *v )
 /* Gets a count even while the counter is still running */
 /*------------------------------------------------------*/
 
-Var *daq_intermediate_count( Var *v )
+Var_T *daq_intermediate_count( Var_T *v )
 {
 	int counter;
 	unsigned long count;
@@ -348,7 +348,7 @@ Var *daq_intermediate_count( Var *v )
 /* Get a count after waiting until the counter is finished counting */
 /*------------------------------------------------------------------*/
 
-Var *daq_final_count( Var *v )
+Var_T *daq_final_count( Var_T *v )
 {
 	int counter;
 	unsigned long count;
@@ -399,7 +399,7 @@ Var *daq_final_count( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_stop_counter( Var *v )
+Var_T *daq_stop_counter( Var_T *v )
 {
 	int counter;
 
@@ -423,7 +423,7 @@ Var *daq_stop_counter( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *daq_single_pulse( Var *v )
+Var_T *daq_single_pulse( Var_T *v )
 {
 	int counter;
 	double duration;
@@ -467,7 +467,7 @@ Var *daq_single_pulse( Var *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var *daq_continuous_pulses( Var *v )
+Var_T *daq_continuous_pulses( Var_T *v )
 {
 	int counter;
 	double len_hi, len_low;

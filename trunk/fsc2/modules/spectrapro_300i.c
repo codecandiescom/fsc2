@@ -39,7 +39,7 @@ struct SPECTRAPRO_300I spectrapro_300i;
 
 static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
 									  double pixel_width,
-									  Var *src, Var *dest );
+									  Var_T *src, Var_T *dest );
 static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 									double pixel_width, double px );
 
@@ -142,7 +142,7 @@ int spectrapro_300i_end_of_exp_hook( void )
 /* Returns a string with the name of the device */
 /*----------------------------------------------*/
 
-Var *monochromator_name( UNUSED_ARG Var *v )
+Var_T *monochromator_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -152,7 +152,7 @@ Var *monochromator_name( UNUSED_ARG Var *v )
 /* Function for setting or quering the currently used grating */
 /*------------------------------------------------------------*/
 
-Var *monochromator_grating( Var *v )
+Var_T *monochromator_grating( Var_T *v )
 {
 	long grating;
 	long gn;
@@ -219,7 +219,7 @@ Var *monochromator_grating( Var *v )
 /* the new turret the function will return an error.                    */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_turret( Var *v )
+Var_T *monochromator_turret( Var_T *v )
 {
 	long turret;
 	long tn;
@@ -297,7 +297,7 @@ Var *monochromator_turret( Var *v )
 /* length as specified (in meters) by the only argument.           */
 /*-----------------------------------------------------------------*/
 
-Var *monochromator_wavelength( Var *v )
+Var_T *monochromator_wavelength( Var_T *v )
 {
 	double wl;
 
@@ -365,7 +365,7 @@ Var *monochromator_wavelength( Var *v )
 /* number as specified (in cm^-1) by the only argument.            */
 /*-----------------------------------------------------------------*/
 
-Var *monochromator_wavenumber( Var *v )
+Var_T *monochromator_wavenumber( Var_T *v )
 {
 	double wl, wn;
 
@@ -424,7 +424,7 @@ Var *monochromator_wavenumber( Var *v )
 /* already a grating installed at the same position.                  */
 /*--------------------------------------------------------------------*/
 
-Var *monochromator_install_grating( Var *v )
+Var_T *monochromator_install_grating( Var_T *v )
 {
 	long grating;
 	long gn;
@@ -505,7 +505,7 @@ Var *monochromator_install_grating( Var *v )
 /* The only argument must be the number of an installed grating.  */
 /*----------------------------------------------------------------*/
 
-Var *monochromator_groove_density( Var *v )
+Var_T *monochromator_groove_density( Var_T *v )
 {
 	long gn;
 
@@ -556,7 +556,7 @@ Var *monochromator_groove_density( Var *v )
 /* for the details of the syntax.                                       */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_load_calibration( Var * v )
+Var_T *monochromator_load_calibration( Var_T * v )
 {
 	char *calib_file = NULL;
 	FILE *cfp = NULL;
@@ -635,9 +635,9 @@ Var *monochromator_load_calibration( Var * v )
 /* values is not 100% correct!                                          */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_wavelength_axis( Var *v )
+Var_T *monochromator_wavelength_axis( Var_T *v )
 {
-	Var *cv;
+	Var_T *cv;
 	double pixel_width;
 	long num_pixels;
 	long gn;
@@ -769,10 +769,10 @@ Var *monochromator_wavelength_axis( Var *v )
 /* values is not 100% correct!                                          */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_wavenumber_axis( Var * v )
+Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
-	Var *cv;
-	Var *fv;
+	Var_T *cv;
+	Var_T *fv;
 	double wn;
 	int acc;
 	long num_pixels;
@@ -819,11 +819,11 @@ Var *monochromator_wavenumber_axis( Var * v )
 /* arguments are not specified the currently set values are used.         */
 /*------------------------------------------------------------------------*/
 
-Var *monochromator_calc_wavelength( Var *v )
+Var_T *monochromator_calc_wavelength( Var_T *v )
 {
 	long gn;
 	double cwl;
-	Var *cv;
+	Var_T *cv;
 	long num_pixels;
 	double pixel_width;
 	ssize_t i;
@@ -881,6 +881,9 @@ Var *monochromator_calc_wavelength( Var *v )
 
 			case INT_REF : case FLOAT_REF :
 				return vars_push( FLOAT_REF, v );
+
+			default :
+				break;
 		}
 	}
 
@@ -965,7 +968,8 @@ Var *monochromator_calc_wavelength( Var *v )
 /*---------------------------------------------------------------*/
 
 static void spectrapro_300i_arr_conv( long gn, double cwl, long num_pixels,
-									  double pixel_width, Var *src, Var *dest )
+									  double pixel_width, Var_T *src,
+									  Var_T *dest )
 {
 	ssize_t i;
 	double px;
@@ -1055,7 +1059,7 @@ static double spectrapro_300i_conv( long gn, double cwl, long num_pixels,
 /* 6. detector angle (in degree)                                    */
 /*------------------------------------------------------------------*/
 
-Var *monochromator_set_calibration( Var *v )
+Var_T *monochromator_set_calibration( Var_T *v )
 {
 	long grating;
 	long gn;
@@ -1168,7 +1172,7 @@ Var *monochromator_set_calibration( Var *v )
 /* monochromator.                                                         */
 /*------------------------------------------------------------------------*/
 
-Var *monochromator_zero_offset( Var *v )
+Var_T *monochromator_zero_offset( Var_T *v )
 {
 	long grating;
 	long gn;
@@ -1248,7 +1252,7 @@ Var *monochromator_zero_offset( Var *v )
 /* monochromator.                                                    */
 /*-------------------------------------------------------------------*/
 
-Var *monochromator_grating_adjust( Var *v )
+Var_T *monochromator_grating_adjust( Var_T *v )
 {
 	long grating;
 	long gn;
@@ -1343,10 +1347,10 @@ Var *monochromator_grating_adjust( Var *v )
 /* 12. start deviation for detector angle                               */
 /*----------------------------------------------------------------------*/
 
-Var *monochromator_calibrate( Var *v )
+Var_T *monochromator_calibrate( Var_T *v )
 {
 	CALIB_PARAMS c;
-	Var *cv;
+	Var_T *cv;
 	int acc;
 	long grating;
 	long gn;

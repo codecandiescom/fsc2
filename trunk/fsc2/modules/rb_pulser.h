@@ -98,27 +98,27 @@
 #define START       1
 
 
-typedef struct RULBUS_CLOCK_CARD RULBUS_CLOCK_CARD;
-typedef struct RULBUS_DELAY_CARD RULBUS_DELAY_CARD;
-typedef struct FUNCTION FUNCTION;
-typedef struct PULSE PULSE;
-typedef struct RB_PULSER RB_PULSER;
+typedef struct RB_Pulser RB_Pulser_T;
+typedef struct Rulbus_Clock_Card Rulbus_Clock_Card_T;
+typedef struct Rulbus_Delay_Card Rulbus_Delay_Card_T;
+typedef struct Function Function_T;
+typedef struct Pulse Pulse_T;
 
 
-struct RULBUS_CLOCK_CARD {
+struct Rulbus_Clock_Card {
 	const char *name;
 	int handle;
 	int freq;
 };
 
 
-struct RULBUS_DELAY_CARD {
+struct Rulbus_Delay_Card {
 	const char *name;
 	int handle;
 	Ticks delay;
 	double intr_delay;
-	RULBUS_DELAY_CARD *prev;
-	RULBUS_DELAY_CARD *next;
+	Rulbus_Delay_Card_T *prev;
+	Rulbus_Delay_Card_T *next;
 	int num_next;
 	bool is_active;
 	bool was_active;
@@ -126,7 +126,7 @@ struct RULBUS_DELAY_CARD {
 };
 
 
-struct FUNCTION {
+struct Function {
 	int self;                   /* the functions number */
 	const char *name;           /* name of function */
 	bool is_used;
@@ -134,18 +134,18 @@ struct FUNCTION {
 
 	int num_pulses;             /* number of pulses assigned to the function */
 	int num_active_pulses;
-	PULSE **pulses;             /* list of pulse pointers */
+	Pulse_T **pulses;           /* list of pulse pointers */
 
 	double last_pulse_len;
 
 	double delay;
 	bool is_delay;
 
-	RULBUS_DELAY_CARD *delay_card;
+	Rulbus_Delay_Card_T *delay_card;
 };
 
 
-struct PULSE {
+struct Pulse {
 	long num;                /* number of the pulse (automatically created
 								pulses have negative, normal pulses
 								positive numbers */
@@ -153,10 +153,10 @@ struct PULSE {
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	PULSE *next;
-	PULSE *prev;
+	Pulse_T *next;
+	Pulse_T *prev;
 
-	FUNCTION *function;      /* function the pulse is associated with */
+	Function_T *function;    /* function the pulse is associated with */
 
 	double pos;              /* current position, length, position change */
 	Ticks len;               /* and length change of pulse (in units of the */
@@ -184,10 +184,15 @@ struct PULSE {
 };
 
 
-struct RB_PULSER {
+struct RB_Pulser {
 	bool is_needed;
 
+	Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
+	Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
+
 	bool exists_synthesizer;
+
+	Pulse_T *pulses;
 
 	double timebase;         /* time base of pulse clock */
 	int tb_index;            /* to be used as argument for clock card */
@@ -207,7 +212,7 @@ struct RB_PULSER {
 	double neg_delay;
 	bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
+	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
 
 	bool needs_update;       /* set if pulse properties have been changed in
 								test run or experiment */
@@ -228,10 +233,7 @@ struct RB_PULSER {
 
 
 
-extern RB_PULSER rb_pulser;
-extern PULSE *rb_pulser_Pulses;
-extern RULBUS_CLOCK_CARD clock_card[ NUM_CLOCK_CARDS ];
-extern RULBUS_DELAY_CARD delay_card[ NUM_DELAY_CARDS ];
+extern RB_Pulser_T rb_pulser;
 
 
 /* Functions defined in rb_pulser.c */
@@ -243,16 +245,16 @@ int rb_pulser_exp_hook( void );
 int rb_pulser_end_of_exp_hook( void );
 void rb_pulser_exit_hook( void );
 
-Var *pulser_name( Var *v );
-Var *pulser_show_pulses( Var *v );
-Var *pulser_dump_pulses( Var *v );
-Var *pulser_state( Var *v );
-Var *pulser_update( Var *v );
-Var *pulser_shift( Var *v );
-Var *pulser_increment( Var *v );
-Var *pulser_reset( Var *v );
-Var *pulser_pulse_reset( Var *v );
-Var *pulser_pulse_minimum_specs( Var *v );
+Var_T *pulser_name( Var_T *v );
+Var_T *pulser_show_pulses( Var_T *v );
+Var_T *pulser_dump_pulses( Var_T *v );
+Var_T *pulser_state( Var_T *v );
+Var_T *pulser_update( Var_T *v );
+Var_T *pulser_shift( Var_T *v );
+Var_T *pulser_increment( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_pulse_reset( Var_T *v );
+Var_T *pulser_pulse_minimum_specs( Var_T *v );
 
 
 /* Functions defined in rb_pulser_gen.c */
@@ -304,7 +306,7 @@ void rb_pulser_seq_length_check( void );
 int rb_pulser_start_compare( const void *A, const void *B );
 Ticks rb_pulser_double2ticks( double p_time );
 double rb_pulser_ticks2double( Ticks ticks );
-PULSE *rb_pulser_get_pulse( long pnum );
+Pulse_T *rb_pulser_get_pulse( long pnum );
 const char *rb_pulser_ptime( double p_time );
 const char *rb_pulser_pticks( Ticks ticks );
 void rb_pulser_show_pulses( void );

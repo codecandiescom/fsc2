@@ -51,9 +51,9 @@ struct HJS_SFC hjs_sfc, hjs_sfc_stored;
 
 int hjs_sfc_init_hook( void )
 {
-	Var *Func_ptr;
+	Var_T *func_ptr;
 	int acc;
-	Var *v;
+	Var_T *v;
 	int dev_num;
 	char *func;
 
@@ -89,7 +89,7 @@ int hjs_sfc_init_hook( void )
 		func = get_string( "daq_reserve_dac#%d", dev_num );
 
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
 		print( FATAL, "Function for reserving the DAC is missing.\n" );
@@ -99,7 +99,7 @@ int hjs_sfc_init_hook( void )
 	T_free( func );
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
-	v = func_call( Func_ptr );
+	v = func_call( func_ptr );
 
 	if ( v->val.lval != 1 )
 	{
@@ -130,7 +130,7 @@ int hjs_sfc_init_hook( void )
 	func = get_string( "daq_dac_parameter#%d", dev_num );
 
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		print( FATAL, "Function for determining the DAC parameters is "
 			   "missing.\n" );
@@ -140,7 +140,7 @@ int hjs_sfc_init_hook( void )
 	func = CHAR_P T_free( func );
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 	
-	v = func_call( Func_ptr );
+	v = func_call( func_ptr );
 
 	if ( v->type != FLOAT_ARR || v->len != 3 )
 	{
@@ -230,7 +230,7 @@ void hjs_sfc_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *magnet_name( UNUSED_ARG Var *v )
+Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -240,7 +240,7 @@ Var *magnet_name( UNUSED_ARG Var *v )
 /* Function for registering the start field and the field step size. */
 /*-------------------------------------------------------------------*/
 
-Var *magnet_setup( Var *v )
+Var_T *magnet_setup( Var_T *v )
 {
 	double start_field;
 	double field_step;
@@ -279,7 +279,7 @@ Var *magnet_setup( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *set_field( Var *v )
+Var_T *set_field( Var_T *v )
 {
 	double field;
 
@@ -311,7 +311,7 @@ Var *set_field( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *get_field( UNUSED_ARG Var *v )
+Var_T *get_field( UNUSED_ARG Var_T *v )
 {
 	if ( ! hjs_sfc.is_act_field )
 	{
@@ -327,7 +327,7 @@ Var *get_field( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_up( UNUSED_ARG Var *v )
+Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
 	double field;
 
@@ -351,7 +351,7 @@ Var *sweep_up( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *sweep_down( UNUSED_ARG Var *v )
+Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
 	double field;
 
@@ -375,7 +375,7 @@ Var *sweep_down( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *reset_field( UNUSED_ARG Var *v )
+Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
 	if ( ! hjs_sfc.is_field )
 	{
@@ -393,7 +393,7 @@ Var *reset_field( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_B0( Var *v )
+Var_T *magnet_B0( Var_T *v )
 {
 	double B0V;
 
@@ -434,7 +434,7 @@ Var *magnet_B0( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_slope( Var *v )
+Var_T *magnet_slope( Var_T *v )
 {
 	double slope;
 
@@ -476,10 +476,9 @@ Var *magnet_slope( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_calibration_file( Var *v )
+Var_T *magnet_calibration_file( Var_T *v )
 {
 	char *buf;
-
 
 
 	if ( hjs_sfc.calib_file != NULL )
@@ -628,13 +627,13 @@ static double hjs_sfc_field_check( double field )
 static double hjs_sfc_set_field( double field )
 {
 	double v_step;
-	Var *Func_ptr;
+	Var_T *func_ptr;
 	int acc;
 
 
 	v_step = ( field - hjs_sfc.B0V ) / hjs_sfc.slope;
 
-	if ( ( Func_ptr = func_get( hjs_sfc.dac_func, &acc ) ) == NULL )
+	if ( ( func_ptr = func_get( hjs_sfc.dac_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
@@ -643,7 +642,7 @@ static double hjs_sfc_set_field( double field )
 
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( FLOAT_VAR, v_step );
-	vars_pop( func_call( Func_ptr ) );
+	vars_pop( func_call( func_ptr ) );
 
 	return hjs_sfc.B0V + v_step * hjs_sfc.slope;
 }

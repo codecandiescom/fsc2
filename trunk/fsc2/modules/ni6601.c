@@ -47,17 +47,17 @@ int ni6601_exp_hook( void );
 int ni6601_end_of_exp_hook( void );
 
 
-Var *counter_name( Var *v );
-Var *counter_start_continuous_counter( Var *v );
-Var *counter_start_timed_counter( Var *v );
-Var *counter_intermediate_count( Var *v );
-Var *counter_timed_count( Var *v );
-Var *counter_final_count( Var *v );
-Var *counter_stop_counter( Var *v );
-Var *counter_single_pulse( Var *c );
-Var *counter_continuous_pulses( Var *v );
-Var *counter_dio_read( Var *v );
-Var *counter_dio_write( Var *v );
+Var_T *counter_name( Var_T *v );
+Var_T *counter_start_continuous_counter( Var_T *v );
+Var_T *counter_start_timed_counter( Var_T *v );
+Var_T *counter_intermediate_count( Var_T *v );
+Var_T *counter_timed_count( Var_T *v );
+Var_T *counter_final_count( Var_T *v );
+Var_T *counter_stop_counter( Var_T *v );
+Var_T *counter_single_pulse( Var_T *c );
+Var_T *counter_continuous_pulses( Var_T *v );
+Var_T *counter_dio_read( Var_T *v );
+Var_T *counter_dio_write( Var_T *v );
 
 
 static int ni6601_counter_number( long ch );
@@ -154,7 +154,7 @@ int ni6601_end_of_exp_hook( void )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_name( UNUSED_ARG Var *v )
+Var_T *counter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -163,7 +163,7 @@ Var *counter_name( UNUSED_ARG Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_start_continuous_counter( Var *v )
+Var_T *counter_start_continuous_counter( Var_T *v )
 {
 	int	counter;
 	int	source;
@@ -217,7 +217,7 @@ Var *counter_start_continuous_counter( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_start_timed_counter( Var *v )
+Var_T *counter_start_timed_counter( Var_T *v )
 {
 	int counter;
 	int source;
@@ -287,7 +287,7 @@ Var *counter_start_timed_counter( Var *v )
 /* for the count interval finish and then fetches the count.       */
 /*-----------------------------------------------------------------*/
 
-Var *counter_timed_count( Var *v )
+Var_T *counter_timed_count( Var_T *v )
 {
 	int counter;
 	int source;
@@ -403,7 +403,7 @@ Var *counter_timed_count( Var *v )
 /* Gets a count even while the counter is still running */
 /*------------------------------------------------------*/
 
-Var *counter_intermediate_count( Var *v )
+Var_T *counter_intermediate_count( Var_T *v )
 {
 	int counter;
 	unsigned long count;
@@ -438,7 +438,7 @@ Var *counter_intermediate_count( Var *v )
 /* Get a count after waiting until the counter is finished counting */
 /*------------------------------------------------------------------*/
 
-Var *counter_final_count( Var *v )
+Var_T *counter_final_count( Var_T *v )
 {
 	int counter;
 	unsigned long count;
@@ -486,7 +486,7 @@ Var *counter_final_count( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_stop_counter( Var *v )
+Var_T *counter_stop_counter( Var_T *v )
 {
 	int counter;
 
@@ -508,7 +508,7 @@ Var *counter_stop_counter( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_single_pulse( Var *v )
+Var_T *counter_single_pulse( Var_T *v )
 {
 	int counter;
 	double duration;
@@ -549,7 +549,7 @@ Var *counter_single_pulse( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *counter_continuous_pulses( Var *v )
+Var_T *counter_continuous_pulses( Var_T *v )
 {
 	int counter;
 	double len_hi, len_low;
@@ -617,7 +617,7 @@ Var *counter_continuous_pulses( Var *v )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-Var *counter_dio_read( Var *v )
+Var_T *counter_dio_read( Var_T *v )
 {
 	long mask;
 	unsigned char bits = 0;
@@ -651,7 +651,7 @@ Var *counter_dio_read( Var *v )
 /*---------------------------------------------------------*/
 /*---------------------------------------------------------*/
 
-Var *counter_dio_write( Var *v )
+Var_T *counter_dio_write( Var_T *v )
 {
 	long bits;
 	long mask;

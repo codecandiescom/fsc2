@@ -137,21 +137,21 @@
 #include "dg2020_f.h"
 
 
-typedef struct DG2020_STORE DG2020_STORE;
+typedef struct dg2020_store dg2020_store_T;
 
-struct  DG2020_STORE {
+struct  dg2020_store {
 	int channel;
 	Ticks address;
 	Ticks length;
 	int state;
-	DG2020_STORE *next;
-	DG2020_STORE *prev;
+	dg2020_store_T *next;
+	dg2020_store_T *prev;
 };
 
 static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 							   int state );
 static bool dg2020_gpib_check( void );
-static bool dg2020_gpib_do_check( DG2020_STORE *params );
+static bool dg2020_gpib_do_check( dg2020_store_T *params );
 
 
 /*------------------------------------------------------*/
@@ -165,7 +165,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params );
 bool dg2020_init( const char *name )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 	char reply[ 100 ];
 	long len = 100;
 
@@ -403,7 +403,7 @@ bool dg2020_update_data( void )
 /*  * 1: ok, 0: error                                                    */
 /*-----------------------------------------------------------------------*/
 
-bool dg2020_make_blocks( int num_blocks, BLOCK *block )
+bool dg2020_make_blocks( int num_blocks, Block_T *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1000 ];
@@ -471,7 +471,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*----------------------------------------------------------------*/
 /* dg2020_make_seq() creates a completely new sequence (i.e. old  */
 /* sequences will be lost) consisting of 'num_blocks' blocks with */
-/* names and block repeat counts defined by the array of BLOCK    */
+/* names and block repeat counts defined by the array of Block_T  */
 /* structures 'block'                                             */
 /* ->                                                             */
 /*  * number of blocks in sequence                                */
@@ -480,7 +480,7 @@ bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 /*  * 1: ok, 0: error                                             */
 /*----------------------------------------------------------------*/
 
-bool dg2020_make_seq( int num_blocks, BLOCK *block )
+bool dg2020_make_seq( int num_blocks, Block_T *block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 10 ];
@@ -705,7 +705,7 @@ void dg2020_gpib_failure( void )
 
 #define MAX_CHECK_RETRIES 3
 
-static DG2020_STORE *dst = NULL;
+static dg2020_store_T *dst = NULL;
 static int check_retries = 0;
 
 
@@ -715,7 +715,7 @@ static int check_retries = 0;
 static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 							   int state )
 {
-	DG2020_STORE *cur = dst;
+	dg2020_store_T *cur = dst;
 
 
 	/* Setup a linked list of all pulse changing commands */
@@ -748,9 +748,9 @@ static void dg2020_gpib_store( int channel, Ticks address, Ticks length,
 
 static bool dg2020_gpib_check( void )
 {
-	DG2020_STORE *cur = dst,
-		         *tmp,
-		         *old_dst;
+	dg2020_store_T *cur = dst,
+		           *tmp,
+		           *old_dst;
 	bool result = OK;
 
 
@@ -867,7 +867,7 @@ static bool dg2020_gpib_check( void )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-static bool dg2020_gpib_do_check( DG2020_STORE *params )
+static bool dg2020_gpib_do_check( dg2020_store_T *params )
 {
 	char cmd[ 100 ] = "DATA:PATT:BIT? ";
 	char *reply;

@@ -32,11 +32,11 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-Var *get_phase_cycled_area( Var *v );
+Var_T *get_phase_cycled_area( Var_T *v );
 
-static Var *get_phase_cycled_area_1( Var *v );
-static Var *get_phase_cycled_area_2( Var *v );
-static bool get_channel_number( Var *v, long *channel );
+static Var_T *get_phase_cycled_area_1( Var_T *v );
+static Var_T *get_phase_cycled_area_2( Var_T *v );
+static bool get_channel_number( Var_T *v, long *channel );
 static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 							bool *is_2, const char *str );
 
@@ -44,7 +44,7 @@ static void pc_basic_check( const char *func_1, bool *is_1, const char *func_2,
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *get_phase_cycled_area( Var *v )
+Var_T *get_phase_cycled_area( Var_T *v )
 {
 	if ( Acq_Seq[ 0 ].defined && Acq_Seq[ 1 ].defined )
 		return get_phase_cycled_area_2( v );
@@ -70,11 +70,11 @@ Var *get_phase_cycled_area( Var *v )
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-static Var *get_phase_cycled_area_1( Var *v )
+static Var_T *get_phase_cycled_area_1( Var_T *v )
 {
-	static Var *V;
-	Var *func_ptr;
-	Var *vn;                                /* all purpose variable */
+	static Var_T *V;
+	Var_T *func_ptr;
+	Var_T *vn;                                /* all purpose variable */
 	static bool first_time = SET;
 	static bool is_get_area;
 	static bool is_get_area_fast;
@@ -287,11 +287,11 @@ static Var *get_phase_cycled_area_1( Var *v )
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-static Var *get_phase_cycled_area_2( Var *v )
+static Var_T *get_phase_cycled_area_2( Var_T *v )
 {
-	static Var *V;
-	Var *func_ptr;
-	Var *vn;                                /* all purpose variable */
+	static Var_T *V;
+	Var_T *func_ptr;
+	Var_T *vn;                                /* all purpose variable */
 	static bool first_time = SET;
 	static bool is_get_area;
 	static bool is_get_area_fast;
@@ -560,10 +560,10 @@ static Var *get_phase_cycled_area_2( Var *v )
 /* If it is the value is returned in 'channel'.                          */
 /*-----------------------------------------------------------------------*/
 
-static bool get_channel_number( Var *v, long *channel )
+static bool get_channel_number( Var_T *v, long *channel )
 {
-	Var *func_ptr;
-	Var *vn;
+	Var_T *func_ptr;
+	Var_T *vn;
 	bool result;
 	int acc;
 

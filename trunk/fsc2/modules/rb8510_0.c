@@ -52,8 +52,8 @@ int rb8510_0_test_hook( void );
 int rb8510_0_exp_hook( void );
 int rb8510_0_end_of_exp_hook( void );
 
-Var *daq_name( Var *v );
-Var *daq_set_voltage( Var *v );
+Var_T *daq_name( Var_T *v );
+Var_T *daq_set_voltage( Var_T *v );
 
 
 /*--------------------------------------------------------------*
@@ -62,7 +62,7 @@ Var *daq_set_voltage( Var *v );
 
 int rb8510_0_init_hook( void )
 {
-	need_RULBUS = SET;
+	Need_RULBUS = SET;
 
 	rb8510.handle = -1;
 	rb8510.volts_is_set = UNSET;
@@ -167,7 +167,7 @@ int rb8510_0_end_of_exp_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var *daq_name( UNUSED_ARG Var *v )
+Var_T *daq_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -177,7 +177,7 @@ Var *daq_name( UNUSED_ARG Var *v )
  * Function sets or returns the output voltage
  *--------------------------------------------*/
 
-Var *daq_set_voltage( Var *v )
+Var_T *daq_set_voltage( Var_T *v )
 {
 	double volts;
 

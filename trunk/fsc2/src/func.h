@@ -26,9 +26,9 @@
 
 #include "fsc2.h"
 
-typedef struct Lib_Struct Lib_Struct;
-typedef struct Func Func;
-typedef struct CALL_STACK CALL_STACK;
+typedef struct Lib_Struct Lib_Struct_T;
+typedef struct Func Func_T;
+typedef struct Call_Stack Call_Stack_T;
 
 
 struct Lib_Struct {
@@ -64,38 +64,38 @@ struct Lib_Struct {
 
 struct Func {
 	const char *name;                 /* name of the function */
-    Var * ( * fnct )( Var * );        /* pointer to the function */
+    Var_T * ( * fnct )( Var_T * );    /* pointer to the function */
 	int nargs;                        /* number of arguments */
     int access_flag;                  /* accessibility flag */
-	Device *device;                   /* handle of defining device module */
+	Device_T *device;                 /* handle of defining device module */
 	bool to_be_loaded;                /* set if function has to be loaded */
 };
 
 
-struct CALL_STACK {
-	Func *f;
-	Device *device;
+struct Call_Stack {
+	Func_T *f;
+	Device_T *device;
 	const char *dev_name;
 	int dev_count;
 	long Cur_Pulser;
-	CALL_STACK *next;
+	Call_Stack_T *next;
 };
 
 
 bool functions_init( void );
 void functions_exit( void );
 int func_exists( const char *name );
-Var *func_get( const char *name, int *acc );
-Var *func_get_long( const char *name, int *acc, bool flag );
-Var *func_call( Var *f );
+Var_T *func_get( const char *name, int *acc );
+Var_T *func_get_long( const char *name, int *acc, bool flag );
+Var_T *func_call( Var_T *f );
 void close_all_files( void );
-CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
-					   int dev_count );
-CALL_STACK *call_pop( void );
+Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
+						 int dev_count );
+Call_Stack_T *call_pop( void );
 
 /* from func_list_lexer.flex */
 
-size_t func_list_parse( Func **fncts, size_t num_func );
+size_t func_list_parse( Func_T **fncts, size_t num_func );
 
 #endif  /* ! FUNC_HEADER */
 

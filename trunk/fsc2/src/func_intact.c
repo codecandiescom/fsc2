@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-TOOLBOX *Toolbox = NULL;
+Toolbox_T *Toolbox = NULL;
 
 struct {
 	int	VERT_OFFSET;
@@ -59,27 +59,27 @@ extern FL_IOPT xcntl;
 static bool is_frozen = UNSET;
 static bool has_been_shown = UNSET;
 
-static Var *f_layout_child( long layout );
-static void f_objdel_child( Var *v );
-static void f_objdel_parent( Var *v );
-static Var *f_obj_clabel_child( long ID, char *label );
-static Var *f_obj_xable_child( long ID, long state );
+static Var_T *f_layout_child( long layout );
+static void f_objdel_child( Var_T *v );
+static void f_objdel_parent( Var_T *v );
+static Var_T *f_obj_clabel_child( long ID, char *label );
+static Var_T *f_obj_xable_child( long ID, long state );
 static int toolbox_close_handler( FL_FORM *a, void *b );
-static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h );
-static void normal_button_setup( IOBJECT *io );
-static void push_button_setup( IOBJECT *io );
-static void radio_button_setup( IOBJECT *io );
-static void slider_setup( IOBJECT *io );
-static void val_slider_setup( IOBJECT *io );
-static void int_input_setup( IOBJECT *io );
-static void float_input_setup( IOBJECT *io );
-static void int_output_setup( IOBJECT *io );
-static void float_output_setup( IOBJECT *io );
-static void menu_setup( IOBJECT *io );
+static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h );
+static void normal_button_setup( Iobject_T *io );
+static void push_button_setup( Iobject_T *io );
+static void radio_button_setup( Iobject_T *io );
+static void slider_setup( Iobject_T *io );
+static void val_slider_setup( Iobject_T *io );
+static void int_input_setup( Iobject_T *io );
+static void float_input_setup( Iobject_T *io );
+static void int_output_setup( Iobject_T *io );
+static void float_output_setup( Iobject_T *io );
+static void menu_setup( Iobject_T *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static void store_toolbox_position( void );
-static Var *f_tb_changed_child( Var *v );
-static Var *f_tb_wait_child( Var *v );
+static Var_T *f_tb_changed_child( Var_T *v );
+static Var_T *f_tb_wait_child( Var_T *v );
 
 
 /*---------------------------------------*/
@@ -196,7 +196,7 @@ void toolbox_delete( void )
 /* This function gets called for the EDL function hide_toolbox(). */
 /*----------------------------------------------------------------*/
 
-Var *f_freeze( Var *v )
+Var_T *f_freeze( Var_T *v )
 {
 	bool is_now_frozen;
 
@@ -218,7 +218,7 @@ Var *f_freeze( Var *v )
 
 void parent_freeze( int freeze )
 {
-	IOBJECT *io = NULL;
+	Iobject_T *io = NULL;
 
 
 	if ( Toolbox == NULL || Toolbox->Tools == NULL )
@@ -286,7 +286,7 @@ void parent_freeze( int freeze )
 /* all of them have been deleted again :).                    */
 /*------------------------------------------------------------*/
 
-Var *f_layout( Var *v )
+Var_T *f_layout( Var_T *v )
 {
 	long layout;
 	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
@@ -363,7 +363,7 @@ Var *f_layout( Var *v )
 /* the message passing mechanism.                                 */
 /*----------------------------------------------------------------*/
 
-static Var *f_layout_child( long layout )
+static Var_T *f_layout_child( long layout )
 {
 	char *buffer, *pos;
 	size_t len = sizeof EDL.Lc + sizeof layout;
@@ -403,7 +403,7 @@ static Var *f_layout_child( long layout )
 /* Deletes one or more objects, parameter are one or more object IDs. */
 /*--------------------------------------------------------------------*/
 
-Var *f_objdel( Var *v )
+Var_T *f_objdel( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -442,7 +442,7 @@ Var *f_objdel( Var *v )
 /* parent via the message passing mechanism.              */
 /*--------------------------------------------------------*/
 
-static void f_objdel_child( Var *v )
+static void f_objdel_child( Var_T *v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -495,9 +495,9 @@ static void f_objdel_child( Var *v )
 /* Part of the f_objdel() function run by the parent exclusively */
 /*---------------------------------------------------------------*/
 
-static void f_objdel_parent( Var *v )
+static void f_objdel_parent( Var_T *v )
 {
-	IOBJECT *io = NULL;
+	Iobject_T *io = NULL;
 
 
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
@@ -558,9 +558,9 @@ static void f_objdel_parent( Var *v )
 /* Function for changing the label of an object */
 /*----------------------------------------------*/
 
-Var *f_obj_clabel( Var *v )
+Var_T *f_obj_clabel( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	char *label = NULL;
 	long ID = 0;
 
@@ -649,7 +649,7 @@ Var *f_obj_clabel( Var *v )
 /* parent via the message passing mechanism.                 */
 /*-----------------------------------------------------------*/
 
-static Var *f_obj_clabel_child( long ID, char *label )
+static Var_T *f_obj_clabel_child( long ID, char *label )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -697,9 +697,9 @@ static Var *f_obj_clabel_child( long ID, char *label )
 /* Function for enabling or disabling an object */
 /*----------------------------------------------*/
 
-Var *f_obj_xable( Var *v )
+Var_T *f_obj_xable( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	long ID;
 	bool state;
 
@@ -777,7 +777,7 @@ Var *f_obj_xable( Var *v )
 /* parent via the message passing mechanism.                */
 /*----------------------------------------------------------*/
 
-static Var *f_obj_xable_child( long ID, long state )
+static Var_T *f_obj_xable_child( long ID, long state )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -825,9 +825,9 @@ static Var *f_obj_xable_child( long ID, long state )
 /* Returns a pointer to an object given its number or NULL if not found */
 /*----------------------------------------------------------------------*/
 
-IOBJECT *find_object_from_ID( long ID )
+Iobject_T *find_object_from_ID( long ID )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 
 
 	if ( Toolbox == NULL )            /* no objects defined yet ? */
@@ -852,7 +852,7 @@ IOBJECT *find_object_from_ID( long ID )
 
 void tools_clear( void )
 {
-	IOBJECT *io, *next;
+	Iobject_T *io, *next;
 	long i;
 
 
@@ -906,7 +906,7 @@ void tools_clear( void )
 
 void recreate_Toolbox( void )
 {
-	IOBJECT *io, *last_io = NULL;
+	Iobject_T *io, *last_io = NULL;
 	int flags;
 	int unsigned dummy;
 	int tool_x, tool_y;
@@ -1021,7 +1021,7 @@ static int toolbox_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 /* to the right of the other objects.                                  */
 /*---------------------------------------------------------------------*/
 
-static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
+static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h )
 {
 	int old_w;
 	int old_h;
@@ -1161,7 +1161,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io, int *w, int *h )
 /* Creates a normal button, determines its size and sets some properties */
 /*-----------------------------------------------------------------------*/
 
-static void normal_button_setup( IOBJECT *io )
+static void normal_button_setup( Iobject_T *io )
 {
 	if ( io->label != NULL )
 	{
@@ -1204,7 +1204,7 @@ static void normal_button_setup( IOBJECT *io )
 /* Creates a push button, determines its size and sets some properties */
 /*---------------------------------------------------------------------*/
 
-static void push_button_setup( IOBJECT *io )
+static void push_button_setup( Iobject_T *io )
 {
 	io->w = io->h = FI_sizes.PUSH_BUTTON_SIZE;
 	io->self = fl_add_checkbutton( FL_PUSH_BUTTON, io->x, io->y,
@@ -1246,9 +1246,9 @@ static void push_button_setup( IOBJECT *io )
 /* Creates a radio button, determines its size and sets some properties */
 /*----------------------------------------------------------------------*/
 
-static void radio_button_setup( IOBJECT *io )
+static void radio_button_setup( Iobject_T *io )
 {
-	IOBJECT *nio;
+	Iobject_T *nio;
 
 
 	if ( io->group != NULL )
@@ -1327,7 +1327,7 @@ static void radio_button_setup( IOBJECT *io )
 /* Creates a normal slider, determines its size and sets some properties */
 /*-----------------------------------------------------------------------*/
 
-static void slider_setup( IOBJECT *io )
+static void slider_setup( Iobject_T *io )
 {
 	io->w = FI_sizes.SLIDER_WIDTH;
 	io->h = FI_sizes.SLIDER_HEIGHT;
@@ -1373,7 +1373,7 @@ static void slider_setup( IOBJECT *io )
 /* Creates a value slider, determines its size and sets some properties */
 /*----------------------------------------------------------------------*/
 
-static void val_slider_setup( IOBJECT *io )
+static void val_slider_setup( Iobject_T *io )
 {
 	double prec;
 
@@ -1427,7 +1427,7 @@ static void val_slider_setup( IOBJECT *io )
 /* and sets some properties                             */
 /*------------------------------------------------------*/
 
-static void int_input_setup( IOBJECT *io )
+static void int_input_setup( Iobject_T *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1472,7 +1472,7 @@ static void int_input_setup( IOBJECT *io )
 /* size and sets some properties                         */
 /*-------------------------------------------------------*/
 
-static void float_input_setup( IOBJECT *io )
+static void float_input_setup( Iobject_T *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1517,7 +1517,7 @@ static void float_input_setup( IOBJECT *io )
 /* and sets some properties                              */
 /*-------------------------------------------------------*/
 
-static void int_output_setup( IOBJECT *io )
+static void int_output_setup( Iobject_T *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1566,7 +1566,7 @@ static void int_output_setup( IOBJECT *io )
 /* size and sets some properties                          */
 /*--------------------------------------------------------*/
 
-static void float_output_setup( IOBJECT *io )
+static void float_output_setup( Iobject_T *io )
 {
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
@@ -1614,7 +1614,7 @@ static void float_output_setup( IOBJECT *io )
 /* Creates a menu, determines its size and sets some properties */
 /*--------------------------------------------------------------*/
 
-static void menu_setup( IOBJECT *io )
+static void menu_setup( Iobject_T *io )
 {
 	long i;
 	int wt, ht;
@@ -1679,7 +1679,7 @@ static void menu_setup( IOBJECT *io )
 
 static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 {
-	IOBJECT *io, *oio;
+	Iobject_T *io, *oio;
 	long lval;
 	double dval;
 	const char *buf;
@@ -2029,9 +2029,9 @@ static void store_toolbox_position( void )
 /* toolbox but only from within the EDL script.                          */
 /*-----------------------------------------------------------------------*/
 
-Var *f_tb_changed( Var *v )
+Var_T *f_tb_changed( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 
 
 	/* The child process has it's own way of dealing with this */
@@ -2089,10 +2089,10 @@ Var *f_tb_changed( Var *v )
 /* wait for it's reply.                                               */
 /*--------------------------------------------------------------------*/
 
-static Var *f_tb_changed_child( Var *v )
+static Var_T *f_tb_changed_child( Var_T *v )
 {
 	char *buffer, *pos;
-	Var *cv;
+	Var_T *cv;
 	size_t len;
 	long *result;
 	long cid;
@@ -2167,9 +2167,9 @@ static Var *f_tb_changed_child( Var *v )
 /* exceeded.                                                       */
 /*-----------------------------------------------------------------*/
 
-Var *f_tb_wait( Var *v )
+Var_T *f_tb_wait( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	double duration;
 	double secs;
 	struct itimerval sleepy;
@@ -2308,10 +2308,10 @@ Var *f_tb_wait( Var *v )
 /* parent returning a result which gets passed on to the EDL script.   */
 /*---------------------------------------------------------------------*/
 
-static Var *f_tb_wait_child( Var *v )
+static Var_T *f_tb_wait_child( Var_T *v )
 {
 	char *buffer, *pos;
-	Var *cv;
+	Var_T *cv;
 	size_t len;
 	double duration;
 	long *result;
@@ -2400,7 +2400,7 @@ static Var *f_tb_wait_child( Var *v )
 void tb_wait_handler( long ID )
 {
 	long result[ 2 ];
-	IOBJECT *io;
+	Iobject_T *io;
 	struct itimerval sleepy;
 
 

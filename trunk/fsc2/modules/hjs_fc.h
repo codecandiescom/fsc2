@@ -64,16 +64,16 @@ int hjs_fc_exp_hook( void );
 void hjs_fc_exit_hook( void );
 void hjs_fc_child_exit_hook( void );
 
-Var *magnet_calibration_file( Var *v );
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
-Var *magnet_B0( Var *v );
-Var *magnet_slope( Var *v );
+Var_T *magnet_calibration_file( Var_T *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_B0( Var_T *v );
+Var_T *magnet_slope( Var_T *v );
 
 void hjs_fc_read_calibration( void );
 

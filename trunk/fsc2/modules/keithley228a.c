@@ -65,16 +65,16 @@ int keithley228a_exp_hook( void );
 int keithley228a_end_of_exp_hook( void );
 void keithley228a_exit_hook( void );
 
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *magnet_use_correction( Var *v );
-Var *magnet_use_dac_port( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
-Var *magnet_command( Var *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *magnet_use_correction( Var_T *v );
+Var_T *magnet_use_dac_port( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
+Var_T *magnet_command( Var_T *v );
 
 
 /* internally used functions */
@@ -116,7 +116,7 @@ static struct {
 
 int keithley228a_init_hook( void )
 {
-	Var *func_ptr;
+	Var_T *func_ptr;
 	int acc;
 	int i;
 	void *first_DAC_port;
@@ -126,7 +126,7 @@ int keithley228a_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* We need the lock-in driver called *before* the magnet driver since
 	   the lock-ins DAC is needed in the initialization of the magnet.
@@ -286,7 +286,7 @@ void keithley228a_exit_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( UNUSED_ARG Var *v )
+Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -296,7 +296,7 @@ Var *magnet_name( UNUSED_ARG Var *v )
 /* Function for registering the start current and the current step size. */
 /*-----------------------------------------------------------------------*/
 
-Var *magnet_setup( Var *v )
+Var_T *magnet_setup( Var_T *v )
 {
 	double cur;
 	double cur_step;
@@ -336,7 +336,7 @@ Var *magnet_setup( Var *v )
 /* Function for switching use of corrections to the field on and off. */
 /*--------------------------------------------------------------------*/
 
-Var *magnet_use_correction( Var *v )
+Var_T *magnet_use_correction( Var_T *v )
 {
 	if ( v == NULL )
 		keithley228a.use_correction = SET;
@@ -358,7 +358,7 @@ Var *magnet_use_correction( Var *v )
 /* to be used for the corrections to the field.                 */
 /*--------------------------------------------------------------*/
 
-Var *magnet_use_dac_port( Var *v )
+Var_T *magnet_use_dac_port( Var_T *v )
 {
 	int port;
 	void *first_DAC_port;
@@ -394,7 +394,7 @@ Var *magnet_use_dac_port( Var *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-Var *set_field( Var *v )
+Var_T *set_field( Var_T *v )
 {
 	double new_current;
 	double cur;
@@ -423,7 +423,7 @@ Var *set_field( Var *v )
 /* Convenience function: just returns the current */
 /*------------------------------------------------*/
 
-Var *get_field( UNUSED_ARG Var *v )
+Var_T *get_field( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, keithley228a.current );
 }
@@ -432,7 +432,7 @@ Var *get_field( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_up( UNUSED_ARG Var *v )
+Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
 	double new_current;
 
@@ -456,7 +456,7 @@ Var *sweep_up( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_down( UNUSED_ARG Var *v )
+Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
 	double new_current;
 
@@ -480,7 +480,7 @@ Var *sweep_down( UNUSED_ARG Var *v )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-Var *reset_field( UNUSED_ARG Var *v )
+Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
 	if ( ! keithley228a.is_req_current )
 	{
@@ -496,7 +496,7 @@ Var *reset_field( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *magnet_command( Var *v )
+Var_T *magnet_command( Var_T *v )
 {
 	char *cmd = NULL;
 
@@ -793,7 +793,7 @@ static double keithley228a_set_current( double new_current )
 	double power_supply_current;
 	double dac_volts;
 	char cmd[ 100 ];
-	Var *func_ptr;
+	Var_T *func_ptr;
 	int acc;
 
 

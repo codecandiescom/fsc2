@@ -62,30 +62,30 @@ int hp8648b_end_of_exp_hook( void );
 void hp8648b_exit_hook( void );
 
 
-Var *synthesizer_name( Var *v );
-Var *synthesizer_state( Var *v );
-Var *synthesizer_frequency( Var *v );
-Var *synthesizer_step_frequency( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_minimum_attenuation( Var *v );
-Var *synthesizer_sweep_up( Var *v );
-Var *synthesizer_sweep_down( Var *v );
-Var *synthesizer_reset_frequency( Var *v );
-Var *synthesizer_use_table( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_att_ref_freq( Var *v );
-Var *synthesizer_modulation( Var *v );
-Var *synthesizer_mod_ampl( Var *v );
-Var *synthesizer_mod_type( Var *v );
-Var *synthesizer_mod_source( Var *v );
-Var *synthesizer_command( Var *v );
+Var_T *synthesizer_name( Var_T *v );
+Var_T *synthesizer_state( Var_T *v );
+Var_T *synthesizer_frequency( Var_T *v );
+Var_T *synthesizer_step_frequency( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_minimum_attenuation( Var_T *v );
+Var_T *synthesizer_sweep_up( Var_T *v );
+Var_T *synthesizer_sweep_down( Var_T *v );
+Var_T *synthesizer_reset_frequency( Var_T *v );
+Var_T *synthesizer_use_table( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_att_ref_freq( Var_T *v );
+Var_T *synthesizer_modulation( Var_T *v );
+Var_T *synthesizer_mod_ampl( Var_T *v );
+Var_T *synthesizer_mod_type( Var_T *v );
+Var_T *synthesizer_mod_source( Var_T *v );
+Var_T *synthesizer_command( Var_T *v );
 
 
-typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
+typedef struct Att_Table_Entry Att_Table_Entry_T;
 typedef struct HP8648B HP8648B;
 
 
-struct ATT_TABLE_ENTRY {
+struct Att_Table_Entry {
 	double freq;
 	double att;
 };
@@ -107,7 +107,7 @@ struct HP8648B {
 
 	char *table_file;               /* name of attenuation table file */
 	bool use_table;
-	ATT_TABLE_ENTRY *att_table;
+	Att_Table_Entry_T *att_table;
 	long att_table_len;
 	double min_table_freq;
 	double max_table_freq;
@@ -137,7 +137,7 @@ FILE *hp8648b_find_table( char **name );
 FILE *hp8648b_open_table( char *name );
 double hp8648b_get_att_from_table( double freq );
 double hp8648b_get_att( double freq );
-int hp8648b_set_mod_param( Var *v, double *dres, int *ires );
+int hp8648b_set_mod_param( Var_T *v, double *dres, int *ires );
 
 
 /* functions defined in "hp8648b_lexer.l" */

@@ -34,7 +34,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 bool hfs9000_is_needed = UNSET;
 HFS9000 hfs9000;
-PULSE *hfs9000_Pulses = NULL;
+Pulse_T *hfs9000_Pulses = NULL;
 bool hfs9000_IN_SETUP = UNSET;
 
 
@@ -48,12 +48,12 @@ int hfs9000_init_hook( void )
 	int i;
 
 
-	pulser_struct.name     = DEVICE_NAME;
-	pulser_struct.has_pods = UNSET;
+	Pulser_Struct.name     = DEVICE_NAME;
+	Pulser_Struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* We have to set up the global structure for the pulser, especially the
 	   pointers for the functions that will get called from pulser.c */
@@ -63,51 +63,51 @@ int hfs9000_init_hook( void )
 	hfs9000.keep_all       = UNSET;
 	hfs9000.stop_on_update = SET;
 
-	pulser_struct.set_timebase = hfs9000_store_timebase;
+	Pulser_Struct.set_timebase = hfs9000_store_timebase;
 
-	pulser_struct.assign_function = NULL;
-	pulser_struct.assign_channel_to_function
-		= hfs9000_assign_channel_to_function;
-	pulser_struct.invert_function = hfs9000_invert_function;
-	pulser_struct.set_function_delay = hfs9000_set_function_delay;
-	pulser_struct.set_function_high_level = hfs9000_set_function_high_level;
-	pulser_struct.set_function_low_level = hfs9000_set_function_low_level;
+	Pulser_Struct.assign_function = NULL;
+	Pulser_Struct.assign_channel_to_function =
+											hfs9000_assign_channel_to_function;
+	Pulser_Struct.invert_function = hfs9000_invert_function;
+	Pulser_Struct.set_function_delay = hfs9000_set_function_delay;
+	Pulser_Struct.set_function_high_level = hfs9000_set_function_high_level;
+	Pulser_Struct.set_function_low_level = hfs9000_set_function_low_level;
 
-	pulser_struct.set_trigger_mode = hfs9000_set_trigger_mode;
-	pulser_struct.set_repeat_time = NULL;
-	pulser_struct.set_trig_in_level = hfs9000_set_trig_in_level;
-	pulser_struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
-	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_max_seq_len = hfs9000_set_max_seq_len;
+	Pulser_Struct.set_trigger_mode = hfs9000_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = NULL;
+	Pulser_Struct.set_trig_in_level = hfs9000_set_trig_in_level;
+	Pulser_Struct.set_trig_in_slope = hfs9000_set_trig_in_slope;
+	Pulser_Struct.set_trig_in_impedance = NULL;
+	Pulser_Struct.set_max_seq_len = hfs9000_set_max_seq_len;
 
-	pulser_struct.set_phase_reference = NULL;
+	Pulser_Struct.set_phase_reference = NULL;
 
-	pulser_struct.new_pulse = hfs9000_new_pulse;
-	pulser_struct.set_pulse_function = hfs9000_set_pulse_function;
-	pulser_struct.set_pulse_position = hfs9000_set_pulse_position;
-	pulser_struct.set_pulse_length = hfs9000_set_pulse_length;
-	pulser_struct.set_pulse_position_change =
-		hfs9000_set_pulse_position_change;
-	pulser_struct.set_pulse_length_change = hfs9000_set_pulse_length_change;
-	pulser_struct.set_pulse_phase_cycle = NULL;
-	pulser_struct.set_grace_period = NULL;
+	Pulser_Struct.new_pulse = hfs9000_new_pulse;
+	Pulser_Struct.set_pulse_function = hfs9000_set_pulse_function;
+	Pulser_Struct.set_pulse_position = hfs9000_set_pulse_position;
+	Pulser_Struct.set_pulse_length = hfs9000_set_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
+											 hfs9000_set_pulse_position_change;
+	Pulser_Struct.set_pulse_length_change = hfs9000_set_pulse_length_change;
+	Pulser_Struct.set_pulse_phase_cycle = NULL;
+	Pulser_Struct.set_grace_period = NULL;
 
-	pulser_struct.get_pulse_function = hfs9000_get_pulse_function;
-	pulser_struct.get_pulse_position = hfs9000_get_pulse_position;
-	pulser_struct.get_pulse_length = hfs9000_get_pulse_length;
-	pulser_struct.get_pulse_position_change =
-		hfs9000_get_pulse_position_change;
-	pulser_struct.get_pulse_length_change = hfs9000_get_pulse_length_change;
-	pulser_struct.get_pulse_phase_cycle = NULL;
+	Pulser_Struct.get_pulse_function = hfs9000_get_pulse_function;
+	Pulser_Struct.get_pulse_position = hfs9000_get_pulse_position;
+	Pulser_Struct.get_pulse_length = hfs9000_get_pulse_length;
+	Pulser_Struct.get_pulse_position_change =
+											 hfs9000_get_pulse_position_change;
+	Pulser_Struct.get_pulse_length_change = hfs9000_get_pulse_length_change;
+	Pulser_Struct.get_pulse_phase_cycle = NULL;
 
-	pulser_struct.phase_setup_prep = NULL;
-	pulser_struct.phase_setup = NULL;
+	Pulser_Struct.phase_setup_prep = NULL;
+	Pulser_Struct.phase_setup = NULL;
 
-	pulser_struct.set_phase_switch_delay = NULL;
+	Pulser_Struct.set_phase_switch_delay = NULL;
 
-	pulser_struct.keep_all_pulses = hfs9000_keep_all;
+	Pulser_Struct.keep_all_pulses = hfs9000_keep_all;
 
-	pulser_struct.ch_to_num = hfs9000_ch_to_num;
+	Pulser_Struct.ch_to_num = hfs9000_ch_to_num;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
@@ -201,13 +201,13 @@ int hfs9000_test_hook( void )
 	/* We need some somewhat different functions (or disable some) for
 	   setting the pulse properties */
 
-	pulser_struct.set_pulse_function = NULL;
+	Pulser_Struct.set_pulse_function = NULL;
 
-	pulser_struct.set_pulse_position = hfs9000_change_pulse_position;
-	pulser_struct.set_pulse_length = hfs9000_change_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.set_pulse_position = hfs9000_change_pulse_position;
+	Pulser_Struct.set_pulse_length = hfs9000_change_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 		hfs9000_change_pulse_position_change;
-	pulser_struct.set_pulse_length_change = hfs9000_change_pulse_length_change;
+	Pulser_Struct.set_pulse_length_change = hfs9000_change_pulse_length_change;
 
 	return 1;
 }
@@ -315,7 +315,7 @@ int hfs9000_end_of_exp_hook( void )
 
 void hfs9000_exit_hook( void )
 {
-	PULSE *p, *np;
+	Pulse_T *p, *np;
 	int i;
 
 
@@ -342,7 +342,7 @@ void hfs9000_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( UNUSED_ARG Var *v )
+Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -351,7 +351,7 @@ Var *pulser_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
 	int pd[ 2 ];
 	pid_t pid;
@@ -423,7 +423,7 @@ Var *pulser_show_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
 	char *name;
 	char *m;
@@ -503,7 +503,7 @@ Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_keep_all_pulses( UNUSED_ARG Var_T *v )
 {
 	hfs9000_keep_all( );
 	return vars_push( INT_VAR, 1L );
@@ -513,7 +513,7 @@ Var *pulser_keep_all_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_maximum_pattern_length( Var *v )
+Var_T *pulser_maximum_pattern_length( Var_T *v )
 {
 	double pl;
 
@@ -528,7 +528,7 @@ Var *pulser_maximum_pattern_length( Var *v )
 /* Switches the output of the pulser on or off */
 /*---------------------------------------------*/
 
-Var *pulser_state( Var *v )
+Var_T *pulser_state( Var_T *v )
 {
 	bool state;
 
@@ -551,7 +551,7 @@ Var *pulser_state( Var *v )
 /* if called with just one argument, returns the state.       */
 /*------------------------------------------------------------*/
 
-Var *pulser_channel_state( Var *v )
+Var_T *pulser_channel_state( Var_T *v )
 {
 	int channel;
 	bool state;
@@ -605,7 +605,7 @@ Var *pulser_channel_state( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( UNUSED_ARG Var *v )
+Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
 	if ( ! hfs9000_is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -627,9 +627,9 @@ Var *pulser_update( UNUSED_ARG Var *v )
 /*            function pulser_update() !                                */
 /*----------------------------------------------------------------------*/
 
-Var *pulser_shift( Var *v )
+Var_T *pulser_shift( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! hfs9000_is_needed )
@@ -699,9 +699,9 @@ Var *pulser_shift( Var *v )
 /*            function pulser_update() !                                   */
 /*-------------------------------------------------------------------------*/
 
-Var *pulser_increment( Var *v )
+Var_T *pulser_increment( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! hfs9000_is_needed )
@@ -775,7 +775,7 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( UNUSED_ARG Var *v )
+Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
 	vars_pop( pulser_pulse_reset( NULL ) );
 	return pulser_update( NULL );
@@ -785,9 +785,9 @@ Var *pulser_reset( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_pulse_reset( Var *v )
+Var_T *pulser_pulse_reset( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
 	if ( ! hfs9000_is_needed )
@@ -851,7 +851,7 @@ Var *pulser_pulse_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_lock_keyboard( UNUSED_ARG Var *v )
+Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
 {
 	print( SEVERE, "Function can't be used for this device.\n" );
 	return vars_push( INT_VAR, 1L );
@@ -861,7 +861,7 @@ Var *pulser_lock_keyboard( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_stop_on_update( Var *v )
+Var_T *pulser_stop_on_update( Var_T *v )
 {
 	hfs9000.stop_on_update = get_strict_long( v, "boolean value" ) == 0 ?
 		                     UNSET : SET;
@@ -873,7 +873,7 @@ Var *pulser_stop_on_update( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_command( Var *v )
+Var_T *pulser_command( Var_T *v )
 {
 	char *cmd = NULL;
 

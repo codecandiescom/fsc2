@@ -32,14 +32,9 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-bool ep385_is_needed = UNSET;
-EP385 ep385;
-PULSE *ep385_Pulses = NULL;
-bool ep385_IN_SETUP = UNSET;
-PHASE_SETUP ep385_phs[ 2 ];
 
-
-static bool in_reset = UNSET;
+EP385_T ep385;
+static bool In_reset = UNSET;
 
 
 /*-------------------------------------------------------------------------*/
@@ -51,20 +46,20 @@ static bool in_reset = UNSET;
 int ep385_init_hook( void )
 {
 	int i, j;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 
 
 	fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 );
 	fsc2_assert( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
 
-	pulser_struct.name     = DEVICE_NAME;
-	pulser_struct.has_pods = UNSET;
+	Pulser_Struct.name     = DEVICE_NAME;
+	Pulser_Struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
 #ifndef EP385_GPIB_DEBUG
-	need_GPIB = SET;
+	Need_GPIB = SET;
 #endif
 
 	/* We have to set up the global structure for the pulser, especially the
@@ -73,49 +68,50 @@ int ep385_init_hook( void )
 	ep385.needs_update = SET;
 	ep385.keep_all     = UNSET;
 
-	pulser_struct.set_timebase = ep385_store_timebase;
-	pulser_struct.assign_function = NULL;
-	pulser_struct.assign_channel_to_function =
+	Pulser_Struct.set_timebase = ep385_store_timebase;
+	Pulser_Struct.assign_function = NULL;
+	Pulser_Struct.assign_channel_to_function =
 											  ep385_assign_channel_to_function;
-	pulser_struct.invert_function = NULL;
-	pulser_struct.set_function_delay = ep385_set_function_delay;
-	pulser_struct.set_function_high_level = NULL;
-	pulser_struct.set_function_low_level = NULL;
+	Pulser_Struct.invert_function = NULL;
+	Pulser_Struct.set_function_delay = ep385_set_function_delay;
+	Pulser_Struct.set_function_high_level = NULL;
+	Pulser_Struct.set_function_low_level = NULL;
 
-	pulser_struct.set_trigger_mode = ep385_set_trigger_mode;
-	pulser_struct.set_repeat_time = ep385_set_repeat_time;
-	pulser_struct.set_trig_in_level = NULL;
-	pulser_struct.set_trig_in_slope = NULL;
-	pulser_struct.set_trig_in_impedance = NULL;
-	pulser_struct.set_max_seq_len = ep385_set_max_seq_len;
+	Pulser_Struct.set_trigger_mode = ep385_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = ep385_set_repeat_time;
+	Pulser_Struct.set_trig_in_level = NULL;
+	Pulser_Struct.set_trig_in_slope = NULL;
+	Pulser_Struct.set_trig_in_impedance = NULL;
+	Pulser_Struct.set_max_seq_len = ep385_set_max_seq_len;
 
-	pulser_struct.set_phase_reference = ep385_set_phase_reference;
+	Pulser_Struct.set_phase_reference = ep385_set_phase_reference;
 
-	pulser_struct.new_pulse = ep385_new_pulse;
-	pulser_struct.set_pulse_function = ep385_set_pulse_function;
-	pulser_struct.set_pulse_position = ep385_set_pulse_position;
-	pulser_struct.set_pulse_length = ep385_set_pulse_length;
-	pulser_struct.set_pulse_position_change = ep385_set_pulse_position_change;
-	pulser_struct.set_pulse_length_change = ep385_set_pulse_length_change;
-	pulser_struct.set_pulse_phase_cycle = ep385_set_pulse_phase_cycle;
-	pulser_struct.set_grace_period = NULL;
+	Pulser_Struct.new_pulse = ep385_new_pulse;
+	Pulser_Struct.set_pulse_function = ep385_set_pulse_function;
+	Pulser_Struct.set_pulse_position = ep385_set_pulse_position;
+	Pulser_Struct.set_pulse_length = ep385_set_pulse_length;
+	Pulser_Struct.set_pulse_position_change = ep385_set_pulse_position_change;
+	Pulser_Struct.set_pulse_length_change = ep385_set_pulse_length_change;
+	Pulser_Struct.set_pulse_phase_cycle = ep385_set_pulse_phase_cycle;
+	Pulser_Struct.set_grace_period = NULL;
 
-	pulser_struct.get_pulse_function = ep385_get_pulse_function;
-	pulser_struct.get_pulse_position = ep385_get_pulse_position;
-	pulser_struct.get_pulse_length = ep385_get_pulse_length;
-	pulser_struct.get_pulse_position_change = ep385_get_pulse_position_change;
-	pulser_struct.get_pulse_length_change = ep385_get_pulse_length_change;
-	pulser_struct.get_pulse_phase_cycle = ep385_get_pulse_phase_cycle;
+	Pulser_Struct.get_pulse_function = ep385_get_pulse_function;
+	Pulser_Struct.get_pulse_position = ep385_get_pulse_position;
+	Pulser_Struct.get_pulse_length = ep385_get_pulse_length;
+	Pulser_Struct.get_pulse_position_change = ep385_get_pulse_position_change;
+	Pulser_Struct.get_pulse_length_change = ep385_get_pulse_length_change;
+	Pulser_Struct.get_pulse_phase_cycle = ep385_get_pulse_phase_cycle;
 
-	pulser_struct.phase_setup_prep = ep385_phase_setup_prep;
-	pulser_struct.phase_setup = ep385_phase_setup;
+	Pulser_Struct.phase_setup_prep = ep385_phase_setup_prep;
+	Pulser_Struct.phase_setup = ep385_phase_setup;
 
-	pulser_struct.set_phase_switch_delay = NULL;
+	Pulser_Struct.set_phase_switch_delay = NULL;
 
-	pulser_struct.keep_all_pulses = ep385_keep_all;
+	Pulser_Struct.keep_all_pulses = ep385_keep_all;
 
 	/* Finally, we initialize variables that store the state of the pulser */
 
+	ep385.in_setup = UNSET;
 	ep385.is_trig_in_mode = UNSET;
 	ep385.is_repeat_time = UNSET;
 	ep385.is_neg_delay = UNSET;
@@ -181,7 +177,7 @@ int ep385_init_hook( void )
 		f->max_duty_warning = 0;
 	}
 
-	ep385_is_needed = SET;
+	ep385.is_needed = SET;
 
 	return 1;
 }
@@ -206,14 +202,14 @@ int ep385_test_hook( void )
 		if ( ep385.do_dump_pulses )
 			ep385_dump_pulses( );
 
-		ep385_IN_SETUP = SET;
+		ep385.in_setup = SET;
 		ep385_init_setup( );
-		ep385_IN_SETUP = UNSET;
+		ep385.in_setup = UNSET;
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		ep385_IN_SETUP = UNSET;
+		ep385.in_setup = UNSET;
 		if ( ep385.dump_file )
 		{
 			fclose( ep385.dump_file );
@@ -232,16 +228,16 @@ int ep385_test_hook( void )
 	/* We need some somewhat different functions (or disable some) for
 	   setting the pulse properties */
 
-	pulser_struct.set_pulse_function = NULL;
+	Pulser_Struct.set_pulse_function = NULL;
 
-	pulser_struct.set_pulse_position = ep385_change_pulse_position;
-	pulser_struct.set_pulse_length = ep385_change_pulse_length;
-	pulser_struct.set_pulse_position_change =
+	Pulser_Struct.set_pulse_position = ep385_change_pulse_position;
+	Pulser_Struct.set_pulse_length = ep385_change_pulse_length;
+	Pulser_Struct.set_pulse_position_change =
 											ep385_change_pulse_position_change;
-	pulser_struct.set_pulse_length_change = ep385_change_pulse_length_change;
+	Pulser_Struct.set_pulse_length_change = ep385_change_pulse_length_change;
 
-	if ( ep385_Pulses == NULL )
-		ep385_is_needed = UNSET;
+	if ( ep385.pulses == NULL )
+		ep385.is_needed = UNSET;
 
 	return 1;
 }
@@ -253,7 +249,7 @@ int ep385_test_hook( void )
 int ep385_end_of_test_hook( void )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 	char *min = NULL;
 
 
@@ -452,15 +448,15 @@ int ep385_exp_hook( void )
 
 	/* Initialize the device */
 
-	ep385_IN_SETUP = SET;
+	ep385.in_setup = SET;
 	if ( ! ep385_init( DEVICE_NAME ) )
 	{
-		ep385_IN_SETUP = UNSET;
+		ep385.in_setup = UNSET;
 		print( FATAL, "Failure to initialize the pulser: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
-	ep385_IN_SETUP = UNSET;
+	ep385.in_setup = UNSET;
 
 	return 1;
 }
@@ -488,8 +484,8 @@ int ep385_end_of_exp_hook( void )
 
 void ep385_exit_hook( void )
 {
-	PULSE *p;
-	FUNCTION *f;
+	Pulse_T *p;
+	Function_T *f;
 	int i, j;
 
 
@@ -507,10 +503,10 @@ void ep385_exit_hook( void )
 
 	/* Free all memory that may have been allocated for the module */
 
-	for ( p = ep385_Pulses; p != NULL;  )
+	for ( p = ep385.pulses; p != NULL;  )
 		p= ep385_delete_pulse( p, UNSET );
 
-	ep385_Pulses = NULL;
+	ep385.pulses = NULL;
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 		ep385.channel[ i ].pulse_params =
@@ -542,7 +538,7 @@ void ep385_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_name( UNUSED_ARG Var *v )
+Var_T *pulser_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -551,7 +547,7 @@ Var *pulser_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_shape_pulses( Var *v )
+Var_T *pulser_automatic_shape_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -674,7 +670,7 @@ Var *pulser_automatic_shape_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_automatic_twt_pulses( Var *v )
+Var_T *pulser_automatic_twt_pulses( Var_T *v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -797,7 +793,7 @@ Var *pulser_automatic_twt_pulses( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_show_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		ep385.do_show_pulses = SET;
@@ -809,7 +805,7 @@ Var *pulser_show_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_dump_pulses( UNUSED_ARG Var *v )
+Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		ep385.do_dump_pulses = SET;
@@ -821,7 +817,7 @@ Var *pulser_dump_pulses( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_shape_to_defense_minimum_distance( Var *v )
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 {
 	double s2d;
 
@@ -852,7 +848,7 @@ Var *pulser_shape_to_defense_minimum_distance( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_defense_to_shape_minimum_distance( Var *v )
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
 {
 	double d2s;
 
@@ -888,7 +884,7 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v )
 /* next call of pulser_update().                                     */
 /*-------------------------------------------------------------------*/
 
-Var *pulser_minimum_twt_pulse_distance( Var *v )
+Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
 {
 	double mtpd;
 
@@ -927,7 +923,7 @@ Var *pulser_minimum_twt_pulse_distance( Var *v )
 /* Switches the output of the pulser on or off */
 /*---------------------------------------------*/
 
-Var *pulser_state( Var *v )
+Var_T *pulser_state( Var_T *v )
 {
 	bool state;
 
@@ -948,7 +944,7 @@ Var *pulser_state( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *pulser_channel_state( UNUSED_ARG Var *v )
+Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 {
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
@@ -959,9 +955,9 @@ Var *pulser_channel_state( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_update( UNUSED_ARG Var *v )
+Var_T *pulser_update( UNUSED_ARG Var_T *v )
 {
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
@@ -981,19 +977,19 @@ Var *pulser_update( UNUSED_ARG Var *v )
 /*            function pulser_update() !                                */
 /*----------------------------------------------------------------------*/
 
-Var *pulser_shift( Var *v )
+Var_T *pulser_shift( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for ( p = ep385_Pulses; p != NULL; p = p->next )
+		for ( p = ep385.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -1075,19 +1071,19 @@ Var *pulser_shift( Var *v )
 /*            function pulser_update() !                                   */
 /*-------------------------------------------------------------------------*/
 
-Var *pulser_increment( Var *v )
+Var_T *pulser_increment( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for ( p = ep385_Pulses; p != NULL; p = p->next )
+		for ( p = ep385.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -1166,19 +1162,19 @@ Var *pulser_increment( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_reset( UNUSED_ARG Var *v )
+Var_T *pulser_reset( UNUSED_ARG Var_T *v )
 {
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
-	in_reset = SET;
+	In_reset = SET;
 
-	if ( ep385_phs[ 0 ].function != NULL ||
-		 ep385_phs[ 1 ].function != NULL )
+	if ( ep385.phs[ 0 ].function != NULL ||
+		 ep385.phs[ 1 ].function != NULL )
 		vars_pop( pulser_phase_reset( NULL ) );
 	vars_pop( pulser_pulse_reset( NULL ) );
 
-	in_reset = UNSET;
+	In_reset = UNSET;
 
 	return pulser_update( NULL );
 }
@@ -1187,12 +1183,12 @@ Var *pulser_reset( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_pulse_reset( Var *v )
+Var_T *pulser_pulse_reset( Var_T *v )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
@@ -1202,7 +1198,7 @@ Var *pulser_pulse_reset( Var *v )
 
 	if ( v == NULL )
 	{
-		for ( p = ep385_Pulses; p != NULL; p = p->next )
+		for ( p = ep385.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 	}
@@ -1285,28 +1281,28 @@ Var *pulser_pulse_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_next_phase( Var *v )
+Var_T *pulser_next_phase( Var_T *v )
 {
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
-		if ( ep385_phs[ 0 ].function == NULL &&
-			 ep385_phs[ 1 ].function == NULL &&
+		if ( ep385.phs[ 0 ].function == NULL &&
+			 ep385.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( ep385_phs[ 0 ].function != NULL )
+		if ( ep385.phs[ 0 ].function != NULL )
 			vars_pop( pulser_next_phase( vars_push( INT_VAR, 1L ) ) );
-		if ( ep385_phs[ 1 ].function != NULL )
+		if ( ep385.phs[ 1 ].function != NULL )
 			vars_pop( pulser_next_phase( vars_push( INT_VAR, 2L ) ) );
 		return vars_push( INT_VAR, 1L );
 	}
@@ -1321,14 +1317,14 @@ Var *pulser_next_phase( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		if ( ! ep385_phs[ phase_number - 1 ].is_defined )
+		if ( ! ep385.phs[ phase_number - 1 ].is_defined )
 		{
 			print( FATAL, "PHASE_SETUP_%ld has not been defined.\n",
 				   phase_number );
 			THROW( EXCEPTION );
 		}
 
-		f = ep385_phs[ phase_number - 1 ].function;
+		f = ep385.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1351,28 +1347,28 @@ Var *pulser_next_phase( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_phase_reset( Var *v )
+Var_T *pulser_phase_reset( Var_T *v )
 {
-	FUNCTION *f;
+	Function_T *f;
 	long phase_number;
 
 
-	if ( ! ep385_is_needed )
+	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	if ( v == NULL )
 	{
-		if ( ep385_phs[ 0 ].function == NULL &&
-			 ep385_phs[ 1 ].function == NULL &&
+		if ( ep385.phs[ 0 ].function == NULL &&
+			 ep385.phs[ 1 ].function == NULL &&
 			 FSC2_MODE == TEST )
 		{
 			print( SEVERE, "Phase cycling isn't used for any function.\n" );
 			return vars_push( INT_VAR, 0L );
 		}
 
-		if ( ep385_phs[ 0 ].function != NULL )
+		if ( ep385.phs[ 0 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 1L ) ) );
-		if ( ep385_phs[ 1 ].function != NULL )
+		if ( ep385.phs[ 1 ].function != NULL )
 			vars_pop( pulser_phase_reset( vars_push( INT_VAR, 2L ) ) );
 		return vars_push( INT_VAR, 1L );
 	}
@@ -1387,7 +1383,7 @@ Var *pulser_phase_reset( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		f = ep385_phs[ phase_number - 1 ].function;
+		f = ep385.phs[ phase_number - 1 ].function;
 
 		if ( ! f->is_used )
 		{
@@ -1401,7 +1397,7 @@ Var *pulser_phase_reset( Var *v )
 	}
 
 	ep385.needs_update = SET;
-	if ( ! in_reset )
+	if ( ! In_reset )
 		pulser_update( NULL );
 	return vars_push( INT_VAR, 1L );
 }
@@ -1410,7 +1406,7 @@ Var *pulser_phase_reset( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_lock_keyboard( UNUSED_ARG Var *v )
+Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
 {
 	print( SEVERE, "Function can't be used for this device.\n" );
 	return vars_push( INT_VAR, 1L );
@@ -1420,7 +1416,7 @@ Var *pulser_lock_keyboard( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *pulser_command( Var *v )
+Var_T *pulser_command( Var_T *v )
 {
 	char *cmd = NULL;
 
@@ -1454,7 +1450,7 @@ Var *pulser_command( Var *v )
 /* pattern length of the pulser.                        */
 /*------------------------------------------------------*/
 
-Var *pulser_maximum_pattern_length( UNUSED_ARG Var *v )
+Var_T *pulser_maximum_pattern_length( UNUSED_ARG Var_T *v )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	ep385_timebase_check( );

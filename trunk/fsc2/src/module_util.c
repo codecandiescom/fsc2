@@ -93,7 +93,7 @@ void stop_on_user_request( void )
 /* arguments to a function.                                     */
 /*--------------------------------------------------------------*/
 
-void too_many_arguments( Var *v )
+void too_many_arguments( Var_T *v )
 {
 	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
@@ -123,7 +123,7 @@ void no_query_possible( void )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-long get_long( Var *v, const char *snippet )
+long get_long( Var_T *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -141,7 +141,7 @@ long get_long( Var *v, const char *snippet )
 /*--------------------------------------------------------------*/
 /*--------------------------------------------------------------*/
 
-double get_double( Var *v, const char *snippet )
+double get_double( Var_T *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -160,7 +160,7 @@ double get_double( Var *v, const char *snippet )
 /* value is converted to an int and this value returned.                */
 /*----------------------------------------------------------------------*/
 
-long get_strict_long( Var *v, const char *snippet )
+long get_strict_long( Var_T *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -198,7 +198,7 @@ long get_strict_long( Var *v, const char *snippet )
 /* match either "ON" or "OFF" and exception is thrown in every case.         */
 /*---------------------------------------------------------------------------*/
 
-bool get_boolean( Var *v )
+bool get_boolean( Var_T *v )
 {
 	const char *alt[ 2 ] = { "OFF", "ON" };
 	int res;
@@ -235,7 +235,7 @@ bool get_boolean( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *get_element( Var *v, int len, ... )
+Var_T *get_element( Var_T *v, int len, ... )
 {
 	va_list ap;
 	long cur_idx;

@@ -39,12 +39,12 @@ int bh15_init_hook( void );
 int bh15_exp_hook( void );
 int bh15_end_of_exp_hook( void );
 
-Var *gaussmeter_name( Var *v );
-Var *gaussmeter_field( Var *v );
-Var *find_field( Var *v );
-Var *gaussmeter_resolution( Var *v );
-Var *gaussmeter_wait( Var *v );
-Var *gaussmeter_command( Var *v );
+Var_T *gaussmeter_name( Var_T *v );
+Var_T *gaussmeter_field( Var_T *v );
+Var_T *find_field( Var_T *v );
+Var_T *gaussmeter_resolution( Var_T *v );
+Var_T *gaussmeter_wait( Var_T *v );
+Var_T *gaussmeter_command( Var_T *v );
 
 
 static double bh15_get_field( void );
@@ -84,7 +84,7 @@ enum {
 
 int bh15_init_hook( void )
 {
-	need_GPIB = SET;
+	Need_GPIB = SET;
 	bh15.name = DEVICE_NAME;
 
 	is_gaussmeter = SET;
@@ -183,7 +183,7 @@ int bh15_end_of_exp_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( UNUSED_ARG Var *v )
+Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -192,7 +192,7 @@ Var *gaussmeter_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_field( UNUSED_ARG Var *v )
+Var_T *gaussmeter_field( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
@@ -201,7 +201,7 @@ Var *gaussmeter_field( UNUSED_ARG Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *find_field( UNUSED_ARG Var *v )
+Var_T *find_field( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
@@ -210,7 +210,7 @@ Var *find_field( UNUSED_ARG Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_resolution( UNUSED_ARG Var *v )
+Var_T *gaussmeter_resolution( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, bh15.resolution );
 }
@@ -219,7 +219,7 @@ Var *gaussmeter_resolution( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *gaussmeter_command( Var *v )
+Var_T *gaussmeter_command( Var_T *v )
 {
 	char *cmd = NULL;
 
@@ -251,7 +251,7 @@ Var *gaussmeter_command( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_wait( UNUSED_ARG Var *v )
+Var_T *gaussmeter_wait( UNUSED_ARG Var_T *v )
 {
 	fsc2_usleep( 100000, UNSET );
 	return vars_push( INT_VAR, 1L );

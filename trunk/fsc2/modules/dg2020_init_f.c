@@ -30,11 +30,11 @@ static void dg2020_basic_pulse_check( void );
 static void dg2020_basic_functions_check( void );
 static void dg2020_distribute_channels( void );
 static void dg2020_pulse_start_setup( void );
-static void dg2020_create_phase_pulses( FUNCTION *f );
-static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
-									  int pos, int pod );
-static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-												PULSE *p, int nth );
+static void dg2020_create_phase_pulses( Function_T *f );
+static Pulse_T *dg2020_new_phase_pulse( Function_T *f, Pulse_T *p, int nth,
+										int pos, int pod );
+static void dg2020_set_phase_pulse_pos_and_len( Function_T *f, Pulse_T *np,
+												Pulse_T *p, int nth );
 
 
 /*---------------------------------------------------------------------------
@@ -67,7 +67,7 @@ void dg2020_init_setup( void )
 
 static void dg2020_init_print( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 
 
@@ -107,10 +107,10 @@ static void dg2020_init_print( FILE *fp )
 
 static void dg2020_basic_pulse_check( void )
 {
-	PULSE *p;
+	Pulse_T *p;
 
 
-	for ( p = dg2020_Pulses; p != NULL; p = p->next )
+	for ( p = dg2020.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -210,8 +210,8 @@ static void dg2020_basic_pulse_check( void )
 static void dg2020_basic_functions_check( void )
 {
 	int i, j;
-	FUNCTION *f;
-	PULSE *cp;
+	Function_T *f;
+	Pulse_T *cp;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -257,7 +257,7 @@ static void dg2020_basic_functions_check( void )
 
 			/* No phase sequences have been defined ? */
 
-			if ( PSeq == NULL )
+			if ( Phs_Seq == NULL )
 			{
 				print( WARN, "Phase functions '%s' isn't needed, because no "
 					   "phase sequences have been defined.\n", f->name );
@@ -332,7 +332,7 @@ static void dg2020_basic_functions_check( void )
 			f->needs_phases = UNSET;
 			f->num_active_pulses = 0;
 
-			for ( cp = dg2020_Pulses; cp != NULL; cp = cp->next )
+			for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
 			{
 				if ( cp->function != f )
 					continue;
@@ -371,7 +371,7 @@ static void dg2020_basic_functions_check( void )
 		else
 		{
 			f->needs_phases = UNSET;
-			f->num_needed_channels = 2 * PSeq->len;
+			f->num_needed_channels = 2 * Phs_Seq->len;
 		}
 
 		/* Put channels not needed back into the pool */
@@ -437,7 +437,7 @@ static void dg2020_basic_functions_check( void )
 static void dg2020_distribute_channels( void )
 {
 	int i;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	/* First count the number of channels we really need for the experiment */
@@ -491,7 +491,7 @@ static void dg2020_distribute_channels( void )
 
 static void dg2020_pulse_start_setup( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 
@@ -508,7 +508,7 @@ static void dg2020_pulse_start_setup( void )
 			 f->self == PULSER_CHANNEL_PHASE_2 )
 			continue;
 
-		qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+		qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
 			   dg2020_start_compare );
 
 		dg2020_do_checks( f );
@@ -528,17 +528,17 @@ static void dg2020_pulse_start_setup( void )
   functions are allowed.
 -----------------------------------------------------------------------------*/
 
-static void dg2020_create_phase_pulses( FUNCTION *f )
+static void dg2020_create_phase_pulses( Function_T *f )
 {
 	int i, j, l;
-	PULSE *p;
+	Pulse_T *p;
 
 
 	for ( i = 0; i < f->phase_func->num_pulses; i++ )
 	{
 		f->num_active_pulses = 0;
 
-		for ( j = 0; j < PSeq->len; j++ )
+		for ( j = 0; j < Phs_Seq->len; j++ )
 			for ( l = 0; l < 2; l++ )
 			{
 				p = dg2020_new_phase_pulse( f, f->phase_func->pulses[ i ], i,
@@ -567,10 +567,10 @@ static void dg2020_create_phase_pulses( FUNCTION *f )
   pod = 0 / 1: the pod for the new phase pulse
 ---------------------------------------------------------------------------*/
 
-static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
-									  int pos, int pod )
+static Pulse_T *dg2020_new_phase_pulse( Function_T *f, Pulse_T *p, int nth,
+										int pos, int pod )
 {
-	PULSE *np, *cp;
+	Pulse_T *np, *cp;
 	int type;
 
 
@@ -589,7 +589,7 @@ static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 
 	/* Get memory for a new pulse and append it to the list of pulses */
 
-	for ( cp = np = dg2020_Pulses; np != NULL; np = np->next )
+	for ( cp = np = dg2020.pulses; np != NULL; np = np->next )
 		cp = np;
 
 	np = PULSE_P T_malloc( sizeof *np );
@@ -640,14 +640,14 @@ static PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
 /*---------------------------------------------------------------------------
 ---------------------------------------------------------------------------*/
 
-static void dg2020_set_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
-												PULSE *p, int nth )
+static void dg2020_set_phase_pulse_pos_and_len( Function_T *f, Pulse_T *np,
+												Pulse_T *p, int nth )
 {
-	PULSE **pppl;                 /* list of phase pulses for previous pulse */
+	Pulse_T **pppl;               /* list of phase pulses for previous pulse */
 	int ppp_num;                  /* and the length of this list */
-	PULSE *pp, *pn;
+	Pulse_T *pp, *pn;
 	int i;
-	PULSE *for_pulse = NULL;
+	Pulse_T *for_pulse = NULL;
 
 
 	if ( nth == 0 )                           /* for first pulse ? */

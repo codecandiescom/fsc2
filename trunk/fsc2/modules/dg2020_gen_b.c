@@ -63,8 +63,8 @@ bool dg2020_store_timebase( double timebase )
 
 bool dg2020_assign_function( int function, long pod )
 {
-	FUNCTION *f = dg2020.function + function;
-	POD *p = dg2020.pod + pod;
+	Function_T *f = dg2020.function + function;
+	Pod_T *p = dg2020.pod + pod;
 
 
 	/* Check that pod number is in valid range */
@@ -116,8 +116,8 @@ bool dg2020_assign_function( int function, long pod )
 
 bool dg2020_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = dg2020.function + function;
-	CHANNEL *c = dg2020.channel + channel;
+	Function_T *f = dg2020.function + function;
+	Channel_T *c = dg2020.channel + channel;
 
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
@@ -527,7 +527,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 
 bool dg2020_set_phase_reference( int phs, int function )
 {
-	FUNCTION *f;
+	Function_T *f;
 
 
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
@@ -544,10 +544,10 @@ bool dg2020_set_phase_reference( int phs, int function )
 
 	/* Check if a function has already been assigned to the phase setup */
 
-	if ( dg2020_phs[ phs ].function != NULL )
+	if ( dg2020.phs[ phs ].function != NULL )
 	{
 		print( FATAL, "PHASE_SETUP_%d has already been assoiated with "
-			   "function %s.\n", phs + 1, dg2020_phs[ phs ].function->name );
+			   "function %s.\n", phs + 1, dg2020.phs[ phs ].function->name );
 		THROW( EXCEPTION );
 	}
 
@@ -562,9 +562,9 @@ bool dg2020_set_phase_reference( int phs, int function )
 		THROW( EXCEPTION );
 	}
 
-	dg2020_phs[ phs ].is_defined = SET;
-	dg2020_phs[ phs ].function = f;
-	f->phase_setup = dg2020_phs + phs;
+	dg2020.phs[ phs ].is_defined = SET;
+	dg2020.phs[ phs ].function = f;
+	f->phase_setup = dg2020.phs + phs;
 
 	return OK;
 }
@@ -593,13 +593,13 @@ bool dg2020_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 
 	/* Complain if a pod has already been assigned for this phase type */
 
-	if ( dg2020_phs[ phs ].is_set[ type ] )
+	if ( dg2020.phs[ phs ].is_set[ type ] )
 	{
-		fsc2_assert( dg2020_phs[ phs ].pod[ type ] != NULL );
+		fsc2_assert( dg2020.phs[ phs ].pod[ type ] != NULL );
 
 		print( SEVERE, "Pod for controlling phase type '%s' has already been "
 			   "set to %d.\n",
-			   Phase_Types[ type ], dg2020_phs[ phs ].pod[ type ]->self );
+			   Phase_Types[ type ], dg2020.phs[ phs ].pod[ type ]->self );
 		return FAIL;
 	}
 
@@ -612,8 +612,8 @@ bool dg2020_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
 		THROW( EXCEPTION );
 	}
 
-	dg2020_phs[ phs ].is_set[ type ] = SET;
-	dg2020_phs[ phs ].pod[ type ] = dg2020.pod + pod;
+	dg2020.phs[ phs ].is_set[ type ] = SET;
+	dg2020.phs[ phs ].pod[ type ] = dg2020.pod + pod;
 
 	return OK;
 }
@@ -628,13 +628,13 @@ bool dg2020_phase_setup( int phs )
 {
 	bool is_set = UNSET;
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	fsc2_assert( Cur_PHS != -1 && Cur_PHS == phs );
 	Cur_PHS = -1;
 
-	if ( dg2020_phs[ phs ].function == NULL )
+	if ( dg2020.phs[ phs ].function == NULL )
 	{
 		print( SEVERE, "No function has been associated with "
 			   "PHASE_SETUP_%1d.\n", phs + 1 );
@@ -643,23 +643,23 @@ bool dg2020_phase_setup( int phs )
 
 	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
 	{
-		if ( ! dg2020_phs[ phs ].is_set[ i ] )
+		if ( ! dg2020.phs[ phs ].is_set[ i ] )
 			 continue;
 
 		is_set = SET;
-		f = dg2020_phs[ phs ].function;
+		f = dg2020.phs[ phs ].function;
 
 		/* Check that the pod reserved for the current phase is reserved for
 		   the function that we're going to phase-cycle */
 
 		for ( j = 0; j < f->num_pods; j++ )
-			if ( dg2020_phs[ phs ].pod[ i ] == f->pod[ j ] )
+			if ( dg2020.phs[ phs ].pod[ i ] == f->pod[ j ] )
 				break;
 
 		if ( j == f->num_pods )
 		{
 			print( FATAL, "Pod %d needed for phase '%s' is not reserved for "
-				   "function '%s'.\n", dg2020_phs[ phs ].pod[ i ]->self,
+				   "function '%s'.\n", dg2020.phs[ phs ].pod[ i ]->self,
 				   Phase_Types[ i ], f->name );
 			THROW( EXCEPTION );
 		}
@@ -667,11 +667,11 @@ bool dg2020_phase_setup( int phs )
 		/* Check that the pod isn't already used for a different phase */
 
 		for ( j = 0; j < i; j++ )
-			if ( dg2020_phs[ phs ].is_set[ j ] &&
-				 dg2020_phs[ phs ].pod[ i ] == dg2020_phs[ phs ].pod[ j ] )
+			if ( dg2020.phs[ phs ].is_set[ j ] &&
+				 dg2020.phs[ phs ].pod[ i ] == dg2020.phs[ phs ].pod[ j ] )
 			{
 				print( FATAL, "The same pod %d is used for phases '%s' and "
-					   "'%s'.\n", dg2020_phs[ phs ].pod[ i ]->self,
+					   "'%s'.\n", dg2020.phs[ phs ].pod[ i ]->self,
 					   Phase_Types[ j ], Phase_Types[ i ] );
 				THROW( EXCEPTION );
 			}

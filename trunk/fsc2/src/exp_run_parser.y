@@ -32,17 +32,21 @@
 
 
 void exp_runparser_init( void );
+int exp_runparse( void );
 
 extern int exp_runlex( void );
 extern char *exptext;
 
-static int wpp;        /* which pulse property */
 
 /* locally used functions */
 
-int exp_runparse( void );
 static void exp_runerror( const char *s );
-static int dont_exec = 0;
+
+
+/* locally used variables */
+
+static int Dont_exec = 0;
+static int W_pp;            /* which pulse property */
 
 %}
 
@@ -54,7 +58,7 @@ static int dont_exec = 0;
 	long   lval;
     double dval;
 	char   *sptr;
-	Var    *vptr;
+	Var_T  *vptr;
 }
 
 %token E_VAR_TOKEN	  258
@@ -118,11 +122,11 @@ input:   /* empty */
 ;
 
 eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
-									 fsc2_assert( dont_exec == 0 );
+									 fsc2_assert( Dont_exec == 0 );
                                      if ( EDL.do_quit )
                                          YYACCEPT; }
        | '}'                       { fsc2_assert( EDL.Var_Stack == NULL );
-									 fsc2_assert( dont_exec == 0 );
+									 fsc2_assert( Dont_exec == 0 );
 	                                 YYACCEPT; }
 ;
 
@@ -137,19 +141,19 @@ line:    lhs '=' expr              { vars_assign( $3, $1 ); }
        | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
-       | plhs '=' expr             { p_set( $1, wpp, $3 ); }
-       | plhs E_PLSA expr          { p_set( $1, wpp, vars_add(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
-       | plhs E_MINA expr          { p_set( $1, wpp, vars_sub(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
-       | plhs E_MULA expr          { p_set( $1, wpp, vars_mult(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
-       | plhs E_DIVA expr          { p_set( $1, wpp, vars_div(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
-       | plhs E_MODA expr          { p_set( $1, wpp, vars_mod(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
-       | plhs E_EXPA expr          { p_set( $1, wpp, vars_pow(
-		                                    p_get_by_num( $1, wpp ), $3 ) ); }
+       | plhs '=' expr             { p_set( $1, W_pp, $3 ); }
+       | plhs E_PLSA expr          { p_set( $1, W_pp, vars_add(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
+       | plhs E_MINA expr          { p_set( $1, W_pp, vars_sub(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
+       | plhs E_MULA expr          { p_set( $1, W_pp, vars_mult(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
+       | plhs E_DIVA expr          { p_set( $1, W_pp, vars_div(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
+       | plhs E_MODA expr          { p_set( $1, W_pp, vars_mod(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
+       | plhs E_EXPA expr          { p_set( $1, W_pp, vars_pow(
+		                                    p_get_by_num( $1, W_pp ), $3 ) ); }
 ;
 
 lhs:     E_VAR_TOKEN               { $$ = $1; }
@@ -157,24 +161,24 @@ lhs:     E_VAR_TOKEN               { $$ = $1; }
          list1 ']'                 { $$ = vars_arr_lhs( $4 ); }
 ;
 
-plhs:    E_PPOS                    { wpp = P_POS; $$ = $1; }
-       | E_PLEN                    { wpp = P_LEN; $$ = $1; }
-       | E_PDPOS                   { wpp = P_DPOS; $$ = $1; }
-       | E_PDLEN                   { wpp = P_DLEN; $$ = $1; }
+plhs:    E_PPOS                    { W_pp = P_POS; $$ = $1; }
+       | E_PLEN                    { W_pp = P_LEN; $$ = $1; }
+       | E_PDPOS                   { W_pp = P_DPOS; $$ = $1; }
+       | E_PDLEN                   { W_pp = P_DLEN; $$ = $1; }
 ;
 
-expr:    E_INT_TOKEN               { if ( ! dont_exec )
+expr:    E_INT_TOKEN               { if ( ! Dont_exec )
 	                                     $$ = vars_push( INT_VAR, $1 ); }
-       | E_FLOAT_TOKEN             { if ( ! dont_exec )
+       | E_FLOAT_TOKEN             { if ( ! Dont_exec )
 		                                 $$ = vars_push( FLOAT_VAR, $1 ); }
-       | E_VAR_TOKEN               { if ( ! dont_exec )
+       | E_VAR_TOKEN               { if ( ! Dont_exec )
 		                                  $$ = vars_push_copy( $1 ); }
-       | E_VAR_TOKEN '['           { if ( ! dont_exec )
+       | E_VAR_TOKEN '['           { if ( ! Dont_exec )
                                          vars_arr_start( $1 ); }
-         list1 ']'                 { if ( ! dont_exec )
+         list1 ']'                 { if ( ! Dont_exec )
                                          $$ = vars_arr_rhs( $4 ); }
        | E_FUNC_TOKEN '(' list2
-         ')'                       { if ( ! dont_exec )
+         ')'                       { if ( ! Dont_exec )
                                          $$ = func_call( $1 );
 	                                 else
 										 vars_pop( $1 ); }
@@ -182,126 +186,126 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | strs
-       | E_VAR_REF                 { if ( dont_exec )
+       | E_VAR_REF                 { if ( Dont_exec )
 										 vars_pop( $1 ); }
        | E_VAR_TOKEN '('           { print( FATAL, "'%s' isn't a function.\n", 
 											$1->name );
 	                                 THROW( EXCEPTION ); }
-       | E_PPOS                    { if ( ! dont_exec )
+       | E_PPOS                    { if ( ! Dont_exec )
 		                                  $$ = p_get_by_num( $1, P_POS ); }
-       | E_PLEN                    { if ( ! dont_exec )
+       | E_PLEN                    { if ( ! Dont_exec )
 		                                  $$ = p_get_by_num( $1, P_LEN ); }
-       | E_PDPOS                   { if ( ! dont_exec )
+       | E_PDPOS                   { if ( ! Dont_exec )
 		                                  $$ = p_get_by_num( $1, P_DPOS ); }
-       | E_PDLEN                   { if ( ! dont_exec )
+       | E_PDLEN                   { if ( ! Dont_exec )
 		                                  $$ = p_get_by_num( $1, P_DLEN ); }
-	   | expr E_AND                { if ( ! dont_exec )
+	   | expr E_AND                { if ( ! Dont_exec )
 	                                 {
 										 if ( ! check_result( $1 ) )
 										 {
-											 dont_exec++;
+											 Dont_exec++;
 											 vars_pop( $1 );
 										 }
 									 }
 									 else
-										 dont_exec++;
+										 Dont_exec++;
 	                               }
-	     expr                      { if ( ! dont_exec )
+	     expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_AND, $1, $4 );
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 										 $$ = vars_push( INT_VAR, 0L );
 		                           }
-       | expr E_OR                 { if ( ! dont_exec )
+       | expr E_OR                 { if ( ! Dont_exec )
 	                                 {
 										 if ( check_result( $1 ) )
 										 {
-											 dont_exec++;
+											 Dont_exec++;
 										     vars_pop( $1 );
 										 }
 									 }
 									 else
-										 dont_exec++;
+										 Dont_exec++;
 	                               }
-	     expr                      { if ( ! dont_exec )
+	     expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_OR, $1, $4 );
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 										 $$ = vars_push( INT_VAR, 1L );
 		                           }
-       | expr E_XOR expr           { if ( ! dont_exec )
+       | expr E_XOR expr           { if ( ! Dont_exec )
 		                                  $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | E_NOT expr %prec E_NOT    { if ( ! dont_exec )
+       | E_NOT expr %prec E_NOT    { if ( ! Dont_exec )
 		                                  $$ = vars_lnegate( $2 ); }
-       | expr E_EQ expr            { if ( ! dont_exec )
+       | expr E_EQ expr            { if ( ! Dont_exec )
 		                                $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr E_NE expr            { if ( ! dont_exec )
+       | expr E_NE expr            { if ( ! Dont_exec )
 		                              $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | expr E_LT expr            { if ( ! dont_exec )
+       | expr E_LT expr            { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr E_GT expr            { if ( ! dont_exec )
+       | expr E_GT expr            { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr E_LE expr            { if ( ! dont_exec )
+       | expr E_LE expr            { if ( ! Dont_exec )
 		                                  $$ = vars_comp( COMP_LESS_EQUAL,
 														  $1, $3 ); }
-       | expr E_GE expr            { if ( ! dont_exec )
+       | expr E_GE expr            { if ( ! Dont_exec )
 		                                  $$ = vars_comp( COMP_LESS_EQUAL,
 														  $3, $1 ); }
-       | expr '+' expr             { if ( ! dont_exec )
+       | expr '+' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_add( $1, $3 ); }
-       | expr '-' expr             { if ( ! dont_exec )
+       | expr '-' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr             { if ( ! dont_exec )
+       | expr '*' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr             { if ( ! dont_exec )
+       | expr '/' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_div( $1, $3 ); }
-       | expr '%' expr             { if ( ! dont_exec )
+       | expr '%' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr             { if ( ! dont_exec )
+       | expr '^' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_pow( $1, $3 ); }
-       | '+' expr %prec E_NEG      { if ( ! dont_exec )
+       | '+' expr %prec E_NEG      { if ( ! Dont_exec )
 		                                 $$ = $2; }
-       | '-' expr %prec E_NEG      { if ( ! dont_exec )
+       | '-' expr %prec E_NEG      { if ( ! Dont_exec )
 		                                 $$ = vars_negate( $2 ); }
-       | '(' expr ')'              { if ( ! dont_exec )
+       | '(' expr ')'              { if ( ! Dont_exec )
 		                                 $$ = $2; }
-       | expr '?'                  { if ( ! dont_exec )
+       | expr '?'                  { if ( ! Dont_exec )
 	                                 {
 		                                 if ( ! check_result( $1 ) )
-		                                     dont_exec++;
+		                                     Dont_exec++;
 		                                 vars_pop( $1 );
 									 }
 	                                 else
-										 dont_exec +=2;
+										 Dont_exec +=2;
 	                               }
-    	 expr ':'                  { if ( ! dont_exec )
-										 dont_exec++;
+    	 expr ':'                  { if ( ! Dont_exec )
+										 Dont_exec++;
 		 							 else
-										 dont_exec--;
+										 Dont_exec--;
 	                               }
-		 expr                      { if ( ! dont_exec )
+		 expr                      { if ( ! Dont_exec )
 										 $$ = $7;
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 									     $$ = $4;
                                    }
 ;
 
 /* list of indices for access of an array element */
 
-list1:   /* empty */                 { if ( ! dont_exec )
+list1:   /* empty */                 { if ( ! Dont_exec )
 		                                  $$ = vars_push( UNDEF_VAR ); }
 	   | l1e
 ;
 
-l1e:     ind                         { if ( ! dont_exec )
+l1e:     ind                         { if ( ! Dont_exec )
 		                                  $$ = $1; }
-       | l1e ',' ind                 { if ( ! dont_exec )
+       | l1e ',' ind                 { if ( ! Dont_exec )
 		                                  $$ = $3; }
 ;
 
-ind:     expr                        { if ( ! dont_exec )
+ind:     expr                        { if ( ! Dont_exec )
 		                                   $$ = $1; }
-	   | expr ':'                    { if ( ! dont_exec )
+	   | expr ':'                    { if ( ! Dont_exec )
 										   vars_push( STR_VAR, ":" ); }
-         expr                        { if ( ! dont_exec )
+         expr                        { if ( ! Dont_exec )
 		                                   $$ = $4; }
 ;
 
@@ -315,11 +319,11 @@ l2e:     expr                       { }
        | l2e ',' expr               { }
 ;
 
-strs:    E_STR_TOKEN               { if ( ! dont_exec )
+strs:    E_STR_TOKEN               { if ( ! Dont_exec )
 		                                 $$ = vars_push( STR_VAR, $1 ); }
-       | strs E_STR_TOKEN          { if ( ! dont_exec )
+       | strs E_STR_TOKEN          { if ( ! Dont_exec )
 	                                 {
-		                                  Var *v = vars_push( STR_VAR, $2 );
+		                                  Var_T *v = vars_push( STR_VAR, $2 );
 										  $$ = vars_add( v->prev, v ); }
 	                               }
 ;
@@ -343,7 +347,7 @@ static void exp_runerror ( UNUSED_ARG const char *s )
 
 void exp_runparser_init( void )
 {
-	dont_exec = 0;
+	Dont_exec = 0;
 }
 
 

@@ -88,11 +88,11 @@
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
 
-typedef struct WINDOW WINDOW;
+typedef struct Window Window_T;
 typedef struct LECROY9400 LECROY9400;
 
 
-struct WINDOW {
+struct Window {
 	long num;                   /* number of window                          */
 	double start;               /* start of window (in time units)           */
 	double width;               /* width of window (in time units)           */
@@ -101,8 +101,8 @@ struct WINDOW {
 	bool is_start;              /* flag, set if start of window has been set */
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
-	WINDOW *next;               /* pointer to next window structure          */
-	WINDOW *prev;               /* pointer to previous window structure      */
+	Window_T *next;             /* pointer to next window structure          */
+	Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
@@ -158,7 +158,7 @@ struct LECROY9400 {
 
 	bool is_reject[ MAX_CHANNELS ];
 
-	WINDOW *w;             /* start element of list of windows               */
+	Window_T *w;           /* start element of list of windows               */
 	int num_windows;
 
 	double cursor_pos;     /* current position of cursor 1                   */
@@ -182,22 +182,22 @@ int lecroy9400_end_of_exp_hook( void );
 void lecroy9400_exit_hook( void );
 
 
-Var *digitizer_name( Var *v );
-Var *digitizer_define_window( Var *v );
-Var *digitizer_timebase( Var *v );
-Var *digitizer_time_per_point( Var *v );
-Var *digitizer_sensitivity( Var *v );
-Var *digitizer_averaging( Var *v );
-Var *digitizer_num_averages( Var *v );
-Var *digitizer_record_length( Var *v );
-Var *digitizer_trigger_position( Var *v );
-Var *digitizer_meas_channel_ok( Var *v );
-Var *digitizer_trigger_channel( Var *v );
-Var *digitizer_start_acquisition( Var *v );
-Var *digitizer_get_curve( Var *v );
-Var *digitizer_get_curve_fast( Var *v );
-Var *digitizer_run( Var *v );
-Var *digitizer_command( Var *v );
+Var_T *digitizer_name( Var_T *v );
+Var_T *digitizer_define_window( Var_T *v );
+Var_T *digitizer_timebase( Var_T *v );
+Var_T *digitizer_time_per_point( Var_T *v );
+Var_T *digitizer_sensitivity( Var_T *v );
+Var_T *digitizer_averaging( Var_T *v );
+Var_T *digitizer_num_averages( Var_T *v );
+Var_T *digitizer_record_length( Var_T *v );
+Var_T *digitizer_trigger_position( Var_T *v );
+Var_T *digitizer_meas_channel_ok( Var_T *v );
+Var_T *digitizer_trigger_channel( Var_T *v );
+Var_T *digitizer_start_acquisition( Var_T *v );
+Var_T *digitizer_get_curve( Var_T *v );
+Var_T *digitizer_get_curve_fast( Var_T *v );
+Var_T *digitizer_run( Var_T *v );
+Var_T *digitizer_command( Var_T *v );
 
 
 /* declaration of internally used functions */
@@ -232,7 +232,7 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 								  bool reject, long rec_len );
 void lecroy9400_finished( void );
 void lecroy9400_start_acquisition( void );
-void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
+void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
 						   bool use_cursor );
 void lecroy9400_free_running( void );
 bool lecroy9400_command( const char *cmd );

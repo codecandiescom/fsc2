@@ -25,23 +25,23 @@
 #include "fsc2.h"
 
 
-Graphics_1d G1;
+Graphics_1d_T G1;
 
 
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-							  Canvas *c );
+							  Canvas_T *c );
 static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-								Canvas *c );
+								Canvas_T *c );
 static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-							   Canvas *c );
-static bool change_x_range_1d( Canvas *c );
-static bool change_y_range_1d( Canvas *c );
-static bool change_xy_range_1d( Canvas *c );
-static bool zoom_x_1d( Canvas *c );
-static bool zoom_y_1d( Canvas *c );
-static bool zoom_xy_1d( Canvas *c );
-static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
-static void reconfigure_window_1d( Canvas *c, int w, int h );
+							   Canvas_T *c );
+static bool change_x_range_1d( Canvas_T *c );
+static bool change_y_range_1d( Canvas_T *c );
+static bool change_xy_range_1d( Canvas_T *c );
+static bool zoom_x_1d( Canvas_T *c );
+static bool zoom_y_1d( Canvas_T *c );
+static bool zoom_xy_1d( Canvas_T *c );
+static bool shift_XPoints_of_curve_1d( Canvas_T *c, Curve_1d_T *cv );
+static void reconfigure_window_1d( Canvas_T *c, int w, int h );
 static void recalc_XPoints_1d( void );
 static void delete_marker_1d( long x_pos );
 
@@ -53,7 +53,7 @@ static void delete_marker_1d( long x_pos );
 int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
 {
-	Canvas *c = ( Canvas * ) udata;
+	Canvas_T *c = ( Canvas_T * ) udata;
 
 
 	switch ( ev->type )
@@ -92,10 +92,10 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 /*-------------------------------------------------------*/
 
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
-							  Canvas *c )
+							  Canvas_T *c )
 {
 	long i;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	int old_button_state = G.button_state;
 	unsigned int keymask;
 	bool active = UNSET;
@@ -271,12 +271,12 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 /*--------------------------------------------------------*/
 
 static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
-								XEvent *ev, Canvas *c )
+								XEvent *ev, Canvas_T *c )
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
 	long i;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	bool active = UNSET;
 
 
@@ -492,9 +492,9 @@ static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 /*------------------------------------------------------------*/
 
 static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
-							   XEvent *ev, Canvas *c )
+							   XEvent *ev, Canvas_T *c )
 {
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	XEvent new_ev;
 	long i;
 	unsigned int keymask;
@@ -613,7 +613,7 @@ static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
 /* scaling are applied - needed for the UNDO button.        */
 /*----------------------------------------------------------*/
 
-void save_scale_state_1d( Curve_1d *cv )
+void save_scale_state_1d( Curve_1d_T *cv )
 {
 	cv->old_s2d[ X ] = cv->s2d[ X ];
 	cv->old_s2d[ Y ] = cv->s2d[ Y ];
@@ -627,11 +627,11 @@ void save_scale_state_1d( Curve_1d *cv )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_x_range_1d( Canvas *c )
+static bool change_x_range_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double x1, x2;
 
 
@@ -664,11 +664,11 @@ static bool change_x_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_y_range_1d( Canvas *c )
+static bool change_y_range_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double cy1, cy2;
 
 
@@ -703,11 +703,11 @@ static bool change_y_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_xy_range_1d( Canvas *c )
+static bool change_xy_range_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double cx1, cx2, cy1, cy2;
 
 
@@ -760,11 +760,11 @@ static bool change_xy_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_x_1d( Canvas *c )
+static bool zoom_x_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double px;
 
 
@@ -810,11 +810,11 @@ static bool zoom_x_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_y_1d( Canvas *c )
+static bool zoom_y_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double py;
 
 
@@ -865,11 +865,11 @@ static bool zoom_y_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_xy_1d( Canvas *c )
+static bool zoom_xy_1d( Canvas_T *c )
 {
 	long i;
 	bool scale_changed = UNSET;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double px, py;
 
 
@@ -939,7 +939,7 @@ static bool zoom_xy_1d( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
+static bool shift_XPoints_of_curve_1d( Canvas_T *c, Curve_1d_T *cv )
 {
 	long j, k;
 	int dx = 0,
@@ -1001,10 +1001,10 @@ static bool shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 /* Handles changes of the window size. */
 /*-------------------------------------*/
 
-static void reconfigure_window_1d( Canvas *c, int w, int h )
+static void reconfigure_window_1d( Canvas_T *c, int w, int h )
 {
 	long i;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	static bool is_reconf[ 2 ] = { UNSET, UNSET };
 	static bool need_redraw[ 2 ] = { UNSET, UNSET };
 	int old_w = c->w,
@@ -1122,10 +1122,10 @@ static void recalc_XPoints_1d( void )
 /* settings for the scale and the offset.                         */
 /*----------------------------------------------------------------*/
 
-void recalc_XPoints_of_curve_1d( Curve_1d *cv )
+void recalc_XPoints_of_curve_1d( Curve_1d_T *cv )
 {
 	long j;
-	Scaled_Point *sp = cv->points;
+	Scaled_Point_T *sp = cv->points;
 	XPoint *xp = cv->xpoints;
 
 
@@ -1166,11 +1166,11 @@ void redraw_all_1d( void )
 /* Does a complete redraw of a canvas. */
 /*-------------------------------------*/
 
-void redraw_canvas_1d( Canvas *c )
+void redraw_canvas_1d( Canvas_T *c )
 {
 	long i;
-	Curve_1d *cv = NULL;
-	Marker_1D *m;
+	Curve_1d_T *cv = NULL;
+	Marker_1d_T *m;
 	short x;
 
 
@@ -1262,13 +1262,13 @@ void redraw_canvas_1d( Canvas *c )
 /* Copies the background pixmap onto the canvas. */
 /*-----------------------------------------------*/
 
-void repaint_canvas_1d( Canvas *c )
+void repaint_canvas_1d( Canvas_T *c )
 {
 	long i;
 	char buf[ 256 ];
 	int x, y;
 	unsigned int w, h;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	double x_pos, y_pos;
 	Pixmap pm;
 
@@ -1402,7 +1402,7 @@ void repaint_canvas_1d( Canvas *c )
 
 int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 {
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	long i;
 	int ppos[ 2 ];
 
@@ -1444,7 +1444,7 @@ void fs_rescale_1d( void )
 		   rw_max;
 	double data;
 	double new_rwc_delta_y;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 
 
 	if ( ! G1.is_scale_set )
@@ -1515,7 +1515,7 @@ void fs_rescale_1d( void )
 /* Function creates the axis scales for 1D displays. */
 /*---------------------------------------------------*/
 
-void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
+void make_scale_1d( Curve_1d_T *cv, Canvas_T *c, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magnitude */
@@ -1720,7 +1720,7 @@ void make_scale_1d( Curve_1d *cv, Canvas *c, int coord )
 
 void set_marker_1d( long x_pos, long color )
 {
-	Marker_1D *m, *cm;
+	Marker_1d_T *m, *cm;
 	XGCValues gcv;
 
 
@@ -1767,7 +1767,7 @@ void set_marker_1d( long x_pos, long color )
 
 static void delete_marker_1d( long x_pos )
 {
-	Marker_1D *m, *mp;
+	Marker_1d_T *m, *mp;
 
 
 	for ( mp = NULL, m = G1.marker_1d; m != NULL; mp = m, m = m->next )
@@ -1792,7 +1792,7 @@ static void delete_marker_1d( long x_pos )
 
 void remove_markers_1d( void )
 {
-	Marker_1D *m, *mn;
+	Marker_1d_T *m, *mn;
 
 
 	if ( G1.marker_1d == NULL )

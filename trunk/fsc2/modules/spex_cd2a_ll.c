@@ -554,9 +554,9 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 
 #ifdef SPEX_CD2A_TEST
-/*
+
 	fprintf( stderr, "%s\n", mess );
-*/
+
 	return 0;
 #endif
 
@@ -619,13 +619,13 @@ static void spex_cd2a_read_ack( void )
 
 	do {
 		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
-											1000000, SET ) ) <= 0 )
+											1000000, UNSET ) ) <= 0 )
 			spex_cd2a_comm_fail( );
 	} while ( *buf == CAN );
 
 	if ( *buf != NAK &&
 		 ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
-										1, 1000000, SET ) ) <= 0 )
+										1, 1000000, UNSET ) ) <= 0 )
 		spex_cd2a_comm_fail( );
 
 	/* A <NAK> character means that there are communication problems */
@@ -659,7 +659,7 @@ static void spex_cd2a_read_ack( void )
 		while ( len > 0 )
 		{
 			if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
-												len - count, 1000000, SET ) )
+												len - count, 1000000, UNSET ) )
 				 <= 0 )
 				spex_cd2a_comm_fail( );
 
@@ -701,9 +701,8 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
 
 		if ( ( already_read +=
 			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-							  to_be_read - already_read, 1000000, SET ) ) < 0 )
+							to_be_read - already_read, 1000000, UNSET ) ) < 0 )
 			spex_cd2a_comm_fail( );
-		stop_on_user_request( );
 
 		/* Throw away <CAN> characters, the device sends them sometimes in the
 		   middle of a message (contrary to what's written in the manual. But
@@ -912,7 +911,7 @@ void spex_cd2a_close( void )
 
 static void spex_cd2a_comm_fail( void )
 {
-//	if ( spex_cd2a_do_print_message )
+	if ( spex_cd2a_do_print_message )
 		print( FATAL, "Can't access the monochromator.\n" );
 	SPEX_CD2A_THROW( EXCEPTION );
 }

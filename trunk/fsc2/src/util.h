@@ -42,7 +42,7 @@ int fsc2_usleep( unsigned long us_dur, bool quit_on_signal );
 int is_in( const char *supplied_in, const char **alternatives, int max );
 void i2rgb( double h, int *rgb );
 void create_colors( void );
-Var *convert_to_channel_number( const char *channel_name );
+Var_T *convert_to_channel_number( const char *channel_name );
 double fsc2_simplex( size_t n, double *x, double *dx, void *par,
 					 double func( double *x, void *par ), double epsilon );
 ssize_t read_line( int fd, void *vptr, size_t max_len );

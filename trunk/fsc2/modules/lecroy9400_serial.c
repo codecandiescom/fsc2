@@ -597,7 +597,7 @@ void lecroy9400_start_acquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-void lecroy9400_get_curve( int ch, WINDOW *w, double **array, long *length,
+void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
 						   bool use_cursor )
 {
 	unsigned char *data;

@@ -39,14 +39,14 @@ int aeg_x_band_test_hook( void );
 int aeg_x_band_exp_hook( void );
 int aeg_x_band_end_of_exp_hook( void );
 
-Var *magnet_name( Var *v );
-Var *magnet_setup( Var *v );
-Var *magnet_fast_init( Var *v );
-Var *set_field( Var *v );
-Var *get_field( Var *v );
-Var *sweep_up( Var *v );
-Var *sweep_down( Var *v );
-Var *reset_field( Var *v );
+Var_T *magnet_name( Var_T *v );
+Var_T *magnet_setup( Var_T *v );
+Var_T *magnet_fast_init( Var_T *v );
+Var_T *set_field( Var_T *v );
+Var_T *get_field( Var_T *v );
+Var_T *sweep_up( Var_T *v );
+Var_T *sweep_down( Var_T *v );
+Var_T *reset_field( Var_T *v );
 
 
 
@@ -205,7 +205,7 @@ int aeg_x_band_test_hook( void )
 
 int aeg_x_band_exp_hook( void )
 {
-	Var *v;
+	Var_T *v;
 	int acc;
 
 
@@ -261,7 +261,7 @@ int aeg_x_band_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *magnet_name( UNUSED_ARG Var *v )
+Var_T *magnet_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -271,7 +271,7 @@ Var *magnet_name( UNUSED_ARG Var *v )
 /* Function for registering the start field and the field step size. */
 /*-------------------------------------------------------------------*/
 
-Var *magnet_setup( Var *v )
+Var_T *magnet_setup( Var_T *v )
 {
 	bool err_flag = UNSET;
 	double start_field;
@@ -324,7 +324,7 @@ Var *magnet_setup( Var *v )
 /* magnet sweep but unfortunately also reducing the accuracy.		  */
 /*--------------------------------------------------------------------*/
 
-Var *magnet_fast_init( UNUSED_ARG Var *v )
+Var_T *magnet_fast_init( UNUSED_ARG Var_T *v )
 {
 	magnet.fast_init = SET;
 	return vars_push( INT_VAR, 1L );
@@ -334,7 +334,7 @@ Var *magnet_fast_init( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *set_field( Var *v )
+Var_T *set_field( Var_T *v )
 {
 	double field;
 	bool err_flag = UNSET;
@@ -390,9 +390,9 @@ Var *set_field( Var *v )
 /* Convenience function: just asks the used gaussmeter for the current field */
 /*---------------------------------------------------------------------------*/
 
-Var *get_field( UNUSED_ARG Var *v )
+Var_T *get_field( UNUSED_ARG Var_T *v )
 {
-	Var *new_var;
+	Var_T *new_var;
 	int acc;
 
 
@@ -405,7 +405,7 @@ Var *get_field( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_up( UNUSED_ARG Var *v )
+Var_T *sweep_up( UNUSED_ARG Var_T *v )
 {
 	bool err_flag = UNSET;
 
@@ -436,7 +436,7 @@ Var *sweep_up( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *sweep_down( UNUSED_ARG Var *v )
+Var_T *sweep_down( UNUSED_ARG Var_T *v )
 {
 	bool err_flag = UNSET;
 
@@ -467,7 +467,7 @@ Var *sweep_down( UNUSED_ARG Var *v )
 /*-----------------------------------------------------*/
 /*-----------------------------------------------------*/
 
-Var *reset_field( UNUSED_ARG Var *v )
+Var_T *reset_field( UNUSED_ARG Var_T *v )
 {
 	if ( ! magnet.is_field )
 	{
@@ -636,7 +636,7 @@ static bool magnet_init( void )
 {
 	double start_field;
 	int i;
-	Var *v;
+	Var_T *v;
 	int acc;
 	int test_steps;
 
@@ -789,7 +789,7 @@ static bool magnet_goto_field_rec( double field, double error, int rec,
 	int i;
 	static double last_diff;  /* field difference in last step */
 	static int tries;		  /* number of steps without conversion */
-	Var *v;
+	Var_T *v;
 	int acc;
 
 

@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var *f_bcreate( Var *v );
-Var *f_bdelete( Var *v );
-Var *f_bstate(  Var *v );
-Var *f_bchanged( Var *v );
+Var_T *f_bcreate( Var_T *v );
+Var_T *f_bdelete( Var_T *v );
+Var_T *f_bstate(  Var_T *v );
+Var_T *f_bchanged( Var_T *v );
 
 
 #endif   /* ! INTERACTIVE_BUTTONS_HEADER */

@@ -26,17 +26,17 @@
 
 
 static bool rs690_update_pulses( bool flag );
-static void rs690_pulse_check( FUNCTION *f );
-static void rs690_defense_shape_check( FUNCTION *shape );
+static void rs690_pulse_check( Function_T *f );
+static void rs690_defense_shape_check( Function_T *shape );
 static void rs690_commit( bool flag );
-static void rs690_make_fs( FS *start_fs );
-static void rs690_populate_fs( FS *start_fs );
+static void rs690_make_fs( FS_T *start_fs );
+static void rs690_populate_fs( FS_T *start_fs );
 static void rs690_check_fs( void );
 static void	rs690_correct_fs_for_8ns( void );
 static void	rs690_correct_fs_for_4ns( void );
-static FS *rs690_append_fs( Ticks pos );
-static FS *rs690_insert_fs( FS *at, Ticks pos );
-static void rs690_delete_fs_successor( FS *n );
+static FS_T *rs690_append_fs( Ticks pos );
+static FS_T *rs690_insert_fs( FS_T *at, Ticks pos );
+static void rs690_delete_fs_successor( FS_T *n );
 
 
 
@@ -80,11 +80,11 @@ static bool rs690_update_pulses( bool flag )
 {
 	int i, j;
 	int l, m;
-	FUNCTION *f;
-	PULSE *p;
-	CHANNEL *ch;
-	PULSE **pm_elem;
-	PULSE_PARAMS *pp;
+	Function_T *f;
+	Pulse_T *p;
+	Channel_T *ch;
+	Pulse_T **pm_elem;
+	Pulse_Params_T *pp;
 
 
 	CLOBBER_PROTECT( i );
@@ -225,7 +225,7 @@ static bool rs690_update_pulses( bool flag )
 						ch->num_active_pulses = ch->old_num_active_pulses;
 					}
 
-				for ( p = rs690_Pulses; p != NULL; p = p->next )
+				for ( p = rs690.pulses; p != NULL; p = p->next )
 				{
 					if ( p->is_old_pos )
 						p->pos = p->old_pos;
@@ -259,9 +259,9 @@ static bool rs690_update_pulses( bool flag )
 /* This function simply checks that no pulses of a function overlap. */
 /*-------------------------------------------------------------------*/
 
-static void rs690_pulse_check( FUNCTION *f )
+static void rs690_pulse_check( Function_T *f )
 {
-	PULSE *p1, *p2;
+	Pulse_T *p1, *p2;
 	int i, j;
 
 
@@ -356,10 +356,10 @@ static void rs690_pulse_check( FUNCTION *f )
 /* mentioned EDL functions have been called.                              */
 /*------------------------------------------------------------------------*/
 
-static void rs690_defense_shape_check( FUNCTION *shape )
+static void rs690_defense_shape_check( Function_T *shape )
 {
-	FUNCTION *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
-	PULSE *shape_p, *defense_p;
+	Function_T *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
+	Pulse_T *shape_p, *defense_p;
 	long i, j;
 
 
@@ -465,9 +465,9 @@ static void rs690_defense_shape_check( FUNCTION *shape )
 void rs690_full_reset( void )
 {
 	int i, j;
-	PULSE *p = rs690_Pulses;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Pulse_T *p = rs690.pulses;
+	Function_T *f;
+	Channel_T *ch;
 
 
 	rs690_cleanup_fs( );
@@ -534,9 +534,9 @@ void rs690_full_reset( void )
 /* Checks if shape padding can be set correctly for all pulses of a channel */
 /*--------------------------------------------------------------------------*/
 
-void rs690_shape_padding_check_1( CHANNEL *ch )
+void rs690_shape_padding_check_1( Channel_T *ch )
 {
-	PULSE_PARAMS *pp, *ppp;
+	Pulse_Params_T *pp, *ppp;
 	int i;
 
 
@@ -587,10 +587,10 @@ void rs690_shape_padding_check_1( CHANNEL *ch )
 
 void rs690_shape_padding_check_2( void )
 {
-	CHANNEL *ch1, *ch2;
-	FUNCTION *f1, *f2;
+	Channel_T *ch1, *ch2;
+	Function_T *f1, *f2;
 	int i, j, k, l, m, n;
-	PULSE_PARAMS *pp1, *pp2;
+	Pulse_Params_T *pp1, *pp2;
 
 
 	/* We need to check all pulses of functions that expect automatically
@@ -658,9 +658,9 @@ void rs690_shape_padding_check_2( void )
 /* if the time between two TWT gets too short.                     */
 /*-----------------------------------------------------------------*/
 
-void rs690_twt_padding_check( CHANNEL *ch )
+void rs690_twt_padding_check( Channel_T *ch )
 {
-	PULSE_PARAMS *pp, *ppp;
+	Pulse_Params_T *pp, *ppp;
 	int i;
 
 
@@ -781,8 +781,8 @@ void rs690_twt_padding_check( CHANNEL *ch )
 void rs690_seq_length_check( void )
 {
 	int i, j;
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 
 
 	/* Determine length of sequence lengths of individual functions */
@@ -821,10 +821,10 @@ void rs690_seq_length_check( void )
 		 rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
 	{
 		Ticks add;
-		CHANNEL *cs =
+		Channel_T *cs =
 					 rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
-				*cd = rs690.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
-		PULSE_PARAMS *shape_p, *defense_p;
+				  *cd = rs690.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+		Pulse_Params_T *shape_p, *defense_p;
 
 		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
 		{
@@ -879,11 +879,11 @@ void rs690_seq_length_check( void )
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
 
-PULSE *rs690_delete_pulse( PULSE *p, bool warn )
+Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn )
 {
-	PULSE *pp;
-	FUNCTION *f;
-	PULSE **pm_elem;
+	Pulse_T *pp;
+	Function_T *f;
+	Pulse_T **pm_elem;
 	int i, j, k;
 
 
@@ -971,8 +971,8 @@ PULSE *rs690_delete_pulse( PULSE *p, bool warn )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == rs690_Pulses )
-		rs690_Pulses = p->next;
+	if ( p == rs690.pulses )
+		rs690.pulses = p->next;
 	T_free( p );
 
 	return pp;
@@ -987,9 +987,9 @@ PULSE *rs690_delete_pulse( PULSE *p, bool warn )
 
 static void rs690_commit( bool flag )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i, j;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	/* Only really set the pulses while doing an experiment */
@@ -1082,9 +1082,9 @@ void rs690_channel_setup( bool flag )
 	{
 		for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
 			if ( rs690.timebase_type == TIMEBASE_8_NS )
-				rs690_default_fields[ i ] &= 0xFF;
+				rs690.default_fields[ i ] &= 0xFF;
 			else
-				rs690_default_fields[ i ] &= 0xF;
+				rs690.default_fields[ i ] &= 0xF;
 	}
 
 	TRY
@@ -1116,13 +1116,13 @@ void rs690_channel_setup( bool flag )
 /* for each change of the state of one of the pulses.         */
 /*------------------------------------------------------------*/
 
-static void rs690_make_fs( FS *start_fs )
+static void rs690_make_fs( FS_T *start_fs )
 {
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 	int i, j, k;
-	PULSE_PARAMS *pp;
-	FS *n;
+	Pulse_Params_T *pp;
+	FS_T *n;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -1202,13 +1202,13 @@ static void rs690_make_fs( FS *start_fs )
 /* all the FS structures to reflect the pulse states.              */
 /*-----------------------------------------------------------------*/
 
-static void rs690_populate_fs( FS *start_fs )
+static void rs690_populate_fs( FS_T *start_fs )
 {
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 	int i, j, k;
-	PULSE_PARAMS *pp;
-	FS *n;
+	Pulse_Params_T *pp;
+	FS_T *n;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -1252,8 +1252,8 @@ static void rs690_populate_fs( FS *start_fs )
 
 void rs690_check_fs( void )
 {
-	FS *nn;
-	FS *n;
+	FS_T *nn;
+	FS_T *n;
 	char *s = NULL;
 
 
@@ -1364,7 +1364,7 @@ void rs690_check_fs( void )
 
 static void rs690_correct_fs_for_8ns( void )
 {
-	FS *n, *p;
+	FS_T *n, *p;
 	int i;
 
 
@@ -1422,7 +1422,7 @@ static void rs690_correct_fs_for_8ns( void )
 
 static void	rs690_correct_fs_for_4ns( void )
 {
-	FS *n, *p;
+	FS_T *n, *p;
 	int i, j;
 
 
@@ -1480,7 +1480,7 @@ static void	rs690_correct_fs_for_4ns( void )
 	{
 		for ( i = 0; i <= rs690.last_used_field; i++ )
 			p->fields[ i ] = ( p->fields[ i ] << 4 ) |
-							 ( rs690_default_fields[ i ] & 0xf );	
+							 ( rs690.default_fields[ i ] & 0xf );	
 		p->len++;
 		p->is_composite = SET;
 	}
@@ -1495,14 +1495,14 @@ static void	rs690_correct_fs_for_4ns( void )
 /* immediately after the FS structure passed to the function. The   */
 /* position mmeberof the new structure is initialized to the value  */
 /* of the second argument and the field members are set to the      */
-/* values of the rs690_default_fields array (which are the bit      */
+/* values of the rs690.default_fields array (which are the bit      */
 /* patterns one needs for no pulses at all, taking into account the */
 /* polarity of the channels).                                       */
 /*------------------------------------------------------------------*/
 
-static FS *rs690_insert_fs( FS *at, Ticks pos )
+static FS_T *rs690_insert_fs( FS_T *at, Ticks pos )
 {
-	FS *n;
+	FS_T *n;
 
 
 	if ( rs690.new_fs == NULL )
@@ -1517,7 +1517,7 @@ static FS *rs690_insert_fs( FS *at, Ticks pos )
 	n->len = 0;
 	n->pos = pos;
 	n->is_composite = UNSET;
-	memcpy( n->fields, rs690_default_fields, sizeof n->fields );
+	memcpy( n->fields, rs690.default_fields, sizeof n->fields );
 
 	return n;
 }
@@ -1528,9 +1528,9 @@ static FS *rs690_insert_fs( FS *at, Ticks pos )
 /* structures. Everything else as in the previous function.       */
 /*----------------------------------------------------------------*/
 
-static FS *rs690_append_fs( Ticks pos )
+static FS_T *rs690_append_fs( Ticks pos )
 {
-	FS *n, *p;
+	FS_T *n, *p;
 
 
 	if ( rs690.new_fs == NULL )
@@ -1551,7 +1551,7 @@ static FS *rs690_append_fs( Ticks pos )
 	n->len = 0;
 	n->pos = pos;
 	n->is_composite = UNSET;
-	memcpy( n->fields, rs690_default_fields, sizeof n->fields );
+	memcpy( n->fields, rs690.default_fields, sizeof n->fields );
 
 	return n;
 }
@@ -1564,9 +1564,9 @@ static FS *rs690_append_fs( Ticks pos )
 /* does *not* get changed!                                          */
 /*------------------------------------------------------------------*/
 
-static void rs690_delete_fs_successor( FS *n )
+static void rs690_delete_fs_successor( FS_T *n )
 {
-	FS *nn;
+	FS_T *nn;
 
 	if ( n->next == NULL )
 		return;

@@ -91,22 +91,22 @@ int sr830_test_hook( void );
 int sr830_exp_hook( void );
 int sr830_end_of_exp_hook( void );
 
-Var *lockin_name( Var *v );
-Var *lockin_get_data( Var *v );
-Var *lockin_get_adc_data( Var *v );
-Var *lockin_dac_voltage( Var *v );
-Var *lockin_sensitivity( Var *v );
-Var *lockin_time_constant( Var *v );
-Var *lockin_phase( Var *v );
-Var *lockin_ref_freq( Var *v );
-Var *lockin_harmonic( Var *v );
-Var *lockin_ref_mode( Var *v );
-Var *lockin_ref_level( Var *v );
-Var *lockin_auto_setup( Var *v );
-Var *lockin_get_sample_time( Var *v );
-Var *lockin_auto_acquisition( Var *v );
-Var *lockin_lock_keyboard( Var *v );
-Var *lockin_command( Var *v );
+Var_T *lockin_name( Var_T *v );
+Var_T *lockin_get_data( Var_T *v );
+Var_T *lockin_get_adc_data( Var_T *v );
+Var_T *lockin_dac_voltage( Var_T *v );
+Var_T *lockin_sensitivity( Var_T *v );
+Var_T *lockin_time_constant( Var_T *v );
+Var_T *lockin_phase( Var_T *v );
+Var_T *lockin_ref_freq( Var_T *v );
+Var_T *lockin_harmonic( Var_T *v );
+Var_T *lockin_ref_mode( Var_T *v );
+Var_T *lockin_ref_level( Var_T *v );
+Var_T *lockin_auto_setup( Var_T *v );
+Var_T *lockin_get_sample_time( Var_T *v );
+Var_T *lockin_auto_acquisition( Var_T *v );
+Var_T *lockin_lock_keyboard( Var_T *v );
+Var_T *lockin_command( Var_T *v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -256,7 +256,7 @@ int sr830_init_hook( void )
 
 	/* Set global variable to indicate that device needs the GPIB bus */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset several variables in the structure describing the device */
 
@@ -362,7 +362,7 @@ int sr830_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_name( UNUSED_ARG Var *v )
+Var_T *lockin_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -387,7 +387,7 @@ Var *lockin_name( UNUSED_ARG Var *v )
  * just large enough to hold all requested data.
  *---------------------------------------------------------------------*/
 
-Var *lockin_get_data( Var *v )
+Var_T *lockin_get_data( Var_T *v )
 {
 	double data[ MAX_DATA_AT_ONCE ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	long channels[ MAX_DATA_AT_ONCE ];
@@ -494,7 +494,7 @@ Var *lockin_get_data( Var *v )
 /* Returned values are in the range between -10.5 V and +10.5 V. */
 /*---------------------------------------------------------------*/
 
-Var *lockin_get_adc_data( Var *v )
+Var_T *lockin_get_adc_data( Var_T *v )
 {
 	long port;
 
@@ -524,7 +524,7 @@ Var *lockin_get_adc_data( Var *v )
 /* returned (which is initially set to 0 V).                 */
 /*-----------------------------------------------------------*/
 
-Var *lockin_dac_voltage( Var *v )
+Var_T *lockin_dac_voltage( Var_T *v )
 {
 	long port;
 	double voltage;
@@ -584,7 +584,7 @@ Var *lockin_dac_voltage( Var *v )
 /* is set to the argument.                                                 */
 /*-------------------------------------------------------------------------*/
 
-Var *lockin_sensitivity( Var *v )
+Var_T *lockin_sensitivity( Var_T *v )
 {
 	double sens;
 	int sens_index = UNDEF_SENS_INDEX;
@@ -697,7 +697,7 @@ Var *lockin_sensitivity( Var *v )
 /* with an argumet the time constant is set to this value.                */
 /*------------------------------------------------------------------------*/
 
-Var *lockin_time_constant( Var *v )
+Var_T *lockin_time_constant( Var_T *v )
 {
 	double tc;
 	int tc_index = UNDEF_TC_INDEX;
@@ -808,7 +808,7 @@ Var *lockin_time_constant( Var *v )
 /* and the value the phase is set to is returned.                  */
 /*-----------------------------------------------------------------*/
 
-Var *lockin_phase( Var *v )
+Var_T *lockin_phase( Var_T *v )
 {
 	double phase;
 
@@ -863,7 +863,7 @@ Var *lockin_phase( Var *v )
 /* Sets or returns the harmonic to be used */
 /*-----------------------------------------*/
 
-Var *lockin_harmonic( Var *v )
+Var_T *lockin_harmonic( Var_T *v )
 {
 	long harm;
 	double freq;
@@ -917,7 +917,7 @@ Var *lockin_harmonic( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_mode( UNUSED_ARG Var *v )
+Var_T *lockin_ref_mode( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR830_TEST_MOD_MODE );
@@ -929,7 +929,7 @@ Var *lockin_ref_mode( UNUSED_ARG Var *v )
 /* Sets or returns the lock-in modulation frequency */
 /*--------------------------------------------------*/
 
-Var *lockin_ref_freq( Var *v )
+Var_T *lockin_ref_freq( Var_T *v )
 {
 	long harm;
 	double freq;
@@ -997,7 +997,7 @@ Var *lockin_ref_freq( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_level( Var *v )
+Var_T *lockin_ref_level( Var_T *v )
 {
 	double level;
 
@@ -1043,7 +1043,7 @@ Var *lockin_ref_level( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_auto_setup( Var *v )
+Var_T *lockin_auto_setup( Var_T *v )
 {
 	double st;
 	double tc;
@@ -1224,7 +1224,7 @@ Var *lockin_auto_setup( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_get_sample_time( UNUSED_ARG Var *v )
+Var_T *lockin_get_sample_time( UNUSED_ARG Var_T *v )
 {
 	long st_index;
 	double tc;
@@ -1259,7 +1259,7 @@ Var *lockin_get_sample_time( UNUSED_ARG Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_auto_acquisition( Var *v )
+Var_T *lockin_auto_acquisition( Var_T *v )
 {
 	bool state;
 
@@ -1289,7 +1289,7 @@ Var *lockin_auto_acquisition( Var *v )
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-Var *lockin_lock_keyboard( Var *v )
+Var_T *lockin_lock_keyboard( Var_T *v )
 {
 	bool lock;
 
@@ -1312,7 +1312,7 @@ Var *lockin_lock_keyboard( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *lockin_command( Var *v )
+Var_T *lockin_command( Var_T *v )
 {
 	char *cmd = NULL;
 

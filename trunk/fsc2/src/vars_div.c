@@ -25,12 +25,12 @@
 #include "fsc2.h"
 
 
-static Var *vars_div_i( Var *v1, Var *v2, bool exc );
-static Var *vars_int_var_div( Var *v1, Var *v2, bool exc );
-static Var *vars_float_var_div( Var *v1, Var *v2, bool exc );
-static Var *vars_int_arr_div( Var *v1, Var *v2, bool exc );
-static Var *vars_float_arr_div( Var *v1, Var *v2, bool exc );
-static Var *vars_ref_div( Var *v1, Var *v2, bool exc );
+static Var_T *vars_div_i( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_int_var_div( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_float_var_div( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_int_arr_div( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_float_arr_div( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_ref_div( Var_T *v1, Var_T *v2, bool exc );
 static void vars_div_check( double val );
 
 
@@ -38,7 +38,7 @@ static void vars_div_check( double val );
 /* Function for dividing of two variables of arbitrary types */
 /*-----------------------------------------------------------*/
 
-Var *vars_div( Var *v1, Var *v2 )
+Var_T *vars_div( Var_T *v1, Var_T *v2 )
 {
 	vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
 	vars_check( v2, RHS_TYPES );
@@ -59,6 +59,10 @@ Var *vars_div( Var *v1, Var *v2 )
 
 		case SUB_REF_PTR :
 			v1 = vars_subref_to_rhs_conv( v1 );
+			break;
+
+		default :
+			break;
 	}
 
 	return vars_div_i( v1, v2, UNSET );
@@ -68,9 +72,9 @@ Var *vars_div( Var *v1, Var *v2 )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_div_i( Var *v1, Var *v2, bool exc )
+static Var_T *vars_div_i( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	switch ( v1->type )
@@ -94,6 +98,9 @@ static Var *vars_div_i( Var *v1, Var *v2, bool exc )
 		case INT_REF : case FLOAT_REF :
 			new_var = vars_ref_div( v1, v2, exc );
 			break;
+
+		default :
+			break;
 	}
 
 	return new_var;
@@ -103,9 +110,9 @@ static Var *vars_div_i( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_int_var_div( Var *v1, Var *v2, bool exc )
+static Var_T *vars_int_var_div( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 	long ir;
@@ -273,9 +280,9 @@ static Var *vars_int_var_div( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_float_var_div( Var *v1, Var *v2, bool exc )
+static Var_T *vars_float_var_div( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	void *gp;
 	double dr;
@@ -420,10 +427,10 @@ static Var *vars_float_var_div( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_int_arr_div( Var *v1, Var *v2, bool exc )
+static Var_T *vars_int_arr_div( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 	long ir;
 	double dr;
@@ -535,10 +542,10 @@ static Var *vars_int_arr_div( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_float_arr_div( Var *v1, Var *v2, bool exc )
+static Var_T *vars_float_arr_div( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 	double dr;
 
@@ -626,10 +633,10 @@ static Var *vars_float_arr_div( Var *v1, Var *v2, bool exc )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static Var *vars_ref_div( Var *v1, Var *v2, bool exc )
+static Var_T *vars_ref_div( Var_T *v1, Var_T *v2, bool exc )
 {
-	Var *new_var = NULL;
-	Var *vt;
+	Var_T *new_var = NULL;
+	Var_T *vt;
 	ssize_t i;
 
 

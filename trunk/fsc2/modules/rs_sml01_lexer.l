@@ -309,7 +309,7 @@ static void rs_sml01_new_table_entry( int type, double val )
 											  * sizeof *rs_sml01.att_table );
 		cur_table_len = rs_sml01.att_table_len;
 		qsort( rs_sml01.att_table, rs_sml01.att_table_len,
-			   sizeof ( ATT_TABLE_ENTRY ), rs_sml01_comp );
+			   sizeof ( Att_Table_Entry_T ), rs_sml01_comp );
 		rs_sml01.min_table_freq = rs_sml01.att_table[ 0 ].freq;
 		rs_sml01.max_table_freq =
 					 rs_sml01.att_table[ rs_sml01.att_table_len - 1 ].freq;
@@ -408,8 +408,8 @@ static void rs_sml01_new_table_entry( int type, double val )
 
 static int rs_sml01_comp( const void *a, const void *b )
 {
-	ATT_TABLE_ENTRY *A = ( ATT_TABLE_ENTRY * ) a,
-					*B = ( ATT_TABLE_ENTRY * ) b;
+	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+					  *B = ( Att_Table_Entry_T * ) b;
 
 
 	if ( A->freq == B->freq )

@@ -25,7 +25,7 @@
 #include "fsc2.h"
 
 
-static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 );
+static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 );
 
 
 /*---------------------------------------------------------------*/
@@ -33,9 +33,9 @@ static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 );
 /* a complete matrix.                                            */
 /*---------------------------------------------------------------*/
 
-Var *vars_negate( Var *v )
+Var_T *vars_negate( Var_T *v )
 {
-	Var *new_var;
+	Var_T *new_var;
 	ssize_t i;
 
 
@@ -123,9 +123,9 @@ Var *vars_negate( Var *v )
 /*      the result of the comparison                                        */
 /*--------------------------------------------------------------------------*/
 
-Var *vars_comp( int comp_type, Var *v1, Var *v2 )
+Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	/* If both variables are strings we can also do some kind of comparisons */
@@ -252,9 +252,9 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 /*--------------------------------------------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
-static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 )
+static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	switch ( comp_type )
@@ -306,9 +306,9 @@ static Var *vars_str_comp( int comp_type, Var *v1, Var *v2 )
 /* variable, otherwise 0.                                                */
 /*-----------------------------------------------------------------------*/
 
-Var *vars_lnegate( Var *v )
+Var_T *vars_lnegate( Var_T *v )
 {
-	Var *new_var;
+	Var_T *new_var;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -331,7 +331,7 @@ Var *vars_lnegate( Var *v )
 /* known length.                                                         */
 /*-----------------------------------------------------------------------*/
 
-void vars_arith_len_check( Var *v1, Var *v2, const char *op )
+void vars_arith_len_check( Var_T *v1, Var_T *v2, const char *op )
 {
 	ssize_t len1 = -1, len2 = -1;
 

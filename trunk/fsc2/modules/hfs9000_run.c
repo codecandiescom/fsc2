@@ -25,9 +25,9 @@
 #include "hfs9000.h"
 
 
-static PULSE *hfs9000_delete_pulse( PULSE *p );
+static Pulse_T *hfs9000_delete_pulse( Pulse_T *p );
 static bool hfs9000_update_pulses( bool flag );
-static bool hfs9000_commit( FUNCTION *f, bool flag );
+static bool hfs9000_commit( Function_T *f, bool flag );
 
 
 /*---------------------------------------------------------------------------
@@ -80,8 +80,8 @@ bool hfs9000_do_update( void )
 static bool hfs9000_update_pulses( bool flag )
 {
 	int i;
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 	bool needed_update = UNSET;
 
 
@@ -98,7 +98,7 @@ static bool hfs9000_update_pulses( bool flag )
 			continue;
 
 		if ( f->num_pulses > 1 )
-			qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+			qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
 				   hfs9000_start_compare );
 
 		/* Check the new pulse positions and lengths, if they're not ok stop
@@ -151,10 +151,11 @@ static bool hfs9000_update_pulses( bool flag )
   and don't overlap.
 --------------------------------------------------------------------------*/
 
-void hfs9000_do_checks( FUNCTION *f )
+void hfs9000_do_checks( Function_T *f )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i;
+
 
 	for ( i = 0; i < f->num_pulses; i++ )
 	{
@@ -218,9 +219,9 @@ void hfs9000_do_checks( FUNCTION *f )
   to the function passed as argument.
 ----------------------------------------------------------------------------*/
 
-void hfs9000_set_pulses( FUNCTION *f )
+void hfs9000_set_pulses( Function_T *f )
 {
-	PULSE *p;
+	Pulse_T *p;
 	Ticks start, end;
 	int i;
 
@@ -269,7 +270,7 @@ void hfs9000_set_pulses( FUNCTION *f )
 
 void hfs9000_full_reset( void )
 {
-	PULSE *p = hfs9000_Pulses;
+	Pulse_T *p = hfs9000_Pulses;
 
 
 	while ( p != NULL )
@@ -314,9 +315,9 @@ void hfs9000_full_reset( void )
   pulse list.
 ----------------------------------------------------------------------------*/
 
-static PULSE *hfs9000_delete_pulse( PULSE *p )
+static Pulse_T *hfs9000_delete_pulse( Pulse_T *p )
 {
-	PULSE *pp;
+	Pulse_T *pp;
 	int i;
 
 
@@ -377,9 +378,9 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
   Some care has taken to minimize the number of commands and their length.
 ----------------------------------------------------------------------------*/
 
-static bool hfs9000_commit( FUNCTION *f, bool flag )
+static bool hfs9000_commit( Function_T *f, bool flag )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i;
 	Ticks start, len;
 	int what;

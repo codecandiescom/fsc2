@@ -24,28 +24,28 @@
 
 #include "fsc2.h"
 
-Graphics_2d G2;
+Graphics_2d_T G2;
 
 
 static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-							  Canvas *c );
+							  Canvas_T *c );
 static void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-								Canvas *c );
+								Canvas_T *c );
 static void motion_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-							   Canvas *c );
-static bool change_x_range_2d( Canvas *c );
-static bool change_y_range_2d( Canvas *c );
-static bool change_xy_range_2d( Canvas *c );
-static bool change_z_range_2d( Canvas *c );
-static bool zoom_x_2d( Canvas *c );
-static bool zoom_y_2d( Canvas *c );
-static bool zoom_xy_2d( Canvas *c );
-static bool zoom_z_2d( Canvas *c );
-static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv );
-static void reconfigure_window_2d( Canvas *c, int w, int h );
+							   Canvas_T *c );
+static bool change_x_range_2d( Canvas_T *c );
+static bool change_y_range_2d( Canvas_T *c );
+static bool change_xy_range_2d( Canvas_T *c );
+static bool change_z_range_2d( Canvas_T *c );
+static bool zoom_x_2d( Canvas_T *c );
+static bool zoom_y_2d( Canvas_T *c );
+static bool zoom_xy_2d( Canvas_T *c );
+static bool zoom_z_2d( Canvas_T *c );
+static bool shift_XPoints_of_curve_2d( Canvas_T *c, Curve_2d_T *cv );
+static void reconfigure_window_2d( Canvas_T *c, int w, int h );
 static void recalc_XPoints_2d( void );
-static void draw_2d_points( Canvas *c, Curve_2d *cv );
-static void make_color_scale( Canvas *c );
+static void draw_2d_points( Canvas_T *c, Curve_2d_T *cv );
+static void make_color_scale( Canvas_T *c );
 static void delete_marker_2d( long x_pos, long y_pos, long curve );
 static inline long d2ci( double a );
 
@@ -57,7 +57,7 @@ static inline long d2ci( double a );
 int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata )
 {
-	Canvas *c = ( Canvas * ) udata;
+	Canvas_T *c = ( Canvas_T * ) udata;
 
 
 	switch ( ev->type )
@@ -95,10 +95,10 @@ int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 /*-------------------------------------------------------------*/
 
 static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
-							  Canvas *c )
+							  Canvas_T *c )
 {
 	long i;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	int old_button_state = G.button_state;
 	unsigned int keymask;
 
@@ -289,7 +289,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 /*---------------------------------------------------------------*/
 
 static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
-								XEvent *ev, Canvas *c )
+								XEvent *ev, Canvas_T *c )
 {
 	unsigned int keymask;
 	bool scale_changed = UNSET;
@@ -519,7 +519,7 @@ static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
 /*---------------------------------------------------*/
 
 static void motion_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
-							   XEvent *ev, Canvas *c )
+							   XEvent *ev, Canvas_T *c )
 {
 	XEvent new_ev;
 	unsigned int keymask;
@@ -647,7 +647,7 @@ static void motion_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
 /* Stores the scaling state of the currently shown curve */
 /*-------------------------------------------------------*/
 
-void save_scale_state_2d( Curve_2d *cv )
+void save_scale_state_2d( Curve_2d_T *cv )
 {
 	int i;
 
@@ -667,9 +667,9 @@ void save_scale_state_2d( Curve_2d *cv )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_x_range_2d( Canvas *c )
+static bool change_x_range_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double x1, x2;
 
 
@@ -696,9 +696,9 @@ static bool change_x_range_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_y_range_2d( Canvas *c )
+static bool change_y_range_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double cy1, cy2;
 	double new_s2d_y;
 
@@ -734,10 +734,10 @@ static bool change_y_range_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_xy_range_2d( Canvas *c )
+static bool change_xy_range_2d( Canvas_T *c )
 {
 	bool scale_changed = UNSET;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double cx1, cx2, cy1, cy2;
 
 
@@ -787,9 +787,9 @@ static bool change_xy_range_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool change_z_range_2d( Canvas *c )
+static bool change_z_range_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double z1, z2;
 
 
@@ -815,9 +815,9 @@ static bool change_z_range_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_x_2d( Canvas *c )
+static bool zoom_x_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double px;
 
 
@@ -857,9 +857,9 @@ static bool zoom_x_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_y_2d( Canvas *c )
+static bool zoom_y_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double py;
 
 
@@ -902,10 +902,10 @@ static bool zoom_y_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_xy_2d( Canvas *c )
+static bool zoom_xy_2d( Canvas_T *c )
 {
 	bool scale_changed = UNSET;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double px, py;
 
 
@@ -969,9 +969,9 @@ static bool zoom_xy_2d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-static bool zoom_z_2d( Canvas *c )
+static bool zoom_z_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	double pz;
 	double factor;
 
@@ -1021,14 +1021,14 @@ static bool zoom_z_2d( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
+static bool shift_XPoints_of_curve_2d( Canvas_T *c, Curve_2d_T *cv )
 {
 	long i, count;
 	int dx = 0,
 		dy = 0,
 		dz;
 	int factor;
-	Scaled_Point *sp = cv->points;
+	Scaled_Point_T *sp = cv->points;
 	XPoint *xp = cv->xpoints;
 
 
@@ -1088,10 +1088,10 @@ static bool shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 /* Handles changes of the window size. */
 /*-------------------------------------*/
 
-static void reconfigure_window_2d( Canvas *c, int w, int h )
+static void reconfigure_window_2d( Canvas_T *c, int w, int h )
 {
 	long i;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	static bool is_reconf[ 3 ] = { UNSET, UNSET, UNSET };
 	static bool need_redraw[ 3 ] = { UNSET, UNSET, UNSET };
 	int old_w = c->w,
@@ -1237,10 +1237,10 @@ static void recalc_XPoints_2d( void )
 /* settings for the scale and the offset.                         */
 /*----------------------------------------------------------------*/
 
-void recalc_XPoints_of_curve_2d( Curve_2d *cv )
+void recalc_XPoints_of_curve_2d( Curve_2d_T *cv )
 {
 	long i, j, count;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 	XPoint *xp = cv->xpoints;
 	XPoint p;
 	short dw, dh;
@@ -1293,10 +1293,10 @@ void redraw_all_2d( void )
 /* Does a complete redraw of a canvas. */
 /*-------------------------------------*/
 
-void redraw_canvas_2d( Canvas *c )
+void redraw_canvas_2d( Canvas_T *c )
 {
-	Curve_2d *cv;
-	Marker_2D *m;
+	Curve_2d_T *cv;
+	Marker_2d_T *m;
 	XPoint points[ 5 ];
 	short int dw, dh;
 
@@ -1421,11 +1421,11 @@ void redraw_canvas_2d( Canvas *c )
 /* the X clipping mechanism take care of this.                      */
 /*------------------------------------------------------------------*/
 
-static void draw_2d_points( Canvas *c, Curve_2d *cv )
+static void draw_2d_points( Canvas_T *c, Curve_2d_T *cv )
 
 {
 	long i, count;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 	XPoint *xp;
 	XPoint p[ 2 ];
 
@@ -1512,13 +1512,13 @@ static void draw_2d_points( Canvas *c, Curve_2d *cv )
 /* Copies the background pixmap onto the canvas. */
 /*-----------------------------------------------*/
 
-void repaint_canvas_2d( Canvas *c )
+void repaint_canvas_2d( Canvas_T *c )
 {
 	char buf[ 256 ];
 	int x, y, x2, y2;
 	long a_index, index_1, index_2;
 	unsigned int w, h;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	Pixmap pm;
 	double x_pos, y_pos, z_pos = 0, z_pos_1 = 0, z_pos_2 = 0;
 
@@ -1743,7 +1743,7 @@ void repaint_canvas_2d( Canvas *c )
 
 int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 {
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	int ppos[ 2 ];
 	long a_index;
 
@@ -1786,7 +1786,7 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 /* curves fit into the canvas and occupy the whole canvas. */
 /*---------------------------------------------------------*/
 
-void fs_rescale_2d( Curve_2d *cv )
+void fs_rescale_2d( Curve_2d_T *cv )
 {
 	long i, count;
 	double min = 1.0,
@@ -1795,7 +1795,7 @@ void fs_rescale_2d( Curve_2d *cv )
 		   rw_max;
 	double data;
 	double new_rwc_delta_z;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 
 
 	if ( ! cv->is_scale_set )
@@ -1859,7 +1859,7 @@ void fs_rescale_2d( Curve_2d *cv )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
+void make_scale_2d( Curve_2d_T *cv, Canvas_T *c, int coord )
 {
 	double rwc_delta,          /* distance between small ticks (in rwc) */
 		   order,              /* and its order of magnitude */
@@ -2105,7 +2105,7 @@ void make_scale_2d( Curve_2d *cv, Canvas *c, int coord )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-static void make_color_scale( Canvas *c )
+static void make_color_scale( Canvas_T *c )
 {
 	int i;
 	unsigned int h;
@@ -2165,9 +2165,9 @@ static inline long d2ci( double a )
 
 void set_marker_2d( long x_pos, long y_pos, long color, long curve )
 {
-	Marker_2D *m, *cm;
+	Marker_2d_T *m, *cm;
 	XGCValues gcv;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 
 
 	if ( color > MAX_CURVES + 1 )
@@ -2232,8 +2232,8 @@ void set_marker_2d( long x_pos, long y_pos, long color, long curve )
 
 static void delete_marker_2d( long x_pos, long y_pos, long curve )
 {
-	Marker_2D *m, *mp;
-	Curve_2d *cv;
+	Marker_2d_T *m, *mp;
+	Curve_2d_T *cv;
 
 
 	/* If no curve number was given and currently there's no curve
@@ -2278,8 +2278,8 @@ static void delete_marker_2d( long x_pos, long y_pos, long curve )
 
 void remove_markers_2d( long *curves )
 {
-	Marker_2D *m, *mn;
-	Curve_2d *cv;
+	Marker_2d_T *m, *mn;
+	Curve_2d_T *cv;
 	long i, j;
 	long c[ MAX_CURVES ];
 

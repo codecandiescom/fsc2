@@ -27,29 +27,29 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOLBOX *Toolbox;
+extern Toolbox_T *Toolbox;
 
 
-static Var *f_ocreate_child( Var *v, long type, long lval, double dval );
-static void f_odelete_child( Var *v );
-static void f_odelete_parent( Var *v );
-static Var *f_ovalue_child( Var *v );
-static Var *f_ochanged_child( Var *v );
+static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval );
+static void f_odelete_child( Var_T *v );
+static void f_odelete_parent( Var_T *v );
+static Var_T *f_ovalue_child( Var_T *v );
+static Var_T *f_ochanged_child( Var_T *v );
 
 
 /*-----------------------------------------------------------*/
 /* For appending a new input or output object to the toolbox */
 /*-----------------------------------------------------------*/
 
-Var *f_ocreate( Var *var )
+Var_T *f_ocreate( Var_T *var )
 {
-	Var *v = var;
+	Var_T *v = var;
 	long type;
 	char *label = NULL;
 	char *help_text = NULL;
 	char *form_str = NULL;
-	IOBJECT *new_io = NULL;
-	IOBJECT *ioi;
+	Iobject_T *new_io = NULL;
+	Iobject_T *ioi;
 	long lval = 0;
 	double dval = 0.0;
 
@@ -290,7 +290,7 @@ Var *f_ocreate( Var *var )
 /* the message passing mechanism.                                  */
 /*-----------------------------------------------------------------*/
 
-static Var *f_ocreate_child( Var *v, long type, long lval, double dval )
+static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -443,7 +443,7 @@ static Var *f_ocreate_child( Var *v, long type, long lval, double dval )
 /* Parameter are one or more object IDs         */
 /*----------------------------------------------*/
 
-Var *f_odelete( Var *v )
+Var_T *f_odelete( Var_T *v )
 {
 	/* We need the ID of the button to delete */
 
@@ -485,7 +485,7 @@ Var *f_odelete( Var *v )
 /* the message passing mechanism.                                  */
 /*-----------------------------------------------------------------*/
 
-static void f_odelete_child( Var *v )
+static void f_odelete_child( Var_T *v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -539,9 +539,9 @@ static void f_odelete_child( Var *v )
 /* which actually removes the input or output object.               */
 /*------------------------------------------------------------------*/
 
-static void f_odelete_parent( Var *v )
+static void f_odelete_parent( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 
 
 	/* No tool box -> no objects -> no objects to delete... */
@@ -606,9 +606,9 @@ static void f_odelete_parent( Var *v )
 /* Sets or returns the content of an input or output object */
 /*----------------------------------------------------------*/
 
-Var *f_ovalue( Var *v )
+Var_T *f_ovalue( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	char buf[ MAX_INPUT_CHARS + 1 ];
 
 
@@ -706,14 +706,14 @@ Var *f_ovalue( Var *v )
 /* the message passing mechanism.                                 */
 /*----------------------------------------------------------------*/
 
-static Var *f_ovalue_child( Var *v )
+static Var_T *f_ovalue_child( Var_T *v )
 {
 	long ID;
 	long state = 0;
 	long lval = 0;
 	double dval = 0.0;
 	char *buffer, *pos;
-	INPUT_RES *input_res;
+	Input_Res_T *input_res;
 	size_t len;
 
 
@@ -786,7 +786,7 @@ static Var *f_ovalue_child( Var *v )
 		*pos++ = '\0';
 
 	/* Ask parent to set or get the value - it will return a pointer to an
-	   INPUT_RES structure, where the res entry indicates failure (negative
+	   Input_Res structure, where the res entry indicates failure (negative
 	   value) and the type of the returned value (0 is integer, positive
 	   non-zero is float), and the second entry is a union for the return
 	   value, i.e. the objects value. */
@@ -819,9 +819,9 @@ static Var *f_ovalue_child( Var *v )
 /* Function for testing if the content of an input or output object changed */
 /*--------------------------------------------------------------------------*/
 
-Var *f_ochanged( Var *v )
+Var_T *f_ochanged( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 
 
 	/* We need at least the objects ID */
@@ -868,7 +868,7 @@ Var *f_ochanged( Var *v )
 /* the message passing mechanism.                                   */
 /*------------------------------------------------------------------*/
 
-static Var *f_ochanged_child( Var *v )
+static Var_T *f_ochanged_child( Var_T *v )
 {
 	long ID;
 	long changed;

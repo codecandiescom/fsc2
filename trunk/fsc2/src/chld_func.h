@@ -29,9 +29,9 @@
 #include "fsc2.h"
 
 
-typedef struct INPUT_RES INPUT_RES;
+typedef struct Input_Res Input_Res_T;
 
-struct INPUT_RES {
+struct Input_Res {
 	int res;
 	union {
 		long lval;
@@ -58,7 +58,7 @@ double *exp_sstate( char *buffer, ptrdiff_t len );
 long *exp_schanged( char *buffer, ptrdiff_t len );
 long *exp_icreate( char *buffer, ptrdiff_t len );
 bool exp_idelete( char *buffer, ptrdiff_t len );
-INPUT_RES *exp_istate( char *buffer, ptrdiff_t len );
+Input_Res_T *exp_istate( char *buffer, ptrdiff_t len );
 long *exp_ichanged( char *buffer, ptrdiff_t len );
 long *exp_mcreate( char *buffer, ptrdiff_t len );
 bool exp_mdelete( char *buffer, ptrdiff_t len );

@@ -32,7 +32,7 @@ typedef union {
 		long   lval;
 		double dval;
 		char   *sptr;
-		Var    *vptr;
+		Var_T  *vptr;
 } Token_Val;
 
 
@@ -80,9 +80,9 @@ typedef union {
 #define ON_STOP_TOK    3333
 
 
-typedef struct Simp_Var Simp_Var;
-typedef struct Prg_Token Prg_Token;
-typedef struct CB_Stack CB_Stack;
+typedef struct Simp_Var Simp_Var_T;
+typedef struct Prg_Token Prg_Token_T;
+typedef struct CB_Stack CB_Stack_T;
 
 
 struct Simp_Var {
@@ -95,17 +95,17 @@ struct Simp_Var {
 struct Prg_Token {
 	int       token;          /* type of current token */
 	Token_Val tv;             /* tokens value as needed by the parser */
-	Prg_Token *start;         /* used in IF, WHILE etc. [1] */
-	Prg_Token *end;           /* used in WHILE, IF etc. [2] */
+	Prg_Token_T *start;       /* used in IF, WHILE etc. [1] */
+	Prg_Token_T *end;         /* used in WHILE, IF etc. [2] */
 	union {
 		struct {
 			long max;         /* maximum counter value for REPEAT loops */
 			long act;         /* actual counter value for REPEAT loops */
 		} repl;
 		struct {
-			Var *act;         /* loop variable of FOR loop */
-			Simp_Var end;     /* maximum value of loop variable */
-			Simp_Var incr;    /* increment for loop variable */
+			Var_T *act;       /* loop variable of FOR loop */
+			Simp_Var_T end;   /* maximum value of loop variable */
+			Simp_Var_T incr;  /* increment for loop variable */
 		} forl;
 	} count;
 	long      counter;        /* counts number of loop repetitions [3] */
@@ -117,7 +117,7 @@ struct Prg_Token {
 struct CB_Stack {
 	char *Fname;
 	long Lc;
-	CB_Stack *next;
+	CB_Stack_T *next;
 };
 
 
@@ -153,11 +153,11 @@ int exp_testlex( void );
 void exp_test_run( void );
 int exp_runlex( void );
 int conditionlex( void );
-bool test_condition( Prg_Token *cur );
-void get_max_repeat_count( Prg_Token *cur );
-void get_for_cond( Prg_Token *cur );
-bool test_for_cond( Prg_Token *cur );
-bool check_result( Var *v );
+bool test_condition( Prg_Token_T *cur );
+void get_max_repeat_count( Prg_Token_T *cur );
+void get_for_cond( Prg_Token_T *cur );
+bool test_for_cond( Prg_Token_T *cur );
+bool check_result( Var_T *v );
 
 
 #endif   /* ! EXP_HEADER */

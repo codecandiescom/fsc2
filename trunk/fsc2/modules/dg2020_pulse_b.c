@@ -31,8 +31,8 @@
 
 bool dg2020_new_pulse( long pnum )
 {
-	PULSE *cp = dg2020_Pulses;
-	PULSE *lp = NULL;
+	Pulse_T *cp = dg2020.pulses;
+	Pulse_T *lp = NULL;
 
 
 	while ( cp != NULL )
@@ -49,9 +49,9 @@ bool dg2020_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( dg2020_Pulses == NULL )
+	if ( dg2020.pulses == NULL )
 	{
-		dg2020_Pulses = cp;
+		dg2020.pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -93,7 +93,7 @@ bool dg2020_new_pulse( long pnum )
 
 bool dg2020_set_pulse_function( long pnum, int function )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( function == PULSER_CHANNEL_PHASE_1 ||
@@ -135,7 +135,7 @@ bool dg2020_set_pulse_function( long pnum, int function )
 
 bool dg2020_set_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_pos )
@@ -176,7 +176,8 @@ bool dg2020_set_pulse_position( long pnum, double p_time )
 
 bool dg2020_set_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
+
 
 	if ( p->is_len )
 	{
@@ -215,7 +216,7 @@ bool dg2020_set_pulse_length( long pnum, double p_time )
 
 bool dg2020_set_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_dpos )
@@ -249,7 +250,7 @@ bool dg2020_set_pulse_position_change( long pnum, double p_time )
 
 bool dg2020_set_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_dlen )
@@ -283,8 +284,8 @@ bool dg2020_set_pulse_length_change( long pnum, double p_time )
 
 bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
-	Phase_Sequence *pc = PSeq;
+	Pulse_T *p = dg2020_get_pulse( pnum );
+	Phs_Seq_T *pc = Phs_Seq;
 
 
 	if ( p->pc != NULL )
@@ -318,7 +319,7 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 
 bool dg2020_get_pulse_function( long pnum, int *function )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_function )
@@ -336,7 +337,7 @@ bool dg2020_get_pulse_function( long pnum, int *function )
 
 bool dg2020_get_pulse_position( long pnum, double *p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_pos )
@@ -356,7 +357,7 @@ bool dg2020_get_pulse_position( long pnum, double *p_time )
 
 bool dg2020_get_pulse_length( long pnum, double *p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_len )
@@ -375,7 +376,7 @@ bool dg2020_get_pulse_length( long pnum, double *p_time )
 
 bool dg2020_get_pulse_position_change( long pnum, double *p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_dpos )
@@ -395,7 +396,7 @@ bool dg2020_get_pulse_position_change( long pnum, double *p_time )
 
 bool dg2020_get_pulse_length_change( long pnum, double *p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_dlen )
@@ -414,7 +415,7 @@ bool dg2020_get_pulse_length_change( long pnum, double *p_time )
 
 bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->pc == NULL )
@@ -433,7 +434,7 @@ bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 
 bool dg2020_change_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_pos = 0;
 
 
@@ -517,7 +518,7 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 
 bool dg2020_change_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_len = 0;
 
 
@@ -601,7 +602,7 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 
 bool dg2020_change_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_dpos = 0;
 
 
@@ -640,7 +641,7 @@ bool dg2020_change_pulse_position_change( long pnum, double p_time )
 
 bool dg2020_change_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = dg2020_get_pulse( pnum );
+	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_dlen = 0;
 
 

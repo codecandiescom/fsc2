@@ -29,7 +29,7 @@
 #include "fsc2.h"
 
 
-Var *vars_pow( Var *v1, Var *v2 );
+Var_T *vars_pow( Var_T *v1, Var_T *v2 );
 
 
 #endif  /* ! VARS_POW_HEADER */

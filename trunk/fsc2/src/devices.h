@@ -26,25 +26,25 @@
 
 #include "fsc2.h"
 
-typedef struct Device Device;
-typedef struct Device_Name Device_Name;
+typedef struct Device Device_T;
+typedef struct Device_Name Device_Name_T;
 
 
 struct Device {
 	char *name;
-	Lib_Struct driver;
+	Lib_Struct_T driver;
 	bool is_loaded;
 	const char *generic_type;
 	const char *device_name;
-	Device *next;
-	Device *prev;
+	Device_T *next;
+	Device_T *prev;
 	int count;
 };
 
 
 struct Device_Name {
 	char *name;
-	Device_Name *next;
+	Device_Name_T *next;
 };
 
 

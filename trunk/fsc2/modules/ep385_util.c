@@ -141,9 +141,9 @@ double ep385_ticks2double( Ticks ticks )
 /* Returns the structure for pulse numbered pnum */
 /*-----------------------------------------------*/
 
-PULSE *ep385_get_pulse( long pnum )
+Pulse_T *ep385_get_pulse( long pnum )
 {
-	PULSE *cp = ep385_Pulses;
+	Pulse_T *cp = ep385.pulses;
 
 
 	if ( pnum < 0 )
@@ -207,8 +207,8 @@ const char *ep385_pticks( Ticks ticks )
 
 int ep385_pulse_compare( const void *A, const void *B )
 {
-	PULSE_PARAMS *a = ( PULSE_PARAMS * ) A,
-		         *b = ( PULSE_PARAMS * ) B;
+	Pulse_Params_T *a = ( Pulse_Params_T * ) A,
+		           *b = ( Pulse_Params_T * ) B;
 
 	return a->pos <= b->pos ? -1 : 1;
 }
@@ -360,8 +360,8 @@ void ep385_dump_pulses( void )
 
 void ep385_dump_channels( FILE *fp )
 {
-	FUNCTION *f;
-	CHANNEL *ch;
+	Function_T *f;
+	Channel_T *ch;
 	int i, j, k;
 
 
@@ -414,7 +414,7 @@ void ep385_dump_channels( FILE *fp )
 
 void ep385_duty_check( void )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i;
 	int fns[ ] = { PULSER_CHANNEL_TWT, PULSER_CHANNEL_TWT_GATE };
 
@@ -439,10 +439,10 @@ void ep385_duty_check( void )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Ticks ep385_calc_max_length( FUNCTION *f )
+Ticks ep385_calc_max_length( Function_T *f )
 {
 	int i, j;
-	CHANNEL *ch;
+	Channel_T *ch;
 	Ticks max_len = 0;
 
 

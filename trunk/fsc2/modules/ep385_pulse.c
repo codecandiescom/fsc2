@@ -31,8 +31,8 @@
 
 bool ep385_new_pulse( long pnum )
 {
-	PULSE *cp = ep385_Pulses;
-	PULSE *lp = NULL;
+	Pulse_T *cp = ep385.pulses;
+	Pulse_T *lp = NULL;
 
 
 	while ( cp != NULL )
@@ -50,9 +50,9 @@ bool ep385_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( ep385_Pulses == NULL )
+	if ( ep385.pulses == NULL )
 	{
-		ep385_Pulses = cp;
+		ep385.pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -93,8 +93,8 @@ bool ep385_new_pulse( long pnum )
 
 bool ep385_set_pulse_function( long pnum, int function )
 {
-	PULSE *p = ep385_get_pulse( pnum );
-	FUNCTION *f = &ep385.function[ function ];
+	Pulse_T *p = ep385_get_pulse( pnum );
+	Function_T *f = &ep385.function[ function ];
 
 
 	if ( function == PULSER_CHANNEL_PHASE_1 ||
@@ -159,7 +159,7 @@ bool ep385_set_pulse_function( long pnum, int function )
 
 bool ep385_set_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( p->is_pos )
@@ -204,7 +204,7 @@ bool ep385_set_pulse_position( long pnum, double p_time )
 
 bool ep385_set_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( p->is_len )
@@ -245,7 +245,7 @@ bool ep385_set_pulse_length( long pnum, double p_time )
 
 bool ep385_set_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( p->is_dpos )
@@ -280,7 +280,7 @@ bool ep385_set_pulse_position_change( long pnum, double p_time )
 
 bool ep385_set_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( p->is_dlen )
@@ -315,8 +315,8 @@ bool ep385_set_pulse_length_change( long pnum, double p_time )
 
 bool ep385_set_pulse_phase_cycle( long pnum, long cycle )
 {
-	PULSE *p = ep385_get_pulse( pnum );
-	Phase_Sequence *pc = PSeq;
+	Pulse_T *p = ep385_get_pulse( pnum );
+	Phs_Seq_T *pc = Phs_Seq;
 
 
 	/* Check that no phase cycle has been asigned to the pulse yet */
@@ -366,7 +366,7 @@ bool ep385_set_pulse_phase_cycle( long pnum, long cycle )
 
 bool ep385_get_pulse_function( long pnum, int *function )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( ! p->is_function )
@@ -386,7 +386,7 @@ bool ep385_get_pulse_function( long pnum, int *function )
 
 bool ep385_get_pulse_position( long pnum, double *p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( ! p->is_pos )
@@ -407,7 +407,7 @@ bool ep385_get_pulse_position( long pnum, double *p_time )
 
 bool ep385_get_pulse_length( long pnum, double *p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( ! p->is_len )
@@ -427,7 +427,7 @@ bool ep385_get_pulse_length( long pnum, double *p_time )
 
 bool ep385_get_pulse_position_change( long pnum, double *p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( ! p->is_dpos )
@@ -448,7 +448,7 @@ bool ep385_get_pulse_position_change( long pnum, double *p_time )
 
 bool ep385_get_pulse_length_change( long pnum, double *p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( ! p->is_dlen )
@@ -468,7 +468,7 @@ bool ep385_get_pulse_length_change( long pnum, double *p_time )
 
 bool ep385_get_pulse_phase_cycle( long pnum, long *cycle )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 
 
 	if ( p->pc == NULL )
@@ -488,7 +488,7 @@ bool ep385_get_pulse_phase_cycle( long pnum, long *cycle )
 
 bool ep385_change_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 	Ticks new_pos = 0;
 
 
@@ -574,7 +574,7 @@ bool ep385_change_pulse_position( long pnum, double p_time )
 
 bool ep385_change_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 	Ticks new_len = 0;
 
 
@@ -662,7 +662,7 @@ bool ep385_change_pulse_length( long pnum, double p_time )
 
 bool ep385_change_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 	Ticks new_dpos = 0;
 
 
@@ -709,7 +709,7 @@ bool ep385_change_pulse_position_change( long pnum, double p_time )
 
 bool ep385_change_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = ep385_get_pulse( pnum );
+	Pulse_T *p = ep385_get_pulse( pnum );
 	Ticks new_dlen = 0;
 
 

@@ -41,13 +41,13 @@ int egg4402_init_hook( void );
 int egg4402_exp_hook( void );
 int egg4402_end_of_exp_hook( void );
 
-Var *boxcar_name( Var *v );
-Var *boxcar_curve_length( Var *v );
-Var *boxcar_get_curve( Var *v );
-Var *boxcar_start_acquisition( Var *v );
-Var *boxcar_stop_acquisition( Var *v );
-Var *boxcar_single_shot( Var *v );
-Var *boxcar_command( Var *v);
+Var_T *boxcar_name( Var_T *v );
+Var_T *boxcar_curve_length( Var_T *v );
+Var_T *boxcar_get_curve( Var_T *v );
+Var_T *boxcar_start_acquisition( Var_T *v );
+Var_T *boxcar_stop_acquisition( Var_T *v );
+Var_T *boxcar_single_shot( Var_T *v );
+Var_T *boxcar_command( Var_T *v);
 
 /* Locally used functions */
 
@@ -72,7 +72,7 @@ int egg4402_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Reset several variables in the structure describing the device */
 
@@ -124,7 +124,7 @@ int egg4402_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_name( UNUSED_ARG Var *v )
+Var_T *boxcar_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -133,7 +133,7 @@ Var *boxcar_name( UNUSED_ARG Var *v )
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-Var *boxcar_curve_length( Var *v )
+Var_T *boxcar_curve_length( Var_T *v )
 {
 	char buffer[ 100 ];
 	long length = 100;
@@ -187,7 +187,7 @@ Var *boxcar_curve_length( Var *v )
 /*--------------------------------------------------*/
 /*--------------------------------------------------*/
 
-Var *boxcar_get_curve( Var *v )
+Var_T *boxcar_get_curve( Var_T *v )
 {
 	unsigned char *buffer;
 	double *ret_buffer;
@@ -200,7 +200,7 @@ Var *boxcar_get_curve( Var *v )
 	long num_points;
 	long i;
 	unsigned char *cc, *cn;
-	Var *cl;
+	Var_T *cl;
 	double tmos[ 7 ] = { 1.0, 3.0, 10.0, 30.0, 100.0, 300.0, 1000.0 };
 	int new_timo;
 	int old_timo = -1;
@@ -416,7 +416,7 @@ Var *boxcar_get_curve( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_start_acquisition( UNUSED_ARG Var *v )
+Var_T *boxcar_start_acquisition( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "START\n" );
@@ -428,7 +428,7 @@ Var *boxcar_start_acquisition( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_stop_acquisition( UNUSED_ARG Var *v )
+Var_T *boxcar_stop_acquisition( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "STOP\n" );
@@ -445,7 +445,7 @@ Var *boxcar_stop_acquisition( UNUSED_ARG Var *v )
 /* the data point(s) are to be fetched from.                      */
 /*----------------------------------------------------------------*/
 
-Var *boxcar_single_shot( Var *v )
+Var_T *boxcar_single_shot( Var_T *v )
 {
 	long channel_1 = 1, channel_2 = -1;
 	double data[ 2 ];
@@ -560,7 +560,7 @@ Var *boxcar_single_shot( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *boxcar_command( Var *v )
+Var_T *boxcar_command( Var_T *v )
 {
 	char *cmd = NULL;
 

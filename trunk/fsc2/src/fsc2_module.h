@@ -95,23 +95,24 @@ extern const char *show_input( const char *content, const char *label );
 
 /* Global variables */
 
-extern Pulser_Struct *pulser_struct;
-extern Phase_Sequence *PSeq;
-extern Acquisition_Sequence ASeq[ ];
+extern Pulser_Struct_T *Pulser_Struct;
+extern Phs_Seq_T *Phs_Seq;
+extern Acq_Seq_T Acq_Seq[ ];
 extern long Cur_Pulser;
 
-extern bool need_GPIB;
-extern bool need_RULBUS;
-
+extern bool Need_GPIB;
+#if defined WITH_RULBUS
+extern bool Need_RULBUS;
+#endif
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
 
-/* The following must be defined after the declaration of pulser_struct ! */
+/* The following must be defined after the declaration of Pulser_Struct ! */
 
-#define pulser_struct pulser_struct[ Cur_Pulser ]
+#define Pulser_Struct Pulser_Struct[ Cur_Pulser ]
 
 
 #define show_choices( a, b, c, d, e, f ) \

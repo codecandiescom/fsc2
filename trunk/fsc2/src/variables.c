@@ -151,11 +151,11 @@
 /* locally used functions */
 
 static void free_all_vars( void );
-static Var *vars_push_submatrix( Var *from, int type, int dim,
-								 ssize_t *sizes );
-static void vars_ref_copy( Var *nsv, Var *cp, bool exact_copy );
-static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy );
-static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p );
+static Var_T *vars_push_submatrix( Var_T *from, Var_Type_T type, int dim,
+								   ssize_t *sizes );
+static void vars_ref_copy( Var_T *nsv, Var_T *cp, bool exact_copy );
+static void vars_ref_copy_create( Var_T *nsv, Var_T *src, bool exact_copy );
+static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var_T *p );
 
 
 /*----------------------------------------------------------------------*/
@@ -169,9 +169,9 @@ static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p );
 /*   * pointer to VAR structure or NULL                                 */
 /*----------------------------------------------------------------------*/
 
-Var *vars_get( char *name )
+Var_T *vars_get( char *name )
 {
-	Var *v;
+	Var_T *v;
 
 
 	/* Try to find the variable with the name passed to the function */
@@ -197,9 +197,9 @@ Var *vars_get( char *name )
 /*   * pointer to variable structure                        */
 /*----------------------------------------------------------*/
 
-Var *vars_new( char *name )
+Var_T *vars_new( char *name )
 {
-	Var *vp;
+	Var_T *vp;
 
 
 	/* Get memory for a new structure and for storing the name */
@@ -238,7 +238,7 @@ Var *vars_new( char *name )
 /*-------------------------------------------------------------------*/
 
 
-Var *vars_arr_start( Var *v )
+Var_T *vars_arr_start( Var_T *v )
 {
 	if ( v->type != UNDEF_VAR )
 		vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
@@ -256,10 +256,10 @@ Var *vars_arr_start( Var *v )
 /* variables for more-dimensional arrays get deleted).          */
 /*--------------------------------------------------------------*/
 
-Var *vars_free( Var *v, bool also_nameless )
+Var_T *vars_free( Var_T *v, bool also_nameless )
 {
 	ssize_t i;
-	Var *ret;
+	Var_T *ret;
 
 
 	fsc2_assert( ! ( v->flags & ON_STACK ) );
@@ -293,6 +293,9 @@ Var *vars_free( Var *v, bool also_nameless )
 						vars_free( v->val.vptr[ i ], SET );
 			v->val.vptr = VAR_PP T_free( v->val.vptr );
 			break;
+
+		default :
+			break;
 	}
 
 	if ( v->name != NULL )
@@ -318,7 +321,7 @@ Var *vars_free( Var *v, bool also_nameless )
 
 static void free_all_vars( void )
 {
-	Var *v;
+	Var_T *v;
 
 
 	for ( v = EDL.Var_List; v != NULL; )
@@ -355,9 +358,9 @@ void vars_clean_up( void )
 /* variable to be copied isn't already a stack variable).      */
 /*-------------------------------------------------------------*/
 
-Var *vars_push_copy( Var *v )
+Var_T *vars_push_copy( Var_T *v )
 {
-	Var *nv = NULL;
+	Var_T *nv = NULL;
 
 
 	if ( v->flags & ON_STACK )
@@ -399,9 +402,9 @@ Var *vars_push_copy( Var *v )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-Var *vars_push_matrix( int type, int dim, ... )
+Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 {
-	Var *nv;
+	Var_T *nv;
 	va_list ap;
 	ssize_t *sizes;
 	ssize_t i;
@@ -476,9 +479,10 @@ Var *vars_push_matrix( int type, int dim, ... )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
+static Var_T *vars_push_submatrix( Var_T *from, Var_Type_T type, int dim,
+								   ssize_t *sizes )
 {
-	Var *nv;
+	Var_T *nv;
 	ssize_t i;
 
 
@@ -538,15 +542,15 @@ static Var *vars_push_submatrix( Var *from, int type, int dim, ssize_t *sizes )
 /*                                    array                              */
 /* INT_PTR, long *                                                       */
 /* FLOAT_PTR, long *                                                     */
-/* INT_REF, Var *                                                        */
-/* FLOAT_REF, Var *                                                      */
-/* REF_PTR, Var *														 */
-/* FUNC_PTR, struct Func *												 */
+/* INT_REF, Var_T *                                                      */
+/* FLOAT_REF, Var_T *                                                    */
+/* REF_PTR, Var_T *														 */
+/* FUNC_PTR, struct Func_T *											 */
 /*-----------------------------------------------------------------------*/
 
-Var *vars_push( int type, ... )
+Var_T *vars_push( Var_Type_T type, ... )
 {
-	Var *nsv, *stack, *src;
+	Var_T *nsv, *stack, *src;
 	va_list ap;
 	ssize_t i;
 	const char *str;
@@ -646,7 +650,7 @@ Var *vars_push( int type, ... )
 			break;
 
 		case INT_REF : case FLOAT_REF :
-			src = va_arg( ap, Var * );
+			src = va_arg( ap, Var_T * );
 			if ( src != NULL )
 				vars_ref_copy( nsv, src, UNSET );
 			break;
@@ -658,7 +662,7 @@ Var *vars_push( int type, ... )
 			break;
 
 		case REF_PTR :
-			nsv->from = va_arg( ap, Var * );
+			nsv->from = va_arg( ap, Var_T * );
 			break;
 
 		case FUNC :
@@ -701,10 +705,10 @@ Var *vars_push( int type, ... )
 /*------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*/
 
-Var *vars_make( int type, Var *src )
+Var_T *vars_make( Var_Type_T type, Var_T *src )
 {
-	Var *nv = NULL;
-	Var *stack;
+	Var_T *nv = NULL;
+	Var_T *stack;
 	ssize_t i;
 
 
@@ -801,7 +805,7 @@ Var *vars_make( int type, Var *src )
 /* functions gets one variable one the stack for each of its arguments.   */
 /*------------------------------------------------------------------------*/
 
-static void vars_ref_copy( Var *nsv, Var *src, bool exact_copy )
+static void vars_ref_copy( Var_T *nsv, Var_T *src, bool exact_copy )
 {
 	if ( ! exact_copy )
 		nsv->flags |= IS_DYNAMIC | IS_TEMP;
@@ -823,9 +827,9 @@ static void vars_ref_copy( Var *nsv, Var *src, bool exact_copy )
 /* and gets called recursively if necessary.            */
 /*------------------------------------------------------*/
 
-static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
+static void vars_ref_copy_create( Var_T *nsv, Var_T *src, bool exact_copy )
 {
-	Var *vd;
+	Var_T *vd;
 	ssize_t i;
 
 
@@ -930,13 +934,13 @@ static void vars_ref_copy_create( Var *nsv, Var *src, bool exact_copy )
 /* successor).                                                     */
 /*-----------------------------------------------------------------*/
 
-Var *vars_pop( Var *v )
+Var_T *vars_pop( Var_T *v )
 {
-	Var *ret = NULL;
+	Var_T *ret = NULL;
 	ssize_t i;
 #ifndef NDEBUG
-	Var *stack,
-		*prev = NULL;
+	Var_T *stack,
+		  *prev = NULL;
 #endif
 
 
@@ -1008,6 +1012,9 @@ Var *vars_pop( Var *v )
 		case SUB_REF_PTR :
 			T_free( v->val.index );
 			break;
+
+		default :
+			break;
 	}
 
 	T_free( v );
@@ -1026,16 +1033,16 @@ Var *vars_pop( Var *v )
 /* as the second argument.                                           */
 /*-------------------------------------------------------------------*/
 
-void vars_check( Var *v, int type )
+void vars_check( Var_T *v, int types )
 {
 	int i;
 	int t;
-	const char *types[ ] = { "STRING", "INTEGER", "FLOAT",
-							 "1D INTEGER ARRAY", "1D FLOAT ARRAY",
-							 "INTEGER MATRIX", "FLOAT MATRIX",
-							 "INTEGER REFERENCE", "FLOAT REFERENCE",
-							 "SUBARRAY REFERENCE", "ARRAY REFERENCE",
-							 "FUNCTION" };
+	const char *type_names[ ] = { "STRING", "INTEGER", "FLOAT",
+								  "1D INTEGER ARRAY", "1D FLOAT ARRAY",
+								  "INTEGER MATRIX", "FLOAT MATRIX",
+								  "INTEGER REFERENCE", "FLOAT REFERENCE",
+								  "SUBARRAY REFERENCE", "ARRAY REFERENCE",
+								   "FUNCTION" };
 
 
 #ifndef NDEBUG
@@ -1074,16 +1081,16 @@ void vars_check( Var *v, int type )
 
 	/* Check that the variable has the correct type */
 
-	if ( ! ( v->type & type ) )
+	if ( ! ( v->type & types ) )
 	{
 		for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
 			/* empty */ ;
 		if ( v->name != NULL )
 			print( FATAL, "The variable '%s' of type %s can't be used in "
-				   "this context.\n", v->name, types[ i ] );
+				   "this context.\n", v->name, type_names[ i ] );
 		else
 			print( FATAL, "Variable of type %s can't be used in this "
-				   "context.\n", types[ i ] );
+				   "context.\n", type_names[ i ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1102,9 +1109,9 @@ void vars_check( Var *v, int type )
 /* on what type of variable it is).                              */
 /*---------------------------------------------------------------*/
 
-bool vars_exist( Var *v )
+bool vars_exist( Var_T *v )
 {
-	Var *lp;
+	Var_T *lp;
 
 
 	fsc2_assert( v != NULL );
@@ -1130,7 +1137,7 @@ bool vars_exist( Var *v )
 /*            done, must be called with a NULL argument.             */
 /*-------------------------------------------------------------------*/
 
-void *vars_iter( Var *v )
+void *vars_iter( Var_T *v )
 {
 	static ssize_t *iter = NULL;
 	void *ret;
@@ -1181,9 +1188,9 @@ void *vars_iter( Var *v )
 /* element a NULL pointer is returned.                          */
 /*--------------------------------------------------------------*/
 
-static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p )
+static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var_T *p )
 {
-	Var *p_next;
+	Var_T *p_next;
 
 
 	/* If the index for the current dimension is too large reset it to
@@ -1228,9 +1235,9 @@ static void *vars_get_pointer( ssize_t *iter, ssize_t depth, Var *p )
 
 void vars_save_restore( bool flag )
 {
-	Var *src;
-	Var *cpy;
-	static Var *cpy_area = NULL;
+	Var_T *src;
+	Var_T *cpy;
+	static Var_T *cpy_area = NULL;
 	static bool exists_copy = UNSET;
 	ssize_t var_count;
 	ssize_t i;

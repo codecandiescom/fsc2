@@ -27,13 +27,14 @@
 
 static void	unpack_and_accept( int dim, char *ptr );
 static void	other_data_request( int dim, int type, char *ptr );
-static void accept_1d_data( long x_index, long curve, int type, char *ptr );
-static void accept_1d_data_sliding( long curve, int type, char *ptr );
-static void accept_2d_data( long x_index, long y_index, long curve, int type,
+static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 							char *ptr );
-static long get_number_of_new_points( char **ptr, int type );
+static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr );
+static void accept_2d_data( long x_index, long y_index, long curve,
+							Var_Type_T type, char *ptr );
+static long get_number_of_new_points( char **ptr, Var_Type_T type );
 static bool get_new_extrema( double *max, double *min, char *ptr,
-							 long len, int type );
+							 long len, Var_Type_T type );
 static bool	incr_x( long x_index, long len );
 static bool	incr_y( long y_index );
 static bool	incr_x_and_y( long x_index, long len, long y_index );
@@ -205,7 +206,7 @@ static void unpack_and_accept( int dim, char *ptr )
 	long x_index,
 		 y_index,
 		 curve;
-	int type;
+	Var_Type_T type;
 	long len;
 
 
@@ -436,7 +437,8 @@ static void other_data_request( int dim, int type, char *ptr )
 /* for 1D graphics (when normal display mode is used).    */
 /*--------------------------------------------------------*/
 
-static void accept_1d_data( long x_index, long curve, int type, char *ptr )
+static void accept_1d_data( long x_index, long curve, Var_Type_T type,
+							char *ptr )
 {
 	long len = 0;
 	char *cur_ptr;
@@ -445,9 +447,9 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 	double new_rwc_delta_y;
 	double old_rw_min;
 	double fac, off;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	long i, j;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 	long count;
 
 
@@ -617,7 +619,7 @@ static void accept_1d_data( long x_index, long curve, int type, char *ptr )
 /* "sliding window" mode is used.                         */
 /*--------------------------------------------------------*/
 
-static void accept_1d_data_sliding( long curve, int type, char *ptr )
+static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 {
 	long len = 0;
 	char *cur_ptr;
@@ -626,12 +628,12 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 	double new_rwc_delta_y;
 	double old_rw_min;
 	double fac, off;
-	Curve_1d *cv;
+	Curve_1d_T *cv;
 	long i;
-	Scaled_Point *sp, *sp1, *sp2;
+	Scaled_Point_T *sp, *sp1, *sp2;
 	long count;
 	long shift;
-	Marker_1D *m, *mn, *mp;
+	Marker_1d_T *m, *mn, *mp;
 
 
 	/* Get the amount of new data and a pointer to the start of the data */
@@ -808,8 +810,8 @@ static void accept_1d_data_sliding( long curve, int type, char *ptr )
 /* fast as possible...)                                           */
 /*----------------------------------------------------------------*/
 
-static void accept_2d_data( long x_index, long y_index, long curve, int type,
-							char *ptr )
+static void accept_2d_data( long x_index, long y_index, long curve,
+							Var_Type_T type, char *ptr )
 {
 	long x_len = 0;
 	long y_len = 0;
@@ -818,9 +820,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	double data;
 	long ldata;
 	double new_rwc_delta_z, fac, off, old_rw_min;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	long i, j;
-	Scaled_Point *sp;
+	Scaled_Point_T *sp;
 	bool size_changed = UNSET;
 
 
@@ -1073,7 +1075,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 /* function returns.                                                   */
 /*---------------------------------------------------------------------*/
 
-static long get_number_of_new_points( char **ptr, int type )
+static long get_number_of_new_points( char **ptr, Var_Type_T type )
 {
 	long len = 0;
 	char *ptr_2d;
@@ -1142,7 +1144,7 @@ static long get_number_of_new_points( char **ptr, int type )
 /*----------------------------------------------------------*/
 
 static bool get_new_extrema( double *max, double *min, char *ptr,
-							 long len, int type )
+							 long len, Var_Type_T type )
 {
 	double data, old_max, old_min;
 	long i, j;
@@ -1219,11 +1221,11 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 static bool incr_x( long x_index, long len )
 {
 	long i, j, k;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	long new_Gnx;
 	long new_num;
-	Scaled_Point *old_points;
-	Scaled_Point *sp;
+	Scaled_Point_T *old_points;
+	Scaled_Point_T *sp;
 
 
 	new_Gnx = x_index + len;
@@ -1268,8 +1270,8 @@ static bool incr_x( long x_index, long len )
 static bool incr_y( long y_index )
 {
 	long i, k;
-	Curve_2d *cv;
-	Scaled_Point *sp;
+	Curve_2d_T *cv;
+	Scaled_Point_T *sp;
 	long new_Gny;
 	long new_num;
 
@@ -1309,12 +1311,12 @@ static bool incr_y( long y_index )
 static bool incr_x_and_y( long x_index, long len, long y_index )
 {
 	long i, j, k;
-	Curve_2d *cv;
+	Curve_2d_T *cv;
 	long new_Gnx;
 	long new_Gny;
 	long new_num;
-	Scaled_Point *old_points;
-	Scaled_Point *sp;
+	Scaled_Point_T *old_points;
+	Scaled_Point_T *sp;
 	bool ret = UNSET;
 
 

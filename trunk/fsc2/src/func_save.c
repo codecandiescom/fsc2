@@ -31,12 +31,12 @@ extern bool No_File_Numbers;
 extern bool Dont_Save;
 
 
-static int get_save_file( Var **v );
-static Var *batch_mode_file_open( char *name );
-static long arr_save( long file_num, Var *v );
-static void f_format_check( Var *v );
-static void ff_format_check( Var *v );
-static long do_printf( long file_num, Var *v );
+static int get_save_file( Var_T **v );
+static Var_T *batch_mode_file_open( char *name );
+static long arr_save( long file_num, Var_T *v );
+static void f_format_check( Var_T *v );
+static void ff_format_check( Var_T *v );
+static long do_printf( long file_num, Var_T *v );
 static long print_browser( int browser, int fid, const char* comment );
 static long T_fprintf( long fn, const char *fmt, ... );
 static long print_include( int fid, char *cp, const char *comment,
@@ -48,7 +48,7 @@ static long print_include( int fid, char *cp, const char *comment,
 /* so just return value indicating success.                       */
 /*----------------------------------------------------------------*/
 
-Var *f_is_file( UNUSED_ARG Var *v )
+Var_T *f_is_file( UNUSED_ARG Var_T *v )
 {
 	return vars_push( INT_VAR, 1L );
 }
@@ -68,15 +68,15 @@ Var *f_is_file( UNUSED_ARG Var *v )
 /* 6. Default extension to add (in case it's not already there) (optional)   */
 /*---------------------------------------------------------------------------*/
 
-Var *f_openf( Var *var )
+Var_T *f_openf( Var_T *var )
 {
-	Var *cur;
+	Var_T *cur;
 	int i;
 	char *fn;
 	char *m;
 	struct stat stat_buf;
 	FILE *fp = NULL;
-	FILE_LIST *old_File_List = NULL;
+	File_List_T *old_File_List = NULL;
 
 
 	CLOBBER_PROTECT( fp );
@@ -173,15 +173,16 @@ Var *f_openf( Var *var )
 	if ( EDL.File_List )
 	{
 		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-											  * sizeof( FILE_LIST ) );
+											  * sizeof *old_File_List );
 		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof( FILE_LIST ) );
+				EDL.File_List_Len * sizeof *old_File_List );
 	}
 
 	TRY
 	{
 		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+											   ( EDL.File_List_Len + 1 )
+											   * sizeof *EDL.File_List );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
@@ -223,16 +224,16 @@ Var *f_openf( Var *var )
 /* 5. Default extension to add (in case it's not already there)              */
 /*---------------------------------------------------------------------------*/
 
-Var *f_getf( Var *var )
+Var_T *f_getf( Var_T *var )
 {
-	Var *cur;
+	Var_T *cur;
 	int i;
 	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 	FILE *fp;
 	struct stat stat_buf;
 	char *r = NULL;
 	char *new_r, *m;
-	FILE_LIST *old_File_List = NULL;
+	File_List_T *old_File_List = NULL;
 
 
 	CLOBBER_PROTECT( fp );
@@ -408,15 +409,16 @@ getfile_retry:
 	if ( EDL.File_List )
 	{
 		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len *
-											  sizeof( FILE_LIST ) );
+											  sizeof *old_File_List );
 		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof( FILE_LIST ) );
+				EDL.File_List_Len * sizeof *old_File_List );
 	}
 
 	TRY
 	{
 		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+											   ( EDL.File_List_Len + 1 )
+											   * sizeof *EDL.File_List );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
@@ -448,11 +450,11 @@ getfile_retry:
 /* after applying some changes according to the input arguments.     */
 /*-------------------------------------------------------------------*/
 
-Var *f_clonef( Var *v )
+Var_T *f_clonef( Var_T *v )
 {
 	char *fn;
 	char *n;
-	Var *new_v, *arg[ 6 ];
+	Var_T *new_v, *arg[ 6 ];
 	int i;
 	long file_num;
 
@@ -532,13 +534,13 @@ Var *f_clonef( Var *v )
 /* Function for opening a file when running in batch mode */
 /*--------------------------------------------------------*/
 
-static Var *batch_mode_file_open( char *name )
+static Var_T *batch_mode_file_open( char *name )
 {
 	unsigned long cn = 0;
 	char *new_name = NULL;
 	struct stat stat_buf;
 	FILE *fp;
-	FILE_LIST *old_File_List = NULL;
+	File_List_T *old_File_List = NULL;
 
 
 	CLOBBER_PROTECT( new_name );
@@ -623,15 +625,16 @@ static Var *batch_mode_file_open( char *name )
 	if ( EDL.File_List )
 	{
 		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-											  * sizeof( FILE_LIST ) );
+											  * sizeof *old_File_List );
 		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof( FILE_LIST ) );
+				EDL.File_List_Len * sizeof *old_File_List );
 	}
 
 	TRY
 	{
 		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-							 ( EDL.File_List_Len + 1 ) * sizeof( FILE_LIST ) );
+											   ( EDL.File_List_Len + 1 )
+											   * sizeof *EDL.File_List );
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
@@ -662,10 +665,10 @@ static Var *batch_mode_file_open( char *name )
 /* family of functions.                                                */
 /*---------------------------------------------------------------------*/
 
-static int get_save_file( Var **v )
+static int get_save_file( Var_T **v )
 {
-	Var *get_file_ptr;
-	Var *file;
+	Var_T *get_file_ptr;
+	Var_T *file;
 	long file_num;
 	int acc;
 
@@ -777,7 +780,7 @@ void close_all_files( void )
 /* slices. It returns the number of characters written.                 */
 /*----------------------------------------------------------------------*/
 
-Var *f_save( Var *v )
+Var_T *f_save( Var_T *v )
 {
 	long file_num;
 	long count = 0;
@@ -830,7 +833,7 @@ Var *f_save( Var *v )
 /* the 'save()' EDL function. It writes out the array one element per line */
 /*-------------------------------------------------------------------------*/
 
-static long arr_save( long file_num, Var *v )
+static long arr_save( long file_num, Var_T *v )
 {
 	ssize_t i;
 	long count = 0;
@@ -853,6 +856,9 @@ static long arr_save( long file_num, Var *v )
 				if ( v->val.vptr[ i ] != NULL )
 					count += arr_save( file_num, v->val.vptr[ i ] );
 			break;
+
+		default :
+			break;
 	}
 
 	return count;
@@ -868,7 +874,7 @@ static long arr_save( long file_num, Var *v )
 /* The function returns the number of chars it wrote to the file.           */
 /*--------------------------------------------------------------------------*/
 
-Var *f_fsave( Var *v )
+Var_T *f_fsave( Var_T *v )
 {
 	long file_num;
 
@@ -903,10 +909,10 @@ Var *f_fsave( Var *v )
 /* a format string that can be passed to fprintf()'s format string.        */
 /*-------------------------------------------------------------------------*/
 
-static void f_format_check( Var *v )
+static void f_format_check( Var_T *v )
 {
 	char *cp;
-	Var *cv;
+	Var_T *cv;
 	ptrdiff_t s2c;
 
 
@@ -1019,7 +1025,7 @@ static void f_format_check( Var *v )
 /* The function returns the number of chars written to the file.           */
 /*-------------------------------------------------------------------------*/
 
-Var *f_ffsave( Var *v )
+Var_T *f_ffsave( Var_T *v )
 {
 	long file_num;
 
@@ -1056,10 +1062,10 @@ Var *f_ffsave( Var *v )
 /* superfluous arguments are discarded).                                    */
 /*--------------------------------------------------------------------------*/
 
-static void ff_format_check( Var *v )
+static void ff_format_check( Var_T *v )
 {
 	const char *sptr = v->val.sptr;
-	Var *vptr = v->next;
+	Var_T *vptr = v->next;
 
 
 	/* Replace escape characters in the format string */
@@ -1258,12 +1264,12 @@ static void ff_format_check( Var *v )
 /* the number of character written.                                      */
 /*-----------------------------------------------------------------------*/
 
-static long do_printf( long file_num, Var *v )
+static long do_printf( long file_num, Var_T *v )
 {
 	char *fmt_start,
 	     *fmt_end,
 	     *sptr;
-	Var *cv;
+	Var_T *cv;
 	long count = 0;
 	char store;
 	int need_vars;
@@ -1566,7 +1572,7 @@ static long do_printf( long file_num, Var *v )
 /* character).                                                             */
 /*-------------------------------------------------------------------------*/
 
-Var *f_save_p( Var *v )
+Var_T *f_save_p( Var_T *v )
 {
 	long file_num;
 
@@ -1598,7 +1604,7 @@ Var *f_save_p( Var *v )
 /* that gets prepended to each line of the output (i.e. a comment char).    */
 /*--------------------------------------------------------------------------*/
 
-Var *f_save_o( Var *v )
+Var_T *f_save_o( Var_T *v )
 {
 	long file_num;
 
@@ -1867,7 +1873,7 @@ static long print_include( int fid, char *cp, const char *comment,
 /* 4. The label for the editor                                         */
 /*---------------------------------------------------------------------*/
 
-Var *f_save_c( Var *v )
+Var_T *f_save_c( Var_T *v )
 {
 	long file_num;
 	const char *cc = NULL;

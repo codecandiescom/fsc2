@@ -68,23 +68,23 @@ int hp8672a_end_of_exp_hook( void );
 void hp8672a_exit_hook( void );
 
 
-Var *synthesizer_name( Var *v );
-Var *synthesizer_state( Var *v );
-Var *synthesizer_frequency( Var *v );
-Var *synthesizer_step_frequency( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_minimum_attenuation( Var *v );
-Var *synthesizer_sweep_up( Var *v );
-Var *synthesizer_sweep_down( Var *v );
-Var *synthesizer_reset_frequency( Var *v );
-Var *synthesizer_use_table( Var *v );
-Var *synthesizer_attenuation( Var *v );
-Var *synthesizer_att_ref_freq( Var *v );
-Var *synthesizer_modulation( Var *v );
-Var *synthesizer_mod_ampl( Var *v );
-Var *synthesizer_mod_type( Var *v );
-Var *synthesizer_mod_source( Var *v );
-Var *synthesizer_command( Var *v );
+Var_T *synthesizer_name( Var_T *v );
+Var_T *synthesizer_state( Var_T *v );
+Var_T *synthesizer_frequency( Var_T *v );
+Var_T *synthesizer_step_frequency( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_minimum_attenuation( Var_T *v );
+Var_T *synthesizer_sweep_up( Var_T *v );
+Var_T *synthesizer_sweep_down( Var_T *v );
+Var_T *synthesizer_reset_frequency( Var_T *v );
+Var_T *synthesizer_use_table( Var_T *v );
+Var_T *synthesizer_attenuation( Var_T *v );
+Var_T *synthesizer_att_ref_freq( Var_T *v );
+Var_T *synthesizer_modulation( Var_T *v );
+Var_T *synthesizer_mod_ampl( Var_T *v );
+Var_T *synthesizer_mod_type( Var_T *v );
+Var_T *synthesizer_mod_source( Var_T *v );
+Var_T *synthesizer_command( Var_T *v );
 
 
 typedef struct ATT_TABLE_ENTRY ATT_TABLE_ENTRY;
@@ -158,7 +158,7 @@ FILE *hp8672a_find_table( char **name );
 FILE *hp8672a_open_table( char *name );
 double hp8672a_get_att_from_table( double freq );
 double hp8672a_get_att( double freq );
-int hp8672a_set_mod_param( Var *v, double *dres, int *ires );
+int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires );
 int hp8672_mod_ampl_check( double ampl );
 
 

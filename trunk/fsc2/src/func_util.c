@@ -24,25 +24,25 @@
 
 #include "fsc2.h"
 
-typedef struct DPoint DPoint;
+typedef struct dpoint dpoint_T;
 
-struct DPoint {
+struct dpoint {
 	long nx;
 	long ny;
 	long nc;
-	int type;
+	Var_Type_T type;
 	long len;
 	long lval;
 	double dval;
 	void *ptr;
-	Var *vptr;
+	Var_T *vptr;
 };
 
 
-static DPoint *eval_display_args( Var *v, int dim, int *npoints );
+static dpoint_T *eval_display_args( Var_T *v, int dim, int *npoints );
 
-extern sigjmp_buf alrm_env;
-extern volatile sig_atomic_t can_jmp_alrm;
+extern sigjmp_buf Alrm_Env;
+extern volatile sig_atomic_t Can_Jmp_Alrm;
 
 
 /*-----------------------------------------------------------------------*/
@@ -59,12 +59,12 @@ extern volatile sig_atomic_t can_jmp_alrm;
 /* the format string.                                                    */
 /*-----------------------------------------------------------------------*/
 
-Var *f_print( Var *v )
+Var_T *f_print( Var_T *v )
 {
 	char *fmt;
 	char *cp;
 	char *ep;
-	Var *cv;
+	Var_T *cv;
 	char *sptr;
 	int in_format,            /* number of wild cards characters */
 		on_stack,             /* number of arguments (beside format string ) */
@@ -256,12 +256,12 @@ Var *f_print( Var *v )
 /* the format string.													 */
 /*-----------------------------------------------------------------------*/
 
-Var *f_sprint( Var *v )
+Var_T *f_sprint( Var_T *v )
 {
 	char *fmt;
 	char *cp;
 	char *ep;
-	Var *cv;
+	Var_T *cv;
 	char *sptr;
 	int in_format,            /* number of wild cards characters */
 		on_stack,             /* number of arguments (beside format string ) */
@@ -452,7 +452,7 @@ Var *f_sprint( Var *v )
 /* Called for the EDL function "show_message()". */
 /*-----------------------------------------------*/
 
-Var *f_showm( Var *v )
+Var_T *f_showm( Var_T *v )
 {
 	char *mess;
 	char *mp;
@@ -516,7 +516,7 @@ Var *f_showm( Var *v )
 /*  * number of seconds to sleep                                     */
 /*-------------------------------------------------------------------*/
 
-Var *f_wait( Var *v )
+Var_T *f_wait( Var_T *v )
 {
 	struct itimerval sleepy;
 	double how_long;
@@ -585,13 +585,13 @@ Var *f_wait( Var *v )
 	   setitimer() and finally start the pause(). This is done in an endless
 	   loop because the pause() can also be ended by a DO_SEND signal which we
 	   have to ignore. In the signal handler for both the SIGALRM and DO_QUIT
-	   signal a siglongjmp() is done if the 'can_jmp_alrm' flag is set,
+	   signal a siglongjmp() is done if the 'Can_Jmp_Alrm' flag is set,
 	   getting us to the point after the 'if'-block because it will always
 	   return with to the point where we called sigsetjmp() with a non-zero
 	   return value.
 
 	   Actually, there is still one race condition left: When the DO_QUIT
-	   signal comes in after the sigsetjmp() but before 'can_jmp_alrm' is set
+	   signal comes in after the sigsetjmp() but before 'Can_Jmp_Alrm' is set
 	   the signal handler will not siglongjmp() but simply return. In this
 	   (fortunately rather improbable case) the DO_QUIT signal will get lost
 	   and pause() will be run until the SIGALRM is triggered. But the only
@@ -600,9 +600,9 @@ Var *f_wait( Var *v )
 	   will probably never notice that he triggered the race condition -
 	   otherwise he simply has to click the stop button a second time. */
 
-	if ( sigsetjmp( alrm_env, 1 ) == 0 )
+	if ( sigsetjmp( Alrm_Env, 1 ) == 0 )
 	{
-		can_jmp_alrm = 1;
+		Can_Jmp_Alrm = 1;
 		setitimer( ITIMER_REAL, &sleepy, NULL );
 		while ( 1 )
 			pause( );
@@ -632,7 +632,7 @@ Var *f_wait( Var *v )
 /* 5. y-axis label (optional)                                        */
 /*-------------------------------------------------------------------*/
 
-Var *f_init_1d( Var *v )
+Var_T *f_init_1d( Var_T *v )
 {
 	int i;
 
@@ -750,7 +750,7 @@ Var *f_init_1d( Var *v )
 /* 2-dimensional experiments.                                        */
 /*-------------------------------------------------------------------*/
 
-Var *f_init_2d( Var *v )
+Var_T *f_init_2d( Var_T *v )
 {
 	int i;
 
@@ -913,7 +913,7 @@ Var *f_init_2d( Var *v )
 /* Function to change 1D display mode */
 /*------------------------------------*/
 
-Var *f_dmode( Var *v )
+Var_T *f_dmode( Var_T *v )
 {
 	long mode;
 	long width = 0;
@@ -1063,7 +1063,7 @@ Var *f_dmode( Var *v )
 /* Function to change the scale during the experiment */
 /*----------------------------------------------------*/
 
-Var *f_cscale( Var *v )
+Var_T *f_cscale( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -1103,7 +1103,7 @@ Var *f_cscale( Var *v )
 /* Function to change the scale of a 1D display during the experiment */
 /*--------------------------------------------------------------------*/
 
-Var *f_cscale_1d( Var *v )
+Var_T *f_cscale_1d( Var_T *v )
 {
 	double x_0, dx;                  /* new scale settings */
 	int is_set = 0;                  /* flags, indicating what to change */
@@ -1223,7 +1223,7 @@ Var *f_cscale_1d( Var *v )
 /* Function to change the scale of a 2D display during the experiment */
 /*--------------------------------------------------------------------*/
 
-Var *f_cscale_2d( Var *v )
+Var_T *f_cscale_2d( Var_T *v )
 {
 	double x_0, y_0, dx, dy;         /* new scale settings */
 	int is_set = 0;                  /* flags, indicating what to change */
@@ -1362,7 +1362,7 @@ Var *f_cscale_2d( Var *v )
 /* Function to change one or more axis labels during the experiment */
 /*------------------------------------------------------------------*/
 
-Var *f_clabel( Var *v )
+Var_T *f_clabel( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -1403,7 +1403,7 @@ Var *f_clabel( Var *v )
 /* of a 1D display during the experiment      */
 /*--------------------------------------------*/
 
-Var *f_clabel_1d( Var *v )
+Var_T *f_clabel_1d( Var_T *v )
 {
 	char *l[ 2 ] = { NULL, NULL };
 	long lengths[ 2 ] = { 1, 1 };
@@ -1530,7 +1530,7 @@ Var *f_clabel_1d( Var *v )
 /* of a 2D display during the experiment      */
 /*--------------------------------------------*/
 
-Var *f_clabel_2d( Var *v )
+Var_T *f_clabel_2d( Var_T *v )
 {
 	char *l[ 3 ] = { NULL, NULL, NULL };
 	long lengths[ 3 ] = { 1, 1, 1 };
@@ -1665,7 +1665,7 @@ Var *f_clabel_2d( Var *v )
 /* during the experiment.                                  */
 /*---------------------------------------------------------*/
 
-Var *f_rescale( Var *v )
+Var_T *f_rescale( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -1706,7 +1706,7 @@ Var *f_rescale( Var *v )
 /* in a 1D display during the experiment.                  */
 /*---------------------------------------------------------*/
 
-Var *f_rescale_1d( Var *v )
+Var_T *f_rescale_1d( Var_T *v )
 {
 	long new_nx;
 	int shm_id;
@@ -1809,7 +1809,7 @@ Var *f_rescale_1d( Var *v )
 /* in a 2D display during the experiment.                  */
 /*---------------------------------------------------------*/
 
-Var *f_rescale_2d( Var *v )
+Var_T *f_rescale_2d( Var_T *v )
 {
 	long new_nx, new_ny;
 	int shm_id;
@@ -1920,7 +1920,7 @@ Var *f_rescale_2d( Var *v )
 /* f_display() is used to send new data to the display system. */
 /*-------------------------------------------------------------*/
 
-Var *f_display( Var *v )
+Var_T *f_display( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -1959,9 +1959,9 @@ Var *f_display( Var *v )
 /* f_display() is used to send new 1D data to the display system. */
 /*----------------------------------------------------------------*/
 
-Var *f_display_1d( Var *v )
+Var_T *f_display_1d( Var_T *v )
 {
-	DPoint *dp;
+	dpoint_T *dp;
 	int shm_id;
 	long len = 0;                     /* total length of message to send */
 	void *buf;
@@ -2018,9 +2018,9 @@ Var *f_display_1d( Var *v )
 
 	len =   sizeof len                  /* length field itself */
 		  + sizeof nsets                /* number of sets to be sent */
-		  + nsets * (                   /* x-, y-index, number and data type */
-					    sizeof dp->nx + sizeof dp->nc 
-					  + sizeof dp->type );
+		  + nsets * (   sizeof dp->nx + sizeof dp->nc 
+					  + sizeof dp->type );  /* x-, y-index, number,data type */
+
 
 	for ( i = 0; i < nsets; i++ )
 	{
@@ -2138,9 +2138,9 @@ Var *f_display_1d( Var *v )
 /* f_display_2d() is used to send new 2D data to the display system. */
 /*-------------------------------------------------------------------*/
 
-Var *f_display_2d( Var *v )
+Var_T *f_display_2d( Var_T *v )
 {
-	DPoint *dp;
+	dpoint_T *dp;
 	int shm_id;
 	long len = 0;                     /* total length of message to send */
 	void *buf;
@@ -2384,12 +2384,16 @@ Var *f_display_2d( Var *v )
 }
 
 
-/*--------------------------------------------------------*/
-/*--------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function is used to pick the arguments to the EDL functions  */
+/* display_1d() and display_2d() from the vaiables stack, check that */
+/* they make sense and then return them in an array of structures to */
+/* be used by the funcrtions f_display_1d() and f_display_2d().      */
+/*-------------------------------------------------------------------*/
 
-static DPoint *eval_display_args( Var *v, int dim, int *nsets )
+static dpoint_T *eval_display_args( Var_T *v, int dim, int *nsets )
 {
-	DPoint *dp = NULL;
+	dpoint_T *dp = NULL;
 	long i;
 
 
@@ -2567,6 +2571,9 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 				}
 				dp[ *nsets ].vptr = v;
 				break;
+
+			default :
+				break;
 		}
 
 		/* There can be several curves and we check if there's a curve number,
@@ -2613,7 +2620,7 @@ static DPoint *eval_display_args( Var *v, int dim, int *nsets )
 /* Function deletes all points of a curve */
 /*----------------------------------------*/
 
-Var *f_clearcv( Var *v )
+Var_T *f_clearcv( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -2654,7 +2661,7 @@ Var *f_clearcv( Var *v )
 /* Function deletes all points of a 1D curve */
 /*-------------------------------------------*/
 
-Var *f_clearcv_1d( Var *v )
+Var_T *f_clearcv_1d( Var_T *v )
 {
 	long curve;
 	long count = 0;
@@ -2802,7 +2809,7 @@ Var *f_clearcv_1d( Var *v )
 /* Function deletes all points of a 2D curve */
 /*-------------------------------------------*/
 
-Var *f_clearcv_2d( Var *v )
+Var_T *f_clearcv_2d( Var_T *v )
 {
 	long curve;
 	long count = 0;
@@ -2950,7 +2957,7 @@ Var *f_clearcv_2d( Var *v )
 /* Function draws a marker */
 /*-------------------------*/
 
-Var *f_setmark( Var *v )
+Var_T *f_setmark( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -2988,7 +2995,7 @@ Var *f_setmark( Var *v )
 /* Function draws a 1D marker */
 /*----------------------------*/
 
-Var *f_setmark_1d( Var *v )
+Var_T *f_setmark_1d( Var_T *v )
 {
 	long position;
 	long color = 0;
@@ -3124,7 +3131,7 @@ Var *f_setmark_1d( Var *v )
 /* Function draws a 2D marker */
 /*----------------------------*/
 
-Var *f_setmark_2d( Var *v )
+Var_T *f_setmark_2d( Var_T *v )
 {
 	long x_pos;
 	long y_pos;
@@ -3295,7 +3302,7 @@ Var *f_setmark_2d( Var *v )
 /* Function deletes all markers */
 /*------------------------------*/
 
-Var *f_clearmark( Var *v )
+Var_T *f_clearmark( Var_T *v )
 {
 	if ( Internals.cmdline_flags & NO_GUI_RUN )
 	{
@@ -3333,7 +3340,7 @@ Var *f_clearmark( Var *v )
 /* Function deletes all 1D markers */
 /*---------------------------------*/
 
-Var *f_clearmark_1d( Var *v )
+Var_T *f_clearmark_1d( Var_T *v )
 {
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -3423,7 +3430,7 @@ Var *f_clearmark_1d( Var *v )
 /* Function deletes all 2D markers */
 /*---------------------------------*/
 
-Var *f_clearmark_2d( UNUSED_ARG Var *v )
+Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
 {
 	long len = 0;                    /* total length of message to send */
 	void *buf;
@@ -3526,12 +3533,14 @@ Var *f_clearmark_2d( UNUSED_ARG Var *v )
 }
 
 
-/*-------------------------------------------------*/
-/*-------------------------------------------------*/
+/*-------------------------------------------------------*/
+/* Function for returning the current mouse position and */
+/* the state of the mouse buttons and the modifier keys. */
+/*-------------------------------------------------------*/
 
-Var *f_get_pos( UNUSED_ARG Var *v )
+Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 {
-	Var *nv;
+	Var_T *nv;
 	long len = 0;                    /* total length of message to send */
 	char *buffer, *pos;
 	double *result;
@@ -3611,7 +3620,7 @@ Var *f_get_pos( UNUSED_ARG Var *v )
 /* peaks.                                                              */
 /*---------------------------------------------------------------------*/
 
-Var *f_find_peak( Var *v )
+Var_T *f_find_peak( Var_T *v )
 {
 	double *arr;
 	ssize_t len;
@@ -3706,7 +3715,7 @@ Var *f_find_peak( Var *v )
 /* the the first of these elements is returned.                      */
 /*-------------------------------------------------------------------*/
 
-Var *f_index_of_max( Var *v )
+Var_T *f_index_of_max( Var_T *v )
 {
 	long ind = 0;
 	long lmax = INT_MIN;
@@ -3745,7 +3754,7 @@ Var *f_index_of_max( Var *v )
 /* the the first of these elements is returned.                       */
 /*--------------------------------------------------------------------*/
 
-Var *f_index_of_min( Var *v )
+Var_T *f_index_of_min( Var_T *v )
 {
 	long ind = 0;
 	ssize_t i;
@@ -3781,7 +3790,7 @@ Var *f_index_of_min( Var *v )
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-Var *f_mean_part_array( Var *v )
+Var_T *f_mean_part_array( Var_T *v )
 {
 	long size;
 	double *m;
@@ -3790,7 +3799,7 @@ Var *f_mean_part_array( Var *v )
 	long *lfrom;
 	double *dfrom;
 	double ipar;
-	Var *nv;
+	Var_T *nv;
 
 
 	vars_check( v, INT_ARR | FLOAT_ARR );
@@ -3869,7 +3878,7 @@ Var *f_mean_part_array( Var *v )
 
 #define OUTLIER_DEF_NUMBER 10
 
-Var *f_spike_rem( Var *v )
+Var_T *f_spike_rem( Var_T *v )
 {
 	double *diffs;
 	long *lpnt;
@@ -3881,7 +3890,7 @@ Var *f_spike_rem( Var *v )
 	ssize_t *ol_indices = NULL, *old_ol_indices;
 	ssize_t ol_len = 0, ol_count = 0;
 	long max_spike_width = 3;
-	Var *nv;
+	Var_T *nv;
 
 
 	CLOBBER_PROTECT( dpnt );

@@ -112,9 +112,9 @@ void dg2020_check_pod_level_diff( double high, double low )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-PULSE *dg2020_get_pulse( long pnum )
+Pulse_T *dg2020_get_pulse( long pnum )
 {
-	PULSE *cp = dg2020_Pulses;
+	Pulse_T *cp = dg2020.pulses;
 
 
 	if ( pnum < 0 )
@@ -177,7 +177,7 @@ const char *dg2020_pticks( Ticks ticks )
 /* to-function-assignment in their EDL program.                            */
 /*-------------------------------------------------------------------------*/
 
-CHANNEL *dg2020_get_next_free_channel( void )
+Channel_T *dg2020_get_next_free_channel( void )
 {
 	int i = 0;
 
@@ -199,8 +199,8 @@ CHANNEL *dg2020_get_next_free_channel( void )
 
 int dg2020_start_compare( const void *A, const void *B )
 {
-	PULSE *a = *( PULSE ** ) A,
-		  *b = *( PULSE ** ) B;
+	Pulse_T *a = *( Pulse_T ** ) A,
+		    *b = *( Pulse_T ** ) B;
 
 	if ( ! a->is_active )
 	{
@@ -224,9 +224,9 @@ int dg2020_start_compare( const void *A, const void *B )
   arguments. If at least one was found a postive result is returned.
 ---------------------------------------------------------------------------*/
 
-bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
+bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num )
 {
-	PULSE *pp = dg2020_Pulses;
+	Pulse_T *pp = dg2020.pulses;
 
 
 	fsc2_assert( p->num >= 0 );    /* is it really a normal pulse ? */
@@ -254,7 +254,8 @@ bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
   same channel and returns them as a sorted list.
 ---------------------------------------------------------------------------*/
 
-int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel, PULSE ***list )
+int dg2020_get_phase_pulse_list( Function_T *f, Channel_T *channel,
+								 Pulse_T ***list )
 {
 	int i;
 	int num_pulses = 0;
@@ -270,7 +271,7 @@ int dg2020_get_phase_pulse_list( FUNCTION *f, CHANNEL *channel, PULSE ***list )
 		*( *list + num_pulses++ ) = f->pulses[ i ];
 	}
 
-	qsort( *list, num_pulses, sizeof( PULSE * ), dg2020_start_compare );
+	qsort( *list, num_pulses, sizeof( Pulse_T * ), dg2020_start_compare );
 
 	return num_pulses;
 }
@@ -283,7 +284,7 @@ Ticks dg2020_get_max_seq_len( void )
 {
 	int i;
 	Ticks max = 0;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -542,8 +543,8 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 
 void dg2020_dump_channels( FILE *fp )
 {
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 	int i, k;
 	int next_phase;
 

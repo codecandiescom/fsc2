@@ -1882,8 +1882,8 @@ void clean_up( void )
 	/* Run exit hook functions and unlink modules */
 
 	delete_devices( );
-	need_GPIB = UNSET;
-	need_RULBUS = UNSET;
+	Need_GPIB = UNSET;
+	Need_RULBUS = UNSET;
 	fsc2_final_serial_cleanup( );
 
 	/* Delete function list */

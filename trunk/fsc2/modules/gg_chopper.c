@@ -49,8 +49,8 @@ int gg_chopper_test_hook( void );
 int gg_chopper_exp_hook( void );
 int gg_chopper_end_of_exp_hook( void );
 void gg_chopper_exit_hook( void );
-Var *chopper_name( Var *v );
-Var *chopper_sector_frequency( Var *v );
+Var_T *chopper_name( Var_T *v );
+Var_T *chopper_sector_frequency( Var_T *v );
 static void gg_chopper_set_dio( long val );
 static void gg_chopper_set_freq_out( double freq );
 
@@ -65,8 +65,8 @@ static void gg_chopper_set_freq_out( double freq );
 int gg_chopper_init_hook( void )
 {
 	int dev_num;
-	Var *Func_ptr;
-	Var *v;
+	Var_T *func_ptr;
+	Var_T *v;
 	char *func;
 	int acc;
 
@@ -86,7 +86,7 @@ int gg_chopper_init_hook( void )
 		func = get_string( "daq_reserve_dio#%d", dev_num );
 
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
 		print( FATAL, "Function for reserving the DIO is missing from "
@@ -97,7 +97,7 @@ int gg_chopper_init_hook( void )
 	T_free( func );
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
-	v = func_call( Func_ptr );
+	v = func_call( func_ptr );
 
 	if ( v->val.lval != 1 )
 	{
@@ -117,7 +117,7 @@ int gg_chopper_init_hook( void )
 		func = get_string( "daq_reserve_freq_out#%d", dev_num );
 
 	if ( ! func_exists( func ) ||
-		 ( Func_ptr = func_get( func, &acc ) ) == NULL )
+		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
 		T_free( func );
 		print( FATAL, "Function for reserving the FREQ_OUT pin is missing "
@@ -128,7 +128,7 @@ int gg_chopper_init_hook( void )
 	T_free( func );
 	vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
-	v = func_call( Func_ptr );
+	v = func_call( func_ptr );
 
 	if ( v->val.lval != 1 )
 	{
@@ -254,7 +254,7 @@ void gg_chopper_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *chopper_name( UNUSED_ARG Var *v )
+Var_T *chopper_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -265,7 +265,7 @@ Var *chopper_name( UNUSED_ARG Var *v )
  * determine or set the sector frequency of the chopper.
  *---------------------------------------------------------------*/
 
-Var *chopper_sector_frequency( Var *v )
+Var_T *chopper_sector_frequency( Var_T *v )
 {
 	double freq;
 	long dio_value;
@@ -325,10 +325,10 @@ Var *chopper_sector_frequency( Var *v )
 
 static void gg_chopper_set_dio( long val )
 {
-	Var *Func_ptr;
+	Var_T *func_ptr;
 	int acc;
 
-	if ( ( Func_ptr = func_get( gg_chopper.dio_func, &acc ) ) == NULL )
+	if ( ( func_ptr = func_get( gg_chopper.dio_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
@@ -337,7 +337,7 @@ static void gg_chopper_set_dio( long val )
 
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( INT_VAR, val );
-	vars_pop( func_call( Func_ptr ) );
+	vars_pop( func_call( func_ptr ) );
 }
 
 
@@ -348,11 +348,11 @@ static void gg_chopper_set_dio( long val )
 
 static void gg_chopper_set_freq_out( double freq )
 {
-	Var *Func_ptr;
+	Var_T *func_ptr;
 	int acc;
 
 
-	if ( ( Func_ptr = func_get( gg_chopper.freq_out_func, &acc ) ) == NULL )
+	if ( ( func_ptr = func_get( gg_chopper.freq_out_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "Internal error detected at %s:%d.\n",
 			   __FILE__, __LINE__ );
@@ -361,5 +361,5 @@ static void gg_chopper_set_freq_out( double freq )
 	
 	vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
 	vars_push( FLOAT_VAR, freq );
-	vars_pop( func_call( Func_ptr ) );
+	vars_pop( func_call( func_ptr ) );
 }

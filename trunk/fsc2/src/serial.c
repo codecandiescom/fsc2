@@ -1262,7 +1262,7 @@ static void fsc2_serial_log_date( void )
 static void fsc2_serial_log_function_start( const char *function,
 											const char *dev_name )
 {
-	if ( ll < LL_CE )
+	if ( fsc2_serial_log == NULL || ll < LL_CE )
 		return;
 
 	raise_permissions( );
@@ -1284,7 +1284,7 @@ static void fsc2_serial_log_function_start( const char *function,
 static void fsc2_serial_log_function_end( const char *function,
 										  const char *dev_name )
 {
-	if ( ll < LL_CE )
+	if ( fsc2_serial_log == NULL || ll < LL_CE )
 		return;
 
 	raise_permissions( );
@@ -1304,7 +1304,7 @@ static void fsc2_serial_log_message( const char *fmt, ... )
 	va_list ap;
 
 
-	if ( ll == LL_NONE )
+	if ( fsc2_serial_log == NULL || ll == LL_NONE )
 		return;
 
 	raise_permissions( );

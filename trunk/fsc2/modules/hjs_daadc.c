@@ -50,13 +50,13 @@ int hjs_daadc_exp_hook( void );
 int hjs_daadc_end_of_exp_hook( void );
 void hjs_daadc_exit_hook( void );
 
-Var *daq_name( Var *v );
-Var *daq_reserve_dac( Var *v );
-Var *daq_reserve_adc( Var *v );
-Var *daq_maximum_output_voltage( Var *v );
-Var *daq_set_voltage( Var *v );
-Var *daq_get_voltage( Var *v );
-Var *daq_dac_parameter( Var *v );
+Var_T *daq_name( Var_T *v );
+Var_T *daq_reserve_dac( Var_T *v );
+Var_T *daq_reserve_adc( Var_T *v );
+Var_T *daq_maximum_output_voltage( Var_T *v );
+Var_T *daq_set_voltage( Var_T *v );
+Var_T *daq_get_voltage( Var_T *v );
+Var_T *daq_dac_parameter( Var_T *v );
 
 
 static int hjs_daadc_da_volts_to_val( double volts );
@@ -205,7 +205,7 @@ void hjs_daadc_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var *daq_name( UNUSED_ARG Var *v )
+Var_T *daq_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -218,7 +218,7 @@ Var *daq_name( UNUSED_ARG Var *v )
 /* daq_set_voltage().                                                 */
 /*--------------------------------------------------------------------*/
 
-Var *daq_reserve_dac( Var *v )
+Var_T *daq_reserve_dac( Var_T *v )
 {
 	bool lock_state = SET;
 
@@ -281,7 +281,7 @@ Var *daq_reserve_dac( Var *v )
 /* argument to the function daq_get_voltage().                        */
 /*--------------------------------------------------------------------*/
 
-Var *daq_reserve_adc( Var *v )
+Var_T *daq_reserve_adc( Var_T *v )
 {
 	bool lock_state = SET;
 
@@ -352,7 +352,7 @@ Var *daq_reserve_adc( Var *v )
 /* passed to the function about the potentiometer setting was correct.  */
 /*----------------------------------------------------------------------*/
 
-Var *daq_maximum_output_voltage( Var *v )
+Var_T *daq_maximum_output_voltage( Var_T *v )
 {
 	double volts;
 	char *pass = NULL;
@@ -432,7 +432,7 @@ Var *daq_maximum_output_voltage( Var *v )
 /* to the highest possible value of 10 V).                              */
 /*----------------------------------------------------------------------*/
 
-Var *daq_set_voltage( Var *v )
+Var_T *daq_set_voltage( Var_T *v )
 {
 	double volts;
 	char *pass = NULL;
@@ -516,7 +516,7 @@ Var *daq_set_voltage( Var *v )
 /* called yet).                                                        */
 /*---------------------------------------------------------------------*/
 
-Var *daq_get_voltage( Var *v )
+Var_T *daq_get_voltage( Var_T *v )
 {
 	char *pass = NULL;
 
@@ -569,7 +569,7 @@ Var *daq_get_voltage( Var *v )
 /* maximum output voltage and voltage resolution).      */
 /*------------------------------------------------------*/
 
-Var *daq_dac_parameter( Var *v )
+Var_T *daq_dac_parameter( Var_T *v )
 {
 	double params[ 3 ];
 

@@ -28,7 +28,7 @@
 static bool rs690_field_channel_setup( void );
 static bool rs690_init_channels( void );
 static void rs690_calc_tables( void );
-static void rs690_table_set( int i, int k, FS *n );
+static void rs690_table_set( int i, int k, FS_T *n );
 static void rs690_gpib_failure( void );
 static void rs690_check( void );
 static int rs690_write( int device_no, const char *s, long len );
@@ -193,7 +193,7 @@ static bool rs690_field_channel_setup( void )
 	int field_list[ 4 * NUM_HSM_CARDS ][ 16 ];
 	char buf[ 72 * 4 * NUM_HSM_CARDS + 6 ];
 	int free_channel = 0;
-	CHANNEL *ch;
+	Channel_T *ch;
 
 
 	/* For a start mark all bits of all fields as unused */
@@ -273,7 +273,7 @@ bool rs690_set_channels( void )
 {
 	char buf[ 100 ];
 	int i, k;
-	FS *n, *o;
+	FS_T *n, *o;
 
 
 	rs690_calc_tables( );
@@ -334,7 +334,7 @@ bool rs690_set_channels( void )
 static bool rs690_init_channels( void )
 {
 	int i, j, k;
-	FS *n;
+	FS_T *n;
 	char buf[ 256 ];
 
 
@@ -372,7 +372,7 @@ static bool rs690_init_channels( void )
 		for ( j = 1; j <= 2; j++ )
 		{
 			sprintf( buf, "LDT,T%d,FL%d,1,1,%X,%ldns!", j, i,
-					 rs690_default_fields[ i ],
+					 rs690.default_fields[ i ],
 					 MAX_TICKS_PER_ENTRY * ( 4 << rs690.timebase_type ) );
 
 			if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
@@ -442,7 +442,7 @@ static void rs690_calc_tables( void )
 /* to and 'n' points to the FS structure with the data and length. */
 /*-----------------------------------------------------------------*/
 
-static void rs690_table_set( int i, int k, FS *n )
+static void rs690_table_set( int i, int k, FS_T *n )
 {
 	char buf[ 256 ];
 

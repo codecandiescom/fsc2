@@ -116,48 +116,48 @@ int pci_mio_16e_1_exp_hook( void );
 int pci_mio_16e_1_end_of_exp_hook( void );
 void pci_mio_16e_1_exit_hook( void );
 
-Var *daq_name( Var *v );
+Var_T *daq_name( Var_T *v );
 
 /* Functions from pci_mio_16e_1_ai.c */
 
-Var *daq_ai_channel_setup( Var *v );
-Var *daq_ai_acq_setup( Var *v );
-Var *daq_ai_start_acquisition( Var *v );
-Var *daq_ai_get_curve( Var * v );
+Var_T *daq_ai_channel_setup( Var_T *v );
+Var_T *daq_ai_acq_setup( Var_T *v );
+Var_T *daq_ai_start_acquisition( Var_T *v );
+Var_T *daq_ai_get_curve( Var_T * v );
 
 
 /* Functions from pci_mio_16e_1_ao.c */
 
-Var *daq_reserve_dac( Var *v );
-Var *daq_ao_channel_setup( Var *v );
-Var *daq_set_voltage( Var *v );
+Var_T *daq_reserve_dac( Var_T *v );
+Var_T *daq_ao_channel_setup( Var_T *v );
+Var_T *daq_set_voltage( Var_T *v );
 
 
 /* Functions from pci_mio_16e_1_gpct.c */
 
-Var *daq_start_continuous_counter( Var *v );
-Var *daq_start_timed_counter( Var *v );
-Var *daq_intermediate_count( Var *v );
-Var *daq_timed_count( Var *v );
-Var *daq_final_count( Var *v );
-Var *daq_stop_counter( Var *v );
-Var *daq_single_pulse( Var *c );
-Var *daq_continuous_pulses( Var *v );
+Var_T *daq_start_continuous_counter( Var_T *v );
+Var_T *daq_start_timed_counter( Var_T *v );
+Var_T *daq_intermediate_count( Var_T *v );
+Var_T *daq_timed_count( Var_T *v );
+Var_T *daq_final_count( Var_T *v );
+Var_T *daq_stop_counter( Var_T *v );
+Var_T *daq_single_pulse( Var_T *c );
+Var_T *daq_continuous_pulses( Var_T *v );
 
 void ni_daq_two_channel_pulses( double delay, double scan_duration );
 
 /* Functions from pci_mio_16e_1_dio.c */
 
-Var *daq_reserve_dio( Var *v );
-Var *daq_dio_read( Var *v );
-Var *daq_dio_write( Var *v );
+Var_T *daq_reserve_dio( Var_T *v );
+Var_T *daq_dio_read( Var_T *v );
+Var_T *daq_dio_write( Var_T *v );
 
 
 /* Functions from pci_mio_16e_1_msc.c */
 
-Var *daq_reserve_freq_out( Var *v );
-Var *daq_freq_out( Var *v );
-Var *daq_trigger_setup( Var *v );
+Var_T *daq_reserve_freq_out( Var_T *v );
+Var_T *daq_freq_out( Var_T *v );
+Var_T *daq_trigger_setup( Var_T *v );
 
 
 /* Functions from pci_mio_16e_1_util.c */

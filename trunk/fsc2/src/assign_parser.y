@@ -43,11 +43,11 @@ static void ass_func( int function );
 
 /* locally used global variables */
 
-static int Channel_Type;
+static int Channel_type;
 static int Cur_PHS = -1;
 static int Cur_PHST = -1;
 static bool Func_is_set = UNSET;
-static int dont_exec = 0;
+static int Dont_exec = 0;
 
 %}
 
@@ -56,7 +56,7 @@ static int dont_exec = 0;
 	long   lval;
 	double dval;
 	char   *sptr;
-	Var    *vptr;
+	Var_T  *vptr;
 }
 
 
@@ -145,24 +145,24 @@ static int dont_exec = 0;
 
 
 input:   /* empty */
-       | input line ';'            { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+       | input line ';'            { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-									 fsc2_assert( dont_exec == 0 );
+									 fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
-       | input SECTION_LABEL       { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+       | input SECTION_LABEL       { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 	                                 fsc2_assert( EDL.Var_Stack == NULL );
-									 fsc2_assert( dont_exec == 0 );
+									 fsc2_assert( Dont_exec == 0 );
 									 Func_is_set = UNSET;
 									 YYACCEPT; }
-       | input ';'                 { Channel_Type = PULSER_CHANNEL_NO_TYPE;
+       | input ';'                 { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
-									 fsc2_assert( dont_exec == 0 );
+									 fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
 ;
 
@@ -301,153 +301,153 @@ pcd:    /* empty */
 pod:    POD_TOKEN sep1 pm
 ;
 
-pm:     INT_TOKEN sep2             { p_assign_pod( Channel_Type,
+pm:     INT_TOKEN sep2             { p_assign_pod( Channel_type,
 												  vars_push( INT_VAR, $1 ) ); }
-      | pm INT_TOKEN sep2          { p_assign_pod( Channel_Type,
+      | pm INT_TOKEN sep2          { p_assign_pod( Channel_type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
 
 chd:    CH_TOKEN sep1 ch
 ;
 
-ch:     INT_TOKEN sep2             { p_assign_channel( Channel_Type,
+ch:     INT_TOKEN sep2             { p_assign_channel( Channel_type,
 												  vars_push( INT_VAR, $1 ) ); }
-      | ch INT_TOKEN sep2          { p_assign_channel( Channel_Type,
+      | ch INT_TOKEN sep2          { p_assign_channel( Channel_type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
 
-del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_Type, $3 ); }
+del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_type, $3 ); }
 ;
 
-inv:    INV_TOKEN sep2             { p_inv( Channel_Type ); }
+inv:    INV_TOKEN sep2             { p_inv( Channel_type ); }
 ;
 
-vh:     VH_TOKEN sep1 expr sep2    { p_set_v_high( Channel_Type, $3 ); }
+vh:     VH_TOKEN sep1 expr sep2    { p_set_v_high( Channel_type, $3 ); }
 ;
 
-vl:     VL_TOKEN sep1 expr sep2    { p_set_v_low( Channel_Type, $3 ); }
+vl:     VL_TOKEN sep1 expr sep2    { p_set_v_low( Channel_type, $3 ); }
 ;
 
-expr:    INT_TOKEN                { if ( ! dont_exec )
+expr:    INT_TOKEN                { if ( ! Dont_exec )
 		                                 $$ = vars_push( INT_VAR, $1 ); }
-       | FLOAT_TOKEN              { if ( ! dont_exec )
+       | FLOAT_TOKEN              { if ( ! Dont_exec )
 		                                 $$ = vars_push( FLOAT_VAR, $1 ); }
-       | VAR_TOKEN                 { if ( ! dont_exec )
+       | VAR_TOKEN                 { if ( ! Dont_exec )
 		                                 $$ = vars_push_copy( $1 ); }
        | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
 											$1->name );
 									 THROW( EXCEPTION ); }
-       | VAR_TOKEN '['             { if ( ! dont_exec )
+       | VAR_TOKEN '['             { if ( ! Dont_exec )
 		                                 vars_arr_start( $1 ); }
-         list1 ']'                 { if ( ! dont_exec )
+         list1 ']'                 { if ( ! Dont_exec )
 		                                 $$ = vars_arr_rhs( $4 ); }
-       | FUNC_TOKEN '(' list2 ')'  { if ( ! dont_exec )
+       | FUNC_TOKEN '(' list2 ')'  { if ( ! Dont_exec )
 		                                 $$ = func_call( $1 ); }
        | FUNC_TOKEN                { print( FATAL, "'%s' is a predefined "
 											"function.\n", $1->name );
 	                                 THROW( EXCEPTION ); }
        | VAR_REF
-	   | expr AND                  { if ( ! dont_exec )
+	   | expr AND                  { if ( ! Dont_exec )
 	                                 {
 										 if ( ! check_result( $1 ) )
 										 {
-											 dont_exec++;
+											 Dont_exec++;
 											 vars_pop( $1 );
 										 }
 									 }
 									 else
-										 dont_exec++;
+										 Dont_exec++;
 	                               }
-	     expr                      { if ( ! dont_exec )
+	     expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_AND, $1, $4 );
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 										 $$ = vars_push( INT_VAR, 0L );
 		                           }
-       | expr OR                   { if ( ! dont_exec )
+       | expr OR                   { if ( ! Dont_exec )
 	                                 {
 										 if ( check_result( $1 ) )
 										 {
-											 dont_exec++;
+											 Dont_exec++;
 										     vars_pop( $1 );
 										 }
 									 }
 									 else
-										 dont_exec++;
+										 Dont_exec++;
 	                               }
-	     expr                      { if ( ! dont_exec )
+	     expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_OR, $1, $4 );
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 									     $$ = vars_push( INT_VAR, 1L );
 		                           }
-       | expr XOR expr       	   { if ( ! dont_exec )
+       | expr XOR expr       	   { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | NOT expr            	   { if ( ! dont_exec )
+       | NOT expr            	   { if ( ! Dont_exec )
 		                                 $$ = vars_lnegate( $2 ); }
-       | expr EQ expr              { if ( ! dont_exec )
+       | expr EQ expr              { if ( ! Dont_exec )
 		                                $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | expr NE expr              { if ( ! dont_exec )
+       | expr NE expr              { if ( ! Dont_exec )
 		                              $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | expr LT expr              { if ( ! dont_exec )
+       | expr LT expr              { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | expr GT expr              { if ( ! dont_exec )
+       | expr GT expr              { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | expr LE expr              { if ( ! dont_exec )
+       | expr LE expr              { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS_EQUAL,
 														 $1, $3 ); }
-       | expr GE expr              { if ( ! dont_exec )
+       | expr GE expr              { if ( ! Dont_exec )
 		                                 $$ = vars_comp( COMP_LESS_EQUAL,
 														 $3, $1 ); }
-       | strs EQ strs              { if ( ! dont_exec )
+       | strs EQ strs              { if ( ! Dont_exec )
                                         $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
-       | strs NE strs              { if ( ! dont_exec )
+       | strs NE strs              { if ( ! Dont_exec )
                                       $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
-       | strs LT strs              { if ( ! dont_exec )
+       | strs LT strs              { if ( ! Dont_exec )
 	                                     $$ = vars_comp( COMP_LESS, $1, $3 ); }
-       | strs GT strs              { if ( ! dont_exec )
+       | strs GT strs              { if ( ! Dont_exec )
 	                                     $$ = vars_comp( COMP_LESS, $3, $1 ); }
-       | strs LE strs              { if ( ! dont_exec )
+       | strs LE strs              { if ( ! Dont_exec )
 	                                     $$ = vars_comp( COMP_LESS_EQUAL,
 														 $1, $3 ); }
-       | strs GE strs              { if ( ! dont_exec )
+       | strs GE strs              { if ( ! Dont_exec )
 	                                     $$ = vars_comp( COMP_LESS_EQUAL,
 														 $3, $1 ); }
-       | '+' expr %prec NEG        { if ( ! dont_exec )
+       | '+' expr %prec NEG        { if ( ! Dont_exec )
 		                                 $$ = $2; }
-       | '-' expr %prec NEG        { if ( ! dont_exec )
+       | '-' expr %prec NEG        { if ( ! Dont_exec )
 		                                 $$ = vars_negate( $2 ); }
-       | expr '+' expr             { if ( ! dont_exec )
+       | expr '+' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_add( $1, $3 ); }
-       | strs '+' strs             { if ( ! dont_exec )
+       | strs '+' strs             { if ( ! Dont_exec )
 		                                 $$ = vars_add( $1, $3 ); }
-       | expr '-' expr             { if ( ! dont_exec )
+       | expr '-' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_sub( $1, $3 ); }
-       | expr '*' expr             { if ( ! dont_exec )
+       | expr '*' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_mult( $1, $3 ); }
-       | expr '/' expr             { if ( ! dont_exec )
+       | expr '/' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_div( $1, $3 ); }
-       | expr '%' expr             { if ( ! dont_exec )
+       | expr '%' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_mod( $1, $3 ); }
-       | expr '^' expr             { if ( ! dont_exec )
+       | expr '^' expr             { if ( ! Dont_exec )
 		                                 $$ = vars_pow( $1, $3 ); }
-       | '(' expr ')'              { if ( ! dont_exec )
+       | '(' expr ')'              { if ( ! Dont_exec )
 		                                 $$ = $2; }
-       | expr '?'                  { if ( ! dont_exec )
+       | expr '?'                  { if ( ! Dont_exec )
 	                                 {
 		                                 if ( ! check_result( $1 ) )
-		                                     dont_exec++;
+		                                     Dont_exec++;
 		                                 vars_pop( $1 );
 									 }
 	                                 else
-										 dont_exec +=2;
+										 Dont_exec +=2;
 	                               }
-		 expr ':'                  { if ( ! dont_exec )
-										 dont_exec++;
+		 expr ':'                  { if ( ! Dont_exec )
+										 Dont_exec++;
 		 							 else
-										 dont_exec--;
+										 Dont_exec--;
 	                               }
-		 expr                      { if ( ! dont_exec )
+		 expr                      { if ( ! Dont_exec )
 										 $$ = $7;
-		                             else if ( ! --dont_exec )
+		                             else if ( ! --Dont_exec )
 									     $$ = $4;
                                    }
 ;
@@ -455,23 +455,23 @@ expr:    INT_TOKEN                { if ( ! dont_exec )
 /* list of indices for access of an array element */
 
 
-list1:   /* empty */              { if ( ! dont_exec )
+list1:   /* empty */              { if ( ! Dont_exec )
 		                                 $$ = vars_push( UNDEF_VAR ); }
-       | l1e                      { if ( ! dont_exec )
+       | l1e                      { if ( ! Dont_exec )
 		                                 $$ = $1; }
 ;
 
-l1e:     ind                      { if ( ! dont_exec )
+l1e:     ind                      { if ( ! Dont_exec )
 		                                 $$ = $1; }
-       | l1e ',' ind              { if ( ! dont_exec )
+       | l1e ',' ind              { if ( ! Dont_exec )
 		                                 $$ = $3; }
 ;
 
-ind:     expr                     { if ( ! dont_exec )
+ind:     expr                     { if ( ! Dont_exec )
 		                                $$ = $1; }
-	   | expr ':'                 { if ( ! dont_exec )
+	   | expr ':'                 { if ( ! Dont_exec )
 									    vars_push( STR_VAR, ":" ); }
-         expr                     { if ( ! dont_exec )
+         expr                     { if ( ! Dont_exec )
 		                                $$ = $4; }
 ;
 
@@ -490,11 +490,11 @@ exprs:   expr                     { }
        | strs                     { }
 ;
 
-strs:    STR_TOKEN                { if ( ! dont_exec )
+strs:    STR_TOKEN                { if ( ! Dont_exec )
 		                                $$ = vars_push( STR_VAR, $1 ); }
-       | strs STR_TOKEN           { if ( ! dont_exec )
+       | strs STR_TOKEN           { if ( ! Dont_exec )
 	                                {
-		                                Var *v = vars_push( STR_VAR, $2 );
+		                                Var_T *v = vars_push( STR_VAR, $2 );
 										$$ = vars_add( v->prev, v );
 									 }
 	                               }
@@ -650,7 +650,7 @@ static void ass_func( int function )
 	if ( ! Func_is_set )
 	{
 		p_exists_function( function );
-		Channel_Type = function;
+		Channel_type = function;
 		return;
 	}
 
@@ -659,14 +659,14 @@ static void ass_func( int function )
 	   has phase switches and this is the declaration of the function that
 	   needs phase switching */
 
-	if ( Channel_Type != PULSER_CHANNEL_NO_TYPE )
+	if ( Channel_type != PULSER_CHANNEL_NO_TYPE )
 	{
-		if ( pulser_struct[ Cur_Pulser ].needs_phase_pulses )
-			p_phase_ref( Channel_Type, function );
+		if ( Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
+			p_phase_ref( Channel_type, function );
 		else
 		{
 			print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
-				   assigntext, pulser_struct[ Cur_Pulser ].name );
+				   assigntext, Pulser_Struct[ Cur_Pulser ].name );
 			THROW( EXCEPTION );
 		}
 		return;
@@ -674,15 +674,15 @@ static void ass_func( int function )
 
 	/* The other alternative is that we're dealing with a pulser with no
 	   phase switches. In this cas Cur_PHS must be set to the number of
-	   the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
+	   the Phase_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-	if ( ! pulser_struct[ Cur_Pulser ].needs_phase_pulses &&
+	if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses &&
 		 Cur_PHS != -1 )
 		p_phase_ref( Cur_PHS, function );
 	else
 	{
 		print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
-			   assigntext, pulser_struct[ Cur_Pulser ].name );
+			   assigntext, Pulser_Struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}
 }
@@ -693,7 +693,7 @@ static void ass_func( int function )
 
 void assignparser_init( void )
 {
-	dont_exec = 0;
+	Dont_exec = 0;
 }
 
 

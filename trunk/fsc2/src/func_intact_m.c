@@ -27,28 +27,28 @@
 
 /* Globals declared in func_intact.c */
 
-extern TOOLBOX *Toolbox;
+extern Toolbox_T *Toolbox;
 
 
-static Var *f_mcreate_child( Var *v, size_t len, long num_strs );
-static void f_mdelete_child( Var *v );
-static void f_mdelete_parent( Var *v );
-static Var *f_mchoice_child( Var *v );
-static Var *f_mchanged_child( Var *v );
+static Var_T *f_mcreate_child( Var_T *v, size_t len, long num_strs );
+static void f_mdelete_child( Var_T *v );
+static void f_mdelete_parent( Var_T *v );
+static Var_T *f_mchoice_child( Var_T *v );
+static Var_T *f_mchanged_child( Var_T *v );
 
 
 /*---------------------------------------------------------*/
 /* Function for appending a new menu object to the toolbox */
 /*---------------------------------------------------------*/
 
-Var *f_mcreate( Var *var )
+Var_T *f_mcreate( Var_T *var )
 {
-	Var *v = var;
-	Var *lv;
+	Var_T *v = var;
+	Var_T *lv;
 	long num_strs = 0;
 	size_t len = 0;
-	IOBJECT *new_io = NULL;
-	IOBJECT *ioi;
+	Iobject_T *new_io = NULL;
+	Iobject_T *ioi;
 	long i;
 
 
@@ -170,7 +170,7 @@ Var *f_mcreate( Var *var )
 /* the message passing mechanism.                                  */
 /*-----------------------------------------------------------------*/
 
-static Var *f_mcreate_child( Var *v, size_t len, long num_strs )
+static Var_T *f_mcreate_child( Var_T *v, size_t len, long num_strs )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -232,7 +232,7 @@ static Var *f_mcreate_child( Var *v, size_t len, long num_strs )
 /* Deletes one or more menu objects, parameter(s) are one or more menu IDs. */
 /*--------------------------------------------------------------------------*/
 
-Var *f_mdelete( Var *v )
+Var_T *f_mdelete( Var_T *v )
 {
 	/* At least one menu ID is needed... */
 
@@ -270,7 +270,7 @@ Var *f_mdelete( Var *v )
 /* the message passing mechanism.                                  */
 /*-----------------------------------------------------------------*/
 
-static void f_mdelete_child( Var *v )
+static void f_mdelete_child( Var_T *v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -322,9 +322,9 @@ static void f_mdelete_child( Var *v )
 /* process, which actually removes the menu.               */
 /*---------------------------------------------------------*/
 
-static void f_mdelete_parent( Var *v )
+static void f_mdelete_parent( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	long i;
 
 
@@ -388,9 +388,9 @@ static void f_mdelete_parent( Var *v )
 /* Sets or returns the selected item in a menu object */
 /*----------------------------------------------------*/
 
-Var *f_mchoice( Var *v )
+Var_T *f_mchoice( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 	long select_item = 0;
 
 
@@ -483,7 +483,7 @@ Var *f_mchoice( Var *v )
 /* the message passing mechanism.                                  */
 /*-----------------------------------------------------------------*/
 
-static Var *f_mchoice_child( Var *v )
+static Var_T *f_mchoice_child( Var_T *v )
 {
 	long ID;
 	char *buffer, *pos;
@@ -574,9 +574,9 @@ static Var *f_mchoice_child( Var *v )
 /* Returns if the selected item of a menu object changed */
 /*-------------------------------------------------------*/
 
-Var *f_mchanged( Var *v )
+Var_T *f_mchanged( Var_T *v )
 {
-	IOBJECT *io;
+	Iobject_T *io;
 
 
 	/* We need at least the ID of the menu */
@@ -621,7 +621,7 @@ Var *f_mchanged( Var *v )
 /* the message passing mechanism.                                   */
 /*------------------------------------------------------------------*/
 
-static Var *f_mchanged_child( Var *v )
+static Var_T *f_mchanged_child( Var_T *v )
 {
 	long ID;
 	char *buffer, *pos;

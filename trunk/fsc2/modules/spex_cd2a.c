@@ -371,7 +371,7 @@ int spex_cd2a_end_of_exp_hook( void )
  * Returns a string with the name of the device
  *----------------------------------------------*/
 
-Var *monochromator_name( UNUSED_ARG Var *v )
+Var_T *monochromator_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -391,7 +391,7 @@ Var *monochromator_name( UNUSED_ARG Var *v )
  * in relative, otherwise in absolute units.
  *-------------------------------------------------------------------------*/
 
-Var *monochromator_scan_setup( Var *v )
+Var_T *monochromator_scan_setup( Var_T *v )
 {
 	double start = 0.0;
 	double step;
@@ -593,7 +593,7 @@ Var *monochromator_scan_setup( Var *v )
  * scan and a new wavelength is set the scan is aborted.
  *----------------------------------------------------------*/
 
-Var *monochromator_wavelength( Var *v )
+Var_T *monochromator_wavelength( Var_T *v )
 {
 	double wl;
 
@@ -666,7 +666,7 @@ Var *monochromator_wavelength( Var *v )
  * set the currently running scan is aborted.
  *----------------------------------------------------------------------*/
 
-Var *monochromator_wavenumber( Var *v )
+Var_T *monochromator_wavenumber( Var_T *v )
 {
 	double wl;
 
@@ -738,7 +738,7 @@ Var *monochromator_wavenumber( Var *v )
  * doing a scan the old scan is aborted.
  *------------------------------------------------------------------*/
 
-Var *monochromator_start_scan( UNUSED_ARG Var *v )
+Var_T *monochromator_start_scan( UNUSED_ARG Var_T *v )
 {
 	if ( ! spex_cd2a.scan_is_init )
 	{
@@ -762,7 +762,7 @@ Var *monochromator_start_scan( UNUSED_ARG Var *v )
  * has been done and a scan already has been started.
  *------------------------------------------------------------*/
 
-Var *monochromator_scan_step( UNUSED_ARG Var *v )
+Var_T *monochromator_scan_step( UNUSED_ARG Var_T *v )
 {
 	if ( ! spex_cd2a.scan_is_init )
 	{
@@ -838,7 +838,7 @@ Var *monochromator_scan_step( UNUSED_ARG Var *v )
  * position has been set.
  *-------------------------------------------------------------*/
 
-Var *monochromator_laser_line( Var *v )
+Var_T *monochromator_laser_line( Var_T *v )
 {
 	double wn, wl;
 
@@ -911,7 +911,7 @@ Var *monochromator_laser_line( Var *v )
  * Function returns the number of grooves per meter of the grating
  *-----------------------------------------------------------------*/
 
-Var *monochromator_groove_density( Var *v )
+Var_T *monochromator_groove_density( Var_T *v )
 {
 	if ( v != NULL )
 		print( WARN, "There's only one grating, argument is discarded.\n" );
@@ -927,7 +927,7 @@ Var *monochromator_groove_density( Var *v )
  * number than the upper limit).
  *-----------------------------------------------------------------------*/
 
-Var *monochromator_shutter_limits( Var *v )
+Var_T *monochromator_shutter_limits( Var_T *v )
 {
 	double l[ 2 ];
 	double tl[ 2 ];
@@ -1084,7 +1084,7 @@ Var *monochromator_shutter_limits( Var *v )
  * been done.
  *--------------------------------------------------------------------*/
 
-Var *monochromator_calibrate( Var *v )
+Var_T *monochromator_calibrate( Var_T *v )
 {
 	double pixel_diff;
 	double offset;
@@ -1177,10 +1177,10 @@ Var *monochromator_calibrate( Var *v )
  * displayed when using these values isn't absolutely correct!
  *----------------------------------------------------------------------*/
 
-Var *monochromator_wavelength_axis( Var *v )
+Var_T *monochromator_wavelength_axis( Var_T *v )
 {
 	double wl = spex_cd2a.wavelength;
-	Var *cv;
+	Var_T *cv;
 	long num_pixels;
 	int acc;
 
@@ -1276,10 +1276,10 @@ Var *monochromator_wavelength_axis( Var *v )
  * displayed when using these values isn't absolutely correct!
  *----------------------------------------------------------------------*/
 
-Var *monochromator_wavenumber_axis( Var *v )
+Var_T *monochromator_wavenumber_axis( Var_T *v )
 {
 	double wl = spex_cd2a.wavelength;
-	Var *cv;
+	Var_T *cv;
 	long num_pixels;
 	int acc;
 

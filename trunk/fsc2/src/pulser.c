@@ -36,7 +36,7 @@ static void is_pulser_func( void *func, const char *text );
 static void is_pulser_driver( void );
 
 
-static P_List *plist;
+static P_List_T *plist;
 
 
 /*--------------------------------------------------------------*/
@@ -47,62 +47,62 @@ static P_List *plist;
 void pulser_struct_init( void )
 {
 	long i;
-	Device *cd = EDL.Device_List;
+	Device_T *cd = EDL.Device_List;
 
 
 	if ( EDL.Num_Pulsers == 0 )
 		return;
 
-	pulser_struct = PULSER_STRUCT_P T_malloc( EDL.Num_Pulsers
-											  * sizeof( Pulser_Struct ) );
+	Pulser_Struct = PULSER_STRUCT_P T_malloc( EDL.Num_Pulsers
+											  * sizeof *Pulser_Struct );
 
 	for ( i = 0; i < EDL.Num_Pulsers; i++ )
 	{
-		pulser_struct[ i ].name                       = NULL;
+		Pulser_Struct[ i ].name                       = NULL;
 
 		while ( ! cd->generic_type ||
 				strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
 			cd = cd->next;
-		pulser_struct[ i ].device                     = cd;
+		Pulser_Struct[ i ].device                     = cd;
 
-		pulser_struct[ i ].needs_phase_pulses         = UNSET;
-		pulser_struct[ i ].has_pods                   = UNSET;
+		Pulser_Struct[ i ].needs_phase_pulses         = UNSET;
+		Pulser_Struct[ i ].has_pods                   = UNSET;
 
-		pulser_struct[ i ].assign_function            = NULL;
-		pulser_struct[ i ].assign_channel_to_function = NULL;
-		pulser_struct[ i ].invert_function            = NULL;
-		pulser_struct[ i ].set_function_delay         = NULL;
-		pulser_struct[ i ].set_function_high_level    = NULL;
-		pulser_struct[ i ].set_function_low_level     = NULL;
-		pulser_struct[ i ].set_timebase               = NULL;
-		pulser_struct[ i ].set_timebase_level         = NULL;
-		pulser_struct[ i ].set_trigger_mode           = NULL;
-		pulser_struct[ i ].set_repeat_time            = NULL;
-		pulser_struct[ i ].set_trig_in_level          = NULL;
-		pulser_struct[ i ].set_trig_in_slope          = NULL;
-		pulser_struct[ i ].set_trig_in_impedance      = NULL;
-		pulser_struct[ i ].set_max_seq_len            = NULL;
-		pulser_struct[ i ].set_phase_reference        = NULL;
-		pulser_struct[ i ].new_pulse                  = NULL;
-		pulser_struct[ i ].set_pulse_function         = NULL;
-		pulser_struct[ i ].set_pulse_position         = NULL;
-		pulser_struct[ i ].set_pulse_length           = NULL;
-		pulser_struct[ i ].set_pulse_position_change  = NULL;
-		pulser_struct[ i ].set_pulse_length_change    = NULL;
-		pulser_struct[ i ].set_pulse_phase_cycle      = NULL;
-		pulser_struct[ i ].get_pulse_function         = NULL;
-		pulser_struct[ i ].get_pulse_position         = NULL;
-		pulser_struct[ i ].get_pulse_length           = NULL;
-		pulser_struct[ i ].get_pulse_position_change  = NULL;
-		pulser_struct[ i ].get_pulse_length_change    = NULL;
-		pulser_struct[ i ].get_pulse_phase_cycle      = NULL;
-		pulser_struct[ i ].ch_to_num                  = NULL;
+		Pulser_Struct[ i ].assign_function            = NULL;
+		Pulser_Struct[ i ].assign_channel_to_function = NULL;
+		Pulser_Struct[ i ].invert_function            = NULL;
+		Pulser_Struct[ i ].set_function_delay         = NULL;
+		Pulser_Struct[ i ].set_function_high_level    = NULL;
+		Pulser_Struct[ i ].set_function_low_level     = NULL;
+		Pulser_Struct[ i ].set_timebase               = NULL;
+		Pulser_Struct[ i ].set_timebase_level         = NULL;
+		Pulser_Struct[ i ].set_trigger_mode           = NULL;
+		Pulser_Struct[ i ].set_repeat_time            = NULL;
+		Pulser_Struct[ i ].set_trig_in_level          = NULL;
+		Pulser_Struct[ i ].set_trig_in_slope          = NULL;
+		Pulser_Struct[ i ].set_trig_in_impedance      = NULL;
+		Pulser_Struct[ i ].set_max_seq_len            = NULL;
+		Pulser_Struct[ i ].set_phase_reference        = NULL;
+		Pulser_Struct[ i ].new_pulse                  = NULL;
+		Pulser_Struct[ i ].set_pulse_function         = NULL;
+		Pulser_Struct[ i ].set_pulse_position         = NULL;
+		Pulser_Struct[ i ].set_pulse_length           = NULL;
+		Pulser_Struct[ i ].set_pulse_position_change  = NULL;
+		Pulser_Struct[ i ].set_pulse_length_change    = NULL;
+		Pulser_Struct[ i ].set_pulse_phase_cycle      = NULL;
+		Pulser_Struct[ i ].get_pulse_function         = NULL;
+		Pulser_Struct[ i ].get_pulse_position         = NULL;
+		Pulser_Struct[ i ].get_pulse_length           = NULL;
+		Pulser_Struct[ i ].get_pulse_position_change  = NULL;
+		Pulser_Struct[ i ].get_pulse_length_change    = NULL;
+		Pulser_Struct[ i ].get_pulse_phase_cycle      = NULL;
+		Pulser_Struct[ i ].ch_to_num                  = NULL;
 
-		pulser_struct[ i ].phase_setup_prep           = NULL;
-		pulser_struct[ i ].phase_setup                = NULL;
-		pulser_struct[ i ].set_phase_switch_delay     = NULL;
-		pulser_struct[ i ].set_grace_period           = NULL;
-		pulser_struct[ i ].keep_all_pulses            = NULL;
+		Pulser_Struct[ i ].phase_setup_prep           = NULL;
+		Pulser_Struct[ i ].phase_setup                = NULL;
+		Pulser_Struct[ i ].set_phase_switch_delay     = NULL;
+		Pulser_Struct[ i ].set_grace_period           = NULL;
+		Pulser_Struct[ i ].keep_all_pulses            = NULL;
 	}
 }
 
@@ -112,8 +112,8 @@ void pulser_struct_init( void )
 
 void pulser_cleanup( void )
 {
-	P_List *cur_p;
-	P_List *next_p;
+	P_List_T *cur_p;
+	P_List_T *next_p;
 
 
 	for ( cur_p = plist; cur_p != NULL; cur_p = next_p )
@@ -124,7 +124,7 @@ void pulser_cleanup( void )
 
 	plist = NULL;
 
-	pulser_struct = PULSER_STRUCT_P T_free( pulser_struct );
+	Pulser_Struct = PULSER_STRUCT_P T_free( Pulser_Struct );
 }
 
 
@@ -160,7 +160,7 @@ static void is_pulser_driver( void )
 
 	fsc2_assert( Cur_Pulser >= 0 && Cur_Pulser < EDL.Num_Pulsers );
 
-	if ( pulser_struct[ Cur_Pulser ].name == NULL )
+	if ( Pulser_Struct[ Cur_Pulser ].name == NULL )
 	{
 		print( FATAL, "No driver has been loaded for pulser #%ld - can't "
 			   "use pulser-specific functions.\n", Cur_Pulser + 1 );
@@ -190,10 +190,10 @@ static void is_pulser_func( void *func, const char *text )
 		if ( Internals.mode == PREPARATION )
 			print( FATAL, "%s: Function for %s doesn't exist or can't be used "
 				   "during the experiment.\n",
-				   pulser_struct[ Cur_Pulser ].name, text );
+				   Pulser_Struct[ Cur_Pulser ].name, text );
 		else
 			print( FATAL, "%s: Function for %s not found in module.\n",
-				   pulser_struct[ Cur_Pulser ].name, text );
+				   Pulser_Struct[ Cur_Pulser ].name, text );
 		THROW( EXCEPTION );
 	}
 }
@@ -205,7 +205,7 @@ static void is_pulser_func( void *func, const char *text )
 /* to be done via the p_assign_channel() function                          */
 /*-------------------------------------------------------------------------*/
 
-void p_assign_pod( long func, Var *v )
+void p_assign_pod( long func, Var_T *v )
 {
 	long pod;
 
@@ -219,10 +219,10 @@ void p_assign_pod( long func, Var *v )
 	/* Test if there's a function for assigning channels to pods - otherwise
 	   the pulser doesn't have pods and we have to quit */
 
-	if ( pulser_struct[ Cur_Pulser ].assign_channel_to_function == NULL )
+	if ( Pulser_Struct[ Cur_Pulser ].assign_channel_to_function == NULL )
 	{
 		print( FATAL, "%s: Pulser has no pods.\n",
-			   pulser_struct[ Cur_Pulser ].name );
+			   Pulser_Struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}
 
@@ -233,19 +233,19 @@ void p_assign_pod( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].assign_function,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].assign_function,
 					"assigning function to pod" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].assign_function( func, pod );
+		Pulser_Struct[ Cur_Pulser ].assign_function( func, pod );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -266,7 +266,7 @@ void p_assign_pod( long func, Var *v )
 /* of pulsers)                                                            */
 /*------------------------------------------------------------------------*/
 
-void p_assign_channel( long func, Var *v )
+void p_assign_channel( long func, Var_T *v )
 {
 	long channel;
 
@@ -286,25 +286,25 @@ void p_assign_channel( long func, Var *v )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		if ( pulser_struct[ Cur_Pulser ].assign_channel_to_function == NULL )
+		if ( Pulser_Struct[ Cur_Pulser ].assign_channel_to_function == NULL )
 		{
-			is_pulser_func( pulser_struct[ Cur_Pulser ].assign_function,
+			is_pulser_func( Pulser_Struct[ Cur_Pulser ].assign_function,
 							"assigning function to pod" );
-			pulser_struct[ Cur_Pulser ].assign_function( func, channel );
+			Pulser_Struct[ Cur_Pulser ].assign_function( func, channel );
 		}
 		else
 		{
 			is_pulser_func(
-				pulser_struct[ Cur_Pulser ].assign_channel_to_function,
+				Pulser_Struct[ Cur_Pulser ].assign_channel_to_function,
 				"assigning function to channel" );
-			pulser_struct[ Cur_Pulser ].assign_channel_to_function( func,
+			Pulser_Struct[ Cur_Pulser ].assign_channel_to_function( func,
 																	channel );
 		}
 		TRY_SUCCESS;
@@ -323,7 +323,7 @@ void p_assign_channel( long func, Var *v )
 /* Function for setting a delay (in seconds) for an output connector */
 /*-------------------------------------------------------------------*/
 
-void p_set_delay( long func, Var *v )
+void p_set_delay( long func, Var_T *v )
 {
 	double delay;
 
@@ -343,19 +343,19 @@ void p_set_delay( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_delay,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_function_delay,
 					"setting a delay" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_function_delay( func, delay );
+		Pulser_Struct[ Cur_Pulser ].set_function_delay( func, delay );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -378,19 +378,19 @@ void p_inv( long func )
 
 	fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].invert_function,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].invert_function,
 					"inverting a channel" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].invert_function( func );
+		Pulser_Struct[ Cur_Pulser ].invert_function( func );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -408,7 +408,7 @@ void p_inv( long func )
 /* for one of the output connector                     */
 /*-----------------------------------------------------*/
 
-void p_set_v_high( long func, Var *v )
+void p_set_v_high( long func, Var_T *v )
 {
 	double voltage;
 
@@ -426,19 +426,19 @@ void p_set_v_high( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_high_level,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_function_high_level,
 					"setting high voltage level" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_function_high_level( func, voltage );
+		Pulser_Struct[ Cur_Pulser ].set_function_high_level( func, voltage );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -456,7 +456,7 @@ void p_set_v_high( long func, Var *v )
 /* for one of the output connectors                   */
 /*----------------------------------------------------*/
 
-void p_set_v_low( long func, Var *v )
+void p_set_v_low( long func, Var_T *v )
 {
 	double voltage;
 
@@ -474,19 +474,19 @@ void p_set_v_low( long func, Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_function_low_level,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_function_low_level,
 					"setting low voltage level" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_function_low_level( func, voltage );
+		Pulser_Struct[ Cur_Pulser ].set_function_low_level( func, voltage );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -503,7 +503,7 @@ void p_set_v_low( long func, Var *v )
 /* Function for setting the timebase of the pulser */
 /*-------------------------------------------------*/
 
-void p_set_timebase( Var *v )
+void p_set_timebase( Var_T *v )
 {
 	double timebase;
 
@@ -520,19 +520,19 @@ void p_set_timebase( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_timebase,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_timebase,
 					"setting the time base" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_timebase( timebase );
+		Pulser_Struct[ Cur_Pulser ].set_timebase( timebase );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -559,19 +559,19 @@ void p_set_timebase_level( int level_type )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_timebase,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_timebase,
 					"setting external clock inpugt level" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_timebase_level( level_type );
+		Pulser_Struct[ Cur_Pulser ].set_timebase_level( level_type );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -588,7 +588,7 @@ void p_set_timebase_level( int level_type )
 /* Function for setting the trigger in mode (EXTERNAL or INTERNAL) */
 /*-----------------------------------------------------------------*/
 
-void p_set_trigger_mode( Var *v )
+void p_set_trigger_mode( Var_T *v )
 {
 	int mode;
 
@@ -610,19 +610,19 @@ void p_set_trigger_mode( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trigger_mode,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_trigger_mode,
 					"setting the trigger mode" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_trigger_mode( mode );
+		Pulser_Struct[ Cur_Pulser ].set_trigger_mode( mode );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -638,7 +638,7 @@ void p_set_trigger_mode( Var *v )
 /* Function for setting the trigger in slope (POSITIVE or NEGATIVE) */
 /*------------------------------------------------------------------*/
 
-void p_set_trigger_slope( Var *v )
+void p_set_trigger_slope( Var_T *v )
 {
 	int slope;
 
@@ -660,19 +660,19 @@ void p_set_trigger_slope( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_slope,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_trig_in_slope,
 					"setting the trigger slope" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_trig_in_slope( slope );
+		Pulser_Struct[ Cur_Pulser ].set_trig_in_slope( slope );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -689,7 +689,7 @@ void p_set_trigger_slope( Var *v )
 /* Function for setting the trigger in level voltage */
 /*---------------------------------------------------*/
 
-void p_set_trigger_level( Var *v )
+void p_set_trigger_level( Var_T *v )
 {
 	double level;
 
@@ -705,19 +705,19 @@ void p_set_trigger_level( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_level,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_trig_in_level,
 					"setting the trigger level" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_trig_in_level( level );
+		Pulser_Struct[ Cur_Pulser ].set_trig_in_level( level );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -734,7 +734,7 @@ void p_set_trigger_level( Var *v )
 /* Function sets the trigger in impedance */
 /*----------------------------------------*/
 
-void p_set_trigger_impedance( Var *v )
+void p_set_trigger_impedance( Var_T *v )
 {
 	int state;
 
@@ -750,19 +750,19 @@ void p_set_trigger_impedance( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_trig_in_impedance,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_trig_in_impedance,
 					"setting the trigger impedance" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_trig_in_impedance( state );
+		Pulser_Struct[ Cur_Pulser ].set_trig_in_impedance( state );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -779,7 +779,7 @@ void p_set_trigger_impedance( Var *v )
 /* Function for setting the (minimum) repeat time for the experiment */
 /*-------------------------------------------------------------------*/
 
-void p_set_rep_time( Var *v )
+void p_set_rep_time( Var_T *v )
 {
 	double rep_time;
 
@@ -803,19 +803,19 @@ void p_set_rep_time( Var *v )
 
 	/* Finally call the function (if it exists...) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_repeat_time,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_repeat_time,
 					"setting a repeat time" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_repeat_time( rep_time );
+		Pulser_Struct[ Cur_Pulser ].set_repeat_time( rep_time );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -832,7 +832,7 @@ void p_set_rep_time( Var *v )
 /* Function for setting the (maximum) repeat frequency for the experiment */
 /*------------------------------------------------------------------------*/
 
-void p_set_rep_freq( Var *v )
+void p_set_rep_freq( Var_T *v )
 {
 	double freq, rep_time;
 
@@ -866,19 +866,19 @@ void p_set_rep_freq( Var *v )
 
 	/* Finally call the function (if it exists) */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_repeat_time,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_repeat_time,
 					"setting a repeat frequency" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_repeat_time( rep_time );
+		Pulser_Struct[ Cur_Pulser ].set_repeat_time( rep_time );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -900,19 +900,19 @@ void p_set_rep_freq( Var *v )
 void p_phase_ref( int func, int ref )
 {
 	is_pulser_driver( );
-    is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_reference,
+    is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_phase_reference,
                     "setting a function for phase cycling" );
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		if ( pulser_struct[ Cur_Pulser ].needs_phase_pulses )
+		if ( Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
 		{
 #ifndef NDEBUG
 			if ( func < 0 || func >= PULSER_CHANNEL_NUM_FUNC )
@@ -959,7 +959,7 @@ void p_phase_ref( int func, int ref )
 			}
 		}
 
-		pulser_struct[ Cur_Pulser ].set_phase_reference( func, ref );
+		Pulser_Struct[ Cur_Pulser ].set_phase_reference( func, ref );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -978,12 +978,12 @@ void p_phase_ref( int func, int ref )
 
 long p_new( long pnum )
 {
-	P_List *cur_p;
-	P_List *new_plist;
+	P_List_T *cur_p;
+	P_List_T *new_plist;
 
 
 	is_pulser_driver( );
-	is_pulser_func( pulser_struct[ Cur_Pulser ].new_pulse,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].new_pulse,
 					"creating a new pulse" );
 
 	/* First check that the pulse does not already exist, the include it
@@ -997,7 +997,7 @@ long p_new( long pnum )
 			THROW( EXCEPTION );
 		}
 
-	new_plist = P_LIST_P T_malloc( sizeof( P_List ) );
+	new_plist = P_LIST_P T_malloc( sizeof *new_plist );
 	new_plist->next    = plist;
 	new_plist->num     = pnum;
 	new_plist->dev_num = Cur_Pulser;
@@ -1005,14 +1005,14 @@ long p_new( long pnum )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].new_pulse( pnum );
+		Pulser_Struct[ Cur_Pulser ].new_pulse( pnum );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1031,12 +1031,12 @@ long p_new( long pnum )
 /* Function for setting one of the properties of a pulse */
 /*-------------------------------------------------------*/
 
-void p_set( long pnum, int type, Var *v )
+void p_set( long pnum, int type, Var_T *v )
 {
 	long func, phase;
 	double pos, len, dpos, dlen;
 	long dev_num = -1;
-	P_List *cur_p;
+	P_List_T *cur_p;
 	long stored_Cur_Pulser;
 
 
@@ -1065,8 +1065,8 @@ void p_set( long pnum, int type, Var *v )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
@@ -1083,34 +1083,34 @@ void p_set( long pnum, int type, Var *v )
 					THROW( EXCEPTION );
 				}
 
-				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_function,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_pulse_function,
 								"setting a pulse function" );
-				pulser_struct[ Cur_Pulser ].set_pulse_function( pnum, func );
+				Pulser_Struct[ Cur_Pulser ].set_pulse_function( pnum, func );
 				break;
 
 			case P_POS :
 				pos = get_double( v, "pulse position" );
 				vars_pop( v );
-				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_position,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_pulse_position,
 								"setting a pulse position" );
-				pulser_struct[ Cur_Pulser ].set_pulse_position( pnum, pos );
+				Pulser_Struct[ Cur_Pulser ].set_pulse_position( pnum, pos );
 				break;
 
 			case P_LEN :
 				len = get_double( v, "pulse length" );
 				vars_pop( v );
-				is_pulser_func( pulser_struct[ Cur_Pulser ].set_pulse_length,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_pulse_length,
 								"setting a pulse length" );
-				pulser_struct[ Cur_Pulser ].set_pulse_length( pnum, len );
+				Pulser_Struct[ Cur_Pulser ].set_pulse_length( pnum, len );
 				break;
 
 			case P_DPOS :
 				dpos = get_double( v, "pulse position change" );
 				vars_pop( v );
 				is_pulser_func(
-					pulser_struct[ Cur_Pulser ].set_pulse_position_change,
+					Pulser_Struct[ Cur_Pulser ].set_pulse_position_change,
 					"setting a pulse position change" );
-				pulser_struct[ Cur_Pulser ].set_pulse_position_change( pnum,
+				Pulser_Struct[ Cur_Pulser ].set_pulse_position_change( pnum,
 																	   dpos );
 				break;
 
@@ -1118,9 +1118,9 @@ void p_set( long pnum, int type, Var *v )
 				dlen = get_double( v, "pulse length change" );
 				vars_pop( v );
 				is_pulser_func(
-					pulser_struct[ Cur_Pulser ].set_pulse_length_change,
+					Pulser_Struct[ Cur_Pulser ].set_pulse_length_change,
 					"setting a pulse length change" );
-				pulser_struct[ Cur_Pulser ].set_pulse_length_change( pnum,
+				Pulser_Struct[ Cur_Pulser ].set_pulse_length_change( pnum,
 																	 dlen );
 				break;
 
@@ -1128,9 +1128,9 @@ void p_set( long pnum, int type, Var *v )
 				phase = get_strict_long( v, "pulse phase cycle" );
 				vars_pop( v );
 				is_pulser_func(
-					pulser_struct[ Cur_Pulser ].set_pulse_phase_cycle,
+					Pulser_Struct[ Cur_Pulser ].set_pulse_phase_cycle,
 					"setting a pulse phase cycle" );
-				pulser_struct[ Cur_Pulser ].set_pulse_phase_cycle( pnum,
+				Pulser_Struct[ Cur_Pulser ].set_pulse_phase_cycle( pnum,
 																   phase );
 				break;
 
@@ -1157,7 +1157,7 @@ void p_set( long pnum, int type, Var *v )
 /* Function for asking the pulser driver about the properties of a pulse */
 /*-----------------------------------------------------------------------*/
 
-Var *p_get( char *txt, int type )
+Var_T *p_get( char *txt, int type )
 {
 	return p_get_by_num( p_num( txt ), type );
 }
@@ -1166,14 +1166,14 @@ Var *p_get( char *txt, int type )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-Var *p_get_by_num( long pnum, int type )
+Var_T *p_get_by_num( long pnum, int type )
 {
 	int function;
 	double ptime;
 	long cycle;
-	Var *v = NULL;
+	Var_T *v = NULL;
 	long dev_num = -1;
-	P_List *cur_p;
+	P_List_T *cur_p;
 	long stored_Cur_Pulser;
 
 
@@ -1199,8 +1199,8 @@ Var *p_get_by_num( long pnum, int type )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
@@ -1209,50 +1209,50 @@ Var *p_get_by_num( long pnum, int type )
 		switch ( type )
 		{
 			case P_FUNC :
-				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_function,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].get_pulse_function,
 								"returning the function of a pulse" );
-				pulser_struct[ Cur_Pulser ].get_pulse_function( pnum,
+				Pulser_Struct[ Cur_Pulser ].get_pulse_function( pnum,
 																&function );
 				v = vars_push( INT_VAR, ( long ) function );
 				break;
 
 			case P_POS :
-				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_position,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].get_pulse_position,
 								"returning a pulses position" );
-				pulser_struct[ Cur_Pulser ].get_pulse_position( pnum, &ptime );
+				Pulser_Struct[ Cur_Pulser ].get_pulse_position( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_LEN :
-				is_pulser_func( pulser_struct[ Cur_Pulser ].get_pulse_length,
+				is_pulser_func( Pulser_Struct[ Cur_Pulser ].get_pulse_length,
 								"returning a pulses length" );
-				pulser_struct[ Cur_Pulser ].get_pulse_length( pnum, &ptime );
+				Pulser_Struct[ Cur_Pulser ].get_pulse_length( pnum, &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DPOS :
 				is_pulser_func(
-					pulser_struct[ Cur_Pulser ].get_pulse_position_change,
+					Pulser_Struct[ Cur_Pulser ].get_pulse_position_change,
 					"returning a pulses position change" );
-				pulser_struct[ Cur_Pulser ].get_pulse_position_change( pnum,
+				Pulser_Struct[ Cur_Pulser ].get_pulse_position_change( pnum,
 																	  &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_DLEN :
 				is_pulser_func(
-						   pulser_struct[ Cur_Pulser ].get_pulse_length_change,
+						   Pulser_Struct[ Cur_Pulser ].get_pulse_length_change,
 						   "returning a pulses length change" );
-				pulser_struct[ Cur_Pulser ].get_pulse_length_change( pnum,
+				Pulser_Struct[ Cur_Pulser ].get_pulse_length_change( pnum,
 																	  &ptime );
 				v = vars_push( FLOAT_VAR, ptime );
 				break;
 
 			case P_PHASE :
 				is_pulser_func(
-							 pulser_struct[ Cur_Pulser ].get_pulse_phase_cycle,
+							 Pulser_Struct[ Cur_Pulser ].get_pulse_phase_cycle,
 							 "returning a pulses phase cycle" );
-				pulser_struct[ dev_num ].get_pulse_phase_cycle( pnum, &cycle );
+				Pulser_Struct[ dev_num ].get_pulse_phase_cycle( pnum, &cycle );
 				v = vars_push( INT_VAR, cycle );
 				break;
 
@@ -1301,28 +1301,28 @@ void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 
 	/* Let's check if the pulser supports the function needed */
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].phase_setup_prep,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup_prep,
 					"setting up phase channels" );
-	is_pulser_func( pulser_struct[ Cur_Pulser ].phase_setup,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup,
 					"setting up phase channels" );
 
-	if ( is_pod && ! pulser_struct[ Cur_Pulser ].has_pods )
+	if ( is_pod && ! Pulser_Struct[ Cur_Pulser ].has_pods )
 	{
 		print( FATAL, "%s: Pulser has no pods, just channels.\n",
-			   pulser_struct[ Cur_Pulser ].name );
+			   Pulser_Struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].phase_setup_prep( func, type, pod, val );
+		Pulser_Struct[ Cur_Pulser ].phase_setup_prep( func, type, pod, val );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1347,14 +1347,14 @@ void p_phs_end( int func )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].phase_setup( func );
+		Pulser_Struct[ Cur_Pulser ].phase_setup( func );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1380,11 +1380,11 @@ void p_exists_function( int function )
 
 	if ( ( function == PULSER_CHANNEL_PHASE_1 ||
 		   function == PULSER_CHANNEL_PHASE_2 ) &&
-		 ! pulser_struct[ Cur_Pulser ].needs_phase_pulses )
+		 ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
 	{
 		print( FATAL, "%s: Pulser driver does not support phase "
 			   "switches, so PHASE functions can't be used.\n",
-			   pulser_struct[ Cur_Pulser ].name );
+			   Pulser_Struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}
 }
@@ -1401,7 +1401,7 @@ void p_exists_function( int function )
 /* (i.e. 0 means PHASE_1, 1 means PHASE_2)                  */
 /*----------------------------------------------------------*/
 
-void p_set_psd( int func, Var *v )
+void p_set_psd( int func, Var_T *v )
 {
 	double psd;
 
@@ -1410,7 +1410,7 @@ void p_set_psd( int func, Var *v )
 
 	psd = get_double( v, "phase switch delay" );
 	vars_pop( v );
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_phase_switch_delay,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_phase_switch_delay,
 					"setting a phase switch delay" );
 
 	print( WARN, "Use of PHASE_SWITCH_DELAY keyword is deprecated, in the "
@@ -1419,14 +1419,14 @@ void p_set_psd( int func, Var *v )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_phase_switch_delay( func == 0 ?
+		Pulser_Struct[ Cur_Pulser ].set_phase_switch_delay( func == 0 ?
 				 PULSER_CHANNEL_PHASE_1 : PULSER_CHANNEL_PHASE_2, psd );
 		TRY_SUCCESS;
 	}
@@ -1444,7 +1444,7 @@ void p_set_psd( int func, Var *v )
 /* Function for setting the grace period following a pulse. */
 /*----------------------------------------------------------*/
 
-void p_set_gp( Var *v )
+void p_set_gp( Var_T *v )
 {
 	double gp;
 
@@ -1454,7 +1454,7 @@ void p_set_gp( Var *v )
 
 	gp = get_double( v, "grace period" );
 	vars_pop( v );
-	is_pulser_func( pulser_struct[ Cur_Pulser ].set_grace_period,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_grace_period,
 					"setting a grace period" );
 
 	print( WARN, "Use of GRACE_PERIOD keyword is deprecated, in the future "
@@ -1463,14 +1463,14 @@ void p_set_gp( Var *v )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_grace_period( gp );
+		Pulser_Struct[ Cur_Pulser ].set_grace_period( gp );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1490,7 +1490,7 @@ void p_set_gp( Var *v )
 /* length can't be determined.                                    */
 /*----------------------------------------------------------------*/
 
-void p_set_max_seq_len( Var *v )
+void p_set_max_seq_len( Var_T *v )
 {
 	double seq_len;
 
@@ -1508,7 +1508,7 @@ void p_set_max_seq_len( Var *v )
 
 	/* Call the appropriate function (if it exists) */
 
-    is_pulser_func( pulser_struct[ Cur_Pulser ].set_max_seq_len,
+    is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_max_seq_len,
                     "setting a maximum pattern length" );
 
 	print( WARN, "Use of MAXIMUM_PATTERN_LENGTH keyword is deprecated, in the "
@@ -1517,14 +1517,14 @@ void p_set_max_seq_len( Var *v )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].set_max_seq_len( seq_len );
+		Pulser_Struct[ Cur_Pulser ].set_max_seq_len( seq_len );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1546,7 +1546,7 @@ void keep_all_pulses( void )
 {
 	is_pulser_driver( );
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].keep_all_pulses,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].keep_all_pulses,
 					"enforcing to keep all pulses" );
 
 	print( WARN, "Use of KEEP_ALL_PULSES keyword is deprecated, in the "
@@ -1555,14 +1555,14 @@ void keep_all_pulses( void )
 
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		pulser_struct[ Cur_Pulser ].keep_all_pulses( );
+		Pulser_Struct[ Cur_Pulser ].keep_all_pulses( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
@@ -1587,20 +1587,20 @@ long p_ch2num( long channel )
 
 	is_pulser_driver( );
 
-	is_pulser_func( pulser_struct[ Cur_Pulser ].ch_to_num,
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].ch_to_num,
 					"converting symbolic channel names to internal channel"
 					"numbers" );
 	
 	TRY
 	{
-		call_push( NULL, pulser_struct[ Cur_Pulser ].device,
-				   pulser_struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
+		call_push( NULL, Pulser_Struct[ Cur_Pulser ].device,
+				   Pulser_Struct[ Cur_Pulser ].name, Cur_Pulser + 1 );
 		TRY_SUCCESS;
 	}
 
 	TRY
 	{
-		num = pulser_struct[ Cur_Pulser ].ch_to_num( channel );
+		num = Pulser_Struct[ Cur_Pulser ].ch_to_num( channel );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

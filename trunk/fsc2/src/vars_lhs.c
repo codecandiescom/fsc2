@@ -28,14 +28,15 @@
 /* locally used functions */
 
 
-static int vars_check_lhs_indices( Var **v, int *range_count );
-static Var *vars_setup_new_array( Var *v, int dim );
-static Var *vars_init_elements( Var *a, Var *v );
-static void vars_do_init( Var *src, Var *dest );
-static Var *vars_lhs_pointer( Var *v, int dim );
-static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count );
-static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim );
-static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim );
+static int vars_check_lhs_indices( Var_T **v, int *range_count );
+static Var_T *vars_setup_new_array( Var_T *v, int dim );
+static Var_T *vars_init_elements( Var_T *a, Var_T *v );
+static void vars_do_init( Var_T *src, Var_T *dest );
+static Var_T *vars_lhs_pointer( Var_T *v, int dim );
+static Var_T *vars_lhs_sub_pointer( Var_T *v, int dim, int range_count );
+static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
+									   int dim );
+static Var_T *vars_lhs_range_pointer( Var_T *a, Var_T *cv, Var_T *v, int dim );
 
 
 /*----------------------------------------------------------------------*/
@@ -46,7 +47,7 @@ static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim );
 /* the array.                                                           */
 /*----------------------------------------------------------------------*/
 
-Var *vars_arr_lhs( Var *v )
+Var_T *vars_arr_lhs( Var_T *v )
 {
 	int dim;
 	int range_count = 0;
@@ -77,10 +78,10 @@ Var *vars_arr_lhs( Var *v )
 /* number.                                                      */
 /*--------------------------------------------------------------*/
 
-static int vars_check_lhs_indices( Var **v, int *range_count )
+static int vars_check_lhs_indices( Var_T **v, int *range_count )
 {
-	Var *cv = *v;
-	Var *ref;
+	Var_T *cv = *v;
+	Var_T *ref;
 	int index_count = 0;
 
 
@@ -215,9 +216,9 @@ static int vars_check_lhs_indices( Var **v, int *range_count )
 /*  possible (i.e. if the sizes are specified including the sub-arrays). */
 /*-----------------------------------------------------------------------*/
 
-static Var* vars_setup_new_array( Var *v, int dim )
+static Var_T* vars_setup_new_array( Var_T *v, int dim )
 {
-	Var *a = v->from;
+	Var_T *a = v->from;
 
 
 	/* We can't continue without indices, i.e. with a definition like "a[ ]" */
@@ -250,9 +251,9 @@ static Var* vars_setup_new_array( Var *v, int dim )
 /* Function creates a new array by creating recursively all sub-arrays. */
 /*----------------------------------------------------------------------*/
 
-void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
+void vars_arr_create( Var_T *a, Var_T *v, int dim, bool is_temp )
 {
-	Var *c;
+	Var_T *c;
 	ssize_t i;
 	ssize_t len;
 
@@ -373,11 +374,11 @@ void vars_arr_create( Var *a, Var *v, int dim, bool is_temp )
 /* of the variable.                                                    */
 /*---------------------------------------------------------------------*/
 
-Var *vars_init_list( Var *v, ssize_t level )
+Var_T *vars_init_list( Var_T *v, ssize_t level )
 {
 	ssize_t count = 0;
 	ssize_t i;
-	Var *cv, *nv;
+	Var_T *cv, *nv;
 	int type = INT_VAR;
 
 
@@ -528,9 +529,9 @@ Var *vars_init_list( Var *v, ssize_t level )
 /* If 'v' is NULL no initialization has to be done.                         */
 /*--------------------------------------------------------------------------*/
 
-void vars_arr_init( Var *v )
+void vars_arr_init( Var_T *v )
 {
-	Var *dest;
+	Var_T *dest;
 
 
 	/* If there aren't any initializers we get v being set to NULL. All we
@@ -577,7 +578,7 @@ void vars_arr_init( Var *v )
 /* being distributed over the stack to the left hand side variable. */
 /*------------------------------------------------------------------*/
 
-static void vars_do_init( Var *src, Var *dest )
+static void vars_do_init( Var_T *src, Var_T *dest )
 {
 	ssize_t i;
 
@@ -699,9 +700,10 @@ static void vars_do_init( Var *src, Var *dest )
 					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
 			}
 			return;
-	}
 
-	fsc2_assert( 1 == 0 );
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 }
 
 
@@ -710,7 +712,7 @@ static void vars_do_init( Var *src, Var *dest )
 /* the variables on the stack (first of which is 'v').                */
 /*--------------------------------------------------------------------*/
 
-static Var *vars_init_elements( Var *a, Var *v )
+static Var_T *vars_init_elements( Var_T *a, Var_T *v )
 {
 	ssize_t i;
 
@@ -762,10 +764,10 @@ static Var *vars_init_elements( Var *a, Var *v )
 /* or (sub-) matrix but the indices do not involve ranges).             */
 /*----------------------------------------------------------------------*/
 
-static Var *vars_lhs_pointer( Var *v, int dim )
+static Var_T *vars_lhs_pointer( Var_T *v, int dim )
 {
-	Var *a = v->from;
-	Var *cv;
+	Var_T *a = v->from;
+	Var_T *cv;
 
 
 	v = vars_pop( v );
@@ -812,10 +814,10 @@ static Var *vars_lhs_pointer( Var *v, int dim )
 /* indices (with negative values for range start values).                 */
 /*------------------------------------------------------------------------*/
 
-static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count )
+static Var_T *vars_lhs_sub_pointer( Var_T *v, int dim, int range_count )
 {
-	Var *a = v->from;
-	Var *sv;
+	Var_T *a = v->from;
+	Var_T *sv;
 	ssize_t i;
 
 
@@ -856,7 +858,8 @@ static Var *vars_lhs_sub_pointer( Var *v, int dim, int range_count )
 /* is found on the stack.                                          */
 /*-----------------------------------------------------------------*/
 
-static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
+static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
+									   int dim )
 {
 	ssize_t ind;
 	ssize_t i;
@@ -950,7 +953,7 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 /* and a positive value) is found on the stack.                       */
 /*--------------------------------------------------------------------*/
 
-static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim )
+static Var_T *vars_lhs_range_pointer( Var_T *a, Var_T *cv, Var_T *v, int dim )
 {
 	ssize_t i, range_start, range_end;
 

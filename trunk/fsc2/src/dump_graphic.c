@@ -295,7 +295,7 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 	CARD16 *sptr;
 	CARD32 *lptr;
 	char *lineptr;
-	G_Hash hash;
+	G_Hash_T hash;
 	unsigned int hash_size;
 
 
@@ -390,12 +390,12 @@ void create_color_hash( void )
 	int key;
 	int r = 0, g = 0, b = 0;
 	unsigned int hash_size = COLOR_HASH_SIZE;
-	G_Hash hash;
+	G_Hash_T hash;
 
 
 	TRY
 	{
-		hash = G_HASH_ENTRY_P T_malloc( hash_size * sizeof( G_Hash_Entry ) );
+		hash = G_HASH_ENTRY_P T_malloc( hash_size * sizeof( G_Hash_Entry_T ) );
 		TRY_SUCCESS;
 	}
 	OTHERWISE

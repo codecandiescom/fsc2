@@ -24,7 +24,7 @@
 #if ! defined GRAPH_CUT_HEADER
 #define GRAPH_CUT_HEADER
 
-typedef struct Cut_Graphics Cut_Graphics;
+typedef struct Cut_Graphics Cut_Graphics_T;
 
 struct Cut_Graphics {
 	int cut_dir;             /* direction of cut (i.e. X, Y) */

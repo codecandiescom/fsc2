@@ -27,14 +27,15 @@
 
 /* locally used functions */
 
-static int vars_check_rhs_indices( Var **v, Var **a, int *range_count );
-static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
-								int range_count );
-static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end );
-static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
+static int vars_check_rhs_indices( Var_T **v, Var_T **a, int *range_count );
+static Var_T *vars_arr_rhs_slice( Var_T *a, Var_T *v, int index_count,
+								  int range_count );
+static void vars_arr_rhs_slice_prune( Var_T *nv, Var_T *v, Var_T *a,
+									  Var_T *end );
+static bool prune_stage_1( Var_T *nv, Var_T *v, Var_T *a, Var_T *end,
 						   bool *needs_stage_2 );
-static void prune_stage_2( Var *nv );
-static void vars_fix_dims( Var *v, int max_dim );
+static void prune_stage_2( Var_T *nv );
+static void vars_fix_dims( Var_T *v, int max_dim );
 
 
 /*--------------------------------------------------------------------------*/
@@ -44,9 +45,9 @@ static void vars_fix_dims( Var *v, int max_dim );
 /* onto the stack.                                                          */
 /*--------------------------------------------------------------------------*/
 
-Var *vars_arr_rhs( Var *v )
+Var_T *vars_arr_rhs( Var_T *v )
 {
-	Var *a, *cv;
+	Var_T *a, *cv;
 	ssize_t ind;
 	int index_count;
 	int range_count = 0;
@@ -122,9 +123,9 @@ Var *vars_arr_rhs( Var *v )
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static int vars_check_rhs_indices( Var **v, Var **a, int *range_count )
+static int vars_check_rhs_indices( Var_T **v, Var_T **a, int *range_count )
 {
-	Var *cv = *v;
+	Var_T *cv = *v;
 	int index_count = 0;
 
 
@@ -248,10 +249,10 @@ static int vars_check_rhs_indices( Var **v, Var **a, int *range_count )
 /* or matrix that appears somewhere on the RHS of a statement. */
 /*-------------------------------------------------------------*/
 
-static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
-								int range_count )
+static Var_T *vars_arr_rhs_slice( Var_T *a, Var_T *v, int index_count,
+								  int range_count )
 {
-	Var *cv = a;
+	Var_T *cv = a;
 
 
 	/* Go down to the first submatrix that's indexed by a range */
@@ -310,7 +311,8 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
+static void vars_arr_rhs_slice_prune( Var_T *nv, Var_T *v, Var_T *a,
+									  Var_T *end )
 {
 	bool needs_stage_2 = UNSET;
 
@@ -323,12 +325,12 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
+static bool prune_stage_1( Var_T *nv, Var_T *v, Var_T *a, Var_T *end,
 						   bool *needs_stage_2 )
 {
 	ssize_t range_start, range_end, range, i;
 	bool keep = UNSET;
-	Var *old_vptr;
+	Var_T *old_vptr;
 
 
 	if ( v->val.lval < 0  )
@@ -454,10 +456,10 @@ static bool prune_stage_1( Var *nv, Var *v, Var *a, Var *end,
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static void prune_stage_2( Var *nv )
+static void prune_stage_2( Var_T *nv )
 {
 	ssize_t i;
-	Var **old_vptr_list;
+	Var_T **old_vptr_list;
 
 
 	if ( nv->val.vptr[ 0 ]->len > 1 )
@@ -499,7 +501,7 @@ static void prune_stage_2( Var *nv )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-static void vars_fix_dims( Var *v, int max_dim )
+static void vars_fix_dims( Var_T *v, int max_dim )
 {
 	ssize_t i;
 
@@ -522,9 +524,9 @@ static void vars_fix_dims( Var *v, int max_dim )
 /* on the RHS which this function does.                                 */
 /*----------------------------------------------------------------------*/
 
-Var *vars_subref_to_rhs_conv( Var *v )
+Var_T *vars_subref_to_rhs_conv( Var_T *v )
 {
-	Var *sv;
+	Var_T *sv;
 	ssize_t i;
 	int range_count = 0;
 

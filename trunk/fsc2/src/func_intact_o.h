@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var *f_ocreate( Var *v );
-Var *f_odelete( Var *v );
-Var *f_ovalue(  Var *v );
-Var *f_ochanged( Var *v );
+Var_T *f_ocreate( Var_T *v );
+Var_T *f_odelete( Var_T *v );
+Var_T *f_ovalue( Var_T *v );
+Var_T *f_ochanged( Var_T *v );
 
 
 #endif   /* ! INTERACTIVE_OBJECTS_HEADER */

@@ -42,12 +42,12 @@ int  pt2025_exp_hook( void );
 int  pt2025_end_of_exp_hook( void );
 
 
-Var *gaussmeter_name( Var *v );
-Var *gaussmeter_field( Var *v );
-Var *measure_field( Var *v );
-Var *gaussmeter_resolution( Var *v );
-Var *gaussmeter_probe_orientation( Var *v );
-Var *gaussmeter_command( Var *v );
+Var_T *gaussmeter_name( Var_T *v );
+Var_T *gaussmeter_field( Var_T *v );
+Var_T *measure_field( Var_T *v );
+Var_T *gaussmeter_resolution( Var_T *v );
+Var_T *gaussmeter_probe_orientation( Var_T *v );
+Var_T *gaussmeter_command( Var_T *v );
 
 
 static bool pt2025_init( const char *name );
@@ -85,7 +85,7 @@ static struct PT2025 pt2025, pt2025_stored;
 
 int pt2025_init_hook( void )
 {
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	pt2025.device = -1;
 	pt2025.probe_orientation = PROBE_ORIENTATION_UNDEFINED;
@@ -144,7 +144,7 @@ int pt2025_end_of_exp_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( UNUSED_ARG Var *v )
+Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -153,7 +153,7 @@ Var *gaussmeter_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_field( Var *v )
+Var_T *gaussmeter_field( Var_T *v )
 {
 	return measure_field( v );
 }
@@ -162,7 +162,7 @@ Var *gaussmeter_field( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *measure_field( UNUSED_ARG Var *v )
+Var_T *measure_field( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 34089.3 );
@@ -174,7 +174,7 @@ Var *measure_field( UNUSED_ARG Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_resolution( Var *v )
+Var_T *gaussmeter_resolution( Var_T *v )
 {
 	double res;
 
@@ -219,7 +219,7 @@ Var *gaussmeter_resolution( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_probe_orientation( Var *v )
+Var_T *gaussmeter_probe_orientation( Var_T *v )
 {
 	long orientation;
 
@@ -270,7 +270,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *gaussmeter_command( Var *v )
+Var_T *gaussmeter_command( Var_T *v )
 {
 	char *cmd = NULL;
 

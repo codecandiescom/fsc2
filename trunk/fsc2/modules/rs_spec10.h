@@ -28,9 +28,9 @@
 /* Define the following for test purposes where no real communication with
    the camera is supposed to happen */
 
-/*
+
 #define RS_SPEC10_TEST
-*/
+
 
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
@@ -113,17 +113,17 @@ void rs_spec10_child_exit_hook( void );
 int rs_spec10_end_of_exp_hook( void );
 void rs_spec10_exit_hook( void );
 
-Var *ccd_camera_name( Var *v );
-Var *ccd_camera_roi( Var *v );
-Var *ccd_camera_binning( Var *v );
-Var *ccd_camera_binning_method( Var *v );
-Var *ccd_camera_exposure_time( Var *v );
-Var *ccd_camera_clear_cycles( Var *v );
-Var *ccd_camera_get_image( Var *v );
-Var *ccd_camera_get_spectrum( Var *v );
-Var *ccd_camera_temperature( Var *v );
-Var *ccd_camera_pixel_size( Var *v );
-Var *ccd_camera_pixel_area( Var *v );
+Var_T *ccd_camera_name( Var_T *v );
+Var_T *ccd_camera_roi( Var_T *v );
+Var_T *ccd_camera_binning( Var_T *v );
+Var_T *ccd_camera_binning_method( Var_T *v );
+Var_T *ccd_camera_exposure_time( Var_T *v );
+Var_T *ccd_camera_clear_cycles( Var_T *v );
+Var_T *ccd_camera_get_image( Var_T *v );
+Var_T *ccd_camera_get_spectrum( Var_T *v );
+Var_T *ccd_camera_temperature( Var_T *v );
+Var_T *ccd_camera_pixel_size( Var_T *v );
+Var_T *ccd_camera_pixel_area( Var_T *v );
 
 /* Functions from rs_spec10_int.c */
 

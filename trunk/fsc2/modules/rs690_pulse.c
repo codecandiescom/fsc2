@@ -31,8 +31,8 @@
 
 bool rs690_new_pulse( long pnum )
 {
-	PULSE *cp = rs690_Pulses;
-	PULSE *lp = NULL;
+	Pulse_T *cp = rs690.pulses;
+	Pulse_T *lp = NULL;
 
 
 	while ( cp != NULL )
@@ -50,9 +50,9 @@ bool rs690_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( rs690_Pulses == NULL )
+	if ( rs690.pulses == NULL )
 	{
-		rs690_Pulses = cp;
+		rs690.pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -91,8 +91,8 @@ bool rs690_new_pulse( long pnum )
 
 bool rs690_set_pulse_function( long pnum, int function )
 {
-	PULSE *p = rs690_get_pulse( pnum );
-	FUNCTION *f = &rs690.function[ function ];
+	Pulse_T *p = rs690_get_pulse( pnum );
+	Function_T *f = &rs690.function[ function ];
 
 
 	if ( function == PULSER_CHANNEL_PHASE_1 ||
@@ -157,7 +157,7 @@ bool rs690_set_pulse_function( long pnum, int function )
 
 bool rs690_set_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( p->is_pos )
@@ -202,7 +202,7 @@ bool rs690_set_pulse_position( long pnum, double p_time )
 
 bool rs690_set_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( p->is_len )
@@ -243,7 +243,7 @@ bool rs690_set_pulse_length( long pnum, double p_time )
 
 bool rs690_set_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( p->is_dpos )
@@ -278,7 +278,7 @@ bool rs690_set_pulse_position_change( long pnum, double p_time )
 
 bool rs690_set_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( p->is_dlen )
@@ -313,8 +313,8 @@ bool rs690_set_pulse_length_change( long pnum, double p_time )
 
 bool rs690_set_pulse_phase_cycle( long pnum, long cycle )
 {
-	PULSE *p = rs690_get_pulse( pnum );
-	Phase_Sequence *pc = PSeq;
+	Pulse_T *p = rs690_get_pulse( pnum );
+	Phs_Seq_T *pc = Phs_Seq;
 
 
 	/* Check that no phase cycle has been asigned to the pulse yet */
@@ -364,7 +364,7 @@ bool rs690_set_pulse_phase_cycle( long pnum, long cycle )
 
 bool rs690_get_pulse_function( long pnum, int *function )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( ! p->is_function )
@@ -384,7 +384,7 @@ bool rs690_get_pulse_function( long pnum, int *function )
 
 bool rs690_get_pulse_position( long pnum, double *p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( ! p->is_pos )
@@ -405,7 +405,7 @@ bool rs690_get_pulse_position( long pnum, double *p_time )
 
 bool rs690_get_pulse_length( long pnum, double *p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( ! p->is_len )
@@ -425,7 +425,7 @@ bool rs690_get_pulse_length( long pnum, double *p_time )
 
 bool rs690_get_pulse_position_change( long pnum, double *p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( ! p->is_dpos )
@@ -446,7 +446,7 @@ bool rs690_get_pulse_position_change( long pnum, double *p_time )
 
 bool rs690_get_pulse_length_change( long pnum, double *p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( ! p->is_dlen )
@@ -466,7 +466,7 @@ bool rs690_get_pulse_length_change( long pnum, double *p_time )
 
 bool rs690_get_pulse_phase_cycle( long pnum, long *cycle )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 
 
 	if ( p->pc == NULL )
@@ -486,7 +486,7 @@ bool rs690_get_pulse_phase_cycle( long pnum, long *cycle )
 
 bool rs690_change_pulse_position( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 	Ticks new_pos = 0;
 
 
@@ -572,7 +572,7 @@ bool rs690_change_pulse_position( long pnum, double p_time )
 
 bool rs690_change_pulse_length( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 	Ticks new_len = 0;
 
 
@@ -660,7 +660,7 @@ bool rs690_change_pulse_length( long pnum, double p_time )
 
 bool rs690_change_pulse_position_change( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 	Ticks new_dpos = 0;
 
 
@@ -707,7 +707,7 @@ bool rs690_change_pulse_position_change( long pnum, double p_time )
 
 bool rs690_change_pulse_length_change( long pnum, double p_time )
 {
-	PULSE *p = rs690_get_pulse( pnum );
+	Pulse_T *p = rs690_get_pulse( pnum );
 	Ticks new_dlen = 0;
 
 

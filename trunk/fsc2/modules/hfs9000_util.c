@@ -113,9 +113,9 @@ void hfs9000_check_pod_level_diff( double high, double low )
 /* Returns the structure for pulse numbered pnum */
 /*-----------------------------------------------*/
 
-PULSE *hfs9000_get_pulse( long pnum )
+Pulse_T *hfs9000_get_pulse( long pnum )
 {
-	PULSE *cp = hfs9000_Pulses;
+	Pulse_T *cp = hfs9000_Pulses;
 
 
 	if ( pnum < 0 )
@@ -178,8 +178,8 @@ const char *hfs9000_pticks( Ticks ticks )
 
 int hfs9000_start_compare( const void *A, const void *B )
 {
-	PULSE *a = *( PULSE ** ) A,
-		  *b = *( PULSE ** ) B;
+	Pulse_T *a = *( Pulse_T ** ) A,
+		    *b = *( Pulse_T ** ) B;
 
 	if ( ! a->is_active )
 	{
@@ -204,7 +204,7 @@ Ticks hfs9000_get_max_seq_len( void )
 {
 	int i;
 	Ticks max = 0;
-	FUNCTION *f;
+	Function_T *f;
 
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -309,7 +309,7 @@ int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 
 void hfs9000_dump_channels( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, k;
 
 

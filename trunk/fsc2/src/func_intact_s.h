@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var *f_screate( Var *v );
-Var *f_sdelete( Var *v );
-Var *f_svalue(  Var *v );
-Var *f_schanged( Var *v );
+Var_T *f_screate( Var_T *v );
+Var_T *f_sdelete( Var_T *v );
+Var_T *f_svalue( Var_T *v );
+Var_T *f_schanged( Var_T *v );
 
 
 #endif   /* ! INTERACTIVE_SLIDERSS_HEADER */

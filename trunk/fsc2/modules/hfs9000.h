@@ -41,21 +41,21 @@ int hfs9000_end_of_exp_hook( void );
 void hfs9000_exit_hook( void );
 
 
-Var *pulser_name( Var *v );
-Var *pulser_show_pulses( Var *v );
-Var *pulser_dump_pulses( Var *v );
-Var *pulser_keep_all_pulses( Var *v );
-Var *pulser_maximum_pattern_length( Var *v );
-Var *pulser_state( Var *v );
-Var *pulser_channel_state( Var *v );
-Var *pulser_update( Var *v );
-Var *pulser_shift( Var *v );
-Var *pulser_increment( Var *v );
-Var *pulser_reset( Var *v );
-Var *pulser_pulse_reset( Var *v );
-Var *pulser_lock_keyboard( Var *v );
-Var *pulser_stop_on_update( Var *v );
-Var *pulser_command( Var *v );
+Var_T *pulser_name( Var_T *v );
+Var_T *pulser_show_pulses( Var_T *v );
+Var_T *pulser_dump_pulses( Var_T *v );
+Var_T *pulser_keep_all_pulses( Var_T *v );
+Var_T *pulser_maximum_pattern_length( Var_T *v );
+Var_T *pulser_state( Var_T *v );
+Var_T *pulser_channel_state( Var_T *v );
+Var_T *pulser_update( Var_T *v );
+Var_T *pulser_shift( Var_T *v );
+Var_T *pulser_increment( Var_T *v );
+Var_T *pulser_reset( Var_T *v );
+Var_T *pulser_pulse_reset( Var_T *v );
+Var_T *pulser_lock_keyboard( Var_T *v );
+Var_T *pulser_stop_on_update( Var_T *v );
+Var_T *pulser_command( Var_T *v );
 
 
 /* Definitions needed for the pulser */
@@ -140,24 +140,24 @@ Var *pulser_command( Var *v );
 /* typedefs of structures needed in the module */
 
 
-typedef struct FUNCTION FUNCTION;
-typedef struct CHANNEL CHANNEL;
-typedef struct PULSE PULSE;
+typedef struct Function Function_T;
+typedef struct Channel Channel_T;
+typedef struct Pulse Pulse_T;
 typedef struct HFS9000 HFS9000;
 
 
-struct FUNCTION {
+struct Function {
 	int self;                  /* the functions number */
 	const char *name;
 	bool is_used;              /* set if the function has been declared in
 								  the ASSIGNMENTS section */
 	bool is_needed;            /* set if the function has been assigned
 								  pulses */
-	CHANNEL *channel;          /* channel assigned to function */
+	Channel_T *channel;        /* channel assigned to function */
 
 	int num_pulses;            /* number of pulses assigned to the function */
 	int num_active_pulses;     /* number of pulses currenty in use */
-	PULSE **pulses;            /* list of pulse pointers */
+	Pulse_T **pulses;          /* list of pulse pointers */
 
 	long max_seq_len;          /* maximum length of the pulse sequence */
 
@@ -174,9 +174,9 @@ struct FUNCTION {
 };
 
 
-struct CHANNEL {
+struct Channel {
 	int self;
-	FUNCTION *function;
+	Function_T *function;
 	bool needs_update;
 	char *old_d;
 	char *new_d;
@@ -184,7 +184,7 @@ struct CHANNEL {
 };
 
 
-struct PULSE {
+struct Pulse {
 
 	long num;                /* (positive) number of the pulse */
 
@@ -192,10 +192,10 @@ struct PULSE {
 	bool was_active;
 	bool has_been_active;    /* used to find useless pulses */
 
-	PULSE *next;
-	PULSE *prev;
+	Pulse_T *next;
+	Pulse_T *prev;
 
-	FUNCTION *function;      /* function the pulse is associated with */
+	Function_T *function;    /* function the pulse is associated with */
 
 	Ticks pos;               /* current position, length, position change */
 	Ticks len;               /* and length change of pulse (in units of the */
@@ -224,7 +224,7 @@ struct PULSE {
 	bool is_old_pos;
 	bool is_old_len;
 
-	CHANNEL *channel;
+	Channel_T *channel;
 
 	bool needs_update;       /* set if the pulses properties have been changed
 								in test run or experiment */
@@ -253,8 +253,8 @@ struct  HFS9000 {
 	long max_seq_len;        /* maximum length of all pulse sequences */
 	bool is_max_seq_len;
 
-	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
-	CHANNEL channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
+	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+	Channel_T channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
 
 	int needed_channels;     /* number of channels that are going to be needed
 								in the experiment */
@@ -276,7 +276,7 @@ struct  HFS9000 {
 
 extern bool hfs9000_is_needed;
 extern HFS9000 hfs9000;
-extern PULSE *hfs9000_Pulses;
+extern Pulse_T *hfs9000_Pulses;
 extern bool hfs9000_IN_SETUP;
 
 
@@ -319,7 +319,7 @@ bool hfs9000_change_pulse_length_change( long pnum, double p_time );
 /* Functions from hfs9000_init.c */
 
 void hfs9000_init_setup( void );
-void hfs9000_set_pulses( FUNCTION *f );
+void hfs9000_set_pulses( Function_T *f );
 
 
 /* Functions from hfs9000_util.c */
@@ -327,7 +327,7 @@ void hfs9000_set_pulses( FUNCTION *f );
 Ticks hfs9000_double2ticks( double p_time );
 double hfs9000_ticks2double( Ticks ticks );
 void hfs9000_check_pod_level_diff( double high, double low );
-PULSE *hfs9000_get_pulse( long pnum );
+Pulse_T *hfs9000_get_pulse( long pnum );
 const char *hfs9000_ptime( double p_time );
 const char *hfs9000_pticks( Ticks ticks );
 int hfs9000_start_compare( const void *A, const void *B );
@@ -340,8 +340,8 @@ void hfs9000_dump_channels( FILE *fp );
 /* Functions fron hfs9000_run.c */
 
 bool hfs9000_do_update( void );
-void hfs9000_do_checks( FUNCTION *f );
-void hfs9000_set_pulses( FUNCTION *f );
+void hfs9000_do_checks( Function_T *f );
+void hfs9000_set_pulses( Function_T *f );
 void hfs9000_full_reset( void );
 
 

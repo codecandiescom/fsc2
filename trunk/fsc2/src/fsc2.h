@@ -163,13 +163,12 @@ int idle_handler( void );
    variables (they are also declared as extern in fsc2_module.h, the header
    file the modules have to include) */
 
-typedef struct INTERNALS INTERNALS;
-typedef struct EDL_Stuff EDL_Stuff;
-typedef struct COMMUNICATION COMMUNICATION;
-typedef struct GUI_Stuff GUI_Stuff;
-typedef struct XI_SIZES XI_SIZES;
+typedef struct Internals Internals_T;
+typedef struct EDL_Stuff EDL_Stuff_T;
+typedef struct Communication Communication_T;
+typedef struct GUI_Stuff GUI_Stuff_T;
 
-struct INTERNALS {
+struct Internals {
 	uid_t EUID;                  /* user and group ID the program got */
 	gid_t EGID;				     /* started with */
 
@@ -232,37 +231,37 @@ struct EDL_Stuff {
 	char *in_file;               /* name of input file */
 	char *Fname;                 /* name of currently parsed EDL file */
 
-	CALL_STACK *Call_Stack;      /* stack for storing some kind of frame
+	Call_Stack_T *Call_Stack;    /* stack for storing some kind of frame
 									information during nested EDL function
 									calls */
 	Compilation compilation;     /* structure with infos about compilation
 									states and errors (see also global.h) */
-	Prg_Token *prg_token;        /* array of predigested program tokens */
+	Prg_Token_T *prg_token;      /* array of predigested program tokens */
 
 	long prg_length;             /* number of array elements in predigested
 									program (negative value indicates that
 									there is no EXPERIMENT section, not even
 									an EXPERIMENT label) */
-	Prg_Token *cur_prg_token;    /* pointer to the currently handled element in
+	Prg_Token_T *cur_prg_token;  /* pointer to the currently handled element in
 									the array of predigested program tokens */
 	long On_Stop_Pos;            /* Index of the ON_STOP command in the array
 									of predigested program tokens (negative
 									value indicates that there is no ON_STOP
 									label) */
-	Var *Var_List;               /* list of all user declared EDL variables */
-	Var *Var_Stack;              /* Stack of variables used in the evaluation
+	Var_T *Var_List;             /* list of all user declared EDL variables */
+	Var_T *Var_Stack;            /* Stack of variables used in the evaluation
 									of expressions and function calls */
 	volatile sig_atomic_t do_quit;  /* becomes set when a running EDL program
 									has to be stopped (because STOP button
 									has been pressed) */
-	volatile sig_atomic_t react_to_do_quit;  /* is set when program should not
+	volatile sig_atomic_t react_to_do_quit;  /* set when program should not
 									react to the STOP button anymore (after the
 									ON_STOP label has been processed) */
-	FILE_LIST *File_List;        /* list of all files the user opened */
+	File_List_T *File_List;      /* list of all files the user opened */
 	int File_List_Len;           /* length of this file list */
 
-    Device *Device_List;
-    Device_Name *Device_Name_List;
+    Device_T *Device_List;
+    Device_Name_T *Device_Name_List;
 
     long Num_Pulsers;
 
@@ -273,7 +272,7 @@ struct EDL_Stuff {
 };
 
 
-struct COMMUNICATION {
+struct Communication {
 	int pd[ 4 ];                 /* pipe descriptors for measurement child */
 	int conn_pd[ 2 ];            /* pipe for communication child */
 	int http_pd[ 4 ];            /* pipes for HTTP server */
@@ -291,7 +290,7 @@ struct GUI_Stuff {
 	bool is_init;
 	Display *d;
 
-	G_FUNCS G_Funcs;
+	G_Funcs_T G_Funcs;
 
 	FD_fsc2 *main_form;
 	FD_run_1d *run_form_1d;
@@ -344,25 +343,27 @@ struct GUI_Stuff {
 
 /* Global variables */
 
-extern INTERNALS Internals;
-extern EDL_Stuff EDL;
-extern COMMUNICATION Comm;
-extern GUI_Stuff GUI;
-extern Graphics G;
-extern Graphics_1d G1;
-extern Graphics_2d G2;
-extern Cut_Graphics CG;
+extern Internals_T Internals;
+extern EDL_Stuff_T EDL;
+extern Communication_T Comm;
+extern GUI_Stuff_T GUI;
+extern Graphics_T G;
+extern Graphics_1d_T G1;
+extern Graphics_2d_T G2;
+extern Cut_Graphics_T CG;
 
-extern bool need_GPIB;
-extern bool need_RULBUS;
+extern bool Need_GPIB;
+#if defined WITH_RULBUS
+extern bool Need_RULBUS;
+#endif
 
-extern Phase_Sequence *PSeq;
-extern Acquisition_Sequence ASeq[ 2 ];
+extern Phs_Seq_T *Phs_Seq;
+extern Acq_Seq_T Acq_Seq[ 2 ];
 
 extern const char *Channel_Names[ NUM_CHANNEL_NAMES ];
 extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 
-extern Pulser_Struct *pulser_struct;
+extern Pulser_Struct_T *Pulser_Struct;
 extern const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ];
 extern long Cur_Pulser;
 

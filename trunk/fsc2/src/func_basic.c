@@ -38,7 +38,7 @@ static double datanh( double arg );
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *f_abort( UNUSED_ARG Var *v )
+Var_T *f_abort( UNUSED_ARG Var_T *v )
 {
 	char *str;
 
@@ -63,7 +63,7 @@ Var *f_abort( UNUSED_ARG Var *v )
 /* This is called for the end() EDL function */
 /*-------------------------------------------*/
 
-Var *f_stopsim( UNUSED_ARG Var *v )
+Var_T *f_stopsim( UNUSED_ARG Var_T *v )
 {
 	EDL.do_quit = SET;
 	return NULL;
@@ -74,9 +74,9 @@ Var *f_stopsim( UNUSED_ARG Var *v )
 /* Conversion float to integer (result is integer) */
 /*-------------------------------------------------*/
 
-Var *f_int( Var *v )
+Var_T *f_int( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -137,9 +137,9 @@ Var *f_int( Var *v )
 /* Conversion int to floating point (result is float) */
 /*----------------------------------------------------*/
 
-Var *f_float( Var *v )
+Var_T *f_float( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	double *dest;
 	long *src;
@@ -194,9 +194,9 @@ Var *f_float( Var *v )
 /* Rounding of floating point numbers (result is integer) */
 /*--------------------------------------------------------*/
 
-Var *f_round( Var *v )
+Var_T *f_round( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -258,9 +258,9 @@ Var *f_round( Var *v )
 /* Floor value (result is integer) */
 /*---------------------------------*/
 
-Var *f_floor( Var *v )
+Var_T *f_floor( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -321,9 +321,9 @@ Var *f_floor( Var *v )
 /* Ceiling value (result is integer) */
 /*-----------------------------------*/
 
-Var *f_ceil( Var *v )
+Var_T *f_ceil( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *dest;
 	double *src;
@@ -384,9 +384,9 @@ Var *f_ceil( Var *v )
 /* abs of value (result has same as type argument) */
 /*-------------------------------------------------*/
 
-Var *f_abs( Var *v )
+Var_T *f_abs( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -462,7 +462,7 @@ Var *f_abs( Var *v )
 /* all inputs were integer values)                      */
 /*------------------------------------------------------*/
 
-Var *f_lmax( Var *v )
+Var_T *f_lmax( Var_T *v )
 {
 	double m = - HUGE_VAL;
 	bool all_int = SET;
@@ -519,6 +519,9 @@ Var *f_lmax( Var *v )
 						m = * ( double * ) gp;
 				all_int = UNSET;
 				break;
+
+			default :
+				break;
 		}
 	}
 
@@ -533,7 +536,7 @@ Var *f_lmax( Var *v )
 /* all inputs were integer values)                      */
 /*------------------------------------------------------*/
 
-Var *f_lmin( Var *v )
+Var_T *f_lmin( Var_T *v )
 {
 	double m = HUGE_VAL;
 	bool all_int = SET;
@@ -590,6 +593,9 @@ Var *f_lmin( Var *v )
 						m = * ( double * ) gp;
 				all_int = UNSET;
 				break;
+
+			default :
+				break;
 		}
 	}
 
@@ -603,9 +609,9 @@ Var *f_lmin( Var *v )
 /* sin of argument (in radian) (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_sin( Var *v )
+Var_T *f_sin( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dest, *dsrc;
@@ -662,9 +668,9 @@ Var *f_sin( Var *v )
 /* cos of argument (in radian) (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_cos( Var *v )
+Var_T *f_cos( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dest, *dsrc;
@@ -721,10 +727,10 @@ Var *f_cos( Var *v )
 /* tan of argument (in radian) (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_tan( Var *v )
+Var_T *f_tan( Var_T *v )
 {
 	double res;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -790,10 +796,10 @@ Var *f_tan( Var *v )
 /* asin (in radian) of argument (with -1 <= x <= 1) (result is float) */
 /*--------------------------------------------------------------------*/
 
-Var *f_asin( Var *v )
+Var_T *f_asin( Var_T *v )
 {
 	double arg;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -866,10 +872,10 @@ Var *f_asin( Var *v )
 /* acos (in radian) of argument (with -1 <= x <= 1) (result is float) */
 /*--------------------------------------------------------------------*/
 
-Var *f_acos( Var *v )
+Var_T *f_acos( Var_T *v )
 {
 	double arg;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -942,9 +948,9 @@ Var *f_acos( Var *v )
 /* atan (in radian) of argument (result is float) */
 /*------------------------------------------------*/
 
-Var *f_atan( Var *v )
+Var_T *f_atan( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -997,10 +1003,10 @@ Var *f_atan( Var *v )
 /* sinh of argument (result is float) */
 /*------------------------------------*/
 
-Var *f_sinh( Var *v )
+Var_T *f_sinh( Var_T *v )
 {
 	double res;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1064,10 +1070,10 @@ Var *f_sinh( Var *v )
 /* cosh of argument (result is float) */
 /*------------------------------------*/
 
-Var *f_cosh( Var *v )
+Var_T *f_cosh( Var_T *v )
 {
 	double res;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1131,9 +1137,9 @@ Var *f_cosh( Var *v )
 /* tanh of argument (result is float) */
 /*------------------------------------*/
 
-Var *f_tanh( Var *v )
+Var_T *f_tanh( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1186,9 +1192,9 @@ Var *f_tanh( Var *v )
 /* Inverse of sinh of argument (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_asinh( Var *v )
+Var_T *f_asinh( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1275,9 +1281,9 @@ Var *f_asinh( Var *v )
 /* Inverse of cosh of argument (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_acosh( Var *v )
+Var_T *f_acosh( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1356,9 +1362,9 @@ Var *f_acosh( Var *v )
 /* Inverse of tanh of argument (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_atanh( Var *v )
+Var_T *f_atanh( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1435,9 +1441,9 @@ Var *f_atanh( Var *v )
 /* exp of argument (result is float) */
 /*-----------------------------------*/
 
-Var *f_exp( Var *v )
+Var_T *f_exp( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	double res;
 	ssize_t i;
 	long *lsrc;
@@ -1508,10 +1514,10 @@ Var *f_exp( Var *v )
 /* ln of argument (with x > 0) (result is float) */
 /*-----------------------------------------------*/
 
-Var *f_ln( Var *v )
+Var_T *f_ln( Var_T *v )
 {
 	double arg, res;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1593,10 +1599,10 @@ Var *f_ln( Var *v )
 /* log of argument (with x > 0) (result is float) */
 /*------------------------------------------------*/
 
-Var *f_log( Var *v )
+Var_T *f_log( Var_T *v )
 {
 	double arg, res;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1678,10 +1684,10 @@ Var *f_log( Var *v )
 /* sqrt of argument (with x >= 0) (result is float) */
 /*--------------------------------------------------*/
 
-Var *f_sqrt( Var *v )
+Var_T *f_sqrt( Var_T *v )
 {
 	double arg;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc;
 	double *dsrc, *dest;
@@ -1755,12 +1761,12 @@ Var *f_sqrt( Var *v )
 /* Returns a random number between 0 and 1 (i.e. result is float) */
 /*----------------------------------------------------------------*/
 
-Var *f_random( Var *v )
+Var_T *f_random( Var_T *v )
 {
 	long len;
 	long i;
 	double *arr;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	if ( v == NULL )
@@ -1791,12 +1797,12 @@ Var *f_random( Var *v )
 
 static bool grand_is_old = UNSET;
 
-Var *f_grand( Var *v )
+Var_T *f_grand( Var_T *v )
 {
 	long len;
 	long i;
 	double *arr;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	if ( v == NULL )
@@ -1860,7 +1866,7 @@ static double gauss_random( void )
 /* since 00:00:00 UTC, January 1, 1970) is used.                             */
 /*---------------------------------------------------------------------------*/
 
-Var *f_setseed( Var *v )
+Var_T *f_setseed( Var_T *v )
 {
 	unsigned int arg;
 
@@ -1912,7 +1918,7 @@ Var *f_setseed( Var *v )
 /* including) 0x20 and 0x7E for a 7-bit ASCII character set.    */
 /*--------------------------------------------------------------*/
 
-Var *f_time( Var *v )
+Var_T *f_time( Var_T *v )
 {
 	time_t tp;
 	char ts[ 100 ];
@@ -1987,7 +1993,7 @@ Var *f_time( Var *v )
 /* for the very first time.                                 */
 /*----------------------------------------------------------*/
 
-Var *f_dtime( UNUSED_ARG Var *v )
+Var_T *f_dtime( UNUSED_ARG Var_T *v )
 {
 	double new_time;
 	static double old_time = 0.0;
@@ -2014,7 +2020,7 @@ Var *f_dtime( UNUSED_ARG Var *v )
 #define DATE_FLAGS_WITH_E_MODIFIER   "cCxXyY"
 #define DATE_FLAGS_WITH_O_MODIFIER   "deHImMSuUVwWy"
 
-Var *f_date( Var *v )
+Var_T *f_date( Var_T *v )
 {
 	time_t tp;
 	char ts[ 256 ];
@@ -2117,7 +2123,7 @@ Var *f_date( Var *v )
 /* Function returns the dimension of an array. */
 /*---------------------------------------------*/
 
-Var *f_dim( Var *v )
+Var_T *f_dim( Var_T *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
 				   INT_REF | FLOAT_REF );
@@ -2131,9 +2137,9 @@ Var *f_dim( Var *v )
 /* or matrices 0 gets returned when no elements exist yet.       */
 /*---------------------------------------------------------------*/
 
-Var *f_size( Var *v )
+Var_T *f_size( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
@@ -2167,7 +2173,7 @@ Var *f_size( Var *v )
 /* be the number of elements to be included into the mean.              */
 /*----------------------------------------------------------------------*/
 
-Var *f_mean( Var *v )
+Var_T *f_mean( Var_T *v )
 {
 	ssize_t i;
 	long start;
@@ -2321,7 +2327,7 @@ Var *f_mean( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *f_rms( Var *v )
+Var_T *f_rms( Var_T *v )
 {
 	ssize_t i;
 	long start;
@@ -2445,13 +2451,13 @@ Var *f_rms( Var *v )
 /* or a submatrix of a more-dimensional matrix  */
 /*----------------------------------------------*/
 
-Var *f_slice( Var *v )
+Var_T *f_slice( Var_T *v )
 {
 	long start;
 	ssize_t len;
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t old_len;
-	Var **old_vptr;
+	Var_T **old_vptr;
 
 
 	vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
@@ -2547,9 +2553,9 @@ Var *f_slice( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *f_square( Var *v )
+Var_T *f_square( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2633,9 +2639,9 @@ Var *f_square( Var *v )
 /* Function for converting magnetic fields from Gauss to Tesla */
 /*-------------------------------------------------------------*/
 
-Var *f_G2T( Var *v )
+Var_T *f_G2T( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2692,9 +2698,9 @@ Var *f_G2T( Var *v )
 /* Function for converting magnetic fields from Tesla to Gauss */
 /*-------------------------------------------------------------*/
 
-Var *f_T2G( Var *v )
+Var_T *f_T2G( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2751,9 +2757,9 @@ Var *f_T2G( Var *v )
 /* Function for converting temperatures from degree Celsius to Kevin */
 /*-------------------------------------------------------------------*/
 
-Var *f_C2K( Var *v )
+Var_T *f_C2K( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2811,9 +2817,9 @@ Var *f_C2K( Var *v )
 /* Function for converting temperatures from Kevin to degree Celsius */
 /*-------------------------------------------------------------------*/
 
-Var *f_K2C( Var *v )
+Var_T *f_K2C( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2871,9 +2877,9 @@ Var *f_K2C( Var *v )
 /* Function for converting values in degrees to radians */
 /*------------------------------------------------------*/
 
-Var *f_D2R( Var *v )
+Var_T *f_D2R( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2931,9 +2937,9 @@ Var *f_D2R( Var *v )
 /* Function for converting values in radians to degrees */
 /*------------------------------------------------------*/
 
-Var *f_R2D( Var *v )
+Var_T *f_R2D( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -2991,9 +2997,9 @@ Var *f_R2D( Var *v )
 /* Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WL2WN( Var *v )
+Var_T *f_WL2WN( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3074,9 +3080,9 @@ Var *f_WL2WN( Var *v )
 /* Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WN2WL( Var *v )
+Var_T *f_WN2WL( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3157,9 +3163,9 @@ Var *f_WN2WL( Var *v )
 /* Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_F2WN( Var *v )
+Var_T *f_F2WN( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3216,9 +3222,9 @@ Var *f_F2WN( Var *v )
 /* Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz) */
 /*-------------------------------------------------------------------------*/
 
-Var *f_WN2F( Var *v )
+Var_T *f_WN2F( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest;
 	double *dsrc, *ddest;
@@ -3274,11 +3280,11 @@ Var *f_WN2F( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *f_islice( Var *v )
+Var_T *f_islice( Var_T *v )
 {
 	long size;
-	Var *ret;
-	Var *cv;
+	Var_T *ret;
+	Var_T *cv;
 	int dim;
 
 
@@ -3328,11 +3334,11 @@ Var *f_islice( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *f_fslice( Var *v )
+Var_T *f_fslice( Var_T *v )
 {
 	long size;
-	Var *ret;
-	Var *cv;
+	Var_T *ret;
+	Var_T *cv;
 	int dim;
 
 
@@ -3382,9 +3388,9 @@ Var *f_fslice( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *f_lspace( Var *v )
+Var_T *f_lspace( Var_T *v )
 {
-	Var *nv;
+	Var_T *nv;
 	ssize_t i;
 	double start;
 	double end;
@@ -3417,9 +3423,9 @@ Var *f_lspace( Var *v )
 /*------------------------------------------------------------*/
 /*------------------------------------------------------------*/
 
-Var *f_reverse( Var *v )
+Var_T *f_reverse( Var_T *v )
 {
-	Var *new_var = NULL;
+	Var_T *new_var = NULL;
 	ssize_t i;
 	long *lsrc, *ldest, ltemp;
 	double *dsrc, *ddest, dtemp;

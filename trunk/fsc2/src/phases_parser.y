@@ -42,7 +42,7 @@ extern char *phasestext;
 
 /* locally used global variables */
 
-Phase_Sequence *Phase_Seq;
+static Phs_Seq_T *Phase_seq;
 
 
 %}
@@ -63,9 +63,9 @@ Phase_Sequence *Phase_Seq;
 
 
 input:   /* empty */
-       | input line                   { Phase_Seq = NULL; }
+       | input line                   { Phase_seq = NULL; }
        | input SECTION_LABEL          { YYACCEPT; }
-       | input ';'                    { Phase_Seq = NULL; }
+       | input ';'                    { Phase_seq = NULL; }
 ;
 
 line:    acq ';'
@@ -85,14 +85,14 @@ a_list:  /* empty */
        | a_list A_TOKEN               { acq_seq_cont( $2 ); }
 ;
 
-phase:   PS_TOKEN                     { Phase_Seq = phase_seq_start( $1 ); }
-         P_TOKEN                      { phases_add_phase( Phase_Seq, $3 ); }
+phase:   PS_TOKEN                     { Phase_seq = phase_seq_start( $1 ); }
+         P_TOKEN                      { phases_add_phase( Phase_seq, $3 ); }
          p_list
-       | PS_TOKEN                     { phase_miss_list( Phase_Seq ); }
+       | PS_TOKEN                     { phase_miss_list( Phase_seq ); }
 ;
 
 p_list:  /* empty */
-       | p_list P_TOKEN               { phases_add_phase( Phase_Seq, $2 ); }
+       | p_list P_TOKEN               { phases_add_phase( Phase_seq, $2 ); }
 ;
 
 

@@ -106,7 +106,7 @@ bool lecroy9400_IN_SETUP = UNSET;
 
 static LECROY9400 lecroy9400_stored;
 
-static Var *get_curve( Var *v, bool use_cursor );
+static Var_T *get_curve( Var_T *v, bool use_cursor );
 
 
 
@@ -125,7 +125,7 @@ int lecroy9400_init_hook( void )
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	/* Initialize some variables in the digitizers structure */
 
@@ -229,7 +229,7 @@ void lecroy9400_exit_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_name( UNUSED_ARG Var *v )
+Var_T *digitizer_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -239,13 +239,13 @@ Var *digitizer_name( UNUSED_ARG Var *v )
 /*------------------------------------------*/
 
 #if 0
-Var *digitizer_define_window( Var *v )
+Var_T *digitizer_define_window( Var_T *v )
 {
 	double win_start = 0,
 		   win_width = 0;
 	bool is_win_start = UNSET;
 	bool is_win_width = UNSET;
-	WINDOW *w;
+	Window_T *w;
 
 
 	if ( lecroy9400.num_windows >= MAX_NUM_OF_WINDOWS )
@@ -286,7 +286,7 @@ Var *digitizer_define_window( Var *v )
 
 	if ( lecroy9400.w == NULL )
 	{
-		lecroy9400.w = w = T_malloc( sizeof( WINDOW ) );
+		lecroy9400.w = w = T_malloc( sizeof *w );
 		w->prev = NULL;
 	}
 	else
@@ -294,7 +294,7 @@ Var *digitizer_define_window( Var *v )
 		w = lecroy9400.w;
 		while ( w->next != NULL )
 			w = w->next;
-		w->next = T_malloc( sizeof( WINDOW ) );
+		w->next = T_malloc( sizeof *w->next );
 		w->next->prev = w;
 		w = w->next;
 	}
@@ -318,7 +318,7 @@ Var *digitizer_define_window( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_timebase( Var *v )
+Var_T *digitizer_timebase( Var_T *v )
 {
 	double timebase;
 	int TB = -1;
@@ -417,7 +417,7 @@ Var *digitizer_timebase( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_time_per_point( UNUSED_ARG Var *v )
+Var_T *digitizer_time_per_point( UNUSED_ARG Var_T *v )
 {
 	return vars_push( FLOAT_VAR, tpp[ lecroy9400.tb_index ] );
 }
@@ -426,7 +426,7 @@ Var *digitizer_time_per_point( UNUSED_ARG Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_sensitivity( Var *v )
+Var_T *digitizer_sensitivity( Var_T *v )
 {
 	long channel;
 	double sens;
@@ -532,7 +532,7 @@ Var *digitizer_sensitivity( Var *v )
 /* sitions).                                                              */
 /*------------------------------------------------------------------------*/
 
-Var *digitizer_averaging( Var *v )
+Var_T *digitizer_averaging( Var_T *v )
 {
 	long channel;
 	long source_ch;
@@ -667,7 +667,7 @@ Var *digitizer_averaging( Var *v )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-Var *digitizer_num_averages( Var *v )
+Var_T *digitizer_num_averages( Var_T *v )
 {
 	long channel;
 
@@ -723,7 +723,7 @@ Var *digitizer_num_averages( Var *v )
 /* Function returns the current record length of the digitizer. */
 /*--------------------------------------------------------------*/
 
-Var *digitizer_record_length( Var *v )
+Var_T *digitizer_record_length( Var_T *v )
 {
 	long channel;
 
@@ -770,7 +770,7 @@ Var *digitizer_record_length( Var *v )
 /* the number of points recorded before the trigger.                   */
 /*---------------------------------------------------------------------*/
 
-Var *digitizer_trigger_position( Var *v )
+Var_T *digitizer_trigger_position( Var_T *v )
 {
 	double trig_pos;
 
@@ -823,7 +823,7 @@ Var *digitizer_trigger_position( Var *v )
 /* argument it returns with either 0 or 1, indicating false or true.    */
 /*----------------------------------------------------------------------*/
 
-Var *digitizer_meas_channel_ok( Var *v )
+Var_T *digitizer_meas_channel_ok( Var_T *v )
 {
 	long channel;
 	bool flag;
@@ -846,7 +846,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 /* triggering.                                                       */
 /*-------------------------------------------------------------------*/
 
-Var *digitizer_trigger_channel( Var *v )
+Var_T *digitizer_trigger_channel( Var_T *v )
 {
 	long channel;
 
@@ -911,7 +911,7 @@ Var *digitizer_trigger_channel( Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *digitizer_start_acquisition( UNUSED_ARG Var *v )
+Var_T *digitizer_start_acquisition( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_start_acquisition( );
@@ -923,7 +923,7 @@ Var *digitizer_start_acquisition( UNUSED_ARG Var *v )
 /*-------------------------------------------------------------------*/
 /*-------------------------------------------------------------------*/
 
-Var *digitizer_get_curve( Var *v )
+Var_T *digitizer_get_curve( Var_T *v )
 {
 	return get_curve( v, lecroy9400.w != NULL ? SET : UNSET );
 }
@@ -932,7 +932,7 @@ Var *digitizer_get_curve( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_get_curve_fast( Var *v )
+Var_T *digitizer_get_curve_fast( Var_T *v )
 {
 	return get_curve( v, UNSET );
 }
@@ -941,13 +941,13 @@ Var *digitizer_get_curve_fast( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-static Var *get_curve( Var *v, bool use_cursor )
+static Var_T *get_curve( Var_T *v, bool use_cursor )
 {
-	WINDOW *w;
+	Window_T *w;
 	int ch, i;
 	double *array = NULL;
 	long length;
-	Var *nv;
+	Var_T *nv;
 #if 0
 	int j = 0;
 #endif
@@ -1036,7 +1036,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_run( UNUSED_ARG Var *v )
+Var_T *digitizer_run( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy9400_free_running( );
@@ -1048,7 +1048,7 @@ Var *digitizer_run( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *digitizer_command( Var *v )
+Var_T *digitizer_command( Var_T *v )
 {
 	char *cmd = NULL;
 

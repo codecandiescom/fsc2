@@ -52,9 +52,9 @@ int hp5340a_exp_hook( void );
 int hp5340a_end_of_exp_hook( void );
 
 
-Var *freq_counter_name( Var *v );
-Var *freq_counter_measure( Var *v );
-Var *freq_counter_command( Var *v );
+Var_T *freq_counter_name( Var_T *v );
+Var_T *freq_counter_measure( Var_T *v );
+Var_T *freq_counter_command( Var_T *v );
 
 
 static bool hp5340a_init( const char *name );
@@ -80,7 +80,7 @@ int hp5340a_init_hook( void )
 {
 	/* Set global variable to indicate that GPIB bus is needed */
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 
 	hp5340a.device = -1;
 	return 1;
@@ -126,7 +126,7 @@ int hp5340a_end_of_exp_hook( void )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *freq_counter_name( UNUSED_ARG Var *v )
+Var_T *freq_counter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -135,7 +135,7 @@ Var *freq_counter_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *freq_counter_measure( UNUSED_ARG Var *v )
+Var_T *freq_counter_measure( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
@@ -147,7 +147,7 @@ Var *freq_counter_measure( UNUSED_ARG Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *freq_counter_command( Var *v )
+Var_T *freq_counter_command( Var_T *v )
 {
 	char *cmd = NULL;
 

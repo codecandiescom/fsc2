@@ -26,8 +26,8 @@
 #include "tds_tmpl.h"
 
 
-static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w );
-static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w );
+static double tds_tmpl_get_area_wo_cursor( int channel, Window_T *w );
+static double tds_tmpl_get_amplitude_wo_cursor( int channel, Window_T *w );
 static bool tds_tmpl_talk( const char *cmd, char *reply, long *length );
 
 static bool in_init = UNSET;
@@ -708,7 +708,7 @@ void tds_tmpl_start_acquisition( void )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
+double tds_tmpl_get_area( int channel, Window_T *w, bool use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
 	/* Some older devices (TDS520) can't do gated measurements at all, so
@@ -794,7 +794,7 @@ double tds_tmpl_get_area( int channel, WINDOW *w, bool use_cursor )
 /* by fetching the curve in the window and integrating it 'by hand'.   */
 /*---------------------------------------------------------------------*/
 
-static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
+static double tds_tmpl_get_area_wo_cursor( int channel, Window_T *w )
 {
 	double *data, area;
 	long length, i;
@@ -841,7 +841,7 @@ static double tds_tmpl_get_area_wo_cursor( int channel, WINDOW *w )
 /* fetched fromt the device is to be encolsed by two vertical cursors.   */
 /*-----------------------------------------------------------------------*/
 
-void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
+void tds_tmpl_get_curve( int channel, Window_T *w, double **data, long *length,
 						 bool use_cursor )
 {
 	char cmd[ 50 ];
@@ -986,7 +986,7 @@ void tds_tmpl_get_curve( int channel, WINDOW *w, double **data, long *length,
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
+double tds_tmpl_get_amplitude( int channel, Window_T *w, bool use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
 	/* Some older devices (TDS520) can't do gated measurements at all, so
@@ -1072,7 +1072,7 @@ double tds_tmpl_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 /* fetching the curve in the window and integrating it 'by hand'.    */
 /*-------------------------------------------------------------------*/
 
-static double tds_tmpl_get_amplitude_wo_cursor( int channel, WINDOW *w )
+static double tds_tmpl_get_amplitude_wo_cursor( int channel, Window_T *w )
 {
 	double *data, min, max;
 	long length, i;

@@ -29,11 +29,11 @@
 #define type_ON( f )   ( ( f )->is_inverted ? LOW : HIGH )
 #define type_OFF( f )  ( ( f )->is_inverted ? HIGH : LOW )
 
-static void dg2020_shape_padding_check_1( FUNCTION *f );
+static void dg2020_shape_padding_check_1( Function_T *f );
 static void dg2020_shape_padding_check_2( void );
-static void dg2020_twt_padding_check( FUNCTION *f );
+static void dg2020_twt_padding_check( Function_T *f );
 static int dg2020_twt_pulse_compare( const void *A, const void *B );
-static void dg2020_defense_shape_check( FUNCTION *shape );
+static void dg2020_defense_shape_check( Function_T *shape );
 
 
 /*-------------------------------------------------------------------------*/
@@ -49,7 +49,7 @@ bool dg2020_do_update( void )
 	bool state;
 
 
-	if ( ! dg2020_is_needed )
+	if ( ! dg2020.is_needed )
 		return OK;
 
 	/* Resort the pulses and check that the new pulse settings are
@@ -82,8 +82,8 @@ bool dg2020_reorganize_pulses( bool flag )
 {
 	int i;
 	int j;
-	FUNCTION *f;
-	PULSE *p;
+	Function_T *f;
+	Pulse_T *p;
 
 
 	CLOBBER_PROTECT( i );
@@ -99,7 +99,7 @@ bool dg2020_reorganize_pulses( bool flag )
 			continue;
 
 		if ( f->num_pulses > 1 )
-			qsort( f->pulses, f->num_pulses, sizeof( PULSE * ),
+			qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
 				   dg2020_start_compare );
 
 		/* Check the new pulse positions and lengths, if they're not ok stop
@@ -122,7 +122,7 @@ bool dg2020_reorganize_pulses( bool flag )
 			if ( flag )
 				THROW( EXCEPTION );
 
-			for ( p = dg2020_Pulses; p != NULL; p = p->next )
+			for ( p = dg2020.pulses; p != NULL; p = p->next )
 			{
 				if ( p->is_old_pos )
 					p->pos = p->old_pos;
@@ -148,9 +148,9 @@ bool dg2020_reorganize_pulses( bool flag )
 		 dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
 	{
 		Ticks add;
-		FUNCTION *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
-				 *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
-		PULSE_PARAMS *shape_p, *defense_p;
+		Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
+				   *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
+		Pulse_Params_T *shape_p, *defense_p;
 
 		if ( fd->num_params > 0 && fs->num_params > 0 )
 		{
@@ -209,10 +209,10 @@ bool dg2020_reorganize_pulses( bool flag )
 /* and don't overlap.                                                      */
 /*-------------------------------------------------------------------------*/
 
-void dg2020_do_checks( FUNCTION *f )
+void dg2020_do_checks( Function_T *f )
 {
-	PULSE *p;
-	PULSE_PARAMS *pp, *ppn;
+	Pulse_T *p;
+	Pulse_Params_T *pp, *ppn;
 	int i;
 
 
@@ -312,7 +312,7 @@ void dg2020_do_checks( FUNCTION *f )
 			else
 				print( FATAL, "Pulses #%ld and #%ld (function '%s') %s"
 					   "overlap.\n", pp->pulse->num, ppn->pulse->num,
-					   f->name, dg2020_IN_SETUP ? "" : "start to "  );
+					   f->name, dg2020.in_setup ? "" : "start to "  );
 			THROW( EXCEPTION );
 		}
 	}
@@ -329,9 +329,9 @@ void dg2020_do_checks( FUNCTION *f )
 /*------------------------------------------------*/
 /*------------------------------------------------*/
 
-static void dg2020_shape_padding_check_1( FUNCTION *f )
+static void dg2020_shape_padding_check_1( Function_T *f )
 {
-	PULSE_PARAMS *pp, *ppp;
+	Pulse_Params_T *pp, *ppp;
 	int i;
 
 
@@ -365,7 +365,7 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 
 	for ( i = 1; i < f->num_params; i++ )
 	{
-		POD *pod_pp, *pod_ppp;
+		Pod_T *pod_pp, *pod_ppp;
 
 		ppp = pp;
 		pp = pp + 1;
@@ -396,7 +396,7 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 			{
 				print( FATAL, "Distance between pulses #%ld and #%ld %s too "
 					   "small to set shape padding.\n", ppp->pulse->num,
-					   pp->pulse->num, dg2020_IN_SETUP ? "is" : "becomes" );
+					   pp->pulse->num, dg2020.in_setup ? "is" : "becomes" );
 				THROW( EXCEPTION );
 			}
 		}
@@ -444,8 +444,8 @@ static void dg2020_shape_padding_check_1( FUNCTION *f )
 
 static void dg2020_shape_padding_check_2( void )
 {
-	FUNCTION *f1, *f2;
-	PULSE_PARAMS *pp1, *pp2;
+	Function_T *f1, *f2;
+	Pulse_Params_T *pp1, *pp2;
 	int i, j, k, l;
 
 
@@ -501,9 +501,9 @@ static void dg2020_shape_padding_check_2( void )
 /* longer than the repetition time or the maximum pulse sequence duration). */
 /*--------------------------------------------------------------------------*/
 
-static void dg2020_twt_padding_check( FUNCTION *f )
+static void dg2020_twt_padding_check( Function_T *f )
 {
-	PULSE_PARAMS *pp, *ppp, tmp_pp;
+	Pulse_Params_T *pp, *ppp, tmp_pp;
 	int i, j;
 
 
@@ -733,8 +733,8 @@ static void dg2020_twt_padding_check( FUNCTION *f )
 
 static int dg2020_twt_pulse_compare( const void *A, const void *B )
 {
-	PULSE_PARAMS *a = ( PULSE_PARAMS * ) A,
-				 *b = ( PULSE_PARAMS * ) B;
+	Pulse_Params_T *a = ( Pulse_Params_T * ) A,
+				   *b = ( Pulse_Params_T * ) B;
 
 	if ( a->pos <= b->pos )
 		return -1;
@@ -755,10 +755,10 @@ static int dg2020_twt_pulse_compare( const void *A, const void *B )
 /* mentioned EDL functions have been called.                               */
 /*-------------------------------------------------------------------------*/
 
-static void dg2020_defense_shape_check( FUNCTION *shape )
+static void dg2020_defense_shape_check( Function_T *shape )
 {
-	FUNCTION *defense = dg2020.function + PULSER_CHANNEL_DEFENSE;
-	PULSE *shape_p, *defense_p;
+	Function_T *defense = dg2020.function + PULSER_CHANNEL_DEFENSE;
+	Pulse_T *shape_p, *defense_p;
 	long i, j;
 
 
@@ -791,7 +791,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( dg2020_IN_SETUP )
+				if ( dg2020.in_setup )
 					print( FATAL, "Distance between PULSE_SHAPE pulse %s"
 						   "#%ld and DEFENSE pulse #%ld is shorter than "
 						   "%s.\n", shape_p->sp ? "for pulse " : "", 
@@ -822,7 +822,7 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 					THROW( EXCEPTION );
 				}
 
-				if ( dg2020_IN_SETUP )
+				if ( dg2020.in_setup )
 				{
 					print( FATAL, "Distance between DEFENSE pulse #%ld and "
 						   "PULSE_SHAPE pulse %s#%ld is shorter than %s.\n",
@@ -848,9 +848,9 @@ static void dg2020_defense_shape_check( FUNCTION *shape )
 /* pulser assigned to the function passed as argument.       */
 /*-----------------------------------------------------------*/
 
-void dg2020_set_pulses( FUNCTION *f )
+void dg2020_set_pulses( Function_T *f )
 {
-	PULSE_PARAMS *pp;
+	Pulse_Params_T *pp;
 	int i, j;
 	Ticks start, len;
 	int what;
@@ -927,7 +927,7 @@ void dg2020_set_pulses( FUNCTION *f )
 
 void dg2020_full_reset( void )
 {
-	PULSE *p = dg2020_Pulses;
+	Pulse_T *p = dg2020.pulses;
 
 
 	while ( p != NULL )
@@ -965,10 +965,10 @@ void dg2020_full_reset( void )
 		p = p->next;
 	}
 
-	if ( dg2020_phs[ 0 ].function != NULL )
-		dg2020_phs[ 0 ].function->next_phase = 0;
-	if ( dg2020_phs[ 1 ].function != NULL )
-		dg2020_phs[ 1 ].function->next_phase = 0;
+	if ( dg2020.phs[ 0 ].function != NULL )
+		dg2020.phs[ 0 ].function->next_phase = 0;
+	if ( dg2020.phs[ 1 ].function != NULL )
+		dg2020.phs[ 1 ].function->next_phase = 0;
 }
 
 
@@ -977,10 +977,10 @@ void dg2020_full_reset( void )
 /* to the next pulse in the pulse list.           */
 /*------------------------------------------------*/
 
-PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
+Pulse_T *dg2020_delete_pulse( Pulse_T *p, bool warn )
 {
-	PULSE *pp;
-	FUNCTION *f;
+	Pulse_T *pp;
+	Function_T *f;
 	int i;
 
 
@@ -1058,8 +1058,8 @@ PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 
 	/* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == dg2020_Pulses && p->next == NULL )
-		dg2020_Pulses = PULSE_P T_free( dg2020_Pulses );
+	if ( p == dg2020.pulses && p->next == NULL )
+		dg2020.pulses = PULSE_P T_free( dg2020.pulses );
 	else
 		T_free( p );
 
@@ -1074,9 +1074,9 @@ PULSE *dg2020_delete_pulse( PULSE *p, bool warn )
 /* commands and their length.                                          */
 /*---------------------------------------------------------------------*/
 
-void dg2020_commit( FUNCTION *f, bool flag )
+void dg2020_commit( Function_T *f, bool flag )
 {
-	PULSE *p;
+	Pulse_T *p;
 	int i, j;
 	Ticks start, len;
 	int what;

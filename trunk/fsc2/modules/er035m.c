@@ -54,15 +54,15 @@ int er035m_test_hook( void );
 int er035m_exp_hook( void );
 int er035m_end_of_exp_hook( void );
 
-Var *gaussmeter_name( Var *v );
-Var *gaussmeter_field( Var *v );
-Var *find_field( Var *v );
-Var *gaussmeter_resolution( Var *v );
-Var *gaussmeter_probe_orientation( Var *v );
-Var *gaussmeter_command( Var *v );
-Var *gaussmeter_wait( Var *v );
-Var *gaussmeter_upper_search_limit( Var *v );
-Var *gaussmeter_lower_search_limit( Var *v );
+Var_T *gaussmeter_name( Var_T *v );
+Var_T *gaussmeter_field( Var_T *v );
+Var_T *find_field( Var_T *v );
+Var_T *gaussmeter_resolution( Var_T *v );
+Var_T *gaussmeter_probe_orientation( Var_T *v );
+Var_T *gaussmeter_command( Var_T *v );
+Var_T *gaussmeter_wait( Var_T *v );
+Var_T *gaussmeter_upper_search_limit( Var_T *v );
+Var_T *gaussmeter_lower_search_limit( Var_T *v );
 
 
 /* internally used functions */
@@ -180,7 +180,7 @@ int er035m_init_hook( void )
 		print( WARN, "Driver for NMR gaussmeter is loaded but no appropriate "
 			   "magnet power supply driver.\n" );
 
-	need_GPIB = SET;
+	Need_GPIB = SET;
 	nmr.is_needed = SET;
 	nmr.name = DEVICE_NAME;
 	nmr.state = ER035M_UNKNOWN;
@@ -212,7 +212,7 @@ int er035m_exp_hook( void )
 	char buffer[ 21 ], *bp;
 	long length = 20;
 	int cur_res;
-	Var *v;
+	Var_T *v;
 
 
 	nmr = nmr_stored;
@@ -399,7 +399,7 @@ int er035m_end_of_exp_hook( void )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_name( UNUSED_ARG Var *v )
+Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -408,7 +408,7 @@ Var *gaussmeter_name( UNUSED_ARG Var *v )
 /*----------------------------------------------------------------*/
 /*----------------------------------------------------------------*/
 
-Var *gaussmeter_field( Var *v )
+Var_T *gaussmeter_field( Var_T *v )
 {
 	return find_field( v );
 }
@@ -419,7 +419,7 @@ Var *gaussmeter_field( Var *v )
 /* and returns the current field value in a variable.             */
 /*----------------------------------------------------------------*/
 
-Var *find_field( UNUSED_ARG Var *v )
+Var_T *find_field( UNUSED_ARG Var_T *v )
 {
 	char buffer[ 21 ];
 	char *bp;
@@ -505,7 +505,7 @@ Var *find_field( UNUSED_ARG Var *v )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_resolution( Var *v )
+Var_T *gaussmeter_resolution( Var_T *v )
 {
 	double res;
 	int i;
@@ -573,7 +573,7 @@ Var *gaussmeter_resolution( Var *v )
 /*--------------------------------------------------------*/
 /*--------------------------------------------------------*/
 
-Var *gaussmeter_probe_orientation( Var *v )
+Var_T *gaussmeter_probe_orientation( Var_T *v )
 {
 	if ( v == NULL )
 	{
@@ -599,7 +599,7 @@ Var *gaussmeter_probe_orientation( Var *v )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *gaussmeter_command( Var *v )
+Var_T *gaussmeter_command( Var_T *v )
 {
 	static char *cmd;
 
@@ -630,7 +630,7 @@ Var *gaussmeter_command( Var *v )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_wait( UNUSED_ARG Var *v )
+Var_T *gaussmeter_wait( UNUSED_ARG Var_T *v )
 {
 	if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
 		fsc2_usleep( ( nmr.resolution * 10 ) * E2_US, UNSET );
@@ -641,7 +641,7 @@ Var *gaussmeter_wait( UNUSED_ARG Var *v )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_upper_search_limit( Var *v )
+Var_T *gaussmeter_upper_search_limit( Var_T *v )
 {
 	double val;
 	long ul;
@@ -684,7 +684,7 @@ Var *gaussmeter_upper_search_limit( Var *v )
 /*-------------------------------------------------------*/
 /*-------------------------------------------------------*/
 
-Var *gaussmeter_lower_search_limit( Var *v )
+Var_T *gaussmeter_lower_search_limit( Var_T *v )
 {
 	double val;
 	long ll;

@@ -31,7 +31,7 @@
 /* when calling the function daq_freq_out() withb an argument.         */
 /*---------------------------------------------------------------------*/
 
-Var *daq_reserve_freq_out( Var *v )
+Var_T *daq_reserve_freq_out( Var_T *v )
 {
 	bool lock_state = SET;
 
@@ -90,7 +90,7 @@ Var *daq_reserve_freq_out( Var *v )
 /* frequency is 0.                                                         */
 /*-------------------------------------------------------------------------*/
 
-Var *daq_freq_out( Var *v )
+Var_T *daq_freq_out( Var_T *v )
 {
 	double freq;
 	double new_freq;
@@ -291,7 +291,7 @@ Var *daq_freq_out( Var *v )
 /*-------------------------------------------------------------------------*/
 /*-------------------------------------------------------------------------*/
 
-Var *daq_trigger_setup( Var *v )
+Var_T *daq_trigger_setup( Var_T *v )
 {
 	NI_DAQ_TRIG_TYPE trigger_type;
 	const char *tt[ ] = { "TTL", "Low_Window", "High_Window", "Middle_Window",

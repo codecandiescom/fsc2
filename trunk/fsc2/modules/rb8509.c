@@ -54,10 +54,10 @@ int rb8509_test_hook( void );
 int rb8509_exp_hook( void );
 int rb8509_end_of_exp_hook( void );
 
-Var *daq_name( Var *v );
-Var *daq_get_voltage( Var *v );
-Var *daq_trigger_mode( Var *v );
-Var *daq_gain( Var *v );
+Var_T *daq_name( Var_T *v );
+Var_T *daq_get_voltage( Var_T *v );
+Var_T *daq_trigger_mode( Var_T *v );
+Var_T *daq_gain( Var_T *v );
 
 static int rb8509_translate_channel( long channel );
 
@@ -71,7 +71,7 @@ int rb8509_init_hook( void )
 	RULBUS_CARD_INFO card_info;
 
 
-	need_RULBUS = SET;
+	Need_RULBUS = SET;
 
 	if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info )
 		 != RULBUS_OK )
@@ -172,7 +172,7 @@ int rb8509_end_of_exp_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var *daq_name( UNUSED_ARG Var *v )
+Var_T *daq_name( UNUSED_ARG Var_T *v )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -182,7 +182,7 @@ Var *daq_name( UNUSED_ARG Var *v )
  * Function returns the converted voltage from one of the channels
  *-----------------------------------------------------------------*/
 
-Var *daq_get_voltage( Var *v )
+Var_T *daq_get_voltage( Var_T *v )
 {
 	int channel;
 	double volts;
@@ -263,7 +263,7 @@ Var *daq_get_voltage( Var *v )
  * can only be determined when the experiment is started
  *-------------------------------------------------------------------*/
 
-Var *daq_trigger_mode( Var *v )
+Var_T *daq_trigger_mode( Var_T *v )
 {
 	if ( v == NULL )
 		return vars_push( INT_VAR, rb8509.trig_mode );
@@ -313,7 +313,7 @@ Var *daq_trigger_mode( Var *v )
  * argument must be either 1, 2, 4 or 8
  *---------------------------------------------------------*/
 
-Var *daq_gain( Var *v )
+Var_T *daq_gain( Var_T *v )
 {
 	int gain;
 

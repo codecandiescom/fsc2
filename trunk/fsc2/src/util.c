@@ -981,7 +981,7 @@ void create_colors( void )
 /* Converts a string with a channel name into a number */
 /*-----------------------------------------------------*/
 
-Var *convert_to_channel_number( const char *channel_name )
+Var_T *convert_to_channel_number( const char *channel_name )
 {
 	long channel;
 

@@ -69,8 +69,8 @@ bool dg2020_store_timebase( double timebase )
 
 bool dg2020_assign_function( int function, long pod )
 {
-	FUNCTION *f = dg2020.function + function;
-	POD *p = dg2020.pod + pod;
+	Function_T *f = dg2020.function + function;
+	Pod_T *p = dg2020.pod + pod;
 
 
 	if ( pod < 0 || pod > NUM_PODS )
@@ -123,8 +123,8 @@ bool dg2020_assign_function( int function, long pod )
 
 bool dg2020_assign_channel_to_function( int function, long channel )
 {
-	FUNCTION *f = dg2020.function + function;
-	CHANNEL *c = dg2020.channel + channel;
+	Function_T *f = dg2020.function + function;
+	Channel_T *c = dg2020.channel + channel;
 
 
 	if ( channel < 0 || channel >= MAX_CHANNELS )
@@ -520,7 +520,7 @@ bool dg2020_set_max_seq_len( double seq_len )
 
 bool dg2020_set_phase_reference( int phase, int function )
 {
-	FUNCTION *p, *f;
+	Function_T *p, *f;
 
 
 	/* First a sanity check... */
@@ -597,12 +597,12 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 
 	if ( pod == -1 )
 	{
-		if ( phs[ func ].is_var[ type ][ 0 ] )
+		if ( dg2020.phs[ func ].is_var[ type ][ 0 ] )
 			pod = 1;
 		else
 			pod = 0;
 
-		if ( phs[ func ].is_var[ type ][ pod ] )
+		if ( dg2020.phs[ func ].is_var[ type ][ pod ] )
 		{
 			print( FATAL, "Both output states for phase %s of "
 				   "function '%s' already have been defined.\n",
@@ -613,7 +613,7 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 		}
 	}
 
-	if ( phs[ func ].is_var[ type ][ pod ] )
+	if ( dg2020.phs[ func ].is_var[ type ][ pod ] )
 	{
 		print( FATAL, "Output state of %d. pod for phase %s of function '%s' "
 			   "already has been defined.\n", pod + 1, Phase_Types[ type ],
@@ -629,8 +629,8 @@ bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
 		THROW( EXCEPTION );
 	}
 
-	phs[ func ].var[ type ][ pod ] = val;
-	phs[ func ].is_var[ type ][ pod ] = SET;
+	dg2020.phs[ func ].var[ type ][ pod ] = val;
+	dg2020.phs[ func ].is_var[ type ][ pod ] = SET;
 
 	return OK;
 }
@@ -657,7 +657,7 @@ bool dg2020_phase_setup( int func )
 	for ( i = 0; i < 4; i++ )
 	{
 		for ( j = 0; j < 2; j++ )
-			if ( ! phs[ func ].is_var[ i ][ j ] )
+			if ( ! dg2020.phs[ func ].is_var[ i ][ j ] )
 			{
 				if ( func == 2 )
 					print( FATAL, "Incomplete data for phase setup of phase "
@@ -670,8 +670,8 @@ bool dg2020_phase_setup( int func )
 				THROW( EXCEPTION );
 			}
 
-		cons[ phs[ func ].var[ i ][ 0 ] + 2 * phs[ func ].var[ i ][ 1 ] ]
-			= SET;
+		cons[ dg2020.phs[ func ].var[ i ][ 0 ]
+			  + 2 * dg2020.phs[ func ].var[ i ][ 1 ] ] = SET;
 	}
 
 	/* Check that the data are consistent, i.e. different phase types haven't
@@ -689,10 +689,10 @@ bool dg2020_phase_setup( int func )
 
 	if ( func == 0 )
 		ret = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1,
-											phs[ func ] );
+											dg2020.phs[ func ] );
 	else
 		ret = dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2,
-											phs[ func ] );
+											dg2020.phs[ func ] );
 
 	return ret;
 }
@@ -701,7 +701,7 @@ bool dg2020_phase_setup( int func )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool dg2020_phase_setup_finalize( int func, PHS p_phs )
+bool dg2020_phase_setup_finalize( int func, PHS_T p_phs )
 {
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );

@@ -34,8 +34,8 @@
 
 int rb_pulser_start_compare( const void *A, const void *B )
 {
-	PULSE *a = *( PULSE ** ) A,
-		  *b = *( PULSE ** ) B;
+	Pulse_T *a = *( Pulse_T ** ) A,
+		    *b = *( Pulse_T ** ) B;
 
 	if ( ! a->is_active )
 	{
@@ -108,9 +108,9 @@ double rb_pulser_ticks2double( Ticks ticks )
  * Returns pointer to the pulses structure if given a valid pulse number.
  *------------------------------------------------------------------------*/
 
-PULSE *rb_pulser_get_pulse( long pnum )
+Pulse_T *rb_pulser_get_pulse( long pnum )
 {
-	PULSE *cp = rb_pulser_Pulses;
+	Pulse_T *cp = rb_pulser.pulses;
 
 
 	if ( pnum < 0 )
@@ -311,7 +311,7 @@ void rb_pulser_dump_pulses( void )
 
 void rb_pulser_write_pulses( FILE *fp )
 {
-	FUNCTION *f;
+	Function_T *f;
 	int i, j;
 
 

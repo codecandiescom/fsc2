@@ -29,8 +29,8 @@
 #include "fsc2.h"
 
 
-Var *vars_arr_rhs( Var *v );
-Var *vars_subref_to_rhs_conv( Var *v );
+Var_T *vars_arr_rhs( Var_T *v );
+Var_T *vars_subref_to_rhs_conv( Var_T *v );
 
 
 #endif  /* ! VARS_RHS_HEADER */

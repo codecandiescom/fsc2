@@ -64,7 +64,7 @@
    functions from the loaded modules */
 
 size_t Num_Func;     /* number of built-in and listed functions */
-Func *Fncts;         /* structure for list of functions */
+Func_T *Fncts;       /* structure for list of functions */
 
 
 /* Both these variables are shared with 'func_util.c' */
@@ -77,7 +77,7 @@ bool Dont_Save;
               display() and clear_curve() if the maximum number of curves
 			  (defined as MAX_CURVES in graphics.h) should ever be changed. */
 
-Func Def_Fncts[ ] =              /* List of built-in functions */
+Func_T Def_Fncts[ ] =              /* List of built-in functions */
 {
 	{ "int",                 f_int,      		 1, ACCESS_ALL,  NULL, UNSET },
 	{ "float",               f_float,    		 1, ACCESS_ALL,  NULL, UNSET },
@@ -260,8 +260,8 @@ bool functions_init( void )
 
 static int func_cmp1( const void *a, const void *b )
 {
-	return strcmp( ( ( const Func * ) a )->name,
-				   ( ( const Func * ) b )->name );
+	return strcmp( ( ( const Func_T * ) a )->name,
+				   ( ( const Func_T * ) b )->name );
 }
 
 
@@ -345,10 +345,10 @@ int func_exists( const char *name )
 /*    exists but has not been loaded an exception is thrown.            */
 /*----------------------------------------------------------------------*/
 
-Var *func_get( const char *name, int *acc )
+Var_T *func_get( const char *name, int *acc )
 {
 	char *sec_name;
-	Var *func_ptr;
+	Var_T *func_ptr;
 
 
 	/* We have to help the writers of modules a bit: If they want a
@@ -411,10 +411,10 @@ Var *func_get( const char *name, int *acc )
 /* printed and an exception is thrown or simply NULL is returned. */
 /*----------------------------------------------------------------*/
 
-Var *func_get_long( const char *name, int *acc, bool flag )
+Var_T *func_get_long( const char *name, int *acc, bool flag )
 {
-	Func *f;
-	Var *ret;
+	Func_T *f;
+	Var_T *ret;
 	char *fn;
 	char *hp;
 
@@ -466,7 +466,7 @@ Var *func_get_long( const char *name, int *acc, bool flag )
 
 static int func_cmp2( const void *a, const void *b )
 {
-	return strcmp( ( const char * ) a, ( ( const Func * ) b )->name );
+	return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
 
 
@@ -477,10 +477,10 @@ static int func_cmp2( const void *a, const void *b )
 /* that then is caught by the first function etc.                 */
 /*----------------------------------------------------------------*/
 
-Var *func_call( Var *f )
+Var_T *func_call( Var_T *f )
 {
-	Var *ap;
-	Var *ret = NULL;
+	Var_T *ap;
+	Var_T *ret = NULL;
 	long ac;
 	long abs_len;
 #ifndef NDEBUG
@@ -667,11 +667,11 @@ Var *func_call( Var *f )
 /* the function from the same module the func_get() call came from.      */
 /*-----------------------------------------------------------------------*/
 
-CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
-					   int dev_count )
+Call_Stack_T *call_push( Func_T *f, Device_T *device, const char *device_name,
+						 int dev_count )
 {
 	const char *t;
-	CALL_STACK *cs;
+	Call_Stack_T *cs;
 
 
 	cs = CALL_STACK_P T_malloc( sizeof *cs );
@@ -714,9 +714,9 @@ CALL_STACK *call_push( Func *f, Device *device, const char *device_name,
 /*---------------------------------------------------------------*/
 /*---------------------------------------------------------------*/
 
-CALL_STACK *call_pop( void )
+Call_Stack_T *call_pop( void )
 {
-	CALL_STACK *cs;
+	Call_Stack_T *cs;
 
 
 	if ( EDL.Call_Stack == NULL )
