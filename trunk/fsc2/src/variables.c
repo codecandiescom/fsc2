@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.21  1999/07/22 07:47:47  jens
+   *** empty log message ***
+
    Revision 1.20  1999/07/21 23:01:23  jens
    *** empty log message ***
 
@@ -1719,6 +1722,7 @@ Var *vars_arr_set( Var *v )
 	/* check that it's really a variable with a generic array pointer */
 
 	vars_check2( v, ARR_PTR );
+	a = v->val.vptr;
 
 	/* count the variable below v on the stack */
 
@@ -1731,27 +1735,48 @@ Var *vars_arr_set( Var *v )
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-	/* if the referenced array is still new set its dimension and allocate
-	   memory for it and return the variable allowing indexing */
+	/* If the referenced array has the NEW_VARIABLE flag still set it means
+	   either that its really completely new or that it is dynamically sized
+	   and the missing dimension could not be determined yet. In the first
+	   case we try to set its sizes and allocate memory for it via calling
+	   vars_setup_new_array().
 
-	a = v->val.vptr;
+	   If the completely new array is a normal fixed size array this will
+	   return a variable on the stack pointing to the very first element of
+	   the array which can be used in the following to initialize the new
+	   array. If, on the other hand, vars_setup_new_array() just returns a
+	   NULL generic array pointer which means it's an dynamically sized array
+	   and makes sure we can't assign data to it. We no pop the array pointer
+	   and return the variable pointer we got from vars_setup_new_array().
+
+	   `New' dynamically sized arrays have already been set up as far as
+	   possible by an earlier call to vars_setup_new_array(). We now expect an
+	   assignment of an array slice which will finally determine the still
+	   missing size. The function doing this assignment will have to do all
+	   normally done here, i.e. determining the size of the last dimension,
+	   allocating memory and calculating the location for storing its data all
+	   by itself. Thus we simply leave the pointer to the array on the stack
+	   untouched and return.
+	*/
 
 	if ( a->flags & NEW_VARIABLE )
-		return( vars_setup_new_array( a, dim, v->next ) );
+	{
+		if ( ! ( a->flags & VARIABLE_SIZED ) )
+		{
+			ret = vars_setup_new_array( a, dim, v->next );
+			vars_pop( v );
+			return( ret );
+		}
+		else
+			return( v );
+	}
 
-	/* now check if this is a variable sized array and is still `new' -
-	   in this case all we can do is leave the stack untouched  - the function
-	   for the assignment to an array slice has to do all things, i.e.
-	   determining the size of the last dimension, allocating memory and
-	   calculating the location for storing its data all by itself */
+	/* check that there are enough indices on the stack (since variable sized
+       arrays allow assignment of array slices there needs to be only one
+       index less than the dimension of the array) */
 
-	if ( a->flags & VARIABLE_SIZED && a->flags & NEW_VARIABLE )
-		return( v );
-
-	/* check that there are enough indices on the stack */
-
-	if ( ( ! ( a->flags &= VARIABLE_SIZED ) && dim != a->dim ) ||
-		 ( a->flags &= VARIABLE_SIZED && a->dim - 1 ) )
+	if ( ( ! ( a->flags & VARIABLE_SIZED ) && dim < a->dim ) ||
+		 ( a->flags & VARIABLE_SIZED && dim < a->dim - 1 ) )
 	{
 		eprint( FATAL, "%s:%ld: Array `%s' is %d-dimensional but only "
 				"indices are given.\n", Fname, Lc, a->name, a->dim, dim );
@@ -1879,8 +1904,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 			   VARIABLE_SIZED set this is going to be a dynamically sized
 			   array - set the corresponding flag in the array variable,
 			   don't reset its NEW_VARIABLE flag and don't allocate memory
-			   and return a variable with a NULL pointer so that no simple
-			   assignments can be done. */
+			   and return a variable with a generic pointer to the array. */
 
 			if ( v->flags & VARIABLE_SIZED )
 			{
@@ -1894,10 +1918,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 				a->flags |= VARIABLE_SIZED;
 				
 				vars_pop( v );
-				if ( a->type == INT_VAR )	
-					return( vars_push( INT_PTR, NULL, a) );
-				else
-					return( vars_push( FLOAT_PTR, NULL, a ) );
+				return( vars_push( ARR_PTR, NULL ) );
 			}
 
 			cur = ( int ) v->val.lval;
