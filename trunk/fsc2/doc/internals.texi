@@ -56,7 +56,7 @@ reloading the @code{EDL} file) only this third step is repeated.
 In the following what happens during the three steps of the execution of
 an @code{EDL} script will be explained in some more details. Then
 follows a real long section that's a @i{tour de force} through the
-sources of the porgram. This is hopefully going to be helpful for people
+sources of the program. This is hopefully going to be helpful for people
 that try eliminate bugs or even extend @code{fsc2}.
 
 
