@@ -912,7 +912,7 @@ static void shift_XPoints_of_curve_2d( Canvas *c, Curve_2d *cv )
 
 	/* Add the shifts to the XPoints */
 
-	cv->up = cv->down = cv->left = cv->right = SET;
+	cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
 	for ( i = 0; i < G.nx * G.ny; sp++, xp++, xps++, i++ )
 	{
@@ -1094,7 +1094,7 @@ void recalc_XPoints_of_curve_2d( Curve_2d *cv )
 	short dw, dh;
 
 
-	cv->up = cv->down = cv->left = cv->right = SET;
+	cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
 	cv->w = ( unsigned short ) ceil( cv->s2d[ X ] );
 	cv->h = ( unsigned short ) ceil( cv->s2d[ Y ] );
