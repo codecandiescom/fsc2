@@ -91,7 +91,7 @@ int main( int argc, char *argv[ ] )
 
 	/* Initialize xforms stuff, quit on error */
 
-	if ( ! 	xforms_init( &argc, argv ) )
+	if ( ! xforms_init( &argc, argv ) )
 	{
 		unlink( LOCKFILE );
 		return EXIT_FAILURE;
@@ -737,7 +737,7 @@ static bool display_file( char *name, FILE *fp )
 
 /*-------------------------------------------------------*/
 /* sigchld_handler() is the default SIGCHLD handler used */
-/* to avoid having to many zombies hanging around.       */
+/* to avoid having too many zombies hanging around.      */
 /*-------------------------------------------------------*/
 
 void sigchld_handler( int sig_type, void *data )
@@ -854,6 +854,9 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	fl_unfreeze_form( main_form->fsc2 );
 }
 
+
+/*------------------------------------------------------------*/  
+/*------------------------------------------------------------*/  
 
 void run_help( FL_OBJECT *a, long b )
 {
