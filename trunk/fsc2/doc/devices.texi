@@ -181,37 +181,45 @@ The modules defining the gaussmeter functions (to be listed in the
 er035m
 er035m_s
 er035m_sa
+er035m_sas
 bh15
 @end example
-The first three modules are for the ER035M NMR gaussmeter, the first one
-is to be used when it's controlled via the GPIB bus and the second if it
-is connected using the serial port of the computer. The third module,
-@code{er035m_sa}, is special in that it doesn't allow field control
-(i.e@: it can't be used together with a magnet module) and was only
-added to enable calibrations of the BH15 field controller using the
-somewhat more precise ER035M NMR gaussmeter. If the program is correctly
-installed the appropriate module is loaded by specifying
+The first four modules are for the ER035M NMR gaussmeter. The first and
+third one are to be used when the device is controlled via the GPIB bus
+while the second and fourth if it's connected using the serial port of
+the computer. The third and fourth module, @code{er035m_sa} and
+@code{er035m_sas}, are special in that they don't allow field control
+(i.e@: can't be used together with a magnet module). If the program is
+correctly installed the appropriate module is loaded by specifying
 `@code{gaussmeter}' instead of one of the listed module names.
 
 The gaussmeter are mainly used together with the magnet power supply
 and have to be specified in the @code{DEVICES} section @b{before} the
 magnet module.
 
-There are only two functions for gaussmeter, both only to be used in
-queries and in the @code{EXPERIMENT} section of the @acronym{EDL}
-program only.
+All functions for gaussmeters can only be used in queries and in the
+@code{EXPERIMENT} section of the @acronym{EDL} program..
 
 @table @samp
 @item find_field()
 @findex find_field()
-The function returns the current value of the magnetic field in Gauss.
-The function can only be called in the @code{EXPERIMENT} section.
+This function is defined in the device drivers @code{er035m} and
+@code{er035m_s}. It returns the current value of the magnetic field in
+Gauss.  The function can only be called in the @code{EXPERIMENT}
+section.
 
 @item field_resolution()
 @findex field_resolution()
-The function returns the resolution in Gauss used in measurements of the
-magnetic field. The function can only be called in the @code{EXPERIMENT}
-section.
+This function is defined in the device drivers @code{er035m} and
+@code{er035m_s}. It returns the resolution in Gauss used in measurements
+of the magnetic field. The function can only be called in the
+@code{EXPERIMENT} section.
+
+@item measure_field()
+@findex measure_field()
+This function is defined in the device drivers @code{er035m_sa} and
+@code{er035m_sas}. It measures the current field and its value in
+Gauss. The function can only be called in the @code{EXPERIMENT} section.
 
 @end table
 
