@@ -21,7 +21,7 @@
 
 
 @node Cloning Devices, Modules, Command Line Options, Top
-@chapter Cloning devices
+@chapter Cloning Devices
 @cindex cloning devices
 
 
