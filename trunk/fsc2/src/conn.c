@@ -19,6 +19,8 @@ static volatile bool is_busy;
 
 
 /*------------------------------------------------------*/
+/* Creates a child process that will listen on a socket */
+/* to allow other processes to run an EDL program.      */
 /*------------------------------------------------------*/
 
 pid_t spawn_conn( bool start_state )
@@ -103,6 +105,8 @@ static void connect_handler( int listen_fd )
 
 	while ( 1 )
 	{
+		/* Listen on the socket */
+
 		cli_len = sizeof( cli_addr );
 		if ( ( conn_fd = accept( listen_fd, ( struct sockaddr * ) &cli_addr,
 								 &cli_len ) ) < 0 )
@@ -145,9 +149,9 @@ static void connect_handler( int listen_fd )
 				}
 			}
 
-		/* If parent is busy return "BUSY\n", if UID that client send us
+		/* If parent is busy return "BUSY\n", if the UID the client send
 		   differs from fsc2s effective UID send "FAIL\n" and otherwise
-		   send "OK\n". On write failure close the connection */
+		   send "OK\n". On write failure simply close the connection. */
 
 		if ( is_busy )
 			strcpy( line, "BUSY\n" );
@@ -180,7 +184,7 @@ static void connect_handler( int listen_fd )
 		if ( line[ 1 ] == '\n' )
 			line[ 1 ] = ' ';
 
-		/* Return "OK\n" unless parent has become busy in the mean time */
+		/* Return "OK\n" unless parent has become busy */
 
 		strcpy( line + 2, is_busy ? "BUSY\n" : "OK\n" );
 		if ( writen( conn_fd, line + 2, strlen( line + 2 ) )

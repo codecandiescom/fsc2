@@ -324,7 +324,7 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 	if ( line[ 0 ] == ' ' )
 		clean_up( fname, sock_fd, -1 );
 
-	/* Now tell fsc2 the method - it can either reply wtih "BUSY\n" or with
+	/* Now tell fsc2 the method - it can either reply with "BUSY\n" or with
        "OK\n" */
 
 	if ( writen( sock_fd, line, strlen( line ) )
@@ -342,13 +342,12 @@ void contact_fsc2( int sock_fd, const char *pname, const char *fname )
 
 	/* Finally tell fsc2 the name of the temporary file */
 
-	strcpy( line, fname );
-	strcat( line, "\n" );
+	snprintf( line, MAXLINE - 2, "%s\n", fname );
 	if ( writen( sock_fd, line, strlen( line ) )
 		 != ( ssize_t ) strlen( line ) )
 		clean_up( fname, sock_fd, -1 );
 
-	if ( ( count = read_line( sock_fd, line, MAXLINE ) ) <= 0 )
+	if ( ( count = read_line( sock_fd, line, MAXLINE - 2 ) ) <= 0 )
 		clean_up( fname, sock_fd, -1 );
 
 	if ( ! strcmp( line, "FAIL\n" ) )

@@ -1139,10 +1139,19 @@ void main_sig_handler( int signo )
 
 void notify_conn( int signo )
 {
+	/* Don't send signal to process responsible fro connections when it's
+	   not existing (in load at the very start) or when the experiment is
+	   running - in this case fsc2 is busy anyway */
+
 	if ( conn_pid <= 0 || child_pid != 0 )
 		return;
+
 	kill( conn_pid, signo );
-	if ( ! conn_child_replied )
-		sleep( INT_MAX );
+
+	/* Wait for reply from child but avoid waiting when it in fact already
+	 replied (as indicated by the variable) */
+
+	while ( ! conn_child_replied )
+		pause( );
 	conn_child_replied = UNSET;
 }
