@@ -406,8 +406,8 @@ Usually, during an experiment the keyboard of the lock-in amplifier is
 locked. But for situations where it would be useful to be able to control
 the lock-in also via its keyboard it can be unlocked (and also re-locked)
 from within the program. To unlock the keyboard call this function with
-an argument of @code{0}, to re-lock the keyboard call it again with a
-non-zero argument or no argument at all.
+an argument of @code{0} or @code{"OFF"}, to re-lock the keyboard call it
+again with a non-zero argument, @code{"ON"} or no argument at all.
 
 @end table
 
@@ -761,8 +761,9 @@ Usually, during an experiment the keyboard of the digitizer is
 locked. But for situations where it would be useful to be able to
 control the digitizer also via its keyboard it can be unlocked (and also
 re-locked) from within the program. To unlock the keyboard call this
-function with an argument of @code{0}, to re-lock the keyboard call it
-again with a non-zero argument or no argument at all.
+function with an argument of @code{0} or @code{"OFF"}, to re-lock the
+keyboard call it again with a non-zero argument, @code{"ON"} or no
+argument at all.
 
 @end table
 
