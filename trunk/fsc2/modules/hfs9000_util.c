@@ -48,7 +48,7 @@ Ticks hfs9000_double2ticks( double p_time )
 	if ( ticks > TICKS_MAX || ticks < TICKS_MIN )
 	{
 		print( FATAL, "Specified time is too long for time base of %s.\n",
-			   dg2020_ptime( hfs9000.timebase ) );
+			   hfs9000_ptime( hfs9000.timebase ) );
 		THROW( EXCEPTION );
 	}
 
