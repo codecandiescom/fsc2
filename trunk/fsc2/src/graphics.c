@@ -826,7 +826,10 @@ void stop_graphics( void )
 		display_has_been_shown = UNSET;
 
 	if ( run_form )
+	{
 		fl_free_form( run_form->run );
+		run_form = NULL;
+	}
 
 	if ( G_stored )
 	{
