@@ -3303,13 +3303,14 @@ chip, not wavelengths.
 The function is mostly meant to make it easy to obtain a wavelength
 scale to be used with the functions @code{change_scale_1d()} and
 @code{change_scale_2d()}. If binning is used in @i{x}-direction the
-elements can't be used directly as arguments for the functions but to
-the first element you will have use halve the number of pixels binned
-together multiplied by the second element and the second element needs
-to be multiplied by the number of pixels bined together. Here's an
-example on how to use the function to set a wavelength @code{x}-axis,
-assuming that @code{xbin} is the number of bits binned together in
-@i{x}-direction and @code{scale} is an array with two elements:
+elements of the returned array can't be used directly as arguments for
+the functions for changing the scale but to the first element you will
+have to add halve the number of pixels binned together and multiplied by
+the second element while the second element needs to be multiplied by
+the number of pixels binned together. Here's an example on how to use
+the function to set a wavelength @code{x}-axis, assuming that
+@code{xbin} is the number of bits binned together in @i{x}-direction and
+@code{scale} is an array with two elements:
 @example
 scale = monochromator_wavelength_axis( );
 change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
