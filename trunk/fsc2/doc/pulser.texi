@@ -494,19 +494,24 @@ the pulse. The program will automatically create the pulses necessary to
 set the phases of the microwave pulses.
 
 One further information that is needed is the time the phase switch has
-to be set to a new phase before the microwave pulse starts (the phase
-switch needs some small amount of time to settle). This time can be set
-via a statement like
+to be set to a new phase before the microwave pulses (or other phase
+cycled pulses) start (the phase switch needs some small amount of time
+to settle). This time can be set via a statement like
 @example
 PHASE_SWITCH_DELAY: 40ns;
 @end example
 This will lead to the phase pulse being switched at least @w{40 ns}
 before the real pulse starts. When this statement is missing a default
-value of @w{20 ns} is used.
+value of @w{20 ns} is used. If there are tweo different phase functions
+(e.g.@: if two different pulse functions need phase cycling) the phase
+switch delay can be set individually for each of them by using
+@code{PHASE_SWITCH_DELAY_1} and @code{PHASE_SWITCH_DELAY_2} (setting the
+phase switch delay for the phase pulses created for phase function 1 and
+2).
 
-And, finally, one may specify how long the phase switch should remain in
-its state after the end of a pulse. This is called the grace period and
-is set via
+And, finally, one may specify how long the phase pulse should remain
+switched on after the end of a pulse. This is called the grace period
+and is set via
 @example
 GRACE_PERIOD: 20ns;
 @end example
