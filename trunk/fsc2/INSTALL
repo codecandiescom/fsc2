@@ -75,7 +75,7 @@ support built into fsc2).
 B) Permissions
 ==============
 
-If you want to do more than just very basic tests with fsc2 you should
+If you want to do more than just a few simple tests with fsc2 you should
 create a special account for it. fsc2 needs to be installed setuid'ed,
 so for security reasons its account should have as low privileges as
 possible so that no-one with this account is able to log in (e.g. by
