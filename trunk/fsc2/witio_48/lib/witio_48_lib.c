@@ -139,7 +139,7 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
         return witio_48_errno = WITIO_48_ERR_INT;
 
 	if ( mode != NULL )
-		*mode = dio_mode.mode;
+		*mode = dev_info.mode[ dio ] = dio_mode.mode;
 
     return witio_48_errno = WITIO_48_OK;
 }
@@ -291,15 +291,15 @@ static int check_channel( WITIO_48_DIO dio, WITIO_48_CHANNEL channel )
 static int check_value( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 						unsigned long value )
 {
-	if ( ( value >= 1UL << 24 )                              ||
+	if ( ( value >= 1UL << 24 )                                    ||
 		 ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
-		   channel == WITIO_48_CHANNEL_1 &&
-		   value >= 1UL << 16 )                              ||
+		   channel == WITIO_48_CHANNEL_1              &&
+		   value >= 1UL << 16 )                                    ||
 		 ( dev_info.mode[ dio ] == WITIO_48_MODE_2x12 &&
-		   value >= 1UL << 12 )                              ||
-		 ( ( dev_info.mode[ dio ] == WITIO_48_MODE_3x8 ||
+		   value >= 1UL << 12 )                                    ||
+		 ( ( dev_info.mode[ dio ] == WITIO_48_MODE_3x8       ||
 			 ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
-			   channel == WITIO_48_CHANNEL_2 ) ) &&
+			   channel == WITIO_48_CHANNEL_2 ) )                &&
 		   value >= 1UL << 8 ) )
 		return witio_48_errno = WITIO_48_ERR_IDV;
 

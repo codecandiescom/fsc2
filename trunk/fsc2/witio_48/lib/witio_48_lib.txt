@@ -80,7 +80,7 @@ They won't be listed anymore in the description of the functions below.
 
 
 There is no need to "open" the board before using it - the first call
-to one of the functions will automatically open the boards device file
+of one of the functions will automatically open the boards device file
 and make it exclusively accessible by the process that opened the board
 this way.
 
@@ -92,14 +92,15 @@ set for the file handle used for accessing the board.
 
 All functions (except witio_48_close() and witio_48_perror() and
 witio_48_strerror()) expect the number of the DIO chip to be used as
-the first argument. This must be either 0 or 1, or instead of directly
-specifying the number either 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+the first argument. This must be either 0 or 1, or, instead of directly
+specifying the number, either 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2' can
+be used.
 
 
-Wherever a I/O mode value is passed to a function or returned by a
+Wherever an I/O mode value is passed to a function or returned by a
 function (i.e. a value specifying how the 24-bit DIO is split into
 sub-DIOs), an unsigned integer between 0 and 3 is valid. Instead of
-using numbers directly you should use either 'WITIO_48_MODE_3x8',
+using numbers directly you can use either 'WITIO_48_MODE_3x8',
 'WITIO_48_2x12', 'WITIO_48_1x24' or 'WITIO_48_16_8'.
 
 
@@ -148,19 +149,19 @@ For 'WITIO_48_MODE_2x12' the 24-bit DIO is split up into two 12-bit wide
 DIOs. In this mode two channels can be used. For channel 'WITIO_48_CHANNEL_0'
 the topmost 4-bits of the value are mapped to the upper 4 C-pins and the
 lower 8-bits of the value to the A-pins. For channel 'WITIO_48_CHANNEL_1'
-the upper for bits of a value get mapped to the lower 4 C-pins and the
-lower 8 bit are mapped to th B-pins.
+the upper four bits of a value get mapped to the lower 4 C-pins and the
+lower 8 bit are mapped to the B-pins.
 
 For 'WITIO_48_MODE_1x24' the 24-bit DIO isn't split up but used as it is.
 In this I/O mode only the single channel 'WITIO_48_CHANNEL_0' can be used
 and the topmost 8 bits of a value are mapped to the C-pins of the connector,
 the middle 8 bits to the B-pins and the lowest 8 bits to the A-pins.
 
-For 'WITIO_48_MODE_16_8' it is split up into a 16-bit and an 8bit wide DIO.
+For 'WITIO_48_MODE_16_8' it is split up into a 16-bit and an 8-bit wide DIO.
 'WITIO_48_CHANNEL_0' is the 16-bit wide DIO and the upper 8 bits of a value
-are mapped to the B-pins of the connector and the lower 8 bits to the A-pins.
-'WITIO_48_CHANNEL_1' is the 8-bit wide DIO and a value is mapped to the
-C-pins.
+are mapped to the B-pins of the connector while the lower 8 bits are mapped
+to the A-pins. 'WITIO_48_CHANNEL_1' is the 8-bit wide DIO and a value is
+mapped to the C-pins.
 
 Beside the error codes mentioned above the function may return:
 
@@ -275,7 +276,7 @@ const char *witio_48_error_message( void )
 
 The function returns a short error message about the reason the last
 call of one of the functions in the library failed. If there was no
-error during the last function call  (or no function was called since
+error during the last function call (or no function was called since
 the library was loaded) an empty string is returned.
 
 
@@ -283,10 +284,10 @@ the library was loaded) an empty string is returned.
 
 int witio_48_perror( const char *s )
 
-The function prints produces a message on the standard error output,
+The function prints produces a message on the standard error output
 describing the error encountered during the last call of one of the
-witio_48_xxx() functions. First (if s is not NULL and *s is not '\0')
-the argument string s is printed, followed by a colon and a blank.
+witio_48_xxx() functions. First (if it's not NULL and *s is not '\0')
+the argument string 's' is printed, followed by a colon and a blank.
 Then follows the error message and a new-line. The function returns
 the number of printed characters.
 
