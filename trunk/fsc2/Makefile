@@ -7,7 +7,7 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 objects        = $(sources:.c=.o)
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 			     -Wmissing-prototypes -Wmissing-declarations \
-				 -W -DDEBUG -W MDEBUG
+				 -W -DDEBUG -DMDEBUG
 modules        = User_Functions.c dg2020.c tds754a.c sr510.c
 header         = ${c_sources:.c=.h} global.h
 
