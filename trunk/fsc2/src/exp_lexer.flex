@@ -35,6 +35,8 @@
 int prim_explex( void );
 extern void prim_expparse( void );
 
+extern Token_Val prim_exp_val;
+
 
 /* locally used global variables */
 
@@ -105,83 +107,83 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of ASSIGNMENTS: labels */
 {ASS}		{
 				Prim_Exp_Next_Section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 			/* handling of DEFAULTS: labels */
 {DEF}		{
 				Prim_Exp_Next_Section = DEFAULTS_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 			/* handling of VARIABLES: labels */
 {VAR}		{
 				Prim_Exp_Next_Section = VARIABLES_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 			/* handling of PHASES: labels */
 {PHAS}		{
 				Prim_Exp_Next_Section = PHASES_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 			/* handling of PREPARATIONS: labels */
 {PREP}		{
 				Prim_Exp_Next_Section = PREPARATIONS_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 			/* handling of EXPERIMENT: labels */
 {EXP}		{
 				Prim_Exp_Next_Section = EXPERIMENT_SECTION;
-				return SECTION_LABEL;
+				return 0;
 			}
 
 {INT}       {
-				prim_explval.lval = atol( prim_exptext );
+				prim_exp_val.lval = atol( prim_exptext );
                 return INT_TOKEN;
             }
 
 {FLOAT}     {
-                prim_explval.dval = atof( prim_exptext );
+                prim_exp_val.dval = atof( prim_exptext );
                 return FLOAT_TOKEN;
             }
 
 			/* combinations of pulse and property, e.g. `P3.LEN' */
 
 {P}?"."{F}  {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_FUNC );
 				return VAR_REF;
             }
 
 {P}?"."{S}  {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_POS );
 				return VAR_REF;
             }
 
 {P}?"."{L}  {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_LEN );
 				return VAR_REF;
             }
 
 {P}?"."{DS} {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_DPOS );
 				return VAR_REF;
             }
 
 {P}?"."{DL} {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_DLEN );
 				return VAR_REF;
             }
 
 {P}?"."{ML} {
-				prim_explval.vptr = pulse_get_by_addr( n2p( prim_exptext ),
+				prim_exp_val.vptr = pulse_get_by_addr( n2p( prim_exptext ),
 													   P_MAXLEN );
 				return VAR_REF;
             }
@@ -189,8 +191,8 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 {IDENT}     {
 				int acc;
 
-				prim_explval.vptr = func_get( prim_exptext, &acc );
-				if ( prim_explval.vptr != NULL )
+				prim_exp_val.vptr = func_get( prim_exptext, &acc );
+				if ( prim_exp_val.vptr != NULL )
 				{
 					if ( acc != ACCESS_ALL_SECTIONS )
 					{
@@ -202,7 +204,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					return FUNC_TOKEN;
 				}
 
-				if ( ( prim_explval.vptr = vars_get( prim_exptext ) )
+				if ( ( prim_exp_val.vptr = vars_get( prim_exptext ) )
 				     == NULL )
 					 THROW( ACCESS_NONEXISTING_VARIABLE );
 
@@ -256,10 +258,8 @@ int primary_experiment_parser( FILE *in )
 
 	Prim_Exp_Next_Section = OK;
 
-	prim_expin = in;
-
 	TRY
-		prim_expparse( );
+		store_exp( in );
 	CATCH( INVALID_INPUT_EXCEPTION )
 	{
 		eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: `%s'\n",
@@ -276,6 +276,13 @@ int primary_experiment_parser( FILE *in )
 		eprint( FATAL, "%s:%ld: Variable `%s' has never been declared.\n",
 				Fname, Lc, prim_exptext );
 		return FAIL;
+	}
+
+	if ( Prim_Exp_Next_Section != NO_SECTION )
+	{
+		eprint( FATAL, "%s:%ld: EXPERIMENT section has to be the very last "
+				"section.\n", Fname, Lc );
+		return( FAIL );
 	}
 
 	return Prim_Exp_Next_Section;

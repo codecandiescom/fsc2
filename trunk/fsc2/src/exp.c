@@ -15,25 +15,24 @@ extern FILE *prim_expin;
 
 
 /* This routine stores the experiment section of an EDL file in the form of
-   tokens as returned by the lexer. Thus it serves as a kind of intermediate
-   between the lexer and the parser. This is necessary for two reasons: First,
-   the experiment section may contain loops. Without an intermediate it would
-   be rather difficult to run through the loops since we would have to re-read
-   and re-tokenize the input file again and again which not only would be slow
-   but also difficult since what we read as input file is actually a pipe from
-   the `cleaner'. Second, we will have to run through the experiment section
-   at least two times, first for sanity checks and then again for really doing
-   the experiment. Again, without an intermediate for storing the tokenized
-   form of the experiment section this would necessitate reading the input
-   files at least two times.
+   tokens (plus their semantic value) as returned by the lexer. Thus it serves
+   as a kind of intermediate between the lexer and the parser. This is
+   necessary for two reasons: First, the experiment section may contain
+   loops. Without an intermediate it would be rather difficult to run through
+   the loops since we would have to re-read and re-tokenize the input file
+   again and again which not only would be slow but also difficult since what
+   we read as input file is actually a pipe from the `cleaner'. Second, we
+   will have to run through the experiment section at least two times, first
+   for sanity checks and then again for really doing the experiment. Again,
+   without an intermediate for storing the tokenized form of the experiment
+   section this would necessitate reading the input files at least two times.
 
    By having an intermediate between the lexer and the parser we avoid several
    problems. We don't have to re-read and re-tokenize the input file. We also
    can find out about about loops and handle them later by simply feeding the
    parser the loop again and again. Of course, beside storing the experiment
    section in tokenized form as done by this function, we also need a routine
-   that later feeds the stored tokens to the parser(s).
-*/
+   that later feeds the stored tokens to the parser(s).  */
 
 
 bool store_exp( FILE *in )
@@ -86,9 +85,11 @@ bool store_exp( FILE *in )
 
 	prg_length = cur_len;
 
-	/* check and initialize if's and loops &c */
+	/* check and initialize if's and loops etc */
 
 	prim_check( );
+
+	return( 1 );
 }
 
 
@@ -98,12 +99,13 @@ void forget_prg( void )
 	long i;
 
 
-	/* check if anything has to be done */
+	/* check if anything has to be done at all */
 
 	if ( prg_token == NULL )
 		return;
 
-	/* get the first file names address and free the string */
+	/* get the address where the first file names ios stored and free the
+	   string */
 
 	cur_Fname = prg_token[ 0 ].Fname;
 	free( cur_Fname );
@@ -121,6 +123,8 @@ void forget_prg( void )
 		if ( prg_token[ i ].Fname != cur_Fname )
 			free( cur_Fname = prg_token[ i ].Fname );
 	}
+
+	/* get rid of the memory used for storing the tokens */
 
 	free( prg_token );
 	prg_token = NULL;

@@ -35,9 +35,11 @@
 #include "phases.h"
 #include "pulse.h"
 #include "ppcheck.h"
+#include "prim_exp.h"
 
 
-
+/* this typedef MUST be identical to the YYSTYPE union defined in
+   `prim_exp_parser.h' which in turn results from `prim_exp_parser.y' !!!! */
 
 typedef union {
 		long   lval;
@@ -47,12 +49,12 @@ typedef union {
 } Token_Val;
 
 
-typedef struct {
+typedef struct PT_ {
 	int token;              /* type of current token */
 	Token_Val tv;           /* token's value as needed by the parser */
-	char *Fname;            /* name of file the token came from */
-	long Lc;                /* number of line number the token came from */
-	long gto;               /* used in branches */
+	struct PT_ *gto;        /* used in branches */
+	char *Fname;            /* name of file the token comes from */
+	long Lc;                /* number of line the token comes from */
 } Prg_Token;
 
 
@@ -73,12 +75,13 @@ int primary_experiment_parser( FILE *in );
 
 #if defined ( FSC2_MAIN )
 
+
 /* used in compiling the user supplied program */
 
 long Lc = 0;
 char *Fname = NULL;
 Compilation compilation;
-Prg_Token *prg_token;
+Prg_Token *prg_token = NULL;
 long prg_length = 0;
 
 long Time_Unit = DEFAULT_TIME_UNIT;
@@ -96,12 +99,14 @@ Acquisition_Sequence ASeq[ 2 ];
 Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
-#else
+
+#else   /*  ! FSC2_MAIN */
+
 
 extern long Lc;
 extern char *Fname;
 extern Compilation compilation;
-extern Prg_Token prg_token;
+extern Prg_Token *prg_token;
 extern long prg_length;
 
 extern long Time_Unit;
@@ -118,6 +123,7 @@ extern Acquisition_Sequence ASeq[ ];
 
 extern Pulse *Plist;
 extern Pulse *Cur_Pulse;
+
 
 #endif
 
