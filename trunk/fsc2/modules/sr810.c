@@ -880,7 +880,7 @@ Var *lockin_harmonic( Var *v )
 /*------------------------------------------------------------------*/
 /*------------------------------------------------------------------*/
 
-Var *lockin_ref_mode( UNUSED_ARGVar *v )
+Var *lockin_ref_mode( UNUSED_ARG Var *v )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
