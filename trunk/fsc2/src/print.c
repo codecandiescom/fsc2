@@ -60,8 +60,8 @@ static char *pc_string = NULL;
 static bool get_print_file( FILE **fp, char **name, long data );
 static void get_print_comm( void );
 static void start_printing( FILE *fp, char *name, long what );
-static void do_printing_1d( FILE *fp, char *name, long what );
-static void do_printing_2d( FILE *fp, char *name );
+static void do_1d_printing( FILE *fp, long what );
+static void do_2d_printing( FILE *fp );
 static FILE *spawn_print_prog( const char *command );
 static void print_header( FILE *fp, char *name );
 static void eps_make_scale( FILE *fp, void *cv, int coord, long dim );
@@ -474,11 +474,17 @@ static void start_printing( FILE *fp, char *name, long what )
 		 ( fp = spawn_print_prog( cmd ) ) == NULL )
 		_exit( EXIT_FAILURE );
 
-	if ( what == 2 )
-		do_printing_2d( fp, name );
-	else
-		do_printing_1d( fp, name, what );
+	print_header( fp, name );
 
+	if ( what == 2 )
+		do_2d_printing( fp );
+	else
+		do_1d_printing( fp, what );
+
+	fprintf( fp, "showpage\n"
+			 	 "%%%%Trailer\n"
+			 	 "end %% fsc2Dict\n"
+				 "%%%%EOF\n" );
 	fclose( fp );
 	_exit( EXIT_SUCCESS );
 }
@@ -548,12 +554,10 @@ static FILE *spawn_print_prog( const char *command )
 /* section in y-direction.                                    */
 /*------------------------------------------------------------*/
 
-static void do_printing_1d( FILE *fp, char *name, long what )
+static void do_1d_printing( FILE *fp, long what )
 {
 	int i;
 
-
-	print_header( fp, name );
 
 	/* Set the area for the graph, leave a margin on all sides and,
        additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
@@ -571,7 +575,7 @@ static void do_printing_1d( FILE *fp, char *name, long what )
 	/* Draw the frame and the scales (just 0.5 mm outside the the area for the
        graph) */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
+	fprintf( fp, "%.2f %.2f m\n0 %.2f rl\n%.2f 0 rl\n0 %.2f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
 	if ( what == 1 )    /* normal 1D printing */
@@ -598,7 +602,7 @@ static void do_printing_1d( FILE *fp, char *name, long what )
 
 	/* Restrict further drawings to the frame of the scales */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
+	fprintf( fp, "%.2f %.2f m\n0 %.2f rl\n%.2f 0 rl\n0 %.2f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
 	if ( what == 1 )
@@ -609,9 +613,6 @@ static void do_printing_1d( FILE *fp, char *name, long what )
 	}
 	else
 		eps_draw_curve_1d( fp, &G.cut_curve, 0, what );
-
-	fprintf( fp, "showpage\n"
-				 "%%%%EOF\n" );
 }
 
 
@@ -622,19 +623,13 @@ static void do_printing_1d( FILE *fp, char *name, long what )
 /* disabled (the user can't select b&w).                        */
 /*--------------------------------------------------------------*/
 
-static void do_printing_2d( FILE *fp, char *name )
+static void do_2d_printing( FILE *fp )
 {
-	print_header( fp, name );
-
 	/* If the active curve has been switched off in the mean time nothing
 	   remains to be printed... */
 
 	if ( G.active_curve == -1 )
-	{
-		fprintf( fp, "showpage\n"
-					 "%%%%EOF\n" );
 		return;
-	}
 
 	/* Set the area for the graph, leave a margin on all sides and,
        additionally, 20 mm (x-axis) / 25 (y-axis) for labels and tick marks */
@@ -656,7 +651,7 @@ static void do_printing_2d( FILE *fp, char *name )
 
 	/* Draw the frame and the scales */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp s\n",
+	fprintf( fp, "%.2f %.2f m\n0 %.2f rl\n%.2f 0 rl\n0 %.2f rl cp s\n",
 			 x_0 - 0.5, y_0 - 0.5, h + 1.0, w + 1.0, - ( h + 1.0 ) );
 
 	eps_make_scale( fp, G.curve_2d[ G.active_curve ], X, 2 );
@@ -667,7 +662,7 @@ static void do_printing_2d( FILE *fp, char *name )
 
 	/* Restrict further drawings to the frame of the scales */
 
-	fprintf( fp, "%f %f m\n0 %f rl\n%f 0 rl\n0 %f rl cp clip np\n",
+	fprintf( fp, "%.2f %.2f m\n0 %.2f rl\n%.2f 0 rl\n0 %.2f rl cp clip np\n",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
 	/* The way the program is working currently only the first alternative
@@ -678,9 +673,6 @@ static void do_printing_2d( FILE *fp, char *name )
 		eps_draw_surface( fp, G.active_curve );
 	else
 		eps_draw_contour( fp, G.active_curve );
-
-	fprintf( fp, "showpage\n"
-				 "%%%%EOF\n" );
 }
 
 
@@ -713,9 +705,11 @@ static void print_header( FILE *fp, char *name )
 			 getpwuid( getuid( ) )->pw_name,
 			 getpwuid( getuid( ) )->pw_gecos );
 
-	/* Some (hopefully) helpful definitions */
+	/* Create a dictonary with the commands used in the following */
 
 	fprintf( fp, "%%%%BeginProlog\n"
+			     "/fsc2Dict 23 dict def\n"
+			     "fsc2Dict begin\n"
 			     "/b { bind def } bind def\n"
 			     "/s { stroke } b\n"
 			     "/f { fill } b\n"
@@ -760,26 +754,30 @@ static void print_header( FILE *fp, char *name )
 			     "        -0.025 0.025 rm } for\n"
 			     "        1 setgray (fsc2) show gr } b\n" );
 
-	/* Now we're done with the header and the document finally starts */
+	/* End of dictonary, open it for all the following (must be closed at end
+	   of file !) */
 
-	fprintf( fp, "%%%%EndProlog\n\n" );
+	fprintf( fp, "end %% fsc2Dict\n"
+			     "%%%%EndProlog\n"
+			 	 "%%%%BeginSetup\n"
+			     "fsc2Dict begin\n"
+			 	 "%%%%EndSetup\n" );
 
-	/* Try to setup the font that also supports umlauts etc., thanks to
-	   Adobe Systems Inc., "PostScript Language Reference", 3rd edition */
+	/* Setup the font that also supports umlauts etc., thanks to Adobe Systems
+	   Inc., "PostScript Language Reference", 3rd edition */
 
-	fprintf( fp, "/Times-Roman findfont\n"
-				 "dup length dict begin\n"
-				 "{ 1 index /FID ne\n"
-				 "    { def } { pop pop } ifelse\n"
+	fprintf( fp, "/Times-RomanISOLatin1 /Times-Roman findfont dup length\n"
+			 	 "dict begin {\n"
+			 	 "  1 index /FID ne\n { def } { pop pop } ifelse\n"
 				 "} forall\n"
 				 "/Encoding ISOLatin1Encoding def\n"
-				 "currentdict end\n"
-				 "/Times-RomanISOLatin1 exch definefont pop\n\n" );
+				 "currentdict end definefont pop\n" );
 
 	/* Rotate and shift for landscape format, scale to mm units, draw logo,
 	   set font and draw date and user name */
 
-	fprintf( fp, "%f dup scale 90 r 0 %f t\n", 72.0 / INCH, - paper_width );
+	fprintf( fp, "%.6f dup scale 90 r 0 %.2f t\n",
+			 72.0 / INCH, - paper_width );
 
 	if ( paper_type == A5_PAPER )
 		fprintf( fp, "10 10 t\n1 2 sqrt div dup scale\n" );
@@ -787,7 +785,7 @@ static void print_header( FILE *fp, char *name )
 	if ( paper_type == A6_PAPER )
 		fprintf( fp, "10 10 t\n0.5 dup scale\n" );
 
-	fprintf( fp, "%f %f fsc2\n", paper_height, paper_width );
+	fprintf( fp, "%.2f %.2f fsc2\n", paper_height, paper_width );
 	fprintf( fp, "/Times-RomanISOLatin1 4 sf\n" );
 
 	TRY
@@ -797,12 +795,12 @@ static void print_header( FILE *fp, char *name )
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
-		fprintf( fp, "5 5 m (%s) show\n\n", getpwuid( getuid( ) )->pw_name );
+		fprintf( fp, "5 5 m (%s) show\n", getpwuid( getuid( ) )->pw_name );
 		return;
 	}
 
 	tstr[ strlen( tstr ) - 1 ] = '\0';
-	fprintf( fp, "5 5 m (%s %s) show\n\n", tstr,
+	fprintf( fp, "5 5 m (%s %s) show\n", tstr,
 			 getpwuid( getuid( ) )->pw_name );
 	T_free( tstr );
 }
@@ -976,7 +974,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			else
 				label = paren_replace( G.label[ dim < 0 ? X : Y ] );
 
-			fprintf( fp, "(%s) dup cw %f exch sub %f m show\n",
+			fprintf( fp, "(%s) dup cw %.2f exch sub %.2f m show\n",
 					 label, x_0 + w, margin );
 			T_free( label );
 			TRY_SUCCESS;
@@ -987,7 +985,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 		/* Set the minimum start position of a x-axis tick label */
 
-		fprintf( fp, "%f\n", d_start_fine - 45.0 );
+		fprintf( fp, "%.2f\n", d_start_fine - 45.0 );
 
 		/* Draw all the ticks and numbers */
 
@@ -998,20 +996,20 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				fprintf( fp, "%f %f m\n 0 -3.5 rl s\n", x, y - 0.5 );
+				fprintf( fp, "%.2f %.2f m 0 -3.5 rl s\n", x, y - 0.5 );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
-				fprintf( fp, "dup %f (%s) cw 0.5 mul sub 3 sub lt {\n",
+				fprintf( fp, "dup %.2f (%s) cw 0.5 mul sub 3 sub lt {\n",
 						 x, lstr );
-				fprintf( fp, "%f (%s) cw 0.5 mul sub %f 5 sub (%s) ch sub m\n"
-						 "(%s) show pop %f (%s) cw 0.5 mul add } if\n",
+				fprintf( fp, "%.2f (%s) cw 0.5 mul sub %.2f 5 sub (%s) ch sub "
+						 "m\n(%s) show pop %.2f (%s) cw 0.5 mul add } if\n",
 						 x, lstr, y - 1.0, lstr, lstr, x, lstr );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				fprintf( fp, "%f %f m\n 0 -2.5 rl s\n", x, y - 0.5 );
+				fprintf( fp, "%.2f %.2f m 0 -2.5 rl s\n", x, y - 0.5 );
 			else                                       /* short line */
-				fprintf( fp, "%f %f m\n 0 -1.5 rl s\n", x, y - 0.5 );
+				fprintf( fp, "%.2f %.2f m 0 -1.5 rl s\n", x, y - 0.5 );
 		}
 
 		fprintf( fp, "pop\n" );
@@ -1028,8 +1026,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 				label = paren_replace( G.label[ Z ] );
 
 			if ( label != NULL )
-				fprintf( fp, "gs (%s) dup dup ch %f add exch cw %f exch sub\n"
-							 "t 90 r 0 0 m show gr\n",
+				fprintf( fp, "gs (%s) dup dup ch %.2f add exch cw %.2f exch "
+						 	 "sub t 90 r 0 0 m show gr\n",
 						 label, margin, paper_width - margin );
 			T_free( label );
 			TRY_SUCCESS;
@@ -1047,17 +1045,17 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				fprintf( fp, "%f %f m\n-3.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -3.5 0 rl s\n", x - 0.5, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
-				fprintf( fp, "%f (%s) cw sub 5 sub %f (%s) ch 0.5 mul "
+				fprintf( fp, "%.2f (%s) cw sub 5 sub %.2f (%s) ch 0.5 mul "
 						 "sub m (%s) show\n", x_0 - 0.5, lstr, y, lstr, lstr );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				fprintf( fp, "%f %f m\n-2.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -2.5 0 rl s\n", x - 0.5, y );
 			else                                      /* short line */
-				fprintf( fp, "%f %f m\n-1.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -1.5 0 rl s\n", x - 0.5, y );
 
 		}
 	}
@@ -1071,8 +1069,8 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			{
 				label = paren_replace( G.label[ Z ] );
 
-				fprintf( fp, "gs (%s) dup dup ch %f exch sub exch cw %f exch "
-							 "sub\n t 90 r 0 0 m show gr\n",
+				fprintf( fp, "gs (%s) dup dup ch %.2f exch sub exch cw %.2f "
+						 	 "exch subt 90 r 0 0 m show gr\n",
 						 label, x + 28.0, paper_width - margin );
 
 				T_free( label );
@@ -1087,7 +1085,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 		/* Draw all the ticks and numbers */
 
-		fprintf( fp, "%f %f m 0 %f rl s\n", x - 1.0, y_0, h );
+		fprintf( fp, "%.2f %.2f m 0 %.2f rl s\n", x - 1.0, y_0, h );
 
 		for ( cur_p = d_start_fine; cur_p < h;
 			  medium++, coarse++, cur_p += d_delta_fine )
@@ -1096,17 +1094,17 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
-				fprintf( fp, "%f %f m\n-3.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -3.5 0 rl s\n", x - 0.5, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
-				fprintf( fp, "%f %f (%s) ch 0.5 mul "
+				fprintf( fp, "%.2f %.2f (%s) ch 0.5 mul "
 						 "sub m (%s) show\n", x + 1, y, lstr, lstr );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
-				fprintf( fp, "%f %f m\n-2.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -2.5 0 rl s\n", x - 0.5, y );
 			else                                      /* short line */
-				fprintf( fp, "%f %f m\n-1.5 0 rl s\n", x - 0.5, y );
+				fprintf( fp, "%.2f %.2f m -1.5 0 rl s\n", x - 0.5, y );
 
 		}
 	}
@@ -1129,7 +1127,7 @@ static void eps_color_scale( FILE *fp )
 	int rgb[ 3 ];
 
 
-	fprintf( fp, "%f %f m 0 %f rl %f 0 rl 0 %f rl cp s\n",
+	fprintf( fp, "%.2f %.2f m 0 %.2f rl %.2f 0 rl 0 %.2f rl cp s\n",
 			 x - 0.1, y_0 - 0.1, h + 0.2, width + 0.2, - ( h + 0.2 ) );
 
 
@@ -1138,8 +1136,8 @@ static void eps_color_scale( FILE *fp )
 	for ( i = 0, c = 0.0; i < NUM_COLORS; y += h_inc, c += c_inc, i++ )
 	{
 		i2rgb( c, rgb );
-		fprintf( fp, "%f %f %f srgb\n"
-				     "%f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
+		fprintf( fp, "%.6f %.6f %.6f srgb\n"
+				     "%.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 ( double ) rgb[ RED ] / 255.0,
 				 ( double ) rgb[ GREEN ] / 255.0,
 				 ( double ) rgb[ BLUE ] / 255.0,
@@ -1212,7 +1210,7 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 	if ( k >= max_points )                  /* is there only just one ? */
 		return;
 
-	fprintf( fp, "%f %f m\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
+	fprintf( fp, "%.2f %.2f m\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
 			 y_0 + s2d[ Y ] * ( cv->points[ k ].v + cv->shift[ Y ] ) );
 	k++;
 
@@ -1220,7 +1218,8 @@ static void eps_draw_curve_1d( FILE *fp, Curve_1d *cv, int i, long dir )
 
 	for ( ; k < max_points; k++ )
 		if (  cv->points[ k ].exist )
-			fprintf( fp, "%f %f l\n", x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
+			fprintf( fp, "%.2f %.2f l\n",
+					 x_0 + s2d[ X ] * ( k + cv->shift[ X ] ),
 					 y_0 + s2d[ Y ] * ( cv->points[ k ].v + cv->shift[ Y ] ) );
 
 	fprintf( fp, "s gr\n" );
@@ -1247,18 +1246,14 @@ static void eps_draw_surface( FILE *fp, int cn )
 
 	fprintf( fp, "gs\n" );
 
-	/* Print areas gray for which there are no data */
+	/* Print comlete area gray to coover all points for which there are
+	   no data */
 
-	fprintf( fp, "%s\n"
-			 "%f %f m\n"
-			 "0 %f rl\n"
-			 "%f 0 rl\n"
-			 "0 %f rl\n"
-			 "cp f\n",
+	fprintf( fp, "%s\n%.2f %.2f m 0 %.2f rl %.2f 0 rl 0 %.2f rl cp f\n",
 			 print_with_color ? "0.5 0.5 0.5 srgb" : "0.5 sgr",
 			 x_0 - 0.1, y_0 - 0.1, h + 0.2, w + 0.2, - ( h + 0.2 ) );
 
-	/* Now draw the data */
+	/* Now draw points for which we have data */
 
 	for ( k = 0, j = 0; j < G.ny; j++ )
 		for ( i = 0; i < G.nx; k++, i++ )
@@ -1269,12 +1264,8 @@ static void eps_draw_surface( FILE *fp, int cn )
 			i2rgb( cv->z_factor * ( cv->points[ k ].v + cv->shift[ Z ] ),
 				   rgb );
 			fprintf( fp,
-					 "%f %f %f srgb\n"
-					 "%f %f m\n"
-					 "%f 0 rl\n"
-					 "0 %f rl\n"
-					 "%f 0 rl\n"
-					 "cp f\n",
+					 "%.6f %.6f %.6f srgb\n"
+					 "%.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 					 ( double ) rgb[ RED ] / 255.0,
 					 ( double ) rgb[ GREEN ] / 255.0,
 					 ( double ) rgb[ BLUE ] / 255.0,
@@ -1314,22 +1305,26 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 	cur_p = s2d[ X ] * cv->shift[ X ];
 	if ( cur_p - dw > 0 )
-		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
+		fprintf( fp,
+				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 x_0, y_0, cur_p - dw, h, - ( cur_p - dw ) );
 
 	cur_p = s2d[ X ] * ( G.nx - 1 + cv->shift[ X ] );
 	if ( w > cur_p + dw )
-		fprintf( fp, "0.5 sgr %f %f m 0 %f rl %f 0 rl 0 %f rl cp f\n",
+		fprintf( fp,
+				 "0.5 sgr %.2f %.2f m 0 %.2f rl %.2f 0 rl 0 %.2f rl cp f\n",
 				 x_0 + cur_p + dw, y_0, h, w - ( cur_p + dw ), - h );
 
 	cur_p = s2d[ Y ] * cv->shift[ Y ];
 	if ( cur_p - dh > 0 )
-		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
+		fprintf( fp,
+				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 x_0, y_0, w, cur_p - dh, - w );
 
 	cur_p = s2d[ Y ] * ( G.ny - 1 + cv->shift[ Y ] );
 	if ( h > cur_p + dh )
-		fprintf( fp, "0.5 sgr %f %f m %f 0 rl 0 %f rl %f 0 rl cp f\n",
+		fprintf( fp,
+				 "0.5 sgr %.2f %.2f m %.2f 0 rl 0 %.2f rl %.2f 0 rl cp f\n",
 				 x_0, y_0 + cur_p + dh , w, h - ( cur_p + dh ), - w );
 
 	/* Now draw the data */
@@ -1340,8 +1335,8 @@ static void eps_draw_contour( FILE *fp, int cn )
 			{
 				if ( ! cv->points[ k ].exist )
 				{
-					fprintf( fp, "0.5 sgr "
-							 "%f %f m 0 %f 2 copy rl %f 0 rl neg rl cp f\n",
+					fprintf( fp, "0.5 sgr %.2f %.2f m 0 %.2f 2 copy rl "
+							 	 "%.2f 0 rl neg rl cp f\n",
 							 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 							 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
 							 2.0 * dh, 2.0 * dw );
@@ -1356,7 +1351,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						fprintf( fp, "%f sgr %f %f m 0 %f rl s\n",
+						fprintf( fp, "%.6f sgr %.2f %.2f m 0 %.2f rl s\n",
 								 g,
 								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) + dw,
 								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) - dh,
@@ -1372,7 +1367,7 @@ static void eps_draw_contour( FILE *fp, int cn )
 
 					if ( ( z1 >= z && z2 < z ) || ( z1 < z && z2 >= z ) )
 					{
-						fprintf( fp, "%f sgr %f %f m %f 0 rl s\n",
+						fprintf( fp, "%.6f sgr %.2f %.2f m %.2f 0 rl s\n",
 								 g,
 								 x_0 + s2d[ X ] * ( i + cv->shift[ X ] ) - dw,
 								 y_0 + s2d[ Y ] * ( j + cv->shift[ Y ] ) + dh,
@@ -1413,7 +1408,7 @@ static void print_comm( FILE *fp )
 						   "{ pop }{ exch pop } ifelse dup\n",
 					   lines[ i ] );
 
-	fprintf( fp, "pop dup %f exch sub 0.5 mul %f add\n", w, margin );
+	fprintf( fp, "pop dup %.2f exch sub 0.5 mul %.2f add\n", w, margin );
 	fprintf( fp, "5 (X) ch 1.5 mul add gs t dup 0 0 m np\n"
 				 "(m) cw neg (X) ch -1.5 mul m\n"
 				 "(m) cw 2 mul add 0 rl\n"
@@ -1424,7 +1419,7 @@ static void print_comm( FILE *fp )
 
 	fprintf( fp, "0 0 m\n"
 				 "count { dup show sw neg (X) ch 1.65 mul rm } "
-				 "repeat gr\n\n" );
+				 "repeat gr\n" );
 
 
 	for ( i = 0; i < num_lines; i++ )
@@ -1624,35 +1619,35 @@ static void print_markers( FILE *fp )
 			switch ( m->color )
 			{
 				case 0 :
-					fprintf( fp, "0.8 0.8 0.8 srgb\n" );    /* "white" */
+					fprintf( fp, "0.8 0.8 0.8 srgb " );    /* "white" */
 					break;
 
 				case 1 :
-					fprintf( fp, "1 0 0 srgb\n" );          /* red */
+					fprintf( fp, "1 0 0 srgb " );          /* red */
 					break;
 
 				case 2 :
-					fprintf( fp, "0 1 0 srgb\n" );          /* green */
+					fprintf( fp, "0 1 0 srgb " );          /* green */
 					break;
 
 				case 3 :
-					fprintf( fp, "1 0.75 0 srgb\n" );       /* dark yellow */
+					fprintf( fp, "1 0.75 0 srgb " );       /* dark yellow */
 					break;
 
 				case 4 :
-					fprintf( fp, "0 0 1 srgb\n" );          /* blue */
+					fprintf( fp, "0 0 1 srgb " );          /* blue */
 					break;
 
 				default :
-					fprintf( fp, "0 0 0 srgb\n" );          /* black */
+					fprintf( fp, "0 0 0 srgb " );          /* black */
 				break;
 			}
 		else
-			fprintf( fp, "0 sgr\n" );
+			fprintf( fp, "0 sgr " );
 
-		fprintf( fp, "[ 1 1 ] 0 sd\n" );
+		fprintf( fp, "[ 1 1 ] 0 sd " );
 		
-		fprintf( fp, "%f %f m 0 %f rl s\n",
+		fprintf( fp, "%.2f %.2f m 0 %.2f rl s\n",
 				 x_0 + s2d * ( m->position + cv->shift[ X ] ), y_0, h );
 	}
 }
