@@ -44,7 +44,7 @@ Fcntl_Lock - Perl extension for file locking with fcntl(2)
   use Fcntl_Lock;
 
   my $fs = Fcntl_Lock->new;
-  $fs->l_type( F_RDLCK );
+  $fs->l_type( F_WRLCK );
   $fs->l_whence( SEEK_CUR );
   $fs->l_start( 100 );
   $fs->l_len( 123 );
