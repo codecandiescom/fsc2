@@ -339,8 +339,8 @@ install:
 	$(MAKE) -C utils install
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
-	if [ "$(INSTALL_MACHINE)" = "install-unknown" ]; then  \
-		$(MAKE) $(INSTALL_MACHINE);                        \
+	if [ "$(INSTALL_MACHINE)" != "install-unknown" ]; then  \
+		$(MAKE) $(INSTALL_MACHINE);                         \
 	fi
 
 
@@ -426,7 +426,7 @@ install-crowley.physik.fu-berlin.de:
 	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
 	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
 	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
@@ -447,7 +447,7 @@ install-door.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/w_band.so
 	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 install-isaak.physik.fu-berlin.de:
 	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
@@ -460,7 +460,7 @@ install-isaak.physik.fu-berlin.de:
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-crowley.none:
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) config/hp8647a.table $(libdir)
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on moebi
