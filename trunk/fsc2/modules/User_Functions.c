@@ -54,8 +54,8 @@ Var *get_phase_cycled_area_1d( Var *v )
 	Acquisition_Sequence *aseq = ASeq;      /* first acquisition sequence */
 
 
-	/* The first time we get here do some basic checks, i.e. check that all
-	   needed functions are there */
+	/* The first time we get here we need to do some basic checks, i.e. find
+	   out if all needed functions can be used */
 
 	if ( first_time )
 	{
@@ -70,7 +70,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s(): Missing "
-				"arguments.\n", Fname, Lc, Curt_Func );
+				"arguments.\n", Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
