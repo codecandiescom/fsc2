@@ -126,7 +126,7 @@ typedef struct _F_ {
 	bool is_low_level;
 
 	bool *pm;
-	struct _C_ *pcm;
+	struct _C_ **pcm;
 
 } FUNCTION;
 
