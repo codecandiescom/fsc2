@@ -25,7 +25,7 @@
 */
 
 
-#include "rulbus.h"
+#include "rulbus_lib.h"
 #include "rulbus_epp.h"
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -36,7 +36,7 @@
 RULBUS_CARD_LIST *rulbus_card = NULL;
 int rulbus_num_cards = 0;
 char *rulbus_dev_file = NULL;
-int ni_daq_errno = RULBUS_OK;
+int rulbus_errno = RULBUS_OK;
 
 
 static const char *rulbus_errlist[ ] = {
@@ -59,12 +59,17 @@ static const char *rulbus_errlist[ ] = {
 	"Missing card name in configuration file",         /* RULBUS_CRD_NAM */
 	"Invalid card type in configuration file",         /* RULBUS_INV_TYP */
 	"Address confict for cards in same rack",          /* RULBUS_ADD_CFL */
+	"Missing modules for card",                        /* RULBUS_TYP_HND */
 	"Missing intialization of library",                /* RULBUS_NO_INIT */
 	"Invalid function argument",                       /* RULBUS_INV_ARG */
-	"No such card",                                    /* RULBUS_INV_CRD  */
+	"No such card",                                    /* RULBUS_INV_CRD */
 	"Invalid card handle",                             /* RULBUS_INV_HND */
 	"Card has not been opened",                        /* RULBUS_CRD_NOP */
 	"Invalid card address offset",                     /* RULBUS_INV_OFF */
+	"Write error"                                      /* RULBUS_WRT_ERR */
+	"Read error"                                       /* RULBUS_RD_ERR  */
+	"Card is busy",                                    /* RULBUS_CRD_BSY */
+	"Invalid delay length",                            /* RULBUS_INV_DEL */
 };
 
 static const int rulbus_nerr =
@@ -77,11 +82,48 @@ static int fd;
 static int rulbus_check_config( void );
 static void rulbus_cleanup( void );
 static int rulbus_write_rack( unsigned char rack, unsigned char addr,
-							  unsigned char data );
+							  unsigned char *data, size_t len );
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
-							 unsigned char *data );
+							 unsigned char *data, size_t len );
 
 extern int yyparse( void );
+
+
+typedef struct RULBUS_CARD_HANDLER RULBUS_CARD_HANDLER;
+
+struct RULBUS_CARD_HANDLER {
+	int card_type;
+	int ( *init ) ( void );       /* module initialization function */
+	void ( *exit ) ( void );      /* module cleanup function */
+	int ( *card_init ) ( int );   /* card initialization function */
+	void ( *card_exit ) ( int );  /* card cleanup function */
+	bool is_init;                 /* module initialization flag */
+};
+
+RULBUS_CARD_HANDLER rulbus_card_handler[ ] =
+		{
+			{                /* RB8514 delay card */
+				RB8514,
+				rulbus_delay_init,
+				rulbus_delay_exit,
+				rulbus_delay_card_init,
+				rulbus_delay_card_exit,
+				UNSET
+			},
+#if 0
+			{                /* RB8515 clock card */
+				RB8514,
+				rulbus_clock_init,
+				rulbus_clock_exit,
+				rulbus_clock_card_init,
+				rulbus_clock_card_exit,
+				UNSET
+			},
+#endif
+		};
+
+static const int rulbus_num_card_handlers = 
+	  ( int ) ( sizeof rulbus_card_handler / sizeof rulbus_card_handler[ 0 ] );
 
 
 /*--------------------------------------------------------------------*
@@ -96,6 +138,7 @@ int rulbus_open( void )
 	const char *config_name;
 	extern FILE *yyin;         /* fron the parser */
 	int retval;
+	int i;
 
 
 	/* Don't try to reinitialize */
@@ -138,6 +181,20 @@ int rulbus_open( void )
 
 	rulbus_in_use = SET;
 
+	/* Call initialization functions of all card drivers that may be needed */
+
+	for ( i = 0; i < rulbus_num_card_handlers; i++ )
+		if ( rulbus_card_handler[ i ].init &&
+			 ( retval = rulbus_card_handler[ i ].init( ) ) < 0 )
+		{
+			for ( --i; i >= 0; i-- )
+				if ( rulbus_card_handler[ i ].exit )
+					rulbus_card_handler[ i ].exit( );
+			rulbus_close( );
+
+			return rulbus_errno = retval;
+		}
+
 	return rulbus_errno = RULBUS_OK;
 }
 
@@ -146,16 +203,31 @@ int rulbus_open( void )
  * Function to "close" to the RULBUS
  *-----------------------------------*/
 
-int rulbus_close( void )
+void rulbus_close( void )
 {
+	int i;
+
+
 	if ( rulbus_in_use )
 	{
+		/* Deactivate all cards, we can't be sure it already has been done */
+
+		for ( i = 0; i < rulbus_num_cards; i++ )
+			if ( rulbus_card[ i ].in_use )
+				rulbus_card_close( i );
+
+		/* Call the deactivation function for all modules */
+
+		for ( i = 0; i < rulbus_num_card_handlers; i++ )
+			if ( rulbus_card_handler[ i ].exit )
+				rulbus_card_handler[ i ].exit( );
+
 		close( fd );
 		rulbus_cleanup( );
 		rulbus_in_use = UNSET;
 	}
 
-	return rulbus_errno = RULBUS_OK;
+	rulbus_errno = RULBUS_OK;
 }
 	
 
@@ -171,6 +243,9 @@ int rulbus_close( void )
 
 int rulbus_perror( const char *s )
 {
+	if ( ! rulbus_in_use )
+		rulbus_errno = RULBUS_NO_INIT;
+
     if ( s != NULL && *s != '\0' )
         return fprintf( stderr, "%s: %s\n",
                         s, rulbus_errlist[ - rulbus_errno ] );
@@ -187,6 +262,9 @@ int rulbus_perror( const char *s )
 
 const char *rulbus_strerror( void )
 {
+	if ( ! rulbus_in_use )
+		return "";
+
     return rulbus_errlist[ - rulbus_errno ];
 }
 
@@ -202,13 +280,17 @@ const char *rulbus_strerror( void )
 int rulbus_card_open( const char *name )
 {
 	int i;
+	int retval;
 
 
 	if ( ! rulbus_in_use )
-		return rulbus_errno = RULBUS_NO_INIT;
+		rulbus_errno = RULBUS_NO_INIT;
 
 	if ( name == NULL || *name == '\0' )
 		return rulbus_errno = RULBUS_INV_ARG;
+
+	if ( ! rulbus_in_use )
+		return rulbus_errno = RULBUS_NO_INIT;
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
 		if ( ! strcmp( name, rulbus_card[ i ].name ) )
@@ -217,35 +299,60 @@ int rulbus_card_open( const char *name )
 	if ( i == rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_CRD;
 
-	rulbus_card[ i ].in_use = SET;
+	/* Call the type specific funtion for initialization of the card */
+
+	if ( ! rulbus_card[ i ].in_use )
+	{
+		if ( rulbus_card[ i ].handler->card_init &&
+			 ( retval = rulbus_card[ i ].handler->card_init( i ) ) < 0 )
+			return retval;
+		rulbus_card[ i ].in_use = SET;
+	}
 
 	return i;
 }
 
 
-/*-------------------------------------------------------------------*
- * Function that can be used to "deactivate" a card
- *-------------------------------------------------------------------*/
+/*-------------------------------*
+ * Function to deactivate a card
+ *-------------------------------*/
 
 int rulbus_card_close( int handle )
 {
 	if ( handle < 0 || handle >= rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_HND;
 
-	rulbus_card[ handle ].in_use = UNSET;
+	/* Call the type specific funtion for deactivating the card */
 
-	return RULBUS_OK;
+	if ( rulbus_card[ handle ].in_use )
+	{
+		if ( rulbus_card[ handle ].handler->card_exit )
+			rulbus_card[ handle ].handler->card_exit( handle );
+		rulbus_card[ handle ].in_use = UNSET;
+	}
+
+	return rulbus_errno = RULBUS_OK;
 }
 
 
-/*----------------------------------------------------------------------*
- * Function for sending a single byte to the card, expects the card
- * handle, an offset (relative to the base address of the card) and,
- * finally, the data byte to be send.
- *----------------------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for sending a 'len' bytes to a card, expects a card
+ * handle, an offset (relative to the base address of the card),
+ * a pointer to a buffer with the data to be written and the
+ * number of bytes to be written. On success it returns the
+ * number of bytes that were written, otherwise a (negative)
+ * value indicating an error.
+ *---------------------------------------------------------------*/
 
-int rulbus_write( int handle, unsigned char offset, unsigned char data )
+int rulbus_write( int handle, unsigned char offset, unsigned char *data,
+				  size_t len)
 {
+	int retval;
+
+
+	if ( ! rulbus_in_use )
+		rulbus_errno = RULBUS_NO_INIT;
+
 	if ( handle < 0 || handle >= rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_HND;
 
@@ -255,20 +362,39 @@ int rulbus_write( int handle, unsigned char offset, unsigned char data )
 	if ( offset >= rulbus_card[ handle ].width )
 		return rulbus_errno = RULBUS_INV_OFF;
 
-	return rulbus_errno =
-		rulbus_write_rack( rulbus_card[ handle ].rack,
-						   rulbus_card[ handle ].addr + offset, data );
+	if ( data == NULL || len == 0 )
+		return rulbus_errno RULBUS_INV_ARG;
+
+	retval = rulbus_write_rack( rulbus_card[ handle ].rack,
+								rulbus_card[ handle ].addr + offset,
+								data, len );
+
+	if ( retval <= 0 )
+		return rulbus_errno = RULBUS_WRT_ERR;
+
+	rulbus_errno = RULBUS_OK;
+	return retval;
 }
 
 
-/*------------------------------------------------------------------------*
- * Function for reading a single byte from the card, expects the card
- * handle, an offset (relative to the base address of the card) and,
- * finally, the a pointer through which the data byte will be returned.
- *------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for reading a 'len' byte a the card. It expects a card
+ * handle, an offset (relative to the base address of the card), a
+ * pointer to a buffer to which the data byte will be written and
+ * the maximum number of bytes to be read. On succes it returns
+ * the number of bytes that were read, otherwise a (negative) value
+ * indicating an error.
+ *------------------------------------------------------------------*/
 
-int rulbus_read( int handle, unsigned char offset, unsigned char *data )
+int rulbus_read( int handle, unsigned char offset, unsigned char *data,
+				 size_t len )
 {
+	int retval;
+
+
+	if ( ! rulbus_in_use )
+		rulbus_errno = RULBUS_NO_INIT;
+
 	if ( handle < 0 || handle >= rulbus_num_cards )
 		return rulbus_errno = RULBUS_INV_HND;
 
@@ -278,9 +404,18 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data )
 	if ( offset >= rulbus_card[ handle ].width )
 		return rulbus_errno = RULBUS_INV_OFF;
 
-	return rulbus_errno =
-		rulbus_read_rack( rulbus_card[ handle ].rack,
-						  rulbus_card[ handle ].addr + offset, data );
+	if ( data == NULL || len == 0 )
+		return rulbus_errno RULBUS_INV_ARG;
+
+	retval = rulbus_read_rack( rulbus_card[ handle ].rack,
+							   rulbus_card[ handle ].addr + offset,
+							   data, len );
+
+	if ( retval <= 0 )
+		return rulbus_errno = RULBUS_RD_ERR;
+
+	rulbus_errno = RULBUS_OK;
+	return retval;
 }
 
 
@@ -298,21 +433,23 @@ static int rulbus_check_config( void )
 
 	if ( rulbus_dev_file == NULL &&
 		 ( rulbus_dev_file = strdup( RULBUS_DEFAULT_DEVICE_FILE ) ) == NULL )
-		return rulbus_errno = RULBUS_NO_MEM;
+		return RULBUS_NO_MEM;
 
 	/* Check that there were cards listed */
 
 	if ( rulbus_num_cards == 0 )
-		return rulbus_errno = RULBUS_NO_CRD;
+		return RULBUS_NO_CRD;
 
 	/* Check that all cards have been assigned a name and set their widths,
 	   i.e. how many 8-bit addresses are used by the cards, and, while were
-	   at it, also check if the cards types make sense */
+	   at it, also check if the cards types make sense and there's a
+	   registered handler for the card type (which then is assigned to the
+	   card)  */
 
 	for ( i = 0; i < rulbus_num_cards; i++ )
 	{
 		if ( rulbus_card[ i ].name == NULL )
-			return rulbus_errno = RULBUS_CRD_NAM;
+			return RULBUS_CRD_NAM;
 
 		switch ( rulbus_card[ i ].type )
 		{
@@ -333,8 +470,17 @@ static int rulbus_check_config( void )
 				break;
 
 			default :
-				return rulbus_errno = RULBUS_INV_TYP;
+				return RULBUS_INV_TYP;
 		}
+
+		for ( j = 0; j < rulbus_num_card_handlers; j++ )
+			if ( rulbus_card[ i ].type == rulbus_card_handler[ j ].card_type )
+				break;
+
+		if ( j == rulbus_num_card_handlers )
+			return RULBUS_TYP_HND;
+
+		rulbus_card[ i ].handler = rulbus_card_handler + j;
 	}
 
 	/* Check that address ranges of cards on the same rack don't overlap */
@@ -352,10 +498,10 @@ static int rulbus_check_config( void )
 				 ( rulbus_card[ j ].addr < rulbus_card[ j ].addr &&
 				   rulbus_card[ j ].addr + rulbus_card[ j ].width >
 				   rulbus_card[ i ].addr ) )
-				return rulbus_errno = RULBUS_ADD_CFL;
+				return RULBUS_ADD_CFL;
 		}
 
-	return rulbus_errno = RULBUS_OK;
+	return RULBUS_OK;
 }
 
 
@@ -388,35 +534,31 @@ static void rulbus_cleanup( void )
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for writing a number of bytes to a certain address at
+ * one of the racks.
+ *----------------------------------------------------------------*/
 
 static int rulbus_write_rack( unsigned char rack, unsigned char addr,
-							  unsigned char data )
+							  unsigned char *data, size_t len )
 {
-	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, data };
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, data, len };
 
-	if ( ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) < 0 )
-		return rulbus_errno = RULBUS_WRT_ERR;
-
-	return RULBUS_OK;
+	return ioctl( fd, RULBUS_EPP_IOC_WRITE, &args );
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for reading a number of bytes from a certain address at
+ * one of the racks.
+ *------------------------------------------------------------------*/
 
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
-							 unsigned char *data )
+							 unsigned char *data, size_t len )
 {
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, data, len };
 
-	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0 };
-
-	if ( ioctl( fd, RULBUS_EPP_IOC_WRITE, &args ) < 0 )
-		return rulbus_errno = RULBUS_RD_ERR;
-
-	*data = args.data;
-	return RULBUS_OK;
+	return ioctl( fd, RULBUS_EPP_IOC_WRITE, &args );
 }
 
 

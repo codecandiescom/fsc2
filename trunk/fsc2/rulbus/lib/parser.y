@@ -27,7 +27,7 @@
 
 %{
 
-#include "rulbus.h"
+#include "rulbus_lib.h"
 
 extern int yylex( void );
 

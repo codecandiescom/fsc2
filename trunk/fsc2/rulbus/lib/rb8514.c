@@ -25,7 +25,7 @@
 */
 
 
-#include "rulbus.h"
+#include "rulbus_lib.h"
 
 
 typedef struct RULBUS_DELAY_CARD RULBUS_DELAY_CARD;
@@ -144,7 +144,7 @@ void rulbus_delay_card_exit( int handle )
 	if ( ( card = rulbus_delay_card_find( handle ) ) == NULL )
 		return;
 
-	/* Copy the elements above the current one one down */
+	/* Remove the entry for the card */
 
 	if ( card != rulbus_delay_card + rulbus_num_delay_cards - 1 )
 		memcpy( card, card + 1, sizeof *card *
