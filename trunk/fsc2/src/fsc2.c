@@ -182,6 +182,7 @@ static bool xforms_init( int *argc, char *argv[] )
 						  "plausibility check" );
 	fl_set_object_helper( main_form->run, "Start loaded EDL program" );
 	fl_set_object_helper( main_form->quit, "Quit fsc2" );
+	fl_set_object_helper( main_form->help, "Show documentation" );
 	fl_set_object_helper( main_form->bug_report, "Mail a bug report" );
 
 #if ( SIZE == HI_RES )
