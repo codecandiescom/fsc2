@@ -70,6 +70,17 @@ int main( int argc, char *argv[ ] )
 	/* Initialize xforms stuff */
 
 	xforms_init( &argc, argv );
+
+	/* Check if there is already a lock file, otherwise create one and remove
+	   orphaned shared memory segments resulting from previous crashes */
+
+	if ( ! fsc2_locking( ) )
+	{
+		xforms_close( );
+		return( EXIT_SUCCESS );
+	}
+	delete_stale_shms( );
+
 	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
 
 	/* If there is a file as argument try to load it */
@@ -98,6 +109,10 @@ int main( int argc, char *argv[ ] )
 	xforms_close( );
 	if ( in_file != NULL )
 		T_free( in_file );
+
+	/* Delete the lock file */
+
+	unlink( LOCKFILE );
 
 	/* Make sure the TRY/CATCH stuff worked out right */
 

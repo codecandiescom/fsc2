@@ -242,6 +242,133 @@ void eprint( int severity, const char *fmt, ... )
 }
 
 
+/*-----------------------------------------------------*/
+/*-----------------------------------------------------*/
+
+
+bool fsc2_locking( void )
+{
+	int fd, flags;
+	struct flock lock;
+	char message[ 128 ] = "If not, delete the lockfile ";
+	char buf[ 10 ];
+
+
+	/* Open a lock file */
+
+	if ( ( fd = open( LOCKFILE, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR ) ) < 0 )
+	{
+		fl_show_alert( "Error", "Sorry, can't create a lockfile.",
+					   LOCKFILE, 1 );
+		return FAIL;
+	}
+
+	/* Set a write lock */
+
+	lock.l_type = F_WRLCK;
+	lock.l_start = 0;
+	lock.l_whence = SEEK_SET;
+	lock.l_len = 0;
+
+	if ( fcntl( fd, F_SETLK, &lock ) == -1 )
+	{
+		strcat( message, LOCKFILE );
+		strcat( message, " and restart." );
+		fl_show_alert( "Error",
+					   "Another instance of is fsc2 is already running.",
+					   message, 1 );
+		return FAIL;
+	}
+
+	/* Truncate to zero length */
+
+	if ( ftruncate( fd, 0 ) < 0 )
+	{
+		unlink( LOCKFILE );
+		fl_show_alert( "Error", "Sorry, can't write lock file:",
+					   LOCKFILE, 1 );
+		return FAIL;
+	}
+
+	/* Write process ID into the lock file */
+
+	sprintf( buf, "%d\n", getpid( ) );
+	if ( write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) )
+	{
+		unlink( LOCKFILE );
+		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+					   LOCKFILE, 1 );
+		return FAIL;
+	}
+
+	/* Set the close-on-exec flag */
+
+	if ( ( flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
+	{
+		unlink( LOCKFILE );
+		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+					   LOCKFILE, 1 );
+		return FAIL;
+	}
+
+	flags |= FD_CLOEXEC;
+
+	if ( fcntl( fd, F_GETFD, flags ) < 0 )
+	{
+		unlink( LOCKFILE );
+		fl_show_alert( "Error", "Sorry, can't write lockfile:",
+					   LOCKFILE, 1 );
+		return FAIL;
+	}
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+void delete_stale_shms( void )
+{
+	char cmd[ 128 ];
+	FILE *pp;
+	int shm_id;
+	void *buf;
+
+
+	/* Start the perl script 'shm_list' (must be located in `libdir') to get
+	   a list of all shared memory segments */
+
+	strcpy( cmd, libdir );
+	strcat( cmd, "/shm_list" );
+	if ( ( pp = popen( cmd, "r" ) ) == NULL )
+		return;
+	
+	/* Run through the list of memory segments */
+
+	while ( fscanf( pp, "%d", &shm_id ) != EOF )
+	{
+		/* Try to attach to the segment */
+
+		if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+			continue;
+
+		/* If the segments starts with the 'fsc2' delete it */
+
+		if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
+		{
+			shmdt( buf );
+			shmctl( shm_id, IPC_RMID, NULL );
+		}
+		else
+			shmdt( buf );
+	}
+
+	pclose( pp );
+	return;
+}
+
+
 /*------------------------------------------------------------------------*/
 /* Function converts intensities into rgb values (between 0 and 255). For */
 /* values below 0 a dark kind of violet is returned, for values above 1 a */
