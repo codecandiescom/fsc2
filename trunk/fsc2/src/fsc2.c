@@ -853,3 +853,45 @@ void win_slider_callback( FL_OBJECT *a, long b )
 							w2, H - ( new_h1 + h ) );
 	fl_unfreeze_form( main_form->fsc2 );
 }
+
+
+void run_help( FL_OBJECT *a, long b )
+{
+	int res;
+	char *cmd;
+
+
+	/* Keep the compiler happy... */
+
+	a = a;
+	b = b;
+
+	/* Fork and execute help browser in child process */
+
+	if ( ( res = fork( ) ) == 0 )
+	{
+		/* Assemble command string, first for the case that netscape is
+		   already running */
+
+		cmd = get_string( 100 + strlen( docdir ) );
+
+		strcpy( cmd, "netscape -remote 'openURL(file:" );
+		strcat( cmd, docdir );
+		strcat( cmd, "fsc2_frame.html,new-window)' 2>/dev/null" );
+
+		if ( system( cmd ) != 0 )
+		{
+			strcpy( cmd, "netscape file:" );
+			strcat( cmd, docdir );
+			strcat( cmd, "fsc2_frame.html 2>/dev/null" );
+			system( cmd );
+		}
+
+		T_free( cmd );
+		_exit( 0 );
+	}
+
+	if ( res == -1 )                                /* fork failed ? */
+		fl_show_alert( "Error", "Sorry, unable to start the help browser.",
+					   NULL, 1 );
+}

@@ -11,23 +11,31 @@ all:
 	$(MAKE) pdf
 
 
-info: $(docs)
+info: fsc2.info
+
+fsc2.info: $(docs)
 	makeinfo fsc2.texi
 
-html: $(docs)
+html: fsc2.html
+
+fsc2.html: $(docs)
 	./texi2html -frames -split chapter -menu -number -sec_nav -iso fsc2.texi
 	sed -e 's/fsc2_[0-9]\+/fsc2_1/' fsc2_frame.html > fsc2_frame.x
 	mv fsc2_frame.x fsc2_frame.html
 
-ps: $(docs)
+ps: fsc2.ps
+
+fsc2.ps: $(docs)
 	texi2dvi -c fsc2.texi
 	dvips fsc2.dvi
 
-pdf: $(docs)
+pdf: fsc2.pdf
+
+fsc2.pdf: $(docs)
 	texi2dvi --pdf -c fsc2.texi
 
 clean:
 	$(RM) $(RMFLAGS) fsc2.dvi *.log
 
 distclean:
-	$(RM) $(RMFLAGS) fsc2_*.html fsc2.ps fsc2.pdf *.info* *~
+	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html fsc2.ps fsc2.pdf *.info* *~
