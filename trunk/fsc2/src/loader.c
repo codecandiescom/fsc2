@@ -27,8 +27,8 @@ void load_all_drivers( void )
 	Device *cd;
 
 
-	/* Treat "User_Functions" also as a kind of device driver and append */
-	/* the device structure at the end of the list of devices*/
+	/* Treat "User_Functions" also as a kind of device driver and append
+	   the device structure at the end of the list of devices*/
 
 	device_append_to_list( "User_Functions" );
 
@@ -111,7 +111,7 @@ void load_functions( Device *dev )
 	strcat( lib_name, ".so" );
 
 	/* Try to open the library - if it can't be found in the usual place give
-       it another chance in the places defined by  LD_LIBRARAY_PATH */
+       it another chance in the places defined by  LD_LIBRARY_PATH */
 
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
 	if ( dev->driver.handle == NULL )
