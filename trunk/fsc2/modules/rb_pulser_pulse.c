@@ -50,17 +50,12 @@ bool rb_pulser_new_pulse( long pnum )
 
 	cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( rb_pulser.pulses == NULL )
-	{
+	if ( lp == NULL )
 		rb_pulser.pulses = cp;
-		cp->prev = NULL;
-	}
 	else
-	{
-		cp->prev = lp;
 		lp->next = cp;
-	}
 
+	cp->prev = lp;
 	cp->next = NULL;
 	cp->num = pnum;
 	cp->is_function = UNSET;
@@ -83,6 +78,8 @@ bool rb_pulser_set_pulse_function( long pnum, int function )
 {
 	Pulse_T *p = rb_pulser_get_pulse( pnum );
 
+
+	/* The pulser has only tree functions */
 
 	if ( function != PULSER_CHANNEL_MW &&
 		 function != PULSER_CHANNEL_RF &&
