@@ -35,10 +35,11 @@ infodir          := $(prefix)/info
 # Here the owner of the program of all files that will be installed as well
 # as the group the owner belongs to has to be set. It is highly recommended
 # to create a special account and group for the program, with 'fsc2' being
-# the natural choice. For a local install, i.e. if the program will be used
-# by one person only and everything is installed in his/her home directory
-# this persons account and group can be used. The owner and group ID will be
-# used when accessing lock and log files and shared memory segments. 
+# the natural choice (and which is also the default). For a local install,
+# i.e. if the program will be used by one person only and everything is
+# installed in his/her home directory this persons account and group can be
+# used. The owner and group ID will be used when accessing lock and log files
+# and shared memory segments. 
 
 OWNER            := fsc2
 GROUP            := fsc2
@@ -82,27 +83,27 @@ MAIL_ADDRESS     := Jens.Toerring@physik.fu-berlin.de
 # if you don't have a good reason...
 ##############################################################################
 
-SHELL          = /bin/sh
-CC             = gcc
-CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
-				 -Wmissing-declarations -W
-				 # -DMDEBUG # for malloc debugging
-				 # -DDEBUG
-				 # -DMAX_DEBUG # for debugging of digitizer
-LD             = ld
-LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
-				 # -lmcheck   # for malloc debugging
-				 # -lefence   # to run with efence
-BISON          = bison
-BISONFLAGS     = -d -v -t -p
-FLEX           = flex
-FLEXFLAGS      = -B -P
-RM             = rm
-RMFLAGS        = -f
-LN             = ln
-LNFLAGS        = -s
-INSTALL        = install
-EXEC_INSTALL   = install
+SHELL            := /bin/sh
+CC               := gcc
+CFLAGS           := -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
+					-Wmissing-declarations -W
+				    # -DMDEBUG # for malloc debugging
+				    # -DDEBUG
+				    # -DMAX_DEBUG # for debugging of digitizer
+LD				 := ld
+LIBS             := -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lm -ldl
+				    # -lmcheck   # for malloc debugging
+				    # -lefence   # to run with efence
+BISON            := bison
+BISONFLAGS       := -d -v -t -p
+FLEX             := flex
+FLEXFLAGS        := -B -P
+RM               := rm
+RMFLAGS          := -f
+LN               := ln
+LNFLAGS          := -s
+INSTALL          := install
+EXEC_INSTALL     := install
 
 
 ############################################################################
@@ -112,15 +113,15 @@ EXEC_INSTALL   = install
 
 # These variables are used internally in the make process
 
-mdir    := $(shell pwd)
-sdir    := $(mdir)/src
-adir    := $(mdir)/aux
-cdir    := $(mdir)/config
+mdir             := $(shell pwd)
+sdir             := $(mdir)/src
+adir             := $(mdir)/aux
+cdir             := $(mdir)/config
 
 
 # Set up a variable with the machines FQDN
 
-machine_name := $(shell hostname -f)
+machine_name     := $(shell hostname -f)
 
 
 # Check that the machine has a new libc, i.e. at least version 2, otherwise
