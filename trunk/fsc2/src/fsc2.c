@@ -461,7 +461,7 @@ static void test_machine_type( void )
 		 utsbuf.machine[ 0 ] == 'i' &&
 		 utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
 		 ! strncmp( utsbuf.machine + 2, "86", 2 ) &&
-		 ! strcasecmp( utsbuf.sysname, "linux" )
+		 ! strcasecmp( utsbuf.sysname, "linux" ) )
 		Internals.is_linux_i386 = SET;
 	else
 		Internals.is_linux_i386 = SET;
