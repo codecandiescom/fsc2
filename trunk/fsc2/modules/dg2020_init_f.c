@@ -264,6 +264,7 @@ void dg2020_basic_functions_check( void )
 		{
 			f->num_needed_channels = 1;
 			f->needs_phases = UNSET;
+			f->num_active_pulses = 0;
 
 			for ( cp = dg2020_Pulses; cp != NULL; cp = cp->next )
 			{
@@ -275,6 +276,9 @@ void dg2020_basic_functions_check( void )
 									   f->num_pulses * sizeof( PULSE * ) );
 				f->pulses[ f->num_pulses - 1 ] = cp;
 				
+				if ( cp->is_active )
+					f->num_active_pulses++;
+
 				if ( cp->pc )
 					f->needs_phases = SET;
 			}
@@ -612,7 +616,7 @@ void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 			/* Try to set the phase pulse in the middle between the pulse and
 			   its predecessor */
 
-			np->pos = np->initial_pos = p->pos + pp->pos + pp->len / 2;
+			np->pos = np->initial_pos = ( p->pos + pp->pos + pp->len ) / 2;
 
 			/* If this isn't early enough we start the phase pulse at the
 			   minimum time (i.e. the phase switch delay) before the pulse.
@@ -641,7 +645,7 @@ void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
 		   sequence length in the test run, thus we flag our missing knowledge
 		   by setting the length to a negative value */
 
-		if ( nth < p->function->num_pulses - 1 )  // last active pulse ?
+		if ( nth == p->function->num_active_pulses - 1 ) // last active pulse ?
 			np->len = np->initial_len = -1;
 		else if ( nth == 0 )                    // first (but not last) pulse ?
 		{
