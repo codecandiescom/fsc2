@@ -100,6 +100,18 @@ void start_graphics( void )
 		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
 		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
 		GI_sizes.DEFAULT_AXISFONT_3 = "9x10";
+
+		G.scale_tick_dist   =  4;
+		G.short_tick_len    =  3;
+		G.medium_tick_len   =  6;
+		G.long_tick_len     =  8;
+		G.label_dist        =  5;
+		G.x_scale_offset    = 12;
+		G.y_scale_offset    = 12;
+		G.z_scale_offset    = 25;
+		G.z_line_offset     =  5;
+		G.z_line_width      =  8;
+		G.enlarge_box_width =  3;
 	}
 	else
 	{
@@ -110,6 +122,18 @@ void start_graphics( void )
 		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
 		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
 		GI_sizes.DEFAULT_AXISFONT_3 = "9x15";
+
+		G.scale_tick_dist   =  6;
+		G.short_tick_len    =  5;
+		G.medium_tick_len   = 10;
+		G.long_tick_len     = 14;
+		G.label_dist        =  7;
+		G.x_scale_offset    = 20;
+		G.y_scale_offset    = 21;
+		G.z_scale_offset    = 46;
+		G.z_line_offset     = 10;
+		G.z_line_width      = 14;
+		G.enlarge_box_width =  5;
 	}
 
 	if ( G.dim == 1 )

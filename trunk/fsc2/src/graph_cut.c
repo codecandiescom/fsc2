@@ -1338,8 +1338,8 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 
 					c->box_x = c->ppos[ X ];
 					c->box_w = 0;
-					c->box_y = X_SCALE_OFFSET + 1;
-					c->box_h = ENLARGE_BOX_WIDTH;
+					c->box_y = G.x_scale_offset + 1;
+					c->box_h = G.enlarge_box_width;
 					c->is_box = SET;
 					break;
 
@@ -1347,9 +1347,9 @@ static void cut_press_handler( FL_OBJECT *obj, Window window,
 					fl_set_cursor( window, CG.cur_1 );
 
 					c->box_x = c->w
-						       - ( Y_SCALE_OFFSET + ENLARGE_BOX_WIDTH + 1 );
+						      - ( G.y_scale_offset + G.enlarge_box_width + 1 );
 					c->box_y = c->ppos[ Y ];
-					c->box_w = ENLARGE_BOX_WIDTH;
+					c->box_w = G.enlarge_box_width;
 					c->box_h = 0;
 					c->is_box = SET;
 					break;
@@ -1886,7 +1886,7 @@ static void repaint_cut_canvas( Canvas *c )
 		else
 		{
 			x = 0;
-			x2 = Z_SCALE_OFFSET + ENLARGE_BOX_WIDTH + 1;
+			x2 = G.z_scale_offset + G.enlarge_box_width + 1;
 			y = y2 = c->box_y + c->box_h;
 			XDrawLine( G.d, pm, c->box_gc, x, y, x2, y2 );
 		}
@@ -2078,10 +2078,10 @@ static void cut_make_scale( Canvas *c, int coord )
 		}
 	}
 
-	/* The distance between the smallest ticks should be ca. `SCALE_TICK_DIST'
+	/* The distance between the smallest ticks should be `G.scale_tick_dist'
 	   points - calculate the corresponding delta in real word units */
 
-	rwc_delta = ( double ) SCALE_TICK_DIST
+	rwc_delta = ( double ) G.scale_tick_dist
 		        * fabs( cv2->rwc_delta[ r_coord ] ) / r_scale;
 
 	/* Now scale this distance to the interval [ 1, 10 [ */
@@ -2179,7 +2179,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		y = X_SCALE_OFFSET;
+		y = G.x_scale_offset;
 		XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
 		/* Draw all the ticks and numbers */
@@ -2192,7 +2192,7 @@ static void cut_make_scale( Canvas *c, int coord )
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
 				XDrawLine( G.d, c->pm, c->font_gc, x, y + 3,
-						   x, y - LONG_TICK_LEN );
+						   x, y - G.long_tick_len );
 				rwc_coarse += coarse_factor * rwc_delta;
 				if ( G.font == NULL )
 					continue;
@@ -2202,24 +2202,24 @@ static void cut_make_scale( Canvas *c, int coord )
 				if ( x - width / 2 - 10 > last )
 				{
 					XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
-								 y + LABEL_DIST + G.font_asc, lstr,
+								 y + G.label_dist + G.font_asc, lstr,
 								 strlen( lstr ) );
 					last = x + width / 2;
 				}
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x, y - MEDIUM_TICK_LEN );
+						   x, y - G.medium_tick_len );
 			else                                       /* short line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x, y - SHORT_TICK_LEN );
+						   x, y - G.short_tick_len );
 		}
 	}
 	else if ( coord == Y )
 	{
 		/* Draw coloured line of scale */
 
-		x = c->w - Y_SCALE_OFFSET;
+		x = c->w - G.y_scale_offset;
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
@@ -2232,7 +2232,7 @@ static void cut_make_scale( Canvas *c, int coord )
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
 				XDrawLine( G.d, c->pm, c->font_gc, x - 3, y,
-						   x + LONG_TICK_LEN, y );
+						   x + G.long_tick_len, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				if ( G.font == NULL )
@@ -2240,22 +2240,22 @@ static void cut_make_scale( Canvas *c, int coord )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				XDrawString( G.d, c->pm, c->font_gc, x - LABEL_DIST - width,
+				XDrawString( G.d, c->pm, c->font_gc, x - G.label_dist - width,
 							 y + G.font_asc / 2, lstr, strlen( lstr ) );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x + MEDIUM_TICK_LEN, y );
+						   x + G.medium_tick_len, y );
 			else                                      /* short line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x + SHORT_TICK_LEN, y );
+						   x + G.short_tick_len, y );
 		}
 	}
 	else
 	{
 		/* Draw coloured line of scale */
 
-		x = Z_SCALE_OFFSET;
+		x = G.z_scale_offset;
 		XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
@@ -2268,7 +2268,7 @@ static void cut_make_scale( Canvas *c, int coord )
 			if ( coarse % coarse_factor == 0 )         /* long line */
 			{
 				XDrawLine( G.d, c->pm, c->font_gc, x + 3, y,
-						   x - LONG_TICK_LEN, y );
+						   x - G.long_tick_len, y );
 				rwc_coarse += coarse_factor * rwc_delta;
 
 				if ( G.font == NULL )
@@ -2276,30 +2276,30 @@ static void cut_make_scale( Canvas *c, int coord )
 
 				make_label_string( lstr, rwc_coarse, ( int ) mag );
 				width = XTextWidth( G.font, lstr, strlen( lstr ) );
-				XDrawString( G.d, c->pm, c->font_gc, x + LABEL_DIST,
+				XDrawString( G.d, c->pm, c->font_gc, x + G.label_dist,
 							 y + G.font_asc / 2, lstr, strlen( lstr ) );
 			}
 			else if ( medium % medium_factor == 0 )    /* medium line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x - MEDIUM_TICK_LEN, y );
+						   x - G.medium_tick_len, y );
 			else                                      /* short line */
 				XDrawLine( G.d, c->pm, c->font_gc, x, y,
-						   x - SHORT_TICK_LEN, y );
+						   x - G.short_tick_len, y );
 		}
 
 		/* Finally draw the triangle indicating the position of the cut */
 
-		triangle[ 0 ].x = x - LONG_TICK_LEN - 3;
+		triangle[ 0 ].x = x - G.long_tick_len - 3;
 		if ( CG.cut_dir == X )
 			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
 					 ( 1.0 - ( double ) CG.index / ( double ) ( G.nx - 1 ) ) );
 		else
 			triangle[ 0 ].y = d2shrt( ( G.cut_z_axis.h - 1 ) *
 					 ( 1.0 - ( double ) CG.index / ( double ) ( G.ny - 1 ) ) );
-		triangle[ 1 ].x = - ( Z_SCALE_OFFSET - LONG_TICK_LEN - 10 );
-		triangle[ 1 ].y = - LONG_TICK_LEN / 3;
+		triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 10 );
+		triangle[ 1 ].y = - G.long_tick_len / 3;
 		triangle[ 2 ].x = 0;
-		triangle[ 2 ].y = 2 * ( LONG_TICK_LEN / 3 );
+		triangle[ 2 ].y = 2 * ( G.long_tick_len / 3 );
 		XFillPolygon( G.d, c->pm, G.curve_2d[ 0 ]->gc, triangle, 3,
 					  Convex, CoordModePrevious );
 	}
