@@ -10,9 +10,11 @@ sf = 8 MHz;
 ef = 22 MHz;
 fs = 24.9999 kHz;
 
+k = 3 cm^-1;
 
 PREPARATIONS:
 
+print( "#\n", k );
 print( "#, #, #\n", ( ef - sf ) / fs, int( ( ef - sf ) / fs ),
 		ceil( ( ef - sf ) / fs ) );
 
