@@ -294,6 +294,12 @@ Var *vars_add( Var *v1, Var *v2 )
 			break;
 			
 		case INT_ARR : case INT_TRANS_ARR :
+			if ( v1->flags && NEED_ALLOC )
+			{
+				v1->sizes[ 0 ] = v2->len;
+				v1->len = v2->len;
+				v1->val.lpnt = T_malloc( v1->len * sizeof( long ) );
+			}
 			new_var = vars_add_to_int_arr( v1, v2 );
 			break;
 
@@ -308,6 +314,13 @@ Var *vars_add( Var *v1, Var *v2 )
 						"on array slices.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
+			if ( v1->flags && NEED_ALLOC )
+			{
+				v1->sizes[ 0 ] = v2->from->len;
+				v1->len = v2->from->len;
+				v1->val.lpnt = T_malloc( v1->len * sizeof( long ) );
+			}
+
 			if ( v1->from->type == INT_ARR )
 				new_var = vars_add_to_int_arr( v1->from, v2 );
 			else
