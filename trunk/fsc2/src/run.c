@@ -69,7 +69,7 @@ static bool graphics_have_been_started = UNSET;
 
 
 /*------------------------------------------------------------------*/
-/* run() starts an experiment. To do so it initialises all needed   */
+/* run() starts an experiment. To do so it initializes all needed   */
 /* devices and opens a new window for displaying the measured data. */
 /* Then everything needed for the communication between parent and  */
 /* the child to be created is set up, i.e. pipes, a semaphore and a */
@@ -132,7 +132,7 @@ bool run( void )
 	   parent. In this case the signal handlers of the parent don't know the
 	   PID of the child process and thus won't work correctly. Therefore all
 	   the signals the child may send are blocked until we can be sure the
-	   parent has got the childs PID. */
+	   parent has got the child's PID. */
 
 	sigemptyset( &new_mask );
 	sigaddset( &new_mask, SIGCHLD );
@@ -182,7 +182,7 @@ static bool start_gpib_and_rulbus( void )
 	int retval;
 #endif
 
-	/* Disable some buttons and show a watch cusor */
+	/* Disable some buttons and show a watch cursor */
 
 	fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 	set_buttons_for_run( 1 );
@@ -886,10 +886,10 @@ static void set_buttons_for_run( int run_state )
 
 /*-------------------------------------------------------------------*/
 /* run_child() is the child process' code for doing the measurement. */
-/* It does some initialisation (e.g. setting up signal handlers) and */
+/* It does some initialization (e.g. setting up signal handlers) and */
 /* then runs the experiment by calling do_measurement(). The         */
 /* experiment stops either when all lines of the program have been   */
-/* dealt with, an unrecoverable error happend or the user told it    */
+/* dealt with, an unrecoverable error happened or the user told it   */
 /* to stop (by pressing the "Stop" button). When returning from the  */
 /* do_measurement() routine it signals the parent process that it's  */
 /* going to die and waits for the arrival of an acknowledging        */
@@ -1128,7 +1128,7 @@ static void wait_for_confirmation( void )
 
 
 /*-----------------------------------------------------------------*/
-/* Childs handler for the DO_QUIT signal while its waiting to die. */
+/* Child's handler for the DO_QUIT signal while its waiting to die */
 /*-----------------------------------------------------------------*/
 
 static void child_confirmation_handler( int signo )
