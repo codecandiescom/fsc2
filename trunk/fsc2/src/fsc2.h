@@ -48,9 +48,9 @@
 #include "T.h"
 #include "util.h"
 #include "variables.h"
-#include "func.h"                 /* load before "devices.h" ! */
-#include "loader.h"               /* load before "devices.h" ! */
-#include "devices.h"
+#include "func.h"                 /* load before "devices.h" */
+#include "devices.h"              /* load before "loader.h"  */
+#include "loader.h"
 #include "assign.h"
 #include "phases.h"
 #include "pulse.h"

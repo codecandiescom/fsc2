@@ -3,7 +3,6 @@
 */
 
 
-#include <dlfcn.h>
 #include "fsc2.h"
 
 
@@ -92,26 +91,11 @@ void delete_devices( void )
 
 	for ( ; cd != NULL; cd = cdp )
 	{
-		/* If there is a driver run the exit hooks and unload it */
-
-		cdp = cd->prev;
-		if ( cd->is_loaded )
-		{
-			if ( ! exit_hooks_are_run && cd->driver.is_exit_hook )
-			{
-				TRY                      /* catch exceptions from the exit   */
-				{                        /* hooks, we've got to run them all */
-					cd->driver.exit_hook( );
-					TRY_SUCCESS;
-				}
-			}
-
-			dlclose( cd->driver.handle );
-		}
-
+		
+		unload_device( cd );     /* run the exit hooks and unload the module */
 		if ( cd->name != NULL )
 			T_free( cd->name );
-
+		cdp = cd->prev;
 		T_free( cd );
 	}
 

@@ -10,10 +10,6 @@
 
 static void f_wait_alarm_handler( int sig_type );
 
-int num_def_func;    /* number of built-in functions */
-int num_func;        /* number of built-in  and listed functions */
-Func *fncts;         /* structure for list of functions */
-
 
 
 /* When in the input an identifier is found it is always tried first if the
@@ -73,7 +69,17 @@ Var *f_wait( Var *v  );
 Var *f_init_display( Var *v );
 
 
-static Func def_fncts[ ] =              /* List of built-in functions */
+
+/* The following variables are shared with loader.c which adds further 
+   functions from the loaded modules */
+
+
+int num_def_func;    /* number of built-in functions */
+int num_func;        /* number of built-in and listed functions */
+Func *fncts;         /* structure for list of functions */
+
+
+Func def_fncts[ ] =              /* List of built-in functions */
 {
 	{ "int",          f_int,           1, ACCESS_ALL_SECTIONS, 0 },
 	{ "float",        f_float,         1, ACCESS_ALL_SECTIONS, 0 },

@@ -327,3 +327,22 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
 
 	return LIB_OK;
 }
+
+
+void unload_device( Device *dev )
+{
+
+	if ( ! dev->is_loaded )
+		return;
+
+	if ( ! exit_hooks_are_run && dev->driver.is_exit_hook )
+	{
+		TRY                             /* catch exceptions from the exit   */
+		{                               /* hooks, we've got to run them all */
+			dev->driver.exit_hook( );
+			TRY_SUCCESS;
+		}
+	}
+	
+	dlclose( dev->driver.handle );
+}
