@@ -42,7 +42,8 @@ Var *vars_add( Var *v1, Var *v2 )
 	Var *new_var = NULL;
 
 
-	vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR );
+	vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR |
+				    INT_PTR | FLOAT_PTR | SUB_REF_PTR );
 	vars_check( v2, STR_VAR | RHS_TYPES );
 
 	if ( ( v1->type == STR_VAR && v2->type != STR_VAR ) ||
@@ -66,6 +67,9 @@ Var *vars_add( Var *v1, Var *v2 )
 		case FLOAT_PTR :
 			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
 			break;
+
+		case SUB_REF_PTR :
+			v1 = vars_subref_to_rhs_conv( v1 );
 	}
 
 	switch ( v1->type )

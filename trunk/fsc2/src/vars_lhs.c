@@ -857,6 +857,7 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 
 
 	ind = v->val.lval;
+	v = v->next;
 
 	/* If the index is larger than the length of the array this is a
 	   fatal error for a fixed length array, but for a dynamically
@@ -897,8 +898,8 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 				case INT_ARR :
 					cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
 										  ( ind + 1 ) * sizeof *cv->val.lpnt );
-					for ( i = cv->len; i <= ind; i++ )
-						cv->val.lpnt[ i ] = 0;
+					memset( cv->val.lpnt + cv->len, 0,
+							( ind - cv->len + 1 ) * sizeof *cv->val.lpnt );
 					break;
 
 				case FLOAT_ARR :
@@ -916,7 +917,7 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 		cv->len = ind + 1;
 	}
 
-	if ( v->next == NULL || v->next->type != INT_VAR )
+	if ( v == NULL || v->type != INT_VAR )
 		switch ( cv->type )
 		{
 			case INT_ARR :
@@ -932,12 +933,9 @@ static Var *vars_lhs_simple_pointer( Var *a, Var *cv, Var *v, int dim )
 				fsc2_assert( 1 == 0 );
 		}
 
-	v = v->next;
-
-	if ( v->val.lval >= 0 )
-		return vars_lhs_simple_pointer( a, cv->val.vptr[ ind ], v, --dim );
-
-	return vars_lhs_range_pointer( a, cv->val.vptr[ ind ], v, --dim );
+	return v->val.lval >= 0 ?
+				vars_lhs_simple_pointer( a, cv->val.vptr[ ind ], v, --dim ) :
+				vars_lhs_range_pointer( a, cv->val.vptr[ ind ], v, --dim );
 }
 
 
@@ -988,8 +986,9 @@ static Var *vars_lhs_range_pointer( Var *a, Var *cv, Var *v, int dim )
 				case INT_ARR :
 					cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
 									( range_end + 1 ) * sizeof *cv->val.lpnt );
-					for ( i = cv->len; i <= range_end; i++ )
-						cv->val.lpnt[ i ] = 0;
+					memset( cv->val.lpnt + cv->len, 0,
+							( range_end - cv->len + 1 )
+							* sizeof *cv->val.lpnt );
 					break;
 
 				case FLOAT_ARR :
@@ -1317,7 +1316,9 @@ static void vars_assign_to_snd_from_1d( Var *src, Var *dest, Var *sub )
 			dval = src->val.dval;
 	}
 
-	vars_assign_to_snd_range_from_1d( dest, sub, 0, lval, dval );	
+	if ( vars_assign_to_snd_range_from_1d( dest, sub, 0, lval, dval ) == 0 )
+		print( WARN, "No elements were set in assignment because size of "
+			   "destination isn't known yet.\n" );
 }
 
 
@@ -1435,147 +1436,9 @@ static void vars_size_check( Var *src, Var *dest )
 }
 
 
-/*------------------------------------------------------*/
-/* Assign of an array to an array specified with ranges */
-/*------------------------------------------------------*/
-
-static void vars_assign_to_snd_from_nd( Var *src, Var *dest, Var *sub )
-{
-	ssize_t cur = 0;
-	ssize_t single_indices = 0;
-	ssize_t i;
-
-
-	while ( sub->val.index[ cur ] >= 0 )
-		dest = dest->val.vptr[ sub->val.index[ cur++ ] ];
-
-	i = cur + 2;
-
-	while ( i < sub->len )
-		if ( sub->val.index[ i++ ] >= 0 )
-			single_indices++;
-
-	/* The dimension of the destination array must be at least as large as
-	   the one of the source array */
-
-	if ( dest->dim - single_indices < src->dim )
-	{
-		print( FATAL, "Left hand side of assignment has lower dimension than "
-			   "right hand side.\n" );
-		THROW ( EXCEPTION );
-	}
-
-	vars_assign_snd_range_from_nd( dest, sub, cur, src );
-}
-
-
-/*--------------------------------------------*/
-/*--------------------------------------------*/
-
-static void vars_assign_snd_range_from_nd( Var *dest, Var *sub, ssize_t cur,
-										   Var *src )
-{
-	ssize_t range_start, range_end, range, i;
-	Var *cv;
-
-
-	if ( sub->val.index[ cur ] < 0 )
-	{
-		range_start = - sub->val.index[ cur++ ] - 1;
-		range_end = sub->val.index[ cur++ ];
-		range = range_end - range_start + 1;
-
-		if ( range != src->len )
-		{
-			print( FATAL, "Sizes of array slices don't fit in "
-				   "assignment.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
-		{
-			/* Now copy all elements, taking care of possibly different types
-			   of the arrays. */
-
-			if ( INT_TYPE( dest ) )
-			{
-				if ( INT_TYPE( src ) )
-					memcpy( dest->val.lpnt + range_start, src->val.lpnt,
-							range * sizeof *dest->val.lpnt );
-				else
-					for ( i = 0; i < range; i++ )
-						dest->val.lpnt[ i + range_start ] =
-												    lrnd( src->val.dpnt[ i ] );
-			}
-			else
-			{
-				if ( INT_TYPE( src ) )
-					for ( i = 0; i < range_end; i++ )
-						dest->val.dpnt[ i + range_start ] =
-												 ( double ) src->val.lpnt[ i ];
-				else
-					memcpy( dest->val.dpnt + range_start, src->val.dpnt,
-							range * sizeof *dest->val.dpnt );
-			}
-		}
-		else
-			for ( i = 0; i < range; i++ )
-				if ( src->dim == dest->dim )
-					vars_assign_snd_range_from_nd(
-											 dest->val.vptr[ i + range_start ],
-											 sub, cur, src->val.vptr[ i ] );
-				else
-					vars_assign_snd_range_from_nd(
-											 dest->val.vptr[ i + range_start ],
-											 sub, cur, src );
-		return;
-	}
-
-	for ( i = cur + 1; i < sub->len; i++ )
-		if ( sub->val.index[ i ] < 0 )
-			break;
-
-	if ( i < sub->len )
-	{
-		while ( sub->val.index[ cur ] >= 0 )
-			dest = dest->val.vptr[ sub->val.index[ cur++ ] ];
-
-		vars_assign_snd_range_from_nd( dest, sub, cur, src );
-		return;
-	}
-	else
-	{
-		i = sub->val.index[ cur ];
-
-		if ( dest->type & ( INT_REF | FLOAT_REF ) &&
-			 dest->val.vptr[ i ] == NULL )
-		{
-
-			dest->val.vptr[ i ]           = vars_new( NULL );
-			dest->val.vptr[ i ]->from     = cv;
-			if ( dest->dim > 2 )
-				dest->val.vptr[ i ]->type = cv->type;
-			else
-				dest->val.vptr[ i ]->type = 
-									 cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
-			dest->val.vptr[ i ]->dim      = dest->dim - 1;
-			dest->val.vptr[ i ]->len      = 0;
-			dest->val.vptr[ i ]->flags   |= IS_DYNAMIC;
-			dest->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
-		}
-
-		if ( ++cur == sub->len )
-			vars_arr_assign( src, dest );
-		else
-			vars_assign_snd_range_from_nd( dest->val.vptr[ i ], sub,
-										   cur, src );
-	}
-}
-
-
-/*--------------------------------------------------------------------------*/
-/* Finally really assign one array to another by looping over all elements. */
-/*--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Really assign one array to another by looping over all elements. */
+/*------------------------------------------------------------------*/
 
 static void vars_arr_assign( Var *src, Var *dest )
 {
@@ -1693,6 +1556,134 @@ static void vars_arr_assign( Var *src, Var *dest )
 
 		for ( i = 0; i < dest->len; i++ )
 			vars_arr_assign( src->val.vptr[ i ], dest->val.vptr[ i ] );
+	}
+}
+
+
+/*------------------------------------------------------*/
+/* Assign of an array to an array specified with ranges */
+/*------------------------------------------------------*/
+
+static void vars_assign_to_snd_from_nd( Var *src, Var *dest, Var *sub )
+{
+	ssize_t cur = 0;
+	ssize_t single_indices = 0;
+	ssize_t i;
+
+
+	while ( sub->val.index[ cur ] >= 0 )
+		dest = dest->val.vptr[ sub->val.index[ cur++ ] ];
+
+	i = cur + 2;
+
+	while ( i < sub->len )
+		if ( sub->val.index[ i++ ] < 0 )
+			i++;
+		else
+			single_indices++;
+
+	/* The dimension of the destination array must be at least as large as
+	   the one of the source array */
+
+	if ( dest->dim - single_indices < src->dim )
+	{
+		print( FATAL, "Left hand side of assignment has lower dimension than "
+			   "right hand side.\n" );
+		THROW ( EXCEPTION );
+	}
+
+	vars_assign_snd_range_from_nd( dest, sub, cur, src );
+}
+
+
+/*--------------------------------------------*/
+/*--------------------------------------------*/
+
+static void vars_assign_snd_range_from_nd( Var *dest, Var *sub, ssize_t cur,
+										   Var *src )
+{
+	ssize_t range_start, range_end, range, i;
+	Var *cv;
+
+
+	if ( sub->val.index[ cur ] < 0 )
+	{
+		range_start = - sub->val.index[ cur++ ] - 1;
+		range_end = sub->val.index[ cur++ ];
+
+		range = range_end - range_start + 1;
+
+		if ( range != src->len )
+		{
+			print( FATAL, "Sizes of array slices don't fit in "
+				   "assignment.\n" );
+			THROW( EXCEPTION );
+		}
+
+		if ( dest->type & ( INT_ARR | FLOAT_ARR ) )
+		{
+			/* Now copy all elements, taking care of possibly different types
+			   of the arrays. */
+
+			if ( INT_TYPE( dest ) )
+			{
+				if ( INT_TYPE( src ) )
+					memcpy( dest->val.lpnt + range_start, src->val.lpnt,
+							range * sizeof *dest->val.lpnt );
+				else
+					for ( i = 0; i < range; i++ )
+						dest->val.lpnt[ i + range_start ] =
+												    lrnd( src->val.dpnt[ i ] );
+			}
+			else
+			{
+				if ( INT_TYPE( src ) )
+					for ( i = 0; i < range_end; i++ )
+						dest->val.dpnt[ i + range_start ] =
+												 ( double ) src->val.lpnt[ i ];
+				else
+					memcpy( dest->val.dpnt + range_start, src->val.dpnt,
+							range * sizeof *dest->val.dpnt );
+			}
+		}
+		else
+			for ( i = 0; i < range; i++ )
+				vars_assign_snd_range_from_nd(
+											 dest->val.vptr[ i + range_start ],
+											 sub, cur, src->val.vptr[ i ] );
+
+		return;
+	}
+
+	while ( cur < sub->len && sub->val.index[ cur ] >= 0 )
+		dest = dest->val.vptr[ sub->val.index[ cur++ ] ];
+
+	if ( cur < sub->len )
+		vars_assign_snd_range_from_nd( dest, sub, cur, src );
+	else
+	{
+		if ( src->dim < dest->dim && dest->len == 0 )
+		{
+			print( WARN, "No elements were set in assignment because size of "
+				   "destination isn't known yet.\n" );
+			return;
+		}
+
+		if ( src->type == INT_ARR )
+			src = vars_push( src->type, src->val.lpnt, src->len );
+		else if ( src->type == FLOAT_ARR )
+			src = vars_push( src->type, src->val.dpnt, src->len );
+		else
+			src = vars_push_copy( src );
+
+		if ( dest->type == INT_ARR )
+			dest = vars_push( dest->type, dest->val.lpnt, dest->len );
+		else if ( dest->type == FLOAT_ARR )
+			dest = vars_push( dest->type, dest->val.dpnt, dest->len );
+		else
+			dest = vars_push_copy( dest );
+
+		vars_assign( src, dest );
 	}
 }
 

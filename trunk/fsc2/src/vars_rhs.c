@@ -262,7 +262,7 @@ static Var *vars_arr_rhs_slice( Var *a, Var *v, int index_count,
 	else if ( cv->type == FLOAT_ARR )
 		cv = vars_push( cv->type, cv->val.dpnt, cv->len );
 	else
-		cv = vars_push( cv->type, cv );
+		cv = vars_push_copy( cv );
 
 	/* Remove everything from the copy not covered by ranges */
 
@@ -327,15 +327,17 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 
 		if ( nv->type == INT_ARR )
 		{
-			memmove( nv->val.lpnt, nv->val.lpnt + range_start,
-					 nv->len * sizeof *nv->val.lpnt );
+			if ( range_start > 0 )
+				memmove( nv->val.lpnt, nv->val.lpnt + range_start,
+						 nv->len * sizeof *nv->val.lpnt );
 			nv->val.lpnt = T_realloc( nv->val.lpnt,
 									  nv->len * sizeof *nv->val.lpnt );
 		}
 		else
 		{
-			memmove( nv->val.dpnt, nv->val.dpnt + range_start,
-					 nv->len * sizeof *nv->val.dpnt );
+			if ( range_start > 0 )
+				memmove( nv->val.dpnt, nv->val.dpnt + range_start,
+						 nv->len * sizeof *nv->val.dpnt );
 			nv->val.dpnt = T_realloc( nv->val.dpnt,
 									  nv->len * sizeof *nv->val.dpnt );
 		}
@@ -349,14 +351,15 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 			vars_free( nv->val.vptr[ i ], SET );
 
 		nv->len = range_end - range_start + 1;
-		memmove( nv->val.vptr, nv->val.vptr + range_start,
-				 nv->len * sizeof *nv->val.vptr );
+		if ( range_start > 0 )
+			memmove( nv->val.vptr, nv->val.vptr + range_start,
+					 nv->len * sizeof *nv->val.vptr );
 		nv->val.vptr = T_realloc( nv->val.vptr,
 								  nv->len * sizeof *nv->val.vptr );
 
 		/* If we're not already at the end of the list of indices and the
-		   next indices make up a range we've got to prune all the submatrices
-		   of the current submatrix recursively */
+		   next indices make up a range again we've got to prune all the
+		   submatrices of the current submatrix recursively */
 
 		if ( v != end && v->val.lval < 0 )
 		{
@@ -367,7 +370,7 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 	}
 
 	/* If we get here we have an index and not a range and the submatrix we're
-	   operation on has at least two dimensions. */
+	   operating on has at least two dimensions. */
 
 	while ( v != end && v->val.lval >= 0 )
 	{
@@ -375,23 +378,39 @@ static void vars_arr_rhs_slice_prune( Var *nv, Var *v, Var *a, Var *end )
 
 		if ( ! ( nv->val.vptr[ 0 ]->type & ( INT_ARR | FLOAT_ARR ) ) )
 		{
+			/* Throw away all subarrays that aren't indexed */
+
 			for ( i = 0; i < nv->len; i++ )
-			{
-				cv = nv->val.vptr[ i ];
+				if ( i != v->val.lval )
+					vars_free( nv->val.vptr[ i ], SET );
 
-				if ( v->val.lval >= cv->len )
-				{
-					print( FATAL, "Invalid index for array '%s'.\n", a->name );
-					THROW( EXCEPTION );
-				}
+			/* Delete the old 'vptr' array and replace it by the one of the
+			   indexed element one level down */
 
-				nv->val.vptr[ i ] = cv->val.vptr[ v->val.lval ];
-				T_free( cv->val.vptr );
-				T_free( cv );
-			}
+			cv = nv->val.vptr[ v->val.lval ];
+
+			T_free( nv->val.vptr );
+			nv->val.vptr = cv->val.vptr;
+
+			/* Adjust the length of the current level and make all subarrays
+			   'from' fields to it */
+
+			nv->len = cv->len;
+			for ( i = 0; i < nv->len; i++ )
+				nv->val.vptr[ i ]->from = nv;
+
+			/* Finally throw away the variable representing the former
+			   intermediate level (but not its still linked subarrays, they
+			   now belong to the current level!) */
+
+			cv->flags |= DONT_RECURSE;
+			vars_pop( cv );
 		}
 		else
 		{
+			/* If we're on the lowest level pick the indexed elements of all
+			   the subarrays */
+
 			for ( i = 0; i < nv->len; i++ )
 				if ( v->val.lval >= nv->val.vptr[ i ]->len )
 				{
@@ -486,7 +505,7 @@ static void vars_fix_dims( Var *v, int max_dim )
 
 Var *vars_subref_to_rhs_conv( Var *v )
 {
-	Var *sv;
+	Var *sv, *nv;
 	ssize_t i;
 	int range_count = 0;
 
@@ -503,8 +522,10 @@ Var *vars_subref_to_rhs_conv( Var *v )
 			range_count++;
 	}
 
-	return vars_arr_rhs_slice( v->from, sv, v->len - range_count,
-							   range_count );
+	nv = vars_arr_rhs_slice( v->from, sv, v->len - range_count,
+							 range_count );
+
+	return nv;
 }
 
 
