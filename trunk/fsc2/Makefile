@@ -124,7 +124,7 @@ install:
 	install -m 644 -o fsc2 -g fsc2 Functions $(libdir)
 	install -m 644 -o fsc2 -g fsc2 Devices $(libdir)
 	install -m 644 -o fsc2 -g fsc2 -s *.so $(libdir)
-	install -m 644 -o fsc2 -g fsc2 -s hp8647a.table $(libdir)
+	install -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
 	install -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
