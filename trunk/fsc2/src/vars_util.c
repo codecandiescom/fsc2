@@ -1281,8 +1281,7 @@ Var *vars_pow_of_int_var( Var *v1, Var *v2 )
 					for ( j = 0; j < i; j++ )
 						dp[ j ] = lp[ j ];
 					dp[ i ] = new_var->val.dval;
-					T_free( lp );
-					lp = NULL;
+					lp = T_free( lp );
 				}
 
 				vars_pop( new_var );
@@ -1402,8 +1401,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 						for ( j = 0; j < i; j++ )
 							dp[ j ] = lp[ j ];
 						dp[ i ] = new_var->val.dval;
-						T_free( lp );
-						lp = NULL;
+						lp = T_free( lp );
 					}
 
 					vars_pop( new_var );
@@ -1465,8 +1463,7 @@ Var *vars_pow_of_int_arr( Var *v1, Var *v2 )
 					for ( j = 0; j < i; j++ )
 						dp[ j ] = lp[ j ];
 					dp[ i ] = new_var->val.dval;
-					T_free( lp );
-					lp = NULL;
+					lp = T_free( lp );
 				}
 
 				vars_pop( new_var );

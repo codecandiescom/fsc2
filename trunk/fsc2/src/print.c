@@ -107,12 +107,7 @@ void print_1d( FL_OBJECT *obj, long data )
 	if ( print_type == S2P )
 		do_print( name, cmd );
 
-	if ( name != NULL )
-	{
-		T_free( name );
-		name = NULL;
-	}
-
+	name = T_free( name );
 	fl_activate_object( obj );
 }
 
@@ -178,12 +173,7 @@ void print_2d( FL_OBJECT *obj, long data )
 	if ( print_type == S2P )
 		do_print( name, cmd );
 
-	if ( name != NULL )
-	{
-		T_free( name );
-		name = NULL;
-	}
-
+	name = T_free( name );
 	fl_activate_object( obj );
 }
 
@@ -210,8 +200,7 @@ static int get_print_file( FILE **fp, char **name )
 	if ( cmd != NULL )
 	{
 		fl_set_input( print_form->s2p_input, cmd );
-		T_free( cmd );
-		cmd = NULL;
+		cmd = T_free( cmd );
 	}
 	else
 		fl_set_input( print_form->s2p_input, "lpr -h" );
@@ -314,11 +303,7 @@ static int get_print_file( FILE **fp, char **name )
 
 	if ( obj == print_form->cancel_button )
 	{
-		if ( *name != NULL )
-		{
-			T_free( *name );
-			*name = NULL;
-		}
+		*name = T_free( *name );
 		return 0;
 	}
 
@@ -358,11 +343,7 @@ static int get_print_file( FILE **fp, char **name )
 							   2, "Yes", "No", NULL, 2 ) ) ||
 		  ( *fp = fopen( *name, "w" ) ) == NULL )
 	{
-		if ( *name != NULL )
-		{
-			T_free( *name );
-			*name = NULL;
-		}
+		*name = T_free( *name );
 		return 0;
 	}
 
@@ -1036,10 +1017,8 @@ static void do_print( char *name, const char *command )
 	CATCH( EXCEPTION )
 		unlink( name );              /* on failure delete the temporary file */
 
-	if ( argv != NULL )
-		T_free( argv );
-	if ( cmd_line != NULL )
-		T_free( cmd_line );
+	T_free( argv );
+	T_free( cmd_line );
 }
 
 

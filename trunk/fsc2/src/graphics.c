@@ -629,12 +629,8 @@ void graphics_free( void )
 
 			if ( cv != NULL )
 			{
-				if ( cv->points != NULL )
-					T_free( cv->points );
-
-				if ( cv->xpoints != NULL )
-					T_free( cv->xpoints );
-
+				T_free( cv->points );
+				T_free( cv->xpoints );
 				T_free( cv );
 				G.curve_2d[ i ] = NULL;
 			}
@@ -657,14 +653,9 @@ void graphics_free( void )
 
 			if ( cv2 != NULL )
 			{
-				if ( cv2->points != NULL )
-					T_free( cv2->points );
-
-				if ( cv2->xpoints != NULL )
-					T_free( cv2->xpoints );
-				if ( cv2->xpoints_s != NULL )
-					T_free( cv2->xpoints_s );
-
+				T_free( cv2->points );
+				T_free( cv2->xpoints );
+				T_free( cv2->xpoints_s );
 				T_free( cv2 );
 				G.curve_2d[ i ] = NULL;
 			}

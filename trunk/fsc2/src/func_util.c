@@ -1167,7 +1167,7 @@ Var *f_getf( Var *var )
 	FILE *fp;
 	long len;
 	struct stat stat_buf;
-	static char *r;
+	static char *r = NULL;
 	static FILE_LIST *old_File_List;
 
 
@@ -1258,18 +1258,13 @@ getfile_retry:
 							"        The data will be lost!",
 							2, "Yes", "No", NULL, 2 ) )
 	{
-		if ( r != NULL )
-		{
-			T_free( r );
-			r = NULL;
-		}
+		r = T_free( r );
 		goto getfile_retry;
 	}
 
 	if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
 	{
-		if ( r != NULL )
-			T_free( r );
+		T_free( r );
 		for ( i = 0; i < 4; i++ )
 			T_free( s[ i ] );
 		return vars_push( INT_VAR, -1 );
@@ -1283,8 +1278,7 @@ getfile_retry:
 							 " Do you really want to overwrite it?",
 							 2, "Yes", "No", NULL, 2 ) )
 	{
-		T_free( r );
-		r = NULL;
+		r = T_free( r );
 		goto getfile_retry;
 	}
 
@@ -1312,8 +1306,7 @@ getfile_retry:
 							  "       Please select a different file." );
 		}
 
-		T_free( r );
-		r = NULL;
+		r = T_free( r );
 		goto getfile_retry;
 	}
 
@@ -2083,10 +2076,7 @@ get_repl_retry:
 							2, "Yes", "No", NULL, 2 ) )
 	{
 		if ( new_name != NULL )
-		{
-			T_free( new_name );
-			new_name = NULL;
-		}
+			new_name = T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -2109,8 +2099,7 @@ get_repl_retry:
 							 " Do you really want to overwrite it?",
 							 2, "Yes", "No", NULL, 2 ) )
 	{
-		T_free( new_name );
-		new_name = NULL;
+		new_name = T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -2143,8 +2132,7 @@ get_repl_retry:
 							  "       Please select a different file." );
 		}
 
-		T_free( new_name );
-		new_name = NULL;
+		new_name = T_free( new_name );
 		goto get_repl_retry;
 	}
 
@@ -2191,8 +2179,7 @@ get_repl_retry:
 				T_free( mess );
 				fclose( new_fp );
 				unlink( new_name );
-				T_free( new_name );
-				new_name = NULL;
+				new_name = T_free( new_name );
 				goto get_repl_retry;
 			}
 

@@ -68,8 +68,7 @@ void *T_realloc( void *ptr, size_t size )
 
 	if ( new_ptr == NULL )
 	{
-		if ( ptr != NULL )
-			T_free( ptr );
+		T_free( ptr );
 		eprint( FATAL, "%s:%ld: Running out of memory.\n", Fname, Lc );
 		THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
@@ -85,7 +84,7 @@ void *T_realloc( void *ptr, size_t size )
 /*---------------------------------------------------------------------*/
 /*---------------------------------------------------------------------*/
 
-void T_free( void *ptr )
+void *T_free( void *ptr )
 {
 #if defined MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
@@ -94,6 +93,7 @@ void T_free( void *ptr )
 #endif
 
 	free( ptr );
+	return NULL;
 }
 
 

@@ -136,8 +136,7 @@ void device_add( char *dev_name )
 	{
 		eprint( FATAL, "%s:%ld: Device `%s' not found in device name data "
 				"base.\n", Fname, Lc, dev_name );
-		if ( real_name != NULL )
-			T_free( real_name );
+		T_free( real_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
 	}
@@ -151,14 +150,12 @@ void device_add( char *dev_name )
 	}
 	OTHERWISE
 	{
-		if ( real_name != NULL )
-			T_free( real_name );
+		T_free( real_name );
 		T_free( dev_name );
 		PASSTHROU( );
 	}
 
-	if ( real_name != NULL )
-		T_free( real_name );
+	T_free( real_name );
 	T_free( dev_name );		
 }
 

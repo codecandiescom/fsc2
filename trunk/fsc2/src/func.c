@@ -170,8 +170,7 @@ void functions_exit( void )
 		if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
 			T_free( ( char * ) Fncts[ i ].name );
 
-	T_free( Fncts );
-	Fncts = NULL;
+	Fncts = T_free( Fncts );
 
 	No_File_Numbers = UNSET;
 	Dont_Save = UNSET;
