@@ -246,19 +246,19 @@ Var *pulse_get_by_addr( Pulse *p, int type )
 			return vars_push( INT_VAR, p->func );
 
 		case P_POS :
-			return vars_push( INT_VAR, p->pos );
+			return vars_push( FLOAT_VAR, p->pos * 1.0e-9 );
 
 		case P_LEN :
-			return vars_push( INT_VAR, p->len );
+			return vars_push( FLOAT_VAR, p->len * 1.0e-9 );
 
 		case P_DPOS :
-			return vars_push( INT_VAR, p->dpos );
+			return vars_push( FLOAT_VAR, p->dpos * 1.0e-9 );
 
 		case P_DLEN :
-			return vars_push( INT_VAR, p->dlen );
+			return vars_push( FLOAT_VAR, p->dlen * 1.0e-9 );
 
 		case P_MAXLEN :
-			return vars_push( INT_VAR, p->maxlen );
+			return vars_push( FLOAT_VAR, p->maxlen * 1.0e-9 );
 	}
 
 	assert( 1 == 0 );      /* this should never happen... */
@@ -334,7 +334,7 @@ void pulse_set_func( Pulse *p, Var *v )
 
 void pulse_set_pos( Pulse *p, Var *v )
 {
-	long val;
+	double val;
 
 
 	if ( p->set_flags & P_POS )
@@ -345,23 +345,23 @@ void pulse_set_pos( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
+	val = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 
-	if ( val < 0 )
+	if ( val < 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Negative start position of pulse %d.\n",
 				Fname, Lc, p->num );
 		THROW( EXCEPTION );
 	}
 
-	if ( val > LONG_MAX )
+	if ( val > LONG_MAX * 1.0e-9 )
 	{
-		eprint( FATAL, "%s:%ld: Start position of pulse %d too large.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Start position of pulse %d is too large, "
+				"maximum is %f s.\n", Fname, Lc, p->num, LONG_MAX * 1.0e-9 );
 		THROW( EXCEPTION );
 	}
 
-	p->pos = val;
+	p->pos = lround( 1.0e9 * val );
 	p->set_flags |= P_POS;
 }
 
@@ -371,7 +371,7 @@ void pulse_set_pos( Pulse *p, Var *v )
 
 void pulse_set_len( Pulse *p, Var *v )
 {
-	long val;
+	double val;
 
 
 	if ( p->set_flags & P_LEN )
@@ -381,23 +381,23 @@ void pulse_set_len( Pulse *p, Var *v )
 		return;
 	}
 
-	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
+	val = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 
-	if ( val < 0 )
+	if ( val < 0.0 )
 	{
 		eprint( FATAL, "%s:%ld: Negative length of pulse %d.\n",
 				Fname, Lc, p->num );
 		THROW( EXCEPTION );
 	}
 
-	if ( val > LONG_MAX )
+	if ( val > LONG_MAX * 1.0e-9 )
 	{
-		eprint( FATAL, "%s:%ld: Length of pulse %d too large.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Length of pulse %d is too large, maximum is "
+		               "%f s.\n", Fname, Lc, p->num, LONG_MAX * 1.0e-9 );
 		THROW( EXCEPTION );
 	}
 
-	p->len = val;
+	p->len = lround( val * 1.0e9 );
 	p->set_flags |= P_LEN;
 }
 
@@ -407,7 +407,7 @@ void pulse_set_len( Pulse *p, Var *v )
 
 void pulse_set_dpos( Pulse *p, Var *v )
 {
-	long val;
+	double val;
 
 
 	if ( p->set_flags & P_DPOS )
@@ -418,16 +418,16 @@ void pulse_set_dpos( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
+	val = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 
-	if ( val > LONG_MAX || val < LONG_MIN)
+	if ( val > LONG_MAX * 1.0e-9 || val < LONG_MIN * 1.0e-9 )
 	{
-		eprint( FATAL, "%s:%ld: Position change of pulse %d too large.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Position change of pulse %d is too large, "
+				"maximum is %f s.\n", Fname, Lc, p->num, LONG_MAX * 1.0e-9 );
 		THROW( EXCEPTION );
 	}
 
-	p->dpos = val;
+	p->dpos = lround( val * 1.0e9 );
 	p->set_flags |= P_DPOS;
 }
 
@@ -437,7 +437,7 @@ void pulse_set_dpos( Pulse *p, Var *v )
 
 void pulse_set_dlen( Pulse *p, Var *v )
 {
-	long val;
+	double val;
 
 
 	if ( p->set_flags & P_DLEN )
@@ -448,16 +448,16 @@ void pulse_set_dlen( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
+	val = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 
-	if ( val > LONG_MAX || val < LONG_MIN)
+	if ( val > LONG_MAX * 1.0e-9 || val < LONG_MIN * 1.0e-9 )
 	{
-		eprint( FATAL, "%s:%ld: Length change of pulse %d too large.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Length change of pulse %d is too large, "
+				"maximum is %f s.\n", Fname, Lc, p->num, LONG_MAX * 1.0e-9 );
 		THROW( EXCEPTION );
 	}
 
-	p->dlen = val;
+	p->dlen = lround( val * 1.0e9 );
 	p->set_flags |= P_DLEN;
 }
 
@@ -467,7 +467,7 @@ void pulse_set_dlen( Pulse *p, Var *v )
 
 void pulse_set_maxlen( Pulse *p, Var *v )
 {
-	long val;
+	double val;
 
 
 	if ( p->set_flags & P_MAXLEN )
@@ -478,16 +478,16 @@ void pulse_set_maxlen( Pulse *p, Var *v )
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	val = ( v->type == INT_VAR ) ? v->val.lval : lround( v->val.dval );
+	val = ( v->type == INT_VAR ) ? ( double ) v->val.lval : v->val.dval;
 
-	if ( val > LONG_MAX || val < LONG_MIN)
+	if ( val > LONG_MAX * 1e-9 || val < LONG_MIN * 1.0e-9 )
 	{
-		eprint( FATAL, "%s:%ld: Maximum length of pulse %d too large.\n",
-				Fname, Lc, p->num );
+		eprint( FATAL, "%s:%ld: Maximum length of pulse %d is too large, "
+				"maximum is %f s.\n", Fname, Lc, p->num, LONG_MAX * 1.0e-9 );
 		THROW( EXCEPTION );
 	}
 
-	p->maxlen = val;
+	p->maxlen = lround( val * 1.0e9 );
 	p->set_flags |= P_MAXLEN;
 }
 

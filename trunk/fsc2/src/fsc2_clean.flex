@@ -77,17 +77,7 @@ INT      [+-]?[0-9]+
 EXPO     [EDed][+-]?{INT}
 FLOAT    ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-UNIT     ("G"|"T"|"Oe"|"V"|"A"|"Hz")
-
-INS      {INT}[\t \r]*"ns"
-IUS      {INT}[\t \r]*"us"
-IMS      {INT}[\t \r]*"ms"
-IS       {INT}[\t \r]*"s"
-
-FNS      {FLOAT}[\t \r]*"ns"
-FUS      {FLOAT}[\t \r]*"us"
-FMS      {FLOAT}[\t \r]*"ms"
-FS       {FLOAT}[\t \r]*"s"
+UNIT     ("s"|"G"|"T"|"Oe"|"V"|"A"|"Hz")
 
 INANO    {INT}[\t \r]*"n"{UNIT}
 IMICRO   {INT}[\t \r]*"u"{UNIT}
@@ -290,83 +280,57 @@ KEEP    [^\t" \n(\/*),;:=%\^\-\+]+
 
             /* here some special handling of numbers with units */
 
-{INS}/(;|,) unit_spec( yytext, 0, 0 );
-{INS}       unit_spec( yytext, 0, 0 );
-{IUS}/(;|,) unit_spec( yytext, 0, 3 );
-{IUS}       unit_spec( yytext, 0, 3 );
-{IMS}/(;|,) unit_spec( yytext, 0, 6 );
-{IMS}       unit_spec( yytext, 0, 6 );
-{IS}/(;|,)  unit_spec( yytext, 0, 9 );
-{IS}        unit_spec( yytext, 0, 9 );
-{FNS}/(;|,) unit_spec( yytext, 1, 0 );
-{FNS}       unit_spec( yytext, 1, 0 );
-{FUS}/(;|,) unit_spec( yytext, 1, 3 );
-{FUS}       unit_spec( yytext, 1, 3 );
-{FMS}/(;|,) unit_spec( yytext, 1, 6 );
-{FMS}       unit_spec( yytext, 1, 6 );
-{FS}/(;|,)  unit_spec( yytext, 1, 9 );
-{FS}        unit_spec( yytext, 1, 9 );
+{INANO}/(;|,)   unit_spec( yytext, 0, -9 );
+{INANO}         unit_spec( yytext, 0, -9 );
+{IMICRO}/(;|,)  unit_spec( yytext, 0, -6 );
+{IMICRO}        unit_spec( yytext, 0, -6 );
+{IMILLI}/(;|,)  unit_spec( yytext, 0, -3 );
+{IMILLI}        unit_spec( yytext, 0, -3 );
+{INONE}/(;|,)   unit_spec( yytext, 0, 0 );
+{INONE}         unit_spec( yytext, 0, 0 );
+{IKILO}/(;|,)   unit_spec( yytext, 0, 3 );
+{IKILO}         unit_spec( yytext, 0, 3 );
+{IMEGA}/(;|,)   unit_spec( yytext, 0, 6 );
+{IMEGA}         unit_spec( yytext, 0, 6 );
 
-{INANO}/(;|,)  unit_spec( yytext, 0, -9 );
-{INANO}        unit_spec( yytext, 0, -9 );
-{IMICRO}/(;|,) unit_spec( yytext, 0, -6 );
-{IMICRO}       unit_spec( yytext, 0, -6 );
-{IMILLI}/(;|,) unit_spec( yytext, 0, -3 );
-{IMILLI}       unit_spec( yytext, 0, -3 );
-{INONE}/(;|,)  unit_spec( yytext, 0, 0 );
-{INONE}        unit_spec( yytext, 0, 0 );
-{IKILO}/(;|,)  unit_spec( yytext, 0, 3 );
-{IKILO}        unit_spec( yytext, 0, 3 );
-{IMEGA}/(;|,)  unit_spec( yytext, 0, 6 );
-{IMEGA}        unit_spec( yytext, 0, 6 );
+{FNANO}/(;|,)   unit_spec( yytext, 1, -9 );
+{FNANO}         unit_spec( yytext, 1, -9 );
+{FMICRO}/(;|,)  unit_spec( yytext, 1, -6 );
+{FMICRO}        unit_spec( yytext, 1, -6 );
+{FMILLI}/(;|,)  unit_spec( yytext, 1, -3 );
+{FMILLI}        unit_spec( yytext, 1, -3 );
+{FNONE}/(;|,)   unit_spec( yytext, 1, 0 );
+{FNONE}         unit_spec( yytext, 1, 0 );
+{FKILO}/(;|,)   unit_spec( yytext, 1, 3 );
+{FKILO}         unit_spec( yytext, 1, 3 );
+{FMEGA}/(;|,)   unit_spec( yytext, 1, 6 );
+{FMEGA}         unit_spec( yytext, 1, 6 );
 
-{FNANO}/(;|,)  unit_spec( yytext, 1, -9 );
-{FNANO}        unit_spec( yytext, 1, -9 );
-{FMICRO}/(;|,) unit_spec( yytext, 1, -6 );
-{FMICRO}       unit_spec( yytext, 1, -6 );
-{FMILLI}/(;|,) unit_spec( yytext, 1, -3 );
-{FMILLI}       unit_spec( yytext, 1, -3 );
-{FNONE}/(;|,)  unit_spec( yytext, 1, 0 );
-{FNONE}        unit_spec( yytext, 1, 0 );
-{FKILO}/(;|,)  unit_spec( yytext, 1, 3 );
-{FKILO}        unit_spec( yytext, 1, 3 );
-{FMEGA}/(;|,)  unit_spec( yytext, 1, 6 );
-{FMEGA}        unit_spec( yytext, 1, 6 );
+{INTs}/(;|,)    unit_spec( yytext, 0, -5 );
+{INTs}          unit_spec( yytext, 0, -5 );
+{IUT}/(;|,)     unit_spec( yytext, 0, -2 );
+{IUT}           unit_spec( yytext, 0, -2 );
+{IMT}/(;|,)     unit_spec( yytext, 0, 1 );
+{IMT}           unit_spec( yytext, 0, 1 );
+{IT}/(;|,)      unit_spec( yytext, 0, 4 );
+{IT}            unit_spec( yytext, 0, 4 );
+{FNT}/(;|,)     unit_spec( yytext, 1, -5 );
+{FNT}           unit_spec( yytext, 1, -5 );
+{FUT}/(;|,)     unit_spec( yytext, 1, -2 );
+{FUT}           unit_spec( yytext, 1, -2 );
+{FMT}/(;|,)     unit_spec( yytext, 1, 1 );
+{FMT}           unit_spec( yytext, 1, 1 );
+{FT}/(;|,)      unit_spec( yytext, 1, 4 );
+{FT}            unit_spec( yytext, 1, 4 );
 
-{INTs}/(;|,) unit_spec( yytext, 0, -5 );
-{INTs}       unit_spec( yytext, 0, -5 );
-{IUT}/(;|,) unit_spec( yytext, 0, -2 );
-{IUT}       unit_spec( yytext, 0, -2 );
-{IMT}/(;|,) unit_spec( yytext, 0, 1 );
-{IMT}       unit_spec( yytext, 0, 1 );
-{IT}/(;|,)  unit_spec( yytext, 0, 4 );
-{IT}        unit_spec( yytext, 0, 4 );
-{FNT}/(;|,) unit_spec( yytext, 1, -5 );
-{FNT}       unit_spec( yytext, 1, -5 );
-{FUT}/(;|,) unit_spec( yytext, 1, -2 );
-{FUT}       unit_spec( yytext, 1, -2 );
-{FMT}/(;|,) unit_spec( yytext, 1, 1 );
-{FMT}       unit_spec( yytext, 1, 1 );
-{FT}/(;|,)  unit_spec( yytext, 1, 4 );
-{FT}        unit_spec( yytext, 1, 4 );
-
-"ns"/(,|;)  printf( "\x4nsec" );
-"ns"        printf( "\x4nsec" );
-"us"/(;|,)  printf( "\x4usec" );
-"us"        printf( "\x4usec" );
-"ms"/(;|,)  printf( "\x4msec" );
-"ms"        printf( "\x4msec" );
-"s"/(;|,)   printf( "\x4sec" );
-"s"         printf( "\x4sec" );
-
-"nT"/(,|;)  printf( "\x4ntesla" );
-"nT"        printf( "\x4ntesla" );
-"uT"/(;|,)  printf( "\x4utesla" );
-"uT"        printf( "\x4utesla" );
-"mT"/(;|,)  printf( "\x4mtesla" );
-"mT"        printf( "\x4mtesla" );
-"T"/(;|,)   printf( "\x4tesla" );
-"T"         printf( "\x4tesla" );
+"nT"/(,|;)      printf( "\x4ntesla" );
+"nT"            printf( "\x4ntesla" );
+"uT"/(;|,)      printf( "\x4utesla" );
+"uT"            printf( "\x4utesla" );
+"mT"/(;|,)      printf( "\x4mtesla" );
+"mT"            printf( "\x4mtesla" );
+"T"/(;|,)       printf( "\x4tesla" );
+"T"             printf( "\x4tesla" );
 
 "n"{UNIT}/(,|;) printf( "\x4nunit" );
 "n"{UNIT}       printf( "\x4nunit" );

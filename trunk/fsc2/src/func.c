@@ -1031,20 +1031,21 @@ Var *f_print( Var *v )
 Var *f_wait( Var *v )
 {
 	struct itimerval sleepy;
-	long how_long;
+	double how_long;
+	double secs;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
 	if ( v->type == INT_VAR )
-		how_long = v->val.lval;
+		how_long = ( double ) v->val.lval;
 	else
-		how_long = lround( v->val.dval );
+		how_long = v->val.dval;
 
-	if ( how_long < 0 )
+	if ( how_long < 0.0 || how_long > LONG_MAX )
 	{
-		eprint( FATAL, "%s:%ld: Negative time or more than 2s for `wait()' "
-				"function.\n", Fname, Lc );
+		eprint( FATAL, "%s:%ld: Negative time or more than %ld s as argument "
+				"of `wait()' function.\n", Fname, Lc, LONG_MAX );
 		THROW( EXCEPTION );
 	}
 
@@ -1053,11 +1054,9 @@ Var *f_wait( Var *v )
 
 	/* set everything up for sleeping */
 
-	sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
-	sleepy.it_value.tv_sec = how_long / 1000000000L;
-	sleepy.it_value.tv_usec =
-		( how_long - sleepy.it_value.tv_sec * 1000000000L ) / 1000;
-
+    sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
+	sleepy.it_value.tv_usec = lround( modf( how_long, &secs ) * 1.0e6 );
+	sleepy.it_value.tv_sec = ( long ) secs;
 
 	signal( SIGALRM, f_wait_alarm_handler );
 	setitimer( ITIMER_REAL, &sleepy, NULL );
