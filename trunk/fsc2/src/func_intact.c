@@ -26,6 +26,7 @@ static void convert_escapes( char *str );
 Var *f_layout( Var *v )
 {
 	int layout;
+	const char *str[ ] = { "VERT", "VERTICAL", "HORI", "HORIZONTAL" };
 
 
 	if ( I_am == PARENT && Tool_Box != NULL )
@@ -49,20 +50,21 @@ Var *f_layout( Var *v )
 	else if ( v->type == FLOAT_VAR )
 		layout = v->val.dval != 0.0 ? HORI : VERT;
 	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "VERT" ) ||
-			 ! strcasecmp( v->val.sptr, "VERTICAL" ) )
-			layout = 0;
-		else if ( ! strcasecmp( v->val.sptr, "HORI" ) ||
-				  ! strcasecmp( v->val.sptr, "HORIZONTAL" ) )
-			layout = 1;
-		else
+		switch ( is_in( v->val.sptr, str, 4 ) )
 		{
-			eprint( FATAL, "%s:%ld: Unknown layout keyword `%s' in function "
-					"`layout'.\n", Fname, Lc, v->val.sptr );
-			THROW( EXCEPTION );
+			case 0 : case 1 :
+				layout = 0;
+				break;
+
+			case 2 : case 3 :
+				layout = 1;
+				break;
+
+			default :
+				eprint( FATAL, "%s:%ld: Unknown layout keyword `%s' in "
+						"function `layout'.\n", Fname, Lc, v->val.sptr );
+				THROW( EXCEPTION );
 		}
-	}
 
 	/* The child has no control over the graphical stuff, it has to pass all
 	   requests concerning them to the parent... */
@@ -561,6 +563,8 @@ Var *f_bstate( Var *v )
 {
 	IOBJECT *io, *oio;
 	int state;
+	const char *on_off_str[ ] = { "ON", "OFF" };
+
 
 
 	/* We need at least the ID of the button */
@@ -597,11 +601,31 @@ Var *f_bstate( Var *v )
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			if ( v->type == INT_VAR )
-				state = v->val.lval != 0 ? 1 : 0;
+			vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+			if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+			{
+				if ( v->type == INT_VAR )
+					state = v->val.lval != 0 ? 1 : 0;
+				else
+					state = v->val.dval != 0.0 ? 1 : 0;
+			}
 			else
-				state = v->val.dval != 0.0 ? 1 : 0;
+				switch ( is_in( v->val.sptr, on_off_str, 2 ) )
+				{
+					case 0 :
+						state = 0;
+						break;
+
+					case 1 :
+						state = 1;
+						break;
+
+					default :
+						eprint( FATAL, "%s%ld: Invalid string `%s' in "
+								"`button_state'.\n", Fname, Lc, v->val.sptr );
+						THROW( EXCEPTION );
+				}
 		}
 
 		/* No more parameters accepted... */
@@ -675,7 +699,7 @@ Var *f_bstate( Var *v )
 	}
 
 	/* If there's no second parameter just return the button state - for
-	   NORMAL_BUUTONs return the number it was pressed since the last call
+	   NORMAL_BUTTONs return the number it was pressed since the last call
 	   and reset the counter to zero */
 
 	if ( ( v = vars_pop( v ) ) == NULL )
@@ -693,8 +717,6 @@ Var *f_bstate( Var *v )
 	/* The optional second argument is the state to be set - but take care,
 	   the state of NORMAL_BUTTONs can't be set */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
 	if ( io->type == NORMAL_BUTTON )
 	{
 		eprint( FATAL, "%s:%ld: Can't set state of a NORMAL_BUTTON.\n",
@@ -702,14 +724,31 @@ Var *f_bstate( Var *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( v->type == INT_VAR )
-		io->state = v->val.lval != 0 ? 1 : 0;
-	else
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		eprint( WARN, "%s:%ld: Float value used as button state in "
-				"`button_state'.\n", Fname, Lc );
-		io->state = v->val.dval != 0.0 ? 1 : 0;
+		if ( v->type == INT_VAR )
+			io->state = v->val.lval != 0 ? 1 : 0;
+		else
+			io->state = v->val.dval != 0.0 ? 1 : 0;
 	}
+	else
+		switch ( is_in( v->val.sptr, on_off_str, 2 ) )
+		{
+			case 0 :
+				io->state = 0;
+				break;
+
+			case 1 :
+				io->state = 1;
+				break;
+
+			default :
+				eprint( FATAL, "%s%ld: Invalid string `%s' in "
+						"`button_state'.\n", Fname, Lc, v->val.sptr );
+				THROW( EXCEPTION );
+		}
 
 	/* If this isn't a test run set the button state */
 
