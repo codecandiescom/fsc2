@@ -1128,9 +1128,9 @@ void clean_up( void )
 
 	delete_device_name_list( );
 
-	/* (Re)initialize the structure for the pulser modules */
+	/* Remove stuff needed for pulsers */
 
-	pulser_struct_init( );
+	pulser_cleanup( );
 
 	/* Clear up structures for phases */
 

@@ -226,10 +226,12 @@ WS          [\n \t]+
 
 			/* Handling of function, variable and array identifiers */
 {FUNC}      {
+				char *t;
 				int acc;
 
-                if ( ! strcmp( strchr( varstext, '#' ), "#1" ) )
-                    *strchr( varstext, '#' ) = '\0';
+				t = strrchr( varstext, '#' );
+                if ( t != NULL && ! strcmp( t, "#1" ) )
+                    *t = '\0';
 
 				varslval.vptr = func_get( varstext, &acc );
 				if ( varslval.vptr != NULL )

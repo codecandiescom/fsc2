@@ -488,6 +488,7 @@ Var *func_call( Var *f )
 
 CALL_STACK *call_push( Func *f, const char *device_name )
 {
+	const char *t;
 	CALL_STACK *cs;
 
 
@@ -495,6 +496,15 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	cs->prev = Call_Stack;
 	cs->f = f;
 	cs->dev_name = device_name;
+
+	if ( f != NULL && f->device != NULL &&
+		 ! strcmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
+	{
+		if ( ( t = strrchr( f->name, '#' ) ) != NULL )
+			Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
+	}
+	else
+		cs->Cur_Pulser = -1;
 
 	return Call_Stack = cs;
 }
@@ -514,6 +524,9 @@ CALL_STACK *call_pop( void )
 	cs = Call_Stack;
 	Call_Stack = cs->prev;
 	T_free( cs );
+
+	if ( Call_Stack && Call_Stack->Cur_Pulser != -1 )
+		Cur_Pulser = cs->prev->Cur_Pulser;
 
 	return Call_Stack;
 }

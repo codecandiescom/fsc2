@@ -42,16 +42,6 @@ int dg2020_f_init_hook( void )
 	int i, j, k;
 
 
-	/* Now test that the name entry in the pulser structure is NULL, otherwise
-	   another pulser driver has already been installed. */
-
-	if ( pulser_struct.name != NULL )
-	{
-		print( FATAL, "While loading the driver found that a driver for "
-			   "pulser %s is already loaded.\n", pulser_struct.name );
-		THROW( EXCEPTION );
-	}
-
 	pulser_struct.name = DEVICE_NAME;
 
 	/* Set global variable to indicate that GPIB bus is needed */
@@ -162,6 +152,8 @@ int dg2020_f_init_hook( void )
 				phs[ i ].is_var[ j ][ k ] = UNSET;
 
 	dg2020_is_needed = SET;
+
+	phase_numbers[ 0 ] = phase_numbers[ 2 ] = -1;
 
 	return 1;
 }

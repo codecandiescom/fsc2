@@ -144,7 +144,9 @@ Device *Device_List = NULL;
 Device_Name *Device_Name_List = NULL;
 int Max_Devices_of_a_Kind;
 
-Pulser_Struct pulser_struct;
+long Cur_Pulser = -1;
+long Num_Pulsers = 0;
+Pulser_Struct *pulser_struct = NULL;
 
 Phase_Sequence *PSeq = NULL;
 Acquisition_Sequence ASeq[ 2 ] = { { UNSET, NULL, 0 }, { UNSET, NULL, 0 } };
@@ -220,7 +222,9 @@ extern int Max_Devices_of_a_Kind;
 extern Var *Var_List;
 extern Var *Var_Stack;
 
-extern Pulser_Struct pulser_struct;
+extern long Cur_Pulser;
+extern long Num_Pulsers;
+extern Pulser_Struct *pulser_struct;
 
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];

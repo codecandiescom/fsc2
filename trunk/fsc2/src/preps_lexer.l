@@ -96,7 +96,7 @@ INT         [0-9]+
 EXPO        [EDed][+-]?{INT}
 FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
-P           P(ULSE)?_?{INT}
+P           P(ULSE)?_?{INT}(#{INT})?
 
 F           F(UNC(TION)?)?
 S           S(TART)?
@@ -105,7 +105,7 @@ DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PC          PH(ASE)?_?C(YCLE)?
 
-PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[12])?
+PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9])?
 
 CHT         ((CH[1-4])|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(EXT(10)?))
 
@@ -238,6 +238,21 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {P}(":")    {
+				char *t;
+
+				Cur_Pulser = 0;
+				if ( ( t = strrchr( prepstext, '#' ) ) != NULL )
+				{
+					if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= Num_Pulsers )
+					{
+						eprint( FATAL, SET, "There is no pulser #%ld\n",
+								Cur_Pulser + 1 );
+						THROW( EXCEPTION );
+					}
+
+					*t = '\0';
+				}
+
 			    Cur_Pulse = p_new( p_num( prepstext ) );
 				return P_TOK;
 			}
@@ -246,8 +261,7 @@ FUNC        {IDENT}"#"[0-9]+
 				long val = 0;
 				char *cp = prepstext + prepsleng - 1;
 
-				/* determine number of phase sequence (currently only 1 or 2
-				   but could be extended to allow a range from 0 to ...) */
+				/* determine number of phase sequence */
 
 				if ( isdigit( *cp ) )
 				{
@@ -333,10 +347,12 @@ FUNC        {IDENT}"#"[0-9]+
 
 			/* Handling of function, variable and array identifiers */
 {FUNC}      {
+				char *t;
 				int acc;
 
-                if ( ! strcmp( strchr( prepstext, '#' ), "#1" ) )
-                    *strchr( prepstext, '#' ) = '\0';
+				t = strrchr( prepstext, '#' );
+                if ( t != NULL && ! strcmp( t, "#1" ) )
+                    *t = '\0';
 
 				prepslval.vptr = func_get( prepstext, &acc );
 				if ( prepslval.vptr != NULL )

@@ -73,6 +73,7 @@
 #define FSC2_MODE get_mode( )
 #define DO_STOP   get_do_stop( )
 
+
 extern void show_message( const char *str );
 extern void show_alert( const char *str );
 extern int show_choices( const char *text, int numb, const char *b1,
@@ -83,11 +84,18 @@ extern const char *show_input( const char *content, const char *label );
 /* Global variables */
 
 extern Compilation compilation;
-extern Pulser_Struct pulser_struct;
+extern Pulser_Struct *pulser_struct;
 extern Phase_Sequence *PSeq;
 extern Acquisition_Sequence ASeq[ ];
+extern long Cur_Pulser;
 
 extern bool need_GPIB;
+
+
+/* The following must be defined after the declaration of pulser_struct ! */
+
+#define pulser_struct pulser_struct[ Cur_Pulser ]
+
 
 #endif  /* ! FSC2_MODULE_HEADER */
 

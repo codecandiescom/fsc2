@@ -236,10 +236,12 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {FUNC}      {
+				char *t;
 				int acc;
 
-                if ( ! strcmp( strchr( exptext, '#' ), "#1" ) )
-                    *strchr( exptext, '#' ) = '\0';
+				t = strrchr( exptext, '#' );
+                if ( t != NULL && ! strcmp( t, "#1" ) )
+                    *t = '\0';
 
 				exp_val.vptr = func_get( exptext, &acc );
 				if ( exp_val.vptr != NULL )

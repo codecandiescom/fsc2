@@ -281,12 +281,6 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 		THROW( EXCEPTION );
 	}
 
-	if ( cycle != 1 && cycle != 2 )
-	{
-		print( FATAL, "Only phase sequence 1 or 2 can be used.\n" );
-		THROW( EXCEPTION );
-	}
-
 	while ( pc != NULL )
 	{
 		if ( pc->num == cycle )
@@ -296,7 +290,7 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 
 	if ( pc == NULL )
 	{
-		print( FATAL, "Referenced phase sequence %d hasn't been defined.\n",
+		print( FATAL, "Referenced phase sequence %ld hasn't been defined.\n",
 			   cycle );
 		THROW( EXCEPTION );
 	}

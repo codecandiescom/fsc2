@@ -41,17 +41,7 @@ int hfs9000_init_hook( void )
 	int i;
 
 
-	/* Test that the name entry in the pulser structure is NULL, otherwise
-	   another pulser driver has already been installed. */
-
-	if ( pulser_struct.name != NULL )
-	{
-		print( FATAL, "While loading the driver found that a driver for "
-			   "pulser %s is already installed.\n", pulser_struct.name );
-		THROW( EXCEPTION );
-	}
-
-	pulser_struct.name = "HFS9000";
+	pulser_struct.name = DEVICE_NAME;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 

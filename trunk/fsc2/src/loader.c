@@ -77,6 +77,11 @@ void load_all_drivers( void )
 
 	qsort( Fncts, Num_Func, sizeof( Func ), func_cmp );
 
+	/* Create and initialize a structure needed for the pulsers */
+
+	pulser_struct_init( );
+	Cur_Pulser = -1;
+
 	/* This done run the init hooks (if they exist) and warn if they don't
 	   return successfully (if an init hook thinks it should kill the whole
 	   program it is supposed to throw an exception). To keep modules writers
@@ -94,6 +99,9 @@ void load_all_drivers( void )
 
 			if ( cd->is_loaded && cd->driver.is_init_hook )
 			{
+				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+					Cur_Pulser++;
+
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.init_hook( ) )
 					eprint( WARN, UNSET, "Initialisation of module `%s.so' "
@@ -342,6 +350,7 @@ static void resolve_functions( Device *dev )
 			continue;
 
 		dlerror( );                /* make sure it's NULL before we continue */
+
 		cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
 		if ( cur == NULL || dlerror( ) != NULL )
@@ -461,7 +470,7 @@ static void resolve_generic_type( Device *dev )
 
 	Max_Devices_of_a_Kind = i_max( Max_Devices_of_a_Kind, dev->count );
 
-	if ( ! strcmp( dev->generic_type, "pulser" ) )
+	if ( ! strcmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
 		Num_Pulsers++;
 }
 
@@ -474,6 +483,8 @@ void run_test_hooks( void )
 {
 	Device *cd;
 
+
+	Cur_Pulser = -1;
 	IN_HOOK = SET;
 
 	TRY
@@ -481,6 +492,9 @@ void run_test_hooks( void )
 		for ( cd = Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_test_hook )
 			{
+				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+					Cur_Pulser++;
+
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.test_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of test run failed "
@@ -509,6 +523,8 @@ void run_end_of_test_hooks( void )
 {
 	Device *cd;
 
+
+	Cur_Pulser = -1;
 	IN_HOOK = SET;
 
 	TRY
@@ -516,6 +532,9 @@ void run_end_of_test_hooks( void )
 		for ( cd = Device_List; cd != NULL; cd = cd->next )
 			if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
 			{
+				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+					Cur_Pulser++;
+
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.end_of_test_hook( ) )
 					eprint( SEVERE, UNSET, "Final checks after test run "
@@ -544,6 +563,8 @@ void run_exp_hooks( void )
 {
 	Device *cd;
 
+
+	Cur_Pulser = -1;
 	IN_HOOK = SET;
 
 	TRY
@@ -552,6 +573,9 @@ void run_exp_hooks( void )
 		{
 			if ( cd->is_loaded && cd->driver.is_exp_hook )
 			{
+				if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+					Cur_Pulser++;
+
 				call_push( NULL, cd->device_name );
 				if ( ! cd->driver.exp_hook( ) )
 					eprint( SEVERE, UNSET, "Initialisation of experiment "
@@ -599,10 +623,14 @@ void run_end_of_exp_hooks( void )
 	   run, probably because the exp-hook for a previous device in the list
 	   failed. */
 
+	Cur_Pulser = -1;
 	IN_HOOK = SET;
 
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 	{
+		if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			Cur_Pulser++;
+
 		if ( ! cd->driver.exp_hook_is_run )
 			continue;
 
@@ -647,10 +675,14 @@ void run_exit_hooks( void )
 	for( cd = Device_List; cd->next != NULL; cd = cd->next )
 		;
 
+	Cur_Pulser = Num_Pulsers;
 	IN_HOOK = SET;
 
 	for ( ; cd != NULL; cd = cd->prev )
 	{
+		if ( ! strcmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+			Cur_Pulser--;
+
 		TRY
 		{
 			if ( cd->is_loaded && cd->driver.is_exit_hook )

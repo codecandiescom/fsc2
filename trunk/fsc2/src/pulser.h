@@ -29,7 +29,6 @@
 
 
 typedef struct {
-
 	const char *name;
 
 	bool needs_phase_pulses;
@@ -85,7 +84,15 @@ enum {
 };
 
 
+typedef struct P_List_ {
+	long num;
+	long dev_num;
+	struct P_List_ *next;
+} P_List;
+
+
 void pulser_struct_init( void );
+void pulser_cleanup( void );
 void p_assign_pod( long func, Var *v );
 void p_assign_channel( long func, Var *v );
 void p_set_delay( long func, Var *v );

@@ -302,6 +302,7 @@ DG2020 dg2020;
 PULSE *dg2020_Pulses = NULL;
 bool dg2020_IN_SETUP = UNSET;
 PHS phs[ 2 ];
+long phase_numbers[ 2 ];
 
 #else
 
@@ -310,6 +311,7 @@ extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
 extern bool dg2020_IN_SETUP;
 extern PHS phs[ 3 ];
+extern long phase_numbers[ 2 ];
 
 #endif
 

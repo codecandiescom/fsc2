@@ -210,6 +210,11 @@ extern const char *Digitizer_Channel_Names[ NUM_DIGITIZER_CHANNEL_NAMES ];
 #endif
 
 
+/* Define the generic type name for pulsers */
+
+#define PULSER_GENERIC_TYPE "pulser"
+
+
 /* Define the different functions pulses may have (it's not dangerous here to
    add further ones as long as the first two and the last remain unchanged) */
 

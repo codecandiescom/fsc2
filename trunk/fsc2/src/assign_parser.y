@@ -546,27 +546,29 @@ static void ass_func( int function )
 
 	if ( Channel_Type != PULSER_CHANNEL_NO_TYPE )
 	{
-		if ( pulser_struct.needs_phase_pulses )
+		if ( pulser_struct[ Cur_Pulser ].needs_phase_pulses )
 			p_phase_ref( Channel_Type, function );
 		else
 		{
-			eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
-					"module %s.\n", assigntext, pulser_struct.name );
+			eprint( FATAL, SET, "Syntax error near `%s' when using pulser "
+					"%s.\n", assigntext, pulser_struct[ Cur_Pulser ].name );
 			THROW( EXCEPTION );
 		}
 		return;
 	}
 
 	/* The other alternative is that we're dealing with a pulser with no
-	   phase switches. In this cas Cur_PHS most be set to the number of
+	   phase switches. In this cas Cur_PHS must be set to the number of
 	   the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-	if ( ! pulser_struct.needs_phase_pulses && Cur_PHS != -1 )
+	if ( ! pulser_struct[ Cur_Pulser ].needs_phase_pulses && Cur_PHS != -1 )
 		p_phase_ref( Cur_PHS, function );
 	else
 	{
-		eprint( FATAL, SET, "Syntax error near `%s' in when using pulser "
-				"module %s.\n", assigntext, pulser_struct.name );
+		fprintf( stderr, "%s:%ld: Cur_Pulser = %ld, Cur_PHS = %d\n",
+				 Fname, Lc, Cur_Pulser, Cur_PHS );
+		eprint( FATAL, SET, "Syntax error near `%s' when using pulser %s.\n",
+				assigntext, pulser_struct[ Cur_Pulser ].name );
 		THROW( EXCEPTION );
 	}
 }

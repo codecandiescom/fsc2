@@ -55,9 +55,8 @@ extern void assignparse( void );
 
 /* locally used global variables */
 
-int Assign_Next_Section;
-
-int Cur_Pulser;
+static int Assign_Next_Section;
+static bool in_phs = UNSET;
 
 /* locally used functions */
 
@@ -104,9 +103,9 @@ RF          R(ADIO)?_?F(REQ(UENCY)?)?(#{INT})?:?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?(#{INT})?:?
 PSH         P(ULSE)?_?SH(APE(R)?)?(#{INT})?:?
 OI          O(THER)?(_?1)?(#{INT})?:?
-OII         O(THER)?_?2?(#{INT}):?
-OIII        O(THER)?_?3?(#{INT}):?
-OIV         O(THER)?_?4?(#{INT}):?
+OII         O(THER)?_?2?(#{INT})?:?
+OIII        O(THER)?_?3?(#{INT})?:?
+OIV         O(THER)?_?4?(#{INT})?:?
 PH1         PH(ASE)?(_?1)?(#{INT})?:?
 PH2         PH(ASE)?_?2(#{INT})?:?
 
@@ -130,10 +129,10 @@ INV         INV(ERT(ED)?)?
 VH          V_?H(IGH)?
 VL          V_?L(OW)?
 
-TB          T(IME)?_?B(ASE)?(#{INT}):?
-TM          T(RIG(GER)?)?_?M(ODE)?(#{INT}):?
+TB          T(IME)?_?B(ASE)?(#{INT})?:?
+TM          T(RIG(GER)?)?_?M(ODE)?(#{INT})?:?
 MPL         MAX(IMUM)?_?PATT(ERN)?_LEN(GTH)(#{INT})?
-KAP         KEEP_?ALL_?PULSES(#{INT}):?
+KAP         KEEP_?ALL_?PULSES(#{INT})?:?
 
 INTERN      INT(ERN(AL)?)?
 EXTERN      EXT(ERN(AL)?)?
@@ -228,11 +227,13 @@ WS          [\n=: ]+
 
 {PHS1}		{
 			    set_cur_pulser( );
+				in_phs = SET;
   				assignlval.lval = 0;
 				return PHS_TOK;
 			}
 {PHS2}		{
 			    set_cur_pulser( );
+				in_phs = SET;
 				assignlval.lval = 1;
 				return PHS_TOK;
 			}
@@ -532,7 +533,10 @@ WS          [\n=: ]+
 
 {WS}        /* skip prettifying characters */
 
-";"         return ';';               /* end of statement character */
+";"         {
+				in_phs = UNSET;
+				return ';';
+			}
 
 			/* handling of invalid input (i.e. everything else) */
 .           {
@@ -551,6 +555,9 @@ WS          [\n=: ]+
 %%		/*     End of Rules     */
 		/*----------------------*/
 
+
+/*-------------------------------------------*/
+/*-------------------------------------------*/
 
 int assignments_parser( FILE *in )
 {
@@ -580,14 +587,26 @@ int assignments_parser( FILE *in )
 }
 
 
+/*-------------------------------------------*/
+/*-------------------------------------------*/
+
 static void set_cur_pulser( void )
 {
 	const char *t;
 
 
+	if ( in_phs )
+		return;
+
 	Cur_Pulser = 0;
-	if ( ( t = strchr( assigntext, '#' ) ) != NULL )
-		Cur_Pulser = T_atol( t + 1 );
+	if ( ( t = strrchr( assigntext, '#' ) ) == NULL )
+		return;
+
+	if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= Num_Pulsers )
+	{
+		eprint( FATAL, SET, "There is no pulser #%ld\n", Cur_Pulser + 1 );
+		THROW( EXCEPTION );
+	}
 }
 
 

@@ -277,9 +277,11 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 		THROW( EXCEPTION );
 	}
 
-	if ( cycle != 1 && cycle != 2 )
+	if ( phase_numbers[ 0 ] != -1 && phase_numbers[ 0 ] != cycle &&
+		 phase_numbers[ 1 ] != -1 && phase_numbers[ 1 ] != cycle )
 	{
-		print( FATAL, "Only phase sequence 1 or 2 can be used.\n" );
+		print( FATAL, "Only two different phase sequences can be used for "
+			   "pulses. \n" );
 		THROW( EXCEPTION );
 	}
 
