@@ -62,18 +62,6 @@ static Var *get_curve( Var *v, bool use_cursor );
 static Var *get_amplitude( Var *v, bool use_cursor );
 
 
-/* Here values are defined that get returned by the driver in the test run
-   when the digitizer can't be accessed - these values must really be
-   reasonable ! */
-
-#define TEST_REC_LEN      500
-#define TEST_TIME_BASE    0.1
-#define TEST_SENSITIVITY  0.01
-#define TEST_NUM_AVG      16
-#define TEST_TRIG_POS     0.1
-#define TEST_TRIG_CHANNEL 0
-
-
 static struct {
 	bool is_equal_width;
 
@@ -367,7 +355,7 @@ Var *digitizer_timebase( Var *v )
 			if ( tds520a.is_timebase )
 				return vars_push( FLOAT_VAR, tds520a.timebase );
 			else
-				return vars_push( FLOAT_VAR, TEST_TIME_BASE );
+				return vars_push( FLOAT_VAR, TDS520A_TEST_TIME_BASE );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -491,7 +479,7 @@ Var *digitizer_sensitivity( Var *v )
 			if ( tds520a.is_sens[ channel ] )
 				return vars_push( FLOAT_VAR, tds520a.sens[ channel ] );
 			else
-				return vars_push( FLOAT_VAR, TEST_SENSITIVITY );
+				return vars_push( FLOAT_VAR, TDS520A_TEST_SENSITIVITY );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -548,7 +536,7 @@ Var *digitizer_num_averages( Var *v )
 			if ( tds520a.is_num_avg )
 				return vars_push( INT_VAR, tds520a.num_avg );
 			else
-				return vars_push( INT_VAR, TEST_NUM_AVG );
+				return vars_push( INT_VAR, TDS520A_TEST_NUM_AVG );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -640,7 +628,7 @@ Var *digitizer_record_length( Var *v )
 			if ( tds520a.is_rec_len )
 				return vars_push( INT_VAR, tds520a.rec_len );
 			else
-				return vars_push( INT_VAR, TEST_REC_LEN );
+				return vars_push( INT_VAR, TDS520A_TEST_REC_LEN );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -724,7 +712,7 @@ Var *digitizer_trigger_position( Var *v )
 			if ( tds520a.is_trig_pos )
 				return vars_push( FLOAT_VAR, tds520a.trig_pos );
 			else
-				return vars_push( FLOAT_VAR, TEST_TRIG_POS );
+				return vars_push( FLOAT_VAR, TDS520A_TEST_TRIG_POS );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -797,7 +785,7 @@ Var *digitizer_trigger_channel( Var *v )
 			if ( tds520a.is_trigger_channel )
 				return vars_push( INT_VAR, tds520a.trigger_channel );
 			else
-				return vars_push( INT_VAR, TEST_TRIG_CHANNEL );
+				return vars_push( INT_VAR, TDS520A_TEST_TRIG_CHANNEL );
 		}
 		else if ( I_am == PARENT )
 		{
@@ -1072,7 +1060,7 @@ static Var *get_curve( Var *v, bool use_cursor )
 	if ( tds520a.is_rec_len  )
 		length = tds520a.rec_len;
 	else
-		length = TEST_REC_LEN;
+		length = TDS520A_TEST_REC_LEN;
 	array = T_malloc( length * sizeof( double ) );
 	for ( i = 0; i < length; i++ )
 		array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );

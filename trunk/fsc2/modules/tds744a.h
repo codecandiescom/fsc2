@@ -32,6 +32,18 @@
 #include "tds744a.conf"
 
 
+/* Here values are defined that get returned by the driver in the test run
+   when the digitizer can't be accessed - these values must really be
+   reasonable ! */
+
+#define TDS744A_TEST_REC_LEN      500
+#define TDS744A_TEST_TIME_BASE    0.1
+#define TDS744A_TEST_SENSITIVITY  0.01
+#define TDS744A_TEST_NUM_AVG      16
+#define TDS744A_TEST_TRIG_POS     0.1
+#define TDS744A_TEST_TRIG_CHANNEL 0
+
+
 
 #define TDS_POINTS_PER_DIV 50
 
