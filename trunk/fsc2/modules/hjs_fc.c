@@ -741,14 +741,14 @@ static double hjs_fc_set_field( double field, double error_margin )
 				 ( cur_volts > 10.0 && hjs_fc.slope < 0.0 ) )
 			{
 				print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
-					   new_field );
+					   field );
 				THROW( EXCEPTION );
 			}
 			else if ( ( cur_volts < 0.0 && hjs_fc.slope < 0.0 ) ||
 					  ( cur_volts > 10.0 && hjs_fc.slope > 0.0 ) )
 			{
 				print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
-					   new_field );
+					   field );
 				THROW( EXCEPTION );
 			}
 
