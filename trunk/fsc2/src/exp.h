@@ -42,6 +42,10 @@ typedef union {
 #define	E_KU_TOKEN	    280
 #define	E_MEG_TOKEN	    281
 #define	E_NEG	        282
+#define	E_AND           283
+#define	E_OR            284
+#define	E_XOR           285
+#define	E_NOT           286
 
 #define IF_TOK         2049
 #define ELSE_TOK       2050

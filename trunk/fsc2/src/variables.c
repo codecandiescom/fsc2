@@ -700,6 +700,31 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 }
 
 
+/*------------------------------------------------------------------------*/
+/* vars_lnegate() does a logical negate of an interger or float variable, */
+/* i.e. if the variables value is zero a value of 1 is returned in a new  */
+/* variable, otherwise 0.                                                 */
+/*------------------------------------------------------------------------*/
+
+VAR *vars_lnegate( Var *v )
+{
+	Var *new_var;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( ( v->type == INT_VAR && v->INT == 0 ) ||
+		 ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
+		new_var = vars_push( INT_VAR, 1 );
+	else
+		new_var = vars_push( INT_VAR, 0 );
+
+	vars_pop( v );
+
+	return new_var;
+}
+
+
 /*-----------------------------------------------------------------------*/
 /* vars_push() creates a new entry on the variable stack (which actually */
 /* is not really a stack but a linked list) and sets its type and value. */

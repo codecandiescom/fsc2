@@ -57,6 +57,10 @@ static Var *CV;
 %token E_KU_TOKEN	  280
 %token E_MEG_TOKEN	  281
 %token E_NEG		  282
+%token E_AND          283
+%token E_OR           284
+%token E_XOR          285
+%token E_NOT          286
 
 
 %token <vptr> E_VAR_TOKEN         /* variable name */
@@ -73,6 +77,8 @@ static Var *CV;
 %type <vptr> expr unit list1
 
 
+%left E_AND E_OR E_XOR
+%left E_NOT
 %left E_EQ E_LT E_LE E_GT E_GE
 %left '+' '-'
 %left '*' '/'
@@ -113,6 +119,10 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
 											"predefined function.\n",
 											Fname, Lc, $1->name );
 	                                THROW( EXCEPTION ); }
+       | expr E_AND expr          { $$ = vars_comp( COMP_AND, $1, $3 ); }
+       | expr E_OR expr           { $$ = vars_comp( COMP_OR, $1, $3 ); }
+       | expr E_XOR expr          { $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | E_NOT expr               { $$ = vars_lnegate( $2 ); }
        | expr E_EQ expr           { $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr E_LT expr           { $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr E_GT expr           { $$ = vars_comp( COMP_LESS, $3, $1 ); }
