@@ -374,6 +374,16 @@ an error message is printed and the experiment is stopped.
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e. without an argument.
 
+
+@item lockin_lock_keyboard()
+@findex lockin_lock_keyboard()
+Usually, during an experiment the keyboard of the lock-in amplifier is
+locked. But for situations where it would be useful to be able to control
+the lock-in also via its keyboard it can be unlocked (and also relocked)
+from within the program. To unlock the keyboard call this function with
+an argument of @code{0}, to relock the keyboard call it again with a
+non-zero argument or no argument at all.
+
 @end table
 
 
@@ -648,6 +658,15 @@ except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
 time interval.
 
+@item digitizer_lock_keyboard()
+@findex digitizer_lock_keyboard()
+Usually, during an experiment the keyboard of the digitizer is
+locked. But for situations where it would be useful to be able to
+control the digitizer also via its keyboard it can be unlocked (and also
+relocked) from within the program. To unlock the keyboard call this
+function with an argument of @code{0}, to relock the keyboard call it
+again with a non-zero argument or no argument at all.
+
 @end table
 
 
@@ -674,6 +693,15 @@ time interval.
 
 @item pulser_phase_reset()
 @findex pulser_phase_reset()
+
+@item pulser_lock_keyboard()
+@findex pulser_lock_keyboard()
+Usually, during an experiment the keyboard of the pulser is locked. But
+for situations where it would be useful to be able to control the pulser
+also via its keyboard it can be unlocked (and also relocked) from within
+the program. To unlock the keyboard call this function with an argument
+of @code{0}, to relock the keyboard call it again with a non-zero
+argument or no argument at all.
 
 @end table
 
