@@ -22,6 +22,10 @@ is compiled. You can use the command
 
    uudecode version.ugz | gunzip -c
 
+or, if you're in the main directory of fsc2,
+
+   make version
+
 to display the contents of the file (but it's pretty boring).
 
 If you are concerned about me receiving any information about you or
@@ -37,11 +41,11 @@ An alternative method, which still sends crash emails, but not to me
 but to someone you can select is changing the variable MAIL_ADDRESS
 in the main Makefile. If you change it to a different email address
 crash emails (but also bug reports send in by the users) will go to
-this email address instead to me. Perhaps this is the best method
-to go about it - set MAIL_ADDRESS to your own email address, and if
-anything should fail badly you can inspect the contents of the email
-and, if you don't find anything you don't want me to know about, you
-can still forward it to me.
+this email address. Perhaps this is the best method to go about it,
+set MAIL_ADDRESS to your own email address, and if anything should
+fail badly you can inspect the contents of the email and, if you
+don't find anything you don't want me to know about, you can still
+forward it on to me.
 
 Finally, sending crash mails can also be disabled when starting the
 program by passing it the "-noCrashMail" option.
