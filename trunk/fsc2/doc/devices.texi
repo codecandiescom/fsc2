@@ -1996,16 +1996,17 @@ specified, it is fixed to 32768 times the clocks oscillation period
 there is no maximum pattern length. Calling the function for either of
 these pulsers does nothing.
 
-In most cases the program will be able to figure out automatically how
-long the length of the longest pulse pattern in the experiment is going
-to be when doing the test run. The longest pulse pattern length is
-needed to set up the pulser correctly. Unfortunately, there are certain
-syntax constructs that make it difficult or even impossible to find out
-this maximum pattern length. These constructs are @code{FOREVER} loops
-and sometimes cases, where changes of pulse positions or lengths are
-done within @code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also
-see the discussion of the problems introduced by @code{FOREVER} loops
-and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
+For the @strong{Sony/Tektronix DG2020} the program will in most cases be
+able to figure out automatically how long the length of the longest
+pulse pattern in the experiment is going to be when doing the test
+run. The longest pulse pattern length is needed to set up the pulser
+correctly. Unfortunately, there are certain syntax constructs that make
+it difficult or even impossible to find out this maximum pattern
+length. These constructs are @code{FOREVER} loops and sometimes cases,
+where changes of pulse positions or lengths are done within
+@code{IF-ELSE} or @code{UNLESS-ELSE} constructs (please also see the
+discussion of the problems introduced by @code{FOREVER} loops and
+@code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
 
 Whenever there is a reason to suspect that these problems may occur one
 can set the maximum pulse pattern length manually (i.e.@: the end point
@@ -2020,6 +2021,13 @@ longer time needed to set up the pulser at the start of the
 experiment. On the other hand, too short a pattern length will lead to
 the experiment being stopped with an error message when the actual
 pattern length becomes larger than the one specified.
+
+In contrast with the @strong{Tektronix HFS9003} pulser the pattern
+length is per default set to the maximum possible length of 65536 times
+the time constant. If your pulse pattern is shorter than this length and
+using the defualt length isn't desirable (e.g.@: because you need a
+higher repetition rate) you can shorten the length of the pulse sequence
+by using this function.
 
 
 @anchor{pulser_phase_switch_delay}
