@@ -11,9 +11,9 @@ static bool other_data_request( int type, void * ptr );
 static void accept_1d_data( long x_index, long curve, int type, void *ptr );
 static void accept_2d_data( long x_index, long y_index, long curve, int type,
 							void *ptr );
-static void incr_x( long x_index, long len );
-static void incr_y( long y_index );
-static void incr_x_and_y( long x_index, long len, long y_index );
+static bool	incr_x( long x_index, long len );
+static bool	incr_y( long y_index );
+static bool	incr_x_and_y( long x_index, long len, long y_index );
 
 
 /*---------------------------------------------------------------------------*/
@@ -437,6 +437,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	Curve_2d *cv;
 	long i, j;
 	Scaled_Point *sp;
+	bool need_cut_redraw = UNSET;
 
 
 	/* Test if the curve number is OK */
@@ -488,12 +489,12 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	if ( x_index + len > G.nx )
 	{
 		if ( y_index >= G.ny )
-			incr_x_and_y( x_index, len, y_index );
+			need_cut_redraw |= incr_x_and_y( x_index, len, y_index );
 		else
-			incr_x( x_index, len );
+			need_cut_redraw |= incr_x( x_index, len );
 	}
 	else if ( y_index >= G.ny )
-		incr_y( y_index );
+		need_cut_redraw |= incr_y( y_index );
 
 	/* Find maximum and minimum of old and new data */
 
@@ -558,6 +559,8 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		cv->rw_min = rw_min;
 		cv->rw_max = rw_max;
 		cv->scale_changed = SET;
+
+		need_cut_redraw |= cut_data_rescaled( curve );
 	}
 
 	/* Now we're finished with rescaling and can set the new number of points
@@ -597,6 +600,10 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			cv->count++;
 			sp->exist = SET;
 		}
+
+		/* Tell the cross section handler about the new data */
+
+		need_cut_redraw |= cut_new_point( curve, i, y_index, sp->v );
 	}
 
 	if ( ! cv->is_scale_set )
@@ -610,11 +617,14 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	{
 		cv = G.curve_2d[ i ];
 		if ( cv->scale_changed )
-		{
 			recalc_XPoints_of_curve_2d( cv );
-			cv->scale_changed = UNSET;
-		}
 	}
+
+	if ( need_cut_redraw )
+		cut_new_data_redraw( );
+
+	for ( i = 0; i < G.nc; i++ )
+		cv->scale_changed = UNSET;
 }
 
 
@@ -622,7 +632,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 /* Increments the number of data in x-direction */
 /*----------------------------------------------*/
 
-static void incr_x( long x_index, long len )
+static bool incr_x( long x_index, long len )
 {
 	long i, j, k;
 	Curve_2d *cv;
@@ -657,6 +667,8 @@ static void incr_x( long x_index, long len )
 			                                        ( double ) ( new_Gnx - 1 );
 		cv->scale_changed = SET;
 	}
+
+	return cut_num_points_changed( X, new_Gnx );
 }
 
 
@@ -664,7 +676,7 @@ static void incr_x( long x_index, long len )
 /* Increments the number of data in y-direction */
 /*----------------------------------------------*/
 
-static void incr_y( long y_index )
+static bool incr_y( long y_index )
 {
 	long i, j, k;
 	Curve_2d *cv;
@@ -690,6 +702,8 @@ static void incr_y( long y_index )
 			cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / ( double ) y_index;
 		cv->scale_changed = SET;
 	}
+
+	return cut_num_points_changed( Y, y_index + 1 );
 }
 
 
@@ -697,13 +711,14 @@ static void incr_y( long y_index )
 /* Increments the number of data in both x- and y-direction */
 /*----------------------------------------------------------*/
 
-static void incr_x_and_y( long x_index, long len, long y_index )
+static bool incr_x_and_y( long x_index, long len, long y_index )
 {
 	long i, j, k;
 	Curve_2d *cv;
 	long new_Gnx = x_index + len;
 	Scaled_Point *old_points;
 	Scaled_Point *sp;
+	bool ret = UNSET;
 
 
 	for ( i = 0; i < G.nc; i++ )
@@ -744,4 +759,7 @@ static void incr_x_and_y( long x_index, long len, long y_index )
 
 		cv->scale_changed = SET;
 	}
+
+	ret = cut_num_points_changed( X, new_Gnx );
+	return ret || cut_num_points_changed( Y, y_index + 1 );
 }

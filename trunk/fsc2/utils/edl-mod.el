@@ -131,7 +131,6 @@
      "[+-]?[yY]\\>"
 	 "[cC][wW]\\>" ))
 
-
 (defvar edl-section-keywords
   '( "DEV\\(ICE\\)?S?:"
 	 "ASS\\(IGNMENT\\)?S?:"

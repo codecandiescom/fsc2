@@ -10,11 +10,12 @@ typedef struct {
 	int cut_dir;             /* direction of cut (i.e. X, Y) */
 	int cut_for_curve;       /* number of the curve the cut comes from */
 
-	unsigned long cut_index;
-
 	bool is_scale_set;       /* have scaling factors been calculated ? */
 	bool scale_changed;      /* have scaling factors changed ? */
 	bool is_fs;              /* state of full scale button */
+
+	long nx;                 /* number of points to display */
+	long index;              /* index in curve the cut is taken from */
 
 	int cur_1,
 		cur_2,
@@ -50,6 +51,11 @@ typedef struct {
 #include "fsc2.h"
 
 void cut_show( int dir, int pos );
+bool cut_data_rescaled( long curve );
+bool cut_num_points_changed( int dir, long num_points );
+bool cut_new_point( long curve, long x_index, long y_index, double val );
+void cut_new_data_redraw( void );
+void cut_new_curve_handler( void );
 void cut_form_close( void );
 void cut_undo_button_callback( FL_OBJECT *a, long b );
 void cut_close_callback( FL_OBJECT *a, long b );

@@ -1,13 +1,13 @@
 VARS:
 
-N = 300;
-M = 300;
+N = 100;
+M = 100;
 K;
 
 
 PREP:
 
-init_2d( 1, N, M );
+init_2d( 1, 0, 0 );
 
 EXP:
 
@@ -16,4 +16,5 @@ set_seed( 23423 );
 
 FOR K = 1:10000 {
 	display( ceil( N * random( ) ), ceil( M * random( ) ), random( ) );
+	wait( 150 ms );
 }

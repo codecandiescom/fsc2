@@ -48,8 +48,9 @@
 
 
 typedef	struct {
-	double v;
-	bool exist;
+	double v;                /* value of the point (in interval [0,1] */
+	bool exist;              /* set if value has been set at all */
+	long xp_ref;             /* index of the associated XPoint */
 } Scaled_Point;
 
 

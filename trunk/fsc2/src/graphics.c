@@ -1273,6 +1273,10 @@ void curve_button_callback( FL_OBJECT *obj, long data )
 		if ( data < 0 )
 		{
 			data = - data;
+
+			if ( data > G.nc )    /* button for non-existing curve triggered */
+				return;           /* via the keyboard */
+
 			switch( data )
 			{
 				case 1:

@@ -3,8 +3,8 @@ DEVICES:
 VARS:
 
 I, J, K;
-N = 50,
-M = 30;
+N = 80,
+M = 100;
 j[ 4, N ];
 k[ N ];
 a, b;
@@ -13,8 +13,10 @@ FILE;
 
 PREP:
 
-init_2d( 4, N, M, 350, 20, 3325, 0.34, "Pulse separation [ns]",
+init_2d( 4, 0, 0, 350, 20, 3325, 0.34, "Pulse separation [ns]",
 		 "Magnetic field [G]", "Echo intensity (arbitrary units)" );
+//init_2d( 4, N, M, 350, 20, 3325, 0.34, "Pulse separation [ns]",
+//		 "Magnetic field [G]", "Echo intensity (arbitrary units)" );
 
 EXP:
 
@@ -25,9 +27,9 @@ FOR K = 1 : M
 	FOR I = 1 : N
 	{
 		a = 0.001 * exp( - ( ( K - 0.8 * M ) / ( 0.2 * M ) )^2 )
-			* exp( - 0.8 * I / N );
+			* exp( - 0.85 * I / N );
 	    b = 0.0007 * exp( - ( ( K - 0.3 * M ) / ( 0.2 * M ) )^2 )
-			* exp( - 0.35 * I / N );
+			* exp( - 0.25 * I / N );
 
 		j[ 1, I ] = float( K  + I - 2 ) / float( M + N - 2 );
 		j[ 2, I ] = a + b;

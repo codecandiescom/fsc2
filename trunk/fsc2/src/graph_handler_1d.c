@@ -5,6 +5,7 @@
 
 #include "fsc2.h"
 
+
 static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
 							  Canvas *c );
 static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
@@ -18,6 +19,8 @@ static bool zoom_x_1d( Canvas *c );
 static bool zoom_y_1d( Canvas *c );
 static bool zoom_xy_1d( Canvas *c );
 static void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
+static void reconfigure_window_1d( Canvas *c, int w, int h );
+static void recalc_XPoints_1d( void );
 
 
 /*--------------------------------------------------------*/
@@ -63,7 +66,8 @@ int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
+							  Canvas *c )
 {
 	long i;
 	Curve_1d *cv;
@@ -199,7 +203,8 @@ void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+static void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
+								Canvas *c )
 {
 	int dummy;
 	bool scale_changed = UNSET;
@@ -302,7 +307,8 @@ void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+static void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
+							   Canvas *c )
 {
 	Curve_1d *cv;
 	XEvent new_ev;
@@ -420,7 +426,7 @@ void save_scale_state_1d( Curve_1d *cv )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_x_range_1d( Canvas *c )
+static bool change_x_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -457,7 +463,7 @@ bool change_x_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_y_range_1d( Canvas *c )
+static bool change_y_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -496,7 +502,7 @@ bool change_y_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_xy_range_1d( Canvas *c )
+static bool change_xy_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -553,7 +559,7 @@ bool change_xy_range_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_x_1d( Canvas *c )
+static bool zoom_x_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -603,7 +609,7 @@ bool zoom_x_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_y_1d( Canvas *c )
+static bool zoom_y_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -658,7 +664,7 @@ bool zoom_y_1d( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_xy_1d( Canvas *c )
+static bool zoom_xy_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -732,7 +738,7 @@ bool zoom_xy_1d( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
+static void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 {
 	long j, k;
 	int dx = 0,
@@ -789,7 +795,7 @@ void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 /* Handles changes of the window size. */
 /*-------------------------------------*/
 
-void reconfigure_window_1d( Canvas *c, int w, int h )
+static void reconfigure_window_1d( Canvas *c, int w, int h )
 {
 	long i;
 	Curve_1d *cv;
@@ -887,7 +893,7 @@ void reconfigure_window_1d( Canvas *c, int w, int h )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void recalc_XPoints_1d( void )
+static void recalc_XPoints_1d( void )
 {
 	long i;
 
