@@ -335,7 +335,7 @@ Var *pulser_shift( Var *v )
 
 	if ( v == NULL )
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
-			if ( p->num > 0 && p->is_active && p->is_dpos )
+			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
 	/* Otherwise run through the supplied pulse list */
@@ -416,7 +416,7 @@ Var *pulser_increment( Var *v )
 
 	if ( v == NULL )
 		for( p = dg2020_Pulses; p != NULL; p = p->next )
-			if ( p->num > 0 && p->is_active && p->is_dlen )
+			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
 	/* Otherwise run through the supplied pulse list */
