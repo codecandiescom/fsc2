@@ -26,7 +26,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c
 
 comp_modules  := dg2020_f dg2020_b hfs9000 tds754a tds744a tds540 tds520c \
-                 tds520a tds520 hp8647a er023m.c
+                 tds520a tds520 hp8647a er023m
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -41,7 +41,7 @@ tds520c       := tds520c.c tds520c_gpib.c tds520c_util.c
 tds520a       := tds520a.c tds520a_gpib.c tds520a_util.c
 tds520        := tds520.c  tds520_gpib.c  tds520_util.c
 hp8647a       := hp8647a.c hp8647a_util.c hp8647a_gpib.c hp8647a_lexer.c
-er023m        := er023m.c er023m_gpib.c
+er023m        := er023m.c  er023m_gpib.c
 
 src_headers   := $(addprefix $(sdir)/,$(headers))
 
