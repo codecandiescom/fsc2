@@ -448,7 +448,7 @@ foo.edl:17: XYZ: Invalid boolean argument ("bla") in abc().
 @end example
 @noindent
 (assuming that the string was @code{"bla"}) and an execption is thrown
-in all cases, even dring the experiement.
+in all cases, even dring the experiment.
 
 
 @subsection Returning data from EDL functions
