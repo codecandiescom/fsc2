@@ -78,7 +78,7 @@ Var *vars_pow( Var *v1, Var *v2 );
 Var *vars_negate( Var *v );
 Var *vars_comp( int comp_type, Var *v1, Var *v2 );
 Var *vars_push_simple( Var *v );
-Var *vars_push( int type, void *data );
+Var *vars_push( int type, ... );
 void vars_pop( Var *v );
 void vars_del_stack( void );
 void vars_arr_start( Var *a );
