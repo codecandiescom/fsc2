@@ -237,8 +237,8 @@ Var *func_get_long( const char *name, int *access, bool flag )
 	{
 		if ( ! flag )
 		{
-			eprint( FATAL, "%s:%ld: Function `%s' has not been "
-					"loaded.\n", Fname, Lc, f->name );
+			eprint( FATAL, "%s:%ld: Function `%s' has not been loaded.\n",
+					Fname, Lc, f->name );
 			THROW( EXCEPTION );
 		}
 		else                     /* some callers do their own error handling */
@@ -269,6 +269,7 @@ static int func_cmp2( const void *a, const void *b )
 
 Var *func_call( Var *f )
 {
+	static long in_call = 0;
 	Var *ap;
 	Var *ret = NULL;
 	int ac;
@@ -335,12 +336,16 @@ Var *func_call( Var *f )
 
 	/* Now call the function */
 
-	Cur_Func = f->name;
+	if ( in_call++ == 0 )
+		Cur_Func = f->name;
+
 	if ( ac != 0 )
 		ret = ( *f->val.fnct )( f->next );
 	else
 		ret = ( *f->val.fnct )( NULL );
-	Cur_Func = NULL;
+
+	if ( --in_call == 0 )
+		Cur_Func = NULL;
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
 	   all parameters - just keep the return value. Before starting to delete
@@ -348,7 +353,7 @@ Var *func_call( Var *f )
 
 	if ( ! vars_exist( f ) )
 	{
-		eprint( FATAL, "%s:%ld: Function `%s' messed up the variable stack.\n",
+		eprint( FATAL, "%s:%ld: Function %s() messed up the variable stack.\n",
 				Fname, Lc, Fncts[ i ].name );
 		THROW( EXCEPTION );
 	}
