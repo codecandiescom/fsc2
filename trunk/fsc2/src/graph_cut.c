@@ -216,14 +216,15 @@ static void cut_calc_curve( int dir, long index )
 		}
 		else
 		{
-			cv->s2d[ Y ] = scv->s2d[ Z ] / ( double ) ( G.z_axis.h - 1 )
-			               * ( double ) ( G.cut_canvas.h - 1 );
+			cv->s2d[ Y ] = scv->s2d[ Z ]
+						   / ( double ) ( G.z_axis.h - 1 )
+						   * ( double ) ( G.cut_canvas.h - 1 );
 			cv->shift[ Y ] = scv->shift[ Z ];
 
 			if ( dir == X )
 			{
 				cv->s2d[ X ] = scv->s2d[ Y ] / ( double ) ( G.canvas.h - 1 )
-					           * ( double ) ( G.cut_canvas.w - 1 );
+							   * ( double ) ( G.cut_canvas.w - 1 );
 				cv->shift[ X ] = scv->shift[ Y ];
 			}
 			else
@@ -239,6 +240,12 @@ static void cut_calc_curve( int dir, long index )
 								  "Rescale curves to fit into the window\n"
 								  "and switch on automatic rescaling" );
 		}
+	}
+	else if ( CG.is_fs )
+	{
+		cv->s2d[ X ] = ( double ) ( G.cut_canvas.w - 1 ) /
+				       ( double ) ( CG.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G.cut_canvas.h - 1 );
 	}
 
 	/* If the index is resonable store it (if called with index smaller than
@@ -374,8 +381,10 @@ bool cut_data_rescaled( long curve )
 	Curve_2d *scv = G.curve_2d[ G.active_curve ];
 
 
-	if ( ! G.is_cut || curve != G.active_curve )
+	printf( "1 cut_data_rescaled\n" );
+	if ( ! G.is_cut || ! CG.is_fs || curve != G.active_curve )
 		return FAIL;
+	printf( "2 cut_data_rescaled\n" );
 
 	/* Get the rescaled data of the cut from the 2d curve */
 
