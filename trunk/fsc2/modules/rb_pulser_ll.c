@@ -43,7 +43,8 @@ void rb_pulser_init( void )
 	int i;
 
 
-	/* Try to open all Rulbus cards used by the pulser */
+	/* Try to get handles for all Rulbus (clock and delay) cards used by
+	   the pulser */
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		if ( ( rb_pulser.clock_card[ i ].handle =
@@ -56,8 +57,9 @@ void rb_pulser_init( void )
 			rb_pulser_failure( SET, "Failure to initialize pulser" );
 
 	/* Make sure the ERT delay card can't emit end pulses yet (which could
-	   in turn trigger the following cards), then stop the clock card feeding
-	   the ERT delay card and finally set the delay for the card to 0 */
+	   in turn trigger the following cards), then stop the clock card
+	   possibly feeding the ERT delay card and finally set the delay for
+	   the card to 0 */
 
 	if ( rulbus_rb8514_delay_set_output_pulse(
 			 						  rb_pulser.delay_card[ ERT_DELAY ].handle,
@@ -148,8 +150,11 @@ void rb_pulser_init( void )
 
 
 /*------------------------------------------------------------------------*
- * If RF pulses might be generated switch on synthesizer pulse modulation
- * and set the pulse delay to the smallest possible value of 20 ns
+ * Function for switching on the synthesizer pulse modulation and setting
+ * the pulse delay to the smallest possible value of 20 ns (but that's
+ * only a nominal value, the real delay is quite a bit longer and has to
+ * be measured carefully, the additional intrinsic delay must be defined
+ * in the configuration file under the name SYNTHESIZER_INTRINSIC_DELAY)
  *------------------------------------------------------------------------*/
 
 static void rb_pulser_synthesizer_init( void )

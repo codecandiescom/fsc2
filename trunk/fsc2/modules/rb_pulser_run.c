@@ -236,7 +236,7 @@ void rb_pulser_delay_card_setup( void )
 				if ( card->next != NULL )
 					start += card->next->intr_delay;
 				else if ( f->self == PULSER_CHANNEL_RF )
-					start += SYNTHESIZER_DELAY;
+					start += SYNTHESIZER_INTRINSIC_DELAY;
 
 				/* Check that the pulse doesn't start earlier */
 
