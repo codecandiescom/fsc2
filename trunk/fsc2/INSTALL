@@ -93,16 +93,17 @@ support built into fsc2).
 B) Permissions
 ==============
 
-If you want to do more than just a few simple tests with fsc2 you should
+Unless you want to do just a few simple tests with fsc2 you should
 create a special account for it. fsc2 needs to be installed setuid'ed,
 so for security reasons its account should have as low privileges as
-possible so that no-one with this account is able to log in (e.g. by
-setting its shell in /etc/passwd to /bin/false), and the account shouldn't
-have root privileges! Most of the time fsc2 runs with the effective user
-ID (EUID) and effective group ID (EGID) set to the real users ID and group,
-but in a few places (e.g. when writing to log files, manipulating lock files
-or accessing shared memory or device files) it reverts back to the EUID and
-EGID of the fsc2 account.
+possible and it should be impossible to log into this account (e.g. by
+setting its shell in /etc/passwd to /bin/false). The account shouldn't
+have root privileges! Most of the time fsc2 runs with the effective
+user ID (EUID) and effective group ID (EGID) set to the real users ID
+and group, i.e. with only the permissions of the user starting fsc2,
+but in a few places (e.g. when writing to log files, manipulating
+lock files or accessing shared memory or device files) it must revert
+back to the EUID and EGID of the fsc2 account.
 
 
 What group the fsc2 account belongs to does not really matter. Relevant is
@@ -117,11 +118,11 @@ will have to either change the modes of the files to allow access by
 users of fsc2 belong to this group as one of their supplementary groups.
 
 
-By setting the group of the device file for the GPIB board to the group
-that fsc2 belongs to (i.e. usually 'uucp' or 'dialout') also the access
-permissions to the board's device file don't have to be set to allow
-either access by 'other' or to make all users members of the group that
-has access permissions.
+By setting the group of the device file for the GPIB board (and possibly
+other boards controlled by fsc2) to the group that fsc2 belongs to (i.e.
+usually 'uucp' or 'dialout') also the access permissions to the board's
+device file don't have to be set to allow either access by 'other' or to
+make all users members of the group that has access permissions.
 
 
 C) Preparing for Installation
@@ -238,31 +239,34 @@ be built into fsc2. Just comment out the line and the web server won't be
 available. If the web server gets included into fsc2 the next variable,
 DEFAULT_HTTP_PORT, determines on which port the web server will listen for
 incoming connections by default (use a number above 1023, lower numbered
-ports are only accessible by programs with root privileges).
+ports are only accessible by programs with root privileges). A reasonable
+choice is 8080.
 
 
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
 not change this variable except when you apply changes to the program on
 your own. In this case sending these kind of mails to me obviously doesn't
-make too much sense...
+make too much sense... Another obvious reason for changing it would be that
+the machine isn't connected to the internet.
 
 
 If you're going to use devices connected via the serial port there's
 another thing you've got to check. The program needs to know to which of
-your serial ports the device is connected. This is controlled by entries
-in the files in the 'config' directory. For each device connected via
-the serial port there's a line like
+your serial ports a device is connected. This is controlled by an entry
+in the configuration file for the device in the 'config' directory. For
+each device connected via the serial port there's a line like
 
 #define SERIAL_PORT     1
 
 This tells the program the number of the serial port. Serial ports are
-numbered starting at 0. So setting SERIAL_PORT to 0 means that the device
-will be accessed via the device file '/dev/ttyS0'. If you are more familiar
-with the DOS or Windows nomenclature, this means COM1. The serial port
-numbered 1 is accessed via 'dev/ttyS1' (re COM2 in DOS-speak). Make sure
-you to the correct number or the program will complain when it tries to
-access the device the first time.
+numbered starting with 0. So setting SERIAL_PORT to 0 means that the
+device will be accessed via the device file '/dev/ttyS0'. In DOS or
+Windows nomenclature this means COM1. The serial port numbered 1 is
+accessed via 'dev/ttyS1' (re COM2 in DOS-speak). Make sure to set the
+correct number or the program will complain when it tries to access
+the device about communication failures.
+
 
 
 D) Compiling and Installing
@@ -276,19 +280,20 @@ library is used), but warnings may occur when the documentation is
 created and some of the required tools are not available. It may even
 happen that the make process stops with an error message during this
 stage (i.e. while making the documentation). This does *not* mean that
-the program didn't compile succesfully!
+the program didn't compile succesfully, only that parts of the
+documentation could not be created.
 
 
-If you start 'make' from one of the subdirectories only the things in
-this subdirectory get made, so if you want to be sure that everything
-will get built always start 'make' from the main directory!
+Don't try to invoke 'make' from one of the sub-directories. While in
+some cases this might work, i.e. things in the sub-directory will
+be created, in most cases it won't even work that far.
 
 
 If you get more than a few warnings (about problems with fsc2, not header
 files included by fsc2) during the compilation stage of the program or if
 the make process fails completely please send me an email with the output
 of make. You can save the output of make to a file, e.g. 'makelog', by
-running make with the command
+running make with the command line
 
     make > makelog 2>&1
 
@@ -349,7 +354,7 @@ files and directories (assuming you've used the default locations, i.e.
 /usr/local/share/doc/fsc2/      (directory)
 /usr/local/man/man1/fsc2.1.gz   (file)
 /usr/local/info/fsc2.info.gz    (file)
-/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 15)
+/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 19)
 
 
 E) Getting started
@@ -374,7 +379,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-                      May 7, 2003             Much luck, Jens
+                      August 7, 2003             Much luck, Jens
 --
        _  _____  _____
       | ||_   _||_   _|         Jens.Toerring@physik.fu-berlin.de
