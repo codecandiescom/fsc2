@@ -192,10 +192,10 @@ void accept_new_data( bool empty_queue )
 }
 
 
-/*------------------------------------------------------------------*/
-/* This function examines the new data by looking at the first item */
-/* and calls the appropriate functions for dealing with the data.   */
-/*------------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Function examines the new data by looking at the first item    */
+/* and calls the appropriate functions for dealing with the data. */
+/*----------------------------------------------------------------*/
 
 static void unpack_and_accept( int dim, char *ptr )
 {
@@ -285,11 +285,11 @@ static void unpack_and_accept( int dim, char *ptr )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function for handling special commands that come disguised as data like */
-/* commands for clearing curves, changing scales etc. Here the type of the */
-/* command is determined and the appropriate functions are called.         */
-/*-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function for handling special commands that come disguised as data  */
+/* (commands for clearing curves, changing scales etc). The type of    */
+/* the command is determined and the appropriate functions are called. */
+/*---------------------------------------------------------------------*/
 
 static void other_data_request( int dim, int type, char *ptr )
 {
@@ -432,8 +432,8 @@ static void other_data_request( int dim, int type, char *ptr )
 
 
 /*--------------------------------------------------------*/
-/* function for storing and displaying of new data points */
-/* for the 1D graphic (when normal display mode is used). */
+/* Function for storing and displaying of new data points */
+/* for 1D graphics (when normal display mode is used).    */
 /*--------------------------------------------------------*/
 
 static void accept_1d_data( long x_index, long curve, int type, char *ptr )
@@ -835,7 +835,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 	}
 #endif
 
-	/* Get number of new data points and pointer to the start of the data */
+	/* Get number of new data points and a pointer to the start of the data */
 
 	x_len = get_number_of_new_points( &ptr, type );
 
@@ -847,9 +847,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 
 	cv = G2.curve_2d[ curve ];
 
-	/* Check if the new data fit into the already allocated memory, otherwise
-	   extend the memory area and figure out if this requires redrawing of the
-	   areas for the axes and the cut window. */
+	/* Check if the new data fit into the already allocated memory. If not
+	   extend the memory area and figure out if this requires redrawing of
+	   the areas of the axes and the cut window. */
 
 	if ( x_index + x_len > G2.nx )
 	{
@@ -880,7 +880,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		size_changed = SET;
 	}
 
-	/* Find maximum and minimum of old and new data and, if the minimum or
+	/* Find maximum and minimum of old and new data. If the minimum or
 	   maximum changed, (re)scale all old data */
 
 	old_rw_min = cv->rw_min;
@@ -909,9 +909,9 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			}
 		}
 
-		/* If data have not been scaled yet to the interval [0,1] and maximum
-		   value isn't identical to the minimum value anymore calculate the
-		   scaling */
+		/* If data have not been scaled yet to the interval [0,1] and the
+		   maximum value isn't identical to the minimum value anymore
+		   calculate the scaling */
 
 		if ( ! cv->is_scale_set && cv->rw_max != cv->rw_min )
 		{
@@ -980,11 +980,11 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 		}
 
 		/* Tell the cross section handler about the new data, its return value
-		   indicates if the cut needs to be redrawn */
+		   indicates if the cut graphics needs to be redrawn */
 
 		need_cut_redraw |= cut_new_points( curve, x_index, y_index, x_len );
 	}
-	else
+	else        /* 2-dimensional data field is to be included */
 	{
 		ptr += sizeof y_len;
 		for ( cur_ptr = ptr, i = y_index; i <= y_index + y_len; i++ )
@@ -1023,7 +1023,7 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			}
 
 			/* Tell the cross section handler about the new data, its return
-			   value indicates if the cut needs to be redrawn */
+			   value indicates if the cut graphics needs to be redrawn */
 
 			need_cut_redraw |= cut_new_points( curve, x_index, i, x_len );
 		}
