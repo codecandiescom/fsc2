@@ -25,7 +25,7 @@
    to the child process before it tries to send further data.
 
    Since the parent process will usually be busy displaying data and shouln't
-   be forces to constantly check for new data, the child process always has to
+   be forced to constantly check for new data, the child process always has to
    send a SIGNAL, NEW_DATA (that's SIGUSR2), before it actually sends the
    data. Thus the parent process is interrupted to read the data. If it has
    done so it again sends the DO_SEND signal to the child process.
@@ -67,7 +67,6 @@
 /* locally used routines */
 
 static void pipe_read( int fd, void *buf, size_t bytes_to_read );
-static void comm_error( int rw, int type );
 static Data_Buffer *get_new_data_buffer( void );
 
 
@@ -90,8 +89,7 @@ long reader( void *ret )
 	switch ( header.type )
 	{
 		case C_EPRINT :          
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			/* get the string to be printed... */
 
@@ -110,8 +108,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_MESSAGE :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			str[ 0 ] = get_string( header.data.len );
 			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
@@ -127,8 +124,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_ALERT :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			str[ 0 ] = get_string( header.data.len );
 			pipe_read( pd[ READ ], str[ 0 ], header.data.len );
@@ -144,8 +140,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_CHOICES :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			/* get number of buttons and number of default button */
 
@@ -180,8 +175,7 @@ long reader( void *ret )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			/* get the 4 parameter strings */
 
@@ -212,8 +206,7 @@ long reader( void *ret )
 			break;
 
 		case C_INIT_GRAPHICS :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
+			assert( I_am == PARENT );       /* only to be read by the parent */
 
 			/* read the dimension and the numbers of points */
 
@@ -243,46 +236,6 @@ long reader( void *ret )
 			for ( i = 0; i < 2 ; i++ )
 				if ( str[ i ] != NULL )
 					T_free( str[ i ] );
-			break;
-
-		case C_DATA :
-			if ( I_am == CHILD )            /* only to be read by the parent */
-				comm_error( READ, header.type );
-
-			dbuf = get_new_data_buffer( );
-
-			/* get x- an y-indices and the data type */
-
-			pipe_read( pd[ READ ], &dbuf->nx, sizeof( long ) );
-			pipe_read( pd[ READ ], &dbuf->ny, sizeof( long ) );
-			pipe_read( pd[ READ ], &dbuf->type, sizeof( int ) );
-
-			switch( dbuf->type )
-			{
-				case INT_VAR :
-					dbuf->data.lval = header.data.long_data;
-					break;
-
-				case FLOAT_VAR :
-					dbuf->data.dval = header.data.double_data;
-					break;
-
-				case INT_TRANS_ARR :
-					dbuf->len = header.data.len;
-					dbuf->data.lpnt = T_malloc( dbuf->len * sizeof( long ) );
-					pipe_read( pd[ READ ], &dbuf->data.lpnt,
-							   dbuf->len * sizeof( long ) );
-					break;
-
-				case FLOAT_TRANS_ARR :
-					dbuf->len = header.data.len;
-					dbuf->data.dpnt = T_malloc( dbuf->len * sizeof( double ) );
-					pipe_read( pd[ READ ], &dbuf->data.dpnt,
-							   dbuf->len * sizeof( double ) );
-					break;
-			}
-			
-			pipe_read( pd[ READ ], &dbuf->overdraw_flag, sizeof( int ) );
 			break;
 
 		case C_STR :
@@ -326,7 +279,7 @@ long reader( void *ret )
 			break;
 
 		default :                     /* this should never be reached... */
-			comm_error( READ, header.type );
+			assert( 1 == 0 );
 	}
 
 	/* The parent process now tells the child process that it's again ready
@@ -380,11 +333,6 @@ void pipe_read( int fd, void *buf, size_t bytes_to_read )
                        strings (char *)
 	C_SHOW_FSELECTOR : 4 strings (char *) with identical meaning as the para-
 	                   meter for fl_show_fselector()
-	C_DATA           : x- and y-indices (long)
-	                   data type (int)
-					   for arrays: length of array (long)
-					   data - either long, double, long * or double *
-					   overdraw flag (int)
 	C_STR            : string (char *)
 	C_INT            : integer data (int)
 	C_LONG,          : long integer data (long)
@@ -432,8 +380,7 @@ void writer( int type, ... )
 	switch ( type )
 	{
 		case C_EPRINT :          
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
@@ -442,8 +389,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_MESSAGE :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
@@ -456,8 +402,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_ALERT :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			header.data.len = strlen( str[ 0 ] );
@@ -470,8 +415,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_CHOICES :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			str[ 0 ] = va_arg( ap, char * );
 			n1 = va_arg( ap, int );
@@ -495,8 +439,7 @@ void writer( int type, ... )
 			break;
 
 		case C_INIT_GRAPHICS :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			dim = va_arg( ap, long );
 			nx = va_arg( ap, long );
@@ -524,8 +467,7 @@ void writer( int type, ... )
 			break;
 
 		case C_SHOW_FSELECTOR :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
+			assert( I_am == CHILD );      /* only to be written by the child */
 
 			/* set up header and write it */
 
@@ -544,60 +486,6 @@ void writer( int type, ... )
 			for ( i = 0; i < 4; i++ )
 				if ( str[ i ] != NULL )
 					write( pd[ WRITE ], str[ i ], header.data.str_len[ i ] );
-			break;
-
-		case C_DATA :
-			if ( I_am == PARENT )       /* only to be written by the child */
-				comm_error( WRITE, type );
-
-			/* Get x- and y-indices */
-
-			nx = va_arg( ap, long );
-			ny = va_arg( ap, long );
-
-			/* Get data type and - for arrays, the array length */
-
-			data_type = va_arg( ap, int );
-			if ( data_type & ( INT_TRANS_ARR | FLOAT_TRANS_ARR ) )
-				header.data.len = ( size_t ) va_arg( ap, long );
-
-			/* Get the data or, for arrays, pointers to the data. For simple
-			   data types the data are stored in the header. */
-
-			switch( data_type )
-			{
-				case INT_VAR :
-					header.data.long_data = va_arg( ap, long );
-					break;
-
-				case FLOAT_VAR :
-					header.data.double_data = va_arg( ap, double );
-					break;
-
-				case INT_TRANS_ARR :
-					lpnt = va_arg( ap, long * );
-					break;
-
-				case FLOAT_TRANS_ARR :
-					dpnt = va_arg( ap, double * );
-					break;
-			}
-
-			/* Get the overdraw flag */
-
-			n1 = va_arg( ap, int );
-
-			/* Now send all the data */
-
-			write( pd[ WRITE ], &header, sizeof( CS ) );
-			write( pd[ WRITE ], &nx, sizeof( long ) );
-			write( pd[ WRITE ], &ny, sizeof( long ) );
-			write( pd[ WRITE ], &data_type, sizeof( int ) );
-			if ( data_type == INT_TRANS_ARR )
-				write( pd[ WRITE ], lpnt, header.data.len * sizeof( long ) );
-			if ( data_type == FLOAT_TRANS_ARR )
-				write( pd[ WRITE ], dpnt, header.data.len * sizeof( double ) );
-			write( pd[ WRITE ], &n1, sizeof( int ) );
 			break;
 
 		case C_STR :
@@ -632,23 +520,13 @@ void writer( int type, ... )
 			break;
 
 		default :                     /* this should never be reached... */
-			comm_error( WRITE, type );
+			assert( 1 == 0 );
 	}
 
 
 	va_end( ap );
 }
 
-
-
-void comm_error( int rw, int type )
-{
-	eprint( FATAL, "INTERNAL ERROR (%s:%d): %s process isn't allowed to %s "
-			"messages of type %d.\n", __FILE__, __LINE__, 
-			I_am == PARENT ? "Parent" : "child",
-			rw == READ ? "read" : "write", type );
-	THROW( EXCEPTION );
-}
 
 
 Data_Buffer *get_new_data_buffer( void )
