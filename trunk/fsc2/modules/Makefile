@@ -29,7 +29,7 @@ simp_modules  := User_Functions.c sr510.c sr530.c sr810.c sr830.c \
 				 kontron4060.c lakeshore330.c pt2025.c er032m.c ips20_4.c \
 				 $(addsuffix .c,$(s_band_list))
 
-comp_modules  := dg2020_f dg2020_b hfs9000 er023m lecroy9400 $(tds_list)
+comp_modules  := dg2020_f dg2020_b hfs9000 ep385 er023m lecroy9400 $(tds_list)
 
 dg2020_f      := dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
 				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
@@ -37,6 +37,8 @@ dg2020_b      := dg2020_b.c dg2020_gen_b.c dg2020_pulse_b.c dg2020_util_b.c \
 				 dg2020_init_b.c dg2020_run_b.c dg2020_gpib_b.c
 hfs9000       := hfs9000.c hfs9000_gen.c hfs9000_pulse.c hfs9000_util.c \
 				 hfs9000_init.c hfs9000_run.c hfs9000_gpib.c
+ep385         := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c \
+				 ep385_init.c ep385_run.c ep385_gpib.c
 tds754a       := tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a       := tds744a.c tds744a_gpib.c tds744a_util.c
 tds540        := tds540.c  tds540_gpib.c  tds540_util.c

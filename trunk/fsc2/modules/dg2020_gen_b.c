@@ -577,10 +577,11 @@ bool dg2020_set_phase_reference( int phs, int function )
 /* in a PHASE_SETUP commmand.                                          */
 /*---------------------------------------------------------------------*/
 
-bool dg2020_phase_setup_prep( int phs, int type, int pod, long val )
+bool dg2020_phase_setup_prep( int phs, int type, int dummy, long pod )
 {
-	pod = pod;                        /* keep the compiler happy... */
-	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+	dummy = dummy;
+	fsc2_assert( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+	fsc2_assert( phs == 0 || phs == 1 );
 
 	Cur_PHS = phs;
 
@@ -608,14 +609,14 @@ bool dg2020_phase_setup_prep( int phs, int type, int pod, long val )
 
 	/* Check that pod number is in valid range */
 
-	if ( val < 0 || val >= MAX_PODS )
+	if ( pod < 0 || pod >= MAX_PODS )
 	{
-		print( FATAL, "Invalid pod number %ld.\n", val );
+		print( FATAL, "Invalid pod number %ld.\n", pod );
 		THROW( EXCEPTION );
 	}
 
 	dg2020_phs[ phs ].is_set[ type ] = SET;
-	dg2020_phs[ phs ].pod[ type ] = &dg2020.pod[ val ];
+	dg2020_phs[ phs ].pod[ type ] = &dg2020.pod[ pod ];
 
 	return OK;
 }
@@ -638,7 +639,7 @@ bool dg2020_phase_setup( int phs )
 	if ( dg2020_phs[ phs ].function == NULL )
 	{
 		print( SEVERE, "No function has been associated with "
-			   "PHASE_SETUP_%1d.\n", phs );
+			   "PHASE_SETUP_%1d.\n", phs + 1 );
 		return FAIL;
 	}
 
@@ -651,7 +652,7 @@ bool dg2020_phase_setup( int phs )
 		f = dg2020_phs[ phs ].function;
 
 		/* Check that the pod reseved for the current phase is reserved for
-		   the function that we're going to phasecycle */
+		   the function that we're going to phase-cycle */
 
 		for ( j = 0; j < f->num_pods; j++ )
 			if ( dg2020_phs[ phs ].pod[ i ] == f->pod[ j ] )
@@ -682,8 +683,8 @@ bool dg2020_phase_setup( int phs )
 
 	if ( ! is_set )
 	{
-		print( SEVERE, "No pods have been assigned to phase in "
-			   "PHASE_SETUP_%1d.\n", phs );
+		print( SEVERE, "No pods have been assigned to phases in "
+			   "PHASE_SETUP_%1d.\n", phs + 1 );
 		return FAIL;
 	}
 

@@ -245,10 +245,6 @@ bool hfs9000_is_needed = UNSET;
 HFS9000 hfs9000;
 PULSE *hfs9000_Pulses = NULL;
 bool hfs9000_IN_SETUP = UNSET;
-const char *hfs9000_fnames[ ] = { "MW", "TWT", "TWTGAT", "DET", "DETGAT",
-								  "DFNS", "RF", "RFGATE", "PSHAPE", "PHASE1",
-								  "PHASE2", "OTHER1", "OTHER2", "OTHER3",
-								  "OTHER4" };
 
 #else
 
@@ -256,7 +252,6 @@ extern bool hfs9000_is_needed;
 extern HFS9000 hfs9000;
 extern PULSE *hfs9000_Pulses;
 extern bool hfs9000_IN_SETUP;
-extern const char *hfs9000_fnames[ PULSER_CHANNEL_NUM_FUNC ];
 
 #endif
 

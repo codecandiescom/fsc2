@@ -94,15 +94,17 @@ etc.).
 
 
 The first statement of the @code{ASSIGNMENTS} section has to be the
-setting of the time base of the pulser. All pulsers function similarly:
-they have a certain number of time slices (usually 65536, 2^16) and for
-each of them the output of the pulser can be either set to a high or a
-low voltage. By setting the output during one or more of these time
-slices to a high voltage (and for the neighboring slices to low) pulses
-are created.  The time base to be set first in the @code{ASSIGNMENT}
-section is the length of each of these time slices. From the above it is
-clear, that all pulses (as well as all the times between pulses) have to
-be integer multiples of the length of the time base.
+setting of the time base of the pulser unless the pulser has a fixed
+timebase, in which case no setting of the time base is possible. All
+pulsers function similarly: they have a certain number of time slices
+(usually 65536, 2^16) and for each of them the output of the pulser can
+be either set to a high or a low voltage. By setting the output during
+one or more of these time slices to a high voltage (and for the
+neighboring slices to low) pulses are created.  The time base to be set
+first in the @code{ASSIGNMENT} section is the length of each of these
+time slices. From the above it is clear, that all pulses (as well as all
+the times between pulses) have to be integer multiples of the length of
+the time base.
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -198,8 +200,8 @@ determine the repetition rate of the experiment, otherwise the pulser
 will repeat the pulse sequence at the highest possible rate.
 
 On the other hand, when using an external trigger one may want to set
-the trigger level, slope and, possibly, the trigger input
-impedance. This done using a statement similar to one of
+the trigger level, slope and, possibly, the trigger input impedance. For
+pulsers allowing this this done using a statement similar to one of
 these@footnote{The keywords @code{LEVEL} can be shortens to @code{LEV},
 @code{SLOPE} to @code{SL}, @code{POSITIVE} to @code{POS},
 @code{NEGATIVE} to @code{NEG}, @code{IMPEDANCE} to @code{IMP} and,
@@ -214,7 +216,8 @@ TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
 @noindent
 Please note: The trigger input impedance can only be set for the
-@strong{Sony/Tektronix DG2020}.
+@strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385} does not
+allow the setting of any of these paramters.
 
 For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix

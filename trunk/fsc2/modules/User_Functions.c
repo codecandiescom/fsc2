@@ -95,7 +95,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	if ( ASeq[ 0 ].defined )
 		aseq = ASeq;
-	else if ( ASeq[ 0 ].defined )
+	else if ( ASeq[ 1 ].defined )
 		aseq = ASeq + 1;
 	else
 	{
@@ -150,7 +150,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			print( FATAL, "Two digitizer channel nunmbers are needed but "
+			print( FATAL, "Two digitizer channel numbers are needed but "
 				   "second argument isn't one.\n" );
 			THROW( EXCEPTION );
 		}
@@ -177,16 +177,16 @@ static Var *get_phase_cycled_area_1( Var *v )
 
 	win_list = LONG_P T_malloc( num_windows * sizeof *win_list );
 
+	if ( V != NULL )
+		for ( i = 0; i < num_windows; V = vars_pop( V ), i++ )
+			win_list[ i ] = get_long( V, "window number" );
+	else
+		win_list[ 0 ] = -1;              /* No window is to be used ! */
+
+	/* Also get memory for the data */
+
 	TRY
 	{
-		if ( V != NULL )
-			for ( i = 0; i < num_windows; V = vars_pop( V ), i++ )
-				win_list[ i ] = get_long( V, "window number" );
-		else
-			win_list[ 0 ] = -1;              /* No window is to be used ! */
-
-		/* Also get memory for the data */
-
 		data = DOUBLE_P T_malloc( num_windows * sizeof *data );
 		TRY_SUCCESS;
 	}
@@ -373,7 +373,7 @@ static Var *get_phase_cycled_area_2( Var *v )
 
 		if ( channels_needed == 2 && ! is_channel )
 		{
-			print( FATAL, "Two digitizer channel nunmbers are needed but "
+			print( FATAL, "Two digitizer channel numbers are needed but "
 				   "second argument isn't one.\n" );
 			THROW( EXCEPTION );
 		}
@@ -580,6 +580,7 @@ static bool get_channel_number( Var *v, long *channel )
 	}
 
 	vars_push( INT_VAR, *channel );
+	vars_push( INT_VAR, 1 );
 	vn = func_call( func_ptr );
 
 	result = ( vn->val.lval != 0 );

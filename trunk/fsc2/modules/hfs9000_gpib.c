@@ -201,7 +201,7 @@ bool hfs9000_init( const char *name )
 			continue;
 
 		sprintf( cmd, "PGENA:CH%1d:SIGN \"%s\"\n", i,
-				 hfs9000_fnames[ hfs9000.channel[ i ].function->self ] );
+				 Function_Names[ hfs9000.channel[ i ].function->self ] );
 		if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 			hfs9000_gpib_failure( );
 	}

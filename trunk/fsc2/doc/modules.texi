@@ -1702,6 +1702,7 @@ structure, @code{pulser_struct}:
 struct @{
     const char *name;
     bool needs_phase_pulses;
+    bool has_pods;
 
     bool ( *assign_channel_to_function )( int function, long channel );
     bool ( *assign_function )( int function, long connector );
@@ -1760,7 +1761,7 @@ corresponding entry in the structure unchanged, i.e.@: leave it a
 detail what the different functions are supposed to do and the meaning
 of the arguments of the functions.
 
-But first the two variables to be set will be discussed. The first
+But first the three variables to be set will be discussed. The first
 variable, @code{name}, is simply the name of the pulser that will be
 used in error messages etc. When setting this variable within the
 @code{init_hook} function it should first be checked if it is still a
@@ -1769,11 +1770,16 @@ quit immediately - when @code{name} is not @code{NULL} a different
 pulser module has already been loaded and currently it is not possible
 to deal with more than one pulser.
 
-The second variable, @code{needs_phase_pulses} must be set to a true
+The second variable, @code{needs_phase_pulses}, must be set to a true
 value only if the experiment the pulser is connected to has phase
 switches that need their own pulses and if the module is prepared to
 create these phase pulses automatically. Currently, this is only the
 case for the Frankfurt S-band spectrometer.
+
+The third variable, @code{has_pods}, must be set when the pulser has
+internal channels for storing pulse sequences which get mapped to
+certain output connectors (pods), like the @code{Sony/Tektronix DG2020}.
+Per default the variable is set to false.
 
 
 @subsection Pulse functions
@@ -1840,10 +1846,10 @@ type of pulsers th function is for assigning a pulse function to one of
 the output connectors.
 
 As discussed in the chapter about pulsers (@pxref{Channel setup}) there
-are 15 different types of pulse functions. To avoid having to change
-your module in case the numbering of the functions changes you should
-only use symbolic names for functions. These symbolic names are defined
-in @file{src/global.h}:
+are currently 15 different types of pulse functions. To avoid having to
+change your module in case the numbering of the functions changes you
+should only use symbolic names for functions. These symbolic names are
+defined in @file{src/global.h}:
 @example
 enum @{
     PULSER_CHANNEL_MW = 0,
@@ -1862,38 +1868,40 @@ enum @{
     PULSER_CHANNEL_OTHER_3,
     PULSER_CHANNEL_OTHER_4
 @};
+@end example
+@noindent
+You also better don't rely on the number of pulse functions, instead of
+using a hardcoded value of 15 use instead the
+@code{PULSER_CHANNEL_NUM_FUNC}.
 
-#if defined ( FSC2_MAIN )
+Beside the definition of pulse function numbers there is also an array
+with the full names for the functions (to be used in error messages).
+@example
 const char *Function_Names[ ] = @{
     "MW", "TWT", "TWT_GATE","DETECTION", "DETECTION_GATE",
     "DEFENSE", "RF", "RF_GATE", "PULSE_SHAPE", "PHASE_1",
     "PHASE_2", "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" @};
-#else
-extern const char *Function_Names[ ];
-#endif
 @end example
-@noindent
-Beside the definition of pulse function numbers there is also an array
-with the full names for the functions (to be used in error messages).
 
 The functions @w{@code{PULSER_CHANNEL_PHASE_1}} and
-@w{@code{PULSER_CHANNEL_PHASE_2}} are a bit different from the rest because
-these functions are reserved for automatically created pulses pulses, so
-the user shouldn't be able to create pulses with both these functions.
+@w{@code{PULSER_CHANNEL_PHASE_2}} are a bit different from the rest
+because these functions are reserved for automatically created phase
+pulses, so the user should never be able to create pulses with both
+these functions.
 
-The second argument obviously is either the number of channel (for
-pulsers of the first type) or the output connector (for pulsers of the
-second type). Please note that for pulsers of the first type several
-channels may be assigned to one function (e.g.@: when automatically
-created phase pulses are used, i.e.@: the variable
+The second argument of @code{assign_channel_to_function()} obviously is
+either the number of channel (for pulsers with no pods) or the output
+connector (for pulsers with pods). Please note that for pulsers of the
+first type several channels may be assigned to one function (e.g.@: when
+automatically created phase pulses are used, i.e.@: the variable
 @code{needs_phase_pulses} is set).
 
 
 @item bool assign_function( int function, long connector )
 For pulsers of the second type, i.e.@: pulsers that have internal
-channels and independent output channels this function is used to
-associate a pulse function to one of the output functions, i.e.@: if in
-the function description the @code{POD} keyword is found:
+channels and independent output pods this function is used to associate
+a pulse function to one of the output functions, i.e.@: if in the
+function description the @code{POD} keyword is found:
 @example
 ASSIGNMENTS:
   MW: POD = 3, ...

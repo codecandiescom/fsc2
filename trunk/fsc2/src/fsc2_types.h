@@ -67,6 +67,7 @@
 #define G_HASH_ENTRY_P   ( G_Hash_Entry * )
 #define PULSE_P          ( PULSE * )
 #define PULSE_PP         ( PULSE ** )
+#define PULSE_PPP        ( PULSE *** )
 #define DG2020_STORE_P   ( DG2020_STORE * )
 #define CHANNEL_PP       ( CHANNEL ** )
 #define WINDOW_P         ( WINDOW * )

@@ -323,10 +323,18 @@ static void lecroy9400_window_check_3( void )
 #endif
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* The function is used to translate back and forth between the */
+/* channel numbers the way the user specifies them in the EDL   */
+/* program and the channel numbers as specified in the header   */
+/* file. When the channel number can't be maped correctly, the  */
+/* way the function reacts depends on the value of the third    */
+/* argument: If this is UNSET, an error message gets printed    */
+/* and an exception ios thrown. If it is SET -1 is returned to  */
+/* indicate the error.                                          */
+/*--------------------------------------------------------------*/
 
-long lecroy9400_translate_channel( int dir, long channel )
+long lecroy9400_translate_channel( int dir, long channel, bool flag )
 {
 	if ( dir == GENERAL_TO_LECROY9400 )
 	{
@@ -371,11 +379,15 @@ long lecroy9400_translate_channel( int dir, long channel )
 			case DIGITIZER_CHANNEL_AUX   :
 			case DIGITIZER_CHANNEL_AUX1  :
 			case DIGITIZER_CHANNEL_AUX2  :
+				if ( flag )
+					return -1;
 				print( FATAL, "Digitizer has no channel %s.\n",
 					   Digitizer_Channel_Names[ channel ] );
 				THROW( EXCEPTION );
 
 			default :
+				if ( flag )
+					return -1;
 				print( FATAL, "Invalid channel number %ld.\n", channel );
 				THROW( EXCEPTION );
 		}
@@ -418,7 +430,6 @@ long lecroy9400_translate_channel( int dir, long channel )
 		}
 	}
 
-	fsc2_assert( 1 == 0 );
 	return -1;
 }
 

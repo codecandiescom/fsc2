@@ -41,7 +41,8 @@ int hfs9000_init_hook( void )
 	int i;
 
 
-	pulser_struct.name = DEVICE_NAME;
+	pulser_struct.name     = DEVICE_NAME;
+	pulser_struct.has_pods = UNSET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
@@ -324,7 +325,7 @@ Var *pulser_state( Var *v )
 
 
 /*------------------------------------------------------------*/
-/* Switches an individual channel of the puleser on or of or, */
+/* Switches an individual channel of the pulser on or off or, */
 /* if called with just one argument, returns the state.       */
 /*------------------------------------------------------------*/
 

@@ -52,9 +52,10 @@ void pulser_struct_init( void )
 
 	for ( i = 0; i < EDL.Num_Pulsers; i++ )
 	{
-		pulser_struct[ i ].needs_phase_pulses         = UNSET;
-
 		pulser_struct[ i ].name                       = NULL;
+
+		pulser_struct[ i ].needs_phase_pulses         = UNSET;
+		pulser_struct[ i ].has_pods                   = UNSET;
 
 		pulser_struct[ i ].assign_function            = NULL;
 		pulser_struct[ i ].assign_channel_to_function = NULL;
@@ -1208,9 +1209,12 @@ Var *p_get_by_num( long pnum, int type )
 /* set yet)                                                             */
 /* 'val' means high or low to be set on the pod channel to set the      */
 /* requested phase (0: low, !0: high)                                   */
+/* The last parameter indicates if this function was invoked with a POD */
+/* keyword - this would be at least dubious for pulsers that don't have */
+/* pods but just channels.                                              */
 /*----------------------------------------------------------------------*/
 
-void p_phs_setup( int func, int type, int pod, long val )
+void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
 {
 	is_pulser_driver( );
 
@@ -1225,6 +1229,13 @@ void p_phs_setup( int func, int type, int pod, long val )
 					"setting up phase channels" );
 	is_pulser_func( pulser_struct[ Cur_Pulser ].phase_setup,
 					"setting up phase channels" );
+
+	if ( is_pod && ! pulser_struct[ Cur_Pulser ].has_pods )
+	{
+		print( FATAL, "%s: Pulser has no pods, just channels.\n",
+			   pulser_struct[ Cur_Pulser ].name );
+		THROW( EXCEPTION );
+	}
 
 	if ( call_push( NULL, pulser_struct[ Cur_Pulser ].name ) == NULL )
 		THROW( OUT_OF_MEMORY_EXCEPTION );

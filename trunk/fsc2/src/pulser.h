@@ -32,6 +32,7 @@ typedef struct {
 	const char *name;
 
 	bool needs_phase_pulses;
+	bool has_pods;
 
 	bool ( *assign_function )( int function, long connector );
 	bool ( *assign_channel_to_function )( int function, long channel );
@@ -119,7 +120,7 @@ void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
 Var *p_get_by_num( long pnum, int type );
 
-void p_phs_setup( int func, int type, int pod, long val );
+void p_phs_setup( int func, int type, int pod, long val, bool is_pod );
 void p_phs_end( int func );
 
 void p_set_psd( int func, Var *v );

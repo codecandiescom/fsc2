@@ -475,16 +475,19 @@ phsl:     /* empty */
 
 phsp:     /* empty */
 		| phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
-												  -1, $2 ); }
+												  -1, $2, UNSET ); }
         | phsp POD1_TOK sep1
 		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $4 ); }
+												  0, $4, SET ); }
         | phsp POD2_TOK sep1
 		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  1, $4 ); }
+												  1, $4, SET ); }
 		| POD_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3 ); }
+												  0, $3, SET ); }
+		| CH_TOKEN sep1 INT_TOKEN
+          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
+												  0, $3, UNSET ); }
 ;
 
 phsv:     INT_TOKEN                { $$ = $1; }

@@ -178,6 +178,7 @@ void dg2020_basic_pulse_check( void )
 			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
 			{
 				p->function->pm = BOOL_P T_malloc( p->pc->len *
+											 sizeof( *p->function->pm ) *
 											 ( PHASE_CW - PHASE_PLUS_X + 1 ) );
 				for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 					for ( j = 0; j < p->pc->len; j++ )
@@ -360,9 +361,9 @@ static void dg2020_phase_setup_check( FUNCTION *f )
 		}
 	}
 
-	/* In the basic pulse check we created made a list of all phase types
-	   needed for the current function. Now we can check if these phase types
-	   are also defined in the phase setup. */
+	/* In the basic pulse check we created a list of all phase types needed
+	   for the current function. Now we can check if these phase types are
+	   also defined in the phase setup. */
 
 	for ( i = 0; i <= PHASE_CW - PHASE_PLUS_X; i++ )
 	{

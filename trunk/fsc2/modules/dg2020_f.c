@@ -42,7 +42,8 @@ int dg2020_f_init_hook( void )
 	int i, j, k;
 
 
-	pulser_struct.name = DEVICE_NAME;
+	pulser_struct.name     = DEVICE_NAME;
+	pulser_struct.has_pods = SET;
 
 	/* Set global variable to indicate that GPIB bus is needed */
 
