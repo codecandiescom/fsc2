@@ -199,9 +199,9 @@ sub fcntl_error {
 #
 
 sub fcntl_system_error {
+	local $!;
 	my $flock_struct = shift;
-	return $! = $flock_struct->{ errno } if $flock_struct->{ errno };
-	return 'undef';
+	return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : 'undef';
 }
 
 
