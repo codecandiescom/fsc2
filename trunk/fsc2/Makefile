@@ -192,6 +192,9 @@ tags:
 		  ${tds754a} tds754a.h ${tds520a} tds520a.h
 
 
+# `clean' delets just all the files remaining from the compilation while
+# `distclean' also removes all executables and shared libraries
+
 clean:
 	$(RM) $(RMFLAGS) *.o *.output *_parser.c *_parser.h \
 		*_lexer.c fsc2_clean.c *.lo mem
