@@ -208,6 +208,31 @@ void ep385_dump_channels( FILE *fp )
 }
 
 
+/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+
+void ep385_calc_max_length( FUNCTION *f )
+{
+	int i, j;
+	CHANNEL *ch;
+	Ticks max_len = 0;
+
+
+	if ( ! f->is_needed || f->num_channels == 0 )
+		return;
+
+	for ( j = 0; j < f->num_channels; j++ )
+	{
+		ch = f->channel[ j ];
+
+		for ( i = 0; i < ch->num_active_pulses; i++ )
+			max_len += ch->pulse_params[ i ].len;
+	}
+
+	f->max_len = l_max( f->max_len, max_len );
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
