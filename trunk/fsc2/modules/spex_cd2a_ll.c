@@ -172,7 +172,9 @@ void spex_cd2a_set_wavelength( void )
 			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.wavelength );
 	}
 
+#ifdef SPEX_CD2A_TEST
 	fprintf( stderr, "%s\n", mess );
+#endif
 
 	spex_cd2a_write( PARAMETER, mess );
 
