@@ -50,6 +50,6 @@ void close_all_files( void );
 
 /* from func_list_lexer.flex */
 
-void func_list_parse( Func **fncts, int num_def_func, int *num_func );
+void func_list_parse( Func **fncts, int *num_func );
 
 #endif  /* ! FUNC_HEADER */
