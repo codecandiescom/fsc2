@@ -17,7 +17,8 @@ use Test;
 BEGIN { plan tests => 17 };
 use POSIX;
 use Fcntl_Lock;
-ok(1); # If we made it this far, we're ok.
+
+ok(1); # If we made it this far, we're in business...
 
 #########################
 
@@ -39,7 +40,7 @@ ok( $fs = $fs->new( 'l_type'   => F_RDLCK,
 					'l_pid'    => $$ ) );
 
 ##############################################
-# 4. Check that properties of created objects are what they are supposed to be
+# 4. Check if properties of created objects are what they are supposed to be
 
 ok( $fs->l_type == F_RDLCK and $fs->l_whence == SEEK_CUR and
 	$fs->l_start == 123 and $fs->l_len == 234 and $fs->l_pid == $$ );
@@ -101,7 +102,7 @@ ok( defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
 # 14. Test if we can get a read lock on the script we're just running
 
 $fs->l_type( F_RDLCK );
-open( $fh, "test.pl" );
+open( $fh, "./test.pl" );
 ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
 
 ##############################################
@@ -113,16 +114,16 @@ close $fh;
 
 ##############################################
 # 16. Now a real test: the child process grabs a write lock on a test file
-#     for 2 secs while the parent repeatedly checks if it could get the
-#     lock. After the child finally releases the lock the parent should be
-#     able to obtain the lock (this test isn't real clean because under
-#     extremely high system load it might not work as expected...)
+#     for 2 secs while the parent repeatedly tries to get the lock. After
+#     the child finally releases the lock the parent should be able to
+#     obtain it (this test isn't real clean because under extremely high
+#     system load it might not work as expected...)
 
 $fs = $fs->new( 'l_type'   => F_WRLCK,
 				'l_whence' => SEEK_SET,
 				'l_start'  => 0,
 				'l_len'    => 0 );
-if ( open( $fh, ">fcntl_locking_test" ) ) {
+if ( open( $fh, ">./fcntl_locking_test" ) ) {
 	unlink( "./fcntl_locking_test" );
 	if ( my $pid = fork ) {
 		sleep 1;
