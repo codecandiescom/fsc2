@@ -655,6 +655,7 @@ void exp_test_run( void )
 		PASSTHROU( );
 	}
 
+	clear_tools_after_test( );
 
 	Fname = NULL;
 	save_restore_variables( UNSET );
