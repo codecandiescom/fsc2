@@ -41,12 +41,10 @@ SLFLAGS        = -shared -fpic
 .PHONY:    all modules res gpib clean distclean
 
 
-# Default target - make only if RESOLUTION and GPIB_LIBRARY are set correctly
+# Default target - make only GPIB_LIBRARY is set correctly
 
 all:
-	@if [ -n "$(RESOLUTION)" -a -n "$(GPIB_LIBRARY)"      \
-		  -a \(    "$(RESOLUTION)" = "lr"                 \
-			    -o "$(RESOLUTION)" = "hr" \)              \
+	@if [ -n "$(GPIB_LIBRARY)"                            \
 		  -a \(    "$(GPIB_LIBRARY)" = "old"              \
 			    -o "$(GPIB_LIBRARY)" = "ni"               \
 			    -o "$(GPIB_LIBRARY)" = "jtt"              \

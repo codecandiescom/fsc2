@@ -32,13 +32,6 @@ mandir         = $(prefix)/man
 infodir        = $(prefix)/info
 
 
-# The next variable tells the Makefile whether to compile the program for a
-# high or a low resolution display (high is roughly 17" monitors and better),
-# set it to either HIGH or LOW ( if not set it default is HIGH)
-
-RESOLUTION     = HIGH
-
-
 # The first variable sets the GPIB library to use, it must be set to either
 # LLP, NI or JTT for the LLP library, the National Instruments library or
 # the library written by me. Alternatively, if no GPIB support is needed
@@ -220,51 +213,37 @@ endif
 INSTALL_MACHINE = install-unknown
 
 ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
-	RESOLUTION      = HIGH
 	GPIB_LIBRARY    = LLP
 	INSTALL_MACHINE = install-$(machine_name)
 endif
 
 ifeq ($(machine_name),moebi.physik.fu-berlin.de)
-	RESOLUTION      = LOW
 	GPIB_LIBRARY    = JTT
 	INSTALL_MACHINE = install-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.physik.fu-berlin.de)
-	RESOLUTION      = HIGH
 	GPIB_LIBRARY    = JTT
 	INSTALL_MACHINE = install-$(machine_name)
 endif
 
 ifeq ($(machine_name),door.physik.fu-berlin.de)
-	RESOLUTION      = LOW
 	GPIB_LIBRARY    = JTT
 	INSTALL_MACHINE = install-$(machine_name)
 endif
 
 ifeq ($(machine_name),isaak.physik.fu-berlin.de)
-	RESOLUTION      = HIGH
 	GPIB_LIBRARY    = JTT
 	INSTALL_MACHINE = install-$(machine_name)
 endif
 
 ifeq ($(machine_name),crowley.none)
-	 RESOLUTION      = HIGH
 	 GPIB_LIBRARY    = JTT
 	 INSTALL_MACHINE = install-$(machine_name)
 endif
 
 
 # Finally the definition of further needed variables
-
-ifeq ($(RESOLUTION),LOW)
-	RESOLUTION   =  lr
-	CFLAGS      += -DSIZE=LOW_RES
-else
-	RESOLUTION   =  hr
-	CFLAGS      += -DSIZE=HI_RES
-endif
 
 ifeq ($(GPIB_LIBRARY),LLP)
 	GPIB_LIBRARY = old
