@@ -148,7 +148,6 @@ static int func_cmp1( const void *a, const void *b );
 static int func_cmp2( const void *a, const void *b );
 
 static long in_call = 0;
-static  char *fname = NULL;
 
 
 
@@ -224,7 +223,6 @@ void functions_exit( void )
 
 	Fncts = T_free( Fncts );
 
-	fname = T_free( fname );
 	in_call = 0;
 
 	No_File_Numbers = UNSET;
@@ -330,8 +328,10 @@ Var *func_call( Var *f )
 	Var *ap;
 	Var *ret = NULL;
 	int ac;
+#ifndef NDEBUG
+	volatile Func *cur_func;
 	int i;
-	
+
 
 	/* Check (and double-check) that it's really a function variable - one
 	   can never be sure someone really got it right... */
@@ -353,6 +353,9 @@ Var *func_call( Var *f )
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
+
+	cur_func = Fncts + i ;
+#endif
 
 	/* If the number of function arguments isn't negative (indicating a
 	   variable number of arguments) count number of variables on the stack */
@@ -396,10 +399,8 @@ Var *func_call( Var *f )
 	   only exception is when from an EDL function another EDL is called,
 	   in which case the name of the 'topmost' function is kept). */
 
-	fname = T_strdup( f->name );
-
 	if ( in_call++ == 0 )
-		Cur_Func = fname;
+		Cur_Func = f->name;
 
 	TRY
 	{
@@ -408,7 +409,6 @@ Var *func_call( Var *f )
 	}
 	OTHERWISE
 	{
-		fname = T_free( fname );
 		if ( --in_call == 0 )
 			Cur_Func = NULL;
 		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
@@ -419,23 +419,22 @@ Var *func_call( Var *f )
 	if ( --in_call == 0 )
 		Cur_Func = NULL;
 
+#ifndef NDEBUG
 	/* Before starting to delete the now defunct variables do another sanity
 	   check, i.e. test that the variables stack didn't get corrupted. */
 
 	if ( ! vars_exist( f ) )
 	{
-		if ( ! Fncts[ i ].to_be_loaded )
+		if ( ! cur_func->to_be_loaded )
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 		else
 			eprint( FATAL, SET, "Function %s() from module %s.so messed "
-					"up the variable stack at %s:%d.\n", fname,
-					Fncts[ i ].device->name, __FILE__, __LINE__ );
-		fname = T_free( fname );
+					"up the variable stack at %s:%d.\n", cur_func->name,
+					cur_func->device->name, __FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
-
-	fname = T_free( fname );
+#endif
 
 	/* Finally do the clean up, i.e. remove the variable with the function
 	   and all parameters that survived - just keep the return value. */
