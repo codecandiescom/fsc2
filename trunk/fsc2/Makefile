@@ -470,8 +470,8 @@ export            # export all variables to sub-makes
 
 
 # Default rule: make the main program, the primary lexer and the modules
-# (the Makefile for modules is called via the Makefile in src), and the
-# documentation and some other, more or less useful stuff
+# (the Makefile for modules is called via the Makefile in src), then
+# the documentation and some other, more or less useful stuff
 
 all:
 	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
@@ -487,8 +487,8 @@ all:
 	$(MAKE) tags
 	$(MAKE) -C src all
 ifdef WITH_HTTP_SERVER
-	cd $(ldir); \
-	perl Makefile.PL ;\
+	cd $(ldir);       \
+	perl Makefile.PL; \
 	cd $(fdir)
 	$(MAKE) -C Fcntl_Lock
 endif
