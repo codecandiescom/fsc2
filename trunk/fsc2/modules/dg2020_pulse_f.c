@@ -10,9 +10,9 @@
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool new_pulse( long pnum )
+bool dg2020_new_pulse( long pnum )
 {
-	PULSE *cp = Pulses;
+	PULSE *cp = dg2020_Pulses;
 	PULSE *lp;
 
 
@@ -30,9 +30,9 @@ bool new_pulse( long pnum )
 
 	cp = T_malloc( sizeof( PULSE ) );
 
-	if ( Pulses == NULL )
+	if ( dg2020_Pulses == NULL )
 	{
-		Pulses = cp;
+		dg2020_Pulses = cp;
 		cp->prev = NULL;
 	}
 	else
@@ -64,9 +64,9 @@ bool new_pulse( long pnum )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_function( long pnum, int function )
+bool dg2020_set_pulse_function( long pnum, int function )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_function )
@@ -97,27 +97,28 @@ bool set_pulse_function( long pnum, int function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_position( long pnum, double time )
+bool dg2020_set_pulse_position( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_pos )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: The start position of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
-				pticks( p->pos ) );
+				dg2020_pticks( p->pos ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( time < 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) start position "
-				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+				"for pulse %ld: %s.\n", Fname, Lc, pnum,
+				dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
-	p->pos = p->initial_pos = double2ticks( time );
+	p->pos = p->initial_pos = dg2020_double2ticks( time );
 	p->is_pos = p->initial_is_pos = SET;
 
 	return OK;
@@ -127,26 +128,26 @@ bool set_pulse_position( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_length( long pnum, double time )
+bool dg2020_set_pulse_length( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 	if ( p->is_len )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: The length of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
-				pticks( p->len ) );
+				dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( time <= 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid length for pulse "
-				"%ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+				"%ld: %s.\n", Fname, Lc, pnum, dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
-	p->len = p->initial_len = double2ticks( time );
+	p->len = p->initial_len = dg2020_double2ticks( time );
 	p->is_len = p->initial_is_len = SET;
 
 	return OK;
@@ -156,20 +157,20 @@ bool set_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_position_change( long pnum, double time )
+bool dg2020_set_pulse_position_change( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_dpos )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: The position change of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
-				pticks( p->dpos ) );
+				dg2020_pticks( p->dpos ) );
 		THROW( EXCEPTION );
 	}
 
-	p->dpos = p->initial_dpos = double2ticks( time );
+	p->dpos = p->initial_dpos = dg2020_double2ticks( time );
 	p->is_dpos = p->initial_is_dpos = SET;
 
 	return OK;
@@ -179,20 +180,20 @@ bool set_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_length_change( long pnum, double time )
+bool dg2020_set_pulse_length_change( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->is_dlen )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: The length change of pulse %ld has "
 				"already been set to %s.\n", Fname, Lc, pnum,
-				pticks( p->len ) );
+				dg2020_pticks( p->len ) );
 		THROW( EXCEPTION );
 	}
 
-	p->dlen = p->initial_dlen = double2ticks( time );
+	p->dlen = p->initial_dlen = dg2020_double2ticks( time );
 	p->is_dlen = p->initial_is_dlen = SET;
 
 	return OK;
@@ -202,9 +203,9 @@ bool set_pulse_length_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool set_pulse_phase_cycle( long pnum, int cycle )
+bool dg2020_set_pulse_phase_cycle( long pnum, int cycle )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 	Phase_Sequence *pc = PSeq;
 
 
@@ -237,9 +238,9 @@ bool set_pulse_phase_cycle( long pnum, int cycle )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_function( long pnum, int *function )
+bool dg2020_get_pulse_function( long pnum, int *function )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_function )
@@ -256,9 +257,9 @@ bool get_pulse_function( long pnum, int *function )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_position( long pnum, double *time )
+bool dg2020_get_pulse_position( long pnum, double *time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_pos )
@@ -268,7 +269,7 @@ bool get_pulse_position( long pnum, double *time )
 		THROW(EXCEPTION );
 	}
 
-	*time = ticks2double( p->pos );
+	*time = dg2020_ticks2double( p->pos );
 	return OK;
 }
 
@@ -276,9 +277,9 @@ bool get_pulse_position( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_length( long pnum, double *time )
+bool dg2020_get_pulse_length( long pnum, double *time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_len )
@@ -288,7 +289,7 @@ bool get_pulse_length( long pnum, double *time )
 		THROW(EXCEPTION );
 	}
 
-	*time = ticks2double( p->len );
+	*time = dg2020_ticks2double( p->len );
 	return OK;
 }
 
@@ -296,9 +297,9 @@ bool get_pulse_length( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_position_change( long pnum, double *time )
+bool dg2020_get_pulse_position_change( long pnum, double *time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_dpos )
@@ -308,7 +309,7 @@ bool get_pulse_position_change( long pnum, double *time )
 		THROW(EXCEPTION );
 	}
 
-	*time = ticks2double( p->dpos );
+	*time = dg2020_ticks2double( p->dpos );
 	return OK;
 }
 
@@ -316,9 +317,9 @@ bool get_pulse_position_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_length_change( long pnum, double *time )
+bool dg2020_get_pulse_length_change( long pnum, double *time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( ! p->is_dlen )
@@ -328,7 +329,7 @@ bool get_pulse_length_change( long pnum, double *time )
 		THROW(EXCEPTION );
 	}
 
-	*time = ticks2double( p->dlen );
+	*time = dg2020_ticks2double( p->dlen );
 	return OK;
 }
 
@@ -336,16 +337,16 @@ bool get_pulse_length_change( long pnum, double *time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool get_pulse_phase_cycle( long pnum, int *cycle )
+bool dg2020_get_pulse_phase_cycle( long pnum, int *cycle )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( p->pc == NULL )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: No phase cycle has been set for "
 				"pulse %ld.\n", Fname, Lc, pnum );
-		THROW(EXCEPTION );
+		THROW( EXCEPTION );
 	}
 
 	*cycle = p->pc->num;
@@ -356,15 +357,16 @@ bool get_pulse_phase_cycle( long pnum, int *cycle )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool change_pulse_position( long pnum, double time )
+bool dg2020_change_pulse_position( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
 	if ( time < 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) start position "
-				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+				"for pulse %ld: %s.\n", Fname, Lc, pnum,
+				dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -373,7 +375,7 @@ bool change_pulse_position( long pnum, double time )
 		p->old_pos = p->pos;
 		p->is_old_pos = SET;
 	}
-	p->pos = double2ticks( time );
+	p->pos = dg2020_double2ticks( time );
 
 	/* If a previously inactive pulse gets a position set and also has a
 	   non-zero length it becomes active */
@@ -410,16 +412,17 @@ bool change_pulse_position( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool change_pulse_length( long pnum, double time )
+bool dg2020_change_pulse_length( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 	bool was_active = p->is_active;
 
 
 	if ( time < 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Invalid (negative) length "
-				"for pulse %ld: %s.\n", Fname, Lc, pnum, ptime( time ) );
+				"for pulse %ld: %s.\n", Fname, Lc, pnum,
+				dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -428,7 +431,7 @@ bool change_pulse_length( long pnum, double time )
 		p->old_len = p->len;
 		p->is_old_len = SET;
 	}
-	p->len = double2ticks( time );
+	p->len = dg2020_double2ticks( time );
 	p->is_len = SET;
 
 	/* If a previously inactive pulse gets a non-zero length and also has a
@@ -465,12 +468,12 @@ bool change_pulse_length( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool change_pulse_position_change( long pnum, double time )
+bool dg2020_change_pulse_position_change( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	p->dpos = double2ticks( time );
+	p->dpos = dg2020_double2ticks( time );
 	p->is_dpos = SET;
 
 	return OK;
@@ -480,12 +483,12 @@ bool change_pulse_position_change( long pnum, double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-bool change_pulse_length_change( long pnum, double time )
+bool dg2020_change_pulse_length_change( long pnum, double time )
 {
-	PULSE *p = get_pulse( pnum );
+	PULSE *p = dg2020_get_pulse( pnum );
 
 
-	p->dlen = double2ticks( time );
+	p->dlen = dg2020_double2ticks( time );
 	p->is_dlen = SET;
 
 	return OK;

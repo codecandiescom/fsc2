@@ -12,7 +12,7 @@
 /* i.e. a integer multiple of the time base                        */
 /*-----------------------------------------------------------------*/
 
-Ticks double2ticks( double time )
+Ticks dg2020_double2ticks( double time )
 {
 	double ticks;
 
@@ -28,10 +28,10 @@ Ticks double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		char *t = get_string_copy( ptime( time ) );
+		char *t = get_string_copy( dg2020_ptime( time ) );
 		eprint( FATAL, "%s:%ld: DG2020: Specified time of %s is not an "
 				"integer multiple of the pulser time base of %s.\n",
-				Fname, Lc, t, ptime( dg2020.timebase ) );
+				Fname, Lc, t, dg2020_ptime( dg2020.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
@@ -44,7 +44,7 @@ Ticks double2ticks( double time )
 /* Does the exact opposite of the previous function... */
 /*-----------------------------------------------------*/
 
-double ticks2double( Ticks ticks )
+double dg2020_ticks2double( Ticks ticks )
 {
 	assert( dg2020.is_timebase );
 	return ( double ) ( dg2020.timebase * ticks );
@@ -56,7 +56,7 @@ double ticks2double( Ticks ticks )
 /* are within the valid limits.                                         */
 /*----------------------------------------------------------------------*/
 
-void check_pod_level_diff( double high, double low )
+void dg2020_check_pod_level_diff( double high, double low )
 {
 	if ( low > high )
 	{
@@ -87,9 +87,9 @@ void check_pod_level_diff( double high, double low )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-PULSE *get_pulse( long pnum )
+PULSE *dg2020_get_pulse( long pnum )
 {
-	PULSE *cp = Pulses;
+	PULSE *cp = dg2020_Pulses;
 
 
 	if ( pnum < 0 )
@@ -120,7 +120,7 @@ PULSE *get_pulse( long pnum )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-const char *ptime( double time )
+const char *dg2020_ptime( double time )
 {
 	static char buffer[ 128 ];
 
@@ -140,9 +140,9 @@ const char *ptime( double time )
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-const char *pticks( Ticks ticks )
+const char *dg2020_pticks( Ticks ticks )
 {
-	return ptime( ticks2double( ticks ) );
+	return dg2020_ptime( dg2020_ticks2double( ticks ) );
 }
 
 
@@ -154,7 +154,7 @@ const char *pticks( Ticks ticks )
    function-assignment in their EDL program.
 -----------------------------------------------------------------------------*/
 
-CHANNEL *get_next_free_channel( void )
+CHANNEL *dg2020_get_next_free_channel( void )
 {
 	int i = MAX_CHANNELS - 1;
 
@@ -173,7 +173,7 @@ CHANNEL *get_next_free_channel( void )
   only the first pulse is inactive pulse or the second pulse starts earlier.
 ---------------------------------------------------------------------------*/
 
-int start_compare( const void *A, const void *B )
+int dg2020_start_compare( const void *A, const void *B )
 {
 	PULSE *a = *( PULSE ** ) A,
 		  *b = *( PULSE ** ) B;
@@ -190,4 +190,36 @@ int start_compare( const void *A, const void *B )
 		return -1;
 
 	return 1;
+}
+
+
+/*---------------------------------------------------------------------------
+  Functions searches for the phase pulses associated with the pulse passed as
+  the first argument and belonging to the channels passed as the second and
+  third argument. If pulses are found they are returned in the last to
+  arguments. If at least one was found a postive result is returned.
+---------------------------------------------------------------------------*/
+
+bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num )
+{
+	PULSE *pp = dg2020_Pulses;
+
+
+	assert( p->num >= 0 );    // is it really a normal pulse ?
+
+	*pl = NULL;
+	*num = 0;
+
+	while ( pp != NULL )
+	{
+		if ( pp->num < 0 && pp->for_pulse == p )
+		{
+			*pl = T_realloc( *pl, ++( *num ) * sizeof( PULSE * ) );
+			( *pl )[ *num - 1 ] = pp;
+		}
+
+		pp = pp->next;
+	}
+
+	return *num != 0;
 }

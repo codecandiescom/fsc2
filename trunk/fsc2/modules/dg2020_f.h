@@ -101,6 +101,9 @@ typedef struct _F_ {
 	                             // for normal functions it's a pointer to the
 	                             // phase function responsible for it.
 
+	Ticks psd;                   // delay due to phase switches (only needed
+	bool is_psd;                 // for the phase functions)
+
 	long max_seq_len;            // maximum length of the pulse sequence
 
 	bool is_inverted;            // if set polarity is inverted
@@ -149,9 +152,6 @@ typedef struct
 	FUNCTION function[ PULSER_CHANNEL_NUM_FUNC ];
 	POD pod[ MAX_PODS ];
 	CHANNEL channel[ MAX_CHANNELS ];
-
-	Ticks pds;               // delay due to phase switches (only needed for
-	bool is_pds;             // the phase functions
 
 	int needed_channels;     // number of channels that are going to be needed
 	                         // for the experiment
@@ -255,7 +255,7 @@ bool dg2020_set_repeat_time( double time );
 bool dg2020_set_phase_reference( int phase, int function );
 bool dg2020_setup_phase( int func, PHS phs );
 
-bool set_phase_switch_delay( int func, double time );
+bool dg2020_set_phase_switch_delay( int func, double time );
 
 
 /* These are the functions from dg2020_pulse.c */
@@ -291,6 +291,7 @@ const char *dg2020_ptime( double time );
 const char *dg2020_pticks( Ticks ticks );
 CHANNEL *dg2020_get_next_free_channel( void );
 int dg2020_start_compare( const void *A, const void *B );
+bool dg2020_find_phase_pulse( PULSE *p, PULSE ***pl, int *num );
 
 
 /* The functions from dg2020_init.c */
@@ -301,7 +302,10 @@ void dg2020_basic_functions_check( void );
 void dg2020_distribute_channels( void );
 void dg2020_pulse_start_setup( void );
 void dg2020_create_phase_pulses( int func );
-PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int pos, int pod );
+PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth,
+							   int pos, int pod );
+void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+											  PULSE *p, int nth );
 
 
 /* Functions from dg2020_run.c */

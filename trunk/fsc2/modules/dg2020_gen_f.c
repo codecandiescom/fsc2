@@ -29,9 +29,9 @@ bool dg2020_store_timebase( double timebase )
 	dg2020.is_timebase = SET;
 	dg2020.timebase = timebase;
 
-	dg2020.function[ PULSER_CHANNEL_PHASE_1 ] =
+	dg2020.function[ PULSER_CHANNEL_PHASE_1 ].psd =
 		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
-	dg2020.function[ PULSER_CHANNEL_PHASE_2 ] =
+	dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
 		( Ticks ) ceil( DEFAULT_PHASE_SWITCH_DELAY / timebase );
 
 	return OK;
@@ -462,18 +462,18 @@ bool dg2020_setup_phase( int func, PHS phs )
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool set_phase_switch_delay( int func, double time )
+bool dg2020_set_phase_switch_delay( int func, double time )
 {
 	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
 
 	if ( time < 0 )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Unreasonable (negative) value for "
-				"phase switch delay: %s.\n", Fname, Lc, ptime( time ) );
+				"phase switch delay: %s.\n", Fname, Lc, dg2020_ptime( time ) );
 		THROW( EXCEPTION );
 	}
 
-	if ( dg2020.function[ func ].is_pds )
+	if ( dg2020.function[ func ].is_psd )
 	{
 		eprint( FATAL, "%s:%ld: DG2020: Phase switch delay for phase function "
 				"`%s' has already been set.\n", Fname, Lc,
@@ -488,15 +488,15 @@ bool set_phase_switch_delay( int func, double time )
 		THROW( EXCEPTION );
 	}
 
-	dg2020.function[ func ].is_pds = SET;
-	dg2020.function[ func ].pds = ( Ticks ) ceil( time / dg2020.timebase );
+	dg2020.function[ func ].is_psd = SET;
+	dg2020.function[ func ].psd = ( Ticks ) ceil( time / dg2020.timebase );
 
 	/* If the delay is set for PHASE_1 and no value has been set for PHASE2
 	   yet, preliminary use the value also for PHASE_2 */
 
 	if ( func == PULSER_CHANNEL_PHASE_1 &&
-		 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_pds )
-		dg2020.function[ PULSER_CHANNEL_PHASE_2 ].pds =
+		 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_psd )
+		dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
 			( Ticks ) ceil( time / dg2020.timebase );
 
 	return OK;

@@ -466,8 +466,7 @@ void dg2020_create_phase_pulses( int func )
 											j, l );
 				if ( p != NULL )
 				{
-					f->num_pulses++;
-					f->pulses = T_realloc( f->pulses, f->num_pulses
+					f->pulses = T_realloc( f->pulses, ++f->num_pulses
 										   * sizeof( PULSE * ) );
 					f->pulses[ f->num_pulses - 1 ] = p;
 
@@ -481,26 +480,18 @@ void dg2020_create_phase_pulses( int func )
 	}
 
 	qsort( f->pulses, f->num_pulses, sizeof( PULSE * ), dg2020_start_compare );
-
-	/* Now that we have these preliminary pulses we need to add some padding
-	   because the phase switches don't work instantaneously and check if the
-	   phase pulses stay separated (here we have to be even more carefully
-	   because to control one switch to pods are combined!)  */
-
-	/* MORE TO COME when I now about the padding times needed...*/
 }
 
 
 /*---------------------------------------------------------------------------
-  ---------------------------------------------------------------------------*/
+---------------------------------------------------------------------------*/
 
 PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 							   int pod )
 {
-	PULSE *np, *cp, *pp, *pn;
-	PULSE **pppl;                 // list of phase pulses for previous pulse
-	int ppp_num;                  // and the length of this list
-	int type, i;
+	PULSE *np, *cp;
+	int type;
+	char *dummy;
 
 
 	/* Figure out the phase type - its stored in the Phase_Sequence the entry
@@ -529,7 +520,7 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 	np->next = NULL;
 	np->pc = NULL;
 
-	/* These artifical pulses get negative numbers */
+	/* These 'artifical' pulses get negative numbers */
 
 	np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
 
@@ -542,7 +533,50 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 
 	np->channel = f->channel[ 2 * pos + pod ];
 
+	/* Its only active if the pulse it belongs to is active */
+
+	np->is_active = p->is_active;
+
 	/* Calculate its position and length if possible */
+
+	if ( np->is_active )
+		dg2020_calc_new_phase_pulse_pos_and_len( f, np, p, nth );
+
+	np->is_dpos = p->is_dpos == UNSET;
+	np->is_dlen = p->is_dlen == UNSET;
+
+	/* it doesn't needs updates yet */
+
+	np->is_old_pos = np->is_old_len = UNSET;
+	np->needs_update = UNSET;
+
+	/* Finally set the pulse it's assigned to */
+
+	np->for_pulse = p;
+
+
+	dummy = get_string_copy( dg2020_pticks( np->pos ) );
+	printf( "Created phase pulse %ld for pulse %ld at %s with a length "
+			"of %s (pos is %sSET, len is %sSET).\n", np->num, p->num,
+			dummy, dg2020_pticks( np->len ),
+			np->is_pos ? "" : "UN", np->is_len ? "" : "UN" );
+	T_free( dummy );
+
+	return np;
+}
+
+
+/*---------------------------------------------------------------------------
+---------------------------------------------------------------------------*/
+
+void dg2020_calc_new_phase_pulse_pos_and_len( FUNCTION *f, PULSE *np,
+											  PULSE *p, int nth )
+{
+	PULSE **pppl;                 // list of phase pulses for previous pulse
+	int ppp_num;                  // and the length of this list
+	PULSE *pp, *pn;
+	int i;
+
 
 	if ( ( np->is_pos = p->is_pos ) == SET )
 	{
@@ -564,8 +598,8 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 		{
 			pp = p->function->pulses[ nth - 1 ];
 
-			/* If the phase pulse delay does not fit between the pulse it gets
-			   associated with and its predecessor we have to complain */
+			/* If the phase switch delay does not fit between the pulse it
+			   gets associated with and its predecessor we have to complain */
 
 			if ( p->pos - pp->pos - pp->len < p->function->psd )
 			{
@@ -600,20 +634,20 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 		}
 	}
 
-	if ( p->is_pos && ( np->is_len = p->is_len ) == SET )
+	if ( p->is_pos && ( ( np->is_len = p->is_len ) == SET ) )
 	{
 		/* We can't know the maximum possible length of the last phase pulse
 		   yet, this will only be known when we figured out the maximum
 		   sequence length in the test run, thus we flag our missing knowledge
 		   by setting the length to a negative value */
 
-		if ( nth == p->function->num_pulses - 1 )  // last pulse ?
+		if ( nth < p->function->num_pulses - 1 )  // last active pulse ?
 			np->len = np->initial_len = -1;
 		else if ( nth == 0 )                    // first (but not last) pulse ?
 		{
-			pn = p->function->pulses[ nth + 1 ];
+			pn = p->function->pulses[ 1 ];
 			np->len = np->initial_len =
-				( p->len + pn->pos - p->pos ) / 2;
+				( p->pos + p->len + pn->pos ) / 2 - np->pos;
 			
 		}
 		else                                         // some pulse in between ?
@@ -624,24 +658,4 @@ PULSE *dg2020_new_phase_pulse( FUNCTION *f, PULSE *p, int nth, int pos,
 				( p->len + pn->pos - pp->pos - pp->len ) / 2;
 		}
 	}
-
-	np->is_dpos = p->is_dpos == UNSET;
-	np->is_dlen = p->is_dlen == UNSET;
-
-	np->is_active = p->is_active;
-
-	/* it doesn't needs updates yet */
-
-	np->is_old_pos = np->is_old_len = UNSET;
-	np->needs_update = UNSET;
-
-	/* Finally set the pulse it's assigned to */
-
-	np->for_pulse = p;
-
-	printf( "Created phase pulse %ld for pulse %ld at %s with length %s.\n",
-			np->num, p->num, dg2020_pticks( np->pos ),
-			dg2020_pticks( np->len ) );
-
-	return np;
 }
