@@ -105,52 +105,51 @@ Var *f_save_c(  Var *v );
 /* The following variables are shared with loader.c which adds further 
    functions from the loaded modules */
 
-int Num_Def_Func;    /* number of built-in functions */
 int Num_Func;        /* number of built-in and listed functions */
 Func *Fncts;         /* structure for list of functions */
 
 
 Func Def_Fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",          f_int,      1, ACCESS_ALL,  0 },
-	{ "float",        f_float,    1, ACCESS_ALL,  0 },
-	{ "round",        f_round,    1, ACCESS_ALL,  0 },
-	{ "floor",        f_floor,    1, ACCESS_ALL,  0 },
-	{ "ceil",         f_ceil,     1, ACCESS_ALL,  0 },
-	{ "abs",          f_abs,      1, ACCESS_ALL,  0 },
-	{ "sin",          f_sin,      1, ACCESS_ALL,  0 },
-	{ "cos",          f_cos,      1, ACCESS_ALL,  0 },
-	{ "tan",          f_tan,      1, ACCESS_ALL,  0 },
-	{ "asin",         f_asin,     1, ACCESS_ALL,  0 },
-	{ "acos",         f_acos,     1, ACCESS_ALL,  0 },
-	{ "atan",         f_atan,     1, ACCESS_ALL,  0 },
-	{ "sinh",         f_sinh,     1, ACCESS_ALL,  0 },
-	{ "cosh",         f_cosh,     1, ACCESS_ALL,  0 },
-	{ "tanh",         f_tanh,     1, ACCESS_ALL,  0 },
-	{ "exp",          f_exp,      1, ACCESS_ALL,  0 },
-	{ "ln",           f_ln,       1, ACCESS_ALL,  0 },
-	{ "log",          f_log,      1, ACCESS_ALL,  0 },
-	{ "sqrt",         f_sqrt,     1, ACCESS_ALL,  0 },
-	{ "random",       f_random,   0, ACCESS_ALL,  0 },
-	{ "set_seed",     f_setseed,  1, ACCESS_ALL,  0 },
-    { "time",         f_time,     0, ACCESS_ALL,  0 },
-    { "date",         f_date,     0, ACCESS_ALL,  0 },
-	{ "print",        f_print,   -1, ACCESS_ALL,  0 },
-	{ "wait",         f_wait,     1, ACCESS_ALL,  0 },
-	{ "init_1d",      f_init_1d, -1, ACCESS_PREP, 0 },
-	{ "init_2d",      f_init_2d, -1, ACCESS_PREP, 0 },
-	{ "display",      f_display, -1, ACCESS_EXP,  0 },
-	{ "clear_curve",  f_clearcv, -1, ACCESS_EXP,  0 },
-	{ "dim",          f_dim,      1, ACCESS_ALL,  0 },
-	{ "size",         f_size,     2, ACCESS_ALL,  0 },
-	{ "sizes",        f_sizes,    1, ACCESS_ALL,  0 },
-	{ "get_file",     f_getf,    -1, ACCESS_EXP,  0 },
-	{ "save",         f_save,    -1, ACCESS_EXP,  0 },
-	{ "fsave",        f_fsave,   -1, ACCESS_EXP,  0 },
-	{ "save_program", f_save_p,  -1, ACCESS_EXP,  0 },
-	{ "save_output",  f_save_o,  -1, ACCESS_EXP,  0 },
-	{ "save_comment", f_save_c,  -1, ACCESS_EXP,  0 },
-	{ NULL,           NULL,       0, 0,           0 }
+	{ "int",          f_int,      1, ACCESS_ALL,  UNSET	},
+	{ "float",        f_float,    1, ACCESS_ALL,  UNSET	},
+	{ "round",        f_round,    1, ACCESS_ALL,  UNSET	},
+	{ "floor",        f_floor,    1, ACCESS_ALL,  UNSET	},
+	{ "ceil",         f_ceil,     1, ACCESS_ALL,  UNSET	},
+	{ "abs",          f_abs,      1, ACCESS_ALL,  UNSET	},
+	{ "sin",          f_sin,      1, ACCESS_ALL,  UNSET	},
+	{ "cos",          f_cos,      1, ACCESS_ALL,  UNSET	},
+	{ "tan",          f_tan,      1, ACCESS_ALL,  UNSET	},
+	{ "asin",         f_asin,     1, ACCESS_ALL,  UNSET	},
+	{ "acos",         f_acos,     1, ACCESS_ALL,  UNSET	},
+	{ "atan",         f_atan,     1, ACCESS_ALL,  UNSET	},
+	{ "sinh",         f_sinh,     1, ACCESS_ALL,  UNSET	},
+	{ "cosh",         f_cosh,     1, ACCESS_ALL,  UNSET	},
+	{ "tanh",         f_tanh,     1, ACCESS_ALL,  UNSET	},
+	{ "exp",          f_exp,      1, ACCESS_ALL,  UNSET	},
+	{ "ln",           f_ln,       1, ACCESS_ALL,  UNSET	},
+	{ "log",          f_log,      1, ACCESS_ALL,  UNSET	},
+	{ "sqrt",         f_sqrt,     1, ACCESS_ALL,  UNSET	},
+	{ "random",       f_random,   0, ACCESS_ALL,  UNSET	},
+	{ "set_seed",     f_setseed,  1, ACCESS_ALL,  UNSET	},
+    { "time",         f_time,     0, ACCESS_ALL,  UNSET	},
+    { "date",         f_date,     0, ACCESS_ALL,  UNSET	},
+	{ "print",        f_print,   -1, ACCESS_ALL,  UNSET	},
+	{ "wait",         f_wait,     1, ACCESS_ALL,  UNSET	},
+	{ "init_1d",      f_init_1d, -1, ACCESS_PREP, UNSET	},
+	{ "init_2d",      f_init_2d, -1, ACCESS_PREP, UNSET	},
+	{ "display",      f_display, -1, ACCESS_EXP,  UNSET	},
+	{ "clear_curve",  f_clearcv, -1, ACCESS_EXP,  UNSET	},
+	{ "dim",          f_dim,      1, ACCESS_ALL,  UNSET	},
+	{ "size",         f_size,     2, ACCESS_ALL,  UNSET	},
+	{ "sizes",        f_sizes,    1, ACCESS_ALL,  UNSET	},
+	{ "get_file",     f_getf,    -1, ACCESS_EXP,  UNSET	},
+	{ "save",         f_save,    -1, ACCESS_EXP,  UNSET	},
+	{ "fsave",        f_fsave,   -1, ACCESS_EXP,  UNSET	},
+	{ "save_program", f_save_p,  -1, ACCESS_EXP,  UNSET	},
+	{ "save_output",  f_save_o,  -1, ACCESS_EXP,  UNSET	},
+	{ "save_comment", f_save_c,  -1, ACCESS_EXP,  UNSET	},
+	{ NULL,           NULL,       0, 0,           UNSET	}
 	                   /* last set marks the very last entry, don't remove ! */
 };
 
@@ -167,11 +166,9 @@ bool functions_init( void )
 
 	/* Count number of built-in functions */
 
-	for ( Num_Def_Func = 0; Def_Fncts[ Num_Def_Func ].fnct != NULL;
-		  Num_Def_Func++ )
+	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL;
+		  Num_Func++ )
 		;
-
-	Num_Func = Num_Def_Func;
 
 	/*
 	   1. Get new memory for the functions structures and copy the built-in
@@ -179,14 +176,15 @@ bool functions_init( void )
 	   2. Parse the function name data base `Functions' where all additional
 	      functions have to be listed.
 	   3. Sort the functions by name so that they can be found using bsearch()
+	      (but only after the function data base has been analysed)
 	*/
 
 	TRY
 	{
 		Fncts = NULL;
-		Fncts = T_malloc( ( Num_Def_Func + 1 ) * sizeof( Func ) );
-		memcpy( Fncts, Def_Fncts, ( Num_Def_Func + 1 ) * sizeof( Func ) );
-		func_list_parse( &Fncts, Num_Def_Func, &Num_Func );
+		Fncts = T_malloc( ( Num_Func + 1 ) * sizeof( Func ) );
+		memcpy( Fncts, Def_Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+		Num_Func = func_list_parse( &Fncts, Num_Func );
 		qsort( Fncts, Num_Func, sizeof( Func ), func_cmp1 );
    		TRY_SUCCESS;
 	}
@@ -218,8 +216,7 @@ void functions_exit( void )
 	if ( Fncts == NULL )
 		return;
 
-	/* Get rid of the structures for the loaded functions (but not the
-	   built-in ones) */
+	/* Get rid of the names of loaded functions (but not the built-in ones) */
 
 	for ( i = 0; i < Num_Func; i++ )
 		if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )

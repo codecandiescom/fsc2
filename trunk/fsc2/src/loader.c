@@ -9,7 +9,6 @@
 
 /* Variables imported from func.c */
 
-extern int Num_Def_Func;    /* number of built-in functions */
 extern int Num_Func;        /* number of built-in and listed functions */
 extern Func *Fncts;         /* structure for list of functions */
 extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
@@ -253,6 +252,7 @@ void load_functions( Device *dev )
 		if ( ! Fncts[ num ].to_be_loaded )
 			continue;
 
+		dlerror( );                /* make sure it's NULL before we continue */
 		cur = dlsym( dev->driver.handle, Fncts[ num ].name );
 
 		if ( dlerror( ) != NULL )     /* function not found in library ? */
@@ -261,29 +261,11 @@ void load_functions( Device *dev )
 		/* Utter strong warning and don't load if function would overload
 		   an already loaded (i.e. non-built-in) function */
 
-		if ( num >= Num_Def_Func && Fncts[ num ].fnct != NULL )
+		if ( Fncts[ num ].fnct != NULL )
 		{
 			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
 					"already been loaded'.\n", Fncts[ num ].name, dev->name );
 			continue;
-		}
-
-		/* Allow overloading of built-in functions - but only once, next time
-		   print severe warning and don't overload! */
-
-		if ( num < Num_Def_Func && Fncts[ num ].fnct != NULL )
-		{
-			if ( Fncts[ num ].fnct != Def_Fncts[ num ].fnct )
-			{
-				eprint( SEVERE, "  Built-in function `%s()' found in module "
-						"`%s.so' has already been overloaded.\n",
-						Fncts[ num ].name, dev->name );
-				continue;
-			}
-
-			eprint( WARN, "  Overloading built-in function `%s()' with "
-					"function from module `%s.so'.\n",
-					Fncts[ num ].name, dev->name );
 		}
 
 		Fncts[ num ].fnct = cur;

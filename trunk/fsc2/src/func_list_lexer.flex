@@ -147,10 +147,10 @@ PREP        return PREP_TOKEN;
 		/*----------------------*/
 
 
-void func_list_parse( Func **fncts, int *num_func )
+int func_list_parse( Func **fncts, int num_func )
 {
 	static bool is_restart = UNSET;
-	int num_def_func = *num_func;
+	int num_def_func = num_func;
 	int num;
 	int cur;
 
@@ -195,12 +195,12 @@ void func_list_parse( Func **fncts, int *num_func )
 	   set defaults values */
 
 	rewind( func_listin );
-	*num_func = num + num_def_func;
+	num_func = num + num_def_func;
 
 	if ( num != 0 )
-		*fncts = T_realloc( *fncts, ( *num_func + 1 ) * sizeof( Func ) );
+		*fncts = T_realloc( *fncts, ( num_func + 1 ) * sizeof( Func ) );
 
-	for ( cur = num_def_func; cur <= *num_func; cur++ )
+	for ( cur = num_def_func; cur <= num_func; cur++ )
 	{
 		( *fncts )[ cur ].name = NULL;
 		( *fncts )[ cur ].fnct = NULL;
@@ -209,7 +209,7 @@ void func_list_parse( Func **fncts, int *num_func )
 		( *fncts )[ cur ].to_be_loaded = SET;
 	}
 
-	( *fncts )[ *num_func ].to_be_loaded = UNSET;
+	( *fncts )[ num_func ].to_be_loaded = UNSET;
 
 	/* Now parse file again */
 
@@ -225,6 +225,7 @@ void func_list_parse( Func **fncts, int *num_func )
 	}
 	
 	fclose( func_listin );
+	return num_func;
 }
 
 
