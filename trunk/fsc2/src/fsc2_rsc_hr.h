@@ -1,4 +1,4 @@
-/** Header file generated with fdesign on Fri Oct 27 21:43:43 2000.**/
+/** Header file generated with fdesign on Sat Oct 28 18:06:33 2000.**/
 
 #ifndef FD_fsc2_h_
 #define FD_fsc2_h_
@@ -111,6 +111,7 @@ typedef struct {
 	FL_OBJECT *cut_undo_button;
 	FL_OBJECT *cut_canvas;
 	FL_OBJECT *cut_print_button;
+	FL_OBJECT *cut_close_button;
 	FL_OBJECT *cut_x_axis;
 	FL_OBJECT *cut_full_scale_button;
 	FL_OBJECT *cut_z_axis;

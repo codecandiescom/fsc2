@@ -1142,7 +1142,7 @@ label: Close
 shortcut: C
 resize: FL_RESIZE_NONE
 gravity: FL_SouthWest FL_SouthWest
-name: 
+name: cut_close_button
 callback: cut_close_callback
 argument: 0
 

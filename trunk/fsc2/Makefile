@@ -118,8 +118,8 @@ all:
 	$(MAKE) -C doc all
 
 
-# Install the program in $bindir and all the other stuff in libdir, auxdir
-# and docdir. Finally create aliases for devices fo the current machine.
+# Install the program in bindir and all the other stuff in libdir, auxdir
+# and docdir. Finally create aliases for devices for the current machine.
 
 install-strip:
 	$(MAKE) EXEC_INSTALL='$(INSTALL) -s' install

@@ -324,7 +324,7 @@ FD_cut *create_form_cut(void)
     fl_set_object_color(obj,FL_COL1,FL_BLACK);
     fl_set_object_lalign(obj,FL_ALIGN_BOTTOM|FL_ALIGN_INSIDE);
     fl_set_object_gravity(obj, FL_NorthWest, FL_NorthWest);
-  obj = fl_add_button(FL_NORMAL_BUTTON,10,405,70,35,"Close");
+  fdui->cut_close_button = obj = fl_add_button(FL_NORMAL_BUTTON,10,405,70,35,"Close");
     fl_set_button_shortcut(obj,"C",1);
     fl_set_object_color(obj,FL_MCOL,FL_GREEN);
     fl_set_object_lsize(obj,FL_NORMAL_SIZE);
