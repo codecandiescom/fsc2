@@ -953,10 +953,10 @@ double sr510_set_phase( double phase )
 static double sr510_get_ref_freq( void )
 {
 	char buffer[ 50 ];
-	long len = 50;
+	long length = 50;
 
 	if ( gpib_write( sr510.device, "F\n" ) == FAILURE ||
-		 gpib_read( sr510.device, buffer, &len ) == FAILURE )
+		 gpib_read( sr510.device, buffer, &length ) == FAILURE )
 	{
 		eprint( FATAL, "%s: Can't access the lock-in amplifier.\n",
 				DEVICE_NAME );
