@@ -319,7 +319,7 @@ static void http_send_picture( int pd, int type )
 			THROW( EXCEPTION );
 
 		/* Older versions of libc (2.0.6 and earlier) don't set the file
-		   permissions correctly to 0600 but 0666... */
+		   permissions correctly to 0600 but 0666, so we do it here... */
 
 		chmod( filename, S_IRUSR | S_IWUSR );
 
