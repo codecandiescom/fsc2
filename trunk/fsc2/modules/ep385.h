@@ -67,7 +67,7 @@ Var *pulser_lock_keyboard( Var *v );
 #define Ticks_min l_min
 
 #define TICKS_MAX LONG_MAX
-#define TICKS_MIN LONG MIN
+#define TICKS_MIN LONG_MIN
 
 #define Ticksrnd lrnd
 
