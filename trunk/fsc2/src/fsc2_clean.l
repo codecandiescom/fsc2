@@ -377,7 +377,7 @@ int main( int argc, char *argv[ ] )
 	mcheck( NULL );
 #endif
 
-	/* Complain if no file name was passed */
+	/* Use stdin if no file name was passed to the program */
 
 	if ( argc < 2 )
 	{
