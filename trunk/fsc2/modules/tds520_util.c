@@ -17,6 +17,7 @@ const char *tds520_ptime( double time )
 {
 	static char buffer[ 128 ];
 
+
 	if ( fabs( time ) >= 1.0 )
 		sprintf( buffer, "%g s", time );
 	else if ( fabs( time ) >= 1.e-3 )
@@ -37,6 +38,7 @@ const char *tds520_ptime( double time )
 void tds520_delete_windows( void )
 {
 	WINDOW *w;
+
 
 	while ( tds520.w != NULL )
 	{
