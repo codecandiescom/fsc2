@@ -36,8 +36,6 @@ sweep_up, 0, EXP;               // sweep magnet up
 sweep_down, 0, EXP;             // sweep magnet down
 reset_field, 0, EXP;            // go back to start field
 
-measure_field, 0, EXP;          // for driver er035m_sa
-
 // Functions exported by the field meter drivers (BH15, ER035M)
 
 find_field, 0, EXP;             // return current field value
