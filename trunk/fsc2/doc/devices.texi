@@ -2036,7 +2036,7 @@ between @code{1} and @code{3} for memory curves.
 Currently only one frequency counter is supported, the HP5340A. Because
 this is a very old device (even pre-dating the GPIB-standard) only two
 functions are defined for the device. All settings have to be done
-manually at the front panel.
+manually via the front panel.
 
 @table @samp
 
