@@ -295,7 +295,7 @@ cursor
 @end ifnottex
 @end ifnothtml
 and a circle is drawn at the position where you pressed the mouse
-button.  When you move the mouse (while keeping both middle and right
+buttons.  When you move the mouse (while keeping both middle and right
 mouse buttons pressed down) a vertical and a horizontal dashed line
 connecting the starting point to the current mouse position is drawn and
 in the left upper corner of the display area pairs of x- and
