@@ -305,18 +305,20 @@ The function can be called in the @code{EXPERIMENT} section, but only if
 the function @code{magnet_setup()} (see above) has been called
 before. It doesn't take an argument and will sweep up the magnet by the
 field step size value set in the @code{magnet_setup()} function.  The
-actual size of the step will @b{not} be controlled using the gaussmeter.
+actual size of the step is @b{not} be controlled using the gaussmeter
+and is thus faster than e.g.@: @code{set_field()}. 
 
 The function returns the new field value.
 
 For the @strong{AEG} magnets the precision of the field sweep depends on
 the step size. While the precision is usually quite good for step sizes
-of up to @w{1 G}, for much larger step sizes it may deteriorate quite
+of up to @w{1 G}, with much larger step sizes it may deteriorate quite
 significantly. It sometimes helps to add a short waiting time (use
 function @code{wait()}) after a sweep step to allow the field to settle
 at the new point. On the other hand, it then might be faster (and more
-reliable) not to use the sweep function at all but @code{set_field()}
-instead.
+reliable) not to use the sweep functions at all but the
+@code{set_field()} function (which always checks and if necessary
+re-adjusts the field if necessray) in these cases instead.
 
 This function is not available for the Oxford sweep power supply, module
 @code{ips20_4}. Use the function @code{magnet_sweep} instead.
@@ -371,12 +373,12 @@ The function can only be used in the @code{EXPERIMENT} section.
 @item magnet_use_correction()
 @findex magnet_use_correction()
 This function is only defined for the Keithley power supply
-(@code{keithley228a}) and accepts no more than one argument. If it is
+(@code{keithley228a}) and accepts not more than one argument. If it is
 called with no argument or a non-zero number or the string @code{"ON"}
 corrections are applied to reduce the effects of certain inaccuracies of
 the power supply. If called with either an agument of @code{0} or a
-string @code{"OFF"} the use of these corrections is switched off.
-Per default @strong{no} corrections are used.
+string @code{"OFF"} the use of these corrections is switched off.  Per
+default @strong{no} corrections are used.
 
 
 @anchor{magnet_use_dac_port}
