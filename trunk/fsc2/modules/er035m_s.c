@@ -446,10 +446,7 @@ Var *find_field( Var *v )
 		   nmr.state == ER035M_S_OD_ACTIVE ||
 		   nmr.state == ER035M_S_UNKNOWN ) &&
 		 er035m_s_write( "SD" ) == FAIL )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		er035_s_comm_fail( );
 	usleep( ER035M_S_WAIT );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */

@@ -29,7 +29,7 @@ the following sections.
 
 But let's start with a short summary of the things a module has to do.
 Usually, a module contains just a few functions that talk to the
-device via an hardware interface, e.g. the GPIB bus or a serial port (or
+device via an hardware interface, e.g.@: the GPIB bus or a serial port (or
 whatever else there might be). As an example for the following I will
 use a lock-in amplifier. Probably the most basic operation is to get
 data from the amplifier. So one will have to create a function called
@@ -57,7 +57,7 @@ The next thing is to append the function(s) exported by the module to
 the function data base called @file{Functions}
 @cindex @code{Functions} file
 . Here one would add a line with the name of the exported function,
-i.e. @code{lockin_get_data()}, followed by the number of arguments the
+i.e.@: @code{lockin_get_data()}, followed by the number of arguments the
 function takes (or a negative number if the function takes a variable
 number of arguments). Optionally, you can add the keywords @code{ALL},
 @cindex @code{ALL} (in @code{Functions} file)
@@ -84,7 +84,7 @@ functions defined in the module can be used in the @acronym{EDL} file.
 
 What about having different lock-in amplifiers with modules defining
 functions with the same names, say @code{lockin_get_data()}? As long as
-only the module for one of the lock-in amplifiers is loaded (i.e. only
+only the module for one of the lock-in amplifiers is loaded (i.e.@: only
 one of them is mentioned in the devices section of the @acronym{EDL}
 file) there is no poblem at all. Only in the rather unusual case that
 more than one lock-in amplifier is to be used for an experiment (and
@@ -145,7 +145,7 @@ the data of the curve between the cursor bars. Let's call this function
     get_curve_between_cursors( cursor_1, cursor_2 )
 @end example
 @noindent
-This hypothetical function expects two values, e.g. the positions of the
+This hypothetical function expects two values, e.g.@: the positions of the
 cursors, and should return the data it fetched from the digitizer. Now, a
 typical C declaration for this function is
 
@@ -205,7 +205,7 @@ got are really integers.  There is a function that can do it for you,
 @findex vars_check()
 All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
-e.g.
+e.g.@:
 
 @example
     vars_check( var, INT_VAR );
@@ -222,7 +222,7 @@ with
     vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
 @noindent
-(i.e. the different types of variables are coded into the bits of the
+(i.e.@: the different types of variables are coded into the bits of the
 the integer @code{type} in the variable's structure, so you have to use
 the bitwise inclusive OR operator @code{|} to test alternatives).
 
@@ -254,7 +254,7 @@ and what you get is a value of type @code{long int} --- @acronym{fsc2}
 is using long integers internally. On the other hand, if the type of the
 variable is @code{FLOAT_VAR} you get at the data with
 @quotation
-    @code{var->FLOAT}@ @ @ @ (i.e. a macro for @code{var->val.dval})
+    @code{var->FLOAT}@ @ @ @ (i.e.@: a macro for @code{var->val.dval})
 @end quotation
 @noindent
 in which case you get a value of type @code{double}.
@@ -270,7 +270,7 @@ in which case you get a value of type @code{double}.
 By the way, there's a special function made for @acronym{fsc2} for allocating
 memory.  This functions does not only allocates memory but also checks
 that the allocation really returns as much memory as you asked for
-(i.e. if it fails it will stop the program and print an appropriate
+(i.e.@: if it fails it will stop the program and print an appropriate
 error message). That means that you don't have to care for error
 handling - if the function returns everything is ok, otherwise it won't
 return at all. This function is called @code{T_malloc()} (think about it
@@ -278,7 +278,7 @@ as @i{tested malloc}). And, of course, there is also a replacement for
 @code{realloc()} and @code{calloc()}, called @code{T_realloc()} and
 @code{T_calloc()}. And, to make things complete, the replacement for
 @code{free()} is called @code{T_free()}. All four functions accept have
-the same input and return values as their normal counterparts, i.e.
+the same input and return values as their normal counterparts, i.e.@:
 
 @example
      void *T_malloc( size_t size )
@@ -371,13 +371,13 @@ Var *square( Var *var )
 
 If your function does not has to return a value at all there are two ways to
 handle this situation. Either return a pointer to a variable with an arbitrary
-value. e.g. write
+value. e.g.@: write
 
 @example
     return vars_push( INT_VAR, 0 );
 @end example
 @noindent
-or simply return a @code{NULL} pointer, i.e.
+or simply return a @code{NULL} pointer, i.e.@:
 
 @example
     return NULL;
@@ -438,7 +438,7 @@ Var *my_function( Var *var )
 @end example
 
 
-An alternative (e.g. if the type of the variables you need to return
+An alternative (e.g.@: if the type of the variables you need to return
 differs) is two write two functions where the first one does the
 calculations needed and stores the second value in a global
 variable. All the second function has to do is just to return the value
@@ -472,7 +472,7 @@ Var *my_function_2( Var *v )
 
 
 Alternatively, you also could write the function in a way that it counts the
-number of times it has been called and returns values accordingly, e.g. 
+number of times it has been called and returns values accordingly, e.g.@: 
 
 @example
 V1 = my_function( );
@@ -543,7 +543,7 @@ The loader will test if these functions exist and if they do they will
 be called automatically at certain points in the interpretation of the
 @acronym{EDL} file.
 
-If it exists, the first function, i.e. @code{abc123_init_hook()} is called
+If it exists, the first function, i.e.@: @code{abc123_init_hook()} is called
 immediately after the functions defined in all modules are loaded. Its main
 purpose is to allow the module to get all kinds of initialization done. Since
 all other modules are already loaded, it also may be used to test for the
@@ -558,9 +558,9 @@ of the test run of the @code{EXPERIMENT} section of the @acronym{EDL}
 input file. Again, it can be used for initializations. But it should be
 noted that changes to the variables defined in the @acronym{EDL} file
 will remain only visible for the test run, after the test is completed
-they will revert to their former values, i.e the ones they had before
+they will revert to their former values, i.e.@: the ones they had before
 the test run started! The return code of the function is the same as for
-the init hook function (i.e. always return a non-zero value on success).
+the init hook function (i.e.@: always return a non-zero value on success).
 
 The third function, @code{abc123_exp_hook()}, is run when the actual
 experiment is done. Initialization of devices should be done
@@ -611,7 +611,7 @@ module for a device that communicates via one of the serial ports, the
 appropriate element of the array should be tested first to determine if
 the port has already mean claimed by another module. If it hasn't, the
 element has to be set to avoid other modules using the same port
-concurrently. I.e. a typical piece of code for the device `ABC123'
+concurrently. I.e.@: a typical piece of code for the device `ABC123'
 needing the serial port number 1 (possibly labeled COM2 on the backside
 of the computer) would be
 
@@ -696,7 +696,7 @@ completely useless and even dangerous to use for any purpose whatsoever!
 @item
 If you just want to test if an @acronym{EDL} function exists at all just do
 only step 1 but after checking the pointer @strong{never} forget to call
-@code{vars_pop()} on the returned variable! I.e. do
+@code{vars_pop()} on the returned variable! I.e.@: do
 @example
 Var *func_ptr;
 int access;
@@ -721,7 +721,7 @@ result if you try to use it.
 
 Actually, if you look closely at the code you will see that you have to
 call @code{vars_pop()} on the returned value only if it wasn't the
-@code{NULL} pointer (i.e. if the function was not found) --- but nothing
+@code{NULL} pointer (i.e.@: if the function was not found) --- but nothing
 bad is going to happen if you call @code{vars_pop()}on the @code{NULL}
 pointer, anyway.
 

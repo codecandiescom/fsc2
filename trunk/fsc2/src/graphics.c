@@ -702,10 +702,9 @@ void graphics_free( void )
 	Curve_2d *cv2;
 
 
-	if ( G.dim == 1 )
-	{
-		/* Deallocate memory for storing scaled data and XPoints */
+	/* Deallocate memory for pixmaps, scaled data and XPoints */
 
+	if ( G.dim == 1 )
 		for ( i = 0; i < G.nc; i++ )
 		{
 			cv = G.curve[ i ];
@@ -727,9 +726,7 @@ void graphics_free( void )
 				G.curve_2d[ i ] = NULL;
 			}
 		}
-	}
 	else
-	{
 		for ( i = 0; i < G.nc; i++ )
 		{
 			cv2 = G.curve_2d[ i ];
@@ -752,7 +749,6 @@ void graphics_free( void )
 				G.curve_2d[ i ] = NULL;
 			}
 		}
-	}
 
 	if ( G.font != NULL )
 		for ( coord = Y; coord <= Z; coord++ )

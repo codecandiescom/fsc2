@@ -31,7 +31,7 @@ Var *measure_field( Var *v );
 /* internally used functions */
 
 static double er035m_sa_get_field( void );
-
+static void er035m_sa_failure( void );
 
 
 typedef struct
@@ -139,8 +139,7 @@ int er035m_sa_exp_hook( void )
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		nmr.device = -1;
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
+		er035m_sa_failure( );
 	}
 	usleep( ER035M_SA_WAIT );
 
@@ -160,18 +159,12 @@ try_again:
 		THROW( USER_BREAK_EXCEPTION );
 
 	if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 	usleep( ER035M_SA_WAIT );
 
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 
 	/* Now look if the status byte says that device is OK where OK means that
 	   for the X-Band magnet the F0-probe is connected, modulation is on and
@@ -270,37 +263,24 @@ try_again:
 	/* Switch the display on */
 
 	if ( gpib_write( nmr.device, "ED\r", 3 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 	usleep( ER035M_SA_WAIT );
 
 	/* Find out the resolution and set it to at least 2 digits */
 
 	if ( gpib_write( nmr.device, "RS\r", 3 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 	usleep( ER035M_SA_WAIT );
 
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 
 	switch ( buffer[ 2 ] )
 	{
 		case '1' :                    /* set resolution to 2 digits */
 			if ( gpib_write( nmr.device, "RS2\r", 4 ) == FAILURE )
-			{
-				eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-						nmr.name );
-				THROW( EXCEPTION );
-			}
+				er035m_sa_failure( );
 			usleep( ER035M_SA_WAIT );
 			/* drop through */
 
@@ -393,10 +373,7 @@ Var *measure_field( Var *v )
 		   nmr.state == ER035M_SA_OD_ACTIVE ||
 		   nmr.state == ER035M_SA_UNKNOWN ) &&
 		 gpib_write( nmr.device, "SD\r", 3 ) == FAILURE )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
-		THROW( EXCEPTION );
-	}
+		er035m_sa_failure( );
 	usleep( ER035M_SA_WAIT );
 
 	/* wait for gaussmeter to go into lock state (or FAILURE) */
@@ -409,20 +386,12 @@ Var *measure_field( Var *v )
 		/* Get status byte and check if lock was achieved */
 
 		if ( gpib_write( nmr.device, "PS\r", 3 ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
-		}
+			er035m_sa_failure( );
 		usleep( ER035M_SA_WAIT );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
-		}
+			er035m_sa_failure( );
 
 		bp = buffer + 2;   /* skip first two chars of status byte */
 
@@ -516,20 +485,12 @@ double er035m_sa_get_field( void )
 		/* Ask gaussmeter to send the current field and read result */
 
 		if ( gpib_write( nmr.device, "PF\r", 3 ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
-		}
+			er035m_sa_failure( );
 		usleep( ER035M_SA_WAIT );
 
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
-		{
-			eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n",
-					nmr.name );
-			THROW( EXCEPTION );
-		}
+			er035m_sa_failure( );
 
 		/* Disassemble field value and flag showing the state */
 
@@ -562,4 +523,14 @@ double er035m_sa_get_field( void )
 	sscanf( buffer + 2, "%lf", &nmr.field );
 
 	return nmr.field;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+static void er035m_sa_failure( void )
+{
+	eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", nmr.name );
+	THROW( EXCEPTION );
 }

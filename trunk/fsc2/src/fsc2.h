@@ -28,9 +28,12 @@
 #define libdir "./"
 #endif
 
-
 #if ! defined auxdir
 #define auxdir "./"
+#endif
+
+#if ! defined docdir
+#define docdir "./doc"
 #endif
 
 #define HI_RES  1

@@ -411,10 +411,7 @@ Var *measure_field( Var *v )
 		   nmr.state == ER035M_SAS_OD_ACTIVE ||
 		   nmr.state == ER035M_SAS_UNKNOWN ) &&
 		 er035m_sas_write( "SD" ) == FAIL )
-	{
-		eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", DEVICE_NAME );
-		THROW( EXCEPTION );
-	}
+		er035_sas_comm_fail( );
 	usleep( ER035M_SAS_WAIT );
 
 	/* Wait for gaussmeter to go into lock state (or FAIL) */
@@ -794,7 +791,7 @@ static bool er035m_sas_comm( int type, ... )
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 
-void er035_sas_comm_fail( void )
+static void er035_sas_comm_fail( void )
 {
 	eprint( FATAL, "%s: Can't access the NMR gaussmeter.\n", DEVICE_NAME );
 	THROW( EXCEPTION );
