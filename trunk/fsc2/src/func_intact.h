@@ -132,6 +132,7 @@ Var *f_idelete( Var *v );
 Var *f_ivalue(  Var *v );
 Var *f_idelete( Var *v );
 Var *f_ivalue(  Var *v );
+Var *f_objdel(  Var *v );
 
 void tools_clear( void );
 

@@ -36,6 +36,7 @@ double *exp_sstate( void *buffer, long len );
 long *exp_icreate( void *buffer, long len );
 bool exp_idelete( void *buffer, long len );
 INPUT_RES *exp_istate( void *buffer, long len );
+bool exp_objdel( void *buffer, long len );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

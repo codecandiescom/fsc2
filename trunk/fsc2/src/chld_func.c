@@ -872,3 +872,58 @@ INPUT_RES *exp_istate( void *buffer, long len )
 		return NULL;
 	}
 }
+
+
+/*--------------------------------------------------------------*/
+/* Child and parent side function for passing the arguments and */
+/* the return value of the object_delete() function.            */
+/*--------------------------------------------------------------*/
+
+bool exp_objdel( void *buffer, long len )
+{
+	if ( I_am == CHILD )
+	{
+		writer( C_ODELETE, len, buffer );
+		T_free( buffer );
+		return ( bool ) reader( NULL );
+	}
+	else
+	{
+		char *old_Fname = Fname;
+		long old_Lc = Lc;
+		Var *Func_ptr;
+		int access;
+		void *pos;
+
+
+		/* Get variable with address of function to delete an input object */
+
+		Func_ptr = func_get( "object_delete", &access );
+
+		/* Unpack parameter and push them onto the stack */
+
+		pos = buffer;
+		memcpy( &Lc, pos, sizeof( long ) );    /* get current line number */
+		pos += sizeof( long );
+
+		vars_push( INT_VAR, * ( ( long * ) pos ) );
+		pos += sizeof( long );
+
+		Fname = ( char * ) pos;                /* get current file name */
+
+		/* Call the function */
+
+		TRY
+		{
+			vars_pop( func_call( Func_ptr ) );
+			writer( C_ODELETE_REPLY, 1L );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			writer( C_ODELETE_REPLY, 0L );
+
+		Fname = old_Fname;
+		Lc = old_Lc;
+		return SET;
+	}
+}

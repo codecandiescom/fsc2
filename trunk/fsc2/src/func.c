@@ -115,6 +115,7 @@ Func Def_Fncts[ ] =              /* List of built-in functions */
     { "output_create", f_icreate, -1, ACCESS_EXP,  NULL, UNSET },
     { "output_delete", f_idelete, -1, ACCESS_EXP,  NULL, UNSET },
     { "output_value",  f_ivalue,  -1, ACCESS_EXP,  NULL, UNSET },
+    { "object_delete", f_objdel,  -1, ACCESS_EXP,  NULL, UNSET },
     { "abort",         f_abort,    0, ACCESS_ALL,  NULL, UNSET },
 	{ NULL,            NULL,       0, 0,           NULL, UNSET }
 	                   /* last set marks the very last entry, don't remove ! */
