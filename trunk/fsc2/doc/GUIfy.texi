@@ -329,17 +329,17 @@ EXPERIMENT:
       wait( tc );
   @}
 @end example
-@noindent
-(Please note that now also the length of time to wait in the loop for
-the experiment uses the new variable, which is more effective anyway
-because we now don't have to query the lock-in all of the time.)
 
-Now let's make the time constant adjustable by the user. And to further
-improve things we also would like to make it possible @b{not} to set a
-time constant but to simply use the one which is already set at the
-lock-in's front panel. To do so we could create a menu (a menu is
-appropriate here, because the lock-in only allows discreet settings for
-the time constant):
+In this script also a new variable was introduces for the length of time
+to wait in the loop for the experiment. This is is more effective
+because we now don't have to query the lock-in amplifier each time.
+
+Now let's make this new time constant variable adjustable by the
+user. And to further improve things we also would like to make it
+possible @b{not} to set a time constant but to simply use the one which
+is already set at the lock-in's front panel. To do so we could create a
+menu (a menu is appropriate here, because the lock-in amplifier only
+allows discreet settings for the time constant):
 @example
 === TC menu [ "Don't set", 3 s", "  1 s", "300 ms", "100 ms", \
 ===           " 30 ms", " 10 ms", "  3 ms" ] [ 4 ] "Time constant"
@@ -347,11 +347,11 @@ the time constant):
 @noindent
 There is something new here: Because it would look rather ugly to have
 an extremely long line for specifying all the different time constant
-settings the lock-in allows, we put a backslash at the end of the first
-line, thus indicating to the conversion script that the next line is a
-continuation of the current line (but then we also have to start the new
-line with three equal signs (and a space) or it wouldn't know what to do
-with it).
+settings the lock-in allows on a single line, we put a backslash at the
+end of the first line, thus indicating to the conversion script that the
+next line is a continuation of the current line (but then we also have
+to start the new line with three equal signs (and a space) or it
+wouldn't know what to do with it).
 
 But the more important point is how to deal with the first menu entry,
 where we promise that the script won't set the time constant but
@@ -361,15 +361,15 @@ occurrence is at the line
   tc          =   300 ms;
 @end example
 @noindent
-If the user selected the @code{"Don't set} menu entry we would get a
-line like
+If we just added the above line and the user selects the @code{"Don't
+set} menu entry we would get a line like
 @example
   tc          =   Don't set;
 @end example
 @noindent
-and you can be quite sure that @code{fsc2} would complain loudly
+and we can be quite sure that @code{fsc2} would complain loudly
 about a syntax errors. Thus we'll need to make this line depend on
-which menu entry the user selected. To do so you will have to use
+which menu entry the user selected. To do so we'll have to use
 (including the commands for creating the menu):
 @example
 === TC menu [ "Don't set", "  3 s", "  1 s", "300 ms", "100 ms", \
@@ -409,10 +409,9 @@ Instead of the comparison for equality, @code{eq}, we could also have
 used the opposite operator, @code{ne}, which evaluates to true if the
 strings differ.
 
-Of course, there is a second place where we have to apply a
-change. That's in the line where we really set the lock-in's time
-constant at the start of the @code{EXPERIMENT} section. Here we have to
-replace
+Of course, there is a second place where we have to apply a change.
+That's in the line where we really set the lock-in's time constant at
+the start of the @code{EXPERIMENT} section. Here we have to replace
 @example
   lockin_time_constant( tc );
 @end example
@@ -427,8 +426,8 @@ by
 @end example
 @noindent
 i.e.@: if the user selected a time constant we have to set the lock-in
-accordingly, otherwise we just query the time constant but do not change
-it.
+amplifier accordingly, otherwise we just query the time constant but do
+not change it.
 
 If you aren't satisfied with just @code{if}, @code{else} and @code{endif}
 you may also try your luck with @code{elsif}, which stands for "else if".
@@ -447,23 +446,23 @@ This means you can also use constructs like
 in which case the script would output a sentence grumbling about the
 time the experiment will take when the user selected a time constant of
 three seconds. Please note that it's important not to omit any spaces
-from the string when comparing it against a menu entry - for a human
+from the string when comparing it against a menu entry - for human eyes
 it's obvious that @w{@code{" 3s"}} and @code{"3s"} is supposed to mean
-the same, but computers aren't that good at getting the meaning but
-rather care about formalities...
+the same, but computers aren't that good at getting the meaning but just
+care about formalities...
 
 Of course, you can also compare numbers in if-elsif-else-endif
 constructs (or whatever you care to call them). The reason that we were
-talking only about the @code{eq} and @code{ne} operator until now is
-just because @code{menu} variables are strings, so they got to be
-compared as strings. On the other hand, the start and end field as well
-as the field step to be used are all (floating point) numbers, so if you
-need to compare them you will have to use the proper operators. These
-are: @code{==} for equality, @code{!=} for inequality, and, finally,
+talking about the @code{eq} and @code{ne} operator only until now is
+because @code{menu} variables are strings, so they got to be compared as
+strings. On the other hand, the start and end field as well as the field
+step to be used are all (floating point) numbers, so if you need to
+compare them you will have to use the proper operators. These are:
+@code{==} for equality, @code{!=} for inequality, and, finally,
 @code{<}, @code{<=}, @code{>} and @code{>=} to check for less then, less
 or equal then, larger then and larger or equal then.
 
-One example, where this would come handy, is to check if the start field
+One example where this would come handy is to check if the start field
 is lower than the end field (otherwise the above script wouldn't do
 anything useful) and, if necessary, to reverse them. To make sure the
 lower field value is always the start field you could write in the
@@ -527,7 +526,7 @@ Just be careful not to change the variables from within the condition
 @section Sending @code{EDL} scripts to @code{fsc2}
 
 
-The @code{fsc2_guify} conversion tool (or, to be exact, the scripts
+The @code{fsc2_guify} conversion tool (or, more exactly, the script
 created by this tool) relies on @code{fsc2} listening to external
 programs that might want to send it @code{EDL} scripts. There is a
 rather simple protocol for doing so. But you don't even have to know
@@ -548,13 +547,13 @@ after a successful test run.
 
 You could e.g.@: invoke these programs from the command line, type in an
 @code{EDL} script and when you're finished, you would see the program
-launch @code{fsc2} with your newly typed in script displayed in the
-main window. Of course, that's not what these programs are really meant
+launch @code{fsc2} with your newly typed in script displayed in the main
+window. Of course, that's not what these programs are really meant
 for. Instead they should allow scripts etc.@: that create @code{EDL}
-scripts to send their results to @code{fsc2} without having to deal
-with any of the details about how this is done. So, such a script just
-starts one of the above programs, passes it the @code{EDL} script and
-then might care to inspect the return value.
+scripts to send their results to @code{fsc2} without having to deal with
+any of the details about how this is done. So such a script just starts
+one of the above programs, passes it the newly generated @code{EDL}
+script and then should just check the return value.
 
 In @code{C} code you probably would do this using the @code{popen()}
 function, requesting a stream for writing (for sending the @code{EDL}
@@ -569,7 +568,8 @@ The success (or reason of failure if you're unlucky) can be determined
 from the return value:
 @table @samp
 @item 0
-Everything's ok, program finished successfully.
+Everything's ok, program finished successfully, i.e.@: @code{fsc2}
+accepted the script.
 @item -1
 An internal error has been detected in the program handling the
 connection to @code{fsc2} (please send a bug report).
@@ -586,10 +586,10 @@ not found).
 @end table
 
 Using these programs you are able to send @code{EDL} scripts to
-@code{fsc2}, created with whichever method or programming language you
+@code{fsc2}, created with whatever method or programming language you
 prefer. A few example scripts written in Perl can be found in the
 @code{scripts} subdirectory of the main directory of the package. You
 could also examine one of the scripts created by @code{fsc2_guify} but
 be warned that these scripts may not be very easy to understand because
 at least some of them were written by a program that doesn't care much
-about proper indentation of readability etc.
+about proper indentation or human readability etc.
