@@ -63,7 +63,7 @@ typedef VarretFnct *FnctPtr;
   the function IF_FUNC(), defined as macro in variables.h, which gets the
   passed the variable's name - if the function returns TRUE the variable is an
   integer (or the array is an integer array) otherwise its type is FLOAT. So,
-  changing IF_FUNC() and recompiling will change the behaviour of the program
+  changing IF_FUNC() and recompiling will change the behavior of the program
   in this respect. Currently, as agreed with Axel and Thomas, IF_FUNC returns
   TRUE for variables starting with a capital letters, thus making the variable
   an integer. But this is easily changed...
@@ -105,14 +105,14 @@ typedef VarretFnct *FnctPtr;
   is to call vars_assign() which assigns the value of the stack variable to
   `A'. The stack variable with the right hand side result is than removed from
   the stack. If we're a bit paranoid we can make sure everything worked out
-  fine by checking that the variabe stack is now empty. Quite simple, isn't
+  fine by checking that the variable stack is now empty. Quite simple, isn't
   it?
 
   What looks like a lot of complicated work to do something rather simple
   has the advantage that, due to its recursive nature, it can be used
   without any changes for much more complicated situations. Instead of the
   value 3.25 we could have a complicated expression to add to `B', which
-  will be handled automagically by a deeper recursion, thus breaking up the
+  will be handled auto-magically by a deeper recursion, thus breaking up the
   complicated task into small, simple tasks, that can be handled easily.
   Also, `B' could be a more complicated expression instead which would be
   handled in the same way.
@@ -127,7 +127,7 @@ typedef VarretFnct *FnctPtr;
             variable_identifier [ 
 
   where `variable_identifier' is a array name. It calls vars_arr_start()
-  where, if the array is still completetly new, the type of the array is set
+  where, if the array is still completely new, the type of the array is set
   to INT_ARR or FLOAT_ARR (depending on the result of the macro IF_FUNC(), see
   above). Finally, it pushes a transient variable onto the stack of type
   ARR_PTR with the `from' element in the variable structure pointing to the
@@ -150,7 +150,7 @@ typedef VarretFnct *FnctPtr;
   i.e. on the top we've the indices (in reverse order) followed by the pointer
   to the array.  The next step depends if this is an access to an array
   element (i.e. it's found on the right hand side of an assignment) or if an
-  array element is to be set (i.e. its on thre left hand side). In the first
+  array element is to be set (i.e. its on the left hand side). In the first
   case the function vars_arr_rhs() is called.
 
   Basically, what vars_arr_rhs() does is to take the indices and the pointer
@@ -175,7 +175,7 @@ typedef VarretFnct *FnctPtr;
   supposed to mean a certain element but are the sizes of the dimensions of
   the array.  If the array is new, vars_arr_lhs() calls vars_setup_new_array()
   instead of doing the normal element lookup. In this routine the indices
-  are interpreted as sizes for the dimesions of the array and memory is
+  are interpreted as sizes for the dimensions of the array and memory is
   allocated for the elements of the array. It returns a ARR_PTR to the array
   with the NEED_INIT flag in the `flags' element of the variables structure
   (of the transient variable) is set, a list of data (in curly brackets,
@@ -615,15 +615,15 @@ Var *vars_negate( Var *v )
 
 /*--------------------------------------------------------------------------*/
 /* vars_comp() is used for comparing the values of two variables. There are */
-/* three types of comparision, it can be tested if two variables are equal, */
+/* three types of comparison, it can be tested if two variables are equal,  */
 /* the first one is less than the second or if the first is less or equal   */
 /* than the second variable (tests for greater or greater or equal can be   */
 /* done simply by switching the arguments).                                 */
 /* ->                                                                       */
-/*    * type of comparision (COMP_EQUAL, COMP_LESS or COMP_LESS_EQUAL)      */
+/*    * type of comparison (COMP_EQUAL, COMP_LESS or COMP_LESS_EQUAL)       */
 /*    * pointers to the two variables                                       */
 /* <-                                                                       */
-/*    * 1 (TRUE) or 0 (FALSE) depending on result of comparision            */
+/*    * 1 (TRUE) or 0 (FALSE) depending on result of comparison             */
 /*--------------------------------------------------------------------------*/
 
 Var *vars_comp( int comp_type, Var *v1, Var *v2 )
@@ -700,11 +700,11 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 }
 
 
-/*------------------------------------------------------------------------*/
-/* vars_lnegate() does a logical negate of an interger or float variable, */
-/* i.e. if the variables value is zero a value of 1 is returned in a new  */
-/* variable, otherwise 0.                                                 */
-/*------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* vars_lnegate() does a logical negate of an integer or float variable, */
+/* i.e. if the variables value is zero a value of 1 is returned in a new */
+/* variable, otherwise 0.                                                */
+/*-----------------------------------------------------------------------*/
 
 Var *vars_lnegate( Var *v )
 {
@@ -728,7 +728,7 @@ Var *vars_lnegate( Var *v )
 /*-----------------------------------------------------------------------*/
 /* vars_push() creates a new entry on the variable stack (which actually */
 /* is not really a stack but a linked list) and sets its type and value. */
-/* When the type of the variable is undefined and datas is non-zero this */
+/* When the type of the variable is undefined and data is non-zero this  */
 /* signifies that this is the start of a print statement - in this case  */
 /* data points to the format string and has to be copied to the new      */
 /* variables name.                                                       */
@@ -740,7 +740,7 @@ Var *vars_push( int type, ... )
 	va_list ap;
 
 
-	/* Get memory for the new variable to be apppended to the stack
+	/* Get memory for the new variable to be appended to the stack
 	   and set its type */
 
 	new_stack_var = T_malloc( sizeof( Var ) );
@@ -1105,7 +1105,7 @@ Var *vars_arr_start( Var *v )
 /*----------------------------------------------------------------------*/
 /* The function is called when the end of an array access (indicated by */
 /* the `]') is found on the left hand side of an assignment. If it is   */
-/* called for a new arrray the indices found on the stack are the sizes */
+/* called for a new array the indices found on the stack are the sizes  */
 /* for the different dimensions of the array and are used to setup the  */
 /* the array.                                                           */
 /*----------------------------------------------------------------------*/
@@ -1138,7 +1138,7 @@ Var *vars_arr_lhs( Var *v )
 
 /*----------------------------------------------------------------------*/
 /* The function is called when after an array variable and the list of  */
-/* indices the final closing braket ']' is found in the input file. It  */
+/* indices the final closing bracket ']' is found in the input file. It */
 /* evaluates the index list and returns an ARR_PTR variable pointing to */
 /* the indexed array element (or slice, if there is one index less than */
 /* the array has dimensions).                                           */
@@ -1349,7 +1349,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 		THROW( EXCEPTION );
 	}
 
-	/* Set array's dimension and allocate memory for their sizes */
+	/* Set arrays dimension and allocate memory for their sizes */
 
 	a->dim = dim;
 	a->sizes = NULL;
@@ -1371,7 +1371,7 @@ Var *vars_setup_new_array( Var *v, int dim )
 		vars_check( v, INT_VAR | FLOAT_VAR );
 
 		/* Check the value of variable with the size and set the corresponding
-		   entry in the array's field for sizes */
+		   entry in the arrays field for sizes */
 
 		if ( v->type == INT_VAR )
 		{
@@ -1461,7 +1461,7 @@ Var *vars_arr_rhs( Var *v )
 	stack until we find the first non-index variable which has to be a pointer
 	to an array. While doing so we also count the number 'dim' of indices on
 	the stack. If the last entry on the stack is an undefined variable this
-	means we ound a refrence to a 1-dimensional array, i.e. something like
+	means we found a reference to a 1-dimensional array, i.e. something like
 	`j[ ]'. */
 
 	dim = 0;
@@ -1802,7 +1802,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 
 	/* Do allocation of memory (set size of missing dimension to the one of
 	   the transient array) if the destination array needs it, otherwise check
-	   that the sizes of the destinationarray size is equal to the length of
+	   that the sizes of the destination array size is equal to the length of
 	   the transient array. */
 
 	if ( d->flags & NEED_ALLOC )
@@ -1876,7 +1876,7 @@ void vars_ass_from_trans_ptr( Var *src, Var *dest )
 /* Function initializes a new array. When called the stack at 'v' contains  */
 /* all the data for the initialization (the last data on top of the stack)  */
 /* and, directly below the data, an ARR_PTR to the array to be initialized. */
-/* If 'v' is an UNDEF_VAR no inititialisation has to be done.               */
+/* If 'v' is an UNDEF_VAR no initialization has to be done.                 */
 /*--------------------------------------------------------------------------*/
 
 void vars_arr_init( Var *v )
@@ -1899,7 +1899,7 @@ void vars_arr_init( Var *v )
 
 	/* The variable pointer this function gets passed is a pointer to the very
        last initialization data on the variable stack. Now we've got to work
-       our way doen the variable stack until we find the first non-data
+       our way down the variable stack until we find the first non-data
        variable which must be of ARR_PTR type. While doing so, we also count
        the number of initializers, 'ni', on the stack. */
 
@@ -1913,7 +1913,7 @@ void vars_arr_init( Var *v )
 	vars_check( a, INT_ARR | FLOAT_ARR );
 
 
-	/* Variable sized arays can't be initialized, they need the assignment of
+	/* Variable sized arrays can't be initialized, they need the assignment of
 	   an array slice to determine the still unknown size of their very last
 	   dimension */
 
