@@ -165,7 +165,16 @@ Var *lockin_sensitivity( Var *v )
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR, 0.5 );
 		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "sr510: Function `lockin_sensitivity' with no "
+						"argument can only be used in the EXPERIMENT "
+						"section.\n" );
+				THROW( EXCEPTION );
+			}
 			return vars_push( FLOAT_VAR, sr510_get_sens( ) );
+		}
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
@@ -185,9 +194,9 @@ Var *lockin_sensitivity( Var *v )
 
 	for ( i = 0; i < 26; i++ )
 	{
-		if ( sens > slist[ i ] && sens < slist[ i + 1 ] )
+		if ( sens <= slist[ i ] && sens >= slist[ i + 1 ] )
 		{
-			if ( sens / slist[ i ] < slist[ i + 1 ] / sens )
+			if ( slist[ i ] / sens < sens / slist[ i + 1 ] )
 				Sens = i + 1;
 			else
 				Sens = i + 2;
@@ -199,8 +208,18 @@ Var *lockin_sensitivity( Var *v )
 		 fabs( sens - slist[ Sens - 1 ] ) > sens * 1.0e-2 && /* error > 1% ? */
 		 ! sr510.Sens_warn  )                       /* no warn message yet ? */
 	{
-		eprint( WARN, "sr510: Can't set sensitivity to %lf V, using %lf V "
-				"instead.\n", sens, slist[ Sens - 1 ] );
+		if ( sens >= 1.0e-3 )
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lf mV, using "
+					"%.0lf mV instead.\n", sens * 1.0e3,
+					slist[ Sens - 1 ] * 1.0e3 );
+		else if ( sens >= 1.0e-6 ) 
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lf uV, using "
+					"%.0lf uV instead.\n", sens * 1.0e6,
+					slist[ Sens - 1 ] * 1.0e6 );
+		else
+			eprint( WARN, "sr510: Can't set sensitivity to %.0lf nV, using "
+					"%.0lf nV instead.\n", sens * 1.0e9, 
+					slist[ Sens - 1 ] * 1.0e9 );
 		sr510.Sens_warn = SET;
 	}
 
@@ -249,11 +268,20 @@ Var *lockin_time_constant( Var *v )
 		if ( TEST_RUN )
 			return vars_push( FLOAT_VAR, 0.1 );
 		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "sr510: Function `lockin_time_constant' with "
+						"no argument can only be used in the EXPERIMENT "
+						"section.\n" );
+				THROW( EXCEPTION );
+			}
 			return vars_push( FLOAT_VAR, sr510_get_tc( ) );
+		}
 	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
-	tc = ( double ) VALUE( v );
+	tc = ( double ) VALUE( v ) / 1.0e9;
 
 	if ( tc < 0.0 )
 	{
@@ -268,7 +296,7 @@ Var *lockin_time_constant( Var *v )
 	   within 1 percent, we utter a warning message (but only once). */
 	
 	for ( i = 0; i < 10; i++ )
-		if ( tc > tcs[ i ] && tc < tcs[ i + 1 ] )
+		if ( tc >= tcs[ i ] && tc <= tcs[ i + 1 ] )
 		{
 			if ( tc / tcs[ i ] < tcs[ i + 1 ] / tc )
 				TC = i + 1;
@@ -281,8 +309,12 @@ Var *lockin_time_constant( Var *v )
 		 fabs( tc - tcs[ TC - 1 ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
 		 ! sr510.TC_warn )                          /* no warn message yet ? */
 	{
-		eprint( WARN, "sr510: Can't set time constant to %lf s, using %lf s "
-				"instead.\n", tc, tcs[ TC - 1 ] );
+		if ( tc >= 1.0 )
+			eprint( WARN, "sr510: Can't set time constant to %.0lf s, using "
+					"%.0lf s instead.\n", tc, tcs[ TC - 1 ] );
+		else
+			eprint( WARN, "sr510: Can't set time constant to %.0lf ms, using "
+					"%.0lf ms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 		sr510.TC_warn = SET;
 	}
 	
@@ -295,8 +327,12 @@ Var *lockin_time_constant( Var *v )
 
 		if ( ! sr510.TC_warn )                      /* no warn message yet ? */
 		{
-			eprint( WARN, "sr510: Invalid time constant (%lf s), using %lf s "
-					"instead.\n", tc, tcs[ TC - 1 ] );
+			if ( tc >= 1.0 )
+				eprint( WARN, "sr510: Invalid time constant (%.0lf s), using "
+					"%.0lf s instead.\n", tc, tcs[ TC - 1 ] );
+			else
+				eprint( WARN, "sr510: Invalid time constant (%.0lf ms), using "
+					"%.0lf ms instead.\n", tc * 1.0e3, tcs[ TC - 1 ] * 1.0e3 );
 			sr510.TC_warn = SET;
 		}
 	}
@@ -333,7 +369,16 @@ Var *lockin_phase( Var *v )
 		if ( TEST_RUN )
 			return vars_push( INT_VAR, 0 );
 		else
+		{
+			if ( I_am == PARENT )
+			{
+				eprint( FATAL, "sr510: Function `lockin_phase' with no "
+						"argument can only be used in the EXPERIMENT "
+						"section.\n" );
+				THROW( EXCEPTION );
+			}
 			return vars_push( INT_VAR, sr510_get_phase( ) );
+		}
 	}
 
 	/* Otherwise set phase to value passed to the function */
