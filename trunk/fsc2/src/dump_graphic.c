@@ -87,7 +87,7 @@ void dump_window( int type, int fd )
 	   between 1D and 2D pictures because they need different amounts of
 	   colors (is this really necessary?) */
 
-	fprintf( fp, "P6 %d %d 255\n", w, h );
+	fprintf( fp, "P6\n%d %d\n255\n", w, h );
 
 	TRY
 	{
@@ -95,6 +95,7 @@ void dump_window( int type, int fd )
 			dump_image_to_file( fp, image, G.hash_1d, G.hash_size_1d );
 		else
 			dump_image_to_file( fp, image, G.hash_2d, G.hash_size_2d );
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
@@ -137,7 +138,7 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
 			   G.y_axis.w, G.canvas.h );
 
-	/* And finally a bit of 3D-effect */
+	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
@@ -185,7 +186,7 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 	XCopyArea( G.d, G.x_axis.pm, pm, gc, 0, 0, G.x_axis.w, G.x_axis.h,
 			   G.y_axis.w, G.canvas.h );
 
-	/* And finally a bit of 3D-effect */
+	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.y_axis.w - 1, G.canvas.h,
@@ -240,7 +241,7 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 			   G.cut_x_axis.w, G.cut_x_axis.h,
 			   G.cut_y_axis.w, G.cut_canvas.h );
 
-	/* And finally a bit of 3D-effect */
+	/* And finally add a bit of 3D-effect */
 
 	XSetForeground( G.d, gc, fl_get_pixel( FL_BLACK ) );
 	XDrawLine( G.d, pm, gc, G.cut_y_axis.w - 1, G.cut_canvas.h,
@@ -260,8 +261,17 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* This function determines the pixel values of an image and uses */
+/* a hash created earlier to figure out the color of the points.  */
+/* It then writes out the colors as three rgb byte values to a    */
+/* file.                                                          */
+/* The part for determining the pixel values (instead of using    */
+/* XGetPixel(), which would be much slower) includes some ideas   */
+/* from the xv program (especially xvgrab.c) by John Bradley,     */
+/* which in turn seems to be based on the 'xwdtopnm.c' utility,   */
+/* part of the pbmplus package written by Jef Poskanzer.          */
+/*----------------------------------------------------------------*/
 
 static void dump_image_to_file( FILE *fp, XImage *image,
 								G_Hash hash, int hash_size )
@@ -281,6 +291,8 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 	char *lineptr;
 
 
+	/* Get some information about the image */
+
 	bits_used = bits_per_item  = image->bitmap_unit;
 	bits_per_pixel = image->bits_per_pixel;
 
@@ -291,6 +303,8 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 
 	bit_order  = image->bitmap_bit_order;
 
+	/* Loop through the complete image, line by line */
+
 	for ( lineptr = image->data, i = 0; i < image->height;
 		  lineptr += image->bytes_per_line, i++ )
 	{
@@ -300,10 +314,10 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 
 		bits_used = bits_per_item;
 
+		/* Get next pixel in current line */
+
 		for ( j = 0; j < image->width; j++ )
 		{
-			/* Get next pixel value from the image data */
-
 			if ( bits_used == bits_per_item )
 			{  
 				bptr++;
@@ -340,6 +354,9 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 
 			bits_used += bits_per_pixel;
 
+			/* Get the rgb color from the pixel value via a hash look-up
+			   and write color to output file */
+
 			key = pixel % hash_size;
 			while ( hash[ key ].pixel != pixel )
 				key = ( key + 1 ) % hash_size;
@@ -349,8 +366,10 @@ static void dump_image_to_file( FILE *fp, XImage *image,
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Creates a pixel value to rgb color hash for the colors used in */
+/* 1D graphics.                                                   */
+/*----------------------------------------------------------------*/
 
 void create_1d_color_hash( void )
 {
@@ -395,8 +414,10 @@ void create_1d_color_hash( void )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+/* Creates a pixel value to rgb color hash for the colors used in */
+/* 2D graphics.                                                   */
+/*----------------------------------------------------------------*/
 
 void create_2d_color_hash( void )
 {

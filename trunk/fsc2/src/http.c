@@ -217,6 +217,11 @@ void http_check( void )
 				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
 				break;
 
+			case 'C' :
+				reply[ 0 ] = ( char ) ( G.active_curve + 1 ) + '0';
+				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+				break;
+
 			case 'E' :
 				http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 				break;

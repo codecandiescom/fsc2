@@ -89,7 +89,7 @@ Exception_Types get_exception_type( const char *file, int line );
 #define CATCH( e )     \
 			else if ( get_exception_type( __FILE__, __LINE__ ) == ( e ) )
 
-#define OTHERWISE      else
+#define OTHERWISE    else
 
 
 #endif  /* ! EXCEPTIONS_HEADER */
