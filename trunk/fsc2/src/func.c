@@ -2217,7 +2217,7 @@ Var *f_save( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( WARN, "%s:%ld: Call of `save()' without any data.",
+		eprint( WARN, "%s:%ld: Call of `save()' without data to save.",
 				Fname, Lc );
 		return vars_push( INT_VAR, 0 );
 	}
