@@ -1379,7 +1379,7 @@ Var *f_icreate( Var *v )
 	}
 
 	/* First argument must be type of input object ("INT_INPUT" or
-	   "FLOAT_INPUT" or 0 or 1) */
+	   "FLOAT_INPUT", "INT_OUTPUT", "FLOAT_OUTPUT" or 0, 1, 2, or 3) */
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -1389,15 +1389,16 @@ Var *f_icreate( Var *v )
 			type = v->val.lval;
 		else
 		{
-			eprint( WARN, "%s:%ld: Float variable used as input object type "
-					"in function input_create().\n", Fname, Lc );
+			eprint( WARN, "%s:%ld: Float variable used as input or output "
+					"object type in function input_create().\n", Fname, Lc );
 			type = lround( v->val.dval );
 		}
 
-		if ( type != INT_INPUT && type != FLOAT_INPUT )
+		if ( type != INT_INPUT && type != FLOAT_INPUT &&
+			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
 		{
-			eprint( FATAL, "%s:%ld: Invalid input object type (%ld) in "
-					"function input_create().\n", Fname, Lc, type );
+			eprint( FATAL, "%s:%ld: Invalid input or output object type (%ld) "
+					"in function input_create().\n", Fname, Lc, type );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1407,10 +1408,14 @@ Var *f_icreate( Var *v )
 			type = INT_INPUT;
 		else if ( ! strcasecmp( v->val.sptr, "FLOAT_INPUT" ) )
 			type = FLOAT_INPUT;
+		else if ( ! strcasecmp( v->val.sptr, "INT_OUTPUT" ) )
+			type = INT_OUTPUT;
+		else if ( ! strcasecmp( v->val.sptr, "FLOAT_OUTPUT" ) )
+			type = FLOAT_OUTPUT;
 		else
 		{
-			eprint( FATAL, "%s:%ld: Unknown input object type (`%s') in "
-					"function input_create().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Unknown input or output object type (`%s')"
+					" in function input_create().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 	}
@@ -1421,16 +1426,17 @@ Var *f_icreate( Var *v )
 
 	if ( v != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( type == INT_INPUT && v->type == FLOAT_VAR )
+		if ( ( type == INT_INPUT || type == INT_OUTPUT ) &&
+			 v->type == FLOAT_VAR )
 		{
 			eprint( SEVERE, "%s:%ld: Float value used as initial value for "
-					"new integer input object in function input_create().\n",
-					Fname, Lc );
+					"new integer input or output object in function "
+					"input_create().\n", Fname, Lc );
 			lval = lround( v->val.dval );
 		}
 		else
 		{
-			if ( type == INT_INPUT )
+			if ( type == INT_INPUT || type == INT_OUTPUT )
 				lval = v->val.lval;
 			else
 				dval = VALUE( v );
@@ -1484,7 +1490,8 @@ Var *f_icreate( Var *v )
 		/* Calculate length of buffer needed */
 
 		len = 2 * sizeof( long )
-			  + ( type == INT_INPUT ? sizeof( long ) : sizeof( double ) );
+			  + ( ( type == INT_INPUT || type == INT_OUTPUT ) ?
+				  sizeof( long ) : sizeof( double ) );
 		if ( Fname )
 			len += strlen( Fname ) + 1;
 		else
@@ -1506,7 +1513,7 @@ Var *f_icreate( Var *v )
 		memcpy( pos, &type, sizeof( long ) );   /* input object type */
 		pos += sizeof( long );
 
-		if ( type == INT_INPUT )
+		if ( type == INT_INPUT || type == INT_OUTPUT )
 		{
 			memcpy( pos, &lval, sizeof( long ) );
 			pos += sizeof( long );
@@ -1591,7 +1598,7 @@ Var *f_icreate( Var *v )
 
 	new_io->ID = ID;
 	new_io->type = ( int ) type;
-	if ( type == INT_INPUT )
+	if ( type == INT_INPUT || type == INT_OUTPUT )
 		new_io->val.lval = lval;
 	else
 		new_io->val.dval = dval;
@@ -1646,8 +1653,8 @@ Var *f_idelete( Var *v )
 
 			if ( v->type != INT_VAR || v->val.lval < 0 )
 			{
-				eprint( FATAL, "%s:%ld: Invalid input object identifier in "
-						"input_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid input or output object "
+						"identifier in input_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -1696,11 +1703,11 @@ Var *f_idelete( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 ||
 			 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-			 ( io->type != INT_INPUT &&
-			   io->type != FLOAT_INPUT ) )
+			 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
+			   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 		{
-			eprint( FATAL, "%s:%ld: Invalid input object identifier in "
-					"input_delete().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid input or output object identifier "
+					"in input_delete().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 
@@ -1737,8 +1744,8 @@ Var *f_idelete( Var *v )
 
 			if ( ( v = vars_pop( v ) ) != NULL )
 			{
-				eprint( FATAL, "%s:%ld: Invalid input object identifier in "
-						"input_delete().\n", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid input or output object "
+						"identifier in input_delete().\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -1798,8 +1805,8 @@ Var *f_ivalue( Var *v )
 
 		if ( v->type != INT_VAR || v->val.lval < 0 )
 		{
-			eprint( FATAL, "%s:%ld: Invalid input object identifier in "
-					"input_value().\n", Fname, Lc );
+			eprint( FATAL, "%s:%ld: Invalid input or output object identifier "
+					"in input_value().\n", Fname, Lc );
 			THROW( EXCEPTION );
 		}
 		ID = v->val.lval;
@@ -1900,8 +1907,8 @@ Var *f_ivalue( Var *v )
 
 	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
 	{
-		eprint( FATAL, "%s:%ld: No input objects have been defined yet.\n",
-				Fname, Lc );
+		eprint( FATAL, "%s:%ld: No input or output objects have been defined "
+				"yet.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -1909,10 +1916,10 @@ Var *f_ivalue( Var *v )
 
 	if ( v->type != INT_VAR || v->val.lval < 0 ||
 		 ( io = find_object_from_ID( v->val.lval ) ) == NULL ||
-		 ( io->type != INT_INPUT &&
-		   io->type != FLOAT_INPUT ) )
+		 ( io->type != INT_INPUT && io->type != FLOAT_INPUT &&
+		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
 	{
-		eprint( FATAL, "%s:%ld: Invalid input object identifier in "
+		eprint( FATAL, "%s:%ld: Invalid input or output object identifier in "
 				"input_value().\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -1921,7 +1928,7 @@ Var *f_ivalue( Var *v )
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
-		if ( io->type == INT_INPUT )
+		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 			return vars_push( INT_VAR, io->val.lval );
 		else
 			return vars_push( FLOAT_VAR, io->val.dval );
@@ -1931,15 +1938,16 @@ Var *f_ivalue( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( io->type == INT_INPUT && v->type == FLOAT_VAR )
+	if ( ( io->type == INT_INPUT || io->type == INT_OUTPUT ) &&
+		 v->type == FLOAT_VAR )
 	{
-		eprint( SEVERE, "%s:%ld: Float number used as integer input object "
-				"value in input_value().\n", Fname, Lc );
+		eprint( SEVERE, "%s:%ld: Float number used as integer input or output "
+				"object value in input_value().\n", Fname, Lc );
 		io->val.lval = lround( v->val.dval );
 	}
 	else
 	{
-		if ( io->type == INT_INPUT )
+		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 			io->val.lval = v->val.lval;
 		else
 			io->val.dval = VALUE( v );
@@ -1947,7 +1955,7 @@ Var *f_ivalue( Var *v )
 
 	if ( ! TEST_RUN )
 	{
-		if ( io->type == INT_INPUT )
+		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		{
 			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
 			fl_set_input( io->self, buf );
@@ -1967,7 +1975,7 @@ Var *f_ivalue( Var *v )
 			;
 	}
 
-	if ( io->type == INT_INPUT )
+	if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		return vars_push( INT_VAR, io->val.lval );
 	else
 		return vars_push( FLOAT_VAR, io->val.dval );
@@ -2143,7 +2151,9 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 				( io->prev->type == NORMAL_SLIDER ||
 				  io->prev->type == VALUE_SLIDER  ||
 				  io->prev->type == INT_INPUT     ||
-				  io->prev->type == FLOAT_INPUT ?
+				  io->prev->type == FLOAT_INPUT   ||
+				  io->prev->type == INT_OUTPUT    ||
+				  io->prev->type == FLOAT_OUTPUT ?
 				  LABEL_VERT_OFFSET : 0 );
 		}
 		else
@@ -2243,6 +2253,30 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 									 io->w, io->h, io->label );
 			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
 			fl_set_input_return( io->self, FL_RETURN_END_CHANGED );
+			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
+			fl_set_input( io->self, buf );
+			break;
+
+		case INT_OUTPUT :
+			io->w = INPUT_WIDTH;
+			io->h = INPUT_HEIGHT;
+			io->self = fl_add_input( FL_INT_INPUT, io->x, io->y, io->w, io->h,
+									 io->label );
+			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
+			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			fl_set_input( io->self, buf );
+			break;
+
+		case FLOAT_OUTPUT :
+			io->w = INPUT_WIDTH;
+			io->h = INPUT_HEIGHT;
+			io->self = fl_add_input( FL_FLOAT_INPUT, io->x, io->y,
+									 io->w, io->h, io->label );
+			fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+			fl_set_input_return( io->self, FL_RETURN_ALWAYS );
 			fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
 			snprintf( buf, MAX_INPUT_CHARS, "%f", io->val.dval );
 			fl_set_input( io->self, buf );
@@ -2360,6 +2394,16 @@ static void tools_callback( FL_OBJECT *obj, long data )
 
 			if ( dval != io->val.dval )
 				io->val.dval = dval;
+			break;
+
+		case INT_OUTPUT :
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
+			fl_set_input( io->self, obuf );
+			break;
+			
+		case FLOAT_OUTPUT :
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%f", io->val.dval );
+			fl_set_input( io->self, obuf );
 			break;
 
 		default :                 /* this can never happen :) */

@@ -59,6 +59,8 @@ typedef struct {
 #define VALUE_SLIDER  4
 #define INT_INPUT     5
 #define FLOAT_INPUT   6
+#define INT_OUTPUT    7
+#define FLOAT_OUTPUT  8
 
 #define VERT          0
 #define HORI          1
