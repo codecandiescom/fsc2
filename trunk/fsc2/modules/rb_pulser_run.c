@@ -34,7 +34,7 @@ static void rb_pulser_rf_pulse( void );
  * to update the pulser accordingly.
  *---------------------------------------------------------------------*/
 
-bool rb_pulser_do_update( void )
+void rb_pulser_do_update( void )
 {
 	bool restart = UNSET;
 
@@ -57,8 +57,6 @@ bool rb_pulser_do_update( void )
 
 	if ( restart && FSC2_MODE == EXPERIMENT )
 		rb_pulser_run( START );
-
-	return OK;
 }
 
 
@@ -67,7 +65,7 @@ bool rb_pulser_do_update( void )
  * that the new settings are reasonable and then commit all changes.
  *---------------------------------------------------------------------*/
 
-bool rb_pulser_update_pulses( bool flag )
+void rb_pulser_update_pulses( bool flag )
 {
 	rb_pulser_function_init( );
 	rb_pulser_init_delay( );
@@ -79,8 +77,6 @@ bool rb_pulser_update_pulses( bool flag )
 	rb_pulser_seq_length_check( );
 
 	rb_pulser_commit( flag );
-
-	return OK;
 }
 
 

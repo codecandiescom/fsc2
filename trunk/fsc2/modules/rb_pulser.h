@@ -289,8 +289,8 @@ void rb_pulser_init_setup( void );
 
 /* Functions defined in rb_pulser_run.c */
 
-bool rb_pulser_do_update( void );
-bool rb_pulser_update_pulses( bool flag );
+void rb_pulser_do_update( void );
+void rb_pulser_update_pulses( bool flag );
 void rb_pulser_function_init( void );
 void rb_pulser_init_delay( void );
 void rb_pulser_delay_card_setup( void );
