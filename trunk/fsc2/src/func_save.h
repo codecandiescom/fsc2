@@ -39,7 +39,7 @@ Var *f_getf(    Var *v );
 Var *f_clonef(  Var *v );
 Var *f_save(    Var *v );
 Var *f_fsave(   Var *v );
-Var *f_printf(  Var *v );
+Var *f_ffsave(  Var *v );
 Var *f_save_p(  Var *v );
 Var *f_save_o(  Var *v );
 Var *f_save_c(  Var *v );
