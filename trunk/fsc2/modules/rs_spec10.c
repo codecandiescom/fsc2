@@ -199,7 +199,7 @@ Var *ccd_camera_roi( Var *v )
 
 	if ( v->type == STR_VAR )
 	{
-		if ( ! strcasecmp( v->val.sptr, "ALL" ) )
+		if ( strcasecmp( v->val.sptr, "ALL" ) )
 		{
 			print( FATAL, "Invalid argument string '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
@@ -301,38 +301,51 @@ Var *ccd_camera_binning( Var *v )
 	if ( v == NULL )
 		return vars_push( INT_ARR, vbin, 2 );
 
-	vars_check( v, INT_ARR | FLOAT_ARR );
+	vars_check( v, INT_ARR | FLOAT_ARR | STR_VAR );
 
-	if ( v->type == FLOAT_ARR )
-		print( WARN, "Float values used as binning factors.\n" );
-
-	if ( v->len > 2 )
-		print( WARN, "Argument array has more than the required 2 elements, "
-			   "discarding superfluous ones.\n" );
-
-	for ( i = 0; i < 2 && i < v->len; i++ )
-		if ( v->type == INT_ARR && v->val.lpnt[ i ] != 0 )
-			vbin[ i ] = v->val.lpnt[ i ];
-		else if ( v->type == FLOAT_ARR && v->val.dpnt[ i ] != 0.0 )
-			vbin[ i ] = lrnd( v->val.dpnt[ i ] );
-
-	for ( i = 0; i < 2; i++ )
-		if ( vbin[ i ] == 0 )
-			vbin[ i ] = rs_spec10->ccd.bin[ i ];
-
-	for ( i = 0; i < 2; i++ )
+	if ( v->type == STR_VAR )
 	{
-		if ( vbin[ i ] < 1 )
+		if ( strcasecmp( v->val.sptr, "NONE" ) )
 		{
-			print( FATAL, "%c binning value smaller than 1.\n", 'X' + i );
+			print( FATAL, "Invalid argument string '%s'.\n", v->val.sptr );
 			THROW( EXCEPTION );
 		}
 
-		if ( vbin[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] + 1 )
+		vbin[ 0 ] = vbin[ 2 ] = 1;
+	}
+	else
+	{
+		if ( v->type == FLOAT_ARR )
+			print( WARN, "Float values used as binning factors.\n" );
+
+		if ( v->len > 2 )
+			print( WARN, "Argument array has more than the required 2 "
+				   "elements, discarding superfluous ones.\n" );
+
+		for ( i = 0; i < 2 && i < v->len; i++ )
+			if ( v->type == INT_ARR && v->val.lpnt[ i ] != 0 )
+				vbin[ i ] = v->val.lpnt[ i ];
+			else if ( v->type == FLOAT_ARR && v->val.dpnt[ i ] != 0.0 )
+				vbin[ i ] = lrnd( v->val.dpnt[ i ] );
+
+		for ( i = 0; i < 2; i++ )
+			if ( vbin[ i ] == 0 )
+				vbin[ i ] = rs_spec10->ccd.bin[ i ];
+
+		for ( i = 0; i < 2; i++ )
 		{
-			print( FATAL, "%c binning value larger than CCD %c-size.\n",
-				   'X' + i, 'X' + i );
-			THROW( EXCEPTION );
+			if ( vbin[ i ] < 1 )
+			{
+				print( FATAL, "%c binning value smaller than 1.\n", 'X' + i );
+				THROW( EXCEPTION );
+			}
+
+			if ( vbin[ i ] > ( long ) rs_spec10->ccd.max_size[ i ] + 1 )
+			{
+				print( FATAL, "%c binning value larger than CCD %c-size.\n",
+					   'X' + i, 'X' + i );
+				THROW( EXCEPTION );
+			}
 		}
 	}
 
