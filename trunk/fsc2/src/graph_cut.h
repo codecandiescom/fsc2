@@ -8,14 +8,17 @@
 
 typedef struct {
 	int cut_dir;             /* direction of cut (i.e. X, Y) */
-	int cut_for_curve;       /* number of the curve the cut comes from */
+	int curve;               /* number of the curve the cut comes from */
 
 	bool is_scale_set;       /* have scaling factors been calculated ? */
 	bool scale_changed;      /* have scaling factors changed ? */
-	bool is_fs;              /* state of full scale button */
 
 	long nx;                 /* number of points to display */
 	long index;              /* index in curve the cut is taken from */
+
+	bool is_fs[ MAX_CURVES ];
+	double s2d[ MAX_CURVES ][ 3 ];
+	double shift[ MAX_CURVES ][ 3 ];
 
 	int cur_1,
 		cur_2,
@@ -53,7 +56,7 @@ typedef struct {
 void cut_show( int dir, int pos );
 bool cut_data_rescaled( long curve );
 bool cut_num_points_changed( int dir, long num_points );
-bool cut_new_point( long curve, long x_index, long y_index, double val );
+bool cut_new_points( long curve, long x_index, long y_index, long len );
 void cut_new_data_redraw( void );
 void cut_new_curve_handler( void );
 void cut_form_close( void );
