@@ -1,0 +1,178 @@
+#
+# $Id$
+#
+
+ WITIO-48 Device Driver Description
+ ==================================
+
+
+This driver only supports a subset of the functionality of the board.
+It only supports simple DIO using the two 82C55A chips on the board in
+mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips also on
+the board are not supported.
+
+Each of the two 24-bit DIOs can be split up independently into sub-DIOs,
+which then can be used indendently for input or output. There exist
+four modes, each of the tow DIOs can be in:
+
+WITIO_48_MODE_3x8:   The DIO is split into three 8-bit wide DIOs
+WITIO_48_MODE_2x12:  The DIO is split into two 12-bit wide DIOs
+WITIO_48_MODE_1x24:  The DIO isn't split up but used as a 24-bit wide DIO
+WITIO_48_MODE_16_8:  The DIO is split into a 16-bit and an 8-bit wide DIO
+
+When the module gets loaded the board gets initialized to mode
+'WITIO_48_MODE_3x8' with all set up as inputs.
+
+Depending on the mode, one, two or three channels can be used to out-
+or input values in different ranges:
+
+ |--------------------|--------------------|-------------------------|
+ |        mode        |     channels       |       ranges            |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_3x8  | WITIO_48_CHANNEL_0 | 0 - 255 (0xFF)          |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
+ |                    | WITIO_48_CHANNEL_2 | 0 - 255 (0xFF)          |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_2x12 | WITIO_48_CHANNEL_0 | 0 - 4095 (0xFFF)        |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 4095 (0xFFF)        |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_1x24 | WITIO_48_CHANNEL_0 | 0 - 16777215 (0xFFFFFF) |
+ |--------------------|--------------------|-------------------------|
+ | WITIO_48_MODE_16_8 | WITIO_48_CHANNEL_0 | 0 - 65536 (0xFFFF)      |
+ |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
+ |--------------------|--------------------|-------------------------|
+
+
+For the different I/O modes there are also different mappings of the
+data to the pins of the connectors of the board:
+
+ |--------------------|--------------------|---------------------------|
+ |        mode        |     channels       |  pins ( <- MSB   LSB-> )  |
+ |--------------------|--------------------|---------------------------|
+ | WITIO_48_MODE_3x8  | WITIO_48_CHANNEL_0 | A7 - A0                   |
+ |                    | WITIO_48_CHANNEL_1 | B7 - B0                   |
+ |                    | WITIO_48_CHANNEL_2 | C7 - C0                   |
+ |--------------------|--------------------|---------------------------|
+ | WITIO_48_MODE_2x12 | WITIO_48_CHANNEL_0 | C7 - C4, A7 - A0          |
+ |                    | WITIO_48_CHANNEL_1 | C3 - C0, B7 - B0          |
+ |--------------------|--------------------|---------------------------|
+ | WITIO_48_MODE_1x24 | WITIO_48_CHANNEL_0 | C7 - C0, B7 - B0, A7 - A0 |
+ |--------------------|--------------------|---------------------------|
+ | WITIO_48_MODE_16_8 | WITIO_48_CHANNEL_0 | B7 - B0, A7 - A0          |
+ |                    | WITIO_48_CHANNEL_1 | C7 - C0                   |
+ |--------------------|--------------------|---------------------------|
+
+
+There are only three operations that can be used with the driver: Beside
+doing an open() and close()/release() on a board all dealings with a
+board are done vio ioctl() calls. The following ioctl() requests are
+currently implemented:
+
+    WITIO_48_IOC_SET_MODE
+    WITIO_48_IOC_GET_MODE
+    WITIO_48_IOC_DIO_OUT
+    WITIO_48_IOC_DIO_IN
+
+
+===================================================================
+
+  WITIO_48_IOC_SET_MODE
+
+This ioctl() request allows to set a new I/O mode for one of the DIO
+chips on the board. The argument is a pointer to a structure which is
+typedef'ed as
+
+    typedef struct {
+        WITIO_48_DIO  dio;
+        WITIO_48_MODE mode;
+    } WITIO_48_DIO_MODE;
+
+The first member specifies for which of the two DIOs the mode is to
+be changed. It is an unsigned integer number, either 0 or 1 or, as
+a symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'. The second
+member specifies the mode, an unsigned integer number between 0 and 3,
+where 0 can be replaced by 'WITIO_48_MODE_3x8', 1 by 'WITIO_48_MODE_2x12',
+2 by 'WITIO_48_MODE_1x24' and, finally, 3 by 'WITIO_48_MODE_16_8'.
+
+
+===================================================================
+
+  WITIO_48_IOC_GET_MODE
+
+This ioctl() request allows to find out about the current I/O mode of
+one of the DIO chips on the board. The argument is a pointer to a
+structure which is typedef'ed as
+
+    typedef struct {
+        WITIO_48_DIO  dio;
+        WITIO_48_MODE mode;
+    } WITIO_48_DIO_MODE;
+
+The first member specifies for which of the two DIOs the mode is to
+be returned. It is an unsigned integer number, either 0 or 1 or, as
+a symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'. When the call
+returns successfully the the second member is set to the current mode,
+an unsigned integer number between 0 and 3, where 0 stands for
+'WITIO_48_MODE_3x8', 1 for 'WITIO_48_MODE_2x12', 2 for
+'WITIO_48_MODE_1x24' and, finally, 3 for 'WITIO_48_MODE_16_8'.
+
+
+===================================================================
+
+  WITIO_48_IOC_DIO_OUT
+
+This ioctl() request allows to output a value at one of the sub-DIOs
+of one of the two DIOs on the board. The argument is a pointer to a
+structure which is typedef'ed as
+
+    typedef struct {
+        WITIO_48_DIO     dio;
+        WITIO_48_CHANNEL channel;
+        unsigned long    value;
+    } WITIO_48_DATA;
+
+The first member specifies at which of the two DIOs the value is to
+be output. It is an unsigned integer number, either 0 or 1 or, as
+a symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+
+The second member is an unsigned integer number, specifying the sub-DIO,
+ between 0 and 2, where 0 can also be written as 'WITIO_48_CHANNEL_0',
+1 as 'WITIO_48_CHANNEL_1' and 2 as 'WITIO_48_CHANNEL_2'. The range of
+allowed values depends on the current I/O mode, please see the table
+in the introduction to determine which channels are allowed and to
+which pins of the connectors the bits of the value to be output will
+appear.
+
+The last member, is obviously, the value to be output. Depending on the
+mode and the selected channel only some of the lower bits (8, 12, 18 or
+24) of the value will appear at the output pins.
+
+
+===================================================================
+
+  WITIO_48_IOC_DIO_IN
+
+This ioctl() request allows to input a value from one of the sub-DIOs
+of one of the two DIOs on the board. The argument is a pointer to a
+structure which is typedef'ed as
+
+    typedef struct {
+        WITIO_48_DIO     dio;
+        WITIO_48_CHANNEL channel;
+        unsigned long    value;
+    } WITIO_48_DATA;
+
+The first member specifies from which of the two DIOs the value is to
+be read. It is an unsigned integer number, either 0 or 1 or, as a
+symbolic name 'WITIO_48_DIO_1' or 'WITIO_48_DIO_2'.
+
+The second member is an unsigned integer number, specifying the sub-DIO,
+between 0 and 2, where 0 can also be written as 'WITIO_48_CHANNEL_0',
+1 as 'WITIO_48_CHANNEL_1' and 2 as 'WITIO_48_CHANNEL_2'. The range of
+allowed values depends on the current I/O mode, please see the table
+in the introduction to determine which channels are allowed and about
+the mapping of the pins of the connectors the bits of the value to be
+fetched.
+
+In the last member of the structure the input value is stored after a
+successful return of the ioctl() call.
