@@ -56,8 +56,8 @@
 
 /* inclusion of programs own header files */
 
-#include "fsc2_rsc.h"
-#include "global.h"               /* must be the very first to be included ! */
+#include "fsc2_rsc.h"             /* must be the first to be included ! */
+#include "global.h"               /* must be the second to be included ! */
 #include "fsc2_assert.h"
 #include "dump.h"
 #include "bugs.h"
@@ -169,6 +169,7 @@ bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
 bool just_testing = UNSET;
 
+G_FUNCS G_Funcs;
 FD_fsc2 *main_form;
 FL_FORM *fsc2_main_form;
 FD_run *run_form;
@@ -241,6 +242,7 @@ extern bool need_Serial_Port[ NUM_SERIAL_PORTS ];
 
 extern bool just_testing;
 
+extern G_FUNCS G_Funcs;
 extern FD_fsc2 *main_form;
 extern FL_FORM *fsc2_main_form;
 extern FD_run *run_form;

@@ -529,7 +529,7 @@ void stop_measurement( FL_OBJECT *a, long b )
 
 static void set_buttons_for_run( int active )
 {
-	fl_freeze_form( fsc2_main_form );
+	fl_freeze_form( main_form->fsc2 );
 
 	if ( active == 0 )
 	{
@@ -568,7 +568,7 @@ static void set_buttons_for_run( int active )
 		notify_conn( UNBUSY_SIGNAL );
 	}
 
-	fl_unfreeze_form( fsc2_main_form );
+	fl_unfreeze_form( main_form->fsc2 );
 }
 
 

@@ -24,10 +24,12 @@
 
 #include "fsc2.h"
 #include <X11/Xresource.h>
+#include <dlfcn.h>
 
 
 static int main_form_close_handler( FL_FORM *a, void *b );
 static void setup_app_options( FL_CMD_OPT app_opt[ ] );
+static bool dl_fsc2_rsc( bool size );
 
 #if 0
 static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
@@ -225,10 +227,17 @@ bool xforms_init( int *argc, char *argv[ ] )
 			* ( ( int * ) xresources[ SLIDERFONTSIZE ].var );
 	fl_set_defaults( FL_PDSliderFontSize, &xcntl );
 
+
+#if ( SIZE == HI_RES )
+	if ( ! dl_fsc2_rsc( HIGH ) )
+#else
+	if ( ! dl_fsc2_rsc( LOW ) )
+#endif
+		 return FAIL;
+
 	/* Create and display the main form */
 
-	main_form = create_form_fsc2( );
-	fsc2_main_form = main_form->fsc2;
+	main_form = G_Funcs.create_form_fsc2( );
 
 	fl_set_object_helper( main_form->Load, "Load new EDL program" );
 	fl_set_object_helper( main_form->Edit, "Edit loaded EDL program" );
@@ -274,7 +283,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 			if ( wh < WIN_MIN_HEIGHT )
 				wh = WIN_MIN_HEIGHT;
 
-			fl_set_form_size( fsc2_main_form, ww, wh );
+			fl_set_form_size( main_form->fsc2, ww, wh );
 		}
 
 		if ( XValue & flags && YValue & flags )
@@ -283,24 +292,24 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	if ( needs_pos )
 	{
-		fl_set_form_position( fsc2_main_form, wx, wy );
-		fl_show_form( fsc2_main_form, FL_PLACE_POSITION,
+		fl_set_form_position( main_form->fsc2, wx, wy );
+		fl_show_form( main_form->fsc2, FL_PLACE_POSITION,
 					  FL_FULLBORDER, "fsc2" );
 	}
 	else
-		fl_show_form( fsc2_main_form, FL_PLACE_MOUSE | FL_FREE_SIZE,
+		fl_show_form( main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
 					  FL_FULLBORDER, "fsc2" );
 
 	
-	XQueryTree( fl_display, fsc2_main_form->window, &root,
+	XQueryTree( fl_display, main_form->fsc2->window, &root,
 				&parent, &children, &nchilds );
 	XQueryTree( fl_display, parent, &root,
 				&parent, &children, &nchilds );
 	XGetWindowAttributes( fl_display, parent, &attr );
-	border_offset_x = fsc2_main_form->x - attr.x;
-	border_offset_y = fsc2_main_form->y - attr.y;
+	border_offset_x = main_form->fsc2->x - attr.x;
+	border_offset_y = main_form->fsc2->y - attr.y;
 
-	fl_winminsize( fsc2_main_form->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+	fl_winminsize( main_form->fsc2->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
 
 	/* Check if axis font exists (if the user set a font) */
 
@@ -317,7 +326,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Set close handler for main form */
 
-	fl_set_form_atclose( fsc2_main_form, main_form_close_handler, NULL );
+	fl_set_form_atclose( main_form->fsc2, main_form_close_handler, NULL );
 
 	/* Set c_cdata and u_cdata elements of load button structure */
 
@@ -326,7 +335,7 @@ bool xforms_init( int *argc, char *argv[ ] )
 
 	/* Create the form for writing a comment */
 
-	input_form = create_form_input_form( );
+	input_form = G_Funcs.create_form_input_form( );
 	input_main_form = input_form->input_form;
 
 	return OK;
@@ -420,6 +429,94 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
+bool dl_fsc2_rsc( bool size )
+{
+	char *lib_name;
+	void *handle;
+
+
+	/* Assemble name of library to be loaded - this will also work for cases
+	   where the device name contains a relative path */
+
+	lib_name = get_string( strlen( libdir ) + 17 );
+	strcpy( lib_name, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( lib_name, "/" );
+	if ( size == HIGH )
+		strcat( lib_name, "fsc2_rsc_hr.so" );
+	else
+		strcat( lib_name, "fsc2_rsc_hr.so" );
+
+	/* Try to open the library. If it can't be found in the place defined at
+	   compilation time give it another chance by trying the paths defined
+	   by LD_LIBRARY_PATH. */
+
+	handle = dlopen( lib_name, RTLD_NOW );
+
+	if ( handle == NULL )
+		handle = dlopen( strrchr( lib_name, '/' ) + 1, RTLD_NOW );
+
+	if ( handle == NULL )
+	{
+		fprintf( stderr, "Can't open graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_form_fsc2 = dlsym( handle, "create_form_fsc2" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_form_run = dlsym( handle, "create_form_run" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_form_input_form = dlsym( handle, "create_form_input_form" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_form_print = dlsym( handle, "create_form_print" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_form_cut = dlsym( handle, "create_form_cut" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	T_free( lib_name );
+
+	return OK;
+}
+
+
+/*----------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*/
+
 static int main_form_close_handler( FL_FORM *a, void *b )
 {
 	a = a;
@@ -443,9 +540,9 @@ static int main_form_close_handler( FL_FORM *a, void *b )
 
 void xforms_close( void )
 {
-	if ( fl_form_is_visible( fsc2_main_form ) )
-		fl_hide_form( fsc2_main_form );
-	fl_free_form( fsc2_main_form );
+	if ( fl_form_is_visible( main_form->fsc2 ) )
+		fl_hide_form( main_form->fsc2 );
+	fl_free_form( main_form->fsc2 );
 }
 
 
@@ -463,7 +560,7 @@ void win_slider_callback( FL_OBJECT *a, long b )
 
 	b = b;
 
-	fl_freeze_form( fsc2_main_form );
+	fl_freeze_form( main_form->fsc2 );
 
 	fl_get_object_geometry( main_form->browser, &x1, &y1, &w1, &h1 );
 	fl_get_object_geometry( main_form->error_browser, &x2, &y2, &w2, &h2 );
@@ -478,7 +575,7 @@ void win_slider_callback( FL_OBJECT *a, long b )
 	fl_set_object_size( main_form->browser, w1, new_h1 );
 	fl_set_object_geometry( main_form->error_browser, x2, y1 + new_h1 + h,
 							w2, H - ( new_h1 + h ) );
-	fl_unfreeze_form( fsc2_main_form );
+	fl_unfreeze_form( main_form->fsc2 );
 }
 
 #if 0
