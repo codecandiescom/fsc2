@@ -66,23 +66,15 @@ static bool display_has_been_shown = UNSET;
 extern FL_resource xresources[ ];
 
 
-#if ( SIZE == HI_RES )
-#define WIN_MIN_1D_WIDTH   400
-#define WIN_MIN_2D_WIDTH   500
-#define WIN_MIN_HEIGHT     435
-#define SMALL_FONT_SIZE    FL_SMALL_SIZE
-#define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-14-*"
-#define DEFAULT_AXISFONT_2 "lucidasanstypewriter-14"
-#define DEFAULT_AXISFONT_3 "9x15"
-#else
-#define WIN_MIN_1D_WIDTH   300
-#define WIN_MIN_2D_WIDTH   350
-#define WIN_MIN_HEIGHT     380
-#define SMALL_FONT_SIZE    FL_TINY_SIZE
-#define DEFAULT_AXISFONT_1 "*-lucida-bold-r-normal-sans-10-*"
-#define DEFAULT_AXISFONT_2 "lucidasanstypewriter-10"
-#define DEFAULT_AXISFONT_3 "9x10"
-#endif
+static struct {
+	int	WIN_MIN_1D_WIDTH;
+	int	WIN_MIN_2D_WIDTH;
+	int	WIN_MIN_HEIGHT;
+	int	SMALL_FONT_SIZE;
+	char *DEFAULT_AXISFONT_1;
+	char *DEFAULT_AXISFONT_2;
+	char *DEFAULT_AXISFONT_3;
+} GI_sizes;
 
 
 /*----------------------------------------------------------------------*/
@@ -98,6 +90,27 @@ void start_graphics( void )
 	bool needs_pos = UNSET;
 	int i;
 
+
+	if ( G_Funcs.size == LOW )
+	{
+		GI_sizes.WIN_MIN_1D_WIDTH   = 300;
+		GI_sizes.WIN_MIN_2D_WIDTH   = 350;
+		GI_sizes.WIN_MIN_HEIGHT     = 380;
+		GI_sizes.SMALL_FONT_SIZE    = FL_TINY_SIZE;
+		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-10-*";
+		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-10";
+		GI_sizes.DEFAULT_AXISFONT_3 = "9x10";
+	}
+	else
+	{
+		GI_sizes.WIN_MIN_1D_WIDTH   = 400;
+		GI_sizes.WIN_MIN_2D_WIDTH   = 500;
+		GI_sizes.WIN_MIN_HEIGHT     = 435;
+		GI_sizes.SMALL_FONT_SIZE    = FL_SMALL_SIZE;
+		GI_sizes.DEFAULT_AXISFONT_1 = "*-lucida-bold-r-normal-sans-14-*";
+		GI_sizes.DEFAULT_AXISFONT_2 = "lucidasanstypewriter-14";
+		GI_sizes.DEFAULT_AXISFONT_3 = "9x15";
+	}
 
 	if ( G.dim == 1 )
 	{
@@ -143,14 +156,15 @@ void start_graphics( void )
 	if ( access( pixmap_file, R_OK ) == 0 )
 	{
 		fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
-		fl_set_object_lsize( run_form->undo_button, SMALL_FONT_SIZE );
+		fl_set_object_lsize( run_form->undo_button, GI_sizes.SMALL_FONT_SIZE );
 		fl_set_object_helper( run_form->undo_button,
 							  "Undo last rescaling operation" );
 
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
-			fl_set_object_lsize( cut_form->cut_undo_button, SMALL_FONT_SIZE );
+			fl_set_object_lsize( cut_form->cut_undo_button,
+								 GI_sizes.SMALL_FONT_SIZE );
 			fl_set_object_helper( cut_form->cut_undo_button,
 								  "Undo last rescaling operation" );
 		}
@@ -165,14 +179,16 @@ void start_graphics( void )
 	if ( access( pixmap_file, R_OK ) == 0 )
 	{
 		fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
-		fl_set_object_lsize( run_form->print_button, SMALL_FONT_SIZE );
+		fl_set_object_lsize( run_form->print_button,
+							 GI_sizes.SMALL_FONT_SIZE );
 		fl_set_object_helper( run_form->print_button, "Print window" );
 
 		if ( G.dim == 2 )
 		{
 			fl_set_pixmapbutton_file( cut_form->cut_print_button,
 									  pixmap_file );
-			fl_set_object_lsize( cut_form->cut_print_button, SMALL_FONT_SIZE );
+			fl_set_object_lsize( cut_form->cut_print_button,
+								 GI_sizes.SMALL_FONT_SIZE );
 			fl_set_object_helper( cut_form->cut_print_button, "Print window" );
 		}
 	}
@@ -299,17 +315,17 @@ void start_graphics( void )
 		{
 			if ( G.dim == 1 )
 			{
-				if ( display_w < WIN_MIN_1D_WIDTH )
-					display_w = WIN_MIN_1D_WIDTH;
+				if ( display_w < GI_sizes.WIN_MIN_1D_WIDTH )
+					display_w = GI_sizes.WIN_MIN_1D_WIDTH;
 			}
 			else
 			{
-				if ( display_w < WIN_MIN_2D_WIDTH )
-					display_w = WIN_MIN_2D_WIDTH;
+				if ( display_w < GI_sizes.WIN_MIN_2D_WIDTH )
+					display_w = GI_sizes.WIN_MIN_2D_WIDTH;
 			}
 
-			if ( display_h < WIN_MIN_HEIGHT )
-				display_h = WIN_MIN_HEIGHT;
+			if ( display_h < GI_sizes.WIN_MIN_HEIGHT )
+				display_h = GI_sizes.WIN_MIN_HEIGHT;
 
 			fl_set_form_size( run_form->run, display_w, display_h );
 		}
@@ -328,8 +344,8 @@ void start_graphics( void )
 	{
 		if ( G.dim == 2 )
 		{
-			if ( display_w < WIN_MIN_2D_WIDTH )
-				display_w = WIN_MIN_2D_WIDTH;
+			if ( display_w < GI_sizes.WIN_MIN_2D_WIDTH )
+				display_w = GI_sizes.WIN_MIN_2D_WIDTH;
 		}
 
 		fl_set_form_geometry( run_form->run, display_x, display_y,
@@ -348,10 +364,10 @@ void start_graphics( void )
 
 	if ( G.dim == 1 )
 		fl_winminsize( run_form->run->window,
-					   WIN_MIN_1D_WIDTH, WIN_MIN_HEIGHT );
+					   GI_sizes.WIN_MIN_1D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
 	else
 		fl_winminsize( run_form->run->window,
-					   WIN_MIN_2D_WIDTH, WIN_MIN_HEIGHT );
+					   GI_sizes.WIN_MIN_2D_WIDTH, GI_sizes.WIN_MIN_HEIGHT );
 
 	fl_set_button( run_form->full_scale_button, 1 );
 
@@ -365,13 +381,13 @@ void start_graphics( void )
 									 ( char * ) xresources[ AXISFONT ].var );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_1 );
+			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_1 );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_2 );
+			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_2 );
 
 		if ( ! G.font )
-			G.font = XLoadQueryFont( G.d, DEFAULT_AXISFONT_3 );
+			G.font = XLoadQueryFont( G.d, GI_sizes.DEFAULT_AXISFONT_3 );
 
 		if ( G.font )
 			XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,

@@ -70,13 +70,11 @@ static void cut_save_scale_state( void );
 
 extern FL_resource xresources[ ];
 
-#if ( SIZE == HI_RES )
-#define WIN_MIN_WIDTH   430
-#define WIN_MIN_HEIGHT  435
-#else
-#define WIN_MIN_WIDTH   380
-#define WIN_MIN_HEIGHT  380
-#endif
+
+static struct {
+	int WIN_MIN_WIDTH;
+	int WIN_MIN_HEIGHT;
+} GC_sizes;
 
 
 static bool is_mapped = UNSET;  /* set while form is mapped */
@@ -91,6 +89,25 @@ static int cur_1,
 	       cur_8;
 static int cut_x, cut_y, cut_w, cut_h;
 static bool cut_has_been_shown = UNSET;
+
+
+/*-----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*/
+
+void cut_init( void )
+{
+	if ( G_Funcs.size == LOW )
+	{
+
+		GC_sizes.WIN_MIN_WIDTH   = 430;
+		GC_sizes.WIN_MIN_HEIGHT  = 435;
+	}
+	else
+	{
+		GC_sizes.WIN_MIN_WIDTH   = 380;
+		GC_sizes.WIN_MIN_HEIGHT  = 380;
+	}
+}
 
 
 /*-----------------------------------------------------------------------*/
@@ -136,11 +153,11 @@ void cut_show( int dir, long index )
 									&cut_x, &cut_y, &cut_w, &cut_h );
 			if ( WidthValue & flags && HeightValue & flags )
 			{
-				if ( cut_w < WIN_MIN_WIDTH )
-					cut_w = WIN_MIN_WIDTH;
+				if ( cut_w < GC_sizes.WIN_MIN_WIDTH )
+					cut_w = GC_sizes.WIN_MIN_WIDTH;
 
-				if ( cut_h < WIN_MIN_HEIGHT )
-					cut_h = WIN_MIN_HEIGHT;
+				if ( cut_h < GC_sizes.WIN_MIN_HEIGHT )
+					cut_h = GC_sizes.WIN_MIN_HEIGHT;
 
 				fl_set_form_size( cut_form->cut, cut_w, cut_h );
 			}
@@ -166,7 +183,8 @@ void cut_show( int dir, long index )
 					  FL_FULLBORDER, "fsc2: Cross section" );
 		cut_has_been_shown = SET;
 
-		fl_winminsize( cut_form->cut->window, WIN_MIN_WIDTH, WIN_MIN_HEIGHT );
+		fl_winminsize( cut_form->cut->window,
+					   GC_sizes.WIN_MIN_WIDTH, GC_sizes.WIN_MIN_HEIGHT );
 		fl_set_form_atclose( cut_form->cut, cut_form_close_handler, NULL );
 
 		cut_setup_canvas( &G.cut_x_axis, cut_form->cut_x_axis );

@@ -78,6 +78,8 @@ typedef struct {
 
 #include "fsc2.h"
 
+
+void cut_init( void );
 void cut_show( int dir, long index );
 bool cut_data_rescaled( long curve, double y_min, double y_max );
 bool cut_num_points_changed( int dir, long num_points );
