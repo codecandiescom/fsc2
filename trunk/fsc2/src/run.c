@@ -429,7 +429,7 @@ static void run_sigchld_handler( int signo )
 /* run_sigchld_callback() is the callback for an invisible button  */
 /* that is triggered on the death of the child. If the child died  */
 /* prematurely, i.e. without notifying the parent by a QUITTING    */
-/* signal, or it signals a hardware error via its return status an */
+/* signal or it signals an hardware error via its return status an */
 /* error message is output. Then the post-measurement clean-up is  */
 /* done.                                                           */
 /*-----------------------------------------------------------------*/
@@ -569,24 +569,18 @@ static void set_buttons_for_run( int active )
 /**************************************************************/
 
 
-/*------------------------------------------------------------------*/
-/* run_child() is the child process for doing the real measurement. */
-/* It sets up the signal handlers and its global variables and then */
-/* goes into an (infinite) loop. In the loop it first sends a       */
-/* NEW_DATA signal (by this first signal it just tells the parent   */
-/* that it's ready to accept signals, later on to signal available  */
-/* data). Then it sets the DO_QUIT signal handler to the handler    */
-/* that just sets a global variable and starts to try to acquire    */
-/* data. If this fails or the program reached its end (indicated    */
-/* by a zero return of the function 'do_measurement) or it received */
-/* a DO_QUIT signal in the  mean time (as indicated by the global   */
-/* variable 'do_quit') it exits. After switching back to the "real" */
-/* DO_QUIT handler as the next and final step of the loop it waits  */
-/* for the global variable indicating a DO_SEND signal to become    */
-/* true - this is necessary in order to avoid loosing data by       */
-/* flooding the parent with data and signals it might not be able   */
-/* to handle.                                                       */
-/*------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* run_child() is the child process' code for doing the measurement. */
+/* It does some initialisation (e.g. setting up signal handlers) and */
+/* then runs the experiment by calling do_measurement(). The         */
+/* experiment stops either when all lines of the program have been   */
+/* dealt with, an unrecoverable error happend or the user told it    */
+/* to stop (by pressing the "Stop" button). When returning from the  */
+/* do_measurement() routine it signals the parent process that it's  */
+/* going to die and waits for the arrival of an acknowledging        */
+/* signal. When the child gets an signal it can't deal with it does  */
+/* not return from do_measurement() but dies in the signal handler.  */
+/*-------------------------------------------------------------------*/
 
 static void run_child( void )
 {
@@ -608,7 +602,7 @@ static void run_child( void )
 	do_quit = UNSET;
 	set_child_signals( );
 
-#if 0                                    /* used for child process debugging */
+#if 0                                    /* used in child process debugging */
 	{
 		bool h = SET;
 		while ( h );
@@ -628,7 +622,8 @@ static void run_child( void )
 	do_quit = UNSET;
 	kill( getppid( ), QUITTING );        /* tell parent that we're exiting */
 
-	/* Using a pause() here is tempting but there exists a race condition
+	/* Wait for the acknoledgement of the QUITTING signal by the parent -
+	   using a pause() here is tempting but there exists a race condition
 	   between the determination of the value of 'do_quit' and the start of
 	   pause() - and it gets triggered (the race condition) sometimes... */
 
@@ -639,14 +634,14 @@ static void run_child( void )
 }
 
 
-/*--------------------------------------------------------------------*/
-/* Sets up the signal handlers for all kinds of signals the child may */
-/* receive. This probably looks a bit like overkill, but I just want  */
-/* to sure the child doesn't get killed by some meaningless signals   */
-/* and, on the other hand, that on deadly signals it still gets a     */
-/* chance to try to get rid of shared memory that the parent didn't   */
-/* destroy (in case it was killed by an signal it couldn't catch).    */
-/*--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Set up the signal handlers for all kinds of signals the child may */
+/* receive. This probably looks a bit like overkill, but I just want */
+/* to make sure the child doesn't get killed by meaningless signals  */
+/* and, on the other hand, that on deadly signals it gets a chance   */
+/* to try to get rid of shared memory that the parent didn't destroy */
+/* (in case it was killed by a signal it couldn't catch).            */
+/*-------------------------------------------------------------------*/
 
 static void set_child_signals( void )
 {
@@ -683,10 +678,10 @@ static void set_child_signals( void )
 
 /*----------------------------------------------------------------*/
 /* This is the signal handler for the signals the child receives. */
-/* There are two signals used for IPC, SIGUSR2 (aka DO_QUIT ) and */
-/* SIGALRM. The other are either ignored or kill the child (but   */
-/* in a, hopefully, controlled way to allow deletion of shared    */
-/*  memory if the parent didn't do it itself.                     */
+/* There are two signals that have a real meaning, SIGUSR2 (aka   */
+/* DO_QUIT ) and SIGALRM. The others are either ignored or kill   */
+/* the child (but in a, hopefully, controlled way to allow        */
+/* deletion of shared memory if the parent didn't do it itself.   */
 /* There's a twist: The SIGALRM signal can only come from the     */
 /* f_wait() function (see func_util.c). Here we wait in a pause() */
 /* for SIGALRM to get a reliable timer. On the other hand, the    */
@@ -705,7 +700,7 @@ void child_sig_handler( int signo )
 	{
 		case DO_QUIT :                /* aka SIGUSR2 */
 			do_quit = SET;
-			/* fall through ! */
+			/* really fall through ! */
 
 		case SIGALRM :
 			if ( can_jmp_alrm )
@@ -713,15 +708,15 @@ void child_sig_handler( int signo )
 				can_jmp_alrm = 0;
 				siglongjmp( alrm_env, 1 );
 			}
-			return;
+			break;
 
 		/* Ignored signals : */
 
 		case SIGHUP :  case SIGINT :  case SIGUSR1 : case SIGCHLD :
 		case SIGCONT : case SIGTTIN : case SIGTTOU : case SIGVTALRM :
-			return;
+			break;
 			
-		/* All the remaining signals are deadly... */
+		/* All remaining signals are deadly... */
 
 		default :
 			if ( * ( ( int * ) xresources[ NOCRASHMAIL ].var ) == 0 &&
