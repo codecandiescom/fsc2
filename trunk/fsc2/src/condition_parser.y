@@ -88,16 +88,10 @@ static Var *CV;
 input:   expr                      { YYACCEPT; }
 ;
 
-expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
-                                      $$ = vars_push( INT_VAR, $1 );
-                                    else
-	                                  $$ = vars_mult( vars_push( INT_VAR, $1 ),
-													  $2 ); }
-       | E_FLOAT_TOKEN unit       { if ( $2 == NULL )
-                                      $$ = vars_push( FLOAT_VAR, $1 );
-                                    else
-	                                  $$ = vars_mult(
-										    vars_push( FLOAT_VAR, $1 ), $2 ); }
+expr:    E_INT_TOKEN unit         { $$ = apply_unit( vars_push( INT_VAR, $1 ),
+													 $2 ); }
+       | E_FLOAT_TOKEN unit       { $$ = apply_unit(
+		                                    vars_push( FLOAT_VAR, $1 ), $2 ); }
        | E_VAR_TOKEN unit         { $$ = apply_unit( $1, $2 ); }
        | E_VAR_TOKEN '['          { vars_arr_start( $1 ); }
          list1 ']'                { CV = vars_arr_rhs( $4 ); }
@@ -135,13 +129,13 @@ expr:    E_INT_TOKEN unit         { if ( $2 == NULL )
        | '(' expr ')' unit        { $$ = vars_mult( $2, $4 ); }
 ;
 
-unit:    /* empty */               { $$ = vars_push( INT_VAR, 1L ); }
+unit:    /* empty */               { $$ = NULL; }
        | E_NT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-5 ); }
        | E_UT_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-2 ); }
        | E_MT_TOKEN                { $$ = vars_push( INT_VAR, 10); }
        | E_T_TOKEN                 { $$ = vars_push( INT_VAR, 1.0e4 ); }
        | E_NU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-9 ); }
-       | E_UU_TOKEN                { $$ = vars_push( INT_VAR, 1.0e-6 ); }
+       | E_UU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-6 ); }
        | E_MU_TOKEN                { $$ = vars_push( FLOAT_VAR, 1.0e-3 ); }
        | E_KU_TOKEN                { $$ = vars_push( INT_VAR, 1000 ); }
        | E_MEG_TOKEN               { $$ = vars_push( INT_VAR, 1000000 ); }
