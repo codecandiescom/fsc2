@@ -54,6 +54,7 @@
 #define INPUT_RES_P       ( INPUT_RES * )
 #define TOOL_BOX_P        ( TOOL_BOX * )
 #define IOBJECT_P         ( IOBJECT * )
+#define PHASE_SETUP_P     ( PHASE_SETUP * )
 #define PHASE_SEQUENCE_P  ( Phase_Sequence * )
 #define DEVICE_P          ( Device * )
 #define PRG_TOKEN_P       ( Prg_Token * )
@@ -99,6 +100,7 @@
 #define INPUT_RES_P
 #define TOOL_BOX_P
 #define IOBJECT_P
+#define PHASE_SETUP_P
 #define PHASE_SEQUENCE_P
 #define DEVICE_P
 #define PRG_TOKEN_P

@@ -648,7 +648,7 @@ static void dg2020_pulse_start_setup( void )
 
 static PHASE_SETUP *dg2020_create_dummy_phase_setup( FUNCTION *f )
 {
-	int i;
+	int i, j;
 
 
 	i = dg2020.num_dummy_phase_setups;

@@ -648,7 +648,7 @@ bool dg2020_phase_setup( int phs )
 		is_set = SET;
 		f = dg2020_phs[ phs ].function;
 
-		/* Check that the pod reseved for the current phase is reserved for
+		/* Check that the pod reserved for the current phase is reserved for
 		   the function that we're going to phase-cycle */
 
 		for ( j = 0; j < f->num_pods; j++ )
