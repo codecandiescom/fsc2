@@ -377,9 +377,11 @@ bool xforms_init( int *argc, char *argv[ ] )
 	main_form->Load->u_ldata = 0;
 	main_form->Load->u_cdata = NULL;
 
-	/* Create the form for writing a comment */
+	/* Create the forms for writing a comment (both for storing with the
+	   data and for printing) */
 
 	input_form = G_Funcs.create_form_input_form( );
+	print_comment = G_Funcs.create_pc_form( );
 
 	return OK;
 }
@@ -548,6 +550,17 @@ bool dl_fsc2_rsc( void )
 	dlerror( );           /* make sure it's NULL before we continue */
 	G_Funcs.create_form_cut =
 		         ( FD_cut * ( * )( void ) ) dlsym( handle, "create_form_cut" );
+	if ( dlerror( ) != NULL )
+	{
+		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );
+		T_free( lib_name );
+		return FAIL;
+	}
+
+	dlerror( );           /* make sure it's NULL before we continue */
+	G_Funcs.create_pc_form =
+		         ( FD_print_comment * ( * )( void ) ) dlsym( handle, 
+											     "create_form_print_comment" );
 	if ( dlerror( ) != NULL )
 	{
 		fprintf( stderr, "Error in graphics library `%s'\n", lib_name );

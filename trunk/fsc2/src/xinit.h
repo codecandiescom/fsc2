@@ -28,11 +28,12 @@
 
 typedef struct {
 	bool size;
-	FD_fsc2 *       ( * create_form_fsc2       ) ( void );
-	FD_run *        ( * create_form_run        ) ( void );
-	FD_input_form * ( * create_form_input_form ) ( void );
-	FD_print *      ( * create_form_print      ) ( void );
-	FD_cut *        ( * create_form_cut        ) ( void );
+	FD_fsc2 *          ( * create_form_fsc2       ) ( void );
+	FD_run *           ( * create_form_run        ) ( void );
+	FD_input_form *    ( * create_form_input_form ) ( void );
+	FD_print *         ( * create_form_print      ) ( void );
+	FD_cut *           ( * create_form_cut        ) ( void );
+	FD_print_comment * ( * create_pc_form         ) ( void );
 } G_FUNCS;
 
 bool xforms_init( int *argc, char *argv[ ] );

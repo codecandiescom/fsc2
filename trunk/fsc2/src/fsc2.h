@@ -161,6 +161,7 @@ FD_fsc2 *main_form;
 FD_run *run_form;
 FD_input_form *input_form;
 FD_cut *cut_form;
+FD_print_comment *print_comment;
 
 int I_am = PARENT;
 int FSC2_MODE = PREPARATION;
@@ -236,6 +237,7 @@ extern FD_fsc2 *main_form;
 extern FD_run *run_form;
 extern FD_input_form *input_form;
 extern FD_cut *cut_form;
+extern FD_print_comment *print_comment;
 
 extern int I_am;
 extern int FSC2_MODE;

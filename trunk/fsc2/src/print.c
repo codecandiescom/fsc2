@@ -1342,7 +1342,7 @@ static void print_comm( FILE *fp )
 					   lines[ i ] );
 
 	fprintf( fp, "pop dup %f exch sub 0.5 mul %f add\n", w, margin );
-	fprintf( fp, "5 (X) ch 1.5 mul add gs translate dup 0 0 m np\n"
+	fprintf( fp, "5 (X) ch 1.5 mul add gs t dup 0 0 m np\n"
 				 "(m) cw neg (X) ch -1.5 mul m\n"
 				 "(m) cw 2 mul add 0 rl\n"
 				 "0 (X) ch %d 1.65 mul 4 add mul rl\n"
@@ -1351,8 +1351,8 @@ static void print_comm( FILE *fp )
 			 num_lines - 1, print_with_color ? "dup dup srgb" : "sgr" );
 
 	fprintf( fp, "0 0 m\n"
-			     "count { dup show sw neg (X) ch 1.65 mul rm } repeat\n"
-			     "gr\n" );
+				 "count { dup show sw neg (X) ch 1.65 mul rm } "
+				 "repeat gr\n\n" );
 
 
 	for ( i = 0; i < num_lines; i++ )
