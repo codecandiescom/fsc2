@@ -450,8 +450,9 @@ static int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
 }
 
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* Function for stopping the counter of a board, i.e. disarming it. */
+/*------------------------------------------------------------------*/
 
 static int ni6601_disarm( Board *board, NI6601_DISARM *arg )
 {
@@ -544,9 +545,9 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 }
 
 
-/*---------------------------------------------------*/
-/* Function to start outputting pulses froma counter */
-/*---------------------------------------------------*/
+/*----------------------------------------------------*/
+/* Function to start outputting pulses from a counter */
+/*----------------------------------------------------*/
 
 static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 {
@@ -704,8 +705,10 @@ static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 }
 
 
-/*-----------------------------------------------------------*/
-/*-----------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Function checks if a counter of a board is currently counting */
+/* (i.e. if it's armed).                                         */
+/*---------------------------------------------------------------*/
 
 static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 {
@@ -732,6 +735,7 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 
 
 /*-----------------------------------------------------------*/
+/* Interrupt handler for all boards, currently does nothing. */
 /*-----------------------------------------------------------*/
 
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
