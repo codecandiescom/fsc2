@@ -176,7 +176,7 @@ the field current is stepped. Thus not sweep rates are used but field
 only exception is the power supply for the Oxford magnet, here only
 continuous sweeps can be done and sweep rates must be specified.
 
-If a @strong{AEG} magnet module is listed in the @code{DEVICES} section
+If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
 start of the experiment, i.e.@: it will sweep the field up and down for
 some time, so please be patient. Also see below on how to reduce the
