@@ -306,6 +306,8 @@ need to append a @code{#} and the number of the pulser to tell the
 @cindex @code{RADIO_FREQUENCY}
 @cindex @code{RADIO_FREQUENCY_GATE}
 @cindex @code{PULSE_SHAPER}
+@cindex @code{PHASE_1}
+@cindex @code{PHASE_2}
 @cindex @code{OTHER_1}
 @cindex @code{OTHER_2}
 @cindex @code{OTHER_3}
@@ -368,6 +370,8 @@ usual, the underscore characters can be omitted.})
 abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
 @code{PULSE_SHAPE}, @code{PULSESHAPE}, @code{PULSESHAPER}, @code{P_SH},
 @code{P_SHAPE}, @code{PSHAPE}, @code{P_SHAPER}, @code{P_SHAPER}.})
+@item @code{PHASE_1} (or @code{PHASE1}, @code{PH_1} or @code{PH1})
+@item @code{PHASE_2} (or @code{PHASE2}, @code{PH_2} or @code{PH2})
 @item @code{OTHER_1} (or @code{OTHER1}, @code{O_1}, @code{O1},
       @code{OTHER} or @code{O})
 @item @code{OTHER_2} (or @code{OTHER2}, @code{O_2} or @code{O2})
@@ -382,6 +386,11 @@ understanding what your @code{EDL} program is supposed to do and there's
 no obfuscated EDL contest yet;-). Besides, some of the pulser modules
 also define special functions (e.g.@: for automatically setting TWT
 pulses) that only work for some of these functions.
+
+The functions @code{PHASE_1} and @code{PHASE_2} are special in that
+they can only be used with the Frankfurt version of the driver for the
+@strong{Sony/Tektronix DG2020} and are used for controlling the phase
+switches, i.e.@: it's pulses are created automatically.
 
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the function names seem to fit the special purpose you
