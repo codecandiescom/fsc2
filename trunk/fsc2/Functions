@@ -58,6 +58,9 @@ lockin_set_dac_data, 2, EXP;    // sets a DAC voltage
 lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
 lockin_time_constant, -1, ALL;  // gets or sets the time constant
 lockin_phase, -1, ALL;          // gets or sets the phase
+lockin_ref_freq, -1, ALL;       // Get or set reference frequency (SR810 only)
+lockin_ref_mode, 0, EXP;        // Get reference mode (SR810 only)
+lockin_ref_levek, -1, ALL;      // Get or set refernce level (SR810 only)
 
 
 // functions exported by the digitizer (TDS754A)
