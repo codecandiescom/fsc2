@@ -1,6 +1,6 @@
 @c $Id$
 
-@node Copying, , Reserved Words, Top
+@node Copying, , Acknowledgments, Top
 @appendix Copying
 @center @strong{GNU GENERAL PUBLIC LICENSE}
 @center Version 2, June 1991
