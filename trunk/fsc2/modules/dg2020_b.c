@@ -254,6 +254,9 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
+	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
+		return 1;
+
 	if ( dg2020.dump_file != NULL )
 	{
 		fclose( dg2020.dump_file );
@@ -265,9 +268,6 @@ int dg2020_b_end_of_test_hook( void )
 		fclose( dg2020.show_file );
 		dg2020.show_file = NULL;
 	}
-
-	if ( ! dg2020_is_needed || dg2020.is_cw_mode )
-		return 1;
 
 	/* First we have to reset the internal representation back to its initial
 	   state */
@@ -998,6 +998,12 @@ Var *pulser_cw_mode( Var *v )
 	{
 		print( FATAL, "Function 'MICROWAVE' has not been defined as needed "
 			   "for CW mode.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( dg2020.function[ PULSER_CHANNEL_MW ]->phase_setup == NULL )
+	{
+		print( FATAL, "Missing PHASE_SETUP for function 'MICROWAVE'.\n" );
 		THROW( EXCEPTION );
 	}
 
