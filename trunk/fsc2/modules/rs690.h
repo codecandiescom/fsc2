@@ -192,6 +192,14 @@ typedef struct _FS_ {
 
 
 typedef struct {
+	int count;
+	int len;
+	int repeat_1;
+	int repeat_2;
+} FS_TABLE;
+
+
+typedef struct {
 	int device;              /* GPIB number of the device */
 
 	double timebase;         /* time base of the digitizer */
@@ -247,6 +255,8 @@ typedef struct {
 	bool auto_twt_pulses;
 	long left_twt_warning;
 
+	int last_used_field;
+
 	FS *new_fs;
 	int new_fs_count;
 	FS *last_new_fs;
@@ -254,6 +264,8 @@ typedef struct {
 	int old_fs_count;
 	FS *last_old_fs;
 
+	FS_TABLE new_table,
+			 old_table;
 } RS690;
 
 

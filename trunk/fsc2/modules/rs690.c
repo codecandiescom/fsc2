@@ -133,6 +133,7 @@ int rs690_init_hook( void )
 	rs690.auto_twt_pulses = UNSET;
 	rs690.left_twt_warning = 0;
 
+	rs690.last_used_field = -1;
 	rs690.new_fs = rs690.old_fs = NULL;
 	rs690.new_fs_count = rs690.old_fs_count = 0;
 
