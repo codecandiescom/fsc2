@@ -1068,6 +1068,9 @@ static void G_init_curves_2d( void )
 		cv->xpoints = NULL;
 		cv->xpoints_s = NULL;
 
+		cv->marker_2d  = NULL;
+		cv->cut_marker = NULL;
+
 		/* Create a GC for drawing the curve and set its colour */
 
 		cv->gc = XCreateGC( G.d, G2.canvas.pm, 0, 0 );
@@ -1157,9 +1160,6 @@ static void G_init_curves_2d( void )
 		cv->xpoints = XPOINT_P T_malloc( G2.nx * G2.ny * sizeof *cv->xpoints );
 		cv->xpoints_s = XPOINT_P T_malloc( G2.nx * G2.ny
 										   * sizeof *cv->xpoints_s );
-
-		cv->marker_2d  = NULL;
-		cv->cut_marker = NULL;
 	}
 }
 
@@ -1248,7 +1248,6 @@ void stop_graphics( void )
 {
 	int i;
 	Marker_1D *m, *mn;
-	Marker_2D *m2, *mn2;
 
 
 	G.is_fully_drawn = UNSET;
@@ -1368,19 +1367,6 @@ void stop_graphics( void )
 		m = MARKER_1D_P T_free( m );
 	}
 
-	for ( i = 0; i < G2.nc; i++ )
-	{
-		if ( G2.curve_2d[ i ] == NULL )
-			break;
-
-		for ( m2 = G2.curve_2d[ i ]->marker_2d; m2 != NULL; m = mn )
-		{
-			XFreeGC( G.d, m2->gc );
-			mn2 = m2->next;
-			m2 = MARKER_2D_P T_free( m2 );
-		}
-	}
-
 	if ( G_stored )
 	{
 		memcpy( &G, G_stored, sizeof G );
@@ -1416,6 +1402,7 @@ void graphics_free( void )
 	int coord;
 	Curve_1d *cv;
 	Curve_2d *cv2;
+	Marker_2D *m2, *mn2;
 
 
 	/* Deallocate memory for pixmaps, scaled data and XPoints. The function
@@ -1454,6 +1441,13 @@ void graphics_free( void )
 			XFreePixmap( G.d, cv2->left_arrow );
 			XFreePixmap( G.d, cv2->right_arrow );
 			XFreeGC( G.d, cv2->font_gc );
+
+			for ( m2 = cv2->marker_2d; m2 != NULL; m2 = mn2 )
+			{
+				XFreeGC( G.d, m2->gc );
+				mn2 = m2->next;
+				m2 = MARKER_2D_P T_free( m2 );
+			}
 
 			T_free( cv2->points );
 			T_free( cv2->xpoints );

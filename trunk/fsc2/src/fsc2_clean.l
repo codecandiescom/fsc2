@@ -87,7 +87,7 @@ int yylex( void );
 static void include_handler( char *file );
 static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 					FILE *primary_fp, FILE **fp, int *incl_depth );
-static void unit_spec( char *text, int power, double offset );
+static void unit_spec( char *text, int power );
 static char *T_strdup( const char *string );
 static void *T_malloc( size_t size );
 static void *T_realloc( void *ptr, size_t size );
@@ -134,20 +134,6 @@ FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
 FNONE    {FLOAT}[\t \r]*{UNIT}
 FKILO    {FLOAT}[\t \r]*"k"{UNIT}
 FMEGA    {FLOAT}[\t \r]*"M"{UNIT}
-
-INANOC   {INT}[\t \r]*"nC"
-IMICROC  {INT}[\t \r]*"uC"
-IMILLIC  {INT}[\t \r]*"mC"
-INONEC   {INT}[\t \r]*"C"
-IKILOC   {INT}[\t \r]*"kC"
-IMEGAC   {INT}[\t \r]*"MC"
-
-FNANOC   {FLOAT}[\t \r]*"nC"
-FMICROC  {FLOAT}[\t \r]*"uC"
-FMILLIC  {FLOAT}[\t \r]*"mC"
-FNONEC   {FLOAT}[\t \r]*"C"
-FKILOC   {FLOAT}[\t \r]*"kC"
-FMEGAC   {FLOAT}[\t \r]*"MC"
 
 INTs     {INT}[\t \r]*"nT"
 IUT      {INT}[\t \r]*"uT"
@@ -367,46 +353,32 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             /* Here's handling of numbers with units - they are converted
 			   to double automatically */
 
-{INANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9, 0.0 );
-{IMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6, 0.0 );
-{IMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3, 0.0 );
-{INONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0, 0.0 );
-{IKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3, 0.0 );
-{IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6, 0.0 );
+{INANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
+{IMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
+{IMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3 );
+{INONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0 );
+{IKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3 );
+{IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6 );
 
-{INANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, 273.16 );
-{IMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, 273.16 );
-{IMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, 273.16 );
-{INONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, 273.16 );
-{IKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, 273.16 );
-{IMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, 273.16 );
+{FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
+{FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
+{FMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3 );
+{FNONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0 );
+{FKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3 );
+{FMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6 );
 
-{FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9, 0.0 );
-{FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6, 0.0 );
-{FMILLI}/[^a-zA-z0-9_]  unit_spec( yytext, -3, 0.0 );
-{FNONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0, 0.0 );
-{FKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3, 0.0 );
-{FMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6, 0.0 );
-
-{FNANOC}/[^a-zA-z0-9_]  unit_spec( yytext, -9, 273.16 );
-{FMICROC}/[^a-zA-z0-9_] unit_spec( yytext, -6, 273.16 );
-{FMILLIC}/[^a-zA-z0-9_] unit_spec( yytext, -3, 273.16 );
-{FNONEC}/[^a-zA-z0-9_]  unit_spec( yytext,  0, 273.16 );
-{FKILOC}/[^a-zA-z0-9_]  unit_spec( yytext,  3, 273.16 );
-{FMEGAC}/[^a-zA-z0-9_]  unit_spec( yytext,  6, 273.16 );
-
-{INTs}/[^a-zA-z0-9_]    unit_spec( yytext, -5, 0.0 );
-{IUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2, 0.0 );
-{IMT}/[^a-zA-z0-9_]     unit_spec( yytext,  1, 0.0 );
-{IT}/[^a-zA-z0-9_]      unit_spec( yytext,  4, 0.0 );
-{IKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7, 0.0 );
-{IMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10, 0.0 );
-{FNT}/[^a-zA-z0-9_]     unit_spec( yytext, -5, 0.0 );
-{FUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2, 0.0 );
-{FMT}/[^a-zA-z0-9_]     unit_spec( yytext,  1, 0.0 );
-{FT}/[^a-zA-z0-9_]      unit_spec( yytext,  4, 0.0 );
-{FKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7, 0.0 );
-{FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10, 0.0 );
+{INTs}/[^a-zA-z0-9_]    unit_spec( yytext, -5 );
+{IUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2 );
+{IMT}/[^a-zA-z0-9_]     unit_spec( yytext,  1 );
+{IT}/[^a-zA-z0-9_]      unit_spec( yytext,  4 );
+{IKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
+{IMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
+{FNT}/[^a-zA-z0-9_]     unit_spec( yytext, -5 );
+{FUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2 );
+{FMT}/[^a-zA-z0-9_]     unit_spec( yytext,  1 );
+{FT}/[^a-zA-z0-9_]      unit_spec( yytext,  4 );
+{FKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
+{FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
 
 			/* All the rest is simply copied to the output */
 
@@ -726,7 +698,7 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
 /* Rewrites combinations like "100ns" or "100 ns" as "0.000000100000". */
 /*---------------------------------------------------------------------*/
 
-static void unit_spec( char *text, int power, double offset )
+static void unit_spec( char *text, int power )
 {
 	double dval;
 
@@ -742,47 +714,47 @@ static void unit_spec( char *text, int power, double offset )
 	switch ( power )
 	{
 		case -9 :
-			 output( "%.12f", dval * 1.0e-9 + offset );
+			 output( "%.12f", dval * 1.0e-9 );
 			 break;
 
 		case -6 :
-			 output( "%.12f", dval * 1.0e-6 + offset );
+			 output( "%.12f", dval * 1.0e-6 );
 			 break;
 
 		case -5 :
-			 output( "%.12f", dval * 1.0e-5 + offset );
+			 output( "%.12f", dval * 1.0e-5 );
 			 break;
 
 		case -3 :
-			 output( "%.12f", dval * 1.0e-3 + offset );
+			 output( "%.12f", dval * 1.0e-3 );
 			 break;
 
 		case -2 :
-			 output( "%.12f", dval * 1.0e-2 + offset );
+			 output( "%.12f", dval * 1.0e-2 );
 			 break;
 
 		case 0 :
-			 output( "%.12f", dval + offset );
+			 output( "%.12f", dval );
 			 break;
 
 		case 1 :
-			 output( "%.12f", dval * 10.0 + offset );
+			 output( "%.12f", dval * 10.0 );
 			 break;
 
 		case 3 :
-			 output( "%.12f", dval * 1.0e3 + offset );
+			 output( "%.12f", dval * 1.0e3 );
 			 break;
 
 		case 4 :
-			 output( "%.12f", dval * 1.0e4 + offset );
+			 output( "%.12f", dval * 1.0e4 );
 			 break;
 
 		case 6 :
-			 output( "%.12f", dval * 1.0e6 + offset );
+			 output( "%.12f", dval * 1.0e6 );
 			 break;
 
 		case 9 :
-			 output( "%f", dval * 1.0e9 + offset );
+			 output( "%f", dval * 1.0e9 );
 			 break;
 
 		default :

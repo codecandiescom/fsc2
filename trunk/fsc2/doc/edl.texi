@@ -386,7 +386,6 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @item @code{A}  @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
 @item @code{Hz} @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
 @item @code{K}  @tab Kelvin (and @code{nK, uK, mK, kK} and @code{MK})
-@item @code{C}  @tab degree Celsius (and @code{nC, uC, mC, kC} and @code{MC})
 @item @code{dB} @tab Decibel (and @code{ndB, udB, mdB, kdB} and @code{MdB})
 @item @code{db} @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
 @end multitable
@@ -394,8 +393,8 @@ the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @noindent
 Please note that all device functions return values in units of seconds,
 meters, Gauss, Volts, Amperes, Hertz, Kelvin and dB or products of these
-units. While you can use Tesla and degree Celsius in the @code{EDL}
-script the functions never return values in these units.
+units. While you can use Tesla in the @code{EDL} script all functions
+return values in Gauss!
 
 
 @anchor{Variable types}

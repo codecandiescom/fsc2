@@ -319,14 +319,12 @@ special meaning as physical units when following directly after a number
 (with only spaces or tabulator characters in between).
 @multitable { @code{mHz} } { Micro-Seconds }
 @item @code{A}                @tab Ampere
-@item @code{C}                @tab degree Celsius
 @item @code{dB}               @tab Decibel
 @item @code{db}               @tab Decibel
 @item @code{G}                @tab Gauss
 @item @code{Hz}               @tab Hertz
 @item @code{K}                @tab Kelvin
 @item @code{kA}               @tab Kilo-Ampere
-@item @code{kC}               @tab Kilo-Celsius
 @item @code{kdB}              @tab Kilo-Dezibel
 @item @code{kdb}              @tab Kilo-Dezibel
 @item @code{kG}               @tab Kilo-Gauss
@@ -337,7 +335,6 @@ special meaning as physical units when following directly after a number
 @item @code{kV}               @tab Kilo-Volt
 @item @code{m}                @tab Meter
 @item @code{MA}               @tab Mega-Ampere
-@item @code{MC}               @tab Mega-Celsius
 @item @code{MdB}              @tab Mega-Dezibel
 @item @code{Mdb}              @tab Mega-Dezibel
 @item @code{MG}               @tab Mega-Gauss
@@ -347,7 +344,6 @@ special meaning as physical units when following directly after a number
 @item @code{Ms}               @tab Mega-Seconds
 @item @code{MV}               @tab Mega-Volt
 @item @code{mA}               @tab Milli-Ampere
-@item @code{mC}               @tab Milli-Celsius
 @item @code{mdB}              @tab Milli-Dezibel
 @item @code{mdb}              @tab Milli-Dezibel
 @item @code{mG}               @tab Milli-Gauss
@@ -358,7 +354,6 @@ special meaning as physical units when following directly after a number
 @item @code{mT}               @tab Milli-Tesla
 @item @code{mV}               @tab Milli-Volt
 @item @code{nA}               @tab Nano-Ampere
-@item @code{nC}               @tab Nano-Celsius
 @item @code{ndB}              @tab Nano-Dezibel
 @item @code{ndb}              @tab Nano-Dezibel
 @item @code{nG}               @tab Nano-Gauss

@@ -1700,6 +1700,7 @@ Var *vars_push_matrix( int type, int dim, ... )
 	}
 
 	nv = vars_push( type, NULL );
+	nv->from = NULL;
 
 	sizes = SSIZE_T_P T_malloc( dim * sizeof *sizes );
 
