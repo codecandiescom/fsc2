@@ -10,6 +10,9 @@
 #include "gpib_if.h"
 
 
+extern int gpibparse( void );
+
+
 /*----------------------------------------------------------------*/
 /* GPIB_LOG_FILE is the name of the default file to which logging */
 /* information about GPIB operations are written - the name can   */
@@ -67,7 +70,7 @@ static GPIB_Device devices[ GPIB_MAX_DEV ];
 int ll;                         /* log level                              */
 int gpib_is_active = 0;         /* flag, set after initialization of bus  */
 FILE *gpib_log;                 /* file pointer of GPIB log file          */
-
+int num_devices = 0;
 
 
 /*-------------------------------------------------------------------------*/
@@ -107,6 +110,7 @@ int gpib_init( char *log_file_name, int log_level )
 
     gpib_init_log( log_file_name );             /* initialize logging */
 
+	num_devices = 0;
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 	{
 		*devices[ i ].name = '\0';
@@ -131,6 +135,7 @@ int gpib_init( char *log_file_name, int log_level )
 
 static int gpib_parse_config( const char *file )
 {
+	static bool is_restart = UNSET;
     extern FILE *gpibin;
     FILE *fp;
     int retval;
@@ -139,30 +144,37 @@ static int gpib_parse_config( const char *file )
     if ( ( fp = fopen( file, "r" ) ) == NULL )
     {
         sprintf( gpib_error_msg, "Can't open data base %s.", file );
-        gpib_error = GPIB_ECFG;
+        iberr = ECAP;
         return FAILURE;
     }
 
     gpibin = fp;
-    if ( ( retval = gpibparse( ) ) != SUCCESS )
-        gpib_error = GPIB_EPAR;
+
+	if ( is_restart )
+	    gpibrestart( gpibin );
+	else
+		is_restart = SET;
+
+    if ( ( retval = gpibparse( ) ) != 0 )
+        iberr = ECAP;
 
     fclose( fp );
 
     return retval;
+}
 
 
 /*-------------------------------------------------------------*/
 /*-------------------------------------------------------------*/
 
-int gpib_dev_setup( Device *temp_dev )
+int gpib_dev_setup( GPIB_Device *temp_dev )
 {
     int i;
 
 
     /* Take care that there aren't too many devices */
 
-    if ( num_devices >= GPIB_MAX_DEVICES )
+    if ( num_devices >= GPIB_MAX_DEV )
         return -1;
 
     /* Check validity of name, addresses and timeout flag */
@@ -204,6 +216,9 @@ int gpib_dev_setup( Device *temp_dev )
 
 int gpib_shutdown( void )
 {
+	int i;
+
+
     TEST_BUS_STATE;
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
@@ -353,6 +368,9 @@ int gpib_init_device( const char *device_name, int *dev )
 
 int gpib_local( int device )
 {
+	int i;
+
+
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
 		{
@@ -558,7 +576,6 @@ int gpib_trigger( int device )
 
 int gpib_wait( int device, int mask, int *status )
 {
-    int old_timeout = timeout;
 	GPIB_Device *devp;
 
 
@@ -592,9 +609,6 @@ int gpib_wait( int device, int mask, int *status )
 
     mask &= TIMO | END | RQS | CMPL;    /* remove invalid bits */
 
-    if ( ! ( mask & TIMO ) && timeout != TNONE )
-        gpib_timeout( device, TNONE );
-
     ibwait( device, mask );
 
     if ( status != NULL )
@@ -606,9 +620,6 @@ int gpib_wait( int device, int mask, int *status )
         fprintf( gpib_log, "wait return status = 0x0%X\n", ibsta );
 		seteuid( getuid( ) );
 	}
-
-    if ( ! ( mask & TIMO ) && old_timeout != TNONE )
-        gpib_timeout( device, old_timeout );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_wait", devp->name );

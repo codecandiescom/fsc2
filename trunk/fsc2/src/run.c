@@ -30,7 +30,7 @@ static void do_measurement( void );
 
 static volatile bool child_is_quitting;
 
-jmp_buf alrm_env;
+sigjmp_buf alrm_env;
 volatile sig_atomic_t can_jmp_alrm = 0;
 
 static struct sigaction sigchld_oact,

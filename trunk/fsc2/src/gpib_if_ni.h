@@ -12,7 +12,7 @@
 
 #include <sys/ugpib.h>
 
-#define GPIB_MAX_DEVICES 14
+#define GPIB_MAX_DEV 15
 #define GPIB_NAME_MAX 14
 
 /* End-of-string (EOS) modes */
@@ -21,6 +21,9 @@
 #define GPIB_XEOS     0x08      /* Set EOI with EOS on writes */
 #define GPIB_BIN      0x10      /* Do 8-bit compare on EOS    */
 #define GPIB_EOT      0x01      /* Send END with last byte    */
+
+#define IS_MASTER   ( 1 << 1 )
+
 
 #define ADDRESS( pad, sad ) \
                            ( ( ( pad ) & 0xff ) | ( ( ( sad ) & 0xff ) << 8 ) )
@@ -76,7 +79,7 @@ typedef struct {
 
 
 GPIB_VARIABLE int gpib_init( char *log_file_name, int log_level );
-GPIB_VARIABLE int gpib_dev_setup( Device *temp_dev );
+GPIB_VARIABLE int gpib_dev_setup( GPIB_Device *temp_dev );
 GPIB_VARIABLE int gpib_shutdown( void );
 GPIB_VARIABLE int gpib_init_device( const char *device_name, int *dev );
 GPIB_VARIABLE int gpib_local( int device );

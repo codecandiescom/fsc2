@@ -543,8 +543,13 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 {
 	char *cmd, *cptr;
 	Ticks k;
-	Ticks m, n;
 	char s = ( state ? '1' : '0' );
+#if defined ( DMA_SIZE )
+	Ticks m, n;
+#endif
+
+
+#if defined ( DMA_SIZE )
 
 	/* The following is a dirty hack to get around the 63K write limit by
 	   splitting transfers that would be too long into several shorter ones.
@@ -561,6 +566,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 		}
 		return OK;
 	}
+#endif
 
 	/* In order to check that the command really arrived at the pulser and has
 	   been executed we have to store each change and compare it with the

@@ -516,11 +516,15 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 {
 	char *cmd, *cptr;
 	Ticks k;
-	Ticks m, n;
 	char s = ( state ? '1' : '0' );
+#if defined DMA_SIZE
+	Ticks m, n;
+#endif
 
 
 	address++;        /* because of the first unset bit */
+
+#if defined DMA_SIZE
 
 	/* The following is a dirty hack to get around the 63K write limit by
 	   splitting transfers that would be too long into several shorter ones.
@@ -537,6 +541,7 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 		}
 		return OK;
 	}
+#endif
 
 	/* Check parameters, allocate memory and set up start of command string */
 

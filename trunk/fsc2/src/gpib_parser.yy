@@ -6,6 +6,7 @@
 %{
 
 
+#include "fsc2.h"
 #include "gpib_if.h"
 
 
@@ -13,6 +14,8 @@ extern int gpiblex( void );
 void gpiberror( const char *s );
 
 static GPIB_Device dev;
+
+#define GPIB_DEF_TIMO T1s
 
 %}
 
@@ -37,9 +40,9 @@ static GPIB_Device dev;
 
 line:   /* empty */
       | line device                         { if ( gpib_dev_setup( &dev ) < 0 )
-		                                          return FAILURE;
+		                                          YYABORT;
                                             }
-	  | error                               { return FAILURE; }
+	  | error                               { YYABORT; }
 ;
 
 device: DEVICE_TOKEN '{'                    {
@@ -96,5 +99,5 @@ void gpiberror( const char *s )
 
 	printf( "%s at token '%s'\n", s, gpibtext );
 
-	gpib_status |= GPIB_ERR;
+	ibsta |= IBERR;
 }

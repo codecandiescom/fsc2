@@ -30,7 +30,7 @@ static void T_fprintf( int file_num, const char *fmt, ... );
 
 extern void child_sig_handler( int signo );
 
-extern jmp_buf alrm_env;
+extern sigjmp_buf alrm_env;
 extern volatile sig_atomic_t can_jmp_alrm;
 extern volatile bool is_alrm;
 

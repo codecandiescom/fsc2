@@ -33,10 +33,8 @@ objects        = $(sources:.c=.o)
 headers        = ${c_sources:.c=.h} global.h
 
 
-# pion still uses the old libc...
-
-ifeq ($(shell hostname -f),pion.chemie.uni-frankfurt.de)
-	CFLAGS    += -DIS_STILL_LIBC1
+ifeq ($(shell hostname -f),door.physik.fu-berlin.de)
+objects += /usr/local/lib/libgpib.a
 endif
 
 
@@ -49,6 +47,7 @@ export headers
 
 
 all:
+	echo $(CFLAGS)
 	if [ `hostname -f` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
 		$(MAKE) pion; \
 	fi
@@ -116,12 +115,12 @@ door:
 		mv gpib_if.h gpib_if_new.h; \
 		mv gpib_if_ni.c gpib_if.c;  \
 		mv gpib_if_ni.h gpib_if.h;  \
-	fi \
-	if [ ! -e gpib_parser.y ]; then     \
-		cp gpib_parser.yy gpib_parser.y \
-	fi \
-	if [ ! -e gpib_lexer.l ]; then      \
-		cp gpib_parser.ll gpib_parser.l \
+	fi
+	if [ ! -e gpib_parser.y ]; then      \
+		cp gpib_parser.yy gpib_parser.y; \
+	fi
+	if [ ! -e gpib_lexer.l ]; then       \
+		cp gpib_lexer.ll gpib_lexer.l; \
 	fi
 
 # don't automatically delete intermediate files created by bison and flex

@@ -7,6 +7,7 @@
 
 %{
 
+#include "fsc2.h"
 #include "gpib.h"
 #include "gpib_parser.h"
 

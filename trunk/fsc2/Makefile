@@ -24,11 +24,18 @@ SHELL          = /bin/sh
 CC             = gcc
 CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 -Wmissing-prototypes -Wmissing-declarations -W \
-				 # -DMDEBUG # for malloc debugging
+				 # -DMDEBUG # for malloc debugging \
 				 # -DDEBUG \
 				 # -DMAX_DEBUG # for debugging of digitizer
+
+ifneq ($(shell hostname -f),door.physik.fu-berlin.de)
 LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lgpib -lfl -lm -ldl \
 				 #  -lmcheck   # for malloc debugging
+else
+LIBS           = -L/usr/X11R6/lib -lforms -lX11 -lfl -lm -ldl \
+				 #  -lmcheck   # for malloc debugging
+endif
+
 LDFLAGS        = -Wl,-E
 BISON          = bison
 BISONFLAGS     = -d -v -t -p
@@ -46,6 +53,12 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
+
+# Last time I checked still used the old libc...
+
+ifeq ($(shell hostname -f),pion.anorg.chemie.uni-frankfurt.de)
+	CFLAGS    += -DIS_STILL_LIBC1
+endif
 
 # Pass GPIB_LOG, GPIB_CONF and AWK via macros to the source files
 # Don't forget to escape all double quotes (`"') with backslashes.
