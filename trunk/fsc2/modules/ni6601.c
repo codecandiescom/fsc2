@@ -644,7 +644,7 @@ Var *counter_dio_read( Var *v )
 		mask = get_strict_long( v, "DIO bit mask" );
 		if ( mask < 0 || mask > 0xFF )
 		{
-			print( FATAL, "Invalid mask of 0x%X, valif range is [0-255].\n",
+			print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
 				   mask );
 			THROW( EXCEPTION );
 		}
@@ -693,7 +693,7 @@ Var *counter_dio_write( Var *v )
 		mask = get_strict_long( v, "DIO bit mask" );
 		if ( mask < 0 || mask > 0xFF )
 		{
-			print( FATAL, "Invalid mask of 0x%X, valif range is [0-255].\n",
+			print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
 				   mask );
 			THROW( EXCEPTION );
 		}
