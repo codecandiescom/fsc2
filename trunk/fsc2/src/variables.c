@@ -2,6 +2,9 @@
    $Id$
 
    $Log$
+   Revision 1.11  1999/07/17 15:45:01  jens
+   Changed vars_push to reflect new treatment of start of print statements.
+
    Revision 1.10  1999/07/17 15:03:12  jens
    Fixed a memory leak & changes to make lint more happy.
 
@@ -850,6 +853,10 @@ Var *vars_push_simple( Var *v )
 /*-----------------------------------------------------------------------*/
 /* vars_push() creates a new entry on the variable stack (which actually */
 /* is not really a stack but a linked list) and sets its type and value. */
+/* When the type of the variable is undefined and datas is non-zero this */
+/* signifies that this is the start of a print statement - in this case  */
+/* data points to the format string and has to be copied to the new      */
+/* variables name.                                                       */
 /*-----------------------------------------------------------------------*/
 
 Var *vars_push( int type, void *data )
@@ -861,7 +868,14 @@ Var *vars_push( int type, void *data )
 
 	new_stack_var = ( Var * ) T_malloc( sizeof( Var ) );
 
-	/* set its type and clear the `new__flag' */
+	/* if the type is undefine and data non-zero this comes from the start of
+	   a print statement and data is a pointer to the format string which is
+	   copied in the new stack variables name */
+
+	if ( type == UNDEF_VAR && data != NULL )
+		new_stack_var->name = get_string_copy( ( char * ) data );
+
+	/* set its type and clear the `new_flag' */
 
 	new_stack_var->type = type;
 	new_stack_var->new_flag = UNSET;
