@@ -873,7 +873,7 @@ void make_label_string( char *lstr, double num, int res )
 		if ( res >= 0 )
 			sprintf( lstr, "%*g", mag, num );
 		else
-			sprintf( lstr, "%*.*f\n", n, abs( res ), num );
+			sprintf( lstr, "%*.*f", n, abs( res ), num );
 	}
 	else if ( mag > -4 && res >= - 4 )          /* num > 10^-4 */
 		sprintf( lstr, "%1.*f", abs( res ), num );
