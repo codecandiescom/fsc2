@@ -62,7 +62,7 @@
 
 
 static int   gpib_init_controller( void );
-static void  gpib_init_log( char *log_file_name );
+static void  gpib_init_log( const char *log_file_name );
 static void  gpib_read_end( const char *dev_name, char *buffer, long received,
 							long expected );
 static void  gpib_log_date( void );
@@ -249,7 +249,7 @@ int gpib_shutdown( void )
 /*    point to a non-empty string stderr is used.                          */
 /*-------------------------------------------------------------------------*/
 
-static void gpib_init_log( char *log_file_name )
+static void gpib_init_log( const char *log_file_name )
 {
 	const char *name;
 	bool access_ok = UNSET;
