@@ -29,9 +29,9 @@
 ########################################################################
 
 
-# Please note: When there is some talk about "commenting out a variable"
-# in the following this simply means that you have to put a hash character
-# ('#') at the start of the line where the variable is set.
+# Please note: When in the following there is some talk about "commenting
+# out a variable" this simply means that you have to put a hash character
+# ('#') at the beginning of the line where the variable is set.
 
 # The following variable determines under which directory the program and
 # its auxiliary files will be installed (defaults to /usr/local)
@@ -143,22 +143,25 @@ DEFAULT_HTTP_PORT := 8080
 # NO_MAIL = yes
 
 
-# This last variable controls to whom emails with bug reports and about crashes
-# will be send - if it's commented out no "Bug report" button will be shown.
-# Please change this if you change the program yourself (in which case
-# sending bug reports or emails about crashes to me wouldn't make too much
-# sense).
+# This last variable controls to whom emails with bug reports and about
+# crashes will be send - if it's commented out no "Bug report" button will
+# be shown. Please change this if you change the program yourself (in which
+# case sending bug reports or emails about crashes to me wouldn't make too
+# much sense).
 
 MAIL_ADDRESS      := Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################
+#
 # Here follow settings determining the make process - which compiler and
 # tools to use as well as their respective options. Better leave this alone
 # if you don't have a good reason to apply changes (put you will probably
 # need to if you don't use gcc)
+#
 # Don't use '-fomit-frame-pointer' in CFLAGS on Intel processors (unless
 # you want to keep me from getting meaningful messages about crashes).
+#
 ##############################################################################
 
 
@@ -239,8 +242,10 @@ EXEC_INSTALL     := install
 
 
 ############################################################################
+###########                                                #################
 ###########   Don't change anything below this line        #################
 ###########  unless you really know what you're doing ...  #################
+###########                                                #################
 ############################################################################
 
 
@@ -477,7 +482,7 @@ endif
 
 # Define variables with the full paths of the 'mail' and 'addr2line' programs
 # and make sure the mail program and addr2line got found by 'which',
-# otherwise don't set the variables, If NO_MAIL has been defined never
+# otherwise don't set the variables. If NO_MAIL has been defined never
 # send crash mails (which require ADDR2LINE to be set).
 
 MAIL_PROGRAM  := $(shell which mail)
@@ -494,7 +499,8 @@ ifndef NO_MAIL
 endif
 
 
-# If required link in the necessary libraries for ME-6000 and 6601 cards
+# If required link in the necessary libraries for the ME-6000 DAC and the
+# National Instruments 6601 GPCT cards
 
 ifeq ($(ME6000_SUPPORT),YES)
 	LIBS                 += -lme6x00
