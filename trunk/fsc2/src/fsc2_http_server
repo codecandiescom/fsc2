@@ -430,7 +430,7 @@ sub serve_pics {
 		# Untaint the file name, then check that file permission and
 		# ownership are ok before proceeding
 
-		$file =~ /^(.*\/fsc2\.[A-Za-z0-9]{6})$/
+		$file =~ /^(.*\/fsc2\.http\.[A-Za-z0-9]{6})$/
 			or die "Received invalid file name from fsc2.\n";
 		$file = $1;
 
