@@ -56,9 +56,9 @@ int deviceserror ( const char *s )
 
 	if ( *devicestext == '\0' )
 		eprint( FATAL, "%s:%ld: Unexpected end of file in DEVICES "
-				"section.", Fname, Lc );
+				"section.\n", Fname, Lc );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.",
+		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, devicestext );
 	THROW( EXCEPTION );
 }

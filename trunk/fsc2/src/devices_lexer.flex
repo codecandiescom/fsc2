@@ -82,13 +82,13 @@ WS          [\n\t ]+
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s", devicestext + 2 );
+				eprint( FATAL, "%s\n", devicestext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				devicestext = strchr( devicestext, '\x03' );
-				eprint( FATAL, "%s", devicestext + 2 );
+				eprint( FATAL, "%s\n", devicestext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -140,7 +140,7 @@ WS          [\n\t ]+
 			/* handling of invalid input (i.e. everything else) */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in DEVICES section: "
-						"`%s'", Fname, Lc, devicestext );
+						"`%s'.\n", Fname, Lc, devicestext );
 				THROW( EXCEPTION );
 			}
 
@@ -166,7 +166,7 @@ int devices_parser( FILE *in )
 	if ( compilation.sections[ DEVICES_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of DEVICES section "
-		        "label.", Fname, Lc );
+		        "label.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -176,7 +176,7 @@ int devices_parser( FILE *in )
 		    continue;
 
 		eprint( FATAL, "%s:%ld: Sorry, the DEVICES section has to be the very "
-				"first section.", Fname, Lc );
+				"first section.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 

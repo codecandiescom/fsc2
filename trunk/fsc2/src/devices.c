@@ -56,7 +56,7 @@ void device_add( char *dev_name )
 	if ( lstat( lib_name, &buf ) < 0 &&
 		 lstat( strrchr( lib_name, '/' ) + 1, &buf ) < 0 )
 	{
-		eprint( FATAL, "Can't find or access module `%s.so'.", dev_name );
+		eprint( FATAL, "Can't find or access module `%s.so'.\n", dev_name );
 		T_free( lib_name );
 		T_free( dev_name );
 		THROW( EXCEPTION );
@@ -78,7 +78,7 @@ void device_add( char *dev_name )
 					pathmax = PATH_MAX_GUESS;
 				else
 				{
-					eprint( FATAL, "%s:%d: This operating system sucks!",
+					eprint( FATAL, "%s:%d: This operating system sucks!\n",
 							__FILE__, __LINE__ );
 					T_free( lib_name );
 					T_free( dev_name );
@@ -90,7 +90,8 @@ void device_add( char *dev_name )
 		real_name = get_string( pathmax );
 		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
 		{
-			eprint( FATAL, "Can't follow symbolic link for `%s'.", lib_name );
+			eprint( FATAL, "Can't follow symbolic link for `%s'.\n",
+					lib_name );
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
@@ -104,7 +105,7 @@ void device_add( char *dev_name )
 		if ( strstr( real_name, ".so" ) == NULL )
 		{
 			eprint( FATAL, "Module `%s' used for device `%s' hasn't extension "
-					"\".so\".", real_name, dev_name );
+					"\".so\".\n", real_name, dev_name );
 			T_free( lib_name );
 			T_free( dev_name );
 			T_free( real_name );
@@ -134,7 +135,7 @@ void device_add( char *dev_name )
 	if ( dl == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Device `%s' not found in device name data "
-				"base.", Fname, Lc, dev_name );
+				"base.\n", Fname, Lc, dev_name );
 		if ( real_name != NULL )
 			T_free( real_name );
 		T_free( dev_name );
@@ -180,8 +181,8 @@ void device_append_to_list( const char *dev_name )
 			if ( ! strcmp( cd->name, dev_name ) )
 			{
 				eprint( FATAL, "%s:%ld: Device `%s' is already listed in the "
-						"DEVICES section (possibly using an alternate name).",
-						Fname, Lc, dev_name );
+						"DEVICES section (possibly using an alternate "
+						"name).\n", Fname, Lc, dev_name );
 				THROW( EXCEPTION );
 			}
 

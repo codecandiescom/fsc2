@@ -476,7 +476,6 @@ int assignments_parser( FILE *in )
 		 is_restart = SET;
 
 	assignparse( );
-/*	assign_end( ); */
 
 	return Assign_Next_Section;
 }
