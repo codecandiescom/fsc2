@@ -234,6 +234,13 @@ double hp8647a_get_att( double freq )
 
 int hp8647a_set_mod_param( Var *v )
 {
+	const char *type[ ] =   { "FM", "AM", "PHASE" },
+		       *source[ ] = { "EXT AC", "AC","EXT DC", "DC",
+							  "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
+							  "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
+							  "INT 400", "400Hz", "400 Hz", "400" };
+
+
 	/* If the variable is an integer of floating value this means a amplitude
 	   setting */
 
@@ -247,7 +254,7 @@ int hp8647a_set_mod_param( Var *v )
 
 	vars_check( v, STR_VAR );
 
-	switch ( hp8647a_is_in( v->val.sptr, "FM\0AM\0PHASE\0\0" ) )
+	switch ( is_in( v->val.sptr, type, 3 ) )
 	{
 		case 0 :
 			vars_pop( synthesizer_mod_type( vars_push( STR_VAR, "FM" ) ) );
@@ -262,12 +269,7 @@ int hp8647a_set_mod_param( Var *v )
 			return 2;
 	}
 
-	switch ( hp8647a_is_in( v->val.sptr,
-							"EXT AC\0AC\0"
-							"EXT DC\0DC\0"
-							"INT 1kHz\0INT 1 kHz\0INT 1\01kHz\01 kHz\01\0"
-							"INT 400Hz\0INT 400 Hz\0INT 400\n400Hz\0"
-							"400 Hz\0400\0\0" ) )
+	switch ( is_in( v->val.sptr, source, 16 ) )
 	{
 
 		case 0 : case 1 :
@@ -296,41 +298,4 @@ int hp8647a_set_mod_param( Var *v )
 	THROW( EXCEPTION );
 
 	return -1;
-}
-
-
-
-int hp8647a_is_in( const char *sup_in, const char *altern )
-{
-	char *in, *cpy;
-	const char *a;
-	int count;
-
-
-	cpy = get_string_copy( sup_in );
-	in = cpy;
-
-	/* Get rid of leading and trailing white space */
-
-	while ( isspace( *in ) )
-		in++;
-	while( isspace( cpy[ strlen( cpy ) - 1 ] ) )
-		cpy[ strlen( cpy ) - 1 ] = '\0';
-
-	a = altern;
-	count = 0;
-
-	while ( a )
-	{
-		if ( ! strcasecmp( in, a ) )
-			break;
-
-		count++;
-		while ( *a++ )
-			;
-	}
-
-	T_free( cpy );
-
-	return a ?  count : -1;
 }

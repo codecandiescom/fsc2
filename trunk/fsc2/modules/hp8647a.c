@@ -153,6 +153,7 @@ Var *synthesizer_state( Var *v )
 {
 	bool state;
 	int res;
+	const char *on_off_str[ ] = { "ON", "OFF" };
 
 
 	if ( v == NULL )              /* i.e. return the current state */
@@ -184,9 +185,7 @@ Var *synthesizer_state( Var *v )
 		state = ( v->val.lval != 0 );
 	else
 	{
-		res = hp8647a_is_in( v->val.sptr, "OFF\0ON\0\0" );
-
-		if ( res == -1 )
+		if ( ( res = is_in( v->val.sptr, on_off_str, 2 ) ) == -1 )
 		{
 			eprint( FATAL, "%s:%ld: Invalid parameter \"s\" in call of "
 					"function `synthesizer_state'.\n", Fname, Lc, DEVICE_NAME,
@@ -194,7 +193,7 @@ Var *synthesizer_state( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		state = res ? SET : UNSET;
+		state = res ? UNSET : SET;
 	}
 
 	if ( ( v = vars_pop( v ) ) != NULL )
@@ -714,22 +713,25 @@ Var *synthesizer_att_ref_freq( Var *v )
 }
 
 
-/*-------------------------------------------------------------*/
-/*-------------------------------------------------------------*/
-
+/*----------------------------------------------------------------*/
+/* Function for setting some or all modlation parameters at once. */
+/* The sequence the parameters are set in don't matter. If the    */
+/* function succeeds 1 (as variable) is returned, otherwise a     */
+/* an exception is thrown.                                        */
+/*----------------------------------------------------------------*/
 
 Var *synthesizer_modulation( Var *v )
 {
 	int res;
 	int set = 0;
-	const char *str[ 4 ] = { "amplitude", "type", "input", "state" };
+	const char *str[ ] = { "amplitude", "type", "input" };
 
 
 	if ( v == NULL )
 	{
 		eprint( FATAL, "%s:%ld: %s: Use functions "
-				"`synthesizer_mod_(type)|(source)|(amp)|(state)' to determine "
-				"modulation settings.\n", Fname, Lc, DEVICE_NAME );
+				"`synthesizer_mod_(type|source|amp)' to determine modulation "
+				"settings.\n", Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -747,20 +749,52 @@ Var *synthesizer_modulation( Var *v )
 }
 
 
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+
 Var *synthesizer_mod_amp( Var *v )
 {
-	if ( v == NULL )
+	double amp;
 
-	vars_pop( v );
+
+	if ( v == NULL )
+	{
+	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		eprint( WARN, "%s:%ld: %s: Integer value used as modulation "
+				"amplitude.\n", Fname, Lc, DEVICE_NAME );
+
+	amp = VALUE( v );
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, "%s:%ld: %s: Superfluous arguments in call of "
+				"function `synthesizer_mod_amp'.\n", Fname, Lc, DEVICE_NAME );
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	
 
 	return vars_push( FLOAT_VAR, 1.0 );
 }
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_mod_type( Var *v )
 {
 	vars_pop( v );
 	return vars_push( STR_VAR, "AM" );
 }
+
+
+/*-------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
 
 Var *synthesizer_mod_source( Var *v )
 {
