@@ -122,7 +122,7 @@ fsc2_rsc_hr.c: fsc2_rsc_hr.fd
 # configuration file are needed.
 
 gpib:
-	if [ ! -e gpib_if.c -o ! -e gpib_if.h                      \
+	if [ ! -e gpib_if.c -o ! -e gpib_if.h                       \
 		  -o gpib_if_$(GPIB_LIBRARY).c -nt gpib_if.c            \
 		  -o gpib_if_$(GPIB_LIBRARY).h -nt gpib_if.h            \
 		  -o ! gpib_if_$(GPIB_LIBRARY).c -ef gpib_if.c          \
