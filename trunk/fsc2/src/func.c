@@ -55,9 +55,7 @@ static bool Dont_Save;
    long!) as additional arguments.
 
    On return func_call() will remove all arguments from the stack as well as
-   the variable for the function. Again, for functions with a variable number
-   of arguments removing the arguments is impossible - the function has to do
-   it by itself. Finally the result of the function is pushed onto the stack.
+   the variable for the function.
 */
 
 
@@ -298,7 +296,7 @@ Var *func_call( Var *f )
 	if ( i == Num_Func )
 	{
 		eprint( FATAL, "%s:%ld: Variable passed to `func_call()' is not "
-				"a valid function.", Fname, Lc );
+				"a known function.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -347,7 +345,8 @@ Var *func_call( Var *f )
 		ret = ( *f->val.fnct )( NULL );
 
 	/* Finally do a clean up, i.e. remove the variable with the function and
-	   all parameters - just keep the return value */
+	   all parameters - just keep the return value (which is alway the last
+	   variable on the stack) */
 
 	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
 		;
@@ -486,11 +485,7 @@ Var *f_abs( Var *v )
 Var *f_sin( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, sin( ( double ) v->val.lval ) );
-	else
-		return vars_push( FLOAT_VAR, sin( v->val.dval ) );
+	return vars_push( FLOAT_VAR, sin( VALUE( v ) ) );
 }
 
 
@@ -501,11 +496,7 @@ Var *f_sin( Var *v )
 Var *f_cos( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, cos( ( double ) v->val.lval ) );
-	else
-		return vars_push( FLOAT_VAR, cos( v->val.dval ) );
+	return vars_push( FLOAT_VAR, cos( VALUE( v ) ) );
 }
 
 
@@ -519,10 +510,7 @@ Var *f_tan( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		res = tan( ( double ) v->val.lval );
-	else
-		res = tan( v->val.dval );
+	res = tan( VALUE( v );
 
 	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
 		eprint( SEVERE, "%s:%ld: Overflow in function `tan()'.", Fname, Lc );
@@ -541,10 +529,7 @@ Var *f_asin( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
+	arg = VALUE( v );
 
 	if ( fabs( arg ) > 1.0 )
 	{
@@ -567,10 +552,7 @@ Var *f_acos( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
+	arg = VALUE( v );
 
 	if ( fabs( arg ) > 1.0 )
 	{
@@ -590,11 +572,7 @@ Var *f_acos( Var *v )
 Var *f_atan( Var *v )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == INT_VAR )
-		return vars_push( FLOAT_VAR, atan( ( double ) v->val.lval ) );
-	else
-		return vars_push( FLOAT_VAR, atan( v->val.dval ) );
+	return vars_push( FLOAT_VAR, atan( VALUE( v ) ) );
 }
 
 
@@ -608,10 +586,7 @@ Var *f_sinh( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		res = sinh( ( double ) v->val.lval );
-	else
-		res = sinh( v->val.dval );
+	res = sinh( VALUE ( v ) );
 
 	if ( fabs( res ) == HUGE_VAL && errno == ERANGE )
 		eprint( SEVERE, "%s:%ld: Overflow in function `sinh()'.",
@@ -631,10 +606,7 @@ Var *f_cosh( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		res = cosh( ( double ) v->val.lval );
-	else
-		res = cosh( v->val.dval );
+	res = cosh( VALUE( v ) );
 
 	if ( res == HUGE_VAL && errno == ERANGE )
 		eprint( SEVERE, "%s:%ld: Overflow in function `cosh()'.",
@@ -665,17 +637,12 @@ Var *f_tanh( Var *v )
 
 Var *f_exp( Var *v )
 {
-	double arg, res;
+	double res;
 
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
-
-	res = exp( arg );
+	res = exp( VALUE( v ) );
 
 	if ( res == 0.0 && errno == ERANGE )
 		eprint( WARN, "%s:%ld: Underflow in function `exp()' - result is 0.",
@@ -698,10 +665,7 @@ Var *f_ln( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
+	arg = VALUE( v );
 
 	if ( arg <= 0.0 )
 	{
@@ -729,10 +693,7 @@ Var *f_log( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
+	arg = VALUE( v );
 
 	if ( arg <= 0.0 )
 	{
@@ -740,6 +701,7 @@ Var *f_log( Var *v )
 				"range.", Fname, Lc );
 		THROW( EXCEPTION );
 	}
+
 	res = log10( arg );
 
 	if ( res == - HUGE_VAL && errno == ERANGE )
@@ -759,10 +721,7 @@ Var *f_sqrt( Var *v )
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
-		arg = ( double ) v->val.lval;
-	else
-		arg = v->val.dval;
+	arg = VALUE( v );
 
 	if ( arg < 0.0 )
 	{
