@@ -69,8 +69,8 @@ Var *get_phase_cycled_area_1d( Var *v )
 
 	if ( v == NULL )
 	{
-		eprint( FATAL, "%s:%ld: %s(): Missing "
-				"arguments.\n", Fname, Lc, Cur_Func );
+		eprint( FATAL, "%s:%ld: %s(): Missing arguments.\n",
+				Fname, Lc, Cur_Func );
 		THROW( EXCEPTION );
 	}
 
