@@ -807,19 +807,23 @@ void p_phs_end( int func )
 /*
   Function for setting the phase switch delay.
   'func' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2)
+  PHASE_1, 1 means PHASE_2, 2 means both)
 */
 
 void p_set_psd( int func, Var *v )
 {
-	assert( func == 0 || func == 1 );
+	assert( func >= 0 && func <= 2 );
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
-	( *pulser_struct.set_phase_switch_delay )( func == 0 ?
-											   PULSER_CHANNEL_PHASE_1 :
-											   PULSER_CHANNEL_PHASE_2,
-											   VALUE( v ) );
+
+	if ( func == 0 || func == 2 )
+		( *pulser_struct.set_phase_switch_delay )( PULSER_CHANNEL_PHASE_1,
+												   VALUE( v ) );
+	if ( func == 1 || func == 2 )
+		( *pulser_struct.set_phase_switch_delay )( PULSER_CHANNEL_PHASE_2,
+												   VALUE( v ) );
+
 	vars_pop( v );
 }

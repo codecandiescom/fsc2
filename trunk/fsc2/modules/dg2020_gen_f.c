@@ -491,13 +491,5 @@ bool dg2020_set_phase_switch_delay( int func, double time )
 	dg2020.function[ func ].is_psd = SET;
 	dg2020.function[ func ].psd = ( Ticks ) ceil( time / dg2020.timebase );
 
-	/* If the delay is set for PHASE_1 and no value has been set for PHASE2
-	   yet, preliminary use the value also for PHASE_2 */
-
-	if ( func == PULSER_CHANNEL_PHASE_1 &&
-		 ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_psd )
-		dg2020.function[ PULSER_CHANNEL_PHASE_2 ].psd =
-			( Ticks ) ceil( time / dg2020.timebase );
-
 	return OK;
 }
