@@ -123,7 +123,6 @@ int pd[ 2 ];                    /* pipe descriptors */
 int child_pid = 0;              /* pid of child */
 volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
-volatile bool Is_Written = UNSET;
 bool exit_hooks_are_run = UNSET;
 
 
@@ -166,7 +165,6 @@ extern int pd[ ];                  /* pipe descriptors */
 extern int child_pid;              /* pid of child */
 extern volatile bool do_send;      /* globals used with the signal handlers */
 extern volatile bool do_quit;
-extern volatile bool Is_Written;
 extern bool exit_hooks_are_run;
 
 #endif

@@ -80,7 +80,7 @@ input:   /* empty */
 ;
 
 eol:     ';'                       { assert( Var_Stack == NULL );
-                                     if ( do_quit || Is_Written ) 
+                                     if ( do_quit ) 
                                          YYACCEPT; }
        | '}'                       { assert( Var_Stack == NULL );
 	                                 YYACCEPT; }
