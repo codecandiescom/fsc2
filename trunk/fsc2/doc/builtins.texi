@@ -1749,9 +1749,9 @@ created and a string with the new label.
 @findex object_enable()
 The function allows to temporarily enable or disable the use of an
 object. It takes two arguments, the ID of the object that was returned
-when the object was created and either the value @code{1} or the string
-@code{"ON"} to enable the object (which is the default state) or the
-value @code{0} or the string @code{"OFF"} to disable the object.
+when the object was created and eitherthe string @code{"ON"} or the
+value @code{1} to enable the object (which is the default state) or the
+string @code{"OFF"} or the value @code{0} to disable the object.
 
 
 @anchor{hide_toolbox}
@@ -1761,8 +1761,8 @@ This function can be used to hide and later redraw the toolbox. This
 can, for example, be used to avoid multiple redraws when creating or
 deleting several objects. The function can even be used before the
 toolbox has been drawn for the first time. It expects exactly one
-boolean argument (either @code{1} or @code{"ON"} to hide the toolbox or
-@code{0} or @code{"OFF"} to redisplay it).
+boolean argument, either @code{"ON"} (or @code{1}) to hide the toolbox
+or @code{"OFF"} (or @code{0} )to redisplay it).
 
 
 
