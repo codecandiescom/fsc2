@@ -12,10 +12,10 @@ with the PCI-MIO-16E-1 board. It was mainly written to allow support for
 this type of card for a program for spectrometer control, fsc2, I have
 written and currently supports analog input (AI) more or less completely,
 analog output (AO) only in direct mode, i.e. no time or trigger controlled
-output, just simply setting the output, event counting, pulse generation
-and DIO. Calibration of the cards (except by reading the factory values
-stored in the EEPROM) isn't possible yet. The driver was tested with 2.4
-kernels only.
+output, just simply setting the output voltages, event counting, pulse
+generation and DIO. Calibration of the cards (except by reading the factory
+values stored in the EEPROM) isn't possible yet. The driver was tested with
+2.4 kernels only.
 
 
 II. Preparation for installation
@@ -147,8 +147,8 @@ V. Acknowledgments
 
 This is not the first Linux driver for these kinds of cards, there already
 exist several others. The one which helped me most and which I studied most
-closely was written by Tomasz Motylewski, at that time at the University of
-Basel (Switzerland).
+closely was written by Tomasz Motylewski, at that time in the group of
+Georg Gescheidt at the University of Basel (Switzerland).
 
 Another driver I found is by Christopher A. Kramer, which seems to have
 predated and influenced the one by Tomasz Motylewski.
@@ -162,12 +162,11 @@ Prof. Georg Gescheidt from Technical University of Graz, Austria, paid me
 for developing the driver and library in order to extend my fsc2 program
 to make it work with his time resolved EPR X-band spectrometer.
 
-While National Instruments has made publically available quite an amount
-of information about register level programming of the card, some very
-important bits, especially about the MITE chip, are missing, making
-figuring out how to program it an unnecessary PITA. Thanks go to Tim Ously
-of National Instruments by divulging on the Comedi mailing list as
-much of the missing informations as he was able to get permission for
-from his superiors.
+While National Instruments has made quite an amount of information about
+register level programming of the card available, some very important bits,
+especially concerning the MITE chip, are missing, making figuring out how
+to program it an unnecessary PITA. Thanks go to Tim Ously of National
+Instruments by supplying list as much of the missing informations on the
+Comedi mailing as he was able to get permission for
 
-    8.3.2004   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+    13.3.2004   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
