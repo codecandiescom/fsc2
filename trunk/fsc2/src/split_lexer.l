@@ -176,7 +176,7 @@ bool scan_main( char *file )
 
 	prg_length = -1;
 
-	sact.sa_handler = SIG_IGN;
+	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
 	sigaction( SIGCHLD, &sact, &oact );
 
 	splitin = popen( cmd, "r" );

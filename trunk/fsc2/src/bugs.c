@@ -66,7 +66,7 @@ void bug_report_callback( FL_OBJECT *a, long b )
 		return;
 	}
 
-	sact.sa_handler = SIG_IGN;
+	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
 	sigaction( SIGCHLD, &sact, &oact );
 
 	fl_set_cursor( FL_ObjWin( a ), XC_watch );

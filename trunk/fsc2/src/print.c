@@ -1338,7 +1338,7 @@ static void start_printing( char **argv, char *name )
 	struct sigaction sact;
 
 
-	sact.sa_handler = SIG_IGN;
+	sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
 	sigaction( SIGCHLD, &sact, NULL );
 
 	if ( ( new_pid = fork( ) ) == 0 )

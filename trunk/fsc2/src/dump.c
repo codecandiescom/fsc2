@@ -83,7 +83,7 @@ void DumpStack( void )
 
 	/* Childs death signal isn't needed */
 
-	sact.sa_handler = SIG_DFL;
+	sact.sa_handler = ( void ( * )( int ) ) SIG_DFL;
 	sact.sa_flags = 0;
 	sigaction( SIGCHLD, &sact, NULL );
 
