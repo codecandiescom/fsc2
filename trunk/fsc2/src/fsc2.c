@@ -836,8 +836,8 @@ static void start_editor( void )
 {
 	char *ed, *ep;
 	char **argv, **final_argv;
-	int argc = 1,
-		i;
+	int argc = 1;
+	int	i;
 
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
@@ -920,8 +920,8 @@ static void start_editor( void )
 			final_argv = argv + 2;
 	}
 
-	execvp( final_argv[ 0 ], ( char ** ) final_argv );
-
+	execvp( final_argv[ 0 ], final_argv );
+	T_free( argv );
 	_exit( EXIT_FAILURE );
 }
 
