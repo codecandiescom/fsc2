@@ -2,13 +2,14 @@ fsc2 is a program for controlling spectrometers.
 
 Programs for controlling spectrometers are usually home-written and
 are often restricted to doing a certain set of experiments with a
-fixed hardware base. In contrast, fsc2 interprets a rather simple
-but powerful scripting language EDL (Experiment Description Language)
-and has a strictly modular approach to the handling of devices.
-This allows setting up a completely new experiment (or to change
-an already existing experiment description) fast and easily without
-any detailed knowledge of the internals of fsc2 nor on how exactly
-the devices have to be controlled.
+fixed hardware base. In contrast, fsc2 is much more flexible because,
+on the one hand, it interprets a rather simple but powerful scripting
+language EDL (Experiment Description Language) and, on the other hand,
+has a strictly modular approach to the handling of devices. This allows
+setting up a completely new experiment (or changing an already existing
+experiment description) fast and easily without requiring any detailed
+knowledge of the internals of fsc2 or on how exactly the devices have
+to be controlled.
 
 * The EDL language is similar to other medium to high level languages,
   borrowing from e.g. MathLab, Fortran, C and Perl etc. Moreover, it
@@ -24,23 +25,23 @@ the devices have to be controlled.
   functionality by usually changing not more than a single line in an
   EDL script.
 
+* fsc2 allows other programs to send it EDL scripts for execution.
+  Thus one may write scripts for standard experiments that in turn
+  automatically create EDL scripts from user input, for example via
+  a graphical user interface. fsc2 even comes with a tool that will
+  automatically generate such scripts from (slightly modified) EDL
+  programs. Once such a script has been created, "normal" users don't
+  have to know how to write or change EDL programs, thus retaining all
+  the convenience of the traditional type of programs but without
+  sacrificing flexibility.
+
+* fsc2 has a built-in simple web server (only running on user demand)
+  that allows the experimentator to remotely monitor the state of an
+  experiment.
+
 * Currently fsc2 controls devices that are either connected via the
   serial ports or the GPIB bus. Functions for simplifying access of
   devices using these interfaces are built into fsc2.
-
-* fsc2 allows other programs to send it EDL scripts for execution.
-  Thus one may write scripts for standard experiments that in turn
-  automatically create EDL scripts from user input e.g. via a
-  graphical user interface. The package even comes with a tool that
-  will automatically generate such scripts from (slightly modified)
-  EDL programs. Once such a script has been created, "normal" users
-  don't have to know how to write or change EDL programs, thus retaining
-  all the convenience of the traditional type of programs but without
-  sacrificing the flexibility of fsc2.
-
-* fsc2 has a built-in simple web server (only running on user demand)
-  that allows the experimentator to remotely monitor the current state
-  of the experiment.
 
 * Writing new device modules (or adapting existing ones for a new device)
   shouldn't be too difficult for anyone having some experience with
@@ -80,11 +81,11 @@ Devices for which functional drivers already exist are:
 * Kontron 4060 Voltmeter
 * EG&G PARC Box-Car Integrator 4402 (download of measured data only)
 
-fsc2 currently works with three different GPIB driver/library combinations,
-the Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
-Instruments driver (http://www.natinst.com) and a driver for NI PCII and
-AT-GPIB/TNT (ISA) cards I wrote an which can be downloaded from the same
-URL as fsc2, see below.
+fsc2 works with three different GPIB driver/library combinations, the
+Linux Lab Project driver (http://www.llp.fu-berlin.de), the National
+Instruments driver (http://www.natinst.com) and a driver for NI PCII
+and AT-GPIB/TNT (ISA) cards I wrote an which can be downloaded from
+the same URL as fsc2, see below.
 
 Of course, there are some limitations: due to my professional background
 fsc2 has been written with the different types of EPR (Electron Paramagnetic
