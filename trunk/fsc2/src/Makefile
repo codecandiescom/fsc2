@@ -31,28 +31,17 @@ flex_sources  = $(wildcard *_lexer.l)
 sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) ${c_sources}
 objects       = $(sources:.c=.o)
 headers       = ${c_sources:.c=.h} global.h
-machine_name  = $(shell hostname -f)
 
 export headers             # export headers to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all                                \
-		   clean                              \
-		   hi_res                             \
-		   low_res                            \
-		   gpib_old                           \
-		   gpib_jtt                           \
-		   gpib_ni                            \
-		   pion.anorg.chemie.uni-frankfurt.de \
-		   moebi.physik.fu-berlin.de          \
-		   door.physik.fu-berlin.de           \
-		   crowley.physik.fu-berlin.de        \
-		   crowley.none
+.PHONY:    all clean high_res low_res gpib_old gpib_jtt gpib_ni
 
 
 all:
-	$(MAKE) $(machine_name)                         # machine dependent stuff
+	$(MAKE) $(RESOLUTION)
+	$(MAKE) $(GPIB_LIBRARY)
 	$(MAKE) fsc2 fsc2_clean fsc2_connect modules
 
 
@@ -86,6 +75,9 @@ fsc2_clean: fsc2_clean.o exceptions.o
 fsc2_clean.c: fsc2_clean.l $(headers)
 	$(FLEX) -B -o$@ $<
 
+
+# Make utilities for interfacing with fsc2
+
 fsc2_connect: fsc2_connect.o
 	$(CC) -o $@ $^
 
@@ -93,61 +85,36 @@ fsc2_connect.o: fsc2_connect.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 
-clean:
-	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c fsc2 \
-					 fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch]     \
-					 fsc2_rsc_[hl]r.[ch] gpib_parser.y gpib_lexer.l mem *~
-
-# Machine specific stuff: different GPIB interfaces and resource files
-# for the graphical interface are needed...
-
-pion.anorg.chemie.uni-frankfurt.de:
-	$(MAKE) hi_res
-	$(MAKE) gpib_old
-
-moebi.physik.fu-berlin.de:
-	$(MAKE) low_res
-	$(MAKE) gpib_jtt
-
-crowley.physik.fu-berlin.de:
-	$(MAKE) hi_res
-	$(MAKE) gpib_jtt
-
-door.physik.fu-berlin.de:
-	$(MAKE) low_res
-	$(MAKE) gpib_jtt
-
-crowley.none:
-	$(MAKE) hi_res
-	$(MAKE) gpib_jtt
-
-
 # How to create the graphical interface files - they need making if either
-# fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist or the file they are
-# made from is newer
+# fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist, the file they are made
+# from is newer or the existing files are for the wrong resolution
 
-hi_res:
-	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
-		 -o ! -e fsc2_rsc_hr.c -o ! -e fsc2_rsc_hr.h \
-		 -o fsc2_rsc_hr.c -nt fsc2_rsc.c             \
-		 -o fsc2_rsc_hr.h -nt fsc2_rsc.h ]; then     \
-		rm -f fsc2_rsc.[ch];                         \
-		fdesign -convert fsc2_rsc_hr.fd;             \
-		cp fsc2_rsc_hr.c fsc2_rsc.c;                 \
-		cp fsc2_rsc_hr.h fsc2_rsc.h;                 \
-		echo "#define SIZE HI_RES" >> fsc2_rsc.h;    \
+high_res:
+	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h           \
+		 -o ! -e fsc2_rsc_hr.c -o ! -e fsc2_rsc_hr.h  \
+		 -o fsc2_rsc_hr.fd -nt fsc2_rsc_hr.c          \
+		 -o fsc2_rsc_hr.fd -nt fsc2_rsc_hr.h          \
+		 -o ! fsc2_rsc_hr.c -ef fsc2_rsc.c            \
+		 -o ! fsc2_rsc_hr.h -ef fsc2_rsc.h ]; then    \
+		rm -f fsc2_rsc.[ch];                          \
+		rm -f fsc2_rsc_[lh]r.[ch];                    \
+		fdesign -convert fsc2_rsc_hr.fd;              \
+		ln -s fsc2_rsc_hr.c fsc2_rsc.c;               \
+		ln -s fsc2_rsc_hr.h fsc2_rsc.h;               \
 	fi
 
 low_res:
-	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h          \
-		 -o ! -e fsc2_rsc_lr.c -o ! -e fsc2_rsc_lr.h \
-		 -o fsc2_rsc_lr.c -nt fsc2_rsc.c             \
-		 -o fsc2_rsc_lr.h -nt fsc2_rsc.h ]; then     \
-		rm -f fsc2_rsc.[ch];                         \
-		fdesign -convert fsc2_rsc_lr.fd;             \
-		cp fsc2_rsc_lr.c fsc2_rsc.c;                 \
-		cp fsc2_rsc_lr.h fsc2_rsc.h;                 \
-		echo "#define SIZE LOW_RES" >> fsc2_rsc.h;   \
+	if [ ! -e fsc2_rsc.c -o ! -e fsc2_rsc.h           \
+		 -o ! -e fsc2_rsc_lr.c -o ! -e fsc2_rsc_lr.h  \
+		 -o fsc2_rsc_lr.fd -nt fsc2_rsc_lr.c          \
+		 -o fsc2_rsc_lr.fd -nt fsc2_rsc_lr.h          \
+         -o ! fsc2_rsc_lr.c -ef fsc2_rsc.c            \
+	     -o ! fsc2_rsc_lr.h -ef fsc2_rsc.h ]; then    \
+		rm -f fsc2_rsc.[ch];                          \
+		rm -f fsc2_rsc_[lh]r.[ch];                    \
+		fdesign -convert fsc2_rsc_lr.fd;              \
+		ln -s fsc2_rsc_lr.c fsc2_rsc.c;               \
+		ln -s fsc2_rsc_lr.h fsc2_rsc.h;               \
 	fi
 
 
@@ -192,6 +159,15 @@ gpib_ni:
 	fi
 
 
+# How to get rid of stuff not needed anymore
+
+clean:
+	$(RM) $(RMFLAGS) *.o *.output *_parser.[ch] *_lexer.c fsc2_clean.c fsc2 \
+					 fsc2_clean fsc2_connect gpib_if.[ch] fsc2_rsc.[ch]     \
+					 fsc2_rsc_[hl]r.[ch] gpib_parser.y gpib_lexer.l mem *~
+
+
 # don't automatically delete intermediate files created by bison and flex
 
 .PRECIOUS: %.c
+
