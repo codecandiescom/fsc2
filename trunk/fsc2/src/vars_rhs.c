@@ -493,7 +493,7 @@ static void vars_fix_dims( Var *v, int max_dim )
 
 Var *vars_subref_to_rhs_conv( Var *v )
 {
-	Var *sv, *nv;
+	Var *sv;
 	ssize_t i;
 	int range_count = 0;
 
