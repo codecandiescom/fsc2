@@ -38,15 +38,18 @@ void accept_new_data( void )
 		/* Attach to the shared memory segment pointed to by the oldest
 		   entry in the message queue */
 
+		seteuid( EUID );
 		if ( ( buf = shmat( Message_Queue[ message_queue_low ].shm_id,
 							NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
 		{
 			shmctl( Message_Queue[ message_queue_low ].shm_id,
 					IPC_RMID, NULL );                  /* delete the segment */
+			seteuid( getuid( ) );
 			eprint( FATAL, "Internal communication error at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
 		}
+		seteuid( getuid( ) );
 
 		/* Skip the magic number at the start and the total length field */
 
@@ -58,8 +61,10 @@ void accept_new_data( void )
 
 		/* Detach from shared memory segment and remove it */
 
+		seteuid( EUID );
 		shmdt( ( void * ) buf );
 		shmctl( Message_Queue[ message_queue_low ].shm_id, IPC_RMID, NULL );
+		seteuid( getuid( ) );
 
 		/* If accepting the data failed throw an exception */
 
@@ -91,6 +96,7 @@ void accept_new_data( void )
 
   		/* Swap current REQUEST with next DATA set */
 
+		seteuid( EUID );
   		shm_id = Message_Queue[ mq_next ].shm_id;
 
   		Message_Queue[ mq_next ].shm_id =
@@ -99,6 +105,7 @@ void accept_new_data( void )
 
   		Message_Queue[ message_queue_low ].shm_id = shm_id;
   		Message_Queue[ message_queue_low ].type = DATA;
+		seteuid( getuid( ) );
   	}
 
 	/* Finally display the new data by redrawing the canvas */
