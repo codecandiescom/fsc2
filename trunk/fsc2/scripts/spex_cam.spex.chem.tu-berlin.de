@@ -850,6 +850,7 @@ use Tk;
 sub run {
 	my ( $top, $line, $geom ) = @_;
 	my $laser_line = Laser_Line::get_line( );
+	my $cal_line;
 
 	return unless defined $laser_line;
 
@@ -865,39 +866,66 @@ sub run {
 
 	$top->withdraw;
 
+	if ( $laser_line != 0.0 ) {
+		$cal_line = $laser_line - $$line;
+	} else {
+		$cal_line = $$line;
+	}
+
 	$f[ 0 ] = $top->Toplevel( '-title' => 'Camera Calibration' );
 	$f[ 1 ] = $f[ 0 ]->Frame( );
-	$f[ 2 ] = $f[ 1 ]->Label( -text => "Line to use for  \ncalibration:  " );
-	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => $line );
+	$f[ 2 ] = $f[ 1 ]->Label( -text => "Line to use for  \ncalibration:  ",
+							  -width => 20 );
+	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$cal_line );
 	if ( $laser_line != 0.0 ) {
+		$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$cal_line,
+								  -width => 15 );
 		$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1\n  (rel.)" );
 	} else {
+		$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => $line );
 		$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1\n  (abs.)" );
 	}
 
-	$f[ 5 ] = $f[ 0 ]->Frame( );
-	$f[ 6 ] = $f[ 5 ]->Button( -text => "Start Calib.",
-							   -command => sub{ cam_calib( $$line );
-												$top->deiconify;
-												$f[ 0 ]->destroy } );
-	$f[ 6 ]->bind( "all", "<Alt-a>" => sub { cam_calib( $$line );
-											 $top->deiconify;
-											 $f[ 0 ]->destroy; } );
-	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
-							   -command => sub { $top->deiconify;
-												 $f[ 0 ]->destroy; } );
-	$f[ 6 ]->bind( "all", "<Alt-q>" => sub { $top->deiconify;
-											 $f[ 0 ]->destroy; } );
+	if ( $laser_line != 0.0 ) {
+		$f[ 5 ] = $f[ 0 ]->Frame( );
+		$f[ 6 ] = $f[ 5 ]->Label( -text => "", -width => 20 );
+		$f[ 7 ] = $f[ 5 ]->Label( -textvariable => $line,
+								  -anchor => "w",
+								  -width => 15 );
+		$f[ 8 ] = $f[ 5 ]->Label( -text => "  cm^-1\n  (abs.)" );
+	}
+
+	$f[ 9 ] = $f[ 0 ]->Frame( );
+	$f[ 10 ] = $f[ 9 ]->Button( -text => "Start Calib.",
+								-command => sub{ cam_calib( $$line );
+												 $top->deiconify;
+												 $f[ 0 ]->destroy } );
+	$f[ 10 ]->bind( "all", "<Alt-a>" => sub { cam_calib( $$line );
+											  $top->deiconify;
+											  $f[ 0 ]->destroy; } );
+	$f[ 11 ] = $f[ 9 ]->Button( -text => "Quit",
+								-command => sub { $top->deiconify;
+												  $f[ 0 ]->destroy; } );
+	$f[ 11 ]->bind( "all", "<Alt-q>" => sub { $top->deiconify;
+											  $f[ 0 ]->destroy; } );
 
 	$f[ 1 ]->pack( %fp );
 	$f[ 2 ]->pack( %wp );
 	$f[ 3 ]->pack( %wp );
 	$f[ 4 ]->pack( %up );
-	$f[ 5 ]->pack( -side => "bottom",
+
+	if ( $laser_line != 0.0 ) {
+		$f[ 5 ]->pack( %fp );
+		$f[ 6 ]->pack( %wp );
+		$f[ 7 ]->pack( %wp );
+		$f[ 8 ]->pack( %up );
+	}
+
+	$f[ 9 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 6 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 7 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 10 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 11 ]->pack( %wp, padx => '5m', -pady => '3m' );
 
 	# New window should appear on top of the button that started it
 
@@ -918,13 +946,19 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ cam_line_valid( shift, $f[ 6 ],
+						-vcmd => sub{ cam_line_valid( shift, $line, $f[ 10 ],
 													  $laser_line ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
 	$f[ 3 ]->focus;
 	$f[ 3 ]->icursor( 'end' );
+
+	if ( $laser_line != 0.0 ) {
+		cam_line_valid( $cal_line, $line, $f[ 10 ], $laser_line );
+	} else {
+		cam_line_valid( $$line, $line, $f[ 10 ], $laser_line );
+	}
 
 	MainLoop;
 }
@@ -937,8 +971,10 @@ sub run {
 # the line can be set to.
 
 sub cam_line_valid {
-	my ( $new, $start_button, $laser_line ) = @_;
+	my ( $new, $line, $start_button, $laser_line ) = @_;
     my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
+
+	$$line = "" if $laser_line != 0.0;
 
     if ( $new =~ /^$float_rep$/ ) {
         if ( ( $laser_line == 0.0 and ( $new < 46300.0 / 3 or $new > 43700 ) )
@@ -948,6 +984,7 @@ sub cam_line_valid {
             $start_button->configure( -state => 'disabled' );
         } else {
             $start_button->configure( -state => 'normal' );
+			$$line = $laser_line - $new if $laser_line != 0.0;
         }
         return 1;
     }
@@ -1035,10 +1072,7 @@ init_1d( 1, 0, - 0.5 * w, 1, "Pixel position", "Counts" );
 EXPERIMENT:
 
 ll = monochromator_laser_line( );
-IF ll != 0.0 {
-	wn = ll - wn;
-	monochromator_laser_line( 0 cm^-1 );
-}
+monochromator_laser_line( 0 cm^-1 );
 old_calib = monochromator_calibrate( );
 monochromator_wavenumber( wn );
 
@@ -1298,6 +1332,7 @@ use IO::Handle;
 sub run {
 	my ( $top, $line, $geom ) = @_;
 	my $laser_line = Laser_Line::get_line( );
+	my $mono_line;
 
 	my $pd = check_pixel_diff( );
 
@@ -1308,6 +1343,12 @@ sub run {
 	}
 
 	return unless defined $laser_line;
+
+	if ( $laser_line != 0.0 ) {
+		$mono_line = $laser_line - $$line;
+	} else {
+		$mono_line = $$line;
+	}
 
 	my @f;
 	my %fp = ( -side => 'top',
@@ -1323,32 +1364,54 @@ sub run {
 
 	$f[ 0 ] = $top->Toplevel( '-title' => 'Monochromator Calibration' );
 	$f[ 1 ] = $f[ 0 ]->Frame( );
-	$f[ 2 ] = $f[ 1 ]->Label( -text => "Line to use for  \ncalibration:  " );
-	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => $line );
+	$f[ 2 ] = $f[ 1 ]->Label( -text => "Line to use for  \ncalibration:  ",
+							  -width => 20 );
 	if ( $laser_line != 0.0 ) {
+		$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$mono_line,
+								  -width => 15 );
 		$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1\n  (rel.)" );
 	} else {
+		$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => $line,
+								  -width => 15);
 		$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1\n  (abs.)" );
 	}
 
-	$f[ 5 ] = $f[ 0 ]->Frame( );
-	$f[ 6 ] = $f[ 5 ]->Button( -text => "Start Calib.",
-							   -command => sub{ mono_calib( $$line );
-												$top->deiconify;
-												$f[ 0 ]->destroy } );
-	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
-							   -command => sub { $top->deiconify;
-												 $f[ 0 ]->destroy; } );
+	if ( $laser_line != 0.0 ) {
+		$f[ 5 ] = $f[ 0 ]->Frame( );
+		$f[ 6 ] = $f[ 5 ]->Label( -text => "", -width => 20 );
+		$f[ 7 ] = $f[ 5 ]->Label( -textvariable => $line,
+								  -anchor => "w",
+								  -width => 15 );
+		$f[ 8 ] = $f[ 5 ]->Label( -text => "  cm^-1\n  (abs.)" );
+	}
+
+	$f[ 9 ] = $f[ 0 ]->Frame( );
+	$f[ 10 ] = $f[ 9 ]->Button( -text => "Start Calib.",
+								-command => sub{ mono_calib( $$line,
+															 $laser_line );
+												 $top->deiconify;
+												 $f[ 0 ]->destroy } );
+	$f[ 11 ] = $f[ 9 ]->Button( -text => "Quit",
+								-command => sub { $top->deiconify;
+												  $f[ 0 ]->destroy; } );
 
 	$f[ 1 ]->pack( %fp );
 	$f[ 2 ]->pack( %wp );
 	$f[ 3 ]->pack( %wp );
 	$f[ 4 ]->pack( %up );
-	$f[ 5 ]->pack( -side => "bottom",
+
+	if ( $laser_line != 0.0 ) {
+		$f[ 5 ]->pack( %fp );
+		$f[ 6 ]->pack( %wp );
+		$f[ 7 ]->pack( %wp );
+		$f[ 8 ]->pack( %up );
+	}
+
+	$f[ 9 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 6 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 7 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 10 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 11 ]->pack( %wp, padx => '5m', -pady => '3m' );
 
 	# New window should appear on top of the button that started it
 
@@ -1369,7 +1432,7 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ mono_line_valid( shift, $f[ 6 ],
+						-vcmd => sub{ mono_line_valid( shift, $line, $f[ 10 ],
 													   $laser_line ) } );
 
 	# Focus should be in the entry field and cursor after the last character
@@ -1377,7 +1440,11 @@ sub run {
 	$f[ 3 ]->focus;
 	$f[ 3 ]->icursor( 'end' );
 
-	mono_line_valid( $$line, $f[ 6 ], $laser_line );
+	if ( $laser_line != 0.0 ) {
+		mono_line_valid( $mono_line, $line, $f[ 10 ], $laser_line );
+	} else {
+		mono_line_valid( $$line, $line, $f[ 10 ], $laser_line );
+	}
 
 	MainLoop;
 }
@@ -1390,8 +1457,10 @@ sub run {
 # the line can be set to.
 
 sub mono_line_valid {
-	my ( $new, $start_button, $laser_line ) = @_;
+	my ( $new, $line, $start_button, $laser_line ) = @_;
     my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
+
+	$$line = "" if $laser_line != 0.0;
 
     if ( $new =~ /^$float_rep$/ ) {
         if ( ( $laser_line == 0.0 and ( $new < 46300.0 / 3 or $new > 43700 ) )
@@ -1401,23 +1470,24 @@ sub mono_line_valid {
             $start_button->configure( -state => 'disabled' );
         } else {
             $start_button->configure( -state => 'normal' );
+			$$line = $laser_line - $new if $laser_line != 0.0;
         }
         return 1;
     }
 
     if ( $new =~ /^[+-]?(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/ ) {
-         $start_button->configure( -state => 'disabled' );
-         return 1;
-     }
+		$start_button->configure( -state => 'disabled' );
+		return 1;
+	}
 
-     return 0;
+	return 0;
 }
 
 
 #############################################
 
 sub mono_calib {
-	my $line = shift;
+	my ( $line, $laser_line ) = @_;
     my $fh;
 
 	no warnings "exec";
@@ -1425,6 +1495,8 @@ sub mono_calib {
 		main::show_message( "Can't start fsc2" );
 		return;
 	}
+
+	$line = $laser_line - $line if $laser_line != 0.0;
 
     print $fh <<EOF;
 /*
@@ -1729,6 +1801,8 @@ sub run {
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
 
+	$$cwn = $laser_line - $$cwn if $laser_line != 0.0;
+
 	if ( $pixel_diff <= 0.0 ) {
 		main::show_message( "Please do a CCD camera calibration first." );
 		return;
@@ -1820,7 +1894,7 @@ sub run {
 								 -command => \&realtime_run );
 	$f[ 19 ] = $f[ 17 ]->Button( -text => "Quit",
 								 -command => sub { if ( $laser_line != 0.0 and
-														$units[ 0 ] == 1 ) {
+														$units[ 1 ] == 1 ) {
 													    $$cwn = $laser_line
 															    - $$cwn;
 												   }
@@ -1910,9 +1984,17 @@ sub set_units {
 	my ( $which, $cl ) = @_;
 
 	if ( $which == 0 ) {
+		if ( $units[ 1 ] == 0 ) {
+			$units[ 0 ] = 1;
+			return;
+		}
 		$units[ 1 ] = 0;
 		$cl->configure( -text => " cm^-1 abs." );
 	} else {
+		if ( $units[ 0 ] == 0 ) {
+			$units[ 1 ] = 1;
+			return;
+		}
 		$units[ 0 ] = 0;
 		$cl->configure( -text => " cm^-1 rel." );
 	}
@@ -2172,6 +2254,8 @@ sub run {
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
 
+	$$cwn = $laser_line - $$cwn if $laser_line != 0.0;
+
 	@units = $laser_line != 0.0 ? ( 0, 1 ) : ( 1, 0 );
 
 	if ( $pixel_diff <= 0.0 ) {
@@ -2272,7 +2356,7 @@ sub run {
 								 -command => \&single_run );
 	$f[ 23 ] = $f[ 21 ]->Button( -text => "Quit",
 								 -command => sub { if ( $laser_line != 0.0 and
-														$units[ 0 ] == 1 ) {
+														$units[ 1 ] == 1 ) {
 													    $$cwn = $laser_line
 															    - $$cwn;
 												   }
@@ -2373,9 +2457,17 @@ sub set_units {
 	my ( $which, $cl ) = @_;
 
 	if ( $which == 0 ) {
+		if ( $units[ 1 ] == 0 ) {
+			$units[ 0 ] = 1;
+			return;
+		}
 		$units[ 1 ] = 0;
 		$cl->configure( -text => " cm^-1 abs." );
 	} else {
+		if ( $units[ 0 ] == 0 ) {
+			$units[ 1 ] = 1;
+			return;
+		}
 		$units[ 0 ] = 0;
 		$cl->configure( -text => " cm^-1 rel." );
 	}
@@ -2702,6 +2794,11 @@ sub run {
 	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( );
 	return unless defined $laser_line;
 
+	if ( $laser_line != 0.0 ) {
+		$$start_wn = $laser_line - $$start_wn;
+		$$end_wn = $laser_line - $$end_wn;
+	}
+
 	@units = $laser_line != 0.0 ? ( 0, 1 ) : ( 1, 0 );
 
 	if ( $pixel_diff <= 0.0 ) {
@@ -2742,7 +2839,7 @@ sub run {
 	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => $start_wn,
 							  -width => 10 );
 	$f[ 4 ] = $f[ 1 ]->Label( -text => " cm^-1 " .
-							  ( $laser_line != 0 ? "rel." : "abs." ),
+							  ( $laser_line != 0.0 ? "rel." : "abs." ),
 							  -width => 9 );
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
@@ -2752,7 +2849,7 @@ sub run {
 	$f[ 7 ] = $f[ 5 ]->Entry( -textvariable => $end_wn,
 							  -width => 10 );
 	$f[ 8 ] = $f[ 5 ]->Label( -text => " cm^-1 " .
-							  ( $laser_line != 0 ? "rel." : "abs." ),
+							  ( $laser_line != 0.0 ? "rel." : "abs." ),
 							  -width => 9 );
 
 	$f[ 9 ] = $f[ 0 ]->Frame( );
@@ -2813,7 +2910,7 @@ sub run {
 	$f[ 27 ] = $f[ 25 ]->Button( -text => "Quit",
 								 -command => 
 								 sub { if ( $laser_line != 0.0 and
-											$units[ 0 ] == 1 ) {
+											$units[ 1 ] == 1 ) {
 									 	   $$start_wn = $laser_line
 											   			- $$start_wn;
 										   $$end_wn = $laser_line - $$end_wn;
@@ -2926,10 +3023,18 @@ sub set_units {
 	my ( $which, $sl, $el ) = @_;
 
 	if ( $which == 0 ) {
+		if ( $units[ 1 ] == 0 ) {
+			$units[ 0 ] = 1;
+			return;
+		}
 		$units[ 1 ] = 0;
 		$sl->configure( -text => " cm^-1 abs." );
 		$el->configure( -text => " cm^-1 abs." );
 	} else {
+		if ( $units[ 0 ] == 0 ) {
+			$units[ 1 ] = 1;
+			return;
+		}
 		$units[ 0 ] = 0;
 		$sl->configure( -text => " cm^-1 rel." );
 		$el->configure( -text => " cm^-1 rel." );
