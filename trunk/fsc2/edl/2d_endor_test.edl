@@ -77,7 +77,7 @@ change_scale( min_time * 1.0e-3, time_res * 1.0e-3);
 mean_curve[ 1 ] = float_slice( Rec_len );
 base_curve = float_slice( Rec_len );
 
-/* Get a file for storing all data and write experiments parameter */
+/* Get a file for storing all data and write experiment parameter */
 
 F1 = get_file( "File for storing complete data sets:" );
 F2 = get_file( "File for storing averaged data sets:" );
