@@ -204,19 +204,16 @@ Var *digitizer_define_window( Var *v )
 
 	if ( v != NULL )
 	{
-
 		/* Get the start point of the window */
 
-		vars_check( v, INT_VAR | FLOAT_VAR );
-		win_start = VALUE( v );
+		win_start = get_double( v, "window start position", DEVICE_NAME );
 		is_win_start = SET;
 
 		/* If there's a second parameter take it to be the window width */
 
 		if ( ( v = vars_pop( v ) ) != NULL )
 		{
-			vars_check( v, INT_VAR | FLOAT_VAR );
-			win_width = VALUE( v );
+			win_width = get_double( v, "window width", DEVICE_NAME );
 
 			/* Allow window width to be zero in test run... */
 
@@ -294,8 +291,7 @@ Var *digitizer_timebase( Var *v )
 				return vars_push( FLOAT_VAR, tds520a.timebase );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	timebase = VALUE( v );
+	timebase = get_double( v, "time base", DEVICE_NAME );
 
 	if ( timebase <= 0 )
 	{
@@ -408,8 +404,7 @@ Var *digitizer_sensitivity( Var *v )
 				return vars_push( FLOAT_VAR, tds520a.sens[ channel ] );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	sens = VALUE( v );
+	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
 	if ( sens < max_sens || sens > min_sens )
 	{
@@ -454,15 +449,7 @@ Var *digitizer_num_averages( Var *v )
 				return vars_push( INT_VAR, tds520a.num_avg );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == INT_VAR )
-		num_avg = v->val.lval;
-	else
-	{
-		eprint( WARN, SET, "%s: Floating point number used as number "
-				"of averages.\n", DEVICE_NAME );
-		num_avg = lrnd( v->val.dval );
-	}
+	num_avg = get_long( v, "number of averages", DEVICE_NAME );
 
 	if ( num_avg == 0 )
 	{
@@ -521,16 +508,7 @@ Var *digitizer_record_length( Var *v )
 				return vars_push( INT_VAR, tds520a.rec_len );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Floating point value used as record "
-				"length.\n", DEVICE_NAME );
-		rec_len = lrnd( v->val.dval );
-	}
-	else
-		rec_len = v->val.lval;
+	rec_len = get_long( v, "record length", DEVICE_NAME );
 
 	i = 0;
 	while ( 1 )
@@ -599,8 +577,7 @@ Var *digitizer_trigger_position( Var *v )
 				return vars_push( FLOAT_VAR, tds520a.trig_pos );
 		}
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	trig_pos = VALUE( v );
+	trig_pos = get_long( v, "trigger position", DEVICE_NAME );
 
 	if ( trig_pos < 0.0 || trig_pos > 1.0 )
 	{
