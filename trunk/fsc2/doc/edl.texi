@@ -156,22 +156,17 @@ characters or character combinations are already used for physical units
 as well as combinations of these with the characters @code{n} (nano),
 @code{u} (micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).
 Here's the complete list:
-@table @samp
-@item s
-Seconds (and @code{ns, us, ms, ks} and @code{Ms})
-@item G
-Gauss (and @code{nG, uG, mG, kG} and @code{MG})
-@item T
-Tesla (and @code{nT, uT} and @code{mT})
-@item V
-Volt (and @code{nV, uV, mV, kV} and @code{MV})
-@item A
-Ampere (and @code{nA, uA, mA, kA} and @code{MA})
-@item Hz
-Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
-@item dB
-dB (deci-Bell)
-@end table
+@quotation
+@multitable{Hz} {Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})}
+@item s @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
+@item G @tab Gauss (and @code{nG, uG, mG, kG} and @code{MG})
+@item T @tab Tesla (and @code{nT, uT} and @code{mT})
+@item V @tab Volt (and @code{nV, uV, mV, kV} and @code{MV})
+@item A @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
+@item Hz @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
+@item dB @tab dB (deci-Bell)
+@end multitable
+@end quotation
 
 Of course, also the reserved words can't be used as variable names. But
 they are easy to avoid, because all reserved words are spelt in all capital
@@ -433,28 +428,31 @@ following block of statements is executed.
 
 Here is a complete list of the comparison operators between to numbers:
 
-@table @samp
-@item @code{==}
-compare for equality (don't confuse with the single `@code{=}' that is
+@quotation
+@multitable{==} { compare for equality (don't confuse with single
+`@code{=}' that is used in assignments)}
+@item @code{==} @tab
+compare for equality (don't confuse with single `@code{=}' that is
 used in assignments)
-@item @code{!=}
+@item @code{!=} @tab
 TRUE if the numbers are unequal
-@item @code{<}
+@item @code{<} @tab
 TRUE if the left side number is smaller than the
 right side number
-@item @code{>}
+@item @code{>} @tab
 TRUE if the left side number is smaller or equal to the
 right side number
-@item @code{<}
+@item @code{<} @tab
 TRUE if the left side number is larger than the
 right side number
-@item @code{>=}
+@item @code{>=} @tab
 TRUE if the left side number is larger or equal to the
 right side number
-@end table
+@end multitable
+@end quotation
 
 And here is also an example for using simple numbers in a condition,
-using that a non-zero value is always interpreted as TRUE:
+using the fact that a non-zero value is always interpreted as TRUE:
 
 @example
     I = 6;
@@ -481,13 +479,14 @@ If you want to check for combinations of expressions you can use the
 logical @code{AND}, @code{OR} or @code{XOR} (exclusive or)
 operators. Here is a list of these operators and their meaning:
 
-@multitable{~} {TRUE if left or right hand side expressions are TRUE but not both}
-@item @code{!} @tab Negate truth of an expression
-@item @code{&} @tab TRUE if left and right hand side expressions are TRUE
-@item @code{|} @tab TRUE if left or right hand side expressions are TRUE
-@item @code{~} @tab TRUE if left or right hand side expressions are TRUE but not both
+@quotation
+@multitable{~} {exclusive or: TRUE if left or right hand side expressions are TRUE but not both}
+@item @code{!} @tab not: Negate truth of an expression
+@item @code{&} @tab and: TRUE if left and right hand side expressions are TRUE
+@item @code{|} @tab or: TRUE if left or right hand side expressions are TRUE
+@item @code{~} @tab exclusive or: TRUE if left or right hand side expressions are TRUE but not both
 @end multitable
-
+@end quotation
 
 Before the @code{WHILE} loop on often has to initialise the loop
 variables and within the statement block the loop variable has to been

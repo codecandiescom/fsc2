@@ -20,35 +20,35 @@
 The most simple approach would be to have a set of functions for each
 individual device, i.e.@: to have a different function for e.g.@:
 fetching data from each of a series of different digitizing
-oscilloscopes.  While this would make life somewhat simpler for me as
-the programmer of @b{fsc2} it would be a nuisance for someone writing
-@b{EDL} programs because whenever (s)he has to change the oscilloscope
-(s)he also has to change the @b{EDL} programs to adjust it to the
-special capabilities of the digitizer (s)he's just using.
+oscilloscopes.  But this would be a nuisance for someone writing @b{EDL}
+programs because whenever for example the oscilloscope has to be
+changed also all the programs have to be adjusted to the special
+capabilities of the digitizer that's just using.
 
-On the other hand, devices with the same function usually have a lot in
-common. Thus, it's rather useful to be able to write something like
+Thus it's reasonable to have generic functions for a similar devices
+that usually have a lot in common. So one may write
 @example
-digitizer_get_curve( CH1 );      // get curve from channel 1
+new_data = digitizer_get_curve( CH1 );    // get curve from channel 1
 @end example
 instead of
 @example
-tds754a_get_curve( 1 );          // get curve from channel 1
+new_data = tds754a_get_curve( 1 );        // get curve from channel 1
 @end example
-and having to change this whenever someone else needs just the TDS754A
-oscilloscope and one has to use the TDS520 oscilloscope instead for a
-few days. 
+and does not have to change anything whenever someone else needs the
+TDS754A oscilloscope for a few days and one has to do with the TDS520
+oscilloscope in the mean time.
 
 Of course, using generic functions has its limitations - when e.g.@: the
 lock-in amplifier has only one channel no abstraction can make it have
-two channels - but wait, actually, it can: rotate the phase by 90
-degrees, wait for another time constant, get the second value and you
-basically have two channels, at least realized in software (of course,
-there's a penality - measurements take at least twice the time needed
-with a two-channel lock-in amplifier). But there can be real hard
-limitations - if you've got a device with only 2 DACs no software
-trickery will ever magically convert it into a device with 4 DACs
-(additional hardware may, but that's a different topic...)
+two channels - but wait, actually, it can: whenever the program is asked
+for data from channel 2 it rotates the phase by 90 degrees, waits for
+another time constant, get the value and you basically have two
+channels, at least realized in software (of course, there's a penality -
+measurements take at least twice the time needed with a two-channel
+lock-in amplifier). But there can be real hard limitations - if you've
+got a device with only 2 DACs no software trickery will ever magically
+convert it into a device with 4 DACs (additional hardware may, but
+that's a different topic...)
 
 The gist is, that, while a lot of abstraction is possible, not all device
 functions can be completely identical for all devices. Thus, while the
@@ -72,7 +72,7 @@ section to load the the functions are
 aeg_x_band
 aeg_s_band
 @end example
-Because magnets are hardly ever changed (if the program is set up
+Because magnets are hardly ever changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
 name instead.
 
@@ -150,13 +150,12 @@ resets the magnetic field to the start field value defined in
 
 
 Currently, two types of gaussmeters are implemented, the Bruker ER035M
-NMR gaussmeter and the Bruker BH15 field controller, using a hall
-probe. The range of fields that can be measured with the Bruker ER035M
-NMR gaussmeter depends on the probe being used. With the F0 probe
-(S-band) the range is @w{460 G} to @w{2390 G} while with the F1 probe
-(X-band) a range between @w{1460 G} and @w{19900 G} can be measured.
-With the BH15 field controller a range between @w{-50 G} and @w{2300 G}
-can be used.
+NMR gaussmeter and the Bruker BH15 hall probe field controller. The
+range of fields that can be measured with the Bruker ER035M NMR
+gaussmeter depends on the probe being used. With the F0 probe (S-band)
+the range is @w{460 G} to @w{2390 G} while with the F1 probe (X-band) a
+range between @w{1460 G} and @w{19900 G} can be measured.  With the BH15
+field controller a range between @w{-50 G} and @w{2300 G} can be used.
 
 The modules defining the gaussmeter functions (to be listed in the
 @code{DEVICES} section) are:
