@@ -1,7 +1,7 @@
-EVICES:
+DEVICES:
 
 dg2020;
-//tds754a;
+tds754a;
 
 VARIABLES:
 

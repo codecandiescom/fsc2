@@ -31,6 +31,10 @@ auxdir         = $(libdir)/aux
 docdir         = $(libdir)/doc
 infodir        = /usr/local/info
 
+# Set the location of the GPIB configuration file (only needed with the
+# National Instruments GPIB library) and the file for writing logs about
+# the interaction on the GPIB bus
+
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
 

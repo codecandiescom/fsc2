@@ -1,0 +1,170 @@
+A) Requirements
+===============
+
+The following tools and libraries are needed to create fsc2:
+
+ 1) gmake
+ 2) gcc
+ 3) flex
+ 4) bison
+ 5) install
+ 6) mail
+ 7) sed
+ 8) addr2line
+ 9) XFORMS library (version 0.89 or higher)
+10) GPIB library
+
+To create the complete documentation also needed are
+
+11) makeinfo
+12) tex
+13) convert
+14) dvips
+15) perl (version 5.0 or higher)
+16) pdftex
+17) gzip
+
+
+The XFORMS library is available from e.g.
+
+  ftp.cs.ruu.nl/pub/XFORMS
+  einstein.phys.uwm.edu/pub/xforms
+  ftp.fu-berlin.de/unix/X11/gui/xforms
+  ftp.st.ryukoku.ac.jp/pub/X11/xforms
+  ftp.via.ecp.fr/pub2/xforms
+  ftp.unipi.it/pub/mirror/xforms
+  ftp.uni-trier.de/pub/unix/X11/xforms
+
+
+The GPIB library consists of a library and a module to interface GPIB cards.
+You can either use the one written by me (works with 2.0, 2.2 and 2.4
+kernels), the older LLP library to be found at
+
+  ftp.llp.fu-berlin.de/pub/linux/LINUX-LAB/IEEE488
+
+(probably won't work with 2.2. and 2.4 kernels) or the library by National
+Instruments to be downloaded from
+
+  http://www.natinst.com
+
+(works with 2.2 kernels). Unfortunately, only the LLP library supports cards
+from other companies than National Instruments.
+
+
+B) Preparing for Installation
+=============================
+
+After installing the required tools and libraries and extracting the archive
+go into the new directory called fsc2. Edit the Makefile in this subdirectory.
+
+Normally, the program and all auxiliary files will be installed in /usr/local
+(specifically /usr/local/bin, /usr/local/lib/fsc2 and /usr/local/info). To
+change this edit the first lines of the Makefile.
+
+If you use the National Instruments GPIB driver you can change the place
+where fsc2 expects the configuration file. Usually this does need to be
+changed. When running fsc2 writes a lot of information about the activity
+on the GPIB bus into a log file. You may change the default, /tmp/gpib.log,
+to something more appropriate, or even /dev/null.
+
+If you are still using the old libc (version 1) please search for the line
+
+  ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
+	  CFLAGS    += -DIS_STILL_LIBC1
+  endif
+
+and relace 'pion.anorg.chemie.uni-frankfurt.de' replaced with fully qualified
+hostname of your machine.
+
+
+Now also edit the Makefile in the subdirectory 'src'. Here you should search
+for the lines starting with the label '.PHONY:' and add a line with the
+fully qualified hostname of your machine.
+
+Now search for the comment
+
+  # Machine specific stuff: different GPIB interfaces and resource files
+  # for the graphical interface are needed...
+
+below you will find an entry for each machine fsc2 is currently running on.
+A typical entry for as machine is
+
+  pion.anorg.chemie.uni-frankfurt.de:
+	  $(MAKE) hi_res
+	  $(MAKE) gpib_old
+
+Please append a similar entry for your machine (please take care that the
+second and third line has to start with a tabulator character, not simple
+spaces). If your machine has a high resolution display, i.e. a 17" monitor
+or better keep the line
+
+	  $(MAKE) hi_res
+
+otherwise change it to
+
+	  $(MAKE) low_res
+
+If you use the LLP GPIB library keep the line
+
+	  $(MAKE) gpib_old
+
+If you use the National Instruments library change it to
+
+	  $(MAKE) gpib_ni
+
+If you use my GPIB library use instead
+
+	  $(MAKE) gpib_jtt
+
+
+You may finally also want to edit the Makefile in the subdirectory 'utils'
+to check if the location for the emacs EDL mode file suits your setup.
+
+
+C) Compiling and Installing
+===========================
+
+Go back into the main directory of the package and type 'make'. This may
+take some time to finish. A few warnings may show up during the compilation,
+especially when the documentation is created and some of the required tools
+are not available. It can even happen that make stops with an error message
+in this case. This does *not* mean that the program didn't compile
+succesfully!
+
+Please don't start make from one of the subdirectories, this is bound to
+fail.
+
+If you get more than a few warnings during the compilation stage of the
+program or the make process even fails you should send me an email with the
+output of make.
+
+When the compilation of the program succeded (even though the creation of
+the documentation failed at some stage), you can now install the program
+by typing 'make install'. Normally, you will need root privileges to do so.
+You should skip the installation if you changed the installation directory
+from '/usr/local' to './', i.e. the main directory of the package.
+
+
+D) Simple Tests
+===============
+
+The subdirectory 'edl' contains several several EDL programs that you can use
+to test fsc2 and get aquinted with the syntax. Please note that some of the
+files will not work - I didn't had time to systematically weed them out.
+There are a few programs that will even work without any devices, these are
+
+  a.edl
+  gr.edl
+  stoch.edl
+  z.edl
+  zz.edl
+  2d_endor_test.edl
+  2_td.edl
+
+Just start by typing 'fsc2 a.edl' or 'fsc2 z.edl' to get an idea about how
+fsc2 displays 1-dimensional and 2-dimensional data sets.
+
+                            Lots of fun,
+                                          Jens Thoms Toerring
+
+                                 email: Jens.Toerring@physik.fu-berlin.de
