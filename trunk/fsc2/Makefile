@@ -608,7 +608,7 @@ manifest:
 	@echo '# List of all (necessary) files of the package' > MANIFEST
 	@echo '#' >> MANIFEST
 	@echo -n '# $$Id' >> MANIFEST
-	@echo ''$$' >> MANIFEST
+	@echo '$$' >> MANIFEST
 	@echo '#' >> MANIFEST
 
 	@for dir in . Fcntl_Lock aux config doc modules scripts src \

@@ -153,27 +153,34 @@ static bool rs690_field_channel_setup( void )
 		}
 	}
 
-	strcpy( buf, "LFD0" );
-
-	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
+	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
-		sprintf( buf + strlen( buf ), ",FL%d,HEX", i );
+		sprintf( buf, "LFD,FL%d,HEX", i );
 
 		for ( j = ( 4 << rs690.timebase_type ) - 1; j >= 0; j-- )
-			if ( field_list[ i ][ j ] != -1 )
+		{
+			if ( field_list[ i ][ j ] == -1 )
 				sprintf( buf + strlen( buf ), ",%c%d",
-						 ( char ) ( 'A' + field_list[ i ][ j ] / 16 ),
-						 field_list[ i ][ j ] );
+						 ( char ) ( 'A' + free_channel / 16 ),
+						 free_channel % 16 );
 			else
 				sprintf( buf + strlen( buf ), ",%c%d",
-						 ( char ) ( 'A' + free_channel / 16 ), free_channel );
+						 ( char ) ( 'A' + field_list[ i ][ j ] / 16 ),
+						 field_list[ i ][ j ] % 16 );
+		}
+
+		strcat( buf, "!" );
+
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
 	}
 
-
-	strcat( buf, "!" );
-
-	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
-		rs690_gpib_failure( );
+	for ( ; i < 4 * NUM_HSM_CARDS; i++ )
+	{
+		sprintf( buf, "LFD,FL%d,OFF!", i );
+		if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
+			rs690_gpib_failure( );
+	}
 
 	return OK;
 }
@@ -237,8 +244,11 @@ static bool rs690_set_channels_8ns( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function calculates or a 16 ns time base function how many   */
+/* tables and loop repetition are needed to produce the current */
+/* pulse sequence.                                              */
+/*--------------------------------------------------------------*/
 
 static void rs690_calc_tables_16ns( void )
 {
@@ -279,12 +289,17 @@ static void rs690_calc_tables_16ns( void )
 }
 
 
-/*----------------------------------------------------------------*/
-/*----------------------------------------------------------------*/
+/*---------------------------------------------------------------*/
+/* Sends all commands to the device to produce the current pulse */
+/* sequence - unless this is the very first call the amount of   */
+/* data to be send is reduced by just sending data for table     */
+/* entries and loop counters that need to be changed. This also  */
+/* includes sending only data for fields that are really used.   */
+/*---------------------------------------------------------------*/
 
 static bool rs690_set_channels_16ns( void )
 {
-	char buf[ 1000 ];
+	char buf[ 100 ];
 	int i, k;
 	FS *n, *o;
 
@@ -322,7 +337,7 @@ static bool rs690_set_channels_16ns( void )
 		{
 			if ( n->len != o->len || n->fields[ i ] != o->fields[ i ] )
 			{
-				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns",
+				sprintf( buf, "LDT,T0,FL%d,%d,1,%X,%ldns!",
 						 i, k, n->fields[ i ],
 						 ( n->len % MAX_TICKS_PER_ENTRY ) * 16L );	
 
@@ -344,7 +359,7 @@ static bool rs690_init_channels_16ns( void )
 {
 	int i, j;
 	FS *n;
-	char buf[ 1000 ];
+	char buf[ 17000 ];
 
 
 	rs690_calc_tables_16ns( );
@@ -359,9 +374,9 @@ static bool rs690_init_channels_16ns( void )
 	if ( gpib_write( rs690.device, buf, strlen( buf ) ) == FAILURE )
 		rs690_gpib_failure( );
 
-	for ( i = 0; i < 4 * NUM_HSM_CARDS; i++ )
+	for ( i = 0; i <= rs690.last_used_field; i++ )
 	{
-		sprintf( buf, "LDT,T0,FL%d,0,%d", i, rs690.new_table.len );
+		sprintf( buf, "LDT0,T0,FL%d,0,%d", i, rs690.new_table.len );
 		for ( n = rs690.new_fs; n != NULL && n->len % MAX_TICKS_PER_ENTRY != 0;
 			  n = n->next )
 			sprintf( buf + strlen( buf ), ",%X,%ldns", n->fields[ i ],
