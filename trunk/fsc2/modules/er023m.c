@@ -406,7 +406,10 @@ Var *lockin_phase( Var *v )
 
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ph )
+	{
 		eprint( WARN, SET, "%s: Phase is not calibrated.\n", DEVICE_NAME );
+		compilation.error[ WARN ] -= 1;
+	}
 
 	if ( v == NULL )
 	{

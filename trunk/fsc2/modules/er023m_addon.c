@@ -177,7 +177,10 @@ Var *lockin_ma( Var *v )
 
 	if ( er023m.mf_index == UNDEF_MF_INDEX ||
 		 ! er023m.calib[ er023m.mf_index ].is_ma )
+	{
 		eprint( WARN, SET, "%s: MA is not calibrated.\n", DEVICE_NAME );
+		compilation.error[ WARN ] -= 1;
+	}
 
 	if ( v == NULL )
 	{

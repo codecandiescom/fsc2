@@ -315,7 +315,7 @@ void er023m_set_ct( int ct_mult )
 	er023m.nb = er023m_nb( );
 
 	er023m.min = 128 * ct_mult;
-	er023m.scale_factor = 2.0 / ( double ) ( 512 * ct_mult - 1 - er023m.min )
+	er023m.scale_factor = 2.0 / ( double ) ( 512 * ct_mult - 1 - er023m.min );
 }
 
 
