@@ -81,7 +81,7 @@ installed setuid'ed, so for security reasons this special user should have as
 low privileges as possible and should not be able to log into the system
 (e.g. by setting its shell in /etc/passwd to /bin/false). Most of the time
 fsc2 runs with the real users ID and group but at a few places (e.g. when
-writing to log files, creating lock files, or accessing shared memory) it
+writing to log files, creating lock files or accessing shared memory) it
 switches back to the EUID and EGID of fsc2.
 
 The next lines are for setting the GPIB library that you are going to use.
@@ -105,7 +105,7 @@ set the verbosity of the logs by changing the variable GPIB_LOG_LEVEL to
 either HIGH, MEDIUM, LOW or OFF.
 
 The final variable to be set is the email address of the person that will
-eceive bug reports and notifications if fsc2 should crash. Usually, you
+receive bug reports and notifications if fsc2 should crash. Usually, you
 should not change this variable except when you apply changes to the program.
 In this case sending these kind of mails to me obviously doesn't make too
 much sense...

@@ -395,8 +395,8 @@ pack:
 
 
 # Create zipped tarball and write it to the ZIP drive (at home or on isaak
-# also mount and unmount the ZIP drive otherwise assume that it's already
-# mounted)
+# also mount and unmount the ZIP drive, otherwise assume that it's already
+# mounted at isaak)
 
 ZIP:
 	$(MAKE) pack
