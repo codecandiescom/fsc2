@@ -278,9 +278,9 @@ expr:    E_INT_TOKEN               { if ( ! dont_exec )
 										 dont_exec--;
 	                               }
 		 expr                      { if ( ! dont_exec )
-										 $$ = $4;
+										 $$ = $7;
 		                             else if ( ! --dont_exec )
-									     $$ = $1;
+									     $$ = $4;
                                    }
 ;
 
