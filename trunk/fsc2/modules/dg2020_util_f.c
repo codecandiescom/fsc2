@@ -331,10 +331,13 @@ void dg2020_calc_padding( void )
 	if ( padding <= 0 )
 	{
 		if ( padding < 0 )
+		{
+			char *t = T_strdup( dg2020_pticks( dg2020.max_seq_len ) );
 			eprint( SEVERE, "%s: Pulse pattern is %s long and thus longer "
 					"than the repeat time of %s.", pulser_struct.name,
-					dg2020_pticks( dg2020.max_seq_len ),
-					dg2020_pticks( dg2020.repeat_time ) );
+					t, dg2020_pticks( dg2020.repeat_time ) );
+			T_free( t );
+		}
 		dg2020.mem_size = dg2020.max_seq_len + 1;
 		return;
 	}

@@ -28,7 +28,7 @@ Ticks dg2020_double2ticks( double time )
 
 	if ( fabs( ticks - lround( ticks ) ) > 1.0e-2 )
 	{
-		char *t = T_strdup( dg2020_ptime( time ) );
+		const char *t = T_strdup( dg2020_ptime( time ) );
 		eprint( FATAL, "%s:%ld: %s: Specified time of %s is not an integer "
 				"multiple of the pulser time base of %s.", Fname, Lc,
 				pulser_struct.name, t, dg2020_ptime( dg2020.timebase ) );
@@ -274,10 +274,13 @@ void dg2020_calc_padding( void )
 	if ( padding <= 0 )
 	{
 		if ( padding < 0 )
+		{
+			const char *t = dg2020_pticks( dg2020.max_seq_len );
 			eprint( SEVERE, "%s: Pulse pattern is %s long and thus longer "
 					"than the repeat time of %s.", pulser_struct.name,
-					dg2020_pticks( dg2020.max_seq_len ),
-					dg2020_pticks( dg2020.repeat_time ) );
+					t, dg2020_pticks( dg2020.repeat_time ) );
+			T_free( t );
+		}
 		dg2020.mem_size = dg2020.max_seq_len + 1;
 		return;
 	}
