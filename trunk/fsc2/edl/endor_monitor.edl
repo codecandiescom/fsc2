@@ -13,7 +13,7 @@ old_freq;
 
 step_freq     =  20 kHz;
 min_step_freq =   5 kHz;
-max_step_freq = 500 kHz;
+max_step_freq = 250 kHz;
 
 atten = -100 db;
 
@@ -97,9 +97,10 @@ FOREVER {
 		atten = new_atten;
 	}
 
-	/* If pause is on go back to start after short sleeping period */
+	/* If pause is on or frequency has been set via slider go back to start
+	   after short sleeping period */
 
-	IF button_state( B5 ) {
+	IF button_state( B5 ) | old_freq != freq {
 		wait( 0.5 s );
 		NEXT;
 	}
