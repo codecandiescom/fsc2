@@ -954,12 +954,12 @@ type as an integer number.
 
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
-If the modulation type has been set the modulation source can be set
-directly via this function. It accepts one of the following strings:
-@code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"},
-@code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"},
-@code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"}
-or @code{"400"}. Alternatively, the number @code{0} can be specified for
+If the modulation type has been set bedore the modulation source can be
+set directly via this function. It accepts one of the following strings:
+@code{"INT 1kHz"}, @code{"INT 1 kHz"}, @code{"INT 1"}, @code{"1kHz"},
+@code{"1 kHz"}, @code{"1"}, @code{"INT 400Hz"}, @code{"INT 400 Hz"},
+@code{"INT 400"}, @code{"400Hz"}, @code{"400 Hz"} or
+@code{"400"}. Alternatively, the number @code{0} can be specified for
 external AC coupled modulation source, @code{1} for an external DC
 coupled source, @code{2} for the internally generated @w{1 kHz} source
 and @code{3} for the internal @w{400 Hz} source.
