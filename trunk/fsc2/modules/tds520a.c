@@ -609,7 +609,7 @@ Var *digitizer_get_curve( Var *v )
 Var *digitizer_get_amplitude( Var *v )
 {
 	WINDOW *w;
-	int ch, i;
+	int ch;
 	Var *nv;
 
 

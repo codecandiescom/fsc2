@@ -758,7 +758,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w )
     if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n" ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	assert( channel >= 0 && channel < TDS754A_AUX1 );
+	assert( channel >= 0 && channel < TDS754A_AUX );
 
 	/* Set channel (if the channel is not already set) */
 
