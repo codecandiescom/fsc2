@@ -1752,14 +1752,15 @@ of an @code{EDL} program.
 
 @anchor{pulser_show_pulses}
 @item pulser_show_pulses()
-@findex{pulser_show_pulses} This function exists for the Berlin X-band
-pulser modules @code{dg2020_b} and @code{ep385} only. It allows to view
-the pulses as they become set during the test run. If this function is
-called an additional window pops up after the end of the test run which
-shows the position of all pulses at the start of the experiment. By
-using the (fast) forward and backward) buttons (or the up and down arrow
-keys (with and without the @code{<SHIFT>} key, the @w{@code{<PAGE UP>}}
-and @w{@code{<PAGE DOWN>}} as well as the @code{<HOME>} and @code{>END}>
+@findex{pulser_show_pulses}
+This function exists for the Berlin X-band pulser modules
+@code{dg2020_b} and @code{ep385} only. It allows to view the pulses as
+they become set during the test run. If this function is called an
+additional window pops up after the end of the test run which shows the
+position of all pulses at the start of the experiment. By using the
+(fast) forward and backward) buttons (or the up and down arrow keys
+(with and without the @code{<SHIFT>} key, the @w{@code{<PAGE UP>}} and
+@w{@code{<PAGE DOWN>}} as well as the @code{<HOME>} and @code{>END}>
 keys) you may view all pulse settings during the experiment (as far as
 they can be determined during the test run).
 
@@ -1774,10 +1775,11 @@ of an @code{EDL} program.
 @anchor{pulser_dump_pulses}
 @item pulser_dump_pulses()
 @findex{pulser_dump_pulses}
-@findex{pulser_show_pulses} This function exists for the Berlin X-band
-pulser modules @code{dg2020_b} and @code{ep385} only. It requests the
-user to select a file name and then writes all pulse settings during the
-test run into the file in a format suitable to be used as input for the
+@findex{pulser_show_pulses}
+This function exists for the Berlin X-band pulser modules
+@code{dg2020_b} and @code{ep385} only. It requests the user to select a
+file name and then writes all pulse settings during the test run into
+the file in a format suitable to be used as input for the
 @code{fsc2_pulses} utility.
 
 This function can only be called during the @code{PREPARATIONS} section
