@@ -28,8 +28,8 @@ int main( void )
 
 	if ( sizeof( f.l_type ) == sizeof( char ) )
 		fprintf( fp, "#define LTYPE_TYPE      char\n" );
-	else if ( sizeof( f.l_type ) == sizeof( short int ) )
-		fprintf( fp, "#define LTYPE_TYPE      short int\n" );
+	else if ( sizeof( f.l_type ) == sizeof( short ) )
+		fprintf( fp, "#define LTYPE_TYPE      short\n" );
 	else if ( sizeof( f.l_type ) == sizeof( int ) )
 		fprintf( fp, "#define LTYPE_TYPE      int\n" );
 	else if ( sizeof( f.l_type ) == sizeof( long ) )
@@ -45,8 +45,8 @@ int main( void )
 
 	if ( sizeof( f.l_whence ) == sizeof( char ) )
 		fprintf( fp, "#define LWHENCE_TYPE    char\n" );
-	else if ( sizeof( f.l_whence ) == sizeof( short int ) )
-		fprintf( fp, "#define LWHENCE_TYPE    short int\n" );
+	else if ( sizeof( f.l_whence ) == sizeof( short ) )
+		fprintf( fp, "#define LWHENCE_TYPE    short\n" );
 	else if ( sizeof( f.l_whence ) == sizeof( int ) )
 		fprintf( fp, "#define LWHENCE_TYPE    int\n" );
 	else if ( sizeof( f.l_whence ) == sizeof( long ) )
@@ -62,8 +62,8 @@ int main( void )
 
 	if ( sizeof( f.l_start ) == sizeof( char ) )
 		fprintf( fp, "#define LSTART_TYPE     char\n" );
-	else if ( sizeof( f.l_start ) == sizeof( short int ) )
-		fprintf( fp, "#define LSTART_TYPE     short int\n" );
+	else if ( sizeof( f.l_start ) == sizeof( short ) )
+		fprintf( fp, "#define LSTART_TYPE     short\n" );
 	else if ( sizeof( f.l_start ) == sizeof( int ) )
 		fprintf( fp, "#define LSTART_TYPE     int\n" );
 	else if ( sizeof( f.l_start ) == sizeof( long ) )
@@ -79,8 +79,8 @@ int main( void )
 
 	if ( sizeof( f.l_len ) == sizeof( char ) )
 		fprintf( fp, "#define LLEN_TYPE       char\n" );
-	else if ( sizeof( f.l_len ) == sizeof( short int ) )
-		fprintf( fp, "#define LLEN_TYPE       short int\n" );
+	else if ( sizeof( f.l_len ) == sizeof( short ) )
+		fprintf( fp, "#define LLEN_TYPE       short\n" );
 	else if ( sizeof( f.l_len ) == sizeof( int ) )
 		fprintf( fp, "#define LLEN_TYPE       int\n" );
 	else if ( sizeof( f.l_len ) == sizeof( long ) )
@@ -96,8 +96,8 @@ int main( void )
 
 	if ( sizeof( f.l_pid ) == sizeof( char ) )
 		fprintf( fp, "#define LPID_TYPE       char\n" );
-	else if ( sizeof( f.l_pid ) == sizeof( short int ) )
-		fprintf( fp, "#define LPID_TYPE       short int\n" );
+	else if ( sizeof( f.l_pid ) == sizeof( short ) )
+		fprintf( fp, "#define LPID_TYPE       short\n" );
 	else if ( sizeof( f.l_pid ) == sizeof( int ) )
 		fprintf( fp, "#define LPID_TYPE       int\n" );
 	else if ( sizeof( f.l_pid ) == sizeof( long ) )
