@@ -99,7 +99,7 @@ GPIB_DEV *gpib_dev_list;        /* list of symbolic names of devices etc. */
 /* of the log file remains unchanged!).                                    */
 /* In order to make opening the log file with write access work for all    */
 /* users it should be created previously and be given the proper access    */
-/* permissions, i.e. r and w for everybody.                                */
+/* permissions, i.e. r and w for everyone .                                */
 /* ->                                                                      */
 /*  * Pointer to the name of log file - if the pointer is NULL or does not */
 /*    point to a non-empty string the default log file name defined by     */
