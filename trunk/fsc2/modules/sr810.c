@@ -71,6 +71,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Declaration of exported functions */
 
 int sr810_init_hook( void );
+int sr810_test_hook( void );
 int sr810_exp_hook( void );
 int sr810_end_of_exp_hook( void );
 void sr810_exit_hook( void );
@@ -100,12 +101,12 @@ int last_DAC_port = 4;
 typedef struct
 {
 	int device;
-	int Sens;
-	bool Sens_warn;
+	int sens_index;
+	bool sens_warn;
 	double phase;
 	bool is_phase;
 	int tc_index;
-	bool TC_warn;
+	bool tc_warn;
 	double mod_freq;
 	bool is_mod_freq;
 	double mod_level;
@@ -117,8 +118,11 @@ typedef struct
 
 
 static SR810 sr810;
-static SR810 sr810_store;
+static SR810 sr810_stored;
 
+
+#define UNDEF_SENS_INDEX -1
+#define UNDEF_TC_INDEX   -1
 
 /* Lists of valid sensitivity settings */
 
@@ -146,7 +150,7 @@ static void sr810_get_xy_data( double *data, long *channels,
 static double sr810_get_adc_data( long channel );
 static double sr810_set_dac_data( long channel, double voltage );
 static double sr810_get_sens( void );
-static void sr810_set_sens( int Sens );
+static void sr810_set_sens( int sens_index );
 static double sr810_get_tc( void );
 static void sr810_set_tc( int tc_index );
 static double sr810_get_phase( void );
@@ -180,21 +184,29 @@ int sr810_init_hook( void )
 
 	sr810.device = -1;
 
-	sr810.Sens = -1;             /* no sensitivity has to be set at start of */
-	sr810.Sens_warn = UNSET;     /* experiment and no warning concerning the */
-                                 /* sensitivity setting has been printed yet */
-	sr810.is_phase = UNSET;      /* no phase has to be set at start of the */
-	                             /* experiment */
-	sr810.tc_index = -1;         /* no time constant has to be set at the */
-	sr810.TC_warn = UNSET;       /* start of the experiment and no warning */
-	                             /* concerning it has been printed yet */
-	sr810.is_mod_freq = UNSET;   /* no modulation frequency has to be set */
-	sr810.is_harmonic = UNSET;   /* no harmonics has to be set */
-	sr810.is_mod_level = UNSET;  /* no modulation level has to b set */
+	sr810.sens_index   = UNDEF_SENS_INDEX;
+	sr810.sens_warn    = UNSET;
+	sr810.is_phase     = UNSET;
+	sr810.tc_index     = UNDEF_TC_INDEX;
+	sr810.tc_warn      = UNSET;
+	sr810.is_mod_freq  = UNSET;
+	sr810.is_harmonic  = UNSET;
+	sr810.is_mod_level = UNSET;
 
 	for ( i = 0; i < NUM_DAC_PORTS; i++ )
 		sr810.dac_voltage[ i ] = 0.0;
 
+	return 1;
+}
+
+
+/*-----------------------------------*/
+/* Test hook function for the module */
+/*-----------------------------------*/
+
+int sr810_test_hook( void )
+{
+	memcpy( &sr810_stored, &sr810, sizeof( SR810 ) );
 	return 1;
 }
 
@@ -207,7 +219,7 @@ int sr810_exp_hook( void )
 {
 	/* Store current state and initialize the lock-in */
 
-	memcpy( &sr810_store, &sr810, sizeof( SR810 ) );
+	memcpy( &sr810_stored, &sr810, sizeof( SR810 ) );
 
 	if ( ! sr810_init( DEVICE_NAME ) )
 	{
@@ -231,7 +243,7 @@ int sr810_end_of_exp_hook( void )
 	if ( sr810.device >= 0 )
 		gpib_local( sr810.device );
 
-	memcpy( &sr810, &sr810_store, sizeof( SR810 ) );
+	memcpy( &sr810, &sr810_stored, sizeof( SR810 ) );
 	sr810.device = -1;
 
 	return 1;
@@ -278,8 +290,9 @@ Var *lockin_get_data( Var *v )
 
 	if ( v == NULL )
 	{
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, 0.0 );
+
+		if ( FSC2_MODE == TEST )           /* return dummy value in test run */
+			return vars_push( FLOAT_VAR, data[ 0 ] );
 		else
 			return vars_push( FLOAT_VAR, sr810_get_data( ) );
 	}
@@ -316,8 +329,13 @@ Var *lockin_get_data( Var *v )
 			;
 	}
 
-	if ( TEST_RUN )
-		return vars_push( FLOAT_ARR, data, num_channels );
+	if ( FSC2_MODE == TEST )
+	{
+		if ( num_channels == 1 )
+			return vars_push( FLOAT_VAR, data[ 0 ] );
+		else
+			return vars_push( FLOAT_ARR, data, num_channels );
+	}
 
 	/* If we need less than two channels we've got to pass the function an
 	   extra value, it expects at least 2 - just take the next channel */
@@ -364,7 +382,7 @@ Var *lockin_get_adc_data( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )                  /* return dummy value in test run */
+	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
 		return vars_push( FLOAT_VAR, SR810_TEST_ADC_VOLTAGE );
 
 	return vars_push( FLOAT_VAR, sr810_get_adc_data( port ) );
@@ -412,7 +430,17 @@ Var *lockin_dac_voltage( Var *v )
 	}
 
 	if ( v == NULL )
+	{
+		if ( FSC2_MODE == PREPARATION )
+		{
+			eprint( FATAL, SET, "%s: Function %s() with only one argument can "
+					"only be used in the EXPERIMENT section.\n",
+					DEVICE_NAME, Cur_Func );
+			THROW( EXCEPTION )
+		}
+
 		return vars_push( FLOAT_VAR, sr810.dac_voltage[ port - 1 ] );
+	}
 
 	/* Get and check the voltage */
 
@@ -438,7 +466,7 @@ Var *lockin_dac_voltage( Var *v )
 	
 	sr810.dac_voltage[ port - 1 ] = voltage;
 
-	if ( TEST_RUN || I_am == PARENT )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, voltage );
 
 	return vars_push( FLOAT_VAR, sr810_set_dac_data( port, voltage ) );
@@ -454,26 +482,28 @@ Var *lockin_dac_voltage( Var *v )
 Var *lockin_sensitivity( Var *v )
 {
 	double sens;
-	int Sens = -1;
+	int sens_index = UNDEF_SENS_INDEX;
 	unsigned int i;
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )                  /* return dummy value in test run */
-			return vars_push( FLOAT_VAR, SR810_TEST_SENSITIVITY );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
-			return vars_push( FLOAT_VAR, sr810_get_sens( ) );
+
+			case TEST :
+				return vars_push( FLOAT_VAR,
+								  sr810.sens_index == UNDEF_SENS_INDEX ?
+								  SR810_TEST_SENSITIVITY :
+								  sens_list[ sr810.sens_index ] );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr810_get_sens( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -506,63 +536,63 @@ Var *lockin_sensitivity( Var *v )
 	for ( i = 0; i < SENS_ENTRIES - 2; i++ )
 		if ( sens >= sens_list[ i ] && sens <= sens_list[ i + 1 ] )
 		{
-			Sens = i + ( ( sens_list[ i ] / sens > sens /
-						   sens_list[ i + 1 ] ) ? 0 : 1 );
+			sens_index = i + ( ( sens_list[ i ] / sens > sens /
+								 sens_list[ i + 1 ] ) ? 0 : 1 );
 			break;
 		}
 
-	if ( Sens < 0 && sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
-		Sens = SENS_ENTRIES - 1;
+	if ( sens_index == UNDEF_SENS_INDEX &&
+		 sens < sens_list[ SENS_ENTRIES - 1 ] * 1.01 )
+		sens_index = SENS_ENTRIES - 1;
 
-	if ( Sens >= 0 &&                                    /* value found ? */
-		 fabs( sens - sens_list[ Sens ] ) > sens * 1.0e-2 && /* error > 1% ? */
-		 ! sr810.Sens_warn  )                            /* no warning yet ? */
+	if ( sens_index >= 0 &&                                 /* value found ? */
+		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
+		 ! sr810.sens_warn  )                            /* no warning yet ? */
 	{
 		if ( sens >= 1.0e-3 )
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf mV, "
 					"using %.0lf mV instead.\n", DEVICE_NAME,
-					sens * 1.0e3, sens_list[ Sens ] * 1.0e3 );
+					sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
 		else if ( sens >= 1.0e-6 ) 
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf uV, "
 					"using %.0lf uV instead.\n", DEVICE_NAME,
-					sens * 1.0e6, sens_list[ Sens ] * 1.0e6 );
+					sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
 		else
 			eprint( WARN, SET, "%s: Can't set sensitivity to %.0lf nV, "
 					"using %.0lf nV instead.\n", DEVICE_NAME,
-					sens * 1.0e9, sens_list[ Sens ] * 1.0e9 );
-		sr810.Sens_warn = SET;
+					sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+		sr810.sens_warn = SET;
 	}
 
-	if ( Sens < 0 )                                   /* not found yet ? */
+	if ( sens_index == UNDEF_SENS_INDEX )                 /* not found yet ? */
 	{
 		if ( sens < sens_list[ 0 ] )
-			Sens = 0;
+			sens_index = 0;
 		else
-		    Sens = SENS_ENTRIES - 1;
+		    sens_index = SENS_ENTRIES - 1;
 
-		if ( ! sr810.Sens_warn )                      /* no warn message yet */
+		if ( ! sr810.sens_warn )                      /* no warn message yet */
 		{
 			if ( sens >= 1.0 )
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf mV is too "
 						"low, using %.0lf mV instead.\n",
- 						DEVICE_NAME, sens * 1.0e3, sens_list[ Sens ] * 1.0e3 );
+ 						DEVICE_NAME, sens * 1.0e3,
+						sens_list[ sens_index ] * 1.0e3 );
 			else
 				eprint( WARN, SET, "%s: Sensitivity of %.0lf nV is too "
 						"high, using %.0lf nV instead.\n",
-						DEVICE_NAME, sens * 1.0e9, sens_list[ Sens ] * 1.0e9 );
-			sr810.Sens_warn = SET;
+						DEVICE_NAME, sens * 1.0e9,
+						sens_list[ sens_index ] * 1.0e9 );
+			sr810.sens_warn = SET;
 		}
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr810_set_sens( Sens );
-		else                         /* if called in a preparation sections */ 
-			sr810.Sens = Sens;
-	}
+	sr810.sens_index = sens_index;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		sr810_set_sens( sens_index );
 	
-	return vars_push( FLOAT_VAR, sens_list[ Sens ] );
+	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
 
@@ -575,26 +605,27 @@ Var *lockin_sensitivity( Var *v )
 Var *lockin_time_constant( Var *v )
 {
 	double tc;
-	int tc_index = -1;
+	int tc_index = UNDEF_SENS_INDEX;
 	unsigned int i;
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_TIME_CONSTANT );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
+
+			case TEST :
+				return vars_push( FLOAT_VAR, sr810.tc_index == UNDEF_TC_INDEX ?
+								  SR810_TEST_TIME_CONSTANT :
+								  tc_list[ sr810.tc_index ] );
+
+			case EXPERIMENT :
 			return vars_push( FLOAT_VAR, sr810_get_tc( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -634,7 +665,7 @@ Var *lockin_time_constant( Var *v )
 
 	if ( tc_index >= 0 &&                                   /* value found ? */
 		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&   /* error > 1% ? */
-		 ! sr810.TC_warn )                          /* no warning yet ? */
+		 ! sr810.tc_warn )                               /* no warning yet ? */
 	{
 		if ( tc > 1.0e3 )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf ks,"
@@ -652,17 +683,17 @@ Var *lockin_time_constant( Var *v )
 			eprint( WARN, SET, "%s: Can't set time constant to %.0lf us,"
 					" using %.0lf us instead.\n", DEVICE_NAME,
 					tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
-		sr810.TC_warn = SET;
+		sr810.tc_warn = SET;
 	}
 	
-	if ( tc_index < 0 )                                  /* not found yet ? */
+	if ( tc_index == UNDEF_TC_INDEX )                     /* not found yet ? */
 	{
 		if ( tc < tc_list[ 0 ] )
 			tc_index = 0;
 		else
 			tc_index = TC_ENTRIES - 1;
 
-		if ( ! sr810.TC_warn )                      /* no warn message yet ? */
+		if ( ! sr810.tc_warn )                      /* no warn message yet ? */
 		{
 			if ( tc >= 3.0e4 )
 				eprint( WARN, SET, "%s: Time constant of %.0lf ks is too"
@@ -672,17 +703,13 @@ Var *lockin_time_constant( Var *v )
 				eprint( WARN, SET, "%s: Time constant of %.0lf us is too"
 						" small, using %.0lf us instead.\n", DEVICE_NAME,
 						tc * 1.0e6, tc_list[ tc_index ] * 1.0e6 );
-			sr810.TC_warn = SET;
+			sr810.tc_warn = SET;
 		}
 	}
 
-	if ( ! TEST_RUN )
-	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			sr810_set_tc( tc_index );
-		else                         /* if called in a preparation sections */ 
-			sr810.tc_index = tc_index;
-	}
+	sr810.tc_index = tc_index;
+	if ( FSC2_MODE == EXPERIMENT )
+		sr810_set_tc( tc_index );
 	
 	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
@@ -704,21 +731,21 @@ Var *lockin_phase( Var *v )
 	/* Without an argument just return current phase settting */
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_PHASE );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
+
+			case TEST :
+				return vars_push( FLOAT_VAR, sr810.is_phase ?
+								  sr810.phase : SR810_TEST_PHASE );
+
+			case EXPERIMENT :
 			return vars_push( FLOAT_VAR, sr810_get_phase( ) );
 		}
-	}
 
 	/* Otherwise set phase to value passed to the function */
 
@@ -748,19 +775,99 @@ Var *lockin_phase( Var *v )
 		phase = 360.0 - phase;
 	}
 
-	if ( TEST_RUN )
+	sr810.phase    = phase;
+	sr810.is_phase = SET;
+
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, phase );
-	else
+
+	return vars_push( FLOAT_VAR, sr810_set_phase( phase ) );
+}
+
+
+/*-----------------------------------------*/
+/* Sets or returns the harmonic to be used */
+/*-----------------------------------------*/
+
+Var *lockin_harmonic( Var *v )
+{
+	long harm;
+	double freq;
+
+
+	/* Without an argument just return current harmonic settting */
+
+	if ( v == NULL )
 	{
-		if ( I_am == CHILD )         /* if called in EXPERIMENT section */
-			return vars_push( FLOAT_VAR, sr810_set_phase( phase ) );
-		else                         /* if called in a preparation sections */ 
-		{
-			sr810.phase    = phase;
-			sr810.is_phase = SET;
-			return vars_push( FLOAT_VAR, phase );
-		}
+		if ( FSC2_MODE == TEST )
+			return vars_push( INT_VAR, sr810.is_harmonic ? 
+							  sr810.is_harmonic : SR810_TEST_HARMONIC );
+		else
+			return vars_push( INT_VAR, sr810_get_harmonic( ) );
 	}
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+	if ( v->type == FLOAT_VAR )
+	{
+		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
+				DEVICE_NAME );
+		harm = ( long ) v->val.dval;
+	}
+	else
+		harm = v->val.lval;
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
+
+		while ( ( v = vars_pop( v ) ) != NULL )
+			;
+	}
+
+	if ( FSC2_MODE == TEST )
+		freq = MIN_MOD_FREQ;
+	else
+		freq = sr810_get_mod_freq( );
+
+	if ( harm > MAX_HARMONIC || harm < MIN_HARMONIC )
+	{
+		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
+				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
+		THROW( EXCEPTION )
+	}
+
+	if ( freq > MAX_MOD_FREQ / ( double ) harm )
+	{
+		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
+				"harmonic set to %ld is not within valid range "
+				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
+				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
+		THROW( EXCEPTION )
+	}
+
+	sr810.harmonic = harm;
+	sr810.is_harmonic = SET;
+
+	if ( FSC2_MODE != EXPERIMENT )
+		return vars_push( INT_VAR, harm );
+
+	return vars_push( INT_VAR, sr810_set_harmonic( harm ) );
+}
+
+
+/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+
+Var *lockin_ref_mode( Var *v )
+{
+	v = v;
+
+
+	if ( FSC2_MODE == TEST )
+		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
+
+	return vars_push( INT_VAR, sr810_get_mod_mode( ) );
 }
 
 
@@ -777,12 +884,21 @@ Var *lockin_ref_freq( Var *v )
 	/* Without an argument just return current frequency settting */
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_MOD_FREQUENCY );
-		else
-			return vars_push( FLOAT_VAR, sr810_get_mod_freq( ) );
-	}
+		switch (FSC2_MODE )
+		{
+			case PREPARATION :
+				eprint( FATAL, SET, "%s: Function %s() with no argument can "
+						"only be used in the EXPERIMENT section.\n",
+						DEVICE_NAME, Cur_Func );
+				THROW( EXCEPTION )
+
+			case TEST :
+				return vars_push( FLOAT_VAR, sr810.is_mod_freq ?
+								  sr810.mod_freq : SR810_TEST_MOD_FREQUENCY );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr810_get_mod_freq( ) );
+		}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -799,14 +915,14 @@ Var *lockin_ref_freq( Var *v )
 			;
 	}
 	
-	if ( ! TEST_RUN && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
+	if ( FSC2_MODE != TEST && sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
 				"modulation source isn't internal.\n", DEVICE_NAME );
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE == TEST )
 		harm = sr810.is_harmonic ? sr810.harmonic : 1;
 	else
 		harm = sr810_get_harmonic( );
@@ -825,93 +941,10 @@ Var *lockin_ref_freq( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, freq );
 
 	return vars_push( FLOAT_VAR, sr810_set_mod_freq( freq ) );
-}
-
-
-/*-----------------------------------------*/
-/* Sets or returns the harmonic to be used */
-/*-----------------------------------------*/
-
-Var *lockin_harmonic( Var *v )
-{
-	long harm;
-	double freq;
-
-
-	/* Without an argument just return current phase settting */
-
-	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( INT_VAR, sr810.is_harmonic ? 
-							  sr810.is_harmonic : SR810_TEST_HARMONIC );
-		else
-			return vars_push( INT_VAR, sr810_get_harmonic( ) );
-	}
-
-	vars_check( v, INT_VAR | FLOAT_VAR );
-	if ( v->type == FLOAT_VAR )
-	{
-		eprint( WARN, SET, "%s: Float value used as harmonic.\n",
-				DEVICE_NAME );
-		harm = ( long ) v->val.dval;
-	}
-	else
-		harm = v->val.lval;
-	
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-
-		while ( ( v = vars_pop( v ) ) != NULL )
-			;
-	}
-
-	if ( TEST_RUN )
-		freq = MIN_MOD_FREQ;
-	else
-		freq = sr810_get_mod_freq( );
-
-
-	if ( harm > MAX_HARMONIC || harm < MIN_HARMONIC )
-	{
-		eprint( FATAL, SET, "%s: Harmonic of %ld not within allowed range of "
-				"%ld-%ld.\n", DEVICE_NAME, harm, MIN_HARMONIC, MAX_HARMONIC );
-		THROW( EXCEPTION )
-	}
-
-	if ( freq > MAX_MOD_FREQ / ( double ) harm )
-	{
-		eprint( FATAL, SET, "%s: Modulation frequency of %f Hz with "
-				"harmonic set to %ld is not within valid range "
-				"(%f Hz - %f kHz).\n", DEVICE_NAME, freq, harm,
-				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
-		THROW( EXCEPTION )
-	}
-
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, harm );
-
-	return vars_push( INT_VAR, sr810_set_harmonic( harm ) );
-}
-
-
-/*------------------------------------------------------------------*/
-/*------------------------------------------------------------------*/
-
-Var *lockin_ref_mode( Var *v )
-{
-	v = v;
-
-
-	if ( TEST_RUN )
-		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
-	return vars_push( INT_VAR, sr810_get_mod_mode( ) );
 }
 
 
@@ -924,22 +957,21 @@ Var *lockin_ref_level( Var *v )
 
 
 	if ( v == NULL )
-	{
-		if ( TEST_RUN )
-			return vars_push( FLOAT_VAR, SR810_TEST_MOD_LEVEL );
-		else
+		switch ( FSC2_MODE )
 		{
-			if ( I_am == PARENT )
-			{
+			case PREPARATION :
 				eprint( FATAL, SET, "%s: Function %s() with no argument can "
 						"only be used in the EXPERIMENT section.\n",
 						DEVICE_NAME, Cur_Func );
 				THROW( EXCEPTION )
-			}
 
-			return vars_push( FLOAT_VAR, sr810_get_mod_level( ) );
+			case TEST :
+				return vars_push( FLOAT_VAR, sr810.is_mod_level ?
+								  sr810.mod_level : SR810_TEST_MOD_LEVEL );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, sr810_get_mod_level( ) );
 		}
-	}
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
@@ -964,17 +996,13 @@ Var *lockin_ref_level( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	if ( TEST_RUN )
+	sr810.mod_level = level;
+	sr810.is_mod_level = SET;
+
+	if ( FSC2_MODE != EXPERIMENT )
 		return vars_push( FLOAT_VAR, level );
 
-	if ( I_am == CHILD )                /* if called in EXPERIMENT section */
-		return vars_push( FLOAT_VAR, sr810_set_mod_level( level ) );
-	else                                /* if called in preparation sections */
-	{
-		sr810.mod_level = level;
-		sr810.is_mod_level = SET;
-		return vars_push( FLOAT_VAR, level );
-	}
+	return vars_push( FLOAT_VAR, sr810_set_mod_level( level ) );
 }
 
 
@@ -1020,7 +1048,7 @@ Var *lockin_lock_keyboard( Var *v )
 			;
 	}
 	
-	if ( ! TEST_RUN )
+	if ( FSC2_MODE == EXPERIMENT )
 		sr810_lock_state( lock );
 
 	return vars_push( INT_VAR, lock ? 1 : 0);
@@ -1080,16 +1108,22 @@ static bool sr810_init( const char *name )
 	   preparation sections only the value was stored and we have to do the
 	   actual setting now because the lock-in could not be accessed before */
 
-	if ( sr810.Sens != -1 )
-		sr810_set_sens( sr810.Sens );
+	if ( sr810.sens_index != UNDEF_SENS_INDEX )
+		sr810_set_sens( sr810.sens_index );
 	if ( sr810.is_phase )
 		sr810_set_phase( sr810.phase );
-	if ( sr810.tc_index != -1 )
+	if ( sr810.tc_index != UNDEF_TC_INDEX )
 		sr810_set_tc( sr810.tc_index );
 	if ( sr810.is_harmonic )
 		sr810_set_harmonic( sr810.harmonic );
 	if ( sr810.is_mod_freq )
-		sr810_set_mod_freq( sr810.mod_freq );
+	{
+		if ( sr810_get_mod_mode( ) != MOD_MODE_INTERNAL )
+			sr810_set_mod_freq( sr810.mod_freq );
+		else
+			eprint( SEVERE, UNSET, "%s: Can't set modulation frequency, "
+					"lock-in uses internal modulation.\n", DEVICE_NAME );
+	}
 	if ( sr810.is_mod_level )
 		sr810_set_mod_level( sr810.mod_level );
 
@@ -1249,12 +1283,12 @@ static double sr810_get_sens( void )
 /* listed in the global array 'sens_list' at the start of the file.     */
 /*----------------------------------------------------------------------*/
 
-static void sr810_set_sens( int Sens )
+static void sr810_set_sens( int sens_index )
 {
 	char buffer[ 20 ];
 
 
-	sprintf( buffer, "SENS %d\n", Sens );
+	sprintf( buffer, "SENS %d\n", sens_index );
 	if ( gpib_write( sr810.device, buffer, strlen( buffer ) ) == FAILURE )
 		sr810_failure( );
 }
