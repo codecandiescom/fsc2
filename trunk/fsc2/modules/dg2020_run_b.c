@@ -154,16 +154,18 @@ void dg2020_do_checks( FUNCTION *f )
 		}
 	}
 
-	if ( dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used &&
+	if ( f->self == PULSER_CHANNEL_TWT_GATE &&
+		 dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used &&
 		 dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used )
 		dg2020_defense_twt_check( );
 }
 
 
-/*----------------------------------------------------------------------*/
-/* If there are both TWT_GATE pulses and DEFENSE pulses check that they */
-/* won't get to near to each other to avoid burning the diode or mixer. */
-/*----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* If there are both TWT_GATE pulses and DEFENSE pulses check that */
+/* they won't get to near to each other to avoid destroying the    */
+/* diode or the mixer inadvertently.                               */
+/*-----------------------------------------------------------------*/
 
 static void dg2020_defense_twt_check( void )
 {
