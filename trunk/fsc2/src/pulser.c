@@ -780,7 +780,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 					"function already have been defined.\n", Fname, Lc,
 					types[ type ], func == 0 ?
 					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
 	}
@@ -791,7 +791,7 @@ void p_phs_setup( int func, int type, int pod, long val )
 				"function already has been defined.\n", Fname, Lc, pod + 1,
 				types[ type ], func == 0 ?
 				Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-				Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+				Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 		THROW( EXCEPTION );
 	}
 
@@ -828,7 +828,7 @@ void p_phs_end( int func )
 				eprint( FATAL, "%s:%ld: Incomplete data for phase setup of "
 						"function `%s'.\n", Fname, Lc, func == 0 ?
 						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 				THROW( EXCEPTION );
 			}
 
@@ -846,12 +846,13 @@ void p_phs_end( int func )
 			eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
 					"function `%s'.\n", Fname, Lc, func == 0 ?
 					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_1 ] );
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
 			THROW( EXCEPTION );
 		}
 	}
 
-	( *pulser_struct.setup_phase )( func, phs[ func ] );
+	( *pulser_struct.setup_phase )( func == 0 ? PULSER_CHANNEL_PHASE_1 : 
+									PULSER_CHANNEL_PHASE_2, phs[ func ] );
 
 	Cur_PHS = -1;
 }
