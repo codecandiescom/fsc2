@@ -72,7 +72,7 @@ void dg2020_basic_pulse_check( void )
 
 		/* Check start position and pulse length */
 
-		if ( ! p->is_pos || ! p->is_len )
+		if ( ! p->is_pos || ! p->is_len || p->len == 0 )
 			p->is_active = UNSET;
 
 		/* Check that the pulse fits into the pulsers memory
@@ -87,12 +87,12 @@ void dg2020_basic_pulse_check( void )
 		   leads to an obviously endless high pulse, while not setting the
 		   first bit keeps the pulser from working at all...) */
 
-		if ( p->is_pos && p->is_len &&
+		if ( p->is_pos && p->is_len && p->len != 0 &&
 			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
 		{
 			eprint( FATAL, "%s: Pulse %ld does not fit into the pulsers "
-					"memory. Maybe, you could try a longer pulser time "
-					"base.\n", pulser_struct.name, p->num );
+					"memory. You could try a longer pulser time base.\n",
+					pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
 

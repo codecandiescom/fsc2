@@ -335,18 +335,18 @@ void dg2020_commit( FUNCTION * f, bool flag )
 
 		/* For the channels used by the pulse enter the old and new position
 		   in the corresponding memory representations of the channels and
-		   mark the channels as needing update */
+		   mark the channel as needing update */
 
 		for ( j = 0; j < f->pc_len; j++ )
 		{
 			if ( p->channel[ j ] == NULL )        /* skip unused channels */
 				continue;
 				
-			if ( p->is_old_pos || p->is_old_len )
+			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
 				dg2020_set( p->channel[ j ]->old,
 							p->is_old_pos ? p->old_pos : p->pos,
 							p->is_old_len ? p->old_len : p->len, f->delay );
-			if ( p->is_pos && p->is_len )
+			if ( p->is_pos && p->is_len && p->len != 0 )
 				dg2020_set( p->channel[ j ]->new, p->pos, p->len, f->delay );
 
 			p->channel[ j ]->needs_update = SET;

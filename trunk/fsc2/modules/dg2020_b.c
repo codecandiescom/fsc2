@@ -668,10 +668,7 @@ Var *pulser_pulse_reset( Var *v )
 		}
 
 		p->len = p->initial_len;
-		if ( p->len != 0.0 )
-			p->is_len = p->initial_is_len;
-		else
-			p->is_len = UNSET;
+		p->is_len = p->initial_is_len;
 
 		p->dpos = p->initial_dpos;
 		p->is_dpos = p->initial_is_dpos;
