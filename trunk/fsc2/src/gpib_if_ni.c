@@ -186,7 +186,9 @@ int gpib_shutdown( void )
 		if ( devices[ i ].is_online )
 		{
 			gpib_local( devices[ i ].number );
+			raise_permissions( );
 			ibonl( devices[ i ].number, 0 );
+			lower_permissions( );
 			num_init_devices--;
 		}
 
@@ -311,12 +313,14 @@ int gpib_init_device( const char *device_name, int *dev )
         return SUCCESS;
 	}
 
+	raise_permissions( );
 	devices[ i ].number = ibdev( 0, devices[ i ].pad, devices[ i ].sad,
 								 devices[ i ].timo,
 								 ( ( devices[ i ].eosmode &
 									 ( REOS | XEOS | BIN ) ) << 8 ) |
 								 ( devices[ i ].eos & 0xff ),
 								 devices[ i ].eosmode & EOT ? 1 : 0 );
+	lower_permissions( );
 
     if ( devices[ i ].number < 0 )
 	{
@@ -350,7 +354,11 @@ int gpib_local( int device )
 		if ( devices[ i ].number == device )
 		{
 			if ( devices[ i ].is_online )
+			{
+				raise_permissions( );
 				ibloc( device );
+				lower_permissions( );
+			}
 			return SUCCESS;
 		}
 
@@ -408,7 +416,9 @@ int gpib_timeout( int device, int period )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     ibtmo( device, period );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -464,7 +474,9 @@ int gpib_clear_device( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", devp->name );
 
+	raise_permissions( );
     ibclr( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", devp->name );
@@ -513,7 +525,9 @@ int gpib_trigger( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", devp->name );
 
+	raise_permissions( );
     ibtrg( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", devp->name );
@@ -583,7 +597,9 @@ int gpib_wait( int device, int mask, int *status )
 
     mask &= TIMO | END | RQS | CMPL;    /* remove invalid bits */
 
+	raise_permissions( );
     ibwait( device, mask );
+	lower_permissions( );
 
     if ( status != NULL )
         *status = ibsta;
@@ -659,7 +675,9 @@ int gpib_write( int device, const char *buffer, long length )
     if ( ll > LL_ERR )
         gpib_write_start( devp->name, buffer, length );
 
+	raise_permissions( );
 	ibwrt( device, ( char * ) buffer, ( unsigned long ) length );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", devp->name );
@@ -759,7 +777,9 @@ int gpib_read( int device, char *buffer, long *length )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     ibrd( device, buffer, expected );
+	lower_permissions( );
     *length = ibcnt;
 
     if ( ll > LL_NONE )
@@ -829,7 +849,9 @@ int gpib_serial_poll( int device, unsigned char *stb )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", devp->name );
 
+	raise_permissions( );
     ibrsp( device, stb );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_serial_poll", devp->name );

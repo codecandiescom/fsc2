@@ -185,11 +185,18 @@ static int gpib_init_controller( void )
 	int state = 0;
 
 
+	raise_permissions( );
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
+	{
+		lower_permissions( );
         return FAILURE;
+	}
 
     if ( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) & GPIB_ERR )
+	{
+		lower_permissions( );
 		return FAILURE;
+	}
 
 	return state ? SUCCESS : FAILURE;
 }
@@ -229,7 +236,9 @@ int gpib_shutdown( void )
 	T_free( cur_dev );
 	gpib_dev_list = NULL;
 
+	raise_permissions( );
     gpib_onl( controller, OFF );       /* "switch off" the controller */
+	lower_permissions( );
 
     if ( ll > LL_NONE )
     {
@@ -344,10 +353,12 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
+	raise_permissions( );
 	if ( strcmp( device_name, CONTROLLER ) )
 		cur_dev->number = gpib_find( ( char * ) device_name );
 	else
 		cur_dev->number = gpib_find( NULL );
+	lower_permissions( );
 
     if ( cur_dev->number < 0 || gpib_status & GPIB_ERR )
 	{
@@ -412,7 +423,9 @@ int gpib_timeout( int device, int period )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     gpib_tmo( device, period );
+	lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
@@ -462,7 +475,9 @@ int gpib_clear_device( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
+	raise_permissions( );
     gpib_clr( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", dev_name );
@@ -504,7 +519,9 @@ int gpib_local( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_local", dev_name );
 
+	raise_permissions( );
     gpib_loc( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local", dev_name );
@@ -546,7 +563,9 @@ int gpib_trigger( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
+	raise_permissions( );
     gpib_trg( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", dev_name );
@@ -685,7 +704,9 @@ int gpib_write( int device, const char *buffer, long length )
     if ( ll > LL_ERR )
         gpib_write_start( dev_name, buffer, length );
 
+	raise_permissions( );
 	gpib_wrt( device, buffer, length );
+	lower_permissions( );
 
     if ( ! ( gpib_status & GPIB_ERR ) )
 		gpib_count--;
@@ -782,7 +803,9 @@ int gpib_read( int device, char *buffer, long *length )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     gpib_rd( device, buffer, expected );
+	lower_permissions( );
     *length = gpib_count;
 
     if ( ll > LL_NONE )
@@ -853,7 +876,9 @@ int gpib_serial_poll( int device, unsigned char *stb )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
+	raise_permissions( );
     gpib_rsp( device, stb );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_serial_poll", dev_name );

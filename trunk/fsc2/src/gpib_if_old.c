@@ -171,15 +171,25 @@ int gpib_init( const char *log_file_name, int log_level )
 
 static int gpib_init_controller( void )
 {
+	raise_permissions( );
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
+	{
+		lower_permissions( );
         return FAILURE;
+	}
 
     if( ! ibIsMaster( controller ) )
+	{
+		lower_permissions( );
         return FAILURE;
+	}
 
     if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
             ibsre( controller, ON ) ) & IBERR )
+	{
+		lower_permissions( );
 		return FAILURE;
+	}
 
     return SUCCESS;
 }
@@ -219,8 +229,10 @@ int gpib_shutdown( void )
 	T_free( cur_dev );
 	gpib_dev_list = NULL;
 
+	raise_permissions( );
     ibsre( controller, OFF );       /* pull down the REN line */
     ibonl( controller, OFF );       /* "switch off" the controller */
+	lower_permissions( );
 
     if ( ll > LL_NONE )
     {
@@ -333,7 +345,9 @@ int gpib_init_device( const char *device_name, int *dev )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
+	raise_permissions( );
     cur_dev->number = ibfind( ( char * ) device_name );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
 	{
@@ -409,7 +423,9 @@ int gpib_timeout( int device, int period )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     ibtmo( device, period );
+	lower_permissions( );
 
     if ( ibsta & IBERR )
     {
@@ -460,7 +476,9 @@ int gpib_clear_device( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
+	raise_permissions( );
     ibclr( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", dev_name );
@@ -502,7 +520,9 @@ int gpib_trigger( int device )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
+	raise_permissions( );
     ibtrg( device );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", dev_name );
@@ -569,7 +589,9 @@ int gpib_wait( int device, int mask, int *status )
     if ( ! ( mask & TIMO ) && timeout != TNONE )
         gpib_timeout( device, TNONE );
 
+	raise_permissions( );
     ibwait( device, mask );
+	lower_permissions( );
 
     if ( status != NULL )
         *status = ibsta;
@@ -642,7 +664,9 @@ int gpib_write( int device, const char *buffer, long length )
     if ( ll > LL_ERR )
         gpib_write_start( dev_name, buf, length );
 
+	raise_permissions( );
 	ibwrt( device, buf, length );
+	lower_permissions( );
 
 	T_free( buf );
 
@@ -742,7 +766,9 @@ int gpib_read( int device, char *buffer, long *length )
 		lower_permissions( );
     }
 
+	raise_permissions( );
     ibrd( device, buffer, expected );
+	lower_permissions( );
     *length = ibcnt;
 
     if ( ll > LL_NONE )
@@ -816,7 +842,9 @@ int gpib_serial_poll( int device, unsigned char *stb )
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
+	raise_permissions( );
     ibrsp( device, stb );
+	lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_serial_poll", dev_name );
