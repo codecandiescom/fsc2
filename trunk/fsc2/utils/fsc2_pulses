@@ -22,6 +22,31 @@
 # the Free Software Foundation, 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+# This is a utility script that allows to display the pulse settings
+# during an experiment. In takes the output of the pulser_dump_pulses()
+# EDL function (or gets invoked directly by the pulser_show_pulses()
+# function) and draws a graphical representation of the pulses. Using
+# buttons in the window, the mouse buttons or the keyboard one can run
+# through all pulse settings during an experiment as far ( at least as
+# fsc2 can figure them out from a test run).
+#
+# Key bindings:
+# Page Up:     next pulse settings
+# Page Down:   previous pulse settings
+# Home:        initial pulse settings
+# End:         final pulse settings
+# Cursor keys: move around in the canvas if it doesn't completely fit into
+#              the window
+# Control-D:   toggle on/off displaying settings with delays
+# Control-Q:   quit program
+# Control-L:   redraw
+#
+# Mouse bindings:
+# Middle button: next pulse settings
+# Right button:  previous pulse settings
+# Scroll up:     next pulse settings
+# Scroll down:   previous pulse settings
+
 
 use warnings;
 use strict;
