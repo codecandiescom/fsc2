@@ -1,7 +1,8 @@
 DEVICES:
 
 sr510;
-w_band;
+keithley228a;
+
 
 VARIABLES:
 
@@ -34,7 +35,7 @@ FOR I =  1 : 80 {
  	wait( 0.1 s );
 }
 
-set_current( start_current );
+set_field( start_current );
 save( start_current );
 
 FOR I =  81 : 160 {

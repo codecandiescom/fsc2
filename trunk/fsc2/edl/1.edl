@@ -17,7 +17,7 @@ EXPERIMENT:
 lockin_time_constant( 1s );
 
 FOR I = 1:1001 {
-	data = lockin_get_data( 0 );
+	data = lockin_get_data( 1, 2 );
 	display( I, data[ 1 ] * 1e9, 1,
 	         I, data[ 2 ] * 1e9, 2 );
 	wait( 0.1s );

@@ -1,0 +1,27 @@
+DEVICES:
+
+sr810;
+
+VARIABLES:
+
+I = 1;
+data;
+sens[ 2 ] = { 100 mV, 10 mV };
+
+
+PREPARATIONS:
+
+init_1d();
+
+
+EXPERIMENT:
+
+FOREVER {
+	display( I, lockin_get_data( ) );
+	I += 1;
+	wait( 0.3 s );
+	IF I % 10 == 0 {
+		print( "I = #, setting sensitivity to #\n", I, sens[ ( I / 10 ) % 2 + 1 ] );
+	    lockin_sensitivity( sens[ ( I / 10 ) % 2 + 1 ] );
+	}
+}

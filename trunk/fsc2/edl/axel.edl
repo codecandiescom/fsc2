@@ -30,7 +30,7 @@ DETECTION:           POD = 0,    V_HIGH = 5 V, V_LOW = 0 V;
 DETECTION_GATE:      POD = 7,    V_HIGH = 5 V, V_LOW = 0 V;
 PHASE_1:         MW, POD = 1, 2, V_HIGH = 5 V, V_LOW = 0 V;
 
-PHASE_1_SETUP:         +X: 0, 0,
+PHASE_SETUP_1: +X: 0, 0,
                +Y: 1, 0,
                -X: 0, 1,
                -Y: 1, 1;

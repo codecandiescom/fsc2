@@ -21,6 +21,7 @@
   Boston, MA 02111-1307, USA.
 */
 
+
 #include "fsc2.h"
 #include <signal.h>
 
@@ -30,29 +31,27 @@
 #define PRG_CHUNK_SIZE 16384
 
 /* Number of tokens to be parsed before forms are rechecked for user input -
-   too low a number slows down the program quite a lot and even relatively
-   short EDL files with loops may produce an appreciable number of tokens,
+   too low a number slows down the program quite a lot (and even moderately
+   short EDL files with loops may produce an appreciable number of tokens),
    while setting it to too large a value will make it difficult for the user
    to stop the interpreter! */
 
 #define CHECK_FORMS_AFTER   8192
 
 
-static bool in_for_lex = UNSET;   // set while handling for loop condition part
+Token_Val exp_val;                        /* also used by exp_lexer.l */
+static bool in_for_lex = UNSET;           /* set while handling for loop
+											 condition part */
 static long token_count;
-static CB_Stack *cb_stack = NULL; // curly brace stack
+static CB_Stack *cb_stack = NULL;         /* curly brace stack */
 
 extern int exp_testparse( void );         /* from exp_parser.y */
 
 extern int exp_runparse( void );          /* from exp_run_parser.y */
 extern int conditionparse( void );        /* from condition_parser.y */
 
-Token_Val exp_val;                        /* exported to exp_lexer.flex */
-
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
-extern Token_Val exp_runlval;             /* from exp_run_parser.y */
-extern Token_Val conditionlval;           /* from condition_parser.y */
 
 extern void exprestart( FILE *expin );
 
@@ -71,25 +70,34 @@ static void save_restore_variables( bool flag );
 /*-----------------------------------------------------------------------------
   This routine stores the experiment section of an EDL file in the form of
   tokens (together with their semantic values if there are any) as returned
-  by the lexer. Thus it serves as a kind of intermediate between the lexer
-  and the parser. This is necessary for two reasons: First, the experiment
-  section may contain loops. Without an intermediate it would be rather
-  difficult to run through the loops since we would have to re-read and
-  re-tokenise the input file again and again, which not only would be
-  painfully slow but also difficult since what we read is not the real EDL
-  file(s) but a pipe that contains what remains after filtering through the
-  program `fsc2_clean'. Second, we will have to run through the experiment
-  section at least three times, first for syntax and sanity checks, then for
-  the test run and finally for really doing the experiment.
+  by the lexer. This is necessary for two reasons: First, the experiment
+  section may contain loops. Without having the EDL program stored internally
+  it would be rather difficult to run through the loops since we would have to
+  re-read and re-tokenise the input file again and again, which not only would
+  be painfully slow but also difficult since what we read is not the real EDL
+  file(s) but a pipe that contains what remains from the input files (there
+  could be more than one when the #include directive has been used) after
+  filtering through the program `fsc2_clean'. Second, we will have to run
+  through the experiment section at least three times, first for syntax and
+  sanity checks, then for the test run and finally for really doing the
+  experiment. Third, handling of loops becomes rather simple because we only
+  have to feed them to the parser again and again. Of course, beside storing
+  the experiment section in tokenised form as done by this function, we also
+  need routines that later passes the stored tokens to the parsers,
+  exp_testlex() and exp_runlex().
 
-  By having an intermediate between the lexer and the parser we avoid several
-  problems. We don't have to re-read and re-tokenise the input file. We also
-  can find out about loops and handle them later by simply feeding the parser
-  the loop again and again. Of course, beside storing the experiment section
-  in tokenised form as done by this function, we also need routines that later
-  feed the stored tokens to the parsers - exp_testlex() and exp_runlex().
+  The following function does the following:
+  1. It stores each token (with its semantic values which it receives from
+     the lexer) in the array of program tokens, prg_token.
+  2. While doing so it also does a few preliminay tests - it checks that
+     opening and closing parentheses and braces match, BREAK and NEXT
+	 statements only appear in loops and that THE ON_STOP statement isn't
+	 in a block or within parantheses or braces.
+  3. When done when storing the program it does everything needed to set up
+     running of loops and if-else and unless-else constructs.
+  4. Finally, a syntax check of the program is run. In this check the whole
+     program is feed to a parser to test if any syntactic errors are found.
 -----------------------------------------------------------------------------*/
-
 
 void store_exp( FILE *in )
 {
@@ -97,7 +105,7 @@ void store_exp( FILE *in )
 	int ret;
 	char *cur_Fname = NULL;
 	long curly_brace_in_loop_count = 0;
-	long paranthesis_count = 0;
+	long parenthesis_count = 0;
 	long square_brace_count = 0;
 	bool in_loop = UNSET;
 
@@ -121,9 +129,9 @@ void store_exp( FILE *in )
 	{
 		if ( ret == ON_STOP_TOK )
 		{
-			if ( paranthesis_count > 0 )
+			if ( parenthesis_count > 0 )
 			{
-				eprint( FATAL, SET, "Unbalanced parenthesis before ON_STOP "
+				eprint( FATAL, SET, "Unbalanced parentheses before ON_STOP "
 						"label.\n" );
 				THROW( EXCEPTION );
 			}
@@ -170,11 +178,11 @@ void store_exp( FILE *in )
 		prg_token[ prg_length ].counter = 0;
 
 		/* In most cases it's enough just to copy the union with the value.
-		   But there are a few exceptions: For strings we need also a copy of
+		   But there are a few exceptions: for strings we need also a copy of
 		   the string since it's not persistent. Function tokens and also
 		   variable references just push their data onto the variable stack,
 		   so we have to copy them from the stack into the token structure.
-		   Finally, we have to do some sanity checks on paranthesis etc. */
+		   Finally, we have to do some sanity checks on parentheses etc. */
 
 		switch( ret )
 		{
@@ -184,11 +192,11 @@ void store_exp( FILE *in )
 				break;
 
 			case '(' :
-				paranthesis_count++;
+				parenthesis_count++;
 				break;
 
 			case ')' :
-				if ( --paranthesis_count < 0 )
+				if ( --parenthesis_count < 0 )
 				{
 					eprint( FATAL, SET, "Found ')' without matching '('.\n" );
 					THROW( EXCEPTION );
@@ -196,7 +204,7 @@ void store_exp( FILE *in )
 				break;
 
 			case '{' :
-				if ( paranthesis_count != 0 )
+				if ( parenthesis_count != 0 )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found before a "
 							"'{'.\n" );
@@ -216,7 +224,7 @@ void store_exp( FILE *in )
 				break;
 
 			case '}' :
-				if ( paranthesis_count != 0 )
+				if ( parenthesis_count != 0 )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found before a "
 							"'}'.\n" );
@@ -256,6 +264,7 @@ void store_exp( FILE *in )
 				break;
 
 			case E_STR_TOKEN :
+				prg_token[ prg_length ].tv.sptr = NULL;
 				prg_token[ prg_length ].tv.sptr = T_strdup( exp_val.sptr );
 				break;
 
@@ -264,6 +273,7 @@ void store_exp( FILE *in )
 				prg_token[ prg_length ].tv.vptr = T_malloc( sizeof( Var ) );
 				memcpy( prg_token[ prg_length ].tv.vptr, Var_Stack,
 						sizeof( Var ) );
+				prg_token[ prg_length ].tv.vptr->name = NULL;
 				prg_token[ prg_length ].tv.vptr->name =
 					                            T_strdup( Var_Stack->name );
 				vars_pop( Var_Stack );
@@ -278,7 +288,7 @@ void store_exp( FILE *in )
 				break;
 
 			case ';' :
-				if ( paranthesis_count != 0 )
+				if ( parenthesis_count != 0 )
 				{
 					eprint( FATAL, SET, "More '(' than ')` found at end of"
 							"statement.\n" );
@@ -310,9 +320,9 @@ void store_exp( FILE *in )
 		prg_length++;
 	}
 
-	/* Check that all paranthesis and braces are balanced */
+	/* Check that all parentheses and braces are balanced */
 
-	if ( paranthesis_count > 0 )
+	if ( parenthesis_count > 0 )
 	{
 		eprint( FATAL, UNSET, "'(' without closing ')' detected at end of "
 				"program.\n" );
@@ -621,7 +631,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 	Prg_Token *cur = prg_token + *pos;
 	long i = *pos + 1;
 	bool in_if = SET;
-	bool dont_need_close_parans = UNSET;           /* set for IF-ELSE and 
+	bool dont_need_close_parens = UNSET;           /* set for IF-ELSE and 
 													  UNLESS-ELSE constructs */
 
 
@@ -653,22 +663,12 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 				setup_while_or_repeat( prg_token[ i ].token, &i );
 				break;
 
-			case CONT_TOK :
+			case CONT_TOK : case BREAK_TOK :
 				if ( cur_wr == NULL )
 				{
-					eprint( FATAL, UNSET, "%s:%ld: NEXT statement not within "
-							"a loop.\n",
-							prg_token[ i ].Fname, prg_token[ i ].Lc );
-					THROW( EXCEPTION );
-				}
-				prg_token[ i ].start = cur_wr;
-				break;
-
-			case BREAK_TOK :
-				if ( cur_wr == NULL )
-				{
-					eprint( FATAL, UNSET, "%s:%ld: BREAK statement not within "
-							"a loop.\n",
+					eprint( FATAL, UNSET, "%s:%ld: %s statement not within "
+							"a loop.\n", prg_token[ i ].token == CONT_TOK ?
+							"NEXT" : "BREAK",
 							prg_token[ i ].Fname, prg_token[ i ].Lc );
 					THROW( EXCEPTION );
 				}
@@ -678,7 +678,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 			case IF_TOK : case UNLESS_TOK :
 				setup_if_else( &i, cur_wr );
 
-				if ( dont_need_close_parans )
+				if ( dont_need_close_parens )
 				{
 					if ( cur->end != NULL )
 						( cur->end - 1 )->end = &prg_token[ i + 1 ];
@@ -720,7 +720,7 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 					  prg_token[ i + 1 ].token == UNLESS_TOK )
 				{
 					cur->end = &prg_token[ i ];
-					dont_need_close_parans = SET;
+					dont_need_close_parens = SET;
 				}
 
 				break;
@@ -764,26 +764,67 @@ static void setup_if_else( long *pos, Prg_Token *cur_wr )
 }
 
 
-/*--------------------------------------------*/
-/*--------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function is called to start the syntax test of the currently */
+/* loaded EDL program. After initializing the pointer to the first   */
+/* program token all it does is calling the test parser defined in   */
+/* exp_test_parser.y. On syntax errors the test parser throws an     */
+/* exception, otherwise this routine returns normally.               */
+/*-------------------------------------------------------------------*/
 
 static void exp_syntax_check( void )
 {
+	Fname = T_free( Fname );
+
+	TRY
+	{
+		cur_prg_token = prg_token;
+		exp_testparse( );
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		Fname = NULL;
+		PASSTHROU( );
+	}
+
+	Fname = NULL;
 }
 
 
-/*--------------------------------------------*/
-/*--------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* This function just feeds the stored program token by token to the */
+/* syntax test parser exp_testparse(), defined in exp_test_parser.y. */
+/* No actions are associated with this parsing stage, all that is    */
+/* done is a test if the syntax of the program is ok.                */
+/*-------------------------------------------------------------------*/
 
 int exp_testlex( void )
 {
+	extern Token_Val exp_testlval;            /* from exp_test_parser.y */
+
+
+	if ( cur_prg_token != NULL && cur_prg_token < prg_token + prg_length )
+	{
+		Fname = cur_prg_token->Fname;
+		Lc = cur_prg_token->Lc;
+		memcpy( &exp_testlval, &cur_prg_token->tv,
+				sizeof( Token_Val ) );
+		return cur_prg_token++->token;
+	}
+
 	return 0;
 }
 
 
-/*--------------------------------------------*/
-/* Function does the test run of the program. */
-/*--------------------------------------------*/
+/*-------------------------------------------------------------------*/
+/* Function does the test run of the program. For most of the stored */
+/* tokens of the EDL program it simply invokes the parser defined in */
+/* exp_run_parser.y, which will then call the function exp_runlex()  */
+/* to get further tokens. Exceptions are tokens that are related to  */
+/* flow control that aren't handled by the parser but by this        */
+/* function.                                                         */
+/*-------------------------------------------------------------------*/
 
 void exp_test_run( void )
 {
@@ -963,12 +1004,13 @@ void exp_test_run( void )
 /* parser the tokens that got stored while running store_exp().   */
 /* The only exceptions are tokens dealing with flow control - for */
 /* most of them the parser gets signaled an end of file, only the */
-/* `}' is handled by the parser itself (but also as an EOF).      */
+/* `}' is handled by the parser itself (but also as an EOF but    */
+/* also doing some sanity checks).                                */
 /*----------------------------------------------------------------*/
 
 int exp_runlex( void )
 {
-	int token;
+	extern Token_Val exp_runlval;             /* from exp_run_parser.y */
 	Var *ret, *from, *next, *prev;
 
 
@@ -991,8 +1033,7 @@ int exp_runlex( void )
 
 			case E_STR_TOKEN :
 				exp_runlval.sptr = cur_prg_token->tv.sptr;
-				cur_prg_token++;
-				return E_STR_TOKEN;
+				break;
 
 			case E_FUNC_TOKEN :
 				ret = vars_push( INT_VAR, 0 );
@@ -1005,8 +1046,7 @@ int exp_runlex( void )
 				ret->next = next;
 				ret->prev = prev;
 				exp_runlval.vptr = ret;
-				cur_prg_token++;
-				return E_FUNC_TOKEN;
+				break;
 
 			case E_VAR_REF :
 				ret = vars_push( INT_VAR, 0 );
@@ -1018,16 +1058,15 @@ int exp_runlex( void )
 				ret->next = next;
 				ret->prev = prev;
 				exp_runlval.vptr = ret;
-				cur_prg_token++;
-				return E_VAR_REF;
+				break;
 
 			default :
 				memcpy( &exp_runlval, &cur_prg_token->tv,
 						sizeof( Token_Val ) );
-				token = cur_prg_token->token;
-				cur_prg_token++;
-				return token;
+				break;
 		}
+
+		return cur_prg_token++->token;
 	}
 	
 	return 0;
@@ -1041,6 +1080,7 @@ int exp_runlex( void )
 
 int conditionlex( void )
 {
+	extern Token_Val conditionlval;           /* from condition_parser.y */
 	int token;
 	Var *ret, *from, *next, *prev;
 
@@ -1510,7 +1550,11 @@ bool test_for_cond( Prg_Token *cur )
 		}
 	}
 
-	fsc2_assert( 1 == 0 );
+	/* We better never end here... */
+
+	eprint( FATAL, UNSET, "Internal error at %s:%d.\n", __FILE__, __LINE__ );
+	THROW( EXCEPTION );
+
 	return FAIL;
 }
 
