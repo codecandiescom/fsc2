@@ -311,8 +311,6 @@ Var *lockin_sensitivity( Var *v )
 
 	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-	
 	if ( sens < 0.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative sensitivity in %s().\n",
@@ -381,6 +379,8 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	sr510.sens_index = sens_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		sr510_set_sens( sens_index );
@@ -418,8 +418,6 @@ Var *lockin_time_constant( Var *v )
 		}
 
 	tc = get_double( v, "time constant", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc <= 0.0 )
 	{
@@ -481,6 +479,8 @@ Var *lockin_time_constant( Var *v )
 		}
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+
 	sr510.tc_index = tc_index;
 	if ( FSC2_MODE == EXPERIMENT )
 		sr510_set_tc( tc_index );
@@ -522,8 +522,6 @@ Var *lockin_phase( Var *v )
 
 	phase = get_double( v, "phase", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-	
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
 
@@ -535,6 +533,8 @@ Var *lockin_phase( Var *v )
 		phase = 360.0 - phase;
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+	
 	sr510.phase    = phase;
 	sr510.is_phase = SET;
 
@@ -628,14 +628,14 @@ Var *lockin_dac_voltage( Var *v )
 
 	voltage = get_double( v, "DAC voltage", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( fabs( voltage ) > 10.24 )
 	{
 		eprint( FATAL, SET, "%s: DAC voltage of %f V is out of valid "
 				"range (+/-10.24 V).\n", DEVICE_NAME, voltage );
 		THROW( EXCEPTION )
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	sr510.dac_voltage[ channel - first_DAC_port ] = voltage;
 

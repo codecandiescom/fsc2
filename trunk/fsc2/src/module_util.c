@@ -47,8 +47,9 @@ inline void too_many_arguments( Var *v, const char *device )
 	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
 
-	eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-			"%s().\n", device, v->next != NULL ? "s" : "", Cur_Func );
+	if ( device != NULL )
+		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
+				"%s().\n", device, v->next != NULL ? "s" : "", Cur_Func );
 	while ( ( v = vars_pop( v ) ) != NULL )
 		;
 }
@@ -62,8 +63,9 @@ inline void too_many_arguments( Var *v, const char *device )
 
 inline void no_query_possible( const char *device )
 {
-	eprint( FATAL, SET, "%s: %s() can be used for queries in the EXPERIMENT "
-			"section only.\n", device, Cur_Func );
+	if (  device != NULL )
+		eprint( FATAL, SET, "%s: %s() can be used for queries in the "
+				"EXPERIMENT section only.\n", device, Cur_Func );
 	THROW( EXCEPTION )
 }
 
@@ -75,7 +77,7 @@ inline long get_long( Var *v, const char *snippet, const char *device )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == FLOAT_VAR )
+	if ( v->type == FLOAT_VAR && snippet != NULL && device != NULL )
 		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
 				device, snippet, Cur_Func );
 
@@ -90,7 +92,7 @@ inline double get_double( Var *v, const char *snippet, const char *device )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR )
+	if ( v->type == INT_VAR && snippet != NULL && device != NULL )
 		eprint( WARN, SET, "%s: Integer number used as %s in %s().\n",
 				device, snippet, Cur_Func );
 
@@ -112,15 +114,17 @@ inline long get_strict_long( Var *v, const char *snippet, const char *device )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 		{
-			eprint( SEVERE, SET, "%s: Floating point number used as %s "
-					"in %s(), trying to continue!\n",
-					device, snippet, Cur_Func );
+			if ( snippet != NULL  && device != NULL )
+				eprint( SEVERE, SET, "%s: Floating point number used as %s "
+						"in %s(), trying to continue!\n",
+						device, snippet, Cur_Func );
 			vars_check( v, FLOAT_VAR );
 			return lrnd( v->val.dval );
 		}
 
-		eprint( FATAL, SET, "%s: Floating point number can't be used as "
-				"%s in %s().\n", device, snippet, Cur_Func );
+		if ( snippet != NULL  && device != NULL )
+			eprint( FATAL, SET, "%s: Floating point number can't be used as "
+					"%s in %s().\n", device, snippet, Cur_Func );
 		THROW( EXCEPTION )
 	}
 
@@ -129,8 +133,15 @@ inline long get_strict_long( Var *v, const char *snippet, const char *device )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/* This function can be called when a variable that should contain a boolean */
+/* is expected, where boolean means either an integer (where 0 corresponds   */
+/* to FALSE and a non-zero value means TRUE) or a string, either "ON" or     */
+/* "OFF" (capitalization doesn't matter). If the value is a floating point   */
+/* it is accepted (after printing an error message) during the EXPERIMENT    */
+/* only, otherwise an exception is thrown. When it's a string and doesn't    */
+/* match either "ON" or "OFF" and exception is thrown in every case.         */
+/*---------------------------------------------------------------------------*/
 
 inline bool get_boolean( Var *v, const char *device )
 {
@@ -138,8 +149,19 @@ inline bool get_boolean( Var *v, const char *device )
 
 	if ( v->type == FLOAT_VAR )
 	{
-		eprint( WARN, SET, "%s: Floating point number found where boolean "
-				"type value was expected in %s().\n", device, Cur_Func );
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			if ( device != NULL )
+				eprint( FATAL, SET, "%s: Floating point number found where "
+						"boolean type value was expected in %s().\n", device,
+						Cur_Func );
+			THROW( EXCEPTION )
+		}
+
+		if ( device != NULL )
+			eprint( SEVERE, SET, "%s: Floating point number found where "
+					"boolean type value was expected in %s().\n", device,
+					Cur_Func );
 		return v->val.dval != 0.0;
 	}
 	else if ( v->type == STR_VAR )
@@ -148,7 +170,8 @@ inline bool get_boolean( Var *v, const char *device )
 			return UNSET;
 		else if ( ! strcasecmp( v->val.sptr, "ON" ) )
 			return SET;
-		else
+
+		else if ( device != NULL )
 		{
 			eprint( FATAL, SET, "%s: Invalid argument (%s) in call of "
 					"function %s().\n", device, v->val.sptr, Cur_Func );

@@ -475,8 +475,6 @@ Var *lockin_sensitivity( Var *v )
 
 	sens = get_double( v, "sensitivity", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( sens < 0.0 )
 	{
 		eprint( FATAL, SET, "%s: Invalid negative sensitivity.\n",
@@ -544,6 +542,8 @@ Var *lockin_sensitivity( Var *v )
 		}
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+
 	sr830.sens_index = sens_index;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -582,8 +582,6 @@ Var *lockin_time_constant( Var *v )
 		}
 
 	tc = get_double( v, "time constant", DEVICE_NAME );
-
-	too_many_arguments( v, DEVICE_NAME );
 
 	if ( tc < 0.0 )
 	{
@@ -650,6 +648,8 @@ Var *lockin_time_constant( Var *v )
 		}
 	}
 
+	too_many_arguments( v, DEVICE_NAME );
+
 	sr830.tc_index = tc_index;
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -695,8 +695,6 @@ Var *lockin_phase( Var *v )
 
 	phase = get_double( v, "phase", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-
 	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
 		phase -= 360.0;
 
@@ -707,6 +705,8 @@ Var *lockin_phase( Var *v )
 			phase -= 360.0;
 		phase = 360.0 - phase;
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	sr830.phase    = phase;
 	sr830.is_phase = SET;
@@ -741,8 +741,6 @@ Var *lockin_harmonic( Var *v )
 
 	harm = get_long( v, "harmonic", DEVICE_NAME );
 	
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( FSC2_MODE == TEST )
 		freq = MIN_MOD_FREQ;
 	else
@@ -763,6 +761,8 @@ Var *lockin_harmonic( Var *v )
 				MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION )
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	sr830.harmonic = harm;
 	sr830.is_harmonic = SET;
@@ -816,8 +816,6 @@ Var *lockin_ref_freq( Var *v )
 
 	freq = get_double( v, "modulation frequency", DEVICE_NAME );
 	
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( FSC2_MODE != TEST && sr830_get_mod_mode( ) != MOD_MODE_INTERNAL )
 	{
 		eprint( FATAL, SET, "%s: Can't set modulation frequency while "
@@ -843,6 +841,8 @@ Var *lockin_ref_freq( Var *v )
 					MIN_MOD_FREQ, 1.0e-3 * MAX_MOD_FREQ / ( double ) harm );
 		THROW( EXCEPTION )
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	sr830.mod_freq    = freq;
 	sr830.is_mod_freq = SET;
@@ -878,8 +878,6 @@ Var *lockin_ref_level( Var *v )
 
 	level = get_double( v, "modulation level", DEVICE_NAME );
 
-	too_many_arguments( v, DEVICE_NAME );
-
 	if ( level < MIN_MOD_LEVEL || level > MAX_MOD_LEVEL )
 	{
 		eprint( FATAL, SET, "%s: Modulation level of %f V is not within "
@@ -887,6 +885,8 @@ Var *lockin_ref_level( Var *v )
 				MIN_MOD_LEVEL, MAX_MOD_LEVEL );
 		THROW( EXCEPTION )
 	}
+
+	too_many_arguments( v, DEVICE_NAME );
 
 	sr830.mod_level = level;
 	sr830.is_mod_level = SET;
