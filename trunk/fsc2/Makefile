@@ -342,7 +342,7 @@ endif
 # Pass lots of variables to the source files...
 # For directories make sure they end with a `/'.
 
-CONFFLAGS += -Dsdir=\"$(sdir:/=)/\"
+CONFFLAGS += -Dsrcdir=\"$(sdir:/=)/\"
 CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
 CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"
@@ -466,7 +466,7 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 .PHONY: all install-strip install uninstall \
-		version test clean distclean        \
+		built version test clean distclean  \
 		mostlyclean tags pack manifest ZIP  \
 		pion.anorg.chemie.uni-frankfurt.de  \
 		crowley.physik.fu-berlin.de         \
@@ -482,22 +482,18 @@ export            # export all variables to sub-makes
 ############## End of configuration section ##############
 
 
-# Default rule: make the main program, the primary lexer and the modules
-# (the Makefile for modules is called via the Makefile in src), then
-# the documentation and some other, more or less useful stuff
+# Default rule: after some configuration stuff make the main program,
+# the primary lexer and the modules (the Makefile for modules is called
+# via the Makefile in src), then the documentation and some other, more
+# or less useful stuff
 
 all: config.h
-	$(MAKE) config
-	if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                 \
+	@if [ $(INSTALL_MACHINE) != "install-unknown" ]; then                \
+		echo "Configuring for machine $(machine_name)...";               \
 		$(MAKE) $(machine_name);                                         \
 	fi
-	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
-				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
-					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
-		grep -v 'sed\|grep' |                                            \
-			sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' |             \
-				gzip -c -9 | uuencode - > version.ugz
 	$(MAKE) -C src gpib_setup
+	$(MAKE) built
 	$(MAKE) tags
 	$(MAKE) -C src all
 ifdef WITH_HTTP_SERVER
@@ -510,14 +506,32 @@ endif
 	$(MAKE) -C doc all
 
 
-# Create a header file with configuration information if either the
-# Makefile got changed or it doesn't exist
+# Create a header file with configuration information from the contents of
+# CONFFLAGS if either the Makefile got changed or it does not already exist
 
 config.h: Makefile
-	echo "/*--- Created automatically, dont' change ---*/" > config.h
-	@echo " $(CONFFLAGS)" | \
-	sed 's/ \-D\([A-Za-z][A-Za-z0-9_]*\)\=\{0,1\}/~#define \1 /g' - | \
-	tr '~' '\n' | sort | uniq >> config.h
+	@if [ -e config.h ]; then          \
+		echo "Recreating config.h..."; \
+	else                               \
+		echo "Creating config.h...";   \
+	fi
+	@echo "/*--- Created automatically, dont' change ---*/" > config.h
+	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> config.h
+
+
+# Create a file with as much as possible information about the files
+# involved in the make process
+
+built:
+	-@cat config.h > version
+	-@echo >> version
+	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]          \
+				     $(mdir)/Makefile $(mdir)/*.[chl]                    \
+					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |  \
+		grep -v 'sed\|grep' |                                            \
+		sed -e 's/^.*$$Id\: \(.*\) jens Exp $$.*/\1/g' >> version
+	gzip -c -9 version | uuencode - > version.ugz
+	$(RM) $(RMFLAGS) version
 
 
 # Install the program and everything else
@@ -581,7 +595,7 @@ endif
 	fi
 
 
-# Unpacks the (local) version file and writes its content to stdout
+# Unpack the (local) version file and write its contents to stdout
 
 version:
 	-@if [ -e version.ugz ]; then             \

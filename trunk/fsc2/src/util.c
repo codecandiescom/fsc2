@@ -711,7 +711,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 		TRY
 		{
 			if ( Internals.cmdline_flags & DO_CHECK )
-				cmd = get_string( "%s%sfsc2_clean", srcdir, slash( sdir ) );
+				cmd = get_string( "%s%sfsc2_clean", srcdir, slash( srcdir ) );
 			else
 				cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
 			TRY_SUCCESS;
