@@ -44,6 +44,30 @@ void *get_memcpy( const void *array, size_t size )
 }
 
 
+/*----------------------------------------------------------------------*/
+/* Function replaces all occurences iof the character combination "\n"  */
+/* in a string by line the break character '\n'. This is done in place, */
+/* i.e. the string passed to the function is changed, not a copy. So,   */
+/* never call it with a char array defined as const.                    */
+/*----------------------------------------------------------------------*/
+
+char *correct_line_breaks( char *str )
+{
+	char *p1 = str,
+		 *p2;
+
+	while ( ( p1 = strstr( p1, "\\n" ) ) != NULL )
+	{
+		p2 = p1++;
+		*p2 = '\n';
+		while ( *++p2 )
+			*p2 = *( p2 + 1 );
+	}
+
+	return str;
+}
+
+
 /*-----------------------------------------------*/
 /* strip_path() returns pointer to bare name the */
 /* function from a path like "/usr/bin/emacs".   */
