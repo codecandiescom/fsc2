@@ -825,7 +825,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			else
 				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
 									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 < VALUE( v2 ) ););
+									 < VALUE( v2 ) );
 			break;
 
 		case COMP_LESS_EQUAL :
@@ -834,7 +834,7 @@ Var *vars_comp( int comp_type, Var *v1, Var *v2 )
 			else
 				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
 									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 <= VALUE( v2 ) ););
+									 <= VALUE( v2 ) );
 			break;
 
 		case COMP_AND :
