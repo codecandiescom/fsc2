@@ -47,10 +47,9 @@ inline void too_many_arguments( Var *v )
 	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
 		return;
 
-	if ( Cur_Dev->device_name != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", Cur_Dev->device_name,
-				v->next != NULL ? "s" : "", Cur_Func );
+	print( WARN, "Too many arguments, discarding superfluous arguments.\n",
+		   v->next != NULL ? "s" : "" );
+
 	while ( ( v = vars_pop( v ) ) != NULL )
 		;
 }
@@ -64,10 +63,8 @@ inline void too_many_arguments( Var *v )
 
 inline void no_query_possible( void )
 {
-	if ( Cur_Dev->device_name != NULL )
-		eprint( FATAL, SET, "%s: %s() can be used for queries in the "
-				"EXPERIMENT section only.\n", Cur_Dev->device_name,
-				Cur_Func );
+	print( FATAL, "Function can be used for queries in the EXPERIMENT "
+		   "section only.\n" );
 	THROW( EXCEPTION );
 }
 
@@ -79,10 +76,8 @@ inline long get_long( Var *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == FLOAT_VAR && snippet != NULL &&
-		 Cur_Dev->device_name != NULL )
-		eprint( WARN, SET, "%s: Floating point number used as %s in %s().\n",
-				Cur_Dev->device_name, snippet, Cur_Func );
+	if ( v->type == FLOAT_VAR && snippet != NULL )
+		print( WARN, "Floating point number used as %s.\n", snippet );
 
 	return v->type == INT_VAR ? v->val.lval : ( long ) v->val.dval;
 }
@@ -95,10 +90,8 @@ inline double get_double( Var *v, const char *snippet )
 {
 	vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR && snippet != NULL &&
-		 Cur_Dev->device_name != NULL )
-		eprint( WARN, SET, "%s: Integer number used as %s in %s().\n",
-				Cur_Dev->device_name, snippet, Cur_Func );
+	if ( v->type == INT_VAR && snippet != NULL )
+		print( WARN, "Integer number used as %s.\n", snippet );
 
 	return v->type == INT_VAR ? v->val.lval : v->val.dval;
 }
@@ -118,18 +111,16 @@ inline long get_strict_long( Var *v, const char *snippet )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 		{
-			if ( snippet != NULL  && Cur_Dev->device_name != NULL )
-				eprint( SEVERE, SET, "%s: Floating point number used as %s "
-						"in %s(), trying to continue!\n",
-						Cur_Dev->device_name, snippet, Cur_Func );
+			if ( snippet != NULL )
+				print( SEVERE, "Floating point number used as %s, "
+					   "trying to continue!\n", snippet );
 			vars_check( v, FLOAT_VAR );
 			return lrnd( v->val.dval );
 		}
 
-		if ( snippet != NULL  && Cur_Dev->device_name != NULL )
-			eprint( FATAL, SET, "%s: Floating point number can't be used as "
-					"%s in %s().\n",
-					Cur_Dev->device_name, snippet, Cur_Func );
+		if ( snippet != NULL  )
+			print( FATAL, "Floating point number can't be used as %s.\n",
+				   snippet );
 		THROW( EXCEPTION );
 	}
 
@@ -156,17 +147,13 @@ inline bool get_boolean( Var *v )
 	{
 		if ( FSC2_MODE != EXPERIMENT )
 		{
-			if ( Cur_Dev->device_name != NULL )
-				eprint( FATAL, SET, "%s: Floating point number found where "
-						"boolean type value was expected in %s().\n",
-						Cur_Dev->device_name, Cur_Func );
+			print( FATAL, "Floating point number found where boolean value "
+				   "was expected.\n" );
 			THROW( EXCEPTION );
 		}
 
-		if ( Cur_Dev->device_name != NULL )
-			eprint( SEVERE, SET, "%s: Floating point number found where "
-					"boolean type value was expected in %s().\n",
-					Cur_Dev->device_name, Cur_Func );
+		print( SEVERE, "Floating point number found where boolean value "
+			   "was expected, trying to continue.\n" );
 		return v->val.dval != 0.0;
 	}
 	else if ( v->type == STR_VAR )
@@ -177,10 +164,7 @@ inline bool get_boolean( Var *v )
 		if ( ! strcasecmp( v->val.sptr, "ON" ) )
 			return SET;
 
-		if ( Cur_Dev->device_name != NULL )
-			eprint( FATAL, SET, "%s: Invalid boolean argument (\"%s\") in "
-					"%s().\n",
-					Cur_Dev->device_name, v->val.sptr, Cur_Func );
+		print( FATAL, "Invalid boolean argument (\"%s\").\n",  v->val.sptr );
 		THROW( EXCEPTION );
 	}
 
