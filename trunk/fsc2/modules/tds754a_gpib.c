@@ -30,7 +30,8 @@ bool tds754a_init( const char *name )
 
     /* Set digitizer to short form of replies */
 
-    if ( gpib_write( tds754a.device, "*CLS;:VERB OFF;:HEAD OFF\n" )== FAILURE )
+    if ( gpib_write( tds754a.device, "*CLS;:VERB OFF;:HEAD OFF\n", 25 )
+		 == FAILURE )
 	{
 		gpib_local( tds754a.device );
         return FAIL;
@@ -47,7 +48,7 @@ bool tds754a_init( const char *name )
 
     /* Set format of data transfer (binary, INTEL format) */
 
-    if ( gpib_write( tds754a.device, "DAT:ENC SRI;WID 2\n" ) == FAILURE )
+    if ( gpib_write( tds754a.device, "DAT:ENC SRI;WID 2\n", 18 ) == FAILURE )
 	{
 		gpib_local( tds754a.device );
         return FAIL;
@@ -55,7 +56,7 @@ bool tds754a_init( const char *name )
 		
     /* Set unit for cursor setting commands to seconds, cursor types to VBAR */
 
-    if ( gpib_write( tds754a.device, "CURS:FUNC VBA:VBA:UNITS SECO\n" )
+    if ( gpib_write( tds754a.device, "CURS:FUNC VBA:VBA:UNITS SECO\n", 29 )
 		 == FAILURE )
     {
         gpib_local( tds754a.device );
@@ -74,7 +75,7 @@ bool tds754a_init( const char *name )
 
     /* Switch off repetitive acquisition mode */
 
-	if ( gpib_write( tds754a.device, "ACQ:REPE OFF\n" ) == FAILURE )
+	if ( gpib_write( tds754a.device, "ACQ:REPE OFF\n", 13 ) == FAILURE )
     {
         gpib_local( tds754a.device );
         return FAIL;
@@ -105,7 +106,7 @@ bool tds754a_init( const char *name )
 
     /* Switch to running until run/stop button is pressed and start running */
 
-    if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST;STATE RUN\n" )
+    if ( gpib_write( tds754a.device, "ACQ:STOPA RUNST;STATE RUN\n", 26 )
 		 == FAILURE )
     {
         gpib_local( tds754a.device );
@@ -125,7 +126,7 @@ double tds754a_get_timebase( void )
 	long length = 30;
 
 
-	if ( gpib_write( tds754a.device, "HOR:MAI:SCA?\n" ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "HOR:MAI:SCA?\n", 13 ) == FAILURE ||
 		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -144,7 +145,7 @@ bool tds754a_set_timebase( double timebase )
 
 	gcvt( timebase, 6, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-	if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -162,7 +163,7 @@ bool tds754a_get_record_length( long *ret )
 	char *r = reply;
 
 
-    if ( gpib_write( tds754a.device, "HOR:RECO?\n" ) == FAILURE ||
+    if ( gpib_write( tds754a.device, "HOR:RECO?\n", 16 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         return FAIL;
 
@@ -183,7 +184,7 @@ bool tds754a_get_trigger_pos( double *ret )
     long length = 30;
 
 
-    if ( gpib_write( tds754a.device, "HOR:TRIG:POS?\n" ) == FAILURE ||
+    if ( gpib_write( tds754a.device, "HOR:TRIG:POS?\n", 14 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         return FAIL;
 
@@ -205,7 +206,7 @@ long tds754a_get_num_avg( void )
 
 	if ( tds754a_get_acq_mode( ) == AVERAGE )
 	{
-		if ( gpib_write( tds754a.device,"ACQ:NUMAV?\n" ) == FAILURE ||
+		if ( gpib_write( tds754a.device,"ACQ:NUMAV?\n", 11 ) == FAILURE ||
 			 gpib_read_w( tds754a.device, reply, &length) == FAILURE )
 			tds754a_gpib_failure( );
 
@@ -230,7 +231,7 @@ bool tds754a_set_num_avg( long num_avg )
 
 	if ( num_avg == 0 )
 	{
-		if ( gpib_write( tds754a.device, "ACQ:STATE STOP\n" ) == FAILURE )
+		if ( gpib_write( tds754a.device, "ACQ:STATE STOP\n", 15 ) == FAILURE )
 			tds754a_gpib_failure( );
 		return OK;
 	}
@@ -240,20 +241,20 @@ bool tds754a_set_num_avg( long num_avg )
 
 	if ( num_avg == 1 )
 	{
-		if ( gpib_write( tds754a.device, "ACQ:MOD SAM\n" ) == FAILURE )
+		if ( gpib_write( tds754a.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
 	else
 	{
 		sprintf( cmd, "ACQ:NUMAV %ld\n", num_avg );
 		if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
-			 gpib_write( tds754a.device, "ACQ:MOD AVE\n" ) == FAILURE )
+			 gpib_write( tds754a.device, "ACQ:MOD AVE\n", 12 ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
 
 	/* Finally restart the digitizer */
 
-	if ( gpib_write( tds754a.device, "ACQ:STATE RUN\n" ) == FAILURE )
+	if ( gpib_write( tds754a.device, "ACQ:STATE RUN\n", 14 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -270,7 +271,7 @@ int tds754a_get_acq_mode( void )
 	long length = 30;
 
 
-	if ( gpib_write( tds754a.device, "ACQ:MOD?\n" ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "ACQ:MOD?\n", 9 ) == FAILURE ||
 		 gpib_read_w ( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -279,7 +280,7 @@ int tds754a_get_acq_mode( void )
 
 	if ( *reply != 'S' )		/* if not in sample mode set it */
 	{
-		if ( gpib_write( tds754a.device,"ACQ:MOD SAM\n" ) == FAILURE )
+		if ( gpib_write( tds754a.device, "ACQ:MOD SAM\n", 12 ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
 
@@ -299,7 +300,7 @@ bool tds754a_get_cursor_position( int cur_no, double *cp )
 	assert( cur_no == 1 || cur_no == 2 );
 
 	strcat( cmd, cur_no == 1 ? "1?\n" : "2?\n" );
-    if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -340,7 +341,7 @@ bool tds754a_set_trigger_channel( const char *name )
 		return FAIL;
 
 	sprintf( cmd, "TRIG:MAI:EDGE:SOU %s\n", name );
-	if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -356,7 +357,7 @@ int tds754a_get_trigger_channel( void )
     long length = 30;
 
 
-    if ( gpib_write( tds754a.device, "TRIG:MAI:EDGE:SOU?\n" ) == FAILURE
+    if ( gpib_write( tds754a.device, "TRIG:MAI:EDGE:SOU?\n", 19 ) == FAILURE
 		 || gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -395,7 +396,7 @@ bool tds754a_clear_SESR( void )
     long length = 30;
 
 
-    if ( gpib_write( tds754a.device, "*ESR?\n" ) == FAILURE ||
+    if ( gpib_write( tds754a.device, "*ESR?\n", 6 ) == FAILURE ||
 		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -409,11 +410,11 @@ bool tds754a_clear_SESR( void )
 
 void tds754a_finished( void )
 {
+	char *cmd = "ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n";
+
+
     tds754a_clear_SESR( );
-
-    gpib_write( tds754a.device,
-				"ACQ:STATE STOP;*SRE 0;:ACQ:STOPA RUNST;STATE RUN\n" );
-
+    gpib_write( tds754a.device, cmd, strlen( cmd ) );
 	gpib_local( tds754a.device );
 }
 
@@ -433,7 +434,7 @@ bool tds754a_set_cursor( int cur_num, double pos )
 	sprintf( cmd + strlen( cmd ), "%d ", cur_num );
     gcvt( pos, 9, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
-    if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -449,7 +450,7 @@ bool tds754a_set_track_cursors( bool flag )
 
 
 	sprintf( cmd, "CURS:MODE %s\n", flag ? "TRAC" : "IND" );
-    if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -465,7 +466,7 @@ bool tds754a_set_gated_meas( bool flag )
 
 
 	sprintf( cmd, "MEASU:GAT %s\n", flag ? "ON" : "OFF" );
-    if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
@@ -482,13 +483,13 @@ bool tds754a_set_snap( bool flag )
 
 	if ( flag )
 	{
-		if ( gpib_write( tds754a.device, "DAT SNA\n" ) == FAILURE )
+		if ( gpib_write( tds754a.device, "DAT SNA\n", 8 ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
 	else
 	{
 		sprintf( cmd, "DAT STAR 1;:DAT STOP %ld\n", tds754a.rec_len );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 	}		
 
@@ -516,7 +517,7 @@ bool tds754a_display_channel( int channel )
 	/* check if channel is already displayed */
 
 	sprintf( cmd, "SEL:%s?\n", Channel_Names[ channel ] );
-    if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -525,7 +526,7 @@ bool tds754a_display_channel( int channel )
     if ( reply[ 0 ] == '0' )
     {
         sprintf( cmd, "SEL:%s ON\n", Channel_Names[ channel ] );
-        if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+        if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
     }
 
@@ -546,7 +547,7 @@ double tds754a_get_sens( int channel )
 	assert( channel >= 0 && channel < TDS754A_AUX );
 
 	sprintf( cmd, "%s:SCA?\n", Channel_Names[ channel ] );
-	if ( gpib_write( tds754a.device, cmd ) == FAILURE ||
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -568,7 +569,8 @@ bool tds754a_start_aquisition( void )
 	   3. set stop after sequence */
 
     if ( ! tds754a_clear_SESR( ) ||
-         gpib_write( tds754a.device, "ACQ:STATE RUN;STOPA SEQ\n" ) == FAILURE )
+         gpib_write( tds754a.device, "ACQ:STATE RUN;STOPA SEQ\n", 24 )
+		 == FAILURE )
 		tds754a_gpib_failure( );
 
 
@@ -591,7 +593,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP ARE\n" ) == FAILURE )
+    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP ARE\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	assert( channel >= 0 && channel < TDS754A_AUX );
@@ -602,7 +604,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 	{
 		strcat( cmd, Channel_Names[ channel ] );
 		strcat( cmd, "\n" );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 		tds754a.meas_source = channel;
 	}
@@ -620,7 +622,7 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
+		if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 			tds754a_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
@@ -628,7 +630,8 @@ double tds754a_get_area( int channel, WINDOW *w, bool use_cursor )
 	/* Get the the area */
 
 	length = 40;
-	if ( gpib_write( tds754a.device, "*WAI;:MEASU:IMM:VAL?\n" ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "*WAI;:MEASU:IMM:VAL?\n", 21 )
+		 == FAILURE ||
 		 gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -689,7 +692,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 	if ( channel != tds754a.data_source )
 	{
 		sprintf( cmd, "DATA:SOURCE %s\n", Channel_Names[ channel ] );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 		tds754a.data_source = channel;
 	}
@@ -703,7 +706,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 		sprintf( cmd, "DAT:START %ld;:DAT:STOP %ld\n", 
 				 w != NULL ? w->start_num : 1,
 				 w != NULL ? w->end_num : tds754a.rec_len );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 	}
 
@@ -716,7 +719,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 		len = 10;
 		usleep( 100000 );
-		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
+		if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read_w( tds754a.device, reply, &len ) == FAILURE )
 			tds754a_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
@@ -736,7 +739,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length,
 
 	/* Now get all the data bytes... */
 
-	if ( gpib_write( tds754a.device, "CURV?\n" ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "CURV?\n", 6 ) == FAILURE ||
 		 gpib_read( tds754a.device, buffer, &len ) == FAILURE )
 	{
 		T_free( buffer );
@@ -777,7 +780,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 	/* Set measurement type to area */
 
-    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n" ) == FAILURE )
+    if ( gpib_write( tds754a.device, "MEASU:IMM:TYP AMP\n", 18 ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	assert( channel >= 0 && channel < TDS754A_AUX );
@@ -788,7 +791,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	{
 		strcat( cmd, Channel_Names[ channel ] );
 		strcat( cmd, "\n" );
-		if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+		if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 			tds754a_gpib_failure( );
 		tds754a.meas_source = channel;
 	}
@@ -806,7 +809,7 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 
 		length = 40;
 		usleep( 100000 );
-		if ( gpib_write( tds754a.device, "BUSY?\n" ) == FAILURE ||
+		if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
 			 gpib_read( tds754a.device, reply, &length ) == FAILURE )
 			tds754a_gpib_failure( );
 	} while ( reply[ 0 ] == '1' ); 
@@ -815,8 +818,8 @@ double tds754a_get_amplitude( int channel, WINDOW *w, bool use_cursor )
 	/* Get the the amplitude */
 
 	length = 40;
-	if ( gpib_write( tds754a.device, "*WAI\n" ) == FAILURE ||
-		 gpib_write( tds754a.device, "MEASU:IMM:VAL?\n" ) == FAILURE ||
+	if ( gpib_write( tds754a.device, "*WAI\n", 5 ) == FAILURE ||
+		 gpib_write( tds754a.device, "MEASU:IMM:VAL?\n", 15 ) == FAILURE ||
 		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -875,7 +878,7 @@ bool tds754a_lock_state( bool lock )
 	char cmd[ 100 ];
 
 	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
-	if ( gpib_write( tds754a.device, cmd ) == FAILURE )
+	if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
 	return OK;
