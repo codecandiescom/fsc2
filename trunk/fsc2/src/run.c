@@ -483,7 +483,7 @@ static void run_child( void )
 	kill( getppid( ), NEW_DATA );
 
 	/* Using a pause() here is tempting but there exists a race condition
-	   between the deterimation of the value of 'do_send' and the start of
+	   between the determination of the value of 'do_send' and the start of
 	   pause() - and it happens... */
 
 	while ( ! do_send )
@@ -504,7 +504,7 @@ static void run_child( void )
 	kill( getppid( ), QUITTING );          /* tell parent that we're exiting */
 
 	/* Using a pause() here is tempting but there exists a race condition
-	   between the deterimation of the value of 'do_quit' and the start of
+	   between the determination of the value of 'do_quit' and the start of
 	   pause() - and it happens... */
 
 	while ( ! do_quit )                    /* wait for acceptance of signal  */

@@ -2174,9 +2174,9 @@ Var *f_display( Var *v )
 		}
 	}
 
-	/* Using a pause() here is tempting but there's a race condition -
-	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagined... */
+	/* Using a pause() here is tempting but there exists a race condition
+	   between the determination of the value of 'do_send' and the start of
+	   pause() - and it happens... */
 
 	while ( ! do_send )             /* wait for parent to become ready */
 		usleep( 50000 );
@@ -2555,9 +2555,9 @@ Var *f_clearcv( Var *v )
 
 	assert( I_am == CHILD );
 
-	/* Using a pause() here is tempting but there's a race condition -
-	   'do_send' may be set while the pause tests are under way. This isn't
-	   just paranoia but happens more often than I imagined... */
+	/* Using a pause() here is tempting but there exists a race condition
+	   between the determination of the value of 'do_send' and the start of
+	   pause() - and it happens... */
 
 	while ( ! do_send )             /* wait for parent to become ready */
 		usleep( 50000 );

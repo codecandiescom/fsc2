@@ -719,8 +719,8 @@ void writer( int type, ... )
 	if ( I_am == CHILD )
 	{
 		/* Using a pause() here is tempting but there exists a race condition
-		   between the deterimation of the value of 'do_send' and the start of
-		   pause() - and it happens... */
+		   between the determination of the value of 'do_send' and the start
+		   of pause() - and it happens... */
 
 		while ( ! do_send )             /* wait for parent to become ready */
 			usleep( 50000 );
