@@ -1110,8 +1110,10 @@ void tds_tmpl_lock_state( bool lock )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* This command is for sending a command to the device. On failure */
+/* an error message gets printed and an exception is thrown.       */
+/*-----------------------------------------------------------------*/
 
 bool tds_tmpl_command( const char *cmd )
 {
@@ -1121,8 +1123,11 @@ bool tds_tmpl_command( const char *cmd )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*/
+/* This function is for sending a query to the device and getting back its */
+/* reply. When writing or reading from the device fails an exception is    */
+/* thrown, otherwise up to *length characters are returned in 'reply'.     */
+/*-------------------------------------------------------------------------*/
 
 static bool tds_tmpl_talk( const char *cmd, char *reply, long *length )
 {
