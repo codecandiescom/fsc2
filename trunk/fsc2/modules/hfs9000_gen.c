@@ -171,22 +171,24 @@ bool hfs9000_set_function_delay( int function, double delay )
 			THROW( EXCEPTION );
 		}
 
-		if ( Delay < hfs9000.neg_delay )
+		hfs9000.is_neg_delay = SET;
+
+		if ( Delay < - hfs9000.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
-				f = hfs9000.function + i;
-				if ( ! f->is_used || i == function )
+				if ( i == function )
 					continue;
-				f->delay += hfs9000.neg_delay - Delay;
+				hfs9000.function[ i ].delay -= hfs9000.neg_delay - Delay;
 			}
-			hfs9000.neg_delay = hfs9000.function[ function ].delay = - Delay;
+			hfs9000.neg_delay = - Delay;
+			hfs9000.function[ function ].delay = 0;
 		}
 		else
-			hfs9000.function[ function ].delay = hfs9000.neg_delay - Delay;
+			hfs9000.function[ function ].delay += Delay;
 	}
 	else
-		hfs9000.function[ function ].delay = Delay - hfs9000.neg_delay;
+		hfs9000.function[ function ].delay += Delay;
 
 	hfs9000.function[ function ].is_used = SET;
 	hfs9000.function[ function ].is_delay = SET;

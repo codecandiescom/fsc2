@@ -213,10 +213,10 @@ bool dg2020_set_function_delay( int function, double delay )
 			dg2020.function[ function ].delay = 0;
 		}
 		else
-			dg2020.function[ function ].delay -= dg2020.neg_delay + Delay;
+			dg2020.function[ function ].delay += Delay;
 	}
 	else
-		dg2020.function[ function ].delay += dg2020.neg_delay + Delay;
+		dg2020.function[ function ].delay += Delay;
 
 	dg2020.function[ function ].is_used = SET;
 	dg2020.function[ function ].is_delay = SET;

@@ -183,7 +183,7 @@ bool ep385_set_function_delay( int function, double delay )
 			ep385.function[ function ].delay = 0;
 		}
 		else
-			ep385.function[ function ].delay += ep385.neg_delay + Delay;
+			ep385.function[ function ].delay += Delay;
 	}
 	else
 		ep385.function[ function ].delay += Delay;
