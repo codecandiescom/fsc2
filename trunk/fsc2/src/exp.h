@@ -82,20 +82,20 @@ typedef struct
 typedef struct PT_ {
 	int       token;          /* type of current token */
 	Token_Val tv;             /* token's value as needed by the parser */
-	struct    PT_ *start;     /* used in if, while etc. [1] */
-	struct    PT_ *end;       /* used in while, if's etc. [2] */
+	struct    PT_ *start;     /* used in IF, WHILE etc. [1] */
+	struct    PT_ *end;       /* used in WHILE, IF etc. [2] */
 	union {
 		struct {
-			long max;         /* maximum counter value for repeat loops */
-			long act;         /* actual counter value for repeat loops */
+			long max;         /* maximum counter value for REPEAT loops */
+			long act;         /* actual counter value for REPEAT loops */
 		} repl;
 		struct {
-			Var *act;         /* loop variable of for loop */
+			Var *act;         /* loop variable of FOR loop */
 			Simp_Var end;     /* maximum value of loop variable */
 			Simp_Var incr;    /* increment for loop variable */
 		} forl;
 	} count;
-	long counter;             /* counts number of loop repetitions */
+	long      counter;        /* counts number of loop repetitions [3] */
 	char      *Fname;         /* name of file the token comes from */
 	long      Lc;             /* number of line the token comes from */
 } Prg_Token;
@@ -103,9 +103,12 @@ typedef struct PT_ {
 
 
 /*
+  The following remaks aren't completely in sync with the current state of
+  the program... (8.3.2001)
+
   [1] In WHILE, UNTIL and REPEAT tokens `start' points to the start of the
-      executable block, in NEXT tokens it points to the corresponding while or
-	  repeat. In IF tokens it points to the first executable block (the on to
+      executable block, in NEXT tokens it points to the corresponding WHILE or
+	  REPEAT. In IF tokens it points to the first executable block (the on to
 	  be executed if the condition is met).
   [2] In WHILE, UNTIL and REPEAT tokens `end' points to the statement
       following the block. In BREAK tokens it points also the statement
@@ -113,6 +116,12 @@ typedef struct PT_ {
 	  one). For `}' tokens of a WHILE, UNTIL or REPEAT token it points to
 	  the WHILE, UNTIL or REPEAT. In IF-ELSE blocks it points to the statement
 	  directly following the IF-ELSE construct.
+  [3] Actually, it does not only count the number of repetitions but also
+      indicates by a value of 0 that the loop condition has not to be simply
+	  checked but reevaluated, e.g. if counter for a FOR loop is zero the
+	  loop variable has to be initialized. Thus it has always to be reset to
+	  zero at the end of a loop (either when the end condition is met or a
+	  BREAK statement is executed).
 */
 
 
