@@ -932,7 +932,7 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 
 			if ( label != NULL )
 				fprintf( fp, "gs (%s) dup dup ch %f add exch cw %f exch sub\n"
-						 "t 90 r 0 0 m show gr\n",
+							 "t 90 r 0 0 m show gr\n",
 						 label, margin, paper_width - margin );
 			T_free( label );
 			TRY_SUCCESS;
@@ -973,9 +973,11 @@ static void eps_make_scale( FILE *fp, void *cv, int coord, long dim )
 			TRY
 			{
 				label = paren_replace( G.label[ Z ] );
-				fprintf( fp, "gs %f (%s) ch sub %f (%s) cw sub t 90 r 0 0 m "
-							 "(%s) show gr\n", x + 28.0, label,
-						 paper_width - margin, label, label );
+
+				fprintf( fp, "gs (%s) dup dup ch %f exch sub exch cw %f exch "
+							 "sub\n t 90 r 0 0 m show gr\n",
+						 label, x + 28.0, paper_width - margin );
+
 				T_free( label );
 				TRY_SUCCESS;
 			}
