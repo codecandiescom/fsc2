@@ -129,8 +129,9 @@ void load_functions( Device *dev )
 	strcat( lib_name, dev->name );
 	strcat( lib_name, ".so" );
 
-	/* Try to open the library - if it can't be found in the usual place give
-       it another chance in the places defined by LD_LIBRARY_PATH */
+	/* Try to open the library - if it can't be found in the usual place or
+       it's already the complete name (i.e. including the path) give it
+       another chance, including the places defined by LD_LIBRARY_PATH */
 
 	dev->driver.handle = dlopen( lib_name, RTLD_LAZY );
 	if ( dev->driver.handle == NULL )
