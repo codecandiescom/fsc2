@@ -57,6 +57,8 @@ pid_t spawn_conn( bool start_state )
 									 &cli_len ) ) < 0 )
 				continue;
 		}
+
+		_exit( 0 );
 	}
 
 	return new_pid;

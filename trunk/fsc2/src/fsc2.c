@@ -15,17 +15,13 @@
 
 /* Locally used global variables */
 
-bool is_loaded = UNSET;       /* set when EDL file is loaded */
-bool is_tested = UNSET;       /* set when EDL file has been  tested */
-bool state = UNSET;           /* set when EDL passed the tests */
+static bool is_loaded = UNSET;       /* set when EDL file is loaded */
+static bool is_tested = UNSET;       /* set when EDL file has been  tested */
+static bool state = UNSET;           /* set when EDL passed the tests */
 static char *in_file = NULL;  /* used for name of input file */
 static time_t in_file_mod = 0;
-
 static double slider_size = 0.05;
-
-
-float *x;
-float *y;
+static bool delete_file = UNSET;
 
 
 /* Locally used functions */
@@ -35,7 +31,7 @@ static bool xforms_init( int *argc, char *argv[ ] );
 static void xforms_close( void );
 static bool display_file( char *name, FILE *fp );
 static void start_editor( void );
-static void start_browser( void );
+static void start_help_browser( void );
 
 
 
@@ -49,6 +45,7 @@ int main( int argc, char *argv[ ] )
 	bool do_test = UNSET;
 	bool do_start = UNSET;
 	bool do_signal = UNSET;
+	bool do_delete = UNSET;
 	char *fname;
 	int cur_arg;
 
@@ -92,6 +89,13 @@ int main( int argc, char *argv[ ] )
 			if ( ! strcmp( argv[ cur_arg ], "-s" ) )
 			{
 				do_signal = SET;
+				cur_arg++;
+				continue;
+			}
+
+			if ( ! strcmp( argv[ cur_arg ], "-d" ) )
+			{
+				do_delete = SET;
 				cur_arg++;
 				continue;
 			}
@@ -178,8 +182,6 @@ int main( int argc, char *argv[ ] )
 		return EXIT_FAILURE;
 	}
 
-	fl_add_signal_callback( SIGCHLD, sigchld_handler, NULL );
-
 	/* If there is a file as argument try to load it */
 
 	if ( do_load )
@@ -202,6 +204,8 @@ int main( int argc, char *argv[ ] )
 		fl_trigger_object( main_form->test_file );
 	if ( do_start && is_loaded )
 		fl_trigger_object( main_form->run );
+	if ( do_delete )
+		delete_file = SET;
 
 	if ( ( conn_pid = spawn_conn( ( do_test || do_start ) && is_loaded ) )
 		 != -1 )
@@ -220,6 +224,7 @@ int main( int argc, char *argv[ ] )
 
 	/* Do everything necessary to end the program */
 
+	unlink( FSC2_SOCKET );
 	clean_up( );
 	xforms_close( );
 	T_free( in_file );
@@ -349,6 +354,7 @@ void load_file( FL_OBJECT *a, long reload )
 	static char *old_in_file;
 	FILE *fp;
 	struct stat file_stat;
+	static char *title = NULL;
 
 
 	a = a;
@@ -430,6 +436,14 @@ void load_file( FL_OBJECT *a, long reload )
 	stat( fn, &file_stat );
 	in_file_mod = file_stat.st_mtime;
 
+	/* Set a new window title */
+
+	T_free( title );
+	title = T_malloc( 7 + strlen( fn ) );
+	strcpy( title, "fsc2: " );
+	strcat( title, fn );
+	fl_set_form_title( main_form->fsc2, title );
+
 	/* Read in and display the new file */
 
 	is_loaded = display_file( in_file, fp );
@@ -485,7 +499,6 @@ static void start_editor( void )
 	char *ed, *ep;
 	char **argv, **final_argv;
 	int argc = 1, i;
-	int res, status;
 
 
 	/* Try to find content of environment variable "EDITOR" - if it doesn't
@@ -568,17 +581,7 @@ static void start_editor( void )
 			final_argv = argv + 2;
 	}
 
-	if ( ( res = fork( ) ) == 0 )
-		execvp( final_argv[ 0 ], final_argv );
-
-	T_free( argv );
-
-	if ( res == -1 )
-		_exit( EDITOR_FAILED );
-
-	waitpid( res, &status, 1 );
-
-	_exit( status );
+	execvp( final_argv[ 0 ], final_argv );
 }
 
 
@@ -887,29 +890,6 @@ static bool display_file( char *name, FILE *fp )
 }
 
 
-/*-------------------------------------------------------*/
-/* sigchld_handler() is the default SIGCHLD handler used */
-/* to avoid having too many zombies hanging around.      */
-/*-------------------------------------------------------*/
-
-void sigchld_handler( int sig_type, void *data )
-{
-	int status;
-
-
-	data = data;
-
-	assert( sig_type == SIGCHLD );
-
-	/* Get exit status of child and display information if necessary */
-
-	wait( &status );
-	if ( status == EDITOR_FAILED )
-		fl_show_alert( "Error", "Sorry, unable to open editor.",
-					   NULL, 1 );
-}
-
-
 /*--------------------------------------------------------------------*/  
 /* Does everything that needs to be done (i.e. deallocating memory,   */
 /* unloading the device drivers, reinitializing all kinds of internal */
@@ -1022,10 +1002,10 @@ void run_help( FL_OBJECT *a, long b )
 	a = a;
 	b = b;
 
-	/* Fork and execute help browser in child process */
+	/* Fork and run help browser in child process */
 
 	if ( ( res = fork( ) ) == 0 )
-		start_browser( );
+		start_help_browser( );
 
 	if ( res == -1 )                                /* fork failed ? */
 		fl_show_alert( "Error", "Sorry, unable to start the help browser.",
@@ -1036,44 +1016,31 @@ void run_help( FL_OBJECT *a, long b )
 /*------------------------------------------------------------*/  
 /*------------------------------------------------------------*/  
 
-static void start_browser( void )
+static void start_help_browser( void )
 {
-	char *cmd;
-	int status;
-	int res;
+	char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 
 
-	if ( ( res = fork( ) ) == 0 )
+	/* If netscape isn't running start it, otherwise ask it to just open a
+	   new window */
+
+	av[ 0 ] = get_string_copy( "netscape" );
+
+	if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
 	{
-
-		/* If netscape isn't running start it, otherwise ask it to just open a
-		   new window */
-
-		if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
-		{
-			cmd = get_string( 41 + strlen( docdir ) );
-			strcpy( cmd, "netscape file:" );
-			strcat( cmd, docdir );
-			strcat( cmd, "fsc2_frame.html 2>/dev/null" );
-		}
-		else
-		{
-			cmd = get_string( 71 + strlen( docdir ) );
-			strcpy( cmd, "netscape -remote 'openURL(file:" );
-			strcat( cmd, docdir );
-			strcat( cmd, "fsc2_frame.html,new-window)' 2>/dev/null" );
-		}
-
-		status = system( cmd );
-		T_free( cmd );
-
-		_exit( status );
+		av[ 1 ] = get_string( 20 + strlen( docdir ) );
+		strcpy( av[ 1 ], "file:" );
+		strcat( av[ 1 ], docdir );
+		strcat( av[ 1 ], "fsc2_frame.html" );
+	}
+	else
+	{
+		av[ 1 ] = get_string_copy( "-remote" );
+		av[ 2 ] = get_string( 42 + strlen( docdir ) );
+		strcpy( av[ 2 ], "'openURL(file:" );
+		strcat( av[ 2 ], docdir );
+		strcat( av[ 2 ], "fsc2_frame.html,new-window)'" );
 	}
 
-	if ( res == -1 )
-		_exit( EXIT_FAILURE );
-
-	waitpid( res, &status, 1 );
-
-	_exit( status );
+	execvp( av[ 0 ], av );
 }
