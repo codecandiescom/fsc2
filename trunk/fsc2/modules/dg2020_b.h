@@ -72,7 +72,7 @@ Var *pulser_pulse_reset( Var *v );
 #define MAX_PODS_PER_FUNC       5
 
 
-#define TWT_2_DEFENSE_MIN_DISTANCE 4.4e-7   // 480 ns
+#define TWT_2_DEFENSE_MIN_DISTANCE 4.3e-7   // 430 ns
 #define DEFENSE_2_TWT_MIN_DISTANCE 1.0e-7
 
 

@@ -6,6 +6,9 @@
 #include "dg2020_b.h"
 
 
+static void dg2020_defense_twt_check( void );
+
+
 #define ON( f )           ( ( f )->is_inverted ? LOW : HIGH )
 #define OFF( f )          ( ( f )->is_inverted ? HIGH : LOW )
 
@@ -115,8 +118,56 @@ void dg2020_do_checks( FUNCTION *f )
 			THROW( EXCEPTION );
 		}
 	}
+
+	if ( dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used &&
+		 dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used )
+		dg2020_defense_twt_check( );
 }
 
+
+static void dg2020_defense_twt_check( void )
+{
+	FUNCTION *twt = &dg2020.function[ PULSER_CHANNEL_TWT_GATE ],
+		     *defense = &dg2020.function[ PULSER_CHANNEL_DEFENSE ];
+	PULSE *twt_p, *defense_p;
+	Ticks defense_2_twt, twt_2_defense;
+	long i, j;
+
+
+	defense_2_twt = ( Ticks ) ceil( DEFENSE_2_TWT_MIN_DISTANCE /
+									dg2020.timebase );
+	twt_2_defense = ( Ticks ) ceil( TWT_2_DEFENSE_MIN_DISTANCE /
+									dg2020.timebase );
+
+	for ( i = 0; i < defense->num_pulses; i++ )
+	{
+		defense_p = defense->pulses[ i ];
+
+		if ( ! defense_p->is_active )
+			continue;
+
+		for ( j = 0; j < twt->num_pulses; j++ )
+		{
+			twt_p = twt->pulses[ j ];
+			if ( ! twt_p->is_active )
+				continue;
+
+			if ( twt_p->pos < defense_p->pos &&
+				 twt_p->len + twt_p->pos + twt_2_defense > defense_p->pos )
+				eprint( SEVERE, "%s:%ld: %s: TWT_GATE pulse %ld gets "
+						"dangerously near to DEFENSE pulse %ld.\n",
+						Fname, Lc, pulser_struct.name, twt_p->num,
+						defense_p->num );
+
+			if ( twt_p->pos > defense_p->pos &&
+				 defense_p->pos + defense_p->len + defense_2_twt > twt_p->pos )
+				eprint( SEVERE, "%s:%ld: %s: DEFENCE pulse %ld gets "
+						"dangerously near to TWT_GATE pulse %ld.\n",
+						Fname, Lc, pulser_struct.name, defense_p->num,
+						twt_p->num );
+		}
+	}
+}
 
 /*----------------------------------------------------------------------------
   Function creates all active pulses in the channels of the pulser assigned
