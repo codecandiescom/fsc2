@@ -147,25 +147,22 @@ static int __init ni6601_init( void )
 
 static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 {
-	board->dev = NULL;
+	board->dev = dev;
 	board->irq = 0;
 
         if ( pci_enable_device( dev ) )
 	{
 		PDEBUG( "Failed to enable board %d\n", board - boards );
-		return -1;
+		goto init_failure;
 	}
 
 	pci_set_master( dev );
-
-	board->dev = dev;
 
 	if ( pci_request_regions( dev, NI6601_NAME ) ) {
 		PDEBUG( "Failed to lock memory regions for board %d\n",
 			board - boards );
 		goto init_failure;
 	}
-
 
 	/* Remap the MITE memory region as well as the memory region at
 	   which we're going to access the TIO */
