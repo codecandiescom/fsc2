@@ -133,9 +133,10 @@ bool tds744a_set_snap( bool flag );
 bool tds744a_display_channel( int channel );
 double tds744a_get_sens( int channel );
 bool tds744a_start_aquisition( void );
-double tds744a_get_area( int channel, WINDOW *w );
-bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length );
-double tds744a_get_amplitude( int channel, WINDOW *w );
+double tds744a_get_area( int channel, WINDOW *w, bool use_cursors );
+bool tds744a_get_curve( int channel, WINDOW *w, double **data, long *length,
+						bool use_cursor );
+double tds744a_get_amplitude( int channel, WINDOW *w, bool use_cursors );
 
 
 
