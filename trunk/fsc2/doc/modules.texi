@@ -585,7 +585,7 @@ string. Thus if you decide which device type string you're going to use
 please first check the device types of other devices as defined in their
 configuration files.  If your device is similar enough to one of the
 exiting devices pick the same device type string, otherwise pick a
-descriptive name. Please also see the next section.
+new and descriptive name. Please also see the next section.
 
 
 
