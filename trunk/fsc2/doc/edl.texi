@@ -1697,16 +1697,16 @@ to 16 levels deep.
 The name of the file to be included must follow the @code{#INCLUDE}
 directly (i.e.@: on the same line and only with spaces and tab
 characters in between). It also must be included either in double quotes
-(i.e.@: have the form @code{"..."}) or in angle braces @code{<} and
-@code{>} (i.e.@: have the form @code{<...>}).
+(i.e.@: it must have the form @code{"..."}) or in angle braces
+'@code{<}' and '@code{>}' (i.e.@: be in the form @code{<...>}).
 
 When the file name is enclosed in double quotes @code{fsc2} tries to
 figure out the location where it is stored by the follwoing algorithm:
 @itemize
-@item If the name starts with a slash, @code{/} it is assumed that the
+@item If the name starts with a slash, '@code{/}', it is assumed that the
       file is given with a complete, absolute path.
-@item If the file name starts with a tilde directly followed by a slash,
-      i.e.@: with @code{~/}, the tilde is replaced by the name of
+@item If the file name starts with a tilde followed directly by a slash,
+      i.e.@: with "@code{~/}", the tilde is replaced by the name of
       the users home directory.
 @item If the file name starts with any other character its path is taken
       to be relative to the path of the file it is included from.
