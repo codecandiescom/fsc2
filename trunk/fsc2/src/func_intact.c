@@ -250,15 +250,10 @@ void parent_freeze( int freeze )
 				fl_set_object_lcol( io->self, FL_INACTIVE_COL );
 			}
 	}
-	else if ( ! is_frozen && freeze )    /* freeze the toolbox */
+	else if ( ! is_frozen && freeze && fl_form_is_visible( Toolbox->Tools ) )
 	{
-		if ( fl_form_is_visible( Toolbox->Tools ) )
-		{
-			store_toolbox_position( );
-			fl_hide_form( Toolbox->Tools );
-		}
-
-		has_pos = SET;
+		store_toolbox_position( );
+		fl_hide_form( Toolbox->Tools );
 	}
 
 	is_frozen = freeze ? SET : UNSET;
@@ -818,13 +813,10 @@ void tools_clear( void )
 	if ( Toolbox == NULL )
 		return;
 
-	if ( Toolbox->Tools )
+	if ( Toolbox->Tools && fl_form_is_visible( Toolbox->Tools ) )
 	{
-		if ( fl_form_is_visible( Toolbox->Tools ) )
-		{
-			store_toolbox_position( );
-			fl_hide_form( Toolbox->Tools );
-		}
+		store_toolbox_position( );
+		fl_hide_form( Toolbox->Tools );
 	}
 
 	for ( io = Toolbox->objs; io != NULL; io = next )
@@ -1935,6 +1927,8 @@ static void store_toolbox_position( void )
 		tool_x = Toolbox->Tools->x - 1;
 		tool_y = Toolbox->Tools->y - 1;
 	}
+
+	has_pos = SET;
 }
 
 
