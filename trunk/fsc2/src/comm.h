@@ -6,7 +6,7 @@
 #define COMM_HEADER
 
 #include "fsc2.h"
-#include <asm/shmparam.h>    /* here we find SHMMNI, at least under linux... */
+#include <sys/param.h>
 
 
 enum {
