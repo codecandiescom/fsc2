@@ -199,7 +199,7 @@ B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock, write lock or unlock).
 
 Queries or sets the B<l_whence> member of the flock structure, determining
 if the B<l_start> value is relative to the start of the file, to the current
-position in the file or to the end of the file. Possible values are
+position in the file or to the end of the file. The corresponding values are
 B<SEEK_SET>, B<SEEK_CUR> and B<SEEK_END>. See also the man page for lseek(2);
 
 
