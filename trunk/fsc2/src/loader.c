@@ -55,7 +55,7 @@ void load_all_drivers( void )
 {
 	Device *cd;
 	bool saved_need_GPIB;
-	bool saved_need RULBUS;
+	bool saved_need_RULBUS;
 
 
 	/* Treat "User_Functions" also as a kind of device driver and append
