@@ -23,9 +23,9 @@
 #  Boston, MA 02111-1307, USA.
 #
 #  This script tries to GUI-fy a suitably adapted EDL script, i.e. it takes
-#  an "enhanced" EDL script and creates from it a Perl script which, in turn,
-#  when run allows the user to set parameters via a GUI and then creates an
-#  EDL script from these parameters and sends it to fsc2 for execution.
+#  an "enhanced" EDL script and creates from it a Perl script which, when
+#  run, allows the user to set parameters via a GUI, then creates an EDL
+#  script from these parameters and sends it to fsc2 for execution.
 
 
 use strict;
