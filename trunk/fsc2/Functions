@@ -109,5 +109,8 @@ synthesizer_mod_type, -1, EXP;
 synthesizer_mod_source, -1, EXP;
 synthesizer_mod_ampl, -1, EXP;
 
+
+// functions exported by the boxcar (EGG4402)
+
 boxcar_curve_length, -1, EXP;
 boxcar_get_curve, -1, EXP;
