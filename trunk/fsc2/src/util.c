@@ -253,7 +253,7 @@ inline long rnd( double x ) { return ( long ) ( 2 * x ) - ( long ) x; }
 /* Converts a double value to a short int - if the value is too large or too
    small the maximum or minimum short int is returned */
 
-inline short shrt( double a )
+inline short d2shrt( double a )
 {
 	if ( a > SHRT_MAX )
 		return SHRT_MAX;
