@@ -77,8 +77,10 @@ DET         DET(ECTION)?:?
 DET_GATE    DET(ECTION)?_?G(ATE)?:?
 RF          R(ADIO)?_?F(REQUENCY)?:?
 RF_GATE     R(ADIO)?_?F(REQUENCY)?_?G(ATE)?:?
-PX          PH(ASE)?_?X:?
-PY          PH(ASE)?_?Y:?
+PX1          PH(ASE)?_?X?1:?
+PX2          PH(ASE)?_?X?2:?
+PY1          PH(ASE)?_?Y1:?
+PY2          PH(ASE)?_?Y2:?
 OI          O(THER)?(_?1)?:?
 OII         O(THER)?_?2:?
 OIII        O(THER)?_?3:?
@@ -190,9 +192,11 @@ WS          [\n=: ]+
 
 {RF_GATE}   return RF_GATE_TOKEN;
 
-{PX}        return PHX_TOKEN;
+{PX1}       return PHX1_TOKEN;
+{PX1}       return PHX2_TOKEN;
 
-{PY}        return PHY_TOKEN;
+{PY1}       return PHY1_TOKEN;
+{PY2}       return PHY2_TOKEN;
 
 {OI}        return OI_TOKEN;
 
