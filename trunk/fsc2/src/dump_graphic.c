@@ -362,7 +362,6 @@ void create_1d_color_hash( void )
 	FL_COLOR pixel;
 	G_Hash hash;
 	int hash_size = 101;
-	bool is_unique = SET;
 
 
 	for ( i = 0; i < MAX_CURVES; i++ )
