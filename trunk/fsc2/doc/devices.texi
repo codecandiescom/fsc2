@@ -276,7 +276,7 @@ does continuous sweeps (instead of simulating a sweep by stepping the
 current) the second argument isn't the sweep step size but must be the
 sweep rate in units of @code{A/s}.
 
-Sinilarily, for the Oxford IPS120-10 power suppky (@code{ips120_10})
+Similarly, for the Oxford IPS120-10 power supply (@code{ips120_10})
 the second argument is the sweep rate in @code{G/s}.
 
 For the @strong{Bruker ER032M} field controller for some combinations of
