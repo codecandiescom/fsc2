@@ -6,8 +6,9 @@
 
 #include "fsc2.h"
 
-#include <malloc.h>
+#if defined DEBUG
 #include <mcheck.h>
+#endif
 
 
 int main( int argc, char *argv[ ] )
