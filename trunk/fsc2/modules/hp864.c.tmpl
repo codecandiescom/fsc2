@@ -372,8 +372,8 @@ Var *synthesizer_attenuation( Var *v )
 
 	if ( att > hp864_tmpl.min_attenuation || att < MAX_ATTEN )
 	{
-		print( FATAL, "RF attenuation (%g db) not within valid range (%g db "
-			   "to %g db).\n", att, MAX_ATTEN, hp864_tmpl.min_attenuation );
+		print( FATAL, "RF attenuation (%g dB) not within valid range (%g dB "
+			   "to %g dB).\n", att, MAX_ATTEN, hp864_tmpl.min_attenuation );
 		if ( FSC2_MODE == EXPERIMENT )
 			return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 		else
@@ -385,7 +385,7 @@ Var *synthesizer_attenuation( Var *v )
 		case PREPARATION :
 			if ( hp864_tmpl.attenuation_is_set )
 			{
-				print( SEVERE, "RF attenuation has already been set to %g db, "
+				print( SEVERE, "RF attenuation has already been set to %g dB, "
 					   "keeping old value.\n", hp864_tmpl.attenuation );
 				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 			}
@@ -1010,7 +1010,7 @@ Var *synthesizer_mod_ampl( Var *v )
 			THROW( EXCEPTION );
 		}
 
-		switch ( FSC2_MODE == EXPERIMENT )
+		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
 				if ( ! hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] )
