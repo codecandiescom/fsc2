@@ -13,7 +13,7 @@
 
 
 typedef	struct {
-	double y;
+	double v;
 	bool exist;
 } Scaled_Point;
 
@@ -28,7 +28,6 @@ typedef struct {
 	bool active;
 
 	double s2d[ 3 ];       /* scaled to display data scale factors */
-
 	double shift[ 3 ];     /* offsets on scaled data */
 
 	bool up,               /* flag, set if data don't fit into canvas */
@@ -48,6 +47,37 @@ typedef struct {
 
 	GC font_gc;             /* gc for font */
 } Curve_1d;
+
+
+typedef struct {
+	Scaled_Point *points;
+	XPoint *xpoints;
+	long count;            /* points in curve */
+
+	GC gc;
+
+	bool active;
+
+	double s2d[ 3 ];       /* scaled to display data scale factors */
+	double shift[ 3 ];     /* offsets on scaled data */
+
+	bool up,               /* flag, set if data don't fit into canvas */
+		 down,
+		 left,
+		 right;
+
+	Pixmap up_arr,
+		   down_arr,
+		   left_arr,
+		   right_arr;
+
+	bool can_undo;
+
+	double old_s2d[ 3 ];
+	double old_shift[ 3 ];
+
+	GC font_gc;             /* gc for font */
+} Curve_2d;
 
 
 typedef struct {
@@ -103,6 +133,7 @@ typedef struct {
 	int drag_canvas;
 
 	Curve_1d *curve[ MAX_CURVES ];
+	Curve_2d *curve2[ MAX_CURVES ];
 
 	FL_COLOR colors[ MAX_CURVES ];
 
@@ -134,12 +165,12 @@ void start_graphics( void );
 void stop_graphics( void );
 void graphics_free( void );
 void free_graphics( void );
-void reconfigure_window( Canvas *c, int w, int h );
-void recalc_XPoints( void );
-void recalc_XPoints_of_curve( Curve_1d *cv );
-void redraw_all( void );
-void redraw_canvas( Canvas *c );
-void repaint_canvas( Canvas *c );
+void reconfigure_window_1d( Canvas *c, int w, int h );
+void recalc_XPoints_1d( void );
+void recalc_XPoints_of_curve_1d( Curve_1d *cv );
+void redraw_all_1d( void );
+void redraw_canvas_1d( Canvas *c );
+void repaint_canvas_1d( Canvas *c );
 void switch_off_special_cursors( void );
 void clear_curve( long curve );
 

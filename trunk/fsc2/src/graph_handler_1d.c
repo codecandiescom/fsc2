@@ -5,25 +5,26 @@
 
 #include "fsc2.h"
 
-void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
-void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
-void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
-void save_scale_state( Curve_1d *cv );
-bool change_x_range( Canvas *c );
-bool change_y_range( Canvas *c );
-bool change_xy_range( Canvas *c );
-bool zoom_x( Canvas *c );
-bool zoom_y( Canvas *c );
-bool zoom_xy( Canvas *c );
-void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv );
+void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
+void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
+						 Canvas *c );
+void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c );
+void save_scale_state_1d( Curve_1d *cv );
+bool change_x_range_1d( Canvas *c );
+bool change_y_range_1d( Canvas *c );
+bool change_xy_range_1d( Canvas *c );
+bool zoom_x_1d( Canvas *c );
+bool zoom_y_1d( Canvas *c );
+bool zoom_xy_1d( Canvas *c );
+void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv );
 
 
 /*--------------------------------------------------------*/
 /* Handler for all kinds of X events the canvas receives. */
 /*--------------------------------------------------------*/
 
-int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
-					void *udata )
+int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
+					   void *udata )
 {
 	Canvas *c = ( Canvas * ) udata;
 
@@ -34,25 +35,25 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 	switch ( ev->type )
     {
         case Expose :
-			repaint_canvas( c );
+			repaint_canvas_1d( c );
             break;
 
 		case ConfigureNotify :
             if ( ( int ) c->w == w && ( int ) c->h == h )
 				break;
-            reconfigure_window( c, w, h );
+            reconfigure_window_1d( c, w, h );
             break;
 
 		case ButtonPress :
-			press_handler( obj, window, ev, c );
+			press_handler_1d( obj, window, ev, c );
 			break;
 
 		case ButtonRelease :
-			release_handler( obj, window, ev, c );
+			release_handler_1d( obj, window, ev, c );
 			break;
 
 		case MotionNotify :
-			motion_handler( obj, window, ev, c );
+			motion_handler_1d( obj, window, ev, c );
 			break;
 	}
 
@@ -63,7 +64,7 @@ int canvas_handler( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
 	long i;
 	Curve_1d *cv;
@@ -140,7 +141,7 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 					break;
 			}
 
-			repaint_canvas( c );
+			repaint_canvas_1d( c );
 			break;
 
 		case 2 :                               /* middle button */
@@ -156,7 +157,7 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				cv = G.curve[ i ];
 
 				if ( cv->active )
-					save_scale_state( cv );
+					save_scale_state_1d( cv );
 				else
 					cv->can_undo = UNSET;
 			}
@@ -168,7 +169,7 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			/* Don't draw the box anymore */
 
 			G.canvas.is_box = UNSET;
-			repaint_canvas( &G.canvas );
+			repaint_canvas_1d( &G.canvas );
 			break;
 
 		case 4 :                               /* right button */
@@ -189,7 +190,7 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			else
 				G.canvas.is_box = UNSET;
 
-			repaint_canvas( &G.canvas );
+			repaint_canvas_1d( &G.canvas );
 			break;
 	}
 }
@@ -198,7 +199,7 @@ void press_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+void release_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
 	int dummy;
 	bool scale_changed = UNSET;
@@ -235,15 +236,15 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* x-axis window */
-					scale_changed = change_x_range( c );
+					scale_changed = change_x_range_1d( c );
 					break;
 
 				case 2 :                       /* in y-axis window */
-					scale_changed = change_y_range( c );
+					scale_changed = change_y_range_1d( c );
 					break;
 
 				case 3 :                       /* in canvas window */
-					scale_changed = change_xy_range( c );
+					scale_changed = change_xy_range_1d( c );
 					break;
 			}
 			c->is_box = UNSET;
@@ -251,24 +252,24 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 		case 2 :                               /* middle mouse button */
 			if ( G.drag_canvas & 1 )
-				redraw_canvas( &G.x_axis );
+				redraw_canvas_1d( &G.x_axis );
 			if ( G.drag_canvas & 2 )
-				redraw_canvas( &G.y_axis );
+				redraw_canvas_1d( &G.y_axis );
 			break;
 
 		case 4 :                               /* right mouse button */
 			switch ( G.drag_canvas )
 			{
 				case 1 :                       /* in x-axis window */
-					scale_changed = zoom_x( c );
+					scale_changed = zoom_x_1d( c );
 					break;
 
 				case 2 :                       /* in y-axis window */
-					scale_changed = zoom_y( c );
+					scale_changed = zoom_y_1d( c );
 					break;
 
 				case 3 :                       /* in canvas window */
-					scale_changed = zoom_xy( c );
+					scale_changed = zoom_xy_1d( c );
 					break;
 			}
 			break;
@@ -287,18 +288,18 @@ void release_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 			fl_set_button( run_form->full_scale_button, 0 );
 		}			
 
-		redraw_all( );
+		redraw_all_1d( );
 	}
 
 	if ( ! scale_changed || c != &G.canvas )
-		repaint_canvas( c );
+		repaint_canvas_1d( c );
 }
 
 
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
+void motion_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 {
 	Curve_1d *cv;
 	XEvent new_ev;
@@ -354,7 +355,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 					c->box_h = - c->box_y;
 			}
 
-			repaint_canvas( c );
+			repaint_canvas_1d( c );
 			break;
 
 		case 2 :                               /* middle button */
@@ -367,7 +368,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 
 				/* Recalculate the offsets and shift curves in the canvas */
 
-				shift_XPoints_of_curve( c, cv );
+				shift_XPoints_of_curve_1d( c, cv );
 				scale_changed = SET;
 			}
 
@@ -380,15 +381,15 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 				fl_set_button( run_form->full_scale_button, 0 );
 			}
 
-			redraw_canvas( &G.canvas );
+			redraw_canvas_1d( &G.canvas );
 			if ( G.drag_canvas & 1 )
-				redraw_canvas( &G.x_axis );
+				redraw_canvas_1d( &G.x_axis );
 			if ( G.drag_canvas & 2 )
-				redraw_canvas( &G.y_axis );
+				redraw_canvas_1d( &G.y_axis );
 			break;
 
 		case 3 : case 5 :               /* left and (middle or right) button */
-			repaint_canvas( &G.canvas );
+			repaint_canvas_1d( &G.canvas );
 			break;
 	}
 }
@@ -397,7 +398,7 @@ void motion_handler( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-void save_scale_state( Curve_1d *cv )
+void save_scale_state_1d( Curve_1d *cv )
 {
 	cv->old_s2d[ X ] = cv->s2d[ X ];
 	cv->old_s2d[ Y ] = cv->s2d[ Y ];
@@ -411,7 +412,7 @@ void save_scale_state( Curve_1d *cv )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_x_range( Canvas *c )
+bool change_x_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -429,7 +430,7 @@ bool change_x_range( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 
 		x1 = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 		x2 = c->ppos[ X ] / cv->s2d[ X ] - cv->shift[ X ];
@@ -437,7 +438,7 @@ bool change_x_range( Canvas *c )
 		cv->shift[ X ] = - d_min( x1, x2 );
 		cv->s2d[ X ] = ( double ) ( G.canvas.w - 1 ) / fabs( x1 - x2 );
 
-		recalc_XPoints_of_curve( cv );
+		recalc_XPoints_of_curve_1d( cv );
 		scale_changed = SET;
 	}
 
@@ -448,7 +449,7 @@ bool change_x_range( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_y_range( Canvas *c )
+bool change_y_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -466,7 +467,7 @@ bool change_y_range( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 
 		y1 = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) / cv->s2d[ Y ]
 			 - cv->shift[ Y ];
@@ -476,7 +477,7 @@ bool change_y_range( Canvas *c )
 		cv->shift[ Y ] = - d_min( y1, y2 );
 		cv->s2d[ Y ] = ( double ) ( G.canvas.h - 1 ) / fabs( y1 - y2 );
 
-		recalc_XPoints_of_curve( cv );
+		recalc_XPoints_of_curve_1d( cv );
 		scale_changed = SET;
 	}
 
@@ -487,7 +488,7 @@ bool change_y_range( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool change_xy_range( Canvas *c )
+bool change_xy_range_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -502,7 +503,7 @@ bool change_xy_range( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 		cv->can_undo = UNSET;
 
 		if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
@@ -534,7 +535,7 @@ bool change_xy_range( Canvas *c )
 		}
 
 		if ( scale_changed )
-			recalc_XPoints_of_curve( cv );
+			recalc_XPoints_of_curve_1d( cv );
 	}
 
 	return scale_changed;
@@ -544,7 +545,7 @@ bool change_xy_range( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_x( Canvas *c )
+bool zoom_x_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -562,7 +563,7 @@ bool zoom_x( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 
 		px = G.start[ X ] / cv->s2d[ X ] - cv->shift[ X ];
 
@@ -583,7 +584,7 @@ bool zoom_x( Canvas *c )
 
 		cv->shift[ X ] = G.start[ X ] / cv->s2d[ X ] - px;
 
-		recalc_XPoints_of_curve( cv );
+		recalc_XPoints_of_curve_1d( cv );
 		scale_changed = SET;
 	}
 
@@ -594,7 +595,7 @@ bool zoom_x( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_y( Canvas *c )
+bool zoom_y_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -612,7 +613,7 @@ bool zoom_y( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 
 		/* Get the value in the interval [0, 1] corresponding to the mouse
 		   posaition */
@@ -638,7 +639,7 @@ bool zoom_y( Canvas *c )
 		cv->shift[ Y ] = ( ( double ) G.canvas.h - 1.0 - G.start[ Y ] ) /
 				                                             cv->s2d[ Y ] - py;
 
-		recalc_XPoints_of_curve( cv );
+		recalc_XPoints_of_curve_1d( cv );
 		scale_changed = SET;
 	}
 
@@ -649,7 +650,7 @@ bool zoom_y( Canvas *c )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-bool zoom_xy( Canvas *c )
+bool zoom_xy_1d( Canvas *c )
 {
 	long i;
 	bool scale_changed = UNSET;
@@ -664,7 +665,7 @@ bool zoom_xy( Canvas *c )
 		if ( ! cv->active )
 			continue;
 
-		save_scale_state( cv );
+		save_scale_state_1d( cv );
 		cv->can_undo = UNSET;
 
 		if ( abs( G.start[ X ] - c->ppos[ X ] ) > 4 )
@@ -710,7 +711,7 @@ bool zoom_xy( Canvas *c )
 		}
 		
 		if ( scale_changed )
-			recalc_XPoints_of_curve( cv );
+			recalc_XPoints_of_curve_1d( cv );
 	}
 
 	return scale_changed;
@@ -723,7 +724,7 @@ bool zoom_xy( Canvas *c )
 /* offset to all XPoints instead of going through all the scalings...    */
 /*-----------------------------------------------------------------------*/
 
-void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
+void shift_XPoints_of_curve_1d( Canvas *c, Curve_1d *cv )
 {
 	long j, k;
 	int dx = 0,
@@ -774,4 +775,3 @@ void shift_XPoints_of_curve( Canvas *c, Curve_1d *cv )
 		}
 	}
 }
-

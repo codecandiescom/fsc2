@@ -1369,7 +1369,9 @@ Var *f_display( Var *v )
 		return vars_push( INT_VAR, 1 );
 	}
 
-	/* We need to determine the amount of shared memory needed */
+	assert( I_am == CHILD );
+
+	/* Determine the needed amount of shared memory */
 
 	len =   4 * sizeof( char )            /* identifier 'fsc2' */
 		  + sizeof( len )                 /* length field itself */

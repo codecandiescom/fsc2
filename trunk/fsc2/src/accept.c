@@ -158,7 +158,8 @@ void accept_new_data( void )
 
 	/* Finally display the new data by redrawing the canvas */
 
-	redraw_all( );
+	if ( G.dim == 1 )
+		redraw_all_1d( );
 }
 
 
@@ -180,12 +181,12 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	long i, j;
 
 
-	/* Check that the curve number is ok */
+	/* Test if the curve number is ok */
 
 	if ( curve >= G.nc )
 	{
-		eprint( FATAL, "$s:%ld: Curve %ld not declared.\n", Fname, Lc,
-				curve + ARRAY_OFFSET );
+		eprint( FATAL, "$s:%ld: There is no curve %ld.\n", Fname, Lc,
+				curve + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -224,13 +225,6 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 	if ( x_index + len > G.nx )
 	{
-		if ( G.is_nx )       /* number of points has been fixed by init_1d() */
-		{
-			eprint( WARN, "%s:%ld: More points than declared in "
-					"`init_1d()'.\n", Fname, Lc );
-			G.is_nx = UNSET;
-		}
-
 		for ( i = 0; i < G.nc; i++ )
 		{
 			cv = G.curve[ i ];
@@ -287,8 +281,8 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 
 				for ( j = 0; j < G.nx; j++ )
 					if ( cv->points[ j ].exist )
-						cv->points[ j ].y = ( G.rwc_delta[ Y ]
-						        * cv->points[ j ].y + G.rw_y_min - rw_y_min ) /
+						cv->points[ j ].v = ( G.rwc_delta[ Y ]
+						        * cv->points[ j ].v + G.rw_y_min - rw_y_min ) /
 							                                   new_rwc_delta_y;
 
 				if ( ! G.is_fs )
@@ -311,7 +305,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 				cv = G.curve[ i ];
 				for ( j = 0; j < G.nx; j++ )
 					if ( cv->points[ j ].exist )
-						cv->points[ j ].y = ( cv->points[ j ].y - rw_y_min ) /
+						cv->points[ j ].v = ( cv->points[ j ].v - rw_y_min ) /
 						                                       new_rwc_delta_y;
 			}
 
@@ -346,10 +340,10 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 		}
 
 		if ( G.is_scale_set )
-			G.curve[ curve ]->points[ i ].y = ( data - G.rw_y_min ) /
+			G.curve[ curve ]->points[ i ].v = ( data - G.rw_y_min ) /
 				                                              G.rwc_delta[ Y ];
 		else
-			G.curve[ curve ]->points[ i ].y = data;
+			G.curve[ curve ]->points[ i ].v = data;
 
 		/* Increase the point count if the point is new and mark it as set */
 
@@ -371,7 +365,7 @@ void accept_1d_data( long x_index, long curve, int type, void *ptr )
 	{
 		if ( ! G.scale_changed && i != curve )
 			continue;
-		recalc_XPoints_of_curve( G.curve[ i ] );
+		recalc_XPoints_of_curve_1d( G.curve[ i ] );
 	}
 
 	G.scale_changed = UNSET;

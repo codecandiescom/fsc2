@@ -43,8 +43,8 @@ bison_sources  = $(wildcard *_parser.y)
 flex_sources   = $(wildcard *_lexer.flex)
 c_sources      = fsc2.c fsc2_rsc.c assign.c util.c exceptions.c variables.c \
 				 func.c T.c phases.c ppcheck.c pulse.c exp.c devices.c \
-				 gpib.c run.c comm.c chld_func.c graphics.c graph_handler.c \
-				 accept.c loader.c bugs.c
+				 gpib.c run.c comm.c chld_func.c graphics.c \
+				 graph_handler_1d.c accept.c loader.c bugs.c
 sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 				 ${c_sources}
 objects        = $(sources:.c=.o)
