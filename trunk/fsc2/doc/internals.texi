@@ -1758,11 +1758,11 @@ script.
 @section Coding conventions
 
 
-When you try the source it might be helpful to know about a few conventions
-I try to follow. This concerns mostly the names and spelling of variables.
-And while I try to be consistent were I, unfortunately, don't follow my
-own rules and later have to try to to correct these mistakes. I can't promise
-that I am always successful in this endeavor.
+When you try to read the source it might be helpful to know about a few
+conventions I try to follow. This concerns mostly the names and spelling
+of variables. And while I try to be consistent unfortunately I don't always
+follow my own rules all of the time and thus later have to try to to correct
+these mistakes. I can't promise that I am always successful in this endeavor.
 
 Local variables with function scope should always be in all lower case
 characters, i.e.@: @code{num_points}. For local variables with file scope
