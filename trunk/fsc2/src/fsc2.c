@@ -60,12 +60,12 @@ int main( int argc, char *argv[ ] )
 	}
 #endif
 
-	/* With the option "-t" just test the file and output results to stderr
-	   - this can be used to test a file e.g. with emacs' "M-x compile"
-	   feature or from the shell without any graphics stuff involved.
-	   With the option -S the program is started immediately, while with
-	   -T it is tested. If the option -s is found fsc2 will send its parent
-	   process a SIGUSR1 signal when it got started successfully. */
+	/* With the option "-t" just test the file and output results to stderr -
+	   this can be used to test a file e.g. with emacs' "M-x compile" feature
+	   or from the shell without any graphics stuff involved.  With the option
+	   '-S' the program is started immediately, while with '-T' it is
+	   tested. If the option '-s' is found fsc2 will send its parent process a
+	   SIGUSR1 signal when it got started successfully. */
 
 	if ( argc > 1 )
 	{
@@ -79,9 +79,9 @@ int main( int argc, char *argv[ ] )
 				return EXIT_FAILURE;
 			}
 
-			fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
-
 			just_testing = SET;    /* signal "just_testing"-mode to eprint() */
+
+			fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
 			return scan_main( fname ) ? EXIT_SUCCESS : EXIT_FAILURE;
 		}
 
