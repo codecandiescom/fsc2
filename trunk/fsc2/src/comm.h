@@ -10,6 +10,10 @@
 
 enum {
 	C_EPRINT = 0,
+	C_INT,
+	C_LONG,
+	C_FLOAT,
+	C_DOUBLE
 };
 
 
@@ -17,13 +21,17 @@ enum {
 typedef struct {
 	int type;
 	union {
-		size_t eprint_len;    /* length of following string (without '\0') */
+		size_t len;    /* length of following string (without '\0') */
+		int int_data;
+		long long_data;
+		float float_data;
+		double double_data;
 	} data;
 } CS;
 
 
 
-void reader( void );
+long reader( void *ret );
 void writer( int type, ... );
 
 

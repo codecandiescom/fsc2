@@ -673,7 +673,7 @@ void new_data_callback( FL_OBJECT *a, long b )
 {
 	a = a;
 	b = b;
-	reader( );
+	reader( NULL );
 	kill( child_pid, DO_SEND );
 }
 
