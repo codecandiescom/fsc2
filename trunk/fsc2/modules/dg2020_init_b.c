@@ -585,10 +585,13 @@ static void dg2020_pulse_start_setup( void )
 			for ( k = 0; k < f->pc_len; k++ )
 				f->pulses[ j ]->channel[ k ] = NULL;
 
-			for ( k = 0; k < f->pc_len; k++ )
-				f->pulses[ j ]->channel[ k ] =
-					f->pcm[ ( f->pulses[ j ]->pc->sequence[ k ]
-							  - PHASE_PLUS_X ) * f->pc_len + k ];
+			if ( f->num_needed_channels == 1 )
+				f->pulses[ j ]->channel[ k ] = f->channel[ 0 ];
+			else
+				for ( k = 0; k < f->pc_len; k++ )
+					f->pulses[ j ]->channel[ k ] =
+						f->pcm[ ( f->pulses[ j ]->pc->sequence[ k ]
+								  - PHASE_PLUS_X ) * f->pc_len + k ];
 		}
 	}
 }
