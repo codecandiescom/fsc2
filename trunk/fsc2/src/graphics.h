@@ -146,12 +146,13 @@ struct Curve_1d {
 struct Curve_2d {
 	bool is_fs;
 	bool is_scale_set;
-	bool scale_changed;
 
 	Scaled_Point *points;
 	XPoint *xpoints,
 		   *xpoints_s;
 	long count;             /* points in curve */
+
+	bool needs_recalc;
 
 	unsigned short w, h;
 
@@ -274,7 +275,6 @@ struct Graphics {
 struct Graphics_1d {
 
 	bool is_scale_set;      /* have scaling factors been calculated ? */
-	bool scale_changed;     /* have scaling factors changed ? */
 	bool is_fs;             /* state of full scale button */
 
 	long nc;                /* number of curves */
@@ -313,7 +313,6 @@ struct Graphics_1d {
 struct Graphics_2d {
 
 	bool is_scale_set;      /* have scaling factors been calculated ? */
-	bool scale_changed;     /* have scaling factors changed ? */
 	bool is_fs;             /* state of full scale button */
 
 	long nc;                /* number of curves */
@@ -338,7 +337,7 @@ struct Graphics_2d {
 
 	int cursor[ 7 ];        /* the different cursors */
 
-	unsigned long color_list[ NUM_COLORS + 2 ];
+	GC gcs[ NUM_COLORS + 2 ];
 
 	Canvas x_axis;
 	Canvas y_axis;

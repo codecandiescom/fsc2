@@ -1177,9 +1177,9 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
 }
 
 
-/*----------------------------------------------*/
-/* Increments the number of data in x-direction */
-/*----------------------------------------------*/
+/*-------------------------------------------------*/
+/* Increments the number of 2D data in x-direction */
+/*-------------------------------------------------*/
 
 static bool incr_x( long x_index, long len )
 {
@@ -1228,9 +1228,9 @@ static bool incr_x( long x_index, long len )
 }
 
 
-/*----------------------------------------------*/
-/* Increments the number of data in y-direction */
-/*----------------------------------------------*/
+/*-------------------------------------------------*/
+/* Increments the number of 2D data in y-direction */
+/*-------------------------------------------------*/
 
 static bool incr_y( long y_index )
 {
@@ -1271,9 +1271,9 @@ static bool incr_y( long y_index )
 }
 
 
-/*----------------------------------------------------------*/
-/* Increments the number of data in both x- and y-direction */
-/*----------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Increments the number of 2D data in both x- and y-direction */
+/*-------------------------------------------------------------*/
 
 static bool incr_x_and_y( long x_index, long len, long y_index )
 {
