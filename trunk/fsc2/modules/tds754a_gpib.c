@@ -132,14 +132,14 @@ bool tds754a_init( const char *name )
 double tds754a_get_timebase( void )
 {
 	char reply[ 30 ];
-	long length;
+	long length = 30;
 
 
 	if ( gpib_write( tds754a.device, "HOR:MAI:SCA?", 12 ) == FAILURE ||
 		 gpib_read( tds754a.device, reply, &length ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	reply[length - 1] = '\0';
+	reply[ length - 1 ] = '\0';
 	return T_atof( reply );
 }
 
@@ -205,7 +205,7 @@ bool tds754a_get_trigger_pos( double *ret )
 
 long tds754a_get_num_avg( void )
 {
-	char reply[30];
+	char reply[ 30 ];
 	long length = 30;
 
 
@@ -273,8 +273,8 @@ bool tds754a_set_num_avg( long num_avg )
 
 int tds754a_get_acq_mode(void)
 {
-	char reply[30];
-	long length;
+	char reply[ 30 ];
+	long length = 30;
 
 
 	if ( gpib_write( tds754a.device, "ACQ:MOD?", 8 ) == FAILURE ||
@@ -302,7 +302,7 @@ int tds754a_get_acq_mode(void)
 bool tds754a_get_cursor_distance( double *cd )
 {
     char reply[ 30 ];
-    long length;
+    long length = 30;
 
 
     if ( gpib_write( tds754a.device, "CURS:VBA:POSITION2?", 19 ) == FAILURE ||
@@ -446,6 +446,21 @@ bool tds754a_set_track_cursors( bool flag )
 	char cmd[ 20 ] = "CURS:MODE  ";
 
 	strcat( cmd, flag ? "TRAC" : "IND" );
+    if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
+		tds754a_gpib_failure( );
+
+	return OK;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+bool tds754a_set_gated_meas( bool flag )
+{
+	char cmd[ 20 ] = "MEAS:GAT ";
+
+	strcat( cmd, flag ? "ON" : "OFF" );
     if ( gpib_write( tds754a.device, cmd, strlen( cmd ) ) == FAILURE )
 		tds754a_gpib_failure( );
 
@@ -629,7 +644,7 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 {
 	char cmd[ 40 ];
 	char reply[ 10 ];
-	long len;
+	long len = 10;
 	char *buffer;
 	long i;
 	double scale;
@@ -678,15 +693,15 @@ bool tds754a_get_curve( int channel, WINDOW *w, double **data, long *length )
 	if ( gpib_read( tds754a.device, reply, &len ) == FAILURE )
 		tds754a_gpib_failure( );
 
-	reply[ len - 1 ] = '\0';
+	reply[ len ] = '\0';
 
 	/* The number of data bytes is twice the number of data points plus
 	   one byte for the line feed character */
 
     len = T_atol( reply );
-	*length = ( len - 1 ) / 2;
+	*length = len / 2;
 
-	*data = T_malloc( *length * sizeof( long ) );
+	*data = T_malloc( *length * sizeof( double ) );
 	buffer = T_malloc( len );
 
 	/* Now get all the data bytes... */
