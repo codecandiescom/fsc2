@@ -159,8 +159,9 @@ void tool_box_delete( void )
 }
 
 
-/*------------------------------------------------------------*/
-/*------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* This function gets called for the EDL function "toolbox_freeze". */
+/*------------------------------------------------------------------*/
 
 Var *f_freeze( Var *v )
 {
@@ -690,8 +691,12 @@ void recreate_Tool_Box( void )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function is the handler when the tool box is about to be closed by */
+/* user intervention, i.e. by clicking on the close button. We make   */
+/* it impossible to close the tool box this way by simply ignoring    */
+/* the event.                                                         */
+/*--------------------------------------------------------------------*/
 
 static int tool_box_close_handler( FL_FORM *a, void *b )
 {
@@ -702,8 +707,11 @@ static int tool_box_close_handler( FL_FORM *a, void *b )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function appends an object to the tool box. In vertical layout mode */
+/* it will be drawn at the bottom of the tool box, in horizontal mode  */
+/* to thr right of the other objects.                                  */
+/*---------------------------------------------------------------------*/
 
 static FL_OBJECT *append_object_to_form( IOBJECT *io )
 {
@@ -913,8 +921,7 @@ static FL_OBJECT *append_object_to_form( IOBJECT *io )
 /*----------------------------------------------------------*/
 /* Callback function for all the objects in the tool box.   */
 /* The states or values are stored in the object structures */
-/* to be used by the functions button_state() and           */
-/* slider_value()                                           */
+/* to be used by the functions button_state() etc.          */
 /*----------------------------------------------------------*/
 
 static void tools_callback( FL_OBJECT *obj, long data )
@@ -1073,8 +1080,12 @@ static void tools_callback( FL_OBJECT *obj, long data )
 }
 
 
-/*------------------------------------------------------*/
-/*------------------------------------------------------*/
+/*----------------------------------------------------------*/
+/* Input and output objects can have a C-like format string */
+/* that tells how the numbers are to be formated. Here we   */
+/* check if the syntax of the format string the user gave   */
+/* us is valid.                                             */
+/*----------------------------------------------------------*/
 
 bool check_format_string( char *buf )
 {
@@ -1395,8 +1406,13 @@ static Var *f_tb_changed_child( Var *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* This function is called for the EDL function "toolbox_wait". It */
+/* pauses the execution of the EDL program until either the state  */
+/* of one of the objects (either all or one from a list the user   */
+/* passed to us) changes or the specified maximum waiting time is  */
+/* exceeded.                                                       */
+/*-----------------------------------------------------------------*/
 
 Var *f_tb_wait( Var *v )
 {
@@ -1405,6 +1421,15 @@ Var *f_tb_wait( Var *v )
 	double secs;
 	struct itimerval sleepy;
 
+
+	/* No tool box -> no objects -> no object state changes we could wait
+	   for... */
+
+	if ( Tool_Box == NULL || Tool_Box->objs == NULL )
+	{
+		print( FATAL, "No objects have been defined yet.\n" );
+		THROW( EXCEPTION );
+	}
 
 	/* The child process has it's own way of dealing with this */
 
@@ -1424,74 +1449,74 @@ Var *f_tb_wait( Var *v )
 
 	Internals.tb_wait = 0;
 
-	if ( Tool_Box != NULL )
+	/* First check if there's already an object with a state marked as
+	   changed. If there is one the ID of the first one we find is returned
+	   immediately. If there's a list of objects onl check for changes of
+	   objects in the list, otherwise check all objects. Don't tell about
+	   changed output objects, they only can be changed by calls of EDL
+	   function, not by user intervention. */
+
+	if ( v != NULL )
 	{
-		/* If there's a list of objects loop over it until the first changed
-		   one is found. Don't tell about output objects. */
-
-		if ( v != NULL )
+		for ( ; v != NULL; v = v->next )
 		{
-			for ( ; v != NULL; v = v->next )
+			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+				continue;
+			if ( io->is_changed )
 			{
-				io = find_object_from_ID( get_strict_long( v, "object ID" ) );
-				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-					continue;
-				if ( io->is_changed )
-				{
-					tb_wait_handler( io->ID );
-					return vars_push( INT_VAR, 0 );
-				}
+				tb_wait_handler( io->ID );
+				return vars_push( INT_VAR, 0 );
 			}
 		}
-		else    /* if there were no arguments loop over all objects */
+	}
+	else    /* if there were no arguments loop over all objects */
+	{
+		for ( io = Tool_Box->objs; io != NULL; io = io->next )
 		{
-			for ( io = Tool_Box->objs; io != NULL; io = io->next )
+			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+				continue;
+			if ( io->is_changed )
 			{
-				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-					continue;
-				if ( io->is_changed )
-				{
-					tb_wait_handler( io->ID );
-					return vars_push( INT_VAR, 0 );
-				}
-			}
-		}
-
-		/* None of the objects have changed - set up all objects we need to
-		   wait for to report a change */
-
-		if ( v != NULL )
-		{
-			for ( ; v != NULL; v = vars_pop( v ) )
-			{
-				io = find_object_from_ID( get_strict_long( v, "object ID" ) );
-				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-					continue;
-				io->report_change = SET;
-			}
-		}
-		else    /* if there were no arguments loop over all objects */
-		{
-			for ( io = Tool_Box->objs; io != NULL; io = io->next )
-			{
-				if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-					continue;
-				io->report_change = SET;
+				tb_wait_handler( io->ID );
+				return vars_push( INT_VAR, 0 );
 			}
 		}
 	}
 
-	/* Only really wait if the duration is at least 1 ms, we don't have
-	   a better time resolution anyway. Also don't wait for indefinite
-	   times if there's no toolbox. */
+	/* None of the objects have changed - set up all objects we're asked to
+	   wait for to report changes. */
 
-	if ( ( duration > 0.0 || Tool_Box == NULL ) && duration < 1.0e-3 )
+	if ( v != NULL )
+	{
+		for ( ; v != NULL; v = vars_pop( v ) )
+		{
+			io = find_object_from_ID( get_strict_long( v, "object ID" ) );
+			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+				continue;
+			io->report_change = SET;
+		}
+	}
+	else    /* if there were no arguments loop over all objects */
+	{
+		for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		{
+			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
+				continue;
+			io->report_change = SET;
+		}
+	}
+
+	/* Only really wait if the duration is at least 1 ms, we don't have
+	   a better time resolution anyway. */
+
+	if ( duration > 0.0 && duration < 1.0e-3 )
 	{
 		tb_wait_handler( 0 );
 		return vars_push( INT_VAR, 0 );
 	}
 
-	/* If the duration is a real time set up a timer */
+	/* If the duration is a real time (i.e. larger than 1 ms) set up a timer */
 
 	if ( duration > 0.0 )
 	{ 
@@ -1508,45 +1533,13 @@ Var *f_tb_wait( Var *v )
 }
 
 
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
-
-void tb_wait_handler( long ID )
-{
-	long result[ 2 ];
-	IOBJECT *io;
-	struct itimerval sleepy;
-
-
-	/* Do nothing if the timer has expired and we arrive here from the
-	   callback for an object or the callback for the 'STOP' button (in
-	   which case we're called with an argument of -1). */
-
-	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED && ID != 0 )
-		return;
-
-	/* If the timer hasn't expired yet stop it */
-
-	if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
-	{
-		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
-		setitimer( ITIMER_REAL, &sleepy, NULL );
-	}
-
-	result[ 0 ] = 1;
-	result[ 1 ] = ID >= 0 ? ID : 0;
-
-	for ( io = Tool_Box->objs; io != NULL; io = io->next )
-		io->report_change = UNSET;
-
-	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
-
-	writer( C_TBWAIT_REPLY, sizeof result, result );
-}
-
-
-/*--------------------------------------------------------------------*/
-/*--------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* This function is executed by the child process doing the experiment */
+/* for calls of the EDL function "toolbox_wait". Since the tool box    */
+/* belongs to the parent it just tells the parent about the parameter  */
+/* and lets it deal with the rest of the work. It only waits for the   */
+/* parent returning a result which gets passed on to the EDL script.   */
+/*---------------------------------------------------------------------*/
 
 static Var *f_tb_wait_child( Var *v )
 {
@@ -1628,6 +1621,46 @@ static Var *f_tb_wait_child( Var *v )
 	T_free( result );
 
 	return vars_push( INT_VAR, cid );
+}
+
+
+/*------------------------------------------------------------------*/
+/* This function gets called if either the timer for waiting for an */
+/* object change expired, an object we are waiting for changed its  */
+/* state or the STOP button was pressed while we are waiting.       */
+/*------------------------------------------------------------------*/
+
+void tb_wait_handler( long ID )
+{
+	long result[ 2 ];
+	IOBJECT *io;
+	struct itimerval sleepy;
+
+
+	/* Do nothing if the timer has expired and we arrive here from the
+	   callback for an object or the callback for the 'STOP' button (in
+	   which case we're called with an argument of -1). */
+
+	if ( Internals.tb_wait == TB_WAIT_TIMER_EXPIRED && ID != 0 )
+		return;
+
+	/* If the timer hasn't expired yet stop it */
+
+	if ( Internals.tb_wait == TB_WAIT_TIMER_RUNNING )
+	{
+		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
+		setitimer( ITIMER_REAL, &sleepy, NULL );
+	}
+
+	result[ 0 ] = 1;
+	result[ 1 ] = ID >= 0 ? ID : 0;
+
+	for ( io = Tool_Box->objs; io != NULL; io = io->next )
+		io->report_change = UNSET;
+
+	Internals.tb_wait = TB_WAIT_NOT_RUNNING;
+
+	writer( C_TBWAIT_REPLY, sizeof result, result );
 }
 
 

@@ -352,10 +352,9 @@ static Var *f_bcreate_child( Var *v, long type, long coll )
 }
 
 
-/*--------------------------------------*/
-/* Deletes one or more buttons          */
-/* Parameter are one or more button IDs */
-/*--------------------------------------*/
+/*-----------------------------------------------------------------------*/
+/* Deletes one or more buttons, parameter(s) are one or more button IDs. */
+/*-----------------------------------------------------------------------*/
 
 Var *f_bdelete( Var *v )
 {
