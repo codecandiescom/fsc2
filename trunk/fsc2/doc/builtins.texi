@@ -90,16 +90,16 @@ windows will be displayed, one for the 1D-data and one for the 2D-data.
 In 1D-display to display a new data point you have to specify the @i{x}-
 and the @i{y}-coordinate of the point. The @i{x}-coordinate is always an
 integer number, where @code{1} indicates the left-most point
-(@i{x}-coordinates belw @code{1} aren't allowed). As the
-@i{y}-coordinate usually simply the measured value is specified. To be
-able to draw a meaningful @i{x}-axis the program needs another piece of
+(@i{x}-coordinates below @code{1} aren't allowed). As the
+@i{y}-coordinate usually the measured value is specified. To be able to
+draw a meaningful @i{x}-axis the program needs another piece of
 information: the starting point of the @i{x}-axis and the difference
-between the points drawn at the @i{x}-axis. For example, if you do an
-cw-EPR experiment, starting with a field of @w{3400 G} and a spacing of
-@w{0.5 G} between the data points you will have to tell the program
-about this in the graphic initialization. If you now specify, when
-drawing a new point, an @i{x}-coordinate of @code{11} the point will
-appear at an axis position of @w{3410 G} because the point numbered
+between two adjacent points drawn along the @i{x}-axis. For example, if
+you do an cw-EPR experiment, starting with a field of @w{3400 G} and a
+spacing of @w{0.5 G} between the data points you will have to tell the
+program about this in the graphic initialization. If you now specify,
+when drawing a new point, an @i{x}-coordinate of @code{11} the point
+will appear at an axis position of @w{3410 G} because the point numbered
 @code{1} is drawn at @w{3400 G}, the point numbered @code{2} at
 @w{3400.5 G} etc.@:, so the point numbered @code{11} will appear at
 @w{3410 G}.
@@ -114,13 +114,23 @@ will be a floating point number. As in the case of 1D-displays also for
 meaningful axis. Here not only the starting point and increment for the
 @i{x}-axis must be given but also values for the @i{y}-axis.
 
-Finally another point: If you have not only one data point to draw but a
-whole array you can do this without having to draw each point on its
-own. Instead, when in the function for drawing you enter a
-(one-dimensional) array instead of a single value (as the
-@i{y}-coordinate for 1D-display or the @i{z}-coordinate for 2D-display)
-all the points of the array will be drawn, starting at the place you
-specified and from there to the right, i.e.@: always in @i{x}-direction.
+Another point: If you have not only one data point to draw but a whole
+1D-array (or in the case of 2D-display even a 2D-array, i.e.@: a
+complete "picture") you can do this without having to draw each point on
+its own. Instead, the functions for drawing let you specify a whole
+array. The data from the array are drawn so that the first data point of
+the array appears at the @i{x}-coordinate you specified, and the
+follwoing points further to the right. In case of 2D-arrays the @i{x}-
+and @i{y}-coordinate specifies the lower left hand corner of where the
+2D-array will be drawn.
+
+Finally, for 1D-display also another display mode is available where new
+data are always drawn automatically to the right of already displayed
+points and where the whole set of already drawn points is shifted to the
+left (and out of the viewable area when the new data points wouldn't fit
+into the display window anymore). Thus in this "sliding display" mode no
+automatical scaling happens, old data are simply discarded when they
+don't fit into the display window anymore.
 
 
 @table @samp
@@ -271,6 +281,11 @@ Formally, the function with its arguments can be written as
 display( n_x_point, data [ , n_curve [ , ... ] ] )
 @end example
 
+When the display mode (@ref{display_mode}) is set to @code{SLIDING
+DISPLAY} the @i{x}-coordinate has no function at all (but must be given
+and must be larger than @code{0}), new data points are always appended
+to the right of already drawn data points.
+
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
@@ -351,7 +366,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ display_mode}
+@anchor{display_mode}
 @item display_mode()
 @findex display_mode()
 Beside the normal display mode, where data get rescaled automatically to
