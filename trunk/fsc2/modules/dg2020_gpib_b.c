@@ -96,8 +96,10 @@
   to implement reasonable GPIB commands. E.g., who can be that stupid to write
   a command for setting pattern bits in a way that you have to send a complete
   byte over the already slow enough GPIB bus just to set one single bit of a
-  pulser channel? And why isn't there for more than 90% of the stuff that you
-  can do via the keyboard an equivalent GPIB command?
+  pulser channel? And why isn't there at least a command to set a block of
+  pattern bits by sending the start end length plus the state? And, finally,
+  why isn't there for more than 90% of the stuff that you can do via the
+  keyboard an equivalent GPIB command?
 
   Ok, they implemented the possibility to simulate all the things that you can
   do via the keyboard with the "ABSTouch" command but than made it complete
@@ -128,13 +130,12 @@
   the impression that Tektronix's devices are quite good and especially the
   programming interface was real good but since they have been bought up by
   Sony much seems to have gone down the drain. Obviously, people at Sony have
-  aproblem understanding the difference between a walkman and a pulse data
+  a problem understanding the difference between a walkman and a pulse data
   generator...
 
   </RANT>
 
 */
-
 
 
 #include "dg2020_b.h"
@@ -231,7 +232,7 @@ bool dg2020_init( const char *name )
 
 	/* Set the time base */
 
-	if ( ! dg2020.is_cw_mode && ! dg2020_set_timebase( dg2020.timebase ) )
+	if ( ! dg2020_set_timebase( dg2020.timebase ) )
 		dg2020_gpib_failure( );
 
 	/* Set the memory size needed */
@@ -241,64 +242,57 @@ bool dg2020_init( const char *name )
 
 	/* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
 	   EXTERNAL trigger mode - in the later case also set trigger level and
-	   slope. For CW mode we need enhanced mode */
+	   slope. */
 
-	if ( ! dg2020.is_cw_mode )
+	if ( dg2020.trig_in_mode == INTERNAL )
 	{
-		if ( dg2020.trig_in_mode == INTERNAL )
-		{
-			if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 )
-				 == FAILURE )
-				dg2020_gpib_failure( );
-		}
-		else
-		{
-			if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 )
-				 == FAILURE )
-				dg2020_gpib_failure( );
-			if ( dg2020.is_trig_in_level )
-				dg2020_set_trigger_in_level( dg2020.trig_in_level );
-			if ( dg2020.is_trig_in_slope )
-				dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
-			if ( dg2020.is_trig_in_impedance )
-				dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
-		}
-
-		/* If additional padding is needed or trigger mode is EXTERNAL create
-		   sequence and blocks */
-
-		if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
-			 ( ! dg2020_make_blocks( 2, dg2020.block ) ||
-			   ! dg2020_make_seq( 2, dg2020.block ) ) )
+		if ( gpib_write( dg2020.device, "MODE:STAT REP\n", 14 )
+			 == FAILURE )
 			dg2020_gpib_failure( );
-
-		if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
-			 ( ! dg2020_make_blocks( 1, dg2020.block ) ||
-			   ! dg2020_make_seq( 1, dg2020.block ) ) )
-			dg2020_gpib_failure( );
-
-		/* Do the assignment of channels to pods */
-
-		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		{
-			f = dg2020.function + i;
-			if ( ! f->is_used )
-				continue;
-
-			if ( f->num_pods == 1 )
-				dg2020_channel_assign( f->channel[ 0 ]->self,
-									   f->pod[ 0 ]->self );
-			else
-				for ( j = 0; j <= PHASE_CW - PHASE_PLUS_X; j++ )
-					if ( f->phase_setup->is_set[ j ] )
-						dg2020_channel_assign(
-							                 f->pcm[ j * f->pc_len + 0 ]->self,
-											  f->phase_setup->pod[ j ]->self );
-		}
 	}
 	else
-		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 ) == FAILURE )
+	{
+		if ( gpib_write( dg2020.device, "MODE:STAT ENH\n", 14 )
+			 == FAILURE )
 			dg2020_gpib_failure( );
+		if ( dg2020.is_trig_in_level )
+			dg2020_set_trigger_in_level( dg2020.trig_in_level );
+		if ( dg2020.is_trig_in_slope )
+			dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
+		if ( dg2020.is_trig_in_impedance )
+			dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
+	}
+
+	/* If additional padding is needed or trigger mode is EXTERNAL create
+	   sequence and blocks */
+
+	if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
+		 ( ! dg2020_make_blocks( 2, dg2020.block ) ||
+		   ! dg2020_make_seq( 2, dg2020.block ) ) )
+		dg2020_gpib_failure( );
+
+	if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
+		 ( ! dg2020_make_blocks( 1, dg2020.block ) ||
+		   ! dg2020_make_seq( 1, dg2020.block ) ) )
+		dg2020_gpib_failure( );
+
+	/* Do the assignment of channels to pods */
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+	{
+		f = dg2020.function + i;
+		if ( ! f->is_used )
+			continue;
+
+		if ( f->num_pods == 1 )
+			dg2020_channel_assign( f->channel[ 0 ]->self,
+								   f->pod[ 0 ]->self );
+		else
+			for ( j = 0; j <= PHASE_MINUS_Y - PHASE_PLUS_X; j++ )
+				if ( f->phase_setup->is_set[ j ] )
+					dg2020_channel_assign( f->pcm[ j * f->pc_len + 0 ]->self,
+										   f->phase_setup->pod[ j ]->self );
+	}
 
 	/* Set up the pod output voltages */
 
@@ -383,8 +377,7 @@ static bool dg2020_set_memory_size( long mem_size )
 	char cmd[ 50 ];
 
 
-	if ( mem_size < 64 || mem_size > MAX_PULSER_BITS )
-		return FAIL;
+	fsc2_assert( mem_size >= 64 && mem_size <= MAX_PULSER_BITS );
 
 	sprintf( cmd, ":DATA:MSIZ %ld\n", mem_size );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -409,9 +402,8 @@ bool dg2020_channel_assign( int channel, int pod )
 	char cmd[ 50 ];
 
 
-	if ( channel < 0 || channel >= MAX_CHANNELS ||
-		 pod < 0 || pod >= MAX_PODS )
-		return FAIL;
+	fsc2_assert( channel >= 0 && channel < MAX_CHANNELS &&
+				 pod >= 0 && pod < MAX_PODS );
 
 	sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d\n", pod, channel );
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -512,10 +504,8 @@ bool dg2020_make_seq( int num_blocks, BLOCK *block )
 
 	for ( i = 1; i < num_blocks; i++ )
 	{
-		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,%c,0,0,%c\n",
-				 i, block[ i ].blk_name, block[ i ].repeat,
-				 dg2020.is_cw_mode ? '1' : '0',
-				 dg2020.is_cw_mode ? '1' : '0' );
+		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
+				 i, block[ i ].blk_name, block[ i ].repeat );
 		if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 			dg2020_gpib_failure( );
 	}

@@ -56,7 +56,6 @@ Var *pulser_defense_to_shape_minimum_distance( Var *v );
 Var *pulser_state( Var *v );
 Var *pulser_channel_state( Var *v );
 Var *pulser_update( Var *v );
-Var *pulser_cw_mode( Var *v );
 Var *pulser_shift( Var *v );
 Var *pulser_increment( Var *v );
 Var *pulser_next_phase( Var *v );
@@ -177,9 +176,8 @@ typedef struct _F_ {
 	struct _C_ **pcm;           /* phase matrix */
 
 	PULSE_PARAMS *pulse_params;
-
-	int old_num_active_pulses;
 	PULSE_PARAMS *old_pulse_params;
+	int num_params;
 
 	bool uses_auto_shape_pulses;
 	Ticks left_shape_padding;
@@ -223,9 +221,9 @@ typedef struct {
 
 typedef struct _PHS_ {
 	bool is_defined;
-	bool is_set[ PHASE_CW - PHASE_PLUS_X + 1 ];
-	bool is_needed[ PHASE_CW - PHASE_PLUS_X + 1 ];
-	POD *pod[ PHASE_CW - PHASE_PLUS_X + 1 ];
+	bool is_set[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
+	bool is_needed[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
+	POD *pod[ PHASE_MINUS_Y - PHASE_PLUS_X + 1 ];
 	FUNCTION *function;
 } PHASE_SETUP;
 
@@ -243,8 +241,6 @@ typedef struct {
 	Ticks repeat_time;       /* only in INTERNAL mode */
 
 	bool keep_all;           /* keep even unused pulses ? */
-
-	bool is_cw_mode;         /* set for cw mode */
 
 	bool is_trig_in_mode;
 	bool is_trig_in_slope;
@@ -448,6 +444,7 @@ Ticks dg2020_get_max_seq_len( void );
 void dg2020_calc_padding( void );
 bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
 void dg2020_set( char *arena, Ticks start, Ticks len );
+void dg2020_clear( char *arena, Ticks start, Ticks len );
 int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
 void dg2020_duty_check( void );
 Ticks dg2020_calc_max_length( FUNCTION *f );
@@ -474,7 +471,6 @@ void dg2020_set_pulses( FUNCTION *f );
 void dg2020_set_phase_pulses( FUNCTION *f );
 void dg2020_commit( FUNCTION * f, bool flag );
 void dg2020_commit_phases( FUNCTION * f, bool flag );
-void dg2020_cw_setup( void );
 
 
 /* Finally the functions from dg2020_gpib_b.c */
