@@ -345,5 +345,5 @@ void dg2020_commit( FUNCTION * f );
 
 bool dg2020_init( const char *name );
 bool dg2020_run( bool flag );
-bool dg2020_set_timebase( void );
+bool dg2020_set_timebase( double timebase );
 bool dg2020_update_data( void );
