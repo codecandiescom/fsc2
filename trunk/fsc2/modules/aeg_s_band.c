@@ -188,10 +188,12 @@ int aeg_s_band_init_hook( void )
 
 	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
-	magnet.is_field = UNSET;
+	/* Finally initialize some variables */
+
+	magnet.is_field      = UNSET;
 	magnet.is_field_step = UNSET;
-	magnet.is_opened = UNSET;
-	magnet.fast_init = UNSET;
+	magnet.is_opened     = UNSET;
+	magnet.fast_init     = UNSET;
 
 	return 1;
 }
