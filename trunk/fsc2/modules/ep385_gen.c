@@ -225,7 +225,8 @@ bool ep385_set_trigger_mode( int mode )
 
 bool ep385_set_repeat_time( double rep_time )
 {
-	static double new_rep_time;
+	double old_rep_time;
+	double new_rep_time;
 	static double min_repeat_time;
 	static double max_repeat_time;
 
@@ -244,13 +245,13 @@ bool ep385_set_repeat_time( double rep_time )
 
 	if ( ep385.is_repeat_time &&
 		 rep_time != 
-		 	( new_rep_time = ( 12800 * ep385.repeat_time 
+		 	( old_rep_time = ( 12800 * ep385.repeat_time 
 								+ BITS_PER_MEMORY_BLOCK * MAX_MEMORY_BLOCKS )
 							 * ep385.timebase ) )
 	{
 		print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
-			   "already been set.\n", ep385_ptime( new_rep_time ),
-			   1.0 / new_rep_time );
+			   "already been set.\n", ep385_ptime( old_rep_time ),
+			   1.0 / old_rep_time );
 		THROW( EXCEPTION );
 	}
 

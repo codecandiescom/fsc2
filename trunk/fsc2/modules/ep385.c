@@ -192,7 +192,7 @@ int ep385_test_hook( void )
 				 lrnd( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE / FIXED_TIMEBASE );
 	}
 
-	if ( ep385_Pulses == NULL && ! ep385.is_cw_mode )
+	if ( ep385_Pulses == NULL )
 	{
 		ep385_is_needed = UNSET;
 		print( WARN, "Driver loaded but no pulses are defined.\n" );
