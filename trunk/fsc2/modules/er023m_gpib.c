@@ -297,9 +297,8 @@ int er023m_get_ct( void )
 /* as how many of the bits in the returned bytes are valid we   */
 /* also have to (re)read this number of bytes and recalculate   */
 /* the scaling factor and offset according to the algorithm     */
-/* that Robert Bittl (FU Berlin) has figured out and was kind   */
-/* enough to tell me (as usual, the manual is tells nothing     */
-/* about how to do it...).                                      */
+/* that Robert Bittl (FU Berlin) has figured out (as usual, the */
+/* manual tells nothing about how to do it...).                 */
 /*--------------------------------------------------------------*/
 
 void er023m_set_ct( int ct_mult )
