@@ -834,10 +834,14 @@ Var *vars_push( int type, ... )
 }
 
 
-/*----------------------------------------------------------------*/
-/* vars_pop() checks if a variable is on the variable stack and   */
-/* if it does removes it from the linked list making up the stack */
-/*----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+/* vars_pop() checks if a variable is on the variable stack and    */
+/* if it does removes it from the linked list making up the stack  */
+/* To make runing through a list of variables easier for some      */
+/* functions, this function returns a pointer to the next variable */
+/* on the stack (if the popped variable was on the stack and has a */
+/* next variable).                                                 */
+/*-----------------------------------------------------------------*/
 
 Var *vars_pop( Var *v )
 {

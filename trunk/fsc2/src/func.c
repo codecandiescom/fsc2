@@ -313,11 +313,8 @@ Var *func_call( Var *f )
 
 			for ( ac = 0, ap = f->next; ac < f->dim; ++ac, ap = ap->next )
 				;
-			for ( ; ap != NULL; ap = apn )
-			{
-				apn = ap->next;
-				vars_pop( ap );
-			}
+			for ( ; ap != NULL; ap = vars_pop( ap ) )
+				;
 		}
 
 		/* Less arguments than needed by the function is a fatal error. */
@@ -338,14 +335,11 @@ Var *func_call( Var *f )
 	else
 		ret = ( *f->val.fnct )( NULL );
 
-	/* Finally do clean up, i.e. remove the variable with the function and all
-	   parameters - just keep the return value */
+	/* Finally do a clean up, i.e. remove the variable with the function and
+	   all parameters - just keep the return value */
 
-	for ( ap = f; ap != ret; ap = apn )
-	{
-		apn = ap->next;
-		vars_pop( ap );
-	}
+	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
+		;
 
 	return ret;
 }
