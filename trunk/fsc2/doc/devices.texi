@@ -147,7 +147,7 @@ spent with field calibration.
 @table @samp
 @item magnet_name()
 @findex magnet_name()
-Returns a string with the name of the magnet tht is being used.
+Returns a string with the name of the magnet that is being used.
 
 
 @item magnet_setup()
