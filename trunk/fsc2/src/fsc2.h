@@ -80,7 +80,6 @@ Pulse *Plist = NULL;
 Pulse *Cur_Pulse = NULL;
 
 int TEST_RUN;
-unsigned int stored_exception_id = NO_EXCEPTION;
 
 #else   /*  ! FSC2_MAIN */
 
@@ -108,7 +107,7 @@ extern Pulse *Plist;
 extern Pulse *Cur_Pulse;
 
 extern int TEST_RUN;
-extern unsigned int stored_exception_id;
+
 #endif
 
 
