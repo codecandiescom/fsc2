@@ -573,7 +573,7 @@ static int me6x00_init_board( int board_count, struct pci_dev *dev )
 	}
 
 	/* Initialize the spinlock that's going to be used to avoid two
-	   processes opening ths same board at the same time */
+	   processes opening the same board at the same time */
 
 	spin_lock_init( &info->use_lock );
 
