@@ -117,7 +117,7 @@ fsc2_connect: fsc2_connect.o
 	chmod 644 $@
 
 $(resources:.fd=.o): %.o: %.c %.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS)  -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS) -c $< -o $@
 
 %.c %.h: %.fd
 	fdesign -convert $<
