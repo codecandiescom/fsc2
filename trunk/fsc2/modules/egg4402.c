@@ -346,18 +346,18 @@ Var *boxcar_get_curve( Var *v )
 
 	if ( FSC2_MODE == TEST )
 	{
-		buffer = T_calloc( num_points, sizeof( double ) );
-		cl = vars_push( FLOAT_ARR, buffer, last - first + 1 );
+		ret_buffer = DOUBLE_P T_calloc( num_points, sizeof *ret_buffer );
+		cl = vars_push( FLOAT_ARR, ret_buffer, last - first + 1 );
 		if ( size_dynamic )
 			cl->flags |= IS_DYNAMIC;
-		T_free( buffer );
+		T_free( ret_buffer );
 		return cl;
 	}
 
 	/* Get a buffer large enough to hold all data */
 
 	length = num_points * 15 + 1;
-	buffer = T_malloc( length );
+	buffer = UCHAR_P T_malloc( length );
 
 	/* Set transfer type to ASCII float */
 
@@ -399,7 +399,7 @@ Var *boxcar_get_curve( Var *v )
 #endif
 #endif
 
-		egg4402_query( buffer, &length );
+		egg4402_query( ( char * ) buffer, &length );
 		gpib_timeout( egg4402.device, old_timo );
 		TRY_SUCCESS;
 	}
@@ -419,11 +419,11 @@ Var *boxcar_get_curve( Var *v )
 	/* Get a buffer for the data in binary form and convert the ASCII data */
 
 	buffer[ length - 1 ] = '\0';
-	ret_buffer = T_malloc( num_points * sizeof( double ) );
+	ret_buffer = DOUBLE_P T_malloc( num_points * sizeof *ret_buffer );
 
 	for ( i = 0, cc = buffer; i < num_points; cc = cn, i++ )
 	{
-		cn = strchr( cc, '\r' );
+		cn = ( unsigned char * ) strchr( ( char * ) cc, '\r' );
 		if ( cn == NULL )
 		{
 			T_free( buffer );
@@ -433,7 +433,7 @@ Var *boxcar_get_curve( Var *v )
 		*cn = '\0';
 		cn += 2;                  /* the boxcar uses "\r\n" as separator */
 
-		ret_buffer[ i ] = T_atod( cc );
+		ret_buffer[ i ] = T_atod( ( char * ) cc );
 	}
 
 	T_free( buffer );
@@ -488,7 +488,7 @@ static void egg4402_query( char *buffer, long *length )
 			egg4402_failure( );
 	} while ( ! ( stb & 0x80 ) && ! ( stb & 1 ) );
 
-	if ( gpib_read( egg4402.device, &stb, &dummy ) == FAILURE ||
+	if ( gpib_read( egg4402.device, ( char * ) &stb, &dummy ) == FAILURE ||
 		 gpib_read( egg4402.device, buffer, length ) == FAILURE )
 		egg4402_failure( );
 }
