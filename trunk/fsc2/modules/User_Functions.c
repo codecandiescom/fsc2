@@ -89,7 +89,7 @@ static Var *get_phase_cycled_area_1( Var *v )
 	int access;
 	double *data;
 	int channels_needed = 1;
-	Acquisition_Sequence *aseq;
+	volatile Acquisition_Sequence *aseq;
 
 
 	V = v;

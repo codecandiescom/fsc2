@@ -1,0 +1,38 @@
+# $Id$
+#
+# Template file for Makefiles to create the modules from more than one source
+# file and a header file. The '##'s get replaced by the module name while
+# making the real Makefile from this template file.
+#
+# Copyright (C) 2001 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+
+##.so: $(##:.c=.o)
+	$(LD) $(LFLAGS) $^ -o $@
+	chmod 644 $@
+
+$(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf
+	$(CC) $(CFLAGS) -c $(LFLAGS) $< -o $@
+
+%_lexer.c: %_lexer.l $(src_header)
+	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
+	sed -e 's/register char \*yy_cp, \*yy_bp;/\
+			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
+	mv -f $@.x $@
