@@ -20,9 +20,9 @@
 # Boston, MA 02111-1307, USA.
 
 
-# The following variables determine where the program files will be copied to
-# by 'make install' as well as the name of the GPIB configuration and log file
-# (set 'prefix' to '.' for a local install)
+# The following variables determine where the program, auxiliary files and
+# the documentation will be copied to by 'make install' (set 'prefix' e.g.
+# to '.' for a local install).
 
 prefix         = /usr/local
 bindir         = $(prefix)/bin
@@ -32,35 +32,58 @@ docdir         = $(prefix)/share/doc/fsc2
 mandir         = $(prefix)/man
 infodir        = $(prefix)/info
 
-# Set the location of the GPIB configuration file (only needed with the
-# National Instruments GPIB library). If not set GPIB_CONF_FILE defaults
-# to /etc/gpib.conf.
-# Also set the file for writing logs about the activity on the GPIB bus.
+
+# The next variable tells the Makefile whether to compile the program for a
+# high or a low resolution display (high is roughly 17" monitors and better),
+# set it to either HIGH or LOW.
+
+RESOLUTION     = HIGH
+
+
+# The first variable sets the GPIB library to use, it must be set to either
+# LLP, NI or JTT for the LLP library, the National Instruments library or
+# the library written by me. Alternatively, if no GPIB support is needed
+# define GPIB_LIBRARY as NONE.
+# Then the location of the GPIB configuration file is set (this is only needed
+# with the National Instruments GPIB library, if not set GPIB_CONF_FILE
+# defaults to /etc/gpib.conf).
+# Next set the file for writing logs about the activity on the GPIB bus.
 # If not given logs will be written to stderr.
 # Finally, set the verbosity level of the GPIB logs, use HIGH, MEDIUM, LOW
-# or OFF. If not set it defaults to LOW, i.e. only errors will reported.
-# All of these settings are compiled into the program.
+# or OFF. If not set it defaults to LOW, i.e. only errors will be logged.
 
+GPIB_LIBRARY   = JTT
 GPIB_CONF_FILE = /etc/gpib.conf
 GPIB_LOG_FILE  = /tmp/gpib.log
 GPIB_LOG_LEVEL = HIGH
 
-# Comment out the next line if your machine does *not* have a i386 processor
-# (some stuff that helps me in debugging the program only works on Intel
-# processors, so removing the following line doesn't influence the basic
-# functionality, it just makes it a little bit harder to trace bugs...)
+
+# Here the owner of the program of all files that will be installed as well
+# as the group the owner belongs to has to be set. It is highly recommended
+# to create a special account and group for the program, with 'fsc2' being
+# the natural choice. For a local install, i.e. if the program will be used
+# by one person only and everything is going to be installed in his/her home
+# directory this persons account and group can be used.
+
+OWNER          = fsc2
+GROUP          = fsc2
+
+
+# Only leave the next line in if your machine does have a i386 type processor,
+# i.e. a i386, i486, Pentium (Pro, II, III or 4) or something compatible like
+# a K6, K7, Celeron, Duron, Athlon etc., otherwise comment it out or delete it.
+# (Some stuff that helps me with debugging the program uses a bit of assembler,
+# so it only works on processors with an Intel type architecture. Removing the
+# following line doesn't influence the basic functionality, it just makes it a
+# little bit harder to trace bugs...)
 
 IS_I386        = 1
-
-# To whom bug reports and crash messages will get send
-
-MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
 
 
 ##############################################################################
 # Here follow settings determining the make process - which compiler and
-# tools to use as well as the respective options. Better leave them alone
-# if you don't have a really good reason...
+# tools to use as well as their respective options. Better leave this alone
+# if you don't have a good reason...
 ##############################################################################
 
 SHELL          = /bin/sh
@@ -71,7 +94,7 @@ CFLAGS         = -ggdb -Wall -Wwrite-strings -Wstrict-prototypes \
 				 # -DDEBUG
 				 # -DMAX_DEBUG # for debugging of digitizer
 LD             = ld
-LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 -lgpib \
+LIBS           = -L/usr/X11R6/lib -L/usr/local/lib -lforms -lX11 \
 				 -lfl -lm -ldl
 				 # -lmcheck   # for malloc debugging
 				 # -lefence   # to run with efence
@@ -79,10 +102,12 @@ BISON          = bison
 BISONFLAGS     = -d -v -t -p
 FLEX           = flex
 FLEXFLAGS      = -B -P
-RM             = -rm
+RM             = rm
 RMFLAGS        = -f
-INSTALL        = install             # command for installing non-executables
-EXEC_INSTALL   = install             # command for installing executables
+LN             = ln
+LNFLAGS        = -s
+INSTALL        = install
+EXEC_INSTALL   = install
 
 
 ############################################################################
@@ -90,15 +115,24 @@ EXEC_INSTALL   = install             # command for installing executables
 ########### (unless you really know what you're doing ...) #################
 ############################################################################
 
+
+# To whom mail with bug reports and crash messages will get send
+
+MAIL_ADDRESS   = Jens.Toerring@physik.fu-berlin.de
+
+
 # Set up a variable with the machines FQDN
 
 machine_name = $(shell hostname -f)
 
-# Last time I checked the pion still had the old libc...
 
-ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
+# Check that the machine has a new libc, i.e. at least version 2, otherwise
+# some problems with the older libc have to be dealt with in the program
+
+ifneq ($(shell ls /lib/libc.so.6),/lib/libc.so.6)
 	CFLAGS += -DIS_STILL_LIBC1
 endif
+
 
 # Pass variables via macros to the source files
 # For directories make sure they end with a `/'.
@@ -127,30 +161,26 @@ else
 	CFLAGS += -Ddocdir=\"$(shell pwd)/doc/\"
 endif
 
-ifdef GPIB_CONF_FILE
-    CFLAGS += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
-else
-    CFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
-endif
 
 ifdef GPIB_LOG_FILE
 	CFLAGS += -DGPIB_LOG_FILE=\"$(GPIB_LOG_FILE)\"
+else
+	CFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
 endif
+
 
 ifeq ($(GPIB_LOG_LEVEL),HIGH)
 	CFLAGS += -DGPIB_LOG_LEVEL=LL_ALL
-endif
-
-ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_CE
-endif
-
-ifeq ($(GPIB_LOG_LEVEL),LOW)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
-endif
-
-ifeq ($(GPIB_LOG_LEVEL),OFF)
-	CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+else
+	ifeq ($(GPIB_LOG_LEVEL),MEDIUM)
+		CFLAGS += -DGPIB_LOG_LEVEL=LL_CE
+	else
+		ifeq ($(GPIB_LOG_LEVEL),OFF)
+			CFLAGS += -DGPIB_LOG_LEVEL=LL_NONE
+		else
+			CFLAGS += -DGPIB_LOG_LEVEL=LL_ERR
+		endif
+	endif
 endif
 
 ifdef IS_I386
@@ -161,13 +191,13 @@ ifdef MAIL_ADDRESS
 	CFLAGS += -DMAIL_ADDRESS=\"$(MAIL_ADDRESS)\"
 endif
 
+
 # Define variables with full paths for the 'mail' and 'addr2line' programs
+# and make sure the mail program and addr2line got found by 'which', otherwise
+# don't set the variables
 
 MAIL_PROGRAM   = $(shell which mail)
 ADDR2LINE      = $(shell which addr2line)
-
-# Make sure the mail program and addr2line got found by which,
-# otherwise don't set the variables
 
 ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
 	CFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
@@ -175,6 +205,82 @@ endif
 
 ifneq ($(word 1,$(ADDR2LINE)),which:)
 	CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
+endif
+
+
+# Here's some stuff that makes it more convenient to make and install on
+# machines that I know well enough - for these machines I don't have
+# to edit the Makefile all the time...
+
+INSTALL_MACHINE = install-unknown
+
+ifeq ($(machine_name),pion.anorg.chemie.uni-frankfurt.de)
+	RESOLUTION      = HIGH
+	GPIB_LIBRARY    = LLP
+	INSTALL_MACHINE = install-$(machine_name)
+endif
+
+ifeq ($(machine_name),moebi.physik.fu-berlin.de)
+	RESOLUTION      = LOW
+	GPIB_LIBRARY    = JTT
+	INSTALL_MACHINE = install-$(machine_name)
+endif
+
+ifeq ($(machine_name),crowley.physik.fu-berlin.de)
+	RESOLUTION      = HIGH
+	GPIB_LIBRARY    = JTT
+	INSTALL_MACHINE = install-$(machine_name)
+endif
+
+ifeq ($(machine_name),door.physik.fu-berlin.de)
+	RESOLUTION      = LOW
+	GPIB_LIBRARY    = JTT
+	INSTALL_MACHINE = install-$(machine_name)
+endif
+
+ifeq ($(machine_name),isaak.physik.fu-berlin.de)
+	RESOLUTION      = HIGH
+	GPIB_LIBRARY    = JTT
+	INSTALL_MACHINE = install-$(machine_name)
+endif
+
+ifeq ($(machine_name),crowley.none)
+	 RESOLUTION      = HIGH
+	 GPIB_LIBRARY    = NONE
+	 INSTALL_MACHINE = install-$(machine_name)
+endif
+
+
+# Finally the definition of remaining variables that are needed...
+
+ifeq ($(RESOLUTION),HIGH)
+	RESOLUTION   = high_res
+	CFLAGS      += -DSIZE=HI_RES
+else
+	RESOLUTION   = low_res
+	CFLAGS      += -DSIZE=LOW_RES
+endif
+
+ifeq ($(GPIB_LIBRARY),LLP)
+	GPIB_LIBRARY = gpib_old
+	LIBS += -lgpib
+else
+	ifeq ($(GPIB_LIBRARY),NI)
+		GPIB_LIBRARY = gpib_ni
+		LIBS += -lgpib
+		ifdef GPIB_CONF_FILE
+			CFLAGS += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
+		else
+			CFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
+		endif
+	else
+		ifeq ($(GPIB_LIBRARY),JTT)
+			GPIB_LIBRARY = gpib_jtt
+			LIBS += -lgpib
+		else
+			GPIB_LIBRARY = gpib_none
+		endif
+	endif
 endif
 
 
@@ -189,10 +295,11 @@ export            # export all variables to sub-makes
 		install-crowley.physik.fu-berlin.de            \
 		install-moebi.physik.fu-berlin.de              \
 		install-door.physik.fu-berlin.de               \
+		install-isaak.physik.fu-berlin.de              \
 		install-crowley.none
 
 
-# default rule: make the main program, the primary lexer and the modules
+# Default rule: make the main program, the primary lexer and the modules
 # (the Makefile for modules is called via the Makefile in src)
 
 all:
@@ -200,10 +307,10 @@ all:
 	cp src/fsc2 .
 	cp src/fsc2_clean .
 	cp src/fsc2_connect .
-	$(RM) $(RMFLAGS) fsc2_start fsc2_test fsc2_load
-	ln -s fsc2_connect fsc2_start
-	ln -s fsc2_connect fsc2_test
-	ln -s fsc2_connect fsc2_load
+	-$(RM) $(RMFLAGS) fsc2_start fsc2_test fsc2_load
+	$(LN) $(LNFLAGS) fsc2_connect fsc2_start
+	$(LN) $(LNFLAGS) fsc2_connect fsc2_test
+	$(LN) $(LNFLAGS) fsc2_connect fsc2_load
 	cp modules/*.so .
 	$(MAKE) -C utils all
 	$(MAKE) -C doc all
@@ -221,86 +328,97 @@ install:
 	$(INSTALL) -d $(auxdir)
 	$(INSTALL) -d $(docdir)
 
-	$(EXEC_INSTALL) -m 6755 -o fsc2 -g fsc2 fsc2 $(bindir)
-	$(EXEC_INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_clean $(libdir)
-	$(EXEC_INSTALL) -m 644 -o fsc2 -g fsc2 *.so $(libdir)
-	$(EXEC_INSTALL) -m 755 -o fsc2 -g fsc2 fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) fsc2_clean $(libdir)
+	$(EXEC_INSTALL) -m 644  -o $(OWNER) -g $(GROUP) *.so $(libdir)
+	$(EXEC_INSTALL) -m 755  -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
 
-	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
-					 $(bindir)/fsc2_load
-	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_start
-	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_test
-	ln -s $(bindir)/fsc2_connect $(bindir)/fsc2_load
+	-$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test \
+					  $(bindir)/fsc2_load
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_start
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_test
+	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 Functions $(libdir)
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 Devices $(libdir)
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 aux/*.xpm $(auxdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) Functions $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) Devices $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) aux/*.xpm $(auxdir)
 
 	$(MAKE) -C utils install
-	if `grep install-$(machine_name) ./Makefile > /dev/null`; then \
-		$(MAKE) install-$(machine_name); \
-	fi
+	$(MAKE) $(INSTALL_MACHINE)
 	$(MAKE) -C scripts install
 	$(MAKE) -C doc install
 
-# Here links for module libraries for often used devices for the different
+
+# Here links of module libraries for often used devices for the different
 # spectrometers are created. If, for example, the spectrometer always uses
-# the aeg_x_band.so as the driver for the magnet power supply by creating
-# a link with the name magnet.so allows to use magnet as an alternative name
-# for the power supply in EDL programs. Don't forget already existing links
-# before creating new ones!
+# the aeg_x_band.so as the driver for the magnet power supply, by creating
+# a link with the name magnet.so allows to use 'magnet' as an alternative name
+# for the power supply in EDL programs. Don't forget to delete already
+# existing links before creating new ones!
+
+install-unknown:
 
 install-pion.anorg.chemie.uni-frankfurt.de:
-	$(RM) $(RMFLAGS) $(libdir)/dg2020.so $(libdir)/s_band.so     \
-					 $(libdir)/lockin.so $(libdir)/gaussmeter.so \
-					 $(libdir)/magnet.so $(libdir)/pulser.so
-	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
-	chown fsc2.fsc2 $(libdir)/dg2020.so
-	ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so
-	chown fsc2.fsc2 $(libdir)/pulser.so
-	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
-	chown fsc2.fsc2 $(libdir)/s_band.so
-	ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so
-	chown fsc2.fsc2 $(libdir)/magnet.so
-	ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
-	ln -s $(libdir)/sr510.so $(libdir)/lockin.so
-	chown fsc2.fsc2 $(libdir)/lockin.so
+	-$(RM) $(RMFLAGS) $(libdir)/dg2020.so $(libdir)/s_band.so     \
+					  $(libdir)/lockin.so $(libdir)/gaussmeter.so \
+					  $(libdir)/magnet.so $(libdir)/pulser.so
+	$(LN) $(LNFLAGS)  $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	chown $(OWNER).$(GROUP) $(libdir)/dg2020.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_f.so $(libdir)/pulser.so
+	chown $(OWNER).$(GROUP) $(libdir)/pulser.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	chown $(OWNER).$(GROUP) $(libdir)/s_band.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_s_band.so $(libdir)/magnet.so
+	chown $(OWNER).$(GROUP) $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/sr510.so $(libdir)/lockin.so
+	chown $(OWNER).$(GROUP) $(libdir)/lockin.so
 
 install-crowley.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
-					 $(libdir)/boxcar.so
-	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
-	chown fsc2.fsc2 $(libdir)/gaussmeter.so
-	ln -s $(libdir)/hp8647a.so $(libdir)/synthesizer.so
-	chown fsc2.fsc2 $(libdir)/synthesizer.so
-	ln -s $(libdir)/egg4402so $(libdir)/boxcar.so
-	chown fsc2.fsc2 $(libdir)/boxcar.so
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
+	-$(RM) $(RMFLAGS) $(libdir)/gaussmeter.so $(libdir)/synthesizer.so \
+					  $(libdir)/boxcar.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
+	chown $(OWNER).$(GROUP) $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/hp8647a.so $(libdir)/synthesizer.so
+	chown $(OWNER).$(GROUP) $(libdir)/synthesizer.so
+	$(LN) $(LNFLAGS) $(libdir)/egg4402so $(libdir)/boxcar.so
+	chown $(OWNER).$(GROUP) $(libdir)/boxcar.so
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
 
 install-moebi.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
-					 $(libdir)/gaussmeter.so
-	ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
+					  $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
 	chown fsc2.fsc2 $(libdir)/pulser.so
-	ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
-	ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
 	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-door.physik.fu-berlin.de:
-	$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so \
-					 $(libdir)/magnet.so
-	ln -s $(libdir)/hfs9000.so $(libdir)/hfs9003.so
+	-$(RM) $(RMFLAGS) $(libdir)/hfs9003.so $(libdir)/w_band.so \
+					  $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/hfs9000.so $(libdir)/hfs9003.so
 	chown fsc2.fsc2 $(libdir)/hfs9003.so
-	ln -s $(libdir)/keithley228a.so $(libdir)/w_band.so
+	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/w_band.so
 	chown fsc2.fsc2 $(libdir)/w_band.so
-	ln -s $(libdir)/keithley228a.so $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/keithley228a.so $(libdir)/magnet.so
 	chown fsc2.fsc2 $(libdir)/magnet.so
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
+
+install-isaak.physik.fu-berlin.de:
+	-$(RM) $(RMFLAGS) $(libdir)/pulser.so $(libdir)/magnet.so \
+					  $(libdir)/gaussmeter.so
+	$(LN) $(LNFLAGS) $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	chown fsc2.fsc2 $(libdir)/pulser.so
+	$(LN) $(LNFLAGS) $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	$(LN) $(LNFLAGS) $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
 
 install-crowley.none:
-	$(INSTALL) -m 644 -o fsc2 -g fsc2 hp8647a.table $(libdir)
+	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) hp8647a.table $(libdir)
 
 
 # make all types of documentation
@@ -341,8 +459,9 @@ distclean:
 	$(MAKE) -C doc distclean
 	$(MAKE) -C utils distclean
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
-					 fsc2_load *.so *~
+	-$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_start fsc2_test \
+					  fsc2_load *.so *~
+
 
 # Clean up everything for a distribution and create a zipped tarball
 
@@ -350,19 +469,21 @@ pack:
 	$(MAKE) distclean
 	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tgz
 
-# Create zipped tarball and write to ZIP drive (at home or on moebi with
-# mount and unmount of ZIP drive otherwise assume that it's already mounted)
+
+# Create zipped tarball and write it to the ZIP drive (at home or on moebi
+# also mount and unmount the ZIP drive otherwise assume that it's already
+# mounted)
 
 ZIP:
 	$(MAKE) pack
-	if [ `hostname -f` = "crowley.none" \
-		 -o `hostname -f` = "moebi.physik.fu-berlin.de" ]; then \
-		if ! `grep ZIP /etc/mtab > /dev/null`; then \
-			sleep 1; \
-			mount /ZIP; \
-		fi; \
-		cp ../fsc2.tgz /ZIP; \
-		umount /ZIP; \
-	else \
-		scp ../fsc2.tgz moebi:/ZIP; \
+	if [    "$(machine_name)" = "crowley.none"                       \
+		 -o "$(machine_name)" = "moebi.physik.fu-berlin.de" ]; then  \
+		if ! `grep ZIP /etc/mtab > /dev/null`; then                  \
+			sleep 1;                                                 \
+			mount /ZIP;                                              \
+		fi;                                                          \
+		cp ../fsc2.tgz /ZIP;                                         \
+		umount /ZIP;                                                 \
+	else                                                             \
+		scp ../fsc2.tgz moebi.physik.fu-berlin.de:/ZIP;              \
 	fi
