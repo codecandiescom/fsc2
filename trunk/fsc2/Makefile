@@ -124,37 +124,44 @@ install:
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2_*.html $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.ps $(docdir)
 	install -m 444 -o fsc2 -g fsc2 doc/fsc2.pdf $(docdir)
-	if [ `hostname --fqdn` = "pion.anorg.chemie.uni-frankfurt.de" ]; then \
-        rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
-               $(libdir)/lockin.so $(libdir)/gaussmeter.so \
-               $(libdir)/magnet.so $(libdir)/pulser.so \
-			   $(libdir)/tds520c.so; \
-		ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so; \
-		chown fsc2.fsc2 $(libdir)/dg2020.so; \
-		ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so; \
-		chown fsc2.fsc2 $(libdir)/s_band.so; \
-		ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so; \
-		chown fsc2.fsc2 $(libdir)/gaussmeter.so; \
-		ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so; \
-		chown fsc2.fsc2 $(libdir)/magnet.so; \
-		ln -s $(libdir)/sr510.so $(libdir)/lockin.so; \
-		chown fsc2.fsc2 $(libdir)/lockin.so; \
-		ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so; \
-		chown fsc2.fsc2 $(libdir)/pulser.so; \
-		ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so; \
-		chown fsc2.fsc2 $(libdir)/tds520c.so; \
-	fi
-	if [ `hostname --fqdn` = "crowley.fu-berlin.de" ]; then \
-		ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so; \
-	fi
-	if [ `hostname --fqdn` = "moebi.fu-berlin.de" ]; then \
-		ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so; \
-		chown fsc2.fsc2 $(libdir)/pulser.so; \
-		ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so; \
-		chown fsc2.fsc2 $(libdir)/magnet.so; \
-		ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so; \
-		chown fsc2.fsc2 $(libdir)/gaussmeter.so; \
-	fi
+	$(MAKE) install-$(shell hostname -f)
+
+
+install-pion.anorg.chemie.uni-frankfurt.de:
+	rm -rf $(libdir)/dg2020.so $(libdir)/s_band.so \
+		$(libdir)/lockin.so $(libdir)/gaussmeter.so \
+        $(libdir)/magnet.so $(libdir)/pulser.so \
+		(libdir)/tds520c.so
+	ln -s $(libdir)/dg2020_f.so $(libdir)/dg2020.so
+	chown fsc2.fsc2 $(libdir)/dg2020.so
+	ln -s $(libdir)/aeg_s_band.so $(libdir)/s_band.so
+	chown fsc2.fsc2 $(libdir)/s_band.so
+	ln -s $(libdir)/bh15.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	ln -s $(libdir)/aeg_s_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	ln -s $(libdir)/sr510.so $(libdir)/lockin.so
+	chown fsc2.fsc2 $(libdir)/lockin.so
+	ln -s $(libdir)/dg2020_f.so $(libdir)/pulser.so
+	chown fsc2.fsc2 $(libdir)/pulser.so
+	ln -s $(libdir)/tds520a.so $(libdir)/tds520c.so
+	chown fsc2.fsc2 $(libdir)/tds520c.so
+
+install-crowley.fu-berlin.de:
+	ln -s $(libdir)/er035m_sas.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+	ln -s $(libdir)/hp8647a.so $(libdir)/synthesizer.so
+	chown fsc2.fsc2 $(libdir)/synthesizer.so
+
+install-moebi.fu-berlin.de:
+	ln -s $(libdir)/dg2020_b.so $(libdir)/pulser.so
+	chown fsc2.fsc2 $(libdir)/pulser.so
+	ln -s $(libdir)/aeg_x_band.so $(libdir)/magnet.so
+	chown fsc2.fsc2 $(libdir)/magnet.so
+	ln -s $(libdir)/er035m_s.so $(libdir)/gaussmeter.so
+	chown fsc2.fsc2 $(libdir)/gaussmeter.so
+
+install-crowley.none:
 
 
 # make all types of documentation
