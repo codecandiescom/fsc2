@@ -584,7 +584,7 @@ Var *daq_dac_parameter( Var *v )
 
 	if ( v != NULL && v->next == NULL )
 	{
-		print( WARN, "Function does not tahe an argument for this DAQ.\n" );
+		print( WARN, "Function does not take an argument for this DAQ.\n" );
 		v = vars_pop( v );
 	}
 
