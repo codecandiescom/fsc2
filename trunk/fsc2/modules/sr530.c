@@ -346,7 +346,7 @@ Var *lockin_sensitivity( Var *v )
 {
 	double sens;
 	int sens_index = -1;
-	int i;
+	unsigned int i;
 
 
 	if ( v == NULL )
@@ -470,7 +470,7 @@ Var *lockin_time_constant( Var *v )
 {
 	double tc;
 	int tc_index = -1;
-	int i;
+	unsigned int i;
 
 
 	if ( v == NULL )

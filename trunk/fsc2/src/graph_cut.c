@@ -2257,7 +2257,7 @@ static void cut_make_scale( Canvas *c, int coord )
 	{
 		/* Draw coloured line of scale */
 
-		x = ishrt( c->w - G.y_scale_offset );
+		x = i2shrt( c->w - G.y_scale_offset );
 		XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
 		/* Draw all the ticks and numbers */
