@@ -132,6 +132,8 @@ volatile bool do_send = UNSET;  /* globals used with the signal handlers */
 volatile bool do_quit = UNSET;
 bool exit_hooks_are_run = UNSET;
 
+Graphics G;
+
 
 #else   /*  ! FSC2_MAIN */
 
@@ -172,6 +174,8 @@ extern int child_pid;              /* pid of child */
 extern volatile bool do_send;      /* globals used with the signal handlers */
 extern volatile bool do_quit;
 extern bool exit_hooks_are_run;
+
+extern Graphics G;
 
 #endif
 
