@@ -176,10 +176,10 @@ const char *slash( const char *path )
 /*   * name of file                                                */
 /*   * pointer for returning number of digits in number of lines   */
 /* <-                                                              */
-/*   * number of lines or -1: failed to open file                  */
+/*   * number of lines or -1: failed to get file descriptor        */
 /*-----------------------------------------------------------------*/
 
-long get_file_length( const char *name, int *len )
+long get_file_length( FILE *fp, int *len )
 {
 	char *cur,
 		 *end,
@@ -191,7 +191,7 @@ long get_file_length( const char *name, int *len )
 	ssize_t bytes_read;
 
 
-	if ( ( fd = open( name, O_RDONLY ) ) < 0 )
+	if ( ( fd = fileno( fp ) ) == -1 )
 		 return -1;
 
 	while ( ( bytes_read = read( fd, buffer, 4096 ) ) > 0 )
@@ -220,7 +220,7 @@ long get_file_length( const char *name, int *len )
 	if ( is_char )
 		lines++;
 
-	close( fd );
+	lseek( fd, 0, SEEK_SET );
 
 	/* Count number of digits of number of lines */
 
@@ -471,6 +471,88 @@ void print( int severity, const char *fmt, ... )
 		va_end( ap );
 		fflush( stdout );
 	}
+}
+
+
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+
+FILE *filter_edl( const char *name, FILE *fp )
+{
+	int pd[ 2 ];
+	pid_t pid;
+	fd_set rfds;
+	int rs;
+
+
+	if ( pipe( pd ) == -1 )
+	{
+		if ( errno == EMFILE || errno == ENFILE )
+			print( FATAL, "Running out of system resources.\n" );
+		return NULL;
+	}
+
+	if ( ( pid =  fork( ) ) < 0 )
+	{
+		if ( errno == ENOMEM || errno == EAGAIN )
+			print( FATAL, "Running out of memory.\n" );
+		return NULL;
+	}
+	else if ( pid == 0 )
+	{
+		static char *cmd = NULL;
+
+
+		/* Make sure we start at the beginnig of the file - the last run
+		   may have been stopped by the user and the file may now be
+		   positioned somewhere in the middle */
+
+		rewind( fp );
+
+		close( pd[ 0 ] );
+		dup2( fileno( fp ), STDIN_FILENO );
+		dup2( pd[ 1 ], STDOUT_FILENO );
+
+		TRY
+		{
+			if ( Internals.cmdline_flags & DO_CHECK )
+				cmd = get_string( "%s%sfsc2_clean", sdir, slash( sdir ) );
+			else
+				cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+			_exit( EXIT_FAILURE );
+
+		execl( cmd, "fsc2_clean", name, NULL );
+		printf( "\x03\nTest procedure failed, utility '%s' not found.\n",
+				cmd );
+		fclose( stdout );
+		fclose( fp );
+		T_free( cmd );
+		_exit( EXIT_FAILURE );
+	}
+
+	close( pd[ 1 ] );
+
+	/* Wait until the child process had a chance to write to the pipe, other-
+	   wise, if the parent would be too fast in trying to read, it only gets
+	   an EOF. */
+
+	FD_ZERO( &rfds );
+	FD_SET( pd[ 0 ], &rfds );
+	while ( ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
+			&& errno == EINTR )
+		/* empty */ ;
+
+	if ( rs == -1 )
+	{
+		if ( errno == ENOMEM )
+			print( FATAL, "Running out of system resources.\n" );
+		return NULL;
+	}
+
+	return fdopen( pd[ 0 ], "r" );
 }
 
 
