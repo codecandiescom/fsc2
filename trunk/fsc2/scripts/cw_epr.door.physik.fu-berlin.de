@@ -30,6 +30,7 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
+my $lockin           = 'SR510';
 my $start_cur        = 0;
 my $end_cur 	     = 0;
 my $cur_step	     = 1;
@@ -162,6 +163,22 @@ $f5_l2->pack( %wp );
 
 
 
+my $f8 = $mw->Frame( );
+my $f8_l = $f8->Label( '-text'              => 'Lock-in amplifier:',
+					   '-width'             => '20',
+					   'anchor'             => 'w' );
+my $f8_m = $f8->Optionmenu( '-options'      =>
+							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
+							'-width'        => 9,
+							'-textvariable' => \$lockin );
+
+$ballon->attach( $f8_m,
+				 '-balloonmsg' => "Select which lock-in amplifiers to use" );
+
+$f8->pack( %fp );
+$f8_l->pack( %wp );
+$f8_m->pack( %wp );
+
 my $f6 = $mw->Frame( );
 my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
 					   '-width'         => '20',
@@ -171,7 +188,7 @@ my $f6_m = $f6->Optionmenu( '-options'  =>
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
                                 ' 10 ms', '  3 ms', '  1 ms' ) ],
 							'-width'    => 9,
-							'-variable' => \$tc );
+							'-textvariable' => \$tc );
 $ballon->attach( $f6_m,
 				 '-balloonmsg' => "Select the lock-in amplifiers time " .
 				 "constant" );
@@ -193,7 +210,7 @@ my $f7_m = $f7->Optionmenu( '-options'  =>
 								'500 nV', '200 nV', '100 nV', ' 50 nV',
 								' 10 nV', '  5 nV', '  2 nV', '  1 nV' ) ],
 							'-width'    => 9,
-							'-variable' => \$sens );
+							'-textvariable' => \$sens );
 $ballon->attach( $f7_m, '-balloonmsg'   =>
 				        "Select the lock-in amplifiers sensitivity" );
 $f7->pack( %fp );
@@ -260,6 +277,10 @@ goto done_reading unless defined( $ne = <F> ) and $ne =~ /^\d+$/;
 chomp $ne;
 $num_runs = $ne;
 
+goto done_reading unless defined( $ne = <F> ) and $ne =~ /^SR[58][13]0$/;
+chomp $ne;
+$lockin = $ne;
+
 goto done_reading unless defined( $ne = <F> )
 	and $ne =~ /(^Don't set)|([13]0{0,2} m?s)$/;
 chomp $ne;
@@ -287,8 +308,9 @@ sub store_defs {
 	$end_cur = 0 if $end_cur eq ".";
 	$cur_step = 0 if $cur_step eq ".";
 
-	print F "# Do not edit - created automatically!\n";
-	print F "$start_cur\n$end_cur\n$cur_step\n$num_runs\n$tc\n$sens\n";
+	print F "# Do not edit - created automatically!\n" .
+		    "$start_cur\n$end_cur\n$cur_step\n$num_runs\n" .
+			"$lockin\n$tc\n$sens\n";
 
 	close F;
 }
@@ -320,13 +342,16 @@ return if &do_checks( ) != 0;
 
 local *F;
 my $text;
+my $lin = $lockin eq "SR510" ? "" : "#2";
+
 
 open( F, "|fsc2_" . lc $how )
 	or die "Can't find utility fsc2_" . lc $how . ".\n";
 
 print F
 "DEVICES:\n\n";
-print F "sr510;\nkeithley228a;\n\n\n";
+print F "sr510;\nkeithley228a;\n";
+print F lc $lockin, ";\n\n" unless $lockin eq "SR510";
 
 print F
 "VARIABLES:\n\nI";
@@ -354,8 +379,8 @@ if ( $tc eq "Don't set" ) {
 
 print F "\n\nPREPARATIONS:\n\n";
 print F "magnet_setup( start_cur, cur_step );\n";
-print F "lockin_time_constant( tc );\n" if $tc ne "Don't set";
-print F "lockin_sensitivity( $sens );\n" if $sens ne "Don't set";
+print F "lockin_time_constant$lin( tc );\n" if $tc ne "Don't set";
+print F "lockin_sensitivity$lin( $sens );\n" if $sens ne "Don't set";
 print F "init_1d( ";
 print F $num_runs == 1 ? "1" : "3";
 print F ", N_points, start_cur, cur_step, \"Magnet current / A\",
@@ -373,13 +398,13 @@ fsave( \"% Field:\\n\"
 	   \"%	 Phase:			  # degree\\n\"
 	   \"% Number of runs:	  #\\n\",
 	   start_cur, start_cur + ( N_points - 1 ) * cur_step, cur_step,
-	   lockin_sensitivity( ), lockin_time_constant( ), lockin_phase( ),
-	   N_runs );
+	   lockin_sensitivity$lin( ), lockin_time_constant$lin( ),
+       lockin_phase$lin( ), N_runs );
 save_comment( \"% \"  \"Sample:  \\nMicrowave frequency:  \\n\"
               \"Microwave power:  \\nTemperature:  \\n\" );
 save_program( \"% \" );\n\n";
 
-print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
+print F "tc = lockin_time_constant$lin( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
 	print F
 "FOR J = 1 : N_runs \{
@@ -388,7 +413,7 @@ if ( $num_runs != 1 ) {
 
 	FOR I = 1 : N_points \{
 
-		new_data[ I ] = lockin_get_data( );\n\n\t\t";
+		new_data[ I ] = lockin_get_data$lin( );\n\n\t\t";
 
 print F "fsave( \"# #\\n\", start_cur + ( I - 1 ) * cur_step, " .
 	    "new_data[ I ] );";
@@ -431,7 +456,7 @@ FOR I = 1 : N_points \{
 } else {
 	print F
 "FOR I = 1 : N_points \{
-	data[ I ] = lockin_get_data( );\n\t";
+	data[ I ] = lockin_get_data$lin( );\n\t";
 print F "fsave( \"# #\\n\", " .
 		"start_cur + ( I - 1 ) * cur_step, data[ I ] );";
 print F "
