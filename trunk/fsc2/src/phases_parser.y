@@ -60,7 +60,7 @@ line:    acq ';'
 
 acq:     AS_TOKEN A_TOKEN             { acq_seq_start( $1, $2 ); }
          a_list
-       | AS_TOKEN ';'                 { acq_miss_list( ); }
+       | AS_TOKEN                     { acq_miss_list( ); }
 ;
 
 a_list:  /* empty */
@@ -70,7 +70,7 @@ a_list:  /* empty */
 phase:   PS_TOKEN                     { Phase_Seq = phase_seq_start( $1 ); }
          P_TOKEN                      { phases_add_phase( Phase_Seq, $3 ); }
          p_list
-       | PS_TOKEN ';'                 { phase_miss_list( Phase_Seq ); }
+       | PS_TOKEN                     { phase_miss_list( Phase_Seq ); }
 ;
 
 p_list:  /* empty */
