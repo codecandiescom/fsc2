@@ -603,11 +603,11 @@ static void accept_2d_data( long x_index, long y_index, long curve, int type,
 			cv->count++;
 			sp->exist = SET;
 		}
-
-		/* Tell the cross section handler about the new data */
-
-		need_cut_redraw |= cut_new_point( curve, i, y_index, sp->v );
 	}
+
+	/* Tell the cross section handler about the new data */
+
+	need_cut_redraw |= cut_new_points( curve, i, y_index, len );
 
 	if ( ! cv->is_scale_set )
 		return;
