@@ -63,6 +63,7 @@ Var *temp_contr_temperature( Var *v );
 Var *temp_contr_sample_channel( Var *v );
 Var *temp_contr_sensor_unit( Var *v );
 Var *temp_contr_lock_keyboard( Var *v );
+Var *temp_contr_command( Var *v );
 
 
 static bool lakeshore330_init( const char *name );
@@ -71,6 +72,7 @@ static long lakeshore330_sample_channel( long channel );
 static void lakeshore330_set_unit( long unit );
 static long lakeshore330_get_unit( void );
 static void lakeshore330_lock( int state );
+static bool lakeshore330_command( const char *cmd );
 static void lakeshore330_gpib_failure( void );
 
 
@@ -296,6 +298,37 @@ Var *temp_contr_lock_keyboard( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *temp_contr_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			lakeshore330_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 /**********************************************************/
 /*                                                        */
 /*       Internal (non-exported) functions                */
@@ -449,6 +482,18 @@ static void lakeshore330_lock( int state )
 		lakeshore330_gpib_failure( );
 
 	lakeshore330.lock_state = state;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool pt2025_command( const char *cmd )
+{
+	if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )
+		lakeshore330_gpib_failure( );
+
+	return OK;
 }
 
 

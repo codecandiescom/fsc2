@@ -54,10 +54,12 @@ int hp5340a_end_of_exp_hook( void );
 
 Var *freq_counter_name( Var *v );
 Var *freq_counter_measure( Var *v );
+Var *freq_counter_command( Var *v );
 
 
 static bool hp5340a_init( const char *name );
 static double h95340a_get_freq( void );
+static bool hp5340a_command( const char *cmd );
 
 
 static struct {
@@ -141,6 +143,37 @@ Var *freq_counter_measure( Var *v )
 }
 
 
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *freq_counter_command( Var *v )
+{
+	static char *cmd;
+
+
+	cmd = NULL;
+	vars_check( v, STR_VAR );
+	
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		TRY
+		{
+			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+			hp5340a_command( cmd );
+			T_free( cmd );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			T_free( cmd );
+			RETHROW( );
+		}
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
 
 /**********************************************************/
 /*                                                        */
@@ -190,3 +223,25 @@ static double h95340a_get_freq( void )
 	buf[ 14 ] = '\0';
 	return T_atod( buf + 3 );
 }
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool hp5340a_command( const char *cmd )
+{
+	if ( gpib_write( hp5340a.device, cmd, strlen( cmd ) ) == FAILURE )
+	{
+		print( FATAL, "Communication with device failed.\n" );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
+}
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

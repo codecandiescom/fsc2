@@ -54,6 +54,7 @@ Var *gaussmeter_name( Var *v );
 Var *gaussmeter_resolution( Var *v );
 Var *gaussmeter_probe_orientation( Var *v );
 Var *measure_field( Var *v );
+Var *gaussmeter_command( Var *v );
 
 
 /* internally used functions */
