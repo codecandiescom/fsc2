@@ -93,13 +93,6 @@ void end_comm( void );
 int new_data_callback( XEvent *a, void *b );
 long reader( void *ret );
 void writer( int type, ... );
-bool exp_layout( void *buffer, long len );
-long *exp_bcreate( void *buffer, long len );
-bool exp_bdelete( void *buffer, long len );
-long exp_bstate( void *buffer, long len );
-long *exp_screate( void *buffer, long len );
-bool exp_sdelete( void *buffer, long len );
-double *exp_sstate( void *buffer, long len );
 
 
 #endif  /* ! COMM_HEADER */
