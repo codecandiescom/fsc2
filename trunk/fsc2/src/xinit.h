@@ -26,6 +26,14 @@
 #define XINIT_HEADER
 
 
+typedef struct {
+	FD_fsc2 *       ( * create_form_fsc2       ) ( void );
+	FD_run *        ( * create_form_run        ) ( void );
+	FD_input_form * ( * create_form_input_form ) ( void );
+	FD_print *      ( * create_form_print      ) ( void );
+	FD_cut *        ( * create_form_cut        ) ( void );
+} G_FUNCS;
+
 bool xforms_init( int *argc, char *argv[ ] );
 void xforms_close( void );
 void win_slider_callback( FL_OBJECT *a, long b );

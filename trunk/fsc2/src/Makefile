@@ -101,27 +101,21 @@ fsc2_connect: fsc2_connect.o
 # if either fsc2_rsc.[ch] or fsc2_rsc_[hl]r.[ch] don't exist, the file they
 # are made from is newer or the existing files are for the wrong resolution
 
-rsc:
-	@if [ ! -e fsc2_rsc_lr.c -o ! -e fsc2_rsc_lr.h                   \
-		  -e fsc2_rsc_lr.so                                          \
-		  -a \( fsc2_rsc_lr.fd -nt fsc2_rsc_lr.so \) ]               \
-		fdesign -convert fsc2_rsc_lr.fd;                             \
-	fi                                                               \
-	@if [ ! -e fsc2_rsc_hr.c -o ! -e fsc2_rsc_hr.h                   \
-		  -e fsc2_rsc_hr.so                                          \
-		  -a \( fsc2_rsc_hr.fd -nt fsc2_rsc_hr.so \) ]               \
-		fdesign -convert fsc2_rsc_lr.fd;                             \
-	fi
-
 %.so: %.o
 	$(LD) $(SLFLAGS) $^ -o $@
 	chmod 644 $@
 
-fsc2_rsc_lr.o: fsc2_rsc_lr.c fsc2_rsc_lr.h
+fsc2_rsc_lr.o: fsc2_rsc_lr.c
 	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
 
-fsc2_rsc_hr.o: fsc2_rsc_hr.c fsc2_rsc_hr.h
+fsc2_rsc_hr.o: fsc2_rsc_hr.c
 	$(CC) $(CFLAGS) -c $(SLFLAGS) $< -o $@
+
+fsc2_rsc_lr.c: fsc2_rsc_lr.fd
+	fdesign -convert fsc2_rsc_lr.fd;                             \
+
+fsc2_rsc_hr.c: fsc2_rsc_hr.fd
+	fdesign -convert fsc2_rsc_hr.fd;                             \
 
 
 # Create files and links needed for the GPIB interface - they need making if
