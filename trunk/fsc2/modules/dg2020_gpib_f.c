@@ -164,7 +164,8 @@ bool dg2020_init( const char *name )
 
 	/* Switch off remote command debugging function */
 
-	gpib_write( dg2020.device, "DEB:SNO:STAT OFF\n" );
+	if ( gpib_write( dg2020.device, "DEB:SNO:STAT OFF\n" ) == FAILURE )
+		dg2020_gpib_failure( );
 
 	/* Switch on phase lock for internal oscillator */
 
