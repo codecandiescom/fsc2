@@ -56,7 +56,7 @@ librulbus.a: ${lib_sources:.c=.o} $(lib_headers)
 
 %.c: %.l $(lib_headers) parser.h
 	$(LEX) $(LFLAGS)rulbus_ -o$@ $<
-	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
+	sed -e 's/register char \*yy_cp, \*yy_bp;/register char \*yy_cp = NULL, \*yy_bp = NULL;/;s/^find_rule:/\/\/find_rule:/' $@ > $@.x
 	mv -f $@.x $@
 
 
