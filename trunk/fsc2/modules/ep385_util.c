@@ -183,20 +183,20 @@ void ep385_dump_channels( void )
 			if ( ! ch->needs_update )
 				continue;
 
-			fprintf( ep385.dump_file, "%s %d\n%d\n",
-					 f->name, ch->self, ch->num_active_pulses );
+			fprintf( ep385.dump_file, "%s:%d", f->name, ch->self );
 			for ( k = 0; k < ch->num_active_pulses; k++ )
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
 					 ch->pulse_params[ k ].pulse->sp )
-					fprintf( ep385.dump_file, "(%ld) %ld %ld\n",
+					fprintf( ep385.dump_file, " (%ld) %ld %ld",
 							 ch->pulse_params[ k ].pulse->sp->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
 				else
-					fprintf( ep385.dump_file, "%ld %ld %ld\n",
+					fprintf( ep385.dump_file, " %ld %ld %ld",
 							 ch->pulse_params[ k ].pulse->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
+			fprintf( ep385.dump_file, "\n" );
 		}
 	}
 }

@@ -56,7 +56,7 @@ void ep385_init_setup( void )
 
 		if ( ep385.dump_file != NULL )
 		{
-			fprintf( ep385.dump_file, "%g\n%ld\n===\n", ep385.timebase,
+			fprintf( ep385.dump_file, "TB: %g\nD: %ld\n===\n", ep385.timebase,
 					 ep385.neg_delay );
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 			{
@@ -66,10 +66,9 @@ void ep385_init_setup( void )
 					continue;
 
 				for ( j = 0; j < f->num_channels; j++ )
-					fprintf( ep385.dump_file, "%s %d: %ld\n",
+					fprintf( ep385.dump_file, "%s:%d %ld\n",
 							 f->name, f->channel[ j ]->self, f->delay );
 			}
-			fprintf( ep385.dump_file, "===\n" );
 		}
 
 		ep385_setup_channels( );
