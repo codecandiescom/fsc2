@@ -37,7 +37,7 @@ fi
 grep -E '^[ \t]*[0-9]+[ \t]+[0-9]+[ \t]+1339[ \t]+399[[:space:]]*$' \
 	 $cdir/rs_spec10.state > /dev/null
 if [ $? -ne 0 ]; then
-	sed 's/\s*([0-9]\{1,\}[ \t]\{1,\}[0-9]\{1,\}[ \t]\{1,\}).$/\1 1399 399/' \
+	sed 's/[ \t]*\([0-9]\{1,\}[ \t]\{1,\}[0-9]\{1,\}\)[ \t]\{1,\}[0-9]\{1,\}[ \t]\{1,\}[0-9]\{1,\}[ \t]*$/\1 1399 399/' \
 		$cdir/rs_spec10.state > $cdir/rs_spec10.state.new
 	mv $cdir/rs_spec10.state.new $cdir/rs_spec10.state
 fi
