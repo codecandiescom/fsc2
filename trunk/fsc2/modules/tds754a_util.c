@@ -1,0 +1,199 @@
+/*
+  $Id$
+*/
+
+#include "tds754a.h"
+
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+const char *tds754a_ptime( double time )
+{
+	static char buffer[ 128 ];
+
+	if ( fabs( time ) >= 1.0 )
+		sprintf( buffer, "%g s", time );
+	else if ( fabs( time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * time );
+	else if ( fabs( time ) >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * time );
+	else
+		sprintf( buffer, "%g ns", 1.e9 * time );
+
+	return buffer;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds754a_delete_windows( void )
+{
+	WINDOW *w;
+
+	while ( tds754a.w != NULL )
+	{
+		w = tds754a.w;
+		tds754a.w = w->next;
+		T_free( w );
+	}
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds754a_do_pre_exp_checks( void )
+{
+	WINDOW *w, *wn;
+	bool is_width = SET;
+    double width, window, dcd, dtb, fac;
+    long tb, cd;
+	double test_width;
+
+
+	/* If a trigger channel has been set in the PREPARATIONS section send
+	   it to the digitizer */
+
+	if ( tds754a.is_trigger_channel )
+		tds754a_set_trigger_channel( 
+			Channel_Names[ tds754a.trigger_channel ] );
+
+	/* That's all if no windows have been defined we switch off gated
+	   measurement mode, i.e. all measurement operations are done on the
+	   whole curve */
+
+	if ( tds754a.w == NULL )
+	{
+		tds754a_set_gated_meas( UNSET );
+		return;
+	}
+	else
+		tds754a_set_gated_meas( SET );
+
+	/* Remove all unused windows and test if for all other windows the width
+	   is set */
+
+	while ( tds754a.w != NULL && ! tds754a.w->is_used )
+	{
+		w = tds754a.w;
+		tds754a.w = tds754a.w->next;
+		T_free( w );
+		tds754a.num_windows--;
+	}
+
+	for ( w = tds754a.w; w->next != NULL; w = w->next )
+	{
+		if ( ! w->is_width )
+			is_width = UNSET;
+		if ( ! w->next->is_used )
+		{
+			wn = w->next;
+			w->next = w->next->next;
+			T_free( wn );
+			tds754a.num_windows--;
+		}
+	}
+
+	if ( ! w->is_width )
+		is_width = UNSET;
+
+	/* If not get the distance of the cursors on the digitizers screen and
+	   use it as the default width. */
+
+	if ( w != NULL )
+	{
+		tds754a_get_cursor_distance( &width );
+
+		if ( width == 0.0 )
+		{
+			eprint( FATAL, "TDS754A: Can't determine a reasonable value for "
+					"the missing window widths." );
+			THROW( EXCEPTION );
+		}
+
+		for ( w = tds754a.w; w != NULL; w = w->next )
+		{
+			if ( ! w->is_width )
+			{
+				w->width = width;
+				w->is_width = SET;
+			}
+		}
+	}
+
+	/* It's not possible to set arbitrary cursor distances - they've got to be
+	   multiples of the smallest time resolution of the digitizer, which is
+	   1 / TDS_POINTS_PER_DIV of the time base. In the following it is tested
+	   if the requested cursor distance fit this requirement and if not the
+	   values are readjusted. While we're at it we also try to find out if
+	   all window widths are equal - than we can use tracking cursors */
+
+	tds754a.is_equal_width = SET;
+
+	for ( w = tds754a.w; w != NULL; w = w->next )
+	{
+		dcd = w->width;
+		dtb = tds754a.timebase;
+		fac = 1.0;
+		while ( fabs( dcd ) < 1.0 )
+		{
+			dcd *= 1000.0;
+			dtb *= 1000.0;
+			fac *= 0.001;
+		}
+		cd = lround( TDS_POINTS_PER_DIV * dcd );
+		tb = lround( dtb );
+
+		if ( labs( cd ) < tb )
+		{
+			w->width = tds754a.timebase / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "TDS754A: Width of window %ld has to be "
+					"readjusted to %s.", w->num, tds754a_ptime( w->width  ) );
+		}
+		else if ( cd % tb )
+		{
+			cd = ( cd / tb ) * tb;
+			dcd = cd * fac / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "TDS754A; Width of window %ld has to be "
+					"readjusted to %s.", w->num, tds754a_ptime( dcd ) );
+			w->width = dcd;
+		}
+
+		if ( w == tds754a.w )
+			test_width = w->width;
+		else if ( w->width != test_width )
+			tds754a.is_equal_width = UNSET;
+	}
+
+	/* Next check: Test if the windows fit into the measurement window */
+
+    window = tds754a.timebase * tds754a.rec_len / TDS_POINTS_PER_DIV;
+
+    for ( w = tds754a.w; w != NULL; w = w->next )
+    {
+        if ( w->start > ( 1.0 - tds754a.trig_pos ) * window ||
+             w->start + w->width > ( 1.0 - tds754a.trig_pos ) * window ||
+             w->start < - tds754a.trig_pos * window ||
+             w->start + w->width < - tds754a.trig_pos * window )
+        {
+			eprint( FATAL, "TDS754A: Window %ld doesn't fit into current "
+					"digitizer time range.", w->num );
+			THROW( EXCEPTION );
+		}
+    }
+
+	/* If the widths of all windows are equal we switch on tracking cursor
+	   mode and set the cursors to the position of the first window */
+
+	if ( tds754a.is_equal_width )
+	{
+		tds754a_set_cursor( 1, tds754a.w->start );
+		tds754a_set_cursor( 2, tds754a.w->start + tds754a.w->width );
+		tds754a_set_track_cursors( SET );
+	}
+	else
+		tds754a_set_track_cursors( UNSET );
+}
