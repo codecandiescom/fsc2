@@ -43,13 +43,13 @@ static int T_fprintf( int file_num, const char *fmt, ... );
 
 /*---------------------------------------------------------------------------*/
 /* Function allows the user to select a file using the file selector. If the */
-/* already file exists confirmation by the user is required. Then the file   */
+/* file already exists a confirmation by the user is required. Then the file */
 /* is opened - if this fails the file selector is shown again. The FILE      */
 /* pointer returned is stored in an array of FILE pointers for each of the   */
 /* open files. The returned value is an INT_VAR with the index in the FILE   */
 /* pointer array or -1 if no file was selected.                              */
-/* (Optional) Input variables (each will replaced by a default string if the */
-/* argument is either NULL or the empty string) :                            */
+/* Optional input variables (each will replaced by a default string if the   */
+/* argument is either NULL or the empty string) are:                         */
 /* 1. Message string (not allowed to start with a backslash `\'!)            */
 /* 2. Default pattern for file name                                          */
 /* 3. Default directory                                                      */
