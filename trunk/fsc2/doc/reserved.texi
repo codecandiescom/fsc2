@@ -19,7 +19,7 @@
 @item @code{AUX1}             @tab Digitizer channel name
 @item @code{AUX2}             @tab Digitizer channel name
 @item                         @tab
-@item @code{BREAK}            @tab Loop control statement
+@item @code{BREAK}            @tab Loop control statement (@pxref{BREAK statement})
 @item                         @tab
 @item @code{ceil}             @tab Built-in function (@pxref{ceil})
 @item @code{CH}               @tab
@@ -71,6 +71,7 @@
 @item @code{DSTART}           @tab
 @item @code{D_START}          @tab
 @item                         @tab
+@item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{EXP:}             @tab Starts the @code{EXPERIMENT} section
 @item @code{EXPERIMENT:}      @tab Starts the @code{EXPERIMENT} section
 @item @code{EXT}              @tab
@@ -80,8 +81,8 @@
 @item @code{F}                @tab
 @item @code{float}            @tab Built-in function (@pxref{float})
 @item @code{floor}            @tab Built-in function (@pxref{floor})
-@item @code{FOR}              @tab Keyword for @code{FOR} loops
-@item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops
+@item @code{FOR}              @tab Keyword for @code{FOR} loops (@pxref{FOR loops})
+@item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@pxref{FOREVER loops})
 @item @code{fsave}            @tab Built-in function (@pxref{fsave})
 @item @code{FUNC}             @tab
 @item @code{FUNCTION}         @tab
@@ -93,6 +94,7 @@
 @item @code{HIGH}             @tab
 @item @code{Hz}               @tab Unit, Hertz
 @item                         @tab
+@item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@pxref{IF-ELSE constructs})
 @item @code{init_1d}          @tab Built-in function (@pxref{init_1d})
 @item @code{init_2d}          @tab Built-in function (@pxref{init_2d})
 @item @code{int}              @tab Built-in function (@pxref{int})
@@ -124,6 +126,7 @@
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
+@item @code{mean}             @tab Built-in function (@pxref{mean})
 @item @code{MG}               @tab Unit, Mega-Gauss
 @item @code{MHz}              @tab Unit, Mega-Hertz
 @item @code{Ms}               @tab Unit, Mega-Seconds
@@ -139,7 +142,7 @@
 @item @code{nA}               @tab Unit, Nano-Ampere
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
-@item @code{NEXT}             @tab Loop control statement
+@item @code{NEXT}             @tab Loop control statement (@pxref{NEXT statement})
 @item @code{nG}               @tab Unit, Nano-Gauss
 @item @code{nHz}              @tab Unit, Nano-Hertz
 @item @code{ns}               @tab Unit, Nano-Seconds
@@ -166,7 +169,7 @@
 @item @code{PULSE@i{[0-9]+}}  @tab
 @item @code{PULSE_@i{[0-9]+}} @tab
 @item                         @tab
-@item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops
+@item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@pxref{REPEAT loops})
 @item @code{REPF}             @tab
 @item @code{REP_F}            @tab
 @item @code{REPEATF}          @tab
@@ -192,6 +195,7 @@
 @item @code{REF2}             @tab Digitizer channel name
 @item @code{REF3}             @tab Digitizer channel name
 @item @code{REF4}             @tab Digitizer channel name
+@item @code{rms}              @tab Built-in function (@pxref{rms})
 @item @code{round}            @tab Built-in function (@pxref{round})
 @item                         @tab
 @item @code{S}                @tab
@@ -227,6 +231,7 @@
 @item @code{uG}               @tab Unit, Micro-Gauss
 @item @code{uHz}              @tab Unit, Micro-Hertz
 @item @code{us}               @tab Unit, Micro-Seconds
+@item @code{UNTIL}            @tab Keyword for @code{UNTIL} loops (@pxref{UNTIL loops})
 @item @code{uT}               @tab Unit, Micro-Tesla
 @item @code{uV}               @tab Unit, Micro-Volt
 @item                         @tab
@@ -245,5 +250,5 @@
 @item @code{V_LOW}            @tab
 @item                         @tab
 @item @code{wait}             @tab Built-in function (@pxref{wait})
-@item @code{WHILE}            @tab Keyword for @code{WHILE} loops
+@item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@pxref{WHILE loops})
 @end multitable

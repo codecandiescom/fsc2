@@ -764,6 +764,7 @@ needed (or still fit into the memory).
 
 
 @subsection REPEAT loops
+@anchor{REPEAT loops}
 @cindex REPEAT loops
 
 The most simple construct is the @code{REPEAT} loop. What is needed
@@ -793,6 +794,7 @@ repetitions. Now, in curly braces, i.e.@: between `@code{@{}' and
 
 
 @subsection WHILE loops
+@anchor{WHILE loops}
 @cindex WHILE loops
 
 
@@ -896,6 +898,7 @@ operators. Here is a list of these operators and their meaning:
 
 
 @subsection UNTIL loops
+@anchor{UNTIL loops}
 @cindex UNTIL loops
 
 Directly related to the @code{WHILE} loop is the @code{UNTIL} loop. The
@@ -906,6 +909,7 @@ condition becomes true.
 
 
 @subsection FOR loops
+@anchor{FOR loops}
 @cindex FOR loops
 
 Before the @code{WHILE} loop one often has to initialize the loop
@@ -954,6 +958,7 @@ variable!
 
 
 @subsection FOREVER loops
+@anchor{FOREVER loops}
 @cindex FOREVER loops
 
 There can be situations where one wants to have the program running as
@@ -974,6 +979,7 @@ parameter for an experiment.
 
 
 @subsection NEXT statement
+@anchor{NEXT statement}
 @cindex NEXT
 
 Under certain conditions one doesn't want to execute all statements of a
@@ -986,6 +992,7 @@ value).
 
 
 @subsection BREAK statement
+@anchor{BREAK statement}
 @cindex BREAK
 
 There may be situations where one doesn't want to continue with a loop
@@ -997,6 +1004,7 @@ program jumps to the first statement following the loop body.
 
 
 @subsection IF-ELSE constructs
+@anchor{IF-ELSE constructs}
 @cindex IF
 @cindex ELSE 
 @cindex IF-ELSE
