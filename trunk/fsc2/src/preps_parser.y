@@ -94,11 +94,13 @@ static char *f_error = NULL;
 input:   /* empty */
        | input ';'                  { EDL.Cur_Pulse = -1; }
        | input line ';'             { EDL.Cur_Pulse = -1;
+									  fsc2_assert( dont_exec == 0 );
 	                                  fsc2_assert( EDL.Var_Stack == NULL ); }
        | input line P_TOK           { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input line SECTION_LABEL   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | input SECTION_LABEL        { EDL.Cur_Pulse = -1;
 	                                  fsc2_assert( EDL.Var_Stack == NULL );
+									  fsc2_assert( dont_exec == 0 );
 	                                  YYACCEPT; }
        | input error ';'            { if ( f_error != NULL )
 	                                  {

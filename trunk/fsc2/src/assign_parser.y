@@ -149,11 +149,13 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
+									 fsc2_assert( dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
        | input SECTION_LABEL       { Channel_Type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 	                                 fsc2_assert( EDL.Var_Stack == NULL );
+									 fsc2_assert( dont_exec == 0 );
 									 Func_is_set = UNSET;
 									 YYACCEPT; }
        | input error ';'           { Channel_Type = PULSER_CHANNEL_NO_TYPE;
@@ -165,6 +167,7 @@ input:   /* empty */
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
 									 Func_is_set = UNSET;
+									 fsc2_assert( dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
 ;
 

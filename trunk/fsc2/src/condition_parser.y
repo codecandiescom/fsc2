@@ -127,7 +127,8 @@ static int dont_exec = 0;
 %%
 
 
-input:   expr                     { YYACCEPT; }
+input:   expr                     { fsc2_assert( dont_exec == 0 );
+                                    YYACCEPT; }
 ;
 
 expr:    E_INT_TOKEN              { if ( ! dont_exec )

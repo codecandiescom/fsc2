@@ -80,9 +80,11 @@ static int dont_exec = 0;
 
 input:   /* empty */
        | input ';'
-       | input line ';'            { fsc2_assert( EDL.Var_Stack == NULL ); }
+       | input line ';'            { fsc2_assert( EDL.Var_Stack == NULL );
+									 fsc2_assert( dont_exec == 0 ); }
        | input line SECTION_LABEL  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | input SECTION_LABEL       { YYACCEPT; }
+       | input SECTION_LABEL       { fsc2_assert( dont_exec == 0 );
+		                             YYACCEPT; }
 ;
 
 line:    linet

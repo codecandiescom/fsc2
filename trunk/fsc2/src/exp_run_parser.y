@@ -117,9 +117,11 @@ input:   /* empty */
 ;
 
 eol:     ';'                       { fsc2_assert( EDL.Var_Stack == NULL );
+									 fsc2_assert( dont_exec == 0 );
                                      if ( EDL.do_quit )
                                          YYACCEPT; }
        | '}'                       { fsc2_assert( EDL.Var_Stack == NULL );
+									 fsc2_assert( dont_exec == 0 );
 	                                 YYACCEPT; }
 ;
 

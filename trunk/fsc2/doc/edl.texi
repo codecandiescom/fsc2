@@ -32,6 +32,7 @@
 * Variables::               Using variables and arrays.
 * Assignment operations::   Assigning to variables.
 * Arithmetic::              Doing calculations with variables.
+* Conditional  operator::   Using the '? : ' construct
 * Control structures::      Flow control in EDL programs.
 * Miscellaneous::           Additional syntactic elements
 @end menu
@@ -358,11 +359,13 @@ characters each and differing only in the last character...)
 
 There are some combinations of characters that can't be used as variable
 names. First of all, variable names may not be identical to function
-names, neither built-in nor device function names. Second, some
-combination of characters are already used for physical units as well as
-combinations of these with the characters @code{n} (nano), @code{u}
-(micro), @code{m} (milli), @code{k} (kilo) and @code{M} (mega).  Here's
-the complete list:
+names, neither built-in nor device function names.
+
+Some combinations of characters are also treated not as a variable name
+when they follow a number directly (i.e.@: only with spaces or tabulator
+characters in between). These are physical units with or without the
+characters @code{n} (nano), @code{u} (micro), @code{m} (milli), @code{k}
+(kilo) and @code{M} (mega).  Here's the complete list:
 @quotation
 @multitable {Hz} {Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})}
 @item @code{s}  @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
@@ -376,6 +379,10 @@ the complete list:
 @item @code{db} @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
 @end multitable
 @end quotation
+@noindent
+You still can use these units as variable names but you have to take
+care that there's no line break between a number and the unit associated
+with the number.
 
 Finally, the keywords used by @code{EDL} also may not be used as
 variable names (to make it easier to avoid these, they are all spelled
@@ -701,7 +708,7 @@ if the matrix on the left hand side isn't variable sized, itssizes must
 fit the sizes of the quantity on the right hand side.
 
 
-@node Arithmetic, Control structures, Assignment operations, EDL
+@node Arithmetic, Conditional operator, Assignment operations, EDL
 @section Arithmetic
 @cindex Arithmetic
 
@@ -1126,8 +1133,117 @@ or `@code{^=}') the left hand side variable of an equation has to be an
 array when arithmetic with arrays is used.
 
 
+@node Conditional operator, Control structures, Arithmetic, EDL
+@section Conditional operator
+@cindex Conditional operator
+@cindex Conditional operator
 
-@node Control structures, Miscellaneous, Arithmetic, EDL
+Quite often it depends on the result of a calculation or external input
+which part of the code of a program is to be executed. For these cases a
+constructs is needed that allows to tell the program to do something if
+e.g.@: the result of a calculation is less then @code{0} and to do
+something else if the result was larger or equal to @code{0}.  An
+admittedly somewhat contrived example would be the calculation of the
+square root of a number, making sure the number is multiplied by -1 in
+case it's negative. Using the conditional operator this can be written
+as
+@example
+sqrt_of_val = ( val < 0.0 ) ? sqrt( -1.0 * val ) : sqrt( val );
+@end example
+@noindent
+The conditional operator is somewhat special in that it consists of both
+the question mark, @code{?}, and the colon, @code{:}. It tells the
+program to evaluate the expression before the question mark and and
+then, depending on the result, execute either the expression before the
+colon or after the colon. Here it is tested if @code{val} is smaller
+than @code{0}, and if this is true, the square root of @code{val}
+multiplied by @code{-1} is taken, otherwise the square root of just
+@code{val} itself.
+
+Beside comparison for the number on the left hand side being smaller
+than the number on the right hand side, several other comparison
+operators exist. Here is a complete list of such comparison operators
+between two expressions (e.g.@: numbers or numerical results of a
+calculation, they can't be used with arrays):
+@quotation
+@cindex == (equal to)
+@cindex equal to `=='
+@cindex != (unequal to)
+@cindex unequal to `!='
+@cindex < (less than)
+@cindex less than `<'
+@cindex <= (less or equal)
+@cindex less or equal `<='
+@cindex > (larger than)
+@cindex larger than `>'
+@cindex >= (larger or equal)
+@cindex larger or equal `>='
+@multitable {@code{==}} {true if left hand side is @i{equal} to right hand side}
+@item @code{==} @tab  true if left hand side is @i{equal} to right hand side
+@item @code{!=} @tab  true if left and right hand side are @i{unequal}
+@item @code{<}  @tab  true if left side is @i{less than} right side
+@item @code{<=} @tab  true if left side is @i{less or equal} to right side
+@item @code{>}  @tab  true if left side is @i{greater than} right side
+@item @code{>=} @tab  true if left side is @i{greater or equal} to right side
+@end multitable
+@end quotation
+
+Please note, that using comparisons between floating point numbers may
+not work as expected. This is a result of the finite precision of
+floating point numbers.  Thus, for example, @code{0.1} and the result of
+e.g.@: @code{0.7 / 7} can be different numbers, in which case a
+comparison for equality will fail. Thus comparison for equality should
+in principle only with integer numbers.
+
+Actually, all these operators do a calculation. When you see something
+like @code{a <= b} this evaluates to 1 if the expression is true (i.e.@:
+if the value of @code{a} is less or equal to the value of @code{b}),
+otherwise to 0. In the test of the conditional execution operator
+(i.e.@: everything before the question mark) it is checked if the result
+is a non-zero number, which is taken as true, or if it's zero, which is
+interpreted as false. Thus instead of en expression with a comparison
+operator the test part could also consist of a simple number and what is
+going to be executed of the two alternatives after the question marks
+depends on the value of this number: if it is non-zero the first
+alternative is used, and if it is zero the second. Thus it would be
+valid to write:
+@example
+exp_of_val = val ? exp( val ) : 1;
+@end example
+@noindent
+This checks if @code{val} is non-zero, in which case the exponential of
+@code{val} is calculated by doing a function call, otherwise, if
+@code{val} is @code{0}, the correct result (@code{1}) is written out
+directly.
+
+One has to be a bit careful when using the operator for conditional
+execution because it has a very low precedence. After
+@example
+x1 = 1.0 + val < 0 ? 5 : 9;
+x2 = 1.0 + ( val < 0 ? 5 : 9 );
+@end example
+@noindent
+@code{x1} and @code{x2} will have different values. In the first line it
+is checked if @code{val} plus @code{1.0} is smaller than @code{0} and
+@code{x1} is set accordingly, while in the second line it is checked if
+@code{val} is less than @code{0} and, depending on the result, either
+@code{5} or @code{9} is added to @code{1.0}. Also the follwing two
+assignments may result in different values:
+@example
+x1 = val < 0 ? 5 : 9 + 1;
+x2 = ( val < 0 ? 5 : 9 ) + 1;
+@end example
+The value of @code{x1} will be either set to @code{5} or @code{10} while
+@code{x2} will be set to @code{6} or @code{10}. Thus it is reasonable
+to use parentheses to make sure that the evaluation happens as expected.
+
+Finally, the same effect as with the conditional operator can also be
+achieved by using an @code{IF-ELSE} construct (see below), but only
+within the @code{EXPERIMENT} section of an @code{EDL} script --
+everywhere else only the conditional operator can be used.
+
+
+@node Control structures, Miscellaneous, Conditional operator, EDL
 @section Control structures
 @cindex Control structures
 @cindex Flow control
@@ -1210,39 +1326,6 @@ This program snippet (that also could have been written using a
 the variables @code{I} and @code{Fact} it is tested in the loop
 condition if @code{I} is still not larger that 6. If this is true, the
 following block of statements is executed.
-
-Here is a complete list of the comparison operators between two
-expressions (e.g.@: numbers):
-
-@quotation
-@cindex == (equal to)
-@cindex equal to `=='
-@cindex != (unequal to)
-@cindex unequal to `!='
-@cindex < (less than)
-@cindex less than `<'
-@cindex <= (less or equal)
-@cindex less or equal `<='
-@cindex > (larger than)
-@cindex larger than `>'
-@cindex >= (larger or equal)
-@cindex larger or equal `>='
-@multitable {@code{==}} {true if left hand side is @i{equal} to right hand side}
-@item @code{==} @tab  true if left hand side is @i{equal} to right hand side
-@item @code{!=} @tab  true if left and right hand side are @i{unequal}
-@item @code{<}  @tab  true if left side is @i{less than} right side
-@item @code{<=} @tab  true if left side is @i{less or equal} to right side
-@item @code{>}  @tab  true if left side is @i{greater than} right side
-@item @code{>=} @tab  true if left side is @i{greater or equal} to right side
-@end multitable
-@end quotation
-
-Please note, that using comparisons between floating point numbers may
-not work as expected. This is a result of the finite precision of
-floating point numbers.  Thus, for example, @code{0.1} and the result of
-e.g.@: @code{0.7 / 7} can be different numbers, in which case a
-comparison for equality will fail. Thus comparison for equality should
-in principle only with integer numbers.
 
 Here is now an example for using simple numbers in a condition,
 using the fact that a non-zero value is always interpreted as TRUE:
