@@ -37,7 +37,6 @@ extern char *devicestext;
 
 static void deviceserror( const char *s );
 
-
 %}
 
 

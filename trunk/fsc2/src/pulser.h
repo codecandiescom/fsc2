@@ -113,7 +113,7 @@ double is_mult_ns( double val, const char * text );
 long p_new( long pnum );
 void p_set( long pnum, int type, Var *v );
 Var *p_get( char *txt, int type );
-Var *p_get_by_num( long p_num, int type );
+Var *p_get_by_num( long pnum, int type );
 
 void p_phs_setup( int func, int type, int pod, long val, long protocol );
 void p_phs_end( int func );

@@ -121,7 +121,7 @@ void cut_init( void )
 /* dir: axis canvas the mouse button was pressed in (X or Y)             */
 /*-----------------------------------------------------------------------*/
 
-void cut_show( int dir, long index )
+void cut_show( int dir, long u_index )
 {
 	bool needs_pos = UNSET;
 	int flags;
@@ -130,8 +130,8 @@ void cut_show( int dir, long index )
 	/* Don't do anything if no curve is currently displayed or if mouse didn't
        got released in one of the axis canvases */
 
-	if ( G.active_curve == -1 || index < 0 ||
-		 ( dir == X && index >= G.nx ) || ( dir == Y && index >= G.ny ) )
+	if ( G.active_curve == -1 || u_index < 0 ||
+		 ( dir == X && u_index >= G.nx ) || ( dir == Y && u_index >= G.ny ) )
 		return;
 
 	/* If the cross section window hasn't been shown before create and
@@ -241,7 +241,7 @@ void cut_show( int dir, long index )
 
 	/* Calculate all the points of the cross section curve */
 
-	cut_calc_curve( dir, index, CG.has_been_shown[ G.active_curve ] );
+	cut_calc_curve( dir, u_index, CG.has_been_shown[ G.active_curve ] );
 
 	if ( ! CG.has_been_shown[ G.active_curve ] )
 	{

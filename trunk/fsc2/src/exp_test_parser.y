@@ -30,8 +30,6 @@
 
 #include "fsc2.h"
 
-#define YYMAXDEPTH 0                  /* avoids compiler warning */
-
 extern int exp_testlex( void );
 
 /* locally used functions */
