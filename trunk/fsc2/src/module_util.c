@@ -27,7 +27,7 @@
 
 /*----------------------------------------------------------------------*/
 /* This function is called by modules to determine the current state of */
-/* the global variable FSC2_MODE without them biing able to change it.  */
+/* the global variable FSC2_MODE without them being able to change it.  */
 /*----------------------------------------------------------------------*/
 
 inline int get_mode( void )
