@@ -347,7 +347,7 @@ variable is @code{FLOAT_VAR} you get at the data with
 in which case you get a value of type @code{double}. Of course, you may
 also access the contents of the union directly. Finally you may use
 @quotation
-    @code{var->STRING}@ @ @ @ (which is a macro standing for @code{var->val.sptr})
+    @code{var->STRING}@ @ @ @ (a macro standing for @code{var->val.sptr})
 @end quotation
 to get the address of the start of a string variable.
 
