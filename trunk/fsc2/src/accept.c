@@ -133,10 +133,10 @@ void accept_new_data( void )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* This function examines the new data, interpreting the start field */
-/* and calls the appropriate functions dealing with the data.        */
-/*-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*/
+/* This function examines the new data interpreting the start field */
+/* and calls the appropriate functions for dealing with the data.   */
+/*------------------------------------------------------------------*/
 
 static void unpack_and_accept( void *ptr )
 {

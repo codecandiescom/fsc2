@@ -61,7 +61,7 @@ OWNER            = fsc2
 GROUP            = fsc2
 
 
-# The next variable defines the number of serial ports that are available on
+# This variable defines the number of serial ports that are available on
 # the computer.
 
 NUM_SERIAL_PORTS = 2
