@@ -472,10 +472,10 @@ synthesizer_state( \"ON\" );\n";
 # Neither the SR510 nor the SR530 can set a modulation frequency nor level...
 
 if ( $lockin =~ /^SR8/ ) {
-	print F "lockin_mod_freq( mod_freq );
-lockin_mod_level( 1 V );\n";
+	print F "lockin_ref_freq( mod_freq );
+lockin_ref_level( 1 V );\n";
 } else {
-	print F "mod_freq = lockin_mod_freq( );\n";
+	print F "mod_freq = lockin_ref_freq( );\n";
 }
 print F "tc = lockin_time_constant( );\n" if $tc eq "Don't set";
 

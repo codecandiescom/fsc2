@@ -157,7 +157,6 @@ install-isaak.physik.fu-berlin.de:
 install-sunone.chemie.unibas.ch:
 
 install-crowley.none:
-	$(MAKE) $(UNINSTALL_MACHINE)
 
 
 # How to uninstall the modules
