@@ -166,7 +166,7 @@ digitizer_get_amplitude_fast, -1, EXP;
 digitizer_run, 0, EXP;
 digitizer_lock_keyboard, -1, EXP;       // Lock or unlock the keyboard
 
-digitizer_meas_channel_ok, 1, ALL;      // only for internal use !
+digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
 
 digitizer_averaging, -1, ALL;           // LeCroy9400 only
 
