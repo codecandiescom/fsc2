@@ -253,19 +253,19 @@ endif
 # Finally the definition of remaining variables that are needed...
 
 ifeq ($(RESOLUTION),HIGH)
-	RESOLUTION   = high_res
+	RESOLUTION   =  hr
 	CFLAGS      += -DSIZE=HI_RES
 else
-	RESOLUTION   = low_res
+	RESOLUTION   =  lr
 	CFLAGS      += -DSIZE=LOW_RES
 endif
 
 ifeq ($(GPIB_LIBRARY),LLP)
-	GPIB_LIBRARY = gpib_old
+	GPIB_LIBRARY = old
 	LIBS += -lgpib
 else
 	ifeq ($(GPIB_LIBRARY),NI)
-		GPIB_LIBRARY = gpib_ni
+		GPIB_LIBRARY = ni
 		LIBS += -lgpib
 		ifdef GPIB_CONF_FILE
 			CFLAGS += -DGPIB_CONF_FILE=\"$(GPIB_CONF_FILE)\"
@@ -274,10 +274,10 @@ else
 		endif
 	else
 		ifeq ($(GPIB_LIBRARY),JTT)
-			GPIB_LIBRARY = gpib_jtt
+			GPIB_LIBRARY = jtt
 			LIBS += -lgpib
 		else
-			GPIB_LIBRARY = gpib_none
+			GPIB_LIBRARY = none
 		endif
 	endif
 endif
