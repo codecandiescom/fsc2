@@ -19,15 +19,19 @@ if ( $#ARGV == -1 ) {
 while ( <F> ) {
 	@f = split /\s+/;
 
-	if ( $_ =~ /^malloc:/ ) {
+	if ( $f[ 1 ] eq /malloc:/ ) {
 		$h{ $f[ 1 ] } = "malloc $f[ 2 ].";
 	}
 
-	if ( $_ =~ /^calloc:/ ) {
+	if ( $f[ 1 ] eq /calloc:/ ) {
 		$h{ $f[ 1 ] } = "calloc $f[ 2 ].";
 	}
 
-	if ( $_ =~ /realloc:/ ) {
+	if ( $f[ 1 ] eq /strdup:/ ) {
+		$h{ $f[ 1 ] } = "strdup $f[ 2 ].";
+	}
+
+	if ( $f[ 1 ] eq /realloc:/ ) {
 		if ( $f[ 1 ] eq "(nil)" ) {
 			$h{ $f[ 3 ] } = "realloc from (nil) $f[ 4 ].";
 		} else {
@@ -40,7 +44,7 @@ while ( <F> ) {
 		}
 	}
 
-	if ( $_ =~ /free:/ ) {
+	if ( $f[ 1 ] eq /free:/ ) {
 		if ( not defined $h{ $f[ 1 ] } ) {
 			print "free error for $f[ 1 ] at line $.\n";
 		} else {
