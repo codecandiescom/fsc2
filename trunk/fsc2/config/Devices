@@ -67,8 +67,11 @@ aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
 er032m        // Bruker ER 032 M field controller
 ips20_4       // Oxford sweep power supply
-s_band_magnet_broad;
-s_band_magnet_narrow;
+s_band_magnet_broad;    // special module for "broken" Frankfurt S-band
+s_band_magnet_narrow;   // special module for "broken" Frankfurt S-band
+hjs_sfc;      // simple field control for Steinhoff group
+fjs_fc;       // field control with field checking for Steinhoff group
+
 
 // Field meter
 
