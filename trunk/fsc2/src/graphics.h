@@ -27,11 +27,9 @@ typedef struct {
 
 	bool active;
 
-	double s2d_x;          /* scaled to display data x scale factors */
-	double s2d_y;          /* scaled to display data y scale factors */
+	double s2d[ 3 ];       /* scaled to display data scale factors */
 
-	double x_shift;        /* offset on scaled x data */
-	double y_shift;        /* offset on scaled y data */
+	double shift[ 3 ];     /* offsets on scaled data */
 
 	bool up,               /* flag, set if data don't fit into canvas */
 		 down,
@@ -45,10 +43,8 @@ typedef struct {
 
 	bool can_undo;
 
-	double old_s2d_x;
-	double old_s2d_y;
-	double old_x_shift;
-	double old_y_shift;
+	double old_s2d[ 3 ];
+	double old_shift[ 3 ];
 
 	GC font_gc;             /* gc for font */
 } Curve_1d;
@@ -59,8 +55,7 @@ typedef struct {
 	Pixmap pm;
 	GC gc;                  /* gc for pixmap */
 
-	int x_cur,              /* last reported pointer position in canvas */
-		y_cur;
+	int ppos[ 2 ];          /* last reported pointer position in canvas */
 
 	bool is_box;
 	GC box_gc;
@@ -73,6 +68,8 @@ typedef struct {
 		y;
 	unsigned int w,         /* width and height of canvas */
 		         h;
+
+	GC font_gc;             /* gc for font */
 } Canvas;	
 
 
@@ -80,8 +77,6 @@ typedef struct {
 	bool is_init;
 	bool is_drawn;
 	bool is_warn;
-	bool is_rwc_x;
-	bool is_rwc_y;
 	bool is_nx;
 	bool is_ny;
 	bool is_scale_set;
@@ -92,16 +87,12 @@ typedef struct {
 	long nc;                /* number of curves (in 1D experiments) */
 	long nx;                /* points in x-direction */
 	long ny;                /* points in y-direction */
-	double rwc_x_start;
-	double rwc_x_delta;
-	double rwc_y_start;
-	double rwc_y_delta;
-	char *x_label;          /* label for x-axis */
-	char *y_label;          /* label for y-axis */
+	double rwc_start[ 3 ];
+	double rwc_delta[ 3 ];
+	char *label[ 2 ];       /* label for x- and y-axis */
 
 	double rw_y_min;        /* minimum of real world y coordinates */
 	double rw_y_max;        /* maximum of real world y coordinates */
-	double rw2s;            /* real world to scaled data (y) scale factor */
 
 	Display *d;             /* pointer to display structure */
 
@@ -124,12 +115,12 @@ typedef struct {
 	    cur_5;
 
 	XFontStruct *font;
+	int font_asc, font_desc;
 
 	int button_state,       /* usuable button states */
 		raw_button_state;   /* the real button state */
 
-	int x_start,
-		y_start;
+	int start[ 3 ];
 
 } Graphics;
 
