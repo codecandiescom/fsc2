@@ -1063,6 +1063,7 @@ automatically for this module.
 @item @code{sweep_up()}               @tab @ref{sweep_up}
 @item @code{sweep_down()}             @tab @ref{sweep_down}
 @item @code{reset_field()}            @tab @ref{reset_field}
+@item @code{magnet_calibration_file()} @tab @ref{magnet_calibration_file}
 @end multitable
 
 
