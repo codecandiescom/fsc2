@@ -37,12 +37,6 @@ exits or a new file is loaded. This flag is only useful for cases where
 the input file is a temporary file that needs to be deleted when it
 isn't needed anymore, so better be @strong{real careful}.
 
-@item @option{-m button_number}
-Specifies which mouse button has to be used to activate the stop button
-while the experiment is running. Use @code{1} for the left mouse button,
-@code{2} for the middle and @code{3} for the right mosue button. Per
-default each of the three mouse buttons can be used.
-
 @item @option{-h, --help}
 Displays a very short help text and exits.
 
@@ -93,5 +87,12 @@ To find out about available X fonts the tools xlsfonts, xfontsel and xfd
 can be rather useful. When you specify a font be sure to enclose the
 font name in quotes if the name contains characters that the shell might
 try to expand.
+
+@item @option{-stopMouseButton button_identifier}
+Specifies which mouse button has to be used to activate the stop button
+while the experiment is running. Use the string @code{left} or the
+number @code{1} for the left mouse button, @code{middle} or @code{2} for
+the middle and @code{right} or @code{3} for the right mouse button. Per
+default each of the three mouse buttons can be used.
 
 @end table

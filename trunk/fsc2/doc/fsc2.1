@@ -41,12 +41,6 @@ flag is only useful for cases where the input file is a temporary file that
 needs to be deleted when it isn't needed anymore, so better be
 \fBreal careful\fR.
 .TP
-\fB\-m\fR \fINUMBER\fR
-Specifies the mouse button that must be used to activate the stop button while
-the experiment is running. Use 1 for the left mouse button, 2 for the middle
-and 3 for the right mouse button. Per default each of the three buttons can
-be used.
-.TP
 \fB\-h\fR, \fB\-\-help\fR
 Displays a very short help text and exits.
 .TP
@@ -89,6 +83,12 @@ out about available X fonts the tools \fIxlsfonts(1)\fP, \fIxfontsel(1)\fP and
 \fIxfd(1)\fP can be rather useful. When you specify a font be sure to enclose
 the font name in quotes if the name contains characters that the shell would
 try to expand.
+.TP
+\fB\-stopMouseButton\fR \fIbutton identifier\fR
+Specifies the mouse button that must be used to activate the stop button while
+the experiment is running. Use the string "left" or 1 for the left mouse
+button, "middle" or 2 for the middle and "right" or 3 for the right mouse
+button. Per default each of the three buttons can be used.
 .SH SEE ALSO
 The complete documentation for \fPfsc2\fR in PostScript, PDF and HTML
 (with and without using frames) format can be found in the directory

@@ -32,12 +32,12 @@ static int fsc2_xio_error_handler( Display *d );
 
 /* Some variables needed for the X resources */
 
-#define N_APP_OPT 13
+#define N_APP_OPT 14
 FL_IOPT xcntl;
 
 char xGeoStr[ 64 ], xdisplayGeoStr[ 64 ],
 	 xcutGeoStr[ 64 ], xtoolGeoStr[ 64 ],
-	 xaxisFont[ 256 ];
+	 xaxisFont[ 256 ], xsmb[ 64 ];
 
 int xbrowserfs, xbuttonfs, xinputfs, xlabelfs, xchoicefs, xsliderfs,
 	xfileselectorfs, xhelpfs;
@@ -64,6 +64,7 @@ FL_resource xresources[ N_APP_OPT ] = {
     { "filselectorFontSize", "*.fileselectorFontSize", FL_INT,
 	  &xfileselectorfs, "0", sizeof( int ) },
     { "helpFontSize", "*.helpFontSize", FL_INT, &xhelpfs, "0", sizeof( int ) },
+    { "stopMouseButton", "*.stopMouseButton", FL_STRING, &xsmb, "", 64 },
 };
 
 
@@ -140,6 +141,21 @@ bool xforms_init( int *argc, char *argv[ ] )
 	xcntl.labelFontSize   = TOOLS_FONT_SIZE;
 	xcntl.choiceFontSize  = TOOLS_FONT_SIZE;
 	xcntl.sliderFontSize  = TOOLS_FONT_SIZE;
+
+	/* Set the stop mouse button */
+
+	if ( * ( ( char * ) xresources[ STOPMOUSEBUTTON ].var ) != '\0' )
+	{
+		if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "1" ) ||
+			 ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "left" ) )
+			stop_button_mask = FL_LEFT_MOUSE;
+		else if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "2" ) ||
+				  ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "middle" ) )
+			stop_button_mask = FL_MIDDLE_MOUSE;
+		else if ( ! strcmp( xresources[ STOPMOUSEBUTTON ].var, "3" ) ||
+				  ! strcasecmp( xresources[ STOPMOUSEBUTTON ].var, "right" ) )
+			stop_button_mask = FL_RIGHT_MOUSE;
+	}
 
 	/* Set the default font size for browsers */
 
@@ -351,6 +367,11 @@ static void set_up_app_options( FL_CMD_OPT app_opt[ ] )
 	app_opt[ HELPFONTSIZE ].specifier     = T_strdup( "*.helpFontSize" );
 	app_opt[ HELPFONTSIZE ].argKind       = XrmoptionSepArg;
 	app_opt[ HELPFONTSIZE ].value         = ( caddr_t ) "0";
+
+	app_opt[ STOPMOUSEBUTTON ].option     = T_strdup( "-stopMouseButton" );
+	app_opt[ STOPMOUSEBUTTON ].specifier  = T_strdup( "*.stopMouseButton" );
+	app_opt[ STOPMOUSEBUTTON ].argKind    = XrmoptionSepArg;
+	app_opt[ STOPMOUSEBUTTON ].value      = ( caddr_t ) "";
 }
 
 
