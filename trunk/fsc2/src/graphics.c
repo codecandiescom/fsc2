@@ -51,6 +51,8 @@ void start_graphics( void )
 	/* Create the form for running experiments */
 
 	run_form = create_form_run( );
+	if ( G.dim == 2 )
+		cut_form = create_form_cut( );
 
 	/* It still need some modifications... */
 
@@ -60,6 +62,14 @@ void start_graphics( void )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "undo.xpm" );
     fl_set_pixmapbutton_file( run_form->undo_button, pixmap_file );
+	fl_set_object_helper( run_form->undo_button,
+						  "Undo last rescaling operation" );
+	if ( G.dim == 2 )
+	{
+		fl_set_pixmapbutton_file( cut_form->cut_undo_button, pixmap_file );
+		fl_set_object_helper( cut_form->cut_undo_button,
+							  "Undo last rescaling operation" );
+	}
 	T_free( pixmap_file );
 
 	pixmap_file = get_string( strlen( auxdir ) + strlen( "/printer.xpm" ) );
@@ -68,12 +78,15 @@ void start_graphics( void )
 		strcat( pixmap_file, "/" );
 	strcat( pixmap_file, "printer.xpm" );
     fl_set_pixmapbutton_file( run_form->print_button, pixmap_file );
-	T_free( pixmap_file );
 	fl_set_object_helper( run_form->print_button, "Print window" );
+	if ( G.dim == 2 )
+	{
+		fl_set_pixmapbutton_file( cut_form->cut_print_button, pixmap_file );
+		fl_set_object_helper( cut_form->cut_print_button, "Print window" );
+	}
+	T_free( pixmap_file );
 
 	fl_set_object_helper( run_form->stop, "Stop the experiment" );
-	fl_set_object_helper( run_form->undo_button,
-						  "Undo last rescaling operation" );
 	fl_set_object_helper( run_form->full_scale_button,
 						  "Switch off automatic rescaling" );
 
@@ -116,11 +129,19 @@ void start_graphics( void )
 
 	fl_set_canvas_decoration( run_form->x_axis, FL_FRAME_BOX );
 	fl_set_canvas_decoration( run_form->y_axis, FL_FRAME_BOX );
+	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
+
 	if ( G.dim == 1 )
 		fl_delete_object( run_form->z_axis );
 	else
+	{
 		fl_set_canvas_decoration( run_form->z_axis, FL_FRAME_BOX );
-	fl_set_canvas_decoration( run_form->canvas, FL_NO_FRAME );
+
+		fl_set_canvas_decoration( cut_form->cut_x_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( cut_form->cut_y_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( cut_form->cut_z_axis, FL_FRAME_BOX );
+		fl_set_canvas_decoration( cut_form->cut_canvas, FL_NO_FRAME );
+	}
 
 	/* Show only buttons really needed */
 
@@ -221,6 +242,7 @@ void start_graphics( void )
 		redraw_all_1d( );
 
 	fl_raise_form( run_form->run );
+	XFlush( G.d );
 }
 
 
@@ -600,7 +622,10 @@ void stop_graphics( void )
 		canvas_off( &G.canvas, run_form->canvas );
 
 		if ( G.dim == 2 )
+		{
+			cut_form_close( );
 			canvas_off( &G.z_axis, run_form->z_axis );
+		}
 	}
 
 	if ( fl_form_is_visible( run_form->run ) )
