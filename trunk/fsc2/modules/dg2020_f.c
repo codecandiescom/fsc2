@@ -19,7 +19,7 @@
 
 int dg2020_f_init_hook( void )
 {
-	int i;
+	int i, j, k;
 
 
 	/* Now test that the name entry in the pulser structure is NULL, otherwise
@@ -80,7 +80,8 @@ int dg2020_f_init_hook( void )
 	pulser_struct.get_pulse_length_change = dg2020_get_pulse_length_change;
 	pulser_struct.get_pulse_phase_cycle = dg2020_get_pulse_phase_cycle;
 
-	pulser_struct.setup_phase = dg2020_setup_phase;
+	pulser_struct.phase_setup_prep = dg2020_setup_phase_prep;
+	pulser_struct.phase_setup = dg2020_setup_phase;
 
 	pulser_struct.set_phase_switch_delay = dg2020_set_phase_switch_delay;
 
@@ -129,6 +130,11 @@ int dg2020_f_init_hook( void )
 		dg2020.channel[ i ].self = i;
 		dg2020.channel[ i ].function = NULL;
 	}
+
+	for ( i = 0; i < 3; i++ )
+		for ( j = 0; j < 4; j++ )
+			for ( k = 0; k < 2; k++ )
+				phs[ i ].is_var[ j ][ k ] = UNSET;
 
 	dg2020_is_needed = SET;
 

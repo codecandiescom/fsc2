@@ -11,9 +11,6 @@
 
 #include "fsc2.h"
 
-static PHS phs[ 3 ];
-static int Cur_PHS = -1;
-
 
 /*---------------------------------------------------------------*/
 /* Function clears the complete pulser structure, that has to be */
@@ -22,8 +19,6 @@ static int Cur_PHS = -1;
 
 void pulser_struct_init( void )
 {
-	int i, j, k;
-
 	if ( pulser_struct.name != NULL )
 	{
 		T_free( pulser_struct.name );
@@ -57,13 +52,10 @@ void pulser_struct_init( void )
 	pulser_struct.get_pulse_length_change = NULL;
 	pulser_struct.get_pulse_phase_cycle = NULL;
 
-	pulser_struct.setup_phase = NULL;
+	pulser_struct.phase_setup_prep = NULL;
+	pulser_struct.phase_setup = NULL;
 	pulser_struct.set_phase_switch_delay = NULL;
 
-	for ( i = 0; i < 3; i++ )
-		for ( j = 0; j < 4; j++ )
-			for ( k = 0; k < 2; k++ )
-				phs[ i ].is_var[ j ][ k ] = UNSET;
 }
 
 
@@ -727,142 +719,41 @@ Var *p_get_by_num( long pnum, int type )
 
 /*----------------------------------------------------------------------------
   'function' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2, 2 means both)
+    PHASE_1, 1 means PHASE_2, 2 means both)
   'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)
   'pod' means if the value is for the first or the second pod channel
-  (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
+    (0: first pod channel, 1: second pod channel, -1: pick the one not set yet)
   'val' means high or low to be set on the pod channel to set the requested
-  phase(0: low, !0: high)
+    phase(0: low, !0: high)
+  'protocol' characterizes the way the phase setup is declared in the input.
 -----------------------------------------------------------------------------*/
 
 void p_phs_setup( int func, int type, int pod, long val, long protocol )
 {
 	/* A few sanity checks before we call the pulsers handler function */
 
-	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
 	assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
 	assert( func >= 0 && func <= 2 );        /* phase function correct ? */
 
-	/* Not all phase types are valid here */
+	/* Let's check if the pulser supports the function needed */
 
-	if ( type != PHASE_PLUS_X && type != PHASE_MINUS_X &&
-		 type != PHASE_PLUS_Y && type != PHASE_MINUS_Y )
-	{
-		eprint( FATAL, "%s:%ld: Phase of type %s can't be used with this "
-				"driver.", Fname, Lc, Phase_Types[ type ] );
-		THROW( EXCEPTION );
-	}
+	is_pulser_func( pulser_struct.phase_setup_prep,
+					"setting up phase channels" );
+	is_pulser_func( pulser_struct.phase_setup, "setting up phase channels" );
 
-	Cur_PHS = func;
-
-	if ( pod == -1 )
-	{
-		if ( phs[ func ].is_var[ type ][ 0 ] )
-			pod = 1;
-		else
-			pod = 0;
-
-		if ( phs[ func ].is_var[ type ][ pod ] )
-		{
-			if ( func == 2 )
-				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"phase functions already have been defined.", Fname, 
-						Lc, Phase_Types[ type ] );
-			else
-				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
-						"function `%s' already have been defined.", Fname,
-						Lc, Phase_Types[ type ], func == 0 ?
-						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
-			THROW( EXCEPTION );
-		}
-	}
-
-	if ( phs[ func ].is_var[ type ][ pod ] )
-	{
-		if ( func == 2 )
-			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
-					"phase functions already has been defined.", Fname, Lc,
-					pod + 1, Phase_Types[ type ] );
-		else
-			eprint( FATAL, "%s:%ld: Output state of %d. pod for phase %s of "
-					"function `%s' already has been defined.", Fname, Lc,
-					pod + 1, Phase_Types[ type ], func == 0 ?
-					Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
-		THROW( EXCEPTION );
-	}
-
-	phs[ func ].var[ type ][ pod ] = val != 0 ? 1 : 0;
-	phs[ func ].is_var[ type ][ pod ] = SET;
+	( *pulser_struct.phase_setup_prep )( func, type, pod, val, protocol );	
 }
 
 
 /*
-  Do all possible checks and tell the pulser about it
+  We reached the end of a phase setup command...
 */
 
 void p_phs_end( int func )
 {
-	int i, j;
-	bool cons[ 4 ] = { UNSET, UNSET, UNSET, UNSET };
+	assert( func >= 0 && func <= 2 );        /* phase function correct ? */
 
-
-	assert( Cur_PHS != -1 && Cur_PHS == func );
-
-	/* Let's check if the pulser supports the function needed before we spend
-	   more time for checking the correctness of the data */
-
-	is_pulser_func( pulser_struct.setup_phase,
-					"setting up phase channels" );
-
-	/* Now check that for all phase types the data are set */
-
-	for ( i = 0; i < 4; i++ )
-	{
-		for ( j = 0; j < 2; j++ )
-			if ( ! phs[ func ].is_var[ i ][ j ] )
-			{
-				if ( func == 2 )
-					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
-							"of phase functions.", Fname, Lc );
-				else
-					eprint( FATAL, "%s:%ld: Incomplete data for phase setup "
-							"of function `%s'.", Fname, Lc, func == 0 ?
-							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-							Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
-				THROW( EXCEPTION );
-			}
-
-		cons[ phs[ func ].var[ i ][ 0 ] + 2 * phs[ func ].var[ i ][ 1 ] ]
-			= SET;
-	}
-
-	/* Finally check that the data are consistent, i.e. different phase types
-	   haven't been assigned the same data */
-
-	for ( i = 0; i < 4; i++ )
-	{
-		if ( ! cons[ i ] )
-		{
-			if ( func == 2 )
-				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
-						"phase functions.", Fname, Lc );
-			else
-				eprint( FATAL, "%s:%ld: Inconsistent data for phase setup of "
-						"function `%s'.", Fname, Lc, func == 0 ?
-						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
-						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
-			THROW( EXCEPTION );
-		}
-	}
-
-	if ( func == 0 || func == 2 )
-		( *pulser_struct.setup_phase )( PULSER_CHANNEL_PHASE_1, phs[ func ] );
-	if ( func == 1 || func == 2 )
-		( *pulser_struct.setup_phase )( PULSER_CHANNEL_PHASE_2, phs[ func ] );
-
-	Cur_PHS = -1;
+	( *pulser_struct.phase_setup )( func );
 }
 
 

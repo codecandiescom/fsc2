@@ -289,7 +289,9 @@ bool dg2020_set_trig_in_slope( int slope );
 bool dg2020_set_trig_in_impedance( int state );
 bool dg2020_set_repeat_time( double time );
 bool dg2020_set_phase_reference( int phase, int function );
-bool dg2020_setup_phase( int func, PHS phs );
+bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
+							  long protocol );
+bool dg2020_phase_setup( int func );
 bool dg2020_set_phase_switch_delay( int func, double time );
 bool dg2020_set_grace_period( double time );
 

@@ -87,6 +87,12 @@ Var *pulser_pulse_reset( Var *v );
 
 /* typedefs of structures needed in the module */
 
+typedef struct {             // needed in phase setup
+	int var[ 4 ][ 2 ];
+	bool is_var[ 4 ][ 2 ];
+} PHS;
+
+
 typedef struct _F_ {
 
 	int self;                    // the functions number
@@ -262,11 +268,6 @@ typedef struct _p_ {
 } PULSE;
 
 
-typedef struct {             // needed in phase setup
-	int var[ 4 ][ 2 ];
-	bool is_var[ 4 ][ 2 ];
-} PHS;
-
 
 /* Here the global variables of the module are declared */
 
@@ -306,7 +307,10 @@ bool dg2020_set_trig_in_slope( int slope );
 bool dg2020_set_trig_in_impedance( int state );
 bool dg2020_set_repeat_time( double time );
 bool dg2020_set_phase_reference( int phase, int function );
-bool dg2020_setup_phase( int func, PHS phs );
+bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
+							  long protocol );
+bool dg2020_phase_setup( int func );
+bool dg2020_phase_setup_finalize( int func, PHS phs );
 bool dg2020_set_phase_switch_delay( int func, double time );
 bool dg2020_set_grace_period( double time );
 

@@ -7,6 +7,8 @@
 #include "dg2020_f.h"
 
 
+static int Cur_PHS = -1;
+
 
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
@@ -542,10 +544,173 @@ bool dg2020_set_phase_reference( int phase, int function )
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* This function is called for each of the definitions of how a phase is */
+/* realizes by the combination of to pod channel outputs.                */
+/* 'function' is the phase function the data are to be used for (i.e. 0  */
+/*   means PHASE_1, 1 means PHASE_2, 2 means both)                       */
+/* 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)   */
+/* 'pod' tells if the value is for the first or the second pod channel   */
+/*   (0: first pod channel, 1: second pod channel, -1: pick the one not  */
+/*    set yet)                                                           */
+/* 'val' means high or low to be set on the pod channel to set the       */
+/*    requested phase(0: low, non-zero: high)                            */
+/* 'protocol': there are different ways to realize a phase, currently    */
+/*    there's the Frankfurt and the Berlin method. This driver can only  */
+/*    accept settings the Frankfurt type method. Sometimes it is not     */
+/*    possible to tell from the input which of these methods is used, in */
+/*    this case also accept the data.                                    */
+/*-----------------------------------------------------------------------*/
+
+bool dg2020_phase_setup_prep( int func, int type, int pod, long val,
+							  long protocol )
+{
+	/* First a sanity check... */
+
+	assert ( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
+
+	/* This driver only accepts the Frankfurt method of declaring a
+	   phase setup - unrecognized method is also ok */ 
+
+	if ( protocol != PHASE_FFM_PROT && protocol != PHASE_UNKNOWN_PROT )
+	{
+		eprint( FATAL, "%s:%ld: %s: Invalid syntax for this driver.",
+				Fname, Lc, pulser_struct.name );
+		THROW( EXCEPTION );
+	}
+
+	/* Not all phase types are valid here */
+
+	if ( type != PHASE_PLUS_X && type != PHASE_MINUS_X &&
+		 type != PHASE_PLUS_Y && type != PHASE_MINUS_Y )
+	{
+		eprint( FATAL, "%s:%ld: %s: Phase of type %s can't be used with this "
+				"driver.", Fname, Lc, pulser_struct.name,
+				Phase_Types[ type ] );
+		THROW( EXCEPTION );
+	}
+
+	Cur_PHS = func;
+
+	if ( pod == -1 )
+	{
+		if ( phs[ func ].is_var[ type ][ 0 ] )
+			pod = 1;
+		else
+			pod = 0;
+
+		if ( phs[ func ].is_var[ type ][ pod ] )
+		{
+			if ( func == 2 )
+				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+						"phase functions already have been defined.", Fname, 
+						Lc, Phase_Types[ type ] );
+			else
+				eprint( FATAL, "%s:%ld: Both output states for phase %s of "
+						"function `%s' already have been defined.", Fname,
+						Lc, Phase_Types[ type ], func == 0 ?
+						Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( phs[ func ].is_var[ type ][ pod ] )
+	{
+		if ( func == 2 )
+			eprint( FATAL, "%s:%ld: %s: Output state of %d. pod for phase %s "
+					"of phase functions already has been defined.", Fname, Lc,
+					pulser_struct.name, pod + 1, Phase_Types[ type ] );
+		else
+			eprint( FATAL, "%s:%ld: %s: Output state of %d. pod for phase %s "
+					"of function `%s' already has been defined.", Fname, Lc,
+					pulser_struct.name, pod + 1, Phase_Types[ type ],
+					func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+					Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+		THROW( EXCEPTION );
+	}
+
+	phs[ func ].var[ type ][ pod ] = val != 0 ? 1 : 0;
+	phs[ func ].is_var[ type ][ pod ] = SET;
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------------*/
+/* Now that we got all information there is about the phase setup do all */
+/* possible checks and finally store the state.                          */
+/*-----------------------------------------------------------------------*/
+
+bool dg2020_phase_setup( int func )
+{
+	int i, j;
+	bool cons[ 4 ] = { UNSET, UNSET, UNSET, UNSET };
+	bool ret1, ret2;
+
+
+	assert( Cur_PHS != -1 && Cur_PHS == func );
+
+	/* Now check that for all phase types the data are set */
+
+	for ( i = 0; i < 4; i++ )
+	{
+		for ( j = 0; j < 2; j++ )
+			if ( ! phs[ func ].is_var[ i ][ j ] )
+			{
+				if ( func == 2 )
+					eprint( FATAL, "%s:%ld: %s: Incomplete data for phase "
+							"setup of phase functions.", Fname, Lc,
+							pulser_struct.name );
+				else
+					eprint( FATAL, "%s:%ld: $s: Incomplete data for phase "
+							"setup of function `%s'.", Fname, Lc,
+							pulser_struct.name, func == 0 ?
+							Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+							Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+				THROW( EXCEPTION );
+			}
+
+		cons[ phs[ func ].var[ i ][ 0 ] + 2 * phs[ func ].var[ i ][ 1 ] ]
+			= SET;
+	}
+
+	/* Finally check that the data are consistent, i.e. different phase types
+	   haven't been assigned the same data */
+
+	for ( i = 0; i < 4; i++ )
+	{
+		if ( ! cons[ i ] )
+		{
+			if ( func == 2 )
+				eprint( FATAL, "%s:%ld: %s: Inconsistent data for phase setup "
+						"of phase functions.", Fname, Lc, pulser_struct.name );
+			else
+				eprint( FATAL, "%s:%ld: %s: Inconsistent data for phase setup "
+						"of function `%s'.", Fname, Lc, pulser_struct.name,
+						func == 0 ? Function_Names[ PULSER_CHANNEL_PHASE_1 ] :
+						Function_Names[ PULSER_CHANNEL_PHASE_2 ] );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( func == 0 || func == 2 )
+		ret1 =
+			dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_1, phs[ func ] );
+	if ( func == 1 || func == 2 )
+		ret2 =
+			dg2020_phase_setup_finalize( PULSER_CHANNEL_PHASE_2, phs[ func ] );
+
+	Cur_PHS = -1;
+
+	return ret1 == OK && ret2 == OK ? OK : FAIL;
+}
+
+
 /*-----------------------------------------------------------------*/
 /*-----------------------------------------------------------------*/
 
-bool dg2020_setup_phase( int func, PHS phs )
+bool dg2020_phase_setup_finalize( int func, PHS phs )
 {
 	assert( func == PULSER_CHANNEL_PHASE_1 || func == PULSER_CHANNEL_PHASE_2 );
 
