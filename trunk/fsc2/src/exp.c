@@ -1177,14 +1177,14 @@ int conditionlex( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function tests the condition of a WHILE, UNTIL or IF or UNLESS. */
-/*-----------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function tests the condition of a WHILE, UNTIL, FOR or REPEAT loop */
+/* or an IF or UNLESS construct.                                      */
+/*--------------------------------------------------------------------*/
 
 bool test_condition( Prg_Token *cur )
 {
 	bool condition;
-	bool neg_cond = UNSET;
 
 
 	cur_prg_token++;                          /* skip the WHILE or IF etc. */
@@ -1198,29 +1198,41 @@ bool test_condition( Prg_Token *cur )
 	{
 		const char *t = NULL;
 
-		if ( cur->token == WHILE_TOK )
-			t = "WHILE loop";
-		if ( cur->token == UNTIL_TOK )
-			t = "UNTIL loop";
-		if ( cur->token == REPEAT_TOK )
-			t = "REPEAT loop";
-		if ( cur->token == FOR_TOK )
-			t = "FOR loop";
-		if ( cur->token == IF_TOK )
-			t = "IF construct";
-		if ( cur->token == UNLESS_TOK )
+		switch ( cur->token )
 		{
-			t = "UNLESS construct";
-			neg_cond = SET;
+			case WHILE_TOK :
+				t = "WHILE loop";
+				break;
+
+			case UNTIL_TOK :
+				t = "UNTIL loop";
+				break;
+
+			case REPEAT_TOK :
+				t = "REPEAT loop";
+				break;
+
+			case FOR_TOK :
+				t = "FOR loop";
+				break;
+
+			case IF_TOK :
+				t = "IF construct";
+				break;
+
+			case UNLESS_TOK :
+				t = "UNLESS construct";
+				break;
+
+			default :
+				eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
 		}
 
 		cur++;
-		if ( t == NULL )
-			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-					__FILE__, __LINE__ );
-		else
-			eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
-					cur->Fname, cur->Lc, t );
+		eprint( FATAL, UNSET, "%s:%ld: Invalid condition for %s.\n",
+				cur->Fname, cur->Lc, t );
 		THROW( EXCEPTION );
 	}
 
@@ -1231,8 +1243,8 @@ bool test_condition( Prg_Token *cur )
 	else
 		condition = Var_Stack->val.dval ? OK : FAIL;
 
-	if ( neg_cond )
-		condition = condition == OK ? FAIL : OK;
+	if ( cur->token == UNLESS_TOK )
+		condition = ! condition;
 
 	vars_pop( Var_Stack );
 	return condition;

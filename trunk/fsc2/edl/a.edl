@@ -25,7 +25,7 @@ X[ 3, 3, 3 ] = {  9,  8,  7,  6,  5,  4,  3,  2,  1,
 
 dt1, dt2;
 
-FILE;
+F1;
 x = 0.5;
 
 PREP:
@@ -58,6 +58,7 @@ init_1d( 4, 0, 890, 0.1, "Magnetic field [G]",
 EXP:
 
 
+F1 = get_file();
 
 FOR K = 1 : 5 {
 	print( "Run \##\n", K );
@@ -78,6 +79,10 @@ FOR K = 1 : 5 {
 		IF I == N / 2 {
 			change_scale( -10.0, 2.5 );
 		}
+
+		UNLESS I % 2 {
+			print( "#\n", I );
+		}
 	}
 
 	IF K != 5 {
@@ -89,19 +94,18 @@ FOR K = 1 : 5 {
 
 ON_STOP:
 
-//FILE = get_file( "", "*.a" );
 
-save( 1, 2, 3, X );
+save( F1, 1, 2, 3, X );
 
 
-save_comment( "% ", "Na, was denkst\ndu über das?\n", 
+save_comment( F1, "% ", "Na, was denkst\ndu über das?\n", 
 			  "Ihre Meinung zählt:" );
-save_program( "# ");
-save_output( "% " );
-fsave( "# # #, \n#\n\n\n", 1, 2, 3, X[ 2, 2, 2 ] );
+save_program( F1, "# ");
+save_output( F1, "% " );
+fsave( F1, "# # #, \n#\n\n\n", 1, 2, 3, X[ 2, 2, 2 ] );
 
 FOR I = 1 : size( c, 1 ) {
 	FOR J = 1 : size( c, 2 ) {
-		fsave( "c[ #, # ] = #\n", I, J, c[ I, J ] );
+		fsave( F1, "c[ #, # ] = #\n", I, J, c[ I, J ] );
 	}
 }
