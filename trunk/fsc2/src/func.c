@@ -4,9 +4,12 @@
 
 
 #include <dlfcn.h>
+
 #include "fsc2.h"
 
 
+
+static void f_wait_alarm_handler( int sig_type );
 
 static int num_def_func;    /* number of built-in functions */
 static int num_func;        /* number of built-in  and listed functions */
@@ -67,6 +70,7 @@ Var *f_ln( Var *v  );
 Var *f_log( Var *v  );
 Var *f_sqrt( Var *v  );
 Var *f_print( Var *v  );
+Var *f_wait( Var *v  );
 
 
 
@@ -92,6 +96,7 @@ static Func def_fncts[ ] =              /* List of built-in functions */
 	{ "log",    f_log,     1, ACCESS_ALL_SECTIONS, 0 },
 	{ "sqrt",   f_sqrt,    1, ACCESS_ALL_SECTIONS, 0 },
 	{ "print",  f_print,  -1, ACCESS_ALL_SECTIONS, 0 },
+	{ "wait",   f_wait,    1, ACCESS_ALL_SECTIONS, 0 },
 	{ NULL,     NULL,      0, 0,                   0 }   /* marks last entry, 
 															don't remove ! */
 };
@@ -1074,4 +1079,74 @@ Var *f_print( Var *v )
 
 	T_free( fmt );
 	return vars_push( INT_VAR, in_format );
+}
+
+
+/*-------------------------------------------------------------------*/
+/* f_wait() is kind of a version of usleep() that isn't disturbed by */
+/* signals - only exception: If a DO_QUIT signal is delivered to the */
+/* caller of f_wait() (i.e. the child) it returns immediately.       */
+/* ->                                                                */
+/*  * number of nanoseconds to sleep                                 */
+/*-------------------------------------------------------------------*/
+
+Var *f_wait( Var *v )
+{
+	struct itimerval sleepy;
+	long how_long;
+
+
+	vars_check( v, INT_VAR | FLOAT_VAR );
+
+	if ( v->type == INT_VAR )
+		how_long = v->val.lval;
+	else
+		how_long = rnd( v->val.dval );
+
+	if ( how_long < 0 )
+	{
+		eprint( FATAL, "%s:%ld: Negative time or more than 2s for `wait()' "
+				"function.\n", Fname, Lc );
+		THROW( EXCEPTION );
+	}
+
+	/* set everything up for sleeping */
+
+	sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
+	sleepy.it_value.tv_sec = how_long / 1000000000L;
+	sleepy.it_value.tv_usec =
+		( how_long - sleepy.it_value.tv_sec * 1000000000L ) / 1000;
+
+	signal( SIGALRM, f_wait_alarm_handler );
+	setitimer( ITIMER_REAL, &sleepy, NULL );
+
+	/* wake up only after sleeping time or if DO_QUIT signal was received */
+
+	do
+	{
+		pause( );
+		getitimer( ITIMER_REAL, &sleepy );
+	} while ( ! do_quit &&
+			  ( sleepy.it_value.tv_sec > 0 || sleepy.it_value.tv_usec > 0 ) );
+
+	signal( SIGALRM, SIG_DFL );
+
+	/* return 1 if end of sleping time was reached, 0 if do_quit was set */
+
+	return vars_push( INT_VAR, do_quit ? 0 : 1 );
+}
+
+
+/*--------------------------------------------------------------------------*/
+/* f_wait_alarm_handler() accepts the alarm signal, it doesn't got to do    */
+/* anything since the alarm signal will wake up f_wait() from its pause() - */
+/* but without it the alarm signal would kill the process, i.e. the child.  */
+/*--------------------------------------------------------------------------*/
+
+void f_wait_alarm_handler( int sig_type )
+{
+	if ( sig_type != SIGALRM )
+		return;
+
+	signal( SIGALRM, f_wait_alarm_handler );
 }
