@@ -63,11 +63,8 @@ void device_add( const char *name )
 	   name of the modules corresponding to the device name */
 
 	lib_name = get_string( strlen( libdir ) + strlen( dev_name ) + 4 );
-	strcpy( lib_name, libdir );
-	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( lib_name, "/" );
-	strcat( lib_name, dev_name );
-	strcat( lib_name, ".so" );
+	sprintf( lib_name, "%s%s%s.so\n", libdir,
+			 libdir[ strlen( libdir ) - 1 ] != '/' ? "/" : "", dev_name );
 
 	/* Try to access the module (also allow the name to be defined via
 	   LD_LIBRARY_PATH) - don't follow links yet */
