@@ -3020,9 +3020,9 @@ Var *f_clearmark_2d( Var *v )
         return vars_push( INT_VAR, 0 );
     }
 
-	/* In a test run this all there is to be done */
+	/* Check for a list of curve numbers */
 
-	for ( i = 0; v != NULL && i < MAX_CURVES, i++, v = vars_pop( v ) )
+	for ( i = 0; v != NULL && i < MAX_CURVES; i++, v = vars_pop( v ) )
 	{
 		curves[ i ] = get_strict_long( v, "curve number" ) - 1;
 
@@ -3035,6 +3035,8 @@ Var *f_clearmark_2d( Var *v )
 	}
 
 	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
 
 	if ( Internals.mode == TEST )
 		return vars_push( INT_VAR, 1 );

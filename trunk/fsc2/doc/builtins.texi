@@ -642,7 +642,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{clear_marker_2d}
 @item clear_marker_2d()
 @findex clear_marker_2d()
-This function deletes all previously set 2D markers. It accepts no arguments.
+When invoked without any arguments at all this function deletes all
+previously set 2D markers on all curves. Otherwise it expects a list
+of curve numbers and deletes only all markers on these curves.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} program.

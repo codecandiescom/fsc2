@@ -2178,7 +2178,7 @@ void remove_markers_2d( long *curves )
 		if ( i == G2.active_curve )
 			repaint_canvas_2d( &G2.canvas );
 
-		if ( G2.is_cut && curves[ j ] = CG.curve )
+		if ( G2.is_cut && curves[ j ] == CG.curve )
 			delete_all_cut_markers( );
 	}
 
