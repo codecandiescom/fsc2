@@ -567,12 +567,9 @@ Var *pulser_update( Var *v )
 
 	/* If we're doing a real experiment also tell the pulser to start */
 
-	if ( FSC2_MODE == EXPERIMENT && ! dg2020_run( START ) )
+	if ( FSC2_MODE == EXPERIMENT )
+		dg2020_run( dg2020.is_running )
 	{
-		print( FATAL, "Communication with pulser failed.\n" );
-		THROW( EXCEPTION );
-	}
-
 	return vars_push( INT_VAR, state ? 1 : 0 );
 }
 
@@ -793,13 +790,15 @@ Var *pulser_reset( Var *v )
 {
 	v = v;
 
+	if ( ! dg2020_is_needed )
+		return vars_push( INT_VAR, 1 );
+
 	if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used ||
 		 dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
 		vars_pop( pulser_pulse_reset( NULL ) );
 	vars_pop( pulser_pulse_reset( NULL ) );
-	dg2020_update_data( );
 
-	return vars_push( INT_VAR, 1 );
+	return pulser_update( NULL );
 }
 
 
