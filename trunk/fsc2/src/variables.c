@@ -2,6 +2,11 @@
    $Id$
 
    $Log$
+   Revision 1.26  1999/07/27 21:33:26  jens
+   Lots of changes mostly to get rid of the array stack and to use the variable
+   stack also for definition of and assignments to arrays. Improved treatment of
+   variable sized arrays. Functions can now return arrays &c.
+
    Revision 1.25  1999/07/27 16:19:25  jens
    *** empty log message ***
 
@@ -820,24 +825,24 @@ Var *vars_push( int type, ... )
 
 		case FUNC :
 			/* getting the function pointer seems to be to complicated for
-			   va_arg when written directly thus `FnctPtr' is a typedef
+			   va_arg() when written directly thus `FnctPtr' is a typedef
 			   (see start of file) */
-
 			new_stack_var->val.fnct = va_arg( ap, FnctPtr );
 			break;
 
 		case ARR_PTR :
-			new_stack_var->val.vptr = va_arg( ap, Var * );
+			new_stack_var->val.gptr = va_arg( ap, void * );
+			new_stack_var->from = va_arg( ap, Var * );
 			break;
 
-		case INT_PTR :
+		case INT_TRANS_ARR :
 			new_stack_var->val.lpnt = va_arg( ap, long * );
-			new_stack_var->from = va_arg( ap, Var * );
+			new_stack_var->len = va_arg( ap, long );
 			break;
 
-		case FLOAT_PTR :
+		case FLOAT_TRANS_ARR :
 			new_stack_var->val.dpnt = va_arg( ap, double * );
-			new_stack_var->from = va_arg( ap, Var * );
+			new_stack_var->len = va_arg( ap, long );
 			break;
 
 		default :
@@ -919,6 +924,10 @@ void vars_pop( Var *v )
 			free( stack->val.sptr );
 		if ( stack->type == FUNC )
 			free( stack->name );
+		if ( stack->type & ( INT_TRANS_ARR ) )
+			free( stack->val.lpnt );
+		if ( stack->type & ( FLOAT_TRANS_ARR ) )
+			free( stack->val.dpnt );
 
 		free( stack );
 	}
@@ -1046,7 +1055,7 @@ bool vars_exist( Var *v )
 
 	eprint( FATAL, "fsc2: INTERNAL ERROR: Use of non-existing "
 			"variable detected at %s:%d.\n", __FILE__, __LINE__ );
-	return( FAIL );
+	exit( EXIT_FAILURE );
 }
 
 
@@ -1054,8 +1063,8 @@ bool vars_exist( Var *v )
 /*-------------------------------------------------------------------*/
 /* This function is called when a `VAR_TOKEN [' combination is found */
 /* in the input. For a new array it sets its type. Everything else   */
-/* it does is pushing a variable with a generic pointer to the array */
-/* onto the stack.                                                   */
+/* it does is pushing a variable with a pointer to the array onto    */
+/* the stack.                                                        */
 /*-------------------------------------------------------------------*/
 
 
@@ -1077,8 +1086,7 @@ Var *vars_arr_start( Var *v )
 
 	/* push variable with generic pointer to array onto the stack */
 
-	ret = vars_push( ARR_PTR, v );
-	ret->flags |= IS_META;
+	ret = vars_push( ARR_PTR, NULL, v );
 	return( ret );
 }
 
@@ -1097,13 +1105,10 @@ Var *vars_arr_lhs( Var *v )
 	Var *a, *cv;
 
 
-	while ( !( v->flags & IS_META ) )
+	while ( v->type != ARR_PTR )
 		v = v->prev;
 
-	/* check that it's really a variable with a generic array pointer */
-
-	vars_check( v, ARR_PTR );
-	a = v->val.vptr;
+	a = v->from;
 
 	/* count the variable below v on the stack */
 
@@ -1157,9 +1162,13 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 
 	if ( need_alloc( a ) && dim != a->dim - 1 )
 	{
-		eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, only %d "
-				"indices are allowed (plus assignment of an array slice).\n",
-				Fname, Lc, a->name, a->dim - 1 );
+		if ( a->dim != 1 )
+			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
+					"only %d indices are allowed here.\n",
+					Fname, Lc, a->name, a->dim - 1 );
+		else
+			eprint( FATAL, "%s:%ld: Size of array `%s' is still unknown, "
+					"no indices are allowed here.\n", Fname, Lc, a->name );
 		THROW( VARIABLES_EXCEPTION );
 	}
 
@@ -1178,15 +1187,15 @@ Var *vars_get_lhs_pointer( Var *a, Var *v, int dim )
 
 	if ( need_alloc( a ) )
 	{
-		ret = vars_push( a->type == INT_ARR ? INT_PTR : FLOAT_PTR, NULL, a );
+		ret = vars_push( ARR_PTR, NULL, a );
 		ret->len = index;
 	}
 	else
 	{
 		if ( a->type == INT_ARR )
-			ret = vars_push( INT_PTR, a->val.lpnt + index , a );
+			ret = vars_push( ARR_PTR, a->val.lpnt + index , a );
 		else
-			ret = vars_push( FLOAT_PTR, a->val.dpnt + index , a );
+			ret = vars_push( ARR_PTR, a->val.dpnt + index , a );
 	}
 
 	/* Set a flag if a slice is indexed */
@@ -1266,7 +1275,7 @@ long vars_calc_index( Var *a, Var *v )
 
 		/* update the index */
 
-		index += index * a->sizes[ i ] + cur;
+		index = index * a->sizes[ i ] + cur;
 
 		/* pop the variable with the index */
 
@@ -1277,7 +1286,7 @@ long vars_calc_index( Var *a, Var *v )
 	/* for slices we need another update of the index */
 
 	if ( i != a->dim )
-		index += index * a->sizes[ i ];
+		index = index * a->sizes[ i ];
 
 	return( index );
 }
@@ -1344,9 +1353,7 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 				a->flags &= ~NEW_VARIABLE;
 				a->sizes[ i ] = 0;
 				a->flags |= NEED_ALLOC;
-				ret = vars_push( a->type == INT_ARR ? INT_PTR: FLOAT_PTR,
-								 NULL, a );
-				ret->flags |= IS_META;
+				ret = vars_push( ARR_PTR, NULL, a );
 				return( ret );
 			}
 
@@ -1387,18 +1394,18 @@ Var *vars_setup_new_array( Var *a, int dim, Var *v )
 											 sizeof( double ) );
 
 	a->flags &= ~NEW_VARIABLE;
-	if ( a->type == INT_ARR )
-		ret = vars_push( INT_PTR, NULL, a );
-	else
-		ret = vars_push( FLOAT_PTR, NULL, a );
+	ret = vars_push( ARR_PTR, NULL, a );
 	ret->flags |= NEED_INIT;
-	ret->flags |= IS_META;
 
 	return( ret );
 }
 
 
 /*----------------------------------------------------------------------*/
+/* Function is called if an element or a slice of an array is accessed  */
+/* after the indices are read in. Prior to the call of this function    */
+/* vars_arr_start() has been called and pushed a generic pointer to the */
+/* array (i.e. of type ARR_PTR) */
 /*----------------------------------------------------------------------*/
 
 Var *vars_arr_rhs( Var *v )
@@ -1413,11 +1420,10 @@ Var *vars_arr_rhs( Var *v )
        the variable stack until we find the first non-index variable which
        should be a pointer to an array. */
 
-	while ( ! ( v->flags & IS_META ) )
+	while ( v->type != ARR_PTR )
 		v = v->prev;
-	vars_check( v, ARR_PTR );         /* check it's really an array pointer */
 
-	a = v->val.vptr;                  /* get array ther pointer points to */
+	a = v->from;                      /* get array ther pointer points to */
 
 	/* If the right hand side array is still variable sizes it never has been
        assigned values to it and it makes no sense to use its elements */
@@ -1475,9 +1481,9 @@ Var *vars_arr_rhs( Var *v )
 	else
 	{
 		if ( a->type == INT_ARR )
-			return( vars_push( INT_PTR, a->val.lpnt + index, a ) );
+			return( vars_push( ARR_PTR, a->val.lpnt + index, a ) );
 		else
-			return( vars_push( FLOAT_PTR, a->val.dpnt + index, a ) );
+			return( vars_push( ARR_PTR, a->val.dpnt + index, a ) );
 	}
 
 	assert( 1 == 0 );       /* we never should end here... */
@@ -1493,10 +1499,23 @@ void vars_assign( Var *src, Var *dest )
 
 	assert( vars_exist( src ) && vars_exist( dest ) );
 
-	if ( src->type & ( INT_VAR | FLOAT_VAR ) )  /* if src is simple variable */
-		vars_ass_from_var( src, dest );
-	else                                        /* if src is an array slice */
-		vars_ass_from_ptr( src, dest );
+	switch ( src->type )
+	{
+		case INT_VAR : case FLOAT_VAR :              /* variable */
+			vars_ass_from_var( src, dest );
+		   break;
+
+		case ARR_PTR :                               /* array slice */
+			vars_ass_from_ptr( src, dest );
+			break;
+
+		case INT_TRANS_ARR : case FLOAT_TRANS_ARR :  /* transient array */
+			vars_ass_from_trans_ptr( src, dest );
+			break;
+
+		default :
+			assert( 1 == 0 );           /* we never should end here... */
+	}
 
 	vars_pop( dest );
 	vars_pop( src );
@@ -1537,25 +1556,58 @@ void vars_ass_from_var( Var *src, Var *dest )
 		dest->flags &= ~NEW_VARIABLE;
 	}
 
-	/* now do the assignment */
+	/* Now do the assignment - take are: the left hand side variable can be
+	   either a real variable or an array pointer with the void pointer
+	   `val.gptr' in the variable structure pointing to the data to be set
+	   in an array. */
 
-	if ( dest->type == INT_VAR )
+	switch ( dest->type )
 	{
-		if ( src->type == INT_VAR )
-			dest->val.lval = src->val.lval;
-		else
-		{
-			eprint( WARN, "%s:%ld: WARNING: Using float value in "
-					"assignment to integer variable.\n", Fname, Lc );
-			dest->val.lval = ( long ) src->val.dval;
-		}
-	}
-	else
-	{
-		if ( src->type == INT_VAR )
-			dest->val.dval = ( double ) src->val.lval;
-		else
-			dest->val.dval = src->val.dval;
+		case INT_VAR : case FLOAT_VAR :
+			if ( dest->type == INT_VAR )
+			{
+				if ( src->type == INT_VAR )
+					dest->val.lval = src->val.lval;
+				else
+				{
+					eprint( WARN, "%s:%ld: WARNING: Using float value in "
+							"assignment to integer variable.\n", Fname, Lc );
+					dest->val.lval = ( long ) src->val.dval;
+				}
+			}
+			else
+			{
+				if ( src->type == INT_VAR )
+					dest->val.dval = ( double ) src->val.lval;
+				else
+					dest->val.dval = src->val.dval;
+			}
+			break;
+
+		case ARR_PTR :
+			if ( dest->from->type == INT_ARR )
+			{
+				if ( src->type == INT_VAR )
+					*( ( long * ) dest->val.gptr ) = src->val.lval;
+				else
+				{
+					eprint( WARN, "%s:%ld: WARNING: Using float value in "
+							"assignment to integer variable.\n", Fname, Lc );
+					*( ( long * ) dest->val.gptr ) = ( long ) src->val.dval;
+				}
+			}
+			else
+			{
+				if ( src->type == INT_VAR )
+					*( ( double * ) dest->val.gptr )
+						                            = ( double ) src->val.lval;
+				else
+					*( ( double * ) dest->val.gptr ) = src->val.dval;
+			}
+			break;
+
+		default :                    /* we never should end here... */
+			assert ( 1 == 0 );
 	}
 }
  
@@ -1565,13 +1617,14 @@ void vars_ass_from_var( Var *src, Var *dest )
 
 void vars_ass_from_ptr( Var *src, Var *dest )
 {
-	Var *d, *s;
+	Var *d,
+		*s;
 	int i;
 
 
 	/* may be that's paranoid, but... */
 
-	assert( src->type & ( INT_PTR | FLOAT_PTR ) );
+	assert( src->from->type & ( INT_ARR | FLOAT_ARR ) );
 
 	/* we can't assign from an array slice to a variable */
 
@@ -1620,6 +1673,11 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 					"different size.\n", Fname, Lc, d->name, s->name );
 			THROW( VARIABLES_EXCEPTION );
 		}
+
+		if ( d->type == INT_ARR )
+			dest->val.lpnt = ( long * ) dest->val.gptr;
+		else
+			dest->val.dpnt = ( double * ) dest->val.gptr;
 	}
 
 	/* Warn on float to integer assignment */
@@ -1627,6 +1685,14 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 	if ( d->type == INT_ARR && s->type == FLOAT_ARR )
 		eprint( WARN, "%s:%ld: Assignment of slice of float array `%s' to "
 				"integer array `%s'.\n", Fname, Lc, s->name, d->name );
+
+	/* get also the correct type of pointer for the data source - the pointer
+	   to the start of the slice is always stored as a void pointer */
+
+	if ( s->type == INT_ARR )
+		src->val.lpnt = ( long * ) src->val.gptr;
+	else
+		src->val.dpnt = ( double * ) src->val.gptr;
 
 	/* Now copy the array slice */
 
@@ -1651,34 +1717,132 @@ void vars_ass_from_ptr( Var *src, Var *dest )
 
 
 
+void vars_ass_from_trans_ptr( Var *src, Var *dest )
+{
+	Var    *d;
+	int    i;
+	double *sdptr;
+	long   *slptr;
+
+
+	/* we can't assign from an array slice to a variable */
+
+	if ( dest->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		eprint( FATAL, "%s:%ld: Left hand side of assignment is a variable "
+				"while right hand side is an array slice.\n", Fname, Lc ); 
+		THROW( VARIABLES_EXCEPTION );
+	}
+
+	/* Again being paranoid... */
+
+	assert( dest->flags & NEED_SLICE );
+
+	d = dest->from;
+
+	/* Do allocation of memory (set size of missing dimension to the last one
+	   of the source array) if the destination array needs it, otherwise check
+	   that sizes of the array sizes is equal. */
+
+	if ( d->flags & NEED_ALLOC )
+	{
+		d->sizes[ d->dim - 1 ] = src->len;
+
+		d->len *= d->sizes[ d->dim - 1 ];
+
+		if ( d->type == INT_ARR )
+		{
+			d->val.lpnt = T_calloc( d->len,  sizeof( long ) );
+			dest->val.lpnt = d->val.lpnt + dest->len;
+		}
+		else
+		{
+			d->val.dpnt = T_calloc( d->len, sizeof( double ) );
+			dest->val.dpnt = d->val.dpnt + dest->len;
+		}
+
+		d->flags &= ~NEED_ALLOC;
+	}
+	else
+	{
+		if ( d->sizes[ d->dim - 1 ] != src->len )
+		{
+			eprint( FATAL, "%s:%ld: Array slices assigned to array `%s' does "
+					"not fit its length.\n", Fname, Lc, d->name );
+			THROW( VARIABLES_EXCEPTION );
+		}
+
+		if ( d->type == INT_ARR )
+			dest->val.lpnt = ( long * ) dest->val.gptr;
+		else
+			dest->val.dpnt = ( double * ) dest->val.gptr;
+	}
+
+	/* Warn on float to integer assignment */
+
+	if ( d->type == INT_ARR && src->type == FLOAT_TRANS_ARR )
+		eprint( WARN, "%s:%ld: Assignment of slice of float type to integer "
+				"array `%s'.\n", Fname, Lc, d->name );
+
+	/* Now copy the array slice */
+
+	if ( src->type == INT_TRANS_ARR )
+		slptr = src->val.lpnt;
+	else
+		sdptr = src->val.dpnt;
+
+	for ( i = 0; i < d->sizes[ d->dim - 1 ]; ++i )
+	{
+		if ( d->type == INT_ARR )
+		{
+			if ( src->type == INT_TRANS_ARR )
+				*dest->val.lpnt++ = *slptr++;
+			else
+				*dest->val.lpnt++ = ( long ) *sdptr++;
+		}
+		else
+		{
+			if ( src->type == INT_TRANS_ARR )
+				*dest->val.dpnt++ = ( double ) *slptr++;
+			else
+				*dest->val.dpnt++ = *sdptr++;
+		}
+	}
+}
+
+
+
 void vars_arr_init( Var *v )
 {
 	long ni;
 	Var *p1, *p2, *a;
 
 
-	if ( v->type == UNDEF_VAR )      /* no initialization */
+	/* if there are no initialization data this is indicated by a variable
+	   of type UNDEF_VAR - just pop it as well as the array pointer */
+
+	if ( v->type == UNDEF_VAR )
 	{
 		vars_pop( v->prev );
 		vars_pop( v );
 		return;
 	}
 
-
 	/* The variable pointer this function gets passed is a pointer to the very
-       last intialisation data on the variable stack. Now we've got to work
+       last initialization datum on the variable stack. Now we've got to work
        our way up in the variable stack until we find the first non-data
-       variable which should be a pointer to an array. */
+       variable, indicated by having the IS_META property set in its flags,
+	   which should be a pointer to an array. */
 
-	while ( ! ( v->flags & IS_META ) )
+	while ( v->type != ARR_PTR )
 		v = v->prev;
-	vars_check( v, INT_PTR | FLOAT_PTR );
+	vars_check( v->from, INT_ARR | FLOAT_ARR );
 
 	a = v->from;
 
-	/* variable sized arays can't be initialized, they need the assignment
-	   of an array slice n order to determine the still unknown size of the
-	   last dimension */
+	/* Variable sized arays can't be initialized, they need the assignment of
+	   an array slice to determine the still unknown size of their very last
+	   dimension */
 
 	if ( need_alloc( a ) )
 	{
@@ -1687,7 +1851,7 @@ void vars_arr_init( Var *v )
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-	/* If the array isn't just declared we can't do an assignment anymore */
+	/* If the array isn't newly declared we can't do an assignment */
 
 	if ( ! ( v->flags & NEED_INIT ) )
 	{
@@ -1696,7 +1860,6 @@ void vars_arr_init( Var *v )
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-
 	/* count number of initializers and check that it fits the length of
 	   the array */
 
@@ -1704,17 +1867,18 @@ void vars_arr_init( Var *v )
 		;
 
 	if ( ni < a->len )
-		eprint( WARN, "%s:%ld: There are less initializers for array `%s' "
-				"than the array has elements.\n", Fname, Lc, a->name );
+		eprint( WARN, "%s:%ld: Less initializers for array `%s' than it has "
+				"elements.\n", Fname, Lc, a->name );
 
 	if ( ni > a->len )
 	{
-		eprint( FATAL, "%s:%ld: there are more initializers for array `%s' "
-				"than the array has elements.\n", Fname, Lc, a->name );
+		eprint( FATAL, "%s:%ld: Too many initializers for array `%s'.\n",
+				Fname, Lc, a->name );
 		THROW( VARIABLES_EXCEPTION );
 	}
 
-	/* Finaly do the assignments */
+	/* Finaly do the assignments - walk through the data and copy them into
+	   the area for data in the array */
 
 	if ( a->type == INT_ARR )
 		v->val.lpnt = a->val.lpnt;
