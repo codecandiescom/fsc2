@@ -497,9 +497,7 @@ static Var_T *vars_push_submatrix( Var_T *from, Var_Type_T type, int dim,
 		if ( type == INT_REF )
 		{
 			nv->type = type = INT_ARR;
-			nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
-			for ( i = 0; i < nv->len; i++ )
-				nv->val.lpnt[ i ] = 0;
+			nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
 		}
 		else
 		{
@@ -608,12 +606,8 @@ Var_T *vars_push( Var_Type_T type, ... )
 					nsv->val.lpnt = LONG_P get_memcpy( nsv->val.lpnt,
 											nsv->len * sizeof *nsv->val.lpnt );
 				else
-				{
-					nsv->val.lpnt = LONG_P T_malloc( nsv->len
-													 * sizeof *nsv->val.lpnt );
-					for ( i = 0; i < nsv->len; i++ )
-						nsv->val.lpnt[ i ] = 0;
-				}
+					nsv->val.lpnt = LONG_P T_calloc( nsv->len,
+													 sizeof *nsv->val.lpnt );
 			}
 			break;
 
@@ -746,12 +740,8 @@ Var_T *vars_make( Var_Type_T type, Var_T *src )
 			nv->len = src->len;
 			nv->dim = 1;
 			if ( nv->len != 0 )
-			{
-				nv->val.lpnt = LONG_P T_malloc( nv->len
-												* sizeof *nv->val.lpnt );
-				for ( i = 0; i < nv->len; i++ )
-					nv->val.lpnt[ i ] = 0;
-			}
+				nv->val.lpnt = LONG_P T_calloc( nv->len,
+												sizeof *nv->val.lpnt );
 			else
 				nv->val.lpnt = NULL;
 			break;
