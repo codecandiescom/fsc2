@@ -106,8 +106,10 @@ void dump_window( int type, int fd )
 }
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function creates a pixmap with a copy of the contents of the */
+/* canvas for drawing 1D data and the surrounding axes canvases */
+/*--------------------------------------------------------------*/
 
 static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 {
@@ -153,8 +155,10 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
 } 
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+/* Function creates a pixmap with a copy of the contents of the */
+/* canvas for drawing 2D data and the surrounding axes canvases */
+/*--------------------------------------------------------------*/
 
 static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 {
@@ -206,8 +210,11 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
 } 
 
 
-/*---------------------------------------------------------------*/
-/*---------------------------------------------------------------*/
+/*---------------------------------------------------------------------*/
+/* Function creates a pixmap with a copy of the contents of the canvas */
+/* for cross sections through a 2D data set and the surrounding axes   */
+/* canvases                                                            */
+/*---------------------------------------------------------------------*/
 
 static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
 {
@@ -361,7 +368,7 @@ static void dump_as_ppm( FILE *fp, XImage *image )
 			bits_used += bits_per_pixel;
 
 			/* Get the rgb color from the pixel value via a hash look-up
-			   and write color to output file */
+			   and write the color to the output file */
 
 			key = pixel % hash_size;
 			while ( hash[ key ].pixel != pixel )
