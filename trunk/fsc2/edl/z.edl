@@ -9,7 +9,7 @@ j[ 4, N ];
 k[ N ];
 a, b;
 FILE;
-
+t;
 
 PREP:
 
@@ -17,6 +17,8 @@ init_2d( 4, N, M, -100, 5, 3325, 2.0, "Time after laser flash [ns]",
 		 "Magnetic field [G]", "Signal intensity [V]" );
 
 EXP:
+
+t = delta_time( );
 
 set_seed( 23423 );
 
@@ -48,6 +50,8 @@ FOR K = 1 : M
 }
 
 //change_scale( 1, 1, 1, 1 );
+
+print( "\Ttime = # s\n", delta_time( ) - t );
 
 #EXIT
 
