@@ -234,12 +234,12 @@ void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 /*----------------------------------------------------------*/
 /*----------------------------------------------------------*/
 
-int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length )
+int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 {
 	static Ticks where = 0;
 	int ret;
-	char *a = old + where,
-		 *b = new + where;
+	char *a = old_p + where,
+		 *b = new_p + where;
 	char cur_state;
 
 

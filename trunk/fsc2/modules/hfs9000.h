@@ -145,8 +145,8 @@ typedef struct _C_ {
 	int self;
 	FUNCTION *function;
 	bool needs_update;
-	char *old;
-	char *new;
+	char *old_d;
+	char *new_d;
 	bool state;
 } CHANNEL;
 
@@ -315,7 +315,7 @@ const char *hfs9000_pticks( Ticks ticks );
 int hfs9000_start_compare( const void *A, const void *B );
 Ticks hfs9000_get_max_seq_len( void );
 void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset );
-int hfs9000_diff( char *old, char *new, Ticks *start, Ticks *length );
+int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
 
 
 /* Functions fron hfs9000_run.c */

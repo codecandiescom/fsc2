@@ -317,12 +317,13 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	   its function send a warning and mark the function as useless */
 
 	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses =
+		p->function->pulses = PULSE_PP
 					  T_realloc( p->function->pulses,
-								 p->function->num_pulses * sizeof( PULSE * ) );
+								 p->function->num_pulses *
+								 sizeof *p->function->pulses );
 	else
 	{
-		p->function->pulses = T_free( p->function->pulses );
+		p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
 		print( SEVERE, "Function '%s' isn't used at all because all its "
 			   "pulses are never used.\n",
@@ -341,7 +342,7 @@ static PULSE *hfs9000_delete_pulse( PULSE *p )
 	/* Special care has to be taken if this is the very last pulse... */
 
 	if ( p == hfs9000_Pulses && p->next == NULL )
-		hfs9000_Pulses = T_free( hfs9000_Pulses );
+		hfs9000_Pulses = PULSE_P T_free( hfs9000_Pulses );
 	else
 		T_free( p );
 
@@ -391,8 +392,8 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 	   First allocate memory for the old and the new states of the channels
 	   used by the function */
 
-	f->channel->old = T_calloc( 2 * hfs9000.max_seq_len, 1 );
-	f->channel->new = f->channel->old + hfs9000.max_seq_len;
+	f->channel->old_d = CHAR_P T_calloc( 2 * hfs9000.max_seq_len, 1 );
+	f->channel->new_d = f->channel->old_d + hfs9000.max_seq_len;
 
 	/* Now loop over all pulses and pick the ones that need changes */
 
@@ -410,11 +411,11 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 		if ( f->channel->self != HFS9000_TRIG_OUT )
 		{
 			if ( p->is_old_pos || ( p->is_old_len && p->old_len != 0 ) )
-				hfs9000_set( p->channel->old,
+				hfs9000_set( p->channel->old_d,
 							 p->is_old_pos ? p->old_pos : p->pos,
 							 p->is_old_len ? p->old_len : p->len, f->delay );
 			if ( p->is_pos && p->is_len && p->len != 0 )
-				hfs9000_set( p->channel->new, p->pos, p->len, f->delay );
+				hfs9000_set( p->channel->new_d, p->pos, p->len, f->delay );
 		}
 
 		p->channel->needs_update = SET;
@@ -437,14 +438,15 @@ static void hfs9000_commit( FUNCTION *f, bool flag )
 		if ( f->channel->self == HFS9000_TRIG_OUT )
 			hfs9000_set_trig_out_pulse( );
 		else
-			while ( ( what = hfs9000_diff( f->channel->old, f->channel->new,
+			while ( ( what = hfs9000_diff( f->channel->old_d,
+										   f->channel->new_d,
 										   &start, &len ) ) != 0 )
 				hfs9000_set_constant( f->channel->self, start, len,
 									  what == -1 ? 0 : 1 );
 	}
 
 	f->channel->needs_update = UNSET;
-	T_free( f->channel->old );
+	T_free( f->channel->old_d );
 }
 
 
