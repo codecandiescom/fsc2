@@ -53,8 +53,8 @@ sources        = $(bison_sources:.y=.c) $(flex_sources:.flex=.c) \
 objects        = $(sources:.c=.o)
 modules        = User_Functions.c tds754a.c sr510.c sr810.c s_band.c \
 				 aeg_x_band.c er035m.c bh15.c hp8647a.c
-dg2020         = dg2020.c dg2020_gen.c dg2020_pulse.c dg2020_init.c \
-				 dg2020_run.c dg2020_util.c dg2020_gpib.c
+dg2020_f       = dg2020_f.c dg2020_gen_f.c dg2020_pulse_f.c dg2020_init_f.c \
+				 dg2020_run_f.c dg2020_util_f.c dg2020_gpib_f.c
 tds754a        = tds754a.c tds754a_gpib.c tds754a_util.c
 header         = ${c_sources:.c=.h} global.h
 
@@ -108,10 +108,10 @@ fsc2: $(objects) $(header)
 # specially since each has its own header file and is divided into several
 # source files
 
-mods: dg2020.so tds754a.so $(modules:.c=.so)
+mods: dg2020_f.so tds754a.so $(modules:.c=.so)
 
-dg2020.so: ${dg2020:.c=.lo} dg2020.h
-	$(CC) -shared -o $@ ${dg2020:.c=.lo} -lm $(LDFLAGS)
+dg2020_f.so: ${dg2020_f:.c=.lo} dg2020_f.h
+	$(CC) -shared -o $@ ${dg2020_f:.c=.lo} -lm $(LDFLAGS)
 	chmod 644 $@
 
 tds754a.so: ${tds754a:.c=.lo} tds754a.h
@@ -122,7 +122,7 @@ tds754a.so: ${tds754a:.c=.lo} tds754a.h
 	$(CC) -shared -o $@ $*.lo -lm $(LDFLAGS)
 	chmod 644 $@
 
-${dg2020:.c=.lo}: dg2020.h
+${dg2020_f:.c=.lo}: dg2020_f.h
 ${tds754a:.c=.lo}: tds754a.h
 
 %.lo: %.c $(header)
@@ -154,7 +154,7 @@ install:
 
 tags:
 	etags -T ${c_sources} *.flex *.y ${c_sources:.c=.h} $(header) \
-		  ${modules} ${dg2020} dg2020.h ${tds754a} tds754a.h
+		  ${modules} ${dg2020_f} dg2020_f.h ${tds754a} tds754a.h
 
 
 clean: 

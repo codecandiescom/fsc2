@@ -5,7 +5,7 @@
 /***********************************************************************/
 
 
-DG2020        // Sony/Tektronix data generator
+DG2020_F      // Sony/Tektronix data generator (frankfurt version)
 
 TDS754A       // Tektronix digitizing oscilloscope
 
