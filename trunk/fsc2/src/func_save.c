@@ -143,7 +143,7 @@ Var *f_getf( Var *var )
 		r = T_strdup( s[ 0 ] + 1 );
 
 	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
-		s[ 0 ] = T_strdup( "Please enter a file name:" );
+		s[ 0 ] = T_strdup( "Please select a file name:" );
 	else
 		s[ 0 ] = T_strdup( s[ 0 ] );
 

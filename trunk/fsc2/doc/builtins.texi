@@ -87,7 +87,7 @@ list of all recognized special sequences:
 @table @samp
 @cindex escape characters (in @code{print()} function)
 @item \n
-Linefeed character: Ends a line, everything following starts on a new
+Linefeed character: Ends a line, everything following it starts on a new
 line. Thus several lines can be printed at once by one call of
 @code{print()}. @code{print()} does not automatically add a linefeed.
 @item \t
@@ -102,8 +102,8 @@ string}.
 Prints a @code{#}, thus switching off the special meaning of the
 @code{#} character as a placeholder for variables to be printed.
 @item \T
-While normally nothing is printed while a test of the @code{EXPERIMENT}
-experiment section of an @acronym{EDL} file is run, if the @i{format
+While normally nothing is printed during the test tun of the
+@code{EXPERIMENT} section of an @acronym{EDL} file, if the @i{format
 string} starts with this escape sequence the @code{print()} function
 will produce output already in the test run.
 @end table
@@ -328,7 +328,7 @@ returns an (invalid) file identifier of @code{-1}.
 The function accepts up to five arguments, all of them optional. The
 first one is usually the prompt string to be printed in the file
 selector. If it is missing or is the empty string (use `@code{""}' to
-create an empty string) it defaults to `@i{Please enter a file
+create an empty string) it defaults to `@i{Please select a file
 name:}'. The second argument is a pattern for the file name, defaulting
 to `@i{*.dat}'. You may use all the usual wildcard characters you're
 used to from the shell. The third argument is the directory the search
