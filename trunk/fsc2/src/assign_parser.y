@@ -115,6 +115,7 @@ static bool Func_is_set = UNSET;
 %token <dval> FLOAT_TOKEN
 %token <sptr> STR_TOKEN
 %token <lval> PXY_TOK        /* X, Y, -X, -Y, CW -- for phases */
+%token <lval> CHN_TOKEN      /* channels for RS690 */
 %token AND OR XOR NOT
 %token EQ NE LT LE GT GE
 
@@ -303,12 +304,16 @@ pm:     INT_TOKEN sep2             { p_assign_pod( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
 
-chd:    CH_TOKEN sep1 ch1
+chd:    CH_TOKEN sep1 ch
 ;
 
-ch1:    INT_TOKEN sep2             { p_assign_channel( Channel_Type,
+ch:     INT_TOKEN sep2             { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $1 ) ); }
-      | ch1 INT_TOKEN sep2         { p_assign_channel( Channel_Type,
+      | CHN_TOKEN sep2             { p_assign_channel( Channel_Type,
+												  vars_push( INT_VAR, $1 ) ); }
+      | ch INT_TOKEN sep2          { p_assign_channel( Channel_Type,
+												  vars_push( INT_VAR, $2 ) ); }
+      | ch CHN_TOKEN sep2          { p_assign_channel( Channel_Type,
 												  vars_push( INT_VAR, $2 ) ); }
 ;
 
@@ -486,6 +491,12 @@ phsp:     /* empty */
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
 												  0, $3, SET ); }
 		| CH_TOKEN sep1 INT_TOKEN
+          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
+												  0, $3, UNSET ); }
+		| POD_TOKEN sep1 CHN_TOKEN
+          sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
+												  0, $3, SET ); }
+		| CH_TOKEN sep1 CHN_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
 												  0, $3, UNSET ); }
 ;
