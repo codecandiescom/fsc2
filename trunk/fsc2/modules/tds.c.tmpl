@@ -914,6 +914,8 @@ Var *digitizer_record_length( Var *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_set_record_length( record_lengths[ i ] );
+	else
+		tds_tmpl.rec_len = record_lengths[ i ];
 
 	tds_tmpl_state_check( tds_tmpl.timebase, record_lengths[ i ],
 						 tds_tmpl.trig_pos );

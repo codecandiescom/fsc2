@@ -216,7 +216,7 @@ FOREVER {
 		lockin_auto_acquisition( \"OFF\" );
 		magnet_sweep( STOPPED );
 		Sweep_State = STOPPED;
-		draw_marker( I + 1, \"WHITE\" );
+		draw_marker( I + 1, \"RED\" );
 
 		IF button_state( POnS ) {
 			Pause_State = 1;
@@ -239,7 +239,7 @@ FOREVER {
 			button_state( Sweep_Stop, \"ON\" );
 			current = set_field( new_current );
 			Sweep_State = STOPPED;
-			draw_marker( I + 1, \"WHITE\" );
+			draw_marker( I + 1, \"RED\" );
 		}
 		input_value( Current, current );
 	}
@@ -327,7 +327,7 @@ FOREVER {
 			magnet_sweep( STOPPED );
 			Sweep_State = STOPPED;
 			button_state( Sweep_Stop, \"ON\" );
-			draw_marker( I, \"WHITE\" );
+			draw_marker( I, \"RED\" );
 			IF button_state( POnS ) {
 				Pause_State = 1;
 			} ELSE {
