@@ -2329,11 +2329,10 @@ get_repl_retry:
 			clearerr( File_List[ file_num ].fp );
 			clearerr( new_fp );
 
-			rw = fread( buffer, sizeof( char ), 1024,
-						File_List[ file_num ].fp );
+			rw = fread( buffer, 1, 1024, File_List[ file_num ].fp );
 
 			if ( rw != 0 )
-				fwrite( buffer, sizeof( char ), rw, new_fp );
+				fwrite( buffer, 1, rw, new_fp );
 
 			if ( ferror( new_fp ) )
 			{

@@ -904,7 +904,7 @@ static bool dg2020_gpib_do_check( DG2020_STORE *params )
 	/* Allocate enough space for the pulsers reply */
 
 	length = params->length + 30;
-	reply = T_malloc( length * sizeof( char ) );
+	reply = T_malloc( length );
 
 	/* Assemble the command string - because of the first bit problem we have
 	   to use the increment of address, see also dg2020_set_constant() */
