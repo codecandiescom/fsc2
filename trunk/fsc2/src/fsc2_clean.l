@@ -81,6 +81,7 @@ static char *T_strdup( const char *string );
 static void *T_malloc( size_t size );
 static void *T_free( void *ptr );
 static void lower_permissions( void );
+static void usage( void );
 
 
 long Lc,
@@ -424,8 +425,14 @@ int main( int argc, char *argv[ ] )
 		printf( "\x01\n" );
 		Fname = T_strdup( "" );
 	}
-	else
+	else if ( argc == 2 )
 	{
+		if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
+		{
+			usage( );
+			return EXIT_SUCCESS;
+		}
+
 		yyin = stdin;
 		if ( yyin == NULL )
 		{
@@ -437,6 +444,11 @@ int main( int argc, char *argv[ ] )
 
 		printf( "\x01\n%s\n", argv[ 1 ] );
 		Fname = T_strdup( argv[ 1 ] );
+	}
+	else
+	{
+		usage( );
+		return EXIT_FAILURE;
 	}
 
 	Lc = 1;
@@ -767,6 +779,30 @@ static void lower_permissions( void )
 {
 	seteuid( getuid( ) );
 	setegid( getgid( ) );
+}
+
+
+/*-------------------------------------------------------*/
+/*-------------------------------------------------------*/
+
+static void usage( void )
+{
+	fprintf( stderr, "Usage: fsc2_clean [FILE]\n"
+			 "This program predigests EDL files and is only meant for\n"
+			 "internal use by fsc2(1). But since you're already here:\n"
+			 "fsc2_clean expects input (i.e. an EDL programs) on STDIN\n"
+			 "and writes a cleaned up version to STDOUT. It is e.g.\n"
+			 "responsible for getting rid of comments, inclusion of\n"
+			 "further EDL files (so fsc2 has only to deal with a flat\n"
+			 "and simple input stream) and also already may detect some\n"
+			 "flaws in an EDL file. If you want to see what fsc2 really\n"
+			 "thinks your EDL file is try\n\n"
+			 "    fsc2_clean my_program.edl < my_program.edl\n\n"
+			 "(but be prepared to get some non-printable character).\n"
+			 "If it gets passed a file name as the only argument this\n"
+			 "name is used in error messages. When called with an argument\n"
+			 "of either \"-h\" or \"--help\" (or with more than one "
+			 "argument)\nit prints out this text.\n" );
 }
 
 
