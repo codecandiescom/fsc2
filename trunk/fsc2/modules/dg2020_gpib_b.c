@@ -415,7 +415,7 @@ static bool dg2020_make_blocks( int num_blocks, BLOCK *block )
 	   need the block name without quotes while in ADD we need quotes...*/
 
 	sprintf( dummy, "%ld,%s\n", block[ 0 ].start, block[ 0 ].blk_name );
-	l = strlen( dummy );
+	l = strlen( dummy ) - 1;
 	sprintf( dummy, "%ld", l );
 	l = strlen( dummy );
 	sprintf( cmd, ":DATA:BLOC:DEF #%ld%s%ld,%s\n", l, dummy,
