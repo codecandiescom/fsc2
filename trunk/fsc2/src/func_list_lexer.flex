@@ -160,7 +160,7 @@ void func_list_parse( Func **fncts, int num_def_func, int *num_func )
 	Fname = get_string( strlen( libdir ) + strlen( "Functions" ) );
 	strcpy( Fname, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
+		strcat( Fname, "/" );
 	strcat( Fname, "Functions" );
 
 	if ( ( func_listin = fopen( Fname, "r" ) ) == NULL )

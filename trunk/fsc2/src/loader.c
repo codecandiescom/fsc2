@@ -106,7 +106,7 @@ void load_functions( Device *dev )
 	lib_name = get_string( strlen( libdir ) + strlen( dev->name ) + 4 );
 	strcpy( lib_name, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
-		strcat( cmd, "/" );
+		strcat( lib_name, "/" );
 	strcat( lib_name, dev->name );
 	strcat( lib_name, ".so" );
 

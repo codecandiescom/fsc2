@@ -156,7 +156,7 @@ bool scan_main( char *file )
 
 	/* Filter input through "fsc2_clean" (must be located in `libdir') */
 
-	cmd = get_string( strlen( libdir ) + 1 + strlen( "fsc2_clean " )
+	cmd = get_string( strlen( libdir ) + strlen( "/fsc2_clean " )
 	                  + strlen( file ) );
 	strcpy( cmd, libdir );
 	if ( libdir[ strlen( libdir ) - 1 ] != '/' )

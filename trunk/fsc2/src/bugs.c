@@ -89,6 +89,8 @@ void bug_report_callback( FL_OBJECT *a, long b )
 					  + strlen( "/Functions" ) + strlen( filename ) );
 	strcpy( cmd, "ls -al " );
 	strcat( cmd, libdir );
+	if ( libdir[ strlen( libdir ) - 1 ] != '/' )
+		strcat( cmd, "/" );
 	strcat( cmd, "Functions >> " );
 	strcat( cmd, filename );
 	system( cmd );
