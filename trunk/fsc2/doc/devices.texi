@@ -1662,11 +1662,12 @@ immediately updates the pulse sequence, as it is done by calling
 @anchor{pulser_stop_on_update}
 @item pulser_stop_on_update()
 @findex pulser_stop_on_update()
-This function exists for the HFS9003 only. While doing updates of the
-pulser to set new pulse positions and length etc.@: it usually gets
-switched off. By calling this function with an argument of @code{0} you
-can tell to pulser to continue even while doing updates. If called with
-an argument of @code{1} you may switch back to the default behavior.
+This function exists for the @strong{Tektronix HFS9003} only. While
+doing updates of the pulser to set new pulse positions and length etc.@:
+it usually gets switched off. By calling this function with an argument
+of @code{0} you can tell to pulser to continue even while doing
+updates. If called with an argument of @code{1} you may switch back to
+the default behavior.
 
 
 @anchor{pulser_cw_mode}
