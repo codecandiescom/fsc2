@@ -5,8 +5,8 @@
 
 #include "fsc2.h"
 
-Var *get_phase_cycled_area_1d( Var *v );
-Var *get_phase_cycled_area_2d( Var *v );
+Var *get_phase_cycled_area( Var *v );
+Var *get_phase_cycled_area_2( Var *v );
 
 
 static bool get_channel_number( Var *v, const char *func_name, long *channel );
@@ -36,7 +36,7 @@ static void pc_basic_check( const char *func_name, const char *func_1,
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-Var *get_phase_cycled_area_1d( Var *v )
+Var *get_phase_cycled_area( Var *v )
 {
 	Var *func_ptr;
 	Var *vn;                                /* all purpose variable */
@@ -257,7 +257,7 @@ Var *get_phase_cycled_area_1d( Var *v )
 /*    phase cycled area for each window                            */
 /*-----------------------------------------------------------------*/
 
-Var *get_phase_cycled_area_2d( Var *v )
+Var *get_phase_cycled_area_2( Var *v )
 {
 	Var *func_ptr;
 	Var *vn;                                /* all purpose variable */
