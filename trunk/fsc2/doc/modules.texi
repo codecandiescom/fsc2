@@ -647,6 +647,14 @@ to find out about the type of the device. If this variable does not
 exist it won't have any information about the device type and having
 another device of the same type recognized automatically will not work.
 
+Another important point is that if in two modules with different
+@code{generic_type} settings the same function is exported only one of
+this modules can be used. If the user tries to list both modules
+simultaneously in the @code{DEVICES} section an error message will be
+printed and interpretation of the program will be stopped. Thus it
+must be avoided to use identical @acronym{EDL} function names in modules
+for unrelated devices.
+
 
 @subsection Global variables
 

@@ -33,12 +33,12 @@ extern Func *Fncts;         /* structure for list of functions */
 extern Func Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
+static int num_func;
 
 static void resolve_hook_functions( Device *dev, const char *dev_name );
 static void load_functions( Device *dev );
 static void resolve_functions( Device *dev );
-static void add_function( int f_index, void *new_func, Device *new_dev,
-						  int num_new );
+static void add_function( int num, void *new_func, Device *new_dev );
 static int func_cmp( const void *a, const void *b );
 static void resolve_generic_type( Device *dev );
 
@@ -64,6 +64,7 @@ void load_all_drivers( void )
 	   which always comes last) and try to resolve the functions from the
 	   function list */
 
+	num_func = Num_Func;
 	for ( cd = Device_List; cd != NULL; cd = cd->next )
 		load_functions( cd );
 
@@ -202,8 +203,10 @@ static void load_functions( Device *dev )
 }
 
 
-/*----------------------------------------------------------------------*/
-/*----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
+/* Function tries to find out which hook functions exist for a device */
+/* and determines the pointers to these functions.                    */
+/*--------------------------------------------------------------------*/
 
 static void resolve_hook_functions( Device *dev, const char *dev_name )
 {
@@ -227,7 +230,7 @@ static void resolve_hook_functions( Device *dev, const char *dev_name )
 	hook_func_name = T_malloc( strlen( dev_name ) + 18 );
 	strcpy( hook_func_name, dev_name );
 	app = hook_func_name + strlen( dev_name );
-	strcat( app, "_init_hook" );
+	strcpy( app, "_init_hook" );
 
 	dlerror( );           /* make sure it's NULL before we continue */
 	dev->driver.init_hook = dlsym( dev->driver.handle, hook_func_name );
@@ -294,14 +297,10 @@ static void resolve_functions( Device *dev )
 {
 	int num;
 	void *cur;
-	char *new_func_name;
-	char *temp;
-	long len;
-	int num_new_funcs = 0;
 	Func *f = Fncts;
 
 
-	for ( num = 0; num < Num_Func; f++, num++ )
+	for ( num = 0; num < num_func; f++, num++ )
 	{
 		/* Don't try to load functions that are not listed in `Functions' */
 
@@ -309,32 +308,16 @@ static void resolve_functions( Device *dev )
 			continue;
 
 		dlerror( );                /* make sure it's NULL before we continue */
-
-		/* If the functions name is still the original one try it, otherwise
-		   first remove the extension with the '#' and the device count */
-
-		if ( ( temp = strchr( f->name, '#' ) ) == NULL )
-			 cur = dlsym( dev->driver.handle, f->name );
-		else
-		{
-			len = temp - f->name;
-			temp = T_malloc( len + 1 );
-			strncpy( temp, f->name, len );
-			temp[ len ] = '\0';
-
-			cur = dlsym( dev->driver.handle, temp );
-			T_free( temp );
-		}
+		cur = dlsym( dev->driver.handle, f->name );
 
 		if ( dlerror( ) != NULL )
 			continue;
 
 		/* If the function is completely new just set the pointer to the
-		   place the function is to be found in the library and - if
-		   necessary, i.e. if another function from the current library
-		   had a add twin in a different library, add '#' and the number
-		   of the device to the functions name. Otherwise this is a multiple
-		   defined function and it got to be appended to function list. */
+		   place the function is to be found in the library and. If it's
+		   not the first device of the same kind (i.e. same generic_type
+		   field) also add a function with '#' and the number. Otherwise
+		   append a new function */
 
 		if ( f->fnct == NULL )
 		{
@@ -342,16 +325,15 @@ static void resolve_functions( Device *dev )
 			f->device = dev;
 			if ( dev->count != 1 )
 			{
-				new_func_name = get_string( "%s#%d", f->name, dev->count );
-				T_free( ( char * ) f->name );
-				f->name = new_func_name;
+				eprint( NO_ERROR, UNSET, "Functions %s() and %s#%d() are both "
+						"defined by module `%s'.\n", f->name, f->name,
+						dev->count, dev->name );
+				add_function( num, cur, dev );
 			}
 		}
 		else
-			add_function( num, cur, dev, num_new_funcs++ );
+			add_function( num, cur, dev );
 	}
-
-	Num_Func += num_new_funcs;
 }
 
 
@@ -364,71 +346,32 @@ static void resolve_functions( Device *dev )
 /* current device.                                                      */
 /*----------------------------------------------------------------------*/
 
-static void add_function( int f_index, void *new_func, Device *new_dev,
-						  int num_new )
+static void add_function( int num, void *new_func, Device *new_dev )
 {
-	int i;
-	char *new_func_name;
-	char *temp;
 	Func *f;
 
 
-	/* Find out the correct device number - this is the next number after
-	   the highest device number of all devices that had twins in the current
-	   library. I.e., if module A exported th functions a1() and a2() and
-	   module B exported b1() and b2() then the functions in module C,
-	   also exporting a1() and b1() can be accessed as a1#2() and a2#2().
-	   This device number is, following a '#', appended to the function name
-	   (and the names of all functions from the current module).
-	   While not being completely bulletproof this method hopefully will work
-	   correctly with all modules written in a reasonable way... */
-
-	if ( new_dev->count == 1 )
+	if ( new_dev->count == 1 ||
+		 ( new_dev->generic_type != NULL &&
+		   Fncts[ num ].device->generic_type != NULL &&
+		   strcmp( new_dev->generic_type,
+				   Fncts[ num ].device->generic_type ) != 0 ) )
 	{
-		if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) != NULL )
-			new_dev->count = atoi( temp + 1 ) + 1;
-		else
-			new_dev->count = 2;
-
-		for ( i = 0, f = Fncts; i < Num_Func + num_new; f++, i++ )
-			if ( f->device == new_dev )
-			{
-				new_func_name = get_string( "%s#%d", f->name, new_dev->count );
-				T_free( ( char * ) f->name );
-				f->name = new_func_name;
-			}
-	}
-	else
-	{
-		if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) != NULL 
-			 && atoi( temp + 1 ) >= new_dev->count )
-		{
-			new_dev->count++;
-			for ( i = 0, f = Fncts; i < Num_Func; f++, i++ )
-				if ( Fncts[ i ].device == new_dev )
-				{
-					new_func_name = get_string( "%*s%d",
-										  strchr( f->name, '#' ) - f->name + 1,
-										  f->name, new_dev->count );
-					T_free( ( char * ) f->name );
-					f->name = new_func_name;
-				}
-		}
+		eprint( FATAL, SET, "Functions both with name %s() are defined in "
+				"modules of different types, `%s' and `%s'.\n",
+				Fncts[ num ].name, Fncts[ num ].device->name, new_dev->name );
+		THROW( EXCEPTION )
 	}
 
 	/* Add an entry for the new function to the list of functions */
 
-	Fncts = T_realloc( Fncts, ( Num_Func + num_new + 1 ) * sizeof( Func ) );
-	f = Fncts + Num_Func + num_new;
-	memcpy( f, Fncts + f_index, sizeof( Func ) );
+	Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof( Func ) );
+	f = Fncts + Num_Func++;
+	memcpy( f, Fncts + num, sizeof( Func ) );
 	
 	f->fnct   = new_func;
 	f->device = new_dev;
-	if ( ( temp = strchr( Fncts[ f_index ].name, '#' ) ) == NULL )
-		f->name = get_string( "%s#%d", Fncts[ f_index ].name, new_dev->count );
-	else
-		f->name = get_string( "%*s%d", temp - Fncts[ f_index ].name + 1,
-							  Fncts[ f_index ].name, new_dev->count );
+	f->name = get_string( "%s#%d", Fncts[ num ].name, new_dev->count );
 }
 
 
@@ -437,17 +380,32 @@ static void add_function( int f_index, void *new_func, Device *new_dev,
 /* string should be the same for devices with the same function, i.e.   */
 /* for all lock-in amplifiers the string is "lockin" etc. Here we try   */
 /* to get a pointer to this string from the library. If none exists the */
-/* pointer is set to NULL.                                              */
+/* pointer is set to NULL. If it exist we also run through the list of  */
+/* devices for which functions have already been loaded and try to find */
+/* out if this is the first of a generic type or how many there already */
+/* are - the result is stored in the Device structure.                  */
 /*----------------------------------------------------------------------*/
 
 static void resolve_generic_type( Device *dev )
 {
+	Device *cd;
+
+
+	dev->count = 1;
 	dlerror( );                    /* make sure it's NULL before we continue */
 	dev->generic_type = ( const char * ) dlsym( dev->driver.handle,
 												"generic_type" );
 
 	if ( dlerror( ) != NULL )               /* symbol not found in library ? */
+	{
 		dev->generic_type = NULL;
+		return;
+	}
+
+	for ( cd = Device_List; cd != dev; cd = cd->next )
+		if ( cd->generic_type != NULL &&
+			 ! strcmp( cd->generic_type, dev->generic_type ) )
+			dev->count++;
 }
 
 
@@ -639,7 +597,7 @@ int get_lib_number( const char *name )
 {
 	Device *cd;
 	Device *sd = NULL;                   /* the device we're looking for */
-	int num;;
+	int num;
 
 
 	for ( cd = Device_List; cd != 0; cd = cd->next )
@@ -653,7 +611,7 @@ int get_lib_number( const char *name )
 	if ( cd == NULL || sd == NULL )
 		return 0;
 
-	for ( num  = 1, cd = Device_List; cd != 0; cd = cd->next )
+	for ( num = 1, cd = Device_List; cd != 0; cd = cd->next )
 	{
 		if ( ! cd->is_loaded )
 			continue;
