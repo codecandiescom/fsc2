@@ -56,19 +56,19 @@ static int check_board( void );
 static int witio_48_errno = 0;
 
 const char *witio_48_errlist[ ] = {
-	"Success",                                        /*WITIO_48_OK      */
-	"Invalid channel number",						  /*WITIO_48_ERR_ICA */
-	"Invalid channel for current I/O mode",			  /*WITIO_48_ERR_ICM */
-	"Invalid DIO number",							  /*WITIO_48_ERR_IVD */
-	"Invalid mode",									  /*WITIO_48_ERR_IMD */
-	"Invalid output value",							  /*WITIO_48_ERR_IDV */
-	"Board is busy",								  /*WITIO_48_ERR_BNO */
-	"Board not open",								  /*WITIO_48_ERR_BBS */
-	"No driver loaded for board",					  /*WITIO_48_ERR_NDV */
-	"No permissions to open device file",			  /*WITIO_48_ERR_ACS */
-	"Device file does not exist",					  /*WITIO_48_ERR_DFM */
-	"Unspecified error when opening device file",	  /*WITIO_48_ERR_DFP */
-	"Internal driver or library error"				  /*WITIO_48_ERR_INT */
+	"Success",                                        /* WITIO_48_OK      */
+	"Invalid channel number",						  /* WITIO_48_ERR_ICA */
+	"Invalid channel for current I/O mode",			  /* WITIO_48_ERR_ICM */
+	"Invalid DIO number",							  /* WITIO_48_ERR_IVD */
+	"Invalid mode",									  /* WITIO_48_ERR_IMD */
+	"Invalid output value",							  /* WITIO_48_ERR_IDV */
+	"Board is busy",								  /* WITIO_48_ERR_BNO */
+	"Board not open",								  /* WITIO_48_ERR_BBS */
+	"No driver loaded for board",					  /* WITIO_48_ERR_NDV */
+	"No permissions to open device file",			  /* WITIO_48_ERR_ACS */
+	"Device file does not exist",					  /* WITIO_48_ERR_DFM */
+	"Unspecified error when opening device file",	  /* WITIO_48_ERR_DFP */
+	"Internal driver or library error"				  /* WITIO_48_ERR_INT */
 };
 
 const int witio_48_nerr =
@@ -107,13 +107,15 @@ int witio_48_set_mode( WITIO_48_DIO dio, WITIO_48_MODE mode )
 	WITIO_48_DIO_MODE dio_mode = { dio, mode };
 
 
-    if ( ( ret = check_board( ) ) < 0     ||
-		 ( ret = check_dio( dio ) ) < 0   ||
-		 ( ret = check_mode( mode ) < 0 ) )
+    if ( ( ret = check_board( ) )     < 0 ||
+		 ( ret = check_dio( dio ) )   < 0 ||
+		 ( ret = check_mode( mode ) ) < 0 )
         return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_SET_MODE, &dio_mode ) < 0 )
         return witio_48_errno = WITIO_48_ERR_INT;
+
+	dev_info.mode[ dio ] = mode;
 
     return witio_48_errno = WITIO_48_OK;
 }
@@ -129,7 +131,7 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
 	WITIO_48_DIO_MODE dio_mode = { dio, 0 };
 
 
-    if ( ( ret = check_board( ) ) < 0   ||
+    if ( ( ret = check_board( ) )   < 0 ||
 		 ( ret = check_dio( dio ) ) < 0 )
         return ret;
 
@@ -145,8 +147,8 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
 
 /*-------------------------------------------------------------------------*/
 /* Function for outputting a value at one of the DIOs. Which channels and  */
-/* which range of of values are allowed depend on the current I/O mode of  */
-/* the specified DIO:													   */
+/* which range of values are allowed depend on the current I/O mode of the */
+/* specified DIO:													       */
 /*                                                                         */
 /* |--------------------|--------------------|-------------------------|   */
 /* |        mode        |     channels       |       ranges            |   */
@@ -192,9 +194,9 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 	WITIO_48_DATA data = { dio, channel, value };
 
 
-    if ( ( ret = check_board( ) ) < 0                     ||
-		 ( ret = check_dio( dio ) ) < 0                   ||
-		 ( ret = check_channel( dio, channel ) ) < 0      ||
+    if ( ( ret = check_board( ) )                     < 0 ||
+		 ( ret = check_dio( dio ) )                   < 0 ||
+		 ( ret = check_channel( dio, channel ) )      < 0 ||
 		 ( ret = check_value( dio, channel, value ) ) < 0 )
         return ret;
 
@@ -205,14 +207,14 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 }
 
 
-/*--------------------------------------------------------------*/
-/* Function for reading in a value from one of the DIOs. Which  */
-/* channels can be used for a certain I/O mode and the range of */
-/* values to be expected as well as the way the pins of the     */
-/* input connectors correspond to the bits of the returned      */
-/* value are identicalal to the entries in the tables of the    */
-/* description of the function witio_48_dio_out() (see above).  */
-/*--------------------------------------------------------------*/
+/*-------------------------------------------------------------*/
+/* Function for reading in a value from one of the DIOs. Which */
+/* channels can be used for a certain I/O mode and the range   */
+/* of values to be expected as well as the way the pins of the */
+/* input connectors correspond to the bits of the returned     */
+/* value are identical to the entries in the tables of the     */
+/* description of the function witio_48_dio_out() (see above). */
+/*-------------------------------------------------------------*/
 
 int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 					 unsigned long *value )
@@ -221,9 +223,9 @@ int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 	WITIO_48_DATA data = { dio, channel, 0 };
 
 
-    if ( ( ret = check_board( ) ) < 0                ||
-		 ( ret = check_dio( dio ) ) < 0              ||
-		 ( ret = check_channel( dio, channel ) < 0 ) )
+    if ( ( ret = check_board( ) )                < 0 ||
+		 ( ret = check_dio( dio ) )              < 0 ||
+		 ( ret = check_channel( dio, channel ) ) < 0 )
 		return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_DIO_IN, &data ) < 0 )
