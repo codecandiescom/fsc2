@@ -129,7 +129,8 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
         return WITIO_48_ERR_INT;
     }
 
-	*mode = dio_mode.mode;
+	if ( mode != NULL )
+		*mode = dio_mode.mode;
 
     return WITIO_48_OK;
 }
@@ -205,7 +206,7 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 /*--------------------------------------------------------------*/
 /* Function for reading in a value from one of the DIOs. Which  */
 /* channels can be used for a certain I/O mode and the range of */
-/*  values to be expected as well as the way the pins of the    */
+/* values to be expected as well as the way the pins of the     */
 /* input connectors correspond to the bits of the returned      */
 /* value are identicalal to the entries in the tables of the    */
 /* description of the function witio_48_dio_out() (see above).  */
@@ -231,9 +232,19 @@ int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
         return WITIO_48_ERR_INT;
     }
 
-	*value = data.value;
+	if ( value != NULL )
+		*value = data.value;
 
     return WITIO_48_OK;
+}
+
+
+/*------------------------------------------------------------*/
+/*------------------------------------------------------------*/
+
+const char *witio_48_error_message( void )
+{
+    return error_message;
 }
 
 
@@ -335,74 +346,78 @@ static int check_board( void )
 	int i;
 
 
-    if ( dev_info.fd < 0 )
-    {
-        /* Check if the device file exists and can be accessed */
+    if ( dev_info.fd >= 0 )
+    return WITIO_48_OK;
 
-        if ( stat( name, &buf ) < 0 )
-            switch ( errno )
-            {
-                case ENOENT :
-                    error_message = WITIO_48_ERR_DFM_MESS;
-                    return WITIO_48_ERR_DFM;
+	/* Check if the device file exists and can be accessed */
 
-                case EACCES :
-                    error_message = WITIO_48_ERR_ACS_MESS;
-                    return WITIO_48_ERR_ACS;
-
-                default :
-                    error_message = WITIO_48_ERR_DFP_MESS;
-                    return WITIO_48_ERR_DFP;
-            }
-
-        /* Try to open it in non-blocking mode */
-
-        if ( ( dev_info.fd = open( name, O_RDWR ) )< 0 )
-            switch ( errno )
-            {
-                case ENODEV : case ENXIO :
-                    error_message = WITIO_48_ERR_NDV_MESS;
-                    return WITIO_48_ERR_NDV;
-            
-                case EACCES :
-                    error_message = WITIO_48_ERR_ACS_MESS;
-                    return WITIO_48_ERR_ACS;
-
-                case EBUSY :
-                    error_message = WITIO_48_ERR_BBS_MESS;
-                    return WITIO_48_ERR_BBS;
-
-                default :
-                    error_message = WITIO_48_ERR_DFP_MESS;
-                    return WITIO_48_ERR_DFP;
-            }
-
-        /* Set the FD_CLOEXEC bit for the device file, exec()'ed applications
-           should have no interest at all in the board (and even don't know
-           that they have the file open) but could interfere seriously with
-           normal operation of the program that did open the device file. */
-
-        fcntl( dev_info.fd, F_SETFD, FD_CLOEXEC );
-
-
-		/* Finally get the I/O mode for both DIOs */
-
-		for ( i = 0; i < 2; i++ )
+	if ( stat( name, &buf ) < 0 )
+		switch ( errno )
 		{
-			dio_mode.dio = i;
+			case ENOENT :
+				error_message = WITIO_48_ERR_DFM_MESS;
+				return WITIO_48_ERR_DFM;
 
-			if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
-			{
-				close( dev_info.fd );
-				dev_info.fd = -1;
-				error_message = WITIO_48_ERR_INT_MESS;
-				return WITIO_48_ERR_INT;
-			}
+			case EACCES :
+				error_message = WITIO_48_ERR_ACS_MESS;
+				return WITIO_48_ERR_ACS;
 
-			dev_info.mode[ i ] = dio_mode.mode;
+			default :
+				error_message = WITIO_48_ERR_DFP_MESS;
+				return WITIO_48_ERR_DFP;
 		}
 
-    }
+	/* Try to open the device file for the board */
+
+	if ( ( dev_info.fd = open( name, O_RDWR ) ) < 0 )
+		switch ( errno )
+		{
+			case ENODEV : case ENXIO :
+				error_message = WITIO_48_ERR_NDV_MESS;
+				return WITIO_48_ERR_NDV;
+
+			case EACCES :
+				error_message = WITIO_48_ERR_ACS_MESS;
+				return WITIO_48_ERR_ACS;
+
+			case EBUSY :
+				error_message = WITIO_48_ERR_BBS_MESS;
+				return WITIO_48_ERR_BBS;
+
+			default :
+				error_message = WITIO_48_ERR_DFP_MESS;
+				return WITIO_48_ERR_DFP;
+		}
+
+	/* Set the FD_CLOEXEC bit for the device file, exec()'ed applications
+	   should have no interest at all in the board (and even don't know
+	   that they have the file open) but could interfere seriously with
+	   normal operation of the program that did open the device file. */
+
+	fcntl( dev_info.fd, F_SETFD, FD_CLOEXEC );
+
+
+	/* Finally get the I/O mode for both DIOs */
+
+	for ( i = 0; i < 2; i++ )
+	{
+		dio_mode.dio = i;
+
+		if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
+		{
+			while ( close( dev_info.fd ) == -1 && errno == EINTR )
+				/* empty */ ;
+			dev_info.fd = -1;
+
+			error_message = WITIO_48_ERR_INT_MESS;
+			return WITIO_48_ERR_INT;
+		}
+
+		dev_info.mode[ i ] = dio_mode.mode;
+	}
+
+	return WITIO_48_OK;
+}
 
     return WITIO_48_OK;
 }

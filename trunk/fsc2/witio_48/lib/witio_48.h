@@ -32,26 +32,25 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 					  unsigned long value );
 int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 					 unsigned long *value );
+const char *witio_48_error_message( void );
 
 
 #define WITIO_48_OK        0
 
-#define WITIO_48_ERR_NSB  -1
-#define WITIO_48_ERR_ICA  -2
-#define WITIO_48_ERR_ICM  -3
-#define WITIO_48_ERR_IVD  -4
-#define WITIO_48_ERR_IMD  -5
-#define WITIO_48_ERR_IDV  -6
-#define WITIO_48_ERR_BNO  -8
+#define WITIO_48_ERR_ICA  -1
+#define WITIO_48_ERR_ICM  -2
+#define WITIO_48_ERR_IVD  -3
+#define WITIO_48_ERR_IMD  -4
+#define WITIO_48_ERR_IDV  -5
+#define WITIO_48_ERR_BNO  -6
 #define WITIO_48_ERR_BBS  -7
-#define WITIO_48_ERR_NDV  -9
-#define WITIO_48_ERR_ACS -10
-#define WITIO_48_ERR_DFM -11
-#define WITIO_48_ERR_DFP -12
+#define WITIO_48_ERR_NDV  -8
+#define WITIO_48_ERR_ACS  -9
+#define WITIO_48_ERR_DFM -10
+#define WITIO_48_ERR_DFP -11
 
-#define WITIO_48_ERR_INT -13
+#define WITIO_48_ERR_INT -12
 
-#define WITIO_48_ERR_NSB_MESS  "No such board"
 #define WITIO_48_ERR_ICA_MESS  "Invalid channel number"
 #define WITIO_48_ERR_ICM_MESS  "Invalid channel for current I/O mode"
 #define WITIO_48_ERR_IVD_MESS  "Invalid DIO number"

@@ -6,10 +6,10 @@
  =======================
 
 The library (and the corresponding kernel module) only supports a subset
-of the functionality of the board. They only allow to use the board as
-a simple DIO device implemented by the two 82C55A chips on the board and
-only uses mode 0 ("Betriebsart 0"). The 8254/82C54 timer/counter chips
-on the board are not supported.
+of the functionality of the board. They only allow to use the board for
+simple DIO using the two 82C55A chips on the board and only with mode 0
+("Betriebsart 0"). The 8254/82C54 timer/counter chips on the board are
+not supported.
 
 The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
 12-bit DIO, one 24-bit DIOs or one 16-bit and one 8-bit DIO. Splitting
@@ -36,10 +36,10 @@ is returned, indicating the type of failure. The following values can be
 expected:
 
     WITIO_48_OK        Function call was successful
-    WITIO_48_ERR_ICA   Invalid channel number specified
-    WITIO_48_ERR_ICM   Channel number can't be used with the current I/O mode
     WITIO_48_ERR_IVD   Invalid DIO number
     WITIO_48_ERR_IMD   Invalid mode
+    WITIO_48_ERR_ICA   Invalid channel number specified
+    WITIO_48_ERR_ICM   Channel number can't be used with the current I/O mode
     WITIO_48_ERR_IDV   Invalid output value
     WITIO_48_ERR_BNO   Device file for the board is not open
     WITIO_48_ERR_BBS   The board is already in use by another process
@@ -90,6 +90,12 @@ Data send to or received from the board are always exchanged as an
 unsigned long. Please note that depending on the current I/O mode,
 only a sub-range of the full range of values representable by an
 unsigned long is valid.
+
+When in the following A-, B- or C-pins are mentioned the pins labeled
+1PA0 to 1PA7 and 2PA0 to 2PA7, 1PB0 to 1PB7 and 2PB0 to 2PB7 and
+1PC0 to 1PC7 and 2PC0 to 2PC7 of the connectors of the board are
+meant. The leading digit indicates if the pins are connected to
+the first or second DIO chip on the board.
 
 
 ======================================================================
@@ -150,7 +156,7 @@ you don't want to use the WITIO_48_MODE type you may use an unsigned
 long instead.
 
 When specifying a NULL pointer as the second argument the current mode
-for the DIO is determined, but the function will not try to dereference
+for the DIO is determined but the function will not try to write to
 the NULL pointer and return 'WITIO_48_OK' immediately.
 
 
@@ -214,8 +220,8 @@ above to find out the valid channel numbers for a certain I/O mode
 as well as the range of values to be expected.
 
 When specifying a NULL pointer as the third argument a value will be
-fetched from the DIO but the function will not try to dereference the
-NULL pointer and return 'WITIO_48_OK' immediately.
+fetched from the DIO but the function will not try to write the NULL
+pointer and return 'WITIO_48_OK' immediately.
 
 Beside the error codes mentioned above the function may return:
 
