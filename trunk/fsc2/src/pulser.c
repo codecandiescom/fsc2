@@ -898,7 +898,8 @@ long p_new( long pnum )
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
 		if ( cur_p->num == pnum )
 		{
-			print( FATAL, "A pulse numbered %ld has already been defined.\n" );
+			print( FATAL, "A pulse numbered %ld has already been defined.\n",
+				   pnum );
 			THROW( EXCEPTION );
 		}
 
