@@ -506,5 +506,6 @@ Finally, occasionally you might want to switch from a cross section
 through the data set in x-direction to one in y-direction or vice
 versa. To do so start of as you would do when determining data values,
 i.e.@: by pressing both the left and the middle mouse button. Move the
-mouse to the x-position where you want the cross section. Now hit the
-@code{Space} bar and the cross section in the other direction is drawn.
+mouse to the new position where you want the cross section in the other
+direction. Now hit the @code{Space} bar and the cross section in the
+other direction is drawn.
