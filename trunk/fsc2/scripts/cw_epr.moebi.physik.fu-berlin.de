@@ -384,7 +384,8 @@ return if &do_checks( ) != 0;
 local *F;
 my $text;
 
-open( F, "|fsc2_" . lc $how ) or die "Can't find utility.\n";
+open( F, "|fsc2_" . lc $how )
+	or die "Can't find utility fsc2_" . lc $how . ".\n";
 
 print F
 "DEVICES:\n\n";

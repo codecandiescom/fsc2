@@ -378,15 +378,10 @@ sub write_out {
 return if &do_checks( ) != 0;
 
 local *F;
-
-my $how2;
 my $text = "";
 
-$how2 = "start" if $how =~ /^Start/;
-$how2 = "test"  if $how =~ /^Test/;
-$how2 = "load"  if $how =~ /^Load/;
-
-open( F, "|fsc2_$how2" ) or die "Can't find utility.\n";
+open( F, "|fsc2_" . lc $how )
+	or die "Can't find utility fsc2_" . lc $how . ".\n";
 
 print F
 "DEVICES:
