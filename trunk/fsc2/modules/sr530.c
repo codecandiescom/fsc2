@@ -131,6 +131,7 @@ static double sr530_get_ref_freq( void );
 static double sr530_set_dac_voltage( long channel, double voltage );
 static void sr530_lock_state( bool lock );
 static bool sr530_command( const char *cmd );
+static bool sr530_talk( const char *cmd, char *reply, long &length );
 static void sr530_failure( void );
 
 
@@ -771,8 +772,7 @@ bool sr530_init( const char *name )
 
 	/* Lock the keyboard */
 
-	if ( gpib_write( sr530.device, "I1\n", 3 ) == FAILURE )
-		return FAIL;
+	sr530_command( "I1\n" );
 
 	/* If sensitivity, time constant or phase were set in one of the
 	   preparation sections only the value was stored and we have to do the
@@ -806,11 +806,7 @@ double sr530_get_data( int channel )
 	fsc2_assert( channel == 1 || channel == 2 );
 
 	cmd[ 1 ] = ( char ) ( channel + '0' );
-
-	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( cmd, buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -829,11 +825,7 @@ double sr530_get_adc_data( long channel )
 
 
 	buffer[ 1 ] = ( char ) channel + '0';
-
-	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( buffer, buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -851,10 +843,7 @@ double sr530_get_sens( void )
 
 	/* Ask lock-in for the sensitivity setting */
 
-	if ( gpib_write( sr530.device, "G\n", 2 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( "G\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	sens = sens_list[ SENS_ENTRIES - T_atol( buffer ) ];
 
@@ -862,10 +851,7 @@ double sr530_get_sens( void )
 	   by a factor of 10 */
 
 	length = 10;
-	if ( gpib_write( sr530.device, "E1\n", 3 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( "E1\n", buffer, &length );
 	if ( buffer[ 0 ] == '1' )
 		sens *= 0.1;
 
@@ -897,24 +883,20 @@ void sr530_set_sens( int sens_index )
 
 	if ( sens_index <= 3 )
 	{
-		if ( gpib_write( sr530.device, "E1,1\n", 5 ) == FAILURE ||
-			 gpib_write( sr530.device, "E2,1\n", 5 ) == FAILURE)
-			sr530_failure( );
+		sr530_command( "E1,1\n" );
+		sr530_command( "E2,1\n" );
 		sens_index += 3;
 	}
 	else
 	{
-		if ( gpib_write( sr530.device, "E1,0\n", 5 ) == FAILURE ||
-			 gpib_write( sr530.device, "E2,0\n", 5 ) == FAILURE )
-			sr530_failure( );
+		sr530_command( "E1,0\n" );
+		sr530_command( "E2,0\n" );
 	}
 
 	/* Now set the sensitivity */
 
 	sprintf( buffer, "G%d\n", sens_index );
-
-	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr530_failure( );
+	sr530_command( buffer );
 }
 
 
@@ -930,10 +912,7 @@ double sr530_get_tc( void )
 	long length = 10;
 
 
-	if ( gpib_write( sr530.device, "T1\n", 3 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( "T1\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return tc_list[ T_atol( buffer ) - 1 ];
 }
@@ -952,21 +931,17 @@ void sr530_set_tc( int tc_index )
 
 
 	sprintf( buffer, "T1,%d\n", tc_index + 1 );
-	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr530_failure( );
+	sr530_command( buffer );
 
 	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
 	   sets it to 100ms and 'T1,2' to 1s */
 
-	if ( tc_index < 4 && gpib_write( sr530.device, "T2,0\n", 5 ) == FAILURE )
-		sr530_failure( );
-
-	if ( tc_index >= 4 && tc_index < 6 &&
-		 gpib_write( sr530.device, "T2,1\n", 5 ) == FAILURE )
-		sr530_failure( );
-
-	if ( tc_index >= 6 && gpib_write( sr530.device, "T2,2\n", 5 ) == FAILURE )
-		sr530_failure( );
+	if ( tc_index < 4 )
+		sr530_command( "T2,0\n" );
+	else if ( tc_index >= 4 && tc_index < 6 )
+		sr530_command( "T2,1\n" );
+	else if ( tc_index >= 6 )
+		sr530_command( "T2,2\n" );
 }
 
 
@@ -982,10 +957,7 @@ double sr530_get_phase( void )
 	double phase;
 
 
-	if ( gpib_write( sr530.device, "P\n", 2 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
-
+	sr530_talk( "P\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	phase = T_atod( buffer );
 
@@ -1009,9 +981,7 @@ double sr530_set_phase( double phase )
 
 
 	sprintf( buffer, "P%.2f\n", phase );
-	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr530_failure( );
-
+	sr530_command( buffer );
 	return phase;
 }
 
@@ -1025,10 +995,8 @@ static double sr530_get_ref_freq( void )
 	char buffer[ 50 ];
 	long length = 50;
 
-	if ( gpib_write( sr530.device, "F\n", 2 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		sr530_failure( );
 
+	sr530_talk( "F\n", buffer, &length );
 	buffer[ length - 2 ] = '\0';
 	return T_atod( buffer );
 }
@@ -1054,9 +1022,7 @@ static double sr530_set_dac_voltage( long channel, double voltage )
 		voltage = -10.24;
 
 	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
-	if ( gpib_write( sr530.device, buffer, strlen( buffer ) ) == FAILURE )
-		sr530_failure( );
-
+	sr530_command( buffer );
 	return voltage;
 }
 
@@ -1070,8 +1036,7 @@ static void sr530_lock_state( bool lock )
 
 
 	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
-	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr530_failure( );
+	sr530_command( cmd );
 }
 
 
@@ -1081,6 +1046,18 @@ static void sr530_lock_state( bool lock )
 static bool sr530_command( const char *cmd )
 {
 	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
+		sr530_failure( );
+	return OK;
+}
+
+
+/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*/
+
+static bool sr530_talk( const char *cmd, char *reply, long &length )
+{
+	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( sr530.device, reply, lengh ) == FAILURE )
 		sr530_failure( );
 	return OK;
 }
