@@ -74,13 +74,13 @@ bool hp864_tmpl_init( const char *name )
 			if ( att < MAX_ATTEN )
 			{
 				print( SEVERE, "Attenuation range is insufficient, using "
-					   "%f db instead of %f db.\n", MAX_ATTEN, att );
+					   "%f dB instead of %f dB.\n", MAX_ATTEN, att );
 				att = MAX_ATTEN;
 			}
 			if ( att > hp864_tmpl.min_attenuation )
 			{
 				print( SEVERE, "Attenuation range is insufficient, using "
-					   "%f db instead of %f db.\n",
+					   "%f dB instead of %f dB.\n",
 					   hp864_tmpl.min_attenuation, att );
 				att = hp864_tmpl.min_attenuation;
 			}

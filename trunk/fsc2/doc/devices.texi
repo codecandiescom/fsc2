@@ -2349,11 +2349,13 @@ of an @code{EDL} script.
 @section Synthesizer Functions
 @cindex Synthesizer Functions
 Supported synthesizers so far are the Hewlett-Packard models @code{HP8647A},
-@code{HP8648B} and @code{HP8672A}. Their modules are loaded by specifying
+@code{HP8648B} and @code{HP8672A} and the Rohde&Schwarz model
+@code{SML01}. Their modules are loaded by specifying
 @example
 hp8647a
 hp8648b
 hp8672a
+rs_sml01
 @end example
 @noindent
 in the @code{DEVICES} section.
@@ -2390,8 +2392,11 @@ The function queries or sets the RF output frequency. If called to set
 the frequency it accepts a frequency as the only argument. For the
 @code{HP8647A} the frequency must be in the range between @w{250 kHz}
 and @w{1000 MHz}, for the @code{HP8648B} between @w{10 kHz} and @w{2 GHz}
-and for the @code{HP8672A} between @w{xxx MHz} and @w{18 GHz}. The
-frequency set by the very first call of this function is also the
+and for the @code{HP8672A} between @w{2 GHz} and @w{18 GHz}. For the
+@code{Rohde&Schwarz} model @code{SML01} the frequency range is @w{9 KHz}
+to @w{1.1 GHz}.
+
+The frequency set by the very first call of this function is also the
 function that is set automatically by a call of the function
 @code{synthesizer_reset_frequency()} (see below).
 
@@ -2406,15 +2411,19 @@ frequency has been set previously.
 @item synthesizer_attenuation()
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
-the attenuation it accepts one argument, the attenuation. For the
-@code{HP8647A} the attenuation must be in the range between @w{+10 db}
-and @w{-136 db} with a resolution of @w{0.1 db}, for the @code{HP8648B}
-between @w{+14.5 db} and @w{-136 db} (with the same resolution) and for
-the @code{HP8672A} between @w{+3 db} and @w{-120 db} with a resolution
-of @w{1 db}.
+the attenuation it accepts one argument, the attenuation.
+
+For the @code{HP8647A} the attenuation must be in the range between
+@w{+10 dB} and @w{-136 dB} with a resolution of @w{0.1 dB}, for the
+@code{HP8648B} between @w{+14.5 dB} and @w{-136 dB} (with the same
+resolution) and for the @code{HP8672A} between @w{+3 dB} and
+@w{-120 dB} with a resolution of @w{1 dB}.
+
+For the @code{Rohde&Schwarz} the allowed range of attenuations is from
+@w{+13 dBm} to @w{- 140 dBm} with a resolution of @w{0.1 dBm}.
 
 Currently for the @code{HP8647A} the minimum attenuation that can be set
-from an @code{EDL} script is limited to @w{-5 db}, should you need lower
+from an @code{EDL} script is limited to @w{-5 dB}, should you need lower
 attenuations change the definition of @code{MIN_ATTEN} in the
 configuration file for the device.
 
@@ -2488,15 +2497,16 @@ new frequency a table file is used. The name of this table file can be
 passed to the function as a (string) argument. If no argument is given a
 default table file is used (typically this is
 @file{/usr/local/lib/fsc2/hp8647a.table} for the @code{HP8647A},
-@file{/usr/local/lib/fsc2/hp8648b.table} for the @code{HP8648B} and
-@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A}, but this
-may depend on the installation of @code{fsc2}).
+@file{/usr/local/lib/fsc2/hp8648b.table} for the @code{HP8648B},
+@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A} and
+@file{/usr/local/lib/fsc2/rs_sml01.table} for the @code{Rhode&Schwarz
+SML01}, but this may depend on the installation of @code{fsc2}).
 
 The table file must consist of pairs of entries, a frequency and a
 corresponding attenuation in db. The attenuation is being added to the
 'raw' attenuation, i.e.@: to achieve an higher attenuation and a lower
 output power a negative attenuation has to be specified.  If no unit are
-given in the table file (i.e.@: @code{MHz} and @code{db}) the first
+given in the table file (i.e.@: @code{MHz} and @code{dB}) the first
 member of an entry must be the frequency, the second the attenuation.
 The entries in the file don't have to be sorted in any way, and
 the frequencies don't have to spaced equally.
@@ -2531,25 +2541,27 @@ When a table file is used there remains the question for which frequency
 to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
 function @code{synthesizer_att_ref_freq()} can be used. If the function
-isn't called a frequency of @w{14 MHz} is used for the @code{HP8647A}
-and @code{HP8648B} and @w{2 GHz} for the @code{HP8672A} (but this is a
-compile time constant that can be adjusted in the configuration file for
-the device by changing the definition of @code{DEF_ATT_REF_FREQ}).
+isn't called a frequency of @w{14 MHz} is used for the @code{HP8647A},
+@code{HP8648B} and @code{R&S SML01} and @w{2 GHz} for the @code{HP8672A}
+(but this is a compile time constant that can be adjusted in the
+configuration file for the device by changing the definition of
+@code{DEF_ATT_REF_FREQ}).
 
 
 @anchor{synthesizer_modulation}
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
-Using this function for the @code{HP8647A} and @code{HP8648B} the type,
-source and amplitude of the modulation can be set, for the
-@code{HP8672A} both type and amplitude. It can set all of these
+Using this function for the @code{HP8647A}, @code{HP8648B} and @code{RS
+SML01} the type, source and amplitude of the modulation can be set, for
+the @code{HP8672A} both type and amplitude. It can set all of these
 parameters at once or only a subset of them.
 
-For the @code{HP8647A} and @code{HP8648B} there are four possible types
-of modulation: FM, AM and phase modulation. The modulation type is
-specified by a string, either @code{"FM"}, @code{"AM"}, @code{"PHASE"}
-or, finally, @code{"OFF"}. For the @code{HP8672A} @code{"FM"},
-@code{"AM"} and @code{"OFF"} can be used.
+For the @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} there are
+four possible types of modulation: FM, AM and phase modulation. The
+modulation type is specified by a string, either @code{"FM"},
+@code{"AM"}, @code{"PHASE"} or, finally, @code{"OFF"} to switch off
+modulation. For the @code{HP8672A} @code{"FM"}, @code{"AM"} and
+@code{"OFF"} can be used.
 
 Please note that setting a modulation source or amplitude while the
 modulation is off (i.e.@: when @code{"OFF"} has been specified as the
@@ -2570,6 +2582,15 @@ amplitude and phase modulation@!
 
 For the @code{HP8672A} no modulation source can be specified.
 
+For the @code{Rohde&Schwarz} model @code{SML01} the possible modulation
+sources are also either external AC coupled (specified by either,
+@code{"EXT AC"} or @code{"AC"}), external DC coupled (use @code{"EXT
+DC"} or just @code{"DC"}) and internal (specified by the string
+@code{"INT}). For internal modulation the function expects another
+argument, directly following the argument specifying the internal
+modulation source, the frequency of the internal modulation, which can
+be in the range between @w{0.1 Hz} and @code{1 MHz}.
+
 Finally you may specify the modulation amplitude, which has to be a
 number (preferably a floating point number). For the @code{HP8647A} FM
 and @code{HP8648B} modulation amplitudes have to be in the range between
@@ -2581,23 +2602,36 @@ For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
 modulation can only be set to either @w{30%} or @w{100%}.
 
+For the @code{Rohde&Schwarz} model @code{SML01} AM modulations between
+@w{0%} and @w{100%} can be used. Both the ranges of FM and phase modulation
+depend on the RF frequency. For frequencies below @w{76 MHz} and above
+@w{605.25 MHz} FM modulation amplitudes between @w{0 Hz} and @w{1 MHz}
+and phase modulation amplitutes between @w{0 rad} and @w{10 rad} can be
+used. In the frequency range above @w{76 MHz} and up to @w{151.3125 MHz}
+the upper limits for the modulation amplitude levels are @w{125 kHz} and
+@w{1.25 rad}, respectively. In the frequency range above @w{151.3125 MHz}
+and up to @w{302.625 MHz} the upper limits are @w{250 MHz} and @w{2.5
+rad}. Finally, between @w{302.625 MHz} and @w{605.25 MHz} the upper
+limits for FM and phase modulation are @w{500 kHz} and @w{5
+rad}. Because the allowed ranges (at least for FM and phase modulation)
+depend on the RF frequency it is required that a RF frequency must be
+known before the modulation amplitide can be set.
 
 Only in the first call of the function all two or three arguments,
 i.e.@: the modulation type, amplitude and source (if applicable) should
 be passed to the function. In further calls not all of the arguments
-need to be given again. Instead, in further calls it is sufficient to
+must be specified again. Instead, in further calls it is sufficient to
 specify only for example a new amplitude. The same, of course, holds for
 the modulation source.
 
 If the modulation type becomes changed, the source and amplitude reverts
 to the settings that were specified in previous calls of the function
-when this modulation type was still active. I.e.@: if for the
-@code{HP8647A} or @code{HP8648B} at first AM modulation using an
-external AC coupled source and an amplitude of @w{50%} was set and then
-the modulation was changed to FM with different settings for source and
-amplitude, another call switching back to AM modulation will also
-restore the settings of external AC coupled source and @w{50%}
-amplitude.
+when this modulation type was still active. I.e.@: if e.g.@: for the
+@code{HP8647A} at first AM modulation using an external AC coupled
+source and an amplitude of @w{50%} was set and then the modulation was
+changed to FM with different settings for source and amplitude, another
+call switching back to AM modulation will also restore the settings of
+external AC coupled source and @w{50%} amplitude.
 
 
 @anchor{synthesizer_mod_type}
@@ -2607,31 +2641,67 @@ As an alternative to the function @code{synthesizer_modulation()} the
 modulation type can be also set via the function
 @code{synthesizer_mod_type()}. It accepts a string argument, either
 @code{"FM"} for frequency modulation, @code{"AM"} for amplitude
-modulation or @code{"OFF"} to switch off modulation. The @code{HP8647A}
-and @code{HP8648B} also allow another argument, @code{"PHASE"} for phase
-modulation.
-
-@c If called with no argument it will return the currently active modulation
-@c type as an integer number.
+modulation or @code{"OFF"} to switch off modulation. The @code{HP8647A},
+@code{HP8648B} and @code{R&S SML01} also allow another argument,
+@code{"PHASE"} for phase modulation.
 
 
 @anchor{synthesizer_mod_source}
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
-This function is only available for the @code{HP8647A} and
-@code{HP8648B}.  If the modulation type has been set before the
-modulation source can be set directly via this function. It accepts one
-of the following strings: @code{"INT 1kHz"}, @code{"INT 1 kHz"},
+This function is only available for the @code{HP8647A}, @code{HP8648B}
+and the @code{R&S SML01}. If the modulation type has been set before the
+modulation source can be set directly via this function.
+
+The function accepts the strings @code{"OFF"} to switch off modulation,
+@code{"EXT AC} (or just simply @code{"AC"}) to use an external AC
+coupled modulation source and @code{"EXT DC} (or @code{"DC"}) for an
+external DC coupled modulation source.
+
+For both the @code{HP8647A} and the @code{HP8648B} it also accepts one
+of the following strings for the internal modulation settings that are
+available for these devices: @code{"INT 1kHz"}, @code{"INT 1 kHz"},
 @code{"INT 1"}, @code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT
 400Hz"}, @code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"},
-@code{"400 Hz"} or @code{"400"}. Alternatively, the number @code{0} can
-be specified for external AC coupled modulation source, @code{1} for an
-external DC coupled source, @code{2} for the internally generated @w{1
-kHz} source and @code{3} for the internal @w{400 Hz} source.
+@code{"400 Hz"} or @code{"400"}.
+
+To set up use of the internal modulation source of the @code{R&S SML01}
+pass the function either two arguments, first the string @code{"INT"}
+and second the modulation frequency (between @w{0.1 Hz} and @w{1 MHz}),
+or just a single argument, the modulation frequency.
 
 If the function is called with no argument it will return the modulation
-source setting for the currently active modulation type as an integer number.
+source setting for the currently active modulation type as an integer
+number. It returns @code{0} for an external, AC coupled modulation
+source and @code{1} for an external, DC coupled source. For the
+@code{HP8647A} and the @code{HP8648B} @code{3} is returned for intenal
+modulation with @w{400 Hz} and @code{4} for @w{1 kHz}.  For the
+@code{R&S SML01} a return value of @code{3} indicates internal
+modulation. To find out the frequency of the modulation for this device
+use the function @code{synthesizer_mod_freq()}.
+
 You can neither set nor obtain the modulation source as long as the
+modulation is switched off, trying to do so will result in aborting the
+program.
+
+
+@anchor{synthesizer_mod_freq}
+@item synthesizer_mod_freq()
+@findex synthesizer_mod_freq()
+This function only exists for the @code{Rohde&Schwarz} model
+@code{SML01} synthesizer. It can be used to change the modulation
+frequency if modulation is switched on and the synthesizer has been set
+up to use the internal oszillator as the modulation source (otherwise
+the function will print out a warning message and do nothing else). It
+expects a single argument, the modulation frequency, which must be
+between @w{0.1 Hz} and @w{1 MHz}.
+
+If called without an argument the function returns the currently used
+modulation frequency - this only works when the device is set up to use
+internal modulation, if this isn't the case the function will print an
+error message and abort the experiment.
+
+You can neither set nor obtain the modulation frequency as long as the
 modulation is switched off, trying to do so will result in aborting the
 program.
 
@@ -2649,6 +2719,18 @@ modulation values between @w{0 degree} and @w{10 degree} are valid.
 For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
 modulation can only be set to either @w{30%} or @w{100%}.
+
+For the @code{Rohde&Schwarz} model @code{SML01} AM modulations between
+@w{0%} and @w{100%} can be used. Both the ranges of FM and phase modulation
+depend on the RF frequency. For frequencies below @w{76 MHz} and above
+@w{605.25 MHz} FM modulation amplitudes between @w{0 Hz} and @w{1 MHz}
+and phase modulation amplitutes between @w{0 rad} and @w{10 rad} can be
+used. In the frequency range above @w{76 MHz} and up to @w{151.3125 MHz}
+the upper limits for the modulation amplitude levels are @w{125 kHz} and
+@w{1.25 rad}, respectively. In the frequency range above @w{151.3125 MHz}
+and up to @w{302.625 MHz} the upper limits are @w{250 MHz} and @w{2.5
+rad}. Finally, between @w{302.625 MHz} and @w{605.25 MHz} the upper
+limits for FM and phase modulation are @w{500 kHz} and @w{5 rad}.
 
 If called with no argument, the function will return the amplitude
 setting for the currently active modulation type. You can neither set
@@ -5067,7 +5149,7 @@ been set calibrations can't be loaded in anymore.
 
 The calibration file must consist of pairs of entries, an attenuation
 (in dB) and a stepper motor position. Attenuations values may be
-followed by an unit of @code{dB} or @code{db}. The attenuation entries
+followed by an unit of @code{dB} or @code{dB}. The attenuation entries
 in the file don't have to be sorted in any way and don't have to be
 equidistant. The only requirement is that the stepper motor settings are
 a monotonuously decreasing function of the attenuation.

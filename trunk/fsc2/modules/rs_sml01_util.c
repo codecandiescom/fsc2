@@ -22,7 +22,7 @@
 */
 
 
-#include "hp864_tmpl.h"
+#include "rs_sml01.h"
 
 
 
@@ -33,7 +33,7 @@
 /* memory used for the file name passed to the function is deallocated. */
 /*----------------------------------------------------------------------*/
 
-FILE *hp864_tmpl_find_table( char **name )
+FILE *rs_sml01_find_table( char **name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -52,9 +52,9 @@ FILE *hp864_tmpl_find_table( char **name )
 	/* Now try to open the file - set table_file entry in the device structure
 	   to the name and return the file pointer */
 
-	if ( ( tfp = hp864_tmpl_open_table( *name ) ) != NULL )
+	if ( ( tfp = rs_sml01_open_table( *name ) ) != NULL )
 	{
-		hp864_tmpl.table_file = T_strdup( *name );
+		rs_sml01.table_file = T_strdup( *name );
 		return tfp;
 	}
 
@@ -72,7 +72,7 @@ FILE *hp864_tmpl_find_table( char **name )
 	T_free( *name );
 	*name = new_name;
 
-	if ( ( tfp = hp864_tmpl_open_table( *name ) ) == NULL )
+	if ( ( tfp = rs_sml01_open_table( *name ) ) == NULL )
 	{
 		print( FATAL, "Table file '%s' not found in either the current "
 			   "directory or in '%s'.\n", strip_path( *name ), libdir );
@@ -92,7 +92,7 @@ FILE *hp864_tmpl_find_table( char **name )
 /* deallocated.                                                     */
 /*------------------------------------------------------------------*/
 
-FILE *hp864_tmpl_open_table( char *name )
+FILE *rs_sml01_open_table( char *name )
 {
 	FILE *tfp;
 
@@ -123,7 +123,7 @@ FILE *hp864_tmpl_open_table( char *name )
 /* a given frequency by interpolation            */
 /*-----------------------------------------------*/
 
-double hp864_tmpl_get_att_from_table( double freq )
+double rs_sml01_get_att_from_table( double freq )
 {
 	long i_low, i_high, i_cur;
 	double att;
@@ -133,18 +133,18 @@ double hp864_tmpl_get_att_from_table( double freq )
 	   print out a warning and return attenuation for the smallest or
 	   highest frequency */
 
-	if ( freq < hp864_tmpl.min_table_freq )
+	if ( freq < rs_sml01.min_table_freq )
 	{
 		print( WARN, "Frequency of %f MHz not covered by table, "
 			   "interpolating.\n", freq * 1.0e-6 );
-		return hp864_tmpl.att_table[ 0 ].att;
+		return rs_sml01.att_table[ 0 ].att;
 	}
 
-	if ( freq > hp864_tmpl.max_table_freq )
+	if ( freq > rs_sml01.max_table_freq )
 	{
 		print( WARN, "Frequency of %f MHz not covered by table, "
 			   "interpolating.\n", freq * 1.0e-6 );
-		return hp864_tmpl.att_table[ hp864_tmpl.att_table_len - 1 ].att;
+		return rs_sml01.att_table[ rs_sml01.att_table_len - 1 ].att;
 	}
 
 	/* Find the indices of the two entries in the table (that has been sorted
@@ -154,22 +154,22 @@ double hp864_tmpl_get_att_from_table( double freq )
 	   frequencies can't be uniformly spaced and we used simple bisecting.*/
 
 	i_low = 0;
-	i_high = hp864_tmpl.att_table_len - 1;
+	i_high = rs_sml01.att_table_len - 1;
 
-	if ( freq == hp864_tmpl.att_table[ i_low ].freq )
-		return hp864_tmpl.att_table[ i_low ].att;
-	if ( freq == hp864_tmpl.att_table[ i_high ].freq )
-		return hp864_tmpl.att_table[ i_high ].att;
+	if ( freq == rs_sml01.att_table[ i_low ].freq )
+		return rs_sml01.att_table[ i_low ].att;
+	if ( freq == rs_sml01.att_table[ i_high ].freq )
+		return rs_sml01.att_table[ i_high ].att;
 
 	i_cur = lrnd( floor( ( i_high - i_low ) *
-						 ( freq - hp864_tmpl.att_table[ i_low ].freq ) /
-						 ( hp864_tmpl.att_table[ i_high ].freq
-						   - hp864_tmpl.att_table[ i_low ].freq ) ) ) + i_low;
+						 ( freq - rs_sml01.att_table[ i_low ].freq ) /
+						 ( rs_sml01.att_table[ i_high ].freq
+						   - rs_sml01.att_table[ i_low ].freq ) ) ) + i_low;
 
-	if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
+	if ( freq > rs_sml01.att_table[ i_cur ].freq )
 	{
 		i_low = i_cur;
-		if ( freq < hp864_tmpl.att_table[ i_cur + 1 ].freq )
+		if ( freq < rs_sml01.att_table[ i_cur + 1 ].freq )
 			i_high = i_cur + 1;
 	}
 	else
@@ -177,7 +177,7 @@ double hp864_tmpl_get_att_from_table( double freq )
 
 	while ( i_high - i_low > 1 )
 	{
-		if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
+		if ( freq > rs_sml01.att_table[ i_cur ].freq )
 			i_low = i_cur;
 		else
 			i_high = i_cur;
@@ -187,12 +187,12 @@ double hp864_tmpl_get_att_from_table( double freq )
 	/* Now do a linear interpolation for the attenuation between the bracketing
 	   frequencies we have data for */
 
-	att =   ( hp864_tmpl.att_table[ i_high ].att
-			  - hp864_tmpl.att_table[ i_low ].att )
-		  * ( freq - hp864_tmpl.att_table[ i_low ].freq )
-		  / (   hp864_tmpl.att_table[ i_high ].freq
-			  - hp864_tmpl.att_table[ i_low ].freq )
-		  + hp864_tmpl.att_table[ i_low ].att;
+	att =   ( rs_sml01.att_table[ i_high ].att
+			  - rs_sml01.att_table[ i_low ].att )
+		  * ( freq - rs_sml01.att_table[ i_low ].freq )
+		  / (   rs_sml01.att_table[ i_high ].freq
+			  - rs_sml01.att_table[ i_low ].freq )
+		  + rs_sml01.att_table[ i_low ].att;
 
 	/* Reduce value to the resolution the attenuation can be set with */
 
@@ -203,29 +203,29 @@ double hp864_tmpl_get_att_from_table( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-double hp864_tmpl_get_att( double freq )
+double rs_sml01_get_att( double freq )
 {
 	double att;
 
-	if ( ! hp864_tmpl.use_table )
-		return hp864_tmpl.attenuation;
+	if ( ! rs_sml01.use_table )
+		return rs_sml01.attenuation;
 
-	att =   hp864_tmpl.attenuation + hp864_tmpl_get_att_from_table( freq )
-		  - hp864_tmpl.att_at_ref_freq;
+	att =   rs_sml01.attenuation + rs_sml01_get_att_from_table( freq )
+		  - rs_sml01.att_at_ref_freq;
 
 	if ( att < MAX_ATTEN )
 	{
 		print( SEVERE, "Attenuation dynamic range is insufficient (f = "
-			   "%g MHz), using %f dB instead of %f dB.\n",
+			   "%g MHz), using %f db instead of %f db.\n",
 			   freq * 1.0e-6, MAX_ATTEN, att );
 		att = MAX_ATTEN;
 	}
-	if ( att > hp864_tmpl.min_attenuation )
+	if ( att > rs_sml01.min_attenuation )
 	{
 		print( SEVERE, "Attenuation dynamic range is insufficient (f = "
-			   "%g MHz), using %f dB instead of %f dB.\n",
-			   freq * 1.0e-6, hp864_tmpl.min_attenuation, att );
-		att = hp864_tmpl.min_attenuation;
+			   "%g MHz), using %f db instead of %f db.\n",
+			   freq * 1.0e-6, rs_sml01.min_attenuation, att );
+		att = rs_sml01.min_attenuation;
 	}
 
 	return att;
@@ -235,72 +235,148 @@ double hp864_tmpl_get_att( double freq )
 /*----------------------------------------------------------------------*/
 /*----------------------------------------------------------------------*/
 
-int hp864_tmpl_set_mod_param( Var *v, double *dres, int *ires )
+unsigned int rs_sml01_get_mod_param( Var **v, double *dres, int *ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
-		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
-							  "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
-							  "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
-							  "INT 400", "400Hz", "400 Hz", "400" };
+			   *source[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };
+
 
 
 	/* If the variable is an integer of floating value this means an
 	   amplitude setting */
 
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+	if ( (*v)->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( v->type == INT_VAR )
-			print( WARN, "Integer value used as modulation amplitude.\n" );
-		*dres = VALUE( v );
-		return 1;
+		*dres = get_double( *v, "modulation amplitude" );
+		return 0;
 	}
 
-	/* Otherwise it got to be a string */
+	if ( (*v)->type !=  STR_VAR )
+	{
+		print( FATAL, "Invalid argument, expecting string argument.\n" );
+		THROW( EXCEPTION );
+	}
 
-	vars_check( v, STR_VAR );
-
-	switch ( is_in( v->val.sptr, type, NUM_MOD_TYPES ) )
+	switch ( is_in( (*v)->val.sptr, type, NUM_MOD_TYPES ) )
 	{
 		case 0 :
 			*ires = MOD_TYPE_FM;
-			return 2;
+			return 1;
 
 		case 1 :
 			*ires = MOD_TYPE_AM;
-			return 2;
+			return 1;
 
 		case 2 :
-			*ires = MOD_TYPE_PHASE;
-			return 2;
+			*ires = MOD_TYPE_PM;
+			return 1;
 
 		case 3 :
 			*ires = MOD_TYPE_OFF;
-			return 2;
+			return 1;
 	}
 
-	switch ( is_in( v->val.sptr, source, 16 ) )
+	switch ( is_in( (*v)->val.sptr, source,
+					sizeof source / sizeof source[ 0 ] ) )
 	{
 		case 0 : case 1 :
 			*ires = MOD_SOURCE_AC;
-			return 3;
+			return 2;
 
 		case 2 : case 3 :
 			*ires = MOD_SOURCE_DC;
-			return 3;
+			return 2;
 
-		case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
-			*ires = MOD_SOURCE_1k;
-			return 3;
+		case 4 :
+			*ires = MOD_SOURCE_INT;
+			if ( ( *v = vars_pop( *v ) ) == NULL || 
+				 ! ( (*v)->type & ( INT_VAR | FLOAT_VAR ) ) )
+			{
+				print( FATAL, "Argument setting to internal modulation must "
+					   "be immediately followed by the modulation "
+					   "frequency.\n" );
+				THROW( EXCEPTION );
+			}
 
-		case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
-			*ires = MOD_SOURCE_400;
-			return 3;
+			*dres = get_double( *v, "modulation frequency" );
+			return 2;
 	}
 
-	print( FATAL, "Invalid parameter \"%s\".\n", v->val.sptr );
+	print( FATAL, "Invalid parameter \"%s\".\n", (*v)->val.sptr );
 	THROW( EXCEPTION );
 
-	return -1;               /* we're never going to get here... */
+	return 4;               /* we're never going to get here... */
+}
+
+
+/*---------------------------------------------------------------------*/
+/* Function for checking that the modulation amplitude is still within */
+/* the allowed range for a certain frequency. If the modulation ampli- */
+/* tude is too large it is reduced to the maximum possible value and a */
+/* warning is printed out.                                             */
+/*---------------------------------------------------------------------*/
+
+void rs_sml01_check_mod_ampl( double freq )
+{
+	size_t i;
+
+
+	/* Now checks required if modulation is off or if AM modulation is used */
+
+	if ( rs_sml01.mod_type == MOD_TYPE_AM ||
+		 rs_sml01.mod_type == MOD_TYPE_OFF )
+		return;
+
+	if ( rs_sml01.mod_type == MOD_TYPE_FM )
+	{
+		for ( i = 0; i < num_fm_mod_ranges; i++ )
+			if ( freq <= fm_mod_ranges[ i ].upper_limit_freq )
+				break;
+
+		fsc2_assert( i < num_fm_mod_ranges );
+
+		if ( rs_sml01.mod_ampl[ rs_sml01.mod_type ] >
+			 								   fm_mod_ranges[ i ].upper_limit )
+		{
+			print( SEVERE, "Current FM modulation amplitude of %.1f kHz is "
+				   "is too high for new RF frequency of %.4f MHz, reducing "
+				   "it to %.1f kHz.\n",
+				   rs_sml01.mod_ampl[ rs_sml01.mod_type ] * 1.0e-3,
+				   freq * 1.0e-6,  fm_mod_ranges[ i ].upper_limit * 1.0e-3 );
+
+			if ( FSC2_MODE == EXPERIMENT )
+				rs_sml01_set_mod_ampl( rs_sml01.mod_type,
+									  rs_sml01.mod_ampl[ rs_sml01.mod_type ] );
+
+			rs_sml01.mod_ampl[ rs_sml01.mod_type ] =
+												fm_mod_ranges[ i ].upper_limit;
+		}
+	}
+	else
+	{
+		for ( i = 0; i < num_pm_mod_ranges; i++ )
+			if ( freq <= pm_mod_ranges[ i ].upper_limit_freq )
+				break;
+
+		fsc2_assert( i < num_pm_mod_ranges );
+
+		if ( rs_sml01.mod_ampl[ rs_sml01.mod_type ] >
+			 								   pm_mod_ranges[ i ].upper_limit )
+		{
+			print( SEVERE, "Current phase modulation amplitude of %.1f kHz is "
+				   "is too high for new RF frequency of %.4f MHz, reducing "
+				   "it to %.1f kHz.\n",
+				   rs_sml01.mod_ampl[ rs_sml01.mod_type ] * 1.0e-3,
+				   freq * 1.0e-6,  pm_mod_ranges[ i ].upper_limit * 1.0e-3 );
+
+			if ( FSC2_MODE == EXPERIMENT )
+				rs_sml01_set_mod_ampl( rs_sml01.mod_type,
+									  rs_sml01.mod_ampl[ rs_sml01.mod_type ] );
+
+			rs_sml01.mod_ampl[ rs_sml01.mod_type ] =
+												pm_mod_ranges[ i ].upper_limit;
+		}
+	}
 }
 
 

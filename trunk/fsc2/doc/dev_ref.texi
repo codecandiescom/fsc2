@@ -59,6 +59,7 @@
 * ni6601::          National Instruments 6601 GPCT card
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
+* rs_sml01::        Rohde & Schwarz SML01 Signal Generator
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
@@ -1456,7 +1457,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pt2025, rs_spec10, pci_mio_16e_1, Device Reference
+@node pt2025, rs_sml01, pci_mio_16e_1, Device Reference
 
 @iftex
 @subheading Metrolab NMR Teslameter PT2025
@@ -1490,7 +1491,54 @@ T. Measured fields are returned in Gauss, not Tesla!
 @c #############################################################
 
 
-@node rs_spec10, rs690, pt2025, Device Reference
+@node rs_sml01, rs_spec10, pt2025, Device Reference
+@iftex
+@subheading Rohde & Schwarz SML01 Signal Generator 
+@end iftex
+@ifnottex
+@section Rohde & Schwarz SML01 Signal Generator
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rs_sml01}
+
+@paragraphindent 0
+@strong{Description}: Rohde & Schwarz SML01 Signal Generator with support
+for output level normalization via frequency/amplitude table files.
+
+Frequency range is @w{9 kHz} to @w{1.1 GHz}, attenuation range @w{-140 dB}
+to @w{13 dB} in @w{0.1 dB} steps.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@multitable @columnfractions .45 .45
+@item @code{synthesizer_name()}                 @tab @ref{synthesizer_name}
+@item @code{synthesizer_state()}                @tab @ref{synthesizer_state}
+@item @code{synthesizer_frequency()}            @tab @ref{synthesizer_frequency}
+@item @code{synthesizer_step_frequency()}       @tab @ref{synthesizer_step_frequency}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_minimum_attenuation()}  @tab @ref{synthesizer_minimum_attenuation}
+@item @code{synthesizer_sweep_up()}             @tab @ref{synthesizer_sweep_up}
+@item @code{synthesizer_sweep_down()}           @tab @ref{synthesizer_sweep_down}
+@item @code{synthesizer_reset_frequency()}      @tab @ref{synthesizer_reset_frequency}
+@item @code{synthesizer_use_table()}            @tab @ref{synthesizer_use_table}
+@item @code{synthesizer_attenuation()}          @tab @ref{synthesizer_attenuation}
+@item @code{synthesizer_att_ref_freq()}         @tab @ref{synthesizer_att_ref_freq}
+@item @code{synthesizer_modulation()}           @tab @ref{synthesizer_modulation}
+@item @code{synthesizer_mod_ampl()}             @tab @ref{synthesizer_mod_ampl}
+@item @code{synthesizer_mod_type()}             @tab @ref{synthesizer_mod_type}
+@item @code{synthesizer_mod_source()}           @tab @ref{synthesizer_mod_source}
+@item @code{synthesizer_mod_freq()}             @tab @ref{synthesizer_mod_freq}
+@end multitable
+
+
+@c #############################################################
+
+
+@node rs_spec10, rs690, rs_sml01, Device Reference
 @iftex
 @subheading Roper Scientific Spec-10 CCD Camera
 @end iftex

@@ -355,6 +355,7 @@ bool hfs9000_get_channel_state( int channel );
 bool hfs9000_set_channel_state( int channel, bool flag );
 bool hfs9000_command( const char *cmd );
 long hfs9000_ch_to_num( long channel );
+bool hfs9000_operation_complete( void );
 
 
 /*

@@ -71,6 +71,7 @@ spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c
 pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
 				   pci_mio_16e_1_dio.c pci_mio_16e_1_gpct.c \
 				   pci_mio_16e_1_msc.c pci_mio_16e_1_util.c
+rs_sml01        := rs_sml01.c rs_sml01_util.c rs_sml01_gpib.c rs_sml01_lexer.c
 
 
 # List of all "complicated" modules that are to be made from more than a
@@ -78,7 +79,7 @@ pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
 
 comp_modules    := dg2020_f dg2020_b hfs9000 ep385 rs690 er023m lecroy9400  \
 				   hp8672a $(hp864_list) $(tds_list) spectrapro_300i        \
-				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a
+				   hjs_attenuator hjs_sfc lecroy9400_s spex_cd2a rs_sml01
 
 
 # Additional modules that only get created on demand (they require some

@@ -208,7 +208,8 @@ digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
 digitizer_averaging, -1, ALL;           // LeCroy9400 only
 
 
-/* Functions exported by the rf synthesizer (HP8647A) */
+/* Functions exported by the RF synthesizers (HP8647A, HP8648A, HP8672A,
+											  R&S SML01) */
 
 synthesizer_name, 0, ALL;             // returns the device name
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
@@ -226,6 +227,7 @@ synthesizer_modulation, -1, ALL;
 synthesizer_mod_type, -1, ALL;
 synthesizer_mod_source, -1, ALL;
 synthesizer_mod_ampl, -1, ALL;
+synthesizer_mod_freq, -1, ALL;
 synthesizer_command, 1, EXP;
 
 
