@@ -180,19 +180,12 @@ Var *temp_contr_sample_channel( Var *v )
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, lakeshore330.sample_channel );
-	else
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type & ( INT_VAR || FLOAT_VAR ) )
 	{
-		if ( v->type == INT_VAR )
-			channel = v->val.lval - 1;
-		else
-		{
-			eprint( WARN, SET, "%s: Float value used as channel channel "
-					"number in %s().\n", DEVICE_NAME, Cur_Func );
-			channel = lrnd( v->val.dval ) - 1;
-		}
+		channel = get_long( v, "channel number", DEVICE_NAME ) - 1;
 
 		if ( channel != SAMPLE_CHANNEL_A && channel != SAMPLE_CHANNEL_B )
 		{
@@ -245,14 +238,7 @@ Var *temp_contr_sensor_unit( Var *v )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		if ( v->type == INT_VAR )
-			unit = v->val.lval;
-		else
-		{
-			eprint( WARN, SET, "%s: Float value used as unit number in "
-					"%s().\n", DEVICE_NAME, Cur_Func );
-			unit = lrnd( v->val.dval );
-		}
+		unit = get_long( v, "unit number", DEVICE_NAME );
 
 		if ( unit < UNIT_KELVIN || unit > UNIT_SENSOR )
 		{
@@ -311,27 +297,9 @@ Var *temp_contr_lock_keyboard( Var *v )
 		lock = LOCK_STATE_REMOTE_LLO;
 	else
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			lock = v->val.lval == 0 ?
-				LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
-		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval == 0.0 ?
-				LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				lock = LOCK_STATE_REMOTE;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				lock = LOCK_STATE_REMOTE_LLO;
-			else
-			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-		}
+		lock = get_boolean( v, DEVICE_NAME ) ?
+			                   LOCK_STATE_REMOTE_LLO : LOCK_STATE_REMOTE;
+		too_many_arguments( v, DEVICE_NAME );
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )

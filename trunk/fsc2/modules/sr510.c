@@ -658,31 +658,10 @@ Var *lockin_lock_keyboard( Var *v )
 		lock = SET;
 	else
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			lock = v->val.lval == 0 ? UNSET : UNSET;
-		else if ( v->type == FLOAT_VAR )
-			lock = v->val.dval == 0.0 ? UNSET : UNSET;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				lock = UNSET;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				lock = SET;
-			else
-			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of %s().\n",
-						DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-		}
+		lock = get_boolean( v, DEVICE_NAME );
+		too_many_arguments( v, DEVICE_NAME );
 	}
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-		eprint( WARN, SET, "%s: Superfluous argument%s in call of function "
-				"%s().\n", DEVICE_NAME, v->next != NULL ? "s" : "", Cur_Func );
-	
 	if ( FSC2_MODE == EXPERIMENT )
 		sr510_lock_state( lock );
 

@@ -375,9 +375,8 @@ Var *digitizer_sensitivity( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel > LECROY9400_CH2 )
 	{
@@ -491,9 +490,8 @@ Var *digitizer_averaging( Var *v )
 
 	/* Get the channel to use for averaging */
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -512,9 +510,8 @@ Var *digitizer_averaging( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
 	source_ch = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											  v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( source_ch != LECROY9400_CH1 && source_ch != LECROY9400_CH2 )
 	{
@@ -578,25 +575,7 @@ Var *digitizer_averaging( Var *v )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-		if ( v->type == INT_VAR )
-			reject = v->val.lval != 0;
-		else if ( v->type == FLOAT_VAR )
-			reject = v->val.dval != 0.0;
-		else
-		{
-			if ( ! strcasecmp( v->val.sptr, "OFF" ) )
-				reject = UNSET;
-			else if ( ! strcasecmp( v->val.sptr, "ON" ) )
-				reject = SET;
-			else
-			{
-				eprint( FATAL, SET, "%s: Invalid argument in call of "
-						"function %s().\n", DEVICE_NAME, Cur_Func );
-				THROW( EXCEPTION )
-			}
-		}
+		reject = get_boolean( v, DEVICE_NAME );
 
 		/* Last (optional) value is the number of points to use in averaging */
 
@@ -669,9 +648,8 @@ Var *digitizer_num_averages( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -732,9 +710,8 @@ Var *digitizer_record_length( Var *v )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel != LECROY9400_FUNC_E && channel != LECROY9400_FUNC_F )
 	{
@@ -813,9 +790,8 @@ Var *digitizer_meas_channel_ok( Var *v )
 	long channel;
 
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel > LECROY9400_FUNC_F )
 		return vars_push( INT_VAR, 0 );
@@ -855,9 +831,8 @@ Var *digitizer_trigger_channel( Var *v )
 					lecroy9400_get_trigger_source( ) ) );
 		}
 
-	vars_check( v, INT_VAR );
 	channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( channel >= MAX_CHANNELS )
 	{
@@ -942,9 +917,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 		THROW( EXCEPTION )
 	}
 
-	vars_check( v, INT_VAR );
 	ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
-											   v->val.lval );
+						 get_strict_long( v, "channel number", DEVICE_NAME ) );
 
 	if ( ch < LECROY9400_CH1 ||
 		 ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
@@ -962,7 +936,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 
 	if ( ( v = vars_pop( v ) ) != NULL )
 	{
-		vars_check( v, INT_VAR );
+		long win_num;
+
 		if ( ( w = lecroy9400.w ) == NULL )
 		{
 			eprint( FATAL, SET, "%s: No measurement windows have been "
@@ -970,9 +945,11 @@ static Var *get_curve( Var *v, bool use_cursor )
 			THROW( EXCEPTION )
 		}
 
+		win_num = get_strict_long( v, "window number", DEVICE_NAME  );
+
 		while ( w != NULL )
 		{
-			if ( w->num == v->val.lval )
+			if ( w->num == win_num )
 			{
 				w->is_used = SET;
 				break;
