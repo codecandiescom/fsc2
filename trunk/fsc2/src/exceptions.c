@@ -37,7 +37,7 @@ unsigned int  exception_id;
 
 void longjmperror( void )
 {
-	syslog( LOG_ERR, "FATAL ERROR: Uncaught exception %d at %%s:%d.\n",
+	syslog( LOG_ERR, "INTERNAL ERROR: Uncaught exception %d at %%s:%d.\n",
 			exception_id, __FILE__, __LINE__ );
 	exit( exception_id );
 }
