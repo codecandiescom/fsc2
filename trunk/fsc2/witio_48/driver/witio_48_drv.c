@@ -797,7 +797,7 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
 
 /*------------------------------------------------------------*
  * Function for reading in either a 16-bit or an 8-bit value.
- * When the channel argument is 0 a 16-bit valueis read in
+ * When the channel argument is 0 a 16-bit value is read in
  * with the upper byte comming from port B and the lower byte
  * from port A. When channel is 1 an 8-bit value is read in
  * from port C.
