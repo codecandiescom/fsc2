@@ -137,6 +137,8 @@ int ep385_init_hook( void )
 	ep385.auto_twt_pulses = UNSET;
 	ep385.left_twt_warning = ep385.right_twt_warning = 0;
 
+	ep385.is_minimum_twt_pulse_distance = UNSET;
+
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
 		ch = ep385.channel + i;

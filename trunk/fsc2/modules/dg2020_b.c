@@ -134,6 +134,8 @@ int dg2020_b_init_hook( void )
 
 	dg2020.block[ 0 ].is_used = dg2020.block[ 1 ].is_used = UNSET;
 
+	dg2020.is_minimum_twt_pulse_distance = UNSET;
+
 	dg2020.twt_distance_warning = 0;
 
 	dg2020.dummy_phase_setup = NULL;
