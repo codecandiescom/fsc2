@@ -818,6 +818,8 @@ void p_phs_end( int func )
 	is_pulser_func( pulser_struct.setup_phase,
 					"setting up phase channels" );
 
+	/* Now check that for all phase types the data are set */
+
 	for ( i = 0; i < 4; i++ )
 	{
 		for ( j = 0; j < 2; j++ )
@@ -834,6 +836,9 @@ void p_phs_end( int func )
 			= SET;
 	}
 
+	/* Finally check that the data are consistent, i.e. different phase types
+	   haven't been assigned the same data */
+
 	for ( i = 0; i < 4; i++ )
 	{
 		if ( ! cons[ i ] )
@@ -846,7 +851,7 @@ void p_phs_end( int func )
 		}
 	}
 
-	( *pulser_struct.setup_phase )( function, phs );
+	( *pulser_struct.setup_phase )( func, phs[ func ] );
 
 	Cur_PHS = -1;
 }
