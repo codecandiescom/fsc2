@@ -491,8 +491,6 @@ long tds520a_translate_channel( int dir, long channel )
 						"%s().\n", DEVICE_NAME, channel, Cur_Func );
 				THROW( EXCEPTION )
 		}
-
-		return TDS520A_UNDEF;
 	}
 	else
 	{
@@ -539,9 +537,8 @@ long tds520a_translate_channel( int dir, long channel )
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION )
 		}
-
-		return DIGITIZER_CHANNEL_INVALID;
 	}
 
+	fsc2_assert( 1 == 0 );
 	return -1;
 }

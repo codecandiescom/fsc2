@@ -465,7 +465,7 @@ Var *digitizer_sensitivity( Var *v )
 	vars_check( v, INT_VAR );
 	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
 
-	if ( channel < TDS520A_CH1 || channel > TDS520A_CH2 )
+	if ( channel > TDS520A_CH2 )
 	{
 		eprint( FATAL, SET, "%s: Can't set or obtain sensitivity for channel "
 				"%s.\n", DEVICE_NAME, Channel_Names[ channel ] );
@@ -748,7 +748,7 @@ Var *digitizer_meas_channel_ok( Var *v )
 	vars_check( v, INT_VAR );
 	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
 
-	if ( channel < TDS520A_CH1 || channel > TDS520A_REF4 )
+	if ( channel > TDS520A_REF4 )
 		return vars_push( INT_VAR, 0 );
 	else
 		return vars_push( INT_VAR, 1 );
@@ -762,6 +762,9 @@ Var *digitizer_meas_channel_ok( Var *v )
 
 Var *digitizer_trigger_channel( Var *v )
 {
+	long channel;
+
+
 	if ( v == NULL )
 	{
 		if ( TEST_RUN )
@@ -791,13 +794,7 @@ Var *digitizer_trigger_channel( Var *v )
 
 	vars_check( v, INT_VAR );
 	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
-
-	if ( channel < 0 || channel >= MAX_CHANNELS )
-	{
-		eprint( FATAL, SET, "%s: Invalid trigger channel %s in %s().\n",
-				DEVICE_NAME, Channel_Names[ channel ], Cur_Func );
-		THROW( EXCEPTION )
-	}
+	vars_pop( v );
 
     switch ( channel )
     {
@@ -817,7 +814,6 @@ Var *digitizer_trigger_channel( Var *v )
 			THROW( EXCEPTION )
     }
 
-	vars_pop( v );
 	return vars_push( INT_VAR, 1 );
 }
 
@@ -860,7 +856,6 @@ static Var *get_area( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch;
-	long channel;
 
 
 	/* The first variable got to be a channel number */
@@ -873,12 +868,8 @@ static Var *get_area( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
+	ch = ( int ) tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
 	v = vars_pop( v );
-
-	for ( ch = 0; ch <= TDS520A_REF4; ch++ )
-		if ( ch == ( int ) channel )
-			break;
 
 	if ( ch > TDS520A_REF4 )
 	{
@@ -966,7 +957,6 @@ static Var *get_curve( Var *v, bool use_cursor )
 {
 	WINDOW *w;
 	int ch, i;
-	long channel;
 	double *array;
 	long length;
 	Var *nv;
@@ -982,12 +972,8 @@ static Var *get_curve( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
+	ch = ( int ) tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
 	v = vars_pop( v );
-
-	for ( ch = 0; ch <= TDS520A_REF4; ch++ )
-		if ( ch == ( int ) channel )
-			break;
 
 	if ( ch > TDS520A_REF4 )
 	{
@@ -1088,7 +1074,6 @@ Var *digitizer_get_amplitude_fast( Var *v )
 static Var *get_amplitude( Var *v, bool use_cursor )
 {
 	WINDOW *w;
-	long channel;
 	int ch;
 	Var *nv;
 
@@ -1103,12 +1088,8 @@ static Var *get_amplitude( Var *v, bool use_cursor )
 	}
 
 	vars_check( v, INT_VAR );
-	channel = tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
+	ch = ( int ) tds520a_translate_channel( GENERAL_TO_TDS520A, v->val.lval );
 	v = vars_pop( v );
-
-	for ( ch = 0; ch <= TDS520A_REF4; ch++ )
-		if ( ch == ( int ) channel )
-			break;
 
 	if ( ch > TDS520A_REF4 )
 	{
