@@ -203,7 +203,6 @@ int dg2020_b_test_hook( void )
 	if ( dg2020_Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
-		print( WARN, "Driver loaded but no pulses defined.\n" );
 		return 1;
 	}
 
@@ -423,9 +422,6 @@ int dg2020_b_exp_hook( void )
 {
 	int i;
 
-
-	if ( ! dg2020_is_needed )
-		return 1;
 
 	/* Extra safety net: If the minimum distances between shape and defense
 	   pulses have been changed by calling the appropriate functions ask
