@@ -22,21 +22,35 @@
 --!>
 
 
-body { font-family:       Verdana, Helvetica, Arial, serif;
-       margin-left:       20px;
-       margin-right:      20px;
-       margin-top:        20px;
-       margin-bottom:     20px;
-	   color:             #000000;
-       background-color:  #FFFFFF;
-     }
+body { background :  #FFFFFF;
+	 }
+
+#level0 { background :         #FFFFFF;
+          background-image :   url(background.gif); 
+          background-repeat :  repeat-y;
+          width :              100%;
+        }
+
+#level1 { margin-left :    180px;
+          padding-left :   10px;
+          background :     #FFFFFF;
+	    }
+
+#main { background :  #FFFFFF;
+	  }
+
+#lftBar { position :     fixed;
+          width :        180px;
+          top :          15px;
+          left :         15px;
+          background :   transparent;
+		}
 
 code { font-family : monospace;
        font-weight : bold;
 	 }
 
-samp { color       : #AA0000;
-       font-family : monospace;
+samp { font-family : monospace;
        font-weight : bold;
      }
 

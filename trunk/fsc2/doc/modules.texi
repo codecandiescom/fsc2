@@ -228,7 +228,7 @@ vars_check( var->next, FLOAT_VAR );
 @end example
 @noindent
 If @code{vars_check()} finds that everything is ok it simply returns,
-otherwise an error message will be printed and the the program stops, so
+otherwise an error message will be printed and the program stops, so
 you don't have to take care of error handling. If you're prepared to accept
 integers as well as floating point data, call @code{vars_check()} instead
 with
@@ -237,7 +237,7 @@ vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
 @noindent
 As you probably already guessed from this the different types of
-variables are coded into the bits of the the integer @code{type} in the
+variables are coded into the bits of the integer @code{type} in the
 variable's structure, so you have to use the bitwise inclusive OR
 operator @code{|} to test alternatives.
 
@@ -1498,7 +1498,7 @@ this is to call either @code{usleep()} or @code{nansleep()}. The second
 function, @code{nanosleep()}, may look like a bit of overkill since both
 functions real time resolution is usually in the @w{10 ms} range, at
 least on Intel machines. On the other hand, @code{usleep()} is marked as
-obsolescent in the the IEEE Standard 1003.1-2001 (Single UNIX
+obsolescent in the IEEE Standard 1003.1-2001 (Single UNIX
 Specification, Version 3) for several reasons and thus should not be
 used anymore.
 
@@ -2521,7 +2521,7 @@ thrown.
 
 
 @item bool get_pulse_phase_cycle( long pulse_number, long *cycle )
-The function should return the the number of the phase sequence (i.e.@:
+The function should return the number of the phase sequence (i.e.@:
 @code{1} or @code{2}) associated with the pulse associated with pulse
 with the number passed to the function as the first argument. If a phase
 sequence has been set for the pulse the number has to be written into

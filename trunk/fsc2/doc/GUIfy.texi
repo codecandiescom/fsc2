@@ -56,8 +56,7 @@ sends it to @code{fsc2} for execution. That's what the @code{fsc2_guify}
 conversion tool that comes with @code{fsc2} is good for.
 
 Let's go back to the relatively simple @code{EDL} script for a cw EPR
-experiment from the start of the chapter about the the @code{EDL}
-language:
+experiment from the start of the chapter about the @code{EDL} language:
 @example
 DEVICES:
   er035m_s;              // gaussmeter module

@@ -227,8 +227,8 @@ or
 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 @end example
 @noindent
-to set the repetition rate of the the experiment to @w{100 Hz}. The
-repeat time must be an integer multiple of the time base of the pulser.
+to set the repetition rate of the experiment to @w{100 Hz}. The repeat
+time must be an integer multiple of the time base of the pulser.
 
 if a repetition time is specified when using an external trigger a
 repetition time or frequency obviously can't be enforced. It can only be

@@ -993,7 +993,7 @@ In line 44 the definition of pulse @code{PULSE_1} (which also could be
 called @code{P1}) starts: its function is set to @code{MICROWAVE},
 i.e.@: it will be output on the pulsers pod designated for microwave
 pulses in the @code{ASSIGNMENTS} section, its starting position is
-@w{0 ns} after the trigger and its length is set to the the value stored
+@w{0 ns} after the trigger and its length is set to the value stored
 in the variable @code{pi_half}.
 
 @code{PULSE_2} is also a microwave pulse, but is starts displaced by a

@@ -1170,12 +1170,12 @@ sqrt_of_val = ( val < 0.0 ) ? sqrt( -1.0 * val ) : sqrt( val );
 @noindent
 The conditional operator is somewhat special in that it consists of both
 the question mark, @code{?}, and the colon, @code{:}. It tells the
-program to evaluate the expression before the question mark and and
-then, depending on the result, execute either the expression before or
-after the colon. In the example it is tested if @code{val} is smaller
-than @code{0}, and if this is true, the square root of @code{val}
-multiplied by @code{-1} is taken, otherwise the square root of just
-@code{val} itself.
+program to evaluate the expression before the question mark and then,
+depending on the result, execute either the expression before or after
+the colon. In the example it is tested if @code{val} is smaller than
+@code{0}, and if this is true, the square root of @code{val} multiplied
+by @code{-1} is taken, otherwise the square root of just @code{val}
+itself.
 
 Beside comparison for the number on the left hand side being smaller
 than the number on the right hand side, several other operators for
@@ -1422,7 +1422,7 @@ If @code{A} equals @code{0} the whole expression is already known to be
 false even though the lock-ins phase may be less then 90 degrees. Thus
 the call of the function @code{lockin_phase()} will never be made.
 
-@b{Thus the sequence in conditions containing the logical or and and
+@b{Thus the sequence in conditions containing the logical "or" and "and"
 operator is important.}
 
 To make it more clear please understand that the code (please read about
