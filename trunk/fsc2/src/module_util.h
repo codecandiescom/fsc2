@@ -34,6 +34,11 @@ inline long get_long( Var *v, const char *snippet );
 inline double get_double( Var *v, const char *snippet );
 inline long get_strict_long( Var *v, const char *snippet );
 inline bool get_boolean( Var *v );
+double module_time( void );
+
+#define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
+										 estimate for calculation of time in
+										 test run via module_time() */
 
 
 #endif  /* ! MODULE_UTIL_HEADER */

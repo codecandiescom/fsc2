@@ -331,8 +331,15 @@ Var *f_wait( Var *v )
 		return 0;
 	}
 
+	/* During the test run we not really wait but just add the expected 
+	   waiting time to the global variable that is used to give the modules
+	   a very rough time estimate about the used time. */
+
 	if ( Internals.mode == TEST )
+	{
+		EDL.module_time += how_long;
 		return vars_push( INT_VAR, 1 );
+	}
 
 	/* Set everything up for sleeping */
 

@@ -33,6 +33,10 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
+#define TEST_CURRENT       2.315
+#define TEST_SWEEP_RATE    ( 0.02 / 60.0 )
+
+
 /* Declaration of exported functions */
 
 int ips20_4_init_hook( void );
@@ -42,18 +46,99 @@ int ips20_4_end_of_exp_hook( void );
 void ips20_4_exit_hook( void );
 
 Var *magnet_name( Var *v );
+Var *magnet_setup( Var *v );
+Var *get_field( Var *v );
+Var *set_field( Var *v );
+Var *set_sweep_rate( Var *v );
+Var *magnet_sweep( Var *v );
+Var *magnet_sweep_rate( Var *v );
+Var *reset_field( Var *v );
+
+
+static void magnet_sweep_up( void );
+static void magnet_sweep_down( void );
+static void magnet_stop_sweep( void );
 
 static bool ips20_4_init( const char *name );
+static void ips20_4_to_local( void );
+static void ips20_4_get_complete_status( void );
+static void ips20_4_sweep_up( void );
+static void ips20_4_sweep_down( void );
+static double ips20_4_current_check( double current );
+static double ips20_4_sweep_rate_check( double sweep_rate );
+static double ips20_4_get_act_current( void );
+static double ips20_4_current_check( double current );
+static double ips20_4_sweep_rate_check( double sweep_rate );
+static double ips20_4_set_target_current( double current );
+static double ips20_4_get_target_current( void );
+static double ips20_4_set_sweep_rate( double sweep_rate );
+static double ips20_4_get_sweep_rate( void );
+static double ips20_4_goto_current( double current );
+static int ips20_4_set_activity( int activity );
+static void ips20_4_comm_failure( void );
+
+
 
 typedef struct {
 	int device;
 
+	int sweep_state;
+
 	int activity;
 	int mode;
 	int state;
+	int loc_rem_state;
 
-	bool lock_state;
+	double act_current;
+	double target_current;
+
+	double start_current;
+	bool is_start_current;
+	
+	double sweep_rate;
+	bool is_sweep_rate;
+
+	double fast_sweep_rate;
+
+	double max_current;
+	double min_current;
+
+	double time_estimate;
+
 } IPS20_4;
+
+
+enum {
+	STOPPED,
+	SWEEPING_UP,
+	SWEEPING_DOWN
+};
+
+enum {
+	LOCAL_AND_LOCKED,
+	REMOTE_AND_LOCKED,
+	LOCAL_AND_UNLOCKED,
+	REMOTE_AND_UNLOCKED
+};
+
+enum {
+	HOLD,
+	TO_SET_POINT,
+	TO_ZERO
+};
+
+enum {
+	AT_REST,
+	SWEEPING,
+	SWEEP_LIMITING,
+	SWEEPING_AND_SWEEP_LIMITING
+};
+
+
+enum {
+	FAST,
+	SLOW
+};
 
 
 IPS20_4 ips20_4;
@@ -69,7 +154,18 @@ int ips20_4_init_hook( void )
 	need_GPIB = SET;
 
 	ips20_4.device = -1;
-	ips20_4.lock_state = SET;
+
+	ips20_4.act_current = 0.0;
+
+	ips20_4.is_start_current = UNSET;
+	ips20_4.is_sweep_rate = UNSET;
+	
+	ips20_4.fast_sweep_rate = FAST_SWEEP_RATE;
+
+	ips20_4.max_current = MAX_CURRENT;
+	ips20_4.min_current = MIN_CURRENT;
+
+	return 1;
 }
 
 
@@ -80,6 +176,27 @@ int ips20_4_init_hook( void )
 int ips20_4_test_hook( void )
 {
 	ips20_4_stored = ips20_4;
+
+	if ( ips20_4.is_start_current )
+		ips20_4.act_current = ips20_4.start_current;
+	else
+	{
+		ips20_4.start_current = ips20_4.act_current = TEST_CURRENT;
+		ips20_4.is_start_current = SET;
+	}
+
+	if ( ! ips20_4.is_sweep_rate )
+	{
+		ips20_4.sweep_rate = TEST_SWEEP_RATE;
+		ips20_4.is_sweep_rate = SET;
+	}
+
+	ips20_4.activity = HOLD;
+	ips20_4.sweep_state = STOPPED;
+
+	ips20_4.time_estimate = module_time( );
+
+	return 1;
 }
 
 
@@ -90,6 +207,15 @@ int ips20_4_test_hook( void )
 int ips20_4_exp_hook( void )
 {
 	ips20_4 = ips20_4_stored;
+
+	if ( ! ips20_4_init( DEVICE_NAME ) )
+	{
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
+		THROW( EXCEPTION );
+	}
+
+	return 1;
 }
 
 
@@ -100,6 +226,11 @@ int ips20_4_exp_hook( void )
 int ips20_4_end_of_exp_hook( void )
 {
 	ips20_4 = ips20_4_stored;
+
+	ips20_4_to_local( );
+	ips20_4.device = -1;
+
+	return 1;
 }
 
 
@@ -109,16 +240,334 @@ int ips20_4_end_of_exp_hook( void )
 
 void ips20_4_exit_hook( void )
 {
+	if ( ips20_4.device >= 0 )
+		ips20_4_end_of_exp_hook( );
+}
+
+
+/*---------------------------------------------------*/
+/* Function returns the name the device is known as. */
+/*---------------------------------------------------*/
+
+Var *magnet_name( Var *v )
+{
+	v = v;
+	return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*----------------------------------------------------------------*/
+/* Function for registering the start current and the sweep rate. */
+/*----------------------------------------------------------------*/
+
+Var *magnet_setup( Var *v )
+{
+	double cur;
+	double sweep_rate;
+
+
+	if ( v->next == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	cur = get_double( v, "magnet current" );
+	ips20_4.start_current = ips20_4_current_check( cur );
+	ips20_4.is_start_current = SET;
+
+	if ( ( v = vars_pop( v ) ) != NULL )
+	{
+		sweep_rate = get_double( v, "magnet sweep speed" );
+		if ( sweep_rate < 0 )
+		{
+			print( FATAL, "Negative sweep rates can't be used, use argument "
+				   "to magnet_sweep() to set sweep direction.\n" );
+			THROW( EXCEPTION );
+		}
+
+		ips20_4.sweep_rate = ips20_4_sweep_rate_check( sweep_rate );
+		ips20_4.is_sweep_rate = SET;
+	}
+
+	return vars_push( INT_VAR, 1 );
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* Function returns the momentary current. During the test run an estimate */
+/* of the current is returned, based on the sweep rate and a guess of the  */
+/* time spent since the last call for determining the current.             */
+/*-------------------------------------------------------------------------*/
+
+Var *get_field( Var *v )
+{
+	v = v;
+
+
+	if ( FSC2_MODE == TEST )
+	{
+		/* During the test run we need to return some not completely bogus
+		   value when a sweep is run. Thus an estimate for the time spend
+		   until now is fetched, multiplied by the sweep rate and added to
+		   the current field */
+
+		if ( ips20_4.sweep_state != STOPPED &&
+			 ips20_4.activity == TO_SET_POINT )
+		{
+			double cur_time, dtime;
+
+			cur_time = module_time( );
+			dtime = cur_time - ips20_4.time_estimate;
+			ips20_4.time_estimate = cur_time;
+
+			ips20_4.act_current = 1.0e-4 * 
+				( double ) lrnd( 1.0e4 * ( ips20_4.act_current
+								 + module_time( ) * ips20_4.sweep_rate
+								 * ( ips20_4.sweep_state == SWEEPING_UP ?
+									 1.0 : - 1.0 ) ) );
+
+			if ( ips20_4.act_current > ips20_4.max_current )
+				ips20_4.act_current = ips20_4.max_current;
+			if ( ips20_4.act_current < ips20_4.min_current )
+				ips20_4.act_current = ips20_4.min_current;
+		}
+	}
+	else
+		ips20_4.act_current = ips20_4_get_act_current( );
+
+	/* If a sweep reached one of the current limits stop the sweep */
+
+	if ( ( ( ips20_4.sweep_state == SWEEPING_UP ||
+			 ips20_4.activity == TO_SET_POINT ) &&
+		   ips20_4.act_current >= ips20_4.max_current ) ||
+		 ( ( ips20_4.sweep_state == SWEEPING_DOWN ||
+			 ips20_4.activity == TO_SET_POINT ) &&
+		   ips20_4.act_current <= ips20_4.min_current ) )
+	{
+		print( WARN, "Sweep had to be stopped because current limit was "
+			   "reached.\n" );
+
+		if ( FSC2_MODE == EXPERIMENT )
+			ips20_4.activity = ips20_4_set_activity( HOLD );
+		else
+			ips20_4.activity = HOLD;
+		ips20_4.sweep_state = STOPPED;
+	}
+
+	return vars_push( FLOAT_VAR, ips20_4.act_current );
+}
+
+
+
+/*--------------------------------------------------------*/
+/* Function for setting a new current value. Please note  */
+/* that setting a new current also stops a running sweep. */
+/*--------------------------------------------------------*/
+
+Var *set_field( Var *v )
+{
+	double cur;
+
+
+	/* Stop sweeping */
+
+	if ( ips20_4.sweep_state != STOPPED ||
+		 ips20_4.activity != HOLD )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+			ips20_4.activity = ips20_4_set_activity( HOLD );
+		else
+			ips20_4.activity = HOLD;
+		ips20_4.sweep_state = STOPPED;
+	}
+
+	/* Check the current */
+
+	cur = ips20_4_current_check( get_double( v, "field current" ) );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		cur = ips20_4_goto_current( cur );
+
+	return vars_push( FLOAT_VAR, ips20_4.act_current = cur );
+}
+
+
+/*----------------------------------------------------*/
+/* This is the EDL function for starting or stopping sweeps or */
+/* inquiring about the current sweep state. */
+/*----------------------------------------------------*/
+
+Var *magnet_sweep( Var *v )
+{
+	long dir;
+	Var *vc;
+
+
+	vc = get_field( NULL );
+	ips20_4.act_current = vc->val.dval;
+	vars_pop( vc );
+
+	if ( v == NULL )
+		switch ( ips20_4.sweep_state )
+		{
+			case STOPPED :
+				return vars_push( INT_VAR, 0 );
+
+			case SWEEPING_UP :
+				return vars_push( INT_VAR, 1 );
+
+			case SWEEPING_DOWN :
+				return vars_push( INT_VAR, -1 );
+		}
+
+	dir = get_long( v, "sweep direction" );
+
+	if ( dir == 0 )
+		magnet_stop_sweep( );
+	else if ( dir > 0 )
+		magnet_sweep_up( );
+	else
+		magnet_sweep_down( );
+
+	return vars_push( FLOAT_VAR, ips20_4.act_current );
 }
 
 
 /*----------------------------------------------------*/
 /*----------------------------------------------------*/
 
-Var *magnet_name( Var *v )
+static void magnet_sweep_up( void )
+{
+	if ( ! ips20_4.is_sweep_rate )
+	{
+		print( FATAL, "No sweep rate has been set.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == TEST )
+	{
+		if ( ips20_4.sweep_state == SWEEPING_UP )
+		{
+			print( SEVERE, "Field is already sweeping up.\n" );
+			return;
+		}
+
+		if ( ips20_4.act_current >= ips20_4.max_current - CURRENT_RESOLUTION )
+		{
+			print( WARN, "Magnet is already at maximum current.\n" );
+			return;
+		}
+
+		ips20_4.sweep_state = SWEEPING_UP;
+		ips20_4.activity = TO_SET_POINT;
+		ips20_4.target_current = ips20_4.max_current;
+		return;
+	}
+
+	ips20_4_sweep_up( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static void magnet_sweep_down( void )
+{
+	if ( ! ips20_4.is_sweep_rate )
+	{
+		print( FATAL, "No sweep rate has been set.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == TEST )
+	{
+		if ( ips20_4.sweep_state == SWEEPING_DOWN )
+		{
+			print( SEVERE, "Field is already sweeping down.\n" );
+			return;
+		}
+
+		if ( ips20_4.act_current <= ips20_4.min_current + CURRENT_RESOLUTION )
+		{
+			print( WARN, "Magnet is already at minimum current.\n" );
+			return;
+		}
+
+		ips20_4.sweep_state = SWEEPING_DOWN;
+		ips20_4.activity = TO_SET_POINT;
+		ips20_4.target_current = ips20_4.min_current;
+		return;
+	}
+
+	ips20_4_sweep_down( );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+static void magnet_stop_sweep( void )
+{
+	if ( ips20_4.sweep_state == STOPPED )
+	{
+		print( FSC2_MODE == TEST ? SEVERE : WARN,
+			   "Sweep is already stopped.\n" );
+		return;
+	}
+
+	if ( FSC2_MODE == TEST )
+	{
+		ips20_4.sweep_state = STOPPED;
+		ips20_4.activity = HOLD;
+		return;
+	}
+
+	ips20_4.activity = ips20_4_set_activity( HOLD );
+	ips20_4.sweep_state = STOPPED;
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *magnet_sweep_rate( Var *v )
+{
+	if ( v == NULL )
+		switch( FSC2_MODE )
+		{
+			case PREPARATION :
+				if ( ! ips20_4.is_sweep_rate )
+					no_query_possible( );
+				else
+					return vars_push( FLOAT_VAR, ips20_4.sweep_rate );
+
+			case TEST :
+				return vars_push( FLOAT_VAR, ips20_4.is_sweep_rate ?
+								  ips20_4.sweep_rate : TEST_SWEEP_RATE );
+
+			case EXPERIMENT :
+				return vars_push( FLOAT_VAR, ips20_4.sweep_rate );
+		}
+
+	ips20_4.sweep_rate =
+					 ips20_4_sweep_rate_check( get_double( v, "sweep rate" ) );
+	ips20_4.is_sweep_rate = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		ips20_4_set_sweep_rate( ips20_4.sweep_rate );
+
+	return vars_push( FLOAT_VAR, ips20_4.sweep_rate );
+}
+
+
+/*----------------------------------------------------*/
+/*----------------------------------------------------*/
+
+Var *reset_field( Var *v )
 {
 	v = v;
-	return vars_push( STR_VAR, DEVICE_NAME );
+	return set_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }
 
 
@@ -128,13 +577,15 @@ Var *magnet_name( Var *v )
 static bool ips20_4_init( const char *name )
 {
 	char cmd[ 100 ];
-	char buf[ 100 ];
+	char reply[ 100 ];
 	long length = 100;
+	double cur_limit;
+	bool was_hold = UNSET;
 
 
 	/* First we have to set up the ITC503 temperature controller which
 	   actually does the whole GPIB communication and passes on commands
-	   to the sweep power supply and returns the replies. */
+	   to the sweep power supply and returns its replies. */
 
 	if ( gpib_init_device( name, &ips20_4.device ) == FAILURE )
 	{
@@ -143,29 +594,167 @@ static bool ips20_4_init( const char *name )
 	}
 
 	/* Bring both the GPIB master device (ITC 503) as well as the sweep power
-	   supply in the remote state and set the keyboard lock to what the user
-	   asked for. */
+	   supply in the remote state */
 
-	sprintf( cmd, "@%1dC%1d\n", MASTER_ISOBUS_ADDRESS,
-			 ips20_4.lock_state ? 1 : 3 );
+	sprintf( cmd, "@%1dC3\n", MASTER_ISOBUS_ADDRESS );
 	length = 100;
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, buf, &length ) == FAILURE )
-		return FAIL;
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
 
-	sprintf( cmd, "@%1dC%1d\n", IPS20_4_ISOBUS_ADDRESS,
-			 ips20_4.lock_state ? 1 : 3 );
-	length = 100;
-	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
-		 gpib_read( ips20_4.device, buf, &length ) == FAILURE )
-		return FAIL;
-
-	/* Set the sweep power supply to send data with extended resolution 
-	   (this is one of the few commands that don't produce a reply) */
-
-	sprintf( cmd, "@%1dC4\n", IPS20_4_ISOBUS_ADDRESS );
+	sprintf( cmd, "@%1dQ0\n", MASTER_ISOBUS_ADDRESS );
 	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
-		return FAIL;
+		ips20_4_comm_failure( );
+
+	sprintf( cmd, "@%1dC3\n", IPS20_4_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	/* Set the sweep power supply to send and accept data with extended
+	   resolution (this is one of the few commands that don't produce a
+	   reply) */
+
+	sprintf( cmd, "@%1dQ4\n", IPS20_4_ISOBUS_ADDRESS );
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	/* Get the status of the magnet - if it's not in the LOC/REMOTE state we
+	   set it to something is going wrong... */
+
+	ips20_4_get_complete_status( );
+	if ( ips20_4.loc_rem_state != REMOTE_AND_UNLOCKED )
+	{
+		print( FATAL, "Magnet did not accept command.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Get the maximum and minimum safe current limits and use these as the
+	   allowed current range (unless they are larger than the ones set in the
+	   configuration file). */
+
+	sprintf( cmd, "@%1dR21\n", IPS20_4_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+	
+	reply[ length - 1 ] = '\0';
+	cur_limit = T_atod( reply ) / 60.0;
+
+	if ( cur_limit > MIN_CURRENT )
+		ips20_4.min_current = cur_limit;
+
+	sprintf( cmd, "@%1dR22\n", IPS20_4_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 6 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+	
+	reply[ length - 1 ] = '\0';
+	cur_limit = T_atod( reply ) / 60.0;
+
+	if ( cur_limit < MAX_CURRENT )
+		ips20_4.max_current = cur_limit;
+
+	/* Get the actual current, and if the magnet is sweeping, the current
+	   sweep direction. If the magnet is running to zero current just stop
+	   it. */
+
+	ips20_4.act_current = ips20_4_get_act_current( );
+	ips20_4.target_current = ips20_4_get_target_current( );
+
+	switch ( ips20_4.activity )
+	{
+		case HOLD :
+			ips20_4.sweep_state = STOPPED;
+			was_hold = SET;
+			break;
+
+		case TO_SET_POINT :
+			ips20_4.sweep_state =
+				ips20_4.act_current < ips20_4.target_current ?
+				SWEEPING_UP : SWEEPING_DOWN;
+			break;
+
+		case TO_ZERO:
+			ips20_4.activity = ips20_4_set_activity( HOLD );
+			ips20_4.sweep_state = STOPPED;
+			break;
+	}
+
+	/* Set the sweep rate if the user defined one, otherwise get the current
+	   sweep rate. */
+
+	if ( ips20_4.is_sweep_rate )
+		ips20_4.sweep_rate = ips20_4_set_sweep_rate( ips20_4.sweep_rate );
+	else
+	{
+		ips20_4.sweep_rate = ips20_4_get_sweep_rate( );
+		ips20_4.is_sweep_rate = SET;
+	}
+
+	/* Finally, if a start curent has been set stop the magnet if necessary
+	   and set the start current. If the magnet was in HOLD state when we
+	   started and no start current had been set use the actual current as the
+	   start current. */
+
+	if ( ips20_4.is_start_current )
+	{
+		if ( ips20_4.sweep_state != STOPPED )
+		{
+			ips20_4.activity = ips20_4_set_activity( HOLD );
+			ips20_4.sweep_state = STOPPED;
+		}
+
+		ips20_4.act_current = ips20_4_goto_current( ips20_4.start_current );
+	}
+	else if ( was_hold )
+	{
+		ips20_4.start_current = ips20_4.act_current;
+		ips20_4.is_start_current = SET;
+	}
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void ips20_4_to_local( void )
+{
+	char cmd[ 20 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	sprintf( cmd, "@%1dC0\n", IPS20_4_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	sprintf( cmd, "@%1dC0\n", MASTER_ISOBUS_ADDRESS );
+	length = 100;
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	gpib_local( ips20_4.device );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void ips20_4_get_complete_status( void )
+{
+	char cmd[ 100 ];
+	char reply[ 100 ];
+	long length = 100;
+
 
 	/* Get all information about the state of the magnet power supply and
 	   analyze the reply which has the form "XmnAnCnMmnPmn" where m and n
@@ -174,38 +763,38 @@ static bool ips20_4_init( const char *name )
 	sprintf( cmd, "@%1dX\n", IPS20_4_ISOBUS_ADDRESS );
 	length = 100;
 	if ( gpib_write( ips20_4.device, cmd, 4 ) == FAILURE ||
-		 gpib_read( ips20_4.device, buf, &length ) == FAILURE )
-		return FAIL;
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
 
 	/* Check system status data */
 
-	switch ( buf[ 1 ] )
+	switch ( reply[ 1 ] )
 	{
 		case '0' :     /* normal */
 			break;
 
 		case '1' :     /* quenched */
-			print( FATAL, "Magnet is quenched.\n" );
-			return FAIL;
+			print( FATAL, "Magnet claims to be quenched.\n" );
+			THROW( EXCEPTION );
 
 		case '2' :     /* overheated */
-			print( FATAL, "Magnet is overheated.\n" );
-			return FAIL;
+			print( FATAL, "Magnet claims to be overheated.\n" );
+			THROW( EXCEPTION );
 
 		case '4' :     /* warming up */
-			print( FATAL, "Magnet is warming up.\n" );
-			return FAIL;
+			print( FATAL, "Magnet claims to be warming up.\n" );
+			THROW( EXCEPTION );
 
 		case '8' :     /* fault */
 			print( FATAL, "Device signals fault condition.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
-	switch ( buf[ 2 ] )
+	switch ( reply[ 2 ] )
 	{
 		case '0' :     /* normal */
 		case '1' :     /* on positive voltage limit */
@@ -214,20 +803,20 @@ static bool ips20_4_init( const char *name )
 
 		case '4' :
 			print( FATAL, "Magnet is outside positive current limit.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 
 		case '8' :
 			print( FATAL, "Magnet is outside negative current limit.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 			
 		default :
 			print( FATAL, "Recived invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 			
 	/* Check activity status */
 
-	switch ( buf[ 4 ] )
+	switch ( reply[ 4 ] )
 	{
 		case '0' :
 			ips20_4.activity = HOLD;
@@ -242,84 +831,76 @@ static bool ips20_4_init( const char *name )
 			break;
 
 		case '4' :
-			print( FATAL, "Magnet is clamped.\n" );
-			return FAIL;
+			print( FATAL, "Magnet claims to be clamped.\n" );
+			THROW( EXCEPTION );
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
-	/* Check LOC/REM status (must be identical to what we already set it to) */
+	/* Check LOC/REM status */
 
-	switch ( buf[ 6 ] )
+	switch ( reply[ 6 ] )
 	{
 		case '0' :
-			print( FATAL, "Magnet did not accept command.\n" );
-			return FAIL;
+			ips20_4.loc_rem_state = LOCAL_AND_LOCKED;
+			break;
 
 		case '1' :
-			if ( ! ips20_4.lock_state )
-			{
-				print( FATAL, "Magnet did not accept command.\n" );
-				return FAIL;
-			}
+			ips20_4.loc_rem_state = REMOTE_AND_LOCKED;
 			break;
 
 		case '2' :
-			print( FATAL, "Magnet did not accept command.\n" );
-			return FAIL;
+			ips20_4.loc_rem_state = LOCAL_AND_UNLOCKED;
+			break;
 
 		case '3' :
-			if ( ! ips20_4.lock_state )
-			{
-				print( FATAL, "Magnet did not accept command.\n" );
-				return FAIL;
-			}
+			ips20_4.loc_rem_state = REMOTE_AND_UNLOCKED;
 			break;
 
 		case '4' :
 		case '5' :
 		case '6' :
 		case '7' :
-			print( FATAL, "Magnet is auto-running down.\n" );
-			return FAIL;
+			print( FATAL, "Magnet claims to be auto-running down.\n" );
+			THROW( EXCEPTION );
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
 	/* Check switch heater status */
 
-	switch ( buf[ 8 ] )
+	switch ( reply[ 8 ] )
 	{
 		case '0' :
 			print( FATAL, "Switch heater is off (at zero field).\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 
 		case '1' :     /* swich heater is on */
 			break;
 
 		case '2' :
 			print( FATAL, "Switch heater is off (at non-zero field).\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 
 		case '5' :
 			print( FATAL, "Switch heater fault condition.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 
 		case '8' :     /* no switch fitted */
 			break;
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
 	/* Check mode status */
 
-	switch ( buf[ 10 ] )
+	switch ( reply[ 10 ] )
 	{
 		case '0' :
 			ips20_4.mode = FAST;
@@ -331,10 +912,10 @@ static bool ips20_4_init( const char *name )
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
-	switch ( buf[ 11 ] )
+	switch ( reply[ 11 ] )
 	{
 		case '0' :
 			ips20_4.state = AT_REST;
@@ -354,16 +935,347 @@ static bool ips20_4_init( const char *name )
 
 		default :
 			print( FATAL, "Received invalid reply from device.\n" );
-			return FAIL;
+			THROW( EXCEPTION );
 	}
 
 	/* The polarity status bytes are always '0' according to the manual */
 
-	if ( buf[ 13 ] != '0' || buf[ 14 ] != '0' )
+	if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
 	{
 		print( FATAL, "Received invalid reply from device.\n" );
-		return FAIL;
+		THROW( EXCEPTION );
+	}
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void ips20_4_sweep_up( void )
+{
+	/* Do nothing except printing a warning when we're alredy sweeping up */
+
+	if ( ips20_4.sweep_state == SWEEPING_UP )
+	{
+		print( WARN, "Useless command, magnet is already sweeping up.\n" );
+		return;
 	}
 
-	return OK;
+	/* Print a severe warning when the actual current is already very near to
+	   the maximum current */
+
+	ips20_4.act_current = ips20_4_get_act_current( );
+	if ( ips20_4.act_current >= ips20_4.max_current - CURRENT_RESOLUTION )
+	{
+		print( SEVERE, "Magnet is already at maximum current.\n" );
+		return;
+	}
+
+	if ( ips20_4.activity != HOLD )
+		ips20_4.activity = ips20_4_set_activity( HOLD );
+
+	ips20_4.target_current = ips20_4_set_target_current( ips20_4.max_current );
+	ips20_4.activity = ips20_4_set_activity( TO_SET_POINT );
+	ips20_4.sweep_state = SWEEPING_UP;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void ips20_4_sweep_down( void )
+{
+	/* Do nothing except printing a warning when we're alredy sweeping down */
+
+	if ( ips20_4.sweep_state == SWEEPING_DOWN )
+	{
+		print( WARN, "Useless command, magnet is already sweeping down.\n" );
+		return;
+	}
+
+	/* Print a severe warning when the actual current is already very near to
+	   the minimum current */
+
+	ips20_4.act_current = ips20_4_get_act_current( );
+	if ( ips20_4.act_current <= ips20_4.min_current + CURRENT_RESOLUTION )
+	{
+		print( SEVERE, "Magnet is already at minimum current.\n" );
+		return;
+	}
+
+	if ( ips20_4.activity != HOLD )
+		ips20_4.activity = ips20_4_set_activity( HOLD );
+	ips20_4.target_current = ips20_4_set_target_current( ips20_4.min_current );
+	ips20_4.activity = ips20_4_set_activity( TO_SET_POINT );
+	ips20_4.sweep_state = SWEEPING_DOWN;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_current_check( double current )
+{
+	if ( current > ips20_4.max_current )
+	{
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Current of %f A is too high, maximum current is "
+				   "%f A.\n", current, ips20_4.max_current );
+			THROW( EXCEPTION );
+		}
+		else
+		{
+			print( SEVERE, "Current of %f A is too high, using maximum "
+				   "current of %f A instead.\n",
+				   current, ips20_4.max_current );
+			return MAX_CURRENT;
+		}
+	}
+
+	if ( current < ips20_4.min_current )
+	{
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Current of %f A is too low, minimum current is "
+				   "%f A.\n", current, ips20_4.min_current );
+			THROW( EXCEPTION );
+		}
+		else
+		{
+			print( SEVERE, "Current of %f A is too low, using minimum "
+				   "current of %f A instead.\n",
+				   current, ips20_4.min_current );
+			return ips20_4.min_current;
+		}
+	}
+
+	/* Maximum current resolution is 0.1 mA */
+
+	return ( double ) lrnd( current * 1.0e4 ) * 1.0e-4;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_sweep_rate_check( double sweep_rate )
+{
+	if ( sweep_rate > MAX_SWEEP_RATE )
+	{
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Sweep rate of %f A/s is too high, maximum sweep "
+				   "rate is %f A/s.\n", sweep_rate, MAX_SWEEP_RATE );
+			THROW( EXCEPTION );
+		}
+		else
+		{
+			print( SEVERE, "Sweep rate of %f A/s is too high, using maximum "
+				   "sweep rate of %f A/s instead.\n",
+				   sweep_rate, MAX_SWEEP_RATE );
+			return MAX_SWEEP_RATE;
+		}
+	}
+
+	if ( sweep_rate < MIN_SWEEP_RATE )
+	{
+		if ( FSC2_MODE != EXPERIMENT )
+		{
+			print( FATAL, "Sweep rate of %f mA/s is too low, minimum sweep "
+				   "rate is %f mA/s.\n",
+				   sweep_rate * 1.0e3, MIN_SWEEP_RATE * 1.0e3 );
+			THROW( EXCEPTION );
+		}
+		else
+		{
+			print( SEVERE, "Sweep rate of %f mA/s is too low, using minimum "
+				   "sweep rate of %f mA/s instead.\n",
+					sweep_rate * 1.0e3, MIN_SWEEP_RATE * 1.0e3 );
+			return MIN_SWEEP_RATE;
+		}
+	}
+
+	/* Minimum sweep speed resolution is 1 mA/s */
+
+	return ( double ) lrnd( sweep_rate * 60000.0 ) / 60000.0;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_get_act_current( void )
+{
+	char cmd[ 20 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	sprintf( cmd, "@%1dR0\n", IPS20_4_ISOBUS_ADDRESS );
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_set_target_current( double current )
+{
+	char cmd[ 30 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	current = ips20_4_current_check( current );
+	sprintf( cmd, "@%1dI%.4f\n", IPS20_4_ISOBUS_ADDRESS, current );
+
+	if ( gpib_write( ips20_4.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	return current;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_get_target_current( void )
+{
+	char cmd[ 30 ];
+	char reply[ 100 ];
+	long length = 100;
+	
+
+	sprintf( cmd, "@%1dR5\n", IPS20_4_ISOBUS_ADDRESS );
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_set_sweep_rate( double sweep_rate )
+{
+	char cmd[ 30 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	sweep_rate = ips20_4_sweep_rate_check( sweep_rate );
+
+	sprintf( cmd, "@%1dS%.3f\n", IPS20_4_ISOBUS_ADDRESS, sweep_rate );
+	if ( gpib_write( ips20_4.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	return sweep_rate;
+}
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_get_sweep_rate( void )
+{
+	char cmd[ 30 ];
+	char reply[ 100 ];
+	long length = 100;
+
+
+	sprintf( cmd, "@%1dR6\n", IPS20_4_ISOBUS_ADDRESS );
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static double ips20_4_goto_current( double current )
+{
+	ips20_4_set_target_current( current );
+	ips20_4_set_sweep_rate( ips20_4.fast_sweep_rate );
+
+	if ( ips20_4.activity != TO_SET_POINT )
+		ips20_4.activity = ips20_4_set_activity( TO_SET_POINT );
+
+	while ( lrnd( ( current -  ips20_4_get_act_current( ) ) /
+				  CURRENT_RESOLUTION ) != 0 )
+	{
+		usleep( 50000 );
+		stop_on_user_request( );
+	}
+
+	ips20_4.activity = ips20_4_set_activity( HOLD );
+	ips20_4.sweep_state = STOPPED;
+
+	if ( ips20_4.is_sweep_rate )
+		ips20_4_set_sweep_rate( ips20_4.sweep_rate );
+
+	return ips20_4_get_act_current( );
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static int ips20_4_set_activity( int activity )
+{
+	char cmd[ 20 ];
+	char reply[ 100 ];
+	long length = 100;
+	int act;
+
+
+	switch ( activity )
+	{
+		case HOLD :
+			act = 0;
+			break;
+
+		case TO_SET_POINT :
+			act = 1;
+			break;
+
+		case TO_ZERO :
+			act = 2;
+			break;
+
+		default :
+			print( FATAL, "Internal error detected at %s:%u,\n",
+				   __FILE__, __LINE__ );
+			THROW( EXCEPTION );
+	}
+
+	sprintf( cmd, "@%1dA%1d\n", IPS20_4_ISOBUS_ADDRESS, act );
+	if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE ||
+		 gpib_read( ips20_4.device, reply, &length ) == FAILURE )
+		ips20_4_comm_failure( );
+
+	return activity;
+}
+
+
+/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*/
+
+static void ips20_4_comm_failure( void )
+{
+	print( FATAL, "Communication with device failed.\n" );
+	THROW( EXCEPTION );
 }

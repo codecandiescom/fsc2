@@ -244,7 +244,13 @@ int keithley228a_init_hook( void )
 
 int keithley228a_exp_hook( void )
 {
-	keithley228a_init( DEVICE_NAME );
+	if ( ! keithley228a_init( DEVICE_NAME ) )
+	{
+		print( FATAL, "Initialization of device failed: %s\n",
+			   gpib_error_msg );
+		THROW( EXCEPTION );
+	}
+
 	return 1;
 }
 

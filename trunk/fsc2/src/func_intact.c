@@ -632,8 +632,10 @@ Var *f_bdelete( Var *v )
 
 			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 			pos += sizeof( long );
+
 			memcpy( pos, &v->val.lval, sizeof( long ) );  /* button ID */
 			pos += sizeof( long );
+
 			if ( EDL.Fname )
 			{
 				strcpy( pos, EDL.Fname );             /* current file name */
@@ -1256,6 +1258,7 @@ Var *f_sdelete( Var *v )
 			}
 
 			len = 2 * sizeof( long );
+
 			if ( EDL.Fname )
 				len += strlen( EDL.Fname ) + 1;
 			else
@@ -1433,6 +1436,7 @@ Var *f_svalue( Var *v )
 		}
 
 		len = 3 * sizeof( long ) + sizeof( double );
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
@@ -1705,18 +1709,22 @@ Var *f_icreate( Var *v )
 		len = 2 * sizeof( long )
 			  + ( ( type == INT_INPUT || type == INT_OUTPUT ) ?
 				  sizeof( long ) : sizeof( double ) );
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else
 			len++;
+
 		if ( label )
 			len += strlen( label ) + 1;
 		else
 			len++;
+
 		if ( help_text )
 			len += strlen( help_text ) + 1;
 		else
 			len++;
+
 		if ( form_str )
 			len += strlen( form_str ) + 1;
 		else
@@ -1908,6 +1916,7 @@ Var *f_idelete( Var *v )
 			/* Get a bufer long enough and write data */
 
 			len = 2 * sizeof( long );
+
 			if ( EDL.Fname )
 				len += strlen( EDL.Fname ) + 1;
 			else
@@ -1917,8 +1926,10 @@ Var *f_idelete( Var *v )
 
 			memcpy( pos, &EDL.Lc, sizeof( long ) );   /* current line number */
 			pos += sizeof( long );
+
 			memcpy( pos, &v->val.lval, sizeof( long ) );  /* object ID */
 			pos += sizeof( long );
+
 			if ( EDL.Fname )
 			{
 				strcpy( pos, EDL.Fname );             /* current file name */
@@ -2096,6 +2107,7 @@ Var *f_ivalue( Var *v )
 
 		len = 3 * sizeof( long );
 		len += state > 1 ? sizeof( double ) : sizeof( long );
+
 		if ( EDL.Fname )
 			len += strlen( EDL.Fname ) + 1;
 		else

@@ -230,7 +230,7 @@ static bool init_devs_and_graphics( void )
 
 	/* Make a copy of the errors found while compiling the program */
 
-	memcpy( &compile_test, &EDL.compilation, sizeof( Compilation ) );
+	compile_test = EDL.compilation;
 
 	TRY
 	{

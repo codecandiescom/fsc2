@@ -134,16 +134,19 @@ Devices})
 
 
 All the following functions may be used to control the magnetic field of
-the magnet. Currently, @strong{AEG} magnets (X-band and S-band) and the
-Bruker @strong{ER032M Field Controller} are supported. The modules that
-have to be listed in the @code{DEVICES} section to load the functions
-are
-@example
-aeg_x_band
-aeg_s_band
-er032m
-keithley228a
-@end example
+the magnet. Currently the following magnet power supplies are supported:
+@table @samp
+@item aeg_x_band
+AEG magnet for X-band with homebuilt controller
+@item aeg_s_band
+AEG magnet for S-band with homebuilt controller
+@item er032m
+Bruker ER032M Field Controller
+@item keithley228a
+Berlin W-band magnet sweep power supply Keithley 228A
+@item ips20_4
+Berlin 360 GHz spectrometer Oxford magnet sweep power supply
+@end table
 @noindent
 Because magnets hardly ever get changed (and if the program is set up
 correctly for the experiment) one can use @code{magnet} as the module
@@ -155,6 +158,12 @@ a gaussmeter to enable @acronym{fsc2} to control the magnet. The module
 name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
+
+All magnet power supplies except the magnet used for the @w{360 GHz}
+don't really do continues sweeps but the field current is stepped. Thus
+normally no sweep rates are used but field (or current, see below) step
+sizes are needed when defining a sweep. The only exception is the power
+supply for the Oxford magnet, here continuous sweeps can be done.
 
 If a @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
@@ -169,6 +178,11 @@ because the magnetic field can't be measured directly during
 measurements for this device the following functions expect arguments in
 current units (i.e. Ampere) instead of field units (i.e. Gauss) as the
 other devices.
+
+The same holds for the magnet used for the @w{360 GHz} spectrometer. 
+Here also no fixed relation between the current and the field can be
+given, so also for this module all values have to be given in current
+units instead of field units.
 
 Because the nomal current resolution of the Keithley power supply is not
 sufficient an additional device is needed supplying DC voltages in the
@@ -199,10 +213,20 @@ Returns a string with the name of the magnet that is being used.
 @findex magnet_setup()
 The function can be called to set the start field and the field step
 size used in sweeps. The function expects two floating point parameters,
-the start field, e.g.@: @w{0.345 T}, and the step size, e.g.@: @w{0.35
-G}. Use curent instead of field units for the Keithley 228A powre supply
-@code{keithley228a}. The function can only be called before the
-@code{EXPERIMENT} section starts.
+the start field, e.g.@: @w{0.345 T}, and, in most cases, the step size,
+e.g.@: @w{0.35 G}.
+
+Use curent instead of field units for the Keithley 228A power supply
+(@code{keithley228a}).
+
+Because the Oxford magnet sweep power supply (@code{ips20_4}) does
+continuous sweeps (instead of simulating a sweep by stepping the
+current) the second argument isn't the sweep step size but must be the
+sweep rate in units of @code{A/s}.
+
+The function can only be called before the @code{EXPERIMENT} section
+starts.
+
 
 @item magnet_fast_init()
 @findex magnet_fast_init()
@@ -236,6 +260,9 @@ the maximum deviation parameter is smaller than the precision of the
 gaussmeter the precision of the gaussmeter is used instead. The function
 can only be called in the @code{EXPERIMENT} section.
 
+For the Oxford magnet sweep power supply this function will
+automatically stop a running continuous sweep.
+
 
 @item sweep_up()
 @findex sweep_up()
@@ -254,6 +281,10 @@ at the new point. On the other hand, it then might be faster (and more
 reliable) not to use the sweep function at all but @code{set_field()}
 instead.
 
+This function is not available for the Oxford sweep power supply, module
+@code{ips20_4}. Use the function @code{magnet_sweep} instead.
+
+
 @item sweep_down()
 @findex sweep_down()
 This is the exact analog to the function @code{sweep_up()} but will
@@ -261,27 +292,42 @@ sweep the magnetic field down instead of up by the field step size
 defined in @code{magnet_setup()}. The function can only be called in the
 @code{EXPERIMENT} section.
 
+This function is not available for the Oxford magnet sweep power supply
+(@code{ips20_4}). Use the function @code{magnet_sweep} instead.
+
 
 @item reset_field()
 @findex reset_field()
 This function resets the magnetic field to the start field value defined
-in @code{magnet_setup()} (which has to be called before). The function
-can only be used in the @code{EXPERIMENT} section.
+in @code{magnet_setup()} (which has to be called before).
+
+Please note that for the Oxford magnet sweep power supply
+(@code{ips20_4}) calling this function also automatically stops a
+running sweep.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
 
 @item get_field()
 @findex get_field()
 For the @strong{AEG} magnets this is only a convenience function that
 just calls a function supplied by the gaussmeter used together with the
-magnet power supply to determine the current field. In contrast, for the
-@strong{ER032M Field Controller} this function returns the current field
-setting in Gauss. The function can only be used in the @code{EXPERIMENT}
-section.
+magnet power supply to determine the current field.
+
+In contrast, for the @strong{ER032M Field Controller} this function
+returns the current field setting in Gauss. For both the Berlin W-band
+magnet (@code{keithley228a}) and the @w{360 GHz} spectrometer magnet
+(@code{ips20_4}) the actual current through the magnets sweep coil is
+returned.
+
+The function can only be used in the @code{EXPERIMENT} section.
 
 @item magnet_use_correction()
 @findex magnet_use_correction()
-This function is only defined for the Keithley power supply and accepts
-no arguments. If it is called corrections are applied to reduce
-the effects of certain inaccuracies of the power supply.
+This function is only defined for the Keithley power supply
+(@code{keithley228a}) and accepts no arguments. If it is called
+corrections are applied to reduce the effects of certain inaccuracies of
+the power supply.
 
 
 @item magnet_use_dac_port()
@@ -294,6 +340,36 @@ to be used -- for the SR510 and SR530 this can be @code{5} or @code{6},
 while for the SR810 and SR830 all values in the range between @code{1}
 and @code{4} may be used.
 
+
+@item magnet_sweep()
+@findex magnet_sweep()
+This function is only available for the Oxford magnet sweep power supply
+(@code{ips20_4}) to control its continuous sweep. It can be called with
+either an integer argument of @code{1} to start a sweep to higher field
+and current values, an argument of @code{-1} to start a downward sweep
+or, finally, an argument of @code{0} to stop a running sweep.
+
+To be able to do a sweep a sweep rate must have been set. This can be
+either done by a cal of the function @code{magnet_setup()} (see above)
+during the @code{PREPARATIONS} section or by calling
+@code{magnet_sweep_rate()} (see below).
+
+The function can also be called without an argument, in which case
+either @code{1}, @code{-1} or @code{0} is returned if the magnet is
+sweeping up or down or the sweep is stopped.
+
+Sweeps will be automatically stopped when a current limit is reached. By
+calling this function without an argument you may check if this has
+happend.
+
+
+@item magnet_swep_rate()
+@findex magnet_swep_rate()
+This function is only available for the Oxford magnet sweep power supply
+(@code{ips20_4}) to set or query the sweep rate for continous sweeps.
+If no argument is passed to the function the currently set sweep rate is
+returned. Otherwise a (positive) sweep rate in units of @code{A/s} must be
+passed to the function.
 
 @end table
 

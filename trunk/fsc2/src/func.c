@@ -516,6 +516,14 @@ CALL_STACK *call_push( Func *f, const char *device_name )
 	else
 		cs->Cur_Pulser = -1;
 
+	/* If this is call of function within one of the modules during the test
+	   run add an extremely rough estimate for the mean time spend in the
+	   function for the call to the global variable that is used to keep
+	   an estimate time for the modules. */
+
+	if ( Internals.mode == TEST && device_name != NULL )
+		EDL.module_time += MODULE_CALL_ESTIMATE;
+
 	return EDL.Call_Stack = cs;
 }
 

@@ -832,6 +832,12 @@ void exp_test_run( void )
 
 	EDL.Fname = T_free( EDL.Fname );
 
+	/* Initialize the function and the global variable which can be used by
+	   modules to get a very rough time estimate */
+
+	module_time( );
+	EDL.module_time = 0.0;
+
 	TRY
 	{
 		/* 1. Run the test run hook functions of the modules.

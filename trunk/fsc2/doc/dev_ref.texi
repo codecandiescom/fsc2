@@ -40,7 +40,7 @@
 * er035m_sas::    Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
 * hfs9000::       Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp8647a::       HP RF Synthesizer HP8647A
-* ips20_4::       Oxford Magnet Sweep Power Supply
+* ips20_4::       Oxford Magnet Sweep Power Supply IPS20-4
 * keithley228a::  Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::   Kontron 4060 Voltmeter
 * lakeshore330::  Lake Shore 330 Temperature Controller
@@ -262,7 +262,7 @@ range from @w{-5 V} to @w{5 V}.
 
 @paragraphindent 0
 @strong{Description}: EG&G PARC box-car integrator - only download of
-already measured curves is currently supported
+already measured curves is currently supported.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE).
@@ -526,7 +526,7 @@ can range from @w{-4.7 V} to @w{4.7 V}.
 @paragraphindent 0
 @strong{Description}: Hewlett-Packard RF synthesizer HP8647A with
 support for output level normalization via frequency/amplitude table
-files. For security reasons only output attenuations below @w{-5 db} are
+files. For safety reasons only output attenuations below @w{-5 db} are
 allowed -- change the configuration file to allow higher output levels.
 
 @paragraphindent 0
@@ -570,6 +570,11 @@ allowed -- change the configuration file to allow higher output levels.
 magnet used for Berlin @w{360 GHz} spektrometer.
 
 @paragraphindent 0
+Please note: With this module the functions expect arguments in terms of
+the currents through the sweep coil (or current changes), not in field
+units!
+
+@paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE) via the Oxford ITC 503
 temperature controller transfering data between GPIB and Oxford ISOBUS.
 
@@ -577,6 +582,12 @@ temperature controller transfering data between GPIB and Oxford ISOBUS.
 @strong{Supported functions}:
 @table @samp
 @item magnet_name()
+@item magnet_setup()
+@item get_field()
+@item set_field()
+@item magnet_sweep_rate()
+@item magnet_sweep()
+@item magnet_reset()
 @end table
 
 
