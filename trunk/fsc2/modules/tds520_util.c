@@ -116,7 +116,10 @@ void tds520_do_pre_exp_checks( void )
 	   they've got to be multiples of the smallest time resolution of the
 	   digitizer, which is the time base divided by TDS_POINTS_PER_DIV. In the
 	   following it is tested if the requested cursor position and distance
-	   fit this requirement and if not the values are readjusted. */
+	   fit this requirement and if not the values are readjusted. While
+	   settings for the position and width of the window not being exact
+	   multiples of the resultion are probably no serious errors a window
+	   width of less than the resolution is a hint for a real problem. */
 
 	for ( w = tds520.w; w != NULL; w = w->next )
 	{
@@ -137,8 +140,9 @@ void tds520_do_pre_exp_checks( void )
 		{
 			cs = ( cs / tb ) * tb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Start point of window %ld has been readjusted"
-					" to %s.\n", DEVICE_NAME, w->num, tds520_ptime( dcs ) );
+			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
+					"from %s to %s.\n", DEVICE_NAME, w->num, 
+					tds520_ptime( w->start ), tds520_ptime( dcs ) );
 			w->start = dcs;
 		}
 
@@ -157,16 +161,19 @@ void tds520_do_pre_exp_checks( void )
 
 		if ( labs( cd ) < tb )     /* window smaller than one point ? */
 		{
-			w->width = tds520.timebase / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
-					"%s.\n", DEVICE_NAME, w->num, tds520_ptime( w->width  ) );
+			dcd = tds520.timebase / TDS_POINTS_PER_DIV;
+			eprint( SEVERE, "%s: Width of window %ld had to be readjusted "
+					"from %s to %s.\n", DEVICE_NAME, w->num,
+					tds520_ptime( w->width ), tds520_ptime( dcd ) );
+			w->width = dcd;
 		}
 		else if ( cd % tb )        /* window width not multiple of a point ? */
 		{
 			cd = ( cd / tb ) * tb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			eprint( SEVERE, "%s: Width of window %ld has been readjusted to "
-					"%s.\n", DEVICE_NAME, w->num, tds520_ptime( dcd ) );
+			eprint( WARN, "%s: Width of window %ld had to be readjusted from "
+					"%s to %s.\n", DEVICE_NAME, w->num,
+					tds520_ptime( w->width ), tds520_ptime( dcd ) );
 			w->width = dcd;
 		}
 	}

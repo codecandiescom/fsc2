@@ -49,8 +49,8 @@ void tds754a_do_pre_exp_checks( void )
 {
 	WINDOW *w, *wn;
 	bool is_width = SET;
-    double width, window, dcd, dtb, fac;
-    long tb, cd;
+    double width, window, dcs, dcd, dtb, fac;
+    long tb, cs, cd;
 	int i;
 
 
@@ -138,7 +138,7 @@ void tds754a_do_pre_exp_checks( void )
 	for ( w = tds754a.w; w != NULL; w = w->next )
 	{
 		dcs = w->start;
-		dtb = tds520.timebase;
+		dtb = tds754a.timebase;
 		fac = 1.0;
 
 		while ( fabs( dcs ) < 1.0 || fabs( dtb ) < 1.0 )
@@ -156,7 +156,7 @@ void tds754a_do_pre_exp_checks( void )
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
 			eprint( WARN, "%s: Start point of window %ld had to be readjusted "
 					"from %s to %s.\n", DEVICE_NAME, w->num,
-					tds520_ptime( w->start ), tds520_ptime( dcs ) );
+					tds754a_ptime( w->start ), tds754a_ptime( dcs ) );
 			w->start = dcs;
 		}
 

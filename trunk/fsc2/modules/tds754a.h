@@ -84,8 +84,6 @@ typedef struct
 /* declaration of exported functions */
 
 int tds754a_init_hook( void );
-int tds754a_test_hook( void );
-int tds754a_end_of_test_hook( void );
 int tds754a_exp_hook( void );
 int tds754a_end_of_exp_hook( void );
 void tds754a_exit_hook( void );

@@ -38,26 +38,6 @@ int tds754a_init_hook( void )
 }
 
 
-/*------------------------------------*/
-/* Test hook function for the module. */
-/*------------------------------------*/
-
-int tds754a_test_hook( void )
-{
-	return 1;
-}
-
-
-/*------------------------------------*/
-/* Test hook function for the module. */
-/*------------------------------------*/
-
-int tds754a_end_of_test_hook( void )
-{
-	return 1;
-}
-
-
 /*--------------------------------------------------*/
 /* Start of experiment hook function for the module */
 /*--------------------------------------------------*/

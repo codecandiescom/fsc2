@@ -81,8 +81,6 @@ typedef struct
 /* declaration of exported functions */
 
 int tds520a_init_hook( void );
-int tds520a_test_hook( void );
-int tds520a_end_of_test_hook( void );
 int tds520a_exp_hook( void );
 int tds520a_end_of_exp_hook( void );
 void tds520a_exit_hook( void );

@@ -36,6 +36,8 @@ typedef struct _W {
 	bool is_used;               /* flag, set when window has been used       */
 	double start;               /* start of window (in time units)           */
 	double width;               /* width of window (in time units)           */
+	long start_num;
+	long end_num;
 	bool is_width;              /* flag, set if width of window has been set */
 	long num_points;            /* number of data points between the cursors */
 	struct _W *next;            /* pointer to next window structure          */
@@ -55,9 +57,6 @@ typedef struct
 
 	WINDOW *w;               /* start element of list of windows             */
 	int num_windows;
-	bool is_equal_width;     /* all windows have equal width -> tracking     */
-							 /* cursors can be used without further checking */
-	bool snap_state;
 
 	int trigger_channel;
 	bool is_trigger_channel;
@@ -80,8 +79,6 @@ typedef struct
 /* declaration of exported functions */
 
 int tds520_init_hook( void );
-int tds520_test_hook( void );
-int tds520_end_of_test_hook( void );
 int tds520_exp_hook( void );
 int tds520_end_of_exp_hook( void );
 void tds520_exit_hook( void );
@@ -102,9 +99,6 @@ Var *digitizer_get_curve( Var *v );
 const char *tds520_ptime( double time );
 void tds520_delete_windows( void );
 void tds520_do_pre_exp_checks( void );
-void tds520_set_meas_window( WINDOW *w );
-void tds520_set_curve_window( WINDOW *w );
-void tds520_set_window( WINDOW *w );
 
 bool tds520_init( const char *name );
 double tds520_get_timebase( void );

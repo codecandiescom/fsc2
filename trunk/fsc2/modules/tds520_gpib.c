@@ -372,16 +372,6 @@ int tds520_get_trigger_channel( void )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
-
-void tds520_gpib_failure( void )
-{
-	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
-	THROW( EXCEPTION );
-}
-
-
 /*-------------------------------------------------------------------*/
 /* tds520_clear_SESR() reads the the standard event status register */
 /* and thereby clears it - if this isn't done no SRQs are flagged !  */
@@ -552,55 +542,20 @@ bool tds520_start_aquisition( void )
 
 double tds520_get_area( int channel, WINDOW *w )
 {
-	char cmd[ 50 ] = "MEASU:IMM:SOURCE ";
-	char reply[ 40 ];
-	long length = 40;
+	double *data, area;
+	long length, i;
 
 
-	/* Set measurement type to area */
+	tds520_get_curve( channel, w, &data, &length );
 
-    if ( gpib_write( tds520.device, "MEASU:IMM:TYP ARE\n" ) == FAILURE )
-		tds520_gpib_failure( );
+	for ( area = 0.0, i = 0; i < length; i++ )
+		area += data[ i ];
 
-	assert( channel >= 0 && channel < TDS520_AUX1 );
+	T_free( data );
 
-	/* Set channel (if the channel is not already set) */
+	/* Return the integrated area, multiplied by the the time per point */
 
-	if ( channel != tds520.meas_source )
-	{
-		strcat( cmd, Channel_Names[ channel ] );
-		strcat( cmd, "\n" );
-		if ( gpib_write( tds520.device, cmd ) == FAILURE )
-			tds520_gpib_failure( );
-		tds520.meas_source = channel;
-	}
-
-	/* Set the cursors */
-
-	tds520_set_meas_window( w );
-
-	/* Wait for measurement to finish (use polling) */
-
-	do
-	{
-		length = 40;
-		usleep( 100000 );
-		if ( gpib_write( tds520.device, "BUSY?\n" ) == FAILURE ||
-			 gpib_read( tds520.device, reply, &length ) == FAILURE )
-			tds520_gpib_failure( );
-	} while ( reply[ 0 ] == '1' ); 
-
-
-	/* Get the the area */
-
-	length = 40;
-	if ( gpib_write( tds520.device, "*WAI\n" ) == FAILURE ||
-		 gpib_write( tds520.device, "MEASU:IMM:VAL?\n" ) == FAILURE ||
-		 gpib_read( tds520.device, reply, &length ) == FAILURE )
-		tds520_gpib_failure( );
-
-	reply[ length - 1 ] = '\0';
-	return T_atof( reply );
+	return area * tds520.timebase / TDS_POINTS_PER_DIV;
 }
 
 
@@ -634,9 +589,15 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 		tds520.data_source = channel;
 	}
 
-	/* Set the cursors */
+	/* Set start and end point of curve to be fetched */
 
-	tds520_set_curve_window( w );
+	sprintf( cmd, "DAT:START %ld\n", w->start_num );
+	if ( gpib_write( tds520.device, cmd ) == FAILURE )
+		tds520_gpib_failure( );
+
+	sprintf( cmd, "DAT:STOP %ld\n", w->end_num );
+	if ( gpib_write( tds520.device, cmd ) == FAILURE )
+		tds520_gpib_failure( );
 
 	/* Wait for measurement to finish (use polling) */
 
@@ -703,4 +664,14 @@ bool tds520_get_curve( int channel, WINDOW *w, double **data, long *length )
 	T_free( buffer );
 
 	return OK;
+}
+
+
+/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*/
+
+void tds520_gpib_failure( void )
+{
+	eprint( FATAL, "%s: Communication with device failed.\n", DEVICE_NAME );
+	THROW( EXCEPTION );
 }
