@@ -176,7 +176,13 @@ typedef struct {
 	Canvas z_axis;
 	Canvas canvas;
 
+	Canvas cut_x_axis;
+	Canvas cut_y_axis;
+	Canvas cut_z_axis;
+	Canvas cut_canvas;
+
 	int drag_canvas;        /* canvas that currently gets the mouse events */
+	int cut_drag_canvas;    /* canvas that currently gets the mouse events */
 
 	Curve_1d *curve[ MAX_CURVES ];
 	Curve_2d *curve_2d[ MAX_CURVES ];
@@ -190,6 +196,11 @@ typedef struct {
 	    cur_5,
 		cur_6,
 		cur_7;
+	int cut_cur_1,
+		cut_cur_2,
+		cut_cur_3,
+		cut_cur_4,
+		cut_cur_5;
 
 	XFontStruct *font;      /* font used for drawing texts */
 	int font_asc, font_desc;

@@ -847,7 +847,8 @@ static void setup_canvas( Canvas *c, FL_OBJECT *obj )
 		fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
 		fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
 
-		/* Get motion events only when first or second button is pressed */
+		/* Get motion events only when first or second button is pressed
+		   (this got to be set *after* requesting motion events) */
 
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
 								   PointerMotionMask | PointerMotionHintMask |

@@ -279,7 +279,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 						scale_changed = change_x_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_X &&
 							  keymask & ShiftMask )
-						show_cut( X, c->box_x + c->box_w );
+						cut_show( X, c->box_x + c->box_w );
 					break;
 
 				case 2 :                       /* in y-axis window */
@@ -287,7 +287,7 @@ void release_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev, Canvas *c )
 						scale_changed = change_y_range_2d( c );
 					else if ( G.cut_select == CUT_SELECT_Y &&
 							  keymask & ShiftMask )
-						show_cut( Y, c->box_y + c->box_h );
+						cut_show( Y, c->box_y + c->box_h );
 					break;
 
 				case 4 :
