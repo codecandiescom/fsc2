@@ -9,11 +9,6 @@
 #include "fsc2.h"
 
 
-typedef struct {
-	int var[ 4 ][ 2 ];
-	bool is_var[ 4 ][ 2 ];
-} PHS;
-
 
 typedef struct {
 

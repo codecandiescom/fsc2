@@ -262,6 +262,12 @@ typedef struct _p_ {
 } PULSE;
 
 
+typedef struct {             // needed in phase setup
+	int var[ 4 ][ 2 ];
+	bool is_var[ 4 ][ 2 ];
+} PHS;
+
+
 /* Here the global variables of the module are declared */
 
 
@@ -271,6 +277,7 @@ bool dg2020_is_needed = UNSET;
 DG2020 dg2020;
 PULSE *dg2020_Pulses = NULL;
 bool dg2020_IN_SETUP = UNSET;
+PHS phs[ 3 ];
 
 #else
 
@@ -278,6 +285,7 @@ extern bool dg2020_is_needed;
 extern DG2020 dg2020;
 extern PULSE *dg2020_Pulses;
 extern bool dg2020_IN_SETUP;
+extern PHS phs[ 3 ];
 
 #endif
 

@@ -7,7 +7,6 @@
 #include "dg2020_f.h"
 
 
-
 /*---------------------------------------------------------------------------
   Function does everything that needs to be done for checking and completing
   the internal representation of the pulser at the start of a test run.
