@@ -60,7 +60,6 @@ Var *pulser_pulse_reset( Var *v );
 #define MIN_TRIG_IN_LEVEL      -5.0
 
 
-
 #define MIN_BLOCK_SIZE     64     // minimum length of a block
 #define MAX_BLOCK_REPEATS  65536  // maximum of repeats of block in sequence
 #define MAX_PULSER_BITS    65536  // maximum number of bits in channel
@@ -68,6 +67,8 @@ Var *pulser_pulse_reset( Var *v );
 
 #define START ( ( bool ) 1 )
 #define STOP  ( ( bool ) 0 )
+
+#define MAX_PODS_PER_FUNC       5
 
 /* A pulse is acive if it has a position and a length set and if the length
    is non-zero */
@@ -95,7 +96,8 @@ typedef struct _F_ {
 	bool is_needed;              // set if the function has been assigned
                                  // pulses
 
-	struct _P_ *pod;             // points to the pod assigned to the function
+	struct _P_ *pod[ MAX_PODS_PER_FUNC ];   // pods assigned to the function
+	int num_pods;
 
 	int num_channels;            // number of channels assigned to function
 	int num_needed_channels;     // number of channels really needed
@@ -130,9 +132,7 @@ typedef struct _F_ {
 
 typedef struct _P_ {
 	int self;                    // pod number
-	FUNCTION *function;          // the function the po is assigned to
-	struct _P_ *next;            // ...for linking into a list
-	struct _P_ *prev;
+	FUNCTION *function;          // the function the pod is assigned to
 } POD;
 
 

@@ -20,11 +20,11 @@ int assignerror( const char *s );
 
 /* locally used global variables */
 
-int Channel_Type;
+static int Channel_Type;
 static Var *CV;
-int Cur_PHS;
-int Cur_PHST;
-long Cur_PROT;
+static int Cur_PHS = -1;
+static int Cur_PHST = -1;
+static long Cur_PROT = PHASE_UNKNOWN_PROT;
 
 %}
 
@@ -156,7 +156,6 @@ line:    func pcd                  { }
        | tm PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | tm GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs                       { p_phs_end( Cur_PHS ); }
-       | phs func                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TB_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs TM_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phs PSD_TOKEN             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -177,85 +176,72 @@ line:    func pcd                  { }
 ;								   
 								   
 								   
-func:    MW_TOKEN                  { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+func:    MW_TOKEN                  { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_MW;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													  PULSER_CHANNEL_MW ); }
-	   | TWT_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+	   | TWT_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_TWT;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													  PULSER_CHANNEL_TWT ); }
-       | TWT_GATE_TOKEN            { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | TWT_GATE_TOKEN            { if ( Cur_PHS == -1 )
 	                                     Channel_Type =
 											 PULSER_CHANNEL_TWT_GATE;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 												   PULSER_CHANNEL_TWT_GATE ); }
-       | DET_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | DET_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_DET;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													  PULSER_CHANNEL_DET ); }
-	   | DET_GATE_TOKEN            { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+	   | DET_GATE_TOKEN            { if ( Cur_PHS == -1 )
 	                                     Channel_Type =
 											 PULSER_CHANNEL_DET_GATE;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 												   PULSER_CHANNEL_DET_GATE ); }
-       | RF_TOKEN                  { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | RF_TOKEN                  { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_RF;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													  PULSER_CHANNEL_RF ); }
-	   | RF_GATE_TOKEN             { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+	   | RF_GATE_TOKEN             { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_RF_GATE;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_RF_GATE ); }
-       | PH1_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | PH1_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_PHASE_1;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_PHASE_1 ); }
-       | PH2_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | PH2_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_PHASE_2;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_PHASE_2 ); }
-       | OI_TOKEN                  { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | OI_TOKEN                  { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_OTHER_1;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_OTHER_1 ); }
-       | OII_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | OII_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_OTHER_2;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_OTHER_2 ); }
-       | OIII_TOKEN                { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | OIII_TOKEN                { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_OTHER_3;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_OTHER_3 ); }
-       | OIV_TOKEN                 { if ( Channel_Type ==
-										  PULSER_CHANNEL_NO_TYPE )
+       | OIV_TOKEN                 { if ( Cur_PHS == -1 )
 	                                     Channel_Type = PULSER_CHANNEL_OTHER_4;
                                      else
-										 p_phase_ref( Channel_Type,
+										 p_phase_ref( Cur_PHS,
 													PULSER_CHANNEL_OTHER_4 ); }
 ;
 
@@ -273,7 +259,6 @@ pcd:    /* empty */
       | pcd inv
 	  | pcd vh
       | pcd vl
-	  | pcd func sep2
 ;
 
 
@@ -448,6 +433,7 @@ phs:      PHS_TOK                  { Cur_PHS = $1;
 ;
 
 phsl:     /* empty */
+		| phsl func sep2
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
           phsp
 ;

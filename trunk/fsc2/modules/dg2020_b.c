@@ -19,17 +19,15 @@
 
 int dg2020_b_init_hook( void )
 {
-	int i;
+	int i, j;
 
-
-	/* Check that the Frankfurt version of the driver isn't already loaded */
 
 	/* Now test that the name entry in the pulser structure is NULL, otherwise
 	   assume, that another pulser driver has already been installed. */
 
 	if ( pulser_struct.name != NULL )
 	{
-		eprint( FATAL, "%s:%ld: While loading driver for DG2020_B found that "
+		eprint( FATAL, "%s:%ld: While loading driver DG2020_B found that "
 				"driver %s is already installed.",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
@@ -111,7 +109,9 @@ int dg2020_b_init_hook( void )
 		dg2020.function[ i ].self = PULSER_CHANNEL_FUNC_MIN + i;
 		dg2020.function[ i ].is_used = UNSET;
 		dg2020.function[ i ].is_needed = UNSET;
-		dg2020.function[ i ].pod = NULL;
+		for ( j = 0; j < MAX_PODS_PER_FUNC; j++ )
+			dg2020.function[ i ].pod[ j ] = NULL;
+		dg2020.function[ i ].num_pods = 0;
 		dg2020.function[ i ].is_psd = UNSET;
 		dg2020.function[ i ].num_channels = 0;
 		dg2020.function[ i ].num_pulses = 0;

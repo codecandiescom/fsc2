@@ -542,22 +542,11 @@ void p_set_rep_freq( Var *v )
 
 void p_phase_ref( long func, int ref )
 {
+	assert( func == 0 || func == 1 );
+	assert( ref >= PHASE_TYPES_MIN && ref <= PHASE_TYPES_MAX );
+
 	is_pulser_func( pulser_struct.set_phase_reference,
 					"setting a function for phase cycling" );
-
-	if ( func != PULSER_CHANNEL_PHASE_1 && func != PULSER_CHANNEL_PHASE_2 )
-	{
-		eprint( FATAL, "%s:%ld: A reference function can only be set for the "
-				"PHASE functions.", Fname, Lc );
-		THROW( EXCEPTION );
-	}
-
-	if ( ref == PULSER_CHANNEL_PHASE_1 || ref == PULSER_CHANNEL_PHASE_2 )
-	{
-		eprint( FATAL, "%s:%ld: A PHASE function can't be phase cycled.",
-				Fname, Lc );
-		THROW( EXCEPTION );
-	}
 
 	( *pulser_struct.set_phase_reference )( ( int ) func, ref );
 }
@@ -733,7 +722,7 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 	/* A few sanity checks before we call the pulsers handler function */
 
 	assert( type >= PHASE_TYPES_MIN && type <= PHASE_TYPES_MAX );
-	assert( func >= 0 && func <= 2 );        /* phase function correct ? */
+	assert( func == 0 || func == 1 );        /* phase function correct ? */
 
 	/* Let's check if the pulser supports the function needed */
 
@@ -751,7 +740,7 @@ void p_phs_setup( int func, int type, int pod, long val, long protocol )
 
 void p_phs_end( int func )
 {
-	assert( func >= 0 && func <= 2 );        /* phase function correct ? */
+	assert( func == 0 || func == 1 );        /* phase function correct ? */
 
 	( *pulser_struct.phase_setup )( func );
 }
@@ -760,24 +749,22 @@ void p_phs_end( int func )
 /*
   Function for setting the phase switch delay.
   'func' is the phase function the data are to be used for (i.e. 0 means
-  PHASE_1, 1 means PHASE_2, 2 means both)
+  PHASE_1, 1 means PHASE_2)
 */
 
 void p_set_psd( int func, Var *v )
 {
-	assert( func >= 0 && func <= 2 );
+	assert( func == 0 || func == 1 );
 
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	is_pulser_func( pulser_struct.set_phase_switch_delay,
 					"setting a phase switch delay" );
 
 	if ( func == 0 || func == 2 )
-		( *pulser_struct.set_phase_switch_delay )( PULSER_CHANNEL_PHASE_1,
+	( *pulser_struct.set_phase_switch_delay )( func == 0 ?
+											   PULSER_CHANNEL_PHASE_1 :
+											   PULSER_CHANNEL_PHASE_2,
 												   VALUE( v ) );
-	if ( func == 1 || func == 2 )
-		( *pulser_struct.set_phase_switch_delay )( PULSER_CHANNEL_PHASE_2,
-												   VALUE( v ) );
-
 	vars_pop( v );
 }
 
