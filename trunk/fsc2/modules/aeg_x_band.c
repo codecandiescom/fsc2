@@ -125,7 +125,7 @@ int aeg_x_band_init_hook( void )
 		 ! exist_device( "bh15" ) )
 	{
 		eprint( FATAL, "%s: Can't find a gaussmeter - must be listed before "
-				"the magnet driver.", DEVICE_NAME );
+				"the magnet driver.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -149,7 +149,7 @@ int aeg_x_band_init_hook( void )
 
 	if ( ret == LIB_ERR_NO_SYM )
 	{
-		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.",
+		eprint( FATAL, "fsc2: INTERNAL ERROR detected at %s:%d.\n",
 				__FILE__, __LINE__ );
 		THROW( EXCEPTION );
 	}
@@ -157,7 +157,7 @@ int aeg_x_band_init_hook( void )
 	if ( ! *is_gaussmeter )
 	{
 		eprint( FATAL, "%s: Problem in DEVICES section: driver for gaussmeter "
-				"must be listed before magnet driver.", DEVICE_NAME );
+				"must be listed before magnet driver.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -166,7 +166,7 @@ int aeg_x_band_init_hook( void )
 
 	if ( ! exist_function( "find_field" ) )
 	{
-		eprint( FATAL, "%s: No function available to do field measurements.",
+		eprint( FATAL, "%s: No function available to do field measurements.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -174,14 +174,14 @@ int aeg_x_band_init_hook( void )
 	if ( ! exist_function( "field_meter_wait" ) )
 	{
 		eprint( FATAL, "%s: Function needed for field measurements not "
-				"available.", DEVICE_NAME );
+				"available.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! exist_function( "field_resolution" ) )
 	{
 		eprint( FATAL, "%s: Function to determine field measurement "
-				"resolution is missing.", DEVICE_NAME );
+				"resolution is missing.\n", DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
 
@@ -189,16 +189,16 @@ int aeg_x_band_init_hook( void )
 
 	if ( SERIAL_PORT >= NUM_SERIAL_PORTS || SERIAL_PORT < 0 )
 	{
-		eprint( FATAL, "%s: Serial port number %d out of valid range (0-%d).",
-				DEVICE_NAME, SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
+		eprint( FATAL, "%s: Serial port number %d out of valid range "
+				"(0-%d).\n", DEVICE_NAME, SERIAL_PORT, NUM_SERIAL_PORTS - 1 );
 		THROW( EXCEPTION );
 	}
 
 	if ( need_Serial_Port[ SERIAL_PORT ] )
 	{
 		eprint( FATAL, "%s: Serial port %d (i.e. /dev/ttyS%d or COM%d) is "
-				"already in use by another device.", DEVICE_NAME, SERIAL_PORT,
-				SERIAL_PORT, SERIAL_PORT + 1 );
+				"already in use by another device.\n", DEVICE_NAME,
+				SERIAL_PORT, SERIAL_PORT, SERIAL_PORT + 1 );
 		THROW( EXCEPTION );
 	}
 
@@ -244,7 +244,7 @@ int aeg_x_band_exp_hook( void )
 
 	if ( ! magnet_init( ) )
 	{
-		eprint( FATAL, "%s: Can't access the X-band magnet power supply.",
+		eprint( FATAL, "%s: Can't access the X-band magnet power supply.\n",
 				DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -310,7 +310,7 @@ Var *magnet_setup( Var *v )
 		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker ER035M gaussmeter, minimum is %d G.",
+					"Bruker ER035M gaussmeter, minimum is %d G.\n",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
@@ -319,7 +319,7 @@ Var *magnet_setup( Var *v )
 		if ( VALUE( v ) > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker ER035M gaussmeter, maximum is %d G.",
+					"Bruker ER035M gaussmeter, maximum is %d G.\n",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
@@ -331,7 +331,7 @@ Var *magnet_setup( Var *v )
 		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too low for "
-					"Bruker BH15 field controller, minimum is %d G.",
+					"Bruker BH15 field controller, minimum is %d G.\n",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
@@ -340,7 +340,7 @@ Var *magnet_setup( Var *v )
 		if ( VALUE( v ) > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Start field (%lf G) too high for "
-					"Bruker BH15 field controller, maximum is %d G.",
+					"Bruker BH15 field controller, maximum is %d G.\n",
 					Fname, Lc, DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
@@ -350,7 +350,7 @@ Var *magnet_setup( Var *v )
 	if ( VALUE( v->next ) < AEG_X_BAND_MIN_FIELD_STEP )
 	{
 		eprint( FATAL, "%s:%ld: %s: Field sweep step size (%lf G) too small, "
-				"minimum is %f G.", Fname, Lc, DEVICE_NAME, VALUE( v->next ),
+				"minimum is %f G.\n", Fname, Lc, DEVICE_NAME, VALUE( v->next ),
 				( double ) AEG_X_BAND_MIN_FIELD_STEP );
 		THROW( EXCEPTION );
 	}
@@ -393,7 +393,7 @@ Var *set_field( Var *v )
 		if ( VALUE( v ) < AEG_X_BAND_WITH_ER035M_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"ER035M gaussmeter, minimum is %d G.", Fname, Lc,
+					"ER035M gaussmeter, minimum is %d G.\n", Fname, Lc,
 					DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_ER035M_MIN_FIELD );
 			THROW( EXCEPTION );
@@ -402,7 +402,7 @@ Var *set_field( Var *v )
 		if ( magnet.field > AEG_X_BAND_WITH_ER035M_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"ER035M gaussmeter, maximum is %d G.", Fname, Lc,
+					"ER035M gaussmeter, maximum is %d G.\n", Fname, Lc,
 					DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_ER035M_MAX_FIELD );
 			THROW( EXCEPTION );
@@ -414,7 +414,7 @@ Var *set_field( Var *v )
 		if ( VALUE( v ) < AEG_X_BAND_WITH_BH15_MIN_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too low for Bruker "
-					"BH15 field controller, minimum is %d G.", Fname, Lc,
+					"BH15 field controller, minimum is %d G.\n", Fname, Lc,
 					DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MIN_FIELD );
 			THROW( EXCEPTION );
@@ -423,7 +423,7 @@ Var *set_field( Var *v )
 		if ( magnet.field > AEG_X_BAND_WITH_BH15_MAX_FIELD )
 		{
 			eprint( FATAL, "%s:%ld: %s: Field (%lf G) too high for Bruker "
-					"BH15 field controller, maximum is %d G.", Fname, Lc,
+					"BH15 field controller, maximum is %d G.\n", Fname, Lc,
 					DEVICE_NAME, VALUE( v ),
 					( int ) AEG_X_BAND_WITH_BH15_MAX_FIELD );
 			THROW( EXCEPTION );
@@ -435,7 +435,7 @@ Var *set_field( Var *v )
 
 	if ( ! magnet_goto_field( VALUE( v ) ) )
 	{
-		eprint( FATAL, "%s: Can't reach requested field of %lf G.",
+		eprint( FATAL, "%s: Can't reach requested field of %lf G.\n",
 				DEVICE_NAME, VALUE( v ) );
 		THROW( EXCEPTION );
 	}
@@ -457,7 +457,7 @@ Var *sweep_up( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.",
+		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -483,7 +483,7 @@ Var *sweep_down( Var *v )
 
 	if ( ! magnet.is_field_step )
 	{
-		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.",
+		eprint( FATAL, "%s:%ld: %s: Sweep step size has not been defined.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -509,7 +509,7 @@ Var *reset_field( Var *v )
 
 	if ( ! magnet.is_field )
 	{
-		eprint( FATAL, "%s:%ld: %s: Start field has not been defined.",
+		eprint( FATAL, "%s:%ld: %s: Start field has not been defined.\n",
 				Fname, Lc, DEVICE_NAME );
 		THROW( EXCEPTION );
 	}
@@ -938,7 +938,7 @@ bool magnet_do( int command )
 			break;
 
 		default :
-			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.",
+			eprint( FATAL, "%s: INTERNAL ERROR detected at %s:%d.\n",
 					DEVICE_NAME, __FILE__, __LINE__ );
 			THROW( EXCEPTION );
 	}

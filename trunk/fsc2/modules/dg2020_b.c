@@ -27,7 +27,7 @@ int dg2020_b_init_hook( void )
 	if ( pulser_struct.name != NULL )
 	{
 		eprint( FATAL, "%s:%ld: While loading driver DG2020_B found that "
-				"driver %s is already installed.",
+				"driver %s is already installed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -158,7 +158,7 @@ int dg2020_b_test_hook( void )
 	if ( dg2020_Pulses == NULL )
 	{
 		dg2020_is_needed = UNSET;
-		eprint( WARN, "%s loaded but no pulses are defined.",
+		eprint( WARN, "%s loaded but no pulses are defined.\n",
 				pulser_struct.name );
 		return 1;
 	}
@@ -221,7 +221,7 @@ int dg2020_b_exp_hook( void )
 	
 	if ( ! dg2020_init( DEVICE_NAME ) )
 	{
-		eprint( FATAL, "%s: Failure to initialize the pulser.",
+		eprint( FATAL, "%s: Failure to initialize the pulser.\n",
 				pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -240,7 +240,7 @@ int dg2020_b_exp_hook( void )
 	dg2020_update_data( );
 	if ( ! dg2020_run( START ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.",
+		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -320,7 +320,7 @@ Var *pulser_update( Var *v )
 
 	if ( ! TEST_RUN && ! dg2020_run( START ) )
 	{
-		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.",
+		eprint( FATAL, "%s:%ld: %s: Communication with pulser failed.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -363,7 +363,7 @@ Var *pulser_shift( Var *v )
 		if ( ! p->is_pos )
 		{
 			eprint( FATAL, "%s:ld: %s: Pulse %ld has no position set, so "
-					"shifting it is impossible.",
+					"shifting it is impossible.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
@@ -371,7 +371,7 @@ Var *pulser_shift( Var *v )
 		if ( ! p->is_dpos )
 		{
 			eprint( FATAL, "%s:%ld: %s: Amount of position change hasn't "
-					"been defined for pulse %ld.",
+					"been defined for pulse %ld.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
@@ -385,7 +385,7 @@ Var *pulser_shift( Var *v )
 		if ( ( p->pos += p->dpos ) < 0 )
 		{
 			eprint( FATAL, "%s:%ld: %s: Shifting the position of pulse "
-					"%ld leads to an invalid  negative position of %s.",
+					"%ld leads to an invalid  negative position of %s.\n",
 					Fname, Lc, pulser_struct.name,
 					p->num, dg2020_pticks( p->pos ) );
 			THROW( EXCEPTION );
@@ -439,7 +439,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_len )
 		{
 			eprint( FATAL, "%s:%ld: %s: Pulse %ld has no length set, so "
-					"imcrementing it is impossibe.",
+					"imcrementing it is impossibe.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
@@ -447,7 +447,7 @@ Var *pulser_increment( Var *v )
 		if ( ! p->is_dlen )
 		{
 			eprint( FATAL, "%s:%ld: %s: Length change time hasn't been "
-					"defined for pulse %ld.",
+					"defined for pulse %ld.\n",
 					Fname, Lc, pulser_struct.name, p->num );
 			THROW( EXCEPTION );
 		}
@@ -461,7 +461,7 @@ Var *pulser_increment( Var *v )
 		if ( ( p->len += p->dlen ) < 0 )
 		{
 			eprint( FATAL, "%s:%ld: %s: Incrementing the length of pulse "
-					"%ld leads to an invalid negative pulse length of %s.",
+					"%ld leads to an invalid negative pulse length of %s.\n",
 					Fname, Lc, pulser_struct.name,
 					p->num, dg2020_pticks( p->len ) );
 			THROW( EXCEPTION );
@@ -502,7 +502,7 @@ Var *pulser_next_phase( Var *v )
 			 TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: %s: No phase cycling is used any of the "
-					"functions.", Fname, Lc, pulser_struct.name );
+					"functions.\n", Fname, Lc, pulser_struct.name );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -517,7 +517,7 @@ Var *pulser_next_phase( Var *v )
 		vars_check( v, INT_VAR );
 		if ( v->val.lval != 1 && v->val.lval != 2 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.",
+			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.\n",
 					Fname, Lc, pulser_struct.name, v->val.lval );
 			THROW( EXCEPTION );
 		}
@@ -529,7 +529,7 @@ Var *pulser_next_phase( Var *v )
 		{
 			if ( TEST_RUN )
 				eprint( SEVERE, "%s:%ld: %s: Function `%s' to be phase cycled "
-						"is not used.", Fname, Lc, pulser_struct.name,
+						"is not used.\n", Fname, Lc, pulser_struct.name,
 						Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}
@@ -574,7 +574,7 @@ Var *pulser_phase_reset( Var *v )
 			 TEST_RUN )
 		{
 			eprint( SEVERE, "%s:%ld: %s: No phase cycling is used any of the "
-					"functions.", Fname, Lc, pulser_struct.name );
+					"functions.\n", Fname, Lc, pulser_struct.name );
 			return vars_push( INT_VAR, 0 );
 		}
 					
@@ -589,7 +589,7 @@ Var *pulser_phase_reset( Var *v )
 		vars_check( v, INT_VAR );
 		if ( v->val.lval != 1 && v->val.lval != 2 )
 		{
-			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.",
+			eprint( FATAL, "%s:%ld: %s: Invalid phase number: %ld.\n",
 					Fname, Lc, pulser_struct.name, v->val.lval );
 			THROW( EXCEPTION );
 		}
@@ -601,7 +601,7 @@ Var *pulser_phase_reset( Var *v )
 		{
 			if ( TEST_RUN )
 				eprint( SEVERE, "%s:%ld: %s: Function `%s' to be phase cycled "
-						"is not used.", Fname, Lc, pulser_struct.name,
+						"is not used.\n", Fname, Lc, pulser_struct.name,
 						Function_Names[ f->self ] );
 			return vars_push( INT_VAR, 0 );
 		}

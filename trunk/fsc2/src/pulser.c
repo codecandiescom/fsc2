@@ -85,7 +85,7 @@ void is_pulser_driver( void )
 	if ( pulser_struct.name == NULL )
 	{
 		eprint( FATAL, "%s:%ld: No pulser driver has been loaded - can't use "
-				"pulser-specific functions.", Fname, Lc );
+				"pulser-specific functions.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 }
@@ -107,7 +107,7 @@ void is_pulser_func( void *func, const char *text )
 	if ( func == NULL )
 	{
 		eprint( FATAL, "%s:%ld: Function for %s is missing in driver "
-				"for pulser %s.", Fname, Lc, text, pulser_struct.name );
+				"for pulser %s.\n", Fname, Lc, text, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
 }
@@ -126,7 +126,7 @@ double is_mult_ns( double val, const char * text )
 	val *= 1.e9;
 	if ( fabs( val - lround( val ) ) > 1.e-2 )
 	{
-		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns.",
+		eprint( FATAL, "%s:%ld: %s has to be an integer multiple of 1 ns.\n",
 				Fname, Lc, text );
 		THROW( EXCEPTION );
 	}
@@ -156,7 +156,7 @@ void p_assign_pod( long func, Var *v )
 
 	if ( pulser_struct.assign_channel_to_function == NULL )
 	{
-		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.",
+		eprint( FATAL, "%s:%ld: Sorry, pulser %s has no pods.\n",
 				Fname, Lc, pulser_struct.name );
 		THROW( EXCEPTION );
 	}
@@ -169,7 +169,7 @@ void p_assign_pod( long func, Var *v )
 		pod = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as pod number.",
+		eprint( WARN, "%s:%ld: Float variable used as pod number.\n",
 				Fname, Lc );
 		pod = ( long ) v->val.dval;
 	}
@@ -208,7 +208,7 @@ void p_assign_channel( long func, Var *v )
 		channel = v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as channel number.",
+		eprint( WARN, "%s:%ld: Float variable used as channel number.\n",
 				Fname, Lc );
 		channel = ( long ) v->val.dval;
 	}
@@ -366,7 +366,7 @@ void p_set_trigger_mode( Var *v )
 	    mode = ( int ) v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger mode.",
+		eprint( WARN, "%s:%ld: Float variable used as trigger mode.\n",
 				Fname, Lc );
 		mode = ( int ) v->val.dval;
 	}
@@ -375,7 +375,7 @@ void p_set_trigger_mode( Var *v )
 
 	if ( mode != INTERNAL && mode != EXTERNAL )
 	{
-		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.",
+		eprint( FATAL, "%s:%ld: Invalid trigger mode specification.\n",
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -403,7 +403,7 @@ void p_set_trigger_slope( Var *v )
 	    slope = ( int ) v->val.lval;
 	else
 	{
-		eprint( WARN, "%s:%ld: Float variable used as trigger slope.",
+		eprint( WARN, "%s:%ld: Float variable used as trigger slope.\n",
 				Fname, Lc );
 		slope = ( int ) v->val.dval;
 	}
@@ -412,7 +412,7 @@ void p_set_trigger_slope( Var *v )
 
 	if ( slope != POSITIVE && slope != NEGATIVE )
 	{
-		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.", 
+		eprint( FATAL, "%s:%ld: Invalid trigger slope specification.\n", 
 				Fname, Lc );
 		THROW( EXCEPTION );
 	}
@@ -488,7 +488,7 @@ void p_set_rep_time( Var *v )
 
 	if ( time < 9.9e-10 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s.",
+		eprint( FATAL, "%s:%ld: Invalid repeat time: %g s.\n",
 				Fname, Lc, time );
 		THROW( EXCEPTION );
 	}
@@ -519,7 +519,7 @@ void p_set_rep_freq( Var *v )
 
 	if ( freq > 1.01e9 || freq <= 0.0 )
 	{
-		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s.",
+		eprint( FATAL, "%s:%ld: Invalid repeat frequency: %g s.\n",
 				Fname, Lc, freq );
 		THROW( EXCEPTION );
 	}
@@ -581,7 +581,7 @@ void p_set( long pnum, int type, Var *v )
 				 v->val.lval < PULSER_CHANNEL_FUNC_MIN ||
 				 v->val.lval > PULSER_CHANNEL_FUNC_MAX )
 			{
-				eprint( FATAL, "%s:%ld: Invalid function.", Fname, Lc );
+				eprint( FATAL, "%s:%ld: Invalid function.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 			is_pulser_func( pulser_struct.set_pulse_function,

@@ -120,13 +120,13 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s", prepstext + 2 );
+				eprint( FATAL, "%s\n", prepstext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				prepstext = strchr( prepstext, '\x03' );
-				eprint( FATAL, "%s", prepstext + 2 );
+				eprint( FATAL, "%s\n", prepstext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -305,7 +305,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 {CTRL}      {
 				eprint( FATAL, "%s:%ld: Flow control structures can't be used "
-						"in the PREPARATIONS section.", Fname, Lc );
+						"in the PREPARATIONS section.\n", Fname, Lc );
 				THROW( EXCEPTION );
 			}
 
@@ -321,7 +321,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					if ( acc == ACCESS_EXP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can only be "
-								"used in the EXPERIMENT section.",
+								"used in the EXPERIMENT section.\n",
 								 Fname, Lc, prepstext );
 						THROW( EXCEPTION );
 					}
@@ -333,7 +333,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
 				{
 					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.", Fname, Lc, prepstext );
+							"declared.\n", Fname, Lc, prepstext );
 					THROW( EXCEPTION );
 				}
 
@@ -393,7 +393,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in PREPARATIONS "
-						"section: `%s'", Fname, Lc, prepstext );
+						"section: `%s'.\n", Fname, Lc, prepstext );
 				THROW( EXCEPTION );
 			}
 
@@ -416,7 +416,7 @@ int preparations_parser( FILE *in )
 	if ( compilation.sections[ PREPARATIONS_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of PREPARATIONS section "
-		        "label.", Fname, Lc );
+		        "label.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ PREPARATIONS_SECTION ] = SET;
@@ -453,7 +453,7 @@ static int preps_get_channel_name( void )
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.",
+			"loaded or module does not know how to interpret the token.\n",
 			Fname, Lc, prepstext );
 	THROW( EXCEPTION );
 }

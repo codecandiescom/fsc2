@@ -25,31 +25,26 @@ Var *float_slice( Var *var );
 
 int User_Functions_init_hook( void )
 {
-/*	eprint( NO_ERROR, "This is User_Functions_init_hook()" ); */
 	return 1;
 }
 
 int User_Functions_test_hook( void )
 {
-/*	eprint( NO_ERROR, "This is User_Functions_test_hook()" ); */
 	return 1;
 }
 
 int User_Functions_exp_hook( void )
 {
-/*	eprint( NO_ERROR, "This is User_Functions_exp_hook()" ); */
 	return 1;
 }
 
 int User_Functions_end_of_exp_hook( void )
 {
-/*	eprint( NO_ERROR, "This is User_Functions_end_of_exp_hook()" ); */
 	return 1;
 }
 
 void User_Functions_exit_hook( void )
 {
-/*	eprint( NO_ERROR, "This is User_Functions_exit_hook()" ); */
 }
 
 

@@ -103,13 +103,13 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 
 			/* handling of error messages from the cleaner */
 {ERR}		{
-				eprint( FATAL, "%s", exptext + 2 );
+				eprint( FATAL, "%s\n", exptext + 2 );
 				THROW( EXCEPTION );
 			}
 
 {ESTR}		{
 				exptext = strchr( exptext, '\x03' );
-				eprint( FATAL, "%s", exptext + 2 );
+				eprint( FATAL, "%s\n", exptext + 2 );
 				THROW( EXCEPTION );
 			}
 
@@ -222,7 +222,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 					if ( acc == ACCESS_PREP )
 					{
 						eprint( FATAL, "%s:%ld: Function `%s' can't be used "
-								"in the EXPERIMENT section.",
+								"in the EXPERIMENT section.\n",
 								Fname, Lc, exptext );
 						THROW( EXCEPTION );
 					}
@@ -233,7 +233,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 				if ( exp_val.vptr == NULL )
 				{
 					eprint( FATAL, "%s:%ld: Variable `%s' has not been "
-							"declared.", Fname, Lc, exptext );
+							"declared.\n", Fname, Lc, exptext );
 					 THROW( EXCEPTION );
 				}
 
@@ -289,7 +289,7 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 			/* handling of invalid input */
 .           {
 				eprint( FATAL, "%s:%ld: Invalid input in EXPERIMENT section: "
-						"`%s'.", Fname, Lc, exptext );
+						"`%s'.\n", Fname, Lc, exptext );
 				THROW( EXCEPTION );
 			}
 
@@ -309,7 +309,7 @@ int experiment_parser( FILE *in )
 	if ( compilation.sections[ EXPERIMENT_SECTION ] )
 	{
 		eprint( FATAL, "%s:%ld: Multiple instances of EXPERIMENTS section "
-		        "label.", Fname, Lc );
+		        "label.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 	compilation.sections[ EXPERIMENT_SECTION ] = SET;
@@ -320,7 +320,7 @@ int experiment_parser( FILE *in )
 	if ( Exp_Next_Section != NO_SECTION )
 	{
 		eprint( FATAL, "%s:%ld: EXPERIMENT section has to be the very last "
-				"section.", Fname, Lc );
+				"section.\n", Fname, Lc );
 		THROW( EXCEPTION );
 	}
 
@@ -344,7 +344,7 @@ static int exp_get_channel_name( void )
 	}
 
 	eprint( FATAL, "%s:%ld: Token `%s' can't be used, no digitizer module "
-			"loaded or module does not know how to interpret the token.",
+			"loaded or module does not know how to interpret the token.\n",
 			Fname, Lc, exptext );
 	THROW( EXCEPTION );
 }

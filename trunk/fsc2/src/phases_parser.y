@@ -86,10 +86,10 @@ void phaseserror ( const char *s )
 	s = s;                    /* stupid but avoids compiler warning */
 
 	if ( *phasestext == '\0' )
-		eprint( FATAL, "%s:%ld: Unexpected end of file in PHASES section.",
+		eprint( FATAL, "%s:%ld: Unexpected end of file in PHASES section.\n",
 				Fname, Lc );
 	else
-		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.",
+		eprint( FATAL, "%s:%ld: Syntax error near token `%s'.\n",
 				Fname, Lc, phasestext );
 	THROW( EXCEPTION );
 }

@@ -57,7 +57,7 @@ void load_all_drivers( void )
 
 		if ( cd->is_loaded && cd->driver.is_init_hook &&
 			 ! cd->driver.init_hook( ) )
-			eprint( WARN, "Initialisation of module `%s.so' failed.",
+			eprint( WARN, "Initialisation of module `%s.so' failed.\n",
 					cd->name );
 
 		if ( need_GPIB == UNSET && saved_need_GPIB == SET )
@@ -153,7 +153,7 @@ void load_functions( Device *dev )
 
 	if ( dev->driver.handle == NULL )
 	{
-		eprint( FATAL, "Can't open module for device `%s'.", 
+		eprint( FATAL, "Can't open module for device `%s'.\n", 
 				strchr( dev->name, '/' ) == NULL ?
 				dev->name : strrchr( dev->name, '/' ) + 1 );
 		T_free( lib_name );
@@ -258,7 +258,7 @@ void load_functions( Device *dev )
 		if ( num >= Num_Def_Func && Fncts[ num ].fnct != NULL )
 		{
 			eprint( SEVERE, " Function `%s()' found in module `%s.so' has "
-					"already been loaded'.", Fncts[ num ].name, dev->name );
+					"already been loaded'.\n", Fncts[ num ].name, dev->name );
 			continue;
 		}
 
@@ -270,13 +270,13 @@ void load_functions( Device *dev )
 			if ( Fncts[ num ].fnct != Def_Fncts[ num ].fnct )
 			{
 				eprint( SEVERE, "  Built-in function `%s()' found in module "
-						"`%s.so' has already been overloaded.",
+						"`%s.so' has already been overloaded.\n",
 						Fncts[ num ].name, dev->name );
 				continue;
 			}
 
 			eprint( WARN, "  Overloading built-in function `%s()' with "
-					"function from module `%s.so'.",
+					"function from module `%s.so'.\n",
 					Fncts[ num ].name, dev->name );
 		}
 
@@ -297,7 +297,7 @@ void run_test_hooks( void )
 		if ( cd->is_loaded && cd->driver.is_test_hook &&
 			 ! cd->driver.test_hook( ) )
 			eprint( SEVERE, "Initialisation of test run failed for "
-					"module `%s'.", cd->name );
+					"module `%s'.\n", cd->name );
 }
 
 
@@ -313,7 +313,7 @@ void run_end_of_test_hooks( void )
 		if ( cd->is_loaded && cd->driver.is_end_of_test_hook &&
 			 ! cd->driver.end_of_test_hook( ) )
 			eprint( SEVERE, "Final checks after test run failed for module "
-					"`%s'.", cd->name );
+					"`%s'.\n", cd->name );
 }
 
 
@@ -329,7 +329,7 @@ void run_exp_hooks( void )
 		if ( cd->is_loaded && cd->driver.is_exp_hook &&
 			 ! cd->driver.exp_hook( ) )
 			eprint( SEVERE, "Initialisation of experiment failed for "
-					"module `%s'.", cd->name );
+					"module `%s'.\n", cd->name );
 }
 
 
@@ -352,7 +352,7 @@ void run_end_of_exp_hooks( void )
 			if ( cd->is_loaded && cd->driver.is_end_of_exp_hook &&
 				 ! cd->driver.end_of_exp_hook( ) )
 				eprint( SEVERE, "Resetting module `%s' after experiment "
-						"failed.", cd->name );
+						"failed.\n", cd->name );
 			TRY_SUCCESS;
 		}
 	}

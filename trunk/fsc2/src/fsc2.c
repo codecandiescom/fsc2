@@ -461,7 +461,7 @@ void test_file( FL_OBJECT *a, long b )
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		user_break = SET;
 		delete_devices( );                       /* run the exit hooks ! */
-		eprint( FATAL, "Test of program aborted, received user break." );
+		eprint( FATAL, "Test of program aborted, received user break.\n" );
 		THROW( EXCEPTION );
 	}
 

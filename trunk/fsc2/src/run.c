@@ -70,7 +70,7 @@ bool run( void )
 
 	if ( need_GPIB && gpib_init( &gpib_log, LL_ALL ) == FAILURE )
 	{
-		eprint( FATAL, "Can't initialize GPIB bus." );
+		eprint( FATAL, "Can't initialize GPIB bus.\n" );
 		set_buttons_for_run( 1 );
 		fl_set_cursor( FL_ObjWin( main_form->run ), XC_left_ptr );
 		return FAIL;
@@ -103,7 +103,7 @@ bool run( void )
 
 	if ( ! setup_comm( ) )
 	{
-		eprint( FATAL, "Can't set up internal communication channels." );
+		eprint( FATAL, "Can't set up internal communication channels.\n" );
 		run_end_of_exp_hooks( );
 		if ( need_GPIB )
 			gpib_shutdown( );
@@ -152,13 +152,13 @@ bool run( void )
 	{
 		case EAGAIN :
 			eprint( FATAL, "Not enough system resources left to run the "
-					"experiment." );
+					"experiment.\n" );
 			fl_show_alert( "FATAL Error", "Not enough system resources",
 						   "left to run the experiment.", 1 );			
 			break;
 
 		case ENOMEM :
-			eprint( FATAL, "Not enough memory left to run the experiment." );
+			eprint( FATAL, "Not enough memory left to run the experiment.\n" );
 			fl_show_alert( "FATAL Error", "Not enough memory left",
 						   "to run the experiment.", 1 );			
 			break;
