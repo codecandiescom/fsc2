@@ -39,7 +39,7 @@
 @section Pulser Overview
 
 Using the pulsers has its own chapter, covering the special methods to
-handle the pulser setup, create pulses und do phase cycling. It also
+handle the pulser setup, create pulses and do phase cycling. It also
 describes how the way the pulser is to be used depends on the hardware
 used in the spectrometer. Currently, there are three
 pulsers/spectrometer combinations of implemented:
@@ -75,7 +75,7 @@ this chapter.
 
 The basic setup of the pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
-cycling is planned for the experinment.
+cycling is planned for the experiment.
 
 
 @c ########################################################
@@ -84,7 +84,7 @@ cycling is planned for the experinment.
 @subsection @code{ASSIGNMENTS} section
 @cindex @code{ASSIGNMENTS} section
 
-Within the @code{ASSIGNMENTS} section the pulsers timebase and the
+Within the @code{ASSIGNMENTS} section the pulsers time base and the
 trigger mode is set. It also deals with the basic setup of the channels,
 i.e. associating some or more output channels with certain functions and
 setting the physical characteristics of the channels (e.g.@: voltages
@@ -92,24 +92,24 @@ etc.).
 
 @c ########################################################
 
-@anchor{Setting the TIMEBASE}
+@anchor{Setting the time base}
 @subsubsection Setting the @code{TIMEBASE}
 @cindex Setting the @code{TIMEBASE}
 @cindex @code{TIMEBASE}
 
 
 The first statement of the @code{ASSIGNMENTS} section has to be the
-setting of the timebase of the pulser. All pulsers function similarly:
+setting of the time base of the pulser. All pulsers function similarly:
 they have a certain number of time slices (65536, 2^16) and for each of
 them the output of the pulser can be either set to a high or a low
 voltage. By setting the output during one or more of these time slices
-to a high voltage (and for the neighbouring slices to low) pulses are
-created.  The timebase to be set first in the @code{ASSIGNMENT} section
+to a high voltage (and for the neighboring slices to low) pulses are
+created.  The time base to be set first in the @code{ASSIGNMENT} section
 is the length of one of these time slices. From the above it is clear,
 that all pulses (as well as all the times between pulses) have to be
-integer multiples of the length of this timebase.
+integer multiples of the length of this time base.
 
-The statement to set the timebase, i.e.@: the length of the individual
+The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 @code{TB:}, @code{T_B}, @code{TBASE:}, @code{T_BASE:}, @code{TIMEB},
 @code{TIME_B:} or @code{TIME_BASE:} instead of @code{TIMEBASE:}.}:
@@ -117,7 +117,7 @@ time slices is@footnote{Instead of @code{TIMEBASE} one may also write
 TIMEBASE: 5 ns;
 @end example
 
-The minumum and maximum values for the timebase differ for both types of
+The minimum and maximum values for the time base differ for both types of
 pulsers:
 @itemize @bullet
 @item Sony/Tektronix DG2020: @w{5 ns} to @w{0.1 s}
@@ -149,7 +149,7 @@ external trigger use a statement like this@footnote{Instead of
 @code{TRIG_M:}, @code{TRIGMODE:}, @code{TRIG_MODE:}, @code{T_MODE:},
 @code{TMODE:}, @code{TRIGGER_M:}, @code{TRIGGERM:} or
 @code{TRIGGERMODE:} can be used. And the keywords @code{INTERNAL} and
-@code{EXTERNAL} can be shortend to @code{INTERN} or @code{INT} and
+@code{EXTERNAL} can be shortened to @code{INTERN} or @code{INT} and
 @code{EXTERN} or @code{EXT}.}:
 @example
 TRIGGER_MODE: INTERNAL;
@@ -179,7 +179,7 @@ or
 TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 @end example
 to set the repetition rate of the the experiment to @w{100 Hz}. Please
-note that the repeat time must be an integer multiple of the timebase of
+note that the repeat time must be an integer multiple of the time base of
 the pulser.
 
 Please note: Unfortunately, for the @strong{Tektronix HFS9000} no
@@ -190,7 +190,7 @@ will repeat the pulse sequence at the highest possible rate.
 On the other hand, when using an external trigger one may want to set
 the trigger level, slope and, possibly, the trigger input
 impedance. This done using a statement similar to one of
-these@footnote{The keywords @code{LEVEL} can be shortend to @code{LEV},
+these@footnote{The keywords @code{LEVEL} can be shortens to @code{LEV},
 @code{SLOPE} to @code{SL}, @code{POSITIVE} to @code{POS},
 @code{NEGATIVE} to @code{NEG}, @code{IMPEDANCE} to @code{IMP} and,
 finally, @code{HIGH} to @code{H} and @code{LOW} to @code{L}.}:
@@ -350,7 +350,7 @@ DETECTION: POD = 11;   // leave it to the program to select the channel
 @end example
 
 
-Beside defining at wich of the output connectors the pulses for a
+Beside defining at which of the output connectors the pulses for a
 function will appear you can also set other properties for the pulses of
 a POD or channel. As far as the hardware allows it you may set the high
 and the low voltage for all pulses of a function by using the keywords
@@ -373,7 +373,7 @@ increments of @w{0.1 V}.
 
 For the @strong{Tektronix HFS9003} the high voltage can be adjusted to
 values between @w{-1.5 V} and @w{+5.5 V}, the low voltage has to be in
-the range from @w{-2 V} to @w{+5 V}. Rhe minimum and maximum voltage
+the range from @w{-2 V} to @w{+5 V}. The minimum and maximum voltage
 swing is @w{0.5 V} and @w{5.5 V}, respectively, and the voltage
 resolution is @w{10 mV}.
 
@@ -421,7 +421,7 @@ The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input channels of the microwave
 bridge. The bridge has 5 different inputs (one for each phase
 @code{+X}, @code{-X}, @code{+Y} and @code{-Y} and one to be used for
-@i{cw} experiments) and the phase of the pulse coming fom the bridge
+@i{cw} experiments) and the phase of the pulse coming from the bridge
 and going to the TWT amplifier depends on which input channel was used
 for the pulse.
 
@@ -449,15 +449,15 @@ between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
 @strong{Frankurt S-band spectrometer}:
 
 The Frankfurt spectrometer is somewhat more complicated. The bridge has
-one microwave pulse input and two further input channels that cotrol the
-setting of the bridge's phase switch. So, while a microwave pulse is sent
+one microwave pulse input and two further input channels that control the
+setting of the bridges phase switch. So, while a microwave pulse is sent
 to the bridge, further phase pulses have to be present to control the
 phase switch. Two pulse inputs are enough to differentiate between the 4
 phases @code{+X}, @code{-X}, @code{+Y} and @code{-Y}.
 
 In order to create the phase pulses an extra function is needed for
 these pulses, which is called @code{PHASE} (or, abbreviated @code{PH}).
-For being able to feed both the bridge's phase inputs, for this function
+For being able to feed both the bridges phase inputs, for this function
 two of the pod channels of the pulser are needed. The definition of this
 function looks nearly identical to the other functions, the only
 exception is that also the name of the function to be phase cycled using the
@@ -502,7 +502,7 @@ PHASE_SWITCH_DELAY: 40ns;
 @end example
 This will lead to the phase pulse being switched at least @w{40 ns}
 before the real pulse starts. When this statement is missing a default
-value of @w{20 ns} is used. If there are tweo different phase functions
+value of @w{20 ns} is used. If there are two different phase functions
 (e.g.@: if two different pulse functions need phase cycling) the phase
 switch delay can be set individually for each of them by using
 @code{PHASE_SWITCH_DELAY_1} and @code{PHASE_SWITCH_DELAY_2} (setting the
@@ -563,7 +563,7 @@ and @code{IF} and @code{ELSE} constructs, @pxref{Control structures}).
 Whenever there is a reason to suspect that these problems may occur one
 can set the maximum pulse pattern length manually (i.e.@: the end point
 of the last pulse when it has been set to its latest position in the
-experiment. This is done by a statement in the @code{ASSIGMENTS} section
+experiment. This is done by a statement in the @code{ASSIGNMENTS} section
 starting with the @code{MAXIMUM_PATTERN_LENGTH} keyword@footnote{In
 @code{MAXIMUM_PATTERN_LENGTH} @code{MAXIMUM} can be abbreviated to
 @code{MAX}, @code{PATTERN} to @code{PATT} and @code{LENGTH} to
@@ -574,7 +574,7 @@ MAXIMUM_PATTERN_LENGTH: 1.2 us
 This will tell the program to expect a maximum pattern length of 1.2
 micro-seconds. Unless in the test run a longer pattern length is found,
 this value is used. It is not a problem to specify too long a maximum
-pattern length, so a conservative guess will do. The only penality
+pattern length, so a conservative guess will do. The only penalty
 incurred is a slightly longer time needed to set up the pulser at the
 start of the experiment. On the other hand, too short a pattern length
 will lead to the experiment being stopped with an error message when the
@@ -594,7 +594,7 @@ reference to or use of these deleted pulses would lead to the immediate
 termination of the experiment. But there are a few situations where it
 can't be detected in the test run that a pulse is actually needed
 (e.g.@: if it is only used in an untestable @code{IF} construct) and it
-gets deleted eventhough it is needed. In this case it is possible to force
+gets deleted even though it is needed. In this case it is possible to force
 the program to keep all pulses, even if they seem to be unused. This is
 done by specifying the keyword @code{KEEP_ALL_PULSES} in the
 @code{ASSIGNMENTS} section, i.e.@: just write
@@ -610,7 +610,7 @@ and pulses will not be deleted even if they seem to be unused.
 @subsection @code{PHASES} section
 @cindex @code{PHASES} section
 @cindex @code{PHASE_SEQUENCE}
-@cindex @code{ACQUSISTION_SEQUENCE}
+@cindex @code{ACQUISITION_SEQUENCE}
 
 
 The @code{PHASES} section is for defining phase sequences and,
@@ -634,7 +634,7 @@ As can be seen from this example the keyword is
 @code{PH_SEQ}, @code{PHSEQ}, @code{PH_S}, @code{PHS}.}, followed by an
 optional underscore and the number of the phase sequence (if there is
 only one phase sequence no number is needed). For the phase number any
-number between 0 and 2147483647 @w{(2^32 - 1)} can be choosen. Of course
+number between 0 and 2147483647 @w{(2^32 - 1)} can be chosen. Of course
 the lengths of all phase sequences have to be identical.
 
 In one of the following sections it is explained how the phase sequences
@@ -650,18 +650,18 @@ area of the first phase, the area of the third also has to be subtracted, and
 for the fourth the area has to be added. Thus the acquisition sequence
 would be defined as:
 @example
-ACQUSISTION_SEQUENCE: +, -, -, +;
+ACQUISITION_SEQUENCE: +, -, -, +;
 @end example
 
 When one has a setup with a quadrature mixer one also can define in the
-acqusition sequence which of the signals from the two digitizer channels
+acquisition sequence which of the signals from the two digitizer channels
 has to be used. The first channel is named @code{A} and the second
 @code{B}. In this case one usually also needs two acquisition sequences,
 one for the real part and one for the imaginary part of the signal. To
 distinguish between the sequences append either @code{1} or @code{2} to
 the keyword (optionally with an underscore in between. As an example
 here the phase and acquisition sequence definitions for an inversion
-revocery experiment with FID detection and phase cycling:
+recovery experiment with FID detection and phase cycling:
 @example
 PHASE_SEQUENCE_1       = +x, +x, +x, +x, -x, -x, -x, -x;
 PHASE_SEQUENCE_2       = +x, -x, +y, -y, +x, -x, +y, -y;
@@ -713,7 +713,7 @@ As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 values like pulse positions and times variables, complex expressions and
 functions can be used.
 
-Pulse numbers can be choosen randomly - the only requirement is that the
+Pulse numbers can be chosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
 @w{(2^32 - 1)}. Positions and lengths of pulses have to be positive
 (including 0). A pulse of zero length is invisible.
@@ -727,10 +727,10 @@ during the experiment, the corresponding keyword is
 @code{DSTART}, @code{D_S} or @code{DS}.}. Second, there is the length
 change of the pulse, @code{DELTA_LENGTH}@footnote{@code{DELTA_LENGTH}
 can be shortened to @code{DELTALENGTH}, @code{DELTA_L}, @code{DELTAL},
-@code{DEL_LENGTH}, @code{DELLENGTH}., @code{DEL_L}. @code{DELL},
+@code{DEL_LENGTH}, @code{DELLENGTH}, @code{DEL_L}, @code{DELL},
 @code{D_LENGTH}, @code{DLENGTH}, @code{DEL_L}, @code{DELL},
 @code{D_LENGTH}, @code{DLENGTH}, @code{D_L} or @code{DL}.}. And finally,
-there is the phase sequence to be used for phase cycling of the pulse -
+there is the phase sequence to be used for phase cycling of the pulse --
 here the keyword is @code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can
 also be written as @code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC},
 @code{PH_CYCLE}, @code{PHCYCLE}, @code{PH_C} or @code{PHC}.}.
@@ -772,7 +772,7 @@ their lengths are defined and non-zero) and all channels or PODs that
 have been assigned pulses (that are really used in the experiment) are
 switched on.
 
-There are two methods to change the properties of pulses. TZhe first one
+There are two methods to change the properties of pulses. The first one
 works by calling a dedicated function. To change the start position of,
 for example, pulse 1 by the start position change time
 (@code{DELTA_START}) as defined in the properties of the pulse the
@@ -843,13 +843,13 @@ change all necessary pulse properties and when everything is done
 the program will also do all its usual checks, e.g.@: it will test that
 no pulses overlap.
 
-There is a further function that resets all pulses to their intial
+There is a further function that resets all pulses to their initial
 state, @code{pulser_pulse_reset()}. This function can, for example, be
 used for repeating the same experiment several times without having to
 reset each pulse individually. As in the other functions the argument
 can be either one pulse, a list of pulses or no argument, in which case
 all pulses are reset to their initial positions and lengths (i.e.@: as
-set in the initial definition of the pulse in the @code{PREPARAIONS}
+set in the initial definition of the pulse in the @code{PREPARATIONS}
 section.
 
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
@@ -862,7 +862,7 @@ the microwave pulses.
 DEVICES:
 
 dg2020_b;    // Berlin X-band spectrometer pulser
-tds520c;     // digitzer
+tds520c;     // digitizer
 
 VARIABLES:
 
@@ -941,7 +941,7 @@ two microwave pulses have to be phase cycled.
 DEVICES:
 
 dg2020_b;    // Berlin X-band spectrometer pulser
-tds520c;     // digitzer
+tds520c;     // digitizer
 
 VARIABLES:
 
@@ -1037,7 +1037,7 @@ use the @acronym{EDL} function @code{get_phase_cycled_area()}. This
 function does everything automatically that had to be spelled out
 explicitely in the loop in the previous example and thus makes the
 program much simpler. The only changes needed are in the @code{PHASES}
-and @code{EXPERIMENT} section: first, an acquistion sequence must be
+and @code{EXPERIMENT} section: first, an acquisition sequence must be
 defined and, second, the whole inner loop can be replaced by a single
 function call.
 @example
@@ -1066,8 +1066,8 @@ the measured areas from the digitizer and adds up the areas according to
 the acquisition sequence.
 
 @code{get_phase_cycled_area()} can handle one as well as two acquisition
-sequences, see below. But also a single acquisistion sequence may need
-data from two different digitizer channels, for example an acquisistion
+sequences, see below. But also a single acquisition sequence may need
+data from two different digitizer channels, for example an acquisition
 sequence like this:
 @example
 ACQUISITION_SEQUENCE =  +A, -B, -A, +B;
