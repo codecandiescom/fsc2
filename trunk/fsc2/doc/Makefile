@@ -84,4 +84,4 @@ install:
 
 distclean:
 	$(MAKE) clean
-	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.pdf *.info* *~ *.gz
+	$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info* *~ *.gz
