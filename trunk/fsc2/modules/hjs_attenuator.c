@@ -245,6 +245,19 @@ Var *mw_attenuator_use_table( Var *v )
 
 Var *mw_attenuator_initial_attenuation( Var *v )
 {
+	if ( hjs_attenuator.is_step )
+	{
+		if ( FSC2_MODE == EXPERIMENT )
+		{
+			print( SEVERE, "Initial attenuation already has been set, "
+				   "discarding new value.\n" );
+			return vars_push( FLOAT_VAR, hjs_attenuator.att );
+		}
+
+		print( FATAL, "Initial attenuation already has been set.\n" );
+		THROW( EXCEPTION );
+	}
+
 	hjs_attenuator.att = get_double( v, "attenuation" );
 	hjs_attenuator.step = hjs_attenuator_att_to_step( hjs_attenuator.att );
 	hjs_attenuator.is_step = SET;
