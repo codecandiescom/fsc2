@@ -118,11 +118,11 @@ In case of the @strong{Interface Technology RS690} the internal clock is
 automatically used for time bases of @w{4 ns}, @w{8 ns} and @w{16 ns},
 all other time bases require an external clock. To distinguish between
 the @code{TTL} and @code{ECL} level input for the external clock the
-additional keywords @code{TTL} and @code@code{ECL} can be given together
-with the time base value. When one of these keywords is given the
-external clock will be used, even if the time base value is one of the
-three values that can be realized using the internal clock. When neither
-of the two keywords is given and the specified time base requires an
+additional keywords @code{TTL} and @code{ECL} can be given together with
+the time base value. When one of these keywords is given the external
+clock will be used, even if the time base value is one of the three
+values that can be realized using the internal clock. When neither of
+the two keywords is given and the specified time base requires an
 external clock the @code{TTL} level colck input is used per default.
 
 
