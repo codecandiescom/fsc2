@@ -520,7 +520,7 @@ indicating the reason for the failure.
 int rulbus_delay_busy( int handle )
 
 This function lets you determine if the card is currently creating a
-delay. It rturns 1 in this case or 0 if the card isn't just creating
+delay. It returns 1 in this case or 0 if the card isn't just creating
 a delay. On failure a negative value indicating the reason for the
 failure is returned.
 
