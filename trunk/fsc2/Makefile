@@ -2,8 +2,13 @@
 # by 'make install' as well as the name of the GPIB configuration and log file
 # together with its ownerships
 
-prefix         = /usr/local
-bindir         = $(prefix)/bin
+#prefix         = /usr/local
+#bindir         = $(prefix)/bin
+
+prefix         = .
+bindir         = $(prefix)/.
+libdir         = $(prefix)/.
+
 GPIB_CONF      = /etc/gpib.conf
 GPIB_LOG       = /tmp/gpib.log
 GPIB_LOG_OWNER = nobody
@@ -57,6 +62,10 @@ endif
 
 ifdef AWK
     CFLAGS += -DAWK=\"$(AWK)\"
+endif
+
+ifdef libdir
+	CFLAGS += -Dlibdir=\"$(libdir)\"
 endif
 
 # Switch off all implicit rules and set suffices of file to be made by make

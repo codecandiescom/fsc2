@@ -18,6 +18,11 @@
 #endif
 
 
+#if ! defined libdir
+#define libdir "./"
+#endif
+
+
 /* inclusion system header files */
 
 #include <stdio.h>
