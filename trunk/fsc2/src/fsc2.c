@@ -165,19 +165,20 @@ int main( int argc, char *argv[ ] )
 static int scan_args( int *argc, char *argv[ ], char **fname )
 {
 	int flags = 0;
+	int cur_arg = 1;
 	int i;
 
 
 	if ( *argc == 1 )
 		return flags;
 
-	while ( *argc > 1 )
+	while ( cur_arg < *argc )
 	{
-		if ( ! strcmp( argv[ 1 ], "-t" ) )
+		if ( ! strcmp( argv[ cur_arg ], "-t" ) )
 		{
 			/* no file name with "-t" option ? */
 
-			if ( *argc == 2)
+			if ( *argc == cur_arg + 1 )
 			{
 				fprintf( stderr, "fsc2 -t: No input file.\n" );
 				exit( EXIT_FAILURE );
@@ -187,31 +188,32 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 
 			seteuid( getuid( ) );
 			setegid( getgid( ) );
-			exit( scan_main( argv[ 1 ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
+			exit( scan_main( argv[ cur_arg ] ) ? EXIT_SUCCESS : EXIT_FAILURE );
 		}
 
-		if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
+		if ( ! strcmp( argv[ cur_arg ], "-h" ) ||
+			 ! strcmp( argv[ cur_arg ], "--help" ) )
 			usage( );
 
-		if ( ! strcmp( argv[ 1 ], "-s" ) )
+		if ( ! strcmp( argv[ cur_arg ], "-s" ) )
 		{
 			flags |= DO_SIGNAL;
-			for ( i = 1; i < *argc; i++ )
+			for ( i = cur_arg; i < *argc; i++ )
 				argv[ i ] = argv[ i + 1 ];
 			*argc -= 1;
 			continue;
 		}
 
-		if ( ! strcmp( argv[ 1 ], "--delete" ) )
+		if ( ! strcmp( argv[ cur_arg ], "--delete" ) )
 		{
 			flags |= DO_DELETE;
-			for ( i = 1; i < *argc; i++ )
+			for ( i = cur_arg; i < *argc; i++ )
 				argv[ i ] = argv[ i + 1 ];
 			*argc -= 1;
 			continue;
 		}
 
-		if ( ! strncmp( argv[ 1 ], "-S", 2 ) )
+		if ( ! strncmp( argv[ cur_arg ], "-S", 2 ) )
 		{
 			if ( flags & DO_TEST )
 			{
@@ -220,15 +222,16 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				usage( );
 			}
 
-			if ( argv[ 1 ][ 2 ] == '\0' && *argc == 2 )
+			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
 				eprint( FATAL, "fsc2 -S: No input file.\n" );
 				usage( );
 			}
 
-			*fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
+			*fname = argv[ cur_arg ][ 2 ] != '\0' ?
+				     &argv[ cur_arg ][ 2 ] : argv[ cur_arg + 1 ];
 			
-			for ( i = 1; i < *argc - 1; i++ )
+			for ( i = cur_arg; i < *argc - 1; i++ )
 				argv[ i ] = argv[ i + 2 ];
 			*argc -= 2;
 
@@ -236,7 +239,7 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
-		if ( ! strncmp( argv[ 1 ], "-T", 2 ) )
+		if ( ! strncmp( argv[ cur_arg ], "-T", 2 ) )
 		{
 			if ( flags & DO_START )
 			{
@@ -245,15 +248,16 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 				usage( );
 			}
 
-			if ( argv[ 1 ][ 2 ] == '\0' && *argc == 2 )
+			if ( argv[ cur_arg ][ 2 ] == '\0' && *argc == cur_arg + 1 )
 			{
 				eprint( FATAL, "fsc2 -T: No input file\n" );
 				usage( );
 			}
 
-			*fname = argv[ 1 ][ 2 ] != '\0' ? &argv[ 1 ][ 2 ] : argv[ 2 ];
+			*fname = argv[ cur_arg ][ 2 ] != '\0' ?
+				     &argv[ cur_arg ][ 2 ] : argv[ cur_arg + 1 ];
 
-			for ( i = 1; i < *argc - 1; i++ )
+			for ( i = cur_arg; i < *argc - 1; i++ )
 				argv[ i ] = argv[ i + 2 ];
 			*argc -= 2;
 
@@ -261,14 +265,16 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 			break;
 		}
 
-		if ( argv[ 1 ][ 0 ] != '-' && *argc == 2 )
+		if ( argv[ cur_arg ][ 0 ] != '-' && *argc == cur_arg + 1 )
 		{
 			flags |= DO_LOAD;
-			*fname = argv[ 1 ];
-			argv[ 1 ] = NULL;
+			*fname = argv[ cur_arg ];
+			argv[ cur_arg ] = NULL;
 			*argc -= 1;
 			break;
 		}
+
+		cur_arg++;
 	}
 
 	return flags;
