@@ -25,8 +25,8 @@
 #define MOD_SOURCE_400  3
 
 #define MAX_FM_AMPL     1.0e5
-#define MAX_AM_AMPL     100
-#define MAX_PHASE_AMPL  10
+#define MAX_AM_AMPL     1.0e2
+#define MAX_PHASE_AMPL  10.0
 
 
 #define DEFAULT_TABLE_FILE "hp8647a.table"     /* libdir will be prepended ! */
@@ -104,12 +104,14 @@ typedef struct
 #if defined( HP8647A_MAIN )
 
 HP8647A hp8647a;
+bool HP8647A_INIT = SET;
 const char *mod_types[ ] =   { "FM", "AM", "PHASE" };
 const char *mod_sources[ ] = { "EXT AC", "EXT DC", "INT 1kHz", "INT 400 Hz" };
 
 #else
 
 extern HP8647A hp8647a;
+extern bool HP8647A_INIT;
 extern const char *mod_types[ ];
 extern const char *mod_sources[ ];
 
