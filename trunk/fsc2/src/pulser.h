@@ -48,6 +48,7 @@ typedef struct {
 	bool ( *set_trig_in_level )( double voltage );
 	bool ( *set_trig_in_slope )( int slope );
 	bool ( *set_trig_in_impedance )( int state );
+	bool ( *set_max_seq_len )( double seq_len );
 
 	bool ( *set_phase_reference )( int phase, int function );
 
@@ -57,7 +58,6 @@ typedef struct {
 	bool ( *set_pulse_length )( long pulse_number, double time );
 	bool ( *set_pulse_position_change )( long pulse_number, double time );
 	bool ( *set_pulse_length_change )( long pulse_number, double time );
-	bool ( *set_max_seq_len )( double seq_len );
 	bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
 
 	bool ( *get_pulse_function )( long pulse_number, int *function );

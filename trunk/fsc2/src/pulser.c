@@ -138,7 +138,7 @@ void is_pulser_func( void *func, const char *text )
 /* argument.                                                                 */
 /*---------------------------------------------------------------------------*/
 
-double is_mult_ns( double val, const char * text )
+double is_mult_ns( double val, const char *text )
 {
 	val *= 1.e9;
 	if ( fabs( val - lround( val ) ) > 1.e-2 )

@@ -69,14 +69,14 @@ fsc2: $(objects)
 modules:
 	$(MAKE) -C ../modules all
 
-%.o: %.c $(all_headers)
+%.o: %.c $(headers)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 %.c %.h: %.y $(headers)
 	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) \
 		-o $(addsuffix .c,$(basename $@)) $<
 
-%.c: %.l $(all_headers)
+%.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
 	sed -e 's/register char \*yy_cp, \*yy_bp;/\
 		register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@ > $@.x
