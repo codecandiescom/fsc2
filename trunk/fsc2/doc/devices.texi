@@ -2358,7 +2358,11 @@ single argument, a pulse, e.g. @code{P1}. If it is the first pulse of
 a function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
 function returns the earliest possible absolute position of the pulse.
 For all later pulses, the minimum distance to the end of the previous
-pulse is returned.
+pulse is returned. Please note that the minimum positions of both the
+@code{RF} pulse and the detection pulse depend on the position of the
+first @code{MW} pulse, so after changes of the position of this pulse
+minimum start positions for the @code{RF} and detection pulses have to
+be recalculated.
 
 This function can only be called during the @code{EXPERIMENT} section
 of an @code{EDL} script.
