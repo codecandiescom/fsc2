@@ -769,13 +769,13 @@ functions and checks if some of them can be found in the library.
 This last step is getting a bit more complicated by the fact that it is
 possible to load two or more modules with the same type (e.g.@: two
 modules for lock-in amplifiers), which both will supply functions of the
-same names. This is handled by each library defining a global variable,
-a string, with the device type. When @code{fsc2} finds that there are
-two or more devices with the same type (according to this global
-variable), it will accept functions of the same name more than one time
-and make the names unique by appending a hash ("@code{#}") and a number
-for the device. So, if there are the modules for two lock-in amplifiers
-listed in the devices section, both supplying a function
+same names. @code{fsc2} recognizes this from a global variable, a string
+with the device type, each module is supposed to define. When it finds
+that there are two or more devices with the same type (according to this
+global variable), it will accept functions of the same name more than
+one time and make the names unique by appending a hash ("@code{#}") and
+a number for the device. So, if there are the modules for two lock-in
+amplifiers listed in the devices section, both supplying a function
 @code{lockin_get_data()}, it will create two entries in its internal
 list of non-builtin functions, one named @code{lockin_get_data#1()} and
 associated with the first lock-in amplifier in the @code{DEVICES}
@@ -916,8 +916,8 @@ variables, but in contrast this list is for temporary variables, which
 get created and deleted all of the time during the interpretation of an
 @code{EDL} script and is in the following often referred to as the
 "stack". In this list also the types of variables that were only
-mentioned en passant above can be found, which I will shortly summarize
-here.
+mentioned @i{en passant} above can be found, which I will shortly
+summarize here.
 
 
 A variable of type @code{STR_VAR} gets created whenever in the text of
@@ -935,35 +935,36 @@ pointing to address to one of the @code{C} functions that get called
 for @code{EDL} functions.
 
 
-After this short detour about variables back to what happens in the
-@code{VARIABLES} section. In the most simple case the @code{VARIABLES}
-section isn't much more than a list of variable names, which need to be
-created. When the lexer finds something which looks like a variable name
-(i.e.@: a word starting with a letter, followed by more letters, digits
-or underscore characters), it will first check if a variable by this
-name already exists by calling the function @code{vars_get()} from
-@file{variables.h} with the name it found. It either receives a pointer
-to the variable or @code{NULL} if the variable does not exist yet. In
-the latter it will create a new variable by calling @code{vars_new()}
-(which returns a pointer to the new variable). It then passes the
-variables address to the parser. Assuming the variable has been newly
-created it will still be of type @code{UNDEF_VAR} and it's not clear yet
-if it's a simple variable or going to be an array. Thus the parser asks
-the lexer for the next token. If this is a comma or a semicolon it can
-conclude that the variable is a simple variable and can set its type to
-either @code{INT_VAR} or @code{FLOAT_VAR} (depending on its name
-starting with a lower or upper case character) and is done with it. But
-if the next token is a "@code{[}" the parser can only notice that this
-is going an array and must ask the lexer for more tokens, which should
-be a list of numbers, separated by commas and ending in a "@code{]}"
-(but there are even more complicated cases). When all these have been
-read in the parser calls some @code{C} code that sets up the new array
-according to the list of sizes the parser received. More complicated
-cases may include that instead of a number an asterisk ("@code{*}") is
-found, in which case the array has to be initialized in a way to
-indicate that the array hasn't been fully specified yet (this is done by
-setting the @code{len} field of the variable structure for the array to
-0 and setting the @code{IS_DYNAMIC} flag in the @code{flags} member).
+After this short detour about variables lets go back to what happens in
+the @code{VARIABLES} section. In the most simple case the
+@code{VARIABLES} section isn't much more than a list of variable names,
+which need to be created. When the lexer finds something which looks
+like a variable name (i.e.@: a word starting with a letter, followed by
+more letters, digits or underscore characters), it will first check if a
+variable by this name already exists by calling the function
+@code{vars_get()} from @file{variables.h} with the name it found. It
+either receives a pointer to the variable or @code{NULL} if the variable
+does not exist yet. In the latter it will create a new variable by
+calling @code{vars_new()} (which returns a pointer to the new
+variable). It then passes the variables address to the parser. Assuming
+the variable has been newly created it will still be of type
+@code{UNDEF_VAR} and it's not clear yet if it's a simple variable or
+going to be an array. Thus the parser asks the lexer for the next
+token. If this is a comma or a semicolon it can conclude that the
+variable is a simple variable and can set its type to either
+@code{INT_VAR} or @code{FLOAT_VAR} (depending on its name starting with
+a lower or upper case character) and is done with it. But if the next
+token is a "@code{[}" the parser can only notice that this is going an
+array and must ask the lexer for more tokens, which should be a list of
+numbers, separated by commas and ending in a "@code{]}" (but there are
+even more complicated cases). When all these have been read in the
+parser calls some @code{C} code that sets up the new array according to
+the list of sizes the parser received. More complicated cases may
+include that instead of a number an asterisk ("@code{*}") is found, in
+which case the array has to be initialized in a way to indicate that the
+array hasn't been fully specified yet (this is done by setting the
+@code{len} field of the variable structure for the array to 0 and
+setting the @code{IS_DYNAMIC} flag in the @code{flags} member).
 
 
 Other complications may include that a size if an array isn't given as a
@@ -1130,16 +1131,415 @@ lexer created from @file{split_lexer.l} with a number indicating the
 type of the next section.
 
 
-If the @code{EDL} script is for an experiment where a pulse generator is
-used chances are high that the next sections would be @code{ASSIGNMENTS}
-and @code{PHASES} section. But I don't want to go into the details of
-the handling of these sections. In principle, it works exactly like the
+If the @code{EDL} script is for an experiment where pulses are used
+chances are high that the next sections would be @code{ASSIGNMENTS} and
+@code{PHASES} section. But I don't want to go into the details of the
+handling of these sections. In principle, it works exactly like the
 interpretation of the @code{VARIABLES} section, i.e.@: there's again a
 lexer for each section (generated from @file{assign_lexer.l} and
 @file{phases_lexer.l}) and a parser (generated from
 @file{assign_parser.y} and @code{phases_parser.y}), which work together
-to digest the @code{EDL} code.
+to digest the @code{EDL} code. The interesting things happening here is
+the interaction with the module for the pulser, but this is in large
+parts already covered by the second half of next chapter about writing
+modules.
 
 
+The next section is usually the @code{PREPARATIONS} section. And again
+nothing much different is going on here from what we already found in
+the @code{VARIABLES} section, the lexer and parser generated from
+@file{preps_lexer.l} and @file{preps_parser.y} play their usual game,
+one asking the other for tokens and then trying to make sense from them,
+analyzing the sequence of tokens and executing the appropriate actions.
+The only difference is that the syntax is a bit different from the one
+of the @code{VARIABLES} section, otherwise the same lexer and parser
+could be used.
 
-That's how far I got yet, a sequel is coming soon, stay tuned ;-)
+
+Where things again get interesting is with the start of the
+@code{EXPERIMENT} section. Here @code{fsc2} does not immediately
+interpret the @code{EDL} code as it has been doing in all the other
+sections up until now. You already may notice from what files you find:
+while there exists a file @file{exp_lexer.l} there are two parsers,
+@file{exp_test_parser.y} and @file{exp_run_parser.y}. And at first,
+these parsers even don't get used. Instead, only the lexer is used to
+split the @code{EXPERIMENT} section into tokens and functions from
+@file{exp.c} store the tokens in an array of structures (of type
+@code{Prg_Token}, see @file{fsc2.h}).
+
+
+There are several reasons for storing the tokens instead of executing
+statements immedately. But the main point is that the @code{EXPERIMENT}
+section isn't interpreted only once but at least two times (or even more
+often if the same experiment is run repeatedly), and parts of the
+@code{EXPERIMENT} section may even be repeated hundreds or thousands of
+times (the loops in the @code{EXPERIMENT} section). Now, as I already
+mentioned above, @code{fsc2} isn't interpreting the @code{EDL} script
+itself, but a "predigested" version that has been run through the
+@code{fsc2_clean} utility.
+
+
+Of course, the question not answered yet is why it's done this way. And
+the answer is simplicity and robustness (and, of course, my lazyness).
+An @code{EDL} script can contain comments, may include include further
+@code{EDL} scripts using the @code{#INCLUDE} directive etc. If this
+wouldn't be dealt with by a the @code{fsc2_clean} utility each and every
+section lexer would have contain code for removing comments and for
+dealing with inclusion of other @code{EDL} scripts (which isn't
+trivial), making the whole design extremely complicated and thus
+error-prone. By moving all of these tasks into a single external utility
+a lot of potential problems simply disappear.
+
+
+But one has to pay a price. And this is that we can't simply jump back
+in a file to a certain statement in the @code{EDL} script (because
+there's no file to move around in, but just a stream of data that gets
+read from an external utility). On the other hand, when you have to
+repeatedly interpret parts of the script you have to jump back to be
+able to interpret the same code over and over again. One solution would
+be to store the "predigested" @code{EDL} the program received from the
+@code{fsc2_clean} utility in memory and then make the lexer split it
+into tokens again and again when needed. But this would be a wast of CPU
+time when you can store the tokens instead of the the code, which would
+need to be processed by lexer every time round.
+
+
+So, why to repeat some or all code of the @code{EXPERIMENT} section at
+all? First of all, before the experiment is run the code should be
+checked carefully. It's much better to find potential problems at an
+early stage instead of having an experiment stop after it has run a for
+a long time just because of an easy to correct error which could have
+been detected much earlier. (Just imagine how happy you would be if you
+had run an experiment for 24 hours on a difficult to prepare sample,
+already seeing from the display that that's going to become an important
+part of your PhD thesis but then the program suddenly stops before it
+finally stores the data to a file because in the code for storing the
+data there's a syntax error...)
+
+
+Thus, each @code{EDL} script needs to be checked. And to do so, it must
+have been read in completely before the experiment is started. And
+another point is that an experiment may have to be repeated. Of course,
+the whole @code{EDL} script could be read in again when an experiment is
+restarted. But this would also require testing it again (which might
+take quite a bit of time), so it's faster to work with the already
+tested code. And, finally, when you have any kinds of loops in a script,
+the same code has to be executed again and again, which requires to jump
+back to the start of the loop.
+
+
+And that's why the tokens of the @code{EXPERIMENT } section need to be
+stored in memory in an array. It is done in the function
+@code{store_exp()} in @file{exp.c} (which is called from the @code{C}
+code in @file{exp_lexer.l}). The function repeatedly calls the lexer
+generated from @file{exp_lexer.l} for new tokens, storing each one in a
+new structure, until the end end of the @code{EDL} code is reached. The
+array of structures is pointed to by @code{EDL.prg_token}. While it does
+so it already runs some simple checks, e.g. for unbalances parentheses
+and braces.
+
+
+When all tokens have been stored the function calls @code{loop_setup()}.
+The function initializes loops and @code{IF}-@code{ELSE} constructs.
+Take as an example a @code{FOR} loop. To be able later to find out where
+the statements of the body of the loop start a pointer to the first
+token of the loop body is set in the structure for the @code{FOR}
+token. And since, at the end of the @code{FOR} loop, control needs to be
+transfered to the first statement after the loop body also a pointer
+pointing to the first token after the loop is also set. And for a
+keyword like @code{NEXT} a pointer to the start of the loop it belongs
+to needs to be set. Finding the start and the end of loops is simply
+done by counting levels of curly braces, '@code{@{}' and '@code{@}}'
+(that's why the statements of loops and also @code{IF} constructs must
+be enclosed in curly braces, even if there's only a single statement).
+
+
+This task out of the way the first real type of test can be done. This
+is still not what in the rest of the manual is called the "test run" but
+just a syntax check of the @code{EXPERIMENT} section. For this purpose
+there exists a parser, generated from @file{exp_test_parser.y} that does
+not execute any actions associated with the statements of the
+@code{EXPERIMENT} section. It is only run to test if all statements are
+syntactically correct. The parser itself need some instance that feeds
+it the tokens. Since there's now no lexer (all tokens have already been
+read in and stored in the array of tokens), the function
+@code{exp_testlex()} in @code{exp.c} plays the role the lexers had in
+the other sections: each time it's called it passes the next token from
+the array back to the parser until it hits the end of the token array.
+
+
+Only when this syntax check succeeded the real test run is started.
+From the @code{C} code in @file{exp_lexer.l} the function
+@code{exp_test_run()}, again from @file{exp.c}, is called.  But before
+the test run can really start a bit of work has to be done.  Some of the
+variables in the @code{EDL} script may have already been set during the
+sections before the @code{EXPERIMENT} section and when the real
+experiment gets started, they must be in the same state as they were
+before the test run was started. But since they will usually will be
+changed during the test run all @code{EDL} variables (i.e.@: all
+variables from the variable list pointed to by @code{EDL.Var_List}) must
+be saved, which is done in the function @code{vars_save_restore()} in
+@file{variables.c}.
+
+
+Then in all modules a hook function has to be called (at least if the
+module defines such a function). This gives the modules e.g.@: a chance
+to also save the states of their internal variables. All of the test
+hook functions are called from the function @code{run_test_hooks()}
+from @file{loader.c}.
+
+
+This preparations successfully out of the way the test run can finally
+start. To tell all parts of the program that get involved in the test
+run that this is still the test run and not a real experiment the member
+@code{mode} of the global structure @code{Internals} is set to a value
+of @code{TEST}. When you look through the code of the @code{C} functions
+called for @code{EDL} functions, both in @code{fsc2} itself and in the
+modules, you will find, that @code{Internals.mode} is again and again
+tested, either directly or via the macro @code{FSC2_MODE} (see
+@file{fsc2_module.h} for its definition). They do so because some things
+can or should only be done during the real experiment. E.g.@: all
+modules must refrain from accesssing the devices they are written to
+control because at this stage they aren't initialized yet. And also
+other functions like the ones for graphics aren't supposed to really
+draw anything to the screen yet. So everything these functions are
+supposed to do during the test run is to check if the arguments they
+receive are reasonable and then return some also reasonable values.
+
+
+Instead of the parser for the mere syntax check now the "real" parser,
+generated from @file{exp_run_parser.y} gets involved. It's the real
+thing, executing the code associated with the @code{EDL} statements
+instead of just testing syntactical correctness. And it also needs some
+instance feeding it tokens. This is now the function
+@code{deal_with_tokens_in_test()}. When you compare it to
+@code{exp_testlex()} that was used during the syntax check, you will
+find that it's a bit more complicated, resulting from the necessity to
+execute flow control statements, which had not to be done during the
+syntax check and which the parser does not take care of.
+
+
+So the function @code{deal_with_tokens_in_test()} calls the parser
+whenever a non-flow-control token is teh current token. The parser
+itself calls @code{exp_runlex()} whenever it needs another token.
+@code{exp_runlex()} stops the parser when it hits a flow control token
+by returning 0 (which a parser interprets as end of file). This brings
+us back into @code{deal_with_tokens_in_test()} which now does what's
+required for flow control. This especially includes checking the
+conditions of loops and @code{IF}-@code{ELSE} constructs. For testing
+conditions the function @code{test_condition()} is called, which invokes
+a special parser generated from @file{condition_parser.y} and made for
+this purpose only and that requests new tokens by calling the function
+@code{conditionlex()}, which also can be found in @code{exp.c}. When the
+condition has been checked @code{test_condition()} returns a value
+indicating that the condition is either satisfied or not and the code
+in @code{deal_with_tokens_in_test()} can decide from the return value
+how to proceed. This takes care that all loops are repeated as often as
+they should and that in @code{IF}-@code{ELSE} constructs the correct
+path through the @code{EDL} code is taken.
+
+
+All the above will be done until we either reach the end of the array of
+tokens or one of the @code{EDL} functions called in the process signals
+an unrecoverable error. I have spend so much space with explaining all
+this because the way the code in the @code{EXPERIMENT} section is
+executed during the experiment is basically identical to the way it is
+done during the test run.
+
+
+There are only a few things left that might be of interest when you try
+to understand what's happening in @code{exp.c} and the related parsers.
+First of all, there's one token that does not get stored in the array of
+tokens. This is the @code{ON_STOP:} label. When during the experiment
+the @code{Stop} button gets pressed by the user flow of control is
+passed as soon as possible to the code directly following the label.  As
+a label, it isn't something that can be executed, so it isn't included
+into the array of tokens. Instead in the global variable
+@code{EDL.On_Stop_Pos} the position of the first token following the
+@code{ON_STOP:} label is stored, so that the parts of the program taking
+care of flow control can calculate easily where to jump to when the user
+hits the @code{Stop} button.
+
+
+The second point I have only mentioned @i{en passant} is error
+handling. You will perhaps have already noticed that there seems to be
+only a rather limited amount of error checking, but that on the other
+hand there are some strange constructs in the @code{C} code with
+keywords like @code{TRY}, @code{TRY_SUCCESS}, @code{CATCH()},
+@code{OTHERWISE} or @code{THROW()}. If you have some experience with
+@code{C++} some of the keywords will probably ring a bell, but for
+@code{C} programmers they look rather strange.
+
+
+In @code{C} errors are usually handled by passing back a return value
+from functions indicating either success or failure (and possibly also
+the kind of problem). This requires that for most function calls it must
+be tested if the function succeeded and if not the function that called
+the lower level function must either try to deal with the error or, when
+it isn't able to do so, must escalate the problem by returning itself a
+value that indicates the type of problems it run into. This requires
+lots of discipline by the programmer because she has to explicitely
+write error checking code over and over again and also makes the source
+often quite hard to read since what really gets done in a function
+becomes drowned in error checking code. And when an error happeningin a
+very low level function that's hard to deal with it may happen that
+control has to transfered to a function serveral levels above that
+finally takes care of the problem, which might make figuring out what
+will happen on such errors hard to figure out.
+
+
+@code{C++} has methods of error handling which are very elegant when
+compared to how it's usually is done in @code{C}. They resolve around
+the notion of exceptions, which usually are seen as error conditions
+(but could also be used for other unusual conditions). A function can
+declare itself responsible for a certain type of expections by executing
+some block of code, where this exception might be triggered, within a
+@i{try}-block and after the end of the @i{try}-block @i{catch} the
+exception. That means that when the exception happens (gets thrown)
+control is transfered immediately to the code in the block of code
+following the @i{catch} without functions on the intermediate levels
+having to get involved. So throwing an exception results in priciple in
+a non-local jumo from the place where the exception got thrown to the
+code in the @i{catch} block. The idea of non-local jumps is a bit alien
+to most @code{C} programmers because, when one uses the infamous
+@code{goto} at all, it can only be used to jump within the code of a
+function (and even then only with some restrictions). But there's a pair
+of (rarely used) "functions" in @code{C} that allow such non-local
+jumps, @code{setjmp()} and @code{longjmp()}. And these function can be
+used to cobble together some poor mans equivalent of the @i{try},
+@i{throw} and @i{catch} functionality of @code{C++} with a set of macros
+and functions. Of course, it's not as polished as its big brother from
+@code{C++}, it's more difficult to use, more error prone and also much
+more restricted, but it still can make life a bit simpler when compared
+to the usual way error handling is done in @code{C}.
+
+
+I don't want to go into details on how exactly it works, you will find
+the code for it in @file{exceptions.h} and @file{exceptions.c} and I
+also will refrain from telling you here how it is used because that's
+already documented in the chapter on writing device modules. I just want
+to give an example how it's used in @code{fsc2}. When you again look up
+the function @code{section_parser()} in the the primary lexer,
+@file{split_lexer.l}, you will find that the whole code in this function
+is enclosed in a block starting with the macro @code{TRY}, thus making
+it the final place where every problem not handled by the lower level
+function will end up. Now one type of error checking you will find all
+over the place in (well-written) @code{C} code is checking the return
+value of functions for memory allocation. But this isn't done in
+@code{fsc2} (except when the function doing the allocation is willing to
+deal with problems). Throughout the whole program instead of e.g.@:
+@code{malloc()} the function @code{T_malloc()} is used. And this
+function, which is just a wrapper around the @code{malloc()} call, does
+throw an @code{OUT_OF_MEMORY_EXCEPTION} if its call of @code{malloc()}
+fails. Unless the function calling @code{T_malloc()} catches the
+exception it gets escalated to the @code{section_parser()} function,
+thereby effectively stopping further interpretation of the @code{EDL}
+script. The same happens for other types of exceptions, for example most
+of the functions associated with @code{EDL} functions (both the built-in
+functions and the functions in modules) usually print an eror message
+and then throw an @code{EXCEPTION} to indicate that they got a problem
+that requires a premature end of the interpretation of the @code{EDL}
+script.
+
+
+But stopping the interpretation of the script isn't always necessary,
+sometimes there are only potential problems the user should be made
+aware of or things that are rather likely to be errors but also could be
+real errors. In these cases the function that should be used to print
+out warnings and error messages, @code{print()} from @file{util.c}, will
+help keeping track of the number of times this happened. @code{print()}
+is, if seen from the user perspective, more or less like the standard
+@code{printf()} function, only with an additional argument, preceeding
+the arguments one would pass to @code{printf()}. This additional
+argument is an integer indicating the severity of the problem and can be
+either @code{NO_ERROR}, @code{WARN}, @code{SEVERE} or @code{FATAL} (with
+the obvious meanings). @code{print()} will now do a few additional
+things: it will first increment a counter for the different types of
+warnings (these counters are in @code{EDL.compilation}) and then prepend
+the message to be printed out with information about the name and the
+line number in the @code{EDL} script that led to the problem and also,
+if appropriate, the @code{EDL} function the problem was detected in.
+Finally it writes the message into the error browser in @code{fsc2}s
+main form.
+
+
+After all this talk about error handling lets get back to the bright
+side of life: perhaps without you noticing we have nearly reached the
+end of the test run. All that remains to be done under normal conditions
+is to restore the values of all of the @code{EDL} variables in
+@code{EDL.Var_List} (which, as you will remember, got stashed away
+before the test run got started) and call hook functions via
+@code{run_end_of_test_hooks()} in @file{loader.c} for all modules that
+contain a function to be run at the end of a test run. Afterwards
+control will be transfered back to the @code{main()} function in
+@file{fsc2.c}, which will now wait for the user to start the experiment
+(of course unless the user initated the test run by pushing the
+@code{Start} button, in which case the experiment will be started
+immediately).
+
+
+When the experiment is to be started the function @code{run_file()} in
+@file{fsc2.c} is invoked. Its main purpose is to ask the user if she is
+serious about starting the experiment even if in the test run it was
+found that there were some things that required a warning or even a
+severe warning. If there weren't or the user doesn't care about the
+warnings then the function @code{run()} in @code{run.c} is called, which
+is where the interesting stuff happens.
+
+
+The first thing the function has to do is to test the value of the
+global variable @code{EDL.prg_length}, which normally holds the number
+of tokens stored during the analysis of the @code{EXPERIMENT} section in
+the array of tokens, @code{EDL.prg_token}. But when it's set to a
+negative value there's no @code{EXPERIMENT} section at all in the
+@code{EDL} script, so no experiment can be done. The next step is to
+intialize the @code{GPIB} bus, at least if one or more of the modules
+indicated that the devices they are controlling are accessed via this
+interface. Afterwards we again have to check the value of
+@code{EDL.prg_length}. If it is 0 this means that there was an
+@code{EXPERIMENT} section label but no code following it. This is
+usually used when people want to get the devices into the state they
+would be at the start of the experiment (e.g.@: for setting a certain
+pulse pattern in a pulser or going to a certain field position), but
+don't want to run a "real" experiment yet. So we should honor this
+request and call @code{no_prog_to_run()} in this case.
+
+
+In @code{no_prog_to_run()} the hook functions in the modules to be
+executed at the start of an experiment (via @code{run_exp_hooks()} in
+@file{loader.c}) are called. These are responsible for bringing the
+devices into their initial states. Then we're already nearly done and
+call via @code{run_end_of_exp_hooks()} another set of hook functions,
+the ones that are to be executed at the end of an experiment. Now the
+@code{GPIB} bus can be released and device files for serial ports that
+got opened are closed in case the module that opened them should have
+forgotten to do so. And that's already the end of this miniml kind of
+experiment.
+
+
+For a real experiment more exciting things happen, started by calling
+@code{init_devs_and_graphics()}. Of course, also here the hook functions
+to be run at the start of an experiment in all modules get called. Then
+the new window for displaying the results of the experiment is created,
+involving the initialization of all kinds of variables for the graphics.
+This is done by a call of the function @code{start_graphics()}, which
+you will find in @file{graphics.c}.
+
+
+Then we must prepare for the program splitting itself in two separate
+processes, one for running the experiment and one for dealing with the
+interaction with the user. This requires setting up channels of
+communication between the two processes by calling @code{setup_comm()}
+from @file{comm.c}. Since the communication between the processes is
+quite important I would like to spend some time on this topic.
+
+
+The first channel of communication is a set of pipes by which the
+processes can send each other messages and read back the replies. The
+way @code{fsc2} is written this always involves the process doing the
+experiment (called the "child" in the following) sending a request and
+the parent process answering. This is used whenever the child process
+can only continue after it has received the answer to its query.
+
+
+That's how far I got yet, the sequel is coming soon, stay tuned ;-)

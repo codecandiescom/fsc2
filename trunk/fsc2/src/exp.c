@@ -166,7 +166,7 @@ void store_exp( FILE *in )
 		if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
 			EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
 											( EDL.prg_length + PRG_CHUNK_SIZE )
-									        * sizeof( Prg_Token ) );
+									        * sizeof *EDL.prg_token );
 
 		EDL.prg_token[ EDL.prg_length ].token = ret;   /* store token */
 
@@ -339,6 +339,13 @@ void store_exp( FILE *in )
 
 		EDL.prg_length++;
 	}
+
+	/* Now that we know how many tokens thee are cut back the length of the
+       array for tokens to the required length */
+
+	EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
+										   EDL.prg_length
+										   * sizeof *EDL.prg_token );
 
 	/* Check that all parentheses and braces are balanced */
 
