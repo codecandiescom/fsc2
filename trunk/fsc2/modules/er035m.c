@@ -92,7 +92,7 @@ int er035m_init_hook( void )
 
 	if ( ! exist_device( "s_band" ) && ! exist_device( "x_band" ) )
 	{	
-		eprint( WARN, "er035m: Driver for Bruker ER035M gaussmeter is loaded "
+		eprint( WARN, "er035m: Driver for NMR gaussmeter is loaded "
 				"but no appropriate magnet power supply driver.\n" );
 		nmr.is_needed = UNSET;
 	}
@@ -130,7 +130,7 @@ int er035m_exp_hook( void )
 	if ( gpib_init_device( nmr.name, &nmr.device ) == FAILURE )
 	{
 		nmr.device = -1;
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -149,7 +149,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -157,7 +157,7 @@ try_again:
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -175,44 +175,44 @@ try_again:
 			case '0' :      /* Probe F0 is connected -> ok for S-band */
 				if ( exist_device( "s_band" ) )
 					break;
-				eprint( FATAL, "Wrong field probe (F0) connected to the "
-						"Bruker ER035M NMR gaussmeter.\n" );
+				eprint( FATAL, "er035m: Wrong field probe (F0) connected to "
+						"the NMR gaussmeter.\n" );
 				THROW( EXCEPTION );
 				
 
 			case '1' :      /* Probe F1 is connected -> ok for X-band*/
 				if ( exist_device( "x_band" ) )
 					break;
-				eprint( FATAL, "Wrong field probe (F1) connected to the "
-						"Bruker ER035M NMR gaussmeter.\n" );
+				eprint( FATAL, "er035m: Wrong field probe (F1) connected to "
+						"the NMR gaussmeter.\n" );
 				THROW( EXCEPTION );
 
 			case '2' :      /* No probe connected -> error */
-				eprint( FATAL, "No field probe connected to the Bruker ER035M "
+				eprint( FATAL, "er035m: No field probe connected to the "
 						"NMR gaussmeter.\n" );
 				THROW( EXCEPTION );
 
 			case '3' :      /* Error temperature -> error */
-				eprint( FATAL, "Temperature error for Bruker ER035M NMR "
+				eprint( FATAL, "er035m: Temperature error from NMR "
 						"gaussmeter.\n" );
 				THROW( EXCEPTION );
 
 			case '4' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "Bruker ER035M NMR gaussmeter can't find the "
+				eprint( FATAL, "er035m: NMR gaussmeter can't find the "
 						"actual field.\n" );
 				THROW( EXCEPTION );
 
 			case '5' :      /* TRANS L-H -> test again */
 				if ( try_count++ < 10 )
 					goto try_again;
-				eprint( FATAL, "Bruker ER035M NMR gaussmeter can't find the "
+				eprint( FATAL, "er035m: NMR gaussmeter can't find the "
 						"actual field.\n" );
 				THROW( EXCEPTION );
 
 			case '6' :      /* MOD OFF -> error (should never happen */
-				eprint( FATAL, "Modulation of Bruker ER035M NMR gaussmeter "
+				eprint( FATAL, "er035m: Modulation of NMR gaussmeter "
 						"is switched off.\n" );
 				THROW( EXCEPTION );
 
@@ -227,7 +227,7 @@ try_again:
 				break;
 
 			case 'A' :      /* FIELD ? -> error (doesn't seem to work) */
-				eprint( FATAL, "Bruker ER035M NMR gaussmeter has an "
+				eprint( FATAL, "er035m: NMR gaussmeter has an "
 						"unidentifiable problem.\n" );
 				THROW( EXCEPTION );
 
@@ -259,7 +259,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "ED", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -268,7 +268,7 @@ try_again:
 
 	if ( gpib_write( nmr.device, "RS", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -276,7 +276,7 @@ try_again:
 	length = 20;
 	if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -285,8 +285,7 @@ try_again:
 		case '1' :                    /* set resolution to 2 digits */
 			if ( gpib_write( nmr.device, "RS2", 3 ) == FAILURE )
 			{
-				eprint( FATAL, "Can't access the Bruker ER035M NMR "
-						"gaussmeter.\n" );
+				eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 				THROW( EXCEPTION );
 			}
 			usleep( ER035M_WAIT );
@@ -302,7 +301,7 @@ try_again:
 
 		default :                     /* should never happen... */
 		{
-			eprint( FATAL, "Undocumented data received from Bruker ER035M NMR "
+			eprint( FATAL, "er035m: Undocumented data received from the NMR "
 					"gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
@@ -367,7 +366,7 @@ Var *find_field( Var *v )
 		   nmr.state == ER035M_UNKNOWN ) &&
 		 gpib_write( nmr.device, "SD", 2 ) == FAILURE )
 	{
-		eprint( FATAL, "Can't access the Bruker ER035M NMR gaussmeter.\n" );
+		eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 		THROW( EXCEPTION );
 	}
 	usleep( ER035M_WAIT );
@@ -380,8 +379,7 @@ Var *find_field( Var *v )
 
 		if ( gpib_write( nmr.device, "PS", 2 ) == FAILURE )
 		{
-			eprint( FATAL, "Can't access the Bruker ER035M NMR "
-					"gaussmeter.\n" );
+			eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
 		usleep( ER035M_WAIT );
@@ -389,8 +387,7 @@ Var *find_field( Var *v )
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		{
-			eprint( FATAL, "Can't access the Bruker ER035M NMR "
-					"gaussmeter.\n" );
+			eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -411,7 +408,7 @@ Var *find_field( Var *v )
 					break;
 
 				case 'A' :      /* FIELD ? -> error */
-					eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
+					eprint( FATAL, "er0935m: NMR gaussmeter has an "
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
@@ -425,13 +422,13 @@ Var *find_field( Var *v )
 
 				case 'D' :      /* OU active -> error (should never happen) */
 					nmr.state = ER035M_OU_ACTIVE;
-					eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
+					eprint( FATAL, "er035m: NMR gaussmeter has an "
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
 				case 'E' :      /* OD active -> error (should never happen) */
 					nmr.state = ER035M_OD_ACTIVE;
-					eprint( FATAL, "Bruker ER035M NMR gaussmeter has "
+					eprint( FATAL, "er035m: NMR gaussmeter has an "
 							"unidentifiable problem.\n" );
 					THROW( EXCEPTION );
 
@@ -505,8 +502,7 @@ double er035m_get_field( void )
 
 		if ( gpib_write( nmr.device, "PF", 2 ) == FAILURE )
 		{
-			eprint( FATAL, "Can't access the Bruker ER035M NMR "
-					"gaussmeter.\n" );
+			eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
 		usleep( ER035M_WAIT );
@@ -514,8 +510,7 @@ double er035m_get_field( void )
 		length = 20;
 		if ( gpib_read( nmr.device, buffer, &length ) == FAILURE )
 		{
-			eprint( FATAL, "Can't access the Bruker ER035M NMR "
-					"gaussmeter.\n" );
+			eprint( FATAL, "er035m: Can't access the NMR gaussmeter.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -527,7 +522,7 @@ double er035m_get_field( void )
 
 		if ( *state_flag >= '3' )
 		{
-			eprint( FATAL, "Bruker ER035M NMR gaussmeter can't get lock on "
+			eprint( FATAL, "er035m: NMR gaussmeter can't lock on the "
 					"current field.\n" );
 			THROW( EXCEPTION );
 		}
