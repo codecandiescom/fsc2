@@ -366,6 +366,13 @@ Var *set_field( Var *v )
 	double error = 0.0;
 
 
+	if ( v == NULL )
+	{
+		eprint( FATAL, "%s:%ld: %s: Missing parameter in function "
+				"`set_field'.\n", Fname, Lc, DEVICE_NAME );
+		THROW( EXEPTION );
+	}
+
 	vars_check( v, INT_VAR | FLOAT_VAR );
 	if ( v->type == INT_VAR )
 		eprint( WARN, "%s:%ld: %s: Integer value used for magnetic field.\n",
