@@ -92,5 +92,5 @@ inline double get_double( Var *v, const char *snippet,
 		eprint( WARN, SET, "%s: Integer number used as %s in %s().\n",
 				device_name, snippet, Cur_Func );
 
-	return VALUE( v );
+	return v->type == INT_VAR ? v->val.lval : v->val.dval;
 }
