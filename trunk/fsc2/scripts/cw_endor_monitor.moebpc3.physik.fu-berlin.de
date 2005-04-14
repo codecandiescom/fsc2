@@ -49,9 +49,9 @@ VARIABLES:
 
 freq;
 min_freq      =   10 kHz;
-max_freq      = 2000 MHz;
+max_freq      =    2 GHz;
 
-step_freq     =    1 MHz;
+step_freq     =  500 kHz;
 min_step_freq =   10 kHz;
 max_step_freq =  100 MHz;
 
@@ -68,7 +68,7 @@ new_freq, new_step_freq, new_atten, new_current;
 MAX_POINTS = 20000;            // maximum number of data points
 data[ 2, MAX_POINTS ];         // array of data points (X and Y)
 I, J;                          // count of data points
-File;                          // file handler for storing data
+File;                          // file handle for storing data
 
 Pause_State = 1;
 
@@ -89,7 +89,7 @@ Sweep_State = STOPPED;
 
 PREPARATIONS:
 
-init_1d( 2, "Points", "Signal [mV]" );
+init_1d( 2, "Points", "Signal [mV]\n(X: red, Y: green)" );
 
 
 EXPERIMENT:
@@ -260,9 +260,9 @@ FOREVER {
 		}
 	}
 
-	/* Get new data points, if we already have acquired MAX_POINTS data points
-	   or the sweep has been haltet because the maximum or minimum frequency
-	   had been reached also stop sweep without further user intervention */
+	/* Get new data points, if already MAX_POINTS data points have been
+	   acquired or sweep has been haltet due to the maximum or minimum
+       frequency being reached stop sweep without user intervention */
 
 	I += 1;
 	data[ 1, I ] = lockin_get_data( 1 );

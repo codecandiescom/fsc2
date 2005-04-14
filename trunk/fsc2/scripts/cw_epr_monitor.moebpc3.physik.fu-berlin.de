@@ -59,7 +59,7 @@ Cur_Acq_Rate;                  // currently setected acquisition rate menu item
 MAX_POINTS = 16350;            // maximum number of data points
 data[ MAX_POINTS ];            // array of data points
 I;                             // count of data points
-File;                          // file handler for storing data
+File;                          // file handle for storing data
 
 new_current;                   // current as set by user
 new_sweep_rate;                // sweep rate as set by user
