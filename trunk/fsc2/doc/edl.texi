@@ -376,22 +376,21 @@ Finally, some combinations of characters take on a special meaning when
 they follow a number directly (i.e.@: with only spaces or tabulator
 characters in between). These are some physical units with or without
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
-@code{k} (kilo) and @code{M} (mega) (only wave numbers can't be
-preceeded by such a character).  Here's the complete list:
+@code{k} (kilo) @code{M} (mega) and @code{G} (giga) (only wave numbers can't
+be preceeded by such a character).  Here's the complete list:
 @quotation
-@multitable { @code{cm^-1} } {Decibel (and @code{ndbm, udbm, mdbm, kdbm} and @code{Mdbm})}
-@item @code{s}     @tab Seconds (and @code{ns, us, ms, ks} and @code{Ms})
-@item @code{m}     @tab Meter (and @code{nm, um, mm, km} and @code{Mm})
-@item @code{G}     @tab Gauss (and @code{nG, uG, mG, kG} and @code{MG})
-@item @code{T}     @tab Tesla (and @code{nT, uT, mT, kT} and @code{MT})
-@item @code{V}     @tab Volt (and @code{nV, uV, mV, kV} and @code{MV})
-@item @code{A}     @tab Ampere (and @code{nA, uA, mA, kA} and @code{MA})
-@item @code{Hz}    @tab Hertz (and @code{nHz, uHz, mHz, kHz} and @code{MHz})
-@item @code{K}     @tab Kelvin (and @code{nK, uK, mK, kK} and @code{MK})
-@item @code{dB}    @tab Decibel (and @code{ndB, udB, mdB, kdB} and @code{MdB})
-@item @code{dBm}   @tab Decibel (and @code{ndBm, udBm, mdBm, kdBm}
-                        and @code{MdBm})
-@item @code{db}    @tab Decibel (and @code{ndb, udb, mdb, kdb} and @code{Mdb})
+@multitable { @code{cm^-1} } {Decibel (and @code{ndbm, udbm, mdbm, kdbm, Mdbm} and @code{Gdbm})}
+@item @code{s}     @tab Seconds (and @code{ns, us, ms, ks, Ms} and @code{Gs})
+@item @code{m}     @tab Meter (and @code{nm, um, mm, km, Mm} and @code{Gm})
+@item @code{G}     @tab Gauss (and @code{nG, uG, mG, kG, MG} and @code{GG})
+@item @code{T}     @tab Tesla (and @code{nT, uT, mT, kT, MT} and @code{GT})
+@item @code{V}     @tab Volt (and @code{nV, uV, mV, kV, GV} and @code{GV})
+@item @code{A}     @tab Ampere (and @code{nA, uA, mA, kA, GA} and @code{GA})
+@item @code{Hz}    @tab Hertz (and @code{nHz, uHz, mHz, kHz, GHz} and @code{GHz})
+@item @code{K}     @tab Kelvin (and @code{nK, uK, mK, kK, MK} and @code{GK})
+@item @code{dB}    @tab Decibel (and @code{ndB, udB, mdB, kdB, MdB} and @code{GdB})
+@item @code{dBm}   @tab Decibel (and @code{ndBm, udBm, mdBm, kdBm, MdBm}
+                        and @code{GdBm})
 @item @code{cm^-1} @tab wave numbers, i.e.@: inverse of a @code{cm}
 @end multitable
 @end quotation

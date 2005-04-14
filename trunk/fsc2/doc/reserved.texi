@@ -331,6 +331,17 @@ characters in between).
 @item @code{db}               @tab Decibel
 @item @code{dbm}              @tab Decibel (relative to 1 mV)
 @item @code{G}                @tab Gauss
+@item @code{GA}               @tab Giga-Ampere
+@item @code{GdB}              @tab Giga-Dezibel
+@item @code{GdBm}             @tab Giga-Dezibel (relative to 1 mV)
+@item @code{Gdb}              @tab Giga-Dezibel
+@item @code{Gdbm}             @tab Giga-Dezibel (relative to 1 mV)
+@item @code{GG}               @tab Giga-Gauss
+@item @code{GHz}              @tab Giga-Hertz
+@item @code{GK}               @tab Giga-Kelvin
+@item @code{Gm}               @tab Giga-Meter
+@item @code{Gs}               @tab Giga-Seconds
+@item @code{GV}               @tab Giga-Volt
 @item @code{Hz}               @tab Hertz
 @item @code{K}                @tab Kelvin
 @item @code{kA}               @tab Kilo-Ampere

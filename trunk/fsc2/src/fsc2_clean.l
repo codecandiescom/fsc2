@@ -127,6 +127,7 @@ IMILLI   {INT}[\t \r]*"m"{UNIT}
 INONE    {INT}[\t \r]*({UNIT}|cm^-1)
 IKILO    {INT}[\t \r]*"k"{UNIT}
 IMEGA    {INT}[\t \r]*"M"{UNIT}
+IGIGA    {INT}[\t \r]*"G"{UNIT}
 
 FNANO    {FLOAT}[\t \r]*"n"{UNIT}
 FMICRO   {FLOAT}[\t \r]*"u"{UNIT}
@@ -134,6 +135,7 @@ FMILLI   {FLOAT}[\t \r]*"m"{UNIT}
 FNONE    {FLOAT}[\t \r]*({UNIT}|cm^-1)
 FKILO    {FLOAT}[\t \r]*"k"{UNIT}
 FMEGA    {FLOAT}[\t \r]*"M"{UNIT}
+FGIGA    {FLOAT}[\t \r]*"G"{UNIT}
 
 INTs     {INT}[\t \r]*"nT"
 IUT      {INT}[\t \r]*"uT"
@@ -141,6 +143,7 @@ IMT      {INT}[\t \r]*"mT"
 IT       {INT}[\t \r]*"T"
 IKT      {INT}[\t \r]*"kT"
 IMGT     {INT}[\t \r]*"MT"
+IGGT     {INT}[\t \r]*"GT"
 
 FNT      {FLOAT}[\t \r]*"nT"
 FUT      {FLOAT}[\t \r]*"uT"
@@ -148,6 +151,7 @@ FMT      {FLOAT}[\t \r]*"mT"
 FT       {FLOAT}[\t \r]*"T"
 FKT      {FLOAT}[\t \r]*"kT"
 FMGT     {FLOAT}[\t \r]*"MT"
+FGGT     {FLOAT}[\t \r]*"GT"
 
 
 WLWS     ^[\t ]*\n
@@ -359,6 +363,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {INONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0 );
 {IKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3 );
 {IMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6 );
+{IGIGA}/[^a-zA-z0-9_]   unit_spec( yytext,  9 );
 
 {FNANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
 {FMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
@@ -366,6 +371,7 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {FNONE}/[^a-zA-z0-9_]   unit_spec( yytext,  0 );
 {FKILO}/[^a-zA-z0-9_]   unit_spec( yytext,  3 );
 {FMEGA}/[^a-zA-z0-9_]   unit_spec( yytext,  6 );
+{FGIGA}/[^a-zA-z0-9_]   unit_spec( yytext,  9 );
 
 {INTs}/[^a-zA-z0-9_]    unit_spec( yytext, -5 );
 {IUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2 );
@@ -373,12 +379,14 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {IT}/[^a-zA-z0-9_]      unit_spec( yytext,  4 );
 {IKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
 {IMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
+{IGGT}/[^a-zA-z0-9_]    unit_spec( yytext, 13 );
 {FNT}/[^a-zA-z0-9_]     unit_spec( yytext, -5 );
 {FUT}/[^a-zA-z0-9_]     unit_spec( yytext, -2 );
 {FMT}/[^a-zA-z0-9_]     unit_spec( yytext,  1 );
 {FT}/[^a-zA-z0-9_]      unit_spec( yytext,  4 );
 {FKT}/[^a-zA-z0-9_]     unit_spec( yytext,  7 );
 {FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
+{FGGT}/[^a-zA-z0-9_]    unit_spec( yytext, 13 );
 
 			/* All the rest is simply copied to the output */
 
