@@ -10,7 +10,7 @@ sr810;
 
 VARIABLES:
 
-freq          =   14 MHz;
+freq;
 min_freq      =    1 MHz;
 max_freq      =   40 MHz;
 
@@ -18,9 +18,9 @@ step_freq     =   20 kHz;
 min_step_freq =    5 kHz;
 max_step_freq =    1 MHz;
 
-atten      	  =  -80 db;
-min_atten  	  = -100 db;
-max_atten  	  =   -3 db;
+atten;
+min_atten  	  = -136 db;
+max_atten  	  =   -5 db;
 
 
 I = 1;
@@ -36,14 +36,16 @@ STATE = 0;
 PREPARATIONS:
 
 
-synthesizer_frequency( freq );
-synthesizer_attenuation( atten );
 synthesizer_use_table( );
 
 init_1d( );
 
 
 EXPERIMENT:
+
+
+freq  = synthesizer_frequency( );
+atten = synthesizer_attenuation( );
 
 lockin_lock_keyboard( 0 );
 
