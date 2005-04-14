@@ -1,0 +1,336 @@
+#!/usr/bin/perl -w
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2005 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+use strict;
+use warnings;
+use Tk;
+
+
+open my $file, "|fsc2_start"
+	or &show_message( "Can't find program 'fsc2_start'." );
+
+select $file;
+print <<EOF;
+/*************************************************************************/
+/*  EDL program for running cw-ENDOR test measurements with the 360 GHz  */
+/*  spectrometer.                                                        */
+/*************************************************************************/
+
+
+DEVICES:
+
+sr830;                         // load module for the lock-in
+ips20_4;                       // load module for the sweep power supply
+hp8648b;                       // load module for RF synthesizer
+
+
+VARIABLES:
+
+freq;
+min_freq      =   10 kHz;
+max_freq      = 2000 MHz;
+
+step_freq     =    1 MHz;
+min_step_freq =   10 kHz;
+max_step_freq =  100 MHz;
+
+atten;
+max_atten     = -136 db;
+min_atten     = 14.5 dB;
+
+syn_state;
+
+current;                       // current through magnet coil
+
+new_freq, new_step_freq, new_atten, new_current;
+
+MAX_POINTS = 20000;            // maximum number of data points
+data[ 2, MAX_POINTS ];         // array of data points (X and Y)
+I, J;                          // count of data points
+File;                          // file handler for storing data
+
+Pause_State = 1;
+
+/* Variables for all buttons etc. */
+
+Freq, Step_Freq, Sweep_Up, Sweep_Stop, Sweep_Down,
+POnS, OnOff, Atten, Current, Pause, Save, Clear;
+
+
+/* Some variables to make the program  easier to read */
+
+STOPPED = 0;
+UP = 1;
+DOWN = -1;
+
+Sweep_State = STOPPED;
+
+
+PREPARATIONS:
+
+init_1d( 2, "Points", "Signal [mV]" );
+
+
+EXPERIMENT:
+
+/* We start with asking the magnet for the current after having made
+   sure that the magnet isn't sweeping */
+
+IF magnet_sweep( ) != STOPPED {
+	magnet_sweep( STOPPED );
+}
+current = get_field( );
+
+/* Get synthesizer settings */
+
+freq  = synthesizer_frequency( );
+atten = synthesizer_attenuation( );
+syn_state = synthesizer_state( );
+
+/* Unlock the lock-ins keyboard */
+
+lockin_lock_keyboard( "OFF" );
+
+/* Finally, create the form with the buttons for sweeping etc. */
+
+hide_toolbox( "ON" );
+Freq = input_create( "FLOAT_INPUT", freq, "RF frequency (in MHz)" );
+Step_Freq = input_create( "FLOAT_INPUT", step_freq,
+                          "RF step frequency (in MHz)" );
+OnOff = button_create( "PUSH_BUTTON", "Toggle RF power on/off" );
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+POnS       = button_create( "PUSH_BUTTON", "Pause On Stop" );
+button_state( POnS, "ON" );
+
+Atten = input_create( "FLOAT_INPUT", atten, "RF attenuation (in dB)" );
+Current = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
+
+
+Pause = button_create( "PUSH_BUTTON", "Pause display" );
+button_state( Pause, 1 );
+Save  = button_create( "NORMAL_BUTTON", "Save data" );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+hide_toolbox( "OFF" );
+
+
+/* Now we're done with all preparations and can start to run the experiment
+   within an endless loop */
+
+I = 0;
+
+FOREVER {
+
+	/* Remove curve if "Clear curve" button has been pressed */
+
+	IF button_state( Clear ) {
+		clear_curve( );
+		I = 0;
+		NEXT;
+	}
+
+	/* If the frequency has been changed set the new frequency */
+
+	IF input_changed( Freq ) {
+		new_freq = input_value( Freq ) * 1 MHz;
+		IF new_freq >= min_freq AND new_freq <= max_freq {
+			freq = synthesizer_frequency( new_freq );
+		}
+		input_value( Freq, freq /  1 MHz );
+	}
+
+	/* Check value of step frequency */
+
+	IF input_changed( Step_Freq ) {
+		new_step_freq = input_value( Step_Freq ) * 1 MHz;
+		IF new_step_freq < min_step_freq OR new_step_freq > max_step_freq {
+			input_value( Step_Freq, step_freq / 1 MHz );
+		} ELSE {
+			step_freq = new_step_freq;
+		}
+	}
+
+	/* Check if RF power on/off state has changed */
+
+	IF button_state( OnOff ) != syn_state {
+		syn_state = syn_state ~ 1;
+		synthesizer_state( syn_state );
+	}
+
+	/* Check if attenuation has been changed */
+
+	IF input_changed( Atten ) {
+		new_atten = input_value( Atten );
+		IF new_atten < min_atten OR new_atten > max_atten {
+			input_value( Atten, atten );
+		} ELSE IF atten != new_atten {
+			atten = new_atten;
+			synthesizer_attenuation( atten );
+		}
+	}
+
+	/* Check if a new current has been set - if yes go to the new current
+	   after checking that it's within the allowed limits */
+
+	new_current = input_value( Current );
+	IF abs( current - new_current ) > 0.01 mA {
+		IF new_current > 7.0 A OR new_current < -7.0 A {
+			current = get_field( );
+		} ELSE {
+			current = set_field( new_current );
+		}
+		input_value( Current, current );
+	}
+
+	/* Check if the Save button has been pressed (but save only as many points
+	   has have been measured, not the complete array) */
+
+	IF button_state( Save ) {
+		File = get_file( );
+		FOR J = 1 : I {
+			fsave( File, "#, #\n", data[ 1, J ], data[ 2, J ] );
+		}
+	}
+
+	/* Check if the pause state has been changed */
+
+	IF I < MAX_POINTS {
+		Pause_State = button_state( Pause );
+	}
+
+	/* If pause is on or frequency has been changed go back to start
+	   after short sleeping period */
+
+	IF Pause_State {
+		wait( 0.25 s );
+		NEXT;
+	}
+
+	/* Check if the sweep up button has been pressed and we're not already
+	   sweeping up */
+
+	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND I < MAX_POINTS {
+		magnet_sweep( UP );
+		Sweep_State = UP;
+		draw_marker( I + 1, "YELLOW" );
+		button_state( Pause, 0 );
+	}
+
+	/* Check if the sweep down button has been pressed and we're not already
+	   sweeping down */
+
+	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND I < MAX_POINTS {
+		magnet_sweep( DOWN );
+		Sweep_State = DOWN;
+		draw_marker( I + 1, "BLUE" );
+		button_state( Pause, 0 );
+	}
+
+	/* Check if the sweep stop button has been pressed while we're sweeping */
+
+	IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
+		Sweep_State = STOPPED;
+		draw_marker( I + 1, "RED" );
+		IF button_state( POnS ) {
+			Pause_State = 1;
+			button_state( Pause, Pause_State );
+		}
+	}
+
+	/* Get new data points, if we already have acquired MAX_POINTS data points
+	   or the sweep has been haltet because the maximum or minimum frequency
+	   had been reached also stop sweep without further user intervention */
+
+	I += 1;
+	data[ 1, I ] = lockin_get_data( 1 );
+	data[ 2, I ] = lockin_get_data( 2 );
+	display( I, data[ 1, I ] / 1 mV, I, data[ 2, I ] / 1 mV );
+
+	IF ( Sweep_State == UP   AND freq + step_freq > max_freq ) OR
+	   ( Sweep_State == DOWN AND freq - step_freq < min_freq ) OR
+		 I >= MAX_POINTS {
+		Sweep_State = STOPPED;
+		button_state( Sweep_Stop, "ON" );
+		draw_marker( I, "RED" );
+		IF button_state( POnS ) OR I >= MAX_POINTS {
+			Pause_State = 1;
+			button_state( Pause, Pause_State );
+		}
+	} ELSE IF Sweep_State != STOPPED {
+		IF Sweep_State == UP {
+			freq += step_freq;
+		} ELSE IF Sweep_State == DOWN {
+			freq -= step_freq;
+		}
+		freq = synthesizer_frequency( freq );
+		input_value( Freq, freq /  1 MHz );
+	}
+
+	wait( lockin_time_constant( ) );
+}
+
+
+ON_STOP:
+
+synthesizer_state( "OFF" );
+EOF
+
+close $file;
+
+# Notify the user if sending the program to fsc2 failed for some reasons
+
+if ( $? != 0 ) {
+   my $text;
+
+    if ( $? >> 8 == 255 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is already testing or\nrunning an experiment.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange\nis going on here.";
+    }
+
+    &show_message( $text ) if $? >> 8 != 0;
+}
+
+#############################################
+#
+
+sub show_message {
+	my $mw = MainWindow->new;
+	$mw->geometry( "-2000-2000" );
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $_[ 0 ] );
+	exit;
+}

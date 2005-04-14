@@ -23,17 +23,18 @@
 # Boston, MA 02111-1307, USA.
 
 use strict;
+use warnings;
 use Tk;
 
 
 my $text;
-local *F;
 
-open( F, "|fsc2_start" )
+open my $file, "|fsc2_start"
 	or &show_message( "Can't find program 'fsc2_start'." );
 
-print F
-"/***************************************************************************/
+select $file;
+print <<EOF;
+/***************************************************************************/
 /*    EDL program for running cw-EPR test measurements with the 360 GHz    */
 /*    spectrometer.                                                        */
 /***************************************************************************/
@@ -88,7 +89,7 @@ PREPARATIONS:
 
 /* We need just 1D graphics and 1 curve */
 
-init_1d( 1, \"Points\", \"Signal [mV]\" );
+init_1d( 1, "Points", "Signal [mV]" );
 
 
 EXPERIMENT:
@@ -131,30 +132,30 @@ lockin_auto_setup( 1.0 / acq_rates_list[ Cur_Acq_Rate ], 1 );
 
 /* Unlock the lock-ins keyboard */
 
-lockin_lock_keyboard( \"OFF\" );
+lockin_lock_keyboard( "OFF" );
 
 /* Finally, create the form with the buttons for sweeping etc. */
 
-hide_toolbox( \"ON\" );
-Sweep_Up   = button_create( \"RADIO_BUTTON\", \"Sweep up\" );
-Sweep_Stop = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Stop sweep\" );
-Sweep_Down = button_create( \"RADIO_BUTTON\", Sweep_Up, \"Sweep Down\" );
-button_state( Sweep_Stop, \"ON\" );
-POnS       = button_create( \"PUSH_BUTTON\", \"Pause On Stop\" );
-button_state( POnS, \"ON\" );
+hide_toolbox( "ON" );
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+POnS       = button_create( "PUSH_BUTTON", "Pause On Stop" );
+button_state( POnS, "ON" );
 
-Current    = input_create( \"FLOAT_INPUT\", current, \"Set new current (in A)\" );
-Sweep_Rate = input_create( \"FLOAT_INPUT\", sweep_rate * 60.0,
-						   \"Set new sweep rate (in A/min)\" );
-Acq_Rate   = menu_create( \"Lock-in acquisition rate\", \"32 Hz\", \"16 Hz\", \"8 Hz\",
-						   \"4 Hz\", \"2 Hz\", \"1 Hz\", \"1/2 Hz\", \"1/4 Hz\",
-						   \"1/8 Hz\", \"1/16 Hz\" );
+Current    = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
+Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate * 60.0,
+						   "Set new sweep rate (in A/min)" );
+Acq_Rate   = menu_create( "Lock-in acquisition rate", "32 Hz", "16 Hz", "8 Hz",
+						   "4 Hz", "2 Hz", "1 Hz", "1/2 Hz", "1/4 Hz",
+						   "1/8 Hz", "1/16 Hz" );
 menu_choice( Acq_Rate, Cur_Acq_Rate );
-Pause = button_create( \"PUSH_BUTTON\", \"Pause display\" );
+Pause = button_create( "PUSH_BUTTON", "Pause display" );
 button_state( Pause, 1 );
-Save  = button_create( \"NORMAL_BUTTON\", \"Save data\" );
-Clear = button_create( \"NORMAL_BUTTON\", \"Clear screen\" );
-hide_toolbox( \"OFF\" );
+Save  = button_create( "NORMAL_BUTTON", "Save data" );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+hide_toolbox( "OFF" );
 
 
 /* Now we're done with all preparations and can start to run the experiment
@@ -173,17 +174,17 @@ FOREVER {
 		IF Sweep_State == STOPPED {
 			magnet_sweep( UP );
 			Sweep_State = UP;
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "ON" );
 		}
 
 		IF Sweep_State == DOWN {
-			lockin_auto_acquisition( \"OFF\" );
+			lockin_auto_acquisition( "OFF" );
 			magnet_sweep( UP );
 			Sweep_State = UP;
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "ON" );
 		}
 
-		draw_marker( I + 1, \"YELLOW\" );
+		draw_marker( I + 1, "YELLOW" );
 		button_state( Pause, 0 );
 	}
 
@@ -196,33 +197,33 @@ FOREVER {
 		IF Sweep_State == STOPPED {
 			magnet_sweep( DOWN );
 			Sweep_State = DOWN;
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "ON" );
 		}
 
 		IF Sweep_State == UP {
-			lockin_auto_acquisition( \"OFF\" );
+			lockin_auto_acquisition( "OFF" );
 			magnet_sweep( DOWN );
 			Sweep_State = DOWN;
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "ON" );
 		}
 
-		draw_marker( I + 1, \"BLUE\" );
+		draw_marker( I + 1, "BLUE" );
 		button_state( Pause, 0 );
 	}
 
 	/* Check if the sweep stop button has been pressed while we're sweeping */
 
 	IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
-		lockin_auto_acquisition( \"OFF\" );
+		lockin_auto_acquisition( "OFF" );
 		magnet_sweep( STOPPED );
 		Sweep_State = STOPPED;
-		draw_marker( I + 1, \"RED\" );
+		draw_marker( I + 1, "RED" );
 
 		IF button_state( POnS ) {
 			Pause_State = 1;
 			button_state( Pause, 1 );
 		} ELSE {
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "ON" );
 		}
 	}
 
@@ -235,11 +236,11 @@ FOREVER {
 		IF new_current > 7.0 A OR new_current < -7.0 A {
 			current = get_field( );
 		} ELSE {
-			lockin_auto_acquisition( \"OFF\" );
-			button_state( Sweep_Stop, \"ON\" );
+			lockin_auto_acquisition( "OFF" );
+			button_state( Sweep_Stop, "ON" );
 			current = set_field( new_current );
 			Sweep_State = STOPPED;
-			draw_marker( I + 1, \"RED\" );
+			draw_marker( I + 1, "RED" );
 		}
 		input_value( Current, current );
 	}
@@ -256,9 +257,9 @@ FOREVER {
 		IF new_sweep_rate <= 1.0 AND new_sweep_rate >= 0.01 {
 			sweep_rate = magnet_sweep_rate( new_sweep_rate / 60.0 );
 			IF Sweep_State != STOPPED {
-				lockin_auto_acquisition( \"OFF\" );
-				lockin_auto_acquisition( \"ON\" );
-				draw_marker( I + 1, \"GREEN\" )
+				lockin_auto_acquisition( "OFF" );
+				lockin_auto_acquisition( "ON" );
+				draw_marker( I + 1, "GREEN" )
 			}
 		}
 		input_value( Sweep_Rate, sweep_rate * 60.0 );
@@ -274,8 +275,8 @@ FOREVER {
 		acq_rate = acq_rates_list[ Cur_Acq_Rate ];
 		lockin_auto_setup( 1.0 / acq_rate, 1 );
 		IF Sweep_State != STOPPED {
-			lockin_auto_acquisition( \"OFF\" );
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "OFF" );
+			lockin_auto_acquisition( "ON" );
 		}
 	}
 
@@ -303,8 +304,8 @@ FOREVER {
 		rescale( 64 );
 		I = 0;
 		IF Sweep_State != STOPPED {
-			lockin_auto_acquisition( \"OFF\" );
-			lockin_auto_acquisition( \"ON\" );
+			lockin_auto_acquisition( "OFF" );
+			lockin_auto_acquisition( "ON" );
 		}
 	}
 
@@ -321,15 +322,15 @@ FOREVER {
 
 		IF ( Sweep_State != STOPPED AND magnet_sweep( ) == STOPPED ) OR
 			 I >= MAX_POINTS {
-			lockin_auto_acquisition( \"OFF\" );
+			lockin_auto_acquisition( "OFF" );
 			magnet_sweep( STOPPED );
 			Sweep_State = STOPPED;
-			button_state( Sweep_Stop, \"ON\" );
-			draw_marker( I, \"RED\" );
+			button_state( Sweep_Stop, "ON" );
+			draw_marker( I, "RED" );
 			IF button_state( POnS ) {
 				Pause_State = 1;
 			} ELSE {
-				lockin_auto_acquisition( \"ON\" );
+				lockin_auto_acquisition( "ON" );
 			}
 		}
 	} ELSE {
@@ -345,11 +346,11 @@ ON_STOP:
 
 IF Sweep_State != STOPPED {
 	magnet_sweep( STOPPED );
-	lockin_auto_acquisition( \"OFF\" );
+	lockin_auto_acquisition( "OFF" );
 }
-";
+EOF
 
-close F;
+close $file;
 
 # Notify the user if sending the program to fsc2 failed for some reasons
 
