@@ -185,7 +185,7 @@ Var_T *synthesizer_state( Var_T *v )
 	bool state;
 
 
-	if ( v == NULL )              /* i.e. return the current state */
+	if ( v == NULL )              /* query of the current state */
 		switch( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -229,21 +229,30 @@ Var_T *synthesizer_frequency( Var_T *v )
 	double att;
 
 
-	if ( v == NULL )              /* i.e. return the current frequency */
+	if ( v == NULL )              /* query for the current frequency */
 	{
-		if ( FSC2_MODE != EXPERIMENT )
+		switch ( FSC2_MODE )
 		{
-			if ( ! hp864_tmpl.freq_is_set )
-			{
-				print( FATAL, "RF frequency hasn't been set yet.\n" );
-				THROW( EXCEPTION );
-			}
-			else
+			case PREPARATION :
+				if ( ! hp864_tmpl.freq_is_set )
+				{
+					print( FATAL, "RF frequency hasn't been set yet.\n" );
+					THROW( EXCEPTION );
+				}
+				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+
+			case TEST :
+				if ( ! hp864_tmpl.freq_is_set )
+				{
+					hp864_tmpl.freq = HP864_TMPL_TEST_FREQ;
+					hp864_tmpl.freq_is_set = SET;
+				}
+				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+
+			case EXPERIMENT :
+				hp864_tmpl.freq = hp864_tmpl_get_frequency( );
 				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 		}
-
-		hp864_tmpl.freq = hp864_tmpl_get_frequency( );
-		return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 	}
 
 	freq = get_double( v, "RF frequency" );
@@ -343,21 +352,30 @@ Var_T *synthesizer_attenuation( Var_T *v )
 	double att;
 
 
-	if ( v == NULL )              /* i.e. return the current attenuation */
+	if ( v == NULL )              /* query of the current attenuation */
 	{
-		if ( FSC2_MODE != EXPERIMENT )
+		switch ( FSC2_MODE )
 		{
-			if ( ! hp864_tmpl.attenuation_is_set )
-			{
-				print( FATAL, "RF attenuation has not been set yet.\n" );
-				THROW( EXCEPTION );
-			}
-			else
+			case PREPARATION :
+				if ( ! hp864_tmpl.attenuation_is_set )
+				{
+					print( FATAL, "RF attenuation has not been set yet.\n" );
+					THROW( EXCEPTION );
+				}
+				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+
+			case TEST :
+				if ( ! hp864_tmpl.attenuation_is_set )
+				{
+					hp864_tmpl.attenuation = HP864_TMPL_TEST_ATTEN;
+					hp864_tmpl.attenuation_is_set = SET;
+				}
+				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+
+			case EXPERIMENT :
+				hp864_tmpl.attenuation = MAX_ATTEN -100.0;
 				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 		}
-
-		hp864_tmpl.attenuation = MAX_ATTEN -100.0;
-		return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 	}
 
 	att = get_double( v, "RF attenuation" );

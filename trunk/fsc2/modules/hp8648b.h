@@ -53,6 +53,10 @@
 #define MAX_PHASE_AMPL  10.0
 
 
+#define HP8648B_TEST_FREQ   5.6e8  /* 560 MHz */
+#define HP8648B_TEST_ATTEN    -20  /* -20 dB  */
+
+
 typedef struct Att_Table_Entry Att_Table_Entry_T;
 typedef struct HP8648B HP8648B_T;
 
