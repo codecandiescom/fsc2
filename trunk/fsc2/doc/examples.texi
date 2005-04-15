@@ -436,8 +436,8 @@ Now here is the complete @code{EDL} script:
  15 new_field, new_field_step;
  16 
  17 max_field = -50.0 G
- 18 min_field = 23000.0 G;
- 19 min_field_step = 1.0e-3 G;
+ 18 min_field = 23 kG;
+ 19 min_field_step = 1 mG;
  20 max_field_step = 100 G;
  21 
  22 I;
