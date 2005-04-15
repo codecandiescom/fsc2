@@ -676,6 +676,12 @@ P5:  FUNCTION = DETECTION,
 
 EXPERIMENT:
 
+synthesizer_attenuation( att );
+freq = synthesizer_frequency( start_freq );
+synthesizer_state( \"ON\" );
+pulser_state( \"ON\" );
+daq_gain( 4 );
+
 /* Open the data file */
 
 File = get_file( );
@@ -684,11 +690,6 @@ File = get_file( );
 
 field = set_field( field );
 
-synthesizer_attenuation( att );
-freq = synthesizer_frequency( start_freq );
-synthesizer_state( \"ON\" );
-pulser_state( \"ON\" );
-daq_gain( 4 );
 
 FOREVER {
 	freq = synthesizer_frequency( start_freq );
@@ -771,29 +772,30 @@ IF J == 1 {
 }
 
 fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 3_pulse_endor\\n\"
-	   \"% Field:                  # G\\n\"
-	   \"% Start frequency:        # MHz\\n\"
-	   \"% End frequency:          # MHz\\n\"
-	   \"% Frequency step:         # MHz\\n\"
-	   \"% Attenuation:            # dB\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Length of 3st MW pulse: # ns\\n\"
-	   \"% P1-P2 separation:		  # ns\\n\"
-	   \"% P2-P3 separation:		  # ns\\n\"
-	   \"% RF pulse position:      # ns\\n\"
-	   \"% RF pulse length:        # ns\\n\"
-	   \"% Number of averages:     #\\n\"
-	   \"% ADC gain:               4\\n\",
+       \"% Date:                   # #\\n\"
+       \"% Script:                 3_pulse_endor\\n\"
+       \"% Field:                  # G\\n\"
+       \"% Start frequency:        # MHz\\n\"
+       \"% End frequency:          # MHz\\n\"
+       \"% Frequency step:         # MHz\\n\"
+       \"% Attenuation:            # dB\\n\"
+       \"% Repetition time:        # ms\\n\"
+       \"% Length of 1st MW pulse: # ns\\n\"
+       \"% Length of 2nd MW pulse: # ns\\n\"
+       \"% Length of 3rd MW pulse: # ns\\n\"
+       \"% P1-P2 separation:       # ns\\n\"
+       \"% P2-P3 separation:       # ns\\n\"
+       \"% RF pulse position:      # ns\\n\"
+       \"% RF pulse length:        # ns\\n\"
+       \"% Number of averages:     #\\n\"
+       \"% ADC gain:               4\\n\",
 	   date( ), time( ), field, start_freq * 1.0e-6, end_freq * 1.0e-6,
-	   freq_step * 1.0e-6, att, repeat_time * 1.0e3, P1.LENGTH * 1.0e9,
-	   P2.LENGTH * 1.0e9, P3.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9,
-	   p2_to_p3_dist * 1.0e9, P4.START * 1.0e9, P4.LENGTH * 1.0e9, N_Avg );
+	   freq_step * 1.0e-6, att, repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
+	   int( P2.LENGTH * 1.0e9 ), int( P3.LENGTH * 1.0e9 ),
+       int( p1_to_p2_dist * 1.0e9 ), int( p2_to_p3_dist * 1.0e9 ),
+       int( P4.START * 1.0e9 ), int( P4.LENGTH * 1.0e9 ), N_Avg );
 
-save_comment( File, \"%\" );
+save_comment( File, \"% \" );
 ";
     close $fh;
 

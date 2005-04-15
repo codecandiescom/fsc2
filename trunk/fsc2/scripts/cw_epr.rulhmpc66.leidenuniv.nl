@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # -*- cperl -*-
 #
 # $Id$
@@ -24,6 +24,7 @@
 
 
 use strict;
+use warnings;
 use Tk;
 
 my @version = split /\./, $Tk::VERSION;
@@ -766,7 +767,7 @@ IF J == 1 {";
 
 fsave( File, \"\\n\"
        \"% Date:                    # #\\n\"
-	   \"% Script:                  cw_epr\\n\"
+       \"% Script:                  cw_epr\\n\"
        \"% Magnet:\\n\"
        \"%   Start field:           # G\\n\"
        \"%   End field:             # G\\n\"
@@ -854,7 +855,7 @@ sr810;
 VARIABLES:
 
 start_field = $start_field G;
-end_field   = $end_field G
+end_field   = $end_field G;
 sweep_rate  = $sweep_rate G / 1 s;
 Num_Points  = $num_points;
 

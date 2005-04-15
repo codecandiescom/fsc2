@@ -1,4 +1,4 @@
-#!/usr/local/bin/fsc2
+#!/usr/local/bin/fsc2 -T
 
 /*
   $Id$

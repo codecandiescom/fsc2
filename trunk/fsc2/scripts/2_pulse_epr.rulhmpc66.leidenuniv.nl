@@ -490,16 +490,16 @@ P3:  FUNCTION = DETECTION,
     print $fh "
 EXPERIMENT:
 
-/* Go to the start field */
-
-field = set_field( start_field );
+pulser_state( \"ON\" );
+daq_gain( 4 );
 
 /* Open the data file */
 
 File = get_file( );
 
-pulser_state( \"ON\" );
-daq_gain( 4 );
+/* Go to the start field */
+
+field = set_field( start_field );
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );
@@ -537,22 +537,22 @@ FOR I = 1 : N_Points {
 ON_STOP:
 
 fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 2_pulse_epr\\n\"
-	   \"% Start field:            # G\\n\"
-	   \"% End field:              # G\\n\"
-	   \"% Field step:             # G\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Pulse distance:         # ns\\n\"
-	   \"% Number of averages:     #\\n\"
-	   \"% ADC gain:               4\\n\",
+       \"% Date:                   # #\\n\"
+       \"% Script:                 2_pulse_epr\\n\"
+       \"% Start field:            # G\\n\"
+       \"% End field:              # G\\n\"
+       \"% Field step:             # G\\n\"
+       \"% Repetition time:        # ms\\n\"
+       \"% Length of 1st MW pulse: # ns\\n\"
+       \"% Length of 2nd MW pulse: # ns\\n\"
+       \"% Pulse distance:         # ns\\n\"
+       \"% Number of averages:     #\\n\"
+       \"% ADC gain:               4\\n\",
 	   date( ), time( ), start_field, field, field_step,
-	   repeat_time * 1.0e3, P1.LENGTH * 1.0e9, P2.LENGTH * 1.e9,
-	   p1_to_p2_dist, N_Avg );
+	   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
+       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg );
 
-save_comment( File, \"%\" );
+save_comment( File, \"% \" );
 ";
     close $fh;
 

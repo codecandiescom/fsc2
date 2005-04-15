@@ -439,27 +439,28 @@ P4:  FUNCTION    = DETECTION,
 
 EXPERIMENT:
 
-/* Go to the field */
-
-set_field( field );
+pulser_state( \"ON\" );
+daq_gain( 4 );
 
 /* Open the data file, ask user for comment to be written to it and the
    output the parameter to it */
 
 File = get_file( );
 
+/* Go to the field */
+
+set_field( field );
+
 I = 1;
-pulser_state( \"ON\" );
-daq_gain( 4 );
 
 FOREVER {
 	wait( 1.1 * repeat_time * N_Avg );
-	data = daq_get_voltage( CH0 );
+	data = - daq_get_voltage( CH0 );
 	display( I, data );
 	fsave( File, \"#,#\\n\",
 		   ( p1_to_p2_dist + p1_to_p2_incr * ( I - 1 ) ) * 1.0e9, data );
 	pulser_shift( );
-	pulser_update( );	
+	pulser_update( );
 	I += 1;
 }
 
@@ -467,21 +468,22 @@ FOREVER {
 ON_STOP:
 
 fsave( File,
-	   \"% Date:                   # #\\n\"
-	   \"% Script:                 2_pulse_T2\\n\"
-	   \"% Field:                  # G\\n\"
-	   \"% Repetition time:        # ms\\n\"
-	   \"% Length of 1st MW pulse: # ns\\n\"
-	   \"% Length of 2st MW pulse: # ns\\n\"
-	   \"% Init. P1-P2 separation: # ns\\n\"
-	   \"% P1-P2 increment:        # ns\\n\"
-	   \"% Number of averages:     #\\n\"
-	   \"% ADC gain:               4\\n\",
-	   date( ), time( ), field,  repeat_time * 1.0e3, P1.LENGTH * 1.0e9,
-	   P2.LENGTH * 1.0e9, p1_to_p2_dist * 1.0e9, p1_to_p2_incr * 1.0e9,
+       \"% Date:                   # #\\n\"
+       \"% Script:                 2_pulse_T2\\n\"
+       \"% Field:                  # G\\n\"
+       \"% Repetition time:        # ms\\n\"
+       \"% Length of 1st MW pulse: # ns\\n\"
+       \"% Length of 2nd MW pulse: # ns\\n\"
+       \"% Init. P1-P2 separation: # ns\\n\"
+       \"% P1-P2 increment:        # ns\\n\"
+       \"% Number of averages:     #\\n\"
+       \"% ADC gain:               4\\n\",
+	   date( ), time( ), field,  repeat_time * 1.0e3,
+       int( P1.LENGTH * 1.0e9 ), int( P2.LENGTH * 1.0e9 ),
+       int( p1_to_p2_dist * 1.0e9 ), int( p1_to_p2_incr * 1.0e9 ),
 	   N_Avg );
 
-save_comment( File, \"%\" );
+save_comment( File, \"% \" );
 ";
     close $fh;
 
