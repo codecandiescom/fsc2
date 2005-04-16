@@ -213,12 +213,13 @@ an experiment:
 The most prominent feature is the area for displaying the measured
 data. In this case two different curves are displayed simultaneously
 (but you can have up to four). They show data from the x- and y-channel
-of a lock-in amplifier while recording a cw-EPR experiment - obviously
+of a lock-in amplifier while recording a cw-EPR spectrum - obviously
 the lock-in's phase setting isn't optimal yet.
 
 Below and to the left of this main display area are two areas showing
 the x- and y-scales. The fact that the lines in both the axis areas are
-drawn in red indicate that the scales are valid for the first (red) curve.
+drawn in red indicate that the scales are valid (at least) for the first
+(red) curve.
 
 @end ifnotinfo
 @ifnothtml
@@ -245,12 +246,12 @@ undo the last rescaling operation or to send a snapshot of the current
 results to a printer (or, alternatively, write it to a file).
 
 Please note: When printing using a different command than the built-in
-command (@code{lpr -h}) please be aware that the print command will
+command ("@code{lpr -h}") please be aware that the print command will
 receive its input (in PostScript) on its standard input channel. Some
 programs require that you specify a single dash (@code{-}) in place of a
 file name in this case. For example, if you want to view the snapshot
 with ghostscript instead of directly sending it to a printer you have
-to enter @code{ghostview -} as the print command.
+to enter "@code{ghostview -}" as the print command.
 
 The @code{Stop} button lets you abort the currently running experiment -
 when the experiment is finished its label changes to
@@ -445,11 +446,11 @@ lowest and red for the highest values. To show which color represents a
 certain value on the right hand side another axis area for the z-axis is
 drawn. The color bar in this axis area indicates the exact scaling.
 
-In 2D-display mode only one curve can be displayed at once. Thus the
-buttons for the different curves have a different meaning from the one
-in 1D-displays. Here they are used for switching between the different
-curves, i.e.@: only one of the buttons can be active at any time and
-will indicate which curve is currently shown. Each of the curves has each
+In 2D-display mode only one curve can be displayed at once. Thus the buttons
+in the upper left hand corner for the different curves have a different
+meaning from the one in 1D-displays. Here they are used for switching between
+the different curves, i.e.@: only one of the buttons can be active at any time
+and will indicate which curve is currently shown. Each of the curves has each
 own scaling.
 
 As long as there are no measured data for some of the points of the
@@ -477,8 +478,8 @@ data that are too small are shown in a dark kind of blue.
 
 @ifnotinfo
 Here is an example of how the display may look after a z-rescaling. A
-lot of the values are too small to be drawn using the values shown on
-the z-scale and are thus drawn in dark blue while the maximum values at
+lot of the values are now too small to be drawn using the values shown on
+the z-scale and are thus drawn in dark blue, while the maximum values at
 the top of the high-field signal are too large and thus drawn in white.
 
 @image{fsc2fig5,11cm,}
@@ -515,9 +516,9 @@ y-direction was taken.
 @image{fsc2fig6,11cm,}
 
 @end ifnotinfo
-This z-axis area in the cross section window can also be used to select
-a cross section at a different position. When you press the left mouse
-button in the z-axis area the cursor changes to an arrow pointing to the
+The z-axis area at the right side in the cross section window can also be used
+to select a cross section at a different position. When you press the left
+mouse button in the z-axis area the cursor changes to an arrow pointing to the
 left
 @ifnotinfo
 , @image{cursor8,5mm,},

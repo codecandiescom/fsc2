@@ -37,7 +37,7 @@ the experiment completely controllable by the user via scripts is quite
 different from the approach usually taken in programs for remote
 spectrometer control. They normally have a graphical user interface
 where just a set of parameters for the experiment can be edited and then
-one of a usually rather restricted set of hard-coded experiments is
+one of a (usually rather restricted) set of hard-coded experiments is
 started.
 
 The obvious drawback of the traditional approach is that there is only a
