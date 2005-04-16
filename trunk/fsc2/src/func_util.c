@@ -3729,10 +3729,11 @@ Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
  * the state of the mouse buttons and the modifier keys.
  *-------------------------------------------------------*/
 
-Var_T *f_get_pos( UNUSED_ARG Var_T *v )
+Var_T *f_get_pos( Var_T *v )
 {
 	Var_T *nv;
 	long len = 0;                    /* total length of message to send */
+	long buttons;
 	char *buffer, *pos;
 	double *result;
 
@@ -3741,6 +3742,18 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 	{
 		print( FATAL, "Function can't be used without a GUI.\n" );
 		THROW( EXCEPTION );
+	}
+
+	if ( v == NULL )
+		buttons = -1;
+	else
+	{
+		buttons = get_long( v, "button mask" );
+		if ( buttons < 0 || buttons > 7 )
+		{
+			print( FATAL, "Invalid argument, must be between 0 and 7.\n" );
+			THROW( EXCEPTION );
+		}
 	}
 
 	nv = vars_push( FLOAT_ARR, NULL, 2 * MAX_CURVES + 2 );
@@ -3770,7 +3783,7 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 
 	fsc2_assert( Fsc2_Internals.I_am == CHILD );
 
-	len = sizeof EDL.Lc;
+	len = sizeof buttons + sizeof EDL.Lc;
 
 	if ( EDL.Fname )
 		len += strlen( EDL.Fname ) + 1;
@@ -3779,12 +3792,15 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 
 	pos = buffer = CHAR_P T_malloc( len );
 
-	memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
+	memcpy( pos, &buttons, sizeof buttons ); /* buttons to handle */
+	pos += sizeof buttons;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
 	pos += sizeof EDL.Lc;
 
 	if ( EDL.Fname )
 	{
-		strcpy( pos, EDL.Fname );           /* current file name */
+		strcpy( pos, EDL.Fname );            /* current file name */
 		pos += strlen( EDL.Fname ) + 1;
 	}
 	else
@@ -3793,7 +3809,7 @@ Var_T *f_get_pos( UNUSED_ARG Var_T *v )
 	result = exp_getpos( buffer, pos - buffer );
 
 	memcpy( nv->val.dpnt, result, ( 2 * MAX_CURVES + 2 ) * sizeof *result );
-	T_free( result );        /* free result buffer */
+	T_free( result ); 
 
 	return nv;
 }

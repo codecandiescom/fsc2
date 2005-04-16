@@ -2115,7 +2115,7 @@ static void repaint_cut_canvas( Canvas_T *c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int get_mouse_pos_cut( double *pa, unsigned int *keymask )
+int get_mouse_pos_cut( int buttons, double *pa, unsigned int *keymask )
 {
 	Curve_1d_T *cv = &G_2d.cut_curve;
 	Curve_2d_T *scv;
@@ -2126,7 +2126,8 @@ int get_mouse_pos_cut( double *pa, unsigned int *keymask )
 	fl_get_win_mouse( FL_ObjWin( G_2d.cut_canvas.obj ),
 					  ppos + X, ppos + Y, keymask );
 
-	if ( ! G_2d.is_cut || G_2d.active_curve == -1 ||
+	if ( buttons != G.button_state ||
+		 ! G_2d.is_cut || G_2d.active_curve == -1 ||
 		 ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
 		return 0;
 

@@ -1752,7 +1752,7 @@ void repaint_canvas_2d( Canvas_T *c )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int get_mouse_pos_2d( double *pa, unsigned int *keymask )
+int get_mouse_pos_2d( int buttons, double *pa, unsigned int *keymask )
 {
 	Curve_2d_T *cv;
 	int ppos[ 2 ];
@@ -1762,7 +1762,11 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 	fl_get_win_mouse( FL_ObjWin( G_2d.canvas.obj ),
 					  ppos + X, ppos + Y, keymask );
 
-	if ( G_2d.active_curve == -1 ||
+	/* Return value indicating failure when either not the correct buttons are
+	   pressed, there's no active curve or no scaling has been set for the
+	   active curve */
+
+	if ( G.button_state != buttons || G_2d.active_curve == -1 ||
 		 ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
 		return 0;
 
@@ -1771,6 +1775,9 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 	pa[ X ] = ( ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ]  - cv->shift[ X ];
 	pa[ Y ] = ( G_2d.canvas.h - 1.0 - ppos[ Y ] + cv->h / 2 )
 			  / cv->s2d[ Y ] - cv->shift[ Y ];
+
+	/* Return value indicating failure when the mouse isn't within the
+	   display area */
 
 	if ( pa[ X ] < 0 || floor( pa[ X ] ) >= G_2d.nx ||
 		 pa[ Y ] < 0 || floor( pa[ Y ] ) >= G_2d.ny )

@@ -1928,6 +1928,7 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 	{
 		char *pos;
 		double result[ 2 * MAX_CURVES + 2 ];
+		long buttons;
 		char *old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		int i;
@@ -1935,20 +1936,57 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 
 
 		pos = buffer;
+
+		memcpy( &buttons, pos, sizeof buttons );	/* buttons to be handed */
+		pos += sizeof buttons;
+
 		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
 		pos += sizeof EDL.Lc;
 
-		EDL.Fname = pos;	                          /* current file name */
+		EDL.Fname = pos;	                        /* current file name */
 
-		
-		if ( G.coord_display == 1 )
-			result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1, &keys );
-		else if ( G.coord_display == 2 )
-			result[ 0 ] = ( double ) get_mouse_pos_2d( result + 1, &keys );
-		else if ( G.coord_display == 4 )
-			result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1, &keys );
+		/* If called in default mode (i.e. the user doesn't ask for a certain
+		   mouse button combination than look for the window where the left
+		   and middle mouse button is pressed. Otherwise take the wondow
+		   where the mouse currently is in. */
+
+		result[ 0 ] = 0.0;
+
+		if ( buttons == -1 )
+		{
+			if ( G.coord_display == 1 )
+				result[ 0 ] = ( double ) get_mouse_pos_1d( 3, result + 1,
+														   &keys );
+			else if ( G.coord_display == 2 )
+				result[ 0 ] = ( double ) get_mouse_pos_2d( 3, result + 1,
+														   &keys );
+			else if ( G.coord_display == 4 )
+				result[ 0 ] = ( double ) get_mouse_pos_cut( 3, result + 1,
+															&keys );
+			else
+				for ( i = 0; i < 2 * MAX_CURVES + 1; i++ )
+					result[ i ] = 0.0;
+		}
 		else
-			for ( i = 0; i < 2 * MAX_CURVES + 1; i++ )
+		{
+			if ( G.dim & 1 )
+				result[ 0 ] = ( double ) get_mouse_pos_1d( buttons, result + 1,
+														   &keys );
+
+			if ( result[ 0 ] == 0.0 && G.dim & 2 )
+			{
+				result[ 0 ] = ( double ) get_mouse_pos_2d( buttons, result + 1,
+														   &keys );
+
+				if ( result[ 0 ] == 0.0 && G_cut.is_shown )
+					result[ 0 ] = ( double ) get_mouse_pos_cut( buttons,
+																result + 1,
+																&keys );
+			}
+		}
+
+		if ( result[ 0 ] == 0.0 )
+			for ( i = 1; i < 2 * MAX_CURVES + 1; i++ )
 				result[ i ] = 0.0;
 
 		result[ 2 * MAX_CURVES + 1 ] = 0;
