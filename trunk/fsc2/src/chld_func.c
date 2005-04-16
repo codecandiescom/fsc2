@@ -1948,6 +1948,7 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 		result[ 0 ] = 0.0;
 
 		if ( G.button_state == buttons )
+		{
 			if ( G.dim & 1 )
 				result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1, &keys );
 
