@@ -3749,9 +3749,9 @@ Var_T *f_get_pos( Var_T *v )
 	else
 	{
 		buttons = get_long( v, "button mask" );
-		if ( buttons < 0 || buttons > 7 )
+		if ( buttons > 7 )
 		{
-			print( FATAL, "Invalid argument, must be between 0 and 7.\n" );
+			print( FATAL, "Invalid argument, must be less than 8.\n" );
 			THROW( EXCEPTION );
 		}
 	}
