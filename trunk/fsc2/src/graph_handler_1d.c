@@ -1400,7 +1400,7 @@ void repaint_canvas_1d( Canvas_T *c )
  * user for the EDL function mouse_position()
  *---------------------------------------------------------*/
 
-int get_mouse_pos_1d( int buttons, double *pa, unsigned int *keymask )
+int get_mouse_pos_1d( double *pa, unsigned int *keymask )
 {
 	Curve_1d_T *cv;
 	long i;
@@ -1410,8 +1410,7 @@ int get_mouse_pos_1d( int buttons, double *pa, unsigned int *keymask )
 	fl_get_win_mouse( FL_ObjWin( G_1d.canvas.obj ),
 					  ppos + X, ppos + Y, keymask );
 
-	if ( buttons != G.button_state ||
-		 G.coord_display != 1 || ! G_1d.is_scale_set ||
+	if ( ! G_1d.is_scale_set ||
 		 ppos[ X ] < 0 || ppos[ X ] > ( int ) G_1d.canvas.w - 1 ||
 		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_1d.canvas.h - 1 )
 		return 0;

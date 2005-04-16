@@ -35,7 +35,7 @@ void recalc_XPoints_of_curve_1d( Curve_1d_T *cv );
 void redraw_all_1d( void );
 void redraw_canvas_1d( Canvas_T *c );
 void repaint_canvas_1d( Canvas_T *c );
-int get_mouse_pos_1d( int buttons, double *pa, unsigned int *keymask );
+int get_mouse_pos_1d( double *pa, unsigned int *keymask );
 void fs_rescale_1d( bool vert_only );
 void make_scale_1d( Curve_1d_T *cv, Canvas_T *c, int coord );
 void save_scale_state_1d( Curve_1d_T *cv );

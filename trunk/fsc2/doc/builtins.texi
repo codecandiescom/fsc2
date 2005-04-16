@@ -2360,17 +2360,19 @@ FOR I = 1 : 10 @{
 @item mouse_position()
 @findex mouse_position()
 The function can be used to determine the current mouse position in the
-display windows. It can be called in two modes. If called with no
-arguments the function returns the mouse position in the window the
-mouse is in with the left and middle mouse button being pressed.
-If called with an argument, it specifies the mouse buttons to be
-pressed - 0 means none, 1 the left mouse button, 2 the middle button
-and 4 the right button. Combinations can be specified by adding the
-values for the respective mouse buttons. The function returns an array
-with 10 floating point values.
+display windows. It expects either none or a single argument, a integer
+value indicating which mouse buttons must be pressed in order to return
+a set of values - @code{0} means none, @code{1} the left mouse button,
+@code{2} the middle button and @code{4} the right button. Combinations
+can be specified by adding the values for the respective mouse buttons,
+so the argument must be in the range between @code{0} and @code{7}. If
+no argument has been given the function only returns valid values when 
+the left and right mouse button are pressed at once, i.e.@: it works as
+if the function was called with a value of @code{3}. The function returns
+an array of 10 floating point values.
 
 The first element of the returned array can have the following values,
-indicating the meaning of the other elements:
+indicating the meaning of the following elements:
 @table @samp
 @item 0
 The mouse pointer is not within the main display area of one of the

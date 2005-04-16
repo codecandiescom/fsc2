@@ -34,7 +34,7 @@ int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 void recalc_XPoints_of_curve_2d( Curve_2d_T *cv );
 void redraw_all_2d( void );
 void repaint_canvas_2d( Canvas_T *c );
-int get_mouse_pos_2d( int buttons, double *pa, unsigned int *keymask );
+int get_mouse_pos_2d( double *pa, unsigned int *keymask );
 void fs_rescale_2d( Curve_2d_T *cv, bool z_only );
 void make_scale_2d( Curve_2d_T *cv, Canvas_T *c, int coord );
 void save_scale_state_2d( Curve_2d_T *cv );

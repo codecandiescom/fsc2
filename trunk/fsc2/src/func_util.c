@@ -3745,7 +3745,7 @@ Var_T *f_get_pos( Var_T *v )
 	}
 
 	if ( v == NULL )
-		buttons = -1;
+		buttons = 3;          /* default to left and middle mouse button */
 	else
 	{
 		buttons = get_long( v, "button mask" );
