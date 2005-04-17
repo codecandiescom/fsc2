@@ -362,8 +362,7 @@ static int AI_channel_setup( Board *board, unsigned int num_channels,
 	board->AI.num_channels = 0;
 	board->AI.num_data_per_scan = 0;
 
-	for ( i = 0; i < num_channels; i++ )
-	{
+	for ( i = 0; i < num_channels; i++ ) {
 		if ( copy_from_user( &a, channel_args + i,
 				     sizeof *channel_args ) ) {
 			PDEBUG( "Can't read from user space\n" );
@@ -824,8 +823,8 @@ static void AI_acq_register_setup( Board *board )
 	board->func->stc_writew( board, STC_AI_Mode_2, acq_setup.mode_2 );
 	board->func->stc_writew( board, STC_AI_Mode_3, acq_setup.mode_3 );
 
-	if ( acq_setup.need_si_load )
-	{
+	if ( acq_setup.need_si_load ) {
+
 		/* The AI_SI_Load_A register is set to the time difference
 		   between scans, AI_SI_Load_B contains the time between the
 		   start of the acquisition and the first scan */
@@ -849,8 +848,8 @@ static void AI_acq_register_setup( Board *board )
 					 AI_SI_Initial_Load_Source );
 	}
 
-	if ( acq_setup.need_si2_load )
-	{
+	if ( acq_setup.need_si2_load ) {
+
 		/* The AI_SI2_Load_A register contains the time difference
 		   between conversions, AI_SI2_Load_B the time between the
 		   start of the scan and the first conversions */
@@ -1080,8 +1079,7 @@ static int AI_acq_stop( Board *board )
 	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
 		return 0;
 
-	if ( board->AI.is_running )
-	{
+	if ( board->AI.is_running ) {
 		board->func->start_critical_section( board );
 		data = board->stc.Joint_Reset | AI_Configuration_Start;
 		board->func->stc_writew( board, STC_Joint_Reset, data );

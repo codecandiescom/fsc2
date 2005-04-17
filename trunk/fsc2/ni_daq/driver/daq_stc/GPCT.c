@@ -650,7 +650,7 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
 
 	board->func->stc_writew( board, STC_Gi_Mode( counter ), mode );
 
-	/* Finally start the counter by arming */
+	/* Finally start the counter by arming it */
 
 	board->func->stc_writew( board, STC_Gi_Command( counter ), cmd );
 	board->stc.Gi_Command[ counter ] &= ~ Gi_Arm;
