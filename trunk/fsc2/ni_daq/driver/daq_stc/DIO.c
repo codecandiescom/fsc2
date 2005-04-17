@@ -63,8 +63,7 @@ int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg )
 		return -EACCES;
 	}
 
-	switch ( a.cmd )
-	{
+	switch ( a.cmd ) {
 		case NI_DAQ_DIO_INPUT :
 			ret = DIO_in( board, &a.value, a.mask );
 			break;

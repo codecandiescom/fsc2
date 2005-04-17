@@ -278,15 +278,14 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
 	   and release all AI trigger inputs as well as switching off DMA and
 	   releasing the associated buffers. */
 
-	if ( ret != 0 && board->AI.is_running ) {
+	if ( ret != 0 && board->AI.is_running ){
 		board->AI.is_running = 0;
 		daq_irq_disable( board, IRQ_AI_SC_TC );
 		MSC_PFI_setup( board, NI_DAQ_AI_SUBSYSTEM, NI_DAQ_ALL,
 			       NI_DAQ_PFI_UNUSED );
 	}
 
-	if ( ret < 0 )
-	{
+	if ( ret < 0 ) {
 		board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 		return ret;
 	}

@@ -129,8 +129,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 
 	/* Make the buffers size fit the page size */
 
-	while ( buf_size < DMA_BUFFER_SIZE )
-	{
+	while ( buf_size < DMA_BUFFER_SIZE ) {
 		buf_size <<= 1;
 		order++;
 	}
@@ -143,8 +142,8 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	sys_data[ sys ].max_size = size = num_points * sizeof( u16 );
 
 	num_links = size / buf_size;
-	if ( size % buf_size > 0 )
-	{
+
+	if ( size % buf_size > 0 ) {
 		num_links++;
 
 		while ( last_buf_size < size % buf_size ) {
@@ -177,8 +176,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	board->mite_chain[ sys ][ num_links ].buf = NULL;
 
 	for ( mdc = board->mite_chain[ sys ], i = 0; i < num_links;
-	      i++, mdc++ )
-	{
+	      i++, mdc++ ) {
 		if ( size >= buf_size ) {
 			mdc->buf = ( char * ) __get_free_pages( GFP_KERNEL,
 								order );
@@ -220,8 +218,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 
 		mdc->lc.tcr = cpu_to_le32( mdc->size );
 
-		if ( sys != NI_DAQ_AO_SUBSYSTEM )
-		{
+		if ( sys != NI_DAQ_AO_SUBSYSTEM ) {
 			mdc->lc.mar = cpu_to_le32( pci_map_single( board->dev,
 							mdc->buf, mdc->size,
 							PCI_DMA_FROMDEVICE ) );
@@ -237,8 +234,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	/* If the streaming mapping failed all mapped buffers must be unmapped
 	   and then all memory released */
 
-	if ( mdc != board->mite_chain[ sys ] + num_links )
-	{
+	if ( mdc != board->mite_chain[ sys ] + num_links ) {
 		for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL;
 		      mdc++ ) {
 			if ( mdc->is_mapped )
@@ -381,8 +377,7 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 	/* If all data points that can be expected have been fetched disable
 	   DMA, release the buffers and return 1 to indicate this */
 
-	if ( sys_data[ sys ].max_size <= sys_data[ sys ].transfered )
-	{
+	if ( sys_data[ sys ].max_size <= sys_data[ sys ].transfered ) {
 		pci_dma_shutdown( board, sys );
 		return 1;
 	}

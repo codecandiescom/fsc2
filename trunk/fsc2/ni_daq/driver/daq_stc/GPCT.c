@@ -174,8 +174,7 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
 		return -EACCES;
 	}
 
-	switch ( a.cmd )
-	{
+	switch ( a.cmd ) {
 		case NI_DAQ_GPCT_SET_CLOCK_SPEED :
 			return GPCT_clock_speed( board, a.speed );
 
@@ -290,8 +289,7 @@ static int GPCT_counter_output_state( Board *board, unsigned int counter,
 
 static int GPCT_counter_disarm( Board *board, unsigned counter )
 {
-	switch ( counter )
-	{
+	switch ( counter ) {
 		case 0 : case 1 :
 			board->stc.Joint_Reset |= Gi_Reset( counter );
 			board->func->stc_writew( board, STC_Joint_Reset,
@@ -559,8 +557,7 @@ static int GPCT_arm( Board *board, unsigned int counter )
 	u16 cmd = Gi_Arm;
 
 
-	switch ( counter )
-	{
+	switch ( counter ) {
 		case 0 : case 1 :
 			cmd = board->stc.Gi_Command[ counter ] | Gi_Arm;
 			board->func->stc_writew( board,

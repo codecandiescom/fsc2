@@ -388,8 +388,7 @@ int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
 		return -EACCES;
 	}
 
-	switch ( a.cmd )
-	{
+	switch ( a.cmd ) {
 		case NI_DAQ_MSC_SET_CLOCK_SPEED :
 			return MSC_set_speed( board, a.divider, a.speed );
 
@@ -437,8 +436,7 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 	int output_state = caf & FOUT_Enable;
 
 
-	if ( divider < 1 || divider > 16 )
-	{
+	if ( divider < 1 || divider > 16 ) {
 		PDEBUG( "Invalid clock divider %u\n", divider );
 		return -EINVAL;
 	}
@@ -455,8 +453,7 @@ static int MSC_set_speed( Board *board, unsigned int divider,
 	if ( speed == NI_DAQ_HALF_SPEED ) {
 		caf |= Slow_Internal_Time_Divide_By_2;
 		board->timebase2 = 10000;
-	}
-	else {
+	} else {
 		caf &= ~ Slow_Internal_Time_Divide_By_2;
 		board->timebase2 = 5000;
 	}
@@ -538,8 +535,7 @@ static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
 
 		max_trig = 1 << board->type->atrig_bits;
 
-		switch ( trigger_type )
-		{
+		switch ( trigger_type ) {
 			case NI_DAQ_TRIG_LOW_WINDOW :
 				tl = max_trig / 2 - 1 - trigger_low;
 				th = 0;

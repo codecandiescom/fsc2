@@ -151,8 +151,7 @@ inline void pci_stc_writew( Board *board, u16 offset, u16 data )
 	if ( offset >= STC_Interrupt_A_Ack &&
 	     offset <= STC_Gi_Command( 1 ) )
 		writew( data, board->regs->Window_Address + offset );
-	else
-	{
+	else {
 		pci_start_critical_section( board );
 		writew( offset, board->regs->Window_Address );
 		writew( data, board->regs->Window_Data );
@@ -227,8 +226,7 @@ inline u16 pci_stc_readw( Board *board, u16 offset )
 
 	if ( offset >= STC_AI_Status_1 && offset <= STC_DIO_Parallel_Input )
 		data = readw( board->regs->Window_Address + offset );
-	else
-	{
+	else {
 		pci_start_critical_section( board );
 		writew( offset, board->regs->Window_Address );
 		data = readw( board->regs->Window_Data );

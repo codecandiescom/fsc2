@@ -511,8 +511,7 @@ static void pci_irq_A_handler( Board *board, u16 status )
 	int i;
 
 
-	for ( i = IRQ_AI_FIFO; i <= IRQ_AI_START; i++ )
-	{
+	for ( i = IRQ_AI_FIFO; i <= IRQ_AI_START; i++ ) {
 		if ( ! ( board->irq_hand[ i ].enabled &&
 			 status & board->irq_hand[ i ].status_bit_pattern ) )
 			continue;
@@ -548,8 +547,7 @@ static void pci_irq_B_handler( Board *board, u16 status )
 	int i;
 
 
-	for ( i = IRQ_AO_FIFO; i <= IRQ_AO_START; i++ )
-	{
+	for ( i = IRQ_AO_FIFO; i <= IRQ_AO_START; i++ ) {
 		if ( ! ( board->irq_hand[ i ].enabled &&
 			 status & board->irq_hand[ i ].status_bit_pattern ) )
 			continue;
