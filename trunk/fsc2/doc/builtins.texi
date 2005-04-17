@@ -2378,7 +2378,7 @@ indicating the meaning of the following elements:
 @table @samp
 @item 0
 The mouse pointer is not within the main display area of one of the
-display windows, the requested mouse buttons aren't pressed , or no
+display windows, the requested mouse buttons aren't pressed, or no
 curve is shown at the moment in the currently active window (possibly
 because there's no scaling set for the curve). The remaining elements
 (except the last) of the array have no meaning.
