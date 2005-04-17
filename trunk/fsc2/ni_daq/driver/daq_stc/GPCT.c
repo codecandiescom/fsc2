@@ -627,8 +627,8 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
 	board->func->stc_writew( board, STC_Gi_Command( counter ), Gi_Load );
 	board->stc.Gi_Command[ counter ] &= ~ Gi_Load;
 
-	/* Output is usually not relevant for a counter, but since something
-	   must be specified default to something nearly useless, e.g. the TC
+	/* Output is usually not relevant for a counter but, since something
+	   must be specified, default to something nearly useless, e.g. the TC
 	   signal which only happens when the counter overflows. */
 
 	mode = 1 << Gi_Output_Mode_Shift;
