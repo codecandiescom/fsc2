@@ -311,9 +311,9 @@ static int rulbus_open( struct inode *inode_p, struct file *file_p )
         }
 
         if ( rulbus_epp_init( ) != 0  ) {
-                printk( KERN_NOTICE "Rulbus interface not present.\n" );
                 parport_release( rulbus.dev );
                 spin_unlock( &rulbus.spinlock );
+                printk( KERN_NOTICE "Rulbus interface not present.\n" );
                 return -EIO;
         }
 

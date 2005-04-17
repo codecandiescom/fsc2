@@ -10,14 +10,14 @@ limited to 4. But by changing 'ME6X00_MAX_BOARDS' in 'me6x00_drv.h'
 this can easily be changed.
 
 
-A process that opens the device file for a board gets granted exclusive
-access to the board until it closes the device file.
+A process that opens the device file for a board gets granted
+exclusive access to the board until it closes the device file.
 
 
-There are only three operations that can be used with the driver: Beside
-doing an open() and close()/release() on a board all dealings with a
-board are done vio ioctl() calls. The following ioctl() requests are
-currently implemented:
+There are only three operations that can be used with the driver:
+Beside doing an open() and close()/release() on a board all
+dealings with a board are done vio ioctl() calls. The following
+ioctl() requests are currently implemented:
 
     ME6X00_SET_MODE
     ME6X00_START_STOP_CONV
@@ -42,8 +42,8 @@ single, continuous or wrap-around. For ME-6000 cards only single
 output mode can be set,, while for ME-6100 cards the continuous and
 wrap-around mode can be set with the 4 lowest numbered DACs.
 
-The argument is a structure of type me6x00_mode_st, which is a typedef
-of
+The argument is a structure of type me6x00_mode_st, which is a
+typedef of
 
     typedef struct {
     	me6x00_dac_et  dac;
@@ -51,8 +51,9 @@ of
     } me6x00_mode_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
 The second member is the mode to be set, an integer between 0 and 2.
@@ -68,8 +69,8 @@ This ioctl() can be used to stop or resume output in continuous or
 wrap-around mode (only possible for the 4 lowest numbered DACs of
 ME-6100 cards).
 
-The argument is a structure of type me6x00_mode_st, which is a typedef
-of
+The argument is a structure of type me6x00_mode_st, which is a
+typedef of
 
     typedef struct {
     	me6x00_dac_et    dac;
@@ -77,26 +78,28 @@ of
     } me6x00_stasto_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
-The second member determines if the output is stopped or restarted. It
-is an integer and when set to 0 (or ME6X00_START) will restart output,
-while when set to a non-zero value (or ME6X00_STOP) will stop output.
+The second member determines if the output is stopped or restarted.
+It is an integer and when set to 0 (or ME6X00_START) will restart 
+output, while when set to a non-zero value (or ME6X00_STOP) will
+stop output.
 
 
 ===================================================================
 
     ME6X00_CLEAR_ENABLE_FIFO
 
-This ioctl() allows to either enable the FIFO for a DAC or to disable
-(and at the same time clear) the FIFO (only possible for the 4 lowest 
-numbered DACs of ME-6100 cards). This will also automatially stop all
-output in continuous or wrap-around mode.
+This ioctl() allows to either enable the FIFO for a DAC or to
+disable (and at the same time clear) the FIFO (only possible for
+the 4 lowest  numbered DACs of ME-6100 cards). This will also
+automatially stop all output in continuous or wrap-around mode.
 
-The argument is a structure of type me6x00_endis_st, which is a typedef
-of
+The argument is a structure of type me6x00_endis_st, which is a
+typedef of
 
     typedef struct {
     	me6x00_dac_et   dac;
@@ -104,26 +107,29 @@ of
     } me6x00_endis_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
-The second member determines if the FIFO is enabled or disabled and cleared.
-The set to 0 (or ME6X00_ENABLE) the FIFO is enabled, when set to a non-zero
-value (or ME6X00_DISABLE) the FIFO is disabled and cleared.
+The second member determines if the FIFO is enabled or disabled and
+cleared. If set to 0 (or ME6X00_ENABLE) the FIFO is enabled, when
+set to a non-zero value (or ME6X00_DISABLE) the FIFO is disabled
+and cleared.
 
 
 ===================================================================
 
     ME6X00_ENDIS_EXTRIG
 
-This ioctl() allows to enable or disable starting output in continuous
-or wrap-around mode by an external trigger (only possible for the 4
-lowest  numbered DACs of ME-6100 cards). This will also automatially
-stop all output in continuous or wrap-around mode.
+This ioctl() allows to enable or disable starting output in
+continuous or wrap-around mode by an external trigger (only
+possible for the 4 lowest  numbered DACs of ME-6100 cards). This
+will also automatially stop all output in continuous or wrap-
+around mode.
 
-The argument is a structure of type me6x00_endis_st, which is a typedef
-of
+The argument is a structure of type me6x00_endis_st, which is a
+typedef of
 
     typedef struct {
     	me6x00_dac_et   dac;
@@ -131,26 +137,28 @@ of
     } me6x00_endis_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
-The second member determines if the external trigger is eenabled or disabled.
-The set to 0 (or ME6X00_ENABLE) the external trigger is enabled, when set to
-a non-zero value (or ME6X00_DISABLE) is's disabled.
+The second member determines if the external trigger is enabled or
+disabled. If set to 0 (or ME6X00_ENABLE) the external trigger is
+enabled, when set to a non-zero value (or ME6X00_DISABLE) it's
+disabled.
 
 
 ===================================================================
 
     ME6X00_RIFA_EXTRIG
 
-This ioctl() can be used to set the slope of the external trigger to either
-rising or falling (only possible for the 4 lowest  numbered DACs of ME-6100
-cards). This will also automatially stop all output in continuous or wrap-
-around mode.
+This ioctl() can be used to set the slope of the external trigger
+to either rising or falling (only possible for the 4 lowest 
+numbered DACs of ME-6100 cards). This will also automatially stop
+all output in continuous or wrap-around mode.
 
-The argument is a structure of type me6x00_rifa_st, which is a typedef
-of
+The argument is a structure of type me6x00_rifa_st, which is a
+typedef of
 
     typedef struct {
     	me6x00_dac_et   dac;
@@ -158,28 +166,30 @@ of
     } me6x00_rifa_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
-The second argument determines the slope of the external trigger. if set to
-0 (or ME6X00_RISING) the rising slope of an external voltage willl be used
-for the trigger, when set to a non-zero value (or ME6X00_FALLING) it's set
-to the falling edge.
+The second argument determines the slope of the external trigger.
+If set to 0 (or ME6X00_RISING) the rising slope of an external
+voltage will be used for the trigger, when set to a non-zero value
+(or ME6X00_FALLING) it's set to the falling edge.
 
 
 ===================================================================
 
     ME6X00_SET_TIMER
 
-This ioctl() can be used to set the rate at which new voltages (according
-to the values stored in the FIFO are output at a DAC (only possible for
-the 4 lowest  numbered DACs of ME-6100 cards). The time between new
-voltages is given in the number of ticks where a tick has a length of
-30.30 ns (controlled by the internal clock running with 33 MHz).
+This ioctl() can be used to set the rate at which new voltages
+(according to the values stored in the FIFO are output at a DAC
+(only possible for the 4 lowest  numbered DACs of ME-6100 cards).
+The time between new voltages is given in the number of ticks
+where a tick has a length of 30.30 ns (controlled by the internal
+clock running with 33 MHz).
 
-The argument is a structure of type me6x00_rifa_st, which is a typedef
-of
+The argument is a structure of type me6x00_rifa_st, which is a
+typedef of
 
 typedef struct {
 	me6x00_dac_et   dac;
@@ -187,12 +197,12 @@ typedef struct {
 } me6x00_timer_st;
 
 
-The first member of the structure is the number of DAC, an integer between
-0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc. can be used.
+The first member of the structure is the number of DAC, an integer
+between 0 and 4. Alternatively, also ME6X00_DAC00, ME6X00_DAC01 etc.
+can be used.
 
 
-The second member is the number of ticks as described above. It must be a
-number between 42 (for the highest possible rate of 500 kHz) and
+The second member is the number of ticks as described above. It must
+be a number between 42 (for the highest possible rate of 500 kHz) and
 4,294,967,295 (hexadicimal 0xFFFFFFFF), corresponding to about 130 s
 between the output of a new voltage.
-
