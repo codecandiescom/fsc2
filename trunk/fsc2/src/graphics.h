@@ -74,6 +74,9 @@
 
 #define NUM_1D_COLS ( MAX_CURVES + 6 )
 
+#define WINDOW_1D   1
+#define WINDOW_2D   2
+#define WINDOW_CUT  4
 
 typedef struct Scaled_Point Scaled_Point_T;
 typedef struct Marker_1d Marker_1d_T;
@@ -231,6 +234,8 @@ struct Graphics {
 							   2 for 2d only, 3 for both 1d and 2d */
 
 	Display *d;             /* pointer to display structure */
+
+	unsigned focus;         /* tells which window has the focus */
 
 	FL_COLOR colors[ MAX_CURVES ];
 
@@ -399,6 +404,7 @@ void fs_vert_rescale_1d( void );
 void fs_vert_rescale_2d( void );
 void redraw_canvas_2d( Canvas_T *c );
 void change_mode( long mode, long width );
+int form_event_handler( FL_FORM *form, void *xevent );
 
 
 #endif   /* ! GRAPHICS_HEADER */

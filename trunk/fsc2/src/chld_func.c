@@ -1947,19 +1947,15 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 
 		result[ 0 ] = 0.0;
 
-		if ( buttons == -1 || G.button_state == buttons )
+		if ( buttons < 0 || G.button_state == buttons )
 		{
-			if ( G.dim & 1 )
+			if ( G.focus & WINDOW_1D )
 				result[ 0 ] = ( double ) get_mouse_pos_1d( result + 1, &keys );
-
-			if ( result[ 0 ] == 0.0 && G.dim & 2 )
-			{
+			else if ( G.focus & WINDOW_2D )
 				result[ 0 ] = ( double ) get_mouse_pos_2d( result + 1, &keys );
-
-				if ( result[ 0 ] == 0.0 && G_cut.is_shown )
-					result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1,
-																&keys );
-			}
+			else if ( G.focus & WINDOW_CUT )
+				result[ 0 ] = ( double ) get_mouse_pos_cut( result + 1,
+															&keys );
 		}
 
 		if ( result[ 0 ] == 0.0 )

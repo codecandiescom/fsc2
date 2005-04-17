@@ -2704,6 +2704,13 @@ void change_mode( long mode, long width )
 }
 
 
+/*--------------------------------------------------------------*
+ * Function for dealing with X events for the different display
+ * windows in order to keep track which one currently has the
+ * focus (required for the function for determining the mouse
+ * position).
+ *--------------------------------------------------------------*/
+
 int form_event_handler( FL_FORM *form, void *xevent )
 {
 	if ( ( ( XEvent * ) xevent )->type == FocusIn )
