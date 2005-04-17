@@ -537,7 +537,7 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
 
 	board->func->stc_writew( board, STC_Gi_Mode( counter ), mode );
 
-	/* Finally set counter to count downward and if necessary arm it */
+	/* Finally set counter to count downward and, if necessary, arm it */
 
 	board->func->stc_writew( board, STC_Gi_Command( counter ), cmd );
 
