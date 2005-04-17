@@ -747,7 +747,7 @@ MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number of device file" );
 MODULE_PARM( base, "i" );
 MODULE_PARM_DESC( base, "Base address of parallel port the RULBUS is "
-            "connected to" );
+				  "connected to" );
 MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
 MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
 
