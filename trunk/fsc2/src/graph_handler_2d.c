@@ -1762,11 +1762,14 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 	fl_get_win_mouse( FL_ObjWin( G_2d.canvas.obj ),
 					  ppos + X, ppos + Y, keymask );
 
-	/* Return value indicating failure when there's either no active curve or
-	   no scaling has been set for the active curve */
+	/* Return value indicating failure when there's either no active curve,
+	   no scaling has been set for the active curve or the mouse isn't within
+	   the canvas */
 
 	if ( G_2d.active_curve == -1 ||
-		 ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+		 ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set ||
+		 ppos[ X ] < 0 || ppos[ X ] > ( int ) G_2d.canvas.w - 1 ||
+		 ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_2d.canvas.h - 1 )
 		return 0;
 
 	cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -1774,13 +1777,6 @@ int get_mouse_pos_2d( double *pa, unsigned int *keymask )
 	pa[ X ] = ( ppos[ X ] + cv->w / 2 ) / cv->s2d[ X ] - cv->shift[ X ];
 	pa[ Y ] = ( G_2d.canvas.h - 1.0 - ppos[ Y ] + cv->h / 2 )
 			  / cv->s2d[ Y ] - cv->shift[ Y ];
-
-	/* Return value indicating failure when the mouse isn't within the
-	   display area */
-
-	if ( pa[ X ] < 0 || floor( pa[ X ] ) >= G_2d.nx ||
-		 pa[ Y ] < 0 || floor( pa[ Y ] ) >= G_2d.ny )
-		return 0;
 
 	a_index = G_2d.nx * lrnd( floor( pa[ Y ] ) ) + lrnd( floor( pa[ X ] ) );
 

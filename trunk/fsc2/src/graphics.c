@@ -53,6 +53,7 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj );
 static void canvas_off( Canvas_T *c, FL_OBJECT *obj );
 static void graphics_free( void );
 
+
 static Graphics_T *G_stored = NULL;
 static Graphics_1d_T *G_1d_stored = NULL;
 static Graphics_2d_T *G_2d_stored = NULL;
@@ -90,10 +91,13 @@ void start_graphics( void )
 {
 	long i;
 	unsigned diff;
+	Window w;
 
 
 	if ( ! display_has_been_shown )
 		set_defaults( );
+
+	G.focus = 0;
 
 	G.font = NULL;
 
@@ -165,20 +169,26 @@ void start_graphics( void )
 
 	if ( ! G.is_init || G.dim & 1 )
 	{
-		fl_show_form( GUI.run_form_1d->run_1d, GUI.display_1d_has_pos ?
-					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, G.mode == NORMAL_DISPLAY ?
-					  "fsc2: 1D-Display" :
-					  "fsc2: 1D-Display (sliding window)" );
+		w = fl_show_form( GUI.run_form_1d->run_1d, GUI.display_1d_has_pos ?
+						  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, G.mode == NORMAL_DISPLAY ?
+						  "fsc2: 1D-Display" :
+						  "fsc2: 1D-Display (sliding window)" );
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
+		fl_addto_selected_xevent( w, FocusIn | FocusOut );
+		fl_register_raw_callback( GUI.run_form_1d->run_1d, FL_ALL_EVENT,
+								  form_event_handler );
 	}
 
 	if ( G.dim & 2 )
 	{
-		fl_show_form( GUI.run_form_2d->run_2d, GUI.display_2d_has_pos ?
-					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: 2D-Display" );
+		w = fl_show_form( GUI.run_form_2d->run_2d, GUI.display_2d_has_pos ?
+						  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+						  FL_FULLBORDER, "fsc2: 2D-Display" );
 		G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
+		fl_addto_selected_xevent( w, FocusIn | FocusOut );
+		fl_register_raw_callback( GUI.run_form_2d->run_2d, FL_ALL_EVENT,
+								  form_event_handler );
 	}
 
 	display_has_been_shown = SET;
@@ -1566,8 +1576,8 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
 								   PointerMotionMask | PointerMotionHintMask |
 								   ButtonMotionMask );
-		fl_add_selected_xevent( FL_ObjWin( obj ),
-								Button1MotionMask | Button2MotionMask );
+		fl_addto_selected_xevent( FL_ObjWin( obj ),
+								  Button1MotionMask | Button2MotionMask );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
 		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
@@ -2693,6 +2703,30 @@ void change_mode( long mode, long width )
 	redraw_all_1d( );
 }
 
+
+int form_event_handler( FL_FORM *form, void *xevent )
+{
+	if ( ( ( XEvent * ) xevent )->type == FocusIn )
+	{
+		if ( form == GUI.run_form_1d->run_1d )
+			G.focus |= WINDOW_1D;
+		else if ( form == GUI.run_form_2d->run_2d )
+			G.focus |= WINDOW_2D;
+		else if ( form == GUI.cut_form->cut )
+			G.focus |= WINDOW_CUT;
+	}
+	else if ( ( ( XEvent * ) xevent )->type == FocusOut )
+	{
+		if ( form == GUI.run_form_1d->run_1d )
+			G.focus &= ~ WINDOW_1D;
+		else if ( form == GUI.run_form_2d->run_2d )
+			G.focus &= ~ WINDOW_2D;
+		else if ( form == GUI.cut_form->cut )
+			G.focus &= ~ WINDOW_CUT;
+	}
+
+	return 0;
+}
 
 /*
  * Local variables:

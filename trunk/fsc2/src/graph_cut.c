@@ -120,6 +120,7 @@ void cut_show( int dir, long u_index )
 	int flags;
 	int x, y;
 	unsigned int h, w;
+	Window win;
 
 
 	/* Don't do anything if no curve is currently displayed or if mouse didn't
@@ -176,9 +177,13 @@ void cut_show( int dir, long u_index )
 								  GUI.cut_win_y, GUI.cut_win_width,
 								  GUI.cut_win_height );
 
-		fl_show_form( GUI.cut_form->cut, GUI.cut_win_has_pos ?
-					  FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-					  FL_FULLBORDER, "fsc2: Cross section" );
+		win = fl_show_form( GUI.cut_form->cut, GUI.cut_win_has_pos ?
+							FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+							FL_FULLBORDER, "fsc2: Cross section" );
+
+		fl_addto_selected_xevent( win, FocusIn | FocusOut );
+		fl_register_raw_callback( GUI.cut_form->cut, FL_ALL_EVENT,
+								  form_event_handler );
 
 		fl_winminsize( GUI.cut_form->cut->window,
 					   GC_sizes.WIN_MIN_WIDTH, GC_sizes.WIN_MIN_HEIGHT );
@@ -313,8 +318,8 @@ static void cut_setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 		fl_remove_selected_xevent( FL_ObjWin( obj ),
 								   PointerMotionMask | PointerMotionHintMask |
 			                       ButtonMotionMask );
-		fl_add_selected_xevent( FL_ObjWin( obj ),
-								Button1MotionMask | Button2MotionMask );
+		fl_addto_selected_xevent( FL_ObjWin( obj ),
+								  Button1MotionMask | Button2MotionMask );
 
 		c->font_gc = XCreateGC( G.d, FL_ObjWin( obj ), 0, 0 );
 		XSetForeground( G.d, c->font_gc, fl_get_pixel( FL_BLACK ) );
