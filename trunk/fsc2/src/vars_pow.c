@@ -99,10 +99,7 @@ static Var_T *vars_pow_i( Var_T *v1, Var_T *v2, bool exc )
 			new_var = vars_ref_pow( v1, v2, exc );
 			break;
 
-#ifdef NDEBUG
-		default :
-			break;
-#else
+#ifndef NDEBUG
 		default :
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
