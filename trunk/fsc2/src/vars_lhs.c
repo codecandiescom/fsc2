@@ -697,8 +697,12 @@ static void vars_do_init( Var_T *src, Var_T *dest )
 			}
 			return;
 
+#ifndef NDEBUG
 		default :
-			fsc2_assert( 1 == 0 );
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+#endif
 	}
 }
 
@@ -914,8 +918,12 @@ static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
 						cv->val.dpnt[ i ] = 0.0;
 					break;
 
+#ifndef NDEBUG
 				default :
-					fsc2_assert( 1 == 0 );
+					eprint( FATAL, UNSET, "Internal error detected at "
+							"%s:%d.\n", __FILE__, __LINE__ );
+					THROW( EXCEPTION );
+#endif
 			}
 		}
 
@@ -934,8 +942,12 @@ static Var_T *vars_lhs_simple_pointer( Var_T *a, Var_T *cv, Var_T *v,
 			case INT_REF : case FLOAT_REF :
 				return vars_push( REF_PTR, cv->val.vptr[ ind ] );
 
+#ifndef NDEBUG
 			default :
-				fsc2_assert( 1 == 0 );
+				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+#endif
 		}
 
 	return v->val.lval >= 0 ?
@@ -1013,8 +1025,12 @@ static Var_T *vars_lhs_range_pointer( Var_T *a, Var_T *cv, Var_T *v, int dim )
 						cv->val.dpnt[ i ] = 0.0;
 					break;
 
+#ifndef NDEBUG
 				default :
-					fsc2_assert( 1 == 0 );
+					eprint( FATAL, UNSET, "Internal error detected at "
+							"%s:%d.\n", __FILE__, __LINE__ );
+					THROW( EXCEPTION );
+#endif
 			}
 		}
 

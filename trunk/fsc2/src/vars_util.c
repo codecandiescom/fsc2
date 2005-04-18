@@ -235,9 +235,12 @@ Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
 			break;
 
-		default:               /* this should never happen... */
-			fsc2_assert( 1 == 0 );
-			break;
+#ifndef NDEBUG
+		default :
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+#endif
 	}
 
 	/* Pop the variables from the stack */
@@ -286,9 +289,12 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
 				   "with string variables.\n" );
 			THROW( EXCEPTION );
 
-		default:               /* this should never happen... */
-			fsc2_assert( 1 == 0 );
-			break;
+#ifndef NDEBUG
+		default :
+			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+					__FILE__, __LINE__ );
+			THROW( EXCEPTION );
+#endif
 	}
 
 	/* Pop the variables from the stack */

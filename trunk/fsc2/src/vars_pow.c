@@ -260,7 +260,6 @@ static Var_T *vars_int_var_pow( Var_T *v1, Var_T *v2, bool exc )
 			vars_pop( v1 );
 			if ( new_var != v2 )
 				vars_pop( v2 );
-
 			break;
 
 #ifndef NDEBUG
@@ -409,7 +408,6 @@ static Var_T *vars_float_var_pow( Var_T *v1, Var_T *v2, bool exc )
 			vars_pop( v1 );
 			if ( v2 != new_var )
 				vars_pop( v2 );
-
 			break;
 
 #ifndef NDEBUG
@@ -524,7 +522,6 @@ static Var_T *vars_int_arr_pow( Var_T *v1, Var_T *v2, bool exc )
 			vars_pop( v1 );
 			if ( new_var != v2 )
 				vars_pop( v2 );
-
 			break;
 
 #ifndef NDEBUG
@@ -617,7 +614,6 @@ static Var_T *vars_float_arr_pow( Var_T *v1, Var_T *v2, bool exc )
 			vars_pop( v1 );
 			if ( new_var != v2 )
 				vars_pop( v2 );
-
 			break;
 
 #ifndef NDEBUG
@@ -691,7 +687,6 @@ static Var_T *vars_ref_pow( Var_T *v1, Var_T *v2, bool exc )
 				vars_pop( v1 );
 			if ( v2 != new_var )
 				vars_pop( v2 );
-
 			break;
 
 #ifndef NDEBUG
