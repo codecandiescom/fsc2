@@ -63,28 +63,11 @@ void vars_assign( Var_T *src, Var_T *dest )
 #ifndef NDEBUG
 	/* Check that both variables exist and src has a reasonable type */
 
-	if ( ! vars_exist( src ) || ! vars_exist( dest ) )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
-
-	if ( src->type == STR_VAR )
-	{
-		print( FATAL, "Variable of type STRING can't be used in this "
-			   "context.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( ! ( src->type & ( INT_VAR | FLOAT_VAR |
+	if ( ! vars_exist( src ) || ! vars_exist( dest ) || src->type == STR_VAR ||
+		 ! ( src->type & ( INT_VAR | FLOAT_VAR |
 						   INT_ARR | FLOAT_ARR |
 						   INT_REF | FLOAT_REF ) ) )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 #endif
 
 	/* First we distinguish between the different possible types of variables
@@ -104,12 +87,8 @@ void vars_assign( Var_T *src, Var_T *dest )
 			count = vars_assign_to_nd( src, dest );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	vars_pop( dest );
@@ -264,12 +243,8 @@ static long vars_assign_to_nd( Var_T *src, Var_T *dest )
 			}
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return count;

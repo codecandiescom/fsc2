@@ -89,12 +89,8 @@ Var_T *vars_negate( Var_T *v )
 
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	if ( new_var != v )
@@ -235,12 +231,8 @@ Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	/* Pop the variables from the stack */
@@ -289,12 +281,8 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
 				   "with string variables.\n" );
 			THROW( EXCEPTION );
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	/* Pop the variables from the stack */

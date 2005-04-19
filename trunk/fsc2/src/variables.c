@@ -406,12 +406,10 @@ Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 	ssize_t i;
 
 
+#ifndef NDEBUG
 	if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
+#endif
 
 	nv = vars_push( type, NULL );
 	nv->from = NULL;
@@ -423,15 +421,11 @@ Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 	for ( i = 0; i < dim; i++ )
 	{
 		sizes[ i ] = ( ssize_t ) va_arg( ap, long );
+
+#ifndef NDEBUG
 		if ( sizes[ i ] == 0 )
-		{
-			va_end( ap );
-			T_free( sizes );
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
-	}
+			fsc2_assert( 1 == 0 );
+#endif
 	
 	va_end( ap );
 
@@ -658,14 +652,8 @@ Var_T *vars_push( Var_Type_T type, ... )
 			nsv->val.fnct = va_arg( ap, struct Func * );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			T_free( nsv );
-			va_end( ap );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	va_end( ap );
@@ -940,11 +928,7 @@ Var_T *vars_pop( Var_T *v )
 		prev = stack;
 
 	if ( stack == NULL )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 #endif
 
 	/* Now get rid of the variable */
@@ -1034,21 +1018,13 @@ void vars_check( Var_T *v, int types )
 	   though this clearly is a bug) */
 
 	if ( v == NULL )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 
 	/* Being real paranoid we check that the variable exists at all -
 	   probably this can vanish later. */
 
 	if ( ! vars_exist( v ) )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 #endif
 
 	/* Check that the variable has a value assigned to it */

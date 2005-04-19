@@ -102,12 +102,8 @@ Var_T *vars_add( Var_T *v1, Var_T *v2 )
 			new_var = vars_ref_add( v1, v2 );
 			break;
 
-#ifndef NDEBUG
-			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 		}
 
 	return new_var;
@@ -224,12 +220,8 @@ static Var_T *vars_int_var_add( Var_T *v1, Var_T *v2 )
 				vars_pop( v2 );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return new_var;
@@ -317,12 +309,8 @@ static Var_T *vars_float_var_add( Var_T *v1, Var_T *v2 )
 				vars_pop( v2 );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return new_var;
@@ -405,12 +393,8 @@ static Var_T *vars_int_arr_add( Var_T *v1, Var_T *v2 )
 				vars_pop( v2 );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return new_var;
@@ -487,12 +471,8 @@ static Var_T *vars_float_arr_add( Var_T *v1, Var_T *v2 )
 				vars_pop( v2 );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return new_var;
@@ -565,12 +545,8 @@ static Var_T *vars_ref_add( Var_T *v1, Var_T *v2 )
 				vars_pop( v2 );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 	return new_var;

@@ -544,12 +544,8 @@ static void f_objdel_parent( Var_T *v )
 			vars_pop( f_mdelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 }
 

@@ -819,8 +819,7 @@ FILE *filter_edl( const char *name, FILE *fp )
 				   "of system resources.\n" );
 #ifndef NDEBUG
 		else
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
+			fsc2_assert( 1 == 0 );
 #endif
 		close( pd[ 0 ] );
 		return NULL;
@@ -1006,11 +1005,7 @@ Var_T *convert_to_channel_number( const char *channel_name )
 
 #ifndef NDEBUG
 	if ( channel == NUM_CHANNEL_NAMES )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 #endif
 
 	return vars_push( INT_VAR, channel );

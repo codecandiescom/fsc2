@@ -95,8 +95,7 @@ void accept_new_data( bool empty_queue )
 	{
 		/* Attach to the shared memory segment pointed to by the oldest entry
 		   in the message queue - even though this should never fail it
-		   sometimes does (seems to happen with 2.0 kernels only) so we better
-		   have a bit more of error output until this is finally sorted out. */
+		   sometimes does (with 2.0 kernels only) */
 
 		if ( ( buf = attach_shm( Comm.MQ->slot[ Comm.MQ->low ].shm_id ) )
 			 == NULL )
@@ -270,12 +269,8 @@ static void unpack_and_accept( int dim, char *ptr )
 				ptr_next = ptr + len;
 				break;
 
-#ifndef NDEBUG
-			default :
-				eprint( FATAL, UNSET, "Internal communication error at "
-						"%s:%d.\n", __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 		}
 
 		if ( dim == DATA_1D )
@@ -429,12 +424,8 @@ static void other_data_request( int dim, int type, char *ptr )
 			change_mode( mode, width );
 			break;
 
-#ifndef NDEBUG
-		default :                             /* unknown command */
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 }
 
@@ -1131,21 +1122,13 @@ static long get_number_of_new_points( char **ptr, Var_Type_T type )
 			}
 			break;
 
-#ifndef NDEBUG
 		default :
-			eprint( FATAL, UNSET, "Internal communication error at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-#endif
+			fsc2_assert( 1 == 0 );     /* This can't happen... */
 	}
 
 #ifndef NDEBUG
 	if ( len <= 0 )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d, number of "
-				"points to be drawn: %ld.\n", __FILE__, __LINE__, len );
-		THROW( EXCEPTION );
-	}
+		fsc2_assert( 1 == 0 );
 #endif
 
 	return len;
