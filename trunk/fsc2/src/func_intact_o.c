@@ -665,8 +665,8 @@ Var_T *f_ovalue( Var_T *v )
 	if ( ( io->type == INT_INPUT || io->type == INT_OUTPUT ) &&
 		 v->type == FLOAT_VAR )
 	{
-		print( SEVERE, "Float number used as integer input or output object "
-			   "value.\n" );
+		print( SEVERE, "Float number used as integer input or output "
+			   "object value.\n" );
 		io->val.lval = lrnd( v->val.dval );
 	}
 	else
@@ -760,7 +760,7 @@ static Var_T *f_ovalue_child( Var_T *v )
 	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
 	pos += sizeof EDL.Lc;
 
-	memcpy( pos, &ID, sizeof ID );          /* sliders ID */
+	memcpy( pos, &ID, sizeof ID );          /* object ID */
 	pos += sizeof ID;
 
 	memcpy( pos, &state, sizeof state );    /* needs input setting ? */

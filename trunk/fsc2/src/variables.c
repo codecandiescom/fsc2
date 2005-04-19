@@ -426,7 +426,8 @@ Var_T *vars_push_matrix( Var_Type_T type, int dim, ... )
 		if ( sizes[ i ] == 0 )
 			fsc2_assert( 1 == 0 );
 #endif
-	
+	}
+
 	va_end( ap );
 
 	TRY
