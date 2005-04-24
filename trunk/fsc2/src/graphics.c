@@ -2715,21 +2715,26 @@ int form_event_handler( FL_FORM *form, void *xevent )
 {
 	if ( ( ( XEvent * ) xevent )->type == FocusIn )
 	{
-		if ( form == GUI.run_form_1d->run_1d )
+		if ( G.dim & 1 && form == GUI.run_form_1d->run_1d )
 			G.focus |= WINDOW_1D;
-		else if ( form == GUI.run_form_2d->run_2d )
-			G.focus |= WINDOW_2D;
-		else if ( form == GUI.cut_form->cut )
-			G.focus |= WINDOW_CUT;
+		else if ( G.dim & 2 )
+		{
+			if ( form == GUI.run_form_2d->run_2d )
+				G.focus |= WINDOW_2D;
+			else if ( form == GUI.cut_form->cut )
+				G.focus |= WINDOW_CUT;
+		}
 	}
 	else if ( ( ( XEvent * ) xevent )->type == FocusOut )
 	{
-		if ( form == GUI.run_form_1d->run_1d )
+		if ( G.dim & 1 && form == GUI.run_form_1d->run_1d )
 			G.focus &= ~ WINDOW_1D;
-		else if ( form == GUI.run_form_2d->run_2d )
-			G.focus &= ~ WINDOW_2D;
-		else if ( form == GUI.cut_form->cut )
-			G.focus &= ~ WINDOW_CUT;
+		else if ( G.dim & 2 ) {
+			if ( form == GUI.run_form_2d->run_2d )
+				G.focus &= ~ WINDOW_2D;
+			else if ( form == GUI.cut_form->cut )
+				G.focus &= ~ WINDOW_CUT;
+		}
 	}
 
 	return 0;
