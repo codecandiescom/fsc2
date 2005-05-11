@@ -25,9 +25,9 @@
 #include "rb_pulser.h"
 
 
-/*--------------------------------*/
-/* global variables of the module */
-/*--------------------------------*/
+/*--------------------------------*
+ * global variables of the module *
+ *--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -36,6 +36,11 @@ const char generic_type[ ] = DEVICE_TYPE;
 RB_Pulser_T rb_pulser;
 Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
 Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
+
+
+/*-------------------------------*
+ * local functions and variables *
+ *-------------------------------*/
 
 static void rb_pulser_card_setup( void );
 static bool Is_running_at_start;
