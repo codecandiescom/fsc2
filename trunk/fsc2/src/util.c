@@ -524,15 +524,13 @@ void lower_permissions( void )
 
 char *handle_escape( char *str )
 {
-	char *cp;
-	int esc_len;
+	char *cp = str;
+	size_t esc_len;
 
 
-	for ( cp = str; *cp != '\0'; cp++)
-	{
-		if ( *cp != '\\' )
-			continue;
+	fsc2_assert( str != NULL );
 
+	while ( ( cp = strchr( cp, '\\' ) ) != NULL )
 		switch ( *( cp + 1 ) )
 		{
 			case '\0' :
@@ -542,85 +540,85 @@ char *handle_escape( char *str )
 				break;
 
 			case 'a' :
-				*cp = '\a';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\a';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case 'b' :
-				*cp = '\b';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\b';
+				memmove( cp, cp + 1, strlen( cp ) );
+				cp++;
 				break;
 
 			case 'f' :
-				*cp = '\f';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\f';
+				memmove( cp, cp + 1, strlen( cp ) );
+				cp++;
 				break;
 
 			case 'n' :
-				*cp = '\n';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\n';
+				memmove( cp, cp + 1, strlen( cp ) );
+				cp++;
 				break;
 
 			case 'r' :
-				*cp = '\r';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\r';
+				memmove( cp, cp + 1, strlen( cp ) );
+				cp++;
 				break;
 
 			case 't' :
-				*cp = '\t';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\t';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case 'v' :
-				*cp = '\v';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\v';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case '\\' :
-				*cp = '\\';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\\';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case '\?' :
-				*cp = '\?';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\?';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case '\'' :
-				*cp = '\'';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\'';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case '\"' :
-				*cp = '\"';
-				memmove( cp + 1, cp + 2, strlen( cp + 1 ) );
+				*cp++ = '\"';
+				memmove( cp, cp + 1, strlen( cp ) );
 				break;
 
 			case 'x' :
-				if ( ! isdigit( *( cp + 2 ) ) &&
-					 ( toupper( *( cp + 2 ) ) < 'A' ||
-					   toupper( *( cp + 2 ) ) > 'F' ) )
+				if ( ! isxdigit( *( cp + 2 ) ) )
 				{
 					print( FATAL, "'\\x' with no following hex digits "
 						   "in string.\n" );
 					THROW( EXCEPTION );
 				}
 				esc_len = 1;
-				*cp = *( cp + 2 )
-					  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' + 10 ) );
+				*cp = toupper( *( cp + 2 ) )
+					  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' - 10 ) );
 
-				if ( isdigit( *( cp + 3 ) ) ||
-					 ( toupper( *( cp + 3 ) ) >= 'A' &&
-					   toupper( *( cp + 3 ) ) <= 'F' ) )
+				if ( isxdigit( *( cp + 3 ) ) )
 				{
 					esc_len++;
 					*cp = *cp * 16
-					      + ( *( cp + 3 )
-						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' + 10 ) ) );
+						  + toupper( *( cp + 3 ) )
+						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' - 10 ) );
 				}
 
-				memmove( cp + 1, cp + 2 + esc_len,
-						 strlen( cp + 1 + esc_len ) );
+				cp++;
+				memmove( cp, cp + 1 + esc_len, strlen( cp + esc_len ) );
 				break;
 
 			default :
@@ -640,17 +638,17 @@ char *handle_escape( char *str )
 					esc_len++;
 
 					if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
-						 *cp < 0x1F )
+						 *cp <= 0x1F )
 					{
 						*cp = *cp * 8 + *( cp + 3 ) - '0';
 						esc_len++;
 					}
 				}
 
-				memmove( cp + 1, cp + 1 + esc_len, strlen( cp + esc_len ) );
+				cp++;
+				memmove( cp, cp + esc_len, strlen( cp + esc_len ) + 1 );
 				break;
 		}
-	}
 
 	return str;
 }

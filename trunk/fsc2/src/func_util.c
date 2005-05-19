@@ -81,7 +81,7 @@ Var_T *f_print( Var_T *v )
 	/* Make sure the first argument is a string */
 
 	vars_check( v, STR_VAR );
-	sptr = cp = v->val.sptr;
+	sptr = v->val.sptr;
 
 	/* Do we also have to print while the TEST is running ? */
 
