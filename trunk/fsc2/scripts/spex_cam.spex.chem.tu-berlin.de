@@ -433,7 +433,6 @@ sub ll_valid {
 # setting of the laser line
 
 sub get_line {
-	my $reply;
 	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXX" );
 
 	$f->autoflush( 1 );
@@ -448,7 +447,7 @@ VARIABLES:
 LL;
 EXPERIMENT:
 LL = round( 1000 * monochromator_laser_line( ) );
-print( "#.###", LL / 1000, ( LL % 1000 ) / 100,
+print( "#.###\\n", LL / 1000, ( LL % 1000 ) / 100,
        ( LL % 100 ) / 10, LL % 10 );
 EOF
 
@@ -465,7 +464,8 @@ EOF
 		return;
 	}
 
-	$reply = <$g>;
+	my $reply = <$g>;
+	chomp $reply;
 	close $g;
 	unlink $fn;
 
