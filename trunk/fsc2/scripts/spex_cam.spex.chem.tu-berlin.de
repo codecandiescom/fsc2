@@ -40,10 +40,10 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 my $Dead_Points = 5;
 
 
-# This variable is the minimum distance a wavenumber may have from the
-# laser line. In most cases the user is getting asked if he want's to
-# really continue if he tries to use one that's nearer (the script for
-# setting up the ROI and binning does not accept them at all).
+# This variable is the minimum distance a wavenumber may have from the laser
+# line. In most cases the user is getting asked if he really wants to
+# continue if he tries to use one that's nearer (the script for setting up
+# the ROI and binning does not accept them at all).
 
 my $Min_Dist = 200.0;                  # in cm^-1
 

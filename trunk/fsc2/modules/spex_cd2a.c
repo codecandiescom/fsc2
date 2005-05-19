@@ -26,7 +26,7 @@
 
 
 /*--------------------------------*
- * global variables of the module
+ * Global variables of the module
  *--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
