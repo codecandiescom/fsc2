@@ -41,7 +41,7 @@ static inline int i_min( int a, int b );
 static inline long l_max( long a, long b );
 static inline long l_min( long a, long b );
 static inline float f_max( float a, float b );
-static inline float f_min( float  a, float  b );
+static inline float f_min( float a, float b );
 static inline double d_max( double a, double b );
 static inline double d_min( double a, double b );
 static inline size_t s_min( size_t a, size_t b );
@@ -52,7 +52,7 @@ static inline int irnd( double x );
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline short int d2shrt( double a )
+static short int d2shrt( double a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
@@ -66,7 +66,7 @@ static inline short int d2shrt( double a )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline short int i2shrt( int a )
+static short int i2shrt( int a )
 {
 	if ( a > SHRT_MAX_HALF )
 		return SHRT_MAX_HALF;
@@ -80,7 +80,7 @@ static inline short int i2shrt( int a )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline unsigned short int d2ushrt( double a )
+static unsigned short int d2ushrt( double a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
@@ -94,7 +94,7 @@ static inline unsigned short int d2ushrt( double a )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline unsigned short int i2ushrt( int a )
+static unsigned short int i2ushrt( int a )
 {
 	if ( a > USHRT_MAX )
 		return USHRT_MAX;
@@ -107,21 +107,21 @@ static inline unsigned short int i2ushrt( int a )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline int    i_max( int    a, int    b ) { return a > b ? a : b; }
-static inline int    i_min( int    a, int    b ) { return a < b ? a : b; }
-static inline long   l_max( long   a, long   b ) { return a > b ? a : b; }
-static inline long   l_min( long   a, long   b ) { return a < b ? a : b; }
-static inline float  f_max( float  a, float  b ) { return a > b ? a : b; }
-static inline float  f_min( float  a, float  b ) { return a < b ? a : b; }
-static inline double d_max( double a, double b ) { return a > b ? a : b; }
-static inline double d_min( double a, double b ) { return a < b ? a : b; }
-static inline size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
+static int    i_max( int    a, int    b ) { return a > b ? a : b; }
+static int    i_min( int    a, int    b ) { return a < b ? a : b; }
+static long   l_max( long   a, long   b ) { return a > b ? a : b; }
+static long   l_min( long   a, long   b ) { return a < b ? a : b; }
+static float  f_max( float  a, float  b ) { return a > b ? a : b; }
+static float  f_min( float  a, float  b ) { return a < b ? a : b; }
+static double d_max( double a, double b ) { return a > b ? a : b; }
+static double d_min( double a, double b ) { return a < b ? a : b; }
+static size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
 
 
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline long lrnd( double x )
+static long lrnd( double x )
 {
 	if ( x > LONG_MAX )
 		return LONG_MAX;
@@ -135,7 +135,7 @@ static inline long lrnd( double x )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static inline int irnd( double x )
+static int irnd( double x )
 {
 	if ( x > INT_MAX )
 		return INT_MAX;
