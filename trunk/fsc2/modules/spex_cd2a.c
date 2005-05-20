@@ -385,7 +385,7 @@ Var_T *monochromator_name( UNUSED_ARG Var_T *v )
  * scan and the scan step size. If a new scan setup is done while the
  * device is already doing a scan (is in scan mode) the currently running
  * scan is aborted. For wavelength driven monochromators the scan start
- * position and the step size must be given in m while for wavenumber
+ * position and the step size must be given in meters while for wavenumber
  * driven ones in cm^-1. Of course, in queries both are also returned in
  * these units. For wavenumber driven monochromators we also have to deal
  * with a laser line being set: if it is the start wavenumber is taken to
