@@ -56,7 +56,7 @@ enum {
 int ni6601_close( int /* board */ );
 int ni6601_start_counter( int /* board */, int /* counter */,
 						  int /* source */ );
-int ni6601_start_gated_counter( int /+ board */, int /* counter */,
+int ni6601_start_gated_counter( int /* board */, int /* counter */,
 								double /* gate_length */, int /* source */ );
 int ni6601_stop_counter( int /* board */, int /* counter */ );
 int ni6601_get_count( int /* board */, int /* counter */,
