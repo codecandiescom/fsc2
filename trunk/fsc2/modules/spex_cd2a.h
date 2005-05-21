@@ -31,9 +31,9 @@
 /* Define the following for test purposes only where no real communication
    with the monochromator is supposed to happen */
 
-/*
+
 #define SPEX_CD2A_TEST
-*/
+
 
 /* Defines for the parity used by the device */
 
@@ -119,22 +119,11 @@ struct Spex_CD2A {
 	int units;
 	bool has_shutter;
 
-	double lower_limit;              /* wavelength in m */
-	double upper_limit;              /* wavelength in m */
-
-	double grooves;                  /* in grooves per m */
-	double standard_grooves;         /* in grooves per m */
-
-	double shutter_low_limit;        /* wavelength in m */
-	double shutter_high_limit;       /* wavelength in m */
-	bool shutter_limits_are_set;
+	int mode;                        /* wavelength (WL) or wavenumber
+										(absolute (WN) relative (WND)) */
 
 	double wavelength;               /* in m */
 	bool is_wavelength;
-
-	double offset;                   /* in m or cm^-1, depending on mode */
-
-	double pixel_diff;               /* in m */
 
 	double laser_wavenumber;         /* in cm^-1 (wavenumber mode only) */
 
@@ -144,9 +133,22 @@ struct Spex_CD2A {
 	bool scan_is_init;
 	bool in_scan;                    /* set while scanning */
 
-	double mini_step;
+	double offset;                   /* in m or cm^-1, depending on mode,
+									    in wavenumber mode always for the
+										absolute wavenumber */
+	double pixel_diff;               /* in m */
 
-	int mode;
+	double mini_step;                /* in m or cm^-1, depending on mode */
+
+	double lower_limit;              /* wavelength in m */
+	double upper_limit;              /* wavelength in m */
+
+	double grooves;                  /* in grooves per m */
+	double standard_grooves;         /* in grooves per m */
+
+	double shutter_low_limit;        /* wavelength in m */
+	double shutter_high_limit;       /* wavelength in m */
+	bool shutter_limits_are_set;
 
 	struct termios *tio;             /* serial port terminal interface
 										structure */

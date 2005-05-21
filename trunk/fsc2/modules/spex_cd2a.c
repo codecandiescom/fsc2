@@ -227,10 +227,10 @@ int spex_cd2a_init_hook( void )
 	if ( spex_cd2a.mode == WL )
 	{
 		if ( UNITS == NANOMETER )
-			spex_cd2a.mini_step = 10e-9 * spex_cd2a.standard_grooves
+			spex_cd2a.mini_step = 1.0e-9 * spex_cd2a.standard_grooves
 								  / ( spex_cd2a.grooves * STEPS_PER_UNIT );
 		else
-			spex_cd2a.mini_step = 10e-10 * spex_cd2a.standard_grooves
+			spex_cd2a.mini_step = 1.0e-10 * spex_cd2a.standard_grooves
 								  / ( spex_cd2a.grooves * STEPS_PER_UNIT );
 	}
 	else
@@ -498,7 +498,7 @@ Var_T *monochromator_scan_setup( Var_T *v )
 		step = get_double( v, "wavelength step width" );
 
 	/* All SPEX monochromators scan from low to high wavelengths and high
-	   to low wavenumbers. */
+	   to low (absolute) wavenumbers. */
 
 	if ( step <= 0.0 ) 
 	{
@@ -589,9 +589,9 @@ Var_T *monochromator_scan_setup( Var_T *v )
 
 /*----------------------------------------------------------*
  * Set or query the current wavelength of the monochromator
- * (always return the absolute wavelength in m, even when
- * in wavenumber mode). If the monochromator is doing a
- * scan and a new wavelength is set the scan is aborted.
+ * (always return the absolute wavelength in meter, even
+ * when in wavenumber mode). If the monochromator is doing
+ * a scan and a new wavelength is set the scan is aborted.
  *----------------------------------------------------------*/
 
 Var_T *monochromator_wavelength( Var_T *v )

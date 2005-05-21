@@ -555,7 +555,7 @@ static size_t spex_cd2a_write( int type, const char *mess )
 
 #ifdef SPEX_CD2A_TEST
 
-	fprintf( stderr, "%s\n", mess );
+//	fprintf( stderr, "%s\n", mess );
 
 	return 0;
 #endif
