@@ -69,6 +69,7 @@
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/wait.h>
 
 #include "fsc2_config.h"
 #include "fsc2_types.h"
@@ -100,7 +101,7 @@ extern int snprintf( char *str, size_t size, const  char *format, ... );
 
 void make_tmp_file( char *fname );
 int open_fsc2_socket( const char *fname );
-void start_fsc2( char *pname, char *fname );
+void start_fsc2( char *pname, char *fname, int wait_flag );
 void sig_handler( int signo );
 void contact_fsc2( int sock_fd, char *pname, char *fname );
 void clean_up( const char *fname, int sock_fd, int ret_val );
@@ -121,7 +122,7 @@ static volatile sig_atomic_t Sig_type = 0;
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int main( UNUSED_ARG int argc, char *argv[ ] )
+int main( int argc, char *argv[ ] )
 {
 	char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
 	int sock_fd;
@@ -129,7 +130,12 @@ int main( UNUSED_ARG int argc, char *argv[ ] )
 
 	make_tmp_file( fname );
 	if ( ( sock_fd = open_fsc2_socket( fname ) ) == -1 )
-		start_fsc2( argv[ 0 ], fname );
+	{
+		if ( argc == 1 || strcmp( argv[ 1 ], "-w" ) )
+			start_fsc2( argv[ 0 ], fname, 0 );
+		else
+			start_fsc2( argv[ 0 ], fname, 1 );
+	}
 	else
 		contact_fsc2( sock_fd, argv[ 0 ], fname );
 
@@ -237,7 +243,7 @@ int open_fsc2_socket( const char *fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void start_fsc2( char *pname, char *fname )
+void start_fsc2( char *pname, char *fname, int wait_flag )
 {
 	char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
 	int ac = 0;
@@ -310,6 +316,9 @@ void start_fsc2( char *pname, char *fname )
 			exit( 4 );
 		}
 	}
+
+	if ( wait_flag )
+		waitpid( new_pid, NULL, 0 );
 }
 
 
