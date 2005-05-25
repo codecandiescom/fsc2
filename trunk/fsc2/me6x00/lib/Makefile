@@ -35,7 +35,7 @@ CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 INCLUDES  = -I../driver
 
 sources   = me6x00_lib.c
-headers   = me6x00.h ../driver/me6x00_drv.h
+headers   = me6x00.h ../driver/me6x00_drv.h ../driver/autoconf.h
 
 .SUFFIXES:                    # don't use implicit rules
 .PHONY: all cleanup clean install

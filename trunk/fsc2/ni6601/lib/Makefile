@@ -34,7 +34,7 @@ CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
 INCLUDES  = -I../driver -I.
 
 sources   = ni6601_lib.c
-headers   = ni6601.h ../driver/ni6601_drv.h
+headers   = ni6601.h ../driver/ni6601_drv.h ../driver/autoconf.h
 
 .SUFFIXES:                    # don't use implicit rules
 .PHONY: all cleanup clean install
