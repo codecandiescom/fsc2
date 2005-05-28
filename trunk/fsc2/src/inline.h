@@ -46,7 +46,9 @@ static inline double d_max( double a, double b );
 static inline double d_min( double a, double b );
 static inline size_t s_min( size_t a, size_t b );
 static inline long lrnd( double x );
+static inline unsigned long ulrnd( double x );
 static inline int irnd( double x );
+static inline unsigned int uirnd( double x );
 
 
 /*-------------------------------------------------------------------------*
@@ -135,6 +137,20 @@ static long lrnd( double x )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
+static unsigned long ulrnd( double x )
+{
+	if ( x > ULONG_MAX )
+		return ULONG_MAX;
+	if ( x < 0 )
+		return 0;
+
+	return ( unsigned long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+}
+
+
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
+
 static int irnd( double x )
 {
 	if ( x > INT_MAX )
@@ -143,6 +159,20 @@ static int irnd( double x )
 		return INT_MIN;
 
 	return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+}
+
+
+/*-------------------------------------------------------------------------*
+ *-------------------------------------------------------------------------*/
+
+static unsigned int uirnd( double x )
+{
+	if ( x > UINT_MAX )
+		return UINT_MAX;
+	if ( x < 0 )
+		return 0;
+
+	return ( unsigned int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
