@@ -377,7 +377,7 @@ endif
 # code and libc memory debugging (if available)
 
 ifneq ($(MAKECMDGOALS),release)
-	CFLAGS += -ggdb
+	CFLAGS += -ggdb3
 else
 	CFLAGS += -DNDEBUG                    # switch off all debugging code
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
