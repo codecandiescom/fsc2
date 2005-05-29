@@ -81,7 +81,7 @@ int rs_spec10_test_hook( void )
 	rs_spec10_test = rs_spec10_prep;
 	rs_spec10 = &rs_spec10_test;
 
-	rs_spec10->ccd.exp_time = 100000;
+	rs_spec10->ccd.exp_time = ( uns32 ) 100000U;
 	rs_spec10->ccd.exp_res = 1.0e-6;
 	rs_spec10->ccd.clear_cycles = CCD_DEFAULT_CLEAR_CYCLES;
 
@@ -431,7 +431,7 @@ Var_T *ccd_camera_exposure_time( Var_T *v )
 
 	et = get_double( v, "exposure time" );
 
-	rs_spec10->ccd.exp_time = ( uns32 ) lrnd( et / rs_spec10->ccd.exp_res );
+	rs_spec10->ccd.exp_time = ( uns32 ) ulrnd( et / rs_spec10->ccd.exp_res );
 
 	if ( rs_spec10->ccd.exp_time < 1 )
 	{
@@ -444,7 +444,7 @@ Var_T *ccd_camera_exposure_time( Var_T *v )
 	   but it's hard to imagine that anyone will ever need such a long exposure
 	   time... ("640 kB will be enough for everyone" ;-) */
 
-	if ( et > 3600.0 )
+	if ( rs_spec10->ccd.exp_time > ( uns32 ) 3600000000UL )
 	{
 		print( FATAL, "Exposure time of %.1f s is too long.\n", et );
 		THROW( EXCEPTION );

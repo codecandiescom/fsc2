@@ -100,7 +100,12 @@ void rs_spec10_init_camera( void )
 	rs_spec10_ccd_init( );
 	rs_spec10_temperature_init( );
 
-#endif /* ! defined RS_SPEC10_TEST */
+#else
+	rs_spec10->ccd.exp_time = ( uns32 ) ulrnd( CCD_EXPOSURE_TIME /
+											   CCD_EXPOSURE_RESOLUTION );
+	rs_spec10->ccd.exp_res = CCD_EXPOSURE_RESOLUTION;
+	rs_spec10->ccd.clear_cycles = CCD_DEFAULT_CLEAR_CYCLES;
+#endif
 }
 
 
