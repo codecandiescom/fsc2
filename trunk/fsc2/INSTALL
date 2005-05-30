@@ -52,7 +52,7 @@ A1) Graphics support
 Graphics in fsc2 are mostly build on top of the XFORMS package. While it
 works with the older XFORMS library version 0.89, which may be still
 available in binary only form you may prefer to use the newer version
-1.0 version which is distributed under the GPL and can be downloaded from
+1.0.90 version which can be downloaded from
 
   http://savannah.nongnu.org/projects/xforms/
 
