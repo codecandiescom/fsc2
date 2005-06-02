@@ -35,7 +35,7 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 );
 
 Var_T *vars_negate( Var_T *v )
 {
-	Var_T *new_var;
+	Var_T *new_var = v;
 	ssize_t i;
 
 
@@ -44,22 +44,20 @@ Var_T *vars_negate( Var_T *v )
 	vars_check( v, RHS_TYPES | SUB_REF_PTR );
 
 	if ( v->type == SUB_REF_PTR )
-		v = vars_subref_to_rhs_conv( v );
+		new_var = v = vars_subref_to_rhs_conv( v );
 
 	switch( v->type )
 	{
 		case INT_VAR :
 			v->val.lval = - v->val.lval;
-			new_var = v;
+			break;
 
 		case FLOAT_VAR :
 			v->val.dval = - v->val.dval;
-			new_var = v;
+			break;
 
 		case INT_ARR :
-			if ( v->flags & IS_TEMP )
-				 new_var = v;
-			else
+			if ( ! ( v->flags & IS_TEMP ) )
 				new_var = vars_push( v->type, v->val.lpnt, v->len );
 
 			for ( i = 0; i < new_var->len; i++ )
@@ -68,9 +66,7 @@ Var_T *vars_negate( Var_T *v )
 			break;
 
 		case FLOAT_ARR :
-			if ( v->flags & IS_TEMP )
-				 new_var = v;
-			else
+			if ( ! ( v->flags & IS_TEMP ) )
 				new_var = vars_push( v->type, v->val.dpnt, v->len );
 
 			for ( i = 0; i < new_var->len; i++ )
@@ -79,9 +75,7 @@ Var_T *vars_negate( Var_T *v )
 			break;
 
 		case INT_REF : case FLOAT_REF :
-			if ( v->flags & IS_TEMP )
-				new_var = v;
-			else
+			if ( ! ( v->flags & IS_TEMP ) )
 				new_var = vars_push( v->type, v );
 
 			for ( i = 0; i < new_var->len; i++ )
