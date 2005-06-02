@@ -50,11 +50,11 @@ Var_T *vars_negate( Var_T *v )
 	{
 		case INT_VAR :
 			v->val.lval = - v->val.lval;
-			return v;
+			new_var = v;
 
 		case FLOAT_VAR :
 			v->val.dval = - v->val.dval;
-			return v;
+			new_var = v;
 
 		case INT_ARR :
 			if ( v->flags & IS_TEMP )

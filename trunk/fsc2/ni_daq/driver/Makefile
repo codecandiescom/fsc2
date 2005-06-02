@@ -49,8 +49,8 @@ export CC CFLAGS INCLUDES
 
 
 all:
-	$(MAKE) -C pci_e_series
-	$(MAKE) -C daq_stc
+	$(MAKE) -C pci_e_series all
+	$(MAKE) -C daq_stc all
 	$(MAKE) $(MODULE)
 
 

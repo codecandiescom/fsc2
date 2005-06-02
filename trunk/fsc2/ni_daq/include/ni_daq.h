@@ -119,7 +119,7 @@ int ni_daq_ao( int /* board */,
 
 /* Functions for the GPCT subsystem */
 
-int ni_daq_gpct_set_speed( int /* board */
+int ni_daq_gpct_set_speed( int /* board */,
 			   NI_DAQ_CLOCK_SPEED_VALUE /* speed */ );
 int ni_daq_gpct_get_speed( int /* board */,
 			   NI_DAQ_CLOCK_SPEED_VALUE * /* speed */ );
