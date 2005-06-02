@@ -88,12 +88,13 @@
 /* Please note: within the module we do all calculations in wavelengths
    (in m) and thus nearly all data are also stored as wavelengths. The
    only exception is the position of the laser line, which is stored in
-   wavenumbers (i.e. cm^-1). Data passed to the EDL functions must be
-   in wavelengths when the monochromator has a wavelength drive, other-
-   wise in wavenumbers. Values returned by the functions follow the same
-   pattern. If a laser line position has been set (only possible when in
-   wavenumber mode) input and output is in relative wavenumbers, i.e.
-   wavenumber of laser line minus absoulte wavenumber.
+   wavenumbers (i.e. cm^-1) and the step width. Data passed to the EDL
+   functions must be in wavelengths when the monochromator has a wave-
+   length drive, otherwise in wavenumbers. Values returned by the
+   functions follow the same pattern. If a laser line position has been
+   set (only possible when in wavenumber mode) input and output is in
+   relative wavenumbers, i.e. wavenumber of laser line minus absoulte
+   wavenumber.
 
    Exceptions: monochromator_wavelength() expects and returns data always
                in wavelength units.
@@ -109,8 +110,11 @@
 
 
 /* All wavelengths and -numbers stored in the following structure are (as
-   far as applicable) in monochromator units, i.e. without correction
-   according to the offset value also stored in the structure */
+   far as applicable) in monochromator units, i.e. without corrections due
+   to the offset value also stored in the structure. As far as possible all
+   data are stored in wavelength units, exceptions being the laser line
+   position (which only makes sense at all in wavenumber mode) and the
+   scan step width and the minimum value for a scan step. */
 
 struct Spex_CD2A {
 	bool is_needed;
@@ -119,47 +123,47 @@ struct Spex_CD2A {
 	int units;
 	bool has_shutter;
 
-	int mode;                        /* wavelength (WL) or wavenumber
-										(absolute (WN) relative (WND)) */
+	int mode;                       /* wavelength (WL) or wavenumber
+									   (absolute (WN) relative (WND)) */
 
-	double wavelength;               /* in m */
+	double wavelength;              /* in m */
 	bool is_wavelength;
 
-	double laser_wavenumber;         /* in cm^-1 (wavenumber mode only) */
+	double laser_line;              /* in cm^-1 (wavenumber mode only) */
 
-	double scan_start;               /* absolute scan start position in m
-									    or cm^-1, depending on mode */
-	double scan_step;                /* in m or cm^-1, depending on mode */
+	double scan_start;              /* in m */
+	double scan_step;               /* in m or cm^-1, depending on mode */
 	bool scan_is_init;
-	bool in_scan;                    /* set while scanning */
+	bool in_scan;                   /* set while scanning */
 
-	double offset;                   /* in m or cm^-1, depending on mode,
-									    in wavenumber mode always for the
-										absolute wavenumber */
-	double pixel_diff;               /* in m */
+	double offset;                  /* in m or abs. cm^-1, depending on mode */
 
-	double mini_step;                /* in m or cm^-1, depending on mode */
+	double pixel_diff;              /* in m */
 
-	double lower_limit;              /* wavelength in m */
-	double upper_limit;              /* wavelength in m */
+	double mini_step;               /* in m or cm^-1, depending on mode */
 
-	double grooves;                  /* in grooves per m */
-	double standard_grooves;         /* in grooves per m */
+	double lower_limit;             /* wavelength in m */
+	double upper_limit;             /* wavelength in m */
 
-	double shutter_low_limit;        /* wavelength in m */
-	double shutter_high_limit;       /* wavelength in m */
+	double grooves;                 /* in grooves per m */
+	double standard_grooves;        /* in grooves per m */
+
+	double shutter_low_limit;       /* wavelength in m */
+	double shutter_high_limit;      /* wavelength in m */
 	bool shutter_limits_are_set;
 
-	struct termios *tio;             /* serial port terminal interface
-										structure */
+	struct termios *tio;            /* serial port terminal interface
+									   structure */
 
-	bool data_format;                /* either STANDARD or DATALOGGER */
-	bool use_checksum;               /* do we need a checksum in transfers ? */
+	bool data_format;               /* either STANDARD or DATALOGGER */
+	bool use_checksum;              /* do we need a checksum in transfers ? */
 	bool sends_lf;
 
-    bool fatal_error;                /* set on exceptions etc. */
+    bool fatal_error;               /* set on exceptions etc. */
 
-} ;
+	bool new_calibration;           /* set when monochromator_calibrate()
+									   has been called successfully */
+};
 
 extern struct Spex_CD2A spex_cd2a;
 
@@ -207,26 +211,19 @@ void spex_cd2a_close( void );
 
 bool spex_cd2a_read_state( void );
 bool spex_cd2a_store_state( void );
-double spex_cd2a_wl2Awn( double wl );
-double spex_cd2a_Awn2wl( double wn );
-double spex_cd2a_wl2Mwn( double wl );
-double spex_cd2a_Awn2Mwn( double wn );
-double spex_cd2a_Mwn2Awn( double wn );
-double spex_cd2a_Mwn2wl( double wn );
-double spex_cd2a_Swl2Uwl( double wl );
-double spex_cd2a_Uwl2Swl( double wl );
-double spex_cd2a_SAwn2UAwn( double wn );
-double spex_cd2a_UAwn2SAwn( double wn );
-double spex_cd2a_SAwn2UMwn( double wn );
-double spex_cd2a_SMwn2UMwn( double wn );
-double spex_cd2a_UMwn2SMwn( double wn );
-double spex_cd2a_Swl2UMwn( double wl );
-double spex_cd2a_UMwn2SAwn( double wn );
-double spex_cd2a_UMwn2S2wl( double wn );
-double spex_cd2a_Swl2UAwn( double wl );
-double spex_cd2a_UAwn2Swl( double wn );
-double spex_cd2a_UMwn2Swl( double wn );
-double spex_cd2a_SAwn2Uwl( double wn );
+double spex_cd2a_wl2wn( double wl );
+double spex_cd2a_wn2wl( double wn );
+double spex_cd2a_wl2wn( double wl );
+double spex_cd2a_wn2wl( double wn );
+double spex_cd2a_wl2Uwl( double wl );
+double spex_cd2a_Uwl2wl( double wl );
+double spex_cd2a_wn2Uwn( double wn );
+double spex_cd2a_Uwn2wn( double wn );
+double spex_cd2a_wn2Uwl( double wn );
+double spex_cd2a_Uwl2wn( double wl );
+double spex_cd2a_wl2Uwn( double wl );
+double spex_cd2a_Uwn2wl( double wn );
+double spex_cd2a_wl2mu( double wl );
 
 
 #define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;      \

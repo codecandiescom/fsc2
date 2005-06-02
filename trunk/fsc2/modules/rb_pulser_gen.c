@@ -25,6 +25,9 @@
 #include "rb_pulser.h"
 
 
+/* Array of timebases the adjustable clock (RB8515) can be set to and
+   of values to be send to the clocks driver to set the timebase */
+
 static double timebases[ ] = { 1.0e-8, 1.0e-7, 1.0e-6, 1.0e-5,
 							   1.0e-4, 1.0e-3, 1.0e-2 };
 static int num_timebases = NUM_ELEMS( timebases );
@@ -211,12 +214,20 @@ bool rb_pulser_set_trig_in_slope( int slope )
 
 /*------------------------------------------------------------------*
  * Function for setting the repetition time for the pulse sequences
+ * when pulser runs in internal trigger mode
  *------------------------------------------------------------------*/
 
 bool rb_pulser_set_repeat_time( double rep_time )
 {
 	int i;
 
+
+	if ( rb_pulser.is_trig_in_mode && rb_pulser.trig_in_mode != INTERNAL )
+	{
+		print( FATAL, "Setting repeat time/frequency is useless for EXTERNAL "
+			   "trigger mode.\n" );
+		return FAIL;
+	}
 
 	/* Complain if a different repetition time has already been set */
 

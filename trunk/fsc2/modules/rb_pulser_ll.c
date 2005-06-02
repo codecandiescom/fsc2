@@ -1,20 +1,20 @@
 /*
  *  $Id$
- * 
+ *
  *  Copyright (C) 1999-2005 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -27,6 +27,8 @@
 
 static void rb_pulser_failure( bool rb_flag, const char *mess );
 static void rb_pulser_synthesizer_init( void );
+static void rb_pulser_start_external_trigger( void );
+static void rb_pulser_start_internal_trigger( void );
 
 
 /*---------------------------------------------------------------*
@@ -86,8 +88,7 @@ void rb_pulser_init( void )
 #if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
 		if ( rulbus_rb8514_delay_set_trigger(
 				 					 rb_pulser.delay_card[ INIT_DELAY ].handle,
-									 ( rb_pulser.trig_in_slope 
-										 	 					== POSITIVE ) ?
+									 ( rb_pulser.trig_in_slope == POSITIVE ) ?
 									 RULBUS_RB8514_DELAY_RAISING_EDGE :
 									 RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 													!= RULBUS_OK ||
@@ -98,8 +99,7 @@ void rb_pulser_init( void )
 #else
 		if ( rulbus_rb8514_delay_set_trigger(
 				 					  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  ( rb_pulser.trig_in_slope 
-										 	 					== POSITIVE ) ?
+									  ( rb_pulser.trig_in_slope == POSITIVE ) ?
 									  RULBUS_RB8514_DELAY_RAISING_EDGE :
 									  RULBUS_RB8514_DELAY_FALLING_EDGE )
 			 													 != RULBUS_OK )
@@ -197,7 +197,7 @@ static void rb_pulser_synthesizer_init( void )
 	if ( ( func_ptr = func_get( rb_pulser.synth_trig_slope, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for setting synthesizer pulse "
 						   "trigger slope is not available" );
-		
+
 	vars_push( STR_VAR, "POSITIVE" );
 	vars_pop( func_call( func_ptr ) );
 
@@ -219,7 +219,7 @@ static void rb_pulser_synthesizer_init( void )
 	if ( ( func_ptr = func_get( rb_pulser.synth_pulse_state, &acc ) ) == NULL )
 		rb_pulser_failure( UNSET, "Function for switching synthesizer pulse "
 						   "modulation on or off is not available" );
-		
+
 	vars_push( STR_VAR, f->pulses[ 0 ]->is_active ? "ON" : "OFF" );
 	vars_pop( func_call( func_ptr ) );
 
@@ -243,9 +243,10 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 		if ( rb_pulser.clock_card[ i ].handle >= 0 )
 		{
+#if 0
 			/* Commented out according to Huibs wishes, he wants the clocks
 			   to continue to run even after the end of the experiment. */
-#if 0
+
 			rulbus_rb8515_clock_set_frequency(
 											  rb_pulser.clock_card[ i ].handle,
 											  RULBUS_RB8515_CLOCK_FREQ_OFF );
@@ -286,84 +287,9 @@ void rb_pulser_run( bool state )
 	if ( state == START )
 	{
 		if ( rb_pulser.trig_in_mode == EXTERNAL )
-		{
-#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
-			/* In external trigger mode with the external trigger getting fed
-			   to the INIT_DELAY card set the delay for this card and enable
-			   end pulses */
-
-			if ( rulbus_rb8514_delay_set_output_pulse(
-					 				 rb_pulser.delay_card[ INIT_DELAY ].handle,
-									 RULBUS_RB8514_DELAY_OUTPUT_BOTH,
-									 RULBUS_RB8514_DELAY_END_PULSE )
-				 												!= RULBUS_OK ||
-				 rulbus_rb8514_delay_set_raw_delay( 
-									 rb_pulser.delay_card[ INIT_DELAY ].handle,
-									 rb_pulser.delay_card[ INIT_DELAY ].delay,
-									 1 )                        != RULBUS_OK )
-				rb_pulser_failure( SET, "Failure to start pulser" );
-			rb_pulser.delay_card[ INIT_DELAY ].old_delay =
-									 rb_pulser.delay_card[ INIT_DELAY ].delay;
-#else
-			/* In external trigger mode with the external trigger going to the
-			   ERT_DELAY card set the rate of the clock feeding the ERT delay
-			   card to the highest possible rate and set the delay of that card
-			   to 0 to make the end pulse appear as fast as possible after the
-			   input trigger from the external source and make the card output
-			   end pulses on the first start/end pulse output connector. */
-
-			if ( rulbus_rb8515_clock_set_frequency(
-									  rb_pulser.clock_card[ ERT_CLOCK ].handle,
-									  RULBUS_RB8515_CLOCK_FREQ_100MHz )
-				 												!= RULBUS_OK ||
-				 rulbus_rb8514_delay_set_raw_delay(
-					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  0, 1 )					!= RULBUS_OK ||
-				 rulbus_rb8514_delay_set_output_pulse(
-					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  RULBUS_RB8514_DELAY_OUTPUT_1,
-									  RULBUS_RB8514_DELAY_END_PULSE )
-				 												 != RULBUS_OK )
-				rb_pulser_failure( SET, "Failure to start pulser" );
-#endif
-		}
+			rb_pulser_start_external_trigger( );
 		else
-		{
-			/* In internal trigger mode set the clock frequency to the value
-			   required for the experiment repetition time, set the delay of
-			   the card accordingly and the get the card to output end pulses
-			   on both the first and second start/end pulse connector */
-
-			if ( rulbus_rb8515_clock_set_frequency(
-									  rb_pulser.clock_card[ ERT_CLOCK ].handle,
-									  rb_pulser.clock_card[ ERT_CLOCK ].freq )
-				 												!= RULBUS_OK ||
-				 rulbus_rb8514_delay_set_raw_delay(
-					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  rb_pulser.delay_card[ ERT_DELAY ].delay,
-									  1 )						!= RULBUS_OK ||
-				 rulbus_rb8514_delay_set_output_pulse(
-					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  RULBUS_RB8514_DELAY_OUTPUT_BOTH,
-									  RULBUS_RB8514_DELAY_END_PULSE )
-				 												 != RULBUS_OK )
-				rb_pulser_failure( SET, "Failure to start pulser" );
-
-			/* Now get the ERT card running by toggling the trigger slope,
-			   first to falling, then to raising edge. That makes it emit an
-			   end pulse and afterwards it keeps running because it's own end
-			   pulse is fed back to itself as the trigger input */
-
-			if ( rulbus_rb8514_delay_set_trigger(
-									  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  RULBUS_RB8514_DELAY_FALLING_EDGE )
-			 												    != RULBUS_OK ||
-				 rulbus_rb8514_delay_set_trigger(
-					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
-									  RULBUS_RB8514_DELAY_RAISING_EDGE )
-																!= RULBUS_OK )
-				rb_pulser_failure( SET, "Failure to start pulser" );
-		}
+			rb_pulser_start_internal_trigger( );
 	}
 	else                        /* stop the pulser */
 	{
@@ -403,6 +329,93 @@ void rb_pulser_run( bool state )
 }
 
 
+/*-------------------------------------------------------------------*
+ * This function is for actually starting the pulser when running in
+ * external trigger mode. Depending on the configuration, i.e. if
+ * the external trigger goes to the INIT_DELAY or the ERT_DELAY card,
+ * different methods have to be used.
+ *-----------------------------------------------------------*/
+
+
+static void rb_pulser_start_external_trigger( void )
+{
+#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
+
+	/* In external trigger mode with the external trigger getting fed
+	   to the INIT_DELAY card set the delay for this card and enable
+	   end pulses */
+
+	if ( rulbus_rb8514_delay_set_output_pulse(
+					 				 rb_pulser.delay_card[ INIT_DELAY ].handle,
+									 RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+									 RULBUS_RB8514_DELAY_END_PULSE )
+				 												!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_raw_delay(
+									 rb_pulser.delay_card[ INIT_DELAY ].handle,
+									 rb_pulser.delay_card[ INIT_DELAY ].delay,
+									 1 )                        != RULBUS_OK )
+		rb_pulser_failure( SET, "Failure to start pulser" );
+	rb_pulser.delay_card[ INIT_DELAY ].old_delay =
+									 rb_pulser.delay_card[ INIT_DELAY ].delay;
+
+#else
+
+	/* In external trigger mode with the external trigger going to the
+	   ERT_DELAY card set the rate of the clock feeding the ERT delay
+	   card to the highest possible rate and set the delay of that card
+	   to 0 to make the end pulse appear as fast as possible after the
+	   input trigger from the external source and make the card output
+	   end pulses on the first start/end pulse output connector. */
+
+	if ( rulbus_rb8515_clock_set_frequency(
+									  rb_pulser.clock_card[ ERT_CLOCK ].handle,
+									  RULBUS_RB8515_CLOCK_FREQ_100MHz )
+				 												!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_raw_delay(
+					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
+									  0, 1 )					!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_output_pulse(
+					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
+									  RULBUS_RB8514_DELAY_OUTPUT_1,
+									  RULBUS_RB8514_DELAY_END_PULSE )
+				 												 != RULBUS_OK )
+		rb_pulser_failure( SET, "Failure to start pulser" );
+#endif
+}
+
+
+/*-----------------------------------------------------------*
+ * This function is for actually starting the pulser when running in
+ * external trigger mode.
+ *-----------------------------------------------------------*/
+
+static void rb_pulser_start_internal_trigger( void )
+{
+	/* In internal trigger mode set the clock frequency to the value required
+	   for the experiment repetition time, set the delay of the card
+	   accordingly, make the card output end pulses on both the first and
+	   second start/end pulse connector and then start a delay via software */
+
+	if ( rulbus_rb8515_clock_set_frequency(
+									  rb_pulser.clock_card[ ERT_CLOCK ].handle,
+									  rb_pulser.clock_card[ ERT_CLOCK ].freq )
+				 												!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_raw_delay(
+					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
+									  rb_pulser.delay_card[ ERT_DELAY ].delay,
+									  1 )						!= RULBUS_OK ||
+		 rulbus_rb8514_delay_set_output_pulse(
+					 				  rb_pulser.delay_card[ ERT_DELAY ].handle,
+									  RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+									  RULBUS_RB8514_DELAY_END_PULSE )
+				 												!= RULBUS_OK ||
+		rulbus_rb8514_software_start(
+									 rb_pulser.delay_card[ ERT_DELAY ].handle )
+																 != RULBUS_OK )
+		rb_pulser_failure( SET, "Failure to start pulser" );
+}
+
+
 /*-----------------------------------------------------------*
  * Function for making a card either "active" or "inactive"
  * which just means that it gets set up to create end pulses
@@ -438,7 +451,7 @@ void rb_pulser_delay_card_delay( int handle, unsigned long delay )
 
 
 /*---------------------------------------------------------*
- * FUnction gets called when communication with the device
+ * Function gets called when communication with the device
  * fails. It stops the running experiment.
  *---------------------------------------------------------*/
 

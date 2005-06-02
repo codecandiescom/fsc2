@@ -128,13 +128,8 @@ void spex_cd2a_init( void )
 		spex_cd2a_scan_start( );
 		spex_cd2a_scan_step( );
 
-		if ( spex_cd2a.is_wavelength )
+		if ( ! spex_cd2a.is_wavelength )
 		{
-			if ( spex_cd2a.mode & WN_MODES )
-				spex_cd2a.wavelength =
-									  spex_cd2a_Awn2wl( spex_cd2a.scan_start );
-			else
-				spex_cd2a.wavelength = spex_cd2a.scan_start;
 			spex_cd2a_set_wavelength( );
 			spex_cd2a.is_wavelength = SET;
 		}
@@ -162,16 +157,7 @@ void spex_cd2a_set_wavelength( void )
 
 	/* Set the wavenumber or -length, depending on monochromator type */
 
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2Mwn( spex_cd2a.wavelength ) );
-	else
-	{
-		if ( UNITS == NANOMETER )
-			spex_cd2a_print( mess + 2, 8, 1.0e9 * spex_cd2a.wavelength );
-		else
-			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.wavelength );
-	}
+	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.wavelength ) );
 
 	spex_cd2a_write( PARAMETER, mess );
 
@@ -210,10 +196,7 @@ void spex_cd2a_start_scan( void )
 		spex_cd2a_write( COMMAND, "T" );
 
 	spex_cd2a.in_scan = SET;
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a.wavelength = spex_cd2a_Awn2wl( spex_cd2a.scan_start );
-	else
-		spex_cd2a.wavelength = spex_cd2a.scan_start;
+	spex_cd2a.wavelength = spex_cd2a.scan_start;
 }
 
 
@@ -227,6 +210,13 @@ void spex_cd2a_trigger( void )
 
 	if ( FSC2_MODE == EXPERIMENT )
 		spex_cd2a_write( COMMAND, "E" );
+
+	if ( spex_cd2a.mode == WL )
+		spex_cd2a.wavelength += spex_cd2a.scan_step;
+	else
+		spex_cd2a.wavelength =
+					   spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
+										- spex_cd2a.scan_step );
 }
 
 
@@ -246,7 +236,7 @@ void spex_cd2a_trigger( void )
 
 void spex_cd2a_set_laser_line( void )
 {
-	char mess[ 11 ] = "LL0";
+	char mess[ 11 ] = "LL";
 
 
 	fsc2_assert( spex_cd2a.mode & WN_MODES );
@@ -254,18 +244,15 @@ void spex_cd2a_set_laser_line( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return;
 
+	fsc2_assert( spex_cd2a.mode & WN_MODES );
+
 	/* Stop a running scan */
 
 	if ( spex_cd2a.in_scan )
 		spex_cd2a_halt( );
 
-	if ( spex_cd2a.mode == WN )
-		spex_cd2a_write( PARAMETER, mess );
-	else
-	{
-		spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_wavenumber );
-		spex_cd2a_write( PARAMETER, mess );
-	}
+	spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_line );
+	spex_cd2a_write( PARAMETER, mess );
 }
 
 
@@ -290,17 +277,13 @@ void spex_cd2a_set_shutter_limits( void )
 
 	/* Set the lower shutter limit */
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a.mode & WN_MODES ?
-					 spex_cd2a_wl2Mwn( spex_cd2a.lower_limit ) :
-					 spex_cd2a.lower_limit );
+	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.lower_limit ) );
 	spex_cd2a_write( PARAMETER, mess );
 
 	/* Set the upper shutter limit */
 
 	strcpy( mess, "SH" );
-	spex_cd2a_print( mess + 2, 8, spex_cd2a.mode & WN_MODES ?
-					 spex_cd2a_wl2Mwn( spex_cd2a.upper_limit ) :
-					 spex_cd2a.lower_limit );
+	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
 	spex_cd2a_write( PARAMETER, mess );
 }
 
@@ -324,17 +307,7 @@ void spex_cd2a_scan_start( void )
 
 	/* Set start wavenumber or -length, depending on monochromator type */
 
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_Awn2Mwn( spex_cd2a.scan_start ) );
-	else
-	{
-		if ( UNITS == NANOMETER )
-			spex_cd2a_print( mess + 2, 8, 1.0e9 * spex_cd2a.scan_start );
-		else
-			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.scan_start );
-	}
-
+	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.scan_start ) );
 	spex_cd2a_write( PARAMETER, mess );
 }
 
@@ -350,17 +323,7 @@ static void spex_cd2a_scan_end( void )
 {
 	char mess[ 11 ] = "EN";
 
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a_print( mess + 2, 8,
-						 spex_cd2a_wl2Mwn( spex_cd2a.upper_limit ) );
-	else
-	{
-		if ( UNITS == NANOMETER )
-			spex_cd2a_print( mess + 2, 8, 1.0e9 * spex_cd2a.upper_limit );
-		else
-			spex_cd2a_print( mess + 2, 8, 1.0e10 * spex_cd2a.upper_limit );
-	}
-
+	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
 	spex_cd2a_write( PARAMETER, mess );
 }
 
@@ -380,12 +343,8 @@ void spex_cd2a_scan_step( void )
 	if ( spex_cd2a.mode & WN_MODES )
 		spex_cd2a_print( mess + 2, 6, spex_cd2a.scan_step );
 	else
-	{
-		if ( UNITS == NANOMETER )
-			spex_cd2a_print( mess + 2, 6, 1.0e9 * spex_cd2a.scan_step );
-		else
-			spex_cd2a_print( mess + 2, 6, 1.0e10 * spex_cd2a.scan_step );
-	}
+		spex_cd2a_print( mess + 2, 6, ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 )
+						 			  * spex_cd2a.scan_step );
 
 	spex_cd2a_write( PARAMETER, mess );
 }	

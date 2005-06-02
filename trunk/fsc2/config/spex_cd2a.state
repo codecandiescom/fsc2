@@ -1,18 +1,16 @@
 # --- Do *not* edit this file, it gets created automatically ---
 
 # In this file state information for the spex_cd2a driver is stored:
-# 1. The wavelength the monochromator is set to (in either absolute
-#    wavenumbers for wavenumber driven monochromators or as a wavelength
-#    for wavelength driven ones).
+# 1. The wavelength the monochromator is set to
 # 2. An offset of the monochromator, i.e. a number that always has to be
-#    added to wavenumbers -or lengths reported by the monochromator and
-#    subtracted from wavenumbers or -lengths send to the device.
-# 3. The wavelength or wavenumber difference between two pixels of the
-#    connected CCD camera\n"
+#    added to wavenumbers or -lengths specified by the user
+# 3. The wavelength difference between two pixels of the connected CCD camera
 # 4. For wavenumber driven monochromators only: the current setting of
-#    the position of the laser line (as set at the SPEX CD2A).
+#    the position of the laser line (as set at the SPEX CD2A)
+# 5. a flag that indicates if a new calibration has been done.
 
+555.55555 cm^-1
 0.0000 cm^-1
-0.0000 cm^-1
-0.0000 cm^-1
-0.0000 cm^-1
+0.1500 nm
+20000.0000 cm^-1
+0

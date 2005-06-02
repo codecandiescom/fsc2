@@ -5153,14 +5153,15 @@ are the current calibration settings for the inclusion angle (in
 degree), the focal length (in @code{m}) and the detector angle (in degree).
 
 For the @code{SPEX} monochromators it can be used to set an offset
-between the wavelength or -number displayed by the CD2A console and the
-"real", i.e.@: experimentally well-known wavelength or (absolute)
-wavenumber. Once it has been set, all functions will take this offset
-into account when talking with the device.
+between the wavelength or -number used to set the monochromator to
+the current position and the "real", i.e.@: experimentally determined
+wavelength or (absolute) wavenumber. Once it has been set, all functions
+will take this offset into account when talking with the device.
 
-The second calibration value (the optional second argument) to be set
-by the function for @code{SPEX} monochromators is the wavelength or
--number difference between two pixels of an attached CCD camera.
+The second calibration value (the optional second argument) to be set by
+the function for @code{SPEX} monochromators is the wavelength (even for
+wavenumber driven monochromators) difference between two pixels of an
+attached CCD camera.
 
 The offset is taken to be the difference between the "real" position of
 a line and the position where it appears when measured with @code{fsc2}.
@@ -5168,8 +5169,9 @@ Thus the usual procedure to set the offset is to measure the position of
 a well-known line using @code{fsc2} and then to call the function with
 the difference between the "real" position and the observed position.
 Afterwards @code{fsc2} will automatically take the offset into account
-and in a new measurement the line should seem to appear at the expected
-position.
+and, after a further call to @code{monochromator_wavelength()} or
+@code{monochromator_wavenumber()}, the line should seem to appear at the
+expected position.
 
 Please note that the offset can @strong{only} be set for wavenumber
 driven monochromators while using absolute wavenumbers, i.e.@: while no
