@@ -148,7 +148,7 @@ int ni_daq_gpct_continuous_pulses( int /* board */,
 				   double /* low_phase */,
 				   double * /* delay */,
 				   int /* dont_start */ );
-int ni_daq_gpct_start_pulses( int /* board */
+int ni_daq_gpct_start_pulses( int /* board */,
 			      int /* counter */ );
 int ni_daq_gpct_stop_pulses( int /* board */,
 			     int /* counter */ );
