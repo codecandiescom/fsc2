@@ -199,7 +199,7 @@ Var_T *vars_get( char *name )
 
 Var_T *vars_new( char *name )
 {
-	static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
+	static Var_T template = { -1, NULL, UNDEF_VAR, { 0 }, 0, 0,
 							  NEW_VARIABLE, NULL, NULL, NULL };
 	Var_T *vp;
 
