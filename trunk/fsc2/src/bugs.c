@@ -205,7 +205,7 @@ void bug_report_callback( FL_OBJECT *a, UNUSED_ARG long b )
 			user = ( getpwuid( getuid( ) ) )->pw_name;
 
 		rewind( tmp );
-		if ( send_mail( "fsc2 bug report", "fsc2", user,
+		if ( send_mail( "FSC2: Bug report", "fsc2", user,
 						MAIL_ADDRESS, tmp ) != 0 )
 			fl_show_messages( "Sorry, sending the mail may\n"
 							  "   have failed to work." );
@@ -320,7 +320,7 @@ void death_mail( int signo )
 	}
 
 	rewind( mail );
-	send_mail( "fsc2 crash", "fsc2", NULL, MAIL_ADDRESS, mail );
+	send_mail( "FSC2: Crash", "fsc2", NULL, MAIL_ADDRESS, mail );
 	fclose( mail );
 }
 #else
