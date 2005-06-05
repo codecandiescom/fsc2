@@ -286,7 +286,7 @@ DEFAULT_HTTP_PORT  := 8080
 # case sending bug reports or emails about crashes to me wouldn't make too
 # much sense).
 
-MAIL_ADDRESS       := Jens.Toerring@physik.fu-berlin.de
+MAIL_ADDRESS       := fsc2@toerring.de
 
 
 ##############################################################################
