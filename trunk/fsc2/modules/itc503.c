@@ -368,7 +368,8 @@ static double itc503_sens_data( void )
 	cmd[ 1 ] = itc503.sample_channel + '0';
 	len = itc503_talk( cmd, buf, sizeof buf );
 
-	if ( buf[ 1 ] != '-' && buf[ 1 ] != '+' && ! isdigit( buf[ 1 ] ) )
+	if ( buf[ 1 ] != '-' && buf[ 1 ] != '+' &&
+		 ! isdigit( ( unsigned char ) buf[ 1 ] ) )
 	{
 		print( FATAL, "Error reading temperature.\n" );
 		THROW( EXCEPTION );
@@ -379,7 +380,7 @@ static double itc503_sens_data( void )
 	/* If the first character is a '+' or '-' the sensor is returning
 	   temperatures om degree celsius */
 
-	if ( ! isdigit( buf[ 1 ] ) )
+	if ( ! isdigit( ( unsigned char ) buf[ 1 ] ) )
 		 temp += C2K_OFFSET;
 
 	return temp;

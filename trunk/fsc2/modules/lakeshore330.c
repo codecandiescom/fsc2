@@ -389,7 +389,7 @@ static double lakeshore330_sens_data( void )
 
 	lakeshore330_talk( "SDAT?\n", buf, &len );
 
-	if ( *buf != '-' && *buf != '+' && ! isdigit( *buf ) )
+	if ( *buf != '-' && *buf != '+' && ! isdigit( ( unsigned char ) *buf ) )
 	{
 		print( FATAL, "Error reading temperature.\n" );
 		THROW( EXCEPTION );

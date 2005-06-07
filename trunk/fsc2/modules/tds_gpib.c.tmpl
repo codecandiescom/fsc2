@@ -279,7 +279,7 @@ long tds_tmpl_get_record_length( void )
 
 	tds_tmpl_talk( "HOR:RECO?\n", reply, &length );
     reply[ length - 1 ] = '\0';
-	while ( ! isdigit( *r ) && *r++ )
+	while ( ! isdigit( ( unsigned char ) *r ) && *r++ )
 		/* empty */ ;
 
     return T_atol( r );

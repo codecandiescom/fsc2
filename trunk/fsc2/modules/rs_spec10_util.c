@@ -58,7 +58,8 @@ bool rs_spec10_read_state( void )
 
 	do
 	{
-		while ( ( c = fsc2_fgetc( fp ) ) != EOF && c != '\n' && isspace( c ) )
+		while ( ( c = fsc2_fgetc( fp ) ) != EOF && c != '\n' &&
+				isspace( ( unsigned char ) c ) )
 			/* empty */ ;
 
 		switch ( c )
@@ -80,7 +81,7 @@ bool rs_spec10_read_state( void )
 				if ( in_comment )
 					break;
 
-				if ( ! isdigit( c ) )
+				if ( ! isdigit( ( unsigned char ) c ) )
 				{
 					print( FATAL, "Invalid line %d in state file '%s'.\n",
 						   line, fn );
@@ -424,7 +425,7 @@ int *rs_spec10_get_fd_list( void )
 
 	while ( ( de = readdir( dir ) ) != NULL )
 	{
-		for ( dn = de->d_name; *dn && isdigit( *dn ); dn++ )
+		for ( dn = de->d_name; *dn && isdigit( ( unsigned char ) *dn ); dn++ )
 			/* empty */ ;
 
 		if ( *dn != '\0' )
