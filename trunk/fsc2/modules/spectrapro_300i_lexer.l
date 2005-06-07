@@ -299,7 +299,8 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 	if ( value_type == DATA_U_TYPE )
 	{
 		for ( cp = spectrapro_300i_text + spectrapro_300i_leng - 1;
-			  cp > spectrapro_300i_text && isalpha( *cp ); cp-- )
+			  cp > spectrapro_300i_text && isalpha( ( unsigned char ) *cp );
+			  cp-- )
 			/* empty */;
 
 		if ( cp++ == spectrapro_300i_text )

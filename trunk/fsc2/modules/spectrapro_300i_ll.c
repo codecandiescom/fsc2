@@ -574,7 +574,7 @@ void spectrapro_300i_get_gratings( void )
 		if ( ! isdigit( *sp ) )
 		{
 			spectrapro_300i.grating[ i ].blaze = -1;
-			while ( *sp != '\0' && isalpha( *sp ) )
+			while ( *sp != '\0' && isalpha( ( unsigned char ) *sp ) )
 				sp++;
 			if ( *sp == '\0' )
 			{
