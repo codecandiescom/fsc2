@@ -719,7 +719,7 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 	   the cursors do) but if the record length got smaller we have to do
 	   also some checking and, if necessary, readjustments.
 	   But there's a small amount of time where we may *not* do this and
-	   this is during the inititialisation of the device when we just have
+	   this is during the initialisation of the device when we just have
 	   set a new time base but haven't checked and set up the windows yet -
 	   in this case the values stored in the windows structures are still
 	   bogus and the following would lead to wrong error messages. */

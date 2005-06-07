@@ -493,7 +493,7 @@ void spectrapro_300i_get_gratings( void )
 
 	for ( sp = reply, i = 0; i < MAX_GRATINGS; i++ )
 	{
-		while ( *sp != '\0' && ! isdigit( *sp ) )
+		while ( *sp != '\0' && ! isdigit( ( unsigned char ) *sp ) )
 			sp++;
 
 		if ( *sp == '\0' )
@@ -503,7 +503,7 @@ void spectrapro_300i_get_gratings( void )
 		}
 
 		gn = 0;
-		while( *sp != '\0' && isdigit( *sp ) )
+		while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
 			gn = gn * 10 + ( long ) ( *sp++ - '0' );
 
 		if ( *sp == '\0' || gn - 1 != i )
@@ -512,7 +512,7 @@ void spectrapro_300i_get_gratings( void )
 			spectrapro_300i_comm_fail( );
 		}
 
-		while ( *sp != '\0' && isspace( *sp ) )
+		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
 			sp++;
 
 		if ( *sp == '\0' )
@@ -527,14 +527,14 @@ void spectrapro_300i_get_gratings( void )
 			continue;
 		}
 
-		if ( ! isdigit( *sp ) )
+		if ( ! isdigit( ( unsigned char ) *sp ) )
 		{
 			T_free( ( void * ) reply );
 			spectrapro_300i_comm_fail( );
 		}
 
 		gr = 0;
-		while( *sp != '\0' && isdigit( *sp ) )
+		while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
 			gr = gr * 10 + ( long ) ( *sp++ - '0' );
 
 		if ( *sp == '\0' )
@@ -545,7 +545,7 @@ void spectrapro_300i_get_gratings( void )
 
 		spectrapro_300i.grating[ i ].grooves = gr * 1000;
 
-		while ( *sp != '\0' && isspace( *sp ) )
+		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
 			sp++;
 
 		if ( *sp == '\0' )
@@ -562,7 +562,7 @@ void spectrapro_300i_get_gratings( void )
 
 		sp += 9;
 
-		while ( *sp != '\0' && isspace( *sp ) )
+		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
 			sp++;
 
 		if ( *sp == '\0' )
@@ -571,7 +571,7 @@ void spectrapro_300i_get_gratings( void )
 			spectrapro_300i_comm_fail( );
 		}
 
-		if ( ! isdigit( *sp ) )
+		if ( ! isdigit( ( unsigned char ) *sp ) )
 		{
 			spectrapro_300i.grating[ i ].blaze = -1;
 			while ( *sp != '\0' && isalpha( ( unsigned char ) *sp ) )
@@ -585,7 +585,7 @@ void spectrapro_300i_get_gratings( void )
 		else
 		{
 			bl = 0;
-			while( *sp != '\0' && isdigit( *sp ) )
+			while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
 				bl = bl * 10 + ( long ) ( *sp++ - '0' );
 
 			if ( *sp == '\0' )
@@ -596,7 +596,7 @@ void spectrapro_300i_get_gratings( void )
 
 			spectrapro_300i.grating[ i ].blaze = bl * 1.0e-9;
 
-			while ( *sp != '\0' && isspace( *sp ) )
+			while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
 				sp++;
 
 			if ( *sp == '\0' )
