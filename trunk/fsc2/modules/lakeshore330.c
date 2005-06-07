@@ -238,7 +238,7 @@ Var_T *temp_contr_sensor_unit( Var_T *v )
 	else
 	{
 		for ( i = 0; i < ( long ) strlen( in_units ); i++ )
-			if ( toupper( *v->val.sptr ) == in_units[ i ] )
+			if ( toupper( ( unsigned char ) *v->val.sptr ) == in_units[ i ] )
 			{
 				unit = i;
 				break;

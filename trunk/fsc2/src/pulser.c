@@ -135,7 +135,7 @@ void pulser_cleanup( void )
 
 long p_num( char *txt )
 {
-	while ( txt != NULL && ! isdigit( *txt ) )
+	while ( txt != NULL && ! isdigit( ( unsigned char ) *txt ) )
 		txt++;
 
 	fsc2_assert( txt != NULL );          /* Paranoia ? */

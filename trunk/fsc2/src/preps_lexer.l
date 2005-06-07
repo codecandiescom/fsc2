@@ -307,9 +307,9 @@ FUNC        {IDENT}"#"[0-9]+
 
 				/* determine number of phase sequence */
 
-				if ( isdigit( *cp ) )
+				if ( isdigit( ( unsigned char ) *cp ) )
 				{
-					while ( isdigit( *cp ) )
+					while ( isdigit( ( unsigned char ) *cp ) )
 						cp--;
 					val = T_atol( ++cp );
 				}

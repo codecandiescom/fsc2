@@ -939,7 +939,7 @@ static bool get_serial_lock( int sn )
 			while ( *bp && *bp == ' ' )
 				bp++;
 
-			if ( *bp && isdigit( *bp ) )
+			if ( *bp && isdigit( ( unsigned char ) *bp ) )
 				n = sscanf( bp, "%ld", &pid );
 
 			if ( n == 0 || n == EOF )

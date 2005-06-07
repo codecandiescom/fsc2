@@ -99,8 +99,8 @@ char *string_to_lower( char *str )
 	if ( str == NULL )
 		return NULL;
 	for ( ptr = str; *ptr; ptr++ )
-		if ( isupper( *ptr ) )
-			*ptr = ( char ) tolower( *ptr );
+		if ( isupper( ( unsigned char ) *ptr ) )
+			*ptr = ( char ) tolower( ( unsigned char ) *ptr );
 
 	return str;
 }
@@ -599,22 +599,24 @@ char *handle_escape( char *str )
 				break;
 
 			case 'x' :
-				if ( ! isxdigit( *( cp + 2 ) ) )
+				if ( ! isxdigit( ( unsigned char ) *( cp + 2 ) ) )
 				{
 					print( FATAL, "'\\x' with no following hex digits "
 						   "in string.\n" );
 					THROW( EXCEPTION );
 				}
 				esc_len = 1;
-				*cp = toupper( *( cp + 2 ) )
-					  - ( isdigit( *( cp + 2 ) ) ? '0' : ( 'A' - 10 ) );
+				*cp = toupper( ( unsigned char ) *( cp + 2 ) )
+					  - ( isdigit( ( unsigned char )*( cp + 2 ) ) ?
+						  '0' : ( 'A' - 10 ) );
 
-				if ( isxdigit( *( cp + 3 ) ) )
+				if ( isxdigit( ( unsigned char ) *( cp + 3 ) ) )
 				{
 					esc_len++;
 					*cp = *cp * 16
-						  + toupper( *( cp + 3 ) )
-						  - ( isdigit( *( cp + 3 ) ) ? '0' : ( 'A' - 10 ) );
+						  + toupper( ( unsigned char ) *( cp + 3 ) )
+						  - ( isdigit( ( unsigned char ) *( cp + 3 ) ) ?
+							  '0' : ( 'A' - 10 ) );
 				}
 
 				cp++;
@@ -877,9 +879,9 @@ int is_in( const char *supplied_in, const char **alternatives, int max )
 	   space */
 
 	in = cpy = T_strdup( supplied_in );
-	while ( isspace( *in ) )
+	while ( isspace( ( unsigned char ) *in ) )
 		in++;
-	while( isspace( cpy[ strlen( cpy ) - 1 ] ) )
+	while( isspace( ( unsigned char ) cpy[ strlen( cpy ) - 1 ] ) )
 		cpy[ strlen( cpy ) - 1 ] = '\0';
 
 	/* Now check if the cleaned up input string is identical to one of the

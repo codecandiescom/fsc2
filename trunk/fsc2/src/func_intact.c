@@ -1852,7 +1852,7 @@ bool check_format_string( char *buf )
 
 
 	if ( *++bp != '.' )                 /* test for width parameter */
-		while ( isdigit( *bp ) )
+		while ( isdigit( ( unsigned char ) *bp ) )
 			bp++;
 
 	if ( bp == lcp )                    /* no precision ? */
@@ -1864,7 +1864,7 @@ bool check_format_string( char *buf )
 	if ( bp == lcp )
 		return OK;
 
-	while ( isdigit( *bp ) )
+	while ( isdigit( ( unsigned char ) *bp ) )
 		bp++;
 
 	return lcp == bp ? OK : FAIL;
@@ -1938,7 +1938,7 @@ void check_label( char *str )
 
 	if ( *p == '+' )
 	{
-		if ( ! isdigit( *( p + 1 ) ) )
+		if ( ! isdigit( ( unsigned char ) *( p + 1 ) ) )
 			goto bad_label_string;
 		else
 			p += 2;
@@ -1953,11 +1953,11 @@ void check_label( char *str )
 	}
 	else if ( *p == '-' )
 	{
-		if ( ! isdigit( *( p + 1 ) ) &&
+		if ( ! isdigit( ( unsigned char ) *( p + 1 ) ) &&
 			 *( p + 1 ) != '>' && *( p + 1 ) != '-' )
 			goto bad_label_string;
 
-		if ( isdigit( *( p + 1 ) ) )
+		if ( isdigit( ( unsigned char ) *( p + 1 ) ) )
 			p += 2;
 
 		if ( *p == '#' )
@@ -1973,14 +1973,15 @@ void check_label( char *str )
 	   1 and 9 with the exception of 5, or an angle, starting with 0 and
 	   followed by exactly three digits. */
 
-	if ( isdigit( *p ) )
+	if ( isdigit( ( unsigned char ) *p ) )
 	{
 		if ( *p == '5' )
 			goto bad_label_string;
 		else if ( *p == '0' )
 		{
-			if ( ! isdigit( *( p + 1 ) ) || ! isdigit( *( p + 2 ) ) ||
-				 ! isdigit( *( p + 3 ) ) )
+			if ( ! isdigit( ( unsigned char ) *( p + 1 ) ) ||
+				 ! isdigit( ( unsigned char ) *( p + 2 ) ) ||
+				 ! isdigit( ( unsigned char ) *( p + 3 ) ) )
 				goto bad_label_string;
 			p += 4;
 		}

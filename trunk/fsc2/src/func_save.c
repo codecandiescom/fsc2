@@ -1125,8 +1125,8 @@ static void ff_format_check( Var_T *v )
 			sptr++;
 			vptr = vptr->next;
 		}
-		else if ( isdigit( *sptr ) )
-			while ( isdigit( *++sptr ) )
+		else if ( isdigit( ( unsigned char ) *sptr ) )
+			while ( isdigit( ( unsigned char ) *++sptr ) )
 				/* empty */ ;
 
 		if ( *sptr == '\0' )
@@ -1159,8 +1159,8 @@ static void ff_format_check( Var_T *v )
 				sptr++;
 				vptr = vptr->next;
 			}
-			else if ( isdigit( *sptr ) )
-				while ( isdigit( *++sptr ) )
+			else if ( isdigit( ( unsigned char ) *sptr ) )
+				while ( isdigit( ( unsigned char ) *++sptr ) )
 					/* empty */ ;
 
 			if ( *sptr == '\0' )
@@ -1347,8 +1347,8 @@ static long do_printf( long file_num, Var_T *v )
 				need_vars++;
 				fmt_end++;
 			}
-			else if ( isdigit( *fmt_end ) )
-				while ( isdigit( *++fmt_end ) )
+			else if ( isdigit( ( unsigned char ) *fmt_end ) )
+				while ( isdigit( ( unsigned char ) *++fmt_end ) )
 					/* empty */ ;
 
 			if ( *fmt_end == '.' )
@@ -1358,8 +1358,8 @@ static long do_printf( long file_num, Var_T *v )
 					need_vars++;
 					fmt_end++;
 				}
-				else if ( isdigit( *fmt_end ) )
-					while ( isdigit( *++fmt_end ) )
+				else if ( isdigit( ( unsigned char ) *fmt_end ) )
+					while ( isdigit( ( unsigned char ) *++fmt_end ) )
 						/* empty */ ;
 			}
 

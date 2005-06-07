@@ -319,7 +319,7 @@ static double bh15_get_field( void )
 		/* Try to find the qualifier */
 
 		val = buffer;
-		while ( *val && ! isdigit( *val ) )
+		while ( *val && ! isdigit( ( unsigned char ) *val ) )
 			val++;
 
 		if ( *val == '\0' )    /* no qualifier found ? */
@@ -371,7 +371,8 @@ static double bh15_get_field( void )
 	/* Try to locate the start of the field value */
 
 	val++;
-	while ( *val && ! isdigit( *val ) && *val != '+' && *val != '-' )
+	while ( *val && ! isdigit( ( unsigned char )*val ) &&
+			*val != '+' && *val != '-' )
 		val++;
 
 	if ( *val == '\0' )    /* no field value found ? */

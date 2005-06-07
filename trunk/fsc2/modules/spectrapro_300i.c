@@ -469,11 +469,11 @@ Var_T *monochromator_install_grating( Var_T *v )
 	/* Do some minimal checks on the part number */
 
 	if ( strcmp( v->val.sptr, "UNINSTALL" ) &&
-		 ( ! isdigit( v->val.sptr[ 0 ] ) ||
-		   v->val.sptr[ 0 ] != '-'       ||
-		   ! isdigit( v->val.sptr[ 2 ] ) ||
-		   ! isdigit( v->val.sptr[ 3 ] ) ||
-		   ! isdigit( v->val.sptr[ 4 ] ) ||
+		 ( ! isdigit( ( unsigned char ) v->val.sptr[ 0 ] ) ||
+		   v->val.sptr[ 0 ] != '-'                         ||
+		   ! isdigit( ( unsigned char ) v->val.sptr[ 2 ] ) ||
+		   ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] ) ||
+		   ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] ) ||
 		   ! v->val.sptr[ 5 ] != '-' || 
 		   strlen( v->val.sptr ) > 10 ) )
 	{

@@ -2080,7 +2080,7 @@ static double sr810_get_auto_data( int type )
 		buffer[ length - 1 ] = '\0';
 
 		ptr = buffer;
-		while ( ! isdigit( *ptr ) )
+		while ( ! isdigit( ( unsigned char ) *ptr ) )
 			ptr++;
 
 		sr810.stored_data = T_atol( ptr );

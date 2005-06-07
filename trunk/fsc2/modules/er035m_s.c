@@ -861,7 +861,7 @@ static double er035m_s_get_field( void )
 	   drop it... */
 
 	*( state_flag - 1 ) = '\0';
-	for ( vs = buffer; ! isdigit( *vs ); vs++ )
+	for ( vs = buffer; ! isdigit( ( unsigned char ) *vs ); vs++ )
 		/* empty */ ;
 	sscanf( vs, "%lf", &nmr.field );
 
@@ -957,7 +957,7 @@ static long er035m_s_get_upper_search_limit( void )
 
 	for ( ptr = buffer; *ptr != '\0'; ptr++ )
 	{
-		if ( ! isdigit( *ptr ) )
+		if ( ! isdigit( ( unsigned char ) *ptr ) )
 		{
 			print( FATAL, "Undocumented data received.\n" );
 			THROW( EXCEPTION );
@@ -998,7 +998,7 @@ static long er035m_s_get_lower_search_limit( void )
 
 	for ( ptr = buffer; *ptr != '\0'; ptr++ )
 	{
-		if ( ! isdigit( *ptr ) )
+		if ( ! isdigit( ( unsigned char ) *ptr ) )
 		{
 			print( FATAL, "Undocumented data received.\n" );
 			THROW( EXCEPTION );

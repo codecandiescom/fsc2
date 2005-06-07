@@ -416,7 +416,7 @@ static double pt2025_get_field( void )
 			THROW( EXCEPTION );
 		}
 
-		if ( toupper( *buf ) == 'L' )
+		if ( toupper( ( unsigned char ) *buf ) == 'L' )
 			break;
 
 		stop_on_user_request( );

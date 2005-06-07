@@ -163,9 +163,9 @@ WS          [\n=,:. ]+
 				/* determine number of phase sequence (0 to ...)*/
 
 				phaseslval.lval = 0;
-				if ( isdigit( *cp ) )
+				if ( isdigit( ( unsigned char ) *cp ) )
 				{
-					while ( isdigit( *cp ) )
+					while ( isdigit( ( unsigned char ) *cp ) )
 						cp--;
 					phaseslval.lval = T_atol( ++cp );
 				}
