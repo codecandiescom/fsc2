@@ -103,8 +103,8 @@ void pci_mite_close( Board *board )
  * The default size of the buffers can be set by the DMA_BUFFER_SIZE
  * macro, but this value is increased to a power of the PAGE size if
  * necessary. Setting this to too large a value may lead to allocation
- * failures because a continuous buffer may not be available, while too
- * small a buffer size may require too many buffers.
+ * failures because a buffer of the requested size may not be available,
+ * while too small a buffer size may require too many buffers.
  *----------------------------------------------------------------------*/
 
 #define DMA_BUFFER_SIZE  16384   /* 16 kByte */
