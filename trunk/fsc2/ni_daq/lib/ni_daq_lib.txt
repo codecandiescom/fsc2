@@ -434,7 +434,7 @@ has). As the second channel the channel with the the number of the first
 channel plus 8 is than automatically used.
 
 The 'NI_DAQ_AI_TYPE_Calibration' setting is used for calibration of the
-board and shouldn't be needed for normal programms.
+board and shouldn't be needed in normal programms.
 
 'NI_DAQ_AI_TYPE_Aux' is for measuring the output voltage of a onboard
 temperature sensor (+100 mV = -40 degree Celsius and +1.25 V = 125 degree
@@ -647,14 +647,14 @@ ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
 This function obtains measured data from an acquisition. If the acquisition
 hasn't been started yet (but the acquisition parameters have been set up
 using ni_daq_ai_channel_configuration() and ni_daq_ai_acq_setup()) calling
-the fucntion will automatically start an acquisition.
+the function will automatically start an acquisition.
 
 As usual the first argument of the function is a handle for the board.
 The second argument is an array of as many double pointers as there are
 channels returning data, i.e. the return value of the function 
 ni_daq_ai_channel_configuration(). Each pointer has to point to an array
 of doubles with at least as many elements as there are scans to be fetched
-from (which is also the fourth element). Data coverted to volts (according
+from (which is also the fourth element). Data converted to volts (according
 to the gain setttings of the channels) are returned via these arrays.
 
    -------
