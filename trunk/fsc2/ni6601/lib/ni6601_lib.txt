@@ -12,12 +12,12 @@ for the second board '/dev/ni6601_1' etc. They are sorted according to the
 sequence the boards are found on the PCI bus.
 
 
-The maximum number of boards that can be used is controlled via
-'NI6601_MAX_BOARDS', which is currently set to 4. This isn't defined by
-the library but by the kernel module - if you want to use more boards
-you must change the define in the header file for the kernel module
-'ni6601_drv.h' and recompile and re-install both the kernel module and
-the library.
+The maximum number of boards that can be used is controlled via the
+'NI6601_MAX_BOARDS' macro, which is currently set to 4. This isn't
+defined by the library but by the kernel module - if you want to use
+more boards you must change the define in the header file for the
+kernel module 'ni6601_drv.h' and recompile and re-install both the
+kernel module and the library.
 
 
 To use the library you will have to include the header file 'ni6601.h'.
@@ -68,7 +68,9 @@ array of short descriptions of the error encountered, which is defined as
 
 extern const char *ni6601_errlist[ ];
 
-The length of this array is given by the (constant) global variable
+(but you better use the function ni6601_strerror() to get at the
+string for the last error). The length of this array is given by
+the (constant) global variable
 
 extern const int ni6601_nerr;
 
@@ -89,13 +91,13 @@ of the functions anymore.
 
 Nearly all functions require the number of the board as the first argument.
 This argument is an integer number between 0 and (NI6601_MAX_BOARDS - 1)
-or the number of installed boards minus 1, whatever is smaller.
+or the number of installed boards minus 1, whichever is smaller.
 
 
 Most functions expect a counter number as the second argument. The valid
 range for this argument is between 0 and 3. Instead of directly
 specifiying the counter number also 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
-'NI6601_COUNTER_2', or 'NI6601_COUNTER_3' can be used.
+'NI6601_COUNTER_2' or 'NI6601_COUNTER_3' can be used.
 
 
 Some functions require a 'source' argument, i.e. the source of the
@@ -192,20 +194,23 @@ The function returns the current value of a counter. If the
 'wait_for_end' argument has a non-zero value, the function will
 only return after the counter has stopped counting with the final
 result - because a continuous counter will never stop the function
-will return indicating an error when this ius tried with a continuously
+will return indicating an error when this is tried with a continuously
 running counter. If a signal gets caught while waiting for the counter
 to finish the error code NI6601_ERR_ITR gets returned.
 
 The counters value is returned in the variable pointed to by 'count'.
 The maximum return value is 4294967295 (ULONG_MAX). If the counter
-did overflow (more events than this number happened) the counter did
-reset to 0 and the final result is the modulo of the real number of
-events and 4294967296 (ULONG_MAX + 1).
+overflows (more events than this number happen) the counter wraps
+around to 0 and the final result is the modulo of the real number of
+events and 4294967296 (ULONG_MAX + 1) - it is not possible to detect
+this condition.
 
 The current state of the counter, i.e. if the counter is still counting
 or is already stopped is returned in the variable pointed to by the
 'state' argument (unless 'state' is NULL). The variable 'state' is
-pointing to will either get set to 'NI6601_BUSY' or 'NI6601_IDLE'.
+pointing to will either get set to 'NI6601_BUSY' or 'NI6601_IDLE' (if
+the 'wait_for_end' argument was non-zero 'state' is always set to
+'NI6601_IDLE', obviously).
 
    int board             Board number
    int counter           Number of the counter
@@ -266,7 +271,8 @@ Beside the error codes mentioned above the function may return:
 
 int ni6601_stop_pulses( int board, int counter )
 
-The function is just an alias for the ni6601_stop_counter() function.
+The function is just an alias for the ni6601_stop_counter() function
+and can be used to stop a continous train of pulses being generated.
 
 
 ======================================================================
@@ -369,4 +375,5 @@ the number of printed characters.
 const char *ni6601_strerror( void )
 
 The function returns a string with the error message for the last
-call of one of the ni6601_xxx() functions.
+call of one of the ni6601_xxx() functions. Do not try to change this
+string or to deallocate the memory it is pointing to.
