@@ -130,7 +130,8 @@ typedef struct Var
 @} Var_T;
 @end example
 
-There are only six types of variables you have to know about:
+There are only six types of variables (defined by an enumeration with
+type @code{Var_Type_T}) you have to know about:
 @multitable {FLOAT_ARR} {a one-dimensional array of floating point values}
 @item @code{INT_VAR} @tab a variable for integer values
 @item @code{FLOAT_VAR} @tab a variable for floating point values
@@ -141,17 +142,19 @@ There are only six types of variables you have to know about:
 point values
 @end multitable
 @noindent
-(There are a few others, but they are only used by @code{fsc2} internally.
+There are a few others, but they are only used by @code{fsc2} internally.
 If you test for variable types in an @code{switch} you may get compiler
 warnings because @code{Var_Type_T} is an @code{enum}. To avoid the warning
-simply add a @code{default} for all the other types.)
+simply add a @code{default} for all the other types, you should receive a
+variable of such a type and can thus throw an exception (see below) should
+your function ever receive one - it would be an obvious big in @code{fsc2}.
 
 To give you a better idea what these variables are good for let's assume
 that you want to write a function that returns the curve between the two
 cursor bars of your shiny new LeCronix digitizer. So, you may want to
 write a function that has the two positions of the cursor bars as input
-parameters and returns the data of the curve between the cursor
-bars. Let's call this function
+arguments and that returns the data of the curve between the cursor bars.
+Let's call this function
 @example
 get_curve_between_cursors( cursor_1, cursor_2 )
 @end example
@@ -196,12 +199,12 @@ the pointers until the @code{next} pointer of a parameter is @code{NULL}.
 When you later tell @code{fsc2} about the function (by adding it to the
 @file{Functions} file, see below) you can explicitely state if the
 functions allows a variable number of arguments or only a certain fixed
-number of arguments. A function that only accepts e.g.@: 3 arguments
-will always get 3 -- when the @code{EDL} function is called with less
-arguments an error message is printed and executing the @code{EDL}
-script is stopped, if it is called with too many arguments, the
-superfluous ones are discarded and an error message is printed before
-your function gets invoked with the correct number of arguments.
+number. A function that only accepts e.g.@: 3 arguments will always get
+3 -- when the @code{EDL} function is called with less arguments an error
+message is printed and executing the @code{EDL} script is stopped, if it
+is called with too many arguments, the superfluous ones are discarded and
+an error message is printed before your function gets invoked with the
+correct number of arguments.
 
 In case you defined the function to accept a variable number of
 arguments you probably better check in your function that there aren't
@@ -229,10 +232,11 @@ vars_check( var->next, FLOAT_VAR );
 @end example
 @noindent
 If @code{vars_check()} finds that everything is ok it simply returns,
-otherwise an error message will be printed and the program stops, so
-you don't have to take care of error handling. If you're prepared to accept
-integers as well as floating point data, call @code{vars_check()} instead
-with
+otherwise an error message will be printed (telling the user that a
+variable of an unexpected type was detected in the function call) and
+the program stops, so you don't have to take care of error handling.
+If you're prepared to accept integers as well as floating point data,
+call @code{vars_check()} instead with
 @example
 vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
