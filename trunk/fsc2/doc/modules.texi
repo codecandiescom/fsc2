@@ -1025,7 +1025,7 @@ with their replacements:
 @findex fsc2_tcflow()
 @end table
 
-The only functions that are different to their normal counterparts are
+The only functions that are different from their normal counterparts are
 @code{fsc2_serial_open()}, @code{fsc2_serial_write()},
 @code{fsc2_serial_read()} and
 @code{fsc2_serial_close()}:
