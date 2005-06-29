@@ -74,9 +74,8 @@ ones like @code{lockin_fetch_data()} when the functionality is the same.
 
 Of course, a module will usually also contain other utility functions.
 Here you're free to use whatever name you like. To avoid trouble I
-always prepend the names of all function not exported by the module with
-the name of the device and define them, as far as possible, as
-@code{static}.
+always prepend the name of the device to the names of all function not
+exported by the module and define them, as far as possible, as @code{static}.
 
 There usually are a few functions in a module beside the ones that are
 going to be invoked from @code{EDL} scripts that get called from
@@ -91,7 +90,7 @@ bring it back into a well defined state when the experiment is done.
 Once you have written the module you must make @code{fsc2} aware of the
 new device it's supposed to control and give it a list of the @code{EDL}
 functions that can be used with the device. For this purpose there are
-to files in the @file{config} directory, called @file{Devices} and
+two files in the @file{config} directory, called @file{Devices} and
 @file{Functions} where you have to enter the name of the device and add
 the list of the new functions.
 
