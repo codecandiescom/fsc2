@@ -608,6 +608,7 @@ Var_T *ccd_camera_get_image( UNUSED_ARG Var_T *v )
 
 			size = ( uns32 ) ( width * height *sizeof *frame );
 			cf = frame = UNS16_P T_malloc( size );
+
 			for ( i = 0; i < width * height; i++ )
 				frame[ i ] = random( ) % max_val;
 		}
@@ -793,6 +794,7 @@ Var_T *ccd_camera_get_spectrum( UNUSED_ARG Var_T *v )
 
 			size = ( uns32 ) ( width * sizeof *frame );
 			cf = frame = UNS16_P T_malloc( size );
+
 			for ( i = 0; i < width; i++ )
 				frame[ i ] = random( ) * max_val;
 		}
