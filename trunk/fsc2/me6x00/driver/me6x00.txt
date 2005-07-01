@@ -39,7 +39,7 @@ ioctl() requests are currently implemented:
 
 This ioctl() can be called to set the output mode of a DAC to either
 single, continuous or wrap-around. For ME-6000 cards only single
-output mode can be set,, while for ME-6100 cards the continuous and
+output mode can be set, while for ME-6100 cards the continuous and
 wrap-around mode can be set with the 4 lowest numbered DACs.
 
 The argument is a structure of type me6x00_mode_st, which is a
