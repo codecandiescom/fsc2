@@ -178,7 +178,7 @@ sub check_status {
 	my $mw = MainWindow->new;
 	$mw->title( 'Status Check' );
 
-	$laser_line = Laser_Line::get_line( );
+	$laser_line = Laser_Line::get_line( $mw );
 
 	$center_line = 1.0e7 / $vals[ 0 ];
 
@@ -196,7 +196,7 @@ sub check_status {
 
 	$fc[ 0 ] = $mw->Frame( );
 	push @t, $fc[ 0 ]->Label( '-text' => 'Please check if monochromator is ' .
-							  'still set to: ' );
+							  'still set to:' );
 
 	$fc[ 1 ] = $mw->Frame( );
 	push @t, $fc[ 1 ]->Label( '-text' => 'Center wavenumber:',
@@ -209,22 +209,41 @@ sub check_status {
 							  '-width' => 10 );
 
 	$fc[ 2 ] = $mw->Frame( );
-	push @bc, $fc[ 2 ]->Button( -text => "Yes",
+	push @t, $fc[ 2 ]->Label( '-text' => '(Compare to value shown on the ' .
+							             'SPEX display)' );
+
+
+	$fc[ 3 ] = $mw->Frame( );
+	push @bc, $fc[ 3 ]->Button( -text => "Yes",
 								-command => sub { $is_calibrated = 1;
+												  is_safe_warn( $mw );
 												  $mw->destroy; } );
-	push @bc, $fc[ 2 ]->Button( -text => "No",
+	push @bc, $fc[ 3 ]->Button( -text => "No",
 								-command => sub { $mw->destroy; } );
 
 	$fc[ 0 ]->pack( %fp );
 	$fc[ 1 ]->pack( %fp );
 	$_->pack( %wp ) foreach @t;
-
-	$fc[ 2 ]->pack( -side => "bottom",
+	$fc[ 2 ]->pack( %fp );
+	$fc[ 3 ]->pack( -side => "bottom",
 					-fill => "x",
 					-padx => "4m" );
 	$_->pack( %wp, padx => '5m', -pady => '3m' ) foreach @bc;
 
 	MainLoop;
+}
+
+
+#############################################
+
+sub is_safe_warn {
+	my $mw = shift;
+	return if $laser_line == 0.0 or
+		      abs( $center_line - $laser_line ) >= $Min_Dist;
+
+	show_message( $mw, "Take care: the laser line and the " .
+				       "monochromators center posision are " .
+				       "less the $Min_Dist cm^-1 apart." );
 }
 
 
@@ -553,7 +572,7 @@ EOF
 
 	unless ( defined $reply and $reply =~ /^\d+(\.\d*)?$/ ) {
 		main::show_message( $top, "Can't determine monochromators laser " .
-							"line setting" );
+							"line setting:\n$reply" );
 		return;
 	}
 
@@ -568,6 +587,9 @@ EOF
 sub set_line {
 	my ( $top, $ll ) = @_;
 	$ll = main::round( $ll, 3 );
+
+	return unless Laser_Check::ask_if_safe( $top, $ll, $center_line );
+
 	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXXX" );
 
 	$f->autoflush( 1 );
@@ -654,14 +676,16 @@ sub run {
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
 	$f[ 6 ] = $f[ 5 ]->Button( -text => "Apply",
-							   -command => sub { set_cwn( $cwn );
-												 $is_calibrated = 0;
-												 $center_line =
-													 $laser_line == 0 ?
-													 $cwn :
-													 $laser_line - $cwn;
-												 $top->deiconify;
-												 $f[ 0 ]->destroy; } );
+							   -command => sub { $f[ 0 ]->destroy;
+												 if ( set_cwn( $top, $cwn ) ) {
+								   					 $is_calibrated = 0;
+													 $center_line =
+														 ( $laser_line == 0 ?
+														   $cwn :
+														   $laser_line - $cwn )
+															 + $offset;
+												 }
+												 $top->deiconify; } );
 	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
 							   -command => sub { $top->deiconify;
 												 $f[ 0 ]->destroy; } );
@@ -710,7 +734,11 @@ sub run {
 # Function for setting a new center position for the monochromator
 
 sub set_cwn {
-	my $cwn = shift;
+	my ( $top, $cwn ) = @_;
+
+	Laser_Check::ask_if_safe( $top, $laser_line, $laser_line - $cwn )
+		  if $laser_line != 0.0;
+
 	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXXX" );
 
 	$f->autoflush( 1 );
@@ -741,11 +769,16 @@ EOF
 		main::show_message( "Please press the \"REMOTE\" button at" .
 							"the console to allow computer control" .
 							"of the monochromator." );
-		return;
+		return 0;
 	}
 
-	main::show_message( "Can't set monochromators center position line" )
-		  if defined $reply;
+	if ( defined $reply ) {
+		main::show_message( "Can't set monochromators center position line\n" .
+							"$reply" );
+		return 0;
+	}
+
+	return 1;
 }
 
 
@@ -872,7 +905,8 @@ B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [pixel]",
 B_conf  = button_create( "NORMAL_BUTTON", "Accept line position" );
 hide_toolbox( "OFF" );
 
-Spec = spike_remove( ccd_camera_get_spectrum( ) );
+//Spec = spike_remove( ccd_camera_get_spectrum( ) );
+Spec = ccd_camera_get_spectrum( );
 display( 1, Spec );
 
 FOREVER {
@@ -906,12 +940,12 @@ FOREVER {
 
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -968,9 +1002,9 @@ FOR I = 1 : 2 {
 center_dev /= 2;
 center_dev += 0.01 / abs_cl;
 IF center_dev > 0 nm {
-	center_dev = 0.01 / ( 0.01 / abs_cl + center_dev ) - abs_cl;
+	center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl + center_dev );
 } ELSE {
-	center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl - center_dev );
+	center_dev = 0.01 / ( 0.01 / abs_cl - center_dev ) - abs_cl;
 }
 
 hide_toolbox( "ON" );
@@ -1008,12 +1042,12 @@ FOREVER {
        	}
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -1064,9 +1098,9 @@ FOREVER {
 		center_dev /= LP_count;
 		center_dev += 0.01 / abs_cl;
 		IF center_dev > 0 nm {
-			center_dev = 0.01 / ( 0.01 / abs_cl + center_dev ) - abs_cl;
+			center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl + center_dev );
 		} ELSE {
-			center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl - center_dev );
+			center_dev = 0.01 / ( 0.01 / abs_cl - center_dev ) - abs_cl;
 		}
 
 		output_value( B_pd, 1.0e9 * pixel_diff );
@@ -1160,63 +1194,55 @@ sub ask_if_safe {
 	return 1 if $laser_line == 0.0;
 
 	if ( $swn >= $laser_line and defined $ewn and $ewn <= $laser_line ) {
-		if ( $mw->Dialog( '-text' =>
-						  "The spectral range includes\n" .
-						  "the the laser line.\n ".
-						  "Do you really want to continue?",
-						  '-buttons' => [ "Yes", "No" ],
-						  '-default_button' => "No" )->Show( ) eq "No" ) {
-			return 0;
-		}
-		return 1;
+		return $mw->Dialog( '-text' =>
+							"The spectral range includes\n" .
+							"the the laser line.\n ".
+							"Do you really want this?",
+							'-buttons' => [ "Yes", "No" ],
+							'-default_button' => "No" )->Show( ) eq "Yes";
 	}
 
 	if ( abs( $swn - $laser_line ) < $Min_Dist ) {
-
-		if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist and
-			 $mw->Dialog( '-text' =>
-						  "Both the start and end\n" .
-						  "wavenumber are less than\n" .
-						  "$Min_Dist cm^-1 away from the\n" .
-						  "laser line.\n" .
-						  "Do you really want to continue?",
-						  '-buttons' => [ "Yes", "No" ],
-						  '-default_button' => "No" )->Show( ) eq "No" ) {
-			return 0;
+		if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist ) {
+			return $mw->Dialog( '-text' =>
+								"Both the start and end\n" .
+								"wavenumber are less than\n" .
+								"$Min_Dist cm^-1 away from the\n" .
+								"laser line.\n" .
+								"Do you really want this?",
+								'-buttons' => [ "Yes", "No" ],
+								'-default_button' => "No" )->Show( ) eq "Yes";
 		}
 
-		if ( defined $ewn and abs( $ewn - $laser_line ) >= $Min_Dist and
-			 $mw->Dialog( '-text' =>
-						  "The start wavenumber is\n" .
-						  "less than $Min_Dist cm^-1 away\n" .
-						  "from the laser line.\n" .
-						  "Do you really want to continue?",
-						  '-buttons' => [ "Yes", "No" ],
-						  '-default_button' => "No" )->Show( ) eq "No" ) {
-			return 0;
+		if ( defined $ewn and abs( $ewn - $laser_line ) >= $Min_Dist ) {
+			return $mw->Dialog( '-text' =>
+								"The start wavenumber is\n" .
+								"less than $Min_Dist cm^-1 away\n" .
+								"from the laser line.\n" .
+								"Do you really want do this?",
+								'-buttons' => [ "Yes", "No" ],
+								'-default_button' => "No" )->Show( ) eq "Yes";
 		}
 
-		if ( ! defined $ewn and
-			 $mw->Dialog( '-text' =>
-						  "The selected wavenumber is\n" .
-						  "less than $Min_Dist cm^-1 away\n" .
-						  "from the laser line.\n" .
-						  "Do you really want to continue?",
-						  '-buttons' => [ "Yes", "No" ],
-						  '-default_button' => "No" )->Show( ) eq "No" ) {
-			return 0;
+		if ( ! defined $ewn ) {
+			return $mw->Dialog( '-text' =>
+								"The center wavenumber is\n" .
+								"less than $Min_Dist cm^-1 away\n" .
+								"from the laser line.\n" .
+								"Do you really want this?",
+								'-buttons' => [ "Yes", "No" ],
+								'-default_button' => "No" )->Show( ) eq "Yes";
 		}
 	}
 
-	if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist and
-		 $mw->Dialog( '-text' =>
-					  "The end wavenumber is\n" .
-					  "less than $Min_Dist cm^-1 away\n" .
-					  "from the laser line.\n" .
-					  "Do you really want to continue?",
-					  '-buttons' => [ "Yes", "No" ],
-					  '-default_button' => "No" )->Show( ) eq "No" ) {
-		return 0;
+	if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist ) {
+		return $mw->Dialog( '-text' =>
+							"The end wavenumber is\n" .
+							"less than $Min_Dist cm^-1 away\n" .
+							"from the laser line.\n" .
+							"Do you really want this?",
+							'-buttons' => [ "Yes", "No" ],
+							'-default_button' => "No" )->Show( ) eq "Yes";
 	}
 
 	return 1;
@@ -1241,6 +1267,8 @@ sub run {
 	my $top = shift;
     my $fh;
 
+	return unless Laser_Check::ask_if_safe( $top, $laser_line, $center_line );
+
 	$top->withdraw;
 
 	no warnings "exec";
@@ -1259,13 +1287,11 @@ rs_spec10;
 
 VARIABLES:
 
-wn = 0.0 cm^-1;
 exposure_time = 0.1 s;
-laser_line;
 CCD_size[ 2 ] = ccd_camera_pixel_area( );
 ROI[ 4 ] = ccd_camera_roi( );
 BIN[ 2 ] = ccd_camera_binning( );
-B_wnr, B_wna, B_et, B_roi[ 4 ], B_bin[ 2 ], B_type[ 2 ], B_gi;
+B_et, B_roi[ 4 ], B_bin[ 2 ], B_type[ 2 ], B_gi;
 Image[ *, * ];
 D_Im[ *, * ];
 Spec[ * ];
@@ -1287,16 +1313,8 @@ init_2d( 1, ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ],
 EXPERIMENT:
 
 ccd_camera_exposure_time( exposure_time );
-laser_line = monochromator_laser_line( );
-monochromator_laser_line( 0.0 );
-wn = laser_line;
 
 hide_toolbox( "ON" );
-IF laser_line != 0.0 {
-	B_wnr = input_create( "FLOAT_INPUT", laser_line - wn,
-						  "Wavenumber [rel. cm^-1]" );
-}
-B_wna = input_create( "FLOAT_INPUT", wn, "Wavenumber [abs. cm^-1]" );
 B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
 B_roi[ 1 ] = input_create( "INT_INPUT", ROI[ 1 ], "ROI:  x-LLC" );
 B_roi[ 2 ] = input_create( "INT_INPUT", ROI[ 2 ], "ROI:  y-LLC" );
@@ -1326,50 +1344,6 @@ FOREVER {
 	IF ! toolbox_changed( ) {
 		wait( 0.2 s );
 		NEXT;
-	}
-
-   	IF laser_line != 0.0 AND toolbox_changed( B_wnr ) {
-       	new = input_value( B_wnr );
-       	IF new == wn OR
-		   laser_line - new > 44000.0 OR
-		   laser_line - new < 46000.0 / 3.0 OR
-		   abs( new ) < $Min_Dist {
-           	input_value( B_wnr, laser_line - wn );
-           	NEXT;
-       	}
-
-		hide_toolbox( "ON" );
-		wn = laser_line - new;
-		input_value( B_wna, wn );
-		monochromator_wavenumber( wn );
-		Spec = ccd_camera_get_spectrum( );
-		display_1d( 1, Spec );
-		clear_curve_2d( );
-		Image = ccd_camera_get_image( );
-		display_2d( 1, 1, Image );
-		hide_toolbox( "OFF" );
-	}
-
-   	IF toolbox_changed( B_wna ) {
-       	new = input_value( B_wna );
-       	IF new == wn OR new > 44000.0 OR new < 46000.0 / 3.0 OR 
-		   ( laser_line != 0.0 AND abs( laser_line - new ) < $Min_Dist ) {
-           	input_value( B_wna, wn );
-           	NEXT;
-       	}
-
-		hide_toolbox( "ON" );
-		wn = new;
-		IF laser_line != 0.0 {
-			input_value( B_wnr, laser_line - wn );
-		}
-		monochromator_wavenumber( wn );
-		Spec = ccd_camera_get_spectrum( );
-		display_1d( 1, Spec );
-		clear_curve_2d( );
-		Image = ccd_camera_get_image( );
-		display_2d( 1, 1, Image );
-		hide_toolbox( "OFF" );
 	}
 
    	IF toolbox_changed( B_et ) {
@@ -1533,9 +1507,6 @@ FOREVER {
 		hide_toolbox( "OFF" );
 	}
 }
-
-ON_STOP:
-	monochromator_laser_line( laser_line );
 EOF
 
     close $fh;
@@ -1675,8 +1646,8 @@ sub run {
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
 	$f[ 6 ] = $f[ 5 ]->Label( -text => "Center wavenumber:",
-								-width => 20,
-								-anchor => 'w' );
+							  -width => 20,
+							  -anchor => 'w' );
 	$f[ 7 ] = $f[ 5 ]->Label( -text => main::round( $p{ 'wn_center' }, 3 ),
 							  -width => 10,
 							  -anchor => 'w' );
@@ -1686,13 +1657,13 @@ sub run {
 
 	$f[  9 ] = $f[ 0 ]->Frame( );
 	$f[ 10 ] = $f[ 9 ]->Label( -text => "Spectral width:",
-								-width => 20,
-								-anchor => 'w' );
+							   -width => 20,
+							   -anchor => 'w' );
 	$f[ 11 ] = $f[ 9 ]->Label( -text => $p{ 'wn_width' },
-							  -width => 10,
-							  -anchor => 'w' );
+							   -width => 10,
+							   -anchor => 'w' );
 	$f[ 12 ] = $f[ 9 ]->Label( -text => " cm^-1",
-							  -width => 9 );
+							   -width => 9 );
 
 	$f[ 13 ] = $f[  0 ]->Frame( );
 	$f[ 14 ] = $f[ 13 ]->Label( -text => "Spectral resolution:",
@@ -1708,9 +1679,8 @@ sub run {
 
 	$f[ 17 ] = $f[ 0 ]->Frame( );
 	$f[ 18 ] = $f[ 17 ]->Button( -text => "Start measurement",
-								 -command => sub { $f[ 0 ]->withdraw;
+								 -command => sub { $f[ 0 ]->destroy;
 												   realtime_run( $top, %p );
-												   $f[ 0 ]->destroy;
 												   $top->deiconify; } );
 	$f[ 19 ] = $f[ 17 ]->Button( -text => "Quit",
 								 -command => sub { $f[ 0 ]->destroy;
@@ -1817,9 +1787,9 @@ sub realtime_run {
 		return;
 	}
 
-
     print $fh <<EOF;
 DEVICES:
+
 spex_cd2a;
 rs_spec10;
 
@@ -1867,7 +1837,7 @@ hide_toolbox( 0 );
 FOREVER {
 	spec = ccd_camera_get_spectrum( );
 
-	spec = spike_remove( spec );
+//	spec = spike_remove( spec );
 	display_1d( 1, spec );
 
 	IF ! toolbox_changed( ) {
@@ -2227,6 +2197,7 @@ sub single_run {
 
     print $fh <<EOF;
 DEVICES:
+
 spex_cd2a;
 rs_spec10;
 
@@ -2295,7 +2266,7 @@ FOR I = 1 : N_scans {
 		fsave( F_cur, "# #\\n", wl[ J ], spec[ J ] );
 	}
 
-	spec = spike_remove( spec );
+//	spec = spike_remove( spec );
 	avg += spec;
 	display_1d( 1, spec, 2, 1, avg / I, 1 );
 
@@ -2336,10 +2307,12 @@ button_delete( B_wl );
 IF laser_line != 0 cm^-1 {
 	button_delete( B_rel );
 	MP_rel = output_create( "FLOAT_OUTPUT", -1.0,
-							"Mouse position [cm^-1 rel.]" );
+                            "Mouse position [cm^-1 rel.]", "", "%.4f" );
 }
-MP_abs = output_create( "FLOAT_OUTPUT", -1.0, "Mouse position [cm^-1 abs.]" );
-MP_wl = output_create( "FLOAT_OUTPUT", -1.0, "Mouse position [nm]" );
+MP_abs = output_create( "FLOAT_OUTPUT", -1.0, "Mouse position [cm^-1 abs.]",
+                        "", "%.4f" );
+MP_wl = output_create( "FLOAT_OUTPUT", -1.0, "Mouse position [nm]", "",
+                       "%.6f" );
 hide_toolbox( 0 );
 change_label_1d( "Wavelength [nm]" );
 change_scale_1d( $p{ 'wl_start' } / 1 nm, $p{ 'wl_resolution' } / 1 nm );
@@ -2511,5 +2484,3 @@ EOF
 
 
 1;
-
-
