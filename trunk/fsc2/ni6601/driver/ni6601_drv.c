@@ -849,8 +849,8 @@ module_exit( ni6601_cleanup );
 
 MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number to use" );
-MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
-MODULE_DESCRIPTION( "National Instruments 6601 GBCT board driver" );
+MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
+MODULE_DESCRIPTION( "National Instruments 6601 GPCT board driver" );
 
 
 /* MODULE_LICENSE should be defined since at least 2.4.10 */
