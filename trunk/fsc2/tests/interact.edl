@@ -11,7 +11,7 @@ VARIABLES:
 B1, B2, B3, B4;
 S1, S2;
 I1, I2;
-O1, O2;
+O1, O2, O3;
 M;
 I;
 
@@ -37,6 +37,9 @@ O1 = output_create( "INT_OUTPUT", 1750, "Integer output object",
 					"This is an output\nobject for integers" );
 O2 = output_create( "FLOAT_OUTPUT", 3.1415927, "Float output object",
 					"This is an output\nobject for floats", "%14.7f" );
+O3 = output_create( "STRING_OUTPUT", date( ) + " " + time( ),
+	                "String output object",
+					"This is an output\nobject for stringgs" );
 M = menu_create( "Menu", "Item1", "Item2", "Item3" );
 hide_toolbox( 0 );
 
@@ -53,6 +56,7 @@ FOR I = 1 : 10 {
 	input_value( I2, input_value( I2 ) * 2 );
 	output_value( O1, output_value( O1 ) - 10 );
 	output_value( O2, output_value( O2 ) / 2 );
+	output_value( O3, sprint( "# #", date( ) + " " + time( ), I ) );
 	menu_choice( M, menu_choice( M ) % 3 + 1 );
 }
 
@@ -61,24 +65,26 @@ button_delete( B3 );
 button_delete( B4 );
 slider_delete( S1, S2 );
 input_delete( I1, I2 );
-output_delete( O1, O2 );
+output_delete( O1, O2, O3 );
 menu_delete( M );
 
 B1 = button_create( 0, "Normal button", "This is a\nnormal button" );
 B2 = button_create( 1, "Push\nbutton", "This is a\npush button" );
 B3 = button_create( 2, "Radio button 1", "This is a\nradio button" );
 B4 = button_create( 2, B3, "Radio button 2", "This is another\nradio button" );
-S1 = slider_create( 3, 0, 10, 0.5, "Normal slider",
+S1 = slider_create( 0, 0, 10, 0.5, "Normal slider",
 					"This is a\nnormal slider" );
-S2 = slider_create( 4, -10, 10, 1, "Value slider", "This is a\nvalue slider" );
-I1 = input_create( 7, 1685, "Integer input object",
+S2 = slider_create( 1, -10, 10, 1, "Value slider", "This is a\nvalue slider" );
+I1 = input_create( 0, 1685, "Integer input object",
 				   "This is an input\nobject for integers" );
-I2 = input_create( 8, -2.7182818, "Float input object",
+I2 = input_create( 1, -2.7182818, "Float input object",
 				   "This is an input\nobject for floats", "%14.7e" );
-O1 = output_create( 9, 1750, "Integer output object",
+O1 = output_create( 2, 1750, "Integer output object",
 					"This is an output\nobject for integers" );
-O2 = output_create( 10, 3.1415927, "Float output object",
+O2 = output_create( 3, 3.1415927, "Float output object",
 					"This is an output\nobject for floats", "%14.7f" );
+O3 = output_create( 4, date( ) + " " + time( ), "String output object",
+					"This is an output\nobject for strings" );
 M = menu_create( "Menu", "Item1", "Item2", "Item3" );
 
 FOR I = 1 : 10 {
@@ -94,7 +100,8 @@ FOR I = 1 : 10 {
 	input_value( I2, input_value( I2 ) / 2 );
 	output_value( O1, output_value( O1 ) + 10 );
 	output_value( O2, output_value( O2 ) * 2 );
+	output_value( O3, sprint( "# #", date( ) + " " + time( ), I ) );
 	menu_choice( M, menu_choice( M ) % 3 + 1 );
 }
 
-object_delete( M, O2, O1, I2, I1, S2, S1, B4, B3, B2, B1 );
+object_delete( M, O3, O2, O1, I2, I1, S2, S1, B4, B3, B2, B1 );
