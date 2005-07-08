@@ -28,7 +28,7 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_bcreate_child( Var_T *v, long type, long coll );
+static Var_T *f_bcreate_child( Var_T *v, Iobject_Type_T type, long coll );
 static void f_bdelete_child( Var_T *v );
 static void f_bdelete_parent( Var_T *v );
 static Var_T *f_bstate_child( Var_T *v );
@@ -42,7 +42,7 @@ static Var_T *f_bchanged_child( Var_T *v );
 Var_T *f_bcreate( Var_T *var )
 {
 	Var_T *v = var;
-	long type;
+	Iobject_Type_T type;
 	long coll = -1;
 	char *label = NULL;
 	char *help_text = NULL;
@@ -72,13 +72,14 @@ Var_T *f_bcreate( Var_T *var )
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		type = get_strict_long( v, "button type" );
+		type = get_strict_long( v, "button type" ) + FIRST_BUTTON_TYPE;
 
 		if ( type != NORMAL_BUTTON &&
 			 type != PUSH_BUTTON   &&
 			 type != RADIO_BUTTON     )
 		{
-			print( FATAL, "Invalid button type (%ld).\n", type );
+			print( FATAL, "Invalid button type (%ld).\n",
+				   ( long ) ( type - FIRST_BUTTON_TYPE ) );
 			THROW( EXCEPTION );
 		}
 	}
@@ -224,7 +225,7 @@ Var_T *f_bcreate( Var_T *var )
 	}
 
 	new_io->ID = Toolbox->next_ID++;
-	new_io->type = ( int ) type;
+	new_io->type = type;
 	if ( type == RADIO_BUTTON && coll == -1 )
 		new_io->state = 1;
 	else
@@ -252,7 +253,7 @@ Var_T *f_bcreate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_bcreate_child( Var_T *v, long type, long coll )
+static Var_T *f_bcreate_child( Var_T *v, Iobject_Type_T type, long coll )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -307,7 +308,7 @@ static Var_T *f_bcreate_child( Var_T *v, long type, long coll )
 	memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* current line number */
 	pos += sizeof EDL.Lc;
 
-	memcpy( pos, &type, sizeof type );     /* button type */
+	memcpy( pos, &type, sizeof type );
 	pos += sizeof type;
 
 	memcpy( pos, &coll, sizeof coll );     /* group leaders ID */
@@ -477,7 +478,7 @@ static void f_bdelete_parent( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL || ! IS_BUTTON( io ) )
+	if ( io == NULL || ! IS_BUTTON( io->type ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -577,7 +578,7 @@ Var_T *f_bstate( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL || ! IS_BUTTON( io ) )
+	if ( io == NULL || ! IS_BUTTON( io->type ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );
@@ -767,7 +768,7 @@ Var_T *f_bchanged( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "button ID" ) );
 
-	if ( io == NULL || ! IS_BUTTON( io ) )
+	if ( io == NULL || ! IS_BUTTON( io->type ) )
 	{
 		print( FATAL, "Invalid button identifier.\n" );
 		THROW( EXCEPTION );

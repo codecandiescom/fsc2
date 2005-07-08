@@ -346,7 +346,7 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
 			pos += sizeof EDL.Lc;
 
 			memcpy( &type, pos, sizeof type );
-			vars_push( INT_VAR, type );
+			vars_push( INT_VAR, type - FIRST_BUTTON_TYPE );
 			pos += sizeof type;
 
 			memcpy( &val, pos, sizeof val );         /* get colleague ID */
@@ -648,7 +648,7 @@ long *exp_screate( char *buffer, ptrdiff_t len )
 			pos += sizeof EDL.Lc;
 
 			memcpy( &type, pos, sizeof type );
-			vars_push( INT_VAR, type );
+			vars_push( INT_VAR, type - FIRST_SLIDER_TYPE );
 			pos += sizeof type;
 
 			for ( i = 0; i < 3; i++ )
@@ -926,6 +926,7 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 			THROW( EXCEPTION );
 		}
 		T_free( buffer );
+
 		result = LONG_P T_malloc( 2 * sizeof( long ) );
 		if ( ! reader( ( void * ) result ) )
 			result[ 0 ] = 0;
@@ -955,8 +956,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 			memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
 			pos += sizeof EDL.Lc;
 
-			memcpy( &type, pos, sizeof type );
-			vars_push( INT_VAR, type );              /* type of input object */
+			memcpy( &type, pos, sizeof type );       /* type of input object */
+			vars_push( INT_VAR, type - FIRST_INOUTPUT_TYPE );
 			pos += sizeof type;
 
 			if ( type == INT_INPUT || type == INT_OUTPUT )
@@ -967,13 +968,18 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
 				vars_push( INT_VAR, lval );
 				pos += sizeof lval;
 			}
-			else
+			else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
 			{
 				double dval;
 
 				memcpy( &dval, pos, sizeof dval );
 				vars_push( FLOAT_VAR, dval );
 				pos += sizeof dval;
+			}
+			else
+			{
+				vars_push( STR_VAR, pos );
+				pos += strlen( pos ) + 1;
 			}
 
 			EDL.Fname = pos;                         /* current file name */
@@ -1094,12 +1100,17 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 		Input_Res_T *input_res;
 
 
+		/* Pass the data to the parent */
+
 		if ( ! writer( C_ISTATE, len, buffer ) )
 		{
 			T_free( buffer );
 			THROW( EXCEPTION );
 		}
 		T_free( buffer );
+
+		/* Now get the parents reply */
+
 		input_res = INPUT_RES_P T_malloc( sizeof *input_res );
 		if ( ! reader( ( void * ) input_res ) )
 			input_res->res = -1;
@@ -1114,13 +1125,14 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 		Var_T *ret = NULL;
 		int acc;
 		char *pos;
-		Input_Res_T input_res;
+		Input_Res_T input_res = { -1, { 0 } };
 		long ID;
 
 
 		TRY
 		{
-			/* Get variable with address of function to set/get slider value */
+			/* Get variable with address of function to set/get an input
+			   or output object value */
 
 			func_ptr = func_get( "input_value", &acc );
 
@@ -1137,7 +1149,7 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 			memcpy( &type, pos, sizeof type );
 			pos += sizeof type;
 
-			if ( type == 1 )                           /* new integer value */
+			if ( type == INT_VAR )                    /* new integer value */
 			{
 				long lval;
 
@@ -1145,7 +1157,7 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 				vars_push( INT_VAR, lval );
 				pos += sizeof lval;
 			}
-			else if ( type == 2 )                      /* new float value */
+			else if ( type == FLOAT_VAR )             /* new float value */
 			{
 				double dval;
 
@@ -1153,22 +1165,39 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 				vars_push( FLOAT_VAR, dval );
 				pos += sizeof dval;
 			}
+			else if ( type == STR_VAR )                /* new string value */
+			{
+				vars_push( STR_VAR, pos );
+				pos += strlen( pos ) + 1;
+			}
 
-			EDL.Fname = pos;                            /* current file name */
+			EDL.Fname = pos;                           /* current file name */
 
 			/* Call the function */
 
 			ret = func_call( func_ptr );
-			if ( ret->type == INT_VAR )
+
+			switch ( ret->type )
 			{
-				input_res.res = 0;
-				input_res.val.lval = ret->val.lval;
+				case INT_VAR :
+					input_res.res = INT_VAR;
+					input_res.val.lval = ret->val.lval;
+					break;
+
+				case FLOAT_VAR :
+					input_res.res = FLOAT_VAR;
+					input_res.val.dval = ret->val.dval;
+					break;
+
+				case STR_VAR :
+					input_res.res = STR_VAR;
+					input_res.val.sptr = T_strdup( ret->val.sptr );
+					break;
+
+				default :
+					fsc2_assert( 1 == 0 );             /* this can't happen */
 			}
-			else
-			{
-				input_res.res = 1;
-				input_res.val.dval = ret->val.dval;
-			}
+
 			vars_pop( ret );
 			TRY_SUCCESS;
 		}
@@ -1177,8 +1206,24 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
-		if ( ! writer( C_ISTATE_REPLY, sizeof input_res, &input_res ) )
-			THROW( EXCEPTION );
+
+		if ( input_res.res != STR_VAR )
+		{
+			if ( ! writer( C_ISTATE_REPLY, sizeof input_res, &input_res ) )
+				THROW( EXCEPTION );
+		}
+		else
+		{
+			if ( ! writer( C_ISTATE_STR_REPLY, strlen( input_res.val.sptr ),
+						   input_res.val.sptr ) )
+			{
+				T_free( input_res.val.sptr );
+				THROW( EXCEPTION );
+			}
+
+			T_free( input_res.val.sptr );
+		}
+
 		return NULL;
 	}
 }

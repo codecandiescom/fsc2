@@ -1618,8 +1618,7 @@ first argument of the function for creating an input field,
 @code{input_create()}, is the type of the input field. If the first
 argument is @code{"INT_INPUT"} the input field will only accept integer
 numbers, while with an argument of @code{"FLOAT_INPUT"} also floating
-point numbers can be entered. (@code{"INT_INPUT"} can be replaced by the
-numerical argument @code{0} and @code{"FLOAT_INPUT"} by 1.)
+point numbers can be entered.
 
 If the second argument is a number it is taken to be the initial value
 in the input field. If there is either no second argument or the second
@@ -1638,6 +1637,10 @@ string is a simplified version of a C format string. It must start with
 precision and finally (non-optionally) either @code{f}, @code{e} or
 @code{g} (or @code{F}, @code{E} or @code{G}). For more information
 please read the manual page for @code{C}'s @code{printf(3)}.
+
+Please note that the maximum amount of text shown in the input fields
+consists of 32 characters (including white-space). If the text is longer
+it gets truncated and longer texts can't be entered.
 
 
 @anchor{input_delete}
@@ -1674,20 +1677,25 @@ new value by calling @code{input_value()}.
 @findex output_create()
 In contrast to input objects output objects can be used to display a
 value but the user can't change the value. As in the case of input
-objects there are two different types of output fields, one, that will
-only accept integer values, while the other also allows output of
-floating point numbers. The first argument of the function for creating
+objects there are two types of output fields, one, that will only
+accept integer values while the other also allows output of floating
+point numbers. The first argument of the function for creating
 an output field, @code{output_create()}, is the type of the output
 field. If the first argument is @code{"INT_OUTPUT"} the output field
 will only show integer numbers, while with an argument of
 @code{"FLOAT_OUTPUT"} also floating point numbers can be
-displayed. (@code{"INT_OUTPUT"} can be replaced by the numerical
-argument 2 and @code{"FLOAT_OUTPUT"} by 3.)
+displayed. Beside the two output fields for numerical values there
+also exists a field for string output. You create it by specifying
+@code{"STRING_OUTPUT"} as the first argument.
 
 If the second argument is a number it is taken to be the initial value
-in the output field. If there is either no second argument or the second
+in the output field. In the case of output fields for integer or floating
+point numbers if there is either no second argument or the second
 argument is not a number but a string, the output field will be
-initialized to @code{0}.
+initialized to @code{0}. For string output fields an initial value must
+be given if there are more arguments to follow - it can be e.g.@: the
+empty string. If a numerical value is given for a string output field the
+number is converted to a string representing this number.
 
 As in the case of buttons and sliders there are two more (optional)
 arguments, the label to be shown below the input field and a help
@@ -1702,6 +1710,9 @@ precision and finally (non-optionally) either @code{f}, @code{e} or
 @code{g} (or @code{F}, @code{E} or @code{G}). For more information
 please read the manual page for @code{C}'s @code{printf(3)}.
 
+Please note that the maximum amount of text shown in any of the output
+fields consists of 32 characters (including white-space). If the text
+is longer it gets truncated.
 
 @anchor{output_delete}
 @item output_delete()
@@ -1718,7 +1729,9 @@ current value. The first argument must be an output field identifier as
 returned by the function @code{output_create()}. If this is the only
 argument the value the output field is set to is returned. If there's a
 second value the output field is set to this value. Obviously, the value
-must be number.
+must be number for integer and floating point output fields. If for a
+string output field a number is passed to the function the number is
+automatically converted to a string respresenting that number.
 
 
 @anchor{menu_create}

@@ -28,7 +28,8 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval );
+static Var_T *f_ocreate_child( Var_T *v, Iobject_Type_T type, long lval,
+							   double dval, char *sptr );
 static void f_odelete_child( Var_T *v );
 static void f_odelete_parent( Var_T *v );
 static Var_T *f_ovalue_child( Var_T *v );
@@ -42,7 +43,7 @@ static Var_T *f_ochanged_child( Var_T *v );
 Var_T *f_ocreate( Var_T *var )
 {
 	Var_T *v = var;
-	long type;
+	Iobject_Type_T type;
 	char *label = NULL;
 	char *help_text = NULL;
 	char *form_str = NULL;
@@ -50,6 +51,7 @@ Var_T *f_ocreate( Var_T *var )
 	Iobject_T *ioi;
 	long lval = 0;
 	double dval = 0.0;
+	char *sptr = NULL;
 
 
 	CLOBBER_PROTECT( v );
@@ -60,6 +62,7 @@ Var_T *f_ocreate( Var_T *var )
 	CLOBBER_PROTECT( new_io );
 	CLOBBER_PROTECT( lval );
 	CLOBBER_PROTECT( dval );
+	CLOBBER_PROTECT( sptr );
 
 	/* At least the type of the input or output object must be specified */
 
@@ -69,20 +72,20 @@ Var_T *f_ocreate( Var_T *var )
 		THROW( EXCEPTION );
 	}
 
-	/* First argument must be type of "INT_INPUT", "FLOAT_INPUT",
-	   "INT_OUTPUT" or "FLOAT_OUTPUT" or 0, 1, 2, or 3 */
+	/* First argument must be type of object ("INT_INPUT", "FLOAT_INPUT",
+	   "INT_OUTPUT", "FLOAT_OUTPUT", "STRING_OUTPUT" or 0, 1, 2, 3, or 4) */
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		type = get_strict_long( v, "input or output object type" );
+		type = get_strict_long( v, "input or output object type" )
+			   + FIRST_INOUTPUT_TYPE;
 
-		if ( type != INT_INPUT && type != FLOAT_INPUT &&
-			 type != INT_OUTPUT && type != FLOAT_OUTPUT )
+		if ( ! IS_INOUTPUT( type ) )
 		{
 			print( FATAL, "Invalid input or output object type (%ld).\n",
-				   type );
+				   ( long ) ( type - FIRST_INOUTPUT_TYPE ) );
 			THROW( EXCEPTION );
 		}
 	}
@@ -96,6 +99,8 @@ Var_T *f_ocreate( Var_T *var )
 			type = INT_OUTPUT;
 		else if ( ! strcasecmp( v->val.sptr, "FLOAT_OUTPUT" ) )
 			type = FLOAT_OUTPUT;
+		else if ( ! strcasecmp( v->val.sptr, "STRING_OUTPUT" ) )
+			type = STRING_OUTPUT;
 		else
 		{
 			print( FATAL, "Unknown input or output object type: '%s'.\n",
@@ -107,32 +112,77 @@ Var_T *f_ocreate( Var_T *var )
 	/* Next argument could be a value to be set in the input or output
 	   object */
 
-	if ( ( v = vars_pop( v ) ) != NULL && v->type & ( INT_VAR | FLOAT_VAR ) )
+	if ( ( v = vars_pop( v ) ) != NULL ) 
 	{
-		if ( ( type == INT_INPUT || type == INT_OUTPUT ) &&
-			 v->type == FLOAT_VAR )
+		switch ( v->type )
 		{
-			print( SEVERE, "Float value used as initial value for new integer "
-				   "input or output object.\n" );
-			lval = lrnd( v->val.dval );
-		}
-		else
-		{
-			if ( type == INT_INPUT || type == INT_OUTPUT )
-				lval = v->val.lval;
-			else
-				dval = VALUE( v );
+			case INT_VAR :
+				if ( type == INT_INPUT || type == INT_OUTPUT )
+					lval = v->val.lval;
+				else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+					dval = VALUE( v );
+				else
+					sptr = get_string( "%d", v->val.lval );
+				break;
+
+			case FLOAT_VAR :
+				if ( type == INT_INPUT || type == INT_OUTPUT )
+				{
+					print( SEVERE, "Float value used as initial value for new "
+						   "integer input or output object.\n" );
+					lval = lrnd( v->val.dval );
+				}
+				else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+					dval = v->val.dval;
+				else
+					sptr = get_string( "%f", v->val.dval );
+				break;
+
+			case STR_VAR :
+				if ( type == STRING_OUTPUT )
+					sptr = T_strdup( v->val.sptr );
+				else
+				{
+					print( FATAL, "Can't use a string as the value for an "
+						   "int or float input or output object.\n" );
+					THROW( EXCEPTION );
+				}
+				break;
+
+			default:
+				print( FATAL, "Invalid variable type for input or "
+					   "output object.\n" );
+				THROW( EXCEPTION );
 		}
 
 		v = vars_pop( v );
-	}
+	} else if ( type == STRING_OUTPUT )
+		sptr = T_strdup( "" );
 
 	/* Since the child process can't use graphics it has to write the
 	   parameter into a buffer, pass it to the parent process and ask the
-	   parent to create the button */
+	   parent to create the object (due to the possibly allocated memory for
+	   a string output field we need to call the function in a TRY block
+	   to be able to get rid of that memory in all cases). */
 
 	if ( Fsc2_Internals.I_am == CHILD )
-		return f_ocreate_child( v, type, lval, dval );
+	{
+		TRY
+		{
+			v = f_ocreate_child( v, type, lval, dval, sptr );
+			TRY_SUCCESS;
+		}
+		OTHERWISE
+		{
+			if ( type == STRING_OUTPUT )
+				T_free( sptr );
+			RETHROW( );
+		}
+
+		if ( type == STRING_OUTPUT )
+			T_free( sptr );
+		return v;
+	}
 
 	/* Next argument is the label string */
 
@@ -150,6 +200,7 @@ Var_T *f_ocreate( Var_T *var )
 		OTHERWISE
 		{
 			T_free( label );
+			T_free( sptr );
 			RETHROW( );
 		}
 
@@ -171,6 +222,7 @@ Var_T *f_ocreate( Var_T *var )
 		{
 			T_free( help_text );
 			T_free( label );
+			T_free( sptr );
 			RETHROW( );
 		}
 
@@ -184,8 +236,10 @@ Var_T *f_ocreate( Var_T *var )
 		TRY
 		{
 			vars_check( v, STR_VAR );
-			if ( type == INT_INPUT || type == INT_OUTPUT )
-				print( WARN, "Can't set format string for integer data.\n" );
+			if ( type == INT_INPUT || type == INT_OUTPUT ||
+				 type == STRING_OUTPUT )
+				print( WARN, "Can't set format string for integer or "
+					   "string data.\n" );
 			else
 			{
 				form_str = T_strdup( v->val.sptr );
@@ -203,6 +257,7 @@ Var_T *f_ocreate( Var_T *var )
 			T_free( form_str );
 			T_free( help_text );
 			T_free( label );
+			T_free( sptr );
 			RETHROW( );
 		}
 	}
@@ -243,6 +298,7 @@ Var_T *f_ocreate( Var_T *var )
 			T_free( new_io->form_str );
 		T_free( help_text );
 		T_free( label );
+		T_free( sptr );
 		RETHROW( );
 	}
 		
@@ -261,11 +317,13 @@ Var_T *f_ocreate( Var_T *var )
 	}
 
 	new_io->ID = Toolbox->next_ID++;
-	new_io->type = ( int ) type;
+	new_io->type = type;
 	if ( type == INT_INPUT || type == INT_OUTPUT )
 		new_io->val.lval = lval;
-	else
+	else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
 		new_io->val.dval = dval;
+	else
+		new_io->val.sptr = sptr;
 	new_io->self = NULL;
 	new_io->group = NULL;
 	new_io->label = label;
@@ -288,7 +346,8 @@ Var_T *f_ocreate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
+static Var_T *f_ocreate_child( Var_T *v, Iobject_Type_T type, long lval,
+							   double dval, char *sptr )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -318,7 +377,8 @@ static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 			if ( v->next->next != NULL )
 			{
 				vars_check( v->next->next, STR_VAR );
-				if ( type == INT_INPUT || type == INT_OUTPUT )
+				if ( type == INT_INPUT || type == INT_OUTPUT ||
+					 type == STRING_OUTPUT )
 					print( WARN, "Can't set format string for integer "
 						   "data.\n" );
 				form_str = v->next->next->val.sptr;
@@ -334,9 +394,14 @@ static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 
 	/* Calculate length of buffer needed */
 
-	len =   sizeof EDL.Lc + sizeof type
-		  + ( ( type == INT_INPUT || type == INT_OUTPUT ) ?
-			  sizeof lval : sizeof dval );
+	len = sizeof EDL.Lc + sizeof type;
+
+	if ( type == INT_INPUT || type == INT_OUTPUT )
+		len += sizeof lval;
+	else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
+		len +=sizeof dval;
+	else
+		len += strlen( sptr ) + 1;
 
 	if ( EDL.Fname )
 		len += strlen( EDL.Fname ) + 1;
@@ -363,7 +428,7 @@ static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
 	pos += sizeof EDL.Lc;
 
-	memcpy( pos, &type, sizeof type );         /* object type */
+	memcpy( pos, &type, sizeof type );
 	pos += sizeof type;
 
 	if ( type == INT_INPUT || type == INT_OUTPUT )
@@ -371,10 +436,15 @@ static Var_T *f_ocreate_child( Var_T *v, long type, long lval, double dval )
 		memcpy( pos, &lval, sizeof lval );
 		pos += sizeof lval;
 	}
-	else
+	else if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
 	{
 		memcpy( pos, &dval, sizeof dval );
 		pos += sizeof dval;
+	}
+	else
+	{
+		strcpy( pos, sptr );
+		pos += strlen( sptr ) + 1;
 	}
 
 	if ( EDL.Fname )
@@ -492,7 +562,7 @@ static void f_odelete_child( Var_T *v )
 	long ID;
 
 
-	/* Do all possible checking of the parameter */
+	/* Do all possible checks on the parameter */
 
 	ID = get_strict_long( v, "input or output object ID" );
 
@@ -557,9 +627,7 @@ static void f_odelete_parent( Var_T *v )
 	io = find_object_from_ID( get_strict_long( v,
 											   "input or output object ID" ) );
 
-	if ( io == NULL ||
-		 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
-		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
+	if ( io == NULL || ! IS_INOUTPUT( io->type ) )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );
@@ -581,6 +649,9 @@ static void f_odelete_parent( Var_T *v )
 		fl_delete_object( io->self );
 		fl_free_object( io->self );
 	}
+
+	if ( io->type == STRING_OUTPUT )
+		T_free( io->val.sptr );
 
 	T_free( io->label );
 	T_free( io->help_text );
@@ -638,9 +709,7 @@ Var_T *f_ovalue( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v,
 											   "input or output object ID" ) );
-	if ( io == NULL ||
-		 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
-		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
+	if ( io == NULL || ! IS_INOUTPUT( io->type ) )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );
@@ -654,49 +723,78 @@ Var_T *f_ovalue( Var_T *v )
 	{
 		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 			return vars_push( INT_VAR, io->val.lval );
-		else
+		else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
 			return vars_push( FLOAT_VAR, io->val.dval );
+		else
+			return vars_push( STR_VAR, io->val.sptr );
 	}
 
 	/* Otherwise check the next argument, i.e. the value to be set */
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+	switch ( v->type )
+	{
+		case INT_VAR :
+			if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
+				io->val.lval = v->val.lval;
+			else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
+				io->val.dval = VALUE( v );
+			else
+				io->val.sptr = get_string( "%d", v->val.lval );
+			break;
 
-	if ( ( io->type == INT_INPUT || io->type == INT_OUTPUT ) &&
-		 v->type == FLOAT_VAR )
-	{
-		print( SEVERE, "Float number used as integer input or output "
-			   "object value.\n" );
-		io->val.lval = lrnd( v->val.dval );
-	}
-	else
-	{
-		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
-			io->val.lval = v->val.lval;
-		else
-			io->val.dval = VALUE( v );
+		case FLOAT_VAR :
+			if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
+			{
+				print( SEVERE, "Float value used as initial value for new "
+					   "integer input or output object.\n" );
+				io->val.lval = lrnd( v->val.dval );
+			}
+			else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
+				io->val.dval = v->val.dval;
+			else
+				io->val.sptr = get_string( "%f", v->val.dval );
+			break;
+
+		case STR_VAR :
+			if ( io->type == STRING_OUTPUT )
+			{
+				T_free( io->val.sptr );
+				io->val.sptr = T_strdup( v->val.sptr );
+			}
+			else
+			{
+				print( FATAL, "Can't use a string as the value for an "
+					   "int or float input or output object.\n" );
+				THROW( EXCEPTION );
+			}
+			break;
+
+		default:
+			print( FATAL, "Invalid variable type for input or "
+				   "output object.\n" );
+			THROW( EXCEPTION );
 	}
 
 	if ( Fsc2_Internals.mode != TEST )
 	{
 		if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
-		{
 			snprintf( buf, MAX_INPUT_CHARS + 1, "%ld", io->val.lval );
-			fl_set_input( io->self, buf );
-		}
-		else
-		{
+		else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
 			snprintf( buf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
-			fl_set_input( io->self, buf );
-		}
+		else
+			snprintf( buf, MAX_INPUT_CHARS + 1, "%s", io->val.sptr );
+
+		fl_set_input( io->self, buf );
 	}
 
 	too_many_arguments( v );
 
 	if ( io->type == INT_INPUT || io->type == INT_OUTPUT )
 		return vars_push( INT_VAR, io->val.lval );
-	else
+	else if ( io->type == FLOAT_INPUT || io->type == FLOAT_OUTPUT )
 		return vars_push( FLOAT_VAR, io->val.dval );
+	else
+		return vars_push( STR_VAR, io->val.sptr );
 }
 
 
@@ -712,6 +810,7 @@ static Var_T *f_ovalue_child( Var_T *v )
 	long state = 0;
 	long lval = 0;
 	double dval = 0.0;
+	char *sptr = NULL;
 	char *buffer, *pos;
 	Input_Res_T *input_res;
 	size_t len;
@@ -730,25 +829,38 @@ static Var_T *f_ovalue_child( Var_T *v )
 	/* Another argument means that the objects value is to be set */
 
 	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		vars_check( v, INT_VAR | FLOAT_VAR );
+		switch ( v->type )
+		{
+			case INT_VAR :
+				state = INT_VAR;
+				lval = v->val.lval;
+				break;
 
-		if ( v->type == INT_VAR )
-		{
-			state = 1;
-			lval = v->val.lval;
+			case FLOAT_VAR :
+				state = FLOAT_VAR;
+				dval = VALUE( v );
+				break;
+
+			case STR_VAR :
+				state = STR_VAR;
+				sptr = T_strdup( v->val.sptr );
+				break;
+
+			default :
+				print( FATAL, "Invalid type to set for the input or output "
+					   "object.\n" );
+				THROW( EXCEPTION );
 		}
-		else
-		{
-			state = 2;
-			dval = VALUE( v );
-		}
-	}
 
 	too_many_arguments( v );
 
-	len =   sizeof EDL.Lc + sizeof ID + sizeof state
-		  + ( state <= 1 ? sizeof lval : sizeof dval );
+	len = sizeof EDL.Lc + sizeof ID + sizeof state;
+	if ( state == 0 || state == INT_VAR )
+		len += sizeof lval;
+	else if ( state == FLOAT_VAR )
+		len += sizeof dval;
+	else if ( state == STR_VAR )
+		len += strlen( sptr ) + 1;
 
 	if ( EDL.Fname )
 		len += strlen( EDL.Fname ) + 1;
@@ -763,18 +875,24 @@ static Var_T *f_ovalue_child( Var_T *v )
 	memcpy( pos, &ID, sizeof ID );          /* object ID */
 	pos += sizeof ID;
 
-	memcpy( pos, &state, sizeof state );    /* needs input setting ? */
+	memcpy( pos, &state, sizeof state );      /* needs input setting ? */
 	pos += sizeof state;
 
-	if ( state <= 1 )                       /* new object value */
+	if ( state == 0 || state == INT_VAR )     /* new object value */
 	{
 		memcpy( pos, &lval, sizeof lval );
 		pos += sizeof lval;
 	}
-	else
+	else if ( state == FLOAT_VAR )
 	{
 		memcpy( pos, &dval, sizeof dval );
 		pos += sizeof dval;
+	}
+	else if ( state == STR_VAR )
+	{
+		strcpy( pos, sptr );
+		pos += strlen( sptr ) + 1;
+		T_free( sptr );
 	}
 
 	if ( EDL.Fname )
@@ -787,9 +905,9 @@ static Var_T *f_ovalue_child( Var_T *v )
 
 	/* Ask parent to set or get the value - it will return a pointer to an
 	   Input_Res structure, where the res entry indicates failure (negative
-	   value) and the type of the returned value (0 is integer, positive
-	   non-zero is float), and the second entry is a union for the return
-	   value, i.e. the objects value. */
+	   value) and the state of the returned value and the second entry is a
+	   union for the return value, i.e. the objects value or a pointer to
+	   a string. */
 
 	input_res = exp_istate( buffer, pos - buffer );
 
@@ -802,16 +920,23 @@ static Var_T *f_ovalue_child( Var_T *v )
 	}
 
 	state = input_res->res;
-	if ( state == 0 )
+	if ( state == INT_VAR )
 		lval = input_res->val.lval;
-	else
+	else if ( state == FLOAT_VAR )
 		dval = input_res->val.dval;
+	else if ( state == STR_VAR )
+		sptr = input_res->val.sptr;
+
 	T_free( input_res );
 
-	if ( state == 0 )
+	if ( state == INT_VAR )
 		return vars_push( INT_VAR, lval );
-	else
+	else if ( state == FLOAT_VAR )
 		return vars_push( FLOAT_VAR, dval );
+
+	v = vars_push( STR_VAR, sptr );
+	T_free( sptr );
+	return v;
 }
 
 
@@ -850,9 +975,7 @@ Var_T *f_ochanged( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v,
 											   "input or output object ID" ) );
-	if ( io == NULL ||
-		 ( io->type != INT_INPUT  && io->type != FLOAT_INPUT &&
-		   io->type != INT_OUTPUT && io->type != FLOAT_OUTPUT ) )
+	if ( io == NULL || ! IS_INOUTPUT( io->type ) )
 	{
 		print( FATAL, "Invalid input or output object identifier.\n" );
 		THROW( EXCEPTION );

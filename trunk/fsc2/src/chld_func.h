@@ -36,6 +36,7 @@ struct Input_Res {
 	union {
 		long lval;
 		double dval;
+		char *sptr;
 	} val;
 };
 

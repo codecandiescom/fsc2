@@ -28,7 +28,7 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_screate_child( Var_T *v, long type, double start_val,
+static Var_T *f_screate_child( Var_T *v, Iobject_Type_T, double start_val,
 							   double end_val, double step );
 static void f_sdelete_child( Var_T *v );
 static void f_sdelete_parent( Var_T *v );
@@ -45,7 +45,7 @@ Var_T *f_screate( Var_T *var )
 	Var_T *v = var;
 	Iobject_T *new_io = NULL;
 	Iobject_T *ioi;
-	long type;
+	Iobject_Type_T type;
 	double start_val, end_val;
 	double step = 0.0;
 	char *label = NULL;
@@ -70,18 +70,19 @@ Var_T *f_screate( Var_T *var )
 		THROW( EXCEPTION );
 	}
 
-	/* Check the type parameter */
+	/* First argument must be type of slider ("NORMAL_SLIDER", "VALUE_SLIDER"
+	   "SLOW_NORMAL_SLIDER" or "SLOW_VLAUE_SLIDER" or 0, 1, 2 or 3) */
 
 	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == INT_VAR || v->type == FLOAT_VAR )
 	{
-		type = get_strict_long( v, "slider type" );
+		type = get_strict_long( v, "slider type" ) + FIRST_SLIDER_TYPE;
 
-		if ( type != NORMAL_SLIDER && type != VALUE_SLIDER &&
-			 type != SLOW_NORMAL_SLIDER && type != SLOW_VALUE_SLIDER )
+		if ( ! IS_SLIDER( type ) )
 		{
-			print( FATAL, "Invalid slider type (%ld).\n", type );
+			print( FATAL, "Invalid slider type (%ld).\n",
+				   ( long ) ( type - FIRST_SLIDER_TYPE ) );
 			THROW( EXCEPTION );
 		}
 	}
@@ -229,7 +230,7 @@ Var_T *f_screate( Var_T *var )
 	}
 
 	new_io->ID = Toolbox->next_ID++;
-	new_io->type = ( int ) type;
+	new_io->type = type;
 	new_io->self = NULL;
 	new_io->start_val = start_val;
 	new_io->end_val = end_val;
@@ -258,7 +259,7 @@ Var_T *f_screate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_screate_child( Var_T *v, long type, double start_val,
+static Var_T *f_screate_child( Var_T *v, Iobject_Type_T type, double start_val,
 							   double end_val, double step )
 {
 	char *buffer, *pos;
@@ -475,7 +476,7 @@ static void f_sdelete_parent( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL || ! IS_SLIDER( io ) )
+	if ( io == NULL || ! IS_SLIDER( io->type ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -552,7 +553,7 @@ Var_T *f_svalue( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL || ! IS_SLIDER( io ) )
+	if ( io == NULL || ! IS_SLIDER( io->type ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );
@@ -722,7 +723,7 @@ Var_T *f_schanged( Var_T *v )
 
 	io = find_object_from_ID( get_strict_long( v, "slider ID" ) );
 
-	if ( io == NULL || ! IS_SLIDER( io ) )
+	if ( io == NULL || ! IS_SLIDER( io->type ) )
 	{
 		print( FATAL, "Invalid slider identifier.\n" );
 		THROW( EXCEPTION );

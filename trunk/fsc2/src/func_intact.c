@@ -75,6 +75,7 @@ static void int_input_setup( Iobject_T *io );
 static void float_input_setup( Iobject_T *io );
 static void int_output_setup( Iobject_T *io );
 static void float_output_setup( Iobject_T *io );
+static void string_output_setup( Iobject_T *io );
 static void menu_setup( Iobject_T *io );
 static void tools_callback( FL_OBJECT *ob, long data );
 static void store_toolbox_position( void );
@@ -255,18 +256,21 @@ void parent_freeze( int freeze )
 		   when it's done while the toolbox is hidden */
 
 		for ( io = Toolbox->objs; io != NULL; io = io->next )
+		{
+			if ( IS_OUTPUT( io->type ) )
+				continue;
+
 			if ( io->enabled )
 			{
-				if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-					fl_activate_object( io->self );
+				fl_activate_object( io->self );
 				fl_set_object_lcol( io->self, FL_BLACK );
 			}
 			else
 			{
-				if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-					fl_deactivate_object( io->self );
+				fl_deactivate_object( io->self );
 				fl_set_object_lcol( io->self, FL_INACTIVE_COL );
 			}
+		}
 	}
 	else if ( ! Is_frozen && freeze && fl_form_is_visible( Toolbox->Tools ) )
 	{
@@ -537,6 +541,7 @@ static void f_objdel_parent( Var_T *v )
 
 		case INT_INPUT  : case FLOAT_INPUT :
 		case INT_OUTPUT : case FLOAT_OUTPUT :
+		case STRING_OUTPUT :
 			vars_pop( f_odelete( vars_push( INT_VAR, v->val.lval ) ) );
 			break;
 
@@ -745,19 +750,17 @@ Var_T *f_obj_xable( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( state != io->enabled )
+	if ( ! IS_OUTPUT( io->type ) && state != io->enabled )
 	{
 		if ( state )
 		{
-			if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-				fl_activate_object( io->self );
+			fl_activate_object( io->self );
 			fl_set_object_lcol( io->self, FL_BLACK );
 			io->enabled = SET;
 		}
 		else
 		{
-			if ( io->type != FLOAT_OUTPUT && io->type != INT_OUTPUT )
-				fl_deactivate_object( io->self );
+			fl_deactivate_object( io->self );
 			fl_set_object_lcol( io->self, FL_INACTIVE_COL );
 			io->enabled = UNSET;
 		}
@@ -1040,15 +1043,10 @@ static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h )
 			/* The vertical distance between two buttons would look too large
 			   if we use the whole horizontal spacing, so take only the half */
 
-			if ( (  io->prev->type == NORMAL_BUTTON ||
-					io->prev->type == PUSH_BUTTON   ||
-					io->prev->type == RADIO_BUTTON     ) &&
-				 ( io->type == NORMAL_BUTTON ||
-				   io->type == PUSH_BUTTON   ||
-				   io->type == RADIO_BUTTON ) )
-				 io->y += FI_sizes.HORI_OFFSET / 2;
+			if ( IS_BUTTON( io->prev->type ) && IS_BUTTON( io->type ) )
+				io->y += FI_sizes.HORI_OFFSET / 2;
 			else
-				 io->y += FI_sizes.HORI_OFFSET;
+				io->y += FI_sizes.HORI_OFFSET;
 		}
 		else
 		{
@@ -1095,6 +1093,10 @@ static FL_OBJECT *append_object_to_form( Iobject_T *io, int *w, int *h )
 
 		case FLOAT_OUTPUT :
 			float_output_setup( io );
+			break;
+
+		case STRING_OUTPUT :
+			string_output_setup( io );
 			break;
 
 		case MENU :
@@ -1606,6 +1608,55 @@ static void float_output_setup( Iobject_T *io )
 }
 
 
+/*-----------------------------------------------------*
+ * Creates a string output object, determines its size
+ * and sets some properties
+ *-----------------------------------------------------*/
+
+static void string_output_setup( Iobject_T *io )
+{
+	char buf[ MAX_INPUT_CHARS + 1 ];
+
+
+	io->w = FI_sizes.IN_OUT_WIDTH;
+	io->h = FI_sizes.OUT_HEIGHT;
+
+	io->self = fl_add_input( FL_INT_INPUT, io->x, io->y,
+							 io->w, io->h, io->label );
+
+	fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
+	fl_set_object_lsize( io->self, GUI.toolboxFontSize );
+
+	if ( io->label != NULL )
+	{
+		fl_get_string_dimension( FL_NORMAL_STYLE, GUI.toolboxFontSize,
+								 io->label, strlen( io->label ),
+								 &io->wt, &io->ht );
+
+		if ( io->wt < io->w )
+			io->wt = io->w;
+		else if ( io->wt > io->w )
+			fl_set_object_lalign( io->self, FL_ALIGN_LEFT_BOTTOM );
+
+		io->ht += io->h;
+	}
+	else
+	{
+		io->wt = io->w;
+		io->ht = io->h;
+	}
+
+	fl_set_object_boxtype( io->self, FL_EMBOSSED_BOX );
+	fl_set_input_return( io->self, FL_RETURN_ALWAYS );
+	fl_set_input_maxchars( io->self, MAX_INPUT_CHARS );
+	fl_set_object_color( io->self, FL_COL1, FL_COL1 );
+	fl_set_input_color( io->self, FL_BLACK, FL_COL1 );
+	fl_deactivate_object( io->self );
+	snprintf( buf, MAX_INPUT_CHARS + 1, "%s", io->val.sptr );
+	fl_set_input( io->self, buf );
+}
+
+
 /*--------------------------------------------------------------*
  * Creates a menu, determines its size and sets some properties
  *--------------------------------------------------------------*/
@@ -1807,6 +1858,11 @@ static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
 
 		case FLOAT_OUTPUT :
 			snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
+			fl_set_input( io->self, obuf );
+			break;
+
+		case STRING_OUTPUT :
+			snprintf( obuf, MAX_INPUT_CHARS + 1, "%s", io->val.sptr );
 			fl_set_input( io->self, obuf );
 			break;
 
@@ -2057,9 +2113,7 @@ Var_T *f_tb_changed( Var_T *v )
 				THROW( EXCEPTION );
 			}
 
-			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-				continue;
-			if ( io->is_changed )
+			if ( ! IS_OUTPUT( io->type ) && io->is_changed )
 				return vars_push( INT_VAR, io->ID );
 		}
 
@@ -2069,12 +2123,8 @@ Var_T *f_tb_changed( Var_T *v )
 	/* If there were no arguments loop over all objects */
 
 	for ( io = Toolbox->objs; io != NULL; io = io->next )
-	{
-		if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-			continue;
-		if ( io->is_changed )
+		if ( ! IS_OUTPUT( io->type ) && io->is_changed )
 			return vars_push( INT_VAR, io->ID );
-	}
 
 	return vars_push( INT_VAR, 0L );
 }
@@ -2218,9 +2268,7 @@ Var_T *f_tb_wait( Var_T *v )
 				THROW( EXCEPTION );
 			}
 
-			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-				continue;
-			if ( io->is_changed )
+			if ( ! IS_OUTPUT( io->type ) && io->is_changed )
 			{
 				tb_wait_handler( io->ID );
 				return vars_push( INT_VAR, 0L );
@@ -2230,15 +2278,11 @@ Var_T *f_tb_wait( Var_T *v )
 	else    /* if there were no arguments loop over all objects */
 	{
 		for ( io = Toolbox->objs; io != NULL; io = io->next )
-		{
-			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-				continue;
-			if ( io->is_changed )
+			if ( ! IS_OUTPUT( io->type ) && io->is_changed )
 			{
 				tb_wait_handler( io->ID );
 				return vars_push( INT_VAR, 0L );
 			}
-		}
 	}
 
 	/* None of the objects have changed - set up all objects we're asked to
@@ -2256,18 +2300,16 @@ Var_T *f_tb_wait( Var_T *v )
 				THROW( EXCEPTION );
 			}
 
-			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-				continue;
-			io->report_change = SET;
+			if ( ! IS_OUTPUT( io->type ) )
+				io->report_change = SET;
 		}
 	}
 	else    /* if there were no arguments loop over all objects */
 	{
 		for ( io = Toolbox->objs; io != NULL; io = io->next )
 		{
-			if ( io->type == INT_OUTPUT || io->type == FLOAT_OUTPUT )
-				continue;
-			io->report_change = SET;
+			if ( ! IS_OUTPUT( io->type ) )
+				io->report_change = SET;
 		}
 	}
 

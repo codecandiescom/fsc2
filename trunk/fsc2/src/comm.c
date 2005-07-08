@@ -416,8 +416,7 @@ static bool parent_reader( Comm_Struct_T *header )
 
 			/* Get rid of the string and return */
 
-			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
-
+			T_free( str[ 0 ] );
 			break;
 
 		case C_SHOW_MESSAGE :
@@ -445,7 +444,7 @@ static bool parent_reader( Comm_Struct_T *header )
 				return FAIL;
 			}
 
-			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
+			T_free( str[ 0 ] );
 
 			/* Send back an acknowledgement that the message has been read
 			   by the user */
@@ -475,7 +474,7 @@ static bool parent_reader( Comm_Struct_T *header )
 				return FAIL;
 			}
 
-			str[ 0 ] = CHAR_P T_free( str[ 0 ] );
+			T_free( str[ 0 ] );
 
 			/* Send back an acknowledgement that alert has been read by the
 			   user */
@@ -522,8 +521,8 @@ static bool parent_reader( Comm_Struct_T *header )
 
 			/* Get rid of the strings and return */
 
-			for ( i = 0; i < 4; i++ )
-				str[ i ] = CHAR_P T_free( str[ i ] );
+			for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+				T_free( str[ i ] );
 			break;
 
 		case C_SHOW_FSELECTOR :
@@ -561,8 +560,8 @@ static bool parent_reader( Comm_Struct_T *header )
 				return FAIL;
 			}
 
-			for ( i = 0; i < 4; i++ )
-				str[ i ] = CHAR_P T_free( str[ i ] );
+			for ( i = 0; i < 4 && str[ i ] != NULL; i++ )
+				T_free( str[ i ] );
 			Fsc2_Internals.state = STATE_RUNNING;
 			break;
 
@@ -1017,7 +1016,8 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 			}
 			OTHERWISE
 			{
-				T_free( retstr );
+				if ( retstr != NULL )
+					T_free( retstr );
 				return FAIL;
 			}
 
@@ -1062,6 +1062,35 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 			}
 			return OK;
 
+		case C_ISTATE_STR_REPLY :
+			TRY
+			{
+				retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
+				if ( header->data.len > 0 )
+				{
+					pipe_read( retstr, ( size_t ) header->data.len );
+					retstr[ header->data.len ] = '\0';
+				}
+				else
+					strcpy( retstr, "" );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				if ( retstr != NULL )
+					T_free( retstr );
+				return FAIL;
+			}
+
+			if ( ret != NULL )
+			{
+				( ( Input_Res_T * ) ret )->res = STR_VAR;
+				( ( Input_Res_T * ) ret )->val.sptr = retstr;
+			}
+			return OK;
+			
+
+
 		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
 		case C_IDELETE_REPLY : case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
@@ -1100,6 +1129,7 @@ bool writer( int type, ... )
 	va_start( ap, type );
 
 	if ( Fsc2_Internals.I_am == CHILD )
+	{
 		switch ( type )
 		{
 			case C_EPRINT :
@@ -1281,7 +1311,9 @@ bool writer( int type, ... )
 				va_end( ap );
 				fsc2_assert( 1 == 0 );
 		}
+	}
 	else                   /* if this is the parent process */
+	{
 		switch ( type )
 		{		
 			case C_ACK :
@@ -1312,6 +1344,25 @@ bool writer( int type, ... )
 				va_end( ap );
 				return pipe_write( ( char * ) data,
 								   ( size_t ) header.data.len );
+
+			case C_ISTATE_STR_REPLY :
+				header.data.len = va_arg( ap, ptrdiff_t );
+
+				/* Don't try to continue writing on EPIPE (SIGPIPE is
+				   ignored) */
+
+				if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
+					 errno == EPIPE )
+				{
+					va_end( ap );
+					return FAIL;
+				}
+
+				data = va_arg( ap, void * );
+				va_end( ap );
+				return pipe_write( ( char * ) data,
+								   ( size_t ) header.data.len );
+				break;
 
 			case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
 			case C_SDELETE_REPLY : case C_IDELETE_REPLY :
@@ -1368,6 +1419,7 @@ bool writer( int type, ... )
 				va_end( ap );
 				fsc2_assert( 1 == 0 );
 		}
+	}
 
 	return OK;
 }
