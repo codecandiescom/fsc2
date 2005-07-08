@@ -655,10 +655,24 @@ uns16 *rs_spec10_get_pic( uns32 *size )
 #else  /* #if defined RS_SPEC10_TEST */
 	{
 		uns32 i;
+		uns32 j;
+
 		unsigned long max_val = ~ ( uns16 ) 0;
 
+#if 0
 		for ( i = 0; i < *size / sizeof *frame; i++ )
 			frame[ i ] = random( ) & max_val;
+#endif
+
+		for ( i = 0; i < abs( region.s2 - region.s1 + 1 ) / region.sbin; i++ )
+		{
+			uns16 val = 0;
+			if ( i == 370 || i == 969 )
+				val = 20000;
+			for ( j = 0; j < labs( region.p2 - region.p1 + 1 ) / region.pbin;
+				  j++ )
+				frame[ i * labs( region.p2 - region.p1 + 1 ) / region.pbin + j ] = val;
+		}
 	}
 #endif
 
