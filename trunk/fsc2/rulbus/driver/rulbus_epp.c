@@ -198,7 +198,8 @@ static int __init rulbus_init( void )
 static void __exit rulbus_cleanup( void )
 {
 #ifdef CONFIG_DEVFS_FS
-        if ( major && devfs_unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
+        if ( major != 0 &&
+			 devfs_unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
 #else
         if ( unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
 #endif
