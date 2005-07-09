@@ -26,7 +26,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-sensitive stack nounput noyy_top_state
+%option noyywrap stack nounput noyy_top_state
 
 %{
 
@@ -164,17 +164,53 @@ size_t func_list_parse( Func_T **fncts, size_t num_func )
 	size_t num_predef_func = num_func;
 	size_t num;
 	size_t cur;
+    struct stat buf;
+    char *ld_path;
+    char *ld = NULL;
+    char *ldc;
 
 
 	CLOBBER_PROTECT( nf );
 
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
-	EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
+
+    /* As usual, we first check paths defined by the environment variable
+       'LD_LIBRARY_PATH' and then the compiled-in path (except when this
+	   is a check run). */
+
+    if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+    {
+        ld = T_strdup( ld_path );
+
+        for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+        {
+            EDL.Fname = get_string( "%s%sFunctions", ldc, slash( ldc ) );
+            if ( lstat( EDL.Fname, &buf ) == 0 )
+                break;
+            EDL.Fname = CHAR_P T_free( EDL.Fname );
+        }
+
+        T_free( ld );
+    }
+
+    if ( EDL.Fname == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+    {
+        EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
+        if ( lstat( EDL.Fname, &buf ) < 0 )
+            EDL.Fname = CHAR_P T_free( EDL.Fname );
+    }
+
+	if ( EDL.Fname == NULL )
+	{
+		eprint( FATAL, UNSET, "Can't open function data base 'Functions'.\n" );
+		THROW( EXCEPTION );
+	}
 
 	if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
 				EDL.Fname );
+		EDL.Fname = CHAR_P T_free( EDL.Fname );
 		THROW( EXCEPTION );
 	}
 

@@ -26,7 +26,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-sensitive stack nounput noyy_top_state
+%option noyywrap stack nounput noyy_top_state
 
 %{
 
@@ -145,15 +145,51 @@ bool device_list_parse( void )
 {
 	static bool is_restart = UNSET;
 	Device_Name_T *new_device_name;
+    struct stat buf;
+    char *ld_path;
+    char *ld = NULL;
+    char *ldc;
 
 
 	EDL.Fname = CHAR_P T_free( EDL.Fname );
-	EDL.Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
+
+    /* As usual, we first check paths defined by the environment variable
+       'LD_LIBRARY_PATH' and then the compiled-in path (except when this
+	   is a check run). */
+
+    if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+    {
+        ld = T_strdup( ld_path );
+
+        for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+        {
+            EDL.Fname = get_string( "%s%sDevices", ldc, slash( ldc ) );
+            if ( lstat( EDL.Fname, &buf ) == 0 )
+                break;
+            EDL.Fname = CHAR_P T_free( EDL.Fname );
+        }
+
+        T_free( ld );
+    }
+
+    if ( EDL.Fname == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+    {
+        EDL.Fname = get_string( "%s%sDevices", libdir, slash( libdir ) );
+        if ( lstat( EDL.Fname, &buf ) < 0 )
+            EDL.Fname = CHAR_P T_free( EDL.Fname );
+    }
+
+	if ( EDL.Fname == NULL )
+	{
+		eprint( FATAL, UNSET, "Can't open device data base 'Devices'.\n" );
+		return FAIL;
+	}
 
 	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
 	{
 		eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
 					   EDL.Fname );
+		EDL.Fname = CHAR_P T_free( EDL.Fname );
 		return FAIL;
 	}
 

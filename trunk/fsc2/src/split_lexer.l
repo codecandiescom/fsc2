@@ -27,7 +27,7 @@
 /**********************************************/
 
 
-%option noyywrap case-sensitive nounput
+%option noyywrap nounput
 
 %{
 
@@ -149,6 +149,14 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 		/*----------------------*/
 %%		/*     End of rules     */
 		/*----------------------*/
+
+
+/* The following is for some versions of flex that undefine YY_FLUSH_BUFFER
+   immediately after the rules section */
+
+#if ! defined YY_FLUSH_BUFFER
+#define YY_FLUSH_BUFFER split_flush_buffer( YY_CURRENT_BUFFER )
+#endif
 
 
 /*-------------------------------------------*

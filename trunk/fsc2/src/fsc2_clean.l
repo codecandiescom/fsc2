@@ -415,8 +415,16 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 
 		/*----------------------*/
-%%		/*     END OF RULES     */
+%%		/*     End of rULES     */
 		/*----------------------*/
+
+
+/* The following is for some versions of flex that undefine YY_FLUSH_BUFFER
+   immediately after the rules section */
+
+#if ! defined YY_FLUSH_BUFFER
+#define YY_FLUSH_BUFFER yy_flush_buffer( YY_CURRENT_BUFFER )
+#endif
 
 
 /*-------------------------------------------------------*
