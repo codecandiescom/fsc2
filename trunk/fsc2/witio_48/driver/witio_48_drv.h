@@ -153,7 +153,11 @@ struct State {
 
 
 struct Board {
+#ifndef CONFIG_DEVFS_FS
 	int major;
+#else
+	devfs_handle_t dev_handle;
+#endif
 	unsigned char *base;
 	int in_use;
 	uid_t owner;

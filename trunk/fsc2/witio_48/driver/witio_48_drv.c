@@ -75,7 +75,9 @@ static struct file_operations witio_48_file_ops = {
 
 static int __init witio_48_init( void )
 {
+#ifndef CONFIG_DEVFS_FS
 	int dynamic_major;
+#endif
 	int i, j;
 
 
@@ -84,15 +86,20 @@ static int __init witio_48_init( void )
 	   If the major number is 0 this means we must use a dynamically
 	   assigned major number. */
 
+#ifdef CONFIG_DEVFS_FS
+	if ( ( board.dev_handle =
+	       devfs_register( NULL, "witio_48",
+			       DEVFS_FL_AUTO_OWNER | DEVFS_FL_AUTO_DEVNUM,
+			       0, 0, S_IFCHR | S_IRUGO | S_IWUGO,
+			       &witio_48_file_ops, &board ) ) == NULL ) {
+		printk( KERN_ERR "witio_48: Can't register device.\n" );
+		goto device_registration_failure;
+	}
+#else
 	board.major = major;
 
-#ifdef CONFIG_DEVFS_FS
-	if ( ( dynamic_major = devs_register_chrdev( board.major, "witio_48",
-						&witio_48_file_ops ) ) < 0 ) {
-#else
 	if ( ( dynamic_major = register_chrdev( board.major, "witio_48",
 						&witio_48_file_ops ) ) < 0 ) {
-#endif
 		printk( KERN_ERR "witio_48: Can't register device major "
 			"%d.\n", board.major );
 		goto device_registration_failure;
@@ -100,6 +107,7 @@ static int __init witio_48_init( void )
 
 	if ( board.major == 0 )
 		board.major = dynamic_major;
+#endif
 
 	/* Now try to get the IO-port region required for the board */
 
@@ -133,7 +141,9 @@ static int __init witio_48_init( void )
 	/* Finally tell the world about the successful installation ;-) */
 
 	printk( KERN_INFO "witio_48: Module succesfully installed.\n" );
+#ifndef CONFIG_DEVFS_FS
 	printk( KERN_INFO "witio_48: Major = %d\n", board.major );
+#endif
 	printk( KERN_INFO "witio_48: Base = 0x%lx\n",
 		( unsigned long ) board.base );
 
@@ -141,8 +151,7 @@ static int __init witio_48_init( void )
 
  ioport_failure:
 #ifdef CONFIG_DEVFS_FS
-	if ( board.major )
-		devfs_unregister_chrdev( board.major, "witio_48" );
+	devfs_unregister( board.dev_handle );
 #else
 	unregister_chrdev( board.major, "witio_48" );
 #endif
@@ -164,8 +173,7 @@ static void __exit witio_48_cleanup( void )
 	release_region( ( unsigned long ) board.base, 0x0BUL );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( board.major &&
-	     devfs_unregister_chrdev( board.major, "witio_48" ) != 0 )
+	devfs_unregister( board.dev_handle );
 #else
 	if ( unregister_chrdev( board.major, "witio_48" ) != 0 )
 #endif
