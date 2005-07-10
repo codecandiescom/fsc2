@@ -358,7 +358,7 @@ int init_module( void )
 		sprintf( name, ME6X00_NAME "_%d", i );
 		info_vec[ i ].dev_handle =
 			devfs_register( NULL, dev_name,
-					DEVFS_FL_AUTO_AUTO_OWNER |
+					DEVFS_FL_AUTO_OWNER |
 					DEVFS_FL_AUTO_DEVNUM, 0, 0,
 					S_IFCHR | S_IRUGO | S_IWUGO,
 					&me6x00_file_operations,

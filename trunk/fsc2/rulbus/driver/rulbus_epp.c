@@ -177,7 +177,7 @@ static int __init rulbus_init( void )
 
 #ifdef CONFIG_DEVFS_FS
 		if ( ( dev_handle = devfs_register( NULL, RULBUS_EPP_NAME,
-											DEVFS_FL_AUTO_AUTO_OWNER |
+											DEVFS_FL_AUTO_OWNER |
 											DEVFS_FL_AUTO_DEVNUM, 0, 0,
 											S_IFCHR | S_IRUGO | S_IWUGO,
 											&rulbus_file_ops,

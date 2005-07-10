@@ -127,7 +127,7 @@ static int __init ni6601_init( void )
 		sprintf( name, NI6601_NAME "_%d", i );
 		boards[ i ].dev_handle =
 			devfs_register( NULL, dev_name,
-					DEVFS_FL_AUTO_AUTO_OWNER |
+					DEVFS_FL_AUTO_OWNER |
 					DEVFS_FL_AUTO_DEVNUM, 0, 0,
 					S_IFCHR | S_IRUGO | S_IWUGO,
 					&ni6601_file_ops, boards + i );

@@ -127,7 +127,7 @@ static int __init pci_e_series_init( void )
 
 		sprintf( name, BOARD_SERIES_NAME "_%d", i );
 		boards[ i ].dev_handle =
-			devfs_register( NULL, name, DEVFS_FL_AUTO_AUTO_OWNER |
+			devfs_register( NULL, name, DEVFS_FL_AUTO_OWNER |
 					DEVFS_FL_AUTO_DEVNUM, 0, 0,
 					S_IFCHR | S_IRUGO | S_IWUGO,
 					&ni_daq_file_ops, boards + i );
