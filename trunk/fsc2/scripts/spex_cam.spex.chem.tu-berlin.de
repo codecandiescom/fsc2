@@ -905,8 +905,7 @@ B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [pixel]",
 B_conf  = button_create( "NORMAL_BUTTON", "Accept line position" );
 hide_toolbox( "OFF" );
 
-//Spec = spike_remove( ccd_camera_get_spectrum( ) );
-Spec = ccd_camera_get_spectrum( );
+Spec = spike_remove( ccd_camera_get_spectrum( ) );
 display( 1, Spec );
 
 FOREVER {
@@ -940,12 +939,12 @@ FOREVER {
 
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -1042,12 +1041,12 @@ FOREVER {
        	}
        	exposure_time = new;
 		ccd_camera_exposure_time( exposure_time );
-//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
    	}
 
     IF button_state( B_gs ) {
-//		Spec = spike_remove( ccd_camera_get_spectrum( ) );
+		Spec = spike_remove( ccd_camera_get_spectrum( ) );
 		display_1d( 1, Spec );
     }
 
@@ -1835,9 +1834,7 @@ IF laser_line != 0.0 {
 hide_toolbox( 0 );
 
 FOREVER {
-	spec = ccd_camera_get_spectrum( );
-
-//	spec = spike_remove( spec );
+	spec = spike_remove( ccd_camera_get_spectrum( ) );
 	display_1d( 1, spec );
 
 	IF ! toolbox_changed( ) {
@@ -2266,7 +2263,7 @@ FOR I = 1 : N_scans {
 		fsave( F_cur, "# #\\n", wl[ J ], spec[ J ] );
 	}
 
-//	spec = spike_remove( spec );
+	spec = spike_remove( spec );
 	avg += spec;
 	display_1d( 1, spec, 2, 1, avg / I, 1 );
 

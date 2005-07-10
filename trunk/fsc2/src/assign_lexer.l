@@ -31,7 +31,7 @@
 		/*     DEFINITIONS     */
 		/*---------------------*/
 
-%option noyywrap case-sensitive nounput
+%option noyywrap nounput
 
 %{
 

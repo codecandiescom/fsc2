@@ -64,8 +64,8 @@ void device_add( const char *name )
 	   a symbolic link to the 'real' device. If so get the real name by
 	   following the link. This way it's possible to have more convenient,
 	   locally adjustable names for the devices. As usual, we first check
-	   paths defined the environment variable 'LD_LIBRARY_PATH' and then in
-	   the compiled-in path (except when this is a check run). */
+	   paths defined by the environment variable 'LD_LIBRARY_PATH' and then
+	   in the compiled-in path (except when this is a check run). */
 
 	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
 	{

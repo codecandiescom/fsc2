@@ -60,7 +60,7 @@ int me6x00_single( int /* board */, int /* dac */,
 int me6x00_start( int /* board */, int /* dac */ );
 int me6x00_stop( int /* board */, int /* dac */ );
 int me6x00_stop_ex( int /* board */, int /* dac */ );
-int me6x00_wraparound( int /* board */, int /* dac */
+int me6x00_wraparound( int /* board */, int /* dac */,
 					   int /* size */, unsigned short * /* buf */ );
 int me6x00_perror( const char * /* s */ );
 const char *me6x00_strerror( void );
