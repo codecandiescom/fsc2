@@ -85,7 +85,11 @@ struct file_operations ni6601_file_ops = {
 static int __init ni6601_init( void )
 {
 	struct pci_dev *dev = NULL;
+#ifndef CONFIG_DEVFS_FS
 	int res_major;
+#else
+	int i;
+#endif
 
 
 	/* Try to find all boards */
@@ -117,20 +121,39 @@ static int __init ni6601_init( void )
 			"the %d supported boards!\n", NI6601_MAX_BOARDS );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( res_major = devfs_register_chrdev( major, NI6601_NAME,
-						  &ni6601_file_ops ) ) < 0 ) {
+	for ( i = 0; i < board_count; i++ ) {
+		char dev_name[ 12 ];       /* long enough for 9999 boards;-) */
+
+		sprintf( name, ME6601_NAME "_%d", i );
+		boards[ i ].dev_handle =
+			devfs_register( NULL, dev_name,
+					DEVFS_FL_AUTO_AUTO_OWNER |
+					DEVFS_FL_AUTO_DEVNUM, 0, 0,
+					S_IFCHR | S_IRUGO | S_IWUGO,
+					&ni6601_file_ops, boards + i );
+		if ( boards[ i ].dev_handle == NULL ) {
+			printk( KERN_ERR NI6601_NAME ": Failed to register "
+				"board %d\n", i );
+			while ( i > 0 )
+				devfs_unregister( boards[ --i ].dev_handle );
+			ni6601_release_resources( boards, board_count );
+			return -ENODEV;
+		}
+	}
+		
 #else
 	if ( ( res_major = register_chrdev( major, NI6601_NAME,
 					    &ni6601_file_ops ) ) < 0 ) {
-#endif
+
 		printk( KERN_ERR NI6601_NAME ": Can't register as char "
 			"device.\n" );
 		ni6601_release_resources( boards, board_count );
-		return major;
+		return -ENODEV;
 	}
 
 	if ( major == 0 )
 		major = res_major;
+#endif
 
 	printk( KERN_INFO NI6601_NAME ": Module successfully installed\n"
 		NI6601_NAME ": Initialized %d board%s\n",
@@ -146,21 +169,28 @@ static int __init ni6601_init( void )
 
 static void __exit ni6601_cleanup( void )
 {
+#ifdef CONFIG_DEVFS_FS
+	int i;
+#endif
+
+
 	ni6601_release_resources( boards, board_count );
 
 	/* Unregister the character device (but only when we aren't using
 	   devfs exclussively as indicated by major being 0 */
 
 #ifdef CONFIG_DEVFS_FS
-	if ( major != 0 && devfs_unregister_chrdev( major, NI6601_NAME ) < 0 )
+	for ( i = board_count - 1; i >= 0; i-- )
+		devfs_unregister( boards[ i ].dev_handle );
 #else
-	if ( unregister_chrdev( major, NI6601_NAME ) < 0 )
-#endif
+	if ( unregister_chrdev( major, NI6601_NAME ) < 0 ) {
 		printk( KERN_ERR NI6601_NAME ": Unable to unregister "
 			"module.\n" );
-	else
-		printk( KERN_INFO NI6601_NAME ": Module successfully "
-			"removed\n" );
+		return;
+	}
+#endif
+	printk( KERN_INFO NI6601_NAME ": Module successfully "
+		"removed\n" );
 }
 
 
