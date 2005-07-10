@@ -121,10 +121,14 @@ static me6x00_info_st info_vec[ ME6X00_MAX_BOARDS ];
 static int me6x00_board_count;
 
 
-/* Major Device Number, 0 means to get it automatically from the System */
+/* Major device number, 0 means to get it automatically from the system -
+   in case of use of devfs the handle is used instead */
 
 static int major = ME6X00_MAJOR;
 
+#ifdef CONFIG_DEVFS_FS
+static devfs_handle_t dev_handle;
+#endif
 
 /* Structure holding information about the different board types */
 
@@ -351,8 +355,13 @@ int init_module( void )
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( res_major = devfs_register_chrdev( major, ME6X00_NAME,
-					    &me6x00_file_operations ) ) < 0 ) {
+	if ( ( dev_handle = devfs_register( NULL, ME6X00_NAME,
+					    DEVFS_FL_AUTO_AUTO_OWNER |
+					    DEVFS_FL_AUTO_DEVNUM, 0, 0,
+					    S_IFCHR | S_IRUSR | S_IWUSER |
+					    S_IRGRP | S_IWGRP,
+					    &me6x00_file_operations, NULL ) )
+	     == NULL ) {
 #else
 	if ( ( res_major = register_chrdev( major, ME6X00_NAME,
 					    &me6x00_file_operations ) ) < 0 ) {
@@ -362,8 +371,10 @@ int init_module( void )
 		return -ENODEV;
 	}
 
+#ifndef CONFIG_DEVFS_FS
 	if ( major == 0 )
 		major = res_major;
+#endif
 
 	printk( KERN_INFO "ME6X00: driver succesfully installed.\n" );
 
@@ -414,14 +425,15 @@ void cleanup_module( void )
 	}
 
 #ifdef CONFIG_DEVFS_FS
-	if ( major && devfs_unregister_chrdev( major, ME6x00_NAME ) < 0 )
+	devfs_unregister( dev_handle );
 #else
-	if ( unregister_chrdev( major, ME6X00_NAME ) )
-#endif
+	if ( unregister_chrdev( major, ME6X00_NAME ) ) {
 		printk( KERN_ERR "ME6X00: cleanup_module(): "
 			"can't unregister module.\n" );
-	else
-		printk( KERN_INFO "ME6X00: driver de-installed.\n" );
+		return;
+	}
+#endif
+	printk( KERN_INFO "ME6X00: driver de-installed.\n" );
 }
 
 
