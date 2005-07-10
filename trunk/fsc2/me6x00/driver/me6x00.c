@@ -324,7 +324,9 @@ int init_module( void )
 #endif
 {
 #ifdef CONFIG_PCI
+#ifndef CONFIG_DEVFS_FS
 	int res_major;
+#endif
 	int i;
 
 

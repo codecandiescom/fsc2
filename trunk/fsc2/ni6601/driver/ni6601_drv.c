@@ -124,7 +124,7 @@ static int __init ni6601_init( void )
 	for ( i = 0; i < board_count; i++ ) {
 		char dev_name[ 12 ];       /* long enough for 9999 boards;-) */
 
-		sprintf( name, ME6601_NAME "_%d", i );
+		sprintf( name, NI6601_NAME "_%d", i );
 		boards[ i ].dev_handle =
 			devfs_register( NULL, dev_name,
 					DEVFS_FL_AUTO_AUTO_OWNER |
