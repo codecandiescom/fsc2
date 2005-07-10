@@ -351,14 +351,14 @@ int init_module( void )
 
 #ifdef CONFIG_DEVFS_FS
 	for ( i = 0; i < me6x00_board_count; i++ ) {
-		char name[ 12 ];        /* long enough for 9999 boards;-) */
+		char dev_name[ 12 ];       /* long enough for 9999 boards;-) */
 
 		sprintf( name, ME6X00_NAME "_%d", i );
 		info_vec[ i ].dev_handle =
-			devfs_register( NULL, name, DEVFS_FL_AUTO_AUTO_OWNER |
+			devfs_register( NULL, dev_name,
+					DEVFS_FL_AUTO_AUTO_OWNER |
 					DEVFS_FL_AUTO_DEVNUM, 0, 0,
-					S_IFCHR | S_IRUSR | S_IWUSER |
-					S_IRGRP | S_IWGRP,
+					S_IFCHR | S_IRUGO | S_IWUGO,
 					&me6x00_file_operations,
 					info_vec + i );
 		if ( info_vec[ i ].dev_handle == NULL ) {
@@ -416,7 +416,7 @@ int init_module( void )
  */
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
-static void __exit me6x00_exit( vod )
+static void __exit me6x00_exit( void )
 #else
 void cleanup_module( void )
 #endif

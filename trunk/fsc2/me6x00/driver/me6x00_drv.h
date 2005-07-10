@@ -410,6 +410,9 @@ typedef struct {
 
 typedef  struct {
   char name[ 7 ];
+#ifdef CONFIG_DEVFS_FS
+  devfs_handle_t dev_handle;
+#endif
   struct pci_dev *dev;
   unsigned int plx_regbase;         /* PLX configuration space base address  */
   unsigned int me6x00_regbase;      /* Base address of the ME6X00            */
@@ -429,8 +432,8 @@ typedef  struct {
   spinlock_t use_lock;              /* Guards board_in_use                   */
   unsigned int num_dacs;            /* number of DACs on board               */
   int keep_voltage_on_close[ 16 ];
-  me6x00_circ_buf_st  buf[ 4 ];
-  wait_queue_head_t   wait_queues[ 4 ];
+  me6x00_circ_buf_st buf[ 4 ];
+  wait_queue_head_t wait_queues[ 4 ];
 } me6x00_info_st;
 
 #endif
