@@ -122,17 +122,33 @@ static int __init pci_e_series_init( void )
 			NI_DAQ_MAX_PCI_E_BOARDS );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( major = devfs_register_chrdev( major, BOARD_SERIES_NAME,
-					     &ni_daq_file_ops ) ) < 0 ) {
+	for ( i = 0; i < board_count; i++ ) {
+		char dev_name[ 12 ];
+
+		sprintf( name, BOARD_SERIES_NAME "_%d", i );
+		boards[ i ].dev_handle =
+			devfs_register( NULL, name, DEVFS_FL_AUTO_AUTO_OWNER |
+					DEVFS_FL_AUTO_DEVNUM, 0, 0,
+					S_IFCHR | S_IRUGO | S_IWUGO,
+					&ni_daq_file_ops, boards + i );
+		if ( boards[ i ].dev_handle == NULL ) {
+			printk( KERN_ERR BOARD_SERIES_NAME ": Failure to "
+				"register board %d\n", i );
+			while ( i > 0 )
+				devfs_unregister( boards[ --i ].dev_handle );
+			pci_e_series_release_resources( boards, board_count );
+			return -ENODEV;
+		}
+	}
 #else
 	if ( ( major = register_chrdev( major, BOARD_SERIES_NAME,
 					&ni_daq_file_ops ) ) < 0 ) {
-#endif
 		printk( KERN_ERR BOARD_SERIES_NAME ": Can't get assigned a "
 			"major device number\n" );
 		pci_e_series_release_resources( boards, board_count );
-		return major;
+		return -ENODEV;
 	}
+#endif
 
 	printk( KERN_INFO BOARD_SERIES_NAME ": Module successfully installed\n"
 		BOARD_SERIES_NAME ": Major device number = %d\n"
@@ -232,19 +248,26 @@ static int __init pci_e_series_init_board( struct pci_dev *dev, Board *board )
 
 static void __exit pci_e_series_cleanup( void )
 {
+#ifdef CONFIG_DEVFS_FS
+	int i;
+#endif
+
+
 	pci_e_series_release_resources( boards, board_count );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( devfs_unregister_chrdev( major, BOARD_SERIES_NAME ) < 0 )
+	for ( i = board_count - 1; i >= 0; i-- )
+		devfs_unregister( boards[ i ].dev_handle );
 #else
-	if ( unregister_chrdev( major, BOARD_SERIES_NAME ) < 0 )
-#endif
+	if ( unregister_chrdev( major, BOARD_SERIES_NAME ) < 0 ) {
 		printk( KERN_ERR BOARD_SERIES_NAME ": Unable to unregister "
 			"module with major = %d\n", major );
-	else
-		printk( KERN_INFO BOARD_SERIES_NAME ": Module (controlling "
-			"%d board%s) successfully removed\n", board_count,
-			board_count == 1 ? "" : "s" );
+		return;
+	}
+#endif
+	printk( KERN_INFO BOARD_SERIES_NAME ": Module (controlling "
+		"%d board%s) successfully removed\n", board_count,
+		board_count == 1 ? "" : "s" );
 }
 
 
