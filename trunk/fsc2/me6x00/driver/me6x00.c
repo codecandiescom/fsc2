@@ -121,14 +121,9 @@ static me6x00_info_st info_vec[ ME6X00_MAX_BOARDS ];
 static int me6x00_board_count;
 
 
-/* Major device number, 0 means to get it automatically from the system -
-   in case of use of devfs the handle is used instead */
+/* Major device number, 0 means to get it automatically from the system */
 
 static int major = ME6X00_MAJOR;
-
-#ifdef CONFIG_DEVFS_FS
-static devfs_handle_t dev_handle;
-#endif
 
 /* Structure holding information about the different board types */
 
@@ -355,23 +350,33 @@ int init_module( void )
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
 #ifdef CONFIG_DEVFS_FS
-	if ( ( dev_handle = devfs_register( NULL, ME6X00_NAME,
-					    DEVFS_FL_AUTO_AUTO_OWNER |
-					    DEVFS_FL_AUTO_DEVNUM, 0, 0,
-					    S_IFCHR | S_IRUSR | S_IWUSER |
-					    S_IRGRP | S_IWGRP,
-					    &me6x00_file_operations, NULL ) )
-	     == NULL ) {
+	for ( i = 0; i < me6x00_board_count; i++ ) {
+		char name[ 12 ];        /* long enough for 9999 boards;-) */
+
+		sprintf( name, ME6X00_NAME "_%d", i );
+		info_vec[ i ].dev_handle =
+			devfs_register( NULL, name, DEVFS_FL_AUTO_AUTO_OWNER |
+					DEVFS_FL_AUTO_DEVNUM, 0, 0,
+					S_IFCHR | S_IRUSR | S_IWUSER |
+					S_IRGRP | S_IWGRP,
+					&me6x00_file_operations,
+					info_vec + i );
+		if ( info_vec[ i ].dev_handle == NULL ) {
+			printk( KERN_ERR "ME6X00: init_module(): "
+				"Failed to register board %d\n", i );
+			while ( i > 0 )
+				devfs_unregister( info_vec[ --i ].dev_handle );
+			return -ENODEV;
+		}
+	}
 #else
 	if ( ( res_major = register_chrdev( major, ME6X00_NAME,
 					    &me6x00_file_operations ) ) < 0 ) {
-#endif
 		printk( KERN_ERR "ME6X00: init_module(): "
 			"Can't get assigned a major number\n" );
 		return -ENODEV;
 	}
 
-#ifndef CONFIG_DEVFS_FS
 	if ( major == 0 )
 		major = res_major;
 #endif
@@ -425,7 +430,8 @@ void cleanup_module( void )
 	}
 
 #ifdef CONFIG_DEVFS_FS
-	devfs_unregister( dev_handle );
+	for ( i = me6x00_board_count - 1; i >= 0; i-- )
+		devfs_unregister( info_vec[ i ].dev_handle );
 #else
 	if ( unregister_chrdev( major, ME6X00_NAME ) ) {
 		printk( KERN_ERR "ME6X00: cleanup_module(): "
