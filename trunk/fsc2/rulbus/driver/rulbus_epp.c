@@ -48,6 +48,10 @@
 
 
 #include <linux/kernel.h>
+#include <linux/fs.h>
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
 #include <linux/parport.h>
 #include <linux/stddef.h>
 #include <linux/init.h>
@@ -148,6 +152,9 @@ struct file_operations rulbus_file_ops = {
 static int major = RULBUS_EPP_MAJOR;
 static unsigned long base = RULBUS_EPP_BASE;
 
+#ifdef CONFIG_DEVFS_FS
+static devfs_handle_t dev_handle;   /* handle for devfs */
+#endif
 
 
 /*------------------------------------------------------*
@@ -156,7 +163,9 @@ static unsigned long base = RULBUS_EPP_BASE;
 
 static int __init rulbus_init( void )
 {
+#ifdef CONFIG_DEVFS_FS
         int res_major;
+#endif
 
 
         /* All we do at the moment is registering a driver and a char device,
@@ -167,8 +176,12 @@ static int __init rulbus_init( void )
                 return -EIO;
 
 #ifdef CONFIG_DEVFS_FS
-        if ( ( res_major = devfs_register_chrdev( major, RULBUS_EPP_NAME,
-                                                  &rulbus_file_ops ) ) < 0 ) {
+		if ( ( dev_handle = devfs_register( NULL, RULBUS_EPP_NAME,
+											DEVFS_FL_AUTO_AUTO_OWNER |
+											DEVFS_FL_AUTO_DEVNUM, 0, 0,
+											S_IFCHR | S_IRUGO | S_IWUGO,
+											&rulbus_file_ops,
+											&rulbus ) ) == NULL ) {
 #else
         if ( ( res_major = register_chrdev( major, RULBUS_EPP_NAME,
                                             &rulbus_file_ops ) ) < 0 ) {
@@ -179,8 +192,10 @@ static int __init rulbus_init( void )
                 return -EIO;
         }
 
+#ifndef CONFIG_DEVFS_FS
         if ( major == 0 )
                 major = res_major;
+#endif
 
         spin_lock_init( &rulbus.spinlock );
 
@@ -198,13 +213,15 @@ static int __init rulbus_init( void )
 static void __exit rulbus_cleanup( void )
 {
 #ifdef CONFIG_DEVFS_FS
-        if ( major != 0 &&
-			 devfs_unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
+		devfs_unregister( dev_handle );
 #else
         if ( unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
-#endif
+		{
                 printk( KERN_ERR RULBUS_EPP_NAME
                         ": Device busy or other module error.\n" );
+				return;
+		}
+#endif
 
         /* Unregister the device (but only if it's registered) */
 

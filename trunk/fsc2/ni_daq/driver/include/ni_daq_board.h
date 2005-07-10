@@ -57,6 +57,11 @@
 
 #include <linux/kernel.h>
 #include <linux/fs.h>
+
+#ifdef CONFIG_DEVFS_FS
+#include <linux/devfs_fs_kernel.h>
+#endif
+
 #include <linux/pci.h>
 #include <linux/stddef.h>             /* for definition of NULL              */
 #include <asm/semaphore.h>            /* for definition of struct semaphore  */
