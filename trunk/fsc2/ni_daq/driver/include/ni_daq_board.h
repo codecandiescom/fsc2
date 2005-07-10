@@ -258,6 +258,10 @@ typedef struct {
 
 
 struct Board {
+#ifdef CONFIG_DEVFS_FS
+	devfs_handle_t dev_handle;
+#endif
+
 	struct pci_dev *dev;        /* PCI device structure of board */
 
 	u8 *mite;                   /* virtual address of MITE */
