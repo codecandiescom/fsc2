@@ -16,4 +16,4 @@ WITH_RS_SPEC10     := yes
 rs_spec10_incl     := /usr/local/include/pvcam
 rs_spec10_libs     := libpvcam.so
 BROWSER            := konqueror
-MAIL_ADDRESS       := toerring@spex.chem.tu-berlin.de
+MAIL_ADDRESS       := fsc2@toerring.de
