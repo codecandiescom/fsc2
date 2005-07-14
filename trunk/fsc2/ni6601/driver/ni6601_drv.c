@@ -545,20 +545,30 @@ static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 	}
 
 	/* If required wait for counting to stop (by waiting for the
-	   neighboring counter creating the gate pulse to stop) and
-	   then reset both counters. */
+	   neighboring counter creating the gate pulse to stop) and then
+	   reset both counters. We can wait either for an interrupt,
+	   putting the process to sleep in the meantime, or poll the
+	   status register in a tight loop. What is done depends on
+	   the 'do_poll' member of the argument structure. */
 
 	if ( cs.wait_for_end ) {
 
 		int oc = cs.counter + ( cs.counter & 1 ? -1 : 1 );
 
-		ni6601_irq_enable( board, oc );
+		if ( ! cs.do_poll ) {
+			ni6601_irq_enable( board, oc );
 
-		if ( readw( board->regs.joint_status[ oc ] ) &
-		     Gi_COUNTING( oc ) )
-			wait_event_interruptible( board->waitqueue,
+			if ( readw( board->regs.joint_status[ oc ] ) &
+			     Gi_COUNTING( oc ) )
+				wait_event_interruptible( board->waitqueue,
 						  board->TC_irq_raised[ oc ] );
-		ni6601_irq_disable( board, oc );
+			ni6601_irq_disable( board, oc );
+		} else {
+			while ( readw( board->regs.joint_status[ oc ] ) &
+				Gi_COUNTING( oc ) &&
+				! signal_pending( current ) )
+				/* empty */ ;
+		}
 
 		writew( G1_RESET | G0_RESET,
 			board->regs.joint_reset[ cs.counter ] );

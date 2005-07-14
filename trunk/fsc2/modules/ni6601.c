@@ -69,6 +69,7 @@ static double ni6601_time_check( double duration, const char *text );
 #define COUNTER_IS_BUSY 1
 
 static int states[ 4 ];
+static double jiffy_len;
 
 
 /*---------------------------------------------------------*
@@ -81,6 +82,10 @@ int ni6601_init_hook( void )
 
 	for ( i = 0; i < 4; i++ )
 		states[ i ] = 0;
+
+	/* Get the number of clock ticks per second */
+
+	jiffy_len = 1.0 / ( double ) sysconf( _SC_CLK_TCK );
 
 	return 1;
 }
@@ -352,15 +357,15 @@ Var_T *counter_timed_count( Var_T *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		/* For longer intervals (i.e. longer than the typical time resolution
-		   of the machine) sleep instead of waiting in the kernel for the
-		   count interval to finish (as we would do when calling
-		   ni6601_get_count() immediately with the third argument being set
-		   to 1). If the user pressed the "Stop" button while we were
-		   sleeping stop the counter and return the current count without
-		   further waiting. */
+		/* For longer intervals (i.e. longer than the clock rate of the
+		   machine) sleep instead of waiting (either sleeping or even
+		   polling) in the kernel for the count interval to finish (as we
+		   would do when calling ni6601_get_count() immediately with the
+		   third argument being set to 1). If the user presses the "Stop"
+		   button while we were sleeping stop the counter and return the
+		   current count without waiting any longer. */
 
-		if ( ( interval -= 0.01 ) > 0.0 )
+		if ( ( interval -= jiffy_len ) > 0.0 )
 		{
 			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
 			if ( check_user_request( ) )
@@ -369,7 +374,13 @@ Var_T *counter_timed_count( Var_T *v )
 
 	try_counter_again:
 
-		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
+		/* Now ask the board for the value - make the kernel poll for the
+		   result because, once we get here, the result should be available
+		   within less than the clock rate. This helps not slowing down the
+		   program too much when really short counting intervals are used. */
+
+		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, 1,
+								   &count, &state ) )
 		{
 			case NI6601_OK :
 				if ( count > LONG_MAX )
