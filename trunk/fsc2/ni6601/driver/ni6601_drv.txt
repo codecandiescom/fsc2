@@ -279,6 +279,7 @@ a structure of type NI6601_COUNTER_VAL, which is a typedef of
 		NI6601_COUNTER_NUM counter;
 		int wait_for_end;
 		unsigned long count;
+		int do_poll;
 	} NI6601_COUNTER_VAL;
 
 
@@ -297,8 +298,21 @@ the final result. Waiting for the counter to stop is interrupted when
 a signal is received, in which case errno is set to 'EINTR'.
 
 
-The third and final member, 'count', will contain the value of the counter
-on successfull return.
+The third member, 'count', will contain the value of the counter on
+successfull return.
+
+
+The fourth and final argument, 'do_poll' is only relevant if 'wait_for_end'
+is set. If zero it tells that the process should go to sleep, being woken
+up again on an interrupt received when the counter stopped, and if non-zero
+that the process should poll a board register (indicating that the counter
+stopped) in a tight loop. To use polling (i.e. a non-zero argument) is
+dangerous when the counter won't stop in a very short time (nothing else
+can be done by the CPU until then), but under some circumstances (when
+it's well-known that the counter will stop very soon) it can be of some
+advantage not to have the process being put to sleep. Polling can only
+be interrupted by a signal - but only on a multi-CPU machine, since on a
+single-CPU machine no other process gets scheduled that can send a signal!
 
 
 ===================================================================

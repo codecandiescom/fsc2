@@ -188,15 +188,32 @@ nothing happens (i.e. success is reported).
 ======================================================================
 
 int ni6601_get_count( int board, int counter, int wait_for_end,
-					  unsigned long *count, int *state )
+					  int do_poll, unsigned long *count, int *state )
 
 The function returns the current value of a counter. If the
 'wait_for_end' argument has a non-zero value, the function will
 only return after the counter has stopped counting with the final
 result - because a continuous counter will never stop the function
-will return indicating an error when this is tried with a continuously
+will return indicating an error when this is tried on a continuously
 running counter. If a signal gets caught while waiting for the counter
 to finish the error code NI6601_ERR_ITR gets returned.
+
+If 'wait_for_end' is set the argument 'do_poll' is of relevance. If it
+is set to zero the process will sleep in the kernel for the counter
+interval to end (the board raises an interrupt in that case, waking
+up the processes). If non-zero, the process won't sleep in the kernel
+but will poll, i.e. re-evaluate a register that indicates when the
+counter stopped in a loop, using all of the CPU time and without being
+able to be interrupted, at least on a single-CPU macine! You have to be
+very careful when using a non-zero argument here because you can stop
+the machine from responding at all until the counter stops - which can
+look as if the machine crashed when the counter is e.g. going to continue
+to count for several seconds. So a non-zero value (i.e. polling within
+the kernel) should only be used for very short counting intervals when
+putting your process to sleep would slow done the program unreasonably.
+Unless you are sure what you're doing (especially you know that the
+counter will stop a very short time after the call of this function)
+always use a zero argument here!
 
 The counters value is returned in the variable pointed to by 'count'.
 The maximum return value is 4294967295 (ULONG_MAX). If the counter
