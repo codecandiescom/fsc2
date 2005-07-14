@@ -204,16 +204,16 @@ interval to end (the board raises an interrupt in that case, waking
 up the processes). If non-zero, the process won't sleep in the kernel
 but will poll, i.e. re-evaluate a register that indicates when the
 counter stopped in a loop, using all of the CPU time and without being
-able to be interrupted, at least on a single-CPU macine! You have to be
-very careful when using a non-zero argument here because you can stop
-the machine from responding at all until the counter stops - which can
-look as if the machine crashed when the counter is e.g. going to continue
-to count for several seconds. So a non-zero value (i.e. polling within
-the kernel) should only be used for very short counting intervals when
-putting your process to sleep would slow done the program unreasonably.
-Unless you are sure what you're doing (especially you know that the
-counter will stop a very short time after the call of this function)
-always use a zero argument here!
+able to be interrupted, at least on a single-CPU machine! So one has
+to be very careful when using a non-zero argument here because it can
+stop the machine from responding at all until the counter stops - which
+may look as if the machine hangs when the counter is e.g. going to
+continue to count for several seconds. A non-zero value (i.e. polling
+within the kernel) thus should only be used for very short counting
+intervals when putting the process to sleep would slow done the program
+unreasonably. Unless being sure what one is doing (especially unless
+one knows that the counter will stop a very short time after the call
+of this function) a zero argument should always be used!
 
 The counters value is returned in the variable pointed to by 'count'.
 The maximum return value is 4294967295 (ULONG_MAX). If the counter

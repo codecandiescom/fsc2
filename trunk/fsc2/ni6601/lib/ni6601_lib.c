@@ -270,7 +270,7 @@ int ni6601_stop_counter( int board, int counter )
  *--------------------------------------------------------------------*/
 
 int ni6601_get_count( int board, int counter, int wait_for_end,
-					  unsigned long *count, int *state )
+					  int do_poll, unsigned long *count, int *state )
 {
 	int ret;
 	NI6601_COUNTER_VAL v;
@@ -296,8 +296,8 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 		return ret;
 
 	v.counter = counter;
-
 	v.wait_for_end = wait_for_end ? 1 : 0;
+	v.do_poll = do_poll ? 1 : 0;
 
 	if ( ioctl( dev_info[ board ].fd, NI6601_IOC_COUNT, &v ) < 0 )
 		return ni6601_errno =

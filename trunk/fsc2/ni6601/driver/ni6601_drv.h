@@ -89,6 +89,7 @@ typedef struct {
 	NI6601_COUNTER_NUM counter;
 	int wait_for_end;
 	unsigned long count;
+	int do_poll;
 } NI6601_COUNTER_VAL;
 
 

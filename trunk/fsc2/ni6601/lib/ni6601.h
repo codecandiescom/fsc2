@@ -60,8 +60,8 @@ int ni6601_start_gated_counter( int /* board */, int /* counter */,
 								double /* gate_length */, int /* source */ );
 int ni6601_stop_counter( int /* board */, int /* counter */ );
 int ni6601_get_count( int /* board */, int /* counter */,
-					  int /* wait_for_end */, unsigned long * /* count */,
-					  int * /* state */ );
+					  int /* wait_for_end */, int /* do_poll */,
+					  unsigned long * /* count */, int * /* state */ );
 int ni6601_generate_continuous_pulses( int /* board */, int /* counter */,
 									   double /* high_phase */,
 									   double /* low_phase */ );

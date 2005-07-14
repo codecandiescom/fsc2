@@ -426,7 +426,8 @@ Var_T *counter_intermediate_count( Var_T *v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni6601_get_count( BOARD_NUMBER, counter, 0, &count, &state ) < 0 )
+		if ( ni6601_get_count( BOARD_NUMBER, counter, 0, 0,
+							   &count, &state ) < 0 )
 		{
 			print( FATAL, "Can't get counter value.\n" );
 			THROW( EXCEPTION );
@@ -464,7 +465,8 @@ Var_T *counter_final_count( Var_T *v )
 
 	try_counter_again:
 
-		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, &count, &state ) )
+		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, 0,
+								   &count, &state ) )
 		{
 			case NI6601_OK :
 				if ( count > LONG_MAX )
