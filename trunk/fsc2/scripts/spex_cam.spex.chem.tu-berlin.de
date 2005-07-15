@@ -1715,7 +1715,7 @@ sub run {
 
 	$f[ 3 ]->configure( -validate => 'key',
 						-vcmd => sub { exp_time_check( shift,
-														$f[ 14 ] ); } );
+														$f[ 18 ] ); } );
 
 	# Focus should be in the entry field and cursor after the last character
 
@@ -1749,11 +1749,15 @@ sub exp_time_check {
 	my ( $new, $start_button ) = @_;
     my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
-	if ( $new ne "" and $new !~ /^($float_rep)?$/ ) {
+	return 0 unless $new ne "" or $new =~ /^($float_rep)?$/;
+
+	if ( $new eq "" or $new < 1.0e-6 or $new > 3600 ) {
 		$start_button->configure( -state => 'disabled' );
 	} else {
-		$start_button->configure( -state => 'active' );
+		$start_button->configure( -state => 'normal' );
 	}
+
+	return 1;
 }
 
 
