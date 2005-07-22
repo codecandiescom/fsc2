@@ -224,6 +224,7 @@ Var_T *digitizer_sensitivity( Var_T *v );
 Var_T *digitizer_num_averages( Var_T *v );
 Var_T *digitizer_record_length( Var_T *v );
 Var_T *digitizer_trigger_position( Var_T *v );
+Var_T *digitizer_trigger_delay( Var_T *v );
 Var_T *digitizer_meas_channel_ok( Var_T *v );
 Var_T *digitizer_trigger_channel( Var_T *v );
 Var_T *digitizer_start_acquisition( Var_T *v );
