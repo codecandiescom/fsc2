@@ -283,9 +283,9 @@ double lecroy9400_get_offset( int channel )
 	sprintf( cmd, "C%1dOF,?", channel + 1 );
 	lecroy9400_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
-	lecroy9400.sens[ channel ] = T_atod( reply );
+	lecroy9400.offset[ channel ] = T_atod( reply );
 
-	return lecroy9400.sens[ channel ];
+	return lecroy9400.offset[ channel ];
 }
 
 
