@@ -401,6 +401,30 @@ int gpib_local( int device )
 
 
 /*-----------------------------------------------------------*
+ *-----------------------------------------------------------*/
+
+int gpib_llo( int device )
+{
+	int i;
+
+
+	for ( i = 0; i < GPIB_MAX_DEV; i++ )
+		if ( devices[ i ].number == device )
+		{
+			if ( devices[ i ].is_online )
+			{
+				raise_permissions( );
+				ibllo( device );
+				lower_permissions( );
+			}
+			return SUCCESS;
+		}
+
+	return FAILURE;
+}
+
+
+/*-----------------------------------------------------------*
  * gpib_timeout() sets the period the controller is supposed
  * to wait for a reaction from a device before timing out.
  * ->

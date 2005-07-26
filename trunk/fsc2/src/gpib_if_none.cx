@@ -91,6 +91,16 @@ int gpib_local( int device )
 /*--------------------------------------*
  *--------------------------------------*/
 
+int gpib_llo( int device )
+{
+	device = device;
+	return FAILURE;
+}
+
+
+/*--------------------------------------*
+ *--------------------------------------*/
+
 int gpib_trigger( int device )
 {
 	device = device;

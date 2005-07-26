@@ -76,6 +76,7 @@ int gpib_init_device( const char * /* device_name */, int * /* dev */ );
 int gpib_timeout( int /* device */, int /* period */ );
 int gpib_clear_device( int /* device */ );
 int gpib_local( int /* device */ );
+int gpib_llo( int /* device */ );
 int gpib_trigger( int /* device */ );
 int gpib_wait( int /* device */, int /* mask */, int * /* status */ );
 int gpib_write( int device, const char *buffer, long length );
