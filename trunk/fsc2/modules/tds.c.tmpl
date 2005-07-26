@@ -685,6 +685,10 @@ Var_T *digitizer_time_per_point( UNUSED_ARG Var_T *v )
 	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
 		tds_tmpl_state_check( 0.0, 0, 0.0 );
 
+
+	if ( FSC2_MODE == PREPARATION && ! tds_tmpl.is_timebase )
+		no_query_possible( );
+
 	return vars_push( FLOAT_VAR, tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV );
 }
 
@@ -1671,7 +1675,7 @@ Var_T *digitizer_copy_curve( Var_T *v )
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_copy_curve( src, dest );
 
-	return vars_push( INT_VAR, 1 );
+	return vars_push( INT_VAR, 1L );
 }
 
 
