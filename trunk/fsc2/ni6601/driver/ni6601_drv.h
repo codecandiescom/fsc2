@@ -204,8 +204,6 @@ typedef struct {
 #define NI6601_SOURCE( num )   ( 39 - ( num ) * 4 )
 
 
-
-
 typedef struct {
 	unsigned char *irq_ack[ 4 ];                 /* write-only   */
 	unsigned char *status[ 4 ];                  /* read-only    */
