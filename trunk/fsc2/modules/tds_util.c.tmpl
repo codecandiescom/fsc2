@@ -681,7 +681,7 @@ void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
  * have to be recalculated and, if necessary, readjusted.
  * Unfortunately, we can't check without a lot of additional
  * work if the user changes on of the parameters mentioned
- * above manually. Therefor, this function should be called
+ * above manually. Therefore, this function should be called
  * whenever a function might change, query or just rely on the
  * validity of this parameters and the digitizers keyboard
  * isn't locked.
@@ -820,7 +820,7 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
 #ifndef NO_GATED_MEASUREMENTS
 
 /*-------------------------------------------------------------------*
- * This function fisrt checks if all window widths are idendentical.
+ * This function first checks if all window widths are idendentical.
  * Then it positions the cursors at the end points of the window the
  * function got passed (or to both ends of the digitizers record
  * length if a NULL pointer was passed to the function. Finally, it
