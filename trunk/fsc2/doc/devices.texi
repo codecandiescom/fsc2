@@ -252,14 +252,39 @@ hjs_fc;
 @end example
 
 
+@noindent
+@strong{List of all magnet functions}:
 @table @samp
-@anchor{magnet_name}
+@item @ref{magnet_name()}
+@item @ref{magnet_setup()}
+@item @ref{magnet_fast_init()}
+@item @ref{set_field()}
+@item @ref{sweep_up()}
+@item @ref{sweep_down()}
+@item @ref{reset_field()}
+@item @ref{get_field()}
+@item @ref{magnet_use_correction()}
+@item @ref{magnet_use_dac_port()}
+@item @ref{magnet_sweep()}
+@item @ref{magnet_sweep_rate()}
+@item @ref{magnet_goto_field_on_end()}
+@item @ref{magnet_B0()}
+@item @ref{magnet_slope()}
+@item @ref{magnet_calibration_file()}
+@end table
+
+
+@noindent
+@strong{Complete descriptions of magnet functions}:
+
+@table @samp
+@anchor{magnet_name()}
 @item magnet_name()
 @findex magnet_name()
 Returns a string with the name of the magnet that is being used.
 
 
-@anchor{magnet_setup}
+@anchor{magnet_setup()}
 @item magnet_setup()
 @findex magnet_setup()
 The function can be called in the @code{PREPARATIONS} section to set the
@@ -294,7 +319,7 @@ probably prudent never to try this and use in all cases the functions
 for sweeping down if a sweep to lower field values is required.
 
 
-@anchor{magnet_fast_init}
+@anchor{magnet_fast_init()}
 @item magnet_fast_init()
 @findex magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
@@ -309,7 +334,7 @@ This function does not exist for the modules @code{hfs_sfc} and
 @code{hjs_fc}.
 
 
-@anchor{set_field}
+@anchor{set_field()}
 @item set_field()
 @findex set_field()
 This function expects one floating point argument for the field value
@@ -348,7 +373,7 @@ deviation was larger than @w{5 mG} at the end of the test run as well
 as the experiment the maximum field deviation is printed out.
 
 
-@anchor{sweep_up}
+@anchor{sweep_up()}
 @item sweep_up()
 @findex sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
@@ -375,7 +400,7 @@ This function is not available for the Oxford power supplyies (modules
 @code{magnet_sweep} instead.
 
 
-@anchor{sweep_down}
+@anchor{sweep_down()}
 @item sweep_down()
 @findex sweep_down()
 This is the exact analog to the function @code{sweep_up()} but will
@@ -390,7 +415,7 @@ This function is not available for the Oxford magnet power supplies
 @code{magnet_sweep} instead.
 
 
-@anchor{reset_field}
+@anchor{reset_field()}
 @item reset_field()
 @findex reset_field()
 This function resets the magnetic field to the start field value defined
@@ -405,7 +430,7 @@ running sweep.
 The function can only be used in the @code{EXPERIMENT} section.
 
 
-@anchor{get_field}
+@anchor{get_field()}
 @item get_field()
 @findex get_field()
 For the @strong{AEG} magnets this is only a convenience function that
@@ -422,7 +447,7 @@ The function can only be used in the @code{EXPERIMENT} section and is
 not available for the @code{hjs_sfc} module.
 
 
-@anchor{magnet_use_correction}
+@anchor{magnet_use_correction()}
 @item magnet_use_correction()
 @findex magnet_use_correction()
 This function is only defined for the Keithley power supply
@@ -434,7 +459,7 @@ string @code{"OFF"} the use of these corrections is switched off.  Per
 default @strong{no} corrections are used.
 
 
-@anchor{magnet_use_dac_port}
+@anchor{magnet_use_dac_port()}
 @item magnet_use_dac_port()
 @findex magnet_use_dac_port()
 This function is only defined for the Keithley power supply and tells
@@ -448,7 +473,7 @@ and @code{4} may be used.
 The function can only be used in the @code{PREPARATIONS} section.
 
 
-@anchor{magnet_sweep}
+@anchor{magnet_sweep()}
 @item magnet_sweep()
 @findex magnet_sweep()
 This function is only available for the Oxford magnet sweep power
@@ -474,7 +499,7 @@ happened.
 The function can only be used in the @code{EXPERIMENT} section.
 
 
-@anchor{magnet_sweep_rate}
+@anchor{magnet_sweep_rate()}
 @item magnet_sweep_rate()
 @findex magnet_sweep_rate()
 This function is only available for the Oxford magnet power supplies
@@ -485,7 +510,7 @@ in units of either @code{A/s} (for the IPS20-4) or @code{G/s} (for the
 IPS120_19) must be passed to the function.
 
 
-@anchor{magnet_goto_field_on_end}
+@anchor{magnet_goto_field_on_end()}
 @item magnet_goto_field_on_end()
 @findex magnet_goto_field_on_end()
 This function is only available for the Oxford magnet power supplies
@@ -502,7 +527,7 @@ experiment.  If called more than once the current or field of the last
 call will be used.
 
 
-@anchor{magnet_B0}
+@anchor{magnet_B0()}
 @item magnet_B0()
 @findex magnet_B0()
 This function is only available for the module @code{hfs_sfc}. For this
@@ -517,7 +542,7 @@ the module assumes to be the field at a DAC output voltage of @code{0 V}.
 The function can only be used in the @code{PREPARATIONS} section.
 
 
-@anchor{magnet_slope}
+@anchor{magnet_slope()}
 @item magnet_slope()
 @findex magnet_slope()
 This function is only available for the module @code{hfs_sfc}. For this
@@ -534,7 +559,7 @@ assumes to be the field change for a DAC output voltage change of
 The function can only be used in the @code{PREPARATIONS} section.
 
 
-@anchor{magnet_calibration_file}
+@anchor{magnet_calibration_file()}
 @item magnet_calibration_file()
 @findex magnet_calibration_file()
 This function is only available for the modules @code{hfs_sfc} and
@@ -630,14 +655,31 @@ DIO card (module @code{witio_48}and the home-built DA/AD converter
 loaded.
 
 
+@noindent
+@strong{List of all gaussmeter functions}:
 @table @samp
-@anchor{gaussmeter_name}
+@item @ref{gaussmeter_name()}
+@item @ref{gaussmeter_field()}
+@item @ref{find_field()}
+@item @ref{measure_field()}
+@item @ref{gaussmeter_resolution()}
+@item @ref{gaussmeter_probe_orientation()}
+@item @ref{gaussmeter_upper_search_limit()}
+@item @ref{gaussmeter_lower_search_limit()}
+@end table
+
+
+@noindent
+@strong{Complete descriptions of gaussmeter functions}:
+
+@table @samp
+@anchor{gaussmeter_name()}
 @item gaussmeter_name()
 @findex gaussmeter_name()
 Returns a string with the name of the gaussmeter being used.
 
 
-@anchor{gaussmeter_field}
+@anchor{gaussmeter_field()}
 @item gaussmeter_field()
 @findex gaussmeter_field()
 The function returns the current field in Gauss. It takes no arguments
@@ -649,7 +691,7 @@ cut off, i.e.@: with this resolution setting a field of @code{3125.63 G}
 will be reported as being @code{123.63 G}.
 
 
-@anchor{find_field}
+@anchor{find_field()}
 @item find_field()
 @findex find_field()
 Use of this function is deprecated, use @code{gaussmeter_field()}
@@ -659,7 +701,7 @@ Gauss.  The function can only be called in the @code{EXPERIMENT}
 section.
 
 
-@anchor{measure_field}
+@anchor{measure_field()}
 @item measure_field()
 @findex measure_field()
 Use of this function is deprecated, use @code{gaussmeter_field()}
@@ -669,7 +711,7 @@ returns the value in Gauss. The function can only be called in the
 @code{EXPERIMENT} section.
 
 
-@anchor{gaussmeter_resolution}
+@anchor{gaussmeter_resolution()}
 @item gaussmeter_resolution()
 @findex gaussmeter_resolution()
 This function is defined in the device drivers for the Bruker NMR
@@ -702,7 +744,7 @@ received from the device correctly. Per default the module will assume
 that the resolution is set to @code{0.1 G}.
 
 
-@anchor{gaussmeter_probe_orientation}
+@anchor{gaussmeter_probe_orientation()}
 @item gaussmeter_probe_orientation()
 @findex gaussmeter_probe_orientation()
 This function is currently implemented for the Metrolab NMR gaussmeter
@@ -715,7 +757,7 @@ The function can only be called in the @code{EXPERIMENT} section for
 queries.
 
 
-@anchor{gaussmeter_upper_search_limit}
+@anchor{gaussmeter_upper_search_limit()}
 @item gaussmeter_upper_search_limit()
 @findex gaussmeter_upper_search_limit()
 This function can be called to set of query the upper search limit (in
@@ -724,7 +766,7 @@ and @code{er035m_sas}. The function can only be called in the
 @code{EXPERIMENT} section.
 
 
-@anchor{gaussmeter_lower_search_limit}
+@anchor{gaussmeter_lower_search_limit()}
 @item gaussmeter_lower_search_limit()
 @findex gaussmeter_lower_search_limit()
 This function can be called to set of query the lower search limit (in
@@ -765,14 +807,40 @@ of these different modes of calling the functions one should carefully
 check the arguments to achieve the desired results.
 
 
+@noindent
+@strong{List of all lock-in functions}:
 @table @samp
-@anchor{lockin_name}
+@item @ref{lockin_name()}
+@item @ref{lockin_get_data()}
+@item @ref{lockin_auto_setup()}
+@item @ref{lockin_auto_acquisition()}
+@item @ref{lockin_get_adc_data()}
+@item @ref{lockin_dac_voltage()}
+@item @ref{lockin_sensitivity()}
+@item @ref{lockin_time_constant()}
+@item @ref{lockin_phase()}
+@item @ref{lockin_ref_freq()}
+@item @ref{lockin_ref_level()}
+@item @ref{lockin_ref_mode()}
+@item @ref{lockin_harmonic()}
+@item @ref{lockin_lock_keyboard()}
+@item @ref{lockin_conversion_time()}
+@item @ref{lockin_resonator()}
+@item @ref{lockin_is_overload()}
+@end table
+
+
+@noindent
+@strong{Complete descriptions of lock-in functions}:
+
+@table @samp
+@anchor{lockin_name()}
 @item lockin_name()
 @findex lockin_name()
 Returns a string with the name of the lock-in amplifier being used.
 
 
-@anchor{lockin_get_data}
+@anchor{lockin_get_data()}
 @item lockin_get_data()
 @findex lockin_get_data()
 This is a function only to be used in queries, i.e.@: to fetch measured
@@ -845,7 +913,7 @@ No argument is allowed -- the function returns a floating point value.
 @end table
 
 
-@anchor{lockin_auto_setup}
+@anchor{lockin_auto_setup()}
 @item lockin_auto_setup()
 @findex lockin_auto_setup()
 This function is only available for the Stanford Research lock-in
@@ -903,7 +971,7 @@ auto-acquisition all data stored in the lock-in's internal buffer are
 discarded before the measurement continues using the new settings.
 
 
-@anchor{lockin_auto_acquisition}
+@anchor{lockin_auto_acquisition()}
 @item lockin_auto_acquisition()
 @findex lockin_auto_acquisition()
 This function is only available for the Stanford Research lock-in
@@ -937,7 +1005,7 @@ dictates to stop auto-acquisition, thereby automatically clearing the
 lock-in's internal buffers, whenever possible.
 
 
-@anchor{lockin_get_adc_data}
+@anchor{lockin_get_adc_data()}
 @item lockin_get_adc_data()
 @findex lockin_get_adc_data()
 The function returns the voltage at one of the ADC ports at the back
@@ -948,7 +1016,7 @@ This function can only be used with the @strong{Stanford Research}
 lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
 
 
-@anchor{lockin_dac_voltage}
+@anchor{lockin_dac_voltage()}
 @item lockin_dac_voltage()
 @findex lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
@@ -978,7 +1046,7 @@ with two argument, i.e@: to set the output voltage of one of the DACs
 to be used in the initialization of the device.
 
 
-@anchor{lockin_sensitivity}
+@anchor{lockin_sensitivity()}
 @item lockin_sensitivity()
 @findex lockin_sensitivity()
 This function can be used to query or set the sensitivity of the lock-in
@@ -1016,7 +1084,7 @@ In the @code{PREPARATION} section this function can't be called in query
 mode, i.e.@: without an argument.
 
 
-@anchor{lockin_time_constant}
+@anchor{lockin_time_constant()}
 @item lockin_time_constant()
 @findex lockin_time_constant()
 The function queries or sets the time constant of the lock-in
@@ -1046,7 +1114,7 @@ In the @code{PREPARATIONS} section this function can't be called as a
 query, i.e.@: without an argument.
 
 
-@anchor{lockin_phase}
+@anchor{lockin_phase()}
 @item lockin_phase()
 @findex lockin_phase()
 The function queries or sets the phase of the lock-in amplifier. If
@@ -1058,7 +1126,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
-@anchor{lockin_ref_freq}
+@anchor{lockin_ref_freq()}
 @item lockin_ref_freq()
 @findex lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
@@ -1082,7 +1150,7 @@ In the @code{PREPARATIONS} section this function can't be called in
 query mode, i.e.@: without an argument.
 
 
-@anchor{lockin_ref_level}
+@anchor{lockin_ref_level()}
 @item lockin_ref_level()
 @findex lockin_ref_level()
 This function can be only used with the models @strong{SR810},
@@ -1100,7 +1168,7 @@ In the @code{PREPARATIONS} section this function can't be called in query
 mode, i.e.@: without an argument.
 
 
-@anchor{lockin_ref_mode}
+@anchor{lockin_ref_mode()}
 @item lockin_ref_mode()
 @findex lockin_ref_mode()
 This function can be only used with the models @strong{SR810},
@@ -1110,14 +1178,14 @@ the function returns an integer value of @code{1} while in the second
 case @code{0} is returned.
 
 
-@anchor{lockin_harmonic}
+@anchor{lockin_harmonic()}
 @item lockin_harmonic()
 @findex lockin_harmonic()
 SR8[13]0: 1-19999
 ER023M:   1-2
 
 
-@anchor{lockin_lock_keyboard}
+@anchor{lockin_lock_keyboard()}
 @item lockin_lock_keyboard()
 @findex lockin_lock_keyboard()
 Usually, during an experiment the keyboard of the lock-in amplifier is
@@ -1131,7 +1199,7 @@ This function can only be used with the @strong{Stanford Research}
 lock-in amplifiers.
 
 
-@anchor{lockin_conversion_time}
+@anchor{lockin_conversion_time()}
 @item lockin_conversion_time()
 @findex lockin_conversion_time()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -1156,7 +1224,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
-@anchor{lockin_resonator}
+@anchor{lockin_resonator()}
 @item lockin_resonator()
 @findex lockin_resonator()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -1168,7 +1236,7 @@ In the @code{PREPARATIONS} section this function can't be called without
 an argument, i.e.@: as a query.
 
 
-@anchor{lockin_is_overload}
+@anchor{lockin_is_overload()}
 @item lockin_is_overload()
 @findex lockin_is_overload()
 This function exists for the @strong{Bruker ER023M} signal channel only
@@ -1251,15 +1319,48 @@ External amplified trigger input (LeCroy 9400)
 @end table
 
 
+@noindent
+@strong{List of all digitizer functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_display_channel()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_area_fast()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_curve_fast()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_get_amplitude_fast()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
+@item @ref{digitizer_lock_keyboard()}
+@end table
+
+@noindent
+@strong{Complete descriptions of digitizer functions}:
+
+
 @table @samp
 
-@anchor{digitizer_name}
+@anchor{digitizer_name()}
 @item digitizer_name()
 @findex digitizer_name()
 Returns a string with the name of the digitizer being used.
 
 
-@anchor{digitizer_timebase}
+@anchor{digitizer_timebase()}
 @item digitizer_timebase()
 @findex digitizer_timebase()
 The function queries (if called with no argument) or sets (if called
@@ -1270,7 +1371,7 @@ The function can be called in query mode (i.e.@: without an argument)
 in the @code{EXPERIMENT} section only.
 
 
-@anchor{digitizer_time_per_point}
+@anchor{digitizer_time_per_point()}
 @item digitizer_time_per_point()
 @findex digitizer_time_per_point()
 The function (to be called in the @code{EXPERIMENT} section only)
@@ -1278,7 +1379,7 @@ returns the time difference (in seconds) between two data points
 measured by the digitizer.
 
 
-@anchor{digitizer_sensitivity}
+@anchor{digitizer_sensitivity()}
 @item digitizer_sensitivity()
 @findex digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
@@ -1312,7 +1413,7 @@ The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
 
 
-@anchor{digitizer_num_averages}
+@anchor{digitizer_num_averages()}
 @item digitizer_num_averages()
 @findex digitizer_num_averages()
 This function is intended for the @strong{Tektronix} digitizers, see at
@@ -1343,7 +1444,7 @@ at because it only shows up in the signal-to-noise ratio being worse
 by a factor of the square root of 2 than is to be expected.
 
 
-@anchor{digitizer_averaging}
+@anchor{digitizer_averaging()}
 @item digitizer_averaging()
 @findex digitizer_averaging()
 This function only exists for the @strong{LeCroy 9400} and must be used
@@ -1368,7 +1469,7 @@ have been set will be returned by a @code{digitizer_get_curve()}
 command.
 
 
-@anchor{digitizer_trigger_channel}
+@anchor{digitizer_trigger_channel()}
 @item digitizer_trigger_channel()
 @findex digitizer_trigger_channel()
 The function queries or sets the channel of the digitizing oscilloscope
@@ -1402,7 +1503,7 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
-@anchor{digitizer_record_length}
+@anchor{digitizer_record_length()}
 @item digitizer_record_length()
 @findex digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
@@ -1416,7 +1517,7 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
-@anchor{digitizer_trigger_position}
+@anchor{digitizer_trigger_position()}
 @item digitizer_trigger_position()
 @findex digitizer_trigger_position()
 The function queries (if called with no argument) or sets (if called
@@ -1432,7 +1533,7 @@ only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
 
-@anchor{digitizer_define_window}
+@anchor{digitizer_define_window()}
 @item digitizer_define_window()
 @findex digitizer_define_window()
 The function must be used to define a time window to be used in later
@@ -1469,7 +1570,7 @@ specified values don't fit the requirement a warning is printed and the
 position and width are adjusted to the nearest allowed values.
 
 
-@anchor{digitizer_change_window}
+@anchor{digitizer_change_window()}
 @item digitizer_change_window()
 @findex digitizer_change_window()
 This function can be used to change the position and width of an already
@@ -1483,7 +1584,7 @@ and width. If only a new start position is given the distance between the
 cursors on the screen is used for the window width.
 
 
-@anchor{digitizer_window_position}
+@anchor{digitizer_window_position()}
 @item digitizer_window_position()
 @findex digitizer_window_position()
 This function can be used to query the position or to set a new position
@@ -1493,7 +1594,7 @@ further argument the position of the window is returned. Otherwise the
 second parameter is taken to be the new window position.
 
 
-@anchor{digitizer_window_width}
+@anchor{digitizer_window_width()}
 @item digitizer_window_width()
 @findex digitizer_window_width()
 This function can be used to query the width or to set a new width for
@@ -1503,7 +1604,7 @@ further argument the width of the window is returned. Otherwise the
 second parameter is taken to be the new window width.
 
 
-@anchor{digitizer_display_channel}
+@anchor{digitizer_display_channel()}
 @item digitizer_display_channel()
 @findex digitizer_display_channel()
 This function can be used during the @code{PREPARATIONS} section to tell
@@ -1521,7 +1622,7 @@ you may have to use this function to make sure the channel stays
 switched on.
 
 
-@anchor{digitizer_start_acquisition}
+@anchor{digitizer_start_acquisition()}
 @item digitizer_start_acquisition()
 @findex digitizer_start_acquisition()
 This function starts an acquisition sequence of the
@@ -1531,7 +1632,7 @@ The function can only be used in the @code{EXPERIMENT} section of the
 @code{EDL} file.
 
 
-@anchor{digitizer_get_area}
+@anchor{digitizer_get_area()}
 @item digitizer_get_area()
 @findex digitizer_get_area()
 This function is currently only implemented for the @strong{Tektronix}
@@ -1601,7 +1702,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
-@anchor{digitizer_get_area_fast}
+@anchor{digitizer_get_area_fast()}
 @item digitizer_get_area_fast()
 @findex digitizer_get_area_fast()
 This function takes the same arguments as the function
@@ -1616,7 +1717,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
-@anchor{digitizer_get_curve}
+@anchor{digitizer_get_curve()}
 @item digitizer_get_curve()
 @findex digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
@@ -1663,7 +1764,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
-@anchor{digitizer_get_curve_fast}
+@anchor{digitizer_get_curve_fast()}
 @item digitizer_get_curve_fast()
 @findex digitizer_get_curve_fast()
 This function is nearly identical to the function
@@ -1671,7 +1772,7 @@ This function is nearly identical to the function
 are not positioned at the start and end point of the curve to be fetched.
 
 
-@anchor{digitizer_get_amplitude}
+@anchor{digitizer_get_amplitude()}
 @item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
 This function is currently only implemented for the @strong{Tektronix}
@@ -1741,7 +1842,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
-@anchor{digitizer_get_amplitude_fast}
+@anchor{digitizer_get_amplitude_fast()}
 @item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()
 This function is nearly identical to @code{digitizer_get_amplitude()}
@@ -1750,7 +1851,7 @@ isn't used and the cursors aren't positioned at the start and end of the
 time interval.
 
 
-@anchor{digitizer_run}
+@anchor{digitizer_run()}
 @item digitizer_run()
 @findex digitizer_run()
 Usually, during an experiment the digitizer starts to do the
@@ -1762,7 +1863,7 @@ accepts no arguments and can only be used in the @code{EXPERIMENT}
 section.
 
 
-@anchor{digitizer_copy_curve}
+@anchor{digitizer_copy_curve()}
 @item digitizer_copy_curve()
 @findex digitizer_copy_curve()
 This function is only available for the @code{Tektronix} digitizers and
@@ -1792,7 +1893,7 @@ to, i.e.@: on from
 @end itemize
 
 
-@anchor{digitizer_lock_keyboard}
+@anchor{digitizer_lock_keyboard()}
 @item digitizer_lock_keyboard()
 @findex digitizer_lock_keyboard()
 Usually, during an experiment the keyboard of the digitizer is
@@ -1860,16 +1961,49 @@ of the pulse sequence has to be committed explicitely by calling
 @code{pulser_update()}.
 
 
+@noindent
+@strong{List of all pulser functions}:
+@table @samp
+@item @ref{pulser_name()}
+@item @ref{pulser_state()}
+@item @ref{pulser_channel_state()}
+@item @ref{pulser_lock_keyboard()}
+@item @ref{pulser_update()}
+@item @ref{pulser_shift()}
+@item @ref{pulser_increment()}
+@item @ref{pulser_pulse_reset()}
+@item @ref{pulser_next_phase()}
+@item @ref{pulser_phase_reset()}
+@item @ref{pulser_reset()}
+@item @ref{pulser_stop_on_update()}
+@item @ref{pulser_shape_to_defense_minimum_distance()}
+@item @ref{pulser_defense_to_shape_minimum_distance()}
+@item @ref{pulser_automatic_shape_pulses()}
+@item @ref{pulser_automatic_twt_pulses()}
+@item @ref{pulser_minimum_twt_pulse_distance()}
+@item @ref{pulser_keep_all_pulses()}
+@item @ref{pulser_maximum_pattern_length()}
+@item @ref{pulser_phase_switch_delay()}
+@item @ref{pulser_grace_period()}
+@item @ref{pulser_show_pulses()}
+@item @ref{pulser_dump_pulses()}
+@item @ref{pulser_pulse_minimum_specs()}
+@end table
+
+@noindent
+@strong{Complete descriptions of pulser functions}:
+
+
 
 @table @samp
 
-@anchor{pulser_name}
+@anchor{pulser_name()}
 @item pulser_name()
 @findex pulser_name()
 Returns a string with the name of the digitizer being used.
 
 
-@anchor{pulser_state}
+@anchor{pulser_state()}
 @item pulser_state()
 @findex pulser_state()
 This function can be either used to determine if the pulser is running
@@ -1884,7 +2018,7 @@ e.g.@: to keep the pulser to get started immediately at the start of
 the experiment.
 
 
-@anchor{pulser_channel_state}
+@anchor{pulser_channel_state()}
 @item pulser_channel_state()
 @findex pulser_channel_state()
 For the @strong{Tektronix HFS9003} this function can be used to
@@ -1895,7 +2029,7 @@ additional numeric argument or a string of @code{"ON"} or @code{"OFF"}
 the channel can be switched on or off.
 
 
-@anchor{pulser_lock_keyboard}
+@anchor{pulser_lock_keyboard()}
 @item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
 Usually, during an experiment the keyboard of the pulser (if it has one)
@@ -1908,7 +2042,7 @@ argument at all. This command is only available for the
 @strong{Sony/Tektronix DG2020}.
 
 
-@anchor{pulser_update}
+@anchor{pulser_update()}
 @item pulser_update()
 @findex pulser_update()
 This function has to be called after changes have been applied to pulses
@@ -1919,7 +2053,7 @@ the pulser. Only by calling the function these changes are committed and
 the real pulses will change.
 
 
-@anchor{pulser_shift}
+@anchor{pulser_shift()}
 @item pulser_shift()
 @findex pulser_shift()
 This function can be called with either no argument or with a list of
@@ -1931,7 +2065,7 @@ there is only one argument or a list of pulses only the start position
 of the listed pulses are changed.
 
 
-@anchor{pulser_increment}
+@anchor{pulser_increment()}
 @item pulser_increment()
 @findex pulser_increment()
 This function can be called with either no argument or with a list of
@@ -1943,7 +2077,7 @@ a length of 0) are incremented by their respective
 only the lengths of the listed pulses are changed.
 
 
-@anchor{pulser_pulse_reset}
+@anchor{pulser_pulse_reset()}
 @item pulser_pulse_reset()
 @findex pulser_pulse_reset()
 This function can be called with either no argument or with a list of
@@ -1959,7 +2093,7 @@ If called with one argument or a list of pulses only the pulses from the
 list are set back to their initial states.
 
 
-@anchor{pulser_next_phase}
+@anchor{pulser_next_phase()}
 @item pulser_next_phase()
 @findex pulser_next_phase()
 When the experiment starts the phases of all pulses are set to the first
@@ -1971,7 +2105,7 @@ This function also immediately updates the pulse sequence, as it is done
 by calling @code{pulser_update()}.
 
 
-@anchor{pulser_phase_reset}
+@anchor{pulser_phase_reset()}
 @item pulser_phase_reset()
 @findex pulser_phase_reset()
 This function can be called with either no argument or with a list of
@@ -1992,7 +2126,7 @@ This function also immediately updates the pulse sequence, as it is done
 by calling @code{pulser_update()}.
 
 
-@anchor{pulser_reset}
+@anchor{pulser_reset()}
 @item pulser_reset()
 @findex pulser_reset()
 This function does not take any arguments at all. It switches the pulser
@@ -2002,7 +2136,7 @@ also immediately updates the pulser as it is done by calling
 @code{pulser_update()}.
 
 
-@anchor{pulser_stop_on_update}
+@anchor{pulser_stop_on_update()}
 @item pulser_stop_on_update()
 @findex pulser_stop_on_update()
 This function exists for the @strong{Tektronix HFS9003} only. While
@@ -2013,7 +2147,7 @@ updates. If called with an argument of @code{1} you may switch back to
 the default behavior.
 
 
-@anchor{pulser_shape_to_defense_minimum_distance}
+@anchor{pulser_shape_to_defense_minimum_distance()}
 @item pulser_shape_to_defense_minimum_distance()
 @findex pulser_shape_to_defense_minimum_distance()
 This function exists for the Berlin X-band pulser modules
@@ -2032,7 +2166,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_defense_to_shape_minimum_distance}
+@anchor{pulser_defense_to_shape_minimum_distance()}
 @item pulser_defense_to_shape_minimum_distance()
 @findex pulser_defense_to_shape_minimum_distance()
 This function exists for the Berlin X-band pulser modules
@@ -2056,7 +2190,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_automatic_shape_pulses}
+@anchor{pulser_automatic_shape_pulses()}
 @item pulser_automatic_shape_pulses()
 @findex pulser_automatic_shape_pulses()
 This function exists for the Berlin X-band pulser modules
@@ -2109,7 +2243,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_automatic_twt_pulses}
+@anchor{pulser_automatic_twt_pulses()}
 @item pulser_automatic_twt_pulses()
 @findex pulser_automatic_twt_pulses()
 This function exists for the Berlin X-band pulser modules
@@ -2146,7 +2280,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_minimum_twt_pulse_distance}
+@anchor{pulser_minimum_twt_pulse_distance()}
 @item pulser_minimum_twt_pulse_distance
 @findex pulser_minimum_twt_pulse_distance
 This function exists for the Berlin X-band pulser modules
@@ -2168,7 +2302,7 @@ function that automatically updates the pulser, i.e.@: either
 @code{pulser_phase_reset()}
 
 
-@anchor{pulser_keep_all_pulses}
+@anchor{pulser_keep_all_pulses()}
 @item pulser_keep_all_pulses()
 @findex pulser_keep_all_pulses()
 Usually pulses that in the test run were found to be unused (i.e.@:
@@ -2183,7 +2317,7 @@ all pulses even if it assumes them to be useless by calling this
 function (without any arguments).
 
 
-@anchor{pulser_maximum_pattern_length}
+@anchor{pulser_maximum_pattern_length()}
 @item pulser_maximum_pattern_length()
 @findex pulser_maximum_pattern_length()
 This function only exists for the @strong{Sony/Tektronix DG2020} pulser
@@ -2231,7 +2365,7 @@ higher repetition rate) you can shorten the length of the pulse sequence
 by using this function.
 
 
-@anchor{pulser_phase_switch_delay}
+@anchor{pulser_phase_switch_delay()}
 @item pulser_phase_switch_delay()
 @findex pulser_phase_switch_delay()
 This function is only implemented for the Frankfurt version the
@@ -2254,7 +2388,7 @@ pulses. If the pulse distances get too short to set the phase switch
 delays the program will abort with an error message.
 
 
-@anchor{pulser_grace_period}
+@anchor{pulser_grace_period()}
 @item pulser_grace_period()
 @findex pulser_grace_period()
 This function is only implemented for the Frankfurt version the
@@ -2292,7 +2426,7 @@ pulses. If the pulse distances get very small it may drop the grace
 period.
 
 
-@anchor{pulser_show_pulses}
+@anchor{pulser_show_pulses()}
 @item pulser_show_pulses()
 @findex pulser_show_pulses()
 This function allows to view the pulses as they become set during the
@@ -2336,7 +2470,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_dump_pulses}
+@anchor{pulser_dump_pulses()}
 @item pulser_dump_pulses()
 @findex pulser_dump_pulses()
 This function requests the user to select a file name and then writes
@@ -2349,7 +2483,7 @@ This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_pulse_minimum_specs}
+@anchor{pulser_pulse_minimum_specs()}
 @item pulser_pulse_minimum_specs()
 @findex pulser_pulse_minimum_specs()
 This function is available only for the @code{rb_pulser} module, i.e.@:
@@ -2387,15 +2521,44 @@ rs_sml01
 in the @code{DEVICES} section.
 
 
+@noindent
+@strong{List of all synthesizer functions}:
+@table @samp
+@item @ref{synthesizer_name()}
+@item @ref{synthesizer_state()}
+@item @ref{synthesizer_frequency()}
+@item @ref{synthesizer_attenuation()}
+@item @ref{synthesizer_minimum_attenuation()}
+@item @ref{synthesizer_step_frequency()}
+@item @ref{synthesizer_sweep_up()}
+@item @ref{synthesizer_sweep_down()}
+@item @ref{synthesizer_reset_frequency()}
+@item @ref{synthesizer_use_table()}
+@item @ref{synthesizer_att_ref_freq()}
+@item @ref{synthesizer_modulation()}
+@item @ref{synthesizer_mod_type()}
+@item @ref{synthesizer_mod_source()}
+@item @ref{synthesizer_mod_freq()}
+@item @ref{synthesizer_mod_ampl()}
+@item @ref{synthesizer_pulse_state()}
+@item @ref{synthesizer_pulse_trigger_slope()}
+@item @ref{synthesizer_pulse_width()}
+@item @ref{synthesizer_pulse_delay()}
+@end table
+
+@noindent
+@strong{Complete descriptions of synthesizer functions}:
+
+
 @table @samp
 
-@anchor{synthesizer_name}
+@anchor{synthesizer_name()}
 @item synthesizer_name()
 @findex synthesizer_name()
 Returns a string with the name of the synthesizer being used.
 
 
-@anchor{synthesizer_state}
+@anchor{synthesizer_state()}
 @item synthesizer_state()
 @findex synthesizer_state()
 The function queries or sets the output state of the synthesizer. i.e.@:
@@ -2411,7 +2574,7 @@ returns either @code{1} or @code{0} to indicate the on/off state of the
 RF output.
 
 
-@anchor{synthesizer_frequency}
+@anchor{synthesizer_frequency()}
 @item synthesizer_frequency()
 @findex synthesizer_frequency()
 The function queries or sets the RF output frequency. If called to set
@@ -2433,7 +2596,7 @@ been set by calling the function with an argument). For the
 frequency has been set previously.
 
 
-@anchor{synthesizer_attenuation}
+@anchor{synthesizer_attenuation()}
 @item synthesizer_attenuation()
 @findex synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
@@ -2460,7 +2623,7 @@ been set by calling the function with an argument). For the
 attenuation has been set previously.
 
 
-@anchor{synthesizer_minimum_attenuation}
+@anchor{synthesizer_minimum_attenuation()}
 @item synthesizer_minimum_attenuation()
 @findex synthesizer_minimum_attenuation()
 The function can be used to restrict the minimum output attenuation to
@@ -2473,7 +2636,7 @@ disables setting the attenuation by further calls of
 function.
 
 
-@anchor{synthesizer_step_frequency}
+@anchor{synthesizer_step_frequency()}
 @item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
 The function queries or sets the RF step frequency to be used in calls
@@ -2488,7 +2651,7 @@ argument the query form of the function (i.e.@: calling it without an
 argument can't be used).
 
 
-@anchor{synthesizer_sweep_up}
+@anchor{synthesizer_sweep_up()}
 @item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
 If there has been set both a frequency and a step frequency the function
@@ -2497,7 +2660,7 @@ frequency. The function can only be called in the @code{EXPERIMENT}
 section.
 
 
-@anchor{synthesizer_sweep_down}
+@anchor{synthesizer_sweep_down()}
 @item synthesizer_sweep_down()
 @findex synthesizer_sweep_down()
 If there has been set both a frequency and a step frequency the function
@@ -2506,7 +2669,7 @@ frequency. The function can only be called in the @code{EXPERIMENT}
 section.
 
 
-@anchor{synthesizer_reset_frequency}
+@anchor{synthesizer_reset_frequency()}
 @item synthesizer_reset_frequency()
 @findex synthesizer_reset_frequency()
 If a frequency has been set at all the function will reset the
@@ -2514,7 +2677,7 @@ synthesizers frequency to the frequency that has been set at first. The
 function can only be called in the @code{EXPERIMENT} section.
 
 
-@anchor{synthesizer_use_table}
+@anchor{synthesizer_use_table()}
 @item synthesizer_use_table()
 @findex synthesizer_use_table()
 This function tells the program to also adjust the attenuation when a
@@ -2560,7 +2723,7 @@ isn't within the range of frequencies covered by the table a warning is
 printed and the attenuation for the nearest frequency is used.
 
 
-@anchor{synthesizer_att_ref_freq}
+@anchor{synthesizer_att_ref_freq()}
 @item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
 When a table file is used there remains the question for which frequency
@@ -2574,7 +2737,7 @@ configuration file for the device by changing the definition of
 @code{DEF_ATT_REF_FREQ}).
 
 
-@anchor{synthesizer_modulation}
+@anchor{synthesizer_modulation()}
 @item synthesizer_modulation()
 @findex synthesizer_modulation()
 Using this function for the @code{HP8647A}, @code{HP8648B} and @code{RS
@@ -2660,7 +2823,7 @@ call switching back to AM modulation will also restore the settings of
 external AC coupled source and @w{50%} amplitude.
 
 
-@anchor{synthesizer_mod_type}
+@anchor{synthesizer_mod_type()}
 @item synthesizer_mod_type()
 @findex synthesizer_mod_type()
 As an alternative to the function @code{synthesizer_modulation()} the
@@ -2672,7 +2835,7 @@ modulation or @code{"OFF"} to switch off modulation. The @code{HP8647A},
 @code{"PHASE"} for phase modulation.
 
 
-@anchor{synthesizer_mod_source}
+@anchor{synthesizer_mod_source()}
 @item synthesizer_mod_source()
 @findex synthesizer_mod_source()
 This function is only available for the @code{HP8647A}, @code{HP8648B}
@@ -2711,7 +2874,7 @@ modulation is switched off, trying to do so will result in aborting the
 program.
 
 
-@anchor{synthesizer_mod_freq}
+@anchor{synthesizer_mod_freq()}
 @item synthesizer_mod_freq()
 @findex synthesizer_mod_freq()
 This function only exists for the @code{Rohde&Schwarz} model
@@ -2732,7 +2895,7 @@ modulation is switched off, trying to do so will result in aborting the
 program.
 
 
-@anchor{synthesizer_mod_ampl}
+@anchor{synthesizer_mod_ampl()}
 @item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
 
@@ -2764,7 +2927,7 @@ nor obtain the modulation amplitude as long as the modulation is
 switched off, trying to do so will result in aborting the program.
 
 
-@anchor{synthesizer_pulse_state}
+@anchor{synthesizer_pulse_state()}
 @item synthesizer_pulse_state()
 @findex synthesizer_pulse_state()
 This function is only available for the @code{Rohde&Schwarz SML01}
@@ -2778,7 +2941,7 @@ on, if called with an argument of @code{"OFF"} or @code{1} pulse
 modulation mode is switched off.
 
 
-@anchor{synthesizer_pulse_trigger_slope}
+@anchor{synthesizer_pulse_trigger_slope()}
 @item synthesizer_pulse_trigger_slope()
 @findex synthesizer_pulse_trigger_slope()
 This function is only available for the @code{Rohde&Schwarz SML01}
@@ -2793,7 +2956,7 @@ triggers on the raising edge of the trigger input, when called with
 the argument @code{"NEGATIVE"} or @code{"NEG"} triggers are detected on
 the falling edge.
 
-@anchor{synthesizer_pulse_width}
+@anchor{synthesizer_pulse_width()}
 @item synthesizer_pulse_width()
 @findex synthesizer_pulse_width()
 This function is only available for the @code{Rohde&Schwarz SML01}
@@ -2804,7 +2967,7 @@ If called with a (floating point) argument the pulse length is set
 accordingly. The pulse length must be between @w{20 ns} and @w{1.3 s}.
 
 
-@anchor{synthesizer_pulse_delay}
+@anchor{synthesizer_pulse_delay()}
 @item synthesizer_pulse_delay()
 @findex synthesizer_pulse_delay()
 This function is only available for the @code{Rohde&Schwarz SML01}
@@ -2837,15 +3000,29 @@ controllers can only be used in the @code{EXPERIMENT} section of
 the @code{EDL} script.
 
 
+@noindent
+@strong{List of all temperature controller functions}:
+@table @samp
+@item @ref{temp_contr_name()}
+@item @ref{temp_contr_temperature()}
+@item @ref{temp_contr_sample_channel()}
+@item @ref{temp_contr_sensor_unit()}
+@item @ref{temp_contr_lock_keyboard()}
+@end table
+
+@noindent
+@strong{Complete descriptions of temperature controller functions}:
+
+
 @table @samp
 
-@anchor{temp_contr_name}
+@anchor{temp_contr_name()}
 @item temp_contr_name()
 @findex temp_contr_name()
 Returns a string with the name of the temperature controller being used.
 
 
-@anchor{temp_contr_temperature}
+@anchor{temp_contr_temperature()}
 @item temp_contr_temperature()
 @findex temp_contr_temperature()
 This function accepts no arguments and returns the temperature at the
@@ -2857,7 +3034,7 @@ the default channel is channel @code{1}. When no temperature unit has
 been selected temperatures are returned in Kelvin.
 
 
-@anchor{temp_contr_sample_channel}
+@anchor{temp_contr_sample_channel()}
 @item temp_contr_sample_channel()
 @findex temp_contr_sample_channel()
 This function returns, when called with no argument, the currently
@@ -2876,7 +3053,7 @@ of channels and this number is a compile time option that has to be set
 in the configuration file for the device.
 
 
-@anchor{temp_contr_sensor_unit}
+@anchor{temp_contr_sensor_unit()}
 @item temp_contr_sensor_unit()
 @findex temp_contr_sensor_unit()
 The function either returns or sets the units returned by the device on
@@ -2893,7 +3070,7 @@ Shore 330} only, @code{2} for Volts, @code{3} for Ohms and @code{4} for
 milli-Volts.
 
 
-@anchor{temp_contr_lock_keyboard}
+@anchor{temp_contr_lock_keyboard()}
 @item temp_contr_lock_keyboard()
 @findex temp_contr_lock_keyboard()
 Usually, during an experiment the keyboard of the temperature controller
@@ -2919,27 +3096,40 @@ kontron4060
 @noindent
 in the @code{DEVICES} section.
 
+@noindent
+@strong{List of all voltmeter functions}:
+@table @samp
+@item @ref{voltmeter_name()}
+@item @ref{voltmeter_get_data()}
+@item @ref{voltmeter_ac_measurement()}
+@item @ref{voltmeter_dc_measurement()}
+@end table
+
+@noindent
+@strong{Complete descriptions of voltmeter functions}:
+
+
 @table @samp
 
-@anchor{voltmeter_name}
+@anchor{voltmeter_name()}
 @item voltmeter_name()
 @findex voltmeter_name()
 Returns a string with the name of the voltmeter being used.
 
 
-@anchor{voltmeter_get_data}
+@anchor{voltmeter_get_data()}
 @item voltmeter_get_data()
 @findex voltmeter_get_data()
 The function returns the current voltage measured by the voltmeter.
 
 
-@anchor{voltmeter_ac_measurement}
+@anchor{voltmeter_ac_measurement()}
 @item voltmeter_ac_measurement()
 @findex voltmeter_ac_measurement()
 The function switches the voltmeter to doing AC measurements.
 
 
-@anchor{voltmeter_dc_measurement}
+@anchor{voltmeter_dc_measurement()}
 @item voltmeter_dc_measurement()
 @findex voltmeter_dc_measurement()
 The function switches the voltmeter to doing DC measurements.
@@ -2962,15 +3152,30 @@ in the @code{DEVICES} section. All functions for the boxcar integrator
 can only be used in the @code{EXPERIMENT} section of the @code{EDL}
 script.
 
+@noindent
+@strong{List of all boxcar functions}:
+@table @samp
+@item @ref{boxcar_name()}
+@item @ref{boxcar_curve_length()}
+@item @ref{boxcar_get_curve()}
+@item @ref{boxcar_start_acquisition()}
+@item @ref{boxcar_stop_acquisition()}
+@item @ref{boxcar_single_shot()}
+@end table
+
+@noindent
+@strong{Complete descriptions of boxcar functions}:
+
+
 @table @samp
 
-@anchor{boxcar_name}
+@anchor{boxcar_name()}
 @item boxcar_name()
 @findex boxcar_name()
 Returns a string with the name of the boxcar integrator being used.
 
 
-@anchor{boxcar_curve_length}
+@anchor{boxcar_curve_length()}
 @item boxcar_curve_length()
 @findex boxcar_curve_length()
 Returns an integer variable with the length of curves to be sent by the
@@ -2980,7 +3185,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{boxcar_get_curve}
+@anchor{boxcar_get_curve()}
 @item boxcar_get_curve()
 @findex boxcar_get_curve()
 Fetches a curve from the boxcar integrator. Two first argument is either
@@ -2995,7 +3200,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{boxcar_start_acquisition}
+@anchor{boxcar_start_acquisition()}
 @item boxcar_start_acquisition()
 @findex boxcar_start_acquisition()
 Function starts a new acquisition.
@@ -3004,7 +3209,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{boxcar_stop_acquisition}
+@anchor{boxcar_stop_acquisition()}
 @item boxcar_stop_acquisition()
 @findex boxcar_stop_acquisition()
 Function stops a running acquisition.
@@ -3013,7 +3218,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{boxcar_single_shot}
+@anchor{boxcar_single_shot()}
 @item boxcar_single_shot()
 @findex boxcar_single_shot()
 The function expects either one or two arguments, the number of one or
@@ -3045,15 +3250,26 @@ hp5340a
 @noindent
 in the @code{DEVICES} section. 
 
+@noindent
+@strong{List of all frequency counter functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@end table
+
+@noindent
+@strong{Complete descriptions of frequency counter functions}:
+
+
 @table @samp
 
-@anchor{freq_counter_name}
+@anchor{freq_counter_name()}
 @item freq_counter_name()
 @findex freq_counter_name()
 Returns a string with the name of the frequency counter being used.
 
 
-@anchor{freq_counter_measure}
+@anchor{freq_counter_measure()}
 @item freq_counter_measure()
 @findex freq_counter_measure()
 Returns a floating point value with the measured frequency. The function
@@ -3093,15 +3309,50 @@ rb8510
 in the @code{DEVICES} section. 
 
 
+@noindent
+@strong{List of all DAQ functions}:
+@table @samp
+@item @ref{daq_name()}
+@item @ref{daq_ai_channel_setup()}
+@item @ref{daq_ai_acq_setup()}
+@item @ref{daq_ai_start_acquisition()}
+@item @ref{daq_ai_get_curve()}
+@item @ref{daq_trigger_setup()}
+@item @ref{daq_start_continuous_counter()}
+@item @ref{daq_start_timed_counter()}
+@item @ref{daq_timed_count()}
+@item @ref{daq_intermediate_count()}
+@item @ref{daq_final_count()}
+@item @ref{daq_stop_counter()}
+@item @ref{daq_single_pulse()}
+@item @ref{daq_continuous_pulses()}
+@item @ref{daq_dio_read()}
+@item @ref{daq_dio_write()}
+@item @ref{daq_ao_channel_setup()}
+@item @ref{daq_freq_out()}
+@item @ref{daq_reserve_dac()}
+@item @ref{daq_set_voltage()}
+@item @ref{daq_maximum_output_voltage()}
+@item @ref{daq_reserve_adc()}
+@item @ref{daq_get_voltage()}
+@item @ref{daq_dac_parameter()}
+@item @ref{daq_trigger_mode()}
+@item @ref{daq_gain()}
+@end table
+
+@noindent
+@strong{Complete descriptions of DAQ functions}:
+
+
 @table @samp
 
-@anchor{daq_name}
+@anchor{daq_name()}
 @item daq_name()
 @findex daq_name()
 Returns a string with the name of the DAC being used.
 
 
-@anchor{daq_ai_channel_setup}
+@anchor{daq_ai_channel_setup()}
 @item daq_ai_channel_setup()
 @findex daq_ai_channel_setup()
 This function is only available for the PCI-MIO-16E-1 card. It is
@@ -3182,7 +3433,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_ai_acq_setup}
+@anchor{daq_ai_acq_setup()}
 @item daq_ai_acq_setup()
 @findex daq_ai_acq_setup()
 This function is only available for the PCI-MIO-16E-1 card. It is
@@ -3340,7 +3591,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_ai_start_acquisition}
+@anchor{daq_ai_start_acquisition()}
 @item daq_ai_start_acquisition()
 @findex daq_ai_start_acquisition()
 This function is only available for the PCI-MIO-16E-1 card. It is to be
@@ -3352,7 +3603,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_ai_get_curve}
+@anchor{daq_ai_get_curve()}
 @item daq_ai_get_curve()
 @findex daq_ai_get_curve()
 This function is only available for the PCI-MIO-16E-1 card and is used
@@ -3367,7 +3618,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_trigger_setup}
+@anchor{daq_trigger_setup()}
 @item daq_trigger_setup()
 @findex daq_trigger_setup()
 This function is only available for the PCI-MIO-16E-1 card and can be
@@ -3425,7 +3676,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_start_continuous_counter}
+@anchor{daq_start_continuous_counter()}
 @item daq_start_continuous_counter()
 @findex daq_start_continuous_counter()
 This function is only available for the PCI-MIO-16E-1 card. It starts
@@ -3447,7 +3698,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_start_timed_counter}
+@anchor{daq_start_timed_counter()}
 @item daq_start_timed_counter()
 @findex daq_start_timed_counter()
 This function is only available for the PCI-MIO-16E-1 card and starts
@@ -3476,7 +3727,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_timed_count}
+@anchor{daq_timed_count()}
 @item daq_timed_count()
 @findex daq_timed_count()
 This function is only available for the PCI-MIO-16E-1 card is and very
@@ -3490,7 +3741,7 @@ The largest value that can be returned is @w{16777215}, i.e.@: @w{2^24
 - 1}.
 
 
-@anchor{daq_intermediate_count}
+@anchor{daq_intermediate_count()}
 @item daq_intermediate_count()
 @findex daq_intermediate_count()
 This function is only available for the PCI-MIO-16E-1 card and returns
@@ -3510,7 +3761,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_final_count}
+@anchor{daq_final_count()}
 @item daq_final_count()
 @findex daq_final_count()
 This function is only available for the PCI-MIO-16E-1 card and waits for
@@ -3533,7 +3784,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_stop_counter}
+@anchor{daq_stop_counter()}
 @item daq_stop_counter()
 @findex daq_stop_counter()
 This function is only available for the PCI-MIO-16E-1 card and can be
@@ -3548,7 +3799,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_single_pulse}
+@anchor{daq_single_pulse()}
 @item daq_single_pulse()
 @findex daq_single_pulse()
 This function is only available for the PCI-MIO-16E-1 card.  Beside
@@ -3564,7 +3815,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_continuous_pulses}
+@anchor{daq_continuous_pulses()}
 @item daq_continuous_pulses()
 @findex daq_continuous_pulses()
 This function is only available for the PCI-MIO-16E-1 card.  It allows
@@ -3588,7 +3839,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_dio_read}
+@anchor{daq_dio_read()}
 @item daq_dio_read()
 @findex daq_dio_read()
 This function is only available for the PCI-MIO-16E-1 card. Beside
@@ -3619,7 +3870,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_dio_write}
+@anchor{daq_dio_write()}
 @item daq_dio_write()
 @findex daq_dio_write()
 This function is only available for the PCI-MIO-16E-1 card. The 8 DIO
@@ -3654,7 +3905,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_ao_channel_setup}
+@anchor{daq_ao_channel_setup()}
 @item daq_ao_channel_setup()
 @findex daq_ao_channel_setup()
 This function is only available for the PCI-MIO-16E-1 card. It allows to
@@ -3683,7 +3934,7 @@ channels is not changed. Both channels are per default in bipolar mode
 and use the internal reference voltage.
 
 
-@anchor{daq_freq_out}
+@anchor{daq_freq_out()}
 @item daq_freq_out()
 @findex daq_freq_out()
 This function is only available for the PCI-MIO-16E-1 card. The card has
@@ -3711,7 +3962,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{daq_reserve_dac}
+@anchor{daq_reserve_dac()}
 @item daq_reserve_dac()
 @findex daq_reserve_dac()
 This function can be used to reserve (or un-reserve) a DAC so that it
@@ -3749,7 +4000,7 @@ reserving or releasing the DAC channel) succeeded, if it is @code{0} the
 operation failed.
 
 
-@anchor{daq_set_voltage}
+@anchor{daq_set_voltage()}
 @item daq_set_voltage()
 @findex daq_set_voltage()
 This function has to be used to output a voltage at (one of) the output
@@ -3808,7 +4059,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
 
 
-@anchor{daq_maximum_output_voltage}
+@anchor{daq_maximum_output_voltage()}
 @item daq_maximum_output_voltage()
 @findex daq_maximum_output_voltage()
 This function is only available for the home-built AD and DA converter.
@@ -3837,7 +4088,7 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
 
 
-@anchor{daq_reserve_adc}
+@anchor{daq_reserve_adc()}
 @item daq_reserve_adc()
 @findex daq_reserve_adc()
 This function is only available for the home-built AD and DA converter
@@ -3865,7 +4116,7 @@ reserving or releasing the DAC channel) succeeded, if it is @code{0} the
 operation failed.
 
 
-@anchor{daq_get_voltage}
+@anchor{daq_get_voltage()}
 @item daq_get_voltage()
 @findex daq_get_voltage()
 This function is only available for the home-built AD and DA converter
@@ -3896,7 +4147,7 @@ call has to be passed to the function as the very first argument if you
 want to be able to read in the voltage at the ADC.
 
 
-@anchor{daq_dac_parameter}
+@anchor{daq_dac_parameter()}
 @item daq_dac_parameter()
 @findex daq_dac_parameter()
 This function is available only for the ME-6000 and ME-6100 cards and
@@ -3910,7 +4161,7 @@ argument (which can be omitted if settings for alll channels must be
 identical).
 
 
-@anchor{daq_trigger_mode}
+@anchor{daq_trigger_mode()}
 @item daq_trigger_mode()
 @findex daq_trigger_mode()
 Some of the Rulbus RB8509 ADC cards allow to trigger a conversion on
@@ -3924,7 +4175,7 @@ internal trigger mode, or @code{"EXT"} or @code{"EXTERNAL"} to switch to
 external trigger mode.
 
 
-@anchor{daq_gain}
+@anchor{daq_gain()}
 @item daq_gain()
 @findex daq_gain()
 The Rulbus RB8509 ADC cards have an pre-amplifier with a gain factor
@@ -3950,14 +4201,28 @@ in the @code{DEVICES} section.
 Use of this card requires that a kernel module and an additional
 library (both coming with @code{fsc2}) have been successfully installed.
 
+
+@noindent
+@strong{List of all DIO functions}:
+@table @samp
+@item @ref{dio_name()}
+@item @ref{dio_reserve_dio()}
+@item @ref{dio_mode()}
+@item @ref{dio_value()}
+@end table
+
+@noindent
+@strong{Complete descriptions of DIO functions}:
+
+
 @table @samp
 
-@anchor{dio_name}
+@anchor{dio_name()}
 @item dio_name()
 @findex dio_name()
 Returns a string with the name of the DIO device being used.
 
-@anchor{dio_reserve_dio}
+@anchor{dio_reserve_dio()}
 @item dio_reserve_dio()
 @findex dio_reserve_dio()
 This function can be used to reserve (or un-reserve) a DIO so that it
@@ -3988,7 +4253,7 @@ reserving or releasing the DIO) succeeded, if it is @code{0} the
 operation failed.
 
 
-@anchor{dio_mode}
+@anchor{dio_mode()}
 @item dio_mode()
 @findex dio_mode()
 The WITIO-48 card has two DIO chips, both allowing 24 bit wide input and
@@ -4030,7 +4295,7 @@ you want to be able to change the mode of the DIO.
 
 
 
-@anchor{dio_value}
+@anchor{dio_value()}
 @item dio_value()
 @findex dio_value()
 This function is used to either input or output a value. It expects at
@@ -4129,15 +4394,37 @@ in the @code{DEVICES} section.
 Use of this card requires that a kernel module and an additional
 library (both coming with @code{fsc2}) have been successfully installed.
 
+
+@noindent
+@strong{List of all counter functions}:
+@table @samp
+@item @ref{counter_name()}
+@item @ref{counter_start_continuous_counter()}
+@item @ref{counter_start_timed_counter()}
+@item @ref{counter_timed_count()}
+@item @ref{counter_intermediate_count()}
+@item @ref{counter_final_count()}
+@item @ref{counter_stop_counter()}
+@item @ref{counter_single_pulse()}
+@item @ref{counter_continuous_pulses()}
+@item @ref{counter_dio_read()}
+@item @ref{counter_dio_write()}
+@item @ref{ccd_camera_name()}
+@end table
+
+@noindent
+@strong{Complete descriptions of counter functions}:
+
+
 @table @samp
 
-@anchor{counter_name}
+@anchor{counter_name()}
 @item counter_name()
 @findex counter_name()
 Returns a string with the name of the event counter being used.
 
 
-@anchor{counter_start_continuous_counter}
+@anchor{counter_start_continuous_counter()}
 @item counter_start_continuous_counter()
 @findex counter_start_continuous_counter()
 This functions starts one of the counters of the card. The counter will
@@ -4164,7 +4451,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_start_timed_counter}
+@anchor{counter_start_timed_counter()}
 @item counter_start_timed_counter()
 @findex counter_start_timed_counter()
 This function starts one of the counters of the card. The counter will
@@ -4199,7 +4486,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_timed_count}
+@anchor{counter_timed_count()}
 @item counter_timed_count()
 @findex counter_timed_count()
 This function is very similar to the previous function,
@@ -4213,7 +4500,7 @@ The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31
 - 1}.
 
 
-@anchor{counter_intermediate_count}
+@anchor{counter_intermediate_count()}
 @item counter_intermediate_count()
 @findex counter_intermediate_count()
 The function returns the current value of a counter. The counter may
@@ -4232,7 +4519,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_final_count}
+@anchor{counter_final_count()}
 @item counter_final_count()
 @findex counter_final_count()
 This function waits for an counter to stop and only then returns the
@@ -4254,7 +4541,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_stop_counter}
+@anchor{counter_stop_counter()}
 @item counter_stop_counter()
 @findex counter_stop_counter()
 This function can be used to stop a counter independently of the purpose
@@ -4268,7 +4555,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_single_pulse}
+@anchor{counter_single_pulse()}
 @item counter_single_pulse()
 @findex counter_single_pulse()
 Beside being used as event counters the counters can also be used to
@@ -4284,7 +4571,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_continuous_pulses}
+@anchor{counter_continuous_pulses()}
 @item counter_continuous_pulses()
 @findex counter_continuous_pulses()
 This function allows to create a continuous train of pulses. It requires
@@ -4307,7 +4594,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_dio_read}
+@anchor{counter_dio_read()}
 @item counter_dio_read()
 @findex counter_dio_read()
 Beside counters the card also can do digital input and output. There are
@@ -4337,7 +4624,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{counter_dio_write}
+@anchor{counter_dio_write()}
 @item counter_dio_write()
 @findex counter_dio_write()
 The 8 DIO lines of the card can not only be monitored (see the previous
@@ -4409,15 +4696,35 @@ experiments, so at the start of an experiment these values are set
 automatically to the ones they had in the previously run experiment.
 
 
+@noindent
+@strong{List of all CCD camera functions}:
+@table @samp
+@item @ref{ccd_camera_name()}
+@item @ref{ccd_camera_roi()}
+@item @ref{ccd_camera_binning()}
+@item @ref{ccd_camera_binning_method()}
+@item @ref{ccd_camera_exposure_time()}
+@item @ref{ccd_camera_clear_cycles()}
+@item @ref{ccd_camera_get_image()}
+@item @ref{ccd_camera_get_spectrum()}
+@item @ref{ccd_camera_temperature()}
+@item @ref{ccd_camera_pixel_size()}
+@item @ref{ccd_camera_pixel_area()}
+@end table
+
+@noindent
+@strong{Complete descriptions of CCD camera functions}:
+
+
 @table @samp
 
-@anchor{ccd_camera_name}
+@anchor{ccd_camera_name()}
 @item ccd_camera_name()
 @findex ccd_camera_name()
 Returns a string with the name of the CCD camera being used.
 
 
-@anchor{ccd_camera_roi}
+@anchor{ccd_camera_roi()}
 @item ccd_camera_roi()
 @findex ccd_camera_roi()
 The function is used to query or set the region of interest (ROI) of the
@@ -4452,7 +4759,7 @@ is started the ROI setting is identical to the one it had in a
 previously run experiment.
 
 
-@anchor{ccd_camera_binning}
+@anchor{ccd_camera_binning()}
 @item ccd_camera_binning()
 @findex ccd_camera_binning()
 The function allows to set or query the binning (i.e.@: the combining of
@@ -4497,7 +4804,7 @@ new experiment is started the settings for the binnoing are identical to
 the one they had in a previously run experiment.
 
 
-@anchor{ccd_camera_binning_method}
+@anchor{ccd_camera_binning_method()}
 @item ccd_camera_binning_method()
 @findex ccd_camera_binning_method()
 This function lets you query or set the binning method to be used.  You
@@ -4524,7 +4831,7 @@ experiment is started its settingis identical to the it had in a
 previously run experiment.
 
 
-@anchor{ccd_camera_exposure_time}
+@anchor{ccd_camera_exposure_time()}
 @item ccd_camera_exposure_time()
 @findex ccd_camera_exposure_time()
 The function can be used to determine or set the exposure time used by
@@ -4539,7 +4846,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ccd_camera_clear_cycles}
+@anchor{ccd_camera_clear_cycles()}
 @item ccd_camera_clear_cycles()
 @findex ccd_camera_clear_cycles()
 The function allows to determine or set the number of clear cycles of
@@ -4558,7 +4865,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ccd_camera_get_image}
+@anchor{ccd_camera_get_image()}
 @item ccd_camera_get_image()
 @findex ccd_camera_get_image()
 The function starts an exposure, fetches the resulting image from the
@@ -4571,7 +4878,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ccd_camera_get_spectrum}
+@anchor{ccd_camera_get_spectrum()}
 @item ccd_camera_get_spectrum()
 @findex ccd_camera_get_spectrum()
 The function starts an exposure, fetches the result from the camera and
@@ -4584,7 +4891,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ccd_camera_temperature}
+@anchor{ccd_camera_temperature()}
 @item ccd_camera_temperature()
 @findex ccd_camera_temperature()
 The function can be used to determine the current temperature of the CCD
@@ -4599,14 +4906,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{ccd_camera_pixel_size}
+@anchor{ccd_camera_pixel_size()}
 @item ccd_camera_pixel_size()
 @findex ccd_camera_pixel_size()
 The function takes no arguments and returns the width of a pixel of the
 CCD chip.
 
 
-@anchor{ccd_camera_pixel_area}
+@anchor{ccd_camera_pixel_area()}
 @item ccd_camera_pixel_area()
 @findex ccd_camera_pixel_area()
 The function accepts no arguments and returns an 1-dimensional array with
@@ -4666,15 +4973,44 @@ the Spec-10 CCD camera by Roper Scientific in conjunction with the
 supported monochromatore).
 
 
+@noindent
+@strong{List of all monochromator functions}:
+@table @samp
+@item @ref{monochromator_name()}
+@item @ref{monochromator_wavelength()}
+@item @ref{monochromator_wavenumber()}
+@item @ref{monochromator_laser_line()}
+@item @ref{monochromator_scan_setup()}
+@item @ref{monochromator_start_scan()}
+@item @ref{monochromator_scan_step()}
+@item @ref{monochromator_shutter_limits()}
+@item @ref{monochromator_groove_density()}
+@item @ref{monochromator_grating()}
+@item @ref{monochromator_turret()}
+@item @ref{monochromator_wavelength_axis()}
+@item @ref{monochromator_wavenumber_axis()}
+@item @ref{monochromator_calc_wavelength()}
+@item @ref{monochromator_load_calibration()}
+@item @ref{monochromator_set_calibration()}
+@item @ref{monochromator_install_grating()}
+@item @ref{monochromator_zero_offset()}
+@item @ref{monochromator_grating_adjust()}
+@item @ref{monochromator_calibrate()}
+@end table
+
+@noindent
+@strong{Complete descriptions of monochromator functions}:
+
+
 @table @samp
 
-@anchor{monochromator_name}
+@anchor{monochromator_name()}
 @item monochromator_name()
 @findex monochromator_name()
 Returns a string with the name of the monochromator being used.
 
 
-@anchor{monochromator_wavelength}
+@anchor{monochromator_wavelength()}
 @item monochromator_wavelength()
 @findex monochromator_wavelength()
 If called with no argument the function returns the current center
@@ -4686,7 +5022,7 @@ Please note: for SPEX monochromators doing a scan calling this function
 automatically aborts the currently running scan.
 
 
-@anchor{monochromator_wavenumber}
+@anchor{monochromator_wavenumber()}
 @item monochromator_wavenumber()
 @findex monochromator_wavenumber()
 If called with no argument this function returns the current center
@@ -4702,7 +5038,7 @@ Please note: for SPEX monochromators doing a scan calling this function
 automatically aborts the currently running scan.
 
 
-@anchor{monochromator_laser_line}
+@anchor{monochromator_laser_line()}
 @item monochromator_laser_line()
 @findex monochromator_laser_line()
 The function is only supported for wavenumber-driven SPEX
@@ -4733,7 +5069,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_scan_setup}
+@anchor{monochromator_scan_setup()}
 @item monochromator_scan_setup()
 @findex monochromator_scan_setup()
 The function is only supported for SPEX monochromators. These have a
@@ -4759,7 +5095,7 @@ Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
 
 
-@anchor{monochromator_start_scan}
+@anchor{monochromator_start_scan()}
 @item monochromator_start_scan()
 @findex monochromator_start_scan()
 The function is only supported for SPEX monochromators and requires that
@@ -4778,7 +5114,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_scan_step}
+@anchor{monochromator_scan_step()}
 @item monochromator_scan_step()
 @findex monochromator_scan_step()
 The function is only supported for SPEX monochromators and requires that
@@ -4795,7 +5131,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_shutter_limits}
+@anchor{monochromator_shutter_limits()}
 @item monochromator_shutter_limits()
 @findex monochromator_shutter_limits()
 The function is only supported for SPEX monochromators that have
@@ -4813,7 +5149,7 @@ Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
 
 
-@anchor{monochromator_groove_density}
+@anchor{monochromator_groove_density()}
 @item monochromator_groove_density()
 @findex monochromator_groove_density()
 If called with no argument the function returns the number of grooves
@@ -4826,7 +5162,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_grating}
+@anchor{monochromator_grating()}
 @item monochromator_grating()
 @findex monochromator_grating()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -4841,7 +5177,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_turret}
+@anchor{monochromator_turret()}
 @item monochromator_turret()
 @findex monochromator_turret()
 The function is only supported for SpectraPro-300i monochromators. If
@@ -4854,7 +5190,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_wavelength_axis}
+@anchor{monochromator_wavelength_axis()}
 @item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
 The function requires that the module for a CCD camera is available that
@@ -4911,7 +5247,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_wavenumber_axis}
+@anchor{monochromator_wavenumber_axis()}
 @item monochromator_wavenumber_axis()
 @findex monochromator_wavenumber_axis()
 This function is similar to the function
@@ -4927,7 +5263,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_calc_wavelength}
+@anchor{monochromator_calc_wavelength()}
 @item monochromator_calc_wavelength()
 @findex monochromator_calc_wavelength()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -4953,7 +5289,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_load_calibration}
+@anchor{monochromator_load_calibration()}
 @item monochromator_load_calibration()
 @findex monochromator_load_calibration()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -4994,7 +5330,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_set_calibration}
+@anchor{monochromator_set_calibration()}
 @item monochromator_set_calibration()
 @findex monochromator_set_calibration()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -5014,7 +5350,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_install_grating}
+@anchor{monochromator_install_grating()}
 @item monochromator_install_grating()
 @findex monochromator_install_grating()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -5039,7 +5375,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_zero_offset}
+@anchor{monochromator_zero_offset()}
 @item monochromator_zero_offset()
 @findex monochromator_zero_offset()
 The function is only supported for SpectraPro-300i monochromators. It
@@ -5069,7 +5405,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_grating_adjust}
+@anchor{monochromator_grating_adjust()}
 @item monochromator_grating_adjust()
 @findex monochromator_grating_adjust()
 The function is only supported for SpectraPro-300i monochromators. The
@@ -5102,7 +5438,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_calibrate}
+@anchor{monochromator_calibrate()}
 @item monochromator_calibrate()
 @findex monochromator_calibrate()
 The function is takes different arguments for the @code{SpectraPro-300i} and
@@ -5215,15 +5551,32 @@ mcn700_2000
 @noindent
 in the @code{DEVICES} section. 
 
+
+@noindent
+@strong{List of all power supply functions}:
+@table @samp
+@item @ref{powersupply_name()}
+@item @ref{powersupply_channel_state()}
+@item @ref{powersupply_damping()}
+@item @ref{powersupply_voltage()}
+@item @ref{powersupply_voltage_limit()}
+@item @ref{powersupply_current()}
+@item @ref{powersupply_current_limit()}
+@end table
+
+@noindent
+@strong{Complete descriptions of power supply functions}:
+
+
 @table @samp
 
-@anchor{powersupply_name}
+@anchor{powersupply_name()}
 @item powersupply_name()
 @findex powersuppy_name()
 Returns a string with the name of the power supply being used.
 
 
-@anchor{powersupply_channel_state}
+@anchor{powersupply_channel_state()}
 @item powersupply_channel_state()
 @findex powersupply_channel_state()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
@@ -5237,7 +5590,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{powersupply_damping}
+@anchor{powersupply_damping()}
 @item powersupply_damping()
 @findex powersupply_damping()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
@@ -5251,7 +5604,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{powersupply_voltage}
+@anchor{powersupply_voltage()}
 @item powersupply_voltage()
 @findex powersupply_voltage()
 This function allows to either set or query the output voltage.
@@ -5277,7 +5630,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{powersupply_voltage_limit}
+@anchor{powersupply_voltage_limit()}
 @item powersupply_voltage_limit()
 @findex powersupply_voltage_limit()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
@@ -5294,7 +5647,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{powersupply_current}
+@anchor{powersupply_current()}
 @item powersupply_current()
 @findex powersupply_current()
 This function allows to either set or query the output current
@@ -5320,7 +5673,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{powersupply_current_limit}
+@anchor{powersupply_current_limit()}
 @item powersupply_current_limit()
 @findex powersupply_current_limit()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
@@ -5359,15 +5712,29 @@ motor. The name of the file can be set in the configuration file for the
 module.
 
 
+@noindent
+@strong{List of all microwave attenuator functions}:
+@table @samp
+@item @ref{mw_attenuator_name()}
+@item @ref{mw_attenuator_load_calibration()}
+@item @ref{mw_attenuator_initial_attenuation()}
+@item @ref{mw_attenuator_attenuation()}
+@end table
+
+@noindent
+@strong{Complete descriptions of microwave attenuator functions}:
+
+
+
 @table @samp
 
-@anchor{mw_attenuator_name}
+@anchor{mw_attenuator_name()}
 @item mw_attenuator_name()
 @findex mw_attenuator_name()
 Returns a string with the name of the power supply being used.
 
 
-@anchor{mw_attenuator_load_calibration}
+@anchor{mw_attenuator_load_calibration()}
 @item mw_attenuator_load_calibration()
 @findex mw_attenuator_load_calibration()
 This function can be used to load a calibration table file different
@@ -5411,7 +5778,7 @@ The function can only be used in the @code{PREPARATIONS} section of an
 @code{EDL} script.
 
 
-@anchor{mw_attenuator_initial_attenuation}
+@anchor{mw_attenuator_initial_attenuation()}
 @item mw_attenuator_initial_attenuation()
 @findex mw_attenuator_initial_attenuation()
 The module has no way to find out to find out the setting of the
@@ -5423,7 +5790,7 @@ be within the range of attenuations covered by the calibration file. The
 function may not be called again (until a new experiment is started).
 
 
-@anchor{mw_attenuator_attenuation}
+@anchor{mw_attenuator_attenuation()}
 @item mw_attenuator_attenuation()
 @findex mw_attenuator_attenuation()
 Thsi function can be used to query the current attenuation or set a new
@@ -5471,14 +5838,26 @@ when a resonable rotation frequency is set by calling the function
 chopper gets stopped automatically.
 
 
+@noindent
+@strong{List of all chopper functions}:
+@table @samp
+@item @ref{chopper_name()}
+@item @ref{chopper_rotation_frequency()}
+@item @ref{chopper_create_trigger()}
+@end table
+
+@noindent
+@strong{Complete descriptions of chopper functions}:
+
+
 @table @samp
 
-@anchor{chopper_name}
+@anchor{chopper_name()}
 @item chopper_name()
 @findex chopper_name()
 Returns a string with the name of the chopper being used.
 
-@anchor{chopper_rotation_frequency}
+@anchor{chopper_rotation_frequency()}
 @item chopper_rotation_frequency()
 @findex chopper_rotation_frequency()
 This function allows to either query or set the rotation speed of the
@@ -5496,7 +5875,7 @@ script the choppers rotation frequency is set to this value when the
 experiment is started.
 
 
-@anchor{chopper_create_trigger}
+@anchor{chopper_create_trigger()}
 @item chopper_create_trigger()
 @findex chopper_create_trigger()
 This function makes the electronics controlling the chopper create a
@@ -5520,7 +5899,7 @@ section.
 
 @table @samp
 
-@anchor{get_phase_cycled_area}
+@anchor{get_phase_cycled_area()}
 @item get_phase_cycled_area()
 @findex get_phase_cycled_area()
 This function is for doing a complete measurement sequence in a phase
@@ -5669,7 +6048,6 @@ data[ Num_x_points, 2 ];
 Win_ID_1;                // signal window
 Win_ID_2;                // background window
 I;
-
 ...
 
 ASSIGNMENTS:

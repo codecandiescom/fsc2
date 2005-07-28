@@ -60,30 +60,30 @@ fsc2.html: $(docs) $(figures)
 
 	@echo -e '  <div id="links">\n  <img src="fsc2.gif" alt="fsc2 logo">\n  <br><br>' >> TOC
 	@for i in fsc2.html fsc2_[1-9].html; do \
-		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
+		if [ -z "`grep -h '^<title>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
-			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
-			sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
+			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
+			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
 	@for i in fsc2_[1-9][0-9].html; do \
-		if [ -z "`grep -h '^<TITLE>fsc2: Index:' $$i`" ]; then \
+		if [ -z "`grep -h '^<title>fsc2: Index:' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
-			grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' $$i | \
-			sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br>/' >> TOC; \
+			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
+			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
 	@echo -n '  <a href="fsc2_toc.html">' >> TOC;
-	@grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' fsc2_toc.html | \
-	sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
+	@grep -h '^<title>fsc2: [^<]*</title>$$' fsc2_toc.html | \
+	sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br><br>/' >> TOC;
 	@echo '  <a href="http://toerring.de">Download</a><br>' >> TOC
 	@echo '  <a href="mailto:jt@toerring.de">Contact</a>' >> TOC
 	@echo -e '  </div>\n  <div id="main">' >> TOC
 	@for i in *.html; do \
-		sed '1,/BODY/!d' $$i > $$i.x; \
+		sed '1,/body/!d' $$i > $$i.x; \
 		cat TOC >> $$i.x; \
-		sed '1,/<BODY>/d;/<\/BODY/,$$d' $$i >> $$i.x; \
-		echo -e '  </div>\n</BODY>\n</HTML>' >> $$i.x; \
+		sed '1,/<body>/d;/<\/body/,$$d' $$i >> $$i.x; \
+		echo -e '  </div>\n</body>\n</html>' >> $$i.x; \
 		mv $$i.x $$i; \
 	done
 	-@$(RM) TOC

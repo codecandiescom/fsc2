@@ -676,18 +676,16 @@ $T2H_print_toc_frame          = \&T2H_DEFAULT_print_toc_frame;
 
 sub T2H_DEFAULT_print_section
 {
-  my $fh = shift;
-  local $T2H_BUTTONS = \@T2H_SECTION_BUTTONS;
-  &$T2H_print_head_navigation($fh) if $T2H_SECTION_NAVIGATION;
-  my $nw = t2h_print_lines($fh);
-  if ($T2H_SPLIT eq 'section' && $T2H_SECTION_NAVIGATION)
-  {
-    &$T2H_print_foot_navigation($fh, $nw);
-  }
-#  else
-#  {
-#    print $fh '<HR SIZE="6">' . "\n";
-#  }
+    my $fh = shift;
+    local $T2H_BUTTONS = \@T2H_SECTION_BUTTONS;
+    &$T2H_print_head_navigation($fh) if $T2H_SECTION_NAVIGATION;
+    my $nw = t2h_print_lines($fh);
+    if ($T2H_SPLIT eq 'section' && $T2H_SECTION_NAVIGATION) {
+        &$T2H_print_foot_navigation($fh, $nw);
+    }
+#   else {
+#       print $fh '<hr size="6">' . "\n";
+#   }
 }
 
 ###################################################################
@@ -702,56 +700,52 @@ sub T2H_DEFAULT_print_section
 
 sub T2H_DEFAULT_print_Top_header
 {
-  &$T2H_print_page_head(@_) if $T2H_SPLIT;
-  t2h_print_label(@_); # this needs to be called, otherwise no label set
-  &$T2H_print_head_navigation(@_);
+    &$T2H_print_page_head(@_) if $T2H_SPLIT;
+    t2h_print_label(@_); # this needs to be called, otherwise no label set
+    &$T2H_print_head_navigation(@_);
 }
 
 sub T2H_DEFAULT_print_Top_footer
 {
-  &$T2H_print_foot_navigation(@_);
-  &$T2H_print_page_foot(@_) if $T2H_SPLIT;
+    &$T2H_print_foot_navigation(@_);
+    &$T2H_print_page_foot(@_) if $T2H_SPLIT;
 }
 
 sub T2H_DEFAULT_print_Top
 {
-  my $fh = shift;
+    my $fh = shift;
 
-  # for redefining navigation buttons use:
-  # local $T2H_BUTTONS = [...];
-  # as it is, 'Top', 'Contents', 'Index', 'About' are printed
+    # for redefining navigation buttons use:
+    # local $T2H_BUTTONS = [...];
+    # as it is, 'Top', 'Contents', 'Index', 'About' are printed
 
-  local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
-  &$T2H_print_Top_header($fh);
-  if ($T2H_THIS_SECTION)
-  {
-    # if top-level node has content, then print it with extra header
-    print $fh "<H1>$T2H_NAME{Top}</H1><P>"
-      unless ($T2H_HAS_TOP_HEADING);
-    t2h_print_lines($fh, $T2H_THIS_SECTION)
-  }
-  else
-  {
-    # top-level node is fully enclosed in @ifnothtml
-    # print fulltitle, subtitle, author, Overview
+    local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
+    &$T2H_print_Top_header($fh);
+    if ($T2H_THIS_SECTION) {
+        # if top-level node has content, then print it with extra header
+        print $fh "<h1>$T2H_NAME{Top}</h1><p>"
+            unless ($T2H_HAS_TOP_HEADING);
+        t2h_print_lines($fh, $T2H_THIS_SECTION)
+    } else {
+        # top-level node is fully enclosed in @ifnothtml
+        # print fulltitle, subtitle, author, Overview
 
-    print $fh 
-      "<CENTER>\n<H1>" .
-      join("</H1>\n<H1>", split(/\n/,  $T2H_THISDOC{fulltitle})) .
-      "</H1>\n";
-    print $fh "<H2>$T2H_THISDOC{subtitle}</H2>\n" if $T2H_THISDOC{subtitle};
-    print $fh "$T2H_THISDOC{author}\n" if $T2H_THISDOC{author};
-    print $fh <<EOT;
-</CENTER>
-<HR>
-<P></P>
-<H2> Overview: </H2>
-<BLOCKQUOTE>
+        print $fh "<center>\n<h1>" .
+              join("</h1>\n<h1>", split(/\n/,  $T2H_THISDOC{fulltitle})) .
+              "</h1>\n";
+        print $fh "<h2>$T2H_THISDOC{subtitle}</h2>\n" if $T2H_THISDOC{subtitle};
+        print $fh "$T2H_THISDOC{author}\n" if $T2H_THISDOC{author};
+        print $fh <<EOT;
+</center>
+<hr>
+<p></p>
+<h2> Overview: </h2>
+<blockquote>
 EOT
-    t2h_print_lines($fh, $T2H_OVERVIEW);
-    print $fh "</BLOCKQUOTE>\n";
-  }
-  &$T2H_print_Top_footer($fh);
+        t2h_print_lines($fh, $T2H_OVERVIEW);
+        print $fh "</blockquote>\n";
+    }
+    &$T2H_print_Top_footer($fh);
 }
 
 ###################################################################
@@ -762,46 +756,46 @@ EOT
 
 sub T2H_DEFAULT_print_Toc
 {
-  return &$T2H_print_misc(@_);
+    return &$T2H_print_misc(@_);
 }
 
 sub T2H_DEFAULT_print_Overview
 {
-  return &$T2H_print_misc(@_);
+    return &$T2H_print_misc(@_);
 }
 
 sub T2H_DEFAULT_print_Footnotes
 {
-  return &$T2H_print_misc(@_);
+    return &$T2H_print_misc(@_);
 }
 
 sub T2H_DEFAULT_print_About
 {
-  return &$T2H_print_misc(@_);
+    return &$T2H_print_misc(@_);
 }
 
 sub T2H_DEFAULT_print_misc_header
 {
-  &$T2H_print_page_head(@_) if $T2H_SPLIT;
-  # this needs to be called, otherwise, no labels are set
-  t2h_print_label(@_);
-  &$T2H_print_head_navigation(@_);
+    &$T2H_print_page_head(@_) if $T2H_SPLIT;
+    # this needs to be called, otherwise, no labels are set
+    t2h_print_label(@_);
+    &$T2H_print_head_navigation(@_);
 }
 
 sub T2H_DEFAULT_print_misc_footer
 {
-  &$T2H_print_foot_navigation(@_);
-  &$T2H_print_page_foot(@_) if $T2H_SPLIT;
+    &$T2H_print_foot_navigation(@_);
+    &$T2H_print_page_foot(@_) if $T2H_SPLIT;
 }
 
 sub T2H_DEFAULT_print_misc
 {
-  my $fh = shift;
-  local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
-  &$T2H_print_misc_header($fh);
-  print $fh "<H1>$T2H_NAME{This}</H1>\n";
-  t2h_print_lines($fh);
-  &$T2H_print_misc_footer($fh);
+    my $fh = shift;
+    local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
+    &$T2H_print_misc_header($fh);
+    print $fh "<h1>$T2H_NAME{This}</h1>\n";
+    t2h_print_lines($fh);
+    &$T2H_print_misc_footer($fh);
 }
 
 ###################################################################
@@ -815,27 +809,26 @@ sub T2H_DEFAULT_print_misc
 # and put print_navigation into print_chapter_header
 
 @T2H_CHAPTER_BUTTONS =
-  (
-   'FastBack', 'FastForward', ' ', ' ', ' ', ' ', ' ',
-   'Top', 'Contents', 'Index', 'About',
-  );
+    (
+     'FastBack', 'FastForward', ' ', ' ', ' ', ' ', ' ',
+     'Top', 'Contents', 'Index', 'About',
+    );
 
 sub T2H_DEFAULT_print_chapter_header
 {
-  # nothing to do there, by default
-  if (! $T2H_SECTION_NAVIGATION)
-  {
-    my $fh = shift;
-    local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
-    &$T2H_print_navigation($fh);
-    print $fh "\n<HR SIZE=2>\n";
-  }
+    # nothing to do there, by default
+    if (! $T2H_SECTION_NAVIGATION) {
+        my $fh = shift;
+        local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
+        &$T2H_print_navigation($fh);
+        print $fh "\n<hr size=\"2\">\n";
+    }
 }
 
 sub T2H_DEFAULT_print_chapter_footer
 {
-  local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
-  &$T2H_print_navigation(@_);
+    local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
+    &$T2H_print_navigation(@_);
 }
 
 ###################################################################
@@ -843,63 +836,63 @@ sub T2H_DEFAULT_print_chapter_footer
 #
 # Set the default body text, inserted between <BODY ... >
 
-# text inserted after <BODY ...>
+# text inserted after <body ...>
 
 $T2H_AFTER_BODY_OPEN = '';
 
-#text inserted before </BODY>
+#text inserted before </body>
 
 $T2H_PRE_BODY_CLOSE = '';
 
 # this is used in footer
 
-$T2H_ADDRESS = "by <I>$T2H_USER</I> " if $T2H_USER;
-$T2H_ADDRESS .= "on <I>$T2H_TODAY</I>";
+$T2H_ADDRESS = "by <i>$T2H_USER</i> " if $T2H_USER;
+$T2H_ADDRESS .= "on <i>$T2H_TODAY</i>";
 
-# this is added inside <HEAD></HEAD> after <TITLE> and some META NAME stuff
+# this is added inside <head></head> after <title> and some meta name stuff
 # can be used for <style> <script>, <meta> tags
 
 $T2H_EXTRA_HEAD = '';
 
 sub T2H_DEFAULT_print_page_head    # added Content-Type JTT
 {
-  my $fh = shift; 
-  my $longtitle = "$T2H_THISDOC{title}: $T2H_NAME{This}";
-  print $fh <<EOT;
+    my $fh = shift; 
+    my $longtitle = "$T2H_THISDOC{title}: $T2H_NAME{This}";
+    print $fh <<EOT;
 $T2H_DOCTYPE
 <!-- Created on $T2H_TODAY by $THISPROG -->
-<HTML>
-<HEAD>
-<TITLE>$longtitle</TITLE>
-<META NAME="description" CONTENT="$longtitle">
-<META NAME="keywords" CONTENT="$longtitle">
-<META NAME="resource-type" CONTENT="document">
-<META NAME="distribution" CONTENT="global">
-<META NAME="Generator" CONTENT="$THISPROG">
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<html>
+<head>
+<title>$longtitle</title>
+<meta name="description" content="$longtitle">
+<meta name="keywords" content="$longtitle">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="$THISPROG">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 $T2H_EXTRA_HEAD
-<LINK REL=STYLESHEET TYPE="text/css" HREF="fsc2.css">
-<LINK HREF="fsc2.ico" REL="shortcut icon" TYPE="image/x-icon">
-</HEAD>
+<link rel=stylesheet type="text/css" href="fsc2.css">
+<link href="fsc2.ico" rel="shortcut icon" type="image/x-icon">
+</head>
 
-<BODY>
+<body>
 $T2H_AFTER_BODY_OPEN
 EOT
 }
 
 sub T2H_DEFAULT_print_page_foot
 {
-  my $fh = shift;
-  print $fh <<EOT;
-<BR>  
-<FONT SIZE="-1">
+    my $fh = shift;
+    print $fh <<EOT;
+<br>
+<font size="-1">
 This document was generated
 $T2H_ADDRESS
-using <A HREF="$T2H_HOMEPAGE"><I>texi2html</I></A>
-</FONT>
+using <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
+</font>
 $T2H_PRE_BODY_CLOSE
-</BODY>
-</HTML>
+</body>
+</html>
 EOT
 }
 
@@ -911,27 +904,23 @@ $T2H_VERTICAL_HEAD_NAVIGATION = 0;
 
 sub T2H_DEFAULT_print_head_navigation
 {
-  my $fh = shift;
-  if ($T2H_VERTICAL_HEAD_NAVIGATION)
-  {
-    print $fh <<EOT;
-<TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0">
-<TR VALIGN="TOP">
-<TD ALIGN="LEFT">
+    my $fh = shift;
+    if ($T2H_VERTICAL_HEAD_NAVIGATION) {
+        print $fh <<EOT;
+<table border="0" cellpadding="0" cellspacing="0">
+<tr align="top">
+<td align="left">
 EOT
-  }
-  &$T2H_print_navigation($fh, $T2H_VERTICAL_HEAD_NAVIGATION);
-  if ($T2H_VERTICAL_HEAD_NAVIGATION)
-  {
-    print $fh <<EOT;
-</TD>
-<TD ALIGN="LEFT">
+    }
+    &$T2H_print_navigation($fh, $T2H_VERTICAL_HEAD_NAVIGATION);
+    if ($T2H_VERTICAL_HEAD_NAVIGATION) {
+        print $fh <<EOT;
+</td>
+<td align="left">
 EOT
-  }
-  elsif ($T2H_SPLIT eq 'section')
-  {
-    print $fh "<HR SIZE=1>\n";
-  }
+    } elsif ($T2H_SPLIT eq 'section') {
+        print $fh "<hr size=\"1\">\n";
+    }
 }
 
 # Specifies the minimum page length required before a navigation panel
@@ -942,18 +931,17 @@ $T2H_WORDS_IN_PAGE = 300;
 
 sub T2H_DEFAULT_print_foot_navigation
 {
-  my $fh = shift;
-  my $nwords = shift;
-  if ($T2H_VERTICAL_HEAD_NAVIGATION)
-  {
-    print $fh <<EOT;
-</TD>
-</TR>
-</TABLE>
+    my $fh = shift;
+    my $nwords = shift;
+    if ($T2H_VERTICAL_HEAD_NAVIGATION) {
+        print $fh <<EOT;
+</td>
+</tr>
+</table>
 EOT
-  }
-  print $fh "<HR SIZE=1>\n";
-  &$T2H_print_navigation($fh) if ($nwords >= $T2H_WORDS_IN_PAGE)
+    }
+    print $fh "<hr size=\"1\">\n";
+    &$T2H_print_navigation($fh) if ($nwords >= $T2H_WORDS_IN_PAGE)
 }
 
 ######################################################################
@@ -977,52 +965,52 @@ EOT
 
 $T2H_ICONS=1;
 %T2H_ACTIVE_ICONS =
-  (
-   'Top',         'home.png',
-   'Contents',    'toc.png',
-   'Overview',    '',
-   'Index',       'index.png',
-   'Back',        'prev.png',
-   'FastBack',    'back.png',
-   'Prev',        '',
-   'Up',          'up.png',
-   'Next',        '',
-   'Forward',     'next.png',
-   'FastForward', 'forward.png',
-   'About' ,      'help.png',
-   'First',       '',
-   'Last',        '',
-   ' ',           ''
-  );
+    (
+     'Top',         'home.png',
+     'Contents',    'toc.png',
+     'Overview',    '',
+     'Index',       'index.png',
+     'Back',        'prev.png',
+     'FastBack',    'back.png',
+     'Prev',        '',
+     'Up',          'up.png',
+     'Next',        '',
+     'Forward',     'next.png',
+     'FastForward', 'forward.png',
+     'About' ,      'help.png',
+     'First',       '',
+     'Last',        '',
+     ' ',           ''
+    );
 
 # insert here name of icon images for these, if button is inactive
 
 %T2H_PASSIVE_ICONS =
-  (
-   'Top',         'inactive.png',
-   'Contents',    'inactive.png',
-   'Overview',    '',
-   'Index',       'inactive.png',
-   'Back',        'inactive.png',
-   'FastBack',    'inactive.png',
-   'Prev',        '',
-   'Up',          'inactive.png',
-   'Next',        '',
-   'Forward',     'inactive.png',
-   'FastForward', 'inactive.png',
-   'About',       'inactive.png',
-   'First',       '',
-   'Last',        '',
-  );
+    (
+     'Top',         'inactive.png',
+     'Contents',    'inactive.png',
+     'Overview',    '',
+     'Index',       'inactive.png',
+     'Back',        'inactive.png',
+     'FastBack',    'inactive.png',
+     'Prev',        '',
+     'Up',          'inactive.png',
+     'Next',        '',
+     'Forward',     'inactive.png',
+     'FastForward', 'inactive.png',
+     'About',       'inactive.png',
+     'First',       '',
+     'Last',        '',
+    );
 
 # how to create IMG tag
 
 sub T2H_DEFAULT_button_icon_img
 {
-  my $button = shift;
-  my $icon = shift;
-  my $name = shift;
-  return qq{<IMG SRC="$icon" BORDER="0" ALT="$button: $name" ALIGN="MIDDLE">};
+    my $button = shift;
+    my $icon = shift;
+    my $name = shift;
+    return qq{<img src="$icon" border="0" alt="$button: $name" align="middle">};
 }
 
 # Names of text as alternative for icons
@@ -1051,14 +1039,14 @@ sub T2H_DEFAULT_print_navigation
 	my $fh = shift;
 	my $vertical = shift;
 
-	print $fh "<TABLE class=navi>\n";
+	print $fh "<table class=navi>\n";
 
-	print $fh "<TR>" unless $vertical;
+	print $fh "<tr>" unless $vertical;
 	for $button (@$T2H_BUTTONS) {
-		print $fh qq{<TR VALIGN="TOP" ALIGN="LEFT">\n} if $vertical;
-		print $fh qq{<TD VALIGN="MIDDLE" ALIGN="LEFT">};
+		print $fh qq{<tr valign="top" align="left">\n} if $vertical;
+		print $fh qq{<td valign="middle" align="left">};
 
-		if (ref($button) eq 'CODE') {
+		if (ref($button) eq 'code') {
 			&$button($fh, $vertical);
 		} elsif ($button eq ' ') { # handle space button
 			print $fh
@@ -1085,12 +1073,12 @@ sub T2H_DEFAULT_print_navigation
 									 "[" . $T2H_NAVIGATION_TEXT{$button} . "]";
 		}
 
-		print $fh "</TD>\n";
-		print $fh "</TR>\n" if $vertical;
+		print $fh "</td>\n";
+		print $fh "</tr>\n" if $vertical;
 	}
 
-	print $fh "</TR>" unless $vertical;
-	print $fh "</TABLE>\n";
+	print $fh "</tr>" unless $vertical;
+	print $fh "</table>\n";
 }
 
 ######################################################################
@@ -1101,13 +1089,13 @@ sub T2H_DEFAULT_print_frame
 {
   my $fh = shift;
   print $fh <<EOT;
-<HTML>
-<HEAD><TITLE>$T2H_THISDOC{title}</TITLE></HEAD>
-<FRAMESET cols="140,*">
-  <FRAME name=toc  src="$docu_toc_frame_file">
-  <FRAME name=main src="$docu_doc">
-</FRAMESET> 
-</HTML>
+<html>
+<head><title>$T2H_THISDOC{title}</title></head>
+<frameset cols="140,*">
+  <frame name=toc  src="$docu_toc_frame_file">
+  <frame name=main src="$docu_doc">
+</frameset>
+</html>
 EOT
 }
 
@@ -1116,10 +1104,10 @@ sub T2H_DEFAULT_print_toc_frame
   my $fh = shift;
   &$T2H_print_page_head($fh);
   print $fh <<EOT;
-<H2>Content</H2>
+<h2>Content</h2>
 EOT
-  print $fh map {s/HREF=/target=\"main\" HREF=/; $_;} @stoc_lines;
-  print $fh "</BODY></HTML>\n";
+  print $fh map {s/href=/target=\"main\" href=/; $_;} @stoc_lines;
+  print $fh "</body></html>\n";
 }
 
 ######################################################################
@@ -1130,15 +1118,15 @@ EOT
 
 $T2H_PRE_ABOUT = <<EOT;
 This document was generated $T2H_ADDRESS
-using <A HREF="$T2H_HOMEPAGE"><I>texi2html</I></A>
-<P></P>
+using <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
+<p></p>
 EOT
 $T2H_AFTER_ABOUT = '';
 
 sub T2H_DEFAULT_about_body
 {
   my $about;
-  if (ref($T2H_PRE_ABOUT) eq 'CODE')
+  if (ref($T2H_PRE_ABOUT) eq 'code')
   {
     $about = &$T2H_PRE_ABOUT();
   }
@@ -1148,70 +1136,70 @@ sub T2H_DEFAULT_about_body
   }
   $about .= <<EOT;
 The buttons in the navigation panels have the following meaning:
-<P></P>
+<p></p>
 <table border = "1">
-<TR>
-<TH> Button </TH>
-<TH> Name </TH>
-<TH> Go to </TH>
-<TH> From 1.2.3 go to</TH>
-</TR>
+<tr>
+<th> Button </th>
+<th> Name </th>
+<th> Go to </th>
+<th> From 1.2.3 go to</th>
+</tr>
 EOT
 
   for $button (@T2H_SECTION_BUTTONS)
   {
-    next if $button eq ' ' || ref($button) eq 'CODE';
+    next if $button eq ' ' || ref($button) eq 'code';
     $about .= <<EOT;
-<TR>
-<TD ALIGN="CENTER">
+<tr>
+<td align="center">
 EOT
     $about .=
       ($T2H_ICONS && $T2H_ACTIVE_ICONS{$button} ?
        &$T2H_button_icon_img($button, $T2H_ACTIVE_ICONS{$button}) :
        " [" . $T2H_NAVIGATION_TEXT{$button} . "] ");
     $about .= <<EOT;
-</TD>
-<TD ALIGN="CENTER">
+</td>
+<td align="center">
 $button
-</TD>
-<TD>
+</td>
+<td>
 $T2H_BUTTONS_GOTO{$button}
-</TD>
-<TD>
+</td>
+<td>
 $T2H_BUTTONS_EXAMPLE{$button}
-</TD>
-</TR>
+</td>
+</tr>
 EOT
   }
 
   $about .= <<EOT;
-</TABLE>
-<P></P>
-where the <STRONG> Example </STRONG> assumes that the current position
-is at <STRONG> Subsubsection One-Two-Three </STRONG> of a document of
+</table>
+<p></p>
+where the <strong> Example </strong> assumes that the current position
+is at <strong> Subsubsection One-Two-Three </strong> of a document of
 the following structure:
-<UL>
-<LI> 1. Section One  </LI>
-<UL>
-<LI>1.1 Subsection One-One</LI>
-<UL>
-<LI> ... </LI>
-</UL>
-<LI>1.2 Subsection One-Two</LI>
-<UL>
-<LI>1.2.1 Subsubsection One-Two-One
-</LI><LI>1.2.2 Subsubsection One-Two-Two
-</LI><LI>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp; <STRONG>
-&lt;== Current Position </STRONG>
-</LI><LI>1.2.4 Subsubsection One-Two-Four
-</LI></UL>
-<LI>1.3 Subsection One-Three</LI>
-<UL>
-<LI> ... </LI>
-</UL>
-<LI>1.4 Subsection One-Four</LI>
-</UL>
-</UL>
+<ul>
+<li> 1. Section One  </li>
+<ul>
+<li>1.1 Subsection One-One</li>
+<ul>
+<li> ... </li>
+</ul>
+<li>1.2 Subsection One-Two</li>
+<ul>
+<li>1.2.1 Subsubsection One-Two-One
+</li><li>1.2.2 Subsubsection One-Two-Two
+</li><li>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp; <strong>
+&lt;== Current Position </strong>
+</li><li>1.2.4 Subsubsection One-Two-Four
+</li></ul>
+<li>1.3 Subsection One-Three</li>
+<ul>
+<li> ... </li>
+</ul>
+<li>1.4 Subsection One-Four</li>
+</ul>
+</ul>
 $T2H_AFTER_ABOUT
 EOT
   return $about;
@@ -1794,13 +1782,13 @@ $index_properties =
 
 %simple_map = (
 	       # cf. makeinfo.c
-	       "*", "<BR>",		# HTML+
+	       "*", "<br>",		# HTML+
 	       " ", " ",
 	       "\t", " ",
   	       "-", "&#173;",	# soft hyphen
 	       "\n", "\n",
 	       "|", "",
-	       'tab', '<\/TD><TD>',
+	       'tab', '<\/td><td>',
 	       # spacing commands
 	       ":", "",
 	       "!", "!",
@@ -1815,7 +1803,7 @@ $index_properties =
 
 %things_map = (
 	       'TeX', 'TeX',
-	       'br', '<P>',		# paragraph break
+	       'br', '<p>',		# paragraph break
 	       'bullet', '*',
 	       'copyright', '(C)',
 	       'dots', '<small>...<\/small>',
@@ -1851,31 +1839,31 @@ $index_properties =
 %style_map = (
 	      'acronym', '&do_acronym',
 	      'asis', '',
-	      'b', 'B',
-	      'cite', 'CITE',
-	      'code', 'CODE',
-	      'command', 'CODE',
+	      'b', 'b',
+	      'cite', 'cite',
+	      'code', 'code',
+	      'command', 'code',
 	      'ctrl', '&do_ctrl',	# special case
-	      'dfn', 'EM',		    # DFN tag is illegal in the standard
+	      'dfn', 'em',		    # DFN tag is illegal in the standard
 	      'dmn', '',		    # useless
 	      'email', '&do_email', # insert a clickable email address
-	      'emph', 'EM',
-	      'env', 'CODE',
-	      'file', '"TT',		# will put quotes, cf. &apply_style
-	      'i', 'I',
-	      'kbd', 'KBD',
-	      'key', 'KBD',
+	      'emph', 'em',
+	      'env', 'code',
+	      'file', '"tt',		# will put quotes, cf. &apply_style
+	      'i', 'i',
+	      'kbd', 'kbd',
+	      'key', 'kbd',
 	      'math', '&do_math',
-	      'option', '"SAMP',    # will put quotes, cf. &apply_style
+	      'option', '"samp',    # will put quotes, cf. &apply_style
 	      'r', '',			    # unsupported
 	      'samp', '&do_bold',	# will put make it bold, cf. &apply_style
 	      'sc', '&do_sc',		# special case
-	      'strong', 'STRONG',
-	      't', 'TT',
+	      'strong', 'strong',
+	      't', 'tt',
 	      'titlefont', '',		# useless
 	      'uref', '&do_uref',   # insert a clickable URL
 	      'url', '&do_url',     # insert a clickable URL
-	      'var', 'VAR',
+	      'var', 'var',
 	      'w', '',			    # unsupported
 	      'H', '&do_accent',
 	      'dotaccent', '&do_accent',
@@ -1894,13 +1882,13 @@ $index_properties =
 #
 
 %format_map = (
-	       'quotation', 'BLOCKQUOTE',
+	       'quotation', 'blockquote',
 	       # lists
-	       'itemize', 'UL',
-	       'enumerate', 'OL',
+	       'itemize', 'ul',
+	       'enumerate', 'ol',
 	       # poorly supported
-	       'flushleft', 'PRE',
-	       'flushright', 'PRE',
+	       'flushleft', 'pre',
+	       'flushright', 'pre',
 	       );
 
 #
@@ -1911,23 +1899,23 @@ $complex_format_map =
 {
  example =>
  [
-  q{"<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL<td class=example><pre>"},
+  q{"<table><tr>$T2H_EXAMPLE_INDENT_CELL<td class=example><pre>"},
   q{'</pre></td></tr></table>'}
  ],
  smallexample =>
  [
-  q{"<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smallexample><FONT SIZE=$T2H_SMALL_FONT_SIZE><pre>"},
-  q{'</FONT></pre></td></tr></table>'}
+  q{"<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=\"smallexample\"><font size=\"$T2H_SMALL_FONT_SIZE\"><pre>"},
+  q{'</font></pre></td></tr></table>'}
  ],
  display =>
  [
-  q{"<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL<td class=display><pre " . 'style="font-family: serif">'},
+  q{"<table><tr>$T2H_EXAMPLE_INDENT_CELL<td class=\"display\"><pre " . 'style="font-family: serif">'},
   q{'</pre></td></tr></table>'}
  ],
  smalldisplay =>
  [
-  q{"<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=smalldisplay><FONT SIZE=$T2H_SMALL_FONT_SIZE><pre " . 'style="font-family: serif">'},
-  q{'</pre></FONT></td></tr></table>'}
+  q{"<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL<td class=\"smalldisplay\"><font size=\"$T2H_SMALL_FONT_SIZE\"><pre " . 'style="font-family: serif">'},
+  q{'</pre></font></td></tr></table>'}
  ]
 };
 
@@ -1941,95 +1929,95 @@ $complex_format_map->{smallformat} = $complex_format_map->{smalldisplay};
 #
 
 %def_map = (
-	    # basic commands
-	    'deffn', 0,
-	    'defvr', 0,
-	    'deftypefn', 0,
-	    'deftypevr', 0,
-	    'defcv', 0,
-	    'defop', 0,
-	    'deftp', 0,
-	    # basic x commands
-	    'deffnx', 0,
-	    'defvrx', 0,
-	    'deftypefnx', 0,
-	    'deftypevrx', 0,
-	    'defcvx', 0,
-	    'defopx', 0,
-	    'deftpx', 0,
-	    # shortcuts
-	    'defun', 'deffn Function',
-	    'defmac', 'deffn Macro',
-	    'defspec', 'deffn {Special Form}',
-	    'defvar', 'defvr Variable',
-	    'defopt', 'defvr {User Option}',
-	    'deftypefun', 'deftypefn Function',
-	    'deftypevar', 'deftypevr Variable',
-	    'defivar', 'defcv {Instance Variable}',
-	    'deftypeivar', 'defcv {Instance Variable}', # NEW: FIXME
-	    'defmethod', 'defop Method',
-	    'deftypemethod', 'defop Method', # NEW:FIXME
-	    # x shortcuts
-	    'defunx', 'deffnx Function',
-	    'defmacx', 'deffnx Macro',
-	    'defspecx', 'deffnx {Special Form}',
-	    'defvarx', 'defvrx Variable',
-	    'defoptx', 'defvrx {User Option}',
-	    'deftypefunx', 'deftypefnx Function',
-	    'deftypevarx', 'deftypevrx Variable',
-	    'defivarx', 'defcvx {Instance Variable}',
-	    'defmethodx', 'defopx Method',
-	    );
+            # basic commands
+            'deffn', 0,
+            'defvr', 0,
+            'deftypefn', 0,
+            'deftypevr', 0,
+            'defcv', 0,
+            'defop', 0,
+            'deftp', 0,
+            # basic x commands
+            'deffnx', 0,
+            'defvrx', 0,
+            'deftypefnx', 0,
+            'deftypevrx', 0,
+            'defcvx', 0,
+            'defopx', 0,
+            'deftpx', 0,
+            # shortcuts
+            'defun', 'deffn Function',
+            'defmac', 'deffn Macro',
+            'defspec', 'deffn {Special Form}',
+            'defvar', 'defvr Variable',
+            'defopt', 'defvr {User Option}',
+            'deftypefun', 'deftypefn Function',
+            'deftypevar', 'deftypevr Variable',
+            'defivar', 'defcv {Instance Variable}',
+            'deftypeivar', 'defcv {Instance Variable}', # NEW: FIXME
+            'defmethod', 'defop Method',
+            'deftypemethod', 'defop Method', # NEW:FIXME
+            # x shortcuts
+            'defunx', 'deffnx Function',
+            'defmacx', 'deffnx Macro',
+            'defspecx', 'deffnx {Special Form}',
+            'defvarx', 'defvrx Variable',
+            'defoptx', 'defvrx {User Option}',
+            'deftypefunx', 'deftypefnx Function',
+            'deftypevarx', 'deftypevrx Variable',
+            'defivarx', 'defcvx {Instance Variable}',
+            'defmethodx', 'defopx Method',
+           );
 
 #
 # things to skip
 #
 %to_skip = (
-	    # comments
-	    'c', 1,
-	    'comment', 1,
+            # comments
+            'c', 1,
+            'comment', 1,
             'ifnotinfo', 1,
             'ifnottex', 1,
-	    'ifhtml', 1,
-	    'end ifhtml', 1,
+            'ifhtml', 1,
+            'end ifhtml', 1,
             'end ifnotinfo', 1,
             'end ifnottex', 1,
-	    # useless
-	    'detailmenu', 1,
+            # useless
+            'detailmenu', 1,
             'direntry', 1,
-	    'contents', 1,
-	    'shortcontents', 1,
-	    'summarycontents', 1,
-	    'footnotestyle', 1,
-	    'end ifclear', 1,
-	    'end ifset', 1,
-	    'titlepage', 1,
-	    'end titlepage', 1,
-	    # unsupported commands (formatting)
-	    'afourpaper', 1,
-	    'cropmarks', 1,
-	    'finalout', 1,
-	    'headings', 1,
+            'contents', 1,
+            'shortcontents', 1,
+            'summarycontents', 1,
+            'footnotestyle', 1,
+            'end ifclear', 1,
+            'end ifset', 1,
+            'titlepage', 1,
+            'end titlepage', 1,
+            # unsupported commands (formatting)
+            'afourpaper', 1,
+            'cropmarks', 1,
+            'finalout', 1,
+            'headings', 1,
             'sp', 1,
-	    'need', 1,
-	    'page', 1,
-	    'setchapternewpage', 1,
-	    'everyheading', 1,
-	    'everyfooting', 1,
-	    'evenheading', 1,
-	    'evenfooting', 1,
-	    'oddheading', 1,
-	    'oddfooting', 1,
-	    'smallbook', 1,
-	    'vskip', 1,
-	    'filbreak', 1,
-	    'paragraphindent', 1,
-	    # unsupported formats
-	    'cartouche', 1,
-	    'end cartouche', 1,
-	    'group', 1,
-	    'end group', 1,
-	    );
+            'need', 1,
+            'page', 1,
+            'setchapternewpage', 1,
+            'everyheading', 1,
+            'everyfooting', 1,
+            'evenheading', 1,
+            'evenfooting', 1,
+            'oddheading', 1,
+            'oddfooting', 1,
+            'smallbook', 1,
+            'vskip', 1,
+            'filbreak', 1,
+            'paragraphindent', 1,
+            # unsupported formats
+            'cartouche', 1,
+            'end cartouche', 1,
+            'group', 1,
+            'end group', 1,
+           );
 
 #############################################################################
 #
@@ -2158,10 +2146,10 @@ $T2H_OPTIONS -> {verbose} =
 my $home = $ENV{HOME};
 defined($home) or $home = '';
 foreach $i ('/usr/local/etc/texi2htmlrc', "$home/.texi2htmlrc") {
-    if (-f $i) {
-	print "# reading initialization file from $i\n" 
-	    if ($T2H_VERBOSE);
-	require($i);
+    if ( -f $i ) {
+        print "# reading initialization file from $i\n"
+            if ($T2H_VERBOSE);
+        require($i);
     }
 }
 
@@ -2197,20 +2185,19 @@ if ($T2H_CHECK) {
 
 if ($T2H_EXPAND eq 'info') 
 {
-  $to_skip{'ifinfo'} = 1;
-  $to_skip{'end ifinfo'} = 1;
-}
-elsif ($T2H_EXPAND eq 'tex')
-{
-  $to_skip{'iftex'} = 1;
-  $to_skip{'end iftex'} = 1;
+    $to_skip{'ifinfo'} = 1;
+    $to_skip{'end ifinfo'} = 1;
+} elsif ($T2H_EXPAND eq 'tex') {
+    $to_skip{'iftex'} = 1;
+    $to_skip{'end iftex'} = 1;
 }
 
-$T2H_INVISIBLE_MARK = '<IMG SRC="invisible.xbm">' if $T2H_INVISIBLE_MARK eq 'xbm';
+$T2H_INVISIBLE_MARK = '<img src="invisible.xbm">' if $T2H_INVISIBLE_MARK eq 'xbm';
 
 #
 # file name business
 #
+
 die "Need exactly one file to translate\n$usage" unless @ARGV == 1;
 $docu = shift @ARGV;
 if ($docu =~ /.*\//) {
@@ -2225,88 +2212,72 @@ $docu_name =~ s/\.te?x(i|info)?$//;	# basename of the document
 $docu_name = $T2H_PREFIX if ($T2H_PREFIX);
 
 # subdir
-if ($T2H_SUBDIR && ! $T2H_OUT)
-{
-  $T2H_SUBDIR =~ s|/*$||;
-  unless (-d "$T2H_SUBDIR" && -w "$T2H_SUBDIR")
-  {
-    if ( mkdir($T2H_SUBDIR, oct(755)))
-    {
-      print "# created directory $T2H_SUBDIR\n" if ($T2H_VERBOSE);
+if ( $T2H_SUBDIR && ! $T2H_OUT ) {
+    $T2H_SUBDIR =~ s|/*$||;
+    unless (-d "$T2H_SUBDIR" && -w "$T2H_SUBDIR") {
+        if ( mkdir($T2H_SUBDIR, oct(755))) {
+            print "# created directory $T2H_SUBDIR\n" if ($T2H_VERBOSE);
+        }
+        else
+            {
+                warn "$ERROR can't create directory $T2H_SUBDIR. Put " .
+                     "results into current directory\n";
+                $T2H_SUBDIR = '';
+            }
     }
-    else
-    {
-      warn "$ERROR can't create directory $T2H_SUBDIR. Put results into current directory\n";
-      $T2H_SUBDIR = '';
-    }
-  }
 }
 
-if ($T2H_SUBDIR && ! $T2H_OUT)
-{
-  $docu_rdir = "$T2H_SUBDIR/";
-  print "# putting result files into directory $docu_rdir\n" if ($T2H_VERBOSE);
-}
-else
-{
-  if ($T2H_OUT && $T2H_OUT =~ m|(.*)/|)
-  {
-    $docu_rdir = "$1/";
-    print "# putting result files into directory $docu_rdir\n" if ($T2H_VERBOSE);
-  }
-  else
-  {
-    print "# putting result files into current directory \n" if ($T2H_VERBOSE);
-    $docu_rdir = '';
-  }
+if ( $T2H_SUBDIR && ! $T2H_OUT ) {
+    $docu_rdir = "$T2H_SUBDIR/";
+    print "# putting result files into directory $docu_rdir\n"
+        if $T2H_VERBOSE;
+} else {
+    if ($T2H_OUT && $T2H_OUT =~ m|(.*)/|) {
+        $docu_rdir = "$1/";
+        print "# putting result files into directory $docu_rdir\n"
+            if $T2H_VERBOSE;
+    } else {
+        print "# putting result files into current directory \n"
+            if $T2H_VERBOSE;
+        $docu_rdir = '';
+    }
 }
 
 # extension
-if ($T2H_SHORTEXTN)
-{
-  $docu_ext = "htm";
+if ( $T2H_SHORTEXTN ) {
+    $docu_ext = "htm";
+} else {
+    $docu_ext = "html";
 }
-else
-{
-  $docu_ext = "html";
-}
-if ($T2H_TOP_FILE =~ /\..*$/)
-{
+if ($T2H_TOP_FILE =~ /\..*$/) {
   $T2H_TOP_FILE = $`.".$docu_ext";
 }
 
 # result files
-if (! $T2H_OUT && ($T2H_SPLIT =~ /section/i || $T2H_SPLIT =~ /node/i))
-{
+
+if (! $T2H_OUT && ($T2H_SPLIT =~ /section/i || $T2H_SPLIT =~ /node/i)) {
   $T2H_SPLIT = 'section';
-}
-elsif (! $T2H_OUT && $T2H_SPLIT =~ /chapter/i)
-{
-  $T2H_SPLIT = 'chapter'
-}
-else
-{
-  undef $T2H_SPLIT;
+} elsif (! $T2H_OUT && $T2H_SPLIT =~ /chapter/i) {
+    $T2H_SPLIT = 'chapter'
+} else {
+    undef $T2H_SPLIT;
 }
 
 $docu_doc = "$docu_name.$docu_ext";		# document's contents
 $docu_doc_file = "$docu_rdir$docu_doc";
-if ($T2H_SPLIT) 
-{
-  $docu_toc  = $T2H_TOC_FILE || "${docu_name}_toc.$docu_ext"; # document's table of contents
-  $docu_stoc = "${docu_name}_ovr.$docu_ext"; # document's short toc
-  $docu_foot = "${docu_name}_fot.$docu_ext"; # document's footnotes
-  $docu_about = "${docu_name}_abt.$docu_ext"; # about this document
-  $docu_top  = $T2H_TOP_FILE || $docu_doc;
-}
-else
-{
-  if ($T2H_OUT)
-  {
-    $docu_doc = $T2H_OUT;
-    $docu_doc =~ s|.*/||;
-  }
-  $docu_toc = $docu_foot = $docu_stoc = $docu_about = $docu_top = $docu_doc;
+if ($T2H_SPLIT) {
+    $docu_toc  = $T2H_TOC_FILE ||
+        "${docu_name}_toc.$docu_ext"; # document's table of contents
+    $docu_stoc = "${docu_name}_ovr.$docu_ext"; # document's short toc
+    $docu_foot = "${docu_name}_fot.$docu_ext"; # document's footnotes
+    $docu_about = "${docu_name}_abt.$docu_ext"; # about this document
+    $docu_top  = $T2H_TOP_FILE || $docu_doc;
+} else {
+    if ($T2H_OUT) {
+        $docu_doc = $T2H_OUT;
+        $docu_doc =~ s|.*/||;
+    }
+    $docu_toc = $docu_foot = $docu_stoc = $docu_about = $docu_top = $docu_doc;
 }
 
 $docu_toc_file  = "$docu_rdir$docu_toc";
@@ -2321,13 +2292,17 @@ $docu_toc_frame_file = "$docu_rdir${docu_name}_toc_frame.$docu_ext";
 #
 # variables
 #
+
 $value{'html'} = 1;			# predefine html (the output format)
 $value{'texi2html'} = $THISVERSION;	# predefine texi2html (the translator)
+
 # _foo: internal to track @foo
+
 foreach ('_author', '_title', '_subtitle',
-	 '_settitle', '_setfilename', '_shorttitle') {
+         '_settitle', '_setfilename', '_shorttitle') {
     $value{$_} = '';		        # prevent -w warnings
 }
+
 %node2sec = ();				# node to section name
 %sec2node = ();				# section to node name
 %sec2number = ();                       # section to number
@@ -2343,8 +2318,9 @@ foreach ('_author', '_title', '_subtitle',
 %tag2pro = ();				# protected sections
 
 #
-# initial indexes
+# initial indices
 #
+
 $bib_num = 0;
 $foot_num = 0;
 $gloss_num = 0;
@@ -2356,6 +2332,7 @@ $html_num = 0;
 #
 # can I use ISO8879 characters? (HTML+)
 #
+
 if ($T2H_USE_ISO) {
     $things_map{'bullet'} = "&bull;";
     $things_map{'copyright'} = "&copy;";
@@ -2369,17 +2346,19 @@ if ($T2H_USE_ISO) {
 #
 # read texi2html extensions (if any)
 #
+
 $extensions = 'texi2html.ext'; # extensions in working directory
 if (-f $extensions) {
     print "# reading extensions from $extensions\n" if $T2H_VERBOSE;
     require($extensions);
 }
+
 ($progdir = $0) =~ s/[^\/]+$//;
 if ($progdir && ($progdir ne './')) {
     $extensions = "${progdir}texi2html.ext"; # extensions in texi2html directory
     if (-f $extensions) {
-	print "# reading extensions from $extensions\n" if $T2H_VERBOSE;
-	require($extensions);
+        print "# reading extensions from $extensions\n" if $T2H_VERBOSE;
+        require($extensions);
     }
 }
 
@@ -2387,12 +2366,15 @@ if ($progdir && ($progdir ne './')) {
 #
 # Check Language
 #
-if (! exists $T2H_WORDS->{$T2H_LANG})
-{
-  warn "$ERROR: Language specs for '$T2H_LANG' do not exists. Reverting to 'english'\n";
-  $T2H_LANG = 'en'
+
+if (! exists $T2H_WORDS->{$T2H_LANG}) {
+    warn "$ERROR: Language specs for '$T2H_LANG' do not exists. " .
+         "Reverting to 'english'\n";
+    $T2H_LANG = 'en'
 }
+
 print "# reading from $docu\n" if $T2H_VERBOSE;
+
 
 #########################################################################
 #
@@ -2454,86 +2436,92 @@ EOT
 # return used latex 1, if l2h could be initalized properly, 0 otherwise
 sub l2h_InitToLatex
 {
-  %l2h_to_latex = ();
-  unless ($T2H_L2H_SKIP)
-  {
-    unless (open(L2H_LATEX, ">$l2h_latex_file"))
-    {
-      warn "$ERROR Error l2h: Can't open latex file '$latex_file' for writing\n";
-      return 0;
+    %l2h_to_latex = ();
+    unless ( $T2H_L2H_SKIP ) {
+        unless ( open( L2H_LATEX, ">$l2h_latex_file" ) ) {
+            warn "$ERROR Error l2h: Can't open latex file '$latex_file' " .
+                 "for writing\n";
+            return 0;
+        }
+
+        print "# l2h: use ${l2h_latex_file} as latex file\n" if ($T2H_VERBOSE);
+        print L2H_LATEX $l2h_latex_preample;
     }
-    print "# l2h: use ${l2h_latex_file} as latex file\n" if ($T2H_VERBOSE);
-    print L2H_LATEX $l2h_latex_preample;
-  }
-  # open database for caching
-  l2h_InitCache();
-  $l2h_latex_count = 0;
-  $l2h_to_latex_count = 0;
-  $l2h_cached_count = 0;
-  return  1;
+
+    # open database for caching
+
+    l2h_InitCache();
+    $l2h_latex_count = 0;
+    $l2h_to_latex_count = 0;
+    $l2h_cached_count = 0;
+    return  1;
 }
+
 
 # print text (1st arg) into latex file (if not already there), return
 # HTML commentary which can be later on replaced by the latex2html
 # generated text
+
 sub l2h_ToLatex
 {
-  my($text) = @_;
-  my($count);
+    my $text = @_;
+    my $count;
 
-  $l2h_to_latex_count++;
-  $text =~ s/(\s*)$//;
+    $l2h_to_latex_count++;
+    $text =~ s/(\s*)$//;
 
-  # try whether we can cache it
-  my $cached_text = l2h_FromCache($text);
-  if ($cached_text)
-  {
-    $l2h_cached_count++;
-    return $cached_text;
-  }
+    # try whether we can cache it
 
-  # try whether we have text already on things to do
-  unless ($count = $l2h_to_latex{$text})
-  {
-    $count = $l2h_latex_count;
-    $l2h_latex_count++;
-    $l2h_to_latex{$text} = $count;
-    $l2h_to_latex[$count] = $text;
-    unless ($T2H_L2H_SKIP)
-    {
-      print L2H_LATEX "\\begin{rawhtml}\n";
-      print L2H_LATEX "<!-- l2h_begin ${l2h_name} ${count} -->\n";
-      print L2H_LATEX "\\end{rawhtml}\n";
-
-      print L2H_LATEX "$text\n";
-
-      print L2H_LATEX "\\begin{rawhtml}\n";
-      print L2H_LATEX "<!-- l2h_end ${l2h_name} ${count} -->\n";
-      print L2H_LATEX "\\end{rawhtml}\n";
+    my $cached_text = l2h_FromCache($text);
+    if ($cached_text) {
+        $l2h_cached_count++;
+        return $cached_text;
     }
-  }
-  return "<!-- l2h_replace ${l2h_name} ${count} -->";
+
+    # try whether we have text already on things to do
+
+    unless ( $count = $l2h_to_latex{$text} ) {
+        $count = $l2h_latex_count;
+        $l2h_latex_count++;
+        $l2h_to_latex{$text} = $count;
+        $l2h_to_latex[$count] = $text;
+        unless ($T2H_L2H_SKIP) {
+            print L2H_LATEX "\\begin{rawhtml}\n";
+            print L2H_LATEX "<!-- l2h_begin ${l2h_name} ${count} -->\n";
+            print L2H_LATEX "\\end{rawhtml}\n";
+
+            print L2H_LATEX "$text\n";
+
+            print L2H_LATEX "\\begin{rawhtml}\n";
+            print L2H_LATEX "<!-- l2h_end ${l2h_name} ${count} -->\n";
+            print L2H_LATEX "\\end{rawhtml}\n";
+        }
+    }
+
+    return "<!-- l2h_replace ${l2h_name} ${count} -->";
 }
+
 
 # print closing into latex file and close it
+
 sub l2h_FinishToLatex
 {
-  local ($reused);
+    my $reused = $l2h_to_latex_count - $l2h_latex_count - $l2h_cached_count;
+    unless ($T2H_L2H_SKIP) {
+        print L2H_LATEX $l2h_latex_closing;
+        close(L2H_LATEX);
+    }
 
-  $reused = $l2h_to_latex_count - $l2h_latex_count - $l2h_cached_count;
-  unless ($T2H_L2H_SKIP)
-  {
-    print L2H_LATEX $l2h_latex_closing;
-    close(L2H_LATEX);
-  }
-  print "# l2h: finished to latex ($l2h_cached_count cached, $reused reused, $l2h_latex_count contents)\n" if ($T2H_VERBOSE);
-  unless ($l2h_latex_count)
-  {
-    l2h_Finish();
-    return 0;
-  }
-  return 1;
+    print "# l2h: finished to latex ($l2h_cached_count cached, " .
+          "$reused reused, $l2h_latex_count contents)\n" if $T2H_VERBOSE;
+    unless ($l2h_latex_count) {
+        l2h_Finish();
+        return 0;
+    }
+
+    return 1;
 }
+
 
 ###################################
 # Second stage: Use latex2html to generate corresponding html code and images
@@ -2544,66 +2532,75 @@ sub l2h_FinishToLatex
 #   Return 1, on success
 #          0, otherwise
 #
+
 sub l2h_ToHtml
 {
-  local($call, $ext, $root, $dotbug);
+    my ($call, $ext, $root, $dotbug);
 
-  if ($T2H_L2H_SKIP)
-  {
-    print "# l2h: skipping latex2html run\n" if ($T2H_VERBOSE);
-    return 1;
-  }
-
-  # Check for dot in directory where dvips will work
-  if ($T2H_L2H_TMP)
-  {
-    if ($T2H_L2H_TMP =~ /\./)
-    {
-      warn "$ERROR Warning l2h: l2h_tmp dir contains a dot. Use /tmp, instead\n";
-      $dotbug = 1;
+    if ($T2H_L2H_SKIP) {
+        print "# l2h: skipping latex2html run\n" if ($T2H_VERBOSE);
+        return 1;
     }
-  }
-  else
-  {
-    if (&getcwd =~ /\./)
-    {
-     warn "$ERROR Warning l2h: current dir contains a dot. Use /tmp as l2h_tmp dir \n";
-     $dotbug = 1;
-   }
-  }
-  # fix it, if necessary and hope that it works 
-  $T2H_L2H_TMP = "/tmp" if ($dotbug);
 
-  $call = $T2H_L2H_L2H;
+    # Check for dot in directory where dvips will work
+
+    if ($T2H_L2H_TMP) {
+        if ($T2H_L2H_TMP =~ /\./) {
+            warn "$ERROR Warning l2h: l2h_tmp dir contains a dot. " .
+                  "Use /tmp, instead\n";
+            $dotbug = 1;
+        }
+    } else {
+        if (&getcwd =~ /\./) {
+            warn "$ERROR Warning l2h: current dir contains a dot. " .
+                 "Use /tmp as l2h_tmp dir \n";
+            $dotbug = 1;
+        }
+    }
+
+    # fix it, if necessary and hope that it works 
+
+    $T2H_L2H_TMP = "/tmp" if $dotbug;
+
+    $call = $T2H_L2H_L2H;
+
   # use init file, if specified
-  $call = $call . " -init_file " . $init_file if ($init_file && -f $init_file);
-  # set output dir
-  $call .=  ($docu_rdir ? " -dir $docu_rdir" : " -no_subdir");
-  # use l2h_tmp, if specified
-  $call = $call . " -tmp $T2H_L2H_TMP" if ($T2H_L2H_TMP);
-  # options we want to be sure of
-  $call = $call ." -address 0 -info 0 -split 0 -no_navigation -no_auto_link";
-  $call = $call ." -prefix ${l2h_prefix} $l2h_latex_file"; 
 
-  print "# l2h: executing '$call'\n" if ($T2H_VERBOSE);
-  if (system($call))
-  {
-    warn "l2h ***Error: '${call}' did not succeed\n";
-    return 0;
-  }
-  else
-  {
-    print "# l2h: latex2html finished successfully\n" if ($T2H_VERBOSE);
-    return 1;
-  }
+    $call .= " -init_file " . $init_file
+        if $init_file && -f $init_file;
+
+    # set output dir
+
+    $call .= $docu_rdir ? " -dir $docu_rdir" : " -no_subdir";
+
+    # use l2h_tmp, if specified
+
+    $call .= " -tmp $T2H_L2H_TMP" if ($T2H_L2H_TMP);
+
+    # options we want to be sure of
+
+    $call .= " -address 0 -info 0 -split 0 -no_navigation -no_auto_link" .
+             " -prefix ${l2h_prefix} $l2h_latex_file"; 
+
+    print "# l2h: executing '$call'\n" if ($T2H_VERBOSE);
+
+    if ( system( $call ) ) {
+        warn "l2h ***Error: '${call}' did not succeed\n";
+        return 0;
+    } else {
+        print "# l2h: latex2html finished successfully\n" if ($T2H_VERBOSE);
+        return 1;
+    }
 }
 
+
 # this is directly pasted over from latex2html
+
 sub getcwd {
-    local($_) = `pwd`;
+    local( $_ ) = `pwd`;
 
     die "'pwd' failed (out of memory?)\n"
-	unless length;
+        unless length;
     chop;
     $_;
 }
@@ -2623,143 +2620,141 @@ sub getcwd {
 
 sub l2h_InitFromHtml
 {
-  local($h_line, $h_content, $count, %l2h_img);
+    local($h_line, $h_content, $count, %l2h_img);
 
-  if (! open(L2H_HTML, "<${l2h_html_file}"))
-  {
-    print "$ERROR Error l2h: Can't open ${l2h_html_file} for reading\n";
-    return 0;
-  }
-  print "# l2h: use ${l2h_html_file} as html file\n" if ($T2H_VERBOSE);
-
-  $l2h_html_count = 0;
-
-  while ($h_line = <L2H_HTML>)
-  {
-    if ($h_line =~ /^<!-- l2h_begin $l2h_name ([0-9]+) -->/)
-    {
-      $count = $1;
-      $h_content = "";
-      while ($h_line = <L2H_HTML>)
-      {
-	if ($h_line =~ /^<!-- l2h_end $l2h_name $count -->/)
-	{
-	  chomp $h_content;
-	  chomp $h_content;
-	  $l2h_html_count++;
-	  $h_content = l2h_ToCache($count, $h_content);
-	  $l2h_from_html[$count] = $h_content;
-	  $h_content = '';
-	  last;
-	}
-	$h_content = $h_content.$h_line;
-      }
-      if ($hcontent)
-      {
-	print "$ERROR Warning l2h: l2h_end $l2h_name $count not found\n" 
-	  if ($T2H_VERBOSE);
-	close(L2H_HTML);
-	return 0;
-      }
+    if (! open(L2H_HTML, "<${l2h_html_file}")) {
+        print "$ERROR Error l2h: Can't open ${l2h_html_file} for reading\n";
+        return 0;
     }
-  }
-  print "# l2h: Got $l2h_html_count of $l2h_latex_count html contents\n"
-    if ($T2H_VERBOSE);
 
-  close(L2H_HTML);
-  return 1;
+    print "# l2h: use ${l2h_html_file} as html file\n" if ($T2H_VERBOSE);
+
+    $l2h_html_count = 0;
+
+    while ($h_line = <L2H_HTML>) {
+        if ($h_line =~ /^<!-- l2h_begin $l2h_name ([0-9]+) -->/) {
+            $count = $1;
+            $h_content = "";
+            while ($h_line = <L2H_HTML>) {
+                if ($h_line =~ /^<!-- l2h_end $l2h_name $count -->/) {
+                    chomp $h_content;
+                    chomp $h_content;
+                    $l2h_html_count++;
+                    $h_content = l2h_ToCache($count, $h_content);
+                    $l2h_from_html[$count] = $h_content;
+                    $h_content = '';
+                    last;
+                }
+
+                $h_content = $h_content.$h_line;
+            }
+
+            if ($hcontent) {
+                print "$ERROR Warning l2h: l2h_end $l2h_name $count " .
+                      "not found\n"
+                	if $T2H_VERBOSE;
+                close(L2H_HTML);
+                return 0;
+            }
+        }
+    }
+
+    print "# l2h: Got $l2h_html_count of $l2h_latex_count html contents\n"
+        if $T2H_VERBOSE;
+
+    close(L2H_HTML);
+    return 1;
 }
+
 
 sub l2h_FromHtml
 {
-  local($text) = @_;
-  local($done, $to_do, $count);
+    my $text = @_;
+    my ( $done, $to_do, $count );
 
-  $to_do = $text;
+    $to_do = $text;
 
-  while ($to_do =~ /([^\000]*)<!-- l2h_replace $l2h_name ([0-9]+) -->([^\000]*)/)
-  {
-    $to_do = $1;
-    $count = $2;
-    $done = $3.$done;
+    while ($to_do =~ /([^\000]*)<!-- l2h_replace $l2h_name ([0-9]+) -->([^\000]*)/) {
+        $to_do = $1;
+        $count = $2;
+        $done = $3.$done;
 
-    $done = "<!-- l2h_end $l2h_name $count -->".$done
-      if ($T2H_DEBUG & $DEBUG_L2H);
+        $done = "<!-- l2h_end $l2h_name $count -->".$done
+            if $T2H_DEBUG & $DEBUG_L2H;
 
-    $done = &l2h_ExtractFromHtml($count) . $done;
+        $done = &l2h_ExtractFromHtml($count) . $done;
 
-    $done = "<!-- l2h_begin $l2h_name $count -->".$done
-      if ($T2H_DEBUG & $DEBUG_L2H);
-  }
-  return $to_do.$done;
+        $done = "<!-- l2h_begin $l2h_name $count -->".$done
+            if $T2H_DEBUG & $DEBUG_L2H;
+    }
+
+    return $to_do.$done;
 }
 
 
 sub l2h_ExtractFromHtml
 {
-  local($count) = @_;
+    my $count = @_;
 
-  return $l2h_from_html[$count] if ($l2h_from_html[$count]);
+    return $l2h_from_html[$count] if $l2h_from_html[$count];
 
-  if ($count >= 0 && $count < $l2h_latex_count)
-  {
-    # now we are in trouble
-    local($l_l2h, $_);
+    if ($count >= 0 && $count < $l2h_latex_count) {
+        # now we are in trouble
+        local($l_l2h, $_);
 
-    $l2h_extract_error++;
-    print "$ERROR l2h: can't extract content $count from html\n"
-      if ($T2H_VERBOSE);
-    # try simple (ordinary) substition (without l2h)
-    $l_l2h = $T2H_L2H;
-    $T2H_L2H = 0;
-    $_ = $l2h_to_latex{$count};
-    $_ = &substitute_style($_);
-    &unprotect_texi;
-    $_ = "<!-- l2h: ". __LINE__ . " use texi2html -->" . $_
-      if ($T2H_DEBUG & $DEBUG_L2H);
-    $T2H_L2H = $l_l2h;
-    return $_;
-  }
-  else
-  {
-    # now we have been incorrectly called
-    $l2h_range_error++;
-    print "$ERROR l2h: Request of $count content which is out of valide range [0,$l2h_latex_count)\n";
-    return "<!-- l2h: ". __LINE__ . " out of range count $count -->"
-      if ($T2H_DEBUG & $DEBUG_L2H);
-    return "<!-- l2h: out of range count $count -->";
-  }
+        $l2h_extract_error++;
+        print "$ERROR l2h: can't extract content $count from html\n"
+            if $T2H_VERBOSE;
+
+        # try simple (ordinary) substition (without l2h)
+
+        $l_l2h = $T2H_L2H;
+        $T2H_L2H = 0;
+        $_ = $l2h_to_latex{$count};
+        $_ = &substitute_style($_);
+        &unprotect_texi;
+        $_ = "<!-- l2h: ". __LINE__ . " use texi2html -->" . $_
+            if $T2H_DEBUG & $DEBUG_L2H;
+        $T2H_L2H = $l_l2h;
+        return $_;
+    } else {
+        # now we have been incorrectly called
+        $l2h_range_error++;
+        print "$ERROR l2h: Request of $count content which is out of " .
+              "valid range [0,$l2h_latex_count)\n";
+        return "<!-- l2h: ". __LINE__ . " out of range count $count -->"
+            if $T2H_DEBUG & $DEBUG_L2H;
+        return "<!-- l2h: out of range count $count -->";
+    }
 }
+
 
 sub l2h_FinishFromHtml
 {
-  if ($T2H_VERBOSE)
-  {
-    if ($l2h_extract_error + $l2h_range_error)
-    {
-      print "# l2h: finished from html ($l2h_extract_error extract and $l2h_range_error errors)\n";
+    if ( $T2H_VERBOSE ) {
+        if ($l2h_extract_error + $l2h_range_error) {
+            print "# l2h: finished from html ($l2h_extract_error extract " .
+                  "and $l2h_range_error errors)\n";
+        } else {
+            print "# l2h: finished from html (no errors)\n";
+        }
     }
-    else
-    {
-      print "# l2h: finished from html (no errors)\n";
-    }
-  }
 }
+
 
 sub l2h_Finish
 {
-  l2h_StoreCache();
-  if ($T2H_L2H_CLEAN)
-  {
-    print "# l2h: removing temporary files generated by l2h extension\n"
-      if $T2H_VERBOSE;
-    while (<"$docu_rdir$l2h_name"*>)
-    {
-      unlink $_;
+    l2h_StoreCache();
+    if ($T2H_L2H_CLEAN) {
+        print "# l2h: removing temporary files generated by l2h extension\n"
+            if $T2H_VERBOSE;
+        while ( <"$docu_rdir$l2h_name"*> ) {
+            unlink $_;
+        }
     }
-  }
-  print "# l2h: Finished\n" if $T2H_VERBOSE;
-  return 1;
+
+    print "# l2h: Finished\n" if $T2H_VERBOSE;
+    return 1;
 }
 
 ##############################
@@ -2768,15 +2763,16 @@ sub l2h_Finish
 
 # I tried doing this with a dbm data base, but it did not store all
 # keys/values. Hence, I did as latex2html does it
+
 sub l2h_InitCache
 {
-  if (-r "$l2h_cache_file")
-  {
-    my $rdo = do "$l2h_cache_file";
-    warn("$ERROR l2h Error: could not load $docu_rdir$l2h_cache_file: $@\n")
-      unless ($rdo);
-  }
+    if (-r "$l2h_cache_file") {
+        my $rdo = do "$l2h_cache_file";
+        warn("$ERROR l2h Error: could not load $docu_rdir$l2h_cache_file: " .
+             "$@\n") unless $rdo;
+    }
 }
+
 
 sub l2h_StoreCache
 {
@@ -2785,10 +2781,9 @@ sub l2h_StoreCache
 	my ($key, $value);
 	open(FH, ">$l2h_cache_file") ||
 		return warn "$ERROR l2h Error: could not open " .
-			"$docu_rdir$l2h_cache_file for writing: $!\n";
+				    "$docu_rdir$l2h_cache_file for writing: $!\n";
 
-	while (($key, $value) = each %l2h_cache)
-	{
+	while ( ( $key, $value ) = each %l2h_cache) {
 		# escape stuff
 
 		$key =~ s|/|\\/|g;
@@ -2804,18 +2799,19 @@ sub l2h_StoreCache
 		print FH "\n\$l2h_cache_key = q/$key/;\n";
 		print FH "\$l2h_cache{\$l2h_cache_key} = q|$value|;\n";
 	}
+
 	print FH "1;";
 	close(FH);
 }
 
 # return cached html, if it exists for text, and if all pictures
 # are there, as well
+
 sub l2h_FromCache
 {
 	my $text = shift;
 	my $cached = $l2h_cache{$text};
-	if ($cached)
-	{
+	if ( $cached ) {
 		while ($cached =~ m/SRC="(.*?)"/g) {
 			unless (-e "$docu_rdir$1") {
 				return undef;
@@ -3121,8 +3117,8 @@ eval("sub simple_substitutions { $subst_code }");
 	  &normalise_node($node_prev);
 	  &normalise_node($node_up);
 	  $node =~ /\"/ ?
-	    push @lines, &html_debug("<A NAME='$node'></A>\n", __LINE__) :
-	    push @lines, &html_debug("<A NAME=\"$node\"></A>\n", __LINE__);
+	    push @lines, &html_debug("<a name='$node'></a>\n", __LINE__) :
+	    push @lines, &html_debug("<a name=\"$node\"></a>\n", __LINE__);
 	  next;
 	} elsif ($tag eq 'include') {
 	    if (/^\@include\s+($FILERE)\s*$/o) {
@@ -3161,14 +3157,14 @@ eval("sub simple_substitutions { $subst_code }");
 	    &html_push_if($tag);
 	    push @lines, &html_debug('', __LINE__);
 	} elsif ($format_map{$tag}) {
-	    $in_pre = 1 if $format_map{$tag} eq 'PRE';
+	    $in_pre = 1 if $format_map{$tag} eq 'pre';
 	    &html_push_if($format_map{$tag});
 	    push @lines, &html_debug('', __LINE__);
-	    $in_list++ if $format_map{$tag} eq 'UL' || $format_map{$tag} eq 'OL' ;
-#	    push @lines, &debug("<BLOCKQUOTE>\n", __LINE__)
+	    $in_list++ if $format_map{$tag} eq 'ul' || $format_map{$tag} eq 'ol' ;
+#	    push @lines, &debug("<blockquote>\n", __LINE__)
 #	      if $tag =~ /example/i;
-	    # sunshine@sunshineco.com: <PRE>bla</PRE> looks better than
-	    # <PRE>\nbla</PRE> (at least on NeXTstep browser
+	    # sunshine@sunshineco.com: <pre>bla</pre> looks better than
+	    # <pre>\nbla</pre> (at least on NeXTstep browser
 	    push @lines, &debug("<$format_map{$tag}>" .
 				($in_pre ? '' : "\n"), __LINE__);
 	    next;
@@ -3193,11 +3189,11 @@ eval("sub simple_substitutions { $subst_code }");
 		    unshift @tables, join( $;, $table_type, $in_table);
 		    if ( $table_type eq "multi" ) {
 		        # don't use borders -- gets confused by empty cells
-		        push @lines, &debug( "<TABLE>\n", __LINE__ );
-		        &html_push_if('TABLE');
+		        push @lines, &debug( "<table>\n", __LINE__ );
+		        &html_push_if('table');
 		    } else {
-		        push @lines, &debug( "<DL COMPACT>\n", __LINE__ );
-		        &html_push_if( 'DL' );
+		        push @lines, &debug( "<dl compact>\n", __LINE__ );
+		        &html_push_if( 'dl' );
 		    }
 		    push @lines, &html_debug('', __LINE__);
 	    } else {
@@ -3254,7 +3250,7 @@ eval("sub simple_substitutions { $subst_code }");
 	  next;
 	}
 	elsif ($tag eq 'sp') {
-	    push @lines, &debug("<P>\n", __LINE__);
+	    push @lines, &debug("<p>\n", __LINE__);
 	    next;
 	} elsif ($tag eq 'center') {
 	    push @lines, &debug("<center>\n", __LINE__);
@@ -3365,26 +3361,26 @@ eval("sub simple_substitutions { $subst_code }");
 	    my $name = shift @args;
 	    $name =~ s/^\{(.*)\}$/$1/;
 	    if ($is_extra) {
-		$_ = &debug("<DT>", __LINE__);
+		$_ = &debug("<dt>", __LINE__);
 	    } else {
-		$_ = &debug("<DL>\n<DT>", __LINE__);
+		$_ = &debug("<dl>\n<dt>", __LINE__);
 	    }
 	    if ($tag eq 'deffn' || $tag eq 'defvr' || $tag eq 'deftp') {
-		$_ .= "<U>$type</U> <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    } elsif ($tag eq 'deftypefn' || $tag eq 'deftypevr'
 		     || $tag eq 'defcv' || $tag eq 'defop') {
 		$ftype = $name;
 		$name = shift @args;
 		$name =~ s/^\{(.*)\}$/$1/;
-		$_ .= "<U>$type</U> $ftype <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> $ftype <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    } else {
 		warn "$ERROR Unknown definition type: $tag\n";
-		$_ .= "<U>$type</U> <B>$name</B>";
-		$_ .= " <I>@args</I>" if @args;
+		$_ .= "<u>$type</u> <b>$name</b>";
+		$_ .= " <i>@args</i>" if @args;
 	    }
- 	    $_ .= &debug("\n<DD>", __LINE__);
+ 	    $_ .= &debug("\n<dd>", __LINE__);
 	    $name = &unprotect_html($name);
 	    if ($tag eq 'deffn' || $tag eq 'deftypefn') {
 	      EnterIndexEntry('f', $name, $docu_doc, $section, \@lines);
@@ -3403,8 +3399,8 @@ eval("sub simple_substitutions { $subst_code }");
 	}
     } elsif ($end_tag) {
 	if ($format_map{$end_tag}) {
-	    $in_pre = 0 if $format_map{$end_tag} eq 'PRE';
-	    $in_list-- if $format_map{$end_tag} eq 'UL' || $format_map{$end_tag} eq 'OL' ;
+	    $in_pre = 0 if $format_map{$end_tag} eq 'pre';
+	    $in_list-- if $format_map{$end_tag} eq 'ul' || $format_map{$end_tag} eq 'ol' ;
 	    &html_pop_if('P');
 	    &html_pop_if('LI');
 	    &html_pop_if();
@@ -3436,13 +3432,13 @@ eval("sub simple_substitutions { $subst_code }");
 		next;
 	    }
 	    if ($table_type eq "multi") {
-		push @lines, "</TR></TABLE>\n";
+		push @lines, "</tr></table>\n";
 		&html_pop_if('TR');
 	    } else {
-			push @lines, "</DD>\n" if $html_element eq 'DD';
-			&html_pop_if( 'DD' );
-			push @lines, "</DL>\n";
-			&html_pop_if('DD');
+			push @lines, "</dd>\n" if $html_element eq 'dd';
+			&html_pop_if( 'dd' );
+			push @lines, "</dl>\n";
+			&html_pop_if('dd');
 	    }
 	    &html_pop_if();
 	    if (@tables) {
@@ -3451,7 +3447,7 @@ eval("sub simple_substitutions { $subst_code }");
 		$in_table = 0;
 	    }
 	} elsif (defined($def_map{$end_tag})) {
- 	    push @lines, &debug("</DL>\n", __LINE__);
+ 	    push @lines, &debug("</dl>\n", __LINE__);
 	} elsif ($end_tag eq 'menu') {
 	    &html_pop_if();
 	    push @lines, $_; # must keep it for pass 2
@@ -3465,7 +3461,7 @@ eval("sub simple_substitutions { $subst_code }");
       $_ = $`.$';
       my $anchor = $1;
       $anchor = &normalise_node($anchor);
-      push @lines, &html_debug("<A NAME=\"$anchor\"></A>\n");
+      push @lines, &html_debug("<a name=\"$anchor\"></a>\n");
       $node2href{$anchor} = "$docu_doc#$anchor";
       next INPUT_LINE if $_ =~ /^\s*$/;
     }
@@ -3538,7 +3534,7 @@ eval("sub simple_substitutions { $subst_code }");
 				   $T2H_SPLIT && $level == $toplevel);
 		  }
 		  $sec_num++;
-		  $docid = "SEC$sec_num";
+		  $docid = "sec$sec_num";
 		  $tocid = (/^\@\w*heading/ ? undef : "TOC$sec_num");
 		  # check biblio and glossary
 		  $in_bibliography = ($name =~ /^([A-Z]|\d+)?(\.\d+)*\s*bibliography$/i);
@@ -3574,27 +3570,27 @@ eval("sub simple_substitutions { $subst_code }");
 		    # update TOC
 		    while ($level > $curlevel) {
 		      $curlevel++;
-		      push @toc_lines, "<UL>\n";
+		      push @toc_lines, "<ul>\n";
 		    }
 		    while ($level < $curlevel) {
 		      $curlevel--;
-		      push @toc_lines, "</UL>\n";
+		      push @toc_lines, "</ul>\n";
 		    }
 		    $_ = &t2h_anchor($tocid, "$docu_doc#$docid", $name, 1);
 		    $_ = &substitute_style($_);
-		    push @stoc_lines, "$_<BR>\n" if $level == 1;
+		    push @stoc_lines, "$_<br>\n" if $level == 1;
 		    if ($T2H_NUMBER_SECTIONS)
 		    {
-		      push @toc_lines, $_ . "<BR>\n"
+		      push @toc_lines, $_ . "<br>\n"
 		    }
 		    else
 		    {
-		      push @toc_lines, "<LI>" . $_ ."</LI>";
+		      push @toc_lines, "<li>" . $_ ."</li>";
 		    }
 		  }
 		  else
 		  {
-		    push @lines, &html_debug("<A NAME=\"$docid\"></A>\n", __LINE__);
+		    push @lines, &html_debug("<a name=\"$docid\"></a>\n", __LINE__);
 		  }
 		  # update DOC
 		  push @lines, &html_debug('', __LINE__);
@@ -3649,27 +3645,27 @@ eval("sub simple_substitutions { $subst_code }");
 		    EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
 		}
 		&html_pop_if('P');
-		if ($html_element eq 'DL' || $html_element eq 'DD') {
+		if ($html_element eq 'dl' || $html_element eq 'dd') {
 		    if ( $things_map{$in_table} && ! $what ) {
 			# special case to allow @table @bullet for instance
-				push @lines, &debug( "<DT>$things_map{$in_table}</DT>\n", __LINE__ );  # JTT 15-4-2003
+				push @lines, &debug( "<dt>$things_map{$in_table}</dt>\n", __LINE__ );  # JTT 15-4-2003
 		    } else {
-				push @lines, &debug( "<DT>\@$in_table\{$what\}</DT>\n", __LINE__ );  # JTT 15-4-2003
+				push @lines, &debug( "<dt>\@$in_table\{$what\}</dt>\n", __LINE__ );  # JTT 15-4-2003
 		    }
-		    push @lines, "<DD>";
-		    &html_push('DD') unless $html_element eq 'DD';
+		    push @lines, "<dd>";
+		    &html_push('dd') unless $html_element eq 'dd';
 		    if ($table_type) { # add also an index
 			unshift @input_spool, "\@${table_type}index $what\n";
 		    }
-		} elsif ($html_element eq 'TABLE') {
-		    push @lines, &debug("<TR><TD>$what</TD>\n", __LINE__);
+		} elsif ($html_element eq 'table') {
+		    push @lines, &debug("<tr><td>$what</td>\n", __LINE__);
 		    &html_push('TR');
-		} elsif ($html_element eq 'TR') {
-		    push @lines, &debug("</TR>\n", __LINE__);
-		    push @lines, &debug("<TR><TD>$what</TD>\n", __LINE__);
+		} elsif ($html_element eq 'tr') {
+		    push @lines, &debug("</tr>\n", __LINE__);
+		    push @lines, &debug("<tr><td>$what</td>\n", __LINE__);
 		} else {
-		    push @lines, &debug("<LI>$what\n", __LINE__);
-		    &html_push('LI') unless $html_element eq 'LI';
+		    push @lines, &debug("<li>$what\n", __LINE__);
+		    &html_push('LI') unless $html_element eq 'li';
 		}
 		push @lines, &html_debug('', __LINE__);
 		if ($deferred_ref) {
@@ -3678,7 +3674,7 @@ eval("sub simple_substitutions { $subst_code }");
 		}
 		next;
 	    } elsif (/^\@tab\s+(.*)$/) {
-		push @lines, "<TD>$1</TD>\n";
+		push @lines, "<td>$1</td>\n";
 		next;
 	    }
 	}
@@ -3688,13 +3684,13 @@ eval("sub simple_substitutions { $subst_code }");
     if ($_ eq "\n" && ! $in_pre) {
 		next if $#lines >= 0 && $lines[$#lines] eq "\n";
 		if ($html_element eq 'P') {
-			push @lines, &debug("</P><P>\n", __LINE__);
+			push @lines, &debug("</p><p>\n", __LINE__);
 		}
-		elsif ($html_element eq 'body' || $html_element eq 'BLOCKQUOTE' ||
-			   $html_element eq 'DD' || $html_element eq 'LI') 
+		elsif ($html_element eq 'body' || $html_element eq 'blockquote' ||
+			   $html_element eq 'dd' || $html_element eq 'li')
 		{
 			&html_push('P');
-			push @lines, &debug("<P>\n", __LINE__);
+			push @lines, &debug("<p>\n", __LINE__);
 		}
 	}
     # otherwise
@@ -3706,7 +3702,7 @@ eval("sub simple_substitutions { $subst_code }");
 $level = 0;
 while ($level < $curlevel) {
     $curlevel--;
-    push @toc_lines, "</UL>\n";
+    push @toc_lines, "</ul>\n";
 }
 
 print "# end of pass 1\n" if $T2H_VERBOSE;
@@ -3792,7 +3788,7 @@ sub GetIndexEntries
 	for $key (keys %{$index->{$prefix}})
 	{
 	  $entries->{$key} = {%{$index->{$prefix}->{$key}}};
-	  $entries->{$key}->{html_key} = "<CODE>$entries->{$key}->{html_key}</CODE>";
+	  $entries->{$key}->{html_key} = "<code>$entries->{$key}->{html_key}</code>";
 	}
       }
     }
@@ -3883,7 +3879,7 @@ sub GetIndexSummary
   my ($page, $letter, $summary, $i, $l1, $l2, $l);
 
   $i = 0;
-  $summary = '<table><tr><th valign=top>Jump to: &nbsp; </th><td>';
+  $summary = '<table><tr><th valign="top">Jump to: &nbsp; </th><td>';
 
   for $page ($first_page, @$Pages)
   {
@@ -3902,7 +3898,7 @@ sub GetIndexSummary
       }
     }
   }
-  $summary .= $l1 . "<BR>\n" if ($l1);
+  $summary .= $l1 . "<br>\n" if ($l1);
   $summary .= $l2 . '</td></tr></table><br>';
   return $summary;
 }
@@ -3917,27 +3913,27 @@ sub PrintIndexPage
   push @$lines, $summary;
 
   push @$lines , <<EOT;
-<P></P>
-<TABLE border=0>
-<TR><TD></TD><TH ALIGN=LEFT>Index Entry</TH><TH ALIGN=LEFT> Section</TH></TR>
-<TR><TD COLSPAN=3> <HR></TD></TR>
+<p></p>
+<table border="0">
+<tr><td></td><th align="left">Index Entry</th><th align="left"> Section</th></tr>
+<tr><td colspan="3"> <hr></td></tr>
 EOT
 
   for $letter (@{$page->{Letters}})
   {
-    push @$lines, "<TR><TH><A NAME=\"${name}_$letter\"></A>$letter</TH><TD></TD><TD></TD></TR>\n";
+    push @$lines, "<tr><th><a name=\"${name}_$letter\"></a>$letter</th><td></td><td></td></tr>\n";
     for $entry (@{$page->{EntriesByLetter}->{$letter}})
     {
       push @$lines, 
-      "<TR><TD></TD><TD valign=top>" .
+      "<tr><td></td><td valign=\"top\">" .
 	t2h_anchor('', $entry->{href}, $entry->{html_key}) .
-	  "</TD><TD valign=top>" . 
+	  "</td><td valign=\"top\">" .
 	    t2h_anchor('', sec_href($entry->{section}), clean_name($entry->{section})) .
-	      "</TD></TR>\n";
+	      "</td></tr>\n";
     }
-    push @$lines, "<TR><TD COLSPAN=3> <HR></TD></TR>\n";
+    push @$lines, "<tr><td colspan=\"3\"><hr></td></tr>\n";
   }
-  push @$lines, "</TABLE><P></P>";
+  push @$lines, "</table><p></p>";
   push @$lines, $summary;
 }
 
@@ -4024,7 +4020,7 @@ sub PrintIndex
   for $page (@$Pages)
   {
     push @$lines, ($T2H_SPLIT eq 'chapter' ? $CHAPTEREND : $SECTIONEND);
-    push @$lines, "<H2 ALIGN=\"Left\">$page->{name}</H2>\n";
+    push @$lines, "<h2 align=\"left\">$page->{name}</h2>\n";
     PrintIndexPage($lines, $summary, $page, $name);
   }
 }
@@ -4059,16 +4055,16 @@ while (@lines) {
     if ( /^\@menu\b/ ) {
 		$in_menu = 1;
 		$in_menu_listing = 1;
-		push @lines2, &debug( "<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n",
-							   __LINE__);
+		push @lines2, &debug( "<blockquote><table border=\"0\" " .
+                              "cellspacing=\"0\">\n", __LINE__);
 		next;
     }
 
     if ( /^\@end\s+menu\b/ ) {
 		if ( $in_menu_listing ) {
-			push @lines2, &debug( "</TABLE></BLOCKQUOTE>\n", __LINE__ );
+			push @lines2, &debug( "</table></blockquote>\n", __LINE__ );
 		} else {
-			push @lines2, &debug( "</BLOCKQUOTE>\n", __LINE__ );
+			push @lines2, &debug( "</blockquote>\n", __LINE__ );
 		}
 		$in_menu = 0;
 		$in_menu_listing = 0;
@@ -4089,7 +4085,7 @@ while (@lines) {
 		} else {
 			if ( $in_menu_listing ) {
 				$in_menu_listing = 0;
-				push @lines2, &debug( "</TABLE>\n", __LINE__ );
+				push @lines2, &debug( "</table>\n", __LINE__ );
 			}
 
 	    # should be like verbatim -- preseve spaces, etc
@@ -4103,7 +4099,8 @@ while (@lines) {
 			if ( ! $in_menu_listing ) {
 				$in_menu_listing = 1;
 				push @lines2,
-				     &debug( "<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__ );
+				     &debug( "<table border=\"0\" cellspacing=\"0\">\n",
+                             __LINE__ );
 			}
 
 			# look for continuation
@@ -4218,11 +4215,11 @@ while (@lines) {
 	             LocateIncludeFile( "$base.jpg" ) ||
                  LocateIncludeFile( "$base.gif" );
      warn "$ERROR no image file for $base: $_" unless ( $image && -e $image );
-     if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/P><P>\s*$/
+     if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/p><p>\s*$/
 		  and $T2H_CENTER_IMAGE ) {
-		 "<CENTER><IMG SRC=\"$image\" ALT=\"$base\"></CENTER>$in_line";
+		 "<center><img src=\"$image\" alt=\"$base\"></center>$in_line";
 	 } else {
-		 "<IMG SRC=\"$image\" ALT=\"$base\">$in_line";
+		 "<img src=\"$image\" alt=\"$base\">$in_line";
 	 }
     }e){};
 
@@ -4230,7 +4227,7 @@ while (@lines) {
     # try to guess bibliography references or glossary terms
     #
 
-    unless (/^<H\d><A NAME=\"SEC\d/) {
+    unless (/^<H\d><a name=\"sec\d/) {
 		if ($use_bibliography) {
 			$done = '';
 			while (/$BIBRE/o) {
@@ -4336,7 +4333,7 @@ print "# end of pass 3\n" if $T2H_VERBOSE;
 
 @foot_lines = ();			# footnotes
 @doc_lines = ();			# final document
-$end_of_para = 0;			# true if last line is <P>
+$end_of_para = 0;			# true if last line is <p>
 
 while (@lines3) {
     $_ = shift @lines3;
@@ -4376,15 +4373,15 @@ while (@lines3) {
 	    $footid = "FOOT$foot_num";
 	    $foot = "($foot_num)";
 	    push@foot_lines, "<H3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</H3>\n";
-	    $text = "<P>$text" unless $text =~ /^\s*<P>/;
+	    $text = "<p>$text" unless $text =~ /^\s*<p>/;
 	    push @foot_lines, "$text\n";
 	    $_ = $before . &t2h_anchor($docid, "$docu_foot#$footid", $foot) . $after;
 	}
     }
     #
-    # remove unnecessary <P>
+    # remove unnecessary <p>
     #
-    if (/^\s*<P>\s*$/) {
+    if (/^\s*<p>\s*$/) {
 	next if $end_of_para++;
     } else {
 	$end_of_para = 0;
@@ -4452,7 +4449,7 @@ unless (@sections)
   (
    'First' ,   sec_href($sections[0]),
    'Last',     sec_href($sections[$#sections]),
-   'About',     $docu_about. '#SEC_About',
+   'About',     $docu_about. '#sec_About',
   );
 
 # prepare TOC, OVERVIEW, TOP
@@ -4466,7 +4463,7 @@ if ($has_top)
     last if /$TOPEND/;
     push @$T2H_TOP, $_;
   }
-  $T2H_HREF{'Top'} = $docu_top . '#SEC_Top';
+  $T2H_HREF{'Top'} = $docu_top . '#sec_Top';
 }
 else
 {
@@ -4474,8 +4471,8 @@ else
 }
 
 $node2href{Top} = $T2H_HREF{Top};
-$T2H_HREF{Contents} = $docu_toc.'#SEC_Contents' if @toc_lines;
-$T2H_HREF{Overview} = $docu_stoc.'#SEC_OVERVIEW' if @stoc_lines;
+$T2H_HREF{Contents} = $docu_toc.'#sec_Contents' if @toc_lines;
+$T2H_HREF{Overview} = $docu_stoc.'#sec_OVERVIEW' if @stoc_lines;
 
 # settle on index
 if ($T2H_INDEX_CHAPTER)
@@ -4741,8 +4738,8 @@ if (@stoc_lines)
   $T2H_HREF{This} = $T2H_HREF{Overview};
   $T2H_NAME{This} = $T2H_NAME{Overview};
   $T2H_THIS_SECTION = \@stoc_lines;
-  unshift @$T2H_THIS_SECTION, "<BLOCKQUOTE>\n";
-  push @$T2H_THIS_SECTION, "\n</BLOCKQUOTE>\n";
+  unshift @$T2H_THIS_SECTION, "<blockquote>\n";
+  push @$T2H_THIS_SECTION, "\n</blockquote>\n";
   &$T2H_print_Overview(\*FILE);
   close(FILE) if $T2H_SPLIT;
 }
@@ -5109,16 +5106,16 @@ sub menu_entry
       $clean_descr =~ s/[^\w]//g;
       $descr = '' if ($clean_entry eq $clean_descr)
     }
-    push @lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
+    push @lines2,&debug('<tr><td align="left" valign="top">' .
 			&t2h_anchor('', $href, $entry) .
-			'</TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">' .
-			$descr . "</TD></TR>\n", __LINE__);
+			'</td><td>&nbsp;&nbsp;</td><td align="left" valign="top">' .
+			$descr . "</td></tr>\n", __LINE__);
   }
   elsif ($node =~ /^\(.*\)\w+/)
   {
-    push @lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
-						$entry . '</TD><TD ALIGN="left" VALIGN="TOP">' .
-						$descr . "</TD></TR>\n", __LINE__);
+    push @lines2,&debug('<tr><td align="left" valign="top">' .
+						$entry . '</td><td align="left" valign="top">' .
+						$descr . "</td></tr>\n", __LINE__);
   }
   else
   {
@@ -5150,7 +5147,7 @@ sub do_sc
 sub do_math
 {
   return &l2h_ToLatex("\$".&unprotect_html($_[0])."\$") if ($T2H_L2H);
-  return "<EM>".$text."</EM>";
+  return "<em>".$text."</em>";
 }
 
 sub do_uref {
@@ -5165,7 +5162,7 @@ sub do_url { &t2h_anchor('', $_[0], $_[0]) }
 
 sub do_acronym
 {
-  return '<FONT SIZE="-1">' . $_[0] . '</FONT>';
+  return '<font size="-1">' . $_[0] . '</font>';
 }
 
 sub do_accent
@@ -5248,16 +5245,16 @@ sub t2h_anchor {
     local($name, $href, $text, $newline, $extra_attribs) = @_;
     local($result);
 
-    $result = "<A";
-    $result .= " NAME=\"$name\"" if $name;
+    $result = "<a";
+    $result .= " name=\"$name\"" if $name;
     if ($href)
     {
       $href =~ s|^$T2H_HREF_DIR_INSTEAD_FILE|./|
 	  if ($T2H_HREF_DIR_INSTEAD_FILE);
-      $result .= ($href =~ /\"/ ? " HREF='$href'"  : " HREF=\"$href\"");
+      $result .= ($href =~ /\"/ ? "href='$href'"  : " href=\"$href\"");
     }
     $result .= " $extra_attribs" if $extra_attribs;
-    $result .= ">$text</A>";
+    $result .= ">$text</a>";
     $result .= "\n" if $newline;
     return $result;
 }
@@ -5324,15 +5321,15 @@ sub protect_html {
     $what =~ s/\>/\&\#62;/g;
     # restore anything in quotes
     # this fixes my problem where I had:
-    # < IMG SRC="leftarrow.gif" ALT="<--" >  but what if I wanted &#60; in my ALT text ??
+    # < img src="leftarrow.gif" alt="<--" >  but what if I wanted &#60; in my ALT text ??
     # maybe byte stuffing or some other technique should be used.
     $what =~ s/\"([^\&]+)\&\#60;(.*)\"/"$1<$2"/g;
     $what =~ s/\"([^\&]+)\&\#62;(.*)\"/"$1>$2"/g;
     $what =~ s/\"([^\&]+)\&\#38;(.*)\"/"$1&$2"/g;
     # but recognize some HTML things
-    $what =~ s/\&\#60;\/A\&\#62;/<\/A>/g;	      # </A>
-    $what =~ s/\&\#60;A ([^\&]+)\&\#62;/<A $1>/g;     # <A [^&]+>
-    $what =~ s/\&\#60;IMG ([^\&]+)\&\#62;/<IMG $1>/g; # <IMG [^&]+>
+    $what =~ s/\&\#60;\/a\&\#62;/<\/a>/g;	      # </a>
+    $what =~ s/\&\#60;a ([^\&]+)\&\#62;/<a $1>/g;     # <a [^&]+>
+    $what =~ s/\&\#60;img ([^\&]+)\&\#62;/<img $1>/g; # <img [^&]+>
     return $what;
 }
 
@@ -5364,7 +5361,7 @@ sub t2h_print_label
     my $fh = shift;
     my $href = shift || $T2H_HREF{This};
     $href =~ s/.*#(.*)$/$1/;
-    print $fh qq{<A NAME="$href"></A>\n};
+    print $fh qq{<a name="$href"></a>\n};
 }
 
 ##############################################################################
