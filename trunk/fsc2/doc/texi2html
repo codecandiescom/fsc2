@@ -1868,7 +1868,7 @@ $index_properties =
 	      'math', '&do_math',
 	      'option', '"SAMP',    # will put quotes, cf. &apply_style
 	      'r', '',			    # unsupported
-	      'samp', '&do_bold',		# will put quotes, cf. &apply_style
+	      'samp', '&do_bold',	# will put make it bold, cf. &apply_style
 	      'sc', '&do_sc',		# special case
 	      'strong', 'STRONG',
 	      't', 'TT',
