@@ -76,8 +76,8 @@ fsc2.html: $(docs) $(figures)
 	@echo -n '  <a href="fsc2_toc.html">' >> TOC;
 	@grep -h '^<TITLE>fsc2: [^<]*</TITLE>$$' fsc2_toc.html | \
 	sed 's/^<TITLE>fsc2: \([^<]*\)<\/TITLE>$$/\1<\/a><br><br>/' >> TOC;
-	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.html">Download</a><br>' >> TOC
-	@echo '  <a href="mailto:Jens.Toerring@physik.fu-berlin.de">Contact</a>' >> TOC
+	@echo '  <a href="http://toerring.de">Download</a><br>' >> TOC
+	@echo '  <a href="mailto:jt@toerring.de">Contact</a>' >> TOC
 	@echo -e '  </div>\n  <div id="main">' >> TOC
 	@for i in *.html; do \
 		sed '1,/BODY/!d' $$i > $$i.x; \
