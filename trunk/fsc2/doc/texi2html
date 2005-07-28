@@ -1525,8 +1525,8 @@ sub dumpOptions
 
 sub getOptions
 {
-	push(@_, 0) if ($#_ == 2);	# Default for $ignoreCase is 0.
-	push(@_, 1) if ($#_ == 3);	# Default for $helpThenExit is 1.
+	push @_, 0 if $#_ == 2;	# Default for $ignoreCase is 0.
+	push @_, 1 if $#_ == 3;	# Default for $helpThenExit is 1.
 
 	my($self, $default, $helpText, $versionText, 
 	   $helpThenExit, $versionThenExit, $ignoreCase) = @_;
@@ -1565,7 +1565,7 @@ sub getOptions
 	for (keys(%{$self -> {'default'} }) )
 	{
 	  my $type = ${$self -> {'default'} }{$_}{'type'};
-	  push(@{$self -> {'type'} }, "$_$type");
+	  push @{$self -> {'type'} }, "$_$type";
 	  $self->{'opt'}->{$_} =  ${$self -> {'default'} }{$_}{'linkage'}
             if ${$self -> {'default'} }{$_}{'linkage'};
 	}
@@ -1868,7 +1868,7 @@ $index_properties =
 	      'math', '&do_math',
 	      'option', '"SAMP',    # will put quotes, cf. &apply_style
 	      'r', '',			    # unsupported
-	      'samp', '"SAMP',		# will put quotes, cf. &apply_style
+	      'samp', '&do_bold',		# will put quotes, cf. &apply_style
 	      'sc', '&do_sc',		# special case
 	      'strong', 'STRONG',
 	      't', 'TT',
@@ -2212,7 +2212,7 @@ $T2H_INVISIBLE_MARK = '<IMG SRC="invisible.xbm">' if $T2H_INVISIBLE_MARK eq 'xbm
 # file name business
 #
 die "Need exactly one file to translate\n$usage" unless @ARGV == 1;
-$docu = shift(@ARGV);
+$docu = shift @ARGV;
 if ($docu =~ /.*\//) {
     chop($docu_dir = $&);
     $docu_name = $';
@@ -2220,7 +2220,7 @@ if ($docu =~ /.*\//) {
     $docu_dir = '.';
     $docu_name = $docu;
 }
-unshift(@T2H_INCLUDE_DIRS, $docu_dir);
+unshift @T2H_INCLUDE_DIRS, $docu_dir;
 $docu_name =~ s/\.te?x(i|info)?$//;	# basename of the document
 $docu_name = $T2H_PREFIX if ($T2H_PREFIX);
 
@@ -2959,7 +2959,7 @@ eval("sub simple_substitutions { $subst_code }");
 		 next;
 	 } elsif ($tag eq 'html') {
 		 $in_html = $PROTECTTAG . ++$html_num;
-		 push(@lines, $in_html);
+		 push @lines, $in_html;
 		 next;
 	 }
 
@@ -3052,7 +3052,7 @@ eval("sub simple_substitutions { $subst_code }");
 	{
 	    # no more in top
 	    $in_top = 0;
-	    push(@lines, $TOPEND);
+	    push @lines, $TOPEND;
 	}
     }
     unless ($in_pre) {
@@ -3081,7 +3081,7 @@ eval("sub simple_substitutions { $subst_code }");
 	  if ($T2H_EXPAND eq 'tex' && $T2H_L2H && ! $in_pre)
 	  {
 	    # add space to the end -- tex(i2dvi) does this, as well
-	    push(@lines, &l2h_ToLatex(&string_until($tag) . " "));
+	    push @lines, &l2h_ToLatex(&string_until($tag) . " ");
 	  }
 	  else
 	  {
@@ -3109,7 +3109,7 @@ eval("sub simple_substitutions { $subst_code }");
 	  if ($in_top)
 	  {
 	    $in_top = 0;
-	    push(@lines, $TOPEND);
+	    push @lines, $TOPEND;
 	  }
 	  warn "$ERROR Bad node line: $_" unless $_ =~ /^\@node\s$NODESRE$/o;
 	  # request of "Richard Y. Kim" <ryk@ap.com>
@@ -3159,48 +3159,49 @@ eval("sub simple_substitutions { $subst_code }");
 		next;
 	    }
 	    &html_push_if($tag);
-	    push(@lines, &html_debug('', __LINE__));
+	    push @lines, &html_debug('', __LINE__);
 	} elsif ($format_map{$tag}) {
 	    $in_pre = 1 if $format_map{$tag} eq 'PRE';
 	    &html_push_if($format_map{$tag});
-	    push(@lines, &html_debug('', __LINE__));
+	    push @lines, &html_debug('', __LINE__);
 	    $in_list++ if $format_map{$tag} eq 'UL' || $format_map{$tag} eq 'OL' ;
-#	    push(@lines, &debug("<BLOCKQUOTE>\n", __LINE__))
+#	    push @lines, &debug("<BLOCKQUOTE>\n", __LINE__)
 #	      if $tag =~ /example/i;
 	    # sunshine@sunshineco.com: <PRE>bla</PRE> looks better than
 	    # <PRE>\nbla</PRE> (at least on NeXTstep browser
-	    push(@lines, &debug("<$format_map{$tag}>" .
-				($in_pre ? '' : "\n"), __LINE__));
+	    push @lines, &debug("<$format_map{$tag}>" .
+				($in_pre ? '' : "\n"), __LINE__);
 	    next;
 	}
 	elsif (exists $complex_format_map->{$tag})
 	{
-	  my $start = eval $complex_format_map->{$tag}->[0];
-	  if ($@)
-	  {
-	    print "$ERROR: eval of complex_format_map->{$tag}->[0] $complex_format_map->{$tag}->[0]: $@";
-	    $start = '<pre>'
-	  }
-	  $in_pre = 1 if $start =~ /<pre/;
-	  push(@lines, html_debug($start. ($in_pre ? '' : "\n"), __LINE__));
-	  next;
-	} elsif ($tag eq 'table') {
+	    my $start = eval $complex_format_map->{$tag}->[0];
+	    if ($@)
+	    {
+	        print "$ERROR: eval of complex_format_map->{$tag}->[0] " .
+				  "$complex_format_map->{$tag}->[0]: $@";
+	        $start = '<pre>'
+	    }
+	    $in_pre = 1 if $start =~ /<pre/;
+	    push @lines, html_debug($start. ($in_pre ? '' : "\n"), __LINE__);
+	    next;
+	} elsif ( $tag eq 'table' ) {
 	  # anorland@hem2.passagen.se
 	  # if (/^\s*\@(|f|v|multi)table\s+\@(\w+)/) {
-	     if (/^\s*\@(|f|v|multi)table\s+\@(\w+)|(\{[^\}]*\})/) {
-		$in_table = $2;
-		unshift(@tables, join($;, $table_type, $in_table));
-		if ($table_type eq "multi") {
-		    # don't use borders -- gets confused by empty cells
-		    push(@lines, &debug("<TABLE>\n", __LINE__));
-		    &html_push_if('TABLE');
-		} else {
-		    push(@lines, &debug("<DL COMPACT>\n", __LINE__));
-		    &html_push_if('DL');
-		}
-		push(@lines, &html_debug('', __LINE__));
+	    if ( /^\s*\@(|f|v|multi)table\s+\@(\w+)|(\{[^\}]*\})/ ) {
+		    $in_table = $2;
+		    unshift @tables, join( $;, $table_type, $in_table);
+		    if ( $table_type eq "multi" ) {
+		        # don't use borders -- gets confused by empty cells
+		        push @lines, &debug( "<TABLE>\n", __LINE__ );
+		        &html_push_if('TABLE');
+		    } else {
+		        push @lines, &debug( "<DL COMPACT>\n", __LINE__ );
+		        &html_push_if( 'DL' );
+		    }
+		    push @lines, &html_debug('', __LINE__);
 	    } else {
-		warn "$ERROR Bad table line: $_";
+		    warn "$ERROR Bad table line: $_";
 	    }
 	    next;
 	} 
@@ -3212,13 +3213,13 @@ eval("sub simple_substitutions { $subst_code }");
 	    my $to = $2;
 	    my $prefix_from = IndexName2Prefix($from);
 	    my $prefix_to = IndexName2Prefix($to);
-
-	    warn("$ERROR unknown from index name $from ind syn*index line: $_"), next
-	      unless $prefix_from;
+	    warn( "$ERROR unknown from index name $from ind " .
+              "syn*index line: $_"), next
+	        unless $prefix_from;
 	    warn("$ERROR unknown to index name $to ind syn*index line: $_"), next
-	      unless $prefix_to;
+	        unless $prefix_to;
 
-	    if ($tag eq 'syncodeindex')
+	    if ( $tag eq 'syncodeindex' )
 	    {
 	      $index_properties->{$prefix_to}->{'from_code'}->{$prefix_from} = 1;
 	    }
@@ -3249,14 +3250,14 @@ eval("sub simple_substitutions { $subst_code }");
 	}
 	elsif (/^\@printindex/)
 	{
-	  push (@lines, "<!--::${section}::-->$_");
+	  push @lines, "<!--::${section}::-->$_";
 	  next;
 	}
 	elsif ($tag eq 'sp') {
-	    push(@lines, &debug("<P>\n", __LINE__));
+	    push @lines, &debug("<P>\n", __LINE__);
 	    next;
 	} elsif ($tag eq 'center') {
-	    push(@lines, &debug("<center>\n", __LINE__));
+	    push @lines, &debug("<center>\n", __LINE__);
 	    s/\@center//;
 	} elsif ($tag eq 'setref') {
 	    &protect_html; # if setref contains '&' for instance
@@ -3336,19 +3337,19 @@ eval("sub simple_substitutions { $subst_code }");
 	if (defined($def_map{$tag})) {
 	    s/^\@$tag\s+//;
 	    if ($tag =~ /x$/) {
-		# extra definition line
-		$tag = $`;
-		$is_extra = 1;
+			# extra definition line
+			$tag = $`;
+			$is_extra = 1;
 	    } else {
-		$is_extra = 0;
+			$is_extra = 0;
 	    }
 	    while (/\{([^\{\}]*)\}/) {
-		# this is a {} construct
-		($before, $contents, $after) = ($`, $1, $');
-		# protect spaces
-		$contents =~ s/\s+/$;9/g;
-		# restore $_ protecting {}
-		$_ = "$before$;7$contents$;8$after";
+			# this is a {} construct
+			($before, $contents, $after) = ($`, $1, $');
+			# protect spaces
+			$contents =~ s/\s+/$;9/g;
+			# restore $_ protecting {}
+			$_ = "$before$;7$contents$;8$after";
 	    }
 	    @args = split(/\s+/, &protect_html($_));
 	    foreach (@args) {
@@ -3356,12 +3357,12 @@ eval("sub simple_substitutions { $subst_code }");
 		s/$;7/\{/g;	# ... {
 		s/$;8/\}/g;	# ... }
 	    }
-	    $type = shift(@args);
+	    $type = shift @args;
 	    $type =~ s/^\{(.*)\}$/$1/;
 	    print "# def ($tag): {$type} ", join(', ', @args), "\n"
 		if $T2H_DEBUG & $DEBUG_DEF;
 	    $type .= ':'; # it's nicer like this
-	    my $name = shift(@args);
+	    my $name = shift @args;
 	    $name =~ s/^\{(.*)\}$/$1/;
 	    if ($is_extra) {
 		$_ = &debug("<DT>", __LINE__);
@@ -3374,7 +3375,7 @@ eval("sub simple_substitutions { $subst_code }");
 	    } elsif ($tag eq 'deftypefn' || $tag eq 'deftypevr'
 		     || $tag eq 'defcv' || $tag eq 'defop') {
 		$ftype = $name;
-		$name = shift(@args);
+		$name = shift @args;
 		$name =~ s/^\{(.*)\}$/$1/;
 		$_ .= "<U>$type</U> $ftype <B>$name</B>";
 		$_ .= " <I>@args</I>" if @args;
@@ -3387,16 +3388,16 @@ eval("sub simple_substitutions { $subst_code }");
 	    $name = &unprotect_html($name);
 	    if ($tag eq 'deffn' || $tag eq 'deftypefn') {
 	      EnterIndexEntry('f', $name, $docu_doc, $section, \@lines);
-#		unshift(@input_spool, "\@findex $name\n");
+#		unshift @input_spool, "\@findex $name\n";
 	    } elsif ($tag eq 'defop') {
 	      EnterIndexEntry('f', "$name on $ftype", $docu_doc, $section, \@lines);
-#		unshift(@input_spool, "\@findex $name on $ftype\n");
+#		unshift @input_spool, "\@findex $name on $ftype\n";
 	    } elsif ($tag eq 'defvr' || $tag eq 'deftypevr' || $tag eq 'defcv') {
 	      EnterIndexEntry('v', $name, $docu_doc, $section, \@lines);
-#		unshift(@input_spool, "\@vindex $name\n");
+#		unshift @input_spool, "\@vindex $name\n";
 	    } else {
 	      EnterIndexEntry('t', $name, $docu_doc, $section, \@lines);
-#		unshift(@input_spool, "\@tindex $name\n");
+#		unshift @input_spool, "\@tindex $name\n";
 	    }
 	    $dont_html = 1;
 	}
@@ -3407,8 +3408,8 @@ eval("sub simple_substitutions { $subst_code }");
 	    &html_pop_if('P');
 	    &html_pop_if('LI');
 	    &html_pop_if();
-	    push(@lines, &debug("</$format_map{$end_tag}>\n", __LINE__));
-	    push(@lines, &html_debug('', __LINE__));
+	    push @lines, &debug("</$format_map{$end_tag}>\n", __LINE__);
+	    push @lines, &html_debug('', __LINE__);
 	}
 	elsif (exists $complex_format_map->{$end_tag})
 	{
@@ -3422,25 +3423,25 @@ eval("sub simple_substitutions { $subst_code }");
 	  if ( $end_tag =~ /example/ ) {      # get rid of newline before end of
 		  chomp $lines[ $#lines ];        # example table (JTT, 14-4-2003)
 	  }
-	  push(@lines, html_debug($end, __LINE__));
+	  push @lines, html_debug($end, __LINE__);
 	} elsif ($end_tag =~ /^(|f|v|multi)table$/) {
 	    unless (@tables) {
 		warn "$ERROR \@end $end_tag without \@*table\n";
 		next;
 	    }
 	    &html_pop_if('P');
-	    ($table_type, $in_table) = split($;, shift(@tables));
+	    ($table_type, $in_table) = split($;, shift @tables );
 	    unless ($1 eq $table_type) {
 		warn "$ERROR \@end $end_tag without matching \@$end_tag\n";
 		next;
 	    }
 	    if ($table_type eq "multi") {
-		push(@lines, "</TR></TABLE>\n");
+		push @lines, "</TR></TABLE>\n";
 		&html_pop_if('TR');
 	    } else {
-			push(@lines, "</DD>\n") if $html_element eq 'DD';
+			push @lines, "</DD>\n" if $html_element eq 'DD';
 			&html_pop_if( 'DD' );
-			push(@lines, "</DL>\n");
+			push @lines, "</DL>\n";
 			&html_pop_if('DD');
 	    }
 	    &html_pop_if();
@@ -3450,10 +3451,10 @@ eval("sub simple_substitutions { $subst_code }");
 		$in_table = 0;
 	    }
 	} elsif (defined($def_map{$end_tag})) {
- 	    push(@lines, &debug("</DL>\n", __LINE__));
+ 	    push @lines, &debug("</DL>\n", __LINE__);
 	} elsif ($end_tag eq 'menu') {
 	    &html_pop_if();
-	    push(@lines, $_); # must keep it for pass 2
+	    push @lines, $_; # must keep it for pass 2
 	} 
 	next;
     }
@@ -3532,7 +3533,7 @@ eval("sub simple_substitutions { $subst_code }");
 		      }
 		      $toplevel = $level;
 		    }
-		    push(@sections, $name);
+		    push @sections, $name;
 		    next_doc() if ($T2H_SPLIT eq 'section' ||
 				   $T2H_SPLIT && $level == $toplevel);
 		  }
@@ -3573,39 +3574,38 @@ eval("sub simple_substitutions { $subst_code }");
 		    # update TOC
 		    while ($level > $curlevel) {
 		      $curlevel++;
-		      push(@toc_lines, "<UL>\n");
+		      push @toc_lines, "<UL>\n";
 		    }
 		    while ($level < $curlevel) {
 		      $curlevel--;
-		      push(@toc_lines, "</UL>\n");
+		      push @toc_lines, "</UL>\n";
 		    }
 		    $_ = &t2h_anchor($tocid, "$docu_doc#$docid", $name, 1);
 		    $_ = &substitute_style($_);
-		    push(@stoc_lines, "$_<BR>\n") if ($level == 1);
+		    push @stoc_lines, "$_<BR>\n" if $level == 1;
 		    if ($T2H_NUMBER_SECTIONS)
 		    {
-		      push(@toc_lines, $_ . "<BR>\n")
+		      push @toc_lines, $_ . "<BR>\n"
 		    }
 		    else
 		    {
-		      push(@toc_lines, "<LI>" . $_ ."</LI>");
+		      push @toc_lines, "<LI>" . $_ ."</LI>";
 		    }
 		  }
 		  else
 		  {
-		    push(@lines, &html_debug("<A NAME=\"$docid\"></A>\n", 
-					   __LINE__));
+		    push @lines, &html_debug("<A NAME=\"$docid\"></A>\n", __LINE__);
 		  }
 		  # update DOC
-		  push(@lines, &html_debug('', __LINE__));
+		  push @lines, &html_debug('', __LINE__);
 		  &html_reset;
 		  $_ =  "<H$level> $name </H$level>\n<!--docid::${docid}::-->\n";
 		  $_ = &debug($_, __LINE__);
-		  push(@lines, &html_debug('', __LINE__));
+		  push @lines, &html_debug('', __LINE__);
 		}
 		# update DOC
 		foreach $line (split(/\n+/, $_)) {
-		    push(@lines, "$line\n");
+		    push @lines, "$line\n";
 		}
 		next;
 	    } else {
@@ -3646,39 +3646,39 @@ eval("sub simple_substitutions { $subst_code }");
 		}
 		elsif ($in_table && ($table_type eq 'f' || $table_type eq 'v'))
 		{
-		  EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
+		    EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
 		}
 		&html_pop_if('P');
 		if ($html_element eq 'DL' || $html_element eq 'DD') {
-		    if ($things_map{$in_table} && !$what) {
+		    if ( $things_map{$in_table} && ! $what ) {
 			# special case to allow @table @bullet for instance
-			push(@lines, &debug("<DT>$things_map{$in_table}</DT>\n", __LINE__));# JTT 15-4-2003
+				push @lines, &debug( "<DT>$things_map{$in_table}</DT>\n", __LINE__ );  # JTT 15-4-2003
 		    } else {
-			push(@lines, &debug("<DT>\@$in_table\{$what\}</DT>\n", __LINE__));# JTT 15-4-2003
+				push @lines, &debug( "<DT>\@$in_table\{$what\}</DT>\n", __LINE__ );  # JTT 15-4-2003
 		    }
-		    push(@lines, "<DD>");
+		    push @lines, "<DD>";
 		    &html_push('DD') unless $html_element eq 'DD';
 		    if ($table_type) { # add also an index
-			unshift(@input_spool, "\@${table_type}index $what\n");
+			unshift @input_spool, "\@${table_type}index $what\n";
 		    }
 		} elsif ($html_element eq 'TABLE') {
-		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
+		    push @lines, &debug("<TR><TD>$what</TD>\n", __LINE__);
 		    &html_push('TR');
 		} elsif ($html_element eq 'TR') {
-		    push(@lines, &debug("</TR>\n", __LINE__));
-		    push(@lines, &debug("<TR><TD>$what</TD>\n", __LINE__));
+		    push @lines, &debug("</TR>\n", __LINE__);
+		    push @lines, &debug("<TR><TD>$what</TD>\n", __LINE__);
 		} else {
-		    push(@lines, &debug("<LI>$what\n", __LINE__));
+		    push @lines, &debug("<LI>$what\n", __LINE__);
 		    &html_push('LI') unless $html_element eq 'LI';
 		}
-		push(@lines, &html_debug('', __LINE__));
+		push @lines, &html_debug('', __LINE__);
 		if ($deferred_ref) {
-		    push(@lines, &debug("$deferred_ref\n", __LINE__));
+		    push @lines, &debug("$deferred_ref\n", __LINE__);
 		    $deferred_ref = '';
 		}
 		next;
 	    } elsif (/^\@tab\s+(.*)$/) {
-		push(@lines, "<TD>$1</TD>\n");
+		push @lines, "<TD>$1</TD>\n";
 		next;
 	    }
 	}
@@ -3688,25 +3688,25 @@ eval("sub simple_substitutions { $subst_code }");
     if ($_ eq "\n" && ! $in_pre) {
 		next if $#lines >= 0 && $lines[$#lines] eq "\n";
 		if ($html_element eq 'P') {
-			push (@lines, &debug("</P><P>\n", __LINE__));
+			push @lines, &debug("</P><P>\n", __LINE__);
 		}
 		elsif ($html_element eq 'body' || $html_element eq 'BLOCKQUOTE' ||
 			   $html_element eq 'DD' || $html_element eq 'LI') 
 		{
 			&html_push('P');
-			push(@lines, &debug("<P>\n", __LINE__));
+			push @lines, &debug("<P>\n", __LINE__);
 		}
 	}
     # otherwise
-    push(@lines, $_) unless $in_titlepage;
-    push(@lines, &debug("</center>\n", __LINE__))  if ($tag eq 'center');
+    push @lines, $_ unless $in_titlepage;
+    push @lines, &debug("</center>\n", __LINE__) if $tag eq 'center';
 }
 
 # finish TOC
 $level = 0;
 while ($level < $curlevel) {
     $curlevel--;
-    push(@toc_lines, "</UL>\n");
+    push @toc_lines, "</UL>\n";
 }
 
 print "# end of pass 1\n" if $T2H_VERBOSE;
@@ -3748,7 +3748,7 @@ sub EnterIndexEntry
   else
   {
     $id = 'IDX' . ++$idx_num;
-    push(@$lines, &t2h_anchor($id, '', $T2H_INVISIBLE_MARK, !$in_pre));
+    push @$lines, &t2h_anchor($id, '', $T2H_INVISIBLE_MARK, !$in_pre);
   }
   $index->{$prefix}->{$key}->{html_key} = $html_key;
   $index->{$prefix}->{$key}->{section} = $section;
@@ -3832,7 +3832,7 @@ sub GetIndexPages
 
   for $key (@keys)
   {
-    push @{$EntriesByLetter->{uc(substr($key,0, 1))}} , $entries->{$key};
+    push @{$EntriesByLetter->{uc(substr($key,0, 1))}}, $entries->{$key};
   }
   @Letters = sort byAlpha keys %$EntriesByLetter;
 
@@ -4041,14 +4041,14 @@ sub PrintIndex
 $in_menu = 0;				# am I inside a menu
 
 while (@lines) {
-    $_ = shift(@lines);
+    $_ = shift @lines;
 
     #
     # special case (protected sections)
     #
 
     if ( /^$PROTECTTAG/o ) {
-		push( @lines2, $_ );
+		push @lines2, $_;
 		next;
     }
 
@@ -4059,16 +4059,16 @@ while (@lines) {
     if ( /^\@menu\b/ ) {
 		$in_menu = 1;
 		$in_menu_listing = 1;
-		push( @lines2, &debug( "<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n",
-							   __LINE__));
+		push @lines2, &debug( "<BLOCKQUOTE><TABLE BORDER=0 CELLSPACING=0> \n",
+							   __LINE__);
 		next;
     }
 
     if ( /^\@end\s+menu\b/ ) {
 		if ( $in_menu_listing ) {
-			push( @lines2, &debug( "</TABLE></BLOCKQUOTE>\n", __LINE__ ) );
+			push @lines2, &debug( "</TABLE></BLOCKQUOTE>\n", __LINE__ );
 		} else {
-			push( @lines2, &debug( "</BLOCKQUOTE>\n", __LINE__ ) );
+			push @lines2, &debug( "</BLOCKQUOTE>\n", __LINE__ );
 		}
 		$in_menu = 0;
 		$in_menu_listing = 0;
@@ -4089,26 +4089,26 @@ while (@lines) {
 		} else {
 			if ( $in_menu_listing ) {
 				$in_menu_listing = 0;
-				push( @lines2, &debug( "</TABLE>\n", __LINE__ ) );
+				push @lines2, &debug( "</TABLE>\n", __LINE__ );
 			}
 
 	    # should be like verbatim -- preseve spaces, etc
 
 			s/ /\&nbsp;/g;
 			$_ .= "<br>\n";
-			push( @lines2, $_ );
+			push @lines2, $_;
 		}
 
 		if ( $node ) {
 			if ( ! $in_menu_listing ) {
 				$in_menu_listing = 1;
-				push( @lines2,
-					  &debug( "<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__ ) );
+				push @lines2,
+				     &debug( "<TABLE BORDER=0 CELLSPACING=0>\n", __LINE__ );
 			}
 
 			# look for continuation
 			while ( $lines[ 0 ] =~ /^\s+\w+/ ) {
-				$descr .= shift( @lines );
+				$descr .= shift @lines;
 			}
 			&menu_entry( $node, $name, $descr );
 		}
@@ -4152,7 +4152,7 @@ while (@lines) {
 			$type = '';
 		}
 		unless ( $full ) {
-			$next = shift( @lines );
+			$next = shift @lines;
 			$next = &substitute_style( $next );
 			chop( $nodes );                # remove final newline
 			if ( $next =~ /\}/ ) {         # split on 2 lines
@@ -4160,7 +4160,7 @@ while (@lines) {
 				$after = $';
 			} else {
 				$nodes .= " $next";
-				$next = shift( @lines );
+				$next = shift @lines;
 				$next = &substitute_style( $next );
 				chop( $nodes );
 				if ( $next =~ /\}/ ) {         # split on 3 lines
@@ -4169,7 +4169,7 @@ while (@lines) {
 				} else {
 					warn "$ERROR Bad xref (no ending }): $_";
 					$_ = "$before$;0xref\{$nodes$after";
-					unshift( @lines, $next );
+					unshift @lines, $next;
 					next;                    # while xref
 				}
 			}
@@ -4210,8 +4210,8 @@ while (@lines) {
     while ( s[\@image\s*{(.+?)}(.*)]
 	{
 	 my $in_line = $2;
-	 my $next_line = shift( @lines );
-	 unshift( @lines, $next_line );
+	 my $next_line = shift @lines;
+	 unshift @lines, $next_line;
      my @args = split (/\s*,\s*/, $1);
      my $base = $args[ 0 ];
      my $image = LocateIncludeFile( "$base.png" ) ||
@@ -4265,7 +4265,7 @@ while (@lines) {
 
     # otherwise
 
-    push(@lines2, $_);
+    push @lines2, $_;
 }
 
 print "# end of pass 2\n" if $T2H_VERBOSE;
@@ -4274,15 +4274,15 @@ print "# end of pass 2\n" if $T2H_VERBOSE;
 # split style substitutions
 #
 
-while (@lines2) {
-    $_ = shift(@lines2);
+while ( @lines2 ) {
+    $_ = shift @lines2;
 
     #
     # special case (protected sections)
     #
 
-    if (/^$PROTECTTAG/o) {
-		push(@lines3, $_);
+    if ( /^$PROTECTTAG/o ) {
+		push @lines3, $_;
 		next;
     }
 
@@ -4308,13 +4308,13 @@ while (@lines2) {
 						last;
 					} else {
 						$text .= $_;
-						$_ = shift(@lines2);
+						$_ = shift @lines2;
 					}
 				}
 				if ($failed) {
 					die "* Bad syntax (\@$style) after: $before\n";
 				} else {
-					$text = &apply_style($style, $text);
+					$text = &apply_style( $style, $text );
 					$_ = "$before$text$after";
 				}
 			}
@@ -4323,7 +4323,7 @@ while (@lines2) {
 
     # otherwise
 
-    push(@lines3, $_);
+    push @lines3, $_;
 }
 
 print "# end of pass 3\n" if $T2H_VERBOSE;
@@ -4339,12 +4339,12 @@ print "# end of pass 3\n" if $T2H_VERBOSE;
 $end_of_para = 0;			# true if last line is <P>
 
 while (@lines3) {
-    $_ = shift(@lines3);
+    $_ = shift @lines3;
     #
     # special case (protected sections)
     #
     if (/^$PROTECTTAG/o) {
-	push(@doc_lines, $_);
+	push @doc_lines, $_;
 	$end_of_para = 0;
 	next;
     }
@@ -4365,7 +4365,7 @@ while (@lines3) {
 		last;
 	    } else {
 		$text .= $_;
-		$_ = shift(@lines3);
+		$_ = shift @lines3;
 	    }
 	}
 	if ($failed) {
@@ -4375,9 +4375,9 @@ while (@lines3) {
 	    $docid  = "DOCF$foot_num";
 	    $footid = "FOOT$foot_num";
 	    $foot = "($foot_num)";
-	    push(@foot_lines, "<H3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</H3>\n");
+	    push@foot_lines, "<H3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</H3>\n";
 	    $text = "<P>$text" unless $text =~ /^\s*<P>/;
-	    push(@foot_lines, "$text\n");
+	    push @foot_lines, "$text\n";
 	    $_ = $before . &t2h_anchor($docid, "$docu_foot#$footid", $foot) . $after;
 	}
     }
@@ -4390,7 +4390,7 @@ while (@lines3) {
 	$end_of_para = 0;
     }
     # otherwise
-    push(@doc_lines, $_);
+    push @doc_lines, $_;
 }
 
 print "# end of pass 4\n" if $T2H_VERBOSE;
@@ -4569,7 +4569,7 @@ else
 
 $counter = 0;
 # loop through sections
-while ($section = shift(@sections))
+while ( $section = shift @sections )
 {
   if ($T2H_SPLIT && ($T2H_SPLIT eq 'section' || $previous eq $CHAPTEREND))
   {
@@ -4678,9 +4678,9 @@ while ($section = shift(@sections))
 
   $T2H_THIS_SECTION = [];
   while (@doc_lines) {
-    $_ = shift(@doc_lines);
+    $_ = shift @doc_lines;
     last if ($_ eq $SECTIONEND || $_ eq $CHAPTEREND);
-    push(@$T2H_THIS_SECTION, $_);
+    push @$T2H_THIS_SECTION, $_;
   }
   $previous = $_;
   &$T2H_print_section($FH);
@@ -4831,11 +4831,10 @@ sub update_sec_num {
 }
 
 sub incr_sec_num {
-    local($level, $l);
-    $level = shift(@_);
-    $_[$level]++;
-    foreach $l ($level+1 .. 3) {
-	$_[$l] = 0;
+    my $level = shift @_;
+    $_[ $level ]++;
+    foreach my $l ( $level+1 .. 3 ) {
+		$_[ $l ] = 0;
     }
 }
 
@@ -4944,7 +4943,7 @@ sub open {
 
     ++$fh_name;
     if (open($fh_name, $name)) {
-	unshift(@fhs, $fh_name);
+	unshift @fhs, $fh_name;
     } else {
 	  warn "$ERROR Can't read file $name: $!\n";
     }
@@ -4961,17 +4960,17 @@ sub next_line {
     local($fh, $line);
 
     if (@input_spool) {
-	  $line = shift(@input_spool);
-	  return($line);
+	  $line = shift @input_spool;
+	  return $line;
     }
     while (@fhs) {
 	  $fh = $fhs[0];
 	  $line = <$fh>;
-	  return($line) if $line;
+	  return $line if $line;
 	  close($fh);
-	  shift(@fhs);
+	  shift @fhs;
     }
-    return(undef);
+    return undef;
 }
 
 # used in pass 1, use &next_line
@@ -5009,15 +5008,14 @@ sub html_reset {
 
 sub html_push {
     local($what) = @_;
-
-    push(@html_stack, $html_element);
+    push @html_stack, $html_element;
     $html_element = $what;
 }
 
 sub html_push_if {
     local($what) = @_;
-    push(@html_stack, $html_element)
-	if ($html_element && $html_element ne 'P');
+    push @html_stack, $html_element
+		if $html_element && $html_element ne 'P';
     $html_element = $what;
 }
 
@@ -5041,41 +5039,41 @@ sub html_pop_if {
 }
 
 sub html_debug {
-    local($what, $line) = @_;
-    if ($T2H_DEBUG & $DEBUG_HTML)
+    my ( $what, $line ) = @_;
+    if ( $T2H_DEBUG & $DEBUG_HTML )
     {
-     $what = "\n" unless $what;
-     return("<!-- $line @html_stack, $html_element -->$what")
+    	$what = "\n" unless $what;
+     	return "<!-- $line @html_stack, $html_element -->$what";
     }
-    return($what);
+    return $what;
 }
 
 # to debug the output...
 sub debug {
-    local($what, $line) = @_;
-    return("<!-- $line -->$what")
-	if $T2H_DEBUG & $DEBUG_HTML;
-    return($what);
+    my ( $what, $line ) = @_;
+    return "<!-- $line -->$what"
+		if $T2H_DEBUG & $DEBUG_HTML;
+    return $what;
 }
 
 sub SimpleTexi2Html
 {
-  local $_ = $_[0];
-  &protect_texi;
-  &protect_html;
-  $_ = substitute_style($_);
-  $_[0] = $_;
+	local $_ = $_[0];
+	&protect_texi;
+	&protect_html;
+	$_ = substitute_style($_);
+	$_[0] = $_;
 }
 
 sub normalise_node {
-  local $_ = $_[0];
-  s/\s+/ /g;
-  s/ $//;
-  s/^ //;
-  &protect_texi;
-  &protect_html;
-  $_ = substitute_style($_);
-  $_[0]  = $_;
+	local $_ = $_[0];
+	s/\s+/ /g;
+	s/ $//;
+	s/^ //;
+	&protect_texi;
+	&protect_html;
+	$_ = substitute_style($_);
+	$_[0]  = $_;
 }
 
 sub menu_entry 
@@ -5111,16 +5109,16 @@ sub menu_entry
       $clean_descr =~ s/[^\w]//g;
       $descr = '' if ($clean_entry eq $clean_descr)
     }
-    push(@lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
+    push @lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
 			&t2h_anchor('', $href, $entry) .
 			'</TD><TD>&nbsp;&nbsp;</TD><TD ALIGN="left" VALIGN="TOP">' .
-			$descr . "</TD></TR>\n", __LINE__));
+			$descr . "</TD></TR>\n", __LINE__);
   }
   elsif ($node =~ /^\(.*\)\w+/)
   {
-    push(@lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
-			$entry . '</TD><TD ALIGN="left" VALIGN="TOP">' . $descr .
-			"</TD></TR>\n", __LINE__))
+    push @lines2,&debug('<TR><TD ALIGN="left" VALIGN="TOP">' .
+						$entry . '</TD><TD ALIGN="left" VALIGN="TOP">' .
+						$descr . "</TD></TR>\n", __LINE__);
   }
   else
   {
@@ -5137,10 +5135,15 @@ sub do_email {
     &t2h_anchor('', "mailto:$addr", $text);
 }
 
+sub do_bold
+{
+	return "<b>$_[0]</b>";
+}
+
 sub do_sc
 {
   # l2h does this much better
-  return &l2h_ToLatex("{\\sc ".&unprotect_html($_[0])."}") if ($T2H_L2H);
+  return &l2h_ToLatex("{\\sc ".&unprotect_html($_[0])."}") if $T2H_L2H;
   return "\U$_[0]\E";
 }
 
@@ -5151,7 +5154,7 @@ sub do_math
 }
 
 sub do_uref {
-    local($url, $text, $only_text) = split(/,\s*/, $_[0]);
+    local ($url, $text, $only_text) = split(/,\s*/, $_[0]);
 
     $text = $only_text if $only_text;
     $text = $url unless $text;
@@ -5181,33 +5184,33 @@ sub do_accent
 }
 
 sub apply_style {
-    local($texi_style, $text) = @_;
-    local($style);
+    my ( $texi_style, $text ) = @_;
+    my $style;
 
     $style = $style_map{$texi_style};
-    if (defined($style)) { # known style
-	  if ($style =~ /^\"/) { # add quotes
+    if ( defined( $style ) ) { # known style
+	  if ( $style =~ /^\"/ ) { # add quotes
 	    $style = $';
 	    $text = "\`$text\'";
 	  }
-	  if ($style =~ /^\&/) { # custom
+	  if ( $style =~ /^\&/ ) { # custom
 	    $style = $';
-	    $text = &$style($text, $texi_style);
-	  } elsif ($style) { # good style
+	    $text = &$style( $text, $texi_style );
+	  } elsif ( $style ) { # good style
 	    $text = "<$style>$text</$style>";
 	  } else { # no style
 	  }
     } else { # unknown style
 	  $text = undef;
     }
-    return($text);
+    return $text;
 }
 
 # remove Texinfo styles
 sub remove_style {
-    local($_) = @_;
-    1 while(s/\@\w+{([^\{\}]+)}/$1/g);
-    return($_);
+    local( $_ ) = @_;
+    1 while( s/\@\w+{([^\{\}]+)}/$1/g );
+    return $_;
 }
 
 sub remove_things
@@ -5238,7 +5241,7 @@ sub substitute_style {
 	}
         $_ = $done . $_;
     }
-    return($_);
+    return $_;
 }
 
 sub t2h_anchor {
@@ -5256,7 +5259,7 @@ sub t2h_anchor {
     $result .= " $extra_attribs" if $extra_attribs;
     $result .= ">$text</A>";
     $result .= "\n" if $newline;
-    return($result);
+    return $result;
 }
 
 sub pretty_date {
@@ -5267,13 +5270,13 @@ sub pretty_date {
     ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
     $year += ($year < 70) ? 2000 : 1900;
     # obachman: Let's do it as the Americans do
-    return("$MoY[$mon], $mday  $year");
+    return "$MoY[$mon], $mday  $year";
 }
 
 sub doc_href {
     local($num) = @_;
 
-    return("${docu_name}_$num.$docu_ext");
+    return "${docu_name}_$num.$docu_ext";
 }
 
 sub sec_href
@@ -5330,7 +5333,7 @@ sub protect_html {
     $what =~ s/\&\#60;\/A\&\#62;/<\/A>/g;	      # </A>
     $what =~ s/\&\#60;A ([^\&]+)\&\#62;/<A $1>/g;     # <A [^&]+>
     $what =~ s/\&\#60;IMG ([^\&]+)\&\#62;/<IMG $1>/g; # <IMG [^&]+>
-    return($what);
+    return $what;
 }
 
 sub unprotect_texi {
@@ -5345,7 +5348,7 @@ sub Unprotect_texi
 {
   local $_ = shift;
   &unprotect_texi;
-  return($_);
+  return $_;
 }
 
 sub unprotect_html {
@@ -5353,7 +5356,7 @@ sub unprotect_html {
     $what =~ s/\&\#38;/\&/g;
     $what =~ s/\&\#60;/\</g;
     $what =~ s/\&\#62;/\>/g;
-    return($what);
+    return $what;
 }
 
 sub t2h_print_label
