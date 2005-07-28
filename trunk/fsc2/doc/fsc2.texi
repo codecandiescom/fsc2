@@ -26,7 +26,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate July 26, 2004
+@set lastupdate July 28, 2005
 @iftex
 @afourpaper
 @end iftex
@@ -43,11 +43,11 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center July 2004
+@center July 2005
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
-@center @email{Jens.Toerring@@physik.fu-berlin.de}
+@center @email{jt@@toerring.de}
 @sp 16
 @center Copyright @copyright{} 1999--2005 Jens Thoms T@"orring
 Permission is granted to make and distribute verbatim
@@ -103,7 +103,7 @@ modules and lots of further topics.
 * Modules::                 How to create new modules
 * Device Reference::        List of devices and their functions
 * Reserved Words::          List of all reserved words
-* EDL mode for emacs::      Support for editing with emacs
+* EDL Mode for Emacs::      Support for editing with emacs
 * Acknowledgments::         The title says it all...
 * Copying::                 The GNU General Public License
 * Index::                   List of all indexed words

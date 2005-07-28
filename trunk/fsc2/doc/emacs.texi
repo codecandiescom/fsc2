@@ -20,8 +20,8 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node EDL mode for emacs, Acknowledgments, Reserved Words, Top
-@appendix EDL mode for emacs
+@node EDL Mode for Emacs, Acknowledgments, Reserved Words, Top
+@appendix EDL Mode for Emacs
 
 There exists a still not very useful @emph{emacs} mode for editing
 @code{EDL} scripts. It currently only does syntax highlighting.  This
