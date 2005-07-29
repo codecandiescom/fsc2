@@ -117,11 +117,11 @@ meaningful axis. Here not only the starting point and increment for the
 Another point: If you have not only one data point to draw but a whole
 1D-array (or in the case of 2D-display even a 2D-array, i.e.@: a
 complete "picture") you can do this without having to draw each point on
-its own. Instead, the functions for drawing let you specify a whole
-array. The data from the array are drawn so that the first data point of
-the array appears at the @i{x}-coordinate you specified, and the
-follwoing points further to the right. In case of 2D-arrays the @i{x}-
-and @i{y}-coordinate specifies the lower left hand corner of where the
+its own. The functions for drawing also let you specify a whole array.
+The data from the array are drawn so that the first data point of the
+array appears at the @i{x}-coordinate you specified, and the following
+points further to the right. In case of 2D-arrays the @i{x}- and
+@i{y}-coordinate specifies the lower left hand corner of where the
 2D-array will be drawn.
 
 Finally, for 1D-display also another display mode is available where new
@@ -129,8 +129,8 @@ data are always drawn automatically to the right of already displayed
 points and where the whole set of already drawn points is shifted to the
 left (and out of the viewable area when the new data points wouldn't fit
 into the display window anymore). Thus in this "sliding display" mode no
-automatical scaling happens, old data are simply discarded when they
-don't fit into the display window anymore.
+automatic scaling happens, old data are simply discarded when they don't
+fit into the display window anymore.
 
 
 @table @samp
@@ -448,7 +448,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex vert_rescale_1d()
 @item vert_rescale_1d()
 The function allows to resize the @i{y}-scaling of the display so that
-all curves will again fit vertically into the display area (the horizintal
+all curves will again fit vertically into the display area (the horizontal
 scaling is left unchanged). The function takes no arguments.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -598,7 +598,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex clear_curve_2d()
 @item clear_curve_2d()
 Removes one or more curves from the 2D-display. As many curve numbers as
-there are 2D-curves displayeed can be used. No arguments at all implies
+there are 2D-curves displayed can be used. No arguments at all implies
 the first curve only. Invalid arguments are discarded and an error message is
 printed.
 
@@ -635,7 +635,7 @@ specify either an integer number or a string:
 @item @code{6} @tab @code{"DELETE"} @tab
 @end multitable
 @noindent
-The last color, @code{"DELETE"}, is bviously not a color but can be used
+The last color, @code{"DELETE"}, is obviously not a color but can be used
 to delete a marker at the specified position (if more than one marker
 has been set for that position only the first, older one will be
 deleted).
@@ -644,7 +644,7 @@ Please note: in "sliding window" display mode, the coordinate for the
 marker is not used at all (but must be given and must be larger than
 @code{0}), the marker will always be drawn at the newest point for the
 first displayed curve (the curve numbered 1). Thus also can't delete
-a single marker in this mode but only all of them using the functin
+a single marker in this mode but only all of them using the function
 @code{clear_marker_1d()}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -1265,7 +1265,7 @@ creating, handling and deleting of objects can only be used within the
 
 There are two possible layouts for the toolbox, either all elements laid
 out vertically (the default) or all side by side horizontally.  If that
-many objects are creeated that the toolbox wouldn't fit onto the screen
+many objects are created that the toolbox wouldn't fit onto the screen
 anymore in vertical layout mode a new column is started automatically
 while in horizontal mode a new row. When exactly this happens depends
 (obviously) on the size of the screen, but also on details of the
@@ -1398,7 +1398,7 @@ an object (button, slider or in- or output field) has been invoked.
 This function lets you test if the state of one of the objects in the
 toolbox has been changed by the user, i.e.@: if a button has been
 pressed, a slider has been moved, an input field has been edited or the
-selected entryof a menu has been changed. You can pass this function a
+selected entry of a menu has been changed. You can pass this function a
 list of object IDs, in which case only the objects in the list are
 checked. When no argument is passed to the function all objects (except
 output fields) are checked. If the state of one or more objects has been
@@ -1731,7 +1731,7 @@ argument the value the output field is set to is returned. If there's a
 second value the output field is set to this value. Obviously, the value
 must be number for integer and floating point output fields. If for a
 string output field a number is passed to the function the number is
-automatically converted to a string respresenting that number.
+automatically converted to a string representing that number.
 
 
 @anchor{menu_create}
@@ -1998,7 +1998,7 @@ numbers an integer number is returned, otherwise a floating point value.
 Expects an 1- or more-dimensional array as input and returns the mean
 value of the array elements. Optionally, it accepts up to two more
 integer arguments, the start index of the first element of the
-(1-dimensional) array or the index of the first submatrix (for
+(1-dimensional) array or the index of the first sub-matrix (for
 more-dimensional array) to be included into the calculation and the
 number of elements to be used. If the length parameter is missing all
 elements up to the end of the 1D-array or all remaining sub-matrices of
@@ -2018,7 +2018,7 @@ cases where a repeated signal, that has been sampled several times and
 is stored in a flat array, is to be averaged.
 
 Calling the function with a chunk size of @code{1} is equivalent to
-invoking the @code{mean()} function while calling it with a subpartition
+invoking the @code{mean()} function while calling it with a sub-partition
 size equal to the length of the array itself is equivalent to calling
 the @code{float()} function on the array.
 
@@ -2410,15 +2410,15 @@ far as they exist.
 The mouse pointer is in the display area of the 2D display window and
 the requested mouse buttons are pressed. The second and third element
 of the array are @i{x}- and @i{y}-coordinates of the mouse position
-according to scaling of the currectly displayed curve. The fourth
-element is the @i{z}-value of the curve at this position. All othe
+according to scaling of the currently displayed curve. The fourth
+element is the @i{z}-value of the curve at this position. All of the
 array elements (except the last one) are meaningless.
 
 @item -2
 The mouse pointer is in the display area of the 2D display window and
 the requested mouse buttons are pressed. The second and third element
-of the array are @i{x}- and @i{y}-coordinates of the mous position
-according to scaling of the currectly displayed curve. At the current
+of the array are @i{x}- and @i{y}-coordinates of the mouse position
+according to scaling of the correctly displayed curve. At the current
 mouse position is no displayed point, a @i{z}-value thus cannot be
 given. All other array elements (except the last one) are meaningless.
 
@@ -2427,7 +2427,7 @@ The mouse pointer is in the display area of the display window showing a
 cross section through a 2-dimensional data set and the requested mouse
 buttons are pressed. The second and third element of the array are @i{x}-
 and @i{y}-coordinates of the mouse position according to scaling of the
-currectly displayed cross section curve. The fourth element is th
+correctly displayed cross section curve. The fourth element is th
 coordinate of the cut through the 2-dimensional curve. All other array
 elements (except the last one) are meaningless.
 
@@ -2503,7 +2503,7 @@ between adjacent points being identical.
 @anchor{find_peak}
 @findex find_peak()
 @item find_peak()
-This function can be used fot trying to find a peak in a certain region of
+This function can be used for trying to find a peak in a certain region of
 an 1-dimensional array, the only function argument. The function returns
 useful results only when the spectrum has a rather good signal-to-noise
 ratio (at least about 250) and a more or less straight baseline (i.e.@:
@@ -2523,7 +2523,7 @@ is impossible and when this function is used it must be done with all
 restrictions in mind.
 
 The function calculates numerically the first derivative of the 1-dimensional
-arrays by computing the differences between neighbouring points of the array.
+arrays by computing the differences between neighboring points of the array.
 It then goes on the calculate the mean and the standard deviation of the
 derivatives and picks the points where the derivative deviates by more than
 a certain factor (to be specified as one of the arguments to the function)
@@ -2531,13 +2531,13 @@ of the standard deviation from the mean value. These "outliers" are further
 investigated.
 
 In the next step all points are discarded where no other "outlier" with the
-opposite derivative is within its vincinity (another argument to be passed
+opposite derivative is within its vicinity (another argument to be passed
 to the function). Only the remaining points are taken to be spikes.
 
 To summarize: a structure in the spectrum to be recognized as a spike must
 satisfy two conditions. First, there must be an usually large derivative and,
 at the same time, another unusually large derivative, but with opposite sign,
-must exist in the near vincinity (and there's some special treatment for
+must exist in the near vicinity (and there's some special treatment for
 spikes at the very fringes of the spectrum in case it starts or ends with a
 spike). The algorithm fails often rather miserably when e.g. a "positive"
 spike is directly followed by a "negative" spike.
