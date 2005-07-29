@@ -1463,7 +1463,7 @@ operators. Here is a list of these operators and their meaning:
 @cindex xor operator `XOR'
 @cindex logical xor operator `~'
 @cindex logical xor operator `XOR'
-@multitable {XOR or ~} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
+@multitable {@code{AND} or @code{&}} {@i{exclusive or}: true if left or right hand side expressions are true but not both}
 @item @code{NOT} or @code{!} @tab @i{not}: negates truth of an expression
 @item @code{AND} or @code{&} @tab @i{and}: true if both left and right hand side expressions are true
 @item @code{OR} or @code{|} @tab @i{or}: true if at least one of the left and right hand side expressions is true
@@ -1483,12 +1483,12 @@ only the first part, @code{A == 0}, is tested when @code{A} is @code{0}
 because in this case the result is already known to be true and does not
 depend on the second comparison. The same holds for expressions like
 @example
-A != 0 AND lockin_phase( ) > 90
+A != 0 AND lockin_phase( ) > 90.0
 @end example
 @noindent
-If @code{A} equals @code{0} the whole expression is already known to be
-false even though the lock-ins phase may be less then 90 degrees. Thus
-the call of the function @code{lockin_phase()} will never be made.
+If @code{A} equals @code{0} the value of the whole expression is already
+known to be false even though the lock-ins phase may be less then 90 degrees.
+Thus no call of the function @code{lockin_phase()} will be done.
 
 @b{Thus the sequence in conditions containing the logical "or" and "and"
 operator is important.}
