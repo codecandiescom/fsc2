@@ -135,8 +135,8 @@ don't fit into the display window anymore.
 
 @table @samp
 @anchor{init_1d}
-@item init_1d()
 @findex init_1d()
+@item init_1d()
 This function initializes the display for one-dimensional data
 representation -- without a call to this function (or @code{init_2d()},
 see below) no data can be displayed. The function accepts up to six
@@ -195,8 +195,8 @@ This function can only be used in the @code{PREPARATIONS} section of an
 
 
 @anchor{init_2d}
-@item init_2d()
 @findex init_2d()
+@item init_2d()
 The function initializes the display for two-dimensional data
 representation.  The function accepts up to nine arguments, all of them
 optional. The arguments are:
@@ -247,8 +247,8 @@ This function can only be used in the @code{PREPARATIONS} section of an
 
 
 @anchor{display_1d}
-@item display_1d()
 @findex display_1d()
+@item display_1d()
 This function is used called to draw data in the window for 1D-data. It
 takes the following arguments:
 @enumerate
@@ -291,8 +291,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{display_2d}
-@item display_2d()
 @findex display_2d()
+@item display_2d()
 This function is used called to draw data in the window for 2D-data.
 experiments. It takes the following arguments:
 @enumerate
@@ -333,8 +333,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{display}
-@item display()
 @findex display()
+@item display()
 This function can be used instead of either @code{display_1d()} or
 @code{display_2d()} if either @code{init_1d()} or @code{init_2d()} (but
 not both) were called in the @code{PREPARATIONS} section.  It takes the
@@ -367,8 +367,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{display_mode}
-@item display_mode()
 @findex display_mode()
+@item display_mode()
 Beside the normal display mode, where data get rescaled automatically to
 fit onto the 1D display window (at least as long as the @code{FS} button
 is switched on), there's also a second display mode, where a rescaling
@@ -399,8 +399,8 @@ This function can be used in both the @code{PREPARATIONS} as well as the
 
 
 @anchor{change_scale_1d}
-@item change_scale_1d()
 @findex change_scale_1d()
+@item change_scale_1d()
 This function allows to change the scale settings of the 1D-data window
 (originally set in the call of @w{@code{init_1d()}}) after an experiment
 has been started. The function can be passed a maximum of two arguments,
@@ -413,8 +413,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{change_scale_2d}
-@item change_scale_2d()
 @findex change_scale_2d()
+@item change_scale_2d()
 This function allows to change the scale settings of the 2D-data window
 (originally set in the call of @w{@code{init_2d()}}) after an experiment
 has been started. The function accepts up to four arguments, the new
@@ -428,8 +428,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{change_scale}
-@item change_scale()
 @findex change_scale()
+@item change_scale()
 This function allows to change the scale settings (originally set in the
 call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) when your using
 either a 1D-display or a 2D-display (but not both) after the experiment
@@ -445,8 +445,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{vert_rescale_1d}
-@item vert_rescale_1d()
 @findex vert_rescale_1d()
+@item vert_rescale_1d()
 The function allows to resize the @i{y}-scaling of the display so that
 all curves will again fit vertically into the display area (the horizintal
 scaling is left unchanged). The function takes no arguments.
@@ -456,8 +456,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{vert_rescale_2d}
-@item vert_rescale_2d()
 @findex vert_rescale_2d()
+@item vert_rescale_2d()
 The function allows to resize the @i{z}-scaling of the display so that
 currently displayed curve will use the full range of @i{z}-values again.
 The function takes no arguments.
@@ -467,8 +467,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{vert_rescale}
-@item vert_rescale()
 @findex vert_rescale()
+@item vert_rescale()
 The function allows to change the vertical scaling for 1D-display or the
 @i{z}-scaling for 2D-display when only either 1D or 2D display is activated.
 If both are active use the function @code{vert_rescale_1d()} to change
@@ -480,8 +480,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{change_label_1d}
-@item change_label_1d()
 @findex change_label_1d()
+@item change_label_1d()
 Using this function the labels at the axis of the 1D-display window can
 be changed from within as @code{EDL} script. It accepts up to two
 strings for the @i{x}- and @i{y}-axis labels. To leave a label unchanged
@@ -494,8 +494,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{change_label_2d}
-@item change_label_2d()
 @findex change_label_2d()
+@item change_label_2d()
 Using this function the labels at the axis of the 2D-display window
 (and, if shown, of the cross section window) can be changed from within
 as @code{EDL} script. It accepts up to three strings for the @i{x}-,
@@ -509,8 +509,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{change_label}
-@item change_label()
 @findex change_label()
+@item change_label()
 Using this function the labels at the axis of the display window (and,
 if shown, of the cross section window) can be changed from within as
 @code{EDL} script when only either the 1D- or the 2D-display window is
@@ -526,8 +526,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{rescale_1d}
-@item rescale_1d()
 @findex rescale_1d()
+@item rescale_1d()
 In the function @code{init_1d()} the number of points in @i{x}-direction
 can be set. If, during the experiment more points are displayed then set
 in the initialization, the scaling of the axis will be changed
@@ -545,8 +545,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{rescale_2d}
-@item rescale_2d()
 @findex rescale_2d()
+@item rescale_2d()
 In the function @code{init_2d()} the number of points in @i{x}- and
 @i{y}- direction can be set. If, during the experiment more points are
 displayed then set in the initialization, the scaling of the axes in the
@@ -568,8 +568,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{rescale}
-@item rescale()
 @findex rescale()
+@item rescale()
 This function can be called instead of @code{rescale_1d()} or
 @code{rescale_2d()} when only either a 1D- or a 2D-display is used (but
 not both at once). In the 1D-case the function accepts one argument, the
@@ -583,8 +583,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_curve_1d}
-@item clear_curve_1d()
 @findex clear_curve_1d()
+@item clear_curve_1d()
 Removes one or more curves from the 1d-display. As many curve numbers as
 there are curves displayed can be passed to the function as
 arguments. No arguments at all implies the first curve only. Invalid
@@ -595,8 +595,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_curve_2d}
-@item clear_curve_2d()
 @findex clear_curve_2d()
+@item clear_curve_2d()
 Removes one or more curves from the 2D-display. As many curve numbers as
 there are 2D-curves displayeed can be used. No arguments at all implies
 the first curve only. Invalid arguments are discarded and an error message is
@@ -607,8 +607,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_curve}
-@item clear_curve()
 @findex clear_curve()
+@item clear_curve()
 If there is only either a 1D- or 2D-display window this function can be
 used instead of @code{clear_curve_1d()} or @code{clear_curve_2d()}.
 
@@ -617,8 +617,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{draw_marker_1d}
-@item draw_marker_1d()
 @findex draw_marker_1d()
+@item draw_marker_1d()
 This function can be used for 1D graphics and draws a vertical
 dashed line on the display window. It expects at least one argument, an
 integer number defining the @i{x}-position of the marker to be drawn. A
@@ -652,8 +652,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{draw_marker_2d}
-@item draw_marker_2d()
 @findex draw_marker_2d()
+@item draw_marker_2d()
 This function can be used for 2D graphics and draws a box in the display
 window. It expects at least two arguments, integer numbers defining the
 @i{x}- and @i{y}-position of the marker to be drawn. As a third argument
@@ -682,8 +682,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{draw_marker}
-@item draw_marker()
 @findex draw_marker()
+@item draw_marker()
 This function can be called instead of @code{draw_marker_1d()} or
 @code{draw_marker_2d()} when only either a 1D- or a 2D-display is used
 (but not both at once).
@@ -693,8 +693,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_marker_1d}
-@item clear_marker_1d()
 @findex clear_marker_1d()
+@item clear_marker_1d()
 This function deletes all previously set 1D markers. It accepts no arguments.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -702,8 +702,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_marker_2d}
-@item clear_marker_2d()
 @findex clear_marker_2d()
+@item clear_marker_2d()
 When invoked without any arguments at all this function deletes all
 previously set 2D markers on all curves. Otherwise it expects a list
 of curve numbers and deletes only all markers on these curves.
@@ -713,8 +713,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clear_marker}
-@item clear_marker()
 @findex clear_marker()
+@item clear_marker()
 This function can be called instead of @code{clear_marker_1d()} or
 @code{clear_marker_2d()} when only either a 1D- or a 2D-display is used
 (but not both at once).
@@ -724,8 +724,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{print}
-@item print()
 @findex print()
+@item print()
 This function prints text into the output browser in the main form of
 @code{fsc2}.  It needs a @i{format string}
 @cindex format string
@@ -798,8 +798,8 @@ printed).
 
 
 @anchor{show_message}
-@item show_message()
 @findex show_message()
+@item show_message()
 The function allows to display a message in a new window. The user has
 to click onto the "Ok" button in this window before the function
 returns, i.e.@: the experiment is paused while the message is shown.
@@ -833,8 +833,8 @@ time you try to write out data in this case.
 @table @samp
 
 @anchor{get_file}
-@item get_file()
 @findex get_file()
+@item get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
 of the @w{@code{save_xxx()}}-family. Usually a file selector gets shown
@@ -880,8 +880,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{open_file}
-@item open_file()
 @findex open_file()
+@item open_file()
 This function is similar to the previous one with the main difference
 that one may specify an hard-coded file name in the script. The function
 will use its first argument as a file name and try to open this file. If
@@ -905,8 +905,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{clone_file}
-@item clone_file()
 @findex clone_file()
+@item clone_file()
 Sometimes two output files are needed that should only differ in their
 extension but not in the filename. In this case the function
 @code{clone_file()} can be useful. It expects exactly three
@@ -954,8 +954,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{save}
-@item save()
 @findex save()
+@item save()
 Writes one or more data or complete arrays to a file. But some care has
 to be used: If @w{@code{get_file()}} has been called before the first
 argument has to be the file number returned by the call to tell
@@ -1010,8 +1010,8 @@ section of an @code{EDL} script.
 
 
 @anchor{fsave}
-@item fsave()
 @findex fsave()
+@item fsave()
 This function (the name stands for 'formated save') can be used to write
 data to a file in a formated way. As in the case of the @code{save()}
 function the first argument may be a file identifier. The next argument
@@ -1100,8 +1100,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ffsave}
-@item ffsave()
 @findex ffsave()
+@item ffsave()
 This function can also be used to write data into a file using a format
 string. In comparison to the @code{fsave()} function it gives you even
 more control over the format that is used by accepting a format string
@@ -1199,8 +1199,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{save_program}
-@item save_program()
 @findex save_program()
+@item save_program()
 This functions writes the currently run @code{EDL} script into a
 file. As usual, the first argument may be a file identifier -- the same
 rules apply as for @code{save()} and @code{fsave()}. The second argument
@@ -1217,8 +1217,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{save_output}
-@item save_output()
 @findex save_output()
+@item save_output()
 This function has the same arguments as @code{save_program()} but prints
 the content of the output window (i.e.@: the bottom browser window in
 the main form) into the file.
@@ -1228,8 +1228,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{save_comment}
-@item save_comment()
 @findex save_comment()
+@item save_comment()
 This function is used to print comments into the file. When it is called a
 small editor is shown and the user may enter comments. These will be then
 written into the file.
@@ -1379,8 +1379,8 @@ section of an @code{EDL} script.
 
 @table @samp
 @anchor{layout}
-@item layout()
 @findex layout()
+@item layout()
 The functions tells the program how to layout the buttons and sliders in
 the window, either vertically or horizontally. The function must be
 called either with the strings @code{"VERT"}, @code{"VERTICAL"},
@@ -1393,8 +1393,8 @@ an object (button, slider or in- or output field) has been invoked.
 
 
 @anchor{toolbox_changed}
-@item toolbox_changed()
 @findex toolbox_changed()
+@item toolbox_changed()
 This function lets you test if the state of one of the objects in the
 toolbox has been changed by the user, i.e.@: if a button has been
 pressed, a slider has been moved, an input field has been edited or the
@@ -1416,8 +1416,8 @@ reporting e.g.@: a new slider value until you have called
 
 
 @anchor{toolbox_wait}
-@item toolbox_wait()
 @findex toolbox_wait()
+@item toolbox_wait()
 This function is very similar to the previous function,
 @code{toolbox_change()}. The main difference is that it will wait for a
 certain time and only returns when either this time has expired or an
@@ -1435,8 +1435,8 @@ been changed by the user.
 
 
 @anchor{button_create}
-@item button_create()
 @findex button_create()
+@item button_create()
 The function creates a new button and returns a unique integer number
 that has to be used in later calls to identify this button. There are
 three types of buttons, normal buttons that can be just pressed to
@@ -1481,8 +1481,8 @@ group of radio buttons.
 
 
 @anchor{button_delete}
-@item button_delete()
 @findex button_delete()
+@item button_delete()
 Using this function one or more buttons can be deleted. It expects one
 or a list of button identifiers (separated by commas) as returned by
 the function @code{button_create()}.
@@ -1497,8 +1497,8 @@ deleted immediately afterwards).
 
 
 @anchor{button_state}
-@item button_state()
 @findex button_state()
+@item button_state()
 This function returns or sets the state of a button, depending on the
 number of arguments passed to the function. The non-optional first
 argument is the identifier of the button as it was returned by the
@@ -1522,8 +1522,8 @@ buttons cannot be set.
 
 
 @anchor{button_changed}
-@item button_changed()
 @findex button_changed()
+@item button_changed()
 The function takes one argument, the ID of a button. It will return
 @code{1} if the button has been activated and @code{0} if the state of
 the button hasn't been changed. Please note that the function will
@@ -1538,8 +1538,8 @@ radio buttons.
 
 
 @anchor{slider_create}
-@item slider_create()
 @findex slider_create()
+@item slider_create()
 Sliders are useful for setting values within a predefined range. There
 are two types of sliders, normal sliders and value sliders. The
 difference between these types is that for value sliders there is an
@@ -1577,15 +1577,15 @@ used as the sliders initial value.
 
 
 @anchor{slider_delete}
-@item slider_delete()
 @findex slider_delete()
+@item slider_delete()
 The function deletes one or more sliders. It expects one or a list of
 slider identifiers as returned by the function @code{slider_create()}.
 
 
 @anchor{slider_value}
-@item slider_value()
 @findex slider_value()
+@item slider_value()
 This function returns or sets the value of a slider. The first argument
 must be a slider identifier as returned by the function
 @code{slider_create()}. If this is the only argument the value the
@@ -1599,8 +1599,8 @@ the step size the nearest allowed value is set.
 
 
 @anchor{slider_changed}
-@item slider_changed()
 @findex slider_changed()
+@item slider_changed()
 The function takes one argument, the ID of a slider. It will return
 @code{1} if the value of the slider has been changed by the user and
 @code{0} if not. Please note that the function will repeatedly report a
@@ -1609,8 +1609,8 @@ calling @code{slider_value()} for the slider.
 
 
 @anchor{input_create}
-@item input_create()
 @findex input_create()
+@item input_create()
 Using input fields numerical values can be entered. There are two
 different types of input fields, one, that will only accept integer
 values, while the other also allows input of floating point numbers. The
@@ -1644,15 +1644,15 @@ it gets truncated and longer texts can't be entered.
 
 
 @anchor{input_delete}
-@item input_delete()
 @findex input_delete()
+@item input_delete()
 The function deletes one or more input field. It expects one or a list of
 input field identifiers as returned by the function @code{input_create()}.
 
 
 @anchor{input_value}
-@item input_value()
 @findex input_value()
+@item input_value()
 This function returns or sets the value of an input field. The first
 argument must be an input field identifier as returned by the function
 @code{input_create()}. If this is the only argument the value the input
@@ -1663,8 +1663,8 @@ will also be accepted) for @code{FLOAT_INPUT} objects.
 
 
 @anchor{input_changed}
-@item input_changed()
 @findex input_changed()
+@item input_changed()
 The function takes one argument, the ID of an input field. It returns
 @code{1} if the value of the input field has been changed by the user
 and @code{0} if not. Please note that the function will repeatedly
@@ -1673,8 +1673,8 @@ new value by calling @code{input_value()}.
 
 
 @anchor{output_create}
-@item output_create()
 @findex output_create()
+@item output_create()
 In contrast to input objects output objects can be used to display a
 value but the user can't change the value. As in the case of input
 objects there are two types of output fields, one, that will only
@@ -1715,15 +1715,15 @@ fields consists of 32 characters (including white-space). If the text
 is longer it gets truncated.
 
 @anchor{output_delete}
-@item output_delete()
 @findex output_delete()
+@item output_delete()
 The function deletes one or more output field. It expects one or a list of
 output field identifiers as returned by the function @code{input_create()}.
 
 
 @anchor{output_value}
-@item output_value()
 @findex output_value()
+@item output_value()
 This function sets a new value for an output field or returns the
 current value. The first argument must be an output field identifier as
 returned by the function @code{output_create()}. If this is the only
@@ -1735,8 +1735,8 @@ automatically converted to a string respresenting that number.
 
 
 @anchor{menu_create}
-@item menu_create()
 @findex menu_create()
+@item menu_create()
 This function creates a popup-menu button to allow the selection of one
 of two or more alternatives. The first argument must be a label string,
 followed by as many strings as necessary (but at least two) for the
@@ -1748,16 +1748,16 @@ that has to be used in further commands dealing with the widget.
 
 
 @anchor{menu_delete}
-@item menu_delete()
 @findex menu_delete()
+@item menu_delete()
 This function deletes one or more popup-menu buttons. It expects one or
 a list of popup-menu button identifiers as returned by the function
 @code{menu_create()}.
 
 
 @anchor{menu_choice}
-@item menu_choice()
 @findex menu_choice()
+@item menu_choice()
 This function either selects a new item from the list of items of the
 popup-menu button or returns the number of the currently selected item.
 The first argument must be a valid popup-menu button identifiers as
@@ -1774,8 +1774,8 @@ second etc.).
 
 
 @anchor{menu_changed}
-@item menu_changed()
 @findex menu_changed()
+@item menu_changed()
 The function takes one argument, the ID of a menu. It will return
 @code{1} if the the user has selected a new menu item and @code{0} if
 not. Please note that the function will repeatedly report a change of
@@ -1784,8 +1784,8 @@ the selected menu item until you have determined the new item by calling
 
 
 @anchor{object_delete}
-@item object_delete()
 @findex object_delete()
+@item object_delete()
 The function deletes one or more objects from the toolbox. It expects
 one or a comma separated list of object identifiers as returned by the
 functions @code{button_create()}, @code{slider_create()},
@@ -1793,16 +1793,16 @@ functions @code{button_create()}, @code{slider_create()},
 
 
 @anchor{object_change_label}
-@item object_change_label()
 @findex object_change_label()
+@item object_change_label()
 The function allows to change the label of an object. It takes two
 arguments, the ID of the object that was returned when the object was
 created and a string with the new label.
 
 
 @anchor{object_enable}
-@item object_enable()
 @findex object_enable()
+@item object_enable()
 The function allows to temporarily enable or disable the use of an
 object. It takes two arguments, the ID of the object that was returned
 when the object was created and either the string @code{"ON"} or the
@@ -1811,8 +1811,8 @@ string @code{"OFF"} or the value @code{0} to disable the object.
 
 
 @anchor{hide_toolbox}
-@item hide_toolbox()
 @findex hide_toolbox()
+@item hide_toolbox()
 This function can be used to hide and later redraw the toolbox. This
 can, for example, be used to avoid multiple redraws when creating or
 deleting several objects. The function can even be used before the
@@ -1834,16 +1834,17 @@ The following mathematical function can be used in all section of an
 @code{EDL} script that allow the use of functions.
 
 @table @samp
+
 @anchor{abs}
-@item abs()
 @findex abs()
+@item abs()
 Returns the absolute value of an integer or floating point number (or
 all the elements of an 1- or more-dimensional array) .
 
 
 @anchor{acos}
-@item acos()
 @findex acos()
+@item acos()
 Returns the inverse of the cosine function of the argument (simple
 number or all elements of an 1- or more-dimensional array) as an angle
 in radian. The argument must be in the interval @w{[-1, 1]}, the result
@@ -1851,15 +1852,15 @@ an element of the interval @w{[0, pi]}.
 
 
 @anchor{acosh}
-@item acosh()
 @findex acosh()
+@item acosh()
 Returns the inverse of the hyperbolic cosine function of the argument
 (simple number or all elements of an 1- or more-dimensional array ).
 
 
 @anchor{asin}
-@item asin()
 @findex asin()
+@item asin()
 Returns the inverse of the sine function of the argument (simple number
 or all elements of an 1- or more-dimensional array) as an angle in
 radian. The argument must be in the interval @w{[-1, 1]}, the result an
@@ -1867,30 +1868,30 @@ element of the interval @w{[-pi/2, pi/2]}.
 
 
 @anchor{asinh}
-@item asinh()
 @findex asinh()
+@item asinh()
 Returns the inverse of the hyperbolic sine function of the argument
 (simple number or all elements of an 1- or more-dimensional array).
 
 
 @anchor{atan}
-@item atan()
 @findex atan()
+@item atan()
 Returns the inverse of the tangent function of the argument (simple
 number or all elements of an 1- or more-dimensional array) as an angle
 in radian, the result an element of the interval @w{[-pi, pi]}.
 
 
 @anchor{atanh}
-@item atanh()
 @findex atanh()
+@item atanh()
 Returns the inverse of the hyperbolic tangent function of the argument
 (simple number or all elements of an 1- or more-dimensional array).
 
 
 @anchor{ceil}
-@item ceil()
 @findex ceil()
+@item ceil()
 Converts a floating point number (or all the elements of an 1- or
 more-dimensional array) to the smallest integer that is not less than
 the argument, i.e.@:
@@ -1901,30 +1902,30 @@ round( 8.6 ) = 9     round( -8.6 ) = -8
 
 
 @anchor{cos}
-@item cos()
 @findex cos()
+@item cos()
 Returns the cosine of the argument (simple number or all elements of an
 1- or more-dimensional array), with the argument interpreted as the
 angle in radian.
 
 
 @anchor{cosh}
-@item cosh()
 @findex cosh()
+@item cosh()
 Returns the hyperbolic cosine of the argument (simple number or all elements
 of an 1- or more-dimensional array).
 
 
 @anchor{float}
-@item float()
 @findex float()
+@item float()
 Converts a number (or all the elements of an 1- or more-dimensional
 array) to floating point type.
 
 
 @anchor{floor}
-@item floor()
 @findex floor()
+@item floor()
 Converts a floating point number (or all the elements of an 1- or
 more-dimensional array) to the largest integer that is not larger than
 the argument, i.e.@:
@@ -1935,8 +1936,8 @@ floor( 8.6 ) = 8    floor( -8.6 ) = -9
 
 
 @anchor{grandom}
-@item grandom()
 @findex grandom()
+@item grandom()
 If called without an argument the function returns one of a set of
 pseudo-random number with Gaussian distribution, a mean of zero and a
 variance of 1. If called with a non-zero, positive argument it returns
@@ -1947,8 +1948,8 @@ better suited for simulating noise than the ones returned by
 
 
 @anchor{index_of_max}
-@item index_of_max()
 @findex index_of_max()
+@item index_of_max()
 The function expects a 1-dimensional array as its only argument and
 returns the index of the largest element in the array. If there's more
 that one element having the maximum value in the array the index
@@ -1956,8 +1957,8 @@ designates the first of these elements.
 
 
 @anchor{index_of_min}
-@item index_of_min()
 @findex index_of_min()
+@item index_of_min()
 The function expects a 1-dimensional array as its only argument and
 returns the index of the smallest element in the array. If there's more
 that one element having the minimum value in the array the index
@@ -1965,16 +1966,16 @@ designates the first of these elements.
 
 
 @anchor{int}
-@item int()
 @findex int()
+@item int()
 Converts a number (or all the elements of an 1- or more-dimensional
 array) to integer type by truncating all digits following the decimal
 point.
 
 
 @anchor{round}
-@item round()
 @findex round()
+@item round()
 Converts a floating point number (or all the elements of an 1- or
 more-dimensional array) to the nearest integer, i.e.@:
 
@@ -1984,16 +1985,16 @@ round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
 
 
 @anchor{max_of}
-@item max_of()
 @findex max_of()
+@item max_of()
 Returns the largest value of all arguments. Arguments can be any number
 of numbers or 1- or more-dimensional arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
 
 @anchor{mean}
-@item mean()
 @findex mean()
+@item mean()
 Expects an 1- or more-dimensional array as input and returns the mean
 value of the array elements. Optionally, it accepts up to two more
 integer arguments, the start index of the first element of the
@@ -2006,8 +2007,8 @@ elements or sub-arrays specified as the third argument are used.
 .
 
 @anchor{mean_part_array}
-@item mean_part_array()
 @findex mean_part_array()
+@item mean_part_array()
 The function expects as its arguments an 1-dimensional arrays of integers
 or floats and a positive integer, with the length of the array being an
 integer multiple of this number. The array is now split into chunks of
@@ -2023,16 +2024,16 @@ the @code{float()} function on the array.
 
 
 @anchor{min_of}
-@item min_of()
 @findex min_of()
+@item min_of()
 Returns the smallest value of all arguments. Arguments can be any number
 of numbers or 1- or more-dimensional arrays. If all arguments are integer
 numbers an integer number is returned, otherwise a floating point value.
 
 
 @anchor{random}
-@item random()
 @findex random()
+@item random()
 If called with no argument the function returns a single pseudo-random
 number in the interval @w{[0, 1]}. If called with a non-zero, positive
 argument it returns an array of random numbers where the argument
@@ -2040,8 +2041,8 @@ specifies the size of the array.
 
 
 @anchor{rms}
-@item rms()
 @findex rms()
+@item rms()
 Expects an one-dimensional array as input and returns the square root of
 the sum of the squared array elements, divided by the number of
 elements.  Optionally, it accepts up to two more integer arguments, the
@@ -2054,8 +2055,8 @@ sub-matrices as specified by the third argument are used..
 
 
 @anchor{set_seed}
-@item set_seed()
 @findex set_seed()
+@item set_seed()
 Sets a seed for the random number generator used in the functions
 @code{random()} and @code{grandom()}. The argument has to be a positive
 integer. Alternatively, when no argument is given, the time in seconds
@@ -2063,39 +2064,39 @@ since 00:00:00 UTC, January 1, 1970 is used as the seed.
 
 
 @anchor{sin}
-@item sin()
 @findex sin()
+@item sin()
 Returns the sine of the argument (simple number or all elements of an 1-
 or more-dimensional array), with the argument interpreted as the angle
 in radian.
 
 
 @anchor{sinh}
-@item sinh()
 @findex sinh()
+@item sinh()
 Returns the hyperbolic sine of the argument (simple number or all elements
 of an 1- or more-dimensional array).
 
 
 @anchor{sqrt}
-@item sqrt()
 @findex sqrt()
+@item sqrt()
 Returns the square root of an integer or floating point number (or all
 the elements of an 1- or more-dimensional array). The argument must be a
 positive number.
 
 
 @anchor{tan}
-@item tan()
 @findex tan()
+@item tan()
 Returns the tangent of the argument (simple number or all elements of an
 1- or more-dimensional array), with the argument interpreted as the
 angle in radian.
 
 
 @anchor{tanh}
-@item tanh()
 @findex tanh()
+@item tanh()
 Returns the hyperbolic tangent of the argument (simple number or all
 elements of an 1- or more-dimensional array).
 
@@ -2111,8 +2112,8 @@ elements of an 1- or more-dimensional array).
 
 @table @samp
 @anchor{end}
-@item end()
 @findex end()
+@item end()
 The function simulates the user clicking onto the @code{Stop} button in
 the display window. If there is an @code{ON_STOP} label flow of control
 will be transfered to the code following the @code{ON_STOP} label,
@@ -2122,8 +2123,8 @@ used in the @code{EXPERIMENT} section only and not after the
 
 
 @anchor{abort}
-@item abort()
 @findex abort()
+@item abort()
 The function will abort the currently running script immediately
 without even running the code following the @code{ON_STOP} label, so it
 is a kind of an emergency exit when nothing better will do. When called it
@@ -2132,8 +2133,8 @@ can only be used in the @code{EXPERIMENT} section
 
 
 @anchor{date}
-@item date()
 @findex date()
+@item date()
 When called without an argument the function returns a string with the
 current date in a form like @w{@code{Sun Jun 17, 2000}}. Alternatively,
 it may be called with a single argument, a string representing a format
@@ -2146,8 +2147,8 @@ may be preceeded by an @code{E} and @code{deHImMSuUVwWy} by an @code{O}.
 
 
 @anchor{time}
-@item time()
 @findex time()
+@item time()
 If called without an argument the function returns a string with the
 current time in the form @w{@code{hh:mm:ss}}. If it's called with a
 string containing of one or two characters the colons ('@code{:}') in
@@ -2157,8 +2158,8 @@ control characters.
 
 
 @anchor{delta_time}
-@item delta_time()
 @findex delta_time()
+@item delta_time()
 This function (that can only be used in the @code{EXPERIMENT} section of
 the script) returns the time (in seconds) since the last call of the
 functions as a floating point value. When called for the very first time
@@ -2168,8 +2169,8 @@ returned by the function has micro-second resolution.
 
 
 @anchor{wait}
-@item wait()
 @findex wait()
+@item wait()
 Waits for the specified time. Times are always to be given in seconds or
 alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
 resolution of @code{wait()} is in the @w{10 ms} range and may even be
@@ -2182,82 +2183,82 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{T_to_G}
-@item T_to_G()
 @findex T_to_G()
+@item T_to_G()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to have a unit of Tesla, to Gauss (by multiplying with
 @code{1.0e-4}).
 
 
 @anchor{G_to_T}
-@item G_to_T()
 @findex G_to_T()
+@item G_to_T()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to have a unit of Gauss, to Tesla (by multiplying with
 @code{1.0e-4}).
 
 
 @anchor{C_to_K}
-@item C_to_K()
 @findex C_to_K()
+@item C_to_K()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to have a unit of degree Celsius, to Kelvin (by adding
 @code{273.16}).
 
 
 @anchor{K_to_C}
-@item K_to_C()
 @findex K_to_C()
+@item K_to_C()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to have a unit of Kelvin, to degree Celsius (by subtracting
 @code{273.16}).
 
 
 @anchor{D_to_R}
-@item D_to_R()
 @findex D_to_R()
+@item D_to_R()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to represent angles in degrees, to radians.
 
 
 @anchor{R_to_D}
-@item R_to_D()
 @findex R_to_D()
+@item R_to_D()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to represent angles in radians, to degrees.
 
 
 @anchor{WL_to_WN}
-@item WL_to_WN()
 @findex WL_to_WN()
+@item WL_to_WN()
 Converts a wave length (in @code{m}) or all elements of an 1- or
 more-dimensional array of wave lengths to wavenumbers (in @code{cm^-1}).
 
 
 @anchor{WN_to_WL}
-@item WN_to_WL()
 @findex WN_to_WL()
+@item WN_to_WL()
 Converts a wavenumber (in @code{cm^-1}) or all elements of an 1- or
 more-dimensional array of wavenumbers to wave lengths (in @code{m}).
 
 
 @anchor{F_to_WN}
-@item F_to_WN()
 @findex F_to_WN()
+@item F_to_WN()
 Converts a frequency (in @code{Hz}) or all elements of an 1- or
 more-dimensional array of frequencies to wavenumbers (in @code{cm^-1}).
 
 
 @anchor{WN_to_F}
-@item WN_to_F()
 @findex WN_to_F()
+@item WN_to_F()
 Converts a wavenumber (in @code{cm^-1}) or all elements of an 1- or
 more-dimensional array of wavenumbers to frequencies (in @code{Hz}).
 
 
 @anchor{slice}
-@item slice()
 @findex slice()
+@item slice()
 The function returns a part (slice) of an one-dimensional array. It
 expects at least two arguments, the array the values are to be taken
 from and the number of the start element of the slice to be returned.
@@ -2286,24 +2287,24 @@ array (@pxref{Array ranges}).
 
 
 @anchor{int_slice}
-@item int_slice()
 @findex int_slice()
+@item int_slice()
 Creates an integer array of the size of the first and only argument
 with every element set to @code{0} that can be assigned to an integer
 array of variable length.
 
 
 @anchor{float_slice}
-@item float_slice()
 @findex float_slice()
+@item float_slice()
 Creates an float array of the size of the first and only argument with
 every element set to @code{0.0} that can be assigned to a float array
 of variable length.
 
 
 @anchor{dim}
-@item dim()
 @findex dim()
+@item dim()
 The function returns the dimension of the array passed to it as
 argument. I.e.@: if applied to the array
 @example
@@ -2314,8 +2315,8 @@ it will return @code{3}.
 
 
 @anchor{size}
-@item size()
 @findex size()
+@item size()
 The function normally takes one arguments, an array, and returns its
 length. I.e.@:
 for an array defined as
@@ -2331,8 +2332,8 @@ function returns @code{0}.
 
 
 @anchor{reverse}
-@item reverse()
 @findex reverse()
+@item reverse()
 The function takes a single argument, normally a one- or
 more-dimensional array. For a one-dimensional array it returns another
 array with the order of the elements of the input array reversed. For
@@ -2346,8 +2347,8 @@ number gets returned.
 
 
 @anchor{sprint}
-@item sprint()
 @findex sprint()
+@item sprint()
 The function can be used to create strings with a text that only gets
 determined while the experiment is running, e.g.@: to create label
 strings on demand etc. The function expects at least one argument, a
@@ -2370,8 +2371,8 @@ FOR I = 1 : 10 @{
 
 
 @anchor{mouse_position}
-@item mouse_position()
 @findex mouse_position()
+@item mouse_position()
 The function can be used to determine the mouse position in the display
 windows currently having the focus. It expects either none or a single
 argument, a integer value indicating which mouse buttons must be pressed
@@ -2489,8 +2490,8 @@ Modifier-2 to Modifier-5 functions often are not mapped to a key.
 
 
 @anchor{lin_space}
-@item lin_space()
 @findex lin_space()
+@item lin_space()
 The function returns an array of equally spaced (floating point)
 numbers. It expects three arguments, the start value, then end value and
 the number of points. It then returns an array with as many points as
@@ -2500,8 +2501,8 @@ between adjacent points being identical.
 
 
 @anchor{find_peak}
-@item find_peak()
 @findex find_peak()
+@item find_peak()
 This function can be used fot trying to find a peak in a certain region of
 an 1-dimensional array, the only function argument. The function returns
 useful results only when the spectrum has a rather good signal-to-noise
@@ -2513,8 +2514,8 @@ asymmetric peaks.
 
 
 @anchor{spike_remove}
-@item spike_remove()
 @findex spike_remove()
+@item spike_remove()
 The function tries to remove spikes from 1-dimensional arrays. Before going
 on describing the arguments here's an explanation how it works. That's
 necessary because a fit-it-all function for detecting and removing spikes

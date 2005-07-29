@@ -279,14 +279,14 @@ hjs_fc;
 
 @table @samp
 @anchor{magnet_name()}
-@item magnet_name()
 @findex magnet_name()
+@item magnet_name()
 Returns a string with the name of the magnet that is being used.
 
 
 @anchor{magnet_setup()}
-@item magnet_setup()
 @findex magnet_setup()
+@item magnet_setup()
 The function can be called in the @code{PREPARATIONS} section to set the
 start field and the field step size used in sweeps.  The function
 expects two floating point parameters, the start field or current,
@@ -320,8 +320,8 @@ for sweeping down if a sweep to lower field values is required.
 
 
 @anchor{magnet_fast_init()}
-@item magnet_fast_init()
 @findex magnet_fast_init()
+@item magnet_fast_init()
 Calling this functions in the @code{PREPARATIONS} section will shorten
 the time used for the calibration of the field sweep at the start of the
 experiment for the @strong{AEG} magnet power supplies. Unfortunately,
@@ -335,8 +335,8 @@ This function does not exist for the modules @code{hfs_sfc} and
 
 
 @anchor{set_field()}
-@item set_field()
 @findex set_field()
+@item set_field()
 This function expects one floating point argument for the field value
 and will set the magnetic field to this value. For the Keithley power
 supply (@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4})
@@ -374,8 +374,8 @@ as the experiment the maximum field deviation is printed out.
 
 
 @anchor{sweep_up()}
-@item sweep_up()
 @findex sweep_up()
+@item sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
 the function @code{magnet_setup()} (see above) has been called
 before. It doesn't take an argument and will sweep up the magnet by the
@@ -401,8 +401,8 @@ This function is not available for the Oxford power supplyies (modules
 
 
 @anchor{sweep_down()}
-@item sweep_down()
 @findex sweep_down()
+@item sweep_down()
 This is the exact analog to the function @code{sweep_up()} but will
 sweep the magnetic field down instead of up by the field step size
 defined in @code{magnet_setup()}. The function can only be called in the
@@ -416,8 +416,8 @@ This function is not available for the Oxford magnet power supplies
 
 
 @anchor{reset_field()}
-@item reset_field()
 @findex reset_field()
+@item reset_field()
 This function resets the magnetic field to the start field value defined
 in @code{magnet_setup()} (which has to be called before).
 
@@ -431,8 +431,8 @@ The function can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{get_field()}
-@item get_field()
 @findex get_field()
+@item get_field()
 For the @strong{AEG} magnets this is only a convenience function that
 just calls a function supplied by the gaussmeter used together with the
 magnet power supply to determine the current field.
@@ -448,8 +448,8 @@ not available for the @code{hjs_sfc} module.
 
 
 @anchor{magnet_use_correction()}
-@item magnet_use_correction()
 @findex magnet_use_correction()
+@item magnet_use_correction()
 This function is only defined for the Keithley power supply
 (@code{keithley228a}) and accepts not more than one argument. If it is
 called with no argument or a non-zero number or the string @code{"ON"}
@@ -460,8 +460,8 @@ default @strong{no} corrections are used.
 
 
 @anchor{magnet_use_dac_port()}
-@item magnet_use_dac_port()
 @findex magnet_use_dac_port()
+@item magnet_use_dac_port()
 This function is only defined for the Keithley power supply and tells
 the driver which of the DAC ports of the lock-in amplifier is connected
 (following a voltage divider) to the modulation input of the power
@@ -474,8 +474,8 @@ The function can only be used in the @code{PREPARATIONS} section.
 
 
 @anchor{magnet_sweep()}
-@item magnet_sweep()
 @findex magnet_sweep()
+@item magnet_sweep()
 This function is only available for the Oxford magnet sweep power
 supplies (@code{ips20_4} and @code{ips120_10}) to control their
 continuous sweep. It can be called with either an integer argument of
@@ -500,8 +500,8 @@ The function can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{magnet_sweep_rate()}
-@item magnet_sweep_rate()
 @findex magnet_sweep_rate()
+@item magnet_sweep_rate()
 This function is only available for the Oxford magnet power supplies
 (@code{ips20_4} and @code{ips120_10}) to set or query the sweep rate for
 continuous sweeps.  If no argument is passed to the function the
@@ -511,8 +511,8 @@ IPS120_19) must be passed to the function.
 
 
 @anchor{magnet_goto_field_on_end()}
-@item magnet_goto_field_on_end()
 @findex magnet_goto_field_on_end()
+@item magnet_goto_field_on_end()
 This function is only available for the Oxford magnet power supplies
 (@code{ips20_4} and @code{ips120_10}) and the S-band field modules
 @code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to
@@ -528,8 +528,8 @@ call will be used.
 
 
 @anchor{magnet_B0()}
-@item magnet_B0()
 @findex magnet_B0()
+@item magnet_B0()
 This function is only available for the module @code{hfs_sfc}. For this
 module the magnet is controlled via the output voltage of a DAC. The
 function allows to tell the module about the field at an output voltage
@@ -543,8 +543,8 @@ The function can only be used in the @code{PREPARATIONS} section.
 
 
 @anchor{magnet_slope()}
-@item magnet_slope()
 @findex magnet_slope()
+@item magnet_slope()
 This function is only available for the module @code{hfs_sfc}. For this
 module the magnet is controlled via the output voltage of a DAC. The
 function allows to tell the module about the field change (in Gauss) for
@@ -560,8 +560,8 @@ The function can only be used in the @code{PREPARATIONS} section.
 
 
 @anchor{magnet_calibration_file()}
-@item magnet_calibration_file()
 @findex magnet_calibration_file()
+@item magnet_calibration_file()
 This function is only available for the modules @code{hfs_sfc} and
 @code{hjs_fc}. For both modules the magnet is controlled via the
 output voltage of a DAC (currently only module @code{hjs_daadc}
@@ -674,14 +674,14 @@ loaded.
 
 @table @samp
 @anchor{gaussmeter_name()}
-@item gaussmeter_name()
 @findex gaussmeter_name()
+@item gaussmeter_name()
 Returns a string with the name of the gaussmeter being used.
 
 
 @anchor{gaussmeter_field()}
-@item gaussmeter_field()
 @findex gaussmeter_field()
+@item gaussmeter_field()
 The function returns the current field in Gauss. It takes no arguments
 and can only be used in the @code{EXPERIMENT} section.
 
@@ -692,8 +692,8 @@ will be reported as being @code{123.63 G}.
 
 
 @anchor{find_field()}
-@item find_field()
 @findex find_field()
+@item find_field()
 Use of this function is deprecated, use @code{gaussmeter_field()}
 instead. It is defined in the device modules @code{er035m} and
 @code{er035m_s}. It returns the current value of the magnetic field in
@@ -702,8 +702,8 @@ section.
 
 
 @anchor{measure_field()}
-@item measure_field()
 @findex measure_field()
+@item measure_field()
 Use of this function is deprecated, use @code{gaussmeter_field()}
 instead. It is defined in the device drivers @code{er035m_sa},
 @code{er035m_sas} and @code{pt2025}. It measures the current field and
@@ -712,8 +712,8 @@ returns the value in Gauss. The function can only be called in the
 
 
 @anchor{gaussmeter_resolution()}
-@item gaussmeter_resolution()
 @findex gaussmeter_resolution()
+@item gaussmeter_resolution()
 This function is defined in the device drivers for the Bruker NMR
 gaussmeters (@code{er035m}, @code{er035m_s}, @code{er035m_sa} and
 @code{er035m_sas}), the Metrolab NMR gaussmeter, @code{pt2025} and for
@@ -745,8 +745,8 @@ that the resolution is set to @code{0.1 G}.
 
 
 @anchor{gaussmeter_probe_orientation()}
-@item gaussmeter_probe_orientation()
 @findex gaussmeter_probe_orientation()
+@item gaussmeter_probe_orientation()
 This function is currently implemented for the Metrolab NMR gaussmeter
 @code{pt2025} only. It allows to set or query the current probe
 orientation relative to the field. To set an orientation a parameter of
@@ -758,8 +758,8 @@ queries.
 
 
 @anchor{gaussmeter_upper_search_limit()}
-@item gaussmeter_upper_search_limit()
 @findex gaussmeter_upper_search_limit()
+@item gaussmeter_upper_search_limit()
 This function can be called to set of query the upper search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
@@ -767,8 +767,8 @@ and @code{er035m_sas}. The function can only be called in the
 
 
 @anchor{gaussmeter_lower_search_limit()}
-@item gaussmeter_lower_search_limit()
 @findex gaussmeter_lower_search_limit()
+@item gaussmeter_lower_search_limit()
 This function can be called to set of query the lower search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
@@ -835,14 +835,14 @@ check the arguments to achieve the desired results.
 
 @table @samp
 @anchor{lockin_name()}
-@item lockin_name()
 @findex lockin_name()
+@item lockin_name()
 Returns a string with the name of the lock-in amplifier being used.
 
 
 @anchor{lockin_get_data()}
-@item lockin_get_data()
 @findex lockin_get_data()
+@item lockin_get_data()
 This is a function only to be used in queries, i.e.@: to fetch measured
 values from the lock-in amplifier. This function can only be called in
 the @code{EXPERIMENT} section. The parameters that may be passed to the
@@ -914,8 +914,8 @@ No argument is allowed -- the function returns a floating point value.
 
 
 @anchor{lockin_auto_setup()}
-@item lockin_auto_setup()
 @findex lockin_auto_setup()
+@item lockin_auto_setup()
 This function is only available for the Stanford Research lock-in
 amplifiers @strong{SR810} and @strong{SR830}. Both lock-in amplifiers
 can automatically acquire data at fixed time intervals (or on receiving
@@ -972,8 +972,8 @@ discarded before the measurement continues using the new settings.
 
 
 @anchor{lockin_auto_acquisition()}
-@item lockin_auto_acquisition()
 @findex lockin_auto_acquisition()
+@item lockin_auto_acquisition()
 This function is only available for the Stanford Research lock-in
 amplifiers @strong{SR810} and @strong{SR830}. It allows to start or stop
 the automatic acquisition of data at constant time intervals. Before
@@ -1006,8 +1006,8 @@ lock-in's internal buffers, whenever possible.
 
 
 @anchor{lockin_get_adc_data()}
-@item lockin_get_adc_data()
 @findex lockin_get_adc_data()
+@item lockin_get_adc_data()
 The function returns the voltage at one of the ADC ports at the back
 side of the lock-in amplifier. Allowed values of the required argument
 are between @code{1} and @code{4}, corresponding to the port numbering.
@@ -1017,8 +1017,8 @@ lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
 
 
 @anchor{lockin_dac_voltage()}
-@item lockin_dac_voltage()
 @findex lockin_dac_voltage()
+@item lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
 ports at the back side of the @strong{Stanford Research} lock-in
 amplifier. While for the models @strong{SR510} and @strong{SR530} the
@@ -1047,8 +1047,8 @@ to be used in the initialization of the device.
 
 
 @anchor{lockin_sensitivity()}
-@item lockin_sensitivity()
 @findex lockin_sensitivity()
+@item lockin_sensitivity()
 This function can be used to query or set the sensitivity of the lock-in
 amplifier. If no argument is passed to the function the current
 sensitivity is returned. For the models @strong{SR510} and
@@ -1085,8 +1085,8 @@ mode, i.e.@: without an argument.
 
 
 @anchor{lockin_time_constant()}
-@item lockin_time_constant()
 @findex lockin_time_constant()
+@item lockin_time_constant()
 The function queries or sets the time constant of the lock-in
 amplifier. If no argument is passed to the function the current time
 constant is returned. If there's an argument the time constant is set
@@ -1115,8 +1115,8 @@ query, i.e.@: without an argument.
 
 
 @anchor{lockin_phase()}
-@item lockin_phase()
 @findex lockin_phase()
+@item lockin_phase()
 The function queries or sets the phase of the lock-in amplifier. If
 called with no argument it will return the current phase setting in the
 interval between 0 and 360 degrees. If called with an argument the phase
@@ -1127,8 +1127,8 @@ an argument, i.e.@: as a query.
 
 
 @anchor{lockin_ref_freq()}
-@item lockin_ref_freq()
 @findex lockin_ref_freq()
+@item lockin_ref_freq()
 The function can be used to query the modulation frequency and, for the
 @strong{SR810}, @strong{SR830} and @strong{ER023M} to set the modulation
 frequency (both the other models need an external modulation). If called
@@ -1151,8 +1151,8 @@ query mode, i.e.@: without an argument.
 
 
 @anchor{lockin_ref_level()}
-@item lockin_ref_level()
 @findex lockin_ref_level()
+@item lockin_ref_level()
 This function can be only used with the models @strong{SR810},
 @strong{SR830} and the @strong{ER023M}. It queries (if called with no
 argument) or sets (if called with an argument) the level of the
@@ -1169,8 +1169,8 @@ mode, i.e.@: without an argument.
 
 
 @anchor{lockin_ref_mode()}
-@item lockin_ref_mode()
 @findex lockin_ref_mode()
+@item lockin_ref_mode()
 This function can be only used with the models @strong{SR810},
 @strong{SR830}. It returns the modulation mode, i.e.@: if the internal
 modulation or an external modulation input is used. In the first case
@@ -1179,15 +1179,15 @@ case @code{0} is returned.
 
 
 @anchor{lockin_harmonic()}
-@item lockin_harmonic()
 @findex lockin_harmonic()
+@item lockin_harmonic()
 SR8[13]0: 1-19999
 ER023M:   1-2
 
 
 @anchor{lockin_lock_keyboard()}
-@item lockin_lock_keyboard()
 @findex lockin_lock_keyboard()
+@item lockin_lock_keyboard()
 Usually, during an experiment the keyboard of the lock-in amplifier is
 locked. But for situations where it would be useful to be able to control
 the lock-in also via its keyboard it can be unlocked (and also re-locked)
@@ -1200,8 +1200,8 @@ lock-in amplifiers.
 
 
 @anchor{lockin_conversion_time()}
-@item lockin_conversion_time()
 @findex lockin_conversion_time()
+@item lockin_conversion_time()
 This function exists for the @strong{Bruker ER023M} signal channel only
 and either queries or sets the time that the built-in ADC takes to
 convert a voltage into a binary data value. The voltage resolution is
@@ -1225,8 +1225,8 @@ an argument, i.e.@: as a query.
 
 
 @anchor{lockin_resonator()}
-@item lockin_resonator()
 @findex lockin_resonator()
+@item lockin_resonator()
 This function exists for the @strong{Bruker ER023M} signal channel only
 and queries or returns the selected resonator. If called without an
 argument it returns either @code{1} or @code{2} for the first or second
@@ -1237,8 +1237,8 @@ an argument, i.e.@: as a query.
 
 
 @anchor{lockin_is_overload()}
-@item lockin_is_overload()
 @findex lockin_is_overload()
+@item lockin_is_overload()
 This function exists for the @strong{Bruker ER023M} signal channel only
 and can only be used as a query, i.e.@: it does not allows arguments. It
 can be called before a new data value is fetched from the lock-in to
@@ -1355,14 +1355,14 @@ External amplified trigger input (LeCroy 9400)
 @table @samp
 
 @anchor{digitizer_name()}
-@item digitizer_name()
 @findex digitizer_name()
+@item digitizer_name()
 Returns a string with the name of the digitizer being used.
 
 
 @anchor{digitizer_timebase()}
-@item digitizer_timebase()
 @findex digitizer_timebase()
+@item digitizer_timebase()
 The function queries (if called with no argument) or sets (if called
 with an argument) the time base setting of the oscilloscope. The
 possible time bases depend on the model, please check the manual.
@@ -1372,16 +1372,16 @@ in the @code{EXPERIMENT} section only.
 
 
 @anchor{digitizer_time_per_point()}
-@item digitizer_time_per_point()
 @findex digitizer_time_per_point()
+@item digitizer_time_per_point()
 The function (to be called in the @code{EXPERIMENT} section only)
 returns the time difference (in seconds) between two data points
 measured by the digitizer.
 
 
 @anchor{digitizer_sensitivity()}
-@item digitizer_sensitivity()
 @findex digitizer_sensitivity()
+@item digitizer_sensitivity()
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the sensitivity setting of one of the channels
 of the oscilloscope. It needs at least one argument, the channel, either
@@ -1414,8 +1414,8 @@ argument) only in the @code{EXPERIMENT} section.
 
 
 @anchor{digitizer_num_averages()}
-@item digitizer_num_averages()
 @findex digitizer_num_averages()
+@item digitizer_num_averages()
 This function is intended for the @strong{Tektronix} digitizers, see at
 the end on how to also use it with the @strong{LeCroy 9400}. It queries
 (if called with no argument) or sets (if called with an argument) the
@@ -1445,8 +1445,8 @@ by a factor of the square root of 2 than is to be expected.
 
 
 @anchor{digitizer_averaging()}
-@item digitizer_averaging()
 @findex digitizer_averaging()
+@item digitizer_averaging()
 This function only exists for the @strong{LeCroy 9400} and must be used
 to set up averaging. It expects at least three arguments. The first
 argument is the channel to be used to do the averaging, i.e.@: either
@@ -1470,8 +1470,8 @@ command.
 
 
 @anchor{digitizer_trigger_channel()}
-@item digitizer_trigger_channel()
 @findex digitizer_trigger_channel()
+@item digitizer_trigger_channel()
 The function queries or sets the channel of the digitizing oscilloscope
 to be used as trigger input. Possible arguments or return values are,
 depending on the type of the oscilloscope (return values are always
@@ -1504,8 +1504,8 @@ only if either it has already been called with an argument or in the
 
 
 @anchor{digitizer_record_length()}
-@item digitizer_record_length()
 @findex digitizer_record_length()
+@item digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
 with an argument) the length of the traces measured by the
 digitizer. Because the digitizer only allows certain record lengths
@@ -1518,8 +1518,8 @@ only if either it has already been called with an argument or in the
 
 
 @anchor{digitizer_trigger_position()}
-@item digitizer_trigger_position()
 @findex digitizer_trigger_position()
+@item digitizer_trigger_position()
 The function queries (if called with no argument) or sets (if called
 with an argument) the amount of pre-triggering, i.e.@: the portion of
 the trace shown with data before the trigger was detected. The function
@@ -1534,8 +1534,8 @@ only if either it has already been called with an argument or in the
 
 
 @anchor{digitizer_define_window()}
-@item digitizer_define_window()
 @findex digitizer_define_window()
+@item digitizer_define_window()
 The function must be used to define a time window to be used in later
 calls of the functions to measure an area, an amplitude or to fetch a
 curve from the oscilloscope. Usually it is called with two arguments,
@@ -1571,8 +1571,8 @@ position and width are adjusted to the nearest allowed values.
 
 
 @anchor{digitizer_change_window()}
-@item digitizer_change_window()
 @findex digitizer_change_window()
+@item digitizer_change_window()
 This function can be used to change the position and width of an already
 existing window. As the first parameter the function expects a window
 number as returned by @code{digitizer_define_window()}. The following
@@ -1585,8 +1585,8 @@ cursors on the screen is used for the window width.
 
 
 @anchor{digitizer_window_position()}
-@item digitizer_window_position()
 @findex digitizer_window_position()
+@item digitizer_window_position()
 This function can be used to query the position or to set a new position
 for an already defined window. It expects at least one argument, a window
 number as returned by @code{digitizer_define_window()}. If there is no
@@ -1595,8 +1595,8 @@ second parameter is taken to be the new window position.
 
 
 @anchor{digitizer_window_width()}
-@item digitizer_window_width()
 @findex digitizer_window_width()
+@item digitizer_window_width()
 This function can be used to query the width or to set a new width for
 an already existing window. It expects at least one argument, a window
 number as returned by @code{digitizer_define_window()}. If there is no
@@ -1605,8 +1605,8 @@ second parameter is taken to be the new window width.
 
 
 @anchor{digitizer_display_channel()}
-@item digitizer_display_channel()
 @findex digitizer_display_channel()
+@item digitizer_display_channel()
 This function can be used during the @code{PREPARATIONS} section to tell
 the program that you want a certain channel or a set of channels to be
 displayed in any case. It expects a channel name or number (or a comma
@@ -1623,8 +1623,8 @@ switched on.
 
 
 @anchor{digitizer_start_acquisition()}
-@item digitizer_start_acquisition()
 @findex digitizer_start_acquisition()
+@item digitizer_start_acquisition()
 This function starts an acquisition sequence of the
 oscilloscope. Previously measured curves are discarded and new data
 are sampled until the requested number of averages has been reached.
@@ -1633,8 +1633,8 @@ The function can only be used in the @code{EXPERIMENT} section of the
 
 
 @anchor{digitizer_get_area()}
-@item digitizer_get_area()
 @findex digitizer_get_area()
+@item digitizer_get_area()
 This function is currently only implemented for the @strong{Tektronix}
 oscilloscopes.
 
@@ -1703,8 +1703,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{digitizer_get_area_fast()}
-@item digitizer_get_area_fast()
 @findex digitizer_get_area_fast()
+@item digitizer_get_area_fast()
 This function takes the same arguments as the function
 @code{digitizer_get_area()} and also basically does the same. The only
 difference is that instead of using the function built into the
@@ -1718,8 +1718,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{digitizer_get_curve()}
-@item digitizer_get_curve()
 @findex digitizer_get_curve()
+@item digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
 arguments, the channel the data are to be fetched from and, optionally,
 a window ID as returned by @code{digitizer_define_window()} to specify
@@ -1765,16 +1765,16 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{digitizer_get_curve_fast()}
-@item digitizer_get_curve_fast()
 @findex digitizer_get_curve_fast()
+@item digitizer_get_curve_fast()
 This function is nearly identical to the function
 @code{digitizer_get_curve()} with the only difference that the cursors
 are not positioned at the start and end point of the curve to be fetched.
 
 
 @anchor{digitizer_get_amplitude()}
-@item digitizer_get_amplitude()
 @findex digitizer_get_amplitude()
+@item digitizer_get_amplitude()
 This function is currently only implemented for the @strong{Tektronix}
 oscilloscopes.
 
@@ -1843,8 +1843,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{digitizer_get_amplitude_fast()}
-@item digitizer_get_amplitude_fast()
 @findex digitizer_get_amplitude_fast()
+@item digitizer_get_amplitude_fast()
 This function is nearly identical to @code{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
@@ -1852,8 +1852,8 @@ time interval.
 
 
 @anchor{digitizer_run()}
-@item digitizer_run()
 @findex digitizer_run()
+@item digitizer_run()
 Usually, during an experiment the digitizer starts to do the
 acquisitions following a call of @code{digitizer_start_acquisition()}
 and stops when it's done. To have the digitizer running constantly
@@ -1864,8 +1864,8 @@ section.
 
 
 @anchor{digitizer_copy_curve()}
-@item digitizer_copy_curve()
 @findex digitizer_copy_curve()
+@item digitizer_copy_curve()
 This function is only available for the @code{Tektronix} digitizers and
 allows to save a curve from on of the normal or @code{MATH} channels to
 one of the @code{REF} channels. It takes two arguments, first the source
@@ -1894,8 +1894,8 @@ to, i.e.@: on from
 
 
 @anchor{digitizer_lock_keyboard()}
-@item digitizer_lock_keyboard()
 @findex digitizer_lock_keyboard()
+@item digitizer_lock_keyboard()
 Usually, during an experiment the keyboard of the digitizer is
 locked. But for situations where it would be useful to be able to
 control the digitizer also via its keyboard it can be unlocked (and also
@@ -1998,14 +1998,14 @@ of the pulse sequence has to be committed explicitely by calling
 @table @samp
 
 @anchor{pulser_name()}
-@item pulser_name()
 @findex pulser_name()
+@item pulser_name()
 Returns a string with the name of the digitizer being used.
 
 
 @anchor{pulser_state()}
-@item pulser_state()
 @findex pulser_state()
+@item pulser_state()
 This function can be either used to determine if the pulser is running
 when called without an argument, in which case either @code{1} (i.e.@:
 the pulser is running) or @code{0} (pulser is stopped) is returned. if
@@ -2019,8 +2019,8 @@ the experiment.
 
 
 @anchor{pulser_channel_state()}
-@item pulser_channel_state()
 @findex pulser_channel_state()
+@item pulser_channel_state()
 For the @strong{Tektronix HFS9003} this function can be used to
 determine or set the state of individual channels of the pulser. If
 called with a single integer argument between @code{1} and @code{4} the
@@ -2030,8 +2030,8 @@ the channel can be switched on or off.
 
 
 @anchor{pulser_lock_keyboard()}
-@item pulser_lock_keyboard()
 @findex pulser_lock_keyboard()
+@item pulser_lock_keyboard()
 Usually, during an experiment the keyboard of the pulser (if it has one)
 is locked. But for situations where it would be useful to be able to
 control the pulser also via its keyboard it can be unlocked (and also
@@ -2043,8 +2043,8 @@ argument at all. This command is only available for the
 
 
 @anchor{pulser_update()}
-@item pulser_update()
 @findex pulser_update()
+@item pulser_update()
 This function has to be called after changes have been applied to pulses
 either via any of the following pulser functions or by changing a pulse
 property directly. Before this function is called, all changes are only
@@ -2054,8 +2054,8 @@ the real pulses will change.
 
 
 @anchor{pulser_shift()}
-@item pulser_shift()
 @findex pulser_shift()
+@item pulser_shift()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
 argument is given the positions of all pulses which have a
@@ -2066,8 +2066,8 @@ of the listed pulses are changed.
 
 
 @anchor{pulser_increment()}
-@item pulser_increment()
 @findex pulser_increment()
+@item pulser_increment()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
 argument is given the lengths of all pulses which have a
@@ -2078,8 +2078,8 @@ only the lengths of the listed pulses are changed.
 
 
 @anchor{pulser_pulse_reset()}
-@item pulser_pulse_reset()
 @findex pulser_pulse_reset()
+@item pulser_pulse_reset()
 This function can be called with either no argument or with a list of
 (comma separated) pulse identifiers (pulse numbers will also do). If no
 argument is given all pulses are reset to their initial states, i.e.@:
@@ -2094,8 +2094,8 @@ list are set back to their initial states.
 
 
 @anchor{pulser_next_phase()}
-@item pulser_next_phase()
 @findex pulser_next_phase()
+@item pulser_next_phase()
 When the experiment starts the phases of all pulses are set to the first
 phase of the phase sequence (defined in the @code{PHASE} section)
 associated with the pulses. By calling this function the phases of the
@@ -2106,8 +2106,8 @@ by calling @code{pulser_update()}.
 
 
 @anchor{pulser_phase_reset()}
-@item pulser_phase_reset()
 @findex pulser_phase_reset()
+@item pulser_phase_reset()
 This function can be called with either no argument or with a list of
 @code{PULSE_SETUP}s numbers. A @code{PHASE_SETUP} (see also @ref{Phase
 channel setup}) defines on which output connectors of the pulser the
@@ -2127,8 +2127,8 @@ by calling @code{pulser_update()}.
 
 
 @anchor{pulser_reset()}
-@item pulser_reset()
 @findex pulser_reset()
+@item pulser_reset()
 This function does not take any arguments at all. It switches the pulser
 back to the initial state it was in at the start of the experiment. It
 includes the complete functionality of @code{pulser_pulse_reset()} but
@@ -2137,8 +2137,8 @@ also immediately updates the pulser as it is done by calling
 
 
 @anchor{pulser_stop_on_update()}
-@item pulser_stop_on_update()
 @findex pulser_stop_on_update()
+@item pulser_stop_on_update()
 This function exists for the @strong{Tektronix HFS9003} only. While
 doing updates of the pulser to set new pulse positions and length etc.@:
 it usually gets switched off. By calling this function with an argument
@@ -2148,8 +2148,8 @@ the default behavior.
 
 
 @anchor{pulser_shape_to_defense_minimum_distance()}
-@item pulser_shape_to_defense_minimum_distance()
 @findex pulser_shape_to_defense_minimum_distance()
+@item pulser_shape_to_defense_minimum_distance()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It sets the minimum
 allowed distance between the end of a pulse shaper pulse and the start
@@ -2167,8 +2167,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_defense_to_shape_minimum_distance()}
-@item pulser_defense_to_shape_minimum_distance()
 @findex pulser_defense_to_shape_minimum_distance()
+@item pulser_defense_to_shape_minimum_distance()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It sets the minimum
 allowed distance between the end of a defense pulse and the start of a
@@ -2191,8 +2191,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_automatic_shape_pulses()}
-@item pulser_automatic_shape_pulses()
 @findex pulser_automatic_shape_pulses()
+@item pulser_automatic_shape_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells
 @code{fsc2} to automatically create pulse shaper pulses in the
@@ -2244,8 +2244,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_automatic_twt_pulses()}
-@item pulser_automatic_twt_pulses()
 @findex pulser_automatic_twt_pulses()
+@item pulser_automatic_twt_pulses()
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It tells
 @code{fsc2} to automatically create in the @code{TWT}
@@ -2281,8 +2281,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_minimum_twt_pulse_distance()}
-@item pulser_minimum_twt_pulse_distance
 @findex pulser_minimum_twt_pulse_distance
+@item pulser_minimum_twt_pulse_distance
 This function exists for the Berlin X-band pulser modules
 @code{dg2020_b}, @code{ep385} and @code{rs690} only. It can be used to
 set or query the minimum time the module allows between automatically
@@ -2303,8 +2303,8 @@ function that automatically updates the pulser, i.e.@: either
 
 
 @anchor{pulser_keep_all_pulses()}
-@item pulser_keep_all_pulses()
 @findex pulser_keep_all_pulses()
+@item pulser_keep_all_pulses()
 Usually pulses that in the test run were found to be unused (i.e.@:
 always had a length of @code{0}) are deleted and a warning message is
 printed indicating this. Any further references to or use of these
@@ -2318,8 +2318,8 @@ function (without any arguments).
 
 
 @anchor{pulser_maximum_pattern_length()}
-@item pulser_maximum_pattern_length()
 @findex pulser_maximum_pattern_length()
+@item pulser_maximum_pattern_length()
 This function only exists for the @strong{Sony/Tektronix DG2020} pulser
 (both the @code{dg2020_b} and @code{dg2020_b} module) and the
 @strong{Tektronix HFS9003} pulser.
@@ -2366,8 +2366,8 @@ by using this function.
 
 
 @anchor{pulser_phase_switch_delay()}
-@item pulser_phase_switch_delay()
 @findex pulser_phase_switch_delay()
+@item pulser_phase_switch_delay()
 This function is only implemented for the Frankfurt version the
 @strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. It lets you
 specify the time a phase pulse has to be set to a new phase before the
@@ -2389,8 +2389,8 @@ delays the program will abort with an error message.
 
 
 @anchor{pulser_grace_period()}
-@item pulser_grace_period()
 @findex pulser_grace_period()
+@item pulser_grace_period()
 This function is only implemented for the Frankfurt version the
 @strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. Like the time a
 phase pulse must start before the pulse it was set for can be set via
@@ -2427,8 +2427,8 @@ period.
 
 
 @anchor{pulser_show_pulses()}
-@item pulser_show_pulses()
 @findex pulser_show_pulses()
+@item pulser_show_pulses()
 This function allows to view the pulses as they become set during the
 test run. If this function is called an additional window pops up after
 the end of the test run which shows the position of all pulses at the
@@ -2471,8 +2471,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_dump_pulses()}
-@item pulser_dump_pulses()
 @findex pulser_dump_pulses()
+@item pulser_dump_pulses()
 This function requests the user to select a file name and then writes
 all pulse settings during the test run into the file in a format
 suitable to be used as input for the @code{fsc2_pulses} utility.
@@ -2484,8 +2484,8 @@ of an @code{EDL} script.
 
 
 @anchor{pulser_pulse_minimum_specs()}
-@item pulser_pulse_minimum_specs()
 @findex pulser_pulse_minimum_specs()
+@item pulser_pulse_minimum_specs()
 This function is available only for the @code{rb_pulser} module, i.e.@:
 the pulser used with the 275 GHz spectrometer in Leiden. It expects a
 single argument, a pulse, e.g. @code{P1}. If it is the first pulse of
@@ -2553,14 +2553,14 @@ in the @code{DEVICES} section.
 @table @samp
 
 @anchor{synthesizer_name()}
-@item synthesizer_name()
 @findex synthesizer_name()
+@item synthesizer_name()
 Returns a string with the name of the synthesizer being used.
 
 
 @anchor{synthesizer_state()}
-@item synthesizer_state()
 @findex synthesizer_state()
+@item synthesizer_state()
 The function queries or sets the output state of the synthesizer. i.e.@:
 to switch output of RF on or off. If called to set the output state it
 accepts one argument, either a non-zero value or the string @code{"ON"}
@@ -2575,8 +2575,8 @@ RF output.
 
 
 @anchor{synthesizer_frequency()}
-@item synthesizer_frequency()
 @findex synthesizer_frequency()
+@item synthesizer_frequency()
 The function queries or sets the RF output frequency. If called to set
 the frequency it accepts a frequency as the only argument. For the
 @code{HP8647A} the frequency must be in the range between @w{250 kHz}
@@ -2597,8 +2597,8 @@ frequency has been set previously.
 
 
 @anchor{synthesizer_attenuation()}
-@item synthesizer_attenuation()
 @findex synthesizer_attenuation()
+@item synthesizer_attenuation()
 The function queries or sets the output attenuation. If called to set
 the attenuation it accepts one argument, the attenuation.
 
@@ -2624,8 +2624,8 @@ attenuation has been set previously.
 
 
 @anchor{synthesizer_minimum_attenuation()}
-@item synthesizer_minimum_attenuation()
 @findex synthesizer_minimum_attenuation()
+@item synthesizer_minimum_attenuation()
 The function can be used to restrict the minimum output attenuation to
 avoid to inadvertently set too high output power levels. It can be
 called to both query and sets the minimum output attenuation. If called
@@ -2637,8 +2637,8 @@ function.
 
 
 @anchor{synthesizer_step_frequency()}
-@item synthesizer_step_frequency()
 @findex synthesizer_step_frequency()
+@item synthesizer_step_frequency()
 The function queries or sets the RF step frequency to be used in calls
 of the functions @code{synthesizer_sweep_up()} and
 @code{synthesizer_sweep_down()} (see below). In order to set the step
@@ -2652,8 +2652,8 @@ argument can't be used).
 
 
 @anchor{synthesizer_sweep_up()}
-@item synthesizer_sweep_up()
 @findex synthesizer_sweep_up()
+@item synthesizer_sweep_up()
 If there has been set both a frequency and a step frequency the function
 will increment the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
@@ -2661,8 +2661,8 @@ section.
 
 
 @anchor{synthesizer_sweep_down()}
-@item synthesizer_sweep_down()
 @findex synthesizer_sweep_down()
+@item synthesizer_sweep_down()
 If there has been set both a frequency and a step frequency the function
 will decrement the synthesizers frequency. It returns the newly set
 frequency. The function can only be called in the @code{EXPERIMENT}
@@ -2670,16 +2670,16 @@ section.
 
 
 @anchor{synthesizer_reset_frequency()}
-@item synthesizer_reset_frequency()
 @findex synthesizer_reset_frequency()
+@item synthesizer_reset_frequency()
 If a frequency has been set at all the function will reset the
 synthesizers frequency to the frequency that has been set at first. The
 function can only be called in the @code{EXPERIMENT} section.
 
 
 @anchor{synthesizer_use_table()}
-@item synthesizer_use_table()
 @findex synthesizer_use_table()
+@item synthesizer_use_table()
 This function tells the program to also adjust the attenuation when a
 new frequency is set. To find out which attenuation has to be set for a
 new frequency a table file is used. The name of this table file can be
@@ -2724,8 +2724,8 @@ printed and the attenuation for the nearest frequency is used.
 
 
 @anchor{synthesizer_att_ref_freq()}
-@item synthesizer_att_ref_freq()
 @findex synthesizer_att_ref_freq()
+@item synthesizer_att_ref_freq()
 When a table file is used there remains the question for which frequency
 to use the attenuation has been set e.g.@: by
 @code{synthesizer_attenuation()}. To set this reference frequency the
@@ -2738,8 +2738,8 @@ configuration file for the device by changing the definition of
 
 
 @anchor{synthesizer_modulation()}
-@item synthesizer_modulation()
 @findex synthesizer_modulation()
+@item synthesizer_modulation()
 Using this function for the @code{HP8647A}, @code{HP8648B} and @code{RS
 SML01} the type, source and amplitude of the modulation can be set, for
 the @code{HP8672A} both type and amplitude. It can set all of these
@@ -2824,8 +2824,8 @@ external AC coupled source and @w{50%} amplitude.
 
 
 @anchor{synthesizer_mod_type()}
-@item synthesizer_mod_type()
 @findex synthesizer_mod_type()
+@item synthesizer_mod_type()
 As an alternative to the function @code{synthesizer_modulation()} the
 modulation type can be also set via the function
 @code{synthesizer_mod_type()}. It accepts a string argument, either
@@ -2836,8 +2836,8 @@ modulation or @code{"OFF"} to switch off modulation. The @code{HP8647A},
 
 
 @anchor{synthesizer_mod_source()}
-@item synthesizer_mod_source()
 @findex synthesizer_mod_source()
+@item synthesizer_mod_source()
 This function is only available for the @code{HP8647A}, @code{HP8648B}
 and the @code{R&S SML01}. If the modulation type has been set before the
 modulation source can be set directly via this function.
@@ -2875,8 +2875,8 @@ program.
 
 
 @anchor{synthesizer_mod_freq()}
-@item synthesizer_mod_freq()
 @findex synthesizer_mod_freq()
+@item synthesizer_mod_freq()
 This function only exists for the @code{Rohde&Schwarz} model
 @code{SML01} synthesizer. It can be used to change the modulation
 frequency if modulation is switched on and the synthesizer has been set
@@ -2896,8 +2896,8 @@ program.
 
 
 @anchor{synthesizer_mod_ampl()}
-@item synthesizer_mod_ampl()
 @findex synthesizer_mod_ampl()
+@item synthesizer_mod_ampl()
 
 If the modulation type has been set this function can be used to set the
 modulation amplitude. For the @code{HP8647A} and @code{HP8648B} the
@@ -2928,8 +2928,8 @@ switched off, trying to do so will result in aborting the program.
 
 
 @anchor{synthesizer_pulse_state()}
-@item synthesizer_pulse_state()
 @findex synthesizer_pulse_state()
+@item synthesizer_pulse_state()
 This function is only available for the @code{Rohde&Schwarz SML01}
 synthesizer with @code{SML-B3} option. These devices have a pulse
 modulation mode that allows th creation of RF pulses of user defined
@@ -2942,8 +2942,8 @@ modulation mode is switched off.
 
 
 @anchor{synthesizer_pulse_trigger_slope()}
-@item synthesizer_pulse_trigger_slope()
 @findex synthesizer_pulse_trigger_slope()
+@item synthesizer_pulse_trigger_slope()
 This function is only available for the @code{Rohde&Schwarz SML01}
 synthesizer with @code{SML-B3} option. This function can be used to
 query or set if the trigger leading to the creation a RF pulse is
@@ -2957,8 +2957,8 @@ the argument @code{"NEGATIVE"} or @code{"NEG"} triggers are detected on
 the falling edge.
 
 @anchor{synthesizer_pulse_width()}
-@item synthesizer_pulse_width()
 @findex synthesizer_pulse_width()
+@item synthesizer_pulse_width()
 This function is only available for the @code{Rohde&Schwarz SML01}
 synthesizer with @code{SML-B3} option. It allows to query or set the
 length of the RF pulse generated by the synthseizer in pulse modulation
@@ -2968,8 +2968,8 @@ accordingly. The pulse length must be between @w{20 ns} and @w{1.3 s}.
 
 
 @anchor{synthesizer_pulse_delay()}
-@item synthesizer_pulse_delay()
 @findex synthesizer_pulse_delay()
+@item synthesizer_pulse_delay()
 This function is only available for the @code{Rohde&Schwarz SML01}
 synthesizer with @code{SML-B3} option. It allows to query or set the
 delay between receiving an external trigger and the creation of the RF
@@ -3017,14 +3017,14 @@ the @code{EDL} script.
 @table @samp
 
 @anchor{temp_contr_name()}
-@item temp_contr_name()
 @findex temp_contr_name()
+@item temp_contr_name()
 Returns a string with the name of the temperature controller being used.
 
 
 @anchor{temp_contr_temperature()}
-@item temp_contr_temperature()
 @findex temp_contr_temperature()
+@item temp_contr_temperature()
 This function accepts no arguments and returns the temperature at the
 currently active sample channel and with the currently selected unit.
 
@@ -3035,8 +3035,8 @@ been selected temperatures are returned in Kelvin.
 
 
 @anchor{temp_contr_sample_channel()}
-@item temp_contr_sample_channel()
 @findex temp_contr_sample_channel()
+@item temp_contr_sample_channel()
 This function returns, when called with no argument, the currently
 selected sample channel. For the @code{Lake Shore 330} it returns
 @code{1} for channel @code{A} and @code{2} for channel @code{B} while
@@ -3054,8 +3054,8 @@ in the configuration file for the device.
 
 
 @anchor{temp_contr_sensor_unit()}
-@item temp_contr_sensor_unit()
 @findex temp_contr_sensor_unit()
+@item temp_contr_sensor_unit()
 The function either returns or sets the units returned by the device on
 temperature readings. If used to set a unit the function must be called
 with the value @code{0} or @code{"K"} to set the unit to Kelvin,
@@ -3071,8 +3071,8 @@ milli-Volts.
 
 
 @anchor{temp_contr_lock_keyboard()}
-@item temp_contr_lock_keyboard()
 @findex temp_contr_lock_keyboard()
+@item temp_contr_lock_keyboard()
 Usually, during an experiment the keyboard of the temperature controller
 is locked. But for situations where it would be useful to be able to
 control the device also via its keyboard it can be unlocked (and also
@@ -3112,26 +3112,26 @@ in the @code{DEVICES} section.
 @table @samp
 
 @anchor{voltmeter_name()}
-@item voltmeter_name()
 @findex voltmeter_name()
+@item voltmeter_name()
 Returns a string with the name of the voltmeter being used.
 
 
 @anchor{voltmeter_get_data()}
-@item voltmeter_get_data()
 @findex voltmeter_get_data()
+@item voltmeter_get_data()
 The function returns the current voltage measured by the voltmeter.
 
 
 @anchor{voltmeter_ac_measurement()}
-@item voltmeter_ac_measurement()
 @findex voltmeter_ac_measurement()
+@item voltmeter_ac_measurement()
 The function switches the voltmeter to doing AC measurements.
 
 
 @anchor{voltmeter_dc_measurement()}
-@item voltmeter_dc_measurement()
 @findex voltmeter_dc_measurement()
+@item voltmeter_dc_measurement()
 The function switches the voltmeter to doing DC measurements.
 
 
@@ -3170,14 +3170,14 @@ script.
 @table @samp
 
 @anchor{boxcar_name()}
-@item boxcar_name()
 @findex boxcar_name()
+@item boxcar_name()
 Returns a string with the name of the boxcar integrator being used.
 
 
 @anchor{boxcar_curve_length()}
-@item boxcar_curve_length()
 @findex boxcar_curve_length()
+@item boxcar_curve_length()
 Returns an integer variable with the length of curves to be sent by the
 boxcar integrator.
 
@@ -3186,8 +3186,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{boxcar_get_curve()}
-@item boxcar_get_curve()
 @findex boxcar_get_curve()
+@item boxcar_get_curve()
 Fetches a curve from the boxcar integrator. Two first argument is either
 a number, either @code{0} for a live curve or @code{1} for a memory
 curve, or one of the strings @code{"LC"}, @code{"LIVECURVE"},
@@ -3201,8 +3201,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{boxcar_start_acquisition()}
-@item boxcar_start_acquisition()
 @findex boxcar_start_acquisition()
+@item boxcar_start_acquisition()
 Function starts a new acquisition.
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -3210,8 +3210,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{boxcar_stop_acquisition()}
-@item boxcar_stop_acquisition()
 @findex boxcar_stop_acquisition()
+@item boxcar_stop_acquisition()
 Function stops a running acquisition.
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -3219,8 +3219,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{boxcar_single_shot()}
-@item boxcar_single_shot()
 @findex boxcar_single_shot()
+@item boxcar_single_shot()
 The function expects either one or two arguments, the number of one or
 two live curves (i.e.@: either @code{1} or @code{2}). The function
 starts an acquisition and immediately stops the acquisition again when
@@ -3264,14 +3264,14 @@ in the @code{DEVICES} section.
 @table @samp
 
 @anchor{freq_counter_name()}
-@item freq_counter_name()
 @findex freq_counter_name()
+@item freq_counter_name()
 Returns a string with the name of the frequency counter being used.
 
 
 @anchor{freq_counter_measure()}
-@item freq_counter_measure()
 @findex freq_counter_measure()
+@item freq_counter_measure()
 Returns a floating point value with the measured frequency. The function
 does not accept any parameters and can only by used in the
 @code{EXPERIMENT} section.
@@ -3347,14 +3347,14 @@ in the @code{DEVICES} section.
 @table @samp
 
 @anchor{daq_name()}
-@item daq_name()
 @findex daq_name()
+@item daq_name()
 Returns a string with the name of the DAC being used.
 
 
 @anchor{daq_ai_channel_setup()}
-@item daq_ai_channel_setup()
 @findex daq_ai_channel_setup()
+@item daq_ai_channel_setup()
 This function is only available for the PCI-MIO-16E-1 card. It is
 required that this function is called before analog input (AI) can be
 done to setup the properties of the input channels.
@@ -3434,8 +3434,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_ai_acq_setup()}
-@item daq_ai_acq_setup()
 @findex daq_ai_acq_setup()
+@item daq_ai_acq_setup()
 This function is only available for the PCI-MIO-16E-1 card. It is
 required that this function is called before analog input (AI) can be
 done using the card to setup the trigger mode, trigger sources and
@@ -3592,8 +3592,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_ai_start_acquisition()}
-@item daq_ai_start_acquisition()
 @findex daq_ai_start_acquisition()
+@item daq_ai_start_acquisition()
 This function is only available for the PCI-MIO-16E-1 card. It is to be
 used to start an analog input acquisition according to the paramter set
 by previous calls of the functions @code{daq_ai_channel_setup()} and
@@ -3604,8 +3604,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_ai_get_curve()}
-@item daq_ai_get_curve()
 @findex daq_ai_get_curve()
+@item daq_ai_get_curve()
 This function is only available for the PCI-MIO-16E-1 card and is used
 to fetch the acquired data from the card. It expects no arguments.
 What type of variable the function returns depends on the number of
@@ -3619,8 +3619,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_trigger_setup()}
-@item daq_trigger_setup()
 @findex daq_trigger_setup()
+@item daq_trigger_setup()
 This function is only available for the PCI-MIO-16E-1 card and can be
 used to switch the first trigger input line (named @code{"PFI0"} or
 @code{"TRIG1"} when specified in the function @code{daq_ai_acq_setup()}
@@ -3677,8 +3677,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_start_continuous_counter()}
-@item daq_start_continuous_counter()
 @findex daq_start_continuous_counter()
+@item daq_start_continuous_counter()
 This function is only available for the PCI-MIO-16E-1 card. It starts
 one of the two counters of the card. The counter will count until it is
 stopped by a call of the @code{EDL} function @code{daq_stop_counter()}.
@@ -3699,8 +3699,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_start_timed_counter()}
-@item daq_start_timed_counter()
 @findex daq_start_timed_counter()
+@item daq_start_timed_counter()
 This function is only available for the PCI-MIO-16E-1 card and starts
 one of the counters of the card. The counter will count for a specified
 time and then stops automatically. It requires at least two arguments,
@@ -3728,8 +3728,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_timed_count()}
-@item daq_timed_count()
 @findex daq_timed_count()
+@item daq_timed_count()
 This function is only available for the PCI-MIO-16E-1 card is and very
 similar to the previous function, @code{daq_start_timed_counter()},
 i.e.@: it runs a counter for a specified of time, but in contrast it
@@ -3742,8 +3742,8 @@ The largest value that can be returned is @w{16777215}, i.e.@: @w{2^24
 
 
 @anchor{daq_intermediate_count()}
-@item daq_intermediate_count()
 @findex daq_intermediate_count()
+@item daq_intermediate_count()
 This function is only available for the PCI-MIO-16E-1 card and returns
 the current value of a counter. The counter may still be running, in
 which case each call of the function will return an updated value
@@ -3762,8 +3762,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_final_count()}
-@item daq_final_count()
 @findex daq_final_count()
+@item daq_final_count()
 This function is only available for the PCI-MIO-16E-1 card and waits for
 an counter to stop and only then returns the final value of the
 counter. Trying to call this function on a counter that has been started
@@ -3785,8 +3785,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_stop_counter()}
-@item daq_stop_counter()
 @findex daq_stop_counter()
+@item daq_stop_counter()
 This function is only available for the PCI-MIO-16E-1 card and can be
 used to stop a counter independently of the purpose (i.e.@: counting or
 pulse train creation, see below) it was started for. It requires one
@@ -3800,8 +3800,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_single_pulse()}
-@item daq_single_pulse()
 @findex daq_single_pulse()
+@item daq_single_pulse()
 This function is only available for the PCI-MIO-16E-1 card.  Beside
 being used as event counters the counters can also be used to create
 pulses on its default output port. This function can be used to create a
@@ -3816,8 +3816,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_continuous_pulses()}
-@item daq_continuous_pulses()
 @findex daq_continuous_pulses()
+@item daq_continuous_pulses()
 This function is only available for the PCI-MIO-16E-1 card.  It allows
 to create a continuous train of pulses. It requires at least two
 arguments, the first being the counter to be used, specified by a
@@ -3840,8 +3840,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_dio_read()}
-@item daq_dio_read()
 @findex daq_dio_read()
+@item daq_dio_read()
 This function is only available for the PCI-MIO-16E-1 card. Beside
 counters the card also can do digital input and output. There are 8
 lines that can be monitored or set. Using this function the current
@@ -3871,8 +3871,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_dio_write()}
-@item daq_dio_write()
 @findex daq_dio_write()
+@item daq_dio_write()
 This function is only available for the PCI-MIO-16E-1 card. The 8 DIO
 lines of the card can not only be monitored (see the previous function,
 @code{counter_dio_read()}) but also set, which this function is to be
@@ -3906,8 +3906,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_ao_channel_setup()}
-@item daq_ao_channel_setup()
 @findex daq_ao_channel_setup()
+@item daq_ao_channel_setup()
 This function is only available for the PCI-MIO-16E-1 card. It allows to
 configure individulaly the analog outputs (AO) of the card. Both output
 channels can be used to do biplor or unipolar output. While in bipolar
@@ -3935,8 +3935,8 @@ and use the internal reference voltage.
 
 
 @anchor{daq_freq_out()}
-@item daq_freq_out()
 @findex daq_freq_out()
+@item daq_freq_out()
 This function is only available for the PCI-MIO-16E-1 card. The card has
 an @code{FREQ_OUT} in and this function can be used to determine or set
 the frequency output at this pin (or switch output off). If called with
@@ -3963,8 +3963,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{daq_reserve_dac()}
-@item daq_reserve_dac()
 @findex daq_reserve_dac()
+@item daq_reserve_dac()
 This function can be used to reserve (or un-reserve) a DAC so that it
 can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DAC to keep an @code{EDL} script from
@@ -4001,8 +4001,8 @@ operation failed.
 
 
 @anchor{daq_set_voltage()}
-@item daq_set_voltage()
 @findex daq_set_voltage()
+@item daq_set_voltage()
 This function has to be used to output a voltage at (one of) the output
 ports. For the PCI-MIO-16E-1 and ME-6000 and ME-6100 cards the first
 argument has to be the output port, specified by one of the symbolic
@@ -4060,8 +4060,8 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 
 
 @anchor{daq_maximum_output_voltage()}
-@item daq_maximum_output_voltage()
 @findex daq_maximum_output_voltage()
+@item daq_maximum_output_voltage()
 This function is only available for the home-built AD and DA converter.
 This device has a potentiometer at the front side that can be used to
 reduce the output voltage level from the maximum level of @w{+10 V}. By
@@ -4089,8 +4089,8 @@ The function can be used in the @code{EXPERIMENT} as well as in the
 
 
 @anchor{daq_reserve_adc()}
-@item daq_reserve_adc()
 @findex daq_reserve_adc()
+@item daq_reserve_adc()
 This function is only available for the home-built AD and DA converter
 and can be used to reserve (or un-reserve) the ADC so that it can only be
 used with a pass-phrase. This will mainly be used by modules for other
@@ -4117,8 +4117,8 @@ operation failed.
 
 
 @anchor{daq_get_voltage()}
-@item daq_get_voltage()
 @findex daq_get_voltage()
+@item daq_get_voltage()
 This function is only available for the home-built AD and DA converter
 and the Rulbus RB8509 ADC card. For the home-built AD and DA converter
 it accepts no arguments and returns the current voltage at the input of
@@ -4148,8 +4148,8 @@ want to be able to read in the voltage at the ADC.
 
 
 @anchor{daq_dac_parameter()}
-@item daq_dac_parameter()
 @findex daq_dac_parameter()
+@item daq_dac_parameter()
 This function is available only for the ME-6000 and ME-6100 cards and
 the home-built AD and DA converter. It can be used to determine the
 current parameter of a DAC (channel). It returns an array of three
@@ -4162,8 +4162,8 @@ identical).
 
 
 @anchor{daq_trigger_mode()}
-@item daq_trigger_mode()
 @findex daq_trigger_mode()
+@item daq_trigger_mode()
 Some of the Rulbus RB8509 ADC cards allow to trigger a conversion on
 receipt of an external trigger. When in internal trigger mode a
 conversion is triggered automatically by calling the function
@@ -4176,8 +4176,8 @@ external trigger mode.
 
 
 @anchor{daq_gain()}
-@item daq_gain()
 @findex daq_gain()
+@item daq_gain()
 The Rulbus RB8509 ADC cards have an pre-amplifier with a gain factor
 that can be set to either @code{1}, @code{2}, @code{4} or @code{8} using
 this function. Trying to set it to any other values will result in an
@@ -4218,13 +4218,13 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @table @samp
 
 @anchor{dio_name()}
-@item dio_name()
 @findex dio_name()
+@item dio_name()
 Returns a string with the name of the DIO device being used.
 
 @anchor{dio_reserve_dio()}
-@item dio_reserve_dio()
 @findex dio_reserve_dio()
+@item dio_reserve_dio()
 This function can be used to reserve (or un-reserve) a DIO so that it
 can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DIO to keep an @code{EDL} script from
@@ -4254,8 +4254,8 @@ operation failed.
 
 
 @anchor{dio_mode()}
-@item dio_mode()
 @findex dio_mode()
+@item dio_mode()
 The WITIO-48 card has two DIO chips, both allowing 24 bit wide input and
 output. These DIOs can be further split up into sub-DIOs of smaller
 width. By calling this function you can set the way a DIO is split up.
@@ -4296,8 +4296,8 @@ you want to be able to change the mode of the DIO.
 
 
 @anchor{dio_value()}
-@item dio_value()
 @findex dio_value()
+@item dio_value()
 This function is used to either input or output a value. It expects at
 least two arguments, the DIO to be used (preferably use the symbolic
 names @code{DIO1} and @code{DIO2}) and a channel. Depending on the mode
@@ -4419,14 +4419,14 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @table @samp
 
 @anchor{counter_name()}
-@item counter_name()
 @findex counter_name()
+@item counter_name()
 Returns a string with the name of the event counter being used.
 
 
 @anchor{counter_start_continuous_counter()}
-@item counter_start_continuous_counter()
 @findex counter_start_continuous_counter()
+@item counter_start_continuous_counter()
 This functions starts one of the counters of the card. The counter will
 count until it is stopped by a call of the @code{EDL} function
 @code{counter_stop_counter()}. It requires at least one argument, the
@@ -4452,8 +4452,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_start_timed_counter()}
-@item counter_start_timed_counter()
 @findex counter_start_timed_counter()
+@item counter_start_timed_counter()
 This function starts one of the counters of the card. The counter will
 count for a specified time and then stops automatically. It requires at
 least two arguments, the counter to be used, specified by a symbolic
@@ -4487,8 +4487,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_timed_count()}
-@item counter_timed_count()
 @findex counter_timed_count()
+@item counter_timed_count()
 This function is very similar to the previous function,
 @code{counter_start_timed_counter()}, i.e.@: it runs a counter for a
 specified of time, but in contrast it waits for the requested duration
@@ -4501,8 +4501,8 @@ The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31
 
 
 @anchor{counter_intermediate_count()}
-@item counter_intermediate_count()
 @findex counter_intermediate_count()
+@item counter_intermediate_count()
 The function returns the current value of a counter. The counter may
 still be running, in which case each call of the function will return an
 updated value according to the number of events that happened between
@@ -4520,8 +4520,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_final_count()}
-@item counter_final_count()
 @findex counter_final_count()
+@item counter_final_count()
 This function waits for an counter to stop and only then returns the
 final value of the counter. Trying to call this function on a counter
 that has been started by the function
@@ -4542,8 +4542,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_stop_counter()}
-@item counter_stop_counter()
 @findex counter_stop_counter()
+@item counter_stop_counter()
 This function can be used to stop a counter independently of the purpose
 (i.e.@: counting or pulse train creation, see below) it was started
 for. It requires one argument, the counter to be stopped. It must be
@@ -4556,8 +4556,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_single_pulse()}
-@item counter_single_pulse()
 @findex counter_single_pulse()
+@item counter_single_pulse()
 Beside being used as event counters the counters can also be used to
 create pulses on its default output port. This function can be used to
 create a single pulse on the output port. It requires two arguments, the
@@ -4572,8 +4572,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_continuous_pulses()}
-@item counter_continuous_pulses()
 @findex counter_continuous_pulses()
+@item counter_continuous_pulses()
 This function allows to create a continuous train of pulses. It requires
 at least two arguments, the first being the counter to be used,
 specified by a symbolic value between @code{CH0} and @code{CH3}. If the
@@ -4595,8 +4595,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_dio_read()}
-@item counter_dio_read()
 @findex counter_dio_read()
+@item counter_dio_read()
 Beside counters the card also can do digital input and output. There are
 8 lines that can be monitored or set. Using this function the current
 state of any subset of these 8 lines can be determined. If the function
@@ -4625,8 +4625,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{counter_dio_write()}
-@item counter_dio_write()
 @findex counter_dio_write()
+@item counter_dio_write()
 The 8 DIO lines of the card can not only be monitored (see the previous
 function, @code{counter_dio_read()}) but also set, which this function
 is to be used for. The function requires at least one integer argument,
@@ -4719,14 +4719,14 @@ automatically to the ones they had in the previously run experiment.
 @table @samp
 
 @anchor{ccd_camera_name()}
-@item ccd_camera_name()
 @findex ccd_camera_name()
+@item ccd_camera_name()
 Returns a string with the name of the CCD camera being used.
 
 
 @anchor{ccd_camera_roi()}
-@item ccd_camera_roi()
 @findex ccd_camera_roi()
+@item ccd_camera_roi()
 The function is used to query or set the region of interest (ROI) of the
 CCD chip to be used when fetching spectra or images from the
 camera. When no arguments are specified the function returns an array
@@ -4760,8 +4760,8 @@ previously run experiment.
 
 
 @anchor{ccd_camera_binning()}
-@item ccd_camera_binning()
 @findex ccd_camera_binning()
+@item ccd_camera_binning()
 The function allows to set or query the binning (i.e.@: the combining of
 several pixels) done by the camera. If called with no arguments the
 function returns an array with 2 elements. The first element is the
@@ -4805,8 +4805,8 @@ the one they had in a previously run experiment.
 
 
 @anchor{ccd_camera_binning_method()}
-@item ccd_camera_binning_method()
 @findex ccd_camera_binning_method()
+@item ccd_camera_binning_method()
 This function lets you query or set the binning method to be used.  You
 can use either hardware binning, i.e.@: binning is done by the camera
 itself, or binning can be done by the software, in which case the whole
@@ -4832,8 +4832,8 @@ previously run experiment.
 
 
 @anchor{ccd_camera_exposure_time()}
-@item ccd_camera_exposure_time()
 @findex ccd_camera_exposure_time()
+@item ccd_camera_exposure_time()
 The function can be used to determine or set the exposure time used by
 the camera. If called without an argument the function returns the
 exposure time in seconds. If called with an argument, the exposure time
@@ -4847,8 +4847,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ccd_camera_clear_cycles()}
-@item ccd_camera_clear_cycles()
 @findex ccd_camera_clear_cycles()
+@item ccd_camera_clear_cycles()
 The function allows to determine or set the number of clear cycles of
 the CCD chip to be done before an exposure is started. If called without
 an argument the function returns the number of clear cycles. If an
@@ -4866,8 +4866,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ccd_camera_get_image()}
-@item ccd_camera_get_image()
 @findex ccd_camera_get_image()
+@item ccd_camera_get_image()
 The function starts an exposure, fetches the resulting image from the
 camera and returns it to the @code{EDL} script as a 2-dimensional
 array. The size of the image depends on the setting of the region of
@@ -4879,8 +4879,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ccd_camera_get_spectrum()}
-@item ccd_camera_get_spectrum()
 @findex ccd_camera_get_spectrum()
+@item ccd_camera_get_spectrum()
 The function starts an exposure, fetches the result from the camera and
 returns it as an 1-dimensionl array to the @code{EDL} script. The length
 of the array depends on the width of the region of interest (ROI) and
@@ -4892,8 +4892,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ccd_camera_temperature()}
-@item ccd_camera_temperature()
 @findex ccd_camera_temperature()
+@item ccd_camera_temperature()
 The function can be used to determine the current temperature of the CCD
 chip or to set a target temperature for the chip. If called without an
 argument the current temperature (in Kelvin) of the chip is returned.
@@ -4907,15 +4907,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{ccd_camera_pixel_size()}
-@item ccd_camera_pixel_size()
 @findex ccd_camera_pixel_size()
+@item ccd_camera_pixel_size()
 The function takes no arguments and returns the width of a pixel of the
 CCD chip.
 
 
 @anchor{ccd_camera_pixel_area()}
-@item ccd_camera_pixel_area()
 @findex ccd_camera_pixel_area()
+@item ccd_camera_pixel_area()
 The function accepts no arguments and returns an 1-dimensional array with
 two elements, where the first argument is the number of pixels of the
 CCD chip in the (horizintal) @i{x}-direction and the second element is
@@ -5005,14 +5005,14 @@ supported monochromatore).
 @table @samp
 
 @anchor{monochromator_name()}
-@item monochromator_name()
 @findex monochromator_name()
+@item monochromator_name()
 Returns a string with the name of the monochromator being used.
 
 
 @anchor{monochromator_wavelength()}
-@item monochromator_wavelength()
 @findex monochromator_wavelength()
+@item monochromator_wavelength()
 If called with no argument the function returns the current center
 wavelength (in m) of the grating. If called with an argument the grating
 is moved to the specified center wavelength (which must be in the range
@@ -5023,8 +5023,8 @@ automatically aborts the currently running scan.
 
 
 @anchor{monochromator_wavenumber()}
-@item monochromator_wavenumber()
 @findex monochromator_wavenumber()
+@item monochromator_wavenumber()
 If called with no argument this function returns the current center
 wavenumber in @code{cm^-1} of the grating, either in absolute units or,
 if a laser line position has been set, in relative units, i.e.@: as the
@@ -5039,8 +5039,8 @@ automatically aborts the currently running scan.
 
 
 @anchor{monochromator_laser_line()}
-@item monochromator_laser_line()
 @findex monochromator_laser_line()
+@item monochromator_laser_line()
 The function is only supported for wavenumber-driven SPEX
 monochromators. It allows to set (or query if the function is called
 without an argument) to set a laser line position. If such a laser line
@@ -5070,8 +5070,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_scan_setup()}
-@item monochromator_scan_setup()
 @findex monochromator_scan_setup()
+@item monochromator_scan_setup()
 The function is only supported for SPEX monochromators. These have a
 special scan mode, where scans can be done going from low to high
 wavelengths or from high to low wavenumbers (during a scan the
@@ -5096,8 +5096,8 @@ automatically aborts the currently running scan.
 
 
 @anchor{monochromator_start_scan()}
-@item monochromator_start_scan()
 @findex monochromator_start_scan()
+@item monochromator_start_scan()
 The function is only supported for SPEX monochromators and requires that
 the function @code{monochromator_scan_setup()} has been called
 previously to define the scan parameters. It slews the monochromator to
@@ -5115,8 +5115,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_scan_step()}
-@item monochromator_scan_step()
 @findex monochromator_scan_step()
+@item monochromator_scan_step()
 The function is only supported for SPEX monochromators and requires that
 both the function @code{monochromator_scan_setup()} has been called
 previously to define the scan parameters and that the monochromator has
@@ -5132,8 +5132,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_shutter_limits()}
-@item monochromator_shutter_limits()
 @findex monochromator_shutter_limits()
+@item monochromator_shutter_limits()
 The function is only supported for SPEX monochromators that have
 shutters to protect the PMT or APD etc.@: from excitation light in a
 certain frequency range. The function can be used to query or set these
@@ -5150,8 +5150,8 @@ automatically aborts the currently running scan.
 
 
 @anchor{monochromator_groove_density()}
-@item monochromator_groove_density()
 @findex monochromator_groove_density()
+@item monochromator_groove_density()
 If called with no argument the function returns the number of grooves
 per meter of the currently used grating. If called with an integer
 argument it returns the number of grooves per m of the grating indexed
@@ -5163,8 +5163,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_grating()}
-@item monochromator_grating()
 @findex monochromator_grating()
+@item monochromator_grating()
 The function is only supported for SpectraPro-300i monochromators. It
 queries or sets a new grating. If called with no argument the function
 returns the number of the currently used grating (an integer between 1
@@ -5178,8 +5178,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_turret()}
-@item monochromator_turret()
 @findex monochromator_turret()
+@item monochromator_turret()
 The function is only supported for SpectraPro-300i monochromators. If
 called with no argument the function returns the number of the currently
 used turret of the monochromator (an integer number starting at 1). If
@@ -5191,8 +5191,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_wavelength_axis()}
-@item monochromator_wavelength_axis()
 @findex monochromator_wavelength_axis()
+@item monochromator_wavelength_axis()
 The function requires that the module for a CCD camera is available that
 returns information about the number of pixels of the CCD chip and the
 distance between pixels. It then returns an array with two elements,
@@ -5248,8 +5248,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_wavenumber_axis()}
-@item monochromator_wavenumber_axis()
 @findex monochromator_wavenumber_axis()
+@item monochromator_wavenumber_axis()
 This function is similar to the function
 @code{monochromator_wavelength_axis()} but instead of returning values
 to be used for setting a wavelength axis the values are suitable for
@@ -5264,8 +5264,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_calc_wavelength()}
-@item monochromator_calc_wavelength()
 @findex monochromator_calc_wavelength()
+@item monochromator_calc_wavelength()
 The function is only supported for SpectraPro-300i monochromators. It
 requires that the module for a CCD camera is available that returns
 information about the number of pixels of the CCD chip and the distance
@@ -5290,8 +5290,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_load_calibration()}
-@item monochromator_load_calibration()
 @findex monochromator_load_calibration()
+@item monochromator_load_calibration()
 The function is only supported for SpectraPro-300i monochromators. It
 tries to load a file with calibration data for one or more of the
 gratings. For each grating three values are required for a complete
@@ -5331,8 +5331,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_set_calibration()}
-@item monochromator_set_calibration()
 @findex monochromator_set_calibration()
+@item monochromator_set_calibration()
 The function is only supported for SpectraPro-300i monochromators. It
 allows to set calibration data for a grating directly instead of reading
 them from a file. It can also used to reset the calibration for a
@@ -5351,8 +5351,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_install_grating()}
-@item monochromator_install_grating()
 @findex monochromator_install_grating()
+@item monochromator_install_grating()
 The function is only supported for SpectraPro-300i monochromators. It
 can be used to tell the monochromator about a new grating.  It expects
 two arguments, the grating number (an integer between 1 and the maximum
@@ -5376,8 +5376,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_zero_offset()}
-@item monochromator_zero_offset()
 @findex monochromator_zero_offset()
+@item monochromator_zero_offset()
 The function is only supported for SpectraPro-300i monochromators. It
 allows to either query or set the zero offset of a grating. The zero
 offset is basically an angle that results from misalignments of the
@@ -5406,8 +5406,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_grating_adjust()}
-@item monochromator_grating_adjust()
 @findex monochromator_grating_adjust()
+@item monochromator_grating_adjust()
 The function is only supported for SpectraPro-300i monochromators. The
 value that can be queried or set by this function is used to adjust the
 angle by which the grating is rotated when moving it to a certain
@@ -5439,8 +5439,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{monochromator_calibrate()}
-@item monochromator_calibrate()
 @findex monochromator_calibrate()
+@item monochromator_calibrate()
 The function is takes different arguments for the @code{SpectraPro-300i} and
 the @code{SPEX} monochromator.
 
@@ -5571,14 +5571,14 @@ in the @code{DEVICES} section.
 @table @samp
 
 @anchor{powersupply_name()}
-@item powersupply_name()
 @findex powersuppy_name()
+@item powersupply_name()
 Returns a string with the name of the power supply being used.
 
 
 @anchor{powersupply_channel_state()}
-@item powersupply_channel_state()
 @findex powersupply_channel_state()
+@item powersupply_channel_state()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
 allows to switch the channels of the power supply on or off. It requires two
 arguments. The first one is the channel, which must be either @code{CH1} or
@@ -5591,8 +5591,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{powersupply_damping()}
-@item powersupply_damping()
 @findex powersupply_damping()
+@item powersupply_damping()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
 allows to switch damping of the output of one of the channels of the power
 supply on or off. It requires two arguments. The first one is the channel,
@@ -5605,8 +5605,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{powersupply_voltage()}
-@item powersupply_voltage()
 @findex powersupply_voltage()
+@item powersupply_voltage()
 This function allows to either set or query the output voltage.
 
 For the @strong{MCN700-2000} when called with no argument the
@@ -5631,8 +5631,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{powersupply_voltage_limit()}
-@item powersupply_voltage_limit()
 @findex powersupply_voltage_limit()
+@item powersupply_voltage_limit()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
 allows to query the current setting of the voltage limit. It expects one
 argument, the channel, which must be specified as either @code{CH1} or
@@ -5648,8 +5648,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{powersupply_current()}
-@item powersupply_current()
 @findex powersupply_current()
+@item powersupply_current()
 This function allows to either set or query the output current
 
 For the @strong{MCN700-2000} when called with no argument the
@@ -5674,8 +5674,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 
 
 @anchor{powersupply_current_limit()}
-@item powersupply_current_limit()
 @findex powersupply_current_limit()
+@item powersupply_current_limit()
 This function exists only for the @strong{Thurlby&Thandar} power supply and
 allows to query the current setting of the current limit. It expects one
 argument, the channel, which must be specified as either @code{CH1} or
@@ -5729,14 +5729,14 @@ module.
 @table @samp
 
 @anchor{mw_attenuator_name()}
-@item mw_attenuator_name()
 @findex mw_attenuator_name()
+@item mw_attenuator_name()
 Returns a string with the name of the power supply being used.
 
 
 @anchor{mw_attenuator_load_calibration()}
-@item mw_attenuator_load_calibration()
 @findex mw_attenuator_load_calibration()
+@item mw_attenuator_load_calibration()
 This function can be used to load a calibration table file different
 from the one read in when the module is loaded. It expects a single
 argument, a (string) variable with the name of the table file. If no
@@ -5779,8 +5779,8 @@ The function can only be used in the @code{PREPARATIONS} section of an
 
 
 @anchor{mw_attenuator_initial_attenuation()}
-@item mw_attenuator_initial_attenuation()
 @findex mw_attenuator_initial_attenuation()
+@item mw_attenuator_initial_attenuation()
 The module has no way to find out to find out the setting of the
 attenuation at the start of the experiment but this information is
 obviously required to change the attenuation to a new value. Thus this
@@ -5791,8 +5791,8 @@ function may not be called again (until a new experiment is started).
 
 
 @anchor{mw_attenuator_attenuation()}
-@item mw_attenuator_attenuation()
 @findex mw_attenuator_attenuation()
+@item mw_attenuator_attenuation()
 Thsi function can be used to query the current attenuation or set a new
 one. If called with no argument it returns the currently attenuation. If
 it is called with an argument the attenuation is set to this new value.
@@ -5853,13 +5853,13 @@ chopper gets stopped automatically.
 @table @samp
 
 @anchor{chopper_name()}
-@item chopper_name()
 @findex chopper_name()
+@item chopper_name()
 Returns a string with the name of the chopper being used.
 
 @anchor{chopper_rotation_frequency()}
-@item chopper_rotation_frequency()
 @findex chopper_rotation_frequency()
+@item chopper_rotation_frequency()
 This function allows to either query or set the rotation speed of the
 chopper. When called without an argument the function returns the
 current rotation frequency or @w{0 Hz} when the chopper is stopped.  If
@@ -5876,8 +5876,8 @@ experiment is started.
 
 
 @anchor{chopper_create_trigger()}
-@item chopper_create_trigger()
 @findex chopper_create_trigger()
+@item chopper_create_trigger()
 This function makes the electronics controlling the chopper create a
 @code{TTL} trigger pulse the next time the light path gets opened,
 e.g.@: to trigger an acquisition.
@@ -5900,8 +5900,8 @@ section.
 @table @samp
 
 @anchor{get_phase_cycled_area()}
-@item get_phase_cycled_area()
 @findex get_phase_cycled_area()
+@item get_phase_cycled_area()
 This function is for doing a complete measurement sequence in a phase
 cycled experiment. It goes through a complete phase cycle, setting the
 pulser, fetching the data from the digitizer and finally returning the
