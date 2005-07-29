@@ -2305,14 +2305,14 @@ can only be used in the @code{EXPERIMENT} section
 @findex date()
 @item date()
 When called without an argument the function returns a string with the
-current date in a form like @w{@code{Sun Jun 17, 2000}}. Alternatively,
+current date in a form like @w{"@code{Sun Jun 17, 2000}"}. Alternatively,
 it may be called with a single argument, a string representing a format
-string acceptable to the @code{strftime(3)} function, please read the
-manual page for this function (type @w{@code{man 3 strftime}} at the
+string acceptable to the @code{strftime(3)} function .Please read the
+manual page for this function (type "@w{@code{man 3 strftime}"} at the
 command prompt to read it) to find out how such a format string must
 look like. Allowed conversion specifiers are
-@code{aAbBcCdDeFGghHIjklmMnPrRsStTuUVWxXyYzZ+%}, where @code{cCxXyY}
-may be preceeded by an @code{E} and @code{deHImMSuUVwWy} by an @code{O}.
+"@code{"aAbBcCdDeFGghHIjklmMnPrRsStTuUVWxXyYzZ+%}", where "@code{cCxXyY}"
+may be preceeded by an "@code{E} and "@code{deHImMSuUVwWy}" by an @code{O}.
 
 
 @anchor{time()}
@@ -2334,7 +2334,9 @@ the script) returns the time (in seconds) since the last call of the
 functions as a floating point value. When called for the very first time
 it returns the time since the start of the experiment (i.e.@: the time
 the start of the @code{EXPERIMENT} section was processed). The time
-returned by the function has micro-second resolution.
+returned by the function has micro-second resolution. During the test
+run of the @code{EDL} script the function returns a very rough guess of
+the time that will be required in the real run of the experiment.
 
 
 @anchor{wait()}
