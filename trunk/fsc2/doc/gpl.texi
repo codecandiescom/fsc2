@@ -290,7 +290,7 @@ of promoting the sharing and reuse of software generally.
 @heading No Warranty
 @end iftex
 @ifinfo
-@center No Warranty
+@strong{No Warranty}
 @end ifinfo
 
 @item
@@ -320,7 +320,7 @@ POSSIBILITY OF SUCH DAMAGES.
 @heading End of Terms and Conditions
 @end iftex
 @ifinfo
-@center End of Terms and Conditions
+@strong{End of Terms and Conditions}
 @end ifinfo
 
 @page
@@ -335,9 +335,9 @@ to attach them to the start of each source file to most effectively
 convey the exclusion of warranty; and each file should have at least
 the ``copyright'' line and a pointer to where the full notice is found.
 
-@smallexample
-@var{one line to give the program's name and a brief idea of what it does.}
-Copyright (C) @var{yyyy}  @var{name of author}
+@quotation
+@var{one line to give the program's name and a brief idea of what it does.}@*
+Copyright (C) @var{yyyy}@ @ @ @ @ @ @ @  @var{name of author}
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -352,19 +352,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-@end smallexample
+@end quotation
 
 Also add information on how to contact you by electronic and paper mail.
 
 If the program is interactive, make it output a short notice like this
 when it starts in an interactive mode:
 
-@smallexample
-Gnomovision version 69, Copyright (C) 19@var{yy} @var{name of author}
+@quotation
+Gnomovision version 69, Copyright (C) 19@var{yy} @ @ @ @ @ @ @ @
+@var{name of author}@*
 Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type `show c' for details.
-@end smallexample
+@end quotation
 
 The hypothetical commands @samp{show w} and @samp{show c} should show
 the appropriate parts of the General Public License.  Of course, the

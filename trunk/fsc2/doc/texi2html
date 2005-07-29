@@ -692,7 +692,7 @@ sub T2H_DEFAULT_print_Top
     if ($T2H_THIS_SECTION) {
         # if top-level node has content, then print it with extra header
         print $fh "<h1>$T2H_NAME{Top}</h1><p>"
-            unless ($T2H_HAS_TOP_HEADING);
+            unless $T2H_HAS_TOP_HEADING;
         t2h_print_lines($fh, $T2H_THIS_SECTION)
     } else {
         # top-level node is fully enclosed in @ifnothtml
@@ -1814,10 +1814,10 @@ $index_properties = {
 #
 
 %format_map = ( 'quotation'  => 'blockquote',
-                # lists
+                 # lists
                 'itemize'    => 'ul',
                 'enumerate'  => 'ol',
-                # poorly supported
+                 # poorly supported
                 'flushleft'  => 'pre',
                 'flushright' => 'pre',
               );
@@ -1828,28 +1828,28 @@ $index_properties = {
 
 $complex_format_map = {
     example =>      [
-                      q{ "<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL" .
+                      q{ "<table><tr>$T2H_EXAMPLE_INDENT_CELL" .
                          '<td class="example"><pre>' },
                       q{ '</pre></td></tr></table>' }
                     ],
     smallexample => [
-                      q{ "<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL" .
+                      q{ "<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL" .
                          '<td class="smallexample">' .
-                         "<FONT SIZE=$T2H_SMALL_FONT_SIZE><pre>" },
-                      q{ '</FONT></pre></td></tr></table>' }
+                         "<font size=$T2H_SMALL_FONT_SIZE><pre>" },
+                      q{ '</pre></font></td></tr></table>' }
                     ],
     display =>      [
-                      q{ "<TABLE><tr>$T2H_EXAMPLE_INDENT_CELL" .
+                      q{ "<table><tr>$T2H_EXAMPLE_INDENT_CELL" .
                          '<td class="display"><pre ' .
                          'style="font-family: serif">' },
                       q{ '</pre></td></tr></table>' }
                     ],
-    smalldisplay => [ q{ "<TABLE><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL" .
+    smalldisplay => [ q{ "<table><tr>$T2H_SMALL_EXAMPLE_INDENT_CELL" .
                          '<td class="smalldisplay">' .
-                         "<FONT SIZE=$T2H_SMALL_FONT_SIZE>" .
+                         "<font size=$T2H_SMALL_FONT_SIZE>" .
                          '<pre style="font-family: serif">' },
-                      q{ '</pre></FONT></td></tr></table>' }
-                    ]
+                      q{ '</pre></font></td></tr></table>' }
+                    ],
 };
 
 $complex_format_map->{ lisp }        = $complex_format_map->{ example };
@@ -3098,15 +3098,17 @@ while ($_ = &next_line) {
 	    	push @lines, &debug("<$format_map{$tag}>" .
 				($in_pre ? '' : "\n"), __LINE__);
 	    	next;
-		} elsif (exists $complex_format_map->{$tag}) {
-	    	my $start = eval $complex_format_map->{$tag}->[0];
-	    	if ($@) {
-	        	print "$ERROR: eval of complex_format_map->{$tag}->[0] " .
-					  "$complex_format_map->{$tag}->[0]: $@";
+		} elsif ( exists $complex_format_map->{ $tag } ) {
+	    	my $start = eval $complex_format_map->{ $tag }->[ 0 ];
+	    	if ( $@ ) {
+	        	print "$ERROR: eval of complex_format_map->{ $tag }->[ 0 ] " .
+					  "$complex_format_map->{$tag}->[ 0 ]: $@";
 	        	$start = '<pre>'
 	    	}
 	    	$in_pre = 1 if $start =~ /<pre/;
-	    	push @lines, html_debug($start. ($in_pre ? '' : "\n"), __LINE__);
+			push @lines, html_debug( "</p>\n", __LINE__)
+            	if &html_pop_if( 'p' );                   # JTT 2005-07-29
+	    	push @lines, html_debug( $start. ($in_pre ? '' : "\n"), __LINE__);
 	    	next;
 		} elsif ( $tag eq 'table' ) {
 	  		# anorland@hem2.passagen.se
@@ -3306,19 +3308,19 @@ while ($_ = &next_line) {
             $dont_html = 1;
         }
     } elsif ($end_tag) {
-        if ($format_map{$end_tag}) {
-            $in_pre = 0 if $format_map{$end_tag} eq 'pre';
+        if ( $format_map{ $end_tag } ) {
+            $in_pre = 0 if $format_map{ $end_tag } eq 'pre';
             $in_list--
-                if $format_map{$end_tag} eq 'ul' ||
-                   $format_map{$end_tag} eq 'ol' ;
-            &html_pop_if('p');
-            &html_pop_if('li');
-            &html_pop_if();
-            push @lines, &debug("</$format_map{$end_tag}>\n", __LINE__);
-            push @lines, &html_debug('', __LINE__);
-        } elsif (exists $complex_format_map->{$end_tag}) {
-            my $end = eval $complex_format_map->{$end_tag}->[1];
-            if ($@) {
+                if $format_map{ $end_tag } eq 'ul' ||
+                   $format_map{ $end_tag } eq 'ol' ;
+            &html_pop_if( 'p' );
+            &html_pop_if( 'li' );
+            &html_pop_if( );
+            push @lines, &debug( "</$format_map{$end_tag}>\n", __LINE__ );
+            push @lines, &html_debug( '', __LINE__ );
+        } elsif ( exists $complex_format_map->{ $end_tag } ) {
+            my $end = eval $complex_format_map->{$end_tag}->[ 1 ];
+            if ( $@ ) {
                 print "$ERROR: eval of complex_format_map->{$end_tag}->[1] $complex_format_map->{$end_tag}->[0]: $@";
                 $end = '</pre>'
             }
@@ -3326,13 +3328,13 @@ while ($_ = &next_line) {
             if ( $end_tag =~ /example/ ) {   # get rid of newline before end of
                 chomp $lines[ $#lines ];     # example table (JTT, 14-4-2003)
             }
-            push @lines, html_debug($end, __LINE__);
-        } elsif ($end_tag =~ /^(|f|v|multi)table$/) {
-            unless (@tables) {
+            push @lines, html_debug( $end, __LINE__ );
+        } elsif ( $end_tag =~ /^(|f|v|multi)table$/ ) {
+            unless ( @tables ) {
                 warn "$ERROR \@end $end_tag without \@*table\n";
                 next;
             }
-            &html_pop_if('p');
+            &html_pop_if( 'p' );
             ($table_type, $in_table) = split($;, shift @tables );
             unless ($1 eq $table_type) {
                 warn "$ERROR \@end $end_tag without matching \@$end_tag\n";
@@ -3416,8 +3418,10 @@ while ($_ = &next_line) {
                        $name =~ /index/i;
                 if ($in_top && /heading/){
                     $T2H_HAS_TOP_HEADING = 1;
-                    $_ = &debug("<H$level>$name</H$level>\n", __LINE__);
-                    &html_push_if('body');
+                    push @lines, html_debug( "</p>\n", __LINE__)
+                        if &html_pop_if( 'p' );              # JTT 2005-07-29
+                    $_ = &debug("<h$level>$name</h$level>\n", __LINE__);
+                    &html_push_if( 'body' );
                     print "# top heading, section $name, level $level\n"
                         if $T2H_DEBUG & $DEBUG_TOC;
                 } else {
@@ -3545,7 +3549,7 @@ while ($_ = &next_line) {
 		{
 		    EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
 		}
-		&html_pop_if('p');
+		&html_pop_if( 'p' );
 		if ($html_element eq 'dl' || $html_element eq 'dd') {
 		    if ( $things_map{$in_table} && ! $what ) {
 			# special case to allow @table @bullet for instance
@@ -3584,14 +3588,14 @@ while ($_ = &next_line) {
 
     if ($_ eq "\n" && ! $in_pre) {
 		next if $#lines >= 0 && $lines[$#lines] eq "\n";
-		if ($html_element eq 'p') {
+		if ( $html_element eq 'p' ) {
 			push @lines, &debug("</p><p>\n", __LINE__);
 		}
-		elsif ($html_element eq 'body' || $html_element eq 'blockquote' ||
-			   $html_element eq 'dd' || $html_element eq 'li')
+		elsif ( $html_element eq 'body' || $html_element eq 'blockquote' ||
+			    $html_element eq 'dd' || $html_element eq 'li')
 		{
-			&html_push('p');
-			push @lines, &debug("<p>\n", __LINE__);
+			&html_push( 'p' );
+			push @lines, &debug( "<p>\n", __LINE__ );
 		}
 	}
     # otherwise
@@ -4118,7 +4122,7 @@ while (@lines) {
      warn "$ERROR no image file for $base: $_" unless ( $image && -e $image );
      if ( $in_line =~ /\s*/ and $next_line =~ /^\s*<\/p><p>\s*$/
 		  and $T2H_CENTER_IMAGE ) {
-		 "<center><img src=\"$image\" alt=\"$base\"></center>$in_line";
+		 "</p><center><img src=\"$image\" alt=\"$base\"></center><p>$in_line";
 	 } else {
 		 "<img src=\"$image\" alt=\"$base\">$in_line";
 	 }
@@ -4273,8 +4277,10 @@ while (@lines3) {
 	    $docid  = "DOCF$foot_num";
 	    $footid = "FOOT$foot_num";
 	    $foot = "($foot_num)";
-	    push@foot_lines, "<H3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</H3>\n";
-	    $text = "<p>$text" unless $text =~ /^\s*<p>/;
+	    push @foot_lines,
+			"<h3>" . &t2h_anchor($footid, "$d#$docid", $foot) . "</h3>\n";
+    	$text = "<p>$text"
+			unless $text =~ /^\s*<p>/;
 	    push @foot_lines, "$text\n";
 	    $_ = $before . &t2h_anchor($docid, "$docu_foot#$footid", $foot) . $after;
 	}
@@ -4283,9 +4289,9 @@ while (@lines3) {
     # remove unnecessary <p>
     #
     if (/^\s*<p>\s*$/) {
-	next if $end_of_para++;
+		next if $end_of_para++;
     } else {
-	$end_of_para = 0;
+		$end_of_para = 0;
     }
     # otherwise
     push @doc_lines, $_;
@@ -4907,35 +4913,37 @@ sub html_reset {
 }
 
 sub html_push {
-    local ( $what ) = @_;
+    my $what = $_[ 0 ];
     push @html_stack, $html_element;
     $html_element = $what;
 }
 
 sub html_push_if {
-    local ( $what ) = @_;
+    my $what = $_[ 0 ];
     push @html_stack, $html_element
 		if $html_element && $html_element ne 'p';
     $html_element = $what;
 }
 
 sub html_pop {
-    $html_element = pop(@html_stack);
+    $html_element = pop @html_stack;
 }
 
 sub html_pop_if {
-    local($elt);
-
-    if (@_) {
-	foreach $elt (@_) {
-	    if ($elt eq $html_element) {
-		$html_element = pop(@html_stack) if @html_stack;
-		last;
-	    }
-	}
+    my $ret = 0;
+    if ( @_ ) {
+		foreach my $elt ( @_ ) {
+	    	if ( $elt eq $html_element ) {
+				$html_element = pop @html_stack if @html_stack;
+                $ret = 1;
+				last;
+	    	}
+		}
     } else {
-	$html_element = pop(@html_stack) if @html_stack;
+        $html_element = pop @html_stack if @html_stack;
     }
+
+    return $ret;
 }
 
 sub html_debug {
