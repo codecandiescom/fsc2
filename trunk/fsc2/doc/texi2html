@@ -855,7 +855,7 @@ sub T2H_DEFAULT_print_page_foot
 <font size="-1">
 This document was generated
 $T2H_ADDRESS
-using (a slightly modified version of) <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
+using a modified version of <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
 </font>
 $T2H_PRE_BODY_CLOSE
 </body>
@@ -1077,7 +1077,7 @@ EOT
 
 $T2H_PRE_ABOUT = <<EOT;
 This document was generated $T2H_ADDRESS
-using (a slightly modified version of) <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
+using a modified version of <a href="$T2H_HOMEPAGE"><i>texi2html</i></a>
 <p></p>
 EOT
 
