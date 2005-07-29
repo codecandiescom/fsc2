@@ -172,9 +172,14 @@ fit into the display window anymore.
 @strong{Descriptions of output functions}:
 
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{init_1d()}
 @findex init_1d()
+
+@table @samp
+
 @item init_1d()
 This function initializes the display for one-dimensional data
 representation -- without a call to this function (or @code{init_2d()},
@@ -808,8 +813,13 @@ The sine of 0.500000 is 0.479426
 There are special sequences allowed in the @i{format string}. They all
 start with an @i{escape character}, the backslash @code{\}. Here's a
 list of all recognized special sequences:
-@table @samp
+
+@c The cindex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @cindex escape characters (in @code{print()} function)
+
+@table @samp
 @item \n
 Linefeed character: Ends a line, everything following it starts on a new
 line. Thus several lines can be printed at once by one call of
@@ -888,10 +898,14 @@ time you try to write out data in this case.
 @strong{Descriptions of file handling functions}:
 
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{get_file()}
 @findex get_file()
+
+@table @samp
+
 @item get_file()
 Opens a new file and returns a unique identifier for the file that can
 be stored in an integer variable and is to be used in calls to functions
@@ -1469,9 +1483,13 @@ pixels smaller than the default size use the label string
 All the following functions can only be used in the @code{EXPERIMENT}
 section of an @code{EDL} script.
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{layout()}
 @findex layout()
+
+@table @samp
 @item layout()
 The functions tells the program how to layout the buttons and sliders in
 the window, either vertically or horizontally. The function must be
@@ -1964,11 +1982,14 @@ The following mathematical function can be used in all section of an
 @noindent
 @strong{Descriptions of mathematical functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{abs()}
 @findex abs()
+
+@table @samp
+
 @item abs()
 Returns the absolute value of an integer or floating point number (or
 all the elements of an 1- or more-dimensional array) .
@@ -2279,9 +2300,13 @@ elements of an 1- or more-dimensional array).
 @strong{Descriptions of auxiliary functions}:
 
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{end()}
 @findex end()
+
+@table @samp
 @item end()
 The function simulates the user clicking onto the @code{Stop} button in
 the display window. If there is an @code{ON_STOP} label flow of control

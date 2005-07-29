@@ -1367,12 +1367,12 @@ External amplified trigger input (LeCroy 9400)
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML in't valid
 
+@anchor{digitizer_name()}
 @findex digitizer_name()
-@item digitizer_name()
 
 @table @samp
 
-@anchor{digitizer_name()}
+@item digitizer_name()
 Returns a string with the name of the digitizer being used.
 
 
@@ -2009,17 +2009,15 @@ of the pulse sequence has to be committed explicitely by calling
 @noindent
 @strong{Descriptions of pulser functions}:
 
-
-
-@table @samp
-
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML in't valid
 
-@findex pulser_name()
-@item pulser_name()
-
 @anchor{pulser_name()}
+@findex pulser_name()
+
+@table @samp
+
+@item pulser_name()
 Returns a string with the name of the digitizer being used.
 
 
