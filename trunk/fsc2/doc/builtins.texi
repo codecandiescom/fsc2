@@ -133,6 +133,45 @@ automatic scaling happens, old data are simply discarded when they don't
 fit into the display window anymore.
 
 
+@noindent
+@strong{List of all output functions}:
+@table @samp
+@item @ref{init_1d()}
+@item @ref{init_2d()}
+@item @ref{display_1d()}
+@item @ref{display_2d()}
+@item @ref{display()}
+@item @ref{display_mode()}
+@item @ref{change_scale_1d()}
+@item @ref{change_scale_2d()}
+@item @ref{change_scale()}
+@item @ref{vert_rescale_1d()}
+@item @ref{vert_rescale_2d()}
+@item @ref{vert_rescale()}
+@item @ref{change_label_1d()}
+@item @ref{change_label_2d()}
+@item @ref{change_label()}
+@item @ref{rescale_1d()}
+@item @ref{rescale_2d()}
+@item @ref{rescale()}
+@item @ref{clear_curve_1d()}
+@item @ref{clear_curve_2d()}
+@item @ref{clear_curve()}
+@item @ref{draw_marker_1d()}
+@item @ref{draw_marker_2d()}
+@item @ref{draw_marker()}
+@item @ref{clear_marker_1d()}
+@item @ref{clear_marker_2d()}
+@item @ref{clear_marker()}
+@item @ref{print()}
+@item @ref{show_message()}
+@end table
+
+
+@noindent
+@strong{Descriptions of output functions}:
+
+
 @table @samp
 @anchor{init_1d()}
 @findex init_1d()
@@ -830,6 +869,25 @@ file -- @code{fsc2} will automatically ask for a file name the first
 time you try to write out data in this case.
 
 
+@noindent
+@strong{List of all file handling functions}:
+@table @samp
+@item @ref{get_file()}
+@item @ref{open_file()}
+@item @ref{clone_file()}
+@item @ref{save()}
+@item @ref{fsave()}
+@item @ref{ffsave()}
+@item @ref{save_program()}
+@item @ref{save_output()}
+@item @ref{save_comment()}
+@end table
+
+
+@noindent
+@strong{Descriptions of file handling functions}:
+
+
 @table @samp
 
 @anchor{get_file()}
@@ -1372,7 +1430,41 @@ pixels smaller than the default size use the label string
 @code{"@@-3circle"}.
 
 
-@subsection List of Interaction Functions
+@noindent
+@strong{List of all interaction functions}:
+@table @samp
+@item @ref{layout()}
+@item @ref{toolbox_changed()}
+@item @ref{toolbox_wait()}
+@item @ref{button_create()}
+@item @ref{button_delete()}
+@item @ref{button_state()}
+@item @ref{button_changed()}
+@item @ref{slider_create()}
+@item @ref{slider_delete()}
+@item @ref{slider_value()}
+@item @ref{slider_changed()}
+@item @ref{input_create()}
+@item @ref{input_delete()}
+@item @ref{input_value()}
+@item @ref{input_changed()}
+@item @ref{output_create()}
+@item @ref{output_delete()}
+@item @ref{output_value()}
+@item @ref{menu_create()}
+@item @ref{menu_delete()}
+@item @ref{menu_choice()}
+@item @ref{menu_changed()}
+@item @ref{object_delete()}
+@item @ref{object_change_label()}
+@item @ref{object_enable()}
+@item @ref{hide_toolbox()}
+@end table
+
+
+@noindent
+@strong{Descriptions of interaction functions}:
+
 
 All the following functions can only be used in the @code{EXPERIMENT}
 section of an @code{EDL} script.
@@ -1833,6 +1925,46 @@ or @code{"OFF"} (or @code{0} )to redisplay it).
 The following mathematical function can be used in all section of an
 @code{EDL} script that allow the use of functions.
 
+
+@noindent
+@strong{List of all mathematical functions}:
+@table @samp
+@item @ref{abs()}
+@item @ref{acos()}
+@item @ref{acosh()}
+@item @ref{asin()}
+@item @ref{asinh()}
+@item @ref{atan()}
+@item @ref{atanh()}
+@item @ref{ceil()}
+@item @ref{cos()}
+@item @ref{cosh()}
+@item @ref{float()}
+@item @ref{floor()}
+@item @ref{grandom()}
+@item @ref{index_of_max()}
+@item @ref{index_of_min()}
+@item @ref{int()}
+@item @ref{round()}
+@item @ref{max_of()}
+@item @ref{mean()}
+@item @ref{mean_part_array()}
+@item @ref{min_of()}
+@item @ref{random()}
+@item @ref{rms()}
+@item @ref{set_seed()}
+@item @ref{sin()}
+@item @ref{sinh()}
+@item @ref{sqrt()}
+@item @ref{tan()}
+@item @ref{tanh()}
+@end table
+
+
+@noindent
+@strong{Descriptions of mathematical functions}:
+
+
 @table @samp
 
 @anchor{abs()}
@@ -2108,6 +2240,43 @@ elements of an 1- or more-dimensional array).
 @node Auxiliary functions, , Mathematical functions, Built-in Functions
 @section Auxiliary functions
 @cindex auxiliary functions
+
+
+@noindent
+@strong{List of all auxiliary functions}:
+@table @samp
+@item @ref{end()}
+@item @ref{abort()}
+@item @ref{date()}
+@item @ref{time()}
+@item @ref{delta_time()}
+@item @ref{wait()}
+@item @ref{T_to_G()}
+@item @ref{G_to_T()}
+@item @ref{C_to_K()}
+@item @ref{K_to_C()}
+@item @ref{D_to_R()}
+@item @ref{R_to_D()}
+@item @ref{WL_to_WN()}
+@item @ref{WN_to_WL()}
+@item @ref{F_to_WN()}
+@item @ref{WN_to_F()}
+@item @ref{slice()}
+@item @ref{int_slice()}
+@item @ref{float_slice()}
+@item @ref{dim()}
+@item @ref{size()}
+@item @ref{reverse()}
+@item @ref{sprint()}
+@item @ref{mouse_position()}
+@item @ref{lin_space()}
+@item @ref{find_peak()}
+@item @ref{spike_remove()}
+@end table
+
+
+@noindent
+@strong{Descriptions of auxiliary functions}:
 
 
 @table @samp
