@@ -275,7 +275,7 @@ hjs_fc;
 
 
 @noindent
-@strong{Complete descriptions of magnet functions}:
+@strong{Descriptions of magnet functions}:
 
 @table @samp
 @anchor{magnet_name()}
@@ -670,7 +670,7 @@ loaded.
 
 
 @noindent
-@strong{Complete descriptions of gaussmeter functions}:
+@strong{Descriptions of gaussmeter functions}:
 
 @table @samp
 @anchor{gaussmeter_name()}
@@ -831,7 +831,7 @@ check the arguments to achieve the desired results.
 
 
 @noindent
-@strong{Complete descriptions of lock-in functions}:
+@strong{Descriptions of lock-in functions}:
 
 @table @samp
 @anchor{lockin_name()}
@@ -1349,7 +1349,7 @@ External amplified trigger input (LeCroy 9400)
 @end table
 
 @noindent
-@strong{Complete descriptions of digitizer functions}:
+@strong{Descriptions of digitizer functions}:
 
 
 @table @samp
@@ -1991,7 +1991,7 @@ of the pulse sequence has to be committed explicitely by calling
 @end table
 
 @noindent
-@strong{Complete descriptions of pulser functions}:
+@strong{Descriptions of pulser functions}:
 
 
 
@@ -2547,7 +2547,7 @@ in the @code{DEVICES} section.
 @end table
 
 @noindent
-@strong{Complete descriptions of synthesizer functions}:
+@strong{Descriptions of synthesizer functions}:
 
 
 @table @samp
@@ -3011,7 +3011,7 @@ the @code{EDL} script.
 @end table
 
 @noindent
-@strong{Complete descriptions of temperature controller functions}:
+@strong{Descriptions of temperature controller functions}:
 
 
 @table @samp
@@ -3106,7 +3106,7 @@ in the @code{DEVICES} section.
 @end table
 
 @noindent
-@strong{Complete descriptions of voltmeter functions}:
+@strong{Descriptions of voltmeter functions}:
 
 
 @table @samp
@@ -3164,7 +3164,7 @@ script.
 @end table
 
 @noindent
-@strong{Complete descriptions of boxcar functions}:
+@strong{Descriptions of boxcar functions}:
 
 
 @table @samp
@@ -3258,7 +3258,7 @@ in the @code{DEVICES} section.
 @end table
 
 @noindent
-@strong{Complete descriptions of frequency counter functions}:
+@strong{Descriptions of frequency counter functions}:
 
 
 @table @samp
@@ -3341,7 +3341,7 @@ in the @code{DEVICES} section.
 @end table
 
 @noindent
-@strong{Complete descriptions of DAQ functions}:
+@strong{Descriptions of DAQ functions}:
 
 
 @table @samp
@@ -4212,7 +4212,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @end table
 
 @noindent
-@strong{Complete descriptions of DIO functions}:
+@strong{Descriptions of DIO functions}:
 
 
 @table @samp
@@ -4413,7 +4413,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @end table
 
 @noindent
-@strong{Complete descriptions of counter functions}:
+@strong{Descriptions of counter functions}:
 
 
 @table @samp
@@ -4713,7 +4713,7 @@ automatically to the ones they had in the previously run experiment.
 @end table
 
 @noindent
-@strong{Complete descriptions of CCD camera functions}:
+@strong{Descriptions of CCD camera functions}:
 
 
 @table @samp
@@ -4999,7 +4999,7 @@ supported monochromatore).
 @end table
 
 @noindent
-@strong{Complete descriptions of monochromator functions}:
+@strong{Descriptions of monochromator functions}:
 
 
 @table @samp
@@ -5565,7 +5565,7 @@ in the @code{DEVICES} section.
 @end table
 
 @noindent
-@strong{Complete descriptions of power supply functions}:
+@strong{Descriptions of power supply functions}:
 
 
 @table @samp
@@ -5722,7 +5722,7 @@ module.
 @end table
 
 @noindent
-@strong{Complete descriptions of microwave attenuator functions}:
+@strong{Descriptions of microwave attenuator functions}:
 
 
 
@@ -5847,7 +5847,7 @@ chopper gets stopped automatically.
 @end table
 
 @noindent
-@strong{Complete descriptions of chopper functions}:
+@strong{Descriptions of chopper functions}:
 
 
 @table @samp

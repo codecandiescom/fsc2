@@ -1624,8 +1624,8 @@ the loop variable @code{I} has the value @code{11} and not @code{9}.
 There are situations where one wants to have the program running as long
 as the @code{STOP} button doesn't get pressed. While something like this
 can be realized by using i.e.@: a @code{REPEAT} loop with a huge number
-of repeats, this would take extremely long to test the script before the
-@code{EXPERIMENT} is started. In these cases a @code{FOREVER} loop is
+of repeats, this would take extremely long when testing the script before
+the @code{EXPERIMENT} is started. In these cases a @code{FOREVER} loop is
 more convenient because the content of the loop is only tested once, so
 the experiment can start much faster. For obvious reasons, a
 @code{FOREVER} loop doesn't have a loop condition and the loop block
@@ -1633,13 +1633,13 @@ starts directly after the @code{FOREVER} keyword.
 
 @quotation
 @cartouche
-There is a disadvantage of using a @code{FOREVER} loop: Because
+There is a disadvantage of using a @code{FOREVER} loop: because
 @code{fsc2} can't determine in advance when the @code{FOREVER} loop is
 going to be terminated it is not possible to test the loop thoroughly in
 the test run, i.e.@ before the experiment is started. Instead, in the
 test run a @code{FOREVER} loop is just run once to do a plausibility
 check, but further tests are not feasible. Thus, it can not be
-guaranteed that the experiment will run without errors.  Therefore, the
+guaranteed that the experiment will run without errors.  Therefore the
 use of @code{FOREVER} loops should be restricted to preliminary
 experiments, e.g.@: when trying to figure out the optimum parameters for
 an experiment, unless you're quite sure you know what you are doing.
