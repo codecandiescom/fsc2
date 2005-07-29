@@ -1655,7 +1655,7 @@ Sometimes under certain conditions one doesn't want to execute all
 remaining statements of a @code{WHILE}, @code{UNTIL}, @code{REPEAT} or
 @code{FOR} loop but to go back to the test of the loop condition
 immediately. Whenever the keyword @code{NEXT} is encountered in a loop
-all the remaining statements are skipped and the program jumps drectly
+all the remaining statements are skipped and the program jumps directly
 back to the test of the loop condition.
 
 

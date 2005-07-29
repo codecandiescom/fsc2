@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Reserved Words, EDL mode for emacs, Device Reference, Top
+@node Reserved Words, EDL Mode for Emacs, Device Reference, Top
 @appendix Reserved Words
 
 
@@ -32,12 +32,12 @@ functions and may not be used as variable names.
 @item @code{#INCLUDE}         @tab Miscellaneous (@ref{#INCLUDE statement})
 @item @code{#QUIT}            @tab Miscellaneous (@ref{#QUIT statement})
 @item                         @tab
-@item @code{abort}            @tab Built-in function (@ref{abort})
-@item @code{abs}              @tab Built-in function (@ref{abs})
-@item @code{acos}             @tab Built-in function (@ref{acos})
+@item @code{abort}            @tab Built-in function (@ref{abort()})
+@item @code{abs}              @tab Built-in function (@ref{abs()})
+@item @code{acos}             @tab Built-in function (@ref{acos()})
 @item @code{AND}              @tab logical AND operator
-@item @code{asin}             @tab Built-in function (@ref{asin})
-@item @code{atan}             @tab Built-in function (@ref{atan})
+@item @code{asin}             @tab Built-in function (@ref{asin()})
+@item @code{atan}             @tab Built-in function (@ref{atan()})
 @item @code{ASS:}             @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENT:}      @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENTS:}     @tab Starts the @code{ASSIGNMENTS} section
@@ -46,11 +46,11 @@ functions and may not be used as variable names.
 @item @code{AUX2}             @tab Digitizer channel name
 @item                         @tab
 @item @code{BREAK}            @tab Loop control statement (@ref{BREAK statement})
-@item @code{button_create}    @tab Built-in function (@ref{button_create})
-@item @code{button_delete}    @tab Built-in function (@ref{button_delete})
-@item @code{button_state}     @tab Built-in function (@ref{button_state})
+@item @code{button_create}    @tab Built-in function (@ref{button_create()})
+@item @code{button_delete}    @tab Built-in function (@ref{button_delete()})
+@item @code{button_state}     @tab Built-in function (@ref{button_state()})
 @item                         @tab
-@item @code{ceil}             @tab Built-in function (@ref{ceil})
+@item @code{ceil}             @tab Built-in function (@ref{ceil()})
 @item @code{CH}               @tab
 @item @code{CH0}              @tab Channel name
 @item @code{CH1}              @tab Channel name
@@ -69,21 +69,21 @@ functions and may not be used as variable names.
 @item @code{CH14}             @tab Channel name
 @item @code{CH15}             @tab Channel name
 @item @code{CHANNEL}          @tab
-@item @code{change_label}     @tab Built-in function (@ref{change_label})
-@item @code{change_label_1d}  @tab Built-in function (@ref{change_label_1d})
-@item @code{change_label_2d}  @tab Built-in function (@ref{change_label_2d})
-@item @code{change_scale}     @tab Built-in function (@ref{change_scale})
-@item @code{change_scale_1d}  @tab Built-in function (@ref{change_scale_1d})
-@item @code{change_scale_2d}  @tab Built-in function (@ref{change_scale_2d})
-@item @code{clear_curve}      @tab Built-in function (@ref{clear_curve})
-@item @code{clear_curve_1d}   @tab Built-in function (@ref{clear_curve_1d})
-@item @code{clear_curve_2d}   @tab Built-in function (@ref{clear_curve_2d})
-@item @code{clone_file}       @tab Built-in function (@ref{clone_file})
-@item @code{clear_marker}     @tab Built-in function (@ref{clear_marker})
-@item @code{cos}              @tab Built-in function (@ref{cos})
-@item @code{cosh}             @tab Built-in function (@ref{cosh})
+@item @code{change_label}     @tab Built-in function (@ref{change_label()})
+@item @code{change_label_1d}  @tab Built-in function (@ref{change_label_1d()})
+@item @code{change_label_2d}  @tab Built-in function (@ref{change_label_2d()})
+@item @code{change_scale}     @tab Built-in function (@ref{change_scale()})
+@item @code{change_scale_1d}  @tab Built-in function (@ref{change_scale_1d()})
+@item @code{change_scale_2d}  @tab Built-in function (@ref{change_scale_2d()})
+@item @code{clear_curve}      @tab Built-in function (@ref{clear_curve()})
+@item @code{clear_curve_1d}   @tab Built-in function (@ref{clear_curve_1d()})
+@item @code{clear_curve_2d}   @tab Built-in function (@ref{clear_curve_2d()})
+@item @code{clone_file}       @tab Built-in function (@ref{clone_file()})
+@item @code{clear_marker}     @tab Built-in function (@ref{clear_marker()})
+@item @code{cos}              @tab Built-in function (@ref{cos()})
+@item @code{cosh}             @tab Built-in function (@ref{cosh()})
 @item                         @tab
-@item @code{date}             @tab Built-in function (@ref{date})
+@item @code{date}             @tab Built-in function (@ref{date()})
 @item @code{DEFAULT_SOURCE}   @tab Channel Name
 @item @code{DEL}              @tab @code{DELAY} keyword
 @item @code{DELAY}            @tab @code{DELAY} keyword
@@ -109,17 +109,17 @@ functions and may not be used as variable names.
 @item @code{DEVS:}            @tab Starts the @code{DEVICES} section
 @item @code{DEVICE:}          @tab Starts the @code{DEVICES} section
 @item @code{DEVICES:}         @tab Starts the @code{DEVICES} section
-@item @code{dim}              @tab Built-in function (@ref{dim})
-@item @code{display}          @tab Built-in function (@ref{display})
-@item @code{display_1d}       @tab Built-in function (@ref{display_1d})
-@item @code{display_2d}       @tab Built-in function (@ref{display_2d})
+@item @code{dim}              @tab Built-in function (@ref{dim()})
+@item @code{display}          @tab Built-in function (@ref{display()})
+@item @code{display_1d}       @tab Built-in function (@ref{display_1d()})
+@item @code{display_2d}       @tab Built-in function (@ref{display_2d()})
 @item @code{DL}               @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_L}              @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DLEN}             @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_LEN}            @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{DLENGTH}          @tab Pulse @code{DELTA_LENGTH} keyword
 @item @code{D_LENGTH}         @tab Pulse @code{DELTA_LENGTH} keyword
-@item @code{draw_marker}      @tab Built-in function (@ref{draw_marker})
+@item @code{draw_marker}      @tab Built-in function (@ref{draw_marker()})
 @item @code{DS}               @tab Pulse @code{DELTA_START} keyword
 @item @code{D_S}              @tab Pulse @code{DELTA_START} keyword
 @item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
@@ -135,12 +135,12 @@ functions and may not be used as variable names.
 @item @code{EXTERNAL}         @tab @code{EXTERNAL} keyword
 @item                         @tab
 @item @code{F}                @tab
-@item @code{float}            @tab Built-in function (@ref{float})
-@item @code{floor}            @tab Built-in function (@ref{floor})
+@item @code{float}            @tab Built-in function (@ref{float()})
+@item @code{floor}            @tab Built-in function (@ref{floor()})
 @item @code{FOR}              @tab Keyword for @code{FOR} loops (@ref{FOR loops})
 @item @code{FOREVER}          @tab Keyword for @code{FOREVER} loops (@ref{FOREVER loops})
-@item @code{fsave}            @tab Built-in function (@ref{fsave})
-@item @code{ffsave}           @tab Built-in function (@ref{ffsave})
+@item @code{fsave}            @tab Built-in function (@ref{fsave()})
+@item @code{ffsave}           @tab Built-in function (@ref{ffsave()})
 @item @code{FUNC}             @tab
 @item @code{FUNC_E}           @tab Digitizer channel name
 @item @code{FUNC_F}           @tab Digitizer channel name
@@ -148,20 +148,20 @@ functions and may not be used as variable names.
 @item @code{FUNCF}            @tab Digitizer channel name
 @item @code{FUNCTION}         @tab
 @item                         @tab
-@item @code{get_file}         @tab Built-in function (@ref{get_file})
+@item @code{get_file}         @tab Built-in function (@ref{get_file()})
 @item @code{GRACE_PERIOD}     @tab Deprecated keyword
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
-@item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox})
+@item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox()})
 @item @code{HIGH}             @tab @code{HIGH} keyword
 @item                         @tab
 @item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
-@item @code{init_1d}          @tab Built-in function (@ref{init_1d})
-@item @code{init_2d}          @tab Built-in function (@ref{init_2d})
-@item @code{input_create}     @tab Built-in function (@ref{input_create})
-@item @code{input_delete}     @tab Built-in function (@ref{input_delete})
-@item @code{input_value}      @tab Built-in function (@ref{input_value})
-@item @code{int}              @tab Built-in function (@ref{int})
+@item @code{init_1d}          @tab Built-in function (@ref{init_1d()})
+@item @code{init_2d}          @tab Built-in function (@ref{init_2d()})
+@item @code{input_create}     @tab Built-in function (@ref{input_create()})
+@item @code{input_delete}     @tab Built-in function (@ref{input_delete()})
+@item @code{input_value}      @tab Built-in function (@ref{input_value()})
+@item @code{int}              @tab Built-in function (@ref{int()})
 @item @code{INT}              @tab @code{INTERNAL} keyword
 @item @code{INTERN}           @tab @code{INTERNAL} keyword
 @item @code{INTERNAL}         @tab @code{INTERNAL} keyword
@@ -174,7 +174,7 @@ functions and may not be used as variable names.
 @item @code{KEEP_ALL_PULSES}  @tab Deprecated keyword
 @item                         @tab
 @item @code{L}                @tab @code{LOW} keyword / Pulse @code{LENGTH} keyword
-@item @code{layout}           @tab Built-in function (@ref{layout})
+@item @code{layout}           @tab Built-in function (@ref{layout()})
 @item @code{LEN}              @tab Pulse @code{LENGTH} keyword
 @item @code{LENGTH}           @tab Pulse @code{LENGTH} keyword
 @item @code{LEV}              @tab Pulser channel @code{LEVEL} keyword
@@ -183,17 +183,17 @@ functions and may not be used as variable names.
 @item @code{LINE}             @tab Digitizer trigger channel name
 @item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
-@item @code{max_of}           @tab Built-in function (@ref{max_of})
+@item @code{max_of}           @tab Built-in function (@ref{max_of()})
 @item @code{MATH1}            @tab Digitizer channel name
 @item @code{MATH2}            @tab Digitizer channel name
 @item @code{MATH3}            @tab Digitizer channel name
 @item @code{MAXIMUM_PATTERN_LENGTH}  @tab Deprecated keyword
-@item @code{mean}             @tab Built-in function (@ref{mean})
+@item @code{mean}             @tab Built-in function (@ref{mean()})
 @item @code{MEM_C}            @tab Digitizer channel name
 @item @code{MEM_D}            @tab Digitizer channel name
 @item @code{MEMC}             @tab Digitizer channel name
 @item @code{MEMD}             @tab Digitizer channel name
-@item @code{min_of}           @tab Built-in function (@ref{min_of})
+@item @code{min_of}           @tab Built-in function (@ref{min_of()})
 @item @code{MODE}             @tab
 @item                         @tab
 @item @code{NEG}              @tab
@@ -202,12 +202,12 @@ functions and may not be used as variable names.
 @item @code{NEXT_GATE}        @tab Channel Name
 @item @code{NOT}              @tab logical NOT operator
 @item                         @tab
-@item @code{object_delete}    @tab Built-in function (@ref{object_delete})
+@item @code{object_delete}    @tab Built-in function (@ref{object_delete()})
 @item @code{ON_STOP:}         @tab Label in @code{EXPERIMENT} section
 @item @code{OR}               @tab logical OR operator
-@item @code{output_create}    @tab Built-in function (@ref{output_create})
-@item @code{output_delete}    @tab Built-in function (@ref{output_delete})
-@item @code{output_value}     @tab Built-in function (@ref{output_value})
+@item @code{output_create}    @tab Built-in function (@ref{output_create()})
+@item @code{output_delete}    @tab Built-in function (@ref{output_delete()})
+@item @code{output_value}     @tab Built-in function (@ref{output_value()})
 @item                         @tab
 @item @code{P}                @tab
 @item @code{P@i{[0-9]+}}      @tab
@@ -224,11 +224,11 @@ functions and may not be used as variable names.
 @item @code{PREPS:}           @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATION:}     @tab Starts the @code{PREPARATIONS} section
 @item @code{PREPARATIONS:}    @tab Starts the @code{PREPARATIONS} section
-@item @code{print}            @tab Built-in function (@ref{print})
+@item @code{print}            @tab Built-in function (@ref{print()})
 @item @code{PULSE@i{[0-9]+}}  @tab
 @item @code{PULSE_@i{[0-9]+}} @tab
 @item                         @tab
-@item @code{random}           @tab Built-in function (@ref{random})
+@item @code{random}           @tab Built-in function (@ref{random()})
 @item @code{REPEAT}           @tab Keyword for @code{REPEAT} loops (@ref{REPEAT loops})
 @item @code{REPF}             @tab Pulser @code{REPETITION_FREQUENCY} keyword
 @item @code{REP_F}            @tab Pulser @code{REPETITION_FREQUENCY} keyword
@@ -254,41 +254,41 @@ functions and may not be used as variable names.
 @item @code{REF2}             @tab Digitizer channel name
 @item @code{REF3}             @tab Digitizer channel name
 @item @code{REF4}             @tab Digitizer channel name
-@item @code{rescale}          @tab Built-in function (@ref{rescale})
-@item @code{rescale_1d}       @tab Built-in function (@ref{rescale_1d})
-@item @code{rescale_2d}       @tab Built-in function (@ref{rescale_2d})
-@item @code{rms}              @tab Built-in function (@ref{rms})
-@item @code{round}            @tab Built-in function (@ref{round})
+@item @code{rescale}          @tab Built-in function (@ref{rescale()})
+@item @code{rescale_1d}       @tab Built-in function (@ref{rescale_1d()})
+@item @code{rescale_2d}       @tab Built-in function (@ref{rescale_2d()})
+@item @code{rms}              @tab Built-in function (@ref{rms()})
+@item @code{round}            @tab Built-in function (@ref{round()})
 @item                         @tab
 @item @code{S}                @tab
-@item @code{save}             @tab Built-in function (@ref{save})
-@item @code{save_comment}     @tab Built-in function (@ref{save_comment})
-@item @code{save_output}      @tab Built-in function (@ref{save_output})
-@item @code{save_program}     @tab Built-in function (@ref{save_program})
-@item @code{set_seed}         @tab Built-in function (@ref{set_seed})
-@item @code{sin}              @tab Built-in function (@ref{sin})
-@item @code{sinh}             @tab Built-in function (@ref{sinh})
-@item @code{size}             @tab Built-in function (@ref{size})
+@item @code{save}             @tab Built-in function (@ref{save()})
+@item @code{save_comment}     @tab Built-in function (@ref{save_comment()})
+@item @code{save_output}      @tab Built-in function (@ref{save_output()})
+@item @code{save_program}     @tab Built-in function (@ref{save_program()})
+@item @code{set_seed}         @tab Built-in function (@ref{set_seed()})
+@item @code{sin}              @tab Built-in function (@ref{sin()})
+@item @code{sinh}             @tab Built-in function (@ref{sinh()})
+@item @code{size}             @tab Built-in function (@ref{size()})
 @item @code{SL}               @tab
-@item @code{slice}            @tab Built-in function (@ref{slice})
-@item @code{slider_create}    @tab Built-in function (@ref{slider_create})
-@item @code{slider_delete}    @tab Built-in function (@ref{slider_delete})
-@item @code{slider_value}     @tab Built-in function (@ref{slider_value})
+@item @code{slice}            @tab Built-in function (@ref{slice()})
+@item @code{slider_create}    @tab Built-in function (@ref{slider_create()})
+@item @code{slider_delete}    @tab Built-in function (@ref{slider_delete()})
+@item @code{slider_value}     @tab Built-in function (@ref{slider_value()})
 @item @code{SLOPE}            @tab Pulser @code{SLOPE} keyword
 @item @code{SOURCE_0}         @tab Channel Name
 @item @code{SOURCE_1}         @tab Channel Name
 @item @code{SOURCE_2}         @tab Channel Name
 @item @code{SOURCE_3}         @tab Channel Name
-@item @code{sqrt}             @tab Built-in function (@ref{sqrt})
+@item @code{sqrt}             @tab Built-in function (@ref{sqrt()})
 @item @code{START}            @tab
 @item                         @tab
-@item @code{tan}              @tab Built-in function (@ref{tan})
-@item @code{tanh}             @tab Built-in function (@ref{tanh})
+@item @code{tan}              @tab Built-in function (@ref{tan()})
+@item @code{tanh}             @tab Built-in function (@ref{tanh()})
 @item @code{TB}               @tab Pulser @code{TIME_BASE} keyword
 @item @code{T_B}              @tab Pulser @code{TIME_BASE} keyword
 @item @code{TBASE}            @tab Pulser @code{TIME_BASE} keyword
 @item @code{T_BASE}           @tab Pulser @code{TIME_BASE} keyword
-@item @code{time}             @tab Built-in function (@ref{time})
+@item @code{time}             @tab Built-in function (@ref{time()})
 @item @code{TIMEB}            @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIME_B}           @tab Pulser @code{TIME_BASE} keyword
 @item @code{TIMEBASE}         @tab Pulser @code{TIME_BASE} keyword
@@ -312,7 +312,7 @@ functions and may not be used as variable names.
 @item @code{VLOW}             @tab
 @item @code{V_LOW}            @tab
 @item                         @tab
-@item @code{wait}             @tab Built-in function (@ref{wait})
+@item @code{wait}             @tab Built-in function (@ref{wait()})
 @item @code{WHILE}            @tab Keyword for @code{WHILE} loops (@ref{WHILE loops})
 @item                         @tab
 @item @code{XOR}              @tab logical XOR operator
