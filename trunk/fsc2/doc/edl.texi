@@ -389,8 +389,7 @@ be preceeded by such a character).  Here's the complete list:
 @item @code{Hz}    @tab Hertz (and @code{nHz, uHz, mHz, kHz, GHz} and @code{GHz})
 @item @code{K}     @tab Kelvin (and @code{nK, uK, mK, kK, MK} and @code{GK})
 @item @code{dB}    @tab Decibel (and @code{ndB, udB, mdB, kdB, MdB} and @code{GdB})
-@item @code{dBm}   @tab Decibel (and @code{ndBm, udBm, mdBm, kdBm, MdBm}
-                        and @code{GdBm})
+@item @code{dBm}   @tab Decibel (and @code{ndBm, udBm, mdBm, kdBm, MdBm} and @code{GdBm})
 @item @code{cm^-1} @tab wave numbers, i.e.@: inverse of a @code{cm}
 @end multitable
 @end quotation
