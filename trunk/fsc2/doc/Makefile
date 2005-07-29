@@ -100,7 +100,7 @@ fsc2.ps.gz: $(docs) $(eps_pics)
 		dvips fsc2.dvi -o fsc2.ps;                    \
 		gzip -f -9 fsc2.ps;                           \
 	else                                              \
-		echo "Can't make PostScript documentation, programs tex and/or dvips not found.";  \
+		echo "Can't make PostScript documentation, programs tex and/or dvips not found";  \
 	fi
 
 
@@ -111,7 +111,7 @@ ifneq ($(word 1,$(shell which convert)),which:)
 	convert $< $@
 else
 %.pdf: $(figures)
-	@echo "Can't make PostScript documentation, program 'convert' not found."; \
+	@echo "Can't make PostScript documentation, program 'convert' not found"; \
 	exit 1;
 endif
 
@@ -122,7 +122,7 @@ fsc2.pdf: $(docs) $(pdf_pics)
 	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then                      \
 		./texi2dvi --pdf -c fsc2.texi;                                     \
 	else                                                                   \
-		echo "Can't make PDF documentation, program 'pdftex' not found.";  \
+		echo "Can't make PDF documentation, program 'pdftex' not found";  \
 	fi
 
 
@@ -135,7 +135,7 @@ ifneq ($(word 1,$(shell which convert)),which:)
 		-page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
 else
 %.pdf: $(figures)
-	@echo "Can't make PDF documentation, program 'convert' not found."; \
+	@echo "Can't make PDF documentation, program 'convert' not found"; \
 	exit 1;
 endif
 

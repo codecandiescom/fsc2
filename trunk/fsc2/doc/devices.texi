@@ -127,15 +127,15 @@ a short message is printed out when the module gets loaded.
 
 
 The only situation that's a bit more problematical is the case where two
-absolutely identical devices are to be used simultaneously. Due to
-limitations not only of @code{fsc2} but already to the way the libraries
-used for accessing the GPIB bus work you can't simply list the same
-device twice in the @code{DEVICES} section and then use them as outlined
-above. Instead, two device modules with different names have to be
-created for the identical devices and made known to the program.
-Fortunately, there's a Perl script that can automatically clone a module
-of an already exsiting device, please see one of the following chapters
-(@pxref{Cloning Devices}) on how this is done.
+identical devices are to be used simultaneously. Due to limitations not
+only of @code{fsc2} but already to the way the libraries used for accessing
+the GPIB bus work you can't simply list the same device twice in the
+@code{DEVICES} section and then use them as outlined above. Instead, two
+device modules with different names have to be created for the identical
+devices and made known to the program. Fortunately, there's a Perl script
+that can automatically clone a module of an already exsiting device, please
+see one of the following chapters (@pxref{Cloning Devices}) on how this is
+done.
 
 
 @node Magnet Functions, Gaussmeter Functions, Overview, Device Functions
