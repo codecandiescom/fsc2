@@ -277,9 +277,13 @@ hjs_fc;
 @noindent
 @strong{Descriptions of magnet functions}:
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{magnet_name()}
 @findex magnet_name()
+
+@table @samp
 @item magnet_name()
 Returns a string with the name of the magnet that is being used.
 
@@ -672,9 +676,13 @@ loaded.
 @noindent
 @strong{Descriptions of gaussmeter functions}:
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{gaussmeter_name()}
 @findex gaussmeter_name()
+
+@table @samp
 @item gaussmeter_name()
 Returns a string with the name of the gaussmeter being used.
 
@@ -833,9 +841,13 @@ check the arguments to achieve the desired results.
 @noindent
 @strong{Descriptions of lock-in functions}:
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @anchor{lockin_name()}
 @findex lockin_name()
+
+@table @samp
 @item lockin_name()
 Returns a string with the name of the lock-in amplifier being used.
 
@@ -1352,11 +1364,15 @@ External amplified trigger input (LeCroy 9400)
 @strong{Descriptions of digitizer functions}:
 
 
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
+@findex digitizer_name()
+@item digitizer_name()
+
 @table @samp
 
 @anchor{digitizer_name()}
-@findex digitizer_name()
-@item digitizer_name()
 Returns a string with the name of the digitizer being used.
 
 
@@ -1997,9 +2013,13 @@ of the pulse sequence has to be committed explicitely by calling
 
 @table @samp
 
-@anchor{pulser_name()}
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
+
 @findex pulser_name()
 @item pulser_name()
+
+@anchor{pulser_name()}
 Returns a string with the name of the digitizer being used.
 
 
@@ -2550,10 +2570,14 @@ in the @code{DEVICES} section.
 @strong{Descriptions of synthesizer functions}:
 
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{synthesizer_name()}
 @findex synthesizer_name()
+
+@table @samp
+
 @item synthesizer_name()
 Returns a string with the name of the synthesizer being used.
 
@@ -3013,11 +3037,14 @@ the @code{EDL} script.
 @noindent
 @strong{Descriptions of temperature controller functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{temp_contr_name()}
 @findex temp_contr_name()
+
+@table @samp
+
 @item temp_contr_name()
 Returns a string with the name of the temperature controller being used.
 
@@ -3108,11 +3135,14 @@ in the @code{DEVICES} section.
 @noindent
 @strong{Descriptions of voltmeter functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{voltmeter_name()}
 @findex voltmeter_name()
+
+@table @samp
+
 @item voltmeter_name()
 Returns a string with the name of the voltmeter being used.
 
@@ -3166,11 +3196,14 @@ script.
 @noindent
 @strong{Descriptions of boxcar functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{boxcar_name()}
 @findex boxcar_name()
+
+@table @samp
+
 @item boxcar_name()
 Returns a string with the name of the boxcar integrator being used.
 
@@ -3260,11 +3293,14 @@ in the @code{DEVICES} section.
 @noindent
 @strong{Descriptions of frequency counter functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{freq_counter_name()}
 @findex freq_counter_name()
+
+@table @samp
+
 @item freq_counter_name()
 Returns a string with the name of the frequency counter being used.
 
@@ -3343,11 +3379,14 @@ in the @code{DEVICES} section.
 @noindent
 @strong{Descriptions of DAQ functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{daq_name()}
 @findex daq_name()
+
+@table @samp
+
 @item daq_name()
 Returns a string with the name of the DAC being used.
 
@@ -4215,10 +4254,14 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @strong{Descriptions of DIO functions}:
 
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{dio_name()}
 @findex dio_name()
+
+@table @samp
+
 @item dio_name()
 Returns a string with the name of the DIO device being used.
 
@@ -4415,11 +4458,14 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @noindent
 @strong{Descriptions of counter functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{counter_name()}
 @findex counter_name()
+
+@table @samp
+
 @item counter_name()
 Returns a string with the name of the event counter being used.
 
@@ -4715,11 +4761,14 @@ automatically to the ones they had in the previously run experiment.
 @noindent
 @strong{Descriptions of CCD camera functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{ccd_camera_name()}
 @findex ccd_camera_name()
+
+@table @samp
+
 @item ccd_camera_name()
 Returns a string with the name of the CCD camera being used.
 
@@ -5001,11 +5050,14 @@ supported monochromatore).
 @noindent
 @strong{Descriptions of monochromator functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{monochromator_name()}
 @findex monochromator_name()
+
+@table @samp
+
 @item monochromator_name()
 Returns a string with the name of the monochromator being used.
 
@@ -5567,11 +5619,14 @@ in the @code{DEVICES} section.
 @noindent
 @strong{Descriptions of power supply functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{powersupply_name()}
 @findex powersuppy_name()
+
+@table @samp
+
 @item powersupply_name()
 Returns a string with the name of the power supply being used.
 
@@ -5724,12 +5779,14 @@ module.
 @noindent
 @strong{Descriptions of microwave attenuator functions}:
 
-
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{mw_attenuator_name()}
 @findex mw_attenuator_name()
+
+@table @samp
+
 @item mw_attenuator_name()
 Returns a string with the name of the power supply being used.
 
@@ -5849,11 +5906,14 @@ chopper gets stopped automatically.
 @noindent
 @strong{Descriptions of chopper functions}:
 
-
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{chopper_name()}
 @findex chopper_name()
+
+@table @samp
+
 @item chopper_name()
 Returns a string with the name of the chopper being used.
 
@@ -5897,10 +5957,14 @@ don't support the needed functions). The module they are defined in is
 automatically loaded, so it needs no special entry in the @code{DEVICES}
 section.
 
-@table @samp
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML in't valid
 
 @anchor{get_phase_cycled_area()}
 @findex get_phase_cycled_area()
+
+@table @samp
+
 @item get_phase_cycled_area()
 This function is for doing a complete measurement sequence in a phase
 cycled experiment. It goes through a complete phase cycle, setting the
