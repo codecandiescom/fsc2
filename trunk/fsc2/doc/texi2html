@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 'di ';
 'ig 00 ';
 ###############################################################################
@@ -347,7 +347,7 @@ $T2H_OPTIONS->{prefix} = {
 $T2H_OUT = '';
 $T2H_OPTIONS->{out_file} = {
     type    => '=s',
-    linkage => sub {$main::T2H_OUT = @_[1]; $T2H_SPLIT = '';},
+    linkage => sub { $main::T2H_OUT = $_[1]; $T2H_SPLIT = ''; },
     verbose => 'if set, all HTML output goes into file $s',
 };
 
@@ -461,7 +461,7 @@ $T2H_OPTIONS->{l2h_clean} = {
 
 $T2H_OPTIONS->{D} = {
     type    => '=s',
-    linkage => sub {$main::value{@_[1]} = 1;},
+    linkage => sub { $main::value{ $_[1] } = 1; },
     verbose => 'equivalent to Texinfo "@set $s 1"',
     noHelp  => 1,
 };
@@ -1465,9 +1465,9 @@ sub getOptions
 	my ( $self, $default, $helpText, $versionText, 
          $helpThenExit, $versionThenExit, $ignoreCase ) = @_;
 
-	$helpThenExit = 1 unless (defined($helpThenExit));
-	$versionThenExit = 1 unless (defined($versionThenExit));
-	$ignoreCase = 0 unless (defined($ignoreCase));
+	$helpThenExit = 1    unless defined $helpThenExit;
+	$versionThenExit = 1 unless defined $versionThenExit;
+	$ignoreCase = 0      unless defined $ignoreCase;
 
 	$self->{'default'}		  = $default;
 	$self->{'helpText'}	      = $helpText;
@@ -1486,9 +1486,9 @@ sub getOptions
         type    => '',
         default => '',
         linkage => sub { print $self->{'versionText'}; 
-                         exit 0 if versionTheExit; },
+                         exit 0 if $versionThenExit; },
         verbose => "print version and exit"
-      } unless (defined($self->{'default'}{'version'}));
+      } unless defined $self->{'default'}{'version'};
 
 	for ( keys %{$self->{'default'} } ) {
         my $type = ${$self->{'default'} }{$_}{'type'};
@@ -2045,7 +2045,7 @@ $T2H_OPTIONS->{no_verbose} = {
 $T2H_OUT = '';
 $T2H_OPTIONS->{output_file} = {
     type    => '=s',
-    linkage => sub {$main::T2H_OUT = @_[1]; $T2H_SPLIT = '';},
+    linkage => sub { $main::T2H_OUT = $_[1]; $T2H_SPLIT = ''; },
     verbose => 'obsolete, use -out_file instead',
     noHelp  => 2,
 };
@@ -2190,6 +2190,7 @@ if ( ! $T2H_OUT and ( $T2H_SPLIT =~ /section/i or $T2H_SPLIT =~ /node/i ) ) {
 
 $docu_doc = "$docu_name.$docu_ext";		# document's contents
 $docu_doc_file = "$docu_rdir$docu_doc";
+
 if ( $T2H_SPLIT ) {
     $docu_toc  = $T2H_TOC_FILE ||
                  "${docu_name}_toc.$docu_ext"; # document's table of contents
@@ -2223,8 +2224,8 @@ $value{'texi2html'} = $THISVERSION;	# predefine texi2html (the translator)
 
 # _foo: internal to track @foo
 
-foreach ('_author', '_title', '_subtitle',
-         '_settitle', '_setfilename', '_shorttitle') {
+foreach ( '_author', '_title', '_subtitle',
+		  '_settitle', '_setfilename', '_shorttitle' ) {
     $value{$_} = '';		        # prevent -w warnings
 }
 
@@ -4495,7 +4496,9 @@ while ( $section = shift @sections ) {
         $T2H_NAME{Forward} = &clean_name($T2H_NODE{Forward});
         $T2H_HREF{Forward} = sec_href($sections[0]);
     } else {
-        undef $T2H_HREF{Forward}, $T2H_NODE{Forward}, $T2H_NAME{Forward};
+        undef $T2H_HREF{Forward};
+		undef $T2H_NODE{Forward};
+		undef $T2H_NAME{Forward};
     }
 
     $node = $node2up{$T2H_NODE{This}};
