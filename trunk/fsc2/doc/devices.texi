@@ -1270,14 +1270,16 @@ The function can only be used in the @code{EXPERIMENT} section.
 @cindex Digitizer Functions
 
 The digitizing oscilloscopes currently implemented are the Tektronix
-TDS520, TDS520A, TDS540, TDS744A and TDS754A. The corresponding module
-names to be used in the @code{DEVICES} section are
+TDS520, TDS520A, TDS540, TDS744A and TDS754A. The module for the
+@w{LeCroy 9400} supports a subset of the functionality. The corresponding
+module names to be used in the @code{DEVICES} section are
 @example
 tds520
 tds520a
 tds540
 tds744a
 tds754a
+lecroy9400
 @end example
 
 When specifying digitizer channels or trigger inputs you should use only
