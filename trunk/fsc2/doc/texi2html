@@ -3881,11 +3881,13 @@ sub PrintIndex
 
     if ( $T2H_IDX_SUMMARY ) {
         my $key;
-        open(FHIDX, ">$docu_rdir$docu_name" . "_$name.idx")
-            || die "Can't open > $docu_rdir$docu_name" . "_$name.idx for writing: $!\n";
-        print "# writing $name index summary in $docu_rdir$docu_name" . "_$name.idx...\n" if $T2H_VERBOSE;
+        open( FHIDX, ">$docu_rdir$docu_name" . "_$name.idx") or
+            die "Can't open > $docu_rdir$docu_name" .
+			"_$name.idx for writing: $!\n";
+        print "# writing $name index summary in $docu_rdir$docu_name" .
+			  "_$name.idx...\n" if $T2H_VERBOSE;
 
-        for $key (sort keys %$Entries) {
+        for $key ( sort keys %$Entries ) {
             print FHIDX "$key\t$Entries->{$key}->{href}\n";
         }
     }
@@ -4339,8 +4341,8 @@ for $key (keys %T2H_THISDOC) {
 
 unless (@sections) {
     print "# Writing content into $docu_top_file \n" if $T2H_VERBOSE;
-    open(FILE, "> $docu_top_file") 
-         || die "$ERROR: Can't open $docu_top_file for writing: $!\n";
+    open( FILE, "> $docu_top_file" ) or
+         die "$ERROR: Can't open $docu_top_file for writing: $!\n";
 
   	&$T2H_print_page_head(\*FILE);
   	$T2H_THIS_SECTION = \@doc_lines;
@@ -4412,14 +4414,14 @@ print "# Using '" . clean_name($T2H_INDEX_CHAPTER) . "' as index page\n"
 #
 
 if ( $T2H_FRAMES ) {
-    open(FILE, "> $docu_frame_file") 
-        || die "$ERROR: Can't open $docu_frame_file for writing: $!\n";
+    open( FILE, "> $docu_frame_file" ) or
+        die "$ERROR: Can't open $docu_frame_file for writing: $!\n";
     print "# Creating frame in $docu_frame_file ...\n" if $T2H_VERBOSE;
     &$T2H_print_frame(\*FILE);
     close(FILE);
 
-    open(FILE, "> $docu_toc_frame_file") 
-        || die "$ERROR: Can't open $docu_toc_frame_file for writing: $!\n";
+    open( FILE, "> $docu_toc_frame_file" ) or
+        die "$ERROR: Can't open $docu_toc_frame_file for writing: $!\n";
     print "# Creating toc frame in $docu_frame_file ...\n" if $T2H_VERBOSE;
     &$T2H_print_toc_frame(\*FILE);
     close(FILE);
@@ -4430,8 +4432,8 @@ if ( $T2H_FRAMES ) {
 # print Top
 #
 
-open(FILE, "> $docu_top_file") 
-    || die "$ERROR: Can't open $docu_top_file for writing: $!\n";
+open( FILE, "> $docu_top_file" ) or
+    die "$ERROR: Can't open $docu_top_file for writing: $!\n";
 &$T2H_print_page_head(\*FILE) unless ($T2H_SPLIT);
 
 if ($has_top) {
@@ -4524,7 +4526,7 @@ while ( $section = shift @sections ) {
             $node = $node2up{$node};
         }
         $node = $node2prev{$node} 
-        	unless $node2up{$node} eq 'Top' || ! $node2up{$node};
+        	unless $node2up{$node} eq 'Top' or ! $node2up{$node};
     } else {
         $node = $node2prev{$node};
     }
@@ -4555,7 +4557,7 @@ while ( $section = shift @sections ) {
     if (! defined($FH)) {
         my $file = $T2H_HREF{This};
         $file =~ s/\#.*$//;
-        open(FILE, "> $docu_rdir$file") || 
+        open( FILE, "> $docu_rdir$file" ) or
             die "$ERROR: Can't open $docu_rdir$file for writing: $!\n";
         $FH = \*FILE;
         &$T2H_print_page_head($FH);
@@ -4568,7 +4570,7 @@ while ( $section = shift @sections ) {
     $T2H_THIS_SECTION = [];
     while (@doc_lines) {
         $_ = shift @doc_lines;
-        last if ($_ eq $SECTIONEND || $_ eq $CHAPTEREND);
+        last if $_ eq $SECTIONEND or $_ eq $CHAPTEREND;
         push @$T2H_THIS_SECTION, $_;
     }
     $previous = $_;
@@ -4599,7 +4601,8 @@ undef $T2H_HREF{Up};
 
 if (@foot_lines) {
     print "# writing Footnotes in $docu_foot_file...\n" if $T2H_VERBOSE;
-    open (FILE, "> $docu_foot_file") || die "$ERROR: Can't open $docu_foot_file for writing: $!\n"
+    open( FILE, "> $docu_foot_file" ) or
+		die "$ERROR: Can't open $docu_foot_file for writing: $!\n"
         if $T2H_SPLIT;
     $T2H_HREF{This} = $docu_foot;
     $T2H_NAME{This} = $T2H_WORDS->{$T2H_LANG}->{'Footnotes_Title'};
@@ -4610,7 +4613,8 @@ if (@foot_lines) {
 
 if (@toc_lines) {
     print "# writing Toc in $docu_toc_file...\n" if $T2H_VERBOSE;
-    open (FILE, "> $docu_toc_file") || die "$ERROR: Can't open $docu_toc_file for writing: $!\n"
+    open( FILE, "> $docu_toc_file" ) or
+		die "$ERROR: Can't open $docu_toc_file for writing: $!\n"
         if $T2H_SPLIT;
     $T2H_HREF{This} = $T2H_HREF{Contents};
     $T2H_NAME{This} = $T2H_NAME{Contents};
@@ -4621,7 +4625,8 @@ if (@toc_lines) {
 
 if (@stoc_lines) {
     print "# writing Overview in $docu_stoc_file...\n" if $T2H_VERBOSE;
-    open (FILE, "> $docu_stoc_file") || die "$ERROR: Can't open $docu_stoc_file for writing: $!\n"
+    open( FILE, "> $docu_stoc_file" ) or
+		die "$ERROR: Can't open $docu_stoc_file for writing: $!\n"
         if $T2H_SPLIT;
   
     $T2H_HREF{This} = $T2H_HREF{Overview};
@@ -4635,7 +4640,8 @@ if (@stoc_lines) {
 
 if ($about_body = &$T2H_about_body()) {
     print "# writing About in $docu_about_file...\n" if $T2H_VERBOSE;
-    open (FILE, "> $docu_about_file") || die "$ERROR: Can't open $docu_about_file for writing: $!\n"
+    open( FILE, "> $docu_about_file" ) or
+		die "$ERROR: Can't open $docu_about_file for writing: $!\n"
         if $T2H_SPLIT;
 
     $T2H_HREF{This} = $T2H_HREF{About};
@@ -5101,19 +5107,19 @@ sub substitute_style {
 
     &simple_substitutions;
     $changed = 1;
-    while ($changed) {
-	$changed = 0;
-	$done = '';
-	while (/\@(\w+){([^\{\}]+)}/ || /\@(,){([^\{\}]+)}/) {
-	    $text = &apply_style($1, $2);
-	    if ($text) {
-		$_ = "$`$text$'";
-		$changed = 1;
-	    } else {
-		$done .= "$`\@$1";
-		$_ = "{$2}$'";
-	    }
-	}
+    while ( $changed ) {
+		$changed = 0;
+		$done = '';
+		while ( /\@(\w+){([^\{\}]+)}/ or /\@(,){([^\{\}]+)}/ ) {
+		    $text = &apply_style( $1, $2 );
+		    if ( $text ) {
+				$_ = "$`$text$'";
+				$changed = 1;
+		    } else {
+				$done .= "$`\@$1";
+				$_ = "{$2}$'";
+		    }
+		}
         $_ = $done . $_;
     }
     return $_;
