@@ -309,7 +309,7 @@ would prefer @code{fsc2} @b{not} to send such a mail use this
 option.
 
 @item @option{-noBalloons}
-Normally, whenever the mouse hoovers over a button for some time a
+Normally, whenever the mouse hovers over a button for some time a
 little help message is shown, explaining what the button is supposed to
 do. If you get annoyed with this you can use this option to switch off
 the display of the help balloons.

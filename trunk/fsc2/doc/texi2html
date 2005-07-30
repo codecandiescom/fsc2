@@ -3,12 +3,11 @@
 'ig 00 ';
 ###############################################################################
 #
-# CVS version:
 # $Id$
 #
-# Slightly hacked to get some additional effects and to make the
-# output more acceptable to the W3C validator (getting it really
-# right seems to be hopeless).
+# Modified version to get some additional effects and to make the
+# output pass the W3C validator (but which also requires some care
+# to be taken in the input file).
 #                                          J. T. Toerring
 #
 ############################################################################
@@ -1065,7 +1064,7 @@ sub T2H_DEFAULT_print_toc_frame
     print $fh <<EOT;
 <h2>Content</h2>
 EOT
-  print $fh map {s/href=/target=\"main\" href=/; $_;} @stoc_lines;
+  print $fh map { s/href=/target=\"main\" href=/; $_; } @stoc_lines;
   print $fh "</body></html>\n";
 }
 
@@ -3433,35 +3432,45 @@ while ($_ = &next_line) {
                             $sec2number{$name} = $number;
                             $number2sec{$number} = $name;
                         }
-                        if (defined($toplevel)) {
+
+                        if ( defined $toplevel ) {
                             push @lines,
                                ($level==$toplevel ? $CHAPTEREND : $SECTIONEND);
                         } else {
                             # first time we see a "section"
-                            unless ($level == 1) {
-                                warn "$WARN The first section found is not of level 1: $_";
-                            }
+                            warn "$WARN The first section found is not " .
+                                 "of level 1: $_"
+                                unless $level == 1;
                             $toplevel = $level;
                         }
+
                         push @sections, $name;
                         next_doc() if ($T2H_SPLIT eq 'section' ||
                                        $T2H_SPLIT && $level == $toplevel);
                     }
+
                     $sec_num++;
                     $docid = "sec$sec_num";
                     $tocid = (/^\@\w*heading/ ? undef : "TOC$sec_num");
+
                     # check biblio and glossary
-                    $in_bibliography = ($name =~ /^([A-Z]|\d+)?(\.\d+)*\s*bibliography$/i);
-                    $in_glossary = ($name =~ /^([A-Z]|\d+)?(\.\d+)*\s*glossary$/i);
+
+                    $in_bibliography =
+                        ( $name =~ /^([A-Z]|\d+)?(\.\d+)*\s*bibliography$/i );
+                    $in_glossary =
+                        ( $name =~ /^([A-Z]|\d+)?(\.\d+)*\s*glossary$/i );
+
                     # check node
+
                     if ($node) {
                         warn "$ERROR Duplicate node found: $node\n"
                             if $node2sec{$node};
                     } else {
-                        $name .= ' ' while ($node2sec{$name});
+                        $name .= ' ' while $node2sec{ $name };
                         $node = $name;
                     }
-                    $name .= ' ' while ($sec2node{$name});
+
+                    $name .= ' ' while $sec2node{ $name };
                     $section = $name; 
                     $node2sec{$node} = $name;
                     $sec2node{$name} = $node;
@@ -3476,36 +3485,46 @@ while ($_ = &next_line) {
                     $node_next = '';
                     $node_prev = '';
                     $node_next = '';
+
                     if ($tocid) {
-                        # update TOC
-                        while ($level > $curlevel) {
+                        # update TOC   several changes here JTT 2005-07-30
+
+                        while ( $level > $curlevel ) {
                             $curlevel++;
+                            $toc_lines[ -1 ] =~ s/<\/li>$//
+                                if $toc_lines[ -1 ] =~ /<\/li>$/;
                             push @toc_lines, "<ul>\n";
                         }
-                        while ($level < $curlevel) {
+
+                        while ( $level < $curlevel ) {
                             $curlevel--;
-                            push @toc_lines, "</ul>\n";
+                            if ( $toc_lines[ -1 ] =~ /<\/li>$/ ) {
+                                $toc_lines[ -1 ] =~ s/<\/li>$//;
+                                push @toc_lines, "</ul></li>\n";
+                            } else {
+                                push @toc_lines, "</ul>\n";
+                            }
                         }
-                        $_ = &t2h_anchor($tocid, "$docu_doc#$docid", $name, 1);
-                        $_ = &substitute_style($_);
+
+                        $_ = &t2h_anchor( $tocid, "$docu_doc#$docid",
+                                          $name, 1);
+                        $_ = &substitute_style( $_ );
                         push @stoc_lines, "$_<br>\n" if $level == 1;
-                        if ($T2H_NUMBER_SECTIONS) {
-                            push @toc_lines, $_ . "<br>\n"
-                        } else {
-                            push @toc_lines, "<li>" . $_ ."</li>";
-                        }
+                        push @toc_lines, "<li>" . $_ ."</li>";
                     } else {
-                        push @lines, &html_debug("<a name=\"$docid\"></a>\n", __LINE__);
+                        push @lines,
+                            &html_debug("<a name=\"$docid\"></a>\n", __LINE__);
                     }
+
                     # update DOC
                     push @lines, &html_debug('', __LINE__);
                     &html_reset;
-                    $_ =  "<H$level> $name </H$level>\n<!--docid::${docid}::-->\n";
-                    $_ = &debug($_, __LINE__);
+                    $_ = "<h$level> $name </h$level>\n<!--docid::${docid}::-->\n";
+                    $_ = &debug( $_, __LINE__ );
                     push @lines, &html_debug('', __LINE__);
                 }
                 # update DOC
-                foreach $line (split(/\n+/, $_)) {
+                foreach $line ( split( /\n+/, $_ ) ) {
                     push @lines, "$line\n";
                 }
                 next;
@@ -4132,7 +4151,7 @@ while (@lines) {
     # try to guess bibliography references or glossary terms
     #
 
-    unless (/^<H\d><a name=\"sec\d/) {
+    unless (/^<h\d><a name=\"sec\d/) {
 		if ($use_bibliography) {
 			$done = '';
 			while (/$BIBRE/o) {
