@@ -122,26 +122,26 @@ eval { ($T2H_USER = (getpwuid ($<))[6]) =~ s/,.*//;}; # Who am i
 
 $T2H_DEBUG = 0;
 $T2H_OPTIONS->{debug} = {
-    type => '=i',
+    type    => '=i',
     linkage => \$main::T2H_DEBUG,
     verbose => 'output HTML with debuging information',
 };
 
 $T2H_DOCTYPE = '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';
 $T2H_OPTIONS->{doctype} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$main::T2H_DOCTYPE,
     verbose => 'document type which is output in header of HTML files',
-    noHelp => 1
+    noHelp  => 1
 };
 
 $T2H_CHECK = 0;
 $T2H_OPTIONS->{check} = {
-    type => '!',
+    type    => '!',
     linkage => \$main::T2H_CHECK,
     verbose => 'if set, only check files and output all things that may ' .
                'be Texinfo commands',
-    noHelp => 1
+    noHelp  => 1
 };
 
 # -expand
@@ -150,7 +150,7 @@ $T2H_OPTIONS->{check} = {
 
 $T2H_EXPAND = "info";
 $T2H_OPTIONS->{expand} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_EXPAND,
     verbose => 'Expand info|tex|none section of texinfo source',
 };
@@ -160,7 +160,7 @@ $T2H_OPTIONS->{expand} = {
 
 $T2H_USE_GLOSSARY = 0;
 $T2H_OPTIONS->{glossary} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_USE_GLOSSARY,
     verbose => "if set, uses section named `Footnotes' for glossary",
     noHelp  => 1,
@@ -180,7 +180,7 @@ $T2H_INVISIBLE_MARK = '';
 # $T2H_INVISIBLE_MARK = '&#160;';
 
 $T2H_OPTIONS->{invisible} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_INVISIBLE_MARK,
     verbose => 'use text in invisible anchor',
     noHelp  => 1,
@@ -191,7 +191,7 @@ $T2H_OPTIONS->{invisible} = {
 
 $T2H_USE_ISO = 0;
 $T2H_OPTIONS->{iso} = {
-    type => 'iso',
+    type    => 'iso',
     linkage => \$T2H_USE_ISO,
     verbose => 'if set, ISO8879 characters are used for special symbols ' .
                '(like copyright, etc)',
@@ -204,7 +204,7 @@ $T2H_OPTIONS->{iso} = {
 
 @T2H_INCLUDE_DIRS = (".");
 $T2H_OPTIONS->{I} = {
-    type => '=s',
+    type    => '=s',
     linkage => \@T2H_INCLUDE_DIRS,
     verbose => 'append $s to the @include search path',
 };
@@ -217,7 +217,7 @@ $T2H_OPTIONS->{I} = {
 
 $T2H_TOP_FILE = '';
 $T2H_OPTIONS->{top_file} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_TOP_FILE,
     verbose => 'use $s as top file, instead of <docname>.html',
 };
@@ -230,7 +230,7 @@ $T2H_OPTIONS->{top_file} = {
 
 $T2H_TOC_FILE = '';
 $T2H_OPTIONS->{toc_file} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_TOC_FILE,
     verbose => 'use $s as ToC file, instead of <docname>_toc.html',
 };
@@ -240,10 +240,10 @@ $T2H_OPTIONS->{toc_file} = {
 
 $T2H_FRAMES = 0;
 $T2H_OPTIONS->{frames} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_FRAMES,
     verbose => 'output files which use HTML 4.0 frames (experimental)',
-    noHelp => 1,
+    noHelp  => 1,
 };
 
 
@@ -252,7 +252,7 @@ $T2H_OPTIONS->{frames} = {
 
 $T2H_SHOW_MENU = 1;
 $T2H_OPTIONS->{menu} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_SHOW_MENU,
     verbose => 'ouput Texinfo menus',
 };
@@ -263,7 +263,7 @@ $T2H_OPTIONS->{menu} = {
 
 $T2H_NUMBER_SECTIONS = 1;
 $T2H_OPTIONS->{number} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_NUMBER_SECTIONS,
     verbose => 'use numbered sections'
 };
@@ -287,7 +287,7 @@ $T2H_AVOID_MENU_REDUNDANCY = 1;
 
 $T2H_SPLIT = '';
 $T2H_OPTIONS->{split} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_SPLIT,
     verbose => 'split document on section|chapter else no splitting',
 };
@@ -301,7 +301,7 @@ $T2H_OPTIONS->{split} = {
 
 $T2H_SECTION_NAVIGATION = 1;
 $T2H_OPTIONS->{sec_nav} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_SECTION_NAVIGATION,
     verbose => 'output navigation panels for each section',
 };
@@ -313,7 +313,7 @@ $T2H_OPTIONS->{sec_nav} = {
 
 $T2H_SUBDIR = '';
 $T2H_OPTIONS->{subdir} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_SUBDIR,
     verbose => 'put HTML files in directory $s, instead of $cwd',
 };
@@ -324,7 +324,7 @@ $T2H_OPTIONS->{subdir} = {
 
 $T2H_SHORTEXTN = 0;
 $T2H_OPTIONS->{short_ext} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_SHORT_EXT,
     verbose => 'use "htm" extension for output HTML files',
 };
@@ -336,7 +336,7 @@ $T2H_OPTIONS->{short_ext} = {
 
 $T2H_PREFIX = '';
 $T2H_OPTIONS->{prefix} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_PREFIX,
     verbose => 'use as prefix for output files, instead of <docname>',
 };
@@ -346,7 +346,7 @@ $T2H_OPTIONS->{prefix} = {
 
 $T2H_OUT = '';
 $T2H_OPTIONS->{out_file} = {
-    type => '=s',
+    type    => '=s',
     linkage => sub {$main::T2H_OUT = @_[1]; $T2H_SPLIT = '';},
     verbose => 'if set, all HTML output goes into file $s',
 };
@@ -356,7 +356,7 @@ $T2H_OPTIONS->{out_file} = {
 
 $T2H_SHORT_REF = '';
 $T2H_OPTIONS->{short_ref} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_SHORT_REF,
     verbose => 'if set, references are without section numbers',
 };
@@ -368,7 +368,7 @@ $T2H_OPTIONS->{short_ref} = {
 
 $T2H_IDX_SUMMARY = 0;
 $T2H_OPTIONS->{idx_sum} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_IDX_SUMMARY,
     verbose => 'if set, also output index summary',
     noHelp  => 1,
@@ -379,7 +379,7 @@ $T2H_OPTIONS->{idx_sum} = {
 
 $T2H_VERBOSE = '';
 $T2H_OPTIONS->{Verbose} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_VERBOSE,
     verbose => 'print progress info to stdout',
 };
@@ -392,7 +392,7 @@ $T2H_OPTIONS->{Verbose} = {
 
 $T2H_LANG = 'en';
 $T2H_OPTIONS->{lang} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_LANG,
     verbose => 'use $s as document language (ISO 639 encoding)',
 };
@@ -402,7 +402,7 @@ $T2H_OPTIONS->{lang} = {
 
 $T2H_L2H = '';
 $T2H_OPTIONS->{l2h} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_L2H,
     verbose => 'if set, uses latex2html for @math and @tex',
 };
@@ -416,10 +416,10 @@ $T2H_OPTIONS->{l2h} = {
 
 $T2H_L2H_L2H = "latex2html";
 $T2H_OPTIONS->{l2h_l2h} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_L2H_L2H,
     verbose => 'program to use for latex2html translation',
-    noHelp => 1,
+    noHelp  => 1,
 };
 
 # -l2h_skip
@@ -428,10 +428,10 @@ $T2H_OPTIONS->{l2h_l2h} = {
 
 $T2H_L2H_SKIP = '';
 $T2H_OPTIONS->{l2h_skip} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_L2H_SKIP,
     verbose => 'if set, tries to reuse previously latex2html output',
-    noHelp => 1,
+    noHelp  => 1,
 };
 
 # -l2h_tmp
@@ -441,10 +441,10 @@ $T2H_OPTIONS->{l2h_skip} = {
 
 $T2H_L2H_TMP = '';
 $T2H_OPTIONS->{l2h_tmp} = {
-    type => '=s',
+    type    => '=s',
     linkage => \$T2H_L2H_TMP,
     verbose => 'if set, uses $s as temporary latex2html directory',
-    noHelp => 1,
+    noHelp  => 1,
 };
 
 # if set, cleans intermediate files (they all have the prefix $doc_l2h_)
@@ -452,22 +452,22 @@ $T2H_OPTIONS->{l2h_tmp} = {
 
 $T2H_L2H_CLEAN = 1;
 $T2H_OPTIONS->{l2h_clean} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_L2H_CLEAN,
     verbose => 'if set, do not keep intermediate latex2html files for ' .
                'later reuse',
-	noHelp => 1,
+	noHelp  => 1,
 };
 
 $T2H_OPTIONS->{D} = {
-    type => '=s',
+    type    => '=s',
     linkage => sub {$main::value{@_[1]} = 1;},
     verbose => 'equivalent to Texinfo "@set $s 1"',
-    noHelp => 1,
+    noHelp  => 1,
 };
 
 $T2H_OPTIONS->{init_file} = {
-    type => '=s',
+    type    => '=s',
     linkage => \&LoadInitFile,
     verbose => 'load init file $s'
 };
@@ -527,14 +527,14 @@ $T2H_HREF_DIR_INSTEAD_FILE = '';
 
 $T2H_ENGLISH_WORDS = {
     # titles  of pages
-    'ToC_Title' => 'Table of Contents',
-    'Overview_Title' => 'Short Table of Contents',
-    'Index_Title' => 'Index',
-    'About_Title' => 'About this document',
+    'ToC_Title'       => 'Table of Contents',
+    'Overview_Title'  => 'Short Table of Contents',
+    'Index_Title'     => 'Index',
+    'About_Title'     => 'About this document',
     'Footnotes_Title' => 'Footnotes',
-    'See' => 'See',
-    'see' => 'see',
-    'section' => 'section',
+    'See'             => 'See',
+    'see'             => 'see',
+    'section'         => 'section',
 
 # If necessary, we could extend this as follows:
 #  # text for buttons
@@ -555,14 +555,14 @@ $T2H_ENGLISH_WORDS = {
 };
 
 $T2H_GERMAN_WORDS = {
-    'ToC_Title' => 'Inhaltsverzeichniss',
-    'Overview_Title' => 'Kurzes Inhaltsverzeichniss',
-    'Index_Title' => 'Index',
-    'About_Title' => '&Uuml;ber dieses Dokument',
+    'ToC_Title'       => 'Inhaltsverzeichniss',
+    'Overview_Title'  => 'Kurzes Inhaltsverzeichniss',
+    'Index_Title'     => 'Index',
+    'About_Title'     => '&Uuml;ber dieses Dokument',
     'Footnotes_Title' => 'Fu&szlig;noten',
-    'See' => 'Siehe',
-    'see' => 'siehe',
-    'section' => 'Abschnitt',
+    'See'             => 'Siehe',
+    'see'             => 'siehe',
+    'section'         => 'Abschnitt',
 };
 
 $T2H_WORDS = {
@@ -1475,7 +1475,7 @@ sub getOptions
 	$Getopt::Long::ignorecase = $ignoreCase;
 
     $self->{'default'}{'help'} = {
-        type => ':i',
+        type    => ':i',
         default => '',
         linkage => sub {$self->helpOptions($_[1]); exit (0) if $helpThenExit;},
         verbose => "print help and exit"
@@ -1483,7 +1483,7 @@ sub getOptions
 
 	
     $self->{'default'}{'version'} = {
-        type => '',
+        type    => '',
         default => '',
         linkage => sub { print $self->{'versionText'}; 
                          exit 0 if versionTheExit; },
@@ -1902,49 +1902,49 @@ $complex_format_map->{ smallformat } = $complex_format_map->{ smalldisplay };
 # things to skip
 #
 %to_skip = ( # comments
-             'c', 1,
-             'comment', 1,
-             'ifnotinfo', 1,
-             'ifnottex', 1,
-             'ifhtml', 1,
-             'end ifhtml', 1,
-             'end ifnotinfo', 1,
-             'end ifnottex', 1,
+             'c'                 => 1,
+             'comment'           => 1,
+             'ifnotinfo'         => 1,
+             'ifnottex'          => 1,
+             'ifhtml'            => 1,
+             'end ifhtml'        => 1,
+             'end ifnotinfo'     => 1,
+             'end ifnottex'      => 1,
              # useless
-             'detailmenu', 1,
-             'direntry', 1,
-             'contents', 1,
-             'shortcontents', 1,
-             'summarycontents', 1,
-             'footnotestyle', 1,
-             'end ifclear', 1,
-             'end ifset', 1,
-             'titlepage', 1,
-             'end titlepage', 1,
+             'detailmenu'        => 1,
+             'direntry'          => 1,
+             'contents'          => 1,
+             'shortcontents'     => 1,
+             'summarycontents'   => 1,
+             'footnotestyle'     => 1,
+             'end ifclear'       => 1,
+             'end ifset'         => 1,
+             'titlepage'         => 1,
+             'end titlepage'     => 1,
              # unsupported commands (formatting)
-             'afourpaper', 1,
-             'cropmarks', 1,
-             'finalout', 1,
-             'headings', 1,
-             'sp', 1,
-             'need', 1,
-             'page', 1,
-             'setchapternewpage', 1,
-             'everyheading', 1,
-             'everyfooting', 1,
-             'evenheading', 1,
-             'evenfooting', 1,
-             'oddheading', 1,
-             'oddfooting', 1,
-             'smallbook', 1,
-             'vskip', 1,
-             'filbreak', 1,
-             'paragraphindent', 1,
+             'afourpaper'        => 1,
+             'cropmarks'         => 1,
+             'finalout'          => 1,
+             'headings'          => 1,
+             'sp'                => 1,
+             'need'              => 1,
+             'page'              => 1,
+             'setchapternewpage' => 1,
+             'everyheading'      => 1,
+             'everyfooting'      => 1,
+             'evenheading'       => 1,
+             'evenfooting'       => 1,
+             'oddheading'        => 1,
+             'oddfooting'        => 1,
+             'smallbook'         => 1,
+             'vskip'             => 1,
+             'filbreak'          => 1,
+             'paragraphindent'   => 1,
              # unsupported formats
-             'cartouche', 1,
-             'end cartouche', 1,
-             'group', 1,
-             'end group', 1,
+             'cartouche'         => 1,
+             'end cartouche'     => 1,
+             'group'             => 1,
+             'end group'         => 1,
            );
     
 #############################################################################
@@ -2015,53 +2015,53 @@ $T2H_OPTIONS->{expandtex} = {
 };
 
 $T2H_OPTIONS->{monolithic} = {
-    type => '!',
+    type    => '!',
     linkage => sub {$main::T2H_SPLIT = '';},
     verbose => 'obsolete, use "-split no" instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OPTIONS->{split_node} = {
-    type => '!',
+    type    => '!',
     linkage => sub{$main::T2H_SPLIT = 'section';},
     verbose => 'obsolete, use "-split section" instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OPTIONS->{split_chapter} = {
-    type => '!',
+    type    => '!',
     linkage => sub{$main::T2H_SPLIT = 'chapter';},
     verbose => 'obsolete, use "-split chapter" instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OPTIONS->{no_verbose} = {
-    type => '!',
+    type    => '!',
     linkage => sub {$main::T2H_VERBOSE = 0;},
     verbose => 'obsolete, use -noverbose instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OUT = '';
 $T2H_OPTIONS->{output_file} = {
-    type => '=s',
+    type    => '=s',
     linkage => sub {$main::T2H_OUT = @_[1]; $T2H_SPLIT = '';},
     verbose => 'obsolete, use -out_file instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OPTIONS->{section_navigation} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_SECTION_NAVIGATION,
     verbose => 'obsolete, use -sec_nav instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 $T2H_OPTIONS->{verbose} = {
-    type => '!',
+    type    => '!',
     linkage => \$T2H_VERBOSE,
     verbose => 'obsolete, use -Verbose instead',
-    noHelp => 2,
+    noHelp  => 2,
 };
 
 # read initialzation from $sysconfdir/texi2htmlrc or $HOME/.texi2htmlrc
@@ -2098,7 +2098,7 @@ if ( ! $options->getOptions( $T2H_OPTIONS, $T2H_USAGE_TEXT,
 if ( $T2H_CHECK ) {
     die "Need file to check\n$usage" unless @ARGV > 0;
     &check;
-    exit 1;
+    exit;
 }
 
 #############################################################################
@@ -4355,12 +4355,10 @@ unless (@sections) {
 
 # initialize $T2H_HREF, $T2H_NAME
 
-%T2H_HREF =
-  (
-   'First' ,   sec_href($sections[0]),
-   'Last',     sec_href($sections[$#sections]),
-   'About',     $docu_about. '#sec_About',
-  );
+%T2H_HREF = ( 'First' => sec_href($sections[0]),
+              'Last'  => sec_href($sections[$#sections]),
+              'About' => $docu_about. '#sec_About',
+  			);
 
 # prepare TOC, OVERVIEW, TOP
 
@@ -4398,16 +4396,16 @@ if (! $T2H_HREF{Index} and $first_index_chapter) {
 print "# Using '" . clean_name($T2H_INDEX_CHAPTER) . "' as index page\n"
     if $T2H_VERBOSE and $T2H_HREF{Index};
 
-%T2H_NAME =
-  (
-   'First',   clean_name($sec2node{$sections[0]}),
-   'Last',    clean_name($sec2node{$sections[$#sections]}),
-   'About',    $T2H_WORDS->{$T2H_LANG}->{'About_Title'},
-   'Contents', $T2H_WORDS->{$T2H_LANG}->{'ToC_Title'},
-   'Overview', $T2H_WORDS->{$T2H_LANG}->{'Overview_Title'},
-   'Index' ,   clean_name($T2H_INDEX_CHAPTER),
-   'Top',      clean_name($T2H_TOP_HEADING || $T2H_THISDOC{'title'} || $T2H_THISDOC{'shorttitle'}),
-  );
+%T2H_NAME = ( 'First'    => clean_name($sec2node{$sections[0]}),
+			  'Last'     => clean_name($sec2node{$sections[$#sections]}),
+			  'About'    => $T2H_WORDS->{$T2H_LANG}->{'About_Title'},
+			  'Contents' => $T2H_WORDS->{$T2H_LANG}->{'ToC_Title'},
+			  'Overview' => $T2H_WORDS->{$T2H_LANG}->{'Overview_Title'},
+			  'Index'    => clean_name($T2H_INDEX_CHAPTER),
+			  'Top'      => clean_name( $T2H_TOP_HEADING ||
+									    $T2H_THISDOC{'title'} ||
+										$T2H_THISDOC{'shorttitle'} ),
+			);
 
 #############################################################################
 # print frame and frame toc file
