@@ -690,6 +690,7 @@ for command_line_filename in ${1+"$@"}; do
   # We also return to the original directory so that
   # - the next file is processed in correct conditions
   # - the temporary file can be removed
+
   if test -n "$clean"; then
     if test -n "$oname"; then
        dest=$oname
@@ -703,6 +704,7 @@ for command_line_filename in ${1+"$@"}; do
   fi
 
   # Remove temporary files.
+
   if test "x$debug" = "x"; then
     $verbose "Removing $tmpdir_src $tmpdir_xtr $tmpdir_bak ..."
     cd /
