@@ -140,12 +140,12 @@ Finally, @code{tc} is going to be used for the lock-in's time constant.
 
 Also the first line of the @code{PREPARATIONS} section does not has
 changed, again we set up the magnet using @code{magnet_setup()}
-(@pxref{magnet_setup}) to be started at a field as stored in the
+(@pxref{magnet_setup()}) to be started at a field as stored in the
 variable @code{start_field} and tell it, that sweeps will be done with
 step sizes of @code{field_step}.
 
 But the graphics initialization with function @code{init_1d()}
-(@pxref{init_1d}) in line 23 has been changed a bit. Instead of using
+(@pxref{init_1d()}) in line 23 has been changed a bit. Instead of using
 the defaults, we now request 2 curves (one for the newly measured data
 points and one for the mean values of all runs don so far).  Also, we
 indicate that the curves will be @code{Number_of_points} long.  The next
@@ -154,7 +154,7 @@ start with a value of @code{start_field} and the difference between two
 points in @i{x}-direction is @code{field_step}. Finally, we also set
 labels for the @i{x}- and @i{y}-axis: the values at the @i{x}-axis are
 the magnetic fields (in Gauss) and the @i{y}-axis will represent the
-measured signal intensity in micro-Volts.
+measured signal intensity in microvolt.
 
 The first thing done in the @code{EXPERIMENT} section is asking the user
 to supply two file names -- what we get back from the functions are
@@ -182,7 +182,7 @@ to the appropriate element of the array of mean values.
 
 In line 40/41 the new data value and the new mean value both are
 displayed on the screen. The first three arguments of the call of the
-function @code{display_1d()} (@pxref{display_1d}) are the
+function @code{display_1d()} (@pxref{display_1d()}) are the
 @i{x}-coordinate, which is just the loop counter variable, the
 @i{y}-coordinate, the new data value but multiplied by @code{1.0e6}
 because the value returned by the lock-in amplifiers is always in Volts
@@ -194,7 +194,7 @@ element by @code{I}, the number of runs done so far.
 If you should have any trouble understanding that the @i{x}-coordinate
 is given as an integer numbers but on the screen the scale is to be
 shown in field units, here's an explanation: in the @code{init_1d()}
-function call (@pxref{init_1d}) during the @code{PREPARATIONS} section
+function call (@pxref{init_1d()}) during the @code{PREPARATIONS} section
 we told the program that the first @i{x}-axis value would be at a field
 of the value of @code{start_field} and that all following fields would
 be equally spaced by a field difference according to the value of the
@@ -205,16 +205,16 @@ at @code{start_value + field_step} etc.
 
 The next instruction (line 42) stores the newly measured value, together
 with the current field, in the first file. In this case we use the
-function @code{fsave()} (@pxref{fsave}) to write both the current field
+function @code{fsave()} (@pxref{fsave()}) to write both the current field
 (as stored in the variable @code{field}) and the new data into the
 (first) file. According to the format string both values will appear on
 one line.
 
 All now still needed in the inner loop is to sweep to a new magnetic
 field (which, according to the our call of @code{magnet_setup()}
-(@pxref{magnet_setup}) in the @code{PREPARATIONS} section is supposed to
-be @code{field_step} higher than the current value). When the magnet has
-reached the new field the @code{sweep_up()} function (@pxref{sweep_up})
+(@pxref{magnet_setup()}) in the @code{PREPARATIONS} section is supposed to
+be @code{field_step()} higher than the current value). When the magnet has
+reached the new field the @code{sweep_up()} function (@pxref{sweep_up()})
 returns the new field value which gets stored in the variable
 @code{field}.
 
@@ -223,12 +223,12 @@ have reached the end field and now have to start a new run. First we
 write a single new line into the file for the data of all runs to have a
 visual indication where the data of the new run start. Then we have to
 get the field back to the start field, which can be done by calling the
-function @code{reset_field()} (@pxref{reset_field}) (you actually also
+function @code{reset_field()} (@pxref{reset_field()}) (you actually also
 could also tell the magnet to go to a field of @code{start_field()} by
-calling @code{set_field()} (@pxref{set_field}) with @code{start_field()}
+calling @code{set_field()} (@pxref{set_field()}) with @code{start_field()}
 as its only argument). Finally, we have to remove the data of the last
 run from the screen but keeping the curve with the mean values. This is
-done by calling the function @code{clear_curve()} (@pxref{clear_curve})
+done by calling the function @code{clear_curve()} (@pxref{clear_curve()})
 with the number of the curve to remove (which is 1) as the
 parameter. Then we proceed with the inner loop.
 
@@ -236,7 +236,7 @@ When the experiment finally is done, i.e.@: we're finished doing the
 @code{Number_of_runs} repetitions of the field sweep we end up at line
 51 where we now can store the whole array of mean values, together with
 some information about the experimental parameters. Please note that
-using the function @code{save()} (@pxref{save}) it is possible to write
+using the function @code{save()} (@pxref{save()}) it is possible to write
 whole (one-dimensional) arrays with one call, also this is an example
 that arithmetic can be done on arrays, here all array elements are
 automatically divided by @code{Number_of_runs} before being written to
@@ -334,8 +334,8 @@ here we only use floating point and integer variables. The type is
 followed by the allowed range of the variable, enclosed in square braces
 and with the upper and lower limit separated by a colon, "@code{:}". As
 you can see, you may leave out one (or even both) limits. Here we use
-as the limits for the start and end field the field range that can be
-measured with the gaussmeter used. For the field step variable there's
+the field range that can be measured with the gaussmeter as the limits
+for the start and end field . For the field step variable there's
 only a lower limit, the smallest step size possible with the magnet
 power supply. Also for the number of runs only a lower limit is given,
 which is @code{1} for obvious reasons.
@@ -626,7 +626,7 @@ change the settings.
 The second thing to be done is figuring out at which field the magnet
 currently is and store it in both the variables @code{field} and
 @code{last_field}. Because we didn't call the function
-@code{magnet_setup()} (@pxref{magnet_setup}) in the @code{PREPARATIONS}
+@code{magnet_setup()} (@pxref{magnet_setup()}) in the @code{PREPARATIONS}
 section as in the previous example script the magnet will simply start
 of at the field value it has been set to manually.
 
@@ -634,7 +634,7 @@ All the lines 43 to 58 are for setting up an additional window with
 graphical elements, i.e.@: buttons and in- and output fields. The first
 element is an output field, i.e.@: a box to just display values.  It is
 created by calling the function @code{output_create()}
-(@pxref{output_create}) with three arguments. The first is the type of
+(@pxref{output_create()}) with three arguments. The first is the type of
 the field where "FLOAT_OUTPUT" stands for a field for displaying
 floating point values. The second is the value to display in the field
 and the third is a label to appear below the field. Obviously, this
@@ -648,7 +648,7 @@ Radio buttons always appear in groups and the important property is that
 only one of them can be switched on at a time. That's exactly what we
 need to control if the magnet is to be swept up or down or stopped -- it
 can only be in one of these states. To create a button we need to call
-the function @code{button_create()} (@pxref{button_create}). For the
+the function @code{button_create()} (@pxref{button_create()}). For the
 first of group of radio buttons it takes just two arguments, the first
 one indicating the type of the button, i.e.@: @code{"RADIO_BUTTON"}
 (there are also other types of buttons as we will see soon) and a label
@@ -660,7 +660,7 @@ argument is simply the number of the first button of the group. It has
 to be given between the buttons type and the label string.
 
 After creating all three buttons we now select one of them as activated
-with a call to @code{button_state()} (@pxref{button_state}). When we
+with a call to @code{button_state()} (@pxref{button_state()}). When we
 want to set the state of a button we have to pass the function two
 arguments, the number associated with the button and the state, either
 @code{"ON"} or @code{"OFF"} (but @code{1} and @code{0} will also do). If
@@ -671,7 +671,7 @@ corresponding button.
 
 Next we add two input fields where the user can enter a new field as
 well as a new field step size. This is down by a call of the function
-@code{input_create()} (@pxref{input_create}). Since both values are
+@code{input_create()} (@pxref{input_create()}). Since both values are
 floating point numbers we use @code{"FLOAT_INPUT"} as the first
 argument. As already in the case of the function for creating an output
 field, the second argument is the value to be shown at first in the
@@ -683,23 +683,23 @@ active or inactive, i.e.@: it's either pushed in or not. The natural
 choice in this case is to use a button of type @code{"PUSH_BUTTON"}
 which has exactly these properties. As we already have seen when
 creating radio buttons, the function to create a button is
-@code{button_create()} (@pxref{button_create}) and the first argument
+@code{button_create()} (@pxref{button_create()}) and the first argument
 passed to it must be the type of the button. The second argument is just
 the label string to be shown on its right side. Since push buttons start
 of in the inactive state per default but it is probably better not to
 start the experiment already acquiring data (the user probably first
 will have to set a reasonable field value) we have to activate button
 (indicating that the acquisition is stopped) by calling
-@code{button_state()} (@pxref{button_state}) with the buttons handle and
-the new state to be set.
+@code{button_state()} (@pxref{button_state()}) with the buttons handle
+and the new state to be set.
 
 The last button for clearing the display is just a normal button, i.e.@:
 a button that just can be clicked on. This is indicated by the button
 type @code{"NORMAL_BUTTON"} as the first argument to
-@code{button_create()} (@pxref{button_create}).
+@code{button_create()} (@pxref{button_create()}).
 
 The creation of all the buttons and in- and output fields is enclosed by
-two calls of the function @code{hide_toolbox()} (@pxref{hide_toolbox})
+two calls of the function @code{hide_toolbox()} (@pxref{hide_toolbox()})
 (line 43 and 58). Before we start creating the buttons etc.@: this
 disables the immediate display of the newly created objects in a window
 labled "Toolbox", redrawing the window for each object. When we're done
@@ -749,7 +749,7 @@ Before now also stepping the field up or down we first have to check the
 state of the sweep buttons -- the user may have pushed one of them. This
 is what happens in the lines 74 to 89. Checking the state of a button is
 done using the same function that already was used to set the state of a
-button, @code{button_state()} (@pxref{button_state}), but without a
+button, @code{button_state()} (@pxref{button_state()}), but without a
 second argument, just with the button handle as the only argument. If a
 radio or push button is active it returns a non-zero number, otherwise
 @code{0}.
@@ -760,7 +760,7 @@ active but we're not sweeping up (i.e.@: when @code{Sweep_State} isn't
 accordance with the users request. To also give a visual indication that
 the sweep directon changed we then draw a marker at the current
 coordinate. This is one via the @code{draw_marker()} function
-(@pxref{draw_marker}). It takes two arguments, the @i{x}-coordinate and
+(@pxref{draw_marker()}). It takes two arguments, the @i{x}-coordinate and
 a string for the color of the marker, and will draw a vertical dashed
 line in the selected color.
 
@@ -780,10 +780,10 @@ shouldn't count on this.)
 
 If the new field value is still within the allowed range we tell the
 magnet to set the new field by calling the function @code{set_field()}
-(@pxref{set_field}).  It returns the value of the new field, which we
+(@pxref{set_field()}).  It returns the value of the new field, which we
 store in the @code{field} variable. When done with this we still have to
 update the output field for displaying the current field by calling the
-@code{output_value()} function (@pxref{output_value}). It takes two
+@code{output_value()} function (@pxref{output_value()}). It takes two
 arguments, the handle of the output field we got when it was created and
 the new value to be displayed.
 
@@ -806,7 +806,7 @@ something changed we need to take appropriate action. This is what
 happens during lines 111 to 130.
 
 For both the field and the field step size we fetch the current value by
-calling @code{input_value()} (@pxref{input_value}) with just one
+calling @code{input_value()} (@pxref{input_value()}) with just one
 argument, the entry fields handle, and store the returned value in a
 variable, @code{new_field} and @code{new_field_step}, respectively. Now
 we can compare the last recoded value to the current value of the input
@@ -821,7 +821,7 @@ in both the variables @code{field} and @code{last_field}. Of course, we
 also have the output field showing the current field. On the other hand,
 if the value isn't acceptable we must notify the user which we do by
 resetting the input field to its previous value, using again the
-@code{input_value()} function (@pxref{input_value}).
+@code{input_value()} function (@pxref{input_value()}).
 
 Now we're nearly done, there only remain two more buttons to be taken
 care of. Handling the button for stopping the acquisition is simple --
@@ -830,7 +830,7 @@ accordingly, which is done in line 133.
 
 Also dealing with the button for clearing the display isn't complicated.
 First we must determine if it had been clicked on in the mean
-time. Again, we can use the @code{button_state()} (@pxref{button_state})
+time. Again, we can use the @code{button_state()} (@pxref{button_state()})
 function. It will return a non-zero value if the button has been clicked
 on since the last invocation of the function for this button, otherwise
 @code{0}. (Actually, the value returned by the function is the number of
@@ -838,11 +838,11 @@ times the button was clicked on since the last call.)
 
 If the user clicked onto the button we have to clear both the curves and
 also remove the markers that might have been drawn, using the functions
-@code{clear_curve()} (@pxref{clear_curve}) and @code{clear_marker()}
-(@pxref{clear_marker}) (if invoked without an argument the functions
+@code{clear_curve()} (@pxref{clear_curve()}) and @code{clear_marker()}
+(@pxref{clear_marker()}) (if invoked without an argument the functions
 remove all curves and markers, otherwise you would have to supply a list
 of curve numbers and marker handles).  But we also call the function
-@code{rescale()} (@pxref{rescale}) to reduce the @i{x}-scaling to some
+@code{rescale()} (@pxref{rescale()}) to reduce the @i{x}-scaling to some
 reasonable value (here @code{64}) -- if we wouldn't do so and the number
 of points displayed before removing the curves was very large, e.g.@:
 10000, the @i{x}-scaling would remain set for displaying 10000 points,
@@ -1013,19 +1013,19 @@ get initialized.
 
 Because we use here a digitizer to measure the echo area we also should
 set up the digitizer. Calling the function
-@code{digitizer_num_averages()} (@pxref{digitizer_num_averages}) we set
+@code{digitizer_num_averages()} (@pxref{digitizer_num_averages()}) we set
 the digitizer to always accumulate the results of 100 repetitions of the
 pulse sequence. @code{digitizer_trigger_channel()}
-(@pxref{digitizer_trigger_channel}) tells the digitizer to expect the
+(@pxref{digitizer_trigger_channel()}) tells the digitizer to expect the
 trigger signal on its @code{AUX} channel. The next call of
-@code{digitizer_trigger_position()} (@pxref{digitizer_trigger_position})
+@code{digitizer_trigger_position()} (@pxref{digitizer_trigger_position()})
 sets the position within the trace it records. By setting it to 0.2 the
 digitzer will use a pretrigger a fifth (of 20%) of the measured trace.
 
 Finally, we must define ranges for measuring the area, otherwise the
 digitizer would return the area of the full trace. This is done by
 calling the @code{digitizer_define_window()} function
-(@pxref{digitizer_define_window}), which expects up to two arguments,
+(@pxref{digitizer_define_window()}), which expects up to two arguments,
 the start position of the range (relative to the trigger position and
 its length. It returns an integer number which in the following is used
 in further function calls for the digitizer. Here we define two windows,
@@ -1041,10 +1041,10 @@ field.
 Since the pulser is already running the first thing to be done in the
 loop is to start an acquisition sequence of the digitizer by calling
 @code{digitizer_start_acquisition()}
-(@pxref{digitizer_start_acquisition}). This function only returns when
+(@pxref{digitizer_start_acquisition()}). This function only returns when
 the digitizer is finished accumulating the requested number of traces.
 When it is done we first fetch the area where the echo is supposed to be
-by calling @code{digitizer_get_area()} (@pxref{digitizer_get_area}). The
+by calling @code{digitizer_get_area()} (@pxref{digitizer_get_area()}). The
 function expects two arguments, the channel used for measuring (here
 channel 1, @code{CH1}), and the handle for the window previously
 defined. After storing the result in the first element of array
@@ -1058,17 +1058,17 @@ always in Vs units. Afterwards we have to increment the counter @code{I}
 to be prepared for displaying the next data point.
 
 We also need to write the data to a file, which is done by the next call
-of @code{fsave()} (@pxref{fsave}). Here we write first the current
+of @code{fsave()} (@pxref{fsave()}). Here we write first the current
 field, both areas and the difference between the areas to a file. Since
 we didn't open a file explicitely by a call of e.g.@: @code{get_file()}
-(@pxref{get_file}) we don't have a file handle to pass to the function
+(@pxref{get_file()}) we don't have a file handle to pass to the function
 as the first argument as we did in the first script. Instead we simply
 leave out the file handle. In this case the first time the script needs
 to write to the file a file selector box pops up.
 
 All left to be done in the loop of the experiemnt is to sweep up the
 field. The new field value as returned by @code{sweep_up()}
-(@pxref{sweep_up}) is stored in the @code{field} variable. which then is
+(@pxref{sweep_up()}) is stored in the @code{field} variable. which then is
 used at the begin of the loop to figure out if the experiment has to
 continue or if the end field has already been reached.
 
