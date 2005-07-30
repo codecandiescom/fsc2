@@ -650,7 +650,7 @@ sub T2H_DEFAULT_print_section
     &$T2H_print_head_navigation($fh) if $T2H_SECTION_NAVIGATION;
     my $nw = t2h_print_lines($fh);
 
-    &$T2H_print_foot_navigation($fh, $nw)
+    &$T2H_print_foot_navigation( $fh, $nw )
         if $T2H_SPLIT eq 'section' and $T2H_SECTION_NAVIGATION;
 }
 
@@ -666,15 +666,15 @@ sub T2H_DEFAULT_print_section
 
 sub T2H_DEFAULT_print_Top_header
 {
-    &$T2H_print_page_head(@_) if $T2H_SPLIT;
-    t2h_print_label(@_); # this needs to be called, otherwise no label set
-    &$T2H_print_head_navigation(@_);
+    &$T2H_print_page_head( @_ ) if $T2H_SPLIT;
+    t2h_print_label( @_ ); # this needs to be called, otherwise no label set
+    &$T2H_print_head_navigation( @_ );
 }
 
 sub T2H_DEFAULT_print_Top_footer
 {
-    &$T2H_print_foot_navigation(@_);
-    &$T2H_print_page_foot(@_) if $T2H_SPLIT;
+    &$T2H_print_foot_navigation( @_ );
+    &$T2H_print_page_foot( @_ ) if $T2H_SPLIT;
 }
 
 sub T2H_DEFAULT_print_Top
@@ -691,13 +691,13 @@ sub T2H_DEFAULT_print_Top
         # if top-level node has content, then print it with extra header
         print $fh "<h1>$T2H_NAME{Top}</h1><p>"
             unless $T2H_HAS_TOP_HEADING;
-        t2h_print_lines($fh, $T2H_THIS_SECTION)
+        t2h_print_lines( $fh, $T2H_THIS_SECTION )
     } else {
         # top-level node is fully enclosed in @ifnothtml
         # print fulltitle, subtitle, author, Overview
 
         print $fh "<center>\n<h1>" .
-              join("</h1>\n<h1>", split(/\n/,  $T2H_THISDOC{fulltitle})) .
+              join( "</h1>\n<h1>", split /\n/,  $T2H_THISDOC{fulltitle} ) .
               "</h1>\n";
         print $fh "<h2>$T2H_THISDOC{subtitle}</h2>\n"
             if $T2H_THISDOC{subtitle};
@@ -709,7 +709,7 @@ sub T2H_DEFAULT_print_Top
 <h2> Overview: </h2>
 <blockquote>
 EOT
-        t2h_print_lines($fh, $T2H_OVERVIEW);
+        t2h_print_lines( $fh, $T2H_OVERVIEW );
         print $fh "</blockquote>\n";
     }
     &$T2H_print_Top_footer($fh);
@@ -723,46 +723,46 @@ EOT
 
 sub T2H_DEFAULT_print_Toc
 {
-    return &$T2H_print_misc(@_);
+    return &$T2H_print_misc( @_ );
 }
 
 sub T2H_DEFAULT_print_Overview
 {
-    return &$T2H_print_misc(@_);
+    return &$T2H_print_misc( @_ );
 }
 
 sub T2H_DEFAULT_print_Footnotes
 {
-    return &$T2H_print_misc(@_);
+    return &$T2H_print_misc( @_ );
 }
 
 sub T2H_DEFAULT_print_About
 {
-    return &$T2H_print_misc(@_);
+    return &$T2H_print_misc( @_ );
 }
 
 sub T2H_DEFAULT_print_misc_header
 {
-    &$T2H_print_page_head(@_) if $T2H_SPLIT;
+    &$T2H_print_page_head( @_ ) if $T2H_SPLIT;
     # this needs to be called, otherwise, no labels are set
-    t2h_print_label(@_);
-    &$T2H_print_head_navigation(@_);
+    t2h_print_label( @_ );
+    &$T2H_print_head_navigation( @_ );
 }
 
 sub T2H_DEFAULT_print_misc_footer
 {
-    &$T2H_print_foot_navigation(@_);
-    &$T2H_print_page_foot(@_) if $T2H_SPLIT;
+    &$T2H_print_foot_navigation( @_ );
+    &$T2H_print_page_foot( @_ ) if $T2H_SPLIT;
 }
 
 sub T2H_DEFAULT_print_misc
 {
     my $fh = shift;
     local $T2H_BUTTONS = \@T2H_MISC_BUTTONS;
-    &$T2H_print_misc_header($fh);
+    &$T2H_print_misc_header( $fh );
     print $fh "<h1>$T2H_NAME{This}</h1>\n";
-    t2h_print_lines($fh);
-    &$T2H_print_misc_footer($fh);
+    t2h_print_lines( $fh );
+    &$T2H_print_misc_footer( $fh );
 }
 
 ###################################################################
@@ -793,7 +793,7 @@ sub T2H_DEFAULT_print_chapter_header
 sub T2H_DEFAULT_print_chapter_footer
 {
     local $T2H_BUTTONS = \@T2H_CHAPTER_BUTTONS;
-    &$T2H_print_navigation(@_);
+    &$T2H_print_navigation( @_ );
 }
 
 ###################################################################
@@ -991,6 +991,7 @@ sub T2H_DEFAULT_button_icon_img
                          'Last',         ' &gt;| '
                        );
 
+
 sub T2H_DEFAULT_print_navigation
 {
 	my $fh = shift;
@@ -1006,23 +1007,22 @@ sub T2H_DEFAULT_print_navigation
 			&$button( $fh, $vertical );
 		} elsif ( $button eq ' ' ) { # handle space button
 			print $fh
-				$T2H_ICONS and $T2H_ACTIVE_ICONS{' '} ?
+				$T2H_ICONS && $T2H_ACTIVE_ICONS{' '} ?
 					&$T2H_button_icon_img( $button, $T2H_ACTIVE_ICONS{' '} ) :
 					$T2H_NAVIGATION_TEXT{' '};
 		} elsif ( $T2H_HREF{$button} ) { # button is active
 			print $fh
-				$T2H_ICONS and $T2H_ACTIVE_ICONS{$button} ? # use icon ?
+				$T2H_ICONS && $T2H_ACTIVE_ICONS{$button} ? # use icon ?
 				t2h_anchor( '', $T2H_HREF{$button},  # yes
                             &$T2H_button_icon_img( $button,
                                                    $T2H_ACTIVE_ICONS{$button},
                                                    $T2H_NAME{$button} ) )
 					: # use text
-						"[" .
-						t2h_anchor('', $T2H_HREF{$button},
-								   $T2H_NAVIGATION_TEXT{$button}) . "]";
+					"[" . t2h_anchor( '', $T2H_HREF{$button},
+									  $T2H_NAVIGATION_TEXT{$button} ) . "]";
 		} else { # button is passive
 			print $fh
-				  $T2H_ICONS and $T2H_PASSIVE_ICONS{$button} ?
+				  $T2H_ICONS && $T2H_PASSIVE_ICONS{$button} ?
 		                    &$T2H_button_icon_img( $button,
                                                    $T2H_PASSIVE_ICONS{$button},
                                                    $T2H_NAME{$button} ) :
@@ -1106,7 +1106,7 @@ EOT
 <tr>
 <td align="center">
 EOT
-    	$about .= ($T2H_ICONS and $T2H_ACTIVE_ICONS{$button} ?
+    	$about .= ($T2H_ICONS && $T2H_ACTIVE_ICONS{$button} ?
                    &$T2H_button_icon_img($button, $T2H_ACTIVE_ICONS{$button}) :
                    " [" . $T2H_NAVIGATION_TEXT{$button} . "] ");
     	$about .= <<EOT;
@@ -2140,8 +2140,8 @@ $docu_name = $T2H_PREFIX if $T2H_PREFIX;
 
 if ( $T2H_SUBDIR and ! $T2H_OUT ) {
     $T2H_SUBDIR =~ s|/*$||;
-    unless (-d "$T2H_SUBDIR" and -w "$T2H_SUBDIR") {
-        if ( mkdir($T2H_SUBDIR, oct(755))) {
+    unless ( -d "$T2H_SUBDIR" and -w "$T2H_SUBDIR" ) {
+        if ( mkdir( $T2H_SUBDIR, oct( 755 ) ) ) {
             print "# created directory $T2H_SUBDIR\n" if $T2H_VERBOSE;
         } else {
             warn "$ERROR can't create directory $T2H_SUBDIR. Put " .
@@ -3051,8 +3051,8 @@ while ($_ = &next_line) {
 		} elsif ( $tag eq 'include' ) {
 	    	if ( /^\@include\s+($FILERE)\s*$/o ) {
 				$file = LocateIncludeFile($1);
-				if ($file and -e $file) {
-		    		&open($file);
+				if ( $file and -e $file ) {
+		    		&open( $file );
 		    		print "# including $file\n" if $T2H_VERBOSE;
 				} else {
 		    		warn "$ERROR Can't find $1, skipping";
@@ -3202,7 +3202,7 @@ while ($_ = &next_line) {
 
                 $macros->{$name}->{Args} = \@args;
                 $macros->{$name}->{Body} = '';
-                while (($_ = &next_line) and $_ !~ /\@end $tag/) {
+                while ( ( $_ = &next_line ) and $_ !~ /\@end $tag/ ) {
                     $macros->{$name}->{Body} .= $_;
                 }
                 die "ERROR: No closing '\@end $tag' found for macro " .
@@ -3406,7 +3406,7 @@ while ($_ = &next_line) {
     #
 
     if ($tag) {
-        if (defined($sec2level{$tag}) and $sec2level{$tag} > 0) {
+        if ( defined $sec2level{$tag} and $sec2level{$tag} > 0) {
             if (/^\@$tag\s+(.+)$/) {
                 $name = $1;
                 $name = &normalise_node($name);
@@ -3563,11 +3563,10 @@ while ($_ = &next_line) {
 		    print "# found glossary for '$entry' id $id\n"
 			if $T2H_DEBUG & $DEBUG_GLOSS;
 		    $what = &t2h_anchor($id, '', $what);
-		}
-		elsif ($in_table and ($table_type eq 'f' or $table_type eq 'v'))
-		{
+		} elsif ($in_table and ( $table_type eq 'f' or $table_type eq 'v' ) ) {
 		    EnterIndexEntry($table_type, $what, $docu_doc, $section, \@lines);
 		}
+
 		&html_pop_if( 'p' );
 		if ($html_element eq 'dl' or $html_element eq 'dd') {
 		    if ( $things_map{$in_table} and ! $what ) {
@@ -4540,10 +4539,10 @@ while ( $section = shift @sections ) {
     $T2H_NODE{Next} = $node;
 
     $node = $T2H_NODE{This};
-    if ($node2up{$node} and $node2up{$node} ne 'Top' and
-        ($node2next{$node} eq $T2H_NODE{Forward} || ! $node2next{$node})) {
+    if ( $node2up{$node} and $node2up{$node} ne 'Top' and
+		 ( $node2next{$node} eq $T2H_NODE{Forward} or ! $node2next{$node} ) ) {
         $node = $node2up{$node};
-        while ($node and $node ne $node2up{$node} and ! $node2next{$node}) {
+        while ( $node and $node ne $node2up{$node} and ! $node2next{$node} ) {
             $node = $node2up{$node};
         }
     }
@@ -4973,9 +4972,9 @@ sub menu_entry
             $name = '';
         } else {
             &normalise_node($name);
-            $entry = ($name &&
-                      ($name ne $node || ! $T2H_AVOID_MENU_REDUNDANCY) ?
-                      "$name : $node" : $node);
+            $entry = ( $name &&
+                       ( $name ne $node or ! $T2H_AVOID_MENU_REDUNDANCY ) ?
+					   "$name : $node" : $node );
         }
 
         if ($T2H_AVOID_MENU_REDUNDANCY and $descr) {
