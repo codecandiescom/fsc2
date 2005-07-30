@@ -22,7 +22,7 @@
 
 @node Command Line Options, GUI-fying, Example EDL Scripts, Top
 @chapter Command Line Options
-@cindex command ine options
+@cindex command line options
 
 @ifinfo
 @menu
@@ -87,7 +87,7 @@ complete list of all differences that might be expected:
   In batch mode @code{fsc2} does not query the user for names of output
   file names.  Instead, a file name is constructed from the name of the
   currently executed @code{EDL} script and an extension of
-  "@code{.batch_output.}", followed by a unique integer nuber. See the
+  "@code{.batch_output.}", followed by a unique integer number. See the
   description of the built-in @code{EDL} functions @code{get_file()},
   @code{open_file()} and @code{clone_file()} for the details.
 
@@ -111,7 +111,7 @@ the scripts to be used carefully before running them in batch mode.
 
 @node Non-exclusive mode, Options summary, Batch mode, Command Line Options
 @section Non-exclusive mode
-@cindex non-exlusive mode
+@cindex non-exclusive mode
 
 Normally it is not possible to start @code{fsc2} more than once, if you
 try to a short error message is printed out and the program aborts. It was

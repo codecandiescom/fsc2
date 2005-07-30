@@ -139,7 +139,6 @@ type @code{Var_Type_T}) you have to know about:
 @item @code{FLOAT_ARR} @tab a one-dimensional array of floating point values
 @item @code{INT_REF} @tab a more-dimensional array of integer values
 @item @code{FLOAT_REF} @tab a more-dimensional array of floating point values
-point values
 @end multitable
 @noindent
 There are a few others, but they are only used by @code{fsc2} internally.
