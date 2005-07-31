@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 'di ';
 'ig 00 ';
 ###############################################################################
@@ -968,7 +968,6 @@ $T2H_ICONS=1;
 sub T2H_DEFAULT_button_icon_img
 {
     my ( $button, $icon, $name ) = @_;
-	print STDERR "$button, $icon, $name\n";
     return "<img src=\"$icon\" border=\"0\" alt=\"$button: $name\" " .
            "align=\"middle\">";
 }
