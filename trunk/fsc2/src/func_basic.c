@@ -2131,25 +2131,31 @@ Var_T *f_dim( Var_T *v )
 }
 
 
-/*---------------------------------------------------------------*
+/*-----------------------------------------------------------------*
  * Function returns the length of an array or the number of rows
- * of a matrix (for simple variables 1 is returned). For arrays
- * or matrices 0 gets returned when no elements exist yet.
- *---------------------------------------------------------------*/
+ * of a matrix (for simple numerical variables 1 is returned and
+ * a warning is printed while for string variables the lenght of
+ * the string is returned). For arrays or matrices 0 gets returned
+ * when no elements exist yet.
+ *-----------------------------------------------------------------*/
 
 Var_T *f_size( Var_T *v )
 {
 	Var_T *new_var = NULL;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_REF );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR |
+				   INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
 		case INT_VAR : case FLOAT_VAR :
 			print( WARN, "Argument is a number.\n" );
 			new_var = vars_push( INT_VAR, 1L );
+			break;
+
+		case STR_VAR :
+			new_var = vars_push( INT_VAR, ( long ) strlen( v->val.sptr ) );
 			break;
 
 		case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
@@ -3429,10 +3435,12 @@ Var_T *f_reverse( Var_T *v )
 	ssize_t i;
 	long *lsrc, *ldest, ltemp;
 	double *dsrc, *ddest, dtemp;
+	char *rs, *sp, *ep;
+	char tmp;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_REF );
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR |
+				   INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
 	switch ( v->type )
 	{
@@ -3442,6 +3450,20 @@ Var_T *f_reverse( Var_T *v )
 
 		case FLOAT_VAR :
 			new_var = vars_push( FLOAT_VAR, v->val.dval );
+			break;
+
+
+		case STR_VAR :
+			sp = rs = T_strdup( v->val.sptr );
+			ep = sp + strlen( sp ) - 1;
+			while ( sp < ep )
+			{
+				tmp = *sp;
+				*sp++ = *ep;
+				*ep-- = tmp;
+			}
+			new_var = vars_push( STR_VAR, rs );
+			T_free( rs );
 			break;
 
 		case INT_ARR :

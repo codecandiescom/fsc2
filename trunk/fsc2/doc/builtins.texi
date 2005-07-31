@@ -2502,7 +2502,7 @@ array of variable length.
 @findex dim()
 @item dim()
 The function returns the dimension of the array passed to it as
-argument. I.e.@: if applied to the array
+argument. I.e.@: if applied to the array defined as
 @example
 X[ 4, 2, 5 ]
 @end example
@@ -2514,17 +2514,20 @@ it will return @code{3}.
 @findex size()
 @item size()
 The function normally takes one arguments, an array, and returns its
-length. I.e.@:
-for an array defined as
+length. I.e.@: for an array defined as
 @example
 @code{X[ 4, 2, 5 ]}
 @end example
 @noindent
-@code{size( X )} will return @code{4}, @code{size( X[ 4 ] )} returns
-@code{2} and @code{size( X[ 4, 2 ] )} returns @code{5}.
+@code{size( X )} will return @code{4}, @code{size(X[4])} returns
+@code{2} and @code{size(X[4, 2])} returns @code{5}.
 
 For variable sized arrays for which the length is still unknown the
 function returns @code{0}.
+
+If the argument is a simple numerical variable @code{1} is returned
+and a warning i printed. If the argument is a string the length of the
+string is returned.
 
 
 @anchor{reverse()}
@@ -2539,7 +2542,8 @@ one-dimensional arrays making up the multi-dimensional array being
 reversed.
 
 If the argument is a simple integer or floating point number the same
-number gets returned.
+number gets returned. If the argument is a string the reversed string
+is returned.
 
 
 @anchor{sprint()}
