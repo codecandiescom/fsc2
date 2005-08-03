@@ -2704,12 +2704,12 @@ between adjacent points being identical.
 @findex find_peak()
 @item find_peak()
 This function can be used for trying to find a peak in a certain region of
-an 1-dimensional array, the only function argument. The function returns
+a 1-dimensional array, the only function argument. The function returns
 useful results only when the spectrum has a rather good signal-to-noise
 ratio (at least about 250) and a more or less straight baseline (i.e.@:
 does only changes linearly). It makes no assumptions about the form of
 the peak and returns the index in the array where the area under the peak
-is halve that of its total area, s it should work reasonable well with
+is halve that of its total area, so it should work reasonable well with
 asymmetric peaks.
 
 
