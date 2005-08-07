@@ -1,0 +1,1572 @@
+/* -*-C-*-
+ *
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
+
+
+#include "lecroy94_tmpl.h"
+
+
+static unsigned char *lecroy94_tmpl_get_data( long *len );
+static unsigned int lecroy94_tmpl_get_inr( void );
+static int lecroy94_tmpl_get_int_value( int ch, const char *name );
+static double lecroy94_tmpl_get_float_value( int ch, const char *name );
+static unsigned char *lecroy94_tmpl_get_data( long *len );
+static bool lecroy94_tmpl_talk( const char *cmd, char *reply, long *length );
+static void lecroy94_tmpl_gpib_failure( void );
+
+
+static unsigned int can_fetch;
+static int trg_channels[ ] = {
+#if defined LECROY94_TMPL_CH4_AS_TRG
+								LECROY94_TMPL_CH4,
+#endif
+								LECROY94_TMPL_LIN,
+#if defined LECROY94_TMPL_EXT
+								LECROY94_TMPL_EXT,
+#endif
+#if defined LECROY94_TMPL_EXT10
+								LECROY94_TMPL_EXT10
+
+#endif
+							  };
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_init( const char *name )
+{
+	char buffer[ 100 ];
+	long len = 100;
+	int i;
+
+
+	if ( gpib_init_device( name, &lecroy94_tmpl.device ) == FAILURE )
+        return FAIL;
+
+    /* Disable the local button, set digitizer to short form of replies,
+	   switch off debugging, transmit data in one block in binary word
+	   (2 byte) format with LSB first. Then ask it for the status byte
+	   to make sure the device reacts. */
+
+    if ( gpib_llo( lecroy94_tmpl.device ) == FAILURE  ||
+		 gpib_write( lecroy94_tmpl.device,
+					 "CHDR OFF;CHLP OFF;CBLS,-1;CFMT DEF9,WORD,BIN;COORD LO",
+					 53 ) == FAILURE ||
+		 gpib_write( lecroy94_tmpl.device, "*STB?", 5 ) == FAILURE ||
+		 gpib_read( lecroy94_tmpl.device, buffer, &len ) == FAILURE )
+	{
+		gpib_local( lecroy94_tmpl.device );
+        return FAIL;
+	}
+
+	TRY
+	{
+		/* Set or get the time base (including the index in the table of
+		   possible time bases) while also taking care of the mode, i.e.
+		   RIS or SS */
+
+		if ( lecroy94_tmpl.is_timebase )
+			lecroy94_tmpl_set_timebase( lecroy94_tmpl.timebase );
+		else
+		{
+			lecroy94_tmpl.tb_index = -1;
+
+			lecroy94_tmpl.timebase = lecroy94_tmpl_get_timebase( );
+
+			for ( i = 0; i < ( int ) NUM_ELEMS( hres ); i++ )
+				if ( abs( hres[ i ].tdiv - lecroy94_tmpl.timebase ) /
+					 lecroy94_tmpl.timebase < 0.1 )
+				{
+					lecroy94_tmpl.tb_index = i;
+					break;
+				}
+
+			if ( lecroy94_tmpl.tb_index < 0 )
+			{
+				print( FATAL, "Can't determine time base corretly.\n" );
+				THROW( EXCEPTION );
+			}
+		}
+
+		/* Switch interleaved mode on if the user asked for it and it can
+		   be done, otherwise switch off */
+
+		if ( lecroy94_tmpl.is_interleaved && lecroy94_tmpl.interleaved &&
+			 hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 )
+			lecroy94_tmpl_set_interleaved( SET );
+
+		if ( ( lecroy94_tmpl.is_interleaved && ! lecroy94_tmpl.interleaved ) ||
+			 hres[ lecroy94_tmpl.tb_index ].ss_rl > 0 )
+			lecroy94_tmpl_set_interleaved( UNSET );
+
+		/* Set (if required) the sensitivies, offsets coupling types of
+		   all measurement channels */
+
+		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
+		{
+			if ( lecroy94_tmpl.is_sens[ i ] )
+				lecroy94_tmpl.sens[ i ] = lecroy94_tmpl_get_sens( i );
+
+			if ( lecroy94_tmpl.is_offset[ i ] )
+				lecroy94_tmpl.offset[ i ] = lecroy94_tmpl_get_offset( i );
+
+			if ( lecroy94_tmpl.is_coupling[ i ] )
+				lecroy94_tmpl.coupling[ i ] = lecroy94_tmpl_get_coupling( i );
+		}
+
+		/* Set (if required) the state of the bandwidth limiter */
+
+		if ( lecroy94_tmpl.is_bandwidth_limiter )
+				lecroy94_tmpl.bandwidth_limiter =
+										lecroy94_tmpl_get_bandwidth_limiter( );
+
+		/* Set (if required) the trigger source */
+
+		if ( lecroy94_tmpl.is_trigger_channel )
+			lecroy94_tmpl.trigger_channel =
+										   lecroy94_tmpl_get_trigger_source( );
+
+		/* Set (if required) the trigger level, slope and coupling of the
+		   trigger channels */
+
+		for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
+		{
+			if ( trg_channels[ i ] == LECROY94_TMPL_LIN )
+				continue;
+
+			if ( lecroy94_tmpl.is_trigger_level[ trg_channels[ i ] ] )
+				lecroy94_tmpl_set_trigger_level( trg_channels[ i ],
+							lecroy94_tmpl.trigger_level[ trg_channels[ i ] ] );
+
+			if ( lecroy94_tmpl.is_trigger_slope[ trg_channels[ i ] ] )
+				lecroy94_tmpl_set_trigger_slope( trg_channels[ i ],
+							lecroy94_tmpl.trigger_slope[ trg_channels[ i ] ] );
+
+			if ( lecroy94_tmpl.is_trigger_coupling[ trg_channels[ i ] ] )
+				lecroy94_tmpl_set_trigger_coupling( trg_channels[ i ],
+						 lecroy94_tmpl.trigger_coupling[ trg_channels[ i ] ] );
+		}
+
+		/* Set (if required) the trigger delay */
+
+		if ( lecroy94_tmpl.is_trigger_delay )
+			lecroy94_tmpl_set_trigger_delay( lecroy94_tmpl.trigger_delay );
+
+		/* Set the trigger mode - if the user didn't request one and we're
+		   in SEQUENCE or WRAP mode switch to normal mode */
+
+		if ( lecroy94_tmpl.is_trigger_mode )
+			lecroy94_tmpl_set_trigger_mode( lecroy94_tmpl.trigger_mode );
+		else
+		{
+			int mode = lecroy94_tmpl_get_trigger_mode( );
+
+			if ( mode == TRG_MODE_SEQUENCE || mode == TRG_MODE_WRAP )
+			{
+				lecroy94_tmpl_set_trigger_mode( TRG_MODE_NORMAL );
+				lecroy94_tmpl.trigger_mode = TRG_MODE_NORMAL;
+			}
+			else
+				lecroy94_tmpl.trigger_mode = mode;
+		}
+
+		can_fetch = lecroy94_tmpl_get_inr( );
+	}
+	OTHERWISE
+	{
+		gpib_local( lecroy94_tmpl.device );
+        return FAIL;
+	}
+		
+	return OK;
+}
+
+
+/*-------------------------------------------------*
+ * Function for determing the digitizers time base 
+ *-------------------------------------------------*/
+
+double lecroy94_tmpl_get_timebase( void )
+{
+	char reply[ 30 ];
+	long length = 30;
+
+
+	lecroy94_tmpl_talk( "TDIV?", reply, &length );
+	reply[ length - 1 ] = '\0';
+	return T_atod( reply );
+}
+
+
+/*-----------------------------------------------*
+ * Function for setting the digitizers time base 
+ *-----------------------------------------------*/
+
+bool lecroy94_tmpl_set_timebase( double timebase )
+{
+	char cmd[ 40 ] = "TDIV ";
+
+
+	gcvt( timebase, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*------------------------------------------------------------*
+ * Function for determining if digitizer is in RIS or SS mode
+ *------------------------------------------------------------*/
+
+bool lecroy94_tmpl_get_interleaved( void )
+{
+	char reply[ 30 ];
+	long length = 30;
+
+
+	lecroy94_tmpl_talk( "ILVD?", reply, &length );
+	return reply[ 1 ] == 'N';
+}
+
+
+/*------------------------------------------------*
+ * Function for switching between RIS and SS mode
+ *------------------------------------------------*/
+
+bool lecroy94_tmpl_set_interleaved( bool state )
+{
+	char cmd[ 30 ] = "ILVD ";
+
+	strcat( cmd, state ? "ON" : "OFF" );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+
+/*------------------------------------------------------------------*
+ * Function for determining the sensitivity (in V/div) of a channel
+ *------------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_sens( int channel )
+{
+    char cmd[ 20 ];
+    char reply[ 30 ];
+    long length = 30;
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+
+	sprintf( cmd, "C%1d:VDIV?", channel + 1 );
+	lecroy94_tmpl_talk( cmd, reply, &length );
+    reply[ length - 1 ] = '\0';
+	return lecroy94_tmpl.sens[ channel ] = T_atod( reply );
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for setting the sensitivity (in V/div) of a channel
+ *--------------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_sens( int channel, double sens )
+{
+    char cmd[ 40 ];
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+
+	sprintf( cmd, "C%1d:VDIV ", channel + 1 );
+	gcvt( sens, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	lecroy94_tmpl_get_desc( channel );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for determining the offset voltage for a channel
+ *-----------------------------------------------------------*/
+
+double lecroy94_tmpl_get_offset( int channel )
+{
+    char buf[ 30 ];
+    long length = 30;
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+
+	sprintf( buf, "C%1d:OFST?", channel + 1 );
+	lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
+    buf[ length - 1 ] = '\0';
+	return  T_atod( buf );
+}
+
+
+/*-------------------------------------------------------*
+ * Function for setting the offset voltage for a channel
+ *-------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_offset( int channel, double offset )
+{
+    char cmd[ 40 ];
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+
+	sprintf( cmd, "C%1d:OFST ", channel + 1 );
+	gcvt( offset, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*----------------------------------------------------------*
+ * Function for determining the coupling type for a channel
+ *----------------------------------------------------------*/
+
+int lecroy94_tmpl_get_coupling( int channel )
+{
+	int type = INVALID_COUPL;
+	char buf[ 100 ];
+	long length = 100;
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+
+	sprintf( buf, "C%1d:CPL?", channel + 1 );
+	lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
+    buf[ length - 1 ] = '\0';
+
+	if ( buf[ 0 ] == 'A' )
+		type = AC_1_MOHM;
+	else if ( buf[ 0 ] == 'G' )
+		type = GND;
+	else if ( buf[ 1 ] == '1' )
+		type = DC_1_MOHM;
+	else if ( buf[ 1 ] == '5' )
+		type = DC_50_OHM;
+
+	fsc2_assert( type != INVALID_COUPL );    /* call me paranoid... */
+
+	return type;
+}
+
+
+/*------------------------------------------------------*
+ * Function for setting the coupling type for a channel
+ *------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_coupling( int channel, int type )
+{
+    char cmd[ 30 ];
+	char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_CH_MAX );
+	fsc2_assert( type >= AC_1_MOHM && type <= DC_50_OHM );
+
+
+	sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	lecroy94_tmpl_get_desc( channel );
+
+	return OK;
+}
+
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+int lecroy94_tmpl_get_bandwidth_limiter( void )
+{
+	char buf[ 30 ] = "BWL?";
+	long length = 30;
+
+	lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
+	return buf[ 1 ] == 'N';
+}
+
+
+/*------------------------------------------------*
+ *------------------------------------------------*/
+
+bool lecroy94_tmpl_set_bandwidth_limiter( bool state )
+{
+	char cmd[ 30 ] = "BWL ";
+
+	strcat( cmd, state ? "ON" : "OFF" );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int lecroy94_tmpl_get_trigger_source( void )
+{
+	char reply[ 100 ];
+	long length = 100;
+	int src = LECROY94_TMPL_UNDEF;
+
+
+	lecroy94_tmpl_talk( "TRSE?", reply, &length );
+	reply[ length - 1 ] = '\0';
+
+	if ( strncmp( reply, "STD,SR,", 7 ) ) {
+		print( SEVERE, "Non-standard mode trigger, switched to LIN trigger "
+			   "mode.\n" );
+		return lecroy94_tmpl_set_trigger_source( LECROY94_TMPL_LIN );
+	}
+
+	if ( reply[ 7 ] == 'C' )
+		sscanf( reply + 8, "%d", &src );
+	else if ( reply[ 7 ] == 'L' )
+		src = LECROY94_TMPL_LIN;
+#if defined LECROY94_TMPL_EXT
+	else if ( reply[ 7 ] == 'E' )
+		src = LECROY94_TMPL_EXT;
+#endif
+
+	fsc2_assert( src != LECROY94_TMPL_UNDEF );
+
+	return src;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_trigger_source( int channel )
+{
+	char cmd[ 40 ] = "TRSE STD,SR,";
+
+
+	fsc2_assert( ( channel >= LECROY94_TMPL_CH1 &&
+				   channel <= LECROY94_TMPL_CH2 )
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel <= LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+		)
+		sprintf( cmd + 11, "C%1d", channel + 1 );
+	else if ( channel == LECROY94_TMPL_LIN )
+		strcat( cmd, "LINE" );
+#if defined LECROY94_TMPL_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcat( cmd, "EX" );
+#endif
+#if defined LECROY94_TMPL_EXT10
+	else
+		strcat( cmd, "EX10" );
+#endif
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_trigger_level( int channel )
+{
+	char buf[ 30 ];
+	long length = 30;
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( buf, "C%1d:TRLV?", channel + 1 );
+#if defined LECROY94_TMPL_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( buf, "EX:TRLV?" );
+#endif
+#if defined LECROY94_TMPL_EXT10
+	else
+		strcpy( buf, "EX10:TRLV?" );
+#endif
+
+	lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
+	buf[ length - 1 ] = '\0';
+	return T_atod( buf );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_trigger_level( int channel, double level )
+{
+	char cmd[ 40 ];
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( cmd, "C%1d:TRLV ", channel + 1 );
+#if defined LECROY94_TMPL_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( cmd, "EX:TRLV " );
+#endif
+#if defined LECROY94_TMPL_EXT10
+	else
+		strcpy( cmd, "EX10:TRLV " );
+#endif
+
+	gcvt( level, 6, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_trigger_slope( int channel )
+{
+	char buf[ 30 ];
+	long length = 30;
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( buf, "C%1d:TRSL?", channel + 1 );
+#if defined LECROY94_TMPL_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( buf, "EX:TRSL?" );
+#endif
+#if defined LECROY94_TMPL_EXT10
+	else
+		strcpy( buf, "EX10:TRSL?" );
+#endif
+
+	lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
+	return buf[ 0 ] == 'P';
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_trigger_slope( int channel, int slope )
+{
+	char cmd[ 40 ];
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( cmd, "C%1d:TRSL ", channel + 1 );
+#if defined LECROY94_TMPL_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( cmd, "EX:TRSL " );
+#endif
+#if defined LECROY94_TMPL_EXT10
+	else
+		strcpy( cmd, "EX10:TRSL " );
+#endif
+
+	strcat( cmd, slope ? "POS" : "NEG" );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int lecroy94_tmpl_get_trigger_coupling( int channel )
+{
+	char buf[ 40 ];
+	long length = 40;
+	int cpl = -1;
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( buf, "C%1d:TRCP?", channel + 1 );
+#if defined LECROY94_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( buf, "EX:TRCP?" );
+#endif
+#if defined LECROY94_EXT10
+	else
+		strcpy( buf, "EX10:TRCP?" );
+#endif
+
+	lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
+
+	switch ( buf[ 0 ] )
+	{
+		case 'A' :
+			cpl = TRG_CPL_AC;
+			break;
+
+		case 'D' :
+			cpl = TRG_CPL_DC;
+			break;
+
+		case 'L' :
+			cpl = TRG_CPL_LF_REJ;
+			break;
+
+		case 'H' :
+			cpl = buf[ 2 ] == 'R' ? TRG_CPL_HF_REJ : TRG_CPL_HF;
+			break;
+
+		default :
+			lecroy94_tmpl_gpib_failure( );
+	}
+
+	return cpl;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int lecroy94_tmpl_set_trigger_coupling( int channel, int cpl )
+{
+	char cmd[ 40 ];
+	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ", "HFDIV" };
+
+
+	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+				 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+				 || channel == LECROY94_TMPL_CH4
+#endif
+				 || channel == LECROY94_TMPL_LIN
+#if defined LECROY94_TMPL_EXT
+				 || channel == LECROY94_TMPL_EXT
+#endif
+#if defined LECROY94_TMPL_EXT10
+				 || channel == LECROY94_TMPL_EXT10
+#endif
+			   );
+
+	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
+#if defined LECROY94_TMPL_CH4_AS_TRG
+		 || channel == LECROY94_TMPL_CH4
+#endif
+	   )
+		sprintf( cmd, "C%1d:TRCP ", channel + 1 );
+#if defined LECROY94_EXT
+	else if ( channel == LECROY94_TMPL_EXT )
+		strcpy( cmd, "EX:TRCP " );
+#endif
+#if defined LECROY94_EXT10
+	else
+		strcpy( cmd, "EX10:TRCP " );
+#endif
+
+	strcat( cmd, cpl_str[ cpl ] );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int lecroy94_tmpl_get_trigger_mode( void )
+{
+	char buf[ 40 ];
+	long length = 40;
+	int mode = -1;
+
+
+	lecroy94_tmpl_talk( "TRMD?", buf, &length );
+
+	switch ( buf[ 0 ] )
+	{
+		case 'A' :
+			mode = TRG_MODE_AUTO;
+			break;
+
+		case 'N' :
+			mode = TRG_MODE_NORMAL;
+			break;
+
+		case 'W' :
+			mode = TRG_MODE_WRAP;
+			break;
+
+		case 'S' :
+			mode = buf[ 1 ] == 'E' ? TRG_MODE_SEQUENCE : TRG_MODE_SINGLE;
+			break;
+
+		default :
+			lecroy94_tmpl_gpib_failure( );
+	}
+
+	return mode;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int lecroy94_tmpl_set_trigger_mode( int mode )
+{
+	char cmd[ 40 ] = "TRMD ";
+	const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "SEQNCE", "WRAP" };
+
+
+	fsc2_assert( mode >= TRG_MODE_AUTO && mode <= TRG_MODE_WRAP );
+
+	strcat( cmd, mode_str[ mode ] );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_trigger_delay( void )
+{
+	char reply[ 40 ];
+	long length = 40;
+	double delay;
+
+
+	lecroy94_tmpl_talk( "TRDL?", reply, &length );
+	reply[ length - 1 ] = '\0';
+	delay = T_atod( reply );
+
+	/* Positive delays (i.e. when pretrigger is on) get returned as
+	   a percentage of the full horizontal screen while for negative
+	   values it's already the delay time */
+
+	if ( delay > 0.0 )
+		delay = 0.1 * lecroy94_tmpl.timebase;
+
+	return delay;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_set_trigger_delay( double delay )
+{
+	char cmd[ 40 ] = "TRDL ";
+
+
+	/* For positive delay (i.e. pretrigger) the delay must be set as a
+	   percentage of the full horizontal screen width */
+
+	if ( delay > 0.0 )
+		delay = 10.0 * delay / lecroy94_tmpl.timebase;
+
+	gcvt( delay, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_is_displayed( int channel )
+{
+	char reply[ 30 ];
+	long length = 30;
+	char const *cmds[ ] = { "TRC1,?", "TRC2,?", "TRMC,?", "TRMD,?",
+							"TRFE,?", "TRFF,?" };
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_FUNC_F );
+
+	lecroy94_tmpl_talk( cmds[ channel - LECROY94_TMPL_CH1 ], reply, &length );
+    reply[ length - 1 ] = '\0';
+	return strcmp( reply, "ON" ) ? UNSET : SET;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool lecroy94_tmpl_display( int channel, int on_off )
+{
+	char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
+						  "TRFE,", "TRFF," };
+
+
+	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
+				 channel <= LECROY94_TMPL_FUNC_F );
+
+	if ( on_off &&
+		 lecroy94_tmpl.num_used_channels >= LECROY94_TMPL_MAX_USED_CHANNELS )
+	{
+		print( FATAL, "More than %d channels are needed to run the "
+			   "experiment.\n", LECROY94_TMPL_MAX_USED_CHANNELS );
+		THROW( EXCEPTION );
+	}
+
+	strcat( cmds[ channel - LECROY94_TMPL_CH1 ], on_off ? "ON" : "OFF" );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmds[ channel - LECROY94_TMPL_CH1 ],
+					 strlen( cmds[ channel - LECROY94_TMPL_CH1 ] ) )
+		 == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	if ( on_off )
+	{
+		lecroy94_tmpl.num_used_channels++;
+		lecroy94_tmpl.channels_in_use[ channel ] = SET;
+	}
+	else
+	{
+		lecroy94_tmpl.num_used_channels--;
+		lecroy94_tmpl.channels_in_use[ channel ] = UNSET;
+	}
+
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void lecroy94_tmpl_finished( void )
+{
+	gpib_local( lecroy94_tmpl.device );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void lecroy94_tmpl_start_acquisition( void )
+{
+	int ch;
+	char cmd[ 100 ];
+
+
+	/* Stop the digitizer */
+
+	if ( gpib_write( lecroy94_tmpl.device, "STOP", 4 ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* Set up the parameter to be used for averaging for the function channels
+	   (as far as they have been set by the user) */
+
+	for ( ch = LECROY94_TMPL_FUNC_E; ch <= LECROY94_TMPL_FUNC_F; ch++ )
+	{
+		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
+			continue;
+		snprintf( cmd, 100, "F%c:DEF EQN,AVGS CH%ld,MAXPTS,%ld,SWEEPS,%ld",
+				  ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F',
+				  lecroy94_tmpl.source_ch[ ch ] - LECROY94_TMPL_CH1 + 1,
+				  lecroy94_tmpl.rec_len[ ch ],
+				  lecroy94_tmpl.num_avg[ ch ] );
+
+		if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) )
+			 == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+	}
+
+	/* Switch digitizer back on to running state by switching to normal
+	   trigger mode */
+
+	if ( gpib_write( lecroy94_tmpl.device, "TRMD NORM", 9 ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* Reset the bits in the word that tells us later that the data in the
+	   corresponding channel are ready to be fetched */
+
+	can_fetch &= ~ ( INR_FE_DONE | INR_FF_DONE | INR_SIG_DONE );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void lecroy94_tmpl_get_curve( int ch, Window_T *w, double **array,
+							  long *length )
+{
+	unsigned char *data = NULL;
+	unsigned char *dp;
+	unsigned int bit_to_test;
+	char cmd[ 100 ];
+	long i;
+	double gain, offset;
+	char ch_str[ 3 ];
+	bool is_mem_ch = UNSET;
+
+
+	CLOBBER_PROTECT( data );
+	CLOBBER_PROTECT( bit_to_test );
+
+	/* Figure out which channel is to be used and set a few variables
+	   needed later accordingly */
+
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+	{
+		bit_to_test = INR_SIG_DONE;
+		sprintf( ch_str, "C%d", ch - LECROY94_TMPL_CH1 + 1 );
+	}
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+	{
+		print( FATAL, "Fetching curves from EXPAND channels not "
+			   "implemented\n" );
+		THROW( EXCEPTION );
+	}
+	else if ( ch >= LECROY94_TMPL_MEM_C && ch <= LECROY94_TMPL_MEM_D )
+	{
+		bit_to_test = ch == LECROY94_TMPL_MEM_C ? INR_MC_DONE : INR_MD_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "MC" : "MD" );
+		is_mem_ch = SET;
+	}
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+	{
+		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
+		{
+			print( FATAL, "Averaging has not been initialized for "
+				   "channel %s.\n", LECROY94_TMPL_Channel_Names[ ch ] );
+			THROW( EXCEPTION );
+		}
+
+		bit_to_test = ch == LECROY94_TMPL_FUNC_E ? INR_FE_DONE : INR_FF_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "FE" : "FF" );
+	}
+
+	/* Set up the number of points to be fetched */
+
+	if ( w != NULL )
+		sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
+				 w->num_points, w->start_num );
+	else
+		sprintf( cmd, "WFSU SP,0,NP,0,FP,0,SN,0" );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* When a non-memory curve is to be fetched poll until the bit telling
+	   that the acquisition for the requested channel is finished has become
+	   set */
+
+	if ( ! is_mem_ch && ! ( can_fetch & bit_to_test ) )
+	{
+		while ( ! ( ( can_fetch | lecroy94_tmpl_get_inr( ) ) & bit_to_test ) )
+		{
+			stop_on_user_request( );
+			fsc2_usleep( 20000, UNSET );
+		}
+	}
+
+	TRY
+	{
+		/* Ask the device for the data */
+
+		strcpy( cmd, ch_str );
+		strcat( cmd, ":WF? DAT1" );
+		if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) )
+			 == FAILURE )
+			lecroy94_tmpl_gpib_failure( );
+
+		/* And fetch 'em */
+
+		data = lecroy94_tmpl_get_data( length );
+		*length /= 2;          /* we got word sized (16 bit) data, LSB first */
+
+		/* Get the gain factor and offset for the date we just fetched */
+
+		gain = lecroy94_tmpl_get_float_value( ch, "VERTICAL_GAIN" );
+		offset = lecroy94_tmpl_get_float_value( ch, "VERTICAL_OFFSET" );
+
+		/* Allocate enough memory for the array to be returned to the caller */
+
+		*array = DOUBLE_P T_malloc( *length * sizeof **array );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( data != NULL )
+			T_free( data );
+		RETHROW( );
+	}
+
+	/* Calculate the voltages from the data */
+
+	for ( i = 0, dp = data; i < *length; dp += 2, i++ )
+		( *array )[ i ] = gain * ( dp[ 0 ] + 256.0 * dp[ 1 ] ) - offset;
+
+	T_free( data );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_area( int ch, Window_T *w )
+{
+	unsigned char *data = NULL;
+	unsigned char *dp;
+	unsigned int bit_to_test;
+	char cmd[ 100 ];
+	long i;
+	double gain, offset;
+	char ch_str[ 3 ];
+	bool is_mem_ch = UNSET;
+	double area = 0.0;
+	long length;
+
+
+	CLOBBER_PROTECT( data );
+	CLOBBER_PROTECT( bit_to_test );
+	CLOBBER_PROTECT( area );
+
+	/* Figure out which channel is to be used and set a few variables
+	   needed later accordingly */
+
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+	{
+		bit_to_test = INR_SIG_DONE;
+		sprintf( ch_str, "C%d", ch - LECROY94_TMPL_CH1 + 1 );
+	}
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+	{
+		print( FATAL, "Measruing areas from EXPAND channels not "
+			   "implemented\n" );
+		THROW( EXCEPTION );
+	}
+	else if ( ch >= LECROY94_TMPL_MEM_C && ch <= LECROY94_TMPL_MEM_D )
+	{
+		bit_to_test = ch == LECROY94_TMPL_MEM_C ? INR_MC_DONE : INR_MD_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "MC" : "MD" );
+		is_mem_ch = SET;
+	}
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+	{
+		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
+		{
+			print( FATAL, "Averaging has not been initialized for "
+				   "channel %s.\n", LECROY94_TMPL_Channel_Names[ ch ] );
+			THROW( EXCEPTION );
+		}
+
+		bit_to_test = ch == LECROY94_TMPL_FUNC_E ? INR_FE_DONE : INR_FF_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "FE" : "FF" );
+	}
+
+	/* Set up the number of points to be fetched */
+
+	if ( w != NULL )
+		sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
+				 w->num_points, w->start_num );
+	else
+		sprintf( cmd, "WFSU SP,0,NP,0,FP,0,SN,0" );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* When a non-memory curve is to be fetched poll until the bit telling
+	   that the acquisition for the requested channel is finished has become
+	   set */
+
+	if ( ! is_mem_ch && ! ( can_fetch & bit_to_test ) )
+	{
+		while ( ! ( ( can_fetch | lecroy94_tmpl_get_inr( ) ) & bit_to_test ) )
+		{
+			stop_on_user_request( );
+			fsc2_usleep( 20000, UNSET );
+		}
+	}
+
+	TRY
+	{
+		/* Ask the device for the data */
+
+		strcpy( cmd, ch_str );
+		strcat( cmd, ":WF? DAT1" );
+		if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) )
+			 == FAILURE )
+			lecroy94_tmpl_gpib_failure( );
+
+		/* And fetch 'em */
+
+		data = lecroy94_tmpl_get_data( &length );
+		length /= 2;          /* we got word sized (16 bit) data, LSB first */
+
+		/* Get the gain factor and offset for the date we just fetched */
+
+		gain = lecroy94_tmpl_get_float_value( ch, "VERTICAL_GAIN" );
+		offset = lecroy94_tmpl_get_float_value( ch, "VERTICAL_OFFSET" );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( data != NULL )
+			T_free( data );
+		RETHROW( );
+	}
+
+	/* Calculate the voltages from the data */
+
+	for ( i = 0, dp = data; i < length; dp += 2, i++ )
+		area += gain * ( dp[ 0 ] + 256.0 * dp[ 1 ] ) - offset;
+
+	T_free( data );
+
+	return area;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_get_amplitude( int ch, Window_T *w )
+{
+	unsigned char *data = NULL;
+	unsigned char *dp;
+	unsigned int bit_to_test;
+	char cmd[ 100 ];
+	long i;
+	double gain, offset;
+	char ch_str[ 3 ];
+	bool is_mem_ch = UNSET;
+	long length;
+	double min;
+	double max;
+	double val;
+
+
+	CLOBBER_PROTECT( data );
+	CLOBBER_PROTECT( bit_to_test );
+
+	/* Figure out which channel is to be used and set a few variables
+	   needed later accordingly */
+
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+	{
+		bit_to_test = INR_SIG_DONE;
+		sprintf( ch_str, "C%d", ch - LECROY94_TMPL_CH1 + 1 );
+	}
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+	{
+		print( FATAL, "measuring amplitudes from EXPAND channels not "
+			   "implemented\n" );
+		THROW( EXCEPTION );
+	}
+	else if ( ch >= LECROY94_TMPL_MEM_C && ch <= LECROY94_TMPL_MEM_D )
+	{
+		bit_to_test = ch == LECROY94_TMPL_MEM_C ? INR_MC_DONE : INR_MD_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "MC" : "MD" );
+		is_mem_ch = SET;
+	}
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+	{
+		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
+		{
+			print( FATAL, "Averaging has not been initialized for "
+				   "channel %s.\n", LECROY94_TMPL_Channel_Names[ ch ] );
+			THROW( EXCEPTION );
+		}
+
+		bit_to_test = ch == LECROY94_TMPL_FUNC_E ? INR_FE_DONE : INR_FF_DONE;
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "FE" : "FF" );
+	}
+
+	/* Set up the number of points to be fetched */
+
+	if ( w != NULL )
+		sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
+				 w->num_points, w->start_num );
+	else
+		sprintf( cmd, "WFSU SP,0,NP,0,FP,0,SN,0" );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* When a non-memory curve is to be fetched poll until the bit telling
+	   that the acquisition for the requested channel is finished has become
+	   set */
+
+	if ( ! is_mem_ch && ! ( can_fetch & bit_to_test ) )
+	{
+		while ( ! ( ( can_fetch | lecroy94_tmpl_get_inr( ) ) & bit_to_test ) )
+		{
+			stop_on_user_request( );
+			fsc2_usleep( 20000, UNSET );
+		}
+	}
+
+	TRY
+	{
+		/* Ask the device for the data */
+
+		strcpy( cmd, ch_str );
+		strcat( cmd, ":WF? DAT1" );
+		if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) )
+			 == FAILURE )
+			lecroy94_tmpl_gpib_failure( );
+
+		/* And fetch 'em */
+
+		data = lecroy94_tmpl_get_data( &length );
+		length /= 2;           /* we got word sized (16 bit) data, LSB first */
+
+		/* Get the gain factor and offset for the date we just fetched */
+
+		gain = lecroy94_tmpl_get_float_value( ch, "VERTICAL_GAIN" );
+		offset = lecroy94_tmpl_get_float_value( ch, "VERTICAL_OFFSET" );
+
+		TRY_SUCCESS;
+	}
+	OTHERWISE
+	{
+		if ( data != NULL )
+			T_free( data );
+		RETHROW( );
+	}
+
+	/* Calculate the maximum and minimum voltages from the data */
+
+	min = HUGE_VAL;
+	max = - HUGE_VAL;
+
+	for ( i = 0, dp = data; i < length; i++, dp += 2 )
+	{
+		val = gain * ( dp[ 0 ] + 256.0 * dp[ 1 ] ) - offset;
+		max = d_max( val, max );
+		min = d_min( val, min );
+	}
+
+	T_free( data );
+
+	/* Return the difference between highest and lowest value */
+
+	return max - min;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void lecroy94_tmpl_free_running( void )
+{
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+long lecroy94_tmpl_get_num_avg( int ch )
+{
+	fsc2_assert( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F );
+	return lecroy94_tmpl_get_int_value( ch, "SWEEPS_PER_ACQ" );
+}
+
+
+/*----------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
+
+static unsigned char *lecroy94_tmpl_get_data( long *len )
+{
+	unsigned char *data;
+	char len_str[ 10 ];
+
+
+	/* First thing we read is something like "#[0-9]" where the number
+	   following the '#' is the number of bytes to be read next */
+
+	*len = 2;
+	if ( gpib_read( lecroy94_tmpl.device, len_str, len ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	len_str [ *len - 1 ] = '\0';
+	*len = T_atol( len_str + 1 );
+
+	fsc2_assert( *len > 0 );
+
+	/* Now get the number of bytes to read */
+
+	if ( gpib_read( lecroy94_tmpl.device, len_str, len ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+	
+	len_str[ *len - 1 ] = '\0';
+	*len = T_atol( len_str );
+
+	fsc2_assert( *len > 0 );
+
+	/* Obtain enough memory and then read the real data */
+
+	data = UCHAR_P T_malloc( *len );
+
+	if ( gpib_read( lecroy94_tmpl.device, data, len ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	return data;
+}
+
+
+/*----------------------------------------------------------------------*
+ * Function for obtaining an integer value from the waveform descriptor
+ *---------------------------------------------------------------------*/
+
+static int lecroy94_tmpl_get_int_value( int ch, const char *name )
+{
+	char cmd[ 100 ];
+	long length = 100;
+
+
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+		sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY94_TMPL_CH1 + 1, name );
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+		sprintf( cmd, "E%c:INSP? '%s'", ch == LECROY94_TMPL_EXP_A ? 'A' : 'B',
+				 name );
+	else if ( ch == LECROY94_TMPL_MEM_C || ch == LECROY94_TMPL_MEM_D )
+		sprintf( cmd, "M%c:INSP? '%s'", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D',
+				 name );
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+		sprintf( cmd, "F%c:INSP? '%s'", ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F',
+				 name );
+
+	lecroy94_tmpl_talk( cmd, cmd, &length );
+	cmd[ length - 1 ] = '\0';
+
+	return T_atoi( cmd );
+}
+		
+
+/*-------------------------------------------------------------------*
+ * Function for obtaining a float value from the waveform descriptor
+ *-------------------------------------------------------------------*/
+
+static double lecroy94_tmpl_get_float_value( int ch, const char *name )
+{
+	char cmd[ 100 ];
+	long length = 100;
+
+
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+		sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY94_TMPL_CH1 + 1, name );
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+		sprintf( cmd, "E%c:INSP? '%s'", ch == LECROY94_TMPL_EXP_A ? 'A' : 'B',
+				 name );
+	else if ( ch == LECROY94_TMPL_MEM_C || ch == LECROY94_TMPL_MEM_D )
+		sprintf( cmd, "M%c:INSP? '%s'", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D',
+				 name );
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+		sprintf( cmd, "F%c:INSP? '%s'", ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F',
+				 name );
+
+	lecroy94_tmpl_talk( cmd, cmd, &length );
+	cmd[ length - 1 ] = '\0';
+
+	return T_atod( cmd );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+bool lecroy94_tmpl_command( const char *cmd )
+{
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+	return OK;
+}
+
+
+/*------------------------------------------------------------------------*
+ * Function fetches (thereby reseting!) the INR register from the device.
+ * It sets all bits in the INR element of the structure for the device
+ * where a bit in the INR is set. Functions making use of the fact that
+ * a bit is set must reset it when the action they take invalidate the
+ * condition that led to the bit becoming set.
+ *-----------------------------------------------------------------------*/
+
+static unsigned int lecroy94_tmpl_get_inr( void )
+{
+	char reply[ 10 ] = "INR?";
+	long length = 10;
+
+
+	lecroy94_tmpl_talk( "INR?", reply, &length );
+	reply[ length - 1 ] = '\0';
+	return ( unsigned int ) T_atoi( reply );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static bool lecroy94_tmpl_talk( const char *cmd, char *reply, long *length )
+{
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
+		 gpib_read( lecroy94_tmpl.device, reply, length ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+	return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void lecroy94_tmpl_gpib_failure( void )
+{
+	print( FATAL, "Communication with device failed.\n" );
+	THROW( EXCEPTION );
+}
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

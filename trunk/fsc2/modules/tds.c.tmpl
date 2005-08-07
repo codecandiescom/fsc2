@@ -1256,7 +1256,7 @@ static Var_T *get_area( Var_T *v, bool use_cursor )
 		}
 	}
 
-	/* Complain when we got something that could be a window handler but no
+	/* Complain when we got something that could be a window handle but no
 	   windows have been defined */
 
 	if ( win_count > 0 && tds_tmpl.w == NULL )
@@ -1589,7 +1589,7 @@ static Var_T *get_amplitude( Var_T *v, bool use_cursor )
 				if ( win_count == 1 )
 					return vars_push( FLOAT_VAR, 1.23e-7 );
 
-				ret->val.dpnt[ i++ ] = 1.234e-8;
+				ret->val.dpnt[ i++ ] = 1.234e-7;
 			}
 		}
 

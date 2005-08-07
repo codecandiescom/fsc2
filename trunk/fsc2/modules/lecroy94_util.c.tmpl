@@ -1,0 +1,466 @@
+/* -*-C-*-
+ *
+ *  $Id$
+ * 
+ *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ * 
+ *  This file is part of fsc2.
+ * 
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ * 
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
+
+
+#include "lecroy94_tmpl.h"
+
+
+static long lecroy94_tmpl_calc_pos( double t );
+
+
+
+/*-----------------------------------------------------------*
+ * Returns a string with a time value with a resonable unit.
+ *-----------------------------------------------------------*/
+
+const char *lecroy94_tmpl_ptime( double p_time )
+{
+	static char buffer[ 128 ];
+
+
+	if ( fabs( p_time ) >= 1.0 )
+		sprintf( buffer, "%g s", p_time );
+	else if ( fabs( p_time ) >= 1.e-3 )
+		sprintf( buffer, "%g ms", 1.e3 * p_time );
+	else if ( fabs( p_time ) >= 1.e-6 )
+		sprintf( buffer, "%g us", 1.e6 * p_time );
+	else
+		sprintf( buffer, "%g ns", 1.e9 * p_time );
+
+	return buffer;
+}
+
+
+/*-----------------------------------------------------------------*
+ * Deletes a window by removing it from the linked list of windows
+ *-----------------------------------------------------------------*/
+
+void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T *s )
+{
+	Window_T *w;
+
+
+	while ( s->w != NULL )
+	{
+		w = s->w;
+		s->w = w->next;
+		T_free( w );
+	}
+}
+
+
+/*-----------------------------------------------------------*
+ * Returns a pointer to the window given it's ID. The second
+ * argument gets set to the windows number.
+ *------------------------------------------------------------*/
+
+Window_T *lecroy94_tmpl_get_window_by_number( long wid )
+{
+	Window_T *w;
+	
+
+	if ( wid >= WINDOW_START_NUMBER )
+		for ( w = lecroy94_tmpl.w; w != NULL; w = w->next )
+			if ( w->num == wid )
+				return w;
+
+	print( FATAL, "Argument isn't a valid window number.\n" );
+	THROW( EXCEPTION );
+
+	return NULL;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for checking that all windows still fit into the
+ * recorded data set after changing the time resolution or
+ * switching interleaved mode on or off.
+ *-----------------------------------------------------------*/
+
+void lecroy94_tmpl_all_windows_check( void )
+{
+	Window_T *w = lecroy94_tmpl.w;
+
+
+	while ( w != NULL )
+	{
+		lecroy94_tmpl_window_check( w, SET );
+		w = w->next;
+	}
+}
+
+
+/*------------------------------------------------------*
+ * Checks if the window fits into the recorded data set
+ *------------------------------------------------------*/
+
+void lecroy94_tmpl_window_check( Window_T *w, bool show_num )
+{
+	long start;
+	long end;
+	long max_len = lecroy94_tmpl_curve_length( );
+	double max_time = max_len * lecroy94_tmpl_time_per_point( )
+		              - lecroy94_tmpl.trigger_delay;
+
+
+	/* Start with calculating the start and end position of the window
+	   in points */
+
+	start = lecroy94_tmpl_calc_pos( w->start );
+	end   = lecroy94_tmpl_calc_pos( w->start + w->width );
+
+	if ( start < 0 )
+	{
+		if ( show_num > 0 )
+			print( FATAL, "%ld. window starts too early, earliest possible "
+				   "time is %s\n", w->num - WINDOW_START_NUMBER + 1,
+				   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+		else
+			print( FATAL, "Window starts too early, earliest possible time "
+				   "is %s\n",
+				   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( start > max_len )
+	{
+		if ( show_num > 0 )
+			print( FATAL, "%ld. window starts too late, last possible time "
+				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
+				   lecroy94_tmpl_ptime( max_time ) );
+		else
+			print( FATAL, "Window starts too late, last possible time "
+				   "is %s.\n", lecroy94_tmpl_ptime( max_time ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( end > max_len )
+	{
+		if ( show_num > 0 )
+			print( FATAL, "%d. window ends too late, largest possible width "
+				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
+				   lecroy94_tmpl_ptime( w->start - max_time ) );
+		else
+			print( FATAL, "Window ends too late, largest possible width "
+				   "is %s.\n", lecroy94_tmpl_ptime( w->start - max_time ) );
+		THROW( EXCEPTION );
+	}
+
+	w->start_num  = start;
+	w->end_num    = end;
+	w->num_points = end - start + 1;
+}
+
+
+/*----------------------------------------------------------------*
+ * Function tests if a record length requested for an acquisition
+ * is long enough that all windows fit into it
+ *----------------------------------------------------------------*/
+
+void lecroy94_tmpl_length_check( long len )
+{
+	Window_T *w = lecroy94_tmpl.w;
+
+
+	if ( len > lecroy94_tmpl_curve_length( ) )
+	{
+		print( FATAL, "Requested record length f %ld points larger than "
+			   "maximum number of points of %ld.\n",
+			   len, lecroy94_tmpl_curve_length( ) );
+		THROW( EXCEPTION );
+	}
+
+	while ( w != NULL )
+	{
+		if ( len < w->end_num - 1 )
+		{
+			if ( lecroy94_tmpl.w->next != NULL )
+				print( FATAL, "Requested record length of %ld points too "
+					   "short for %d. window.\n", len,
+					   w->num - WINDOW_START_NUMBER + 1 );
+			else
+				print( FATAL, "Requested record length of %ld points too "
+					   "short for window.\n", len );
+			THROW( EXCEPTION );
+		}
+
+		w = w->next;
+	}
+}
+
+
+/*-----------------------------------------------------------------------*
+ * Function tries to find a record length for averaging that can be used
+ * with the current timebase and is long enough for all defined windows
+ *-----------------------------------------------------------------------*/
+
+long lecroy94_tmpl_find_length( void )
+{
+	long rec_len;
+	int i;
+	long max_len = lecroy94_tmpl_curve_length( );
+	Window_T *w = lecroy94_tmpl.w;
+
+
+	for ( i = ( int ) ( NUM_ELEMS( rl ) - 1 ); i >= 0; i++ )
+		if ( rl[ i ] <= max_len )
+			break;
+
+	fsc2_assert( i >= 0 );        /* just to make 100% sure....*/
+
+	rec_len = rl[ i ];
+
+	while ( w != NULL )
+	{
+		if ( rec_len < w->end_num - 1 )
+		{
+			if ( lecroy94_tmpl.w->next != NULL )
+				print( FATAL, "No record length possible that would be long "
+					   "enough for %d. window.\n",
+					   w->num - WINDOW_START_NUMBER + 1 );
+			else
+				print( FATAL, "No record length possible that would be long "
+					   "enough for window.\n" );
+			THROW( EXCEPTION );
+		}
+
+		w = w->next;
+	}
+
+	return rec_len;
+}
+
+
+/*-------------------------------------------------------------*
+ * Returns a windows start or end position in points given the
+ * position relative to the trigger position
+ *-------------------------------------------------------------*/
+
+static long lecroy94_tmpl_calc_pos( double t )
+{
+	return lrnd( ( t - lecroy94_tmpl.trigger_delay ) /
+				 lecroy94_tmpl_time_per_point( ) );
+
+}
+
+
+/*-----------------------------------------------------------------*
+ * Returns the current 
+ *-----------------------------------------------------------------*/
+
+long lecroy94_tmpl_curve_length( void )
+{
+	return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
+		   ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
+			 lecroy94_tmpl.interleaved ) ?
+		   hres[ lecroy94_tmpl.tb_index ].ris_rl :
+		   hres[ lecroy94_tmpl.tb_index ].ss_rl;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+double lecroy94_tmpl_time_per_point( void )
+{
+	return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
+		   ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
+			 lecroy94_tmpl.interleaved ) ?
+		   hres[ lecroy94_tmpl.tb_index ].ris_tp :
+		   hres[ lecroy94_tmpl.tb_index ].ss_tp;
+}
+
+
+/*--------------------------------------------------------------*
+ * The function is used to translate back and forth between the
+ * channel numbers the way the user specifies them in the EDL
+ * program and the channel numbers as specified in the header
+ * file. When the channel number can't be maped correctly, the
+ * way the function reacts depends on the value of the third
+ * argument: If this is UNSET, an error message gets printed
+ * and an exception ios thrown. If it is SET -1 is returned to
+ * indicate the error.
+ *--------------------------------------------------------------*/
+
+long lecroy94_tmpl_translate_channel( int dir, long channel, bool flag )
+{
+	if ( dir == GENERAL_TO_LECROY94_TMPL )
+	{
+		switch ( channel )
+		{
+			case CHANNEL_CH1 :
+				return LECROY94_TMPL_CH1;
+
+			case CHANNEL_CH2 :
+				return LECROY94_TMPL_CH2;
+#ifdef LECROY94_TMPL_CH3
+			case CHANNEL_CH3 :
+				return LECROY94_TMPL_CH3;
+#endif
+#ifdef LECROY94_TMPL_CH4
+			case CHANNEL_CH4 :
+				return LECROY94_TMPL_CH4;
+#endif
+			case CHANNEL_EXP_A :
+				return LECROY94_TMPL_EXP_A;
+
+			case CHANNEL_EXP_B :
+				return LECROY94_TMPL_EXP_B;
+
+			case CHANNEL_MEM_C :
+				return LECROY94_TMPL_MEM_C;
+
+			case CHANNEL_MEM_D :
+				return LECROY94_TMPL_MEM_D;
+
+			case CHANNEL_FUNC_E :
+				return LECROY94_TMPL_FUNC_E;
+
+			case CHANNEL_FUNC_F :
+				return LECROY94_TMPL_FUNC_F;
+
+			case CHANNEL_LINE :
+				return LECROY94_TMPL_LIN;
+
+#ifdef LECROY94_TMPL_EXT
+			case CHANNEL_EXT :
+				return LECROY94_TMPL_EXT;
+#endif
+#ifdef LECROY94_TMPL_EXT10
+			case CHANNEL_EXT10 :
+				return LECROY94_TMPL_EXT10;
+#endif
+		}
+
+		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+		{
+			if ( flag )
+				return -1;
+			print( FATAL, "Digitizer has no channel %s.\n",
+				   Channel_Names[ channel ] );
+			THROW( EXCEPTION );
+		}
+
+		if ( flag )
+			return -1;
+		print( FATAL, "Invalid channel number %ld.\n", channel );
+		THROW( EXCEPTION );
+	}
+	else
+	{
+		switch ( channel )
+		{
+			case LECROY94_TMPL_CH1 :
+				return CHANNEL_CH1;
+
+			case LECROY94_TMPL_CH2 :
+				return CHANNEL_CH2;
+#ifdef LECROY94_TMPL_CH3
+			case LECROY94_TMPL_CH3 :
+				return CHANNEL_CH3;
+#endif
+#ifdef LECROY94_TMPL_CH4
+			case LECROY94_TMPL_CH4 :
+				return CHANNEL_CH4;
+#endif
+			case LECROY94_TMPL_EXP_A :
+				return CHANNEL_EXP_A;
+
+			case LECROY94_TMPL_EXP_B :
+				return CHANNEL_EXP_B;
+
+			case LECROY94_TMPL_MEM_C :
+				return CHANNEL_MEM_C;
+
+			case LECROY94_TMPL_MEM_D :
+				return CHANNEL_MEM_D;
+
+			case LECROY94_TMPL_FUNC_E :
+				return CHANNEL_FUNC_E;
+
+			case LECROY94_TMPL_FUNC_F :
+				return CHANNEL_FUNC_F;
+
+			case LECROY94_TMPL_LIN :
+				return CHANNEL_LINE;
+#ifdef LECROY94_TMPL_EXT
+			case LECROY94_TMPL_EXT :
+				return CHANNEL_EXT;
+#endif
+#ifdef LECROY94_TMPL_EXT10
+			case LECROY94_TMPL_EXT10 :
+				return CHANNEL_EXT10;
+#endif
+			default :
+				print( FATAL, "Internal error detected at %s:%d.\n",
+						__FILE__, __LINE__ );
+				THROW( EXCEPTION );
+		}
+	}
+
+	return -1;
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void lecroy94_tmpl_store_state( LECROY94_TMPL_T *dest, LECROY94_TMPL_T *src )
+{
+	Window_T *w;
+	int i;
+
+
+	while ( dest->w != NULL )
+	{
+		w = dest->w;
+		dest->w = w->next;
+		T_free( w );
+	}
+
+	*dest = *src;
+
+	if ( src->num_windows == 0 )
+	{
+		dest->w = 0;
+		return;
+	}
+
+	dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
+	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+	{
+		*( dest->w + i ) = *w;
+		if ( i != 0 )
+			dest->w->prev = dest->w - 1;
+		if ( w->next != NULL )
+			dest->w->next = dest->w + 1;
+	}
+}
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */
