@@ -56,6 +56,10 @@
 * kontron4060::     Kontron 4060 Voltmeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
+* lecroy9420::      LeCroy Digitizing Oscilloscope 9420
+* lecroy9424::      LeCroy Digitizing Oscilloscope 9424
+* lecroy9424e::     LeCroy Digitizing Oscilloscope 9424e
+* lecroy9450::      LeCroy Digitizing Oscilloscope 9450
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
@@ -1389,7 +1393,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node lecroy9400, mcn700_2000, lakeshore330, Device Reference
+@node lecroy9400, lecroy9420, lakeshore330, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9400
 @end iftex
@@ -1430,7 +1434,223 @@ channels, 2 function channels (needed for averaging).
 
 @c #############################################################
 
-@node mcn700_2000, me6000, lecroy9400, Device Reference
+
+@node lecroy9420, lecroy9424, lecroy9400, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9420
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9420
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9420}
+
+@paragraphindent 0
+@strong{Description}: Lecroy Digitizing Oscilloscope 9420, 2 measurement
+channels, 2 function channels (needed for averaging).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_meas_channel_ok()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@end table
+
+
+@c #############################################################
+
+
+@node lecroy9424, lecroy9424e, lecroy9420, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9424
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9424
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9424}
+
+@paragraphindent 0
+@strong{Description}: Lecroy Digitizing Oscilloscope 9424, 4 measurement
+channels, 2 function channels (needed for averaging).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_meas_channel_ok()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@end table
+
+
+@c #############################################################
+
+
+@node lecroy9424e, lecroy9450, lecroy9424, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9424e
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9424e
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9424e}
+
+@paragraphindent 0
+@strong{Description}: Lecroy Digitizing Oscilloscope 9424e, 4 measurement
+channels, 2 function channels (needed for averaging).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_meas_channel_ok()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@end table
+
+
+@c #############################################################
+
+
+@node lecroy9450, mcn700_2000, lecroy9424e, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9450
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9450
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9450}
+
+@paragraphindent 0
+@strong{Description}: Lecroy Digitizing Oscilloscope 9450, 2 measurement
+channels, 2 function channels (needed for averaging).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_meas_channel_ok()}
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@end table
+
+
+@c #############################################################
+
+@node mcn700_2000, me6000, lecroy9450, Device Reference
 @iftex
 @subheading F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 @end iftex

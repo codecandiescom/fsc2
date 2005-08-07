@@ -1271,7 +1271,7 @@ The function can only be used in the @code{EXPERIMENT} section.
 
 The digitizing oscilloscopes currently implemented are the Tektronix
 TDS520, TDS520A, TDS540, TDS744A and TDS754A. The module for the
-@w{LeCroy 9400} supports a subset of the functionality. The corresponding
+@w{LeCroy9400} supports a subset of the functionality. The corresponding
 module names to be used in the @code{DEVICES} section are
 @example
 tds520
@@ -1280,6 +1280,10 @@ tds540
 tds744a
 tds754a
 lecroy9400
+lecroy9420
+lecroy9424
+lecroy9424e
+lecroy9450
 @end example
 
 When specifying digitizer channels or trigger inputs you should use only
@@ -1293,9 +1297,11 @@ First digitizer channel (all models)
 @item CH2
 Second digitizer channel (all models)
 @item CH3
-Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
+Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy9424, 
+LeCroy9424e)
 @item CH4
-Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A)
+Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy9424, 
+LeCroy9424e)
 @item MATH1
 First mathematic function channel (all Tektronix digitizers)
 @item MATH2
@@ -1319,17 +1325,18 @@ Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
 Line In for trigger (all models)
 @item MEM_C
-First memory channel (LeCroy 9400)
+First memory channel (all LeCroy digitizers)
 @item MEM_D
-Second memory channel (LeCroy 9400)
+Second memory channel (all LeCroy digitizers)
 @item FUNC_E
-First function (averaging) channel (LeCroy 9400)
+First function (averaging) channel (all LeCroy digitizers)
 @item FUNC_F
-second function (averaging) channel (LeCroy 9400)
+second function (averaging) channel (all LeCroy digitizers)
 @item EXT
-External trigger input (LeCroy 9400)
+External trigger input (LeCroy9400, LeCroy9420, LeCroy9424 with ext. trigger
+option, LeCroy9450)
 @item EXT10
-External amplified trigger input (LeCroy 9400)
+External amplified trigger input (LeCroy9400, LeCroy9420, LeCroy9450)
 @end table
 
 
@@ -1338,13 +1345,21 @@ External amplified trigger input (LeCroy 9400)
 @table @samp
 @item @ref{digitizer_name()}
 @item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_averaging()}
 @item @ref{digitizer_trigger_channel()}
-@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
 @item @ref{digitizer_trigger_position()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_record_length()}
 @item @ref{digitizer_define_window()}
 @item @ref{digitizer_change_window()}
 @item @ref{digitizer_window_position()}
@@ -1385,6 +1400,13 @@ The function queries (if called with no argument) or sets (if called
 with an argument) the time base setting of the oscilloscope. The
 possible time bases depend on the model, please check the manual.
 
+For the @strong{LeCroy} digitizers interleaved sample mode will be
+automatically switched on or off if the selected timebase requires
+it (see the manuals at which timebase settings RIS only or single
+shot mode is possible and required). Please also note that changing
+the timebase for these digitizers also can lead to changes in the
+number of points for a trace.
+
 The function can be called in query mode (i.e.@: without an argument)
 in the @code{EXPERIMENT} section only.
 
@@ -1397,6 +1419,21 @@ returns the time difference (in seconds) between two data points
 measured by the digitizer.
 
 
+@anchor{digitizer_interleave_mode()}
+@findex digitizer_interleave_mode()
+@item digitizer_interleave_mode()
+This function is only available for the @strong{LeCroy} digitizers. It
+allows to switch between interleaved (RIS) and single shot mode (if
+setting the mode is compatible with the currently selected timebase).
+Please note that by changing the timebase interleaved mode may get
+switched on or off automatically.
+
+If called without an argument the function returns the requested mode
+(independent of the mode the digitizer is currently in due to the
+timebase setting), @code{1} when interleaved (RIS) mode is requested,
+otherwise 0.
+
+
 @anchor{digitizer_sensitivity()}
 @findex digitizer_sensitivity()
 @item digitizer_sensitivity()
@@ -1404,15 +1441,19 @@ The function queries (if called with just one argument) or sets (if
 called with two arguments) the sensitivity setting of one of the channels
 of the oscilloscope. It needs at least one argument, the channel, either
 symbolically or numerically. The channels that can be used as arguments
-depend on the model of the oscilloscope:
+depends on the model of the oscilloscope:
 @table @samp
 @item TDS520
 @itemx TDS520A
-@itemx LECROY9400
+@itemx LeCroy9400
+@itemx LeCroy9420
+@itemx LeCroy9450
 @code{CH1} or @code{CH2}
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
+@itemx LeCroy9424
+@itemx LeCroy9424e
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
 
@@ -1431,11 +1472,57 @@ The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
 
 
+@anchor{digitizer_offset()}
+@findex digitizer_offset()
+@item digitizer_offset()
+The function queries (if called with just one argument) or sets (if
+called with two arguments) the offset setting of one of the channels
+of the oscilloscope. Currently this function only exists for the
+@strong{LeCroy9420}, @strong{LeCroy9424}, @strong{LeCroy9424e} and
+@strong{LeCroy9450}. It needs at least one argument, the channel, either
+symbolically or numerically. The channels that can be used as arguments
+depends on the model of the oscilloscope:
+@table @samp
+@itemx LeCroy9400
+@itemx LeCroy9420
+@itemx LeCroy9450
+@code{CH1} or @code{CH2}
+@itemx LeCroy9424
+@itemx LeCroy9424e
+@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@end table
+
+If a second argument is given this is taken to be the new offset
+setting (in Volts). If no second argument is given the current offset
+setting for the channel is returned.
+
+The function can be called in query mode (i.e.@: without a second
+argument) only in the @code{EXPERIMENT} section.
+
+
+@anchor{digitizer_bandwidth_limiter()}
+@findex digitizer_bandwidth_limiter()
+@item digitizer_bandwidth_limiter()
+The function queries (if called with no argument) or sets (if
+called with an arguments) if the bandwidth limiter (@w{80 MHz}) is switched
+on or of. Currently this function only exists for the @strong{LeCroy9420},
+@strong{LeCroy9424}, @strong{LeCroy9424e} and @strong{LeCroy9450}.
+
+If a an argument is given and it is a non-zero number or the string
+@code{"ON"} the bandwidth limiter is switched on, if the argument is
+zero or the string @code{"OFF"} the bandwidth limiter is switched off.
+If called without an argument the function returns @code{1} if the
+bandwidth limiter is on, otherwise @code{0}.
+
+The function can be called in query mode (i.e.@: without a second
+argument) only in the @code{EXPERIMENT} section.
+
+
 @anchor{digitizer_num_averages()}
 @findex digitizer_num_averages()
 @item digitizer_num_averages()
 This function is intended for the @strong{Tektronix} digitizers, see at
-the end on how to also use it with the @strong{LeCroy 9400}. It queries
+the end on how to also use it with the @strong{LeCroy9400}. It queries
 (if called with no argument) or sets (if called with an argument) the
 number of averages done by the oscilloscope.  If the number of averages
 is passed to the function it must be at least 1 (which will switch the
@@ -1446,7 +1533,7 @@ is used instead.
 The function can be called in query mode (i.e.@: without an argument)
 only in the @code{EXPERIMENT} section.
 
-For the @strong{LeCroy 9400} this function can only be used in query
+For the @strong{LeCroy9400} this function can only be used in query
 mode and returns the number of averages that has been set in a previous
 call of @code{digitizer_averaging()}. It needs exactly one argument, the
 the channel used to do the averaging, i.e.@: either @code{FUNC_E} or
@@ -1465,7 +1552,7 @@ by a factor of the square root of 2 than is to be expected.
 @anchor{digitizer_averaging()}
 @findex digitizer_averaging()
 @item digitizer_averaging()
-This function only exists for the @strong{LeCroy 9400} and must be used
+This function only exists for the @strong{LeCroy9400} and must be used
 to set up averaging. It expects at least three arguments. The first
 argument is the channel to be used to do the averaging, i.e.@: either
 @code{FUNC_E} or @code{FUNC_F}. The second is the data source channel
@@ -1509,7 +1596,9 @@ numeric!):
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{AUX} or @code{LINE} (@code{LINE} can be abbreviated to @code{LIN})
 @end itemize
-@item LECROY9400
+@item LeCroy9400
+@item LeCroy9420
+@item LeCroy9450
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{LINE}, @code{EXT} or @code{EXT10} (@code{LINE} can be
@@ -1538,13 +1627,31 @@ only if either it has already been called with an argument or in the
 @anchor{digitizer_trigger_position()}
 @findex digitizer_trigger_position()
 @item digitizer_trigger_position()
-The function queries (if called with no argument) or sets (if called
-with an argument) the amount of pre-triggering, i.e.@: the portion of
-the trace shown with data before the trigger was detected. The function
+This function only exists for the @string{Tectronics} oszilloscopes.
+It queries (if called with no argument) or sets (if called with an
+argument) the amount of pre-triggering, i.e.@: the portion of the
+trace shown with data before the trigger was detected. The function
 accepts or returns values from the interval @w{[0, 1]} (where 0 means
 that the trigger is at the very first point of the trace, i.e.@: no
 pre-trigger is used, and 1 that it's at the last point, i.e.@: the
 complete curve is recorded before the trigger).
+
+The function can be called in query mode (i.e.@: without an argument)
+only if either it has already been called with an argument or in the
+@code{EXPERIMENT} section.
+
+
+@anchor{digitizer_trigger_delay()}
+@findex digitizer_trigger_delay()
+@item digitizer_trigger_delay()
+The function queries (if called with no argument) or sets (if called
+with an argument) the amount of pre- or post-triggering (in seconds).
+If called with a negative value, acquisitions starts as specified by
+the value before the trigger is received, if called with a positive
+value start of the acquisition is delayed by that value (relative to
+the trigger position). If called without an argument the current
+setting of the pre- or post-trigger delay is returned. Post-trigger
+can only be used with the @strong{LeCroy} oszilloscopes.
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the
@@ -1653,8 +1760,8 @@ The function can only be used in the @code{EXPERIMENT} section of the
 @anchor{digitizer_get_area()}
 @findex digitizer_get_area()
 @item digitizer_get_area()
-This function is currently only implemented for the @strong{Tektronix}
-oscilloscopes.
+This function is currently not implemented for the @strong{LeCroy9400}
+oscilloscope.
 
 The function returns the area under one of the measured curves. It
 expects at least one argument, the oscilloscopes channel the data are to
@@ -1676,12 +1783,20 @@ the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4} 
 @end itemize
-@c @item LECROY9400
-@c @itemize @bullet
-@c @item @code{CH1} or @code{CH2}
-@c @item @code{MEM_C} or @code{MEM_D}
-@c @item @code{FUNC_E} or @code{FUNC_F}
-@c @end itemize
+@item LeCroy9420
+@item LeCroy9450
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
+@item LeCroy9424
+@item LeCroy9424e
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
 @end table
 
 The following, optional arguments are a list of integer variables or
@@ -1701,17 +1816,14 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the area for the corresponding window.
 
-Except for the @code{TDS520}
-@c and the @code{LECROY9400}
+Except for the @code{TDS520} and the @code{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
-area. For the @code{TDS520}
-@c and @code{LECROY9400}
-, that misses this built-in function, the curve in the interval is
-fetched and then used to compute the area. To give some visual
-feedback also for the @code{TDS520} the cursors are moved to the borders
-of the interval.
+area. For the @code{TDS520} and the @code{LcCroy} digitizers, which miss
+this built-in function, the curve in the interval is fetched and then
+used to compute the area. To give some visual feedback also for the
+@code{TDS520} the cursors are moved to the borders of the interval.
 
 The function will automatically wait until a still running acquisition
 sequence is finished before measuring the area. 
@@ -1729,7 +1841,8 @@ difference is that instead of using the function built into the
 digitizer to compute the area the curve in the specified interval is
 fetched and the area is computed from these data. This function can be a
 bit faster because it doesn't set the cursors (which also means that
-there is no visual feedback).
+there is no visual feedback). It is not implemented for the @code{LeCroy}
+digitizers, where no visual feedback is used.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
@@ -1759,9 +1872,18 @@ of the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
-@item LECROY9400
+@item LeCroy9400
+@item LeCroy9420
+@item LeCroy9450
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
+@item LeCroy9424
+@item LeCroy9424e
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
@@ -1775,8 +1897,7 @@ defined with an unspecified number of elements.
 
 For the @strong{Tektronix} oscilloscopes the function positions the
 cursors at the start and end point of the specified window (or the first
-and last point if no window as been specified) to give a visual
-feedback.
+and last point if no window as been specified) to give a visual feedback.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
@@ -1788,13 +1909,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function is nearly identical to the function
 @code{digitizer_get_curve()} with the only difference that the cursors
 are not positioned at the start and end point of the curve to be fetched.
-
+It is not implemented for the @code{LeCroy} digitizers, where no visual
+feedback is used.
 
 @anchor{digitizer_get_amplitude()}
 @findex digitizer_get_amplitude()
 @item digitizer_get_amplitude()
-This function is currently only implemented for the @strong{Tektronix}
-oscilloscopes.
+This function is currently not implemented for the @strong{LeCroy9400}
+oscilloscope.
 
 The function returns the amplitude, i.e.@: the difference between the
 maximum and minimum voltage, from the digitizer. The function takes at
@@ -1816,12 +1938,20 @@ choices of the data channel depend on the model of the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
-@c @item LECROY9400
-@c @itemize @bullet
-@c @item @code{CH1} or @code{CH2}
-@c @item @code{MEM_C} or @code{MEM_D}
-@c @item @code{FUNC_E} or @code{FUNC_F}
-@c @end itemize
+@item LeCroy9420
+@item LeCroy9450
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
+@item LeCroy9424
+@item LeCroy9424e
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MEM_C} or @code{MEM_D}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
 @end table
 
 The following, optional arguments are a list of integer variables or
@@ -1841,8 +1971,7 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the amplitide for the corresponding window.
 
-Except for the @code{TDS520}
-@c and the @code{LeCroy9400}
+Except for the @code{TDS520} and th @code{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
@@ -1866,7 +1995,8 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function is nearly identical to @code{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
-time interval.
+time interval. It is not implemented for the @code{LeCroy} digitizers,
+where no visual feedback is used.
 
 
 @anchor{digitizer_run()}
