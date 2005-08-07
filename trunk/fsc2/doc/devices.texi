@@ -2047,6 +2047,7 @@ to, i.e.@: on from
 @anchor{digitizer_lock_keyboard()}
 @findex digitizer_lock_keyboard()
 @item digitizer_lock_keyboard()
+This funtion is only available for the @strong{Tectronix} oszilloscopes.
 Usually, during an experiment the keyboard of the digitizer is
 locked. But for situations where it would be useful to be able to
 control the digitizer also via its keyboard it can be unlocked (and also
