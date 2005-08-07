@@ -87,16 +87,14 @@
 #define LECROY9424_FUNC_F   9
 #define LECROY9424_LIN     10
 
-/* Add here for 9424 with ext. trigger option
-
-#define LECROY9424_EXT     11
-
-# * and increase LECROY9424_MAX_CHANNELS below to 12 */
-
-
 /* Measurement channel with the highest number */
 
 #define LECROY9424_CH_MAX   LECROY9424_CH4
+
+
+/* Channel 4 can be used as trigger with this model */
+
+#define LCROY94_TMPL_CH4_AS_TRG
 
 
 #define GENERAL_TO_LECROY9424 0
@@ -133,8 +131,6 @@
 /* Maximum factors or values for trigger levels */
 
 #define LECROY9424_TRG_MAX_LEVEL_CH_FAC 5.0
-#define LECROY9424_TRG_MAX_LEVEL_EXT    2.0
-#define LECROY9424_TRG_MAX_LEVEL_EXT10  10.0
 
 #define UNDEFINED_REC_LEN  -1
 

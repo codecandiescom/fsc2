@@ -858,16 +858,16 @@ Var_T *digitizer_trigger_level( Var_T *v )
 							   get_strict_long( v, "channel number" ), UNSET );
 	v = vars_pop( v );
 
-	if ( channel != LECROY94_TMPL_CH1 || channel != LECROY94_TMPL_CH2
+	if ( channel != LECROY94_TMPL_CH1 && channel != LECROY94_TMPL_CH2
 #if defined LECROY94_TMP_CH4_AS_TRG
-		 || channel != LECROY94_TMPL_CH4
+		 && channel != LECROY94_TMPL_CH4
 #endif
-		 || channel != LECROY94_TMPL_LIN
+		 && channel != LECROY94_TMPL_LIN
 #if defined LECROY94_TMPL_EXT
-		 || channel != LECROY94_TMPL_EXT
+		 && channel != LECROY94_TMPL_EXT
 #endif
 #if defined LECROY94_TMPL_EXT10
-		 || channel != LECROY94_TMPL_EXT10
+		 && channel != LECROY94_TMPL_EXT10
 #endif
 	   )
 	{
@@ -986,16 +986,16 @@ Var_T *digitizer_trigger_slope( Var_T *v )
 							   get_strict_long( v, "channel number" ), UNSET );
 	v = vars_pop( v );
 
-	if ( channel != LECROY94_TMPL_CH1 || channel != LECROY94_TMPL_CH2
+	if ( channel != LECROY94_TMPL_CH1 && channel != LECROY94_TMPL_CH2
 #if defined LECROY94_TMP_CH4_AS_TRG
-		 || channel != LECROY94_TMPL_CH4
+		 && channel != LECROY94_TMPL_CH4
 #endif
-		 || channel != LECROY94_TMPL_LIN
+		 && channel != LECROY94_TMPL_LIN
 #if defined LECROY94_TMPL_EXT
-		 || channel != LECROY94_TMPL_EXT
+		 && channel != LECROY94_TMPL_EXT
 #endif
 #if defined LECROY94_TMPL_EXT10
-		 || channel != LECROY94_TMPL_EXT10
+		 && channel != LECROY94_TMPL_EXT10
 #endif
 	   )
 	{
@@ -1064,16 +1064,16 @@ Var_T *digitizer_trigger_coupling( Var_T *v )
 							   get_strict_long( v, "channel number" ), UNSET );
 	v = vars_pop( v );
 
-	if ( channel != LECROY94_TMPL_CH1 || channel != LECROY94_TMPL_CH2
+	if ( channel != LECROY94_TMPL_CH1 && channel != LECROY94_TMPL_CH2
 #if defined LECROY94_TMP_CH4_AS_TRG
-		 || channel != LECROY94_TMPL_CH4
+		 && channel != LECROY94_TMPL_CH4
 #endif
-		 || channel != LECROY94_TMPL_LIN
+		 && channel != LECROY94_TMPL_LIN
 #if defined LECROY94_TMPL_EXT
-		 || channel != LECROY94_TMPL_EXT
+		 && channel != LECROY94_TMPL_EXT
 #endif
 #if defined LECROY94_TMPL_EXT10
-		 || channel != LECROY94_TMPL_EXT10
+		 && channel != LECROY94_TMPL_EXT10
 #endif
 	   )
 	{

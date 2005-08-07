@@ -86,6 +86,7 @@
 #define LECROY9424E_FUNC_E   8
 #define LECROY9424E_FUNC_F   9
 #define LECROY9424E_LIN     10
+#define LECROY9424E_EXT     11
 
 
 /* Measurement channel with the highest number */
@@ -100,7 +101,7 @@
 /* Total number of channels and maximum number of channels that can be
    diesplayed at once */
 
-#define LECROY9424E_MAX_CHANNELS       11         /* number of channel names */
+#define LECROY9424E_MAX_CHANNELS       12         /* number of channel names */
 #define LECROY9424E_MAX_USED_CHANNELS   4
 
 
@@ -128,7 +129,6 @@
 
 #define LECROY9424E_TRG_MAX_LEVEL_CH_FAC 5.0
 #define LECROY9424E_TRG_MAX_LEVEL_EXT    2.0
-#define LECROY9424E_TRG_MAX_LEVEL_EXT10  10.0
 
 #define UNDEFINED_REC_LEN  -1
 
