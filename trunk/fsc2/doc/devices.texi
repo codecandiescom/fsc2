@@ -1324,6 +1324,10 @@ First auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
 Line In for trigger (all models)
+@item EXP_A
+First expansion channel (all LeCroy digitizers)
+@item EXB_B
+Second expansion channel (all LeCroy digitizers)
 @item MEM_C
 First memory channel (all LeCroy digitizers)
 @item MEM_D
@@ -1608,6 +1612,50 @@ abbreviated to @code{LIN})
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
+
+
+@anchor{digitizer_trigger_level()}
+@findex digitizer_trigger_level()
+@item digitizer_trigger_level()
+Function for setting or quering the trigger level (@strong{LeCroy9420},
+@strong{LeCroy9424}, @strong{LeCroy9424e} and @strong{LeCroy9450} only).
+It expects at least a single argument, the trigger channel, see the
+channels listed for the function @ref{digitizer_trigger_channel()}.
+If called with no further argument the current setting for the trigger
+level of this channel. If called with a second argument it must be the
+trigger level (in Volt) to be set for that channel.
+
+
+@anchor{digitizer_trigger_slope()}
+@findex digitizer_trigger_slope()
+@item digitizer_trigger_slope()
+Function for setting or quering the trigger slope (@strong{LeCroy9420},
+@strong{LeCroy9424}, @strong{LeCroy9424e} and @strong{LeCroy9450} only).
+It expects at least a single argument, the trigger channel, see the
+channels listed for the function @ref{digitizer_trigger_channel()}.
+If called with no further argument the current setting for the trigger
+slope of this channel as a number, where @code{1} stands for positive
+slope and @code{0} for negative slope. If called with a second argument
+it must be either the string @code{"POSITIVE"} or @code{"POS"} (or the
+number @code{1}) to set a positive slope or the string @code{"NEGATIVE"}
+or @code{"NEG"} (or the number{0}) to set a negative trigger slope for
+that channel.
+
+
+@anchor{digitizer_trigger_coupling()}
+@findex digitizer_trigger_coupling()
+@item digitizer_trigger_coupling()
+Function for setting or quering the trigger coupling (@strong{LeCroy9420},
+@strong{LeCroy9424}, @strong{LeCroy9424e} and @strong{LeCroy9450} only).
+
+
+@anchor{digitizer_trigger_mode()}
+@findex digitizer_trigger_mode()
+@item digitizer_trigger_mode()
+Function for setting or quering the trigger slope (@strong{LeCroy9420},
+@strong{LeCroy9424}, @strong{LeCroy9424e} and @strong{LeCroy9450} only).
+
+
 
 
 @anchor{digitizer_record_length()}

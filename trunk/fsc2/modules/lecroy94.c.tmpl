@@ -1006,7 +1006,7 @@ Var_T *digitizer_trigger_slope( Var_T *v )
 	if ( channel == LECROY94_TMPL_LIN ) {
 		print( SEVERE, "Trigger slope for LINE can't be determined or "
 			   "changed.\n" );
-		return vars_push( FLOAT_VAR, 0.0 );
+		return vars_push( INT_VAR, 0 );
 	}
 
 	if ( v == NULL )
@@ -1016,26 +1016,41 @@ Var_T *digitizer_trigger_slope( Var_T *v )
 			case PREPARATION :
 				if ( ! lecroy94_tmpl.is_trigger_slope[ channel ] )
 					no_query_possible( );
-				return vars_push( FLOAT_VAR,
+				return vars_push( INT_VAR, ( long )
 								  lecroy94_tmpl.trigger_slope[ channel ] );
 
 			case TEST :
 				if ( lecroy94_tmpl.is_trigger_slope[ channel ] )
-					return vars_push( FLOAT_VAR,
+					return vars_push( INT_VAR, ( long )
 									  lecroy94_tmpl.trigger_slope[ channel ] );
 				else
-					return vars_push( FLOAT_VAR,
+					return vars_push( INT_VAR,
 									  LECROY94_TMPL_TEST_TRIG_SLOPE	);
 
 			case EXPERIMENT :
 				lecroy94_tmpl.trigger_slope[ channel ] =
 								   lecroy94_tmpl_get_trigger_slope( channel );
-				return vars_push( FLOAT_VAR,
+				return vars_push( INT_VAR, ( long )
 								  lecroy94_tmpl.trigger_slope[ channel ] );
 		}
 	}
 
-	slope = get_long( v, "trigger slope" );
+	if ( v->type == STR_VAR )
+	{
+		if ( ! strcasecmp( v->val.sptr, "POSITIVE" ) ||
+			 ! strcasecmp( v->val.sptr, "POS" )
+			slope = 1;
+		else if ( ! strcasecmp( v->val.sptr, "NEGATIVE" ) ||
+				  ! strcasecmp( v->val.sptr, "NEG" ) ) 
+			slope = 0;
+		else
+		{
+			print( FATAL, "Invalid slope: \"%s\".\n", v->val.sptr );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		slope = get_long( v, "trigger slope" );
 
 	too_many_arguments( v );
 
