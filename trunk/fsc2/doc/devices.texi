@@ -1638,8 +1638,8 @@ slope of this channel as a number, where @code{1} stands for positive
 slope and @code{0} for negative slope. If called with a second argument
 it must be either the string @code{"POSITIVE"} or @code{"POS"} (or the
 number @code{1}) to set a positive slope or the string @code{"NEGATIVE"}
-or @code{"NEG"} (or the number{0}) to set a negative trigger slope for
-that channel.
+or @code{"NEG"} (or the number @code{0}) to set a negative trigger slope
+for that channel.
 
 
 @anchor{digitizer_trigger_coupling()}
@@ -1675,7 +1675,7 @@ only if either it has already been called with an argument or in the
 @anchor{digitizer_trigger_position()}
 @findex digitizer_trigger_position()
 @item digitizer_trigger_position()
-This function only exists for the @string{Tectronics} oszilloscopes.
+This function only exists for the @strong{Tectronics} oszilloscopes.
 It queries (if called with no argument) or sets (if called with an
 argument) the amount of pre-triggering, i.e.@: the portion of the
 trace shown with data before the trigger was detected. The function
