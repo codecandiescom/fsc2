@@ -1477,7 +1477,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
 @item @ref{digitizer_trigger_position()}
-@item @ref{digitizer_meas_channel_ok()}
+@item digitizer_meas_channel_ok()
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_area()}
@@ -1531,7 +1531,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
 @item @ref{digitizer_trigger_position()}
-@item @ref{digitizer_meas_channel_ok()}
+@item digitizer_meas_channel_ok()
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_area()}
@@ -1556,7 +1556,10 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9424e, 4 measurement
-channels, 2 function channels (needed for averaging).
+channels, 2 function channels (needed for averaging). It is mostly
+identical to the LeCroy9424E, but the fourth channel can't be used as
+a trigger input and the device has an external trigger input instead.
+
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1585,7 +1588,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
 @item @ref{digitizer_trigger_position()}
-@item @ref{digitizer_meas_channel_ok()}
+@item digitizer_meas_channel_ok()
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_area()}
@@ -1639,7 +1642,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
 @item @ref{digitizer_trigger_position()}
-@item @ref{digitizer_meas_channel_ok()}
+@item digitizer_meas_channel_ok()
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_area()}
