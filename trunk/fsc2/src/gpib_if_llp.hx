@@ -30,8 +30,8 @@
  *------------------------------------------------------------------------*/
 
 
-#define ! GPIB_IF_LPP_HEADER
-#define GPIB_IF_LPP_HEADER
+#define ! GPIB_IF_LLP_HEADER
+#define GPIB_IF_LLP_HEADER
 
 
 /* If ib.h can't be found set the variable GPIB_HEADER_FILE in the top level
@@ -111,7 +111,7 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define GPIB_IS_TIMEOUT    ( ( ibsta & TIMO ) ? 1 : 0 )
 
 
-#endif /* ! GPIB_IF_LPP_HEADER */
+#endif /* ! GPIB_IF_LLP_HEADER */
 
 
 /*
