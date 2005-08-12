@@ -205,7 +205,7 @@ static int gpib_init_controller( void )
         return FAILURE;
 	}
 
-    if( ! ibIsMaster( controller ) )
+    if ( ! ibIsMaster( controller ) )
 	{
 		if ( fd_list )
 			T_free( fd_list );
@@ -213,8 +213,8 @@ static int gpib_init_controller( void )
         return FAILURE;
 	}
 
-    if  ( ( ibonl( controller, ON ) | ibsic( controller ) |
-            ibsre( controller, ON ) ) & IBERR )
+    if ( ( ibonl( controller, ON ) | ibsic( controller ) |
+		   ibsre( controller, ON ) ) & IBERR )
 	{
 		if ( fd_list )
 			T_free( fd_list );
