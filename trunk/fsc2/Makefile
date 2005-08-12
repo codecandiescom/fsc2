@@ -496,7 +496,7 @@ endif
 
 ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_HEADER_DIR
-		INCLUDES  += -I$(patsubst % ,%,$(GPIB_HEADER_FIR))
+		INCLUDES  += -I$(patsubst % ,%,$(GPIB_HEADER_DIR))
 	endif
 
 	ifdef GPIB_CONF_FILE
