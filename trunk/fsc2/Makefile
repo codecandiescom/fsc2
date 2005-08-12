@@ -538,11 +538,8 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		endif
 		LIBS                 += -lfl
 	else
-		if ($(GPIB_LIBRARY),SLG)
-			ifndef GPIB_HEADER_DIR
-				INCLUDES         += -I/usr/local/include/gpib
-			endif
-			LIBS                 += -lfl
+		ifeq ($(GPIB_LIBRARY),SLG)
+			GPIB_LIBRARY         := slg
 		else
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
