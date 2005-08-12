@@ -72,8 +72,9 @@ GROUP              := uucp
 
 
 # The next variable defines the GPIB library to use, it must be set to either
-# 'LLP' for the LLP library, 'NI' for the National Instruments library or
-# 'JTT' for the library written by me. Alternatively, if no GPIB support is
+# 'LLP' for the LLP library, 'NI' for the National Instruments library,
+# 'SLG' for the updated version of the LLP library, now hosted on sourceforge,
+# or 'JTT' for the library written by me. Alternatively, if no GPIB support is
 # needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY       := JTT
@@ -107,10 +108,12 @@ GPIB_LOG_FILE      := /tmp/gpib.log
 GPIB_LOG_LEVEL     := HIGH
 
 
-# Finally, if the header files for the GPIB library aren't in either
-# /usr/include or /usr/local/include (e.g. if they are in /usr/include/gpib)
-# set the variable GPIB_HEADER_DIR to the absolute path of the directory
-# where the header file(s) for the library reside.
+# Finally, if the header files for the GPIB library won't get found
+# automatically in either /usr/include or /usr/local/include (this is
+# typically only the case for the LLP library where one has to explicitely
+# specify that it's in /usr/include/gpib) set the variable GPIB_HEADER_DIR
+# to the absolute path of the directory where the header file(s) for the
+# library reside.
 
 # GPIB_HEADER_DIR    := /usr/include/gpib
 
@@ -535,11 +538,18 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		endif
 		LIBS                 += -lfl
 	else
-		ifeq ($(GPIB_LIBRARY),NI)
-			GPIB_LIBRARY     := ni
+		if ($(GPIB_LIBRARY),SLG)
+			ifndef GPIB_HEADER_DIR
+				INCLUDES         += -I/usr/local/include/gpib
+			endif
+			LIBS                 += -lfl
 		else
-			ifeq ($(GPIB_LIBRARY),JTT)
-				GPIB_LIBRARY := jtt
+			ifeq ($(GPIB_LIBRARY),NI)
+				GPIB_LIBRARY     := ni
+			else
+				ifeq ($(GPIB_LIBRARY),JTT)
+					GPIB_LIBRARY := jtt
+				endif
 			endif
 		endif
 	endif
