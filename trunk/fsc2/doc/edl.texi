@@ -1768,7 +1768,7 @@ Everywhere within an @code{EDL} script one can include another
 @code{EDL} file. This is done using the @code{#INCLUDE} keyword,
 followed by the name of the file to be included, and has the same effect
 as if the included file had been pasted into the current @code{EDL}
-script, replacing the @code{#Include} statement. Included files
+script, replacing the @code{#INCLUDE} statement. Included files
 themselves may contain further @code{#INCLUDE} statements, up to 16
 levels deep.
 
