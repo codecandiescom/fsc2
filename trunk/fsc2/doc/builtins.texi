@@ -173,7 +173,7 @@ fit into the display window anymore.
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{init_1d()}
 @findex init_1d()
@@ -815,7 +815,7 @@ start with an @i{escape character}, the backslash @code{\}. Here's a
 list of all recognized special sequences:
 
 @c The cindex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @cindex escape characters (in @code{print()} function)
 
@@ -899,7 +899,7 @@ time you try to write out data in this case.
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{get_file()}
 @findex get_file()
@@ -1484,7 +1484,7 @@ All the following functions can only be used in the @code{EXPERIMENT}
 section of an @code{EDL} script.
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{layout()}
 @findex layout()
@@ -1983,7 +1983,7 @@ The following mathematical function can be used in all section of an
 @strong{Descriptions of mathematical functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{abs()}
 @findex abs()
@@ -2301,7 +2301,7 @@ elements of an 1- or more-dimensional array).
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{end()}
 @findex end()

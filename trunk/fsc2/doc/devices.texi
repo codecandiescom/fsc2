@@ -677,7 +677,7 @@ loaded.
 @strong{Descriptions of gaussmeter functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{gaussmeter_name()}
 @findex gaussmeter_name()
@@ -842,7 +842,7 @@ check the arguments to achieve the desired results.
 @strong{Descriptions of lock-in functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{lockin_name()}
 @findex lockin_name()
@@ -1386,7 +1386,7 @@ External amplified trigger input (LeCroy9400, LeCroy9420, LeCroy9450)
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{digitizer_name()}
 @findex digitizer_name()
@@ -2222,7 +2222,7 @@ of the pulse sequence has to be committed explicitely by calling
 @strong{Descriptions of pulser functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{pulser_name()}
 @findex pulser_name()
@@ -2781,7 +2781,7 @@ in the @code{DEVICES} section.
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{synthesizer_name()}
 @findex synthesizer_name()
@@ -3248,7 +3248,7 @@ the @code{EDL} script.
 @strong{Descriptions of temperature controller functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{temp_contr_name()}
 @findex temp_contr_name()
@@ -3346,7 +3346,7 @@ in the @code{DEVICES} section.
 @strong{Descriptions of voltmeter functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{voltmeter_name()}
 @findex voltmeter_name()
@@ -3407,7 +3407,7 @@ script.
 @strong{Descriptions of boxcar functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{boxcar_name()}
 @findex boxcar_name()
@@ -3504,7 +3504,7 @@ in the @code{DEVICES} section.
 @strong{Descriptions of frequency counter functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{freq_counter_name()}
 @findex freq_counter_name()
@@ -3590,7 +3590,7 @@ in the @code{DEVICES} section.
 @strong{Descriptions of DAQ functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{daq_name()}
 @findex daq_name()
@@ -4465,7 +4465,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{dio_name()}
 @findex dio_name()
@@ -4669,7 +4669,7 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @strong{Descriptions of counter functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{counter_name()}
 @findex counter_name()
@@ -4972,7 +4972,7 @@ automatically to the ones they had in the previously run experiment.
 @strong{Descriptions of CCD camera functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{ccd_camera_name()}
 @findex ccd_camera_name()
@@ -5261,7 +5261,7 @@ supported monochromatore).
 @strong{Descriptions of monochromator functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{monochromator_name()}
 @findex monochromator_name()
@@ -5830,7 +5830,7 @@ in the @code{DEVICES} section.
 @strong{Descriptions of power supply functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{powersupply_name()}
 @findex powersuppy_name()
@@ -5990,7 +5990,7 @@ module.
 @strong{Descriptions of microwave attenuator functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{mw_attenuator_name()}
 @findex mw_attenuator_name()
@@ -6117,7 +6117,7 @@ chopper gets stopped automatically.
 @strong{Descriptions of chopper functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{chopper_name()}
 @findex chopper_name()
@@ -6168,7 +6168,7 @@ automatically loaded, so it needs no special entry in the @code{DEVICES}
 section.
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{get_phase_cycled_area()}
 @findex get_phase_cycled_area()
