@@ -278,7 +278,7 @@ hjs_fc;
 @strong{Descriptions of magnet functions}:
 
 @c The anchor and the findex must come before the start of the table,
-@c otherwise the created HTML in't valid
+@c otherwise the created HTML isn't valid
 
 @anchor{magnet_name()}
 @findex magnet_name()
