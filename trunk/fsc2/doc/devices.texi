@@ -1544,7 +1544,7 @@ the channel used to do the averaging, i.e.@: either @code{FUNC_E} or
 @code{FUNC_F}.
 
 @strong{Please note}: Anton Savitzky noticed that there seems to be
-firmware bug in the @code{Tektronix} digitzers from the 500 series
+firmware bug in the @strong{Tektronix} digitzers from the 500 series
 (i.e. @code{TDS520}, @code{TDS520A}, @code{TDS520C} and @code{TDS540}).
 For numbers of averages above about 16 only half of the number of
 averages seem to be taken by the device it has been instructed to do.
@@ -1864,7 +1864,7 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the area for the corresponding window.
 
-Except for the @code{TDS520} and the @code{LeCroy} digitizers
+Except for the @code{TDS520} and the @strong{Lecroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
@@ -1890,7 +1890,7 @@ difference is that instead of using the function built into the
 digitizer to compute the area the curve in the specified interval is
 fetched and the area is computed from these data. This function can be a
 bit faster because it doesn't set the cursors (which also means that
-there is no visual feedback). It is not implemented for the @code{LeCroy}
+there is no visual feedback). It is not implemented for the @strong{Lecroy}
 digitizers, where no visual feedback is used.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -1959,7 +1959,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function is nearly identical to the function
 @code{digitizer_get_curve()} with the only difference that the cursors
 are not positioned at the start and end point of the curve to be fetched.
-It is not implemented for the @code{LeCroy} digitizers, where no visual
+It is not implemented for the @strong{Lecroy} digitizers, where no visual
 feedback is used.
 
 @anchor{digitizer_get_amplitude()}
@@ -1989,14 +1989,14 @@ choices of the data channel depend on the model of the digitizer:
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item LeCroy9420
-@item LeCroy9450
+@itemx LeCroy9450
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
 @item LeCroy9424
-@item LeCroy9424e
+@itemx LeCroy9424e
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MEM_C} or @code{MEM_D}
@@ -2021,7 +2021,7 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the amplitide for the corresponding window.
 
-Except for the @code{TDS520} and th @code{LeCroy} digitizers
+Except for the @code{TDS520} and the @strong{Lecroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
@@ -2046,7 +2046,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function is nearly identical to @code{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
-time interval. It is not implemented for the @code{LeCroy} digitizers,
+time interval. It is not implemented for the @strong{Lecroy} digitizers,
 where no visual feedback is used.
 
 
@@ -2065,11 +2065,12 @@ section.
 @anchor{digitizer_copy_curve()}
 @findex digitizer_copy_curve()
 @item digitizer_copy_curve()
-This function is only available for the @code{Tektronix} digitizers and
-allows to save a curve from on of the normal or @code{MATH} channels to
-one of the @code{REF} channels. It takes two arguments, first the source
-channel, i.e.@: the channel to copy the data from, which must be
-(depending on the model of the digitizer)
+This function is available for the @strong{Tektronix} and all @strong{LeCroy}
+digitizers except the @code{LeCroy9400}. It allows to save a curve from on of
+the normal or @code{MATH} / @code{FUNC} channels to one of the @code{REF} /
+@code{MEM} channels. It takes two arguments, first the source channel, i.e.@:
+the channel to copy the data from, which must be (depending on the model of
+the digitizer)
 @table @samp
 @item TDS520
 @itemx TDS520A
@@ -2084,12 +2085,39 @@ channel, i.e.@: the channel to copy the data from, which must be
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
+@item LeCroy9420
+@itemx LeCroy9450
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
+@item LeCroy9424
+@itemx LeCroy9424e
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{FUNC_E} or @code{FUNC_F}
+@end itemize
 @end table
-The second argument is the reference channel the data are to be copied
-to, i.e.@: on from
+
+The second argument is the channel the data are to be copied to, i.e.@: on
+from
+@table @samp
+@item TDS520
+@itemx TDS520A
+@itemx TDS540
+@itemx TDS744A
+@itemx TDS754A
 @itemize @bullet
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
+@item LeCroy9420
+@itemx LeCroy9424
+@itemx LeCroy9424e
+@itemx LeCroy9450
+@itemize @bullet
+@item @code{MEM_C} or @code{MEM_D}
+@end itemize
+@end table
 
 
 @anchor{digitizer_lock_keyboard()}
