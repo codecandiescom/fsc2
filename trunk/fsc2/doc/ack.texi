@@ -24,12 +24,11 @@
 @appendix Acknowledgments
 
 
-A large part of @code{fsc2} has been written while I was working in the
-groups of Prof.@: Th.@: Prisner (J.-W.-Goethe-Universit@"at,
-Frankfurt/Main) and Prof.@: K.@: M@"obius (Freie Universit@"at
-Berlin). Both where so kind to allow me to spend quite large amounts of
-time on getting it to the state it is in now. Prof.@: R.@: Bittl (Freie
-Universit@"at Berlin), Prof.@: H.-J.@: Steinhoff (Universt@"at
+Parts of @code{fsc2} has been written while I was working in the groups
+of Prof.@: Th.@: Prisner (J.-W.-Goethe-Universit@"at, Frankfurt/Main)
+and Prof.@: K.@: M@"obius (Freie Universit@"at Berlin). Both where so
+kind to allow me to spend quite some amount of time on it. Prof.@: R.@:
+Bittl (Freie Universit@"at Berlin), Prof.@: H.-J.@: Steinhoff (Universt@"at
 Osnabr@"uck), Prof.@: P.@: Hildebrandt(Technische Universit@"at Berlin),
 Prof.@: G.@: Gescheidt (Universit@"at Basel, Switzerland/Technische
 Universit@"at Graz, Austria) and Prof.@: J.@: Schmidt and Prof.@: E.@:
