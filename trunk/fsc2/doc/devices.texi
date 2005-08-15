@@ -2099,7 +2099,7 @@ the digitizer)
 @end itemize
 @end table
 
-The second argument is the channel the data are to be copied to, i.e.@: on
+The second argument is the channel the data are to be copied to, i.e.@: one
 from
 @table @samp
 @item TDS520
@@ -2118,6 +2118,11 @@ from
 @item @code{MEM_C} or @code{MEM_D}
 @end itemize
 @end table
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script and is probably most useful for being able to start
+a new acquisition before fetching the data from the prvious one, thus
+reducing the time required to do an experiment.
 
 
 @anchor{digitizer_lock_keyboard()}
