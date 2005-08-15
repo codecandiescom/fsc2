@@ -1415,6 +1415,32 @@ long lecroy94_tmpl_get_num_avg( int ch )
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
+void lecroy94_tmpl_copy_curve( long src, long dest )
+{
+	char cmd[ 100 ];
+
+
+	fsc2_assert( ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX ) ||
+				 src == LECROY94_TMPL_FUNC_E || src == LECROY94_TMPL_FUNC_E );
+	fsc2_assert( dest == LECROY94_TMPL_MEM_C || dest == LECROY94_TMPL_MEM_D );
+
+
+	sprintf( cmd, "M%c:STO ", dest == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
+	if ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX )
+		sprintf( cmd + strlen( cmd ), "C%ld", src - LECROY94_TMPL_CH1 + 1 );
+	else
+		sprintf( cmd + strlen( cmd ), "F%c", 
+				 src == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
+
+	
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+}
+
+
+/*----------------------------------------------------------------------*
+ *---------------------------------------------------------------------*/
+
 static unsigned char *lecroy94_tmpl_get_data( long *len )
 {
 	unsigned char *data;

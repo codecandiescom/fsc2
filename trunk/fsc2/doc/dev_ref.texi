@@ -1483,6 +1483,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_amplitude()}
 @item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
 @end table
 
 
@@ -1537,6 +1538,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_amplitude()}
 @item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
 @end table
 
 
@@ -1594,6 +1596,7 @@ a trigger input and the device has an external trigger input instead.
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_amplitude()}
 @item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
 @end table
 
 
@@ -1648,6 +1651,7 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_get_area()}
 @item @ref{digitizer_get_amplitude()}
 @item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
 @end table
 
 

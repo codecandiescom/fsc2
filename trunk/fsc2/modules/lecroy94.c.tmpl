@@ -1534,11 +1534,49 @@ Var_T *digitizer_meas_channel_ok( Var_T *v )
 	channel = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 								get_strict_long( v, "channel number" ), flag );
 
-	if ( ( channel >= LECROY94_TMPL_CH1 && channel <= LECROY94_TMPL_CH_MAX ) ||
-		 channel == LECROY94_TMPL_FUNC_E || channel == LECROY94_TMPL_FUNC_F )
+	if ( channel >= LECROY94_TMPL_CH1 && channel <= LECROY94_TMPL_CH_MAX )
 		return vars_push( INT_VAR, 1L );
 	else
 		return vars_push( INT_VAR, 0L );
+}
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
+Var_T *digitizer_copy_curve( Var_T *v )
+{
+	long src, dest;
+
+
+	src = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
+						get_strict_long( v, "source channel number" ), UNSET );
+
+	if ( ! ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX ) &&
+		 src != LECROY94_TMPL_FUNC_E && src != LECROY94_TMPL_FUNC_E )
+	{
+		print( FATAL, "Invalid source channel %s, must be one of the "
+			   "measurement or FUNC channels.\n",
+			   LECROY94_TMPL_Channel_Names[ src ] );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	dest = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
+				   get_strict_long( v, "destination channel number" ), UNSET );
+
+	if ( dest != LECROY94_TMPL_MEM_C && dest != LECROY94_TMPL_MEM_D )
+	{
+		print( FATAL, "Invalid destination channel %s, must be one of the "
+			   "MEM channels\n", LECROY94_TMPL_Channel_Names[ dest ] );
+		THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+		lecroy94_tmpl_copy_curve( src, dest );
+
+	return vars_push( INT_VAR, 1L );
 }
 
 
