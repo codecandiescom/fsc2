@@ -234,12 +234,16 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 	"H14",
 	"H15",
 	"TRIG_OUT",
+	"EXP_A",
+	"EXP_B",
+	"TRACE_A",
+	"TRACE_B",
+	"TRACE_C",
+	"TRACE_D",
 	"M1",
 	"M2",
 	"M3",
-	"M4",
-	"EXP_A",
-	"EXP_B"
+	"M4"
 };
 
 
