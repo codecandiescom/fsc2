@@ -126,6 +126,11 @@ bool lecroy94_tmpl_init( const char *name )
 			}
 		}
 
+		/* Make sure the internal timebase is used */
+
+		if ( gpib_write( lecroy94_tmpl.device, "SCLK INT", 8 ) == FAILURE )
+			lecroy94_tmpl_gpib_failure( );
+
 		/* Set or get the time base (including the index in the table of
 		   possible time bases) while also taking care of the mode, i.e.
 		   RIS or SS */
