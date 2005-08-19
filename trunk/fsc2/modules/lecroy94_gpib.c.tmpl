@@ -82,6 +82,50 @@ bool lecroy94_tmpl_init( const char *name )
 
 	TRY
 	{
+		/* Figure out which traces are displayed */
+
+		lecroy94_tmpl.num_displayed_channels = 0;
+
+		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
+		{
+			lecroy94_tmpl.displayed[ i ] = UNSET;
+			if ( lecroy94_tmpl_is_displayed( i ) )
+			{
+				lecroy94_tmpl.displayed[ i ] = SET;
+				lecroy94_tmpl.num_displayed_channels++;
+			}
+		}
+
+		for ( i = LECROY94_TMPL_EXP_A; i < LECROY94_TMPL_EXP_B; i++ )
+		{
+			lecroy94_tmpl.displayed[ i ] = UNSET;
+			if ( lecroy94_tmpl_is_displayed( i ) )
+			{
+				lecroy94_tmpl.displayed[ i ] = ON;
+				lecroy94_tmpl.num_displayed_channels++;
+			}
+		}
+
+		for ( i = LECROY94_TMPL_MEM_C; i < LECROY94_TMPL_MEM_D; i++ )
+		{
+			lecroy94_tmpl.displayed[ i ] = UNSET;
+			if ( lecroy94_tmpl_is_displayed( i ) )
+			{
+				lecroy94_tmpl.displayed[ i ] = ON;
+				lecroy94_tmpl.num_displayed_channels++;
+			}
+		}
+
+		for ( i = LECROY94_TMPL_FUNC_E; i < LECROY94_TMPL_FUNC_F; i++ )
+		{
+			lecroy94_tmpl.displayed[ i ] = UNSET;
+			if ( lecroy94_tmpl_is_displayed( i ) )
+			{
+				lecroy94_tmpl.displayed[ i ] = ON;
+				lecroy94_tmpl.num_displayed_channels++;
+			}
+		}
+
 		/* Set or get the time base (including the index in the table of
 		   possible time bases) while also taking care of the mode, i.e.
 		   RIS or SS */
@@ -917,59 +961,68 @@ bool lecroy94_tmpl_set_trigger_delay( double delay )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_is_displayed( int channel )
+bool lecroy94_tmpl_is_displayed( int ch )
 {
-	char reply[ 30 ];
+	char cmd[ 30 ];
 	long length = 30;
-	char const *cmds[ ] = { "TRC1,?", "TRC2,?", "TRMC,?", "TRMD,?",
-							"TRFE,?", "TRFF,?" };
 
 
-	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
-				 channel <= LECROY94_TMPL_FUNC_F );
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+		sprintf( cmd, "C%d:TRA?", ch - LECROY94_TMPL_CH1 + 1 );
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+		sprintf( cmd, "E%c:TRA?", ch == LECROY94_TMPL_EXP_A ? 'A' : 'B' );
+	else if ( ch == LECROY94_TMPL_MEM_C || ch == LECROY94_TMPL_MEM_D )
+		sprintf( cmd, "M%c:TRA?", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+		sprintf( cmd, "F%c:TRA?", ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
 
-	lecroy94_tmpl_talk( cmds[ channel - LECROY94_TMPL_CH1 ], reply, &length );
-    reply[ length - 1 ] = '\0';
-	return strcmp( reply, "ON" ) ? UNSET : SET;
+	lecroy94_tmpl_talk( ( const char * ) cmd, cmd, &length );
+	return cmd[ 1 ] == 'N';
 }
 
 
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_display( int channel, int on_off )
+bool lecroy94_tmpl_display( int ch, int on_off )
 {
-	char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
-						  "TRFE,", "TRFF," };
+	char cmd[ 30 ];
+	long length = 30;
+		
 
+	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
+		sprintf( cmd, "C%d:TRA ", ch - LECROY94_TMPL_CH1 + 1 );
+	else if ( ch == LECROY94_TMPL_EXP_A || ch == LECROY94_TMPL_EXP_B )
+		sprintf( cmd, "E%c:TRA ", ch == LECROY94_TMPL_EXP_A ? 'A' : 'B' );
+	else if ( ch == LECROY94_TMPL_MEM_C || ch == LECROY94_TMPL_MEM_D )
+		sprintf( cmd, "M%c:TRA ", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
+	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
+		sprintf( cmd, "F%c:TRA ", ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
 
-	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
-				 channel <= LECROY94_TMPL_FUNC_F );
+	strcat( cmd, on_off ? "ON" : "OFF" );
 
 	if ( on_off &&
-		 lecroy94_tmpl.num_used_channels >= LECROY94_TMPL_MAX_USED_CHANNELS )
+		 lecroy94_tmpl.num_displayed_channels >=
+		 									  LECROY94_TMPL_MAX_USED_CHANNELS )
 	{
-		print( FATAL, "More than %d channels are needed to run the "
-			   "experiment.\n", LECROY94_TMPL_MAX_USED_CHANNELS );
+		print( FATAL, "Can't switch on another trace, there are already as "
+			   "many as possible (%d) displayed.\n",
+			   LECROY94_TMPL_MAX_USED_CHANNELS );
 		THROW( EXCEPTION );
 	}
 
-	strcat( cmds[ channel - LECROY94_TMPL_CH1 ], on_off ? "ON" : "OFF" );
-
-	if ( gpib_write( lecroy94_tmpl.device, cmds[ channel - LECROY94_TMPL_CH1 ],
-					 strlen( cmds[ channel - LECROY94_TMPL_CH1 ] ) )
-		 == FAILURE )
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
 
 	if ( on_off )
 	{
-		lecroy94_tmpl.num_used_channels++;
-		lecroy94_tmpl.channels_in_use[ channel ] = SET;
+		lecroy94_tmpl.num_displayed_channels++;
+		lecroy94_tmpl.displayed[ ch ] = SET;
 	}
 	else
 	{
-		lecroy94_tmpl.num_used_channels--;
-		lecroy94_tmpl.channels_in_use[ channel ] = UNSET;
+		lecroy94_tmpl.num_displayed_channels--;
+		lecroy94_tmpl.displayed[ ch ] = UNSET;
 	}
 
 	return OK;
