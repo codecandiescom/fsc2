@@ -361,7 +361,7 @@ int gpib_init_device( const char *device_name, int *dev )
     cur_dev->number = ibfind( ( char * ) device_name );
 	lower_permissions( );
 
-    if ( cur_dev->number < 0  )
+    if ( cur_dev->number == -1 )
 	{
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
