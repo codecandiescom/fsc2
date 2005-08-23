@@ -205,15 +205,6 @@ static int gpib_init_controller( void )
         return FAILURE;
 	}
 
-    if ( ( ibonl( controller, ON ) | ibsic( controller ) |
-		   ibsre( controller, ON ) ) & IBERR )
-	{
-		if ( fd_list )
-			T_free( fd_list );
-		lower_permissions( );
-		return FAILURE;
-	}
-
 	close_on_exec_hack( fd_list );
 
     return SUCCESS;
@@ -253,11 +244,6 @@ int gpib_shutdown( void )
 
 	T_free( cur_dev );
 	gpib_dev_list = NULL;
-
-	raise_permissions( );
-    ibsre( controller, OFF );       /* pull down the REN line */
-    ibonl( controller, OFF );       /* "switch off" the controller */
-	lower_permissions( );
 
     if ( ll > LL_NONE )
     {
@@ -375,7 +361,7 @@ int gpib_init_device( const char *device_name, int *dev )
     cur_dev->number = ibfind( ( char * ) device_name );
 	lower_permissions( );
 
-    if ( ibsta & IBERR )
+    if ( cur_dev->number < 0  )
 	{
 		T_free( cur_dev->name );
 		if ( cur_dev->prev != NULL )
@@ -383,8 +369,8 @@ int gpib_init_device( const char *device_name, int *dev )
 		else
 			gpib_dev_list = NULL;
 		T_free( cur_dev );
-        sprintf( gpib_error_msg, "Can't initialize device %s, ibsta = 0x%x",
-				 device_name, ibsta );
+        sprintf( gpib_error_msg, "Can't initialize device %s, not found in "
+				 "GPIB configuration file", device_name );
 
 		return FAILURE;
 	}
