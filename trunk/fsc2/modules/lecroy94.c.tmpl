@@ -96,7 +96,7 @@ int lecroy94_tmpl_init_hook( void )
 	lecroy94_tmpl.interleaved      = UNSET;
 
 	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_FUNC_F; i++ )
-		lecroy94_tmpl.channels_in_use[ i ] = UNSET;
+		lecroy94_tmpl.is_displayed[ i ] = UNSET;
 
 	for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_MAX_CHANNELS; i++ )
 	{

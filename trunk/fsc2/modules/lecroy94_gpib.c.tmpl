@@ -84,45 +84,45 @@ bool lecroy94_tmpl_init( const char *name )
 	{
 		/* Figure out which traces are displayed */
 
-		lecroy94_tmpl.num_displayed_channels = 0;
+		lecroy94_tmpl.num_used_channels = 0;
 
 		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
 		{
-			lecroy94_tmpl.displayed[ i ] = UNSET;
+			lecroy94_tmpl.is_displayed[ i ] = UNSET;
 			if ( lecroy94_tmpl_is_displayed( i ) )
 			{
-				lecroy94_tmpl.displayed[ i ] = SET;
-				lecroy94_tmpl.num_displayed_channels++;
+				lecroy94_tmpl.is_displayed[ i ] = SET;
+				lecroy94_tmpl.num_used_channels++;
 			}
 		}
 
 		for ( i = LECROY94_TMPL_EXP_A; i < LECROY94_TMPL_EXP_B; i++ )
 		{
-			lecroy94_tmpl.displayed[ i ] = UNSET;
+			lecroy94_tmpl.is_displayed[ i ] = UNSET;
 			if ( lecroy94_tmpl_is_displayed( i ) )
 			{
-				lecroy94_tmpl.displayed[ i ] = ON;
-				lecroy94_tmpl.num_displayed_channels++;
+				lecroy94_tmpl.is_displayed[ i ] = ON;
+				lecroy94_tmpl.num_used_channels++;
 			}
 		}
 
 		for ( i = LECROY94_TMPL_MEM_C; i < LECROY94_TMPL_MEM_D; i++ )
 		{
-			lecroy94_tmpl.displayed[ i ] = UNSET;
+			lecroy94_tmpl.is_displayed[ i ] = UNSET;
 			if ( lecroy94_tmpl_is_displayed( i ) )
 			{
-				lecroy94_tmpl.displayed[ i ] = ON;
-				lecroy94_tmpl.num_displayed_channels++;
+				lecroy94_tmpl.is_displayed[ i ] = ON;
+				lecroy94_tmpl.num_used_channels++;
 			}
 		}
 
 		for ( i = LECROY94_TMPL_FUNC_E; i < LECROY94_TMPL_FUNC_F; i++ )
 		{
-			lecroy94_tmpl.displayed[ i ] = UNSET;
+			lecroy94_tmpl.is_displayed[ i ] = UNSET;
 			if ( lecroy94_tmpl_is_displayed( i ) )
 			{
-				lecroy94_tmpl.displayed[ i ] = ON;
-				lecroy94_tmpl.num_displayed_channels++;
+				lecroy94_tmpl.is_displayed[ i ] = ON;
+				lecroy94_tmpl.num_used_channels++;
 			}
 		}
 
@@ -992,7 +992,6 @@ bool lecroy94_tmpl_is_displayed( int ch )
 bool lecroy94_tmpl_display( int ch, int on_off )
 {
 	char cmd[ 30 ];
-	long length = 30;
 		
 
 	if ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX )
@@ -1007,8 +1006,7 @@ bool lecroy94_tmpl_display( int ch, int on_off )
 	strcat( cmd, on_off ? "ON" : "OFF" );
 
 	if ( on_off &&
-		 lecroy94_tmpl.num_displayed_channels >=
-		 									  LECROY94_TMPL_MAX_USED_CHANNELS )
+		 lecroy94_tmpl.num_used_channels >= LECROY94_TMPL_MAX_USED_CHANNELS )
 	{
 		print( FATAL, "Can't switch on another trace, there are already as "
 			   "many as possible (%d) displayed.\n",
@@ -1021,13 +1019,13 @@ bool lecroy94_tmpl_display( int ch, int on_off )
 
 	if ( on_off )
 	{
-		lecroy94_tmpl.num_displayed_channels++;
-		lecroy94_tmpl.displayed[ ch ] = SET;
+		lecroy94_tmpl.num_used_channels++;
+		lecroy94_tmpl.is_displayed[ ch ] = SET;
 	}
 	else
 	{
-		lecroy94_tmpl.num_displayed_channels--;
-		lecroy94_tmpl.displayed[ ch ] = UNSET;
+		lecroy94_tmpl.num_used_channels--;
+		lecroy94_tmpl.is_displayed[ ch ] = UNSET;
 	}
 
 	return OK;

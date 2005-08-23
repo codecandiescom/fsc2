@@ -168,7 +168,6 @@ struct LECROY9450 {
 	unsigned int INR;
 
 	bool is_displayed[ LECROY9450_MAX_CHANNELS ];
-
 	int num_used_channels;
 
 	double timebase;
@@ -215,8 +214,6 @@ struct LECROY9450 {
 
 	Window_T *w;           /* start element of list of windows               */
 	int num_windows;
-
-	bool channels_in_use[ LECROY9450_MAX_CHANNELS ];
 };
 
 
@@ -229,7 +226,7 @@ struct HORI_RES {
 };
 
 
-#if defined LECROY9400_MAIN_
+#if defined LECROY9450_MAIN_
 
 // Take care: these are the data for the 9424 !!!!!!!!!!!!!
 
@@ -325,6 +322,7 @@ Var_T *digitizer_get_curve( Var_T *v );
 Var_T *digitizer_get_area( Var_T *v );
 Var_T *digitizer_get_amplitude( Var_T *v );
 Var_T *digitizer_run( Var_T *v );
+Var_T *digitizer_copy_curve( Var_T *v );
 Var_T *digitizer_command( Var_T *v );
 
 
@@ -355,8 +353,8 @@ int lecroy9450_get_trigger_mode( void );
 int lecroy9450_set_trigger_mode( int mode );
 double lecroy9450_get_trigger_delay( void );
 bool lecroy9450_set_trigger_delay( double delay );
-bool lecroy9450_is_displayed( int channel );
-bool lecroy9450_display( int channel, int on_off );
+bool lecroy9450_is_displayed( int ch );
+bool lecroy9450_display( int ch, int on_off );
 long lecroy9450_get_num_avg( int channel );
 bool lecroy9450_get_desc( int channel );
 void lecroy9450_set_up_averaging( long channel, long source, long num_avg,
@@ -367,6 +365,7 @@ void lecroy9450_get_curve( int ch, Window_T *w, double **array, long *length );
 double lecroy9450_get_area( int ch, Window_T *w );
 double lecroy9450_get_amplitude( int ch, Window_T *w );
 void lecroy9450_free_running( void );
+void lecroy9450_copy_curve( long src, long dest );
 bool lecroy9450_command( const char *cmd );
 
 
