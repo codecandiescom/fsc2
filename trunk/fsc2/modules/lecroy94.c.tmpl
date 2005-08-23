@@ -1615,11 +1615,10 @@ Var_T *digitizer_get_curve( Var_T *v )
 	ch = ( int ) lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch < LECROY94_TMPL_CH1 ||
-		 ( ch > LECROY94_TMPL_CH2 && ch < LECROY94_TMPL_FUNC_E ) ||
-		 ch > LECROY94_TMPL_FUNC_F )
+	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel specification.\n" );
+		print( FATAL, "Invalid channel to get a curve from.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1701,11 +1700,10 @@ Var_T *digitizer_get_area( Var_T *v )
 	ch = ( int ) lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch < LECROY94_TMPL_CH1 ||
-		 ( ch > LECROY94_TMPL_CH2 && ch < LECROY94_TMPL_FUNC_E ) ||
-		 ch > LECROY94_TMPL_FUNC_F )
+	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel specification.\n" );
+		print( FATAL, "Invalid channel for measuring an area.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1844,11 +1842,10 @@ Var_T *digitizer_get_amplitude( Var_T *v )
 	ch = ( int ) lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch < LECROY94_TMPL_CH1 ||
-		 ( ch > LECROY94_TMPL_CH2 && ch < LECROY94_TMPL_FUNC_E ) ||
-		 ch > LECROY94_TMPL_FUNC_F )
+	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel specification.\n" );
+		print( FATAL, "Invalid channel for measuring an amplitude.\n" );
 		THROW( EXCEPTION );
 	}
 
