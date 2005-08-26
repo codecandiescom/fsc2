@@ -356,9 +356,10 @@ static void globals_init( const char *pname )
 	EDL.File_List = FILE_LIST_P T_malloc( 2 * sizeof *EDL.File_List );
 	EDL.File_List_Len = 2;
 	EDL.File_List[ 0 ].fp = stdout;
-	EDL.File_List[ 0 ].name = "stdout";
+	setbuf( EDL.File_List[ 0 ].fp, NULL );
+	EDL.File_List[ 0 ].name = ( char * ) "stdout";
 	EDL.File_List[ 1 ].fp = stderr;
-	EDL.File_List[ 1 ].name = "stderr";
+	EDL.File_List[ 1 ].name = ( char * ) "stderr";
 
     EDL.Device_List = NULL;
     EDL.Device_Name_List = NULL;

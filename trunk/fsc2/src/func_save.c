@@ -463,6 +463,15 @@ Var_T *f_clonef( Var_T *v )
 	   opening a file for this file handle did not happen, so we also don't
 	   open the new file */
 
+	if ( v->type == INT_VAR &&
+		 ( v->val.lval == FILE_NUMBER_STDOUT ||
+		   v->val.lval == FILE_NUMBER_STDERR ) )
+	{
+		print( WARN, "std%s can't be cloned.\n",
+			   v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
+		return vars_push( INT_VAR, FILE_NUMBER_STDERR );
+	}
+
 	if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
 		return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
 
@@ -673,11 +682,24 @@ static int get_save_file( Var_T **v )
 	int acc;
 
 
+	/* If the first argument is an integer variable and has the value 1
+	   or 2 return the index for stdout or stderr */
+
+	if ( *v != NULL && ( *v )->type == INT_VAR &&
+		 ( ( *v )->val.lval == STDOUT_FILENO ||
+		   ( *v )->val.lval == STDERR_FILENO ) )
+	{
+		file_num = ( *v )->val.lval == STDOUT_FILENO ?
+							FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
+		*v = vars_pop( *v );
+		return ( int ) file_num;
+	}
+
 	/* If no file has been selected yet get a file and then use it exclusively
 	   (i.e. also expect that no file identifier is given in later calls),
 	   otherwise the first variable has to be the file identifier */
 
-	if ( EDL.File_List_Len == 0 )
+	if ( EDL.File_List_Len == 2 )
 	{
 		if ( Dont_Save )
 			return FILE_NUMBER_NOT_OPEN;
@@ -718,7 +740,7 @@ static int get_save_file( Var_T **v )
 			print( WARN, "Missing arguments.\n" );
 			return FILE_NUMBER_NOT_OPEN;
 		}
-		*v = ( *v )->next;
+		*v = vars_pop( *v );
 	}
 	else
 		file_num = FILE_NUMBER_OFFSET;
@@ -751,13 +773,14 @@ void close_all_files( void )
 {
 	int i;
 
-	if ( EDL.File_List == NULL )
-	{
-		EDL.File_List_Len = 0;
-		return;
-	}
 
-	for ( i = 0; i < EDL.File_List_Len; i++ )
+	/* Return immediately if only the file entries for stdout and stderr
+	   are in the list */
+
+	if ( EDL.File_List_Len == 2 )
+		return;
+
+	for ( i = 2; i < EDL.File_List_Len; i++ )
 	{
 		if ( EDL.File_List[ i ].fp )
 			fclose( EDL.File_List[ i ].fp );
@@ -765,8 +788,9 @@ void close_all_files( void )
 			T_free( EDL.File_List[ i ].name );
 	}
 
-	EDL.File_List = FILE_LIST_P T_free( EDL.File_List );
-	EDL.File_List_Len = 0;
+	EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+										   2 * sizeof *EDL.File_List );
+	EDL.File_List_Len = 2;
 }
 
 
@@ -853,8 +877,12 @@ static long arr_save( long file_num, Var_T *v )
 
 		case INT_REF : case FLOAT_REF :
 			for ( i = 0; i < v->len; i++ )
+			{
 				if ( v->val.vptr[ i ] != NULL )
 					count += arr_save( file_num, v->val.vptr[ i ] );
+				if ( i != v->len - 1 )
+					count += T_fprintf( file_num, "\n" );
+			}
 			break;
 
 		default :
@@ -2065,6 +2093,14 @@ static long T_fprintf( long fn, const char *fmt, ... )
     {
         T_free( p );
         return n;
+	}
+
+	if ( file_num == 0 || file_num == 1 )
+	{
+		print( SEVERE, "Can't write to std%s, if you're redirecting to a "
+			   "file make sure there's enough space on the disk.\n" );
+        T_free( p );
+        return count;
 	}
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
