@@ -595,6 +595,8 @@ enum {
 
 #define FILE_NUMBER_OFFSET    215927
 #define FILE_NUMBER_NOT_OPEN  ( FILE_NUMBER_OFFSET - 1 )
+#define FILE_NUMBER_STDOUT    FILE_NUMBER_OFFSET
+#define FILE_NUMBER_STDERR    ( FILE_NUMBER_OFFSET + 1 )
 
 
 /* This constants are used in converting integer and double numbers to short

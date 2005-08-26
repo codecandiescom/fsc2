@@ -352,8 +352,12 @@ static void globals_init( const char *pname )
 	EDL.Var_Stack = NULL;
 	EDL.do_quit = UNSET;
 	EDL.react_to_do_quit = SET;
-	EDL.File_List = NULL;
-	EDL.File_List_Len = 0;
+	EDL.File_List = FILE_LIST_P T_malloc( 2 * sizeof *EDL.File_List );
+	EDL.File_List_Len = 2;
+	EDL.File_List[ 0 ].fp = stdout;
+	EDL.File_List[ 0 ].name = "stdout";
+	EDL.File_List[ 1 ].fp = stderr;
+	EDL.File_List[ 1 ].name = "stderr";
     EDL.Device_List = NULL;
     EDL.Device_Name_List = NULL;
     EDL.Num_Pulsers = 0;
@@ -1180,6 +1184,8 @@ static void final_exit_handler( void )
 	fsc2_save_conf( );
 
 	/* Do everything necessary to end the program */
+
+	T_free( EDL.File_List );
 
 	if ( In_file_fp != NULL )
 		fclose( In_file_fp );
