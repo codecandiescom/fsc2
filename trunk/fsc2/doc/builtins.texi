@@ -983,10 +983,14 @@ Sometimes two output files are needed that should only differ in their
 extension but not in the filename. In this case the function
 @code{clone_file()} can be useful. It expects exactly three
 arguments. The first one is an identifier for an already existing file as
-returned by the function @code{get_file()}. (If in the call of
+returned by the function @code{get_file()}. If in the call of
 @code{get_file()} the user did @b{not} to choose a file, i.e.@: pressed
 the @code{Cancel}-button, it is silently assumed that also the second
-file to be created by @code{clone_file()} is @b{not} to be used.)
+file to be created by @code{clone_file()} is @b{not} to be used.
+If either the numer @code{1} (for writing to @i{stdout}) or @code{2} (for
+writing to @i{stderr}) was given as the argument a warning is printed out
+and the output gets written to either @i{stdout} or @i{stderr} as if
+the function wouldn't have been called.
 
 The second and third arguments both have to be strings. The second
 argument is the expected extension of the file that was selected via the
@@ -1029,13 +1033,17 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex save()
 @item save()
 Writes one or more data or complete arrays to a file. But some care has
-to be used: If @w{@code{get_file()}} has been called before the first
-argument has to be the file number returned by the call to tell
-@code{fsc2} which file to use. If, on the other hand,
+to be used: If @w{@code{get_file()}} has been called somewhere before
+in the script the first argument has to be the file number returned by
+the call to tell @code{fsc2} which file to use. If, on the other hand,
 @code{get_file()} hasn't been called before, the user is asked to select
-a file now and all further calls of functions of the
-@w{@code{save_xxx()}} type will use this one file and the first argument
-will be assumed to be a value to be written to this file!
+a file now and all further call of functions of the @w{@code{save_xxx()}}
+type will use this one file and the first argument will be assumed to be
+a value to be written to this file! The only exception is the use of
+the file number @code{1} and @code{2} which indicate that the output is
+to be written to @i{stdout} or @i{stderr}, respectively, which are always
+open and thus can be used all of the time without any calls of
+@w{@code{get_file()}}.
 
 All arguments (following the file identifier if there's one) are
 data. The types of these data may be
@@ -1055,12 +1063,12 @@ Complete more-dimensional arrays
 @end itemize
 
 The function saves data in an unformatted fashion, i.e.@: each data
-value is written on a new line. The only exception are more-dimensional
-arrays -- here an empty line is output between the individual slices of
-the array. Here's an example: The array
+value is written with a new line cahracter appended to it. The only
+exception are more-dimensional arrays -- here an empty line is output
+between the individual slices of the array. Here's an example: The array
 
 @example
-X[ 3, 2 ] = @{ 1, 2, 3, 4, 5, 6 @}
+X[ 3, 2 ] = @{ @{ 1, 2 @}, @{ 3, 4 @}, @{ 5, 6 @} @}
 @end example
 @noindent
 will be printed as
@@ -1086,12 +1094,13 @@ section of an @code{EDL} script.
 @item fsave()
 This function (the name stands for 'formated save') can be used to write
 data to a file in a formated way. As in the case of the @code{save()}
-function the first argument may be a file identifier. The next argument
-must be a @i{format string} with a syntax remotely similar to the one
-for the @code{C} @code{print()} function. The format string can contain
-arbitrary text and conversion specifiers, a @code{#} character for each
-data item from the remaining argument list. In contrast to the
-@code{save()} function this function can not be used to print array
+function the first argument may be a file identifier (including the
+numbers @code{1} and @code{2} to write to @i{stdout} or @i{stder}).
+The next argument must be a @i{format string} with a syntax remotely
+similar to the one for the @code{C} @code{print()} function. The format
+string can contain arbitrary text and conversion specifiers, a @code{#}
+character for each data item from the remaining argument list. In contrast
+to the @code{save()} function this function can not be used to print array
 slices or complete arrays, but only simple data types. On the other
 hand, printing of complete arrays can be done using loops, i.e.@: as in
 the following example:
