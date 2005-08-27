@@ -503,3 +503,7 @@ ON_STOP:
 IF Sweep_State != STOPPED {
     magnet_sweep( STOPPED );
 }
+
+FOR I = 1 : 5 {
+	fsave( 1, "# #\n", PSV[ I ] * 10, PLV[ I ] * 10 );
+}
