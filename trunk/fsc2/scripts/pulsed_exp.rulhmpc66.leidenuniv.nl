@@ -64,6 +64,10 @@ $b[ 1 ]->configure( '-state' => "disabled" );
 
 $b[ 2 ]->configure( '-command' => sub { &run_2_pulse_epr } );
 $b[ 3 ]->configure( '-command' => sub { &run_2_pulse_t2 } );
+$b[ 4 ]->configure( '-command' => sub { &run_3_pulse_epr } );
+$b[ 5 ]->configure( '-command' => sub { &run_3_pulse_t1 } );
+$b[ 6 ]->configure( '-command' => sub { &run_3_pulse_em } );
+$b[ 7 ]->configure( '-command' => sub { &run_3_pulse_endor } );
 
 
 $_->pack( %fp ) foreach @f;
@@ -89,8 +93,9 @@ sub run_2_pulse_epr {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist = $p[ 2 ] - $p[ 0 ];
-		open $f, "2_pulse_epr $p[ 1 ] $p[ 3 ] $length $p[ 8 ]|"
+		my $dist = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist + 0.5 * $p[ 3 ];
+		open $f, "2_pulse_epr $p[ 1 ] $p[ 3 ] $dist $det_offset|"
 			or die "Can't start 2 pulse EPR script.\n";
 	} else {
 		open $f, "2_pulse_epr|" or die "Can't start 2 pulse EPR script.\n";
@@ -104,8 +109,9 @@ sub run_2_pulse_t2 {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist = $p[ 2 ] - $p[ 0 ];
-		open $f, "2_pulse_T2 $p[ 1 ] $p[ 3 ] $dist $p[ 8 ]|"
+		my $dist = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist + 0.5 * $p[ 3 ];
+		open $f, "2_pulse_T2 $p[ 1 ] $p[ 3 ] $dist $det_offset|"
 			or die "Can't start 2 pulse T2 script.\n";
 	} else {
 		open $f, "2_pulse_T2|" or die "Can't start 2 pulse T2 script.\n";
@@ -119,9 +125,11 @@ sub run_3_pulse_epr {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist12 = $p[ 2 ] - $p[ 0 ];
-		my $dist23 = $p[ 4 ] - $p[ 2 ];
-		open $f, "3_pulse_epr $p[ 1 ] $p[ 3 ] $p[ 5 ]$dist12 $dist23 $p[ 8 ]|"
+		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 + 0.5 * $p[ 5 ];
+		open $f, "3_pulse_epr $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
+			     "$det_offset|"
 			or die "Can't start 3 pulse EPR script.\n";
 	} else {
 		open $f, "3_pulse_epr|" or die "Can't start 3 pulse EPR script.\n";
@@ -135,9 +143,11 @@ sub run_3_pulse_t1 {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist12 = $p[ 2 ] - $p[ 0 ];
-		my $dist23 = $p[ 4 ] - $p[ 2 ];
-		open $f, "3_pulse T1 $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 $p[ 8 ]|"
+		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist23 + 0.5 * $p[ 5 ];
+		open $f, "3_pulse T1 $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
+			     "$set_start|"
 			or die "Can't start 3 pulse T1 script.\n";
 	} else {
 		open $f, "3_pulse_T1|" or die "Can't start 3 pulse T1 script.\n";
@@ -151,9 +161,11 @@ sub run_3_pulse_em {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist12 = $p[ 2 ] - $p[ 0 ];
-		my $dist23 = $p[ 4 ] - $p[ 2 ];
-		open $f, "3_pulse EM $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 $p[ 8 ]|"
+		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 + 0.5 * $p[ 5 ];
+		open $f, "3_pulse EM $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
+			     "$det_offset|"
 			or die "Can't start 3 pulse EM script.\n";
 	} else {
 		open $f, "3_pulse_EM|" or die "Can't start 3 pulse EM script.\n";
@@ -167,12 +179,14 @@ sub run_3_pulse_endor {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		my $dist12 = $p[ 2 ] - $p[ 0 ];
-		my $dist12 = $p[ 4 ] - $p[ 2 ];
-		my $dist2rf = $
-
+		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
+		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
+		my $dist2rf = $p[ 6 ] - $p[ 2 ] - $p[ 3 ];
+		my $distrf3 = $dist23 - $p[ 7 ] - 0.5 * ( $p[ 3 ] + $p[ 5 ] )
+			          - $dist2rf;
+		$det_offset = $p[ 8 ]- $p[ 4 ] - $dist12 - 0.5 * $p[ 5 ],
 		open $f, "3_pulse_endor $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
-			     "$p[ 5 ] $p[ 6 ] $p[ 7 ] $p[ 8 ] |"
+			     "$dist2rf $distrf3 $det_offset|"
 			or die "Can't start 3 pulse ENDOR script.\n";
 	} else {
 		open $f, "3_pulse_endor|" or die "Can't start 3 pulse ENDOR script.\n";
@@ -181,4 +195,3 @@ sub run_3_pulse_endor {
 	close $f;
 	$mw->deiconify;
 }
-
