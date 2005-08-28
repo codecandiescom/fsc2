@@ -47,23 +47,23 @@ $b[ 0 ] = $f[ 0 ]->Button( '-text' => "Pulse Monitor" );
 $b[ 1 ] = $f[ 0 ]->Checkbutton( '-text' => "Use monitor data" );
 
 $f[ 1 ] = $mw->Frame(  );
-$b[ 2 ] = $f[ 1 ]->Button( '-text' => "2 Pulse T2" );
-$b[ 3 ] = $f[ 1 ]->Button( '-text' => "2 Pulse EM" );
-$b[ 4 ] = $f[ 1 ]->Button( '-text' => "2 Pulse ENDOR" );
-$b[ 5 ] = $f[ 1 ]->Button( '-text' => "3 Pulse EPR" );
-$b[ 6 ] = $f[ 1 ]->Button( '-text' => "3 Pulse T1" );
-$b[ 7 ] = $f[ 1 ]->Button( '-text' => "3 Pulse EM" );
-$b[ 8 ] = $f[ 1 ]->Button( '-text' => "3 Pulse ENDOR" );
+$b[ 2 ] = $f[ 1 ]->Button( '-text' => "2 Pulse EPR" );
+$b[ 3 ] = $f[ 1 ]->Button( '-text' => "2 Pulse T2" );
+$b[ 4 ] = $f[ 1 ]->Button( '-text' => "3 Pulse EPR" );
+$b[ 5 ] = $f[ 1 ]->Button( '-text' => "3 Pulse T1" );
+$b[ 6 ] = $f[ 1 ]->Button( '-text' => "3 Pulse EM" );
+$b[ 7 ] = $f[ 1 ]->Button( '-text' => "3 Pulse ENDOR" );
 
 $f[ 2 ] = $mw->Frame(  );
-$b[ 9 ] = $f[ 2 ]->Button( '-text' => "Quit",
+$b[ 8 ] = $f[ 2 ]->Button( '-text' => "Quit",
 								   '-command' => sub { $mw->destroy } );
 
 
 $b[ 0 ]->configure( '-command' => sub { &run_monitor } );
 $b[ 1 ]->configure( '-state' => "disabled" );
 
-$b[ 2 ]->configure( '-command' => sub { &run_2_pulse_t2 } );
+$b[ 2 ]->configure( '-command' => sub { &run_2_pulse_epr } );
+$b[ 3 ]->configure( '-command' => sub { &run_2_pulse_t2 } );
 
 
 $_->pack( %fp ) foreach @f;
@@ -85,11 +85,27 @@ sub run_monitor {
 	$mw->deiconify;
 }
 
+sub run_2_pulse_epr {
+	my $f;
+	$mw->withdraw;
+	if ( @p and $use_data ) {
+		my $dist = $p[ 2 ] - $p[ 0 ];
+		open $f, "2_pulse_epr $p[ 1 ] $p[ 3 ] $length $p[ 8 ]|"
+			or die "Can't start 2 pulse EPR script.\n";
+	} else {
+		open $f, "2_pulse_epr|" or die "Can't start 2 pulse EPR script.\n";
+	}
+	while ( <$f> ) { }
+	close $f;
+	$mw->deiconify;
+}
+
 sub run_2_pulse_t2 {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		open $f, "2_pulse_T2 $p[ 1 ] $p[ 2 ] $p[ 3 ] $p[ 4 ]|"
+		my $dist = $p[ 2 ] - $p[ 0 ];
+		open $f, "2_pulse_T2 $p[ 1 ] $p[ 3 ] $dist $p[ 8 ]|"
 			or die "Can't start 2 pulse T2 script.\n";
 	} else {
 		open $f, "2_pulse_T2|" or die "Can't start 2 pulse T2 script.\n";
@@ -99,14 +115,67 @@ sub run_2_pulse_t2 {
 	$mw->deiconify;
 }
 
-sub run_2_pulse_em {
+sub run_3_pulse_epr {
 	my $f;
 	$mw->withdraw;
 	if ( @p and $use_data ) {
-		open $f, "2_pulse_EM $p[ 1 ] $p[ 2 ] $p[ 3 ] $p[ 4 ]|"
-			or die "Can't start 2 pulse EM script.\n";
+		my $dist12 = $p[ 2 ] - $p[ 0 ];
+		my $dist23 = $p[ 4 ] - $p[ 2 ];
+		open $f, "3_pulse_epr $p[ 1 ] $p[ 3 ] $p[ 5 ]$dist12 $dist23 $p[ 8 ]|"
+			or die "Can't start 3 pulse EPR script.\n";
 	} else {
-		open $f, "2_pulse_EM|" or die "Can't start 2 pulse EM script.\n";
+		open $f, "3_pulse_epr|" or die "Can't start 3 pulse EPR script.\n";
+	}
+	while ( <$f> ) { }
+	close $f;
+	$mw->deiconify;
+}
+
+sub run_3_pulse_t1 {
+	my $f;
+	$mw->withdraw;
+	if ( @p and $use_data ) {
+		my $dist12 = $p[ 2 ] - $p[ 0 ];
+		my $dist23 = $p[ 4 ] - $p[ 2 ];
+		open $f, "3_pulse T1 $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 $p[ 8 ]|"
+			or die "Can't start 3 pulse T1 script.\n";
+	} else {
+		open $f, "3_pulse_T1|" or die "Can't start 3 pulse T1 script.\n";
+	}
+	while ( <$f> ) { }
+	close $f;
+	$mw->deiconify;
+}
+
+sub run_3_pulse_em {
+	my $f;
+	$mw->withdraw;
+	if ( @p and $use_data ) {
+		my $dist12 = $p[ 2 ] - $p[ 0 ];
+		my $dist23 = $p[ 4 ] - $p[ 2 ];
+		open $f, "3_pulse EM $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 $p[ 8 ]|"
+			or die "Can't start 3 pulse EM script.\n";
+	} else {
+		open $f, "3_pulse_EM|" or die "Can't start 3 pulse EM script.\n";
+	}
+	while ( <$f> ) { }
+	close $f;
+	$mw->deiconify;
+}
+
+sub run_3_pulse_endor {
+	my $f;
+	$mw->withdraw;
+	if ( @p and $use_data ) {
+		my $dist12 = $p[ 2 ] - $p[ 0 ];
+		my $dist12 = $p[ 4 ] - $p[ 2 ];
+		my $dist2rf = $
+
+		open $f, "3_pulse_endor $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
+			     "$p[ 5 ] $p[ 6 ] $p[ 7 ] $p[ 8 ] |"
+			or die "Can't start 3 pulse ENDOR script.\n";
+	} else {
+		open $f, "3_pulse_endor|" or die "Can't start 3 pulse ENDOR script.\n";
 	}
 	while ( <$f> ) { }
 	close $f;
