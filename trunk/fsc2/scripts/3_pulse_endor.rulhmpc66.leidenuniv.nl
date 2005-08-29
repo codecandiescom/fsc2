@@ -976,13 +976,71 @@ sub load_defs {
     my $name = $0;
     my $ne;
     my $found;
+	my $got_args = 0;
+
+
+	if ( @ARGV == 8 ) {
+		$got_args = 1;
+		foreach ( @ARGV ) {
+			unless ( /^\d+$/ ) {
+				$got_args = 0;
+				last;
+			}
+		}
+	}
 
     $name =~ s|^.*?([^/]+)$|$1|;
-    if ( $ARGV[ 0 ] ) {
-        open( $fh, "<$ARGV[ 0 ]" ) or return;
-    } else {
-        open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
-    }
+
+	if ( $got_args ) {
+		unless ( open $fh, "<$ENV{ HOME }/.fsc2/$name" ) {
+			$ne = $ARGV[ 0 ];
+			return  if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
+				       ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
+			$P1_LEN{ value } = $ne;
+
+			$ne = $ARGV[ 1 ];
+			return if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
+				      ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
+			$P2_LEN{ value } = $ne;
+
+			$ne = $ARGV[ 2 ];
+			return if ( defined $P3_LEN{ max } and $ne > $P3_LEN{ max } ) or
+				      ( defined $P3_LEN{ min } and $ne < $P3_LEN{ min } );
+			$P3_LEN{ value } = $ne;
+
+			$ne = $ARGV[ 3 ];
+			return if ( defined $P1_P2_DIST{ max } and $ne > $P1_P2_DIST{ max } ) or
+                      ( defined $P1_P2_DIST{ min } and $ne < $P1_P2_DIST{ min } );
+			$P1_P2_DIST{ value } = $ne;
+
+			$ne = $ARGV[ 4 ];
+			return if ( defined $P2_P3_DIST{ max } and $ne > $P2_P3_DIST{ max } ) or
+                      ( defined $P2_P3_DIST{ min } and $ne < $P2_P3_DIST{ min } );
+			$P2_P3_DIST{ value } = $ne;
+
+			$ne = $ARGV[ 5 ] if $got_args;
+			return if ( defined $P2_RF_DEL{ max } and $ne > $P2_RF_DEL{ max } ) or
+                      ( defined $P2_RF_DEL{ min } and $ne < $P2_RF_DEL{ min } );
+			$P2_RF_DEL{ value } = $ne;
+
+			$ne = $ARGV[ 6 ] if $got_args;
+			return if ( defined $RF_P3_DEL{ max } and $ne > $RF_P3_DEL{ max } ) or
+                      ( defined $RF_P3_DEL{ min } and $ne < $RF_P3_DEL{ min } );
+			$RF_P3_DEL{ value } = $ne;
+
+			$ne = $ARGV[ 7 ];
+			return if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
+                      ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
+			$DET_OFFSET{ value } = $ne;
+			return;
+		}
+	} else {
+		if ( $ARGV[ 0 ] ) {
+			open( $fh, "<$ARGV[ 0 ]" ) or return;
+		} else {
+			open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
+		}
+	}
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
 
@@ -1008,6 +1066,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 0 ] if $got_args;
     goto done_reading if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
                          ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
     $P1_LEN{ value } = $ne;
@@ -1015,6 +1074,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 1 ] if $got_args;
     goto done_reading if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
                          ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
     $P2_LEN{ value } = $ne;
@@ -1022,6 +1082,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 2 ] if $got_args;
     goto done_reading if ( defined $P3_LEN{ max } and $ne > $P3_LEN{ max } ) or
                          ( defined $P3_LEN{ min } and $ne < $P3_LEN{ min } );
     $P3_LEN{ value } = $ne;
@@ -1029,6 +1090,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 3 ] if $got_args;
     goto done_reading if ( defined $P1_P2_DIST{ max } and $ne > $P1_P2_DIST{ max } ) or
                          ( defined $P1_P2_DIST{ min } and $ne < $P1_P2_DIST{ min } );
     $P1_P2_DIST{ value } = $ne;
@@ -1036,6 +1098,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 4 ] if $got_args;
     goto done_reading if ( defined $P2_P3_DIST{ max } and $ne > $P2_P3_DIST{ max } ) or
                          ( defined $P2_P3_DIST{ min } and $ne < $P2_P3_DIST{ min } );
     $P2_P3_DIST{ value } = $ne;
@@ -1043,6 +1106,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 5 ] if $got_args;
     goto done_reading if ( defined $P2_RF_DEL{ max } and $ne > $P2_RF_DEL{ max } ) or
                          ( defined $P2_RF_DEL{ min } and $ne < $P2_RF_DEL{ min } );
     $P2_RF_DEL{ value } = $ne;
@@ -1050,6 +1114,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 6 ] if $got_args;
     goto done_reading if ( defined $RF_P3_DEL{ max } and $ne > $RF_P3_DEL{ max } ) or
                          ( defined $RF_P3_DEL{ min } and $ne < $RF_P3_DEL{ min } );
     $RF_P3_DEL{ value } = $ne;
@@ -1057,6 +1122,7 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
+	$ne = $ARGV[ 7 ] if $got_args;
     goto done_reading if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
                          ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
     $DET_OFFSET{ value } = $ne;
