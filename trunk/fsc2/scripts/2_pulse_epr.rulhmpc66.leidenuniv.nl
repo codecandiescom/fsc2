@@ -492,13 +492,13 @@ EXPERIMENT:
 pulser_state( \"ON\" );
 daq_gain( 4 );
 
-/* Open the data file */
-
-File = get_file( );
-
 /* Go to the start field */
 
 field = set_field( start_field );
+
+/* Open the data file */
+
+File = get_file( );
 
 FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );

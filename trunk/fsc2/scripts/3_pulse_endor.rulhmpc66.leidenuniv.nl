@@ -682,14 +682,13 @@ synthesizer_state( \"ON\" );
 pulser_state( \"ON\" );
 daq_gain( 4 );
 
-/* Open the data file */
-
-File = get_file( );
-
 /* Go to the start field */
 
 field = set_field( field );
 
+/* Open the data file */
+
+File = get_file( );
 
 FOREVER {
 	freq = synthesizer_frequency( start_freq );

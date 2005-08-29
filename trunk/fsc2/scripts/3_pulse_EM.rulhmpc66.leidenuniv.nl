@@ -503,14 +503,14 @@ EXPERIMENT:
 pulser_state( \"ON\" );
 daq_gain( 4 );
 
+/* Go to the field */
+
+set_field( field );
+
 /* Open the data file, ask user for comment to be written to it and the
    output the parameter to it */
 
 File = get_file( );
-
-/* Go to the field */
-
-set_field( field );
 
 I = 1;
 
