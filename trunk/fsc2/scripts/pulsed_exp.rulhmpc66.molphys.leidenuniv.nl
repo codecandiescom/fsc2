@@ -37,9 +37,7 @@ my %fp = ( '-side' => 'top',
 		   '-fill' => 'x',
 		   '-padx' => '2m',
 		   '-pady' => '2m' );
-my $use_data = 1;
-
-@p = ( 200, 50, 400, 100, 600, 50, 300, 50, 575, 10  );
+my $use_data = 0;
 
 my $mw = MainWindow->new( );
 $mw->title( "Pulsed Experiments" );
