@@ -37,7 +37,9 @@ my %fp = ( '-side' => 'top',
 		   '-fill' => 'x',
 		   '-padx' => '2m',
 		   '-pady' => '2m' );
-my $use_data = 0;
+my $use_data = 1;
+
+@p = ( 200, 50, 400, 100, 600, 50, 300, 50, 575, 10  );
 
 my $mw = MainWindow->new( );
 $mw->title( "Pulsed Experiments" );
@@ -95,7 +97,7 @@ sub run_2_pulse_epr {
 	$mw->withdraw;
 	if ( @p and $use_data ) {
 		my $dist = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
-		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist + 0.5 * $p[ 3 ];
+		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist - 0.5 * $p[ 3 ];
 		open $f, "2_pulse_epr $p[ 1 ] $p[ 3 ] $dist $det_offset|"
 			or die "Can't start 2 pulse EPR script.\n";
 	} else {
@@ -111,7 +113,7 @@ sub run_2_pulse_t2 {
 	$mw->withdraw;
 	if ( @p and $use_data ) {
 		my $dist = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
-		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist + 0.5 * $p[ 3 ];
+		my $det_offset = $p[ 8 ] - $p[ 2 ] - $dist - 0.5 * $p[ 3 ];
 		open $f, "2_pulse_T2 $p[ 1 ] $p[ 3 ] $dist $det_offset|"
 			or die "Can't start 2 pulse T2 script.\n";
 	} else {
@@ -128,7 +130,7 @@ sub run_3_pulse_epr {
 	if ( @p and $use_data ) {
 		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
 		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
-		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 + 0.5 * $p[ 5 ];
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 - 0.5 * $p[ 5 ];
 		open $f, "3_pulse_epr $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
 			     "$det_offset|"
 			or die "Can't start 3 pulse EPR script.\n";
@@ -146,7 +148,7 @@ sub run_3_pulse_t1 {
 	if ( @p and $use_data ) {
 		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
 		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
-		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist23 + 0.5 * $p[ 5 ];
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist23 - 0.5 * $p[ 5 ];
 		open $f, "3_pulse T1 $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
 			     "$det_offset|"
 			or die "Can't start 3 pulse T1 script.\n";
@@ -164,7 +166,7 @@ sub run_3_pulse_em {
 	if ( @p and $use_data ) {
 		my $dist12 = $p[ 2 ] - $p[ 0 ] - 0.5 * ( $p[ 1 ] - $p[ 3 ] );
 		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
-		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 + 0.5 * $p[ 5 ];
+		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist12 - 0.5 * $p[ 5 ];
 		open $f, "3_pulse EM $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
 			     "$det_offset|"
 			or die "Can't start 3 pulse EM script.\n";
