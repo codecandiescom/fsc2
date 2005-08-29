@@ -204,11 +204,11 @@ $P1_P2_DIST{ tk_label }->pack( %wp );
 $P1_P2_DIST{ tk_entry }->pack( %wp );
 $P1_P2_DIST{ tk_unit  }->pack( %up );
 
-# === P2_P3_DIST int [ 100 : 167772150 ] [ 400 ] "Init. P2-P3 distance" "ns"
+# === P2_P3_DIST int [ 100 : 167772150 ] [ 400 ] "P2-P3 distance" "ns"
 
 my %P2_P3_DIST;
 $P2_P3_DIST{ tk_frame } = $fsc2_main_frame->Frame( );
-$P2_P3_DIST{ tk_label } = $P2_P3_DIST{ tk_frame }->Label( -text => "Init. P2-P3 distance",
+$P2_P3_DIST{ tk_label } = $P2_P3_DIST{ tk_frame }->Label( -text => "P2-P3 distance",
 -width => 20,
 -anchor => 'w' );
 $P2_P3_DIST{ value } = 400;
@@ -230,33 +230,6 @@ $P2_P3_DIST{ tk_frame }->pack( %fp );
 $P2_P3_DIST{ tk_label }->pack( %wp );
 $P2_P3_DIST{ tk_entry }->pack( %wp );
 $P2_P3_DIST{ tk_unit  }->pack( %up );
-
-# === P2_P3_INCR int [ 10 : ] [ 20 ] "P2-P3 dist. increment" "ns"
-
-my %P2_P3_INCR;
-$P2_P3_INCR{ tk_frame } = $fsc2_main_frame->Frame( );
-$P2_P3_INCR{ tk_label } = $P2_P3_INCR{ tk_frame }->Label( -text => "P2-P3 dist. increment",
--width => 20,
--anchor => 'w' );
-$P2_P3_INCR{ value } = 20;
-$P2_P3_INCR{ min } = 10;
-$P2_P3_INCR{ max } = undef;
-$P2_P3_INCR{ tk_entry } = $P2_P3_INCR{ tk_frame }->Entry( -textvariable => \$P2_P3_INCR{ value },
--width => 10,
--validate => 'key',
--validatecommand => sub{ int_check( shift,
-( defined $P2_P3_INCR{ min } ? $P2_P3_INCR{ min } : undef ),
-( defined $P2_P3_INCR{ max } ? $P2_P3_INCR{ max } : undef ) ); },
--relief => 'sunken' );
-$fsc2_balloon->attach( $P2_P3_INCR{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $P2_P3_INCR{ min } ? $P2_P3_INCR{ min } : '-inf' ) .
-" : " . ( defined $P2_P3_INCR{ max } ? $P2_P3_INCR{ max } : '+inf' ) . " ]" );
-$P2_P3_INCR{ tk_unit } = $P2_P3_INCR{ tk_frame }->Label( -text => "ns",
--width => 5 );
-$P2_P3_INCR{ tk_frame }->pack( %fp );
-$P2_P3_INCR{ tk_label }->pack( %wp );
-$P2_P3_INCR{ tk_entry }->pack( %wp );
-$P2_P3_INCR{ tk_unit  }->pack( %up );
 
 # === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 
@@ -304,32 +277,86 @@ $N_AVG{ tk_label }->pack( %wp );
 $N_AVG{ tk_entry }->pack( %wp );
 $N_AVG{ tk_unit  }->pack( %up );
 
-# === FIELD float [ 0 : 114304 ] [ 8000 ] "Field" "G"
+# === START_FIELD float [ 0 : 114304 ] [ 8000 ] "Start field" "G"
 
-my %FIELD;
-$FIELD{ tk_frame } = $fsc2_main_frame->Frame( );
-$FIELD{ tk_label } = $FIELD{ tk_frame }->Label( -text => "Field",
+my %START_FIELD;
+$START_FIELD{ tk_frame } = $fsc2_main_frame->Frame( );
+$START_FIELD{ tk_label } = $START_FIELD{ tk_frame }->Label( -text => "Start field",
 -width => 20,
 -anchor => 'w' );
-$FIELD{ value } = 8000;
-$FIELD{ min } = 0;
-$FIELD{ max } = 114304;
-$FIELD{ tk_entry } = $FIELD{ tk_frame }->Entry( -textvariable => \$FIELD{ value },
+$START_FIELD{ value } = 8000;
+$START_FIELD{ min } = 0;
+$START_FIELD{ max } = 114304;
+$START_FIELD{ tk_entry } = $START_FIELD{ tk_frame }->Entry( -textvariable => \$START_FIELD{ value },
 -width => 10,
 -validate => 'key',
 -validatecommand => sub{ float_check( shift,
-( defined $FIELD{ min } ? $FIELD{ min } : undef ),
-( defined $FIELD{ max } ? $FIELD{ max } : undef ) ); },
+( defined $START_FIELD{ min } ? $START_FIELD{ min } : undef ),
+( defined $START_FIELD{ max } ? $START_FIELD{ max } : undef ) ); },
 -relief => 'sunken' );
-$fsc2_balloon->attach( $FIELD{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $FIELD{ min } ? $FIELD{ min } : '-inf' ) .
-" : " . ( defined $FIELD{ max } ? $FIELD{ max } : '+inf' ) . " ]" );
-$FIELD{ tk_unit } = $FIELD{ tk_frame }->Label( -text => "G",
+$fsc2_balloon->attach( $START_FIELD{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $START_FIELD{ min } ? $START_FIELD{ min } : '-inf' ) .
+" : " . ( defined $START_FIELD{ max } ? $START_FIELD{ max } : '+inf' ) . " ]" );
+$START_FIELD{ tk_unit } = $START_FIELD{ tk_frame }->Label( -text => "G",
 -width => 5 );
-$FIELD{ tk_frame }->pack( %fp );
-$FIELD{ tk_label }->pack( %wp );
-$FIELD{ tk_entry }->pack( %wp );
-$FIELD{ tk_unit  }->pack( %up );
+$START_FIELD{ tk_frame }->pack( %fp );
+$START_FIELD{ tk_label }->pack( %wp );
+$START_FIELD{ tk_entry }->pack( %wp );
+$START_FIELD{ tk_unit  }->pack( %up );
+
+# === END_FIELD float [ 0 : 114304 ] [ 9000 ] "End field" "G"
+
+my %END_FIELD;
+$END_FIELD{ tk_frame } = $fsc2_main_frame->Frame( );
+$END_FIELD{ tk_label } = $END_FIELD{ tk_frame }->Label( -text => "End field",
+-width => 20,
+-anchor => 'w' );
+$END_FIELD{ value } = 9000;
+$END_FIELD{ min } = 0;
+$END_FIELD{ max } = 114304;
+$END_FIELD{ tk_entry } = $END_FIELD{ tk_frame }->Entry( -textvariable => \$END_FIELD{ value },
+-width => 10,
+-validate => 'key',
+-validatecommand => sub{ float_check( shift,
+( defined $END_FIELD{ min } ? $END_FIELD{ min } : undef ),
+( defined $END_FIELD{ max } ? $END_FIELD{ max } : undef ) ); },
+-relief => 'sunken' );
+$fsc2_balloon->attach( $END_FIELD{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $END_FIELD{ min } ? $END_FIELD{ min } : '-inf' ) .
+" : " . ( defined $END_FIELD{ max } ? $END_FIELD{ max } : '+inf' ) . " ]" );
+$END_FIELD{ tk_unit } = $END_FIELD{ tk_frame }->Label( -text => "G",
+-width => 5 );
+$END_FIELD{ tk_frame }->pack( %fp );
+$END_FIELD{ tk_label }->pack( %wp );
+$END_FIELD{ tk_entry }->pack( %wp );
+$END_FIELD{ tk_unit  }->pack( %up );
+
+# === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
+
+my %FIELD_STEP;
+$FIELD_STEP{ tk_frame } = $fsc2_main_frame->Frame( );
+$FIELD_STEP{ tk_label } = $FIELD_STEP{ tk_frame }->Label( -text => "Field step",
+-width => 20,
+-anchor => 'w' );
+$FIELD_STEP{ value } = 1;
+$FIELD_STEP{ min } = 0.14288;
+$FIELD_STEP{ max } = undef;
+$FIELD_STEP{ tk_entry } = $FIELD_STEP{ tk_frame }->Entry( -textvariable => \$FIELD_STEP{ value },
+-width => 10,
+-validate => 'key',
+-validatecommand => sub{ float_check( shift,
+( defined $FIELD_STEP{ min } ? $FIELD_STEP{ min } : undef ),
+( defined $FIELD_STEP{ max } ? $FIELD_STEP{ max } : undef ) ); },
+-relief => 'sunken' );
+$fsc2_balloon->attach( $FIELD_STEP{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $FIELD_STEP{ min } ? $FIELD_STEP{ min } : '-inf' ) .
+" : " . ( defined $FIELD_STEP{ max } ? $FIELD_STEP{ max } : '+inf' ) . " ]" );
+$FIELD_STEP{ tk_unit } = $FIELD_STEP{ tk_frame }->Label( -text => "G",
+-width => 5 );
+$FIELD_STEP{ tk_frame }->pack( %fp );
+$FIELD_STEP{ tk_label }->pack( %wp );
+$FIELD_STEP{ tk_entry }->pack( %wp );
+$FIELD_STEP{ tk_unit  }->pack( %up );
 
 # === SHOW_PREV button [ OFF ] "Show pulse preview"
 
@@ -429,10 +456,11 @@ sub write_out {
     my $P3_LEN = $P3_LEN{ value };
     my $P1_P2_DIST = $P1_P2_DIST{ value };
     my $P2_P3_DIST = $P2_P3_DIST{ value };
-    my $P2_P3_INCR = $P2_P3_INCR{ value };
     my $DET_OFFSET = $DET_OFFSET{ value };
     my $N_AVG = $N_AVG{ value };
-    my $FIELD = $FIELD{ value };
+    my $START_FIELD = $START_FIELD{ value };
+    my $END_FIELD = $END_FIELD{ value };
+    my $FIELD_STEP = $FIELD_STEP{ value };
     my $SHOW_PREV = $SHOW_PREV{ value };
 
     print $fh "DEVICES:
@@ -444,47 +472,63 @@ rb_pulser;
 
 VARIABLES:
 
-repeat_time = $REP_TIME ms;
+repeat_time   = $REP_TIME ms;
 p1_to_p2_dist = $P1_P2_DIST ns;
 p2_to_p3_dist = $P2_P3_DIST ns;
-p2_to_p3_incr = $P2_P3_INCR ns;
-p1_len = $P1_LEN ns;
-p2_len = $P2_LEN ns;
-p3_len = $P3_LEN ns;
-det_offset = $DET_OFFSET ns;
+p1_len        = $P1_LEN ns;
+p2_len        = $P2_LEN ns;
+p3_len        = $P3_LEN ns;
+det_offset    = $DET_OFFSET ns;
 
-field = $FIELD G;
+start_field   = $START_FIELD G;
+end_field     = $END_FIELD G;
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+        print $fh "field_step    = $FIELD_STEP G;
+";
+# === else
+    } else {
+        print $fh "field_step    = - $FIELD_STEP G;
+";
+# === endif
+    }
 
-N_Avg  = $N_AVG;
+    print $fh "field;
+
+N_Avg    = $N_AVG;
+N_Points = ceil( ( end_field - start_field ) / field_step ) + 1;
 I;
 data;
 File;
 
 
 ASSIGNMENTS:
+";
+	if ( $TRIG_MODE{ value } eq "EXTERNAL" ) {
+	    print $fh "TRIGGER_MODE: EXTERNAL;\n\n";
+	} else {
+		print $fh "TRIGGER_MODE: $TRIG_MODE, REPEAT_TIME = repeat_time;\n\n";
+	}
 
-TRIGGER_MODE: $TRIG_MODE, REPEAT_TIME = repeat_time;
-
-
+	print $fh "
 PREPARATIONS:
 
-P1:  FUNCTION    = MICROWAVE,
-	 START       = 180 ns,
-	 LENGTH      = p1_len;
+P1:  FUNCTION = MICROWAVE,
+	 START    = 180 ns,
+	 LENGTH   = p1_len;
 
-P2:  FUNCTION    = MICROWAVE,
-	 START       = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
-	 LENGTH      = p2_len;
+P2:  FUNCTION = MICROWAVE,
+	 START    = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
+	 LENGTH   = p2_len;
 
-P3:  FUNCTION    = MICROWAVE,
-	 START       = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
-	 DELTA_START = p2_to_p3_incr,
-	 LENGTH      = p3_len;
+P3:  FUNCTION = MICROWAVE,
+	 START    = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
+	 LENGTH   = p3_len;
 
-P4:  FUNCTION    = DETECTION,
-	 START       = P3.START + det_offset + p1_to_p2_dist + 0.5 * P3.LENGTH,
-	 DELTA_START = p2_to_p3_incr,
-	 LENGTH      = 100 ns;
+P4:  FUNCTION = DETECTION,
+	 START    = P3.START + det_offset + p1_to_p2_dist + 0.5 * P3.LENGTH,
+	 LENGTH   = 100 ns;
 
 ";
 # === if SHOW_PREV
@@ -494,57 +538,94 @@ P4:  FUNCTION    = DETECTION,
 # === endif
     }
 
-    print $fh "init_1d( 1, 0, p2_to_p3_dist * 1.0e9, p2_to_p3_incr * 1.0e9,
-		 \"Pulse separation [ns]\", \"Echo amplitude [a.u.]\" );
+    print $fh "";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+        print $fh "init_1d( 1, N_Points, start_field, field_step,
+		 \"Field [G]\", \"Echo amplitude [a.u.]\" );
+";
+# === else
+    } else {
+        print $fh "init_1d( 1, N_Points, end_field, - field_step,
+		 \"Field [G]\", \"Echo amplitude [a.u.]\" );
+";
+# === endif
+    }
 
+    print $fh "
 
 EXPERIMENT:
+";
 
+	if ( $TRIG_MODE{ value } eq "EXTERNAL" ) {
+		print $fh "print( \"Please make sure the repetition time is set correctly!\\n\\n\" );
+"
+	}
+
+	print $fh "
 pulser_state( \"ON\" );
-daq_gain( 4 );
 
-/* Go to the field */
+/* Go to the start field */
 
-set_field( field );
+field = set_field( start_field );
 
-/* Open the data file, ask user for comment to be written to it and the
-   output the parameter to it */
+/* Open the data file */
 
 File = get_file( );
 
-I = 1;
-
-FOREVER {
+FOR I = 1 : N_Points {
 	wait( 1.1 * repeat_time * N_Avg );
 	data = - daq_get_voltage( CH0 );
-	display( I, data );
-	fsave( File, \"#,#\\n\",
-		   ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) * 1.0e9, data );
-	pulser_shift( );
-	pulser_update( );
-	I += 1;
-}
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+        print $fh "	display_1d( I, data );
+";
+# === else
+    } else {
+        print $fh "	display_1d( N_Points - I + 1, data );
+";
+# === endif
+    }
 
+    print $fh "	fsave( File, \"#,#\\n\", field, data );
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+        print $fh "	IF I < N_Points {
+";
+# === else
+    } else {
+        print $fh "	IF I > 1 {
+";
+# === endif
+    }
+
+    print $fh "		field += field_step;
+		set_field( field );
+	}
+}
 
 ON_STOP:
 
 fsave( File,
        \"% Date:                   # #\\n\"
-       \"% Script:                 3_pulse_EM\\n\"
-       \"% Field:                  # G\\n\"
+       \"% Script:                 3_pulse_epr\\n\"
+       \"% Start field:            # G\\n\"
+       \"% End field:              # G\\n\"
+       \"% Field step:             # G\\n\"
        \"% Repetition time:        # ms\\n\"
        \"% Length of 1st MW pulse: # ns\\n\"
        \"% Length of 2nd MW pulse: # ns\\n\"
        \"% Length of 3rd MW pulse: # ns\\n\"
        \"% P1-P2 separation:       # ns\\n\"
-       \"% Init. P2-P3 separation: # ns\\n\"
-       \"% P2-P3 increment:        # ns\\n\"
+       \"% P2-P3 separation:       # ns\\n\"
        \"% Number of averages:     #\\n\"
        \"% ADC gain:               4\\n\",
-	   date( ), time( ), field,  repeat_time * 1.0e3,
-       int( P1.LENGTH * 1.0e9 ), int( P2.LENGTH * 1.0e9 ),
-       int( P3.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ),
-	   int( p2_to_p3_dist * 1.0e9 ), int( p2_to_p3_incr * 1.0e9 ), N_Avg );
+	   date( ), time( ), start_field, field, field_step,
+	   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ), int( P2.LENGTH * 1.0e9 ),
+	   int( P3.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ),
+       int( p2_to_p3_dist * 1.0e9 ), N_Avg );
 
 save_comment( File, \"% \" );
 ";
@@ -644,14 +725,6 @@ sub store_defs {
         print $fh "400\n";
     }
 
-    if ( $P2_P3_INCR{ value } =~ /^[+-]?\d+$/o and
-         ( defined $P2_P3_INCR{ max } ? $P2_P3_INCR{ max } >= $P2_P3_INCR{ value } : 1 ) and
-         ( defined $P2_P3_INCR{ min } ? $P2_P3_INCR{ min } <= $P2_P3_INCR{ value } : 1 ) ) {
-        print $fh "$P2_P3_INCR{ value }\n";
-    } else {
-        print $fh "20\n";
-    }
-
     if ( $DET_OFFSET{ value } =~ /^[+-]?\d+$/o and
          ( defined $DET_OFFSET{ max } ? $DET_OFFSET{ max } >= $DET_OFFSET{ value } : 1 ) and
          ( defined $DET_OFFSET{ min } ? $DET_OFFSET{ min } <= $DET_OFFSET{ value } : 1 ) ) {
@@ -662,12 +735,28 @@ sub store_defs {
 
     print $fh "$N_AVG{ value }\n";
 
-    if ( $FIELD{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
-         ( defined $FIELD{ max } ? $FIELD{ max } >= $FIELD{ value } : 1 ) and
-         ( defined $FIELD{ min } ? $FIELD{ min } <= $FIELD{ value } : 1 ) ) {
-        print $fh "$FIELD{ value }\n";
+    if ( $START_FIELD{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
+         ( defined $START_FIELD{ max } ? $START_FIELD{ max } >= $START_FIELD{ value } : 1 ) and
+         ( defined $START_FIELD{ min } ? $START_FIELD{ min } <= $START_FIELD{ value } : 1 ) ) {
+        print $fh "$START_FIELD{ value }\n";
     } else {
         print $fh "8000\n";
+    }
+
+    if ( $END_FIELD{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
+         ( defined $END_FIELD{ max } ? $END_FIELD{ max } >= $END_FIELD{ value } : 1 ) and
+         ( defined $END_FIELD{ min } ? $END_FIELD{ min } <= $END_FIELD{ value } : 1 ) ) {
+        print $fh "$END_FIELD{ value }\n";
+    } else {
+        print $fh "9000\n";
+    }
+
+    if ( $FIELD_STEP{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
+         ( defined $FIELD_STEP{ max } ? $FIELD_STEP{ max } >= $FIELD_STEP{ value } : 1 ) and
+         ( defined $FIELD_STEP{ min } ? $FIELD_STEP{ min } <= $FIELD_STEP{ value } : 1 ) ) {
+        print $fh "$FIELD_STEP{ value }\n";
+    } else {
+        print $fh "1\n";
     }
 
     print $fh "$SHOW_PREV{ value }\n";
@@ -807,13 +896,6 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
     chomp $ne;
-    goto done_reading if ( defined $P2_P3_INCR{ max } and $ne > $P2_P3_INCR{ max } ) or
-                         ( defined $P2_P3_INCR{ min } and $ne < $P2_P3_INCR{ min } );
-    $P2_P3_INCR{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> )
-        and $ne =~ /^[+-]?\d+$/;
-    chomp $ne;
 	$ne = $ARGV[ 5 ] if $got_args;
     goto done_reading if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
                          ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
@@ -834,9 +916,23 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $FIELD{ max } and $ne > $FIELD{ max } ) or
-                         ( defined $FIELD{ min } and $ne < $FIELD{ min } );
-    $FIELD{ value } = $ne;
+    goto done_reading if ( defined $START_FIELD{ max } and $ne > $START_FIELD{ max } ) or
+                         ( defined $START_FIELD{ min } and $ne < $START_FIELD{ min } );
+    $START_FIELD{ value } = $ne;
+
+    goto done_reading unless defined( $ne = <$fh> )
+        and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
+    chomp $ne;
+    goto done_reading if ( defined $END_FIELD{ max } and $ne > $END_FIELD{ max } ) or
+                         ( defined $END_FIELD{ min } and $ne < $END_FIELD{ min } );
+    $END_FIELD{ value } = $ne;
+
+    goto done_reading unless defined( $ne = <$fh> )
+        and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
+    chomp $ne;
+    goto done_reading if ( defined $FIELD_STEP{ max } and $ne > $FIELD_STEP{ max } ) or
+                         ( defined $FIELD_STEP{ min } and $ne < $FIELD_STEP{ min } );
+    $FIELD_STEP{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^1|0$/o;
     chomp $ne;

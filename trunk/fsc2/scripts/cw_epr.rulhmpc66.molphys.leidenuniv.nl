@@ -673,9 +673,9 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
-File = get_file( );
-
 magnet_sweep_rate( sweep_rate );
+
+File = get_file( );
 
 FOREVER {
 
@@ -875,70 +875,90 @@ field = start_field;
 		print F "step_size = - sweep_rate / kd;\n\n";
 	}
 
-print F "
+	print F "
 PREPARATIONS:
 
-init_1d( 3, Num_Points, start_field, step_size,
-		 \"Field [G]\", \"Signal [mV]\" );
+init_1d( 3, Num_Points, ";
+	print F ( $start_field <= $end_field ) ? "start_field, " : "end_field, -";
+	print F "step_size, \"Field [G]\", \"Signal [mV]\" );
 lockin_time_constant( tc );
 lockin_auto_setup( 1 / kd, 1 );
 
 
 EXPERIMENT:
 
-File = get_file( );
-
 magnet_sweep_rate( sweep_rate );
+set_field( start_field );
+
+File = get_file( );
 
 FOREVER {
 
+	print( \"Starting #. run\\n\", J + 1 );
 	set_field( start_field );
 ";
-print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
-print F
-"
+	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
+	print F "
 	J += 1;
-	print( \"Starting #. run\\n\", J );
 
 	magnet_sweep( \"$dir\" );
 	lockin_auto_acquisition( \"ON\" );
 
-	FOR I = 1 : Num_Points {
+";
+
+	if ( $dir eq "UP" ) {
+		print F "	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
-		display_1d( I, data[ J, I ] * 1.0e6, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / J * 1.0e6, 2 );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+	}
+";
+	} else {
+		print F "	FOR I = Num_Points : 1 : -1 {
+		data[ J, I ] = lockin_get_data( );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+	}
+";
 	}
 
-	lockin_auto_acquisition( \"OFF\" );
+	print F "	lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
 	clear_curve_1d( 1, 3 );
-	display_1d( 1, data[ J ] * 1.0e6, 3 );
+	display_1d( 1, data[ J ] / 1 uV, 3 );
 
+	print( \"Starting #. run\\n\", J + 1 );
 	set_field( start_field + ( Num_Points - 1 ) * step_size );
 ";
-print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
-print F
+	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
+	print F
 "
 	J += 1;
-	print( \"Starting #. run\\n\", J );
-
 ";
-if ( $dir eq "UP" ) {
-	print F "    magnet_sweep( \"DOWN\" );\n";
-} else {
-	print F "    magnet_sweep( \"UP\" );\n";
-}
-print F "    lockin_auto_acquisition( \"ON\" );
+	if ( $dir eq "UP" ) {
+		print F "    magnet_sweep( \"DOWN\" );
+    lockin_auto_acquisition( \"ON\" );
 
 	FOR I = Num_Points : 1 : -1 {
 		data[ J, I ] = lockin_get_data( );
-		display_1d( I, data[ J, I ] * 1.0e6, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / J * 1.0e6, 2 );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
 	}
+";
+	} else {
+		print F "    magnet_sweep( \"UP\" );
+    lockin_auto_acquisition( \"ON\" );
 
-	lockin_auto_acquisition( \"OFF\" );
+	FOR I = 1 : Num_Points {
+		data[ J, I ] = lockin_get_data( );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+	}
+";
+	}
+	print F "    lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];

@@ -60,7 +60,8 @@ $b[ 8 ] = $f[ 2 ]->Button( '-text' => "Quit",
 
 
 $b[ 0 ]->configure( '-command' => sub { &run_monitor } );
-$b[ 1 ]->configure( '-state' => "disabled" );
+$b[ 1 ]->configure( '-state' => "disabled",
+				    '-variable' => \$use_data );
 
 $b[ 2 ]->configure( '-command' => sub { &run_2_pulse_epr } );
 $b[ 3 ]->configure( '-command' => sub { &run_2_pulse_t2 } );
@@ -147,7 +148,7 @@ sub run_3_pulse_t1 {
 		my $dist23 = $p[ 4 ] - $p[ 2 ] - 0.5 * ( $p[ 3 ] - $p[ 5 ] );
 		my $det_offset = $p[ 8 ] - $p[ 4 ] - $dist23 + 0.5 * $p[ 5 ];
 		open $f, "3_pulse T1 $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
-			     "$set_start|"
+			     "$det_offset|"
 			or die "Can't start 3 pulse T1 script.\n";
 	} else {
 		open $f, "3_pulse_T1|" or die "Can't start 3 pulse T1 script.\n";
@@ -184,7 +185,7 @@ sub run_3_pulse_endor {
 		my $dist2rf = $p[ 6 ] - $p[ 2 ] - $p[ 3 ];
 		my $distrf3 = $dist23 - $p[ 7 ] - 0.5 * ( $p[ 3 ] + $p[ 5 ] )
 			          - $dist2rf;
-		$det_offset = $p[ 8 ]- $p[ 4 ] - $dist12 - 0.5 * $p[ 5 ],
+		my $det_offset = $p[ 8 ]- $p[ 4 ] - $dist12 - 0.5 * $p[ 5 ];
 		open $f, "3_pulse_endor $p[ 1 ] $p[ 3 ] $p[ 5 ] $dist12 $dist23 " .
 			     "$dist2rf $distrf3 $det_offset|"
 			or die "Can't start 3 pulse ENDOR script.\n";
