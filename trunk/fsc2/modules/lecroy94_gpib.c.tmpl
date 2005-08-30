@@ -576,8 +576,8 @@ double lecroy94_tmpl_get_trigger_level( int channel )
 	char buf[ 30 ];
 	long length = 30;
 
-
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
+/*
+	fsc2_assert(    channel == LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 				 || channel == LECROY94_TMPL_CH4
@@ -590,7 +590,7 @@ double lecroy94_tmpl_get_trigger_level( int channel )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 channel == LECROY94_TMPL_CH4
@@ -619,7 +619,7 @@ bool lecroy94_tmpl_set_trigger_level( int channel, double level )
 {
 	char cmd[ 40 ];
 
-
+/*
 	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -633,7 +633,7 @@ bool lecroy94_tmpl_set_trigger_level( int channel, double level )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4
@@ -665,7 +665,7 @@ double lecroy94_tmpl_get_trigger_slope( int channel )
 	char buf[ 30 ];
 	long length = 30;
 
-
+/*
 	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -679,7 +679,7 @@ double lecroy94_tmpl_get_trigger_slope( int channel )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4
@@ -707,7 +707,7 @@ bool lecroy94_tmpl_set_trigger_slope( int channel, int slope )
 {
 	char cmd[ 40 ];
 
-
+/*
 	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -721,7 +721,7 @@ bool lecroy94_tmpl_set_trigger_slope( int channel, int slope )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4
@@ -754,7 +754,7 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 	long length = 40;
 	int cpl = -1;
 
-
+/*
 	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -768,7 +768,7 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4
@@ -820,7 +820,7 @@ int lecroy94_tmpl_set_trigger_coupling( int channel, int cpl )
 	char cmd[ 40 ];
 	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ", "HFDIV" };
 
-
+/*
 	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
 				 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -834,7 +834,7 @@ int lecroy94_tmpl_set_trigger_coupling( int channel, int cpl )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4
