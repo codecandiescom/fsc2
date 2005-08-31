@@ -78,7 +78,7 @@ Ticks rb_pulser_double2ticks( double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( fabs( Ticks_rnd( ticks ) - p_time / rb_pulser.timebase ) > 1.0e-2 ||
+	if ( fabs( ( Ticks_rnd( ticks ) - ticks ) / ticks ) > 1.0e-2 ||
 		 ( p_time > 0.99e-9 && Ticks_rnd( ticks ) == 0 ) )
 	{
 		char *t = T_strdup( rb_pulser_ptime( p_time ) );

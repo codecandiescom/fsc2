@@ -702,7 +702,7 @@ sub load_defs {
 	if ( @ARGV == 4 ) {
 		$got_args = 1;
 		foreach ( @ARGV ) {
-			unless ( /^\d+$/ ) {
+			unless ( /^-?\d+$/ ) {
 				$got_args = 0;
 				last;
 			}
@@ -711,8 +711,7 @@ sub load_defs {
 
 	$name =~ s|^.*?([^/]+)$|$1|;
 
-	if ( $got_args ) {
-		unless ( open $fh, "<$ENV{ HOME }/.fsc2/$name" ) {
+ if ( $got_args ) { unless ( open $fh, "<$ENV{ HOME }/.fsc2/$name" ) {
 			$ne = $ARGV[ 0 ];
 			return  if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
 				       ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );

@@ -625,7 +625,7 @@ sub load_defs {
 	if ( @ARGV == 4 ) {
 		$got_args = 1;
 		foreach ( @ARGV ) {
-			unless ( /^\d+$/ ) {
+			unless ( /^-?\d+$/ ) {
 				$got_args = 0;
 				last;
 			}

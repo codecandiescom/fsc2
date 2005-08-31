@@ -148,15 +148,6 @@ void rb_pulser_init_delay( void )
 		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 
-#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
-	/* If the pulser is in external trigger mode and the trigger goes
-	   into the INIT_DELAY card (instead of the ERT_DELAY card) the
-	   delay due to the ERT_DELAY card is irrelevant */
-
-		if ( rb_pulser.trig_in_mode == EXTERNAL )
-			pos += rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
-#endif
-
 	if ( pos < - PRECISION * rb_pulser.timebase )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
@@ -217,11 +208,6 @@ void rb_pulser_delay_card_setup( void )
 			    + rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 			    + rb_pulser.delay_card[ INIT_DELAY ].delay
 			    * rb_pulser.timebase;
-
-#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
-		if ( rb_pulser.trig_in_mode == EXTERNAL )
-			start -= rb_pulser.delay_card[ ERT_DELAY ].intr_delay;
-#endif
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -424,17 +410,6 @@ static void rb_pulser_commit( bool flag )
 		if ( rb_pulser.show_file != NULL )
 			rb_pulser_write_pulses( rb_pulser.show_file );
 
-		for ( i = 0, card = rb_pulser.delay_card;
-			  i < NUM_DELAY_CARDS; card++, i++ )
-		{
-			if ( i == ERT_DELAY ||
-				 ( i == INIT_DELAY && rb_pulser.trig_in_mode == EXTERNAL ) )
-				continue;
-			if ( card->old_delay != card->delay )
-				fprintf( stderr, "%u %ld\n", i, card->delay );
-			card->old_delay = card->delay;
-		}
-
 		return;
 	}
 
@@ -446,14 +421,6 @@ static void rb_pulser_commit( bool flag )
 
 		if ( i == ERT_DELAY )
 			continue;
-
-#if defined EXT_TRIGGER_GOES_TO_INIT_DELAY
-		/* If the external trigger goes into the INIT_DELAY card also don't
-		   touch this card, it gets set when the pulser is started */
-
-		if ( i == INIT_DELAY && rb_pulser.trig_in_mode == EXTERNAL )
-			continue;
-#endif
 
 		if ( card->was_active && ! card->is_active )
 		{
