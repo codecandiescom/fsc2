@@ -320,17 +320,14 @@ int rb_pulser_exp_hook( void )
 }
 
 
-/*------------------------------------------------------------------------*
- * Function called at the end of the experiment - switches the pulser off 
- *------------------------------------------------------------------------*/
+/*----------------------------------------------*
+ * Function called at the end of the experiment
+ *----------------------------------------------*/
 
 int rb_pulser_end_of_exp_hook( void )
 {
-	rb_pulser_cleanup( );
-
 	if ( rb_pulser.is_needed )
 		rb_pulser_exit( );
-
 	return 1;
 }
 
@@ -346,6 +343,8 @@ void rb_pulser_exit_hook( void )
 	Function_T *f;
 	int i;
 
+
+	rb_pulser_cleanup( );
 
 	if ( ! rb_pulser.is_needed )
 		return;

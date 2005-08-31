@@ -132,6 +132,7 @@ gpib_setup:
 	@if [ -n "$(GPIB_LIBRARY)"                                       \
 		  -a \(    "$(GPIB_LIBRARY)" = "llp"                         \
 			    -o "$(GPIB_LIBRARY)" = "ni"                          \
+			    -o "$(GPIB_LIBRARY)" = "slg"                         \
 			    -o "$(GPIB_LIBRARY)" = "jtt"                         \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then             \
 		if [  ! gpib_if_$(GPIB_LIBRARY).cx -ef gpib_if.c             \

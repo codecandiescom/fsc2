@@ -424,6 +424,17 @@ static void rb_pulser_commit( bool flag )
 		if ( rb_pulser.show_file != NULL )
 			rb_pulser_write_pulses( rb_pulser.show_file );
 
+		for ( i = 0, card = rb_pulser.delay_card;
+			  i < NUM_DELAY_CARDS; card++, i++ )
+		{
+			if ( i == ERT_DELAY ||
+				 ( i == INIT_DELAY && rb_pulser.trig_in_mode == EXTERNAL ) )
+				continue;
+			if ( card->old_delay != card->delay )
+				fprintf( stderr, "%u %ld\n", i, card->delay );
+			card->old_delay = card->delay;
+		}
+
 		return;
 	}
 
@@ -440,7 +451,7 @@ static void rb_pulser_commit( bool flag )
 		/* If the external trigger goes into the INIT_DELAY card also don't
 		   touch this card, it gets set when the pulser is started */
 
-		if ( rb_pulser.trig_in_mode == EXTERNAL && i == INIT_DELAY )
+		if ( i == INIT_DELAY && rb_pulser.trig_in_mode == EXTERNAL )
 			continue;
 #endif
 
@@ -451,14 +462,14 @@ static void rb_pulser_commit( bool flag )
 			continue;
 		}
 
+		if ( ! card->was_active && card->is_active )
+			rb_pulser_delay_card_state( card->handle, START );
+
 		if ( card->old_delay != card->delay )
 		{
 			rb_pulser_delay_card_delay( card->handle, card->delay );
 			card->old_delay = card->delay;
 		}
-
-		if ( ! card->was_active && card->is_active )
-			rb_pulser_delay_card_state( card->handle, START );
 	}
 }
 

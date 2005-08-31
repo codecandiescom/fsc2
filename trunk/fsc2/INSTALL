@@ -16,7 +16,7 @@ run fsc2:
  7) XFORMS library (version 0.89 or higher) and development package
     (a properly installed header file for XForms is required)
  8) GPIB library (fsc2 can also be compiled and run without it but
-    with restricted functionality only, see below)
+    with restricted functionality, see below)
 
 
 Optionally, you should have
@@ -77,16 +77,24 @@ the older LLP (Linux Lab Project) library to be found at
   http://www.llp.fu-berlin.de
 
 (which, at least the last time I checked, didn't work with 2.2 and 2.4
-kernels) or the one from National Instruments, to be downloaded from
+kernels), the successor of this library, that I will call SLG in the
+following (for Sourceforge Linux GPIB) and which is now hosted on
+sourceforge at
+
+http://linux-gpib.sourceforge.net/
+
+working also for 2.6 kernels, or the one from National Instruments, to
+be downloaded from
 
   http://www.natinst.com
 
 (which is supposed to work with 2.2 and 2,4 kernels). From the documentations
-of the LLP library and the one I have written it is already clear that a
-GPIB configuration file (typically '/etc/gpib.conf') is required, in which
-all devices to be used with are listed with their respetive properties. But
-also for the NI library fsc2 expects such a configuration file (instead of
-using the configuration method native to the GPIB library). A typical
+of the LLP and SLG libraries and the one I have written it is already clear
+that a GPIB configuration file (typically '/etc/gpib.conf') is required, in
+which all devices to be used with are listed with their respetive properties.
+
+But also for the NI library fsc2 expects such a configuration file (instead
+of using the configuration method native to the GPIB library). A typical
 entry in this file looks like the following
 
 device {
@@ -134,20 +142,10 @@ for the board. The 'master' flag tells the driver that the board is the
 device controlling the GPIB bus and 'file' sets the name of the device
 file used for the board.
 
-Unfortunately, only the LLP library supports cards from companies other than
+Only the LLP and SLG libraries supports cards from companies other than
 National Instruments. You may also compile fsc2 without having a GPIB library,
 but then devices controlled via the GPIB bus can't be used for obvious
 reasons.
-
-
-There is also an updated version of the LLP library, working with 2.4 kernels
-and downloadable from sourceforge:
-
-  http://linux-gpib.sourceforge.net
-
-I would guess that it also will work, but I didn't yet had the time to
-investigate this.
-
 
 Please make sure that the GPIB library you want to use is already compiled
 and installed before trying to compile fsc2 (unless you don't need GPIB
@@ -498,7 +496,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-June 5, 2005                       Much luck, Jens
+August 12, 2005                       Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___  jt@toerring.de

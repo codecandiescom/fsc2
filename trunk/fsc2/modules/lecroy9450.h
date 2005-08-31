@@ -22,6 +22,10 @@
  */
 
 
+#if ! defined LECROY9450_HEADER
+#define LECROY9450_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -381,6 +385,8 @@ double lecroy9450_time_per_point( void );
 long lecroy9450_translate_channel( int dir, long channel, bool flag );
 void lecroy9450_store_state( LECROY9450_T *dest, LECROY9450_T *src );
 
+
+#endif /* LECROY9450_HEADER */
 
 /*
  * Local variables:

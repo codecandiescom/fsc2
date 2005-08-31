@@ -529,7 +529,7 @@ bool lecroy94_tmpl_set_trigger_source( int channel )
 {
 	char cmd[ 40 ] = "TRSE STD,SR,";
 
-
+/*
 	fsc2_assert( ( channel >= LECROY94_TMPL_CH1 &&
 				   channel <= LECROY94_TMPL_CH2 )
 #if defined LECROY94_TMPL_CH4_AS_TRG
@@ -543,7 +543,7 @@ bool lecroy94_tmpl_set_trigger_source( int channel )
 				 || channel == LECROY94_TMPL_EXT10
 #endif
 			   );
-
+*/
 	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		 || channel == LECROY94_TMPL_CH4

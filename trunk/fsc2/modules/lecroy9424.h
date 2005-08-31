@@ -22,6 +22,9 @@
  */
 
 
+#if ! defined LECROY9424_HEADER
+#define LECROY9424_HEADER
+
 #include "fsc2_module.h"
 
 
@@ -231,7 +234,7 @@ struct HORI_RES {
 };
 
 
-#if defined LECROY9400_MAIN_
+#if defined LECROY9424_MAIN_
 
 HORI_RES_T hres[ 39 ] = { { 1.0e-9, 1.0e-10,   100,   -1.0,    -1 },
 					      { 2.0e-9, 1.0e-10,   200,   -1.0,    -1 },
@@ -325,6 +328,7 @@ Var_T *digitizer_get_curve( Var_T *v );
 Var_T *digitizer_get_area( Var_T *v );
 Var_T *digitizer_get_amplitude( Var_T *v );
 Var_T *digitizer_run( Var_T *v );
+Var_T *digitizer_copy_curve( Var_T *v );
 Var_T *digitizer_command( Var_T *v );
 
 
@@ -355,8 +359,8 @@ int lecroy9424_get_trigger_mode( void );
 int lecroy9424_set_trigger_mode( int mode );
 double lecroy9424_get_trigger_delay( void );
 bool lecroy9424_set_trigger_delay( double delay );
-bool lecroy9424_is_displayed( int channel );
-bool lecroy9424_display( int channel, int on_off );
+bool lecroy9424_is_displayed( int ch );
+bool lecroy9424_display( int ch, int on_off );
 long lecroy9424_get_num_avg( int channel );
 bool lecroy9424_get_desc( int channel );
 void lecroy9424_set_up_averaging( long channel, long source, long num_avg,
@@ -367,6 +371,7 @@ void lecroy9424_get_curve( int ch, Window_T *w, double **array, long *length );
 double lecroy9424_get_area( int ch, Window_T *w );
 double lecroy9424_get_amplitude( int ch, Window_T *w );
 void lecroy9424_free_running( void );
+void lecroy9424_copy_curve( long src, long dest );
 bool lecroy9424_command( const char *cmd );
 
 
@@ -382,6 +387,8 @@ double lecroy9424_time_per_point( void );
 long lecroy9424_translate_channel( int dir, long channel, bool flag );
 void lecroy9424_store_state( LECROY9424_T *dest, LECROY9424_T *src );
 
+
+#endif /* ! LECROY9424_HEADER */
 
 /*
  * Local variables:
