@@ -73,10 +73,12 @@ void rb_pulser_init( void )
 																!= RULBUS_OK ) 
 		rb_pulser_failure( SET, "Failure to stop pulser" );
 
-	/* In external trigger mode set the trigger input slope of the INIT or
-	   ERT delay card (depending on the external trigger going into the INIT
-	   or the ERT delay card) to what the user asked for, in internal trigger
-	   mode to trigger on raising edge. */
+	/* In external trigger mode set the trigger input slope of the ERT delay
+	   card to what the user asked for, while in internal trigger mode to
+	   trigger on raising edge. Then set the delay for the ERT card to the
+	   shortest possible delay (take care: we need to do this without waiting
+	   for the card to output pulses - otherwise we're most likely going to
+	   hang here since it can be rather hard to it that short moment). */
 
 	if ( rb_pulser.trig_in_mode == EXTERNAL )
 	{
@@ -314,12 +316,10 @@ void rb_pulser_run( bool state )
 }
 
 
-/*-------------------------------------------------------------------*
- * This function is for actually starting the pulser when running in
- * external trigger mode. Depending on the configuration, i.e. if
- * the external trigger goes to the INIT_DELAY or the ERT_DELAY card,
- * different methods have to be used.
- *-----------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * This function is for actually starting the pulser when running
+ * in external trigger mode
+ *----------------------------------------------------------------*/
 
 
 static void rb_pulser_start_external_trigger( void )

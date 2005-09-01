@@ -529,37 +529,34 @@ bool lecroy94_tmpl_set_trigger_source( int channel )
 {
 	char cmd[ 40 ] = "TRSE STD,SR,";
 
-/*
-	fsc2_assert( ( channel >= LECROY94_TMPL_CH1 &&
-				   channel <= LECROY94_TMPL_CH2 )
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
+			sprintf( cmd + 11, "C%1d", channel + 1 );
+			break;
+
+		case LECROY94_TMPL_LIN :
+			strcat( cmd, "LINE" );
+			break;
+
 #if defined LECROY94_TMPL_EXT
-				 || channel <= LECROY94_TMPL_EXT
+		case LECROY94_TMPL_EXT :
+			strcat( cmd, "EX" );
+			break;
 #endif
 #if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
+		case LECROY94_TMPL_EXT10 :
+			strcat( cmd, "EX10" );
+			break;
 #endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-		)
-		sprintf( cmd + 11, "C%1d", channel + 1 );
-	else if ( channel == LECROY94_TMPL_LIN )
-		strcat( cmd, "LINE" );
-#if defined LECROY94_TMPL_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcat( cmd, "EX" );
-#endif
-#if defined LECROY94_TMPL_EXT10
-	else
-		strcat( cmd, "EX10" );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
@@ -576,35 +573,30 @@ double lecroy94_tmpl_get_trigger_level( int channel )
 	char buf[ 30 ];
 	long length = 30;
 
-/*
-	fsc2_assert(    channel == LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
+			sprintf( buf, "C%1d:TRLV?", channel + 1 );
+			break;
+
 #if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
+		case LECROY94_TMPL_EXT :
+			strcpy( buf, "EX:TRLV?" );
+			break;
 #endif
 #if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
+		case LECROY94_TMPL_EXT10 :
+			strcpy( buf, "EX10:TRLV?" );
+			break;
 #endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 channel == LECROY94_TMPL_CH4
-#endif
-	   )
-		sprintf( buf, "C%1d:TRLV?", channel + 1 );
-#if defined LECROY94_TMPL_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( buf, "EX:TRLV?" );
-#endif
-#if defined LECROY94_TMPL_EXT10
-	else
-		strcpy( buf, "EX10:TRLV?" );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
 	buf[ length - 1 ] = '\0';
@@ -619,35 +611,30 @@ bool lecroy94_tmpl_set_trigger_level( int channel, double level )
 {
 	char cmd[ 40 ];
 
-/*
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case  LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
-#if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
-#endif
-#if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
-#endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-	   )
 		sprintf( cmd, "C%1d:TRLV ", channel + 1 );
+		break;
+
 #if defined LECROY94_TMPL_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( cmd, "EX:TRLV " );
+		case LECROY94_TMPL_EXT :
+			strcpy( cmd, "EX:TRLV " );
+			break;
 #endif
 #if defined LECROY94_TMPL_EXT10
-	else
-		strcpy( cmd, "EX10:TRLV " );
+		case LECROY94_TMPL_EXT10 :
+			strcpy( cmd, "EX10:TRLV " );
+			break;
 #endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	gcvt( level, 6, cmd + strlen( cmd ) );
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -665,35 +652,30 @@ double lecroy94_tmpl_get_trigger_slope( int channel )
 	char buf[ 30 ];
 	long length = 30;
 
-/*
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
-#if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
-#endif
-#if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
-#endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-	   )
 		sprintf( buf, "C%1d:TRSL?", channel + 1 );
+		break;
+
 #if defined LECROY94_TMPL_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( buf, "EX:TRSL?" );
+		case LECROY94_TMPL_EXT :
+			strcpy( buf, "EX:TRSL?" );
+			break;
 #endif
 #if defined LECROY94_TMPL_EXT10
-	else
-		strcpy( buf, "EX10:TRSL?" );
+		case LECROY94_TMPL_EXT10 :
+			strcpy( buf, "EX10:TRSL?" );
+			break;
 #endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
 	return buf[ 0 ] == 'P';
@@ -707,35 +689,29 @@ bool lecroy94_tmpl_set_trigger_slope( int channel, int slope )
 {
 	char cmd[ 40 ];
 
-/*
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
+			sprintf( cmd, "C%1d:TRSL ", channel + 1 );
+			break;
 #if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
+		case LECROY94_TMPL_EXT :
+			strcpy( cmd, "EX:TRSL " );
+			break;
 #endif
 #if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
+		case LECROY94_TMPL_EXT10 :
+			strcpy( cmd, "EX10:TRSL " );
+			break;
 #endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-	   )
-		sprintf( cmd, "C%1d:TRSL ", channel + 1 );
-#if defined LECROY94_TMPL_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( cmd, "EX:TRSL " );
-#endif
-#if defined LECROY94_TMPL_EXT10
-	else
-		strcpy( cmd, "EX10:TRSL " );
-#endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	strcat( cmd, slope ? "POS" : "NEG" );
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -754,35 +730,30 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 	long length = 40;
 	int cpl = -1;
 
-/*
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
-#if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
-#endif
-#if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
-#endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-	   )
-		sprintf( buf, "C%1d:TRCP?", channel + 1 );
+			sprintf( buf, "C%1d:TRCP?", channel + 1 );
+			break;
+
 #if defined LECROY94_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( buf, "EX:TRCP?" );
+		case LECROY94_TMPL_EXT :
+			strcpy( buf, "EX:TRCP?" );
+			break;
 #endif
 #if defined LECROY94_EXT10
-	else
-		strcpy( buf, "EX10:TRCP?" );
+		case LECROY94_EXT10 :
+			strcpy( buf, "EX10:TRCP?" );
+			break;
 #endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
 
@@ -820,35 +791,30 @@ int lecroy94_tmpl_set_trigger_coupling( int channel, int cpl )
 	char cmd[ 40 ];
 	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ", "HFDIV" };
 
-/*
-	fsc2_assert(    channel >= LECROY94_TMPL_CH1 
-				 || channel == LECROY94_TMPL_CH2
+
+	switch ( channel )
+	{
+		case LECROY94_TMPL_CH1 :
+		case LECROY94_TMPL_CH2 :
 #if defined LECROY94_TMPL_CH4_AS_TRG
-				 || channel == LECROY94_TMPL_CH4
+		case LECROY94_TMPL_CH4 :
 #endif
-				 || channel == LECROY94_TMPL_LIN
-#if defined LECROY94_TMPL_EXT
-				 || channel == LECROY94_TMPL_EXT
-#endif
-#if defined LECROY94_TMPL_EXT10
-				 || channel == LECROY94_TMPL_EXT10
-#endif
-			   );
-*/
-	if ( channel == LECROY94_TMPL_CH1 || channel == LECROY94_TMPL_CH2
-#if defined LECROY94_TMPL_CH4_AS_TRG
-		 || channel == LECROY94_TMPL_CH4
-#endif
-	   )
-		sprintf( cmd, "C%1d:TRCP ", channel + 1 );
+			sprintf( cmd, "C%1d:TRCP ", channel + 1 );
+			break;
+
 #if defined LECROY94_EXT
-	else if ( channel == LECROY94_TMPL_EXT )
-		strcpy( cmd, "EX:TRCP " );
+		case LECROY94_TMPL_EXT :
+			strcpy( cmd, "EX:TRCP " );
+			break;
 #endif
 #if defined LECROY94_EXT10
-	else
-		strcpy( cmd, "EX10:TRCP " );
+		case LECROY94_EXT10 :
+			strcpy( cmd, "EX10:TRCP " );
+			break;
 #endif
+		default :
+			fsc2_assert( 1 == 0 );
+	}
 
 	strcat( cmd, cpl_str[ cpl ] );
 
