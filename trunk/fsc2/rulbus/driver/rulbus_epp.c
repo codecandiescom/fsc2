@@ -74,7 +74,9 @@ static int rulbus_release( struct inode *inode_p, struct file *file_p );
 static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
              unsigned int cmd, unsigned long arg );
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
 static void rulbus_epp_attach( struct parport *port );
 static void rulbus_epp_detach( struct parport *port );
 static int rulbus_epp_init( void );
@@ -396,8 +398,18 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
                         ret = rulbus_read( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
                         break;
 
+                case RULBUS_EPP_IOC_READ_RANGE :
+                        ret =
+						  rulbus_read_range( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
+                        break;
+
                 case RULBUS_EPP_IOC_WRITE :
                         ret = rulbus_write( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
+                        break;
+
+                case RULBUS_EPP_IOC_WRITE_RANGE :
+                        ret = 
+						 rulbus_write_range( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
                         break;
 
                 default :
@@ -465,6 +477,80 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         rulbus_parport_write_addr( rulbus_arg->offset );
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 *bp = rulbus_parport_read_data( );
+
+        /* Copy all that has just been read to the user-space buffer and
+		   deallocate the kernel buffer */
+
+		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
+				kfree( data );
+				printk( KERN_NOTICE "Can't write to user space\n" );
+				return -EACCES;
+		}
+
+		kfree( data );
+
+        return rulbus_arg->len;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for reading data from a card in one of the racks
+ *-----------------------------------------------------------*/
+
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+{
+        unsigned char *data;
+        unsigned char *bp;
+        int i;
+
+
+		/* Plausibility checks */
+
+        if ( rulbus_arg->rack & 0xF0 ) {
+                printk( KERN_NOTICE "Invalid rack number.\n" );
+                return -EINVAL;
+        }
+
+        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+                printk( KERN_NOTICE "Invalid address offset.\n" );
+                return -EINVAL;
+        }
+
+        if ( rulbus_arg->len < 1 ) {
+                printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
+                return -EINVAL;
+        }
+
+        /* Allocate a buffer for reading */
+
+		if ( rulbus_arg->data == NULL ) {
+				printk( KERN_NOTICE "Invalid write data pointer.\n" );
+				return -EINVAL;
+		}
+
+		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+		if ( data == NULL ) {
+				printk( KERN_NOTICE
+						"Not enough memory for reading.\n" );
+				return -ENOMEM;
+		}
+
+        /* Select the rack (unless it's not already selected) */
+
+        if ( rulbus.rack != rulbus_arg->rack ) {
+                rulbus_parport_write_addr( 0 );
+                rulbus_parport_write_data( rulbus_arg->rack );
+                rulbus.rack = rulbus_arg->rack;
+        }
+
+        /* Now read as many data as required from consecutive rulbus
+		   addresses*/
+
+        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- ) {
+				rulbus_parport_write_addr( rulbus_arg->offset++ );
+                *bp = rulbus_parport_read_data( );
+		}
 
         /* Copy all that has just been read to the user-space buffer and
 		   deallocate the kernel buffer */
@@ -552,6 +638,88 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
         rulbus_parport_write_addr( rulbus_arg->offset );
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 rulbus_parport_write_data( *bp );
+
+        if ( rulbus_arg->len > 1 )
+                kfree( data );
+
+        return rulbus_arg->len;
+}
+
+
+/*---------------------------------------------------------------*
+ * Function for writing data to a consecutive range of addresses 
+ * to a card in one of the racks
+ *---------------------------------------------------------------*/
+
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+{
+        unsigned char *data;
+        unsigned char *bp;
+        int i;
+
+
+		/* Plausibility checks */
+
+        if ( rulbus_arg->rack & 0xF0 ) {
+                printk( KERN_NOTICE "Invalid rack number.\n" );
+                return -EINVAL;
+        }
+
+        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+                printk( KERN_NOTICE "Invalid address offset.\n" );
+                return -EINVAL;
+        }
+
+        if ( rulbus_arg->len < 1 ) {
+                printk( KERN_NOTICE
+                        "Invalid number of bytes to be written.\n" );
+                return -EINVAL;
+        }
+
+        /* If there's just a single byte to be written the 'byte' field of
+           the RULBUS_EPP_IOCTL_ARGS structure is used, otherwise a buffer
+		   needs to be allocated and everything gets copied there from user-
+		   space */
+
+        if ( rulbus_arg->len == 1 )
+                data = &rulbus_arg->byte;
+        else {
+                if ( rulbus_arg->data == NULL ) {
+                        printk( KERN_NOTICE "Invalid write data pointer.\n" );
+                        return -EINVAL;
+                }
+
+                data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+                if ( data == NULL ) {
+                        printk( KERN_NOTICE
+                                "Not enough memory for reading.\n" );
+                        return -ENOMEM;
+                }
+
+                if ( copy_from_user( data, rulbus_arg->data,
+                                     rulbus_arg->len ) ) {
+                        kfree( data );
+                        printk( KERN_NOTICE "Can't read from user space\n" );
+                        return -EACCES;
+                }
+        }
+
+        /* Select the rack (if necessary) */
+
+        if ( rulbus.rack != rulbus_arg->rack ) {
+                rulbus_parport_write_addr( 0 );
+                rulbus_parport_write_data( rulbus_arg->rack );
+                rulbus.rack = rulbus_arg->rack;
+        }
+
+        /* Now write as many data as required to consecutive rulbus
+		   addresses */
+
+        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- ) {
+				rulbus_parport_write_addr( rulbus_arg->offset++ );
+                rulbus_parport_write_data( *bp );
+		}
 
         if ( rulbus_arg->len > 1 )
                 kfree( data );
