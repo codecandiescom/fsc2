@@ -115,7 +115,7 @@ int rulbus_rb8514_delay_card_init( int handle )
 {
 	RULBUS_RB8514_DELAY_CARD *tmp;
 	unsigned char i;
-	unsigned char byte;
+	unsigned char byte[ 3 ] = { 0, 0, 0 };
 	int retval;
 
 
@@ -137,14 +137,12 @@ int rulbus_rb8514_delay_card_init( int handle )
 	   interrupts, trigger on rasing edge, output polarity of start and
 	   end pulses is positive, finally set the delay to 0. */
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
-																 != RULBUS_OK )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &tmp->ctrl, 1 ) ) != RULBUS_OK )
 		return rulbus_errno = retval;
 	
-	for ( byte = 0, i = 0; i <= DATA_LSBYTE; i++ )
-		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
-									  &byte, 1 ) ) != 1 )
-			 return rulbus_errno = retval;
+	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
 }
@@ -224,7 +222,7 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 	long ldelay;
 	int retval;
 	unsigned char i;
-	unsigned char byte;
+	unsigned char byte[ 3 ];
 
 
 	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
@@ -254,13 +252,11 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 
 	card->delay = ldelay;
 
-	for ( i = 0; i <= DATA_LSBYTE; ldelay >>= 8, i++ )
-	{
-		byte = ( unsigned char ) ( ldelay & 0xFF );
-		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
-									  &byte, 1 ) ) != 1 )
-			return rulbus_errno = retval;
-	}
+	for ( i = 0; i < 3; ldelay >>= 8, i++ )
+		byte[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
+
+	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
 }
@@ -275,7 +271,7 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
 									   int force )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char byte;
+	unsigned char byte[ 3 ];
 	unsigned char i;
 	int retval;
 
@@ -302,13 +298,11 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
 
 	card->delay = delay;
 
-	for ( i = 0; i <= DATA_LSBYTE; delay >>= 8, i++ )
-	{
-		byte = ( unsigned char ) ( delay & 0xFF );
-		if ( ( retval = rulbus_write( handle, DATA_LSBYTE - i,
-									  &byte, 1 ) ) != 1 )
-			return rulbus_errno = retval;
-	}
+	for ( i = 0; i < 3; delay >>= 8, i++ )
+		byte[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
+
+	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
 }

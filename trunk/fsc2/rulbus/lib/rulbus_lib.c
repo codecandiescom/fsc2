@@ -145,8 +145,12 @@ static int rulbus_check_config( void );
 static void rulbus_cleanup( void );
 static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 							  unsigned char *data, size_t len );
+static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
+									unsigned char *data, size_t len );
 static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 							 unsigned char *data, size_t len );
+static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
+								   unsigned char *data, size_t len );
 
 extern int rulbus_parse( void );
 extern void rulbus_parser_init( void );
@@ -532,6 +536,48 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
 }
 
 
+/*--------------------------------------------------------------*
+ * Function for sending 'len' bytes to consecutive addresses of
+ * a card. Expects a card handle, the starting offset (relative
+ * to the base address of the card), a pointer to a buffer with
+ * the data to be written and the number of bytes to be written.
+ * On success it returns the number of bytes that were written,
+ * otherwise a (negative) value indicating an error.
+ *--------------------------------------------------------------*/
+
+int rulbus_write_range( int handle, unsigned char offset,
+						unsigned char *data, size_t len)
+{
+	int retval;
+
+
+	if ( ! rulbus_in_use )
+		return rulbus_errno = RULBUS_NO_INITIALIZATION;
+
+	if ( handle < 0 || handle >= rulbus_num_cards )
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+
+	if ( ! rulbus_card[ handle ].in_use )
+		return rulbus_errno = RULBUS_CARD_NOT_OPEN;
+
+	if ( offset >= rulbus_card[ handle ].width )
+		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
+
+	if ( data == NULL || len <= 0 )
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+
+	retval = rulbus_write_rack_range( rulbus_card[ handle ].rack,
+								rulbus_card[ handle ].addr + offset,
+								data, len );
+
+	if ( retval <= 0 )
+		return rulbus_errno = retval;
+
+	rulbus_errno = RULBUS_OK;
+	return retval;               /* return number of bytes written */
+}
+
+
 /*------------------------------------------------------------------*
  * Function for reading a 'len' byte a the card. It expects a card
  * handle, an offset (relative to the base address of the card), a
@@ -565,6 +611,48 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
 	retval = rulbus_read_rack( rulbus_card[ handle ].rack,
 							   rulbus_card[ handle ].addr + offset,
 							   data, len );
+
+	if ( retval <= 0 )
+		return rulbus_errno = retval;
+
+	rulbus_errno = RULBUS_OK;
+	return retval;                    /* return number of bytes read */
+}
+
+
+/*-------------------------------------------------------------------*
+ * Function for reading a 'len' byte from consecutive addresses of
+ * the card. It expects a card handle, the starting offset (relative
+ * to the base address of the card), a pointer to a buffer to which
+ * the data byte will be written and the maximum number of bytes to
+ * be read. On succes it returns the number of bytes that were read,
+ * otherwise a (negative) value indicating an error.
+ *-------------------------------------------------------------------*/
+
+int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
+					   size_t len )
+{
+	int retval;
+
+
+	if ( ! rulbus_in_use )
+		return rulbus_errno = RULBUS_NO_INITIALIZATION;
+
+	if ( handle < 0 || handle >= rulbus_num_cards )
+		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+
+	if ( ! rulbus_card[ handle ].in_use )
+		return rulbus_errno = RULBUS_CARD_NOT_OPEN;
+
+	if ( offset >= rulbus_card[ handle ].width )
+		return rulbus_errno = RULBUS_INVALID_CARD_OFFSET;
+
+	if ( data == NULL || len <= 0 )
+		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+
+	retval = rulbus_read_rack_range( rulbus_card[ handle ].rack,
+									 rulbus_card[ handle ].addr + offset,
+									 data, len );
 
 	if ( retval <= 0 )
 		return rulbus_errno = retval;
@@ -668,6 +756,35 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 }
 
 
+/*---------------------------------------------------------*
+ * Function for writing a number of bytes to a consecutive
+ * number of address at one of the racks.
+ *---------------------------------------------------------*/
+
+static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
+									unsigned char *data, size_t len )
+{
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
+	int retval;
+
+
+	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_WRITE_RANGE, &args ) ) <= 0 )
+		switch ( errno )
+		{
+			case ENOMEM :
+				return RULBUS_NO_MEMORY;
+
+			case EIO :
+				return RULBUS_TIME_OUT;
+
+			default :                   /* catch all for "impossible" errors */
+				return RULBUS_WRITE_ERROR;
+		}
+
+	return retval;
+}
+
+
 /*---------------------------------------------*
  * Function for reading a number of bytes from
  * a certain address at one of the racks.
@@ -681,6 +798,35 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 
 
 	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_READ, &args ) ) <= 0 )
+		switch ( errno )
+		{
+			case ENOMEM :
+				return RULBUS_NO_MEMORY;
+
+			case EIO :
+				return RULBUS_TIME_OUT;
+
+			default :                   /* catch all for "impossible" errors */
+				return RULBUS_READ_ERROR;
+		}
+
+	return retval;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for reading a number of bytes from a consecutive
+ * number of addresses at one of the racks.
+ *-----------------------------------------------------------*/
+
+static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
+								   unsigned char *data, size_t len )
+{
+	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
+	int retval;
+
+
+	if ( ( retval = ioctl( fd, RULBUS_EPP_IOC_READ_RANGE, &args ) ) <= 0 )
 		switch ( errno )
 		{
 			case ENOMEM :

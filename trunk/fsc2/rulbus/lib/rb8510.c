@@ -206,7 +206,7 @@ int rulbus_rb8510_dac12_set_voltage( int handle, double volts )
 {
 	RULBUS_RB8510_DAC12_CARD *card;
 	int retval;
-	unsigned char byte;
+	unsigned char byte[ 2 ];
 	unsigned short int val;
 
 
@@ -225,12 +225,10 @@ int rulbus_rb8510_dac12_set_voltage( int handle, double volts )
 
 	card->v = val;
 
-	byte = ( val >> 8 ) & 0xFF;
-	if ( ( retval = rulbus_write( handle, DAC12_MSB, &byte, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+	byte[ 0 ] = ( unsigned char ) ( ( val >> 8 ) & 0xFF );
+	byte[ 1 ] = ( unsigned char ) ( val & 0xFF );
 
-	byte = val & 0xFF;
-	if ( ( retval = rulbus_write( handle, DAC12_LSB, &byte, 1 ) ) != 1 )
+	if ( ( retval = rulbus_write_range( handle, DAC12_MSB, byte, 2 ) ) != 2 )
 		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;

@@ -125,9 +125,15 @@ extern int rulbus_errno;
 
 
 int rulbus_write( int handle, unsigned char offset, unsigned char *data,
-				  size_t len );
+		  size_t len );
+int rulbus_write_range( int handle, unsigned char offset, unsigned char *data,
+			size_t len );
+int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
+		       size_t len );
 int rulbus_read( int handle, unsigned char offset, unsigned char *data,
-				 size_t len );
+		 size_t len );
+int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
+		       size_t len );
 
 
 /* Internal functions for 12-bit ADC cards (RB8509) */
