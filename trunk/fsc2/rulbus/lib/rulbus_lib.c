@@ -757,7 +757,7 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
 
 /*---------------------------------------------------------*
  * Function for writing a number of bytes to a consecutive
- * number of address at one of the racks.
+ * number of address at one of the racks, starting at addr
  *---------------------------------------------------------*/
 
 static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
@@ -815,7 +815,7 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
 
 /*-----------------------------------------------------------*
  * Function for reading a number of bytes from a consecutive
- * number of addresses at one of the racks.
+ * number of addresses at one of the racks, starting at addr
  *-----------------------------------------------------------*/
 
 static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
