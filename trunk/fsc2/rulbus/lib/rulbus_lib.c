@@ -566,8 +566,8 @@ int rulbus_write_range( int handle, unsigned char offset,
 		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
 	retval = rulbus_write_rack_range( rulbus_card[ handle ].rack,
-								rulbus_card[ handle ].addr + offset,
-								data, len );
+									  rulbus_card[ handle ].addr + offset,
+									  data, len );
 
 	if ( retval <= 0 )
 		return rulbus_errno = retval;
