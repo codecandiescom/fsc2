@@ -177,7 +177,7 @@ helpful by supplying all kinds of informations, sending me very well-
 documented Windows code, answering all my stupid questions and even
 reading and pointing out errors in my code. Martin also took it onto
 himself to get parts of his Windows version of the library in sync
-with the Linux version, finding in process several bugs in my code,
+with the Linux version, finding several bugs in my code in the process,
 and made lots very helpful suggestions for other improvements.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
@@ -185,4 +185,4 @@ the driver and library in order to extend my fsc2 program to make
 it work with their 275 GHz EPR and ENDOR spectrometer.
 
 
-5.3.2004   Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>
+3.9.2005     Jens Thoms Törring       <jtt@toerring.de>

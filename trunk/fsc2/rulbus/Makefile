@@ -19,8 +19,7 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 #
-#  To contact the author send email to
-#  Jens.Toerring@physik.fu-berlin.de
+#  To contact the author send email to jtt@toerring.de
 
 SHELL   = /bin/sh
 CC      = gcc

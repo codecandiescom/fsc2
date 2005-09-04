@@ -18,8 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# To contact the author send email to
-# Jens.Toerring@physik.fu-berlin.de
+# To contact the author send email to jtt@toerring.de
 
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
