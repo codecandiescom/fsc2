@@ -114,7 +114,6 @@ void rulbus_rb8514_delay_exit( void )
 int rulbus_rb8514_delay_card_init( int handle )
 {
 	RULBUS_RB8514_DELAY_CARD *tmp;
-	unsigned char i;
 	unsigned char byte[ 3 ] = { 0, 0, 0 };
 	int retval;
 
@@ -222,7 +221,7 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 	long ldelay;
 	int retval;
 	unsigned char i;
-	unsigned char byte[ 3 ];
+	unsigned char bytes[ 3 ];
 
 
 	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
@@ -244,18 +243,19 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
 	   user to set a new delay even though a delay is already created, which
 	   then gets ended prematurely) */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
 		 return rulbus_errno = retval;
 
-	if ( byte & DELAY_BUSY && ! force )
+	if ( bytes[ 0 ] & DELAY_BUSY && ! force )
 		return rulbus_errno = RULBUS_CARD_IS_BUSY;
 
 	card->delay = ldelay;
 
 	for ( i = 0; i < 3; ldelay >>= 8, i++ )
-		byte[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
+		bytes[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
 
-	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
+										bytes, 3 ) ) != 3 )
 		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
@@ -271,7 +271,7 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
 									   int force )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char byte[ 3 ];
+	unsigned char bytes[ 3 ];
 	unsigned char i;
 	int retval;
 
@@ -290,18 +290,19 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
 	   user to set a new delay even though a delay is already created, which
 	   then ends prematurely) */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
+	if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
 		 return rulbus_errno = retval;
 
-	if ( byte & DELAY_BUSY && ! force )
+	if ( bytes[ 0 ] & DELAY_BUSY && ! force )
 		return rulbus_errno = RULBUS_CARD_IS_BUSY;
 
 	card->delay = delay;
 
 	for ( i = 0; i < 3; delay >>= 8, i++ )
-		byte[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
+		bytes[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
 
-	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
+										bytes, 3 ) ) != 3 )
 		return rulbus_errno = retval;
 
 	return rulbus_errno = RULBUS_OK;
