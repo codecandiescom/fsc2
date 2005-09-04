@@ -159,8 +159,8 @@ int rulbus_rb8509_adc12_card_init( int handle )
 	/* Set a few defaults: selected channel is 0, gain is 1, use internal
 	   trigger and no interrupts */
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &tmp->ctrl, 1 ) )
-		 																 != 1 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &tmp->ctrl, 1 ) ) != 1 )
 	{
 		tmp = realloc( rulbus_rb8509_adc12_card,
 					   --rulbus_num_adc12_cards * sizeof *tmp );
@@ -275,8 +275,8 @@ int rulbus_rb8509_adc12_set_channel( int handle, int channel )
 		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = ctrl;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-		 																 != 1 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
 		return rulbus_errno = retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
@@ -320,8 +320,8 @@ int rulbus_rb8509_adc12_set_gain( int handle, int gain )
 		return rulbus_errno = RULBUS_OK;
 
 	card->ctrl = ctrl;
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-																		 != 1 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
 		return rulbus_errno = retval;
 
 	/* The card needs a settling time of about 18 us after gain switching */
@@ -372,8 +372,8 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
 	card->ctrl = ctrl;
 	card->trig_mode = mode;
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR, &card->ctrl, 1 ) )
-																		 != 1 )
+	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+								  &card->ctrl, 1 ) ) != 1 )
 		return rulbus_errno = retval;
 
 	/* Read the low data byte to make sure the EOC bit is cleared */
