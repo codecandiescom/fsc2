@@ -193,7 +193,7 @@ void start_graphics( void )
 
 	display_has_been_shown = SET;
 
-	/* Set minimum size for display window and switch on full scale button */
+	/* Set minimum sizes for display windows and switch on full scale button */
 
 	if ( G.dim & 1 || ! G.is_init )
 	{
@@ -204,6 +204,7 @@ void start_graphics( void )
 		fl_winminsize( GUI.run_form_1d->run_1d->window,
 					   GI.WIN_MIN_1D_WIDTH, GI.WIN_MIN_HEIGHT - diff );
 	}
+
 	if ( G.dim & 2 )
 	{
 		if ( G_2d.nc == 1 )
@@ -216,6 +217,7 @@ void start_graphics( void )
 
 	if ( G.dim & 1 )
 		fl_set_button( GUI.run_form_1d->full_scale_button_1d, 1 );
+
 	if ( G.dim & 2 )
 		fl_set_button( GUI.run_form_2d->full_scale_button_2d, 1 );
 
@@ -256,6 +258,7 @@ void start_graphics( void )
 
 	if ( ! G.is_init || G.dim & 1 )
 		redraw_all_1d( );
+
 	if ( G.dim & 2 )
 		redraw_all_2d( );
 
@@ -263,6 +266,7 @@ void start_graphics( void )
 		fl_raise_form( GUI.run_form_1d->run_1d );
 	else
 		fl_raise_form( GUI.run_form_2d->run_2d );
+
 	G.is_fully_drawn = SET;
 }
 
@@ -281,8 +285,12 @@ static void fonts_init( void )
 	if ( ! G.is_init )
 		return;
 
+	/* Load the (possibly user requested) font */
+
 	if ( * ( ( char * ) Xresources[ AXISFONT ].var ) != '\0' )
 		G.font = XLoadQueryFont( G.d, ( char * ) Xresources[ AXISFONT ].var );
+
+	/* If tat didn't work out try to use one of the default fonts */
 
 	if ( ! G.font )
 		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );
@@ -290,6 +298,9 @@ static void fonts_init( void )
 		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_2 );
 	if ( ! G.font )
 		G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_3 );
+
+	/* Try to figure out how much the font extends above and below the
+	   baseline (if iit was possible to load a font) */
 
 	if ( G.font )
 		XTextExtents( G.font, "Xp", 2, &dummy, &G.font_asc, &G.font_desc,
@@ -473,17 +484,17 @@ static void set_defaults( void )
 		GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-10";
 		GI.DEFAULT_AXISFONT_3  = "fixed";
 
-		G.scale_tick_dist   =  4;
-		G.short_tick_len    =  3;
-		G.medium_tick_len   =  6;
-		G.long_tick_len     =  8;
-		G.label_dist        =  5;
-		G.x_scale_offset    = 12;
-		G.y_scale_offset    = 12;
-		G.z_scale_offset    = 25;
-		G.z_line_offset     =  5;
-		G.z_line_width      =  8;
-		G.enlarge_box_width =  3;
+		G.scale_tick_dist      =  4;
+		G.short_tick_len       =  3;
+		G.medium_tick_len      =  6;
+		G.long_tick_len        =  8;
+		G.label_dist           =  5;
+		G.x_scale_offset       = 12;
+		G.y_scale_offset       = 12;
+		G.z_scale_offset       = 25;
+		G.z_line_offset        =  5;
+		G.z_line_width         =  8;
+		G.enlarge_box_width    =  3;
 	}
 	else
 	{
@@ -496,24 +507,24 @@ static void set_defaults( void )
 		GI.DEFAULT_AXISFONT_2  = "lucidasanstypewriter-14";
 		GI.DEFAULT_AXISFONT_3  = "fixed";
 
-		G.scale_tick_dist   =   6;
-		G.short_tick_len    =   5;
-		G.medium_tick_len   =  10;
-		G.long_tick_len     =  14;
-		G.label_dist        =   7;
-		G.x_scale_offset    =  20;
-		G.y_scale_offset    =  21;
-		G.z_scale_offset    =  46;
-		G.z_line_offset     =  10;
-		G.z_line_width      =  14;
-		G.enlarge_box_width =   5;
+		G.scale_tick_dist      =   6;
+		G.short_tick_len       =   5;
+		G.medium_tick_len      =  10;
+		G.long_tick_len        =  14;
+		G.label_dist           =   7;
+		G.x_scale_offset       =  20;
+		G.y_scale_offset       =  21;
+		G.z_scale_offset       =  46;
+		G.z_line_offset        =  10;
+		G.z_line_width         =  14;
+		G.enlarge_box_width    =   5;
 	}
 }
 
 
 /*---------------------------------------------------------*
  * Function for adapting the forms for the display windows
- * according to the current requirements.
+ * to the current requirements.
  *---------------------------------------------------------*/
 
 static void forms_adapt( void )
@@ -573,6 +584,7 @@ static void forms_adapt( void )
 										  "Undo last rescaling operation" );
 			}
 		}
+
 		T_free( pixmap_file );
 
 		pixmap_file = get_string( "%s%sprinter.xpm", auxdir, slash( auxdir ) );
@@ -782,8 +794,8 @@ static void forms_adapt( void )
  * Function that gets invoked when the close button (not the one in
  * the display window but the one from the windows menu) is clicked
  * on. While the experiment is still running it ignores the event,
- * when the experiment is already finished it does the same as
- * clicking  on the "Close" button within the display window.
+ * while, when the experiment is already finished. it does the same
+ * as clicking  on the "Close" button within the display window.
  *------------------------------------------------------------------*/
 
 int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
@@ -795,6 +807,7 @@ int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
 		else if ( G.dim & 2 )
 			run_close_button_callback( GUI.run_form_2d->stop_2d, 0 );
 	}
+
 	return FL_IGNORE;
 }
 
@@ -813,7 +826,7 @@ static void G_struct_init( void )
 	unsigned int keymask;
 
 
-	/* Get the current mouse button state (useful and raw) */
+	/* Get the current mouse button states */
 
 	G.button_state = 0;
 	G.button_state = 0;
@@ -830,7 +843,7 @@ static void G_struct_init( void )
 		G.raw_button_state |= 4;
 
 	/* Define colors for the curves (this could be made user-configurable)
-	   - this must happen before color creation */
+	   - it must happen before color creation */
 
 	G.colors[ 0 ] = FL_TOMATO;
 	G.colors[ 1 ] = FL_GREEN;
@@ -901,6 +914,9 @@ static void G_struct_init( void )
 
 		create_colors( );
 
+		/* When use of the HTTP server is compiled in also create a hash of
+		   colors for speeding up creating an image file from the canvases */
+
 #if defined WITH_HTTP_SERVER
 		create_color_hash( );
 		G_stored->color_hash = G.color_hash;
@@ -925,6 +941,8 @@ static void G_struct_init( void )
 	G_2d.rw_max = - HUGE_VAL;
 	G_2d.is_scale_set = UNSET;
 
+	/* Create pixmaps for labels that need to be rotated by 90 degrees */
+
 	if ( G.dim & 1 && G_1d.label[ Y ] != NULL && G.font != NULL )
 		create_label_pixmap( &G_1d.y_axis, Y, G_1d.label[ Y ] );
 
@@ -933,6 +951,8 @@ static void G_struct_init( void )
 
 	if ( G.dim & 2 && G_2d.label[ Z ] != NULL && G.font != NULL )
 		create_label_pixmap( &G_2d.z_axis, Z, G_2d.label[ Z ] );
+
+	/* Initialize lots of stuff for the curves */
 
 	if ( G.dim & 1 )
 		G_init_curves_1d( );
@@ -1024,8 +1044,7 @@ static void G_init_curves_1d( void )
 
 		/* Set the scaling factors for the curve */
 
-		cv->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 )
-					   / ( double ) ( G_1d.nx - 1 );
+		cv->s2d[ X ] = ( double ) ( G_1d.canvas.w - 1 ) / ( G_1d.nx - 1 );
 		cv->s2d[ Y ] = ( double ) ( G_1d.canvas.h - 1 );
 
 		cv->shift[ X ] = cv->shift[ Y ] = 0.0;
@@ -1038,7 +1057,7 @@ static void G_init_curves_1d( void )
 
 		cv->points = SCALED_POINT_P T_malloc( G_1d.nx * sizeof *cv->points );
 
-		for ( j = 0; j < G_1d.nx; j++ )        /* no points are known in yet */
+		for ( j = 0; j < G_1d.nx; j++ )          /* no points are known yet */
 			cv->points[ j ].exist = UNSET;
 
 		cv->xpoints = XPOINT_P T_malloc( G_1d.nx * sizeof *cv->xpoints );
@@ -1141,10 +1160,8 @@ static void G_init_curves_2d( void )
 
 		/* Set the scaling factors for the curve */
 
-		cv->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 )
-					   / ( double ) ( G_2d.nx - 1 );
-		cv->s2d[ Y ] = ( double ) ( G_2d.canvas.h - 1 )
-					   / ( double ) ( G_2d.ny - 1 );
+		cv->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 ) / ( G_2d.nx - 1 );
+		cv->s2d[ Y ] = ( double ) ( G_2d.canvas.h - 1 ) / ( G_2d.ny - 1 );
 		cv->s2d[ Z ] = ( double ) ( G_2d.z_axis.h - 1 );
 
 		cv->shift[ X ] = cv->shift[ Y ] = cv->shift[ Z ] = 0.0;
@@ -1157,7 +1174,6 @@ static void G_init_curves_2d( void )
 		cv->rwc_delta[ Y ] = G_2d.rwc_delta[ Y ];
 
 		cv->count = 0;
-		cv->active = i == 0;
 		cv->can_undo = UNSET;
 
 		cv->is_fs = SET;
@@ -1177,6 +1193,8 @@ static void G_init_curves_2d( void )
 		cv->xpoints = XPOINT_P T_malloc( G_2d.nx * G_2d.ny
 										 * sizeof *cv->xpoints );
 	}
+
+	G_2d.curve_2d[ 0 ] = SET;          /* first curve is the active one */
 }
 
 
@@ -1258,7 +1276,7 @@ void create_label_pixmap( Canvas_T *c, int coord, char *label )
 						   i, j, 1, 1, j, k );
 	}
 
-	/* Finally get rid of the temporary pixmap */
+	/* Get rid of the temporary pixmap */
 
 	XFreePixmap( G.d, pm );
 }
@@ -1483,10 +1501,11 @@ static void graphics_free( void )
 		if ( G.dim & 1 )
 			if ( G_1d.label[ Y ] )
 				XFreePixmap( G.d, G_1d.label_pm );
+
 		if ( G.dim & 2 )
-		for ( coord = Y; coord <= Z; coord++ )
-			if ( G_2d.label[ coord ] )
-				XFreePixmap( G.d, G_2d.label_pm[ coord ] );
+			for ( coord = Y; coord <= Z; coord++ )
+				if ( G_2d.label[ coord ] )
+					XFreePixmap( G.d, G_2d.label_pm[ coord ] );
 	}
 }
 
@@ -1546,6 +1565,7 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
 		c->w = obj->w;
 	else
 		c->w = 1;
+
 	if ( obj->h > 0 )
 		c->h = obj->h;
 	else
@@ -1617,6 +1637,7 @@ void create_pixmap( Canvas_T *c )
 			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_RED ) );
 		else
 			XSetForeground( G.d, c->box_gc, fl_get_pixel( FL_BLACK ) );
+
 		XSetLineAttributes( G.d, c->box_gc, 0, LineOnOffDash, CapButt,
 							JoinMiter );
 		XSetDashes( G.d, c->box_gc, 0, dashes, 2 );
@@ -1659,6 +1680,7 @@ void redraw_axis_1d( int coord )
 	if ( coord == X )
 	{
 		c = &G_1d.x_axis;
+
 		if ( G_1d.label[ X ] != NULL && G.font != NULL )
 		{
 			width = XTextWidth( G.font, G_1d.label[ X ],
@@ -1671,6 +1693,7 @@ void redraw_axis_1d( int coord )
 	else
 	{
 		c = &G_1d.y_axis;
+
 		if ( G_1d.label[ coord ] != NULL && G.font != NULL )
 			XCopyArea( G.d, G_1d.label_pm, c->pm, c->gc, 0, 0,
 					   G_1d.label_w, G_1d.label_h, 0, 0 );
@@ -1684,6 +1707,7 @@ void redraw_axis_1d( int coord )
 	for ( i = 0; i < G_1d.nc; i++ )
 	{
 		cv = G_1d.curve[ i ];
+
 		if ( cv->active )
 			break;
 	}
