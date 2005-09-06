@@ -1194,7 +1194,7 @@ static void G_init_curves_2d( void )
 										 * sizeof *cv->xpoints );
 	}
 
-	G_2d.curve_2d[ 0 ] = SET;          /* first curve is the active one */
+	G_2d.curve_2d[ 0 ]->active = SET;       /* first curve is the active one */
 }
 
 
