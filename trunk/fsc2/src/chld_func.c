@@ -2113,7 +2113,10 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len )
 		old_state = fl_get_button( obj );
 
 		if ( state != -1 && old_state != state )
+		{
 			fl_trigger_object( obj );
+			fl_set_button( obj, state );
+		}
 
 		writer( C_CB_1D_REPLY, sizeof old_state, old_state );
 
@@ -2191,7 +2194,10 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
 		old_state = fl_get_button( obj );
 
 		if ( state != -1 && old_state != state )
+		{
 			fl_trigger_object( obj );
+			fl_set_button( obj, state );
+		}
 
 		writer( C_CB_2D_REPLY, sizeof old_state, old_state );
 

@@ -2204,7 +2204,7 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 	/* Make buttons work like radio buttons but also allow switching off
 	   all of them */
 
-	if ( data - 1 == G_2d.active_curve )     /* shown curve is switched off */
+	if ( data - 1 == G_2d.active_curve )      /* curve is to be switched off */
 	{
 		G_2d.curve_2d[ G_2d.active_curve ]->active = UNSET;
 		G_2d.active_curve = -1;

@@ -969,6 +969,38 @@ static bool parent_reader( Comm_Struct_T *header )
 			T_free( data );
 			break;
 
+		case C_CB_1D :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_cb_1d( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
+		case C_CB_2D :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_cb_2d( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
 		default :                     /* this better never gets triggered... */
 			fsc2_assert( 1 == 0 );
 	}
