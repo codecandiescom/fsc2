@@ -1091,9 +1091,11 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 			
 
 
-		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
-		case C_IDELETE_REPLY : case C_MDELETE_REPLY : case C_ODELETE_REPLY :
+		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
+		case C_SDELETE_REPLY : case C_IDELETE_REPLY :
+		case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
+		case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
 			return ( header->data.long_data != 0 ? OK : FAIL );
 	}
 
@@ -1290,7 +1292,8 @@ bool writer( int type, ... )
 			case C_ICHANGED : case C_MCREATE  : case C_MDELETE   :
 			case C_MCHOICE  : case C_MCHANGED : case C_TBCHANGED :
 			case C_TBWAIT   : case C_ODELETE  : case C_CLABEL    :
-			case C_XABLE    : case C_GETPOS   :
+			case C_XABLE    : case C_GETPOS   : case C_CB_1D     :
+			case C_CB_2D    :
 				header.data.len = va_arg( ap, ptrdiff_t );
 				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
 				{
@@ -1327,7 +1330,7 @@ bool writer( int type, ... )
 			case C_ICHANGED_REPLY  : case C_MCREATE_REPLY  :
 			case C_MCHOICE_REPLY   : case C_MCHANGED_REPLY :
 			case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY   :
-			case C_GETPOS_REPLY :
+			case C_GETPOS_REPLY    :
 				header.data.len = va_arg( ap, ptrdiff_t );
 
 				/* Don't try to continue writing on EPIPE (SIGPIPE is
@@ -1368,6 +1371,7 @@ bool writer( int type, ... )
 			case C_SDELETE_REPLY : case C_IDELETE_REPLY :
 			case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 			case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
+			case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
 				header.data.long_data = va_arg( ap, long );
 				va_end( ap );
 				return pipe_write( ( char * ) &header, sizeof header );

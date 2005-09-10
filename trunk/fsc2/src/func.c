@@ -202,9 +202,12 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
     { "clear_marker_1d",     f_clearmark_1d,    -4, ACCESS_EXP,  NULL, UNSET },
     { "clear_marker_2d",     f_clearmark_2d,    -4, ACCESS_EXP,  NULL, UNSET },
     { "mouse_position",      f_get_pos,         -1, ACCESS_EXP,  NULL, UNSET },
+    { "curve_button",        f_curve_button,    -2, ACCESS_EXP,  NULL, UNSET },
+    { "curve_button_1d",     f_curve_button_1d, -2, ACCESS_EXP,  NULL, UNSET },
+    { "curve_button_2d",     f_curve_button_2d, -2, ACCESS_EXP,  NULL, UNSET },
 	{ "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
-	{ NULL,              NULL,     	         0, 0,           NULL, UNSET }
+	{ NULL,                  NULL,     	         0, 0,           NULL, UNSET }
 	                   /* last set marks the very last entry, don't remove ! */
 };
 

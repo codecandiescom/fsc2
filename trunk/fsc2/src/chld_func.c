@@ -1381,6 +1381,8 @@ long *exp_mcreate( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the menu_delete() function.
  *--------------------------------------------------------------*/
 
 bool exp_mdelete( char *buffer, ptrdiff_t len )
@@ -1440,6 +1442,8 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the menu_choice() function.
  *--------------------------------------------------------------*/
 
 long *exp_mchoice( char *buffer, ptrdiff_t len )
@@ -1517,6 +1521,8 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the menu_changed() function.
  *--------------------------------------------------------------*/
 
 long *exp_mchanged( char *buffer, ptrdiff_t len )
@@ -1588,6 +1594,8 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the toolbox_changed() function.
  *--------------------------------------------------------------*/
 
 long *exp_tbchanged( char *buffer, ptrdiff_t len )
@@ -1666,6 +1674,8 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the toolbox_wait() function.
  *--------------------------------------------------------------*/
 
 long *exp_tbwait( char *buffer, ptrdiff_t len )
@@ -1943,6 +1953,8 @@ bool exp_xable( char *buffer, ptrdiff_t len )
 
 
 /*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the mouse_position() function.
  *--------------------------------------------------------------*/
 
 double *exp_getpos( char *buffer, ptrdiff_t len )
@@ -2032,6 +2044,162 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
 	}
 
 	return NULL;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the curve_button_1d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_cb_1d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_CB_1D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		long button;
+		long state;
+		long old_state;
+		FL_OBJECT *obj = NULL;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( &button, pos, sizeof button );	  /* button to be handled */
+		pos += sizeof button;
+
+		memcpy( &state, pos, sizeof state );	  /* what to do with button */
+		pos += sizeof state;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                        /* current file name */
+
+		switch ( button )
+		{
+			case 1 :
+				obj = GUI.run_form_1d->curve_1_button_1d;
+				break;
+
+			case 2 :
+				obj = GUI.run_form_1d->curve_2_button_1d;
+				break;
+
+			case 3 :
+				obj = GUI.run_form_1d->curve_3_button_1d;
+				break;
+
+			case 4 :
+				obj = GUI.run_form_1d->curve_4_button_1d;
+				break;
+
+			default :
+				fsc2_assert( 1 == 0 );
+		}
+
+		old_state = fl_get_button( obj );
+
+		if ( state != -1 && old_state != state )
+			fl_trigger_object( obj );
+
+		writer( C_CB_1D_REPLY, sizeof old_state, old_state );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the curve_button_2d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_cb_2d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_CB_2D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		long button;
+		long state;
+		long old_state;
+		FL_OBJECT *obj = NULL;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( &button, pos, sizeof button );	  /* button to be handled */
+		pos += sizeof button;
+
+		memcpy( &state, pos, sizeof state );	  /* what to do with button */
+		pos += sizeof state;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                        /* current file name */
+
+		switch ( button )
+		{
+			case 1 :
+				obj = GUI.run_form_2d->curve_1_button_2d;
+				break;
+
+			case 2 :
+				obj = GUI.run_form_2d->curve_2_button_2d;
+				break;
+
+			case 3 :
+				obj = GUI.run_form_2d->curve_3_button_2d;
+				break;
+
+			case 4 :
+				obj = GUI.run_form_2d->curve_4_button_2d;
+				break;
+
+			default :
+				fsc2_assert( 1 == 0 );
+		}
+
+		old_state = fl_get_button( obj );
+
+		if ( state != -1 && old_state != state )
+			fl_trigger_object( obj );
+
+		writer( C_CB_2D_REPLY, sizeof old_state, old_state );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
 }
 
 

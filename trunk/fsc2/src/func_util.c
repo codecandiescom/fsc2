@@ -653,8 +653,12 @@ Var_T *f_init_1d( Var_T *v )
 	G_1d.nx = DEFAULT_1D_X_POINTS;
 	G_1d.rwc_start[ X ] = ( double ) ARRAY_OFFSET;
 	G_1d.rwc_delta[ X ] = 1.0;
+
 	for ( i = X; i <= Y; i++ )
 		G_1d.label[ i ] = G_1d.label_orig[ i ] = NULL;
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+		G_1d.cb_state[ i ] = SET;
 
 	/* Now evaluate the arguments */
 
@@ -764,8 +768,12 @@ Var_T *f_init_2d( Var_T *v )
 	G_2d.ny = DEFAULT_2D_Y_POINTS;
 	G_2d.rwc_start[ X ] = G_2d.rwc_start[ Y ] = ( double ) ARRAY_OFFSET;
 	G_2d.rwc_delta[ X ] = G_2d.rwc_delta[ Y ] = 1.0;
+
 	for ( i = X; i <= Z; i++ )
 		G_2d.label[ i ] = G_2d.label_orig[ i ] = NULL;
+
+	for ( i = 0; i < MAX_CURVES; i++ )
+		G_2d.cb_state[ i ] = SET;
 
 	/* Now evaluate the arguments */
 
@@ -3812,6 +3820,260 @@ Var_T *f_get_pos( Var_T *v )
 	T_free( result ); 
 
 	return nv;
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for determining or changing the state of one of the
+ * 1D or 2D curve buttons.
+ *--------------------------------------------------------------*/
+
+Var_T *f_curve_button( Var_T *v )
+{
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There are no display buttons, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function curve_button_1d() or curve_button_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_curve_button_1d( v );
+	else
+		return f_curve_button_2d( v );
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for determining or changing the state of one of the
+ * 1D curve buttons.
+ *--------------------------------------------------------------*/
+
+Var_T *f_curve_button_1d( Var_T *v )
+{
+	long len = 0;                    /* total length of message to send */
+	long button;
+	long state = -1;
+	long old_state;
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There are no display buttons, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+    {
+        print( FATAL, "There's no 1D display, use curve_buttons_2d() "
+			   "instead.\n" );
+		THROW( EXCEPTION );
+    }
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing curve number.\n" );
+		THROW( EXCEPTION );
+	}
+
+	button = get_long( v, "curve number" );
+
+	if ( button < 1 || button > MAX_CURVES )
+	{
+		print( FATAL, "Invalid curve number (%ld).\n", button );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v != NULL )
+		state = ( long ) get_boolean( v );
+
+	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
+
+	if ( Fsc2_Internals.mode == TEST )
+	{
+		if ( button >= G_1d.nc ) {
+			print( FATAL, "Curve button number (%ld) too large, there are "
+				   "only %ld 1D curves.\n", button, G_1d.nc );
+			THROW( EXCEPTION );
+		}
+
+		old_state = G_1d.cb_state[ button - 1 ];
+
+		if ( state != -1 )
+			G_1d.cb_state[ button - 1 ] = ( bool ) state;
+
+		return vars_push( INT_VAR, old_state );
+	}
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof button + sizeof state + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &button, sizeof button );   /* button to handle */
+	pos += sizeof button;
+
+	memcpy( pos, &state, sizeof state );     /* what to do with button */
+	pos += sizeof state;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_cb_1d( buffer, pos - buffer ) );
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for determining or changing the state of one of the
+ * 2D curve buttons.
+ *--------------------------------------------------------------*/
+
+Var_T *f_curve_button_2d( Var_T *v )
+{
+	long len = 0;                    /* total length of message to send */
+	long button;
+	long state = -1;
+	long old_state;
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There are no display buttons, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+    {
+        print( FATAL, "There's no 2D display, use curve_buttons_1d() "
+			   "instead.\n" );
+		THROW( EXCEPTION );
+    }
+
+	button = get_long( v, "curve number" );
+
+	if ( button < 1 || button > MAX_CURVES )
+	{
+		print( FATAL, "Invalid curve number (%ld).\n", button );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v != NULL )
+		state = ( long ) get_boolean( v );
+
+	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
+
+	if ( Fsc2_Internals.mode == TEST )
+	{
+		if ( button >= G_2d.nc ) {
+			print( FATAL, "Curve button number (%ld) too large, there are "
+				   "only %ld 2D curves.\n", button, G_1d.nc );
+			THROW( EXCEPTION );
+		}
+
+		old_state = G_2d.cb_state[ button - 1 ];
+
+		if ( state != -1 )
+			G_2d.cb_state[ button - 1 ] = ( bool ) state;
+
+		return vars_push( INT_VAR, old_state );
+	}
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof button + sizeof state + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &button, sizeof button );   /* button to handle */
+	pos += sizeof button;
+
+	memcpy( pos, &state, sizeof state );     /* what to do with button */
+	pos += sizeof state;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_cb_2d( buffer, pos - buffer ) );
 }
 
 
