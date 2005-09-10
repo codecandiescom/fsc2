@@ -33,6 +33,7 @@
 
 %option noyywrap nounput
 
+
 %{
 
 /* We declare our own input routine to make the lexer read the input byte
