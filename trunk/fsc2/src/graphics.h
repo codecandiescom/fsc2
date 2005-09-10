@@ -293,6 +293,8 @@ struct Graphics_1d {
 	double rwc_delta[ 2 ];  /* real world coordinate increment values */
 	char *label[ 2 ];       /* label for x- and y-axis */
 
+	bool cb_state[ MAX_CURVES ];  /* states of curve buttons */
+
     long nx_orig;
     long ny_orig;
     double rwc_start_orig[ 2 ];
@@ -329,6 +331,8 @@ struct Graphics_2d {
 	double rwc_start[ 3 ];  /* real world coordinate start values */
 	double rwc_delta[ 3 ];  /* real world coordinate increment values */
 	char *label[ 6 ];       /* label for x-, y- and z-axis */
+
+	bool cb_state[ MAX_CURVES ];  /* states of curve buttons */
 
     long nx_orig;
     long ny_orig;

@@ -2845,7 +2845,7 @@ Var_T *f_clearcv( Var_T *v )
 	if ( G.dim == 3 )
 	{
 		print( FATAL, "Both 1D- and 2D-display are in use, use either "
-			   "function clear_curve_1d() or clear__curve_2d().\n" );
+			   "function clear_curve_1d() or clear_curve_2d().\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -3919,7 +3919,7 @@ Var_T *f_curve_button_1d( Var_T *v )
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		if ( button >= G_1d.nc ) {
+		if ( button > G_1d.nc ) {
 			print( FATAL, "Curve button number (%ld) too large, there are "
 				   "only %ld 1D curves.\n", button, G_1d.nc );
 			THROW( EXCEPTION );
@@ -4000,7 +4000,7 @@ Var_T *f_curve_button_2d( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	if ( ! ( G.dim & 1 ) )
+	if ( ! ( G.dim & 2 ) )
     {
         print( FATAL, "There's no 2D display, use curve_buttons_1d() "
 			   "instead.\n" );
@@ -4026,9 +4026,9 @@ Var_T *f_curve_button_2d( Var_T *v )
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		if ( button >= G_2d.nc ) {
+		if ( button > G_2d.nc ) {
 			print( FATAL, "Curve button number (%ld) too large, there are "
-				   "only %ld 2D curves.\n", button, G_1d.nc );
+				   "only %ld 2D curves.\n", button, G_2d.nc );
 			THROW( EXCEPTION );
 		}
 
