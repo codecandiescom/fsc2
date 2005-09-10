@@ -3979,7 +3979,7 @@ Var_T *f_curve_button_2d( Var_T *v )
 {
 	long len = 0;                    /* total length of message to send */
 	long button;
-	long state = -1;
+	long state = -1;                 /* default: ask for state */
 	long old_state;
 	char *buffer, *pos;
 
