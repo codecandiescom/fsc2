@@ -704,10 +704,10 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function can be used for 2D graphics and draws a box in the display
 window. It expects at least two arguments, integer numbers defining the
 @i{x}- and @i{y}-position of the marker to be drawn. As a third argument
-the curve number can be specified - if it is missing the marker is drawn
-over the currently displayed curve. The fourth (optional) argument is
-the color of the marker, here one may specify either an integer number
-or a string:
+the curve number can be specified - if it is missing or as the value
+@code{0} the marker is drawn over the currently displayed curve. The
+fourth (optional) argument is the color of the marker, here one may
+specify either an integer number or a string:
 @multitable @columnfractions 0.15 .35 .35
 @item Number @tab String @tab Color
 @item @code{0} @tab @code{"WHITE"} @tab white
