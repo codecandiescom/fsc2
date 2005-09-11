@@ -2118,7 +2118,7 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len )
 			fl_set_button( obj, state );
 		}
 
-		writer( C_CB_1D_REPLY, sizeof old_state, old_state );
+		writer( C_CB_1D_REPLY, old_state );
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
@@ -2199,7 +2199,7 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
 			fl_set_button( obj, state );
 		}
 
-		writer( C_CB_2D_REPLY, sizeof old_state, old_state );
+		writer( C_CB_2D_REPLY, old_state );
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;
