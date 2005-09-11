@@ -2169,34 +2169,49 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
 
 		EDL.Fname = pos;	                        /* current file name */
 
-		switch ( button )
+		if ( button == 0 )
 		{
-			case 1 :
-				obj = GUI.run_form_2d->curve_1_button_2d;
-				break;
-
-			case 2 :
-				obj = GUI.run_form_2d->curve_2_button_2d;
-				break;
-
-			case 3 :
-				obj = GUI.run_form_2d->curve_3_button_2d;
-				break;
-
-			case 4 :
-				obj = GUI.run_form_2d->curve_4_button_2d;
-				break;
-
-			default :
-				fsc2_assert( 1 == 0 );
+			old_state = 0;
+			if ( fl_get_button( GUI.run_form_2d->curve_1_button_2d ) )
+				old_state = 1;
+			else if ( fl_get_button( GUI.run_form_2d->curve_2_button_2d ) )
+				old_state = 2;
+			else if ( fl_get_button( GUI.run_form_2d->curve_3_button_2d ) )
+				old_state = 3;
+			else if ( fl_get_button( GUI.run_form_2d->curve_4_button_2d ) )
+				old_state = 4;
 		}
-
-		old_state = fl_get_button( obj );
-
-		if ( state != -1 && old_state != state )
+		else
 		{
-			fl_trigger_object( obj );
-			fl_set_button( obj, state );
+			switch ( button )
+			{
+				case 1 :
+					obj = GUI.run_form_2d->curve_1_button_2d;
+					break;
+
+				case 2 :
+					obj = GUI.run_form_2d->curve_2_button_2d;
+					break;
+
+				case 3 :
+					obj = GUI.run_form_2d->curve_3_button_2d;
+					break;
+
+				case 4 :
+					obj = GUI.run_form_2d->curve_4_button_2d;
+					break;
+
+				default :
+					fsc2_assert( 1 == 0 );
+			}
+
+			old_state = fl_get_button( obj );
+
+			if ( state != -1 && old_state != state )
+			{
+				fl_trigger_object( obj );
+				fl_set_button( obj, state );
+			}
 		}
 
 		writer( C_CB_2D_REPLY, old_state );

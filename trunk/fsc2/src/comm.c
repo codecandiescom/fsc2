@@ -1120,15 +1120,15 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 				( ( Input_Res_T * ) ret )->val.sptr = retstr;
 			}
 			return OK;
-			
-
 
 		case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
 		case C_SDELETE_REPLY : case C_IDELETE_REPLY :
 		case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
-		case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
 			return ( header->data.long_data != 0 ? OK : FAIL );
+
+		case C_CB_1D_REPLY :  case C_CB_2D_REPLY :
+			return header->data.long_data;
 	}
 
 	fsc2_assert( 1 == 0 );            /* this better never gets triggered... */

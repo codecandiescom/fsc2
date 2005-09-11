@@ -3407,7 +3407,7 @@ Var_T *f_setmark_2d( Var_T *v )
 
 		if ( curve < 0 || curve >= G_2d.nc )
 		{
-			print( SEVERE, "Can't clear marker on 2D curve %ld, curve does "
+			print( SEVERE, "Can't set marker on 2D curve %ld, curve does "
 				   "not exist.\n", curve + 1 );
 			return vars_push( INT_VAR, 0L );
 		}
@@ -3982,6 +3982,7 @@ Var_T *f_curve_button_2d( Var_T *v )
 	long state = -1;                 /* default: ask for state */
 	long old_state;
 	char *buffer, *pos;
+	int i;
 
 
 	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
@@ -4007,20 +4008,25 @@ Var_T *f_curve_button_2d( Var_T *v )
 		THROW( EXCEPTION );
     }
 
-	button = get_long( v, "curve number" );
-
-	if ( button < 1 || button > MAX_CURVES )
+	if ( v == NULL )
+		button = 0;
+	else
 	{
-		print( FATAL, "Invalid curve number (%ld).\n", button );
-		THROW( EXCEPTION );
+		button = get_long( v, "curve number" );
+
+		if ( button < 1 || button > MAX_CURVES )
+		{
+			print( FATAL, "Invalid curve number (%ld).\n", button );
+			THROW( EXCEPTION );
+		}
+
+		v = vars_pop( v );
+
+		if ( v != NULL )
+			state = ( long ) get_boolean( v );
+
+		too_many_arguments( v );
 	}
-
-	v = vars_pop( v );
-
-	if ( v != NULL )
-		state = ( long ) get_boolean( v );
-
-	too_many_arguments( v );
 
 	/* In a test run this all there is to be done */
 
@@ -4032,10 +4038,22 @@ Var_T *f_curve_button_2d( Var_T *v )
 			THROW( EXCEPTION );
 		}
 
-		old_state = G_2d.cb_state[ button - 1 ];
+		if ( button != 0 )
+		{
+			old_state = G_2d.cb_state[ button - 1 ];
 
-		if ( state != -1 )
-			G_2d.cb_state[ button - 1 ] = ( bool ) state;
+			if ( state != -1 )
+				G_2d.cb_state[ button - 1 ] = ( bool ) state;
+		}
+		else
+		{
+			old_state = 0;
+			for ( i = 0; i < G_2d.nc; i++ )
+				if ( G_2d.cb_state[ i ] ) {
+					old_state = i + 1;
+					break;
+				}
+		}
 
 		return vars_push( INT_VAR, old_state );
 	}
