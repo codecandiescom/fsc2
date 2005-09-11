@@ -444,7 +444,7 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 	long ldata;
 	double new_rwc_delta_y;
 	double old_rw_min;
-	double fac, off;
+	double factor, offset;
 	Curve_1d_T *cv;
 	long i, j, end_index;
 	Scaled_Point_T *sp;
@@ -513,8 +513,8 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 
 		if ( G_1d.is_scale_set )
 		{
-			fac = G_1d.rwc_delta[ Y ] / new_rwc_delta_y;
-			off = ( old_rw_min - G_1d.rw_min ) / new_rwc_delta_y;
+			factor = G_1d.rwc_delta[ Y ] / new_rwc_delta_y;
+			offset = ( old_rw_min - G_1d.rw_min ) / new_rwc_delta_y;
 
 			for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 				  cv = G_1d.curve[ ++i ] )
@@ -522,15 +522,15 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 				for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 					if ( sp->exist )
 					{
-						sp->v = fac * sp->v + off;
+						sp->v = factor * sp->v + offset;
 						count--;
 					}
 
 				if ( G_1d.is_fs )
 					continue;
 
-				cv->s2d[ Y ]  /= fac;
-				cv->shift[ Y ] = fac * cv->shift[ Y ] - off;
+				cv->s2d[ Y ]  /= factor;
+				cv->shift[ Y ] = factor * cv->shift[ Y ] - offset;
 			}
 		}
 
@@ -539,15 +539,15 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
 
 		if ( ! G_1d.is_scale_set && G_1d.rw_max != G_1d.rw_min )
 		{
-			fac = 1.0 / new_rwc_delta_y;
-			off = - G_1d.rw_min / new_rwc_delta_y;
+			factor = 1.0 / new_rwc_delta_y;
+			offset = - G_1d.rw_min / new_rwc_delta_y;
 
 			for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 				  cv = G_1d.curve[ ++i ] )
 				for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 					if ( sp->exist )
 					{
-						  sp->v = fac * sp->v + off;
+						  sp->v = factor * sp->v + offset;
 						  count--;
 					}
 
@@ -628,7 +628,7 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 	double data;
 	double new_rwc_delta_y;
 	double old_rw_min;
-	double fac, off;
+	double factor, offset;
 	Curve_1d_T *cv;
 	long i;
 	Scaled_Point_T *sp, *sp1, *sp2;
@@ -652,23 +652,23 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 
 		if ( G_1d.is_scale_set )
 		{
-			fac = G_1d.rwc_delta[ Y ] / new_rwc_delta_y;
-			off = ( old_rw_min - G_1d.rw_min ) / new_rwc_delta_y;
+			factor = G_1d.rwc_delta[ Y ] / new_rwc_delta_y;
+			offset = ( old_rw_min - G_1d.rw_min ) / new_rwc_delta_y;
 
 			for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 				  cv = G_1d.curve[ ++i ] )
 			{
 				for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 				{
-					sp->v = fac * sp->v + off;
+					sp->v = factor * sp->v + offset;
 					count--;
 				}
 
 				if ( G_1d.is_fs )
 					continue;
 
-				cv->s2d[ Y ]  /= fac;
-				cv->shift[ Y ] = fac * cv->shift[ Y ] - off;
+				cv->s2d[ Y ]  /= factor;
+				cv->shift[ Y ] = factor * cv->shift[ Y ] - offset;
 			}
 		}
 
@@ -677,14 +677,14 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
 
 		if ( ! G_1d.is_scale_set && G_1d.rw_max != G_1d.rw_min )
 		{
-			fac = 1.0 / new_rwc_delta_y;
-			off = - G_1d.rw_min / new_rwc_delta_y;
+			factor = 1.0 / new_rwc_delta_y;
+			offset = - G_1d.rw_min / new_rwc_delta_y;
 
 			for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
 				  cv = G_1d.curve[ ++i ] )
 				for ( sp = cv->points, count = cv->count; count > 0;
 					  sp++, count-- )
-					sp->v = fac * sp->v + off;
+					sp->v = factor * sp->v + offset;
 
 			Scale_1d_changed[ X ] = SET;
 			G_1d.is_scale_set = SET;
@@ -821,7 +821,7 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 	char *cur_ptr;
 	double data;
 	long ldata;
-	double new_rwc_delta_z, fac, off, old_rw_min;
+	double new_rwc_delta_z, factor, offset, old_rw_min;
 	Curve_2d_T *cv;
 	long i, j, end_index;
 	Scaled_Point_T *sp;
@@ -896,21 +896,21 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 
 		if ( cv->is_scale_set )
 		{
-			fac = cv->rwc_delta[ Z ] / new_rwc_delta_z;
-			off = ( old_rw_min - cv->rw_min ) / new_rwc_delta_z;
+			factor = cv->rwc_delta[ Z ] / new_rwc_delta_z;
+			offset = ( old_rw_min - cv->rw_min ) / new_rwc_delta_z;
 
 			for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 				if ( sp->exist )
 				{
-					sp->v = fac * sp->v + off;
+					sp->v = factor * sp->v + offset;
 					count--;
 				}
 
 			if ( ! cv->is_fs )
 			{
-				cv->s2d[ Z ] /= fac;
-				cv->shift[ Z ] = fac * cv->shift[ Z ] - off;
-				cv->z_factor /= fac;
+				cv->s2d[ Z ] /= factor;
+				cv->shift[ Z ] = factor * cv->shift[ Z ] - offset;
+				cv->z_factor /= factor;
 			}
 		}
 
@@ -920,13 +920,13 @@ static void accept_2d_data( long x_index, long y_index, long curve,
 
 		if ( ! cv->is_scale_set && cv->rw_max != cv->rw_min )
 		{
-			fac = 1.0 / new_rwc_delta_z;
-			off = - cv->rw_min / new_rwc_delta_z;
+			factor = 1.0 / new_rwc_delta_z;
+			offset = - cv->rw_min / new_rwc_delta_z;
 
 			for ( sp = cv->points, count = cv->count; count > 0; sp++ )
 				if ( sp->exist )
 				{
-					sp->v = fac * sp->v + off;
+					sp->v = factor * sp->v + offset;
 					count--;
 				}
 
