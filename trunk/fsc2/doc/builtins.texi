@@ -534,7 +534,7 @@ be changed from within as @code{EDL} script. It accepts up to two
 strings for the @i{x}- and @i{y}-axis labels. To leave a label unchanged
 pass the function an empty string, i.e.@ @code{""}. If no label should
 be drawn pass it a string that just contains one (or more) space
-characters, i.e.@: @code{" "}.
+characters, i.e.@: @w{@code{" "}}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -549,7 +549,7 @@ as @code{EDL} script. It accepts up to three strings for the @i{x}-,
 @i{y}-axis and @i{z}-axis label. To leave a label unchanged pass the
 function an empty string, i.e.@ @code{""}. If no label should be drawn
 pass it a string that just contains one (or more) space characters,
-i.e.@: @code{" "}.
+i.e.@: @w{@code{" "}}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
