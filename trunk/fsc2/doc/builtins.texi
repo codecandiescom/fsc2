@@ -154,6 +154,9 @@ fit into the display window anymore.
 @item @ref{rescale_1d()}
 @item @ref{rescale_2d()}
 @item @ref{rescale()}
+@item @ref(zoom_1d()}
+@item @ref(zoom_2d()}
+@item @ref(zoom()}
 @item @ref{clear_curve_1d()}
 @item @ref{clear_curve_2d()}
 @item @ref{clear_curve()}
@@ -526,6 +529,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
+
 @anchor{change_label_1d()}
 @findex change_label_1d()
 @item change_label_1d()
@@ -624,6 +628,70 @@ new number of points in @i{x}-direction. In the 2D-case the function
 accepts two arguments, one for the number of points to be displayed in
 @i{x}-direction and the second for the number of points in
 @i{y}-direction.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{zoom_1d()}
+@findex zoom_1d()
+@item zoom_1d()
+This function can be used to zoom into (or out of) the 1D display window
+as well as shifting the contents of the window, just like you can do
+using the mouse. It expects at least one and up to four arguments. The
+first one is either the point number of the point to show at the leftmost
+position in the window. The second is the number of points to be shown
+within the 1D window. The third value is the smallest @i{y}-value still
+to be shown in the 1D window. The fourth and last optional argument is
+the span of @i{y}-values to show in the 1D window. Keep in mind that both
+the number of points to be shown in @i{x}-direction as well as the
+@i{y}-span must be numbers larger than @code{0}. If an argument is not
+given or is given as an arbitrary string (e.g. @code{"KEEP"}) the
+corresponding value remains unchanged.
+
+The function returns the value @code{1} to indicate success or @code{0}
+if it is impossible to set the zoom (since no scaling has been set for
+the 1D window yet).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+
+@anchor{zoom_2d()}
+@findex zoom_2d()
+@item zoom_2d()
+This function can be used to zoom into (or out of) the 2D display window
+as well as shifting the contents of the window, just like you can do
+using the mouse. It expects at least two and up to seven arguments. The
+first one is the number of the curve to be zoomed. This must be a number
+between @code{1} and the maximum curve number (as set by the call of
+@code{init_2d()}). The second and third argument are the @i{x}-coordinate
+of the leftmost point to be displayed within the 2D wndow and the number
+of points to be displayed in @i{x}-direction. The fourth and fifth argument
+are the @i{y}-coordinate of the point with the smallest @i{y}-value and the
+number of points to be displayed. The sixth and seventh argument determine the
+@i{z}-range to be displayed, the sixth argument being the lowest-valued
+@{z}-value and the last argument the @i{z}-span. Both the number of points
+in @i{x}- and @i{y}-direction and the @i{z}-span must be numbers larger
+than @code{0}. If an argument is not given or is given as an arbitrary
+string (e.g. @code{"KEEP"}) the corresponding value remains unchanged.
+
+The function returns the value @code{1} to indicate success or @code{0}
+if it is impossible to set the zoom (since no scaling has been set for
+the 1D window yet).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{zoom()}
+@findex zoom()
+@item zoom()
+This function can be called instead of @code{zoom_1d()} or @code{zoom_2d()}
+when only either a 1D- or a 2D-display is used (but not both at once). In
+the 1D-case the function must be called with at least two and up to four
+arguments, in the 2D case with at least two and a maximum of seven arguments.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
