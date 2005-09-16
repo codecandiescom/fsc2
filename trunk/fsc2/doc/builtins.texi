@@ -154,9 +154,9 @@ fit into the display window anymore.
 @item @ref{rescale_1d()}
 @item @ref{rescale_2d()}
 @item @ref{rescale()}
-@item @ref(zoom_1d()}
-@item @ref(zoom_2d()}
-@item @ref(zoom()}
+@item @ref{zoom_1d()}
+@item @ref{zoom_2d()}
+@item @ref{zoom()}
 @item @ref{clear_curve_1d()}
 @item @ref{clear_curve_2d()}
 @item @ref{clear_curve()}
