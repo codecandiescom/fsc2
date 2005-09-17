@@ -2255,13 +2255,10 @@ bool exp_zoom_1d( char *buffer, ptrdiff_t len )
 		memcpy( keep, pos, sizeof keep );         /* flags */
 		pos += sizeof keep;
 
-		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
 		pos += sizeof EDL.Lc;
 
-		EDL.Fname = pos;	                        /* current file name */
-
-		user_zoom_1d( d[ 0 ], keep[ 0 ], d[ 1 ], keep[ 1 ],
-					  d[ 2 ], keep[ 2 ], d[ 3 ], keep[ 3 ] );
+		EDL.Fname = pos;	                      /* current file name */
 
 		writer( C_ZOOM_1D_REPLY,
 				( long ) user_zoom_1d( d[ 0 ], keep[ 0 ],
@@ -2315,10 +2312,10 @@ bool exp_zoom_2d( char *buffer, ptrdiff_t len )
 		memcpy( keep, pos, sizeof keep );         /* flags */
 		pos += sizeof keep;
 
-		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
 		pos += sizeof EDL.Lc;
 
-		EDL.Fname = pos;	                        /* current file name */
+		EDL.Fname = pos;	                      /* current file name */
 
 		writer( C_ZOOM_2D_REPLY, 
 				( long ) user_zoom_2d( curve,
