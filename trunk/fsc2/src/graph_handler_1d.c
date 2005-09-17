@@ -703,6 +703,62 @@ static bool change_y_range_1d( Canvas_T *c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
+bool user_zoom_1d( double x, bool keep_x, double xw, bool keep_xw,
+				   double y, bool keep_y, double yw, bool keep_yw )
+{
+	long i;
+	Curve_1d_T *cv;
+
+
+	if ( ! G_1d.is_scale_set )
+		return FAIL;
+
+	for ( i = 0; i < G_1d.nc; i++ )
+	{
+		cv = G_1d.curve[ i ];
+
+		if ( ! cv->active )
+			continue;
+
+		save_scale_state_1d( cv );
+		cv->can_undo = SET;
+
+		if ( ! keep_x )
+			cv->shift[ X ] = - x;
+
+		if ( ! keep_xw )
+			cv->s2d[ X ] = ( G_1d.canvas.w - 1 ) / --xw;
+
+		if ( ! keep_y )
+			cv->shift[ Y ] = ( G_1d.rw_min - y ) / G_1d.rwc_delta[ Y ];
+
+		if ( ! keep_yw )
+			cv->s2d[ Y ] = G_1d.rwc_delta[ Y ] * ( G_1d.canvas.h - 1 ) / yw;
+
+		recalc_XPoints_of_curve_1d( cv );
+	}
+
+	if ( G_1d.is_fs )
+	{
+		G_1d.is_fs = UNSET;
+		fl_set_button( GUI.run_form_1d->full_scale_button_1d, 0 );
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_1d->full_scale_button_1d,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
+	}
+
+	redraw_canvas_1d( &G_1d.x_axis );
+	redraw_canvas_1d( &G_1d.y_axis );
+	redraw_canvas_1d( &G_1d.canvas );
+
+	return OK;
+}
+
+
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
+
 static bool change_xy_range_1d( Canvas_T *c )
 {
 	long i;

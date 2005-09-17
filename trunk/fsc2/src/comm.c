@@ -1001,6 +1001,38 @@ static bool parent_reader( Comm_Struct_T *header )
 			T_free( data );
 			break;
 
+		case C_ZOOM_1D :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_zoom_1d( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
+		case C_ZOOM_2D :
+			TRY
+			{
+				data = CHAR_P T_malloc( ( size_t ) header->data.len );
+				pipe_read( data, ( size_t ) header->data.len );
+				exp_zoom_2d( data, header->data.len );
+				TRY_SUCCESS;
+			}
+			OTHERWISE
+			{
+				T_free( data );
+				return FAIL;
+			}
+			T_free( data );
+			break;
+
 		default :                     /* this better never gets triggered... */
 			fsc2_assert( 1 == 0 );
 	}
@@ -1125,6 +1157,7 @@ static bool child_reader( void *ret, Comm_Struct_T *header )
 		case C_SDELETE_REPLY : case C_IDELETE_REPLY :
 		case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 		case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
+		case C_ZOOM_1D_REPLY  : case C_ZOOM_2D_REPLY   :
 			return ( header->data.long_data != 0 ? OK : FAIL );
 
 		case C_CB_1D_REPLY :  case C_CB_2D_REPLY :
@@ -1325,7 +1358,8 @@ bool writer( int type, ... )
 			case C_MCHOICE  : case C_MCHANGED : case C_TBCHANGED :
 			case C_TBWAIT   : case C_ODELETE  : case C_CLABEL    :
 			case C_XABLE    : case C_GETPOS   : case C_CB_1D     :
-			case C_CB_2D    :
+			case C_CB_2D    : case C_ZOOM_1D  : case C_ZOOM_2D   :
+
 				header.data.len = va_arg( ap, ptrdiff_t );
 				if ( ! pipe_write( ( char * ) &header, sizeof header ) )
 				{
@@ -1404,6 +1438,7 @@ bool writer( int type, ... )
 			case C_MDELETE_REPLY : case C_ODELETE_REPLY :
 			case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
 			case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
+			case C_ZOOM_1D_REPLY : case C_ZOOM_2D_REPLY   :
 				header.data.long_data = va_arg( ap, long );
 				va_end( ap );
 				return pipe_write( ( char * ) &header, sizeof header );

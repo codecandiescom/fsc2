@@ -132,10 +132,13 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
 
 	if ( obj == GUI.run_form_2d->x_axis_2d )        /* in x-axis window */
 		G.drag_canvas = DRAG_2D_X;
+
 	if ( obj == GUI.run_form_2d->y_axis_2d )        /* in y-axis window */
 		G.drag_canvas = DRAG_2D_Y;
+
 	if ( obj == GUI.run_form_2d->z_axis_2d )        /* in z-axis window */
 		G.drag_canvas = DRAG_2D_Z;
+
 	if ( obj == GUI.run_form_2d->canvas_2d )        /* in canvas window */
 		G.drag_canvas = DRAG_2D_C;
 
@@ -314,11 +317,13 @@ static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
 
 	if ( c->ppos[ X ] < 0 )
 		c->ppos[ X ] = 0;
+
 	if ( c->ppos[ X ] >= ( int ) G_2d.canvas.w )
 		c->ppos[ X ] = G_2d.canvas.w - 1;
 
 	if ( c->ppos[ Y ] < 0 )
 		c->ppos[ Y ] = 0;
+
 	if ( c != &G_2d.z_axis )
 	{
 		if ( c->ppos[ Y ] >= ( int ) G_2d.canvas.h )
@@ -733,6 +738,84 @@ static bool change_y_range_2d( Canvas_T *c )
 	cv->needs_recalc = SET;
 
 	return SET;
+}
+
+
+/*----------------------------------------------------------*
+ *----------------------------------------------------------*/
+
+bool user_zoom_2d( long curve,
+				   double x, bool keep_x, double xw, bool keep_xw,
+				   double y, bool keep_y, double yw, bool keep_yw,
+				   double z, bool keep_z, double zw, bool keep_zw )
+{
+	Curve_2d_T *cv;
+
+
+	cv = G_2d.curve_2d[ curve ];
+
+	if ( ! cv->is_scale_set )
+		return FAIL;
+
+	save_scale_state_2d( cv );
+	cv->can_undo = SET;
+
+	if ( ! ( keep_x && keep_xw ) )
+	{
+		if ( ! keep_x )
+			cv->shift[ X ] = - x;
+
+		if ( ! keep_xw )
+			cv->s2d[ X ] = ( G_2d.canvas.w - 1 ) / --xw;
+
+		if ( cv == G_2d.curve_2d[ G_2d.active_curve ] )
+			redraw_canvas_2d( &G_2d.x_axis );
+	}
+
+	if ( ! ( keep_y && keep_yw ) )
+	{
+		if ( ! keep_y )
+			cv->shift[ Y ] = - y;
+
+		if ( ! keep_yw )
+			cv->s2d[ Y ] = ( G_2d.canvas.h - 1 ) / --yw;
+
+		if ( cv == G_2d.curve_2d[ G_2d.active_curve ] )
+			redraw_canvas_2d( &G_2d.y_axis );
+	}
+
+	if ( ! ( keep_z && keep_zw ) )
+	{
+		if ( ! keep_z )
+			cv->shift[ Z ] = ( cv->rw_min - z ) / cv->rwc_delta[ Z ];
+
+		if ( ! keep_zw )
+		{
+			cv->z_factor = cv->rwc_delta[ Z ] / zw;
+			cv->s2d[ Z ] = ( G_2d.z_axis.h - 1 ) * cv->z_factor;
+		}
+
+		if ( cv == G_2d.curve_2d[ G_2d.active_curve ] )
+			redraw_canvas_2d( &G_2d.z_axis );
+	}
+
+	cv->needs_recalc |= 1;
+
+	if ( cv == G_2d.curve_2d[ G_2d.active_curve ] && cv->is_fs )
+	{
+		fl_set_button( GUI.run_form_2d->full_scale_button_2d, 0 );
+		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
+			fl_set_object_helper( GUI.run_form_2d->full_scale_button_2d,
+								  "Rescale curves to fit into the window\n"
+								  "and switch on automatic rescaling" );
+	}
+
+	cv->is_fs = UNSET;
+
+	if ( cv == G_2d.curve_2d[ G_2d.active_curve ] )
+		redraw_canvas_2d( &G_2d.canvas );
+
+	return OK;
 }
 
 

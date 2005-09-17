@@ -4020,6 +4020,12 @@ Var_T *f_curve_button_2d( Var_T *v )
 			THROW( EXCEPTION );
 		}
 
+		if ( button > G_2d.nc ) {
+			print( FATAL, "Curve button number (%ld) too large, there are "
+				   "only %ld 2D curves.\n", button, G_2d.nc );
+			THROW( EXCEPTION );
+		}
+
 		v = vars_pop( v );
 
 		if ( v != NULL )
@@ -4032,12 +4038,6 @@ Var_T *f_curve_button_2d( Var_T *v )
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		if ( button > G_2d.nc ) {
-			print( FATAL, "Curve button number (%ld) too large, there are "
-				   "only %ld 2D curves.\n", button, G_2d.nc );
-			THROW( EXCEPTION );
-		}
-
 		if ( button != 0 )
 		{
 			old_state = G_2d.cb_state[ button - 1 ];
@@ -4093,6 +4093,322 @@ Var_T *f_curve_button_2d( Var_T *v )
 
 	return vars_push( INT_VAR, ( long ) exp_cb_2d( buffer, pos - buffer ) );
 }
+
+
+/*--------------------------------------------------------------*
+ * Function for setting a zoom and shift of the displayed data.
+ *--------------------------------------------------------------*/
+
+Var_T *f_zoom( Var_T *v )
+{
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There are no display buttons, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function zoom_1d() or zoom_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_zoom_1d( v );
+	else
+		return f_zoom_2d( v );
+}
+
+
+/*-----------------------------------------------------------------*
+ * Function for setting a zoom and shift of the displayed 1D data.
+ *-----------------------------------------------------------------*/
+
+Var_T *f_zoom_1d( Var_T *v )
+{
+	double d[ 4 ];
+	bool keep[ 4 ] = { SET, SET, SET, SET };
+	size_t i;
+	long len = 0;                    /* total length of message to send */
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "Can't zoom, missing graphics initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+    {
+        print( FATAL, "There's no 1D display, use zoom_2d() instead.\n" );
+		THROW( EXCEPTION );
+    }
+	
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	for ( i = X; i <= Y; i++ ) {
+		if ( v == NULL )
+			break;
+
+		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+		
+		if ( v->type != STR_VAR )
+		{
+			d[ 2 * i ] = get_double( v, NULL );
+			if ( i == X )
+				d[ 2 * i ]--;
+			keep[ 2 * i ] = UNSET;
+		}
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+			break;
+
+		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+		
+		if ( v->type != STR_VAR )
+		{
+			d[ 2 * i + 1 ] = get_double( v, NULL );
+
+			if ( i == X && d[ 2 * i + 1 ] <= 1.0 )
+			{
+				print( FATAL, "Number of points in %x-direction isn't "
+					   "larger than 1.\n" );
+				THROW( EXCEPTION );
+			}
+			else if ( i == Y && d[ 2 * i + 1 ] <= 0.0 )
+			{
+				print( FATAL, "Invalid zero or negative %z-span.\n" );
+				THROW( EXCEPTION );
+			}
+
+			keep[ 2 * i + 1 ] = UNSET;
+		}
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+			break;
+	}
+
+	too_many_arguments( v );
+
+	for ( i = 0; i < 2 * Y; i++ )
+		if ( ! keep[ i ] )
+			break;
+
+	if ( i == 2 * Y || Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof d + sizeof keep + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, d, sizeof d );              /* dimensions to set */
+	pos += sizeof d;
+
+	memcpy( pos, keep, sizeof keep );        /* flags */
+	pos += sizeof keep;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_zoom_1d( buffer, pos - buffer ) );
+}
+
+
+/*-----------------------------------------------------------------*
+ * Function for setting a zoom and shift of the displayed 2D data.
+ *-----------------------------------------------------------------*/
+
+Var_T *f_zoom_2d( Var_T *v )
+{
+	long curve;
+	double d[ 6 ];
+	bool keep[ 6 ] = { SET, SET, SET, SET, SET, SET };
+	size_t i;
+	long len = 0;                    /* total length of message to send */
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "Can't zoom, missing graphics initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+    {
+        print( FATAL, "There's no 2D display, use zoom_1d() instead.\n" );
+		THROW( EXCEPTION );
+    }
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	curve = get_long( v, "curve number" );
+
+	if ( curve < 1 || curve > MAX_CURVES )
+	{
+		print( FATAL, "Invalid curve number (%ld).\n", curve );
+		THROW( EXCEPTION );
+	}
+
+	if ( curve > G_2d.nc ) {
+		print( FATAL, "Curve number (%ld) too large, there are "
+			   "only %ld 2D curves.\n", curve, G_2d.nc );
+		THROW( EXCEPTION );
+	}
+
+	curve--;
+
+	if ( ( v = vars_pop( v ) ) == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
+	for ( i = X; i <= Z; i++ ) {
+		if ( v == NULL )
+			break;
+
+		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+		
+		if ( v->type != STR_VAR )
+		{
+			d[ 2 * i ] = get_double( v, NULL );
+			if ( i != Z )
+				d[ 2 * i ]--;
+			keep[ 2 * i ] = UNSET;
+		}
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+			break;
+
+		vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+		
+		if ( v->type != STR_VAR )
+		{
+			d[ 2 * i + 1 ] = get_double( v, NULL );
+
+			if ( i != Z && d[ 2 * i + 1 ] <= 1.0 )
+			{
+				print( FATAL, "Number of points in %c-direction isn't "
+					   "larger than 1.\n", 'x' + i );
+				THROW( EXCEPTION );
+			}
+			else if ( i == Z && d[ 2 * i + 1 ] <= 0.0 )
+			{
+				print( FATAL, "Invalid zero or negative z-span.\n" );
+				THROW( EXCEPTION );
+			}
+
+			keep[ 2 * i + 1 ] = UNSET;
+		}
+
+		if ( ( v = vars_pop( v ) ) == NULL )
+			break;
+	}
+
+	too_many_arguments( v );
+
+	for ( i = 0; i < 2 * Z; i++ )
+		if ( ! keep[ i ] )
+			break;
+
+	if ( i == 2 * Z || Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof curve + sizeof d + sizeof keep + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &curve, sizeof curve );     /* curve to zoom */
+	pos += sizeof curve;
+
+	memcpy( pos, d, sizeof d );              /* dimensions to set */
+	pos += sizeof d;
+
+	memcpy( pos, keep, sizeof keep );        /* flags */
+	pos += sizeof keep;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_zoom_2d( buffer, pos - buffer ) );
+}
+
 
 
 /*---------------------------------------------------------------------*

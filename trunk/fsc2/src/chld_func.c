@@ -2208,13 +2208,126 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
 			old_state = fl_get_button( obj );
 
 			if ( state != -1 && old_state != state )
-			{
-				fl_trigger_object( obj );
-				fl_set_button( obj, state );
-			}
+				curve_button_callback_2d( obj, - button );
 		}
 
 		writer( C_CB_2D_REPLY, old_state );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the zoom_1d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_zoom_1d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_ZOOM_1D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		double d[ 4 ];
+		bool keep[ 4 ];
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( d, pos, sizeof d );	              /* new dimensions */
+		pos += sizeof d;
+
+		memcpy( keep, pos, sizeof keep );         /* flags */
+		pos += sizeof keep;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                        /* current file name */
+
+		user_zoom_1d( d[ 0 ], keep[ 0 ], d[ 1 ], keep[ 1 ],
+					  d[ 2 ], keep[ 2 ], d[ 3 ], keep[ 3 ] );
+
+		writer( C_ZOOM_1D_REPLY,
+				( long ) user_zoom_1d( d[ 0 ], keep[ 0 ],
+									   d[ 1 ], keep[ 1 ],
+									   d[ 2 ], keep[ 2 ],
+									   d[ 3 ], keep[ 3 ] ) );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the zoom_2d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_zoom_2d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_ZOOM_2D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		long curve;
+		double d[ 6 ];
+		bool keep[ 6 ];
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( &curve, pos, sizeof curve );	  /* curve to be zoomed */
+		pos += sizeof curve;
+
+		memcpy( d, pos, sizeof d );	              /* new dimensions */
+		pos += sizeof d;
+
+		memcpy( keep, pos, sizeof keep );         /* flags */
+		pos += sizeof keep;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                        /* current file name */
+
+		writer( C_ZOOM_2D_REPLY, 
+				( long ) user_zoom_2d( curve,
+									   d[ 0 ], keep[ 0 ],
+									   d[ 1 ], keep[ 1 ],
+									   d[ 2 ], keep[ 2 ],
+									   d[ 3 ], keep[ 3 ],
+									   d[ 4 ], keep[ 4 ],
+									   d[ 5 ], keep[ 5 ] ) );
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;

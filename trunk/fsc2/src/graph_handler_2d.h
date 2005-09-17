@@ -31,6 +31,10 @@
 
 int canvas_handler_2d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata );
+bool user_zoom_2d( long curve,
+				   double x, bool keep_x, double xw, bool keep_xw,
+				   double y, bool keep_y, double yw, bool keep_yw,
+				   double z, bool keep_z, double zw, bool keep_zw );
 void recalc_XPoints_of_curve_2d( Curve_2d_T *cv );
 void redraw_all_2d( void );
 void repaint_canvas_2d( Canvas_T *c );

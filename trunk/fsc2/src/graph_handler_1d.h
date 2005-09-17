@@ -31,6 +31,8 @@
 
 int canvas_handler_1d( FL_OBJECT *obj, Window window, int w, int h, XEvent *ev,
 					   void *udata );
+bool user_zoom_1d( double x, bool keep_x, double xw, bool keep_xw,
+				   double y, bool keep_y, double yw, bool keep_yw );
 void recalc_XPoints_of_curve_1d( Curve_1d_T *cv );
 void redraw_all_1d( void );
 void redraw_canvas_1d( Canvas_T *c );
