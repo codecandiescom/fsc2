@@ -2159,6 +2159,54 @@ void curve_button_callback_2d( FL_OBJECT *obj, long data )
 	int bstate;
 
 
+	if ( G.drag_canvas == DRAG_2D_X  || G.drag_canvas == DRAG_2D_Y  ||
+		 G.drag_canvas == DRAG_2D_Z  || G.drag_canvas == DRAG_2D_C  ||
+		 G.drag_canvas == DRAG_CUT_X || G.drag_canvas == DRAG_CUT_Y ||
+		 G.drag_canvas == DRAG_CUT_Z || G.drag_canvas == DRAG_CUT_C )
+	{
+		G.button_state = 0;
+		G.coord_display &= ~ 6;
+		G.dist_display  &= ~ 6;
+		G_2d.cut_select = NO_CUT_SELECT;
+
+		switch ( G.drag_canvas )
+		{
+			case DRAG_2D_X :
+				fl_reset_cursor( FL_ObjWin( GUI.run_form_2d->x_axis_2d ) );
+				break;
+					
+			case DRAG_2D_Y :
+				fl_reset_cursor( FL_ObjWin( GUI.run_form_2d->y_axis_2d ) );
+				break;
+
+			case DRAG_2D_Z :
+				fl_reset_cursor( FL_ObjWin( GUI.run_form_2d->z_axis_2d ) );
+				break;
+
+			case DRAG_2D_C :
+				fl_reset_cursor( FL_ObjWin( GUI.run_form_2d->canvas_2d ) );
+				break;
+
+			case DRAG_CUT_X :
+				fl_reset_cursor( FL_ObjWin( GUI.cut_form->cut_x_axis ) );
+				break;
+					
+			case DRAG_CUT_Y :
+				fl_reset_cursor( FL_ObjWin( GUI.cut_form->cut_y_axis ) );
+				break;
+
+			case DRAG_CUT_Z :
+				fl_reset_cursor( FL_ObjWin( GUI.cut_form->cut_z_axis ) );
+				break;
+
+			case DRAG_CUT_C :
+				fl_reset_cursor( FL_ObjWin( GUI.cut_form->cut_canvas ) );
+				break;
+		}
+
+		G.drag_canvas = DRAG_NONE;
+	}
+
 	/* We get a negative curve number if this handler is called via the
 	   hidden curve buttons in the cross section window and have to set
 	   the correct state of the buttons in the main display window */
@@ -2588,6 +2636,7 @@ void rescale_2d( long *new_dims )
 		max_x++;
 	else
 		max_x = MIN_2D_X_POINTS;
+
 	if ( max_y != 0 )
 		 max_y++;
 	else
