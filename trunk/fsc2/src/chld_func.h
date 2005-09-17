@@ -75,6 +75,8 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len );
 bool exp_cb_2d( char *buffer, ptrdiff_t len );
 bool exp_zoom_1d( char *buffer, ptrdiff_t len );
 bool exp_zoom_2d( char *buffer, ptrdiff_t len );
+bool exp_fsb_1d( char *buffer, ptrdiff_t len );
+bool exp_fsb_2d( char *buffer, ptrdiff_t len );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

@@ -208,6 +208,9 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
     { "zoom",                f_zoom,            -7, ACCESS_EXP,  NULL, UNSET },
     { "zoom_1d",             f_zoom_1d,         -4, ACCESS_EXP,  NULL, UNSET },
     { "zoom_2d",             f_zoom_2d,         -7, ACCESS_EXP,  NULL, UNSET },
+    { "fs_button",           f_fs_button,       -2, ACCESS_EXP,  NULL, UNSET },
+    { "fs_button_1d",        f_fs_button_1d,    -2, ACCESS_EXP,  NULL, UNSET },
+    { "fs_button_2d",        f_fs_button_2d,    -2, ACCESS_EXP,  NULL, UNSET },
 	{ "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
 	{ "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
 	{ NULL,                  NULL,     	         0, 0,           NULL, UNSET }

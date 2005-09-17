@@ -2083,10 +2083,10 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len )
 		memcpy( &state, pos, sizeof state );	  /* what to do with button */
 		pos += sizeof state;
 
-		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
 		pos += sizeof EDL.Lc;
 
-		EDL.Fname = pos;	                        /* current file name */
+		EDL.Fname = pos;	                      /* current file name */
 
 		switch ( button )
 		{
@@ -2113,10 +2113,7 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len )
 		old_state = fl_get_button( obj );
 
 		if ( state != -1 && old_state != state )
-		{
-			fl_trigger_object( obj );
-			fl_set_button( obj, state );
-		}
+				curve_button_callback_1d( obj, button );
 
 		writer( C_CB_1D_REPLY, old_state );
 
@@ -2164,10 +2161,10 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
 		memcpy( &state, pos, sizeof state );	  /* what to do with button */
 		pos += sizeof state;
 
-		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	    /* current line number */
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
 		pos += sizeof EDL.Lc;
 
-		EDL.Fname = pos;	                        /* current file name */
+		EDL.Fname = pos;	                      /* current file name */
 
 		if ( button == 0 )
 		{
@@ -2325,6 +2322,132 @@ bool exp_zoom_2d( char *buffer, ptrdiff_t len )
 									   d[ 3 ], keep[ 3 ],
 									   d[ 4 ], keep[ 4 ],
 									   d[ 5 ], keep[ 5 ] ) );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the fs_button_1d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_fsb_1d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_FSB_1D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		long state;
+		long old_state;
+		FL_OBJECT *obj = GUI.run_form_1d->full_scale_button_1d;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( &state, pos, sizeof state );	  /* what to do with button */
+		pos += sizeof state;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                      /* current file name */
+
+		old_state = fl_get_button( obj );
+
+		if ( state != -1 && old_state != state )
+		{
+			fl_set_button( obj, state );
+			fs_button_callback_1d( obj, state );
+		}
+
+		writer( C_FSB_1D_REPLY, old_state );
+
+		EDL.Fname = old_Fname;
+		EDL.Lc = old_Lc;
+	}
+
+	return SET;
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
+ * the return value of the fs_button_2d() function.
+ *--------------------------------------------------------------*/
+
+bool exp_fsb_2d( char *buffer, ptrdiff_t len )
+{
+	if ( Fsc2_Internals.I_am == CHILD )
+	{
+		if ( ! writer( C_FSB_2D, len, buffer ) )
+		{
+			T_free( buffer );
+			THROW( EXCEPTION );
+		}
+		T_free( buffer );
+		return reader( NULL );
+	}
+	else
+	{
+		char *pos;
+		long curve;
+		long state;
+		long old_state;
+		char *old_Fname = EDL.Fname;
+		long old_Lc = EDL.Lc;
+
+
+		pos = buffer;
+
+		memcpy( &curve, pos, sizeof curve );	  /* curve to be handled */
+		pos += sizeof curve;
+
+		memcpy( &state, pos, sizeof state );	  /* what to do with button */
+		pos += sizeof state;
+
+		memcpy( &EDL.Lc, pos, sizeof EDL.Lc );	  /* current line number */
+		pos += sizeof EDL.Lc;
+
+		EDL.Fname = pos;	                      /* current file name */
+
+
+		if ( G_2d.active_curve == curve - 1 )
+		{
+			FL_OBJECT *obj = GUI.run_form_2d->full_scale_button_2d;
+
+			old_state = fl_get_button( obj );
+
+			if ( state != -1 && old_state != state )
+			{
+				fl_set_button( obj, state );
+				fs_button_callback_2d( obj, curve );
+			}
+		}
+		else
+		{
+			old_state = G_2d.curve_2d[ curve - 1 ]->is_fs;
+
+			if ( state != -1 && old_state != state )
+				G_2d.curve_2d[ curve - 1 ]->is_fs = state;
+		}
+
+		writer( C_FSB_2D_REPLY, old_state );
 
 		EDL.Fname = old_Fname;
 		EDL.Lc = old_Lc;

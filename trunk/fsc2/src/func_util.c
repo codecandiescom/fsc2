@@ -4095,6 +4095,222 @@ Var_T *f_curve_button_2d( Var_T *v )
 }
 
 
+/*-----------------------------------------------------------------*
+ * Function for determining or changing the state of the FS button
+ *-----------------------------------------------------------------*/
+
+Var_T *f_fs_button( Var_T *v )
+{
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There are is no \"Full Scale\" buttons, missing "
+			   "graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 3 )
+	{
+		print( FATAL, "Both 1D- and 2D-display are in use, use either "
+			   "function fs_button_1d() or fs_button_2d().\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( G.dim == 1 )
+		return f_fs_button_1d( v );
+	else
+		return f_fs_button_2d( v );
+}
+
+
+/*-------------------------------------------------------------*
+ * Function for determining or changing the state of FS button
+ * for the 1D display
+ *-------------------------------------------------------------*/
+
+Var_T *f_fs_button_1d( Var_T *v )
+{
+	long len = 0;                    /* total length of message to send */
+	long state = -1;
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There is no \"Full Scale\" button, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 1 ) )
+    {
+        print( FATAL, "There's no 1D display, use fs_button_2d() instead.\n" );
+		THROW( EXCEPTION );
+    }
+
+	if ( v != NULL )
+		state = ( long ) get_boolean( v );
+
+	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
+
+	if ( Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+	
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof state + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &state, sizeof state );     /* new state */
+	pos += sizeof state;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_fsb_1d( buffer, pos - buffer ) );
+}
+
+
+/*-------------------------------------------------------------*
+ * Function for determining or changing the state of FS button
+ * for the 2D display
+ *-------------------------------------------------------------*/
+
+Var_T *f_fs_button_2d( Var_T *v )
+{
+	long len = 0;                    /* total length of message to send */
+	long curve;
+	long state = -1;                 /* default: ask for state */
+	char *buffer, *pos;
+
+
+	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+	{
+		print( FATAL, "Function can't be used without a GUI.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* This function can only be called in the EXPERIMENT section and needs
+	   a previous graphics initialization */
+
+	if ( ! G.is_init )
+	{
+		print( FATAL, "There is no \"Full Scale\" button, missing graphics "
+			   "initialization.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ! ( G.dim & 2 ) )
+    {
+        print( FATAL, "There's no 2D display, use fs_button_1d() instead.\n" );
+		THROW( EXCEPTION );
+    }
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	curve = get_long( v, "curve number" );
+
+	if ( curve < 1 || curve > MAX_CURVES )
+	{
+		print( FATAL, "Invalid curve number (%ld).\n", curve );
+		THROW( EXCEPTION );
+	}
+
+	if ( curve > G_2d.nc ) {
+		print( FATAL, "Curve number (%ld) too large, there are "
+			   "only %ld 2D curves.\n", curve, G_2d.nc );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v != NULL )
+		state = ( long ) get_boolean( v );
+
+	too_many_arguments( v );
+
+	/* In a test run this all there is to be done */
+
+	if ( Fsc2_Internals.mode == TEST )
+		return vars_push( INT_VAR, 1L );
+
+	/* Now starts the code only to be executed by the child, i.e. while the
+	   measurement is running. */
+
+	fsc2_assert( Fsc2_Internals.I_am == CHILD );
+
+	/* Now try to get a shared memory segment */
+
+	len = sizeof curve + sizeof state + sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+		len += strlen( EDL.Fname ) + 1;
+	else
+		len++;
+
+	pos = buffer = CHAR_P T_malloc( len );
+
+	memcpy( pos, &curve, sizeof curve );     /* curve to handle */
+	pos += sizeof curve;
+
+	memcpy( pos, &state, sizeof state );     /* what to do with button */
+	pos += sizeof state;
+
+	memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
+	pos += sizeof EDL.Lc;
+
+	if ( EDL.Fname )
+	{
+		strcpy( pos, EDL.Fname );            /* current file name */
+		pos += strlen( EDL.Fname ) + 1;
+	}
+	else
+		*pos++ = '\0';
+
+	return vars_push( INT_VAR, ( long ) exp_fsb_2d( buffer, pos - buffer ) );
+}
+
+
 /*--------------------------------------------------------------*
  * Function for setting a zoom and shift of the displayed data.
  *--------------------------------------------------------------*/
@@ -4109,8 +4325,7 @@ Var_T *f_zoom( Var_T *v )
 
 	if ( ! G.is_init )
 	{
-		print( FATAL, "There are no display buttons, missing graphics "
-			   "initialization.\n" );
+		print( FATAL, "Can't zoom, missing graphics initialization.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -4193,13 +4408,13 @@ Var_T *f_zoom_1d( Var_T *v )
 
 			if ( i == X && d[ 2 * i + 1 ] <= 1.0 )
 			{
-				print( FATAL, "Number of points in %x-direction isn't "
+				print( FATAL, "Number of points in x-direction isn't "
 					   "larger than 1.\n" );
 				THROW( EXCEPTION );
 			}
 			else if ( i == Y && d[ 2 * i + 1 ] <= 0.0 )
 			{
-				print( FATAL, "Invalid zero or negative %z-span.\n" );
+				print( FATAL, "Invalid zero or negative z-span.\n" );
 				THROW( EXCEPTION );
 			}
 
