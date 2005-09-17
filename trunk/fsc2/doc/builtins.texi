@@ -169,6 +169,9 @@ fit into the display window anymore.
 @item @ref{curve_button_1d()}
 @item @ref{curve_button_2d()}
 @item @ref{curve_button()}
+@item @ref{fs_button_1d()}
+@item @ref{fs_button_2d()}
+@item @ref{fs_button()}
 @item @ref{print()}
 @item @ref{show_message()}
 @end table
@@ -841,7 +844,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{curve_button_1d()}
 @findex curve_button_1d()
 @item curve_button_1d()
-If invoked without a single argument, a number between @code{1} and the
+If invoked with a single argument, a number between @code{1} and the
 maximum number of curves displayed in the 1D display window, it returns
 @code{0} if the button for that curve (at the upper left hand side of
 the 1D display window) is switched off (i.e. the curve is exempt from
@@ -862,7 +865,7 @@ If invoked with no argument the number of the currently displaye 2D curve
 in the 2D display window) is returned, or @code{0} if no curve is displayed
 at the moment.
 
-If invoked without a single argument, a number between @code{1} and the
+If invoked with a single argument, a number between @code{1} and the
 maximum number of curves displayed in the 2D display window, it returns
 @code{0} if the button for that curve (at the upper left hand side of
 the 1D display window) is switched off (i.e. the curve is not shown) and
@@ -881,6 +884,49 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item curve_button()
 This function can be called instead of @code{curve_button_1d()} or
 @code{curve_button_2d()} when only either a 1D- or a 2D-display is used
+(but not both at once).
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{fs_button_1d()}
+@findex fs_button_1d()
+@item fs_button_1d()
+If invoked without an argument the function returns @code{0} if the
+@code{FS} (full scale) button is switched off (i.e. automatic rescaling
+is switched off) @code{1} if its on. If called with a boolean argument
+(i.e. either a string,@code{"ON"} or @code{"OFF"}, or a number with
+@code{0} standing for off and a non-zero number for on), the state of
+the button is changed accordingly.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{fs_button_2d()}
+@findex fs_button_2d()
+@item fs_button_2d()
+If invoked with a single argument, a number between @code{1} and the
+maximum number of curves displayed in the 2D display window, it returns
+@code{0} if the @code{FS} (full scale) button for that curve is switched
+off (i.e. the curve will not be rescaled automatically) and @code{1} if
+the @code{FS} button for this curve is currently switched on.
+
+If called with a second, boolean argument (i.e. either a string,@code{"ON"}
+or @code{"OFF"}, or a number with @code{0} standing for off and a non-zero
+number for on), the state of the @code{FS} button for the curve designated
+by the first argument is changed accordingly.
+
+This function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{fs_button()}
+@findex fs_button()
+@item fs_button()
+This function can be called instead of @code{fs_button_1d()} or
+@code{fs_button_2d()} when only either a 1D- or a 2D-display is used
 (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
