@@ -893,12 +893,13 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{fs_button_1d()}
 @findex fs_button_1d()
 @item fs_button_1d()
-If invoked without an argument the function returns @code{0} if the
-@code{FS} (full scale) button is switched off (i.e. automatic rescaling
-is switched off) and @code{1} if it's switched on. If called with a
+If invoked without an argument the function returns @code{1} if the
+@code{FS} (full scale) button is switched on (automatic rescaling
+is enabled) and @code{0} if it's switched off. If called with a
 boolean argument (i.e. either a string,@code{"ON"} or @code{"OFF"},
 or a number with @code{0} standing for off and a non-zero number for on),
-the state of the button is changed accordingly.
+the state of the button is changed accordingly and automatic rescaling
+enabled or disabled.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -909,14 +910,15 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item fs_button_2d()
 If invoked with a single argument, a number between @code{1} and the
 maximum number of curves displayed in the 2D display window, it returns
-@code{0} if the @code{FS} (full scale) button for that curve is switched
-off (i.e. the curve will not be rescaled automatically) and @code{1} if
-the @code{FS} button for this curve is currently switched on.
+@code{1} if the @code{FS} (full scale) button for that curve is switched
+on (i.e. the curve will be rescaled automatically) and @code{0} if
+the @code{FS} button for the curve is switched off.
 
 If called with a second, boolean argument (i.e. either a string,@code{"ON"}
 or @code{"OFF"}, or a number with @code{0} standing for off and a non-zero
 number for on), the state of the @code{FS} button for the curve designated
-by the first argument is changed accordingly.
+by the first argument is changed accordingly and automatic rescaling is
+enabled or disabled.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
