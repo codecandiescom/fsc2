@@ -33,9 +33,13 @@ FOR I = 1 : M {
 		draw_marker_2d( I, I, 1, ( I / 5 ) % 6 );
 	}
 	display_2d( 1, I, l );
+	IF I % 20 == 0 {
+		fs_button( curve_button_2d( ), ! fs_button( curve_button_2d( ) ) );
+	}
 	wait( 0.05 s );
 }
 
+fs_button( curve_button_2d( ), "ON" );
 wait( 1 s );
 clear_marker_2d( );
 
