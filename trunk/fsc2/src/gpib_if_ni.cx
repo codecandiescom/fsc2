@@ -1200,10 +1200,15 @@ static int *get_fd_list( void )
 				THROW( EXCEPTION );
 
 			if ( S_ISDIR( buf.st_mode ) )
+			{
+				TRY_SUCCESS;
 				continue;
+			}
 
 			fd_list = T_realloc( fd_list, ( num_fds + 2 ) * sizeof *fd_list );
 			fd_list[ num_fds++ ] = fd;
+
+			TRY_SUCCESS;
 		}
 		OTHERWISE
 		{
