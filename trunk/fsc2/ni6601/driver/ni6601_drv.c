@@ -26,26 +26,6 @@
 #include "ni6601_drv.h"
 
 
-#define mite_CHOR( ch )             ( board->mite + 0x500 + 0x100 * ( ch ) )
-#define mite_CHCR( ch )             ( board->mite + 0x504 + 0x100 * ( ch ) )
-#define mite_TCR( ch )              ( board->mite + 0x508 + 0x100 * ( ch ) )
-#define mite_CHSR( ch )             ( board->mite + 0x53C + 0x100 * ( ch ) )
-#define mite_MCR( ch )              ( board->mite + 0x50C + 0x100 * ( ch ) )
-#define mite_MAR( ch )              ( board->mite + 0x510 + 0x100 * ( ch ) )
-#define mite_DCR( ch )              ( board->mite + 0x514 + 0x100 * ( ch ) )
-#define mite_DAR( ch )              ( board->mite + 0x518 + 0x100 * ( ch ) )
-#define mite_LKCR( ch )             ( board->mite + 0x51C + 0x100 * ( ch ) )
-#define mite_LKAR( ch )             ( board->mite + 0x520 + 0x100 * ( ch ) )
-#define mite_LLKAR( ch )            ( board->mite + 0x524 + 0x100 * ( ch ) )
-#define mite_BAR( ch )	            ( board->mite + 0x528 + 0x100 * ( ch ) )
-#define mite_BCR( ch )	            ( board->mite + 0x52C + 0x100 * ( ch ) )
-#define mite_SAR( ch )	            ( board->mite + 0x530 + 0x100 * ( ch ) )
-#define mite_WSCR( ch )	            ( board->mite + 0x534 + 0x100 * ( ch ) )
-#define mite_WSER( ch )	            ( board->mite + 0x538 + 0x100 * ( ch ) )
-#define mite_FCR( ch )              ( board->mite + 0x540 + 0x100 * ( ch ) )
-
-
-
 static int ni6601_init_board( struct pci_dev *dev, Board *board );
 static int ni6601_open( struct inode *inode_p, struct file *file_p );
 static int ni6601_release( struct inode *inode_p, struct file *file_p );
@@ -61,7 +41,6 @@ static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
 static void ni6601_irq_enable( Board *board, int counter );
 static void ni6601_irq_disable( Board *board, int counter );
 static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
-static void mite_dump( Board *board, int channel );
 
 
 static Board boards[ NI6601_MAX_BOARDS ];
@@ -821,27 +800,6 @@ static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 		}
 }
 
-
-static void mite_dump( Board *board, int channel )
-{
-	printk( KERN_INFO "mite_CHOR  = 0x%08X\n", readl( mite_CHOR(  channel ) ) );
-	printk( KERN_INFO "mite_CHCR  = 0x%08X\n", readl( mite_CHCR(  channel ) ) );
-	printk( KERN_INFO "mite_TCR   = 0x%08X\n", readl( mite_TCR(   channel ) ) );
-	printk( KERN_INFO "mite_CHSR  = 0x%08X\n", readl( mite_CHSR(  channel ) ) );
-	printk( KERN_INFO "mite_MCR   = 0x%08X\n", readl( mite_MCR(   channel ) ) );
-	printk( KERN_INFO "mite_MAR   = 0x%08X\n", readl( mite_MAR(   channel ) ) );
-	printk( KERN_INFO "mite_DCR   = 0x%08X\n", readl( mite_DCR(   channel ) ) );
-	printk( KERN_INFO "mite_DAR   = 0x%08X\n", readl( mite_DAR(   channel ) ) );
-	printk( KERN_INFO "mite_LKCR  = 0x%08X\n", readl( mite_LKCR(  channel ) ) );
-	printk( KERN_INFO "mite_LKAR  = 0x%08X\n", readl( mite_LKAR(  channel ) ) );
-	printk( KERN_INFO "mite_LLKAR = 0x%08X\n", readl( mite_LLKAR( channel ) ) );
-	printk( KERN_INFO "mite_BAR   = 0x%08X\n", readl( mite_BAR(   channel ) ) );
-	printk( KERN_INFO "mite_BCR   = 0x%08X\n", readl( mite_BCR(   channel ) ) );
-	printk( KERN_INFO "mite_SAR   = 0x%08X\n", readl( mite_SAR(   channel ) ) );
-	printk( KERN_INFO "mite_WSCR  = 0x%08X\n", readl( mite_WSCR(  channel ) ) );
-	printk( KERN_INFO "mite_WSER  = 0x%08X\n", readl( mite_WSER(  channel ) ) );
-	printk( KERN_INFO "mite_FCR   = 0x%08X\n", readl( mite_FCR(   channel ) ) );
-}
 
 
 EXPORT_NO_SYMBOLS;

@@ -181,7 +181,7 @@ void ni6601_dio_init( Board *board )
 	writew( board->dio_mask, board->regs.dio_control );
 
 	/* Switch the DIO pins to output (so that they can be controlled
-	   via the DIO Control Register, all other to input */
+	   via the DIO Control Register), all other to input */
 
 	writel( 0x01010101, board->regs.io_config[ 0 ] );
 	writel( 0x01010101, board->regs.io_config[ 1 ] );
