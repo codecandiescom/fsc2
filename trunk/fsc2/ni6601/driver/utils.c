@@ -185,6 +185,7 @@ void ni6601_dio_init( Board *board )
 
 	writel( 0x01010101, board->regs.io_config[ 0 ] );
 	writel( 0x01010101, board->regs.io_config[ 1 ] );
+
 	for ( i = 2; i < 10; i++ )
 		writel( 0x0, board->regs.io_config[ i ] );
 }
