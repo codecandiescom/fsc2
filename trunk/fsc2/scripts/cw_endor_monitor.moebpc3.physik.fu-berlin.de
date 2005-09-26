@@ -59,7 +59,7 @@ atten;
 max_atten     = -136 db;
 min_atten     = 14.5 dB;
 
-syn_state;
+Syn_State;
 
 current;                       // current through magnet coil
 
@@ -106,7 +106,7 @@ current = get_field( );
 
 freq  = synthesizer_frequency( );
 atten = synthesizer_attenuation( );
-syn_state = synthesizer_state( );
+Syn_State = synthesizer_state( );
 
 /* Unlock the lock-ins keyboard */
 
@@ -162,7 +162,7 @@ FOREVER {
 		input_value( Freq, freq /  1 MHz );
 	}
 
-	/* Check value of step frequency */
+	/* Check value of the step frequency */
 
 	IF input_changed( Step_Freq ) {
 		new_step_freq = input_value( Step_Freq ) * 1 MHz;
@@ -175,16 +175,16 @@ FOREVER {
 
 	/* Check if RF power on/off state has changed */
 
-	IF button_state( OnOff ) != syn_state {
-		syn_state = syn_state ~ 1;
-		synthesizer_state( syn_state );
+	IF button_state( OnOff ) != Syn_State {
+		Syn_State = Syn_State ~ 1;
+		synthesizer_state( Syn_State );
 	}
 
 	/* Check if attenuation has been changed */
 
 	IF input_changed( Atten ) {
 		new_atten = input_value( Atten );
-		IF new_atten < min_atten OR new_atten > max_atten {
+		IF new_atten > min_atten OR new_atten < max_atten {
 			input_value( Atten, atten );
 		} ELSE IF atten != new_atten {
 			atten = new_atten;
@@ -232,7 +232,8 @@ FOREVER {
 	/* Check if the sweep up button has been pressed and we're not already
 	   sweeping up */
 
-	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND I < MAX_POINTS {
+	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND
+        freq <= max_freq - step_freq AND I < MAX_POINTS {
 		magnet_sweep( UP );
 		Sweep_State = UP;
 		draw_marker( I + 1, "YELLOW" );
@@ -242,7 +243,8 @@ FOREVER {
 	/* Check if the sweep down button has been pressed and we're not already
 	   sweeping down */
 
-	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND I < MAX_POINTS {
+	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND
+       freq >= min_freq + freq_step AND I < MAX_POINTS {
 		magnet_sweep( DOWN );
 		Sweep_State = DOWN;
 		draw_marker( I + 1, "BLUE" );
@@ -287,9 +289,8 @@ FOREVER {
 		}
 		freq = synthesizer_frequency( freq );
 		input_value( Freq, freq /  1 MHz );
+		wait( lockin_time_constant( ) );
 	}
-
-	wait( lockin_time_constant( ) );
 }
 
 
