@@ -244,7 +244,7 @@ FOREVER {
 	   sweeping down */
 
 	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND
-       freq >= min_freq + freq_step AND I < MAX_POINTS {
+       freq >= min_freq + step_freq AND I < MAX_POINTS {
 		magnet_sweep( DOWN );
 		Sweep_State = DOWN;
 		draw_marker( I + 1, "BLUE" );
