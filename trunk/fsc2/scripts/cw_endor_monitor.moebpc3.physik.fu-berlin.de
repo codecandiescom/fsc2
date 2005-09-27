@@ -149,7 +149,8 @@ FOREVER {
 		synthesizer_state( Syn_State );
 	}
 
-	/* Check if attenuation has been changed */
+	/* Check if attenuation has been changed (and the new value is within
+	   the limits) */
 
 	IF input_changed( Atten ) {
 		new_atten = input_value( Atten );
