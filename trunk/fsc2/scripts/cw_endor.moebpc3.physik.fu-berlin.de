@@ -609,7 +609,7 @@ FOR I = 1 : N_runs
 		wait( tc );
 	}
 
-	save( File_1, data );
+	save( File_1, start_freq < end_freq ? data : reverse( data ) );
 	display( 1, data, 3 );
 	mean_data += data;
 	K = I;
@@ -619,7 +619,7 @@ FOR I = 1 : N_runs
         print $fh "
 	old_start_freq = start_freq;
 	start_freq = end_freq;
-	end_freq = start_freq;
+	end_freq = old_start_freq;
 	step_freq *= -1;
 
 ";
