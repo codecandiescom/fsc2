@@ -177,7 +177,7 @@ FOREVER {
 	/* Check if the Save button has been pressed (but save only as many points
 	   has have been measured, not the complete array) */
 
-	IF button_state( Save ) {
+	IF button_state( Save ) AND I > 0 {
 		File = get_file( );
 		FOR J = 1 : I {
 			fsave( File, "#, #\n", data[ J, 1 ], data[ J, 2 ] );
@@ -248,12 +248,11 @@ FOREVER {
 	}
 
 	IF ( Sweep_State == UP   AND freq + step_freq > max_freq ) OR
-	   ( Sweep_State == DOWN AND freq - step_freq < min_freq ) OR
-		 I >= MAX_POINTS {
+	   ( Sweep_State == DOWN AND freq - step_freq < min_freq ) {
 		Sweep_State = STOPPED;
 		button_state( Sweep_Stop, "ON" );
 		draw_marker( I, "RED" );
-		IF button_state( POnS ) OR I >= MAX_POINTS {
+		IF button_state( POnS ) {
 			button_state( Pause, "ON" );
 			Pause_State = 1;
 		}
