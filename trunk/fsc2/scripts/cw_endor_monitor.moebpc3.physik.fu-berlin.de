@@ -1,37 +1,6 @@
-#!/usr/bin/perl -w
-# -*- cperl -*-
-#
-# $Id$
-#
-# Copyright (C) 1999-2005 Jens Thoms Toerring
-#
-# This file is part of fsc2.
-#
-# Fsc2 is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-#
-# Fsc2 is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with fsc2; see the file COPYING.  If not, write to
-# the Free Software Foundation, 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.
+#!/usr/local/bin/fsc2 -S
+// -*- edl -*-
 
-use strict;
-use warnings;
-use Tk;
-
-
-open my $file, "|fsc2_start"
-	or &show_message( "Can't find program 'fsc2_start'." );
-
-select $file;
-print <<EOF;
 /*************************************************************************/
 /*  EDL program for running cw-ENDOR test measurements with the 360 GHz  */
 /*  spectrometer.                                                        */
@@ -66,7 +35,7 @@ current;                       // current through magnet coil
 new_freq, new_step_freq, new_atten, new_current;
 
 MAX_POINTS = 20000;            // maximum number of data points
-data[ 2, MAX_POINTS ];         // array of data points (X and Y)
+data[ MAX_POINTS, 2 ];         // array of data points (X and Y)
 I, J;                          // count of data points
 File;                          // file handle for storing data
 
@@ -119,6 +88,7 @@ Freq = input_create( "FLOAT_INPUT", freq, "RF frequency (in MHz)" );
 Step_Freq = input_create( "FLOAT_INPUT", step_freq,
                           "RF step frequency (in MHz)" );
 OnOff = button_create( "PUSH_BUTTON", "Toggle RF power on/off" );
+button_state( OnOff, Syn_State );
 Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
 Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
 Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
@@ -131,7 +101,7 @@ Current = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
 
 
 Pause = button_create( "PUSH_BUTTON", "Pause display" );
-button_state( Pause, 1 );
+button_state( Pause, Pause_State );
 Save  = button_create( "NORMAL_BUTTON", "Save data" );
 Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 hide_toolbox( "OFF" );
@@ -149,7 +119,6 @@ FOREVER {
 	IF button_state( Clear ) {
 		clear_curve( );
 		I = 0;
-		NEXT;
 	}
 
 	/* If the frequency has been changed set the new frequency */
@@ -211,7 +180,7 @@ FOREVER {
 	IF button_state( Save ) {
 		File = get_file( );
 		FOR J = 1 : I {
-			fsave( File, "#, #\n", data[ 1, J ], data[ 2, J ] );
+			fsave( File, "#, #\n", data[ J, 1 ], data[ J, 2 ] );
 		}
 	}
 
@@ -219,6 +188,42 @@ FOREVER {
 
 	IF I < MAX_POINTS {
 		Pause_State = button_state( Pause );
+	} ELSE {
+	    Pause_State = 1;
+	    button_state( Pause, "ON" );
+	}
+
+	/* Check if the sweep up button has been pressed and we're not already
+	   sweeping up */
+
+	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND
+        freq <= max_freq - step_freq AND I < MAX_POINTS {
+		Sweep_State = UP;
+		draw_marker( I + 1, "YELLOW" );
+		button_state( Pause, "OFF" );
+	    Pause_State = 0;
+	}
+
+	/* Check if the sweep down button has been pressed and we're not already
+	   sweeping down */
+
+	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND
+       freq >= min_freq + step_freq AND I < MAX_POINTS {
+		Sweep_State = DOWN;
+		draw_marker( I + 1, "BLUE" );
+		button_state( Pause, "OFF" );
+	    Pause_State = 0;
+	}
+
+	/* Check if the sweep stop button has been pressed while we're sweeping */
+
+	IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
+		Sweep_State = STOPPED;
+		draw_marker( I + 1, "RED" );
+		IF button_state( POnS ) {
+			button_state( Pause, "ON" );
+			Pause_State = 1;
+		}
 	}
 
 	/* If pause is on or frequency has been changed go back to start
@@ -229,47 +234,18 @@ FOREVER {
 		NEXT;
 	}
 
-	/* Check if the sweep up button has been pressed and we're not already
-	   sweeping up */
-
-	IF  Sweep_State != UP AND button_state( Sweep_Up ) AND
-        freq <= max_freq - step_freq AND I < MAX_POINTS {
-		magnet_sweep( UP );
-		Sweep_State = UP;
-		draw_marker( I + 1, "YELLOW" );
-		button_state( Pause, 0 );
-	}
-
-	/* Check if the sweep down button has been pressed and we're not already
-	   sweeping down */
-
-	IF Sweep_State != DOWN AND button_state( Sweep_Down ) AND
-       freq >= min_freq + step_freq AND I < MAX_POINTS {
-		magnet_sweep( DOWN );
-		Sweep_State = DOWN;
-		draw_marker( I + 1, "BLUE" );
-		button_state( Pause, 0 );
-	}
-
-	/* Check if the sweep stop button has been pressed while we're sweeping */
-
-	IF Sweep_State != STOPPED AND button_state( Sweep_Stop ) {
-		Sweep_State = STOPPED;
-		draw_marker( I + 1, "RED" );
-		IF button_state( POnS ) {
-			Pause_State = 1;
-			button_state( Pause, Pause_State );
-		}
-	}
-
 	/* Get new data points, if already MAX_POINTS data points have been
 	   acquired or sweep has been haltet due to the maximum or minimum
        frequency being reached stop sweep without user intervention */
 
+	wait( lockin_time_constant( ) );
 	I += 1;
-	data[ 1, I ] = lockin_get_data( 1 );
-	data[ 2, I ] = lockin_get_data( 2 );
-	display( I, data[ 1, I ] / 1 mV, I, data[ 2, I ] / 1 mV );
+	data[ I ] = lockin_get_data( 1, 2 );
+	display( I, data[ I, 1 ] / 1 mV, I, data[ I, 2 ] / 1 mV );
+
+	IF Sweep_State == STOPPED {
+		NEXT;
+	}
 
 	IF ( Sweep_State == UP   AND freq + step_freq > max_freq ) OR
 	   ( Sweep_State == DOWN AND freq - step_freq < min_freq ) OR
@@ -278,60 +254,23 @@ FOREVER {
 		button_state( Sweep_Stop, "ON" );
 		draw_marker( I, "RED" );
 		IF button_state( POnS ) OR I >= MAX_POINTS {
+			button_state( Pause, "ON" );
 			Pause_State = 1;
-			button_state( Pause, Pause_State );
 		}
-	} ELSE IF Sweep_State != STOPPED {
-		IF Sweep_State == UP {
-			freq += step_freq;
-		} ELSE IF Sweep_State == DOWN {
-			freq -= step_freq;
-		}
-		freq = synthesizer_frequency( freq );
-		input_value( Freq, freq /  1 MHz );
-		wait( lockin_time_constant( ) );
+		NEXT;
 	}
+
+	IF Sweep_State == UP {
+		freq += step_freq;
+	} ELSE IF Sweep_State == DOWN {
+		freq -= step_freq;
+	}
+
+	freq = synthesizer_frequency( freq );
+	input_value( Freq, freq /  1 MHz );
 }
 
 
 ON_STOP:
 
 synthesizer_state( "OFF" );
-EOF
-
-close $file;
-
-# Notify the user if sending the program to fsc2 failed for some reasons
-
-if ( $? != 0 ) {
-   my $text;
-
-    if ( $? >> 8 == 255 ) {
-        $text = "Internal error.";
-    } elsif ( $? >> 8 == 1 ) {
-        $text = "Someone else is running fsc2.";
-    } elsif ( $? >> 8 == 2 ) {
-        $text = "fsc2 is already testing or\nrunning an experiment.";
-    } elsif ( $? >> 8 == 3 ) {
-        $text = "Internal error of fsc2.";
-    } elsif ( $? >> 8 == 4 ) {
-        $text = "Could not start fsc2.";
-    } else {
-        $text = "Something strange\nis going on here.";
-    }
-
-    &show_message( $text ) if $? >> 8 != 0;
-}
-
-#############################################
-#
-
-sub show_message {
-	my $mw = MainWindow->new;
-	$mw->geometry( "-2000-2000" );
-	$mw->messageBox( '-icon' => 'error',
-					 '-type' => 'Ok',
-					 '-title' => 'Error',
-					 '-message' => $_[ 0 ] );
-	exit;
-}
