@@ -81,7 +81,7 @@ Syn_State = synthesizer_state( );
 
 lockin_lock_keyboard( "OFF" );
 
-/* Finally, create the form with the buttons for sweeping etc. */
+/* Create the form with the buttons for sweeping etc. */
 
 hide_toolbox( "ON" );
 Freq = input_create( "FLOAT_INPUT", freq, "RF frequency (in MHz)" );
@@ -107,8 +107,8 @@ Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
 hide_toolbox( "OFF" );
 
 
-/* Now we're done with all preparations and can start to run the experiment
-   within an endless loop */
+/* Now we're done with all preparations and run the experiment within an
+   infinite loop */
 
 I = 0;
 
