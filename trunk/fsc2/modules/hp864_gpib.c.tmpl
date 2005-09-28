@@ -191,6 +191,7 @@ double hp864_tmpl_get_frequency( void )
 
 
 	hp864_tmpl_talk( "FREQ:CW?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
@@ -222,6 +223,7 @@ double hp864_tmpl_get_attenuation( void )
 	long length = 100;
 
 	hp864_tmpl_talk( "POW:AMPL?\n", buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 
@@ -374,6 +376,7 @@ int hp864_tmpl_get_mod_source( int type )
 		sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
 		hp864_tmpl_talk( cmd, buffer, &length );
 		freq = lrnd( T_atod ( buffer ) );
+		buffer[ length - 1 ] = '\0';
 		source = freq == 400 ? MOD_SOURCE_1k : MOD_SOURCE_400;
 	}
 	else
@@ -435,6 +438,7 @@ double hp864_tmpl_get_mod_ampl( int type )
 	fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
 	hp864_tmpl_talk( cmds[ type ], buffer, &length );
+	buffer[ length - 1 ] = '\0';
 	return T_atod( buffer );
 }
 

@@ -373,7 +373,7 @@ Var_T *synthesizer_attenuation( Var_T *v )
 				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 
 			case EXPERIMENT :
-				hp864_tmpl.attenuation = MAX_ATTEN -100.0;
+				hp864_tmpl.attenuation = hp864_tmpl_set_attenuation( );
 				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 		}
 	}
