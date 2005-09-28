@@ -28,11 +28,17 @@ atten;
 max_atten     = -136 db;
 min_atten     = 14.5 dB;
 
-Syn_State;
+mod_freq, mod_ampl;
+min_mod_freq  = 0 Hz;
+max_mod_freq  = 100 kHz;
+min_mod_ampl  = 0 Hz;
+max_mod_ampl  = 100 kHz;
 
+Syn_State;
 current;                       // current through magnet coil
 
-new_freq, new_step_freq, new_atten, new_current;
+new_freq, new_step_freq, new_mod_freq,
+new_mod_ampl, new_atten, new_current;
 
 MAX_POINTS = 20000;            // maximum number of data points
 data[ MAX_POINTS, 2 ];         // array of data points (X and Y)
@@ -43,8 +49,8 @@ Pause_State = 1;
 
 /* Variables for all buttons etc. */
 
-Freq, Step_Freq, Sweep_Up, Sweep_Stop, Sweep_Down,
-POnS, OnOff, Atten, Current, Pause, Save, Clear;
+Freq, Step_Freq, Mod_Freq, Mod_Ampl, Sweep_Up, Sweep_Stop,
+Sweep_Down, POnS, OnOff, Atten, Current, Pause, Save, Clear;
 
 
 /* Some variables to make the program  easier to read */
@@ -76,17 +82,26 @@ current = get_field( );
 freq  = synthesizer_frequency( );
 atten = synthesizer_attenuation( );
 Syn_State = synthesizer_state( );
+synthesizer_mod_type( "FM" );
+synthesizer_mod_source( "EXT DC" );
+mod_ampl = synthesizer_mod_ampl( );
 
-/* Unlock the lock-ins keyboard */
+/* Get lock-in setttings and unlock its keyboard */
 
+mod_freq = lockin_ref_freq( );
+lockin_ref_level( 1 V );
 lockin_lock_keyboard( "OFF" );
 
 /* Create the form with the buttons for sweeping etc. */
 
 hide_toolbox( "ON" );
-Freq = input_create( "FLOAT_INPUT", freq, "RF frequency (in MHz)" );
-Step_Freq = input_create( "FLOAT_INPUT", step_freq,
-                          "RF step frequency (in MHz)" );
+Freq = input_create( "FLOAT_INPUT", freq / 1 MHz, "RF frequency (in MHz)" );
+Step_Freq = input_create( "FLOAT_INPUT", step_freq / 1 kHz,
+                          "RF step frequency (in kHz)" );
+Mod_Freq = input_create( "FLOAT_INPUT", mod_freq / 1 kHz,
+	                     "Modulation frequency (in kHz)" );
+Mod_Ampl = input_create( "FLOAT_INPUT", mod_ampl / 1 kHz,
+	                     "Modulation amplitude (in kHz)" );
 OnOff = button_create( "PUSH_BUTTON", "Toggle RF power on/off" );
 button_state( OnOff, Syn_State );
 Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
@@ -98,7 +113,6 @@ button_state( POnS, "ON" );
 
 Atten = input_create( "FLOAT_INPUT", atten, "RF attenuation (in dB)" );
 Current = input_create( "FLOAT_INPUT", current, "Set new current (in A)" );
-
 
 Pause = button_create( "PUSH_BUTTON", "Pause display" );
 button_state( Pause, Pause_State );
@@ -134,12 +148,32 @@ FOREVER {
 	/* Check value of the step frequency */
 
 	IF input_changed( Step_Freq ) {
-		new_step_freq = input_value( Step_Freq ) * 1 MHz;
+		new_step_freq = input_value( Step_Freq ) * 1 kHz;
 		IF new_step_freq < min_step_freq OR new_step_freq > max_step_freq {
-			input_value( Step_Freq, step_freq / 1 MHz );
+			input_value( Step_Freq, step_freq / 1 kHz );
 		} ELSE {
 			step_freq = new_step_freq;
 		}
+	}
+
+	/* Check if the modulation frequency has been changed */
+
+	IF input_changed( Mod_Freq ) {
+		new_mod_freq = input_value( Mod_Freq ) * 1 kHz;
+		IF new_mod_freq >= min_mod_freq AND new_mod_freq <= max_mod_freq {
+			mod_freq = lockin_ref_freq( new_mod_freq );
+		}
+		input_value( Mod_Freq, mod_freq / 1 kHz );
+	}
+
+	/* Check if the modulation amplitude has been changed */
+
+	IF input_changed( Mod_Ampl ) {
+		new_mod_ampl = input_value( Mod_Ampl ) * 1 kHz;
+		IF new_mod_ampl >= min_mod_ampl AND new_mod_ampl <= max_mod_ampl {
+			mod_ampl = synthesizer_mod_ampl( new_mod_ampl );
+		}
+		input_value( Mod_Ampl, mod_ampl / 1 kHz );
 	}
 
 	/* Check if RF power on/off state has changed */
@@ -242,7 +276,7 @@ FOREVER {
 	wait( lockin_time_constant( ) );
 	I += 1;
 	data[ I ] = lockin_get_data( 1, 2 );
-	display( I, data[ I, 1 ] / 1 mV, I, data[ I, 2 ] / 1 mV );
+	display( I, data[ I, 1 ] / 1 mV, 1, I, data[ I, 2 ] / 1 mV, 2 );
 
 	IF Sweep_State == STOPPED {
 		NEXT;

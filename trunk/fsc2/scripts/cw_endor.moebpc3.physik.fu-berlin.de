@@ -514,7 +514,7 @@ synthesizer_modulation( \"FM\", \"EXT DC\", mod_ampl );
 ";
 # === if START_FREQ < END_FREQ
     if ( eval { $START_FREQ < $END_FREQ } ) {
-        print $fh "init_1d( 3, N_points, start_freq / 1 MHz, step_freq / 1 kHz,
+        print $fh "init_1d( 3, N_points, start_freq / 1 MHz, step_freq / 1 MHz,
 		 \"Frequency / MHz\", \"Signal / V\" );
 ";
 # === else
