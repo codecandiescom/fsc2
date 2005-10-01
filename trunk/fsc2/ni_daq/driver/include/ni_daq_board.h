@@ -58,10 +58,6 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 
-#ifdef CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
-#endif
-
 #include <linux/pci.h>
 #include <linux/stddef.h>             /* for definition of NULL              */
 #include <asm/semaphore.h>            /* for definition of struct semaphore  */
@@ -258,10 +254,6 @@ typedef struct {
 
 
 struct Board {
-#ifdef CONFIG_DEVFS_FS
-	devfs_handle_t dev_handle;
-#endif
-
 	struct pci_dev *dev;        /* PCI device structure of board */
 
 	u8 *mite;                   /* virtual address of MITE */
