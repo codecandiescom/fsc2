@@ -81,7 +81,7 @@
 
 /* Please note: All of the following must *not* depend on the special
                 hardware, i.e. it must work for both PCI-E-series as
-	        well as AT-MIO-series boards! */
+                well as AT-MIO-series boards! */
 
 
 #include "autoconf.h"
