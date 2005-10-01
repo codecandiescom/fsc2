@@ -318,7 +318,8 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
 		return 0;
 	}
 
-	avail *= 2 * board->AI.num_data_per_scan;
+	if ( sys == NI_DAQ_AI_SUBSYSTEM )
+		avail *= 2 * board->AI.num_data_per_scan;
 
 	if ( avail < *size )
 		*size = avail;
