@@ -261,7 +261,7 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
 	   element */
 
 	if ( continuous )
-		board->mite_chain[ num_links - 1 ][ i ].lc.lkar =
+		board->mite_chain[ sys ][ num_links - 1 ].lc.lkar =
 			cpu_to_le32( virt_to_bus(
 					 &board->mite_chain[ sys ][ 0 ].lc ) );
 
