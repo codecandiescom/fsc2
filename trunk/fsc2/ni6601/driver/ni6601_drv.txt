@@ -138,7 +138,7 @@ counted. Valid settings for gate are:
 
 The fifth and final member, 'disable_output', determines if the output of
 the counter is enabled (when set to 0) or disabled (when set to 1). When
-enabled the output toggles of TC events of the counter.
+enabled the output toggles on TC events of the counter.
 
 
 ===================================================================
