@@ -50,6 +50,9 @@ tds540        // Tektronix digitizing oscilloscope, model 540
 tds744a       // Tektronix digitizing oscilloscope, model 744A
 tds754a       // Tektronix digitizing oscilloscope, model 754A
 lecroy9400    // LeCroy digitizing oscilloscope, model 9400
+lecroy9450    // LeCroy digitizing oscilloscope, model 9450
+lecroy9424    // LeCroy digitizing oscilloscope, model 9424
+lecroy9424e   // LeCroy digitizing oscilloscope, model 9424e
 
 
 // Lock-In amplifiers
