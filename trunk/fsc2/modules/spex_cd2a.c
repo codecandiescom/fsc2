@@ -373,7 +373,7 @@ int spex_cd2a_end_of_exp_hook( void )
  * Returns a string with the name of the device
  *----------------------------------------------*/
 
-Var_T *monochromator_name( UNUSED_ARG Var_T *v )
+Var_T *monochromator_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -746,7 +746,7 @@ Var_T *monochromator_wavenumber( Var_T *v )
  * doing a scan the old scan is aborted.
  *------------------------------------------------------------------*/
 
-Var_T *monochromator_start_scan( UNUSED_ARG Var_T *v )
+Var_T *monochromator_start_scan( Var_T *v UNUSED_ARG )
 {
 	if ( ! spex_cd2a.scan_is_init )
 	{
@@ -770,7 +770,7 @@ Var_T *monochromator_start_scan( UNUSED_ARG Var_T *v )
  * has been done and a scan already has been started.
  *------------------------------------------------------------*/
 
-Var_T *monochromator_scan_step( UNUSED_ARG Var_T *v )
+Var_T *monochromator_scan_step( Var_T *v UNUSED_ARG )
 {
 	if ( ! spex_cd2a.scan_is_init )
 	{

@@ -592,7 +592,7 @@ bool rs690_set_phase_reference( int phs, int function )
  * association in a PHASE_SETUP commmand.
  *-------------------------------------------------------------*/
 
-bool rs690_phase_setup_prep( int phs, int type, UNUSED_ARG int dummy,
+bool rs690_phase_setup_prep( int phs, int type, int dummy UNUSED_ARG,
 							 long channel )
 {
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );

@@ -234,7 +234,7 @@ void rs_sml01_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_name( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -551,7 +551,7 @@ Var_T *synthesizer_step_frequency( Var_T *v )
  * Function increments the frequency by a single sweep-step-sized step
  *---------------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_sweep_up( Var_T *v UNUSED_ARG )
 {
 	double att;
 
@@ -613,7 +613,7 @@ Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
  * Function decrements the frequency by a single sweep-step-sized step
  *---------------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_sweep_down( Var_T *v UNUSED_ARG )
 {
 	Var_T *nv;
 
@@ -629,7 +629,7 @@ Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
  * Function resets the frequency to the initial value
  *----------------------------------------------------*/
 
-Var_T *synthesizer_reset_frequency( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_reset_frequency( Var_T *v UNUSED_ARG )
 {
 	if ( ! rs_sml01.start_freq_is_set )
 	{

@@ -613,7 +613,7 @@ Var_T *daq_ai_start_acquisition( Var_T *v UNUSED_ARG )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var_T *daq_ai_get_curve( Var_T * v UNUSED_ARG )
+Var_T *daq_ai_get_curve( Var_T *v UNUSED_ARG )
 {
 	size_t i, j;
 	Var_T *nv = NULL;

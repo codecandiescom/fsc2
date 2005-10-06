@@ -125,7 +125,7 @@ bool rs690_init( const char *name )
 	return OK;
 }
 #else
-bool rs690_init( UNUSED_ARG const char *name )
+bool rs690_init( const char *name UNUSED_ARG )
 {
 	return OK;
 }
@@ -527,8 +527,8 @@ static int rs690_write( int device_no, const char *s, long len )
 	return SUCCESS;
 }
 #else
-static int rs690_write( UNUSED_ARG int device_no, UNUSED_ARG const char *s,
-						UNUSED_ARG long len )
+static int rs690_write( int device_no UNUSED_ARG, const char *s UNUSED_ARG,
+						long len UNUSED_ARG )
 {
 	return SUCCESS;
 }

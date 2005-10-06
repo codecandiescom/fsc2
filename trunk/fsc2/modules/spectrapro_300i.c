@@ -142,7 +142,7 @@ int spectrapro_300i_end_of_exp_hook( void )
  * Returns a string with the name of the device
  *----------------------------------------------*/
 
-Var_T *monochromator_name( UNUSED_ARG Var_T *v )
+Var_T *monochromator_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
