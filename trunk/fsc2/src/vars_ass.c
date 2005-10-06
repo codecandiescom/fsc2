@@ -729,7 +729,7 @@ static long vars_assign_snd_range_from_nd_1( Var_T *dest, Var_T *src,
 					dest->val.lpnt[ i ] = *src->val.lpnt;
 			else
 				for ( i = start; i <= end; i++ )
-					dest->val.lpnt[ i ] = round( *src->val.dpnt );
+					dest->val.lpnt[ i ] = lrnd( *src->val.dpnt );
 			count = 1;
 			break;
 
@@ -781,7 +781,7 @@ static long vars_assign_snd_range_from_nd_2( Var_T *dest, Var_T *src,
 						range * sizeof *dest->val.lpnt );
 			else
 				for ( i = 0; i < range; i++ )
-					dest->val.lpnt[ i + start ] = round( src->val.dpnt[ i ] );
+					dest->val.lpnt[ i + start ] = lrnd( src->val.dpnt[ i ] );
 			count = range;
 			break;
 

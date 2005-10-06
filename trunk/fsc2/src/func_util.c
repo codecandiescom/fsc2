@@ -5091,7 +5091,7 @@ Var_T *f_spike_rem( Var_T *v )
 				for ( k = 1, j = ol_indices[ i ] + 1; j <= ol_indices[ i + 1 ];
 					  j++, k++ )
 					nv->val.lpnt[ j ] = nv->val.lpnt[ ol_indices[ i ] ]
-									    + round( k * m );
+									    + lrnd( k * m );
 			}
 			else
 			{
@@ -5138,7 +5138,7 @@ Var_T *f_spike_rem( Var_T *v )
 				m = ( nv->val.lpnt[ next ] - nv->val.lpnt[ start ] )
 					/ ( next - start );
 				for ( k = 1, j = start + 1; j < next; j++, k++ )
-					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + round( k * m );
+					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k * m );
 			}
 			else
 			{
@@ -5183,7 +5183,7 @@ Var_T *f_spike_rem( Var_T *v )
 					/ ( start - end );
 				for ( k = 1, j = start + 1; j < end;
 					  j++, k++ )
-					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + round( k * m );
+					nv->val.lpnt[ j ] = nv->val.lpnt[ start ] + lrnd( k * m );
 			}
 			else
 			{
