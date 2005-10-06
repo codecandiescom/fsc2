@@ -306,7 +306,7 @@ strs:    E_STR_TOKEN                { if ( ! Dont_exec )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void conditionerror( UNUSED_ARG const char *s )
+static void conditionerror( const char *s UNUSED_ARG )
 {
 	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );

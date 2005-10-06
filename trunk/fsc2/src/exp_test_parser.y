@@ -275,7 +275,7 @@ void exp_test_init( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void exp_testerror( UNUSED_ARG const char *s )
+static void exp_testerror( const char *s UNUSED_ARG )
 {
 	if ( ! Dont_print_error && ! In_cond )
 	{

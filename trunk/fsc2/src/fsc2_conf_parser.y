@@ -90,7 +90,7 @@ line:     DEF_DIR SEPARATOR TEXT    { Fsc2_Internals.def_directory =
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void fsc2_conferror ( UNUSED_ARG const char *s )
+static void fsc2_conferror ( const char *s UNUSED_ARG )
 {
 }
 

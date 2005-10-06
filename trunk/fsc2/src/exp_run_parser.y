@@ -335,7 +335,7 @@ strs:    E_STR_TOKEN               { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void exp_runerror ( UNUSED_ARG const char *s )
+static void exp_runerror ( const char *s UNUSED_ARG )
 {
 	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );

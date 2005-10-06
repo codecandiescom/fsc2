@@ -101,7 +101,7 @@ p_list:  /* empty */
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void phaseserror ( UNUSED_ARG const char *s )
+static void phaseserror ( const char *s UNUSED_ARG )
 {
 	if ( *phasestext == '\0' )
 		print( FATAL, "Unexpected end of file in PHASES section.\n" );
