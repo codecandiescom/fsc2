@@ -358,7 +358,7 @@ int sr830_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_name( UNUSED_ARG Var_T *v )
+Var_T *lockin_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -913,7 +913,7 @@ Var_T *lockin_harmonic( Var_T *v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T *lockin_ref_mode( UNUSED_ARG Var_T *v )
+Var_T *lockin_ref_mode( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR830_TEST_MOD_MODE );
@@ -1220,7 +1220,7 @@ Var_T *lockin_auto_setup( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *lockin_get_sample_time( UNUSED_ARG Var_T *v )
+Var_T *lockin_get_sample_time( Var_T *v UNUSED_ARG )
 {
 	long st_index;
 	double tc;
