@@ -46,22 +46,19 @@ const char *LECROY94_TMPL_Channel_Names[ 13 ] = { "CH1",    "CH2",
 
 /* Possible numbers of points to be averaged */
 
-long rl[ 10 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000 };
-
-/* Possible number of segments */
-
-int ns[ ] =  { 2, 5, 10, 20, 50, 100, 200 };
+static long rl[ 10 ] = { 50, 100, 200, 500, 1000, 2000,
+						 5000, 10000, 20000, 50000 };
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
-double fixed_sens[ ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 0.1, 0.2, 0.5, 1.0 };
+static double fixed_sens[ ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2,
+								0.1, 0.2, 0.5, 1.0 };
 
 /* List of offset factors for the different sensitivity ranges */
 
-int offset_factor[ ] = { 48, 24, 12, 12, 12, 12, 12, 10 };
+static int offset_factor[ ] = { 48, 24, 12, 12, 12, 12, 12, 10 };
 
-bool lecroy94_tmpl_IN_SETUP = UNSET;
-
+static bool lecroy94_tmpl_IN_SETUP = UNSET;
 
 static LECROY94_TMPL_T lecroy94_tmpl_stored;
 
