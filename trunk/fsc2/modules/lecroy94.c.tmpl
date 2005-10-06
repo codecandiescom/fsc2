@@ -296,7 +296,7 @@ Var_T *digitizer_change_window( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	w->width = get_double(  v, "window with" );
+	w->width = get_double(  v, "window width" );
 
 	if ( w->width < 0.0 ) {
 		print( FATAL, "Negative window width.\n" );
@@ -518,14 +518,14 @@ Var_T *digitizer_interleave_mode( Var_T *v )
 
 	if ( ilvd && hres[ lecroy94_tmpl.tb_index ].ris_rl < 0 )
 	{
-		print( FATAL, "Can't switch to RIS mode with time base of %s.\n",
+		print( FATAL, "Can't switch to RIS mode for time base of %s.\n",
 			   lecroy94_tmpl_ptime( hres[ lecroy94_tmpl.tb_index ].tdiv ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! ilvd && hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 )
 	{
-		print( FATAL, "Can't switch to Single Shot mode with time base "
+		print( FATAL, "Can't switch to Single Shot mode for time base "
 			   "of %s.\n",
 			   lecroy94_tmpl_ptime( hres[ lecroy94_tmpl.tb_index ].tdiv ) );
 		THROW( EXCEPTION );
