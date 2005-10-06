@@ -162,7 +162,7 @@ int er023m_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_name( UNUSED_ARG Var_T *v )
+Var_T *lockin_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -824,7 +824,7 @@ Var_T *lockin_resonator( Var_T *v )
  * last data fetched from the device an overload occurred, otherwise 0.
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_is_overload( UNUSED_ARG Var_T *v )
+Var_T *lockin_is_overload( Var_T *v UNUSED_ARG )
 {
 	long res;
 

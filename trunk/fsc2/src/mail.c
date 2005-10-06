@@ -106,7 +106,7 @@ static unsigned short get_ushort( const unsigned char *p );
 
 #if defined MAIL_PROGRAM
 
-int send_mail( const char *subject, UNUSED_ARG const char *from,
+int send_mail( const char *subject, const char *from UNUSED_ARG,
 			   const char* cc_to, const char *to, FILE *fp )
 {
 	FILE *mail;

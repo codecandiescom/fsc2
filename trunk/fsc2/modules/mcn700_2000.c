@@ -140,9 +140,8 @@ int mcn700_2000_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *powersupply_name( Var_T *v )
+Var_T *powersupply_name( Var_T *v UNUSED_ARG )
 {
-	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 

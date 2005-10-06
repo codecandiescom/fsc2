@@ -127,7 +127,7 @@ int hp5340a_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *freq_counter_name( UNUSED_ARG Var_T *v )
+Var_T *freq_counter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -136,7 +136,7 @@ Var_T *freq_counter_name( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *freq_counter_measure( UNUSED_ARG Var_T *v )
+Var_T *freq_counter_measure( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );

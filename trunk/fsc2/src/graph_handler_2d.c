@@ -294,7 +294,7 @@ static void press_handler_2d( FL_OBJECT *obj, Window window, XEvent *ev,
  * Handler for events due to releasing one of the mouse buttons.
  *---------------------------------------------------------------*/
 
-static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
+static void release_handler_2d( FL_OBJECT *obj UNUSED_ARG, Window window,
 								XEvent *ev, Canvas_T *c )
 {
 	unsigned int keymask;
@@ -526,7 +526,7 @@ static void release_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
  * Handler for events due to movements of the mouse.
  *---------------------------------------------------*/
 
-static void motion_handler_2d( UNUSED_ARG FL_OBJECT *obj, Window window,
+static void motion_handler_2d( FL_OBJECT *obj UNUSED_ARG, Window window,
 							   XEvent *ev, Canvas_T *c )
 {
 	XEvent new_ev;

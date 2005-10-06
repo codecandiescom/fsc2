@@ -205,7 +205,7 @@ void hjs_daadc_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( UNUSED_ARG Var_T *v )
+Var_T *daq_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }

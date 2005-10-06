@@ -482,10 +482,8 @@ double lecroy9400_get_trigger_pos( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_pos( double position )
+bool lecroy9400_set_trigger_pos( double position UNUSED_ARG )
 {
-	UNUSED_ARGUMENT( position );
-
 	/***** Still needs to be implemented *****/
 
 	return OK;
@@ -589,8 +587,8 @@ void lecroy9400_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
-						   bool use_cursor )
+void lecroy9400_get_curve( int ch, Window_T *w UNUSED_ARG , double **array,
+						   long *length, bool use_cursor UNUSED_ARG )
 {
 	unsigned char *data;
 	unsigned char *dp;
@@ -599,9 +597,6 @@ void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
 	long i;
 	double gain_fac, vgain_fac, offset_shift;
 
-
-	UNUSED_ARGUMENT( w );
-	UNUSED_ARGUMENT( use_cursor );
 
 	if ( ch >= LECROY9400_CH1 && ch <= LECROY9400_CH2 )
 	{

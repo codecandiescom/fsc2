@@ -353,8 +353,8 @@ static bool get_print_file( FILE **fp, char **name, long data )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static int print_form_close_handler( UNUSED_ARG FL_FORM *a,
-									 UNUSED_ARG void *b )
+static int print_form_close_handler( FL_FORM *a UNUSED_ARG,
+									 void *b UNUSED_ARG )
 {
 	return FL_IGNORE;
 }
@@ -364,7 +364,7 @@ static int print_form_close_handler( UNUSED_ARG FL_FORM *a,
  * Callback function for the objects in the print form.
  *------------------------------------------------------*/
 
-void print_callback( FL_OBJECT *obj, UNUSED_ARG long data )
+void print_callback( FL_OBJECT *obj, long data UNUSED_ARG )
 {
 	const char *fn;
 
@@ -503,8 +503,8 @@ static void get_print_comm( long data )
  * and then pressing the "Done" button.
  *---------------------------------------------------------------------*/
 
-static int print_comment_close_handler( UNUSED_ARG FL_FORM *a,
-										UNUSED_ARG void *b )
+static int print_comment_close_handler( FL_FORM *a UNUSED_ARG,
+										void *b UNUSED_ARG )
 {
 	fl_set_input( GUI.print_comment->pc_input, NULL );
 	fl_trigger_object( GUI.print_comment->pc_done );

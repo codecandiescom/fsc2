@@ -159,7 +159,7 @@ int ni6601_end_of_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_name( UNUSED_ARG Var_T *v )
+Var_T *counter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }

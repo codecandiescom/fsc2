@@ -466,7 +466,7 @@ Ticks ep385_calc_max_length( Function_T *f )
  * because some other pulsers also have it.
  *-----------------------------------------------*/
 
-bool ep385_set_max_seq_len( UNUSED_ARG double seq_len )
+bool ep385_set_max_seq_len( double seq_len UNUSED_ARG )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	return OK;

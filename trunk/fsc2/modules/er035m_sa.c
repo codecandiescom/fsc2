@@ -362,7 +362,7 @@ int er035m_sa_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
+Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -382,7 +382,7 @@ Var_T *gaussmeter_field( Var_T *v )
  * and returns the current field value in a variable.
  *----------------------------------------------------------------*/
 
-Var_T *measure_field( UNUSED_ARG Var_T *v )
+Var_T *measure_field( Var_T *v UNUSED_ARG )
 {
 	char buffer[ 21 ];
 	char *bp;

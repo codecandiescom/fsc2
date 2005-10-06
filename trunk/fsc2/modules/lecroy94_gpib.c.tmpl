@@ -355,8 +355,6 @@ bool lecroy94_tmpl_set_sens( int channel, double sens )
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
 
-	lecroy94_tmpl_get_desc( channel );
-
 	return OK;
 }
 
@@ -453,8 +451,6 @@ bool lecroy94_tmpl_set_coupling( int channel, int type )
 	sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
-
-	lecroy94_tmpl_get_desc( channel );
 
 	return OK;
 }

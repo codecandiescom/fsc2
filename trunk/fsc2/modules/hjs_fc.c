@@ -384,7 +384,7 @@ void hjs_fc_child_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *magnet_name( UNUSED_ARG Var_T *v )
+Var_T *magnet_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -517,7 +517,7 @@ Var_T *set_field( Var_T *v )
  * Function asks the used gaussmeter for the current field
  *---------------------------------------------------------*/
 
-Var_T *get_field( UNUSED_ARG Var_T *v )
+Var_T *get_field( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE != TEST )
 		hjs_fc.act_field = hjs_fc_get_field( );
@@ -529,7 +529,7 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *sweep_up( UNUSED_ARG Var_T *v )
+Var_T *sweep_up( Var_T *v UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field_step )
 	{
@@ -548,7 +548,7 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *sweep_down( UNUSED_ARG Var_T *v )
+Var_T *sweep_down( Var_T *v UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field_step )
 	{
@@ -567,7 +567,7 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *reset_field( UNUSED_ARG Var_T *v )
+Var_T *reset_field( Var_T *v UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field )
 	{

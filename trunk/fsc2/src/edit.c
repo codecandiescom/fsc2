@@ -34,7 +34,7 @@ static void start_editor( void );
  * function for the Edit-button.
  *---------------------------------------------------------------------*/
 
-void edit_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void edit_file( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	int res;
 

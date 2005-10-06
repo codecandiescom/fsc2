@@ -254,7 +254,7 @@ void gg_chopper_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var_T *chopper_name( UNUSED_ARG Var_T *v )
+Var_T *chopper_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }

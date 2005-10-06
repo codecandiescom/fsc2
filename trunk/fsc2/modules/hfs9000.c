@@ -343,7 +343,7 @@ void hfs9000_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_name( UNUSED_ARG Var_T *v )
+Var_T *pulser_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -352,7 +352,7 @@ Var_T *pulser_name( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
+Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
 {
 	int pd[ 2 ];
 	pid_t pid;
@@ -424,7 +424,7 @@ Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
+Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
 {
 	char *name;
 	char *m;
@@ -504,7 +504,7 @@ Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_keep_all_pulses( UNUSED_ARG Var_T *v )
+Var_T *pulser_keep_all_pulses( Var_T *v UNUSED_ARG )
 {
 	hfs9000_keep_all( );
 	return vars_push( INT_VAR, 1L );
@@ -606,7 +606,7 @@ Var_T *pulser_channel_state( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_update( UNUSED_ARG Var_T *v )
+Var_T *pulser_update( Var_T *v UNUSED_ARG )
 {
 	if ( ! hfs9000.is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -776,7 +776,7 @@ Var_T *pulser_increment( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_reset( UNUSED_ARG Var_T *v )
+Var_T *pulser_reset( Var_T *v UNUSED_ARG )
 {
 	vars_pop( pulser_pulse_reset( NULL ) );
 	return pulser_update( NULL );
@@ -852,7 +852,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
+Var_T *pulser_lock_keyboard( Var_T *v UNUSED_ARG )
 {
 	print( SEVERE, "Function can't be used for this device.\n" );
 	return vars_push( INT_VAR, 1L );

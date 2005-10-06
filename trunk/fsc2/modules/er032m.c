@@ -297,7 +297,7 @@ int er032m_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( UNUSED_ARG Var_T *v )
+Var_T *magnet_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -384,7 +384,7 @@ Var_T *magnet_setup( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_up( UNUSED_ARG Var_T *v )
+Var_T *sweep_up( Var_T *v UNUSED_ARG )
 {
 	int steps;
 	int new_swa;
@@ -463,7 +463,7 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_down( UNUSED_ARG Var_T *v )
+Var_T *sweep_down( Var_T *v UNUSED_ARG )
 {
 	int steps;
 	int new_swa;
@@ -538,7 +538,7 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *reset_field( UNUSED_ARG Var_T *v )
+Var_T *reset_field( Var_T *v UNUSED_ARG )
 {
 	if ( ! magnet.is_init )
 	{
@@ -556,7 +556,7 @@ Var_T *reset_field( UNUSED_ARG Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *get_field( UNUSED_ARG Var_T *v )
+Var_T *get_field( Var_T *v UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, er032m_get_field( ) );
 }

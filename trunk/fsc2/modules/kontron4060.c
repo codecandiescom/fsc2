@@ -125,7 +125,7 @@ int kontron4060_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *voltmeter_name( UNUSED_ARG Var_T *v )
+Var_T *voltmeter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -135,7 +135,7 @@ Var_T *voltmeter_name( UNUSED_ARG Var_T *v )
  * Switches the voltmeter to AC measurement mode
  *-----------------------------------------------*/
 
-Var_T *voltmeter_ac_measurement( UNUSED_ARG Var_T *v )
+Var_T *voltmeter_ac_measurement( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -150,7 +150,7 @@ Var_T *voltmeter_ac_measurement( UNUSED_ARG Var_T *v )
  * Switches the voltmeter to DC measurement mode
  *-----------------------------------------------*/
 
-Var_T *voltmeter_dc_measurement( UNUSED_ARG Var_T *v )
+Var_T *voltmeter_dc_measurement( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -165,7 +165,7 @@ Var_T *voltmeter_dc_measurement( UNUSED_ARG Var_T *v )
  * Returns the current voltage from the voltmeter
  *------------------------------------------------*/
 
-Var_T *voltmeter_get_data( UNUSED_ARG Var_T *v )
+Var_T *voltmeter_get_data( Var_T *v UNUSED_ARG )
 {
 	char reply[ 100 ];
 	long length = 100;

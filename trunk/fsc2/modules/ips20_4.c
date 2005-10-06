@@ -248,7 +248,7 @@ int ips20_4_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( UNUSED_ARG Var_T *v )
+Var_T *magnet_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -298,7 +298,7 @@ Var_T *magnet_setup( Var_T *v )
  * time spent since the last call for determining the current.
  *-------------------------------------------------------------------------*/
 
-Var_T *get_field( UNUSED_ARG Var_T *v )
+Var_T *get_field( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 	{
@@ -589,7 +589,7 @@ Var_T *magnet_sweep_rate( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *reset_field( UNUSED_ARG Var_T *v )
+Var_T *reset_field( Var_T *v UNUSED_ARG )
 {
 	return set_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }

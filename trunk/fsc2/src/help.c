@@ -34,7 +34,7 @@ static void start_help_browser( void );
  * documentation.
  *-------------------------------------------------------------*/
 
-void run_help( FL_OBJECT *a, UNUSED_ARG long b )
+void run_help( FL_OBJECT *a, long b UNUSED_ARG )
 {
 	int res;
 	int bn;

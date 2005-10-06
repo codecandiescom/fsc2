@@ -386,9 +386,8 @@ int gpib_init_device( const char *device_name, int *dev )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int gpib_local( int device )
+int gpib_local( int device UNUSED_ARG )
 {
-	UNUSED_ARGUMENT( device );
 	return SUCCESS;
 }
 
@@ -396,9 +395,8 @@ int gpib_local( int device )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int gpib_llo( int device )
+int gpib_llo( int device UNUSED_ARG )
 {
-	UNUSED_ARGUMENT( device );
 	return SUCCESS;
 }
 

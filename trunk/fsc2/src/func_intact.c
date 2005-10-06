@@ -1008,7 +1008,7 @@ void recreate_Toolbox( void )
  * the event.
  *--------------------------------------------------------------------*/
 
-static int toolbox_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
+static int toolbox_close_handler( FL_FORM *a UNUSED_ARG, void *b UNUSED_ARG )
 {
 	return FL_IGNORE;
 }
@@ -1724,7 +1724,7 @@ static void menu_setup( Iobject_T *io )
  * to be used by the functions button_state() etc.
  *----------------------------------------------------------*/
 
-static void tools_callback( FL_OBJECT *obj, UNUSED_ARG long data )
+static void tools_callback( FL_OBJECT *obj, long data UNUSED_ARG )
 {
 	Iobject_T *io, *oio;
 	long lval;

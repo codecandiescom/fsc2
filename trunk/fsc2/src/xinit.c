@@ -770,7 +770,7 @@ bool dl_fsc2_rsc( void )
  * scripts to be run quit immediately.
  *-----------------------------------------------------------------*/
 
-static int main_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
+static int main_form_close_handler( FL_FORM *a UNUSED_ARG, void *b UNUSED_ARG )
 {
 	if ( GUI.main_form->quit->active != 1 )
 		return FL_IGNORE;
@@ -818,7 +818,7 @@ void xforms_close( void )
  * the sizes of the program and the error/output browser.
  *------------------------------------------------------------*/
 
-void win_slider_callback( FL_OBJECT *a, UNUSED_ARG long b )
+void win_slider_callback( FL_OBJECT *a, long b UNUSED_ARG )
 {
 	FL_Coord h, H;
 	FL_Coord new_h1 ;
@@ -905,7 +905,7 @@ static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int fsc2_xio_error_handler( UNUSED_ARG Display *d )
+static int fsc2_xio_error_handler( Display *d UNUSED_ARG )
 {
 	fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
 	exit( EXIT_FAILURE );

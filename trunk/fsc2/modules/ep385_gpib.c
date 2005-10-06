@@ -105,7 +105,7 @@ bool ep385_init( const char *name )
 	return OK;
 }
 #else
-bool ep385_init( UNUSED_ARG const char *name )
+bool ep385_init( const char *name UNUSED_ARG )
 {
 	return OK;
 }

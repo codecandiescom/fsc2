@@ -36,7 +36,7 @@
  * Just tell user about the errors of his way...
  *-----------------------------------------------*/
 
-void fsc2_request_serial_port( UNUSED_ARG int sn, const char *dev_name )
+void fsc2_request_serial_port( int sn UNUSED_ARG, const char *dev_name )
 {
 	eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
 			"not compiled with support for serial port access.\n", dev_name );
@@ -57,8 +57,8 @@ void fsc2_serial_init( void )
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_exp_init( UNUSED_ARG const char *log_file_name,
-						   UNUSED_ARG int log_level )
+void fsc2_serial_exp_init( const char *log_file_name UNUSED_ARG ,
+						   int log_level UNUSED_ARG )
 {
 }
 
@@ -95,9 +95,9 @@ void fsc2_final_serial_cleanup( void )
  * would never call the function anyway.
  *-------------------------------------------------------------*/
 
-struct termios *fsc2_serial_open( UNUSED_ARG int sn,
-								  UNUSED_ARG const char *dev_name,
-								  UNUSED_ARG int flags )
+struct termios *fsc2_serial_open( int sn UNUSED_ARG,
+								  const char *dev_name UNUSED_ARG,
+								  int flags UNUSED_ARG )
 {
 	errno = EACCES;
 	return NULL;
@@ -108,7 +108,7 @@ struct termios *fsc2_serial_open( UNUSED_ARG int sn,
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_close( UNUSED_ARG int sn )
+void fsc2_serial_close( int sn UNUSED_ARG )
 {
 }
 
@@ -117,22 +117,9 @@ void fsc2_serial_close( UNUSED_ARG int sn )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-ssize_t fsc2_serial_write( UNUSED_ARG int sn, UNUSED_ARG const void *buf,
-						   UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
-						   UNUSED_ARG bool quit_on_signal )
-{
-	errno = EBADF;
-	return -1;
-}
-
-
-/*-------------------------------*
- * Return -1 to indicate failure
- *-------------------------------*/
-
-ssize_t fsc2_serial_read( UNUSED_ARG int sn, UNUSED_ARG void *buf,
-						  UNUSED_ARG size_t count, UNUSED_ARG long us_wait,
-						  UNUSED_ARG bool quit_on_signal )
+ssize_t fsc2_serial_write( int sn UNUSED_ARG, const void *buf UNUSED_ARG ,
+						   size_t count UNUSED_ARG, long us_wait UNUSED_ARG,
+						   bool quit_on_signal UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -143,7 +130,9 @@ ssize_t fsc2_serial_read( UNUSED_ARG int sn, UNUSED_ARG void *buf,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcgetattr( UNUSED_ARG int sn, UNUSED_ARG struct termios *termios_p )
+ssize_t fsc2_serial_read( int sn UNUSED_ARG, void *buf UNUSED_ARG ,
+						  size_t count UNUSED_ARG, long us_wait UNUSED_ARG,
+						  bool quit_on_signal UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -154,8 +143,7 @@ int fsc2_tcgetattr( UNUSED_ARG int sn, UNUSED_ARG struct termios *termios_p )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcsetattr( UNUSED_ARG int sn, UNUSED_ARG int optional_actions,
-					UNUSED_ARG struct termios *termios_p )
+int fsc2_tcgetattr( int sn UNUSED_ARG, struct termios *termios_p UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -166,7 +154,8 @@ int fsc2_tcsetattr( UNUSED_ARG int sn, UNUSED_ARG int optional_actions,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcsendbreak( UNUSED_ARG int sn, UNUSED_ARG int duration )
+int fsc2_tcsetattr( int sn UNUSED_ARG, int optional_actions UNUSED_ARG,
+					struct termios *termios_p UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -177,7 +166,7 @@ int fsc2_tcsendbreak( UNUSED_ARG int sn, UNUSED_ARG int duration )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcdrain( UNUSED_ARG int sn )
+int fsc2_tcsendbreak( int sn UNUSED_ARG, int duration UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -188,7 +177,7 @@ int fsc2_tcdrain( UNUSED_ARG int sn )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcflush( UNUSED_ARG int sn, UNUSED_ARG int queue_selector )
+int fsc2_tcdrain( int sn UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -199,7 +188,18 @@ int fsc2_tcflush( UNUSED_ARG int sn, UNUSED_ARG int queue_selector )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcflow( UNUSED_ARG int sn, UNUSED_ARG int action )
+int fsc2_tcflush( int sn UNUSED_ARG, int queue_selector UNUSED_ARG )
+{
+	errno = EBADF;
+	return -1;
+}
+
+
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
+
+int fsc2_tcflow( int sn UNUSED_ARG, int action UNUSED_ARG )
 {
 	errno = EBADF;
 	return -1;
@@ -1050,7 +1050,7 @@ static bool get_serial_lock( int sn )
 	return OK;
 }
 #else
-static bool get_serial_lock( UNUSED_ARG int sn )
+static bool get_serial_lock( int sn UNUSED_ARG )
 {
 	return OK;
 }

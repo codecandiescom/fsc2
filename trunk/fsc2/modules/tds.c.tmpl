@@ -200,7 +200,7 @@ void tds_tmpl_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_name( UNUSED_ARG Var_T *v )
+Var_T *digitizer_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -677,7 +677,7 @@ Var_T *digitizer_timebase( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_time_per_point( UNUSED_ARG Var_T *v )
+Var_T *digitizer_time_per_point( Var_T *v UNUSED_ARG )
 {
 	/* During the experiment if the digitizer's keyboard isn't locked we
 	   need to reread the timebase, record length and trigger position and
@@ -1176,7 +1176,7 @@ Var_T *digitizer_trigger_channel( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_start_acquisition( UNUSED_ARG Var_T *v )
+Var_T *digitizer_start_acquisition( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_start_acquisition( );
@@ -1683,7 +1683,7 @@ Var_T *digitizer_copy_curve( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_run( UNUSED_ARG Var_T *v )
+Var_T *digitizer_run( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_free_running( );

@@ -38,7 +38,7 @@ static double datanh( double arg );
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T *f_abort( UNUSED_ARG Var_T *v )
+Var_T *f_abort( Var_T *v UNUSED_ARG )
 {
 	char *str;
 
@@ -63,7 +63,7 @@ Var_T *f_abort( UNUSED_ARG Var_T *v )
  * This is called for the end() EDL function
  *-------------------------------------------*/
 
-Var_T *f_stopsim( UNUSED_ARG Var_T *v )
+Var_T *f_stopsim( Var_T *v UNUSED_ARG )
 {
 	EDL.do_quit = SET;
 	return NULL;
@@ -1993,7 +1993,7 @@ Var_T *f_time( Var_T *v )
  * for the very first time.
  *----------------------------------------------------------*/
 
-Var_T *f_dtime( UNUSED_ARG Var_T *v )
+Var_T *f_dtime( Var_T *v UNUSED_ARG )
 {
 	double new_time;
 	static double old_time = 0.0;

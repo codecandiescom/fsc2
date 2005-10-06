@@ -141,7 +141,7 @@ int itc503_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_name( UNUSED_ARG Var_T *v )
+Var_T *temp_contr_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -152,7 +152,7 @@ Var_T *temp_contr_name( UNUSED_ARG Var_T *v )
  * (in the currently selected units)
  *---------------------------------------------*/
 
-Var_T *temp_contr_temperature( UNUSED_ARG Var_T *v )
+Var_T *temp_contr_temperature( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR,

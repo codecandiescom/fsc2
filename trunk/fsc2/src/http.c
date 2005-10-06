@@ -49,7 +49,7 @@ enum {
  * in the main form for starting and stopping the HTTP server
  *------------------------------------------------------------*/
 
-void server_callback( FL_OBJECT *obj, UNUSED_ARG long a )
+void server_callback( FL_OBJECT *obj, long a UNUSED_ARG )
 {
 	char *www_help;
 

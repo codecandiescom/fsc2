@@ -492,7 +492,7 @@ static void setup_signal_handlers( void )
  * at this early stage).
  *-----------------------------------------------------------*/
 
-static void stop_while_exp_hook( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+static void stop_while_exp_hook( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	EDL.do_quit = EDL.react_to_do_quit = SET;
 }
@@ -627,7 +627,7 @@ static void check_for_further_errors( Compilation_T *c_old,
  * variable and reacts by sending the child a DO_QUIT signal.
  *---------------------------------------------------------------------*/
 
-static void quitting_handler( UNUSED_ARG int signo )
+static void quitting_handler( int signo UNUSED_ARG )
 {
 	int errno_saved;
 
@@ -644,7 +644,7 @@ static void quitting_handler( UNUSED_ARG int signo )
  * used for this button, see run_close_button_callback().
  *-------------------------------------------------------------------*/
 
-void run_stop_button_callback( FL_OBJECT *a, UNUSED_ARG long b )
+void run_stop_button_callback( FL_OBJECT *a, long b UNUSED_ARG )
 {
 	int bn;
 
@@ -907,7 +907,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
  * in (one of) the display window(s) gets pressed.
  *-------------------------------------------------------*/
 
-void run_close_button_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void run_close_button_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	if ( Graphics_have_been_started )
 	{

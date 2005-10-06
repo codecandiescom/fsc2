@@ -270,7 +270,7 @@ static void press_handler_1d( FL_OBJECT *obj, Window window, XEvent *ev,
  * buttons in the axis areas or the camvas
  *--------------------------------------------------------*/
 
-static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
+static void release_handler_1d( FL_OBJECT *obj UNUSED_ARG, Window window,
 								XEvent *ev, Canvas_T *c )
 {
 	unsigned int keymask;
@@ -491,7 +491,7 @@ static void release_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
  * the buttons was pressed in the axis areas or the camvas
  *------------------------------------------------------------*/
 
-static void motion_handler_1d( UNUSED_ARG FL_OBJECT *obj, Window window,
+static void motion_handler_1d( FL_OBJECT *obj UNUSED_ARG, Window window,
 							   XEvent *ev, Canvas_T *c )
 {
 	Curve_1d_T *cv;

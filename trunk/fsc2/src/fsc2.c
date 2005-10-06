@@ -1239,7 +1239,7 @@ static void final_exit_handler( void )
  * reload == 0: read new file, reload == 1: reload file
  *-------------------------------------------------------------------*/
 
-void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
+void load_file( FL_OBJECT *a UNUSED_ARG, long reload )
 {
 	const char *fn;
 	static char *old_in_file;
@@ -1486,7 +1486,7 @@ void load_file( UNUSED_ARG FL_OBJECT *a, long reload )
  * the currently loaded file.
  *-----------------------------------------------------*/
 
-void test_file( FL_OBJECT *a, UNUSED_ARG long b )
+void test_file( FL_OBJECT *a, long b UNUSED_ARG )
 {
 	static bool running_test = UNSET;
 	static bool user_break = UNSET;
@@ -1635,7 +1635,7 @@ void test_file( FL_OBJECT *a, UNUSED_ARG long b )
  * not already done) and on success starts the experiment.
  *---------------------------------------------------------------*/
 
-void run_file( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void run_file( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	struct stat file_stat;
 	char str1[ 128 ],

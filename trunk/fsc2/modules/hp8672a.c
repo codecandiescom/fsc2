@@ -166,7 +166,7 @@ void hp8672a_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_name( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -460,7 +460,7 @@ Var_T *synthesizer_step_frequency( Var_T *v )
  * This function may only be called in the EXPERIMENT section!
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_sweep_up( Var_T *v UNUSED_ARG )
 {
 	double att;
 
@@ -517,7 +517,7 @@ Var_T *synthesizer_sweep_up( UNUSED_ARG Var_T *v )
  * This function may only be called in the EXPERIMENT section!
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_sweep_down( Var_T *v UNUSED_ARG )
 {
 	Var_T *nv;
 
@@ -533,7 +533,7 @@ Var_T *synthesizer_sweep_down( UNUSED_ARG Var_T *v )
  * This function may only be called in the EXPERIMENT section!
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_reset_frequency( UNUSED_ARG Var_T *v )
+Var_T *synthesizer_reset_frequency( Var_T *v UNUSED_ARG )
 {
 	if ( ! hp8672a.start_freq_is_set )
 	{

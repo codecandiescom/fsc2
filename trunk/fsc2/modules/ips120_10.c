@@ -250,7 +250,7 @@ int ips120_10_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( UNUSED_ARG Var_T *v )
+Var_T *magnet_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -300,7 +300,7 @@ Var_T *magnet_setup( Var_T *v )
  * time spent since the last call for determining the field.
  *-----------------------------------------------------------------------*/
 
-Var_T *get_field( UNUSED_ARG Var_T *v )
+Var_T *get_field( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 	{
@@ -601,7 +601,7 @@ Var_T *magnet_sweep_rate( Var_T *v )
  * i.e. at the very start of the experiment
  *--------------------------------------------------------*/
 
-Var_T *reset_field( UNUSED_ARG Var_T *v )
+Var_T *reset_field( Var_T *v UNUSED_ARG )
 {
 	return set_field( vars_push( FLOAT_VAR,
 								 ips120_10.start_current * F2C_RATIO) );

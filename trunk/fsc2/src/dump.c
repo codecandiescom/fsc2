@@ -225,7 +225,7 @@ void DumpStack( void *crash_address )
 	Fail_Mess_Fd = answer_fd[ DUMP_ANSWER_READ ];
 }
 #else
-void DumpStack( UNUSED_ARG void *crash_address )
+void DumpStack( void *crash_address UNUSED_ARG )
 {
 }
 #endif

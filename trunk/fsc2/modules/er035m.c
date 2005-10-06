@@ -399,7 +399,7 @@ int er035m_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( UNUSED_ARG Var_T *v )
+Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -419,7 +419,7 @@ Var_T *gaussmeter_field( Var_T *v )
  * and returns the current field value in a variable.
  *----------------------------------------------------------------*/
 
-Var_T *find_field( UNUSED_ARG Var_T *v )
+Var_T *find_field( Var_T *v UNUSED_ARG )
 {
 	char buffer[ 21 ];
 	char *bp;
@@ -630,7 +630,7 @@ Var_T *gaussmeter_command( Var_T *v )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_wait( UNUSED_ARG Var_T *v )
+Var_T *gaussmeter_wait( Var_T *v UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
 		fsc2_usleep( ( nmr.resolution * 10 ) * E2_US, UNSET );

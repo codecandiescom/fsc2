@@ -538,7 +538,7 @@ void ep385_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_name( UNUSED_ARG Var_T *v )
+Var_T *pulser_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -793,7 +793,7 @@ Var_T *pulser_automatic_twt_pulses( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
+Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		ep385.do_show_pulses = SET;
@@ -805,7 +805,7 @@ Var_T *pulser_show_pulses( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( UNUSED_ARG Var_T *v )
+Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		ep385.do_dump_pulses = SET;
@@ -944,7 +944,7 @@ Var_T *pulser_state( Var_T *v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
+Var_T *pulser_channel_state( Var_T *v UNUSED_ARG )
 {
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
@@ -955,7 +955,7 @@ Var_T *pulser_channel_state( UNUSED_ARG Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_update( UNUSED_ARG Var_T *v )
+Var_T *pulser_update( Var_T *v UNUSED_ARG )
 {
 	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -1162,7 +1162,7 @@ Var_T *pulser_increment( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_reset( UNUSED_ARG Var_T *v )
+Var_T *pulser_reset( Var_T *v UNUSED_ARG )
 {
 	if ( ! ep385.is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -1406,7 +1406,7 @@ Var_T *pulser_phase_reset( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_lock_keyboard( UNUSED_ARG Var_T *v )
+Var_T *pulser_lock_keyboard( Var_T *v UNUSED_ARG )
 {
 	print( SEVERE, "Function can't be used for this device.\n" );
 	return vars_push( INT_VAR, 1L );
@@ -1450,7 +1450,7 @@ Var_T *pulser_command( Var_T *v )
  * pattern length of the pulser.
  *------------------------------------------------------*/
 
-Var_T *pulser_maximum_pattern_length( UNUSED_ARG Var_T *v )
+Var_T *pulser_maximum_pattern_length( Var_T *v UNUSED_ARG )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	ep385_timebase_check( );

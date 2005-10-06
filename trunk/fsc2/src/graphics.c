@@ -798,7 +798,7 @@ static void forms_adapt( void )
  * as clicking  on the "Close" button within the display window.
  *------------------------------------------------------------------*/
 
-int run_form_close_handler( UNUSED_ARG FL_FORM *a, UNUSED_ARG void *b )
+int run_form_close_handler( FL_FORM *a UNUSED_ARG, void *b UNUSED_ARG )
 {
 	if ( Fsc2_Internals.child_pid == 0 )      /* if child has already exited */
 	{
@@ -1893,7 +1893,7 @@ void switch_off_special_cursors( void )
  * Undoes the last action in the 1d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void undo_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	long i;
 	bool is_undo = UNSET;
@@ -1946,7 +1946,7 @@ void undo_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
  * Undoes the last action in the 2d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void undo_button_callback_2d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	Curve_2d_T *cv2;
 	double temp_s2d,
@@ -2033,7 +2033,7 @@ void fs_vert_rescale_2d( void )
  * Callback for the FS button for 1D display
  *-------------------------------------------*/
 
-void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void fs_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	int state;
 	long i;
@@ -2080,7 +2080,7 @@ void fs_button_callback_1d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
  * Callback for the FS button for 2D display
  *-------------------------------------------*/
 
-void fs_button_callback_2d( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void fs_button_callback_2d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 	int state;
 

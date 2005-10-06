@@ -1396,7 +1396,7 @@ Var_T *f_vrescale( Var_T *v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T *f_vrescale_1d( UNUSED_ARG Var_T *v )
+Var_T *f_vrescale_1d( Var_T *v UNUSED_ARG )
 {
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
@@ -1478,7 +1478,7 @@ Var_T *f_vrescale_1d( UNUSED_ARG Var_T *v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T *f_vrescale_2d( UNUSED_ARG Var_T *v )
+Var_T *f_vrescale_2d( Var_T *v UNUSED_ARG )
 {
 	int shm_id;
 	long len = 0;                    /* total length of message to send */
@@ -3629,7 +3629,7 @@ Var_T *f_clearmark_1d( Var_T *v )
  * Function deletes all 2D markers
  *---------------------------------*/
 
-Var_T *f_clearmark_2d( UNUSED_ARG Var_T *v )
+Var_T *f_clearmark_2d( Var_T *v UNUSED_ARG )
 {
 	long len = 0;                    /* total length of message to send */
 	void *buf;

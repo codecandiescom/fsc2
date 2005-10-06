@@ -286,7 +286,7 @@ void keithley228a_exit_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( UNUSED_ARG Var_T *v )
+Var_T *magnet_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -423,7 +423,7 @@ Var_T *set_field( Var_T *v )
  * Convenience function: just returns the current
  *------------------------------------------------*/
 
-Var_T *get_field( UNUSED_ARG Var_T *v )
+Var_T *get_field( Var_T *v UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, keithley228a.current );
 }
@@ -432,7 +432,7 @@ Var_T *get_field( UNUSED_ARG Var_T *v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_up( UNUSED_ARG Var_T *v )
+Var_T *sweep_up( Var_T *v UNUSED_ARG )
 {
 	double new_current;
 
@@ -456,7 +456,7 @@ Var_T *sweep_up( UNUSED_ARG Var_T *v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_down( UNUSED_ARG Var_T *v )
+Var_T *sweep_down( Var_T *v UNUSED_ARG )
 {
 	double new_current;
 
@@ -480,7 +480,7 @@ Var_T *sweep_down( UNUSED_ARG Var_T *v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *reset_field( UNUSED_ARG Var_T *v )
+Var_T *reset_field( Var_T *v UNUSED_ARG )
 {
 	if ( ! keithley228a.is_req_current )
 	{

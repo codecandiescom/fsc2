@@ -36,7 +36,7 @@ extern int Fail_Mess_Fd;               /* defined in dump.c */
  *------------------------------------------------------------------------*/
 
 #if defined ( MAIL_ADDRESS )
-void bug_report_callback( FL_OBJECT *a, UNUSED_ARG long b )
+void bug_report_callback( FL_OBJECT *a, long b UNUSED_ARG )
 {
 	FILE *tmp;
 	int tmp_fd;
@@ -216,7 +216,7 @@ void bug_report_callback( FL_OBJECT *a, UNUSED_ARG long b )
 	notify_conn( UNBUSY_SIGNAL );
 }
 #else
-void bug_report_callback( UNUSED_ARG FL_OBJECT *a, UNUSED_ARG long b )
+void bug_report_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
 }
 #endif
@@ -324,7 +324,7 @@ void death_mail( int signo )
 	fclose( mail );
 }
 #else
-void death_mail( UNUSED_ARG int signo )
+void death_mail( int signo UNUSED_ARG )
 {
 }
 #endif
