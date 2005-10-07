@@ -562,14 +562,12 @@ enum {
 };
 
 
-/* Convenience macros for accessing the value of simple variables
-   (but be careful with the VALUE macro: the returned value is always
-   a double!) */
+/* Convenience macros for accessing the value of simple variables */
 
 #define INT          val.lval
 #define FLOAT        val.dval
 #define STRING       val.sptr
-#define VALUE( a )   ( ( a )->type == INT_VAR ?            \
+#define VALUE( a )   ( ( a )->type == INT_VAR ?             \
                        ( a )->val.lval : ( a )->val.dval )
 
 
@@ -591,7 +589,8 @@ enum {
 
 
 /* The following number is the start number for numbers designating file
-   identifiers. Valid file numbers start from FILE_NUMBER_OFFSET. */
+   identifiers. Valid file numbers start from FILE_NUMBER_OFFSET + 2, the
+   first two ones are for stdout and stderr. */
 
 #define FILE_NUMBER_OFFSET    215927
 #define FILE_NUMBER_NOT_OPEN  ( FILE_NUMBER_OFFSET - 1 )
@@ -607,8 +606,8 @@ enum {
 
 
 /* In case of a crash we want to send out a mail including the program counter
-   where the crash happened. Within the signal handler this program counter
-   is stored at the following offset from the content of the ebp register
+   where the crash happened. Within the signal handler the program counter
+   is stored at the following offset from the content of the EBP register
    (of course, this only will work with a i386 type processor and only with
    gcc of the versions where I tested it...) */
 
@@ -631,12 +630,12 @@ enum {
 };
 
 
-/* Having "UNUSED_ARG" in front of an argument of a function that's never
-   needed will keep the gcc compiler from complaining about it and make it
-   easier to see that the argument isn't used on purpose. "UNUSED_ARGUMENT"
-   has the same function (but needs to be put into the body of the function)
-   and is mostly used in legacy code or some places where it would be much
-   harder to use the other method. */
+/* Having "UNUSED_ARG" after an argument of a function that is never needed
+   will keep gcc from complaining about it and make it easier to see that
+   the argument isn't used on purpose. "UNUSED_ARGUMENT" has the same function
+   (but needs to be put into the body of the function) and is mostly used in
+   legacy code or some places where it would be much harder to use the other
+   method. */
 
 #if defined __GNUC__
 #define UNUSED_ARG __attribute__ ((unused))
@@ -647,6 +646,8 @@ enum {
 #define UNUSED_ARGUMENT( a )   ( ( void ) ( a ) )
 
 
+/* Macro for calculation the number of elements of an array (but take care,
+   it must be a real array, it won't work with just a pointer to an array!) */
 
 #define NUM_ELEMS( arr ) ( sizeof( arr ) / sizeof *( arr ) )
 
