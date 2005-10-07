@@ -598,7 +598,7 @@ Var_T *f_wait( Var_T *v )
 	   scenario for this to happen is when the user clicks on the stop button
 	   at an really unlucky moment. And if the wait period isn't too long he
 	   will probably never notice that he triggered the race condition -
-	   otherwise he simply has to click the stop button a second time. */
+	   otherwise he simply has to click the stop button another time. */
 
 	if ( sigsetjmp( Alrm_Env, 1 ) == 0 )
 	{
@@ -615,7 +615,7 @@ Var_T *f_wait( Var_T *v )
 	   kill the child prematurely. */
 
 	if ( EDL.do_quit )
-		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec  = 0;
+		sleepy.it_value.tv_usec = sleepy.it_value.tv_sec = 0;
 
 	return vars_push( INT_VAR, EDL.do_quit ? 0L : 1L );
 }
