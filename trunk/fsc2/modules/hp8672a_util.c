@@ -243,7 +243,7 @@ int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires )
 
 	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
 	{
-		*dres = VALUE( v );
+		*dres = get_double( v, "modulation amplitude" );
 		return 1;
 	}
 
