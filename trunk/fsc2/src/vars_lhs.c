@@ -95,8 +95,10 @@ static int vars_check_lhs_indices( Var_T **v, int *range_count )
 		return 0;
 	}
 
-	while ( cv->type != REF_PTR )
+	while ( cv->type != REF_PTR && cv != NULL )
 		cv = cv->prev;
+
+	fsc2_assert( cv != NULL );
 
 	*v = cv;
 	ref = cv->from;
