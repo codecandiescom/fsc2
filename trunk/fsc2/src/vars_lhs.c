@@ -85,6 +85,16 @@ static int vars_check_lhs_indices( Var_T **v, int *range_count )
 	int index_count = 0;
 
 
+	/* If the index variable has the type UNDEF_VAR the whole array has to
+	   be used */
+
+	if ( cv->type == UNDEF_VAR )
+	{
+		*v = cv->prev;
+		fsc2_assert( ( *v )->type == REF_PTR );
+		return 0;
+	}
+
 	while ( cv->type != REF_PTR )
 		cv = cv->prev;
 
