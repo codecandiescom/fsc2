@@ -1,0 +1,5 @@
+# Source this script (i.e. execute '. .local_libs' to set the LD_LIBRARY_PATH
+# environment variable in order to switch to using the local version of all
+# shared libraries and configuration files (useful for debugging)
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/src:`pwd`/modules:`pwd`/config
