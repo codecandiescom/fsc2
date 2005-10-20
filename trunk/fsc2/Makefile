@@ -409,7 +409,7 @@ LFLAGS	 := $(OPT) -shared -fpic  # needed for libraries
 ifeq ($(MPATROL),YES)
 	CONFFLAGS := -DMPATROL
 	LIBS      := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
-				  -lX11 -lXpm -lm -ldl
+				 -lX11 -lXpm -lm -ldl
 else
 	CONFFLAGS :=
 	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
