@@ -36,6 +36,20 @@ OWNER              := fsc2
 GROUP              := uucp
 
 
+# The next variable should only be set for very old Linux systems where
+# linker map files don't really work and the program crashes after loading
+# a module. Only in that case the following line should be activated.
+
+# NO_VERSION_SCRIPTS := yes
+
+
+# The next variable should only be set for very old Linux systems where
+# linker map files don't really work and the program crashes after loading
+# a module. Only in that case the following line should be activated.
+
+# NO_VERSION_SCRIPTS := yes
+
+
 # Now set the system wide path for files to be included by EDL files when
 # after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
 # found. This is for the case where a system wide set of EDL files has been
