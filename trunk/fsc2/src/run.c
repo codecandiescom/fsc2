@@ -782,7 +782,7 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 			fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
 					 "'%s'.\n", EDL.in_file );
 
-		mess = "Experiment stopped unexpectedly after running for";
+		mess = "Experiment stopped unexpectedly after ";
 		state = EXIT_FAILURE;
 	}
 	else if ( ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b ) ||
@@ -802,11 +802,11 @@ void run_sigchld_callback( FL_OBJECT *a, long b )
 			fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
 					 "'%s'.\n", EDL.in_file );
 
-		mess = "Experiment had to be stopped after running for";
+		mess = "Experiment had to be stopped after ";
 		state = EXIT_FAILURE;
 	}
 	else                              /* normal death of child */
-		mess = "Experiment finished after running for";
+		mess = "Experiment finished after ";
 
 	Fsc2_Internals.state = STATE_FINISHED;
 
