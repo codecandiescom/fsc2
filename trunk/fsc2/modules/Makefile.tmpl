@@ -31,7 +31,7 @@
 
 
 ##.fsc2_so: $(##:.c=.o)
-	@if [ -a ##.map ]; then                                           \
+	@if [ -z "$(NO_VERSION_SCRIPTS)" -a -r ##.map ]; then             \
 		map="-Wl,--version-script=##.map";                            \
 	fi;                                                               \
 	if [ -z "$($(patsubst %.fsc2_so,%_libs,$@))" ]; then              \
