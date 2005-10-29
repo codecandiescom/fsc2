@@ -2105,7 +2105,7 @@ can, for example, be used to avoid multiple redraws when creating or
 deleting several objects. The function can even be used before the
 toolbox has been drawn for the first time. It expects exactly one
 boolean argument, either @code{"ON"} (or @code{1}) to hide the toolbox
-or @code{"OFF"} (or @code{0} )to redisplay it).
+or @code{"OFF"} (or @code{0}) to redisplay it).
 
 
 
