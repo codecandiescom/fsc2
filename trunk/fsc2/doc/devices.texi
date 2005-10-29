@@ -2824,6 +2824,10 @@ and for the @code{HP8672A} between @w{2 GHz} and @w{18 GHz}. For the
 @code{Rohde&Schwarz} model @code{SML01} the frequency range is @w{9 KHz}
 to @w{1.1 GHz}.
 
+If a attenuation table is used (@ref{synthesizer_use_table()} then on
+setting a frequency also the attenuation is corrected according to the
+setting in the attenuation table for the frequency.
+
 The frequency set by the very first call of this function is also the
 function that is set automatically by a call of the function
 @code{synthesizer_reset_frequency()} (see below).
@@ -2838,8 +2842,13 @@ frequency has been set previously.
 @anchor{synthesizer_attenuation()}
 @findex synthesizer_attenuation()
 @item synthesizer_attenuation()
-The function queries or sets the output attenuation. If called to set
-the attenuation it accepts one argument, the attenuation.
+The function queries or sets the output attenuation. The function always
+sets the attenuation as given in the argument or returns the value that
+currently is set, independent of the use of an attenuation table.
+
+If called without an argument the currently set attenuation is returned.
+To set the attenuation the function must be called with one argument, the
+attenuation.
 
 For the @code{HP8647A} the attenuation must be in the range between
 @w{+10 dB} and @w{-136 dB} with a resolution of @w{0.1 dB}, for the
@@ -4662,6 +4671,8 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @item @ref{counter_timed_count()}
 @item @ref{counter_intermediate_count()}
 @item @ref{counter_final_count()}
+@item @ref{counter_start_buffered_counter()}
+@item @ref{counter_get_buffered_counts()}
 @item @ref{counter_stop_counter()}
 @item @ref{counter_single_pulse()}
 @item @ref{counter_continuous_pulses()}
@@ -4757,8 +4768,12 @@ of time and only then returns with the masured count. In every other
 respect, e.g.@: the required arguments etc.@: it is identical to the
 previous function.
 
-The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31
-- 1}.
+The largest value that can be returned is @w{2147483647}, i.e.@:
+@w{2^31 - 1}.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
 
 
 @anchor{counter_intermediate_count()}
@@ -4800,6 +4815,133 @@ i.e.@: @w{2^31 - 1}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{counter_start_buffered_counter()}
+@findex counter_start_buffered_counter()
+@item counter_start_buffered_counter()
+The function starts a counter, counting repeatedly for a specified time,
+restarting from 0 at the end of the specified time. It can run in continuous
+or non-continuous mode. In the first case acquisitions will repeated until
+the counter is explicitely stopped while in the second case the counter
+stops after a certain number of data points have been acquired.
+
+The first argument the function expects is the number of the counter
+It must be specified by one of the symbolic names between @code{CH0}
+and @code{CH3} (please @strong{don't} use numbers directly, the mapping
+between the symbolic values and channel numbers is non-trivial).
+If the requested counter is already running the function will fail. 
+Moreover, only a single counter can be used as a buffered counter at once.
+
+@strong{Please note}: This function requires not only one counter
+channel, i.e.@: the one passed to the function as the first argument,
+but also a second, adjacent counter. If @code{CH0} is specified as the
+counter channel also @code{CH1} will be needed and vice versa, and if
+@code{CH2} is specified also @code{CH3} is required and vice versa. If
+the adjacent counter is already in use for some other purpose the
+function fails.
+
+The second required argument is the length of time the counter is suppose
+to count before being reset to 0. This time must be between @w{100 ns} and
+about @w{214.748 s} and must be an integer multiple of @w{50 ns}.
+
+If called without a further argument the counter will count events on
+its default input and will run in continuous mode.
+
+Alternatively, if the third argument is a number (or symbolic name) it
+is taken to be the source of events to be counted which can be specified
+by one of the following symbolic names: @code{DEFAULT_SOURCE} (which is
+what would be used if no second argument is specified), @code{SOURCE_1}
+to @code{SOURCE_3} (the default input sources for channel @code{0} to
+@code{3}), @code{NEXT_GATE} (the gate input for the adjacent counter,
+where the adjacent counter for channel @code{0} is channel @code{1}
+and vice versa, and channels @code{2} and @code{3} also make up a pair)
+and @code{TIMEBASE_1} and @code{TIMEBASE_2} (the internal timebases of
+@w{20 MHz} and @w{100 kHz}).
+
+If the third argument or, if a source was specified, the fourth argument
+must be a string, either @code{"CONTINUOUS"} or @code{"NON-CONTINUOUS"},
+telling if the counter sshould run in continuous or non-continuous mode.
+
+If it is to be run in non-continuous mode another argument is required,
+the number of data points to acquire, which obviously must be larger
+than 0.
+
+Also in continuos mode another argument can be specified, the number
+of points to be used for the internal buffers (or @code{0} to explicitely
+tell the program to use a default value which is either 1 second worth
+of data or 1024 points, whatever is larger).
+
+Using a buffered counter should be done only with some care and after
+running several checks. There are two potential problems: if the time
+teh counter is running between resets is too short for the computer to
+keep up the acquisition automatically gets stopped and when trying to
+fetch data the @code{EDL}-script will automatically abort. Moreover,
+when running in continuous mode, also the internal buffer may overflow
+if data are produced at a high rate and not fetched from within the
+script fast enough. Also in this case the script will abort when trying
+to fetch data. It's rather difficult to estimate what is too fast since
+it may depend a lot on the resources of the computer used and ho much
+workload there is. Careful tests with the system under usual load is
+recommended before using buffered counting for important experiments.
+
+The data acquired by a buffered counter have to be fetched via the
+function @ref{counter_get_buffered_counts()}.
+
+When done with a buffered counter it is required that the function
+@ref{counter_stop_counter()} is called.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
+
+@anchor{counter_get_buffered_counts()}
+@findex counter_get_buffered_counts()
+@item counter_get_buffered_counts()
+This function is for fetching data from a buffered counter. A buffered
+counter produces a (possibly conntinuos if running in continuous mode)
+stream of data which get returned by this function.
+
+The first argument the function expects is the number of the counter
+It must be specified by one of the symbolic names between @code{CH0}
+and @code{CH3} (please @strong{don't} use numbers directly, the mapping
+between the symbolic values and channel numbers is non-trivial).
+
+The second argument must be the maximum number of points to be fetched.
+This may be @code{0}, indicating in the case of a continuously running
+acquisition that there is going to be another argument, indication for
+how long to wait for more data at most, in which case as many data get
+returned as were available during that time. For a non-continuous buffered
+acquisition (when no time limit is specified) a zero number of points
+means that all (remaining) data points are to be returned, with the
+function waiting for the counter to stop.
+
+The third argument is the time the function waits for data. It must be
+given in continuous mode when the number of points is set to @code{0},
+otherwise it is optional. It is a time in seconds with a maximum of about
+@w{4294 s} and a granularity of microseconds. If given the function returns
+only as many points as became available during that time. It can be be
+@code{0.0} to indicate that the function should not wait at all and only
+return the data points available at the time of the call. If the argument
+is missing the function only returns when as many data as requested have
+become available or all data are fetched..
+
+The function returns an array of data points to the @code{EDL}-script.
+The length of the array depends on the the specified maximum number of
+points and the maximum time to wait for points. The length can also be
+@code{0} either because no points were available at all within the
+specified time limit or because all data points already had been
+fetched (in the case of a non-continuous acquisition).
+
+The largest value that can be returned is @w{2147483647}, i.e.@: @w{2^31 - 1}.
+
+If during the call it is detected that either the computer could not
+keep up with the rate data were acquired or, in continuous mode,
+the internal buffers did overflow, the experiment gets aborted.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
+
 
 
 @anchor{counter_stop_counter()}
