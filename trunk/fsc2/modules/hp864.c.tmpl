@@ -177,8 +177,9 @@ Var_T *synthesizer_name( Var_T *v UNUSED_ARG )
 }
 
 
-/*---------------------------------------------------------------------*
- *---------------------------------------------------------------------*/
+/*--------------------------------------------*
+ * Function for switching RF output on or off
+ *--------------------------------------------*/
 
 Var_T *synthesizer_state( Var_T *v )
 {
@@ -353,7 +354,6 @@ Var_T *synthesizer_attenuation( Var_T *v )
 
 
 	if ( v == NULL )              /* query of the current attenuation */
-	{
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
@@ -370,13 +370,12 @@ Var_T *synthesizer_attenuation( Var_T *v )
 					hp864_tmpl.attenuation = HP864_TMPL_TEST_ATTEN;
 					hp864_tmpl.attenuation_is_set = SET;
 				}
-				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 
 			case EXPERIMENT :
 				hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
 				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 		}
-	}
 
 	att = get_double( v, "RF attenuation" );
 
