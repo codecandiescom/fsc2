@@ -76,33 +76,30 @@ double sr[ 21 ] = {						 10.0e-9,
 
 /* List of points per division */
 
-int ppd[ 21 ] = { 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 2500,
-				  2500, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
-				  2500, 2500, 2500 };
+int ppd[ 21 ] = {    5,   10,   20,   50,  100,  200,  500, 1000,
+				  2000, 2500, 2500, 2500, 2500, 2500, 2500, 2500,
+				  2500, 2500, 2500, 2500, 2500 };
 
 /* List of number of averages that can be done using the WP01 Waveform
    Processing option */
 
-long na[ 16 ] = { 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000,
-				  20000, 50000, 100000, 200000, 500000, 1000000 };
-
+long na[ 16 ] = {   10,    20,    50,   100,    200,    500,   1000,    2000,
+				  5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000 };
 
 /* Maximum curve lengths */
 
 long cl[ 10 ] = { 50, 125, 250, 625, 1250, 2500, 6250, 12500, 25000, 32000 };
-
 
 /* Memory limits for averaging, i.e. the maximum number of points that can be
    averaged for the different time bases - not too surprising this is always
    10 times the number of points per division, i.e. the number of points
    displayed */
 
-long ml[ 21 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 25000,
-				  25000, 25000, 25000, 25000, 25000, 25000, 25000, 25000,
-				  25000, 25000, 25000 };
+long ml[ 21 ] = {    50,   100,   200,   500,  1000,  2000,  5000, 10000,
+				  20000, 25000, 25000, 25000, 25000, 25000, 25000, 25000,
+				  25000, 25000, 25000, 25000, 25000 };
 
 bool lecroy9400_IN_SETUP = UNSET;
-
 
 static LECROY9400_T lecroy9400_stored;
 
