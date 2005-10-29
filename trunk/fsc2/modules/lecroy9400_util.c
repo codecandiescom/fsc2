@@ -211,7 +211,7 @@ static void lecroy9400_window_check_2( void )
 {
 	Window_T *w;
     double dcs, dcd, dtb, fac;
-    long tb, cs, cd;
+    long rtb, cs, cd;
 	char *buffer;
 
 
@@ -229,11 +229,11 @@ static void lecroy9400_window_check_2( void )
 			fac *= 0.001;
 		}
 		cs = lrnd( TDS_POINTS_PER_DIV * dcs );
-		tb = lrnd( dtb );
+		rtb = lrnd( dtb );
 
-		if ( cs % tb )        /* window start not multiple of a point ? */
+		if ( cs % rtb )       /* window start not multiple of a point ? */
 		{
-			cs = ( cs / tb ) * tb;
+			cs = ( cs / rtb ) * rtb;
 			dcs = cs * fac / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( lecroy9400_ptime( dcs ) );
 			print( WARN, "Start point of window %ld had to be readjusted from "
@@ -254,9 +254,9 @@ static void lecroy9400_window_check_2( void )
 			fac *= 0.001;
 		}
 		cd = lrnd( TDS_POINTS_PER_DIV * dcd );
-		tb = lrnd( dtb );
+		rtb = lrnd( dtb );
 
-		if ( labs( cd ) < tb )     /* window smaller than one point ? */
+		if ( labs( cd ) < rtb )    /* window smaller than one point ? */
 		{
 			dcd = lecroy9400.timebase / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( lecroy9400_ptime( dcd ) );
@@ -265,9 +265,9 @@ static void lecroy9400_window_check_2( void )
 			T_free( buffer );
 			w->width = dcd;
 		}
-		else if ( cd % tb )        /* window width not multiple of a point ? */
+		else if ( cd % rtb )       /* window width not multiple of a point ? */
 		{
-			cd = ( cd / tb ) * tb;
+			cd = ( cd / rtb ) * rtb;
 			dcd = cd * fac / TDS_POINTS_PER_DIV;
 			buffer = T_strdup( lecroy9400_ptime( dcd ) );
 			print( WARN, "Width of window %ld had to be readjusted from %s to "
