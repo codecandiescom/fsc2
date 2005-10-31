@@ -373,8 +373,17 @@ Var_T *synthesizer_attenuation( Var_T *v )
 				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 
 			case EXPERIMENT :
-				hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
-				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+				if ( ! hp864_tmpl.use_table )
+				{
+					hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
+					return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+				}
+				else
+				{
+					hp864_tmpl.real_attenuation =
+												 hp864_tmpl_get_attenuation( );
+					return vars_push( FLOAT_VAR, hp864_tmpl.real_attenuation );
+				}
 		}
 
 	att = get_double( v, "RF attenuation" );
