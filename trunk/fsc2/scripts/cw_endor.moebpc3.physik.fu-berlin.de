@@ -609,7 +609,10 @@ FOR I = 1 : N_runs
 		wait( tc );
 	}
 
-	save( File_1, start_freq < end_freq ? data : reverse( data ) );
+	FOR J = 1 : N_points {
+		fsave( File_1, \"#, #\\n\", ( start_freq + ( J - 1 ) * step_freq ) / 1MHz,
+               start_freq < end_freq ? data[ J ] : data[ N_points - J + 1 ] );
+	}
 	display( 1, data, 3 );
 	mean_data += data;
 	K = I;
@@ -634,9 +637,11 @@ ON_STOP:
 
 synthesizer_state( \"OFF\" );
 
-IF I > 0
-{
-    save( File_2, mean_data / K );
+IF I > 0 {
+	FOR J = 1 : N_points {
+		fsave( File_1, \"#, #\\n\", ( start_freq + ( J - 1 ) * step_freq ) / 1 MHz,
+               mean_data[ J ] / K );
+	}
 }
 ";
     close $fh;
