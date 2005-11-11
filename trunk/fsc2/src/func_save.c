@@ -719,7 +719,7 @@ static int get_save_file( Var_T **v )
 		}
 
 		vars_pop( file );
-		file_num = FILE_NUMBER_OFFSET;
+		file_num = FILE_NUMBER_OFFSET + 2;
 	}
 	else if ( ! No_File_Numbers )                    /* file number is given */
 	{
@@ -743,7 +743,7 @@ static int get_save_file( Var_T **v )
 		*v = vars_pop( *v );
 	}
 	else
-		file_num = FILE_NUMBER_OFFSET;
+		file_num = FILE_NUMBER_OFFSET + 2;
 
 	/* Check that the file identifier is reasonable */
 
