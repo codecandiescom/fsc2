@@ -1985,27 +1985,30 @@ Var_T *f_save_c( Var_T *v )
 
 
 /*--------------------------------------------------------------------*
- * Function that does all the actual printing. It does a lot of tests
- * in order to make sure that really everything get written to a file
+ * Function that does all the writing to files. It does a lot of tests
+ * in order to make sure that really everything gets written to a file
  * and tries to handle situations gracefully where there isn't enough
- * room left on a disk by asking for a replacement file and copying
+ * space left on a disk by asking for a replacement file and copying
  * everything already written to the file on the full disk into the
  * replacement file. The function returns the number of chars written
  * to the file (but not the copied bytes in case a replacement file
  * had to be used).
  *--------------------------------------------------------------------*/
 
+#define BUFFER_SIZE_GUESS 128       /* guess for number of characters needed */
+#define COPY_BUFFER_SIZE 1024       /* size of buffer used when copying */
+
 static long T_fprintf( long fn, const char *fmt, ... )
 {
-	long n;                     /* number of bytes we need to write */
-	size_t size = 1024;         /* guess for number of characters needed */
+	long n;                         /* number of bytes we need to write */
+	size_t size = BUFFER_SIZE_GUESS;
+	char initial_buffer[ BUFFER_SIZE_GUESS ];
 	char *p;
 	long file_num = fn;
 	va_list ap;
 	char *new_name;
 	FILE *new_fp;
 	struct stat old_stat, new_stat;
-	char *buffer[ 1024 ];
 	size_t rw;
 	char *mess;
 	long count;
@@ -2036,12 +2039,19 @@ static long T_fprintf( long fn, const char *fmt, ... )
 
 	file_num -= FILE_NUMBER_OFFSET;
 
-	/* First we've got to find out how many characters we need to write out */
+	/* First we've got to find out how many characters we need to write out.
+	   We start by trying to write to a fixed size memory buffer. If the
+	   required string is longer we try allocating a longer buffer (where
+	   newer libc versions already tell us how memory much is needed older
+	   don't, so we may have to retry several times with increased buffer
+	   sizes) and write to that. To speed things up we start with a buffer
+	   that is local to the function and only start calling memory allocation
+	   functions if the original buffer isn't large enough. */
 
-	p = CHAR_P T_malloc( size );
+	p = initial_buffer;
 
-	while ( 1 ) {
-
+	while ( 1 )
+	{
         /* Try to print into the allocated space */
 
         va_start( ap, fmt );
@@ -2071,19 +2081,23 @@ static long T_fprintf( long fn, const char *fmt, ... )
 
 		TRY
 		{
-			p = CHAR_P T_realloc( p, size );
+			if ( p == initial_buffer )
+				p = NULL;
+			p = CHAR_P T_realloc( NULL, size );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
 		{
-			T_free( p );
+			if ( p != NULL )
+				T_free( p );
 			RETHROW( );
 		}
     }
 
 	if ( Fsc2_Internals.mode == TEST )
 	{
-		T_free( p );
+		if ( p != initial_buffer )
+			T_free( p );
 		return n;
 	}
 
@@ -2091,16 +2105,32 @@ static long T_fprintf( long fn, const char *fmt, ... )
 
     if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) ) == n )
     {
-        T_free( p );
+		if ( p != initial_buffer )
+			T_free( p );
         return n;
 	}
+
+	/* We can't do anything when writing failed for stdout or stderr, all
+	   we can do is printing out a warning and return, keeping out fingers
+	   crossed... */
 
 	if ( file_num == 0 || file_num == 1 )
 	{
 		print( SEVERE, "Can't write to std%s, if you're redirecting to a "
 			   "file make sure there's enough space on the disk.\n" );
-        T_free( p );
+		if ( p != initial_buffer )
+			T_free( p );
         return count;
+	}
+
+	/* If less characters than required where written we reduce 'n' to the
+	   number of characters that still need to be written out and get rid
+	   of the part of the buffer that already has been written to the file. */
+
+	if ( count > 0 )
+	{
+		n -= count;
+		memmove( p, p + count, n + 1 );
 	}
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
@@ -2133,6 +2163,8 @@ get_repl_retry:
 
 	if ( new_name == NULL || *new_name == '\0' )       /* confirmed 'Cancel' */
 	{
+		if ( p != initial_buffer )
+			T_free( p );
 		if ( new_name != NULL )
 			T_free( new_name );
 		T_free( EDL.File_List[ file_num ].name );
@@ -2201,13 +2233,16 @@ get_repl_retry:
 		T_free( new_name );
 	else
 	{
+		char buffer[ COPY_BUFFER_SIZE ];
+
 		fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET );
 		while( 1 )
 		{
 			clearerr( EDL.File_List[ file_num ].fp );
 			clearerr( new_fp );
 
-			rw = fread( buffer, 1, 1024, EDL.File_List[ file_num ].fp );
+			rw = fread( buffer, 1, COPY_BUFFER_SIZE,
+						EDL.File_List[ file_num ].fp );
 
 			if ( rw != 0 )
 				fwrite( buffer, 1, rw, new_fp );
@@ -2238,16 +2273,25 @@ get_repl_retry:
 
 	/* Finally also write the string that failed to be written */
 
-	if ( fprintf( EDL.File_List[ file_num ].fp, "%s", p ) == n )
+	if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) ) == n )
 	{
-		T_free( p );
+		if ( p != initial_buffer )
+			T_free( p );
 		return n;
 	}
 
-	/* Ooops, also failed to write to the new file */
+	/* Again, get rid of all that already was written to the file */
+
+	if ( count > 0 )
+	{
+		n -= count;
+		memmove( p, p + count, n + 1 );
+	}
+
+	/* Ooops, also failed to write everything to the new file */
 
 	mess = get_string( "Can't write to (replacement) file\n%s\n"
-					   "Please choose a different file.",
+					   "Please choose another replacement file.",
 					   EDL.File_List[ file_num ].name );
 	show_message( mess );
 	T_free( mess );
