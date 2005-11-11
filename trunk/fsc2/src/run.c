@@ -1072,6 +1072,7 @@ static void run_child( void )
 
 	run_child_exit_hooks( );
 
+	close_all_files( );
 	close( Comm.pd[ READ ] );            /* close read end of pipe */
 	close( Comm.pd[ WRITE ] );           /* close also write end of pipe */
 
@@ -1176,6 +1177,8 @@ static void child_sig_handler( int signo )
 
 	/* All remaining signals are deadly... */
 
+	close_all_files( );
+
 	if ( signo != SIGTERM && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
 	{
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
@@ -1201,7 +1204,6 @@ static void child_sig_handler( int signo )
 		sema_destroy( Comm.mq_semaphore );
 	}
 
-	EDL.do_quit = SET;
 	_exit( EXIT_FAILURE );
 }
 
@@ -1238,7 +1240,7 @@ static void wait_for_confirmation( void )
     if ( getppid( ) == 1 || kill( getppid( ), QUITTING ) == -1 )
 		_exit( Child_return_status );           /* commit controlled suicide */
 
-	/* This seemingly infinite loop looks worse than it is, the child really
+	/* The following infinite loop looks worse than it is, the child really
 	   exits in the signal handler for DO_QUIT. */
 
 	while ( 1 )
