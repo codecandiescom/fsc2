@@ -2500,7 +2500,7 @@ The function will abort the currently running script immediately
 without even running the code following the @code{ON_STOP} label, so it
 is a kind of an emergency exit when nothing better will do. When called it
 displays a message box on the screen to inform the user. This function
-can only be used in the @code{EXPERIMENT} section
+can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{date()}
@@ -2697,26 +2697,25 @@ length. I.e.@: for an array defined as
 @end example
 @noindent
 @code{size( X )} will return @code{4}, @code{size(X[4])} returns
-@code{2} and @code{size(X[4, 2])} returns @code{5}.
+@code{2} and @code{size(X[4,2])} returns @code{5}.
 
 For variable sized arrays for which the length is still unknown the
 function returns @code{0}.
 
 If the argument is a simple numerical variable @code{1} is returned
-and a warning i printed. If the argument is a string the length of the
+and a warning is printed. If the argument is a string the length of the
 string is returned.
 
 
 @anchor{reverse()}
 @findex reverse()
 @item reverse()
-The function takes a single argument, normally a one- or
-more-dimensional array. For a one-dimensional array it returns another
-array with the order of the elements of the input array reversed. For
-a multi-dimensional array it returns a multi-dimensional array of the
-same rank as the input array and the order of all the elements of all
-one-dimensional arrays making up the multi-dimensional array being
-reversed.
+The function takes a single argument, normally a one- or more-dimensional
+array. For a one-dimensional array it returns another array with the order of
+the elements of the input array reversed. For a multi-dimensional array it
+returns a multi-dimensional array of the same rank as the input array and the
+order of all the elements of all one-dimensional arrays making up the
+multi-dimensional array being reversed.
 
 If the argument is a simple integer or floating point number the same
 number gets returned. If the argument is a string the reversed string
@@ -2735,7 +2734,7 @@ as placeholders for the values of other variables to be inserted into
 the string. For each unescaped @code{#} in the string there must be
 an additional argument, a number, a variable or a string. The function
 returns a variable that can be used in all places where otherwise a
-string would be required. Here's a simpleminded example on how to create
+string would be required. Here's a simple-minded example on how to create
 a set of 10 buttons, where the label contains the button number (note
 that the first @code{#} character is escaped by a backslash, so it goes
 directly into the string to be created without any conversions):
