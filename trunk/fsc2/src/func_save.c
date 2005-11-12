@@ -2020,6 +2020,7 @@ static long T_fprintf( long fn, const char *fmt, ... )
 
 
 	CLOBBER_PROTECT( size );
+	CLOBBER_PROTECT( written );
 	CLOBBER_PROTECT( p );
 	CLOBBER_PROTECT( file_num );
 
