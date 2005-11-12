@@ -166,9 +166,11 @@ Var_T *f_openf( Var_T *v )
 
  got_file:
 
-	/* The reallocation for the EDL.File_List may fail but we still need to
-	   close all files and get rid of memory for the file names, thus we save
-	   the current EDL.File_List before we try to reallocate */
+	/* The reallocation for the EDL.File_List may fail and we may need to
+	   close all files and get rid of memory for the file names when
+	   stopping the experiment, thus we save a copy of the current
+	   EDL.File_List before we try to reallocate (if allocation already
+	   fails while making the copy this isn't a problem!) */
 
 	if ( EDL.File_List )
 	{
@@ -183,6 +185,7 @@ Var_T *f_openf( Var_T *v )
 		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
 											   ( EDL.File_List_Len + 1 )
 											   * sizeof *EDL.File_List );
+
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
@@ -197,10 +200,12 @@ Var_T *f_openf( Var_T *v )
 		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
 	else
 		EDL.File_List[ EDL.File_List_Len ].fp = fp;
+
+	EDL.File_List[ EDL.File_List_Len ].name = NULL;
 	EDL.File_List[ EDL.File_List_Len ].name = T_strdup( fn );
 
-	/* Switch buffering off so we're sure everything gets written to disk
-	   immediately */
+	/* Switch off buffering for the newly opened file so we're sure
+	   everything gets written to disk without delay */
 
 	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
@@ -944,13 +949,12 @@ static void f_format_check( Var_T *v )
 	ptrdiff_t s2c;
 
 
-	/* Replace the '#' characters with the appropriate conversion specifiers */
+	/* Clean up the format string, especially replace the '#' characters with
+	   the appropriate conversion specifiers */
 
 	for ( cp = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
 	{
-		/* '%' must be replaced by "%%" */
-
-		if ( *cp == '%' )
+		if ( *cp == '%' )                 /* '%' must be replaced by "%%" */
 		{
 			s2c = cp - v->val.sptr;
 			v->val.sptr = CHAR_P T_realloc( v->val.sptr,
@@ -961,7 +965,7 @@ static void f_format_check( Var_T *v )
 			continue;
 		}
 
-		if ( *cp == '\\' )
+		if ( *cp == '\\' )                /* replace escaped '#' characters */
 		{
 			int sc;
 
@@ -975,17 +979,17 @@ static void f_format_check( Var_T *v )
 			continue;
 		}
 
-		if ( *cp != '#' )
+		if ( *cp != '#' )                 /* keep "normal" characters */
 			continue;
 
-		if ( cv == NULL )
+		if ( cv == NULL )                  /* '#' without variable to print */
 		{
 			print( FATAL, "Less data than format descriptors in format "
 				   "string.\n" );
 			THROW( EXCEPTION );
 		}
 
-		switch ( cv->type )
+		switch ( cv->type )               /* replace '#' by format specifier */
 		{
 			case INT_VAR :
 				s2c = cp - v->val.sptr;
@@ -1035,7 +1039,7 @@ static void f_format_check( Var_T *v )
 			/* empty */ ;
 	}
 
-	/* Finally replace the escpe sequences in the format string */
+	/* Finally replace the escape sequences in the format string */
 
 	handle_escape( v->val.sptr );
 }
@@ -1352,7 +1356,7 @@ static long do_printf( long file_num, Var_T *v )
 		strcpy( fmt_start, sptr );
 		fmt_end = fmt_start + 1;
 
-		/* Now repeat printing. starting each time with a conversion specifier
+		/* Now repeat printing, starting each time with a conversion specifier
 		   and ending just before the next one until the end of the format
 		   string has been reached */
 
@@ -1985,9 +1989,9 @@ Var_T *f_save_c( Var_T *v )
 
 
 /*--------------------------------------------------------------------*
- * Function that does all the writing to files. It does a lot of tests
- * in order to make sure that really everything gets written to a file
- * and tries to handle situations gracefully where there isn't enough
+ * Function that does all the writing to files. It does lots of tests
+ * to make sure that really everything got written to the file and
+ * tries to handle situations gracefully where there isn't enough
  * space left on a disk by asking for a replacement file and copying
  * everything already written to the file on the full disk into the
  * replacement file. The function returns the number of chars written
@@ -2000,7 +2004,7 @@ Var_T *f_save_c( Var_T *v )
 
 static long T_fprintf( long fn, const char *fmt, ... )
 {
-	long n;                         /* number of bytes we need to write */
+	long to_write;                       /* number of bytes we need to write */
 	size_t size = BUFFER_SIZE_GUESS;
 	char initial_buffer[ BUFFER_SIZE_GUESS ];
 	char *p;
@@ -2012,6 +2016,7 @@ static long T_fprintf( long fn, const char *fmt, ... )
 	size_t rw;
 	char *mess;
 	long count;
+	long written = 0;
 
 
 	CLOBBER_PROTECT( size );
@@ -2055,19 +2060,19 @@ static long T_fprintf( long fn, const char *fmt, ... )
         /* Try to print into the allocated space */
 
         va_start( ap, fmt );
-        n = vsnprintf( p, size, fmt, ap );
+        to_write = vsnprintf( p, size, fmt, ap );
         va_end( ap );
 
         /* If that worked, try to write out the string */
 
-        if ( n > -1 && size - n > 0 )
+        if ( to_write > -1 && size - to_write > 0 )
             break;
 
         /* Else try again with more space */
 
-        if ( n > -1 )            /* glibc 2.1 */
-            size = n + 1;        /* precisely what is needed */
-        else                     /* glibc 2.0 */
+        if ( to_write > -1 )         /* glibc 2.1 */
+            size = to_write + 1;     /* precisely what is needed */
+        else                         /* glibc 2.0 */
         {
             if ( size < INT_MAX / 2 )
                 size *= 2;           /* twice the old size */
@@ -2098,16 +2103,17 @@ static long T_fprintf( long fn, const char *fmt, ... )
 	{
 		if ( p != initial_buffer )
 			T_free( p );
-		return n;
+		return to_write;
 	}
 
     /* Now we try to write the string to the file */
 
-    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) ) == n )
+    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
+		                                                          == to_write )
     {
 		if ( p != initial_buffer )
 			T_free( p );
-        return n;
+        return count;
 	}
 
 	/* We can't do anything when writing failed for stdout or stderr, all
@@ -2129,8 +2135,9 @@ static long T_fprintf( long fn, const char *fmt, ... )
 
 	if ( count > 0 )
 	{
-		n -= count;
-		memmove( p, p + count, n + 1 );
+		written += count;
+		to_write -= count;
+		memmove( p, p + count, to_write + 1 );
 	}
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
@@ -2219,11 +2226,6 @@ get_repl_retry:
 		goto get_repl_retry;
 	}
 
-	/* Switch off IO buffering for the new file */
-
-	if ( new_fp != NULL )
-		setbuf( new_fp, NULL );
-
 	/* Check if the new and the old file are identical. If they are we simply
 	   continue to write to the old file, otherwise we first have to copy
 	   everything from the old to the new file and get rid of it */
@@ -2250,7 +2252,7 @@ get_repl_retry:
 			if ( ferror( new_fp ) )
 			{
 				mess = get_string( "Can't write to replacement file\n%s\n"
-								   "Please choose a different file.",
+								   "Please choose another replacement file.",
 								   new_name );
 				show_message( mess );
 				T_free( mess );
@@ -2269,26 +2271,31 @@ get_repl_retry:
 		T_free( EDL.File_List[ file_num ].name );
 		EDL.File_List[ file_num ].name = new_name;
 		EDL.File_List[ file_num ].fp = new_fp;
+
+		/* After we're done with copying switch off buffering for the file */
+
+		setbuf( new_fp, NULL );
 	}
 
-	/* Finally also write the string that failed to be written */
+	/* Finally write out the remaining part of the string */
 
-	if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) ) == n )
+	if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
+		                                                          == to_write )
 	{
 		if ( p != initial_buffer )
 			T_free( p );
-		return n;
+		return written + count;
 	}
 
-	/* Again, get rid of all that already was written to the file */
+	/* Again, on failure get rid of all what already has been written to
+	   the file and then ask for another replacement file */
 
 	if ( count > 0 )
 	{
-		n -= count;
-		memmove( p, p + count, n + 1 );
+		written += count;
+		to_write -= count;
+		memmove( p, p + count, to_write + 1 );
 	}
-
-	/* Ooops, also failed to write everything to the new file */
 
 	mess = get_string( "Can't write to (replacement) file\n%s\n"
 					   "Please choose another replacement file.",
