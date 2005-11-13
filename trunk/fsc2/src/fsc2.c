@@ -121,8 +121,6 @@ int main( int argc, char *argv[ ] )
 	else if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
 			  ! xforms_init( &argc, argv ) )
 	{
-		raise_permissions( );
-		lower_permissions( );
 		fprintf( stderr, "Graphic setup failed.\n" );
 		return EXIT_FAILURE;
 	}
@@ -356,7 +354,7 @@ static void globals_init( const char *pname )
 	EDL.File_List = FILE_LIST_P T_malloc( 2 * sizeof *EDL.File_List );
 	EDL.File_List_Len = 2;
 	EDL.File_List[ 0 ].fp = stdout;
-	setbuf( EDL.File_List[ 0 ].fp, NULL );
+	setbuf( stdout, NULL );
 	EDL.File_List[ 0 ].name = ( char * ) "stdout";
 	EDL.File_List[ 1 ].fp = stderr;
 	EDL.File_List[ 1 ].name = ( char * ) "stderr";
@@ -1167,7 +1165,9 @@ static int scan_args( int *argc, char *argv[ ], char **fname )
 /*----------------------------------------------------------*
  * This function is called after either exit() is called or
  * it returns from main(). Here some cleanup is done that
- * is necessary even if the program crashed.
+ * is necessary even if the program crashed. Please take
+ * care: this function also gets called when the processes
+ * foing the experiment are finished!
  *----------------------------------------------------------*/
 
 static void final_exit_handler( void )
