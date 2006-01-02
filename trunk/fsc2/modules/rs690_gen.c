@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -154,7 +154,8 @@ bool rs690_store_timebase_level( int level_type )
  * Function for assigning a channel to a function
  *------------------------------------------------*/
 
-bool rs690_assign_channel_to_function( int function, long channel )
+bool rs690_assign_channel_to_function( int  function,
+									   long channel )
 {
 	Function_T *f = rs690.function + function;
 	Channel_T *c = rs690.channel + channel;
@@ -267,7 +268,8 @@ bool rs690_assign_channel_to_function( int function, long channel )
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool rs690_set_function_delay( int function, double delay )
+bool rs690_set_function_delay( int    function,
+							   double delay )
 {
 	Ticks Delay = rs690_double2ticks( delay );
 	int i;
@@ -531,7 +533,8 @@ bool rs690_set_repeat_time( double rep_time )
  * Function associates a phase sequence with one of the functions
  *----------------------------------------------------------------*/
 
-bool rs690_set_phase_reference( int phs, int function )
+bool rs690_set_phase_reference( int phs,
+								int function )
 {
 	Function_T *f;
 
@@ -592,7 +595,9 @@ bool rs690_set_phase_reference( int phs, int function )
  * association in a PHASE_SETUP commmand.
  *-------------------------------------------------------------*/
 
-bool rs690_phase_setup_prep( int phs, int type, int dummy UNUSED_ARG,
+bool rs690_phase_setup_prep( int  phs,
+							 int  type,
+							 int  dummy  UNUSED_ARG,
 							 long channel )
 {
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );

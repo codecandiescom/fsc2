@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -167,7 +167,7 @@ void rs_spec10_exit_hook( void )
  * Function returns the name of the device
  *-----------------------------------------*/
 
-Var_T *ccd_camera_name( Var_T *v UNUSED_ARG )
+Var_T *ccd_camera_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -181,7 +181,7 @@ Var_T *ccd_camera_name( Var_T *v UNUSED_ARG )
  * the corresponding ROI value remains unchanged.
  *----------------------------------------------------------------*/
 
-Var_T *ccd_camera_roi( Var_T *v )
+Var_T *ccd_camera_roi( Var_T * v )
 {
 	int i;
 	long vroi[ 4 ];
@@ -287,7 +287,7 @@ Var_T *ccd_camera_roi( Var_T *v )
  * be used
  *-----------------------------------------------------------------------*/
 
-Var_T *ccd_camera_binning( Var_T *v )
+Var_T *ccd_camera_binning( Var_T * v )
 {
 	int i;
 	long vbin[ 2 ];
@@ -366,7 +366,7 @@ Var_T *ccd_camera_binning( Var_T *v )
  * "SOFTWARE" or "HARD" or "HARDWARE".
  *-----------------------------------------------------------------------*/
 
-Var_T *ccd_camera_binning_method( Var_T *v )
+Var_T *ccd_camera_binning_method( Var_T * v )
 {
 	if ( v == NULL )
 		return vars_push( INT_VAR, rs_spec10->ccd.bin_mode ? 1L : 0L );
@@ -420,7 +420,7 @@ Var_T *ccd_camera_binning_method( Var_T *v )
  * Function for query or setting if the exposure time
  *----------------------------------------------------*/
 
-Var_T *ccd_camera_exposure_time( Var_T *v )
+Var_T *ccd_camera_exposure_time( Var_T * v )
 {
 	double et;
 
@@ -471,7 +471,7 @@ Var_T *ccd_camera_exposure_time( Var_T *v )
  * to be done before an exposure
  *-----------------------------------------------------*/
 
-Var_T *ccd_camera_clear_cycles( Var_T *v )
+Var_T *ccd_camera_clear_cycles( Var_T * v )
 {
 	long count;
 
@@ -504,7 +504,7 @@ Var_T *ccd_camera_clear_cycles( Var_T *v )
  * Function for getting an image from the camera
  *-----------------------------------------------*/
 
-Var_T *ccd_camera_get_image( Var_T *v UNUSED_ARG )
+Var_T *ccd_camera_get_image( Var_T * v  UNUSED_ARG )
 {
 	uns16 *frame = NULL;
 	long width, height;
@@ -705,7 +705,7 @@ Var_T *ccd_camera_get_image( Var_T *v UNUSED_ARG )
  * Function for getting a spectrum from the camera
  *-------------------------------------------------*/
 
-Var_T *ccd_camera_get_spectrum( Var_T *v UNUSED_ARG )
+Var_T *ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 {
 	uns16 *frame = NULL;
 	long width, height;
@@ -866,7 +866,7 @@ Var_T *ccd_camera_get_spectrum( Var_T *v UNUSED_ARG )
  * or to set a target temperature (setpoint)
  *------------------------------------------------------*/
 
-Var_T *ccd_camera_temperature( Var_T *v )
+Var_T *ccd_camera_temperature( Var_T * v )
 {
 	double temp;
 
@@ -944,7 +944,7 @@ Var_T *ccd_camera_temperature( Var_T *v )
  * Function returns the size of a pixel (in meters)
  *--------------------------------------------------*/
 
-Var_T *ccd_camera_pixel_size( Var_T *v UNUSED_ARG )
+Var_T *ccd_camera_pixel_size( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, RS_SPEC10_PIXEL_SIZE );
 }
@@ -955,7 +955,7 @@ Var_T *ccd_camera_pixel_size( Var_T *v UNUSED_ARG )
  * height of the CCD chip as its element
  *----------------------------------------------*/
 
-Var_T *ccd_camera_pixel_area( Var_T *v UNUSED_ARG )
+Var_T *ccd_camera_pixel_area( Var_T * v  UNUSED_ARG )
 {
 	Var_T *cv;
 

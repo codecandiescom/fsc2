@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,18 +37,33 @@
 
 
 static void spex_cd2a_scan_end( void );
-static void spex_cd2a_print( char *mess, int digits, double val );
-static size_t spex_cd2a_write( int type, const char *mess );
+
+static void spex_cd2a_print( char * mess,
+							 int    digits,
+							 double val );
+
+static size_t spex_cd2a_write( int          type,
+							   const char * mess );
+
 static void spex_cd2a_read_ack( void );
+
 static char *spex_cd2a_read_mess( ssize_t to_be_read );
-static void spex_cd2a_read_cmd_ack( const char *cmd );
+
+static void spex_cd2a_read_cmd_ack( const char * cmd );
+
 static void spex_cd2a_read_set_pos_ack( void );
+
 static void spex_cd2a_read_start_scan_ack( void );
+
 static void spex_cd2a_read_scan_ack( void );
+
 static void spex_cd2a_comm_fail( void );
+
 static void spex_cd2a_wrong_data( void );
+
 static ssize_t spex_cd2a_calc_pos_mess_len( void );
-static void spex_cd2a_pos_mess_check( const char *bp );
+
+static void spex_cd2a_pos_mess_check( const char * bp );
 
 
 static ssize_t spex_cd2a_pos_mess_len;
@@ -355,7 +370,9 @@ void spex_cd2a_scan_step( void )
  * The string is never going to be longer than 'digits'.
  *-----------------------------------------------------------------------*/
 
-static void spex_cd2a_print( char *mess, int digits, double val )
+static void spex_cd2a_print( char * mess,
+							 int    digits,
+							 double val )
 {
 	int pre_digits, after_digits;
 	char *buf;
@@ -503,7 +520,8 @@ void spex_cd2a_open( void )
  * checksum and <CR>).
  *-----------------------------------------------------------------------*/
 
-static size_t spex_cd2a_write( int type, const char *mess )
+static size_t spex_cd2a_write( int          type,
+							   const char * mess )
 {
 	unsigned char *tmx;
 	unsigned long cs = 0;
@@ -725,7 +743,7 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
  * throwing an exception if it isn't coming from the device.
  *-------------------------------------------------------------*/
 
-static void spex_cd2a_read_cmd_ack( const char *cmd )
+static void spex_cd2a_read_cmd_ack( const char * cmd )
 {
 	switch ( *cmd )
 	{
@@ -919,7 +937,7 @@ static ssize_t spex_cd2a_calc_pos_mess_len( void )
  * Reads in data send from the device with information about its position
  *------------------------------------------------------------------------*/
 
-static void spex_cd2a_pos_mess_check( const char *bp )
+static void spex_cd2a_pos_mess_check( const char * bp )
 {
 	char *ep;
 	const char *eu = bp;

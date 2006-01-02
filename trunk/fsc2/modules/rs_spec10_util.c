@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -352,7 +352,8 @@ double rs_spec10_ic2k( int16 tci )
  * ACC_WRITE_ONLY or ACC_READ_WRITE.
  *----------------------------------------------------------*/
 
-bool rs_spec10_param_access( uns32 param, uns16 *acc )
+bool rs_spec10_param_access( uns32   param,
+							 uns16 * acc )
 {
 	boolean avail;
 
@@ -464,7 +465,7 @@ int *rs_spec10_get_fd_list( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void rs_spec10_close_on_exec_hack( int *fd_list )
+void rs_spec10_close_on_exec_hack( int * fd_list )
 {
 	int *new_fd_list;
 	int i, j;

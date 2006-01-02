@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -89,50 +89,73 @@ extern struct SPECTRAPRO_300I spectrapro_300i;
 #define INIT_ADJUST_RANGE              100000
 
 
-int spectrapro_300i_init_hook( void );
-int spectrapro_300i_exp_hook( void );
+int spectrapro_300i_init_hook(       void );
+int spectrapro_300i_exp_hook(        void );
 int spectrapro_300i_end_of_exp_hook( void );
 
-Var_T *monochromator_name( Var_T *v );
-Var_T *monochromator_turret( Var_T *v );
-Var_T *monochromator_grating( Var_T *v );
-Var_T *monochromator_wavelength( Var_T *v );
-Var_T *monochromator_wavenumber( Var_T *v );
-Var_T *monochromator_install_grating( Var_T *v );
-Var_T *monochromator_groove_density( Var_T *v );
-Var_T *monochromator_calibrate( Var_T *v );
-Var_T *monochromator_wavelength_axis( Var_T * v );
-Var_T *monochromator_wavenumber_axis( Var_T * v );
-Var_T *monochromator_calc_wavelength( Var_T *v );
-Var_T *monochromator_load_calibration( Var_T * v );
-Var_T *monochromator_set_calibration( Var_T *v );
-Var_T *monochromator_zero_offset( Var_T *v );
-Var_T *monochromator_grating_adjust( Var_T *v );
+Var_T *monochromator_name(             Var_T * /* v */ );
+Var_T *monochromator_turret(           Var_T * /* v */ );
+Var_T *monochromator_grating(          Var_T * /* v */ );
+Var_T *monochromator_wavelength(       Var_T * /* v */ );
+Var_T *monochromator_wavenumber(       Var_T * /* v */ );
+Var_T *monochromator_install_grating(  Var_T * /* v */ );
+Var_T *monochromator_groove_density(   Var_T * /* v */ );
+Var_T *monochromator_calibrate(        Var_T * /* v */ );
+Var_T *monochromator_wavelength_axis(  Var_T * /* v */ );
+Var_T *monochromator_wavenumber_axis(  Var_T * /* v */ );
+Var_T *monochromator_calc_wavelength(  Var_T * /* v */ );
+Var_T *monochromator_load_calibration( Var_T * /* v */ );
+Var_T *monochromator_set_calibration(  Var_T * /* v */ );
+Var_T *monochromator_zero_offset(      Var_T * /* v */ );
+Var_T *monochromator_grating_adjust(   Var_T * /* v */ );
 
 
-FILE *spectrapro_300i_find_calib( char *name );
-FILE *spectrapro_300i_open_calib( char *name );
-double spectrapro_300i_min( double *x, void *par );
+FILE *spectrapro_300i_find_calib( char * /* name */ );
+
+FILE *spectrapro_300i_open_calib( char * /* name */ );
+
+double spectrapro_300i_min( double * /* x   */,
+							void *   /* par */ );
+
 void spectrapro_300i_open( void );
+
 void spectrapro_300i_close( void );
+
 double spectrapro_300i_get_wavelength( void );
-void spectrapro_300i_set_wavelength( double wavelength );
+
+void spectrapro_300i_set_wavelength( double /* wavelength */ );
+
 long spectrapro_300i_get_turret( void );
-void spectrapro_300i_set_turret( long tn );
+
+void spectrapro_300i_set_turret( long /* tn */ );
+
 long spectrapro_300i_get_grating( void );
-void spectrapro_300i_set_grating( long gn );
+
+void spectrapro_300i_set_grating( long /* gn */ );
+
 void spectrapro_300i_get_gratings( void );
-long spectrapro_300i_get_offset( long gn );
-void spectrapro_300i_set_offset( long gn, long offset );
-long spectrapro_300i_get_adjust( long gn );
-void spectrapro_300i_set_adjust( long gn, long adjust );
-void spectrapro_300i_install_grating( long gn, const char *part_no );
-void spectrapro_300i_uninstall_grating( long gn );
-double spectrapro_300i_wl2wn( double wl );
-double spectrapro_300i_wn2wl( double wn );
 
+long spectrapro_300i_get_offset( long /* gn */ );
 
-void spectrapro_300i_read_calib( FILE *fp, const char *calib_file );
+void spectrapro_300i_set_offset( long /* gn     */,
+								 long /* offset */ );
+
+long spectrapro_300i_get_adjust( long /* gn */ );
+
+void spectrapro_300i_set_adjust( long /* gn     */,
+								 long /* adjust */ );
+
+void spectrapro_300i_install_grating( long         /* gn      */,
+									  const char * /* part_no */ );
+
+void spectrapro_300i_uninstall_grating( long /* gn */ );
+
+double spectrapro_300i_wl2wn( double /* wl */ );
+
+double spectrapro_300i_wn2wl( double /* wn */ );
+
+void spectrapro_300i_read_calib( FILE *       /* fp         */,
+								 const char * /* calib_file */ );
 
 
 #endif /* ! SPECTRAPRO_300I_HEADER */

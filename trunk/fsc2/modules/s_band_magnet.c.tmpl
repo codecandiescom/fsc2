@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,15 +40,15 @@ int s_band_magnet_tmpl_test_hook( void );
 int s_band_magnet_tmpl_exp_hook( void );
 int s_band_magnet_tmpl_end_of_exp_hook( void );
 
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *magnet_fast_init( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *sweep_up( Var_T *v );
-Var_T *sweep_down( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_goto_field_on_end( Var_T *v );
+Var_T *magnet_name( Var_T * v );
+Var_T *magnet_setup( Var_T * v );
+Var_T *magnet_fast_init( Var_T * v );
+Var_T *set_field( Var_T * v );
+Var_T *get_field( Var_T * v );
+Var_T *sweep_up( Var_T * v );
+Var_T *sweep_down( Var_T * v );
+Var_T *reset_field( Var_T * v );
+Var_T *magnet_goto_field_on_end( Var_T * v );
 
 
 /* Locally used functions */
@@ -208,7 +208,7 @@ int s_band_magnet_tmpl_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -218,7 +218,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start field and the field step size.
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	bool err_flag = UNSET;
 	double start_field;
@@ -275,7 +275,7 @@ Var_T *magnet_setup( Var_T *v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double field;
 	bool err_flag = UNSET;
@@ -315,7 +315,7 @@ Var_T *set_field( Var_T *v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, magnet.field );
 }
@@ -324,7 +324,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_up( Var_T *v UNUSED_ARG )
+Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
 	bool err_flag = UNSET;
 
@@ -355,7 +355,7 @@ Var_T *sweep_up( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_down( Var_T *v UNUSED_ARG )
+Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 {
 	bool err_flag = UNSET;
 
@@ -386,7 +386,7 @@ Var_T *sweep_down( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	if ( ! magnet.is_start_field )
 	{
@@ -409,7 +409,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *magnet_goto_field_on_end( Var_T *v )
+Var_T *magnet_goto_field_on_end( Var_T * v )
 {
 	double field;
 	bool err_flag = UNSET;
@@ -439,7 +439,8 @@ Var_T *magnet_goto_field_on_end( Var_T *v )
 /*****************************************************************************/
 
 
-static double s_band_magnet_tmpl_field_check( double field, bool *err_flag )
+static double s_band_magnet_tmpl_field_check( double field,
+											  bool * err_flag )
 {
 	double new_field;
 	int DAC_value;

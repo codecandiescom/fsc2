@@ -2,7 +2,7 @@
  *
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -56,7 +56,7 @@ const char *lecroy94_tmpl_ptime( double p_time )
  * Deletes a window by removing it from the linked list of windows
  *-----------------------------------------------------------------*/
 
-void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T *s )
+void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
 {
 	Window_T *w;
 
@@ -115,7 +115,8 @@ void lecroy94_tmpl_all_windows_check( void )
  * Checks if the window fits into the recorded data set
  *------------------------------------------------------*/
 
-void lecroy94_tmpl_window_check( Window_T *w, bool show_num )
+void lecroy94_tmpl_window_check( Window_T * w,
+								 bool       show_num )
 {
 	long start;
 	long end;
@@ -303,7 +304,9 @@ double lecroy94_tmpl_time_per_point( void )
  * indicate the error.
  *--------------------------------------------------------------*/
 
-long lecroy94_tmpl_translate_channel( int dir, long channel, bool flag )
+long lecroy94_tmpl_translate_channel( int  dir,
+									  long channel,
+									  bool flag )
 {
 	if ( dir == GENERAL_TO_LECROY94_TMPL )
 	{
@@ -425,7 +428,8 @@ long lecroy94_tmpl_translate_channel( int dir, long channel, bool flag )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void lecroy94_tmpl_store_state( LECROY94_TMPL_T *dest, LECROY94_TMPL_T *src )
+void lecroy94_tmpl_store_state( LECROY94_TMPL_T * dest,
+								LECROY94_TMPL_T * src )
 {
 	Window_T *w;
 	int i;

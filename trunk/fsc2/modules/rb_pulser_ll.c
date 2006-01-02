@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -25,9 +25,13 @@
 #include "rb_pulser.h"
 
 
-static void rb_pulser_failure( bool rb_flag, const char *mess );
+static void rb_pulser_failure( bool         rb_flag,
+							   const char * mess );
+
 static void rb_pulser_synthesizer_init( void );
+
 static void rb_pulser_start_external_trigger( void );
+
 static void rb_pulser_start_internal_trigger( void );
 
 
@@ -398,7 +402,8 @@ static void rb_pulser_start_internal_trigger( void )
  * pulses).
  *-----------------------------------------------------------*/
 
-void rb_pulser_delay_card_state( int handle, bool state )
+void rb_pulser_delay_card_state( int  handle,
+								 bool state )
 {
 	unsigned char type = state == START ?
 				RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
@@ -415,7 +420,8 @@ void rb_pulser_delay_card_state( int handle, bool state )
  * Function to set the delay for a delay card
  *--------------------------------------------*/
 
-void rb_pulser_delay_card_delay( int handle, unsigned long delay )
+void rb_pulser_delay_card_delay( int           handle,
+								 unsigned long delay )
 {
 	int ret;
 
@@ -438,7 +444,8 @@ void rb_pulser_delay_card_delay( int handle, unsigned long delay )
  * fails. It stops the running experiment.
  *---------------------------------------------------------*/
 
-static void rb_pulser_failure( bool rb_flag, const char *mess )
+static void rb_pulser_failure( bool         rb_flag,
+							   const char * mess )
 {
 	static int calls = 0;
 

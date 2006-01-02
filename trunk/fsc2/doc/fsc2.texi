@@ -2,7 +2,7 @@
 
 @c  $Id$
 @c
-@c  Copyright (C) 1999-2005 Jens Thoms Toerring
+@c  Copyright (C) 1999-2006 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c

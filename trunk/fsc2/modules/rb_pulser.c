@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,6 +43,8 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
  *-------------------------------*/
 
 static void rb_pulser_card_setup( void );
+static void rb_pulser_cleanup( void );
+
 static bool Is_running_at_start;
 
 
@@ -792,7 +794,7 @@ static void rb_pulser_card_setup( void )
  * configuration file and storing the names of the cards
  *---------------------------------------------------------------*/
 
-void rb_pulser_cleanup( void )
+static void rb_pulser_cleanup( void )
 {
 	size_t i;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,8 @@
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int rb_pulser_start_compare( const void *A, const void *B )
+int rb_pulser_start_compare( const void * A,
+							 const void * B )
 {
 	Pulse_T *a = *( Pulse_T ** ) A,
 		    *b = *( Pulse_T ** ) B;
@@ -309,7 +310,7 @@ void rb_pulser_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rb_pulser_write_pulses( FILE *fp )
+void rb_pulser_write_pulses( FILE * fp )
 {
 	Function_T *f;
 	int i, j;

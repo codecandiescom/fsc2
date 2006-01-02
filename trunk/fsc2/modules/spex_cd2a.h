@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -170,60 +170,85 @@ extern struct Spex_CD2A spex_cd2a;
 
 /* Functions from spex_cd2a.c */
 
-int spex_cd2a_init_hook( void );
-int spex_cd2a_test_hook( void );
-int spex_cd2a_exp_hook( void );
+int spex_cd2a_init_hook(        void );
+int spex_cd2a_test_hook(        void );
+int spex_cd2a_exp_hook(         void );
 void spex_cd2a_child_exit_hook( void );
-int spex_cd2a_end_of_exp_hook( void );
+int spex_cd2a_end_of_exp_hook(  void );
 
-Var_T *monochromator_name( Var_T *v );
-Var_T *monochromator_scan_setup( Var_T *v );
-Var_T *monochromator_wavelength( Var_T *v );
-Var_T *monochromator_wavenumber( Var_T *v );
-Var_T *monochromator_offset( Var_T *v );
-Var_T *monochromator_start_scan( Var_T *v );
-Var_T *monochromator_scan_step( Var_T *v );
-Var_T *monochromator_laser_line( Var_T *v );
-Var_T *monochromator_groove_density( Var_T *v );
-Var_T *monochromator_shutter_limits( Var_T *v );
-Var_T *monochromator_calibrate( Var_T *v );
-Var_T *monochromator_wavelength_axis( Var_T * v );
-Var_T *monochromator_wavenumber_axis( Var_T * v );
+Var_T *monochromator_name(            Var_T * /* v */ );
+Var_T *monochromator_scan_setup(      Var_T * /* v */ );
+Var_T *monochromator_wavelength(      Var_T * /* v */ );
+Var_T *monochromator_wavenumber(      Var_T * /* v */ );
+Var_T *monochromator_offset(          Var_T * /* v */ );
+Var_T *monochromator_start_scan(      Var_T * /* v */ );
+Var_T *monochromator_scan_step(       Var_T * /* v */ );
+Var_T *monochromator_laser_line(      Var_T * /* v */ );
+Var_T *monochromator_groove_density(  Var_T * /* v */ );
+Var_T *monochromator_shutter_limits(  Var_T * /* v */ );
+Var_T *monochromator_calibrate(       Var_T * /* v */ );
+Var_T *monochromator_wavelength_axis( Var_T * /* v */ );
+Var_T *monochromator_wavenumber_axis( Var_T * /* v */ );
 
 
 /* Functions from spex_cd2a_ll.c */
 
 void spex_cd2a_init( void );
+
 void spex_cd2a_set_wavelength( void );
+
 void spex_cd2a_halt( void );
+
 void spex_cd2a_scan_start( void );
+
 void spex_cd2a_scan_step( void );
+
 void spex_cd2a_start_scan( void );
+
 void spex_cd2a_trigger( void );
+
 void spex_cd2a_set_laser_line( void );
+
 void spex_cd2a_set_shutter_limits( void );
+
 void spex_cd2a_sweep_up( void );
+
 void spex_cd2a_open( void );
+
 void spex_cd2a_close( void );
 
 
 /* Functions from spex_cd2a_util.c */
 
 bool spex_cd2a_read_state( void );
+
 bool spex_cd2a_store_state( void );
-double spex_cd2a_wl2wn( double wl );
-double spex_cd2a_wn2wl( double wn );
-double spex_cd2a_wl2wn( double wl );
-double spex_cd2a_wn2wl( double wn );
-double spex_cd2a_wl2Uwl( double wl );
-double spex_cd2a_Uwl2wl( double wl );
-double spex_cd2a_wn2Uwn( double wn );
-double spex_cd2a_Uwn2wn( double wn );
-double spex_cd2a_wn2Uwl( double wn );
-double spex_cd2a_Uwl2wn( double wl );
-double spex_cd2a_wl2Uwn( double wl );
-double spex_cd2a_Uwn2wl( double wn );
-double spex_cd2a_wl2mu( double wl );
+
+double spex_cd2a_wl2wn( double /* wl */ );
+
+double spex_cd2a_wn2wl( double /* wn */ );
+
+double spex_cd2a_wl2wn( double /* wl */ );
+
+double spex_cd2a_wn2wl( double /* wn */ );
+
+double spex_cd2a_wl2Uwl( double /* wl */ );
+
+double spex_cd2a_Uwl2wl( double /* wl */ );
+
+double spex_cd2a_wn2Uwn( double /* wn */ );
+
+double spex_cd2a_Uwn2wn( double /* wn */ );
+
+double spex_cd2a_wn2Uwl( double /* wn */ );
+
+double spex_cd2a_Uwl2wn( double /* wl */ );
+
+double spex_cd2a_wl2Uwn( double /* wl */ );
+
+double spex_cd2a_Uwn2wl( double /* wn */ );
+
+double spex_cd2a_wl2mu( double /* wl */ );
 
 
 #define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;      \

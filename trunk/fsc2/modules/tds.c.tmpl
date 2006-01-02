@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,9 +31,12 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-static Var_T *get_area( Var_T *v, bool use_cursor );
-static Var_T *get_curve( Var_T *v, bool use_cursor );
-static Var_T *get_amplitude( Var_T *v, bool use_cursor );
+static Var_T *get_area( Var_T * v,
+						bool    use_cursor );
+static Var_T *get_curve( Var_T * v,
+						 bool    use_cursor );
+static Var_T *get_amplitude( Var_T * v,
+							 bool    use_cursor );
 
 
 static TDS_TMPL_T tds_tmpl_stored;
@@ -200,7 +203,7 @@ void tds_tmpl_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_name( Var_T *v UNUSED_ARG )
+Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -209,7 +212,7 @@ Var_T *digitizer_name( Var_T *v UNUSED_ARG )
 /*------------------------------------------*
  *------------------------------------------*/
 
-Var_T *digitizer_define_window( Var_T *v )
+Var_T *digitizer_define_window( Var_T * v )
 {
 	double win_start = 0,
 		   win_width = 0;
@@ -340,7 +343,7 @@ Var_T *digitizer_define_window( Var_T *v )
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-Var_T *digitizer_change_window( Var_T *v )
+Var_T *digitizer_change_window( Var_T * v )
 {
 	Window_T *w;
 	long win_num;
@@ -434,7 +437,7 @@ Var_T *digitizer_change_window( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_window_position( Var_T *v )
+Var_T *digitizer_window_position( Var_T * v )
 {
 	Window_T *w;
 
@@ -485,7 +488,7 @@ Var_T *digitizer_window_position( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_window_width( Var_T *v )
+Var_T *digitizer_window_width( Var_T * v )
 {
 	Window_T *w;
 
@@ -539,7 +542,7 @@ Var_T *digitizer_window_width( Var_T *v )
  * (even if it does not seem to be used in the experiment).
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_display_channel( Var_T *v )
+Var_T *digitizer_display_channel( Var_T * v )
 {
 	long channel;
 
@@ -580,7 +583,7 @@ Var_T *digitizer_display_channel( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_timebase( Var_T *v )
+Var_T *digitizer_timebase( Var_T * v )
 {
 	double timebase;
 	int TB = -1;
@@ -677,7 +680,7 @@ Var_T *digitizer_timebase( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_time_per_point( Var_T *v UNUSED_ARG )
+Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
 	/* During the experiment if the digitizer's keyboard isn't locked we
 	   need to reread the timebase, record length and trigger position and
@@ -697,7 +700,7 @@ Var_T *digitizer_time_per_point( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_sensitivity( Var_T *v )
+Var_T *digitizer_sensitivity( Var_T * v )
 {
 	long channel;
 	double sens;
@@ -761,7 +764,7 @@ Var_T *digitizer_sensitivity( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_num_averages( Var_T *v )
+Var_T *digitizer_num_averages( Var_T * v )
 {
 	long num_avg;
 
@@ -838,7 +841,7 @@ Var_T *digitizer_num_averages( Var_T *v )
  * the possible settings the next larger is used instead.
  *------------------------------------------------------------------*/
 
-Var_T *digitizer_record_length( Var_T *v )
+Var_T *digitizer_record_length( Var_T * v )
 {
 	long rec_len;
 	int i;
@@ -922,7 +925,7 @@ Var_T *digitizer_record_length( Var_T *v )
  * the number of points recorded before the trigger.
  *---------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_position( Var_T *v )
+Var_T *digitizer_trigger_position( Var_T * v )
 {
 	double trig_pos;
 
@@ -986,7 +989,7 @@ Var_T *digitizer_trigger_position( Var_T *v )
  * function digitizer_trigger_position(),
  *---------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_delay( Var_T *v )
+Var_T *digitizer_trigger_delay( Var_T * v )
 {
 	double delay;
 	double trig_pos = 0.0;
@@ -1077,7 +1080,7 @@ Var_T *digitizer_trigger_delay( Var_T *v )
  * failure (and no error message is printed).
  *----------------------------------------------------------------------*/
 
-Var_T *digitizer_meas_channel_ok( Var_T *v )
+Var_T *digitizer_meas_channel_ok( Var_T * v )
 {
 	long channel;
 
@@ -1098,7 +1101,7 @@ Var_T *digitizer_meas_channel_ok( Var_T *v )
  * triggering.
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_channel( Var_T *v )
+Var_T *digitizer_trigger_channel( Var_T * v )
 {
 	long in_channel;
 	long channel;
@@ -1176,7 +1179,7 @@ Var_T *digitizer_trigger_channel( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_start_acquisition( Var_T *v UNUSED_ARG )
+Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_start_acquisition( );
@@ -1188,7 +1191,7 @@ Var_T *digitizer_start_acquisition( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_get_area( Var_T *v )
+Var_T *digitizer_get_area( Var_T * v )
 {
 	return get_area( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
@@ -1197,7 +1200,7 @@ Var_T *digitizer_get_area( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_get_area_fast( Var_T *v )
+Var_T *digitizer_get_area_fast( Var_T * v )
 {
 	return get_area( v, UNSET );
 }
@@ -1206,7 +1209,8 @@ Var_T *digitizer_get_area_fast( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static Var_T *get_area( Var_T *v, bool use_cursor )
+static Var_T *get_area( Var_T * v,
+						bool    use_cursor )
 {
 	Window_T *w;
 	int ch;
@@ -1366,7 +1370,7 @@ static Var_T *get_area( Var_T *v, bool use_cursor )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_get_curve( Var_T *v )
+Var_T *digitizer_get_curve( Var_T * v )
 {
 	return get_curve( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
@@ -1375,7 +1379,7 @@ Var_T *digitizer_get_curve( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_get_curve_fast( Var_T *v )
+Var_T *digitizer_get_curve_fast( Var_T * v )
 {
 	return get_curve( v, UNSET );
 }
@@ -1384,7 +1388,8 @@ Var_T *digitizer_get_curve_fast( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static Var_T *get_curve( Var_T *v, bool use_cursor )
+static Var_T *get_curve( Var_T * v,
+						 bool    use_cursor )
 {
 	Window_T *w;
 	int ch, i;
@@ -1476,7 +1481,7 @@ static Var_T *get_curve( Var_T *v, bool use_cursor )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_get_amplitude( Var_T *v )
+Var_T *digitizer_get_amplitude( Var_T * v )
 {
 	return get_amplitude( v, SET );
 }
@@ -1485,7 +1490,7 @@ Var_T *digitizer_get_amplitude( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_get_amplitude_fast( Var_T *v )
+Var_T *digitizer_get_amplitude_fast( Var_T * v )
 {
 	return get_amplitude( v, UNSET );
 }
@@ -1494,7 +1499,8 @@ Var_T *digitizer_get_amplitude_fast( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static Var_T *get_amplitude( Var_T *v, bool use_cursor )
+static Var_T *get_amplitude( Var_T * v,
+							 bool    use_cursor )
 {
 	Window_T *w;
 	int ch;
@@ -1646,7 +1652,7 @@ static Var_T *get_amplitude( Var_T *v, bool use_cursor )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_copy_curve( Var_T *v )
+Var_T *digitizer_copy_curve( Var_T * v )
 {
 	int src, dest;
 
@@ -1683,7 +1689,7 @@ Var_T *digitizer_copy_curve( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_run( Var_T *v UNUSED_ARG )
+Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		tds_tmpl_free_running( );
@@ -1695,7 +1701,7 @@ Var_T *digitizer_run( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_lock_keyboard( Var_T *v )
+Var_T *digitizer_lock_keyboard( Var_T * v )
 {
 	bool lock;
 
@@ -1719,7 +1725,7 @@ Var_T *digitizer_lock_keyboard( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_command( Var_T *v )
+Var_T *digitizer_command( Var_T * v )
 {
 	char *cmd = NULL;
 

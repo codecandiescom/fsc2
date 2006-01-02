@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -47,13 +47,13 @@ static struct {
 } rb8510, rb8510_stored;
 
 
-int rb8510_1_init_hook( void );
-int rb8510_1_test_hook( void );
-int rb8510_1_exp_hook( void );
+int rb8510_1_init_hook(       void );
+int rb8510_1_test_hook(       void );
+int rb8510_1_exp_hook(        void );
 int rb8510_1_end_of_exp_hook( void );
 
-Var_T *daq_name( Var_T *v );
-Var_T *daq_set_voltage( Var_T *v );
+Var_T *daq_name(        Var_T * v );
+Var_T *daq_set_voltage( Var_T * v );
 
 
 /*--------------------------------------------------------------*
@@ -167,7 +167,7 @@ int rb8510_1_end_of_exp_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T *v UNUSED_ARG )
+Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -177,7 +177,7 @@ Var_T *daq_name( Var_T *v UNUSED_ARG )
  * Function sets or returns the output voltage
  *--------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T *v )
+Var_T *daq_set_voltage( Var_T * v )
 {
 	double volts;
 

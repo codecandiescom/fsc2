@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -515,7 +515,7 @@ void rs690_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_name( Var_T *v UNUSED_ARG )
+Var_T *pulser_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -524,7 +524,7 @@ Var_T *pulser_name( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_automatic_shape_pulses( Var_T *v )
+Var_T *pulser_automatic_shape_pulses( Var_T * v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -643,7 +643,7 @@ Var_T *pulser_automatic_shape_pulses( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_automatic_twt_pulses( Var_T *v )
+Var_T *pulser_automatic_twt_pulses( Var_T * v )
 {
 	long func;
 	double dl, dr, tmp;
@@ -762,7 +762,7 @@ Var_T *pulser_automatic_twt_pulses( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
+Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_show_pulses = SET;
@@ -774,7 +774,7 @@ Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
+Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
 		rs690.do_dump_pulses = SET;
@@ -786,7 +786,7 @@ Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T * v )
 {
 	double s2d;
 
@@ -817,7 +817,7 @@ Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T * v )
 {
 	double d2s;
 
@@ -853,7 +853,7 @@ Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v )
  * next call of pulser_update().
  *-------------------------------------------------------------------*/
 
-Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
+Var_T *pulser_minimum_twt_pulse_distance( Var_T * v )
 {
 	double mtpd;
 
@@ -892,7 +892,7 @@ Var_T *pulser_minimum_twt_pulse_distance( Var_T *v )
  * Switches the output of the pulser on or off
  *---------------------------------------------*/
 
-Var_T *pulser_state( Var_T *v )
+Var_T *pulser_state( Var_T * v )
 {
 	bool state;
 
@@ -913,7 +913,7 @@ Var_T *pulser_state( Var_T *v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T *pulser_channel_state( Var_T *v UNUSED_ARG )
+Var_T *pulser_channel_state( Var_T * v  UNUSED_ARG )
 {
 	print( SEVERE, "Individual channels can't be switched on or off for "
 		   "this device.\n" );
@@ -924,7 +924,7 @@ Var_T *pulser_channel_state( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_update( Var_T *v UNUSED_ARG )
+Var_T *pulser_update( Var_T * v  UNUSED_ARG )
 {
 	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -946,7 +946,7 @@ Var_T *pulser_update( Var_T *v UNUSED_ARG )
  *            function pulser_update() !
  *----------------------------------------------------------------------*/
 
-Var_T *pulser_shift( Var_T *v )
+Var_T *pulser_shift( Var_T * v )
 {
 	Pulse_T *p;
 
@@ -1040,7 +1040,7 @@ Var_T *pulser_shift( Var_T *v )
  *            function pulser_update() !
  *-------------------------------------------------------------------------*/
 
-Var_T *pulser_increment( Var_T *v )
+Var_T *pulser_increment( Var_T * v )
 {
 	Pulse_T *p;
 
@@ -1131,7 +1131,7 @@ Var_T *pulser_increment( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_reset( Var_T *v UNUSED_ARG )
+Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
 {
 	if ( ! Is_needed )
 		return vars_push( INT_VAR, 1L );
@@ -1152,7 +1152,7 @@ Var_T *pulser_reset( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_pulse_reset( Var_T *v )
+Var_T *pulser_pulse_reset( Var_T * v )
 {
 	Pulse_T *p;
 
@@ -1250,7 +1250,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_next_phase( Var_T *v )
+Var_T *pulser_next_phase( Var_T * v )
 {
 	Function_T *f;
 	long phase_number;
@@ -1316,7 +1316,7 @@ Var_T *pulser_next_phase( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_phase_reset( Var_T *v )
+Var_T *pulser_phase_reset( Var_T * v )
 {
 	Function_T *f;
 	long phase_number;
@@ -1375,7 +1375,7 @@ Var_T *pulser_phase_reset( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_lock_keyboard( Var_T *v )
+Var_T *pulser_lock_keyboard( Var_T * v )
 {
 	bool lock;
 
@@ -1398,7 +1398,7 @@ Var_T *pulser_lock_keyboard( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_command( Var_T *v )
+Var_T *pulser_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -1432,7 +1432,7 @@ Var_T *pulser_command( Var_T *v )
  * largest representable number.
  *------------------------------------------------*/
 
-Var_T *pulser_maximum_pattern_length( Var_T *v UNUSED_ARG )
+Var_T *pulser_maximum_pattern_length( Var_T * v  UNUSED_ARG )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 

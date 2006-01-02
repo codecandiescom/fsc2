@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -144,82 +144,111 @@ extern RS_SML01_T rs_sml01;
 
 /* declaration of exported functions */
 
-int rs_sml01_init_hook( void );
-int rs_sml01_test_hook( void );
-int rs_sml01_exp_hook( void );
+int rs_sml01_init_hook(       void );
+int rs_sml01_test_hook(       void );
+int rs_sml01_exp_hook(        void );
 int rs_sml01_end_of_exp_hook( void );
-void rs_sml01_exit_hook( void );
+void rs_sml01_exit_hook(      void );
 
 
-Var_T *synthesizer_name( Var_T *v );
-Var_T *synthesizer_state( Var_T *v );
-Var_T *synthesizer_frequency( Var_T *v );
-Var_T *synthesizer_step_frequency( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_minimum_attenuation( Var_T *v );
-Var_T *synthesizer_sweep_up( Var_T *v );
-Var_T *synthesizer_sweep_down( Var_T *v );
-Var_T *synthesizer_reset_frequency( Var_T *v );
-Var_T *synthesizer_use_table( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_att_ref_freq( Var_T *v );
-Var_T *synthesizer_modulation( Var_T *v );
-Var_T *synthesizer_mod_freq( Var_T *v );
-Var_T *synthesizer_mod_ampl( Var_T *v );
-Var_T *synthesizer_mod_type( Var_T *v );
-Var_T *synthesizer_mod_source( Var_T *v );
-Var_T *synthesizer_command( Var_T *v );
+Var_T *synthesizer_name(                Var_T * /* v */ );
+Var_T *synthesizer_state(               Var_T * /* v */ );
+Var_T *synthesizer_frequency(           Var_T * /* v */ );
+Var_T *synthesizer_step_frequency(      Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_minimum_attenuation( Var_T * /* v */ );
+Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
+Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
+Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
+Var_T *synthesizer_use_table(           Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
+Var_T *synthesizer_modulation(          Var_T * /* v */ );
+Var_T *synthesizer_mod_freq(            Var_T * /* v */ );
+Var_T *synthesizer_mod_ampl(            Var_T * /* v */ );
+Var_T *synthesizer_mod_type(            Var_T * /* v */ );
+Var_T *synthesizer_mod_source(          Var_T * /* v */ );
+Var_T *synthesizer_command(             Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
-Var_T *synthesizer_pulse_state( Var_T *v );
-Var_T *synthesizer_pulse_trigger_slope( Var_T *v );
-Var_T *synthesizer_pulse_width( Var_T *v );
-Var_T *synthesizer_pulse_delay( Var_T *v );
+Var_T *synthesizer_pulse_state(         Var_T * /* v */ );
+Var_T *synthesizer_pulse_trigger_slope( Var_T * /* v */ );
+Var_T *synthesizer_pulse_width(         Var_T * /* v */ );
+Var_T *synthesizer_pulse_delay(         Var_T * /* v */ );
 #endif /* WITH_PULSE_MODULATION */
 
 
 /* functions defined in "rs_sml01_util.c" */
 
-void rs_sml01_read_table( FILE *fp );
-FILE *rs_sml01_find_table( char **name );
-FILE *rs_sml01_open_table( char *name );
-double rs_sml01_get_att_from_table( double freq );
-double rs_sml01_get_att( double freq );
-unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires );
-void rs_sml01_check_mod_ampl( double freq );
+void rs_sml01_read_table( FILE * /* fp */ );
+
+FILE *rs_sml01_find_table( char ** /* name */ );
+
+FILE *rs_sml01_open_table( char * /* name */ );
+
+double rs_sml01_get_att_from_table( double /* freq */ );
+
+double rs_sml01_get_att( double /* freq */ );
+
+unsigned int rs_sml01_get_mod_param( Var_T ** /* v    */,
+									 double * /* dres */,
+									 int *    /* ires */ );
+
+void rs_sml01_check_mod_ampl( double /* freq */ );
 
 #if defined WITH_PULSE_MODULATION
-char *rs_sml01_pretty_print( double t );
+char *rs_sml01_pretty_print( double /* t */ );
 #endif
 
 /* functions defined in "rs_sml01_lexer.l" */
 
-void rs_sml01_read_table( FILE *fp );
+void rs_sml01_read_table( FILE * /* fp */ );
 
 
 /* functions defined in "rs_sml01_gpib.c" */
 
-bool rs_sml01_init( const char *name );
+bool rs_sml01_init( const char * /* name */ );
+
 void rs_sml01_finished( void );
-bool rs_sml01_set_output_state( bool state );
+
+bool rs_sml01_set_output_state( bool /* state */ );
+
 bool rs_sml01_get_output_state( void );
-double rs_sml01_set_frequency( double freq );
+
+double rs_sml01_set_frequency( double /* freq */ );
+
 double rs_sml01_get_frequency( void );
-double rs_sml01_set_attenuation( double att );
+
+double rs_sml01_set_attenuation( double /* att */ );
+
 double rs_sml01_get_attenuation( void );
-int rs_sml01_set_mod_type( int type );
+
+int rs_sml01_set_mod_type( int /* type */ );
+
 int rs_sml01_get_mod_type( void );
-int rs_sml01_set_mod_source( int type, int source, double freq );
-int rs_sml01_get_mod_source( int type, double *freq );
-double rs_sml01_set_mod_ampl( int type, double ampl );
-double rs_sml01_get_mod_ampl( int type );
-bool rs_sml01_command( const char *cmd );
+
+int rs_sml01_set_mod_source( int    /* type   */,
+							 int    /* source */,
+							 double /* freq   */ );
+
+int rs_sml01_get_mod_source( int      /* type */,
+							 double * /* freq */ );
+
+double rs_sml01_set_mod_ampl( int    /* type */,
+							  double /* ampl */ );
+
+double rs_sml01_get_mod_ampl( int /* type */ );
+
+bool rs_sml01_command( const char * /* cmd */ );
 
 #if defined WITH_PULSE_MODULATION
-void rs_sml01_set_pulse_state( bool state );
-void rs_sml01_set_pulse_trig_slope( bool state );
-void rs_sml01_set_pulse_width( double width );
-void rs_sml01_set_pulse_delay( double delay );
+void rs_sml01_set_pulse_state( bool /* state */ );
+
+void rs_sml01_set_pulse_trig_slope( bool /* state */ );
+
+void rs_sml01_set_pulse_width( double /* width */ );
+
+void rs_sml01_set_pulse_delay( double /* delay */ );
 #endif /* WITH_PULSE_MODULATION */
 
 

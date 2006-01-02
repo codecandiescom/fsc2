@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,6 +37,7 @@
 
 
 static void rs_spec10_ccd_init( void );
+
 static void rs_spec10_temperature_init( void );
 
 
@@ -458,7 +459,7 @@ void rs_spec10_clear_cycles( uns16 cycles )
  * just using a longer exposure time.
  *------------------------------------------------------------------*/
 
-uns16 *rs_spec10_get_pic( uns32 *size )
+uns16 *rs_spec10_get_pic( uns32 * size )
 {
 	rgn_type region;
 	uns16 *frame;

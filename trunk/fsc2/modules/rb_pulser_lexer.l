@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -38,7 +38,7 @@
 
 static void set_cur_delay( int card_no );
 static void set_cur_clock( int clock_no );
-static void set_name( char *name );
+static void set_name( char * name );
 
 
 static int rb_pulser_lex( void );
@@ -189,7 +189,7 @@ static void set_cur_clock( int clock_no )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void set_name( char *name )
+static void set_name( char * name )
 {
 	/* Make sure either a delay or a clock card has been selected for the
 	   name */

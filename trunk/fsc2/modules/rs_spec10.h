@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -107,46 +107,61 @@ extern struct RS_SPEC10 *rs_spec10,
 
 /* Functions from rs_spec10.c */
 
-int rs_spec10_init_hook( void );
-int rs_spec10_test_hook( void );
-int rs_spec10_exp_hook( void );
+int rs_spec10_init_hook(        void );
+int rs_spec10_test_hook(        void );
+int rs_spec10_exp_hook(         void );
 void rs_spec10_child_exit_hook( void );
-int rs_spec10_end_of_exp_hook( void );
-void rs_spec10_exit_hook( void );
+int rs_spec10_end_of_exp_hook(  void );
+void rs_spec10_exit_hook(       void );
 
-Var_T *ccd_camera_name( Var_T *v );
-Var_T *ccd_camera_roi( Var_T *v );
-Var_T *ccd_camera_binning( Var_T *v );
-Var_T *ccd_camera_binning_method( Var_T *v );
-Var_T *ccd_camera_exposure_time( Var_T *v );
-Var_T *ccd_camera_clear_cycles( Var_T *v );
-Var_T *ccd_camera_get_image( Var_T *v );
-Var_T *ccd_camera_get_spectrum( Var_T *v );
-Var_T *ccd_camera_temperature( Var_T *v );
-Var_T *ccd_camera_pixel_size( Var_T *v );
-Var_T *ccd_camera_pixel_area( Var_T *v );
+Var_T *ccd_camera_name(           Var_T * /* v */ );
+Var_T *ccd_camera_roi(            Var_T * /* v */ );
+Var_T *ccd_camera_binning(        Var_T * /* v */ );
+Var_T *ccd_camera_binning_method( Var_T * /* v */ );
+Var_T *ccd_camera_exposure_time(  Var_T * /* v */ );
+Var_T *ccd_camera_clear_cycles(   Var_T * /* v */ );
+Var_T *ccd_camera_get_image(      Var_T * /* v */ );
+Var_T *ccd_camera_get_spectrum(   Var_T * /* v */ );
+Var_T *ccd_camera_temperature(    Var_T * /* v */ );
+Var_T *ccd_camera_pixel_size(     Var_T * /* v */ );
+Var_T *ccd_camera_pixel_area(     Var_T * /* v */ );
 
 /* Functions from rs_spec10_int.c */
 
 void rs_spec10_init_camera( void );
-void rs_spec10_clear_cycles( uns16 cycles );
-uns16 *rs_spec10_get_pic( uns32 *size );
+
+void rs_spec10_clear_cycles( uns16 /* cycles */ );
+
+uns16 *rs_spec10_get_pic( uns32 * /* size */ );
+
 double rs_spec10_get_temperature( void );
-double rs_spec10_set_temperature( double temp );
+
+double rs_spec10_set_temperature( double /* temp */ );
+
 void rs_spec10_error_handling( void );
 
 /* Functions from rs_spec10_util.c */
 
 bool rs_spec10_read_state( void );
+
 bool rs_spec10_store_state( void );
-double rs_spec10_k2c( double tk );
-double rs_spec10_c2k( double tc );
-int16 rs_spec10_k2ic( double tk );
-double rs_spec10_ic2k( int16 tci );
-bool rs_spec10_param_access( uns32 param, uns16 *acc );
-const char *rs_spec10_ptime( double p_time );
+
+double rs_spec10_k2c( double /* tk */ );
+
+double rs_spec10_c2k( double /* tc */ );
+
+int16 rs_spec10_k2ic( double /* tk */ );
+
+double rs_spec10_ic2k( int16 /* tci */ );
+
+bool rs_spec10_param_access( uns32   /* param */,
+							 uns16 * /* acc   */ );
+
+const char *rs_spec10_ptime( double /* p_time */ );
+
 int *rs_spec10_get_fd_list( void );
-void rs_spec10_close_on_exec_hack( int *fd_list );
+
+void rs_spec10_close_on_exec_hack( int * /* fd_list */ );
 
 
 #endif /* ! RS_SPEC10_HEADER */

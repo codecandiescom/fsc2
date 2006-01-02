@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -47,16 +47,16 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Exported functions */
 
-int me6000_init_hook( void );
-int me6000_test_hook( void );
-int me6000_exp_hook( void );
+int me6000_init_hook(       void );
+int me6000_test_hook(       void );
+int me6000_exp_hook(        void );
 int me6000_end_of_exp_hook( void );
-void me6000_exit_hook( void );
+void me6000_exit_hook(      void );
 
-Var_T *daq_name( Var_T *v );
-Var_T *daq_reserve_dac( Var_T *v );
-Var_T *daq_set_voltage( Var_T *v );
-Var_T *daq_dac_parameter( Var_T *v );
+Var_T *daq_name(          Var_T * v );
+Var_T *daq_reserve_dac(   Var_T * v );
+Var_T *daq_set_voltage(   Var_T * v );
+Var_T *daq_dac_parameter( Var_T * v );
 
 
 /* Locally used functions */
@@ -242,7 +242,7 @@ void me6000_exit_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T *v UNUSED_ARG )
+Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -254,7 +254,7 @@ Var_T *daq_name( Var_T *v UNUSED_ARG )
  * as the very first argument to the function daq_set_voltage().
  *-------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dac( Var_T *v )
+Var_T *daq_reserve_dac( Var_T * v )
 {
 	bool lock_state = SET;
 	long channel;
@@ -326,7 +326,7 @@ Var_T *daq_reserve_dac( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T *v )
+Var_T *daq_set_voltage( Var_T * v )
 {
 	long channel;
 	int dac;
@@ -433,7 +433,7 @@ Var_T *daq_set_voltage( Var_T *v )
  * maximum output voltage and voltage resolution).
  *------------------------------------------------------*/
 
-Var_T *daq_dac_parameter( Var_T *v )
+Var_T *daq_dac_parameter( Var_T * v )
 {
 	double params[ 3 ];
 

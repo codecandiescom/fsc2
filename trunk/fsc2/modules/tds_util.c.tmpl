@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,9 +25,10 @@
 #include "tds_tmpl.h"
 
 
-static void tds_tmpl_window_check_1( bool *is_start, bool *is_width );
-static void tds_tmpl_window_check_2( Window_T *w );
-static void tds_tmpl_window_check_3( Window_T *w );
+static void tds_tmpl_window_check_1( bool * is_start,
+									 bool * is_width );
+static void tds_tmpl_window_check_2( Window_T * w );
+static void tds_tmpl_window_check_3( Window_T * w );
 
 
 /*-----------------------------------------------------------------*
@@ -55,7 +56,7 @@ const char *tds_tmpl_ptime( double p_time )
  * Deletes all window by removing them from the linked list of windows
  *---------------------------------------------------------------------*/
 
-void tds_tmpl_delete_windows( TDS_TMPL_T *s )
+void tds_tmpl_delete_windows( TDS_TMPL_T * s )
 {
 	Window_T *w;
 
@@ -157,7 +158,8 @@ void tds_tmpl_do_pre_exp_checks( void )
  * Checks if for all windows a width is set
  *------------------------------------------*/
 
-static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
+static void tds_tmpl_window_check_1( bool * is_start,
+									 bool * is_width )
 {
 	Window_T *w;
 
@@ -177,7 +179,7 @@ static void tds_tmpl_window_check_1( bool *is_start, bool *is_width )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-void tds_tmpl_window_checks( Window_T *w )
+void tds_tmpl_window_checks( Window_T * w )
 {
 	tds_tmpl_window_check_2( w );
 	tds_tmpl_window_check_3( w );
@@ -197,7 +199,7 @@ void tds_tmpl_window_checks( Window_T *w )
  * equal - than we can use tracking cursors.
  *----------------------------------------------------------------------*/
 
-static void tds_tmpl_window_check_2( Window_T *w )
+static void tds_tmpl_window_check_2( Window_T * w )
 {
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
@@ -286,7 +288,7 @@ static void tds_tmpl_window_check_2( Window_T *w )
  * and the end of the windows in units of points.
  *-------------------------------------------------------------*/
 
-static void tds_tmpl_window_check_3( Window_T *w )
+static void tds_tmpl_window_check_3( Window_T * w )
 {
     double window;
 	char *buf1, *buf2, *buf3;
@@ -463,7 +465,9 @@ static void tds_tmpl_window_check_3( Window_T *w )
  * indicate the error
  *--------------------------------------------------------------*/
 
-long tds_tmpl_translate_channel( int dir, long channel, bool flag )
+long tds_tmpl_translate_channel( int  dir,
+								 long channel,
+								 bool flag )
 {
 	if ( dir == GENERAL_TO_TDS_TMPL )
 	{
@@ -639,7 +643,8 @@ long tds_tmpl_translate_channel( int dir, long channel, bool flag )
  * experiment has to be reset. And that's what this function does.
  *-----------------------------------------------------------------*/
 
-void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
+void tds_tmpl_store_state( TDS_TMPL_T * dest,
+						   TDS_TMPL_T * src )
 {
 	Window_T *w, *dw;
 
@@ -687,7 +692,9 @@ void tds_tmpl_store_state( TDS_TMPL_T *dest, TDS_TMPL_T *src )
  * isn't locked.
  *--------------------------------------------------------------*/
 
-void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
+void tds_tmpl_state_check( double timebase,
+						   long   rec_len,
+						   double trig_pos )
 {
 	Window_T *w;
 	double window;
@@ -828,7 +835,7 @@ void tds_tmpl_state_check( double timebase, long rec_len, double trig_pos )
  * all windows are equal or not.
  *-------------------------------------------------------------------*/
 
-void tds_tmpl_set_tracking( Window_T *w )
+void tds_tmpl_set_tracking( Window_T * w )
 {
 	Window_T *ww;
 	double window;
@@ -886,7 +893,7 @@ void tds_tmpl_set_tracking( Window_T *w )
  * calculation on the complete curve.
  *------------------------------------------------------------------*/
 
-void tds_tmpl_set_meas_window( Window_T *w )
+void tds_tmpl_set_meas_window( Window_T * w )
 {
 	if ( w != NULL )
 	{
@@ -922,7 +929,7 @@ void tds_tmpl_set_meas_window( Window_T *w )
  * is to be fetched from the digitizer.
  *----------------------------------------------------------*/
 
-void tds_tmpl_set_curve_window( Window_T *w )
+void tds_tmpl_set_curve_window( Window_T * w )
 {
 	if ( w != NULL )
 	{
@@ -947,7 +954,7 @@ void tds_tmpl_set_curve_window( Window_T *w )
  * to be set.
  *----------------------------------------------------------------*/
 
-void tds_tmpl_set_window( Window_T *w )
+void tds_tmpl_set_window( Window_T * w )
 {
 	/* If all windows have the same width we only have to set the first
 	   cursor (and only if its not already at the correct position),

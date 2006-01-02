@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,24 +36,27 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MAX_TRIES   150
 
 
-int  pt2025_init_hook( void );
-int  pt2025_test_hook( void );
-int  pt2025_exp_hook( void );
-int  pt2025_end_of_exp_hook( void );
+int pt2025_init_hook(       void );
+int pt2025_test_hook(       void );
+int pt2025_exp_hook(        void );
+int pt2025_end_of_exp_hook( void );
 
 
-Var_T *gaussmeter_name( Var_T *v );
-Var_T *gaussmeter_field( Var_T *v );
-Var_T *measure_field( Var_T *v );
-Var_T *gaussmeter_resolution( Var_T *v );
-Var_T *gaussmeter_probe_orientation( Var_T *v );
-Var_T *gaussmeter_command( Var_T *v );
+Var_T *gaussmeter_name(              Var_T * v );
+Var_T *gaussmeter_field(             Var_T * v );
+Var_T *measure_field(                Var_T * v );
+Var_T *gaussmeter_resolution(        Var_T * v );
+Var_T *gaussmeter_probe_orientation( Var_T * v );
+Var_T *gaussmeter_command(           Var_T * v );
 
 
-static bool pt2025_init( const char *name );
+static bool pt2025_init( const char * name );
+
 static double pt2025_get_field( void );
+
 static void pt2025_set_resolution( int res );
-static bool pt2025_command( const char *cmd );
+
+static bool pt2025_command( const char * cmd );
 
 
 #define PROBE_ORIENTATION_PLUS       0
@@ -144,7 +147,7 @@ int pt2025_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -153,7 +156,7 @@ Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T *v )
+Var_T *gaussmeter_field( Var_T * v )
 {
 	return measure_field( v );
 }
@@ -162,7 +165,7 @@ Var_T *gaussmeter_field( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *measure_field( Var_T *v UNUSED_ARG )
+Var_T *measure_field( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, 34089.3 );
@@ -174,7 +177,7 @@ Var_T *measure_field( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T *v )
+Var_T *gaussmeter_resolution( Var_T * v )
 {
 	double res;
 
@@ -219,7 +222,7 @@ Var_T *gaussmeter_resolution( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_probe_orientation( Var_T *v )
+Var_T *gaussmeter_probe_orientation( Var_T * v )
 {
 	long orientation;
 
@@ -270,7 +273,7 @@ Var_T *gaussmeter_probe_orientation( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *gaussmeter_command( Var_T *v )
+Var_T *gaussmeter_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -308,7 +311,7 @@ Var_T *gaussmeter_command( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool pt2025_init( const char *name )
+static bool pt2025_init( const char * name )
 {
 	unsigned char buf[ 50 ];
 	long len = 50;
@@ -448,7 +451,7 @@ static void pt2025_set_resolution( int res )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool pt2025_command( const char *cmd )
+static bool pt2025_command( const char * cmd )
 {
 	if ( gpib_write( pt2025.device, cmd, strlen( cmd ) ) == FAILURE )
 	{

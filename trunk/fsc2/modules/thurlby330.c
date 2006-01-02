@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Anton Savitsky / Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,33 +35,47 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int thurlby330_init_hook( void );
-int thurlby330_exp_hook( void );
+int thurlby330_init_hook(       void );
+int thurlby330_exp_hook(        void );
 int thurlby330_end_of_exp_hook( void );
 
-Var_T *powersupply_name( Var_T *v );
-Var_T *powersupply_damping( Var_T *v );
-Var_T *powersupply_channel_state( Var_T *v );
-Var_T *powersupply_voltage( Var_T *v );
-Var_T *powersupply_voltage_limit( Var_T *v );
-Var_T *powersupply_current( Var_T *v );
-Var_T *powersupply_current_limit( Var_T *v );
-Var_T *powersupply_command( Var_T *v );
+Var_T *powersupply_name(          Var_T * v );
+Var_T *powersupply_damping(       Var_T * v );
+Var_T *powersupply_channel_state( Var_T * v );
+Var_T *powersupply_voltage(       Var_T * v );
+Var_T *powersupply_voltage_limit( Var_T * v );
+Var_T *powersupply_current(       Var_T * v );
+Var_T *powersupply_current_limit( Var_T * v );
+Var_T *powersupply_command(       Var_T * v );
 
 
 /* Locally used functions */
 
-static bool thurlby330_init( const char *name );
-static double thurlby330_set_voltage( long channel, double voltage );
+static bool thurlby330_init( const char * name );
+
+static double thurlby330_set_voltage( long   channel,
+									  double voltage );
+
 static double thurlby330_get_voltage( long channel );
+
 static double thurlby330_get_voltage_limit( long channel );
-static double thurlby330_set_current( long channel, double current );
+
+static double thurlby330_set_current( long   channel,
+									  double current );
+
 static double thurlby330_get_current( long channel );
+
 static double thurlby330_get_current_limit( long channel );
-static bool thurlby330_command( const char *cmd );
-static bool thurlby330_talk( const char *cmd, char *reply, long *length );
+
+static bool thurlby330_command( const char * cmd );
+
+static bool thurlby330_talk( const char * cmd,
+							 char *       reply,
+							 long *       length );
+
 static void thurlby330_failure( void );
-static long thurlby330_get_channel( Var_T *v );
+
+static long thurlby330_get_channel( Var_T * v );
 
 
 #define TEST_VOLTAGE        12.12   /* in V */
@@ -138,7 +152,7 @@ int thurlby330_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *powersupply_name( Var_T *v UNUSED_ARG )
+Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -148,7 +162,7 @@ Var_T *powersupply_name( Var_T *v UNUSED_ARG )
  * Switch on/off damping of a power supply channel
  *-------------------------------------------------*/
 
-Var_T *powersupply_damping( Var_T *v )
+Var_T *powersupply_damping( Var_T * v )
 {   
 	long channel;
 	long status;
@@ -183,7 +197,7 @@ Var_T *powersupply_damping( Var_T *v )
  * Switch on/off a power supply channel
  *--------------------------------------*/
 
-Var_T *powersupply_channel_state( Var_T *v )
+Var_T *powersupply_channel_state( Var_T * v )
 {   
 	long channel;
 	long status;
@@ -223,7 +237,7 @@ Var_T *powersupply_channel_state( Var_T *v )
  * voltage that had been set due to the current limit).
  *---------------------------------------------------------------*/
 
-Var_T *powersupply_voltage( Var_T *v )
+Var_T *powersupply_voltage( Var_T * v )
 {
 	long channel;
 	double voltage;
@@ -277,7 +291,7 @@ Var_T *powersupply_voltage( Var_T *v )
  * module is started is 0 V.
  *----------------------------------------------------------------*/
 
-Var_T *powersupply_voltage_limit( Var_T *v )
+Var_T *powersupply_voltage_limit( Var_T * v )
 {
 	long channel;
 	double voltage;
@@ -334,7 +348,7 @@ Var_T *powersupply_voltage_limit( Var_T *v )
  * current that had been set due to the voltage limit).
  *---------------------------------------------------------------*/
 
-Var_T *powersupply_current( Var_T *v )
+Var_T *powersupply_current( Var_T * v )
 {
 	long channel;
 	double current;
@@ -389,7 +403,7 @@ Var_T *powersupply_current( Var_T *v )
  * module is started is 0 A.
  *----------------------------------------------------------------*/
 
-Var_T *powersupply_current_limit( Var_T *v )
+Var_T *powersupply_current_limit( Var_T * v )
 {
 	long channel;
 	double current;
@@ -440,7 +454,7 @@ Var_T *powersupply_current_limit( Var_T *v )
  * Function for sending a GPIB command directly to power supply
  *--------------------------------------------------------------*/
 
-Var_T *powersupply_command( Var_T *v )
+Var_T *powersupply_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -473,7 +487,7 @@ Var_T *powersupply_command( Var_T *v )
  * Internal functions for initialization of power-supply
  *-------------------------------------------------------*/
 
-static bool thurlby330_init( const char *name )
+static bool thurlby330_init( const char * name )
 {
 	if ( gpib_init_device( name, &thurlby330.device ) == FAILURE )
         return FAIL;
@@ -485,7 +499,8 @@ static bool thurlby330_init( const char *name )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static double thurlby330_set_voltage( long channel, double voltage )
+static double thurlby330_set_voltage( long   channel,
+									  double voltage )
 {
 	char buffer[ 100 ];
 
@@ -541,7 +556,8 @@ static double thurlby330_get_voltage_limit( long channel )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static double thurlby330_set_current( long channel, double current )
+static double thurlby330_set_current( long   channel,
+									  double current )
 {
 	char buffer[ 100 ];
 
@@ -598,7 +614,7 @@ static double thurlby330_get_current_limit( long channel )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool thurlby330_command( const char *cmd )
+static bool thurlby330_command( const char * cmd )
 {
 	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
 		thurlby330_failure( );
@@ -612,7 +628,9 @@ static bool thurlby330_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool thurlby330_talk( const char *cmd, char *reply, long *length )
+static bool thurlby330_talk( const char * cmd,
+							 char *       reply,
+							 long *       length )
 {
 	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
 		thurlby330_failure( );
@@ -641,7 +659,7 @@ static void thurlby330_failure( void )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static long thurlby330_get_channel( Var_T *v )
+static long thurlby330_get_channel( Var_T * v )
 {
 	long channel;
 

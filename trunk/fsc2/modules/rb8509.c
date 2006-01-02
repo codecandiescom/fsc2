@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,17 +49,19 @@ static struct {
 } rb8509, rb8509_stored;
 
 
-int rb8509_init_hook( void );
-int rb8509_test_hook( void );
-int rb8509_exp_hook( void );
+int rb8509_init_hook(       void );
+int rb8509_test_hook(       void );
+int rb8509_exp_hook(        void );
 int rb8509_end_of_exp_hook( void );
 
-Var_T *daq_name( Var_T *v );
-Var_T *daq_get_voltage( Var_T *v );
-Var_T *daq_trigger_mode( Var_T *v );
-Var_T *daq_gain( Var_T *v );
+Var_T *daq_name(         Var_T * v );
+Var_T *daq_get_voltage(  Var_T * v );
+Var_T *daq_trigger_mode( Var_T * v );
+Var_T *daq_gain(         Var_T * v );
+
 
 static int rb8509_translate_channel( long channel );
+
 static void rb8509_comm_failure( void );
 
 
@@ -172,7 +174,7 @@ int rb8509_end_of_exp_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T *v UNUSED_ARG )
+Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -182,7 +184,7 @@ Var_T *daq_name( Var_T *v UNUSED_ARG )
  * Function returns the converted voltage from one of the channels
  *-----------------------------------------------------------------*/
 
-Var_T *daq_get_voltage( Var_T *v )
+Var_T *daq_get_voltage( Var_T * v )
 {
 	int channel;
 	double volts;
@@ -254,7 +256,7 @@ Var_T *daq_get_voltage( Var_T *v )
  * can only be determined when the experiment is started
  *-------------------------------------------------------------------*/
 
-Var_T *daq_trigger_mode( Var_T *v )
+Var_T *daq_trigger_mode( Var_T * v )
 {
 	if ( v == NULL )
 		return vars_push( INT_VAR, rb8509.trig_mode );
@@ -301,7 +303,7 @@ Var_T *daq_trigger_mode( Var_T *v )
  * argument must be either 1, 2, 4 or 8
  *---------------------------------------------------------*/
 
-Var_T *daq_gain( Var_T *v )
+Var_T *daq_gain( Var_T * v )
 {
 	int gain;
 

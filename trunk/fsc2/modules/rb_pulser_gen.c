@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -89,7 +89,8 @@ bool rb_pulser_store_timebase( double timebase )
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool rb_pulser_set_function_delay( int function, double delay )
+bool rb_pulser_set_function_delay( int    function,
+								   double delay )
 {
 	Function_T *f = rb_pulser.function + function;
 	int i;

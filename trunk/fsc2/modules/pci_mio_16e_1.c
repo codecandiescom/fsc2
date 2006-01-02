@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -288,7 +288,7 @@ void pci_mio_16e_1_exit_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T *v UNUSED_ARG )
+Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }

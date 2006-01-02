@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,7 @@ extern struct MOD_RANGES pm_mod_ranges[ ];
  * memory used for the file name passed to the function is deallocated.
  *----------------------------------------------------------------------*/
 
-FILE *rs_sml01_find_table( char **name )
+FILE *rs_sml01_find_table( char ** name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -96,7 +96,7 @@ FILE *rs_sml01_find_table( char **name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-FILE *rs_sml01_open_table( char *name )
+FILE *rs_sml01_open_table( char * name )
 {
 	FILE *tfp;
 
@@ -239,7 +239,9 @@ double rs_sml01_get_att( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-unsigned int rs_sml01_get_mod_param( Var_T **v, double *dres, int *ires )
+unsigned int rs_sml01_get_mod_param( Var_T ** v,
+									 double * dres,
+									 int *    ires )
 {
 	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
 			   *source[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };

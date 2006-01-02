@@ -1,6 +1,6 @@
 @c  $Id$
 @c
-@c  Copyright (C) 1999-2005 Jens Thoms Toerring
+@c  Copyright (C) 1999-2006 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -723,9 +723,7 @@ automatically gets adjusted to the one on the right hand side. This
 includes even cases where the size of array on the right hand side is
 still unknown. In this case all information about the size of the left
 hand side array and its elements are discarded and it will now be
-treated as if its size never had been set. Since in most cases this may
-be not what you want a warning is printed to inform you about this
-potential problem.
+treated as if its size never had been set.
 
 
 @node Array ranges, Arithmetic, Assignment operations, EDL

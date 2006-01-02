@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,17 +25,27 @@
 #include "rs690.h"
 
 
-static void rs690_init_print( FILE *fp );
+static void rs690_init_print( FILE * fp );
+
 static void rs690_basic_pulse_check( void );
+
 static void rs690_create_shape_pulses( void );
+
 static void rs690_create_twt_pulses( void );
+
 static void rs690_basic_functions_check( void );
-static void rs690_create_phase_matrix( Function_T *f );
+
+static void rs690_create_phase_matrix( Function_T * f );
+
 static void rs690_setup_channels( void );
+
 static void rs690_pulse_start_setup( void );
-static void rs690_channel_start_check( Channel_T *ch );
-static void rs690_pulse_init_check( Function_T *f );
-static void rs690_defense_shape_init_check( Function_T *shape );
+
+static void rs690_channel_start_check( Channel_T * ch );
+
+static void rs690_pulse_init_check( Function_T * f );
+
+static void rs690_defense_shape_init_check( Function_T * shape );
 
 
 /*-----------------------------------------------------------------*
@@ -105,7 +115,7 @@ void rs690_init_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void rs690_init_print( FILE *fp )
+static void rs690_init_print( FILE * fp )
 {
 	Function_T *f;
 	int i, j;
@@ -551,7 +561,7 @@ static void rs690_basic_functions_check( void )
  * and don't overlap.
  *-----------------------------------------------------------------------*/
 
-static void rs690_create_phase_matrix( Function_T *f )
+static void rs690_create_phase_matrix( Function_T * f )
 {
 	Pulse_T *p;
 	Pulse_T **pm_elem;
@@ -871,7 +881,7 @@ static void rs690_pulse_start_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void rs690_channel_start_check( Channel_T *ch )
+static void rs690_channel_start_check( Channel_T * ch )
 {
 	qsort( ch->pulse_params, ch->num_active_pulses,
 		   sizeof *ch->pulse_params, rs690_pulse_compare );
@@ -885,7 +895,7 @@ static void rs690_channel_start_check( Channel_T *ch )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void rs690_pulse_init_check( Function_T *f )
+static void rs690_pulse_init_check( Function_T * f )
 {
 	Pulse_T *p1, *p2;
 	int i, j;
@@ -957,7 +967,7 @@ static void rs690_pulse_init_check( Function_T *f )
  * mentioned EDL functions have been called.
  *------------------------------------------------------------------------*/
 
-static void rs690_defense_shape_init_check( Function_T *shape )
+static void rs690_defense_shape_init_check( Function_T * shape )
 {
 	Function_T *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
 	Pulse_T *shape_p, *defense_p;

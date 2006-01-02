@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,12 +26,22 @@
 
 
 static bool rs690_field_channel_setup( void );
+
 static bool rs690_init_channels( void );
+
 static void rs690_calc_tables( void );
-static void rs690_table_set( int i, int k, FS_T *n );
+
+static void rs690_table_set( int    i,
+							 int    k,
+							 FS_T * n );
+
 static void rs690_gpib_failure( void );
+
 static void rs690_check( void );
-static int rs690_write( int device_no, const char *s, long len );
+
+static int rs690_write( int          device_no,
+						const char * s,
+						long         len );
 
 
 #define UNUSED_BIT -1
@@ -53,7 +63,7 @@ static int rs690_write( int device_no, const char *s, long len );
  *------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
-bool rs690_init( const char *name )
+bool rs690_init( const char * name )
 {
 	char reply[ 100 ];
 	long length = 100;
@@ -125,7 +135,7 @@ bool rs690_init( const char *name )
 	return OK;
 }
 #else
-bool rs690_init( const char *name UNUSED_ARG )
+bool rs690_init( const char * name  UNUSED_ARG )
 {
 	return OK;
 }
@@ -442,7 +452,9 @@ static void rs690_calc_tables( void )
  * to and 'n' points to the FS structure with the data and length.
  *-----------------------------------------------------------------*/
 
-static void rs690_table_set( int i, int k, FS_T *n )
+static void rs690_table_set( int    i,
+							 int    k,
+							 FS_T * n )
 {
 	char buf[ 256 ];
 
@@ -518,7 +530,9 @@ static void rs690_check( void )
  *--------------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
-static int rs690_write( int device_no, const char *s, long len )
+static int rs690_write( int          device_no,
+						const char * s,
+						long         len )
 {
 	if ( gpib_write( device_no, s, len ) == FAILURE &&
 		 GPIB_IS_TIMEOUT &&
@@ -538,7 +552,7 @@ static int rs690_write( int device_no UNUSED_ARG, const char *s UNUSED_ARG,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool rs690_command( const char *cmd )
+bool rs690_command( const char * cmd )
 {
 	if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
 		rs690_gpib_failure( );

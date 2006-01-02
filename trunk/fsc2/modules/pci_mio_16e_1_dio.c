@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,7 @@
  * calling the function daq_dio_write() and daq_dio_read().
  *--------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dio( Var_T *v )
+Var_T *daq_reserve_dio( Var_T * v )
 {
 	bool lock_state = SET;
 
@@ -85,7 +85,7 @@ Var_T *daq_reserve_dio( Var_T *v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T *daq_dio_read( Var_T *v )
+Var_T *daq_dio_read( Var_T * v )
 {
 	long mask;
 	unsigned char bits = 0;
@@ -145,7 +145,7 @@ Var_T *daq_dio_read( Var_T *v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T *daq_dio_write( Var_T *v )
+Var_T *daq_dio_write( Var_T * v )
 {
 	long bits;
 	long mask;

@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,9 @@
 #define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
 
 static int spectrapro_300i_lex( void );
-static void spectrapro_300i_new_entry( int type, const char *calib_file );
+
+static void spectrapro_300i_new_entry( int          type,
+									   const char * calib_file );
 
 static long spectrapro_300i_Lc,
 			spectrapro_300i_Comm_Lc;
@@ -151,7 +153,8 @@ DU       (([+-]?{INT})|{FLOAT})[\t ]?("M"|"k"|"m"|"u"|"n")?"m"
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void spectrapro_300i_read_calib( FILE *fp, const char *calib_file )
+void spectrapro_300i_read_calib( FILE *       fp,
+								 const char * calib_file )
 {
 	static bool is_restart = UNSET;
 	int type;
@@ -239,7 +242,8 @@ void spectrapro_300i_read_calib( FILE *fp, const char *calib_file )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void spectrapro_300i_new_entry( int type, const char *calib_file )
+static void spectrapro_300i_new_entry( int          type,
+									   const char * calib_file )
 {
 	char *cp;
 	long grating;
@@ -356,3 +360,10 @@ static void spectrapro_300i_new_entry( int type, const char *calib_file )
 													  value * atan( 1.0 ) / 45;
 	spectrapro_300i_calibs[ grating ].is_calib[ type ] = SET;
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

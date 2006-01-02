@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Anton Savitsky / Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -48,27 +48,37 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int mcn700_2000_init_hook( void );
-int mcn700_2000_test_hook( void );
-int mcn700_2000_exp_hook( void );
+int mcn700_2000_init_hook(       void );
+int mcn700_2000_test_hook(       void );
+int mcn700_2000_exp_hook(        void );
 int mcn700_2000_end_of_exp_hook( void );
  
-Var_T *powersupply_name( Var_T *v );
-Var_T *powersupply_voltage( Var_T *v );
-Var_T *powersupply_current( Var_T *v );
-Var_T *powersupply_command( Var_T *v ); 
+Var_T *powersupply_name(    Var_T * v );
+Var_T *powersupply_voltage( Var_T * v );
+Var_T *powersupply_current( Var_T * v );
+Var_T *powersupply_command( Var_T * v ); 
 
 
 /* Locally used functions */
 
-static bool mcn700_2000_init( const char *name );
+static bool mcn700_2000_init( const char * name );
+
 static double mcn700_2000_set_voltage( double voltage );
+
 static double mcn700_2000_get_voltage( void );
+
 static double mcn700_2000_set_current( double current );
+
 static double mcn700_2000_get_current( void );
+
 static void mcn700_2000_set_voltage_completed( void );
-static bool mcn700_2000_command( const char *cmd );
-static bool mcn700_2000_talk( const char *cmd, char *reply, long *length );
+
+static bool mcn700_2000_command( const char * cmd );
+
+static bool mcn700_2000_talk( const char * cmd,
+							  char *       reply,
+							  long *       length );
+
 static void mcn700_2000_failure( void );
 
 
@@ -140,7 +150,7 @@ int mcn700_2000_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *powersupply_name( Var_T *v UNUSED_ARG )
+Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -156,7 +166,7 @@ Var_T *powersupply_name( Var_T *v UNUSED_ARG )
  * control is activated (fixed voltage mode)
  *------------------------------------------------------------------*/
 
-Var_T *powersupply_voltage( Var_T *v )
+Var_T *powersupply_voltage( Var_T * v )
 {
 	double voltage;
 
@@ -203,7 +213,7 @@ Var_T *powersupply_voltage( Var_T *v )
  * the voltage limit).
  *----------------------------------------------------------------*/
 
-Var_T *powersupply_current( Var_T *v )
+Var_T *powersupply_current( Var_T * v )
 {
 	double current;
 
@@ -247,7 +257,7 @@ Var_T *powersupply_current( Var_T *v )
  * Function for sending a GPIB command directly to power supply
  *--------------------------------------------------------------*/
 
-Var_T *powersupply_command( Var_T *v )
+Var_T *powersupply_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -280,7 +290,7 @@ Var_T *powersupply_command( Var_T *v )
  * Internal functions for initialization of power suppply
  *--------------------------------------------------------*/
 
-static bool mcn700_2000_init( const char *name )
+static bool mcn700_2000_init( const char * name )
 {
 	if ( gpib_init_device( name, &mcn700_2000.device ) == FAILURE )
 		return FAIL;
@@ -390,7 +400,7 @@ void mcn700_2000_set_voltage_completed( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool mcn700_2000_command( const char *cmd )
+static bool mcn700_2000_command( const char * cmd )
 {
 	if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
 		mcn700_2000_failure( );
@@ -404,7 +414,9 @@ static bool mcn700_2000_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool mcn700_2000_talk( const char *cmd, char *reply, long *length )
+static bool mcn700_2000_talk( const char * cmd,
+							  char *       reply,
+							  long *       length )
 {
 	if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
 		mcn700_2000_failure( );

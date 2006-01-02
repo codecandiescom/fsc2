@@ -2,7 +2,7 @@
  *
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,12 +26,16 @@
 #include "lecroy94_tmpl.h"
 
 
-static unsigned char *lecroy94_tmpl_get_data( long *len );
+static unsigned char *lecroy94_tmpl_get_data( long * len );
 static unsigned int lecroy94_tmpl_get_inr( void );
-static int lecroy94_tmpl_get_int_value( int ch, const char *name );
-static double lecroy94_tmpl_get_float_value( int ch, const char *name );
-static unsigned char *lecroy94_tmpl_get_data( long *len );
-static bool lecroy94_tmpl_talk( const char *cmd, char *reply, long *length );
+static int lecroy94_tmpl_get_int_value( int          ch,
+										const char * name );
+static double lecroy94_tmpl_get_float_value( int          ch,
+											 const char * name );
+static unsigned char *lecroy94_tmpl_get_data( long * len );
+static bool lecroy94_tmpl_talk( const char * cmd,
+								char *       reply,
+								long *       length );
 static void lecroy94_tmpl_gpib_failure( void );
 
 
@@ -54,7 +58,7 @@ static int trg_channels[ ] = {
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_init( const char *name )
+bool lecroy94_tmpl_init( const char * name )
 {
 	char buffer[ 100 ];
 	long len = 100;
@@ -65,7 +69,7 @@ bool lecroy94_tmpl_init( const char *name )
         return FAIL;
 
     /* Disable the local button, set digitizer to short form of replies,
-	   switch off debugging, transmit data in one block in binary word
+	   switch off debugging, transmit data in one block of binary words
 	   (2 byte) format with LSB first. Then ask it for the status byte
 	   to make sure the device reacts. */
 
@@ -342,7 +346,8 @@ double lecroy94_tmpl_get_sens( int channel )
  * Function for setting the sensitivity (in V/div) of a channel
  *--------------------------------------------------------------*/
 
-bool lecroy94_tmpl_set_sens( int channel, double sens )
+bool lecroy94_tmpl_set_sens( int    channel,
+							 double sens )
 {
     char cmd[ 40 ];
 
@@ -383,7 +388,8 @@ double lecroy94_tmpl_get_offset( int channel )
  * Function for setting the offset voltage for a channel
  *-------------------------------------------------------*/
 
-bool lecroy94_tmpl_set_offset( int channel, double offset )
+bool lecroy94_tmpl_set_offset( int    channel,
+							   double offset )
 {
     char cmd[ 40 ];
 
@@ -437,7 +443,8 @@ int lecroy94_tmpl_get_coupling( int channel )
  * Function for setting the coupling type for a channel
  *------------------------------------------------------*/
 
-bool lecroy94_tmpl_set_coupling( int channel, int type )
+bool lecroy94_tmpl_set_coupling( int channel,
+								 int type )
 {
     char cmd[ 30 ];
 	char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
@@ -603,7 +610,8 @@ double lecroy94_tmpl_get_trigger_level( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_set_trigger_level( int channel, double level )
+bool lecroy94_tmpl_set_trigger_level( int    channel,
+									  double level )
 {
 	char cmd[ 40 ];
 
@@ -681,7 +689,8 @@ double lecroy94_tmpl_get_trigger_slope( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_set_trigger_slope( int channel, int slope )
+bool lecroy94_tmpl_set_trigger_slope( int channel,
+									  int slope )
 {
 	char cmd[ 40 ];
 
@@ -782,7 +791,8 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-int lecroy94_tmpl_set_trigger_coupling( int channel, int cpl )
+int lecroy94_tmpl_set_trigger_coupling( int channel,
+										int cpl )
 {
 	char cmd[ 40 ];
 	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ", "HFDIV" };
@@ -951,7 +961,8 @@ bool lecroy94_tmpl_is_displayed( int ch )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy94_tmpl_display( int ch, int on_off )
+bool lecroy94_tmpl_display( int ch,
+							int on_off )
 {
 	char cmd[ 30 ];
 		
@@ -1051,8 +1062,10 @@ void lecroy94_tmpl_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy94_tmpl_get_curve( int ch, Window_T *w, double **array,
-							  long *length )
+void lecroy94_tmpl_get_curve( int        ch,
+							  Window_T * w,
+							  double **  array,
+							  long *     length )
 {
 	unsigned char *data = NULL;
 	unsigned char *dp;
@@ -1169,7 +1182,8 @@ void lecroy94_tmpl_get_curve( int ch, Window_T *w, double **array,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy94_tmpl_get_area( int ch, Window_T *w )
+double lecroy94_tmpl_get_area( int        ch,
+							   Window_T * w )
 {
 	unsigned char *data = NULL;
 	unsigned char *dp;
@@ -1287,7 +1301,8 @@ double lecroy94_tmpl_get_area( int ch, Window_T *w )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy94_tmpl_get_amplitude( int ch, Window_T *w )
+double lecroy94_tmpl_get_amplitude( int        ch,
+									Window_T * w )
 {
 	unsigned char *data = NULL;
 	unsigned char *dp;
@@ -1433,7 +1448,8 @@ long lecroy94_tmpl_get_num_avg( int ch )
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-void lecroy94_tmpl_copy_curve( long src, long dest )
+void lecroy94_tmpl_copy_curve( long src,
+							   long dest )
 {
 	char cmd[ 100 ];
 
@@ -1459,7 +1475,7 @@ void lecroy94_tmpl_copy_curve( long src, long dest )
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static unsigned char *lecroy94_tmpl_get_data( long *len )
+static unsigned char *lecroy94_tmpl_get_data( long * len )
 {
 	unsigned char *data;
 	char len_str[ 10 ];
@@ -1502,7 +1518,8 @@ static unsigned char *lecroy94_tmpl_get_data( long *len )
  * Function for obtaining an integer value from the waveform descriptor
  *---------------------------------------------------------------------*/
 
-static int lecroy94_tmpl_get_int_value( int ch, const char *name )
+static int lecroy94_tmpl_get_int_value( int          ch,
+										const char * name )
 {
 	char cmd[ 100 ];
 	long length = 100;
@@ -1531,7 +1548,8 @@ static int lecroy94_tmpl_get_int_value( int ch, const char *name )
  * Function for obtaining a float value from the waveform descriptor
  *-------------------------------------------------------------------*/
 
-static double lecroy94_tmpl_get_float_value( int ch, const char *name )
+static double lecroy94_tmpl_get_float_value( int          ch,
+											 const char * name )
 {
 	char cmd[ 100 ];
 	long length = 100;
@@ -1559,7 +1577,7 @@ static double lecroy94_tmpl_get_float_value( int ch, const char *name )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool lecroy94_tmpl_command( const char *cmd )
+bool lecroy94_tmpl_command( const char * cmd )
 {
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
@@ -1590,7 +1608,9 @@ static unsigned int lecroy94_tmpl_get_inr( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy94_tmpl_talk( const char *cmd, char *reply, long *length )
+static bool lecroy94_tmpl_talk( const char * cmd,
+								char *       reply,
+								long *       length )
 {
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( lecroy94_tmpl.device, reply, length ) == FAILURE )

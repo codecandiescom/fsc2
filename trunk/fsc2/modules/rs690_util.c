@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -151,7 +151,8 @@ const char *rs690_pticks( Ticks ticks )
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int rs690_pulse_compare( const void *A, const void *B )
+int rs690_pulse_compare( const void * A,
+						 const void * B )
 {
 	Pulse_Params_T *a = ( Pulse_Params_T * ) A,
 		           *b = ( Pulse_Params_T * ) B;
@@ -304,7 +305,7 @@ void rs690_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rs690_dump_channels( FILE *fp )
+void rs690_dump_channels( FILE * fp )
 {
 	Function_T *f;
 	Channel_T *ch;
@@ -384,7 +385,7 @@ void rs690_duty_check( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Ticks rs690_calc_max_length( Function_T *f )
+Ticks rs690_calc_max_length( Function_T * f )
 {
 	int i, j;
 	Channel_T *ch;
@@ -424,7 +425,7 @@ char *rs690_num_2_channel( int num )
  * because some other pulsers also have it.
  *-----------------------------------------------*/
 
-bool rs690_set_max_seq_len( double seq_len UNUSED_ARG )
+bool rs690_set_max_seq_len( double seq_len  UNUSED_ARG )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	return OK;

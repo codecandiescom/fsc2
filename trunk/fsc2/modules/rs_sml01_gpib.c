@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,14 +26,22 @@
 
 
 static void rs_sml01_initial_mod_setup( void );
+
 #if defined WITH_PULSE_MODULATION
 static bool rs_sml01_get_pulse_state( void );
+
 static bool rs_sml01_get_pulse_trig_slope( void );
+
 static double rs_sml01_get_pulse_width( void );
+
 static double rs_sml01_get_pulse_delay( void );
 #endif
+
 static void rs_sml01_comm_failure( void );
-static bool rs_sml01_talk( const char *cmd, char *reply, long *length );
+
+static bool rs_sml01_talk( const char * cmd,
+						   char *       reply,
+						   long *       length );
 
 
 static int dev_handle;
@@ -41,7 +49,7 @@ static int dev_handle;
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool rs_sml01_init( const char *name )
+bool rs_sml01_init( const char * name )
 {
 	double att;
 	int i;
@@ -404,7 +412,9 @@ int rs_sml01_get_mod_type( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int rs_sml01_set_mod_source( int type, int source, double freq )
+int rs_sml01_set_mod_source( int    type,
+							 int    source,
+							 double freq )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
@@ -440,7 +450,8 @@ int rs_sml01_set_mod_source( int type, int source, double freq )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int rs_sml01_get_mod_source( int type, double *freq )
+int rs_sml01_get_mod_source( int      type,
+							 double * freq )
 {
 	const char *types[ ] = { "FM", "AM", "PM" };
 	char cmd[ 100 ];
@@ -483,7 +494,8 @@ int rs_sml01_get_mod_source( int type, double *freq )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_set_mod_ampl( int type, double ampl )
+double rs_sml01_set_mod_ampl( int    type,
+							  double ampl )
 {
 	char cmd[ 100 ];
 
@@ -666,7 +678,7 @@ static void rs_sml01_comm_failure( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool rs_sml01_command( const char *cmd )
+bool rs_sml01_command( const char * cmd )
 {
 	if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE )
 		rs_sml01_comm_failure( );
@@ -677,7 +689,9 @@ bool rs_sml01_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool rs_sml01_talk( const char *cmd, char *reply, long *length )
+static bool rs_sml01_talk( const char * cmd,
+						   char *       reply,
+						   long *       length )
 {
 	if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( dev_handle, reply, length ) == FAILURE )

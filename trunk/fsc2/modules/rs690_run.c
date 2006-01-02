@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,17 +26,29 @@
 
 
 static bool rs690_update_pulses( bool flag );
-static void rs690_pulse_check( Function_T *f );
-static void rs690_defense_shape_check( Function_T *shape );
+
+static void rs690_pulse_check( Function_T * f );
+
+static void rs690_defense_shape_check( Function_T * shape );
+
 static void rs690_commit( bool flag );
-static void rs690_make_fs( FS_T *start_fs );
-static void rs690_populate_fs( FS_T *start_fs );
+
+static void rs690_make_fs( FS_T * start_fs );
+
+static void rs690_populate_fs( FS_T * start_fs );
+
 static void rs690_check_fs( void );
+
 static void	rs690_correct_fs_for_8ns( void );
+
 static void	rs690_correct_fs_for_4ns( void );
+
 static FS_T *rs690_append_fs( Ticks pos );
-static FS_T *rs690_insert_fs( FS_T *at, Ticks pos );
-static void rs690_delete_fs_successor( FS_T *n );
+
+static FS_T *rs690_insert_fs( FS_T * at,
+							  Ticks  pos );
+
+static void rs690_delete_fs_successor( FS_T * n );
 
 
 
@@ -259,7 +271,7 @@ static bool rs690_update_pulses( bool flag )
  * This function simply checks that no pulses of a function overlap.
  *-------------------------------------------------------------------*/
 
-static void rs690_pulse_check( Function_T *f )
+static void rs690_pulse_check( Function_T * f )
 {
 	Pulse_T *p1, *p2;
 	int i, j;
@@ -356,7 +368,7 @@ static void rs690_pulse_check( Function_T *f )
  * mentioned EDL functions have been called.
  *------------------------------------------------------------------------*/
 
-static void rs690_defense_shape_check( Function_T *shape )
+static void rs690_defense_shape_check( Function_T * shape )
 {
 	Function_T *defense = rs690.function + PULSER_CHANNEL_DEFENSE;
 	Pulse_T *shape_p, *defense_p;
@@ -534,7 +546,7 @@ void rs690_full_reset( void )
  * Checks if shape padding can be set correctly for all pulses of a channel
  *--------------------------------------------------------------------------*/
 
-void rs690_shape_padding_check_1( Channel_T *ch )
+void rs690_shape_padding_check_1( Channel_T * ch )
 {
 	Pulse_Params_T *pp, *ppp;
 	int i;
@@ -658,7 +670,7 @@ void rs690_shape_padding_check_2( void )
  * if the time between two TWT gets too short.
  *-----------------------------------------------------------------*/
 
-void rs690_twt_padding_check( Channel_T *ch )
+void rs690_twt_padding_check( Channel_T * ch )
 {
 	Pulse_Params_T *pp, *ppp;
 	int i;
@@ -879,7 +891,8 @@ void rs690_seq_length_check( void )
  * to the next pulse in the pulse list.
  *------------------------------------------------*/
 
-Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn )
+Pulse_T *rs690_delete_pulse( Pulse_T * p,
+							 bool      warn )
 {
 	Pulse_T *pp;
 	Function_T *f;
@@ -1116,7 +1129,7 @@ void rs690_channel_setup( bool flag )
  * for each change of the state of one of the pulses.
  *------------------------------------------------------------*/
 
-static void rs690_make_fs( FS_T *start_fs )
+static void rs690_make_fs( FS_T * start_fs )
 {
 	Function_T *f;
 	Channel_T *ch;
@@ -1202,7 +1215,7 @@ static void rs690_make_fs( FS_T *start_fs )
  * all the FS structures to reflect the pulse states.
  *-----------------------------------------------------------------*/
 
-static void rs690_populate_fs( FS_T *start_fs )
+static void rs690_populate_fs( FS_T * start_fs )
 {
 	Function_T *f;
 	Channel_T *ch;
@@ -1500,7 +1513,8 @@ static void	rs690_correct_fs_for_4ns( void )
  * polarity of the channels).
  *------------------------------------------------------------------*/
 
-static FS_T *rs690_insert_fs( FS_T *at, Ticks pos )
+static FS_T *rs690_insert_fs( FS_T * at,
+							  Ticks  pos )
 {
 	FS_T *n;
 
@@ -1564,7 +1578,7 @@ static FS_T *rs690_append_fs( Ticks pos )
  * does *not* get changed!
  *------------------------------------------------------------------*/
 
-static void rs690_delete_fs_successor( FS_T *n )
+static void rs690_delete_fs_successor( FS_T * n )
 {
 	FS_T *nn;
 

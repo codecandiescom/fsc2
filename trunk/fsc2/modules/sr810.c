@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -83,27 +83,27 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int sr810_init_hook( void );
-int sr810_test_hook( void );
-int sr810_exp_hook( void );
+int sr810_init_hook(       void );
+int sr810_test_hook(       void );
+int sr810_exp_hook(        void );
 int sr810_end_of_exp_hook( void );
 
-Var_T *lockin_name( Var_T *v );
-Var_T *lockin_get_data( Var_T *v );
-Var_T *lockin_get_adc_data( Var_T *v );
-Var_T *lockin_dac_voltage( Var_T *v );
-Var_T *lockin_sensitivity( Var_T *v );
-Var_T *lockin_time_constant( Var_T *v );
-Var_T *lockin_phase( Var_T *v );
-Var_T *lockin_ref_freq( Var_T *v );
-Var_T *lockin_harmonic( Var_T *v );
-Var_T *lockin_ref_mode( Var_T *v );
-Var_T *lockin_ref_level( Var_T *v );
-Var_T *lockin_auto_setup( Var_T *v );
-Var_T *lockin_get_sample_time( Var_T *v );
-Var_T *lockin_auto_acquisition( Var_T *v );
-Var_T *lockin_lock_keyboard( Var_T *v );
-Var_T *lockin_command( Var_T *v );
+Var_T *lockin_name(             Var_T * v );
+Var_T *lockin_get_data(         Var_T * v );
+Var_T *lockin_get_adc_data(     Var_T * v );
+Var_T *lockin_dac_voltage(      Var_T * v );
+Var_T *lockin_sensitivity(      Var_T * v );
+Var_T *lockin_time_constant(    Var_T * v );
+Var_T *lockin_phase(            Var_T * v );
+Var_T *lockin_ref_freq(         Var_T * v );
+Var_T *lockin_harmonic(         Var_T * v );
+Var_T *lockin_ref_mode(         Var_T * v );
+Var_T *lockin_ref_level(        Var_T * v );
+Var_T *lockin_auto_setup(       Var_T * v );
+Var_T *lockin_get_sample_time(  Var_T * v );
+Var_T *lockin_auto_acquisition( Var_T * v );
+Var_T *lockin_lock_keyboard(    Var_T * v );
+Var_T *lockin_command(          Var_T * v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -193,37 +193,71 @@ static long dsp_to_symbol[ ] = { DSP_CH_X, DSP_CH_R, DSP_CH_Xnoise,
 
 /* Declaration of all functions used only within this file */
 
-static bool sr810_init( const char *name );
+static bool sr810_init( const char * name );
+
 static double sr810_get_data( void );
-static void sr810_get_xy_data( double *data, long *channels,
-							   int num_channels );
-static void sr810_get_xy_auto_data( double *data, long *channels,
-									int num_channels );
+
+static void sr810_get_xy_data( double * data,
+							   long *   channels,
+							   int      num_channels );
+
+static void sr810_get_xy_auto_data( double * data,
+									long *   channels,
+									int      num_channels );
+
 static double sr810_get_adc_data( long channel );
-static double sr810_set_dac_data( long channel, double voltage );
+
+static double sr810_set_dac_data( long   channel,
+								  double voltage );
+
 static double sr810_get_dac_data( long port );
+
 static double sr810_get_sens( void );
+
 static void sr810_set_sens( int sens_index );
+
 static double sr810_get_tc( void );
+
 static void sr810_set_tc( int tc_index );
+
 static double sr810_get_phase( void );
+
 static double sr810_set_phase( double phase );
+
 static double sr810_get_mod_freq( void );
+
 static double sr810_set_mod_freq( double freq );
+
 static long sr810_get_mod_mode( void );
+
 static long sr810_get_harmonic( void );
+
 static long sr810_set_harmonic( long harmonic );
+
 static double sr810_get_mod_level( void );
+
 static double sr810_set_mod_level( double level );
+
 static long sr810_set_sample_time( long st_index );
+
 static long sr810_get_sample_time( void );
+
 static void sr810_set_display_channel( long type );
+
 static long sr810_get_display_channel( void );
+
 static void sr810_auto( int flag );
+
 static double sr810_get_auto_data( int type );
+
 static void sr810_lock_state( bool lock );
-static bool sr810_command( const char *cmd );
-static bool sr810_talk( const char *cmd, char *reply, long *length );
+
+static bool sr810_command( const char * cmd );
+
+static bool sr810_talk( const char * cmd,
+						char *       reply,
+						long *       length );
+
 static void sr810_failure( void );
 
 
@@ -336,7 +370,7 @@ int sr810_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_name( Var_T *v UNUSED_ARG )
+Var_T *lockin_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -362,7 +396,7 @@ Var_T *lockin_name( Var_T *v UNUSED_ARG )
  * just large enough to hold all requested data.
  *---------------------------------------------------------------------*/
 
-Var_T *lockin_get_data( Var_T *v )
+Var_T *lockin_get_data( Var_T * v )
 {
 	double data[ MAX_DATA_AT_ONCE ] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	long channels[ MAX_DATA_AT_ONCE ];
@@ -451,7 +485,7 @@ Var_T *lockin_get_data( Var_T *v )
  * Returned values are in the range between -10.5 V and +10.5 V.
  *---------------------------------------------------------------*/
 
-Var_T *lockin_get_adc_data( Var_T *v )
+Var_T *lockin_get_adc_data( Var_T * v )
 {
 	long port;
 
@@ -481,7 +515,7 @@ Var_T *lockin_get_adc_data( Var_T *v )
  * returned (which is initially set to 0 V).
  *-----------------------------------------------------------*/
 
-Var_T *lockin_dac_voltage( Var_T *v )
+Var_T *lockin_dac_voltage( Var_T * v )
 {
 	long port;
 	double voltage;
@@ -541,7 +575,7 @@ Var_T *lockin_dac_voltage( Var_T *v )
  * is set to the argument.
  *-------------------------------------------------------------------------*/
 
-Var_T *lockin_sensitivity( Var_T *v )
+Var_T *lockin_sensitivity( Var_T * v )
 {
 	double sens;
 	int sens_index = UNDEF_SENS_INDEX;
@@ -654,7 +688,7 @@ Var_T *lockin_sensitivity( Var_T *v )
  * with an argumet the time constant is set to this value.
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_time_constant( Var_T *v )
+Var_T *lockin_time_constant( Var_T * v )
 {
 	double tc;
 	int tc_index = UNDEF_TC_INDEX;
@@ -765,7 +799,7 @@ Var_T *lockin_time_constant( Var_T *v )
  * and the value the phase is set to is returned.
  *-----------------------------------------------------------------*/
 
-Var_T *lockin_phase( Var_T *v )
+Var_T *lockin_phase( Var_T * v )
 {
 	double phase;
 
@@ -820,7 +854,7 @@ Var_T *lockin_phase( Var_T *v )
  * Sets or returns the harmonic to be used
  *-----------------------------------------*/
 
-Var_T *lockin_harmonic( Var_T *v )
+Var_T *lockin_harmonic( Var_T * v )
 {
 	long harm;
 	double freq;
@@ -874,7 +908,7 @@ Var_T *lockin_harmonic( Var_T *v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T *lockin_ref_mode( Var_T *v UNUSED_ARG )
+Var_T *lockin_ref_mode( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( INT_VAR, SR810_TEST_MOD_MODE );
@@ -886,7 +920,7 @@ Var_T *lockin_ref_mode( Var_T *v UNUSED_ARG )
  * Sets or returns the lock-in modulation frequency
  *--------------------------------------------------*/
 
-Var_T *lockin_ref_freq( Var_T *v )
+Var_T *lockin_ref_freq( Var_T * v )
 {
 	long harm;
 	double freq;
@@ -954,7 +988,7 @@ Var_T *lockin_ref_freq( Var_T *v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T *lockin_ref_level( Var_T *v )
+Var_T *lockin_ref_level( Var_T * v )
 {
 	double level;
 
@@ -1000,7 +1034,7 @@ Var_T *lockin_ref_level( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *lockin_auto_setup( Var_T *v )
+Var_T *lockin_auto_setup( Var_T * v )
 {
 	double st;
 	double tc;
@@ -1168,7 +1202,7 @@ Var_T *lockin_auto_setup( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *lockin_get_sample_time( Var_T *v UNUSED_ARG )
+Var_T *lockin_get_sample_time( Var_T * v  UNUSED_ARG )
 {
 	long st_index;
 	double tc;
@@ -1233,7 +1267,7 @@ Var_T *lockin_auto_acquisition( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *lockin_lock_keyboard( Var_T *v )
+Var_T *lockin_lock_keyboard( Var_T * v )
 {
 	bool lock;
 
@@ -1256,7 +1290,7 @@ Var_T *lockin_lock_keyboard( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_command( Var_T *v )
+Var_T *lockin_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -1295,7 +1329,7 @@ Var_T *lockin_command( Var_T *v )
  * Function initialises the lock-in amplifier at the start of the experiment
  *---------------------------------------------------------------------------*/
 
-static bool sr810_init( const char *name )
+static bool sr810_init( const char * name )
 {
 	char buffer[ 20 ];
 	long length = 20;
@@ -1415,7 +1449,9 @@ static double sr810_get_data( void )
  * lockin_data() returns the measured voltage of the lock-in.
  *------------------------------------------------------------*/
 
-static void sr810_get_xy_data( double *data, long *channels, int num_channels )
+static void sr810_get_xy_data( double * data,
+							   long *   channels,
+							   int      num_channels )
 {
 	char cmd[ 100 ] = "SNAP?";
 	char buffer[ 200 ];
@@ -1475,8 +1511,9 @@ static void sr810_get_xy_data( double *data, long *channels, int num_channels )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static void sr810_get_xy_auto_data( double *data, long *channels,
-									int num_channels )
+static void sr810_get_xy_auto_data( double * data,
+									long *   channels,
+									int      num_channels )
 {
 	int i, nk;
 	bool need_auto_data = UNSET;
@@ -1562,7 +1599,8 @@ static double sr810_get_adc_data( long channel )
  * -> Voltage to be set (-10.5 V - +10.5 V)
  *------------------------------------------------------*/
 
-static double sr810_set_dac_data( long port, double voltage )
+static double sr810_set_dac_data( long   port,
+								  double voltage )
 {
 	char buffer [ 40 ];
 
@@ -2110,7 +2148,7 @@ static void sr810_lock_state( bool lock )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool sr810_command( const char *cmd )
+static bool sr810_command( const char * cmd )
 {
 	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE )
 		sr810_failure( );
@@ -2121,7 +2159,9 @@ static bool sr810_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool sr810_talk( const char *cmd, char *reply, long *length )
+static bool sr810_talk( const char * cmd,
+						char *       reply,
+						long *       length )
 {
 	if ( gpib_write( sr810.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( sr810.device, reply, length ) == FAILURE )

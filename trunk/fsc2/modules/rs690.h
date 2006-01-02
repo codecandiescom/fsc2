@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -337,74 +337,122 @@ extern RS690_T rs690;
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
-int rs690_init_hook( void );
-int rs690_test_hook( void );
+int rs690_init_hook(        void );
+int rs690_test_hook(        void );
 int rs690_end_of_test_hook( void );
-int rs690_exp_hook( void );
-int rs690_end_of_exp_hook( void );
-void rs690_exit_hook( void );
+int rs690_exp_hook(         void );
+int rs690_end_of_exp_hook(  void );
+void rs690_exit_hook(       void );
 
 
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_automatic_shape_pulses( Var_T *v );
-Var_T *pulser_automatic_twt_pulses( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v );
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v );
-Var_T *pulser_minimum_twt_pulse_distance( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_next_phase( Var_T *v );
-Var_T *pulser_phase_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_command( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
+Var_T *pulser_name(                              Var_T * /* v */ );
+Var_T *pulser_automatic_shape_pulses(            Var_T * /* v */ );
+Var_T *pulser_automatic_twt_pulses(              Var_T * /* v */ );
+Var_T *pulser_show_pulses(                       Var_T * /* v */ );
+Var_T *pulser_dump_pulses(                       Var_T * /* v */ );
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
+Var_T *pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
+Var_T *pulser_state(                             Var_T * /* v */ );
+Var_T *pulser_channel_state(                     Var_T * /* v */ );
+Var_T *pulser_update(                            Var_T * /* v */ );
+Var_T *pulser_shift(                             Var_T * /* v */ );
+Var_T *pulser_increment(                         Var_T * /* v */ );
+Var_T *pulser_reset(                             Var_T * /* v */ );
+Var_T *pulser_pulse_reset(                       Var_T * /* v */ );
+Var_T *pulser_next_phase(                        Var_T * /* v */ );
+Var_T *pulser_phase_reset(                       Var_T * /* v */ );
+Var_T *pulser_lock_keyboard(                     Var_T * /* v */ );
+Var_T *pulser_command(                           Var_T * /* v */ );
+Var_T *pulser_maximum_pattern_length(            Var_T * /* v */ );
 
 
 /* Here follow the functions from rs690_gen.c */
 
-bool rs690_store_timebase( double timebase );
-bool rs690_store_timebase_level( int level_type );
-bool rs690_assign_channel_to_function( int function, long channel );
-bool rs690_set_function_delay( int function, double delay );
-bool rs690_set_trigger_mode( int mode );
-bool rs690_set_trig_in_slope( int slope );
-bool rs690_set_trig_in_level_type( double type );
-bool rs690_set_repeat_time( double rep_time );
-bool rs690_invert_function( int function );
-bool rs690_set_phase_reference( int phase, int function );
-bool rs690_phase_setup_prep( int func, int type, int dummy, long channel );
-bool rs690_phase_setup( int func );
+bool rs690_store_timebase( double /* timebase */ );
+
+bool rs690_store_timebase_level( int /* level_type */ );
+
+bool rs690_assign_channel_to_function( int  /* function */,
+									   long /* channel  */ );
+
+bool rs690_set_function_delay( int    /* function */,
+							   double /* delay    */ );
+
+bool rs690_set_trigger_mode( int /* mode */ );
+
+bool rs690_set_trig_in_slope( int /* slope */ );
+
+bool rs690_set_trig_in_level_type( double /* type */ );
+
+bool rs690_set_repeat_time( double /* rep_time */ );
+
+bool rs690_invert_function( int /* function */ );
+
+bool rs690_set_phase_reference( int /* phase    */,
+								int /* function */ );
+
+bool rs690_phase_setup_prep( int  /* func    */,
+							 int  /* type    */,
+							 int  /* dummy   */,
+							 long /* channel */ );
+
+bool rs690_phase_setup( int /* func */ );
+
 bool rs690_keep_all( void );
 
 
 /* These are the functions from rs690_pulse.c */
 
-bool rs690_new_pulse( long pnum );
-bool rs690_set_pulse_function( long pnum, int function );
-bool rs690_set_pulse_position( long pnum, double p_time );
-bool rs690_set_pulse_length( long pnum, double p_time );
-bool rs690_set_pulse_position_change( long pnum, double p_time );
-bool rs690_set_pulse_length_change( long pnum, double p_time );
-bool rs690_set_pulse_phase_cycle( long pnum, long cycle );
+bool rs690_new_pulse( long /* pnum */ );
 
-bool rs690_get_pulse_function( long pnum, int *function );
-bool rs690_get_pulse_position( long pnum, double *p_time );
-bool rs690_get_pulse_length( long pnum, double *p_time );
-bool rs690_get_pulse_position_change( long pnum, double *p_time );
-bool rs690_get_pulse_length_change( long pnum, double *p_time );
-bool rs690_get_pulse_phase_cycle( long pnum, long *cycle );
+bool rs690_set_pulse_function( long /* pnum     */,
+							   int  /* function */ );
 
-bool rs690_change_pulse_position( long pnum, double p_time );
-bool rs690_change_pulse_length( long pnum, double tp_ime );
-bool rs690_change_pulse_position_change( long pnum, double p_time );
-bool rs690_change_pulse_length_change( long pnum, double p_time );
+bool rs690_set_pulse_position( long   /* pnum   */,
+							   double /* p_time */ );
+
+bool rs690_set_pulse_length( long   /* pnum   */,
+							 double /* p_time */ );
+
+bool rs690_set_pulse_position_change( long   /* pnum   */,
+									  double /* p_time */ );
+
+bool rs690_set_pulse_length_change( long   /* pnum   */,
+									double /* p_time */ );
+
+bool rs690_set_pulse_phase_cycle( long /* pnum  */,
+								  long /* cycle */ );
+
+bool rs690_get_pulse_function( long  /* pnum     */,
+							   int * /* function */ );
+
+bool rs690_get_pulse_position( long     /* pnum   */,
+							   double * /* p_time */ );
+
+bool rs690_get_pulse_length( long     /* pnum   */,
+							 double * /* p_time */ );
+
+bool rs690_get_pulse_position_change( long     /* pnum   */,
+									  double * /* p_time */ );
+
+bool rs690_get_pulse_length_change( long     /* pnum   */,
+									double * /* p_time */ );
+
+bool rs690_get_pulse_phase_cycle( long   /* pnum  */,
+								  long * /* cycle */ );
+
+bool rs690_change_pulse_position( long   /* pnum   */,
+								  double /* p_time */ );
+
+bool rs690_change_pulse_length( long   /* pnum   */,
+								double /* tp_ime */ );
+
+bool rs690_change_pulse_position_change( long   /* pnum   */,
+										 double /* p_time */ );
+
+bool rs690_change_pulse_length_change( long   /* pnum   */,
+									   double /* p_time */ );
 
 
 /* Functions from rs690_init.c */
@@ -414,44 +462,73 @@ void rs690_init_setup( void );
 
 /* Functions from rs690_util.c */
 
-Ticks rs690_double2ticks( double p_time );
-double rs690_ticks2double( Ticks ticks );
-Pulse_T *rs690_get_pulse( long pnum );
-const char *rs690_ptime( double p_time );
-const char *rs690_pticks( Ticks ticks );
-int rs690_pulse_compare( const void *A, const void *B );
+Ticks rs690_double2ticks( double /* p_time */ );
+
+double rs690_ticks2double( Ticks /* ticks */ );
+
+Pulse_T *rs690_get_pulse( long /* pnum */ );
+
+const char *rs690_ptime( double /* p_time */ );
+
+const char *rs690_pticks( Ticks /* ticks */ );
+
+int rs690_pulse_compare( const void * /* A */,
+						 const void * /* B */ );
+
 void rs690_show_pulses( void );
+
 void rs690_dump_pulses( void );
-void rs690_dump_channels( FILE *fp );
+
+void rs690_dump_channels( FILE * /* fp */ );
+
 void rs690_duty_check( void );
-Ticks rs690_calc_max_length( Function_T *f );
-char *rs690_num_2_channel( int num );
-bool rs690_set_max_seq_len( double seq_len );
+
+Ticks rs690_calc_max_length( Function_T * /* f */ );
+
+char *rs690_num_2_channel( int /* num */ );
+
+bool rs690_set_max_seq_len( double /* seq_len */ );
 
 
 /* Functions fron rs690_run.c */
 
 bool rs690_do_update( void );
-void rs690_do_checks( Function_T *f );
-void rs690_set_pulses( Function_T *f );
+
+void rs690_do_checks( Function_T * /* f */ );
+
+void rs690_set_pulses( Function_T * /* f */ );
+
 void rs690_full_reset( void );
-Pulse_T *rs690_delete_pulse( Pulse_T *p, bool warn );
-void rs690_shape_padding_check_1( Channel_T *ch );
+
+Pulse_T *rs690_delete_pulse( Pulse_T * /* p    */,
+							 bool      /* warn */ );
+
+void rs690_shape_padding_check_1( Channel_T * /* ch */ );
+
 void rs690_shape_padding_check_2( void );
-void rs690_twt_padding_check( Channel_T *ch );
+
+void rs690_twt_padding_check( Channel_T * /* ch */ );
+
 void rs690_seq_length_check( void );
-void rs690_channel_setup( bool flag );
+
+void rs690_channel_setup( bool /* flag */ );
+
 void rs690_cleanup_fs( void );
 
 
 /* Functions from rs690_gpib.c */
 
-bool rs690_init( const char *name );
-bool rs690_run( bool state );
-bool rs690_lock_state( bool lock );
+bool rs690_init( const char * /* name */ );
+
+bool rs690_run( bool /* state */ );
+
+bool rs690_lock_state( bool /* lock */ );
+
 bool rs690_set_channels( void );
-bool rs690_command( const char *cmd );
-long rs690_ch_to_num( long channel );
+
+bool rs690_command( const char * /* cmd */ );
+
+long rs690_ch_to_num( long /* channel */ );
 
 
 #endif /* ! RS690_HEADER */

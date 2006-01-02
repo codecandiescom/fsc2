@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -39,20 +39,32 @@ typedef struct {
 } PCI_MIO_16E_1_AI_TRIG_ARGS;
 
 
-static void pci_mio_16e_1_ai_get_trigger_args( Var_T *v );
-static int pci_mio_16e_1_ai_get_trigger_method( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_T_conv( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T *v );
-static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T *v );
-static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
-												  const char *snippet );
-static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
-										   NI_DAQ_POLARITY *pol );
+static void pci_mio_16e_1_ai_get_trigger_args( Var_T * v );
+
+static int pci_mio_16e_1_ai_get_trigger_method( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_T_conv( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T * v );
+
+static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T * v );
+
+static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char * tname,
+												  const char * snippet );
+
+static bool pci_mio_16e_1_ai_get_polarity( const char *      pname,
+										   NI_DAQ_POLARITY * pol );
+
 static void pci_mio_16e_1_ai_check_T_scan( double t );
-static void pci_mio_16e_1_ai_check_T_conv( double t, double t_scan );
+
+static void pci_mio_16e_1_ai_check_T_conv( double t,
+										   double t_scan );
 
 static PCI_MIO_16E_1_AI_TRIG_ARGS trig;
 
@@ -84,7 +96,7 @@ static PCI_MIO_16E_1_AI_TRIG_ARGS trig;
  *              polarity setting of the channel!
  *---------------------------------------------------------------------*/
 
-Var_T *daq_ai_channel_setup( Var_T *v )
+Var_T *daq_ai_channel_setup( Var_T * v )
 {
 	int channel;
 	double range;
@@ -459,7 +471,7 @@ Var_T *daq_ai_channel_setup( Var_T *v )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var_T *daq_ai_acq_setup( Var_T *v )
+Var_T *daq_ai_acq_setup( Var_T * v )
 {
 	long num_scans;
 	int ret;
@@ -556,7 +568,7 @@ Var_T *daq_ai_acq_setup( Var_T *v )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var_T *daq_ai_start_acquisition( Var_T *v UNUSED_ARG )
+Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
 {
 	int ret;
 
@@ -613,7 +625,7 @@ Var_T *daq_ai_start_acquisition( Var_T *v UNUSED_ARG )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-Var_T *daq_ai_get_curve( Var_T *v UNUSED_ARG )
+Var_T *daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 {
 	size_t i, j;
 	Var_T *nv = NULL;
@@ -726,7 +738,7 @@ Var_T *daq_ai_get_curve( Var_T *v UNUSED_ARG )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void pci_mio_16e_1_ai_get_trigger_args( Var_T *v )
+static void pci_mio_16e_1_ai_get_trigger_args( Var_T * v )
 {
 	int method;
 
@@ -816,7 +828,7 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static int pci_mio_16e_1_ai_get_trigger_method( Var_T *v )
+static int pci_mio_16e_1_ai_get_trigger_method( Var_T * v )
 {
 	const char *methods[ ] = { "TRIGGER_NONE", "TRIG_NONE",
 							   "TRIGGER_CONV", "TRIG_CONV",
@@ -853,7 +865,7 @@ static int pci_mio_16e_1_ai_get_trigger_method( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T * v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -887,7 +899,7 @@ static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T * v )
 {
 	double t;
 
@@ -909,7 +921,7 @@ static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T * v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -944,13 +956,12 @@ static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_T_conv( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_T_conv( Var_T * v )
 {
-	double t;
-
 	if ( v != NULL )
 	{
-		t = get_double( v, "conversion time" );
+		double t = get_double( v, "conversion time" );
+
 		t = pci_mio_16e_1_check_time( t, "conversion time" );
 		pci_mio_16e_1_ai_check_T_conv( t, trig.scan_duration );
 		trig.conv_duration = t;
@@ -966,7 +977,7 @@ static Var_T *pci_mio_16e_1_ai_get_T_conv( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T * v )
 {
 	NI_DAQ_POLARITY pol;
 
@@ -1001,7 +1012,7 @@ static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T *v )
+static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T * v )
 {
 	double t;
 
@@ -1022,8 +1033,8 @@ static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T *v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
-												  const char *snippet )
+static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char * tname,
+												  const char * snippet )
 {
 	NI_DAQ_INPUT pfi = NI_DAQ_PFI0;
 	int i;
@@ -1049,8 +1060,8 @@ static NI_DAQ_INPUT pci_mio_16e_1_ai_get_trigger( const char *tname,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static bool pci_mio_16e_1_ai_get_polarity( const char *pname,
-										   NI_DAQ_POLARITY *pol )
+static bool pci_mio_16e_1_ai_get_polarity( const char *      pname,
+										   NI_DAQ_POLARITY * pol )
 {
 	const char *p[ ] = { "POS", "POSITIVE", "NEG", "NEGATIVE" };
 	size_t i;
@@ -1091,7 +1102,8 @@ static void pci_mio_16e_1_ai_check_T_scan( double t )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void pci_mio_16e_1_ai_check_T_conv( double t, double t_scan )
+static void pci_mio_16e_1_ai_check_T_conv( double t,
+										   double t_scan )
 {
 	if ( t == 0.0 )
 		t = pci_mio_16e_1.ai_state.ampl_switch_needed ?

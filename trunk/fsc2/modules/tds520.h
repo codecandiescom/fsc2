@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -212,77 +212,129 @@ int tds520_end_of_exp_hook( void );
 void tds520_exit_hook( void );
 
 
-Var_T *digitizer_name( Var_T *v );
-Var_T *digitizer_define_window( Var_T *v );
-Var_T *digitizer_change_window( Var_T *v );
-Var_T *digitizer_window_position( Var_T *v );
-Var_T *digitizer_window_width( Var_T *v );
-Var_T *digitizer_display_channel( Var_T *v );
-Var_T *digitizer_timebase( Var_T *v );
-Var_T *digitizer_time_per_point( Var_T *v );
-Var_T *digitizer_sensitivity( Var_T *v );
-Var_T *digitizer_num_averages( Var_T *v );
-Var_T *digitizer_record_length( Var_T *v );
-Var_T *digitizer_trigger_position( Var_T *v );
-Var_T *digitizer_trigger_delay( Var_T *v );
-Var_T *digitizer_meas_channel_ok( Var_T *v );
-Var_T *digitizer_trigger_channel( Var_T *v );
-Var_T *digitizer_start_acquisition( Var_T *v );
-Var_T *digitizer_get_area( Var_T *v );
-Var_T *digitizer_get_area_fast( Var_T *v );
-Var_T *digitizer_get_curve( Var_T *v );
-Var_T *digitizer_get_curve_fast( Var_T *v );
-Var_T *digitizer_get_amplitude( Var_T *v );
-Var_T *digitizer_get_amplitude_fast( Var_T *v );
-Var_T *digitizer_run( Var_T *v );
-Var_T *digitizer_lock_keyboard( Var_T *v );
-Var_T *digitizer_copy_curve( Var_T *v );
-Var_T *digitizer_command( Var_T *v );
+Var_T *digitizer_name(               Var_T * /* v */ );
+Var_T *digitizer_define_window(      Var_T * /* v */ );
+Var_T *digitizer_change_window(      Var_T * /* v */ );
+Var_T *digitizer_window_position(    Var_T * /* v */ );
+Var_T *digitizer_window_width(       Var_T * /* v */ );
+Var_T *digitizer_display_channel(    Var_T * /* v */ );
+Var_T *digitizer_timebase(           Var_T * /* v */ );
+Var_T *digitizer_time_per_point(     Var_T * /* v */ );
+Var_T *digitizer_sensitivity(        Var_T * /* v */ );
+Var_T *digitizer_num_averages(       Var_T * /* v */ );
+Var_T *digitizer_record_length(      Var_T * /* v */ );
+Var_T *digitizer_trigger_position(   Var_T * /* v */ );
+Var_T *digitizer_trigger_delay(      Var_T * /* v */ );
+Var_T *digitizer_meas_channel_ok(    Var_T * /* v */ );
+Var_T *digitizer_trigger_channel(    Var_T * /* v */ );
+Var_T *digitizer_start_acquisition(  Var_T * /* v */ );
+Var_T *digitizer_get_area(           Var_T * /* v */ );
+Var_T *digitizer_get_area_fast(      Var_T * /* v */ );
+Var_T *digitizer_get_curve(          Var_T * /* v */ );
+Var_T *digitizer_get_curve_fast(     Var_T * /* v */ );
+Var_T *digitizer_get_amplitude(      Var_T * /* v */ );
+Var_T *digitizer_get_amplitude_fast( Var_T * /* v */ );
+Var_T *digitizer_run(                Var_T * /* v */ );
+Var_T *digitizer_lock_keyboard(      Var_T * /* v */ );
+Var_T *digitizer_copy_curve(         Var_T * /* v */ );
+Var_T *digitizer_command(            Var_T * /* v */ );
 
 
 /* Declaration of internally used functions */
 
-const char *tds520_ptime( double p_time );
-void tds520_delete_windows( TDS520_T *s );
+const char *tds520_ptime( double /* p_time */ );
+
+void tds520_delete_windows( TDS520_T * /* s */ );
+
 void tds520_do_pre_exp_checks( void );
-void tds520_window_checks( Window_T *w );
-long tds520_translate_channel( int dir, long channel, bool flag );
-void tds520_store_state( TDS520_T *dest, TDS520_T *src );
-void tds520_state_check( double timebase, long rec_len, double trig_pos );
-Window_T *tds520_get_window_by_number( long win_number );
+
+void tds520_window_checks( Window_T * /* w */ );
+
+long tds520_translate_channel( int  /* dir     */,
+							   long /* channel */,
+							   bool /* flag    */);
+
+void tds520_store_state( TDS520_T * /* dest */,
+						 TDS520_T * /* src  */ );
+
+void tds520_state_check( double /* timebase */,
+						 long   /* rec_len  */,
+						 double /* trig_pos */ );
+
+Window_T *tds520_get_window_by_number( long /* win_number */ );
 
 
-bool tds520_init( const char *name );
+bool tds520_init( const char * /* name */ );
+
 double tds520_get_timebase( void );
-void tds520_set_timebase( double timebase);
-void tds520_set_record_length( long num_points );
+
+void tds520_set_timebase( double /* timebase */);
+
+void tds520_set_record_length( long /* num_points */ );
+
 long tds520_get_record_length( void );
-void tds520_set_trigger_pos( double pos );
+
+void tds520_set_trigger_pos( double /* pos */ );
+
 double tds520_get_trigger_pos( void );
+
 long tds520_get_num_avg( void );
-void tds520_set_num_avg( long num_avg );
+
+void tds520_set_num_avg( long /* num_avg */ );
+
 int tds520_get_acq_mode( void );
-double tds520_get_cursor_position( int cur_no );
+
+double tds520_get_cursor_position( int /* cur_no */ );
+
 double tds520_get_cursor_distance( void );
-void tds520_set_trigger_channel( int channel );
+
+void tds520_set_trigger_channel( int /* channel */ );
+
 int tds520_get_trigger_channel( void );
+
 void tds520_gpib_failure( void );
+
 void tds520_clear_SESR( void );
+
 void tds520_finished( void );
-void tds520_set_cursor( int cur_num, double pos );
-bool tds520_display_channel_state( int channel );
-void tds520_display_channel( int channel, bool on_flag );
-double tds520_get_sens( int channel );
-void tds520_set_sens( int channel, double val );
+
+void tds520_set_cursor( int    /* cur_num */,
+						double /* pos     */ );
+
+bool tds520_display_channel_state( int /* channel */ );
+
+void tds520_display_channel( int  /* channel */,
+							 bool /* on_flag */ );
+
+double tds520_get_sens( int /* channel */ );
+
+void tds520_set_sens( int    /* channel */,
+					  double /* val     */ );
+
 void tds520_start_acquisition( void );
-double tds520_get_area( int channel, Window_T *w, bool use_cursor );
-void tds520_get_curve( int channel, Window_T *w, double **data, long *length,
-						bool use_cursor );
-double tds520_get_amplitude( int channel, Window_T *w, bool use_cursor );
+
+double tds520_get_area( int        /* channel    */,
+						Window_T * /* w          */,
+						bool       /* use_cursor */ );
+
+void tds520_get_curve( int        /* channel    */,
+					   Window_T * /* w          */,
+					   double **  /* data       */,
+					   long *     /* length     */,
+					   bool       /* use_cursor */ );
+
+double tds520_get_amplitude( int        /* channel    */,
+							 Window_T * /* w          */,
+							 bool       /* use_cursor */);
+
 void tds520_free_running( void );
-void tds520_lock_state( bool lock );
-void tds520_copy_curve( int src, int dest );
-bool tds520_command( const char *cmd );
+
+void tds520_lock_state( bool /* lock */ );
+
+void tds520_copy_curve( int /* src  */,
+						int /* dest */ );
+
+bool tds520_command( const char * /* cmd */ );
 
 
 #endif /* ! TDS520_HEADER */
