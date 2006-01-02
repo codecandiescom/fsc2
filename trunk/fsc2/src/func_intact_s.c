@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,19 +28,22 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_screate_child( Var_T *v, Iobject_Type_T, double start_val,
-							   double end_val, double step );
-static void f_sdelete_child( Var_T *v );
-static void f_sdelete_parent( Var_T *v );
-static Var_T *f_svalue_child( Var_T *v );
-static Var_T *f_schanged_child( Var_T *v );
+static Var_T *f_screate_child( Var_T *        v,
+							   Iobject_Type_T type,
+							   double         start_val,
+							   double         end_val,
+							   double         step );
+static void f_sdelete_child( Var_T * v );
+static void f_sdelete_parent( Var_T * v );
+static Var_T *f_svalue_child( Var_T * v );
+static Var_T *f_schanged_child( Var_T * v );
 
 
 /*----------------------------------------------------*
  * Function for appending a new slider to the toolbox
  *----------------------------------------------------*/
 
-Var_T *f_screate( Var_T *var )
+Var_T *f_screate( Var_T * var )
 {
 	Var_T *v = var;
 	Iobject_T *new_io = NULL;
@@ -259,8 +262,11 @@ Var_T *f_screate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_screate_child( Var_T *v, Iobject_Type_T type, double start_val,
-							   double end_val, double step )
+static Var_T *f_screate_child( Var_T *        v,
+							   Iobject_Type_T type,
+							   double         start_val,
+							   double         end_val,
+							   double         step )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -368,7 +374,7 @@ static Var_T *f_screate_child( Var_T *v, Iobject_Type_T type, double start_val,
  * Deletes one or more sliders, parameter(s) are one or more slider IDs.
  *-----------------------------------------------------------------------*/
 
-Var_T *f_sdelete( Var_T *v )
+Var_T *f_sdelete( Var_T * v )
 {
 	/* At least one slider ID is needed... */
 
@@ -408,7 +414,7 @@ Var_T *f_sdelete( Var_T *v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void f_sdelete_child( Var_T *v )
+static void f_sdelete_child( Var_T * v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -459,7 +465,7 @@ static void f_sdelete_child( Var_T *v )
  * process, which actually removes the slider.
  *---------------------------------------------------------*/
 
-static void f_sdelete_parent( Var_T *v )
+static void f_sdelete_parent( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -522,7 +528,7 @@ static void f_sdelete_parent( Var_T *v )
  * Function for quering or setting the position of a slider
  *----------------------------------------------------------*/
 
-Var_T *f_svalue( Var_T *v )
+Var_T *f_svalue( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -608,7 +614,7 @@ Var_T *f_svalue( Var_T *v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *f_svalue_child( Var_T *v )
+static Var_T *f_svalue_child( Var_T * v )
 {
 	long ID;
 	long state = 0;
@@ -692,7 +698,7 @@ static Var_T *f_svalue_child( Var_T *v )
  * Function for testing if the position of a slider changed
  *----------------------------------------------------------*/
 
-Var_T *f_schanged( Var_T *v )
+Var_T *f_schanged( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -739,7 +745,7 @@ Var_T *f_schanged( Var_T *v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *f_schanged_child( Var_T *v )
+static Var_T *f_schanged_child( Var_T * v )
 {
 	long ID;
 	char *buffer, *pos;

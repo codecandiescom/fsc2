@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,7 @@ extern char *varstext;         /* defined in vars_lexer.l */
 
 /* locally used functions */
 
-static void varserror( const char *s );
+static void varserror( const char * s );
 
 static ssize_t Max_level;
 static ssize_t Cur_level;
@@ -330,7 +330,7 @@ strs:    STR_TOKEN                 { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void varserror ( const char *s UNUSED_ARG )
+static void varserror( const char * s  UNUSED_ARG )
 {
 	if ( *varstext == '\0' )
 		print( FATAL, "Unexpected end of file in VARIABLES section.\n");

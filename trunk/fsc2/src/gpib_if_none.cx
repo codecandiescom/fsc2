@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,10 +31,9 @@ char gpib_error_msg[ 1024 ];      /* global for GPIB error messages */
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_init( const char *log_file_name, int log_level )
+int gpib_init( const char * log_file_name  UNUSED_ARG,
+			   int          log_level      UNUSED_ARG )
 {
-	log_file_name = log_file_name;
-	log_level = log_level;
 	strcpy( gpib_error_msg, "No GPIB support compiled into fsc2." );
 	return FAILURE;
 }
@@ -49,10 +48,9 @@ int gpib_shutdown( void )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_init_device( const char *device_name, int *dev )
+int gpib_init_device( const char * device_name  UNUSED_ARG,
+					  int *        dev          UNUSED_ARG )
 {
-	device_name = device_name;
-	dev = dev;
 	return FAILURE;
 }
 
@@ -60,10 +58,9 @@ int gpib_init_device( const char *device_name, int *dev )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_timeout( int device, int period )
+int gpib_timeout( int device  UNUSED_ARG,
+				  int period  UNUSED_ARG )
 {
-	device = device;
-	period = period;
 	return FAILURE;
 }
 
@@ -71,9 +68,8 @@ int gpib_timeout( int device, int period )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_clear_device( int device )
+int gpib_clear_device( int device  UNUSED_ARG )
 {
-	device = device;
 	return FAILURE;
 }
 
@@ -81,9 +77,8 @@ int gpib_clear_device( int device )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_local( int device )
+int gpib_local( int device  UNUSED_ARG )
 {
-	device = device;
 	return FAILURE;
 }
 
@@ -91,9 +86,8 @@ int gpib_local( int device )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_llo( int device )
+int gpib_llo( int device  UNUSED_ARG )
 {
-	device = device;
 	return FAILURE;
 }
 
@@ -101,9 +95,8 @@ int gpib_llo( int device )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_trigger( int device )
+int gpib_trigger( int device  UNUSED_ARG )
 {
-	device = device;
 	return FAILURE;
 }
 
@@ -111,11 +104,10 @@ int gpib_trigger( int device )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_write( int device, const char *buffer, long length )
+int gpib_write( int          device  UNUSED_ARG,
+				const char * buffer  UNUSED_ARG,
+				long         length  UNUSED_ARG )
 {
-	device = device;
-	buffer = buffer;
-	length = length;
 	return FAILURE;
 }
 
@@ -123,11 +115,10 @@ int gpib_write( int device, const char *buffer, long length )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_read( int device, char *buffer, long *length )
+int gpib_read( int    device  UNUSED_ARG,
+			   char * buffer  UNUSED_ARG,
+			   long * length  UNUSED_ARG )
 {
-	device = device;
-	buffer = buffer;
-	length = length;
 	return FAILURE;
 }
 
@@ -135,7 +126,8 @@ int gpib_read( int device, char *buffer, long *length )
 /*--------------------------------------*
  *--------------------------------------*/
 
-void gpib_log_message( const char *fmt, ... )
+void gpib_log_message( const char * fmt,
+					   ... )
 {
 	va_list ap;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -313,70 +313,114 @@ extern EP385_T  ep385;
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
-int ep385_init_hook( void );
-int ep385_test_hook( void );
+int ep385_init_hook(        void );
+int ep385_test_hook(        void );
 int ep385_end_of_test_hook( void );
-int ep385_exp_hook( void );
-int ep385_end_of_exp_hook( void );
-void ep385_exit_hook( void );
+int ep385_exp_hook(         void );
+int ep385_end_of_exp_hook(  void );
+void ep385_exit_hook(       void );
 
 
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_automatic_shape_pulses( Var_T *v );
-Var_T *pulser_automatic_twt_pulses( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T *v );
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T *v );
-Var_T *pulser_minimum_twt_pulse_distance( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_next_phase( Var_T *v );
-Var_T *pulser_phase_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_command( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
+Var_T *pulser_name(                              Var_T * /* v */ );
+Var_T *pulser_automatic_shape_pulses(            Var_T * /* v */ );
+Var_T *pulser_automatic_twt_pulses(              Var_T * /* v */ );
+Var_T *pulser_show_pulses(                       Var_T * /* v */ );
+Var_T *pulser_dump_pulses(                       Var_T * /* v */ );
+Var_T *pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
+Var_T *pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
+Var_T *pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
+Var_T *pulser_state(                             Var_T * /* v */ );
+Var_T *pulser_channel_state(                     Var_T * /* v */ );
+Var_T *pulser_update(                            Var_T * /* v */ );
+Var_T *pulser_shift(                             Var_T * /* v */ );
+Var_T *pulser_increment(                         Var_T * /* v */ );
+Var_T *pulser_reset(                             Var_T * /* v */ );
+Var_T *pulser_pulse_reset(                       Var_T * /* v */ );
+Var_T *pulser_next_phase(                        Var_T * /* v */ );
+Var_T *pulser_phase_reset(                       Var_T * /* v */ );
+Var_T *pulser_lock_keyboard(                     Var_T * /* v */ );
+Var_T *pulser_command(                           Var_T * /* v */ );
+Var_T *pulser_maximum_pattern_length(            Var_T * /* v */ );
 
 
 /* Here follow the functions from ep385_gen.c */
 
-bool ep385_store_timebase( double timebase );
-bool ep385_assign_channel_to_function( int function, long channel );
-bool ep385_set_function_delay( int function, double delay );
-bool ep385_set_trigger_mode( int mode );
-bool ep385_set_repeat_time( double rep_time );
-bool ep385_set_phase_reference( int phase, int function );
-bool ep385_phase_setup_prep( int func, int type, int dummy, long channel );
-bool ep385_phase_setup( int func );
+bool ep385_store_timebase( double /* timebase */ );
+
+bool ep385_assign_channel_to_function( int  /* function */,
+									   long /* channel  */ );
+
+bool ep385_set_function_delay( int    /* function */,
+							   double /* delay    */ );
+
+bool ep385_set_trigger_mode( int /* mode */ );
+
+bool ep385_set_repeat_time( double /* rep_time */ );
+
+bool ep385_set_phase_reference( int /* phase    */,
+								int /* function */ );
+
+bool ep385_phase_setup_prep( int  /* func    */,
+							 int  /* type    */,
+							 int  /* dummy   */,
+							 long /* channel */ );
+
+bool ep385_phase_setup( int /* func */ );
+
 bool ep385_keep_all( void );
 
 
 /* These are the functions from ep385_pulse.c */
 
-bool ep385_new_pulse( long pnum );
-bool ep385_set_pulse_function( long pnum, int function );
-bool ep385_set_pulse_position( long pnum, double p_time );
-bool ep385_set_pulse_length( long pnum, double p_time );
-bool ep385_set_pulse_position_change( long pnum, double p_time );
-bool ep385_set_pulse_length_change( long pnum, double p_time );
-bool ep385_set_pulse_phase_cycle( long pnum, long cycle );
+bool ep385_new_pulse( long /* pnum */ );
 
-bool ep385_get_pulse_function( long pnum, int *function );
-bool ep385_get_pulse_position( long pnum, double *p_time );
-bool ep385_get_pulse_length( long pnum, double *p_time );
-bool ep385_get_pulse_position_change( long pnum, double *p_time );
-bool ep385_get_pulse_length_change( long pnum, double *p_time );
-bool ep385_get_pulse_phase_cycle( long pnum, long *cycle );
+bool ep385_set_pulse_function( long /* pnum     */,
+							   int  /* function */ );
 
-bool ep385_change_pulse_position( long pnum, double p_time );
-bool ep385_change_pulse_length( long pnum, double tp_ime );
-bool ep385_change_pulse_position_change( long pnum, double p_time );
-bool ep385_change_pulse_length_change( long pnum, double p_time );
+bool ep385_set_pulse_position( long   /* pnum   */,
+							   double /* p_time */ );
+
+bool ep385_set_pulse_length( long   /* pnum   */,
+							 double /* p_time */ );
+
+bool ep385_set_pulse_position_change( long   /* pnum   */,
+									  double /* p_time */ );
+
+bool ep385_set_pulse_length_change( long   /* pnum   */,
+									double /* p_time */ );
+
+bool ep385_set_pulse_phase_cycle( long /* pnum  */,
+								  long /* cycle */ );
+
+bool ep385_get_pulse_function( long  /* pnum     */,
+							   int * /* function */ );
+
+bool ep385_get_pulse_position( long     /* pnum   */,
+							   double * /* p_time */ );
+
+bool ep385_get_pulse_length( long     /* pnum   */,
+							 double * /* p_time */ );
+
+bool ep385_get_pulse_position_change( long     /* pnum   */,
+									  double * /* p_time */ );
+
+bool ep385_get_pulse_length_change( long     /* pnum   */,
+									double * /* p_time */ );
+
+bool ep385_get_pulse_phase_cycle( long   /* pnum  */,
+								  long * /* cycle */ );
+
+bool ep385_change_pulse_position( long   /* pnum   */,
+								  double /* p_time */ );
+
+bool ep385_change_pulse_length( long   /* pnum   */,
+								double /* tp_ime */ );
+
+bool ep385_change_pulse_position_change( long   /* pnum   */,
+										 double /* p_time */ );
+
+bool ep385_change_pulse_length_change( long   /* pnum   */,
+									   double /* p_time */ );
 
 
 /* Functions from ep385_init.c */
@@ -387,39 +431,64 @@ void ep385_init_setup( void );
 /* Functions from ep385_util.c */
 
 void ep385_timebase_check( void );
-Ticks ep385_double2ticks( double p_time );
-Ticks ep385_double2ticks_simple( double p_time );
-double ep385_ticks2double( Ticks ticks );
-Pulse_T *ep385_get_pulse( long pnum );
-const char *ep385_ptime( double p_time );
-const char *ep385_pticks( Ticks ticks );
-int ep385_pulse_compare( const void *A, const void *B );
+
+Ticks ep385_double2ticks( double /* p_time */ );
+
+Ticks ep385_double2ticks_simple( double /* p_time */ );
+
+double ep385_ticks2double( Ticks /* ticks */ );
+
+Pulse_T *ep385_get_pulse( long /* pnum */ );
+
+const char *ep385_ptime( double /* p_time */ );
+
+const char *ep385_pticks( Ticks /* ticks */ );
+
+int ep385_pulse_compare( const void * /* A */,
+						 const void * /* B */ );
+
 void ep385_show_pulses( void );
+
 void ep385_dump_pulses( void );
-void ep385_dump_channels( FILE *fp );
+
+void ep385_dump_channels( FILE * /* fp */ );
+
 void ep385_duty_check( void );
-Ticks ep385_calc_max_length( Function_T *f );
-bool ep385_set_max_seq_len( double seq_len );
+
+Ticks ep385_calc_max_length( Function_T * /* f */ );
+
+bool ep385_set_max_seq_len( double /* seq_len */ );
 
 
 /* Functions fron ep385_run.c */
 
 bool ep385_do_update( void );
-void ep385_do_checks( Function_T *f );
-void ep385_set_pulses( Function_T *f );
+
+void ep385_do_checks( Function_T * /* f */ );
+
+void ep385_set_pulses( Function_T * /* f */ );
+
 void ep385_full_reset( void );
-Pulse_T *ep385_delete_pulse( Pulse_T *p, bool warn );
-void ep385_shape_padding_check_1( Channel_T *ch );
+
+Pulse_T *ep385_delete_pulse( Pulse_T * /* p    */,
+							 bool      /* warn */ );
+
+void ep385_shape_padding_check_1( Channel_T * /* ch */ );
+
 void ep385_shape_padding_check_2( void );
-void ep385_twt_padding_check( Channel_T *ch );
+
+void ep385_twt_padding_check( Channel_T * /* ch */ );
 
 
 /* Functions from ep385_gpib.c */
 
-bool ep385_init( const char *name );
-bool ep385_run( bool state );
+bool ep385_init( const char * /* name */ );
+
+bool ep385_run( bool /* state */ );
+
 bool ep385_set_channels( void );
-bool ep385_command( const char *cmd );
+
+bool ep385_command( const char * /* cmd */ );
 
 
 #endif /* ! EP385_HEADER */

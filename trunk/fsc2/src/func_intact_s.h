@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var_T *f_screate( Var_T *v );
-Var_T *f_sdelete( Var_T *v );
-Var_T *f_svalue( Var_T *v );
-Var_T *f_schanged( Var_T *v );
+Var_T *f_screate(  Var_T * /* v */ );
+Var_T *f_sdelete(  Var_T * /* v */ );
+Var_T *f_svalue(   Var_T * /* v */ );
+Var_T *f_schanged( Var_T * /* v */ );
 
 
 #endif   /* ! INTERACTIVE_SLIDERS_HEADER */

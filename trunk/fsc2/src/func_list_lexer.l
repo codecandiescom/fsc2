@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -157,7 +157,8 @@ PREP        return PREP_TOKEN;
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-size_t func_list_parse( Func_T **fncts, size_t num_func )
+size_t func_list_parse( Func_T ** fncts,
+						size_t    num_func )
 {
 	static bool is_restart = UNSET;
 	size_t nf = num_func;
@@ -284,7 +285,8 @@ size_t func_list_parse( Func_T **fncts, size_t num_func )
  * file and counts the number of defined functions
  *---------------------------------------------------*/
 
-static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func )
+static size_t fll_count_functions( Func_T * fncts,
+								   size_t   num_predef_func )
 {
 	int ret_token;
 	int last_token = 0;
@@ -343,7 +345,8 @@ static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func )
  * Function for comparing function names, used in sorting the function list
  *--------------------------------------------------------------------------*/
 
-static int ffl_func_cmp2( const void *a, const void *b )
+static int ffl_func_cmp2( const void * a,
+						  const void * b )
 {
 	return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
@@ -354,7 +357,8 @@ static int ffl_func_cmp2( const void *a, const void *b )
  * and tries to make sense from the entries
  *------------------------------------------------------------*/
 
-static void fll_get_functions( Func_T *fncts, size_t num_predef_func )
+static void fll_get_functions( Func_T * fncts,
+							   size_t   num_predef_func )
 {
 	int ret_token;
 	int state;

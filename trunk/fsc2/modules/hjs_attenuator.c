@@ -1,7 +1,7 @@
 #/*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -42,10 +42,16 @@ static HJS_Attenuator_T hjs_attenuator_stored;
 /* Local functions */
 
 static bool hjs_attenuator_serial_init( void );
+
 static void hjs_attenuator_set_attenuation( long new_step );
+
 static void hjs_attenuator_comm_failure( void );
-static FILE *hjs_attenuator_find_calibration( char **name );
-static FILE *hjs_attenuator_open_calibration( char *name );
+
+
+static FILE *hjs_attenuator_find_calibration( char ** name );
+
+static FILE *hjs_attenuator_open_calibration( char * name );
+
 static long hjs_attenuator_att_to_step( double att );
 
 
@@ -156,7 +162,7 @@ void hjs_attenuator_child_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *mw_attenuator_name( Var_T *v UNUSED_ARG )
+Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -173,7 +179,7 @@ Var_T *mw_attenuator_name( Var_T *v UNUSED_ARG )
  * used.
  *-----------------------------------------------------------*/
 
-Var_T *mw_attenuator_load_calibration( Var_T *v )
+Var_T *mw_attenuator_load_calibration( Var_T * v )
 {
 	FILE *tfp = NULL;
 	char *tfname;
@@ -270,7 +276,7 @@ Var_T *mw_attenuator_load_calibration( Var_T *v )
  * calculate the number of steps needed to change to a new attenuation.
  *----------------------------------------------------------------------*/
 
-Var_T *mw_attenuator_initial_attenuation( Var_T *v )
+Var_T *mw_attenuator_initial_attenuation( Var_T * v )
 {
 	if ( hjs_attenuator.is_step )
 	{
@@ -299,7 +305,7 @@ Var_T *mw_attenuator_initial_attenuation( Var_T *v )
  * attenuation set at the device.
  *----------------------------------------------------------------*/
 
-Var_T *mw_attenuator_attenuation( Var_T *v )
+Var_T *mw_attenuator_attenuation( Var_T * v )
 {
 	double att;
 	long step;
@@ -446,7 +452,7 @@ static void hjs_attenuator_comm_failure( void )
  * the memory used for the file name passed to the function is deallocated.
  *--------------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_find_calibration( char **name )
+static FILE *hjs_attenuator_find_calibration( char ** name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -505,7 +511,7 @@ static FILE *hjs_attenuator_find_calibration( char **name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_open_calibration( char *name )
+static FILE *hjs_attenuator_open_calibration( char * name )
 {
 	FILE *tfp;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,7 @@ extern int exp_runlex( void );
 
 /* locally used functions */
 
-static void exp_runerror( const char *s );
+static void exp_runerror( const char * s );
 
 
 /* locally used variables */
@@ -335,7 +335,7 @@ strs:    E_STR_TOKEN               { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void exp_runerror ( const char *s UNUSED_ARG )
+static void exp_runerror( const char * s  UNUSED_ARG )
 {
 	print( FATAL, "Syntax error in EXPERIMENT section.\n" );
 	THROW( EXCEPTION );

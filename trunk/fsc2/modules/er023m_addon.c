@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,7 +28,7 @@
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_rg( Var_T *v )
+Var_T *lockin_rg( Var_T * v )
 {
 	long rg_index;
 
@@ -70,7 +70,7 @@ Var_T *lockin_rg( Var_T *v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_tc( Var_T *v )
+Var_T *lockin_tc( Var_T * v )
 {
 	long tc_index;
 
@@ -121,7 +121,7 @@ Var_T *lockin_tc( Var_T *v )
  * If called with an argument the attenuation is set to this value.
  *----------------------------------------------------------------------*/
 
-Var_T *lockin_ma( Var_T *v )
+Var_T *lockin_ma( Var_T * v )
 {
 	long ma;
 
@@ -168,7 +168,7 @@ Var_T *lockin_ma( Var_T *v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_ct( Var_T *v )
+Var_T *lockin_ct( Var_T * v )
 {
 	long ct_mult;
 
@@ -243,7 +243,7 @@ Var_T *lockin_ct( Var_T *v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_mf( Var_T *v )
+Var_T *lockin_mf( Var_T * v )
 {
 	long mf_index;
 	int old_mf_index;

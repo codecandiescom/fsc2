@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -90,7 +90,8 @@ static int Exception_stack_pos = -1;
  * within the exception handler was started.
  *--------------------------------------------------------------------------*/
 
-jmp_buf *push_exception_frame( const char *file, int line )
+jmp_buf *push_exception_frame( const char * file,
+							   int          line )
 {
 	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
 	{
@@ -120,7 +121,8 @@ jmp_buf *push_exception_frame( const char *file, int line )
  * (and calls exit() immediately) if the exception stack is already empty.
  *-------------------------------------------------------------------------*/
 
-void pop_exception_frame( const char *file, int line )
+void pop_exception_frame( const char * file,
+						  int          line )
 {
 	if ( Exception_stack_pos < 0 )
 	{
@@ -176,7 +178,8 @@ jmp_buf *throw_exception( Exception_Types_T type )
  * exception has been thrown the program is stopped immediately.
  *-------------------------------------------------------------------------*/
 
-Exception_Types_T get_exception_type( const char *file, int line )
+Exception_Types_T get_exception_type( const char * file,
+									  int          line )
 {
 	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
 		 ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )

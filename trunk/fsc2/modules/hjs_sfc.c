@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,6 +32,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Local functions */
 
 static double hjs_sfc_field_check( double field );
+
 static double hjs_sfc_set_field( double field );
 
 
@@ -230,7 +231,7 @@ void hjs_sfc_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -240,7 +241,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start field and the field step size.
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	double start_field;
 	double field_step;
@@ -279,7 +280,7 @@ Var_T *magnet_setup( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double field;
 
@@ -311,7 +312,7 @@ Var_T *set_field( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	if ( ! hjs_sfc.is_act_field )
 	{
@@ -327,7 +328,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_up( Var_T *v UNUSED_ARG )
+Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
 	double field;
 
@@ -351,7 +352,7 @@ Var_T *sweep_up( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_down( Var_T *v UNUSED_ARG )
+Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 {
 	double field;
 
@@ -375,7 +376,7 @@ Var_T *sweep_down( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	if ( ! hjs_sfc.is_field )
 	{
@@ -393,7 +394,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_B0( Var_T *v )
+Var_T *magnet_B0( Var_T * v )
 {
 	double B0V;
 
@@ -434,7 +435,7 @@ Var_T *magnet_B0( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_slope( Var_T *v )
+Var_T *magnet_slope( Var_T * v )
 {
 	double slope;
 
@@ -476,7 +477,7 @@ Var_T *magnet_slope( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_calibration_file( Var_T *v )
+Var_T *magnet_calibration_file( Var_T * v )
 {
 	char *buf;
 

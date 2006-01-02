@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -55,24 +55,31 @@ enum {
 #define DEFAULT_UNIT           UNIT_KELVIN
 
 
-int itc503_init_hook( void );
-int itc503_exp_hook( void );
+int itc503_init_hook(       void );
+int itc503_exp_hook(        void );
 int itc503_end_of_exp_hook( void );
 
 
-Var_T *temp_contr_name( Var_T *v );
-Var_T *temp_contr_temperature( Var_T *v );
-Var_T *temp_contr_sample_channel( Var_T *v );
-Var_T *temp_contr_sensor_unit( Var_T *v );
-Var_T *temp_contr_lock_keyboard( Var_T *v );
-Var_T *temp_contr_command( Var_T *v );
+Var_T *temp_contr_name(           Var_T * v );
+Var_T *temp_contr_temperature(    Var_T * v );
+Var_T *temp_contr_sample_channel( Var_T * v );
+Var_T *temp_contr_sensor_unit(    Var_T * v );
+Var_T *temp_contr_lock_keyboard(  Var_T * v );
+Var_T *temp_contr_command(        Var_T * v );
 
 
-static bool itc503_init( const char *name );
+static bool itc503_init( const char * name );
+
 static double itc503_sens_data( void );
+
 static void itc503_lock( int state );
-static bool itc503_command( const char *cmd );
-static long itc503_talk( const char *message, char *reply, long length );
+
+static bool itc503_command( const char * cmd );
+
+static long itc503_talk( const char * message,
+						 char *       reply,
+						 long         length );
+
 static void itc503_gpib_failure( void );
 
 
@@ -141,7 +148,7 @@ int itc503_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_name( Var_T *v UNUSED_ARG )
+Var_T *temp_contr_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -152,7 +159,7 @@ Var_T *temp_contr_name( Var_T *v UNUSED_ARG )
  * (in the currently selected units)
  *---------------------------------------------*/
 
-Var_T *temp_contr_temperature( Var_T *v UNUSED_ARG )
+Var_T *temp_contr_temperature( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR,
@@ -171,7 +178,7 @@ Var_T *temp_contr_temperature( Var_T *v UNUSED_ARG )
  * constant that can be changed in the configuration file.
  *---------------------------------------------------------------------*/
 
-Var_T *temp_contr_sample_channel( Var_T *v )
+Var_T *temp_contr_sample_channel( Var_T * v )
 {
 	long channel;
 
@@ -219,7 +226,7 @@ Var_T *temp_contr_sample_channel( Var_T *v )
  * when reporting temperatures.
  *--------------------------------------------------------*/
 
-Var_T *temp_contr_sensor_unit( Var_T *v )
+Var_T *temp_contr_sensor_unit( Var_T * v )
 {
 	long unit = 0;
 	const char *in_units  = "KC";
@@ -268,7 +275,7 @@ Var_T *temp_contr_sensor_unit( Var_T *v )
  * unlocked during an experiment.
  *-----------------------------------------------------*/
 
-Var_T *temp_contr_lock_keyboard( Var_T *v )
+Var_T *temp_contr_lock_keyboard( Var_T * v )
 {
 	int lock;
 
@@ -291,7 +298,7 @@ Var_T *temp_contr_lock_keyboard( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_command( Var_T *v )
+Var_T *temp_contr_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -329,7 +336,7 @@ Var_T *temp_contr_command( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool itc503_init( const char *name )
+static bool itc503_init( const char * name )
 {
 	char buf[ 10 ];
 
@@ -424,7 +431,7 @@ static void itc503_lock( int state )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool itc503_command( const char *cmd )
+static bool itc503_command( const char * cmd )
 {
 	if ( gpib_write( itc503.device, cmd, strlen( cmd ) ) == FAILURE )
 		itc503_gpib_failure( );
@@ -436,7 +443,9 @@ static bool itc503_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long itc503_talk( const char *message, char *reply, long length )
+static long itc503_talk( const char * message,
+						 char *       reply,
+						 long         length )
 {
 	long len = length;
 	int retries = MAX_RETRIES;

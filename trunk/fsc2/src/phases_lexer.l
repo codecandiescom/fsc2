@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -255,7 +255,7 @@ WS          [\n=,:. ]+
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-int phases_parser( FILE *in )
+int phases_parser( FILE * in )
 {
 	static bool is_restart = UNSET;
 

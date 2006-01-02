@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
 #define UNBUSY_SIGNAL  SIGUSR2
 
 
-pid_t spawn_conn( bool start_state, FILE *in_file_fp );
+pid_t spawn_conn( bool   /* start_state */,
+				  FILE * /* in_file_fp  */ );
 
 
 #endif  /* ! CONN_HEADER */

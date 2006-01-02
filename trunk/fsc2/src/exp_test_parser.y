@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -38,7 +38,7 @@ void exp_test_init( void );
 
 /* locally used functions */
 
-static void exp_testerror( const char *s );
+static void exp_testerror( const char * s );
 
 static bool Dont_print_error;
 static bool In_cond;
@@ -265,17 +265,7 @@ strs:    E_STR_TOKEN
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-void exp_test_init( void )
-{
-	Dont_print_error = UNSET;
-	In_cond = UNSET;
-}
-
-
-/*---------------------------------------------------------*
- *---------------------------------------------------------*/
-
-static void exp_testerror( const char *s UNUSED_ARG )
+static void exp_testerror( const char * s  UNUSED_ARG )
 {
 	if ( ! Dont_print_error && ! In_cond )
 	{
@@ -296,6 +286,16 @@ static void exp_testerror( const char *s UNUSED_ARG )
 	}
 
 	Dont_print_error = UNSET;
+}
+
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+void exp_test_init( void )
+{
+	Dont_print_error = UNSET;
+	In_cond = UNSET;
 }
 
 

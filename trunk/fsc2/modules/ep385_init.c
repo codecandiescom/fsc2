@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,17 +25,27 @@
 #include "ep385.h"
 
 
-static void ep385_init_print( FILE *fp );
+static void ep385_init_print( FILE * fp );
+
 static void ep385_basic_pulse_check( void );
+
 static void ep385_create_shape_pulses( void );
+
 static void ep385_create_twt_pulses( void );
+
 static void ep385_basic_functions_check( void );
-static void ep385_create_phase_matrix( Function_T *f );
+
+static void ep385_create_phase_matrix( Function_T * f );
+
 static void ep385_setup_channels( void );
+
 static void ep385_pulse_start_setup( void );
-static void ep385_channel_start_check( Channel_T *ch );
-static void ep385_pulse_init_check( Function_T *f );
-static void ep385_defense_shape_init_check( Function_T *shape );
+
+static void ep385_channel_start_check( Channel_T * ch );
+
+static void ep385_pulse_init_check( Function_T * f );
+
+static void ep385_defense_shape_init_check( Function_T * shape );
 
 
 /*-----------------------------------------------------------------*
@@ -118,7 +128,7 @@ void ep385_init_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void ep385_init_print( FILE *fp )
+static void ep385_init_print( FILE * fp )
 {
 	Function_T *f;
 	int i, j;
@@ -554,7 +564,7 @@ static void ep385_basic_functions_check( void )
  * and don't overlap.
  *-----------------------------------------------------------------------*/
 
-static void ep385_create_phase_matrix( Function_T *f )
+static void ep385_create_phase_matrix( Function_T * f )
 {
 	Pulse_T *p;
 	Pulse_T **pm_elem;
@@ -930,7 +940,7 @@ static void ep385_pulse_start_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void ep385_channel_start_check( Channel_T *ch )
+static void ep385_channel_start_check( Channel_T * ch )
 {
 	/* Check that there aren't more pulses per channel than the pulser can
 	   deal with */
@@ -955,7 +965,7 @@ static void ep385_channel_start_check( Channel_T *ch )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void ep385_pulse_init_check( Function_T *f )
+static void ep385_pulse_init_check( Function_T * f )
 {
 	Pulse_T *p1, *p2;
 	int i, j;
@@ -1027,7 +1037,7 @@ static void ep385_pulse_init_check( Function_T *f )
  * mentioned EDL functions have been called.
  *------------------------------------------------------------------------*/
 
-static void ep385_defense_shape_init_check( Function_T *shape )
+static void ep385_defense_shape_init_check( Function_T * shape )
 {
 	Function_T *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
 	Pulse_T *shape_p, *defense_p;

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,14 +26,17 @@
 
 
 static bool dont_print_on_error = UNSET;
-static bool er023m_talk( const char *cmd, char *reply, long *length );
+
+static bool er023m_talk( const char * cmd,
+						 char *       reply,
+						 long *       length );
 
 
 /*------------------------------------------------------------------------*
  * Here everything is done to bring the device into a known, useful state
  *------------------------------------------------------------------------*/
 
-bool er023m_init( const char *name )
+bool er023m_init( const char * name )
 {
 	/* Bring device in remote state */
 
@@ -598,7 +601,7 @@ unsigned char er023m_st( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool er023m_command( const char *cmd )
+bool er023m_command( const char * cmd )
 {
 	if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE )
 		er023m_failure( );
@@ -609,7 +612,9 @@ bool er023m_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er023m_talk( const char *cmd, char *reply, long *length )
+static bool er023m_talk( const char * cmd,
+						 char *       reply,
+						 long *       length )
 {
 	if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( er023m.device, reply, length ) == FAILURE )

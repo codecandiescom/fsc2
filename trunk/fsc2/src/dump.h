@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,7 +26,7 @@
 #define DUMP__HEADER
 
 
-void DumpStack( void *crash_address );
+void DumpStack( void * /* crash_address */ );
 
 
 #endif   /* ! DUMP__HEADER */

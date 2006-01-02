@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,19 +28,22 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_ocreate_child( Var_T *v, Iobject_Type_T type, long lval,
-							   double dval, char *sptr );
-static void f_odelete_child( Var_T *v );
-static void f_odelete_parent( Var_T *v );
-static Var_T *f_ovalue_child( Var_T *v );
-static Var_T *f_ochanged_child( Var_T *v );
+static Var_T *f_ocreate_child( Var_T *        v,
+							   Iobject_Type_T type,
+							   long           lval,
+							   double         dval,
+							   char *         sptr );
+static void f_odelete_child( Var_T * v );
+static void f_odelete_parent( Var_T * v );
+static Var_T *f_ovalue_child( Var_T * v );
+static Var_T *f_ochanged_child( Var_T * v );
 
 
 /*-----------------------------------------------------------*
  * For appending a new input or output object to the toolbox
  *-----------------------------------------------------------*/
 
-Var_T *f_ocreate( Var_T *var )
+Var_T *f_ocreate( Var_T * var )
 {
 	Var_T *v = var;
 	Iobject_Type_T type;
@@ -123,6 +126,7 @@ Var_T *f_ocreate( Var_T *var )
 					dval = VALUE( v );
 				else
 					sptr = get_string( "%d", v->val.lval );
+				v = vars_pop( v );
 				break;
 
 			case FLOAT_VAR :
@@ -136,16 +140,14 @@ Var_T *f_ocreate( Var_T *var )
 					dval = v->val.dval;
 				else
 					sptr = get_string( "%f", v->val.dval );
+				v = vars_pop( v );
 				break;
 
 			case STR_VAR :
 				if ( type == STRING_OUTPUT )
-					sptr = T_strdup( v->val.sptr );
-				else
 				{
-					print( FATAL, "Can't use a string as the value for an "
-						   "int or float input or output object.\n" );
-					THROW( EXCEPTION );
+					sptr = T_strdup( v->val.sptr );
+					v = vars_pop( v );
 				}
 				break;
 
@@ -154,8 +156,6 @@ Var_T *f_ocreate( Var_T *var )
 					   "output object.\n" );
 				THROW( EXCEPTION );
 		}
-
-		v = vars_pop( v );
 	} else if ( type == STRING_OUTPUT )
 		sptr = T_strdup( "" );
 
@@ -346,8 +346,11 @@ Var_T *f_ocreate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_ocreate_child( Var_T *v, Iobject_Type_T type, long lval,
-							   double dval, char *sptr )
+static Var_T *f_ocreate_child( Var_T *        v,
+							   Iobject_Type_T type,
+							   long           lval,
+							   double         dval,
+							   char *         sptr )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -511,7 +514,7 @@ static Var_T *f_ocreate_child( Var_T *v, Iobject_Type_T type, long lval,
  * Parameters are one or more object IDs.
  *----------------------------------------------*/
 
-Var_T *f_odelete( Var_T *v )
+Var_T *f_odelete( Var_T * v )
 {
 	/* We need the ID of the button to delete */
 
@@ -555,7 +558,7 @@ Var_T *f_odelete( Var_T *v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void f_odelete_child( Var_T *v )
+static void f_odelete_child( Var_T * v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -609,7 +612,7 @@ static void f_odelete_child( Var_T *v )
  * which actually removes the input or output object.
  *------------------------------------------------------------------*/
 
-static void f_odelete_parent( Var_T *v )
+static void f_odelete_parent( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -677,7 +680,7 @@ static void f_odelete_parent( Var_T *v )
  * Sets or returns the content of an input or output object
  *----------------------------------------------------------*/
 
-Var_T *f_ovalue( Var_T *v )
+Var_T *f_ovalue( Var_T * v )
 {
 	Iobject_T *io;
 	char buf[ MAX_INPUT_CHARS + 1 ];
@@ -804,7 +807,7 @@ Var_T *f_ovalue( Var_T *v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *f_ovalue_child( Var_T *v )
+static Var_T *f_ovalue_child( Var_T * v )
 {
 	long ID;
 	long state = 0;
@@ -944,7 +947,7 @@ static Var_T *f_ovalue_child( Var_T *v )
  * Function for testing if the content of an input or output object changed
  *--------------------------------------------------------------------------*/
 
-Var_T *f_ochanged( Var_T *v )
+Var_T *f_ochanged( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -991,7 +994,7 @@ Var_T *f_ochanged( Var_T *v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *f_ochanged_child( Var_T *v )
+static Var_T *f_ochanged_child( Var_T * v )
 {
 	long ID;
 	long changed;

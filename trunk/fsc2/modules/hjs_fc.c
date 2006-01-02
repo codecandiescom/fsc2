@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,11 +31,18 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Local functions */
 
 static void hjs_fc_init_with_measured_data( void );
+
 static void hjs_fc_init_with_calib_file( void );
-static double hjs_fc_set_field( double field, double error_margin );
+
+static double hjs_fc_set_field( double field,
+								double error_margin );
+
 static double hjs_fc_sweep_to( double new_field );
+
 static double hjs_fc_get_field( void );
+
 static double hjs_fc_field_check( double field );
+
 static void hjs_fc_set_dac( double volts );
 
 
@@ -384,7 +391,7 @@ void hjs_fc_child_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -394,7 +401,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start field and the field step size.
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	hjs_fc.field = get_double( v, "magnetic field" );
 	hjs_fc.field_step = get_double( v->next, "field step width" );
@@ -409,7 +416,7 @@ Var_T *magnet_setup( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_calibration_file( Var_T *v )
+Var_T *magnet_calibration_file( Var_T * v )
 {
 	char *buf;
 
@@ -476,7 +483,7 @@ Var_T *magnet_calibration_file( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double field;
 	double error_margin = 0.0;
@@ -517,7 +524,7 @@ Var_T *set_field( Var_T *v )
  * Function asks the used gaussmeter for the current field
  *---------------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE != TEST )
 		hjs_fc.act_field = hjs_fc_get_field( );
@@ -529,7 +536,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *sweep_up( Var_T *v UNUSED_ARG )
+Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field_step )
 	{
@@ -548,7 +555,7 @@ Var_T *sweep_up( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *sweep_down( Var_T *v UNUSED_ARG )
+Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field_step )
 	{
@@ -567,7 +574,7 @@ Var_T *sweep_down( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	if ( ! hjs_fc.is_field )
 	{
@@ -585,7 +592,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_B0( Var_T *v )
+Var_T *magnet_B0( Var_T * v )
 {
 	if ( v != NULL )
 	{
@@ -608,7 +615,7 @@ Var_T *magnet_B0( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_slope( Var_T *v )
+Var_T *magnet_slope( Var_T * v )
 {
 	if ( v != NULL )
 	{
@@ -788,7 +795,8 @@ static void hjs_fc_init_with_calib_file( void )
  * reached by measuring the new field via the BNM12 gaussmeter.
  *---------------------------------------------------------------*/
 
-static double hjs_fc_set_field( double field, double error_margin )
+static double hjs_fc_set_field( double field,
+								double error_margin )
 {
 	double v_step = 0.0;
 	double cur_field = hjs_fc.B0V;
@@ -806,8 +814,8 @@ static double hjs_fc_set_field( double field, double error_margin )
 	   intitalization are correct we should arrive at the target field
 	   with just one try. But if this isn't the case we retry by
 	   adjusting the output voltage according to the measured difference
-	   from the target field (at least as the deviation is larger than
-	   'error_margin'). */
+	   from the target field (at least as long as the deviation is larger
+	   than 'error_margin'). */
 
 	do
 	{
@@ -820,7 +828,7 @@ static double hjs_fc_set_field( double field, double error_margin )
 			mini_step = - fabs( mini_step );
 
 		while ( ( mini_step > 0.0 && cur_volts < v_step ) ||
-				( mini_step < 0.0  && cur_volts > v_step ) )
+				( mini_step < 0.0 && cur_volts > v_step ) )
 		{
 			cur_volts += mini_step;
 

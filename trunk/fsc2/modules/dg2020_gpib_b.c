@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -103,7 +103,6 @@
  *  state? And, finally, why isn't there for more than 90% of the stuff that
  *  you can do via the keyboard an equivalent GPIB command?
  *
-
  *  Ok, they implemented the possibility to simulate all the things that you
  *  can do via the keyboard with the "ABSTouch" command but than made it
  *  complete useless by not giving the programmer a chance to find out in
@@ -147,12 +146,21 @@
 /* Functions that re used only locally... */
 
 static bool dg2020_set_timebase( double timebase );
+
 static bool dg2020_set_memory_size( long mem_size );
-static bool dg2020_set_pod_high_level( int pod, double voltage );
-static bool dg2020_set_pod_low_level( int pod, double voltage );
+
+static bool dg2020_set_pod_high_level( int    pod,
+									   double voltage );
+
+static bool dg2020_set_pod_low_level( int    pod,
+									  double voltage );
+
 static bool dg2020_set_trigger_in_level( double voltage );
+
 static bool dg2020_set_trigger_in_slope( int slope );
+
 static bool dg2020_set_trigger_in_impedance( int state );
+
 static void dg2020_gpib_failure( void );
 
 
@@ -176,7 +184,7 @@ static void dg2020_gpib_failure( void );
  *  * 1: ok, 0: error
  *------------------------------------------------------*/
 
-bool dg2020_init( const char *name )
+bool dg2020_init( const char * name )
 {
 	int i, j;
 	Function_T *f;
@@ -382,7 +390,8 @@ static bool dg2020_set_memory_size( long mem_size )
  *  * 1: ok, 0: error
  *-----------------------------------------------------*/
 
-bool dg2020_channel_assign( int channel, int pod )
+bool dg2020_channel_assign( int channel,
+							int pod )
 {
 	char cmd[ 50 ];
 
@@ -447,7 +456,8 @@ bool dg2020_update_data( void )
  *  * 1: ok, 0: error
  *-----------------------------------------------------------------------*/
 
-bool dg2020_make_blocks( int num_blocks, Block_T *block )
+bool dg2020_make_blocks( int       num_blocks,
+						 Block_T * block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1000 ];
@@ -489,7 +499,8 @@ bool dg2020_make_blocks( int num_blocks, Block_T *block )
  *  * 1: ok, 0: error
  *----------------------------------------------------------------*/
 
-bool dg2020_make_seq( int num_blocks, Block_T *block )
+bool dg2020_make_seq( int       num_blocks,
+					  Block_T * block )
 {
 	char cmd[ 1024 ] = "",
 		 dummy[ 1024 ];
@@ -536,7 +547,10 @@ bool dg2020_make_seq( int num_blocks, Block_T *block )
  *  * 1: ok, 0: error
  *-----------------------------------------------------*/
 
-bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
+bool dg2020_set_constant( int   channel,
+						  Ticks address,
+						  Ticks length,
+						  int   state )
 {
 	char *cmd, *cptr;
 #if defined DMA_SIZE
@@ -593,7 +607,8 @@ bool dg2020_set_constant( int channel, Ticks address, Ticks length, int state )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool dg2020_set_pod_high_level( int pod, double voltage )
+static bool dg2020_set_pod_high_level( int    pod,
+									   double voltage )
 {
 	char cmd[ 100 ];
 
@@ -610,7 +625,8 @@ static bool dg2020_set_pod_high_level( int pod, double voltage )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool dg2020_set_pod_low_level( int pod, double voltage )
+static bool dg2020_set_pod_low_level( int    pod,
+									  double voltage )
 {
 	char cmd[ 100 ];
 
@@ -698,7 +714,7 @@ bool dg2020_lock_state( bool lock )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool dg2020_command( const char *cmd )
+bool dg2020_command( const char * cmd )
 {
 	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
 		dg2020_gpib_failure( );

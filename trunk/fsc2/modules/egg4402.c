@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,24 +37,29 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int egg4402_init_hook( void );
-int egg4402_exp_hook( void );
+int egg4402_init_hook(       void );
+int egg4402_exp_hook(        void );
 int egg4402_end_of_exp_hook( void );
 
-Var_T *boxcar_name( Var_T *v );
-Var_T *boxcar_curve_length( Var_T *v );
-Var_T *boxcar_get_curve( Var_T *v );
-Var_T *boxcar_start_acquisition( Var_T *v );
-Var_T *boxcar_stop_acquisition( Var_T *v );
-Var_T *boxcar_single_shot( Var_T *v );
-Var_T *boxcar_command( Var_T *v);
+Var_T *boxcar_name(              Var_T * /* v */ );
+Var_T *boxcar_curve_length(      Var_T * /* v */ );
+Var_T *boxcar_get_curve(         Var_T * /* v */ );
+Var_T *boxcar_start_acquisition( Var_T * /* v */ );
+Var_T *boxcar_stop_acquisition(  Var_T * /* v */ );
+Var_T *boxcar_single_shot(       Var_T * /* v */ );
+Var_T *boxcar_command(           Var_T * /* v */ );
 
 /* Locally used functions */
 
-static bool egg4402_init( const char *name );
+static bool egg4402_init( const char * name );
+
 static void egg4402_failure( void );
-static void egg4402_query( char *buffer, long *length, bool wait_for_stop );
-static bool egg4402_command( const char *cmd );
+
+static void egg4402_query( char * buffer,
+						   long * length,
+						   bool   wait_for_stop );
+
+static bool egg4402_command( const char * cmd );
 
 
 static struct {
@@ -124,7 +129,7 @@ int egg4402_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *boxcar_name( Var_T *v UNUSED_ARG )
+Var_T *boxcar_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -133,7 +138,7 @@ Var_T *boxcar_name( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-Var_T *boxcar_curve_length( Var_T *v )
+Var_T *boxcar_curve_length( Var_T * v )
 {
 	char buffer[ 100 ];
 	long length = 100;
@@ -187,7 +192,7 @@ Var_T *boxcar_curve_length( Var_T *v )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-Var_T *boxcar_get_curve( Var_T *v )
+Var_T *boxcar_get_curve( Var_T * v )
 {
 	unsigned char *buffer;
 	double *ret_buffer;
@@ -416,7 +421,7 @@ Var_T *boxcar_get_curve( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *boxcar_start_acquisition( Var_T *v UNUSED_ARG )
+Var_T *boxcar_start_acquisition( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "START\n" );
@@ -428,7 +433,7 @@ Var_T *boxcar_start_acquisition( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *boxcar_stop_acquisition( Var_T *v UNUSED_ARG )
+Var_T *boxcar_stop_acquisition( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT )
 		egg4402_command( "STOP\n" );
@@ -445,7 +450,7 @@ Var_T *boxcar_stop_acquisition( Var_T *v UNUSED_ARG )
  * the data point(s) are to be fetched from.
  *----------------------------------------------------------------*/
 
-Var_T *boxcar_single_shot( Var_T *v )
+Var_T *boxcar_single_shot( Var_T * v )
 {
 	long channel_1 = 1, channel_2 = -1;
 	double data[ 2 ];
@@ -560,7 +565,7 @@ Var_T *boxcar_single_shot( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *boxcar_command( Var_T *v )
+Var_T *boxcar_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -592,7 +597,7 @@ Var_T *boxcar_command( Var_T *v )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static bool egg4402_init( const char *name )
+static bool egg4402_init( const char * name )
 {
 	fsc2_assert( egg4402.device < 0 );
 
@@ -617,7 +622,9 @@ static void egg4402_failure( void )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
+static void egg4402_query( char * buffer,
+						   long * length,
+						   bool   wait_for_stop )
 {
 	unsigned char stb = 0;
 
@@ -645,7 +652,7 @@ static void egg4402_query( char *buffer, long *length, bool wait_for_stop )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool egg4402_command( const char *cmd )
+static bool egg4402_command( const char * cmd )
 {
 	if ( gpib_write( egg4402.device, cmd, strlen( cmd ) ) == FAILURE )
 		egg4402_failure( );

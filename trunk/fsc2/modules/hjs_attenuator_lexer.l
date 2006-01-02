@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,8 +44,12 @@
 
 
 static int hjs_attenuator_lex( void );
-static void hjs_attenuator_new_table_entry( int type, double val );
-static int hjs_attenuator_comp( const void *a, const void *b );
+
+static void hjs_attenuator_new_table_entry( int    type,
+											double val );
+
+static int hjs_attenuator_comp( const void * a,
+								const void * b );
 
 static long hjs_attenuator_Lc,
 			hjs_attenuator_Comm_Lc;
@@ -143,7 +147,7 @@ UNIT     "db"|"dB"
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hjs_attenuator_read_calibration( FILE *fp )
+void hjs_attenuator_read_calibration( FILE * fp )
 {
 	static bool is_restart = UNSET;
 
@@ -199,7 +203,8 @@ void hjs_attenuator_read_calibration( FILE *fp )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hjs_attenuator_new_table_entry( int type, double val )
+static void hjs_attenuator_new_table_entry( int    type,
+											double val )
 {
 	static int last_type;
 	size_t i;
@@ -302,7 +307,8 @@ static void hjs_attenuator_new_table_entry( int type, double val )
  * order of attenuations.
  *---------------------------------------------------------------*/
 
-static int hjs_attenuator_comp( const void *a, const void *b )
+static int hjs_attenuator_comp( const void * a,
+								const void * b )
 {
 	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
 					  *B = ( Att_Table_Entry_T * ) b;

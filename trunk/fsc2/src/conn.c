@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -45,7 +45,8 @@ typedef unsigned int socklen_t;
  * return -1 on errors.
  *------------------------------------------------------*/
 
-pid_t spawn_conn( bool start_state, FILE *in_file_fp )
+pid_t spawn_conn( bool   start_state,
+				  FILE * in_file_fp )
 {
 	int listen_fd;
 	struct sockaddr_un serv_addr;

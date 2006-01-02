@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -66,7 +66,8 @@ bool dg2020_store_timebase( double timebase )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_assign_function( int function, long pod )
+bool dg2020_assign_function( int  function,
+							 long pod )
 {
 	Function_T *f = dg2020.function + function;
 	Pod_T *p = dg2020.pod + pod;
@@ -120,7 +121,8 @@ bool dg2020_assign_function( int function, long pod )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_assign_channel_to_function( int function, long channel )
+bool dg2020_assign_channel_to_function( int  function,
+										long channel )
 {
 	Function_T *f = dg2020.function + function;
 	Channel_T *c = dg2020.channel + channel;
@@ -169,7 +171,8 @@ bool dg2020_invert_function( int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_delay( int function, double delay )
+bool dg2020_set_function_delay( int    function,
+								double delay )
 {
 	Ticks Delay = dg2020_double2ticks( delay );
 	int i;
@@ -221,7 +224,8 @@ bool dg2020_set_function_delay( int function, double delay )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_high_level( int function, double voltage )
+bool dg2020_set_function_high_level( int    function,
+									 double voltage )
 {
 	long v;
 
@@ -254,7 +258,8 @@ bool dg2020_set_function_high_level( int function, double voltage )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_low_level( int function, double voltage )
+bool dg2020_set_function_low_level( int    function,
+									double voltage )
 {
 	long v;
 
@@ -517,7 +522,8 @@ bool dg2020_set_max_seq_len( double seq_len )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_phase_reference( int phase, int function )
+bool dg2020_set_phase_reference( int phase,
+								 int function )
 {
 	Function_T *p, *f;
 
@@ -575,7 +581,10 @@ bool dg2020_set_phase_reference( int phase, int function )
  *    requested phase(0: low, non-zero: high)
  *-----------------------------------------------------------------------*/
 
-bool dg2020_phase_setup_prep( int func, int type, int pod, long val )
+bool dg2020_phase_setup_prep( int  func,
+							  int  type,
+							  int  pod,
+							  long val )
 {
 	/* First a sanity check... */
 
@@ -700,7 +709,8 @@ bool dg2020_phase_setup( int func )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool dg2020_phase_setup_finalize( int func, PHS_T p_phs )
+bool dg2020_phase_setup_finalize( int   func,
+								  PHS_T p_phs )
 {
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );
@@ -722,7 +732,8 @@ bool dg2020_phase_setup_finalize( int func, PHS_T p_phs )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool dg2020_set_phase_switch_delay( int func, double del_time )
+bool dg2020_set_phase_switch_delay( int    func,
+									double del_time )
 {
 	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
 				 func == PULSER_CHANNEL_PHASE_2 );

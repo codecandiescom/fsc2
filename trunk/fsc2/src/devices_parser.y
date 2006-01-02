@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,7 @@ extern char *devicestext;        /* defined in devices_lexer.l */
 
 /* locally used functions */
 
-static void deviceserror( const char *s );
+static void deviceserror( const char * s );
 
 %}
 
@@ -73,7 +73,7 @@ sep:     ';'
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void deviceserror ( const char *s UNUSED_ARG )
+static void deviceserror( const char * s  UNUSED_ARG )
 {
 	if ( *devicestext == '\0' )
 		print( FATAL, "Unexpected end of file in DEVICES section.\n" );

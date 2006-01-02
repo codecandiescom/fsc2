@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,7 +28,8 @@
 #include "fsc2.h"
 
 
-void edit_file( FL_OBJECT *a, long b );
+void edit_file( FL_OBJECT * /* a */,
+				long        /* b */ );
 
 
 #endif  /* ! EDIT_HEADER */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,15 +28,25 @@
 #include "fsc2.h"
 
 
-void *get_shm( int *shm_id, long len );
-char *attach_shm( int key );
-void detach_shm( void *buf, int *key );
+void *get_shm( int * /* shm_id */,
+			   long  /* len    */ );
+
+char *attach_shm( int /* key */ );
+
+void detach_shm( void * /* buf */,
+				 int *  /* key */ );
+
 void delete_all_shm( void );
+
 void delete_stale_shms( void );
-int sema_create( int size );
-int sema_destroy( int sema_id );
-int sema_wait( int sema_id );
-int sema_post( int sema_id );
+
+int sema_create( int /* size */ );
+
+int sema_destroy( int /* sema_id */ );
+
+int sema_wait( int /* sema_id */ );
+
+int sema_post( int /* sema_id */ );
 
 
 #endif   /* ! IPC_HEADER */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,7 @@ extern char *prepstext;        /* defined in preps_lexer.l */
 
 /* locally used functions */
 
-static void prepserror( const char *s );
+static void prepserror( const char * s );
 
 
 /* locally used variables */
@@ -308,7 +308,7 @@ strs:    STR_TOKEN                { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void prepserror ( const char *s UNUSED_ARG )
+static void prepserror( const char * s  UNUSED_ARG )
 {
 	if ( *prepstext == '\0' )
 		print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );

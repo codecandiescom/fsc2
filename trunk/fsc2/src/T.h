@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,12 +28,21 @@
 
 
 void *T_malloc( size_t /* size */ );
-void *T_calloc( size_t /* nmemb */, size_t /* size */ );
-void *T_realloc( void * /* ptr */, size_t /* size */ );
+
+void *T_calloc( size_t /* nmemb */,
+				size_t /* size  */ );
+
+void *T_realloc( void * /* ptr  */,
+				 size_t /* size */ );
+
 void *T_free( void * /* ptr */ );
+
 char *T_strdup( const char * /* str */ );
+
 long T_atol( const char * /* txt */ );
+
 int T_atoi( const char * /* txt */ );
+
 double T_atod( const char * /* txt */ );
 
 

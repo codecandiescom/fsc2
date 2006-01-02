@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -75,8 +75,11 @@ char *Prog_Name;
 #if defined __STRICT_ANSI__
 extern int seteuid( uid_t euid );
 extern int setegid( gid_t egid );
-extern int vsnprintf( char *str, size_t size, const char *format, va_list ap );
-extern int fileno( FILE *stream );
+extern int vsnprintf( char *       str,
+					  size_t       size,
+					  const char * format,
+					  va_list      ap );
+extern int fileno( FILE * stream );
 #endif
 
 #define MAX_INCLUDE_DEPTH  16
@@ -84,16 +87,22 @@ extern int fileno( FILE *stream );
 
 int yylex( void );
 
-static void include_handler( char *file );
-static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-					FILE *primary_fp, FILE **fp, int *incl_depth );
-static void unit_spec( char *text, int power );
-static char *T_strdup( const char *string );
+static void include_handler( char * file );
+static void xclose( YY_BUFFER_STATE   primary_buf,
+					YY_BUFFER_STATE * buf_state,
+					FILE *            primary_fp,
+					FILE **           fp,
+					int *             incl_depth );
+static void unit_spec( char * text,
+					   int    power );
+static char *T_strdup( const char * string );
 static void *T_malloc( size_t size );
-static void *T_realloc( void *ptr, size_t size );
-static void *T_free( void *ptr );
+static void *T_realloc( void * ptr,
+						size_t size );
+static void *T_free( void * ptr );
 static void lower_permissions( void );
-static ssize_t output( const char *fmt, ... );
+static ssize_t output( const char * fmt,
+					   ... );
 static void usage( void );
 
 
@@ -430,7 +439,8 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-int main( int argc, char *argv[ ] )
+int main( int    argc,
+		  char * argv[ ] )
 {
 	struct passwd *pwe;
 
@@ -549,7 +559,7 @@ int main( int argc, char *argv[ ] )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void include_handler( char *file )
+static void include_handler( char * file )
 {
 	static YY_BUFFER_STATE primary_buf;
 	static YY_BUFFER_STATE buf_state[ MAX_INCLUDE_DEPTH ];
@@ -689,8 +699,11 @@ static void include_handler( char *file )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
-			 		FILE *primary_fp, FILE **fp, int *incl_depth )
+static void xclose( YY_BUFFER_STATE   primary_buf,
+					YY_BUFFER_STATE * buf_state,
+			 		FILE *            primary_fp,
+					FILE **           fp,
+					int *             incl_depth )
 {
 	if ( *incl_depth > 0 )
 	{
@@ -715,7 +728,8 @@ static void xclose( YY_BUFFER_STATE primary_buf, YY_BUFFER_STATE *buf_state,
  * Rewrites combinations like "100ns" or "100 ns" as "0.000000100000".
  *---------------------------------------------------------------------*/
 
-static void unit_spec( char *text, int power )
+static void unit_spec( char * text,
+					   int    power )
 {
 	double dval;
 
@@ -804,7 +818,7 @@ static void *T_malloc( size_t size )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void *T_free( void *ptr )
+static void *T_free( void * ptr )
 {
 #if defined FSC2_MDEBUG
 	fprintf( stderr, "free:    %p\n", ptr );
@@ -819,7 +833,8 @@ static void *T_free( void *ptr )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static void *T_realloc( void *ptr, size_t size )
+static void *T_realloc( void * ptr,
+						size_t size )
 {
 	void *new_ptr;
 
@@ -839,7 +854,7 @@ static void *T_realloc( void *ptr, size_t size )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static char *T_strdup( const char *string )
+static char *T_strdup( const char * string )
 {
 	char *new_mem;
 
@@ -876,7 +891,8 @@ static void lower_permissions( void )
 
 #define OUTPUT_TRY_LENGTH 256
 
-static ssize_t output( const char *fmt, ... )
+static ssize_t output( const char * fmt,
+					   ... )
 {
 	static char *c = NULL;
 	static size_t len = OUTPUT_TRY_LENGTH;

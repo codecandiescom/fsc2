@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,7 +26,8 @@
 #define PRINT_HEADER
 
 
-void print_it( FL_OBJECT *obj, long data );
+void print_it( FL_OBJECT * /* obj  */,
+			   long        /* data */ );
 
 
 #endif   /* ! PRINT_HEADER */

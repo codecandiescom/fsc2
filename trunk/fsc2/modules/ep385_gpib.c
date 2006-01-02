@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -42,7 +42,7 @@ static void ep385_gpib_failure( void );
  *----------------------------------------------------------------*/
 
 #ifndef EP385_GPIB_DEBUG
-bool ep385_init( const char *name )
+bool ep385_init( const char * name )
 {
 	char cmd[ 100 ];
 	int i;
@@ -105,7 +105,7 @@ bool ep385_init( const char *name )
 	return OK;
 }
 #else
-bool ep385_init( const char *name UNUSED_ARG )
+bool ep385_init( const char * name  UNUSED_ARG )
 {
 	return OK;
 }
@@ -175,7 +175,7 @@ bool ep385_set_channels( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool ep385_command( const char *cmd )
+bool ep385_command( const char * cmd )
 {
 	if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
 		ep385_gpib_failure( );

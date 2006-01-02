@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -90,7 +90,8 @@ void *T_malloc( size_t size )
  * allocated and the address the call came from to stderr.
  *----------------------------------------------------------------*/
 
-void *T_calloc( size_t nmemb, size_t size )
+void *T_calloc( size_t nmemb,
+				size_t size )
 {
 	void *mem;
 #if defined FSC2_MDEBUG
@@ -150,7 +151,8 @@ void *T_calloc( size_t nmemb, size_t size )
  * allocated and the address the call came from to stderr.
  *-----------------------------------------------------------------*/
 
-void *T_realloc( void *ptr, size_t size )
+void *T_realloc( void * ptr,
+				 size_t size )
 {
 	void *new_ptr;
 #if defined FSC2_MDEBUG
@@ -198,7 +200,7 @@ void *T_realloc( void *ptr, size_t size )
  * written to stderr.
  *------------------------------------------------------------------*/
 
-void *T_free( void *ptr )
+void *T_free( void * ptr )
 {
 #if defined FSC2_MDEBUG
 	int *EBP;             /* assumes sizeof(int) equals size of pointers */
@@ -234,7 +236,7 @@ void *T_free( void *ptr )
  * and the address the call came from to stderr.
  *--------------------------------------------------------------------*/
 
-char *T_strdup( const char *str )
+char *T_strdup( const char * str )
 {
 	char *new_str;
 	size_t len;
@@ -282,7 +284,7 @@ char *T_strdup( const char *str )
  * in the calling function.
  *--------------------------------------------------------------------*/
 
-long T_atol( const char *txt )
+long T_atol( const char * txt )
 {
 	long ret;
 	char *end_p;
@@ -323,7 +325,7 @@ long T_atol( const char *txt )
  * function.
  *--------------------------------------------------------------------*/
 
-int T_atoi( const char *txt )
+int T_atoi( const char * txt )
 {
 	long ret;
 	char *end_p;
@@ -364,7 +366,7 @@ int T_atoi( const char *txt )
  * bug in the calling function.
  *--------------------------------------------------------------------*/
 
-double T_atod( const char *txt )
+double T_atod( const char * txt )
 {
 	double ret;
 	char *end_p;

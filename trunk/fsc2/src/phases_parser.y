@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,7 @@ extern char *phasestext;         /* defined in phases_lexer.l */
 
 /* locally used functions */
 
-static void phaseserror( const char *s );
+static void phaseserror( const char * s );
 
 
 /* locally used global variables */
@@ -101,7 +101,7 @@ p_list:  /* empty */
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void phaseserror ( const char *s UNUSED_ARG )
+static void phaseserror( const char * s  UNUSED_ARG )
 {
 	if ( *phasestext == '\0' )
 		print( FATAL, "Unexpected end of file in PHASES section.\n" );

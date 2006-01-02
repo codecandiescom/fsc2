@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -46,44 +46,65 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int ips120_10_init_hook( void );
-int ips120_10_test_hook( void );
-int ips120_10_exp_hook( void );
+int ips120_10_init_hook(       void );
+int ips120_10_test_hook(       void );
+int ips120_10_exp_hook(        void );
 int ips120_10_end_of_exp_hook( void );
 
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *set_sweep_rate( Var_T *v );
-Var_T *magnet_sweep( Var_T *v );
-Var_T *magnet_sweep_rate( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_goto_field_on_end( Var_T *v );
-Var_T *magnet_command( Var_T *v );
+Var_T *magnet_name(              Var_T * v );
+Var_T *magnet_setup(             Var_T * v );
+Var_T *get_field(                Var_T * v );
+Var_T *set_field(                Var_T * v );
+Var_T *set_sweep_rate(           Var_T * v );
+Var_T *magnet_sweep(             Var_T * v );
+Var_T *magnet_sweep_rate(        Var_T * v );
+Var_T *reset_field(              Var_T * v );
+Var_T *magnet_goto_field_on_end( Var_T * v );
+Var_T *magnet_command(           Var_T * v );
 
 
 static void magnet_sweep_up( void );
+
 static void magnet_sweep_down( void );
+
 static void magnet_stop_sweep( void );
 
-static bool ips120_10_init( const char *name );
+static bool ips120_10_init( const char * name );
+
 static void ips120_10_to_local( void );
+
 static void ips120_10_get_complete_status( void );
+
 static void ips120_10_sweep_up( void );
+
 static void ips120_10_sweep_down( void );
+
 static double ips120_10_current_check( double current );
+
 static double ips120_10_sweep_rate_check( double sweep_rate );
+
 static double ips120_10_get_act_current( void );
+
 static double ips120_10_current_check( double current );
+
 static double ips120_10_sweep_rate_check( double sweep_rate );
+
 static double ips120_10_set_target_current( double current );
+
 static double ips120_10_get_target_current( void );
+
 static double ips120_10_set_sweep_rate( double sweep_rate );
+
 static double ips120_10_get_sweep_rate( void );
+
 static double ips120_10_goto_current( double current );
+
 static int ips120_10_set_activity( int activity );
-static long ips120_10_talk( const char *message, char *reply, long length );
+
+static long ips120_10_talk( const char * message,
+							char *       reply,
+							long         length );
+
 static void ips120_10_comm_failure( void );
 
 
@@ -250,7 +271,7 @@ int ips120_10_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -260,7 +281,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start current and the sweep rate.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	double cur;
 	double sweep_rate;
@@ -300,7 +321,7 @@ Var_T *magnet_setup( Var_T *v )
  * time spent since the last call for determining the field.
  *-----------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 	{
@@ -361,7 +382,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
  * that setting a new field also stops a running sweep.
  *------------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double cur;
 
@@ -396,7 +417,7 @@ Var_T *set_field( Var_T *v )
  * inquiring about the current sweep state.
  *-------------------------------------------------------------*/
 
-Var_T *magnet_sweep( Var_T *v )
+Var_T *magnet_sweep( Var_T * v )
 {
 	long dir;
 	Var_T *vc;
@@ -559,7 +580,7 @@ static void magnet_stop_sweep( void )
  * Function to query or set a field sweep rate
  *---------------------------------------------*/
 
-Var_T *magnet_sweep_rate( Var_T *v )
+Var_T *magnet_sweep_rate( Var_T * v )
 {
 	double sweep_rate;
 
@@ -601,7 +622,7 @@ Var_T *magnet_sweep_rate( Var_T *v )
  * i.e. at the very start of the experiment
  *--------------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	return set_field( vars_push( FLOAT_VAR,
 								 ips120_10.start_current * F2C_RATIO) );
@@ -614,7 +635,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
  * the experiment has ended.
  *-----------------------------------------------------------*/
 
-Var_T *magnet_goto_field_on_end( Var_T *v )
+Var_T *magnet_goto_field_on_end( Var_T * v )
 {
 	double cur;
 
@@ -632,7 +653,7 @@ Var_T *magnet_goto_field_on_end( Var_T *v )
  * the magent - only use for debugging or testing purposes!
  *-------------------------------------------------------------*/
 
-Var_T *magnet_command( Var_T *v )
+Var_T *magnet_command( Var_T * v )
 {
 	char *cmd = NULL;
 	char reply[ 100 ];
@@ -665,7 +686,7 @@ Var_T *magnet_command( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static bool ips120_10_init( const char *name )
+static bool ips120_10_init( const char * name )
 {
 	char reply[ 100 ];
 	long length;
@@ -1390,7 +1411,9 @@ static int ips120_10_set_activity( int activity )
  * Function for talking with the magnet via the GPIB
  *---------------------------------------------------*/
 
-static long ips120_10_talk( const char *message, char *reply, long length )
+static long ips120_10_talk( const char * message,
+							char *       reply,
+							long         length )
 {
 	long len = length;
 	int retries = MAX_RETRIES;
@@ -1402,11 +1425,11 @@ static long ips120_10_talk( const char *message, char *reply, long length )
 		 															  FAILURE )
 		ips120_10_comm_failure( );
 
-	/* Re-enable the following if you want to be extremely careful (that's
-	   what the manual recommends, but even the LabVIEW driver written by
-	   Oxford does not use it..). */
-
 #if 0
+	/* Re-enable this if you want to be extremely careful (that's what the
+	   manual recommends, but not even the LabVIEW driver written by Oxford
+	   does it this way...). */
+
 	do {
 		unsigned char stb;
 

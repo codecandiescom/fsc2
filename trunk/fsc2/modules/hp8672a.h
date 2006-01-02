@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -108,58 +108,73 @@ extern double fm_ampl[ ];
 
 /* Declaration of exported functions */
 
-int hp8672a_init_hook( void );
-int hp8672a_test_hook( void );
-int hp8672a_exp_hook( void );
+int hp8672a_init_hook(       void );
+int hp8672a_test_hook(       void );
+int hp8672a_exp_hook(        void );
 int hp8672a_end_of_exp_hook( void );
-void hp8672a_exit_hook( void );
+void hp8672a_exit_hook(      void );
 
 
-Var_T *synthesizer_name( Var_T *v );
-Var_T *synthesizer_state( Var_T *v );
-Var_T *synthesizer_frequency( Var_T *v );
-Var_T *synthesizer_step_frequency( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_minimum_attenuation( Var_T *v );
-Var_T *synthesizer_sweep_up( Var_T *v );
-Var_T *synthesizer_sweep_down( Var_T *v );
-Var_T *synthesizer_reset_frequency( Var_T *v );
-Var_T *synthesizer_use_table( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_att_ref_freq( Var_T *v );
-Var_T *synthesizer_modulation( Var_T *v );
-Var_T *synthesizer_mod_ampl( Var_T *v );
-Var_T *synthesizer_mod_type( Var_T *v );
-Var_T *synthesizer_mod_source( Var_T *v );
-Var_T *synthesizer_command( Var_T *v );
+Var_T *synthesizer_name(                Var_T * /* v */ );
+Var_T *synthesizer_state(               Var_T * /* v */ );
+Var_T *synthesizer_frequency(           Var_T * /* v */ );
+Var_T *synthesizer_step_frequency(      Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_minimum_attenuation( Var_T * /* v */ );
+Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
+Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
+Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
+Var_T *synthesizer_use_table(           Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
+Var_T *synthesizer_modulation(          Var_T * /* v */ );
+Var_T *synthesizer_mod_ampl(            Var_T * /* v */ );
+Var_T *synthesizer_mod_type(            Var_T * /* v */ );
+Var_T *synthesizer_mod_source(          Var_T * /* v */ );
+Var_T *synthesizer_command(             Var_T * /* v */ );
 
 
 /* functions defined in "hp8672a_util.c" */
 
-void hp8672a_read_table( FILE *fp );
-FILE *hp8672a_find_table( char **name );
-FILE *hp8672a_open_table( char *name );
-double hp8672a_get_att_from_table( double freq );
-double hp8672a_get_att( double freq );
-int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires );
-int hp8672_mod_ampl_check( double ampl );
+void hp8672a_read_table( FILE * /* fp */ );
+
+FILE *hp8672a_find_table( char ** /* name */ );
+
+FILE *hp8672a_open_table( char * /* name */ );
+
+double hp8672a_get_att_from_table( double /* freq */ );
+
+double hp8672a_get_att( double /* freq */ );
+
+int hp8672a_set_mod_param( Var_T *  /* v    */,
+						   double * /* dres */,
+						   int *    /* ires */ );
+
+int hp8672_mod_ampl_check( double /* ampl */ );
 
 
 /* functions defined in "hp8672a_lexer.flex" */
 
-void hp8672a_read_table( FILE *fp );
+void hp8672a_read_table( FILE * /* fp */ );
 
 
 /* functions defined in "hp8672a_gpib.c" */
 
-bool hp8672a_init( const char *name );
+bool hp8672a_init( const char * /* name */ );
+
 void hp8672a_finished( void );
-bool hp8672a_set_output_state( bool state );
+
+bool hp8672a_set_output_state( bool /* state */ );
+
 bool hp8672a_get_output_state( void );
-double hp8672a_set_frequency( double freq );
-double hp8672a_set_attenuation( double att );
+
+double hp8672a_set_frequency( double /* freq */ );
+
+double hp8672a_set_attenuation( double /* att */ );
+
 int hp8672a_set_modulation( void );
-bool hp8672a_command( const char *cmd );
+
+bool hp8672a_command( const char * /* cmd */ );
 
 
 /*

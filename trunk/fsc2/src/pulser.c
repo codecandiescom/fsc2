@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,8 @@
 #include "fsc2.h"
 
 
-static void is_pulser_func( void *func, const char *text );
+static void is_pulser_func( void *       func,
+							const char * text );
 static void is_pulser_driver( void );
 
 
@@ -133,7 +134,7 @@ void pulser_cleanup( void )
  * of the form '/^P(ULSE)?_?[0-9]+$/i' (in Perl speak)
  *------------------------------------------------------------*/
 
-long p_num( char *txt )
+long p_num( char * txt )
 {
 	while ( txt != NULL && ! isdigit( ( unsigned char ) *txt ) )
 		txt++;
@@ -181,7 +182,8 @@ static void is_pulser_driver( void )
  * needed).
  *----------------------------------------------------------------------*/
 
-static void is_pulser_func( void *func, const char *text )
+static void is_pulser_func( void *       func,
+							const char * text )
 {
 	is_pulser_driver( );
 
@@ -205,7 +207,8 @@ static void is_pulser_func( void *func, const char *text )
  * to be done via the p_assign_channel() function
  *-------------------------------------------------------------------------*/
 
-void p_assign_pod( long func, Var_T *v )
+void p_assign_pod( long    func,
+				   Var_T * v )
 {
 	long pod;
 
@@ -266,7 +269,8 @@ void p_assign_pod( long func, Var_T *v )
  * of pulsers)
  *------------------------------------------------------------------------*/
 
-void p_assign_channel( long func, Var_T *v )
+void p_assign_channel( long    func,
+					   Var_T * v )
 {
 	long channel;
 
@@ -323,7 +327,8 @@ void p_assign_channel( long func, Var_T *v )
  * Function for setting a delay (in seconds) for an output connector
  *-------------------------------------------------------------------*/
 
-void p_set_delay( long func, Var_T *v )
+void p_set_delay( long    func,
+				  Var_T * v )
 {
 	double delay;
 
@@ -408,7 +413,8 @@ void p_inv( long func )
  * for one of the output connector
  *-----------------------------------------------------*/
 
-void p_set_v_high( long func, Var_T *v )
+void p_set_v_high( long    func,
+				   Var_T * v )
 {
 	double voltage;
 
@@ -456,7 +462,8 @@ void p_set_v_high( long func, Var_T *v )
  * for one of the output connectors
  *----------------------------------------------------*/
 
-void p_set_v_low( long func, Var_T *v )
+void p_set_v_low( long    func,
+				  Var_T * v )
 {
 	double voltage;
 
@@ -503,7 +510,7 @@ void p_set_v_low( long func, Var_T *v )
  * Function for setting the timebase of the pulser
  *-------------------------------------------------*/
 
-void p_set_timebase( Var_T *v )
+void p_set_timebase( Var_T * v )
 {
 	double timebase;
 
@@ -588,7 +595,7 @@ void p_set_timebase_level( int level_type )
  * Function for setting the trigger in mode (EXTERNAL or INTERNAL)
  *-----------------------------------------------------------------*/
 
-void p_set_trigger_mode( Var_T *v )
+void p_set_trigger_mode( Var_T * v )
 {
 	int mode;
 
@@ -638,7 +645,7 @@ void p_set_trigger_mode( Var_T *v )
  * Function for setting the trigger in slope (POSITIVE or NEGATIVE)
  *------------------------------------------------------------------*/
 
-void p_set_trigger_slope( Var_T *v )
+void p_set_trigger_slope( Var_T * v )
 {
 	int slope;
 
@@ -689,7 +696,7 @@ void p_set_trigger_slope( Var_T *v )
  * Function for setting the trigger in level voltage
  *---------------------------------------------------*/
 
-void p_set_trigger_level( Var_T *v )
+void p_set_trigger_level( Var_T * v )
 {
 	double level;
 
@@ -734,7 +741,7 @@ void p_set_trigger_level( Var_T *v )
  * Function sets the trigger in impedance
  *----------------------------------------*/
 
-void p_set_trigger_impedance( Var_T *v )
+void p_set_trigger_impedance( Var_T * v )
 {
 	int state;
 
@@ -779,7 +786,7 @@ void p_set_trigger_impedance( Var_T *v )
  * Function for setting the (minimum) repeat time for the experiment
  *-------------------------------------------------------------------*/
 
-void p_set_rep_time( Var_T *v )
+void p_set_rep_time( Var_T * v )
 {
 	double rep_time;
 
@@ -832,7 +839,7 @@ void p_set_rep_time( Var_T *v )
  * Function for setting the (maximum) repeat frequency for the experiment
  *------------------------------------------------------------------------*/
 
-void p_set_rep_freq( Var_T *v )
+void p_set_rep_freq( Var_T * v )
 {
 	double freq, rep_time;
 
@@ -897,7 +904,8 @@ void p_set_rep_freq( Var_T *v )
  * is the function the phase stuff is meant for.
  *------------------------------------------------------------------------*/
 
-void p_phase_ref( int func, int ref )
+void p_phase_ref( int func,
+				  int ref )
 {
 	is_pulser_driver( );
     is_pulser_func( Pulser_Struct[ Cur_Pulser ].set_phase_reference,
@@ -1031,7 +1039,9 @@ long p_new( long pnum )
  * Function for setting one of the properties of a pulse
  *-------------------------------------------------------*/
 
-void p_set( long pnum, int type, Var_T *v )
+void p_set( long    pnum,
+			int     type,
+			Var_T * v )
 {
 	long func, phase;
 	double pos, len, dpos, dlen;
@@ -1158,7 +1168,8 @@ void p_set( long pnum, int type, Var_T *v )
  * specified by the EDL pulse name (i.e. "P12")
  *-----------------------------------------------------------------------*/
 
-Var_T *p_get( char *txt, int type )
+Var_T *p_get( char * txt,
+			  int    type )
 {
 	return p_get_by_num( p_num( txt ), type );
 }
@@ -1169,7 +1180,8 @@ Var_T *p_get( char *txt, int type )
  * specified by pulse number
  *-----------------------------------------------------------------------*/
 
-Var_T *p_get_by_num( long pnum, int type )
+Var_T *p_get_by_num( long pnum,
+					 int  type )
 {
 	int function;
 	double ptime;
@@ -1293,7 +1305,11 @@ Var_T *p_get_by_num( long pnum, int type )
  * pods but just channels.
  *----------------------------------------------------------------------*/
 
-void p_phs_setup( int func, int type, int pod, long val, bool is_pod )
+void p_phs_setup( int  func,
+				  int  type,
+				  int  pod,
+				  long val,
+				  bool is_pod )
 {
 	is_pulser_driver( );
 
@@ -1404,7 +1420,8 @@ void p_exists_function( int function )
  * (i.e. 0 means PHASE_1, 1 means PHASE_2)
  *----------------------------------------------------------*/
 
-void p_set_psd( int func, Var_T *v )
+void p_set_psd( int     func,
+				Var_T * v )
 {
 	double psd;
 
@@ -1447,7 +1464,7 @@ void p_set_psd( int func, Var_T *v )
  * Function for setting the grace period following a pulse.
  *----------------------------------------------------------*/
 
-void p_set_gp( Var_T *v )
+void p_set_gp( Var_T * v )
 {
 	double gp;
 
@@ -1493,7 +1510,7 @@ void p_set_gp( Var_T *v )
  * length can't be determined.
  *----------------------------------------------------------------*/
 
-void p_set_max_seq_len( Var_T *v )
+void p_set_max_seq_len( Var_T * v )
 {
 	double seq_len;
 

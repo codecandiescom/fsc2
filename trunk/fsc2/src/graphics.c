@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -45,12 +45,15 @@ static void fonts_init( void );
 static void set_default_sizes( void );
 static void set_defaults( void );
 static void forms_adapt( void );
-static int run_form_close_handler( FL_FORM *a, void *b );
+static int run_form_close_handler( FL_FORM * a,
+								   void *    b );
 static void G_struct_init( void );
 static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
-static void setup_canvas( Canvas_T *c, FL_OBJECT *obj );
-static void canvas_off( Canvas_T *c, FL_OBJECT *obj );
+static void setup_canvas( Canvas_T  * c,
+						  FL_OBJECT * obj );
+static void canvas_off( Canvas_T *  c,
+						FL_OBJECT * obj );
 static void graphics_free( void );
 
 
@@ -798,7 +801,8 @@ static void forms_adapt( void )
  * as clicking  on the "Close" button within the display window.
  *------------------------------------------------------------------*/
 
-int run_form_close_handler( FL_FORM *a UNUSED_ARG, void *b UNUSED_ARG )
+int run_form_close_handler( FL_FORM * a  UNUSED_ARG,
+							void    * b  UNUSED_ARG )
 {
 	if ( Fsc2_Internals.child_pid == 0 )      /* if child has already exited */
 	{
@@ -1205,7 +1209,9 @@ static void G_init_curves_2d( void )
  * pixmap and then rotate this pixmap 'by hand'.
  *----------------------------------------------------------------------*/
 
-void create_label_pixmap( Canvas_T *c, int coord, char *label )
+void create_label_pixmap( Canvas_T * c,
+						  int        coord,
+						  char *     label )
 {
 	Pixmap pm;
 	int width, height;
@@ -1513,7 +1519,8 @@ static void graphics_free( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
+static void canvas_off( Canvas_T *  c,
+						FL_OBJECT * obj )
 {
 	FL_HANDLE_CANVAS ch;
 
@@ -1545,7 +1552,8 @@ static void canvas_off( Canvas_T *c, FL_OBJECT *obj )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
+static void setup_canvas( Canvas_T *  c,
+						  FL_OBJECT * obj )
 {
 	XSetWindowAttributes attributes;
 	FL_HANDLE_CANVAS ch;
@@ -1610,7 +1618,7 @@ static void setup_canvas( Canvas_T *c, FL_OBJECT *obj )
  * Creates a pixmap for a canvas for buffering.
  *----------------------------------------------*/
 
-void create_pixmap( Canvas_T *c )
+void create_pixmap( Canvas_T * c )
 {
 	char dashes[ ] = { 2, 2 };
 
@@ -1649,7 +1657,7 @@ void create_pixmap( Canvas_T *c )
  * Deletes the pixmap for a canvas for buffering.
  *------------------------------------------------*/
 
-void delete_pixmap( Canvas_T *c )
+void delete_pixmap( Canvas_T * c )
 {
 	XFreeGC( G.d, c->gc );
 	XFreePixmap( G.d, c->pm );
@@ -1779,7 +1787,9 @@ void redraw_axis_2d( int coord )
  * correct number of digits after the decimal point
  *-----------------------------------------------------*/
 
-void make_label_string( char *lstr, double num, int res )
+void make_label_string( char * lstr,
+						double num,
+						int    res )
 {
 	int n, mag;
 
@@ -1893,7 +1903,8 @@ void switch_off_special_cursors( void )
  * Undoes the last action in the 1d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
+							  long        b  UNUSED_ARG )
 {
 	long i;
 	bool is_undo = UNSET;
@@ -1946,7 +1957,8 @@ void undo_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
  * Undoes the last action in the 2d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_2d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
+							  long        b  UNUSED_ARG )
 {
 	Curve_2d_T *cv2;
 	double temp_s2d,
@@ -2033,7 +2045,8 @@ void fs_vert_rescale_2d( void )
  * Callback for the FS button for 1D display
  *-------------------------------------------*/
 
-void fs_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
+							long        b  UNUSED_ARG )
 {
 	int state;
 	long i;
@@ -2080,7 +2093,8 @@ void fs_button_callback_1d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
  * Callback for the FS button for 2D display
  *-------------------------------------------*/
 
-void fs_button_callback_2d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
+							long        b  UNUSED_ARG )
 {
 	int state;
 
@@ -2124,7 +2138,8 @@ void fs_button_callback_2d( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
  * Callback function for the curve buttons in the 1D display window
  *------------------------------------------------------------------*/
 
-void curve_button_callback_1d( FL_OBJECT *obj, long data )
+void curve_button_callback_1d( FL_OBJECT * obj,
+							   long        data )
 {
 	char hstr[ 128 ];
 
@@ -2153,7 +2168,8 @@ void curve_button_callback_1d( FL_OBJECT *obj, long data )
  * Callback function for the curve buttons in the 2D display window
  *------------------------------------------------------------------*/
 
-void curve_button_callback_2d( FL_OBJECT *obj, long data )
+void curve_button_callback_2d( FL_OBJECT * obj,
+							   long        data )
 {
 	char hstr[ 128 ];
 	int bstate;
@@ -2348,7 +2364,8 @@ void clear_curve_2d( long curve )
  * Function does the work for the change_scale_1d() EDL function
  *---------------------------------------------------------------*/
 
-void change_scale_1d( int is_set, void *ptr )
+void change_scale_1d( int    is_set,
+					  void * ptr )
 {
 	double vals[ 4 ];
 
@@ -2366,7 +2383,8 @@ void change_scale_1d( int is_set, void *ptr )
  * Function does the work for the change_scale_2d() EDL function
  *---------------------------------------------------------------*/
 
-void change_scale_2d( int is_set, void *ptr )
+void change_scale_2d( int    is_set,
+					  void * ptr )
 {
 	long i;
 	double vals[ 4 ];
@@ -2408,7 +2426,7 @@ void change_scale_2d( int is_set, void *ptr )
  * Function does the work for the change_label_1d() EDL function
  *---------------------------------------------------------------*/
 
-void change_label_1d( char **label )
+void change_label_1d( char ** label )
 {
 	if ( *label[ X ] != '\0' )
 	{
@@ -2440,7 +2458,7 @@ void change_label_1d( char **label )
  * Function does the work for the change_label_2d() EDL function
  *---------------------------------------------------------------*/
 
-void change_label_2d( char **label )
+void change_label_2d( char ** label )
 {
 	int coord;
 
@@ -2602,7 +2620,7 @@ void rescale_1d( long new_nx )
  * Function does the work for the rescale_2d() EDL function
  *----------------------------------------------------------*/
 
-void rescale_2d( long *new_dims )
+void rescale_2d( long * new_dims )
 {
 	long i, j, k, l, count;
 	long max_x = 0,
@@ -2717,7 +2735,8 @@ void rescale_2d( long *new_dims )
  * Function for toggling 1D display between normal and sliding window mode
  *-------------------------------------------------------------------------*/
 
-void change_mode( long mode, long width )
+void change_mode( long mode,
+				  long width )
 {
 	long curves;
 	long i;
@@ -2784,7 +2803,8 @@ void change_mode( long mode, long width )
  * position).
  *--------------------------------------------------------------*/
 
-int form_event_handler( FL_FORM *form, void *xevent )
+int form_event_handler( FL_FORM * form,
+						void *    xevent )
 {
 	if ( ( ( XEvent * ) xevent )->type == FocusIn )
 	{

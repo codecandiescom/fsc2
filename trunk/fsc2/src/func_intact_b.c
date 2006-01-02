@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,18 +28,20 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_bcreate_child( Var_T *v, Iobject_Type_T type, long coll );
-static void f_bdelete_child( Var_T *v );
-static void f_bdelete_parent( Var_T *v );
-static Var_T *f_bstate_child( Var_T *v );
-static Var_T *f_bchanged_child( Var_T *v );
+static Var_T *f_bcreate_child( Var_T *        v,
+							   Iobject_Type_T type,
+							   long           coll );
+static void f_bdelete_child( Var_T * v );
+static void f_bdelete_parent( Var_T * v );
+static Var_T *f_bstate_child( Var_T * v );
+static Var_T *f_bchanged_child( Var_T * v );
 
 
 /*----------------------------------------------------*
  * Function for appending a new button to the toolbox
  *----------------------------------------------------*/
 
-Var_T *f_bcreate( Var_T *var )
+Var_T *f_bcreate( Var_T * var )
 {
 	Var_T *v = var;
 	Iobject_Type_T type;
@@ -253,7 +255,9 @@ Var_T *f_bcreate( Var_T *var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_bcreate_child( Var_T *v, Iobject_Type_T type, long coll )
+static Var_T *f_bcreate_child( Var_T *        v,
+							   Iobject_Type_T type, 
+							   long           coll )
 {
 	char *buffer, *pos;
 	long new_ID;
@@ -361,7 +365,7 @@ static Var_T *f_bcreate_child( Var_T *v, Iobject_Type_T type, long coll )
  * Deletes one or more buttons, parameter(s) are one or more button IDs.
  *-----------------------------------------------------------------------*/
 
-Var_T *f_bdelete( Var_T *v )
+Var_T *f_bdelete( Var_T * v )
 {
 	/* We need the ID of the button to delete */
 
@@ -406,7 +410,7 @@ Var_T *f_bdelete( Var_T *v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void f_bdelete_child( Var_T *v )
+static void f_bdelete_child( Var_T * v )
 {
 	char *buffer, *pos;
 	size_t len;
@@ -460,7 +464,7 @@ static void f_bdelete_child( Var_T *v )
  * process, which actually removes the button.
  *---------------------------------------------------------*/
 
-static void f_bdelete_parent( Var_T *v )
+static void f_bdelete_parent( Var_T * v )
 {
 	Iobject_T *io, *nio;
 	long new_anchor = 0;
@@ -546,7 +550,7 @@ static void f_bdelete_parent( Var_T *v )
  * Sets or returns the state of a button
  *---------------------------------------*/
 
-Var_T *f_bstate( Var_T *v )
+Var_T *f_bstate( Var_T * v )
 {
 	Iobject_T *io, *oio;
 	int state;
@@ -657,7 +661,7 @@ Var_T *f_bstate( Var_T *v )
  * the message passing mechanism.
  *----------------------------------------------------------------*/
 
-static Var_T *f_bstate_child( Var_T *v )
+static Var_T *f_bstate_child( Var_T * v )
 {
 	long ID;
 	long chld_state = -1;
@@ -737,7 +741,7 @@ static Var_T *f_bstate_child( Var_T *v )
  * Function for testing if the state of a button changed
  *-------------------------------------------------------*/
 
-Var_T *f_bchanged( Var_T *v )
+Var_T *f_bchanged( Var_T * v )
 {
 	Iobject_T *io;
 
@@ -784,7 +788,7 @@ Var_T *f_bchanged( Var_T *v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *f_bchanged_child( Var_T *v )
+static Var_T *f_bchanged_child( Var_T * v )
 {
 	long ID;
 	char *buffer, *pos;

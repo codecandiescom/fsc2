@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,8 +26,11 @@
 
 
 static bool ep385_update_pulses( bool flag );
-static void ep385_pulse_check( Function_T *f );
-static void ep385_defense_shape_check( Function_T *shape );
+
+static void ep385_pulse_check( Function_T * f );
+
+static void ep385_defense_shape_check( Function_T * shape );
+
 static void ep385_commit( bool flag );
 
 
@@ -347,7 +350,7 @@ static bool ep385_update_pulses( bool flag )
  * This function simply checks that no pulses of a function overlap.
  *-------------------------------------------------------------------*/
 
-static void ep385_pulse_check( Function_T *f )
+static void ep385_pulse_check( Function_T * f )
 {
 	Pulse_T *p1, *p2;
 	int i, j;
@@ -443,7 +446,7 @@ static void ep385_pulse_check( Function_T *f )
  * mentioned EDL functions have been called.
  *------------------------------------------------------------------------*/
 
-static void ep385_defense_shape_check( Function_T *shape )
+static void ep385_defense_shape_check( Function_T * shape )
 {
 	Function_T *defense = ep385.function + PULSER_CHANNEL_DEFENSE;
 	Pulse_T *shape_p, *defense_p;
@@ -613,7 +616,7 @@ void ep385_full_reset( void )
  * Checks if shape padding can be set correctly for all pulses of a channel
  *--------------------------------------------------------------------------*/
 
-void ep385_shape_padding_check_1( Channel_T *ch )
+void ep385_shape_padding_check_1( Channel_T * ch )
 {
 	Pulse_Params_T *pp, *ppp;
 	int i;
@@ -757,7 +760,7 @@ void ep385_shape_padding_check_2( void )
  * if the time between two TWT gets too short.
  *-----------------------------------------------------------------*/
 
-void ep385_twt_padding_check( Channel_T *ch )
+void ep385_twt_padding_check( Channel_T * ch )
 {
 	Pulse_Params_T *pp, *ppp;
 	int i;
@@ -900,7 +903,8 @@ void ep385_twt_padding_check( Channel_T *ch )
  * to the next pulse in the pulse list.
  *------------------------------------------------*/
 
-Pulse_T *ep385_delete_pulse( Pulse_T *p, bool warn )
+Pulse_T *ep385_delete_pulse( Pulse_T * p,
+							 bool      warn )
 {
 	Pulse_T *pp;
 	Function_T *f;

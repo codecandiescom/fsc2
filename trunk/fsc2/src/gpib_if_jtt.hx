@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -51,19 +51,30 @@ struct GPIB_Dev {
 };
 
 
-int gpib_init( const char * /* log_file_name */, int /* log_level */ );
+int gpib_init( const char * /* log_file_name */,
+			   int          /* log_level     */ );
 int gpib_shutdown( void );
-int gpib_init_device( const char * /* device_name */, int * /* dev */ );
-int gpib_timeout( int /* device */, int /* period */ );
+int gpib_init_device( const char * /* device_name */,
+					  int *        /* dev         */ );
+int gpib_timeout( int /* device */,
+				  int /* period */ );
 int gpib_clear_device( int /* device */ );
 int gpib_local( int /* device */ );
 int gpib_llo( int /* device */ );
 int gpib_trigger( int /* device */ );
-int gpib_wait( int /* device */, int /* mask */, int * /* status */ );
-int gpib_write( int device, const char *buffer, long length );
-int gpib_read( int /* device */, char * /* buffer */, long * /* length */ );
-int gpib_serial_poll( int /* device */, unsigned char * /* stb */ );
-void gpib_log_message( const char * /* fmt */, ... );
+int gpib_wait( int   /* device */,
+			   int   /* mask   */,
+			   int * /* status */ );
+int gpib_write( int          /* device */,
+				const char * /* buffer */,
+				long         /* length */ );
+int gpib_read( int    /* device */,
+			   char * /* buffer */,
+			   long * /* length */ );
+int gpib_serial_poll( int             /* device */,
+					  unsigned char * /* stb    */ );
+void gpib_log_message( const char * /* fmt */,
+					   ... );
 
 
 extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */

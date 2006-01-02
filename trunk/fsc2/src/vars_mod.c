@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,12 +25,24 @@
 #include "fsc2.h"
 
 
-static Var_T *vars_mod_i( Var_T *v1, Var_T *v2, bool exc );
-static Var_T *vars_int_var_mod( Var_T *v1, Var_T *v2, bool exc );
-static Var_T *vars_float_var_mod( Var_T *v1, Var_T *v2, bool exc );
-static Var_T *vars_int_arr_mod( Var_T *v1, Var_T *v2, bool exc );
-static Var_T *vars_float_arr_mod( Var_T *v1, Var_T *v2, bool exc );
-static Var_T *vars_ref_mod( Var_T *v1, Var_T *v2, bool exc );
+static Var_T *vars_mod_i( Var_T * v1,
+						  Var_T * v2,
+						  bool    exc );
+static Var_T *vars_int_var_mod( Var_T * v1,
+								Var_T * v2,
+								bool    exc );
+static Var_T *vars_float_var_mod( Var_T * v1,
+								  Var_T * v2,
+								  bool    exc );
+static Var_T *vars_int_arr_mod( Var_T * v1,
+								Var_T * v2,
+								bool    exc );
+static Var_T *vars_float_arr_mod( Var_T * v1,
+								  Var_T * v2,
+								  bool   exc );
+static Var_T *vars_ref_mod( Var_T * v1,
+							Var_T * v2,
+							bool    exc );
 static void vars_mod_check( double val );
 
 
@@ -38,7 +50,8 @@ static void vars_mod_check( double val );
  * Function for calculating the modulo of two variables of arbitrary types
  *-------------------------------------------------------------------------*/
 
-Var_T *vars_mod( Var_T *v1, Var_T *v2 )
+Var_T *vars_mod( Var_T * v1,
+				 Var_T * v2 )
 {
 	vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
 	vars_check( v2, RHS_TYPES );
@@ -72,7 +85,9 @@ Var_T *vars_mod( Var_T *v1, Var_T *v2 )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_mod_i( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_mod_i( Var_T * v1,
+						  Var_T * v2,
+						  bool    exc )
 {
 	Var_T *new_var = NULL;
 
@@ -110,7 +125,9 @@ static Var_T *vars_mod_i( Var_T *v1, Var_T *v2, bool exc )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_var_mod( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_int_var_mod( Var_T * v1,
+								Var_T * v2,
+								bool    exc )
 {
 	Var_T *new_var = NULL;
 	ssize_t i;
@@ -277,7 +294,9 @@ static Var_T *vars_int_var_mod( Var_T *v1, Var_T *v2, bool exc )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_var_mod( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_float_var_mod( Var_T * v1,
+								  Var_T * v2,
+								  bool    exc )
 {
 	Var_T *new_var = NULL;
 	ssize_t i;
@@ -419,7 +438,9 @@ static Var_T *vars_float_var_mod( Var_T *v1, Var_T *v2, bool exc )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_arr_mod( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_int_arr_mod( Var_T * v1,
+								Var_T * v2,
+								bool    exc )
 {
 	Var_T *new_var = NULL;
 	Var_T *vt;
@@ -531,7 +552,9 @@ static Var_T *vars_int_arr_mod( Var_T *v1, Var_T *v2, bool exc )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_arr_mod( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_float_arr_mod( Var_T * v1,
+								  Var_T * v2,
+								  bool    exc )
 {
 	Var_T *new_var = NULL;
 	Var_T *vt;
@@ -617,7 +640,9 @@ static Var_T *vars_float_arr_mod( Var_T *v1, Var_T *v2, bool exc )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_ref_mod( Var_T *v1, Var_T *v2, bool exc )
+static Var_T *vars_ref_mod( Var_T * v1,
+							Var_T * v2,
+							bool    exc )
 {
 	Var_T *new_var = NULL;
 	Var_T *vt;

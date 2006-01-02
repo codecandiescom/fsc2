@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -63,12 +63,18 @@ static volatile sig_atomic_t Fsc2d_replied;
 static int Cwd_ok;
 
 static int connect_to_fsc2d( void );
-static int start_fsc2d( bool exclusive, FILE *in_file_fp );
+static int start_fsc2d( bool   exclusive,
+						FILE * in_file_fp );
 static void fsc2d_sig_handler( int signo );
-static void fsc2d( int fd, bool exclusive, struct passwd *ui );
-static int check_instances( Fsc2_Instance_T *instances, int num_instances,
-							int is_new_connect );
-static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances );
+static void fsc2d( int             fd,
+				   bool            exclusive,
+				   struct passwd * ui );
+static int check_instances( Fsc2_Instance_T * instances,
+							int               num_instances,
+							int               is_new_connect );
+static int new_client( int               fd,
+					   Fsc2_Instance_T * instances,
+					   int               num_instances );
 static void set_fs2d_signals( void );
 
 
@@ -81,7 +87,8 @@ static void set_fs2d_signals( void );
  * may run and must start a child process for external connections.
  *---------------------------------------------------------------------*/
 
-int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp )
+int check_spawn_fsc2d( bool   exclusive,
+					   FILE * in_file_fp )
 {
 	int sock_fd;
 	char line[ MAX_LINE_LENGTH ];
@@ -228,7 +235,8 @@ static int connect_to_fsc2d( void )
  * fsc2 must get permission from before they may start.
  *----------------------------------------------------------*/
 
-static int start_fsc2d( bool exclusive, FILE *in_file_fp )
+static int start_fsc2d( bool   exclusive,
+						FILE * in_file_fp )
 {
 	pid_t pid;
 	int listen_fd;
@@ -336,7 +344,9 @@ static void fsc2d_sig_handler( int signo )
  * segments and also quits.
  *-------------------------------------------------------------------------*/
 
-static void fsc2d( int fd, bool exclusive, struct passwd *ui )
+static void fsc2d( int             fd,
+				   bool            exclusive,
+				   struct passwd * ui )
 {
 	Fsc2_Instance_T instances[ FSC2_MAX_INSTANCES + 1 ];
 	fd_set fds;
@@ -393,8 +403,9 @@ static void fsc2d( int fd, bool exclusive, struct passwd *ui )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int check_instances( Fsc2_Instance_T *instances, int num_instances,
-							int is_new_connect )
+static int check_instances( Fsc2_Instance_T * instances,
+							int               num_instances,
+							int               is_new_connect )
 {
 	Fsc2_Instance_T *ip = instances;
 	int i = 0;
@@ -456,7 +467,9 @@ static int check_instances( Fsc2_Instance_T *instances, int num_instances,
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int new_client( int fd, Fsc2_Instance_T *instances, int num_instances )
+static int new_client( int               fd,
+					   Fsc2_Instance_T * instances,
+					   int               num_instances )
 {
 	socklen_t cli_len;
 	struct sockaddr_un cli_addr;

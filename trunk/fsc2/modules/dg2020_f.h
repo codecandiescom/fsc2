@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -294,100 +294,191 @@ extern DG2020_T dg2020;
 /* Here are all the directy exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
-int dg2020_f_init_hook( void );
-int dg2020_f_test_hook( void );
+int dg2020_f_init_hook(        void );
+int dg2020_f_test_hook(        void );
 int dg2020_f_end_of_test_hook( void );
-int dg2020_f_exp_hook( void );
-int dg2020_f_end_of_exp_hook( void );
-void dg2020_f_exit_hook( void );
+int dg2020_f_exp_hook(         void );
+int dg2020_f_end_of_exp_hook(  void );
+void dg2020_f_exit_hook(       void );
 
 
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_phase_switch_delay( Var_T *v );
-Var_T *pulser_grace_period( Var_T *v );
-Var_T *pulser_keep_all_pulses( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_next_phase( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_phase_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_command( Var_T *v );
+Var_T *pulser_name(                   Var_T * /* v */ );
+Var_T *pulser_show_pulses(            Var_T * /* v */ );
+Var_T *pulser_dump_pulses(            Var_T * /* v */ );
+Var_T *pulser_phase_switch_delay(     Var_T * /* v */ );
+Var_T *pulser_grace_period(           Var_T * /* v */ );
+Var_T *pulser_keep_all_pulses(        Var_T * /* v */ );
+Var_T *pulser_maximum_pattern_length( Var_T * /* v */ );
+Var_T *pulser_state(                  Var_T * /* v */ );
+Var_T *pulser_channel_state(          Var_T * /* v */ );
+Var_T *pulser_update(                 Var_T * /* v */ );
+Var_T *pulser_shift(                  Var_T * /* v */ );
+Var_T *pulser_increment(              Var_T * /* v */ );
+Var_T *pulser_next_phase(             Var_T * /* v */ );
+Var_T *pulser_reset(                  Var_T * /* v */ );
+Var_T *pulser_phase_reset(            Var_T * /* v */ );
+Var_T *pulser_pulse_reset(            Var_T * /* v */ );
+Var_T *pulser_lock_keyboard(          Var_T * /* v */ );
+Var_T *pulser_command(                Var_T * /* v */ );
 
 
 /* Here follow the functions from dg2020_gen_f.c */
 
-bool dg2020_store_timebase( double timebase );
-bool dg2020_assign_function( int function, long pod );
-bool dg2020_assign_channel_to_function( int function, long channel );
-bool dg2020_invert_function( int function );
-bool dg2020_set_function_delay( int function, double delay );
-bool dg2020_set_function_high_level( int function, double voltage );
-bool dg2020_set_function_low_level( int function, double voltage );
-bool dg2020_set_trigger_mode( int mode );
-bool dg2020_set_trig_in_level( double voltage );
-bool dg2020_set_trig_in_slope( int slope );
-bool dg2020_set_trig_in_impedance( int state );
-bool dg2020_set_repeat_time( double rep_time );
-bool dg2020_set_max_seq_len( double seq_len );
-bool dg2020_set_phase_reference( int phase, int function );
-bool dg2020_phase_setup_prep( int func, int type, int pod, long val );
-bool dg2020_phase_setup( int func );
-bool dg2020_phase_setup_finalize( int func, PHS_T p_phs );
-bool dg2020_set_phase_switch_delay( int func, double del_time );
-bool dg2020_set_grace_period( double gp_time );
+bool dg2020_store_timebase( double /* timebase */ );
+
+bool dg2020_assign_function( int  /* function */,
+							 long /* pod      */ );
+
+bool dg2020_assign_channel_to_function( int  /* function */, 
+										long /* channel  */ );
+
+bool dg2020_invert_function( int /* function */ );
+
+bool dg2020_set_function_delay( int    /* function */,
+								double /* delay    */ );
+
+bool dg2020_set_function_high_level( int    /* function */,
+									 double /* voltage  */ );
+
+bool dg2020_set_function_low_level( int    /* function */,
+									double /* voltage  */ );
+
+bool dg2020_set_trigger_mode( int /* mode */ );
+
+bool dg2020_set_trig_in_level( double /* voltage */ );
+
+bool dg2020_set_trig_in_slope( int /* slope */ );
+
+bool dg2020_set_trig_in_impedance( int /* state */ );
+
+bool dg2020_set_repeat_time( double /* rep_time */ );
+
+bool dg2020_set_max_seq_len( double /* seq_len */ );
+
+bool dg2020_set_phase_reference( int /* phase    */,
+								 int /* function */ );
+
+bool dg2020_phase_setup_prep( int  /* func */,
+							  int  /* type */,
+							  int  /* pod  */,
+							  long /* val  */ );
+
+bool dg2020_phase_setup( int /* func */ );
+
+bool dg2020_phase_setup_finalize( int   /* func  */,
+								  PHS_T /* p_phs */ );
+
+bool dg2020_set_phase_switch_delay( int    /* func     */,
+									double /* del_time */ );
+
+bool dg2020_set_grace_period( double /* gp_time */ );
+
 bool dg2020_keep_all( void );
 
 
 /* These are the functions from dg2020_pulse_f.c */
 
-bool dg2020_new_pulse( long pnum );
-bool dg2020_set_pulse_function( long pnum, int function );
-bool dg2020_set_pulse_position( long pnum, double p_time );
-bool dg2020_set_pulse_length( long pnum, double p_time );
-bool dg2020_set_pulse_position_change( long pnum, double p_time );
-bool dg2020_set_pulse_length_change( long pnum, double p_time );
-bool dg2020_set_pulse_phase_cycle( long pnum, long cycle );
+bool dg2020_new_pulse( long /* pnum */ );
 
-bool dg2020_get_pulse_function( long pnum, int *function );
-bool dg2020_get_pulse_position( long pnum, double *p_time );
-bool dg2020_get_pulse_length( long pnum, double *p_time );
-bool dg2020_get_pulse_position_change( long pnum, double *p_time );
-bool dg2020_get_pulse_length_change( long pnum, double *p_time );
-bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle );
+bool dg2020_set_pulse_function( long /* pnum     */,
+								int  /* function */ );
 
-bool dg2020_change_pulse_position( long pnum, double p_time );
-bool dg2020_change_pulse_length( long pnum, double p_time );
-bool dg2020_change_pulse_position_change( long pnum, double p_time );
-bool dg2020_change_pulse_length_change( long pnum, double p_time );
+bool dg2020_set_pulse_position( long   /* pnum   */,
+								double /* p_time */ );
+
+bool dg2020_set_pulse_length( long   /* pnum   */,
+							  double /* p_time */ );
+
+bool dg2020_set_pulse_position_change( long   /* pnum   */,
+									   double /* p_time */ );
+
+bool dg2020_set_pulse_length_change( long   /* pnum   */,
+									 double /* p_time */ );
+
+bool dg2020_set_pulse_phase_cycle( long /* pnum  */,
+								   long /* cycle */ );
+
+
+bool dg2020_get_pulse_function( long  /* pnum     */,
+								int * /* function */ );
+
+bool dg2020_get_pulse_position( long     /* pnum   */,
+								double * /* p_time */ );
+
+bool dg2020_get_pulse_length( long     /* pnum   */,
+							  double * /* p_time */ );
+
+bool dg2020_get_pulse_position_change( long     /* pnum   */,
+									   double * /* p_time */ );
+
+bool dg2020_get_pulse_length_change( long     /* pnum   */,
+									 double * /* p_time */ );
+
+bool dg2020_get_pulse_phase_cycle( long   /* pnum  */,
+								   long * /* cycle */ );
+
+
+bool dg2020_change_pulse_position( long   /* pnum   */,
+								   double /* p_time */ );
+
+bool dg2020_change_pulse_length( long   /* pnum   */,
+								 double /* p_time */ );
+
+bool dg2020_change_pulse_position_change( long   /* pnum   */,
+										  double /* p_time */ );
+
+bool dg2020_change_pulse_length_change( long   /* pnum   */,
+										double /* p_time */ );
 
 
 /* Here come the functions from dg2020_util_f.c */
 
-Ticks dg2020_double2ticks( double p_time );
-double dg2020_ticks2double( Ticks ticks );
-void dg2020_check_pod_level_diff( double high, double low );
-Pulse_T *dg2020_get_pulse( long pnum );
-const char *dg2020_ptime( double p_time );
-const char *dg2020_pticks( Ticks ticks );
+Ticks dg2020_double2ticks( double /* p_time */ );
+
+double dg2020_ticks2double( Ticks /* ticks */ );
+
+void dg2020_check_pod_level_diff( double /* high */,
+								  double /* low  */ );
+
+Pulse_T *dg2020_get_pulse( long /* pnum */ );
+
+const char *dg2020_ptime( double /* p_time */ );
+
+const char *dg2020_pticks( Ticks /* ticks */ );
+
 Channel_T *dg2020_get_next_free_channel( void );
-int dg2020_start_compare( const void *A, const void *B );
-bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num );
-int dg2020_get_phase_pulse_list( Function_T *f, Channel_T *channel,
-								 Pulse_T ***list );
+
+int dg2020_start_compare( const void * /* A */,
+						  const void * /* B */ );
+
+bool dg2020_find_phase_pulse( Pulse_T *   /* p   */,
+							  Pulse_T *** /* pl  */,
+							  int *       /* num */ );
+
+int dg2020_get_phase_pulse_list( Function_T * /* f       */,
+								 Channel_T *  /* channel */,
+								 Pulse_T ***  /* list    */ );
+
 Ticks dg2020_get_max_seq_len( void );
+
 void dg2020_calc_padding( void );
-bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length );
-void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset );
-int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
-void dg2020_dump_channels( FILE *fp );
+
+bool dg2020_prep_cmd( char ** /* cmd     */,
+					  int     /* channel */,
+					  Ticks   /* address */,
+					  Ticks   /* length  */ );
+
+void dg2020_set( char * /* arena  */,
+				 Ticks  /* start  */,
+				 Ticks  /* len    */,
+				 Ticks  /* offset */ );
+
+int dg2020_diff( char *  /* old_p  */,
+				 char *  /* new_p  */,
+				 Ticks * /* start  */,
+				 Ticks * /* length */ );
+
+void dg2020_dump_channels( FILE * /* fp */ );
 
 
 /* Functions from dg2020_init_f.c */
@@ -398,44 +489,89 @@ void dg2020_init_setup( void );
 /* Functions from dg2020_run_f.c */
 
 bool dg2020_do_update( void );
-bool dg2020_reorganize_pulses( bool flag );
-void dg2020_do_checks( Function_T *f );
+
+bool dg2020_reorganize_pulses( bool /* flag */ );
+
+void dg2020_do_checks( Function_T * /* f */ );
+
 void dg2020_full_reset( void );
-Pulse_T *dg2020_delete_pulse( Pulse_T *p );
-void dg2020_reorganize_phases( Function_T *f, bool flag );
-void dg2020_recalc_phase_pulse( Function_T *f, Pulse_T *phase_p,
-								Pulse_T *p, int nth, bool flag );
-void dg2020_finalize_phase_pulses( int func );
-void dg2020_set_pulses( Function_T *f );
-void dg2020_set_phase_pulses( Function_T *f );
-void dg2020_commit( Function_T * f, bool flag );
-void dg2020_commit_phases( Function_T * f, bool flag );
-void dg2020_clear_padding_block( Function_T *f );
+
+Pulse_T *dg2020_delete_pulse( Pulse_T * /* p */ );
+
+void dg2020_reorganize_phases( Function_T * /* f    */,
+							   bool         /* flag */ );
+
+void dg2020_recalc_phase_pulse( Function_T * /* f       */,
+								Pulse_T *    /* phase_p */,
+								Pulse_T *    /* p       */,
+								int          /* nth     */,
+								bool         /* flag    */ );
+
+void dg2020_finalize_phase_pulses( int /* func */ );
+
+void dg2020_set_pulses( Function_T * /* f */ );
+
+void dg2020_set_phase_pulses( Function_T * /* f */ );
+
+void dg2020_commit( Function_T * /* f    */,
+					bool         /* flag */ );
+
+void dg2020_commit_phases( Function_T * /* f    */,
+						   bool         /* flag */ );
+
+void dg2020_clear_padding_block( Function_T * /* f */ );
 
 
 /* Finally the functions from dg2020_gpib_f.c */
 
-bool dg2020_init( const char *name );
-bool dg2020_run( bool flag );
-bool dg2020_set_timebase( double timebase );
-bool dg2020_set_memory_size( long mem_size );
-bool dg2020_channel_assign(  int channel, int pod );
+bool dg2020_init( const char * /* name */ );
+
+bool dg2020_run( bool /* flag */ );
+
+bool dg2020_set_timebase( double /* timebase */ );
+
+bool dg2020_set_memory_size( long /* mem_size */ );
+
+bool dg2020_channel_assign(  int /* channel */,
+							 int /* pod     */ );
+
 bool dg2020_update_data( void );
-bool dg2020_make_blocks( int num_blocks, Block_T *block );
-bool dg2020_make_seq( int num_blocks, Block_T *block );
-bool pulser_set_channel( int channel, Ticks address,
-						 Ticks length, char *pattern );
-bool dg2020_set_constant( int channel, Ticks address,
-						  Ticks length, int state );
-bool dg2020_set_pod_high_level( int pod, double voltage );
-bool dg2020_set_pod_low_level( int pod, double voltage );
-bool dg2020_set_trigger_in_level( double voltage );
-bool dg2020_set_trigger_in_slope( int slope );
-bool dg2020_set_trigger_in_impedance( int state );
+
+bool dg2020_make_blocks( int       /* num_blocks */,
+						 Block_T * /* block      */ );
+
+bool dg2020_make_seq( int       /* num_blocks */,
+					  Block_T * /* block      */ );
+
+bool pulser_set_channel( int    /* channel */,
+						 Ticks  /* address */,
+						 Ticks  /* length  */,
+						 char * /* pattern */ );
+
+bool dg2020_set_constant( int   /* channel */,
+						  Ticks /* address */,
+						  Ticks /* length  */,
+						  int   /* state   */ );
+
+bool dg2020_set_pod_high_level( int    /* pod     */,
+								double /* voltage */ );
+
+bool dg2020_set_pod_low_level( int    /* pod     */,
+							   double /* voltage */ );
+
+bool dg2020_set_trigger_in_level( double /* voltage */ );
+
+bool dg2020_set_trigger_in_slope( int /* slope */ );
+
+bool dg2020_set_trigger_in_impedance( int /* state */ );
+
 void dg2020_gpib_failure( void );
-bool dg2020_lock_state( bool lock );
-bool dg2020_command( const char *cmd );
-long dg2020_ch_to_num( long channel );
+
+bool dg2020_lock_state( bool /* lock */ );
+
+bool dg2020_command( const char * /* cmd */ );
+
+long dg2020_ch_to_num( long /* channel */ );
 
 
 #endif /* ! DG2020_F_HEADER */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,7 +29,8 @@
 #include "fsc2.h"
 
 
-void vars_assign( Var_T *src, Var_T *dest );
+void vars_assign( Var_T * /* src */,
+				  Var_T * /* dest */ );
 
 
 #endif  /* ! VARS_ASS_HEADER */

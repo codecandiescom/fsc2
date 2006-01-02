@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -388,27 +388,56 @@ struct Graphics_2d {
 
 
 void start_graphics( void );
+
 void stop_graphics( void );
-void make_label_string( char *lstr, double num, int res );
-void create_label_pixmap( Canvas_T *c, int coord, char *label );
+
+void make_label_string( char * /* lstr */,
+						double /* num  */,
+						int    /* res  */ );
+
+void create_label_pixmap( Canvas_T * /* c     */,
+						  int        /* coord */,
+						  char *     /* label */ );
+
 void switch_off_special_cursors( void );
-void clear_curve_1d( long curve );
-void clear_curve_2d( long curve );
-void create_pixmap( Canvas_T *c );
-void delete_pixmap( Canvas_T *c );
-void redraw_axis_1d( int coord );
-void redraw_axis_2d( int coord );
-void change_scale_1d( int is_set, void *ptr );
-void change_scale_2d( int is_set, void *ptr );
-void change_label_1d( char **label );
-void change_label_2d( char **label );
-void rescale_1d( long new_nx );
-void rescale_2d( long *new_dims );
+
+void clear_curve_1d( long /* curve */ );
+
+void clear_curve_2d( long /* curve */ );
+
+void create_pixmap( Canvas_T * /* c */ );
+
+void delete_pixmap( Canvas_T * /* c */ );
+
+void redraw_axis_1d( int /* coord */ );
+
+void redraw_axis_2d( int /* coord */ );
+
+void change_scale_1d( int    /* is_set */,
+					  void * /* ptr    */ );
+
+void change_scale_2d( int    /* is_set */,
+					  void * /* ptr    */ );
+
+void change_label_1d( char ** /* label */ );
+
+void change_label_2d( char ** /* label */ );
+
+void rescale_1d( long /* new_nx */ );
+
+void rescale_2d( long * /* new_dims */ );
+
 void fs_vert_rescale_1d( void );
+
 void fs_vert_rescale_2d( void );
-void redraw_canvas_2d( Canvas_T *c );
-void change_mode( long mode, long width );
-int form_event_handler( FL_FORM *form, void *xevent );
+
+void redraw_canvas_2d( Canvas_T * /* c */ );
+
+void change_mode( long /* mode  */,
+				  long /* width */ );
+
+int form_event_handler( FL_FORM * /* form   */,
+						void *    /* xevent */ );
 
 
 #endif   /* ! GRAPHICS_HEADER */

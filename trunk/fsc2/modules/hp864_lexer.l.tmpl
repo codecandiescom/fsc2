@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,8 +43,10 @@
 
 static int hp864_tmpl_lex( void );
 static int hp864_tmpl_get_unit( void );
-static void hp864_tmpl_new_table_entry( int type, double val );
-static int hp864_tmpl_comp( const void *a, const void *b );
+static void hp864_tmpl_new_table_entry( int type,
+										double val );
+static int hp864_tmpl_comp( const void * a,
+							const void * b );
 
 static long hp864_tmpl_Lc,
 			hp864_tmpl_Comm_Lc;
@@ -149,7 +151,7 @@ DU       {IU}|{FU}
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hp864_tmpl_read_table( FILE *fp )
+void hp864_tmpl_read_table( FILE * fp )
 {
 	static bool is_restart = UNSET;
 	int type;
@@ -257,7 +259,8 @@ static int hp864_tmpl_get_unit( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hp864_tmpl_new_table_entry( int type, double val )
+static void hp864_tmpl_new_table_entry( int    type,
+										double val )
 {
 	static bool is_freq = UNSET,
 				is_att = UNSET;
@@ -401,12 +404,13 @@ static void hp864_tmpl_new_table_entry( int type, double val )
 }
 
 
-/*---------------------------------------------------------------*
- * Comparison function sorting of the table entries in ascending
- * order of frequencies.
- *---------------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Comparison function for sorting of the table entries
+ * in ascending order of frequencies.
+ *------------------------------------------------------*/
 
-static int hp864_tmpl_comp( const void *a, const void *b )
+static int hp864_tmpl_comp( const void * a,
+							const void * b )
 {
 	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
 					  *B = ( Att_Table_Entry_T * ) b;

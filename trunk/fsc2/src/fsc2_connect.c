@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -87,9 +87,13 @@ typedef unsigned int socklen_t;
 
 #if defined __STRICT_ANSI__
 #define P_tmpdir   "/tmp"
-extern int mkstemp( char *template );
-extern int fchmod( int fildes, mode_t mode );
-extern int snprintf( char *str, size_t size, const  char *format, ... );
+extern int mkstemp( char * template );
+extern int fchmod( int    fildes,
+				   mode_t mode );
+extern int snprintf( char *        str,
+					 size_t        size,
+					 const  char * format,
+					 ... );
 #endif
 
 /* FSC2_SOCKET must be identical to the definition in fsc2.h ! */
@@ -99,15 +103,26 @@ extern int snprintf( char *str, size_t size, const  char *format, ... );
 #define MAXLINE      4096
 
 
-void make_tmp_file( char *fname );
-int open_fsc2_socket( const char *fname );
-void start_fsc2( char *pname, char *fname, int wait_flag );
+void make_tmp_file( char * fname );
+int open_fsc2_socket( const char * fname );
+void start_fsc2( char * pname,
+				 char * fname,
+				 int    wait_flag );
 void sig_handler( int signo );
-void contact_fsc2( int sock_fd, char *pname, char *fname );
-void clean_up( const char *fname, int sock_fd, int ret_val );
-ssize_t writen( int fd, const void *vptr, size_t n );
-ssize_t read_line( int fd, void *vptr, size_t max_len );
-ssize_t do_read( int fd, char *ptr );
+void contact_fsc2( int    sock_fd,
+				   char * pname,
+				   char * fname );
+void clean_up( const char * fname,
+			   int          sock_fd,
+			   int          ret_val );
+ssize_t writen( int          fd,
+				const void * vptr,
+				size_t       n );
+ssize_t read_line( int    fd,
+				   void * vptr,
+				   size_t max_len );
+ssize_t do_read( int    fd,
+				 char * ptr );
 
 
 static volatile sig_atomic_t Sig_type = 0;
@@ -122,7 +137,7 @@ static volatile sig_atomic_t Sig_type = 0;
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int main( int argc, char *argv[ ] )
+int main( int argc, char * argv[ ] )
 {
 	char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
 	int sock_fd;
@@ -146,7 +161,7 @@ int main( int argc, char *argv[ ] )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void make_tmp_file( char *fname )
+void make_tmp_file( char * fname )
 {
 	int tmp;
 	ssize_t bytes_read;
@@ -191,7 +206,7 @@ void make_tmp_file( char *fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int open_fsc2_socket( const char *fname )
+int open_fsc2_socket( const char * fname )
 {
 	int sock_fd;
 	struct sockaddr_un serv_addr;
@@ -243,7 +258,9 @@ int open_fsc2_socket( const char *fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void start_fsc2( char *pname, char *fname, int wait_flag )
+void start_fsc2( char * pname,
+				 char * fname,
+				 int    wait_flag )
 {
 	char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
 	int ac = 0;
@@ -339,7 +356,9 @@ void sig_handler( int signo )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void contact_fsc2( int sock_fd, char *pname, char *fname )
+void contact_fsc2( int    sock_fd,
+				   char * pname,
+				   char * fname )
 {
 	char line[ MAXLINE ];
 	char *prog_name;
@@ -432,7 +451,9 @@ void contact_fsc2( int sock_fd, char *pname, char *fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void clean_up( const char *fname, int sock_fd, int ret_val )
+void clean_up( const char * fname,
+			   int          sock_fd,
+			   int          ret_val )
 {
 	unlink( fname );
 	close( sock_fd );
@@ -443,7 +464,9 @@ void clean_up( const char *fname, int sock_fd, int ret_val )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t read_line( int fd, void *vptr, size_t max_len )
+ssize_t read_line( int    fd,
+				   void * vptr,
+				   size_t max_len )
 {
 	ssize_t n, rc;
 	char c, *ptr;
@@ -477,7 +500,8 @@ ssize_t read_line( int fd, void *vptr, size_t max_len )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t do_read( int fd, char *ptr )
+ssize_t do_read( int    fd,
+				 char * ptr )
 {
 	static int read_cnt;
 	static char *read_ptr;
@@ -508,7 +532,9 @@ ssize_t do_read( int fd, char *ptr )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t writen( int fd, const void *vptr, size_t n )
+ssize_t writen( int          fd,
+				const void * vptr,
+				size_t       n )
 {
 	size_t nleft;
 	ssize_t nwritten;

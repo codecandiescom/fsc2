@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -197,67 +197,110 @@ enum {
 
 /* declaration of exported functions */
 
-int lecroy9400_init_hook( void );
-int lecroy9400_test_hook( void );
-int lecroy9400_exp_hook( void );
+int lecroy9400_init_hook(       void );
+int lecroy9400_test_hook(       void );
+int lecroy9400_exp_hook(        void );
 int lecroy9400_end_of_exp_hook( void );
-void lecroy9400_exit_hook( void );
+void lecroy9400_exit_hook(      void );
 
 
-Var_T *digitizer_name( Var_T *v );
-Var_T *digitizer_define_window( Var_T *v );
-Var_T *digitizer_timebase( Var_T *v );
-Var_T *digitizer_time_per_point( Var_T *v );
-Var_T *digitizer_sensitivity( Var_T *v );
-Var_T *digitizer_averaging( Var_T *v );
-Var_T *digitizer_num_averages( Var_T *v );
-Var_T *digitizer_record_length( Var_T *v );
-Var_T *digitizer_trigger_position( Var_T *v );
-Var_T *digitizer_meas_channel_ok( Var_T *v );
-Var_T *digitizer_trigger_channel( Var_T *v );
-Var_T *digitizer_start_acquisition( Var_T *v );
-Var_T *digitizer_get_curve( Var_T *v );
-Var_T *digitizer_get_curve_fast( Var_T *v );
-Var_T *digitizer_run( Var_T *v );
-Var_T *digitizer_command( Var_T *v );
+Var_T *digitizer_name(              Var_T * /* v */ );
+Var_T *digitizer_define_window(     Var_T * /* v */ );
+Var_T *digitizer_timebase(          Var_T * /* v */ );
+Var_T *digitizer_time_per_point(    Var_T * /* v */ );
+Var_T *digitizer_sensitivity(       Var_T * /* v */ );
+Var_T *digitizer_averaging(         Var_T * /* v */ );
+Var_T *digitizer_num_averages(      Var_T * /* v */ );
+Var_T *digitizer_record_length(     Var_T * /* v */ );
+Var_T *digitizer_trigger_position(  Var_T * /* v */ );
+Var_T *digitizer_meas_channel_ok(   Var_T * /* v */ );
+Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
+Var_T *digitizer_start_acquisition( Var_T * /* v */ );
+Var_T *digitizer_get_curve(         Var_T * /* v */ );
+Var_T *digitizer_get_curve_fast(    Var_T * /* v */ );
+Var_T *digitizer_run(               Var_T * /* v */ );
+Var_T *digitizer_command(           Var_T * /* v */ );
 
 
 /* declaration of internally used functions */
 
-int lecroy9400_get_tb_index( double timebase );
-const char *lecroy9400_ptime( double p_time );
-void lecroy9400_delete_windows( LECROY9400_T *s );
-void lecroy9400_do_pre_exp_checks( void );
-long lecroy9400_translate_channel( int dir, long channel, bool flag );
-void lecroy9400_store_state( LECROY9400_T *src, LECROY9400_T *dest );
+int lecroy9400_get_tb_index( double /* timebase */ );
 
-bool lecroy9400_init( const char *name );
+const char *lecroy9400_ptime( double /* p_time */ );
+
+void lecroy9400_delete_windows( LECROY9400_T * /* s */ );
+
+void lecroy9400_do_pre_exp_checks( void );
+
+long lecroy9400_translate_channel( int  /* dir    */,
+								   long /* channel */,
+								   bool /* flag    */ );
+
+void lecroy9400_store_state( LECROY9400_T * /* src  */,
+							 LECROY9400_T * /* dest */ );
+
+bool lecroy9400_init( const char * /* name */ );
+
 double lecroy9400_get_timebase( void );
-bool lecroy9400_set_timebase( double timebase);
+
+bool lecroy9400_set_timebase( double /* timebase */ );
+
 int lecroy9400_get_trigger_source( void );
-bool lecroy9400_set_trigger_source( int channel );
+
+bool lecroy9400_set_trigger_source( int /* channel */ );
+
 double lecroy9400_get_trigger_level( void );
-bool lecroy9400_set_trigger_level( double level );
-double lecroy9400_get_sens( int channel );
-bool lecroy9400_set_sens( int channel, double sens );
-double lecroy9400_get_offset( int channel );
-bool lecroy9400_set_offset( int channel, double offset );
-int lecroy9400_get_coupling( int channel );
-bool lecroy9400_set_coupling( int channel, int type );
-bool lecroy9400_is_displayed( int channel );
-bool lecroy9400_display( int channel, int on_off );
-long lecroy9400_get_num_avg( int channel );
-bool lecroy9400_get_desc( int channel );
+
+bool lecroy9400_set_trigger_level( double /* level */ );
+
+double lecroy9400_get_sens( int /* channel */ );
+
+bool lecroy9400_set_sens( int    /* channel */,
+						  double /* sens    */ );
+
+double lecroy9400_get_offset( int /* channel */ );
+
+bool lecroy9400_set_offset( int    /* channel */,
+							double /* offset */ );
+
+int lecroy9400_get_coupling( int /* channel */ );
+
+bool lecroy9400_set_coupling( int /* channel */,
+							  int /* type    */ );
+
+bool lecroy9400_is_displayed( int /* channel */ );
+
+bool lecroy9400_display( int /* channel */,
+						 int /* on_off  */ );
+
+long lecroy9400_get_num_avg( int /* channel */ );
+
+bool lecroy9400_get_desc( int /* channel */ );
+
 double lecroy9400_get_trigger_pos( void );
-bool lecroy9400_set_trigger_pos( double position );
-void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
-								  bool reject, long rec_len );
+
+bool lecroy9400_set_trigger_pos( double /* position */ );
+
+void lecroy9400_set_up_averaging( long /* channel */,
+								  long /* source  */,
+								  long /* num_avg */,
+								  bool /* reject  */,
+								  long /* rec_len */ );
+
 void lecroy9400_finished( void );
+
 void lecroy9400_start_acquisition( void );
-void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
-						   bool use_cursor );
+
+void lecroy9400_get_curve( int        /* ch         */,
+						   Window_T * /* w          */,
+						   double **  /* array      */,
+						   long *     /* length     */,
+						   bool       /* use_cursor */ );
+
 void lecroy9400_free_running( void );
-bool lecroy9400_command( const char *cmd );
+
+bool lecroy9400_command( const char * /* cmd */ );
+
 void lecroy9400_gpib_failure( void );
 
 

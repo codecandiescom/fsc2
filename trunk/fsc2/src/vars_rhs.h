@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,8 +29,9 @@
 #include "fsc2.h"
 
 
-Var_T *vars_arr_rhs( Var_T *v );
-Var_T *vars_subref_to_rhs_conv( Var_T *v );
+Var_T *vars_arr_rhs( Var_T * /* v */ );
+
+Var_T *vars_subref_to_rhs_conv( Var_T * /* v */ );
 
 
 #endif  /* ! VARS_RHS_HEADER */

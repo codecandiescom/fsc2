@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,7 +49,8 @@ union semun {
  * to the following memory. If it fails completely it returns NULL.
  *-------------------------------------------------------------------*/
 
-void *get_shm( int *shm_id, long len )
+void *get_shm( int * shm_id,
+			   long  len )
 {
 	void *buf;
 
@@ -130,7 +131,8 @@ char *attach_shm( int key )
  * the shared memory region.
  *---------------------------------------------------------------------*/
 
-void detach_shm( void *buf, int *key )
+void detach_shm( void * buf,
+				 int *  key )
 {
 	raise_permissions( );
 

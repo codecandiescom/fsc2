@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -27,7 +27,7 @@
 
 #include "fsc2.h"
 
-void accept_new_data( bool empty_queue );
+void accept_new_data( bool /* empty_queue */ );
 
 #endif   /* ! ACCEPT_HEADER */
 

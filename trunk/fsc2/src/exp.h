@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -142,17 +142,27 @@ struct Prg_Token {
 #include "fsc2.h"
 
 
-void store_exp( FILE *in );
+void store_exp( FILE * /* in */ );
+
 void forget_prg( void );
+
 int exp_testlex( void );
+
 void exp_test_run( void );
+
 int exp_runlex( void );
+
 int conditionlex( void );
-bool test_condition( Prg_Token_T *cur );
-void get_max_repeat_count( Prg_Token_T *cur );
-void get_for_cond( Prg_Token_T *cur );
-bool test_for_cond( Prg_Token_T *cur );
-bool check_result( Var_T *v );
+
+bool test_condition( Prg_Token_T * /* cur */ );
+
+void get_max_repeat_count( Prg_Token_T * /* cur */ );
+
+void get_for_cond( Prg_Token_T * /* cur */ );
+
+bool test_for_cond( Prg_Token_T * /* cur */ );
+
+bool check_result( Var_T * /* v */ );
 
 
 #endif   /* ! EXP_HEADER */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,8 @@
 
 static void spawn_server( void );
 static void http_send_error_browser( int pd );
-static void http_send_picture( int pd, int type );
+static void http_send_picture( int pd,
+							   int type );
 
 
 enum {
@@ -49,7 +50,8 @@ enum {
  * in the main form for starting and stopping the HTTP server
  *------------------------------------------------------------*/
 
-void server_callback( FL_OBJECT *obj, long a UNUSED_ARG )
+void server_callback( FL_OBJECT * obj,
+					  long        a  UNUSED_ARG )
 {
 	char *www_help;
 
@@ -294,7 +296,8 @@ static void http_send_error_browser( int pd )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static void http_send_picture( int pd, int type )
+static void http_send_picture( int pd,
+							   int type )
 {
 	char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
 	char reply[ 2 ];

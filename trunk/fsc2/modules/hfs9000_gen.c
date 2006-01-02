@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -57,7 +57,8 @@ bool hfs9000_store_timebase( double timebase )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_assign_channel_to_function( int function, long channel )
+bool hfs9000_assign_channel_to_function( int  function,
+										 long channel )
 {
 	Function_T *f = hfs9000.function + function;
 	Channel_T *c = hfs9000.channel + channel;
@@ -147,7 +148,8 @@ bool hfs9000_invert_function( int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_delay( int function, double delay )
+bool hfs9000_set_function_delay( int    function,
+								 double delay )
 {
 	Ticks Delay = hfs9000_double2ticks( delay );
 	int i;
@@ -199,7 +201,8 @@ bool hfs9000_set_function_delay( int function, double delay )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_high_level( int function, double voltage )
+bool hfs9000_set_function_high_level( int    function,
+									  double voltage )
 {
 	Function_T *f = hfs9000.function + function;
 	long v;
@@ -247,7 +250,8 @@ bool hfs9000_set_function_high_level( int function, double voltage )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_low_level( int function, double voltage )
+bool hfs9000_set_function_low_level( int    function,
+									 double voltage )
 {
 	Function_T *f = hfs9000.function + function;
 	long v;

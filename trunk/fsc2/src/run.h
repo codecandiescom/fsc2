@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -46,8 +46,12 @@
 
 
 bool run( void );
-void run_stop_button_callback( FL_OBJECT *a, long b );
-void run_close_button_callback( FL_OBJECT *a, long b );
+
+void run_stop_button_callback( FL_OBJECT * /* a */,
+							   long        /* b */ );
+
+void run_close_button_callback( FL_OBJECT * /* a */,
+								long        /* b */ );
 
 
 #endif  /* ! RUN_HEADER */

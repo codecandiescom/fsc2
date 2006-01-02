@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -144,23 +144,39 @@ struct Toolbox {
 /* exported functions */
 
 
-void toolbox_create( long layout );
+void toolbox_create( long /* layout */ );
+
 void toolbox_delete( void );
-Var_T *f_layout(  Var_T *v );
-Var_T *f_objdel(  Var_T *v );
-Var_T *f_freeze(  Var_T *v );
-Var_T *f_obj_clabel( Var_T * );
-Var_T *f_obj_xable( Var_T *v );
-Iobject_T *find_object_from_ID( long ID );
+
+Var_T *f_layout(  Var_T * /* v */ );
+
+Var_T *f_objdel(  Var_T * /* v */ );
+
+Var_T *f_freeze(  Var_T * /* v */ );
+
+Var_T *f_obj_clabel( Var_T * /* v */ );
+
+Var_T *f_obj_xable( Var_T * /* v */ );
+
+Iobject_T *find_object_from_ID( long /* ID */ );
+
 void recreate_Toolbox( void );
-void convert_escapes( char *str );
-void check_label( char *str );
-bool check_format_string( char *buf );
-void parent_freeze( int freeze );
+
+void convert_escapes( char * /* str */ );
+
+void check_label( char * /* str */ );
+
+bool check_format_string( char * /* buf */ );
+
+void parent_freeze( int /* freeze */ );
+
 void tools_clear( void );
-Var_T *f_tb_changed( Var_T *v );
-void tb_wait_handler( long ID );
-Var_T *f_tb_wait( Var_T *v );
+
+Var_T *f_tb_changed( Var_T * /* v */ );
+
+void tb_wait_handler( long /* ID */ );
+
+Var_T *f_tb_wait( Var_T * /* v */ );
 
 
 #endif   /* ! INTERACTIVE_HEADER */

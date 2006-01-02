@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,7 +35,8 @@ struct Fsc2_Assert {
 
 
 int fsc2_assert_print( const char * /* expression */,
-					   const char * /* filename */, int /* line */ );
+					   const char * /* filename   */,
+					   int          /* line       */ );
 
 
 #ifdef NDEBUG

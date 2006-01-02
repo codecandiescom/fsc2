@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -86,13 +86,19 @@
 
 
 extern void show_message( const char * /* str */ );
+
 extern void show_alert( const char * /* str */ );
-extern int show_choices( const char * /* text */, int /* numb */,
-						 const char * /* b1 */, const char * /* b2 */,
-						 const char * /* b3 */, int /* def */,
-						 bool /* is_batch */ );
+
+extern int show_choices( const char * /* text     */,
+						 int          /* numb     */,
+						 const char * /* b1       */,
+						 const char * /* b2       */,
+						 const char * /* b3       */,
+						 int          /* def      */,
+						 bool         /* is_batch */ );
+
 extern const char *show_input( const char * /* content */,
-							   const char * /* label */ );
+							   const char * /* label   */ );
 
 
 /* Global variables that must be visible for modules */

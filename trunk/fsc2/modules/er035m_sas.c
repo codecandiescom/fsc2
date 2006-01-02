@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,35 +44,49 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* exported functions and symbols */
 
-int er035m_sas_init_hook( void );
-int er035m_sas_test_hook( void );
-int er035m_sas_exp_hook( void );
+int er035m_sas_init_hook(       void );
+int er035m_sas_test_hook(       void );
+int er035m_sas_exp_hook(        void );
 int er035m_sas_end_of_exp_hook( void );
 
-Var_T *gaussmeter_name( Var_T *v );
-Var_T *gaussmeter_field( Var_T *v );
-Var_T *gaussmeter_resolution( Var_T *v );
-Var_T *gaussmeter_probe_orientation( Var_T *v );
-Var_T *measure_field( Var_T *v );
-Var_T *gaussmeter_command( Var_T *v );
-Var_T *gaussmeter_upper_search_limit( Var_T *v );
-Var_T *gaussmeter_lower_search_limit( Var_T *v );
+Var_T *gaussmeter_name(               Var_T * v );
+Var_T *gaussmeter_field(              Var_T * v );
+Var_T *gaussmeter_resolution(         Var_T * v );
+Var_T *gaussmeter_probe_orientation(  Var_T * v );
+Var_T *measure_field(                 Var_T * v );
+Var_T *gaussmeter_command(            Var_T * v );
+Var_T *gaussmeter_upper_search_limit( Var_T * v );
+Var_T *gaussmeter_lower_search_limit( Var_T * v );
 
 
 /* internally used functions */
 
 static double er035m_sas_get_field( void );
+
 static int er035m_sas_get_resolution( void );
+
 static void er035m_sas_set_resolution( int res_index );
+
 static long	er035m_sas_get_upper_search_limit( void );
+
 static long	er035m_sas_get_lower_search_limit( void );
+
 static void er035m_sas_set_upper_search_limit( long	ul );
+
 static void er035m_sas_set_lower_search_limit( long	ll );
+
 static bool er035m_sas_open( void );
+
 static bool er035m_sas_close( void );
-static bool er035m_sas_write( const char *buf );
-static bool er035m_sas_read( char *buf, size_t *len );
-static bool er035m_sas_comm( int type, ... );
+
+static bool er035m_sas_write( const char * buf );
+
+static bool er035m_sas_read( char *   buf,
+							 size_t * len );
+
+static bool er035m_sas_comm( int type,
+							 ... );
+
 static void er035m_sas_comm_fail( void );
 
 
@@ -375,7 +389,7 @@ int er035m_sas_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -384,7 +398,7 @@ Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T *v )
+Var_T *gaussmeter_field( Var_T * v )
 {
 	return measure_field( v );
 }
@@ -395,7 +409,7 @@ Var_T *gaussmeter_field( Var_T *v )
  * and returns the current field value in a variable.
  *----------------------------------------------------------------*/
 
-Var_T *measure_field( Var_T *v UNUSED_ARG )
+Var_T *measure_field( Var_T * v  UNUSED_ARG )
 {
 	char buffer[ 21 ];
 	char *bp;
@@ -511,7 +525,7 @@ Var_T *measure_field( Var_T *v UNUSED_ARG )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T *v )
+Var_T *gaussmeter_resolution( Var_T * v )
 {
 	double res;
 	int i;
@@ -579,7 +593,7 @@ Var_T *gaussmeter_resolution( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_probe_orientation( Var_T *v )
+Var_T *gaussmeter_probe_orientation( Var_T * v )
 {
 	if ( v == NULL )
 	{
@@ -605,7 +619,7 @@ Var_T *gaussmeter_probe_orientation( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *gaussmeter_command( Var_T *v )
+Var_T *gaussmeter_command( Var_T * v )
 {
 	static char *cmd;
 
@@ -632,7 +646,7 @@ Var_T *gaussmeter_command( Var_T *v )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_upper_search_limit( Var_T *v )
+Var_T *gaussmeter_upper_search_limit( Var_T * v )
 {
 	double val;
 	long ul;
@@ -675,7 +689,7 @@ Var_T *gaussmeter_upper_search_limit( Var_T *v )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_lower_search_limit( Var_T *v )
+Var_T *gaussmeter_lower_search_limit( Var_T * v )
 {
 	double val;
 	long ll;
@@ -995,7 +1009,7 @@ static bool er035m_sas_close( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static bool er035m_sas_write( const char *buf )
+static bool er035m_sas_write( const char * buf )
 {
 	static char *wrbuf = NULL;
 	static long wrlen = 0;
@@ -1032,7 +1046,8 @@ static bool er035m_sas_write( const char *buf )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static bool er035m_sas_read( char *buf, size_t *len )
+static bool er035m_sas_read( char *   buf,
+							 size_t * len )
 {
 	char *ptr;
 
@@ -1080,7 +1095,8 @@ static bool er035m_sas_read( char *buf, size_t *len )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static bool er035m_sas_comm( int type, ... )
+static bool er035m_sas_comm( int type,
+							 ... )
 {
 	va_list ap;
 	char *buf;

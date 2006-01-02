@@ -2,7 +2,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -280,14 +280,11 @@ HORI_RES_T hres[ 39 ] = { { 1.0e-9, 1.0e-10,   100,   -1.0,    -1 },
 
 #else
 extern HORI_RES_T hres[ 39 ];
-extern long rl[ 10 ];
 #endif
 
+extern long rl[ 10 ];
 extern LECROY9420_T lecroy9420;
-
 extern const char *LECROY9420_Channel_Names[ 13 ];
-
-extern bool lecroy9420_IN_SETUP;
 
 
 enum {
@@ -298,98 +295,163 @@ enum {
 
 /* declaration of exported functions */
 
-int lecroy9420_init_hook( void );
-int lecroy9420_test_hook( void );
-int lecroy9420_exp_hook( void );
+int lecroy9420_init_hook(       void );
+int lecroy9420_test_hook(       void );
+int lecroy9420_exp_hook(        void );
 int lecroy9420_end_of_exp_hook( void );
-void lecroy9420_exit_hook( void );
+void lecroy9420_exit_hook(      void );
 
 
-Var_T *digitizer_name( Var_T *v );
-Var_T *digitizer_define_window( Var_T *v );
-Var_T *digitizer_change_window( Var_T *v );
-Var_T *digitizer_window_position( Var_T *v );
-Var_T *digitizer_window_width( Var_T *v );
-Var_T *digitizer_timebase( Var_T *v );
-Var_T *digitizer_interleave_mode( Var_T *v );
-Var_T *digitizer_time_per_point( Var_T *v );
-Var_T *digitizer_sensitivity( Var_T *v );
-Var_T *digitizer_offset( Var_T *v );
-Var_T *digitizer_bandwidth_limiter( Var_T *v );
-Var_T *digitizer_trigger_channel( Var_T *v );
-Var_T *digitizer_trigger_level( Var_T *v );
-Var_T *digitizer_trigger_slope( Var_T *v );
-Var_T *digitizer_trigger_coupling( Var_T *v );
-Var_T *digitizer_trigger_mode( Var_T *v );
-Var_T *digitizer_trigger_delay( Var_T *v );
-Var_T *digitizer_averaging( Var_T *v );
-Var_T *digitizer_num_averages( Var_T *v );
-Var_T *digitizer_record_length( Var_T *v );
-Var_T *digitizer_trigger_position( Var_T *v );
-Var_T *digitizer_meas_channel_ok( Var_T *v );
-Var_T *digitizer_start_acquisition( Var_T *v );
-Var_T *digitizer_get_curve( Var_T *v );
-Var_T *digitizer_get_area( Var_T *v );
-Var_T *digitizer_get_amplitude( Var_T *v );
-Var_T *digitizer_run( Var_T *v );
-Var_T *digitizer_copy_curve( Var_T *v );
-Var_T *digitizer_command( Var_T *v );
+Var_T *digitizer_name(              Var_T * /* v */ );
+Var_T *digitizer_define_window(     Var_T * /* v */ );
+Var_T *digitizer_change_window(     Var_T * /* v */ );
+Var_T *digitizer_window_position(   Var_T * /* v */ );
+Var_T *digitizer_window_width(      Var_T * /* v */ );
+Var_T *digitizer_timebase(          Var_T * /* v */ );
+Var_T *digitizer_interleave_mode(   Var_T * /* v */ );
+Var_T *digitizer_time_per_point(    Var_T * /* v */ );
+Var_T *digitizer_sensitivity(       Var_T * /* v */ );
+Var_T *digitizer_offset(            Var_T * /* v */ );
+Var_T *digitizer_bandwidth_limiter( Var_T * /* v */ );
+Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
+Var_T *digitizer_trigger_level(     Var_T * /* v */ );
+Var_T *digitizer_trigger_slope(     Var_T * /* v */ );
+Var_T *digitizer_trigger_coupling(  Var_T * /* v */ );
+Var_T *digitizer_trigger_mode(      Var_T * /* v */ );
+Var_T *digitizer_trigger_delay(     Var_T * /* v */ );
+Var_T *digitizer_averaging(         Var_T * /* v */ );
+Var_T *digitizer_num_averages(      Var_T * /* v */ );
+Var_T *digitizer_record_length(     Var_T * /* v */ );
+Var_T *digitizer_trigger_position(  Var_T * /* v */ );
+Var_T *digitizer_meas_channel_ok(   Var_T * /* v */ );
+Var_T *digitizer_start_acquisition( Var_T * /* v */ );
+Var_T *digitizer_get_curve(         Var_T * /* v */ );
+Var_T *digitizer_get_area(          Var_T * /* v */ );
+Var_T *digitizer_get_amplitude(     Var_T * /* v */ );
+Var_T *digitizer_run(               Var_T * /* v */ );
+Var_T *digitizer_copy_curve(        Var_T * /* v */ );
+Var_T *digitizer_command(           Var_T * /* v */ );
 
 
 /* declaration of internally used functions */
 
-bool lecroy9420_init( const char *name );
+bool lecroy9420_init( const char * /* name */ );
+
 double lecroy9420_get_timebase( void );
-bool lecroy9420_set_timebase( double timebase );
+
+bool lecroy9420_set_timebase( double /* timebase */ );
+
 bool lecroy9420_get_interleaved( void );
-bool lecroy9420_set_interleaved( bool state );
-double lecroy9420_get_sens( int channel );
-bool lecroy9420_set_sens( int channel, double sens );
-double lecroy9420_get_offset( int channel );
-bool lecroy9420_set_offset( int channel, double offset );
-int lecroy9420_get_coupling( int channel );
-bool lecroy9420_set_coupling( int channel, int type );
+
+bool lecroy9420_set_interleaved( bool /* state */ );
+
+double lecroy9420_get_sens( int /* channel */ );
+
+bool lecroy9420_set_sens( int    /* channel */,
+						  double /* sens    */ );
+
+double lecroy9420_get_offset( int /* channel */ );
+
+bool lecroy9420_set_offset( int    /* channel */,
+							double /* offset  */ );
+
+int lecroy9420_get_coupling( int /* channel */ );
+
+bool lecroy9420_set_coupling( int /* channel */,
+							  int /* type    */ );
+
 int lecroy9420_get_bandwidth_limiter( void );
-bool lecroy9420_set_bandwidth_limiter( bool state );
+
+bool lecroy9420_set_bandwidth_limiter( bool /* state */ );
+
 int lecroy9420_get_trigger_source( void );
-bool lecroy9420_set_trigger_source( int channel );
-double lecroy9420_get_trigger_level( int channel );
-bool lecroy9420_set_trigger_level( int channel, double level );
-double lecroy9420_get_trigger_slope( int channel );
-bool lecroy9420_set_trigger_slope( int channel, int slope );
-int lecroy9420_get_trigger_coupling( int channel );
-int lecroy9420_set_trigger_coupling( int channel, int cpl );
+
+bool lecroy9420_set_trigger_source( int /* channel */ );
+
+double lecroy9420_get_trigger_level( int /* channel */ );
+
+bool lecroy9420_set_trigger_level( int    /* channel */,
+								   double /* level   */ );
+
+double lecroy9420_get_trigger_slope( int /* channel */ );
+
+bool lecroy9420_set_trigger_slope( int /* channel */,
+								   int /* slope   */ );
+
+int lecroy9420_get_trigger_coupling( int /* channel */ );
+
+int lecroy9420_set_trigger_coupling( int /* channel */,
+									 int /* cpl     */ );
+
 int lecroy9420_get_trigger_mode( void );
-int lecroy9420_set_trigger_mode( int mode );
+
+int lecroy9420_set_trigger_mode( int /* mode */ );
+
 double lecroy9420_get_trigger_delay( void );
-bool lecroy9420_set_trigger_delay( double delay );
-bool lecroy9420_is_displayed( int ch );
-bool lecroy9420_display( int ch, int on_off );
-long lecroy9420_get_num_avg( int channel );
-bool lecroy9420_get_desc( int channel );
-void lecroy9420_set_up_averaging( long channel, long source, long num_avg,
-								  long rec_len );
+
+bool lecroy9420_set_trigger_delay( double /* delay */ );
+
+bool lecroy9420_is_displayed( int /* ch */ );
+
+bool lecroy9420_display( int /* ch     */,
+						 int /* on_off */ );
+
+long lecroy9420_get_num_avg( int /* channel */ );
+
+bool lecroy9420_get_desc( int /* channel */ );
+
+void lecroy9420_set_up_averaging( long /* channel */,
+								  long /* source  */,
+								  long /* num_avg */,
+								  long /* rec_len */ );
+
 void lecroy9420_finished( void );
+
 void lecroy9420_start_acquisition( void );
-void lecroy9420_get_curve( int ch, Window_T *w, double **array, long *length );
-double lecroy9420_get_area( int ch, Window_T *w );
-double lecroy9420_get_amplitude( int ch, Window_T *w );
+
+void lecroy9420_get_curve( int        /* ch     */,
+						   Window_T * /* w      */,
+						   double **  /* array  */,
+						   long *     /* length */ );
+
+double lecroy9420_get_area( int        /* ch */,
+							Window_T * /* w */ );
+
+double lecroy9420_get_amplitude( int        /* ch */,
+								 Window_T * /* w  */ );
+
 void lecroy9420_free_running( void );
-void lecroy9420_copy_curve( long src, long dest );
-bool lecroy9420_command( const char *cmd );
 
+void lecroy9420_copy_curve( long /* src  */,
+							long /* dest */ );
 
-const char *lecroy9420_ptime( double p_time );
-void lecroy9420_delete_windows( LECROY9420_T *s );
-Window_T *lecroy9420_get_window_by_number( long wid );
+bool lecroy9420_command( const char * /* cmd */ );
+
+const char *lecroy9420_ptime( double /* p_time */ );
+
+void lecroy9420_delete_windows( LECROY9420_T * /* s */ );
+
+Window_T *lecroy9420_get_window_by_number( long /* wid */ );
+
 void lecroy9420_all_windows_check( void );
-void lecroy9420_window_check( Window_T *w, bool show_num );
-void lecroy9420_length_check( long len );
+
+void lecroy9420_window_check( Window_T * /* w        */,
+							  bool       /* show_num */ );
+
+void lecroy9420_length_check( long /* len */ );
+
 long lecroy9420_find_length( void );
+
 long lecroy9420_curve_length( void );
+
 double lecroy9420_time_per_point( void );
-long lecroy9420_translate_channel( int dir, long channel, bool flag );
-void lecroy9420_store_state( LECROY9420_T *dest, LECROY9420_T *src );
+
+long lecroy9420_translate_channel( int  /* dir     */,
+								   long /* channel */,
+								   bool /* flag    */ );
+
+void lecroy9420_store_state( LECROY9420_T * /* dest */,
+							 LECROY9420_T * /* src  */ );
 
 
 #endif /* ! LECROY9420_HEADER */

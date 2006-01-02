@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -60,23 +60,23 @@ extern HJS_Attenuator_T hjs_attenuator;
 
 /* Exported functions */
 
-int hjs_attenuator_init_hook( void );
-int hjs_attenuator_test_hook( void );
-int hjs_attenuator_exp_hook( void );
-int hjs_attenuator_end_of_exp_hook( void );
-void hjs_attenuator_exit_hook( void );
+int hjs_attenuator_init_hook(        void );
+int hjs_attenuator_test_hook(        void );
+int hjs_attenuator_exp_hook(         void );
+int hjs_attenuator_end_of_exp_hook(  void );
+void hjs_attenuator_exit_hook(       void );
 void hjs_attenuator_child_exit_hook( void );
 
 
-Var_T *mw_attenuator_name( Var_T *v );
-Var_T *mw_attenuator_load_calibration( Var_T *v );
-Var_T *mw_attenuator_initial_attenuation( Var_T *v );
-Var_T *mw_attenuator_attenuation( Var_T *v );
+Var_T *mw_attenuator_name(                Var_T * /* v */ );
+Var_T *mw_attenuator_load_calibration(    Var_T * /* v */ );
+Var_T *mw_attenuator_initial_attenuation( Var_T * /* v */ );
+Var_T *mw_attenuator_attenuation(         Var_T * /* v */ );
 
 
 /* Functions from hjs_attenuator_lexer.l */
 
-void hjs_attenuator_read_calibration( FILE *fp );
+void hjs_attenuator_read_calibration( FILE * /* fp */ );
 
 
 /*

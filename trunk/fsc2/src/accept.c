@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,19 +25,36 @@
 #include "fsc2.h"
 
 
-static void	unpack_and_accept( int dim, char *ptr );
-static void	other_data_request( int dim, int type, char *ptr );
-static void accept_1d_data( long x_index, long curve, Var_Type_T type,
-							char *ptr );
-static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr );
-static void accept_2d_data( long x_index, long y_index, long curve,
-							Var_Type_T type, char *ptr );
-static long get_number_of_new_points( char **ptr, Var_Type_T type );
-static bool get_new_extrema( double *max, double *min, char *ptr,
-							 long len, Var_Type_T type );
-static bool	incr_x( long x_index, long len );
+static void	unpack_and_accept( int  dim,
+							   char * ptr );
+static void	other_data_request( int    dim,
+								int    type,
+								char * ptr );
+static void accept_1d_data( long        x_index,
+							long       curve,
+							Var_Type_T type,
+							char *     ptr );
+static void accept_1d_data_sliding( long       curve,
+									Var_Type_T type,
+									char *     ptr );
+static void accept_2d_data( long        x_index,
+							long        y_index,
+							long        curve,
+							Var_Type_T  type,
+							char *      ptr );
+static long get_number_of_new_points( char **    ptr,
+									  Var_Type_T type );
+static bool get_new_extrema( double *   max,
+							 double *   min,
+							 char *     ptr,
+							 long       len,
+							 Var_Type_T type );
+static bool	incr_x( long x_index,
+					long len );
 static bool	incr_y( long y_index );
-static bool	incr_x_and_y( long x_index, long len, long y_index );
+static bool	incr_x_and_y( long x_index,
+						  long len,
+						  long y_index );
 
 
 /* These variables are used to determine which parts of the display(s) need
@@ -197,7 +214,8 @@ void accept_new_data( bool empty_queue )
  * and calls the appropriate functions for dealing with the data.
  *----------------------------------------------------------------*/
 
-static void unpack_and_accept( int dim, char *ptr )
+static void unpack_and_accept( int    dim,
+							   char * ptr )
 {
 	int i;
 	int nsets;
@@ -287,7 +305,9 @@ static void unpack_and_accept( int dim, char *ptr )
  * the command is determined and the appropriate functions are called.
  *---------------------------------------------------------------------*/
 
-static void other_data_request( int dim, int type, char *ptr )
+static void other_data_request( int    dim,
+								int    type,
+								char * ptr )
 {
 	long i;
 	long count;
@@ -435,8 +455,10 @@ static void other_data_request( int dim, int type, char *ptr )
  * for 1D graphics (when normal display mode is used).
  *--------------------------------------------------------*/
 
-static void accept_1d_data( long x_index, long curve, Var_Type_T type,
-							char *ptr )
+static void accept_1d_data( long       x_index,
+							long       curve,
+							Var_Type_T type,
+							char *     ptr )
 {
 	long len = 0;
 	char *cur_ptr;
@@ -620,7 +642,9 @@ static void accept_1d_data( long x_index, long curve, Var_Type_T type,
  * "sliding window" mode is used.
  *--------------------------------------------------------*/
 
-static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
+static void accept_1d_data_sliding( long       curve,
+									Var_Type_T type,
+									char *     ptr )
 {
 	long len = 0;
 	char *cur_ptr;
@@ -812,8 +836,11 @@ static void accept_1d_data_sliding( long curve, Var_Type_T type, char *ptr )
  * a bit of work has gone into getting it as fast as possible...)
  *----------------------------------------------------------------*/
 
-static void accept_2d_data( long x_index, long y_index, long curve,
-							Var_Type_T type, char *ptr )
+static void accept_2d_data( long       x_index,
+							long       y_index,
+							long       curve,
+							Var_Type_T type,
+							char *     ptr )
 {
 	long x_len = 0;
 	long y_len = 0;
@@ -1080,7 +1107,8 @@ static void accept_2d_data( long x_index, long y_index, long curve,
  * set (i.e. after the header) when the function returns.
  *---------------------------------------------------------------------*/
 
-static long get_number_of_new_points( char **ptr, Var_Type_T type )
+static long get_number_of_new_points( char **    ptr,
+									  Var_Type_T type )
 {
 	long len = 0;
 	char *ptr_2d;
@@ -1140,8 +1168,11 @@ static long get_number_of_new_points( char **ptr, Var_Type_T type )
  * set and returns if the maximum or minimum changed.
  *----------------------------------------------------------*/
 
-static bool get_new_extrema( double *max, double *min, char *ptr,
-							 long len, Var_Type_T type )
+static bool get_new_extrema( double *   max,
+							 double *   min,
+							 char *     ptr,
+							 long       len,
+							 Var_Type_T type )
 {
 	double data;
 	long i, j;
@@ -1214,7 +1245,8 @@ static bool get_new_extrema( double *max, double *min, char *ptr,
  * Increments the number of 2D data in x-direction
  *-------------------------------------------------*/
 
-static bool incr_x( long x_index, long len )
+static bool incr_x( long x_index,
+					long len )
 {
 	long i, j, k;
 	Curve_2d_T *cv;
@@ -1305,7 +1337,9 @@ static bool incr_y( long y_index )
  * Increments the number of 2D data in both x- and y-direction
  *-------------------------------------------------------------*/
 
-static bool incr_x_and_y( long x_index, long len, long y_index )
+static bool incr_x_and_y( long x_index,
+						  long len,
+						  long y_index )
 {
 	long i, j, k;
 	Curve_2d_T *cv;

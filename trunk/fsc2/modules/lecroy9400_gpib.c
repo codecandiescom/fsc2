@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,13 +26,16 @@
 
 
 static bool is_acquiring = UNSET;
-static bool lecroy9400_talk( const char *cmd, char *reply, long *length );
+
+static bool lecroy9400_talk( const char * cmd,
+							 char *       reply,
+							 long *       length );
 
 
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_init( const char *name )
+bool lecroy9400_init( const char * name )
 {
 	char buffer[ 100 ];
 	long len = 100;
@@ -250,7 +253,8 @@ double lecroy9400_get_sens( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_sens( int channel, double sens )
+bool lecroy9400_set_sens( int    channel,
+						  double sens )
 {
     char cmd[ 40 ];
 
@@ -292,7 +296,8 @@ double lecroy9400_get_offset( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_offset( int channel, double offset )
+bool lecroy9400_set_offset( int    channel,
+							double offset )
 {
     char cmd[ 40 ];
 
@@ -343,7 +348,8 @@ int lecroy9400_get_coupling( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_coupling( int channel, int type )
+bool lecroy9400_set_coupling( int channel,
+							  int type )
 {
     char cmd[ 30 ];
 	char const *cpl[ ] = { "A1M", "D1M", "D50" };
@@ -385,7 +391,8 @@ bool lecroy9400_is_displayed( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_display( int channel, int on_off )
+bool lecroy9400_display( int channel,
+						 int on_off )
 {
 	char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
 						  "TRFE,", "TRFF," };
@@ -482,7 +489,7 @@ double lecroy9400_get_trigger_pos( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_pos( double position UNUSED_ARG )
+bool lecroy9400_set_trigger_pos( double position  UNUSED_ARG )
 {
 	/***** Still needs to be implemented *****/
 
@@ -493,8 +500,11 @@ bool lecroy9400_set_trigger_pos( double position UNUSED_ARG )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
-								  bool reject, long rec_len )
+void lecroy9400_set_up_averaging( long channel,
+								  long source,
+								  long num_avg,
+								  bool reject,
+								  long rec_len )
 {
 	char cmd[ 100 ];
 	size_t i;
@@ -587,8 +597,11 @@ void lecroy9400_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_get_curve( int ch, Window_T *w UNUSED_ARG , double **array,
-						   long *length, bool use_cursor UNUSED_ARG )
+void lecroy9400_get_curve( int        ch,
+						   Window_T * w  UNUSED_ARG,
+						   double **  array,
+						   long *     length,
+						   bool       use_cursor  UNUSED_ARG )
 {
 	unsigned char *data;
 	unsigned char *dp;
@@ -710,7 +723,7 @@ void lecroy9400_free_running( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool lecroy9400_command( const char *cmd )
+bool lecroy9400_command( const char * cmd )
 {
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy9400_gpib_failure( );
@@ -721,7 +734,9 @@ bool lecroy9400_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy9400_talk( const char *cmd, char *reply, long *length )
+static bool lecroy9400_talk( const char * cmd,
+							 char *       reply,
+							 long *       length )
 {
 	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( lecroy9400.device, reply, length ) == FAILURE )

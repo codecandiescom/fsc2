@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -257,29 +257,29 @@ extern HFS9000_T hfs9000;
 /* Here are all the directly exported functions (i.e. exported either implicit
    as a hook functions or via the Functions data base) */
 
-int hfs9000_init_hook( void );
-int hfs9000_test_hook( void );
+int hfs9000_init_hook(        void );
+int hfs9000_test_hook(        void );
 int hfs9000_end_of_test_hook( void );
-int hfs9000_exp_hook( void );
-int hfs9000_end_of_exp_hook( void );
-void hfs9000_exit_hook( void );
+int hfs9000_exp_hook(         void );
+int hfs9000_end_of_exp_hook(  void );
+void hfs9000_exit_hook(       void );
 
 
-Var_T *pulser_name( Var_T *v );
-Var_T *pulser_show_pulses( Var_T *v );
-Var_T *pulser_dump_pulses( Var_T *v );
-Var_T *pulser_keep_all_pulses( Var_T *v );
-Var_T *pulser_maximum_pattern_length( Var_T *v );
-Var_T *pulser_state( Var_T *v );
-Var_T *pulser_channel_state( Var_T *v );
-Var_T *pulser_update( Var_T *v );
-Var_T *pulser_shift( Var_T *v );
-Var_T *pulser_increment( Var_T *v );
-Var_T *pulser_reset( Var_T *v );
-Var_T *pulser_pulse_reset( Var_T *v );
-Var_T *pulser_lock_keyboard( Var_T *v );
-Var_T *pulser_stop_on_update( Var_T *v );
-Var_T *pulser_command( Var_T *v );
+Var_T *pulser_name(                   Var_T * /* v */ );
+Var_T *pulser_show_pulses(            Var_T * /* v */ );
+Var_T *pulser_dump_pulses(            Var_T * /* v */ );
+Var_T *pulser_keep_all_pulses(        Var_T * /* v */ );
+Var_T *pulser_maximum_pattern_length( Var_T * /* v */ );
+Var_T *pulser_state(                  Var_T * /* v */ );
+Var_T *pulser_channel_state(          Var_T * /* v */ );
+Var_T *pulser_update(                 Var_T * /* v */ );
+Var_T *pulser_shift(                  Var_T * /* v */ );
+Var_T *pulser_increment(              Var_T * /* v */ );
+Var_T *pulser_reset(                  Var_T * /* v */ );
+Var_T *pulser_pulse_reset(            Var_T * /* v */ );
+Var_T *pulser_lock_keyboard(          Var_T * /* v */ );
+Var_T *pulser_stop_on_update(         Var_T * /* v */ );
+Var_T *pulser_command(                Var_T * /* v */ );
 
 
 /* Here follow the functions from hfs9000_gen.c */
@@ -300,63 +300,123 @@ bool hfs9000_keep_all( void );
 /* These are the functions from hfs9000_pulse.c */
 
 bool hfs9000_new_pulse( long pnum );
-bool hfs9000_set_pulse_function( long pnum, int function );
-bool hfs9000_set_pulse_position( long pnum, double p_time );
-bool hfs9000_set_pulse_length( long pnum, double p_time );
-bool hfs9000_set_pulse_position_change( long pnum, double p_time );
-bool hfs9000_set_pulse_length_change( long pnum, double p_time );
 
-bool hfs9000_get_pulse_function( long pnum, int *function );
-bool hfs9000_get_pulse_position( long pnum, double *p_time );
-bool hfs9000_get_pulse_length( long pnum, double *p_time );
-bool hfs9000_get_pulse_position_change( long pnum, double *p_time );
-bool hfs9000_get_pulse_length_change( long pnum, double *p_time );
+bool hfs9000_set_pulse_function( long /* pnum     */,
+								 int  /* function */ );
 
-bool hfs9000_change_pulse_position( long pnum, double p_time );
-bool hfs9000_change_pulse_length( long pnum, double tp_ime );
-bool hfs9000_change_pulse_position_change( long pnum, double p_time );
-bool hfs9000_change_pulse_length_change( long pnum, double p_time );
+bool hfs9000_set_pulse_position( long   /* pnum   */,
+								 double /* p_time */ );
+
+bool hfs9000_set_pulse_length( long   /* pnum   */,
+							   double /* p_time */ );
+
+bool hfs9000_set_pulse_position_change( long   /* pnum   */,
+										double /* p_time */ );
+
+bool hfs9000_set_pulse_length_change( long   /* pnum   */,
+									  double /* p_time */ );
+
+bool hfs9000_get_pulse_function( long  /* pnum     */,
+								 int * /* function */ );
+
+bool hfs9000_get_pulse_position( long     /* pnum   */,
+								 double * /* p_time */ );
+
+bool hfs9000_get_pulse_length( long     /* pnum   */,
+							   double * /* p_time */ );
+
+bool hfs9000_get_pulse_position_change( long     /* pnum   */,
+										double * /* p_time */ );
+
+bool hfs9000_get_pulse_length_change( long     /* pnum   */,
+									  double * /* p_time */ );
+
+bool hfs9000_change_pulse_position( long   /* pnum   */,
+									double /* p_time */ );
+
+bool hfs9000_change_pulse_length( long   /* pnum   */,
+								  double /* tp_ime */ );
+
+bool hfs9000_change_pulse_position_change( long   /* pnum   */,
+										   double /* p_time */ );
+
+bool hfs9000_change_pulse_length_change( long   /* pnum   */,
+										 double /* p_time */ );
 
 
 /* Functions from hfs9000_init.c */
 
 void hfs9000_init_setup( void );
-void hfs9000_set_pulses( Function_T *f );
+
+void hfs9000_set_pulses( Function_T * /* f */ );
 
 
 /* Functions from hfs9000_util.c */
 
-Ticks hfs9000_double2ticks( double p_time );
-double hfs9000_ticks2double( Ticks ticks );
-void hfs9000_check_pod_level_diff( double high, double low );
-Pulse_T *hfs9000_get_pulse( long pnum );
-const char *hfs9000_ptime( double p_time );
-const char *hfs9000_pticks( Ticks ticks );
-int hfs9000_start_compare( const void *A, const void *B );
+Ticks hfs9000_double2ticks( double /* p_time */ );
+
+double hfs9000_ticks2double( Ticks /* ticks */ );
+
+void hfs9000_check_pod_level_diff( double /* high */,
+								   double /* low  */ );
+
+Pulse_T *hfs9000_get_pulse( long /* pnum */ );
+
+const char *hfs9000_ptime( double /* p_time */ );
+
+const char *hfs9000_pticks( Ticks /* ticks */ );
+
+int hfs9000_start_compare( const void * /* A */,
+						   const void * /* B */ );
+
 Ticks hfs9000_get_max_seq_len( void );
-void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset );
-int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length );
-void hfs9000_dump_channels( FILE *fp );
+
+void hfs9000_set( char * /* arena  */,
+				  Ticks  /* start  */,
+				  Ticks  /* len    */,
+				  Ticks  /* offset */ );
+
+int hfs9000_diff( char *  /* old_p  */,
+				  char *  /* new_p  */,
+				  Ticks * /* start  */,
+				  Ticks * /* length */ );
+
+void hfs9000_dump_channels( FILE * /* fp */ );
 
 
 /* Functions fron hfs9000_run.c */
 
 bool hfs9000_do_update( void );
-void hfs9000_do_checks( Function_T *f );
-void hfs9000_set_pulses( Function_T *f );
+
+void hfs9000_do_checks( Function_T * /* f */ );
+
+void hfs9000_set_pulses( Function_T * /* f */ );
+
 void hfs9000_full_reset( void );
 
 
 /* Functions from hfs9000_gpib.c */
 
-bool hfs9000_init( const char *name );
-bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state );
+bool hfs9000_init( const char * /* name */ );
+
+bool hfs9000_set_constant( int   /* channel */,
+						   Ticks /* start   */,
+						   Ticks /* length  */,
+						   int   /* state   */ );
+
 bool hfs9000_set_trig_out_pulse( void );
-bool hfs9000_run( bool flag );
-bool hfs9000_get_channel_state( int channel );
-bool hfs9000_set_channel_state( int channel, bool flag );
-bool hfs9000_command( const char *cmd );
-long hfs9000_ch_to_num( long channel );
+
+bool hfs9000_run( bool /* flag */ );
+
+bool hfs9000_get_channel_state( int /* channel */ );
+
+bool hfs9000_set_channel_state( int  /* channel */,
+								bool /* flag    */ );
+
+bool hfs9000_command( const char * /* cmd */ );
+
+long hfs9000_ch_to_num( long /* channel */ );
+
 bool hfs9000_operation_complete( void );
 
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -90,7 +90,8 @@ bool dg2020_new_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_function( long pnum, int function )
+bool dg2020_set_pulse_function( long pnum,
+								int  function )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -132,7 +133,8 @@ bool dg2020_set_pulse_function( long pnum, int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_position( long pnum, double p_time )
+bool dg2020_set_pulse_position( long   pnum,
+								double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -173,7 +175,8 @@ bool dg2020_set_pulse_position( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_length( long pnum, double p_time )
+bool dg2020_set_pulse_length( long   pnum,
+							  double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -213,7 +216,8 @@ bool dg2020_set_pulse_length( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_position_change( long pnum, double p_time )
+bool dg2020_set_pulse_position_change( long   pnum,
+									   double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -247,7 +251,8 @@ bool dg2020_set_pulse_position_change( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_length_change( long pnum, double p_time )
+bool dg2020_set_pulse_length_change( long   pnum,
+									 double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -281,7 +286,8 @@ bool dg2020_set_pulse_length_change( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
+bool dg2020_set_pulse_phase_cycle( long pnum,
+								   long cycle )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 	Phs_Seq_T *pc = PA_Seq.phs_seq;
@@ -316,7 +322,8 @@ bool dg2020_set_pulse_phase_cycle( long pnum, long cycle )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_function( long pnum, int *function )
+bool dg2020_get_pulse_function( long  pnum,
+								int * function )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -334,7 +341,8 @@ bool dg2020_get_pulse_function( long pnum, int *function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_position( long pnum, double *p_time )
+bool dg2020_get_pulse_position( long     pnum,
+								double * p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -354,7 +362,8 @@ bool dg2020_get_pulse_position( long pnum, double *p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_length( long pnum, double *p_time )
+bool dg2020_get_pulse_length( long     pnum,
+							  double * p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -373,7 +382,8 @@ bool dg2020_get_pulse_length( long pnum, double *p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_position_change( long pnum, double *p_time )
+bool dg2020_get_pulse_position_change( long     pnum,
+									   double * p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -393,7 +403,8 @@ bool dg2020_get_pulse_position_change( long pnum, double *p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_length_change( long pnum, double *p_time )
+bool dg2020_get_pulse_length_change( long     pnum,
+									 double * p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -412,7 +423,8 @@ bool dg2020_get_pulse_length_change( long pnum, double *p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
+bool dg2020_get_pulse_phase_cycle( long  pnum,
+								   long *cycle )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 
@@ -431,7 +443,8 @@ bool dg2020_get_pulse_phase_cycle( long pnum, long *cycle )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_change_pulse_position( long pnum, double p_time )
+bool dg2020_change_pulse_position( long   pnum,
+								   double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_pos = 0;
@@ -515,7 +528,8 @@ bool dg2020_change_pulse_position( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_change_pulse_length( long pnum, double p_time )
+bool dg2020_change_pulse_length( long   pnum,
+								 double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_len = 0;
@@ -599,7 +613,8 @@ bool dg2020_change_pulse_length( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_change_pulse_position_change( long pnum, double p_time )
+bool dg2020_change_pulse_position_change( long   pnum,
+										  double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_dpos = 0;
@@ -638,7 +653,8 @@ bool dg2020_change_pulse_position_change( long pnum, double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_change_pulse_length_change( long pnum, double p_time )
+bool dg2020_change_pulse_length_change( long   pnum,
+										double p_time )
 {
 	Pulse_T *p = dg2020_get_pulse( pnum );
 	Ticks new_dlen = 0;

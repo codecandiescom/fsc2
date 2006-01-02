@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,7 +28,8 @@
 #include "fsc2.h"
 
 
-void run_help( FL_OBJECT *a, long b );
+void run_help( FL_OBJECT * /* a */,
+			   long        /* b */ );
 
 
 #endif  /* ! HELP_HEADER */

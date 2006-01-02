@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -56,16 +56,19 @@ extern int fsc2_confparse( void );   /* from fsc2_conf_parser.y */
 
 /* Locally used functions */
 
-static void globals_init( const char *pname );
+static void globals_init( const char * pname );
 static void fsc2_get_conf( void );
 static void fsc2_save_conf( void );
-static bool get_edl_file( char *fname );
+static bool get_edl_file( char * fname );
 static void check_run( void );
 static void no_gui_run( void );
 static void test_machine_type( void );
-static int scan_args( int *argc, char *argv[ ], char **fname );
+static int scan_args( int *   argc,
+					  char *  argv[ ],
+					  char ** fname );
 static void final_exit_handler( void );
-static bool display_file( char *name, FILE *fp );
+static bool display_file( char * name,
+						  FILE * fp );
 static void set_main_signals( void );
 
 
@@ -74,7 +77,8 @@ static void set_main_signals( void );
 /*     Here we go...      */
 /**************************/
 
-int main( int argc, char *argv[ ] )
+int main( int    argc,
+		  char * argv[ ] )
 {
 	char *fname = NULL;
 	int conn_pid;
@@ -287,7 +291,7 @@ int main( int argc, char *argv[ ] )
  * Initialization of global variables
  *-------------------------------------*/
 
-static void globals_init( const char *pname )
+static void globals_init( const char * pname )
 {
 	/* As the very first action the effective UID and GID gets stored and
 	   then the program lowers the permissions to the ones of the real UID
@@ -545,7 +549,7 @@ static void fsc2_save_conf( void )
  * Function sets 'EDL.infile' to the complete name of an EDL input file
  *----------------------------------------------------------------------*/
 
-static bool get_edl_file( char *fname )
+static bool get_edl_file( char * fname )
 {
 	TRY
 	{
@@ -701,7 +705,9 @@ static void test_machine_type( void )
  * be dealt with earlier.
  *-------------------------------------------------------*/
 
-static int scan_args( int *argc, char *argv[ ], char **fname )
+static int scan_args( int *   argc,
+					  char *  argv[ ],
+					  char ** fname )
 {
 	int flags = 0;
 	int cur_arg = 1;
@@ -1239,7 +1245,8 @@ static void final_exit_handler( void )
  * reload == 0: read new file, reload == 1: reload file
  *-------------------------------------------------------------------*/
 
-void load_file( FL_OBJECT *a UNUSED_ARG, long reload )
+void load_file( FL_OBJECT * a  UNUSED_ARG,
+				long        reload )
 {
 	const char *fn;
 	static char *old_in_file;
@@ -1486,7 +1493,8 @@ void load_file( FL_OBJECT *a UNUSED_ARG, long reload )
  * the currently loaded file.
  *-----------------------------------------------------*/
 
-void test_file( FL_OBJECT *a, long b UNUSED_ARG )
+void test_file( FL_OBJECT * a,
+				long        b  UNUSED_ARG )
 {
 	static bool running_test = UNSET;
 	static bool user_break = UNSET;
@@ -1635,7 +1643,8 @@ void test_file( FL_OBJECT *a, long b UNUSED_ARG )
  * not already done) and on success starts the experiment.
  *---------------------------------------------------------------*/
 
-void run_file( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void run_file( FL_OBJECT * a  UNUSED_ARG,
+			   long        b  UNUSED_ARG )
 {
 	struct stat file_stat;
 	char str1[ 128 ],
@@ -1754,7 +1763,8 @@ void run_file( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
  * the file.
  *--------------------------------------------------------------------*/
 
-static bool display_file( char *name, FILE *fp )
+static bool display_file( char * name,
+						  FILE * fp )
 {
 	int len, key;
 	long lc, cc, i;                         /* line and char counter */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -82,7 +82,8 @@ double dg2020_ticks2double( Ticks ticks )
  * a pod connector are within the valid limits.
  *------------------------------------------------------*/
 
-void dg2020_check_pod_level_diff( double high, double low )
+void dg2020_check_pod_level_diff( double high,
+								  double low )
 {
 	if ( low > high )
 	{
@@ -198,7 +199,8 @@ Channel_T *dg2020_get_next_free_channel( void )
  * the second pulse starts earlier.
  *------------------------------------------------------------------*/
 
-int dg2020_start_compare( const void *A, const void *B )
+int dg2020_start_compare( const void * A,
+						  const void * B )
 {
 	Pulse_T *a = *( Pulse_T ** ) A,
 			*b = *( Pulse_T ** ) B;
@@ -377,7 +379,10 @@ void dg2020_calc_padding( void )
  *  * 1: ok, 0: error
  *----------------------------------------------------------*/
 
-bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
+bool dg2020_prep_cmd( char ** cmd,
+					  int     channel,
+					  Ticks   address,
+					  Ticks   length )
 {
 	char dummy[ 10 ];
 
@@ -407,7 +412,9 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void dg2020_set( char *arena, Ticks start, Ticks len )
+void dg2020_set( char * arena,
+				 Ticks  start,
+				 Ticks  len )
 {
 	fsc2_assert( start + len <= dg2020.max_seq_len );
 
@@ -418,7 +425,9 @@ void dg2020_set( char *arena, Ticks start, Ticks len )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void dg2020_clear( char *arena, Ticks start, Ticks len )
+void dg2020_clear( char * arena,
+				   Ticks  start,
+				   Ticks  len )
 {
 	fsc2_assert( start + len <= dg2020.max_seq_len );
 
@@ -429,7 +438,10 @@ void dg2020_clear( char *arena, Ticks start, Ticks len )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
+int dg2020_diff( char *  old_p,
+				 char *  new_p,
+				 Ticks * start,
+				 Ticks * length )
 {
 	static Ticks where = 0;
 	int ret;
@@ -521,7 +533,7 @@ void dg2020_duty_check( void )
  * Function calculates the total length of all active pulses of a function
  *-------------------------------------------------------------------------*/
 
-Ticks dg2020_calc_max_length( Function_T *f )
+Ticks dg2020_calc_max_length( Function_T * f )
 {
 	int i;
 	Ticks max_len = 0;
@@ -681,7 +693,7 @@ void dg2020_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void dg2020_dump_channels( FILE *fp )
+void dg2020_dump_channels( FILE * fp )
 {
 	Function_T *f;
 	Pod_T *pod;

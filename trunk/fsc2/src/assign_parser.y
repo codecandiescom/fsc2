@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,7 @@ extern char *assigntext;         /* defined in assign_lexer.l */
 
 /* locally used functions */
 
-static void assignerror( const char *s );
+static void assignerror( const char * s );
 static void ass_func( int function );
 
 
@@ -629,7 +629,7 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
  * Called in case of syntax errors
  *---------------------------------*/
 
-static void assignerror ( UNUSED_ARG const char *s )
+static void assignerror( const char * s  UNUSED_ARG )
 {
 	if ( *assigntext == '\0' )
 		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );

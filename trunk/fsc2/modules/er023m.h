@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -182,58 +182,82 @@ extern struct ER023M er023m;
 
 /* Declaration of exported functions */
 
-int er023m_init_hook( void );
-int er023m_test_hook( void );
-int er023m_exp_hook( void );
+int er023m_init_hook(       void );
+int er023m_test_hook(       void );
+int er023m_exp_hook(        void );
 int er023m_end_of_exp_hook( void );
-void er023m_exit_hook( void );
-
-Var_T *lockin_name( Var_T *v );
-Var_T *lockin_get_data( Var_T *v );
-Var_T *lockin_sensitivity( Var_T *v );
-Var_T *lockin_time_constant( Var_T *v );
-Var_T *lockin_phase( Var_T *v );
-Var_T *lockin_offset( Var_T *v );
-Var_T *lockin_conversion_time( Var_T *v );
-Var_T *lockin_ref_freq( Var_T *v );
-Var_T *lockin_ref_level( Var_T *v );
-Var_T *lockin_harmonic( Var_T *v );
-Var_T *lockin_resonator( Var_T *v );
-Var_T *lockin_is_overload( Var_T *v );
-Var_T *lockin_command( Var_T *v );
+void er023m_exit_hook(      void );
 
 
-Var_T *lockin_rg( Var_T *v );
-Var_T *lockin_tc( Var_T *v );
-Var_T *lockin_ma( Var_T *v );
-Var_T *lockin_ct( Var_T *v );
-Var_T *lockin_mf( Var_T *v );
+Var_T *lockin_name(            Var_T * /* v */ );
+Var_T *lockin_get_data(        Var_T * /* v */ );
+Var_T *lockin_sensitivity(     Var_T * /* v */ );
+Var_T *lockin_time_constant(   Var_T * /* v */ );
+Var_T *lockin_phase(           Var_T * /* v */ );
+Var_T *lockin_offset(          Var_T * /* v */ );
+Var_T *lockin_conversion_time( Var_T * /* v */ );
+Var_T *lockin_ref_freq(        Var_T * /* v */ );
+Var_T *lockin_ref_level(       Var_T * /* v */ );
+Var_T *lockin_harmonic(        Var_T * /* v */ );
+Var_T *lockin_resonator(       Var_T * /* v */ );
+Var_T *lockin_is_overload(     Var_T * /* v */ );
+Var_T *lockin_command(         Var_T * /* v */ );
+
+Var_T *lockin_rg(              Var_T * /* v */ );
+Var_T *lockin_tc(              Var_T * /* v */ );
+Var_T *lockin_ma(              Var_T * /* v */ );
+Var_T *lockin_ct(              Var_T * /* v */ );
+Var_T *lockin_mf(              Var_T * /* v */ );
 
 
-bool er023m_init( const char *name );
+bool er023m_init( const char * /* name */ );
+
 unsigned int er023m_get_data( void );
+
 int er023m_get_rg( void );
-void er023m_set_rg( int rg_index );
+
+void er023m_set_rg( int /* rg_index */ );
+
 int er023m_get_tc( void );
-void er023m_set_tc( int tc_index );
+
+void er023m_set_tc( int /* tc_index */ );
+
 int er023m_get_ph( void );
-void er023m_set_ph( int ph_index );
+
+void er023m_set_ph( int /* ph_index */ );
+
 int er023m_get_ma( void );
-void er023m_set_ma( int ma );
+
+void er023m_set_ma( int /* ma */ );
+
 int er023m_get_of( void );
-void er023m_set_of( int of );
+
+void er023m_set_of( int /* of */ );
+
 int er023m_get_ct( void );
-void er023m_set_ct( int ct_mult );
+
+void er023m_set_ct( int /* ct_mult */ );
+
 int er023m_get_mf( void );
-void er023m_set_mf( int mf_index ) ;
+
+void er023m_set_mf( int /* mf_index */ ) ;
+
 int er023m_get_ha( void );
-void er023m_set_ha( int ha );
+
+void er023m_set_ha( int /* ha */ );
+
 int er023m_get_re( void );
-void er023m_set_re( int re );
+
+void er023m_set_re( int /* re */ );
+
 int er023m_nb( void );
-void er023m_srq( int on_off );
+
+void er023m_srq( int /* on_off */ );
+
 unsigned char er023m_st( void );
-bool er023m_command( const char *cmd );
+
+bool er023m_command( const char * /* cmd */ );
+
 void er023m_failure( void );
 
 

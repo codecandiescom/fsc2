@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -63,7 +63,7 @@ extern void conditionparser_init( void ); /* from condition_parser.y */
 extern int explex( void );                /* from exp_lexer.flex */
 extern FILE *expin;                       /* from exp_lexer.flex */
 
-extern void exprestart( FILE *fp );
+extern void exprestart( FILE * fp );
 
 extern Token_Val_T exp_runlval;           /* from exp_run_parser.y */
 extern Token_Val_T exp_testlval;          /* from exp_test_parser.y */
@@ -71,19 +71,26 @@ extern Token_Val_T conditionlval;         /* from condition_parser.y */
 
 /* local functions */
 
-static void get_and_store_tokens( long *parenthesis_count, 
-								  long *square_brace_count );
-static void push_curly_brace( Prg_Token_T *where );
+static void get_and_store_tokens( long * parenthesis_count, 
+								  long * square_brace_count );
+static void push_curly_brace( Prg_Token_T * where );
 static bool pop_curly_brace( void );
 static void loop_setup( void );
-static void setup_while_or_repeat( int type, long *pos );
-static void setup_if_else( long *pos, Prg_Token_T *cur_wr );
-static void setup_else( Prg_Token_T *cur, long i, bool in_if,
-						bool *dont_need_close_parens );
-static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i,
-										 bool in_if );
-static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
-										  bool *in_if );
+static void setup_while_or_repeat( int   type,
+								   long * pos );
+static void setup_if_else( long *        pos,
+						   Prg_Token_T * cur_wr );
+static void setup_else( Prg_Token_T * cur,
+						long          i,
+						bool          in_if,
+						bool *        dont_need_close_parens );
+static void setup_open_brace_in_if_else( Prg_Token_T * cur,
+										 long          i,
+										 bool          in_if );
+static bool setup_close_brace_in_if_else( long *        pos,
+										  Prg_Token_T * cur,
+										  long          i,
+										  bool *        in_if );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
 static const char *get_construct_name( int token_type );
@@ -120,7 +127,7 @@ static const char *get_construct_name( int token_type );
  *    program is feed to a parser to test if syntactic errors are found.
  *---------------------------------------------------------------------------*/
 
-void store_exp( FILE *in )
+void store_exp( FILE * in )
 {
 	static bool is_restart = UNSET;
 	long parenthesis_count = 0;
@@ -202,8 +209,8 @@ void store_exp( FILE *in )
  * balancedness of braces and parentheses.
  *---------------------------------------------------------------------*/
 
-static void get_and_store_tokens( long *parenthesis_count, 
-								  long *square_brace_count )
+static void get_and_store_tokens( long * parenthesis_count, 
+								  long * square_brace_count )
 {
 	int token;
 	Prg_Token_T *cur;
@@ -435,7 +442,7 @@ static void get_and_store_tokens( long *parenthesis_count,
  * print more informative error messages if the braces don't match up.
  *-------------------------------------------------------------------------*/
 
-static void push_curly_brace( Prg_Token_T *where )
+static void push_curly_brace( Prg_Token_T * where )
 {
 	struct CB_Stack *new_cb;
 
@@ -586,7 +593,8 @@ static void loop_setup( void )
  *  2. Pointer to number of token
  *----------------------------------------------------------------*/
 
-static void setup_while_or_repeat( int type, long *pos )
+static void setup_while_or_repeat( int    type,
+								   long * pos )
 {
 	Prg_Token_T *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
@@ -681,7 +689,8 @@ static void setup_while_or_repeat( int type, long *pos )
  *       loop (needed for handling of 'break' and 'continue').
  *----------------------------------------------------------------------*/
 
-static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
+static void setup_if_else( long *        pos,
+						   Prg_Token_T * cur_wr )
 {
 	Prg_Token_T *cur = EDL.prg_token + *pos;
 	long i = *pos + 1;
@@ -765,8 +774,10 @@ static void setup_if_else( long *pos, Prg_Token_T *cur_wr )
  * Handling of 'ELSE' during the setup of IF-ELSE loops
  *------------------------------------------------------*/
 
-static void setup_else( Prg_Token_T *cur, long i, bool in_if,
-						bool *dont_need_close_parens )
+static void setup_else( Prg_Token_T * cur,
+						long          i,
+						bool          in_if,
+						bool *        dont_need_close_parens )
 {
 	if ( i + 1 == EDL.prg_length )
 	{
@@ -806,7 +817,9 @@ static void setup_else( Prg_Token_T *cur, long i, bool in_if,
  * Handling of '{' during the setup of IF-ELSE loops
  *---------------------------------------------------*/
 
-static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
+static void setup_open_brace_in_if_else( Prg_Token_T * cur,
+										 long          i,
+										 bool          in_if )
 {
 	if ( i + 1 == EDL.prg_length )
 	{
@@ -827,8 +840,10 @@ static void setup_open_brace_in_if_else( Prg_Token_T *cur, long i, bool in_if )
  * Handling of '}' during the setup of IF-ELSE loops
  *---------------------------------------------------*/
 
-static bool setup_close_brace_in_if_else( long *pos, Prg_Token_T *cur, long i,
-										  bool *in_if )
+static bool setup_close_brace_in_if_else( long *        pos,
+										  Prg_Token_T * cur,
+										  long          i,
+										  bool *        in_if )
 {
 	if ( *in_if )
 	{
@@ -1289,7 +1304,7 @@ int conditionlex( void )
  * or an IF or UNLESS construct.
  *--------------------------------------------------------------------*/
 
-bool test_condition( Prg_Token_T *cur )
+bool test_condition( Prg_Token_T * cur )
 {
 	bool condition;
 
@@ -1327,7 +1342,7 @@ bool test_condition( Prg_Token_T *cur )
  * Functions determines the repeat count for a REPEAT loop
  *---------------------------------------------------------*/
 
-void get_max_repeat_count( Prg_Token_T *cur )
+void get_max_repeat_count( Prg_Token_T * cur )
 {
 	EDL.cur_prg_token++;                         /* skip the REPEAT token */
 	conditionparse( );                           /* get the value */
@@ -1369,7 +1384,7 @@ void get_max_repeat_count( Prg_Token_T *cur )
  * end and increment variable must be integers.
  *--------------------------------------------------------------------------*/
 
-void get_for_cond( Prg_Token_T *cur )
+void get_for_cond( Prg_Token_T * cur )
 {
 	/* First of all get the loop variable */
 
@@ -1590,7 +1605,7 @@ void get_for_cond( Prg_Token_T *cur )
  * Function tests the loop condition of a for loop.
  *--------------------------------------------------*/
 
-bool test_for_cond( Prg_Token_T *cur )
+bool test_for_cond( Prg_Token_T * cur )
 {
 	bool sign = UNSET;
 
@@ -1652,7 +1667,7 @@ bool test_for_cond( Prg_Token_T *cur )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-bool check_result( Var_T *v )
+bool check_result( Var_T * v )
 {
     if ( ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
 	{

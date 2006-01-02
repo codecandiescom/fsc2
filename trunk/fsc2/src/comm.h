@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -166,11 +166,18 @@ enum {
 
 
 void setup_comm( void );
+
 void end_comm( void );
+
 int new_data_handler( void );
-bool reader( void *ret );
-bool writer( int type, ... );
-void send_data( int type, int shm_id );
+
+bool reader( void * /* ret */ );
+
+bool writer( int /* type */,
+			 ... );
+
+void send_data( int /* type   */,
+				int /* shm_id */ );
 
 
 #endif  /* ! COMM_HEADER */

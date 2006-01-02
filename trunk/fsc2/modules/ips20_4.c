@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,44 +44,65 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int ips20_4_init_hook( void );
-int ips20_4_test_hook( void );
-int ips20_4_exp_hook( void );
+int ips20_4_init_hook(       void );
+int ips20_4_test_hook(       void );
+int ips20_4_exp_hook(        void );
 int ips20_4_end_of_exp_hook( void );
 
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *set_sweep_rate( Var_T *v );
-Var_T *magnet_sweep( Var_T *v );
-Var_T *magnet_sweep_rate( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_goto_field_on_end( Var_T *v );
-Var_T *magnet_command( Var_T *v );
+Var_T *magnet_name(              Var_T * v );
+Var_T *magnet_setup(             Var_T * v );
+Var_T *get_field(                Var_T * v );
+Var_T *set_field(                Var_T * v );
+Var_T *set_sweep_rate(           Var_T * v );
+Var_T *magnet_sweep(             Var_T * v );
+Var_T *magnet_sweep_rate(        Var_T * v );
+Var_T *reset_field(              Var_T * v );
+Var_T *magnet_goto_field_on_end( Var_T * v );
+Var_T *magnet_command(           Var_T * v );
 
 
 static void magnet_sweep_up( void );
+
 static void magnet_sweep_down( void );
+
 static void magnet_stop_sweep( void );
 
-static bool ips20_4_init( const char *name );
+static bool ips20_4_init( const char * name );
+
 static void ips20_4_to_local( void );
+
 static void ips20_4_get_complete_status( void );
+
 static void ips20_4_sweep_up( void );
+
 static void ips20_4_sweep_down( void );
+
 static double ips20_4_current_check( double current );
+
 static double ips20_4_sweep_rate_check( double sweep_rate );
+
 static double ips20_4_get_act_current( void );
+
 static double ips20_4_current_check( double current );
+
 static double ips20_4_sweep_rate_check( double sweep_rate );
+
 static double ips20_4_set_target_current( double current );
+
 static double ips20_4_get_target_current( void );
+
 static double ips20_4_set_sweep_rate( double sweep_rate );
+
 static double ips20_4_get_sweep_rate( void );
+
 static double ips20_4_goto_current( double current );
+
 static int ips20_4_set_activity( int activity );
-static long ips20_4_talk( const char *message, char *reply, long length );
+
+static long ips20_4_talk( const char * message,
+						  char *       reply,
+						  long length );
+
 static void ips20_4_comm_failure( void );
 
 
@@ -248,7 +269,7 @@ int ips20_4_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -258,7 +279,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start current and the sweep rate.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	double cur;
 	double sweep_rate;
@@ -298,7 +319,7 @@ Var_T *magnet_setup( Var_T *v )
  * time spent since the last call for determining the current.
  *-------------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 	{
@@ -360,7 +381,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
  * that setting a new current also stops a running sweep.
  *--------------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double cur;
 
@@ -393,7 +414,7 @@ Var_T *set_field( Var_T *v )
  * sweeps or inquiring about the current sweep state.
  *----------------------------------------------------*/
 
-Var_T *magnet_sweep( Var_T *v )
+Var_T *magnet_sweep( Var_T * v )
 {
 	long dir;
 	Var_T *vc;
@@ -550,7 +571,7 @@ static void magnet_stop_sweep( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_sweep_rate( Var_T *v )
+Var_T *magnet_sweep_rate( Var_T * v )
 {
 	double sweep_rate;
 
@@ -589,7 +610,7 @@ Var_T *magnet_sweep_rate( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	return set_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }
@@ -601,7 +622,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
  * the experiment has ended.
  *-----------------------------------------------------------*/
 
-Var_T *magnet_goto_field_on_end( Var_T *v )
+Var_T *magnet_goto_field_on_end( Var_T * v )
 {
 	double cur;
 
@@ -617,7 +638,7 @@ Var_T *magnet_goto_field_on_end( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_command( Var_T *v )
+Var_T *magnet_command( Var_T * v )
 {
 	char *cmd = NULL;
 	char reply[ 100 ];
@@ -650,7 +671,7 @@ Var_T *magnet_command( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static bool ips20_4_init( const char *name )
+static bool ips20_4_init( const char * name )
 {
 	char cmd[ 100 ];
 	char reply[ 100 ];
@@ -1374,7 +1395,9 @@ static int ips20_4_set_activity( int activity )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-static long ips20_4_talk( const char *message, char *reply, long length )
+static long ips20_4_talk( const char * message,
+						  char *       reply,
+						  long         length )
 {
 	long len = length;
 	int retries = MAX_RETRIES;
@@ -1385,11 +1408,11 @@ static long ips20_4_talk( const char *message, char *reply, long length )
 	if ( gpib_write( ips20_4.device, message, strlen( message ) ) == FAILURE )
 		ips20_4_comm_failure( );
 
-	/* Re-enable the following if you want to be extremely careful (that's
-	   what the manual recommends), but even the LabVIEW driver written by
-	   Oxford doesn't use it... */
-
 #if 0
+	/* Re-enable this if you want to be extremely careful (that's what the
+	   manual recommends), but not even the LabVIEW driver written by Oxford
+	   does it this way... */
+
 	do {
 		unsigned char stb;
 

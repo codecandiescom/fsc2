@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -108,64 +108,87 @@ extern const char *mod_sources[ ];
 
 /* declaration of exported functions */
 
-int hp8648b_init_hook( void );
-int hp8648b_test_hook( void );
-int hp8648b_exp_hook( void );
+int hp8648b_init_hook(       void );
+int hp8648b_test_hook(       void );
+int hp8648b_exp_hook(        void );
 int hp8648b_end_of_exp_hook( void );
-void hp8648b_exit_hook( void );
+void hp8648b_exit_hook(      void );
 
 
-Var_T *synthesizer_name( Var_T *v );
-Var_T *synthesizer_state( Var_T *v );
-Var_T *synthesizer_frequency( Var_T *v );
-Var_T *synthesizer_step_frequency( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_minimum_attenuation( Var_T *v );
-Var_T *synthesizer_sweep_up( Var_T *v );
-Var_T *synthesizer_sweep_down( Var_T *v );
-Var_T *synthesizer_reset_frequency( Var_T *v );
-Var_T *synthesizer_use_table( Var_T *v );
-Var_T *synthesizer_attenuation( Var_T *v );
-Var_T *synthesizer_att_ref_freq( Var_T *v );
-Var_T *synthesizer_modulation( Var_T *v );
-Var_T *synthesizer_mod_ampl( Var_T *v );
-Var_T *synthesizer_mod_type( Var_T *v );
-Var_T *synthesizer_mod_source( Var_T *v );
-Var_T *synthesizer_command( Var_T *v );
+Var_T *synthesizer_name(                Var_T * /* v */ );
+Var_T *synthesizer_state(               Var_T * /* v */ );
+Var_T *synthesizer_frequency(           Var_T * /* v */ );
+Var_T *synthesizer_step_frequency(      Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_minimum_attenuation( Var_T * /* v */ );
+Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
+Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
+Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
+Var_T *synthesizer_use_table(           Var_T * /* v */ );
+Var_T *synthesizer_attenuation(         Var_T * /* v */ );
+Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
+Var_T *synthesizer_modulation(          Var_T * /* v */ );
+Var_T *synthesizer_mod_ampl(            Var_T * /* v */ );
+Var_T *synthesizer_mod_type(            Var_T * /* v */ );
+Var_T *synthesizer_mod_source(          Var_T * /* v */ );
+Var_T *synthesizer_command(             Var_T * /* v */ );
 
 
 /* functions defined in "hp8648b_util.c" */
 
-void hp8648b_read_table( FILE *fp );
-FILE *hp8648b_find_table( char **name );
-FILE *hp8648b_open_table( char *name );
-double hp8648b_get_att_from_table( double freq );
-double hp8648b_get_att( double freq );
-int hp8648b_set_mod_param( Var_T *v, double *dres, int *ires );
+void hp8648b_read_table( FILE * /* fp */ );
+
+FILE *hp8648b_find_table( char ** /* name */ );
+
+FILE *hp8648b_open_table( char * /* name */ );
+
+double hp8648b_get_att_from_table( double /* freq */ );
+
+double hp8648b_get_att( double /* freq */ );
+
+int hp8648b_set_mod_param( Var_T *  /* v    */,
+						   double * /* dres */,
+						   int *    /* ires */ );
 
 
 /* functions defined in "hp8648b_lexer.l" */
 
-void hp8648b_read_table( FILE *fp );
+void hp8648b_read_table( FILE * /* fp */ );
 
 
 /* functions defined in "hp8648b_gpib.c" */
 
-bool hp8648b_init( const char *name );
+bool hp8648b_init( const char */* name */ );
+
 void hp8648b_finished( void );
-bool hp8648b_set_output_state( bool state );
+
+bool hp8648b_set_output_state( bool /* state */ );
+
 bool hp8648b_get_output_state( void );
-double hp8648b_set_frequency( double freq );
+
+double hp8648b_set_frequency( double /* freq */ );
+
 double hp8648b_get_frequency( void );
-double hp8648b_set_attenuation( double att );
+
+double hp8648b_set_attenuation( double /* att */ );
+
 double hp8648b_get_attenuation( void );
-int hp8648b_set_mod_type( int type );
+
+int hp8648b_set_mod_type( int /* type */ );
+
 int hp8648b_get_mod_type( void );
-int hp8648b_set_mod_source( int type, int source );
-int hp8648b_get_mod_source( int type );
-double hp8648b_set_mod_ampl( int type, double ampl );
-double hp8648b_get_mod_ampl( int type );
-bool hp8648b_command( const char *cmd );
+
+int hp8648b_set_mod_source( int /* type   */,
+							int /* source */ );
+
+int hp8648b_get_mod_source( int /* type */ );
+
+double hp8648b_set_mod_ampl( int    /* type */,
+							 double /* ampl */ );
+
+double hp8648b_get_mod_ampl( int /* type */ );
+
+bool hp8648b_command( const char * /* cmd */ );
 
 
 /*

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,7 +26,9 @@
 #define DUMP_GRAPHICS_HEADER
 
 
-void dump_window( int type, int fd );
+void dump_window( int /* type */,
+				  int /* fd   */ );
+
 void create_color_hash( void );
 
 

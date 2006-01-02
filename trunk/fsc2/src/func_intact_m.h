@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,10 +30,10 @@
 
 /* exported functions */
 
-Var_T *f_mcreate( Var_T *v );
-Var_T *f_mdelete( Var_T *v );
-Var_T *f_mchoice( Var_T *v );
-Var_T *f_mchanged( Var_T *v );
+Var_T *f_mcreate(  Var_T * /* v */ );
+Var_T *f_mdelete(  Var_T * /* v */ );
+Var_T *f_mchoice(  Var_T * /* v */ );
+Var_T *f_mchanged( Var_T * /* v */ );
 
 
 #endif   /* ! INTERACTIVE_MENUS_HEADER */

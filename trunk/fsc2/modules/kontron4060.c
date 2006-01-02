@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,21 +35,23 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Declaration of exported functions */
 
-int kontron4060_init_hook( void );
-int kontron4060_exp_hook( void );
+int kontron4060_init_hook(       void );
+int kontron4060_exp_hook(        void );
 int kontron4060_end_of_exp_hook( void );
 
-Var_T *voltmeter_name( Var_T *v );
-Var_T *voltmeter_get_data( Var_T *v );
-Var_T *voltmeter_ac_measurement( Var_T *v );
-Var_T *voltmeter_dc_measurement( Var_T *v );
-Var_T *voltmeter_command( Var_T *v );
+Var_T *voltmeter_name(           Var_T * v );
+Var_T *voltmeter_get_data(       Var_T * v );
+Var_T *voltmeter_ac_measurement( Var_T * v );
+Var_T *voltmeter_dc_measurement( Var_T * v );
+Var_T *voltmeter_command(        Var_T * v );
 
 
 /* Locally used functions */
 
-static bool kontron4060_init( const char *name );
-static bool kontron4060_command( const char *cmd );
+static bool kontron4060_init( const char * name );
+
+static bool kontron4060_command( const char * cmd );
+
 static void kontron4060_failure( void );
 
 
@@ -125,7 +127,7 @@ int kontron4060_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *voltmeter_name( Var_T *v UNUSED_ARG )
+Var_T *voltmeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -135,7 +137,7 @@ Var_T *voltmeter_name( Var_T *v UNUSED_ARG )
  * Switches the voltmeter to AC measurement mode
  *-----------------------------------------------*/
 
-Var_T *voltmeter_ac_measurement( Var_T *v UNUSED_ARG )
+Var_T *voltmeter_ac_measurement( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -150,7 +152,7 @@ Var_T *voltmeter_ac_measurement( Var_T *v UNUSED_ARG )
  * Switches the voltmeter to DC measurement mode
  *-----------------------------------------------*/
 
-Var_T *voltmeter_dc_measurement( Var_T *v UNUSED_ARG )
+Var_T *voltmeter_dc_measurement( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -165,7 +167,7 @@ Var_T *voltmeter_dc_measurement( Var_T *v UNUSED_ARG )
  * Returns the current voltage from the voltmeter
  *------------------------------------------------*/
 
-Var_T *voltmeter_get_data( Var_T *v UNUSED_ARG )
+Var_T *voltmeter_get_data( Var_T * v  UNUSED_ARG )
 {
 	char reply[ 100 ];
 	long length = 100;
@@ -188,7 +190,7 @@ Var_T *voltmeter_get_data( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *voltmeter_command( Var_T *v )
+Var_T *voltmeter_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -220,7 +222,7 @@ Var_T *voltmeter_command( Var_T *v )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static bool kontron4060_init( const char *name )
+static bool kontron4060_init( const char * name )
 {
 	if ( gpib_init_device( name, &kontron4060.device ) == FAILURE )
         return FAIL;
@@ -259,7 +261,7 @@ static bool kontron4060_init( const char *name )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool kontron4060_command( const char *cmd )
+static bool kontron4060_command( const char * cmd )
 {
 	if ( gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
 		kontron4060_failure( );

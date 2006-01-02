@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -82,7 +82,8 @@ double dg2020_ticks2double( Ticks ticks )
  * are within the valid limits.
  *----------------------------------------------------------------------*/
 
-void dg2020_check_pod_level_diff( double high, double low )
+void dg2020_check_pod_level_diff( double high,
+								  double low )
 {
 	if ( low > high )
 	{
@@ -196,7 +197,8 @@ Channel_T *dg2020_get_next_free_channel( void )
  * only the first pulse is inactive pulse or the second pulse starts earlier.
  *---------------------------------------------------------------------------*/
 
-int dg2020_start_compare( const void *A, const void *B )
+int dg2020_start_compare( const void * A,
+						  const void * B )
 {
 	Pulse_T *a = *( Pulse_T ** ) A,
 		    *b = *( Pulse_T ** ) B;
@@ -223,7 +225,9 @@ int dg2020_start_compare( const void *A, const void *B )
  * arguments. If at least one was found a postive result is returned.
  *--------------------------------------------------------------------------*/
 
-bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num )
+bool dg2020_find_phase_pulse( Pulse_T *   p,
+							  Pulse_T *** pl,
+							  int *       num )
 {
 	Pulse_T *pp = dg2020.pulses;
 
@@ -253,8 +257,9 @@ bool dg2020_find_phase_pulse( Pulse_T *p, Pulse_T ***pl, int *num )
  * the same channel and returns them as a sorted list.
  *-----------------------------------------------------------------------*/
 
-int dg2020_get_phase_pulse_list( Function_T *f, Channel_T *channel,
-								 Pulse_T ***list )
+int dg2020_get_phase_pulse_list( Function_T * f,
+								 Channel_T *  channel,
+								 Pulse_T ***  list )
 {
 	int i;
 	int num_pulses = 0;
@@ -434,7 +439,10 @@ void dg2020_calc_padding( void )
  *  * 1: ok, 0: error
  *----------------------------------------------------------*/
 
-bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
+bool dg2020_prep_cmd( char ** cmd,
+					  int     channel,
+					  Ticks   address,
+					  Ticks   length )
 {
 	char dummy[ 10 ];
 
@@ -464,7 +472,10 @@ bool dg2020_prep_cmd( char **cmd, int channel, Ticks address, Ticks length )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
+void dg2020_set( char * arena,
+				 Ticks  start,
+				 Ticks  len,
+				 Ticks  offset )
 {
 	fsc2_assert( start + len + offset <= dg2020.max_seq_len );
 
@@ -475,7 +486,10 @@ void dg2020_set( char *arena, Ticks start, Ticks len, Ticks offset )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
+int dg2020_diff( char *  old_p,
+				 char *  new_p,
+				 Ticks * start,
+				 Ticks * length )
 {
 	static Ticks where = 0;
 	int ret;
@@ -540,7 +554,7 @@ int dg2020_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void dg2020_dump_channels( FILE *fp )
+void dg2020_dump_channels( FILE * fp )
 {
 	Function_T *f;
 	Pulse_T *p;

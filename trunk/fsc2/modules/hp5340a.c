@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -48,19 +48,21 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-int hp5340a_init_hook( void );
-int hp5340a_exp_hook( void );
+int hp5340a_init_hook(       void );
+int hp5340a_exp_hook(        void );
 int hp5340a_end_of_exp_hook( void );
 
 
-Var_T *freq_counter_name( Var_T *v );
-Var_T *freq_counter_measure( Var_T *v );
-Var_T *freq_counter_command( Var_T *v );
+Var_T *freq_counter_name(    Var_T * v );
+Var_T *freq_counter_measure( Var_T * v );
+Var_T *freq_counter_command( Var_T * v );
 
 
-static bool hp5340a_init( const char *name );
+static bool hp5340a_init( const char * name );
+
 static double h95340a_get_freq( void );
-static bool hp5340a_command( const char *cmd );
+
+static bool hp5340a_command( const char * cmd );
 
 
 static struct {
@@ -127,7 +129,7 @@ int hp5340a_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *freq_counter_name( Var_T *v UNUSED_ARG )
+Var_T *freq_counter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -136,7 +138,7 @@ Var_T *freq_counter_name( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *freq_counter_measure( Var_T *v UNUSED_ARG )
+Var_T *freq_counter_measure( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == TEST )
 		return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
@@ -148,7 +150,7 @@ Var_T *freq_counter_measure( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *freq_counter_command( Var_T *v )
+Var_T *freq_counter_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -187,7 +189,7 @@ Var_T *freq_counter_command( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool hp5340a_init( const char *name )
+static bool hp5340a_init( const char * name )
 {
 	if ( gpib_init_device( name, &hp5340a.device ) == FAILURE )
         return FAIL;
@@ -235,7 +237,7 @@ static double h95340a_get_freq( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool hp5340a_command( const char *cmd )
+static bool hp5340a_command( const char * cmd )
 {
 	if ( gpib_write( hp5340a.device, cmd, strlen( cmd ) ) == FAILURE )
 	{

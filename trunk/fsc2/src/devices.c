@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,7 @@ static long pathmax = 0;
  * the end of the linked list.
  *--------------------------------------------------------------------------*/
 
-void device_add( const char *name )
+void device_add( const char * name )
 {
 	Device_Name_T *dl;
 	char *dev_name;
@@ -212,7 +212,7 @@ void device_add( const char *name )
  * it to the list of devices.
  *-----------------------------------------------------*/
 
-void device_append_to_list( const char *dev_name )
+void device_append_to_list( const char * dev_name )
 {
 	Device_T *cd;
 

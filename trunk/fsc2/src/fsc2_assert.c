@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,8 +28,9 @@
 Fsc2_Assert_T Assert_Struct;
 
 
-int fsc2_assert_print( const char *expression, const char *filename,
-					   int line )
+int fsc2_assert_print( const char * expression,
+					   const char * filename,
+					   int          line )
 {
 	fprintf( stderr, "%s:%d: failed assertion: %s\n", filename, line,
 			 expression );

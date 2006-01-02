@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,27 +44,33 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Exported functions */
 
-int hjs_daadc_init_hook( void );
-int hjs_daadc_test_hook( void );
-int hjs_daadc_exp_hook( void );
+int hjs_daadc_init_hook(       void );
+int hjs_daadc_test_hook(       void );
+int hjs_daadc_exp_hook(        void );
 int hjs_daadc_end_of_exp_hook( void );
-void hjs_daadc_exit_hook( void );
+void hjs_daadc_exit_hook(      void );
 
-Var_T *daq_name( Var_T *v );
-Var_T *daq_reserve_dac( Var_T *v );
-Var_T *daq_reserve_adc( Var_T *v );
+Var_T *daq_name(                   Var_T *v );
+Var_T *daq_reserve_dac(            Var_T *v );
+Var_T *daq_reserve_adc(            Var_T *v );
 Var_T *daq_maximum_output_voltage( Var_T *v );
-Var_T *daq_set_voltage( Var_T *v );
-Var_T *daq_get_voltage( Var_T *v );
-Var_T *daq_dac_parameter( Var_T *v );
+Var_T *daq_set_voltage(            Var_T *v );
+Var_T *daq_get_voltage(            Var_T *v );
+Var_T *daq_dac_parameter(          Var_T *v );
 
 
 static int hjs_daadc_da_volts_to_val( double volts );
+
 static double hjs_daadc_val_to_ad_volts( int val );
+
 static bool hjs_daadc_serial_init( void );
+
 static void hjs_daadc_out( int out );
+
 static int hjs_daadc_in( void );
+
 static int hjs_daadc_in_out( int out );
+
 static void hjs_daadc_comm_failure( void );
 
 
@@ -205,7 +211,7 @@ void hjs_daadc_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T *v UNUSED_ARG )
+Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -218,7 +224,7 @@ Var_T *daq_name( Var_T *v UNUSED_ARG )
  * daq_set_voltage().
  *--------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dac( Var_T *v )
+Var_T *daq_reserve_dac( Var_T * v )
 {
 	bool lock_state = SET;
 
@@ -281,7 +287,7 @@ Var_T *daq_reserve_dac( Var_T *v )
  * argument to the function daq_get_voltage().
  *--------------------------------------------------------------------*/
 
-Var_T *daq_reserve_adc( Var_T *v )
+Var_T *daq_reserve_adc( Var_T * v )
 {
 	bool lock_state = SET;
 
@@ -352,7 +358,7 @@ Var_T *daq_reserve_adc( Var_T *v )
  * passed to the function about the potentiometer setting was correct.
  *----------------------------------------------------------------------*/
 
-Var_T *daq_maximum_output_voltage( Var_T *v )
+Var_T *daq_maximum_output_voltage( Var_T * v )
 {
 	double volts;
 	char *pass = NULL;
@@ -432,7 +438,7 @@ Var_T *daq_maximum_output_voltage( Var_T *v )
  * to the highest possible value of 10 V).
  *----------------------------------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T *v )
+Var_T *daq_set_voltage( Var_T * v )
 {
 	double volts;
 	char *pass = NULL;
@@ -516,7 +522,7 @@ Var_T *daq_set_voltage( Var_T *v )
  * called yet).
  *---------------------------------------------------------------------*/
 
-Var_T *daq_get_voltage( Var_T *v )
+Var_T *daq_get_voltage( Var_T * v )
 {
 	char *pass = NULL;
 
@@ -569,7 +575,7 @@ Var_T *daq_get_voltage( Var_T *v )
  * maximum output voltage and voltage resolution).
  *------------------------------------------------------*/
 
-Var_T *daq_dac_parameter( Var_T *v )
+Var_T *daq_dac_parameter( Var_T * v )
 {
 	double params[ 3 ];
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -27,12 +27,14 @@
 #include <dlfcn.h>
 
 
-static int main_form_close_handler( FL_FORM *a, void *b );
+static int main_form_close_handler( FL_FORM * a ,
+									void *    b );
 static void setup_app_options( FL_CMD_OPT app_opt[ ] );
 static bool dl_fsc2_rsc( void );
 
 #if 0
-static int fsc2_x_error_handler( Display *d, XErrorEvent *err );
+static int fsc2_x_error_handler( Display *d,
+								 XErrorEvent *err );
 static int fsc2_xio_error_handler( Display *d );
 #endif
 
@@ -198,7 +200,8 @@ FL_resource Xresources[ ] = {
  * and creates all the forms needed by the program.
  *--------------------------------------------------*/
 
-bool xforms_init( int *argc, char *argv[ ] )
+bool xforms_init( int  * argc,
+				  char * argv[ ] )
 {
 	Display *display;
 	FL_Coord h, H;
@@ -770,7 +773,8 @@ bool dl_fsc2_rsc( void )
  * scripts to be run quit immediately.
  *-----------------------------------------------------------------*/
 
-static int main_form_close_handler( FL_FORM *a UNUSED_ARG, void *b UNUSED_ARG )
+static int main_form_close_handler( FL_FORM * a  UNUSED_ARG,
+									void    * b  UNUSED_ARG )
 {
 	if ( GUI.main_form->quit->active != 1 )
 		return FL_IGNORE;
@@ -818,7 +822,8 @@ void xforms_close( void )
  * the sizes of the program and the error/output browser.
  *------------------------------------------------------------*/
 
-void win_slider_callback( FL_OBJECT *a, long b UNUSED_ARG )
+void win_slider_callback( FL_OBJECT * a,
+						  long        b  UNUSED_ARG )
 {
 	FL_Coord h, H;
 	FL_Coord new_h1 ;
@@ -854,7 +859,8 @@ void win_slider_callback( FL_OBJECT *a, long b UNUSED_ARG )
 
 #define WM_STATE_ELEMENTS 1
 
-int is_iconic( Display *d, Window w )
+int is_iconic( Display * d,
+			   Window    w )
 {
 	Atom xa_wm_state, actual_type;
 	unsigned char *property = NULL;
@@ -890,7 +896,8 @@ int is_iconic( Display *d, Window w )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
+static int fsc2_x_error_handler( Display *     d,
+								 XErrorEvent * err )
 {
 	char err_str[ 1024 ];
 
@@ -905,7 +912,7 @@ static int fsc2_x_error_handler( Display *d, XErrorEvent *err )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int fsc2_xio_error_handler( Display *d UNUSED_ARG )
+static int fsc2_xio_error_handler( Display * d  UNUSED_ARG )
 {
 	fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
 	exit( EXIT_FAILURE );

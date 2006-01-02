@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,17 +25,28 @@
 #include "dg2020_b.h"
 
 
-static void dg2020_init_print( FILE *fp );
+static void dg2020_init_print( FILE * fp );
+
 static void dg2020_basic_pulse_check( void );
+
 static void dg2020_basic_functions_check( void );
-static int dg2020_calc_channels_needed( Function_T *f );
-static void dg2020_phase_setup_check( Function_T *f );
+
+static int dg2020_calc_channels_needed( Function_T * f );
+
+static void dg2020_phase_setup_check( Function_T * f );
+
 static void dg2020_distribute_channels( void );
-static void dg2020_setup_phase_matrix( Function_T *f );
+
+static void dg2020_setup_phase_matrix( Function_T * f );
+
 static void dg2020_pulse_start_setup( void );
-static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f );
+
+static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f );
+
 static Phs_Seq_T *dg2020_create_dummy_phase_seq( void );
+
 static void dg2020_create_shape_pulses( void );
+
 static void dg2020_create_twt_pulses( void );
 
 
@@ -70,7 +81,7 @@ void dg2020_init_setup( void )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static void dg2020_init_print( FILE *fp )
+static void dg2020_init_print( FILE * fp )
 {
 	Function_T *f;
 	int i, j;
@@ -314,7 +325,7 @@ static void dg2020_basic_functions_check( void )
  * constant voltage.
  *-------------------------------------------------------------------*/
 
-static int dg2020_calc_channels_needed( Function_T *f )
+static int dg2020_calc_channels_needed( Function_T * f )
 {
 	int i, j;
 	int num_channels;
@@ -355,7 +366,7 @@ static int dg2020_calc_channels_needed( Function_T *f )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void dg2020_phase_setup_check( Function_T *f )
+static void dg2020_phase_setup_check( Function_T * f )
 {
 	int i, j;
 	Pod_T *free_pod_list[ MAX_PODS_PER_FUNC ];
@@ -522,7 +533,7 @@ static void dg2020_distribute_channels( void )
  * the stages of the phase cycle this is the minimum number of channels.
  *--------------------------------------------------------------------------*/
 
-static void dg2020_setup_phase_matrix( Function_T *f )
+static void dg2020_setup_phase_matrix( Function_T * f )
 {
 	int i, j;
 	int cur_channel;
@@ -658,7 +669,7 @@ static void dg2020_pulse_start_setup( void )
  * assigned to it will stay low all of the time.
  *----------------------------------------------------------------------*/
 
-static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T *f )
+static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f )
 {
 	int i, j;
 

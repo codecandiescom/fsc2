@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,7 @@ void conditionparser_init( void );
 
 /* locally used functions */
 
-static void conditionerror( const char *s );
+static void conditionerror( const char * s );
 
 
 /* A problem are expressions of the form 'expr & expr' or 'expr | expr'.
@@ -306,7 +306,7 @@ strs:    E_STR_TOKEN                { if ( ! Dont_exec )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void conditionerror( const char *s UNUSED_ARG )
+static void conditionerror( const char * s  UNUSED_ARG )
 {
 	print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 	THROW( EXCEPTION );

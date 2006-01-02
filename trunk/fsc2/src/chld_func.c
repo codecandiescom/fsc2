@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -24,7 +24,8 @@
 
 #include "fsc2.h"
 
-static const char *handle_input( const char *content, const char *label );
+static const char *handle_input( const char * content,
+								 const char * label );
 
 
 /*--------------------------------------------------------*
@@ -32,7 +33,7 @@ static const char *handle_input( const char *content, const char *label );
  * newline characters to get multi-line messages.
  *--------------------------------------------------------*/
 
-void show_message( const char *str )
+void show_message( const char * str )
 {
 	if ( Fsc2_Internals.I_am == PARENT )
 	{
@@ -60,7 +61,7 @@ void show_message( const char *str )
  * newline characters to get multi-line messages.
  *-------------------------------------------------------*/
 
-void show_alert( const char *str )
+void show_alert( const char * str )
 {
 	char *strc, *strs[ 3 ];
 	int i;
@@ -116,8 +117,13 @@ void show_alert( const char *str )
  *    4. number of button to be used as default button (range 1 - 3)
  *------------------------------------------------------------------------*/
 
-int show_choices( const char *text, int numb, const char *b1, const char *b2,
-				  const char *b3, int def, bool is_batch )
+int show_choices( const char * text,
+				  int          numb,
+				  const char * b1,
+				  const char * b2,
+				  const char * b3,
+				  int          def,
+				  bool         is_batch )
 {
 	int ret;
 
@@ -159,8 +165,10 @@ int show_choices( const char *text, int numb, const char *b1, const char *b2,
  * Returns either a static buffer with the file name or NULL.
  *---------------------------------------------------------------*/
 
-const char *show_fselector( const char *message, const char *directory,
-							const char *pattern, const char *def )
+const char *show_fselector( const char * message,
+							const char * directory,
+							const char * pattern,
+							const char * def )
 {
 	const char *ret = NULL;
 
@@ -186,7 +194,8 @@ const char *show_fselector( const char *message, const char *directory,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-const char *show_input( const char *content, const char *label )
+const char *show_input( const char * content,
+						const char * label )
 {
 	char *ret = NULL;
 
@@ -208,7 +217,8 @@ const char *show_input( const char *content, const char *label )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static const char *handle_input( const char *content, const char *label )
+static const char *handle_input( const char * content,
+								 const char * label )
 {
 	if ( label != NULL && label != '\0' )
 		fl_set_object_label( GUI.input_form->comm_input, label );
@@ -241,7 +251,8 @@ static const char *handle_input( const char *content, const char *label )
  * the return value of the layout() function.
  *--------------------------------------------------------------*/
 
-bool exp_layout( char *buffer, ptrdiff_t len )
+bool exp_layout( char *    buffer,
+				 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -302,7 +313,8 @@ bool exp_layout( char *buffer, ptrdiff_t len )
  * the return values of the button_create() function.
  *--------------------------------------------------------------*/
 
-long *exp_bcreate( char *buffer, ptrdiff_t len )
+long *exp_bcreate( char *    buffer,
+				   ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -389,7 +401,8 @@ long *exp_bcreate( char *buffer, ptrdiff_t len )
  * the return value of the button_delete() function.
  *--------------------------------------------------------------*/
 
-bool exp_bdelete( char *buffer, ptrdiff_t len )
+bool exp_bdelete( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -450,7 +463,8 @@ bool exp_bdelete( char *buffer, ptrdiff_t len )
  * the return values of the button_state() function .
  *--------------------------------------------------------------*/
 
-long *exp_bstate( char *buffer, ptrdiff_t len )
+long *exp_bstate( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -529,7 +543,8 @@ long *exp_bstate( char *buffer, ptrdiff_t len )
  * the return values of the button_changed() function .
  *--------------------------------------------------------------*/
 
-long *exp_bchanged( char *buffer, ptrdiff_t len )
+long *exp_bchanged( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -603,7 +618,8 @@ long *exp_bchanged( char *buffer, ptrdiff_t len )
  * the return values of the slider_create() function .
  *--------------------------------------------------------------*/
 
-long *exp_screate( char *buffer, ptrdiff_t len )
+long *exp_screate( char *    buffer,
+				   ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -692,7 +708,8 @@ long *exp_screate( char *buffer, ptrdiff_t len )
  * the return value of the slider_delete() function.
  *--------------------------------------------------------------*/
 
-bool exp_sdelete( char *buffer, ptrdiff_t len )
+bool exp_sdelete( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -753,7 +770,8 @@ bool exp_sdelete( char *buffer, ptrdiff_t len )
  * arguments and results of the slider_value() function
  *--------------------------------------------------------------*/
 
-double *exp_sstate( char *buffer, ptrdiff_t len )
+double *exp_sstate( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -839,7 +857,8 @@ double *exp_sstate( char *buffer, ptrdiff_t len )
  * arguments and results of the slider_changed() function
  *--------------------------------------------------------------*/
 
-long *exp_schanged( char *buffer, ptrdiff_t len )
+long *exp_schanged( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -913,7 +932,8 @@ long *exp_schanged( char *buffer, ptrdiff_t len )
  * the return values of the input_create() function.
  *--------------------------------------------------------------*/
 
-long *exp_icreate( char *buffer, ptrdiff_t len )
+long *exp_icreate( char *    buffer,
+				   ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1032,7 +1052,8 @@ long *exp_icreate( char *buffer, ptrdiff_t len )
  * the return value of the input_delete() function.
  *--------------------------------------------------------------*/
 
-bool exp_idelete( char *buffer, ptrdiff_t len )
+bool exp_idelete( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1093,7 +1114,8 @@ bool exp_idelete( char *buffer, ptrdiff_t len )
  * arguments and results of the input_value() function
  *--------------------------------------------------------------*/
 
-Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
+Input_Res_T *exp_istate( char *    buffer,
+						 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1234,7 +1256,8 @@ Input_Res_T *exp_istate( char *buffer, ptrdiff_t len )
  * arguments and results of the input_value() function
  *--------------------------------------------------------------*/
 
-long *exp_ichanged( char *buffer, ptrdiff_t len )
+long *exp_ichanged( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1307,7 +1330,8 @@ long *exp_ichanged( char *buffer, ptrdiff_t len )
  * the return values of the menu_create() function.
  *--------------------------------------------------------------*/
 
-long *exp_mcreate( char *buffer, ptrdiff_t len )
+long *exp_mcreate( char *    buffer,
+				   ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1399,7 +1423,7 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 	}
 	else
 	{
-		char *old_Fname = EDL.Fname;
+		char *    old_Fname = EDL.Fname;
 		long old_Lc = EDL.Lc;
 		Var_T *func_ptr;
 		int acc;
@@ -1411,7 +1435,8 @@ bool exp_mdelete( char *buffer, ptrdiff_t len )
 		{
 			/* Get variable with address of function to delete a menu */
 
-			func_ptr = func_get( "menu_delete", &acc );
+			func_ptr = func_get( "menu_delete",
+								 &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1525,7 +1550,8 @@ long *exp_mchoice( char *buffer, ptrdiff_t len )
  * the return value of the menu_changed() function.
  *--------------------------------------------------------------*/
 
-long *exp_mchanged( char *buffer, ptrdiff_t len )
+long *exp_mchanged( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1538,7 +1564,7 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 			THROW( EXCEPTION );
 		}
 		T_free( buffer );
-		result = LONG_P T_malloc( 2 * sizeof *result );
+		result = LONG_P T_malloc( 2 *     sizeof *result );
 		if ( ! reader( ( void * ) result ) )
 			result[ 0 ] = 0;
 		return result;
@@ -1559,7 +1585,8 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
 		{
 			/* Get function for dealing with menu state */
 
-			func_ptr = func_get( "menu_changed", &acc );
+			func_ptr = func_get( "menu_changed",
+								 &acc );
 
 			/* Unpack parameter and push them onto the stack */
 
@@ -1598,7 +1625,8 @@ long *exp_mchanged( char *buffer, ptrdiff_t len )
  * the return value of the toolbox_changed() function.
  *--------------------------------------------------------------*/
 
-long *exp_tbchanged( char *buffer, ptrdiff_t len )
+long *exp_tbchanged( char *    buffer,
+					 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1678,7 +1706,8 @@ long *exp_tbchanged( char *buffer, ptrdiff_t len )
  * the return value of the toolbox_wait() function.
  *--------------------------------------------------------------*/
 
-long *exp_tbwait( char *buffer, ptrdiff_t len )
+long *exp_tbwait( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1766,7 +1795,8 @@ long *exp_tbwait( char *buffer, ptrdiff_t len )
  * the return value of the object_delete() function.
  *--------------------------------------------------------------*/
 
-bool exp_objdel( char *buffer, ptrdiff_t len )
+bool exp_objdel( char *    buffer,
+				 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1827,7 +1857,8 @@ bool exp_objdel( char *buffer, ptrdiff_t len )
  * the return value of the object_change_label() function.
  *--------------------------------------------------------------*/
 
-bool exp_clabel( char *buffer, ptrdiff_t len )
+bool exp_clabel( char *    buffer,
+				 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1891,7 +1922,8 @@ bool exp_clabel( char *buffer, ptrdiff_t len )
  * the return value of the object_enable() function.
  *--------------------------------------------------------------*/
 
-bool exp_xable( char *buffer, ptrdiff_t len )
+bool exp_xable( char *    buffer,
+				ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -1957,7 +1989,8 @@ bool exp_xable( char *buffer, ptrdiff_t len )
  * the return value of the mouse_position() function.
  *--------------------------------------------------------------*/
 
-double *exp_getpos( char *buffer, ptrdiff_t len )
+double *exp_getpos( char *    buffer,
+					ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2052,7 +2085,8 @@ double *exp_getpos( char *buffer, ptrdiff_t len )
  * the return value of the curve_button_1d() function.
  *--------------------------------------------------------------*/
 
-bool exp_cb_1d( char *buffer, ptrdiff_t len )
+bool exp_cb_1d( char *    buffer,
+				ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2130,7 +2164,8 @@ bool exp_cb_1d( char *buffer, ptrdiff_t len )
  * the return value of the curve_button_2d() function.
  *--------------------------------------------------------------*/
 
-bool exp_cb_2d( char *buffer, ptrdiff_t len )
+bool exp_cb_2d( char *    buffer,
+				ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2223,7 +2258,8 @@ bool exp_cb_2d( char *buffer, ptrdiff_t len )
  * the return value of the zoom_1d() function.
  *--------------------------------------------------------------*/
 
-bool exp_zoom_1d( char *buffer, ptrdiff_t len )
+bool exp_zoom_1d( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2276,7 +2312,8 @@ bool exp_zoom_1d( char *buffer, ptrdiff_t len )
  * the return value of the zoom_2d() function.
  *--------------------------------------------------------------*/
 
-bool exp_zoom_2d( char *buffer, ptrdiff_t len )
+bool exp_zoom_2d( char *    buffer,
+				  ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2336,7 +2373,8 @@ bool exp_zoom_2d( char *buffer, ptrdiff_t len )
  * the return value of the fs_button_1d() function.
  *--------------------------------------------------------------*/
 
-bool exp_fsb_1d( char *buffer, ptrdiff_t len )
+bool exp_fsb_1d( char *    buffer,
+				 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{
@@ -2391,7 +2429,8 @@ bool exp_fsb_1d( char *buffer, ptrdiff_t len )
  * the return value of the fs_button_2d() function.
  *--------------------------------------------------------------*/
 
-bool exp_fsb_2d( char *buffer, ptrdiff_t len )
+bool exp_fsb_2d( char *    buffer,
+				 ptrdiff_t len )
 {
 	if ( Fsc2_Internals.I_am == CHILD )
 	{

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -205,7 +205,8 @@ const char *ep385_pticks( Ticks ticks )
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int ep385_pulse_compare( const void *A, const void *B )
+int ep385_pulse_compare( const void * A,
+						 const void * B )
 {
 	Pulse_Params_T *a = ( Pulse_Params_T * ) A,
 		           *b = ( Pulse_Params_T * ) B;
@@ -358,7 +359,7 @@ void ep385_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void ep385_dump_channels( FILE *fp )
+void ep385_dump_channels( FILE * fp )
 {
 	Function_T *f;
 	Channel_T *ch;
@@ -439,7 +440,7 @@ void ep385_duty_check( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Ticks ep385_calc_max_length( Function_T *f )
+Ticks ep385_calc_max_length( Function_T * f )
 {
 	int i, j;
 	Channel_T *ch;
@@ -466,7 +467,7 @@ Ticks ep385_calc_max_length( Function_T *f )
  * because some other pulsers also have it.
  *-----------------------------------------------*/
 
-bool ep385_set_max_seq_len( double seq_len UNUSED_ARG )
+bool ep385_set_max_seq_len( double seq_len  UNUSED_ARG )
 {
 	print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
 	return OK;

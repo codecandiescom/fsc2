@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,7 +34,8 @@ static void start_help_browser( void );
  * documentation.
  *-------------------------------------------------------------*/
 
-void run_help( FL_OBJECT *a, long b UNUSED_ARG )
+void run_help( FL_OBJECT * a,
+			   long        b  UNUSED_ARG )
 {
 	int res;
 	int bn;

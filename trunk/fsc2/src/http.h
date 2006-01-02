@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,7 +26,9 @@
 #define HTTP_HEADER
 
 
-void server_callback( FL_OBJECT *obj, long a );
+void server_callback( FL_OBJECT * /* obj */,
+					  long        /* a   */ );
+
 void http_check( void );
 
 

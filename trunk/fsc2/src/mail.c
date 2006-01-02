@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -68,23 +68,39 @@
 
 #define DNS_MAX_ANSWER_LEN  4096
 
-static int do_send( const char *rec_host, const char *to,
-					const char *from, const char *local_host,
-					const char *subject, FILE *fp );
-static int open_mail_socket( const char *remote, const char *local );
-static const char *get_mail_server( const char *remote, const char *local );
-static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
-												unsigned short *sec_entries,
-												const char *remote,
-												unsigned short type );
-static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
-						   char *host, unsigned short *sec_entries );
-static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
-					 unsigned short num_ans, const char *host );
-static const char *get_host( unsigned char *buf, int len,
-							 unsigned short num_ans, unsigned char *ans_sec );
-static const char *get_name( unsigned char *buf, int len, unsigned char **rr );
-static unsigned short get_ushort( const unsigned char *p );
+static int do_send( const char * rec_host,
+					const char * to,
+					const char * from,
+					const char * local_host,
+					const char * subject,
+					FILE *       fp );
+static int open_mail_socket( const char * remote,
+							 const char * local );
+static const char *get_mail_server( const char * remote,
+									const char * local );
+static unsigned char *analyze_dns_reply_header( unsigned char *  buf,
+												int              len,
+												unsigned short * sec_entries,
+												const char *     remote,
+												unsigned short   type );
+static int check_cname_rr( unsigned char *  buf,
+						   int              len,
+						   unsigned char *  ans_sec,
+						   char *           host,
+						   unsigned short * sec_entries );
+static int weed_out( unsigned char * buf,
+					 int             len,
+					 unsigned char * ans_sec,
+					 unsigned short  num_ans,
+					 const char *    host );
+static const char *get_host( unsigned char * buf,
+							 int             len,
+							 unsigned short  num_ans,
+							 unsigned char * ans_sec );
+static const char *get_name( unsigned char *  buf,
+							 int              len,
+							 unsigned char ** rr );
+static unsigned short get_ushort( const unsigned char * p );
 
 #endif
 
@@ -106,8 +122,11 @@ static unsigned short get_ushort( const unsigned char *p );
 
 #if defined MAIL_PROGRAM
 
-int send_mail( const char *subject, const char *from UNUSED_ARG,
-			   const char* cc_to, const char *to, FILE *fp )
+int send_mail( const char * subject,
+			   const char * from  UNUSED_ARG,
+			   const char * cc_to,
+			   const char * to,
+			   FILE *       fp )
 {
 	FILE *mail;
 	char *cmd;
@@ -155,8 +174,11 @@ int send_mail( const char *subject, const char *from UNUSED_ARG,
 
 #else
 
-int send_mail( const char *subject, const char *from, const char* cc_to,
-				const char *to, FILE *fp )
+int send_mail( const char * subject,
+			   const char * from,
+			   const char * cc_to,
+			   const char * to,
+			   FILE *       fp )
 {
 	struct hostent *hp;
 	char *rec_host;
@@ -201,9 +223,12 @@ int send_mail( const char *subject, const char *from, const char* cc_to,
  * the domain and then sending the mail, see RFC 821 etc.
  *-----------------------------------------------------------*/
 
-static int do_send( const char *rec_host, const char *to,
-					const char *from, const char *local_host,
-					const char *subject, FILE *fp )
+static int do_send( const char * rec_host,
+					const char * to,
+					const char * from,
+					const char * local_host,
+					const char * subject,
+					FILE *       fp )
 {
 	int mfd;
 	char line[ MAX_LINE_LENGTH ];
@@ -391,7 +416,8 @@ static int do_send( const char *rec_host, const char *to,
  * needs to know about the local machine avoid creating a loop.
  *------------------------------------------------------------------------*/
 
-static int open_mail_socket( const char *remote, const char *local )
+static int open_mail_socket( const char * remote,
+							 const char * local )
 {
 	int sock_fd;
 #ifdef USE_IPv6
@@ -508,7 +534,8 @@ static int open_mail_socket( const char *remote, const char *local )
  * accept mail for the remote machine.
  *------------------------------------------------------------------------*/
 
-static const char *get_mail_server( const char *remote, const char *local )
+static const char *get_mail_server( const char * remote,
+									const char * local )
 {
     static char host[ NS_MAXDNAME ];
     static unsigned char buf[ DNS_MAX_ANSWER_LEN ];
@@ -613,10 +640,11 @@ static const char *get_mail_server( const char *remote, const char *local )
  * on return.
  *------------------------------------------------------------------------*/
 
-static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
-                                                unsigned short *sec_entries,
-                                                const char *remote,
-                                                unsigned short type )
+static unsigned char *analyze_dns_reply_header( unsigned char *  buf,
+												int              len,
+                                                unsigned short * sec_entries,
+                                                const char *     remote,
+                                                unsigned short   type )
 {
     unsigned short rpq;
     static char host[ NS_MAXDNAME ];
@@ -712,8 +740,11 @@ static unsigned char *analyze_dns_reply_header( unsigned char *buf, int len,
  * function returns 1. If none is found returns 0 and -1 on errors.
  *------------------------------------------------------------------*/
 
-static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
-                           char *host, unsigned short *sec_entries )
+static int check_cname_rr( unsigned char *  buf,
+						   int              len,
+						   unsigned char *  ans_sec,
+                           char *           host,
+						   unsigned short * sec_entries )
 {
     unsigned int num_recs =   sec_entries[ ANCOUNT ]
                             + sec_entries[ NSCOUNT ]
@@ -760,8 +791,11 @@ static int check_cname_rr( unsigned char *buf, int len, unsigned char *ans_sec,
  * be used.
  *--------------------------------------------------------------------*/
 
-static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
-                     unsigned short num_ans, const char *local )
+static int weed_out( unsigned char * buf,
+					 int             len,
+					 unsigned char * ans_sec,
+                     unsigned short  num_ans,
+					 const char *    local )
 {
     unsigned short i;
     int rrs_left = num_ans;
@@ -837,8 +871,10 @@ static int weed_out( unsigned char *buf, int len, unsigned char *ans_sec,
  * to keep it from getting used it again.
  *------------------------------------------------------------------*/
 
-static const char *get_host( unsigned char *buf, int len,
-                             unsigned short num_ans, unsigned char *ans_sec )
+static const char *get_host( unsigned char * buf,
+							 int             len,
+                             unsigned short  num_ans,
+							 unsigned char * ans_sec )
 {
     unsigned short i;
     unsigned short prior = 0xFFFF;
@@ -883,7 +919,9 @@ static const char *get_host( unsigned char *buf, int len,
  * returned (and '*rr' remains unchanged).
  *-------------------------------------------------------------------------*/
 
-static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
+static const char *get_name( unsigned char *  buf,
+							 int              len,
+							 unsigned char ** rr )
 {
     static char for_host[ NS_MAXDNAME ];
 
@@ -923,7 +961,7 @@ static const char *get_name( unsigned char *buf, int len, unsigned char **rr )
  * from the reply of the DNS server
  *----------------------------------------------*/
 
-static unsigned short get_ushort( const unsigned char *p )
+static unsigned short get_ushort( const unsigned char * p )
 {
     return ( ( *p & 0xFF ) << 8 ) + ( * ( p + 1 ) & 0xFF );
 }

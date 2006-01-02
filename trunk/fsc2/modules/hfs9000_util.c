@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -83,7 +83,8 @@ double hfs9000_ticks2double( Ticks ticks )
  * are within the valid limits.
  *----------------------------------------------------------------------*/
 
-void hfs9000_check_pod_level_diff( double high, double low )
+void hfs9000_check_pod_level_diff( double high,
+								   double low )
 {
 	if ( low > high )
 	{
@@ -177,7 +178,8 @@ const char *hfs9000_pticks( Ticks ticks )
  * second pulse starts earlier.
  *--------------------------------------------------------------------*/
 
-int hfs9000_start_compare( const void *A, const void *B )
+int hfs9000_start_compare( const void * A,
+						   const void * B )
 {
 	Pulse_T *a = *( Pulse_T ** ) A,
 		    *b = *( Pulse_T ** ) B;
@@ -232,7 +234,10 @@ Ticks hfs9000_get_max_seq_len( void )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
+void hfs9000_set( char * arena,
+				  Ticks  start,
+				  Ticks  len,
+				  Ticks  offset )
 {
 	fsc2_assert( start + len + offset <= hfs9000.max_seq_len );
 
@@ -243,7 +248,10 @@ void hfs9000_set( char *arena, Ticks start, Ticks len, Ticks offset )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
+int hfs9000_diff( char *  old_p,
+				  char *  new_p,
+				  Ticks * start,
+				  Ticks * length )
 {
 	static Ticks where = 0;
 	int ret;
@@ -308,7 +316,7 @@ int hfs9000_diff( char *old_p, char *new_p, Ticks *start, Ticks *length )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void hfs9000_dump_channels( FILE *fp )
+void hfs9000_dump_channels( FILE * fp )
 {
 	Function_T *f;
 	int i, k;

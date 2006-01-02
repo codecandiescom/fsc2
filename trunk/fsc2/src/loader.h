@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,17 +29,29 @@
 
 
 void load_all_drivers( void );
-int exists_device( const char *name );
+
+int exists_device( const char * /* name */ );
+
 bool exists_device_type( const char * /* type */ );
+
 bool exists_function( const char * /* name */ );
+
 void run_test_hooks( void );
+
 void run_end_of_test_hooks( void );
+
 void run_exp_hooks( void );
+
 void run_end_of_exp_hooks( void );
+
 void run_exit_hooks( void );
+
 void run_child_exit_hooks( void );
-int get_lib_symbol( const char * /* from */, const char * /* symbol */,
-					void ** /* symbol_ptr */ );
+
+int get_lib_symbol( const char * /* from       */,
+					const char * /* symbol     */,
+					void **      /* symbol_ptr */ );
+
 void unload_device( Device_T * /* dev */ );
 
 

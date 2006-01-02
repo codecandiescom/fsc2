@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,23 +32,48 @@
 #endif
 
 
-static inline short int d2shrt( double a );
-static inline short int i2shrt( int a );
-static inline unsigned short int d2ushrt( double a );
-static inline unsigned short int i2ushrt( int a );
-static inline int i_max( int a, int b );
-static inline int i_min( int a, int b );
-static inline long l_max( long a, long b );
-static inline long l_min( long a, long b );
-static inline float f_max( float a, float b );
-static inline float f_min( float a, float b );
-static inline double d_max( double a, double b );
-static inline double d_min( double a, double b );
-static inline size_t s_min( size_t a, size_t b );
-static inline long lrnd( double x );
-static inline unsigned long ulrnd( double x );
-static inline int irnd( double x );
-static inline unsigned int uirnd( double x );
+static inline short int d2shrt( double /* a */ );
+
+static inline short int i2shrt( int /* a */ );
+
+static inline unsigned short int d2ushrt( double /* a */ );
+
+static inline unsigned short int i2ushrt( int /* a */ );
+
+static inline int i_max( int /* a */,
+						 int /* b */ );
+
+static inline int i_min( int /* a */,
+						 int /* b */ );
+
+static inline long l_max( long /* a */,
+						  long /* b */ );
+
+static inline long l_min( long /* a */,
+						  long /* b */ );
+
+static inline float f_max( float /* a */,
+						   float /* b */ );
+
+static inline float f_min( float /* a */,
+						   float /* b */ );
+
+static inline double d_max( double /* a */,
+							double /* b */ );
+
+static inline double d_min( double /* a */,
+							double /* b */ );
+
+static inline size_t s_min( size_t /* a */,
+							size_t /* b */ );
+
+static inline long lrnd( double /* x */ );
+
+static inline unsigned long ulrnd( double /* x */ );
+
+static inline int irnd( double /* x */ );
+
+static inline unsigned int uirnd( double /* x */ );
 
 
 /*-------------------------------------------------------------------------*

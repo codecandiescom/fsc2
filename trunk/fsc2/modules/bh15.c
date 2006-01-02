@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,20 +36,21 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define BH15_TEST_FIELD   0.0
 
 
-int bh15_init_hook( void );
-int bh15_exp_hook( void );
+int bh15_init_hook(       void );
+int bh15_exp_hook(        void );
 int bh15_end_of_exp_hook( void );
 
-Var_T *gaussmeter_name( Var_T *v );
-Var_T *gaussmeter_field( Var_T *v );
-Var_T *find_field( Var_T *v );
-Var_T *gaussmeter_resolution( Var_T *v );
-Var_T *gaussmeter_wait( Var_T *v );
-Var_T *gaussmeter_command( Var_T *v );
+Var_T *gaussmeter_name(       Var_T * v );
+Var_T *gaussmeter_field(      Var_T * v );
+Var_T *find_field(            Var_T * v );
+Var_T *gaussmeter_resolution( Var_T * v );
+Var_T *gaussmeter_wait(       Var_T * v );
+Var_T *gaussmeter_command(    Var_T * v );
 
 
 static double bh15_get_field( void );
-static bool bh15_command( const char *cmd );
+
+static bool bh15_command( const char * cmd );
 
 
 static struct {
@@ -184,7 +185,7 @@ int bh15_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -193,7 +194,7 @@ Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_field( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
@@ -202,7 +203,7 @@ Var_T *gaussmeter_field( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *find_field( Var_T *v UNUSED_ARG )
+Var_T *find_field( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, bh15_get_field( ) );
 }
@@ -211,7 +212,7 @@ Var_T *find_field( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_resolution( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, bh15.resolution );
 }
@@ -220,7 +221,7 @@ Var_T *gaussmeter_resolution( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *gaussmeter_command( Var_T *v )
+Var_T *gaussmeter_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -252,7 +253,7 @@ Var_T *gaussmeter_command( Var_T *v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_wait( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_wait( Var_T * v  UNUSED_ARG )
 {
 	fsc2_usleep( 100000, UNSET );
 	return vars_push( INT_VAR, 1L );
@@ -399,7 +400,7 @@ static double bh15_get_field( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool bh15_command( const char *cmd )
+static bool bh15_command( const char * cmd )
 {
 	if ( gpib_write( bh15.device, cmd, strlen( cmd ) ) == FAILURE )
 	{

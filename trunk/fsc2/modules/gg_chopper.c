@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,14 +44,18 @@ static struct {
 } gg_chopper, gg_chopper_reserved;
 
 
-int gg_chopper_init_hook( void );
-int gg_chopper_test_hook( void );
-int gg_chopper_exp_hook( void );
+int gg_chopper_init_hook(       void );
+int gg_chopper_test_hook(       void );
+int gg_chopper_exp_hook(        void );
 int gg_chopper_end_of_exp_hook( void );
-void gg_chopper_exit_hook( void );
-Var_T *chopper_name( Var_T *v );
-Var_T *chopper_sector_frequency( Var_T *v );
+void gg_chopper_exit_hook(      void );
+
+Var_T *chopper_name(             Var_T * v );
+Var_T *chopper_sector_frequency( Var_T * v );
+
+
 static void gg_chopper_set_dio( long val );
+
 static void gg_chopper_set_freq_out( double freq );
 
 
@@ -254,7 +258,7 @@ void gg_chopper_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var_T *chopper_name( Var_T *v UNUSED_ARG )
+Var_T *chopper_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -265,7 +269,7 @@ Var_T *chopper_name( Var_T *v UNUSED_ARG )
  * determine or set the sector frequency of the chopper.
  *---------------------------------------------------------------*/
 
-Var_T *chopper_sector_frequency( Var_T *v )
+Var_T *chopper_sector_frequency( Var_T * v )
 {
 	double freq;
 	long dio_value;
@@ -363,3 +367,10 @@ static void gg_chopper_set_freq_out( double freq )
 	vars_push( FLOAT_VAR, freq );
 	vars_pop( func_call( func_ptr ) );
 }
+
+
+/*
+ * Local variables:
+ * tags-file-name: "../TAGS"
+ * End:
+ */

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,7 @@
  * memory used for the file name passed to the function is deallocated.
  *----------------------------------------------------------------------*/
 
-FILE *hp8672a_find_table( char **name )
+FILE *hp8672a_find_table( char ** name )
 {
 	FILE *tfp;
 	char *new_name;
@@ -91,7 +91,7 @@ FILE *hp8672a_find_table( char **name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-FILE *hp8672a_open_table( char *name )
+FILE *hp8672a_open_table( char * name )
 {
 	FILE *tfp;
 
@@ -233,7 +233,9 @@ double hp8672a_get_att( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-int hp8672a_set_mod_param( Var_T *v, double *dres, int *ires )
+int hp8672a_set_mod_param( Var_T *  v,
+						   double * dres,
+						   int *    ires )
 {
 	const char *type[ ] =   { "FM", "AM", "OFF" };
 

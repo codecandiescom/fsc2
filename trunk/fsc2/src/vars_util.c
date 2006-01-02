@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,7 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 );
  * a complete matrix.
  *---------------------------------------------------------------*/
 
-Var_T *vars_negate( Var_T *v )
+Var_T *vars_negate( Var_T * v )
 {
 	Var_T *new_var = v;
 	ssize_t i;
@@ -113,7 +113,9 @@ Var_T *vars_negate( Var_T *v )
  *      the result of the comparison
  *--------------------------------------------------------------------------*/
 
-Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
+Var_T *vars_comp( int     comp_type,
+				  Var_T * v1,
+				  Var_T * v2 )
 {
 	Var_T *new_var = NULL;
 
@@ -241,7 +243,9 @@ Var_T *vars_comp( int comp_type, Var_T *v1, Var_T *v2 )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
+static Var_T *vars_str_comp( int     comp_type,
+							 Var_T * v1,
+							 Var_T * v2 )
 {
 	Var_T *new_var = NULL;
 
@@ -294,7 +298,7 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 )
  * variable, otherwise 0.
  *-----------------------------------------------------------------------*/
 
-Var_T *vars_lnegate( Var_T *v )
+Var_T *vars_lnegate( Var_T * v )
 {
 	Var_T *new_var;
 
@@ -319,7 +323,9 @@ Var_T *vars_lnegate( Var_T *v )
  * known length.
  *-----------------------------------------------------------------------*/
 
-void vars_arith_len_check( Var_T *v1, Var_T *v2, const char *op )
+void vars_arith_len_check( Var_T *      v1,
+						   Var_T *      v2,
+						   const char * op )
 {
 	ssize_t len1 = -1, len2 = -1;
 

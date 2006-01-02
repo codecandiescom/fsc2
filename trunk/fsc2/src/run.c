@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -42,11 +42,12 @@ static bool start_gpib_and_rulbus( void );
 static void error_while_iconified( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
-static void stop_while_exp_hook( FL_OBJECT *a, long b );
+static void stop_while_exp_hook( FL_OBJECT * a,
+								 long        b );
 static void setup_signal_handlers( void );
 static void fork_failure( int stored_errno );
-static void check_for_further_errors( Compilation_T *c_old,
-									  Compilation_T *c_all );
+static void check_for_further_errors( Compilation_T * c_old,
+									  Compilation_T * c_all );
 static void quitting_handler( int signo	);
 static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int run_state );
@@ -492,7 +493,8 @@ static void setup_signal_handlers( void )
  * at this early stage).
  *-----------------------------------------------------------*/
 
-static void stop_while_exp_hook( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+static void stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
+								 long        b  UNUSED_ARG )
 {
 	EDL.do_quit = EDL.react_to_do_quit = SET;
 }
@@ -574,8 +576,8 @@ static void fork_failure( int stored_errno )
  * exception was thrown.
  *-------------------------------------------------------------------*/
 
-static void check_for_further_errors( Compilation_T *c_old,
-									  Compilation_T *c_all )
+static void check_for_further_errors( Compilation_T * c_old,
+									  Compilation_T * c_all )
 {
 	Compilation_T diff;
 	char str1[ 128 ],
@@ -627,7 +629,7 @@ static void check_for_further_errors( Compilation_T *c_old,
  * variable and reacts by sending the child a DO_QUIT signal.
  *---------------------------------------------------------------------*/
 
-static void quitting_handler( int signo UNUSED_ARG )
+static void quitting_handler( int signo  UNUSED_ARG )
 {
 	int errno_saved;
 
@@ -644,7 +646,8 @@ static void quitting_handler( int signo UNUSED_ARG )
  * used for this button, see run_close_button_callback().
  *-------------------------------------------------------------------*/
 
-void run_stop_button_callback( FL_OBJECT *a, long b UNUSED_ARG )
+void run_stop_button_callback( FL_OBJECT * a,
+							   long        b  UNUSED_ARG )
 {
 	int bn;
 
@@ -759,7 +762,8 @@ static void run_sigchld_handler( int signo )
  * gets pressed.
  *----------------------------------------------------------------*/
 
-void run_sigchld_callback( FL_OBJECT *a, long b )
+void run_sigchld_callback( FL_OBJECT * a,
+						   long        b )
 {
 	int hours, mins, secs;
 	const char *mess;

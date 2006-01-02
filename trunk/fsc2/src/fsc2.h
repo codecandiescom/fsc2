@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -130,30 +130,58 @@
 
 #if defined __STRICT_ANSI__
 #define P_tmpdir   "/tmp"
-extern int seteuid( uid_t euid );
-extern int setegid( gid_t egid );
-extern int vsnprintf( char *str, size_t size, const char *format, va_list ap );
-extern int mkstemp( char *template );
-extern int fchmod( int fildes, mode_t mode );
-extern int snprintf( char *str, size_t size, const  char *format, ... );
-extern int strcasecmp(const char *s1, const char *s2);
-extern int fileno( FILE *stream );
+extern int seteuid( uid_t /* euid */ );
+
+extern int setegid( gid_t /* egid */ );
+
+extern int vsnprintf( char *       /* str    */
+					  size_t       /* size   */,
+					  const char * /* format */,
+					  va_list      /* ap     */ );
+
+extern int mkstemp( char * /* template */ );
+
+extern int fchmod( int    /* fildes */,
+				   mode_t /* mode   */ );
+
+extern int snprintf( char *        /* str    */,
+					 size_t        /* size   */,
+					 const  char * /* format */,
+					 ... );
+
+extern int strcasecmp( const char * /* s1 */,
+					   const char * /* s2 */ );
+
+extern int fileno( FILE * /* stream */ );
 #endif
 
 /* Some global functions */
 
 void clean_up( void );
-bool scan_main( const char *name, FILE *fp );
-int  devices_parser( FILE *in );
-int  assignments_parser( FILE *in );
-int  variables_parser( FILE *in );
-int  phases_parser( FILE *in );
-int  preparations_parser( FILE *in );
-int  experiment_parser( FILE *in );
-void main_sig_handler( int signo );
+
+bool scan_main( const char * /* name */,
+				FILE *       /* fp   */ );
+
+int  devices_parser( FILE * /* in */ );
+
+int  assignments_parser( FILE * /* in */ );
+
+int  variables_parser( FILE * /* in */ );
+
+int  phases_parser( FILE * /* in */ );
+
+int  preparations_parser( FILE * /* in */ );
+
+int  experiment_parser( FILE * /* in */ );
+
+void main_sig_handler( int /* signo */ );
+
 void conn_request_handler( void );
-void notify_conn( int signo );
-void usage( int result_status );
+
+void notify_conn( int /* signo */ );
+
+void usage( int /* result_status */ );
+
 int idle_handler( void );
 
 

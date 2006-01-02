@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -27,7 +27,10 @@
 int Fail_Mess_Fd = -1;
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-static void write_dump( int *pipe_fd, int *answer_fd, int k, void * addr );
+static void write_dump( int *  pipe_fd,
+						int *  answer_fd,
+						int    k,
+						void * addr );
 
 enum {
 	DUMP_PARENT_READ = 0,
@@ -68,7 +71,7 @@ enum {
  *-----------------------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-void DumpStack( void *crash_address )
+void DumpStack( void * crash_address )
 {
 	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 	int answer_fd[ 2 ];
@@ -225,7 +228,7 @@ void DumpStack( void *crash_address )
 	Fail_Mess_Fd = answer_fd[ DUMP_ANSWER_READ ];
 }
 #else
-void DumpStack( void *crash_address UNUSED_ARG )
+void DumpStack( void * crash_address  UNUSED_ARG )
 {
 }
 #endif
@@ -236,7 +239,10 @@ void DumpStack( void *crash_address UNUSED_ARG )
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
 
-static void write_dump( int *pipe_fd, int *answer_fd, int k, void *addr )
+static void write_dump( int *  pipe_fd,
+						int *  answer_fd,
+						int    k,
+						void * addr )
 {
 	char buf[ 128 ];
 	char c;

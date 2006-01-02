@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -84,7 +84,8 @@ bool ep385_store_timebase( double timebase )
  * Function for assigning a channel to a function
  *------------------------------------------------*/
 
-bool ep385_assign_channel_to_function( int function, long channel )
+bool ep385_assign_channel_to_function( int  function,
+									   long channel )
 {
 	Function_T *f = ep385.function + function;
 	Channel_T *c = ep385.channel + channel;
@@ -151,7 +152,8 @@ bool ep385_assign_channel_to_function( int function, long channel )
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool ep385_set_function_delay( int function, double delay )
+bool ep385_set_function_delay( int    function,
+							   double delay )
 {
 	Ticks Delay = ep385_double2ticks( delay );
 	int i;
@@ -329,7 +331,8 @@ bool ep385_set_repeat_time( double rep_time )
  * Fucntion associates a phase sequence with one of the functions
  *----------------------------------------------------------------*/
 
-bool ep385_set_phase_reference( int phs, int function )
+bool ep385_set_phase_reference( int phs,
+								int function )
 {
 	Function_T *f;
 
@@ -390,7 +393,9 @@ bool ep385_set_phase_reference( int phs, int function )
  * association in a PHASE_SETUP commmand.
  *-------------------------------------------------------------*/
 
-bool ep385_phase_setup_prep( int phs, int type, int dummy UNUSED_ARG,
+bool ep385_phase_setup_prep( int  phs,
+							 int  type,
+							 int  dummy  UNUSED_ARG,
 							 long channel )
 {
 	fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );

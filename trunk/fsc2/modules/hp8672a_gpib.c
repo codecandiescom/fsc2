@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -48,7 +48,7 @@ static void hp8672a_comm_failure( void );
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp8672a_init( const char *name )
+bool hp8672a_init( const char * name )
 {
 	double att;
 	char buffer[ 10 ];
@@ -287,7 +287,7 @@ int hp8672a_set_modulation( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool hp8672a_command( const char *cmd )
+bool hp8672a_command( const char * cmd )
 {
 	if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
 		hp8672a_comm_failure( );

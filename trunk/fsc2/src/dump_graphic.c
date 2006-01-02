@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -27,10 +27,14 @@
 #include <X11/Xmd.h>
 
 
-static Pixmap get_1d_window( unsigned int *width, unsigned int *height );
-static Pixmap get_2d_window( unsigned int *width, unsigned int *height );
-static Pixmap get_cut_window( unsigned int *width, unsigned int *height );
-static void dump_as_ppm( FILE *dp, XImage *image );
+static Pixmap get_1d_window( unsigned int * width,
+							 unsigned int * height );
+static Pixmap get_2d_window( unsigned int * width,
+							 unsigned int * height );
+static Pixmap get_cut_window( unsigned int * width,
+							  unsigned int * height );
+static void dump_as_ppm( FILE *   dp,
+						 XImage * image );
 
 
 /*------------------------------------------------------------------------*
@@ -40,7 +44,8 @@ static void dump_as_ppm( FILE *dp, XImage *image );
  * of returning an error code).
  *------------------------------------------------------------------------*/
 
-void dump_window( int type, int fd )
+void dump_window( int type,
+				  int fd )
 {
 	XImage *image;
 	unsigned int w, h;
@@ -111,7 +116,8 @@ void dump_window( int type, int fd )
  * canvas for drawing 1D data and the surrounding axes canvases
  *--------------------------------------------------------------*/
 
-static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
+static Pixmap get_1d_window( unsigned int * width,
+							 unsigned int * height )
 {
 	Pixmap pm;
 	GC gc;
@@ -160,7 +166,8 @@ static Pixmap get_1d_window( unsigned int *width, unsigned int *height )
  * canvas for drawing 2D data and the surrounding axes canvases
  *--------------------------------------------------------------*/
 
-static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
+static Pixmap get_2d_window( unsigned int * width,
+							 unsigned int * height )
 {
 	Pixmap pm;
 	GC gc;
@@ -216,7 +223,8 @@ static Pixmap get_2d_window( unsigned int *width, unsigned int *height )
  * canvases
  *---------------------------------------------------------------------*/
 
-static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
+static Pixmap get_cut_window( unsigned int * width,
+							  unsigned int * height )
 {
 	Pixmap pm;
 	GC gc;
@@ -280,7 +288,8 @@ static Pixmap get_cut_window( unsigned int *width, unsigned int *height )
  * the pbmplus package written by Jef Poskanzer.
  *----------------------------------------------------------------*/
 
-static void dump_as_ppm( FILE *fp, XImage *image )
+static void dump_as_ppm( FILE *   fp,
+						 XImage * image )
 {
 	int i, j;
 	unsigned long pixel = 0;

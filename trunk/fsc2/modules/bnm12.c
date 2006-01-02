@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -72,14 +72,14 @@ static struct BNM12 bnm12_stored;
 
 /* Exported functions */
 
-int bnm12_init_hook( void );
-int bnm12_test_hook( void );
-int bnm12_exp_hook( void );
+int bnm12_init_hook(  void );
+int bnm12_test_hook(  void );
+int bnm12_exp_hook(   void );
 void bnm12_exit_hook( void );
 
-Var_T *gaussmeter_name( Var_T *v );
-Var_T *gaussmeter_field( Var_T *v );
-Var_T *gaussmeter_resolution( Var_T *v );
+Var_T *gaussmeter_name(       Var_T * v );
+Var_T *gaussmeter_field(      Var_T * v );
+Var_T *gaussmeter_resolution( Var_T * v );
 
 
 /* Local functions */
@@ -247,7 +247,7 @@ void bnm12_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -257,7 +257,7 @@ Var_T *gaussmeter_name( Var_T *v UNUSED_ARG )
  * Measure a new field value and return it to the caller
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T *v UNUSED_ARG )
+Var_T *gaussmeter_field( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, bnm12_get_field( ) );
 }
@@ -269,7 +269,7 @@ Var_T *gaussmeter_field( Var_T *v UNUSED_ARG )
  * trust what the user tells us...
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T *v )
+Var_T *gaussmeter_resolution( Var_T * v )
 {
 	double res;
 	int i;

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,7 @@ static void hfs9000_setup_trig_in( void );
  * Intialization of the device at the start of the experiment
  *------------------------------------------------------------*/
 
-bool hfs9000_init( const char *name )
+bool hfs9000_init( const char * name )
 {
 	int i;
 	char cmd[ 100 ];
@@ -309,7 +309,10 @@ static void hfs9000_setup_trig_in( void )
  * Sets 'length' slots, starting at 'start', of a channel to either 1 or 0
  *-------------------------------------------------------------------------*/
 
-bool hfs9000_set_constant( int channel, Ticks start, Ticks length, int state )
+bool hfs9000_set_constant( int   channel,
+						   Ticks start,
+						   Ticks length,
+						   int   state )
 {
 	char cmd[ 100 ];
 
@@ -389,7 +392,8 @@ bool hfs9000_get_channel_state( int channel )
  * Switches a channel on or off
  *------------------------------*/
 
-bool hfs9000_set_channel_state( int channel, bool flag )
+bool hfs9000_set_channel_state( int  channel,
+								bool flag )
 {
 	char cmd[ 100 ];
 
@@ -409,7 +413,7 @@ bool hfs9000_set_channel_state( int channel, bool flag )
  * Sends a command to the device
  *-------------------------------*/
 
-bool hfs9000_command( const char *cmd )
+bool hfs9000_command( const char * cmd )
 {
 	if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
 		hfs9000_gpib_failure( );

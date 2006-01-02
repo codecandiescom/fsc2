@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -39,10 +39,16 @@ struct G_Funcs {
 	FD_print_comment * ( * create_pc_form         ) ( void );
 };
 
-bool xforms_init( int *argc, char *argv[ ] );
+bool xforms_init( int *  /* argc */,
+				  char * /* argv */ [ ] );
+
 void xforms_close( void );
-void win_slider_callback( FL_OBJECT *a, long b );
-int is_iconic( Display *d, Window w );
+
+void win_slider_callback( FL_OBJECT * /* a */,
+						  long        /* b */ );
+
+int is_iconic( Display * /* d */,
+			   Window    /* w */ );
 
 
 #endif   /* ! XINIT__HEADER */

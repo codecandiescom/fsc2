@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -74,10 +74,16 @@ enum Exception_Types {
 };
 
 
-jmp_buf *push_exception_frame( const char *file, int line );
-void pop_exception_frame( const char *file, int line );
-jmp_buf *throw_exception( Exception_Types_T type );
-Exception_Types_T get_exception_type( const char *file, int line );
+jmp_buf *push_exception_frame( const char * /* file */,
+							   int          /* line */ );
+
+void pop_exception_frame( const char * /* file */,
+						  int          /* line */ );
+
+jmp_buf *throw_exception( Exception_Types_T /* type */ );
+
+Exception_Types_T get_exception_type( const char * /* file */,
+									  int          /* line */ );
 
 
 #define TRY         \

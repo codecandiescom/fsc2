@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,7 +35,8 @@ static long cur_aseq;
  * Called when an acquisition sequence keyword is found.
  *-------------------------------------------------------*/
 
-void acq_seq_start( long acq_num, long acq_type )
+void acq_seq_start( long acq_num,
+					long acq_type )
 {
 	fsc2_assert( acq_num == 0 || acq_num == 1 );
 
@@ -159,7 +160,8 @@ Phs_Seq_T *phase_seq_start( long phase_seq_num )
  * * either PHASE_PLUS_X, PHASE_MINUS_X, PHASE_PLUS_Y, PHASE_MINUS_Y
  *-------------------------------------------------------------------*/
 
-void phases_add_phase( Phs_Seq_T *p, int phase_type )
+void phases_add_phase( Phs_Seq_T * p,
+					   int         phase_type )
 {
 	fsc2_assert ( phase_type >= 0 && phase_type < NUM_PHASE_TYPES );
 
@@ -189,7 +191,7 @@ void acq_miss_list( void )
  * without a corresponding list of phases.
  *---------------------------------------------*/
 
-void phase_miss_list( Phs_Seq_T *p )
+void phase_miss_list( Phs_Seq_T * p )
 {
 	print( FATAL, "Missing list of phases for phase sequence %d.\n", p->num );
 	THROW( EXCEPTION );

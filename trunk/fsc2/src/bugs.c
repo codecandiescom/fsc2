@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,8 @@ extern int Fail_Mess_Fd;               /* defined in dump.c */
  *------------------------------------------------------------------------*/
 
 #if defined ( MAIL_ADDRESS )
-void bug_report_callback( FL_OBJECT *a, long b UNUSED_ARG )
+void bug_report_callback( FL_OBJECT * a,
+						  long        b  UNUSED_ARG )
 {
 	FILE *tmp;
 	int tmp_fd;

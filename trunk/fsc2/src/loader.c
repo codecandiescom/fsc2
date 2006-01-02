@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,13 +36,16 @@ extern Func_T Def_Fncts[ ];   /* structures for list of built-in functions */
 static size_t num_func;
 static int Max_Devices_of_a_Kind;
 
-static void resolve_hook_functions( Device_T *dev );
-static void load_functions( Device_T *dev );
-static void resolve_functions( Device_T *dev );
-static void add_function( int num, void *new_func, Device_T *new_dev );
-static int func_cmp( const void *a, const void *b );
-static void resolve_device_name( Device_T *dev );
-static void resolve_generic_type( Device_T *dev );
+static void resolve_hook_functions( Device_T * dev );
+static void load_functions( Device_T * dev );
+static void resolve_functions( Device_T * dev );
+static void add_function( int        num,
+						  void *     new_func,
+						  Device_T * new_dev );
+static int func_cmp( const void * a,
+					 const void * b );
+static void resolve_device_name( Device_T * dev );
+static void resolve_generic_type( Device_T * dev );
 
 
 /*-------------------------------------------------------------------------*
@@ -176,7 +179,8 @@ void load_all_drivers( void )
  * for sorting the function names by binary search.
  *----------------------------------------------------------*/
 
-static int func_cmp( const void *a, const void *b )
+static int func_cmp( const void * a,
+					 const void * b )
 {
 	return strcmp( ( ( const Func_T * ) a )->name,
 				   ( ( const Func_T * ) b )->name );
@@ -189,7 +193,7 @@ static int func_cmp( const void *a, const void *b )
  * to be appended to the function names, otherwise 0.
  *---------------------------------------------------------------*/
 
-int exists_device( const char *name )
+int exists_device( const char * name )
 {
 	Device_T *cd;
 
@@ -208,7 +212,7 @@ int exists_device( const char *name )
  * type passed to the function by 'type' is loaded.
  *---------------------------------------------------------------*/
 
-bool exists_device_type( const char *type )
+bool exists_device_type( const char * type )
 {
 	Device_T *cd;
 
@@ -225,7 +229,7 @@ bool exists_device_type( const char *type )
  * Routine tests if a function passed to the routine by name exists.
  *-------------------------------------------------------------------*/
 
-bool exists_function( const char *name )
+bool exists_function( const char * name )
 {
 	size_t i;
 
@@ -246,7 +250,7 @@ bool exists_function( const char *name )
  * data base 'Functions'.
  *-------------------------------------------------------------*/
 
-static void load_functions( Device_T *dev )
+static void load_functions( Device_T * dev )
 {
 	char *lib_name;
 
@@ -310,7 +314,7 @@ static void load_functions( Device_T *dev )
  * and determines the pointers to these functions.
  *--------------------------------------------------------------------*/
 
-static void resolve_hook_functions( Device_T *dev )
+static void resolve_hook_functions( Device_T * dev )
 {
 	char *hook_func_name;
 	char *app;
@@ -399,7 +403,7 @@ static void resolve_hook_functions( Device_T *dev )
  * to be resolved try to find them in the device driver functions.
  *---------------------------------------------------------------------*/
 
-static void resolve_functions( Device_T *dev )
+static void resolve_functions( Device_T * dev )
 {
 	size_t num;
 	void *cur;
@@ -452,7 +456,9 @@ static void resolve_functions( Device_T *dev )
  * current device.
  *----------------------------------------------------------------------*/
 
-static void add_function( int num, void *new_func, Device_T *new_dev )
+static void add_function( int        num,
+						  void *     new_func,
+						  Device_T * new_dev )
 {
 	Func_T *f;
 
@@ -488,7 +494,7 @@ static void add_function( int num, void *new_func, Device_T *new_dev )
  * the module and stores it in the Device structure.
  *-------------------------------------------------------------------*/
 
-static void resolve_device_name( Device_T *dev )
+static void resolve_device_name( Device_T * dev )
 {
 	dlerror( );
 	dev->device_name = ( const char * ) dlsym( dev->driver.handle,
@@ -510,7 +516,7 @@ static void resolve_device_name( Device_T *dev )
  * are - the result is stored in the Device structure.
  *----------------------------------------------------------------------*/
 
-static void resolve_generic_type( Device_T *dev )
+static void resolve_generic_type( Device_T * dev )
 {
 	Device_T *cd;
 
@@ -900,7 +906,9 @@ void run_child_exit_hooks( void )
  *    the address of the symbol.
  *------------------------------------------------------------------------*/
 
-int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
+int get_lib_symbol( const char * from,
+					const char * symbol,
+					void **      symbol_ptr )
 {
 	Device_T *cd;
 
@@ -933,7 +941,7 @@ int get_lib_symbol( const char *from, const char *symbol, void **symbol_ptr )
  * than closes the connection to the modules.
  *-------------------------------------------------------------*/
 
-void unload_device( Device_T *dev )
+void unload_device( Device_T * dev )
 {
 	fsc2_assert( EDL.Call_Stack == NULL );
 

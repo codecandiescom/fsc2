@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  Thanks to Anton Savitsky for re-measuring the data for the corrections
  *  and including them into the code.
@@ -60,35 +60,44 @@ static int dac_ports[ ]       = { 6,       6,       4,       4      };
 
 /* Exported functions */
 
-int keithley228a_init_hook( void );
-int keithley228a_exp_hook( void );
+int keithley228a_init_hook(       void );
+int keithley228a_exp_hook(        void );
 int keithley228a_end_of_exp_hook( void );
-void keithley228a_exit_hook( void );
+void keithley228a_exit_hook(      void );
 
-Var_T *magnet_name( Var_T *v );
-Var_T *magnet_setup( Var_T *v );
-Var_T *magnet_use_correction( Var_T *v );
-Var_T *magnet_use_dac_port( Var_T *v );
-Var_T *set_field( Var_T *v );
-Var_T *get_field( Var_T *v );
-Var_T *sweep_up( Var_T *v );
-Var_T *sweep_down( Var_T *v );
-Var_T *reset_field( Var_T *v );
-Var_T *magnet_command( Var_T *v );
+Var_T *magnet_name(           Var_T * v );
+Var_T *magnet_setup(          Var_T * v );
+Var_T *magnet_use_correction( Var_T * v );
+Var_T *magnet_use_dac_port(   Var_T * v );
+Var_T *set_field(             Var_T * v );
+Var_T *get_field(             Var_T * v );
+Var_T *sweep_up(              Var_T * v );
+Var_T *sweep_down(            Var_T * v );
+Var_T *reset_field(           Var_T * v );
+Var_T *magnet_command(        Var_T * v );
 
 
 /* internally used functions */
 
-static bool keithley228a_init( const char *name );
-static void keithley228a_to_local(void);
+static bool keithley228a_init( const char * name );
+
+static void keithley228a_to_local( void );
+
 static bool keithley228a_set_state( bool new_state );
+
 static double keithley228a_goto_current( double current );
+
 static double keithley228a_set_current( double current );
+
 static void keithley228a_gpib_failure( void );
+
 static double keithley228a_current_check( double current );
-static void keithley228a_get_corrected_current( double c, double *psc,
-												double *dacv );
-static bool keithley228a_command( const char *cmd );
+
+static void keithley228a_get_corrected_current( double   c,
+												double * psc,
+												double * dacv );
+
+static bool keithley228a_command( const char * cmd );
 
 
 static struct {
@@ -286,7 +295,7 @@ void keithley228a_exit_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T *v UNUSED_ARG )
+Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -296,7 +305,7 @@ Var_T *magnet_name( Var_T *v UNUSED_ARG )
  * Function for registering the start current and the current step size.
  *-----------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T *v )
+Var_T *magnet_setup( Var_T * v )
 {
 	double cur;
 	double cur_step;
@@ -336,7 +345,7 @@ Var_T *magnet_setup( Var_T *v )
  * Function for switching use of corrections to the field on and off.
  *--------------------------------------------------------------------*/
 
-Var_T *magnet_use_correction( Var_T *v )
+Var_T *magnet_use_correction( Var_T * v )
 {
 	if ( v == NULL )
 		keithley228a.use_correction = SET;
@@ -358,7 +367,7 @@ Var_T *magnet_use_correction( Var_T *v )
  * to be used for the corrections to the field.
  *--------------------------------------------------------------*/
 
-Var_T *magnet_use_dac_port( Var_T *v )
+Var_T *magnet_use_dac_port( Var_T * v )
 {
 	int port;
 	void *first_DAC_port;
@@ -394,7 +403,7 @@ Var_T *magnet_use_dac_port( Var_T *v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *set_field( Var_T *v )
+Var_T *set_field( Var_T * v )
 {
 	double new_current;
 	double cur;
@@ -423,7 +432,7 @@ Var_T *set_field( Var_T *v )
  * Convenience function: just returns the current
  *------------------------------------------------*/
 
-Var_T *get_field( Var_T *v UNUSED_ARG )
+Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( FLOAT_VAR, keithley228a.current );
 }
@@ -432,7 +441,7 @@ Var_T *get_field( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_up( Var_T *v UNUSED_ARG )
+Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
 	double new_current;
 
@@ -456,7 +465,7 @@ Var_T *sweep_up( Var_T *v UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_down( Var_T *v UNUSED_ARG )
+Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 {
 	double new_current;
 
@@ -480,7 +489,7 @@ Var_T *sweep_down( Var_T *v UNUSED_ARG )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T *v UNUSED_ARG )
+Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
 	if ( ! keithley228a.is_req_current )
 	{
@@ -496,7 +505,7 @@ Var_T *reset_field( Var_T *v UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_command( Var_T *v )
+Var_T *magnet_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -534,7 +543,7 @@ Var_T *magnet_command( Var_T *v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool keithley228a_init( const char *name )
+static bool keithley228a_init( const char * name )
 {
 	char cmd[ 100 ];
 	char reply[ 100 ];
@@ -855,7 +864,7 @@ static double keithley228a_set_current( double new_current )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool keithley228a_command( const char *cmd )
+static bool keithley228a_command( const char * cmd )
 {
 	if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
 		keithley228a_gpib_failure( );
@@ -900,7 +909,7 @@ static double keithley228a_current_check( double current )
  * program. Here's the comment from this program about the rationale and
  * the way it is done (sorry, to lazy to translate it especially since I'm
  * not sure if it still is a reasonable approach and the data used still
- * valid):
+ * are valid):
  * Nun zu den weiteren Feinheiten : Leider stellte sich heraus, dass das
  * Power Supply zwar sein Spezifikationen erfuellt, aber eben nur gerade.
  * Die erreichte Genauigkeit von 10 mA beim Sweepbereich von 10 A ist
@@ -973,24 +982,25 @@ static double keithley228a_current_check( double current )
  * zugleichen sind.
  *--------------------------------------------------------------------------*/
 
-static void keithley228a_get_corrected_current( double c, double *psc,
-												double *dacv )
+static void keithley228a_get_corrected_current( double   c,
+												double * psc,
+												double * dacv )
 {
 	int i;
 	double del = 0.0;
 
 	static double
-		ranges[ ] =    { -7.5, -5.5, -4.5, -1.7, -0.007, 0.004, 5.3, 7.2,
-						 9.0 },
-		slopes[ ] =    { 0.0010, 0.000916, 0.000441, -0.000444, -0.001576,
-						 0.0, -0.001027, 0.001396, 0.00429, 0.005472 },
-		offsets[ ] =   { 0.00793, 0.007257, 0.004831, 0.000866, -0.000962,
-						 0.0, 0.000252, -0.012237, -0.033361, -0.043436 },
-	    pos_jumps[ ]=  { 0.0, 0.14, 0.53, 0.67, 1.06, 1.20, 1.59, 1.73, 
+		ranges[ ] =    { -7.5, -5.5, -4.5, -1.7, -0.007, 0.004,
+						  5.3,  7.2,  9.0 },
+		slopes[ ] =    { 0.0010,  0.000916, 0.000441, -0.000444, -0.001576,
+						 0.0,    -0.001027, 0.001396,  0.00429,   0.005472 },
+		offsets[ ] =   { 0.00793, 0.007257,  0.004831,  0.000866, -0.000962,
+						 0.0,     0.000252, -0.012237, -0.033361, -0.043436 },
+	    pos_jumps[ ]=  { 0.0,  0.14, 0.53, 0.67, 1.06, 1.20, 1.59, 1.73, 
 						 2.25, 2.39, 2.78, 2.92, 3.31, 3.45, 3.84, 3.98, 
-						 4.5, 4.64, 5.03, 5.17, 5.56, 5.70, 6.09, 6.23,
+						 4.5,  4.64, 5.03, 5.17, 5.56, 5.70, 6.09, 6.23,
 						 6.75, 6.89, 7.28, 7.42, 7.81, 7.95, 8.47, 8.61, 
-						 9.00, 9.14, 9.53, 9.67},
+						 9.00, 9.14, 9.53, 9.67 },
 
 		/* here the old jumps, new positions (above) measured 11.3.2003
 
@@ -1015,7 +1025,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		 if ( c >= 0.0)
 		 {
 			 *psc = 1.0e-2 * floor( 1.0e2 * c );
-			 if ( fabs( *psc - c ) > 9.99999e-3)
+			 if ( fabs( *psc - c ) > 9.99999e-3 )
 				 *psc += 1.0e-2;
 		 }
 		 else
@@ -1031,14 +1041,14 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 	 {
 		 if ( c >= 0.0 )
 		 {
-			 if ( c < 0.001)
+			 if ( c < 0.001 )
 				 c = 0.001;
 			 *psc = 0.04;
 			 *dacv = V_TO_A_FACTOR * ( c - 0.04 );
 		 }
 		 else
 		 {
-			 if ( c > -0.007)
+			 if ( c > -0.007 )
 				 c = -0.007;
 			 *psc = - 0.04;
 			 *dacv = - V_TO_A_FACTOR * ( c + 0.04 );
@@ -1047,7 +1057,7 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 
 	 /* Try to correct for non-linearities */
 
-	 for ( i = 0; i < 9; i++ )
+	 for ( i = 0; i < NUM_ELEMS( ranges ); i++ )
 		 if ( c < ranges[ i ] )
 			 break;
 
@@ -1078,8 +1088,8 @@ static void keithley228a_get_corrected_current( double c, double *psc,
 		 i = 0;
 		 do
 		 {
-			 if ( lrnd( 1.0e6 * c ) <= lrnd( 1.0e6 * neg_jumps[ i ] ) &&
-				  lrnd( 1.0e6 * c ) > lrnd( 1.0e6 * neg_jumps[ i + 1 ] ) )
+			 if ( lrnd( 1.0e6 * c ) <= lrnd( 1.0e6 * neg_jumps[ i     ] ) &&
+				  lrnd( 1.0e6 * c ) >  lrnd( 1.0e6 * neg_jumps[ i + 1 ] ) )
 			 {
 				 c -= neg_jumps[ i ];
 				 if ( i & 1 )

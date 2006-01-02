@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,8 +25,11 @@
 #include "lecroy9400.h"
 
 #if 0
-static void lecroy9400_window_check_1( bool *is_start, bool *is_width );
+static void lecroy9400_window_check_1( bool * is_start,
+									   bool * is_width );
+
 static void lecroy9400_window_check_2( void );
+
 static void lecroy9400_window_check_3( void );
 #endif
 
@@ -74,7 +77,7 @@ const char *lecroy9400_ptime( double p_time )
  * Deletes a window by removing it from the linked list of windows
  *-----------------------------------------------------------------*/
 
-void lecroy9400_delete_windows( LECROY9400_T *s )
+void lecroy9400_delete_windows( LECROY9400_T * s )
 {
 	Window_T *w;
 
@@ -176,7 +179,8 @@ void lecroy9400_do_pre_exp_checks( void )
  * a width is set - this is returned to the calling function
  *---------------------------------------------------------------*/
 
-static void lecroy9400_window_check_1( bool *is_start, bool *is_width )
+static void lecroy9400_window_check_1( bool * is_start,
+									   bool * is_width )
 {
 	Window_T *w;
 
@@ -336,7 +340,9 @@ static void lecroy9400_window_check_3( void )
  * indicate the error.
  *--------------------------------------------------------------*/
 
-long lecroy9400_translate_channel( int dir, long channel, bool flag )
+long lecroy9400_translate_channel( int  dir,
+								   long channel,
+								   bool flag )
 {
 	if ( dir == GENERAL_TO_LECROY9400 )
 	{
@@ -429,7 +435,8 @@ long lecroy9400_translate_channel( int dir, long channel, bool flag )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void lecroy9400_store_state( LECROY9400_T *dest, LECROY9400_T *src )
+void lecroy9400_store_state( LECROY9400_T * dest,
+							 LECROY9400_T * src )
 {
 	Window_T *w;
 	int i;

@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -181,7 +181,7 @@ WS          [\n\t ]+
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-int devices_parser( FILE *in )
+int devices_parser( FILE * in )
 {
 	int i;
 

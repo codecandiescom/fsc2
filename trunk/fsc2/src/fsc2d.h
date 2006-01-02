@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2006 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,7 +26,8 @@
 #define FSC2D_HEADER
 
 
-int check_spawn_fsc2d( bool exclusive, FILE *in_file_fp );
+int check_spawn_fsc2d( bool   /* exclusive  */,
+					   FILE * /* in_file_fp */ );
 
 
 #endif  /* ! FSC2D_HEADER */
