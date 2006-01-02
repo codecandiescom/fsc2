@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -123,56 +123,85 @@ extern RULBUS_CARD_LIST *rulbus_card;
 extern int rulbus_errno;
 
 
-int rulbus_write( int handle, unsigned char offset, unsigned char *data,
-		  size_t len );
-int rulbus_write_range( int handle, unsigned char offset, unsigned char *data,
-			size_t len );
-int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
-		       size_t len );
-int rulbus_read( int handle, unsigned char offset, unsigned char *data,
-		 size_t len );
-int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
-		       size_t len );
+int rulbus_write( int             /* handle */,
+		  unsigned char   /* offset */,
+		  unsigned char * /* data   */,
+		  size_t          /* len    */ );
+
+int rulbus_write_range( int             /* handle */,
+			unsigned char   /* offset */,
+			unsigned char * /* data   */,
+			size_t          /* len    */ );
+
+int rulbus_read_range( int             /* handle */,
+		       unsigned char   /* offset */,
+		       unsigned char * /* data   */,
+		       size_t          /* len    */ );
+
+int rulbus_read( int             /* handle */,
+		 unsigned char   /* offset */,
+		 unsigned char * /* data   */,
+		 size_t          /* len    */ );
+
+int rulbus_read_range( int             /* handle */,
+		       unsigned char   /* offset */,
+		       unsigned char * /* data   */,
+		       size_t          /* len    */ );
 
 
 /* Internal functions for 12-bit ADC cards (RB8509) */
 
 int rulbus_rb8509_adc12_init( void );
+
 void rulbus_rb8509_adc12_exit( void );
-int rulbus_rb8509_adc12_card_init( int handle );
-int rulbus_rb8509_adc12_card_exit( int handle );
+
+int rulbus_rb8509_adc12_card_init( int /* handle */ );
+
+int rulbus_rb8509_adc12_card_exit( int /* handle */ );
 
 
 /* Internal functions for 12-bit DAC cards (RB8510) */
 
 int rulbus_rb8510_dac12_init( void );
+
 void rulbus_rb8510_dac12_exit( void );
-int rulbus_rb8510_dac12_card_init( int handle );
-int rulbus_rb8510_dac12_card_exit( int handle );
+
+int rulbus_rb8510_dac12_card_init( int /* handle */ );
+
+int rulbus_rb8510_dac12_card_exit( int /* handle */ );
 
 
 /* Internal functions for delay cards (RB8514) */
 
 int rulbus_rb8514_delay_init( void );
+
 void rulbus_rb8514_delay_exit( void );
-int rulbus_rb8514_delay_card_init( int handle );
-int rulbus_rb8514_delay_card_exit( int handle );
+
+int rulbus_rb8514_delay_card_init( int /* handle */ );
+
+int rulbus_rb8514_delay_card_exit( int /* handle */ );
 
 
 /* Internal functions for clock cards (RB8515) */
 
 int rulbus_rb8515_clock_init( void );
+
 void rulbus_rb8515_clock_exit( void );
-int rulbus_rb8515_clock_card_init( int handle );
-int rulbus_rb8515_clock_card_exit( int handle );
+
+int rulbus_rb8515_clock_card_init( int /* handle */ );
+
+int rulbus_rb8515_clock_card_exit( int /* handle */ );
 
 
 /* Internal functions for generic cards (RB_GENERIC) */
 
 int rulbus_generic_init( void );
+
 void rulbus_generic_exit( void );
-int rulbus_generic_card_init( int handle );
-int rulbus_generic_card_exit( int handle );
+
+int rulbus_generic_card_init( int /* handle */ );
+
+int rulbus_generic_card_exit( int /* handle */ );
 
 
 #ifdef __cplusplus

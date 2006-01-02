@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,12 +28,21 @@
 #define MSC_HEADER
 
 
-void MSC_reset_all( Board *board );
-void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) );
-void daq_irq_disable( Board *board, int irq );
-int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
-		   NI_DAQ_INPUT channel, NI_DAQ_PFI_STATE state );
-int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg );
+void MSC_reset_all( Board * board );
+void daq_irq_enable( Board *  board,
+		     int      irq,
+		     void ( * handler )( Board * ) );
+
+void daq_irq_disable( Board * board,
+		      int     irq );
+
+int MSC_PFI_setup( Board *          board,
+		   NI_DAQ_SUBSYSTEM sub_system,
+		   NI_DAQ_INPUT     channel,
+		   NI_DAQ_PFI_STATE state );
+
+int MSC_ioctl_handler( Board *          board,
+		       NI_DAQ_MSC_ARG * arg );
 
 
 #endif /* MSC_HEADER */

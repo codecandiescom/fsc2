@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -32,6 +32,7 @@
 extern int rulbus_lex( void );
 
 void rulbus_parser_init( void );
+
 void rulbus_parser_clean_up( void );
 
 extern RULBUS_CARD_LIST *rulbus_card;
@@ -44,25 +45,45 @@ static int rulbus_rack_addrs[ RULBUS_DEF_RACK_ADDR + 1 ];
 static char **rulbus_rack_names = NULL;
 static int rulbus_num_racks = 0;
 
-static int set_dev_file( const char *name );
+static int set_dev_file( const char * name );
+
 static int rack_addr( int addr );
-static int rack_name( const char *name );
+
+static int rack_name( const char * name );
+
 static int setup_rack( void );
+
 static int finalize_rack( void );
-static int new_card( int type, const char *name );
-static int set_defaults( RULBUS_CARD_LIST *card );
-static int set_rb8509_defaults( RULBUS_CARD_LIST *card );
-static int set_rb8510_defaults( RULBUS_CARD_LIST *card );
-static int set_rb8514_defaults( RULBUS_CARD_LIST *card );
-static int set_rb8515_defaults( RULBUS_CARD_LIST *card );
-static int set_rb_generic_defaults( RULBUS_CARD_LIST *card );
+
+static int new_card( int          type,
+					 const char * name );
+
+static int set_defaults( RULBUS_CARD_LIST * card );
+
+static int set_rb8509_defaults( RULBUS_CARD_LIST * card );
+
+static int set_rb8510_defaults( RULBUS_CARD_LIST * card );
+
+static int set_rb8514_defaults( RULBUS_CARD_LIST * card );
+
+static int set_rb8515_defaults( RULBUS_CARD_LIST * card );
+
+static int set_rb_generic_defaults( RULBUS_CARD_LIST * card );
+
 static int set_addr( int addr );
+
 static int set_nchan( int nchan );
+
 static int set_vpb( double vpb );
+
 static int set_bipolar( int is_bipolar );
+
 static int set_exttrig( int is_ext_trigger );
+
 static int set_intr_delay( double intr_delay );
-static void rulbus_error( const char *s );
+
+static void rulbus_error( const char * s );
+
 static inline long lrnd( double x );
 
 %}
@@ -184,7 +205,7 @@ sep2:     /* empty */
  * Function for setting the name of the device file
  *--------------------------------------------------*/
 
-static int set_dev_file( const char *name )
+static int set_dev_file( const char * name )
 {
 	extern char *rulbus_dev_file;
 
@@ -233,7 +254,7 @@ static int rack_addr( int addr )
  * Function called for rack name assignments
  *-------------------------------------------*/
 
-static int rack_name( const char *name )
+static int rack_name( const char * name )
 {
 	char **rns;
 	int i;
@@ -331,7 +352,8 @@ static int finalize_rack( void )
  * Function to be called when a new card is found
  *------------------------------------------------*/
 
-static int new_card( int type, const char *name )
+static int new_card( int          type,
+					 const char * name )
 {
 	RULBUS_CARD_LIST *tmp;
 	int i;
@@ -384,7 +406,7 @@ static int new_card( int type, const char *name )
  * Function for setting default values for unspecified properties
  *----------------------------------------------------------------*/
 
-static int set_defaults( RULBUS_CARD_LIST *card )
+static int set_defaults( RULBUS_CARD_LIST * card )
 {
 	int i;
 
@@ -444,7 +466,7 @@ static int set_defaults( RULBUS_CARD_LIST *card )
  * of RB8509 ADC12 cards
  *----------------------------------------------------------------*/
 
-static int set_rb8509_defaults( RULBUS_CARD_LIST *card )
+static int set_rb8509_defaults( RULBUS_CARD_LIST * card )
 {
 	int i;
 
@@ -485,7 +507,7 @@ static int set_rb8509_defaults( RULBUS_CARD_LIST *card )
  * of RB8510 DAC12 cards
  *----------------------------------------------------------------*/
 
-static int set_rb8510_defaults( RULBUS_CARD_LIST *card )
+static int set_rb8510_defaults( RULBUS_CARD_LIST * card )
 {
 	int i;
 
@@ -520,7 +542,7 @@ static int set_rb8510_defaults( RULBUS_CARD_LIST *card )
  * of RB8514 delay cards
  *----------------------------------------------------------------*/
 
-static int set_rb8514_defaults( RULBUS_CARD_LIST *card )
+static int set_rb8514_defaults( RULBUS_CARD_LIST * card )
 {
 	int i;
 
@@ -552,7 +574,7 @@ static int set_rb8514_defaults( RULBUS_CARD_LIST *card )
  * of RB8515 clock cards
  *----------------------------------------------------------------*/
 
-static int set_rb8515_defaults( RULBUS_CARD_LIST *card )
+static int set_rb8515_defaults( RULBUS_CARD_LIST * card )
 {
 	int i;
 
@@ -581,7 +603,7 @@ static int set_rb8515_defaults( RULBUS_CARD_LIST *card )
  * of generic cards
  *----------------------------------------------------------------*/
 
-static int set_rb_generic_defaults( RULBUS_CARD_LIST *card )
+static int set_rb_generic_defaults( RULBUS_CARD_LIST * card )
 {
 	/* The address for the generic card is always 0 and the width is set
 	   to the whole range plus one (which then allows access to all
@@ -770,9 +792,9 @@ static int set_intr_delay( double intr_delay )
  * Dummy function (required by bison) called on errors
  *-----------------------------------------------------*/
 
-static void rulbus_error( const char *s )
+static void rulbus_error( const char * s )
 {
-	s = s;
+	s = s;     /* keeps the compiler from complaining... */
 }
 
 

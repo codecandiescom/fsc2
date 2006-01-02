@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments 6601 boards
  * 
- *  Copyright (C) 2002-2005 Jens Thoms Toerring
+ *  Copyright (C) 2002-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,40 +19,29 @@
  *  along with this program; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
+ *
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
-#include "autoconf.h"
 #include "ni6601_drv.h"
 
 
 static int ni6601_init_board( struct pci_dev *dev, Board *board );
-static int ni6601_open( struct inode *inode_p, struct file *file_p );
-static int ni6601_release( struct inode *inode_p, struct file *file_p );
-static int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
-			 unsigned int cmd, unsigned long arg );
-static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg );
-static int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg );
-static int ni6601_disarm( Board *board, NI6601_DISARM *arg );
-static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
-static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
-static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
-static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
-static void ni6601_irq_enable( Board *board, int counter );
-static void ni6601_irq_disable( Board *board, int counter );
-static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
 
 
-static Board boards[ NI6601_MAX_BOARDS ];
 static int major = NI6601_MAJOR;
-static int board_count = 0;
+Board boards[ NI6601_MAX_BOARDS ];
+int board_count = 0;
 
 
 struct file_operations ni6601_file_ops = {
 	owner:		    THIS_MODULE,
 	ioctl:              ni6601_ioctl,
 	open:               ni6601_open,
-	release:            ni6601_release,
+	poll:               ni6601_poll,
+	read:               ni6601_read,
+	release:            ni6601_release
 };
 
 
@@ -183,10 +172,12 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 		goto init_failure;
 	}
 
-	/* Enable access to the 2nd memory region where the TIO is located */
+	/* Enable access to the 2nd memory region (width 8k) where the
+	   TIO is located through the MITE */
 
-	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x80,
-		board->mite + 0xC0 );
+	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x8C,
+		board->mite + 0xC4 );
+	writel( 0, board->mite + 0xF4 );
 
 	/* Request the interrupt used by the board */
 
@@ -200,16 +191,26 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	/* Initialize variables for interrupt handling */
 
 	board->irq = dev->irq;
+	board->expect_tc_irq = 0;
 	for ( i = 0; i < 4; i++ ) {
-		board->irq_enabled[ i ] = 0;
-		board->TC_irq_raised[ i ] = 0;
+		board->tc_irq_enabled[ i ] = 0;
+		board->tc_irq_raised[ i ] = 0;
 	}
 
-	init_waitqueue_head( &board->waitqueue );
+	board->dma_irq_enabled = 0;
+	board->buf_counter = -1;
+
+	init_waitqueue_head( &board->tc_waitqueue );
+	init_waitqueue_head( &board->dma_waitqueue );
 
 	spin_lock_init( &board->spinlock );
 
+	/* Get addresses of all registers and reset the board */
+
 	ni6601_register_setup( board );
+
+	/* Initialization of DIO lines */
+
 	ni6601_dio_init( board );
 
 	board->in_use = 0;
@@ -219,585 +220,6 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
  init_failure:
 	ni6601_release_resources( boards, board_count );
 	return -1;
-}
-
-
-/*----------------------------------------------------------------------*
- * Function gets exectuted when the device file for a board gets opened
- *----------------------------------------------------------------------*/
-
-static int ni6601_open( struct inode *inode_p, struct file *file_p )
-{
-	int minor;
-	Board *board;
-
-
-	file_p = file_p;
-
-	if ( ( minor = MINOR( inode_p->i_rdev ) ) >= board_count ) {
-		PDEBUG( "Board %d does not exist\n", minor );
-		return -ENODEV;
-	}
-
-	board = boards + minor;
-
-	spin_lock( &board->spinlock );
-
-	if ( board->in_use &&
-	     board->owner != current->uid &&
-	     board->owner != current->euid &&
-	     ! capable( CAP_DAC_OVERRIDE ) ) {
-		PDEBUG( "Board already in use by another user\n" );
-		spin_unlock( &board->spinlock );
-		return -EBUSY;
-	}
-
-	if ( ! board->in_use ) {
-		board->in_use = 1;
-		board->owner = current->uid;
-	}
-
-	MOD_INC_USE_COUNT;
-
-	spin_unlock( &board->spinlock );
-
-	return 0;
-}
-
-
-/*---------------------------------------------------------------------*
- * Function gets executed when the device file for a board gets closed
- *---------------------------------------------------------------------*/
-
-static int ni6601_release( struct inode *inode_p, struct file *file_p )
-{
-	int minor;
-	Board *board;
-	int i;
-
-
-	file_p = file_p;
-
-	minor = MINOR( inode_p->i_rdev );
-
-	if ( minor >= board_count ) {
-		PDEBUG( "Board %d does not exist\n", minor );
-		return -ENODEV;
-	}
-
-	board = boards + minor;
-
-	/* Reset and disarm all counters */
-
-	writew( G1_RESET | G0_RESET, board->regs.joint_reset[ 0 ] );
-	writew( G1_RESET | G0_RESET, board->regs.joint_reset[ 2 ] );
-
-	writew( 0, board->regs.dio_control );
-
-	for ( i = 0; i < 10; i++ )
-		writel( 0, board->regs.io_config[ i ] );
-		
-	board->in_use = 0;
-
-	MOD_DEC_USE_COUNT;
-
-	return 0;
-}
-
-
-/*--------------------------------------------------------------*
- * Function for handling of ioctl() calls for one of the boards
- *--------------------------------------------------------------*/
-
-static int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
-			 unsigned int cmd, unsigned long arg )
-{
-	int minor;
-
-
-	file_p = file_p;
-
-	minor = MINOR( inode_p->i_rdev );
-
-	if ( minor >= board_count ) {
-		PDEBUG( "Board %d does not exist\n", minor );
-		return -ENODEV;
-	}
-
-	if ( _IOC_TYPE( cmd ) != NI6601_MAGIC_IOC || 
-	     _IOC_NR( cmd ) < NI6601_MIN_NR ||
-	     _IOC_NR( cmd ) > NI6601_MAX_NR ) {
-		PDEBUG( "Invalid ioctl() call %d\n", cmd );
-		return -EINVAL;
-	}
-
-	switch ( cmd ) {
-		case NI6601_IOC_DIO_IN :
-			return ni6601_dio_in( boards + minor,
-					      ( NI6601_DIO_VALUE * ) arg );
-
-		case NI6601_IOC_DIO_OUT :
-			return ni6601_dio_out( boards + minor,
-					       ( NI6601_DIO_VALUE * ) arg );
-
-		case NI6601_IOC_COUNT :
-			return ni6601_read_count( boards + minor,
-						( NI6601_COUNTER_VAL * ) arg );
-
-		case NI6601_IOC_PULSER :
-			return ni6601_start_pulses( boards + minor,
-						    ( NI6601_PULSES * ) arg );
-
-		case NI6601_IOC_COUNTER :
-			return ni6601_start_counting( boards + minor,
-						    ( NI6601_COUNTER * ) arg );
-
-		case NI6601_IOC_IS_BUSY :
-			return ni6601_is_busy( boards + minor,
-					       ( NI6601_IS_ARMED * ) arg );
-
-		case NI6601_IOC_DISARM :
-			return ni6601_disarm( boards + minor,
-					      ( NI6601_DISARM * ) arg );
-	}			
-
-	return 0;
-}
-
-
-/*-----------------------------------------------------------*
- * Function reads an 8-bit value from the DIO pins (PFI 0-7)
- * but only from pins for which bits are set in the mask
- * (this allows having some of the bits used for input while
- * the others are used for output at the same time).
- *-----------------------------------------------------------*/
-
-static int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
-{
-	NI6601_DIO_VALUE dio;
-
-
-	if ( copy_from_user( &dio, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	/* If necessary switch selected pins to input mode */
-
-	if ( ( ( u8 ) ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
-		board->dio_mask &= ~ ( u16 ) dio.mask;
-		writew( board->dio_mask, board->regs.dio_control );
-	}
-
-	/* Read in data value from DIO parallel input register */
-
-	dio.value = ( unsigned char )
-		    ( readw( board->regs.dio_parallel_in ) & dio.mask );
-
-	if ( copy_to_user( arg, &dio, sizeof *arg ) ) {
-		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
-	}
-
-	return 0;
-}
-
-
-/*-----------------------------------------------------------*
- * Function outputs an 8-bit value at the DIO pins (PFI 0-7)
- * but only at the pins for which bits are set in the mask
- * (this allows having some of the bits used for output
- * while the others are used for input at the same time).
- *-----------------------------------------------------------*/
-
-static int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
-{
-	NI6601_DIO_VALUE dio;
-
-
-	if ( copy_from_user( &dio, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	/* Write data value to DIO parallel output register */
-
-	writew( ( u16 ) dio.value, board->regs.dio_output );
-
-	/* Now if necessary switch selected pins to output mode */
-
-	if ( ( board->dio_mask & 0xFF ) != dio.mask ) {
-		board->dio_mask |= dio.mask;
-		writew( board->dio_mask, board->regs.dio_control );
-	}
-
-	return 0;
-}
-
-
-/*------------------------------------------------------------------*
- * Function for stopping the counter of a board, i.e. disarming it.
- *------------------------------------------------------------------*/
-
-static int ni6601_disarm( Board *board, NI6601_DISARM *arg )
-{
-	NI6601_DISARM d;
-
-
-	if ( copy_from_user( &d, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	if ( d.counter < NI6601_COUNTER_0 || d.counter > NI6601_COUNTER_3 ) {
-		PDEBUG( "Invalid counter number %d\n", d.counter );
-		return -EINVAL;
-	}
-
-	writew( DISARM, board->regs.command[ d.counter ] );
-
-	return 0;
-}
-
-
-/*---------------------------------------------------------------------------*
- * Function for reading the value of a counter (from the SW save register).
- * When called with the 'wait_on_end' member of the NI6601_COUNTER_VAL
- * structure passed to the function being set it's assumed that the counter
- * is doing a gated measurement with the neighbouring counter as the source
- * of the (single) gate pulse. The function will then wait for the neigh-
- * bouring counter to stop counting before disarming the counter and reading
- * the counter value.
- *---------------------------------------------------------------------------*/
-
-static int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
-{
-	NI6601_COUNTER_VAL cs;
-	u32 next_val;
-
-
-	if ( copy_from_user( &cs, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	if ( cs.counter < NI6601_COUNTER_0 || cs.counter > NI6601_COUNTER_3 ) {
-		PDEBUG( "Invalid counter number %d\n", cs.counter );
-		return -EINVAL;
-	}
-
-	/* If required wait for counting to stop (by waiting for the
-	   neighboring counter creating the gate pulse to stop) and then
-	   reset both counters. We can wait either for an interrupt,
-	   putting the process to sleep in the meantime, or poll the
-	   status register in a tight loop. What is done depends on
-	   the 'do_poll' member of the argument structure. */
-
-	if ( cs.wait_for_end ) {
-
-		int oc = cs.counter + ( cs.counter & 1 ? -1 : 1 );
-
-		if ( ! cs.do_poll ) {
-			ni6601_irq_enable( board, oc );
-
-			if ( readw( board->regs.joint_status[ oc ] ) &
-			     Gi_COUNTING( oc ) )
-				wait_event_interruptible( board->waitqueue,
-						  board->TC_irq_raised[ oc ] );
-			ni6601_irq_disable( board, oc );
-		} else {
-			while ( readw( board->regs.joint_status[ oc ] ) &
-				Gi_COUNTING( oc ) &&
-				! signal_pending( current ) )
-				/* empty */ ;
-		}
-
-		writew( G1_RESET | G0_RESET,
-			board->regs.joint_reset[ cs.counter ] );
-
-		if ( signal_pending( current ) ) {
-			PDEBUG( "Aborted by signal\n" );
-			return -EINTR;
-		}
-	}
-
-	/* Read the SW save register to get the current count value */
-
-	cs.count = readl( board->regs.sw_save[ cs.counter ] );
-
-	/* If the counter is armed, re-read the SW save register until two
-	   readings are identical */
-
-	if ( readw( board->regs.joint_status[ cs.counter ] ) &
-	     Gi_ARMED( cs.counter ) )
-		while ( cs.count != ( next_val =
-				 readl( board->regs.sw_save[ cs.counter ] ) ) )
-			cs.count = next_val;
-	
-	if ( copy_to_user( arg, &cs, sizeof *arg ) ) {
-		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
-	}
-
-	return 0;
-}
-
-
-/*----------------------------------------------------*
- * Function to start outputting pulses from a counter
- *----------------------------------------------------*/
-
-static int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
-{
-	NI6601_PULSES p;
-	u16 gate_bits;
-	u16 source_bits;
-	u16 mode_bits = 0;
-	int use_gate;
-	u16 cmd_bits = ALWAYS_DOWN;
-
-
-	if ( copy_from_user( &p, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	if ( p.counter < NI6601_COUNTER_0 || p.counter > NI6601_COUNTER_3 ) {
-		PDEBUG( "Invalid counter number %d\n", p.counter );
-		return -EINVAL;
-	}
-
-	if ( ( use_gate = ni6601_input_gate( p.gate, &gate_bits ) ) < 0 ) {
-		PDEBUG( "Invalid gate setting %d\n", p.gate );
-		return -EINVAL;
-	}
-
-	if ( ni6601_input_source( p.source, &source_bits ) <= 0 ) {
-		PDEBUG( "Invalid source setting %d\n", p.source );
-		return -EINVAL;
-	}
-
-	if ( p.low_ticks < 2 || p.high_ticks < 2 ) {
-		PDEBUG( "Invalid low or high ticks\n" );
-		return -EINVAL;
-	}
-
-	/* Set the input select register */
-
-	source_bits |= gate_bits;
-	if ( p.output_polarity != NI6601_NORMAL )
-		source_bits |= INVERTED_OUTPUT_POLARITY;
-
-	writew( source_bits, board->regs.input_select[ p.counter ] );
-
-	/* Load counter with 1 so we're able to start the first pulse as
-	   fast as possible, i.e. 100 ns after arming the counter */
-
-	writel( 1UL, board->regs.load_a[ p.counter ] );
-	writew( LOAD, board->regs.command[ p.counter ] );
-
-	/* Use normal counting and no second gating */
-
-	writew( 0, board->regs.counting_mode[ p.counter ] );
-	writew( 0, board->regs.second_gate[ p.counter ] );
-
-	if ( ! p.disable_output )
-		ni6601_enable_out( board, NI6601_OUT( p.counter ) );
-	else
-		ni6601_disable_out( board, NI6601_OUT( p.counter ) );
-
-	/* Set the count for the duration of the high and the low voltage
-	   phase of the pulse (after subtracting 1) */
-
-	writel( p.high_ticks - 1, board->regs.load_a[ p.counter ] );
-	writel( p.low_ticks - 1,  board->regs.load_b[ p.counter ] );
-
-	/* Assemble value to be written into the mode register */
-
-	mode_bits = RELOAD_SOURCE_SWITCHING | LOADING_ON_TC |
-		    OUTPUT_MODE_TOGGLE_ON_TC | LOAD_SOURCE_SELECT_A;
-
-	if ( ! p.continuous )
-		mode_bits |= STOP_MODE_ON_GATE_OR_2ND_TC;
-
-	if ( use_gate ) {
-		mode_bits |= GATING_MODE_LEVEL;
-		cmd_bits  |= SYNCHRONIZE_GATE;
-	}
-
-	writew( mode_bits, board->regs.mode[ p.counter ] );
-
-	/* Finally start outputting the pulses */
-
-	writew( cmd_bits, board->regs.command[ p.counter ] );
-	writew( cmd_bits | ARM, board->regs.command[ p.counter ] );
-
-	return 0;
-}
-
-
-/*---------------------------------------*
- * Function for starting event counting.
- *---------------------------------------*/
-
-static int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
-{
-	NI6601_COUNTER c;
-	u16 gate_bits;
-	u16 source_bits;
-	u16 mode_bits = OUTPUT_MODE_TC;
-	int use_gate;
-	u16 cmd_bits = ALWAYS_UP | LOAD;
-
-
-	if ( copy_from_user( &c, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	if ( c.counter < NI6601_COUNTER_0 || c.counter > NI6601_COUNTER_3 ) {
-		PDEBUG( "Invalid counter number %d\n", c.counter );
-		return -EINVAL;
-	}
-
-	if ( ( use_gate = ni6601_input_gate( c.gate, &gate_bits ) ) < 0 ) {
-		PDEBUG( "Invalid gate setting %d\n", c.gate );
-		return -EINVAL;
-	}
-
-	if ( ni6601_input_source( c.source, &source_bits ) <= 0 ) {
-		PDEBUG( "Invalid source setting %d\n", c.source );
-		return -EINVAL;
-	}
-
-	/* Set input source and gate as well as source input polarity */
-
-	source_bits |= gate_bits;
-	if ( c.source_polarity != NI6601_NORMAL )
-		source_bits |= INVERTED_SOURCE_POLARITY;
-
-	writew( source_bits, board->regs.input_select[ c.counter ] );
-
-	if ( ! c.disable_output )
-		ni6601_enable_out( board, NI6601_OUT( c.counter ) );
-	else
-		ni6601_disable_out( board, NI6601_OUT( c.counter ) );
-
-	/* Use normal counting and no second gating */
-
-	writew( 0, board->regs.counting_mode[ c.counter ] );
-	writew( 0, board->regs.second_gate[ c.counter ] );
-
-	if ( use_gate ) {
-		mode_bits |= GATING_MODE_LEVEL;
-		cmd_bits  |= SYNCHRONIZE_GATE;
-	}
-
-	writew( mode_bits, board->regs.mode[ c.counter ] );
-
-	/* Load counter from A, set counting direction etc., then arm
-	   (arming while loading does not seems to work for some of the
-	   counters...) */
-
-	writel( 0UL, board->regs.load_a[ c.counter ] );
-	writew( cmd_bits, board->regs.command[ c.counter ] );
-	writew( cmd_bits | ARM, board->regs.command[ c.counter ] );
-
-	return 0;
-}
-
-
-/*---------------------------------------------------------------*
- * Function checks if a counter of a board is currently counting
- * (i.e. if it's armed).
- *---------------------------------------------------------------*/
-
-static int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
-{
-	NI6601_IS_ARMED a;
-
-
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
-		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
-	}
-
-	/* Test if the counter is armed */
-
-	a.state =  ( readw( board->regs.joint_status[ a.counter ] ) &
-		     Gi_ARMED( a.counter ) ) ? 1 : 0;
-	
-	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
-		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
-	}
-
-	return 0;
-}
-
-
-/*-----------------------------------------------------------*
- * Function to enable TC interrupts from one of the counters
- *-----------------------------------------------------------*/
-
-static void ni6601_irq_enable( Board *board, int counter )
-{
-	board->TC_irq_raised[ counter ] = 0;
-	if ( ! board->irq_enabled[ counter ] )
-	{
-		PDEBUG( "Enabling IRQ for counter %d\n", counter );
-		writew( Gi_TC_INTERRUPT_ACK, board->regs.irq_ack[ counter ] );
-		writew( Gi_TC_INTERRUPT_ENABLE( counter ),
-			board->regs.irq_enable[ counter ] );
-		board->irq_enabled[ counter ] = 1;
-	}
-}
-
-
-/*------------------------------------------------------------*
- * Function to disable TC interrupts from one of the counters
- *------------------------------------------------------------*/
-
-static void ni6601_irq_disable( Board *board, int counter )
-{
-	if ( board->irq_enabled[ counter ] )
-	{
-		PDEBUG( "Disabling IRQ for counter %d\n", counter );
-
-		writew( 0, board->regs.irq_enable[ counter ] );
-		writew( Gi_TC_INTERRUPT_ACK,
-			board->regs.irq_ack[ counter ] );
-		board->irq_enabled[ counter ] = 0;
-	}
-}
-
-
-/*-------------------------------------------------------------------*
- * Interrupt handler for all boards, raising a flag on TC interrupts
- *-------------------------------------------------------------------*/
-
-static void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
-{
-	Board *board = ( Board * ) data;
-	u16 mask = Gi_INTERRUPT | Gi_TC_STATUS;
-	int i;
-
-
-	if ( irq != board->irq ) {
-		PDEBUG( "Invalid interrupt num: %d\n", irq );
-		return;
-	}
-
-	for ( i = 0; i < 4; i++ )
-		if ( board->irq_enabled[ i ] &&
-		     mask == ( readw( board->regs.status[ i ] ) & mask ) )
-		{
-			PDEBUG( "Interrupt for counter %d\n", i );
-			writew( Gi_TC_INTERRUPT_ACK,
-				board->regs.irq_ack[ i ] );
-			board->TC_irq_raised[ i ]++;
-			wake_up_interruptible( &board->waitqueue );
-		}
 }
 
 
@@ -835,4 +257,3 @@ MODULE_LICENSE( "GPL" );
  * tab-width: 8
  * End:
  */
-

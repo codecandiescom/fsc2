@@ -3,7 +3,7 @@
 #
 # Makefile for National Instruments 6601 board
 #
-# Copyright (C) 2002-2005 Jens Thoms Toerring
+# Copyright (C) 2002-2006 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# To contact the author send email to
-# Jens.Toerring@physik.fu-berlin.de
+# To contact the author send email to:  jt@toerring.de
 
 
 ifneq ($(NI6601_KERNEL_SOURCE),)
@@ -34,7 +33,7 @@ else
 endif
 
 MODULE   = ni6601.o
-SOURCES  = ni6601_drv.c utils.c
+SOURCES  = ni6601_drv.c fops.c ioctl.c utils.c
 HEADERS  = ni6601_drv.h autoconf.h
 INCLUDES = -I$(KERNEL_SRC)/include -I.
 

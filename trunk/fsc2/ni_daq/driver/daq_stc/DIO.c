@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments PCI E Series DAQ boards
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -39,7 +38,7 @@
  * disabling serial output and switching all pins to input.
  *--------------------------------------------------------------*/
 
-void DIO_reset_all( Board *board )
+void DIO_reset_all( Board * board )
 {
 	board->stc.DIO_Control &= ~ ( DIO_HW_Serial_Enable |
 				      DIO_Pins_Dir_Field );
@@ -52,7 +51,8 @@ void DIO_reset_all( Board *board )
  * Handler for ioctl() calls for the DIO subsystem
  *-------------------------------------------------*/
 
-int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg )
+int DIO_ioctl_handler( Board *          board,
+		       NI_DAQ_DIO_ARG * arg )
 {
 	NI_DAQ_DIO_ARG a;
 	int ret;
@@ -92,7 +92,9 @@ int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg )
  * output at the same time).
  *---------------------------------------------------------------*/
 
-int DIO_in( Board *board, unsigned char *value, unsigned char mask )
+int DIO_in( Board *         board,
+	    unsigned char * value,
+	    unsigned char   mask )
 {
 	/* If necessary switch selected pins to input mode */
 
@@ -118,7 +120,9 @@ int DIO_in( Board *board, unsigned char *value, unsigned char mask )
  * input at the same time).
  *------------------------------------------------------------------*/
 
-int DIO_out( Board *board, unsigned char value, unsigned char mask )
+int DIO_out( Board *       board,
+	     unsigned char value,
+	     unsigned char mask )
 {
 	/* Write data value to DIO parallel output register */
 

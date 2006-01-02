@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -39,11 +39,16 @@ typedef struct RULBUS_CARD_INFO RULBUS_CARD_INFO;
 
 int rulbus_open( void );
 void rulbus_close( void );
+
 int rulbus_perror( const char * /* s */ );
+
 const char *rulbus_strerror( void );
+
 int rulbus_card_open( const char * /* name */ );
+
 int rulbus_card_close( int /* handle */ );
-int rulbus_get_card_info( const char * /* name */,
+
+int rulbus_get_card_info( const char *       /* name      */,
 			  RULBUS_CARD_INFO * /* card_info */ );
 
 extern int rulbus_errno;
@@ -75,15 +80,29 @@ struct RULBUS_CARD_INFO {
 /* Functions and definitions for the 12-bit ADC card module (RB8509) */
 
 int rulbus_rb8509_adc12_num_channels( int /* handle */ );
-int rulbus_rb8509_adc12_set_channel( int /* handle */, int /* channel */ );
-int rulbus_rb8509_adc12_set_gain( int /* handle */, int /* gain */ );
+
+int rulbus_rb8509_adc12_set_channel( int /* handle  */,
+				     int /* channel */ );
+
+int rulbus_rb8509_adc12_set_gain( int /* handle */,
+				  int /* gain   */ );
+
 int rulbus_rb8509_adc12_has_external_trigger( int /* handle */ );
-int rulbus_rb8509_adc12_set_trigger_mode( int /* handle */, int /* mode */ );
-int rulbus_rb8509_adc12_properties( int /* handle */, double * /* Vmax */,
-				    double * /* Vmin */, double * /* dV */ );
-int rulbus_rb8509_adc12_check_convert( int /* handle */,
-				       double * /* volts */ );
-int rulbus_rb8509_adc12_convert( int /* handle */, double * /* volts */ );
+
+int rulbus_rb8509_adc12_set_trigger_mode( int /* handle */,
+					  int /* mode   */ );
+
+int rulbus_rb8509_adc12_properties( int      /* handle */,
+				    double * /* Vmax   */,
+				    double * /* Vmin   */,
+				    double * /* dV     */ );
+
+int rulbus_rb8509_adc12_check_convert( int      /* handle */,
+				       double * /* volts  */ );
+
+int rulbus_rb8509_adc12_convert( int      /* handle */,
+				 double * /* volts  */ );
+
 
 #define RULBUS_RB8509_ADC12_GAIN_1         1
 #define RULBUS_RB8509_ADC12_GAIN_2         2
@@ -96,28 +115,43 @@ int rulbus_rb8509_adc12_convert( int /* handle */, double * /* volts */ );
 
 /* Functions and definitions for the 12-bit DAC card module (RB8510) */
 
-int rulbus_rb8510_dac12_set_voltage( int /* handle */, double /* volts */ );
-int rulbus_rb8510_dac12_properties( int /* handle */, double * /* Vmax */,
-				    double * /* Vmin */, double * /* dV */ );
+int rulbus_rb8510_dac12_set_voltage( int    /* handle */,
+				     double /* volts  */ );
+
+int rulbus_rb8510_dac12_properties( int      /* handle */,
+				    double * /* Vmax   */,
+				    double * /* Vmin   */,
+				    double * /* dV     */ );
 
 
 /* Functions and definitions for the delay card module (RB8514) */
 
-int rulbus_rb8514_delay_set_clock_frequency( int /* handle */,
-					     double /* freq */ );
-int rulbus_rb8514_delay_set_delay( int /* handle */, double /* delay */,
-				   int /* force */ );
-int rulbus_rb8514_delay_set_raw_delay( int /* handle */,
-				       unsigned long /* delay */,
-				       int /* force */ );
-int rulbus_rb8514_delay_set_trigger( int /* handle */, int /* edge */ );
-int rulbus_rb8514_delay_set_output_pulse( int /* handle */, int /* output */,
-					  int /* type */ );
+int rulbus_rb8514_delay_set_clock_frequency( int    /* handle */,
+					     double /* freq   */ );
+
+int rulbus_rb8514_delay_set_delay( int    /* handle */,
+				   double /* delay  */,
+				   int    /* force  */ );
+
+int rulbus_rb8514_delay_set_raw_delay( int           /* handle */,
+				       unsigned long /* delay  */,
+				       int           /* force  */ );
+
+int rulbus_rb8514_delay_set_trigger( int /* handle */,
+				     int /* edge   */ );
+
+int rulbus_rb8514_delay_set_output_pulse( int /* handle */,
+					  int /* output */,
+					  int /* type   */ );
+
 int rulbus_rb8514_delay_set_output_pulse_polarity( int /* handle */,
-						   int /* type */,
-						   int /* pol */ );
+						   int /* type   */,
+						   int /* pol    */ );
+
 int rulbus_rb8514_software_start( int /* handle */ );
+
 int rulbus_rb8514_delay_busy( int /* handle */ );
+
 double rulbus_rb8514_delay_get_intrinsic_delay( int /* handle */ );
 
 
@@ -141,7 +175,9 @@ double rulbus_rb8514_delay_get_intrinsic_delay( int /* handle */ );
 
 /* Functions and definitions for the clock card module (RB8515) */
 
-int rulbus_rb8515_clock_set_frequency( int /* handle */, int /* freq */ );
+int rulbus_rb8515_clock_set_frequency( int /* handle */,
+				       int /* freq   */ );
+
 
 #define RULBUS_RB8515_CLOCK_FREQ_OFF            0
 #define RULBUS_RB8515_CLOCK_FREQ_100Hz          1
@@ -155,10 +191,15 @@ int rulbus_rb8515_clock_set_frequency( int /* handle */, int /* freq */ );
 
 /* Functions for the generic card module (RB_GENERIC) */
 
-int rulbus_generic_write( int /* handle */, unsigned char /* address */,
-			  unsigned char * /* data */, size_t /* len */ );
-int rulbus_generic_read( int /* handle */, unsigned char /* address */,
-			 unsigned char * /* data */, size_t /* len */ );
+int rulbus_generic_write( int             /* handle  */,
+			  unsigned char   /* address */,
+			  unsigned char * /* data    */,
+			  size_t          /* len     */ );
+
+int rulbus_generic_read( int             /* handle  */,
+			 unsigned char   /* address */,
+			 unsigned char * /* data    */,
+			 size_t          /* len     */ );
 
 
 /* Error codes of the library */

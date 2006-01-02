@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments PCI E Series DAQ boards
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -63,9 +62,12 @@ static Board_Functions func = {
 extern struct file_operations ni_daq_file_ops;   /* from daq_stc/fops.c */
 
 
-static void pci_e_series_release_resources( Board *boards, int board_count );
-static void pci_e_series_init_all( Board *board );
-static int pci_e_series_init_board( struct pci_dev *dev, Board *board );
+static void pci_e_series_release_resources( Board * boards,
+					    int     board_count );
+
+static void pci_e_series_init_all( Board * board );
+static int pci_e_series_init_board( struct pci_dev * dev,
+				    Board *          board );
 
 
 static unsigned int num_pci_e_series_boards = 
@@ -167,7 +169,8 @@ static int __init pci_e_series_init( void )
  * Initialization of a board (only use while loading the module)
  *---------------------------------------------------------------*/
 
-static int __init pci_e_series_init_board( struct pci_dev *dev, Board *board )
+static int __init pci_e_series_init_board( struct pci_dev * dev,
+					   Board *          board )
 {
 	board->dev = dev;
 	board->irq = 0;
@@ -275,7 +278,8 @@ static void __exit pci_e_series_cleanup( void )
  * Function for releasing all resources requested for the boards
  *---------------------------------------------------------------*/
 
-static void pci_e_series_release_resources( Board *boards, int board_count )
+static void pci_e_series_release_resources( Board * boards,
+					    int     board_count )
 {
 	int i;
 
@@ -309,7 +313,7 @@ static void pci_e_series_release_resources( Board *boards, int board_count )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void pci_e_series_init_all( Board *board )
+static void pci_e_series_init_all( Board * board )
 {
 	/* Set up the pointers to the registers, the list of windowed
 	   register offsets and the structures for interrupt handling */
@@ -340,7 +344,7 @@ module_exit( pci_e_series_cleanup );
 
 MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number to use" );
-MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
+MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
 MODULE_DESCRIPTION( "National Instruments PCI E Series DAQ board driver" );
 
 

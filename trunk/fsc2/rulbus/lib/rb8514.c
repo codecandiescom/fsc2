@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -68,6 +68,7 @@ static int rulbus_num_delay_cards = 0;
 
 
 static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card_find( int handle );
+
 static inline long lrnd( double x );
 
 
@@ -194,7 +195,8 @@ int rulbus_rb8514_delay_card_exit( int handle )
  * Function for setting the delay duration
  *-----------------------------------------*/
 
-int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
+int rulbus_rb8514_delay_set_clock_frequency( int    handle,
+											 double freq )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 
@@ -214,7 +216,9 @@ int rulbus_rb8514_delay_set_clock_frequency( int handle, double freq )
  * Function for setting the delay duration
  *-----------------------------------------*/
 
-int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
+int rulbus_rb8514_delay_set_delay( int    handle,
+								   double delay,
+								   int    force )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 	long ldelay;
@@ -266,8 +270,9 @@ int rulbus_rb8514_delay_set_delay( int handle, double delay, int force )
  * (the intrinsic delay has to be dealt with by the caller)
  *--------------------------------------------------------------*/
 
-int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
-									   int force )
+int rulbus_rb8514_delay_set_raw_delay( int           handle,
+									   unsigned long delay,
+									   int           force )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char bytes[ 3 ];
@@ -313,7 +318,8 @@ int rulbus_rb8514_delay_set_raw_delay( int handle, unsigned long delay,
  * or the raising edge of the external trigger
  *---------------------------------------------------------------*/
 
-int rulbus_rb8514_delay_set_trigger( int handle, int edge )
+int rulbus_rb8514_delay_set_trigger( int handle,
+									 int edge )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
@@ -352,7 +358,9 @@ int rulbus_rb8514_delay_set_trigger( int handle, int edge )
  * output at output 1 and/or 2
  *-------------------------------------------------------------*/
 
-int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
+int rulbus_rb8514_delay_set_output_pulse( int handle,
+										  int output,
+										  int type )
 {
 	RULBUS_RB8514_DELAY_CARD *card;
 	unsigned char ctrl;
@@ -407,7 +415,8 @@ int rulbus_rb8514_delay_set_output_pulse( int handle, int output, int type )
  * output at output 1 and/or 2
  *-------------------------------------------------------------*/
 
-int rulbus_rb8514_delay_set_output_pulse_polarity( int handle, int type,
+int rulbus_rb8514_delay_set_output_pulse_polarity( int handle,
+												   int type,
 												   int pol )
 {
 	RULBUS_RB8514_DELAY_CARD *card;

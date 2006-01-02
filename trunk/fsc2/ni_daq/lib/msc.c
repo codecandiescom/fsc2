@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -37,8 +36,9 @@
  * on the FREQ_OUT pin only.
  *----------------------------------------------------------------*/
 
-int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
-								int divider )
+int ni_daq_msc_set_clock_speed( int                      board,
+								NI_DAQ_CLOCK_SPEED_VALUE speed,
+								int                      divider )
 {
 	NI_DAQ_MSC_ARG msc;
 	int ret;
@@ -70,8 +70,9 @@ int ni_daq_msc_set_clock_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed,
  * and for enabling and disabling the frequency output
  *-----------------------------------------------------------------*/
 
-int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
-								 NI_DAQ_STATE on_off )
+int ni_daq_msc_set_clock_output( int               board,
+								 NI_DAQ_CLOCK_TYPE daq_clock,
+								 NI_DAQ_STATE      on_off )
 {
 	NI_DAQ_MSC_ARG msc;
 	int ret;
@@ -103,10 +104,11 @@ int ni_daq_msc_set_clock_output( int board, NI_DAQ_CLOCK_TYPE daq_clock,
  * Function for determining all current clock settings of the board
  *------------------------------------------------------------------*/
 
-int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
-								NI_DAQ_STATE *on_off,
-								NI_DAQ_CLOCK_SPEED_VALUE *speed,
-								int *divider )
+int ni_daq_msc_get_clock_state( int                        board,
+								NI_DAQ_CLOCK_TYPE *        daq_clock,
+								NI_DAQ_STATE *             on_off,
+								NI_DAQ_CLOCK_SPEED_VALUE * speed,
+								int *                      divider )
 {
 	int ret;
 
@@ -130,8 +132,10 @@ int ni_daq_msc_get_clock_state( int board, NI_DAQ_CLOCK_TYPE *daq_clock,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_msc_set_trigger( int board, NI_DAQ_TRIG_TYPE trigger_type,
-							double trigger_high, double trigger_low )
+int ni_daq_msc_set_trigger( int              board,
+							NI_DAQ_TRIG_TYPE trigger_type,
+							double           trigger_high,
+							double           trigger_low )
 {
 	NI_DAQ_MSC_ARG a;
 	int ret;

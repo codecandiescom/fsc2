@@ -2,7 +2,7 @@
 ;;
 ;;  $Id$
 ;;
-;;  Copyright (C) 1999-2005 Jens Thoms Törring
+;;  Copyright (C) 1999-2006 Jens Thoms Törring
 ;;
 ;;  Author: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
 ;;  Maintainer: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
@@ -46,7 +46,7 @@
 
 
 (defconst edl-maintainer-address
-  "Jens Thoms Törring <Jens.Toerring@physik.fu-berlin.de>" )
+  "Jens Thoms Törring <jt@toerring.de>" )
 
 (defgroup edl nil
   "Major mode for editing EDL source files."

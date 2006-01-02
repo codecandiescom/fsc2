@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -37,10 +36,11 @@
  * reference and bipolar mode.
  *---------------------------------------------------------------*/
 
-int ni_daq_ao_channel_configuration( int board, int num_channels,
-									 int *channels,
-									 NI_DAQ_STATE *external_reference,
-									 NI_DAQ_BU_POLARITY *polarity )
+int ni_daq_ao_channel_configuration( int                  board,
+									 int                  num_channels,
+									 int *                channels,
+									 NI_DAQ_STATE *       external_reference,
+									 NI_DAQ_BU_POLARITY * polarity )
 {
     int ret;
 	int i;
@@ -122,7 +122,10 @@ int ni_daq_ao_channel_configuration( int board, int num_channels,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_ao( int board, int num_channels, int *channels, double *values )
+int ni_daq_ao( int      board,
+			   int      num_channels,
+			   int *    channels,
+			   double * values )
 {
     int ret;
 	int i;

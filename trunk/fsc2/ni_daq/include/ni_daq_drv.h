@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -273,13 +272,13 @@ typedef enum {
 
 typedef enum {
 	NI_DAQ_GAIN_NOT_AVAIL = -1,
-	NI_DAQ_GAIN_0_5 = 0,              /* divide by 2 */          
-	NI_DAQ_GAIN_1   = 1,		  /* no amplification */          
-	NI_DAQ_GAIN_2   = 2,		  /* amplify by factor of 2 */  
-	NI_DAQ_GAIN_5   = 3,		  /* amplify by factor of 5 */  
-	NI_DAQ_GAIN_10  = 4,		  /* amplify by factor of 10 */ 
-	NI_DAQ_GAIN_20  = 5,		  /* amplify by factor of 20 */ 
-	NI_DAQ_GAIN_50  = 6,		  /* amplify by factor of 50 */ 
+	NI_DAQ_GAIN_0_5 = 0,              /* divide by 2              */
+	NI_DAQ_GAIN_1   = 1,		  /* no amplification         */
+	NI_DAQ_GAIN_2   = 2,		  /* amplify by factor of 2   */
+	NI_DAQ_GAIN_5   = 3,		  /* amplify by factor of 5   */
+	NI_DAQ_GAIN_10  = 4,		  /* amplify by factor of 10  */
+	NI_DAQ_GAIN_20  = 5,		  /* amplify by factor of 20  */
+	NI_DAQ_GAIN_50  = 6,		  /* amplify by factor of 50  */
 	NI_DAQ_GAIN_100 = 7		  /* amplify by factor of 100 */
 } NI_DAQ_AI_GAIN_TYPES;
 

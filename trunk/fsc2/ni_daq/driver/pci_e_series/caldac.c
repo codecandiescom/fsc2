@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments PCI E Series DAQ boards
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,23 +28,40 @@
 #include "board.h"
 
 
-static u8 eeprom_read( Board *board, u16 addr );
-static void caldac_write( Board *board, u8 ser_dac, CALDAC_TYPES type,
-			  u8 addr, u16 val );
-static void caldac_send( Board *board, u8 ser_dac, u16 data, int num_bits );
-static void calib_1( Board *board );
-static void calib_2( Board *board );
-static void calib_3( Board *board );
-static void calib_4( Board *board );
-static void calib_5( Board *board );
-static void calib_6( Board *board );
+static u8 eeprom_read( Board * board,
+		       u16     addr );
+
+static void caldac_write( Board *      board,
+			  u8           ser_dac,
+			  CALDAC_TYPES type,
+			  u8           addr,
+			  u16          val );
+
+static void caldac_send( Board * board,
+			 u8      ser_dac,
+			 u16     data,
+			 int     num_bits );
+
+static void calib_1( Board * board );
+
+static void calib_2( Board * board );
+
+static void calib_3( Board * board );
+
+static void calib_4( Board * board );
+
+static void calib_5( Board * board );
+
+static void calib_6( Board * board );
 
 
 /*------------------------------------------------*
  * Function for setting the analog trigger levels
  *------------------------------------------------*/
 
-void pci_set_trigger_levels( Board *board, u16 high, u16 low )
+void pci_set_trigger_levels( Board * board,
+			     u16     high,
+			     u16     low )
 {
 	caldac_write( board, 0, board->type->atrig_caldac,
 		      board->type->atrig_low_ch, low );
@@ -58,7 +74,8 @@ void pci_set_trigger_levels( Board *board, u16 high, u16 low )
  *  Function for reading out data from the EEPROM
  *------------------------------------------------*/
 
-static u8 eeprom_read( Board *board, u16 addr )
+static u8 eeprom_read( Board * board,
+		       u16     addr )
 {
 	u16 bit;
 	u8 bits = 0;
@@ -111,8 +128,11 @@ static u8 eeprom_read( Board *board, u16 addr )
  * Function for writing data to (one of) the CalDAC(s) of the board
  *------------------------------------------------------------------*/
 
-static void caldac_write( Board *board, u8 ser_dac, CALDAC_TYPES type,
-			  u8 addr, u16 val )
+static void caldac_write( Board *      board,
+			  u8           ser_dac,
+			  CALDAC_TYPES type,
+			  u8           addr,
+			  u16          val )
 {
 	static unsigned char rev_nibble[ ] = { 0,  8,  4, 12,
 					       2, 10,  6, 14,
@@ -151,7 +171,10 @@ static void caldac_write( Board *board, u8 ser_dac, CALDAC_TYPES type,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static void caldac_send( Board *board, u8 ser_dac, u16 data, int num_bits )
+static void caldac_send( Board * board,
+			 u8      ser_dac,
+			 u16     data,
+			 int     num_bits )
 {
 	u16 bit;
 	u16 bitstring;
@@ -179,7 +202,7 @@ static void caldac_send( Board *board, u8 ser_dac, u16 data, int num_bits )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-void caldac_calibrate( Board *board )
+void caldac_calibrate( Board * board )
 {
 	struct calib_list {
 		const char *board_name;
@@ -213,7 +236,7 @@ void caldac_calibrate( Board *board )
  * and PCI-6071E to the values from the EEPROM
  *---------------------------------------------------------------------*/
 
-static void calib_1( Board *board )
+static void calib_1( Board * board )
 {
 	u16 val;
 
@@ -258,7 +281,7 @@ static void calib_1( Board *board )
  * PCI-6032E and PCI-6033E to the values from the EEPROM
  *--------------------------------------------------------------------*/
 
-static void calib_2( Board *board )
+static void calib_2( Board * board )
 {
 	u16 val;
 
@@ -298,7 +321,7 @@ static void calib_2( Board *board )
  * from the EEPROM
  *----------------------------------------------------------------------*/
 
-static void calib_3( Board *board )
+static void calib_3( Board * board )
 {
 	u16 val;
 
@@ -335,7 +358,7 @@ static void calib_3( Board *board )
  * from the EEPROM
  *----------------------------------------------------------------*/
 
-static void calib_4( Board *board )
+static void calib_4( Board * board )
 {
 	u16 val;
 
@@ -359,7 +382,7 @@ static void calib_4( Board *board )
  * to the values from the EEPROM
  *----------------------------------------------------------------*/
 
-static void calib_5( Board *board )
+static void calib_5( Board * board )
 {
 	u16 val;
 
@@ -401,7 +424,7 @@ static void calib_5( Board *board )
  * from the EEPROM
  *----------------------------------------------------------------*/
 
-static void calib_6( Board *board )
+static void calib_6( Board * board )
 {
 	/* The manual claims that this board uses two MB88341 chips, but
 	   this can't be correct because the MB88341 has only 12 DACs

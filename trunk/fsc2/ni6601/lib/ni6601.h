@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2002-2005 Jens Thoms Toerring
+ *  Copyright (C) 2002-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * 
- *  To contact the author send email to:
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -28,11 +27,14 @@ extern "C" {
 
 
 #include <ni6601_drv.h>
+#include <stdlib.h>
 #include <math.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/select.h>
 
 
 typedef struct {
@@ -49,7 +51,8 @@ enum {
 	NI6601_PULSER_RUNNING,
 	NI6601_CONT_PULSER_RUNNING,
 	NI6601_COUNTER_RUNNING,
-	NI6601_CONT_COUNTER_RUNNING
+	NI6601_CONT_COUNTER_RUNNING,
+	NI6601_BUFF_COUNTER_RUNNING
 };
 
 
@@ -58,6 +61,18 @@ int ni6601_start_counter( int /* board */, int /* counter */,
 						  int /* source */ );
 int ni6601_start_gated_counter( int /* board */, int /* counter */,
 								double /* gate_length */, int /* source */ );
+int ni6601_start_buffered_counter( int /* board */, int /* counter */,
+								   double /* gate_length */, int /* source */,
+								   unsigned long /* num_points */,
+								   int /* continuous */ );
+ssize_t ni6601_get_buffered_available( int /* board */ );
+ssize_t ni6601_get_buffered_counts( int /* board */,
+									unsigned long * /* counts */,
+									size_t /* num_points */,
+									double /* wait_secs */,
+									int * /* quit_on_signal */,
+									int * /* timed_out */,
+									int * /* end_of_data */ );
 int ni6601_stop_counter( int /* board */, int /* counter */ );
 int ni6601_get_count( int /* board */, int /* counter */,
 					  int /* wait_for_end */, int /* do_poll */,
@@ -98,6 +113,11 @@ extern const int ni6601_nerr;
 #define NI6601_ERR_DFM -13
 #define NI6601_ERR_DFP -14
 #define NI6601_ERR_INT -15
+#define NI6601_ERR_TMB -16
+#define NI6601_ERR_MEM -17
+#define NI6601_ERR_OFL -18
+#define NI6601_ERR_TFS -19
+#define NI6601_ERR_NBC -20
 
 
 #ifdef __cplusplus

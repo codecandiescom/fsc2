@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2005 Jens Thoms Toerring
+  Copyright (C) 1999-2006 Jens Thoms Toerring
 
   This file is part of fsc2.
 
@@ -315,6 +315,8 @@ daq_gain, -1, ALL;                      // RB8905 only
 counter_name, 0, ALL;
 counter_start_continuous_counter, -1, EXP;
 counter_start_timed_counter, -1, EXP;
+counter_start_buffered_counter, -1, EXP;
+counter_get_buffered_counts, -1, EXP;
 counter_timed_count, -1, EXP;
 counter_intermediate_count, 1, EXP;
 counter_final_count, 1, EXP;

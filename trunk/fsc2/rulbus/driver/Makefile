@@ -1,11 +1,9 @@
 #
 # $Id$
 #
-
-#
 # Makefile for National Instruments 6601 board
 #
-# Copyright (C) 2003-2005 Jens Thoms Toerring
+# Copyright (C) 2003-2006 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-# To contact the author send email to jtt@toerring.de
+# To contact the author send email to jt@toerring.de
 
 
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)

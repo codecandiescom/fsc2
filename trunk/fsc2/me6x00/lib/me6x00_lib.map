@@ -1,7 +1,7 @@
 #  
 #  $Id$
 #  
-#  Copyright (C) 2002-2005 Jens Thoms Toerring
+#  Copyright (C) 2002-2006 Jens Thoms Toerring
 #  
 #  This library should simplify accessing ME6000 and ME6100 DAC boards
 #  by Meilhaus Electronic GmbH by avoiding to be forced to make ioctl()
@@ -25,8 +25,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #  
-#  To contact the author send email to:
-#  Jens.Toerring@physik.fu-berlin.de
+#  To contact the author send email to:  jt@toerring.de
 
 
 ME6x00_LIB_1.0 {

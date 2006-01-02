@@ -3,7 +3,7 @@
  * 
  *  Driver for the RULBUS EPP interface
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -67,25 +67,48 @@
 
 
 static int __init rulbus_init( void );
+
 static void __exit rulbus_cleanup( void );
-static int rulbus_open( struct inode *inode_p, struct file *file_p );
-static int rulbus_release( struct inode *inode_p, struct file *file_p );
-static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
-             unsigned int cmd, unsigned long arg );
-static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
-static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
-static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
-static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg );
-static void rulbus_epp_attach( struct parport *port );
-static void rulbus_epp_detach( struct parport *port );
+
+static int rulbus_open( struct inode * inode_p,
+						struct file * file_p );
+
+static int rulbus_release( struct inode * inode_p,
+						   struct file *  file_p );
+
+static int rulbus_ioctl( struct inode * inode_p,
+						 struct file *  file_p,
+						 unsigned int   cmd,
+						 unsigned long  arg );
+
+static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static void rulbus_epp_attach( struct parport * port );
+
+static void rulbus_epp_detach( struct parport * port );
+
 static int rulbus_epp_init( void );
+
 static inline int rulbus_clear_epp_timeout( void );
+
 static inline unsigned char rulbus_epp_timout_check( void );
+
 static inline unsigned char rulbus_parport_read_data( void );
+
 static inline unsigned char rulbus_parport_read_addr( void );
+
 static inline void rulbus_parport_write_data( unsigned char data );
+
 static inline void rulbus_parport_write_addr( unsigned char addr );
+
 static inline void rulbus_parport_reverse( void );
+
 static int rulbus_epp_interface_present( void );
 
 
@@ -216,7 +239,7 @@ static void __exit rulbus_cleanup( void )
  * a driver for it.
  *--------------------------------------------------------------------*/
 
-static void rulbus_epp_attach( struct parport *port )
+static void rulbus_epp_attach( struct parport * port )
 {
         /* Check that the port has the base address we're looking for and
            that we don't already have a device registered for this port */
@@ -244,7 +267,7 @@ static void rulbus_epp_attach( struct parport *port )
  * unregisters the device we might have registered for the port.
  *---------------------------------------------------------------------*/
 
-static void rulbus_epp_detach( struct parport *port )
+static void rulbus_epp_detach( struct parport * port )
 {
         if ( rulbus.dev == NULL || rulbus.port != port )
                 return;
@@ -266,7 +289,8 @@ static void rulbus_epp_detach( struct parport *port )
  * and talks EPP. Only then we can be reasonably sure we got it.
  *---------------------------------------------------------------------------*/
 
-static int rulbus_open( struct inode *inode_p, struct file *file_p )
+static int rulbus_open( struct inode * inode_p,
+						struct file *  file_p )
 {
         spin_lock( &rulbus.spinlock );
 
@@ -340,7 +364,8 @@ static int rulbus_open( struct inode *inode_p, struct file *file_p )
  * closed. We must unclaim the port and unregister the device for it.
  *---------------------------------------------------------------------*/
 
-static int rulbus_release( struct inode *inode_p, struct file *file_p )
+static int rulbus_release( struct inode * inode_p,
+						   struct file *  file_p )
 {
         if ( rulbus.in_use == 0 ) {
                 printk( KERN_NOTICE "Device not open\n" );
@@ -373,8 +398,10 @@ static int rulbus_release( struct inode *inode_p, struct file *file_p )
  * Function dealing with ioctl() calls for the device
  *----------------------------------------------------*/
 
-static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
-						 unsigned int cmd, unsigned long arg )
+static int rulbus_ioctl( struct inode * inode_p,
+						 struct file *  file_p,
+						 unsigned int   cmd,
+						 unsigned long  arg )
 {
         RULBUS_EPP_IOCTL_ARGS rulbus_arg;
         int ret;
@@ -424,7 +451,7 @@ static int rulbus_ioctl( struct inode *inode_p, struct file *file_p,
  * Function for reading data from a card in one of the racks
  *-----------------------------------------------------------*/
 
-static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
         unsigned char *data;
         unsigned char *bp;
@@ -496,7 +523,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
  * Function for reading data from a card in one of the racks
  *-----------------------------------------------------------*/
 
-static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
         unsigned char *data;
         unsigned char *bp;
@@ -570,7 +597,7 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
  * Function for writing data to a card in one of the racks
  *---------------------------------------------------------*/
 
-static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
         unsigned char *data;
         unsigned char *bp;
@@ -650,7 +677,7 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
  * to a card in one of the racks
  *---------------------------------------------------------------*/
 
-static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS *rulbus_arg )
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
         unsigned char *data;
         unsigned char *bp;
@@ -910,7 +937,7 @@ MODULE_PARM_DESC( major, "Major device number of device file" );
 MODULE_PARM( base, "i" );
 MODULE_PARM_DESC( base, "Base address of parallel port the RULBUS is "
 				  "connected to" );
-MODULE_AUTHOR( "Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>" );
+MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
 MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
 
 

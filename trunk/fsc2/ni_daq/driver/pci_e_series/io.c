@@ -3,7 +3,7 @@
  
   Driver for National Instruments PCI E Series DAQ boards
 
-  Copyright (C) 2003-2005 Jens Thoms Toerring
+  Copyright (C) 2003-2006 Jens Thoms Toerring
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
   the Free Software Foundation, 59 Temple Place - Suite 330,
   Boston, MA 02111-1307, USA.
 
-  To contact the author send email to
-  Jens.Toerring@physik.fu-berlin.de
+  To contact the author send email to:  jt@toerring.de
 */
 
 
@@ -127,10 +126,14 @@ static char *DAQ_reg_names[ ] = { "Window_Address",
  *------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
-inline void pci_stc_writew( const char *fn, Board *board, u16 offset,
-			    u16 data )
+inline void pci_stc_writew( const char * fn,
+			    Board *      board,
+			    u16          offset,
+			    u16          data )
 #else
-inline void pci_stc_writew( Board *board, u16 offset, u16 data )
+inline void pci_stc_writew( Board * board,
+			    u16     offset,
+			    u16     data )
 #endif
 {
 #if defined NI_DAQ_DEBUG
@@ -171,10 +174,14 @@ inline void pci_stc_writew( Board *board, u16 offset, u16 data )
  *------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
-inline void pci_stc_writel( const char *fn, Board *board, u16 offset,
-			    u32 data )
+inline void pci_stc_writel( const char * fn,
+			    Board *      board,
+			    u16          offset,
+			    u32          data )
 #else
-inline void pci_stc_writel( Board *board, u16 offset, u32 data )
+inline void pci_stc_writel( Board * board,
+			    u16     offset,
+			    u32     data )
 #endif
 {
 #if defined NI_DAQ_DEBUG
@@ -207,7 +214,8 @@ inline void pci_stc_writel( Board *board, u16 offset, u32 data )
  * reading from the window data register.
  *--------------------------------------------------------------------*/
 
-inline u16 pci_stc_readw( Board *board, u16 offset )
+inline u16 pci_stc_readw( Board * board,
+			  u16     offset )
 {
 	u16 data;
 
@@ -243,7 +251,8 @@ inline u16 pci_stc_readw( Board *board, u16 offset )
  * reading from the window data register.
  *--------------------------------------------------------------------*/
 
-inline u32 pci_stc_readl( Board *board, u16 offset )
+inline u32 pci_stc_readl( Board * board,
+			  u16     offset )
 {
 	u32 data;
 
@@ -272,7 +281,7 @@ inline u32 pci_stc_readl( Board *board, u16 offset )
  * parts of code that must not be interrupted.
  *------------------------------------------------------------*/
 
-void pci_init_critical_section_handling( Board *board )
+void pci_init_critical_section_handling( Board * board )
 {
 	board->critical_section.count = 0;
 	spin_lock_init( &board->critical_section.spinlock );
@@ -285,7 +294,7 @@ void pci_init_critical_section_handling( Board *board )
  * function has been to give up the spinlock and re-enable interrupts.
  *---------------------------------------------.-----------------------*/
 
-inline void pci_start_critical_section( Board *board )
+inline void pci_start_critical_section( Board * board )
 {
 	if ( board->critical_section.count++ == 0 )
 		spin_lock_irqsave( &board->critical_section.spinlock,
@@ -298,7 +307,7 @@ inline void pci_start_critical_section( Board *board )
  * must not be interrupted.
  *----------------------------------------------------------*/
 
-inline void pci_end_critical_section( Board *board )
+inline void pci_end_critical_section( Board * board )
 {
 #if defined NI_DAQ_DEBUG
 	if ( board->critical_section.count == 0 ) {

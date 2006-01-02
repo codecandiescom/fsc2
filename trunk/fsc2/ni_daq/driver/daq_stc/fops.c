@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,24 +20,36 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
 #include "ni_daq_board.h"
 
 
-static int ni_daq_open( struct inode *inode_p, struct file *file_p );
-static int ni_daq_release( struct inode *inode_p, struct file *file_p );
-static unsigned int ni_daq_poll( struct file *filep,
+static int ni_daq_open( struct inode * inode_p,
+			struct file *  file_p );
+
+static int ni_daq_release( struct inode * inode_p,
+			   struct file *  file_p );
+
+static unsigned int ni_daq_poll( struct file *              filep,
 				 struct poll_table_struct * pt );
-static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
-			    loff_t *offp );
-static ssize_t ni_daq_write( struct file *filep, const char *buff,
-			     size_t count, loff_t *offp );
-static int ni_daq_ioctl( struct inode *inode_p, struct file *file_p,
-			 unsigned int cmd, unsigned long arg );
+
+static ssize_t ni_daq_read( struct file * filep,
+			    char *        buff,
+			    size_t        count,
+			    loff_t *      offp );
+
+static ssize_t ni_daq_write( struct file * filep,
+			     const char *  buff,
+			     size_t        count,
+			     loff_t *      offp );
+
+static int ni_daq_ioctl( struct inode * inode_p,
+			 struct file *  file_p,
+			 unsigned int   cmd,
+			 unsigned long  arg );
 
 
 struct file_operations ni_daq_file_ops = {
@@ -55,7 +67,8 @@ struct file_operations ni_daq_file_ops = {
  * Function gets executed when the device file for a board gets opened
  *---------------------------------------------------------------------*/
 
-static int ni_daq_open( struct inode *inode_p, struct file *file_p )
+static int ni_daq_open( struct inode * inode_p,
+			struct file *  file_p )
 {
 	int minor;
 	Board *board;
@@ -98,7 +111,8 @@ static int ni_daq_open( struct inode *inode_p, struct file *file_p )
  * Function gets executed when the device file for a board gets closed
  *---------------------------------------------------------------------*/
 
-static int ni_daq_release( struct inode *inode_p, struct file *file_p )
+static int ni_daq_release( struct inode * inode_p,
+			   struct file *  file_p )
 {
 	int minor;
 	Board *board;
@@ -143,7 +157,7 @@ static int ni_daq_release( struct inode *inode_p, struct file *file_p )
  * Function for dealing with poll() and select() calls for the driver
  *--------------------------------------------------------------------*/
 
-static unsigned int ni_daq_poll( struct file *filep,
+static unsigned int ni_daq_poll( struct file *              filep,
 				 struct poll_table_struct * pt )
 {
 	int minor;
@@ -209,8 +223,10 @@ static unsigned int ni_daq_poll( struct file *filep,
  *    and trigger input lines are released back into the pool
  *----------------------------------------------------------------------*/
 
-static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
-			    loff_t *offp )
+static ssize_t ni_daq_read( struct file * filep,
+			    char *        buff,
+			    size_t        count,
+			    loff_t *      offp )
 {
 	int minor;
 	Board *board;
@@ -302,8 +318,10 @@ static ssize_t ni_daq_read( struct file *filep, char *buff, size_t count,
  * Not implemented yet (to be used with the AO subsystem)
  *--------------------------------------------------------*/
 
-static ssize_t ni_daq_write( struct file *filep, const char *buff,
-			     size_t count, loff_t *offp )
+static ssize_t ni_daq_write( struct file * filep,
+			     const char *  buff,
+			     size_t        count,
+			     loff_t *      offp )
 {
 	return 0;
 }
@@ -313,8 +331,10 @@ static ssize_t ni_daq_write( struct file *filep, const char *buff,
  * Function for handling of ioctl() calls for one of the boards
  *--------------------------------------------------------------*/
 
-static int ni_daq_ioctl( struct inode *inode_p, struct file *file_p,
-			 unsigned int cmd, unsigned long arg )
+static int ni_daq_ioctl( struct inode * inode_p,
+			 struct file *  file_p,
+			 unsigned int   cmd,
+			 unsigned long  arg )
 {
 	int minor;
 

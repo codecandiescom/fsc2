@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -157,7 +157,8 @@ int rulbus_rb8515_clock_card_exit( int handle )
  * Function for setting the frequency of the clock
  *-------------------------------------------------*/
 
-int rulbus_rb8515_clock_set_frequency( int handle, int freq )
+int rulbus_rb8515_clock_set_frequency( int handle,
+									   int freq )
 {
 	RULBUS_RB8515_CLOCK_CARD *card;
 	int retval;

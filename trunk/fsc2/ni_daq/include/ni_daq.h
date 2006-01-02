@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -45,112 +44,134 @@ extern const int ni_daq_nerr;
 /* Basic function for opening and closing the board */
 
 int ni_daq_open( const char * /* name */ );
+
 int ni_daq_close( int /* board */ );
 
 
 /* Error handling utility functions */
 
 int ni_daq_perror( const char * /* s */ );
+
 const char *ni_daq_strerror( void );
 
 
 /* Functions for setting the clock speeds and the output at the FREQ_OUT pin
    as well as for determining the boards current state in this respect */
 
-int ni_daq_msc_set_clock_speed( int /* board */,
-				NI_DAQ_CLOCK_SPEED_VALUE /* speed */, 
-				int /* divider */ );
-int ni_daq_msc_set_clock_output( int /* board */,
+int ni_daq_msc_set_clock_speed( int                      /* board   */,
+				NI_DAQ_CLOCK_SPEED_VALUE /* speed   */, 
+				int                      /* divider */ );
+
+int ni_daq_msc_set_clock_output( int               /* board     */,
 				 NI_DAQ_CLOCK_TYPE /* daq_clock */,
-				 NI_DAQ_STATE /* on_off */ );
-int ni_daq_msc_get_clock_state( int /* board */,
-				NI_DAQ_CLOCK_TYPE * /* daq_clock */,
-				NI_DAQ_STATE * /* on_off */,
-				NI_DAQ_CLOCK_SPEED_VALUE * /* speed */,
-				int * /* divider */ );
-int ni_daq_msc_set_trigger( int /* board */,
+				 NI_DAQ_STATE      /* on_off    */ );
+
+int ni_daq_msc_get_clock_state( int                        /* board     */,
+				NI_DAQ_CLOCK_TYPE *        /* daq_clock */,
+				NI_DAQ_STATE *             /* on_off    */,
+				NI_DAQ_CLOCK_SPEED_VALUE * /* speed     */,
+				int *                      /* divider   */ );
+
+int ni_daq_msc_set_trigger( int              /* board        */,
 			    NI_DAQ_TRIG_TYPE /* trigger_type */,
-			    double /* trigger_high */,
-			    double /* trigger_low */ );
+			    double           /* trigger_high */,
+			    double           /* trigger_low  */ );
 
 
 /* Functions for the AI subsystem */
 
-int ni_daq_ai_set_speed( int /* board */,
+int ni_daq_ai_set_speed( int                      /* board */,
 			 NI_DAQ_CLOCK_SPEED_VALUE /* speed */ );
-int ni_daq_ai_get_speed( int /* board */,
+
+int ni_daq_ai_get_speed( int                        /* board */,
 			 NI_DAQ_CLOCK_SPEED_VALUE * /* speed */ );
-int ni_daq_ai_channel_configuration( int /* board */,
-				     int /* num_channels */,
-				     int * /* channels */,
-				     NI_DAQ_AI_TYPE * /* types */,
-				     NI_DAQ_BU_POLARITY * /* polarities */,
-				     double * /* ranges */,
-				     NI_DAQ_STATE * /* dither_enable */ );
-int ni_daq_ai_acq_setup( int /* board */,
-			 NI_DAQ_INPUT /* start */,
+
+int ni_daq_ai_channel_configuration( int                  /* board         */,
+				     int                  /* num_channels  */,
+				     int *                /* channels      */,
+				     NI_DAQ_AI_TYPE *     /* types         */,
+				     NI_DAQ_BU_POLARITY * /* polarities    */,
+				     double               * /* ranges      */,
+				     NI_DAQ_STATE *       /* dither_enable */ );
+
+int ni_daq_ai_acq_setup( int             /* board          */,
+			 NI_DAQ_INPUT    /* start          */,
 			 NI_DAQ_POLARITY /* start_polarity */,
-			 NI_DAQ_INPUT /* scan_start */,
-			 NI_DAQ_POLARITY /* scan_polarity */,
-			 double /* scan_duration */,
-			 NI_DAQ_INPUT /* conv_start */,
-			 NI_DAQ_POLARITY /* conv_polarity */,
-			 double /* conv_duration */,
-			 size_t /* num_scans */ );
+			 NI_DAQ_INPUT /* scan_start        */,
+			 NI_DAQ_POLARITY /* scan_polarity  */,
+			 double          /* scan_duration  */,
+			 NI_DAQ_INPUT    /* conv_start     */,
+			 NI_DAQ_POLARITY /* conv_polarity  */,
+			 double          /* conv_duration  */,
+			 size_t          /* num_scans      */ );
+
 int ni_daq_ai_start_acq( int /* board */ );
+
 int ni_daq_ai_stop_acq( int /* board */ );
-ssize_t ni_daq_ai_get_acq_data( int /* board */,
-				double * /* volts */ [ ],
-				size_t /* offset */,
-				size_t /* num_data_per_channel */,
-				int /* wait_for_end */ );
+
+ssize_t ni_daq_ai_get_acq_data( int      /* board                */,
+				double * /* volts                */ [ ],
+				size_t   /* offset               */,
+				size_t   /* num_data_per_channel */,
+				int      /* wait_for_end         */ );
 
 /* Functions for the AO subsystem */
 
-int ni_daq_ao_channel_configuration( int /* board */,
-				     int /* num_channels */,
-				     int * /* channels */,
-				     NI_DAQ_STATE */* external_reference */,
-				     NI_DAQ_BU_POLARITY * /* polarity */ );
-int ni_daq_ao( int /* board */,
-	       int /* num_channels */,
-	       int * /* channels */, double * /* values */ );
+int ni_daq_ao_channel_configuration( int                  /* board         */,
+				     int                  /* num_channels  */,
+				     int *                /* channels      */,
+				     NI_DAQ_STATE *       /* ext_reference */,
+				     NI_DAQ_BU_POLARITY * /* polarity      */ );
+
+int ni_daq_ao( int      /* board        */,
+	       int      /* num_channels */,
+	       int *    /* channels     */,
+	       double * /* values       */ );
 
 
 /* Functions for the GPCT subsystem */
 
-int ni_daq_gpct_set_speed( int /* board */,
+int ni_daq_gpct_set_speed( int                      /* board */,
 			   NI_DAQ_CLOCK_SPEED_VALUE /* speed */ );
-int ni_daq_gpct_get_speed( int /* board */,
+
+int ni_daq_gpct_get_speed( int                        /* board */,
 			   NI_DAQ_CLOCK_SPEED_VALUE * /* speed */ );
-int ni_daq_gpct_start_counter( int /* board */,
-			       int /* counter */,
-			       NI_DAQ_INPUT /* source */ );
-int ni_daq_gpct_start_gated_counter( int /* board */,
-				     int /* counter */,
-				     double /* gate_length */,
-				     NI_DAQ_INPUT /* source */ );
+
+int ni_daq_gpct_start_counter( int          /* board   */,
+			       int          /* counter */,
+			       NI_DAQ_INPUT /* source  */ );
+
+int ni_daq_gpct_start_gated_counter( int          /* board       */,
+				     int          /* counter     */,
+				     double       /* gate_length */,
+				     NI_DAQ_INPUT /* source      */ );
+
 int ni_daq_gpct_stop_counter( int /* board */,
 			      int /* counter */ );
-int ni_daq_gpct_get_count( int /* board */,
-			   int /* counter */,
-			   int /* wait_for_end */,
-			   unsigned long * /* count */,
-			   int * /* state */ );
-int ni_daq_gpct_single_pulse( int /* board */,
-			      int /* counter */,
-			      double /* duration */,
-			      double * /* delay */,
-			      int /* dont_start */ );
-int ni_daq_gpct_continuous_pulses( int /* board */,
-				   int /* counter */,
-				   double /* high_phase */,
-				   double /* low_phase */,
-				   double * /* delay */,
-				   int /* dont_start */ );
-int ni_daq_gpct_start_pulses( int /* board */,
+
+int ni_daq_gpct_get_count( int             /* board        */,
+			   int             /* counter      */,
+			   int             /* wait_for_end */,
+			   unsigned long * /* count        */,
+			   int *           /* state        */ );
+
+int ni_daq_gpct_single_pulse( int      /* board      */,
+			      int      /* counter    */,
+			      double   /* duration   */,
+			      double * /* delay      */,
+			      int      /* dont_start */ );
+
+int ni_daq_gpct_continuous_pulses( int      /* board      */,
+				   int      /* counter    */,
+				   double   /* high_phase */,
+				   double   /* low_phase  */,
+				   double * /* delay      */,
+				   int      /* dont_start */ );
+
+int ni_daq_gpct_start_pulses( int /* board   */,
 			      int /* counter */ );
-int ni_daq_gpct_stop_pulses( int /* board */,
+
+int ni_daq_gpct_stop_pulses( int /* board   */,
 			     int /* counter */ );
 
 
@@ -158,10 +179,11 @@ int ni_daq_gpct_stop_pulses( int /* board */,
 
 int ni_daq_dio_write( int /* board */,
 		      unsigned char /* value */,
-		      unsigned char /* mask */ );
-int ni_daq_dio_read( int /* board */,
+		      unsigned char /* mask  */ );
+
+int ni_daq_dio_read( int             /* board */,
 		     unsigned char * /* value */,
-		     unsigned char /* mask */ );
+		     unsigned char   /* mask  */ );
 
 
 enum {

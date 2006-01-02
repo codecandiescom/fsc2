@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2002-2005 Jens Thoms Toerring
+ *  Copyright (C) 2002-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  *  along with this program; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
+ *
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -126,6 +128,10 @@ typedef struct {
 
 
 typedef struct {
+	unsigned long count;
+} NI6601_BUF_AVAIL;
+
+typedef struct {
 	NI6601_COUNTER_NUM counter;
 	int state;
 } NI6601_IS_ARMED;
@@ -148,6 +154,8 @@ typedef struct {
 			    _IOW ( NI6601_MAGIC_IOC, 0x85, NI6601_COUNTER )
 #define NI6601_IOC_STOP_BUF_COUNTER  \
 			    _IO  ( NI6601_MAGIC_IOC, 0x86 )
+#define NI6601_IOC_GET_BUF_AVAIL  \
+			    _IOR ( NI6601_MAGIC_IOC, 0x88, NI6601_BUF_AVAIL )
 #define NI6601_IOC_IS_BUSY  _IOWR( NI6601_MAGIC_IOC, 0x87, NI6601_IS_ARMED )
 #define NI6601_IOC_DISARM   _IOW ( NI6601_MAGIC_IOC, 0x88, NI6601_DISARM )
 
@@ -322,8 +330,8 @@ int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
 int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
 int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
 int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg );
+int ni6601_get_buf_avail( Board *board, NI6601_BUF_AVAIL *arg );
 int ni6601_stop_buf_counting( Board *board );
-void ni6601_stop_internal( Board *board );
 int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
 void ni6601_tc_irq_enable( Board *board, int counter );
 void ni6601_tc_irq_disable( Board *board, int counter );

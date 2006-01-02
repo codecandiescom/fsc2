@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments PCI E Series DAQ boards
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,8 +28,11 @@
 #include "board.h"
 
 
-static void pci_irq_A_handler( Board *board, u16 status );
-static void pci_irq_B_handler( Board *board, u16 status );
+static void pci_irq_A_handler( Board * board,
+			       u16     status );
+
+static void pci_irq_B_handler( Board * board,
+			       u16     status );
 
 
 #if defined NI_DAQ_DEBUG
@@ -44,7 +46,7 @@ static void pci_irq_B_handler( Board *board, u16 status );
  * with board register addresses
  *----------------------------------------------------------------*/
 
-void pci_board_register_setup( Board *board )
+void pci_board_register_setup( Board * board )
 {
 	/* Addresses of the registers of the board */
 
@@ -115,7 +117,7 @@ void pci_board_register_setup( Board *board )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-void pci_board_irq_handling_setup( Board *board )
+void pci_board_irq_handling_setup( Board * board )
 {
 	int i;
 
@@ -267,7 +269,7 @@ void pci_board_irq_handling_setup( Board *board )
  * Function to bring the board into a known, quite state
  *-------------------------------------------------------*/
 
-void pci_board_reset_all( Board *board )
+void pci_board_reset_all( Board * board )
 {
 	/* Set up the DACs of the board with the values stored in the EEPROM */
 
@@ -298,7 +300,7 @@ void pci_board_reset_all( Board *board )
  * writing to the Write_Strobe_0 register.
  *---------------------------------------------*/
 
-void pci_clear_configuration_memory( Board *board )
+void pci_clear_configuration_memory( Board * board )
 {
 	pci_stc_writew( board, STC_Write_Strobe_0, Write_Strobe_0_Bit );
 }
@@ -308,7 +310,7 @@ void pci_clear_configuration_memory( Board *board )
  * Function clears the ADC FIFO by writing to the Write_Strobe_1 register.
  *-------------------------------------------------------------------------*/
 
-void pci_clear_ADC_FIFO( Board *board )
+void pci_clear_ADC_FIFO( Board * board )
 {
 	pci_stc_writew( board, STC_Write_Strobe_1, Write_Strobe_1_Bit );
 }
@@ -318,7 +320,7 @@ void pci_clear_ADC_FIFO( Board *board )
  * Function clears the DAC FIFO by writing to the Write_Strobe_1 register.
  *-------------------------------------------------------------------------*/
 
-void pci_clear_DAC_FIFO( Board *board )
+void pci_clear_DAC_FIFO( Board * board )
 {
 	pci_stc_writew( board, STC_Write_Strobe_2, Write_Strobe_2_Bit );
 }
@@ -328,7 +330,8 @@ void pci_clear_DAC_FIFO( Board *board )
  * Function for setting up the Configuration Memory High Register
  *----------------------------------------------------------------*/
 
-int pci_configuration_high( Board *board, unsigned int channel, 
+int pci_configuration_high( Board *        board,
+			    unsigned int   channel, 
 			    NI_DAQ_AI_TYPE channel_type )
 {
 	u16 val;
@@ -368,10 +371,11 @@ int pci_configuration_high( Board *board, unsigned int channel,
  * Function for setting up the Configuration Memory Low Register
  *---------------------------------------------------------------*/
 
-int pci_configuration_low( Board *board, unsigned int last_channel,
-			   NI_DAQ_STATE generate_trigger,
-			   NI_DAQ_STATE dither_enable,
-			   NI_DAQ_BU_POLARITY polarity,
+int pci_configuration_low( Board *              board,
+			   unsigned int         last_channel,
+			   NI_DAQ_STATE         generate_trigger,
+			   NI_DAQ_STATE dither_ enable,
+			   NI_DAQ_BU_POLARITY   polarity,
 			   NI_DAQ_AI_GAIN_TYPES gain )
 {
 	u16 val = 0;
@@ -418,10 +422,11 @@ int pci_configuration_low( Board *board, unsigned int last_channel,
  * Function for setting up the AO Configuration Register
  *-------------------------------------------------------*/
 
-int pci_ao_configuration( Board *board, unsigned int channel,
-			  NI_DAQ_STATE ground_ref,
-			  NI_DAQ_STATE external_ref,
-			  NI_DAQ_STATE reglitch,
+int pci_ao_configuration( Board *            board,
+			  unsigned int       channel,
+			  NI_DAQ_STATE       ground_ref,
+			  NI_DAQ_STATE       external_ref,
+			  NI_DAQ_STATE       reglitch,
 			  NI_DAQ_BU_POLARITY polarity )
 {
 	u16 val = 0;
@@ -462,7 +467,9 @@ int pci_ao_configuration( Board *board, unsigned int channel,
  * in two's complement form (for bipolar output).
  *----------------------------------------------------------------------*/
 
-int pci_dac_direct_data( Board *board, unsigned int channel, int value )
+int pci_dac_direct_data( Board *      board,
+			 unsigned int channel,
+			 int          value )
 {
 	u16 *reg = channel ? board->regs->DAC1_Direct_data :
 			     board->regs->DAC0_Direct_data;
@@ -483,7 +490,9 @@ int pci_dac_direct_data( Board *board, unsigned int channel, int value )
  * Handler for interrupts raised by the boards
  *---------------------------------------------*/
 
-void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy )
+void pci_board_irq_handler( int              irq,
+			    void *           data,
+			    struct pt_regs * dummy )
 {
 	u16 status;
 	Board *board = ( Board * ) data;
@@ -506,7 +515,8 @@ void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy )
  * (i.e. from the AI subsystem and general purpose counter 0).
  *---------------------------------------------------------------*/
 
-static void pci_irq_A_handler( Board *board, u16 status )
+static void pci_irq_A_handler( Board * board,
+			       u16     status )
 {
 	int i;
 
@@ -542,7 +552,8 @@ static void pci_irq_A_handler( Board *board, u16 status )
  * (i.e. from the AO subsystem and general purpose counter 1).
  *---------------------------------------------------------------*/
 
-static void pci_irq_B_handler( Board *board, u16 status )
+static void pci_irq_B_handler( Board * board,
+			       u16     status )
 {
 	int i;
 

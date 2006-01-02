@@ -3,8 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# Copyright (C) 2002-2005 Jens Thoms Toerring
-#               <Jens.Toerring@physik.fu-berlin.de>
+# Copyright (C) 2002-2006 Jens Thoms Toerring <jt@toerring.de>
 #
 # $Id$
 
@@ -44,7 +43,7 @@ close $fh;
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
 	unlink "fcntl_test.c";
 	die "Can't compile a program that uses fcntl(). Does your system " .
-		"really has a fcntl() system call?\n";
+		"really have a fcntl() system call?\n";
 }
 unlink "fcntl_test";
 unlink "fcntl_test.c";
@@ -71,7 +70,7 @@ WriteMakefile(
     'PREREQ_PM'		=> {},
     ( $] >= 5.005 ?
       ( ABSTRACT_FROM => 'Fcntl_Lock.pm', # retrieve abstract from module
-        AUTHOR     => 'Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>' ) :
+        AUTHOR     => 'Jens Thoms Toerring <jt@toerring.de>' ) :
 	  ( ) ),
     'LIBS'		=> [ '' ],
     'DEFINE'	=> '',

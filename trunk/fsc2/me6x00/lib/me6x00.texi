@@ -2,7 +2,7 @@
 
 @c $Id$
 @c
-@c Copyright (C) 2002-2005 Jens Thoms Toerring
+@c Copyright (C) 2002-2006 Jens Thoms Toerring
 @c
 @c This program is free software; you can redistribute it and/or modify
 @c it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@
 @c the Free Software Foundation, 59 Temple Place - Suite 330,
 @c Boston, MA 02111-1307, USA.
 @c
-@c To contact the author send email to:
-@c Jens.Toerring@physik.fu-berlin.de
+@c To contact the author send email to:  jt@toerring.de
 
 @c %**start of header
 
@@ -47,7 +46,7 @@
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
-@center @email{Jens.Toerring@@physik.fu-berlin.de}
+@center @email{jt@toerring.de}
 @sp 16
 @center Copyright @copyright{} 2003 Jens Thoms T@"orring
 @end titlepage

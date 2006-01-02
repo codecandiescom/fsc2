@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,28 +20,46 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
 #include "ni_daq_board.h"
 
 
-static void AI_daq_reset( Board *board );
-static int AI_channel_setup( Board *board, unsigned int num_channels,
-			     NI_DAQ_AI_CHANNEL_ARGS *channel_args );
-static int AI_clock_setup( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed );
-static int AI_acq_setup( Board *board, NI_DAQ_ACQ_SETUP *acq_args );
-static int AI_START_STOP_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static int AI_SI_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static int AI_START1_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static int AI_CONVERT_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static int AI_SI2_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static int AI_SC_setup( Board *board, NI_DAQ_ACQ_SETUP *a );
-static void AI_acq_register_setup( Board *board );
-static int AI_acq_wait( Board *board );
-static int AI_acq_stop( Board *board );
+static void AI_daq_reset( Board * board );
+
+static int AI_channel_setup( Board *                  board,
+			     unsigned int             num_channels,
+			     NI_DAQ_AI_CHANNEL_ARGS * channel_args );
+
+static int AI_clock_setup( Board *                  board,
+			   NI_DAQ_CLOCK_SPEED_VALUE speed );
+
+static int AI_acq_setup( Board *            board,
+			 NI_DAQ_ACQ_SETUP * acq_args );
+
+static int AI_START_STOP_setup( Board *            board,
+				NI_DAQ_ACQ_SETUP * a );
+
+static int AI_SI_setup( Board *            board,
+			NI_DAQ_ACQ_SETUP * a );
+
+static int AI_START1_setup( Board *            board,
+			    NI_DAQ_ACQ_SETUP * a );
+
+static int AI_CONVERT_setup( Board *            board,
+			     NI_DAQ_ACQ_SETUP * a );
+
+static int AI_SI2_setup( Board *            board,
+			 NI_DAQ_ACQ_SETUP * a );
+
+static int AI_SC_setup( Board *            board,
+			NI_DAQ_ACQ_SETUP * a );
+
+static void AI_acq_register_setup( Board * board );
+static int AI_acq_wait( Board * board );
+static int AI_acq_stop( Board * board );
 
 
 static struct {
@@ -69,7 +87,7 @@ static struct {
  * Function resets the AI subsystem back into a known state
  *----------------------------------------------------------*/
 
-void AI_reset_all( Board *board )
+void AI_reset_all( Board * board )
 {
 	u16 data;
 
@@ -137,7 +155,7 @@ void AI_reset_all( Board *board )
  * Function for resetting the STC-DAQ
  *------------------------------------*/
 
-static void AI_daq_reset( Board *board )
+static void AI_daq_reset( Board * board )
 {
 	u16 data;
 
@@ -233,7 +251,8 @@ static void AI_daq_reset( Board *board )
  * Function for handling ioctl() calls for the AI subsystem
  *----------------------------------------------------------*/
 
-int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
+int AI_ioctl_handler( Board *         board,
+		      NI_DAQ_AI_ARG * arg )
 {
 	NI_DAQ_AI_ARG a;
 	int ret = 0;
@@ -301,7 +320,8 @@ int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg )
  * subsystem!).
  *---------------------------------------------------------------*/
 
-static int AI_clock_setup( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+static int AI_clock_setup( Board *                  board,
+			   NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
 	if ( board->AI.is_running )
 		return -EBUSY;
@@ -325,8 +345,9 @@ static int AI_clock_setup( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
  * Function sets up the Configuration FIFO
  *-----------------------------------------*/
 
-static int AI_channel_setup( Board *board, unsigned int num_channels,
-			     NI_DAQ_AI_CHANNEL_ARGS *channel_args )
+static int AI_channel_setup( Board *                  board,
+			     unsigned int             num_channels,
+			     NI_DAQ_AI_CHANNEL_ARGS * channel_args )
 {
 	int ret;
 	unsigned int i;
@@ -442,7 +463,8 @@ static int AI_channel_setup( Board *board, unsigned int num_channels,
  * Function for setting up all triggers and timings for an acquisition
  *---------------------------------------------------------------------*/
 
-static int AI_acq_setup( Board *board, NI_DAQ_ACQ_SETUP *acq_args )
+static int AI_acq_setup( Board *            board,
+			 NI_DAQ_ACQ_SETUP * acq_args )
 {
 	NI_DAQ_ACQ_SETUP a;
 	unsigned int i;
@@ -495,7 +517,8 @@ static int AI_acq_setup( Board *board, NI_DAQ_ACQ_SETUP *acq_args )
  * done during an acquisition.
  *------------------------------------------------*/
 
-static int AI_SC_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_SC_setup( Board *            board,
+			NI_DAQ_ACQ_SETUP * a )
 {
 	if ( a->num_scans == 0 ) {
 		PDEBUG( "Number of scans too small\n" );
@@ -522,7 +545,8 @@ static int AI_SC_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * the Configuration FIFO).
  *------------------------------------------------------------*/
 
-static int AI_START_STOP_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_START_STOP_setup( Board *            board,
+				NI_DAQ_ACQ_SETUP * a )
 {
 	/* Check the START source setting isn't bogus */
 
@@ -559,7 +583,8 @@ static int AI_START_STOP_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * supposed to come from the TC event of the SI counter.
  *-----------------------------------------------------------------*/
 
-static int AI_SI_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_SI_setup( Board *            board,
+			NI_DAQ_ACQ_SETUP * a )
 {
 	unsigned long len = 0;
 
@@ -663,7 +688,8 @@ static int AI_SI_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * starts an acquisition.
  *------------------------------------------------------------*/
 
-static int AI_START1_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_START1_setup( Board *            board,
+			    NI_DAQ_ACQ_SETUP * a )
 {
 	/* Check that the source for START1 is reasonable */
 
@@ -699,7 +725,8 @@ static int AI_START1_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * Function for setting what's going to creates CONVERT signals
  *--------------------------------------------------------------*/
 
-static int AI_CONVERT_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_CONVERT_setup( Board *            board,
+			     NI_DAQ_ACQ_SETUP * a )
 {
 	/* Check that the source of CONVERT signals is reasonable */
 
@@ -738,7 +765,8 @@ static int AI_CONVERT_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * is supposed to come from the TC event of the SI2 counter.
  *-----------------------------------------------------------------*/
 
-static int AI_SI2_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
+static int AI_SI2_setup( Board *            board,
+			 NI_DAQ_ACQ_SETUP * a )
 {
 	/* If the CONVERT trigger does not come from the SI2_TC event the
 	   SI2 counter does not need to be set up */
@@ -798,7 +826,7 @@ static int AI_SI2_setup( Board *board, NI_DAQ_ACQ_SETUP *a )
  * during the acquisition setup just before an acquisition is started
  *----------------------------------------------------------------------*/
 
-static void AI_acq_register_setup( Board *board )
+static void AI_acq_register_setup( Board * board )
 {
 	AI_daq_reset( board );
 
@@ -887,7 +915,7 @@ static void AI_acq_register_setup( Board *board )
  * the SC TC interrupt, indicating the end of the acquisition.
  *---------------------------------------------------------------*/
 
-int AI_start_acq( Board *board )
+int AI_start_acq( Board * board )
 {
 	int ret;
 	u16 data;
@@ -1042,7 +1070,7 @@ int AI_start_acq( Board *board )
  * if a signal is received and 0 otherwise.
  *---------------------------------------------------------*/
 
-static int AI_acq_wait( Board *board )
+static int AI_acq_wait( Board * board )
 {
 	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
 		return -EIO;
@@ -1071,7 +1099,7 @@ static int AI_acq_wait( Board *board )
  * Function for stopping an acquisition.
  *---------------------------------------*/
 
-static int AI_acq_stop( Board *board )
+static int AI_acq_stop( Board * board )
 {
 	u16 data;
 
@@ -1110,7 +1138,7 @@ static int AI_acq_stop( Board *board )
  * wakes up processes sleeping on the associated wait queue.
  *-------------------------------------------------------------*/
 
-void AI_irq_handler( Board *board )
+void AI_irq_handler( Board * board )
 {
 	PDEBUG( "AI_interrupt\n" );
 	wake_up_interruptible( &board->AI.waitqueue );
@@ -1122,7 +1150,7 @@ void AI_irq_handler( Board *board )
  * Processes sleeping on the associated wait queue are woken.
  *--------------------------------------------------------------------*/
 
-void AI_SC_irq_handler( Board *board )
+void AI_SC_irq_handler( Board * board )
 {
 	PDEBUG( "AI SC TC interrupt\n" );
 	board->AI.is_running = 0;

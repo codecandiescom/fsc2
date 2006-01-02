@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards with a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,11 +28,16 @@
 #define AI_HEADER
 
 
-void AI_reset_all( Board *board );
-int AI_ioctl_handler( Board *board, NI_DAQ_AI_ARG *arg );
-void AI_irq_handler( Board *board );
-void AI_SC_irq_handler( Board *board );
-int AI_start_acq( Board *board );
+void AI_reset_all( Board * board );
+
+int AI_ioctl_handler( Board *         board,
+		      NI_DAQ_AI_ARG * arg );
+
+void AI_irq_handler( Board * board );
+
+void AI_SC_irq_handler( Board * board );
+
+int AI_start_acq( Board * board );
 
 
 #endif /* AI_HEADER */

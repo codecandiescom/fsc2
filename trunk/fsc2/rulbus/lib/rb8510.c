@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -175,8 +175,10 @@ int rulbus_rb8510_dac12_card_exit( int handle )
  * Function for enquiring about the DACs properties 
  *--------------------------------------------------*/
 
-int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
-									double *dV )
+int rulbus_rb8510_dac12_properties( int      handle,
+									double * Vmax,
+									double * Vmin,
+									double * dV )
 {
 	RULBUS_RB8510_DAC12_CARD *card;
 
@@ -201,7 +203,8 @@ int rulbus_rb8510_dac12_properties( int handle, double *Vmax, double *Vmin,
  * Function for setting a new output voltage
  *-------------------------------------------*/
 
-int rulbus_rb8510_dac12_set_voltage( int handle, double volts )
+int rulbus_rb8510_dac12_set_voltage( int    handle,
+									 double volts )
 {
 	RULBUS_RB8510_DAC12_CARD *card;
 	int retval;

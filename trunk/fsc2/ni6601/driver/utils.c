@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2002-2005 Jens Thoms Toerring
+ *  Copyright (C) 2002-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
+ *
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -33,6 +35,11 @@ void ni6601_release_resources( Board *boards, int board_count )
 	int i;
 
 	for ( i = 0; i < board_count; i++ ) {
+		if ( boards[ i ].buf ) {
+			vfree( boards[ i ].buf );
+			boards[ i ].buf = NULL;
+		}
+
 		if ( boards[ i ].mite ) {
 			iounmap( boards[ i ].mite );
 			boards[ i ].mite = NULL;
@@ -126,6 +133,11 @@ void ni6601_register_setup( Board *board )
 	board->regs.input_select[ 2 ]   = board->addr + 0x148;
 	board->regs.input_select[ 3 ]   = board->addr + 0x14A;
 
+	board->regs.autoincrement[ 0 ]  = board->addr + 0x088;
+	board->regs.autoincrement[ 1 ]  = board->addr + 0x08A;
+	board->regs.autoincrement[ 2 ]  = board->addr + 0x188;
+	board->regs.autoincrement[ 3 ]  = board->addr + 0x18A;
+
 	board->regs.joint_reset[ 0 ]    = board->addr + 0x090;
 	board->regs.joint_reset[ 1 ]    = board->addr + 0x090;
 	board->regs.joint_reset[ 2 ]    = board->addr + 0x190;
@@ -156,8 +168,6 @@ void ni6601_register_setup( Board *board )
 	board->regs.dma_status[ 2 ]     = board->addr + 0x1B8;
 	board->regs.dma_status[ 3 ]     = board->addr + 0x1BA;
 
-	board->regs.clock_config        = board->addr + 0x73C;
-
 	board->regs.dio_parallel_in     = board->addr + 0x00E;
 	board->regs.dio_output          = board->addr + 0x014;
 	board->regs.dio_control         = board->addr + 0x016;
@@ -165,6 +175,17 @@ void ni6601_register_setup( Board *board )
 
 	for ( i = 0; i < 10; i++ )
 		board->regs.io_config[ i ] = board->addr + 0x77C + 4 * i;
+
+	board->regs.reset_control       = board->addr + 0x700;
+	board->regs.global_irq_control  = board->addr + 0x770;
+	board->regs.global_irq_status   = board->addr + 0x754;
+	board->regs.dma_configuration   = board->addr + 0x76C;
+	board->regs.clock_config        = board->addr + 0x73C;
+	board->regs.chip_signature      = board->addr + 0x700;
+
+	/* Send a reset to get the board in a clean, well-defined state */
+
+	writel( SOFT_RESET, board->regs.reset_control );
 }
 
 

@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,20 +20,27 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
 #include "ni_daq_board.h"
 
-static int MSC_set_speed( Board *board, unsigned int divider,
+static int MSC_set_speed( Board *                  board,
+			  unsigned int             divider,
 			  NI_DAQ_CLOCK_SPEED_VALUE speed );
-static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
-			     NI_DAQ_STATE output_state );
-static int  MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
-			       int trigger_high, int trigger_low );
-static int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg );
+
+static int MSC_clock_output( Board *           board,
+			     NI_DAQ_CLOCK_TYPE clock,
+			     NI_DAQ_STATE      output_state );
+
+static int  MSC_trigger_setup( Board *          board,
+			       NI_DAQ_TRIG_TYPE trigger_type,
+			       int              trigger_high,
+			       int              trigger_low );
+
+static int MSC_board_properties( Board *                   board,
+				 NI_DAQ_BOARD_PROPERTIES * arg );
 
 
 #if defined NI_DAQ_DEBUG
@@ -55,7 +62,7 @@ static PFI_States PFI_state[ 10 ];
  * Function resets the MSC subsystem back into a known state
  *-----------------------------------------------------------*/
 
-void MSC_reset_all( Board *board )
+void MSC_reset_all( Board * board )
 {
 	int i;
 
@@ -135,7 +142,9 @@ void MSC_reset_all( Board *board )
  * Function for enabling one of the interrupts of the DAQ-STC
  *------------------------------------------------------------*/
 
-void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) )
+void daq_irq_enable( Board *  board,
+		     int      irq,
+		     void ( * handler )( Board * ) )
 {
 	int i;
 
@@ -220,7 +229,8 @@ void daq_irq_enable( Board *board, int irq, void ( * handler )( Board * ) )
  * Function for disabling one of the interrupts of the DAQ-STC
  *-------------------------------------------------------------*/
 
-void daq_irq_disable( Board *board, int irq )
+void daq_irq_disable( Board * board,
+		      int     irq )
 {
 	int i;
 
@@ -304,8 +314,10 @@ void daq_irq_disable( Board *board, int irq )
  * The function returns 0 on success and 1 on errors.
  *-----------------------------------------------------------------*/
 
-int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
-		   NI_DAQ_INPUT channel, NI_DAQ_PFI_STATE state )
+int MSC_PFI_setup( Board *          board,
+		   NI_DAQ_SUBSYSTEM sub_system,
+		   NI_DAQ_INPUT     channel,
+		   NI_DAQ_PFI_STATE state )
 {
 	int ch;
 	int i;
@@ -378,7 +390,8 @@ int MSC_PFI_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
  * Function for handling ioctl() calls for the MSC subsystem
  *-----------------------------------------------------------*/
 
-int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
+int MSC_ioctl_handler( Board *          board,
+		       NI_DAQ_MSC_ARG * arg )
 {
 	NI_DAQ_MSC_ARG a;
 
@@ -429,7 +442,8 @@ int MSC_ioctl_handler( Board *board, NI_DAQ_MSC_ARG *arg )
  * Sets the clock speeds (both the fast and slow clock)
  *------------------------------------------------------*/
 
-static int MSC_set_speed( Board *board, unsigned int divider,
+static int MSC_set_speed( Board *                  board,
+			  unsigned int             divider,
 			  NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
 	u16 caf = board->stc.Clock_and_FOUT;
@@ -487,8 +501,9 @@ static int MSC_set_speed( Board *board, unsigned int divider,
  * and enables or disables output.
  *---------------------------------------------------*/
 
-static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
-			     NI_DAQ_STATE output_state )
+static int MSC_clock_output( Board *           board,
+			     NI_DAQ_CLOCK_TYPE clock,
+			     NI_DAQ_STATE      output_state )
 {
 	u16 caf = board->stc.Clock_and_FOUT;
 
@@ -516,8 +531,10 @@ static int MSC_clock_output( Board *board, NI_DAQ_CLOCK_TYPE clock,
  * with the required level(s)).
  *--------------------------------------------------------*/
 
-static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
-			      int trigger_high, int trigger_low )
+static int MSC_trigger_setup( Board *          board,
+			      NI_DAQ_TRIG_TYPE trigger_type,
+			      int              trigger_high,
+			      int              trigger_low )
 {
 	u16 ate = board->stc.Analog_Trigger_Etc &
 		  ~ ( Analog_Trigger_Mode_Field | Analog_Trigger_Drive |
@@ -581,7 +598,8 @@ static int MSC_trigger_setup( Board *board, NI_DAQ_TRIG_TYPE trigger_type,
  * of a board and returns it to the caller.
  *---------------------------------------------------*/
 
-int MSC_board_properties( Board *board, NI_DAQ_BOARD_PROPERTIES *arg )
+int MSC_board_properties( Board *                   board,
+			  NI_DAQ_BOARD_PROPERTIES * arg )
 {
 	int i;
 	NI_DAQ_BOARD_PROPERTIES p;

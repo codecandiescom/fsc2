@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments PCI E Series DAQ boards
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -39,7 +38,8 @@ struct Subsystem_Data {
 
 static Subsystem_Data sys_data[ 4 ];
 
-static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys );
+static void pci_dma_stop( Board *          board,
+			  NI_DAQ_SUBSYSTEM sys );
 
 
 /*---------------------------------------------------------------------*
@@ -48,7 +48,7 @@ static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys );
  * different subsystems of the board.
  *---------------------------------------------------------------------*/
 
-void pci_mite_init( Board *board )
+void pci_mite_init( Board * board )
 {
 	int i;
 
@@ -83,7 +83,7 @@ void pci_mite_init( Board *board )
  * all MITE activities and freeing DMA kernel buffers.
  *----------------------------------------------------------*/
 
-void pci_mite_close( Board *board )
+void pci_mite_close( Board * board )
 {
 	int i;
 
@@ -109,8 +109,10 @@ void pci_mite_close( Board *board )
 
 #define DMA_BUFFER_SIZE  16384   /* 16 kByte */
 
-int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
-		       size_t num_points, int continuous )
+int pci_dma_buf_setup( Board *          board,
+		       NI_DAQ_SUBSYSTEM sys,
+		       size_t           num_points,
+		       int              continuous )
 {
 	MITE_DMA_CHAIN *mdc;
 	int num_links;
@@ -292,8 +294,11 @@ int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sys,
  *              2-byte, little-endian numbers.
  *-------------------------------------------------------------*/
 
-int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
-		     size_t *size, int still_used )
+int pci_dma_buf_get( Board *          board,
+		     NI_DAQ_SUBSYSTEM sys,
+		     void *           dest,
+		     size_t *         size,
+		     int              still_used )
 {
 	size_t left;
 	size_t transf = 0;
@@ -395,7 +400,8 @@ int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
  * the last time.
  *-------------------------------------------------------------------------*/
 
-size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
+size_t pci_dma_get_available( Board *          board,
+			      NI_DAQ_SUBSYSTEM sys )
 {
 	/* It seems to be important to read from the MITE DAR register first
 	   and only then from the FCR register - otherwise sometimes the very
@@ -424,7 +430,8 @@ size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys )
  * allocated for a subsystem of the board
  *------------------------------------------------------*/
 
-void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys )
+void pci_dma_buf_release( Board *          board,
+			  NI_DAQ_SUBSYSTEM sys )
 {
 	MITE_DMA_CHAIN *mdc;
 
@@ -457,7 +464,8 @@ void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys )
  * that DMA memory has already been allocated.
  *------------------------------------------------*/
 
-int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
+int pci_dma_setup( Board *          board,
+		   NI_DAQ_SUBSYSTEM sys )
 {
 	MITE_DMA_CHAIN *mdc;
 	u32 chcr;
@@ -545,7 +553,8 @@ int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sys )
  * Disables DMA ad releases DMA memory for a subsystem
  *-----------------------------------------------------*/
 
-int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
+int pci_dma_shutdown( Board *          board,
+		      NI_DAQ_SUBSYSTEM sys )
 {
 	if ( board->mite_irq_enabled[ sys ] == 0 )
 		return 0;
@@ -567,7 +576,8 @@ int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys )
  * Stops DMA for subsystem
  *-------------------------*/
 
-static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
+static void pci_dma_stop( Board *          board,
+			  NI_DAQ_SUBSYSTEM sys )
 {
 	if ( board->mite_irq_enabled[ sys ] == 0 )
 		return;
@@ -587,9 +597,9 @@ static void pci_dma_stop( Board *board, NI_DAQ_SUBSYSTEM sys )
  *--------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
-void pci_mite_dump( Board *board, int channel )
-{
-	PDEBUG( "mite_CHOR  = 0x%08X\n", readl( mite_CHOR(  channel ) ) );
+void pci_mite_dump( Board * board,
+		    int     channel )
+{	PDEBUG( "mite_CHOR  = 0x%08X\n", readl( mite_CHOR(  channel ) ) );
 	PDEBUG( "mite_CHCR  = 0x%08X\n", readl( mite_CHCR(  channel ) ) );
 	PDEBUG( "mite_TCR   = 0x%08X\n", readl( mite_TCR(   channel ) ) );
 	PDEBUG( "mite_CHSR  = 0x%08X\n", readl( mite_CHSR(  channel ) ) );

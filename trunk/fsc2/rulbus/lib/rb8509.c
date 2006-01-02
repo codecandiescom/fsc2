@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -255,7 +255,8 @@ int rulbus_rb8509_adc12_num_channels( int handle )
  * is to be used in conversions
  *---------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_channel( int handle, int channel )
+int rulbus_rb8509_adc12_set_channel( int handle,
+									 int channel )
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 	unsigned char ctrl;
@@ -292,7 +293,8 @@ int rulbus_rb8509_adc12_set_channel( int handle, int channel )
  * either 1, 2, 4 or 8.
  *----------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_gain( int handle, int gain )
+int rulbus_rb8509_adc12_set_gain( int handle,
+								  int gain )
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 	unsigned char ctrl;
@@ -341,7 +343,8 @@ int rulbus_rb8509_adc12_set_gain( int handle, int gain )
  * RULBUS_RB8509_ADC12_INT_TRIG or RULBUS_RB8509_ADC12_INT_TRIG
  *-------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
+int rulbus_rb8509_adc12_set_trigger_mode( int handle,
+										  int mode )
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 	unsigned char ctrl;
@@ -389,8 +392,10 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle, int mode )
  * as the voltage resolution of the card.
  *---------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_properties( int handle, double *Vmax, double *Vmin,
-									double *dV )
+int rulbus_rb8509_adc12_properties( int      handle,
+									double * Vmax,
+									double * Vmin,
+									double * dV )
 
 {
 	RULBUS_RB8509_ADC12_CARD *card;
@@ -437,7 +442,8 @@ int rulbus_rb8509_adc12_has_external_trigger( int handle )
  * 0 is returned.
  *----------------------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_check_convert( int handle, double *volts )
+int rulbus_rb8509_adc12_check_convert( int      handle,
+									   double * volts )
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 	unsigned char hi, low;
@@ -489,7 +495,8 @@ int rulbus_rb8509_adc12_check_convert( int handle, double *volts )
  * Function for getting a converted voltage from the card.
  *--------------------------------------------------------*/
 
-int rulbus_rb8509_adc12_convert( int handle, double *volts )
+int rulbus_rb8509_adc12_convert( int      handle,
+								 double * volts )
 {
 	RULBUS_RB8509_ADC12_CARD *card;
 	int retval;

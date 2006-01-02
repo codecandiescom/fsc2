@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  *
  *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
  *
@@ -20,7 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jtt@toerring.de
+ *  To contact the author send email to jt@toerring.de
  */
 
 
@@ -141,18 +141,33 @@ static int fd;
 
 
 static int rulbus_check_config( void );
+
 static void rulbus_cleanup( void );
-static int rulbus_write_rack( unsigned char rack, unsigned char addr,
-							  unsigned char *data, size_t len );
-static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
-									unsigned char *data, size_t len );
-static int rulbus_read_rack( unsigned char rack, unsigned char addr,
-							 unsigned char *data, size_t len );
-static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
-								   unsigned char *data, size_t len );
+
+static int rulbus_write_rack( unsigned char   rack,
+							  unsigned char   addr,
+							  unsigned char * data,
+							  size_t          len );
+
+static int rulbus_write_rack_range( unsigned char   rack,
+									unsigned char   addr,
+									unsigned char * data,
+									size_t          len );
+
+static int rulbus_read_rack( unsigned char   rack,
+							 unsigned char   addr,
+							 unsigned char * data,
+							 size_t          len );
+
+static int rulbus_read_rack_range( unsigned char   rack,
+								   unsigned char   addr,
+								   unsigned char * data,
+								   size_t          len );
 
 extern int rulbus_parse( void );
+
 extern void rulbus_parser_init( void );
+
 extern void rulbus_parser_clean_up( void );
 
 
@@ -377,7 +392,7 @@ void rulbus_close( void )
  * printed.
  *----------------------------------------------------------------*/
 
-int rulbus_perror( const char *s )
+int rulbus_perror( const char * s )
 {
 	extern int rulbus_lineno;
 	extern int rulbus_column;
@@ -435,7 +450,7 @@ const char *rulbus_strerror( void )
  * card.
  *-------------------------------------------------------------------*/
 
-int rulbus_card_open( const char *name )
+int rulbus_card_open( const char * name )
 {
 	int i;
 	int retval;
@@ -502,8 +517,10 @@ int rulbus_card_close( int handle )
  * value indicating an error.
  *---------------------------------------------------------------*/
 
-int rulbus_write( int handle, unsigned char offset, unsigned char *data,
-				  size_t len)
+int rulbus_write( int             handle,
+				  unsigned char   offset,
+				  unsigned char * data,
+				  size_t          len)
 {
 	int retval;
 
@@ -544,8 +561,10 @@ int rulbus_write( int handle, unsigned char offset, unsigned char *data,
  * otherwise a (negative) value indicating an error.
  *--------------------------------------------------------------*/
 
-int rulbus_write_range( int handle, unsigned char offset,
-						unsigned char *data, size_t len)
+int rulbus_write_range( int             handle,
+						unsigned char   offset,
+						unsigned char * data,
+						size_t          len)
 {
 	int retval;
 
@@ -586,8 +605,10 @@ int rulbus_write_range( int handle, unsigned char offset,
  * indicating an error.
  *------------------------------------------------------------------*/
 
-int rulbus_read( int handle, unsigned char offset, unsigned char *data,
-				 size_t len )
+int rulbus_read( int             handle,
+				 unsigned char   offset,
+				 unsigned char * data,
+				 size_t          len )
 {
 	int retval;
 
@@ -628,8 +649,10 @@ int rulbus_read( int handle, unsigned char offset, unsigned char *data,
  * otherwise a (negative) value indicating an error.
  *-------------------------------------------------------------------*/
 
-int rulbus_read_range( int handle, unsigned char offset, unsigned char *data,
-					   size_t len )
+int rulbus_read_range( int             handle,
+					   unsigned char   offset,
+					   unsigned char * data,
+					   size_t          len )
 {
 	int retval;
 
@@ -731,8 +754,10 @@ static void rulbus_cleanup( void )
  * a certain address at one of the racks.
  *-------------------------------------------*/
 
-static int rulbus_write_rack( unsigned char rack, unsigned char addr,
-							  unsigned char *data, size_t len )
+static int rulbus_write_rack( unsigned char   rack,
+							  unsigned char   addr,
+							  unsigned char * data,
+							  size_t          len )
 {
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
 	int retval;
@@ -760,8 +785,10 @@ static int rulbus_write_rack( unsigned char rack, unsigned char addr,
  * number of address at one of the racks, starting at addr
  *---------------------------------------------------------*/
 
-static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
-									unsigned char *data, size_t len )
+static int rulbus_write_rack_range( unsigned char   rack,
+									unsigned char   addr,
+									unsigned char * data,
+									size_t          len )
 {
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, *data, data, len };
 	int retval;
@@ -789,8 +816,10 @@ static int rulbus_write_rack_range( unsigned char rack, unsigned char addr,
  * a certain address at one of the racks.
  *---------------------------------------------*/
 
-static int rulbus_read_rack( unsigned char rack, unsigned char addr,
-							 unsigned char *data, size_t len )
+static int rulbus_read_rack( unsigned char   rack,
+							 unsigned char   addr,
+							 unsigned char * data,
+							 size_t          len )
 {
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
 	int retval;
@@ -818,8 +847,10 @@ static int rulbus_read_rack( unsigned char rack, unsigned char addr,
  * number of addresses at one of the racks, starting at addr
  *-----------------------------------------------------------*/
 
-static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
-								   unsigned char *data, size_t len )
+static int rulbus_read_rack_range( unsigned char   rack,
+								   unsigned char   addr,
+								   unsigned char * data,
+								   size_t          len )
 {
 	RULBUS_EPP_IOCTL_ARGS args = { rack, addr, 0, data, len };
 	int retval;
@@ -847,7 +878,8 @@ static int rulbus_read_rack_range( unsigned char rack, unsigned char addr,
  * as far as specified in the configuration file
  *----------------------------------------------------*/
 
-int rulbus_get_card_info( const char *card_name, RULBUS_CARD_INFO *card_info )
+int rulbus_get_card_info( const char *       card_name,
+						  RULBUS_CARD_INFO * card_info )
 {
 	const char *config_name;
 	extern FILE *rulbus_in;             /* defined in parser.y */

@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,11 +28,20 @@
 
 
 static int ni_daq_gpct_check_source( NI_DAQ_INPUT source );
-static int ni_daq_gpct_state( int board, int counter, int *state );
-static int ni_daq_gpct_is_armed( int board, int counter, int *state );
-static int ni_daq_gpct_time_to_ticks( int board, int counter,
-									  double gate_length, unsigned long *ticks,
-									  NI_DAQ_INPUT *source );
+
+static int ni_daq_gpct_state( int   board,
+							  int   counter,
+							  int * state );
+
+static int ni_daq_gpct_is_armed( int   board,
+								 int   counter,
+								 int * state );
+
+static int ni_daq_gpct_time_to_ticks( int             board,
+									  int             counter,
+									  double          gate_length,
+									  unsigned long * ticks,
+									  NI_DAQ_INPUT *  source );
 
 
 /*-------------------------------------------------*
@@ -41,7 +49,8 @@ static int ni_daq_gpct_time_to_ticks( int board, int counter,
  * the fast time base) between 20 MHz and 10 MHz
  *-------------------------------------------------*/
 
-int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+int ni_daq_gpct_set_speed( int                      board,
+						   NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
 	NI_DAQ_GPCT_ARG a;
 	int ret;
@@ -73,7 +82,8 @@ int ni_daq_gpct_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
  * fast time base) is running at 20 MHz or at 10 MHz
  *---------------------------------------------------*/
 
-int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
+int ni_daq_gpct_get_speed( int                        board,
+						   NI_DAQ_CLOCK_SPEED_VALUE * speed )
 {
 	int ret;
 
@@ -95,7 +105,9 @@ int ni_daq_gpct_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
  * stopped by a call of ni_daq_gpct_stop_counter().
  *-----------------------------------------------------------------*/
 
-int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
+int ni_daq_gpct_start_counter( int          board,
+							   int          counter,
+							   NI_DAQ_INPUT source )
 {
 	int ret;
 	int state;
@@ -138,8 +150,10 @@ int ni_daq_gpct_start_counter( int board, int counter, NI_DAQ_INPUT source )
  * for 'gate_length'. It stops automatically at the end of the gate.
  *----------------------------------------------------------------------*/
 
-int ni_daq_gpct_start_gated_counter( int board, int counter,
-									 double gate_length, NI_DAQ_INPUT source )
+int ni_daq_gpct_start_gated_counter( int          board,
+									 int          counter,
+									 double       gate_length, 
+									 NI_DAQ_INPUT source )
 {
 	int ret;
 	int pulser;
@@ -226,7 +240,8 @@ int ni_daq_gpct_start_gated_counter( int board, int counter,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_stop_counter( int board, int counter )
+int ni_daq_gpct_stop_counter( int board,
+							  int counter )
 {
 	int ret;
 	int states[ 2 ];
@@ -311,7 +326,8 @@ int ni_daq_gpct_stop_counter( int board, int counter )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_start_pulses( int board, int counter )
+int ni_daq_gpct_start_pulses( int board,
+							  int counter )
 {
 	int ret;
 	NI_DAQ_GPCT_ARG a;
@@ -356,8 +372,11 @@ int ni_daq_gpct_start_pulses( int board, int counter )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
-						   unsigned long *count, int *state )
+int ni_daq_gpct_get_count( int             board,
+						   int             counter,
+						   int             wait_for_end,
+						   unsigned long * count, 
+						   int *           state )
 {
 	int ret;
 	NI_DAQ_GPCT_ARG a;
@@ -408,8 +427,11 @@ int ni_daq_gpct_get_count( int board, int counter, int wait_for_end,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_single_pulse( int board, int counter, double duration,
-							  double *delay, int dont_start )
+int ni_daq_gpct_single_pulse( int      board,
+							  int      counter,
+							  double   duration,
+							  double * delay, 
+							  int      dont_start )
 {
 	int ret;
 	NI_DAQ_GPCT_ARG a;
@@ -491,9 +513,12 @@ int ni_daq_gpct_single_pulse( int board, int counter, double duration,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_continuous_pulses( int board, int counter,
-								   double high_phase, double low_phase,
-								   double *delay, int dont_start )
+int ni_daq_gpct_continuous_pulses( int      board,
+								   int      counter,
+								   double   high_phase,
+								   double   low_phase,
+								   double * delay,
+								   int      dont_start )
 {
 	int ret;
 	int state;
@@ -616,7 +641,8 @@ int ni_daq_gpct_continuous_pulses( int board, int counter,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_stop_pulses( int board, int counter )
+int ni_daq_gpct_stop_pulses( int board,
+							 int counter )
 {
 	int ret;
 
@@ -631,7 +657,9 @@ int ni_daq_gpct_stop_pulses( int board, int counter )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_gpct_state( int board, int counter, int *state )
+int ni_daq_gpct_state( int   board,
+					   int   counter,
+					   int * state )
 {
 	if ( counter < 0 || counter > 1 )
 		return ni_daq_errno = NI_DAQ_ERR_IVA;
@@ -676,7 +704,9 @@ static int ni_daq_gpct_check_source( NI_DAQ_INPUT source )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static int ni_daq_gpct_is_armed( int board, int counter, int *state )
+static int ni_daq_gpct_is_armed( int   board,
+								 int   counter,
+								 int * state )
 {
     NI_DAQ_GPCT_ARG a;
 
@@ -730,9 +760,11 @@ int ni_daq_gpct_init( int board )
  * achieve to requested timing.
  *--------------------------------------------------------------------*/
 
-static int ni_daq_gpct_time_to_ticks( int board, int counter,
-									  double duration, unsigned long *ticks,
-									  NI_DAQ_INPUT *source )
+static int ni_daq_gpct_time_to_ticks( int             board,
+									  int             counter,
+									  double          duration,
+									  unsigned long * ticks,
+									  NI_DAQ_INPUT *  source )
 {
 	int state;
 	unsigned int poss_clock = 0;

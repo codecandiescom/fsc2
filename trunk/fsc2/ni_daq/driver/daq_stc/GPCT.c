@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -30,31 +29,57 @@
 #define GPCT_is_valid_counter( x )  ( ( x ) < 2 )
 
 
-static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed );
-static int GPCT_counter_output_state( Board *board, unsigned int counter,
+static int GPCT_clock_speed( Board *                  board,
+			     NI_DAQ_CLOCK_SPEED_VALUE speed );
+
+static int GPCT_counter_output_state( Board *      board,
+				      unsigned int counter,
 				      NI_DAQ_STATE output_state );
-static int GPCT_counter_disarm( Board *board, unsigned int counter );
-static int GPCT_get_count( Board *board, unsigned counter,
-			   int wait_for_end, unsigned long *count );
-static void G0_TC_handler( Board *board );
-static void G1_TC_handler( Board *board );
-static int GPCT_start_pulses( Board *board, unsigned int counter,
-			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
-			      unsigned long low_ticks,
-			      unsigned long high_ticks,
-			      unsigned long delay_ticks,
+
+static int GPCT_counter_disarm( Board *      board,
+				unsigned int counter );
+
+static int GPCT_get_count( Board *         board,
+			   unsigned int    counter,
+			   int             wait_for_end,
+			   unsigned long * count );
+
+static void G0_TC_handler( Board * board );
+
+static void G1_TC_handler( Board * board );
+
+static int GPCT_start_pulses( Board *board,
+			      unsigned int    counter,
+			      NI_DAQ_INPUT    source,
+			      NI_DAQ_INPUT    gate,
+			      unsigned long   low_ticks,
+			      unsigned long   high_ticks,
+			      unsigned long   delay_ticks,
 			      NI_DAQ_POLARITY output_polarity,
 			      NI_DAQ_POLARITY source_polarity,
 			      NI_DAQ_POLARITY gate_polarity,
-			      int continuous, int delay_start );
-static int GPCT_arm( Board *board, unsigned int counter );
-static int GPCT_start_counting( Board *board, unsigned counter,
-				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
+			      int             continuous,
+			      int             delay_start );
+
+static int GPCT_arm( Board *      board,
+		     unsigned int counter );
+
+static int GPCT_start_counting( Board *         board,
+				unsigned        counter,
+				NI_DAQ_INPUT    source,
+				NI_DAQ_INPUT    gate,
 				NI_DAQ_POLARITY source_polarity,
 				NI_DAQ_POLARITY gate_polarity );
-static int GPCT_is_busy( Board *board, unsigned int counter, int *is_armed );
-static int GPCT_input_gate( int gate, u16 *bits );
-static int GPCT_input_source( int source, u16 *bits );
+
+static int GPCT_is_busy( Board *      board,
+			 unsigned int counter,
+			 int *        is_armed );
+
+static int GPCT_input_gate( int   gate,
+			    u16 * bits );
+
+static int GPCT_input_source( int   source,
+			      u16 * bits );
 
 
 #if defined NI_DAQ_DEBUG
@@ -67,7 +92,7 @@ static int GPCT_input_source( int source, u16 *bits );
  * Function resets the whole GCPT subsystem back into a known state
  *------------------------------------------------------------------*/
 
-void GPCT_reset_all( Board *board )
+void GPCT_reset_all( Board * board )
 {
 	int i;
 	u16 data;
@@ -163,7 +188,8 @@ void GPCT_reset_all( Board *board )
  * Handler for ioctl() calls for the GPCT subsystem
  *--------------------------------------------------*/
 
-int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
+int GPCT_ioctl_handler( Board *           board,
+			NI_DAQ_GPCT_ARG * arg )
 {
 	NI_DAQ_GPCT_ARG a;
 	int ret = 0;
@@ -240,7 +266,8 @@ int GPCT_ioctl_handler( Board *board, NI_DAQ_GPCT_ARG *arg )
  * is controlled by the general setting of the MSC subsystem!).
  *----------------------------------------------------------------------*/
 
-static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+static int GPCT_clock_speed( Board *                  board,
+			     NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
 	if ( speed == NI_DAQ_FULL_SPEED ) {
 		board->stc.Clock_and_FOUT &= ~ G_Source_Divide_By_2;
@@ -261,7 +288,8 @@ static int GPCT_clock_speed( Board *board, NI_DAQ_CLOCK_SPEED_VALUE speed )
  * Function for enabling or disabling the output of a counter
  *------------------------------------------------------------*/
 
-static int GPCT_counter_output_state( Board *board, unsigned int counter,
+static int GPCT_counter_output_state( Board *      board,
+				      unsigned int counter,
 				      NI_DAQ_STATE output_state )
 {
 	if ( ! GPCT_is_valid_counter( counter ) ) {
@@ -287,7 +315,8 @@ static int GPCT_counter_output_state( Board *board, unsigned int counter,
  * Function for stopping the counter(s) of a board, i.e. disarming it.
  *---------------------------------------------------------------------*/
 
-static int GPCT_counter_disarm( Board *board, unsigned counter )
+static int GPCT_counter_disarm( Board *      board,
+				unsigned int counter )
 {
 	switch ( counter ) {
 		case 0 : case 1 :
@@ -322,8 +351,10 @@ static int GPCT_counter_disarm( Board *board, unsigned counter )
  * the counters value.
  *--------------------------------------------------------------------------*/
 
-static int GPCT_get_count( Board *board, unsigned int counter,
-			   int wait_for_end, unsigned long *count )
+static int GPCT_get_count( Board *         board,
+			   unsigned int    counter,
+			   int             wait_for_end,
+			   unsigned long * count )
 {
 	u16 cmd;
 	u32 next_val;
@@ -396,7 +427,7 @@ static int GPCT_get_count( Board *board, unsigned int counter,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void G0_TC_handler( Board *board )
+static void G0_TC_handler( Board * board )
 {
 	wake_up_interruptible( &board->GPCT0.waitqueue );
 }
@@ -405,7 +436,7 @@ static void G0_TC_handler( Board *board )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void G1_TC_handler( Board *board )
+static void G1_TC_handler( Board * board )
 {
 	wake_up_interruptible( &board->GPCT1.waitqueue );
 }
@@ -415,15 +446,18 @@ static void G1_TC_handler( Board *board )
  * Function to start output of pulses from a counter
  *---------------------------------------------------*/
 
-static int GPCT_start_pulses( Board *board, unsigned int counter,
-			      NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
-			      unsigned long low_ticks,
-			      unsigned long high_ticks,
-			      unsigned long delay_ticks,
+static int GPCT_start_pulses( Board *         board,
+			      unsigned int    counter,
+			      NI_DAQ_INPUT    source,
+			      NI_DAQ_INPUT    gate,
+			      unsigned long   low_ticks,
+			      unsigned long   high_ticks,
+			      unsigned long   delay_ticks,
 			      NI_DAQ_POLARITY output_polarity,
 			      NI_DAQ_POLARITY source_polarity,
 			      NI_DAQ_POLARITY gate_polarity,
-			      int continuous, int delay_start )
+			      int             continuous,
+			      int             delay_start )
 {
 	int use_gate;
 	u16 input = 0;
@@ -552,7 +586,8 @@ static int GPCT_start_pulses( Board *board, unsigned int counter,
  * NI_DAQ_GPCT_START_PULSER in delayed start mode)
  *-------------------------------------------------------------*/
 
-static int GPCT_arm( Board *board, unsigned int counter )
+static int GPCT_arm( Board *      board,
+		     unsigned int counter )
 {
 	u16 cmd = Gi_Arm;
 
@@ -586,8 +621,10 @@ static int GPCT_arm( Board *board, unsigned int counter )
  * Function to start event counting
  *----------------------------------*/
 
-static int GPCT_start_counting( Board *board, unsigned int counter,
-				NI_DAQ_INPUT source, NI_DAQ_INPUT gate,
+static int GPCT_start_counting( Board *         board,
+				unsigned int    counter,
+				NI_DAQ_INPUT    source,
+				NI_DAQ_INPUT    gate,
 				NI_DAQ_POLARITY source_polarity,
 				NI_DAQ_POLARITY gate_polarity )
 {
@@ -661,7 +698,9 @@ static int GPCT_start_counting( Board *board, unsigned int counter,
  * (i.e. if it's armed).
  *---------------------------------------------------------------*/
 
-static int GPCT_is_busy( Board *board, unsigned counter, int *is_armed )
+static int GPCT_is_busy( Board *  board,
+			 unsigned counter,
+			 int *    is_armed )
 {
 	if ( ! GPCT_is_valid_counter( counter ) ) {
 		PDEBUG( "Invalid counter number %d\n", counter );
@@ -680,7 +719,8 @@ static int GPCT_is_busy( Board *board, unsigned counter, int *is_armed )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int GPCT_input_gate( int gate, u16 *bits )
+static int GPCT_input_gate( int   gate,
+			    u16 * bits )
 {
 	if ( gate == NI_DAQ_NONE ) {
 		*bits = 0;
@@ -699,7 +739,8 @@ static int GPCT_input_gate( int gate, u16 *bits )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int GPCT_input_source( int source, u16 *bits )
+static int GPCT_input_source( int   source,
+			      u16 * bits )
 {
 	if ( source == NI_DAQ_NONE ) {
 		return 0;

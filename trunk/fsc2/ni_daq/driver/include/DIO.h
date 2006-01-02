@@ -3,7 +3,7 @@
  * 
  *  Driver for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,10 +28,18 @@
 #define DIO_HEADER
 
 
-void DIO_reset_all( Board *board );
-int DIO_ioctl_handler( Board *board, NI_DAQ_DIO_ARG *arg );
-int DIO_in( Board *board, unsigned char *value, unsigned char mask );
-int DIO_out( Board *board, unsigned char value, unsigned char mask );
+void DIO_reset_all( Board * board );
+
+int DIO_ioctl_handler( Board *          board,
+		       NI_DAQ_DIO_ARG * arg );
+
+int DIO_in( Board *         board,
+	    unsigned char * value,
+	    unsigned char   mask );
+
+int DIO_out( Board *       board,
+	     unsigned char value,
+	     unsigned char mask );
 
 
 #endif /* DIO_HEADER */

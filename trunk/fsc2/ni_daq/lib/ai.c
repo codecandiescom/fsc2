@@ -3,7 +3,7 @@
  * 
  *  Library for National Instruments DAQ boards based on a DAQ-STC
  * 
- *  Copyright (C) 2003-2005 Jens Thoms Toerring
+ *  Copyright (C) 2003-2006 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
  * 
- *  To contact the author send email to
- *  Jens.Toerring@physik.fu-berlin.de
+ *  To contact the author send email to:  jt@toerring.de
  */
 
 
@@ -29,14 +28,26 @@
 
 
 static int ni_daq_acq_start_check( NI_DAQ_INPUT as );
+
 static int ni_daq_scan_start_check( NI_DAQ_INPUT ss );
+
 static int ni_daq_conv_start_check( NI_DAQ_INPUT cs );
-static int ni_daq_get_ai_timings( int board, NI_DAQ_INPUT *ss, double sd,
-								  unsigned long *sl, NI_DAQ_INPUT *cs,
-								  double cd, unsigned long *cl );
-static int ni_daq_get_ai_timings2( int board, NI_DAQ_INPUT *ss, double sd,
-								   unsigned long *sl, NI_DAQ_INPUT *cs,
-								   double cd, unsigned long *cl );
+
+static int ni_daq_get_ai_timings( int             board,
+								  NI_DAQ_INPUT *  ss,
+								  double          sd,
+								  unsigned long * sl,
+								  NI_DAQ_INPUT *  cs,
+								  double          cd,
+								  unsigned long * cl );
+
+static int ni_daq_get_ai_timings2( int             board,
+								   NI_DAQ_INPUT *  ss,
+								   double          sd,
+								   unsigned long * sl,
+								   NI_DAQ_INPUT *  cs,
+								   double          cd,
+								   unsigned long * cl );
 
 
 /*---------------------------------------------------------------------*
@@ -44,7 +55,8 @@ static int ni_daq_get_ai_timings2( int board, NI_DAQ_INPUT *ss, double sd,
  * between 20 MHz and 10 MHz
  *---------------------------------------------------------------------*/
 
-int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
+int ni_daq_ai_set_speed( int                      board,
+						 NI_DAQ_CLOCK_SPEED_VALUE speed )
 {
 	NI_DAQ_AI_ARG a;
 	int ret;
@@ -76,7 +88,8 @@ int ni_daq_ai_set_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE speed )
  * is running at 20 MHz or at 10 MHz
  *-------------------------------------------------------------------*/
 
-int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
+int ni_daq_ai_get_speed( int                        board,
+						 NI_DAQ_CLOCK_SPEED_VALUE * speed )
 {
 	int ret;
 
@@ -96,11 +109,13 @@ int ni_daq_ai_get_speed( int board, NI_DAQ_CLOCK_SPEED_VALUE *speed )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni_daq_ai_channel_configuration( int board, int num_channels,
-									 int *channels, NI_DAQ_AI_TYPE *types,
-									 NI_DAQ_BU_POLARITY *polarities,
-									 double *ranges,
-									 NI_DAQ_STATE *dither_enables )
+int ni_daq_ai_channel_configuration( int                  board,
+									 int                  num_channels,
+									 int *                channels,
+									 NI_DAQ_AI_TYPE *     types,
+									 NI_DAQ_BU_POLARITY * polarities,
+									 double *             ranges,
+									 NI_DAQ_STATE *       dither_enables )
 {
 	int ret;
 	int gi;
@@ -311,15 +326,16 @@ int ni_daq_ai_channel_configuration( int board, int num_channels,
  * be number between 1 and 2^24.
  *--------------------------------------------------------------------------*/
 
-int ni_daq_ai_acq_setup( int board, NI_DAQ_INPUT start,
+int ni_daq_ai_acq_setup( int             board,
+						 NI_DAQ_INPUT    start,
 						 NI_DAQ_POLARITY start_polarity,
-						 NI_DAQ_INPUT scan_start,
+						 NI_DAQ_INPUT    scan_start,
 						 NI_DAQ_POLARITY scan_polarity,
-						 double scan_duration,
-						 NI_DAQ_INPUT conv_start,
+						 double          scan_duration,
+						 NI_DAQ_INPUT    conv_start,
 						 NI_DAQ_POLARITY conv_polarity,
-						 double conv_duration,
-						 size_t num_scans )
+						 double          conv_duration,
+						 size_t          num_scans )
 {
 	int ret;
 	unsigned long scan_len;
@@ -478,9 +494,11 @@ int ni_daq_ai_stop_acq( int board )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-ssize_t ni_daq_ai_get_acq_data( int board, double *volts[ ],
-								size_t offset, size_t num_data_per_channel,
-								int wait_for_end )
+ssize_t ni_daq_ai_get_acq_data( int      board,
+								double * volts[ ],
+								size_t   offset,
+								size_t   num_data_per_channel,
+								int      wait_for_end )
 {
 	NI_DAQ_AI_ARG a;
 	int ret;
@@ -675,9 +693,13 @@ static int ni_daq_conv_start_check( NI_DAQ_INPUT cs )
  * counters to fit the timings specified by the user.
  *-------------------------------------------------------------------*/
 
-static int ni_daq_get_ai_timings( int board, NI_DAQ_INPUT *ss, double sd,
-								  unsigned long *sl, NI_DAQ_INPUT *cs,
-								  double cd, unsigned long *cl )
+static int ni_daq_get_ai_timings( int             board,
+								  NI_DAQ_INPUT *  ss,
+								  double          sd,
+								  unsigned long * sl,
+								  NI_DAQ_INPUT *  cs,
+								  double          cd,
+								  unsigned long * cl )
 {
 	double dur;
 	unsigned long *len;
@@ -779,9 +801,13 @@ static int ni_daq_get_ai_timings( int board, NI_DAQ_INPUT *ss, double sd,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static int ni_daq_get_ai_timings2( int board, NI_DAQ_INPUT *ss, double sd,
-								   unsigned long *sl, NI_DAQ_INPUT *cs,
-								   double cd, unsigned long *cl )
+static int ni_daq_get_ai_timings2( int             board,
+								   NI_DAQ_INPUT *  ss,
+								   double          sd,
+								   unsigned long * sl,
+								   NI_DAQ_INPUT *  cs,
+								   double          cd,
+								   unsigned long * cl )
 {
 	unsigned int poss_clock_s = 0;
 	unsigned int poss_clock_c = 0;
