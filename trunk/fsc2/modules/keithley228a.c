@@ -986,7 +986,7 @@ static void keithley228a_get_corrected_current( double   c,
 												double * psc,
 												double * dacv )
 {
-	int i;
+	size_t i;
 	double del = 0.0;
 
 	static double

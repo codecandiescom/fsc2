@@ -252,6 +252,7 @@ Var_T *pulser_reset(               Var_T * /* v */ );
 Var_T *pulser_pulse_reset(         Var_T * /* v */ );
 Var_T *pulser_pulse_minimum_specs( Var_T * /* v */ );
 
+void rb_pulser_cleanup( void );
 
 /* Functions defined in rb_pulser_gen.c */
 
