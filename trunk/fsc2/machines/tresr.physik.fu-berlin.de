@@ -4,7 +4,6 @@
 
 OWNER              := fsc2
 GROUP              := uucp
-NO_VERSION_SCRIPTS := yes
 GPIB_LIBRARY       := LLP
 NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock

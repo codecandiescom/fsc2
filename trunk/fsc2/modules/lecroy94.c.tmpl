@@ -48,15 +48,6 @@ const char *LECROY94_TMPL_Channel_Names[ 13 ] = { "CH1",    "CH2",
 
 long rl[ 10 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000 };
 
-/* List of fixed sensivity settings where the range of the offset changes */
-
-static double fixed_sens[ ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2,
-								0.1, 0.2, 0.5, 1.0 };
-
-/* List of offset factors for the different sensitivity ranges */
-
-static int offset_factor[ ] = { 48, 24, 12, 12, 12, 12, 12, 10 };
-
 static bool lecroy94_tmpl_IN_SETUP = UNSET;
 
 static LECROY94_TMPL_T lecroy94_tmpl_stored;
@@ -561,6 +552,9 @@ Var_T *digitizer_sensitivity( Var_T * v )
 {
 	long channel;
 	double sens;
+	size_t i;
+	size_t fs_index = 0;
+	double offset;
 
 
 	if ( v == NULL )
@@ -623,6 +617,36 @@ Var_T *digitizer_sensitivity( Var_T * v )
 	if ( sens > LECROY94_TMPL_MAX_SENS )
 		sens = LECROY94_TMPL_MAX_SENS;
 
+	/* Check that the currently set offset isn't too large for the requested
+	   sensitivity (if we're in the preparations phase we can only do the
+	   check if an offset has already been set) */
+
+	if ( FSC2_MODE != PREPARATION || lecroy94_tmpl.is_offset[ channel ] ) 
+	{
+		for ( i = 1; i < NUM_ELEMS( fixed_sens ); i++ )
+			if ( sens < 0.9999 * fixed_sens[ i ] )
+			{
+				fs_index = i - 1;
+				break;
+			}
+
+		if ( i ==  NUM_ELEMS( fixed_sens ) )
+			fs_index = i - 1;
+
+		if ( FSC2_MODE == TEST && ! lecroy94_tmpl.is_offset[ channel ] )
+			offset = LECROY94_TMPL_TEST_OFFSET;
+		else
+			offset = lecroy94_tmpl.sens[ channel ];
+
+		if ( abs( offset ) >=
+			      1.0001 * offset_factor[ fs_index ] * fixed_sens[ fs_index ] )
+		{
+			print( FATAL, "Currently set offset too large for the requested "
+				   "sensitivity.\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy94_tmpl_set_sens( channel, sens );
 
@@ -641,9 +665,8 @@ Var_T *digitizer_offset( Var_T * v )
 {
 	long channel;
 	double offset;
-	ssize_t i = -1;
+	size_t i;
 	size_t fs_index = 0;
-
 
 
 	if ( v == NULL )
@@ -686,32 +709,32 @@ Var_T *digitizer_offset( Var_T * v )
 
 	too_many_arguments( v );
 
-	if ( FSC2_MODE == PREPARATION && ! lecroy94_tmpl.is_sens[ channel ] )
+	/* Check that the requested offset is possible with the current sensitivity
+	   setting ((if we're in the preparations phase we can only do the check
+	   if the sensitivity has already been set) */
+
+	if ( FSC2_MODE != PREPARATION || lecroy94_tmpl.is_sens[ channel ] )
 	{
-		print( FATAL, "Can't set offset unless the channels sensitivity "
-			   "has been set.\n" );
-		THROW( EXCEPTION );
-	}
+		if ( FSC2_MODE == TEST && ! lecroy94_tmpl.is_sens[ channel ] )
+			lecroy94_tmpl.sens[ channel ] = LECROY94_TMPL_TEST_SENSITIVITY;
 
-	if ( FSC2_MODE == TEST && ! lecroy94_tmpl.is_sens[ channel ] )
-		lecroy94_tmpl.sens[ channel ] = LECROY94_TMPL_TEST_SENSITIVITY;
+		for ( i = 1; i < ( ssize_t ) NUM_ELEMS( fixed_sens ); i++ )
+			if ( lecroy94_tmpl.sens[ channel ] < 0.9999 * fixed_sens[ i ] )
+			{
+				fs_index = i - 1;
+				break;
+			}
 
-	for ( i = 1; i < ( ssize_t ) NUM_ELEMS( fixed_sens ); i++ )
-		if ( lecroy94_tmpl.sens[ channel ] < 0.9999 * fixed_sens[ i ] )
-		{
+		if ( i == NUM_ELEMS( fixed_sens ) )
 			fs_index = i - 1;
-			break;
-		}
 
-	if ( i < 0 )
-		fs_index = NUM_ELEMS( fixed_sens ) - 1;
-
-	if ( abs( offset ) >=
+		if ( abs( offset ) >=
 		 		 1.0001 * offset_factor[ fs_index ] * fixed_sens[ fs_index ] )
-	{
-		print( FATAL, "Offset too large for the currently set channel "
-			   "sensitivity.\n" );
-		THROW( EXCEPTION );
+		{
+			print( FATAL, "Offset too large for the currently set channel "
+				   "sensitivity.\n" );
+			THROW( EXCEPTION );
+		}
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -1161,7 +1184,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 
 /*---------------------------------------------------------------*
  * Function to set or determine the current trigger mode (please
- * note: SEQUENCE and WRAP mode are currrently nit supported)
+ * note: SEQUENCE and WRAP mode are currrently not supported)
  *---------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_mode( Var_T * v )
@@ -1210,7 +1233,7 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 
 	if ( mode == TRG_MODE_SEQUENCE || mode == TRG_MODE_WRAP )
 	{
-		print( FATAL, "SEQUNCE and WRAP trigger mode currently not suppoerted "
+		print( FATAL, "SEQUNCE and WRAP trigger mode currently not supported "
 			   "by the driver.\n" );
 		THROW( EXCEPTION );
 	}

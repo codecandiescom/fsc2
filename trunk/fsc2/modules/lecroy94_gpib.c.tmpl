@@ -163,7 +163,7 @@ bool lecroy94_tmpl_init( const char * name )
 		}
 
 		/* Switch interleaved mode on if the user asked for it and it can
-		   be done, otherwise switch off */
+		   be done, otherwise switch it off */
 
 		if ( lecroy94_tmpl.is_interleaved && lecroy94_tmpl.interleaved &&
 			 hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 )
@@ -178,27 +178,73 @@ bool lecroy94_tmpl_init( const char * name )
 
 		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
 		{
-			if ( lecroy94_tmpl.is_sens[ i ] )
+			if ( ! lecroy94_tmpl.is_sens[ i ] )
 				lecroy94_tmpl.sens[ i ] = lecroy94_tmpl_get_sens( i );
 
-			if ( lecroy94_tmpl.is_offset[ i ] )
+			if ( ! lecroy94_tmpl.is_offset[ i ] )
 				lecroy94_tmpl.offset[ i ] = lecroy94_tmpl_get_offset( i );
 
+			/* If only a sensitivity or an offset setting was requested check
+			   that it's possible to set it with the offset or sensitivity
+			   already set at the device */
+
+			if ( ( ! lecroy94_tmpl.is_sens[ i ] &&
+				   lecroy94_tmpl.is_offset[ i ]    ) ||
+				 ( lecroy94_tmpl.is_sens[ i ]   &&
+				   ! lecroy94_tmpl.is_offset[ i ]  ) )
+			{
+				size_t j;
+				size_t fs_index = 0;
+
+				for ( j = 1; j < NUM_ELEMS( fixed_sens ); j++ )
+					if ( lecroy94_tmpl.sens[ i ] < 0.9999 * fixed_sens[ j ] )
+					{
+						fs_index = j - 1;
+						break;
+					}
+
+				if ( j == NUM_ELEMS( fixed_sens ) )
+					fs_index = j - 1;
+
+				if ( abs( lecroy94_tmpl.offset[ i ] ) >=
+					                         1.0001 * offset_factor[ fs_index ]
+					                         * fixed_sens[ fs_index ] )
+				{
+					if ( ! lecroy94_tmpl.is_sens[ i ] )
+						print( FATAL, "Currently set offset too large for the "
+							   "requested sensitivity.\n" );
+					else
+						print( FATAL, "Requested iffset tiio large for the "
+							   "currently set sensitivity.\n" );
+					THROW( EXCEPTION );
+				}
+			}
+
+			if ( lecroy94_tmpl.is_sens[ i ] )
+				lecroy94_tmpl_set_sens( i, lecroy94_tmpl.sens[ i ] );
+
+			if ( lecroy94_tmpl.is_offset[ i ] )
+				lecroy94_tmpl_set_offset( i, lecroy94_tmpl.offset[ i ] );
+
 			if ( lecroy94_tmpl.is_coupling[ i ] )
+				lecroy94_tmpl_set_coupling( i, lecroy94_tmpl.coupling[ i ] );
+			else
 				lecroy94_tmpl.coupling[ i ] = lecroy94_tmpl_get_coupling( i );
 		}
 
 		/* Set (if required) the state of the bandwidth limiter */
 
 		if ( lecroy94_tmpl.is_bandwidth_limiter )
-				lecroy94_tmpl.bandwidth_limiter =
-										lecroy94_tmpl_get_bandwidth_limiter( );
+			lecroy94_tmpl_set_bandwidth_limiter( lecroy94_tmpl.bandwidth_limiter );
+		else 
+			lecroy94_tmpl.bandwidth_limiter = lecroy94_tmpl_get_bandwidth_limiter( );
 
 		/* Set (if required) the trigger source */
 
 		if ( lecroy94_tmpl.is_trigger_channel )
-			lecroy94_tmpl.trigger_channel =
-										   lecroy94_tmpl_get_trigger_source( );
+			lecroy94_tmpl_set_trigger_source( lecroy94_tmpl.trigger_channel );
+		else
+			lecroy94_tmpl.trigger_channel = lecroy94_tmpl_get_trigger_source( );
 
 		/* Set (if required) the trigger level, slope and coupling of the
 		   trigger channels */
@@ -211,20 +257,31 @@ bool lecroy94_tmpl_init( const char * name )
 			if ( lecroy94_tmpl.is_trigger_level[ trg_channels[ i ] ] )
 				lecroy94_tmpl_set_trigger_level( trg_channels[ i ],
 							lecroy94_tmpl.trigger_level[ trg_channels[ i ] ] );
+			else
+				lecroy94_tmpl.trigger_level[ trg_channels[ i ] ] =
+					      lecroy94_tmpl_get_trigger_level( trg_channels[ i ] );
 
 			if ( lecroy94_tmpl.is_trigger_slope[ trg_channels[ i ] ] )
 				lecroy94_tmpl_set_trigger_slope( trg_channels[ i ],
 							lecroy94_tmpl.trigger_slope[ trg_channels[ i ] ] );
+			else
+				lecroy94_tmpl.trigger_slope[ trg_channels[ i ] ] =
+					      lecroy94_tmpl_get_trigger_slope( trg_channels[ i ] );
 
 			if ( lecroy94_tmpl.is_trigger_coupling[ trg_channels[ i ] ] )
 				lecroy94_tmpl_set_trigger_coupling( trg_channels[ i ],
 						 lecroy94_tmpl.trigger_coupling[ trg_channels[ i ] ] );
+			else
+				lecroy94_tmpl.trigger_coupling[ trg_channels[ i ] ] =
+					   lecroy94_tmpl_get_trigger_coupling( trg_channels[ i ] );
 		}
 
 		/* Set (if required) the trigger delay */
 
 		if ( lecroy94_tmpl.is_trigger_delay )
 			lecroy94_tmpl_set_trigger_delay( lecroy94_tmpl.trigger_delay );
+		else
+			lecroy94_tmpl.trigger_delay = lecroy94_tmpl_get_trigger_delay( );
 
 		/* Set the trigger mode - if the user didn't request one and we're
 		   in SEQUENCE or WRAP mode switch to normal mode */

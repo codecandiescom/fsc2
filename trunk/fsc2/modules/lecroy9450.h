@@ -272,8 +272,19 @@ HORI_RES_T hres[ 39 ] = { { 1.0e-9, 1.0e-10,   100,   -1.0,    -1 },
 					      {  2.0e3,    -1.0,    -1, 5.0e-1, 40000 },
 					      {  5.0e3,    -1.0,    -1,    1.0, 50000 } };
 
+/* List of fixed sensivity settings where the range of the offset changes */
+
+double fixed_sens[ 8 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2,
+						   0.1, 0.2, 0.5, 1.0 };
+
+/* List of offset factors for the different sensitivity ranges */
+
+int offset_factor[ 8 ] = { 48, 24, 12, 12, 12, 12, 12, 10 };
+
 #else
 extern HORI_RES_T hres[ 39 ];
+extern double fixed_sens[ 8 ];
+extern int offset_factor[ 8 ];
 #endif
 
 extern long rl[ 10 ];
