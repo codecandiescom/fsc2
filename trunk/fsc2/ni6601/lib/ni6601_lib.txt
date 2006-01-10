@@ -27,6 +27,7 @@ The library supplies the following functions:
 
     ni6601_start_counter()
     ni6601_start_gated_counter()
+    ni6601_start_buffered_counter()
     ni6601_stop_counter()
     ni6601_get_count()
     ni6601_generate_continuous_pulses()
@@ -39,8 +40,7 @@ The library supplies the following functions:
 	ni6601_perror()
 	ni6601_strerror()
 
-
-All functions return an integer, indicating success or failure. On success,
+Most functions return an integer, indicating success or failure. On success,
 'NI6601_OK' (which is just 0) is returned. On failure a negative number
 is returned, indicating the type of failure. The following values can be
 expected:
@@ -61,6 +61,11 @@ expected:
 	NI6601_ERR_DFM    Device file for the requested board does not exist
 	NI6601_ERR_DFP    Unspecified error when opening the device file
     NI6601_ERR_INT    Internal driver or library error
+	NI6601_ERR_TMB    Only one buffered counter possible
+	NI6601_ERR_MEM    Not enough memory for internal buffers
+	NI6601_ERR_OFL    Internal buffer overflow
+	NI6601_ERR_TFS    Acquisition is procceding too fast
+	NI6601_ERR_NBC    No buffered counter running
 
 
 The absolute value of the error code can be used as an index into a an
@@ -176,6 +181,69 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
+int ni6601_start_buffered_counter( int board, int counter, double gate_length,
+								   int source, unsigned long num_points,
+                                   int continuous )
+
+The function starts a buffered, gated counter. The counter will repeatedly
+run for the specified 'gate_length' and store the data in an internal
+buffer, from which the data can be fetched via a read() call, using
+file descriptor returned by the call of the function.
+
+The function does require a second counter beside the one specified
+by the 'counter' argument to create the gates for the counter. For the
+counter numbered 0 also counter 1 is required (and vice versa), and
+for the counter numbered 2 also counter 3 is required (and vice versa).
+Thus both counters must be available, i.e. not being counting when the
+function gets called. Only a single counter can run at a time as a
+buffered gated counter.
+
+   int board        Board number
+   int counter      Number of the counter
+   int gate_length  length of time to count in seconds
+   int source       Number indicating the the source of events to be counted
+   unsigned long num_points  Number of points to acquire in non-continuous
+                             mode or size of buffer to be used in continuous
+                             mode (see below)
+   int continuous   Flag that tells if continuous mode is to be used.
+
+'gate_length' must be at least 150 ns and must also be an integer multiple
+of 50 ns. It may not be longer than 214.7483648 s.
+
+There are two acquisition modes, continuous and non-continuous mode. In
+non-continuous mode the buffered counter does as as many acquisitions
+as are specified by the 'num_points' argument. In continuous mode the
+counter never stops acquiring new data points before it is explicitely
+stopped (by calling the ni6601_stop_counter() function). In continuous
+mode the argument 'num_points' tells the driver for the board how many
+points it should be able to store internally (if 'num_points' is set to
+0 the function will ask for a buffer of at least 1s worth of data points
+or 1024, whatever is larger). Please note that specifying too small a
+buffer for continuous mode can result in the acquisition becoming
+aborted because of buffer overflows if the calling program is too slow
+fetching data. On the other hand, using very large buffers can also be
+counterproductive since the buffer must exist in kernel space.
+
+After being done with counting the function ni6601_stop_counter() must
+be called.
+
+To get at the acquired data the function ni6601_get_buffered_counts()
+is to be called.
+
+Due to the counter producing data at a potenially high rate there is
+the possibility that either internal buffers overflow or that data are
+produced at such a high rate that the system can't handle the flood
+of interrupts. In this case counting will be stopped immediately and
+the user gets notified via the function ni6601_get_buffered_counts().
+
+Beside the error codes mentioned above the function may return:
+
+     NI6601_ERR_IVS    NI6601_ERR_IVA    NI6601_ERR_CBS
+     NI6601_ERR_NCB    NI6601_ERR_TMB
+
+
+======================================================================
+
 int ni6601_stop_counter( int board, int counter )
 
 The function stops a counter. If the specified counter isn't counting
@@ -190,13 +258,15 @@ nothing happens (i.e. success is reported).
 int ni6601_get_count( int board, int counter, int wait_for_end,
 					  int do_poll, unsigned long *count, int *state )
 
-The function returns the current value of a counter. If the
-'wait_for_end' argument has a non-zero value, the function will
-only return after the counter has stopped counting with the final
-result - because a continuous counter will never stop the function
-will return indicating an error when this is tried on a continuously
-running counter. If a signal gets caught while waiting for the counter
-to finish the error code NI6601_ERR_ITR gets returned.
+The function returns the current value of a non-buffered counter (use
+the function ni6601_get_buffered_counts() to obtain the data acquired
+by a buffered counter). If the 'wait_for_end' argument has a non-zero
+value, the function will only return after the counter has stopped
+counting with the final result - because a continuous counter will
+never stop the function will return indicating an error when this is
+tried on a continuously running counter. If a signal gets caught while
+waiting for the counter to finish the error code NI6601_ERR_ITR gets
+returned.
 
 If 'wait_for_end' is set the argument 'do_poll' is of relevance. If it
 is set to zero the process will sleep in the kernel for the counter
@@ -238,6 +308,67 @@ the 'wait_for_end' argument was non-zero 'state' is always set to
 Beside the error codes mentioned above the function may return:
 
      NI6601_ERR_IVA    NI6601_ERR_WFC    NI6601_ERR_ITR
+
+
+======================================================================
+
+ssize_t ni6601_get_buffered_counts( int board, unsigned long *counts,
+									size_t num_points, double wait_secs,
+									int *quit_on_signal, int *timed_out,
+									int *end_of_data )
+
+This function must be used to fetch data from a buffered counter.
+
+   int board              Board number
+   unsigned long *counts  Pointer to user supplied buffer for data
+   size_t num_points      Maximum number of points to be returned
+   double *wait_secs      Time to wait before function returns
+   int *quit_on_signal    Indicates if function is to return on signals
+   int *timed_out         Indicates if fucntion returns due to time out
+   int *end_of_data       Indicates if function returns since all data
+                          have been read
+
+The 'counts' argument must point to an array of a lenght of at least
+'num_points'. 'num_points' indicates the maximum number of points
+returned by the function - it may return less if the function returns
+either due to a timeout, a signal was received or there are no more
+data to return (this can only happen if the buffered counter runs in
+non-continuous mode).
+
+The 'wait_secs' argument tells if the function is supposed to return
+after a certain amount of time. If set to a non-zero. positive value
+the function returns after about as many seconds (never earlier). If
+it is a zero value the function only returns when either as many data
+can be returned as requested via the 'num_points' argument, there are
+no data left to return or a signal got caught (and the function is
+told to return on signals via the 'quit_on_signal' argument). If the
+argument has a negative value the function never waits, returning only
+as many data (if any) as currently are available.
+
+The 'quit_on_signal' can be used to instruct the function to return on
+receipt of a signal by setting what the pointer points to to a non-
+zero value. On return it tells if the function returned due to the
+receipt of a signal by setting the value pointed to accordingly. If
+the pointer is NULL the function does not return on receipt of signals.
+
+The 'timed_out' argument is used by the function to indicate if it
+returned due to a timeout, i.e. the maximum time set via 'wait_secs'
+was exceeded, by setting the value pointed to to a non-zero value. The
+pointer can be NULL in which case the user obviously can't determine if
+a timeout happened.
+
+Finally, the 'end_of_data' argument is used to indicate if the function
+returned because all data already have been transfered to the user (in
+non-continuous mode only). The pointer can be a NULL pointer.
+
+The return value of the function is either the number of data points
+returned to the caller if it is zero or a positive value. A negative
+value indicates an error.
+
+Beside the error codes mentioned above the function may return:
+
+     NI6601_ERR_IVA    NI6601_ERR_NBC    NI6601_ERR_MEM
+     NI6601_ERR_OFL    NI6601_ERR_TFS
 
 
 ======================================================================
@@ -365,7 +496,7 @@ simultaneously.
 
 int ni6601_close( int board )
 
-The function can be used to close the boards device file and thus make
+The function can be used to close the boards device file and thus making
 the board accessible by other processes.
 
    int board             Board number
