@@ -86,7 +86,7 @@ my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
                        '-validatecommand' => \&is_numeric,
                        '-relief'          => 'sunken' );
 $balloon->attach( $f1_v, '-balloonmsg'    =>
-                         "Enter the start field (in Gauss)" );
+                         "Enter start field (in Gauss)" );
 my $f1_l2 = $f1->Label( '-text'           => 'G',
                         '-width'          => 1 );
 
@@ -105,7 +105,7 @@ my $f2_v = $f2->Entry( '-textvariable'   => \$end_field,
                        '-validate'       => 'key',
                        '-validatecommand'=> \&is_numeric,
                        '-relief'         => 'sunken' );
-$balloon->attach( $f2_v, '-balloonmsg'   => "Enter the end field (in Gauss)" );
+$balloon->attach( $f2_v, '-balloonmsg'   => "Enter end field (in Gauss)" );
 my $f2_l2 = $f2->Label( '-text'          => 'G',
                         '-width'         => 1 );
 
@@ -125,7 +125,7 @@ my $f3_v = $f3->Entry( '-textvariable'    => \$field_step,
                        '-validatecommand' => \&is_numeric,
                        '-relief'          => 'sunken' );
 $balloon->attach( $f3_v, '-balloonmsg'    =>
-                         "Enter the size of the field steps (in Gauss)" );
+                         "Enter size of field steps (in Gauss)" );
 my $f3_l2 = $f3->Label( '-text'           => 'G',
                         '-width'          => 1 );
 
@@ -162,11 +162,11 @@ my $f10_m1 = $f10->Optionmenu( '-options'  =>
                                [ ( "Don't set", '1.0', '1.25', '1.5', '2.0',
                                    '2.5', '3.0', '4.0', '5.0', '6.0',
                                    '8.0' ) ],
-                               '-width'    => 4,
+                               '-width'    => 7,
                                '-textvariable' => \$sens1,
                                '-command' => \&sens_check );
 $balloon->attach( $f10_m1, '-balloonmsg' =>
-                  "Select the lock-in amplifiers amplification factor" );
+                  "Select lock-in amplifiers amplification factor" );
 my $f10_m2 = $f10->Optionmenu( '-options'  =>
                                [ ( 'E+1', 'E+2', 'E+3', 'E+4', 'E+5', 'E+6',
                                    'E+7' ) ],
@@ -174,7 +174,7 @@ my $f10_m2 = $f10->Optionmenu( '-options'  =>
                                '-textvariable' => \$sens2,
                                '-command' => \&sens_check );
 $balloon->attach( $f10_m2, '-balloonmsg' =>
-                  "Select the lock-in amplifiers amplification factor" );
+                  "Select lock-in amplifiers amplification factor" );
 
 $f10->pack( %fp );
 $f10_l->pack( %wp );
@@ -193,7 +193,7 @@ my $f9_m = $f9->Optionmenu( '-options'  =>
                             '-width'    => 9,
                             '-textvariable' => \$tc );
 $balloon->attach( $f9_m, '-balloonmsg' =>
-                         "Select the lock-in amplifiers time constant" );
+                         "Select lock-in amplifiers time constant" );
 $f9->pack( %fp );
 $f9_l->pack( %wp );
 $f9_m->pack( %wp );
@@ -212,8 +212,8 @@ my $f7_v = $f7->Entry( '-textvariable'    => \$tc_fact,
 my $f7_l2 = $f7->Label( '-text'           => '* tc',
                         '-width'          => 2 );
 $balloon->attach( $f7_v, '-balloonmsg' =>
-                         "Enter the number of lock-in time constants\n" .
-                         "to wait before a new data point is recorded" );
+                         "Enter number of lock-in time constants to\n" .
+                         "wait before a new data point is recorded" );
 
 $f7->pack( %fp );
 $f7_l1->pack( %wp );
@@ -232,7 +232,7 @@ my $f4_v = $f4->Entry( '-textvariable'    => \$phase,
 my $f4_l2 = $f4->Label( '-text'           => ' ',
                         '-width'          => 1 );
 $balloon->attach( $f4_v, '-balloonmsg'    =>
-                  "Set the lock-in amplifiers phase"  );
+                  "Set lock-in amplifiers phase"  );
 $f4->pack( %fp );
 $f4_l1->pack( %wp );
 $f4_v->pack( %wp );
@@ -248,7 +248,7 @@ my $f5_m = $f5->Optionmenu( '-options'  =>
                             '-width'    => 9,
                             '-textvariable' => \$mod_freq );
 $balloon->attach( $f5_m, '-balloonmsg' =>
-                         "Select the lock-in modulation frequency" );
+                         "Select lock-in modulation frequency" );
 $f5->pack( %fp );
 $f5_l->pack( %wp );
 $f5_m->pack( %wp );
@@ -265,7 +265,7 @@ my $f8_v = $f8->Entry( '-textvariable'    => \$mod_amp,
 my $f8_l2 = $f8->Label( '-text'           => 'G',
                         '-width'          => 1 );
 $balloon->attach( $f8_v, '-balloonmsg'    =>
-                  "Set the lock-in amplifiers modulation amplitude\n" );
+                  "Set lock-in amplifiers modulation amplitude\n" );
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
