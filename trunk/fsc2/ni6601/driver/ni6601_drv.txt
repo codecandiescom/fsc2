@@ -75,8 +75,8 @@ time.
   NI6601_IOC_COUNTER
 
 This ioctl() request initializes one of the four counters of the board
-with a value of 0 and starts an upward count. If a gate is used the count
-will stop at the end of the first gate.
+with a value of 0 and starts an upward count. If a gate is used counting
+stops at the end of the first gate.
 
 
 The argument is a structure of type NI6601_COUNTER, which is a typedef of
@@ -90,17 +90,17 @@ The argument is a structure of type NI6601_COUNTER, which is a typedef of
 	} NI6601_COUNTER;
 
 The first member of the structure, 'counter', is the number of the
-counter to be started, an integer between 0 and 3 (you may also use
-the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
-'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+counter to be started, an integer between 0 and 3 or, alternatively,
+one of the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3'.
 
 The second member, 'source_polarity', determines the polarity of the
 source of events to be counted. It is an integer, 0 for normal polarity
 and 1 for inverted polarity. The symbolic names 'NI6601_NORMAL' and
 'NI6601_INVERTED' can be used instead.
 
-The third member, 'gate', determines if counting is gated and which is
-the source of the gate. Valid settings for 'gate' are:
+The third member, 'gate', determines if counting is gated and, if yes,
+which is the source of the gate. Valid settings for 'gate' are:
 
 	NI6601_NONE                don't use a gate
 	NI6601_LOW                 gate input is always low
@@ -167,10 +167,10 @@ which is a typedef of
 	} NI6601_PULSES;
 
 
-The first member of the structure, 'counter', is the number of the counter
-to be used for creating the pulses, an integer between 0 and 3 (you may
-also use the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
-'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+The first member of the structure, 'counter', is the number of the
+counter to be used for creating the pulses, an integer between 0 and
+3 or, alternatively, the symbolic names 'NI6601_COUNTER_0',
+'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and 'NI6601_COUNTER_3'.
 
 
 The second member, 'low_ticks', is the time between pulses, given in
@@ -285,8 +285,8 @@ a structure of type NI6601_COUNTER_VAL, which is a typedef of
 
 The first member of the structure, 'counter', is the number of the
 counter for which the current value is to be returned, an integer
-between 0 and 3 (you may also use the symbolic names 'NI6601_COUNTER_0',
-'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+between 0 and 3 or one of the symbolic names 'NI6601_COUNTER_0',
+'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and 'NI6601_COUNTER_3'.
 
 
 The second member, 'wait_for_end', should only be set to 1 when the counter
@@ -330,10 +330,10 @@ of type NI6601_IS_ARMED, which is a typedef of
 
 
 The first member of the structure, 'counter', is the number of the
-counter for which the information about the state of the counter is to be
-returned, an integer between 0 and 3 (you may also use the symbolic names
-'NI6601_COUNTER_0', 'NI6601_COUNTER_1', 'NI6601_COUNTER_2' and
-'NI6601_COUNTER_3').
+counter for which the information about the state of the counter is
+to be returned, an integer between 0 and 3 or, alternatively, one of
+the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3'.
 
 
 The second member, 'state', will be set on return to 1 if the counter is
@@ -354,6 +354,6 @@ which is a typedef of
 
 
 The first and only member of the structure, 'counter', is the number of
-the counter which is to be disarmed, an integer between 0 and 3 (you may
-also use the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
-'NI6601_COUNTER_2' and 'NI6601_COUNTER_3').
+the counter which is to be disarmed, an integer between 0 and 3 or one
+of the symbolic names 'NI6601_COUNTER_0', 'NI6601_COUNTER_1',
+'NI6601_COUNTER_2' and 'NI6601_COUNTER_3'.
