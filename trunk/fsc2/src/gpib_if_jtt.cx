@@ -570,20 +570,20 @@ int gpib_local_lockout( int device )
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
-		sprintf( gpib_error_msg, "Call of gpib_llo for unknown device "
-				 "(device number %d)\n", device );
+		sprintf( gpib_error_msg, "Call of gpib_local_lockout() for unknown "
+				 "device (device number %d)\n", device );
 		return FAILURE;
 	}
 
     if ( ll > LL_ERR )
-        gpib_log_function_start( "gpib_llo", dev_name );
+        gpib_log_function_start( "gpib_local_lockout", dev_name );
 
 	raise_permissions( );
     gpib_llo( device );
 	lower_permissions( );
 
     if ( ll > LL_NONE )
-        gpib_log_function_end( "gpib_llo", dev_name );
+        gpib_log_function_end( "gpib_local_lockout", dev_name );
 
     if ( gpib_status & GPIB_ERR )
     {
