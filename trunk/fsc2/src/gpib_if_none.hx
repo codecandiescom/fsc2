@@ -79,7 +79,7 @@ int gpib_timeout( int /* device */,
 				  int /* period */ );
 int gpib_clear_device( int /* device */ );
 int gpib_local( int /* device */ );
-int gpib_llo( int /* device */ );
+int gpib_local_lockout( int /* device */ );
 int gpib_trigger( int /* device */ );
 int gpib_wait( int   /* device */,
 			   int   /* mask   */,

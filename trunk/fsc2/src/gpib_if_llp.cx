@@ -423,7 +423,7 @@ int gpib_local( int device )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int gpib_llo( int device )
+int gpib_local_lockout( int device )
 {
 	device = device;
 	return SUCCESS;

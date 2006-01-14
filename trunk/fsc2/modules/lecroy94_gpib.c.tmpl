@@ -73,7 +73,7 @@ bool lecroy94_tmpl_init( const char * name )
 	   (2 byte) format with LSB first. Then ask it for the status byte
 	   to make sure the device reacts. */
 
-    if ( gpib_llo( lecroy94_tmpl.device ) == FAILURE  ||
+    if ( gpib_local_lockout( lecroy94_tmpl.device ) == FAILURE  ||
 		 gpib_write( lecroy94_tmpl.device,
 					 "CHDR OFF;CHLP OFF;CBLS,-1;CFMT DEF9,WORD,BIN;COORD LO",
 					 53 ) == FAILURE ||

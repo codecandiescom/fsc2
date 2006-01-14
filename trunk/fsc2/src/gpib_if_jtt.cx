@@ -552,16 +552,16 @@ int gpib_local( int device )
 }
 
 
-/*-----------------------------------------*
- * gpib_llo() locks a device by sending it
- * a Local Lockout Command.
+/*------------------------------------------------*
+ * gpib_local_lockout() locks a device by sending
+ * it the Local Lockout command.
  * ->
  *  * number of device to be locked
  * <-
  *  * SUCCESS: OK, FAILURE: error
- *-----------------------------------------*/
+ *------------------------------------------------*/
 
-int gpib_llo( int device )
+int gpib_local_lockout( int device )
 {
 	char *dev_name;
 
