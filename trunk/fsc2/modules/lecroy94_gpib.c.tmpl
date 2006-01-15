@@ -803,13 +803,13 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 			sprintf( buf, "C%1d:TRCP?", channel + 1 );
 			break;
 
-#if defined LECROY94_EXT
+#if defined LECROY94_TMPL_EXT
 		case LECROY94_TMPL_EXT :
 			strcpy( buf, "EX:TRCP?" );
 			break;
 #endif
-#if defined LECROY94_EXT10
-		case LECROY94_EXT10 :
+#if defined LECROY94_TMPL_EXT10
+		case LECROY94_TMPL_EXT10 :
 			strcpy( buf, "EX10:TRCP?" );
 			break;
 #endif
@@ -865,13 +865,13 @@ int lecroy94_tmpl_set_trigger_coupling( int channel,
 			sprintf( cmd, "C%1d:TRCP ", channel + 1 );
 			break;
 
-#if defined LECROY94_EXT
+#if defined LECROY94_TMPL_EXT
 		case LECROY94_TMPL_EXT :
 			strcpy( cmd, "EX:TRCP " );
 			break;
 #endif
-#if defined LECROY94_EXT10
-		case LECROY94_EXT10 :
+#if defined LECROY94_TMPL_EXT10
+		case LECROY94_TMPL_EXT10 :
 			strcpy( cmd, "EX10:TRCP " );
 			break;
 #endif
