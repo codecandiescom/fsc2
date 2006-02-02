@@ -105,6 +105,7 @@
      "AUX[12]?[^A-Za-z0-9_]"
      "LIN[^A-Za-z0-9_]"
 	 "FUNC_[EF]"
+	 "MEM_[AB]"
      "INV\\(ERT\\(ED\\)?\\)?[^A-Za-z0-9_]"
      "V_?H\\(IGH\\)?[^A-Za-z0-9_]"
      "V_?L\\(OW\\)?[^A-Za-z0-9_]"
