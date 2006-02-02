@@ -64,7 +64,8 @@
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
 
-#define LECROY9424E_TEST_TIMEBASE     1.0e-3     /* 1 ms per division*/
+#define LECROY9424E_TEST_TIMEBASE     5.0e-5     /* 50 us per division*/
+#define LECROY9424E_TEST_TB_INDEX     14
 #define LECROY9424E_TEST_ILVD_MODE    UNSET      /* interleave mode (RIS/SS) */
 #define LECROY9424E_TEST_SENSITIVITY  2.5        /* 2.5 V per division */
 #define LECROY9424E_TEST_OFFSET       0.0
@@ -77,6 +78,7 @@
 #define LECROY9424E_TEST_TRIG_MODE    TRG_MODE_NORMAL
 #define LECROY9424E_TEST_REC_LEN      1000
 #define LECROY9424E_TEST_BWL          UNSET      /* bandwidth limiter */
+
 
 #define LECROY9424E_UNDEF   -1
 #define LECROY9424E_CH1      0
@@ -440,6 +442,8 @@ const char *lecroy9424e_ptime( double /* p_time */ );
 void lecroy9424e_delete_windows( LECROY9424E_T * /* s */ );
 
 Window_T *lecroy9424e_get_window_by_number( long /* wid */ );
+
+double lecroy9424e_trigger_delay_check( void );
 
 void lecroy9424e_all_windows_check( void );
 

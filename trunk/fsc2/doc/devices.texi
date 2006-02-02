@@ -1087,8 +1087,8 @@ the @strong{SR510} and @strong{SR530}.
 For the @strong{ER023M Signal Channel} the function does not set the
 sensitivity in units of the output voltage but sets the receiver
 gain. Valid receiver gains are in the range between @code{2.0E+1} and
-@code{1.0E+7} and in increments of @code{2 dB}. Thus in this range the
-following multiplier steps can be used: @code{1.0}, @code{1.25},
+@code{1.0E+7} and in increments of about @w{2 dB}. Thus in this range
+the following multiplier steps can be used: @code{1.0}, @code{1.25},
 @code{1.5}, @code{2.0}, @code{2.5}, @code{3.0}, @code{4.0}, @code{5.0},
 @code{6.0} and @code{8.0}.
 
@@ -1693,13 +1693,17 @@ only if either it has already been called with an argument or in the
 @findex digitizer_trigger_delay()
 @item digitizer_trigger_delay()
 The function queries (if called with no argument) or sets (if called
-with an argument) the amount of pre- or post-triggering (in seconds).
-If called with a negative value, acquisitions starts as specified by
-the value before the trigger is received, if called with a positive
-value start of the acquisition is delayed by that value (relative to
-the trigger position). If called without an argument the current
-setting of the pre- or post-trigger delay is returned. Post-trigger
-can only be used with the @strong{LeCroy} oszilloscopes.
+with an argument) the amount of pre- or post-triggering (in seconds),
+i.e. the time difference between the start of the acquisition and the
+trigger. Thus, if called with a positive value, the acquisitions starts
+by the specified value before the trigger is received (pre-trigger
+acquisition), if called with a negative value start of the acquisition
+is delayed by that value relative to the trigger position (post-trigger
+acquisition). If called without an argument the current setting of the
+pre- or post-trigger delay is returned. Post-trigger acquisitions can
+only done with the @strong{LeCroy} oszilloscopes (where the maximum
+pre-trigger delay is typically 10 times the timebase and the maximum
+post-trigger delay 10,000 times the timebase setting).
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the

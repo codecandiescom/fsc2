@@ -38,7 +38,7 @@ LECROY94_TMPL_T lecroy94_tmpl;
 
 const char *LECROY94_TMPL_Channel_Names[ 13 ] = { "CH1",    "CH2",
 												  "CH3",    "CH4",
-												  "EXP_C",  "EXP_D",
+												  "EXP_A",  "EXP_B",
 												  "MEM_C",  "MEM_D",
 												  "FUNC_E", "FUNC_F",
 												  "LINE",   "EXT",
@@ -81,6 +81,7 @@ int lecroy94_tmpl_init_hook( void )
 	lecroy94_tmpl.is_trigger_delay = UNSET;
 	lecroy94_tmpl.num_windows      = 0;
 	lecroy94_tmpl.interleaved      = UNSET;
+	lecroy94_tmpl.tb_index         = LECROY94_TMPL_TEST_TB_INDEX;
 
 	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_FUNC_F; i++ )
 		lecroy94_tmpl.is_displayed[ i ] = UNSET;
@@ -93,6 +94,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.is_trigger_slope[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_coupling[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_level[ i ] = UNSET;
+		lecroy94_tmpl.rec_len[ i ] = UNDEFINED_REC_LEN;
 	}
 
 	for ( i = LECROY94_TMPL_FUNC_E; i <= LECROY94_TMPL_FUNC_F; i++ )
@@ -100,7 +102,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.source_ch[ i ]  =
 								 LECROY94_TMPL_CH1 + i - LECROY94_TMPL_FUNC_E;
 		lecroy94_tmpl.is_avg_setup[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ]    = UNDEFINED_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ] = UNDEFINED_REC_LEN;
 	}
 
 	lecroy94_tmpl_stored.w = NULL;
@@ -189,14 +191,15 @@ Var_T *digitizer_define_window( Var_T * v )
 
 	if ( v == NULL || v->next == NULL )
 	{
-		print( FATAL, "Missing argument(s), absoluet window position "
+		print( FATAL, "Missing argument(s), absolute window position "
 			   "(relative to trigger) and window width must be specified.\n" );
 		THROW( EXCEPTION );
 	}
 
-	/* Get the start point of the window */
+	/* Get start point and width of window */
 
 	win_start = get_double( v, "window start position" );
+	v = vars_pop( v );
 	win_width = get_double( v, "window width" );
 
 	/* Allow window width to be zero in test run... */
@@ -229,8 +232,6 @@ Var_T *digitizer_define_window( Var_T * v )
 
 	w->next = NULL;
 	w->num = lecroy94_tmpl.num_windows++ + WINDOW_START_NUMBER;
-
-	too_many_arguments( v );
 
 	w->start = win_start;
 	w->width = win_width;
@@ -321,8 +322,8 @@ Var_T *digitizer_window_position( Var_T * v )
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
-	w = lecroy94_tmpl_get_window_by_number(
-									       get_strict_long( v, "window ID" ) );
+	w = lecroy94_tmpl_get_window_by_number( get_strict_long( v,
+															 "window ID" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, w->start );
@@ -360,8 +361,8 @@ Var_T *digitizer_window_width( Var_T * v )
 	/* Figure out the window number and test if a window with this number
 	   exists at all */
 
-	w = lecroy94_tmpl_get_window_by_number(
-									       get_strict_long( v, "window ID" ) );
+	w = lecroy94_tmpl_get_window_by_number( get_strict_long( v,
+															 "window ID" ) );
 
 	if ( ( v = vars_pop( v ) ) == NULL )
 		return vars_push( FLOAT_VAR, w->width );
@@ -377,7 +378,7 @@ Var_T *digitizer_window_width( Var_T * v )
 
 
 /*-------------------------------------------------------------*
- * Function for determining or setting the tim base (in s/div)
+ * Function for determining or setting the timebase (in s/div)
  *-------------------------------------------------------------*/
 
 Var_T *digitizer_timebase( Var_T * v )
@@ -407,17 +408,17 @@ Var_T *digitizer_timebase( Var_T * v )
 				return vars_push( FLOAT_VAR, lecroy94_tmpl.timebase );
 		}
 
-	timebase = get_double( v, "time base" );
+	timebase = get_double( v, "timebase" );
 
 	if ( timebase <= 0 )
 	{
-		print( FATAL, "Invalid zero or negative time base: %s.\n",
+		print( FATAL, "Invalid zero or negative timebase: %s.\n",
 			   lecroy94_tmpl_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
 
 	/* Pick the allowed timebase nearest to the user supplied value, tell
-	   the user about problems if there's a deviation of more than 1 % */
+	   the user about problems if there's a deviation of more than 1% */
 
 	for ( i = 0; i < NUM_ELEMS( hres ) - 1; i++ )
 		if ( timebase >= hres[ i ].tdiv && timebase <= hres[ i + 1 ].tdiv )
@@ -443,13 +444,13 @@ Var_T *digitizer_timebase( Var_T * v )
 		if ( timebase < hres[ 0 ].tdiv )
 		{
 			tb_index = 0;
-			print( WARN, "Timebase of %s is too low, using %s instead.\n",
+			print( WARN, "Timebase of %s is too short, using %s instead.\n",
 				   t, lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
 		}
 		else
 		{
 		    tb_index = NUM_ELEMS( hres ) - 1;
-			print( WARN, "Timebase of %s is too large, using %s instead.\n",
+			print( WARN, "Timebase of %s is too long, using %s instead.\n",
 				   t, lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
 		}
 
@@ -460,10 +461,22 @@ Var_T *digitizer_timebase( Var_T * v )
 	lecroy94_tmpl.tb_index = tb_index;
 	lecroy94_tmpl.is_timebase = SET;
 
+	/* Now check for the trigger delay (if it's set) if it fits with the new
+	   timebase setting, and based on this the window positions and widths */
+
+	lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
 	lecroy94_tmpl_all_windows_check( );
 
+	/* In the experiment set the timebaseand also the trigger delay, at least
+	   if it was already set */
+
 	if ( FSC2_MODE == EXPERIMENT )
+	{
 		lecroy94_tmpl_set_timebase( hres[ tb_index ].tdiv );
+
+		if ( lecroy94_tmpl.is_trigger_delay )
+			lecroy94_tmpl_set_trigger_delay( lecroy94_tmpl.trigger_delay );
+	}
 
 	return vars_push( FLOAT_VAR, lecroy94_tmpl.timebase );
 }
@@ -505,26 +518,32 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 
 	if ( ilvd && hres[ lecroy94_tmpl.tb_index ].ris_rl < 0 )
 	{
-		print( FATAL, "Can't switch to RIS mode for time base of %s.\n",
+		print( FATAL, "Can't switch to RIS mode for timebase of %s.\n",
 			   lecroy94_tmpl_ptime( hres[ lecroy94_tmpl.tb_index ].tdiv ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( ! ilvd && hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 )
 	{
-		print( FATAL, "Can't switch to Single Shot mode for time base "
+		print( FATAL, "Can't switch to Single Shot mode for timebase "
 			   "of %s.\n",
 			   lecroy94_tmpl_ptime( hres[ lecroy94_tmpl.tb_index ].tdiv ) );
 		THROW( EXCEPTION );
 	}
 
+	lecroy94_tmpl.interleaved = ilvd;
+	lecroy94_tmpl.is_interleaved = SET;
+
+	lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
 	lecroy94_tmpl_all_windows_check( );
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
 		lecroy94_tmpl_set_interleaved( ilvd );
 
-	lecroy94_tmpl.interleaved = ilvd;
-	lecroy94_tmpl.is_interleaved = SET;
+		if ( lecroy94_tmpl.is_trigger_delay )
+			lecroy94_tmpl_set_trigger_delay( lecroy94_tmpl.trigger_delay );
+	}
 
 	return vars_push( INT_VAR, ( long ) ilvd );
 }
@@ -532,7 +551,7 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 
 /*----------------------------------------------------------------*
  * Returns the time difference between two points for the current
- * time base and mode (i.e. RIS or SS)
+ * timebase and mode (i.e. RIS or SS)
  *----------------------------------------------------------------*/
 
 Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
@@ -1251,10 +1270,10 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 /*-----------------------------------------------------------------*
  * digitizer_trigger_delay() sets or determines the trigger delay,
  * positive values (up to the full horizontal width of the screen,
- * i.e. 10 times the time base) are for pretrigger while negative
- * values (up to 10,000 times the time base) are for starting the
+ * i.e. 10 times the timebase) are for pretrigger while negative
+ * values (up to 10,000 times the timebase) are for starting the
  * acquisition after the trigger. Time resolution of the trigger
- * delay is 1/50 of the time base.
+ * delay is 1/50 of the timebase.
  *-----------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_delay( Var_T * v )
@@ -1292,17 +1311,22 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( delay > 0.0 && delay > 10 * lecroy94_tmpl.timebase )
+	/* Check that the trigger delay is within the limits (taking rounding
+	   errors of the order of the current time resolution into account) */
+
+	if ( delay > 0.0 && delay >   10.0 * lecroy94_tmpl.timebase
+		                        +  0.5 * lecroy94_tmpl_time_per_point( ) )
 	{
-		print( FATAL, "Pretrigger delay is too long, can't be longer than "
-			   "10 times the time base.\n" );
+		print( FATAL, "Pre-trigger delay is too long, can't be longer than "
+			   "10 times the timebase.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( delay < 0.0 && delay < -1.0e4 * lecroy94_tmpl.timebase )
+	if ( delay < 0.0 && delay <  -1.0e4 * lecroy94_tmpl.timebase
+		                        -  0.5 * lecroy94_tmpl_time_per_point( ) )
 	{
-		print( FATAL, "Posttriger delay is too long, can't be longer that "
-			   "10,000 times the time base.\n" );
+		print( FATAL, "Post-triger delay is too long, can't be longer that "
+			   "10,000 times the timebase.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -1324,12 +1348,13 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 /*------------------------------------------------------------------------*
  * Function for setting up averaging:
  *  1st argument is one of the function channel doing the averaging,
- *  2nd argument is the source channel, either channel 1 or 2
+ *  2nd argument is the source channel
  *  3rd argument is the number of averages to be done
- *  4th (optional) argument is the number of points to average (defaults
+ *  4th (optional) argument is the number of points to average. Defaults
  *  to a number at least as large as the maximum number of points that can
- *  be returned according to the time resolution setting, if set only that
- *  many data points will be returned in acquisitions).
+ *  be returned according to the time resolution setting. If set only that
+ *  many data points will be returned in acquisitions. Must cover all
+ *  defined windows.
  *------------------------------------------------------------------------*/
 
 Var_T *digitizer_averaging( Var_T * v )
@@ -1680,7 +1705,9 @@ Var_T *digitizer_get_curve( Var_T * v )
 	}
 	else
 	{
-		if ( lecroy94_tmpl.rec_len[ ch ] == UNDEFINED_REC_LEN )
+		if ( w != NULL )
+			length = w->num_points;
+		else if ( lecroy94_tmpl.rec_len[ ch ] == UNDEFINED_REC_LEN )
 			length = LECROY94_TMPL_TEST_REC_LEN;
 		else
 			length = lecroy94_tmpl.rec_len[ ch ];

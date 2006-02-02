@@ -103,11 +103,57 @@ void lecroy94_tmpl_all_windows_check( void )
 	Window_T *w = lecroy94_tmpl.w;
 
 
-	while ( w != NULL )
+	if ( w == NULL )
+		return;
+
+	if ( w->next == NULL )
+		lecroy94_tmpl_window_check( w, UNSET );
+	else
+		for ( ; w != NULL; w = w->next )
+			lecroy94_tmpl_window_check( w, SET );
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for checking the trigger delay when the timebase
+ * gets changed
+ *-----------------------------------------------------------*/
+
+double lecroy94_tmpl_trigger_delay_check( void )
+{
+	double delay = lecroy94_tmpl.trigger_delay;
+
+
+	/* Nothing needs to be done if the trigger delay never was set */
+
+	if ( ! lecroy94_tmpl.is_trigger_delay )
+		return delay;
+
+	/* Check that the trigger delay is within the limits (taking rounding
+	   errors of the order of the current time resolution into account) */
+
+	if ( delay > 0.0 && delay >   10.0 * lecroy94_tmpl.timebase
+		                        +  0.5 * lecroy94_tmpl_time_per_point( ) )
 	{
-		lecroy94_tmpl_window_check( w, SET );
-		w = w->next;
+		print( FATAL, "Pre-trigger delay is too long, can't be longer than "
+			   "10 times the timebase.\n" );
+		THROW( EXCEPTION );
 	}
+
+	if ( delay < 0.0 && delay <  -1.0e4 * lecroy94_tmpl.timebase
+		                        -  0.5 * lecroy94_tmpl_time_per_point( ) )
+	{
+		print( FATAL, "Post-triger delay is too long, can't be longer that "
+			   "10,000 times the timebase.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* The delay can only be set in units of 1/50 of the timebase */
+
+	delay = 0.02 * lrnd( 50.0 * delay / lecroy94_tmpl.timebase )
+		    * lecroy94_tmpl.timebase;
+
+	return delay;
 }
 
 
@@ -120,13 +166,10 @@ void lecroy94_tmpl_window_check( Window_T * w,
 {
 	long start;
 	long end;
-	long max_len = lecroy94_tmpl_curve_length( );
-	double max_time = max_len * lecroy94_tmpl_time_per_point( )
-		              - lecroy94_tmpl.trigger_delay;
 
 
 	/* Start with calculating the start and end position of the window
-	   in points */
+	   in points (thereby also taking care of rounding errors) */
 
 	start = lecroy94_tmpl_calc_pos( w->start );
 	end   = lecroy94_tmpl_calc_pos( w->start + w->width );
@@ -144,27 +187,35 @@ void lecroy94_tmpl_window_check( Window_T * w,
 		THROW( EXCEPTION );
 	}
 
-	if ( start > max_len )
+	if ( start >= lecroy94_tmpl_curve_length( ) - 1 )
 	{
+		double max_start_time =   10.0 * lecroy94_tmpl.timebase
+			                    - lecroy94_tmpl.trigger_delay
+			                    - 2 * lecroy94_tmpl_time_per_point( );
+
 		if ( show_num > 0 )
 			print( FATAL, "%ld. window starts too late, last possible time "
 				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-				   lecroy94_tmpl_ptime( max_time ) );
+				   lecroy94_tmpl_ptime( max_start_time ) );
 		else
 			print( FATAL, "Window starts too late, last possible time "
-				   "is %s.\n", lecroy94_tmpl_ptime( max_time ) );
+				   "is %s.\n", lecroy94_tmpl_ptime( max_start_time ) );
 		THROW( EXCEPTION );
 	}
 
-	if ( end > max_len )
+	if ( end >= lecroy94_tmpl_curve_length( ) )
 	{
+		double max_end_time =   10.0 * lecroy94_tmpl.timebase
+			                  - lecroy94_tmpl.trigger_delay - w->start
+			                  - 2 * lecroy94_tmpl_time_per_point( );
+
 		if ( show_num > 0 )
 			print( FATAL, "%d. window ends too late, largest possible width "
 				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-				   lecroy94_tmpl_ptime( w->start - max_time ) );
+				   lecroy94_tmpl_ptime( max_end_time ) );
 		else
 			print( FATAL, "Window ends too late, largest possible width "
-				   "is %s.\n", lecroy94_tmpl_ptime( w->start - max_time ) );
+				   "is %s.\n", lecroy94_tmpl_ptime( max_end_time ) );
 		THROW( EXCEPTION );
 	}
 
@@ -220,12 +271,11 @@ long lecroy94_tmpl_find_length( void )
 {
 	long rec_len;
 	int i;
-	long max_len = lecroy94_tmpl_curve_length( );
 	Window_T *w = lecroy94_tmpl.w;
 
 
 	for ( i = ( int ) ( NUM_ELEMS( rl ) - 1 ); i >= 0; i++ )
-		if ( rl[ i ] <= max_len )
+		if ( rl[ i ] <= lecroy94_tmpl_curve_length( ) )
 			break;
 
 	fsc2_assert( i >= 0 );        /* just to make 100% sure....*/
@@ -260,15 +310,16 @@ long lecroy94_tmpl_find_length( void )
 
 static long lecroy94_tmpl_calc_pos( double t )
 {
-	return lrnd( ( t - lecroy94_tmpl.trigger_delay ) /
+	return lrnd( ( t + lecroy94_tmpl.trigger_delay ) /
 				 lecroy94_tmpl_time_per_point( ) );
 
 }
 
 
-/*-----------------------------------------------------------------*
- * Returns the current 
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function returns the number of points acquired with the currently
+ * set timebase and acquisition mode (SS or RIS) setting
+ *-------------------------------------------------------------------*/
 
 long lecroy94_tmpl_curve_length( void )
 {
@@ -280,8 +331,11 @@ long lecroy94_tmpl_curve_length( void )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function returns the time resolution (as the time difference
+ * bbetween two acquired points for the current setting of the
+ * timebase and acquisition (SS or RIS) mode
+ *--------------------------------------------------------------*/
 
 double lecroy94_tmpl_time_per_point( void )
 {
