@@ -37,7 +37,7 @@
 #define LECROY9400_TEST_TB_ENTRY     19        /* i.e. 100 ms */
 #define LECROY9400_TEST_SENSITIVITY  0.01
 #define LECROY9400_TEST_NUM_AVG      10
-#define LECROY9400_TEST_TRIG_POS     0.1
+#define LECROY9400_TEST_TRIG_DELAY   0.0
 #define LECROY9400_TEST_TRIG_CHANNEL 0
 #define LECROY9400_TEST_REC_LEN      1250
 
@@ -146,8 +146,8 @@ struct LECROY9400 {
 	int trigger_coupling;
 	bool is_trigger_coupling;
 
-	double trig_pos;
-	bool is_trig_pos;
+	double trigger_delay;
+	bool is_trigger_delay;
 
 	long source_ch[ MAX_CHANNELS ];
 
@@ -212,13 +212,12 @@ Var_T *digitizer_sensitivity(       Var_T * /* v */ );
 Var_T *digitizer_averaging(         Var_T * /* v */ );
 Var_T *digitizer_num_averages(      Var_T * /* v */ );
 Var_T *digitizer_record_length(     Var_T * /* v */ );
-Var_T *digitizer_trigger_position(  Var_T * /* v */ );
+Var_T *digitizer_trigger_delay(     Var_T * /* v */ );
 Var_T *digitizer_meas_channel_ok(   Var_T * /* v */ );
 Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
 Var_T *digitizer_start_acquisition( Var_T * /* v */ );
 Var_T *digitizer_get_curve(         Var_T * /* v */ );
 Var_T *digitizer_get_curve_fast(    Var_T * /* v */ );
-Var_T *digitizer_run(               Var_T * /* v */ );
 Var_T *digitizer_command(           Var_T * /* v */ );
 
 
@@ -229,6 +228,8 @@ int lecroy9400_get_tb_index( double /* timebase */ );
 const char *lecroy9400_ptime( double /* p_time */ );
 
 void lecroy9400_delete_windows( LECROY9400_T * /* s */ );
+
+double lecroy9400_trigger_delay_check( void );
 
 void lecroy9400_do_pre_exp_checks( void );
 
@@ -277,9 +278,9 @@ long lecroy9400_get_num_avg( int /* channel */ );
 
 bool lecroy9400_get_desc( int /* channel */ );
 
-double lecroy9400_get_trigger_pos( void );
+double lecroy9400_get_trigger_delay( void );
 
-bool lecroy9400_set_trigger_pos( double /* position */ );
+void lecroy9400_set_trigger_delay( double /* delay */ );
 
 void lecroy9400_set_up_averaging( long /* channel */,
 								  long /* source  */,
@@ -296,8 +297,6 @@ void lecroy9400_get_curve( int        /* ch         */,
 						   double **  /* array      */,
 						   long *     /* length     */,
 						   bool       /* use_cursor */ );
-
-void lecroy9400_free_running( void );
 
 bool lecroy9400_command( const char * /* cmd */ );
 

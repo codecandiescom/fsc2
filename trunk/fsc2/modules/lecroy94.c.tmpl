@@ -94,7 +94,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.is_trigger_slope[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_coupling[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_level[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = UNDEFINED_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEFINED_REC_LEN;
 	}
 
 	for ( i = LECROY94_TMPL_FUNC_E; i <= LECROY94_TMPL_FUNC_F; i++ )
@@ -102,7 +102,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.source_ch[ i ]  =
 								 LECROY94_TMPL_CH1 + i - LECROY94_TMPL_FUNC_E;
 		lecroy94_tmpl.is_avg_setup[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = UNDEFINED_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEFINED_REC_LEN;
 	}
 
 	lecroy94_tmpl_stored.w = NULL;
@@ -467,7 +467,7 @@ Var_T *digitizer_timebase( Var_T * v )
 	lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
 	lecroy94_tmpl_all_windows_check( );
 
-	/* In the experiment set the timebaseand also the trigger delay, at least
+	/* In the experiment set the timebase and also the trigger delay, at least
 	   if it was already set */
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -622,19 +622,19 @@ Var_T *digitizer_sensitivity( Var_T * v )
 	}
 
 	/* Check that the sensitivity setting isn't out of range (taking care
-	   of rouinding errors) */
+	   of rounding errors) */
 
-	if ( sens < 0.9999 * LECROY94_TMPL_MIN_SENS ||
+	if ( sens < 0.9999 * LECROY94_TMPL_MAX_SENS ||
 		 sens > 1.0001 * LECROY94_TMPL_MIN_SENS )
 	{
 		print( FATAL, "Requested sensitivity setting is out of range.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( sens < LECROY94_TMPL_MIN_SENS )
-		sens = LECROY94_TMPL_MIN_SENS;
-	if ( sens > LECROY94_TMPL_MAX_SENS )
+	if ( sens < LECROY94_TMPL_MAX_SENS )
 		sens = LECROY94_TMPL_MAX_SENS;
+	if ( sens > LECROY94_TMPL_MIN_SENS )
+		sens = LECROY94_TMPL_MIN_SENS;
 
 	/* Check that the currently set offset isn't too large for the requested
 	   sensitivity (if we're in the preparations phase we can only do the
@@ -890,7 +890,14 @@ Var_T *digitizer_trigger_level( Var_T * v )
 {
 	int channel;
 	double level;
+	double sens = 0.0;
 
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argiment.\n" );
+		THROW( EXCEPTION );
+	}
 
 	channel = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
@@ -955,18 +962,34 @@ Var_T *digitizer_trigger_level( Var_T * v )
 #if defined LECROY94_TMPL_CH4_AS_TRG
 		case LECROY94_TMPL_CH4 :
 #endif
-			if ( FSC2_MODE == PREPARATION &&
-				 ! lecroy94_tmpl.is_sens[ channel ] )
+
+			switch ( FSC2_MODE )
 			{
-				print( FATAL, "Can't set trigger level in PREPARATION section "
-					   "while sensitivity for the chaannel hasn't been "
-					   "set.\n" );
-				THROW( EXCEPTION );
+				case PREPARATION :
+					if ( ! lecroy94_tmpl.is_sens[ channel ] )
+					{
+						print( FATAL, "Can't set trigger level in PREPARATION "
+							   "section while sensitivity for the channel "
+							   "hasn't been set.\n" );
+						THROW( EXCEPTION );
+					}
+					sens = lecroy94_tmpl.sens[ channel ];
+					break;
+
+				case TEST :
+					if ( lecroy94_tmpl.is_sens[ channel ] )
+						sens = lecroy94_tmpl.sens[ channel ];
+					else
+						sens = LECROY94_TMPL_TEST_SENSITIVITY;
+					break;
+
+				case EXPERIMENT :
+					sens = lecroy94_tmpl_get_sens( channel );
+					break;
 			}
 
 			if ( lrnd( abs( 1.0e6 * level ) ) >
-					  lrnd( 1.0e6 * LECROY94_TMPL_TRG_MAX_LEVEL_CH_FAC *
-							lecroy94_tmpl_get_sens( channel ) ) )
+				    lrnd( 1.0e6 * LECROY94_TMPL_TRG_MAX_LEVEL_CH_FAC * sens ) )
 			{
 				print( FATAL, "Trigger level is too large, maximum is %f "
 					   "times the current channel sensitivity.\n",
@@ -1019,6 +1042,12 @@ Var_T *digitizer_trigger_slope( Var_T * v )
 	int channel;
 	int slope;
 
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argiment.\n" );
+		THROW( EXCEPTION );
+	}
 
 	channel = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
@@ -1109,9 +1138,15 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 {
 	long channel;
 	long cpl = -1;
-	const char *cpl_str[ ] = { "AC", "DC" "LF REJ", "HF REJ", "HF" };
+	const char *cpl_str[ ] = { "AC", "DC", "LF REJ", "HF REJ", "HF" };
 	size_t i;
 
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argiment.\n" );
+		THROW( EXCEPTION );
+	}
 
 	channel = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
@@ -1174,7 +1209,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	else
 		cpl = get_long( v, "trigger coupling type" );
 
-	if ( cpl < TRG_CPL_AC || cpl > TRG_CPL_HF )
+	if ( cpl < LECROY94_TMPL_TRG_CPL_AC || cpl > LECROY94_TMPL_TRG_CPL_HF )
 	{
 		print( FATAL, "Invalid trigger coupling type.\n" );
 		THROW( EXCEPTION );
@@ -1191,7 +1226,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	/* Settting the HF trigger coupling automatically switches to positive
 	   trigger slope */
 
-	if ( cpl == TRG_CPL_HF )
+	if ( cpl == LECROY94_TMPL_TRG_CPL_HF )
 	{
 		lecroy94_tmpl.is_trigger_slope[ channel ] = SET;
 		lecroy94_tmpl.trigger_slope[ channel ] = POSITIVE;
@@ -1250,9 +1285,10 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( mode == TRG_MODE_SEQUENCE || mode == TRG_MODE_WRAP )
+	if ( mode == LECROY94_TMPL_TRG_MODE_SEQUENCE ||
+		 mode == LECROY94_TMPL_TRG_MODE_WRAP )
 	{
-		print( FATAL, "SEQUNCE and WRAP trigger mode currently not supported "
+		print( FATAL, "SEQUENCE and WRAP trigger mode currently not supported "
 			   "by the driver.\n" );
 		THROW( EXCEPTION );
 	}
@@ -1270,15 +1306,16 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 /*-----------------------------------------------------------------*
  * digitizer_trigger_delay() sets or determines the trigger delay,
  * positive values (up to the full horizontal width of the screen,
- * i.e. 10 times the timebase) are for pretrigger while negative
+ * i.e. 10 times the timebase) are for pre-trigger while negative
  * values (up to 10,000 times the timebase) are for starting the
- * acquisition after the trigger. Time resolution of the trigger
- * delay is 1/50 of the timebase.
+ * acquisition after the trigger (post-trigger). Time resolution
+ * of the trigger delay is 1/50 of the timebase.
  *-----------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_delay( Var_T * v )
 {
 	double delay;
+	double real_delay;
 
 
 	if ( v == 0 )
@@ -1307,41 +1344,59 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 	if ( FSC2_MODE == PREPARATION && ! lecroy94_tmpl.is_timebase )
 	{
 		print( FATAL, "Can't set trigger delay in PREPARATION "
-			   "section while tim base hasn't been set.\n" );
-		THROW( EXCEPTION );
-	}
-
-	/* Check that the trigger delay is within the limits (taking rounding
-	   errors of the order of the current time resolution into account) */
-
-	if ( delay > 0.0 && delay >   10.0 * lecroy94_tmpl.timebase
-		                        +  0.5 * lecroy94_tmpl_time_per_point( ) )
-	{
-		print( FATAL, "Pre-trigger delay is too long, can't be longer than "
-			   "10 times the timebase.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( delay < 0.0 && delay <  -1.0e4 * lecroy94_tmpl.timebase
-		                        -  0.5 * lecroy94_tmpl_time_per_point( ) )
-	{
-		print( FATAL, "Post-triger delay is too long, can't be longer that "
-			   "10,000 times the timebase.\n" );
+			   "section while timebase hasn't been set.\n" );
 		THROW( EXCEPTION );
 	}
 
 	/* The delay can only be set in units of 1/50 of the timebase */
 
-	delay = 0.02 * lrnd( 50.0 * delay / lecroy94_tmpl.timebase )
-		    * lecroy94_tmpl.timebase;
+	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy94_tmpl.timebase )
+		         * lecroy94_tmpl.timebase;
+
+	/* Check that the trigger delay is within the limits (taking rounding
+	   errors of the order of the current time resolution into account) */
+
+	if ( real_delay > 0.0 &&
+		 real_delay >   10.0 * lecroy94_tmpl.timebase
+		              +  0.5 * lecroy94_tmpl_time_per_point( ) )
+	{
+		print( FATAL, "Pre-trigger delay of %s is too long, can't be longer "
+			   "than 10 times the timebase.\n",
+			   lecroy94_tmpl_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( real_delay < 0.0 &&
+		 real_delay <   -1.0e4 * lecroy94_tmpl.timebase
+		              -  0.5 * lecroy94_tmpl_time_per_point( ) )
+	{
+		print( FATAL, "Post-triger delay of %s is too long, can't be longer "
+			   "than 10,000 times the timebase.\n",
+			   lecroy94_tmpl_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	/* If the difference between the requested trigger delay and the one
+	   that can be set is larger than the time resolution warn the user */
+
+	if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
+	{
+		char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
+
+		print( WARN, "Trigger delay has to be adjusted from %s to %s.\n",
+			   cp, lecroy94_tmpl_ptime( real_delay ) );
+		T_free( cp );
+	}
+
+	/* Finally set the delay */
 
 	if ( FSC2_MODE == EXPERIMENT )
-		lecroy94_tmpl_set_trigger_delay( delay );
+		lecroy94_tmpl_set_trigger_delay( real_delay );
 
-	lecroy94_tmpl.trigger_delay = delay;
+	lecroy94_tmpl.trigger_delay    = real_delay;
 	lecroy94_tmpl.is_trigger_delay = SET;
 
-	return vars_push( FLOAT_VAR, delay );
+	return vars_push( FLOAT_VAR, real_delay );
 }
 
 
@@ -1350,11 +1405,6 @@ Var_T *digitizer_trigger_delay( Var_T * v )
  *  1st argument is one of the function channel doing the averaging,
  *  2nd argument is the source channel
  *  3rd argument is the number of averages to be done
- *  4th (optional) argument is the number of points to average. Defaults
- *  to a number at least as large as the maximum number of points that can
- *  be returned according to the time resolution setting. If set only that
- *  many data points will be returned in acquisitions. Must cover all
- *  defined windows.
  *------------------------------------------------------------------------*/
 
 Var_T *digitizer_averaging( Var_T * v )
@@ -1362,8 +1412,6 @@ Var_T *digitizer_averaging( Var_T * v )
 	long channel;
 	long source_ch;
 	long num_avg;
-	long rec_len = UNDEFINED_REC_LEN;
-	unsigned int i;
 
 
 	if ( v == NULL )
@@ -1430,51 +1478,12 @@ Var_T *digitizer_averaging( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	/* If there is a further argument it's the record length, if not given
-	   the default value is used. */
-
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		rec_len = get_long( v, "record length" );
-
-		if ( rec_len <= 0 )
-		{
-			print( FATAL, "Invalid zero or negative record length.\n" );
-			THROW( EXCEPTION );
-		}
-
-		if ( rec_len > rl[ NUM_ELEMS( rl ) - 1 ] )
-		{
-			print( FATAL, "Record length of %ld points too long.\n",
-				   rec_len );
-			THROW( EXCEPTION );
-		}
-
-		for ( i = 0; i < NUM_ELEMS( rl ) - 1; i++ )
-		{
-			if ( rec_len < rl[ i ] )
-				print( WARN, "Record length had to be increased to %ld.\n",
-					   rl[ i ] );
-
-			if ( rec_len <= rl[ i ] )
-			{
-				rec_len = rl[ i ];
-				break;
-			}
-		}
-
-		lecroy94_tmpl_length_check( rec_len );
-	}
-
 	too_many_arguments( v );
-
-	if ( rec_len == UNDEFINED_REC_LEN )
-		rec_len = lecroy94_tmpl_find_length( );
 
 	lecroy94_tmpl.is_avg_setup[ channel ] = SET;
 	lecroy94_tmpl.source_ch[ channel ]    = source_ch;
 	lecroy94_tmpl.num_avg[ channel ]      = num_avg;
-	lecroy94_tmpl.rec_len[ channel ]      = rec_len;
+	lecroy94_tmpl.rec_len[ channel ]      = lecroy94_tmpl_find_length( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -1486,7 +1495,6 @@ Var_T *digitizer_averaging( Var_T * v )
 Var_T *digitizer_num_averages( Var_T * v )
 {
 	long channel;
-	long num_avg = 0;
 
 
 	if ( v == NULL )
@@ -1512,29 +1520,14 @@ Var_T *digitizer_num_averages( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	switch ( FSC2_MODE )
+	if ( ! lecroy94_tmpl.is_avg_setup[ channel ] )
 	{
-		case TEST :
-			num_avg = lecroy94_tmpl.is_avg_setup[ channel ] ?
-							lecroy94_tmpl.num_avg[ channel ] :
-							LECROY94_TMPL_TEST_NUM_AVG;
-			break;
-
-		case PREPARATION :
-			if ( lecroy94_tmpl.is_avg_setup[ channel ] )
-				no_query_possible( );
-			num_avg = lecroy94_tmpl.num_avg[ channel ];
-			break;
-
-		case EXPERIMENT :
-			if ( lecroy94_tmpl.is_avg_setup[ channel ] )
-				num_avg = lecroy94_tmpl.num_avg[ channel ];
-			else
-				num_avg = lecroy94_tmpl_get_num_avg( channel );
-			break;
+		print( FATAL, "Number of averages can't be determined "
+			   "without a previous acqusition setup.\n" );
+		THROW( EXCEPTION );
 	}
-
-	return vars_push( INT_VAR, num_avg );
+			
+	return vars_push( INT_VAR, lecroy94_tmpl.num_avg[ channel ] );
 }
 
 
@@ -1600,7 +1593,7 @@ Var_T *digitizer_copy_curve( Var_T * v )
 		 src != LECROY94_TMPL_FUNC_E && src != LECROY94_TMPL_FUNC_E )
 	{
 		print( FATAL, "Invalid source channel %s, must be one of the "
-			   "measurement or FUNC channels.\n",
+			   "measurement or function channels.\n",
 			   LECROY94_TMPL_Channel_Names[ src ] );
 		THROW( EXCEPTION );
 	}
@@ -1613,7 +1606,7 @@ Var_T *digitizer_copy_curve( Var_T * v )
 	if ( dest != LECROY94_TMPL_MEM_C && dest != LECROY94_TMPL_MEM_D )
 	{
 		print( FATAL, "Invalid destination channel %s, must be one of the "
-			   "MEM channels\n", LECROY94_TMPL_Channel_Names[ dest ] );
+			   "memory channels\n", LECROY94_TMPL_Channel_Names[ dest ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1629,10 +1622,41 @@ Var_T *digitizer_copy_curve( Var_T * v )
 
 Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
+	int ch;
+	int cnt = 0;
+
+
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+		for ( ch = LECROY94_TMPL_CH1; ch <= LECROY94_TMPL_CH_MAX; ch++ )
+			if ( lecroy94_tmpl.is_displayed[ ch ] )
+				cnt++;
+
+		for ( ch = LECROY94_TMPL_FUNC_E; ch <= LECROY94_TMPL_FUNC_F; ch++ )
+			if ( lecroy94_tmpl.is_avg_setup[ ch ] )
+				cnt++;
+
+		if ( cnt == 0 )
+		{
+			print( FATAL, "Can't start acquisition if with neither a "
+				   "measurement channnel being switched on nor an "
+				   "acquisition being setup.\n" );
+			THROW( EXCEPTION );
+		}
+
 		lecroy94_tmpl_start_acquisition( );
+	}
 
 	return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *digitizer_get_curve_fast( Var_T * v )
+{
+	return digitizer_get_curve( v );
 }
 
 
@@ -1660,9 +1684,11 @@ Var_T *digitizer_get_curve( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_MEM_C  && ch != LECROY94_TMPL_MEM_C &&
 		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel to get a curve from.\n" );
+		print( FATAL, "Can't get a curve from channel %s.\n",
+			   LECROY94_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1707,7 +1733,8 @@ Var_T *digitizer_get_curve( Var_T * v )
 	{
 		if ( w != NULL )
 			length = w->num_points;
-		else if ( lecroy94_tmpl.rec_len[ ch ] == UNDEFINED_REC_LEN )
+		else if ( lecroy94_tmpl.rec_len[ ch ] ==
+				  				              LECROY94_TMPL_UNDEFINED_REC_LEN )
 			length = LECROY94_TMPL_TEST_REC_LEN;
 		else
 			length = lecroy94_tmpl.rec_len[ ch ];
@@ -1720,6 +1747,15 @@ Var_T *digitizer_get_curve( Var_T * v )
 
 	T_free( array );
 	return nv;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *digitizer_get_area_fast( Var_T * v )
+{
+	return digitizer_get_area( v );
 }
 
 
@@ -1747,9 +1783,11 @@ Var_T *digitizer_get_area( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_MEM_C  && ch != LECROY94_TMPL_MEM_C &&
 		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel for measuring an area.\n" );
+		print( FATAL, "Can't get an area for channel %s.\n",
+			   LECROY94_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1868,6 +1906,15 @@ Var_T *digitizer_get_area( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
+Var_T *digitizer_get_amplitude_fast( Var_T * v )
+{
+	return digitizer_get_amplitude( v );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
 Var_T *digitizer_get_amplitude( Var_T * v )
 {
 	Window_T *w;
@@ -1889,9 +1936,11 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ! ( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX ) &&
+		 ch != LECROY94_TMPL_MEM_C  && ch != LECROY94_TMPL_MEM_C &&
 		 ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
 	{
-		print( FATAL, "Invalid channel for measuring an amplitude.\n" );
+		print( FATAL, "Can't get an amplitude for channel %s.\n",
+			   LECROY94_TMPL_Channel_Names[ ch ] );
 		THROW( EXCEPTION );
 	}
 
@@ -2006,18 +2055,6 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 	}
 
 	return ret;
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
-{
-	if ( FSC2_MODE == EXPERIMENT )
-		lecroy94_tmpl_free_running( );
-
-	return vars_push( INT_VAR,1L );
 }
 
 

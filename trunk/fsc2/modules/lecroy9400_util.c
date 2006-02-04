@@ -73,6 +73,66 @@ const char *lecroy9400_ptime( double p_time )
 }
 
 
+/*-----------------------------------------------------------*
+ * Function for checking the trigger delay when the timebase
+ * gets changed
+ *-----------------------------------------------------------*/
+
+double lecroy9400_trigger_delay_check( void )
+{
+	double delay = lecroy9400.trigger_delay;
+	double real_delay;
+
+
+	/* Nothing needs to be done if the trigger delay never was set */
+
+	if ( ! lecroy9400.is_trigger_delay )
+		return delay;
+
+	/* The delay can only be set in units of 1/50 of the timebase */
+
+	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy9400.timebase )
+		         * lecroy9400.timebase;
+
+	/* Check that the trigger delay is within the limits (taking rounding
+	   errors of the order of the current time resolution into account) */
+
+	if ( real_delay > 0.0 &&
+		 real_delay >   10.0 * lecroy9400.timebase
+		              +  0.5 * tpp[ lecroy9400.tb_index ] )
+	{
+		print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
+			   "longer than 10 times the timebase.\n",
+			   lecroy9400_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( real_delay < 0.0 &&
+		 real_delay <   -1.0e4 * lecroy9400.timebase
+		              -  0.5 * tpp[ lecroy9400.tb_index ] )
+	{
+		print( FATAL, "Post-triger delay of %s now is too long, can't be "
+			   "longer that 10,000 times the timebase.\n",
+			   lecroy9400_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	/* If the difference between the requested trigger delay and the one
+	   that can be set is larger than the time resolution warn the user */
+
+	if ( fabs( real_delay - delay ) > tpp[ lecroy9400.tb_index ] )
+	{
+		char *cp = T_strdup( lecroy9400_ptime( delay ) );
+
+		print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
+			   cp, lecroy9400_ptime( real_delay ) );
+		T_free( cp );
+	}
+
+	return real_delay;
+}
+
+
 /*-----------------------------------------------------------------*
  * Deletes a window by removing it from the linked list of windows
  *-----------------------------------------------------------------*/

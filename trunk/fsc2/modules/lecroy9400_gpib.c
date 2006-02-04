@@ -96,6 +96,13 @@ bool lecroy9400_init( const char * name )
 	if ( gpib_write( lecroy9400.device, "IL,OFF", 6 ) == FAILURE )
 		return FAIL;
 
+	/* Set (if required) the trigger delay */
+
+	if ( lecroy9400.is_trigger_delay )
+		lecroy9400_set_trigger_delay( lecroy9400.trigger_delay );
+	else
+		lecroy9400.trigger_delay = lecroy9400_get_trigger_delay( );
+
 	/* Now get the waveform descriptors for all channels */
 
 	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
@@ -478,22 +485,46 @@ bool lecroy9400_get_desc( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_trigger_pos( void )
+double lecroy9400_get_trigger_delay( void )
 {
-	/***** Still needs to be implemented *****/
+	char reply[ 40 ];
+	long length = 40;
+	double delay;
 
-	return 0;
+
+	lecroy9400_talk( "TRD?", reply, &length );
+	reply[ length - 1 ] = '\0';
+	delay = T_atod( reply );
+
+	/* Positive delays (i.e. when pre-trigger is on) get returned as
+	   a percentage of the full horizontal screen (i.e. 10 times the
+	   timebase) while for negative values it's already the delay time */
+
+	if ( delay > 0.0 )
+		delay = 0.1 * lecroy9400.timebase;
+
+	return delay;
 }
 
 
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_pos( double position  UNUSED_ARG )
+void lecroy9400_set_trigger_delay( double delay )
 {
-	/***** Still needs to be implemented *****/
+	char cmd[ 40 ] = "TRD ";
 
-	return OK;
+
+	/* For positive delay (i.e. pre-trigger) the delay must be set as a
+	   percentage of the full horizontal screen width (i.e. 10 times the
+	   timebase) */
+
+	if ( delay > 0.0 )
+		delay = 10.0 * delay / lecroy9400.timebase;
+
+	gcvt( delay, 8, cmd + strlen( cmd ) );
+	if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+		lecroy9400_gpib_failure( );
 }
 
 
@@ -526,7 +557,7 @@ void lecroy9400_set_up_averaging( long channel,
 		return;
 
 	/* If the record length hasn't been set use the number of points on the
-	   screen (which depends on the time base). Otherwise check that the
+	   screen (which depends on the timebase). Otherwise check that the
 	   number we got isn't larger than the number of points on the screen
 	   and, if necessary reduce it. */
 
@@ -709,14 +740,6 @@ void lecroy9400_get_curve( int        ch,
 
 	T_free( data );
 	is_acquiring = UNSET;
-}
-
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-void lecroy9400_free_running( void )
-{
 }
 
 

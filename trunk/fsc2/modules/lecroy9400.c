@@ -91,7 +91,7 @@ long na[ 16 ] = {   10,    20,    50,   100,    200,    500,   1000,    2000,
 long cl[ 10 ] = { 50, 125, 250, 625, 1250, 2500, 6250, 12500, 25000, 32000 };
 
 /* Memory limits for averaging, i.e. the maximum number of points that can be
-   averaged for the different time bases - not too surprising this is always
+   averaged for the different timebases - not too surprising this is always
    10 times the number of points per division, i.e. the number of points
    displayed */
 
@@ -130,13 +130,13 @@ int lecroy9400_init_hook( void )
 	lecroy9400.is_reacting = UNSET;
 	lecroy9400.num_used_channels = 0;
 
-	lecroy9400.w           = NULL;
-	lecroy9400.is_timebase = UNSET;
-	lecroy9400.is_trig_pos = UNSET;
-	lecroy9400.num_windows = 0;
-	lecroy9400.data_source = LECROY9400_UNDEF;
-	lecroy9400.meas_source = LECROY9400_UNDEF;
-	lecroy9400.lock_state  = SET;
+	lecroy9400.w                = NULL;
+	lecroy9400.is_timebase      = UNSET;
+	lecroy9400.is_trigger_delay = UNSET;
+	lecroy9400.num_windows      = 0;
+	lecroy9400.data_source      = LECROY9400_UNDEF;
+	lecroy9400.meas_source      = LECROY9400_UNDEF;
+	lecroy9400.lock_state       = SET;
 
 	for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
 		lecroy9400.channels_in_use[ i ] = UNSET;
@@ -343,24 +343,11 @@ Var_T *digitizer_timebase( Var_T * v )
 				return vars_push( FLOAT_VAR, lecroy9400.timebase );
 		}
 
-	if ( FSC2_MODE != PREPARATION )
-	{
-		print( FATAL, "Digitizer time base can only be set in the "
-			   "PREPARATION section.\n" );
-		THROW( EXCEPTION );
-	}
-
-	if ( lecroy9400.is_timebase )
-	{
-		print( FATAL, "Digitizer time base has already been set.\n" );
-		THROW( EXCEPTION );
-	}
-
-	timebase = get_double( v, "time base" );
+	timebase = get_double( v, "timebase" );
 
 	if ( timebase <= 0 )
 	{
-		print( FATAL, "Invalid zero or negative time base: %s.\n",
+		print( FATAL, "Invalid zero or negative timebase: %s.\n",
 			   lecroy9400_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
@@ -407,6 +394,23 @@ Var_T *digitizer_timebase( Var_T * v )
 	lecroy9400.timebase = tb[ TB ];
 	lecroy9400.tb_index = TB;
 	lecroy9400.is_timebase = SET;
+
+	/* Now check for the trigger delay (if it's set) if it fits with the new
+	   timebase setting, and based on this the window positions and widths */
+
+	lecroy9400.trigger_delay = lecroy9400_trigger_delay_check( );
+//	lecroy9400_all_windows_check( );
+
+	/* In the experiment set the timebase and also the trigger delay, at least
+	   if it was already set */
+
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		lecroy9400_set_timebase( lecroy9400.timebase );
+
+		if ( lecroy9400.is_trigger_delay )
+			lecroy9400_set_trigger_delay( lecroy9400.trigger_delay );
+	}
 
 	return vars_push( FLOAT_VAR, lecroy9400.timebase );
 }
@@ -763,53 +767,99 @@ Var_T *digitizer_record_length( Var_T * v )
 }
 
 
-/*---------------------------------------------------------------------*
- * Function either sets or returns the amount of pretrigger as a value
- * between 0 and 1, which, when multiplied by the record length gives
- * the number of points recorded before the trigger.
- *---------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * digitizer_trigger_delay() sets or determines the trigger delay,
+ * positive values (up to the full horizontal width of the screen,
+ * i.e. 10 times the timebase) are for pretrigger while negative
+ * values (up to 10,000 times the timebase) are for starting the
+ * acquisition after the trigger. Time resolution of the trigger
+ * delay is 1/50 of the timebase.
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_position( Var_T * v )
+Var_T *digitizer_trigger_delay( Var_T * v )
 {
-	double trig_pos;
+	double delay;
+	double real_delay;
 
 
-	if ( v == NULL )
+	if ( v == 0 )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				no_query_possible( );
+				if ( ! lecroy9400.is_trigger_delay )
+					no_query_possible( );
+				return vars_push( FLOAT_VAR, lecroy9400.trigger_delay );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, lecroy9400.is_trig_pos ?
-								             lecroy9400.trig_pos :
-								             LECROY9400_TEST_TRIG_POS );
+				return vars_push( FLOAT_VAR, lecroy9400.is_trigger_delay ?
+								  lecroy9400.trigger_delay :
+								  LECROY9400_TEST_TRIG_DELAY );
 
 			case EXPERIMENT :
-				lecroy9400.trig_pos = lecroy9400_get_trigger_pos( );
-				lecroy9400.is_trig_pos = SET;
-				return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
+				lecroy9400.trigger_delay = lecroy9400_get_trigger_delay( );
+				return vars_push( FLOAT_VAR, lecroy9400.trigger_delay );
 		}
 
-	trig_pos = get_double( v, "trigger position" );
-
-	if ( trig_pos < 0.0 || trig_pos > 1.0 )
-	{
-		print( FATAL, "Invalid trigger position: %f, must be in interval "
-			   "[0,1].\n", trig_pos );
-		THROW( EXCEPTION );
-	}
+	delay = get_double( v, "trigger delay" );
 
 	too_many_arguments( v );
 
-	lecroy9400.trig_pos = trig_pos;
-	lecroy9400.is_trig_pos = SET;
+	if ( FSC2_MODE == PREPARATION && ! lecroy9400.is_timebase )
+	{
+		print( FATAL, "Can't set trigger delay in PREPARATION "
+			   "section while timebase hasn't been set.\n" );
+		THROW( EXCEPTION );
+	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ! lecroy9400_set_trigger_pos( lecroy9400.trig_pos ) )
-		lecroy9400_gpib_failure( );
+	/* The delay can only be set in units of 1/50 of the timebase */
 
-	return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
+	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy9400.timebase )
+		         * lecroy9400.timebase;
+
+	/* Check that the trigger delay is within the limits (taking rounding
+	   errors of the order of the current time resolution into account) */
+
+	if ( real_delay > 0.0 &&
+		 real_delay >   10.0 * lecroy9400.timebase
+		              +  0.5 * tpp[ lecroy9400.tb_index ] )
+	{
+		print( FATAL, "Pre-trigger delay of %s is too long, can't be longer "
+			   "than 10 times the timebase.\n",
+			   lecroy9400_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( real_delay < 0.0 &&
+		 real_delay <   -1.0e4 * lecroy9400.timebase
+		              -  0.5 * tpp[ lecroy9400.tb_index ] )
+	{
+		print( FATAL, "Post-triger delay of %s is too long, can't be longer "
+			   "than 10,000 times the timebase.\n",
+			   lecroy9400_ptime( real_delay ) );
+		THROW( EXCEPTION );
+	}
+
+	/* If the difference between the requested trigger delay and the one
+	   that can be set is larger than the time resolution warn the user */
+
+	if ( fabs( real_delay - delay ) > tpp[ lecroy9400.tb_index ] )
+	{
+		char *cp = T_strdup( lecroy9400_ptime( delay ) );
+
+		print( WARN, "Trigger delay has to be adjusted from %s to %s.\n",
+			   cp, lecroy9400_ptime( real_delay ) );
+		T_free( cp );
+	}
+
+	/* Finally set the delay */
+
+	if ( FSC2_MODE == EXPERIMENT )
+		lecroy9400_set_trigger_delay( real_delay );
+
+	lecroy9400.trigger_delay    = real_delay;
+	lecroy9400.is_trigger_delay = SET;
+
+	return vars_push( FLOAT_VAR, real_delay );
 }
 
 
@@ -1030,18 +1080,6 @@ static Var_T *get_curve( Var_T * v,
 
 	T_free( array );
 	return nv;
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
-Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
-{
-	if ( FSC2_MODE == EXPERIMENT )
-		lecroy9400_free_running( );
-
-	return vars_push( INT_VAR,1L );
 }
 
 

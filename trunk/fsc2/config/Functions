@@ -185,10 +185,15 @@ digitizer_window_position, -1, ALL;     // set or get window position
 digitizer_window_width, -1, ALL;        // set or get window width
 digitizer_display_channel, -1, PREP;    //
 digitizer_timebase, -1, ALL;            // set or get the time base
+digitizer_interleave_mode, -1, ALL;     // set or get SS/RIS mode
 digitizer_time_per_point, 0, EXP;       // returns time per point
 digitizer_sensitivity, -1, ALL;         // set or get the sensitivity
 digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, -1, ALL;     // set or get trigger channel
+digitizer_trigger_level, -1, ALL;       // set or get trigger level
+digitizer_trigger_slope, -1, ALL;       // set or get trigger slope
+digitizer_trigger_coupling, -1, ALL;    // set or get trigger coupling
+digitizer_trigger_mode, -1, ALL;        // set or get trigger mode
 digitizer_record_length, -1, ALL;       // set or get record_length
 digitizer_trigger_position, -1, ALL;    // set or get trigger position (deprec)
 digitizer_trigger_delay, -1, ALL;       // set pre/post trigger position
@@ -200,8 +205,8 @@ digitizer_get_curve_fast, -1, EXP;
 digitizer_get_amplitude, -1, EXP;
 digitizer_get_amplitude_fast, -1, EXP;
 digitizer_run, 0, EXP;
-digitizer_lock_keyboard, -1, EXP;       // Lock or unlock the keyboard
-digitizer_copy_curve, 2, EXP;           // TDSxxx only
+digitizer_lock_keyboard, -1, EXP;       // Lock/unlock keyboard (TDSxxx only)
+digitizer_copy_curve, 2, EXP;
 digitizer_command, 1, EXP;
 
 digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
