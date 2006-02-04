@@ -41,7 +41,7 @@
  *   header file me6x00_drv.h.
  *
  *   Responsible for this version:
- *   Jens Thoms Toerring <Jens.Toerring@physik.fu-berlin.de>
+ *   Jens Thoms Toerring <jt@toerring.de>
  */
 
 
@@ -172,39 +172,86 @@ MODULE_DEVICE_TABLE( pci, me6x00_pci_tbl );
 
 /* Prototypes */
 
-static int me6x00_open( struct inode *, struct file * );
-static int me6x00_release( struct inode *, struct file * );
-static int me6x00_ioctl( struct inode *, struct file *,
-			 unsigned int , unsigned long );
-static void me6x00_isr( int, void *, struct pt_regs * );
+static int me6x00_open( struct inode * /* inode_p */,
+			struct file  * /* file_p  */ );
+
+static int me6x00_release( struct inode * /* inode_p */,
+			   struct file  * /* file_p  */ );
+
+static int me6x00_ioctl( struct inode * /* inode_p */,
+			 struct file  * /* file_p  */,
+			 unsigned int   /* service */,
+			 unsigned long  /* arg     */ );
+
+
+static void me6x00_isr( int              /* irq    */,
+			void *           /* dev_id */,
+			struct pt_regs * /* dummy  */);
 
 static int me6x00_find_boards( void );
-static int me6x00_init_board( int, struct pci_dev * );
-static int me6x00_xilinx_download( me6x00_info_st *info );
-static int me6x00_reset_board( int, int );
 
-static int me6x00_board_info( me6x00_dev_info *arg, int minor );
-static int me6x00_board_keep_volts( me6x00_keep_st *arg, int minor );
-static int me6x00_set_mode( me6x00_mode_st *, int );
-static int me6x00_start_stop_conv( me6x00_stasto_st *, int );
-static int me6x00_clear_enable_fifo( me6x00_endis_st *, int );
-static int me6x00_endis_extrig( me6x00_endis_st *, int );
-static int me6x00_rifa_extrig( me6x00_rifa_st *, int );
-static int me6x00_set_timer( me6x00_timer_st *arg, int minor );
-static int me6x00_write_single( me6x00_single_st *arg, int minor );
-static int me6x00_write_continuous( me6x00_write_st *arg, int minor );
-static int me6x00_write_wraparound( me6x00_write_st *arg, int minor );
 
-static int me6x00_buf_count( me6x00_circ_buf_st * );
-static int me6x00_space_to_end( me6x00_circ_buf_st * );
-static int me6x00_values_to_end( me6x00_circ_buf_st * );
+static int me6x00_init_board( int              /* board_count */,
+			      struct pci_dev * /* dev         */ );
 
-static void me6x00_outb( unsigned char value, unsigned int port );
-static void me6x00_outw( unsigned short value, unsigned int port );
-static void me6x00_outl( unsigned int value, unsigned int port );
-static unsigned char  me6x00_inb( unsigned int port );
-static unsigned short me6x00_inw( unsigned int port );
-static unsigned int   me6x00_inl( unsigned int port );
+static int me6x00_xilinx_download( me6x00_info_st * info );
+
+static int me6x00_reset_board( int /* board */,
+			       int /* from  */ );
+
+static int me6x00_board_info( me6x00_dev_info * /* arg   */,
+			      int               /* minor */ );
+
+static int me6x00_board_keep_volts( me6x00_keep_st * /* arg   */,
+				    int              /* minor */ );
+
+static int me6x00_set_mode( me6x00_mode_st * /* arg   */,
+			    int              /* minor */);
+
+static int me6x00_start_stop_conv( me6x00_stasto_st * /* arg   */,
+				   int                /* minor */ );
+
+static int me6x00_clear_enable_fifo( me6x00_endis_st * /* arg   */,
+				     int               /* minor */ );
+
+static int me6x00_endis_extrig( me6x00_endis_st * /* arg   */,
+				int               /* minor */ );
+
+static int me6x00_rifa_extrig( me6x00_rifa_st * /* arg   */,
+			       int              /* minor */ );
+
+static int me6x00_set_timer( me6x00_timer_st * /* arg   */,
+			     int               /* minor */ );
+
+static int me6x00_write_single( me6x00_single_st * /* arg   */,
+				int                /* minor */ );
+
+static int me6x00_write_continuous( me6x00_write_st * /* arg   */,
+				    int               /* minor */ );
+
+static int me6x00_write_wraparound( me6x00_write_st * /* arg   */,
+				    int               /* minor */ );
+
+static int me6x00_buf_count( me6x00_circ_buf_st * /* buf */ );
+
+static int me6x00_space_to_end( me6x00_circ_buf_st * /* buf */ );
+
+static int me6x00_values_to_end( me6x00_circ_buf_st * /* buf */);
+
+static void me6x00_outb( unsigned char /* value */,
+			 unsigned int  /* port  */ );
+
+static void me6x00_outw( unsigned short /* value */,
+			 unsigned int   /* port  */ );
+
+static void me6x00_outl( unsigned int /* value */,
+			 unsigned int /* port */ );
+
+static unsigned char  me6x00_inb( unsigned int /* port */ );
+
+static unsigned short me6x00_inw( unsigned int /* port */ );
+
+static unsigned int   me6x00_inl( unsigned int /* port */ );
 
 
 /* File operations provided by the driver */
@@ -529,7 +576,8 @@ static int me6x00_find_boards( void )
  * Modification: JTT
  */
 
-static int me6x00_init_board( int board_count, struct pci_dev *dev )
+static int me6x00_init_board( int              board_count,
+			      struct pci_dev * dev )
 {
 	unsigned int i;
 	me6x00_info_st *info;
@@ -712,7 +760,7 @@ static int me6x00_init_board( int board_count, struct pci_dev *dev )
 #define XILINX_BUSY_COUNT 100    /* I found that none of the loops where   */
 #define XILINX_DONE_COUNT 100    /* run more than once                     */
 
-static int me6x00_xilinx_download( me6x00_info_st *info )
+static int me6x00_xilinx_download( me6x00_info_st * info )
 {
 	int size = 0;
 	int value = 0;
@@ -835,7 +883,8 @@ static int me6x00_xilinx_download( me6x00_info_st *info )
  * Modification: JTT
  */
 
-static int me6x00_reset_board( int board_count, int from )
+static int me6x00_reset_board( int board_count,
+			       int from )
 {
 	unsigned int i;
 	unsigned int base;
@@ -928,7 +977,8 @@ static int me6x00_reset_board( int board_count, int from )
  * Modification: JTT
  */
 
-static int me6x00_open( struct inode *inode_p, struct file *file_p )
+static int me6x00_open( struct inode * inode_p,
+			struct file *  file_p )
 {
 	int minor = 0;
 	int i;
@@ -1025,7 +1075,8 @@ static int me6x00_open( struct inode *inode_p, struct file *file_p )
  * Modification: JTT
  */
 
-static int me6x00_release( struct inode *inode_p, struct file *file_p )
+static int me6x00_release( struct inode * inode_p,
+			   struct file *  file_p )
 {
 	unsigned int i;
 	int minor = 0;
@@ -1092,8 +1143,10 @@ static int me6x00_release( struct inode *inode_p, struct file *file_p )
  * Modification: JTT
  */
 
-static int me6x00_ioctl( struct inode * inode_p, struct file *file_p,
-			 unsigned int service, unsigned long arg )
+static int me6x00_ioctl( struct inode * inode_p,
+			 struct file *  file_p,
+			 unsigned int   service,
+			 unsigned long  arg )
 {
 	int minor = 0;
 
@@ -1202,7 +1255,8 @@ static int me6x00_ioctl( struct inode * inode_p, struct file *file_p,
  * Modification:
  */
 
-static int me6x00_board_info( me6x00_dev_info *arg, int minor )
+static int me6x00_board_info( me6x00_dev_info * arg,
+			      int               minor )
 {
 	me6x00_dev_info dev_info;
 	me6x00_info_st *info;
@@ -1250,7 +1304,8 @@ static int me6x00_board_info( me6x00_dev_info *arg, int minor )
  * Modification:
  */
 
-static int me6x00_board_keep_volts( me6x00_keep_st *arg, int minor )
+static int me6x00_board_keep_volts( me6x00_keep_st * arg,
+				    int              minor )
 {
 	me6x00_keep_st keep;
 	
@@ -1295,7 +1350,8 @@ static int me6x00_board_keep_volts( me6x00_keep_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_set_mode( me6x00_mode_st *arg, int minor )
+static int me6x00_set_mode( me6x00_mode_st * arg,
+			    int              minor )
 {
 	me6x00_mode_st dacmode;
 	unsigned int reg = 0;
@@ -1360,7 +1416,8 @@ static int me6x00_set_mode( me6x00_mode_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_start_stop_conv( me6x00_stasto_st *arg, int minor )
+static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
+				   int                minor )
 {
 	me6x00_stasto_st conv;
 	me6x00_info_st *info;
@@ -1468,7 +1525,8 @@ static int me6x00_start_stop_conv( me6x00_stasto_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_clear_enable_fifo( me6x00_endis_st *arg, int minor )
+static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
+				     int               minor )
 {
 	me6x00_endis_st fifo;
 	unsigned int reg;
@@ -1535,7 +1593,8 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_endis_extrig( me6x00_endis_st *arg, int minor )
+static int me6x00_endis_extrig( me6x00_endis_st * arg,
+				int               minor )
 {
 	me6x00_endis_st trig;
 	unsigned int reg;
@@ -1603,7 +1662,8 @@ static int me6x00_endis_extrig( me6x00_endis_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_rifa_extrig( me6x00_rifa_st *arg, int minor )
+static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
+			       int              minor )
 {
 	me6x00_rifa_st edge;
 	unsigned int reg;
@@ -1672,7 +1732,8 @@ static int me6x00_rifa_extrig( me6x00_rifa_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_set_timer( me6x00_timer_st *arg, int minor )
+static int me6x00_set_timer( me6x00_timer_st * arg,
+			     int               minor )
 {
 	me6x00_timer_st timer;
 	unsigned int port;
@@ -1738,7 +1799,8 @@ static int me6x00_set_timer( me6x00_timer_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_write_single( me6x00_single_st *arg, int minor )
+static int me6x00_write_single( me6x00_single_st * arg,
+				int                minor )
 {
 	wait_queue_head_t wait;
 	unsigned int port;
@@ -1836,7 +1898,8 @@ static int me6x00_write_single( me6x00_single_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_write_continuous( me6x00_write_st *arg, int minor )
+static int me6x00_write_continuous( me6x00_write_st * arg,
+				    int               minor )
 {
 	me6x00_info_st *info;
 	me6x00_write_st write;
@@ -2035,7 +2098,8 @@ static int me6x00_write_continuous( me6x00_write_st *arg, int minor )
  * Modification: JTT
  */
 
-static int me6x00_write_wraparound( me6x00_write_st *arg, int minor )
+static int me6x00_write_wraparound( me6x00_write_st * arg,
+				    int               minor )
 {
 	me6x00_info_st *info;
 	me6x00_write_st write;
@@ -2183,7 +2247,9 @@ static int me6x00_write_wraparound( me6x00_write_st *arg, int minor )
  * Modification: JTT
  */
 
-static void me6x00_isr( int irq, void *dev_id, struct pt_regs *dummy )
+static void me6x00_isr( int              irq,
+			void *           dev_id,
+			struct pt_regs * dummy )
 {
 	me6x00_info_st *info;
 	unsigned int reg1;
@@ -2349,7 +2415,8 @@ static void me6x00_isr( int irq, void *dev_id, struct pt_regs *dummy )
  * Modification: JTT
  */
 
-static int me6x00_buf_count( me6x00_circ_buf_st *buf ) {
+static int me6x00_buf_count( me6x00_circ_buf_st * buf )
+{
 	return ( buf->head - buf->tail ) & ( ME6X00_BUFFER_COUNT - 1 );
 }
 
@@ -2372,7 +2439,7 @@ static int me6x00_buf_count( me6x00_circ_buf_st *buf ) {
  * Modification: JTT
  */
 
-static int me6x00_values_to_end( me6x00_circ_buf_st *buf )
+static int me6x00_values_to_end( me6x00_circ_buf_st * buf )
 {
 	int end;
 	int n;
@@ -2405,7 +2472,7 @@ static int me6x00_values_to_end( me6x00_circ_buf_st *buf )
  * Modification: JTT
  */
 
-static int me6x00_space_to_end( me6x00_circ_buf_st *buf )
+static int me6x00_space_to_end( me6x00_circ_buf_st * buf )
 {
 	int end;
 	int n;
@@ -2434,7 +2501,8 @@ static int me6x00_space_to_end( me6x00_circ_buf_st *buf )
  * Modification:
  */
 
-static void me6x00_outb( unsigned char value, unsigned int port )
+static void me6x00_outb( unsigned char value,
+			 unsigned int  port )
 {
 	PORT_PDEBUG( "--> 0x%02X port 0x%04X\n", value, port );
 	outb( value, port );
@@ -2456,7 +2524,8 @@ static void me6x00_outb( unsigned char value, unsigned int port )
  * Modification:
  */
 
-static void me6x00_outw( unsigned short value, unsigned int port )
+static void me6x00_outw( unsigned short value,
+			 unsigned int   port )
 {
 	PORT_PDEBUG( "--> 0x%04X port 0x%04X\n", value, port );
 	outw( value, port );
@@ -2478,7 +2547,8 @@ static void me6x00_outw( unsigned short value, unsigned int port )
  * Modification:
  */
 
-static void me6x00_outl( unsigned int value, unsigned int port )
+static void me6x00_outl( unsigned int value,
+			 unsigned int port )
 {
 	PORT_PDEBUG( "--> 0x%08X port 0x%04X\n", value, port );
 	outl( value, port );

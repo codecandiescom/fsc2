@@ -1592,10 +1592,11 @@ Var_T *digitizer_copy_curve( Var_T * v )
 						get_strict_long( v, "source channel number" ), UNSET );
 
 	if ( ! ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX ) &&
+		 src != LECROY94_TMPL_EXP_A  && src != LECROY94_TMPL_EXP_B &&
+		 src != LECROY94_TMPL_MEM_C  && src != LECROY94_TMPL_MEM_D &&
 		 src != LECROY94_TMPL_FUNC_E && src != LECROY94_TMPL_FUNC_E )
 	{
-		print( FATAL, "Invalid source channel %s, must be one of the "
-			   "measurement or function channels.\n",
+		print( FATAL, "Invalid source channel %s.\n",
 			   LECROY94_TMPL_Channel_Names[ src ] );
 		THROW( EXCEPTION );
 	}
@@ -1612,7 +1613,7 @@ Var_T *digitizer_copy_curve( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT )
+	if ( FSC2_MODE == EXPERIMENT && src != dest )
 		lecroy94_tmpl_copy_curve( src, dest );
 
 	return vars_push( INT_VAR, 1L );

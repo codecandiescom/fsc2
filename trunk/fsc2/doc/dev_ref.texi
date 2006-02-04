@@ -1415,20 +1415,19 @@ channels, 2 function channels (needed for averaging).
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
-@c @ref{@item digitizer_define_window()}
+@c @ref{digitizer_define_window()}
 @item @ref{digitizer_timebase()}
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_averaging()}
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
-@item @ref{@item digitizer_trigger_delay()}
+@item @ref{digitizer_trigger_delay()}
 @item digitizer_meas_channel_ok()
-@item @ref{@item digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
-@c @ref{@item digitizer_get_curve_fast()}
-@c @ref{@item digitizer_run()}
+@item @ref{digitizer_get_curve_fast()}
 @end table
 
 

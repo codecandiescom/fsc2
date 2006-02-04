@@ -161,7 +161,7 @@ FOR I = 1:10 {
  		P332.LEN = 100ns;
  		P332.START = P33.START + P33.LEN - P332.LEN;
  		P332.DLEN = P33.DLEN;
- 		P33.LEN = 0;
+ 		P33.LEN = 0s;
  	}
 	pulser_update( );
 	digitizer_start_acquisition( ); 

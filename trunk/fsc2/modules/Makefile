@@ -63,7 +63,7 @@ lecroy9420      := lecroy9420.c lecroy9420_gpib.c lecroy9450_util.c
 lecroy9424      := lecroy9424.c lecroy9424_gpib.c lecroy9450_util.c
 lecroy9424e     := lecroy9424e.c lecroy9424e_gpib.c lecroy9424e_util.c
 lecroy9450      := lecroy9450.c lecroy9450_gpib.c lecroy9450_util.c
-lecroy_wr2      := lecroy_wr2.c lecroy_wr2_gpib.c lecroy_wr2_util.c
+#lecroy_wr2      := lecroy_wr2.c lecroy_wr2_gpib.c lecroy_wr2_util.c
 rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
 				   spectrapro_300i_lexer.c
@@ -97,8 +97,9 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a ips20_4    \
 				   pt2025 sr510 sr530 sr810 sr830 thurlby330 mcn700_2000
 
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a      \
-				   $(hp864_list) lecroy9400 lecroy_wr2 rs690 rs_sml01  \
+				   $(hp864_list) lecroy9400 rs690 rs_sml01  \
 	               $(tds_list) $(lecroy94_list)
+#lecroy_wr2
 endif
 
 ifneq ($(NUM_SERIAL_PORTS),0)
