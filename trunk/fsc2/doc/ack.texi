@@ -47,7 +47,7 @@ the very first version. Later also Burkhard Endeward had to deal with
 it. Then, in Berlin, Stefan Weber, Chris W.@: M.@: Kay, Gerriet Eilers,
 Andreas Kuppig, Heike M@"ogling, Michael Fuhs, Anton Savitsky, Alexander
 Schnegg, Radek Kowalczyk, Martin Fuchs, Celine Els@"asser, Marc Brecht,
-Hauke Studier, Jana Nieder and Irina Karayagina took over. Finally, also Iwo
+Hauke Studier, Jana Nieder and Irina Karyagina took over. Finally, also Iwo
 Gatlik, Tomasz Motylewski and Daniela Hristova (Basel/Graz) got some share
 of the fun. Another important contributor is Huib Block (Leiden). I would
 like to thank them not only for the constant stream of bug reports and
