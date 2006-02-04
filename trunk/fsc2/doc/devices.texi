@@ -371,7 +371,7 @@ For both the Oxford magnet sweep power supplies (@code{ips20_4} and
 
 For the @strong{Bruker ER032M} field controller setting a field with
 this function while also having initialized the magnet using
-@code{magnet_setup()} may result in deviations between the requested
+@ref{magnet_setup()} may result in deviations between the requested
 field and the real field of up to @w{25 mG}. If the maximum field
 deviation was larger than @w{5 mG} at the end of the test run as well
 as the experiment the maximum field deviation is printed out.
@@ -381,11 +381,11 @@ as the experiment the maximum field deviation is printed out.
 @findex sweep_up()
 @item sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
-the function @code{magnet_setup()} (see above) has been called
+the function @ref{magnet_setup()} (see above) has been called
 before. It doesn't take an argument and will sweep up the magnet by the
-field step size value set in the @code{magnet_setup()} function.  The
+field step size value set in the @ref{magnet_setup()} function.  The
 actual size of the step is @b{not} be controlled using the gaussmeter
-and is thus faster than e.g.@: @code{set_field()}. 
+and is thus faster than e.g.@: @ref{set_field()}. 
 
 The function returns the new field value.
 
@@ -393,10 +393,10 @@ For the @strong{AEG} magnets the precision of the field sweep depends on
 the step size. While the precision is usually quite good for step sizes
 of up to @w{1 G}, with much larger step sizes it may deteriorate quite
 significantly. It sometimes helps to add a short waiting time (use
-function @code{wait()}) after a sweep step to allow the field to settle
+function @ref{wait()}) after a sweep step to allow the field to settle
 at the new point. On the other hand, it then might be faster (and more
 reliable) not to use the sweep functions at all but the
-@code{set_field()} function (which always checks and if necessary
+@ref{set_field()} function (which always checks and if necessary
 re-adjusts the field if necessray) in these cases instead.
 
 This function is not available for the Oxford power supplyies (modules
@@ -407,23 +407,23 @@ This function is not available for the Oxford power supplyies (modules
 @anchor{sweep_down()}
 @findex sweep_down()
 @item sweep_down()
-This is the exact analog to the function @code{sweep_up()} but will
+This is the exact analog to the function @ref{sweep_up()} but will
 sweep the magnetic field down instead of up by the field step size
-defined in @code{magnet_setup()}. The function can only be called in the
+defined in @ref{magnet_setup()}. The function can only be called in the
 @code{EXPERIMENT} section.
 
 The function returns the new field value.
 
 This function is not available for the Oxford magnet power supplies
 (modules @code{ips20_4} and @code{ips120_10}). Use the function
-@code{magnet_sweep} instead.
+@ref{magnet_sweep()} instead.
 
 
 @anchor{reset_field()}
 @findex reset_field()
 @item reset_field()
 This function resets the magnetic field to the start field value defined
-in @code{magnet_setup()} (which has to be called before).
+in a previous call of the function @ref{magnet_setup()}.
 
 The function returns the new field value.
 
@@ -488,9 +488,8 @@ argument of @code{-1} to start a downward sweep or, finally, an argument
 of @code{0} to stop a running sweep.
 
 To be able to do a sweep a sweep rate must have been set. This can be
-either done by a call of the function @code{magnet_setup()} (see above)
-within the @code{PREPARATIONS} section or by calling
-@code{magnet_sweep_rate()} (see below).
+either done by a call of the function @ref{magnet_setup()} within the
+@code{PREPARATIONS} section or by calling @ref{magnet_sweep_rate()}.
 
 The function can also be called without an argument, in which case
 either @code{1}, @code{-1} or @code{0} is returned if the magnet is
@@ -589,7 +588,7 @@ character ('@code{#}') are taken to be comments.
 The module @code{hfs_fc} per default tries to determine the data
 described above by doing a measurement of the minimum and maximum field
 position at the start of each experiment. But if in the
-@code{PREPARATIONS} section @code{magnet_calibration_file()} is invoked
+@code{PREPARATIONS} section @ref{magnet_calibration_file()} is invoked
 the data from the configuration file are used instead, thus avoiding the
 lengthy measurement.
 
@@ -702,7 +701,7 @@ will be reported as being @code{123.63 G}.
 @anchor{find_field()}
 @findex find_field()
 @item find_field()
-Use of this function is deprecated, use @code{gaussmeter_field()}
+Use of this function is deprecated, use @ref{gaussmeter_field()}
 instead. It is defined in the device modules @code{er035m} and
 @code{er035m_s}. It returns the current value of the magnetic field in
 Gauss.  The function can only be called in the @code{EXPERIMENT}
@@ -712,7 +711,7 @@ section.
 @anchor{measure_field()}
 @findex measure_field()
 @item measure_field()
-Use of this function is deprecated, use @code{gaussmeter_field()}
+Use of this function is deprecated, use @ref{gaussmeter_field()}
 instead. It is defined in the device drivers @code{er035m_sa},
 @code{er035m_sas} and @code{pt2025}. It measures the current field and
 returns the value in Gauss. The function can only be called in the
@@ -879,9 +878,9 @@ If no argument is specified the 'X' signal is returned. If a parameter
 is passed to the function the value at the corresponding channel is
 returned. Possible channel numbers and their meaning are (please note
 that some of these can only be used when in auto-acquisition mode, see
-below in the explanation of the functions @code{lockin_auto_setup()} and
-@code{lockin_auto_acquisition} and some even then with the
-@strong{SR830} only):
+below in the explanation of the functions @ref{lockin_auto_setup()} and
+@ref{lockin_auto_acquisition()} and some even then with the @strong{SR830}
+only):
 @table @samp
 @item 1
 'X' signal
@@ -941,7 +940,7 @@ sample one data type in this mode (because it only has one displayable
 channel), while the @code{SR830} can sample two data channels
 simultaneously.
 
-@code{lockin_auto_setup()} @strong{must} be invoked to setup
+@ref{lockin_auto_setup()} @strong{must} be invoked to setup
 auto-acquisition (if not called auto-acquisition can't be started). The
 first parameter passed to the function is the sample time, i.e.@: the
 time interval at which data are sampled. Sample times can range between
@@ -959,7 +958,7 @@ The next one or two parameter define which data type should be sampled
 in auto-acquisition mode (the @code{SR810} only accepts one data type
 arguments while the @code{SR830} accepts two). You may specify integer
 numbers with exactly the same meaning as the arguments to the function
-@code{lockin_get_data()}. This will also automatically switch the type
+@ref{lockin_get_data()}. This will also automatically switch the type
 of data displayed on the front side channels to the specified values.
 Not all combinations are possible, the following list shows which
 combinations are possible:
@@ -990,12 +989,12 @@ This function is only available for the Stanford Research lock-in
 amplifiers @strong{SR810} and @strong{SR830}. It allows to start or stop
 the automatic acquisition of data at constant time intervals. Before
 this function can be used auto-acquisition must be initialized by a call
-of the function @code{lockin_auto_setup()}.
+of the function @ref{lockin_auto_setup()}.
 
 When called with an argument of @code{1} (or a string @code{"ON}")
 auto-acquisition is started. If you now request data from one of the
 channels configured to be used in @code{lockin_auto_setup()} via the
-function @code{lockin_get_data()} the next data sample from the internal
+function @ref{lockin_get_data()} the next data sample from the internal
 buffer of the lock-in amplifier will be returned (instead of returning
 the value at the moment of the call of the function).
 
@@ -1406,9 +1405,9 @@ possible time bases depend on the model, please check the manual.
 For the @strong{LeCroy} digitizers (except the @strong{9400} model)
 interleaved sample (RIS) mode will be automatically switched on if
 the selected timebase requires it (see the manuals at which timebase
-settings RIS only or single shot mode is possible and required). Please
-also note that changing the timebase for these digitizers also can lead
-to changes in the number of points for a trace.
+settings RIS or single shot mode is only possible). Changing the
+timebase for these digitizers also can lead to changes in the number
+of points of a trace.
 
 Please note that trying to change the timebase may lead to the program
 getting aborted if the new timebase setting isn't compatible with a
@@ -1431,7 +1430,7 @@ measured by the digitizer.
 @findex digitizer_interleave_mode()
 @item digitizer_interleave_mode()
 This function is only available for the @strong{LeCroy} digitizers (except
-the @code{9400} model). It allows to switch between interleaved (RIS) and
+the @strong{9400} model). It allows to switch between interleaved (RIS) and
 single shot (SS) mode, given that setting the mode is compatible with the
 currently selected timebase. Please note that by changing the timebase
 interleaved mode may get switched on or off automatically.
@@ -1545,7 +1544,7 @@ only in the @code{EXPERIMENT} section.
 
 For the @strong{LeCroy} oscilloscopes this function can only be used in
 query mode and returns the number of averages that has been set in a
-previous call of @code{digitizer_averaging()}. It needs exactly one
+previous call of @ref{digitizer_averaging()}. It needs exactly one
 argument, the the channel used to do the averaging, i.e.@: either
 @code{FUNC_E} or @code{FUNC_F}.
 
@@ -1769,8 +1768,8 @@ don't allow post-trigger acquisitions.
 If called without an argument the current setting of the pre- or post-trigger
 delay is returned. Post-trigger acquisitions can only done with the
 @strong{LeCroy} oszilloscopes (where the maximum pre-trigger delay is
-typically 10 times the timebase and the maximum post-trigger delay 10,000
-times the timebase setting).
+typically 10 times the timebase and the maximum post-trigger delay
+@code{10,000} times the timebase setting).
 
 Please note that, if a trigger delay has been set and a new timebase
 gets set, the program may get aorted if the requested trigger delay
@@ -1824,7 +1823,7 @@ position and width are adjusted to the nearest allowed values.
 @item digitizer_change_window()
 This function can be used to change the position and width of an already
 existing window. As the first parameter the function expects a window
-number as returned by @code{digitizer_define_window()}. The following
+number as returned by @ref{digitizer_define_window()}. The following
 two arguments are the new position and width for this window. During the
 experiment neither the position nor the width argument must be
 specified.
@@ -1843,7 +1842,7 @@ window width.
 @item digitizer_window_position()
 This function can be used to query the position or to set a new position
 for an already defined window. It expects at least one argument, a window
-number as returned by @code{digitizer_define_window()}. If there is no
+number as returned by @ref{digitizer_define_window()}. If there is no
 further argument the position of the window is returned. Otherwise the
 second parameter is taken to be the new window position.
 
@@ -1854,7 +1853,7 @@ second parameter is taken to be the new window position.
 @item digitizer_window_width()
 This function can be used to query the width or to set a new width for
 an already existing window. It expects at least one argument, a window
-number as returned by @code{digitizer_define_window()}. If there is no
+number as returned by @ref{digitizer_define_window()}. If there is no
 further argument the width of the window is returned. Otherwise the
 second parameter is taken to be the new window width.
 
@@ -1894,7 +1893,7 @@ can only be used in the @code{EXPERIMENT} section of the @code{EDL} file.
 @item digitizer_get_curve()
 The function fetches a curve from the digitizer. It expects up to two
 arguments, the channel the data are to be fetched from and, optionally,
-a window ID as returned by @code{digitizer_define_window()} to specify
+a window ID as returned by @ref{digitizer_define_window()} to specify
 the time interval. Valid choices of the data channel depend on the model
 of the digitizer:
 @table @samp
@@ -1999,7 +1998,7 @@ the digitizer:
 
 The following, optional arguments are a list of integer variables or
 1-dimensional integer arrays, where each number (or array element) is a
-window ID as returned by @code{digitizer_define_window()}, specifying
+window ID as returned by @ref{digitizer_define_window()}, specifying
 the time interval the area is computed from.
 
 If you pass the function no argument beside the channel number the area
@@ -2093,7 +2092,7 @@ choices of the data channel depend on the model of the digitizer:
 
 The following, optional arguments are a list of integer variables or
 1-dimensional integer arrays, where each number (or array element) is a
-window ID as returned by @code{digitizer_define_window()}, specifying
+window ID as returned by @ref{digitizer_define_window()}, specifying
 the time interval the amplitude is determined from.
 
 If you pass the function no argument beside the channel number the
@@ -2129,7 +2128,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{digitizer_get_amplitude_fast()}
 @findex digitizer_get_amplitude_fast()
 @item digitizer_get_amplitude_fast()
-This function is nearly identical to @code{digitizer_get_amplitude()}
+This function is nearly identical to @ref{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
 time interval. It is not implemented for the @strong{Lecroy} digitizers,
@@ -2261,10 +2260,10 @@ reading the chapter about pulsers and pulses.
 
 @strong{Please note}: Most functions for changing pulses will
 @strong{not} lead to an immediate change of the pulse sequence the
-pulser outputs. E.g.@: calling the function @code{pulser_shift()} (for
+pulser outputs. E.g.@: calling the function @ref{pulser_shift()} (for
 moving pulses) will not shift the pulses immediately. Instead, all
 changes to pulses are recorded and but only executed when the function
-@code{pulser_update()} gets called.
+@ref{pulser_update()} gets called.
 
 The reason for this is twofold: Changes to only parts of the pulses
 might lead to a pulse sequence, which can't be output, e.g.@: because
@@ -2276,10 +2275,10 @@ more complex change of the pulse sequence is finished might increase the
 time needed to do an experiment a lot.
 
 The only functions that immediately change the pulse sequence are
-@code{pulser_update()}, @code{pulser_reset}, @code{pulser_next_phase()}
-and @code{pulser_phase_reset()}. For all other functions the new state
+@ref{pulser_update()}, @ref{pulser_reset()}, @ref{pulser_next_phase()}
+and @ref{pulser_phase_reset()}. For all other functions the new state
 of the pulse sequence has to be committed explicitely by calling
-@code{pulser_update()}.
+@ref{pulser_update()}.
 
 
 @noindent
@@ -2408,9 +2407,9 @@ This function can be called with either no argument or with a list of
 argument is given all pulses are reset to their initial states, i.e.@:
 the states of the pulses set in the @code{PREPARATIONS} section. The
 function also does a reset of all pulse phases, as done by
-@code{pulser_phase_reset()}. It does @strong{not} update the pulser, if
+@ref{pulser_phase_reset()}. It does @strong{not} update the pulser, if
 you want to reset all pulses @strong{and} and also update the pulser use
-the function @code{pulser_reset()} instead.
+the function @ref{pulser_reset()} instead.
 
 If called with one argument or a list of pulses only the pulses from the
 list are set back to their initial states.
@@ -2425,7 +2424,7 @@ associated with the pulses. By calling this function the phases of the
 pulses are switched to the next phase. By repeatedly calling the
 function one can run through the complete list of phases for the pulses.
 This function also immediately updates the pulse sequence, as it is done
-by calling @code{pulser_update()}.
+by calling @ref{pulser_update()}.
 
 
 @anchor{pulser_phase_reset()}
@@ -2446,7 +2445,7 @@ of the function associated with either @code{PULSE_SETUP_1} or
 @code{PULSE_SETUP_2}.
 
 This function also immediately updates the pulse sequence, as it is done
-by calling @code{pulser_update()}.
+by calling @ref{pulser_update()}.
 
 
 @anchor{pulser_reset()}
@@ -2454,9 +2453,9 @@ by calling @code{pulser_update()}.
 @item pulser_reset()
 This function does not take any arguments at all. It switches the pulser
 back to the initial state it was in at the start of the experiment. It
-includes the complete functionality of @code{pulser_pulse_reset()} but
+includes the complete functionality of @ref{pulser_pulse_reset()} but
 also immediately updates the pulser as it is done by calling
-@code{pulser_update()}.
+@ref{pulser_update()}.
 
 
 @anchor{pulser_stop_on_update()}
@@ -2528,7 +2527,7 @@ pulses are created for all microwave pulses.
 The shape pulses have exactly the same length as the pulses they are
 created for. The pulses the shape pulses are created for in turn are
 automatically lengthened a bit to make them start before their shape
-pulses and also to last longer.
+pulses and also to last a bit longer.
 
 The amount of time the pulse a pulse with an automatically generated
 shape pulse will start earlier than specified in the @code{EDL} script
@@ -2536,8 +2535,8 @@ shape pulse will start earlier than specified in the @code{EDL} script
 missing a default value (set in the configuration file for the pulser)
 is used. In the same way the third argument specifies how much longer
 the pulse lasts  ("right padding") than the shape pulse. (It is not a
-problem if the pulses should become that long that they overlap, if
-necessary they are shortened.)
+problem if the pulses should become that long that they overlap due to
+padding, if necessary they are shortened.)
 
 To make this more clear an example. Let's assume that @code{MICROWAVE}
 pulse has been set in the @code{EDL} script:
@@ -2547,20 +2546,20 @@ P1:   FUNCTION = MICROWAVE,
       LENGTH   = 600 ns;
 @end example
 @noindent
-If now the @code{pulser_automatic_shape_pulses()} function is called as
+If now the @ref{pulser_automatic_shape_pulses()} function is called as
 @example
 pulser_automatic_shape_pulses( MICROWAVE, 24 ns, 16 ns );
 @end example
 the automatically created shape pulse will start at @w{400 ns} and last
-for @w{600 ns} but the microwave pulse @code{P1} will now start @code{24
-ns} earlier, i.e.@: at @w{376 ns}, and will have a length of @w{640 ns}.
+for @w{600 ns} but the microwave pulse @code{P1} will now start
+@w{24 ns} earlier, i.e.@: at @w{376 ns}, and will have a length of @w{640 ns}.
 
-The function @code{pulser_automatic_shape_pulses()} can be called for
+The function @ref{pulser_automatic_shape_pulses()} can be called for
 more than one function (e.g.@: for both the @code{MICROWAVE} and the
 @code{OTHER_2} function) and also additional shape pulses can be created
 manually. The only requirement is that the shape pulses (both
-automatically and manually created ones) don't overlap during the
-experiment.
+automatically and manually created ones) for a certain channel don't
+overlap during the experiment.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
@@ -2586,7 +2585,7 @@ file for the pulser. The third argument is the time the automatically
 created TWT pulses last longer than the associated pulse. Again, if not
 specified a default value is used.
 
-The function @code{pulser_automatic_twt_pulses()} can be called for
+The function @ref{pulser_automatic_twt_pulses()} can be called for
 more than one function (e.g.@: for both the @code{MICROWAVE} and the
 @code{OTHER_2} function) and also additional TWT pulses can be created
 manually. It isn't a problem if the TWT pulses would overlap, if
@@ -2595,7 +2594,7 @@ necessary they are shortenend.
 Since TWTs often require a minimum distance between pulses the
 automatically created pulses will automatically lengthened to cover too
 short a distance between them. If not set via the function
-@code{pulser_minimum_twt_pulse_distance()} a compile time constant (that
+@ref{pulser_minimum_twt_pulse_distance()} a compile time constant (that
 can be adjusted in the configuration file for the module) is used as
 the minimum TWT pulse distance.
 
@@ -2619,10 +2618,9 @@ This function can be used in all sections of the script and even allows
 to change the minimum time multiple during an experiment. Please note
 that setting a new minimum TWT pulse distance does not automatically
 change the current state of the pulses, they only get changed to reflect
-the new setting when either @code{pulser_update()} is called or another
+the new setting when either @ref{pulser_update()} is called or another
 function that automatically updates the pulser, i.e.@: either
-@code{pulser_reset}, @code{pulser_next_phase()} or
-@code{pulser_phase_reset()}
+@ref{pulser_reset()}, @ref{pulser_next_phase()} or @ref{pulser_phase_reset()}
 
 
 @anchor{pulser_keep_all_pulses()}
@@ -2669,7 +2667,7 @@ discussion of the problems introduced by @code{FOREVER} loops and
 Whenever there is a reason to suspect that these problems may occur one
 can set the maximum pulse pattern length manually (i.e.@: the end point
 of the last pulse when it has been set to its latest position during the
-experiment) by calling @code{pulser_maximum_pattern_length()} with the
+experiment) by calling @ref{pulser_maximum_pattern_length()} with the
 the maximum pulse pattern length as the only argument.
 
 Unless in the test run an even longer pattern length is found, this
@@ -2717,7 +2715,7 @@ delays the program will abort with an error message.
 This function is only implemented for the Frankfurt version the
 @strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. Like the time a
 phase pulse must start before the pulse it was set for can be set via
-the @code{pulser_phase_switch_delay()} function, you also may set how
+the @ref{pulser_phase_switch_delay()} function, you also may set how
 much longer a phase pulse has to be set after the oiginal pulse ended.
 
 The function takes only one argument, the time the phase pulses will last
@@ -2918,7 +2916,7 @@ setting in the attenuation table for the frequency.
 
 The frequency set by the very first call of this function is also the
 function that is set automatically by a call of the function
-@code{synthesizer_reset_frequency()} (see below).
+@ref{synthesizer_reset_frequency()}.
 
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the frequency has already
@@ -2968,7 +2966,7 @@ called to both query and sets the minimum output attenuation. If called
 to set the attenuation it accepts one argument, the attenuation within
 the allowed range of attenuations of the device. Calling the function
 disables setting the attenuation by further calls of
-@code{synthesizer_attenuation()} to ranges below the value set by this
+@ref{synthesizer_attenuation()} to ranges below the value set by this
 function.
 
 
@@ -2976,8 +2974,8 @@ function.
 @findex synthesizer_step_frequency()
 @item synthesizer_step_frequency()
 The function queries or sets the RF step frequency to be used in calls
-of the functions @code{synthesizer_sweep_up()} and
-@code{synthesizer_sweep_down()} (see below). In order to set the step
+of the functions @ref{synthesizer_sweep_up()} and
+@ref{synthesizer_sweep_down()} (see below). In order to set the step
 frequency it expects one argument, the step frequency in Hz. The step
 frequency can be set in the @code{PREPARATIONS} section only once, but
 it can be changed later in the @code{EXPERIMENT} section.
@@ -3062,15 +3060,14 @@ printed and the attenuation for the nearest frequency is used.
 @anchor{synthesizer_att_ref_freq()}
 @findex synthesizer_att_ref_freq()
 @item synthesizer_att_ref_freq()
-When a table file is used there remains the question for which frequency
-to use the attenuation has been set e.g.@: by
-@code{synthesizer_attenuation()}. To set this reference frequency the
-function @code{synthesizer_att_ref_freq()} can be used. If the function
-isn't called a frequency of @w{14 MHz} is used for the @code{HP8647A},
-@code{HP8648B} and @code{R&S SML01} and @w{2 GHz} for the @code{HP8672A}
-(but this is a compile time constant that can be adjusted in the
-configuration file for the device by changing the definition of
-@code{DEF_ATT_REF_FREQ}).
+When a table file is used there remains the question for which frequency to
+use the attenuation has been set e.g.@: by @ref{synthesizer_attenuation()}.
+To set this reference frequency the function @ref{synthesizer_att_ref_freq()}
+can be used. If the function isn't called a frequency of @w{14 MHz} is used
+for the @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} and @w{2 GHz}
+for the @code{HP8672A} (but this is a compile time constant that can be
+adjusted in the configuration file for the device by changing the definition
+of @code{DEF_ATT_REF_FREQ}).
 
 
 @anchor{synthesizer_modulation()}
@@ -3162,13 +3159,12 @@ external AC coupled source and @w{50%} amplitude.
 @anchor{synthesizer_mod_type()}
 @findex synthesizer_mod_type()
 @item synthesizer_mod_type()
-As an alternative to the function @code{synthesizer_modulation()} the
-modulation type can be also set via the function
-@code{synthesizer_mod_type()}. It accepts a string argument, either
-@code{"FM"} for frequency modulation, @code{"AM"} for amplitude
-modulation or @code{"OFF"} to switch off modulation. The @code{HP8647A},
-@code{HP8648B} and @code{R&S SML01} also allow another argument,
-@code{"PHASE"} for phase modulation.
+As an alternative to the function @ref{synthesizer_modulation()} the
+modulation type can be also set via the function @ref{synthesizer_mod_type()}.
+It accepts a string argument, either @code{"FM"} for frequency modulation,
+@code{"AM"} for amplitude modulation or @code{"OFF"} to switch off
+modulation. The @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} also
+allow another argument, @code{"PHASE"} for phase modulation.
 
 
 @anchor{synthesizer_mod_source()}
@@ -3203,7 +3199,7 @@ source and @code{1} for an external, DC coupled source. For the
 modulation with @w{400 Hz} and @code{4} for @w{1 kHz}.  For the
 @code{R&S SML01} a return value of @code{3} indicates internal
 modulation. To find out the frequency of the modulation for this device
-use the function @code{synthesizer_mod_freq()}.
+use the function @ref{synthesizer_mod_freq()}.
 
 You can neither set nor obtain the modulation source as long as the
 modulation is switched off, trying to do so will result in aborting the
@@ -3804,7 +3800,7 @@ second argument the function expects is one of these:
 @table @samp
 @item "TRIGGER_NONE"
 The acquisition is started immediately without requiring an external
-trigger event when the function @code{daq_ai_start_acquisition()} is
+trigger event when the function @ref{daq_ai_start_acquisition()} is
 called, the start of scans and conversions is controlled via timers on
 the card.
 @item "TRIGGER_SCAN"
@@ -3856,7 +3852,7 @@ falling edge.
 
 A special role is played by the trigger input @code{PFI0}: while all
 other trigger inputs work only on TTL levels, this input can be switched
-to be used as an analog trigger. The function @code{daq_trigger_setup()}
+to be used as an analog trigger. The function @ref{daq_trigger_setup()}
 can be used to switch this input between TTL level mode and analog
 trigger mode. (To make the difference easier to spot and to stay in tune
 with the naming scheme in the documentation of the card instead of
@@ -3947,8 +3943,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item daq_ai_start_acquisition()
 This function is only available for the PCI-MIO-16E-1 card. It is to be
 used to start an analog input acquisition according to the paramter set
-by previous calls of the functions @code{daq_ai_channel_setup()} and
-@code{daq_ai_acq_setup()}. It expects no arguments.
+by previous calls of the functions @ref{daq_ai_channel_setup()} and
+@ref{daq_ai_acq_setup()}. It expects no arguments.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -3974,7 +3970,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item daq_trigger_setup()
 This function is only available for the PCI-MIO-16E-1 card and can be
 used to switch the first trigger input line (named @code{"PFI0"} or
-@code{"TRIG1"} when specified in the function @code{daq_ai_acq_setup()}
+@code{"TRIG1"} when specified in the function @ref{daq_ai_acq_setup()}
 between "digital" (TTL level) and analog mode.
 
 To switch to "digital mode where a TTL-level trigger signal is required
@@ -4032,7 +4028,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item daq_start_continuous_counter()
 This function is only available for the PCI-MIO-16E-1 card. It starts
 one of the two counters of the card. The counter will count until it is
-stopped by a call of the @code{EDL} function @code{daq_stop_counter()}.
+stopped by a call of the @code{EDL} function @ref{daq_stop_counter()}.
 The first required argument is the counter to be used, which needs to be
 specified by one of the symbolic names @code{CH0} and @code{CH1} (please
 @strong{don't} use numbers directly, the mapping between the symbolic
@@ -4082,7 +4078,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex daq_timed_count()
 @item daq_timed_count()
 This function is only available for the PCI-MIO-16E-1 card is and very
-similar to the previous function, @code{daq_start_timed_counter()},
+similar to the previous function, @ref{daq_start_timed_counter()},
 i.e.@: it runs a counter for a specified of time, but in contrast it
 waits for the requested duration of time and only then returns with the
 masured count. In every other respect, e.g.@: the required arguments
@@ -4118,7 +4114,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function is only available for the PCI-MIO-16E-1 card and waits for
 an counter to stop and only then returns the final value of the
 counter. Trying to call this function on a counter that has been started
-by the function @code{daq_start_continuous_counter()} and hasn't already
+by the function @ref{daq_start_continuous_counter()} and hasn't already
 been stopped will fail, because such a counter will never stop by
 itself.
 
@@ -4184,7 +4180,7 @@ the same restrictions as for the second argument) the distance between
 pulses can be set.
 
 To stop creation of pulses (and to free the counter for other uses) the
-function @code{daq_stop_counter()} must be called.
+function @ref{daq_stop_counter()} must be called.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -4226,7 +4222,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item daq_dio_write()
 This function is only available for the PCI-MIO-16E-1 card. The 8 DIO
 lines of the card can not only be monitored (see the previous function,
-@code{counter_dio_read()}) but also set, which this function is to be
+@ref{counter_dio_read()}) but also set, which this function is to be
 used for. The function requires at least one integer argument, defining
 the states of the DIO lines to be set to. To output a high voltage at
 one of the DIO lines the corresponding bit of the value must be set.
@@ -4292,7 +4288,7 @@ This function is only available for the PCI-MIO-16E-1 card. The card has
 an @code{FREQ_OUT} in and this function can be used to determine or set
 the frequency output at this pin (or switch output off). If called with
 no argument it returns the currently output frequency (or @code{0.0} if
-the ouutput is switched off.
+the output is switched off.
 
 When called with an argument this must be the frequency to output (or
 @code{0.0} to switch output off). The allowed frequencies are either
@@ -4335,9 +4331,9 @@ the DAC channel is reserved, if it is @code{0} the DAC channel is not
 reserved and can be used without a pass-phrase.
 
 The next argument is a string variable to be used as the pass-phrase
-in later calls of the function @code{daq_set_voltage()} and, in the
+in later calls of the function @ref{daq_set_voltage()} and, in the
 case of the home-built AD and DA converter, the function
-@code{daq_maximum_output_voltage()}.
+@ref{daq_maximum_output_voltage()}.
 
 The final argument is optional. If is not given the function will try to
 reserve the DAC channel. If called with either an argument of @code{0} or
@@ -4377,7 +4373,7 @@ voltage to be output in the range between @w{-10 V} and @w{+10 V}.
 In contrast, for the home-built AD and DA converter card, the only
 argument is the output voltage. It must be between @w{0 V} and the
 maximum voltage that has been spcified in the call of the function
-@code{daq_maximum_output_voltage()}. If this function hasn't been called
+@ref{daq_maximum_output_voltage()}. If this function hasn't been called
 the default maximum output voltage is @w{+10 V}.
 
 Also the module for the Rulbus RB8510 12-bit DAC allows only a single
@@ -4396,12 +4392,12 @@ experiment please put a command for setting this voltage into the
 @code{ON_STOP} section of the @code{EDL} script.
 
 For the home-built DA and AD card the output voltage will automatically
-drop to @w{0 V} if the function @code{daq_get_voltage()} (see below)
+drop to @w{0 V} if the function @ref{daq_get_voltage()} (see below)
 is called without a previous call of the function for setting an output
 voltage.
 
 @strong{Please note}: if the DAC channel had previously been reserved by
-a call of the function @code{daq_reserve_dac()} the pass-phrase
+a call of the function @ref{daq_reserve_dac()} the pass-phrase
 specified in that call has to be passed to the function as the very
 first argument if you want to be able to change the output voltage of
 the DAC channel.
@@ -4422,7 +4418,7 @@ required output voltages instead of values that have to be too large by
 the reduction factor of the potentiometer. So, if the potentiometer is
 set to 5 (of its maximum range of 10) and you call this function with an
 argument of @w{5 V} you then can specify the real voltage you want to
-output in calls of @code{daq_set_voltage()} instead of having to pass it
+output in calls of @ref{daq_set_voltage()} instead of having to pass it
 values that are too large by a factor of 2.
 
 If this function hasn't been called the program will assume that the
@@ -4430,7 +4426,7 @@ potentiometer is set to its maximum of 10 and output voltages of the
 DA converter are between @w{0 V} and @w{+10 V}.
 
 @strong{Please note}: if the DAC channel had previously been reserved by
-a call of the function @code{daq_reserve_dac()} the pass-phrase
+a call of the function @ref{daq_reserve_dac()} the pass-phrase
 specified in that call has to be passed to the function as the very
 first argument if you want to be able to change the maximum output
 voltage.
@@ -4453,7 +4449,7 @@ is reserved, if it is @code{0} the ADC channel is not reserved and can
 be used without a pass-phrase.
 
 The first argument is a string variable to be used as the pass-phrase
-in later calls of the function @code{daq_get_voltage()}.
+in later calls of the function @ref{daq_get_voltage()}.
 
 The final argument is optional. If is not given the function will try to
 reserve the ADC channel. If called with either an argument of @code{0} or
@@ -4480,20 +4476,20 @@ where the @code{x} stands for one less than the number of channels the
 card has.The voltage value returned depends on the type of the RB8509
 card (there are several versions with different voltage ranges and some
 allowing only unipolar input while others can convert biplor voltages)
-and the gain setting for the card, see function @code{daq_gain()} below.
+and the gain setting for the card, see function @ref{daq_gain()} below.
 
 The function can be used in the @code{EXPERIMENT} section only.
 
 The following remarks apply to the home-built AD and DA converter only:
 
 @strong{Please note}: If this function is called without a previous call
-of the function @code{daq_set_voltage()} (see above) the voltage at the
+of the function @ref{daq_set_voltage()} (see above) the voltage at the
 output of the DA converter will switch to @w{0 V} automatically. So you
-should call @code{daq_set_voltage()} always before
-@code{daq_get_voltage()} if something is connected to the DA output!
+should call @ref{daq_set_voltage()} always before
+@ref{daq_get_voltage()} if something is connected to the DA output!
 
 @strong{Note also}: if the ADC had previously been reserved by a call of
-the function @code{daq_reserve_adc()} the pass-phrase specified in that
+the function @ref{daq_reserve_adc()} the pass-phrase specified in that
 call has to be passed to the function as the very first argument if you
 want to be able to read in the voltage at the ADC.
 
@@ -4518,8 +4514,8 @@ identical).
 Some of the Rulbus RB8509 ADC cards allow to trigger a conversion on
 receipt of an external trigger. When in internal trigger mode a
 conversion is triggered automatically by calling the function
-@code{daq_get_voltage()}. In external trigger mode the conversion is
-triggered by an external event and the @code{daq_get_voltage()} function
+@ref{daq_get_voltage()}. In external trigger mode the conversion is
+triggered by an external event and the @ref{daq_get_voltage()} function
 only returns after such a trigger as been received. The function expects
 a string argument, either @code{"INT"} or @code{"INTERNAL"} to select
 internal trigger mode, or @code{"EXT"} or @code{"EXTERNAL"} to switch to
@@ -4594,7 +4590,7 @@ the DIO is reserved, if it is @code{0} the DIO is not reserved and can
 be used without a pass-phrase.
 
 The next argument is a string variable to be used as the pass-phrase
-in later calls of the functions @code{dio_mode()} and @code{dio_value()}.
+in later calls of the functions @ref{dio_mode()} and @ref{dio_value()}.
 
 The final argument is optional. If is not given the function will try to
 reserve the DIO channel. If called with either an argument of @code{0} or
@@ -4625,11 +4621,11 @@ string to specify the new mode:
 @table @samp
 @item @code{0} or @code{"3x8"}
 The DIO is split up into three independent 8-bit DIOs, which then can be
-addressed as channels in calls of the function @code{dio_value()}.
+addressed as channels in calls of the function @ref{dio_value()}.
 
 @item @code{1} or @code{"2x12"}
 The DIO is split up into two independent 12-bit DIOs, which then can be
-addressed as channels in calls of the function @code{dio_value()}.
+addressed as channels in calls of the function @ref{dio_value()}.
 
 @item @code{2} or @code{"1x24"}
 The DIO isn't split up at all but used as a 24-bit wide DIO.
@@ -4637,14 +4633,14 @@ The DIO isn't split up at all but used as a 24-bit wide DIO.
 @item @code{3} or @code{"16_8"}
 The DIO is split up into two independent DIOs, one with a width of 16
 bit and one 8-bit wide. These can be addressed as channels in calls of
-the function @code{dio_value()}.
+the function @ref{dio_value()}.
 @end table
 
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
 @strong{Please note}: if the DIO had previously been reserved by a call
-of the function @code{dio_reserve_dio()} the pass-phrase specified in
+of the function @ref{dio_reserve_dio()} the pass-phrase specified in
 that call has to be passed to the function as the very first argument if
 you want to be able to change the mode of the DIO.
 
@@ -4656,7 +4652,7 @@ you want to be able to change the mode of the DIO.
 This function is used to either input or output a value. It expects at
 least two arguments, the DIO to be used (preferably use the symbolic
 names @code{DIO1} and @code{DIO2}) and a channel. Depending on the mode
-the DIO has been set to using the function @code{dio_mode()}, either
+the DIO has been set to using the function @ref{dio_mode()}, either
 one, two or three channels can be used. Use the symbolic names
 @code{CH1}, @code{CH2} and @code{CH3}. If there is no further argument
 data will be read in from the DIO and pass it back to the @code{EDL}
@@ -4722,7 +4718,7 @@ truncated to the allowed range by stripping off the higher order bits
 and a warning message is printed out.
 
 @strong{Note also}: if the DIO had previously been reserved by a call of
-the function @code{dio_reserve_dio()} the pass-phrase specified in that
+the function @ref{dio_reserve_dio()} the pass-phrase specified in that
 call has to be passed to the function as the very first argument if you
 want to be able to read from or write to the DIO.
 
@@ -4789,7 +4785,7 @@ Returns a string with the name of the event counter being used.
 @item counter_start_continuous_counter()
 This functions starts one of the counters of the card. The counter will
 count until it is stopped by a call of the @code{EDL} function
-@code{counter_stop_counter()}. It requires at least one argument, the
+@ref{counter_stop_counter()}. It requires at least one argument, the
 counter to be used, which needs to be specified by one of the symbolic
 names between @code{CH0} and @code{CH3} (please @strong{don't} use
 numbers directly, the mapping between the symbolic values and channel
@@ -4850,7 +4846,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex counter_timed_count()
 @item counter_timed_count()
 This function is very similar to the previous function,
-@code{counter_start_timed_counter()}, i.e.@: it runs a counter for a
+@ref{counter_start_timed_counter()}, i.e.@: it runs a counter for a
 specified of time, but in contrast it waits for the requested duration
 of time and only then returns with the masured count. In every other
 respect, e.g.@: the required arguments etc.@: it is identical to the
@@ -4889,7 +4885,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function waits for an counter to stop and only then returns the
 final value of the counter. Trying to call this function on a counter
 that has been started by the function
-@code{counter_start_continuous_counter()} and hasn't already been
+@ref{counter_start_continuous_counter()} and hasn't already been
 stopped will fail, because such a counter will never stop by itself.
 
 The function requires one argument, the counter for which the current
@@ -5079,7 +5075,7 @@ the same restrictions as for the second argument) the distance between
 pulses can be set.
 
 To stop creation of pulses (and to free the counter for other uses) the
-function @code{counter_stop_counter()} must be called.
+function @ref{counter_stop_counter()} must be called.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -5119,7 +5115,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex counter_dio_write()
 @item counter_dio_write()
 The 8 DIO lines of the card can not only be monitored (see the previous
-function, @code{counter_dio_read()}) but also set, which this function
+function, @ref{counter_dio_read()}) but also set, which this function
 is to be used for. The function requires at least one integer argument,
 defining the states of the DIO lines to be set to. To output a high
 voltage at one of the DIO lines the corresponding bit of the value must
@@ -5179,7 +5175,7 @@ can be used to satisfy the requirement.
 @strong{Please note}: At the start of the experiment the target
 temperature for the camera is set to the lowest possible value unless a
 target temperature is explicitely set using the function
-@code{ccd_camera_temperature()} (see below).
+@ref{ccd_camera_temperature()} (see below).
 
 The values for the region of interest, the binning values, the binning
 mode and the number of clear cycles are stored internally between
@@ -5235,7 +5231,7 @@ of the chip.
 If there is an argument this must be either an array with 4 elements that
 specify the ROI as explained above or the string @code{"ALL"} to set the
 ROI to the complete area of the CCD chip. Further calls of the functions
-@code{ccd_camera_get_image()} and @code{ccd_camera_get_spectrum()} will
+@ref{ccd_camera_get_image()} and @ref{ccd_camera_get_spectrum()} will
 return pictures or spectra from the ROI specified by the command. If one
 of the elements of the array specifying the ROI is @code{0} the
 corresponding setting for the ROI remains unchanged.
@@ -5451,7 +5447,7 @@ Another important point is that for SPEX type monochromators an offset
 "real" wavelength or -number is automatically taken into account. Thus
 the position reported by the program and at the console of the CD2A unit
 may differ because the program tries to take care of the offset (see the
-description of the function @code{monochromator_calibrate()} below for
+description of the function @ref{monochromator_calibrate()} below for
 more information). Furthermore, for wavenumber-driven SPEX
 monochromators also the position of the laser line gets remembered
 between experiments. These informations are stored in a file in the same
@@ -5596,7 +5592,7 @@ automatically aborts the currently running scan.
 @findex monochromator_start_scan()
 @item monochromator_start_scan()
 The function is only supported for SPEX monochromators and requires that
-the function @code{monochromator_scan_setup()} has been called
+the function @ref{monochromator_scan_setup()} has been called
 previously to define the scan parameters. It slews the monochromator to
 the start position of the scan, switches to scan mode and returns the
 spectral position of the monochromator, either in wavelength units for
@@ -5615,9 +5611,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_scan_step()
 @item monochromator_scan_step()
 The function is only supported for SPEX monochromators and requires that
-both the function @code{monochromator_scan_setup()} has been called
+both the function @ref{monochromator_scan_setup()} has been called
 previously to define the scan parameters and that the monochromator has
-been switched to scan mode by calling @code{monochromator_start_scan()}.
+been switched to scan mode by calling @ref{monochromator_start_scan()}.
 The function slews the monochromator to the next spectral position by
 the scan step size and returns the new position, either in wavelength
 units for wavelength driven monochromators or wavenumbers for wavenumber
@@ -5702,15 +5698,15 @@ grating and wavelength of the monochromator are used.
 
 For @code{SpectraPro-300i} monochromators it is required that a
 calibration for the grating has been loaded, either by calling
-@code{monochromator_set_calibration()} or
-@code{monochromator_read_calibration()} (see below). If no calibration
+@ref{monochromator_set_calibration()} or
+@ref{monochromator_load_calibration()}. If no calibration
 has been loaded for the grating a warning is printed and the returned
 scaling values represent pixel numbers relative to the center of the CCD
 chip, not wavelengths.
 
 The function is mostly meant to make it easy to obtain a wavelength
-scale to be used with the functions @code{change_scale_1d()} and
-@code{change_scale_2d()}. If binning is used in @i{x}-direction the
+scale to be used with the functions @ref{change_scale_1d()} and
+@ref{change_scale_2d()}. If binning is used in @i{x}-direction the
 elements of the returned array can't be used directly as arguments for
 the functions for changing the scale but to the first element you will
 have to add halve the number of pixels binned together and multiplied by
@@ -5734,7 +5730,7 @@ grating with 1200 grooves per mm the deviation is about @w{0.5 nm} and
 for gratings with lower groove densities the deviation gets even larger,
 proportional to the inverse of the groove density. To obtain the exact
 wavelength for a certain pixel on the chip use the function
-@code{monochromator_calc_wavelength()} discussed below.
+@ref{monochromator_calc_wavelength()} discussed below.
 
 @strong{Please note}: The function assumes that the spectra taken with
 the camera show increasing wavelengths going from the left to the right
@@ -5748,7 +5744,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_wavenumber_axis()
 @item monochromator_wavenumber_axis()
 This function is similar to the function
-@code{monochromator_wavelength_axis()} but instead of returning values
+@ref{monochromator_wavelength_axis()} but instead of returning values
 to be used for setting a wavelength axis the values are suitable for
 setting up a wavenumber axis.
 
@@ -5777,8 +5773,8 @@ of the monochromator are used.
 
 To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
-@code{monochromator_set_calibration()} or
-@code{monochromator_read_calibration()} (see below). If no calibration
+@ref{monochromator_set_calibration()} or
+@ref{monochromator_load_calibration()} (see below). If no calibration
 has been loaded for the grating a warning is printed and the input
 value(s) are simply returned.
 
@@ -6002,15 +5998,15 @@ Thus the usual procedure to set the offset is to measure the position of
 a well-known line using @code{fsc2} and then to call the function with
 the difference between the "real" position and the observed position.
 Afterwards @code{fsc2} will automatically take the offset into account
-and, after a further call to @code{monochromator_wavelength()} or
-@code{monochromator_wavenumber()}, the line should seem to appear at the
+and, after a further call to @ref{monochromator_wavelength()} or
+@ref{monochromator_wavenumber()}, the line should seem to appear at the
 expected position.
 
 Please note that the offset can @strong{only} be set for wavenumber
 driven monochromators while using absolute wavenumbers, i.e.@: while no
 laser line position is set! If you want to determine and set a new
 offset first store the current laser line position, switch off use of a
-laser line position by calling @code{monochromator_laser_line()} with a
+laser line position by calling @ref{monochromator_laser_line()} with a
 zero argument and only after measuring and setting a new offset set the
 laser line position again.
 
@@ -6141,7 +6137,7 @@ argument, the channel, which must be specified as either @code{CH1} or
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, this value is used as the new voltage limit. The same
 effect can be achieved by calling the function
-@code{powersupply_voltage()}.
+@ref{powersupply_voltage()}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6184,7 +6180,7 @@ argument, the channel, which must be specified as either @code{CH1} or
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, this value is used as the new current limit. The same
 effect can be achieved by calling the function
-@code{powersupply_current()}.
+@ref{powersupply_current()}.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6247,8 +6243,8 @@ argument is given a default table file is reloaded (typically this is
 the installation of @code{fsc2}).
 
 If this function is used it @strong{must} be called before the functions
-@code{mw_attenuator_initial_attenuation()} or
-@code{mw_attenuator_attenuation()} are invoked. Once an attenuation has
+@ref{mw_attenuator_initial_attenuation()} or
+@ref{mw_attenuator_attenuation()} are invoked. Once an attenuation has
 been set calibrations can't be loaded in anymore.
 
 The calibration file must consist of pairs of entries, an attenuation
@@ -6300,12 +6296,12 @@ one. If called with no argument it returns the currently attenuation. If
 it is called with an argument the attenuation is set to this new value.
 The new value has to be within the range of attenuations covered by the
 calibration file either read in when the module was loaded or by a later
-invocation of the function @code{mw_attenuator_use_table()}. Attenuation
-values within this range but not listed in the table are handled by
-linear interpolation of the nearest neighboring values.
+invocation of the function @ref{mw_attenuator_load_calibration()}.
+Attenuation values within this range but not listed in the table are
+handled by linear interpolation of the nearest neighboring values.
 
 @strong{Please note}: The function
-@code{mw_attenuator_initial_attenuation()} must be called before the
+@ref{mw_attenuator_initial_attenuation()} must be called before the
 first invocation of this function to make the module aware about the
 setting of the attenuation when the experiment was started.
 
@@ -6336,7 +6332,7 @@ module.
 Unless a rotation frequency has set already during the
 @code{PREPARATIONS} section the chopper will only start to rotate
 when a resonable rotation frequency is set by calling the function
-@code{chopper_rotation_frequency()}. At the end of an experiment the
+@ref{chopper_rotation_frequency()}. At the end of an experiment the
 chopper gets stopped automatically.
 
 
@@ -6445,7 +6441,7 @@ have two different signals, e.g.@: the two outputs of a quadrature mixer
 and the measured data consist of adding up signals from both channels.
 
 The following arguments are as many window identifiers (as returned by
-@code{digitizer_define_window()} as there are needed. If no window
+@ref{digitizer_define_window()} as there are needed. If no window
 argument is given always the area of the complete curve is returned!
 
 The type of the return value depends on the number of window identifiers
@@ -6534,9 +6530,9 @@ data now must, according to the acquisition sequence, be added to the
 previous accumulated data. The result, an array with two elements for
 the first and second window is returned by the function.
 
-You may note that in this script @code{pulser_update()} isn't called
-after @code{pulser_shift()}. This is possible because
-@code{get_phase_cycled_area()} internally calls @code{pulser_update()}
+You may note that in this script @ref{pulser_update()} isn't called
+after @ref{pulser_shift()}. This is possible because
+@ref{get_phase_cycled_area()} internally calls @ref{pulser_update()}
 before it starts doing the measurement.
 
 Two acquisition sequences would, for example, be used in an inversion
