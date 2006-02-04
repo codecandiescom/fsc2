@@ -1448,13 +1448,28 @@ void lecroy94_tmpl_copy_curve( long src,
 
 
 	fsc2_assert( ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX ) ||
+				 src == LECROY94_TMPL_EXP_A  || src == LECROY94_TMPL_EXP_B   ||
+				 src == LECROY94_TMPL_MEM_C  || src == LECROY94_TMPL_MEM_D   ||
 				 src == LECROY94_TMPL_FUNC_E || src == LECROY94_TMPL_FUNC_E );
 	fsc2_assert( dest == LECROY94_TMPL_MEM_C || dest == LECROY94_TMPL_MEM_D );
 
 
+	if ( ! lecroy94_tmpl.is_displayed[ src ] )
+	{
+		print( FATAL, "Can't copy channel %s since it isn't switched on.\n",
+			   LECROY94_TMPL_Channel_Names[ ch ] );
+		THROW( EXCEPTION );
+	}
+
 	sprintf( cmd, "M%c:STO ", dest == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
 	if ( src >= LECROY94_TMPL_CH1 && src <= LECROY94_TMPL_CH_MAX )
 		sprintf( cmd + strlen( cmd ), "C%ld", src - LECROY94_TMPL_CH1 + 1 );
+	else if ( src == LECROY94_TMPL_EXP_A  || src == LECROY94_TMPL_EXP_B )
+		sprintf( cmd + strlen( cmd ), "E%c", 
+				 src == LECROY94_TMPL_EXP_A ? 'A' : 'B' );
+	else if ( src == LECROY94_TMPL_MEM_C  || src == LECROY94_TMPL_MEM_D )
+		sprintf( cmd + strlen( cmd ), "M%c", 
+				 src == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
 	else
 		sprintf( cmd + strlen( cmd ), "F%c", 
 				 src == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
