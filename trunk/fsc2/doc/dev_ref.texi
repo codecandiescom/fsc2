@@ -1422,9 +1422,9 @@ channels, 2 function channels (needed for averaging).
 @item @ref{digitizer_averaging()}
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
-@c @ref{@item digitizer_trigger_position()}
+@item @ref{@item digitizer_trigger_delay()}
 @item digitizer_meas_channel_ok()
-@c @ref{@item digitizer_trigger_channel()}
+@item @ref{@item digitizer_trigger_channel()}
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @c @ref{@item digitizer_get_curve_fast()}

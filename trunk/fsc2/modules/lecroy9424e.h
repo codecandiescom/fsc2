@@ -34,29 +34,29 @@
 #include "lecroy9424e.conf"
 
 
-#define INVALID_COUPL     -1         /* Input coupling for data channel */
-#define AC_1_MOHM          0         /* (don't change the sequence!) */
-#define DC_1_MOHM          1
-#define DC_50_OHM          2
-#define GND                3
+#define LECROY9424E_INVALID_COUPL     -1  /* Input coupling for data channel */
+#define LECROY9424E_AC_1_MOHM          0  /* (don't change the sequence!) */
+#define LECROY9424E_DC_1_MOHM          1
+#define LECROY9424E_DC_50_OHM          2
+#define LECROY9424E_GND                3
 
-#define TRG_AC             0
-#define TRG_DC             1
-#define TRG_LF_REJ         2
-#define TRG_HF_REJ         3
-#define TRG_HF             4
+#define LECROY9424E_TRG_AC             0
+#define LECROY9424E_TRG_DC             1
+#define LECROY9424E_TRG_LF_REJ         2
+#define LECROY9424E_TRG_HF_REJ         3
+#define LECROY9424E_TRG_HF             4
 
-#define TRG_CPL_AC         0         /* Trigger couplings */
-#define TRG_CPL_DC         1         /* (don't change the sequence!) */
-#define TRG_CPL_LF_REJ     2
-#define TRG_CPL_HF_REJ     3
-#define TRG_CPL_HF         4
+#define LECROY9424E_TRG_CPL_AC         0  /* Trigger couplings */
+#define LECROY9424E_TRG_CPL_DC         1  /* (don't change the sequence!) */
+#define LECROY9424E_TRG_CPL_LF_REJ     2
+#define LECROY9424E_TRG_CPL_HF_REJ     3
+#define LECROY9424E_TRG_CPL_HF         4
 
-#define TRG_MODE_AUTO      0         /* Trigger modes */
-#define TRG_MODE_NORMAL    1         /* (don't change the sequence!) */
-#define TRG_MODE_SINGLE    2
-#define TRG_MODE_SEQUENCE  3
-#define TRG_MODE_WRAP      4
+#define LECROY9424E_TRG_MODE_AUTO      0  /* Trigger modes */
+#define LECROY9424E_TRG_MODE_NORMAL    1  /* (don't change the sequence!) */
+#define LECROY9424E_TRG_MODE_SINGLE    2
+#define LECROY9424E_TRG_MODE_SEQUENCE  3
+#define LECROY9424E_TRG_MODE_WRAP      4
 
 
 
@@ -74,8 +74,8 @@
 #define LECROY9424E_TEST_TRIG_CHANNEL 0          /* trigger on CH1 */
 #define LECROY9424E_TEST_TRIG_LEVEL   0.0
 #define LECROY9424E_TEST_TRIG_SLOPE   POSITIVE
-#define LECROY9424E_TEST_TRIG_COUP    TRG_CPL_AC
-#define LECROY9424E_TEST_TRIG_MODE    TRG_MODE_NORMAL
+#define LECROY9424E_TEST_TRIG_COUP    LECROY9424E_TRG_CPL_AC
+#define LECROY9424E_TEST_TRIG_MODE    LECROY9424E_TRG_MODE_NORMAL
 #define LECROY9424E_TEST_REC_LEN      1000
 #define LECROY9424E_TEST_BWL          UNSET      /* bandwidth limiter */
 
@@ -98,7 +98,6 @@
 /* Measurement channel with the highest number */
 
 #define LECROY9424E_CH_MAX   LECROY9424E_CH4
-
 
 #define GENERAL_TO_LECROY9424E 0
 #define LECROY9424E_TO_GENERAL 1
@@ -128,7 +127,11 @@
 
 /* Maximum number of averages */
 
+#if defined WP01
+#define LECROY9424E_MAX_AVERAGES    1000000
+#else
 #define LECROY9424E_MAX_AVERAGES    1000
+#endif
 
 
 /* Maximum factors or values for trigger levels */
@@ -136,16 +139,16 @@
 #define LECROY9424E_TRG_MAX_LEVEL_CH_FAC 5.0
 #define LECROY9424E_TRG_MAX_LEVEL_EXT    2.0
 
-#define UNDEFINED_REC_LEN  -1
+#define LECROY9424E_UNDEFINED_REC_LEN  -1
 
 
 /* Constants for the INR register */
 
-#define INR_FF_DONE        ( 1U << 11 )
-#define INR_FE_DONE        ( 1U << 10 )
-#define INR_MD_DONE        ( 1U <<  9 )
-#define INR_MC_DONE        ( 1U <<  8 )
-#define INR_SIG_DONE       ( 1U <<  0 )
+#define LECROY9424E_INR_FF_DONE        ( 1U << 11 )
+#define LECROY9424E_INR_FE_DONE        ( 1U << 10 )
+#define LECROY9424E_INR_MD_DONE        ( 1U <<  9 )
+#define LECROY9424E_INR_MC_DONE        ( 1U <<  8 )
+#define LECROY9424E_INR_SIG_DONE       ( 1U <<  0 )
 
 
 /* Structure for description of a 'window' on the digitizer, made up from the
@@ -312,35 +315,37 @@ int lecroy9424e_end_of_exp_hook( void );
 void lecroy9424e_exit_hook(      void );
 
 
-Var_T *digitizer_name(              Var_T * /* v */ );
-Var_T *digitizer_define_window(     Var_T * /* v */ );
-Var_T *digitizer_change_window(     Var_T * /* v */ );
-Var_T *digitizer_window_position(   Var_T * /* v */ );
-Var_T *digitizer_window_width(      Var_T * /* v */ );
-Var_T *digitizer_timebase(          Var_T * /* v */ );
-Var_T *digitizer_interleave_mode(   Var_T * /* v */ );
-Var_T *digitizer_time_per_point(    Var_T * /* v */ );
-Var_T *digitizer_sensitivity(       Var_T * /* v */ );
-Var_T *digitizer_offset(            Var_T * /* v */ );
-Var_T *digitizer_bandwidth_limiter( Var_T * /* v */ );
-Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
-Var_T *digitizer_trigger_level(     Var_T * /* v */ );
-Var_T *digitizer_trigger_slope(     Var_T * /* v */ );
-Var_T *digitizer_trigger_coupling(  Var_T * /* v */ );
-Var_T *digitizer_trigger_mode(      Var_T * /* v */ );
-Var_T *digitizer_trigger_delay(     Var_T * /* v */ );
-Var_T *digitizer_averaging(         Var_T * /* v */ );
-Var_T *digitizer_num_averages(      Var_T * /* v */ );
-Var_T *digitizer_record_length(     Var_T * /* v */ );
-Var_T *digitizer_trigger_position(  Var_T * /* v */ );
-Var_T *digitizer_meas_channel_ok(   Var_T * /* v */ );
-Var_T *digitizer_start_acquisition( Var_T * /* v */ );
-Var_T *digitizer_get_curve(         Var_T * /* v */ );
-Var_T *digitizer_get_area(          Var_T * /* v */ );
-Var_T *digitizer_get_amplitude(     Var_T * /* v */ );
-Var_T *digitizer_run(               Var_T * /* v */ );
-Var_T *digitizer_copy_curve(        Var_T * /* v */ );
-Var_T *digitizer_command(           Var_T * /* v */ );
+Var_T *digitizer_name(               Var_T * /* v */ );
+Var_T *digitizer_define_window(      Var_T * /* v */ );
+Var_T *digitizer_change_window(      Var_T * /* v */ );
+Var_T *digitizer_window_position(    Var_T * /* v */ );
+Var_T *digitizer_window_width(       Var_T * /* v */ );
+Var_T *digitizer_timebase(           Var_T * /* v */ );
+Var_T *digitizer_interleave_mode(    Var_T * /* v */ );
+Var_T *digitizer_time_per_point(     Var_T * /* v */ );
+Var_T *digitizer_sensitivity(        Var_T * /* v */ );
+Var_T *digitizer_offset(             Var_T * /* v */ );
+Var_T *digitizer_bandwidth_limiter(  Var_T * /* v */ );
+Var_T *digitizer_trigger_channel(    Var_T * /* v */ );
+Var_T *digitizer_trigger_level(      Var_T * /* v */ );
+Var_T *digitizer_trigger_slope(      Var_T * /* v */ );
+Var_T *digitizer_trigger_coupling(   Var_T * /* v */ );
+Var_T *digitizer_trigger_mode(       Var_T * /* v */ );
+Var_T *digitizer_trigger_delay(      Var_T * /* v */ );
+Var_T *digitizer_averaging(          Var_T * /* v */ );
+Var_T *digitizer_num_averages(       Var_T * /* v */ );
+Var_T *digitizer_record_length(      Var_T * /* v */ );
+Var_T *digitizer_trigger_position(   Var_T * /* v */ );
+Var_T *digitizer_meas_channel_ok(    Var_T * /* v */ );
+Var_T *digitizer_start_acquisition(  Var_T * /* v */ );
+Var_T *digitizer_get_curve(          Var_T * /* v */ );
+Var_T *digitizer_get_curve_fast(     Var_T * /* v */ );
+Var_T *digitizer_get_area(           Var_T * /* v */ );
+Var_T *digitizer_get_area_fast(      Var_T * /* v */ );
+Var_T *digitizer_get_amplitude(      Var_T * /* v */ );
+Var_T *digitizer_get_amplitude_fast( Var_T * /* v */ );
+Var_T *digitizer_copy_curve(         Var_T * /* v */ );
+Var_T *digitizer_command(            Var_T * /* v */ );
 
 
 /* declaration of internally used functions */
@@ -349,66 +354,67 @@ bool lecroy9424e_init( const char * /* name */ );
 
 double lecroy9424e_get_timebase( void );
 
-bool lecroy9424e_set_timebase( double /* timebase */ );
+void lecroy9424e_set_timebase( double /* timebase */ );
 
 bool lecroy9424e_get_interleaved( void );
 
-bool lecroy9424e_set_interleaved( bool /* state */ );
+void lecroy9424e_set_interleaved( bool /* state */ );
 
 double lecroy9424e_get_sens( int /* channel */ );
 
-bool lecroy9424e_set_sens( int    /* channel */,
+void lecroy9424e_set_sens( int    /* channel */,
 						   double /* sens    */ );
 
 double lecroy9424e_get_offset( int /* channel */ );
 
-bool lecroy9424e_set_offset( int    /* channel */,
+void lecroy9424e_set_offset( int    /* channel */,
 							 double /* offset  */ );
 
 int lecroy9424e_get_coupling( int /* channel */ );
 
-bool lecroy9424e_set_coupling( int /* channel */,
+void lecroy9424e_set_coupling( int /* channel */,
 							   int /* type    */ );
 
 int lecroy9424e_get_bandwidth_limiter( void );
 
-bool lecroy9424e_set_bandwidth_limiter( bool /* state */ );
+void lecroy9424e_set_bandwidth_limiter( bool /* state */ );
 
 int lecroy9424e_get_trigger_source( void );
 
-bool lecroy9424e_set_trigger_source( int /* channel */ );
+void lecroy9424e_set_trigger_source( int /* channel */ );
 
 double lecroy9424e_get_trigger_level( int /* channel */ );
 
-bool lecroy9424e_set_trigger_level( int    /* channel */,
+void lecroy9424e_set_trigger_level( int    /* channel */,
 									double /* level   */ );
 
 double lecroy9424e_get_trigger_slope( int /* channel */ );
 
-bool lecroy9424e_set_trigger_slope( int /* channel */,
+void lecroy9424e_set_trigger_slope( int /* channel */,
 									int /* slope   */ );
 
 int lecroy9424e_get_trigger_coupling( int /* channel */ );
 
-int lecroy9424e_set_trigger_coupling( int /* channel */,
-									  int /* cpl     */ );
+void lecroy9424e_set_trigger_coupling( int /* channel */,
+									   int /* cpl     */ );
 
 int lecroy9424e_get_trigger_mode( void );
 
-int lecroy9424e_set_trigger_mode( int /* mode */ );
+void lecroy9424e_set_trigger_mode( int /* mode */ );
 
 double lecroy9424e_get_trigger_delay( void );
 
-bool lecroy9424e_set_trigger_delay( double /* delay */ );
+long lecroy9424e_get_probe_attenuation( int /* ch */ );
+
+void lecroy9424e_set_probe_attenuation( int /* ch */,
+										long /* att */ );
+
+void lecroy9424e_set_trigger_delay( double /* delay */ );
 
 bool lecroy9424e_is_displayed( int /* ch */ );
 
-bool lecroy9424e_display( int /* ch     */,
+void lecroy9424e_display( int /* ch     */,
 						  int /* on_off */ );
-
-long lecroy9424e_get_num_avg( int /* channel */ );
-
-bool lecroy9424e_get_desc( int /* channel */ );
 
 void lecroy9424e_set_up_averaging( long /* channel */,
 								   long /* source  */,
@@ -430,12 +436,10 @@ void lecroy9424e_finished( void );
 
 void lecroy9424e_start_acquisition( void );
 
-void lecroy9424e_free_running( void );
-
 void lecroy9424e_copy_curve( long /* src  */,
 							 long /* dest */ );
 
-bool lecroy9424e_command( const char * /* cmd */ );
+void lecroy9424e_command( const char * /* cmd */ );
 
 const char *lecroy9424e_ptime( double /* p_time */ );
 
@@ -449,8 +453,6 @@ void lecroy9424e_all_windows_check( void );
 
 void lecroy9424e_window_check( Window_T * /* w        */,
 							   bool       /* show_num */ );
-
-void lecroy9424e_length_check( long /* len */ );
 
 long lecroy9424e_find_length( void );
 

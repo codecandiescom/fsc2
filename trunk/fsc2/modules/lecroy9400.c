@@ -833,7 +833,7 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 		 real_delay <   -1.0e4 * lecroy9400.timebase
 		              -  0.5 * tpp[ lecroy9400.tb_index ] )
 	{
-		print( FATAL, "Post-triger delay of %s is too long, can't be longer "
+		print( FATAL, "Post-trigger delay of %s is too long, can't be longer "
 			   "than 10,000 times the timebase.\n",
 			   lecroy9400_ptime( real_delay ) );
 		THROW( EXCEPTION );

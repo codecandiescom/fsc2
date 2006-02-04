@@ -208,9 +208,7 @@ digitizer_run, 0, EXP;
 digitizer_lock_keyboard, -1, EXP;       // Lock/unlock keyboard (TDSxxx only)
 digitizer_copy_curve, 2, EXP;
 digitizer_command, 1, EXP;
-
 digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
-
 digitizer_averaging, -1, ALL;           // LeCroy9400 only
 
 
