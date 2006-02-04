@@ -1226,7 +1226,10 @@ static void lecroy94_tmpl_get_prep( int              ch,
 		sprintf( ch_str, "C%d", ch - LECROY94_TMPL_CH1 + 1 );
 	}
 	else if ( ch >= LECROY94_TMPL_MEM_C && ch <= LECROY94_TMPL_MEM_D )
+	{
 		is_mem_ch = SET;
+		sprintf( ch_str, "M%c", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
+	}
 	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
 	{
 		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
