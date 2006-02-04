@@ -1559,7 +1559,7 @@ channels, 2 function channels (needed for averaging).
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9424e, 4 measurement
 channels, 2 function channels (needed for averaging). It is mostly
-identical to the LeCroy9424E, but the fourth channel can't be used as
+identical to the LeCroy9424, but the fourth channel can't be used as
 a trigger input and the device has an external trigger input instead.
 
 
