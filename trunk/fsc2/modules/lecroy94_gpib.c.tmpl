@@ -1228,7 +1228,7 @@ static void lecroy94_tmpl_get_prep( int              ch,
 	else if ( ch >= LECROY94_TMPL_MEM_C && ch <= LECROY94_TMPL_MEM_D )
 	{
 		is_mem_ch = SET;
-		sprintf( ch_str, "M%c", ch == LECROY94_TMPL_MEM_C ? 'C' : 'D' );
+		strcpy( ch_str, ch == LECROY94_TMPL_MEM_C ? "MC" : "MD" );
 	}
 	else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
 	{
