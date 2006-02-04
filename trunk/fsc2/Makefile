@@ -171,8 +171,8 @@ EDITOR             := vi
 
 # Define the default browser to use when the "Help" button gets pressed and
 # the manual is to be shown, currently supported are netscape, mozilla,
-# opera, konqueror, galeon, lnyx and w3m (but a user can still override this
-# setting an environment variable named 'BROWSER').
+# firefox, opera, konqueror, galeon, lnyx and w3m (but a user can still
+# override this by setting an environment variable named 'BROWSER').
 
 BROWSER            := netscape
 
