@@ -73,7 +73,8 @@
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
-* spectrapro_300i::  Acton Research SpectraPro-300i Monochromator
+* schlum7150::      Schlumberger Solartron 7150 Multimeter
+* spectrapro_300i:: Acton Research SpectraPro-300i Monochromator
 * spex_cd2a::       SPEX Monochromators with CD2A Compudrive
 * sr510::           Stanford Research Lock-In Amplifier SR510
 * sr530::           Stanford Research Lock-In Amplifier SR530
@@ -1336,7 +1337,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @strong{Module name}: @code{kontron4060}
 
 @paragraphindent 0
-@strong{Description}: Kontron digital multimeter 4060.
+@strong{Description}: Kontron digital voltmeter 4060, DC and AC measurements
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -2177,7 +2178,7 @@ is 0 G to 2047.5 G with a resolution of 0.5 G.
 @c #############################################################
 
 
-@node s_band_magnet_narrow, spectrapro_300i, s_band_magnet_broad, Device Reference
+@node s_band_magnet_narrow, schlum7150, s_band_magnet_broad, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (narrow range)
 @end iftex
@@ -2214,7 +2215,42 @@ Prisner at the J.-W.-Goethe University in Frankfurt/Main. Field range is
 @c #############################################################
 
 
-@node spectrapro_300i, spex_cd2a, s_band_magnet_narrow, Device Reference
+@node schlum7150, spectrapro_300i, s_band_magnet_narrow, Device Reference
+@iftex
+@subheading Schlumberger Solartron 7150 Multimeter
+@end iftex
+@ifnottex
+@section Schlumberger Solartron 7150 Multimeter
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{schlum7150}
+
+@paragraphindent 0
+@strong{Description}: Schlumberger Solartron 7150 Multimeter, DC and AC
+voltage and current measurements
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} to @code{yes} and @code{set-xeos} and
+@code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{multimeter_name()}
+@item @ref{multimeter_mode()}
+@item @ref{multimeter_precision()}
+@item @ref{multimeter_get_data()}
+@item @ref{multimeter_lock_keyboard()}
+@end table
+
+
+@c #############################################################
+
+
+@node spectrapro_300i, spex_cd2a, schlum7150, Device Reference
 @iftex
 @subheading Acton Research SpectraPro-300i Monochromator
 @end iftex

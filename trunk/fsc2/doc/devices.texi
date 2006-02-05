@@ -3437,6 +3437,7 @@ in the @code{DEVICES} section.
 @table @samp
 @item @ref{multimeter_name()}
 @item @ref{multimeter_mode()}
+@item @ref{multimeter_precision()}
 @item @ref{multimeter_get_data()}
 @item @ref{multimeter_ac_measurement()}
 @item @ref{multimeter_dc_measurement()}
@@ -3469,6 +3470,19 @@ or the string @code{"Vac"} (or the integer @code{1}) to switch to AC voltage
 mode. For the @code{Schlumbreger 7150} additional possible arguments are
 the strings @code{"Idc"} (or the integer @code{2}) for DC current mode and
 @code{"Iac"} (or the integer @code{3}) for AC current mode.
+
+
+@anchor{multimeter_precision()}
+@findex multimeter_precision()
+@item multimeter_precision()
+This function exists only for the @strong{Schlumberger 7150}. It allows to
+determine or set the precision measurements are done with. If called with
+no argument, the current precision setting gets returned as an integer. If
+called with an argument the precision gets set. Allowed arguments are the
+string @code{"3.5"} (or the integer number @code{0}) to set the device to
+a precision of 3.5 digits, @code{"4.5"} (or the integer @code{1}) for 4.5
+digits, @code{"5.5"} (or @code{2}) for 5.5 digits or @code{"6.5"} (or
+@code{3}) for 6.5 digits.
 
 
 @anchor{multimeter_get_data()}
