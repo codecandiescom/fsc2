@@ -211,10 +211,10 @@ Because the normal current resolution of the Keithley power supply is
 not sufficient an additional device is needed supplying DC voltages in
 the range between @w{-10 V} and @w{+10 V} to the modulation input of the
 power supply. Currently the DAC ports of one of the Stanford Research
-lock-in amplifiers (SR510, SR530, SR810 or SR830)) are used for this
+lock-in amplifiers @strong{SR510, SR530, SR810 or SR830}) are used for this
 purpose. Which of the lock-ins is used can be specified during
 compilation by an entry in the configuration file for the Keithley
-driver, usually it's the @code{SR510} lock-in amplifier. Alternatively,
+driver, usually it's the @strong{SR510} lock-in amplifier. Alternatively,
 if no lock-in has been set in the configuration file the
 @code{keithley228a} module will assume that the very first lock-in
 listed in the devices section is to be used.
@@ -300,12 +300,12 @@ G}.
 Use current instead of field units for the Keithley 228A power supply
 (@code{keithley228a}).
 
-Because the Oxford IPS20-4 magnet sweep power supply (@code{ips20_4})
-does continuous sweeps (instead of simulating a sweep by stepping the
-current) the second argument isn't the sweep step size but must be the
-sweep rate in units of @code{A/s}.
+Because the @strong{Oxford IPS20-4} magnet sweep power supply (@code{ips20_4})
+does continuous sweeps (instead of simulating a sweep by stepping the current)
+the second argument isn't the sweep step size but must be the sweep rate in
+units of @code{A/s}.
 
-Similarly, for the Oxford IPS120-10 power supply (@code{ips120_10})
+Similarly, for the @strong{Oxford IPS120-10} power supply (@code{ips120_10})
 the second argument is the sweep rate in @code{G/s}.
 
 For the @strong{Bruker ER032M} field controller for some combinations of
@@ -341,10 +341,10 @@ This function does not exist for the modules @code{hfs_sfc} and
 @anchor{set_field()}
 @findex set_field()
 @item set_field()
-This function expects one floating point argument for the field value
-and will set the magnetic field to this value. For the Keithley power
-supply (@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4})
-specify a current value.
+This function expects one floating point argument for the field value and will
+set the magnetic field to this value. For the @strong{Keithley} power supply
+(@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4}) specify a
+current value.
 
 The function returns the new value of the field (which, in some cases
 might differ a bit from the requested value due to the properties of the
@@ -366,7 +366,7 @@ smaller than the precision of the gaussmeter the precision of the
 gaussmeter is used instead. The function can only be called in the
 @code{EXPERIMENT} section.
 
-For both the Oxford magnet sweep power supplies (@code{ips20_4} and
+For both the @strong{Oxford} magnet sweep power supplies (@code{ips20_4} and
 @code{ips120_10}) this function will automatically stop a running sweep.
 
 For the @strong{Bruker ER032M} field controller setting a field with
@@ -399,8 +399,8 @@ reliable) not to use the sweep functions at all but the
 @ref{set_field()} function (which always checks and if necessary
 re-adjusts the field if necessray) in these cases instead.
 
-This function is not available for the Oxford power supplyies (modules
-@code{ips20_4} and @code{ips120_10}). Use the function
+This function is not available for the @strong{Oxford} power supplyies
+(modules @code{ips20_4} and @code{ips120_10}). Use the function
 @code{magnet_sweep} instead.
 
 
@@ -414,7 +414,7 @@ defined in @ref{magnet_setup()}. The function can only be called in the
 
 The function returns the new field value.
 
-This function is not available for the Oxford magnet power supplies
+This function is not available for the @strong{Oxford} magnet power supplies
 (modules @code{ips20_4} and @code{ips120_10}). Use the function
 @ref{magnet_sweep()} instead.
 
@@ -427,7 +427,7 @@ in a previous call of the function @ref{magnet_setup()}.
 
 The function returns the new field value.
 
-Please note that for the Oxford magnet power supplies (@code{ips20_4}
+Please note that for the @strong{Oxford} magnet power supplies (@code{ips20_4}
 and @code{ips120_10}) calling this function also automatically stops a
 running sweep.
 
@@ -454,7 +454,7 @@ not available for the @code{hjs_sfc} module.
 @anchor{magnet_use_correction()}
 @findex magnet_use_correction()
 @item magnet_use_correction()
-This function is only defined for the Keithley power supply
+This function is only defined for the @strong{Keithley} power supply
 (@code{keithley228a}) and accepts not more than one argument. If it is
 called with no argument or a non-zero number or the string @code{"ON"}
 corrections are applied to reduce the effects of certain inaccuracies of
@@ -466,13 +466,13 @@ default @strong{no} corrections are used.
 @anchor{magnet_use_dac_port()}
 @findex magnet_use_dac_port()
 @item magnet_use_dac_port()
-This function is only defined for the Keithley power supply and tells
+This function is only defined for the @strong{Keithley} power supply and tells
 the driver which of the DAC ports of the lock-in amplifier is connected
-(following a voltage divider) to the modulation input of the power
-supply. The function expects a single integer value, the DAC port number
-to be used -- for the SR510 and SR530 this can be @code{5} or @code{6},
-while for the SR810 and SR830 all values in the range between @code{1}
-and @code{4} may be used.
+(following a voltage divider) to the modulation input of the power supply. The
+function expects a single integer value, the DAC port number to be used -- for
+the @strong{SR510} and @strong{SR530} this can be @code{5} or @code{6}, while
+for the @strong{SR810} and @strong{SR830} all values in the range between
+@code{1} and @code{4} may be used.
 
 The function can only be used in the @code{PREPARATIONS} section.
 
@@ -480,7 +480,7 @@ The function can only be used in the @code{PREPARATIONS} section.
 @anchor{magnet_sweep()}
 @findex magnet_sweep()
 @item magnet_sweep()
-This function is only available for the Oxford magnet sweep power
+This function is only available for the @strong{Oxford} magnet sweep power
 supplies (@code{ips20_4} and @code{ips120_10}) to control their
 continuous sweep. It can be called with either an integer argument of
 @code{1} to start a sweep to higher field and current values, an
@@ -505,7 +505,7 @@ The function can only be used in the @code{EXPERIMENT} section.
 @anchor{magnet_sweep_rate()}
 @findex magnet_sweep_rate()
 @item magnet_sweep_rate()
-This function is only available for the Oxford magnet power supplies
+This function is only available for the @strong{Oxford} magnet power supplies
 (@code{ips20_4} and @code{ips120_10}) to set or query the sweep rate for
 continuous sweeps.  If no argument is passed to the function the
 currently set sweep rate is returned. Otherwise a (positive) sweep rate
@@ -516,18 +516,17 @@ IPS120_19) must be passed to the function.
 @anchor{magnet_goto_field_on_end()}
 @findex magnet_goto_field_on_end()
 @item magnet_goto_field_on_end()
-This function is only available for the Oxford magnet power supplies
+This function is only available for the @strong{Oxford} magnet power supplies
 (@code{ips20_4} and @code{ips120_10}) and the S-band field modules
-@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to
-set a target current or field that the magnet will be swept to @b{after}
-the experiment has ended (per default the magnet would stay at the last
-field position for the Oxford magnet supplies or move to the middle of
-the allowed field range for the S-band drivers). This function can be
-called in the @code{PREPARATION} as well the @code{EXPERIMENT} section
-and returns for the IPS20-4 the target current and for the three other
-modules the target field the magnet will sweept to after the end of the
-experiment.  If called more than once the current or field of the last
-call will be used.
+@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to set a
+target current or field that the magnet will be swept to @b{after} the
+experiment has ended (per default the magnet would stay at the last field
+position for the @strong{Oxford} magnet supplies or move to the middle of the
+allowed field range for the S-band drivers). This function can be called in
+the @code{PREPARATION} as well the @code{EXPERIMENT} section and returns for
+the IPS20-4 the target current and for the three other modules the target
+field the magnet will sweept to after the end of the experiment.  If called
+more than once the current or field of the last call will be used.
 
 
 @anchor{magnet_B0()}
@@ -603,17 +602,17 @@ The function can only be used in the @code{PREPARATIONS} section.
 @cindex Gaussmeter Functions
 
 
-Currently, four types of gaussmeters are implemented, the Bruker ER035M
-NMR gaussmeter, the Bruker BH15 hall probe field controller, the
-Metrolab PT2025 NMR gaussmeter and, finally, the Bruker BNM12 NMR
-gaussmeter. The range of fields that can be measured with the Bruker
-ER035M NMR gaussmeter depends on the probe being used. With the F0 probe
-(S-band) the range is @w{460 G} to @w{2390 G} while with the F1 probe
-(X-band) a range between @w{1460 G} and @w{19900 G} can be measured.
-With the BH15 field controller a range between @w{-50 G} and @w{2300 G}
-can be used. Finally, for the Metrolab PT2025 it is currently assumed
-that a probe for the field range between @w{1.5 T} and @w{3.4 T}
-(W-band) is used.
+Currently, four types of gaussmeters are implemented, the @strong{Bruker
+ER035M} NMR gaussmeter, the @strong{Bruker BH15} hall probe field controller,
+the @strong{Metrolab PT2025} NMR gaussmeter and, finally, the @strong{Bruke
+BNM12 NMR} gaussmeter. The range of fields that can be measured with the
+@strong{Bruker ER035M} NMR gaussmeter depends on the probe being used. With
+the F0 probe (S-band) the range is @w{460 G} to @w{2390 G} while with the F1
+probe (X-band) a range between @w{1460 G} and @w{19900 G} can be measured.
+With the @strong{BH15} field controller a range between @w{-50 G} and
+@w{2300 G} can be used. Finally, for the @strong{Metrolab PT2025} it is
+currently assumed that a probe for the field range between @w{1.5 T} and
+@w{3.4 T} (W-band) is used.
 
 The modules defining the gaussmeter functions (to be listed in the
 @code{DEVICES} section) are:
@@ -627,17 +626,17 @@ pt2025
 bnm12
 @end example
 @noindent
-The modules with names starting with @code{er035m} are for the Bruker
-ER035M NMR gaussmeter. @code{er035m} and @code{er035m_sa} are to be used
+The modules with names starting with @code{er035m} are for the @strong{Bruker
+ER035M} NMR gaussmeter. @code{er035m} and @code{er035m_sa} are to be used
 when the device is controlled via the GPIB bus while @code{er035m_s} and
 @code{er035m_sas} expect the device to be connected to a serial port of
 the computer. (If you're wondering why there are versions for both the
 GPIB bus and the serial port, the simple explanation is that some of the
-ER035M gaussmeters simple don't work with the GPIB bus even though they
-should.) The @code{bh15} module is for the Hall controller used in some
-setups, the @code{pt2025} module is for the Metrolab NMR gaussmeter from
-the Berlin W-Band spectrometer. The last module, @code{bnm12}, is for
-the Bruker BNM12 gaussmeter.
+@strong{ER035M} gaussmeters simple don't work with the GPIB bus even though
+they should.) The @code{bh15} module is for the Hall controller used in some
+setups, the @code{pt2025} module is for the @strong{Metrolab} NMR gaussmeter
+from the Berlin W-Band spectrometer. The last module, @code{bnm12}, is for
+the @strong{Bruker BNM12} gaussmeter.
 
 
 The three gaussmeter modules, @code{er035m}, @code{er035m_s} and
@@ -652,10 +651,10 @@ In contrast, the four other modules, @code{er035m_sa},
 @code{er035m_sas}, @code{pt2025} and @code{bnm12}, are only to be used
 for field measurements but not for direct field control.
 
-The Bruker BNM12 NMR gaussmeter can only be read out when the WITIO-48
-DIO card (module @code{witio_48}and the home-built DA/AD converter
-(@code{hjs_daadc} are available and their modules have already been
-loaded.
+The @strong{Bruker BNM12} NMR gaussmeter can only be read out when the
+@strong{WITIO-48 DIO} card (module @code{witio_48}and the home-built
+DA/AD converter (@code{hjs_daadc} are available and their modules have
+already been loaded.
 
 
 @noindent
@@ -692,7 +691,7 @@ Returns a string with the name of the gaussmeter being used.
 The function returns the current field in Gauss. It takes no arguments
 and can only be used in the @code{EXPERIMENT} section.
 
-@strong{Please note}: for the Bruker NMR gaussmeter BNM12 with a field
+@strong{Please note}: for the @strong{Bruker BNM12} NMR gaussmeter with a field
 resolution setting of @code{0.01 G} the kG part of the field value gets
 cut off, i.e.@: with this resolution setting a field of @code{3125.63 G}
 will be reported as being @code{123.63 G}.
@@ -721,17 +720,17 @@ returns the value in Gauss. The function can only be called in the
 @anchor{gaussmeter_resolution()}
 @findex gaussmeter_resolution()
 @item gaussmeter_resolution()
-This function is defined in the device drivers for the Bruker NMR
+This function is defined in the device drivers for the @strong{Bruker} NMR
 gaussmeters (@code{er035m}, @code{er035m_s}, @code{er035m_sa} and
-@code{er035m_sas}), the Metrolab NMR gaussmeter, @code{pt2025} and for
-the @code{bnm12} Bruker BNM12 NMR gaussmeter.  It can be used to set or
-query the resolution in Gauss used in measurements of the magnetic
+@code{er035m_sas}), the @strong{Metrolab} NMR gaussmeter, @code{pt2025} and
+for the @code{bnm12} @strong{Bruker BNM12} NMR gaussmeter.  It can be used to
+set or query the resolution in Gauss used in measurements of the magnetic
 field.
 
 To set a resolution the values @code{0.1 G}, @code{0.01 G} and
-@code{0.001 G} can be used for the Bruker NMR gaussmeter. For the
-Metrolab Gaussmeter only @code{0.01 G} and @code{0.001 G} are usable.
-Finally, for the Bruker BNM12 NMR gaussmeter the values @code{1.0 G},
+@code{0.001 G} can be used for the @strong{Bruker} NMR gaussmeter. For the
+@strong{Metrolab} Gaussmeter only @code{0.01 G} and @code{0.001 G} are usable.
+Finally, for the @strong{Bruker BNM12} NMR gaussmeter the values @code{1.0 G},
 @code{0.1 G} and @code{0.01 G} can be used.
 
 @strong{Please note}: for the modules @code{er035m} and @code{er035m_s},
@@ -741,7 +740,7 @@ initialization (i.e.@: at the very start of the experiment) unless
 the low resolution has been set explicitely during the
 @code{PREPARATIONS} section.
 
-@strong{Also note}: for the Bruker BNM12 gaussmeter changing the
+@strong{Also note}: for the @strong{Bruker BNM12} gaussmeter changing the
 resolution won't effect the device directly, it can only be read
 out. The device has a switch at its front panel where the resolution can
 be set and calling this function is for making the module aware of the
@@ -754,7 +753,7 @@ that the resolution is set to @code{0.1 G}.
 @anchor{gaussmeter_probe_orientation()}
 @findex gaussmeter_probe_orientation()
 @item gaussmeter_probe_orientation()
-This function is currently implemented for the Metrolab NMR gaussmeter
+This function is currently implemented for the @strong{Metrolab} NMR gaussmeter
 @code{pt2025} only. It allows to set or query the current probe
 orientation relative to the field. To set an orientation a parameter of
 @code{1} or @code{"+"} can be used to define an orientation parallel to
@@ -788,12 +787,11 @@ and @code{er035m_sas}. The function can only be called in the
 @section Lock-In Functions
 @cindex Lock-In Functions
 
-Modules for five different lock-in amplifiers are implemented. Most are
-by Stanford Research and have the model names @strong{SR510},
+Modules for five different lock-in amplifiers are implemented. Most are by
+@strong{Stanford Research} and have the model names @strong{SR510},
 @strong{SR530}, @strong{SR810} and @strong{SR830}. The fifth is the
-@strong{ER023M Signal Channel} used in Bruker spectrometers of the ESP
-series. The module names to be specified in the @code{DEVICES} section
-are
+@strong{ER023M Signal Channel} used in @strong{Bruker} spectrometers of the
+ESP series. The module names to be specified in the @code{DEVICES} section are
 @example
 sr510
 sr530
@@ -955,8 +953,8 @@ going to be used -- the user has to take care that the trigger input
 rate is not larger than @w{512 Hz}.
 
 The next one or two parameter define which data type should be sampled
-in auto-acquisition mode (the @code{SR810} only accepts one data type
-arguments while the @code{SR830} accepts two). You may specify integer
+in auto-acquisition mode (the @strong{SR810} only accepts one data type
+arguments while the @strong{SR830} accepts two). You may specify integer
 numbers with exactly the same meaning as the arguments to the function
 @ref{lockin_get_data()}. This will also automatically switch the type
 of data displayed on the front side channels to the specified values.
@@ -970,7 +968,7 @@ combinations are possible:
 @item @tab @code{7} (ADC 2) @tab @code{8} (ADC 4)
 @item @tab @code{9} (X noise) @tab @code{10} (Y noise)
 @end multitable
-For the @code{SR810} only the first column is relevant.
+For the @strong{SR810} only the first column is relevant.
 
 Additionally, you also may specify a value of @code{0}, indicating that
 the function to be displayed should not be changed, i.e.@: the data type
@@ -993,19 +991,19 @@ of the function @ref{lockin_auto_setup()}.
 
 When called with an argument of @code{1} (or a string @code{"ON}")
 auto-acquisition is started. If you now request data from one of the
-channels configured to be used in @code{lockin_auto_setup()} via the
+channels configured to be used in @ref{lockin_auto_setup()} via the
 function @ref{lockin_get_data()} the next data sample from the internal
 buffer of the lock-in amplifier will be returned (instead of returning
 the value at the moment of the call of the function).
 
 When called with an argument of @code{0} (or a string @code{"OFF"})
 auto-acquisition is stopped and the internal buffer of the lock-in is
-cleared. Following calls of @code{lockin_get_data()} will then return
+cleared. Following calls of @ref{lockin_get_data()} will then return
 values measured in the 'normal' way.
 
 @strong{Please note}: The sizes of the internal buffers of the lock-in
-amplifiers are restricted: while the @code{SR830} can store up to 16383
-data points for each of the two channel, the @code{SR810} can only store
+amplifiers are restricted: while the @strong{SR830} can store up to 16383
+data points for each of the two channel, the @strong{SR810} can only store
 a maximum of 8191 samples. If the program detects when fetching new data
 that the maximum number of data have already been fetched from the
 lock-in the internal buffer is cleared. In this case data which should
@@ -1550,7 +1548,7 @@ argument, the the channel used to do the averaging, i.e.@: either
 
 @strong{Please note}: Anton Savitzky noticed that there seems to be
 firmware bug in the @strong{Tektronix} digitzers from the 500 series
-(i.e. @code{TDS520}, @code{TDS520A}, @code{TDS520C} and @code{TDS540}).
+(i.e. @strong{TDS520}, @strong{TDS520A}, @strong{TDS520C} and @strong{TDS540}).
 For numbers of averages above about 16 only half of the number of
 averages seem to be taken by the device it has been instructed to do.
 It's hard to say which is the exact number of averages this bug starts
@@ -2013,14 +2011,14 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the area for the corresponding window.
 
-Except for the @code{TDS520} and the @strong{LeCroy} digitizers
+Except for the @strong{TDS520} and the @strong{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
-area. For the @code{TDS520} and the @code{LcCroy} digitizers, which miss
+area. For the @strong{TDS520} and the @strong{LcCroy} digitizers, which miss
 this built-in function, the curve in the interval is fetched and then
 used to compute the area. To give some visual feedback also for the
-@code{TDS520} the cursors are moved to the borders of the interval.
+@strong{TDS520} the cursors are moved to the borders of the interval.
 
 Unless data from a memory channel are fetched the function automatically
 waits until a still running acquisition sequence is finished before
@@ -2107,14 +2105,14 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the amplitide for the corresponding window.
 
-Except for the @code{TDS520} and the @strong{Lecroy} digitizers
+Except for the @strong{TDS520} and the @strong{Lecroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
-amplitude. For the @code{TDS520} and the @code{LeCroy} digitizers, that
+amplitude. For the @strong{TDS520} and the @strong{LeCroy} digitizers, that
 miss this built-in function the curve in the interval is fetched and then
 is used to compute the amplitude. To give some visual feedback also for
-the @code{TDS520} the cursors are moved to the borders of the interval.
+the @strong{TDS520} the cursors are moved to the borders of the interval.
 
 Unless data from a memory channel are fetched the function automatically
 waits until a still running acquisition sequence is finished before
@@ -2151,8 +2149,8 @@ function does not exist for the @strong{LeCroy} oscilloscopes.
 @findex digitizer_copy_curve()
 @item digitizer_copy_curve()
 This function is available for the @strong{Tektronix} and all @strong{LeCroy}
-digitizers except the @code{LeCroy 9400}. It allows to save a curve from on of
-the normal measurement or @code{MATH} / @code{FUNC} channels to one of the
+digitizers except the @strong{LeCroy 9400}. It allows to save a curve from on
+of the normal measurement or @code{MATH} / @code{FUNC} channels to one of the
 @code{REF} / @code{MEM} channels. It takes two arguments, first the source
 channel, i.e.@: the channel to copy the data from, which must be (depending
 on the model of
@@ -2829,17 +2827,11 @@ of an @code{EDL} script.
 @node Synthesizer Functions, Temperature Controller Functions, Pulser Functions, Device Functions
 @section Synthesizer Functions
 @cindex Synthesizer Functions
-Supported synthesizers so far are the Hewlett-Packard models @code{HP8647A},
-@code{HP8648B} and @code{HP8672A} and the Rohde&Schwarz model
-@code{SML01}. Their modules are loaded by specifying
-@example
-hp8647a
-hp8648b
-hp8672a
-rs_sml01
-@end example
-@noindent
-in the @code{DEVICES} section.
+Supported synthesizers so far are the @strong{Hewlett-Packard} models
+@strong{HP8647A}, @strong{HP8648B} and @strong{HP8672A} and the
+@strong{Rohde&Schwarz} model @strong{SML01}. Their modules are loaded by
+specifying @example hp8647a hp8648b hp8672a rs_sml01 @end example @noindent in
+the @code{DEVICES} section.
 
 
 @noindent
@@ -2904,10 +2896,10 @@ RF output.
 @item synthesizer_frequency()
 The function queries or sets the RF output frequency. If called to set
 the frequency it accepts a frequency as the only argument. For the
-@code{HP8647A} the frequency must be in the range between @w{250 kHz}
-and @w{1000 MHz}, for the @code{HP8648B} between @w{10 kHz} and @w{2 GHz}
-and for the @code{HP8672A} between @w{2 GHz} and @w{18 GHz}. For the
-@code{Rohde&Schwarz} model @code{SML01} the frequency range is @w{9 KHz}
+@strong{HP8647A} the frequency must be in the range between @w{250 kHz}
+and @w{1000 MHz}, for the @strong{HP8648B} between @w{10 kHz} and @w{2 GHz}
+and for the @strong{HP8672A} between @w{2 GHz} and @w{18 GHz}. For the
+@strong{Rohde&Schwarz} model @strong{SML01} the frequency range is @w{9 KHz}
 to @w{1.1 GHz}.
 
 If a attenuation table is used (@ref{synthesizer_use_table()} then on
@@ -2921,7 +2913,7 @@ function that is set automatically by a call of the function
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the frequency has already
 been set by calling the function with an argument). For the
-@code{HP8672A} the function can be called in query mode only when the
+@strong{HP8672A} the function can be called in query mode only when the
 frequency has been set previously.
 
 
@@ -2936,16 +2928,16 @@ If called without an argument the currently set attenuation is returned.
 To set the attenuation the function must be called with one argument, the
 attenuation.
 
-For the @code{HP8647A} the attenuation must be in the range between
+For the @strong{HP8647A} the attenuation must be in the range between
 @w{+10 dB} and @w{-136 dB} with a resolution of @w{0.1 dB}, for the
-@code{HP8648B} between @w{+14.5 dB} and @w{-136 dB} (with the same
-resolution) and for the @code{HP8672A} between @w{+3 dB} and
+@strong{HP8648B} between @w{+14.5 dB} and @w{-136 dB} (with the same
+resolution) and for the @strong{HP8672A} between @w{+3 dB} and
 @w{-120 dB} with a resolution of @w{1 dB}.
 
-For the @code{Rohde&Schwarz} the allowed range of attenuations is from
+For the @strong{Rohde&Schwarz} the allowed range of attenuations is from
 @w{+13 dBm} to @w{- 140 dBm} with a resolution of @w{0.1 dBm}.
 
-Currently for the @code{HP8647A} the minimum attenuation that can be set
+Currently for the @strong{HP8647A} the minimum attenuation that can be set
 from an @code{EDL} script is limited to @w{-5 dB}, should you need lower
 attenuations change the definition of @code{MIN_ATTEN} in the
 configuration file for the device.
@@ -2953,7 +2945,7 @@ configuration file for the device.
 Before the @code{EXPERIMENT} section this function can't be called in
 query mode, i.e.@: without an argument (unless the attenuation has already
 been set by calling the function with an argument). For the
-@code{HP8672A} the function can be called in query mode only when the
+@strong{HP8672A} the function can be called in query mode only when the
 attenuation has been set previously.
 
 
@@ -3019,10 +3011,10 @@ new frequency is set. To find out which attenuation has to be set for a
 new frequency a table file is used. The name of this table file can be
 passed to the function as a (string) argument. If no argument is given a
 default table file is used (typically this is
-@file{/usr/local/lib/fsc2/hp8647a.table} for the @code{HP8647A},
-@file{/usr/local/lib/fsc2/hp8648b.table} for the @code{HP8648B},
-@file{/usr/local/lib/fsc2/hp8672a.table} for the @code{HP8672A} and
-@file{/usr/local/lib/fsc2/rs_sml01.table} for the @code{Rhode&Schwarz
+@file{/usr/local/lib/fsc2/hp8647a.table} for the @strong{HP8647A},
+@file{/usr/local/lib/fsc2/hp8648b.table} for the @strong{HP8648B},
+@file{/usr/local/lib/fsc2/hp8672a.table} for the @strong{HP8672A} and
+@file{/usr/local/lib/fsc2/rs_sml01.table} for the @strong{Rhode&Schwarz
 SML01}, but this may depend on the installation of @code{fsc2}).
 
 The table file must consist of pairs of entries, a frequency and a
@@ -3064,8 +3056,8 @@ When a table file is used there remains the question for which frequency to
 use the attenuation has been set e.g.@: by @ref{synthesizer_attenuation()}.
 To set this reference frequency the function @ref{synthesizer_att_ref_freq()}
 can be used. If the function isn't called a frequency of @w{14 MHz} is used
-for the @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} and @w{2 GHz}
-for the @code{HP8672A} (but this is a compile time constant that can be
+for the @strong{HP8647A}, @strong{HP8648B} and @strong{R&S SML01} and @w{2 GHz}
+for the @strong{HP8672A} (but this is a compile time constant that can be
 adjusted in the configuration file for the device by changing the definition
 of @code{DEF_ATT_REF_FREQ}).
 
@@ -3073,16 +3065,16 @@ of @code{DEF_ATT_REF_FREQ}).
 @anchor{synthesizer_modulation()}
 @findex synthesizer_modulation()
 @item synthesizer_modulation()
-Using this function for the @code{HP8647A}, @code{HP8648B} and @code{RS
+Using this function for the @strong{HP8647A}, @strong{HP8648B} and @strong{RS
 SML01} the type, source and amplitude of the modulation can be set, for
-the @code{HP8672A} both type and amplitude. It can set all of these
+the @strong{HP8672A} both type and amplitude. It can set all of these
 parameters at once or only a subset of them.
 
-For the @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} there are
+For the @strong{HP8647A}, @strong{HP8648B} and @strong{R&S SML01} there are
 four possible types of modulation: FM, AM and phase modulation. The
 modulation type is specified by a string, either @code{"FM"},
 @code{"AM"}, @code{"PHASE"} or, finally, @code{"OFF"} to switch off
-modulation. For the @code{HP8672A} @code{"FM"}, @code{"AM"} and
+modulation. For the @strong{HP8672A} @code{"FM"}, @code{"AM"} and
 @code{"OFF"} can be used.
 
 Please note that setting a modulation source or amplitude while the
@@ -3090,7 +3082,7 @@ modulation is off (i.e.@: when @code{"OFF"} has been specified as the
 modulation type) is not possible and trying to do so will make the
 program abort.
 
-For the @code{HP8647A} and @code{HP8648B} the possible modulation
+For the @strong{HP8647A} and @strong{HP8648B} the possible modulation
 sources are either external AC coupled, external DC coupled, internal
 @w{1 kHz} or internal @w{400 Hz}. For external AC or DC coupled
 modulation specify one the strings @code{"EXT AC"}, @code{"AC"},
@@ -3102,9 +3094,9 @@ modulation specify one the strings @code{"EXT AC"}, @code{"AC"},
 please note: external DC coupled modulation source does not work with
 amplitude and phase modulation@!
 
-For the @code{HP8672A} no modulation source can be specified.
+For the @strong{HP8672A} no modulation source can be specified.
 
-For the @code{Rohde&Schwarz} model @code{SML01} the possible modulation
+For the @strong{Rohde&Schwarz} model @strong{SML01} the possible modulation
 sources are also either external AC coupled (specified by either,
 @code{"EXT AC"} or @code{"AC"}), external DC coupled (use @code{"EXT
 DC"} or just @code{"DC"}) and internal (specified by the string
@@ -3114,17 +3106,17 @@ modulation source, the frequency of the internal modulation, which can
 be in the range between @w{0.1 Hz} and @code{1 MHz}.
 
 Finally you may specify the modulation amplitude, which has to be a
-number (preferably a floating point number). For the @code{HP8647A} FM
-and @code{HP8648B} modulation amplitudes have to be in the range between
+number (preferably a floating point number). For the @strong{HP8647A} FM
+and @strong{HP8648B} modulation amplitudes have to be in the range between
 @w{0 Hz} and @w{100 kHz}, AM modulation amplitudes between @w{0%} and
 @w{100%} and phase modulation amplitudes between @w{0 degree} and @w{10
 degree}.
 
-For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
+For the @strong{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
 modulation can only be set to either @w{30%} or @w{100%}.
 
-For the @code{Rohde&Schwarz} model @code{SML01} AM modulations between
+For the @strong{Rohde&Schwarz SML01} AM modulations between
 @w{0%} and @w{100%} can be used. Both the ranges of FM and phase modulation
 depend on the RF frequency. For frequencies below @w{76 MHz} and above
 @w{605.25 MHz} FM modulation amplitudes between @w{0 Hz} and @w{1 MHz}
@@ -3149,7 +3141,7 @@ the modulation source.
 If the modulation type becomes changed, the source and amplitude reverts
 to the settings that were specified in previous calls of the function
 when this modulation type was still active. I.e.@: if e.g.@: for the
-@code{HP8647A} at first AM modulation using an external AC coupled
+@strong{HP8647A} at first AM modulation using an external AC coupled
 source and an amplitude of @w{50%} was set and then the modulation was
 changed to FM with different settings for source and amplitude, another
 call switching back to AM modulation will also restore the settings of
@@ -3163,15 +3155,15 @@ As an alternative to the function @ref{synthesizer_modulation()} the
 modulation type can be also set via the function @ref{synthesizer_mod_type()}.
 It accepts a string argument, either @code{"FM"} for frequency modulation,
 @code{"AM"} for amplitude modulation or @code{"OFF"} to switch off
-modulation. The @code{HP8647A}, @code{HP8648B} and @code{R&S SML01} also
+modulation. The @strong{HP8647A}, @strong{HP8648B} and @strong{R&S SML01} also
 allow another argument, @code{"PHASE"} for phase modulation.
 
 
 @anchor{synthesizer_mod_source()}
 @findex synthesizer_mod_source()
 @item synthesizer_mod_source()
-This function is only available for the @code{HP8647A}, @code{HP8648B}
-and the @code{R&S SML01}. If the modulation type has been set before the
+This function is only available for the @strong{HP8647A}, @strong{HP8648B}
+and the @strong{R&S SML01}. If the modulation type has been set before the
 modulation source can be set directly via this function.
 
 The function accepts the strings @code{"OFF"} to switch off modulation,
@@ -3179,14 +3171,14 @@ The function accepts the strings @code{"OFF"} to switch off modulation,
 coupled modulation source and @code{"EXT DC} (or @code{"DC"}) for an
 external DC coupled modulation source.
 
-For both the @code{HP8647A} and the @code{HP8648B} it also accepts one
+For both the @strong{HP8647A} and the @strong{HP8648B} it also accepts one
 of the following strings for the internal modulation settings that are
 available for these devices: @code{"INT 1kHz"}, @code{"INT 1 kHz"},
 @code{"INT 1"}, @code{"1kHz"}, @code{"1 kHz"}, @code{"1"}, @code{"INT
 400Hz"}, @code{"INT 400 Hz"}, @code{"INT 400"}, @code{"400Hz"},
 @code{"400 Hz"} or @code{"400"}.
 
-To set up use of the internal modulation source of the @code{R&S SML01}
+To set up use of the internal modulation source of the @strong{R&S SML01}
 pass the function either two arguments, first the string @code{"INT"}
 and second the modulation frequency (between @w{0.1 Hz} and @w{1 MHz}),
 or just a single argument, the modulation frequency.
@@ -3195,9 +3187,9 @@ If the function is called with no argument it will return the modulation
 source setting for the currently active modulation type as an integer
 number. It returns @code{0} for an external, AC coupled modulation
 source and @code{1} for an external, DC coupled source. For the
-@code{HP8647A} and the @code{HP8648B} @code{3} is returned for intenal
+@strong{HP8647A} and the @strong{HP8648B} @code{3} is returned for intenal
 modulation with @w{400 Hz} and @code{4} for @w{1 kHz}.  For the
-@code{R&S SML01} a return value of @code{3} indicates internal
+@strong{R&S SML01} a return value of @code{3} indicates internal
 modulation. To find out the frequency of the modulation for this device
 use the function @ref{synthesizer_mod_freq()}.
 
@@ -3209,13 +3201,12 @@ program.
 @anchor{synthesizer_mod_freq()}
 @findex synthesizer_mod_freq()
 @item synthesizer_mod_freq()
-This function only exists for the @code{Rohde&Schwarz} model
-@code{SML01} synthesizer. It can be used to change the modulation
-frequency if modulation is switched on and the synthesizer has been set
-up to use the internal oszillator as the modulation source (otherwise
-the function will print out a warning message and do nothing else). It
-expects a single argument, the modulation frequency, which must be
-between @w{0.1 Hz} and @w{1 MHz}.
+This function only exists for the @strong{Rohde&Schwarz SML01} synthesizer. It
+can be used to change the modulation frequency if modulation is switched on
+and the synthesizer has been set up to use the internal oszillator as the
+modulation source (otherwise the function will print out a warning message and
+do nothing else). It expects a single argument, the modulation frequency,
+which must be between @w{0.1 Hz} and @w{1 MHz}.
 
 If called without an argument the function returns the currently used
 modulation frequency - this only works when the device is set up to use
@@ -3232,26 +3223,26 @@ program.
 @item synthesizer_mod_ampl()
 
 If the modulation type has been set this function can be used to set the
-modulation amplitude. For the @code{HP8647A} and @code{HP8648B} the
+modulation amplitude. For the @strong{HP8647A} and @strong{HP8648B} the
 allowed range of FM frequencies is from @w{0 Hz} to @w{100 kHz}, for AM
 amplitudes between @w{0%} and @w{100%} are acceptable and for phase
 modulation values between @w{0 degree} and @w{10 degree} are valid.
 
-For the @code{HP8672A} FM modulation can be set to either @w{30 kHz},
+For the @strong{HP8672A} FM modulation can be set to either @w{30 kHz},
 @w{100 kHz}, @w{300 kHz}, @w{1 MHz}, @w{3 MHz} or @w{10 MHz}. AM
 modulation can only be set to either @w{30%} or @w{100%}.
 
-For the @code{Rohde&Schwarz} model @code{SML01} AM modulations between
-@w{0%} and @w{100%} can be used. Both the ranges of FM and phase modulation
-depend on the RF frequency. For frequencies below @w{76 MHz} and above
-@w{605.25 MHz} FM modulation amplitudes between @w{0 Hz} and @w{1 MHz}
-and phase modulation amplitutes between @w{0 rad} and @w{10 rad} can be
-used. In the frequency range above @w{76 MHz} and up to @w{151.3125 MHz}
-the upper limits for the modulation amplitude levels are @w{125 kHz} and
-@w{1.25 rad}, respectively. In the frequency range above @w{151.3125 MHz}
-and up to @w{302.625 MHz} the upper limits are @w{250 MHz} and @w{2.5
-rad}. Finally, between @w{302.625 MHz} and @w{605.25 MHz} the upper
-limits for FM and phase modulation are @w{500 kHz} and @w{5 rad}.
+For the @strong{Rohde&Schwarz SML01} AM modulations between @w{0%} and
+@w{100%} can be used. Both the ranges of FM and phase modulation depend on the
+RF frequency. For frequencies below @w{76 MHz} and above @w{605.25 MHz} FM
+modulation amplitudes between @w{0 Hz} and @w{1 MHz} and phase modulation
+amplitutes between @w{0 rad} and @w{10 rad} can be used. In the frequency
+range above @w{76 MHz} and up to @w{151.3125 MHz} the upper limits for the
+modulation amplitude levels are @w{125 kHz} and @w{1.25 rad}, respectively. In
+the frequency range above @w{151.3125 MHz} and up to @w{302.625 MHz} the upper
+limits are @w{250 MHz} and @w{2.5 rad}. Finally, between @w{302.625 MHz} and
+@w{605.25 MHz} the upper limits for FM and phase modulation are @w{500 kHz}
+and @w{5 rad}.
 
 If called with no argument, the function will return the amplitude
 setting for the currently active modulation type. You can neither set
@@ -3262,8 +3253,8 @@ switched off, trying to do so will result in aborting the program.
 @anchor{synthesizer_pulse_state()}
 @findex synthesizer_pulse_state()
 @item synthesizer_pulse_state()
-This function is only available for the @code{Rohde&Schwarz SML01}
-synthesizer with @code{SML-B3} option. These devices have a pulse
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. These devices have a pulse
 modulation mode that allows th creation of RF pulses of user defined
 length and position. The function allows to query or switch on or off
 this pulse mode. If called without an argument it returns @code{1} or
@@ -3276,8 +3267,8 @@ modulation mode is switched off.
 @anchor{synthesizer_pulse_trigger_slope()}
 @findex synthesizer_pulse_trigger_slope()
 @item synthesizer_pulse_trigger_slope()
-This function is only available for the @code{Rohde&Schwarz SML01}
-synthesizer with @code{SML-B3} option. This function can be used to
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. This function can be used to
 query or set if the trigger leading to the creation a RF pulse is
 detected on the raising or falling edge of an external trigger input.
 If called with no argument the function returns @code{1} when the
@@ -3291,8 +3282,8 @@ the falling edge.
 @anchor{synthesizer_pulse_width()}
 @findex synthesizer_pulse_width()
 @item synthesizer_pulse_width()
-This function is only available for the @code{Rohde&Schwarz SML01}
-synthesizer with @code{SML-B3} option. It allows to query or set the
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. It allows to query or set the
 length of the RF pulse generated by the synthseizer in pulse modulation
 mode. If called with no argument the length of the RF pulse is returned.
 If called with a (floating point) argument the pulse length is set
@@ -3302,8 +3293,8 @@ accordingly. The pulse length must be between @w{20 ns} and @w{1.3 s}.
 @anchor{synthesizer_pulse_delay()}
 @findex synthesizer_pulse_delay()
 @item synthesizer_pulse_delay()
-This function is only available for the @code{Rohde&Schwarz SML01}
-synthesizer with @code{SML-B3} option. It allows to query or set the
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. It allows to query or set the
 delay between receiving an external trigger and the creation of the RF
 pulse. If called with no argument the value of this delay is returned.
 If called wih a (floating point) argument the delay is set accordingly.
@@ -3319,8 +3310,8 @@ this value.
 @node Temperature Controller Functions, Multimeter Functions, Synthesizer Functions, Device Functions
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
-The only currently implemented temperature controllers are the @code{Lake
-Shore 330} and the @code{Oxford ITC503}. Their modules get loaded by
+The only currently implemented temperature controllers are the @strong{Lake
+Shore 330} and the @strong{Oxford ITC503}. Their modules get loaded by
 specifying
 @example
 lakeshore330
@@ -3363,8 +3354,8 @@ Returns a string with the name of the temperature controller being used.
 This function accepts no arguments and returns the temperature at the
 currently active sample channel and with the currently selected unit.
 
-If no sample channel has been selected for the @code{Lake Shore 330}
-channels @code{B} is used by default, while for the @code{Oxford ITC503}
+If no sample channel has been selected for the @strong{Lake Shore 330}
+channels @code{B} is used by default, while for the @strong{Oxford ITC503}
 the default channel is channel @code{1}. When no temperature unit has
 been selected temperatures are returned in Kelvin.
 
@@ -3373,16 +3364,16 @@ been selected temperatures are returned in Kelvin.
 @findex temp_contr_sample_channel()
 @item temp_contr_sample_channel()
 This function returns, when called with no argument, the currently
-selected sample channel. For the @code{Lake Shore 330} it returns
+selected sample channel. For the @strong{Lake Shore 330} it returns
 @code{1} for channel @code{A} and @code{2} for channel @code{B} while
-for the @code{Oxford ITC503} @code{1}, @code{2} or @code{3} get
+for the @strong{Oxford ITC503} @code{1}, @code{2} or @code{3} get
 returned, indicating which of sample channel is selected. These values
 can also passed to the function to set a new sample channel.
 Alternatively, one may also use the strings @code{"A"} or @code{"B"}
-(and @code{"C"} for the third channel of the @code{Oxford ITC503}).
+(and @code{"C"} for the third channel of the @strong{Oxford ITC503}).
 
 Please take note that setting a sample channel takes about half a second
-with the @code{Lake Shore 330}. For the @code{Oxford ITC503} not all
+with the @strong{Lake Shore 330}. For the @strong{Oxford ITC503} not all
 sample channels may be usable, there are models with different numbers
 of channels and this number is a compile time option that has to be set
 in the configuration file for the device.
@@ -3394,13 +3385,13 @@ in the configuration file for the device.
 The function either returns or sets the units returned by the device on
 temperature readings. If used to set a unit the function must be called
 with the value @code{0} or @code{"K"} to set the unit to Kelvin,
-@code{1} or @code{"C"} to set to degree Celsius. The @code{Lake Shore
+@code{1} or @code{"C"} to set to degree Celsius. The @strong{Lake Shore
 330} also allows to select the most appropriate unit for the sensor 
 (volts for diodes, Ohms for RTD or milli-Volts for thermocouples) by
 passing the function an argument of @code{2} or @code{"S"}.
 
 The function always return the unit setting as an integer value with
-@code{0} for Kelvin, @code{1} for degree Celsius, or, for the @code{Lake
+@code{0} for Kelvin, @code{1} for degree Celsius, or, for the @strong{Lake
 Shore 330} only, @code{2} for Volts, @code{3} for Ohms and @code{4} for
 milli-Volts.
 
@@ -3464,10 +3455,10 @@ Returns a string with the name of the multimeter being used.
 @item multimeter_mode()
 If called with no argument the function returns the currently set measurement
 mode (as an integer), if called with an argument the mode gets set. For the
-@code{Kontron 4060} voltmeter the possible arguments are either the string
+@strong{Kontron 4060} voltmeter the possible arguments are either the string
 @code{"Vdc"} (or the integer number @code{0}) to switch to DC voltage mode
 or the string @code{"Vac"} (or the integer @code{1}) to switch to AC voltage
-mode. For the @code{Schlumbreger 7150} additional possible arguments are
+mode. For the @strong{Schlumbreger 7150} additional possible arguments are
 the strings @code{"Idc"} (or the integer @code{2}) for DC current mode and
 @code{"Iac"} (or the integer @code{3}) for AC current mode.
 
@@ -3676,19 +3667,20 @@ does not accept any parameters and can only by used in the
 @node DAQ Functions, DIO Functions, Frequency Counter Functions, Device Functions
 @section DAQ Functions
 @cindex DAQ Functions
-Currently, the supported data acquisition (DAQ) devices are the National
-Instruments PCI-MIO-16E-1 card, the @strong{Meilhaus Electronic GmbH}
-digital-to-analog converter cards ME-6000 and ME-6100, a home-built DA
-and AD converter from the group of H.-J.@: Steinhoff at the University
-of Osnabrueck and the 12-bit RB8509 ADC and the 12-bit RB8510 DAC card
-connected via the Rulbus (Rijksuniversiteit Leiden BUS).
+Currently, the supported data acquisition (DAQ) devices are the
+@strong{National Instruments PCI-MIO-16E-1} card, the @strong{Meilhaus
+Electronic GmbH} digital-to-analog converter cards @strong{ME-6000} and
+@strong{ME-6100}, a home-built DA and AD converter from the group of H.-J.@:
+Steinhoff at the University of Osnabrueck and the 12-bit @strong{RB8509 ADC}
+and the 12-bit @strong{RB8510 DAC} card connected via the @strong{Rulbus}
+(Rijksuniversiteit Leiden BUS).
 
-Both the National Instruments PCI-MIO-16E-1 card and the ME-6000 and
-ME-6100 cards require that a kernel module and an additional library
-(both coming with @code{fsc2}) have been successfully installed.
+Both the @strong{National Instruments PCI-MIO-16E-1} and the @strong{ME-6000}
+and @strong{ME-6100} cards require that a kernel module and an additional
+library (both coming with @code{fsc2}) have been successfully installed.
 
-The RB8509 and RB8510 ADC and DAC cards both require that a kernel
-module and an additional library (coming with @code{fsc2}) have been
+The @strong{RB8509} and @strong{RB8510} ADC and DAC cards both require that a
+kernel module and an additional library (coming with @code{fsc2}) have been
 successfully installed.
 
 The modules for these devices are loaded by specifying
@@ -3752,7 +3744,7 @@ Returns a string with the name of the DAC being used.
 @anchor{daq_ai_channel_setup()}
 @findex daq_ai_channel_setup()
 @item daq_ai_channel_setup()
-This function is only available for the PCI-MIO-16E-1 card. It is
+This function is only available for the @strong{PCI-MIO-16E-1} card. It is
 required that this function is called before analog input (AI) can be
 done to setup the properties of the input channels.
 
@@ -3833,7 +3825,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_ai_acq_setup()}
 @findex daq_ai_acq_setup()
 @item daq_ai_acq_setup()
-This function is only available for the PCI-MIO-16E-1 card. It is
+This function is only available for the @strong{PCI-MIO-16E-1} card. It is
 required that this function is called before analog input (AI) can be
 done using the card to setup the trigger mode, trigger sources and
 timings for the analog data acquisition.
@@ -3991,8 +3983,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_ai_start_acquisition()}
 @findex daq_ai_start_acquisition()
 @item daq_ai_start_acquisition()
-This function is only available for the PCI-MIO-16E-1 card. It is to be
-used to start an analog input acquisition according to the paramter set
+This function is only available for the @strong{PCI-MIO-16E-1} card. It is to
+be used to start an analog input acquisition according to the paramter set
 by previous calls of the functions @ref{daq_ai_channel_setup()} and
 @ref{daq_ai_acq_setup()}. It expects no arguments.
 
@@ -4003,7 +3995,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_ai_get_curve()}
 @findex daq_ai_get_curve()
 @item daq_ai_get_curve()
-This function is only available for the PCI-MIO-16E-1 card and is used
+This function is only available for the @strong{PCI-MIO-16E-1} card and is used
 to fetch the acquired data from the card. It expects no arguments.
 What type of variable the function returns depends on the number of
 channels that got sampled. If there was only a single channel the
@@ -4018,7 +4010,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_trigger_setup()}
 @findex daq_trigger_setup()
 @item daq_trigger_setup()
-This function is only available for the PCI-MIO-16E-1 card and can be
+This function is only available for the @strong{PCI-MIO-16E-1} card and can be
 used to switch the first trigger input line (named @code{"PFI0"} or
 @code{"TRIG1"} when specified in the function @ref{daq_ai_acq_setup()}
 between "digital" (TTL level) and analog mode.
@@ -4076,7 +4068,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_start_continuous_counter()}
 @findex daq_start_continuous_counter()
 @item daq_start_continuous_counter()
-This function is only available for the PCI-MIO-16E-1 card. It starts
+This function is only available for the @strong{PCI-MIO-16E-1} card. It starts
 one of the two counters of the card. The counter will count until it is
 stopped by a call of the @code{EDL} function @ref{daq_stop_counter()}.
 The first required argument is the counter to be used, which needs to be
@@ -4098,7 +4090,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_start_timed_counter()}
 @findex daq_start_timed_counter()
 @item daq_start_timed_counter()
-This function is only available for the PCI-MIO-16E-1 card and starts
+This function is only available for the @strong{PCI-MIO-16E-1} card and starts
 one of the counters of the card. The counter will count for a specified
 time and then stops automatically. It requires at least two arguments,
 the counter to be used, specified by a symbolic name, @code{CH0} or
@@ -4127,7 +4119,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_timed_count()}
 @findex daq_timed_count()
 @item daq_timed_count()
-This function is only available for the PCI-MIO-16E-1 card is and very
+This function is only available for the @strong{PCI-MIO-16E-1} card is and very
 similar to the previous function, @ref{daq_start_timed_counter()},
 i.e.@: it runs a counter for a specified of time, but in contrast it
 waits for the requested duration of time and only then returns with the
@@ -4141,7 +4133,7 @@ The largest value that can be returned is @w{16777215}, i.e.@: @w{2^24
 @anchor{daq_intermediate_count()}
 @findex daq_intermediate_count()
 @item daq_intermediate_count()
-This function is only available for the PCI-MIO-16E-1 card and returns
+This function is only available for the @strong{PCI-MIO-16E-1} card and returns
 the current value of a counter. The counter may still be running, in
 which case each call of the function will return an updated value
 according to the number of events that happened between invocations of
@@ -4161,12 +4153,11 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_final_count()}
 @findex daq_final_count()
 @item daq_final_count()
-This function is only available for the PCI-MIO-16E-1 card and waits for
-an counter to stop and only then returns the final value of the
-counter. Trying to call this function on a counter that has been started
-by the function @ref{daq_start_continuous_counter()} and hasn't already
-been stopped will fail, because such a counter will never stop by
-itself.
+This function is only available for the @strong{PCI-MIO-16E-1} card and waits
+for an counter to stop and only then returns the final value of the
+counter. Trying to call this function on a counter that has been started by
+the function @ref{daq_start_continuous_counter()} and hasn't already been
+stopped will fail, because such a counter will never stop by itself.
 
 The function requires one argument, the counter for which the current
 value is to be returned. It must be specified by one of the symbolic
@@ -4184,7 +4175,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_stop_counter()}
 @findex daq_stop_counter()
 @item daq_stop_counter()
-This function is only available for the PCI-MIO-16E-1 card and can be
+This function is only available for the @strong{PCI-MIO-16E-1} card and can be
 used to stop a counter independently of the purpose (i.e.@: counting or
 pulse train creation, see below) it was started for. It requires one
 argument, the counter to be stopped. It must be specified by one of the
@@ -4199,7 +4190,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_single_pulse()}
 @findex daq_single_pulse()
 @item daq_single_pulse()
-This function is only available for the PCI-MIO-16E-1 card.  Beside
+This function is only available for the @strong{PCI-MIO-16E-1} card.  Beside
 being used as event counters the counters can also be used to create
 pulses on its default output port. This function can be used to create a
 single pulse on the output port. It requires two arguments, the first
@@ -4215,7 +4206,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_continuous_pulses()}
 @findex daq_continuous_pulses()
 @item daq_continuous_pulses()
-This function is only available for the PCI-MIO-16E-1 card.  It allows
+This function is only available for the @strong{PCI-MIO-16E-1} card. It allows
 to create a continuous train of pulses. It requires at least two
 arguments, the first being the counter to be used, specified by a
 symbolic value @code{CH0} and @code{CH1}. If the requested counter is
@@ -4239,7 +4230,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_dio_read()}
 @findex daq_dio_read()
 @item daq_dio_read()
-This function is only available for the PCI-MIO-16E-1 card. Beside
+This function is only available for the @strong{PCI-MIO-16E-1} card. Beside
 counters the card also can do digital input and output. There are 8
 lines that can be monitored or set. Using this function the current
 state of any subset of these 8 lines can be determined. If the function
@@ -4270,7 +4261,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_dio_write()}
 @findex daq_dio_write()
 @item daq_dio_write()
-This function is only available for the PCI-MIO-16E-1 card. The 8 DIO
+This function is only available for the @strong{PCI-MIO-16E-1} card. The 8 DIO
 lines of the card can not only be monitored (see the previous function,
 @ref{counter_dio_read()}) but also set, which this function is to be
 used for. The function requires at least one integer argument, defining
@@ -4305,13 +4296,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{daq_ao_channel_setup()}
 @findex daq_ao_channel_setup()
 @item daq_ao_channel_setup()
-This function is only available for the PCI-MIO-16E-1 card. It allows to
-configure individulaly the analog outputs (AO) of the card. Both output
-channels can be used to do biplor or unipolar output. While in bipolar
-mode voltages between @w{-10 V} and @w{+10 V} with a resolution of ca.@:
-@w{5 mV} can be produced, in unipolar mode voltages between only @w{0 V}
-and @w{+10 V} but with an increased resolution of about @w{2.5 mV} can
-be produced.
+This function is only available for the @strong{PCI-MIO-16E-1} card. It allows
+to configure individulaly the analog outputs (AO) of the card. Both output
+channels can be used to do biplor or unipolar output. While in bipolar mode
+voltages between @w{-10 V} and @w{+10 V} with a resolution of ca.@: @w{5 mV}
+can be produced, in unipolar mode voltages between only @w{0 V} and @w{+10 V}
+but with an increased resolution of about @w{2.5 mV} can be produced.
 
 The channels can also be used to either output a voltage derived from an
 internal reference voltage (in which case voltages between @w{-10 V} and
@@ -4334,11 +4324,11 @@ and use the internal reference voltage.
 @anchor{daq_freq_out()}
 @findex daq_freq_out()
 @item daq_freq_out()
-This function is only available for the PCI-MIO-16E-1 card. The card has
-an @code{FREQ_OUT} in and this function can be used to determine or set
-the frequency output at this pin (or switch output off). If called with
-no argument it returns the currently output frequency (or @code{0.0} if
-the output is switched off.
+This function is only available for the @strong{PCI-MIO-16E-1} card. The card
+has an @code{FREQ_OUT} in and this function can be used to determine or set
+the frequency output at this pin (or switch output off). If called with no
+argument it returns the currently output frequency (or @code{0.0} if the
+output is switched off.
 
 When called with an argument this must be the frequency to output (or
 @code{0.0} to switch output off). The allowed frequencies are either
@@ -4367,13 +4357,13 @@ can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DAC to keep an @code{EDL} script from
 accdentally changing the output of the DAC.
 
-This function is not implemented for the Rulbus RB8905 ADC card.
+This function is not implemented for the Rulbus @strong{RB8905 ADC} card.
 
-For the ME-6000 and ME-6100 card the function expects an output port as
-the first argument specified by one of the symbolic values between
-@code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
-For the home-built AD and DA converter this argument can't be specified
-since it has only a single output.
+For the @strong{ME-6000} and @strong{ME-6100} card the function expects an
+output port as the first argument specified by one of the symbolic values
+between @code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
+For the home-built AD and DA converter this argument can't be specified since
+it has only a single output.
 
 If there is no further argument (or, in the case of the home-built AD
 and DA converter, no argument) an integer is returned. If it @code{1}
@@ -4401,24 +4391,25 @@ operation failed.
 @findex daq_set_voltage()
 @item daq_set_voltage()
 This function has to be used to output a voltage at (one of) the output
-ports. For the PCI-MIO-16E-1 and ME-6000 and ME-6100 cards the first
-argument has to be the output port, specified by one of the symbolic
-values between @code{CH0} and and @code{CH1} for the PCI-MIO-16E-1 card
-and between @code{CH1} and @code{CH15} for the ME-6000 and ME-6100 cards
-(don't try to use simple numbers instead!). For the home-built AD and DA
-converter as well as the RB8510 DAC card this argument can't be
-specified since both have only a single output.
+ports. For the @strong{PCI-MIO-16E-1}, @strong{ME-6000} and @strong{ME-6100}
+cards the first argument has to be the output port, specified by one of the
+symbolic values between @code{CH0} and and @code{CH1} for the
+@strong{PCI-MIO-16E-1} card and between @code{CH1} and @code{CH15} for the
+@strong{ME-6000} and @strong{ME-6100} cards (don't try to use simple numbers
+instead!). For the home-built AD and DA converter as well as the
+@strong{RB8510 DAC} card this argument can't be specified since both have only
+a single output.
 
-If the PCI-MIO-16E-1 card he channel is in biploar mode and uses the
-internal voltage reference the second argument, the voltage to be
-output, must be between @w{-10 V} and @w{+10 V}). If it is set to
-unipolar mode it must be between @w{0 V} and @w{+10 V}). If the channel
-is setup to use an external refeference voltage the argument must be
-be either between @w{-1} and @w{+1} or @w{0} and @w{1}, standing for
-the fraction of the external reference voltage to be output.
+If the @strong{PCI-MIO-16E-1} card he channel is in biploar mode and uses the
+internal voltage reference the second argument, the voltage to be output, must
+be between @w{-10 V} and @w{+10 V}). If it is set to unipolar mode it must be
+between @w{0 V} and @w{+10 V}). If the channel is setup to use an external
+refeference voltage the argument must be be either between @w{-1} and @w{+1}
+or @w{0} and @w{1}, standing for the fraction of the external reference
+voltage to be output.
 
-For the ME-6000 and ME-6100 cards the second argument is the output
-voltage to be output in the range between @w{-10 V} and @w{+10 V}.
+For the @strong{ME-6000} and @strong{ME-6100} cards the second argument is the
+output voltage to be output in the range between @w{-10 V} and @w{+10 V}.
 
 In contrast, for the home-built AD and DA converter card, the only
 argument is the output voltage. It must be between @w{0 V} and the
@@ -4426,7 +4417,7 @@ maximum voltage that has been spcified in the call of the function
 @ref{daq_maximum_output_voltage()}. If this function hasn't been called
 the default maximum output voltage is @w{+10 V}.
 
-Also the module for the Rulbus RB8510 12-bit DAC allows only a single
+Also the module for the Rulbus @strong{RB8510 12-bit DAC} allows only a single
 argument, the output voltage. Since there are different versions of the
 card with different output voltage ranges the possible range can only be
 determined at the start of the experiment.
@@ -4517,7 +4508,7 @@ operation failed.
 @findex daq_get_voltage()
 @item daq_get_voltage()
 This function is only available for the home-built AD and DA converter
-and the Rulbus RB8509 ADC card. For the home-built AD and DA converter
+and the Rulbus @strong{RB8509 ADC} card. For the home-built AD and DA converter
 it accepts no arguments and returns the current voltage at the input of
 the AD converter, a value between @w{-10 V} and @w{+10 V}. For the
 Rulbus RB8509 card it expects a single argument, the input channel. This
@@ -4547,21 +4538,20 @@ want to be able to read in the voltage at the ADC.
 @anchor{daq_dac_parameter()}
 @findex daq_dac_parameter()
 @item daq_dac_parameter()
-This function is available only for the ME-6000 and ME-6100 cards and
-the home-built AD and DA converter. It can be used to determine the
-current parameter of a DAC (channel). It returns an array of three
-floating point values. The first element of the array is the minimum
-voltage that can be output by the DAC, the second is the maximum output
-voltage and the third is the voltage resolution. If the device has more
-than one DAC channel, the function expects a channel as the only
-argument (which can be omitted if settings for alll channels must be
-identical).
+This function is available only for the @strong{ME-6000} and @strong{ME-6100}
+cards and the home-built AD and DA converter. It can be used to determine the
+current parameter of a DAC (channel). It returns an array of three floating
+point values. The first element of the array is the minimum voltage that can
+be output by the DAC, the second is the maximum output voltage and the third
+is the voltage resolution. If the device has more than one DAC channel, the
+function expects a channel as the only argument (which can be omitted if
+settings for alll channels must be identical).
 
 
 @anchor{daq_trigger_mode()}
 @findex daq_trigger_mode()
 @item daq_trigger_mode()
-Some of the Rulbus RB8509 ADC cards allow to trigger a conversion on
+Some of the Rulbus @strong{RB8509 ADC} cards allow to trigger a conversion on
 receipt of an external trigger. When in internal trigger mode a
 conversion is triggered automatically by calling the function
 @ref{daq_get_voltage()}. In external trigger mode the conversion is
@@ -4575,7 +4565,7 @@ external trigger mode.
 @anchor{daq_gain()}
 @findex daq_gain()
 @item daq_gain()
-The Rulbus RB8509 ADC cards have an pre-amplifier with a gain factor
+The Rulbus @strong{RB8509 ADC} card has a pre-amplifier with a gain factor
 that can be set to either @code{1}, @code{2}, @code{4} or @code{8} using
 this function. Trying to set it to any other values will result in an
 error message an the running experiment is immediately stopped.
@@ -5201,18 +5191,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section CCD Camera Functions
 @cindex CCD Camera Functions
 
-The only currently supplied CCD camera is the Roper Scientific Spec-10
-camera (without a shutter and with LN cooling). Its module is loaded by
-specifying
+The only currently supplied CCD camera is the @strong{Roper Scientific
+Spec-10} camera (without a shutter and with LN cooling). Its module is loaded
+by specifying
 @example
 rs_spec10
 @end example
 in the @code{DEVICES} section. 
 
-The module requires the PVCAM library supplied by Roper Scientific to be
-installed. To to be able to work with the camera also the Linux device
-driver for the PCI board used for the communication with camera, also
-supplied by Roper Scientific, must be installed.
+The module requires the PVCAM library supplied by @strong{Roper Scientific} to
+be installed. To to be able to work with the camera also the Linux device
+driver for the PCI board used for the communication with camera, also supplied
+by Roper Scientific, must be installed.
 
 @strong{Please note}: By setting two variables the configuration file
 the orientation of the spectra or images taken by the camera can be
@@ -5469,9 +5459,9 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-Currently the SpectraPro-300i series of monochromator (actually, the
-module has only been tested with the 308i) by the Acton Research
-Corporation and monochromators by SPEX controlled via the CD2A
+Currently the @strong{SpectraPro-300i} series of monochromator (actually, the
+module has only been tested with the @strong{308i}) by @strong{Acton Research
+Corporation} and monochromators by @strong{SPEX} controlled via the CD2A
 Compudrive interface are supported. The modules for the monochromators
 get loaded by specifying
 @example
@@ -5480,8 +5470,8 @@ spex_cd2a
 @end example
 in the @code{DEVICES} section. 
 
-There are two different types of monochromators by SPEX. They are either
-wavelength- or wavenumber-driven. In case of wavelength-driven
+There are two different types of monochromators by @strong{SPEX}. They are
+either wavelength- or wavenumber-driven. In case of wavelength-driven
 monochromators functions accepting or returning spectral positions
 etc.@: expect or return them in units of wavelengths, i.e.@: in
 @code{m}. In contrast, for wavenumber-driven monochromators the
@@ -5492,7 +5482,7 @@ line position is set values are expected or returned in relative
 wavenumber units, i.e.@: as differences between the wavenumber of the
 laser line and the absolute wavenumber.
 
-Another important point is that for SPEX type monochromators an offset
+Another important point is that for @strong{SPEX} type monochromators an offset
 (between the wavelength or -number displayed by the CD2A unit and the
 "real" wavelength or -number is automatically taken into account. Thus
 the position reported by the program and at the console of the CD2A unit
@@ -5507,10 +5497,10 @@ file for the device). This file automatically gets read in when the
 module is loaded and at the start of each experiment and rewritten at
 the end of the experiment.
 
-Some of the functions listed below will only work when a monochromator
-is used in conjunction with a CCD camera (and have been tested only with
-the Spec-10 CCD camera by Roper Scientific in conjunction with the
-supported monochromatore).
+Some of the functions listed below will only work when a monochromator is used
+in conjunction with a CCD camera (and have been tested only with the
+@strong{Spec-10} CCD camera by @strong{Roper Scientific} in conjunction with
+the supported monochromatore).
 
 
 @noindent
@@ -5561,8 +5551,8 @@ wavelength (in m) of the grating. If called with an argument the grating
 is moved to the specified center wavelength (which must be in the range
 covered by the monochromator and the current grating).
 
-Please note: for SPEX monochromators doing a scan calling this function
-automatically aborts the currently running scan.
+Please note: for @strong{SPEX} monochromators doing a scan calling this
+function automatically aborts the currently running scan.
 
 
 @anchor{monochromator_wavenumber()}
@@ -5577,14 +5567,14 @@ specified center wavenumber, which must be given in absolute units if no
 laser line position has been set, otherwise in relative units. The
 possible range depends on the grating being used.
 
-Please note: for SPEX monochromators doing a scan calling this function
-automatically aborts the currently running scan.
+Please note: for @strong{SPEX} monochromators doing a scan calling this
+function automatically aborts the currently running scan.
 
 
 @anchor{monochromator_laser_line()}
 @findex monochromator_laser_line()
 @item monochromator_laser_line()
-The function is only supported for wavenumber-driven SPEX
+The function is only supported for wavenumber-driven @strong{SPEX}
 monochromators. It allows to set (or query if the function is called
 without an argument) to set a laser line position. If such a laser line
 has been set the device automatically switches to using relative
@@ -5615,8 +5605,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_scan_setup()}
 @findex monochromator_scan_setup()
 @item monochromator_scan_setup()
-The function is only supported for SPEX monochromators. These have a
-special scan mode, where scans can be done going from low to high
+The function is only supported for @strong{SPEX} monochromators. These have
+a special scan mode, where scans can be done going from low to high
 wavelengths or from high to low wavenumbers (during a scan the
 monochromator doesn't have to do backslash removal, making the slew to a
 new position faster). For being able to start a scan the start position
@@ -5641,14 +5631,13 @@ automatically aborts the currently running scan.
 @anchor{monochromator_start_scan()}
 @findex monochromator_start_scan()
 @item monochromator_start_scan()
-The function is only supported for SPEX monochromators and requires that
-the function @ref{monochromator_scan_setup()} has been called
-previously to define the scan parameters. It slews the monochromator to
-the start position of the scan, switches to scan mode and returns the
-spectral position of the monochromator, either in wavelength units for
-wavelength driven monochromators or wavenumbers for wavenumber driven
-ones (in absolute units, if no laser line position has been set,
-otherwise in relative units).
+The function is only supported for @strong{SPEX} monochromators and requires
+that the function @ref{monochromator_scan_setup()} has been called previously
+to define the scan parameters. It slews the monochromator to the start
+position of the scan, switches to scan mode and returns the spectral position
+of the monochromator, either in wavelength units for wavelength driven
+monochromators or wavenumbers for wavenumber driven ones (in absolute units,
+if no laser line position has been set, otherwise in relative units).
 
 Please note: if the monochromators is already doing a scan calling this
 function automatically aborts the running scan.
@@ -5660,15 +5649,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_scan_step()}
 @findex monochromator_scan_step()
 @item monochromator_scan_step()
-The function is only supported for SPEX monochromators and requires that
-both the function @ref{monochromator_scan_setup()} has been called
-previously to define the scan parameters and that the monochromator has
-been switched to scan mode by calling @ref{monochromator_start_scan()}.
-The function slews the monochromator to the next spectral position by
-the scan step size and returns the new position, either in wavelength
-units for wavelength driven monochromators or wavenumbers for wavenumber
-driven ones (in absolute units, if no laser line position has been set,
-otherwise in relative units).
+The function is only supported for @strong{SPEX} monochromators and requires
+that both the function @ref{monochromator_scan_setup()} has been called
+previously to define the scan parameters and that the monochromator has been
+switched to scan mode by calling @ref{monochromator_start_scan()}.  The
+function slews the monochromator to the next spectral position by the scan
+step size and returns the new position, either in wavelength units for
+wavelength driven monochromators or wavenumbers for wavenumber driven ones (in
+absolute units, if no laser line position has been set, otherwise in relative
+units).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -5677,7 +5666,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_shutter_limits()}
 @findex monochromator_shutter_limits()
 @item monochromator_shutter_limits()
-The function is only supported for SPEX monochromators that have
+The function is only supported for @strong{SPEX} monochromators that have
 shutters to protect the PMT or APD etc.@: from excitation light in a
 certain frequency range. The function can be used to query or set these
 shutter limits. To set the shutter limits the function expects two
@@ -5708,7 +5697,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_grating()}
 @findex monochromator_grating()
 @item monochromator_grating()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 queries or sets a new grating. If called with no argument the function
 returns the number of the currently used grating (an integer between 1
 and the maximum number of installed gratings). If called with an integer
@@ -5723,7 +5712,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_turret()}
 @findex monochromator_turret()
 @item monochromator_turret()
-The function is only supported for SpectraPro-300i monochromators. If
+The function is only supported for @strong{SpectraPro-300i} monochromators. If
 called with no argument the function returns the number of the currently
 used turret of the monochromator (an integer number starting at 1). If
 called with an integer argument it switches the monochromator to the
@@ -5746,7 +5735,7 @@ arguments, an integer for the grating number and the wavelength at the
 center of the chip. If these arguments aren't given, the currently used
 grating and wavelength of the monochromator are used.
 
-For @code{SpectraPro-300i} monochromators it is required that a
+For @strong{SpectraPro-300i} monochromators it is required that a
 calibration for the grating has been loaded, either by calling
 @ref{monochromator_set_calibration()} or
 @ref{monochromator_load_calibration()}. If no calibration
@@ -5809,7 +5798,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calc_wavelength()}
 @findex monochromator_calc_wavelength()
 @item monochromator_calc_wavelength()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 requires that the module for a CCD camera is available that returns
 information about the number of pixels of the CCD chip and the distance
 between pixels. It accepts a pixel position or an array of pixel
@@ -5835,7 +5824,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_load_calibration()}
 @findex monochromator_load_calibration()
 @item monochromator_load_calibration()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 tries to load a file with calibration data for one or more of the
 gratings. For each grating three values are required for a complete
 calibration.
@@ -5876,7 +5865,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_set_calibration()}
 @findex monochromator_set_calibration()
 @item monochromator_set_calibration()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 allows to set calibration data for a grating directly instead of reading
 them from a file. It can also used to reset the calibration for a
 grating.
@@ -5896,7 +5885,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_install_grating()}
 @findex monochromator_install_grating()
 @item monochromator_install_grating()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 can be used to tell the monochromator about a new grating.  It expects
 two arguments, the grating number (an integer between 1 and the maximum
 number of installable gratings) and a string with the part number of the
@@ -5921,7 +5910,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_zero_offset()}
 @findex monochromator_zero_offset()
 @item monochromator_zero_offset()
-The function is only supported for SpectraPro-300i monochromators. It
+The function is only supported for @strong{SpectraPro-300i} monochromators. It
 allows to either query or set the zero offset of a grating. The zero
 offset is basically an angle that results from misalignments of the
 grating (and the CCD chip) and leads to the zero order peak not
@@ -5951,7 +5940,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_grating_adjust()}
 @findex monochromator_grating_adjust()
 @item monochromator_grating_adjust()
-The function is only supported for SpectraPro-300i monochromators. The
+The function is only supported for @strong{SpectraPro-300i} monochromators. The
 value that can be queried or set by this function is used to adjust the
 angle by which the grating is rotated when moving it to a certain
 wavelength. The monochromator has a built-in default value for the ratio
@@ -5984,10 +5973,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibrate()}
 @findex monochromator_calibrate()
 @item monochromator_calibrate()
-The function is takes different arguments for the @code{SpectraPro-300i} and
-the @code{SPEX} monochromator.
+The function is takes different arguments for the @strong{SpectraPro-300i} and
+the @strong{SPEX} monochromator.
 
-For the @code{SpectraPro-300i} it is for use in the dispersion
+For the @strong{SpectraPro-300i} it is for use in the dispersion
 calibration of a grating, i.e.@: the procedure where from a set of at
 least 4 measured positions of known lines (at at least two different
 center wavelengths) the optimum values for the inclusion angle, the
@@ -6026,19 +6015,19 @@ returns an (1-dimensional) array with three elements, where the first
 element is the inclusion angle (in degrees), the second element is the
 focal length (in m) and the third is the detector angle (in degrees).
 
-When called without an argument for @code{SpectraPro-300i}
+When called without an argument for @strong{SpectraPro-300i}
 monochromators the function returns an array with three elements, which
 are the current calibration settings for the inclusion angle (in
 degree), the focal length (in @code{m}) and the detector angle (in degree).
 
-For the @code{SPEX} monochromators it can be used to set an offset
+For the @strong{SPEX} monochromators it can be used to set an offset
 between the wavelength or -number used to set the monochromator to
 the current position and the "real", i.e.@: experimentally determined
 wavelength or (absolute) wavenumber. Once it has been set, all functions
 will take this offset into account when talking with the device.
 
 The second calibration value (the optional second argument) to be set by
-the function for @code{SPEX} monochromators is the wavelength (even for
+the function for @strong{SPEX} monochromators is the wavelength (even for
 wavenumber driven monochromators) difference between two pixels of an
 attached CCD camera.
 
@@ -6060,14 +6049,14 @@ laser line position by calling @ref{monochromator_laser_line()} with a
 zero argument and only after measuring and setting a new offset set the
 laser line position again.
 
-If called without an argument for @code{SPEX} monochromators the
+If called without an argument for @strong{SPEX} monochromators the
 function returns an array with two elements, representing the cuurent
 calibration setting of the offset (in @code{m} for wavelength driven and
 in @code{cm^-1} for wavenumber driven monochromators) and the wavelength
 or -number difference between two adjacent CCD camera pixels (or
 @code{0} if the value isn't known).
 
-Please note: To set the offset of a @code{SPEX} monochromator to
+Please note: To set the offset of a @strong{SPEX} monochromator to
 @code{0} @strong{don't} pass a zero argument for the offset to the
 function. Instead determine the current offset setting by a call without
 arguments and then call the function again with that offset as the first
@@ -6083,8 +6072,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Power Supply Functions
 @cindex Power Supply Functions
 
-The currently supplied power supplies are the @strong{Thurlby&Thandar}
-PL330DP and the @strong{F.u.G. Elektronik GmbH} MCN700-2000. The modules
+The currently supplied power supplies are the @strong{Thurlby&Thandar
+PL330DP} and the @strong{F.u.G. Elektronik GmbH MCN700-2000}. The modules
 for these power supplies are loaded
 by specifying
 @example
@@ -6368,8 +6357,8 @@ Currently there's just a single supported light chopper. It is a chopper
 used in the group of G.@: Gescheidt (Graz University of Technology,
 Austria), that, via some homebuild electronics@footnote{see Ph.D.@:
 thesis by Torsten Zytowski, Z@"urich 1998} is indirectly controlled by a
-data acquisition device, currently the National Instruments
-@w{PCI-MIO-16E-1} DAQ card. The module for the device is loaded by
+data acquisition device, currently the @strong{National Instruments
+PCI-MIO-16E-1} DAQ card. The module for the device is loaded by
 specifying
 @example
 gg_chopper
