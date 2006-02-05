@@ -39,11 +39,11 @@ int kontron4060_init_hook(       void );
 int kontron4060_exp_hook(        void );
 int kontron4060_end_of_exp_hook( void );
 
-Var_T *voltmeter_name(           Var_T * v );
-Var_T *voltmeter_get_data(       Var_T * v );
-Var_T *voltmeter_ac_measurement( Var_T * v );
-Var_T *voltmeter_dc_measurement( Var_T * v );
-Var_T *voltmeter_command(        Var_T * v );
+Var_T *multimeter_name(           Var_T * v );
+Var_T *multimeter_get_data(       Var_T * v );
+Var_T *multimeter_ac_measurement( Var_T * v );
+Var_T *multimeter_dc_measurement( Var_T * v );
+Var_T *multimeter_command(        Var_T * v );
 
 
 /* Locally used functions */
@@ -94,7 +94,7 @@ int kontron4060_exp_hook( void )
 {
 	/* Nothing to be done yet in a test run */
 
-	/* Initialize the voltmeter */
+	/* Initialize the multimeter */
 
 	if ( ! kontron4060_init( DEVICE_NAME ) )
 	{
@@ -127,17 +127,17 @@ int kontron4060_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *voltmeter_name( Var_T * v  UNUSED_ARG )
+Var_T *multimeter_name( Var_T * v  UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
-/*-----------------------------------------------*
- * Switches the voltmeter to AC measurement mode
- *-----------------------------------------------*/
+/*------------------------------------------------*
+ * Switches the multimeter to AC measurement mode
+ *------------------------------------------------*/
 
-Var_T *voltmeter_ac_measurement( Var_T * v  UNUSED_ARG )
+Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -149,10 +149,10 @@ Var_T *voltmeter_ac_measurement( Var_T * v  UNUSED_ARG )
 
 
 /*-----------------------------------------------*
- * Switches the voltmeter to DC measurement mode
+ * Switches the multimeter to DC measurement mode
  *-----------------------------------------------*/
 
-Var_T *voltmeter_dc_measurement( Var_T * v  UNUSED_ARG )
+Var_T *multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
 {
 	if ( FSC2_MODE == EXPERIMENT &&
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -164,10 +164,10 @@ Var_T *voltmeter_dc_measurement( Var_T * v  UNUSED_ARG )
 
 
 /*------------------------------------------------*
- * Returns the current voltage from the voltmeter
+ * Returns the current voltage from the multimeter
  *------------------------------------------------*/
 
-Var_T *voltmeter_get_data( Var_T * v  UNUSED_ARG )
+Var_T *multimeter_get_data( Var_T * v  UNUSED_ARG )
 {
 	char reply[ 100 ];
 	long length = 100;
@@ -190,7 +190,7 @@ Var_T *voltmeter_get_data( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *voltmeter_command( Var_T * v )
+Var_T *multimeter_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -246,13 +246,13 @@ static bool kontron4060_init( const char * name )
 		kontron4060_failure( );
 
 	if ( kontron4060.meas_type == MEAS_TYPE_AC )
-		vars_pop( voltmeter_ac_measurement( NULL ) );
+		vars_pop( multimeter_ac_measurement( NULL ) );
 	else
-		vars_pop( voltmeter_dc_measurement( NULL ) );
+		vars_pop( multimeter_dc_measurement( NULL ) );
 
 	/* Get one value - the first one always seems to be bogus */
 
-	vars_pop( voltmeter_get_data( NULL ) );
+	vars_pop( multimeter_get_data( NULL ) );
 
 	return OK;
 }
@@ -275,7 +275,7 @@ static bool kontron4060_command( const char * cmd )
 
 static void kontron4060_failure( void )
 {
-	print( FATAL, "Communication with voltmeter failed.\n" );
+	print( FATAL, "Communication with multimeter failed.\n" );
 	THROW( EXCEPTION );
 }
 

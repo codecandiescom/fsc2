@@ -250,13 +250,16 @@ boxcar_stop_acquisition, 0, EXP;
 boxcar_single_shot, -1, EXP;
 boxcar_command, 1, EXP;
 
-/* Functions exported by the voltmeter (Kontron 4060) */
+/* Functions exported by the multimeters (Kontron 4060, Schlumberger 7150) */
 
-voltmeter_name, 0, ALL;
-voltmeter_get_data, 0, EXP;
-voltmeter_ac_measurement, 0, EXP;
-voltmeter_dc_measurement, 0, EXP;
-voltmeter_command, 1, EXP;
+multimeter_name, 0, ALL;
+multimeter_get_data, 0, EXP;
+multimeter_ac_measurement, 0, EXP;          // Kontron 4060 only
+multimeter_dc_measurement, 0, EXP;          // Kontron 4060 only
+multimeter_mode, -1, ALL;                   // Schlumberger 7150 only
+multimeter_precision, -1, ALL;              // Schlumberger 7150 only
+multimeter_lock_keyboard, -1, EXP;          // Schlumberger 7150 only
+multimeter_command, 1, EXP;
 
 
 /* Functions exported by the temperature controller (Lakeshore 330) */

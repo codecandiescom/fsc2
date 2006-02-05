@@ -102,10 +102,10 @@ rs_sml01      // Rohde&Schwarz SML01 Signal Generator
 egg4402       // EG&G PARC box-car
 
 
-// Voltmeters
+// Multimeters
 
 kontron4060   // Kontron 4060 voltmeter
-
+schlum7150    // Schlumberger 7150
 
 // Temperature controllers
 

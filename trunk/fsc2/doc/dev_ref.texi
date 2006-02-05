@@ -53,7 +53,7 @@
 * ips120_10::       Oxford Magnet Sweep Power Supply IPS120-10
 * itc503::          Oxford Temperature Controller ITC503
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
-* kontron4060::     Kontron 4060 Voltmeter
+* kontron4060::     Kontron 4060 Multimeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
 * lecroy9420::      LeCroy Digitizing Oscilloscope 9420
@@ -1326,17 +1326,17 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 
 @node kontron4060, lakeshore330, keithley228a, Device Reference
 @iftex
-@subheading Kontron 4060 Voltmeter
+@subheading Kontron 4060 Multimeter
 @end iftex
 @ifnottex
-@section Kontron 4060 Voltmeter
+@section Kontron 4060 Multimeter
 @end ifnottex
 
 @paragraphindent 0
 @strong{Module name}: @code{kontron4060}
 
 @paragraphindent 0
-@strong{Description}: Kontron digital voltmeter 4060.
+@strong{Description}: Kontron digital multimeter 4060.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1347,10 +1347,10 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @paragraphindent 0
 @strong{Supported functions}:
 @table @samp
-@item @ref{voltmeter_name()}
-@item @ref{voltmeter_get_data()}
-@item @ref{voltmeter_ac_measurement()}
-@item @ref{voltmeter_dc_measurement()}
+@item @ref{multimeter_name()}
+@item @ref{multimeter_get_data()}
+@item @ref{multimeter_ac_measurement()}
+@item @ref{multimeter_dc_measurement()}
 @end table
 
 

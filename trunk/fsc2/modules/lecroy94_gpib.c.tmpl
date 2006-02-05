@@ -1457,7 +1457,7 @@ void lecroy94_tmpl_copy_curve( long src,
 	if ( ! lecroy94_tmpl.is_displayed[ src ] )
 	{
 		print( FATAL, "Can't copy channel %s since it isn't switched on.\n",
-			   LECROY94_TMPL_Channel_Names[ ch ] );
+			   LECROY94_TMPL_Channel_Names[ src ] );
 		THROW( EXCEPTION );
 	}
 

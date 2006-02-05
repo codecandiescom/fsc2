@@ -33,7 +33,7 @@
 * Pulser Functions::
 * Synthesizer Functions::
 * Temperature Controller Functions::
-* Voltmeter Functions::
+* Multimeter Functions::
 * Boxcar Integrator Functions::
 * Frequency Counter Functions::
 * DAQ Functions::
@@ -3316,7 +3316,7 @@ this value.
 
 
 
-@node Temperature Controller Functions, Voltmeter Functions, Synthesizer Functions, Device Functions
+@node Temperature Controller Functions, Multimeter Functions, Synthesizer Functions, Device Functions
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
 The only currently implemented temperature controllers are the @code{Lake
@@ -3420,10 +3420,10 @@ argument at all.
 
 
 
-@node Voltmeter Functions, Boxcar Integrator Functions, Temperature Controller Functions, Device Functions
-@section Voltmeter Functions
-@cindex Voltmeter Functions
-The only currently supported digital voltmeter is the @strong{Kontron 4060}.
+@node Multimeter Functions, Boxcar Integrator Functions, Temperature Controller Functions, Device Functions
+@section Multimeter Functions
+@cindex Multimeter Functions
+The only currently supported digital multimeter is the @strong{Kontron 4060}.
 Its module is loaded by specifying
 @example
 kontron4060
@@ -3432,52 +3432,52 @@ kontron4060
 in the @code{DEVICES} section.
 
 @noindent
-@strong{List of all voltmeter functions}:
+@strong{List of all multimeter functions}:
 @table @samp
-@item @ref{voltmeter_name()}
-@item @ref{voltmeter_get_data()}
-@item @ref{voltmeter_ac_measurement()}
-@item @ref{voltmeter_dc_measurement()}
+@item @ref{multimeter_name()}
+@item @ref{multimeter_get_data()}
+@item @ref{multimeter_ac_measurement()}
+@item @ref{multimeter_dc_measurement()}
 @end table
 
 @noindent
-@strong{Descriptions of voltmeter functions}:
+@strong{Descriptions of multimeter functions}:
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
 
-@anchor{voltmeter_name()}
-@findex voltmeter_name()
+@anchor{multimeter_name()}
+@findex multimeter_name()
 
 @table @samp
 
-@item voltmeter_name()
-Returns a string with the name of the voltmeter being used.
+@item multimeter_name()
+Returns a string with the name of the multimeter being used.
 
 
-@anchor{voltmeter_get_data()}
-@findex voltmeter_get_data()
-@item voltmeter_get_data()
-The function returns the current voltage measured by the voltmeter.
+@anchor{multimeter_get_data()}
+@findex multimeter_get_data()
+@item multimeter_get_data()
+The function returns the current voltage measured by the multimeter.
 
 
-@anchor{voltmeter_ac_measurement()}
-@findex voltmeter_ac_measurement()
-@item voltmeter_ac_measurement()
-The function switches the voltmeter to doing AC measurements.
+@anchor{multimeter_ac_measurement()}
+@findex multimeter_ac_measurement()
+@item multimeter_ac_measurement()
+The function switches the multimeter to doing AC measurements.
 
 
-@anchor{voltmeter_dc_measurement()}
-@findex voltmeter_dc_measurement()
-@item voltmeter_dc_measurement()
-The function switches the voltmeter to doing DC measurements.
+@anchor{multimeter_dc_measurement()}
+@findex multimeter_dc_measurement()
+@item multimeter_dc_measurement()
+The function switches the multimeter to doing DC measurements.
 
 
 @end table
 
 
 
-@node Boxcar Integrator Functions, Frequency Counter Functions, Voltmeter Functions, Device Functions
+@node Boxcar Integrator Functions, Frequency Counter Functions, Multimeter Functions, Device Functions
 @section Boxcar Integrator Functions
 @cindex Boxcar Integrator Functions
 Currently there is only rudimentary support for one type of boxcar
