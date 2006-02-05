@@ -1450,7 +1450,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9420, 2 measurement
-channels, 2 function channels (needed for averaging).
+channels, 2 function channels (needed for averaging), 350 MHz bandwidth
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1508,7 +1508,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9424, 4 measurement
-channels, 2 function channels (needed for averaging).
+channels, 2 function channels (needed for averaging), 350 MHz bandwidth
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1566,9 +1566,9 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9424E, 4 measurement
-channels, 2 function channels (needed for averaging). It is mostly
-identical to the LeCroy9424, but the fourth channel can't be used as
-a trigger input and the device has an external trigger input instead.
+channels, 2 function channels (needed for averaging), 350 MHz bandwidth.
+It is mostly identical to the LeCroy9424, but the fourth channel can't be
+used as a trigger input and the device has an external trigger input instead.
 
 
 @paragraphindent 0
@@ -1627,7 +1627,9 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9450, 2 measurement
-channels, 2 function channels (needed for averaging).
+channels, 2 function channels (needed for averaging), 350 MHz bandwidth.
+This module should also work with the 9450A, which just seems to be a
+300 MHz bandwidth version of the 9450.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
