@@ -518,9 +518,6 @@ static bool schlum7150_init( const char *name )
 		case SCHLUM7150_MODE_IAC :
 			cmd[ 11 ] = '4';                                /* M4 */
 			break;
-
-		default :
-			fsc2_assert( 1 == 0 );
 	}
 
 	switch ( schlum7150.prec )
@@ -540,9 +537,6 @@ static bool schlum7150_init( const char *name )
 		case SCHLUM7150_PREC_65 :
 			cmd[ 5 ] = '4';                                /* I4 */
 			break;
-
-		default :
-			fsc2_assert( 1 == 0 );
 	}
 
 	if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
