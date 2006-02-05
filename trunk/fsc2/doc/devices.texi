@@ -3424,7 +3424,7 @@ argument at all.
 @section Multimeter Functions
 @cindex Multimeter Functions
 The only currently supported digital multimeters are the @strong{Kontron 4060}
-and the @string{Schlumberger 7150}. The modules are loaded by specifying
+and the @strong{Schlumberger 7150}. The modules are loaded by specifying
 @example
 kontron4060
 schlumberger7140
@@ -3481,7 +3481,7 @@ by the multimeter.
 @anchor{multimeter_ac_measurement()}
 @findex multimeter_ac_measurement()
 @item multimeter_ac_measurement()
-This function is only available for the @string{Kontron 4060} and switches
+This function is only available for the @strong{Kontron 4060} and switches
 it to doing AC measurements. The function is deprecated and should be replaced
 by a call of @ref{multimeter_mode()}.
 
@@ -3489,7 +3489,7 @@ by a call of @ref{multimeter_mode()}.
 @anchor{multimeter_dc_measurement()}
 @findex multimeter_dc_measurement()
 @item multimeter_dc_measurement()
-This function is only available for the @string{Kontron 4060} and switches
+This function is only available for the @strong{Kontron 4060} and switches
 it to doing DC measurements. The function is deprecated and should be replaced
 by a call of @ref{multimeter_mode()}.
 
