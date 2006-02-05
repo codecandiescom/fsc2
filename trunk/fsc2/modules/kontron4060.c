@@ -36,10 +36,12 @@ const char generic_type[ ] = DEVICE_TYPE;
 /* Declaration of exported functions */
 
 int kontron4060_init_hook(       void );
+int kontron4060_test_hook(       void );
 int kontron4060_exp_hook(        void );
 int kontron4060_end_of_exp_hook( void );
 
 Var_T *multimeter_name(           Var_T * v );
+Var_T *multimeter_mode(           Var_T * v );
 Var_T *multimeter_get_data(       Var_T * v );
 Var_T *multimeter_ac_measurement( Var_T * v );
 Var_T *multimeter_dc_measurement( Var_T * v );
@@ -55,16 +57,22 @@ static bool kontron4060_command( const char * cmd );
 static void kontron4060_failure( void );
 
 
-#define MEAS_TYPE_AC 0
-#define MEAS_TYPE_DC 0
-#define TEST_VOLTAGE -0.123
+#define KONTRON4060_MODE_VDC      0
+#define KONTRON4060_MODE_VAC      1
+#define KONTRON4060_MODE_INVALID -1
+
+#define KONTRON4060_TEST_VOLTAGE -0.123
 
 
-static struct {
+typedef struct Kontron4060 Kontron4060_T;
+
+struct Kontron4060 {
 	int device;
-	int meas_type;
-} kontron4060;
+	int mode;
+};
 
+
+static Kontron4060_T kontron4060, kontron4060_store;
 
 
 /*------------------------------------*
@@ -80,8 +88,19 @@ int kontron4060_init_hook( void )
 	/* Reset several variables in the structure describing the device */
 
 	kontron4060.device = -1;
-	kontron4060.meas_type = MEAS_TYPE_DC;
+	kontron4060.mode   = KONTRON4060_MODE_VDC;
 
+	return 1;
+}
+
+
+/*--------------------------------------------*
+ * Start of test hook function for the module
+ *--------------------------------------------*/
+
+int kontron4060_test_hook( void )
+{
+	kontron4060_store = kontron4060;
 	return 1;
 }
 
@@ -92,7 +111,7 @@ int kontron4060_init_hook( void )
 
 int kontron4060_exp_hook( void )
 {
-	/* Nothing to be done yet in a test run */
+	kontron4060 = kontron4060_store;
 
 	/* Initialize the multimeter */
 
@@ -133,6 +152,60 @@ Var_T *multimeter_name( Var_T * v  UNUSED_ARG )
 }
 
 
+Var_T *multimeter_mode( Var_T *v )
+{
+	int old_mode = kontron4060.mode;
+	char cmd[ ] = "x\n";
+
+
+	/* Without an argument just return the currently set mode */
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, ( long ) kontron4060.mode );
+
+	/* Get and check the mode argument */ 
+
+	kontron4060.mode = KONTRON4060_MODE_INVALID;
+
+	if ( v->type == STR_VAR )
+	{
+		if ( ! strcasecmp( v->val.sptr, "VAC" ) )
+			 kontron4060.mode = KONTRON4060_MODE_VAC;
+		else if ( ! strcasecmp( v->val.sptr, "VDC" ) )
+			 kontron4060.mode = KONTRON4060_MODE_VDC;
+	}
+	else
+		kontron4060.mode = get_strict_long( v, "voltmeter mode" );
+
+	too_many_arguments( v );
+
+	if ( old_mode == kontron4060.mode )
+		return vars_push( INT_VAR, ( long ) kontron4060.mode );
+
+	switch ( kontron4060.mode )
+	{
+		case KONTRON4060_MODE_VDC :
+			cmd[ 1 ] = '0';
+			break;
+
+		case KONTRON4060_MODE_VAC :
+			cmd[ 1 ] = '1';
+			break;
+
+		default :
+			print( FATAL, "Invalid voltmeter mode, valid are modes are "
+				   "\"Vdc\" and \"Vac\".\n" );
+			THROW( EXCEPTION );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT &&
+		 gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
+		kontron4060_failure( );
+
+	return vars_push( INT_VAR, ( long ) kontron4060.mode );
+}
+
+
 /*------------------------------------------------*
  * Switches the multimeter to AC measurement mode
  *------------------------------------------------*/
@@ -143,7 +216,7 @@ Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
 		 gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
 		kontron4060_failure( );
 
-	kontron4060.meas_type = MEAS_TYPE_AC;
+	kontron4060.mode = KONTRON4060_MODE_VAC;
 	return vars_push( INT_VAR, 1L );
 }
 
@@ -158,7 +231,7 @@ Var_T *multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
 		 gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
 		kontron4060_failure( );
 
-	kontron4060.meas_type = MEAS_TYPE_DC;
+	kontron4060.mode = KONTRON4060_MODE_VDC;
 	return vars_push( INT_VAR, 1L );
 }
 
@@ -176,13 +249,13 @@ Var_T *multimeter_get_data( Var_T * v  UNUSED_ARG )
 
 
 	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+		return vars_push( FLOAT_VAR, KONTRON4060_TEST_VOLTAGE );
 
-	if ( gpib_write( kontron4060.device, "G\n", 2 ) == FAILURE ||
-		 gpib_read( kontron4060.device, reply, &length ) == FAILURE )
+	if ( gpib_write( kontron4060.device, "G\n", 2 ) == FAILURE      ||
+		 gpib_read( kontron4060.device, reply, &length ) == FAILURE ||
+		 sscanf( reply, "%s %lf", buffer, &val ) != 2 )
 		kontron4060_failure( );
 
-	sscanf( reply, "%s %lf", buffer, &val );
 	return vars_push( FLOAT_VAR, val );
 }
 
@@ -224,6 +297,9 @@ Var_T *multimeter_command( Var_T * v )
 
 static bool kontron4060_init( const char * name )
 {
+	Var_T *v = vars_push( INT_VAR, ( long ) kontron4060.mode );
+
+
 	if ( gpib_init_device( name, &kontron4060.device ) == FAILURE )
         return FAIL;
 
@@ -245,10 +321,9 @@ static bool kontron4060_init( const char * name )
 		 == FAILURE )
 		kontron4060_failure( );
 
-	if ( kontron4060.meas_type == MEAS_TYPE_AC )
-		vars_pop( multimeter_ac_measurement( NULL ) );
-	else
-		vars_pop( multimeter_dc_measurement( NULL ) );
+	/* Set the measurement mode */
+
+	vars_pop( multimeter_mode( v ) );
 
 	/* Get one value - the first one always seems to be bogus */
 

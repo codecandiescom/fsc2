@@ -46,7 +46,9 @@ Var_T *multimeter_command( Var_T *v );
 /* Locally used functions */
 
 static bool schlum7150_init( const char *name );
+
 static void schlum7150_command( const char *cmd );
+
 static void schlum7150_failure( void );
 
 
