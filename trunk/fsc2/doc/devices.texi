@@ -2829,9 +2829,16 @@ of an @code{EDL} script.
 @cindex Synthesizer Functions
 Supported synthesizers so far are the @strong{Hewlett-Packard} models
 @strong{HP8647A}, @strong{HP8648B} and @strong{HP8672A} and the
-@strong{Rohde&Schwarz} model @strong{SML01}. Their modules are loaded by
-specifying @example hp8647a hp8648b hp8672a rs_sml01 @end example @noindent in
-the @code{DEVICES} section.
+@strong{Rohde&Schwarz SML01}. Their modules are loaded by
+specifying
+@example
+hp8647a
+hp8648b
+hp8672a
+rs_sml01
+@end example
+@noindent
+in the @code{DEVICES} section.
 
 
 @noindent
