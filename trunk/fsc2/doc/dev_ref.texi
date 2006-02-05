@@ -58,7 +58,7 @@
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
 * lecroy9420::      LeCroy Digitizing Oscilloscope 9420
 * lecroy9424::      LeCroy Digitizing Oscilloscope 9424
-* lecroy9424e::     LeCroy Digitizing Oscilloscope 9424e
+* lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
 * lecroy9450::      LeCroy Digitizing Oscilloscope 9450
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
@@ -1410,6 +1410,9 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1450,7 +1453,10 @@ channels, 2 function channels (needed for averaging).
 channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1506,6 +1512,9 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1546,17 +1555,17 @@ channels, 2 function channels (needed for averaging).
 
 @node lecroy9424e, lecroy9450, lecroy9424, Device Reference
 @iftex
-@subheading LeCroy Digitizing Oscilloscope 9424e
+@subheading LeCroy Digitizing Oscilloscope 9424E
 @end iftex
 @ifnottex
-@section LeCroy Digitizing Oscilloscope 9424e
+@section LeCroy Digitizing Oscilloscope 9424E
 @end ifnottex
 
 @paragraphindent 0
 @strong{Module name}: @code{lecroy9424e}
 
 @paragraphindent 0
-@strong{Description}: Lecroy Digitizing Oscilloscope 9424e, 4 measurement
+@strong{Description}: Lecroy Digitizing Oscilloscope 9424E, 4 measurement
 channels, 2 function channels (needed for averaging). It is mostly
 identical to the LeCroy9424, but the fourth channel can't be used as
 a trigger input and the device has an external trigger input instead.
@@ -1564,6 +1573,9 @@ a trigger input and the device has an external trigger input instead.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1619,6 +1631,9 @@ channels, 2 function channels (needed for averaging).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
