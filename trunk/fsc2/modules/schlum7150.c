@@ -220,7 +220,7 @@ Var_T *multimeter_mode( Var_T *v )
 
 		default :
 			print( FATAL, "Invalid multimeter mode, valid are modes are "
-				   "\"IDC\", \"IAC\", \"VDC\" or \"VAC\".\n" );
+				   "\"Idc\", \"Iac\", \"Vdc\" or \"Vac\".\n" );
 			THROW( EXCEPTION );
 	}
 

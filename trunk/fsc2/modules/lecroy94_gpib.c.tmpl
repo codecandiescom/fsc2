@@ -1473,7 +1473,6 @@ void lecroy94_tmpl_copy_curve( long src,
 	else
 		sprintf( cmd + strlen( cmd ), "F%c", 
 				 src == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
-
 	
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
