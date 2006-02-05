@@ -1450,7 +1450,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Lecroy Digitizing Oscilloscope 9420, 2 measurement
-channels, 2 function channels (needed for averaging), 350 MHz bandwidth
+channels, 2 function channels (needed for averaging), 350 MHz bandwidth.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*

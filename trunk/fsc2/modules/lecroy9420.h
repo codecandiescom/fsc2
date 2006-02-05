@@ -241,7 +241,9 @@ struct HORI_RES {
 
 #if defined LECROY9420_MAIN_
 
-// Take care: these are the data for the 9424 !!!!!!!!!!!!!
+/* Take care: these are the data from the manual for the 9424, but since the
+   the 9424 just seems to be the 4 channel version of the 9420 it is rather
+   likely that these are also valid for the 9420 */
 
 HORI_RES_T hres[ 39 ] = { { 1.0e-9, 1.0e-10,   100,   -1.0,    -1 },
 					      { 2.0e-9, 1.0e-10,   200,   -1.0,    -1 },
