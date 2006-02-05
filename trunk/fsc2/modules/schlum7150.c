@@ -62,6 +62,14 @@ static void schlum7150_failure( void );
 #define SCHLUM7150_PREC_65        3
 #define SCHLUM7150_PREC_INVALID  -1
 
+#define SCHLUM7150_RANGE_AUTO     0
+#define SCHLUM7150_RANGE_02       1
+#define SCHLUM7150_RANGE_2        2
+#define SCHLUM7150_RANGE_20       3
+#define SCHLUM7150_RANGE_200      4
+#define SCHLUM7150_RANGE_2000     5
+#define SCHLUM7150_RANGE_INVALID -1
+
 #define SCHLUM7150_TIME_OUT      15.0         /* 15 s timeout */
 
 #define SCHLUM7150_TEST_VOLTAGE  -0.123
@@ -76,6 +84,7 @@ struct Schlum7150 {
 	int device;
 	int mode;
 	int prec;
+	int range;
 };
 
 Schlum7150_T schlum7150, schlum7150_store;
@@ -96,6 +105,7 @@ int schlum7150_init_hook( void )
 	schlum7150.device = -1;
 	schlum7150.mode   = SCHLUM7150_TEST_MODE;
 	schlum7150.mode   = SCHLUM7150_TEST_PREC;
+	schlum7150.range  = SCHLUM7150_RANGE_INVALID;
 
 	return 1;
 }
@@ -107,6 +117,8 @@ int schlum7150_init_hook( void )
 
 int schlum7150_test_hook( void )
 {
+	/* Store the state of the device as it is before the test run */
+
 	schlum7150_store = schlum7150;
 	return 1;
 }
@@ -156,7 +168,7 @@ int schlum7150_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_name( UNUSED_ARG Var_T *v )
+Var_T *multimeter_name( Var_T *v UNUSED_ARG )
 {
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -171,6 +183,8 @@ Var_T *multimeter_mode( Var_T *v )
 	char cmd[ ] = "Mx\n";
 	int old_mode = schlum7150.mode;
 
+
+	/* Without an argument just return the currently set mode */
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) schlum7150.mode );
@@ -243,6 +257,8 @@ Var_T *multimeter_precision( Var_T *v )
 	char cmd[ ] = "Ix\n";
 	int old_prec = schlum7150.prec;
 
+
+	/* Without an argument just return the currently set precision */
 
 	if ( v == NULL )
 		return vars_push( INT_VAR, ( long ) schlum7150.prec );
@@ -317,7 +333,11 @@ Var_T *multimeter_get_data( Var_T *v )
 	long length = 100;
 	double start_time;
 	unsigned char stb = 0;
+	int old_range = schlum7150.range;
 
+
+	/* If there's an argument it must be the precision, if there's none
+	   the precision is set to autoscale mode */
 
 	if ( v != NULL )
 	{
@@ -326,15 +346,15 @@ Var_T *multimeter_get_data( Var_T *v )
 		/* Get and check the range argument */ 
 
 		if ( ! strcasecmp( v->val.sptr, "0.2V" ) )
-			cmd[ 1 ] = '1';                      /* R1 */
+			schlum7150.range = SCHLUM7150_RANGE_02;
 		else if ( ! strcasecmp( v->val.sptr, "2V" ) )
-			cmd[ 1 ] = '2';                      /* R2 */
+			schlum7150.range = SCHLUM7150_RANGE_2;
 		else if ( ! strcasecmp( v->val.sptr, "20V" ) )
-			cmd[ 1 ] = '3';                      /* R3 */
+			schlum7150.range = SCHLUM7150_RANGE_20;
 		else if ( ! strcasecmp( v->val.sptr, "200V" ) )
-			cmd[ 1 ] = '4';                      /* R4 */
+			schlum7150.range = SCHLUM7150_RANGE_200;
 		else if ( ! strcasecmp( v->val.sptr, "2000V" ) )
-			cmd[ 1 ] = '5';                      /* R5 */
+			schlum7150.range = SCHLUM7150_RANGE_2000;
 		else
 		{
 			print(  FATAL,"Invalid range argument, valid are "
@@ -343,8 +363,8 @@ Var_T *multimeter_get_data( Var_T *v )
 			THROW( EXCEPTION );
 		}
 	} 
-	else                                       /* otherwise use autorange */
-		cmd[ 1 ] = '0';                          /* R0 */
+	else
+		schlum7150.range = SCHLUM7150_RANGE_AUTO;
 
 	too_many_arguments( v );
 
@@ -357,10 +377,14 @@ Var_T *multimeter_get_data( Var_T *v )
 			return vars_push( FLOAT_VAR, SCHLUM7150_TEST_CURRENT );
 	}
 
-	/* Set the range */
+	/* Set the range (but only if it changed since the last invocation) */
 
-	if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE ) 
-		schlum7150_failure( );
+	if ( old_range != schlum7150.range )
+	{
+		cmd[ 1 ] = ( char ) ( schlum7150.range + '0' );
+		if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE ) 
+			schlum7150_failure( );
+	}
 
 	/* Set OFF Track mode */
 
