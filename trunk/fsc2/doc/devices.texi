@@ -3423,10 +3423,11 @@ argument at all.
 @node Multimeter Functions, Boxcar Integrator Functions, Temperature Controller Functions, Device Functions
 @section Multimeter Functions
 @cindex Multimeter Functions
-The only currently supported digital multimeter is the @strong{Kontron 4060}.
-Its module is loaded by specifying
+The only currently supported digital multimeters are the @strong{Kontron 4060}
+and the @string{Schlumberger 7150}. The modules are loaded by specifying
 @example
 kontron4060
+schlumberger7140
 @end example
 @noindent
 in the @code{DEVICES} section.
@@ -3435,9 +3436,11 @@ in the @code{DEVICES} section.
 @strong{List of all multimeter functions}:
 @table @samp
 @item @ref{multimeter_name()}
+@item @ref{multimeter_mode()}
 @item @ref{multimeter_get_data()}
 @item @ref{multimeter_ac_measurement()}
 @item @ref{multimeter_dc_measurement()}
+@item @ref{multimeter_lock_keyboard()}
 @end table
 
 @noindent
@@ -3455,22 +3458,55 @@ in the @code{DEVICES} section.
 Returns a string with the name of the multimeter being used.
 
 
+@anchor{multimeter_mode()}
+@findex multimeter_mode()
+@item multimeter_mode()
+If called with no argument the function returns the currently set measurement
+mode (as an integer), if called with an argument the mode gets set. For the
+@code{Kontron 4060} voltmeter the possible arguments are either the string
+@code{"Vdc"} (or the integer number @code{0}) to switch to DC voltage mode
+or the string @code{"Vac"} (or the integer @code{1}) to switch to AC voltage
+mode. For the @code{Schlumbreger 7150} additional possible arguments are
+the strings @code{"Idc"} (or the integer @code{2}) for DC current mode and
+@code{"Iac"} (or the integer @code{3}) for AC current mode.
+
+
 @anchor{multimeter_get_data()}
 @findex multimeter_get_data()
 @item multimeter_get_data()
-The function returns the current voltage measured by the multimeter.
+The function returns the voltage or current (depending on the mode) measured
+by the multimeter.
 
 
 @anchor{multimeter_ac_measurement()}
 @findex multimeter_ac_measurement()
 @item multimeter_ac_measurement()
-The function switches the multimeter to doing AC measurements.
+This function is only available for the @string{Kontron 4060} and switches
+it to doing AC measurements. The function is deprecated and should be replaced
+by a call of @ref{multimeter_mode()}.
 
 
 @anchor{multimeter_dc_measurement()}
 @findex multimeter_dc_measurement()
 @item multimeter_dc_measurement()
-The function switches the multimeter to doing DC measurements.
+This function is only available for the @string{Kontron 4060} and switches
+it to doing DC measurements. The function is deprecated and should be replaced
+by a call of @ref{multimeter_mode()}.
+
+
+@anchor{multimeter_lock_keyboard()}
+@findex multimeter_lock_keyboard()
+@item multimeter_lock_keyboard()
+This function is only available for the @strong{Schlumberger 7150}. Usually
+ during an experiment the keyboard of the device is locked. But for situations
+where it would be useful to be able to control the device also via its
+keyboard it can be unlocked (and also re-locked) from within the script.
+To unlock the keyboard call this function with an argument of @code{0} or
+@code{"OFF"}, to re-lock the keyboard call it again with a non-zero argument,
+@code{"ON"} or no argument at all.
+
+The function can only be used in the @code{EXPERIMENT} section of an
+@code{EDL} script.
 
 
 @end table

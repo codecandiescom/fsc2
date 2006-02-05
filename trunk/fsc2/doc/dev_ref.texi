@@ -1348,9 +1348,10 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @strong{Supported functions}:
 @table @samp
 @item @ref{multimeter_name()}
+@item @ref{multimeter_mode()}
 @item @ref{multimeter_get_data()}
-@item @ref{multimeter_ac_measurement()}
-@item @ref{multimeter_dc_measurement()}
+@item @ref{multimeter_ac_measurement()} (deprecated)
+@item @ref{multimeter_dc_measurement()} (deprecated)
 @end table
 
 
