@@ -80,8 +80,10 @@ int lecroy94_tmpl_init_hook( void )
 	lecroy94_tmpl.is_trigger_mode  = UNSET;
 	lecroy94_tmpl.is_trigger_delay = UNSET;
 	lecroy94_tmpl.num_windows      = 0;
-	lecroy94_tmpl.interleaved      = UNSET;
+	lecroy94_tmpl.interleaved      = LECROY9450_TEST_ILVD_MODE;
 	lecroy94_tmpl.tb_index         = LECROY94_TMPL_TEST_TB_INDEX;
+	lecroy94_tmpl.timebase         = LECROY94_TMPL_TEST_TIMEBASE;
+	lecroy94_tmpl.trigger_delay    = LECROY9450_TEST_TRIG_DELAY;
 
 	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_FUNC_F; i++ )
 		lecroy94_tmpl.is_displayed[ i ] = UNSET;
@@ -853,14 +855,14 @@ Var_T *digitizer_trigger_channel( Var_T * v )
     switch ( channel )
     {
         case LECROY94_TMPL_CH1 : case LECROY94_TMPL_CH2 :
-#if defined LCROY94_TMPL_CH4_AS_TRG
+#if defined LECROY94_TMPL_CH4_AS_TRG
 		case LECROY94_TMPL_CH4 :
 #endif
 		case LECROY94_TMPL_LIN :
-#if defined LCROY94_TMPL_EXT
+#if defined LECROY94_TMPL_EXT
 		case LECROY94_TMPL_EXT :
 #endif
-#if defined LCROY94_TMPL_EXT10
+#if defined LECROY94_TMPL_EXT10
 		case LECROY94_TMPL_EXT10 :
 #endif
 			lecroy94_tmpl.trigger_channel = channel;
@@ -1383,7 +1385,7 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 	{
 		char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
 
-		print( WARN, "Trigger delay has to be adjusted from %s to %s.\n",
+		print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
 			   cp, lecroy94_tmpl_ptime( real_delay ) );
 		T_free( cp );
 	}

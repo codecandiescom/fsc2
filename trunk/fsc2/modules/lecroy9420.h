@@ -63,13 +63,13 @@
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
 
-#define LECROY9420_TEST_TIMEBASE     5.0e-5      /* 50 us per division*/
-#define LECROY9420_TEST_TB_INDEX     14
+#define LECROY9420_TEST_TIMEBASE     5.0e-8      /* 50 ns per division*/
+#define LECROY9420_TEST_TB_INDEX     5
 #define LECROY9420_TEST_ILVD_MODE    UNSET       /* interleave mode (RIS/SS) */
 #define LECROY9420_TEST_SENSITIVITY  2.5         /* 2.5 V per division */
 #define LECROY9420_TEST_OFFSET       0.0
 #define LECROY9420_TEST_NUM_AVG      10
-#define LECROY9420_TEST_TRIG_DELAY   1.0e-2      /* 10 ms pretrigger */
+#define LECROY9420_TEST_TRIG_DELAY   1.0e-8      /* 10 ns pretrigger */
 #define LECROY9420_TEST_TRIG_CHANNEL 0           /* trigger on CH1 */
 #define LECROY9420_TEST_TRIG_LEVEL   0.0
 #define LECROY9420_TEST_TRIG_SLOPE   POSITIVE
