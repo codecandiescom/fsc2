@@ -787,7 +787,7 @@ Var_T *vars_make( Var_Type_T type,
  * Function for making a copy of an INT_REF or FLOAT_REF via vars_push().
  * This also works with making a FLOAT type copy of an INT type matrix.
  * Note that sub-matrices do not go onto the stack but into the variables
- * list (but without a name attached to them and the with IS_TEMP flag
+ * list (but without a name attached to them and with the IS_TEMP flag
  * being set) - this is needed to keep the convention working that an EDL
  * functions gets one variable one the stack for each of its arguments.
  *------------------------------------------------------------------------*/

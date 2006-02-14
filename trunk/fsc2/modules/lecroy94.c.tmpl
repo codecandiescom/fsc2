@@ -80,10 +80,10 @@ int lecroy94_tmpl_init_hook( void )
 	lecroy94_tmpl.is_trigger_mode  = UNSET;
 	lecroy94_tmpl.is_trigger_delay = UNSET;
 	lecroy94_tmpl.num_windows      = 0;
-	lecroy94_tmpl.interleaved      = LECROY9450_TEST_ILVD_MODE;
+	lecroy94_tmpl.interleaved      = LECROY94_TMPL_TEST_ILVD_MODE;
 	lecroy94_tmpl.tb_index         = LECROY94_TMPL_TEST_TB_INDEX;
 	lecroy94_tmpl.timebase         = LECROY94_TMPL_TEST_TIMEBASE;
-	lecroy94_tmpl.trigger_delay    = LECROY9450_TEST_TRIG_DELAY;
+	lecroy94_tmpl.trigger_delay    = LECROY94_TMPL_TEST_TRIG_DELAY;
 
 	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_FUNC_F; i++ )
 		lecroy94_tmpl.is_displayed[ i ] = UNSET;
