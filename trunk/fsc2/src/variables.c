@@ -35,15 +35,14 @@
    the user (they are for storing literal strings in the EDL code).
    Both INT_ARRs and FLOAT_ARRs exist in two flavors. Depending on how
    they were defined by the user they can have either a fixed, immutable
-   size or can have a dynamically adjustable size. In the later case the
-   size will change when an 1D-array of a different size is assigned
-   to the array (in which case the size can get both larger and smaller)
-   or when a value is assigned to an element that didn't exist yet (in
-   which case the size will grow if necessary to allow storing the new
-   element). The 'len' field of the Var structures allows to determine
-   the current length of the array (for dynamically sized arrays it's
-   legal to have 'len' set to 0, in this case the size hasn't been set
-   yet). 
+   size or a dynamically adjustable size. In the later case the size will
+   change automatically when an 1D-array of a different size is assigned
+   to the array (the size can get both larger and smaller!) or when a value
+   is assigned to an element that didn't exist yet (in which case the size
+   will grow if necessary to allow storing the new element). The 'len'
+   field of the Var structures allows to determine the current length of
+   the array (for dynamically sized arrays it's legal to have 'len' set
+   to 0, in this case the size hasn't been set yet). 
 
    To allow for two- and more dimensional arrays there are two further
    variable types
@@ -52,10 +51,11 @@
 	 FLOAT_REF
 
    These variables contain pointers to further variables of the same kind
-   or, for the lowest dimension, INT_ARRs or FLOAT_ARRs. Again, there are
-   two flavors, fixed and dynamically sized references. The 'dim' field of
-   the Var structure allows to determine the dimensionality of the array,
-   the 'len' field the size of the current dimension.
+   (only with the 'dim' field set to a value smaller by 1) or, for the
+   lowest dimension, INT_ARRs or FLOAT_ARRs. Again, there are two flavors,
+   fixed and dynamically sized references. The 'dim' field of the Var
+   structure allows to determine the dimensionality of the array, the
+   'len' field the size of the current dimension.
 
    The only restriction here is that if a reference is dynamically sized
    also all referenced references and arrays (down to the lowest level)
@@ -73,7 +73,7 @@
 	 f[ *, 4, 2 ];
 
    It is also possible that the referenced references or arrays of a
-   reference have different dimensions, i.e. the definition
+   reference have different lengths, i.e. the definition
 
      g[ 3, * ];
 
