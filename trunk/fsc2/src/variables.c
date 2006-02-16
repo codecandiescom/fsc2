@@ -134,13 +134,13 @@
    reference is found in the EDL script with no indices within the square
    braces.
 
-   FUNC, pointing to an EDL function is used during the evaluation of
-   functions (the variables below the FUNC variable are the arguments).
-   The 'name' field of the Var structure contains the name of the function
-   to be called.
+   A variable of type FUNC, pointing to an EDL function, is used during the
+   evaluation of functions (the variables below the FUNC variable are the
+   arguments). The 'name' field of the Var structure contains the name of
+   the function to be called.
 
    All variables of the types STR_VAR, INT_PTR, FLOAT_PTR, REF_PTR and FUNC
-   can only appear on the variable stack but never as a "real" variable in
+   can only appear on the variable stack but never as "real" variables in
    the variables list.
 */
 
