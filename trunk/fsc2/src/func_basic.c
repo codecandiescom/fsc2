@@ -27,6 +27,9 @@
 
 static double gauss_random( void );
 static double datanh( double arg );
+static void avg_data_check( Var_T * avg,
+							Var_T * data,
+							long count );
 
 
 #define C2K_OFFSET   273.16
@@ -2322,7 +2325,7 @@ Var_T *f_mean( Var_T * v )
 
 	if ( count == 0 )
 	{
-		print( FATAL, "Number of array or matrix elements is 0.\n" );
+		print( FATAL, "Number of array or matrix elements isn't set.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -3527,6 +3530,246 @@ static double datanh( double arg )
 	}
 
 	return sgn * 0.5 * log( ( 1.0 + arg ) / ( 1.0 - arg ) );
+}
+
+
+/*------------------------------------------------------------------------*
+ * Function for adding a new value (or array or matrix) to an average so
+ * that the new average (always as a float number of array) gets returned
+ *------------------------------------------------------------------------*/
+
+Var_T *f_add2avg( Var_T * v )
+{
+	Var_T *avg = f_float( v );
+	long count = get_long( v->next->next, "average count" );
+	Var_T *scans_done = vars_push( INT_VAR, count - 1 );
+
+
+	if ( count < 1 )
+	{
+		print( FATAL, "Average count is less than 1.\n" );
+		THROW( EXCEPTION );
+	}
+
+	avg_data_check( avg, v->next, count );
+
+	return vars_div( vars_add( vars_mult( avg, scans_done ),
+							   v->next ),
+					 v->next->next );
+}
+
+
+/*------------------------------------------------------------------------*
+ * Function for checking that the sizes of the data and average used in
+ * f_add2avg() are set up correctly (if necessary and possible extending
+ * tthe size(s) of the average and initializing to zero)
+ *------------------------------------------------------------------------*/
+
+static void avg_data_check( Var_T * avg,
+							Var_T * data,
+							long count )
+{
+	ssize_t i;
+
+
+	vars_check( data, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+				      INT_REF | FLOAT_REF );
+
+	/* The dimension of the average must always at last as big as the one
+	   of the data */
+
+	if ( avg->dim < data->dim )
+	{
+		print( FATAL, "Dimension of average is lower than the one of the "
+			   "data array or matrix.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Checks for the case that data is a simple number */
+
+	if ( data->type & ( INT_VAR | FLOAT_VAR ) )
+	{
+		/* Nothing to check if the average is also just a number */
+
+		if ( avg->type == FLOAT_VAR )
+			return;
+
+		/* Otherwise the length of the array or matrix must be known */
+
+		if ( avg->len == 0 )
+		{
+			print( FATAL, "Size(s) of average array aren't set.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* If the average is a matrix do the checks recursively */
+
+		if ( avg->type == FLOAT_REF )
+			for ( i = 0; i < avg->len; i++ )
+				avg_data_check( avg->val.vptr[ i ], data, count );
+
+		/* If we got this far everything should be fine */
+
+		return;
+	}
+
+	/* If data is an array or a matrix its size must be known */
+
+	if ( data->len == 0 )
+	{
+		print( FATAL, "Length of data array is still unknown.\n" );
+		THROW( EXCEPTION );
+	}
+
+	/* Checks for the case that data is a normal array */
+
+	if ( data->type & ( INT_ARR | FLOAT_ARR ) )
+	{
+		/* If average is also just an array compare the sizes to the one
+		   of the data array. If the average size is unset set it to the
+		   same size as the data array (and initialize with zeros), if
+		   its smaller grudgingly increase the size (and set new elements
+		   to zero, but draw a line at the case where the average array is
+		   actually longer */
+
+		if ( avg->type == FLOAT_ARR )
+		{
+			if ( avg->len == 0 )
+			{
+				if ( count > 1 )
+				{
+					print( SEVERE, "Size of average array hasn't been set "
+						   "despite the average counter being larger than "
+						   "1.\n" );
+					count = 1;
+				}
+
+				avg->val.dpnt = DOUBLE_P T_malloc( data->len
+											   * sizeof *avg->val.dpnt );
+				for ( i = 0; i < data->len; i++ )
+					avg->val.dpnt[ i ] = 0.0;
+
+				avg->len = data->len;
+			}
+			else if ( avg->len < data->len )
+			{
+				print( SEVERE, "Average array is shorter than data array, "
+					   "padding it with zeros.\n" );
+
+				avg->val.dpnt = DOUBLE_P T_realloc( avg->val.dpnt,
+													data->len
+													* sizeof *avg->val.dpnt );
+				for ( i = avg->len; i < data->len; i++ )
+					avg->val.dpnt[ i ] = 0.0;
+			}
+			else if ( avg->len > data->len )
+			{
+				print( FATAL, "Size of average array is larger than that "
+					   "of the data array.\n" );
+				THROW( EXCEPTION );
+			}
+
+			return;
+		}
+
+		/* Now remains the case that the average is a matrix - this requires
+		   that we know how many subarrays it has */
+
+		if ( avg->len == 0 )
+		{
+			print( FATAL, "Subarrays of average don't exist yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		/* Check recursively for each of the subarrays */
+
+		for ( i = 0; i < avg->len; i++ )
+			avg_data_check( avg->val.vptr[ i ], data, count );
+
+		return;
+	}
+
+	/* When we arrive here both the average as well as the data are both
+	   matrices. If the averages dimension is higher all its subarrays must
+	   exist and, if that's the case we can do the checks recursively */
+
+	if ( avg->dim > data->dim )
+	{
+		if ( avg->len == 0 )
+		{
+			print( FATAL, "Subarrays of average don't exist yet.\n" );
+			THROW( EXCEPTION );
+		}
+
+		for ( i = 0; i < avg->len; i++ )
+			avg_data_check( avg->val.vptr[ i ], data, count );
+
+		return;
+	}
+
+	/* The only remaining case is that average and data have the same
+	   dimension. As in the case of arrays we require that the size of
+	   the average isn't larger than that of the data. */
+
+	if ( avg->len > data->len )
+	{
+		print( FATAL, "Size of average matrix is smaller than that of the "
+			   "data matrix.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( avg->len == 0 )
+	{
+		if ( count > 1 )
+		{
+			print( SEVERE, "Size of average matrix hasn't been set "
+				   "despite the average counter being larger than 1.\n" );
+			count = 1;
+		}
+
+		avg->val.vptr = VAR_PP T_realloc( avg->val.vptr,
+										  data->len * sizeof *avg->val.vptr );
+	}
+	else if ( avg->len < data->len )
+	{
+		print( SEVERE, "Average matrix is shorter than data matrix, "
+					   "extending average matrix.\n" );
+
+		avg->val.vptr = VAR_PP T_malloc( data->len * sizeof *avg->val.vptr );
+	}
+
+	if ( avg->len != data->len )
+	{
+		ssize_t start = avg->len;
+
+		for ( ; avg->len < data->len; avg->len++ )
+			avg->val.vptr[ avg->len ] = NULL;
+
+		for ( i = start; i < avg->len; i++ )
+		{
+			Var_T *v = avg->val.vptr[ i ] = vars_new( NULL );
+
+			v->from = avg;
+			v->flags &= ~ NEW_VARIABLE;
+			v->flags |= IS_DYNAMIC | IS_TEMP;
+			v->len = 0;
+			v->dim = avg->dim - 1;
+
+			if ( avg->dim > 2 )
+			{
+				v->type = avg->type;
+				v->val.vptr = NULL;
+			}
+
+			v->type = FLOAT_ARR;
+			v->val.dpnt = NULL;
+		}
+	}
+
+	/* Now everything is set up for a further recursive check */
+
+	for ( i = 0; i < avg->len; i++ )
+		avg_data_check( avg->val.vptr[ i ], data->val.vptr[ i ], count );
 }
 
 

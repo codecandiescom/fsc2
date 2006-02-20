@@ -81,7 +81,7 @@ Var_T *f_islice(  Var_T * /* v */ );
 Var_T *f_fslice(  Var_T * /* v */ );
 Var_T *f_lspace(  Var_T * /* v */ );
 Var_T *f_reverse( Var_T * /* v */ );
-
+Var_T *f_add2avg( Var_T * /* v */ );
 
 #endif  /* ! FUNC_BASIC_HEADER */
 

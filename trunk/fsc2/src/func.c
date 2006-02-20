@@ -106,6 +106,7 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
 	{ "random",              f_random,   	    -1, ACCESS_ALL,  NULL, UNSET },
 	{ "grandom",             f_grand,    	    -1, ACCESS_ALL,  NULL, UNSET },
 	{ "set_seed",            f_setseed,  	    -1, ACCESS_ALL,  NULL, UNSET },
+    { "add_to_average",      f_add2avg,          3, ACCESS_ALL,  NULL, UNSET },
 	{ "time",                f_time,     		-1, ACCESS_ALL,  NULL, UNSET },
 	{ "date",                f_date,     		-1, ACCESS_ALL,  NULL, UNSET },
 	{ "delta_time",          f_dtime,    		 0, ACCESS_EXP,  NULL, UNSET },
