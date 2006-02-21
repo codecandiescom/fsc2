@@ -42,7 +42,7 @@ static int lecroy94_tmpl_get_int_value( int          ch,
 static double lecroy94_tmpl_get_float_value( int          ch,
 											 const char * name );
 static unsigned char *lecroy94_tmpl_get_data( long * len );
-static bool lecroy94_tmpl_talk( const char * cmd,
+static void lecroy94_tmpl_talk( const char * cmd,
 								char *       reply,
 								long *       length );
 static void lecroy94_tmpl_gpib_failure( void );
@@ -81,12 +81,12 @@ bool lecroy94_tmpl_init( const char * name )
 
     /* Disable the local button, set digitizer to short form of replies,
 	   switch off debugging, transmit data in one block of binary words
-	   (2 byte) format with LSB first. Then ask it for the status byte
-	   to make sure the device reacts. */
+	   (2 byte) format with LSB first and switch on auto-calibration. Then
+	   ask it for the status byte to make sure the device reacts. */
 
     if ( // gpib_local_lockout( lecroy94_tmpl.device ) == FAILURE  ||
 		gpib_write( lecroy94_tmpl.device,
-					"CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
+					"CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;ACAL", 49 )
 					                                    == FAILURE ||
 		 gpib_write( lecroy94_tmpl.device, "*STB?", 5 ) == FAILURE ||
 		 gpib_read( lecroy94_tmpl.device, buffer, &len ) == FAILURE )
@@ -103,7 +103,7 @@ bool lecroy94_tmpl_init( const char * name )
 
 		lecroy94_tmpl.num_used_channels = 0;
 
-		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
+		for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_CH_MAX; i++ )
 		{
 			lecroy94_tmpl.is_displayed[ i ] = UNSET;
 			if ( lecroy94_tmpl_is_displayed( i ) )
@@ -189,7 +189,7 @@ bool lecroy94_tmpl_init( const char * name )
 		/* Set (if required) the sensitivies, offsets coupling types of
 		   all measurement channels */
 
-		for ( i = LECROY94_TMPL_CH1; i < LECROY94_TMPL_CH_MAX; i++ )
+		for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_CH_MAX; i++ )
 		{
 			if ( ! lecroy94_tmpl.is_sens[ i ] )
 				lecroy94_tmpl.sens[ i ] = lecroy94_tmpl_get_sens( i );
@@ -1138,6 +1138,7 @@ void lecroy94_tmpl_start_acquisition( void )
 {
 	int ch;
 	char cmd[ 100 ];
+	long length = 100;
 
 
 	/* Stop the digitizer */
@@ -1163,7 +1164,7 @@ void lecroy94_tmpl_start_acquisition( void )
 		if ( ! lecroy94_tmpl_is_displayed( ch ) )
 			lecroy94_tmpl_display( ch, SET );
 
-		snprintf( cmd, 100, "F%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld",
+		sprintf( cmd, "F%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld",
 				  ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F',
 				  lecroy94_tmpl.source_ch[ ch ] - LECROY94_TMPL_CH1 + 1,
 				  lecroy94_tmpl.rec_len[ ch ],
@@ -1173,6 +1174,29 @@ void lecroy94_tmpl_start_acquisition( void )
 			 == FAILURE )
 			lecroy94_tmpl_gpib_failure( );
 	}
+
+	/* Reset the function channels that do the averaging (i.e. set the
+	   sweep count to zero and restart the acquisition) */
+
+	*cmd = '\0';
+	for ( ch = LECROY94_TMPL_FUNC_E; ch <= LECROY94_TMPL_FUNC_F; ch++ )
+	{
+		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
+			continue;
+
+		sprintf( cmd + strlen( cmd ), ";F%c:FRST",
+				 ch == LECROY94_TMPL_FUNC_E ? 'E' : 'F' );
+	}
+
+	if ( *cmd == ';' &&
+		 gpib_write( lecroy94_tmpl.device, cmd + 1, strlen( cmd ) - 1 )
+		                                                           == FAILURE )
+		lecroy94_tmpl_gpib_failure( );
+
+	/* Clear the bits in the INR register that tells when the acquisition is
+	   finished by reading it in */
+
+	lecroy94_tmpl_talk( "INR?", cmd, &length );
 
 	/* Switch digitizer back on to running state by switching to normal
 	   trigger mode and arm it, so that the next trigger starts the
@@ -1653,14 +1677,13 @@ static unsigned int lecroy94_tmpl_get_inr( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy94_tmpl_talk( const char * cmd,
+static void lecroy94_tmpl_talk( const char * cmd,
 								char *       reply,
 								long *       length )
 {
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
 		 gpib_read( lecroy94_tmpl.device, reply, length ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
-	return OK;
 }
 
 
