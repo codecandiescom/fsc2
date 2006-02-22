@@ -3540,9 +3540,12 @@ static double datanh( double arg )
 
 Var_T *f_add2avg( Var_T * v )
 {
-	Var_T *avg = f_float( v );
-	long count = get_long( v->next->next, "average count" );
-	Var_T *scans_done = vars_push( INT_VAR, count - 1 );
+	Var_T *avg = ( v->type & ( INT_VAR | INT_ARR | INT_REF ) ) ?
+		         f_float( v ) : v;
+	Var_T *data = v->next;
+	Var_T *cnt = data->next;
+	long count = get_long( cnt, "average count" );
+	Var_T *scans_done = vars_push( FLOAT_VAR, count - 1.0 );
 
 
 	if ( count < 1 )
@@ -3551,11 +3554,24 @@ Var_T *f_add2avg( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	avg_data_check( avg, v->next, count );
+	avg_data_check( avg, data, count );
 
-	return vars_div( vars_add( vars_mult( avg, scans_done ),
-							   v->next ),
-					 v->next->next );
+	/* The next line looks simple but actually involves some trickery. You
+	   may have wondered why all these extra variables of type 'Var_T *' were
+	   created above (one might ty to use v->next instead of 'data' and even
+	   v->next->next instead of 'cnt'). This is because all the vars_xxx()
+	   function return a new variable, destroying the ones passed to them
+	   (actually, that's not the full truth, the returned variable might be
+	   one of those passed to the function, but you can't tell if this
+	   happens and then which of them gets returned). Thus, depending on the
+	   way the compiler rearranges the code, v->next->next might be a
+	   pointer to the counter variable from the arguments or, if what was
+	   v->next got removed, a pointer to nothing at all, or to 'avg' or to
+	   'scans_done' - one simply can't tell. But the way the function is
+	   written now one can be sure that everything left on the stack at the
+	   end of the function is the return value - as it should. */
+
+	return vars_div( vars_add( vars_mult( avg, scans_done ), data ), cnt );
 }
 
 
