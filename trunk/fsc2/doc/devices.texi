@@ -477,9 +477,11 @@ for the @strong{SR810} and @strong{SR830} all values in the range between
 The function can only be used in the @code{PREPARATIONS} section.
 
 
-@anchor{magnet_sweep()} @findex magnet_sweep() @item magnet_sweep() This
-function is only available for the @strong{Oxford Instruments} magnet sweep
-power supplies (@code{ips20_4} and @code{ips120_10}) to control their
+@anchor{magnet_sweep()}
+@findex magnet_sweep()
+@item magnet_sweep()
+This function is only available for the @strong{Oxford Instruments} magnet
+sweep power supplies (@code{ips20_4} and @code{ips120_10}) to control their
 continuous sweep. It can be called with either an integer argument of @code{1}
 to start a sweep to higher field and current values, an argument of @code{-1}
 to start a downward sweep or, finally, an argument of @code{0} to stop a
