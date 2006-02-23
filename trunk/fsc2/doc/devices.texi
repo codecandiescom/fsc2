@@ -155,9 +155,9 @@ Bruker ER032M Field Controller
 @item keithley228a
 Berlin W-band magnet sweep power supply Keithley 228A
 @item ips20_4
-Berlin 360 GHz spectrometer Oxford magnet sweep power supply
+Berlin 360 GHz spectrometer Oxford Instruments magnet sweep power supply
 @item ips120_10
-Leiden 275 GHz spectrometer Oxford magnet power supply
+Leiden 275 GHz spectrometer Oxford Instruments magnet power supply
 @item s_band_magnet_broad
 Frankfurt S-band magnet via homebuilt DAC, broad field range
 @item s_band_magnet_narrow
@@ -176,13 +176,12 @@ name of the gaussmeter has to appear @b{before} the magnet module entry
 in the @code{DEVICES} section. See the next section for the implemented
 gaussmeter and the related functions.
 
-All magnet power supplies (except the ones used with the Oxford magnets)
-don't do continuous sweeps but the field current is instead stepped.
-Thus many of the functions discussed in the following don't expect sweep
-rates are but field (or current, see below) step sizes for defining a
-sweep. The only exception are the power supplies for the Oxford magnets,
-here only continuous sweeps can be done and sweep rates must be
-specified.
+All magnet power supplies (except the ones used with the Oxford Instruments
+magnets) don't do continuous sweeps but the field current is instead stepped.
+Thus many of the functions discussed in the following don't expect sweep rates
+are but field (or current, see below) step sizes for defining a sweep. The
+only exception are the power supplies for the Oxford magnets, here only
+continuous sweeps can be done and sweep rates must be specified.
 
 If an @strong{AEG} magnet module is listed in the @code{DEVICES} section
 the program will try to calibrate the field sweep parameters at the
@@ -300,13 +299,13 @@ G}.
 Use current instead of field units for the Keithley 228A power supply
 (@code{keithley228a}).
 
-Because the @strong{Oxford IPS20-4} magnet sweep power supply (@code{ips20_4})
-does continuous sweeps (instead of simulating a sweep by stepping the current)
-the second argument isn't the sweep step size but must be the sweep rate in
-units of @code{A/s}.
+Because the @strong{Oxford Instruments IPS20-4} magnet sweep power supply
+(@code{ips20_4}) does continuous sweeps (instead of simulating a sweep by
+stepping the current) the second argument isn't the sweep step size but must
+be the sweep rate in units of @code{A/s}.
 
-Similarly, for the @strong{Oxford IPS120-10} power supply (@code{ips120_10})
-the second argument is the sweep rate in @code{G/s}.
+Similarly, for the @strong{Oxford Instruments IPS120-10} power supply
+(@code{ips120_10}) the second argument is the sweep rate in @code{G/s}.
 
 For the @strong{Bruker ER032M} field controller for some combinations of
 the start field and field step size deviations between the requested
@@ -366,8 +365,9 @@ smaller than the precision of the gaussmeter the precision of the
 gaussmeter is used instead. The function can only be called in the
 @code{EXPERIMENT} section.
 
-For both the @strong{Oxford} magnet sweep power supplies (@code{ips20_4} and
-@code{ips120_10}) this function will automatically stop a running sweep.
+For both the @strong{Oxford Instruments} magnet sweep power supplies
+(@code{ips20_4} and @code{ips120_10}) this function will automatically stop a
+running sweep.
 
 For the @strong{Bruker ER032M} field controller setting a field with
 this function while also having initialized the magnet using
@@ -399,8 +399,8 @@ reliable) not to use the sweep functions at all but the
 @ref{set_field()} function (which always checks and if necessary
 re-adjusts the field if necessray) in these cases instead.
 
-This function is not available for the @strong{Oxford} power supplyies
-(modules @code{ips20_4} and @code{ips120_10}). Use the function
+This function is not available for the @strong{Oxford Instruments} power
+supplyies (modules @code{ips20_4} and @code{ips120_10}). Use the function
 @code{magnet_sweep} instead.
 
 
@@ -414,8 +414,8 @@ defined in @ref{magnet_setup()}. The function can only be called in the
 
 The function returns the new field value.
 
-This function is not available for the @strong{Oxford} magnet power supplies
-(modules @code{ips20_4} and @code{ips120_10}). Use the function
+This function is not available for the @strong{Oxford Instruments} magnet
+power supplies (modules @code{ips20_4} and @code{ips120_10}). Use the function
 @ref{magnet_sweep()} instead.
 
 
@@ -427,9 +427,9 @@ in a previous call of the function @ref{magnet_setup()}.
 
 The function returns the new field value.
 
-Please note that for the @strong{Oxford} magnet power supplies (@code{ips20_4}
-and @code{ips120_10}) calling this function also automatically stops a
-running sweep.
+Please note that for the @strong{Oxford Instruments} magnet power supplies
+(@code{ips20_4} and @code{ips120_10}) calling this function also automatically
+stops a running sweep.
 
 The function can only be used in the @code{EXPERIMENT} section.
 
@@ -477,15 +477,13 @@ for the @strong{SR810} and @strong{SR830} all values in the range between
 The function can only be used in the @code{PREPARATIONS} section.
 
 
-@anchor{magnet_sweep()}
-@findex magnet_sweep()
-@item magnet_sweep()
-This function is only available for the @strong{Oxford} magnet sweep power
-supplies (@code{ips20_4} and @code{ips120_10}) to control their
-continuous sweep. It can be called with either an integer argument of
-@code{1} to start a sweep to higher field and current values, an
-argument of @code{-1} to start a downward sweep or, finally, an argument
-of @code{0} to stop a running sweep.
+@anchor{magnet_sweep()} @findex magnet_sweep() @item magnet_sweep() This
+function is only available for the @strong{Oxford Instruments} magnet sweep
+power supplies (@code{ips20_4} and @code{ips120_10}) to control their
+continuous sweep. It can be called with either an integer argument of @code{1}
+to start a sweep to higher field and current values, an argument of @code{-1}
+to start a downward sweep or, finally, an argument of @code{0} to stop a
+running sweep.
 
 To be able to do a sweep a sweep rate must have been set. This can be
 either done by a call of the function @ref{magnet_setup()} within the
@@ -505,28 +503,28 @@ The function can only be used in the @code{EXPERIMENT} section.
 @anchor{magnet_sweep_rate()}
 @findex magnet_sweep_rate()
 @item magnet_sweep_rate()
-This function is only available for the @strong{Oxford} magnet power supplies
-(@code{ips20_4} and @code{ips120_10}) to set or query the sweep rate for
-continuous sweeps.  If no argument is passed to the function the
-currently set sweep rate is returned. Otherwise a (positive) sweep rate
-in units of either @code{A/s} (for the IPS20-4) or @code{G/s} (for the
-IPS120_19) must be passed to the function.
+This function is only available for the @strong{Oxford Instruments} magnet
+power supplies (@code{ips20_4} and @code{ips120_10}) to set or query the sweep
+rate for continuous sweeps.  If no argument is passed to the function the
+currently set sweep rate is returned. Otherwise a (positive) sweep rate in
+units of either @code{A/s} (for the IPS20-4) or @code{G/s} (for the IPS120_19)
+must be passed to the function.
 
 
 @anchor{magnet_goto_field_on_end()}
 @findex magnet_goto_field_on_end()
 @item magnet_goto_field_on_end()
-This function is only available for the @strong{Oxford} magnet power supplies
-(@code{ips20_4} and @code{ips120_10}) and the S-band field modules
-@code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows to set a
-target current or field that the magnet will be swept to @b{after} the
-experiment has ended (per default the magnet would stay at the last field
-position for the @strong{Oxford} magnet supplies or move to the middle of the
-allowed field range for the S-band drivers). This function can be called in
-the @code{PREPARATION} as well the @code{EXPERIMENT} section and returns for
-the IPS20-4 the target current and for the three other modules the target
-field the magnet will sweept to after the end of the experiment.  If called
-more than once the current or field of the last call will be used.
+This function is only available for the @strong{Oxford Instruments} magnet
+power supplies (@code{ips20_4} and @code{ips120_10}) and the S-band field
+modules @code{s_band_magnet_narrow} and @code{s_band_magnet_broad}. It allows
+to set a target current or field that the magnet will be swept to @b{after}
+the experiment has ended (per default the magnet would stay at the last field
+position for the @strong{Oxford Instruments} magnet supplies or move to the
+middle of the allowed field range for the S-band drivers). This function can
+be called in the @code{PREPARATION} as well the @code{EXPERIMENT} section and
+returns for the IPS20-4 the target current and for the three other modules the
+target field the magnet will sweept to after the end of the experiment.  If
+called more than once the current or field of the last call will be used.
 
 
 @anchor{magnet_B0()}
@@ -3318,8 +3316,8 @@ this value.
 @section Temperature Controller Functions
 @cindex Temperature Controller Functions
 The only currently implemented temperature controllers are the @strong{Lake
-Shore 330} and the @strong{Oxford ITC503}. Their modules get loaded by
-specifying
+Shore 330} and the @strong{Oxford Instruments ITC503}. Their modules get
+loaded by specifying
 @example
 lakeshore330
 itc503
@@ -3362,8 +3360,8 @@ This function accepts no arguments and returns the temperature at the
 currently active sample channel and with the currently selected unit.
 
 If no sample channel has been selected for the @strong{Lake Shore 330}
-channels @code{B} is used by default, while for the @strong{Oxford ITC503}
-the default channel is channel @code{1}. When no temperature unit has
+channels @code{B} is used by default, while for the @strong{Oxford Instruments
+ITC503} the default channel is channel @code{1}. When no temperature unit has
 been selected temperatures are returned in Kelvin.
 
 
@@ -3373,15 +3371,16 @@ been selected temperatures are returned in Kelvin.
 This function returns, when called with no argument, the currently
 selected sample channel. For the @strong{Lake Shore 330} it returns
 @code{1} for channel @code{A} and @code{2} for channel @code{B} while
-for the @strong{Oxford ITC503} @code{1}, @code{2} or @code{3} get
-returned, indicating which of sample channel is selected. These values
+for the @strong{Oxford Instruments ITC503} @code{1}, @code{2} or @code{3}
+get returned, indicating which of sample channel is selected. These values
 can also passed to the function to set a new sample channel.
 Alternatively, one may also use the strings @code{"A"} or @code{"B"}
-(and @code{"C"} for the third channel of the @strong{Oxford ITC503}).
+(and @code{"C"} for the third channel of the @strong{Oxford Instruments
+ITC503}).
 
 Please take note that setting a sample channel takes about half a second
-with the @strong{Lake Shore 330}. For the @strong{Oxford ITC503} not all
-sample channels may be usable, there are models with different numbers
+with the @strong{Lake Shore 330}. For the @strong{Oxford Instruments ITC503}
+not all sample channels may be usable, there are models with different numbers
 of channels and this number is a compile time option that has to be set
 in the configuration file for the device.
 
