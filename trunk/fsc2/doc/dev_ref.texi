@@ -248,8 +248,8 @@ at the front panel of the device, the function
 @code{gaussmeter_resolution()} must be called, otherwise the field values
 returned by the module will be wrong. Also note that for a resolution
 setting of @w{0.01 G} the kG part of the field will be missing, i.e.@: a
-field of @w{3125.63 G} will be reported as being @w{125.63 G} for this
-resolution setting.
+field of @w{3125.63 G} will be reported as being @w{125.63 G} for the
+highest resolution setting.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -829,7 +829,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Hewlett-Packard HP (now Agilent,
-@url{http://www.home.agilent.com/}) frequency counterHP5340A. This is a
+@url{http://www.home.agilent.com/}) frequency counter HP5340A. This is a
 very old device even pre-dating the GPIB-standard. Only its capability
 to return the measured frequency can be used.
 
@@ -1222,7 +1222,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @paragraphindent 0
 @strong{Description}: Power supply for the Oxford Instruments
 (@url{http://www.oxford-instruments.com/}) superconducting
-magnet used for Leiden @w{275 GHz} spektrometer.
+magnet used for Leiden @w{275 GHz} (J-band) spektrometer.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
@@ -1704,8 +1704,8 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: Power supply by F.u.G. Elektronik GmbH
-(@url{http://www.fug-elektronik.de/}) , voltage range @w{0 -} @w{2000 V}
-with @w{1 V} resolution, current range @w{0 -} @w{300 mA} with
+(@url{http://www.fug-elektronik.de/}) , voltage range @w{0 V} to @w{2000 V}
+with @w{1 V} resolution, current range @w{0 mA} to @w{300 mA} with
 @w{1 mA} resolution.
 
 @paragraphindent 0
@@ -2124,9 +2124,9 @@ Trigger-in: either via @code{TTL} or @code{ECL} level input connector@*
 Number of channels: 16 (4 per output connector) with internal @w{4 ns}
 time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
 time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
-Maximum repetition time: 2,147,483,647 times the time base for external
-clock or @w{4 ns} internal clock (i.e.@: @w{8.5899 s}), @w{17.1799 s} for
-@w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
+Maximum repetition time: 2,147,483,647 times the time base with external
+clock or @w{4 ns} internal clock (i.e.@: @w{8.59 s}), @w{17.18 s} with
+@w{8 ns} internal time base, @w{34.36 s} with @w{16 ns} internal time base
 
 @paragraphindent 0
 When using an external clock or the internal @w{4 ns} time base for certain 
@@ -2181,7 +2181,7 @@ character, set @code{set-reos} to @code{yes} and @code{set-xeos} and
 control to be used with the S-band spectrometer in the group of T.@:
 Prisner at the J.-W.-Goethe University in Frankfurt/Main
 (@url{http://www.prisner.de/}). Field range is @w{0 G} to @w{2047.5 G}
-with a resolution of 0.5 G.
+with a resolution of @w{0.5 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -2219,7 +2219,7 @@ with a resolution of 0.5 G.
 control to be used with the S-band spectrometer in the group of T.@:
 Prisner at the J.-W.-Goethe University in Frankfurt/Main
 (@url{http://www.prisner.de/}). Field range is @w{1070 G} to @w{1479.5 G}
-with a resolution of 0.1 G.
+with a resolution of @w{0.1 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -2861,7 +2861,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @paragraphindent 0
 @strong{Description}: Thurlby & Thandar (@url{http://www.tti-test.com/})
 Power Supply PL330DP, 3 output channels, voltage range: @w{0 V} to @w{32 V}
-with resolution of @w{10 mV}, current range: @w{0 A} to @w{3 A} with
+with a resolution of @w{10 mV}, current range: @w{0 A} to @w{3 A} with a
 resolution of @w{1 mA}.
 
 @paragraphindent 0
