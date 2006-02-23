@@ -2129,10 +2129,10 @@ clock or @w{4 ns} internal clock (i.e.@: @w{8.5899 s}), @w{17.1799 s} for
 @w{8 ns} internal time base, @w{34.3597} for @w{16 ns} internal time base
 
 @paragraphindent 0
-When using an external clock or the internal @w{4 ns} time base under
-for certain pulse seqences the repetition time may be increases slightly
-(but never more than 3 times the time base), with an @w{8 ns} time base
-the repetition time may become larger by @w{8 ns}.
+When using an external clock or the internal @w{4 ns} time base for certain 
+pulse seqences the repetition time may be increases slightly (but never more
+than 3 times the time base), with an @w{8 ns} time base the repetition time
+may become larger by @w{8 ns}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
