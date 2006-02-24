@@ -48,8 +48,6 @@ const char *LECROY94_TMPL_Channel_Names[ 13 ] = { "CH1",    "CH2",
 
 long rl[ 10 ] = { 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000 };
 
-static bool lecroy94_tmpl_IN_SETUP = UNSET;
-
 static LECROY94_TMPL_T lecroy94_tmpl_stored;
 
 
@@ -135,14 +133,12 @@ int lecroy94_tmpl_exp_hook( void )
 
 	lecroy94_tmpl_store_state( &lecroy94_tmpl, &lecroy94_tmpl_stored );
 
-	lecroy94_tmpl_IN_SETUP = SET;
 	if ( ! lecroy94_tmpl_init( DEVICE_NAME ) )
 	{
 		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
-	lecroy94_tmpl_IN_SETUP = UNSET;
 
 	return 1;
 }
