@@ -1718,14 +1718,15 @@ or @code{WRAP} trigger mode isn't supported.
 @item digitizer_record_length()
 The function queries (if called with no argument) or sets (if called
 with an argument) the length of the traces measured by the digitizer.
+If called with an argument the value passed to the function will be
+rounded up to the nearest allowed values if necessary.
+
 For all @strong{LeCroy} oscilloscopes the function can only be called
-in query mode, i.e.@: without an argument. If called with an argument
-the value passed to the function will be rounded up to the nearest allowed
-values if necessary.
+in query mode, i.e.@: without an argument.
 
 Except for the @strong{LeCroy} oscilloscopes, the function can be called
-in query mode for the(i.e.@: without an argument) only if either it has
-already been called with an argument or when in the @code{EXPERIMENT} section.
+in query mode (i.e.@: without an argument) only if either it has already
+been called with an argument or when in the @code{EXPERIMENT} section.
 
 
 
