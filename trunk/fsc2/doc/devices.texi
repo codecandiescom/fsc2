@@ -1588,7 +1588,7 @@ the function. The first one is either an integer number, with a non-zero
 value representing truth and @code{0} falsehood, or a string, either
 @code{"ON"} or @code{"OFF"}, that determines if overflow rejection is
 switched on or off (if switched on all traces that overflowed the ADC
-range will be rejected automatically). The seocond one is the number of
+range will be rejected automatically). The second one is the number of
 points that get included into the average. Usually it doesn't make too
 much sense to set this value because the program will make sure that at
 least as many points of a curve as can be read from the digitizer are
