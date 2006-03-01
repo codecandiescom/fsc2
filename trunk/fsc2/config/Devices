@@ -43,25 +43,26 @@ rb_pulser     // Leiden pulser made up from Rulbus cards
 
 // Digital oszilloscopes
 
-tds520        // Tektronix digitizing oscilloscope, model 520
-tds520a       // Tektronix digitizing oscilloscope, model 520A
-tds520c       // Tektronix digitizing oscilloscope, model 520C
-tds540        // Tektronix digitizing oscilloscope, model 540
-tds744a       // Tektronix digitizing oscilloscope, model 744A
-tds754a       // Tektronix digitizing oscilloscope, model 754A
-lecroy9400    // LeCroy digitizing oscilloscope, model 9400
-lecroy9450    // LeCroy digitizing oscilloscope, model 9450
-lecroy9424    // LeCroy digitizing oscilloscope, model 9424
-lecroy9424e   // LeCroy digitizing oscilloscope, model 9424e
+tds520        // Tektronix digitizing oscilloscope 520
+tds520a       // Tektronix digitizing oscilloscope 520A
+tds520c       // Tektronix digitizing oscilloscope 520C
+tds540        // Tektronix digitizing oscilloscope 540
+tds744a       // Tektronix digitizing oscilloscope 744A
+tds754a       // Tektronix digitizing oscilloscope 754A
+lecroy9400    // LeCroy digitizing oscilloscope 9400
+lecroy9450    // LeCroy digitizing oscilloscope 9450
+lecroy9424    // LeCroy digitizing oscilloscope 9424
+lecroy9424e   // LeCroy digitizing oscilloscope 9424e
+lecroy_wr2    // LeCroy digitizing oscilloscope Waverunner 2
 
 
 // Lock-In amplifiers
 
-sr510         // Stanford Research lock-in amplifier, model 510
-sr530         // Stanford Research lock-in amplifier, model 530
-sr810         // Stanford Research lock-in amplifier, model 810
-sr830         // Stanford Research lock-in amplifier, model 830
-er023m        // Bruker Signal Channel, model ER 023 M
+sr510         // Stanford Research lock-in amplifier 510
+sr530         // Stanford Research lock-in amplifier 530
+sr810         // Stanford Research lock-in amplifier 810
+sr830         // Stanford Research lock-in amplifier 830
+er023m        // Bruker Signal Channel ER 023 M
 
 
 // Magnet power suplies
