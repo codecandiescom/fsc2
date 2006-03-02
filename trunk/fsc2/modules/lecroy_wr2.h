@@ -125,7 +125,7 @@
 #define LECROY_WR2_MAX_USED_CHANNELS   8
 
 
-/* Maximum and minimum sensitivity [V/div]
+/* Maximum and minimum sensitivity [V/div] */
 
 #define LECROY_WR2_MAX_SENS     5.0e-3     /* 5 mV */
 #define LECROY_WR2_MIN_SENS     2.5        /* 2.5 V */
