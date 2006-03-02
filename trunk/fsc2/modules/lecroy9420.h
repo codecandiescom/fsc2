@@ -139,7 +139,7 @@
 #define LECROY9420_TRG_MAX_LEVEL_EXT    2.0
 #define LECROY9420_TRG_MAX_LEVEL_EXT10  10.0
 
-#define LECROY9420_UNDEFINED_REC_LEN  -1
+#define LECROY9420_UNDEF_REC_LEN  -1
 
 
 /* Constants for the INR register */

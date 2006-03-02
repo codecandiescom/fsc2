@@ -94,7 +94,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.is_trigger_slope[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_coupling[ i ] = UNSET;
 		lecroy94_tmpl.is_trigger_level[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEFINED_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEF_REC_LEN;
 	}
 
 	for ( i = LECROY94_TMPL_FUNC_E; i <= LECROY94_TMPL_FUNC_F; i++ )
@@ -102,7 +102,7 @@ int lecroy94_tmpl_init_hook( void )
 		lecroy94_tmpl.source_ch[ i ]  =
 								 LECROY94_TMPL_CH1 + i - LECROY94_TMPL_FUNC_E;
 		lecroy94_tmpl.is_avg_setup[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEFINED_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEF_REC_LEN;
 	}
 
 	lecroy94_tmpl_stored.w = NULL;
@@ -396,9 +396,7 @@ Var_T *digitizer_timebase( Var_T * v )
 				return vars_push( FLOAT_VAR, lecroy94_tmpl.timebase );
 
 			case TEST :
-				return vars_push( FLOAT_VAR, lecroy94_tmpl.is_timebase?
-								  lecroy94_tmpl.timebase :
-								  LECROY94_TMPL_TEST_TIMEBASE );
+				return vars_push( FLOAT_VAR, lecroy94_tmpl.timebase );
 
 			case EXPERIMENT :
 				lecroy94_tmpl.timebase = lecroy94_tmpl_get_timebase( );
@@ -459,8 +457,8 @@ Var_T *digitizer_timebase( Var_T * v )
 	lecroy94_tmpl.tb_index = tb_index;
 	lecroy94_tmpl.is_timebase = SET;
 
-	/* Now check for the trigger delay (if it's set) if it fits with the new
-	   timebase setting, and based on this the window positions and widths */
+	/* Now check if the trigger delay (in case it's set) fits with the new
+	   timebase setting, and, based on this, the window positions and widths */
 
 	lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
 	lecroy94_tmpl_all_windows_check( );
@@ -493,21 +491,20 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 		switch ( FSC2_MODE )
 		{
 			case PREPARATION :
-				if ( ! lecroy94_tmpl.is_interleaved ||
-					 ! lecroy94_tmpl.is_timebase )
+				if ( ! lecroy94_tmpl.is_interleaved )
 					no_query_possible( );
 				return vars_push( INT_VAR,
 								  ( long ) lecroy94_tmpl.interleaved );
 
 			case TEST :
-				return vars_push( INT_VAR, lecroy94_tmpl.is_interleaved ?
-								  ( long ) lecroy94_tmpl.interleaved :
-								  LECROY94_TMPL_TEST_ILVD_MODE );
+				return vars_push( INT_VAR,
+								  ( long ) lecroy94_tmpl.interleaved );
 
 			case EXPERIMENT :
+				lecroy94_tmpl.interleaved = lecroy94_tmpl_get_interleaved( );
+				lecroy94_tmpl.is_interleaved = SET;
 				return vars_push( INT_VAR,
-								  ( long ) lecroy94_tmpl_get_interleaved( ) );
-
+								  ( long ) lecroy94_tmpl.interleaved );
 		}
 
 	ilvd = get_boolean( v );
@@ -531,6 +528,8 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 
 	lecroy94_tmpl.interleaved = ilvd;
 	lecroy94_tmpl.is_interleaved = SET;
+	lecroy94_tmpl.is_timebase = SET;              /* must be set to be able 
+													 to set interleaved mode */
 
 	lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
 	lecroy94_tmpl_all_windows_check( );
@@ -554,7 +553,8 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 
 Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
-	if ( FSC2_MODE == PREPARATION && ! lecroy94_tmpl.is_timebase )
+	if ( FSC2_MODE == PREPARATION && 
+		 ( ! lecroy94_tmpl.is_timebase || ! lecroy94_tmpl.is_interleaved ) )
 		no_query_possible( );
 
 	return vars_push( FLOAT_VAR, lecroy94_tmpl_time_per_point( ) );
@@ -1734,8 +1734,7 @@ Var_T *digitizer_get_curve( Var_T * v )
 	{
 		if ( w != NULL )
 			length = w->num_points;
-		else if ( lecroy94_tmpl.rec_len[ ch ] ==
-				  				              LECROY94_TMPL_UNDEFINED_REC_LEN )
+		else if ( lecroy94_tmpl.rec_len[ ch ] == LECROY94_TMPL_UNDEF_REC_LEN )
 			length = LECROY94_TMPL_TEST_REC_LEN;
 		else
 			length = lecroy94_tmpl.rec_len[ ch ];

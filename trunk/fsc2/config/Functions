@@ -185,7 +185,7 @@ digitizer_window_position, -1, ALL;     // set or get window position
 digitizer_window_width, -1, ALL;        // set or get window width
 digitizer_display_channel, -1, PREP;    //
 digitizer_timebase, -1, ALL;            // set or get the time base
-digitizer_interleave_mode, -1, ALL;     // set or get SS/RIS mode
+digitizer_interleave_mode, -1, ALL;     // set or get SS/RIS mode (LeCroy only)
 digitizer_time_per_point, 0, EXP;       // returns time per point
 digitizer_sensitivity, -1, ALL;         // set or get the sensitivity
 digitizer_num_averages, -1, ALL;        // set or get number of averages
@@ -205,11 +205,12 @@ digitizer_get_curve_fast, -1, EXP;
 digitizer_get_amplitude, -1, EXP;
 digitizer_get_amplitude_fast, -1, EXP;
 digitizer_run, 0, EXP;
-digitizer_lock_keyboard, -1, EXP;       // Lock/unlock keyboard (TDSxxx only)
+digitizer_lock_keyboard, -1, EXP;       // Lock/unlock keyboard (TDS only)
 digitizer_copy_curve, 2, EXP;
 digitizer_command, 1, EXP;
 digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
-digitizer_averaging, -1, ALL;           // LeCroy9400 only
+digitizer_averaging, -1, ALL;           // LeCroy digitizers only
+digitizer_memory_size, -1, ALL;         // LeCroy WR2 only
 
 
 /* Functions exported by the RF synthesizers (HP8647A, HP8648A, HP8672A,
