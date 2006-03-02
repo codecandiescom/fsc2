@@ -29,10 +29,10 @@
 static unsigned char *lecroy_wr2_get_data( long * len );
 
 static unsigned int lecroy_wr2_get_inr( void );
-
+#if 0
 static int lecroy_wr2_get_int_value( int          ch,
 									 const char * name );
-
+#endif
 static double lecroy_wr2_get_float_value( int          ch,
 										  const char * name );
 
@@ -1092,7 +1092,6 @@ bool lecroy_wr2_display( int ch,
 						 int on_off )
 {
 	char cmd[ 30 ];
-	long length = 30;
 		
 
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
