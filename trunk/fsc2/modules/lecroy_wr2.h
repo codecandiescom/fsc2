@@ -53,12 +53,8 @@
 #define LECROY_WR2_EXT10   14
 
 
-
-
-
 #define GENERAL_TO_LECROY_WR2 0
 #define LECROY_WR2_TO_GENERAL 1
-
 
 
 #define LECROY_WR2_INVALID_COUPL     -1   /* Input coupling for data channel */
@@ -125,20 +121,14 @@
 /* Total number of channels and maximum number of channels that can be
    displayed at once */
 
-#define LECROY_WR2_MAX_CHANNELS       14
+#define LECROY_WR2_MAX_CHANNELS       12
 #define LECROY_WR2_MAX_USED_CHANNELS   8
 
 
-/* Maximum and minimum sensitivity [V/div] for CH1 and CH2 */
+/* Maximum and minimum sensitivity [V/div]
 
 #define LECROY_WR2_MAX_SENS     5.0e-3     /* 5 mV */
 #define LECROY_WR2_MIN_SENS     2.5        /* 2.5 V */
-
-
-/* Maximum number of averages - is this correct? The documentation gives
-   different numbers, one of them being 4000... */
-
-#define LECROY_WR2_MAX_AVERAGES    1000
 
 
 /* Maximum factors or values for trigger levels */
