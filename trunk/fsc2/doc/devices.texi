@@ -1268,7 +1268,8 @@ The function can only be used in the @code{EXPERIMENT} section.
 
 The digitizing oscilloscopes currently implemented are the Tektronix
 TDS520, TDS520A, TDS540, TDS744A and TDS754A and the LeCroy 9400 (with the
-WP01 Waveform Processing option), 9420, 9424, 9424E and 9450. The
+WP01 Waveform Processing option), 9420, 9424, 9424E, 9450 and the
+Waverunner-2. The
 corresponding module names to be used in the @code{DEVICES} section are
 @example
 tds520
@@ -1281,6 +1282,7 @@ lecroy9420
 lecroy9424
 lecroy9424e
 lecroy9450
+lecroy_wr2
 @end example
 
 When specifying digitizer channels or trigger inputs you should use only
@@ -1295,10 +1297,10 @@ First digitizer channel (all models)
 Second digitizer channel (all models)
 @item CH3
 Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E)
+LeCroy 9424E, some models of the Waverunner-2)
 @item CH4
 Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E)
+LeCroy 9424E, some models of the Waverunner-2)
 @item MATH1
 First mathematic function channel (all Tektronix digitizers)
 @item MATH2
@@ -1322,21 +1324,34 @@ Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
 Line In for trigger (all models)
 @item EXP_A
-First expansion channel (all LeCroy digitizers)
+First expansion channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
 @item EXB_B
-Second expansion channel (all LeCroy digitizers)
+Second expansion channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
+@item MEM_A
+Memory channel A (LeCroy Waverunner-2)
+@item MEM_B
+Memory channel B (LeCroy Waverunner-2)
 @item MEM_C
-First memory channel (all LeCroy digitizers)
+Memory channel C (all LeCroy digitizers)
 @item MEM_D
-Second memory channel (all LeCroy digitizers)
+Memory channel D (all LeCroy digitizers)
 @item FUNC_E
-First function (averaging) channel (all LeCroy digitizers)
+First function (averaging) channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
 @item FUNC_F
-second function (averaging) channel (all LeCroy digitizers)
+Second function (averaging) channel (LeCroy  9400, 9420, 9424, 9424E, 9450)
+@item TRACE_A
+First function (averaging) channel (LeCroy Waverunner-2)
+@item TRACE_B
+Second function (averaging) channel (LeCroy Waverunner-2)
+@item TRACE_C
+Third function (averaging) channel (LeCroy Waverunner-2)
+@item TRACE_D
+Fourth function (averaging) channel (LeCroy Waverunner-2)
 @item EXT
-External trigger input (LeCroy 9400, LeCroy 9420, LeCroy 9424E, LeCroy 9450)
+External trigger input (LeCroy 9400, LeCroy 9420, LeCroy 9424E, LeCroy 9450,
+Waverunner-2)
 @item EXT10
-External amplified trigger input (LeCroy 9400, LeCroy 9420, LeCroy 9450)
+External amplified trigger input (LeCroy 9400, 9420, 9450, Waverunner-2)
 @end table
 
 
@@ -1360,6 +1375,7 @@ External amplified trigger input (LeCroy 9400, LeCroy 9420, LeCroy 9450)
 @item @ref{digitizer_trigger_position()}
 @item @ref{digitizer_trigger_delay()}
 @item @ref{digitizer_record_length()}
+@item @ref{digitizer_memory_size()}
 @item @ref{digitizer_define_window()}
 @item @ref{digitizer_change_window()}
 @item @ref{digitizer_window_position()}
@@ -1455,12 +1471,14 @@ oscilloscope:
 @itemx LeCroy 9400
 @itemx LeCroy 9420
 @itemx LeCroy 9450
+@itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
 @code{CH1} or @code{CH2}
 @item TDS540
 @itemx TDS744A
 @itemx TDS754A
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
+@itemx LeCroy Waverunner-2 (LT264, LT354, LT374)
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
 
@@ -1493,9 +1511,11 @@ oscilloscope:
 @itemx LeCroy 9400
 @itemx LeCroy 9420
 @itemx LeCroy 9450
+@itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
 @code{CH1} or @code{CH2}
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
+@itemx LeCroy Waverunner-2 (LT264, LT354, LT374)
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
 
@@ -1510,16 +1530,27 @@ argument) only in the @code{EXPERIMENT} section.
 @anchor{digitizer_bandwidth_limiter()}
 @findex digitizer_bandwidth_limiter()
 @item digitizer_bandwidth_limiter()
-The function queries (if called with no argument) or sets (if
-called with an arguments) if the bandwidth limiter (@w{80 MHz}) is switched
-on or of. The function only exists for the @strong{LeCroy 9420},
-@strong{LeCroy 9424}, @strong{LeCroy 9424E} and @strong{LeCroy 9450}.
+For the @strong{LeCroy 9420, 9424, 9424E, 9450} the function queries
+(if called with no argument) or sets (if called with an arguments) if
+the bandwidth limiter (@w{80 MHz}) is switched on or off. If an argument
+is given and it is a non-zero number or the string @code{"ON"} the
+bandwidth limiter is switched on, if the argument is zero or the string
+@code{"OFF"} the bandwidth limiter is switched off. If called without an
+argument the function returns @code{1} if the bandwidth limiter is on,
+@code{0} if it's off.
 
-If an argument is given and it is a non-zero number or the string
-@code{"ON"} the bandwidth limiter is switched on, if the argument is
-zero or the string @code{"OFF"} the bandwidth limiter is switched off.
-If called without an argument the function returns @code{1} if the
-bandwidth limiter is on, @code{0} if it's off.
+For the @strong{LeCroy Waverunner-2} three possible setings exist.
+The bandwidth limiter can be either on (i.e.@. set to @w{20 MHz},
+off or set to @w{200 MHz}. If called with a string argument of @code{"OFF"}
+(or an integer argument of @code{0}) the bandwidth limiter gets switched off.
+If called with a string argument of @code{"ON"} (or the number @code{1})
+the bandwidth limiter is switched on (with a limit of @w{20 MHz}). Finally,
+if called with the string @code{"200MHZ"} (or the value @code{2}) the
+bandwidth limiter also gets swithed on, but with a limit of @w{200 MHz}.
+If called without an argument the currently set state of the bandwidth
+limiter gets returned as an integer value with the same meaning as above.
+
+The function does not exis for the @strong{Tektronix} digitizers.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -1544,7 +1575,9 @@ For the @strong{LeCroy} oscilloscopes this function can only be used in
 query mode and returns the number of averages that has been set in a
 previous call of @ref{digitizer_averaging()}. It needs exactly one
 argument, the the channel used to do the averaging, i.e.@: either
-@code{FUNC_E} or @code{FUNC_F}.
+@code{FUNC_E} or @code{FUNC_F} for the @strong{LeCroy 9400, 9420, 9424,
+9424E, 9450} and @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or
+@code{TRACE_D} for the @strong{LeCroy Waverunner-2}.
 
 @strong{Please note}: Anton Savitzky noticed that there seems to be
 firmware bug in the @strong{Tektronix} digitzers from the 500 series
@@ -1562,15 +1595,26 @@ by a factor of the square root of 2 than is to be expected.
 This function only exists for the @strong{LeCroy} oscilloscopes and
 must be used to set up averaging. It expects at least three arguments.
 The first argument is the channel to be used to do the averaging, i.e.@:
-either @code{FUNC_E} or @code{FUNC_F}. The second is the source channel
-to be averaged, i.e.@:
+@table @samp
+@itemx LeCroy 9400
+@itemx LeCroy 9420
+@itemx LeCroy 9424
+@itemx LeCroy 9424E
+@itemx LeCroy 9450
+@code{FUNC_E} or @code{FUNC_F}
+@itemx LeCroy Waverunner-2
+@code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end table
+The second is the source channel to be averaged, i.e.@:
 @table @samp
 @itemx LeCroy 9400
 @itemx LeCroy 9420
 @itemx LeCroy 9450
+@itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
 @code{CH1} or @code{CH2}
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
+@itemx LeCroy Waverunner-2 (LT264, LT354, LT374)
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
 
@@ -1578,10 +1622,15 @@ The third required argument is the number of averages. For the
 @strong{LeCroy9400} this has to be either @code{1}, @code{2} or @code{5},
 multiplied by @code{10}, @code{100}, @code{1,000}, @code{10,000} etc.@: up
 to @code{1,000,000} (if a number not fitting this scheme is passed to the
-function the nearest allowd number is used instead). For all other models
-this can be an arbitrary  number between @code{1} and @code{1,000} or
-@code{1,000,000} if the device is fitted with the WP01 Waveform Processing
-option.
+function the nearest allowd number is used instead).
+
+For the @strong{LeCroy 9420, 9424, 9424E, 9450} this can be an arbitrary 
+number between @code{1} and @code{1,000} or @code{1,000,000} if the device
+is fitted with the WP01 Waveform Processing option.
+
+Finally, for the @strong{LeCroy Waverunner-2} this also can be an arbitrary
+number with an upper limit of @code{4,000} or @code{1,000,000} if it is
+fitted with the WaveAnalyzer option.
 
 For the @strong{LeCroy9400} two more optionals argument can be passed to
 the function. The first one is either an integer number, with a non-zero
@@ -1620,10 +1669,17 @@ numeric!):
 @end itemize
 @item LeCroy 9400
 @itemx LeCroy 9420
-@itemx LeCroy 9420E
+@itemx LeCroy 9424E
 @itemx LeCroy 9450
+@itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
+@item @code{EXT}, @code{EXT10} or @code{LINE} (can be abbreviated to
+@code{LIN})
+@end itemize
+@item LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{EXT}, @code{EXT10} or @code{LINE} (can be abbreviated to
 @code{LIN})
 @end itemize
@@ -1647,31 +1703,32 @@ only if either it has already been called with an argument or in the
 @anchor{digitizer_trigger_level()}
 @findex digitizer_trigger_level()
 @item digitizer_trigger_level()
-Function for setting or quering the trigger level (@strong{LeCroy 9420},
-@strong{LeCroy 9424}, @strong{LeCroy 9424E} and @strong{LeCroy 9450} only).
-It expects at least a single argument, the trigger channel, see the
-channels listed for the function @ref{digitizer_trigger_channel()}, for obvious
-reasons excluding the @code{LINE} channel. If called with no further argument
-the current setting for the trigger level of this channel is returned. If
-called with a second argument it must be the trigger level (in Volt) to be
-set for that channel.
+
+Function for setting or quering the trigger level of one of the trigger
+channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+@strong{Waverunner-2} digitizers. It expects at least a single argument, the
+trigger channel, see the channels listed for the function
+@ref{digitizer_trigger_channel()}, for obvious reasons excluding the
+@code{LINE} channel. If called with no further argument the current setting
+for the trigger level of this channel is returned. If called with a second
+argument it must be the trigger level (in Volt) to be set for that channel.
 
 
 
 @anchor{digitizer_trigger_slope()}
 @findex digitizer_trigger_slope()
 @item digitizer_trigger_slope()
-Function for setting or quering the trigger slope (@strong{LeCroy 9420},
-@strong{LeCroy 9424}, @strong{LeCroy 9424E} and @strong{LeCroy 9450} only).
-It expects at least a single argument, the trigger channel, see the
-channels listed for the function @ref{digitizer_trigger_channel()}.
-If called with no further argument the current setting for the trigger
-slope of this channel as a number, where @code{1} stands for positive
-slope and @code{0} for negative slope. If called with a second argument
-it must be either the string @code{"POSITIVE"} or @code{"POS"} (or the
-number @code{1}) to set a positive slope or the string @code{"NEGATIVE"}
-or @code{"NEG"} (or the number @code{0}) to set a negative trigger slope
-for that channel.
+Function for setting or quering the trigger slope of one of the trigger
+channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+@strong{Waverunner-2} digitizers. It expects at least a single argument, the
+trigger channel, see the channels listed for the function
+@ref{digitizer_trigger_channel()}. If called with no further argument the
+current setting for the trigger slope of this channel as a number, where
+@code{1} stands for positive slope and @code{0} for negative slope. If called
+with a second argument it must be either the string @code{"POSITIVE"} or
+@code{"POS"} (or the number @code{1}) to set a positive slope or the string
+@code{"NEGATIVE"} or @code{"NEG"} (or the number @code{0}) to set a negative
+trigger slope for that channel.
 
 Please note: setting a trigger slope for a trigger channel does @strong{not}
 automatically make this channel the selected trigger channel.
@@ -1681,17 +1738,19 @@ automatically make this channel the selected trigger channel.
 @anchor{digitizer_trigger_coupling()}
 @findex digitizer_trigger_coupling()
 @item digitizer_trigger_coupling()
+
 Function for setting or quering the trigger coupling of one of the trigger
-channels (@strong{LeCroy 9420}, @strong{LeCroy 9424}, @strong{LeCroy 9424E}
-and @strong{LeCroy 9450} only). If called with a single argument, the trigger
-channel (see the description of the function digitizer_trigger_channel() for
-a list of te possible trigger channels), the trigger coupling gets returned
-as a number, where @code{0} stands for @code{AC} coupling, @code{1} for
-@code{DC} coupling, @code{2} for @code{LF REJ} coupling, @code{3} for
-@code{HF REF} coupling and @code{4} for @code{HF} coupling. To change
-the coupling for the channel pass the function a second argument, either
-an integer as it gets returnedon queries, or one of the strings @code{"AC"},
-@code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or @code{"HF"}.
+channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+@strong{Waverunner-2} digitizers. If called with a single argument, the
+trigger channel (see the description of the function
+digitizer_trigger_channel() for a list of te possible trigger channels), the
+trigger coupling gets returned as a number, where @code{0} stands for
+@code{AC} coupling, @code{1} for @code{DC} coupling, @code{2} for @code{LF
+REJ} coupling, @code{3} for @code{HF REF} coupling and @code{4} for @code{HF}
+coupling. To change the coupling for the channel pass the function a second
+argument, either an integer as it gets returnedon queries, or one of the
+strings @code{"AC"}, @code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or
+@code{"HF"}.
 
 Please note: setting a trigger coupling for a trigger channel does @strong{not}
 automatically make this channel the selected trigger channel.
@@ -1701,15 +1760,34 @@ automatically make this channel the selected trigger channel.
 @anchor{digitizer_trigger_mode()}
 @findex digitizer_trigger_mode()
 @item digitizer_trigger_mode()
-Function for setting or quering the trigger mode (@strong{LeCroy 9420},
-@strong{LeCroy 9424}, @strong{LeCroy 9424E} and @strong{LeCroy 9450} only).
-If called withou an argument the function returns the currently set trigger
-mode as an integer, where @code{0} stands for @code{AUTO} mode, @code{1}
-for @code{NORM} mode and @code{2} for @code{SINGLE}, @code{3} for 
-@code{SEQUENCE} mode and @code{4} for @code{WRAP} mode. If called with
-an argument this must be either a string, @code{"AUTO"}, @code{"NORM"}
-or @code{"SINGLE"} or the corresponding number. Setting @code{SEQUENCE}
-or @code{WRAP} trigger mode isn't supported.
+
+Function for setting or quering the trigger mode of one of the @strong{LeCroy
+9420, 9424, 9424E, 9450} and @strong{Waverunner-2} digitizers. If called
+without an argument the function returns the currently set trigger mode as an
+integer, if called to set the mode it can either be a string or an integer.
+The following values are allowed:
+@table @samp
+@item LeCroy 9420
+@itemx LeCroy 9424
+@itemx LeCroy 9424E
+@itemx LeCroy 9450
+@itemize @bullet
+@item @code{AUTO} or @code{0}
+@item @code{NORM} or @code{1}
+@item @code{SINGLE} or @code{2}
+@item @code{SEQUENCE} or @code{3}
+@item @code{WRAP} or @code{4}
+@end itemize
+@item LeCroy Waverunner-2
+@itemize @bullet
+@item @code{AUTO} or @code{0}
+@item @code{NORM} or @code{1}
+@item @code{SINGLE} or @code{2}
+@item @code{STOP} or @code{3}
+@end itemize
+@end table
+Currently, setting the @code{SEQUENCE} or @code{WRAP} trigger modes isn't
+supported.
 
 
 
@@ -1728,6 +1806,25 @@ Except for the @strong{LeCroy} oscilloscopes, the function can be called
 in query mode (i.e.@: without an argument) only if either it has already
 been called with an argument or when in the @code{EXPERIMENT} section.
 
+
+@anchor{digitizer_memory_size()}
+@findex digitizer_memory_size()
+@item digitizer_memory_size()
+This function is only available for the @strong{LeCroy Waverunner-2} and
+can be used to query or set the memory size to be used for storing curves.
+If the function gets called with an (integer) argument the memory size
+is set accordingly. Please note that memory sizes can only be set according
+to an 1-2.5-5 scheme, starting with a minimum memory size of @code{500} samples
+(i.e. the lowest memory sizes are @code{500}, @code{1000}, @code{2500} etc.).
+If the argument doesn't fit into this scheme the next larger memory size is
+used and a warning is printed. If called without an argument the function
+returns the currently set memory size.
+
+Please note that changing the memory size may also change the time resolution
+(but not the timebase), i.e.@: when going to a lower memory size the time
+distance between adjacent measured data points may become larger and vice
+versa. This in turn may have an effect on the exact positions of previously
+set windows (see below).
 
 
 @anchor{digitizer_trigger_position()}
@@ -1761,17 +1858,19 @@ trigger. Thus, if called with a positive value, the acquisitions starts
 by the specified value before the trigger is received (pre-trigger
 acquisition), if called with a negative value start of the acquisition
 is delayed by that value relative to the trigger position (post-trigger
-acquisition). Please note that the @strong{Tektronix} oscilloscopes
-don't allow post-trigger acquisitions.
+acquisition).
+
+Please note that the @strong{Tektronix} oscilloscopes don't allow post-trigger
+acquisitions, post-trigger acquisitions can only done with the @strong{LeCroy}
+oszilloscopes (where the maximum pre-trigger delay is typically 10 times the
+timebase and the maximum post-trigger delay @code{10,000} times the timebase
+setting).
 
 If called without an argument the current setting of the pre- or post-trigger
-delay is returned. Post-trigger acquisitions can only done with the
-@strong{LeCroy} oszilloscopes (where the maximum pre-trigger delay is
-typically 10 times the timebase and the maximum post-trigger delay
-@code{10,000} times the timebase setting).
+delay is returned. 
 
 Please note that, if a trigger delay has been set and a new timebase
-gets set, the program may get aorted if the requested trigger delay
+gets set, the program may get aborted if the requested trigger delay
 isn't possible with the changed timebase setting.
 
 The function can be called in query mode (i.e.@: without an argument)
@@ -1801,20 +1900,22 @@ to address the window. Thus, you need to store this number in an integer
 variable to be able to use this window in further calls of digitizer
 functions.
 
-The allowed ranges of arguments for the start point and width of the
+The allowed ranges of the arguments for the start point and width of the
 window depend on the time base setting of the oscilloscope as well as
 the pre- or post-trigger setting (and, for the @strong{Tektronix}
-oscillosopes, the current record length. The time of the trigger event
-itself corresponds to a cursor position of exactly 0. Times before the
-trigger are negative, times after the trigger positive. If a window width
-is given it has to be positive and the window must fit into the time
-interval measured by the oscilloscope.
+oscillosopes, the current record length or, for the @strong{LeCroy
+Waverunner-2}, the memory size). The position of the trigger event
+itself corresponds to a time of exactly 0. Times before the trigger are
+negative, times after the trigger positive. If a window width is given
+it has to be positive and the window must fit into the time interval
+measured by the oscilloscope.
 
 Because the data measured by the oscilloscope are discreet it is not
 possible to specify arbitrary values for the starting point and window
 width but they must fit with the current minimum time resolution. If the
 specified values don't fit the requirement a warning is printed and the
 position and width are adjusted to the nearest allowed values.
+
 
 
 @anchor{digitizer_change_window()}
@@ -1926,6 +2027,18 @@ of the digitizer:
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+@item LeCroy Waverunner-2 (LT262, LT372, LT584)
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
+@item LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
 @end table
 
 Unless data from a memory channel are fetched the function automatically
@@ -1942,12 +2055,13 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
 
 
+
 @anchor{digitizer_get_curve_fast()}
 @findex digitizer_get_curve_fast()
 @item digitizer_get_curve_fast()
 This function is nearly identical to the function @ref{digitizer_get_curve()}
 with the only difference that the cursor are not positioned at the start and
-end point of the curve to be fetched. For the @strong{Lecroy} digitizers,
+end point of the curve to be fetched. For the @strong{LeCroy} digitizers,
 where no visual feedback is used, the function is identical to
 @ref{digitizer_get_curve()}.
 
@@ -1993,6 +2107,18 @@ the digitizer:
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+@item LeCroy Waverunner-2 (LT262, LT372, LT584)
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
+@item LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
 @end table
 
 The following, optional arguments are a list of integer variables or
@@ -2016,7 +2142,7 @@ Except for the @strong{TDS520} and the @strong{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
-area. For the @strong{TDS520} and the @strong{LcCroy} digitizers, which miss
+area. For the @strong{TDS520} and the @strong{LeCroy} digitizers, which miss
 this built-in function, the curve in the interval is fetched and then
 used to compute the area. To give some visual feedback also for the
 @strong{TDS520} the cursors are moved to the borders of the interval.
@@ -2038,8 +2164,8 @@ difference is that instead of using the function built into the
 digitizer to compute the area the curve in the specified interval is
 fetched and the area is computed from these data. This function can be a
 bit faster because it doesn't set the cursors (which also means that
-there is no visual feedback). For the @strong{Lecroy} digitizers, where
-no visual feedback is used, the function is identiical to
+there is no visual feedback). For the @strong{LeCroy} digitizers, where
+no visual feedback is used, the function is identical to
 @ref{digitizer_get_area()}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -2087,6 +2213,18 @@ choices of the data channel depend on the model of the digitizer:
 @item @code{MEM_C} or @code{MEM_D}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+@item LeCroy Waverunner-2 (LT262, LT372, LT584)
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
+@item LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
 @end table
 
 The following, optional arguments are a list of integer variables or
@@ -2106,7 +2244,7 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the amplitide for the corresponding window.
 
-Except for the @strong{TDS520} and the @strong{Lecroy} digitizers
+Except for the @strong{TDS520} and the @strong{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
 specified) and uses the function built into the digitizer to compute the
@@ -2130,7 +2268,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 This function is nearly identical to @ref{digitizer_get_amplitude()}
 except that the function to compute amplitudes built into the digitizer
 isn't used and the cursors aren't positioned at the start and end of the
-time interval. It is not implemented for the @strong{Lecroy} digitizers,
+time interval. It is not implemented for the @strong{LeCroy} digitizers,
 where no visual feedback is used.
 
 
@@ -2152,7 +2290,7 @@ function does not exist for the @strong{LeCroy} oscilloscopes.
 This function is available for the @strong{Tektronix} and all @strong{LeCroy}
 digitizers except the @strong{LeCroy 9400}. It allows to save a curve from on
 of the normal measurement or @code{MATH} / @code{FUNC} channels to one of the
-@code{REF} / @code{MEM} channels. It takes two arguments, first the source
+@code{REF}/@code{MEM} channels. It takes two arguments, first the source
 channel, i.e.@: the channel to copy the data from, which must be (depending
 on the model of
 the digitizer)
@@ -2182,6 +2320,16 @@ the digitizer)
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{FUNC_E} or @code{FUNC_F}
 @end itemize
+@item LeCroy Waverunner-2 (LT262, LT372, LT584)
+@itemize @bullet
+@item @code{CH1} or @code{CH2}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
+@item LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemize @bullet
+@item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@item @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
+@end itemize
 @end table
 
 The second argument is the channel the data are to be copied to, i.e.@: one
@@ -2201,6 +2349,10 @@ from
 @itemx LeCroy 9450
 @itemize @bullet
 @item @code{MEM_C} or @code{MEM_D}
+@end itemize
+@item LeCroy Waverunner-2
+@itemize @bullet
+@item @code{MEM_A}, @code{MEM_B}, @code{MEM_C} or @code{MEM_D}
 @end itemize
 @end table
 
