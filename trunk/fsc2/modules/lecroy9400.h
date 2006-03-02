@@ -41,7 +41,7 @@
 #define LECROY9400_TEST_TRIG_CHANNEL 0
 #define LECROY9400_TEST_REC_LEN      1250
 
-#define MAX_CHANNELS       9         /* number of channel names */
+#define MAX_CHANNELS       9
 #define MAX_USED_CHANNELS  4
 
 #define LECROY9400_UNDEF   -1

@@ -123,10 +123,10 @@
 
 
 /* Total number of channels and maximum number of channels that can be
-   diesplayed at once */
+   displayed at once */
 
-#define LECROY_WR2_MAX_CHANNELS       14         /* number of channel names */
-#define LECROY_WR2_MAX_USED_CHANNELS   4
+#define LECROY_WR2_MAX_CHANNELS       14
+#define LECROY_WR2_MAX_USED_CHANNELS   8
 
 
 /* Maximum and minimum sensitivity [V/div] for CH1 and CH2 */
