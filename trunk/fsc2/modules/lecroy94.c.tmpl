@@ -84,25 +84,23 @@ int lecroy94_tmpl_init_hook( void )
 	lecroy94_tmpl.trigger_delay    = LECROY94_TMPL_TEST_TRIG_DELAY;
 
 	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_FUNC_F; i++ )
-		lecroy94_tmpl.is_displayed[ i ] = UNSET;
-
-	for ( i = LECROY94_TMPL_CH1; i <= LECROY94_TMPL_MAX_CHANNELS; i++ )
 	{
-		lecroy94_tmpl.is_sens[ i ] = UNSET;
-		lecroy94_tmpl.is_offset[ i ] = UNSET;
-		lecroy94_tmpl.is_coupling[ i ] = UNSET;
-		lecroy94_tmpl.is_trigger_slope[ i ] = UNSET;
+		lecroy94_tmpl.is_displayed[ i ]        = UNSET;
+		lecroy94_tmpl.is_sens[ i ]             = UNSET;
+		lecroy94_tmpl.is_offset[ i ]           = UNSET;
+		lecroy94_tmpl.is_coupling[ i ]         = UNSET;
+		lecroy94_tmpl.is_trigger_slope[ i ]    = UNSET;
 		lecroy94_tmpl.is_trigger_coupling[ i ] = UNSET;
-		lecroy94_tmpl.is_trigger_level[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEF_REC_LEN;
+		lecroy94_tmpl.is_trigger_level[ i ]    = UNSET;
+		lecroy94_tmpl.rec_len[ i ]             = LECROY94_TMPL_UNDEF_REC_LEN;
 	}
 
 	for ( i = LECROY94_TMPL_FUNC_E; i <= LECROY94_TMPL_FUNC_F; i++ )
 	{
-		lecroy94_tmpl.source_ch[ i ]  =
+		lecroy94_tmpl.source_ch[ i ]    =
 								 LECROY94_TMPL_CH1 + i - LECROY94_TMPL_FUNC_E;
 		lecroy94_tmpl.is_avg_setup[ i ] = UNSET;
-		lecroy94_tmpl.rec_len[ i ] = LECROY94_TMPL_UNDEF_REC_LEN;
+		lecroy94_tmpl.rec_len[ i ]      = LECROY94_TMPL_UNDEF_REC_LEN;
 	}
 
 	lecroy94_tmpl_stored.w = NULL;
