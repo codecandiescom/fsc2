@@ -119,10 +119,10 @@ endif
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(pdf_pics)
-	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then                      \
-		./texi2dvi --pdf -c fsc2.texi;                                     \
-	else                                                                   \
-		echo "Can't make PDF documentation, program 'pdftex' not found";  \
+	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then                    \
+		./texi2dvi --pdf -c fsc2.texi                                    \
+	else                                                                 \
+		echo "Can't make PDF documentation, program 'pdftex' not found"  \
 	fi
 
 
