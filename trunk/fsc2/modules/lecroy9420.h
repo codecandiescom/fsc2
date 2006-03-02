@@ -110,7 +110,7 @@
 
 
 /* Maximum and minimum time base setting [s/div] - please note that the
-   time resolution depends in a somewhat complivcated way on the time
+   time resolution depends in a somewhat complicated way on the time
    base and possibly the mode (RIS or SINGLE SHOT), see the HORI_RES
    structure below */
 
