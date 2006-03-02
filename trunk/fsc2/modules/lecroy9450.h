@@ -106,7 +106,7 @@
 /* Total number of channels and maximum number of channels that can be
    displayed at once */
 
-#define LECROY9450_MAX_CHANNELS       11
+#define LECROY9450_MAX_CHANNELS       10
 #define LECROY9450_MAX_USED_CHANNELS   4
 
 
