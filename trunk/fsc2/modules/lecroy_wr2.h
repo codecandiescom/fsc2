@@ -89,14 +89,14 @@
 /* Here values are defined that get returned by the driver in the test run
    when the digitizer can't be accessed - these values must be reasonable ! */
 
-#define LECROY_WR2_TEST_TB_INDEX     5           /* 50 ns per division*/
+#define LECROY_WR2_TEST_TB_INDEX     5           /* 50/20 ns per division */
 #define LECROY_WR2_TEST_MS_INDEX     ( lecroy_wr2.num_mem_sizes - 1 )
 #define LECROY_WR2_TEST_ILVD_MODE    UNSET       /* interleave mode (RIS/SS) */
 #define LECROY_WR2_TEST_SENSITIVITY  2.5         /* 2.5 V per division */
 #define LECROY_WR2_TEST_OFFSET       0.0
 #define LECROY_WR2_TEST_COUPLING     LECROY_WR2_DC_1_MOHM
 #define LECROY_WR2_TEST_NUM_AVG      10
-#define LECROY_WR2_TEST_TRIG_DELAY   1.0e-8      /* 10 ns pretrigger */
+#define LECROY_WR2_TEST_TRIG_DELAY   0           /* no pre- or posttrigger */
 #define LECROY_WR2_TEST_TRIG_SOURCE  LECROY_WR2_CH1
 #define LECROY_WR2_TEST_TRIG_MODE    TRG_MODE_NORMAL
 #define LECROY_WR2_TEST_TRIG_LEVEL   0.0
@@ -125,7 +125,7 @@
 #define LECROY_WR2_MAX_USED_CHANNELS   8
 
 
-/* Maximum and minimum sensitivity [V/div] */
+/* Maximum and minimum sensitivity (in V/div) */
 
 #define LECROY_WR2_MAX_SENS     5.0e-3     /* 5 mV */
 #define LECROY_WR2_MIN_SENS     2.5        /* 2.5 V */
@@ -183,13 +183,14 @@
 #endif
 
 
-/* Structure for description of a 'window' on the digitizer, made up from
-   the area between the pair of cursors */
 
 typedef struct Window Window_T;
 typedef struct LECROY_WR2 LECROY_WR2_T;
 typedef struct HORI_RES HORI_RES_T;
 
+
+/* Structure for description of a 'window' on the digitizer, made up from
+   the area between the pair of cursors */
 
 struct Window {
 	long num;                   /* number of window                          */
@@ -201,6 +202,11 @@ struct Window {
 	Window_T *next;             /* pointer to next window structure          */
 	Window_T *prev;             /* pointer to previous window structure      */
 };
+
+
+/* Structure for the time resolution ("time per point") and number of samples
+   ("points per division") for SS and RIS mode (we need one such structure
+   for each memory size and timebase setting) */
 
 
 struct HORI_RES {
