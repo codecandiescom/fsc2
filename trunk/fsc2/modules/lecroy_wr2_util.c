@@ -68,9 +68,10 @@ double lecroy_wr2_trigger_delay_check( void )
 	if ( ! lecroy_wr2.is_trigger_delay )
 		return delay;
 
-	/* The delay can only be set in units of 1/50 of the timebase */
+	/* It looks as if the delay can only be set in units of 1/10 of the
+	   timebase */
 
-	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy_wr2.timebase )
+	real_delay = 0.1 * lrnd( 10.0 * delay / lecroy_wr2.timebase )
 		         * lecroy_wr2.timebase;
 
 	/* Check that the trigger delay is within the limits (taking rounding
@@ -231,43 +232,6 @@ void lecroy_wr2_window_check( Window_T * w,
 	w->start_num  = start;
 	w->end_num    = end;
 	w->num_points = end - start + 1;
-}
-
-
-/*----------------------------------------------------------------*
- * Function tests if a record length requested for an acquisition
- * is long enough that all windows fit into it
- *----------------------------------------------------------------*/
-
-void lecroy_wr2_length_check( long len )
-{
-	Window_T *w = lecroy_wr2.w;
-
-
-	if ( len > lecroy_wr2_curve_length( ) )
-	{
-		print( FATAL, "Requested record length f %ld points larger than "
-			   "maximum number of points of %ld.\n",
-			   len, lecroy_wr2_curve_length( ) );
-		THROW( EXCEPTION );
-	}
-
-	while ( w != NULL )
-	{
-		if ( len < w->end_num - 1 )
-		{
-			if ( lecroy_wr2.w->next != NULL )
-				print( FATAL, "Requested record length of %ld points too "
-					   "short for %d. window.\n", len,
-					   w->num - WINDOW_START_NUMBER + 1 );
-			else
-				print( FATAL, "Requested record length of %ld points too "
-					   "short for window.\n", len );
-			THROW( EXCEPTION );
-		}
-
-		w = w->next;
-	}
 }
 
 
@@ -524,8 +488,8 @@ void lecroy_wr2_clean_up( void )
 long lecroy_wr2_curve_length( void )
 {
 	return 10 *
-		  ( ( lecroy_wr2.cur_hres->ppd_ris > 0 && lecroy_wr2.interleaved ) ?
-			lecroy_wr2.cur_hres->ppd_ris : lecroy_wr2.cur_hres->ppd );
+		   ( ( lecroy_wr2.cur_hres->ppd_ris > 0 && lecroy_wr2.interleaved ) ?
+			 lecroy_wr2.cur_hres->ppd_ris : lecroy_wr2.cur_hres->ppd );
 }
 
 

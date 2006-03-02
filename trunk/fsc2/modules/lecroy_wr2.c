@@ -600,13 +600,10 @@ Var_T *digitizer_memory_size( Var_T *v )
 		THROW( EXCEPTION );
 	}
 
-	for ( i = 0; i < lecroy_wr2.num_mem_sizes - 1; i++ )
-		if ( mem_size >= lecroy_wr2.mem_sizes[ i ] &&
-			 mem_size <= lecroy_wr2.mem_sizes[ i + 1 ] )
+	for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
+		if ( mem_size >= lecroy_wr2.mem_sizes[ i ] )
 		{
-			ms_index = i + ( ( lecroy_wr2.mem_sizes[ i ] / mem_size >
-							   mem_size / lecroy_wr2.mem_sizes[ i + 1 ] ) ?
-							 0 : 1 );
+			ms_index = i;
 			break;
 		}
 
@@ -905,7 +902,7 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 		if ( bwl < LECROY_WR2_BWL_OFF || bwl > LECROY_WR2_BWL_200MHZ )
 		{
 			print( FATAL, "Invalid argument, bandwidth limiter can only be "
-				   "set to 'BWL_OFF' (%d), 'BWL_ON' (%d) or 'BWL_200MHZ' "
+				   "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "
 				   "(%d).\n", LECROY_WR2_BWL_OFF, LECROY_WR2_BWL_ON,
 				   LECROY_WR2_BWL_200MHZ );
 			THROW( EXCEPTION );
@@ -913,15 +910,15 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 	}
 	else if ( v->type == STR_VAR )
 	{
-		if ( strcasecmp( v->val.sptr, "BWL_OFF" ) )
+		if ( strcasecmp( v->val.sptr, "OFF" ) )
 			bwl = LECROY_WR2_BWL_OFF;
-		else if ( strcasecmp( v->val.sptr, "BWL_ON" ) )
+		else if ( strcasecmp( v->val.sptr, "ON" ) )
 			bwl = LECROY_WR2_BWL_ON;
-		else if ( strcasecmp( v->val.sptr, "BWL_200MHZ" ) )
+		else if ( strcasecmp( v->val.sptr, "200MHZ" ) )
 			bwl = LECROY_WR2_BWL_200MHZ;
 		else
 			print( FATAL, "Invalid argument, bandwidth limiter can only be "
-				   "set to 'BWL_OFF' (%d), 'BWL_ON' (%d) or 'BWL_200MHZ' "
+				   "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "
 				   "(%d).\n", LECROY_WR2_BWL_OFF, LECROY_WR2_BWL_ON,
 				   LECROY_WR2_BWL_200MHZ );
 	}
@@ -1450,7 +1447,7 @@ Var_T *digitizer_averaging( Var_T * v )
 	channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( channel < LECROY_WR2_TA && channel != LECROY_WR2_TD )
+	if ( channel < LECROY_WR2_TA && channel > LECROY_WR2_TD )
 	{
 		print( FATAL, "Averaging can only be done with channels %s to %s.\n",
 			   LECROY_WR2_Channel_Names[ LECROY_WR2_TA ],
@@ -1464,12 +1461,6 @@ Var_T *digitizer_averaging( Var_T * v )
 	{
 		print( FATAL, "Missing source channel argument.\n" );
 		THROW( EXCEPTION );
-	}
-
-	if ( v->type == STR_VAR && ! strcasecmp( v->val.sptr, "OFF" ) )
-	{
-		lecroy_wr2.is_avg_setup[ channel ] = UNSET;
-		return vars_push( INT_VAR, 1L );
 	}
 
 	source_ch = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,

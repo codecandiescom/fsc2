@@ -11,6 +11,7 @@ MANIFEST
 README
 README.mail
 TODO
+xx.edl
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -91,6 +92,7 @@ config/lecroy9424.conf
 config/lecroy9424e.conf
 config/lecroy9450.conf
 config/lecroy_wr2.conf
+config/lecroy_wr2.conf~
 config/Makefile
 config/mcn700_2000.conf
 config/me6000.conf
@@ -109,6 +111,8 @@ config/rs_spec10.conf
 config/rs_spec10.state
 config/s_band_magnet_broad.conf
 config/s_band_magnet_narrow.conf
+config/schlum7150.conf
+config/schlum7150.conf~
 config/spectrapro_300i.calib
 config/spectrapro_300i.conf
 config/spex_cd2a.conf
@@ -328,6 +332,7 @@ modules/rs_spec10_int.c
 modules/rs_spec10.map
 modules/rs_spec10_util.c
 modules/s_band_magnet.c.tmpl
+modules/schlum7150.c
 modules/spectrapro_300i.c
 modules/spectrapro_300i.h
 modules/spectrapro_300i_lexer.l
@@ -355,6 +360,7 @@ modules/tds_util.c.tmpl
 modules/thurlby330.c
 modules/User_Functions.c
 modules/witio_48.c
+modules/x.c
 
 scripts/2_pulse_epr.rulhmpc66.molphys.leidenuniv.nl
 scripts/2_pulse_T2.rulhmpc66.molphys.leidenuniv.nl
@@ -390,6 +396,7 @@ scripts/spex_cam.spex.chem.tu-berlin.de
 scripts/spex.spex.chem.tu-berlin.de
 scripts/trepr.isaak.physik.fu-berlin.de
 scripts/tresr.sunone.chemie.unibas.ch
+scripts/tresr.tresr.physik.fu-berlin.de
 
 src/accept.c
 src/accept.h

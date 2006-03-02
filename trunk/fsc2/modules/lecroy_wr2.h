@@ -454,8 +454,6 @@ void lecroy_wr2_all_windows_check( void );
 void lecroy_wr2_window_check( Window_T * /* w        */,
 							  bool       /* show_num */ );
 
-void lecroy_wr2_length_check( long /* len */ );
-
 long lecroy_wr2_curve_length( void );
 
 double lecroy_wr2_time_per_point( void );

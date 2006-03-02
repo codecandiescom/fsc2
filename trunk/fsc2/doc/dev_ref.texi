@@ -60,6 +60,7 @@
 * lecroy9424::      LeCroy Digitizing Oscilloscope 9424
 * lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
 * lecroy9450::      LeCroy Digitizing Oscilloscope 9450
+* lecroy_wr2::      LeCroy Digitizing Oscilloscope Waverunner-2
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
@@ -1466,7 +1467,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @paragraphindent 0
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
 Oscilloscope 9420, 2 measurement channels, 2 function channels (needed
-for averaging), 350 MHz bandwidth.
+for averaging), 2 memory channels, 350 MHz bandwidth.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1525,7 +1526,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @paragraphindent 0
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
 Oscilloscope 9424, 4 measurement channels, 2 function channels (needed
-for averaging), 350 MHz bandwidth
+for averaging), 2 memory channels, 350 MHz bandwidth
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1582,11 +1583,12 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @strong{Module name}: @code{lecroy9424e}
 
 @paragraphindent 0
+
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
-Oscilloscope 9424E, 4 measurement channels, 2 function channels (needed
-for averaging), 350 MHz bandwidth. It is mostly identical to the LeCroy9424,
-but the fourth channel can't be used as a trigger input and the device has
-an external trigger input instead.
+Oscilloscope 9424E, 4 measurement channels, 2 function channels (needed for
+averaging), 2 memory channels, 350 MHz bandwidth. It is mostly identical to
+the LeCroy9424, but the fourth channel can't be used as a trigger input and
+the device has an external trigger input instead.
 
 
 @paragraphindent 0
@@ -1632,7 +1634,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @c #############################################################
 
 
-@node lecroy9450, mcn700_2000, lecroy9424e, Device Reference
+@node lecroy9450, lecroy_wr2, lecroy9424e, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9450
 @end iftex
@@ -1645,9 +1647,10 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @paragraphindent 0
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
-Oscilloscope 9450, 2 measurement channels, 2 function channels (needed
-for averaging), 350 MHz bandwidth. This module should also work with
-the 9450A, which seems to be just a 300 MHz bandwidth version of the 9450.
+Oscilloscope 9450, 2 measurement channels, 2 function channels (needed for
+averaging), 2 memory channels, 350 MHz bandwidth. This module should also work
+with the 9450A, which seems to be just a 300 MHz bandwidth version of the
+9450.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1691,7 +1694,71 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @c #############################################################
 
-@node mcn700_2000, me6000, lecroy9450, Device Reference
+@node lecroy_wr2, mcn700_2000, lecroy9450, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope Waverunner-2
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope Waverunner-2
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy_wr2}
+
+@paragraphindent 0
+@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+Oscilloscope Waverunner-2, 2 or 4 measurement channels (depending on model),
+4 function channels (needed for averaging), 4 memory channels.
+
+@paragraphindent 0
+@strong{Please note}: There exist at least 6 different models of the
+Waverunner-2, with lots of additional options. The configuration file
+for the device must be adjusted accordingly.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_memory_size()}
+@item @ref{digitizer_trigger_position()}
+@item digitizer_meas_channel_ok()
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
+@end table
+
+
+@c #############################################################
+
+@node mcn700_2000, me6000, lecroy_wr2, Device Reference
 @iftex
 @subheading F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 @end iftex
