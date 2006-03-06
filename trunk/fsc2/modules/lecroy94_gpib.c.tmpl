@@ -82,18 +82,23 @@ bool lecroy94_tmpl_init( const char * name )
     /* Disable the local button, set digitizer to short form of replies,
 	   switch off debugging, transmit data in one block of binary words
 	   (2 byte) format with LSB first and switch on auto-calibration. Then
-	   ask it for the status byte to make sure the device reacts. */
+	   ask it for the identification string to make sure the device reacts
+	   and we can check if it's really the device we expect. */
 
-    if ( // gpib_local_lockout( lecroy94_tmpl.device ) == FAILURE  ||
-		gpib_write( lecroy94_tmpl.device,
+    if ( gpib_local_lockout( lecroy94_tmpl.device ) == FAILURE  ||
+		 gpib_write( lecroy94_tmpl.device,
 					"CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;ACAL", 49 )
 					                                    == FAILURE ||
-		 gpib_write( lecroy94_tmpl.device, "*STB?", 5 ) == FAILURE ||
+		 gpib_write( lecroy94_tmpl.device, "*IDN?", 5 ) == FAILURE ||
 		 gpib_read( lecroy94_tmpl.device, buffer, &len ) == FAILURE )
 	{
 		gpib_local( lecroy94_tmpl.device );
         return FAIL;
 	}
+
+	if ( strncmp( buffer, LECROY94_TMPL_IDENT_STRING, 13 ) )
+		print( SEVERE, "Device does not seem to be the one this module was "
+			   "written for.\n" );
 
 	TRY
 	{
@@ -1513,7 +1518,8 @@ static unsigned char *lecroy94_tmpl_get_data( long * len )
 
 
 	/* First thing we read is "DAT1,#[0-9]" where the number following the
-	   hash mark is the number of bytes to be read next */
+	   hash mark is the number of bytes to be read next, which in turn
+	   are an ASCII string, representing the number of 8-bit data bytes */
 
 	*len = 7;
 	if ( gpib_read( lecroy94_tmpl.device, len_str, len ) == FAILURE )
