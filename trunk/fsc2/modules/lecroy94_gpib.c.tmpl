@@ -1300,6 +1300,26 @@ static void lecroy94_tmpl_get_prep( int              ch,
 			stop_on_user_request( );
 			fsc2_usleep( 20000, UNSET );
 		}
+
+		/* Now, the next delay of 20 ms is here for the following reason:
+		   with the LeCroy 9450 I tested the module with we found that in
+		   some cases the very first data points of a curve fetched from the
+		   digitizer were junk (seemingly random data over the full range
+		   while the signal to expected there was less than a single division).
+		   Since the data did seem to come directly from the digitizer and the
+		   range didn't change with e.g. the number of averages when fetching
+		   an averaged curve my best guess was that even when the flag in the
+		   INR register was set the data weren't really already in memory,
+		   where they get fetched from with the "WF?" command. So I inserted
+		   a delay of 10 ms, which reduced the frequency of getting junk
+		   data as well as the number of junk data at the start of the curve.
+		   After increasing the delay to 20 ms no junk data were seen anymore.
+		   Since the tests were done when fetching curves with 8000 points
+		   it's possible that the delay may have to be increased for longer
+		   curves.
+		*/
+
+		fsc2_usleep( 20000, UNSET );
 	}
 
 	TRY
