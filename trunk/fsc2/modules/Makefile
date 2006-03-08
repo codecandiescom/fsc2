@@ -20,7 +20,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-# Lists of modules that get created from the same template files
+# Lists of modules that get created from a set of template files
 
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
@@ -32,7 +32,7 @@ lecroy94_list   := lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # far as they don't require some additional hardware that gets tested for
 # below)
 
-simp_modules    := User_Functions gg_chopper 
+simp_modules    := User_Functions gg_chopper
 
 
 # For each of the "complicated" modules a list of all source files they are

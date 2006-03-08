@@ -747,7 +747,9 @@ range depends on probe being used, with @code{F0} probe it is @w{460 G} to
 at the Graz University of Technology, Austria
 (@url{http://www.ptc.tugraz.at/}). This module doesn't control the device
 directly but, via some homebuild electronics, by using a data acquisition
-card, currently the National Instruments PCI-MIO-16E-1 DAQ card.
+card, currently the National Instruments PCI-MIO-16E-1 DAQ card. For
+details on the home-built electronics controlling the chopper please see
+Torsten Zytowski's PhD thesis, University Z@"urich, 1998.
 
 @paragraphindent 0
 @strong{Supported functions}:

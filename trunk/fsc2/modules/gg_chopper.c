@@ -21,6 +21,12 @@
  *  Boston, MA 02111-1307, USA.
  */
 
+/*  In order to understand how exactly the chopper is controlled please
+	see the PhD thesis of Torsten Zytowski, "Die Kinetik der Addition des
+	Methylradikals an Alkene und andere ungesaettigte Verbindungen",
+    Universitaet Zuerich, 1998. There you will find the complete description
+	of the home-built electronics that controls the speed of the chopper. */
+
 
 #include "fsc2_module.h"
 
@@ -34,7 +40,14 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define MAX_DIO_VALUE 255      /* lowest possible frequency of 39.2 Hz */
+/* The rotation frequency of the chopper is controlled via the output of
+   a DIO (divide 10 kHz by the DIO output value to arrive at the sector
+   frequency, which is twice the rotation frequency since the chopper
+   has two slots). The minimum allowed DIO value MIN_DIO_VALUE (and thus
+   the maximum rotation frequency) is defined in the configuration file
+   for the chopper. */
+
+#define MAX_DIO_VALUE 255 /* for lowest possible sector frequency of 39.2 Hz */
 
 
 static struct {
@@ -197,9 +210,9 @@ int gg_chopper_test_hook( void )
  * Function gets called at the start of the experiment. It sets the
  * frequency of the FREQ_OUT pin of the DAQ device card to 1 MHz
  * and then sets the chopper sector frequency (if this was requested
- * during the PREPARATIONS section). Take note: the chopper sector
- * frequency is twice the chopper rotation speed because it has two
- * openings (of 45 degree each).
+ * during the PREPARATIONS section). Take note: the chopper rotation
+ * frequency is half the sector frequency because it has two slots
+ * (of 45 degree each).
  *------------------------------------------------------------------*/
 
 int gg_chopper_exp_hook( void )
@@ -212,7 +225,10 @@ int gg_chopper_exp_hook( void )
 
 	gg_chopper_set_dio( 0 );
 
-	/* Set the frequency of the FREQ_OUT pin of the DAQ device to 10 MHz */
+	/* Set the frequency of the FREQ_OUT pin (which is connected the frequency
+	   input of the chopper control electronics) of the DAQ device to 1 MHz
+	   (not 10 MHz as one might assume from Torsten Zytowski's PhD thesis
+	   since the 1:10 divider is missing in the current setup). */
 
 	gg_chopper_set_freq_out( 1.0e6 );
 
