@@ -32,6 +32,7 @@
 
 #include "lecroy9424.conf"
 
+#define LECROY9424_IDENT_STRING      "LECROY,9424_,"
 
 #define LECROY9424_INVALID_COUPL     -1   /* Input coupling for data channel */
 #define LECROY9424_AC_1_MOHM          0   /* (don't change the sequence!) */
@@ -126,6 +127,11 @@
 
 #define LECROY9424_MAX_SENS     5.0e-3     /* 5 mV */
 #define LECROY9424_MIN_SENS     2.5        /* 2.5 V */
+
+
+/* The trigger delay can be set with a resolution of 1/50 of the timebase */
+
+#define LECROY9424_TRIG_DELAY_RESOLUTION   0.02
 
 
 /* Maximum number of averages */

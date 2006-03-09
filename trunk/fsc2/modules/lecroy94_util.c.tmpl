@@ -130,10 +130,12 @@ double lecroy94_tmpl_trigger_delay_check( void )
 	if ( ! lecroy94_tmpl.is_trigger_delay )
 		return delay;
 
-	/* The delay can only be set in units of 1/50 of the timebase */
+	/* The delay can only be set with a certain resolution (1/50) with respect
+	   to the current timebase, so make it a integer multiple of this */
 
-	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy94_tmpl.timebase )
-		         * lecroy94_tmpl.timebase;
+	real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION * lecroy94_tmpl.timebase
+		         * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
+								   lecroy94_tmpl.timebase ) );
 
 	/* Check that the trigger delay is within the limits (taking rounding
 	   errors of the order of the current time resolution into account) */
