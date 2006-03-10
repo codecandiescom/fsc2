@@ -910,19 +910,19 @@ int lecroy_wr2_get_trigger_coupling( int channel )
 	switch ( buf[ 0 ] )
 	{
 		case 'A' :
-			cpl = TRG_CPL_AC;
+			cpl = LECROY_WR2_TRG_CPL_AC;
 			break;
 
 		case 'D' :
-			cpl = TRG_CPL_DC;
+			cpl = LECROY_WR2_TRG_CPL_DC;
 			break;
 
 		case 'L' :
-			cpl = TRG_CPL_LF_REJ;
+			cpl = LECROY_WR2_TRG_CPL_LF_REJ;
 			break;
 
 		case 'H' :
-			cpl = TRG_CPL_HF_REJ;
+			cpl = LECROY_WR2_TRG_CPL_HF_REJ;
 			break;
 
 		default :
@@ -949,7 +949,7 @@ int lecroy_wr2_set_trigger_coupling( int channel,
 				   channel <= LECROY_WR2_CH_MAX ) ||
 				 channel == LECROY_WR2_EXT        ||
 				 channel == LECROY_WR2_EXT10 );
-	fsc2_assert( cpl >= TRG_AC && cpl <= TRG_HF_REJ );
+	fsc2_assert( cpl >= LECROY_WR2_TRG_AC && cpl <= LECROY_WR2_TRG_HF_REJ );
 
 	if ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
 		sprintf( cmd, "C%1d:TRCP ", channel + 1 );
@@ -980,13 +980,13 @@ int lecroy_wr2_get_trigger_mode( void )
 	lecroy_wr2_talk( "TRMD?", buf, &length );
 
 	if ( buf[ 0 ] == 'A' )
-		mode = TRG_MODE_AUTO;
+		mode = LECROY_WR2_TRG_MODE_AUTO;
 	else if ( buf[ 0 ] == 'N' )
-		mode = TRG_MODE_NORMAL;
+		mode = LECROY_WR2_TRG_MODE_NORMAL;
 	else if ( buf[ 1 ] == 'S' )
-		mode = TRG_MODE_SINGLE;
+		mode = LECROY_WR2_TRG_MODE_SINGLE;
 	else if ( buf[ 1 ] == 'T' )
-		mode = TRG_MODE_STOP;
+		mode = LECROY_WR2_TRG_MODE_STOP;
 
 	fsc2_assert( 1 == 0 );
 
@@ -1003,7 +1003,8 @@ int lecroy_wr2_set_trigger_mode( int mode )
 	const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "STOP" };
 
 
-	fsc2_assert( mode >= TRG_MODE_AUTO && mode <= TRG_MODE_STOP );
+	fsc2_assert( mode >= LECROY_WR2_TRG_MODE_AUTO &&
+				 mode <= LECROY_WR2_TRG_MODE_STOP );
 
 	strcat( cmd, mode_str[ mode ] );
 	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
