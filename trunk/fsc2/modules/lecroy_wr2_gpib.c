@@ -1213,7 +1213,7 @@ void lecroy_wr2_start_acquisition( void )
 	else if ( lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_AUTO )
 		strcpy( cmd + 5, "AUTO" );
 	else
-		lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_NORMAL;
+		lecroy_wr2.trigger_mode = LECROY_WR2_TRG_MODE_NORMAL;
 
 	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_wr2_gpib_failure( );

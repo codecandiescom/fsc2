@@ -1218,7 +1218,7 @@ void lecroy94_tmpl_start_acquisition( void )
 	else if ( lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_AUTO )
 		strcpy( cmd + 5, "AUTO" );
 	else
-		lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_NORMAL;
+		lecroy94_tmpl.trigger_mode = LECROY94_TMPL_TRG_MODE_NORMAL;
 	strcat( cmd, ";ARM" );
 
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
