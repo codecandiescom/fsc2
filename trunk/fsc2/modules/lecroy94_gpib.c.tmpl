@@ -1475,7 +1475,7 @@ double lecroy94_tmpl_get_amplitude( int        ch,
 	   byte (LSB first), two's complement integers */
 
 	min = LONG_MAX;
-	max = - LONG_MIN;
+	max = LONG_MIN;
 
 	for ( i = 0, dp = data; i < length; i++, dp += 2 )
 	{

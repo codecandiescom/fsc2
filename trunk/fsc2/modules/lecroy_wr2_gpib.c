@@ -1418,7 +1418,7 @@ double lecroy_wr2_get_area( int        ch,
 		if ( dp[ 1 ] & 0x80 ) 
 			val -= 0x10000;
 
-		area += gain * val - offset
+		area += gain * val - offset;
 	}
 
 	T_free( data );
