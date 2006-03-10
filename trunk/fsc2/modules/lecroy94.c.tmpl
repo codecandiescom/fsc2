@@ -1437,6 +1437,16 @@ Var_T *digitizer_averaging( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
+	/* If we get the string "OFF" it means we're supposed to switch off
+	   averaging (at least for this channel) */
+
+	if ( v->type == STR_VAR && ! strcasecmp( v->val.sptr, "OFF" ) )
+	{
+		too_many_arguments( v );
+		lecroy94_tmpl.is_avg_setup[ channel ] = UNSET;
+		return vars_push( INT_VAR, 0L );
+	}
+
 	source_ch = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
 							   get_strict_long( v, "channel number" ), UNSET );
 

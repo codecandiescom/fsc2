@@ -1144,6 +1144,7 @@ void lecroy94_tmpl_start_acquisition( void )
 	int ch;
 	char cmd[ 100 ];
 	long length = 100;
+	bool do_averaging = UNSET;
 
 
 	/* Stop the digitizer */
@@ -1158,6 +1159,8 @@ void lecroy94_tmpl_start_acquisition( void )
 	{
 		if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
 			continue;
+
+		do_averaging = SET;
 
 		/* It looks as if both the source channel as well as the function
 		   channel doing the averaging must be displayed in order to be
@@ -1203,11 +1206,22 @@ void lecroy94_tmpl_start_acquisition( void )
 
 	lecroy94_tmpl_talk( "INR?", cmd, &length );
 
-	/* Switch digitizer back on to running state by switching to normal
-	   trigger mode and arm it, so that the next trigger starts the
-	   acquisition */
+	/* Switch digitizer back on to running state by switching to a trigger
+	   mode where the digitizer is running (i.e. typically NORM, but, if
+	   the user requested it, also AUTO, or, if there's no averaging setup,
+	   even SINGLE mode will do) */
 
-	if ( gpib_write( lecroy94_tmpl.device, "TRMD NORM;ARM", 13 ) == FAILURE )
+	strcpy( cmd, "TRMD NORM" );
+	if ( ! do_averaging &&
+		 lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_SINGLE )
+		strcpy( cmd + 5, "SINGLE" );
+	else if ( lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_AUTO )
+		strcpy( cmd + 5, "AUTO" );
+	else
+		lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_NORM;
+	strcat( cmd, ";ARM" );
+
+	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy94_tmpl_gpib_failure( );
 
 	/* Reset the bits in the word that tells us later that the data in the
