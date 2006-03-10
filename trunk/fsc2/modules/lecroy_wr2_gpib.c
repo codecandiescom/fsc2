@@ -1228,6 +1228,9 @@ void lecroy_wr2_start_acquisition( void )
 
 
 /*------------------------------------------------------------*
+ * Function for fetching data from the digitizer - the calling
+ * function than does the remaining specific manipulations on
+ * these data
  *------------------------------------------------------------*/
 
 static void lecroy_wr2_get_prep( int              ch,
@@ -1373,10 +1376,10 @@ void lecroy_wr2_get_curve( int        ch,
 
 	for ( i = 0, dp = data; i < *length; dp += 2, i++ )
 	{
-		val = dp[ 0 ] + 256 * dp[ 1 ];
+		val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
-		if ( val >= 32768 )
-			val -= 65536;
+		if ( dp[ 1 ] & 0x80  )
+			val -= 0x10000;
 
 		( *array )[ i ] = gain * val - offset;
 	}
@@ -1410,12 +1413,12 @@ double lecroy_wr2_get_area( int        ch,
 
 	for ( i = 0, dp = data; i < length; dp += 2, i++ )
 	{
-		val = dp[ 0 ] + 256 * dp[ 1 ];
+		val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
-		if ( val >= 32768 )
-			val -= 65536;
+		if ( dp[ 1 ] & 0x80 ) 
+			val -= 0x10000;
 
-		area += gain * val - offset;
+		area += gain * val - offset
 	}
 
 	T_free( data );
@@ -1434,11 +1437,9 @@ double lecroy_wr2_get_amplitude( int        ch,
 	unsigned char *dp;
 	long i;
 	double gain, offset;
-	double min;
-	double max;
-	double val;
+	long min, max;
+	long val;
 	long length;
-	int dat;
 
 
 	/* Get the curve from the device */
@@ -1447,30 +1448,27 @@ double lecroy_wr2_get_amplitude( int        ch,
 							"amplitude" );
 
 	/* Calculate the maximum and minimum voltages from the data, data are two
-	   byte (LSB first), two's complement integers, which then need to be
-	   scaled by gain and offset. */
+	   byte (LSB first), two's complement integers */
 
-	min = HUGE_VAL;
-	max = - HUGE_VAL;
+	min = LONG_MAX;
+	max = LONG_MIN;
 
 	for ( i = 0, dp = data; i < length; i++, dp += 2 )
 	{
-		dat = dp[ 0 ] + 256 * dp[ 1 ];
+		val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
-		if ( dat >= 32768 )
-			dat -= 65536;
+		if ( dp[ 1 ] & 0x80 )
+			val -= 0x10000;
 
-		val = gain * dat - offset;
-
-		max = d_max( val, max );
-		min = d_min( val, min );
+		max = l_max( val, max );
+		min = l_min( val, min );
 	}
 
 	T_free( data );
 
-	/* Return difference between highest and lowest value */
+	/* Return difference between highest and lowest value (in volt units) */
 
-	return max - min;
+	return gain * ( max - min );
 }
 
 
