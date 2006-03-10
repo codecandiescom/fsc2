@@ -376,8 +376,9 @@ long lecroy_wr2_get_memory_size( void )
 }
 
 
-/*------------------------------------------------*
- *------------------------------------------------*/
+/*--------------------------------------*
+ * Function for setting the memory size
+ *--------------------------------------*/
 
 bool lecroy_wr2_set_memory_size( long mem_size )
 {
@@ -533,8 +534,9 @@ bool lecroy_wr2_set_coupling( int channel,
 }
 
 
-/*------------------------------------------------------------*
- *------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for determining the bandwidth limiter of one of the channels
+ *-----------------------------------------------------------------------*/
 
 int lecroy_wr2_get_bandwidth_limiter( int channel )
 {
@@ -611,8 +613,9 @@ int lecroy_wr2_get_bandwidth_limiter( int channel )
 }
 
 
-/*------------------------------------------------*
- *------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for setting the bandwidth limiter for one of the channels
+ *--------------------------------------------------------------------*/
 
 bool lecroy_wr2_set_bandwidth_limiter( int channel,
 									   int bwl )
@@ -693,8 +696,9 @@ bool lecroy_wr2_set_bandwidth_limiter( int channel,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for finding out the current trigger source channel
+ *-------------------------------------------------------------*/
 
 int lecroy_wr2_get_trigger_source( void )
 {
@@ -733,8 +737,9 @@ int lecroy_wr2_get_trigger_source( void )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for setting the current trigger source channel
+ *---------------------------------------------------------*/
 
 bool lecroy_wr2_set_trigger_source( int channel )
 {
@@ -763,8 +768,9 @@ bool lecroy_wr2_set_trigger_source( int channel )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for finding out the trigger level of one of the channels
+ *-------------------------------------------------------------------*/
 
 double lecroy_wr2_get_trigger_level( int channel )
 {
@@ -790,8 +796,9 @@ double lecroy_wr2_get_trigger_level( int channel )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the trigger slope for one of the channels
+ *----------------------------------------------------------------*/
 
 bool lecroy_wr2_set_trigger_level( int    channel,
 								   double level )
@@ -820,8 +827,9 @@ bool lecroy_wr2_set_trigger_level( int    channel,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for finding out the trigger slope of one of the channels
+ *-------------------------------------------------------------------*/
 
 bool lecroy_wr2_get_trigger_slope( int channel )
 {
@@ -851,8 +859,9 @@ bool lecroy_wr2_get_trigger_slope( int channel )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function for setting the trigger slope for one of the channels
+ *----------------------------------------------------------------*/
 
 bool lecroy_wr2_set_trigger_slope( int channel,
 								   bool slope )
@@ -883,8 +892,9 @@ bool lecroy_wr2_set_trigger_slope( int channel,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for finding out the trigger coupling for one of the channels
+ *-----------------------------------------------------------------------*/
 
 int lecroy_wr2_get_trigger_coupling( int channel )
 {
@@ -935,8 +945,9 @@ int lecroy_wr2_get_trigger_coupling( int channel )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for setting the trigger coupling for one of the channels
+ *-------------------------------------------------------------------*/
 
 int lecroy_wr2_set_trigger_coupling( int channel,
 									 int cpl )
@@ -967,8 +978,9 @@ int lecroy_wr2_set_trigger_coupling( int channel,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function for finding out the current trigger mode
+ *---------------------------------------------------*/
 
 int lecroy_wr2_get_trigger_mode( void )
 {
@@ -994,8 +1006,9 @@ int lecroy_wr2_get_trigger_mode( void )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------*
+ * Function for setting the trigger mode 
+ *---------------------------------------*/
 
 int lecroy_wr2_set_trigger_mode( int mode )
 {
@@ -1014,8 +1027,9 @@ int lecroy_wr2_set_trigger_mode( int mode )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for determining the current trigger delay
+ *----------------------------------------------------*/
 
 double lecroy_wr2_get_trigger_delay( void )
 {
@@ -1027,9 +1041,9 @@ double lecroy_wr2_get_trigger_delay( void )
 	reply[ length - 1 ] = '\0';
 	lecroy_wr2.trigger_delay = T_atod( reply );
 
-	/* Positive delays (i.e. when pretrigger is on) get returned as
-	   a percentage of the full horizontal screen while for negative
-	   values it's already the delay time */
+	/* Positive delays (i.e. when pretrigger is on) get returned from the
+	   device as a percentage of the full horizontal screen while for
+	   negative values it's already the delay time */
 
 	if ( lecroy_wr2.trigger_delay > 0.0 )
 		lecroy_wr2.trigger_delay = 0.1 * lecroy_wr2.timebase;
@@ -1038,8 +1052,9 @@ double lecroy_wr2_get_trigger_delay( void )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------*
+ * Function for setting the trigger delay 
+ *----------------------------------------*/
 
 bool lecroy_wr2_set_trigger_delay( double delay )
 {
@@ -1060,8 +1075,9 @@ bool lecroy_wr2_set_trigger_delay( double delay )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for checking if a certain channel is displayed
+ *---------------------------------------------------------*/
 
 bool lecroy_wr2_is_displayed( int ch )
 {
@@ -1086,8 +1102,9 @@ bool lecroy_wr2_is_displayed( int ch )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function to switch  display of a channel on or off
+ *----------------------------------------------------*/
 
 bool lecroy_wr2_display( int ch,
 						 int on_off )
@@ -1145,16 +1162,18 @@ void lecroy_wr2_finished( void )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-----------------------------------------*
+ * Function for starting a new acquisition
+ *-----------------------------------------*/
 
 void lecroy_wr2_start_acquisition( void )
 {
 	int ch;
 	char cmd[ 100 ];
+	bool do_averaging = UNSET;
 
 
-	/* Stop the digitizer */
+	/* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
 	if ( gpib_write( lecroy_wr2.device, "STOP", 4 ) == FAILURE )
 		lecroy_wr2_gpib_failure( );
@@ -1166,6 +1185,8 @@ void lecroy_wr2_start_acquisition( void )
 	{
 		if ( ! lecroy_wr2.is_avg_setup[ ch ] )
 			continue;
+
+		do_averaging = SET;
 
 		snprintf( cmd, 100, "T%c:DEF EQN,AVGS CH%ld,MAXPTS,%ld,SWEEPS,%ld",
 				  'A' + LECROY_WR2_TA - ch,
@@ -1180,10 +1201,21 @@ void lecroy_wr2_start_acquisition( void )
 		lecroy_wr2_gpib_failure( );
 	}
 
-	/* Switch digitizer back on to running state by switching to normal
-	   trigger mode */
+	/* Switch digitizer back on to running state by switching to a trigger
+	   mode where the digitizer is running (i.e. typically NORM, but, if
+	   the user requested it, also AUTO, or, if there's no averaging setup,
+	   even SINGLE mode will do) */
 
-	if ( gpib_write( lecroy_wr2.device, "TRMD NORM", 9 ) == FAILURE )
+	strcpy( cmd, "TRMD NORM" );
+	if ( ! do_averaging &&
+		 lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_SINGLE )
+		strcpy( cmd + 5, "SINGLE" );
+	else if ( lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_AUTO )
+		strcpy( cmd + 5, "AUTO" );
+	else
+		lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_NORM;
+
+	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_wr2_gpib_failure( );
 
 	/* Reset the bits in the word that tells us later that the data in the

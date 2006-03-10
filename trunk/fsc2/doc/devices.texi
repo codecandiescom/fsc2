@@ -1617,8 +1617,18 @@ The second is the source channel to be averaged, i.e.@:
 @itemx LeCroy Waverunner-2 (LT264, LT354, LT374)
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @end table
+Alternatively, for all digitizers except the @strong{LeCroy9400} the
+second (and in this case final) argument can be the string @code{"OFF"}
+to switch of averaging for the channel. Normally, this won't be necessary
+unless you want to fetch a curve acquired in @code{SINGLE} trigger mode.
+Normally, at the start of an acquisition, the trigger mode gets changed
+to @code{NORM} (or @code{AUTO}, if you have set the trigger mode to this).
+Only in these trigger modes averaging can be done. Only when no averaging
+setup has been done (or all previously done setups have been deleted by
+using the @code{"OFF"} instead of a source channel) it is possible to
+start an acquisition in @code{SINGLE} trigger mode.
 
-The third required argument is the number of averages. For the
+Otherwise the third required argument is the number of averages. For the
 @strong{LeCroy9400} this has to be either @code{1}, @code{2} or @code{5},
 multiplied by @code{10}, @code{100}, @code{1,000}, @code{10,000} etc.@: up
 to @code{1,000,000} (if a number not fitting this scheme is passed to the
@@ -1986,6 +1996,9 @@ Previously measured curves are discarded and new data are sampled
 until the requested number of averages has been reached. The function
 can only be used in the @code{EXPERIMENT} section of the @code{EDL} file.
 
+Please note that for starting an acquisition involving averages for the
+@sstring{LeCroy} oscilloscopes the function @ref{digitizer_averaging()}
+mus have been called before starting the acquisition.
 
 
 @anchor{digitizer_get_curve()}
@@ -2041,11 +2054,13 @@ of the digitizer:
 @end itemize
 @end table
 
-Unless data from a memory channel are fetched the function automatically
-waits until a still running acquisition sequence is finished before
-returning a curve. The data will be returned as an array of floating point
-numbers with a number of elements depending on the current settings of the
-digitizer and possibly the used window width.
+Unless data from a memory channel are fetched the function only returns
+after a still running acquisition sequence (started by a call of
+@ref(digitizer_start_acquisition()}) is finished. The data will b
+returned as an array of floating point numbers with a number of
+elements depending on the current settings of the digitizer (timebase,
+record lengths, memory size etc.) and possibly the window width
+(if a window is to be used).
 
 For the @strong{Tektronix} oscilloscopes the function positions the
 cursors at the start and end point of the specified window (or the first
@@ -2132,6 +2147,10 @@ of the whole curve is returned. If you pass it a single window number
 length @code{1}) the function return a floating point variable with the
 area in the specified window.
 
+Unless you want to fetch an area from a memory channel the function only
+returns after an acquisition (started by a call of the function
+@ref(digitizer_start_acquisition()}) has been finished.
+
 Finally, if you pass the function more than one window identifier
 (either by passing it more than one integer variable or or one or more
 integer arrays), it returns a flat, 1-dimensional floating point array
@@ -2146,10 +2165,6 @@ area. For the @strong{TDS520} and the @strong{LeCroy} digitizers, which miss
 this built-in function, the curve in the interval is fetched and then
 used to compute the area. To give some visual feedback also for the
 @strong{TDS520} the cursors are moved to the borders of the interval.
-
-Unless data from a memory channel are fetched the function automatically
-waits until a still running acquisition sequence is finished before
-measuring the area. 
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
@@ -2244,6 +2259,10 @@ integer arrays), it returns a flat, 1-dimensional floating point array
 with as many elements as there were window identifiers, each element
 being the amplitide for the corresponding window.
 
+Unless you want to fetch an amplitude from a memory channel the function
+only returns after an acquisition (started by a call of the function
+@ref(digitizer_start_acquisition()}) has been finished.
+
 Except for the @strong{TDS520} and the @strong{LeCroy} digitizers
 this function positions the cursors at the start and end point of the
 specified window (or the first and last point if no window as been
@@ -2252,10 +2271,6 @@ amplitude. For the @strong{TDS520} and the @strong{LeCroy} digitizers, that
 miss this built-in function the curve in the interval is fetched and then
 is used to compute the amplitude. To give some visual feedback also for
 the @strong{TDS520} the cursors are moved to the borders of the interval.
-
-Unless data from a memory channel are fetched the function automatically
-waits until a still running acquisition sequence is finished before
-measuring the amplitude.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} file.
