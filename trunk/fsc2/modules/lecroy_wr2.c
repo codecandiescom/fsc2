@@ -227,7 +227,7 @@ Var_T *digitizer_define_window( Var_T * v )
 	v = vars_pop( v );
 	win_width = get_double( v, "window width" );
 
-	/* Allow window width to be zero only durning test run... */
+	/* Allow window width to be zero in test run only... */
 	
 	if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
 		 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
