@@ -68,11 +68,12 @@ double lecroy_wr2_trigger_delay_check( void )
 	if ( ! lecroy_wr2.is_trigger_delay )
 		return delay;
 
-	/* It looks as if the delay can only be set in units of 1/10 of the
-	   timebase */
+	/* The delay can only be set with a certain resolution (1/10) with respect
+	   to the current timebase, so make it a integer multiple of this */
 
-	real_delay = 0.1 * lrnd( 10.0 * delay / lecroy_wr2.timebase )
-		         * lecroy_wr2.timebase;
+	real_delay = LECROY_WR2_TRIG_DELAY_RESOLUTION * lecroy_wr2.timebase
+		         * lrnd( delay / ( LECROY_WR2_TRIG_DELAY_RESOLUTION *
+								   lecroy_wr2.timebase ) );
 
 	/* Check that the trigger delay is within the limits (taking rounding
 	   errors of the order of the current time resolution into account) */

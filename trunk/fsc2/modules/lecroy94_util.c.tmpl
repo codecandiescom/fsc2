@@ -40,13 +40,13 @@ const char *lecroy94_tmpl_ptime( double p_time )
 
 
 	if ( fabs( p_time ) >= 1.0 )
-		sprintf( buffer, "%g s", p_time );
-	else if ( fabs( p_time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * p_time );
-	else if ( fabs( p_time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * p_time );
+		sprintf( buffer, "%.3f s", p_time );
+	else if ( fabs( p_time ) >= 1.0e-3 )
+		sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
+	else if ( fabs( p_time ) >= 1.0e-6 )
+		sprintf( buffer, "%3f us", 1.0e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * p_time );
+		sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
 
 	return buffer;
 }
