@@ -63,24 +63,23 @@
 #define LECROY_WR2_DC_50_OHM          2
 #define LECROY_WR2_GND                3
 
-#define TRG_AC             0
-#define TRG_DC             1
-#define TRG_LF_REJ         2
-#define TRG_HF_REJ         3
+#define LECROY_WR2_TRG_AC             0
+#define LECROY_WR2_TRG_DC             1
+#define LECROY_WR2_TRG_LF_REJ         2
+#define LECROY_WR2_TRG_HF_REJ         3
 
-#define TRG_CPL_AC         0         /* Trigger couplings */
-#define TRG_CPL_DC         1         /* (don't change the sequence!) */
-#define TRG_CPL_LF_REJ     2
-#define TRG_CPL_HF_REJ     3
-#define TRG_CPL_HF         4
+#define LECROY_WR2_TRG_CPL_AC         0    /* Trigger couplings */
+#define LECROY_WR2_TRG_CPL_DC         1    /* (don't change the sequence!) */
+#define LECROY_WR2_TRG_CPL_LF_REJ     2
+#define LECROY_WR2_TRG_CPL_HF_REJ     3
+#define LECROY_WR2_TRG_CPL_HF         4
 
-#define TRG_MODE_AUTO      0         /* Trigger modes */
-#define TRG_MODE_NORMAL    1         /* (don't change the sequence!) */
-#define TRG_MODE_SINGLE    2
-#define TRG_MODE_STOP      3
+#define LECROY_WR2_TRG_MODE_AUTO      0    /* Trigger modes */
+#define LECROY_WR2_TRG_MODE_NORMAL    1    /* (don't change the sequence!) */
+#define LECROY_WR2_TRG_MODE_SINGLE    2
+#define LECROY_WR2_TRG_MODE_STOP      3
 
-
-#define LECROY_WR2_BWL_OFF            0       /* Bandwidth limiter settings */
+#define LECROY_WR2_BWL_OFF            0    /* Bandwidth limiter settings */
 #define LECROY_WR2_BWL_ON             1
 #define LECROY_WR2_BWL_200MHZ         2
 
@@ -98,11 +97,11 @@
 #define LECROY_WR2_TEST_NUM_AVG      10
 #define LECROY_WR2_TEST_TRIG_DELAY   0           /* no pre- or posttrigger */
 #define LECROY_WR2_TEST_TRIG_SOURCE  LECROY_WR2_CH1
-#define LECROY_WR2_TEST_TRIG_MODE    TRG_MODE_NORMAL
+#define LECROY_WR2_TEST_TRIG_MODE    LECROY_WR2_TRG_MODE_NORMAL
 #define LECROY_WR2_TEST_TRIG_LEVEL   0.0
 #define LECROY_WR2_TEST_TRIG_SLOPE   POSITIVE
-#define LECROY_WR2_TEST_TRIG_COUP    TRG_CPL_DC
-#define LECROY_WR2_TEST_TRIG_MODE    TRG_MODE_NORMAL
+#define LECROY_WR2_TEST_TRIG_COUP    LECROY_WR2_TRG_CPL_DC
+#define LECROY_WR2_TEST_TRIG_MODE    LECROY_WR2_TRG_MODE_NORMAL
 #define LECROY_WR2_TEST_BWL          LECROY_WR2_BWL_OFF /* bandwidth limiter */
 
 
@@ -131,6 +130,11 @@
 #define LECROY_WR2_MIN_SENS     2.5        /* 2.5 V */
 
 
+/* The trigger delay can be set with a resolution of 1/10 of the timebase */
+
+#define LECROY_WR2_TRIG_DELAY_RESOLUTION 0.1
+
+
 /* Maximum factors or values for trigger levels */
 
 #define LECROY_WR2_TRG_MAX_LEVEL_CH_FAC 5.0    /* 5 times sensitivity */
@@ -139,10 +143,10 @@
 
 
 
-/* Definition of the shortest possible record length (i.e. te number of
-   points for a single channel) - this seems to be identical for all models */
+/* Definition of the shortest possible record length (i.e. the number of
+   samples for an aquisition) - this is identical for all models */
 
-#define LECROY_WR2_MIN_MEM_SIZE    500
+#define LECROY_WR2_MIN_MEMORY_SIZE    500
 
 
 /* Model dependend values */

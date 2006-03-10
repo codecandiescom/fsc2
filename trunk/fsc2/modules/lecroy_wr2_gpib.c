@@ -1202,7 +1202,7 @@ void lecroy_wr2_start_acquisition( void )
 	}
 
 	/* Switch digitizer back on to running state by switching to a trigger
-	   mode where the digitizer is running (i.e. typically NORM, but, if
+	   mode where the digitizer is running (i.e. typically NORMAL, but, if
 	   the user requested it, also AUTO, or, if there's no averaging setup,
 	   even SINGLE mode will do) */
 
@@ -1213,7 +1213,7 @@ void lecroy_wr2_start_acquisition( void )
 	else if ( lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_AUTO )
 		strcpy( cmd + 5, "AUTO" );
 	else
-		lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_NORM;
+		lecroy_wr2.trigger_mode == LECROY_WR2_TRG_MODE_NORMAL;
 
 	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_wr2_gpib_failure( );

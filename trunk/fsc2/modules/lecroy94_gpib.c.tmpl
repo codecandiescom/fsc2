@@ -1218,7 +1218,7 @@ void lecroy94_tmpl_start_acquisition( void )
 	else if ( lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_AUTO )
 		strcpy( cmd + 5, "AUTO" );
 	else
-		lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_NORM;
+		lecroy94_tmpl.trigger_mode == LECROY94_TMPL_TRG_MODE_NORMAL;
 	strcat( cmd, ";ARM" );
 
 	if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -1474,8 +1474,8 @@ double lecroy94_tmpl_get_amplitude( int        ch,
 	/* Calculate the maximum and minimum voltages from the data, data are two
 	   byte (LSB first), two's complement integers */
 
-	min = HUGE_VAL;
-	max = - HUGE_VAL;
+	min = LONG_MAX;
+	max = - LONG_MIN;
 
 	for ( i = 0, dp = data; i < length; i++, dp += 2 )
 	{
