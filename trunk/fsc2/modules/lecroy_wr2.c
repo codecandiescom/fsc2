@@ -2016,18 +2016,6 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
-{
-	if ( FSC2_MODE == EXPERIMENT )
-		lecroy_wr2_free_running( );
-
-	return vars_push( INT_VAR,1L );
-}
-
-
-/*----------------------------------------------------*
- *----------------------------------------------------*/
-
 Var_T *digitizer_command( Var_T * v )
 {
 	char *cmd = NULL;

@@ -1349,8 +1349,9 @@ static void lecroy_wr2_get_prep( int              ch,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for fetching a curve from the oscilloscope
+ *-----------------------------------------------------*/
 
 void lecroy_wr2_get_curve( int        ch,
 						   Window_T * w,
@@ -1469,14 +1470,6 @@ double lecroy_wr2_get_amplitude( int        ch,
 	/* Return difference between highest and lowest value (in volt units) */
 
 	return gain * ( max - min );
-}
-
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-void lecroy_wr2_free_running( void )
-{
 }
 
 

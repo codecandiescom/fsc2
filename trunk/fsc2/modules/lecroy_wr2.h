@@ -341,7 +341,6 @@ Var_T *digitizer_start_acquisition( Var_T * /* v */ );
 Var_T *digitizer_get_curve(         Var_T * /* v */ );
 Var_T *digitizer_get_area(          Var_T * /* v */ );
 Var_T *digitizer_get_amplitude(     Var_T * /* v */ );
-Var_T *digitizer_run(               Var_T * /* v */ );
 Var_T *digitizer_copy_curve(        Var_T * /* v */ );
 Var_T *digitizer_command(           Var_T * /* v */ );
 
@@ -437,8 +436,6 @@ double lecroy_wr2_get_area( int        /* ch */,
 
 double lecroy_wr2_get_amplitude( int        /* ch */,
 								 Window_T * /* w  */ );
-
-void lecroy_wr2_free_running( void );
 
 void lecroy_wr2_copy_curve( long /* src  */,
 							long /* dest */ );
