@@ -195,8 +195,9 @@ void lecroy_wr2_exit_hook( void )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function eturns a string with the name of the device
+ *------------------------------------------------------*/
 
 Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 {
@@ -204,8 +205,9 @@ Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*------------------------------------------*
- *------------------------------------------*/
+/*------------------------------------*
+ * Function for creating a new window
+ *------------------------------------*/
 
 Var_T *digitizer_define_window( Var_T * v )
 {
@@ -269,8 +271,9 @@ Var_T *digitizer_define_window( Var_T * v )
 }
 
 
-/*------------------------------------------------*
- *------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for changing the properties of an already existing window
+ *--------------------------------------------------------------------*/
 
 Var_T *digitizer_change_window( Var_T * v )
 {
@@ -325,8 +328,9 @@ Var_T *digitizer_change_window( Var_T * v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function for query or change of the position of an alread existing window
+ *---------------------------------------------------------------------------*/
 
 Var_T *digitizer_window_position( Var_T * v )
 {
@@ -363,8 +367,9 @@ Var_T *digitizer_window_position( Var_T * v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for query or change of the width of an alread existing window
+ *------------------------------------------------------------------------*/
 
 Var_T *digitizer_window_width( Var_T * v )
 {
@@ -1123,10 +1128,10 @@ Var_T *digitizer_trigger_level( Var_T * v )
 }
 
 
-/*----------------------------------------------------------*
- * digitizer_trigger_slope() sets or determines the trigger
- * slope for one of the possible trigger channels
- *----------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function sets or determines the trigger slope for
+ * one of the trigger channels
+ *---------------------------------------------------*/
 
 Var_T *digitizer_trigger_slope( Var_T * v )
 {
@@ -1206,8 +1211,10 @@ Var_T *digitizer_trigger_slope( Var_T * v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function to query of change the trigger coupling
+ * of one of the trigger channels
+ *--------------------------------------------------*/
 
 Var_T *digitizer_trigger_coupling( Var_T * v )
 {
@@ -1293,9 +1300,9 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 }
 
 
-/*---------------------------------------------------------------*
+/*-------------------------------------------------------*
  * Function to set or determine the current trigger mode
- *---------------------------------------------------------------*/
+ *-------------------------------------------------------*/
 
 Var_T *digitizer_trigger_mode( Var_T * v )
 {
@@ -1348,12 +1355,12 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 
 
 /*-----------------------------------------------------------------*
- * digitizer_trigger_delay() sets or determines the trigger delay,
- * positive values (up to the full horizontal width of the screen,
- * i.e. 10 times the time base) are for pretrigger while negative
- * values (up to 10,000 times the time base) are for starting the
- * acquisition after the trigger. Time resolution of the trigger
- * delay is 1/50 of the time base.
+ * Function to set or determine the trigger delay, positive values
+ * (up to the full horizontal width of the screen, i.e. 10 times
+ * the time base) are for pretrigger while negative values (up to
+ * 10,000 times the time base) are for starting the acquisition
+ * after the trigger. Time resolution of the trigger delay is 1/10
+ * of the timebase.
  *-----------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_delay( Var_T * v )
@@ -1520,8 +1527,9 @@ Var_T *digitizer_averaging( Var_T * v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Function for quering the number of averages for one of the trace channels
+ *---------------------------------------------------------------------------*/
 
 Var_T *digitizer_num_averages( Var_T * v )
 {
@@ -1593,6 +1601,8 @@ Var_T *digitizer_meas_channel_ok( Var_T * v )
 
 
 /*-------------------------------------------------------------------*
+ * Function for copying a curve from a normal or trae channel to one
+ * of the memory channels
  *-------------------------------------------------------------------*/
 
 Var_T *digitizer_copy_curve( Var_T * v )
@@ -1632,8 +1642,9 @@ Var_T *digitizer_copy_curve( Var_T * v )
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*--------------------------------------*
+ * Function for starting an acquisition
+ *--------------------------------------*/
 
 Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
@@ -1644,8 +1655,10 @@ Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for fetching a curve from one of the channels,
+ * possibly using a window
+ *---------------------------------------------------------*/
 
 Var_T *digitizer_get_curve( Var_T * v )
 {
@@ -1727,8 +1740,10 @@ Var_T *digitizer_get_curve( Var_T * v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for fetching the area under the curve of one of the channels,
+ * possibly using one or more windows
+ *------------------------------------------------------------------------*/
 
 Var_T *digitizer_get_area( Var_T * v )
 {
@@ -1869,8 +1884,10 @@ Var_T *digitizer_get_area( Var_T * v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Funcction for getting the maximum amplitude of a curve of
+ * one of the channels, possibly using one or more windows
+ *-----------------------------------------------------------*/
 
 Var_T *digitizer_get_amplitude( Var_T * v )
 {
@@ -2013,8 +2030,9 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function for sending a command string to the device
+ *-----------------------------------------------------*/
 
 Var_T *digitizer_command( Var_T * v )
 {

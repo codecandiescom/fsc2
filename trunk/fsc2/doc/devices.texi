@@ -2290,13 +2290,14 @@ where no visual feedback is used.
 @anchor{digitizer_run()}
 @findex digitizer_run()
 @item digitizer_run()
-Usually, during an experiment the @strong{Tektronix} digitizer start
-to do an acquisitions following a call of @ref{digitizer_start_acquisition()}
-and then stop when it's done. To have the digitizer running constantly
-following an acquisition (at least up to the next
-@ref{digitizer_start_acquisition()} command) use this function. It accepts
-no arguments and can only be used in the @code{EXPERIMENT} section. The
-function does not exist for the @strong{LeCroy} oscilloscopes.
+Usually, during an experiment the @strong{Tektronix} digitizers start
+acquisitions after a call of @ref{digitizer_start_acquisition()} and
+then stop when it's done. To have the digitizer running constantly
+following an acquisition (at least up to the next call of
+@ref{digitizer_start_acquisition()}) call this function after the
+acquisition is done. It accepts no arguments and can only be used in
+the @code{EXPERIMENT} section. The function does not exist for the
+@strong{LeCroy} oscilloscopes.
 
 
 @anchor{digitizer_copy_curve()}
