@@ -40,13 +40,13 @@ const char *lecroy_wr2_ptime( double p_time )
 
 
 	if ( fabs( p_time ) >= 1.0 )
-		sprintf( buffer, "%g s", p_time );
-	else if ( fabs( p_time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * p_time );
-	else if ( fabs( p_time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * p_time );
+		sprintf( buffer, "%.3f s", p_time );
+	else if ( fabs( p_time ) >= 1.0e-3 )
+		sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
+	else if ( fabs( p_time ) >= 1.0e-6 )
+		sprintf( buffer, "%.3f us", 1.0e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * p_time );
+		sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
 
 	return buffer;
 }
@@ -68,8 +68,8 @@ double lecroy_wr2_trigger_delay_check( void )
 	if ( ! lecroy_wr2.is_trigger_delay )
 		return delay;
 
-	/* The delay can only be set with a certain resolution (1/10) with respect
-	   to the current timebase, so make it a integer multiple of this */
+	/* The delay can only be set with a certain resolution (1/10) of the
+	   current timebase, so make it a integer multiple of this */
 
 	real_delay = LECROY_WR2_TRIG_DELAY_RESOLUTION * lecroy_wr2.timebase
 		         * lrnd( delay / ( LECROY_WR2_TRIG_DELAY_RESOLUTION *
@@ -254,12 +254,12 @@ static long lecroy_wr2_calc_pos( double t )
  * memory sizes, using the LECROY_WR2_MAX_MEMORY_SIZE macro
  * defined in the configuration file. Assumes that the memory
  * sizes always follow an 1-2.5-5 scheme and that the smallest
- * memory size ids 500 samples.
+ * memory size is 500 (LECROY_WR2_MIN_MEMORY_SIZE) samples.
  *-------------------------------------------------------------*/
 
 void lecroy_wr2_numpoints_prep( void )
 {
-	long cur_mem_size = LECROY_WR2_MIN_MEM_SIZE;
+	long cur_mem_size = LECROY_WR2_MIN_MEMORY_SIZE;
 	long len;
 
 
@@ -273,7 +273,8 @@ void lecroy_wr2_numpoints_prep( void )
 	lecroy_wr2.mem_sizes =
 		                 LONG_P T_malloc( len * sizeof *lecroy_wr2.mem_sizes );
 
-	cur_mem_size = LECROY_WR2_MIN_MEM_SIZE;
+	cur_mem_size = LECROY_WR2_MIN_MEMORY_SIZE;
+
 	for ( len = 0; len < lecroy_wr2.num_mem_sizes; len++ )
 	{
 		lecroy_wr2.mem_sizes[ len ] = cur_mem_size;
