@@ -1266,7 +1266,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	else
 		cpl = get_long( v, "trigger coupling type" );
 
-	if ( cpl < TRG_CPL_AC || cpl > TRG_CPL_HF )
+	if ( cpl < LECROY_WR2_TRG_CPL_AC || cpl > LECROY_WR2_TRG_CPL_HF )
 	{
 		print( FATAL, "Invalid trigger coupling type.\n" );
 		THROW( EXCEPTION );
@@ -1283,7 +1283,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	/* Settting the HF trigger coupling automatically switches to positive
 	   trigger slope */
 
-	if ( cpl == TRG_CPL_HF )
+	if ( cpl == LECROY_WR2_TRG_CPL_HF )
 	{
 		lecroy_wr2.is_trigger_slope[ channel ] = SET;
 		lecroy_wr2.trigger_slope[ channel ] = POSITIVE;
@@ -1461,6 +1461,16 @@ Var_T *digitizer_averaging( Var_T * v )
 	{
 		print( FATAL, "Missing source channel argument.\n" );
 		THROW( EXCEPTION );
+	}
+
+	/* If we get the string "OFF" it means we're supposed to switch off
+	   averaging (at least for this channel) */
+
+	if ( v->type == STR_VAR && ! strcasecmp( v->val.sptr, "OFF" ) )
+	{
+		too_many_arguments( v );
+		lecroy_wr2.is_avg_setup[ channel ] = UNSET;
+		return vars_push( INT_VAR, 0L );
 	}
 
 	source_ch = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
