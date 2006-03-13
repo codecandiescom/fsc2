@@ -649,11 +649,11 @@ Var_T *digitizer_memory_size( Var_T *v )
 }
 
 
-/*-------------------------------------------------*
+/*------------------------------------------------------------------*
  * Function returns the current record length, which depends on the
  * timebase and mode (SS or RIS) on the one hand, the memory size
  * on the other.
- *-------------------------------------------------*/
+ *------------------------------------------------------------------*/
 
 Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
 {
@@ -1015,10 +1015,10 @@ Var_T *digitizer_trigger_channel( Var_T * v )
 }
 
 
-/*-------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  * digitizer_trigger_level() sets or determines the trigger level for
  * one of the possible trigger channels
- *-------------------------------------------------------------------*/
+ *--------------------------------------------------------------------*/
 
 Var_T *digitizer_trigger_level( Var_T * v )
 {
@@ -1429,12 +1429,12 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
+/*-----------------------------------------------------------------*
  * Function for setting up averaging:
  *  1st argument is the trace channels the average is displayed on
  *  2nd argument is the source channel (or "OFF")
  *  3rd argument is the number of averages to be done
- *------------------------------------------------------------------------*/
+ *-----------------------------------------------------------------*/
 
 Var_T *digitizer_averaging( Var_T * v )
 {

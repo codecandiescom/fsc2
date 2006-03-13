@@ -669,10 +669,11 @@ void lecroy_wr2_store_state( LECROY_WR2_T * dest,
 
 	if ( src->num_windows == 0 )
 	{
-		dest->w = 0;
+		dest->w = NULL;
 		return;
 	}
 
+	dest->w = NULL;
 	dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
 
 	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
