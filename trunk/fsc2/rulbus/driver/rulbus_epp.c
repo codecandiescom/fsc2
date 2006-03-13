@@ -520,7 +520,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 
 /*-------------------------------------------------------------------*
- * Function for reading data from a (sonsecutive) range of addresses
+ * Function for reading data from a (consecutive) range of addresses
  * of one of the racks
  *-------------------------------------------------------------------*/
 
@@ -530,6 +530,11 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         unsigned char *bp;
         int i;
 
+
+		/* If only a single byte is to be read call rulbus_read() */
+
+		if ( rulbus_arg->len == 1 )
+				return rulbus_read( rulbus_arg ); 
 
 		/* Plausibility checks */
 
@@ -545,6 +550,11 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
         if ( rulbus_arg->len < 1 ) {
                 printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
+                return -EINVAL;
+        }
+
+        if ( ( long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+                printk( KERN_NOTICE "Address range too large.\n" );
                 return -EINVAL;
         }
 
@@ -685,6 +695,11 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         int i;
 
 
+		/* If only a single byte is to be written call rulbus_write() */
+
+		if ( rulbus_arg->len == 1 )
+				return rulbus_write( rulbus_arg ); 
+
 		/* Plausibility checks */
 
         if ( rulbus_arg->rack & 0xF0 ) {
@@ -703,34 +718,31 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        /* If there's just a single byte to be written the 'byte' field of
-           the RULBUS_EPP_IOCTL_ARGS structure is used, otherwise a buffer
-		   needs to be allocated and everything gets copied there from user-
-		   space */
-
-        if ( rulbus_arg->len == 1 )
-                data = &rulbus_arg->byte;
-        else {
-                if ( rulbus_arg->data == NULL ) {
-                        printk( KERN_NOTICE "Invalid write data pointer.\n" );
-                        return -EINVAL;
-                }
-
-                data = kmalloc( rulbus_arg->len, GFP_KERNEL );
-
-                if ( data == NULL ) {
-                        printk( KERN_NOTICE
-                                "Not enough memory for reading.\n" );
-                        return -ENOMEM;
-                }
-
-                if ( copy_from_user( data, rulbus_arg->data,
-                                     rulbus_arg->len ) ) {
-                        kfree( data );
-                        printk( KERN_NOTICE "Can't read from user space\n" );
-                        return -EACCES;
-                }
+        if ( ( long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+                printk( KERN_NOTICE "Address range too large.\n" );
+                return -EINVAL;
         }
+
+        /* We need to allocate a buffer and copy everything over there from
+		   userspace */
+
+		if ( rulbus_arg->data == NULL ) {
+				printk( KERN_NOTICE "Invalid write data pointer.\n" );
+				return -EINVAL;
+		}
+
+		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+		if ( data == NULL ) {
+				printk( KERN_NOTICE "Not enough memory for reading.\n" );
+				return -ENOMEM;
+		}
+
+		if ( copy_from_user( data, rulbus_arg->data, rulbus_arg->len ) ) {
+				kfree( data );
+				printk( KERN_NOTICE "Can't read from user space\n" );
+				return -EACCES;
+		}
 
         /* Select the rack (if necessary) */
 
