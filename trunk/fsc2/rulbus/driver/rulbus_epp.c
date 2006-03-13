@@ -504,7 +504,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 *bp = rulbus_parport_read_data( );
 
-        /* Copy all that has just been read to the user-space buffer and
+        /* Copy all that has just been read to the user space buffer and
 		   deallocate the kernel buffer */
 
 		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
@@ -589,7 +589,7 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 *bp = rulbus_parport_read_data( );
 		}
 
-        /* Copy all that has just been read to the user-space buffer and
+        /* Copy all that has just been read to the user space buffer and
 		   deallocate the kernel buffer */
 
 		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
@@ -635,7 +635,7 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
         /* If there's just a single byte to be written the 'byte' field of
            the RULBUS_EPP_IOCTL_ARGS structure is used, otherwise a buffer
-		   needs to be allocated and everything gets copied there from user-
+		   needs to be allocated and everything gets copied there from user
 		   space */
 
         if ( rulbus_arg->len == 1 )
@@ -724,7 +724,7 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         }
 
         /* We need to allocate a buffer and copy everything over there from
-		   userspace */
+		   user space */
 
 		if ( rulbus_arg->data == NULL ) {
 				printk( KERN_NOTICE "Invalid write data pointer.\n" );
