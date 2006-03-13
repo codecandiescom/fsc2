@@ -195,9 +195,9 @@ void lecroy_wr2_exit_hook( void )
 }
 
 
-/*------------------------------------------------------*
- * Function eturns a string with the name of the device
- *------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function returns a string with the name of the device
+ *-------------------------------------------------------*/
 
 Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 {
