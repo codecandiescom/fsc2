@@ -328,9 +328,9 @@ Var_T *digitizer_change_window( Var_T * v )
 }
 
 
-/*---------------------------------------------------------------------------*
- * Function for query or change of the position of an alread existing window
- *---------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function queries or changes the position of an already existing window
+ *------------------------------------------------------------------------*/
 
 Var_T *digitizer_window_position( Var_T * v )
 {
@@ -367,9 +367,9 @@ Var_T *digitizer_window_position( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
- * Function for query or change of the width of an alread existing window
- *------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function queries or changes he width of an already existing window
+ *--------------------------------------------------------------------*/
 
 Var_T *digitizer_window_width( Var_T * v )
 {
