@@ -553,7 +553,7 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        if ( ( long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+        if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
                 printk( KERN_NOTICE "Address range too large.\n" );
                 return -EINVAL;
         }
@@ -718,7 +718,7 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        if ( ( long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+        if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
                 printk( KERN_NOTICE "Address range too large.\n" );
                 return -EINVAL;
         }

@@ -50,10 +50,10 @@ to copy the module to the correct place in '/lib/modules', run
 gets installed automatically). So, this probably is only for those that
 are quite sure they know what they are doing...
 
-Another thing you should definitely check is that your version of the
-GNU C compiler gcc is identical to the version the kernel was compiled
-with. And finally please note that in order to compile the Rulbus
-library the tools 'flex' and 'bison' are required.
+Another thing you may want to check is if your version of the GNU C
+compiler gcc is identical to the version the kernel was compiled with.
+And finally please note that in order to compile the Rulbus library
+the tools 'flex' and 'bison' are required.
 
 
 III. Compiling and installing via the 'INSTALL' script
