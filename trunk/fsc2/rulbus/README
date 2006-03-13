@@ -166,19 +166,24 @@ with the documentation of the module.
 In the 'lib' subdirectory a file named 'rulbus_lib.txt' describes the
 functionality supplied by the library.
 
+For questions concerning the Rulbus system as well as the parallel
+port interface itself please contact either Martin J. Moene
+(m.j.moene@eld.physics.leidenuniv.nl) or or Arno van Amersfoort
+(arnova@molphys.leidenuniv.nl).
+
 
 V. Acknowledgments
 ==================
 
-Martin J. Moene (moene@biophys.LeidenUniv.nl) and Arno van Amersfoort
-(arnova@molphys.leidenuniv.nl) from the Physics department of the
-Rijksuniversiteit Leiden, who developed the interface, were extremely
-helpful by supplying all kinds of informations, sending me very well-
-documented Windows code, answering all my stupid questions and even
-reading and pointing out errors in my code. Martin also took it onto
-himself to get parts of his Windows version of the library in sync
-with the Linux version, finding several bugs in my code in the process,
-and made lots very helpful suggestions for other improvements.
+Martin J. Moene (m.j.moene@eld.physics.leidenuniv.nl) and Arno van
+Amersfoort (arnova@molphys.leidenuniv.nl) from the Physics department
+of the Rijksuniversiteit Leiden, who developed the interface, were
+extremely helpful by supplying all kinds of informations, sending me
+very well-documented Windows code, answering all my stupid questions
+and even reading and pointing out errors in my code. Martin also took
+it onto himself to get parts of his Windows version of the library in
+sync with the Linux version, finding several bugs in my code in the
+process, and made lots very helpful suggestions for other improvements.
 
 Prof. Jan Schmidt and Prof. Edgar Groenen paid me for developing
 the driver and library in order to extend my fsc2 program to make
