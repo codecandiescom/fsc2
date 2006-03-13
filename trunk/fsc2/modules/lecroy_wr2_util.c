@@ -30,9 +30,9 @@ static long lecroy_wr2_calc_pos( double t );
 
 
 
-/*-----------------------------------------------------------*
- * Returns a string with a time value with a resonable unit.
- *-----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Returns a string with a time value with a resonable unit
+ *----------------------------------------------------------*/
 
 const char *lecroy_wr2_ptime( double p_time )
 {
@@ -132,10 +132,9 @@ void lecroy_wr2_delete_windows( LECROY_WR2_T * s )
 }
 
 
-/*-----------------------------------------------------------*
- * Returns a pointer to the window given it's ID. The second
- * argument gets set to the windows number.
- *------------------------------------------------------------*/
+/*-----------------------------------------------*
+ * Returns a pointer to the window given it's ID
+ *-----------------------------------------------*/
 
 Window_T *lecroy_wr2_get_window_by_number( long wid )
 {
@@ -157,7 +156,7 @@ Window_T *lecroy_wr2_get_window_by_number( long wid )
 /*-----------------------------------------------------------*
  * Function for checking that all windows still fit into the
  * recorded data set after changing the time resolution or
- * switching interleaved mode on or off.
+ * switching interleaved mode on or off
  *-----------------------------------------------------------*/
 
 void lecroy_wr2_all_windows_check( void )
@@ -485,6 +484,8 @@ void lecroy_wr2_clean_up( void )
 
 
 /*-----------------------------------------------------------------*
+ * Returns the number of samples in a curve for the current setting
+ * of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
 long lecroy_wr2_curve_length( void )
@@ -496,6 +497,8 @@ long lecroy_wr2_curve_length( void )
 
 
 /*-----------------------------------------------------------------*
+ * Returns the time distance between to points of a curve for the
+ * current setting of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
 double lecroy_wr2_time_per_point( void )
@@ -512,7 +515,7 @@ double lecroy_wr2_time_per_point( void )
  * file. When the channel number can't be maped correctly, the
  * way the function reacts depends on the value of the third
  * argument: If this is UNSET, an error message gets printed
- * and an exception ios thrown. If it is SET -1 is returned to
+ * and an exception is thrown. If it is SET -1 is returned to
  * indicate the error.
  *--------------------------------------------------------------*/
 
@@ -643,8 +646,10 @@ long lecroy_wr2_translate_channel( int  dir,
 }
 
 
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function makes a copy of the stucture holding information
+ * about the current state of the oscilloscope
+ *-----------------------------------------------------------*/
 
 void lecroy_wr2_store_state( LECROY_WR2_T * dest,
 							 LECROY_WR2_T * src )
