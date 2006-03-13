@@ -519,9 +519,10 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for reading data from a card in one of the racks
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for reading data from a (sonsecutive) range of addresses
+ * of one of the racks
+ *-------------------------------------------------------------------*/
 
 static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
@@ -674,7 +675,7 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 /*---------------------------------------------------------------*
  * Function for writing data to a consecutive range of addresses 
- * to a card in one of the racks
+ * in one of the racks
  *---------------------------------------------------------------*/
 
 static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
