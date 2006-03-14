@@ -743,14 +743,14 @@ IF J == 1 {";
 	if ( $start_field < $end_field ) {
 		print F "
 	FOR K = 1 : I - 1 {
-		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
 			   data[ 1, K ] );
 	}
 ";
 	} else {
 		print F "
 	FOR K = I + 1 : Num_Points {
-		fsave( File, \"#,#\", field + ( K - 1 ) * step_size,
+		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
 			   data[ 1, K ] );
 	}
 ";

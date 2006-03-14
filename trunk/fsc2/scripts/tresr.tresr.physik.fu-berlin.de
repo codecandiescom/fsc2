@@ -520,7 +520,7 @@ IF Num_Avg > 1 {
 
 /* Create the toolbox with two output field, one for the current scan number
    and one for the current field as well as a push button for stopping the
-   experiment after the end of a scan */
+   experiment at the end of a scan */
 
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
@@ -542,7 +542,7 @@ FOREVER {
 
 		/* Start an acquisition and fetch the resulting curve, then
 		   immediately sweep up */
-		
+
 		digitizer_start_acquisition( );
 		IF Num_Avg > 1 {
 ";
