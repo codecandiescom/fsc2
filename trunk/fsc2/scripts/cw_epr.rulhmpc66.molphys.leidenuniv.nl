@@ -657,6 +657,7 @@ field = start_field;
 		print F "step_size = - sweep_rate / kd;\n";
 	}
 print F "
+B1, B2, B3;
 
 
 PREPARATIONS:
@@ -674,6 +675,16 @@ magnet_sweep_rate( sweep_rate );
 
 File = get_file( );
 
+/* Create the toolbox with two output field, one for the current scan number
+   and one for the current field as well as a push button for stopping the
+   experiment at the end of a scan */
+
+hide_toolbox( \"ON\" );
+B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
+B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
+B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+hide_toolbox( \"OFF\" );
+
 FOREVER {
 
 	set_field( start_field );
@@ -685,7 +696,7 @@ print F
 	lockin_auto_acquisition( \"ON\" );
 
 	J += 1;
-	print( \"Starting #. run\\n\", J );
+	output_value( B1, J );	              // Update the scan count display
 ";
 
 	if ( $start_field < $end_field ) {
@@ -714,7 +725,10 @@ print F
 
 	clear_curve_1d( 1, 3 );
 	display( 1, data[ J ] * 1.0e6, 3 );
-	print( \"#. run finished, sweeping magnet to start field.\\n\", J );
+
+	IF button_state( B3 ) {               // Stop on user request
+		BREAK;
+	}
 }
 
 
