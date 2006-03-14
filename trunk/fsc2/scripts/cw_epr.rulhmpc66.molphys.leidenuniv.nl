@@ -195,13 +195,10 @@ my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
 					   '-width'           => '8',
 					   '-state'           => 'disabled',
 					   '-relief'          => 'sunken' );
-my $f8_l2 = $f8->Label( '-text'           => 's',
-						'-width'          => 5 );
 
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
-$f8_l2->pack( %wp );
 
 my $f12 = $mf2->Frame( );
 my $f12_l1 = $f12->Label( '-text'           => 'Time for single sweep:',
