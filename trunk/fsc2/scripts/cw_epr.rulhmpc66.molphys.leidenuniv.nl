@@ -648,7 +648,7 @@ data[ *, * ];
 avg[ Num_Points ];
 
 I = 0, J = 0, K;
-File;
+File1, File2;
 field = start_field;
 ";
 	if ( $start_field <= $end_field ) {
@@ -673,7 +673,19 @@ EXPERIMENT:
 
 magnet_sweep_rate( sweep_rate );
 
-File = get_file( );
+/* Open the file for averaged data */
+
+File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
+
+/* Create the toolbox with two output field, one for the current scan number
+   and one for the current field as well as a push button for stopping the
+   experiment at the end of a scan */
+
+hide_toolbox( \"ON\" );
+B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
+B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
+B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+hide_toolbox( \"OFF\" );
 
 /* Create the toolbox with two output field, one for the current scan number
    and one for the current field as well as a push button for stopping the
@@ -703,6 +715,7 @@ print F
 		print F "
 	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, start_field + ( I - 1 ) * step_size );
 		display_1d( I, data[ J, I ] * 1.0e6, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
 	}
@@ -711,6 +724,7 @@ print F
 		print F "
 	FOR I = Num_Points : 1 : - 1 {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, end_field + ( I - 1 ) * step_size );
 		display_1d( I, data[ J, I ] * 1.0e6, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
 	}
@@ -743,40 +757,53 @@ IF J == 1 {";
 	if ( $start_field < $end_field ) {
 		print F "
 	FOR K = 1 : I - 1 {
+<<<<<<< cw_epr.rulhmpc66.molphys.leidenuniv.nl
+		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+=======
 		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
+>>>>>>> 1.5
 			   data[ 1, K ] );
 	}
 ";
 	} else {
 		print F "
 	FOR K = I + 1 : Num_Points {
+<<<<<<< cw_epr.rulhmpc66.molphys.leidenuniv.nl
+		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+=======
 		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
+>>>>>>> 1.5
 			   data[ 1, K ] );
 	}
 ";
 	}
 
 	print F "
+	fsave( File1, \"\\n\" );
 } ELSE {
 	IF I <= Num_Points {
 		J -= 1;
 	}
 
-	FOR I = 1 : Num_Points {
-		fsave( File, \"#\", field + ( I - 1 ) * step_size );
-		FOR K = 1 : J {
-			fsave( File, \",#\", data[ K, I ] );
+	IF J > 1 {
+		File2 = clone_file( File1, \"avg\", \"scans\" );
+		FOR I = 1 : Num_Points {
+			fsave( File2, \"#\", field + ( I - 1 ) * step_size );
+			FOR K = 1 : J {
+				fsave( File2, \",#\", data[ K, I ] );
+			}
+			fsave( File2, \"\\n\" );
 		}
-		fsave( File, \"\\n\" );
+		fsave( File2, \"\\n\" );
 	}
 
-	fsave( File, \"\\n\" );
 	FOR I = 1 : Num_Points {
-		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
+		fsave( File2, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
 	}
+	fsave( File2, \"\\n\" );
 }
 
-fsave( File, \"\\n\"
+fsave( File1,
        \"% Date:                    # #\\n\"
        \"% Script:                  cw_epr\\n\"
        \"% Magnet:\\n\"
@@ -791,7 +818,7 @@ fsave( File, \"\\n\"
        \"%   Phase:                 # degree\\n\"
        \"%   Modulation frequency:  # Khz\\n\"
        \"%   Modulation amplitude:  # V\\n\"
-       \"% Number of runs:          #\\n\"
+       \"% Number of scans:         #\\n\"
        \"% Number of points:        #\\n\",
        date(), time(),
 	   start_field, start_field + ( Num_Points - 1 ) * step_size,
@@ -799,7 +826,34 @@ fsave( File, \"\\n\"
        ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 	   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
 	   J, Num_Points );
-save_comment( File, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+IF J > 1 {
+	fsave( File2,
+	       \"% Date:                    # #\\n\"
+	       \"% Script:                  cw_epr\\n\"
+	       \"% Magnet:\\n\"
+	       \"%   Start field:           # G\\n\"
+	       \"%   End field:             # G\\n\"
+	       \"%   Sweep rate:            # G/s\\n\"
+	       \"%   Start delay:           # s\\n\"
+	       \"% Lock-In:\\n\"
+	       \"%   Sensitivity:           # mV\\n\"
+	       \"%   Time constant:         # s\\n\"
+	       \"%   Acquisition rate:      # Hz\\n\"
+	       \"%   Phase:                 # degree\\n\"
+	       \"%   Modulation frequency:  # Khz\\n\"
+	       \"%   Modulation amplitude:  # V\\n\"
+	       \"% Number of scans:         #\\n\"
+	       \"% Number of points:        #\\n\",
+	       date(), time(),
+		   start_field, start_field + ( Num_Points - 1 ) * step_size,
+		   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+		   J, Num_Points );
+}
 ";
 
 	close F;
@@ -995,19 +1049,19 @@ IF J == 1 {
 		J -= 1;
 	}
 
-	FOR I = 1 : Num_Points {
-		fsave( File, \"#\", field + ( I - 1 ) * step_size );
-		FOR K = 1 : J {
-			fsave( File, \",#\", data[ K, I ] );
+	IF J > 1 {
+		FOR I = 1 : Num_Points {
+			fsave( File, \"#\", field + ( I - 1 ) * step_size );
+			FOR K = 1 : J {
+				fsave( File, \",#\", data[ K, I ] );
+			}
+			fsave( File, \"\\n\" );
 		}
 		fsave( File, \"\\n\" );
 	}
 
-	IF J > 1 {
-		fsave( File, \"\\n\" );
-		FOR I = 1 : Num_Points {
-			fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
-		}
+	FOR I = 1 : Num_Points {
+		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
 	}
 }
 

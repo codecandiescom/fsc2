@@ -50,159 +50,32 @@ $fsc2_apply_frame->pack( -side => "bottom",
                          -fill => "x",
                          -padx => "4m" );
 
-# === TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
+# === DET_TIME float [ 0.001 : ] [ 50 ] "Detection time" "ms"
 
-my %TRIG_MODE;
-$TRIG_MODE{ tk_frame } = $fsc2_main_frame->Frame( );
-$TRIG_MODE{ tk_label } = $TRIG_MODE{ tk_frame }->Label( -text => "Trigger mode",
+my %DET_TIME;
+$DET_TIME{ tk_frame } = $fsc2_main_frame->Frame( );
+$DET_TIME{ tk_label } = $DET_TIME{ tk_frame }->Label( -text => "Detection time",
 -width => 20,
 -anchor => 'w' );
-$TRIG_MODE{ value } = "EXTERNAL";
-my @TRIG_MODE = ( "EXTERNAL", "INTERNAL" );
-$TRIG_MODE{ tk_entry } = $TRIG_MODE{ tk_frame }->Optionmenu( -options => \@TRIG_MODE,
--width => 10,
--textvariable => \$TRIG_MODE{ value } );
-$TRIG_MODE{ tk_unit } = $TRIG_MODE{ tk_frame }->Label( -text => "",
--width => 5 );
-$TRIG_MODE{ tk_frame }->pack( %fp );
-$TRIG_MODE{ tk_label }->pack( %wp );
-$TRIG_MODE{ tk_entry }->pack( %wp );
-$TRIG_MODE{ tk_unit  }->pack( %up );
-
-# === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
-
-my %REP_TIME;
-$REP_TIME{ tk_frame } = $fsc2_main_frame->Frame( );
-$REP_TIME{ tk_label } = $REP_TIME{ tk_frame }->Label( -text => "Repetition time",
--width => 20,
--anchor => 'w' );
-$REP_TIME{ value } = 50;
-$REP_TIME{ min } = 0.001;
-$REP_TIME{ max } = undef;
-$REP_TIME{ tk_entry } = $REP_TIME{ tk_frame }->Entry( -textvariable => \$REP_TIME{ value },
+$DET_TIME{ value } = 50;
+$DET_TIME{ min } = 0.001;
+$DET_TIME{ max } = undef;
+$DET_TIME{ tk_entry } = $DET_TIME{ tk_frame }->Entry( -textvariable => \$DET_TIME{ value },
 -width => 10,
 -validate => 'key',
 -validatecommand => sub{ float_check( shift,
-( defined $REP_TIME{ min } ? $REP_TIME{ min } : undef ),
-( defined $REP_TIME{ max } ? $REP_TIME{ max } : undef ) ); },
+( defined $DET_TIME{ min } ? $DET_TIME{ min } : undef ),
+( defined $DET_TIME{ max } ? $DET_TIME{ max } : undef ) ); },
 -relief => 'sunken' );
-$fsc2_balloon->attach( $REP_TIME{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $REP_TIME{ min } ? $REP_TIME{ min } : '-inf' ) .
-" : " . ( defined $REP_TIME{ max } ? $REP_TIME{ max } : '+inf' ) . " ]" );
-$REP_TIME{ tk_unit } = $REP_TIME{ tk_frame }->Label( -text => "ms",
+$fsc2_balloon->attach( $DET_TIME{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $DET_TIME{ min } ? $DET_TIME{ min } : '-inf' ) .
+" : " . ( defined $DET_TIME{ max } ? $DET_TIME{ max } : '+inf' ) . " ]" );
+$DET_TIME{ tk_unit } = $DET_TIME{ tk_frame }->Label( -text => "ms",
 -width => 5 );
-$REP_TIME{ tk_frame }->pack( %fp );
-$REP_TIME{ tk_label }->pack( %wp );
-$REP_TIME{ tk_entry }->pack( %wp );
-$REP_TIME{ tk_unit  }->pack( %up );
-
-# === P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
-
-my %P1_LEN;
-$P1_LEN{ tk_frame } = $fsc2_main_frame->Frame( );
-$P1_LEN{ tk_label } = $P1_LEN{ tk_frame }->Label( -text => "Length of 1st MW pulse",
--width => 20,
--anchor => 'w' );
-$P1_LEN{ value } = 100;
-$P1_LEN{ min } = 10;
-$P1_LEN{ max } = 167772150;
-$P1_LEN{ tk_entry } = $P1_LEN{ tk_frame }->Entry( -textvariable => \$P1_LEN{ value },
--width => 10,
--validate => 'key',
--validatecommand => sub{ int_check( shift,
-( defined $P1_LEN{ min } ? $P1_LEN{ min } : undef ),
-( defined $P1_LEN{ max } ? $P1_LEN{ max } : undef ) ); },
--relief => 'sunken' );
-$fsc2_balloon->attach( $P1_LEN{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $P1_LEN{ min } ? $P1_LEN{ min } : '-inf' ) .
-" : " . ( defined $P1_LEN{ max } ? $P1_LEN{ max } : '+inf' ) . " ]" );
-$P1_LEN{ tk_unit } = $P1_LEN{ tk_frame }->Label( -text => "ns",
--width => 5 );
-$P1_LEN{ tk_frame }->pack( %fp );
-$P1_LEN{ tk_label }->pack( %wp );
-$P1_LEN{ tk_entry }->pack( %wp );
-$P1_LEN{ tk_unit  }->pack( %up );
-
-# === P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2st MW pulse" "ns"
-
-my %P2_LEN;
-$P2_LEN{ tk_frame } = $fsc2_main_frame->Frame( );
-$P2_LEN{ tk_label } = $P2_LEN{ tk_frame }->Label( -text => "Length of 2st MW pulse",
--width => 20,
--anchor => 'w' );
-$P2_LEN{ value } = 200;
-$P2_LEN{ min } = 10;
-$P2_LEN{ max } = 167772150;
-$P2_LEN{ tk_entry } = $P2_LEN{ tk_frame }->Entry( -textvariable => \$P2_LEN{ value },
--width => 10,
--validate => 'key',
--validatecommand => sub{ int_check( shift,
-( defined $P2_LEN{ min } ? $P2_LEN{ min } : undef ),
-( defined $P2_LEN{ max } ? $P2_LEN{ max } : undef ) ); },
--relief => 'sunken' );
-$fsc2_balloon->attach( $P2_LEN{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $P2_LEN{ min } ? $P2_LEN{ min } : '-inf' ) .
-" : " . ( defined $P2_LEN{ max } ? $P2_LEN{ max } : '+inf' ) . " ]" );
-$P2_LEN{ tk_unit } = $P2_LEN{ tk_frame }->Label( -text => "ns",
--width => 5 );
-$P2_LEN{ tk_frame }->pack( %fp );
-$P2_LEN{ tk_label }->pack( %wp );
-$P2_LEN{ tk_entry }->pack( %wp );
-$P2_LEN{ tk_unit  }->pack( %up );
-
-# === PULSE_DIST int [ 100 : 167772150 ] [ 400 ] "Pulse distance" "ns"
-
-my %PULSE_DIST;
-$PULSE_DIST{ tk_frame } = $fsc2_main_frame->Frame( );
-$PULSE_DIST{ tk_label } = $PULSE_DIST{ tk_frame }->Label( -text => "Pulse distance",
--width => 20,
--anchor => 'w' );
-$PULSE_DIST{ value } = 400;
-$PULSE_DIST{ min } = 100;
-$PULSE_DIST{ max } = 167772150;
-$PULSE_DIST{ tk_entry } = $PULSE_DIST{ tk_frame }->Entry( -textvariable => \$PULSE_DIST{ value },
--width => 10,
--validate => 'key',
--validatecommand => sub{ int_check( shift,
-( defined $PULSE_DIST{ min } ? $PULSE_DIST{ min } : undef ),
-( defined $PULSE_DIST{ max } ? $PULSE_DIST{ max } : undef ) ); },
--relief => 'sunken' );
-$fsc2_balloon->attach( $PULSE_DIST{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $PULSE_DIST{ min } ? $PULSE_DIST{ min } : '-inf' ) .
-" : " . ( defined $PULSE_DIST{ max } ? $PULSE_DIST{ max } : '+inf' ) . " ]" );
-$PULSE_DIST{ tk_unit } = $PULSE_DIST{ tk_frame }->Label( -text => "ns",
--width => 5 );
-$PULSE_DIST{ tk_frame }->pack( %fp );
-$PULSE_DIST{ tk_label }->pack( %wp );
-$PULSE_DIST{ tk_entry }->pack( %wp );
-$PULSE_DIST{ tk_unit  }->pack( %up );
-
-# === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
-
-my %DET_OFFSET;
-$DET_OFFSET{ tk_frame } = $fsc2_main_frame->Frame( );
-$DET_OFFSET{ tk_label } = $DET_OFFSET{ tk_frame }->Label( -text => "Detection offset",
--width => 20,
--anchor => 'w' );
-$DET_OFFSET{ value } = 0;
-$DET_OFFSET{ min } = -167772150;
-$DET_OFFSET{ max } = 167772150;
-$DET_OFFSET{ tk_entry } = $DET_OFFSET{ tk_frame }->Entry( -textvariable => \$DET_OFFSET{ value },
--width => 10,
--validate => 'key',
--validatecommand => sub{ int_check( shift,
-( defined $DET_OFFSET{ min } ? $DET_OFFSET{ min } : undef ),
-( defined $DET_OFFSET{ max } ? $DET_OFFSET{ max } : undef ) ); },
--relief => 'sunken' );
-$fsc2_balloon->attach( $DET_OFFSET{ tk_entry },
--balloonmsg  => "Range: [ " . ( defined $DET_OFFSET{ min } ? $DET_OFFSET{ min } : '-inf' ) .
-" : " . ( defined $DET_OFFSET{ max } ? $DET_OFFSET{ max } : '+inf' ) . " ]" );
-$DET_OFFSET{ tk_unit } = $DET_OFFSET{ tk_frame }->Label( -text => "ns",
--width => 5 );
-$DET_OFFSET{ tk_frame }->pack( %fp );
-$DET_OFFSET{ tk_label }->pack( %wp );
-$DET_OFFSET{ tk_entry }->pack( %wp );
-$DET_OFFSET{ tk_unit  }->pack( %up );
+$DET_TIME{ tk_frame }->pack( %fp );
+$DET_TIME{ tk_label }->pack( %wp );
+$DET_TIME{ tk_entry }->pack( %wp );
+$DET_TIME{ tk_unit  }->pack( %up );
 
 # === START_FIELD float [ 0 : 114304 ] [ 8000 ] "Start field" "G"
 
@@ -284,42 +157,6 @@ $FIELD_STEP{ tk_frame }->pack( %fp );
 $FIELD_STEP{ tk_label }->pack( %wp );
 $FIELD_STEP{ tk_entry }->pack( %wp );
 $FIELD_STEP{ tk_unit  }->pack( %up );
-
-# === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000",  "3000", "10000" ] [ 3 ] "Number of averages"
-
-my %N_AVG;
-$N_AVG{ tk_frame } = $fsc2_main_frame->Frame( );
-$N_AVG{ tk_label } = $N_AVG{ tk_frame }->Label( -text => "Number of averages",
--width => 20,
--anchor => 'w' );
-$N_AVG{ value } = "10";
-my @N_AVG = ( "1", "3", "10", "30", "100", "300", "1000", "3000", "10000" );
-$N_AVG{ tk_entry } = $N_AVG{ tk_frame }->Optionmenu( -options => \@N_AVG,
--width => 10,
--textvariable => \$N_AVG{ value } );
-$N_AVG{ tk_unit } = $N_AVG{ tk_frame }->Label( -text => "",
--width => 5 );
-$N_AVG{ tk_frame }->pack( %fp );
-$N_AVG{ tk_label }->pack( %wp );
-$N_AVG{ tk_entry }->pack( %wp );
-$N_AVG{ tk_unit  }->pack( %up );
-
-# === SHOW_PREV button [ OFF ] "Show pulse preview"
-
-my %SHOW_PREV;
-$SHOW_PREV{ tk_frame } = $fsc2_main_frame->Frame( );
-$SHOW_PREV{ tk_label } = $SHOW_PREV{ tk_frame }->Label( -text => "Show pulse preview",
--width => 20,
--anchor => 'w' );
-$SHOW_PREV{ value } = 0;
-$SHOW_PREV{ tk_entry } = $SHOW_PREV{ tk_frame }->Checkbutton( -variable => \$SHOW_PREV{ value },
--width => 10 );
-$SHOW_PREV{ tk_unit } = $SHOW_PREV{ tk_frame }->Label( -text => "",
--width => 5 );
-$SHOW_PREV{ tk_frame }->pack( %fp );
-$SHOW_PREV{ tk_label }->pack( %wp );
-$SHOW_PREV{ tk_entry }->pack( %wp );
-$SHOW_PREV{ tk_unit  }->pack( %up );
 
 # === WAIT_TIME float [ 0.0 : ] [ 5.0 ] "Magnet wait time" "s"
 
@@ -421,34 +258,21 @@ sub write_out {
     open( $fh, "|fsc2_" . lc $fsc2_how_to_run )
         or die "Can't find utility fsc2_" . lc $fsc2_how_to_run . ".\n";
 
-    my $TRIG_MODE = $TRIG_MODE{ value };
-    my $REP_TIME = $REP_TIME{ value };
-    my $P1_LEN = $P1_LEN{ value };
-    my $P2_LEN = $P2_LEN{ value };
-    my $PULSE_DIST = $PULSE_DIST{ value };
-    my $DET_OFFSET = $DET_OFFSET{ value };
+    my $DET_TIME = $DET_TIME{ value };
     my $START_FIELD = $START_FIELD{ value };
     my $END_FIELD = $END_FIELD{ value };
     my $FIELD_STEP = $FIELD_STEP{ value };
-    my $N_AVG = $N_AVG{ value };
-    my $SHOW_PREV = $SHOW_PREV{ value };
     my $WAIT_TIME = $WAIT_TIME{ value };
 
     print $fh "DEVICES:
 
 ips120_10;
 rb8509;
-rb_pulser;
 
 
 VARIABLES:
 
-repeat_time   = $REP_TIME ms;
-p1_to_p2_dist = $PULSE_DIST ns;
-p1_len        = $P1_LEN ns;
-p2_len        = $P2_LEN ns;
-det_offset    = $DET_OFFSET ns;
-
+detection_time   = $DET_TIME ms;
 start_field   = $START_FIELD G;
 end_field     = $END_FIELD G;
 ";
@@ -465,7 +289,6 @@ end_field     = $END_FIELD G;
 
     print $fh "field;
 
-N_Avg    = $N_AVG;
 N_Points = ceil( ( end_field - start_field ) / field_step ) + 1;
 wait_time = $WAIT_TIME s;
 I;
@@ -477,39 +300,9 @@ File1, File2;
 B1, B2, B3;
 
 
-ASSIGNMENTS:
-
-";
-	if ( $TRIG_MODE{ value } eq "EXTERNAL" ) {
-	    print $fh "TRIGGER_MODE: EXTERNAL;\n\n";
-	} else {
-		print $fh "TRIGGER_MODE: $TRIG_MODE, REPEAT_TIME = repeat_time;\n\n";
-	}
-
-	print $fh "
 PREPARATIONS:
 
-P1:  FUNCTION = MICROWAVE,
-	 START    = 180 ns,
-	 LENGTH   = p1_len;
-
-P2:  FUNCTION = MICROWAVE,
-	 START    = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
-	 LENGTH   = p2_len;
-
-P3:  FUNCTION = DETECTION,
-	 START    = P2.START + det_offset + p1_to_p2_dist + 0.5 * P2.LENGTH,
-	 LENGTH   = 100 ns;
-
 ";
-# === if SHOW_PREV
-    if ( eval { $SHOW_PREV } ) {
-        print $fh "pulser_show_pulses( );
-";
-# === endif
-    }
-
-    print $fh "";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
         print $fh "init_1d( 2, N_Points, start_field, field_step,
@@ -527,13 +320,7 @@ P3:  FUNCTION = DETECTION,
 EXPERIMENT:
 ";
 
-	if ( $TRIG_MODE{ value } eq "EXTERNAL" ) {
-		print $fh "print( \"Please make sure the repetition time is set correctly!\\n\\n\" );
-"
-	}
-
 	print $fh "
-pulser_state( \"ON\" );
 daq_gain( 4 );
 
 /* Open the file for averaged data */
@@ -564,7 +351,7 @@ FOREVER {
 	output_value( B1, J );	              // Update the scan count display
 
 	FOR I = 1 : N_Points {
-		wait( 1.1 * repeat_time * N_Avg );
+		wait( detection_time );
 		output_value( B2, field );
 ";
 # === if ( START_FIELD <= END_FIELD )
@@ -653,8 +440,6 @@ IF J == 1 {
 			}
 			fsave( File2, \"\\n\" );
 		}
-
-		fsave( File2, \"\\n\" );
 	}
 
 	FOR I = 1 : N_Points {
@@ -668,46 +453,37 @@ IF J == 1 {
 		print $fh "		fsave( File1, \"#,#\\n\", end_field + ( I - 1 ) * field_step, avg[ I ] );
 ";
 	}
+
 	print $fh "	}
 	fsave( File1, \"\\n\" );
 }
 
 fsave( File1,
        \"% Date:                   # #\\n\"
-       \"% Script:                 2_pulse_epr\\n\"
+       \"% Script:                 direct_detected_epr\\n\"
        \"% Start field:            # G\\n\"
        \"% End field:              # G\\n\"
        \"% Field step:             # G\\n\"
-       \"% Repetition time:        # ms\\n\"
-       \"% Length of 1st MW pulse: # ns\\n\"
-       \"% Length of 2nd MW pulse: # ns\\n\"
-       \"% Pulse distance:         # ns\\n\"
-       \"% Number of averages:     #\\n\"
-       \"% Number of scans:        #\\n\"
+       \"% Detection time:         # ms\\n\"
+	   \"% Number of scans:        #\\n\"
        \"% ADC gain:               4\\n\",
 	   date( ), time( ), start_field, field, field_step,
-	   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
-       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg, J );
+	   detection_time * 1.0e3, J );
 
 save_comment( File1, \"% \" );
 
 IF J > 1 {
 	fsave( File2,
-	       \"% Date:                   # #\\n\"
-	       \"% Script:                 2_pulse_epr\\n\"
-	       \"% Start field:            # G\\n\"
-	       \"% End field:              # G\\n\"
-	       \"% Field step:             # G\\n\"
-	       \"% Repetition time:        # ms\\n\"
-	       \"% Length of 1st MW pulse: # ns\\n\"
-	       \"% Length of 2nd MW pulse: # ns\\n\"
-	       \"% Pulse distance:         # ns\\n\"
-	       \"% Number of averages:     #\\n\"
-	       \"% Number of scans:        #\\n\"
-	       \"% ADC gain:               4\\n\",
+    	   \"% Date:                   # #\\n\"
+       	   \"% Script:                 direct_detected_epr\\n\"
+    	   \"% Start field:            # G\\n\"
+    	   \"% End field:              # G\\n\"
+    	   \"% Field step:             # G\\n\"
+    	   \"% Detection time:         # ms\\n\"
+		   \"% Number of scans:        #\\n\"
+    	   \"% ADC gain:               4\\n\",
 		   date( ), time( ), start_field, field, field_step,
-		   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
-	       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg, J );
+		   detection_time * 1.0e3, J );
 }
 ";
     close $fh;
@@ -756,46 +532,12 @@ sub store_defs {
     open( $fh, ">$ENV{ HOME }/.fsc2/$name" ) or return;
     print $fh "# Do not edit - created automatically!\n";
 
-    print $fh "$TRIG_MODE{ value }\n";
-
-    if ( $REP_TIME{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
-         ( defined $REP_TIME{ max } ? $REP_TIME{ max } >= $REP_TIME{ value } : 1 ) and
-         ( defined $REP_TIME{ min } ? $REP_TIME{ min } <= $REP_TIME{ value } : 1 ) ) {
-        print $fh "$REP_TIME{ value }\n";
+    if ( $DET_TIME{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
+         ( defined $DET_TIME{ max } ? $DET_TIME{ max } >= $DET_TIME{ value } : 1 ) and
+         ( defined $DET_TIME{ min } ? $DET_TIME{ min } <= $DET_TIME{ value } : 1 ) ) {
+        print $fh "$DET_TIME{ value }\n";
     } else {
         print $fh "50\n";
-    }
-
-    if ( $P1_LEN{ value } =~ /^[+-]?\d+$/o and
-         ( defined $P1_LEN{ max } ? $P1_LEN{ max } >= $P1_LEN{ value } : 1 ) and
-         ( defined $P1_LEN{ min } ? $P1_LEN{ min } <= $P1_LEN{ value } : 1 ) ) {
-        print $fh "$P1_LEN{ value }\n";
-    } else {
-        print $fh "100\n";
-    }
-
-    if ( $P2_LEN{ value } =~ /^[+-]?\d+$/o and
-         ( defined $P2_LEN{ max } ? $P2_LEN{ max } >= $P2_LEN{ value } : 1 ) and
-         ( defined $P2_LEN{ min } ? $P2_LEN{ min } <= $P2_LEN{ value } : 1 ) ) {
-        print $fh "$P2_LEN{ value }\n";
-    } else {
-        print $fh "200\n";
-    }
-
-    if ( $PULSE_DIST{ value } =~ /^[+-]?\d+$/o and
-         ( defined $PULSE_DIST{ max } ? $PULSE_DIST{ max } >= $PULSE_DIST{ value } : 1 ) and
-         ( defined $PULSE_DIST{ min } ? $PULSE_DIST{ min } <= $PULSE_DIST{ value } : 1 ) ) {
-        print $fh "$PULSE_DIST{ value }\n";
-    } else {
-        print $fh "400\n";
-    }
-
-    if ( $DET_OFFSET{ value } =~ /^[+-]?\d+$/o and
-         ( defined $DET_OFFSET{ max } ? $DET_OFFSET{ max } >= $DET_OFFSET{ value } : 1 ) and
-         ( defined $DET_OFFSET{ min } ? $DET_OFFSET{ min } <= $DET_OFFSET{ value } : 1 ) ) {
-        print $fh "$DET_OFFSET{ value }\n";
-    } else {
-        print $fh "0\n";
     }
 
     if ( $START_FIELD{ value } =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
@@ -822,11 +564,7 @@ sub store_defs {
         print $fh "1\n";
     }
 
-    print $fh "$N_AVG{ value }\n";
-
-    print $fh "$SHOW_PREV{ value }\n";
-
-    print $fh "$WAIT_TIME{ value }\n";
+	print $fh "$WAIT_TIME{ value }\n";
 
     print $fh "$fsc2_how_to_run\n";
 
@@ -846,100 +584,22 @@ sub load_defs {
 	my $got_args = 0;
 
 
-	if ( @ARGV == 4 ) {
-		$got_args = 1;
-		foreach ( @ARGV ) {
-			unless ( /^-?\d+$/ ) {
-				$got_args = 0;
-				last;
-			}
-		}
-	}
-
 	$name =~ s|^.*?([^/]+)$|$1|;
 
- if ( $got_args ) { unless ( open $fh, "<$ENV{ HOME }/.fsc2/$name" ) {
-			$ne = $ARGV[ 0 ];
-			return  if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
-				       ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
-			$P1_LEN{ value } = $ne;
-
-			$ne = $ARGV[ 1 ];
-			return if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
-				      ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
-			$P2_LEN{ value } = $ne;
-
-			$ne = $ARGV[ 2 ];
-			return if ( defined $PULSE_DIST{ max } and $ne > $PULSE_DIST{ max } ) or
-                      ( defined $PULSE_DIST{ min } and $ne < $PULSE_DIST{ min } );
-			$PULSE_DIST{ value } = $ne;
-
-			$ne = $ARGV[ 3 ];
-			return if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
-                      ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
-			$DET_OFFSET{ value } = $ne;
-			return;
-		}
+	if ( $ARGV[ 0 ] ) {
+		open( $fh, "<$ARGV[ 0 ]" ) or return;
 	} else {
-		if ( $ARGV[ 0 ] ) {
-			open( $fh, "<$ARGV[ 0 ]" ) or return;
-		} else {
-			open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
-		}
+		open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
 	}
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
 
-    goto done_reading unless defined( $ne = <$fh> );
-    chomp $ne;
-    $found = 0;
-    for ( @TRIG_MODE ) {
-        if ( $ne eq $_) {
-            $found = 1;
-            last;
-        }
-    }
-    goto done_reading unless $found;
-    $TRIG_MODE{ value } = $ne;
-
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
     chomp $ne;
-    goto done_reading if ( defined $REP_TIME{ max } and $ne > $REP_TIME{ max } ) or
-                         ( defined $REP_TIME{ min } and $ne < $REP_TIME{ min } );
-    $REP_TIME{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> )
-        and $ne =~ /^[+-]?\d+$/;
-    chomp $ne;
-	$ne = $ARGV[ 0 ] if $got_args;
-    goto done_reading if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
-                         ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
-    $P1_LEN{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> )
-        and $ne =~ /^[+-]?\d+$/;
-    chomp $ne;
-	$ne = $ARGV[ 1 ] if $got_args;
-    goto done_reading if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
-                         ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
-    $P2_LEN{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> )
-        and $ne =~ /^[+-]?\d+$/;
-    chomp $ne;
-	$ne = $ARGV[ 2 ] if $got_args;
-    goto done_reading if ( defined $PULSE_DIST{ max } and $ne > $PULSE_DIST{ max } ) or
-                         ( defined $PULSE_DIST{ min } and $ne < $PULSE_DIST{ min } );
-    $PULSE_DIST{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> )
-        and $ne =~ /^[+-]?\d+$/;
-    chomp $ne;
-	$ne = $ARGV[ 3 ] if $got_args;
-    goto done_reading if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
-                         ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
-    $DET_OFFSET{ value } = $ne;
+    goto done_reading if ( defined $DET_TIME{ max } and $ne > $DET_TIME{ max } ) or
+                         ( defined $DET_TIME{ min } and $ne < $DET_TIME{ min } );
+    $DET_TIME{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
@@ -961,22 +621,6 @@ sub load_defs {
     goto done_reading if ( defined $FIELD_STEP{ max } and $ne > $FIELD_STEP{ max } ) or
                          ( defined $FIELD_STEP{ min } and $ne < $FIELD_STEP{ min } );
     $FIELD_STEP{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> );
-    chomp $ne;
-    $found = 0;
-    for ( @N_AVG ) {
-        if ( $ne eq $_) {
-            $found = 1;
-            last;
-        }
-    }
-    goto done_reading unless $found;
-    $N_AVG{ value } = $ne;
-
-    goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^1|0$/o;
-    chomp $ne;
-    $SHOW_PREV{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;

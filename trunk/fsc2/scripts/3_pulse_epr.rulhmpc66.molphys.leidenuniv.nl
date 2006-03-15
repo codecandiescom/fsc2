@@ -375,6 +375,32 @@ $SHOW_PREV{ tk_label }->pack( %wp );
 $SHOW_PREV{ tk_entry }->pack( %wp );
 $SHOW_PREV{ tk_unit  }->pack( %up );
 
+# === WAIT_TIME float [ 0.0 : ] [ 5.0 ] "Magnet wait time" "s"
+
+my %WAIT_TIME;
+$WAIT_TIME{ tk_frame } = $fsc2_main_frame->Frame( );
+$WAIT_TIME{ tk_label } = $WAIT_TIME{ tk_frame }->Label( -text => "Magnet wait time",
+-width => 20,
+-anchor => 'w' );
+$WAIT_TIME{ value } = 5.0;
+$WAIT_TIME{ min } = 0;
+$WAIT_TIME{ tk_entry } = $WAIT_TIME{ tk_frame }->Entry( -textvariable => \$WAIT_TIME{ value },
+-width => 10,
+-validate => 'key',
+-validatecommand => sub{ float_check( shift,
+( defined $WAIT_TIME{ min } ? $WAIT_TIME{ min } : undef ),
+( defined $WAIT_TIME{ max } ? $WAIT_TIME{ max } : undef ) ); },
+-relief => 'sunken' );
+$fsc2_balloon->attach( $WAIT_TIME{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $WAIT_TIME{ min } ? $WAIT_TIME{ min } : '-inf' ) .
+" : " . ( defined $WAIT_TIME{ max } ? $WAIT_TIME{ max } : '+inf' ) . " ]" );
+$WAIT_TIME{ tk_unit } = $WAIT_TIME{ tk_frame }->Label( -text => "s",
+-width => 5 );
+$WAIT_TIME{ tk_frame }->pack( %fp );
+$WAIT_TIME{ tk_label }->pack( %wp );
+$WAIT_TIME{ tk_entry }->pack( %wp );
+$WAIT_TIME{ tk_unit  }->pack( %up );
+
 $fsc2_main_frame->pack( %fp, -pady => '1m' );
 $fsc2_main_window->Optionmenu( -options => \@fsc2_how_to_run,
                                 -textvariable => \$fsc2_how_to_run,
@@ -462,6 +488,7 @@ sub write_out {
     my $END_FIELD = $END_FIELD{ value };
     my $FIELD_STEP = $FIELD_STEP{ value };
     my $SHOW_PREV = $SHOW_PREV{ value };
+	my $WAIT_TIME = $WAIT_TIME{ value };
 
     print $fh "DEVICES:
 
@@ -498,9 +525,14 @@ end_field     = $END_FIELD G;
 
 N_Avg    = $N_AVG;
 N_Points = ceil( ( end_field - start_field ) / field_step ) + 1;
+wait_time = $WAIT_TIME s;
 I;
-data;
-File;
+J = 0;
+K;
+data[ *, * ];
+avg[ N_Points ] = float_slice( N_Points );
+File1, File2;
+B1, B2, B3;
 
 
 ASSIGNMENTS:
@@ -541,12 +573,12 @@ P4:  FUNCTION = DETECTION,
     print $fh "";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-        print $fh "init_1d( 1, N_Points, start_field, field_step,
+        print $fh "init_1d( 2, N_Points, start_field, field_step,
 		 \"Field [G]\", \"Echo amplitude [a.u.]\" );
 ";
 # === else
     } else {
-        print $fh "init_1d( 1, N_Points, end_field, - field_step,
+        print $fh "init_1d( 2, N_Points, end_field, - field_step,
 		 \"Field [G]\", \"Echo amplitude [a.u.]\" );
 ";
 # === endif
@@ -565,50 +597,143 @@ EXPERIMENT:
 	print $fh "
 pulser_state( \"ON\" );
 
-/* Go to the start field */
+/* Open the file for averaged data */
 
-field = set_field( start_field );
+File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 
-/* Open the data file */
+/* Create the toolbox with two output field, one for the current scan number
+   and one for the current field as well as a push button for stopping the
+   experiment at the end of a scan */
 
-File = get_file( );
+hide_toolbox( \"ON\" );
+B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
+B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
+B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+hide_toolbox( \"OFF\" );
 
-FOR I = 1 : N_Points {
-	wait( 1.1 * repeat_time * N_Avg );
-	data = - daq_get_voltage( CH0 );
+
+FOREVER {
+
+	/* Go to the start field */
+
+	field = set_field( start_field );
+	IF wait_time > 1 us {
+		wait( wait_time );
+	}
+
+	J += 1;
+	output_value( B1, J );	              // Update the scan count display
+
+	FOR I = 1 : N_Points {
+		wait( 1.1 * repeat_time * N_Avg );
+		output_value( B2, field );
 ";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-        print $fh "	display_1d( I, data );
+        print $fh "
+		data[ J, I ] = - daq_get_voltage( CH0 );
+		display_1d( I, data[ J, I ], 1,
+                    I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / J, 2 );
 ";
 # === else
     } else {
-        print $fh "	display_1d( N_Points - I + 1, data );
+        print $fh "
+		data[ J, N_Points - I + 1 ] = - daq_get_voltage( CH0 );
+		display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
+                    N_Points - I + 1,
+                    ( ( J - 1 ) * avg[ N_Points - I + 1 ]
+                      + data[ J, N_Points - I + 1 ] ) / J, 2 );
 ";
 # === endif
     }
 
-    print $fh "	fsave( File, \"#,#\\n\", field, data );
-";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-        print $fh "	IF I < N_Points {
+        print $fh "		IF I < N_Points {
 ";
 # === else
     } else {
-        print $fh "	IF I > 1 {
+        print $fh "		IF I > 1 {
 ";
 # === endif
     }
 
-    print $fh "		field += field_step;
-		set_field( field );
+    print $fh "			field += field_step;
+			set_field( field );
+		}
+	}
+
+	avg = add_to_average( avg, data[ J ], J );
+
+	IF button_state( B3 ) {               // Stop on user request
+		BREAK;
 	}
 }
 
 ON_STOP:
 
-fsave( File,
+IF J == 1 {
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+		print $fh "	FOR K = 1 : I - 1 {
+		fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * field_step,
+			   data[ 1, K ] );
+	}
+";
+# === else
+    } else {
+        print $fh "	FOR K = N_Points - I + 2 : N_Points {
+		fsave( File1, \"#,#\\n\", end_field + ( K - 1 ) * field_step,
+			   data[ 1, K ] );
+	}
+";
+	}
+# === endif
+	print $fh "	fsave( File1, \"\\n\" );
+} ELSE {
+	IF I <= N_Points {
+		J -= 1;
+	}
+
+	IF J > 1 {
+		File2 = clone_file( File1, \"avg\", \"scans\" );
+		FOR I = 1 : N_Points {
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+		print $fh " 		fsave( File2, \"#\", start_field + ( I - 1 ) * field_step );
+";
+# === else
+    } else {
+		print $fh " 		fsave( File2, \"#\", end_field + ( I - 1 ) * field_step );
+";
+	}
+	print $fh "		FOR K = 1 : J {
+				fsave( File2, \",#\", data[ K, I ] );
+			}
+			fsave( File2, \"\\n\" );
+		}
+
+		fsave( File2, \"\\n\" );
+	}
+
+	FOR I = 1 : N_Points {
+";
+# === if ( START_FIELD <= END_FIELD )
+    if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
+		print $fh "		fsave( File1, \"#,#\\n\", start_field + ( I - 1 ) * field_step, avg[ I ] );
+";
+# === else
+    } else {
+		print $fh "		fsave( File1, \"#,#\\n\", end_field + ( I - 1 ) * field_step, avg[ I ] );
+";
+	}
+	print $fh "	}
+	fsave( File1, \"\\n\" );
+}
+
+fsave( File1,
        \"% Date:                   # #\\n\"
        \"% Script:                 3_pulse_epr\\n\"
        \"% Start field:            # G\\n\"
@@ -621,13 +746,37 @@ fsave( File,
        \"% P1-P2 separation:       # ns\\n\"
        \"% P2-P3 separation:       # ns\\n\"
        \"% Number of averages:     #\\n\"
+	   \"% Number of scans:        #\\n\"
        \"% ADC gain:               4\\n\",
 	   date( ), time( ), start_field, field, field_step,
 	   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ), int( P2.LENGTH * 1.0e9 ),
 	   int( P3.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ),
-       int( p2_to_p3_dist * 1.0e9 ), N_Avg );
+       int( p2_to_p3_dist * 1.0e9 ), J, N_Avg );
 
-save_comment( File, \"% \" );
+save_comment( File1, \"% \" );
+
+IF J > 1 {
+	fsave( File2,
+	       \"% Date:                   # #\\n\"
+	       \"% Script:                 3_pulse_epr\\n\"
+	       \"% Start field:            # G\\n\"
+	       \"% End field:              # G\\n\"
+	       \"% Field step:             # G\\n\"
+	       \"% Repetition time:        # ms\\n\"
+	       \"% Length of 1st MW pulse: # ns\\n\"
+	       \"% Length of 2nd MW pulse: # ns\\n\"
+	       \"% Length of 3rd MW pulse: # ns\\n\"
+	       \"% P1-P2 separation:       # ns\\n\"
+	       \"% P2-P3 separation:       # ns\\n\"
+	       \"% Number of averages:     #\\n\"
+		   \"% Number of scans:        #\\n\"
+	       \"% ADC gain:               4\\n\",
+		   date( ), time( ), start_field, field, field_step,
+		   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
+		   int( P2.LENGTH * 1.0e9 ), int( P3.LENGTH * 1.0e9 ),
+		   int( p1_to_p2_dist * 1.0e9 ), int( p2_to_p3_dist * 1.0e9 ),
+		   J, N_Avg );
+}
 ";
     close $fh;
 
@@ -760,6 +909,8 @@ sub store_defs {
     }
 
     print $fh "$SHOW_PREV{ value }\n";
+
+    print $fh "$WAIT_TIME{ value }\n";
 
     print $fh "$fsc2_how_to_run\n";
 
@@ -937,6 +1088,13 @@ sub load_defs {
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^1|0$/o;
     chomp $ne;
     $SHOW_PREV{ value } = $ne;
+
+    goto done_reading unless defined( $ne = <$fh> )
+        and $ne =~ /^((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o;
+    chomp $ne;
+    goto done_reading if ( defined $WAIT_TIME{ max } and $ne > $WAIT_TIME{ max } ) or
+                         ( defined $WAIT_TIME{ min } and $ne < $WAIT_TIME{ min } );
+    $WAIT_TIME{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> );
     chomp $ne;
