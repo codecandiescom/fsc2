@@ -757,22 +757,14 @@ IF J == 1 {";
 	if ( $start_field < $end_field ) {
 		print F "
 	FOR K = 1 : I - 1 {
-<<<<<<< cw_epr.rulhmpc66.molphys.leidenuniv.nl
 		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-=======
-		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
->>>>>>> 1.5
 			   data[ 1, K ] );
 	}
 ";
 	} else {
 		print F "
 	FOR K = I + 1 : Num_Points {
-<<<<<<< cw_epr.rulhmpc66.molphys.leidenuniv.nl
 		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-=======
-		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
->>>>>>> 1.5
 			   data[ 1, K ] );
 	}
 ";
@@ -931,7 +923,8 @@ data[ *, * ];
 avg[ Num_Points ];
 
 I, J = 0, K;
-File;
+B1, B3;
+File1, File2;
 field = start_field;
 ";
 	if ( $start_field < $end_field ) {
@@ -955,16 +948,27 @@ EXPERIMENT:
 magnet_sweep_rate( sweep_rate );
 set_field( start_field );
 
-File = get_file( );
+/* Open the file for averaged data */
+
+File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
+
+/* Create the toolbox with two output field, one for the current scan number
+   and one for the current field as well as a push button for stopping the
+   experiment at the end of a scan */
+
+hide_toolbox( \"ON\" );
+B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
+B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+hide_toolbox( \"OFF\" );
 
 FOREVER {
 
-	print( \"Starting #. run\\n\", J + 1 );
 	set_field( start_field );
 ";
 	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F "
 	J += 1;
+	output_value( B1, J );	              // Update the scan count display
 
 	magnet_sweep( \"$dir\" );
 	lockin_auto_acquisition( \"ON\" );
@@ -994,13 +998,17 @@ FOREVER {
 	clear_curve_1d( 1, 3 );
 	display_1d( 1, data[ J ] / 1 uV, 3 );
 
-	print( \"Starting #. run\\n\", J + 1 );
+	IF button_state( B3 ) {               // Stop on user request
+		BREAK;
+	}
+
 	set_field( start_field + ( Num_Points - 1 ) * step_size );
 ";
 	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F
 "
 	J += 1;
+	output_value( B1, J );	              // Update the scan count display
 ";
 	if ( $dir eq "UP" ) {
 		print F "    magnet_sweep( \"DOWN\" );
@@ -1029,6 +1037,10 @@ FOREVER {
 	avg += data[ J ];
 	clear_curve_1d( 1, 3 );
 	display_1d( 1, data[ J ] * 1.0e6, 3 );
+
+	IF button_state( B3 ) {               // Stop on user request
+		BREAK;
+	}
 }
 
 
@@ -1041,7 +1053,7 @@ IF magnet_sweep( ) {
 
 IF J == 1 {
 	FOR K = 1 : I - 1 {
-		fsave( File, \"#,#\\n\", field + ( K - 1 ) * step_size,
+		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
 			   data[ 1, K ] );
 	}
 } ELSE {
@@ -1050,25 +1062,28 @@ IF J == 1 {
 	}
 
 	IF J > 1 {
+		File2 = clone_file( File1, \"avg\", \"scans\" );
 		FOR I = 1 : Num_Points {
-			fsave( File, \"#\", field + ( I - 1 ) * step_size );
+			fsave( File2, \"#\", field + ( I - 1 ) * step_size );
 			FOR K = 1 : J {
-				fsave( File, \",#\", data[ K, I ] );
+				fsave( File2, \",#\", data[ K, I ] );
 			}
-			fsave( File, \"\\n\" );
+			fsave( File2, \"\\n\" );
 		}
-		fsave( File, \"\\n\" );
+		fsave( File2, \"\\n\" );
 	}
 
 	FOR I = 1 : Num_Points {
-		fsave( File, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] );
+		fsave( File1, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
 	}
+	fsave( File1, \"\\n\" );
+
 }
 
-fsave( File, \"\\n\"
+fsave( File1,
        \"% Date:                    # #\\n\"
 	   \"% Script:                  cw_epr\\n\"
-       \"% Magnet (measuring during both sweep up and down):\\n\"
+       \"% Magnet (measuring while sweeping both up and down):\\n\"
        \"%   Start field:           # G\\n\"
        \"%   End field:             # G\\n\"
        \"%   Sweep rate:            # G/min\\n\"
@@ -1080,7 +1095,7 @@ fsave( File, \"\\n\"
        \"%   Phase:                 # degree\\n\"
        \"%   Modulation frequency:  # Khz\\n\"
        \"%   Modulation amplitude:  # V\\n\"
-       \"% Number of runs:          #\\n\"
+       \"% Number of scans:         #\\n\"
        \"% Number of points:        #\\n\",
 	   date(), time(),
 	   start_field, start_field + ( Num_Points - 1 ) * step_size,
@@ -1088,7 +1103,33 @@ fsave( File, \"\\n\"
        ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 	   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
 	   J, Num_Points );
-save_comment( File, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+IF J > 1 {
+	fsave( File2,
+	       \"% Date:                    # #\\n\"
+		   \"% Script:                  cw_epr\\n\"
+	       \"% Magnet (measuring while sweeping both up and down):\\n\"
+	       \"%   Start field:           # G\\n\"
+	       \"%   End field:             # G\\n\"
+	       \"%   Sweep rate:            # G/min\\n\"
+	       \"%   Start delay:           # s\\n\"
+	       \"% Lock-In:\\n\"
+	       \"%   Sensitivity:           # mV\\n\"
+	       \"%   Time constant:         # s\\n\"
+	       \"%   Acquisition rate:      # Hz\\n\"
+	       \"%   Phase:                 # degree\\n\"
+	       \"%   Modulation frequency:  # Khz\\n\"
+	       \"%   Modulation amplitude:  # V\\n\"
+	       \"% Number of scans:         #\\n\"
+	       \"% Number of points:        #\\n\",
+		   date(), time(),
+		   start_field, start_field + ( Num_Points - 1 ) * step_size,
+		   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+		   J, Num_Points );
+}
 ";
 
 	close F;
