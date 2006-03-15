@@ -826,7 +826,13 @@ sub store_defs {
 
     print $fh "$SHOW_PREV{ value }\n";
 
-    print $fh "$WAIT_TIME{ value }\n";
+    if ( $WAIT_TIME{ value } =~ /^((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?$/o and
+         ( defined $WAIT_TIME{ max } ? $WAIT_TIME{ max } >= $WAIT_TIME{ value } : 1 ) and
+         ( defined $WAIT_TIME{ min } ? $WAIT_TIME{ min } <= $WAIT_TIME{ value } : 1 ) ) {
+        print $fh "$WAIT_TIME{ value }\n";
+    } else {
+        print $fh "5.0\n";
+    }
 
     print $fh "$fsc2_how_to_run\n";
 
