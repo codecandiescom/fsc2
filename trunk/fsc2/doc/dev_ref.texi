@@ -56,6 +56,7 @@
 * kontron4060::     Kontron 4060 Multimeter
 * lakeshore330::    Lake Shore 330 Temperature Controller
 * lecroy9400::      LeCroy Digitizing Oscilloscope 9400
+* lecroy9410::      LeCroy Digitizing Oscilloscope 9410
 * lecroy9420::      LeCroy Digitizing Oscilloscope 9420
 * lecroy9424::      LeCroy Digitizing Oscilloscope 9424
 * lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
@@ -1410,7 +1411,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node lecroy9400, lecroy9420, lakeshore330, Device Reference
+@node lecroy9400, lecroy9410, lakeshore330, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9400
 @end iftex
@@ -1455,7 +1456,66 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @c #############################################################
 
 
-@node lecroy9420, lecroy9424, lecroy9400, Device Reference
+@node lecroy9410, lecroy9420, lecroy9400, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 9410
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 9410
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy9410}
+
+@paragraphindent 0
+@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+Oscilloscope 9410, 2 measurement channels, 2 function channels (needed
+for averaging), 2 memory channels, 150 MHz bandwidth.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{no} and
+@code{set-bin} and @code{set-eot} to @code{yes}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_trigger_position()}
+@item digitizer_meas_channel_ok()
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
+@end table
+
+
+@c #############################################################
+
+
+@node lecroy9420, lecroy9424, lecroy9410, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9420
 @end iftex

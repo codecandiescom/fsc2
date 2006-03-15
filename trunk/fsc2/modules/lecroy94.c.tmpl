@@ -1134,8 +1134,13 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 {
 	long channel;
 	long cpl = -1;
-	const char *cpl_str[ ] = { "AC", "DC", "LF REJ", "HF REJ", "HF" };
 	size_t i;
+	const char *cpl_str[ ] = { "AC", "DC", "LF REJ", "HF REJ"
+#if defined LECROY94_TMPL_TRG_CPL_HF
+                               , "HF" };
+#else
+                               };
+#endif
 
 
 	if ( v == NULL )
@@ -1205,7 +1210,12 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	else
 		cpl = get_long( v, "trigger coupling type" );
 
-	if ( cpl < LECROY94_TMPL_TRG_CPL_AC || cpl > LECROY94_TMPL_TRG_CPL_HF )
+	if ( cpl < LECROY94_TMPL_TRG_CPL_AC || 
+#if defined LECROY94_TMPL_TRG_CPL_HF
+		 cpl > LECROY94_TMPL_TRG_CPL_HF )
+#else
+		 cpl > LECROY94_TMPL_TRG_CPL_HF_REJ )
+#endif
 	{
 		print( FATAL, "Invalid trigger coupling type.\n" );
 		THROW( EXCEPTION );
@@ -1219,6 +1229,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 	lecroy94_tmpl.is_trigger_coupling[ channel ] = SET;
 	lecroy94_tmpl.trigger_coupling[ channel ] = cpl;
 
+#if defined LECROY94_TMPL_TRG_CPL_HF
 	/* Settting the HF trigger coupling automatically switches to positive
 	   trigger slope */
 
@@ -1227,6 +1238,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 		lecroy94_tmpl.is_trigger_slope[ channel ] = SET;
 		lecroy94_tmpl.trigger_slope[ channel ] = POSITIVE;
 	}
+#endif
 
 	return vars_push( INT_VAR, cpl );
 }

@@ -1268,7 +1268,7 @@ The function can only be used in the @code{EXPERIMENT} section.
 
 The digitizing oscilloscopes currently implemented are the Tektronix
 TDS520, TDS520A, TDS540, TDS744A and TDS754A and the LeCroy 9400 (with the
-WP01 Waveform Processing option), 9420, 9424, 9424E, 9450 and the
+WP01 Waveform Processing option), 9410, 9420, 9424, 9424E, 9450 and the
 Waverunner-2. The
 corresponding module names to be used in the @code{DEVICES} section are
 @example
@@ -1278,6 +1278,7 @@ tds540
 tds744a
 tds754a
 lecroy9400
+lecroy9410
 lecroy9420
 lecroy9424
 lecroy9424e
@@ -1324,9 +1325,9 @@ Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item LINE
 Line In for trigger (all models)
 @item EXP_A
-First expansion channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
+First expansion channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
 @item EXB_B
-Second expansion channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
+Second expansion channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
 @item MEM_A
 Memory channel A (LeCroy Waverunner-2)
 @item MEM_B
@@ -1336,9 +1337,10 @@ Memory channel C (all LeCroy digitizers)
 @item MEM_D
 Memory channel D (all LeCroy digitizers)
 @item FUNC_E
-First function (averaging) channel (LeCroy 9400, 9420, 9424, 9424E, 9450)
+First function (averaging) channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
 @item FUNC_F
-Second function (averaging) channel (LeCroy  9400, 9420, 9424, 9424E, 9450)
+Second function (averaging) channel (LeCroy  9400, 9410, 9420, 9424, 9424E,
+9450)
 @item TRACE_A
 First function (averaging) channel (LeCroy Waverunner-2)
 @item TRACE_B
@@ -1348,10 +1350,9 @@ Third function (averaging) channel (LeCroy Waverunner-2)
 @item TRACE_D
 Fourth function (averaging) channel (LeCroy Waverunner-2)
 @item EXT
-External trigger input (LeCroy 9400, LeCroy 9420, LeCroy 9424E, LeCroy 9450,
-Waverunner-2)
+External trigger input (LeCroy 9400, 9410, 9420, 9424E, 9450, Waverunner-2)
 @item EXT10
-External amplified trigger input (LeCroy 9400, 9420, 9450, Waverunner-2)
+External amplified trigger input (LeCroy 9400, 9410, 9420, 9450, Waverunner-2)
 @end table
 
 
@@ -1469,6 +1470,7 @@ oscilloscope:
 @item TDS520
 @itemx TDS520A
 @itemx LeCroy 9400
+@itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
@@ -1503,13 +1505,14 @@ argument) only in the @code{EXPERIMENT} section.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the offset setting of one of the channels
 of the oscilloscope. Currently this function only exists for the
-@strong{LeCroy 9420}, @strong{LeCroy 9424}, @strong{LeCroy 9424E} and
-@strong{LeCroy 9450}. It needs at least one argument, the channel. The
-channels that can be used as arguments depends on the model of the
+@strong{LeCroy} osccilloscopes @strong{9410}, @strong{9420}, @strong{9424},
+@strong{9424E} and @strong{9450}. It needs at least one argument, the channel.
+The channels that can be used as arguments depends on the model of the
 oscilloscope:
 @table @samp
 @itemx LeCroy 9400
 @itemx LeCroy 9420
+@itemx LeCroy 9410
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
 @code{CH1} or @code{CH2}
@@ -1530,7 +1533,7 @@ argument) only in the @code{EXPERIMENT} section.
 @anchor{digitizer_bandwidth_limiter()}
 @findex digitizer_bandwidth_limiter()
 @item digitizer_bandwidth_limiter()
-For the @strong{LeCroy 9420, 9424, 9424E, 9450} the function queries
+For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} the function queries
 (if called with no argument) or sets (if called with an arguments) if
 the bandwidth limiter (@w{80 MHz}) is switched on or off. If an argument
 is given and it is a non-zero number or the string @code{"ON"} the
@@ -1575,7 +1578,7 @@ For the @strong{LeCroy} oscilloscopes this function can only be used in
 query mode and returns the number of averages that has been set in a
 previous call of @ref{digitizer_averaging()}. It needs exactly one
 argument, the the channel used to do the averaging, i.e.@: either
-@code{FUNC_E} or @code{FUNC_F} for the @strong{LeCroy 9400, 9420, 9424,
+@code{FUNC_E} or @code{FUNC_F} for the @strong{LeCroy 9400, 9410, 9420, 9424,
 9424E, 9450} and @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or
 @code{TRACE_D} for the @strong{LeCroy Waverunner-2}.
 
@@ -1597,6 +1600,7 @@ must be used to set up averaging. It expects at least three arguments.
 The first argument is the channel to be used to do the averaging, i.e.@:
 @table @samp
 @itemx LeCroy 9400
+@itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
@@ -1608,6 +1612,7 @@ The first argument is the channel to be used to do the averaging, i.e.@:
 The second is the source channel to be averaged, i.e.@:
 @table @samp
 @itemx LeCroy 9400
+@itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
@@ -1634,7 +1639,7 @@ multiplied by @code{10}, @code{100}, @code{1,000}, @code{10,000} etc.@: up
 to @code{1,000,000} (if a number not fitting this scheme is passed to the
 function the nearest allowd number is used instead).
 
-For the @strong{LeCroy 9420, 9424, 9424E, 9450} this can be an arbitrary 
+For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} this can be an arbitrary 
 number between @code{1} and @code{1,000} or @code{1,000,000} if the device
 is fitted with the WP01 Waveform Processing option.
 
@@ -1678,6 +1683,7 @@ numeric!):
 @item @code{AUX} or @code{LINE} (can be abbreviated to @code{LIN})
 @end itemize
 @item LeCroy 9400
+@itemx LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9424E
 @itemx LeCroy 9450
@@ -1715,7 +1721,7 @@ only if either it has already been called with an argument or in the
 @item digitizer_trigger_level()
 
 Function for setting or quering the trigger level of one of the trigger
-channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
 @strong{Waverunner-2} digitizers. It expects at least a single argument, the
 trigger channel, see the channels listed for the function
 @ref{digitizer_trigger_channel()}, for obvious reasons excluding the
@@ -1729,7 +1735,7 @@ argument it must be the trigger level (in Volt) to be set for that channel.
 @findex digitizer_trigger_slope()
 @item digitizer_trigger_slope()
 Function for setting or quering the trigger slope of one of the trigger
-channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
 @strong{Waverunner-2} digitizers. It expects at least a single argument, the
 trigger channel, see the channels listed for the function
 @ref{digitizer_trigger_channel()}. If called with no further argument the
@@ -1750,7 +1756,7 @@ automatically make this channel the selected trigger channel.
 @item digitizer_trigger_coupling()
 
 Function for setting or quering the trigger coupling of one of the trigger
-channels of the @strong{LeCroy 9420, 9424, 9424E, 9450} and
+channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
 @strong{Waverunner-2} digitizers. If called with a single argument, the
 trigger channel (see the description of the function
 digitizer_trigger_channel() for a list of te possible trigger channels), the
@@ -1772,12 +1778,13 @@ automatically make this channel the selected trigger channel.
 @item digitizer_trigger_mode()
 
 Function for setting or quering the trigger mode of one of the @strong{LeCroy
-9420, 9424, 9424E, 9450} and @strong{Waverunner-2} digitizers. If called
+9410, 9420, 9424, 9424E, 9450} and @strong{Waverunner-2} digitizers. If called
 without an argument the function returns the currently set trigger mode as an
 integer, if called to set the mode it can either be a string or an integer.
 The following values are allowed:
 @table @samp
-@item LeCroy 9420
+@item LeCroy 9410
+@itemx LeCroy 9420
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy 9450
@@ -2026,6 +2033,7 @@ of the digitizer:
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item LeCroy 9400
+@item LeCroy 9410
 @item LeCroy 9420
 @item LeCroy 9450
 @itemize @bullet
@@ -2108,6 +2116,7 @@ the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4} 
 @end itemize
+@item LeCroy 9410
 @item LeCroy 9420
 @item LeCroy 9450
 @itemize @bullet
@@ -2214,7 +2223,8 @@ choices of the data channel depend on the model of the digitizer:
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
-@item LeCroy 9420
+@item LeCroy 9410
+@itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
@@ -2324,7 +2334,8 @@ the digitizer)
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
 @end itemize
-@item LeCroy 9420
+@item LeCroy 9410
+@itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
@@ -2359,7 +2370,8 @@ from
 @itemize @bullet
 @item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
-@item LeCroy 9420
+@item LeCroy 9410
+@itemx LeCroy 9420
 @itemx LeCroy 9424
 @itemx LeCroy 9424E
 @itemx LeCroy 9450

@@ -854,8 +854,12 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
 			break;
 
 		case 'H' :
+#if defined LECROY94_TMPL_TRG_CPL_HF
 			cpl = buf[ 2 ] == 'R' ?
 				  LECROY94_TMPL_TRG_CPL_HF_REJ : LECROY94_TMPL_TRG_CPL_HF;
+#else
+			cpl = LECROY94_TMPL_TRG_CPL_HF_REJ;
+#endif
 			break;
 
 		default :
@@ -876,7 +880,12 @@ void lecroy94_tmpl_set_trigger_coupling( int channel,
 										 int cpl )
 {
 	char cmd[ 40 ];
-	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ", "HFDIV" };
+	const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ"
+#if defined LECROY94_TMPL_TRG_CPL_HF
+							   , "HFDIV" };
+#else
+                             };
+#endif
 
 
 	switch ( channel )
@@ -990,7 +999,7 @@ double lecroy94_tmpl_get_trigger_delay( void )
 	   timebase) while for negative values it's already the delay time */
 
 	if ( delay > 0.0 )
-		delay = 0.1 * lecroy94_tmpl.timebase;
+		delay *= 0.1 * lecroy94_tmpl.timebase;
 
 	return delay;
 }
