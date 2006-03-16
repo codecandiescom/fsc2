@@ -1759,14 +1759,14 @@ Function for setting or quering the trigger coupling of one of the trigger
 channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
 @strong{Waverunner-2} digitizers. If called with a single argument, the
 trigger channel (see the description of the function
-digitizer_trigger_channel() for a list of te possible trigger channels), the
+digitizer_trigger_channel() for a list of the possible trigger channels), the
 trigger coupling gets returned as a number, where @code{0} stands for
 @code{AC} coupling, @code{1} for @code{DC} coupling, @code{2} for @code{LF
 REJ} coupling, @code{3} for @code{HF REF} coupling and @code{4} for @code{HF}
 coupling. To change the coupling for the channel pass the function a second
 argument, either an integer as it gets returnedon queries, or one of the
 strings @code{"AC"}, @code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or
-@code{"HF"}.
+(exceptt for the @strong{LeCroy 9410}) @code{"HF"} .
 
 Please note: setting a trigger coupling for a trigger channel does @strong{not}
 automatically make this channel the selected trigger channel.
