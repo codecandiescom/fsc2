@@ -115,7 +115,7 @@ int rb_pulser_init_hook( void )
 #ifndef FIXED_TIMEBASE
 	rb_pulser.is_timebase = UNSET;
 #else
-	rb_pulser.timebase = 1.0e-8;;
+	rb_pulser.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
 	rb_pulser.is_timebase = SET;
 #endif
 
@@ -201,7 +201,7 @@ int rb_pulser_test_hook( void )
 			{
 				print( FATAL, "Module \"" SYNTHESIZER_MODULE "\" pulser must "
 					   "be listed before \"rb_pulser\" module in DEVICES "
-					   "section when RF pulses are used.\n" );
+					   "section when RF pulses are to be used.\n" );
 				THROW( EXCEPTION );
 			}
 
