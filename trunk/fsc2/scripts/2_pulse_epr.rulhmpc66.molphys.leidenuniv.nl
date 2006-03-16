@@ -437,6 +437,7 @@ sub write_out {
     print $fh "DEVICES:
 
 ips120_10;
+itc503;
 rb8509;
 rb_pulser;
 
@@ -468,13 +469,14 @@ end_field     = $END_FIELD G;
 N_Avg    = $N_AVG;
 N_Points = ceil( ( end_field - start_field ) / field_step ) + 1;
 wait_time = $WAIT_TIME s;
-I;
+I = 0;
 J = 0;
 K;
 data[ *, * ];
 avg[ N_Points ] = float_slice( N_Points );
 File1, File2;
-B1, B2, B3;
+B1, B2, B3, B4;
+start_temp;
 
 
 ASSIGNMENTS:
@@ -535,6 +537,12 @@ EXPERIMENT:
 	print $fh "
 pulser_state( \"ON\" );
 daq_gain( 4 );
+start_temp = temp_contr_temperature( );
+
+field =set_field( start_field );
+IF wait_time > 1 us {
+	wait( wait_time );
+}
 
 /* Open the file for averaged data */
 
@@ -547,25 +555,20 @@ File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
 B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
-B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+B3 = output_create( \"FLOAT_OUTPUT\", \"Current temperature [K]\", \"%.1f\" );
+B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
 
 FOREVER {
 
-	/* Go to the start field */
-
-	field = set_field( start_field );
-	IF wait_time > 1 us {
-		wait( wait_time );
-	}
-
 	J += 1;
 	output_value( B1, J );	              // Update the scan count display
 
 	FOR I = 1 : N_Points {
-		wait( 1.1 * repeat_time * N_Avg );
 		output_value( B2, field );
+		output_value( B3, temp_contr_temperature( ) );
+		wait( 1.1 * repeat_time * N_Avg );
 ";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
@@ -604,95 +607,80 @@ FOREVER {
 
 	avg = add_to_average( avg, data[ J ], J );
 
-	IF button_state( B3 ) {               // Stop on user request
+	IF button_state( B4 ) {               // Stop on user request
 		BREAK;
+	}
+
+	field = set_field( start_field );
+	IF wait_time > 1 us {
+		wait( wait_time );
 	}
 }
 
 ON_STOP:
 
-IF J == 1 {
-";
+IF I != 0 {
+	IF J == 1 {
+	";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-		print $fh "	FOR K = 1 : I - 1 {
-		fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * field_step,
-			   data[ 1, K ] );
+		print $fh "		FOR K = 1 : I - 1 {
+			fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * field_step,
+			   	data[ 1, K ] );
 	}
 ";
 # === else
     } else {
-        print $fh "	FOR K = N_Points - I + 2 : N_Points {
-		fsave( File1, \"#,#\\n\", end_field + ( K - 1 ) * field_step,
-			   data[ 1, K ] );
+        print $fh "		FOR K = N_Points - I + 2 : N_Points {
+			fsave( File1, \"#,#\\n\", end_field + ( K - 1 ) * field_step,
+			   	data[ 1, K ] );
 	}
 ";
 	}
 # === endif
-	print $fh "	fsave( File1, \"\\n\" );
-} ELSE {
-	IF I <= N_Points {
-		J -= 1;
-	}
+	print $fh "		fsave( File1, \"\\n\" );
+	} ELSE {
+		IF I <= N_Points {
+			J -= 1;
+		}
 
-	IF J > 1 {
-		File2 = clone_file( File1, \"avg\", \"scans\" );
-		FOR I = 1 : N_Points {
+		IF J > 1 {
+			File2 = clone_file( File1, \"avg\", \"scans\" );
+			FOR I = 1 : N_Points {
 ";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-		print $fh " 		fsave( File2, \"#\", start_field + ( I - 1 ) * field_step );
+		print $fh "	 		fsave( File2, \"#\", start_field + ( I - 1 ) * field_step );
 ";
 # === else
     } else {
-		print $fh " 		fsave( File2, \"#\", end_field + ( I - 1 ) * field_step );
+		print $fh "	 		fsave( File2, \"#\", end_field + ( I - 1 ) * field_step );
 ";
 	}
-	print $fh "		FOR K = 1 : J {
-				fsave( File2, \",#\", data[ K, I ] );
+	print $fh "			FOR K = 1 : J {
+					fsave( File2, \",#\", data[ K, I ] );
+				}
+				fsave( File2, \"\\n\" );
 			}
 			fsave( File2, \"\\n\" );
 		}
 
-		fsave( File2, \"\\n\" );
-	}
-
-	FOR I = 1 : N_Points {
+		FOR I = 1 : N_Points {
 ";
 # === if ( START_FIELD <= END_FIELD )
     if ( eval { ( $START_FIELD <= $END_FIELD ) } ) {
-		print $fh "		fsave( File1, \"#,#\\n\", start_field + ( I - 1 ) * field_step, avg[ I ] );
+		print $fh "			fsave( File1, \"#,#\\n\", start_field + ( I - 1 ) * field_step, avg[ I ] );
 ";
 # === else
     } else {
-		print $fh "		fsave( File1, \"#,#\\n\", end_field + ( I - 1 ) * field_step, avg[ I ] );
+		print $fh "			fsave( File1, \"#,#\\n\", end_field + ( I - 1 ) * field_step, avg[ I ] );
 ";
 	}
-	print $fh "	}
-	fsave( File1, \"\\n\" );
-}
+	print $fh "		}
+		fsave( File1, \"\\n\" );
+	}
 
-fsave( File1,
-       \"% Date:                   # #\\n\"
-       \"% Script:                 2_pulse_epr\\n\"
-       \"% Start field:            # G\\n\"
-       \"% End field:              # G\\n\"
-       \"% Field step:             # G\\n\"
-       \"% Repetition time:        # ms\\n\"
-       \"% Length of 1st MW pulse: # ns\\n\"
-       \"% Length of 2nd MW pulse: # ns\\n\"
-       \"% Pulse distance:         # ns\\n\"
-       \"% Number of averages:     #\\n\"
-       \"% Number of scans:        #\\n\"
-       \"% ADC gain:               4\\n\",
-	   date( ), time( ), start_field, field, field_step,
-	   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
-       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg, J );
-
-save_comment( File1, \"% \" );
-
-IF J > 1 {
-	fsave( File2,
+	fsave( File1,
 	       \"% Date:                   # #\\n\"
 	       \"% Script:                 2_pulse_epr\\n\"
 	       \"% Start field:            # G\\n\"
@@ -704,10 +692,37 @@ IF J > 1 {
 	       \"% Pulse distance:         # ns\\n\"
 	       \"% Number of averages:     #\\n\"
 	       \"% Number of scans:        #\\n\"
-	       \"% ADC gain:               4\\n\",
+	       \"% ADC gain:               4\\n\"
+	       \"% Temperature at start:   # K\\n\"
+    	   \"% Temperature at end:     # K\\n\",
 		   date( ), time( ), start_field, field, field_step,
 		   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
-	       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg, J );
+	       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg, J,
+		   start_temp, temp_contr_temperature( ) );
+
+	save_comment( File1, \"% \" );
+
+	IF J > 1 {
+		fsave( File2,
+		       \"% Date:                   # #\\n\"
+		       \"% Script:                 2_pulse_epr\\n\"
+		       \"% Start field:            # G\\n\"
+		       \"% End field:              # G\\n\"
+		       \"% Field step:             # G\\n\"
+		       \"% Repetition time:        # ms\\n\"
+		       \"% Length of 1st MW pulse: # ns\\n\"
+		       \"% Length of 2nd MW pulse: # ns\\n\"
+		       \"% Pulse distance:         # ns\\n\"
+		       \"% Number of averages:     #\\n\"
+		       \"% Number of scans:        #\\n\"
+		       \"% ADC gain:               4\\n\"
+		       \"% Temperature at start:   # K\\n\"
+    		   \"% Temperature at end:     # K\\n\",
+			   date( ), time( ), start_field, field, field_step,
+			   repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
+		       int( P2.LENGTH * 1.0e9 ), int( p1_to_p2_dist * 1.0e9 ), N_Avg,
+			   J, start_temp, temp_contr_temperature( ) );
+	}
 }
 ";
     close $fh;

@@ -749,6 +749,7 @@ ON_STOP:
 IF magnet_sweep( ) {
 	magnet_sweep( \"STOP\" );
 }
+
 lockin_auto_acquisition( \"OFF\" );
 
 IF I != 0 {
@@ -1047,7 +1048,8 @@ FOREVER {
 	}
 ";
 	}
-	print F "    lockin_auto_acquisition( \"OFF\" );
+	print F "
+    lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg += data[ J ];
