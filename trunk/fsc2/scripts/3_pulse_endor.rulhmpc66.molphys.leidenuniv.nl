@@ -1086,7 +1086,7 @@ sub load_defs {
                       ( defined $RF_P3_DEL{ min } and $ne < $RF_P3_DEL{ min } );
 			$RF_P3_DEL{ value } = $ne;
 
-			$ne = $ARGV[ 7 ];
+			$ne = $ARGV[ 8 ];
 			return if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
                       ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
 			$DET_OFFSET{ value } = $ne;
