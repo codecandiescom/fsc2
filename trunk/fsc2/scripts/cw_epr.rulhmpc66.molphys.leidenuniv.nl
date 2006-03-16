@@ -631,6 +631,7 @@ sub write_out_uni {
 DEVICES:
 
 ips120_10;
+itc503;
 sr810;
 
 
@@ -657,7 +658,7 @@ field = start_field;
 		print F "step_size = - sweep_rate / kd;\n";
 	}
 print F "
-B1, B2, B3;
+B1, B2, B3, B4;
 
 
 PREPARATIONS:
@@ -671,8 +672,12 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
+start_temp = temp_contr_temperature( );
 magnet_sweep_rate( sweep_rate );
-
+set_field( start_field );
+";
+	print F "wait( $sleep_time s );\n" if $sleep_time ne "";
+	print F "
 /* Open the file for averaged data */
 
 File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
@@ -684,26 +689,12 @@ File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
 B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
-B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
-hide_toolbox( \"OFF\" );
-
-/* Create the toolbox with two output field, one for the current scan number
-   and one for the current field as well as a push button for stopping the
-   experiment at the end of a scan */
-
-hide_toolbox( \"ON\" );
-B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
-B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
-B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+B3 = output_create( \"FLOAT_OUTPUT\", \"Current temperature [K]\", \"%.1f\" );
+B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
 FOREVER {
 
-	set_field( start_field );
-";
-print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
-print F
-"
 	magnet_sweep( \"$dir\" );
 	lockin_auto_acquisition( \"ON\" );
 
@@ -716,6 +707,7 @@ print F
 	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
 		output_value( B2, start_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] * 1.0e6, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
 	}
@@ -725,6 +717,7 @@ print F
 	FOR I = Num_Points : 1 : - 1 {
 		data[ J, I ] = lockin_get_data( );
 		output_value( B2, end_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] * 1.0e6, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
 	}
@@ -740,9 +733,14 @@ print F
 	clear_curve_1d( 1, 3 );
 	display( 1, data[ J ] * 1.0e6, 3 );
 
-	IF button_state( B3 ) {               // Stop on user request
+	IF button_state( B4 ) {               // Stop on user request
 		BREAK;
 	}
+
+	set_field( start_field );
+";
+	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
+	print F "
 }
 
 
@@ -753,76 +751,50 @@ IF magnet_sweep( ) {
 }
 lockin_auto_acquisition( \"OFF\" );
 
-IF J == 1 {";
+IF I != 0 {
+	IF J == 1 {";
 	if ( $start_field < $end_field ) {
 		print F "
-	FOR K = 1 : I - 1 {
-		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-			   data[ 1, K ] );
-	}
+		FOR K = 1 : I - 1 {
+			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+				   data[ 1, K ] );
+		}
 ";
 	} else {
 		print F "
-	FOR K = I + 1 : Num_Points {
-		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-			   data[ 1, K ] );
-	}
+		FOR K = I + 1 : Num_Points {
+			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+				   data[ 1, K ] );
+		}
 ";
 	}
 
 	print F "
-	fsave( File1, \"\\n\" );
-} ELSE {
-	IF I <= Num_Points {
-		J -= 1;
-	}
+		fsave( File1, \"\\n\" );
+	} ELSE {
+		IF I <= Num_Points {
+			J -= 1;
+		}
 
-	IF J > 1 {
-		File2 = clone_file( File1, \"avg\", \"scans\" );
-		FOR I = 1 : Num_Points {
-			fsave( File2, \"#\", field + ( I - 1 ) * step_size );
-			FOR K = 1 : J {
-				fsave( File2, \",#\", data[ K, I ] );
+		IF J > 1 {
+			File2 = clone_file( File1, \"avg\", \"scans\" );
+			FOR I = 1 : Num_Points {
+				fsave( File2, \"#\", field + ( I - 1 ) * step_size );
+				FOR K = 1 : J {
+					fsave( File2, \",#\", data[ K, I ] );
+				}
+				fsave( File2, \"\\n\" );
 			}
 			fsave( File2, \"\\n\" );
+		}
+
+		FOR I = 1 : Num_Points {
+			fsave( File2, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
 		}
 		fsave( File2, \"\\n\" );
 	}
 
-	FOR I = 1 : Num_Points {
-		fsave( File2, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
-	}
-	fsave( File2, \"\\n\" );
-}
-
-fsave( File1,
-       \"% Date:                    # #\\n\"
-       \"% Script:                  cw_epr\\n\"
-       \"% Magnet:\\n\"
-       \"%   Start field:           # G\\n\"
-       \"%   End field:             # G\\n\"
-       \"%   Sweep rate:            # G/s\\n\"
-       \"%   Start delay:           # s\\n\"
-       \"% Lock-In:\\n\"
-       \"%   Sensitivity:           # mV\\n\"
-       \"%   Time constant:         # s\\n\"
-       \"%   Acquisition rate:      # Hz\\n\"
-       \"%   Phase:                 # degree\\n\"
-       \"%   Modulation frequency:  # Khz\\n\"
-       \"%   Modulation amplitude:  # V\\n\"
-       \"% Number of scans:         #\\n\"
-       \"% Number of points:        #\\n\",
-       date(), time(),
-	   start_field, start_field + ( Num_Points - 1 ) * step_size,
-	   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
-       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
-	   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-	   J, Num_Points );
-
-save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
-
-IF J > 1 {
-	fsave( File2,
+	fsave( File1,
 	       \"% Date:                    # #\\n\"
 	       \"% Script:                  cw_epr\\n\"
 	       \"% Magnet:\\n\"
@@ -838,13 +810,45 @@ IF J > 1 {
 	       \"%   Modulation frequency:  # Khz\\n\"
 	       \"%   Modulation amplitude:  # V\\n\"
 	       \"% Number of scans:         #\\n\"
-	       \"% Number of points:        #\\n\",
+	       \"% Number of points:        #\\n\"
+	       \"% Temperature at start:    # K\\n\"
+    	   \"% Temperature at end:      # K\\n\",
 	       date(), time(),
 		   start_field, start_field + ( Num_Points - 1 ) * step_size,
 		   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
 	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-		   J, Num_Points );
+		   J, Num_Points, start_temp, temp_contr_temperature( ) );
+
+	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+	IF J > 1 {
+		fsave( File2,
+		       \"% Date:                    # #\\n\"
+		       \"% Script:                  cw_epr\\n\"
+		       \"% Magnet:\\n\"
+		       \"%   Start field:           # G\\n\"
+		       \"%   End field:             # G\\n\"
+		       \"%   Sweep rate:            # G/s\\n\"
+		       \"%   Start delay:           # s\\n\"
+		       \"% Lock-In:\\n\"
+		       \"%   Sensitivity:           # mV\\n\"
+		       \"%   Time constant:         # s\\n\"
+		       \"%   Acquisition rate:      # Hz\\n\"
+		       \"%   Phase:                 # degree\\n\"
+		       \"%   Modulation frequency:  # Khz\\n\"
+		       \"%   Modulation amplitude:  # V\\n\"
+		       \"% Number of scans:         #\\n\"
+		       \"% Number of points:        #\\n\"
+		       \"% Temperature at start:    # K\\n\"
+    		   \"% Temperature at end:      # K\\n\",
+		       date(), time(),
+			   start_field, start_field + ( Num_Points - 1 ) * step_size,
+			   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+		       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+			   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+			   J, Num_Points, start_temp, temp_contr_temperature( ) );
+	}
 }
 ";
 
@@ -906,6 +910,7 @@ sub write_out_bi {
 DEVICES:
 
 ips120_10;
+itc503;
 sr810;
 
 
@@ -922,8 +927,9 @@ kd = $kdw Hz;
 data[ *, * ];
 avg[ Num_Points ];
 
-I, J = 0, K;
-B1, B3;
+I = 0, J = 0, K;
+B1, B2, B3, B4;
+start_temp;
 File1, File2;
 field = start_field;
 ";
@@ -945,9 +951,12 @@ lockin_auto_setup( 1 / kd, 1 );
 
 EXPERIMENT:
 
+start_temp = temp_contr_temperature( );
 magnet_sweep_rate( sweep_rate );
 set_field( start_field );
-
+";
+	print F "wait( $sleep_time s );\n" if $sleep_time ne "";
+	print F "
 /* Open the file for averaged data */
 
 File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
@@ -958,15 +967,14 @@ File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
-B3 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
+B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
+B3 = output_create( \"FLOAT_OUTPUT\", \"Current temperature [K]\", \"%.1f\" );
+B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
 FOREVER {
 
 	set_field( start_field );
-";
-	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
-	print F "
 	J += 1;
 	output_value( B1, J );	              // Update the scan count display
 
@@ -978,6 +986,8 @@ FOREVER {
 	if ( $dir eq "UP" ) {
 		print F "	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, start_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
 	}
@@ -985,6 +995,8 @@ FOREVER {
 	} else {
 		print F "	FOR I = Num_Points : 1 : -1 {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, start_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
 	}
@@ -998,7 +1010,7 @@ FOREVER {
 	clear_curve_1d( 1, 3 );
 	display_1d( 1, data[ J ] / 1 uV, 3 );
 
-	IF button_state( B3 ) {               // Stop on user request
+	IF button_state( B4 ) {               // Stop on user request
 		BREAK;
 	}
 
@@ -1016,6 +1028,8 @@ FOREVER {
 
 	FOR I = Num_Points : 1 : -1 {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, start_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
 	}
@@ -1026,6 +1040,8 @@ FOREVER {
 
 	FOR I = 1 : Num_Points {
 		data[ J, I ] = lockin_get_data( );
+		output_value( B2, start_field + ( I - 1 ) * step_size );
+		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
 	}
@@ -1038,9 +1054,14 @@ FOREVER {
 	clear_curve_1d( 1, 3 );
 	display_1d( 1, data[ J ] * 1.0e6, 3 );
 
-	IF button_state( B3 ) {               // Stop on user request
+	IF button_state( B4 ) {               // Stop on user request
 		BREAK;
 	}
+
+	set_field( start_field );
+";
+	print F "	wait( $sleep_time s );" if $sleep_time ne "";
+	print F "
 }
 
 
@@ -1051,62 +1072,36 @@ IF magnet_sweep( ) {
 	magnet_sweep( \"STOP\" );
 }
 
-IF J == 1 {
-	FOR K = 1 : I - 1 {
-		fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-			   data[ 1, K ] );
-	}
-} ELSE {
-	IF I <= Num_Points {
-		J -= 1;
-	}
+IF I != 0 {
+	IF J == 1 {
+		FOR K = 1 : I - 1 {
+			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+				   data[ 1, K ] );
+		}
+	} ELSE {
+		IF I <= Num_Points {
+			J -= 1;
+		}
 
-	IF J > 1 {
-		File2 = clone_file( File1, \"avg\", \"scans\" );
-		FOR I = 1 : Num_Points {
-			fsave( File2, \"#\", field + ( I - 1 ) * step_size );
-			FOR K = 1 : J {
-				fsave( File2, \",#\", data[ K, I ] );
+		IF J > 1 {
+			File2 = clone_file( File1, \"avg\", \"scans\" );
+			FOR I = 1 : Num_Points {
+				fsave( File2, \"#\", field + ( I - 1 ) * step_size );
+				FOR K = 1 : J {
+					fsave( File2, \",#\", data[ K, I ] );
+				}
+				fsave( File2, \"\\n\" );
 			}
 			fsave( File2, \"\\n\" );
 		}
-		fsave( File2, \"\\n\" );
+
+		FOR I = 1 : Num_Points {
+			fsave( File1, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
+		}
+		fsave( File1, \"\\n\" );
 	}
 
-	FOR I = 1 : Num_Points {
-		fsave( File1, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
-	}
-	fsave( File1, \"\\n\" );
-
-}
-
-fsave( File1,
-       \"% Date:                    # #\\n\"
-	   \"% Script:                  cw_epr\\n\"
-       \"% Magnet (measuring while sweeping both up and down):\\n\"
-       \"%   Start field:           # G\\n\"
-       \"%   End field:             # G\\n\"
-       \"%   Sweep rate:            # G/min\\n\"
-       \"%   Start delay:           # s\\n\"
-       \"% Lock-In:\\n\"
-       \"%   Sensitivity:           # mV\\n\"
-       \"%   Time constant:         # s\\n\"
-       \"%   Acquisition rate:      # Hz\\n\"
-       \"%   Phase:                 # degree\\n\"
-       \"%   Modulation frequency:  # Khz\\n\"
-       \"%   Modulation amplitude:  # V\\n\"
-       \"% Number of scans:         #\\n\"
-       \"% Number of points:        #\\n\",
-	   date(), time(),
-	   start_field, start_field + ( Num_Points - 1 ) * step_size,
-	   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
-       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
-	   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-	   J, Num_Points );
-save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
-
-IF J > 1 {
-	fsave( File2,
+	fsave( File1,
 	       \"% Date:                    # #\\n\"
 		   \"% Script:                  cw_epr\\n\"
 	       \"% Magnet (measuring while sweeping both up and down):\\n\"
@@ -1122,13 +1117,44 @@ IF J > 1 {
 	       \"%   Modulation frequency:  # Khz\\n\"
 	       \"%   Modulation amplitude:  # V\\n\"
 	       \"% Number of scans:         #\\n\"
-	       \"% Number of points:        #\\n\",
+	       \"% Number of points:        #\\n\"
+	       \"% Temperature at start:    # K\\n\"
+    	   \"% Temperature at end:      # K\\n\",
 		   date(), time(),
 		   start_field, start_field + ( Num_Points - 1 ) * step_size,
 		   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
 	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-		   J, Num_Points );
+		   J, Num_Points, start_temp, temp_contr_temperature( ) );
+	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
+
+	IF J > 1 {
+		fsave( File2,
+		       \"% Date:                    # #\\n\"
+			   \"% Script:                  cw_epr\\n\"
+		       \"% Magnet (measuring while sweeping both up and down):\\n\"
+		       \"%   Start field:           # G\\n\"
+		       \"%   End field:             # G\\n\"
+		       \"%   Sweep rate:            # G/min\\n\"
+		       \"%   Start delay:           # s\\n\"
+		       \"% Lock-In:\\n\"
+		       \"%   Sensitivity:           # mV\\n\"
+		       \"%   Time constant:         # s\\n\"
+		       \"%   Acquisition rate:      # Hz\\n\"
+		       \"%   Phase:                 # degree\\n\"
+		       \"%   Modulation frequency:  # Khz\\n\"
+		       \"%   Modulation amplitude:  # V\\n\"
+		       \"% Number of scans:         #\\n\"
+		       \"% Number of points:        #\\n\"
+		       \"% Temperature at start:    # K\\n\"
+    		   \"% Temperature at end:      # K\\n\",
+			   date(), time(),
+			   start_field, start_field + ( Num_Points - 1 ) * step_size,
+			   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+		       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+			   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+			   J, Num_Points, start_temp, temp_contr_temperature( ) );
+	}
 }
 ";
 
