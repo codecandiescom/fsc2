@@ -226,7 +226,7 @@ void rb_pulser_delay_card_setup( void )
 			}
 
 			/* All except the first MW pulse have a previous delay card which
-			   isn't the delay card for the initial delay and which must be
+			   is not the delay card for the initial delay and which must be
 			   set to get the pulse to start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||

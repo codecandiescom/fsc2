@@ -251,7 +251,7 @@ Pulser_Struct_T *Pulser_Struct = NULL;
 long Cur_Pulser = -1;
 
 /* If you change the following always remember to also adjust the
-   enum for pulser function  numbers in global.h accordingly! */
+   enum for pulser function numbers in global.h accordingly! */
 
 const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 {
