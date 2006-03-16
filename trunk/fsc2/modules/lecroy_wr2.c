@@ -103,7 +103,6 @@ int lecroy_wr2_init_hook( void )
 	lecroy_wr2.cur_hres      = 
 		          lecroy_wr2.hres[ lecroy_wr2.ms_index ] + lecroy_wr2.tb_index;
 
-
 	for ( i = LECROY_WR2_CH1; i < LECROY_WR2_CH_MAX; i++ )
 	{
 		lecroy_wr2.is_sens[ i ]              = UNSET;
@@ -259,8 +258,6 @@ Var_T *digitizer_define_window( Var_T * v )
 
 	w->next = NULL;
 	w->num = lecroy_wr2.num_windows++ + WINDOW_START_NUMBER;
-
-	too_many_arguments( v );
 
 	w->start = win_start;
 	w->width = win_width;
@@ -839,7 +836,7 @@ Var_T *digitizer_offset( Var_T * v )
 	if ( i < 0 )
 		fs_index = NUM_ELEMS( fixed_sens ) - 1;
 
-	if ( abs( offset ) >= 1.0001 * max_offsets[ fs_index ] )
+	if ( fabs( offset ) >= 1.0001 * max_offsets[ fs_index ] )
 	{
 		print( FATAL, "Offset too large for the currently set channel "
 			   "sensitivity.\n" );
@@ -1086,7 +1083,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
 				THROW( EXCEPTION );
 			}
 
-			if ( lrnd( abs( 1.0e6 * level ) ) >
+			if ( lrnd( fabs( 1.0e6 * level ) ) >
 					  lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_CH_FAC *
 							lecroy_wr2_get_sens( channel ) ) )
 			{
@@ -1098,7 +1095,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
 			break;
 
 		case LECROY_WR2_EXT :
-			if ( lrnd( abs( 1.0e6 * level ) ) >
+			if ( lrnd( fabs( 1.0e6 * level ) ) >
 				 lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_EXT ) )
 			{
 				print( FATAL, "Trigger level too large, maximum is %f V.\n",
@@ -1108,7 +1105,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
 			break;
 
 		case LECROY_WR2_EXT10 :
-			if ( lrnd( abs( 1.0e6 * level ) ) >
+			if ( lrnd( fabs( 1.0e6 * level ) ) >
 				 lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_EXT10 ) )
 			{
 				print( FATAL, "Trigger level too large, maximum is %f V.\n",
@@ -1220,7 +1217,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 {
 	long channel;
 	long cpl = -1;
-	const char *cpl_str[ ] = { "AC", "DC" "LF REJ", "HF REJ", "HF" };
+	const char *cpl_str[ ] = { "AC", "DC", "LF REJ", "HF REJ", "HF" };
 	size_t i;
 
 
@@ -1681,7 +1678,7 @@ Var_T *digitizer_get_curve( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
-		 ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M2     ) &&
+		 ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
 		 ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
@@ -1765,8 +1762,9 @@ Var_T *digitizer_get_area( Var_T * v )
 	ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( !! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
-			  ( ch >= LECROY_WR2_TA &&  ch <= LECROY_WR2_TD     )    ) )
+	if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
+		 ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
+		 ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
@@ -1909,8 +1907,9 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 	ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( !! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
-			  ( ch >= LECROY_WR2_TA &&  ch <= LECROY_WR2_TD     )    ) )
+	if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
+		 ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
+		 ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
