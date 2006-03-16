@@ -96,6 +96,33 @@ $REP_TIME{ tk_label }->pack( %wp );
 $REP_TIME{ tk_entry }->pack( %wp );
 $REP_TIME{ tk_unit  }->pack( %up );
 
+# === P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
+
+my %P1_POS;
+$P1_POS{ tk_frame } = $fsc2_main_frame->Frame( );
+$P1_POS{ tk_label } = $P1_POS{ tk_frame }->Label( -text => "Position of 1st MW pulse",
+-width => 20,
+-anchor => 'w' );
+$P1_POS{ value } = 200;
+$P1_POS{ min } = 200;
+$P1_POS{ max } = 167772150;
+$P1_POS{ tk_entry } = $P1_POS{ tk_frame }->Entry( -textvariable => \$P1_POS{ value },
+-width => 10,
+-validate => 'key',
+-validatecommand => sub{ int_check( shift,
+( defined $P1_POS{ min } ? $P1_POS{ min } : undef ),
+( defined $P1_POS{ max } ? $P1_POS{ max } : undef ) ); },
+-relief => 'sunken' );
+$fsc2_balloon->attach( $P1_POS{ tk_entry },
+-balloonmsg  => "Range: [ " . ( defined $P1_POS{ min } ? $P1_POS{ min } : '-inf' ) .
+" : " . ( defined $P1_POS{ max } ? $P1_POS{ max } : '+inf' ) . " ]" );
+$P1_POS{ tk_unit } = $P1_POS{ tk_frame }->Label( -text => "ns",
+-width => 5 );
+$P1_POS{ tk_frame }->pack( %fp );
+$P1_POS{ tk_label }->pack( %wp );
+$P1_POS{ tk_entry }->pack( %wp );
+$P1_POS{ tk_unit  }->pack( %up );
+
 # === P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
 
 my %P1_LEN;
@@ -423,6 +450,7 @@ sub write_out {
 
     my $TRIG_MODE = $TRIG_MODE{ value };
     my $REP_TIME = $REP_TIME{ value };
+    my $P1_POS = $P1_POS{ value };
     my $P1_LEN = $P1_LEN{ value };
     my $P2_LEN = $P2_LEN{ value };
     my $PULSE_DIST = $PULSE_DIST{ value };
@@ -445,6 +473,7 @@ rb_pulser;
 VARIABLES:
 
 repeat_time   = $REP_TIME ms;
+p1_pos        = $P1_POS ns;
 p1_to_p2_dist = $PULSE_DIST ns;
 p1_len        = $P1_LEN ns;
 p2_len        = $P2_LEN ns;
@@ -492,7 +521,7 @@ ASSIGNMENTS:
 PREPARATIONS:
 
 P1:  FUNCTION = MICROWAVE,
-	 START    = 200 ns,
+	 START    = p1_pos,
 	 LENGTH   = p1_len;
 
 P2:  FUNCTION = MICROWAVE,
@@ -781,6 +810,14 @@ sub store_defs {
         print $fh "50\n";
     }
 
+    if ( $P1_POS{ value } =~ /^[+-]?\d+$/o and
+         ( defined $P1_POS{ max } ? $P1_POS{ max } >= $P1_POS{ value } : 1 ) and
+         ( defined $P1_POS{ min } ? $P1_POS{ min } <= $P1_POS{ value } : 1 ) ) {
+        print $fh "$P1_POS{ value }\n";
+    } else {
+        print $fh "200\n";
+    }
+
     if ( $P1_LEN{ value } =~ /^[+-]?\d+$/o and
          ( defined $P1_LEN{ max } ? $P1_LEN{ max } >= $P1_LEN{ value } : 1 ) and
          ( defined $P1_LEN{ min } ? $P1_LEN{ min } <= $P1_LEN{ value } : 1 ) ) {
@@ -881,21 +918,26 @@ sub load_defs {
 
  if ( $got_args ) { unless ( open $fh, "<$ENV{ HOME }/.fsc2/$name" ) {
 			$ne = $ARGV[ 0 ];
+			return  if ( defined $P1_POS{ max } and $ne > $P1_POS{ max } ) or
+				       ( defined $P1_POS{ min } and $ne < $P1_POS{ min } );
+			$P1_POS{ value } = $ne;
+
+			$ne = $ARGV[ 1 ];
 			return  if ( defined $P1_LEN{ max } and $ne > $P1_LEN{ max } ) or
 				       ( defined $P1_LEN{ min } and $ne < $P1_LEN{ min } );
 			$P1_LEN{ value } = $ne;
 
-			$ne = $ARGV[ 1 ];
+			$ne = $ARGV[ 2 ];
 			return if ( defined $P2_LEN{ max } and $ne > $P2_LEN{ max } ) or
 				      ( defined $P2_LEN{ min } and $ne < $P2_LEN{ min } );
 			$P2_LEN{ value } = $ne;
 
-			$ne = $ARGV[ 2 ];
+			$ne = $ARGV[ 3 ];
 			return if ( defined $PULSE_DIST{ max } and $ne > $PULSE_DIST{ max } ) or
                       ( defined $PULSE_DIST{ min } and $ne < $PULSE_DIST{ min } );
 			$PULSE_DIST{ value } = $ne;
 
-			$ne = $ARGV[ 3 ];
+			$ne = $ARGV[ 4 ];
 			return if ( defined $DET_OFFSET{ max } and $ne > $DET_OFFSET{ max } ) or
                       ( defined $DET_OFFSET{ min } and $ne < $DET_OFFSET{ min } );
 			$DET_OFFSET{ value } = $ne;
@@ -929,6 +971,14 @@ sub load_defs {
     goto done_reading if ( defined $REP_TIME{ max } and $ne > $REP_TIME{ max } ) or
                          ( defined $REP_TIME{ min } and $ne < $REP_TIME{ min } );
     $REP_TIME{ value } = $ne;
+
+    goto done_reading unless defined( $ne = <$fh> )
+        and $ne =~ /^[+-]?\d+$/;
+    chomp $ne;
+	$ne = $ARGV[ 0 ] if $got_args;
+    goto done_reading if ( defined $P1_POS{ max } and $ne > $P1_POS{ max } ) or
+                         ( defined $P1_POS{ min } and $ne < $P1_POS{ min } );
+    $P1_POS{ value } = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
         and $ne =~ /^[+-]?\d+$/;
