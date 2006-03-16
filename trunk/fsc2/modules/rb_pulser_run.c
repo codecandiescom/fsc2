@@ -73,7 +73,7 @@ void rb_pulser_update_pulses( bool flag )
 	rb_pulser_delay_card_setup( );
 	rb_pulser_rf_pulse( );
 
-	/* Now figure out the pulse sequence length and then commit changes */
+	/* Now calculate the pulse sequence length and then commit changes */
 
 	rb_pulser_seq_length_check( );
 
@@ -113,11 +113,11 @@ void rb_pulser_function_init( void )
 
 /*----------------------------------------------------------------------*
  * Function sets the delay for the very first delay card, i.e. the card
- * controlling the delay of the first microwave pulse. If there's no MW
- * pulse the delay for this card is set to the shortest possible time.
- * Since the GATE output from this card also triggers the detection delay
- * card the length of this delay can never be zero but must be at least
- * INIT_DELAY_MINIMUM_DELAY_TICKS (defined in rb_pulser.h) long!
+ * controlling the delay of the first microwave pulse (and all other
+ * channels). If there's no MW pulse the delay for this card is set to
+ * the shortest possible time. Since the GATE output from this card also
+ * triggers the detection delay card the length of this delay can never
+ * be zero but must be at least INIT_DELAY_MINIMUM_DELAY_TICKS long!
  *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )

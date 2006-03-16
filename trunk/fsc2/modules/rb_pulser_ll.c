@@ -245,15 +245,15 @@ void rb_pulser_exit( void )
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 		if ( rb_pulser.delay_card[ i ].handle >= 0 )
 		{
+#if 0
 			/* Commented out according to Huibs wishes, he want's the pulses
 			   to stay where they were at the end of the experiment. */
-#if 0
+
 			rulbus_rb8514_delay_set_output_pulse(
 											  rb_pulser.delay_card[ i ].handle,
 											  RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 											  RULBUS_RB8514_DELAY_PULSE_NONE );
 #endif
-
 			rulbus_card_close( rb_pulser.delay_card[ i ].handle );
 			rb_pulser.delay_card[ i ].handle = -1;
 		}
@@ -426,7 +426,7 @@ void rb_pulser_delay_card_delay( int           handle,
 	int ret;
 
 
-	/* Set the new delay but Wait until the card is finished with outputting
+	/* Set the new delay but wait until the card is finished with outputting
 	   a pulse */
 
 	while ( ( ret =
