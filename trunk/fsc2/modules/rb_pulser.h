@@ -98,7 +98,7 @@
 #define START       1
 
 
-/* The delay from the initial delay card may never be zero since the pulse
+/* The delay of the "initial delay" card may never be zero since the pulse
    created by it triggers the detection delay card. A minimum delay (in
    Ticks) must be set here). */
 

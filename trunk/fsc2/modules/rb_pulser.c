@@ -667,6 +667,7 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 		if ( p == p->function->pulses[ 0 ] )
 			t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
 				+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
+				+ INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase
 				+ rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 		else if ( p == p->function->pulses[ 1 ] )
 			t =   rb_pulser.delay_card[ MW_DELAY_1 ].intr_delay

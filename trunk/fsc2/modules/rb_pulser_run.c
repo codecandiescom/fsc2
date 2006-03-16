@@ -115,10 +115,9 @@ void rb_pulser_function_init( void )
  * Function sets the delay for the very first delay card, i.e. the card
  * controlling the delay of the first microwave pulse. If there's no MW
  * pulse the delay for this card is set to the shortest possible time.
- *
- * There's a problem here: If there are no MW pulses the card is set to
- * a delay of 0 and therefor there's no GATE output and thus no detection
- * trigger. This hasn't become a problem yet but needs repairing!
+ * Since the GATE output from this card also triggers the detection delay
+ * card the length of this delay can never be zero but must be at least
+ * INIT_DELAY_MINIMUM_DELAY_TICKS (defined in rb_pulser.h) long!
  *----------------------------------------------------------------------*/
 
 void rb_pulser_init_delay( void )
@@ -133,12 +132,14 @@ void rb_pulser_init_delay( void )
 	card->is_active = SET;
 
 	/* If there's no active MW pulse the initial delay card always gets
-	   set to the shortest possible delay, otherwise to the delay required
-	   for the first MW pulse */
+	   set to the shortest possible delay at which there's still a pulse
+	   output (needed for triggering the detection delay card), otherwise
+	   to the value required for delaying the first MW pulse correctly (but
+	   not shorter than the minimum length). */
 
 	if ( f->num_active_pulses == 0 )
 	{
-		card->delay = 0;
+		card->delay = INIT_DELAY_MINIMUM_DELAY_TICKS;
 		return;
 	}
 
@@ -149,14 +150,15 @@ void rb_pulser_init_delay( void )
 		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 
-	if ( pos < - PRECISION * rb_pulser.timebase )
+	if ( pos - INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase <
+		 									 - PRECISION * rb_pulser.timebase )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( pos < 0.0 )
-		pos = 0.0;
+	if ( pos - INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase < 0.0 )
+		pos = INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase;
 
 	shift = Ticks_rnd( pos / rb_pulser.timebase ) * rb_pulser.timebase - pos;
 
