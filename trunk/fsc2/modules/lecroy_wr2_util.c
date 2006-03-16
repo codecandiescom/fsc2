@@ -242,7 +242,7 @@ void lecroy_wr2_window_check( Window_T * w,
 
 static long lecroy_wr2_calc_pos( double t )
 {
-	return lrnd( ( t - lecroy_wr2.trigger_delay ) /
+	return lrnd( ( t + lecroy_wr2.trigger_delay ) /
 				 lecroy_wr2_time_per_point( ) );
 
 }

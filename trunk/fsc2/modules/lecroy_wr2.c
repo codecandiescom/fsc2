@@ -654,9 +654,6 @@ Var_T *digitizer_memory_size( Var_T *v )
 
 Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
 {
-	long rec_len;
-
-
 	if ( v != NULL )
 	{
 		print( FATAL, "Record length can only be queried\n" );
@@ -666,12 +663,7 @@ Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
 	if ( FSC2_MODE == PREPARATION )
 		no_query_possible( );
 
-	if ( lecroy_wr2.is_interleaved )
-		rec_len = 10 * lecroy_wr2.cur_hres->ppd_ris;
-	else
-		rec_len = 10 * lecroy_wr2.cur_hres->ppd;
-
-	return vars_push( INT_VAR, rec_len );
+	return vars_push( INT_VAR, lecroy_wr2_curve_length( ) );
 }
 
 
@@ -1724,7 +1716,7 @@ Var_T *digitizer_get_curve( Var_T * v )
 	}
 	else
 	{
-		length = lecroy_wr2.mem_size;
+		length = lecroy_wr2_curve_length( );
 		array = DOUBLE_P T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
