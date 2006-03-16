@@ -579,6 +579,7 @@ sub write_out {
     print $fh "DEVICES:
 
 ips120_10;
+itc503;
 rs_sml01;
 rb8509;
 rb_pulser;
@@ -620,6 +621,7 @@ I, J = 0, K;
 data[ *, *];
 avg[ N_Points ];
 File;
+start_temp;
 
 
 ASSIGNMENTS:
@@ -634,7 +636,7 @@ ASSIGNMENTS:
 PREPARATIONS:
 
 P1:  FUNCTION = MICROWAVE,
-	 START    = 180 ns,
+	 START    = 200 ns,
 	 LENGTH   = p1_len;
 
 P2:  FUNCTION = MICROWAVE,
@@ -692,6 +694,7 @@ freq = synthesizer_frequency( start_freq );
 synthesizer_state( \"ON\" );
 pulser_state( \"ON\" );
 daq_gain( 4 );
+start_temp = temp_contr_temperature( );
 
 /* Go to the start field */
 
@@ -798,12 +801,15 @@ fsave( File,
        \"% RF pulse position:      # ns\\n\"
        \"% RF pulse length:        # ns\\n\"
        \"% Number of averages:     #\\n\"
-       \"% ADC gain:               4\\n\",
+       \"% ADC gain:               4\\n\"
+       \"% Temperature at start:   # K\\n\"
+       \"% Temperature at end:     # K\\n\",
 	   date( ), time( ), field, start_freq * 1.0e-6, end_freq * 1.0e-6,
 	   freq_step * 1.0e-6, att, repeat_time * 1.0e3, int( P1.LENGTH * 1.0e9 ),
 	   int( P2.LENGTH * 1.0e9 ), int( P3.LENGTH * 1.0e9 ),
        int( p1_to_p2_dist * 1.0e9 ), int( p2_to_p3_dist * 1.0e9 ),
-       int( P4.START * 1.0e9 ), int( P4.LENGTH * 1.0e9 ), N_Avg );
+       int( P4.START * 1.0e9 ), int( P4.LENGTH * 1.0e9 ), N_Avg,
+ 	   start_temp, temp_contr_temperature( ) );
 
 save_comment( File, \"% \" );
 ";

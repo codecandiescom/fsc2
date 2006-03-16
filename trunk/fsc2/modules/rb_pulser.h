@@ -98,6 +98,13 @@
 #define START       1
 
 
+/* The delay from the initial delay card may never be zero since the pulse
+   created by it triggers the detection delay card. A minimum delay (in
+   Ticks) must be set here). */
+
+#define INIT_DELAY_MINIMUM_DELAY_TICKS    2   /* typically 20 ns */
+
+
 typedef struct RB_Pulser RB_Pulser_T;
 typedef struct Rulbus_Clock_Card Rulbus_Clock_Card_T;
 typedef struct Rulbus_Delay_Card Rulbus_Delay_Card_T;

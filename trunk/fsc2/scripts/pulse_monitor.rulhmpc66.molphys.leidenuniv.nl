@@ -57,7 +57,7 @@ MAX_LEN = 16777215;     /* max. delay (in ticks) */
 PREPARATIONS:
 
 P1:   FUNCTION = MW,
-      START    = 180 ns,
+      START    = 200 ns,
       LENGTH   = 60 ns;
 
 P2:   FUNCTION = MW,
@@ -182,12 +182,10 @@ FOREVER {
 
                     IF PSV[ 4 ] < PMS[ 4 ] {
                         PSV[ 4 ] = PMS[ 4 ];
-                        P5.START = PMS[ 4 ] * 10 ns;
+                        P4.START = PMS[ 4 ] * 10 ns;
                         input_value( PS[ 4 ], PSV[ 4 ] * 10 );
                     }
 
-                    PMS[ 5 ] = round( pulser_pulse_minimum_specs( P5 )
-                                      / 10 ns );
                     IF PSV[ 5 ] < PMS[ 5 ] {
                         PSV[ 5 ] = PMS[ 5 ];
                         P5.START = PMS[ 5 ] * 10 ns;

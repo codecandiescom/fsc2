@@ -382,6 +382,7 @@ sub write_out {
     print $fh "DEVICES:
 
 ips120_10;
+itc503;
 rb8509;
 rb_pulser;
 
@@ -401,6 +402,7 @@ N_Avg  = $N_AVG;
 I;
 data;
 File;
+start_temp;
 
 
 ASSIGNMENTS:
@@ -416,7 +418,7 @@ ASSIGNMENTS:
 PREPARATIONS:
 
 P1:  FUNCTION    = MICROWAVE,
-	 START       = 180 ns,
+	 START       = 200 ns,
 	 LENGTH      = p1_len;
 
 P2:  FUNCTION    = MICROWAVE,
@@ -452,6 +454,7 @@ EXPERIMENT:
 	print $fh "
 pulser_state( \"ON\" );
 daq_gain( 4 );
+start_temp = temp_contr_temperature( );
 
 /* Go to the field */
 
@@ -488,11 +491,13 @@ fsave( File,
        \"% Init. P1-P2 separation: # ns\\n\"
        \"% P1-P2 increment:        # ns\\n\"
        \"% Number of averages:     #\\n\"
-       \"% ADC gain:               4\\n\",
+       \"% ADC gain:               4\\n\"
+       \"% Temperature at start:   # K\\n\"
+       \"% Temperature at end:     # K\\n\",
 	   date( ), time( ), field,  repeat_time * 1.0e3,
        int( P1.LENGTH * 1.0e9 ), int( P2.LENGTH * 1.0e9 ),
        int( p1_to_p2_dist * 1.0e9 ), int( p1_to_p2_incr * 1.0e9 ),
-	   N_Avg );
+	   N_Avg, start_temp, temp_contr_temperature( ) );
 
 save_comment( File, \"% \" );
 ";
