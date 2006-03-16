@@ -150,14 +150,14 @@ void rb_pulser_init_delay( void )
 		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
 		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
 
-	if ( pos - INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase <
-		 									 - PRECISION * rb_pulser.timebase )
+	if ( pos / rb_pulser.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS <
+		 									                     - PRECISION )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( pos - INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase < 0.0 )
+	if ( pos / rb_pulser.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS < 0.0 )
 		pos = INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase;
 
 	shift = Ticks_rnd( pos / rb_pulser.timebase ) * rb_pulser.timebase - pos;
