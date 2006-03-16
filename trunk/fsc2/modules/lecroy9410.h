@@ -294,7 +294,7 @@ double fixed_sens[ 8 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2,
 int offset_factor[ 8 ] = { 48, 24, 12, 12, 12, 12, 12, 10 };
 
 #else
-extern HORI_RES_T hres[ 39 ];
+extern HORI_RES_T hres[ 36 ];
 extern double fixed_sens[ 8 ];
 extern int offset_factor[ 8 ];
 #endif

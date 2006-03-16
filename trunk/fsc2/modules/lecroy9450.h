@@ -244,9 +244,6 @@ struct HORI_RES {
 
 #if defined LECROY9450_MAIN_
 
-/* The following data are from direct observation of the device - the manual
-   was not available */
-
 HORI_RES_T hres[ 39 ] = { { 1.0e-9, 1.0e-10,   100,   -1.0,    -1 },
 					      { 2.0e-9, 1.0e-10,   200,   -1.0,    -1 },
 					      { 5.0e-9, 1.0e-10,   500,   -1.0,    -1 },

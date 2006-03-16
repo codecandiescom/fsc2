@@ -596,9 +596,9 @@ Var_T *pulser_reset( Var_T *v UNUSED_ARG )
 }
 
 
-/*-----------------------------------------------------------------------*
- * Function for resetting one or more pulses back to their initial state
- *-----------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for resetting one or more pulses back to the initial state
+ *---------------------------------------------------------------------*/
 
 Var_T *pulser_pulse_reset( Var_T *v )
 {
