@@ -122,29 +122,29 @@ need three variables for the start field, the end field and the field
 step size. But now also another variable for the number of runs we'll do
 during the experiment is needed, which we declare in line 10.
 
-The following variables are all used for auxiliary variables.
-@code{Number_of_points} is automatically initialized to the number of
-points during one run (we got to add 1, otherwise we wouldn't the last
-point of the field range. The next variables, @code{data} and
-@code{mean_data} are both for storing the results f the experiment. But
-since (as the name indicates) @code{mean_data} is going to be used to
-store the mean value of all data points it needs to be an array with
-enough space for all points of the spectrum.
+The following variables are all auxiliary variables. @code{Number_of_points}
+is automatically initialized to the number of points during one run (we got
+to add 1, otherwise we wouldn't get the last point of the field range). The
+next variables, @code{data} and @code{mean_data} are both for storing the
+results f the experiment. But since (as the name indicates) @code{mean_data}
+is going to be used to store the mean value of all data points it needs to
+be an array with enough space for all points of the spectrum.
 
 The variables @code{I} and @code{J} are simple counters and
 @code{File_1} and @code{File_2} are integer variables that we will be
 used for file handles -- we are going to use two files, one for storing
 intermediate results, i.e.@: all single run spectra, and a second one
-for saving the end results, the mean values of the data of all runs.
-Finally, @code{tc} is going to be used for the lock-in's time constant.
+for saving the end results, i.e.@: the mean values of the data from all
+runs. Finally, @code{tc} is going to be used for the lock-in's time
+constant.
 
-Also the first line of the @code{PREPARATIONS} section does not has
-changed, again we set up the magnet using @code{magnet_setup()}
+Also the first line of the @code{PREPARATIONS} section hasn't changed,
+again we set up the magnet using @code{magnet_setup()}
 (@pxref{magnet_setup()}) to be started at a field as stored in the
 variable @code{start_field} and tell it, that sweeps will be done with
 step sizes of @code{field_step}.
 
-But the graphics initialization with function @code{init_1d()}
+But the graphics initialization using the function @code{init_1d()}
 (@pxref{init_1d()}) in line 23 has been changed a bit. Instead of using
 the defaults, we now request 2 curves (one for the newly measured data
 points and one for the mean values of all runs don so far).  Also, we
@@ -159,19 +159,19 @@ measured signal intensity in microvolt.
 The first thing done in the @code{EXPERIMENT} section is asking the user
 to supply two file names -- what we get back from the functions are
 integer numbers that are going to be used later to indicate into which
-of the two files data are to be written (should the user have hit the
+of the two files data are to be written to (should the user hit the
 @code{Cancel} button to indicate that (s)he doesn't want to write out
-the data the number returned will tell @code{fsc2} not to open a file
-and skip writing data to the file).
+the data to a file the number returned will tell @code{fsc2} not to
+open a file and skip commands for writing data to this file).
 
 The next step (line 31) is to determine the lock-in amplifiers time
 constant, we will have to wait for this time after a field sweep step to
-give the it enough time to measure a new value.
+give the lock-in enough time to measure a new value.
 
-The actual experiment now contains of two loops, a main loop for doing
+The actual experiment now consists of two loops, a main loop for doing
 all the consecutive runs over the field range, and an embedded loop for
 acquiring, displaying and storing each data point in a run. Both loops
-are realized by @code{FOR} loops because for both we now exactly how
+are realized by @code{FOR} loops because for both we know exactly how
 many times each one has to be repeated.
 
 Within the inner loop, i.e.@: for each data point we wait for the
