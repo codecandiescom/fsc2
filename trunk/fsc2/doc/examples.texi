@@ -191,17 +191,17 @@ the curve, @code{1}. The next three arguments are for the new mean
 value, we only have to take care to divide the @code{mean_data} array
 element by @code{I}, the number of runs done so far.
 
-If you should have any trouble understanding that the @i{x}-coordinate
-is given as an integer numbers but on the screen the scale is to be
-shown in field units, here's an explanation: in the @code{init_1d()}
-function call (@pxref{init_1d()}) during the @code{PREPARATIONS} section
-we told the program that the first @i{x}-axis value would be at a field
-of the value of @code{start_field} and that all following fields would
-be equally spaced by a field difference according to the value of the
-variable @code{field_step}. The program uses this information to convert
-a @i{x}-coordinate of @code{1} to make the data point appear at the
-field scale value of @code{start_field}, a @i{x}-coordinate of @code{2}
-at @code{start_value + field_step} etc.
+If you have trouble understanding why the @i{x}-coordinate is passed to
+@code{display_1d()} (@pxref{display_1d()}) as an integer numbers but on
+the screen the scale is being shown in field units, here's an explanation:
+in the @code{init_1d()} function call (@pxref{init_1d()}) during the
+@code{PREPARATIONS} section we told the program that the first @i{x}-axis
+value would be at a field of the value of @code{start_field} and that all
+following fields would be equally spaced by a field difference according
+to the value of the second variable, @code{field_step}. The program uses
+this information to convert a @i{x}-coordinate of @code{1} to make the
+data point appear at the field scale value of @code{start_field}, a
+@i{x}-coordinate of @code{2} at @code{start_value + field_step} etc.
 
 The next instruction (line 42) stores the newly measured value, together
 with the current field, in the first file. In this case we use the
@@ -210,7 +210,7 @@ function @code{fsave()} (@pxref{fsave()}) to write both the current field
 (first) file. According to the format string both values will appear on
 one line.
 
-All now still needed in the inner loop is to sweep to a new magnetic
+All now still to be done in the inner loop is to sweep to a new magnetic
 field (which, according to the our call of @code{magnet_setup()}
 (@pxref{magnet_setup()}) in the @code{PREPARATIONS} section is supposed to
 be @code{field_step()} higher than the current value). When the magnet has
@@ -219,26 +219,27 @@ returns the new field value which gets stored in the variable
 @code{field}.
 
 When the inner loop has been repeated @code{Number_of_points} times we
-have reached the end field and now have to start a new run. First we
-write a single new line into the file for the data of all runs to have a
-visual indication where the data of the new run start. Then we have to
-get the field back to the start field, which can be done by calling the
-function @code{reset_field()} (@pxref{reset_field()}) (you actually also
-could also tell the magnet to go to a field of @code{start_field()} by
-calling @code{set_field()} (@pxref{set_field()}) with @code{start_field()}
-as its only argument). Finally, we have to remove the data of the last
-run from the screen but keeping the curve with the mean values. This is
-done by calling the function @code{clear_curve()} (@pxref{clear_curve()})
-with the number of the curve to remove (which is 1) as the
-parameter. Then we proceed with the inner loop.
+have reached the end field and now have to start a new scan. First we
+write an empty line into the file for the data of all runs in order to
+have a visual indication where the data of the new run start. Then we
+have to set the field back to the start field, which can be done by
+calling the function @code{reset_field()} (@pxref{reset_field()})
+(you actually also could also tell the magnet to go to a field of
+@code{start_field()} by calling @code{set_field()} (@pxref{set_field()})
+with @code{start_field()} as its only argument). Finally, we have to
+remove the data of the last run from the screen but keeping the curve
+with the mean values. This is done by calling the function
+@code{clear_curve()} (@pxref{clear_curve()}) with the number of the
+curve to be removed (which is 1) as the parameter. Then we proceed with
+the inner loop.
 
-When the experiment finally is done, i.e.@: we're finished doing the
+When the experiment finally is done, i.e.@: when we're finished doing the
 @code{Number_of_runs} repetitions of the field sweep we end up at line
 51 where we now can store the whole array of mean values, together with
 some information about the experimental parameters. Please note that
 using the function @code{save()} (@pxref{save()}) it is possible to write
-whole (one-dimensional) arrays with one call, also this is an example
-that arithmetic can be done on arrays, here all array elements are
+whole (one-dimensional) arrays with one call. You also see here an example
+of arithmetic done on arrays: all array elements of @code{mean_data} are
 automatically divided by @code{Number_of_runs} before being written to
 the file.
 
@@ -246,16 +247,15 @@ the file.
 @node GUI-fying the script, cw-EPR monitor script, An enhanced cw-EPR experiment, Example EDL Scripts
 @section GUI-fying the script
 
-Having a final look at the above script one may find that there are only
-a few variables that always need editing when doing a new
-experiment. These are the start and end field, the field step size and
-the number of runs. Having to edit the script all of the time can become
-rather tedious. But there's a simple method to add a graphical user
-interface to the program that lets one edit the parameters and does not
-require to load the script into an editor, change it and then load the
-script into @code{fsc2}.
+Looking again at the above script one may recognize that there are only
+a few variables that always need to be edited when doing a new experiment.
+These are the start and end field, the field step size and the number of
+runs. Having to edit the script all of the time can become rather tedious.
+But there's a simple method to add a graphical user interface to the
+program that lets one set these parameters and does not require to load
+the script into an editor, change it and then load the script into @code{fsc2}.
 
-All that is needed is to add and change a few lines.:
+All what's needed is to add and change a few lines.:
 @example
  1 === START_FIELD float [ 1460 : 19900 ] [ 3360 ] "Start field:" "G"
  2 === END_FIELD float [ 1460 : 19900 ] [ 3450 ] "End field:" "G"
