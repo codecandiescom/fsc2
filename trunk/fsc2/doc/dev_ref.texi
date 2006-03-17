@@ -1771,14 +1771,9 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
 Oscilloscope Waverunner-2, models @w{LT 262}, @w{LT 264}, @w{LT 354},
 @w{LT 372}, @w{LT 274}, @w{LT 584} (the exact model must be set in the
-configuration file together with additional information e.g.@: about
-the amount of memory). 2 or 4 measurement channels (depending on model),
+configuration file together with additional information about options
+e.g.@: amount of memory). 2 or 4 measurement channels (depending on model),
 4 function channels (needed for averaging), 4 memory channels.
-
-@paragraphindent 0
-@strong{Please note}: There exist at least 6 different models of the
-Waverunner-2, with lots of additional options. The configuration file
-for the device must be adjusted accordingly.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
