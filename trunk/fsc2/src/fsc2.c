@@ -778,23 +778,23 @@ static int scan_args( int *   argc,
 
 			if ( flags & BATCH_MODE )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
-						"'-B' at once.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' or "
+						 "'-nw' and '-B' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
 			if ( flags & ICONIFIED_RUN )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
-						"'-I' at once.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' or "
+						 "'-nw' and once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
-			/* no file name with "-ng" option ? */
+			/* no file name with "-ng" or "-nw" option ? */
 
 			if ( argv[ ++cur_arg ] == NULL )
 			{
-				fprintf( stderr, "fsc2 -ng: No input file.\n" );
+				fprintf( stderr, "fsc2 -ng (or '-nw'): No input file.\n" );
 				exit( EXIT_FAILURE );
 			}
 

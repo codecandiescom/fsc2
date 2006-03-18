@@ -200,7 +200,7 @@ window gets closed @code{fsc2} is also quit. On syntax or other
 errors in the @code{EDL} script the main window gets automatically
 de-iconified so that the error messages become readable.
 
-@item @option{-ng}
+@item @option{-ng, -nw}
 Does both the test run as well as the experiment for the input
 @code{EDL} file without using any graphics. Afterwards @code{fsc2}
 quits immediately, returning @code{0} on success and @code{1} on
