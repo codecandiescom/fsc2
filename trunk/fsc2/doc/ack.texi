@@ -49,7 +49,7 @@ it. Then, in Berlin, Stefan Weber, Chris W.@: M.@: Kay, Gerriet Eilers,
 Andreas Kuppig, Heike M@"ogling, Michael Fuhs, Anton Savitsky, Alexander
 Schnegg, Radek Kowalczyk, Martin Fuchs, Celine Els@"asser, Marc Brecht,
 Hauke Studier, Jana Nieder, Irina Karyagina and Sergey Weber took over.
-Finally, also Iwo Gatlik, Tomasz Motylewski and Daniela Hristova (Basel/Graz)
+Finally, also Iwo Gatlik, Tomasz Motylewski, Daniela Hristova (Basel/Graz),
 Huib Block and Peter Gast (Leiden) got some share of the fun. I would like to
 thank them not only for the constant stream of bug reports and proposals for
 improvements or new features (and I sometimes needed quite a bit of convincing
