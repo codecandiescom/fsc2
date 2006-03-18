@@ -766,12 +766,13 @@ static int scan_args( int *   argc,
 		}
 
 		if ( strlen( argv[ cur_arg ] ) == 3 &&
-			 ! strcmp( argv[ cur_arg ], "-ng" ) )
+			 ( ! strcmp( argv[ cur_arg ], "-ng" ) ||
+			   ! strcmp( argv[ cur_arg ], "-nw" ) ) )
 		{
 			if ( flags & DO_CHECK )
 			{
-				fprintf( stderr, "fsc2: Can't have both flags '-ng' and "
-						"'-X' at once.\n" );
+				fprintf( stderr, "fsc2: Can't have both flags '-ng' or "
+						 "'-nw' and '-X' at once.\n" );
 				usage( EXIT_FAILURE );
 			}
 
