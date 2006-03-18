@@ -2262,6 +2262,7 @@ void redraw_cut_axis( int coord )
 	if ( G_2d.active_curve != -1 &&
 		 G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
 		cut_make_scale( c, coord );
+
 	XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
 			   0, 0, c->w, c->h, 0, 0 );
 }
@@ -2536,7 +2537,8 @@ static void cut_make_scale( Canvas_T * c,
 
 		/* Finally draw the triangle indicating the position of the cut */
 
-		triangle[ 0 ].x = i2shrt( x - G.long_tick_len - 3 );
+		triangle[ 0 ].x = i2shrt( x - G.long_tick_len - 1 );
+
 		if ( G_cut.cut_dir == X )
 			triangle[ 0 ].y = d2shrt( ( G_2d.cut_z_axis.h - 1 )
 									  * ( 1.0 - G_cut.index /
@@ -2545,10 +2547,12 @@ static void cut_make_scale( Canvas_T * c,
 			triangle[ 0 ].y = 
 						 d2shrt( ( G_2d.cut_z_axis.h - 1 )
 								 * ( 1.0 - G_cut.index / ( G_2d.ny - 1.0 ) ) );
-		triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 10 );
+
+		triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 7 );
 		triangle[ 1 ].y = i2shrt( - G.long_tick_len / 3 );
 		triangle[ 2 ].x = 0;
 		triangle[ 2 ].y = i2shrt( 2 * ( G.long_tick_len / 3 ) );
+
 		XFillPolygon( G.d, c->pm, G_2d.curve_2d[ 0 ]->gc, triangle, 3,
 					  Convex, CoordModePrevious );
 	}
