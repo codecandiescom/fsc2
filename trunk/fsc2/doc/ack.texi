@@ -50,10 +50,9 @@ Andreas Kuppig, Heike M@"ogling, Michael Fuhs, Anton Savitsky, Alexander
 Schnegg, Radek Kowalczyk, Martin Fuchs, Celine Els@"asser, Marc Brecht,
 Hauke Studier, Jana Nieder, Irina Karyagina and Sergey Weber took over.
 Finally, also Iwo Gatlik, Tomasz Motylewski and Daniela Hristova (Basel/Graz)
-got some share of the fun. Another important contributor is Huib Block
-(Leiden). I would like to thank them not only for the constant stream of
-bug reports and proposals for improvements or new features (and I sometimes
-needed quite a lot of convincing even though they where right) but especially
-for their enduring patience. Much too often, when they had to do an important
-experiment things didn't work and they had to wait until I got it fixed.
-Lots of thanks to all of them!
+Huib Block and Peter Gast (Leiden) got some share of the fun. I would like to
+thank them not only for the constant stream of bug reports and proposals for
+improvements or new features (and I sometimes needed quite a bit of convincing
+even though they where right) but especially for their enduring patience. Much
+too often, when they had to do an important experiment things didn't work and
+they had to wait until I got it fixed. Lots of thanks to all of them!
