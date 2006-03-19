@@ -41,8 +41,7 @@ static void lecroy_wr2_get_prep( int              ch,
 								 unsigned char ** data,
 								 long *           length,
 								 double *         gain,
-								 double *         offset,
-								 const char *     what );
+								 double *         offset );
 
 static unsigned char *lecroy_wr2_get_data( long * len );
 
@@ -53,7 +52,7 @@ static bool lecroy_wr2_talk( const char * cmd,
 static void lecroy_wr2_gpib_failure( void );
 
 
-static unsigned int can_fetch;
+static unsigned int can_fetch = 0;
 static int trg_channels[ ] = {
 #if defined LECROY_WR2_CH4_AS_TRG
 								LECROY_WR2_CH4,
@@ -88,7 +87,7 @@ bool lecroy_wr2_init( const char * name )
 	   transmit data in one block in binary word (2 byte) format with LSB
 	   first. Then ask for the status byte to make sure the device reacts. */
 
-    if ( gpib_local_lockout( lecroy_wr2.device ) == FAILURE  ||
+    if ( //gpib_local_lockout( lecroy_wr2.device ) == FAILURE  ||
 		 gpib_write( lecroy_wr2.device,
 					 "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;ACAL", 49 )
 		                                                          == FAILURE ||
@@ -118,14 +117,7 @@ bool lecroy_wr2_init( const char * name )
 		}
 
 		for ( i = LECROY_WR2_M1; i <= LECROY_WR2_M4; i++ )
-		{
 			lecroy_wr2.is_displayed[ i ] = UNSET;
-			if ( lecroy_wr2_is_displayed( i ) )
-			{
-				lecroy_wr2.is_displayed[ i ] = SET;
-				lecroy_wr2.num_used_channels++;
-			}
-		}
 
 		for ( i = LECROY_WR2_TA; i <= LECROY_WR2_TD; i++ )
 		{
@@ -155,8 +147,8 @@ bool lecroy_wr2_init( const char * name )
 			lecroy_wr2.timebase = lecroy_wr2_get_timebase( );
 
 			for ( i = 0; i < lecroy_wr2.num_tbas; i++ )
-				if ( abs( lecroy_wr2.tbas[ i ] - lecroy_wr2.timebase ) /
-					 lecroy_wr2.timebase < 0.1 )
+				if ( fabs( lecroy_wr2.tbas[ i ] - lecroy_wr2.timebase ) /
+					 lecroy_wr2.tbas[ i ] < 0.1 )
 				{
 					lecroy_wr2.tb_index = i;
 					break;
@@ -175,6 +167,9 @@ bool lecroy_wr2_init( const char * name )
 			lecroy_wr2_set_memory_size( lecroy_wr2.mem_size );
 		else
 			lecroy_wr2.mem_size = lecroy_wr2_get_memory_size( );
+
+		lecroy_wr2.cur_hres = 
+		          lecroy_wr2.hres[ lecroy_wr2.ms_index ] + lecroy_wr2.tb_index;
 
 		/* Switch interleaved (RIS) mode on if the user asked for it and it
 		   can be done, otherwise switch it off */
@@ -276,7 +271,7 @@ double lecroy_wr2_get_timebase( void )
 	timebase = T_atod( reply );
 
 	for ( i = 0; i < lecroy_wr2.num_tbas; i++ )
-		if ( abs( lecroy_wr2.tbas[ i ] - timebase ) / timebase < 0.01 )
+		if ( fabs( lecroy_wr2.tbas[ i ] - timebase ) / timebase < 0.01 )
 			break;
 
 	if ( i == lecroy_wr2.num_tbas )
@@ -352,12 +347,30 @@ long lecroy_wr2_get_memory_size( void )
 	long length = 30;
 	long mem_size;
 	long i;
+	char *end_p;
 
 
 	lecroy_wr2_talk( "MSIZ?", reply, &length );
 	reply[ length - 1 ] = '\0';
 
-	mem_size =  T_atol( reply );
+	mem_size = strtol( reply, &end_p, 10 );
+
+	if ( errno == ERANGE )
+	{
+		print( FATAL, "Long integer number out of range: %s.\n", reply );
+		THROW( EXCEPTION );
+	}
+
+	if ( end_p == ( char * ) reply )
+	{
+		print( FATAL, "Not an integer number: %s.\n", reply );
+		THROW( EXCEPTION );
+	}
+
+	if ( *end_p == 'K' )
+		mem_size *= 1000;
+	else if ( *end_p == 'M' )
+		mem_size *= 1000000;
 
 	for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
 		if ( lecroy_wr2.mem_sizes[ i ] == mem_size )
@@ -999,8 +1012,8 @@ int lecroy_wr2_get_trigger_mode( void )
 		mode = LECROY_WR2_TRG_MODE_SINGLE;
 	else if ( buf[ 1 ] == 'T' )
 		mode = LECROY_WR2_TRG_MODE_STOP;
-
-	fsc2_assert( 1 == 0 );
+	else
+		fsc2_assert( 1 == 0 );
 
 	return lecroy_wr2.trigger_mode = mode;
 }
@@ -1046,7 +1059,7 @@ double lecroy_wr2_get_trigger_delay( void )
 	   negative values it's already the delay time */
 
 	if ( lecroy_wr2.trigger_delay > 0.0 )
-		lecroy_wr2.trigger_delay = 0.1 * lecroy_wr2.timebase;
+		lecroy_wr2.trigger_delay *= 0.1 * lecroy_wr2.timebase;
 
 	return lecroy_wr2.trigger_delay;
 }
@@ -1087,10 +1100,13 @@ bool lecroy_wr2_is_displayed( int ch )
 
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
 		sprintf( cmd, "C%d:TRA?", ch - LECROY_WR2_CH1 + 1 );
-	else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TB )
+	else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD )
 		sprintf( cmd, "T%c:TRA?", ch - LECROY_WR2_TA + 'A' );
 	else if ( ch >= LECROY_WR2_M1 && ch <= LECROY_WR2_M4 )
-		sprintf( cmd, "M%d:TRA?", ch - LECROY_WR2_M1 + 1 );
+	{
+		print( FATAL, "A memory channel can't be displayed.\n");
+		THROW( EXCEPTION );
+	}
 	else
 	{
 		print( FATAL, "Internal error detected.\n" );
@@ -1115,9 +1131,12 @@ bool lecroy_wr2_display( int ch,
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
 		sprintf( cmd, "C%d:TRA ", ch - LECROY_WR2_CH1 + 1 );
 	else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD )
-		sprintf( cmd, "E%c:TRA ", ch - LECROY_WR2_TA + 'A' );
+		sprintf( cmd, "T%c:TRA ", ch - LECROY_WR2_TA + 'A' );
 	else if ( ch >= LECROY_WR2_M1 && ch <= LECROY_WR2_M4 )
-		sprintf( cmd, "M%d:TRA ", ch - LECROY_WR2_M1 + 1 );
+	{
+		print( FATAL, "Memory channels can't be displayed.\n" );
+		THROW( EXCEPTION );
+	}
 	else
 	{
 		print( FATAL, "Internal error detected.\n" );
@@ -1188,17 +1207,38 @@ void lecroy_wr2_start_acquisition( void )
 
 		do_averaging = SET;
 
-		snprintf( cmd, 100, "T%c:DEF EQN,AVGS CH%ld,MAXPTS,%ld,SWEEPS,%ld",
+		snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld",
 				  'A' + LECROY_WR2_TA - ch,
 				  lecroy_wr2.source_ch[ ch ] - LECROY_WR2_CH1 + 1,
-				  10 * ( lecroy_wr2.is_interleaved ?
-						 lecroy_wr2.cur_hres->ppd_ris :
-						 lecroy_wr2.cur_hres->ppd ),
+				  lecroy_wr2_curve_length( ),
 				  lecroy_wr2.num_avg[ ch ] );
 
 		if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) )
 			 == FAILURE )
-		lecroy_wr2_gpib_failure( );
+			lecroy_wr2_gpib_failure( );
+
+		/* If we want to use a trace it must be switched on (but not the
+		   channel that gets averaged) */
+
+		if ( ! lecroy_wr2_is_displayed( ch ) )
+			lecroy_wr2_display( ch, SET );
+
+		/* Switch off horizontal zoom and shift - if it's on the curve fetched
+		   from the device isn't what one would expect... */
+
+		sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5", 'A' + LECROY_WR2_TA - ch,
+				 'A' + LECROY_WR2_TA - ch ) ;
+
+		if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
+			lecroy_wr2_gpib_failure( );
+
+		/* Finally reset what's currently stored in the trace (otherwise a
+		   new acquisition may not get started) */
+
+		sprintf( cmd, "T%c:FRST", 'A' + LECROY_WR2_TA - ch );
+
+		if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
+			lecroy_wr2_gpib_failure( );
 	}
 
 	/* Switch digitizer back on to running state by switching to a trigger
@@ -1221,6 +1261,8 @@ void lecroy_wr2_start_acquisition( void )
 	/* Reset the bits in the word that tells us later that the data in the
 	   corresponding channel are ready to be fetched */
 
+	lecroy_wr2_get_inr( );
+
 	can_fetch &= ~ ( LECROY_WR2_PROC_DONE_TA | LECROY_WR2_PROC_DONE_TB |
 					 LECROY_WR2_PROC_DONE_TC | LECROY_WR2_PROC_DONE_TD |
 					 LECROY_WR2_SIGNAL_ACQ );
@@ -1238,8 +1280,7 @@ static void lecroy_wr2_get_prep( int              ch,
 								 unsigned char ** data,
 								 long *           length,
 								 double *         gain,
-								 double *         offset,
-								 const char *     what )
+								 double *         offset )
 {
 	unsigned int bit_to_test;
 	char cmd[ 100 ];
@@ -1255,13 +1296,6 @@ static void lecroy_wr2_get_prep( int              ch,
 
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
 	{
-		if ( ! lecroy_wr2.is_displayed[ ch ] )
-		{
-			print( FATAL, "Can't fetch %s for channel %s since it isn't "
-				   "switched on.\n", what, LECROY_WR2_Channel_Names[ ch ] );
-			THROW( EXCEPTION );
-		}
-
 		bit_to_test = LECROY_WR2_SIGNAL_ACQ;
 		sprintf( ch_str, "C%d", ch - LECROY_WR2_CH1 + 1 );
 	}
@@ -1304,13 +1338,11 @@ static void lecroy_wr2_get_prep( int              ch,
 
 	if ( ! is_mem_ch &&
 		 ! ( can_fetch & bit_to_test ) )
-	{
 		while ( ! ( ( can_fetch |= lecroy_wr2_get_inr( ) ) & bit_to_test ) )
 		{
 			stop_on_user_request( );
 			fsc2_usleep( 20000, UNSET );
 		}
-	}
 
 	TRY
 	{
@@ -1367,7 +1399,7 @@ void lecroy_wr2_get_curve( int        ch,
 
 	/* Get the curve from the device */
 
-	lecroy_wr2_get_prep( ch, w, &data, length, &gain, &offset, "curve" );
+	lecroy_wr2_get_prep( ch, w, &data, length, &gain, &offset );
 
 	/* Calculate the voltages from the data, data are two byte (LSB first),
 	   two's complement integers, which then need to be scaled by gain and
@@ -1406,7 +1438,7 @@ double lecroy_wr2_get_area( int        ch,
 
 	/* Get the curve from the device */
 
-	lecroy_wr2_get_prep( ch, w, &data, &length, &gain, &offset, "area" );
+	lecroy_wr2_get_prep( ch, w, &data, &length, &gain, &offset );
 
 	/* Calculate the voltages from the data, data are two byte (LSB first),
 	   two's complement integers, which then need to be scaled by gain and
@@ -1445,8 +1477,7 @@ double lecroy_wr2_get_amplitude( int        ch,
 
 	/* Get the curve from the device */
 
-	lecroy_wr2_get_prep( ch, w, &data, &length, &gain, &offset,
-							"amplitude" );
+	lecroy_wr2_get_prep( ch, w, &data, &length, &gain, &offset );
 
 	/* Calculate the maximum and minimum voltages from the data, data are two
 	   byte (LSB first), two's complement integers */
@@ -1509,15 +1540,15 @@ static unsigned char *lecroy_wr2_get_data( long * len )
 	char len_str[ 10 ];
 
 
-	/* First thing we read is something like "#[0-9]" where the number
+	/* First thing we read is something like "DAT1,#[0-9]" where the number
 	   following the '#' is the number of bytes to be read next */
 
-	*len = 2;
+	*len = 7;
 	if ( gpib_read( lecroy_wr2.device, len_str, len ) == FAILURE )
 		lecroy_wr2_gpib_failure( );
 
-	len_str [ *len - 1 ] = '\0';
-	*len = T_atol( len_str + 1 );
+	len_str [ *len ] = '\0';
+	*len = T_atol( len_str + 6 );
 
 	fsc2_assert( *len > 0 );
 
@@ -1526,7 +1557,7 @@ static unsigned char *lecroy_wr2_get_data( long * len )
 	if ( gpib_read( lecroy_wr2.device, len_str, len ) == FAILURE )
 		lecroy_wr2_gpib_failure( );
 	
-	len_str[ *len - 1 ] = '\0';
+	len_str[ *len ] = '\0';
 	*len = T_atol( len_str );
 
 	fsc2_assert( *len > 0 );
@@ -1551,6 +1582,7 @@ static int lecroy_wr2_get_int_value( int          ch,
 {
 	char cmd[ 100 ];
 	long length = 100;
+	char *ptr = cmd;
 
 
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
@@ -1567,7 +1599,13 @@ static int lecroy_wr2_get_int_value( int          ch,
 	lecroy_wr2_talk( cmd, cmd, &length );
 	cmd[ length - 1 ] = '\0';
 
-	return T_atoi( cmd );
+	while ( *ptr && *ptr++ != ':' )
+		/* empty */ ;
+
+	if ( ! *ptr )
+		lecroy_wr2_gpib_failure( );
+
+	return T_atoi( ptr );
 }
 #endif
 
@@ -1580,6 +1618,7 @@ static double lecroy_wr2_get_float_value( int          ch,
 {
 	char cmd[ 100 ];
 	long length = 100;
+	char *ptr = cmd;
 
 
 	if ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX )
@@ -1596,7 +1635,13 @@ static double lecroy_wr2_get_float_value( int          ch,
 	lecroy_wr2_talk( cmd, cmd, &length );
 	cmd[ length - 1 ] = '\0';
 
-	return T_atod( cmd );
+	while ( *ptr && *ptr++ != ':' )
+		/* empty */ ;
+
+	if ( ! *ptr )
+		lecroy_wr2_gpib_failure( );
+
+	return T_atod( ptr );
 }
 
 

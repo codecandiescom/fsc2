@@ -43,8 +43,6 @@ void rb_pulser_init_setup( void )
 	rb_pulser_basic_functions_init( );
 	rb_pulser_rf_synth_init( );
 
-	
-
 	if ( rb_pulser.dump_file != NULL )
 		rb_pulser_init_print( rb_pulser.dump_file );
 

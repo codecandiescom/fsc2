@@ -108,12 +108,12 @@
 /* Flags from the INR (internal state change) register indicating that an
    acquisition or a waveform processing has finished */
 
-#define LECROY_WR2_SIGNAL_ACQ      ( 1 <  0 )
-#define LECROY_WR2_PROC_DONE_TA    ( 1 <  8 )
-#define LECROY_WR2_PROC_DONE_TB    ( 1 <  9 )
-#define LECROY_WR2_PROC_DONE_TC    ( 1 < 10 )
-#define LECROY_WR2_PROC_DONE_TD    ( 1 < 11 )
-#define LECROY_WR2_PROC_DONE( ch ) ( 1 < ( 8 + ch - LECROY_WR2_CH1 ) )
+#define LECROY_WR2_SIGNAL_ACQ      ( 1 <<  0 )
+#define LECROY_WR2_PROC_DONE_TA    ( 1 <<  8 )
+#define LECROY_WR2_PROC_DONE_TB    ( 1 <<  9 )
+#define LECROY_WR2_PROC_DONE_TC    ( 1 << 10 )
+#define LECROY_WR2_PROC_DONE_TD    ( 1 << 11 )
+#define LECROY_WR2_PROC_DONE( ch ) ( 1 << ( 8 + ch - LECROY_WR2_TA ) )
 
 
 

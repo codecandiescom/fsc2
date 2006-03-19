@@ -1,4 +1,4 @@
-#  $Id$
+	#  $Id$
 #
 #  Copyright (C) 1999-2006 Jens Thoms Toerring
 #
@@ -25,7 +25,7 @@
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
 hp864_list      := hp8647a hp8648b
-lecroy94_list   := lecroy9420 lecroy9424 lecroy9424e lecroy9450
+lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 
 # List of modules that are to be made from a single source file only (as
@@ -59,8 +59,9 @@ hp8648b         := hp8648b.c hp8648b_util.c hp8648b_gpib.c hp8648b_lexer.c
 hp8672a         := hp8672a.c hp8672a_util.c hp8672a_gpib.c hp8672a_lexer.c
 er023m          := er023m.c  er023m_addon.c er023m_gpib.c
 lecroy9400      := lecroy9400.c lecroy9400_gpib.c lecroy9400_util.c
-lecroy9420      := lecroy9420.c lecroy9420_gpib.c lecroy9450_util.c
-lecroy9424      := lecroy9424.c lecroy9424_gpib.c lecroy9450_util.c
+lecroy9410      := lecroy9410.c lecroy9410_gpib.c lecroy9410_util.c
+lecroy9420      := lecroy9420.c lecroy9420_gpib.c lecroy9420_util.c
+lecroy9424      := lecroy9424.c lecroy9424_gpib.c lecroy9424_util.c
 lecroy9424e     := lecroy9424e.c lecroy9424e_gpib.c lecroy9424e_util.c
 lecroy9450      := lecroy9450.c lecroy9450_gpib.c lecroy9450_util.c
 lecroy_wr2      := lecroy_wr2.c lecroy_wr2_gpib.c lecroy_wr2_util.c
