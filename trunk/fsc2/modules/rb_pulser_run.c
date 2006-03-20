@@ -335,7 +335,15 @@ void rb_pulser_full_reset( void )
 		card->is_active =
 		card->was_active = UNSET;
 		card->delay = card->old_delay = 0;
+
+#if ! defined RB_PULSER_TEST
 		rb_pulser_delay_card_state( card->handle, STOP );
+
+#else   /* in test mode */
+		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
+				 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
+				 "RULBUS_RB8514_DELAY_PULSE_NONE )\n", i );
+#endif
 	}
 
 	/* The card for the initial delay needs some special handling, otherwise
@@ -427,17 +435,37 @@ static void rb_pulser_commit( bool flag )
 
 		if ( card->was_active && ! card->is_active )
 		{
+#if ! defined RB_PULSER_TEST
 			rb_pulser_delay_card_state( card->handle, STOP );
+
+#else   /* in test mode */
+			fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
+					 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
+					 "RULBUS_RB8514_DELAY_PULSE_NONE )\n", i );
+#endif
 			card->delay = card->old_delay = 0;
 			continue;
 		}
 
 		if ( ! card->was_active && card->is_active )
+#if ! defined RB_PULSER_TEST
 			rb_pulser_delay_card_state( card->handle, START );
+
+#else   /* in test mode */
+		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
+				 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
+				 "RULBUS_RB8514_DELAY_END_PULSE )\n", i );
+#endif
 
 		if ( card->old_delay != card->delay )
 		{
+#if ! defined RB_PULSER_TEST
 			rb_pulser_delay_card_delay( card->handle, card->delay );
+
+#else   /* in test mode */
+			fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, "
+					 "%lu, 0 )\n", i, card->delay );
+#endif
 			card->old_delay = card->delay;
 		}
 	}
@@ -463,6 +491,7 @@ static void rb_pulser_rf_pulse( void )
 
 	if ( p->is_active )
 	{
+#if ! defined RB_PULSER_TEST
 		if ( ( func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) )
 																	  == NULL )
 		{
@@ -473,6 +502,11 @@ static void rb_pulser_rf_pulse( void )
 
 		vars_push( FLOAT_VAR, f->last_pulse_len );
 		vars_pop( func_call( func_ptr ) );
+
+#else   /* in test mode */
+		fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
+				 f->last_pulse_len );
+#endif
 	}
 
 	/* Switch synthesizer output on or off if the pulse just became active or
@@ -481,6 +515,7 @@ static void rb_pulser_rf_pulse( void )
 	if ( ( p->was_active && ! p->is_active ) ||
 		 ( ! p->was_active && p->is_active ) )
 	{
+#if ! defined RB_PULSER_TEST
 		if ( ( func_ptr = func_get( rb_pulser.synth_state, &acc ) ) == NULL )
 		{
 			print( FATAL, "Function for setting synthesizer output state is "
@@ -494,6 +529,11 @@ static void rb_pulser_rf_pulse( void )
 			vars_push( STR_VAR, "ON" );
 
 		vars_pop( func_call( func_ptr ) );
+
+#else   /* in test mode */
+		fprintf( stderr, "synthesizer_pulse_state( \"%s\" )\n",
+				 ( p->was_active && ! p->is_active ) ? "OFF" : "ON" );
+#endif
 
 		p->was_active = p->is_active;
 	}

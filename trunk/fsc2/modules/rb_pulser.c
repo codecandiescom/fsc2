@@ -62,9 +62,14 @@ int rb_pulser_init_hook( void )
 
 	/* Set global variable to indicate that Rulbus is needed */
 
+#if ! defined RB_PULSER_TEST
 	Need_RULBUS = SET;
 
 	rb_pulser.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
+
+#else   /* in test mode */
+	rb_pulser.exists_synthesizer = SET;
+#endif
 
 #ifndef FIXED_TIMEBASE
 	Pulser_Struct.set_timebase = rb_pulser_store_timebase;

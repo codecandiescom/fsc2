@@ -34,6 +34,8 @@
 #include "rb_pulser.conf"
 
 
+#define RB_PULSER_TEST
+
 /* Include the Rulbus header file */
 
 #include <rulbus.h>
