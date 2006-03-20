@@ -23,7 +23,7 @@
 
 
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)
-    KERNEL_INC = $(RULBUS_EPP_SOURCE)
+    KERNEL_SRC = $(RULBUS_EPP_KERNEL_SOURCE)
 else
 	KERNEL_SRC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 							 echo "/lib/modules/`uname -r`/build"; \
