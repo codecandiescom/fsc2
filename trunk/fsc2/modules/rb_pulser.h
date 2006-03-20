@@ -34,12 +34,21 @@
 #include "rb_pulser.conf"
 
 
-#define RB_PULSER_TEST
-
 /* Include the Rulbus header file */
 
 #include <rulbus.h>
 
+
+/* Uncomment the following line to have the pulser run in test mode, i.e.
+   instead of outputting pulses have a line printed to stderr for each
+   call for setting a deleay or clock card. */
+
+#if 0
+#define RB_PULSER_TEST
+#endif
+
+
+/* Defines for the number of delay and clock cards */
 
 #define NUM_DELAY_CARDS  10
 
