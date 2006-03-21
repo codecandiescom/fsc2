@@ -107,7 +107,7 @@ static const char *rulbus_errlist[ ] = {
 	"%d, column %d",               		/* RULBUS_CF_INTR_DELAY_INVALID */
 	"Not permission to open device file",
 										/* RULBUS_DEV_FILE_ACCESS */
-	"Invalid device file name or missing device file",
+	"Invalid device file name or device file missing",
 										/* RULBUS_DEV_FILE_NAME_INVALID */
 	"Can't open device file",           /* RULBUS_DEV_FILE_OPEN_FAIL */
 	"device does not exit or driver not loaded",
