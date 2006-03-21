@@ -38,6 +38,7 @@ extern "C" {
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
+#include <assert.h>
 #include "rulbus.h"
 
 

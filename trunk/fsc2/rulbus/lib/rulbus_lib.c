@@ -36,7 +36,7 @@
 RULBUS_CARD_LIST *rulbus_card = NULL;
 int rulbus_num_cards = 0;
 char *rulbus_dev_file = NULL;
-int rulbus_errno = RULBUS_OK;
+int rulbus_errno = RULBUS_NO_INITIALIZATION;
 
 
 static const char *rulbus_errlist[ ] = {
@@ -396,12 +396,13 @@ int rulbus_perror( const char * s )
 {
 	extern int rulbus_lineno;
 	extern int rulbus_column;
-	const char *p;
+	const char *p = rulbus_errlist[ - rulbus_errno ];
 	int count = 0;
 
 
-	p = rulbus_errlist[ rulbus_in_use ? - rulbus_errno :
-						                - RULBUS_NO_INITIALIZATION ];
+	assert( rulbus_errno <= RULBUS_OK &&
+			rulbus_errno >=
+				- ( int ) ( sizeof rulbus_errlist / sizeof *rulbus_errlist ) );
 
     if ( s != NULL && *s != '\0' )
 		count += fprintf( stderr, "%s: ", s );
@@ -428,8 +429,9 @@ const char *rulbus_strerror( void )
 	extern int rulbus_column;
 
 
-	if ( ! rulbus_in_use )
-		return rulbus_errlist[ - RULBUS_NO_INITIALIZATION ];
+	assert( rulbus_errno <= RULBUS_OK &&
+			rulbus_errno >=
+				- ( int ) ( sizeof rulbus_errlist / sizeof *rulbus_errlist ) );
 
 	if ( ! strstr( rulbus_errlist[ - rulbus_errno ], "%%d" ) )
 	{
