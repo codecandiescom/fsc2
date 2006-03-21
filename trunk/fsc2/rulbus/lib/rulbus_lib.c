@@ -401,7 +401,7 @@ int rulbus_perror( const char * s )
 
 
 	assert( rulbus_errno <= RULBUS_OK &&
-			rulbus_errno >=
+			rulbus_errno >
 				- ( int ) ( sizeof rulbus_errlist / sizeof *rulbus_errlist ) );
 
     if ( s != NULL && *s != '\0' )
@@ -430,7 +430,7 @@ const char *rulbus_strerror( void )
 
 
 	assert( rulbus_errno <= RULBUS_OK &&
-			rulbus_errno >=
+			rulbus_errno >
 				- ( int ) ( sizeof rulbus_errlist / sizeof *rulbus_errlist ) );
 
 	if ( ! strstr( rulbus_errlist[ - rulbus_errno ], "%%d" ) )
