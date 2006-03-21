@@ -1270,7 +1270,7 @@ The digitizing oscilloscopes currently implemented are the Tektronix
 TDS520, TDS520A, TDS540, TDS744A and TDS754A and the LeCroy 9400 (with the
 WP01 Waveform Processing option), 9410, 9420, 9424, 9424E, 9450 and the
 Waverunner-2 (models @w{LT 262}, @w{LT 264}, @w{LT 354}, @w{LT 372},
-@w{LT 274} and @w{LT 584}). The corresponding module names to be used
+@w{LT 374} and @w{LT 584}). The corresponding module names to be used
 in the @code{DEVICES} section are
 @example
 tds520
