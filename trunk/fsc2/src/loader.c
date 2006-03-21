@@ -61,7 +61,6 @@ void load_all_drivers( void )
 #if defined WITH_RULBUS
 	bool saved_need_RULBUS;
 #endif
-	bool saved_need_LAN;
 
 
 	CLOBBER_PROTECT( cd );
@@ -113,7 +112,6 @@ void load_all_drivers( void )
 #if defined WITH_RULBUS
 			saved_need_RULBUS = Need_RULBUS;
 #endif
-			saved_need_LAN    = Need_LAN;
 
 			if ( cd->is_loaded && cd->driver.is_init_hook )
 			{
@@ -161,9 +159,6 @@ void load_all_drivers( void )
 				THROW( EXCEPTION );
 			}
 #endif
-
-			if ( Need_LAN == UNSET && saved_need_LAN == SET )
-				Need_LAN = SET;
 		}
 
 		TRY_SUCCESS;
