@@ -35,8 +35,9 @@ EDL_Stuff_T EDL;
 Communication_T Comm;
 GUI_Stuff_T GUI;
 
-bool Need_GPIB = UNSET;          /* Flag, set if GPIB bus is needed */
+bool Need_GPIB   = UNSET;        /* Flag, set if GPIB bus is needed */
 bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
+bool Need_LAN    = UNSET;        /* Flag, set if LAN connection is needed */
 
 
 /* If you change the following always remember to also adjust the
