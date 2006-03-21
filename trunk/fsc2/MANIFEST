@@ -11,7 +11,6 @@ MANIFEST
 README
 README.mail
 TODO
-xx.edl
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -87,12 +86,12 @@ config/keithley228a.conf
 config/kontron4060.conf
 config/lakeshore330.conf
 config/lecroy9400.conf
+config/lecroy9410.conf
 config/lecroy9420.conf
 config/lecroy9424.conf
 config/lecroy9424e.conf
 config/lecroy9450.conf
 config/lecroy_wr2.conf
-config/lecroy_wr2.conf~
 config/Makefile
 config/mcn700_2000.conf
 config/me6000.conf
@@ -112,7 +111,6 @@ config/rs_spec10.state
 config/s_band_magnet_broad.conf
 config/s_band_magnet_narrow.conf
 config/schlum7150.conf
-config/schlum7150.conf~
 config/spectrapro_300i.calib
 config/spectrapro_300i.conf
 config/spex_cd2a.conf
@@ -270,6 +268,7 @@ modules/lecroy9400_gpib.c
 modules/lecroy9400.h
 modules/lecroy9400.map
 modules/lecroy9400_util.c
+modules/lecroy9410.h
 modules/lecroy9420.h
 modules/lecroy9424e.h
 modules/lecroy9424.h
@@ -360,7 +359,6 @@ modules/tds_util.c.tmpl
 modules/thurlby330.c
 modules/User_Functions.c
 modules/witio_48.c
-modules/x.c
 
 scripts/2_pulse_epr.rulhmpc66.molphys.leidenuniv.nl
 scripts/2_pulse_T2.rulhmpc66.molphys.leidenuniv.nl
@@ -385,6 +383,7 @@ scripts/cw_epr_saturation.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr_saturation.freed.physik.uni-osnabrueck.de
 scripts/cw_epr_saturation.pake.physik.uni-osnabrueck.de
 scripts/cw_epr.tresr.physik.fu-berlin.de
+scripts/direct_detected_epr.rulhmpc66.molphys.leidenuniv.nl
 scripts/endor_monitor.crowley.physik.fu-berlin.de
 scripts/kinetic.milli.ptc.tugraz.at
 scripts/Makefile
