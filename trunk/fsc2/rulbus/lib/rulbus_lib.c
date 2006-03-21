@@ -110,7 +110,7 @@ static const char *rulbus_errlist[ ] = {
 	"Invalid device file name or missing device file",
 										/* RULBUS_DEV_FILE_NAME_INVALID */
 	"Can't open device file",           /* RULBUS_DEV_FILE_OPEN_FAIL */
-	"Device doesn't exit or driver not loaded",
+	"device doesn't exit or driver not loaded",
 										/* RULBUS_DEV_NO_DEVICE */
 	"Missing intialization of Rulbus library",
 										/* RULBUS_NO_INITIALIZATION */
