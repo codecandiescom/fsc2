@@ -102,7 +102,7 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 # indefinitely, if you start a new experiment its previous contents gets
 # overwritten. If no file is specified logs will be written to stderr.
 
-GPIB_LOG_FILE      := /tmp/gpib.log
+GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 
 
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
@@ -149,7 +149,7 @@ SERIAL_LOCK_DIR    := /var/lock
 # indefinitely, if you start a new experiment its previous contents gets
 # overwritten. If no file is specified logs will be written to stderr.
 
-SERIAL_LOG_FILE    := /tmp/serial.log
+SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 
 
 # The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the logs
@@ -170,7 +170,7 @@ SERIAL_LOG_LEVEL   := HIGH
 # indefinitely, if you start a new experiment its previous contents gets
 # overwritten. If no file is specified logs will be written to stderr.
 
-LAN_LOG_FILE    := /tmp/lan.log
+LAN_LOG_FILE    := /tmp/fsc2_lan.log
 
 
 # The next variable, LAN_LOG_LEVEL, sets the verbosity level for the logs
