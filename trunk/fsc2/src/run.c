@@ -335,6 +335,8 @@ static bool no_prog_to_run( void )
 
 	fsc2_serial_cleanup( );
 
+	fsc2_lan_cleanup( );
+
 	Fsc2_Internals.mode = PREPARATION;
 
 	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
@@ -438,6 +440,8 @@ static bool init_devs_and_graphics( void )
 			gpib_shutdown( );
 
 		fsc2_serial_cleanup( );
+
+		fsc2_lan_cleanup( );
 
 		Fsc2_Internals.mode = PREPARATION;
 
@@ -560,6 +564,8 @@ static void fork_failure( int stored_errno )
 		gpib_shutdown( );
 
 	fsc2_serial_cleanup( );
+
+	fsc2_lan_cleanup( );
 
 	Fsc2_Internals.mode = PREPARATION;
 
@@ -829,7 +835,7 @@ void run_sigchld_callback( FL_OBJECT * a,
 
 	tools_clear( );
 
-	/* Reset all the devices and finally the GPIB bus, RULBUS and serial
+	/* Reset all the devices and finally the GPIB bus, RULBUS, LAN and serial
 	   port(s) */
 
 	run_end_of_exp_hooks( );
@@ -843,6 +849,8 @@ void run_sigchld_callback( FL_OBJECT * a,
 		gpib_shutdown( );
 
 	fsc2_serial_cleanup( );
+
+	fsc2_lan_cleanup( );
 
 	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		return;
