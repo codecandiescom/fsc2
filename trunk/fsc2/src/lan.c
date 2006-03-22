@@ -278,6 +278,7 @@ int fsc2_lan_open( const char * dev_name,
 		ll->fd = sock_fd;
 		ll->name = NULL;
 		ll->name = T_strdup( dev_name );
+		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
@@ -308,7 +309,7 @@ int fsc2_lan_open( const char * dev_name,
 		ll->so_timeo_avail = UNSET;
 
 	if ( lan_log_level == LL_ALL )
-		fsc2_lan_log_message( "Opened connection to device %s: IP = %s, "
+		fsc2_lan_log_message( "Opened connection to device %s: IP = \"%s\", "
 							  "port = %d\n", dev_name, address, port );
 
 	return ll->fd;
@@ -427,14 +428,13 @@ ssize_t fsc2_lan_write( int          handle,
 	if ( lan_log_level == LL_ALL )
 	{
 		if ( us_wait <= 0 )
-			fsc2_lan_log_message( "Expected to write %ld bytes without "
-								  "delay to LAN for device %s:\n%*s\n",
-								  ( long ) length, ll->name,
-								  ( int ) length, message );
+			fsc2_lan_log_message( "Expected to write %ld bytes delay to LAN "
+								  "for device %s:\n%*s\n", ( long ) length,
+								  ll->name, ( int ) length, message );
 		else
 			fsc2_lan_log_message( "Expected to write %ld bytes within %ld ms "
 								  "to LAN for device %s:\n%*s\n\n",
-								  ( long ) length, ll->name,
+								  ( long ) length, us_wait / 1000, ll->name,
 								  ( int ) length, message );
 	}
 
@@ -547,7 +547,7 @@ ssize_t fsc2_lan_read( int    handle,
 	{
 		if ( us_wait <= 0 )
 			fsc2_lan_log_message( "Expected to read up to %ld bytes "
-								  "without delay from LAN for device %s\n",
+								  "from LAN for device %s\n",
 								  ( long ) length, ll->name );
 		else
 			fsc2_lan_log_message( "Expected to read up to %ld bytes "
@@ -618,7 +618,6 @@ void fsc2_lan_cleanup( void )
 			close( ll->fd );
 		
 		lan_list = ll->next;
-		lan_list->prev = NULL;
 
 		if ( ll->name )
 			T_free( ( char * ) ll->name );
@@ -858,10 +857,10 @@ static void get_ip_address( const char *     address,
 	/* If this didn't do the trick try to resolve the name via a DNS query */
 
 	if ( ( he = gethostbyname( address ) ) == NULL ||
-		 he->h_addrtype != AF_INET || he->h_length < 1 )
+		 he->h_addrtype != AF_INET || *he->h_addr_list == NULL )
 		ip_addr->s_addr = 0;
 	else
-		memcpy( &ip_addr->s_addr, he->h_addr_list, 4 );
+		memcpy( &ip_addr->s_addr, *he->h_addr_list, 4 );
 }
 
 
