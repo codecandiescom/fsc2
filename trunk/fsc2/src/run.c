@@ -855,7 +855,7 @@ void run_sigchld_callback( FL_OBJECT * a,
 	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		return;
 
-	/* Print out for how long the experiment has been running */
+	/* Print out for how long the experiment had been running */
 
 	secs  = irnd( experiment_time( ) );
 	hours = secs / 3600;
