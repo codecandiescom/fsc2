@@ -70,8 +70,9 @@
 #include "loader.h"
 #include "phases.h"
 #include "pulser.h"
-#include "serial.h"
 #include "gpib_if.h"
+#include "serial.h"
+#include "lan.h"
 #include "module_util.h"
 
 
