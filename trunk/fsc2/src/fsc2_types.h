@@ -82,6 +82,7 @@
 #define ATT_TABLE_ENTRY_P     ( Att_Table_Entry_T * )
 #define FS_P                  ( FS_T * )
 #define UNS16_P               ( uns16 * )
+#define LAN_LIST_P            ( LAN_List_T * )
 
 #else
 
@@ -133,6 +134,7 @@
 #define ATT_TABLE_ENTRY_P
 #define FS_P
 #define UNS16_P
+#define LAN_LIST_P
 
 #endif
 
