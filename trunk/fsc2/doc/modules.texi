@@ -1084,6 +1084,136 @@ descriptor. If the function gets passed an invalid serial port number
 @code{errno} is set to @code{EBADF}.
 
 
+@subsection Handling devices connected via the LAN
+
+There are some functions for the communication with devices connected
+via the LAN (@code{TCP} only, there's no support for @code{UDP} yet)
+provided by @code{fsc2}. They allow you to connect to a device, send
+and receive data and finally close the connection. Naturally they
+aren't written with a certain protocol in mind -- writing that is your
+business -- but just provide a set of fundamental routines on top of
+which you can write your own functions. You can even forego using them
+at all and write your own code for talking with the devices directly,
+they only exist for your convenience.
+
+The advantage of using them is that you don't have to care about basic
+operations (including dealing with timeouts etc.@:) and that the
+functions automatically log whatever gets send between the computer
+and the devices. How much is written to the log file (and where this
+log file is and is named) can be set as a compilation option, see the
+main @file{Makefile} or the settings for your machine in the 
+@file{machines} subdirectory (if you created such a file).
+
+Here is a complete list of these convenience functions:
+@table @samp
+@item @code{fsc2_lan_open()}
+Opens a connection to a device
+@item @code{fsc2_lan_write()}
+Sends data to the device
+@item @code{fsc2_lan_read()}
+Reads data from the device
+@item @code{fsc2_lan_close()}
+Closes the connection to the device
+@end table
+@noindent
+While they are similar to the @code{open()}, @code{write()}, @code{read()}
+and @code{close()} function for dealing with normal file descriptors the
+all need several extra arguments.
+
+@findex fsc2_lan_open()
+The for opening a connection, function @code{fsc2_lan_open()}, is declared
+as
+@example
+int fsc2_lan_open( const char * dev_name,
+                   const char * address,
+                   int          port,
+                   long         us_wait,
+                   bool         quit_on_signal )
+@end example
+@noindent
+The first argument, @code{dev_name}, is a string with the name of the
+device to be used when writing to the log file. The second argument,
+@code{address} is a string with the IP address of the device. This can
+be either the numerical IP address in dotted-quad format (i.e.
+@code{"123.97.243.12"} or a symbolic host name, for which the IP address
+is determined via a DNS request. The third argument, @code{port}, is the
+port the device is accepting connections on, i.e.@: a number between
+@code{0} and @code{65535}. The fourth argument, @code{us_wait}, is the
+maximum time (in micro-seconds) to wait for a connection to be achieved.
+If set to @code{0} (or a negative value) the connection will only time out
+after a system dependent delay (typically in the order of a minute.
+Finally, the last argument @code{quit_on_signal} tells the function
+if it is supposed to return immediately if a signal is received while it
+is trying to connect to the device.
+
+The function returns a positive integer on success, that can be used as
+a handle for the device in the following function calls, and @code{-1}
+on errors. Please note that the handle returned is the file descriptor
+for the socket which is connected to the device. You are free to use
+this file descriptor for whatever you want, but please call the function
+@code{fsc2_lan_close()} to close it. The only option set for the socket
+initially is @code{SO_KEEPALIVE} (but you can unset that if you want).
+Later on the options @code{SO_SNDTIMEO} and @code{SO_RCVTIMEO} may be
+set to realize timeouts for read and write operations, so you better
+leave them alone if you plan to use the functions @code{fsc2_lan_write()}
+and @code{fsc2_lan_read()}.
+
+@findex fsc2_lan_write()
+The function for writing, @code{fsc2_lan_write()}, is declared as
+@example
+ssize_t fsc2_lan_write( int          handle,
+                        const char * message,
+                        long         length,
+                        long         us_wait,
+                        bool         quit_on_signal )
+@end example
+@noindent
+The first argument is the handle returned by @code{fsc2_lan_open()},
+identifying the device. The second argument, @code{message}, is a
+buffer with the data to be send to the device. The third, @code{length},
+is the length of the data buffer. The fourth argument, @code{us_wait},
+is the amount of time to wait for data to be written to the device
+before timing out. If this is set to @code{0} (or even a negative value)
+no timeout is used, i.e.@: the write function will wait indefinitely.
+The last argument, @code{quit_on_signal}, again indicates if the function
+must return immediately if a signal is received.
+
+Please note that, as always with writing to the network, the function
+may return before as many bytes as requested have been send. The return
+value will tell you how many actually were sent or, if @code{-1} is
+returned, that the write operation failed.
+
+@findex fsc2_lan_read()
+The function for reading, @code{fsc2_lan_read()}, is declared as
+@example
+ssize_t fsc2_lan_read( int    handle,
+                       char * buffer,
+                       long   length,
+                       long   us_wait,
+                       bool   quit_on_signal )
+@end example
+@noindent
+The arguments are identical to the ones of @code{fsc2_lan_write()},
+with the only difference that the third, @code{buffer}, is a buffer
+large enough to hold at least @code{length} bytes (make sure that
+this is the case!).
+
+As for @code{fsc2_lan_write()} it isn't guaranteed that has many bytes
+as requested get read. The return value tells you how many actually
+got read - if this should be @code{-1} reading failed.
+
+@findex fsc2_lan_close()
+Finally, the function @code{fsc2_lan_close()} for closing the connection
+is declared as
+@example
+int fsc2_lan_close( int handle )
+@end example
+It only expects a single argument, the handle of for the connection to
+close. It normally returns @code{0}, but when you try to close a connection
+with an invalid handle (possibly because the connection had already been
+closed), @code{-1} gets returned.
+
+
 @subsection Hook functions
 @cindex hook functions
 @findex init_hook()
