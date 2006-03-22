@@ -958,7 +958,7 @@ int gpib_trigger( int device );
 @noindent
 triggers the device by sending it a Device Trigger Command.
 
-
+@findex gpib_log_message()
 Finally, there is an additional function to let you directly write to
 the log file that stores information about the details of the
 communication on the GPIB bus:
@@ -1087,8 +1087,9 @@ argument is always the serial port number instead of a file
 descriptor. If the function gets passed an invalid serial port number
 @code{errno} is set to @code{EBADF}.
 
+@findex fsc2_serial_log_message()
 The only other additional function that can be called is
-@{fsc2_serial_log_message()} and lets you directly write to
+@code{fsc2_serial_log_message()} and lets you directly write to
 the log file that stores information about the details of the
 communication over the serial port:
 @example
@@ -1231,8 +1232,9 @@ with an invalid handle (possibly because the connection had already been
 closed), @code{-1} gets returned.
 
 
+@findex fsc2_lan_log_message()
 The only other additional function that can be called is
-@{fsc2_lan_log_message()} and lets you directly write to
+@code{fsc2_lan_log_message()} and lets you directly write to
 the log file that stores information about the details of the
 communication over LAN:
 @example
