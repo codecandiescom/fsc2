@@ -221,9 +221,9 @@ int fsc2_tcflow( int sn      UNUSED_ARG,
 
 #include <sys/timeb.h>
 
-/* Definition of log levels allowed in calls of fsc2_serial_exp_init()
-   since they are already may have been defined in the GPIB module only
-   define them hen they aren't already known */
+/* Definition of log levels allowed in calls of fsc2_serial_exp_init().
+   Since they already may have been defined in the GPIB module only
+   define them if they aren't already known */
 
 #if ! defined LL_NONE
 #define  LL_NONE  0    /* log nothing */
@@ -334,7 +334,7 @@ void fsc2_request_serial_port( int          sn,
  * start of an experiment in order to open the log file.
  * ->
  *  * Pointer to the name of log file - if the pointer is NULL or does
- *    not point to a non-empty string stderr used.
+ *    point to an empty string stderr is used.
  *  * log level, either LL_NONE, LL_ERR, LL_CE or LL_ALL
  *    (if log level is LL_NONE 'log_file_name' is not used at all)
  *-----------------------------------------------------------------------*/
@@ -431,7 +431,8 @@ void fsc2_serial_cleanup( void )
 	{
 		fsc2_serial_log_message( "Closed all serial ports\n" );
 		raise_permissions( );
-		fclose( fsc2_serial_log );
+		if ( fsc2_serial_log != stderr )
+			fclose( fsc2_serial_log );
 		fsc2_serial_log = NULL;
 		lower_permissions( );
 	}
@@ -666,16 +667,17 @@ ssize_t fsc2_serial_write( int          sn,
 		if ( us_wait == 0 )
 			fsc2_serial_log_message( "Expected to write %ld bytes without "
 									 "delay to serial port %d:\n%.*s\n",
-									 ( long int ) count, sn, count, buf );
+									 ( long int ) count, sn,
+									 ( int ) count, buf );
 		else if ( us_wait < 0 )
 			fsc2_serial_log_message( "Expected to write %ld bytes to serial "
 									 "port %d:\n%.*s\n", ( long int ) count,
-									 sn, count, buf );
+									 sn, ( int ) count, buf );
 		else
 			fsc2_serial_log_message( "Expected to write %ld bytes within %ld "
 									 "ms to serial port %d:\n%.*s\n",
 									 ( long int ) count, us_wait / 1000, sn,
-									 count, buf );
+									 ( int ) count, buf );
 	}
 
 	raise_permissions( );
@@ -702,8 +704,7 @@ ssize_t fsc2_serial_write( int          sn,
 				if ( errno != EINTR )
 				{
 					fsc2_serial_log_message( "Error: select() returned "
-											 "indicating error in "
-											 "fsc2_serial_write()\n" );
+											 "indicating error\n" );
 					fsc2_serial_log_function_end( "fsc2_serial_write",
 												  Serial_Port[ sn ].dev_name );
 					lower_permissions( );
@@ -720,7 +721,7 @@ ssize_t fsc2_serial_write( int          sn,
 				}
 
 				fsc2_serial_log_message( "Error: select aborted due to "
-										 "signal in fsc2_serial_write()\n" );
+										 "signal\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_write",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -728,7 +729,7 @@ ssize_t fsc2_serial_write( int          sn,
 				
 			case 0 :
 				fsc2_serial_log_message( "Error: writing aborted due to "
-										 "timeout in fsc2_serial_write()\n" );
+										 "timeout\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_write",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -744,15 +745,14 @@ ssize_t fsc2_serial_write( int          sn,
 	if ( write_count < 0 && errno == EINTR )
 	{
 		fsc2_serial_log_message( "Error: writing aborted due to signal, "
-								 "0 bytes got written in "
-								 "fsc2_serial_write()\n" );
+								 "0 bytes got written\n" );
 		write_count = 0;
 	}
 	else
 	{
 		if ( ll == LL_ALL )
-			fsc2_serial_log_message( "Wrote %ul bytes to serial port %d\n",
-									 ( unsigned long ) write_count );
+			fsc2_serial_log_message( "Wrote %ld bytes to serial port %d\n",
+									 ( long ) write_count, sn );
 	}
 
 	lower_permissions( );
@@ -807,17 +807,16 @@ ssize_t fsc2_serial_read( int    sn,
 		if ( us_wait == 0 )
 			fsc2_serial_log_message( "Expected to read up to %ld bytes "
 									 "without delay from serial port "
-									 "%d:\n%.*s\n", ( long int ) count, sn,
-									 count, buf );
+									 "%d\n", ( long ) count, sn );
 		else if ( us_wait < 0 )
 			fsc2_serial_log_message( "Expected to read up to %ld bytes from "
-									 "serial port %d:\n%.*s\n",
-									 ( long int ) count, sn, count, buf );
+									 "serial port %d\n",
+									 ( long ) count, sn );
 		else
-			fsc2_serial_log_message( "Expected to read up to  %ld bytes "
+			fsc2_serial_log_message( "Expected to read up to %ld bytes "
 									 "within %ld ms from serial port "
-									 "%d:\n%.*s\n", ( long int ) count,
-									 us_wait / 1000, sn, count, buf );
+									 "%d\n", ( long ) count,
+									 us_wait / 1000, sn );
 	}
 
 	raise_permissions( );
@@ -865,7 +864,7 @@ ssize_t fsc2_serial_read( int    sn,
 				}
 
 				fsc2_serial_log_message( "Error: select aborted due to "
-										 "signal in fsc2_serial_read()\n" );
+										 "signal\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_read",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -873,7 +872,7 @@ ssize_t fsc2_serial_read( int    sn,
 
 			case 0 :
 				fsc2_serial_log_message( "Error: reading aborted due to "
-										 "timeout in fsc2_serial_read()\n" );
+										 "timeout\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_write",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -896,13 +895,10 @@ ssize_t fsc2_serial_read( int    sn,
 								 "0 bytes got read\n" );
 		read_count = 0;
 	}
-	else
-	{
-		if ( ll == LL_ALL )
-			fsc2_serial_log_message( "Read %lu bytes:\n%.*s\n",
-									 ( unsigned long ) read_count, read_count,
-									 buf );
-	}
+	else if ( ll == LL_ALL )
+		fsc2_serial_log_message( "Read %ld bytes from serial port %d:\n%.*s\n",
+								 ( long ) read_count, sn,
+								 ( int ) read_count, buf );
 
 	lower_permissions( );
 
