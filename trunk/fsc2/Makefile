@@ -538,7 +538,7 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	ifdef GPIB_LOG_FILE
 		CONFFLAGS += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
 	else
-		CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/gpib.log\"
+		CONFFLAGS += -DGPIB_LOG_FILE=\"/tmp/fsc2_gpib.log\"
 	endif
 
 	ifdef GPIB_LOG_LEVEL
@@ -598,7 +598,7 @@ endif
 ifdef SERIAL_LOG_FILE
 	CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
 else
-	CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/serial.log\"
+	CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/fsc2_serial.log\"
 endif
 
 ifdef SERIAL_LOG_LEVEL
@@ -625,7 +625,7 @@ endif
 ifdef LAN_LOG_FILE
 	CONFFLAGS += -DLAN_LOG_FILE=\"$(patsubst % ,%,$(LAN_LOG_FILE))\"
 else
-	CONFFLAGS += -DLAN_LOG_FILE=\"/tmp/lan.log\"
+	CONFFLAGS += -DLAN_LOG_FILE=\"/tmp/fsc2_lan.log\"
 endif
 
 ifdef LAN_LOG_LEVEL
