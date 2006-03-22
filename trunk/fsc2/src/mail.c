@@ -467,7 +467,7 @@ static int open_mail_socket( const char * remote,
 			memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
 					sizeof serv_addr.sin_addr.s_addr );
 #endif
-			if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
+			if ( connect( sock_fd, ( const struct sockaddr * ) &serv_addr,
 						  sizeof( serv_addr ) ) == 0 )
 				return sock_fd;
 		}
