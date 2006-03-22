@@ -332,6 +332,12 @@ int gpib_init_device( const char * device_name,
 	GPIB_Dev_T *cur_dev;
 
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
     if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
     {
         strcpy( gpib_error_msg, "GPIB bus not initialised yet.\n" );
@@ -414,6 +420,12 @@ int gpib_timeout( int device,
 							  "30s", "100s", "300s", "1000s" };
 
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
@@ -479,6 +491,11 @@ int gpib_clear_device( int device )
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
 	{
@@ -521,6 +538,12 @@ int gpib_local( int device )
 {
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
@@ -566,6 +589,12 @@ int gpib_local_lockout( int device )
 	char *dev_name;
 
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
 	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
@@ -609,6 +638,12 @@ int gpib_trigger( int device )
 {
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
@@ -668,6 +703,12 @@ int gpib_wait( int   device,
 	int old_timeout = timeout;
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
 	TEST_BUS_STATE;              /* bus not initialised yet ? */
 
@@ -744,6 +785,12 @@ int gpib_write( int          device,
 {
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
@@ -840,6 +887,12 @@ int gpib_read( int    device,
     long expected = *length;
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
@@ -938,6 +991,12 @@ int gpib_serial_poll( int             device,
 {
 	char *dev_name;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 

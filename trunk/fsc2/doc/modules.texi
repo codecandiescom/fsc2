@@ -892,7 +892,8 @@ and also of type @code{bool}, has to be set in the init hook function.
 To make dealing with the GPIB bus simpler there are several routines
 that can be used when writing a module, which then call the needed
 functions from the GPIB library you choose when installing
-@code{fsc2}.
+@code{fsc2}. Please note that these function may not invoked before
+the @code{exp_hook} function.
 
 As already pointed out above, to be able to use the GPIB bus our module
 must set the boolean variable @code{need_GPIB}.
@@ -986,6 +987,9 @@ device name as the second argument. If the requested serial port has
 already been claimed by a different device the function will print an
 error message and stop the @code{EDL} script, so you don't have to
 deal with error handling.
+
+All the other function may not be called before the @code{exp_hook}
+function.
 
 For all functions that deal directly with file descriptors for the
 serial port device files there are replacements functions. The following
@@ -1083,6 +1087,18 @@ argument is always the serial port number instead of a file
 descriptor. If the function gets passed an invalid serial port number
 @code{errno} is set to @code{EBADF}.
 
+The only other additional function that can be called is
+@{fsc2_serial_log_message()} and lets you directly write to
+the log file that stores information about the details of the
+communication over the serial port:
+@example
+void fsc2_serial_log_message( const char *fmt, ... );
+@end example
+@noindent
+It expects a format string as you would use in the @code{C printf()}
+function plus arguments corresponding to the conversion specifiers in
+the format string.
+
 
 @subsection Handling devices connected via the LAN
 
@@ -1094,7 +1110,8 @@ aren't written with a certain protocol in mind -- writing that is your
 business -- but just provide a set of fundamental routines on top of
 which you can write your own functions. You can even forego using them
 at all and write your own code for talking with the devices directly,
-they only exist for your convenience.
+they only exist for your convenience. But if you use them make sure
+they don't get invoked before the @code{exp_hook} function.
 
 The advantage of using them is that you don't have to care about basic
 operations (including dealing with timeouts etc.@:) and that the
@@ -1212,6 +1229,19 @@ It only expects a single argument, the handle of for the connection to
 close. It normally returns @code{0}, but when you try to close a connection
 with an invalid handle (possibly because the connection had already been
 closed), @code{-1} gets returned.
+
+
+The only other additional function that can be called is
+@{fsc2_lan_log_message()} and lets you directly write to
+the log file that stores information about the details of the
+communication over LAN:
+@example
+void fsc2_lan_log_message( const char *fmt, ... );
+@end example
+@noindent
+It expects a format string as you would use in the @code{C printf()}
+function plus arguments corresponding to the conversion specifiers in
+the format string.
 
 
 @subsection Hook functions
