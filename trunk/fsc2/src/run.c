@@ -275,6 +275,8 @@ static bool start_gpib_and_rulbus( void )
 
 	fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
 
+	fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
+
 	return OK;
 }
 

@@ -162,6 +162,27 @@ SERIAL_LOG_FILE    := /tmp/serial.log
 SERIAL_LOG_LEVEL   := HIGH
 
 
+# Now set the file for writing logs about the activity on the LAN port
+# Make sure that fsc2 or its users have write access to the directory the
+# log file will be created in. Don't use a partition on which you don't have
+# at least a few megabytes to spare, depending on the type of experiments
+# you will do the file can become rather long. But the file will not grow
+# indefinitely, if you start a new experiment its previous contents gets
+# overwritten. If no file is specified logs will be written to stderr.
+
+LAN_LOG_FILE    := /tmp/lan.log
+
+
+# The next variable, LAN_LOG_LEVEL, sets the verbosity level for the logs
+# for the LAN port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
+# to 'HIGH' all LAN port function calls together with all data send to or
+# received from devices are stored. When set to 'MEDIUM' only serial port
+# function calls are logged. When set to 'LOW' only errors messages will be
+# written to the log file. If not set it defaults to 'LOW'.
+
+LAN_LOG_LEVEL   := HIGH
+
+
 # Define the default editor to use for editing when the "Edit" button gets
 # pressed or for writing a bug report  (but a user can still override this
 # by setting an environment variable named 'EDITOR')
@@ -594,6 +615,33 @@ else
 			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_NONE
 		else
 			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ERR
+		endif
+	endif
+endif
+
+
+# Make sure settings for the LAN port are reasonable
+
+ifdef LAN_LOG_FILE
+	CONFFLAGS += -DLAN_LOG_FILE=\"$(patsubst % ,%,$(LAN_LOG_FILE))\"
+else
+	CONFFLAGS += -DLAN_LOG_FILE=\"/tmp/lan.log\"
+endif
+
+ifdef LAN_LOG_LEVEL
+	LAN_LOG_FILE = $(patsubst % ,%,$(LAN_LOG_LEVEL))
+endif
+
+ifeq ($(LAN_LOG_LEVEL),HIGH)
+	CONFFLAGS += -DLAN_LOG_LEVEL=LL_ALL
+else
+	ifeq ($(LAN_LOG_LEVEL),MEDIUM)
+		CONFFLAGS += -DLAN_LOG_LEVEL=LL_CE
+	else
+		ifeq ($(LAN_LOG_LEVEL),OFF)
+			CONFFLAGS += -DLAN_LOG_LEVEL=LL_NONE
+		else
+			CONFFLAGS += -DLAN_LOG_LEVEL=LL_ERR
 		endif
 	endif
 endif
