@@ -55,7 +55,8 @@ int gpib_init_device( const char * device_name  UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.mode  == EXPERIMENT );
 
 	return FAILURE;
 }
@@ -184,8 +185,8 @@ void gpib_log_message( const char * fmt,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == STATE_RUNNING ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.mode  == EXPERIMENT );
 
 	if ( gpib_log == NULL || ll == LL_NONE )
 		return;

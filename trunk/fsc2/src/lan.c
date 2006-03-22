@@ -996,8 +996,8 @@ void fsc2_lan_log_message( const char * fmt,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == STATE_RUNNING ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.mode  == EXPERIMENT );
 
 	if ( fsc2_lan_log == NULL || lan_log_level == LL_NONE )
 		return;
