@@ -140,10 +140,10 @@ int send_mail( const char * subject,
 	while ( 1 )
 	{
 		TRY
-			{
-				cmd = get_string( "%s -s '%s' %s", MAIL_PROGRAM, subject, to );
-				TRY_SUCCESS;
-			}
+		{
+			cmd = get_string( "%s -s '%s' %s", MAIL_PROGRAM, subject, to );
+			TRY_SUCCESS;
+		}
 		OTHERWISE
 			return -1;
 
