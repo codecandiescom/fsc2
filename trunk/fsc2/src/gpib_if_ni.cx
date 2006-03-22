@@ -302,6 +302,12 @@ int gpib_init_device( const char * device_name,
 	int *fd_list = NULL;
 
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
     if ( ! strcmp( device_name, CONTROLLER ) )
 		return SUCCESS;
 
@@ -389,6 +395,12 @@ int gpib_local( int device )
 	int i;
 
 
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
 		{
@@ -412,6 +424,12 @@ int gpib_local_lockout( int device )
 {
 	int i;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
@@ -447,6 +465,12 @@ int gpib_timeout( int device,
 							  "100ms", "300ms", "1s", "3s", "10s",
 							  "30s", "100s", "300s", "1000s" };
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -518,8 +542,13 @@ int gpib_clear_device( int device )
 	GPIB_Dev_T *devp;
 
 
-    TEST_BUS_STATE;              /* bus not initialized yet ? */
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
 
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
 	if ( ( devp = gpib_get_dev( device ) ) == NULL )
 	{
@@ -569,6 +598,12 @@ int gpib_trigger( int device )
 {
 	GPIB_Dev_T *devp;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -632,6 +667,12 @@ int gpib_wait( int   device,
 {
 	GPIB_Dev_T *devp;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -707,6 +748,12 @@ int gpib_write( int          device,
 {
 	GPIB_Dev_T *devp;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -806,6 +853,12 @@ int gpib_read( int    device,
     unsigned long expected = ( unsigned long ) *length;
 	GPIB_Dev_T *devp;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -910,6 +963,12 @@ int gpib_serial_poll( int             device,
 {
 	GPIB_Dev_T *devp;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -1084,6 +1143,16 @@ void gpib_log_message( const char * fmt,
 {
 	va_list ap;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == STATE_RUNNING ||
+				 Fsc2_Internals.mode == EXPERIMENT );
+
+	if ( gpib_log == NULL || ll == LL_NONE )
+		return;
 
 	raise_permissions( );
 	gpib_log_date( );

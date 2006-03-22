@@ -51,6 +51,12 @@ int gpib_shutdown( void )
 int gpib_init_device( const char * device_name  UNUSED_ARG,
 					  int *        dev          UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -61,6 +67,12 @@ int gpib_init_device( const char * device_name  UNUSED_ARG,
 int gpib_timeout( int device  UNUSED_ARG,
 				  int period  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -70,6 +82,12 @@ int gpib_timeout( int device  UNUSED_ARG,
 
 int gpib_clear_device( int device  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -79,6 +97,12 @@ int gpib_clear_device( int device  UNUSED_ARG )
 
 int gpib_local( int device  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -88,6 +112,12 @@ int gpib_local( int device  UNUSED_ARG )
 
 int gpib_local_lockout( int device  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -97,6 +127,12 @@ int gpib_local_lockout( int device  UNUSED_ARG )
 
 int gpib_trigger( int device  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -108,6 +144,12 @@ int gpib_write( int          device  UNUSED_ARG,
 				const char * buffer  UNUSED_ARG,
 				long         length  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -119,6 +161,12 @@ int gpib_read( int    device  UNUSED_ARG,
 			   char * buffer  UNUSED_ARG,
 			   long * length  UNUSED_ARG )
 {
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+
 	return FAILURE;
 }
 
@@ -131,6 +179,16 @@ void gpib_log_message( const char * fmt,
 {
 	va_list ap;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == STATE_RUNNING ||
+				 Fsc2_Internals.mode == EXPERIMENT );
+
+	if ( gpib_log == NULL || ll == LL_NONE )
+		return;
 
 	va_start( ap, fmt );
 	fprintf( stderr, fmt, ap );

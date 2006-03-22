@@ -63,7 +63,7 @@ ssize_t fsc2_lan_read( int    /* handle */,
 					   long   /* us_wait */,
 					   bool   /* quit_on_signal */ );
 
-static void fsc2_lan_log_message( const char * /* fmt */,
+void fsc2_lan_log_message( const char * /* fmt */,
 								  ... );
 void fsc2_lan_cleanup( void );
 

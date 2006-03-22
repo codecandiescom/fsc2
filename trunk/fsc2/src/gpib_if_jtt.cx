@@ -1126,6 +1126,7 @@ static void gpib_log_function_end( const char * function,
 								   const char * dev_name )
 {
 	raise_permissions( );
+
     if ( gpib_status & GPIB_ERR )
         gpib_log_error( function );
     else
@@ -1165,6 +1166,16 @@ void gpib_log_message( const char * fmt,
 {
 	va_list ap;
 
+
+	/* Keep the module writers from calling the function anywhere else
+	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+	   section */
+
+	fsc2_assert( Fsc2_Internals.mode == STATE_RUNNING ||
+				 Fsc2_Internals.mode == EXPERIMENT );
+
+	if ( gpib_log == NULL || ll == LL_NONE )
+		return;
 
 	raise_permissions( );
 	gpib_log_date( );
