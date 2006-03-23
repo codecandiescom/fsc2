@@ -62,13 +62,13 @@ static FILE *fsc2_lan_log = NULL;
 
 static void timeout_init( int                dir,
 						  LAN_List_T *       ll,
-						  long *             us_wait,
+						  long *             us_timeout,
 						  struct sigaction * old_sact,
 						  struct timeval   * now );
 
 static bool timeout_reset( int                dir,
 						   LAN_List_T *       ll,
-						   long *             us_wait,
+						   long *             us_timeout,
 						   struct sigaction * old_sact,
 						   struct timeval *   before );
 
@@ -93,12 +93,14 @@ static void fsc2_lan_log_function_end( const char * function,
 
 /*----------------------------------------------------------*
  * Function for opening a connection to a device on the LAN
+ * Returns the sockets file descriptor on success or -1 on
+ * failure.
  *----------------------------------------------------------*/
 
 int fsc2_lan_open( const char * dev_name,
 				   const char * address,
 				   int          port,
-				   long         us_wait,
+				   long         us_timeout,
 				   bool         quit_on_signal )
 {
 	LAN_List_T *ll = lan_list;
@@ -190,10 +192,10 @@ int fsc2_lan_open( const char * dev_name,
 	   setting up the handler for the SIGALRM signal or starting the timer
 	   failed, in which case we silently drop the request for a timeout) */
 
-	if ( us_wait > 0 )
+	if ( us_timeout > 0 )
 	{
-		wait_for_connect.it_value.tv_sec     = us_wait / 1000000;
-		wait_for_connect.it_value.tv_usec    = us_wait % 1000000;
+		wait_for_connect.it_value.tv_sec     = us_timeout / 1000000;
+		wait_for_connect.it_value.tv_usec    = us_timeout % 1000000;
 		wait_for_connect.it_interval.tv_sec  =
 		wait_for_connect.it_interval.tv_usec = 0;
 
@@ -204,14 +206,14 @@ int fsc2_lan_open( const char * dev_name,
 		got_sigalrm = 0;
 
 		if ( sigaction( SIGALRM, &sact, &old_sact ) == -1 )
-			us_wait = 0;
+			us_timeout = 0;
 		else
 		{
 			if ( setitimer( ITIMER_REAL, &wait_for_connect, NULL ) == -1 )
 			{
 				ret = sigaction( SIGALRM, &old_sact, NULL );
 				fsc2_assert( ret != -1 );      /* this better doesn't happen */
-				us_wait = 0;
+				us_timeout = 0;
 			}
 		}
 	}
@@ -228,7 +230,7 @@ int fsc2_lan_open( const char * dev_name,
 
 	/* Stop the timer for the timeout and reset the signal handler */
 
-	if ( us_wait > 0 )
+	if ( us_timeout > 0 )
 	{
 		wait_for_connect.it_value.tv_sec    =
 	    wait_for_connect.it_value.tv_usec   =
@@ -245,10 +247,11 @@ int fsc2_lan_open( const char * dev_name,
 	if ( conn_ret == -1 )
 	{
 		close( sock_fd );
-		if ( us_wait > 0 && errno == EINTR && quit_on_signal && ! got_sigalrm )
+		if ( us_timeout > 0 && errno == EINTR &&
+			 quit_on_signal && ! got_sigalrm )
 			fsc2_lan_log_message( "Error: connect() to socket failed due "
 								  "to signal\n" );
-		else if ( us_wait > 0 && errno == EINTR && got_sigalrm )
+		else if ( us_timeout > 0 && errno == EINTR && got_sigalrm )
 			fsc2_lan_log_message( "Error: connect() to socket failed due "
 								  "to timeout\n" );
 		else
@@ -299,7 +302,7 @@ int fsc2_lan_open( const char * dev_name,
 	/* Set the wait time for reads and writes to zero (meaning that none is
 	   set yet, i.e. the default timeout of the system is going to be used. */
 
-	ll->us_read_wait = ll->us_write_wait = 0;
+	ll->us_read_timeout = ll->us_write_out = 0;
 	ll->so_timeo_avail = SET;
 
 	ll->address = dev_addr.sin_addr;
@@ -381,17 +384,17 @@ int fsc2_lan_close( int handle )
 }
 
 
-/*-----------------------------------------------------*
- * Function for writing to the socket. If 'us_wait' is
- * set to a positive (non-zero) value don't wait longer
- * than that many microseconds, if 'quit_on_signal' is
- * set return immediately if a signal gets caught.
- *-----------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for writing to the socket. If 'us_timeout' is set
+ * to a positive (non-zero) value don't wait longer than that 
+ * many microseconds, if 'quit_on_signal' is set return
+ * immediately when a signal gets caught.
+ *------------------------------------------------------------*/
 
 ssize_t fsc2_lan_write( int          handle,
 						const char * message,
 						long         length,
-						long         us_wait,
+						long         us_timeout,
 						bool         quit_on_signal )
 {
 	LAN_List_T *ll;
@@ -443,21 +446,21 @@ ssize_t fsc2_lan_write( int          handle,
 
 	if ( lan_log_level == LL_ALL )
 	{
-		if ( us_wait <= 0 )
+		if ( us_timeout <= 0 )
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) to LAN "
 								  "device %s:\n%*s\n", ( long ) length,
 								  ll->name, ( int ) length, message );
 		else
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) within %ld "
 								  "ms to LAN device %s:\n%*s\n\n",
-								  ( long ) length, us_wait / 1000, ll->name,
+								  ( long ) length, us_timeout / 1000, ll->name,
 								  ( int ) length, message );
 	}
 
 	/* Deal with setting a timeout - if possible a socket option is used,
 	   otherwise a timer is started */
 
-	timeout_init( WRITE, ll, &us_wait, &old_sact, &before );
+	timeout_init( WRITE, ll, &us_timeout, &old_sact, &before );
 
 	/* Start writting - if it's interrupted by a signal other than SIGALRM
 	   and we're supposed to continue on such signals and the timeout time
@@ -465,14 +468,16 @@ ssize_t fsc2_lan_write( int          handle,
 
 	do
 	{
+		if ( ll->so_timeo_avail )
+			errno = 0;
 		bytes_written = write( ll->fd, message, length );
 	} while ( bytes_written == -1 && errno == EINTR &&
 			  ! quit_on_signal && ! got_sigalrm &&
-			  timeout_reset( WRITE, ll, &us_wait, &old_sact, &before ) );
+			  timeout_reset( WRITE, ll, &us_timeout, &old_sact, &before ) );
 
 	/* Get rid of the timeout machinery */
 
-	if ( us_wait != 0 )
+	if ( us_timeout != 0 )
 		timeout_exit( ll, &old_sact );
 
 	if ( bytes_written == -1 )
@@ -496,17 +501,17 @@ ssize_t fsc2_lan_write( int          handle,
 }
 
 
-/*-------------------------------------------------------*
- * Function for reading from the socket. If 'us_wait' is
- * set to a positive (non-zero) value don't wait longer
- * than that many microseconds, if 'quit_on_signal' is
- * set return immediately if a signal gets caught.
- *-------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for reading from the socket. If 'us_timeout' is set
+ * to a positive (non-zero) value don't wait longer than that
+ * many microseconds, if 'quit_on_signal' is set return
+ * immediately if a signal gets caught.
+ *--------------------------------------------------------------*/
 
 ssize_t fsc2_lan_read( int    handle,
 					   char * buffer,
 					   long   length,
-					   long   us_wait,
+					   long   us_timeout,
 					   bool   quit_on_signal )
 {
 	LAN_List_T *ll;
@@ -558,20 +563,21 @@ ssize_t fsc2_lan_read( int    handle,
 
 	if ( lan_log_level == LL_ALL )
 	{
-		if ( us_wait <= 0 )
+		if ( us_timeout <= 0 )
 			fsc2_lan_log_message( "Expecting to read up to %ld byte(s) from "
 								  "LAN device %s\n",
 								  ( long ) length, ll->name );
 		else
 			fsc2_lan_log_message( "Expecting to read up to %ld byte(s) "
 								  "within %ld ms from LAN device %s\n",
-								  ( long ) length, us_wait / 1000, ll->name );
+								  ( long ) length, us_timeout / 1000,
+								  ll->name );
 	}
 
 	/* Deal with setting a timeout - if possible a socket option is used,
 	   otherwise a timer is started */
 
-	timeout_init( READ, ll, &us_wait, &old_sact, &before );
+	timeout_init( READ, ll, &us_timeout, &old_sact, &before );
 
 	/* Start writting - if it's interrupted by a signal other than SIGALRM
 	   and we're supposed to continue on such signals and the timeout time
@@ -579,14 +585,16 @@ ssize_t fsc2_lan_read( int    handle,
 
 	do
 	{
+		if ( ll->so_timeo_avail )
+			errno = 0;
 		bytes_read = read( ll->fd, buffer, length );
 	} while ( bytes_read == -1 && errno == EINTR &&
 			  ! quit_on_signal && ! got_sigalrm &&
-			  timeout_reset( READ, ll, &us_wait, &old_sact, &before ) );
+			  timeout_reset( READ, ll, &us_timeout, &old_sact, &before ) );
 
 	/* Get rid of the timeout machinery */
 
-	if ( us_wait != 0 )
+	if ( us_timeout != 0 )
 		timeout_exit( ll, &old_sact );
 
 	if ( bytes_read == -1 )
@@ -670,7 +678,7 @@ void fsc2_lan_cleanup( void )
 
 static void timeout_init( int                dir,
 						  LAN_List_T *       ll,
-						  long *             us_wait,
+						  long *             us_timeout,
 						  struct sigaction * old_sact,
 						  struct timeval   * now )
 {
@@ -682,8 +690,8 @@ static void timeout_init( int                dir,
 	/* Negative (as well as zero) values for the timeout are interpreted
 	   to mean no timeout */
 
-	if ( *us_wait < 0 )
-		*us_wait = 0;
+	if ( *us_timeout < 0 )
+		*us_timeout = 0;
 
 	/* Figure out the current time */
 
@@ -696,8 +704,8 @@ static void timeout_init( int                dir,
 
 	got_sigalrm = 0;
 
-	iwait.it_value.tv_sec     = *us_wait / 1000000;
-	iwait.it_value.tv_usec    = *us_wait % 1000000;
+	iwait.it_value.tv_sec     = *us_timeout / 1000000;
+	iwait.it_value.tv_usec    = *us_timeout % 1000000;
 	iwait.it_interval.tv_sec  =
 	iwait.it_interval.tv_usec = 0;
 
@@ -709,8 +717,8 @@ static void timeout_init( int                dir,
 		/* If the timeout didn't change nothing is to be done, the socket
 		   option is already set to the correct value */
 
-		if ( ( dir == READ  && *us_wait == ll->us_read_wait  ) ||
-			 ( dir == WRITE && *us_wait == ll->us_write_wait ) )
+		if ( ( dir == READ  && *us_timeout == ll->us_read_timeout  ) ||
+			 ( dir == WRITE && *us_timeout == ll->us_write_timeout ) )
 			return;
 
 		/* Try to set the socket option - if this doesn't work disregard the
@@ -719,20 +727,20 @@ static void timeout_init( int                dir,
 		if ( setsockopt( ll->fd, SOL_SOCKET,
 						 dir == READ ? SO_RCVTIMEO : SO_SNDTIMEO,
 						 &iwait.it_value, sizeof iwait.it_value ) == -1 )
-			*us_wait = 0;
+			*us_timeout = 0;
 		else
 		{
 			if ( dir == READ )
-				ll->us_read_wait  = *us_wait;
+				ll->us_read_timeout  = *us_timeout;
 			else
-				ll->us_write_wait = *us_wait;
+				ll->us_write_timeout = *us_timeout;
 		}
 	}
 	else
 	{
 		/* Nothing to be done if no timeout is requested */
 
-		if ( *us_wait == 0 )
+		if ( *us_timeout == 0 )
 			return;
 
 		/* Try to set handler for SIGALRM signals and then to start a timer,
@@ -743,14 +751,14 @@ static void timeout_init( int                dir,
 		sact.sa_flags = 0;
 
 		if ( sigaction( SIGALRM, &sact, old_sact ) == -1 )
-			*us_wait = 0;
+			*us_timeout = 0;
 		else
 		{
 			if ( setitimer( ITIMER_REAL, &iwait, NULL ) == -1 )
 			{
 				ret = sigaction( SIGALRM, old_sact, NULL );
 				fsc2_assert( ret != -1 );  /* this better doesn't happen */
-				*us_wait = 0;
+				*us_timeout = 0;
 			}
 		}
 	}
@@ -764,7 +772,7 @@ static void timeout_init( int                dir,
 
 static bool timeout_reset( int                dir,
 						   LAN_List_T *       ll,
-						   long *             us_wait,
+						   long *             us_timeout,
 						   struct sigaction * old_sact,
 						   struct timeval *   before )
 {
@@ -773,15 +781,15 @@ static bool timeout_reset( int                dir,
 
 	/* If no timeout is set simply return, resuming is possible */
 
-	if ( *us_wait == 0 )
+	if ( *us_timeout == 0 )
 		return SET;
 
 	/* Figure out the current time and how long we still may wait */
 
 	gettimeofday( &now, NULL );
 
-	*us_wait -=   ( now.tv_sec     * 1000000 + now.tv_usec     )
-		        - ( before->tv_sec * 1000000 + before->tv_usec );
+	*us_timeout -=   ( now.tv_sec     * 1000000 + now.tv_usec     )
+		           - ( before->tv_sec * 1000000 + before->tv_usec );
 
 	/* Stop a possibly running timer */
 
@@ -790,13 +798,13 @@ static bool timeout_reset( int                dir,
 	/* If no time is left return immediately, indicating not to resume a read()
 	   or write(), otherwise start a new timeout with the remaining time */
 
-	if ( *us_wait <= 0 )
+	if ( *us_timeout <= 0 )
 	{
-		*us_wait = 0;
+		*us_timeout = 0;
 		return UNSET;
 	}
 
-	timeout_init( dir, ll, us_wait, old_sact, before );
+	timeout_init( dir, ll, us_timeout, old_sact, before );
 
 	return SET;
 }

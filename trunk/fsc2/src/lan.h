@@ -35,8 +35,8 @@ struct LAN_List {
 	int            fd;
 	struct in_addr address;
 	int            port;
-	long           us_read_wait;
-	long           us_write_wait;
+	long           us_read_timeout;
+	long           us_write_timeout;
 	bool           so_timeo_avail;
 	LAN_List_T *   next;
 	LAN_List_T *   prev;
@@ -46,7 +46,7 @@ struct LAN_List {
 int fsc2_lan_open( const char * /* dev_name */,
 				   const char * /* address */,
 				   int          /* port */,
-				   long         /* us_wait */,
+				   long         /* us_timeout */,
 				   bool         /* quit_on_signal */ );
 
 int fsc2_lan_close( int /* handle */ );
@@ -54,13 +54,13 @@ int fsc2_lan_close( int /* handle */ );
 ssize_t fsc2_lan_write( int          /* handle */,
 						const char * /* message */,
 						long         /* length */,
-						long         /* us_wait */,
+						long         /* us_timeout */,
 						bool         /* quit_on_signal */ );
 
 ssize_t fsc2_lan_read( int    /* handle */,
 					   char * /* buffer */,
 					   long   /* length */,
-					   long   /* us_wait */,
+					   long   /* us_timeout */,
 					   bool   /* quit_on_signal */ );
 
 void fsc2_lan_log_message( const char * /* fmt */,

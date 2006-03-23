@@ -1053,18 +1053,18 @@ file failed and you can determine the reasons by checking @code{errno}.
 @code{fsc2_serial_write()} and @code{fsc2_serial_read()} are defined as
 @example
 ssize_t fsc2_serial_write( int sn, void *buf, size_t count,
-                           long us_wait, bool quit_on_signal );
+                           long us_timeout, bool quit_on_signal );
 ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
-                          long us_wait, bool quit_on_signal );
+                          long us_timeout, bool quit_on_signal );
 @end example
 @noindent
 where @code{sn} is the number of the serial port as already used in
 @code{fsc2_request_serial_port()}, @code{buf} is a buffer of length
-@code{count} for the data to be written or read. @code{us_wait} is the
+@code{count} for the data to be written or read. @code{us_timeout} is the
 time in microseconds you are prepared to wait the serial port becoming
 ready for writing or reading the data. Specifying a negative value is
 interpreted to mean that you want to wait indefinitely for data, while a
-value of @code{0} for @code{us_wait} means not to wait at all. Finally,
+value of @code{0} for @code{us_timeout} means not to wait at all. Finally,
 @code{quit_on_signal} determines if the function returns immediately
 when a signal has been received before any data could be read. This
 might for example happen when the user pressed the @code{Stop} button
@@ -1145,7 +1145,7 @@ as
 int fsc2_lan_open( const char * dev_name,
                    const char * address,
                    int          port,
-                   long         us_wait,
+                   long         us_timeout,
                    bool         quit_on_signal )
 @end example
 @noindent
@@ -1156,7 +1156,7 @@ be either the numerical IP address in dotted-quad format (i.e.
 @code{"123.97.243.12"} or a symbolic host name, for which the IP address
 is determined via a DNS request. The third argument, @code{port}, is the
 port the device is accepting connections on, i.e.@: a number between
-@code{0} and @code{65535}. The fourth argument, @code{us_wait}, is the
+@code{0} and @code{65535}. The fourth argument, @code{us_timeout}, is the
 maximum time (in micro-seconds) to wait for a connection to be achieved.
 If set to @code{0} (or a negative value) the connection will only time out
 after a system dependent delay (typically in the order of a minute.
@@ -1182,14 +1182,14 @@ The function for writing, @code{fsc2_lan_write()}, is declared as
 ssize_t fsc2_lan_write( int          handle,
                         const char * message,
                         long         length,
-                        long         us_wait,
+                        long         us_timeout,
                         bool         quit_on_signal )
 @end example
 @noindent
 The first argument is the handle returned by @code{fsc2_lan_open()},
 identifying the device. The second argument, @code{message}, is a
 buffer with the data to be send to the device. The third, @code{length},
-is the length of the data buffer. The fourth argument, @code{us_wait},
+is the length of the data buffer. The fourth argument, @code{us_timeout},
 is the amount of time to wait for data to be written to the device
 before timing out. If this is set to @code{0} (or even a negative value)
 no timeout is used, i.e.@: the write function will wait indefinitely.
@@ -1207,7 +1207,7 @@ The function for reading, @code{fsc2_lan_read()}, is declared as
 ssize_t fsc2_lan_read( int    handle,
                        char * buffer,
                        long   length,
-                       long   us_wait,
+                       long   us_timeout,
                        bool   quit_on_signal )
 @end example
 @noindent
