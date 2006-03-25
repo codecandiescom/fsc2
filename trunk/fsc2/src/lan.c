@@ -26,6 +26,7 @@
 
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -175,7 +176,7 @@ int fsc2_lan_open( const char * dev_name,
 
 	switch_on = 1;
 	if ( setsockopt( sock_fd, SOL_SOCKET, SO_KEEPALIVE,
-					 &switch_on sizeof switch_on ) == -1 )
+					 &switch_on, sizeof switch_on ) == -1 )
 	{
 		close( sock_fd );
 		fsc2_lan_log_message( "Error: failed to set SO_KEEPALIVE option for "

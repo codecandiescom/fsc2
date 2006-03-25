@@ -1,4 +1,4 @@
-	#  $Id$
+#  $Id$
 #
 #  Copyright (C) 1999-2006 Jens Thoms Toerring
 #
@@ -32,7 +32,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # far as they don't require some additional hardware that gets tested for
 # below)
 
-simp_modules    := User_Functions gg_chopper
+simp_modules    := User_Functions gg_chopper mail
 
 
 # For each of the "complicated" modules a list of all source files they are
@@ -150,9 +150,9 @@ export        # export all symbols to the sub-makefiles
 
 # Making the modules consisting of just one file is simple, to make the
 # more complicated modules we need to create temporary makefiles from a
-# template and then invoke them. For the Tektronix digitizers and the
-# HP864* synthesizers also the sources as well as the linker map files
-# are created from templates.
+# template and then invoke them. For the Tektronix and some of the LeCroy
+# digitizers as well as the HP864* synthesizers also the sources as well
+# as the linker map files are created from templates.
 
 all:
 	$(MAKE) -C .. modules

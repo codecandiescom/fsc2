@@ -64,7 +64,16 @@ static inline double d_max( double /* a */,
 static inline double d_min( double /* a */,
 							double /* b */ );
 
+static inline ssize_t ss_min( ssize_t /* a */,
+							  ssize_t /* b */ );
+
+static inline ssize_t ss_max( ssize_t /* a */,
+							  ssize_t /* b */ );
+
 static inline size_t s_min( size_t /* a */,
+							size_t /* b */ );
+
+static inline size_t s_max( size_t /* a */,
 							size_t /* b */ );
 
 static inline long lrnd( double /* x */ );
@@ -134,15 +143,18 @@ static unsigned short int i2ushrt( int a )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static int    i_max( int    a, int    b ) { return a > b ? a : b; }
-static int    i_min( int    a, int    b ) { return a < b ? a : b; }
-static long   l_max( long   a, long   b ) { return a > b ? a : b; }
-static long   l_min( long   a, long   b ) { return a < b ? a : b; }
-static float  f_max( float  a, float  b ) { return a > b ? a : b; }
-static float  f_min( float  a, float  b ) { return a < b ? a : b; }
-static double d_max( double a, double b ) { return a > b ? a : b; }
-static double d_min( double a, double b ) { return a < b ? a : b; }
-static size_t s_min( size_t a, size_t b ) { return a < b ? a : b; }
+static int     i_max(  int     a, int     b ) { return a > b ? a : b; }
+static int     i_min(  int     a, int     b ) { return a < b ? a : b; }
+static long    l_max(  long    a, long    b ) { return a > b ? a : b; }
+static long    l_min(  long    a, long    b ) { return a < b ? a : b; }
+static float   f_max(  float   a, float   b ) { return a > b ? a : b; }
+static float   f_min(  float   a, float   b ) { return a < b ? a : b; }
+static double  d_max(  double  a, double  b ) { return a > b ? a : b; }
+static double  d_min(  double  a, double  b ) { return a < b ? a : b; }
+static ssize_t ss_min( ssize_t a, ssize_t b ) { return a < b ? a : b; }
+static ssize_t ss_max( ssize_t a, ssize_t b ) { return a < b ? a : b; }
+static size_t  s_min(  size_t  a, size_t  b ) { return a < b ? a : b; }
+static size_t  s_max(  size_t  a, size_t  b ) { return a < b ? a : b; }
 
 
 /*-------------------------------------------------------------------------*
