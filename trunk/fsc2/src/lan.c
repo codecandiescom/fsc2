@@ -52,10 +52,10 @@
 
 /* Local variables */
 
-static LAN_List_T * lan_list = NULL;
-static volatile sig_atomic_t got_sigalrm;
-static int lan_log_level = LL_ALL;
-static FILE *fsc2_lan_log = NULL;
+static LAN_List_T            * lan_list = NULL;
+static volatile sig_atomic_t   got_sigalrm;
+static int                     lan_log_level = LL_ALL;
+static FILE                  * fsc2_lan_log = NULL;
 
 
 /* Functions used only locally */
@@ -103,17 +103,17 @@ int fsc2_lan_open( const char * dev_name,
 				   long         us_timeout,
 				   bool         quit_on_signal )
 {
-	LAN_List_T *ll = lan_list;
-	int sock_fd;
+	LAN_List_T *       ll = lan_list;
+	int                sock_fd;
 	struct sockaddr_in dev_addr;
-	int switch_on;
-	int dummy = 1;
-	struct sigaction sact,
-		             old_sact;
-	struct itimerval wait_for_connect;
-	int conn_ret;
-	int ret;
-	socklen_t len;
+	int                switch_on;
+	int                dummy = 1;
+	struct sigaction   sact,
+		               old_sact;
+	struct itimerval   wait_for_connect;
+	int                conn_ret;
+	int                ret;
+	socklen_t          len;
 
 
 	/* Keep the module writers from calling the function anywhere else
@@ -355,7 +355,7 @@ int fsc2_lan_open( const char * dev_name,
 
 int fsc2_lan_close( int handle )
 {
-	LAN_List_T *ll;
+	LAN_List_T * ll;
 
 
 	/* Keep the module writers from calling the function anywhere else
@@ -419,9 +419,9 @@ ssize_t fsc2_lan_write( int          handle,
 						long         us_timeout,
 						bool         quit_on_signal )
 {
-	LAN_List_T *ll;
-	ssize_t bytes_written;
-	struct timeval before;
+	LAN_List_T     * ll;
+	ssize_t          bytes_written;
+	struct timeval   before;
 	struct sigaction old_sact;
 
 
@@ -543,12 +543,12 @@ ssize_t fsc2_lan_writev( int                  handle,
 						 long                 us_timeout,
 						 bool                 quit_on_signal )
 {
-	LAN_List_T *ll;
-	ssize_t bytes_written;
-	struct timeval before;
-	struct sigaction old_sact;
-	int i;
-	size_t length;
+	LAN_List_T       * ll;
+	ssize_t            bytes_written;
+	struct timeval     before;
+	struct sigaction   old_sact;
+	int                i;
+	size_t             length;
 
 
 	/* Keep the module writers from calling the function anywhere else
@@ -696,10 +696,10 @@ ssize_t fsc2_lan_read( int    handle,
 					   long   us_timeout,
 					   bool   quit_on_signal )
 {
-	LAN_List_T *ll;
-	ssize_t bytes_read;
-	struct timeval before;
-	struct sigaction old_sact;
+	LAN_List_T       * ll;
+	ssize_t            bytes_read;
+	struct timeval     before;
+	struct sigaction   old_sact;
 
 
 	/* Keep the module writers from calling the function anywhere else
@@ -824,12 +824,12 @@ ssize_t fsc2_lan_readv( int            handle,
 						long           us_timeout,
 						bool           quit_on_signal )
 {
-	LAN_List_T *ll;
-	ssize_t bytes_read;
-	struct timeval before;
-	struct sigaction old_sact;
-	int i;
-	size_t length;
+	LAN_List_T       * ll;
+	ssize_t            bytes_read;
+	struct timeval     before;
+	struct sigaction   old_sact;
+	int                i;
+	size_t             length;
 
 
 	/* Keep the module writers from calling the function anywhere else
@@ -990,8 +990,8 @@ ssize_t fsc2_lan_readv( int            handle,
 
 void fsc2_lan_cleanup( void )
 {
-	LAN_List_T *ll;
-	int failed = 0;
+	LAN_List_T * ll;
+	int          failed = 0;
 
 
 	fsc2_lan_log_message( "Call of fsc2_lan_cleanup()\n" );
@@ -1183,7 +1183,7 @@ static void timeout_exit( LAN_List_T *       ll,
 						  struct sigaction * old_sact )
 {
 	struct itimerval iwait = { { 0, 0 }, { 0, 0 } };
-	int ret;
+	int              ret;
 
 
 	/* Nothing to be done if timeouts are dealt with by socket options */
@@ -1216,7 +1216,8 @@ static void wait_alarm_handler( int sig_no  UNUSED_ARG )
 
 static LAN_List_T * find_lan_entry( int handle )
 {
-	LAN_List_T *ll = lan_list;
+	LAN_List_T * ll = lan_list;
+
 
 	while ( ll != NULL )
 		if ( ll->fd == handle )
@@ -1238,7 +1239,7 @@ static LAN_List_T * find_lan_entry( int handle )
 static void get_ip_address( const char *     address,
 							struct in_addr * ip_addr )
 {
-	struct hostent *he;
+	struct hostent * he;
 
 
 	/* For the time being we only deal with IPv4 addresses */
@@ -1317,9 +1318,9 @@ void fsc2_lan_exp_init( const char * log_file_name,
 
 static void fsc2_lan_log_date( void )
 {
-    char tc[ 26 ];
+    char         tc[ 26 ];
 	struct timeb mt;
-    time_t t;
+    time_t       t;
 
 
     t = time( NULL );
