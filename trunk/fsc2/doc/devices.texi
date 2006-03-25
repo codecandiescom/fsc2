@@ -6240,7 +6240,7 @@ zero argument and only after measuring and setting a new offset set the
 laser line position again.
 
 If called without an argument for @strong{SPEX} monochromators the
-function returns an array with two elements, representing the cuurent
+function returns an array with two elements, representing the current
 calibration setting of the offset (in @code{m} for wavelength driven and
 in @code{cm^-1} for wavenumber driven monochromators) and the wavelength
 or -number difference between two adjacent CCD camera pixels (or
