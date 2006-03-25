@@ -108,7 +108,6 @@ int fsc2_lan_open( const char * dev_name,
 	int                sock_fd;
 	struct sockaddr_in dev_addr;
 	int                switch_on;
-	int                dummy = 1;
 	struct sigaction   sact,
 		               old_sact;
 	struct itimerval   wait_for_connect;
