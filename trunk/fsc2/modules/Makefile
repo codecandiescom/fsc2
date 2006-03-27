@@ -80,7 +80,6 @@ rb_pulser       := rb_pulser.c rb_pulser_gen.c rb_pulser_pulse.c \
 				   rb_pulser_util.c rb_pulser_init.c rb_pulser_run.c \
 				   rb_pulser_ll.c rb_pulser_lexer.c
 
-
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
 # hardware (that gets tested for below)
