@@ -92,7 +92,7 @@ bool lecroy_wr2_init( const char * name )
 
     if ( //gpib_local_lockout( lecroy_wr2.device ) == FAILURE  ||
 		 gpib_write( lecroy_wr2.device,
-					 "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;ACAL", 49 )
+					 "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
 		                                                          == FAILURE ||
 		 gpib_write( lecroy_wr2.device, "*STB?", 5 ) == FAILURE ||
 		 gpib_read( lecroy_wr2.device, buffer, &len ) == FAILURE )
