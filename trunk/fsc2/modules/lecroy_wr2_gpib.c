@@ -53,19 +53,22 @@ static void lecroy_wr2_gpib_failure( void );
 
 
 static unsigned int can_fetch = 0;
-static int trg_channels[ ] = {
-#if defined LECROY_WR2_CH4_AS_TRG
-								LECROY_WR2_CH4,
+static int trg_channels[ ] = { LECROY_WE2_CH1,
+							   LECROY_WE2_CH2
+#if defined LECROY_WR2_CH3
+							   LECROY_WR2_CH3,
 #endif
-								LECROY_WR2_LIN,
+#if defined LECROY_WR2_CH4
+							   LECROY_WR2_CH4,
+#endif
+							   LECROY_WR2_LIN,
 #if defined LECROY_WR2_EXT
-								LECROY_WR2_EXT,
+							   LECROY_WR2_EXT,
 #endif
 #if defined LECROY_WR2_EXT10
-								LECROY_WR2_EXT10
-
+							   LECROY_WR2_EXT10
 #endif
-							  };
+							 };
 
 
 /*---------------------------------------------------------------*
