@@ -808,7 +808,7 @@ double lecroy_wr2_get_trigger_level( int channel )
 
 	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
 	buf[ length - 1 ] = '\0';
-	return lecroy_wr2.trigger_level[ channel ] == T_atod( buf );
+	return lecroy_wr2.trigger_level[ channel ] = T_atod( buf );
 }
 
 
