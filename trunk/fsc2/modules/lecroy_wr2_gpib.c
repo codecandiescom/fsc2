@@ -53,8 +53,8 @@ static void lecroy_wr2_gpib_failure( void );
 
 
 static unsigned int can_fetch = 0;
-static int trg_channels[ ] = { LECROY_WE2_CH1,
-							   LECROY_WE2_CH2
+static int trg_channels[ ] = { LECROY_WR2_CH1,
+							   LECROY_WR2_CH2,
 #if defined LECROY_WR2_CH3
 							   LECROY_WR2_CH3,
 #endif
@@ -462,7 +462,7 @@ double lecroy_wr2_get_offset( int channel )
 	fsc2_assert( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX );
 
 	sprintf( buf, "C%1d:OFST?", channel + 1 );
-	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
+	lecroy_wr2_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
 	return  lecroy_wr2.offset[ channel ] = T_atod( buf );
 }
@@ -503,7 +503,7 @@ int lecroy_wr2_get_coupling( int channel )
 	fsc2_assert( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX );
 
 	sprintf( buf, "C%1d:CPL?", channel + 1 );
-	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
+	lecroy_wr2_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
 
 	if ( buf[ 0 ] == 'A' )
@@ -566,7 +566,7 @@ int lecroy_wr2_get_bandwidth_limiter( int channel )
 
 	fsc2_assert( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX );
 
-	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
+	lecroy_wr2_talk( buf, buf, &length );
 	buf[ length - 1 ] = '\0';
 
 	/* We have to distinguish two cases: if the global bandwith limiter is
@@ -647,7 +647,7 @@ bool lecroy_wr2_set_bandwidth_limiter( int channel,
 
 	/* We first need to check if the global bandwidth limiter is on or off. */
 
-	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
+	lecroy_wr2_talk( buf, buf, &length );
 	buf[ length - 1 ] = '\0';
 
 	fsc2_assert( buf[ 1 ] == 'N' || buf[ 1 ] == 'F' );
@@ -798,15 +798,14 @@ double lecroy_wr2_get_trigger_level( int channel )
 				   channel <= LECROY_WR2_CH_MAX ) ||
 				 channel == LECROY_WR2_EXT || channel == LECROY_WR2_EXT10 );
 
-	if ( ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
-	   )
+	if ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
 		sprintf( buf, "C%1d:TRLV?", channel + 1 );
 	else if ( channel == LECROY_WR2_EXT )
 		strcpy( buf, "EX:TRLV?" );
 	else
 		strcpy( buf, "EX10:TRLV?" );
 
-	lecroy_wr2_talk( ( const char * ) buf, buf, &length );
+	lecroy_wr2_talk( buf, buf, &length );
 	buf[ length - 1 ] = '\0';
 	return lecroy_wr2.trigger_level[ channel ] = T_atod( buf );
 }
@@ -827,8 +826,7 @@ bool lecroy_wr2_set_trigger_level( int    channel,
 				 channel == LECROY_WR2_EXT        ||
 				 channel == LECROY_WR2_EXT10 );
 
-	if ( ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
-	   )
+	if ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
 		sprintf( cmd, "C%1d:TRLV ", channel + 1 );
 	else if ( channel == LECROY_WR2_EXT )
 		strcpy( cmd, "EX:TRLV " );
@@ -1116,7 +1114,7 @@ bool lecroy_wr2_is_displayed( int ch )
 		THROW( EXCEPTION );
 	}
 
-	lecroy_wr2_talk( ( const char * ) cmd, cmd, &length );
+	lecroy_wr2_talk( cmd, cmd, &length );
 	return cmd[ 1 ] == 'N';
 }
 
