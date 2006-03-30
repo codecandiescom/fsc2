@@ -1248,7 +1248,7 @@ written to a file.
 @end example
 
 There aren't too many new things in this script. In the @code{DEVICES}
-section the modules for the gauusmeter, the field controller and the
+section the modules for the gaussmeter, the field controller and the
 digitizer get loaded. In the @code{VARIABLES} section first the
 variables that get often changed are listed, i.e.@: the start and end
 field, the field step and the number of laser flashes to average over at
