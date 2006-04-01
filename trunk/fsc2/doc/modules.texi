@@ -1166,15 +1166,15 @@ function if it is supposed to return immediately if a signal is received
 while the function is trying to connect to the device.
 
 The function returns a positive integer on success that can be used as
-a handle for the device in the following function calls, and @code{-1}
+a handle for the device in all the following function calls, and @code{-1}
 on errors. The handle returned by the function is the file descriptor
-for the socket which is connected to the device. You are free to use
-this file descriptor for whatever you want, but please call the function
+for the socket connected to the device. You are free to use this file
+descriptor for whatever you want, but please call the function
 @code{fsc2_lan_close()} to close it. The only two option set for the
-socket are @code{SO_KEEPALIVE} and @code{TCP:NODELAY} (but you can unset
+socket are @code{SO_KEEPALIVE} and @code{TCP_NODELAY} (but you can unset
 them if you want). Later on the options @code{SO_SNDTIMEO} and
-@code{SO_RCVTIMEO} may be set to realize timeouts for read and write
-operations (if the system suppots setting these options), so you better
+@code{SO_RCVTIMEO} may be set for timeouts for read and write
+operations (if the system supports setting these options), so you better
 leave them alone if you plan to use the functions @code{fsc2_lan_write()}
 and @code{fsc2_lan_read()}.
 
@@ -1193,12 +1193,12 @@ identifying the device. The second argument, @code{message}, is a
 buffer with the data to be send to the device. The third, @code{length},
 is the length of the data buffer. The fourth argument, @code{us_timeout},
 is the amount of time to wait for data to be written to the device
-before timing out. If this is set to @code{0} (or even a negative value)
-no timeout is used, i.e.@: the write function will wait indefinitely.
-The last argument, @code{quit_on_signal}, again indicates if the function
-must return immediately if a signal is received.
+before timing out. If this is set to @code{0} (or a negative value)
+no timeout is used, i.e.@: the write function will wait indefinitely if
+necessary. The last argument, @code{quit_on_signal}, again indicates i
+the function must return immediately if a signal is received.
 
-Please note that, as always with writing to the network, the function
+Please note that (as always with writing to the network) the function
 may return before as many bytes as requested have been send. The return
 value will tell you how many actually were sent or, if @code{-1} is
 returned, that the write operation failed.
@@ -1216,7 +1216,8 @@ ssize_t fsc2_lan_read( int    handle,
 The arguments are identical to the ones of @code{fsc2_lan_write()},
 with the only difference that the third, @code{buffer}, is a buffer
 large enough to hold at least @code{length} bytes (make sure that
-this is the case!).
+this is the case!). The arguments @code{us_timeout} and @code{quit_on_signal}
+have exactly the same function as for the function @code{fsc2_lan_write()}.
 
 As for @code{fsc2_lan_write()} it isn't guaranteed that has many bytes
 as requested get read. The return value tells you how many actually
@@ -1238,7 +1239,7 @@ closed), @code{-1} gets returned.
 The only other additional function that can be called is
 @code{fsc2_lan_log_message()} and lets you directly write to
 the log file that stores information about the details of the
-communication over LAN:
+communication over the LAN:
 @example
 void fsc2_lan_log_message( const char *fmt, ... );
 @end example
