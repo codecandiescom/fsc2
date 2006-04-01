@@ -1214,10 +1214,9 @@ ssize_t fsc2_lan_read( int    handle,
 @end example
 @noindent
 The arguments are identical to the ones of @code{fsc2_lan_write()},
-with the only difference that the third, @code{buffer}, is a buffer
+with the only difference that the second, @code{buffer}, is a buffer
 large enough to hold at least @code{length} bytes (make sure that
-this is the case!). The arguments @code{us_timeout} and @code{quit_on_signal}
-have exactly the same function as for the function @code{fsc2_lan_write()}.
+this is the case!).
 
 As for @code{fsc2_lan_write()} it isn't guaranteed that has many bytes
 as requested get read. The return value tells you how many actually
