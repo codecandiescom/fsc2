@@ -30,7 +30,6 @@
 /* C and C++ style comments can be used within this file.              */
 /***********************************************************************/
 
-
 // Pulser
 
 dg2020_f      // Sony/Tektronix data generator (Frankfurt S-band)
