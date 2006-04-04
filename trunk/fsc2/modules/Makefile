@@ -32,7 +32,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 # far as they don't require some additional hardware that gets tested for
 # below)
 
-simp_modules    := User_Functions gg_chopper mail
+simp_modules    := User_Functions gg_chopper
 
 
 # For each of the "complicated" modules a list of all source files they are
