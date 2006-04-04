@@ -11,7 +11,7 @@
 DEVICES:
 
 rs_sml01;
-rb_pulser;
+rb_pulser_j;
 rb8509;
 ips120_10;
 

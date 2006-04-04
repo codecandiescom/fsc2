@@ -468,7 +468,7 @@ sub write_out {
 ips120_10;
 itc503;
 rb8509;
-rb_pulser;
+rb_pulser_j;
 
 
 VARIABLES:
